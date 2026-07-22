@@ -6,10 +6,10 @@
  */
 
 import React, { useMemo } from 'react';
-import { createPortal } from 'react-dom';
 import type { UseEuiTheme } from '@elastic/eui';
-import { EuiIconTip, EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
+import { EuiIcon, EuiLoadingSpinner, EuiText, useEuiTheme } from '@elastic/eui';
 import { css, Global } from '@emotion/react';
+import * as i18n from '../translations';
 import {
   getTemplateDefinitionJsonSchema,
   TEMPLATE_SCHEMA_URI,
@@ -35,31 +35,41 @@ export interface TemplateYamlEditorProps {
 }
 
 const styles = {
-  editorContainer: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      height: '100%',
-      width: '100%',
-      padding: euiTheme.size.xs,
-      position: 'relative',
-    }),
+  // Full-height flex column: editor fills the space, validation footer sits inline
+  // at the bottom so it always tracks the panel width (no fixed positioning).
+  editorColumn: css({
+    height: '100%',
+    display: 'flex',
+    flexDirection: 'column',
+    minHeight: 0,
+  }),
+  editorContainer: css({
+    flex: '1 1 0',
+    minHeight: 0,
+    width: '100%',
+    position: 'relative',
+    overflow: 'hidden',
+  }),
+  validationFooter: css({
+    flexShrink: 0,
+    overflow: 'hidden',
+  }),
   statusIndicator: ({ euiTheme }: UseEuiTheme) =>
     css({
       position: 'absolute',
       top: euiTheme.size.s,
-      right: euiTheme.size.s,
+      right: euiTheme.size.base,
       zIndex: 1,
+      display: 'flex',
+      alignItems: 'center',
+      gap: euiTheme.size.xs,
+      paddingBlock: euiTheme.size.xxs,
+      paddingInline: euiTheme.size.s,
+      borderRadius: euiTheme.border.radius.medium,
+      backgroundColor: euiTheme.colors.backgroundBasePlain,
+      border: `1px solid ${euiTheme.colors.borderBasePlain}`,
+      pointerEvents: 'none',
     }),
-  validationContainer: css({
-    position: 'fixed',
-    bottom: '57px',
-    marginLeft: '-24px',
-    pointerEvents: 'none',
-    display: 'flex',
-    flexDirection: 'column-reverse',
-    '& > *': {
-      pointerEvents: 'auto',
-    },
-  }),
   changedLineGlobal: ({ euiTheme }: UseEuiTheme) =>
     css({
       '.templateChangedLineDecoration': {
@@ -81,12 +91,7 @@ export const TemplateYamlEditor = ({
   const { security } = useKibana().services;
 
   const {
-    containerRef,
-    accordionRef,
     editorRef,
-    containerBounds,
-    accordionHeight,
-    portalNode,
     validationErrors,
     isEditorMounted,
     handleValidationChange,
@@ -116,30 +121,20 @@ export const TemplateYamlEditor = ({
     ];
   }, []);
 
-  const editorPaddingBottom = `${accordionHeight + 8}px`;
-
   return (
-    <>
+    <div css={styles.editorColumn}>
       <Global styles={styles.changedLineGlobal(euiTheme)} />
-      <div
-        ref={containerRef}
-        css={styles.editorContainer(euiTheme)}
-        style={{ paddingBottom: editorPaddingBottom }}
-      >
-        {isSaving && (
-          <div css={styles.statusIndicator(euiTheme)}>
-            <EuiLoadingSpinner size="m" />
-          </div>
-        )}
-        {!isSaving && isSaved && (
-          <div css={styles.statusIndicator(euiTheme)}>
-            <EuiIconTip
-              type="check"
-              color="success"
-              size="l"
-              content="Template saved"
-              anchorProps={{ 'data-test-subj': 'template-saved-icon' }}
-            />
+      <div css={styles.editorContainer}>
+        {(isSaving || isSaved) && (
+          <div css={styles.statusIndicator(euiTheme)} data-test-subj="templateDraftStatus">
+            {isSaving ? (
+              <EuiLoadingSpinner size="s" />
+            ) : (
+              <EuiIcon type="checkInCircleFilled" color="success" size="s" aria-hidden={true} />
+            )}
+            <EuiText size="xs" color="subdued">
+              {isSaving ? i18n.SAVING_DRAFT : i18n.DRAFT_SAVED}
+            </EuiText>
           </div>
         )}
         <TemplateYamlEditorBase
@@ -150,25 +145,14 @@ export const TemplateYamlEditor = ({
           onEditorMount={handleEditorMount}
         />
       </div>
-      {portalNode &&
-        createPortal(
-          <div
-            ref={accordionRef}
-            css={styles.validationContainer}
-            style={{
-              left: `${containerBounds.left}px`,
-              width: `${containerBounds.width}px`,
-            }}
-          >
-            <TemplateYamlValidationAccordion
-              isMounted={isEditorMounted}
-              validationErrors={validationErrors}
-              onErrorClick={handleErrorClick}
-            />
-          </div>,
-          portalNode
-        )}
-    </>
+      <div css={styles.validationFooter}>
+        <TemplateYamlValidationAccordion
+          isMounted={isEditorMounted}
+          validationErrors={validationErrors}
+          onErrorClick={handleErrorClick}
+        />
+      </div>
+    </div>
   );
 };
 

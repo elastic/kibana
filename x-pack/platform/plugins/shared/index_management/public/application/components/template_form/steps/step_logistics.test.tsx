@@ -32,6 +32,7 @@ const mockUseLoadSnapshotRepositories = jest.fn(() => ({
   data: {
     hasDefaultRepository: true,
     defaultRepository: 'found-snapshots',
+    hasRepositories: true,
     canCreateRepository: true,
   },
   resendRequest: jest.fn(),

@@ -17,18 +17,23 @@ import {
   EuiEmptyPrompt,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { Discovery, EventLifecycleResponse } from '@kbn/significant-events-schema';
+import {
+  getSeverityLabel,
+  type Discovery,
+  type EventLifecycleResponse,
+} from '@kbn/significant-events-schema';
 import { formatTimestamp } from '../../../../../util/formatters';
+import { changeTypeLabel } from '../shared/translations';
 import {
   getLifecycleStatusColor,
   getLifecycleStatusLabel,
   isVisibleDiscoveryKind,
-  type LifecycleDisplayStatus,
 } from '../shared/status_display';
 
 interface TimelineEntry {
   icon: string;
-  status: LifecycleDisplayStatus;
+  label: string;
+  color: string;
   timestamp: string;
   title: string;
   description?: string;
@@ -44,10 +49,14 @@ const FLOW_ICONS = {
 function buildEntries(data: EventLifecycleResponse): TimelineEntry[] {
   const detections: TimelineEntry[] = data.detections.map((detection) => ({
     icon: FLOW_ICONS.detection,
-    status: detection.kind as LifecycleDisplayStatus,
+    // Change-point observation only — never a lifecycle state.
+    label: changeTypeLabel(detection.change_point_type),
+    color: 'hollow',
     timestamp: detection['@timestamp'],
     title: detection.rule_name ?? '-',
-    description: [detection.stream_name, detection.change_point_type].filter(Boolean).join(' · '),
+    description: [detection.stream_name, changeTypeLabel(detection.change_point_type)]
+      .filter(Boolean)
+      .join(' · '),
   }));
 
   const discoveries: TimelineEntry[] = data.discoveries
@@ -56,14 +65,15 @@ function buildEntries(data: EventLifecycleResponse): TimelineEntry[] {
     )
     .map((discovery) => ({
       icon: FLOW_ICONS.discovery,
-      status: discovery.kind,
+      label: getLifecycleStatusLabel(discovery.kind),
+      color: getLifecycleStatusColor(discovery.kind),
       timestamp: discovery['@timestamp'],
       title: discovery.title,
       description:
-        discovery.kind === 'discovery' && discovery.criticality != null
-          ? i18n.translate('xpack.streams.lifecycle.criticality', {
-              defaultMessage: 'Criticality {n}',
-              values: { n: discovery.criticality },
+        discovery.kind === 'discovery' && discovery.severity != null
+          ? i18n.translate('xpack.streams.lifecycle.severity', {
+              defaultMessage: 'Severity: {severity}',
+              values: { severity: getSeverityLabel(discovery.severity) },
             })
           : undefined,
     }));
@@ -72,14 +82,15 @@ function buildEntries(data: EventLifecycleResponse): TimelineEntry[] {
     .sort((a, b) => Date.parse(a['@timestamp']) - Date.parse(b['@timestamp']))
     .map((event) => ({
       icon: FLOW_ICONS.event,
-      status: event.status ?? '',
+      label: event.status ? getLifecycleStatusLabel(event.status) : '',
+      color: event.status ? getLifecycleStatusColor(event.status) : 'hollow',
       timestamp: event['@timestamp'],
       title: event.title,
       description:
-        event.criticality != null
-          ? i18n.translate('xpack.streams.lifecycle.criticality', {
-              defaultMessage: 'Criticality {n}',
-              values: { n: event.criticality },
+        event.severity != null
+          ? i18n.translate('xpack.streams.lifecycle.severity', {
+              defaultMessage: 'Severity: {severity}',
+              values: { severity: getSeverityLabel(event.severity) },
             })
           : undefined,
 
@@ -117,9 +128,9 @@ export const LifecycleTimeline = ({ data }: { data: EventLifecycleResponse | und
     <>
       {entries.map((entry, idx) => (
         <EuiTimelineItem
-          key={`${entry.status}-${entry.timestamp}-${idx}`}
+          key={`${entry.label}-${entry.timestamp}-${idx}`}
           icon={entry.icon}
-          iconAriaLabel={getLifecycleStatusLabel(entry.status)}
+          iconAriaLabel={entry.label}
           verticalAlign="top"
         >
           <EuiPanel paddingSize="s" color="plain" hasBorder>
@@ -129,9 +140,7 @@ export const LifecycleTimeline = ({ data }: { data: EventLifecycleResponse | und
             <EuiSpacer size="xs" />
             <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
               <EuiFlexItem grow={false}>
-                <EuiBadge color={getLifecycleStatusColor(entry.status)}>
-                  {getLifecycleStatusLabel(entry.status)}
-                </EuiBadge>
+                <EuiBadge color={entry.color}>{entry.label}</EuiBadge>
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiText size="s">

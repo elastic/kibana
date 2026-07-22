@@ -60,7 +60,6 @@ export const generateWorkflowTool = ({
   return {
     id: platformCoreTools.generateWorkflow,
     type: ToolType.builtin,
-    experimental: true,
     description:
       cleanPrompt(`Generate or update an Elastic workflow definition based on a natural-language description.
 
@@ -96,6 +95,14 @@ And you should **not**:
 — If all you need is to generate a workflow, you do *NOT* need to read the "workflow-authoring" skill first, you can call this tool directly.
 — The tool creates (or updates) a workflow attachment and emits a diff card in chat.
 — Render the diff with "<render_attachment id="{diffAttachmentId}"/>" and the workflow with "<render_attachment id="{attachmentId}" version="{attachmentVersion}"/>".
+
+## Alert-triggered workflows
+
+When the workflow is alert-triggered (\`type: alert\`), runtime alert data is exposed to Liquid expressions as \`event.*\` — NEVER \`triggers.event\` or \`trigger.event\` (the \`triggers\` block only configures which triggers fire the workflow; it does not carry runtime data). If the user's request names specific alert fields (rule name, severity, alert ID, tags, space), pass them in \`context\` using this schema so the generated Liquid resolves correctly:
+— \`event.alerts\` — array of alert objects that fired
+— \`event.alerts[0]._id\` / \`._index\` / \`.kibana.alert.*\` / \`["@timestamp"]\`
+— \`event.rule.id\` / \`event.rule.name\` / \`event.rule.tags\`
+— \`event.spaceId\` — the space where the event was emitted
 
     `),
     schema: generateWorkflowSchema,
@@ -158,7 +165,7 @@ And you should **not**:
           proposalId,
           workflowId: sourceData?.workflowId ?? workflowId,
           name: workflow.name,
-          description: query,
+          description: `Diff for workflow '${workflow.name}'`,
           toolId: platformCoreTools.generateWorkflow,
         });
 

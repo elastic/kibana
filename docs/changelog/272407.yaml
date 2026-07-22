@@ -1,0 +1,9 @@
+prs:
+- https://github.com/elastic/kibana/pull/272407
+type: feature
+products:
+- product: cloud-serverless
+  target: 2026-07-16
+areas:
+- Dashboards and visualizations
+title: Add support for progress bars in tables

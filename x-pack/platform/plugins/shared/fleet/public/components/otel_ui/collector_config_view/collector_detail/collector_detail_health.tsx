@@ -26,6 +26,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedDate, FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 
 import type { Agent, ComponentHealth, OTelCollectorConfig } from '../../../../../common/types';
+import { OPAMP_NON_REPORTING_STATUSES } from '../../../../../common/constants';
 
 import type { OTelComponentType } from '../constants';
 import { COMPONENT_TYPE_LABELS } from '../constants';
@@ -38,13 +39,6 @@ import {
   nanosToMs,
   type ComponentHealthStatus,
 } from '../utils';
-
-const NON_REPORTING_STATUSES: Array<Agent['status']> = [
-  'offline',
-  'inactive',
-  'unenrolled',
-  'uninstalled',
-];
 
 interface CollectorDetailHealthProps {
   health?: ComponentHealth;
@@ -373,7 +367,7 @@ export const CollectorDetailHealth: React.FC<CollectorDetailHealthProps> = ({
 
   const { euiTheme } = useEuiTheme();
 
-  if (agentStatus && NON_REPORTING_STATUSES.includes(agentStatus)) {
+  if (agentStatus && OPAMP_NON_REPORTING_STATUSES.includes(agentStatus)) {
     return (
       <EuiCallOut
         color="warning"

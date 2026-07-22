@@ -1,5 +1,9 @@
 {
-  "sha1": "ff2a67d24d04b1557255fb3827545d78117676b5",
+  "sha1": "ff80132de5ac46c3eefe0fc73cf4d034601efff2",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
   "tests": [
     {
       "id": "f3ddbbb53c28ebe-f2cd2d3cdc77643",
@@ -29,7 +33,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/alert_details_page.spec.ts",
-        "line": 65,
+        "line": 66,
         "column": 9
       }
     },
@@ -45,7 +49,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/alert_details_page.spec.ts",
-        "line": 72,
+        "line": 73,
         "column": 9
       }
     },
@@ -61,7 +65,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/alert_details_page.spec.ts",
-        "line": 83,
+        "line": 84,
         "column": 9
       }
     },
@@ -77,7 +81,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/alert_details_page.spec.ts",
-        "line": 90,
+        "line": 91,
         "column": 9
       }
     },
@@ -93,7 +97,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/alert_details_page.spec.ts",
-        "line": 97,
+        "line": 98,
         "column": 9
       }
     },
@@ -109,7 +113,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/alert_details_page.spec.ts",
-        "line": 108,
+        "line": 109,
         "column": 9
       }
     },
@@ -125,7 +129,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/alert_details_page.spec.ts",
-        "line": 119,
+        "line": 120,
         "column": 9
       }
     },
@@ -141,7 +145,119 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/alert_details_page.spec.ts",
-        "line": 130,
+        "line": 131,
+        "column": 9
+      }
+    },
+    {
+      "id": "a9b59e66421b951-f97219627087f5f",
+      "title": "Alert Details Page should fall back to the generic overview for an Observability alerts user without rule read",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/alert_details_page.spec.ts",
+        "line": 142,
+        "column": 9
+      }
+    },
+    {
+      "id": "6424ee8b61bcc56-409a70db7abf447",
+      "title": "Observability alert details page - rule type RBAC logs rule reader sees the custom alert details overview",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/alert_details_rbac.spec.ts",
+        "line": 102,
+        "column": 9
+      }
+    },
+    {
+      "id": "6424ee8b61bcc56-3cd73251dc4f22a",
+      "title": "Observability alert details page - rule type RBAC metrics rule reader sees the generic overview for a logs alert",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/alert_details_rbac.spec.ts",
+        "line": 123,
+        "column": 9
+      }
+    },
+    {
+      "id": "6424ee8b61bcc56-2106edd02a78d86",
+      "title": "Observability alert details page - rule type RBAC shows the \"Add to case\" button only with cases privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/alert_details_rbac.spec.ts",
+        "line": 144,
+        "column": 9
+      }
+    },
+    {
+      "id": "94ab52636793beb-e47c6210d3bdde0",
+      "title": "Observability alerts page - alerts table RBAC logs rule reader sees rule links only for the logs alert",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/alerts_table_rbac.spec.ts",
+        "line": 110,
+        "column": 9
+      }
+    },
+    {
+      "id": "94ab52636793beb-51a911be2bf4cf3",
+      "title": "Observability alerts page - alerts table RBAC metrics rule reader sees rule links only for the metrics alert",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/alerts_table_rbac.spec.ts",
+        "line": 147,
+        "column": 9
+      }
+    },
+    {
+      "id": "94ab52636793beb-1f48eb09a877e05",
+      "title": "Observability alerts page - alerts table RBAC Observability Alerts only user has no rule management affordances or rule links",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/alerts_table_rbac.spec.ts",
+        "line": 184,
         "column": 9
       }
     },
@@ -617,7 +733,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/rules/rule_details_page/rule_details_page.admin.spec.ts",
-        "line": 162,
+        "line": 163,
         "column": 9
       }
     },
@@ -686,8 +802,8 @@
       }
     },
     {
-      "id": "c30849bf17a1231-b87bedab0eccd3a",
-      "title": "Rule Details Page - Viewer should not show actions button for viewer user",
+      "id": "c30849bf17a1231-f5df63d939c7a0e",
+      "title": "Rule Details Page - Viewer should not show edit or delete actions for viewer user",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",

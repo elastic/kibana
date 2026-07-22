@@ -65,6 +65,13 @@ export const FLYOUT_TAB_RELATED = i18n.translate(
   }
 );
 
+export const FLYOUT_TAB_TIMELINE = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.flyout.tab.timeline',
+  {
+    defaultMessage: 'Timeline',
+  }
+);
+
 export const FLYOUT_TAB_METADATA = i18n.translate(
   'xpack.alertingV2EpisodesUi.details.flyout.tab.metadata',
   {
@@ -233,6 +240,13 @@ export const METADATA_LIST_GROUPING_LABEL = i18n.translate(
   'xpack.alertingV2EpisodesUi.details.metadataList.groupingLabel',
   {
     defaultMessage: 'Grouping',
+  }
+);
+
+export const METADATA_LIST_GROUPING_ERROR = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.metadataList.groupingError',
+  {
+    defaultMessage: 'Could not load grouping.',
   }
 );
 

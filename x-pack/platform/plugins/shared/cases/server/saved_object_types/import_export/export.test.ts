@@ -54,30 +54,35 @@ describe('case export', () => {
     expect(containsIncrementalId).toBeFalsy();
   });
 
-  it('includes cases-attachments when exporting with unified attachments enabled', async () => {
-    const coreSetup = coreMock.createSetup();
+  it.each([
+    ['flag on', { attachments: { enabled: true } } as never],
+    ['flag off', { attachments: { enabled: false } } as never],
+  ])(
+    'includes cases-attachments in the scoped client and export query regardless of the feature flag (%s)',
+    async (_label, configForCase) => {
+      const coreSetup = coreMock.createSetup();
 
-    await handleExport({
-      context: testContext,
-      coreSetup,
-      // @ts-ignore: mock objects are not matching persisted objects
-      objects: testCases,
-      logger,
-      config,
-    });
+      await handleExport({
+        context: testContext,
+        coreSetup,
+        // @ts-ignore: mock objects are not matching persisted objects
+        objects: testCases,
+        logger,
+        config: configForCase,
+      });
 
-    const [coreStart] = await coreSetup.getStartServices();
+      const [coreStart] = await coreSetup.getStartServices();
 
-    expect(coreStart.savedObjects.getScopedClient).toHaveBeenCalledWith(
-      testRequest,
-      expect.objectContaining({
-        includedHiddenTypes: expect.arrayContaining([CASE_ATTACHMENT_SAVED_OBJECT]),
-      })
-    );
-    expect(getAttachmentsAndUserActionsForCases).toHaveBeenCalledWith(
-      expect.anything(),
-      testCases.map((testCase) => testCase.id),
-      true
-    );
-  });
+      expect(coreStart.savedObjects.getScopedClient).toHaveBeenCalledWith(
+        testRequest,
+        expect.objectContaining({
+          includedHiddenTypes: expect.arrayContaining([CASE_ATTACHMENT_SAVED_OBJECT]),
+        })
+      );
+      expect(getAttachmentsAndUserActionsForCases).toHaveBeenCalledWith(
+        expect.anything(),
+        testCases.map((testCase) => testCase.id)
+      );
+    }
+  );
 });

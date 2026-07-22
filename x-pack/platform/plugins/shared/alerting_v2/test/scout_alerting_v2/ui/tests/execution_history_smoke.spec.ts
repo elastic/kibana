@@ -40,9 +40,7 @@ test.describe('Execution history — smoke', { tag: '@local-stateful-classic' },
     });
 
     await test.step('page header is visible', async () => {
-      await expect(
-        page.getByRole('heading', { name: /execution history/i, level: 1 })
-      ).toBeVisible();
+      await expect(pageObjects.alertingNavigation.pageHeading('executionHistory')).toBeVisible();
     });
 
     await test.step('empty state copy is visible', async () => {

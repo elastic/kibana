@@ -9,19 +9,15 @@ import type { FC, ReactNode } from 'react';
 import React, { useCallback, useMemo } from 'react';
 import { EuiLink } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
-import { useStore } from 'react-redux';
+import { useStore } from 'react-redux-v7';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import { flyoutProviders } from './flyout_provider';
-import {
-  defaultToolsFlyoutProperties,
-  useDefaultDocumentFlyoutProperties,
-} from '../hooks/use_default_flyout_properties';
+import { useDefaultDocumentFlyoutProperties } from '../hooks/use_default_flyout_properties';
 import { useKibana } from '../../../common/lib/kibana';
-import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
-import { documentFlyoutHistoryKey } from '../constants/flyout_history';
 import { OPEN_FLYOUT_LINK_TEST_ID } from './test_ids';
-import { buildFlyoutContent } from '../utils/build_flyout_content';
+import { buildFlyoutContent, buildFlyoutTitleFromField } from '../utils/build_flyout_content';
+import { buildFlyoutNavTitle } from '../utils/build_flyout_nav_title';
+import { FlyoutSessionContextProvider, useFlyoutSessionContext } from '../../session_context';
 
 export interface OpenFlyoutLinkProps {
   /**
@@ -29,16 +25,23 @@ export interface OpenFlyoutLinkProps {
    */
   field: string;
   /**
-   * Field value
+   * Field value. Used both to open the flyout and, by default, to derive its history title.
    */
   value: string;
+  /**
+   * Value to use for the link text and history title instead of `value`. For fields where the
+   * navigation target and the display text differ (e.g. rule name links, which navigate by rule
+   * UUID but display the rule name), pass the display value here so the title isn't derived from
+   * the UUID.
+   */
+  displayValue?: string;
   /**
    * The source document record. When provided, enables entity resolution for host/user flyouts.
    */
   hit?: DataTableRecord;
   /**
-   * When true, opens as a parent flyout starting a new session.
-   * When false (default), opens as a child flyout inheriting the parent session.
+   * Optional override to force opening as a new top-level flyout (`session: 'start'`).
+   * By default, the link inherits the current main-flyout session mode.
    */
   asParent?: boolean;
   /**
@@ -52,6 +55,12 @@ export interface OpenFlyoutLinkProps {
 }
 
 /**
+ * Wrapper that renders a preview link for supported field types (host, ip, rule). Injected by
+ * each flyout context so it controls its own navigation (e.g. `OpenFlyoutLink` in the new flyout).
+ */
+export type OpenFlyoutLinkRenderer = FC<OpenFlyoutLinkProps>;
+
+/**
  * Renders a clickable link that opens a system flyout for supported field types.
  *
  * When the field is supported, the link is rendered with `value` as the link text.
@@ -61,6 +70,7 @@ export interface OpenFlyoutLinkProps {
 export const OpenFlyoutLink: FC<OpenFlyoutLinkProps> = ({
   field,
   value,
+  displayValue,
   hit,
   asParent = false,
   children,
@@ -71,40 +81,49 @@ export const OpenFlyoutLink: FC<OpenFlyoutLinkProps> = ({
   const store = useStore();
   const history = useHistory();
   const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
-  const isInSecurityApp = useIsInSecurityApp();
-  const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
+  const { session: sessionMode, historyKey } = useFlyoutSessionContext();
 
   const flyoutContent = useMemo(() => buildFlyoutContent(field, value, hit), [field, value, hit]);
+  const titleValue = displayValue ?? value;
+  const flyoutTitle = useMemo(
+    () => buildFlyoutTitleFromField(field, titleValue) ?? titleValue,
+    [field, titleValue]
+  );
 
   const onClick = useCallback(() => {
     if (flyoutContent) {
-      const baseFlyoutProperties = asParent
-        ? defaultToolsFlyoutProperties
-        : defaultDocumentFlyoutProperties;
+      const resolvedSession = asParent ? 'start' : sessionMode;
       overlays.openSystemFlyout(
         flyoutProviders({
           services,
           store,
           history,
-          children: flyoutContent,
+          children: (
+            <FlyoutSessionContextProvider value={{ session: resolvedSession, historyKey }}>
+              {flyoutContent}
+            </FlyoutSessionContextProvider>
+          ),
         }),
         {
-          ...baseFlyoutProperties,
+          ...defaultDocumentFlyoutProperties,
           historyKey,
-          session: asParent ? 'start' : 'inherit',
-          outsideClickCloses: asParent,
+          session: resolvedSession,
+          outsideClickCloses: resolvedSession === 'start',
+          title: resolvedSession === 'inherit' ? buildFlyoutNavTitle(flyoutTitle) : flyoutTitle,
         }
       );
     }
   }, [
     defaultDocumentFlyoutProperties,
-    overlays,
-    services,
-    store,
     history,
     flyoutContent,
-    asParent,
     historyKey,
+    overlays,
+    services,
+    sessionMode,
+    store,
+    asParent,
+    flyoutTitle,
   ]);
 
   if (!flyoutContent) {
@@ -113,7 +132,7 @@ export const OpenFlyoutLink: FC<OpenFlyoutLinkProps> = ({
 
   return (
     <EuiLink onClick={onClick} data-test-subj={dataTestSubj}>
-      {children ?? value}
+      {children ?? titleValue}
     </EuiLink>
   );
 };

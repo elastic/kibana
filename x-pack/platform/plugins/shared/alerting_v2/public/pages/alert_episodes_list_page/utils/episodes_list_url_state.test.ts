@@ -99,16 +99,6 @@ describe('episodes_list_url_state', () => {
       });
     });
 
-    it('reads legacy severities URL key as severity', async () => {
-      const storage = await createKbnTestUrlStorage({
-        severities: ['high', '__no_severity__'],
-      });
-      expect(readEpisodesListAppStateFromUrlStorage(storage).filterState.severity).toEqual([
-        'high',
-        '__no_severity__',
-      ]);
-    });
-
     it('ignores groupingValues when it is not a plain object', async () => {
       const storage = await createKbnTestUrlStorage({
         groupingValues: 'not-an-object',

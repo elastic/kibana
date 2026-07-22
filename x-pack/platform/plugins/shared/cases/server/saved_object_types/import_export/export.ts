@@ -64,8 +64,7 @@ export async function handleExport({
     const caseIds = cleanedObjects.map((caseObject) => caseObject.id);
     const attachmentsAndUserActionsForCases = await getAttachmentsAndUserActionsForCases(
       savedObjectsClient,
-      caseIds,
-      config.attachments?.enabled === true
+      caseIds
     );
 
     return [...cleanedObjects, ...attachmentsAndUserActionsForCases.flat()];

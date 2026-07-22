@@ -38,10 +38,11 @@ export const UserPicker: React.FC<UserPickerProps> = ({
   metadata,
   isRequired,
   onConfirm,
+  isSaving,
+  isSaveDisabled,
 }) => {
-  const { control, resetField, getFieldState, formState } = useFormContext();
+  const { control, resetField } = useFormContext();
   const path = `${CASE_EXTENDED_FIELDS}.${getFieldSnakeKey(name, type)}`;
-  const { isDirty } = getFieldState(path, formState);
 
   const { owner: owners } = useCasesContext();
   const availableOwners = useAvailableCasesOwners(getAllPermissionsExceptFrom('delete'));
@@ -63,6 +64,10 @@ export const UserPicker: React.FC<UserPickerProps> = ({
 
   const isLoading = isLoadingSuggest || isFetchingSuggest || isUserTyping;
   const isMultiple = metadata?.multiple !== false;
+  const suggestedUids = useMemo(
+    () => new Set(suggestedProfiles.map(({ uid }) => uid)),
+    [suggestedProfiles]
+  );
 
   const rules = useUserPickerValidators({ isRequired: isRequired ?? false, security });
 
@@ -78,31 +83,35 @@ export const UserPicker: React.FC<UserPickerProps> = ({
     [onContentChange]
   );
 
-  const showInlineActions = isDirty && onConfirm != null;
+  const handleCancel = useCallback(() => {
+    resetField(path);
+  }, [path, resetField]);
 
   return (
-    <>
-      <Controller
-        key={name}
-        name={path}
-        control={control}
-        rules={rules}
-        defaultValue={defaultValue}
-        render={({ field, fieldState }) => {
-          const selectedUsers = toSelectedUsers(field.value);
-          const missingUids = selectedUsers
-            .filter((u) => !suggestedProfiles.some((p) => p.uid === u.uid))
-            .map((u) => u.uid);
+    <Controller
+      key={name}
+      name={path}
+      control={control}
+      rules={rules}
+      defaultValue={defaultValue}
+      render={({ field, fieldState }) => {
+        const selectedUsers = toSelectedUsers(field.value);
+        const missingUids = selectedUsers.reduce<string[]>((uids, { uid }) => {
+          if (!suggestedUids.has(uid)) uids.push(uid);
+          return uids;
+        }, []);
 
-          return (
+        return (
+          <>
             <UserPickerComboboxWithProfiles
               label={label}
               name={name}
-              isInvalid={!!fieldState.error}
+              isInvalid={Boolean(fieldState.error)}
               errorMessage={fieldState.error?.message ?? null}
               isLoading={isLoading}
               isMultiple={isMultiple}
               isRequired={isRequired ?? false}
+              isDisabled={isSaving}
               selectedUsers={selectedUsers}
               suggestedProfiles={suggestedProfiles}
               missingUids={missingUids}
@@ -112,13 +121,19 @@ export const UserPicker: React.FC<UserPickerProps> = ({
                 field.onBlur();
               }}
             />
-          );
-        }}
-      />
-      {showInlineActions && (
-        <InlineFieldActions name={name} onConfirm={onConfirm} onCancel={() => resetField(path)} />
-      )}
-    </>
+            {fieldState.isDirty && onConfirm && (
+              <InlineFieldActions
+                name={name}
+                onConfirm={onConfirm}
+                onCancel={handleCancel}
+                isLoading={isSaving}
+                isDisabled={isSaveDisabled}
+              />
+            )}
+          </>
+        );
+      }}
+    />
   );
 };
 
@@ -132,6 +147,7 @@ interface UserPickerComboboxWithProfilesProps {
   isLoading: boolean;
   isMultiple: boolean;
   isRequired: boolean;
+  isDisabled?: boolean;
   selectedUsers: SelectedUser[];
   suggestedProfiles: UserProfileWithAvatar[];
   missingUids: string[];

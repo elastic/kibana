@@ -75,6 +75,10 @@ export {
   type PublishesProjectRoutingOverrides,
 } from './interfaces/fetch/publishes_project_routing';
 export {
+  apiPublishesApproximation,
+  type PublishesApproximation,
+} from './interfaces/fetch/publishes_approximation';
+export {
   apiHasAppContext,
   type EmbeddableAppContext,
   type HasAppContext,
@@ -223,9 +227,15 @@ export {
   type HasSerializedChildState,
 } from './interfaces/containers/child_state';
 
-export { childrenUnsavedChanges$ } from './interfaces/containers/container_state/children_unsaved_changes';
+export {
+  childrenUnsavedChanges$,
+  DEBOUNCE_TIME as CHILDREN_UNSAVED_CHANGES_DEBOUNCE,
+} from './interfaces/containers/container_state/children_unsaved_changes';
 
-export { initializeStateApi } from './interfaces/containers/container_state/initialize_state_api';
+export {
+  initializeStateApi,
+  UNSAVED_CHANGES_DEBOUNCE,
+} from './interfaces/containers/container_state/initialize_state_api';
 
 export {
   apiCanDuplicatePanels,
@@ -284,3 +294,4 @@ export {
 export { apiCanFocusPanel, type CanFocusPanel } from './interfaces/containers/can_focus_panel';
 
 export { apiPublishesESQLQuery, type PublishesESQLQuery } from './interfaces/publishes_esql_query';
+export { apiPublishesEsqlUsage, type PublishesEsqlUsage } from './interfaces/publishes_esql_usage';

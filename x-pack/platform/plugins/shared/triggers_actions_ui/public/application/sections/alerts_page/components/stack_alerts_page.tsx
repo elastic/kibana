@@ -15,6 +15,8 @@ import {
   ALERT_STATUS_UNTRACKED,
   AlertConsumers,
   isSiemRuleType,
+  STACK_ALERTS_ONLY_FEATURE_ID,
+  OBSERVABILITY_ALERTS_FEATURE_ID,
 } from '@kbn/rule-data-utils';
 import { QueryClientProvider } from '@kbn/react-query';
 import type { BoolQuery, Filter } from '@kbn/es-query';
@@ -28,7 +30,9 @@ import type {
   AlertsTableSupportedConsumers,
 } from '@kbn/response-ops-alerts-table/types';
 import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared';
+import { useGetInternalRuleTypesQuery } from '@kbn/response-ops-rules-apis/hooks/use_get_internal_rule_types_query';
 import type { FilterGroupHandler } from '@kbn/alerts-ui-shared/src/alert_filter_controls/types';
+import type { RuleTypeIndex } from '../../../../types';
 import { ALERTS_PAGE_ID } from '../../../../common/constants';
 import type { QuickFiltersMenuItem } from '../../alerts_search_bar/quick_filters';
 import { NoPermissionPrompt } from '../../../components/prompts/no_permission_prompt';
@@ -77,12 +81,29 @@ const PageContentWrapperComponent: React.FC = () => {
     setBreadcrumbs,
     http,
     notifications: { toasts },
+    application: { capabilities },
   } = useKibana().services;
 
   const {
-    ruleTypesState: { data: ruleTypesIndex, isInitialLoad: isInitialLoadingRuleTypes },
+    ruleTypesState: { isInitialLoad: isInitialLoadingRuleTypes },
     authorizedToReadAnyRules,
   } = useGetRuleTypesPermissions({ http, toasts, filteredRuleTypes: [] });
+
+  const { data: internalRuleTypes, isLoading: isLoadingInternalRuleTypes } =
+    useGetInternalRuleTypesQuery({ http, includeAlertViewableTypes: true });
+
+  const ruleTypesIndex = useMemo<RuleTypeIndex>(
+    () => new Map((internalRuleTypes ?? []).map((ruleType) => [ruleType.id, ruleType])),
+    [internalRuleTypes]
+  );
+
+  // The Stack Alerts and Observability Alerts features grant read access to alerts
+  // without requiring rule read privileges, so their `show` capability also unlocks
+  // this page.
+  const authorizedToReadAnyAlerts =
+    authorizedToReadAnyRules ||
+    Boolean(capabilities?.[STACK_ALERTS_ONLY_FEATURE_ID]?.show) ||
+    Boolean(capabilities?.[OBSERVABILITY_ALERTS_FEATURE_ID]?.show);
 
   const ruleTypeIdsByFeatureId = useRuleTypeIdsByFeatureId(ruleTypesIndex);
 
@@ -91,9 +112,10 @@ const PageContentWrapperComponent: React.FC = () => {
     docTitle.change(getCurrentDocTitle('alerts'));
   }, [docTitle, setBreadcrumbs]);
 
-  return !isInitialLoadingRuleTypes ? (
+  return !isInitialLoadingRuleTypes && !isLoadingInternalRuleTypes ? (
     <PageContent
       isLoading={isInitialLoadingRuleTypes}
+      authorizedToReadAnyAlerts={authorizedToReadAnyAlerts}
       authorizedToReadAnyRules={authorizedToReadAnyRules}
       ruleTypeIdsByFeatureId={ruleTypeIdsByFeatureId}
     />
@@ -104,12 +126,17 @@ const PageContentWrapper = React.memo(PageContentWrapperComponent);
 
 interface PageContentProps {
   isLoading: boolean;
+  // Controls page access: true when the user can read alerts (via rule read or
+  // the Stack Alerts `show` capability).
+  authorizedToReadAnyAlerts: boolean;
+  // True only when the user can read rules; gates the rule stats in the header.
   authorizedToReadAnyRules: boolean;
   ruleTypeIdsByFeatureId: RuleTypeIdsByFeatureId;
 }
 
 const PageContentComponent: React.FC<PageContentProps> = ({
   isLoading,
+  authorizedToReadAnyAlerts,
   authorizedToReadAnyRules,
   ruleTypeIdsByFeatureId,
 }) => {
@@ -150,7 +177,7 @@ const PageContentComponent: React.FC<PageContentProps> = ({
   );
 
   const [selectedFilters, setSelectedFilters] = useState<AlertsFeatureIdsFilter[]>([]);
-  const ruleStats = useRuleStats({ ruleTypeIds });
+  const ruleStats = useRuleStats({ ruleTypeIds, enabled: authorizedToReadAnyRules });
   const isFilteringSecurityRules = ruleTypeIds.every(isSiemRuleType);
 
   const onFilterSelected = useCallback(
@@ -280,7 +307,7 @@ const PageContentComponent: React.FC<PageContentProps> = ({
         rightSideItems={ruleStats}
       />
       <EuiSpacer size="l" />
-      {!isLoading && !authorizedToReadAnyRules ? (
+      {!isLoading && !authorizedToReadAnyAlerts ? (
         <NoPermissionPrompt />
       ) : (
         <EuiFlexGroup gutterSize="m" direction="column" data-test-subj="stackAlertsPageContent">

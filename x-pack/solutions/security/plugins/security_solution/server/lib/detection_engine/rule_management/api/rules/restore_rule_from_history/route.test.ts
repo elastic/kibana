@@ -31,6 +31,7 @@ describe('Restore rule from history route', () => {
     jest.clearAllMocks();
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
+    (clients.core.uiSettings.client.get as jest.Mock).mockResolvedValue(true);
     restoreRuleFromHistoryRoute(server.router);
   });
 
@@ -56,6 +57,23 @@ describe('Restore rule from history route', () => {
       ruleId: '6399a03a-9ec2-4c42-8e2a-9e622683cfcd',
       changeId: '7b3e4f52-1a2b-4c5d-8e9f-0a1b2c3d4e5f',
     });
+  });
+
+  test('returns 403 when the ENABLE_RULE_CHANGES_HISTORY_SETTING advanced setting is disabled', async () => {
+    (clients.core.uiSettings.client.get as jest.Mock).mockResolvedValue(false);
+
+    const response = await server.inject(
+      buildRestoreRequest({
+        params: {
+          ruleId: '6399a03a-9ec2-4c42-8e2a-9e622683cfcd',
+          changeId: '7b3e4f52-1a2b-4c5d-8e9f-0a1b2c3d4e5f',
+        },
+      }),
+      requestContextMock.convertContext(context)
+    );
+
+    expect(response.status).toEqual(403);
+    expect(clients.detectionRulesClient.restoreRuleFromHistory).not.toHaveBeenCalled();
   });
 
   test('rejects requests with missing ruleId at validation', () => {

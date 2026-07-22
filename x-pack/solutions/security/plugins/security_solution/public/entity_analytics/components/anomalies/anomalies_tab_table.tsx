@@ -43,19 +43,50 @@ import {
   ENTITY_ANOMALY_TABLE_TACTIC_COLUMN,
   ENTITY_ANOMALY_TABLE_TIMESTAMP_COLUMN,
   ENTITY_ANOMALY_TABLE_TITLE,
+  ENTITY_ANOMALY_TABLE_ACTIONS_COLUMN,
 } from './translations';
 import type { TableRow } from './table/types';
-import { AnomalyJobName } from './table/anomaly_job_name';
-import { AnomalyTacticBadges } from './table/anomaly_tactic_badges';
-import { mapSummaryToRow } from './table/map_summary_to_row';
-import { AnomalyTimestamp } from './table/anomaly_timestamp';
-import { AnomalyExpandedRow } from './table/anomaly_expanded_row';
-import { AnomalyScoreBadge } from './table/anomaly_score_badge';
+import {
+  AnomalyJobName,
+  AnomalyTacticBadges,
+  AnomalyTimestamp,
+  mapSummaryToRow,
+  AnomalyExpandedRow,
+  AnomalyScoreBadge,
+  AnomalyRowActionsMenu,
+} from './table';
+import {
+  ANOMALIES_TAB_TABLE_TEST_ID,
+  ANOMALIES_TAB_TABLE_GRID_TEST_ID,
+  ANOMALIES_TABLE_SCORE_COLUMN_TOOLTIP_TEST_ID,
+  ANOMALIES_TABLE_ROW_EXPAND_BUTTON_TEST_ID,
+} from './test_ids';
+import { AnomaliesTableEmptyMessage } from './table/empty_message';
+import { AnomaliesTableLoadingSkeleton } from './table/loading_skeleton';
 
 export interface TableChangeEvent {
   page?: { index: number; size: number };
   sort?: { field: TableSortField; direction: TableSortDirection };
 }
+
+const compactPaginationSpacerCss = css`
+  .euiBasicTable > div > .euiSpacer.euiSpacer--m {
+    block-size: 8px;
+    height: 8px;
+  }
+`;
+
+// Applied only when the table has no items, so the sole rendered `.euiTableRow`
+// is guaranteed to be the no-items message row (never a real data row).
+const noItemsRowCss = css`
+  .euiTableRow {
+    pointer-events: none;
+
+    &:hover {
+      background-color: transparent;
+    }
+  }
+`;
 
 interface AnomalyTabTableSectionProps {
   anomalies: AnomalySummaryEntry[];
@@ -67,6 +98,7 @@ interface AnomalyTabTableSectionProps {
   sortDirection: TableSortDirection;
   timeRange: { from: string; to: string };
   total: number;
+  isLoading?: boolean;
 }
 
 export const AnomalyTabTableSection: React.FC<AnomalyTabTableSectionProps> = ({
@@ -79,6 +111,7 @@ export const AnomalyTabTableSection: React.FC<AnomalyTabTableSectionProps> = ({
   sortDirection,
   timeRange,
   total,
+  isLoading = false,
 }) => {
   const [expandedRowIds, setExpandedRowIds] = useState<Set<string>>(() => new Set());
 
@@ -133,6 +166,7 @@ export const AnomalyTabTableSection: React.FC<AnomalyTabTableSectionProps> = ({
           return (
             <EuiToolTip content={label} disableScreenReaderOutput>
               <EuiButtonIcon
+                data-test-subj={ANOMALIES_TABLE_ROW_EXPAND_BUTTON_TEST_ID}
                 aria-label={label}
                 aria-expanded={isExpanded}
                 iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
@@ -149,7 +183,12 @@ export const AnomalyTabTableSection: React.FC<AnomalyTabTableSectionProps> = ({
         field: 'jobDisplayName',
         sortable: true,
         render: (_: string, item: TableRow) => (
-          <AnomalyJobName jobId={item.jobId} jobName={item.jobDisplayName} timeRange={timeRange} />
+          <AnomalyJobName
+            jobId={item.jobId}
+            jobName={item.jobDisplayName}
+            recordId={item.recordId}
+            timeRange={timeRange}
+          />
         ),
       },
       // Tactic column
@@ -204,7 +243,7 @@ export const AnomalyTabTableSection: React.FC<AnomalyTabTableSectionProps> = ({
                 type="question"
                 content={ENTITY_ANOMALY_TABLE_SCORE_COLUMN_TOOLTIP}
                 position="top"
-                data-test-subj="entity-anomalies-table-score-column-tooltip"
+                data-test-subj={ANOMALIES_TABLE_SCORE_COLUMN_TOOLTIP_TEST_ID}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -213,6 +252,13 @@ export const AnomalyTabTableSection: React.FC<AnomalyTabTableSectionProps> = ({
         sortable: true,
         width: '136px',
         render: (anomalyScore: number) => <AnomalyScoreBadge score={anomalyScore} />,
+      },
+      // Actions column
+      {
+        name: ENTITY_ANOMALY_TABLE_ACTIONS_COLUMN,
+        width: '64px',
+        align: 'right',
+        render: (item: TableRow) => <AnomalyRowActionsMenu row={item} timeRange={timeRange} />,
       },
     ],
     [expandedRowIds, timeRange, toggleRowExpanded]
@@ -263,6 +309,7 @@ export const AnomalyTabTableSection: React.FC<AnomalyTabTableSectionProps> = ({
     <div>
       <EuiAccordion
         id="entity-anomalies-tab-table-accordion"
+        data-test-subj={ANOMALIES_TAB_TABLE_TEST_ID}
         initialIsOpen
         buttonContent={
           <EuiTitle size="xs">
@@ -271,29 +318,45 @@ export const AnomalyTabTableSection: React.FC<AnomalyTabTableSectionProps> = ({
         }
       >
         <EuiSpacer size="m" />
-        <EuiText size="xs">
-          <FormattedMessage
-            id="xpack.securitySolution.entityAnalytics.entityAnomalies.tab.page"
-            defaultMessage="Showing {from}-{to} of {total} anomalies"
-            values={{
-              from: <strong>{from}</strong>,
-              to: <strong>{to}</strong>,
-              total: <strong>{total}</strong>,
-            }}
-          />
-        </EuiText>
-        <EuiSpacer size="s" />
-        <EuiBasicTable
-          tableCaption={ENTITY_ANOMALY_TABLE_CAPTION}
-          items={rows}
-          itemId="id"
-          columns={columns}
-          sorting={sorting}
-          pagination={pagination}
-          onChange={handleChange}
-          compressed
-          itemIdToExpandedRowMap={itemIdToExpandedRowMap}
-        />
+        {isLoading ? (
+          <AnomaliesTableLoadingSkeleton />
+        ) : (
+          <>
+            <EuiText size="xs">
+              <FormattedMessage
+                id="xpack.securitySolution.entityAnalytics.entityAnomalies.tab.page"
+                defaultMessage="Showing {from}-{to} of {total} anomalies"
+                values={{
+                  from: <strong>{from}</strong>,
+                  to: <strong>{to}</strong>,
+                  total: <strong>{total}</strong>,
+                }}
+              />
+            </EuiText>
+            <EuiSpacer size="s" />
+            <div
+              css={
+                rows.length === 0
+                  ? [compactPaginationSpacerCss, noItemsRowCss]
+                  : compactPaginationSpacerCss
+              }
+            >
+              <EuiBasicTable
+                data-test-subj={ANOMALIES_TAB_TABLE_GRID_TEST_ID}
+                tableCaption={ENTITY_ANOMALY_TABLE_CAPTION}
+                items={rows}
+                itemId="id"
+                columns={columns}
+                sorting={sorting}
+                pagination={pagination}
+                onChange={handleChange}
+                compressed
+                itemIdToExpandedRowMap={itemIdToExpandedRowMap}
+                noItemsMessage={<AnomaliesTableEmptyMessage />}
+              />
+            </div>
+          </>
+        )}
       </EuiAccordion>
     </div>
   );

@@ -22,6 +22,7 @@ const TOKEN_USAGE_MAPPING: MappingProperty = {
   properties: {
     inputTokens: { type: 'long' },
     outputTokens: { type: 'long' },
+    cachedTokens: { type: 'long' },
     totalTokens: { type: 'long' },
   },
 };
@@ -100,6 +101,19 @@ export const WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS: MappingTypeMapping = {
     // Aggregated token usage across all token-consuming steps, accumulated
     // incrementally as each step finishes.
     usage: TOKEN_USAGE_MAPPING,
+    // Per-step token usage, retained on the workflow execution so callers can
+    // query usage by producing step and resolved connector.
+    stepUsage: {
+      type: 'nested',
+      properties: {
+        stepId: { type: 'keyword' },
+        connectorId: { type: 'keyword' },
+        inputTokens: { type: 'long' },
+        outputTokens: { type: 'long' },
+        cachedTokens: { type: 'long' },
+        totalTokens: { type: 'long' },
+      },
+    },
     version: {
       type: 'long',
     },

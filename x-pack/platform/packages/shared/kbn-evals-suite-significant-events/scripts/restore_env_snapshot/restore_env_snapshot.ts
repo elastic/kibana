@@ -65,11 +65,11 @@ async function repromoteQueries({
 }
 
 /**
- * Restores one SigEvents data stream (KI / discoveries / detections) from its captured
- * `snapshot-*` plain index. The plugin owns the data-stream template, so we restore the
- * captured docs into a temp index and reindex them into the data-stream name (op_type:
- * create) — letting ES materialize the data stream. `allowNoMatches` makes this a no-op
- * for older snapshots that predate a given data stream.
+ * Restores one SigEvents data stream from its `snapshot-*` plain index.
+ * The plugin owns the data-stream template, so we restore captured docs into a temp
+ * index and reindex them into the data-stream name — letting ES materialize the stream.
+ * `allowNoMatches` makes this a no-op when the stream was not captured (user chose not
+ * to run the discovery workflow).
  */
 async function restoreDataStream({
   esClient,
@@ -96,7 +96,7 @@ async function restoreDataStream({
       indices: [snapshotIndex],
       renamePattern: '(.+)',
       renameReplacement: tempIndex,
-      allowNoMatches: true, // older snapshots may predate this data stream
+      allowNoMatches: true,
     });
 
     if (!restoreResult.success) {
@@ -108,7 +108,7 @@ async function restoreDataStream({
     }
 
     if (restoreResult.restoredIndices.length === 0) {
-      log.info(`"${dataStream}" not in snapshot "${snapshotName}" — skipping (old snapshot).`);
+      log.info(`"${dataStream}" not in snapshot — skipping (discovery workflow was not run).`);
       return `${dataStream}: skipped (not in snapshot)`;
     }
 
@@ -246,8 +246,9 @@ export const restoreEnvSnapshot = async ({
     // restoreSnapshot and replaySnapshot use the caller's esClient intentionally:
     // the snapshot/replay APIs work with the caller's privileges, and keeping them
     // outside sysClient avoids creating the temp superuser a second time.
-    // No allowNoMatches here — these plain system indices must be present; a genuinely
-    // missing one should fail loudly rather than restore an incomplete environment.
+    // allowNoMatches: system indices like .kibana_streams_tasks-* may be absent from
+    // older snapshots or snapshots captured before the index was created — Kibana
+    // recreates them on startup, so skipping them is safe.
     const restoreResult = await restoreSnapshot({
       esClient,
       log,
@@ -256,6 +257,7 @@ export const restoreEnvSnapshot = async ({
       indices: snapshotSystemIndices,
       renamePattern: 'snapshot-(.*)',
       renameReplacement: '.$1',
+      allowNoMatches: true,
     });
 
     if (!restoreResult.success) {
@@ -263,6 +265,14 @@ export const restoreEnvSnapshot = async ({
         `Failed to restore system indices from snapshot "${snapshotName}": ${restoreResult.errors.join(
           '; '
         )}`
+      );
+    }
+
+    if (restoreResult.restoredIndices.length === 0) {
+      log.warning(
+        `Step 1/7: no system indices restored (looked for: ${snapshotSystemIndices.join(', ')}). ` +
+          `If unexpected, verify --gcs-base-path and --snapshot-name. ` +
+          `Kibana recreates .kibana_streams_tasks on startup so this is safe for older snapshots.`
       );
     }
 

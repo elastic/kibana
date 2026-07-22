@@ -55,7 +55,7 @@ export const RuleSidebar: React.FC<RuleSidebarProps> = ({ showQueryPreview = fal
 
   return (
     <div>
-      <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
+      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" wrap>
         <EuiFlexItem grow={false}>
           <EuiTitle size="s">
             <h2>

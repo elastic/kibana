@@ -1,0 +1,10 @@
+prs:
+- https://github.com/elastic/kibana/pull/276311
+issues:
+- https://github.com/elastic/security-team/issues/15776
+type: feature
+products:
+- product: cloud-serverless
+  target: 2026-07-09
+title: Add version history for Elastic Workflows
+description: "Every time you save a workflow, Elastic Workflows keeps a record of what changed. You can look back at earlier versions, see exactly what was different, and restore a previous definition when you need to undo a change."

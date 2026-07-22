@@ -36,6 +36,20 @@ jest.mock('../ilm_phase_select/ilm_phase_select', () => ({
   },
 }));
 
+jest.mock('../../../../../../hooks/use_kibana', () => ({
+  useKibana: () => ({
+    core: {},
+    dependencies: {
+      start: {
+        streams: {
+          streamsRepositoryClient: {},
+        },
+      },
+    },
+    isServerless: false,
+  }),
+}));
+
 const DATA_TEST_SUBJ = 'streamsEditIlmPhasesFlyout';
 
 const tick = async () => {
@@ -483,9 +497,14 @@ describe('EditIlmPhasesFlyout', () => {
       const warmPanel = withinPhase('warm');
       fireEvent.click(warmPanel.getByTestId(`${DATA_TEST_SUBJ}DownsamplingSwitch`));
 
-      expect(
-        await screen.findByTestId(`${DATA_TEST_SUBJ}DownsamplingNotSupportedCallout-warm`)
-      ).toBeInTheDocument();
+      const callout = await screen.findByTestId(
+        `${DATA_TEST_SUBJ}DownsamplingNotSupportedCallout-warm`
+      );
+      expect(callout).toBeInTheDocument();
+      expect(callout).toHaveTextContent('Downsampling requires a time series stream');
+      expect(callout).toHaveTextContent(
+        'As this stream is not a time series, downsampling steps from this ILM policy will be excluded.'
+      );
     });
 
     it('defaults warm downsample interval to 2x the previous enabled downsample interval', async () => {
@@ -530,7 +549,7 @@ describe('EditIlmPhasesFlyout', () => {
       );
     });
 
-    it('hides and unmounts readonly while downsampling is enabled, and re-adds it when disabled', async () => {
+    it('shows readonly as checked and disabled while downsampling is enabled, and preserves the previous readonly state when disabled', async () => {
       const onChange = jest.fn();
       renderFlyout(
         {
@@ -546,20 +565,26 @@ describe('EditIlmPhasesFlyout', () => {
       await tick();
       const warmPanel = withinPhase('warm');
 
-      // Initially visible.
-      expect(warmPanel.getByTestId(`${DATA_TEST_SUBJ}ReadOnlyCheckbox`)).toBeInTheDocument();
+      // Initially visible, enabled and unchecked.
+      const initialCheckbox = warmPanel.getByTestId(`${DATA_TEST_SUBJ}ReadOnlyCheckbox`);
+      expect(initialCheckbox).toBeInTheDocument();
+      expect(initialCheckbox).toBeEnabled();
+      expect(initialCheckbox).not.toBeChecked();
 
       // Set it to true.
-      fireEvent.click(warmPanel.getByTestId(`${DATA_TEST_SUBJ}ReadOnlyCheckbox`));
+      fireEvent.click(initialCheckbox);
       await tick();
 
-      // Enable downsampling -> readonly should be cleared and hidden.
+      // Enable downsampling -> readonly stays visible but becomes checked and disabled.
       fireEvent.click(warmPanel.getByTestId(`${DATA_TEST_SUBJ}DownsamplingSwitch`));
       await tick();
 
-      expect(warmPanel.queryByTestId(`${DATA_TEST_SUBJ}ReadOnlyCheckbox`)).not.toBeInTheDocument();
+      const downsamplingCheckbox = warmPanel.getByTestId(`${DATA_TEST_SUBJ}ReadOnlyCheckbox`);
+      expect(downsamplingCheckbox).toBeInTheDocument();
+      expect(downsamplingCheckbox).toBeChecked();
+      expect(downsamplingCheckbox).toBeDisabled();
 
-      // Ensure output does not include warm.readonly even if it was previously enabled.
+      // The previously enabled readonly state is preserved in the output alongside downsample.
       expect(onChange).toHaveBeenLastCalledWith(
         {
           hot: { name: 'hot', size_in_bytes: 0, rollover: {} },
@@ -567,19 +592,21 @@ describe('EditIlmPhasesFlyout', () => {
             name: 'warm',
             size_in_bytes: 0,
             min_age: '30d',
+            readonly: true,
             downsample: { after: '30d', fixed_interval: '1d' },
           },
         },
         { invalidPhases: [] }
       );
 
-      // Disable downsampling -> readonly should re-appear (re-mounted).
+      // Disable downsampling -> readonly should be enabled again and keep its previous checked state.
       fireEvent.click(warmPanel.getByTestId(`${DATA_TEST_SUBJ}DownsamplingSwitch`));
       await tick();
 
       const checkbox = warmPanel.getByTestId(`${DATA_TEST_SUBJ}ReadOnlyCheckbox`);
       expect(checkbox).toBeInTheDocument();
-      expect(checkbox).not.toBeChecked();
+      expect(checkbox).toBeEnabled();
+      expect(checkbox).toBeChecked();
     });
 
     it('revalidates cold downsampling interval when re-enabling cold (warm interval changed while cold disabled)', async () => {
@@ -1044,6 +1071,57 @@ describe('EditIlmPhasesFlyout', () => {
         clearTimeoutSpy.mockRestore();
         jest.useRealTimers();
       }
+    });
+  });
+
+  describe('min age boundary help text', () => {
+    const setup = () =>
+      renderFlyout({
+        initialPhases: {
+          hot: { name: 'hot', size_in_bytes: 0, rollover: {} },
+          warm: { name: 'warm', size_in_bytes: 0, min_age: '30d' },
+          frozen: { name: 'frozen', size_in_bytes: 0, min_age: '40d' },
+          delete: { name: 'delete', min_age: '50d' },
+        },
+      });
+
+    it('shows only the next-phase bound on the first configurable phase (hot is not a boundary)', async () => {
+      setup();
+      await tick();
+      // warm's only earlier phase is hot (min age 0, not configurable) so there is no lower
+      // boundary, but the next phase still bounds it from above.
+      expect(withinPhase('warm').queryByText(/Must occur after/)).toBeNull();
+      expect(
+        withinPhase('warm').getByText('Must occur before the frozen phase (40d).')
+      ).toBeInTheDocument();
+    });
+
+    it('references the previous and next configured phases', async () => {
+      setup();
+      await tick();
+      expect(
+        withinPhase('frozen').getByText(
+          'Must occur after the warm phase (30d) and before the delete phase (50d).'
+        )
+      ).toBeInTheDocument();
+      expect(
+        withinPhase('delete').getByText('Must occur after the frozen phase (40d).')
+      ).toBeInTheDocument();
+    });
+
+    it('references the closest previous phase when values are equal', async () => {
+      renderFlyout({
+        initialPhases: {
+          hot: { name: 'hot', size_in_bytes: 0, rollover: {} },
+          warm: { name: 'warm', size_in_bytes: 0, min_age: '30d' },
+          cold: { name: 'cold', size_in_bytes: 0, min_age: '30d' },
+          frozen: { name: 'frozen', size_in_bytes: 0, min_age: '40d' },
+        },
+      });
+      await tick();
+      expect(
+        withinPhase('frozen').getByText('Must occur after the cold phase (30d).')
+      ).toBeInTheDocument();
     });
   });
 });

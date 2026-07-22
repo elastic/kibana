@@ -28,7 +28,7 @@ export const getStatusColorMap = (colors: EpisodeStatusColors): Record<string, s
  * Patches a Lens `TypedLensByValueInput` attributes object to apply episode-aware
  * color coding and strip axis titles.
  *
- * - When `breakdownField` is `'effective_status'`: applies a categorical color
+ * - When `breakdownField` is `'episode.status'`: applies a categorical color
  *   mapping so each status value gets its own color.
  * - When there is no breakdown: colors the whole series to match the active
  *   status filter, falling back to `danger` (red) when no filter is set.
@@ -65,7 +65,7 @@ export const buildModifiedVisAttributes = (
     },
   });
 
-  if (breakdownField === 'effective_status') {
+  if (breakdownField === 'episode.status') {
     return applyColorMapping({
       paletteId: 'default',
       colorMode: { type: 'categorical' },

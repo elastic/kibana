@@ -16,11 +16,11 @@ export const CASE_DETAILS_TITLE = i18n.translate('xpack.cases.casesRedesign.deta
 });
 
 export const CASE_SETTINGS_TITLE = i18n.translate('xpack.cases.casesRedesign.settings.title', {
-  defaultMessage: 'Case Settings (Redesign)',
+  defaultMessage: 'Cases settings',
 });
 
-export const UNDER_CONSTRUCTION = i18n.translate('xpack.cases.casesRedesign.underConstruction', {
-  defaultMessage: 'This page is under construction.',
+export const BACK_TO_CASES = i18n.translate('xpack.cases.casesRedesign.settings.backToCases', {
+  defaultMessage: 'Cases',
 });
 
 export const VIEWING_CASE = (caseId: string) =>
@@ -58,3 +58,101 @@ export const EDIT_CASE_NAME_ARIA = i18n.translate(
     defaultMessage: 'Edit case name',
   }
 );
+
+export const SHOW_FIELDS = i18n.translate('xpack.cases.casesRedesign.details.showFields', {
+  defaultMessage: 'Show fields',
+});
+
+export const HIDE_FIELDS = i18n.translate('xpack.cases.casesRedesign.details.hideFields', {
+  defaultMessage: 'Hide fields',
+});
+
+export const ATTRIBUTES_TITLE = i18n.translate(
+  'xpack.cases.casesRedesign.details.attributesTitle',
+  {
+    defaultMessage: 'Attributes',
+  }
+);
+
+export const TEMPLATE_FIELDS_TITLE = i18n.translate(
+  'xpack.cases.casesRedesign.details.templateFieldsTitle',
+  {
+    defaultMessage: 'Template fields',
+  }
+);
+
+export const NO_TEMPLATE_SELECTED = i18n.translate(
+  'xpack.cases.casesRedesign.details.noTemplateSelected',
+  {
+    defaultMessage: 'No template selected',
+  }
+);
+
+export const CHANGE_TEMPLATE_MODAL_TITLE = i18n.translate(
+  'xpack.cases.casesRedesign.details.changeTemplateModalTitle',
+  {
+    defaultMessage: 'Change template',
+  }
+);
+
+export const CHANGE_TEMPLATE_MODAL_CHANGE_BUTTON = i18n.translate(
+  'xpack.cases.casesRedesign.details.changeTemplateModalChangeButtonLabel',
+  {
+    defaultMessage: 'Change',
+  }
+);
+
+export const CHANGE_TEMPLATE_MODAL_APPLY_BUTTON = i18n.translate(
+  'xpack.cases.casesRedesign.details.changeTemplateModalApplyButtonLabel',
+  {
+    defaultMessage: 'Apply',
+  }
+);
+
+export const CHANGE_TEMPLATE_MODAL_REMOVE_BUTTON = i18n.translate(
+  'xpack.cases.casesRedesign.details.changeTemplateModalRemoveButtonLabel',
+  {
+    defaultMessage: 'Remove',
+  }
+);
+
+export const TEMPLATE_FIELDS_TOOLTIP_ARIA = (templateName: string) =>
+  i18n.translate('xpack.cases.casesRedesign.details.templateFieldsTooltipAriaLabel', {
+    defaultMessage: 'View fields included in the {templateName} template',
+    values: { templateName },
+  });
+
+export const CONNECTORS_TITLE = i18n.translate(
+  'xpack.cases.casesRedesign.details.connectorsTitle',
+  {
+    defaultMessage: 'Connectors',
+  }
+);
+
+export const SECTION_SETTINGS_ARIA = i18n.translate(
+  'xpack.cases.casesRedesign.details.sectionSettingsAria',
+  {
+    defaultMessage: 'Section settings',
+  }
+);
+
+export const ASSIGNED_TITLE = i18n.translate('xpack.cases.casesRedesign.details.assignedTitle', {
+  defaultMessage: 'Assigned',
+});
+
+export const PARTICIPANTS_TITLE = i18n.translate(
+  'xpack.cases.casesRedesign.details.participantsTitle',
+  {
+    defaultMessage: 'Participants',
+  }
+);
+
+export const CLICK_TO_SEND_EMAIL = (email: string) =>
+  i18n.translate('xpack.cases.casesRedesign.details.clickToSendEmail', {
+    defaultMessage: 'Click to send email to {email}',
+    values: { email },
+  });
+
+export const ADD_CONNECTOR = i18n.translate('xpack.cases.casesRedesign.details.addConnector', {
+  defaultMessage: 'Add connector',
+});

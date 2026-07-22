@@ -38,12 +38,11 @@ export class ComposeDiscoverPage {
   public readonly addRunbookButton: Locator;
   public readonly relatedDashboardsSelector: Locator;
   public readonly relatedDashboardsInput: Locator;
-  public readonly createRulePopoverButton: Locator;
+  public readonly createRuleSplitDropdownButton: Locator;
   public readonly createEsqlRuleButton: Locator;
   /** "Create ES|QL rule" card in the empty-state panel (shown when no rules exist). */
   public readonly createEsqlRuleCard: Locator;
   public readonly modeSelect: Locator;
-  public readonly cancelButton: Locator;
   /**
    * Callout shown after Apply when the query has a base but no alert condition
    * (no WHERE) — the whole query is treated as the breach query (every row breaches).
@@ -75,10 +74,11 @@ export class ComposeDiscoverPage {
       'input[placeholder="Link related dashboards for investigation"]'
     );
     this.modeSelect = this.page.testSubj.locator('composeDiscoverModeSelect');
-    this.createRulePopoverButton = this.page.testSubj.locator('createRulePopoverButton');
+    this.createRuleSplitDropdownButton = this.page.testSubj.locator(
+      'createRuleButton-secondary-button'
+    );
     this.createEsqlRuleButton = this.page.testSubj.locator('createEsqlRuleButton');
     this.createEsqlRuleCard = this.page.testSubj.locator('createEsqlRuleCard');
-    this.cancelButton = this.page.testSubj.locator('composeDiscoverCancel');
     this.noAlertConditionCallout = this.page.testSubj.locator('esqlSummaryNoAlertConditionCallout');
     this.emptyQueryCallout = this.page.testSubj.locator('esqlSummaryEmptyCallout');
   }
@@ -98,11 +98,13 @@ export class ComposeDiscoverPage {
   }
 
   async openCreateFlyout() {
-    // Wait until either entry point is rendered — popover button (table state)
+    // Wait until either entry point is rendered — split dropdown (table state)
     // or empty-state card — before deciding which path to take.
-    await this.createRulePopoverButton.or(this.createEsqlRuleCard).waitFor({ state: 'visible' });
-    if (await this.createRulePopoverButton.isVisible()) {
-      await this.createRulePopoverButton.click();
+    await this.createRuleSplitDropdownButton
+      .or(this.createEsqlRuleCard)
+      .waitFor({ state: 'visible' });
+    if (await this.createRuleSplitDropdownButton.isVisible()) {
+      await this.createRuleSplitDropdownButton.click();
       await this.createEsqlRuleButton.click();
     } else {
       await this.createEsqlRuleCard.click();

@@ -10,6 +10,7 @@ import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { CoreStart, ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import type { LicenseCheckState, LicenseType } from '@kbn/licensing-types';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import {
   EntityMaintainerTaskStatus,
   EntityMaintainerTelemetryEventType,
@@ -18,6 +19,8 @@ import {
   type EntityMaintainerTaskMethod,
 } from './types';
 import { CRUDClient, type EntityUpdateClient } from '../../domain/crud';
+import { ResolutionRulesClient } from '../../domain/resolution/rules';
+import { EntityMetadataClient } from '../../domain/entity_metadata';
 import type { TelemetryReporter } from '../../telemetry/events';
 import { ENTITY_MAINTAINER_EVENT } from '../../telemetry/events';
 import { wrapTaskRun } from '../../telemetry/traces';
@@ -25,6 +28,7 @@ import {
   createMaintainerTelemetryClient,
   type InternalMaintainerTelemetryClient,
 } from './maintainer_telemetry_client';
+import { createWorkflowTriggerEmitter } from '../../workflow/create_workflow_trigger_emitter';
 
 const ENTITY_MAINTAINER_LICENSE_CHECK_VALID = 'valid' as const satisfies LicenseCheckState;
 
@@ -42,6 +46,7 @@ export interface ExecuteMaintainerRunParams {
   type: string;
   coreStart: CoreStart;
   licensing: LicensingPluginStart;
+  workflowsExtensions: WorkflowsExtensionsServerPluginStart;
   analytics: TelemetryReporter;
   logger: Logger;
 }
@@ -111,6 +116,7 @@ export async function executeMaintainerRun({
   type,
   coreStart,
   licensing,
+  workflowsExtensions,
   analytics,
   logger,
 }: ExecuteMaintainerRunParams): Promise<{ state: EntityMaintainerStatus } | null> {
@@ -134,9 +140,21 @@ export async function executeMaintainerRun({
   const cpsEsClient = coreStart.elasticsearch.client.asScoped(request, {
     projectRouting: 'space',
   }).asCurrentUser;
+  const soClient = coreStart.savedObjects.getScopedClient(request);
+  const emitWorkflowTriggerEvent = createWorkflowTriggerEmitter({
+    getWorkflowsClient: () => workflowsExtensions.getClient(request),
+    logger,
+    context: `entity maintainer "${id}"`,
+  });
   const crudClient = new CRUDClient({
     logger,
     esClient,
+    namespace: maintainerStatus.metadata.namespace,
+    emitWorkflowTriggerEvent,
+  });
+  const entityMetadataClient = new EntityMetadataClient({
+    logger,
+    esClient: coreStart.elasticsearch.client.asInternalUser,
     namespace: maintainerStatus.metadata.namespace,
   });
   const taskLogger = logger.get(taskId);
@@ -166,6 +184,12 @@ export async function executeMaintainerRun({
         esClient,
         cpsEsClient,
         crudClient,
+        resolutionRulesClient: new ResolutionRulesClient(
+          soClient,
+          maintainerStatus.metadata.namespace,
+          taskLogger
+        ),
+        entityMetadataClient,
         id,
         analytics,
         telemetryClient,
@@ -197,6 +221,8 @@ export async function runEntityMaintainerTask({
   esClient,
   cpsEsClient,
   crudClient,
+  resolutionRulesClient,
+  entityMetadataClient,
   id,
   analytics,
   telemetryClient,
@@ -210,6 +236,8 @@ export async function runEntityMaintainerTask({
   esClient: ElasticsearchClient;
   cpsEsClient: ElasticsearchClient;
   crudClient: EntityUpdateClient;
+  resolutionRulesClient: ResolutionRulesClient;
+  entityMetadataClient: EntityMetadataClient;
   id: string;
   analytics: TelemetryReporter;
   telemetryClient: InternalMaintainerTelemetryClient;
@@ -241,6 +269,8 @@ export async function runEntityMaintainerTask({
         esClient,
         cpsEsClient,
         crudClient,
+        resolutionRulesClient,
+        entityMetadataClient,
         telemetry: telemetryClient,
       });
       analytics.reportEvent(ENTITY_MAINTAINER_EVENT, {
@@ -258,6 +288,8 @@ export async function runEntityMaintainerTask({
       esClient,
       cpsEsClient,
       crudClient,
+      resolutionRulesClient,
+      entityMetadataClient,
       telemetry: telemetryClient,
     });
     analytics.reportEvent(ENTITY_MAINTAINER_EVENT, {

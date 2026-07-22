@@ -25,7 +25,9 @@ import {
   ALERT_TAGGING_CONTEXT_MENU,
   ALERT_TAGGING_CONTEXT_MENU_ITEM,
   ALERT_TAGGING_UPDATE_BUTTON,
-  ALERTS_HISTOGRAM_LEGEND,
+  ALERTS_HISTOGRAM,
+  ALERTS_HISTOGRAM_LEGEND_BUTTON,
+  ALERTS_HISTOGRAM_SERIES,
   ALERTS_TABLE_ROW_LOADER,
   CELL_ADD_TO_TIMELINE_BUTTON,
   CELL_FILTER_IN_BUTTON,
@@ -394,8 +396,17 @@ export const openAnalyzerForFirstAlertInTimeline = () => {
   cy.get(OPEN_ANALYZER_BTN).first().click({ force: true });
 };
 
-export const clickAlertsHistogramLegend = () => {
-  cy.get(ALERTS_HISTOGRAM_LEGEND).click();
+export const clickAlertsHistogramLegend = (ruleName: string) => {
+  cy.get(ALERTS_HISTOGRAM).find(ALERTS_HISTOGRAM_SERIES).should('contain.text', ruleName);
+
+  recurse(
+    () => {
+      cy.get('body').type('{esc}');
+      cy.get(ALERTS_HISTOGRAM).contains(ruleName).realHover();
+      return cy.get(ALERTS_HISTOGRAM_LEGEND_BUTTON(ruleName));
+    },
+    ($el) => $el.is(':visible')
+  ).click();
 };
 
 export const clickAlertsHistogramLegendAddToTimeline = (ruleName: string) => {

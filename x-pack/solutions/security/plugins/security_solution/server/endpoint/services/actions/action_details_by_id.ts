@@ -50,6 +50,7 @@ export const getActionDetailsById = async <T extends ActionDetails = ActionDetai
       // Get all responses
       fetchActionResponses({
         esClient: endpointService.getInternalEsClient(),
+        endpointService,
         actionIds: [actionId],
       }),
     ]);

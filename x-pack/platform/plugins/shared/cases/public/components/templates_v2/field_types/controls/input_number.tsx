@@ -6,7 +6,7 @@
  */
 
 import type { z } from '@kbn/zod/v4';
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
 import { InlineFieldActions } from './inline_field_actions';
@@ -36,10 +36,15 @@ export const InputNumber = ({
   min,
   max,
   onConfirm,
+  isSaving,
+  isSaveDisabled,
 }: InputNumberProps) => {
   const { control, resetField } = useFormContext();
-  const [isFocused, setIsFocused] = useState(false);
   const path = `${CASE_EXTENDED_FIELDS}.${getFieldSnakeKey(name, type)}`;
+
+  const handleCancel = useCallback(() => {
+    resetField(path);
+  }, [path, resetField]);
 
   const rules = useMemo(() => {
     const validate: Record<string, (value: unknown) => true | string> = {};
@@ -67,8 +72,6 @@ export const InputNumber = ({
     return { validate };
   }, [isRequired, min, max]);
 
-  const showInlineActions = isFocused && onConfirm != null;
-
   return (
     <Controller
       key={name}
@@ -76,44 +79,40 @@ export const InputNumber = ({
       control={control}
       rules={rules}
       defaultValue=""
-      render={({ field, fieldState }) => (
-        <>
-          <EuiFormRow
-            label={label}
-            labelAppend={!isRequired ? OptionalFieldLabel : undefined}
-            isInvalid={!!fieldState.error}
-            error={fieldState.error?.message}
-            fullWidth
-          >
-            <EuiFieldNumber
-              inputRef={field.ref}
-              name={field.name}
-              value={(field.value as string | number | undefined) ?? ''}
-              onChange={(e) => field.onChange(e.target.value)}
-              onBlur={() => {
-                field.onBlur();
-                setIsFocused(false);
-              }}
-              onFocus={() => setIsFocused(true)}
-              isInvalid={!!fieldState.error}
+      render={({ field, fieldState }) => {
+        const showInlineActions = fieldState.isDirty && onConfirm != null;
+        return (
+          <>
+            <EuiFormRow
+              label={label}
+              labelAppend={!isRequired ? OptionalFieldLabel : undefined}
+              isInvalid={Boolean(fieldState.error)}
+              error={fieldState.error?.message}
               fullWidth
-            />
-          </EuiFormRow>
-          {showInlineActions && (
-            <InlineFieldActions
-              name={name}
-              onConfirm={() => {
-                setIsFocused(false);
-                onConfirm();
-              }}
-              onCancel={() => {
-                setIsFocused(false);
-                resetField(path);
-              }}
-            />
-          )}
-        </>
-      )}
+            >
+              <EuiFieldNumber
+                inputRef={field.ref}
+                name={field.name}
+                value={(field.value as string | number | undefined) ?? ''}
+                onChange={field.onChange}
+                onBlur={field.onBlur}
+                isInvalid={Boolean(fieldState.error)}
+                disabled={isSaving}
+                fullWidth
+              />
+            </EuiFormRow>
+            {showInlineActions && onConfirm && (
+              <InlineFieldActions
+                name={name}
+                onConfirm={onConfirm}
+                onCancel={handleCancel}
+                isLoading={isSaving}
+                isDisabled={isSaveDisabled}
+              />
+            )}
+          </>
+        );
+      }}
     />
   );
 };

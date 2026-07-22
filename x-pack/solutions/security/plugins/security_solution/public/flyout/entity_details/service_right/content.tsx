@@ -10,13 +10,14 @@ import React from 'react';
 import type { EntityRiskScore, ServiceItem } from '../../../../common/search_strategy';
 import type { Entity } from '../../../../common/api/entity_analytics';
 import { AssetCriticalityAccordion } from '../../../entity_analytics/components/asset_criticality/asset_criticality_selector';
+import { EntityHighlightsAccordion } from '../../../entity_analytics/components/entity_details_flyout/components/entity_highlights';
 import { FlyoutRiskSummary } from '../../../entity_analytics/components/risk_summary_flyout/risk_summary';
 import type { RiskScoreState } from '../../../entity_analytics/api/hooks/use_risk_score';
 import type { EntityRiskScoresState } from '../../../entity_analytics/api/hooks/use_entity_risk_scores';
 import { EntityType } from '../../../../common/entity_analytics/types';
 import { SERVICE_PANEL_RISK_SCORE_QUERY_ID } from '.';
-import { ObservedEntity } from '../shared/components/observed_entity';
-import type { ObservedEntityData } from '../shared/components/observed_entity/types';
+import { ObservedEntity } from '../../../flyout_v2/entity/shared/components/observed_entity';
+import type { ObservedEntityData } from '../../../flyout_v2/entity/shared/components/observed_entity/types';
 import { useObservedServiceItems } from './hooks/use_observed_service_items';
 import type { EntityDetailsPath } from '../shared/components/left_panel/left_panel_header';
 import { VisualizationsSection } from '../shared/components/right/visualizations_section';
@@ -37,14 +38,25 @@ interface ServicePanelContentProps {
   onAssetCriticalityChange: () => void;
   openDetailsPanel: (path: EntityDetailsPath) => void;
   entityRecord?: Entity;
+  refetchEntityRecord?: () => void;
   entityStoreEntityId?: string;
   /** See {@link RiskSummaryProps.prefetchedResolutionRisk}. */
   prefetchedResolutionRisk?: EntityRiskScore<EntityType.service>;
+  /**
+   * When provided, clicking a related entity in the resolution section is delegated to this
+   * callback (used by the new EUI system flyout) instead of the legacy expandable flyout.
+   */
+  onShowEntity?: (params: {
+    engineType: string | undefined;
+    entityId: string;
+    entityName: string | undefined;
+  }) => void;
 }
 
 export const ServicePanelContent = ({
   serviceName,
   entityRecord,
+  refetchEntityRecord,
   observedService,
   riskScoreState,
   entityRiskScores,
@@ -56,12 +68,19 @@ export const ServicePanelContent = ({
   onAssetCriticalityChange,
   entityStoreEntityId,
   prefetchedResolutionRisk,
+  onShowEntity,
 }: ServicePanelContentProps) => {
   const observedFields = useObservedServiceItems(observedService);
   const hasEntityResolutionLicense = useHasEntityResolutionLicense();
 
   return (
     <>
+      <EntityHighlightsAccordion
+        entityIdentifier={entityRecord?.entity?.id ?? serviceName}
+        entityType={EntityType.service}
+        entityRecord={entityRecord}
+        refetchEntityRecord={refetchEntityRecord}
+      />
       {riskScoreState.hasEngineBeenInstalled && riskScoreState.data?.length !== 0 && (
         <>
           <FlyoutRiskSummary
@@ -72,7 +91,7 @@ export const ServicePanelContent = ({
             openDetailsPanel={openDetailsPanel}
             isPreviewMode={isPreviewMode}
             entityType={EntityType.service}
-            entityId={entityRecord?.entity.id}
+            entityId={entityRecord?.entity?.id}
             prefetchedResolutionRisk={prefetchedResolutionRisk}
           />
           <EuiHorizontalRule />
@@ -96,6 +115,7 @@ export const ServicePanelContent = ({
             entityType={EntityType.service}
             scopeId={scopeId}
             openDetailsPanel={openDetailsPanel}
+            onShowEntity={onShowEntity}
           />
           <EuiHorizontalRule />
         </>
@@ -107,7 +127,7 @@ export const ServicePanelContent = ({
         />
       )}
       <ObservedEntity
-        observedData={{ ...observedService, entityId: entityRecord?.entity.id }}
+        observedData={{ ...observedService, entityId: entityRecord?.entity?.id }}
         contextID={contextID}
         scopeId={scopeId}
         observedFields={observedFields}

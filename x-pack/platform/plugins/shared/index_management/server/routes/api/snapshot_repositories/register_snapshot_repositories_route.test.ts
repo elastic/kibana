@@ -14,12 +14,17 @@ describe('[Index management API Routes] Snapshot repositories', () => {
   const router = new RouterMock();
 
   const getSettings = router.getMockESApiFn('cluster.getSettings');
+  const getRepository = router.getMockESApiFn('snapshot.getRepository');
   const hasPrivileges = router.getMockESApiFn('security.hasPrivileges');
 
   const mockRequest: RequestMock = {
     method: 'get',
     path: addBasePath('/snapshot_repositories'),
   };
+
+  beforeEach(() => {
+    getRepository.mockResolvedValue({});
+  });
 
   beforeAll(() => {
     registerSnapshotRepositoriesRoute({
@@ -28,10 +33,11 @@ describe('[Index management API Routes] Snapshot repositories', () => {
     });
   });
 
-  test('returns the configured default repository and canCreate', async () => {
+  test('returns the configured default repository, existing repositories and canCreate', async () => {
     getSettings.mockResolvedValue({
       persistent: { repositories: { default_repository: 'found-snapshots' } },
     });
+    getRepository.mockResolvedValue({ 'found-snapshots': { type: 'fs' } });
     hasPrivileges.mockResolvedValue({
       cluster: { 'cluster:admin/repository/put': true },
     });
@@ -40,6 +46,24 @@ describe('[Index management API Routes] Snapshot repositories', () => {
       body: {
         hasDefaultRepository: true,
         defaultRepository: 'found-snapshots',
+        hasRepositories: true,
+        canCreateRepository: true,
+      },
+    });
+  });
+
+  test('reports existing repositories even when none is configured as default', async () => {
+    getSettings.mockResolvedValue({});
+    getRepository.mockResolvedValue({ 'my-repo': { type: 'fs' } });
+    hasPrivileges.mockResolvedValue({
+      cluster: { 'cluster:admin/repository/put': true },
+    });
+
+    await expect(router.runRequest(mockRequest)).resolves.toEqual({
+      body: {
+        hasDefaultRepository: false,
+        defaultRepository: undefined,
+        hasRepositories: true,
         canCreateRepository: true,
       },
     });
@@ -55,6 +79,7 @@ describe('[Index management API Routes] Snapshot repositories', () => {
       body: {
         hasDefaultRepository: false,
         defaultRepository: undefined,
+        hasRepositories: false,
         canCreateRepository: true,
       },
     });
@@ -70,7 +95,29 @@ describe('[Index management API Routes] Snapshot repositories', () => {
       body: {
         hasDefaultRepository: false,
         defaultRepository: undefined,
+        hasRepositories: false,
         canCreateRepository: false,
+      },
+    });
+  });
+
+  test('defaults hasRepositories to false when listing repositories fails, without failing the endpoint', async () => {
+    getSettings.mockResolvedValue({
+      persistent: { repositories: { default_repository: 'found-snapshots' } },
+    });
+    getRepository.mockRejectedValue(
+      Object.assign(new Error('missing privilege'), { statusCode: 403 })
+    );
+    hasPrivileges.mockResolvedValue({
+      cluster: { 'cluster:admin/repository/put': true },
+    });
+
+    await expect(router.runRequest(mockRequest)).resolves.toEqual({
+      body: {
+        hasDefaultRepository: true,
+        defaultRepository: 'found-snapshots',
+        hasRepositories: false,
+        canCreateRepository: true,
       },
     });
   });
@@ -84,6 +131,7 @@ describe('[Index management API Routes] Snapshot repositories', () => {
       body: {
         hasDefaultRepository: false,
         defaultRepository: undefined,
+        hasRepositories: false,
         canCreateRepository: true,
       },
     });

@@ -115,17 +115,19 @@ export const afterGreaterThanPreviousStep: DslValidationFunc = (arg) => {
   }
 };
 
-export const afterSmallerThanDataRetention = ({
-  retentionMs,
-  retentionEsFormat,
+export const afterBeforeExitBoundary = ({
+  boundaryMs,
+  boundaryEsFormat,
+  phase,
 }: {
-  retentionMs: number;
-  retentionEsFormat: string;
+  boundaryMs: number;
+  boundaryEsFormat: string;
+  phase: 'frozen' | 'delete';
 }): DslValidationFunc => {
   return (arg) => {
     const { formData, path } = arg as DslValidationArg;
 
-    if (!Number.isFinite(retentionMs) || retentionMs < 0) return;
+    if (!Number.isFinite(boundaryMs) || boundaryMs < 0) return;
     if (!/^_meta\.downsampleSteps\[\d+\]\.afterValue$/.test(path)) return;
 
     const stepIndex = getStepIndexFromPath(path);
@@ -146,13 +148,21 @@ export const afterSmallerThanDataRetention = ({
       Number.isFinite(computed) ? computed : -1
     );
 
-    // If a downsampling step happens at or after data retention, it will never execute before deletion.
-    if (ms >= 0 && ms >= retentionMs) {
+    // A downsampling round must run before the data reaches the frozen phase (searchable snapshot)
+    // if one is configured, otherwise before deletion (data retention). At or after that boundary it
+    // would never execute.
+    if (ms >= 0 && ms >= boundaryMs) {
       return {
-        message: i18n.translate('xpack.streams.editDslStepsFlyout.afterGreaterThanRetentionError', {
-          defaultMessage: 'Must not exceed the data retention period ({retention}).',
-          values: { retention: retentionEsFormat },
-        }),
+        message:
+          phase === 'frozen'
+            ? i18n.translate('xpack.streams.editDslStepsFlyout.afterGreaterThanFrozenError', {
+                defaultMessage: 'Must not exceed the frozen phase ({value}).',
+                values: { value: boundaryEsFormat },
+              })
+            : i18n.translate('xpack.streams.editDslStepsFlyout.afterGreaterThanDeletePhaseError', {
+                defaultMessage: 'Must not exceed the delete phase ({value}).',
+                values: { value: boundaryEsFormat },
+              }),
       };
     }
   };
@@ -256,4 +266,58 @@ export const fixedIntervalMultipleOfPreviousStep: DslValidationFunc = (arg) => {
       ),
     };
   }
+};
+
+export const fixedIntervalBeforeExitBoundary = ({
+  boundaryMs,
+  boundaryEsFormat,
+  phase,
+}: {
+  boundaryMs: number;
+  boundaryEsFormat: string;
+  phase: 'frozen' | 'delete';
+}): DslValidationFunc => {
+  return (arg) => {
+    const { formData, path } = arg as DslValidationArg;
+
+    if (!Number.isFinite(boundaryMs) || boundaryMs < 0) return;
+    if (!/^_meta\.downsampleSteps\[\d+\]\.fixedIntervalValue$/.test(path)) return;
+
+    const stepIndex = getStepIndexFromPath(path);
+    if (stepIndex === null) return;
+
+    const value = getAsString(formData, getStepFieldPath(stepIndex, 'fixedIntervalValue')).trim();
+    if (value === '') return;
+
+    const unit = getAsString(
+      formData,
+      getStepFieldPath(stepIndex, 'fixedIntervalUnit'),
+      'd'
+    ) as PreservedTimeUnit;
+    const ms = toMilliseconds(value, unit);
+    if (!Number.isFinite(ms) || ms <= 0) return;
+
+    // The downsample interval must be smaller than the window in which the data is downsampled:
+    // before the frozen phase (searchable snapshot) if configured, otherwise before deletion.
+    if (ms >= boundaryMs) {
+      return {
+        message:
+          phase === 'frozen'
+            ? i18n.translate(
+                'xpack.streams.editDslStepsFlyout.fixedIntervalGreaterThanFrozenError',
+                {
+                  defaultMessage: 'Must not exceed the frozen phase ({value}).',
+                  values: { value: boundaryEsFormat },
+                }
+              )
+            : i18n.translate(
+                'xpack.streams.editDslStepsFlyout.fixedIntervalGreaterThanDeletePhaseError',
+                {
+                  defaultMessage: 'Must not exceed the delete phase ({value}).',
+                  values: { value: boundaryEsFormat },
+                }
+              ),
+      };
+    }
+  };
 };

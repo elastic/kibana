@@ -104,6 +104,7 @@ export const TemplateYamlEditorBase: React.FC<TemplateYamlEditorBaseProps> = ({
       onChange={onChange}
       width="100%"
       height="100%"
+      transparentBackground
       editorDidMount={handleEditorDidMount}
       options={YAML_EDITOR_OPTIONS}
     />

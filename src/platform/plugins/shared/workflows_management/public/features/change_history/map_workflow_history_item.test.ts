@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { getWorkflowYamlFromSnapshot } from './get_workflow_yaml_from_snapshot';
 import {
-  getWorkflowYamlFromSnapshot,
   mapWorkflowHistoryItemToDetail,
   mapWorkflowHistoryItemToListItem,
   toWorkflowChangeHistorySnapshot,
@@ -55,6 +55,33 @@ describe('mapWorkflowHistoryItem', () => {
       action: WorkflowChangeHistoryAction.workflowCreate,
       metadata: { version: 1 },
     });
+  });
+
+  it('passes through changes when provided', () => {
+    const summary = [{ title: 'Steps:', lines: ['2 added', '1 removed', '1 updated'] }];
+
+    expect(
+      mapWorkflowHistoryItemToListItem(currentHistoryItem, {
+        isCurrent: true,
+        changes: {
+          count: 4,
+          summary,
+        },
+      })
+    ).toEqual(
+      expect.objectContaining({
+        changes: {
+          count: 4,
+          summary,
+        },
+      })
+    );
+  });
+
+  it('omits changes when not provided', () => {
+    expect(
+      mapWorkflowHistoryItemToListItem(currentHistoryItem, { isCurrent: true })
+    ).not.toHaveProperty('changes');
   });
 
   it('maps restore rows with comment on the timeline', () => {

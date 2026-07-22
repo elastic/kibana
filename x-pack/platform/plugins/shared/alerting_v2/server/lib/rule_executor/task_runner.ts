@@ -99,7 +99,6 @@ export class RuleExecutorTaskRunner {
   ): Record<string, unknown> {
     switch (reason) {
       case 'rule_disabled':
-      case 'engine_disabled':
         return taskInstance.state ?? {};
       default:
         return {};

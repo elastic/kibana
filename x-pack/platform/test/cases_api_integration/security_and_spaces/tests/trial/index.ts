@@ -37,6 +37,7 @@ export default ({ loadTestFile, getService }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./delete_sub_privilege'));
     loadTestFile(require.resolve('./create_comment_sub_privilege.ts'));
     loadTestFile(require.resolve('./manage_templates_sub_privilege.ts'));
+    loadTestFile(require.resolve('./templates_input_validation.ts'));
     loadTestFile(require.resolve('./user_profiles/get_current'));
     // case observables are only available with a license above basic
     loadTestFile(require.resolve('./internal/observables'));

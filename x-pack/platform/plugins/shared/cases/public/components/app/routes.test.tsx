@@ -41,6 +41,11 @@ jest.mock('../case_view/case_view_page', () => ({
   CaseViewPage: () => <div>{'Case View Page'}</div>,
 }));
 
+jest.mock('../templates_v2/pages/all_templates_page', () => ({
+  __esModule: true,
+  default: () => <div>{'All templates'}</div>,
+}));
+
 jest.mock('../templates_v2/pages/create_template/page', () => ({
   __esModule: true,
   default: () => <div>{'Create template'}</div>,
@@ -144,6 +149,28 @@ describe('Cases routes', () => {
 
     afterEach(() => {
       getConfigSpy.mockRestore();
+    });
+
+    it('navigates to the templates list page', async () => {
+      renderWithRouter(['/cases/configure/templates']);
+      expect(await screen.findByText('All templates')).toBeInTheDocument();
+    });
+
+    it('shows the no privileges page on the templates list route when user lacks manageTemplates permission', async () => {
+      renderWithRouter(
+        ['/cases/configure/templates'],
+        buildCasesPermissions({ manageTemplates: false })
+      );
+      expect(await screen.findByText('Privileges required')).toBeInTheDocument();
+      expect(screen.queryByText('All templates')).not.toBeInTheDocument();
+    });
+
+    it('allows access to the templates list page without settings permission as long as the user has manageTemplates permission', async () => {
+      renderWithRouter(
+        ['/cases/configure/templates'],
+        buildCasesPermissions({ settings: false, manageTemplates: true })
+      );
+      expect(await screen.findByText('All templates')).toBeInTheDocument();
     });
 
     it('navigates to the create template page', async () => {

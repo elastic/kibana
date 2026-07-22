@@ -6,36 +6,42 @@
  */
 
 import React from 'react';
-import { render, waitFor } from '@testing-library/react';
+import { render, waitFor, fireEvent } from '@testing-library/react';
+import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { ElasticInferenceServiceModelsHeader } from './header';
 import { useKibana } from '../../hooks/use_kibana';
 import { docLinks } from '../../../common/doc_links';
 import { INFERENCE_PREFERENCES_FEATURE_FLAG_ID } from '../../../common/constants';
 
 jest.mock('../../hooks/use_kibana');
+jest.mock('@kbn/kibana-react-plugin/public', () => ({
+  ...jest.requireActual('@kbn/kibana-react-plugin/public'),
+  useUiSetting: jest.fn((key: string, defaultValue?: unknown) => defaultValue),
+}));
+
+const mockUseUiSetting = useUiSetting as jest.Mock;
 const mockUseKibana = useKibana as jest.Mock;
 
-const mockUiSettings = (inferencePreferencesEnabled: boolean) => ({
-  get: jest.fn((key: string, defaultValue?: unknown) => {
-    if (key === INFERENCE_PREFERENCES_FEATURE_FLAG_ID) {
-      return inferencePreferencesEnabled;
-    }
-    return defaultValue;
-  }),
-});
-
 describe('ElasticInferenceServiceModelsHeader', () => {
+  const onManageRegions = jest.fn();
+
   beforeEach(() => {
+    jest.clearAllMocks();
+    mockUseUiSetting.mockImplementation((key: string, defaultValue?: unknown) => {
+      if (key === INFERENCE_PREFERENCES_FEATURE_FLAG_ID) return false;
+      return defaultValue;
+    });
     mockUseKibana.mockReturnValue({
       services: {
         cloud: { isCloudEnabled: false },
-        uiSettings: mockUiSettings(false),
       },
     });
   });
 
   it('renders the page title and description', () => {
-    const { getByText } = render(<ElasticInferenceServiceModelsHeader />);
+    const { getByText } = render(
+      <ElasticInferenceServiceModelsHeader onManageRegions={onManageRegions} />
+    );
     expect(getByText('Elastic Inference Service')).toBeInTheDocument();
     expect(
       getByText('Manage models and endpoints for Elastic Inference Service')
@@ -44,7 +50,9 @@ describe('ElasticInferenceServiceModelsHeader', () => {
 
   it('renders a documentation link pointing to the correct href', () => {
     docLinks.elasticInferenceService = 'https://elastic.co/eis';
-    const { getByRole } = render(<ElasticInferenceServiceModelsHeader />);
+    const { getByRole } = render(
+      <ElasticInferenceServiceModelsHeader onManageRegions={onManageRegions} />
+    );
     const link = getByRole('link', { name: /documentation/i });
     expect(link).toHaveAttribute('href', 'https://elastic.co/eis');
     expect(link).toHaveAttribute('target', '_blank');
@@ -52,19 +60,34 @@ describe('ElasticInferenceServiceModelsHeader', () => {
 
   describe('Manage regions button', () => {
     it('shows when inference preferences FF is enabled', () => {
-      mockUseKibana.mockReturnValue({
-        services: {
-          cloud: { isCloudEnabled: false },
-          uiSettings: mockUiSettings(true),
-        },
+      mockUseUiSetting.mockImplementation((key: string, defaultValue?: unknown) => {
+        if (key === INFERENCE_PREFERENCES_FEATURE_FLAG_ID) return true;
+        return defaultValue;
       });
-      const { getByTestId } = render(<ElasticInferenceServiceModelsHeader />);
+      const { getByTestId } = render(
+        <ElasticInferenceServiceModelsHeader onManageRegions={onManageRegions} />
+      );
       expect(getByTestId('eisManageRegionsButton')).toBeInTheDocument();
     });
 
     it('hidden when inference preferences FF is disabled', () => {
-      const { queryByTestId } = render(<ElasticInferenceServiceModelsHeader />);
+      const { queryByTestId } = render(
+        <ElasticInferenceServiceModelsHeader onManageRegions={onManageRegions} />
+      );
       expect(queryByTestId('eisManageRegionsButton')).not.toBeInTheDocument();
+    });
+
+    it('calls onManageRegions when button is clicked', () => {
+      mockUseUiSetting.mockImplementation((key: string, defaultValue?: unknown) => {
+        if (key === INFERENCE_PREFERENCES_FEATURE_FLAG_ID) return true;
+        return defaultValue;
+      });
+      const { getByTestId } = render(
+        <ElasticInferenceServiceModelsHeader onManageRegions={onManageRegions} />
+      );
+
+      fireEvent.click(getByTestId('eisManageRegionsButton'));
+      expect(onManageRegions).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -78,17 +101,20 @@ describe('ElasticInferenceServiceModelsHeader', () => {
               .fn()
               .mockResolvedValue({ billingUrl: 'https://cloud.elastic.co/billing/' }),
           },
-          uiSettings: mockUiSettings(false),
         },
       });
-      const { getByText } = render(<ElasticInferenceServiceModelsHeader />);
+      const { getByText } = render(
+        <ElasticInferenceServiceModelsHeader onManageRegions={onManageRegions} />
+      );
       await waitFor(() => {
         expect(getByText('View Cloud usage')).toBeInTheDocument();
       });
     });
 
     it('hidden when cloud is disabled', () => {
-      const { queryByText } = render(<ElasticInferenceServiceModelsHeader />);
+      const { queryByText } = render(
+        <ElasticInferenceServiceModelsHeader onManageRegions={onManageRegions} />
+      );
       expect(queryByText('View Cloud usage')).not.toBeInTheDocument();
     });
 
@@ -99,10 +125,11 @@ describe('ElasticInferenceServiceModelsHeader', () => {
             isCloudEnabled: true,
             getPrivilegedUrls: jest.fn().mockResolvedValue({}),
           },
-          uiSettings: mockUiSettings(false),
         },
       });
-      const { queryByText } = render(<ElasticInferenceServiceModelsHeader />);
+      const { queryByText } = render(
+        <ElasticInferenceServiceModelsHeader onManageRegions={onManageRegions} />
+      );
       await waitFor(() => {
         expect(queryByText('View Cloud usage')).not.toBeInTheDocument();
       });

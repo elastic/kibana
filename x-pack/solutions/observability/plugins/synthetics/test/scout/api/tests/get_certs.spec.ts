@@ -42,7 +42,7 @@ interface CertFacetsBody {
   tags: CertFacetCount[];
   issuers: CertFacetCount[];
   resourceTypes: CertFacetCount[];
-  party: CertFacetCount[];
+  certOrigin: CertFacetCount[];
   expiringWithin: CertFacetCount[];
 }
 
@@ -208,7 +208,7 @@ apiTest.describe(
         tags: [],
         issuers: [],
         resourceTypes: [],
-        party: [],
+        certOrigin: [],
         expiringWithin: [],
       });
     });
@@ -336,8 +336,8 @@ apiTest.describe(
         'other',
       ]);
       expect(facets.resourceTypes.every((entry) => entry.count === 0)).toBe(true);
-      expect(findCount(facets.party, 'first_party')).toBe(0);
-      expect(findCount(facets.party, 'third_party')).toBe(0);
+      expect(findCount(facets.certOrigin, 'first_party')).toBe(0);
+      expect(findCount(facets.certOrigin, 'third_party')).toBe(0);
 
       // Cumulative "expiring within" windows over not_after of the seeded certs:
       // expired (now-10d), expiring (now+10d), valid (now+60d). `now` counts the
@@ -393,13 +393,13 @@ apiTest.describe(
 
         // Origin filter maps Sec-Fetch-Site onto first/third-party (same-origin ->
         // first-party, cross-site -> third-party).
-        const firstPartyRes = await getCerts(apiClient, '?party=first_party');
+        const firstPartyRes = await getCerts(apiClient, '?certOrigin=first_party');
         expect(firstPartyRes).toHaveStatusCode(200);
         expect(certData(firstPartyRes).certs.map((cert) => cert.common_name)).toStrictEqual([
           'first.browser.scout.test',
         ]);
 
-        const thirdPartyRes = await getCerts(apiClient, '?party=third_party');
+        const thirdPartyRes = await getCerts(apiClient, '?certOrigin=third_party');
         expect(thirdPartyRes).toHaveStatusCode(200);
         expect(certData(thirdPartyRes).certs.map((cert) => cert.common_name)).toStrictEqual([
           'third.browser.scout.test',
@@ -418,8 +418,8 @@ apiTest.describe(
       expect(findCount(facets.resourceTypes, 'image')).toBe(0);
 
       // One first-party (same-origin) + one third-party (cross-site).
-      expect(findCount(facets.party, 'first_party')).toBe(1);
-      expect(findCount(facets.party, 'third_party')).toBe(1);
+      expect(findCount(facets.certOrigin, 'first_party')).toBe(1);
+      expect(findCount(facets.certOrigin, 'third_party')).toBe(1);
 
       // Browser certs now appear alongside the three lightweight HTTP certs.
       expect(findCount(facets.monitorTypes, 'browser')).toBe(2);

@@ -108,6 +108,7 @@ export const ApplicationConnectionsTable = () => {
             connectionId: connection.id,
             connectionName: connection.name,
             userId: connection.user_id,
+            user: connection.user,
           },
         ];
       }),

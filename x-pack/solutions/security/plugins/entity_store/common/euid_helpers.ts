@@ -98,6 +98,15 @@ export const euid = {
     getEuidFilterBasedOnDocument: euidModule.getEuidDslFilterBasedOnDocument,
 
     /**
+     * Query DSL that matches raw source documents belonging to an already-resolved entity-store record.
+     * Trusts the record's resolved evaluated fields (e.g. `entity.namespace`) and reverse-maps them to
+     * raw source-field conditions, so IdP users resolve correctly even though the record does not retain
+     * `event.module` / `data_stream.dataset`. Input: entity type and one entity-store record; output:
+     * bool/term-style filter, or `undefined` if the record lacks enough identity.
+     */
+    getEuidFilterBasedOnEntityRecord: euidModule.getEuidDslFilterBasedOnEntityRecord,
+
+    /**
      * Broad DSL filter: documents that may participate in the entity pipeline and could have an EUID for this type.
      * Input: entity type only. Output: query DSL equivalent to documentsFilter (and postAgg when defined).
      */

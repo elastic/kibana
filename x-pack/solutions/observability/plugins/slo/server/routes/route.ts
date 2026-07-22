@@ -12,6 +12,7 @@ import { deleteCompositeSLORoute } from './composite_slo/delete_composite_slo';
 import { fetchCompositeHistoricalSummaryRoute } from './composite_slo/fetch_composite_historical_summary';
 import { findCompositeSLORoute } from './composite_slo/find_composite_slo';
 import { getCompositeSLORoute } from './composite_slo/get_composite_slo';
+import { getCompositeSLODefinitionRoute } from './composite_slo/get_composite_slo_definition';
 import { getCompositeSLOSuggestionsRoute } from './composite_slo/get_composite_slo_suggestions';
 import { postCompositeSloSummaryRefreshRoute } from './composite_slo/post_composite_slo_summary_refresh';
 import { updateCompositeSLORoute } from './composite_slo/update_composite_slo';
@@ -90,6 +91,7 @@ export const getSloRouteRepository = ({ isServerless }: RouteRepositoryOptions =
     ...searchSloDefinitionsRoute,
     ...createCompositeSLORoute,
     ...getCompositeSLORoute,
+    ...getCompositeSLODefinitionRoute,
     ...findCompositeSLORoute,
     ...updateCompositeSLORoute,
     ...deleteCompositeSLORoute,

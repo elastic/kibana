@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import type { Subscription } from 'rxjs';
 import { BehaviorSubject, combineLatestWith, Subject } from 'rxjs';
 import type * as H from 'history';
 import type {
@@ -83,6 +84,7 @@ import { defaultDeepLinks } from './app/links/default_deep_links';
 import { AIValueReportLocatorDefinition } from '../common/locators/ai_value_report/locator';
 import {
   registerAttachmentUiDefinitions,
+  registerAiRuleCreationHandler,
   registerEntityAnalyticsDashboardAttachment,
   registerEntityAttachment,
   registerRuleAttachment,
@@ -101,6 +103,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
   private appUpdater$ = new Subject<AppUpdater>();
   private storage = new Storage(localStorage);
+  private saveRuleSub?: Subscription;
+  private saveRuleHandlerStopped = false;
 
   // Lazily instantiated dependencies
   private _subPlugins?: SubPlugins;
@@ -145,7 +149,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     }
 
     if (workflowsExtensions) {
-      registerWorkflowSteps(workflowsExtensions, core);
+      registerWorkflowSteps(workflowsExtensions, this.experimentalFeatures);
     }
 
     // Lazily instantiate subPlugins and initialize services
@@ -302,6 +306,19 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     cases.attachmentFramework.registerUnified(getSecurityAlertType());
     cases.attachmentFramework.registerUnified(getTimelineAttachment());
 
+    // Always register the entity attachment renderer so that attachments created
+    // while the feature flag was enabled continue to display correctly after the
+    // flag is disabled. The flag gates server-side writes; client-side rendering
+    // must be unconditional to avoid "Attachment type is not registered" errors.
+    // Lazily imported to keep the entity attachment module out of the page-load bundle.
+    import('./cases/attachments/entity')
+      .then(({ getEntityAttachment }) => {
+        cases.attachmentFramework.registerUnified(getEntityAttachment());
+      })
+      .catch((e) => {
+        this.logger.error('Failed to register entity attachment type', e);
+      });
+
     this.registerDiscoverSharedFeatures(core, plugins);
 
     return this.contract.getSetupContract();
@@ -312,6 +329,21 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     this.registerFleetExtensions(core, plugins);
     this.registerPluginUpdates(core, plugins); // Not awaiting to prevent blocking start execution
 
+    if (this.experimentalFeatures.aiRuleCreationEnabled) {
+      registerAiRuleCreationHandler({
+        aiRuleCreation: this.services.aiRuleCreation,
+        notifications: core.notifications,
+        agentBuilder: plugins.agentBuilder,
+        register: (subscription) => {
+          if (this.saveRuleHandlerStopped) {
+            subscription.unsubscribe();
+            return;
+          }
+          this.saveRuleSub = subscription;
+        },
+      });
+    }
+
     if (plugins.agentBuilder?.attachments) {
       const coreSetup = this._coreSetup;
       if (!coreSetup) {
@@ -319,12 +351,14 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       }
 
       registerAttachmentUiDefinitions(plugins.agentBuilder.attachments);
-      registerRuleAttachment({
-        attachments: plugins.agentBuilder.attachments,
-        application: core.application,
-        aiRuleCreation: this.services.aiRuleCreation,
-        uiSettings: core.uiSettings,
-      });
+      if (this.experimentalFeatures.aiRuleCreationEnabled) {
+        registerRuleAttachment({
+          attachments: plugins.agentBuilder.attachments,
+          application: core.application,
+          aiRuleCreation: this.services.aiRuleCreation,
+          uiSettings: core.uiSettings,
+        });
+      }
       registerEntityAnalyticsDashboardAttachment({
         attachments: plugins.agentBuilder.attachments,
         application: core.application,
@@ -360,6 +394,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   }
 
   public stop() {
+    this.saveRuleHandlerStopped = true;
+    this.saveRuleSub?.unsubscribe();
     this.services.stop();
   }
 
@@ -633,7 +669,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
     const attackFlyoutOverviewTabFeature: SecuritySolutionAttackFlyoutOverviewTabFeature = {
       id: 'security-solution-attack-flyout-overview-tab',
-      render: ({ hit }) => {
+      render: ({ hit, onAttackUpdated, columns, filter, onAddColumn, onRemoveColumn }) => {
         const servicesPromise = this.getDiscoverFlyoutServices(core);
         const storePromise = this.getDiscoverFlyoutStore(core);
 
@@ -643,6 +679,11 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
               hit={hit}
               servicesPromise={servicesPromise}
               storePromise={storePromise}
+              onAttackUpdated={onAttackUpdated}
+              columns={columns}
+              filter={filter}
+              onAddColumn={onAddColumn}
+              onRemoveColumn={onRemoveColumn}
             />
           </React.Suspense>
         );

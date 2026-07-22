@@ -20,6 +20,7 @@ import { useGetCaseConnectors } from '../../../../../../containers/use_get_case_
 import { useDeleteCases } from '../../../../../../containers/use_delete_cases';
 import { useShouldDisableStatus } from '../../../../../actions/status/use_should_disable_status';
 import * as commonI18n from '../../../../../../common/translations';
+import { useAddCaseToChat } from '../../../../../../agent_builder/use_add_case_to_chat';
 import {
   REPORTED_BY,
   CREATED_ON,
@@ -46,6 +47,7 @@ export const useCaseViewHeader = ({
   const refreshCaseViewPage = useRefreshCaseViewPage();
   const { data: caseConnectors } = useGetCaseConnectors(caseData.id);
   const { mutate: deleteCases } = useDeleteCases();
+  const { addToChat, summarizeCase, isAddToChatAvailable } = useAddCaseToChat(caseData);
 
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -147,6 +149,11 @@ export const useCaseViewHeader = ({
       getMenu({
         permissions,
         caseId: caseData.id,
+        chat: {
+          addToChat,
+          summarizeCase,
+          isAddToChatAvailable,
+        },
         currentExternalIncident,
         onRefresh: refreshCaseViewPage,
         onOpenSettings,
@@ -154,6 +161,9 @@ export const useCaseViewHeader = ({
         onOpenDeleteModal,
       }),
     [
+      addToChat,
+      summarizeCase,
+      isAddToChatAvailable,
       permissions,
       caseData.id,
       currentExternalIncident,

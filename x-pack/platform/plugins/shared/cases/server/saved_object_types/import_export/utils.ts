@@ -22,8 +22,7 @@ import { defaultSortField } from '../../common/utils';
 
 export async function getAttachmentsAndUserActionsForCases(
   savedObjectsClient: SavedObjectsClientContract,
-  caseIds: string[],
-  includeCaseAttachments = false
+  caseIds: string[]
 ): Promise<
   Array<
     SavedObject<
@@ -31,9 +30,7 @@ export async function getAttachmentsAndUserActionsForCases(
     >
   >
 > {
-  const attachmentTypes = includeCaseAttachments
-    ? [CASE_COMMENT_SAVED_OBJECT, CASE_ATTACHMENT_SAVED_OBJECT]
-    : CASE_COMMENT_SAVED_OBJECT;
+  const attachmentTypes = [CASE_COMMENT_SAVED_OBJECT, CASE_ATTACHMENT_SAVED_OBJECT];
 
   const [attachments, userActions] = await Promise.all([
     getAssociatedObjects<AttachmentAttributesWithoutRefs | AttachmentAttributesV2>({

@@ -28,7 +28,7 @@ export interface UseChangeHistoryRestoreResult {
 export const useChangeHistoryRestore: (
   args?: UseChangeHistoryRestoreArgs
 ) => UseChangeHistoryRestoreResult = ({ onRestored } = {}) => {
-  const { adapter, objectId, supports } = useChangeHistoryConfig();
+  const { adapter, objectId, supports, telemetry } = useChangeHistoryConfig();
   const invalidateChangeHistory = useInvalidateChangeHistory();
   const [isRestoring, setIsRestoring] = useState(false);
   const [error, setError] = useState<ChangeHistoryError | undefined>();
@@ -53,7 +53,8 @@ export const useChangeHistoryRestore: (
 
       try {
         await adapter.restoreChange({
-          ...params,
+          objectId: params.objectId,
+          changeId: params.changeId,
           signal: params.signal ?? abortController.signal,
         });
 
@@ -61,8 +62,22 @@ export const useChangeHistoryRestore: (
           return false;
         }
 
-        await onRestored?.();
-        await invalidateChangeHistory(objectId);
+        const durationMs =
+          params.confirmedAtMs !== undefined ? Date.now() - params.confirmedAtMs : undefined;
+
+        if (params.restoreTelemetry || durationMs !== undefined) {
+          telemetry.reportRestoreCompleted({
+            ...params.restoreTelemetry,
+            ...(durationMs !== undefined ? { durationMs } : {}),
+          });
+        }
+
+        try {
+          await onRestored?.();
+          await invalidateChangeHistory(objectId);
+        } catch {
+          // Post-restore refresh failures must not affect restore outcome or telemetry.
+        }
 
         if (abortController.signal.aborted) {
           return false;
@@ -74,7 +89,12 @@ export const useChangeHistoryRestore: (
           return false;
         }
 
-        setError(mapChangeHistoryRestoreError(restoreError));
+        const mappedError = mapChangeHistoryRestoreError(restoreError);
+        setError(mappedError);
+        telemetry.reportRestoreFailed({
+          ...params.restoreTelemetry,
+          errorCode: mappedError.code,
+        });
         return false;
       } finally {
         if (!abortController.signal.aborted) {
@@ -82,7 +102,7 @@ export const useChangeHistoryRestore: (
         }
       }
     },
-    [adapter, invalidateChangeHistory, objectId, onRestored, supports.restore]
+    [adapter, invalidateChangeHistory, objectId, onRestored, supports.restore, telemetry]
   );
 
   return {

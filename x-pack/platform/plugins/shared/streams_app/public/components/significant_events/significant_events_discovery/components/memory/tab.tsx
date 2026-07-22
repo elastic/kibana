@@ -22,6 +22,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiToolTip,
   EuiTreeView,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
@@ -36,6 +37,8 @@ import {
   useScrapeConversations,
   useSynthesizeMemory,
   useDetectGaps,
+  useMemoryWorkflowsEnabled,
+  useToggleMemoryWorkflows,
 } from './use_memory';
 import type { MemoryCategoryNode, MemoryVersionRecord } from './types';
 import { EntryFlyout } from './entry_flyout';
@@ -62,6 +65,12 @@ export function MemoryTab() {
   const consolidateMemory = useConsolidateMemory();
   const synthesizeMemory = useSynthesizeMemory();
   const detectGaps = useDetectGaps();
+  const { data: workflowsEnabledData, isLoading: isWorkflowsEnabledLoading } =
+    useMemoryWorkflowsEnabled();
+  const toggleWorkflows = useToggleMemoryWorkflows();
+  const workflowsEnabled = workflowsEnabledData?.enabled ?? false;
+  const areWorkflowActionsDisabled =
+    isWorkflowsEnabledLoading || !workflowsEnabled || toggleWorkflows.isLoading;
 
   const workflowActions: Array<{
     key: string;
@@ -177,27 +186,41 @@ export function MemoryTab() {
                 </EuiFlexItem>
                 {canManage && (
                   <EuiFlexItem grow={false}>
-                    <EuiButtonIcon
-                      iconType="plusInCircle"
-                      aria-label={i18n.translate('xpack.streams.memory.newEntryButton', {
+                    <EuiToolTip
+                      content={i18n.translate('xpack.streams.memory.newEntryButton', {
                         defaultMessage: 'New memory entry',
                       })}
-                      onClick={() => setShowCreateFlyout(true)}
-                      data-test-subj="streamsMemoryNewEntryButton"
-                    />
+                      disableScreenReaderOutput
+                    >
+                      <EuiButtonIcon
+                        iconType="plusInCircle"
+                        aria-label={i18n.translate('xpack.streams.memory.newEntryButton', {
+                          defaultMessage: 'New memory entry',
+                        })}
+                        onClick={() => setShowCreateFlyout(true)}
+                        data-test-subj="streamsMemoryNewEntryButton"
+                      />
+                    </EuiToolTip>
                   </EuiFlexItem>
                 )}
                 <EuiFlexItem grow={false}>
                   <EuiPopover
                     button={
-                      <EuiButtonIcon
-                        iconType="boxesHorizontal"
-                        aria-label={i18n.translate('xpack.streams.memory.workflowActionsButton', {
+                      <EuiToolTip
+                        content={i18n.translate('xpack.streams.memory.workflowActionsButton', {
                           defaultMessage: 'Workflow actions',
                         })}
-                        onClick={() => setIsActionsPopoverOpen((v) => !v)}
-                        data-test-subj="streamsMemoryWorkflowActionsButton"
-                      />
+                        disableScreenReaderOutput
+                      >
+                        <EuiButtonIcon
+                          iconType="boxesHorizontal"
+                          aria-label={i18n.translate('xpack.streams.memory.workflowActionsButton', {
+                            defaultMessage: 'Workflow actions',
+                          })}
+                          onClick={() => setIsActionsPopoverOpen((v) => !v)}
+                          data-test-subj="streamsMemoryWorkflowActionsButton"
+                        />
+                      </EuiToolTip>
                     }
                     isOpen={isActionsPopoverOpen}
                     closePopover={() => setIsActionsPopoverOpen(false)}
@@ -205,24 +228,77 @@ export function MemoryTab() {
                     anchorPosition="downRight"
                   >
                     <EuiContextMenuPanel
-                      items={workflowActions.map((action) => (
-                        <EuiContextMenuItem
-                          key={action.key}
-                          icon={
-                            action.mutation.isLoading ? <EuiLoadingSpinner size="s" /> : action.icon
-                          }
-                          onClick={() => {
-                            action.mutation.mutate();
-                            setIsActionsPopoverOpen(false);
-                          }}
-                          disabled={
-                            action.mutation.isLoading || (action.requiresManage && !canManage)
-                          }
-                          data-test-subj={action.testSubj}
-                        >
-                          {action.label}
-                        </EuiContextMenuItem>
-                      ))}
+                      items={[
+                        ...(canManage
+                          ? [
+                              <EuiContextMenuItem
+                                key="toggleWorkflows"
+                                icon={
+                                  isWorkflowsEnabledLoading || toggleWorkflows.isLoading ? (
+                                    <EuiLoadingSpinner size="s" />
+                                  ) : workflowsEnabled ? (
+                                    'pause'
+                                  ) : (
+                                    'play'
+                                  )
+                                }
+                                onClick={() => {
+                                  toggleWorkflows.mutate(!workflowsEnabled, {
+                                    onSettled: () => setIsActionsPopoverOpen(false),
+                                  });
+                                }}
+                                disabled={isWorkflowsEnabledLoading || toggleWorkflows.isLoading}
+                                data-test-subj="streamsMemoryToggleWorkflowsButton"
+                              >
+                                {workflowsEnabled
+                                  ? i18n.translate('xpack.streams.memory.disableWorkflowsButton', {
+                                      defaultMessage: 'Disable background workflows',
+                                    })
+                                  : i18n.translate('xpack.streams.memory.enableWorkflowsButton', {
+                                      defaultMessage: 'Enable background workflows',
+                                    })}
+                              </EuiContextMenuItem>,
+                            ]
+                          : []),
+                        ...workflowActions.map((action) => {
+                          const isDisabled =
+                            action.mutation.isLoading ||
+                            (action.requiresManage && !canManage) ||
+                            areWorkflowActionsDisabled;
+
+                          return (
+                            <EuiContextMenuItem
+                              key={action.key}
+                              icon={
+                                action.mutation.isLoading ? (
+                                  <EuiLoadingSpinner size="s" />
+                                ) : (
+                                  action.icon
+                                )
+                              }
+                              onClick={() => {
+                                action.mutation.mutate();
+                                setIsActionsPopoverOpen(false);
+                              }}
+                              disabled={isDisabled}
+                              toolTipContent={
+                                !workflowsEnabled && !isWorkflowsEnabledLoading
+                                  ? i18n.translate(
+                                      'xpack.streams.memory.workflowActionRequiresEnabledTooltip',
+                                      {
+                                        defaultMessage:
+                                          'Enable background workflows before running this action.',
+                                      }
+                                    )
+                                  : undefined
+                              }
+                              data-test-subj={action.testSubj}
+                            >
+                              {action.label}
+                            </EuiContextMenuItem>
+                          );
+                        }),
+                      ]}
                     />
                   </EuiPopover>
                 </EuiFlexItem>

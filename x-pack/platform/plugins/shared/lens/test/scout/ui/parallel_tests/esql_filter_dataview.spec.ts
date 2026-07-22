@@ -115,17 +115,15 @@ spaceTest.describe.skip(
         });
 
         await spaceTest.step('verify data view selector has no duplicate names', async () => {
-          const dataViewCombo = page.testSubj.locator('filterIndexPatternsSelect');
-          await expect(dataViewCombo).toBeVisible({ timeout: 5_000 });
+          await expect(page.testSubj.locator('filterIndexPatternsSelect')).toBeVisible({
+            timeout: 5_000,
+          });
 
-          await dataViewCombo.locator('[data-test-subj="comboBoxInput"]').click();
-
-          const optionsList = page.locator('.euiFilterSelectItem');
-          await expect.poll(() => optionsList.count(), { timeout: 5_000 }).toBeGreaterThan(0);
-
-          const allOptionTexts = await optionsList.allInnerTexts();
-          const uniqueTexts = [...new Set(allOptionTexts)];
-          expect(allOptionTexts).toHaveLength(uniqueTexts.length);
+          const allOptionTexts = await page.components
+            .comboBox('filterIndexPatternsSelect')
+            .getAvailableOptions();
+          expect(allOptionTexts.length).toBeGreaterThan(0);
+          expect(allOptionTexts).toHaveLength(new Set(allOptionTexts).size);
         });
       }
     );
@@ -172,9 +170,10 @@ spaceTest.describe.skip(
           await page.testSubj.click('addFilter');
           await expect(page.testSubj.locator('addFilterPopover')).toBeVisible();
 
-          await page.testSubj.click('filterFieldSuggestionList > comboBoxInput');
-          const fieldOptions = page.locator('.euiFilterSelectItem');
-          await expect.poll(() => fieldOptions.count(), { timeout: 10_000 }).toBeGreaterThan(0);
+          const fieldOptions = await page.components
+            .comboBox('filterFieldSuggestionList')
+            .getAvailableOptions();
+          expect(fieldOptions.length).toBeGreaterThan(0);
         });
       }
     );

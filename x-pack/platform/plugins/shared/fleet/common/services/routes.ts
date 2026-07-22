@@ -26,7 +26,7 @@ import {
   UNINSTALL_TOKEN_ROUTES,
   FLEET_DEBUG_ROUTES,
   REMOTE_SYNCED_INTEGRATIONS_API_ROUTES,
-  AGENTLESS_POLICIES_ROUTES,
+  MANAGED_INTEGRATIONS_ROUTES,
 } from '../constants';
 
 export const epmRouteService = {
@@ -184,6 +184,9 @@ export const epmRouteService = {
       pkgVersion
     );
   },
+  getIlmPoliciesPath: () => {
+    return EPM_API_ROUTES.ILM_POLICIES_PATTERN;
+  },
 };
 
 export const packagePolicyRouteService = {
@@ -226,13 +229,28 @@ export const packagePolicyRouteService = {
 
 export const agentlessPolicyRouteService = {
   getCreatePath: () => {
-    return AGENTLESS_POLICIES_ROUTES.CREATE_PATTERN;
+    return MANAGED_INTEGRATIONS_ROUTES.CREATE_PATTERN;
+  },
+  getListPath: () => {
+    return MANAGED_INTEGRATIONS_ROUTES.LIST_PATTERN;
+  },
+  getInfoPath: (policyId: string) => {
+    return MANAGED_INTEGRATIONS_ROUTES.GET_PATTERN.replace('{policyId}', policyId);
+  },
+  getUpdatePath: (policyId: string) => {
+    return MANAGED_INTEGRATIONS_ROUTES.UPDATE_PATTERN.replace('{policyId}', policyId);
   },
   getDeletePath: (policyId: string) => {
-    return AGENTLESS_POLICIES_ROUTES.DELETE_PATTERN.replace('{policyId}', policyId);
+    return MANAGED_INTEGRATIONS_ROUTES.DELETE_PATTERN.replace('{policyId}', policyId);
+  },
+  getUpgradePath: () => {
+    return MANAGED_INTEGRATIONS_ROUTES.UPGRADE_PATTERN;
+  },
+  getUpgradeDryRunPath: () => {
+    return MANAGED_INTEGRATIONS_ROUTES.UPGRADE_DRYRUN_PATTERN;
   },
   getBulkThroughputPath: () => {
-    return AGENTLESS_POLICIES_ROUTES.BULK_THROUGHPUT_PATTERN;
+    return MANAGED_INTEGRATIONS_ROUTES.BULK_THROUGHPUT_PATTERN;
   },
 };
 

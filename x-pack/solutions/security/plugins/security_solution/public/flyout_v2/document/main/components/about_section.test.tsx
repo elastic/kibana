@@ -10,34 +10,20 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { act, render } from '@testing-library/react';
 import React from 'react';
 import { useExpandSection } from '../../../shared/hooks/use_expand_section';
-import { ABOUT_SECTION_TEST_ID, ABOUT_SECTION_TITLE, AboutSection } from './about_section';
+import { useFlyoutApi } from '../../../use_flyout_api';
+import { createFlyoutApiMock } from '../../../use_flyout_api.mock';
+import { ABOUT_SECTION_TEST_ID, AboutSection } from './about_section';
+import { ABOUT_SECTION_TITLE } from '../../../shared/constants/flyout_titles';
 
-jest.mock('../../../../common/lib/kibana', () => ({
-  useKibana: () => ({
-    services: {
-      overlays: {
-        openSystemFlyout: jest.fn(),
-      },
-    },
-  }),
-}));
+jest.mock('../../../use_flyout_api');
 
-jest.mock('react-redux', () => ({
-  ...jest.requireActual('react-redux'),
-  useStore: () => ({}),
-}));
-
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useHistory: () => ({ push: jest.fn() }),
-}));
-
-jest.mock('../../../shared/hooks/use_default_flyout_properties', () => ({
-  useDefaultDocumentFlyoutProperties: () => ({ size: 'm' }),
-}));
-
+// Capture the `onShowRuleSummary` prop passed to AlertDescription so the test can invoke it.
+let capturedOnShowRuleSummary: (() => void) | undefined;
 jest.mock('./alert_description', () => ({
-  AlertDescription: () => <div>{'AlertDescription'}</div>,
+  AlertDescription: ({ onShowRuleSummary }: { onShowRuleSummary?: () => void }) => {
+    capturedOnShowRuleSummary = onShowRuleSummary;
+    return <div>{'AlertDescription'}</div>;
+  },
 }));
 
 jest.mock('./alert_reason', () => ({
@@ -77,13 +63,18 @@ const createMockHit = (flattened: DataTableRecord['flattened']): DataTableRecord
 
 const alertHit = createMockHit({
   'event.kind': 'signal',
+  'kibana.alert.rule.uuid': 'rule-uuid-123',
+  'kibana.alert.rule.name': 'My Rule',
 });
 
 describe('AboutSection', () => {
   const mockUseExpandSection = jest.mocked(useExpandSection);
+  const flyoutApi = createFlyoutApiMock();
 
   beforeEach(() => {
     jest.clearAllMocks();
+    capturedOnShowRuleSummary = undefined;
+    jest.mocked(useFlyoutApi).mockReturnValue(flyoutApi);
   });
 
   it('renders the About expandable section', () => {
@@ -127,6 +118,28 @@ describe('AboutSection', () => {
       expect(getByText('AlertReason')).toBeInTheDocument();
       expect(getByText('AlertStatus')).toBeInTheDocument();
       expect(getByText('MitreAttack')).toBeInTheDocument();
+    });
+  });
+
+  it('opens the rule flyout with the alert rule id when onShowRuleSummary is invoked', () => {
+    mockUseExpandSection.mockReturnValue(true);
+
+    render(
+      <IntlProvider locale="en">
+        <AboutSection hit={alertHit} />
+      </IntlProvider>
+    );
+
+    expect(capturedOnShowRuleSummary).toBeDefined();
+
+    act(() => {
+      capturedOnShowRuleSummary?.();
+    });
+
+    expect(flyoutApi.openRuleFlyout).toHaveBeenCalledTimes(1);
+    expect(flyoutApi.openRuleFlyout).toHaveBeenCalledWith({
+      ruleId: 'rule-uuid-123',
+      title: 'Rule: My Rule',
     });
   });
 

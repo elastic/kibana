@@ -74,6 +74,28 @@ export function enrichErrorMessage(
   return result;
 }
 
+// Schema-aware enrichment replaces the issue message with a description of the
+// *type* expected at the path (e.g. "max expects number"). That is helpful when
+// the author supplied the wrong shape, but it destroys precise, author-written
+// messages carried by the zod issue itself:
+//   - constraint violations (`too_big`, etc.) carrying e.g. "Parallel concurrency
+//     \"max\" cannot exceed 20." would be rewritten to the useless "max expects
+//     number".
+//   - `custom` refinements (e.g. the parallel-mode mutual-exclusivity rule)
+//     carry a hand-written, actionable message; because they attach at the step
+//     node the path points at the step-union, so enrichment would otherwise
+//     replace them with the giant "must be one of ...405 more" union dump.
+// For these codes the zod issue message is already specific and authoritative,
+// so skip the type-describing enrichment and keep it verbatim.
+const AUTHORITATIVE_MESSAGE_ERROR_CODES = new Set([
+  'too_big',
+  'too_small',
+  'not_multiple_of',
+  'invalid_value',
+  'invalid_format',
+  'custom',
+]);
+
 function computeEnrichment(
   path: PropertyKey[],
   originalMessage: string,
@@ -88,7 +110,7 @@ function computeEnrichment(
     return { message: domainEnriched, enriched: true };
   }
 
-  if (path.length > 0) {
+  if (path.length > 0 && !AUTHORITATIVE_MESSAGE_ERROR_CODES.has(errorCode)) {
     const schemaEnriched = trySchemaAwareEnrichment(
       path,
       fieldName,

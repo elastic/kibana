@@ -9,6 +9,8 @@ import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { LicenseType } from '@kbn/licensing-types';
 import type { EntityUpdateClient } from '../../domain/crud';
+import type { ResolutionRulesClient } from '../../domain/resolution/rules';
+import type { EntityMetadataClient } from '../../domain/entity_metadata';
 import type { MaintainerTelemetryClient } from './maintainer_telemetry_client';
 
 export const EntityMaintainerTaskStatus = {
@@ -86,6 +88,8 @@ export interface EntityMaintainerTaskMethodContext {
   esClient: ElasticsearchClient;
   cpsEsClient: ElasticsearchClient;
   crudClient: EntityUpdateClient;
+  resolutionRulesClient: ResolutionRulesClient;
+  entityMetadataClient: EntityMetadataClient;
   telemetry: MaintainerTelemetryClient;
 }
 

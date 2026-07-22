@@ -20,7 +20,7 @@ import type { EncryptedSavedObjectsService } from '../../server/crypto';
 import * as EncryptedSavedObjectsModule from '../../server/saved_objects';
 
 // This will only change if new ESOs are introduced. This number should never get smaller.
-export const ESO_TYPES_COUNT = 24 as const;
+export const ESO_TYPES_COUNT = 25 as const;
 
 describe('checking changes on all registered encrypted SO types', () => {
   let esServer: TestElasticsearchUtils;
@@ -66,8 +66,9 @@ describe('checking changes on all registered encrypted SO types', () => {
       Object {
         "action": "1246557bd7101a6f8f732c6fe2fcebb582b2dfb6154816c43cce224ceaee4239",
         "action_task_params": "06aa563283bdcd5c07ec433a7d0b8425019ad11d75595ee1431691667ecd2cec",
-        "ad_hoc_run_params": "6539367aa4ae8340c62f123c3457c6b8d7873c92de68651c70d41028dfe7ed32",
+        "ad_hoc_run_params": "492d390fb70fba457acb3b33ce76d4ea027625b3a7d7e9dd76c5c3255655c544",
         "alert": "878a3b83179bbf2ad9d3862fcba539b7066429869b14c120a1dc7a8d39f4a7fa",
+        "alerting_action_policy": "539c465f3bf4d062e394acbbb9184f995f48127f701e40ba6f601dc5a20300fd",
         "anonymization-salt": "1e5ff6ba241b27bbfc6901898b0ece9327ba63fdaea1f2f6cba6344d4a425b43",
         "api_key_pending_invalidation": "4dafadadaaca2f2f3f6038ee8363b71b2d101371ca98c34d2b6aa2a96f7e71c5",
         "api_key_to_invalidate": "d7a3423a74032bb5ecce9a0975e8ea1d5d5171348f99173df54b2fa0dfd3de43",
@@ -86,7 +87,7 @@ describe('checking changes on all registered encrypted SO types', () => {
         "synthetics-param": "747ba9d1b7addf5b131713abe7868bd767af6ce0cf8b6b0f335f4ef34b280c7e",
         "task": "d6cc30871dc78caf3f451de1275a3803879ec9935b4a2e34076dee56878c228f",
         "uptime-synthetics-api-key": "5ca81f180763e85397fa8c6508adcd60efd0f916e29bac6dcd5b4564f1db7375",
-        "user_connector_token": "b443b022b46b79c0ff9fa674aecc64176a5fcbd09c2db2d9f050a6a88435732e",
+        "user_connector_token": "7f818fe3827daa31d23b874e480176d105e629cf5da88f5f4e56033e78c3acca",
         "watchlist-entity-source": "9e6445feba401a9b6d44c412d8fe9a069e051ea2483570c03ef17b5cf5e718d7",
       }
     `);
@@ -118,6 +119,7 @@ describe('checking changes on all registered encrypted SO types', () => {
         "action|1",
         "action_task_params|2",
         "action_task_params|1",
+        "ad_hoc_run_params|4",
         "ad_hoc_run_params|3",
         "ad_hoc_run_params|2",
         "ad_hoc_run_params|1",
@@ -129,11 +131,13 @@ describe('checking changes on all registered encrypted SO types', () => {
         "alert|4",
         "alert|3",
         "alert|2",
+        "alert|14",
         "alert|13",
         "alert|12",
         "alert|11",
         "alert|10",
         "alert|1",
+        "alerting_action_policy|1",
         "anonymization-salt|1",
         "api_key_pending_invalidation|2",
         "api_key_pending_invalidation|1",
@@ -167,9 +171,11 @@ describe('checking changes on all registered encrypted SO types', () => {
         "task|4",
         "task|3",
         "task|2",
+        "task|12",
         "task|11",
         "task|10",
         "task|1",
+        "user_connector_token|2",
         "user_connector_token|1",
         "watchlist-entity-source|3",
         "watchlist-entity-source|2",

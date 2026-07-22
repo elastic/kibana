@@ -26,8 +26,7 @@ export const IngestStep = () => {
   if (!path) return <Redirect to={ONBOARDING_PATH} />;
 
   const contentKey = path === 'generate-vectors' ? 'generate' : 'have_vectors';
-  const { title, description, docsLabel, docsHref, api, infoPanel } =
-    getStepContent(docLinks)[contentKey].ingest;
+  const { title, description, api, infoPanel } = getStepContent(docLinks)[contentKey].ingest;
   const step = 'ingest';
 
   return (
@@ -37,8 +36,6 @@ export const IngestStep = () => {
       step={step}
       title={title}
       description={description}
-      docsLabel={docsLabel}
-      docsHref={docsHref}
       onBack={() => history.push(from)}
       onNext={() =>
         history.push({

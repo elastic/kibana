@@ -712,6 +712,60 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
+    it('captures the requesting user name on userScope when scheduling with an API key', async () => {
+      const scheduled = await scheduleTaskWithApiKey({
+        id: 'test-task-for-sample-task-plugin-to-capture-user-name',
+        taskType: 'sampleTask',
+        params: {},
+      });
+
+      const result = await currentTask(scheduled.id);
+
+      // the user name is resolved from the authenticated request via getCurrentUser
+      // and persisted on userScope at schedule time (no enrichment needed)
+      expect(result.userScope?.userName).not.empty();
+
+      // cross-check the captured user name against the owner of the API key that was created for the task
+      const queryResult = await supertest
+        .post('/internal/security/api_key/_query')
+        .send({})
+        .set('kbn-xsrf', 'xxx')
+        .expect(200);
+
+      const createdApiKey = queryResult.body.apiKeys.find(
+        (apiKey: { id: string }) => apiKey.id === result.userScope?.apiKeyId
+      );
+
+      expect(createdApiKey).not.to.be(undefined);
+      expect(result.userScope?.userName).to.eql(createdApiKey.username);
+
+      await supertest.delete('/api/sample_tasks').set('kbn-xsrf', 'xxx').expect(200);
+
+      // Scheduling with an API key grants a Task-Manager-owned key that is queued for
+      // invalidation on task removal. Drain it here so the pending invalidation SO does
+      // not leak into the next test's global `api_key_to_invalidate` count assertions.
+      await delay(1000);
+      await supertest
+        .post('/api/invalidate_api_key_task/run_soon')
+        .send({})
+        .set('kbn-xsrf', 'xxx')
+        .expect(200);
+
+      await retry.try(async () => {
+        const invalidateResponse = await es.search({
+          index: '.kibana_task_manager',
+          size: 100,
+          query: {
+            term: {
+              type: 'api_key_to_invalidate',
+            },
+          },
+        });
+
+        expect(invalidateResponse.hits.hits.length).to.eql(0);
+      });
+    });
+
     it('should schedule tasks with fake request if request is provided', async () => {
       let queryResult = await supertest
         .post('/internal/security/api_key/_query')
@@ -730,7 +784,7 @@ export default function ({ getService }: FtrProviderContext) {
       const result = await currentTask('test-task-for-sample-task-plugin-to-test-task-api-key');
 
       expect(result.apiKey).not.empty();
-      expect(result.userScope?.apiKeyCreatedByUser).to.be(true);
+      expect(result.userScope?.apiKeyCreatedByUser).to.be(false);
 
       queryResult = await supertest
         .post('/internal/security/api_key/_query')
@@ -738,8 +792,14 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'xxx')
         .expect(200);
 
-      // should be one new api key generated in the route
-      expect(queryResult.body.apiKeys.length).eql(apiKeysLength + 1);
+      // route creates one key for the fake request; task manager clones another for the task
+      expect(
+        queryResult.body.apiKeys.filter((apiKey: { id: string }) => {
+          return apiKey.id === result.userScope?.apiKeyId;
+        }).length
+      ).eql(1);
+
+      expect(queryResult.body.apiKeys.length).eql(apiKeysLength + 2);
 
       await supertest.delete('/api/sample_tasks').set('kbn-xsrf', 'xxx').expect(200);
 
@@ -749,8 +809,57 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'xxx')
         .expect(200);
 
-      // api key should not have been invalidated when the task was deleted
-      expect(queryResult.body.apiKeys.length).eql(apiKeysLength + 1);
+      // cloned task api key should still exist until invalidation runs
+      expect(
+        queryResult.body.apiKeys.filter((apiKey: { id: string }) => {
+          return apiKey.id === result.userScope?.apiKeyId;
+        }).length
+      ).eql(1);
+
+      // api_key_to_invalidate saved object should be created for the cloned key
+      await retry.try(async () => {
+        const response = await es.search({
+          index: '.kibana_task_manager',
+          size: 100,
+          query: {
+            term: {
+              type: 'api_key_to_invalidate',
+            },
+          },
+        });
+
+        expect(response.hits.hits.length).to.eql(1);
+        expect((response.hits?.hits?.[0]._source as any).api_key_to_invalidate?.apiKeyId).to.eql(
+          result.userScope?.apiKeyId
+        );
+      });
+
+      // wait for the api_key_to_invalidate saved object to be older than the invalidation removalDelay (1s)
+      await delay(1000);
+
+      // run the api key invalidation task
+      await supertest
+        .post('/api/invalidate_api_key_task/run_soon')
+        .send({})
+        .set('kbn-xsrf', 'xxx')
+        .expect(200);
+
+      // cloned task api key should be invalidated; route-created key remains
+      await retry.try(async () => {
+        queryResult = await supertest
+          .post('/internal/security/api_key/_query')
+          .send({})
+          .set('kbn-xsrf', 'xxx')
+          .expect(200);
+
+        expect(
+          queryResult.body.apiKeys.filter((apiKey: { id: string }) => {
+            return apiKey.id === result.userScope?.apiKeyId;
+          }).length
+        ).eql(0);
+
+        expect(queryResult.body.apiKeys.length).eql(apiKeysLength + 1);
+      });
     });
 
     it('should return a task run result when asked to run a task now', async () => {
@@ -1819,12 +1928,13 @@ export default function ({ getService }: FtrProviderContext) {
     describe('user profile enrichment', () => {
       function scheduleTaskForProfileTest(
         task: Partial<ConcreteTaskInstance>,
-        userProfileId: string
+        userProfileId: string,
+        userName?: string
       ): Promise<SerializedConcreteTaskInstance> {
         return supertest
           .post('/api/sample_tasks/schedule_for_profile_test')
           .set('kbn-xsrf', 'xxx')
-          .send({ task, userProfileId })
+          .send({ task, userProfileId, userName })
           .expect(200)
           .then((response: { body: SerializedConcreteTaskInstance }) => {
             log.debug(`Task Scheduled: ${response.body.id}`);
@@ -1832,19 +1942,25 @@ export default function ({ getService }: FtrProviderContext) {
           });
       }
 
-      it('persists userProfileId on userScope and resolves it via getCurrentUser at run time', async () => {
+      it('persists userProfileId and userName on userScope and resolves them via getCurrentUser at run time', async () => {
         const testProfileUid = 'test-user-profile-uid-1';
+        const testUserName = 'test-user-name-1';
         const scheduled = await scheduleTaskForProfileTest(
           {
             id: 'test-task-for-user-profile-enrichment',
             taskType: 'sampleUserResolvingTask',
             params: {},
           },
-          testProfileUid
+          testProfileUid,
+          testUserName
         );
 
         expect(scheduled.userScope?.userProfileId).to.eql(testProfileUid);
-        expect(scheduled.userScope?.apiKeyCreatedByUser).to.be(true);
+        expect(scheduled.userScope?.userName).to.eql(testUserName);
+        // Scheduling via a fake request clones the caller's key into a Task-Manager-owned key, so
+        // it is not flagged as user-created (it is invalidated on task removal). Profile resolution
+        // is unaffected since the clone runs with the same identity.
+        expect(scheduled.userScope?.apiKeyCreatedByUser).to.be(false);
 
         // The task is one-shot, so it's removed from saved objects after it
         // runs. The task indexes its captured state into the test history
@@ -1856,21 +1972,21 @@ export default function ({ getService }: FtrProviderContext) {
           const state = JSON.parse(docs[0]._source.state) as {
             resolvedFromTaskRequest: {
               profileUid?: string;
-              usernameWasUndefined: boolean;
+              username?: string;
             } | null;
             resolvedFromChildRequest: {
               profileUid?: string;
-              usernameWasUndefined: boolean;
+              username?: string;
             } | null;
           };
 
           expect(state.resolvedFromTaskRequest).to.be.an('object');
           expect(state.resolvedFromTaskRequest?.profileUid).to.eql(testProfileUid);
-          expect(state.resolvedFromTaskRequest?.usernameWasUndefined).to.be(true);
+          expect(state.resolvedFromTaskRequest?.username).to.eql(testUserName);
 
           expect(state.resolvedFromChildRequest).to.be.an('object');
           expect(state.resolvedFromChildRequest?.profileUid).to.eql(testProfileUid);
-          expect(state.resolvedFromChildRequest?.usernameWasUndefined).to.be(true);
+          expect(state.resolvedFromChildRequest?.username).to.eql(testUserName);
         });
       });
     });

@@ -128,7 +128,8 @@ export function getPreviewTransformRequestBody(
   transformConfigQuery: TransformConfigQuery,
   partialRequest?: StepDefineExposedState['previewRequest'],
   runtimeMappings?: StepDefineExposedState['runtimeMappings'],
-  timeRangeMs?: StepDefineExposedState['timeRangeMs']
+  timeRangeMs?: StepDefineExposedState['timeRangeMs'],
+  projectRouting?: PostTransformsPreviewRequestSchema['source']['project_routing']
 ): PostTransformsPreviewRequestSchema {
   const dataViewTitle = dataView.getIndexPattern();
   const index = dataViewTitle.split(',').map((name: string) => name.trim());
@@ -158,6 +159,7 @@ export function getPreviewTransformRequestBody(
       index,
       ...(isDefaultQuery(query) ? {} : { query }),
       ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
+      ...(projectRouting !== undefined ? { project_routing: projectRouting } : {}),
     },
     ...(partialRequest ?? {}),
   };
@@ -189,7 +191,8 @@ export const getCreateTransformSettingsRequestBody = (
 export const getCreateTransformRequestBody = (
   dataView: DataView,
   transformConfigState: StepDefineExposedState,
-  transformDetailsState: StepDetailsExposedState
+  transformDetailsState: StepDetailsExposedState,
+  projectRouting?: PutTransformsRequestSchema['source']['project_routing']
 ): PutTransformsPivotRequestSchema | PutTransformsLatestRequestSchema => ({
   ...getPreviewTransformRequestBody(
     dataView,
@@ -198,7 +201,8 @@ export const getCreateTransformRequestBody = (
     transformConfigState.runtimeMappings,
     transformConfigState.isDatePickerApplyEnabled && transformConfigState.timeRangeMs
       ? transformConfigState.timeRangeMs
-      : undefined
+      : undefined,
+    projectRouting
   ),
   // conditionally add optional description
   ...(transformDetailsState.transformDescription !== ''

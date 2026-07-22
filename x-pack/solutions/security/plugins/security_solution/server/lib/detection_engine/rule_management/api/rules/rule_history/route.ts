@@ -15,6 +15,7 @@ import {
   RuleChangesHistoryRequestQuery,
 } from '../../../../../../../common/api/detection_engine/rule_management';
 import type { RuleChangesHistoryResponse } from '../../../../../../../common/api/detection_engine/rule_management';
+import { ENABLE_RULE_CHANGES_HISTORY_SETTING } from '../../../../../../../common/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import { buildSiemResponse } from '../../../../routes/utils';
 
@@ -46,7 +47,18 @@ export const ruleHistoryRoute = (router: SecuritySolutionPluginRouter) => {
           const { ruleId } = request.params;
           const { page, per_page: perPage } = request.query;
 
-          const ctx = await context.resolve(['securitySolution']);
+          const ctx = await context.resolve(['core', 'securitySolution']);
+
+          const isRuleChangesHistoryEnabled = await ctx.core.uiSettings.client.get<boolean>(
+            ENABLE_RULE_CHANGES_HISTORY_SETTING
+          );
+          if (!isRuleChangesHistoryEnabled) {
+            return siemResponse.error({
+              statusCode: 403,
+              body: 'Rule changes history is disabled. You may enable it in Advanced Settings.',
+            });
+          }
+
           const detectionRulesClient = ctx.securitySolution.getDetectionRulesClient();
 
           const result = await detectionRulesClient.getHistoryForRule({

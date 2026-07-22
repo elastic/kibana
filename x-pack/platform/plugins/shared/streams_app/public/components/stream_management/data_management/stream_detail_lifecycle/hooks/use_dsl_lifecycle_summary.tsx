@@ -20,6 +20,7 @@ import { i18n } from '@kbn/i18n';
 import { useEuiTheme } from '@elastic/eui';
 import { isEqual } from 'lodash';
 import { useKibana } from '../../../../../hooks/use_kibana';
+import { useStreamsAppFetch } from '../../../../../hooks/use_streams_app_fetch';
 import { useIlmPhasesColorAndDescription } from './use_ilm_phases_color_and_description';
 import type { DataStreamStats } from './use_data_stream_stats';
 import { formatBytes } from '../helpers/format_bytes';
@@ -28,7 +29,10 @@ import { OverrideSettingsModal } from '../data_phases/override_settings_modal/ov
 import { EditDslStepsFlyout } from '../data_phases/edit_dsl_steps_flyout/edit_dsl_steps_flyout';
 import { MAX_DOWNSAMPLE_STEPS } from '../data_phases/edit_dsl_steps_flyout/form';
 import type { LifecyclePhase } from '../common/data_lifecycle/lifecycle_types';
-import { buildLifecyclePhases } from '../common/data_lifecycle/lifecycle_types';
+import {
+  buildLifecyclePhases,
+  getFrozenPhaseLabel,
+} from '../common/data_lifecycle/lifecycle_types';
 import {
   dslLifecycleSummaryUiReducer,
   initialDslLifecycleSummaryUiState,
@@ -63,6 +67,11 @@ export const useDslLifecycleSummary = ({
   const {
     core: { notifications },
     isServerless,
+    dependencies: {
+      start: {
+        streams: { streamsRepositoryClient },
+      },
+    },
   } = useKibana();
 
   const { euiTheme } = useEuiTheme();
@@ -77,6 +86,28 @@ export const useDslLifecycleSummary = ({
   const effectiveLifecycle = definition.effective_lifecycle;
   const isDsl = isDslLifecycle(effectiveLifecycle);
   const isDisabled = isDisabledLifecycle(effectiveLifecycle);
+  const frozenAfter = isDsl ? effectiveLifecycle.dsl.frozen_after : undefined;
+
+  // Fetches each phase's storage size and doc count, split by the actual `_tier` allocation, so the
+  // timeline can show hot vs frozen separately. Only called on stateful when `frozen_after` is
+  // configured - the `_tier` query is not supported on serverless, and without a frozen phase
+  // there is nothing to split.
+  const phaseStatsFetch = useStreamsAppFetch(
+    ({ signal }) => {
+      if (isServerless || !frozenAfter) {
+        return undefined;
+      }
+      return streamsRepositoryClient.fetch(
+        'GET /internal/streams/{name}/lifecycle/_dsl_phase_stats',
+        {
+          params: { path: { name: definition.stream.name } },
+          signal,
+        }
+      );
+    },
+    [definition.stream.name, frozenAfter, isServerless, streamsRepositoryClient],
+    { withRefresh: true }
+  );
 
   const getPhases = (): LifecyclePhase[] => {
     if (!isDsl && !isDisabled) {
@@ -84,7 +115,44 @@ export const useDslLifecycleSummary = ({
     }
 
     const retentionPeriod = isDsl ? effectiveLifecycle.dsl.data_retention : undefined;
-    const storageSize = stats?.sizeBytes ? formatBytes(stats.sizeBytes) : undefined;
+    const phaseStats = phaseStatsFetch.value?.phases;
+
+    // Per-phase size/doc indicators are only meaningful when we can attribute data to a phase.
+    //
+    // - No frozen phase configured: `phaseStatsFetch` is skipped by design (`!frozenAfter`), so the
+    //   timeline has a single Hot phase. The whole-stream total (`stats`) belongs entirely to Hot,
+    //   so showing it there is correct and unambiguous.
+    // - Frozen phase configured and per-phase stats resolved: each phase reflects only the data
+    //   actually allocated to it via `_tier`. An absent `hot`/`frozen` entry means that tier is
+    //   genuinely empty (the `_tier` aggregation only returns keys for tiers that hold data), so it
+    //   resolves to `0`, mirroring ILM (where every configured phase always reports a size).
+    // - Frozen phase configured but per-phase stats unavailable (request in flight, or the server
+    //   returned `phases: undefined` after an ES error): we cannot reliably split size/docs by
+    //   phase. The whole-stream total can't be used here — it would land entirely on Hot and leave
+    //   Frozen blank, which reads as authoritative "all data is hot" rather than "unknown". So we
+    //   hide the indicators on every phase (size/docs `undefined`) until reliable data is available.
+    // `hasFrozenPhase` is always false on serverless: the frozen tier can't be configured there, so
+    // `frozenAfter` is never set and serverless always takes the whole-stream branch below.
+    const hasFrozenPhase = frozenAfter !== undefined;
+    const hasPhaseStats = phaseStats !== undefined;
+    // When a frozen phase exists, only show indicators once per-phase stats have resolved.
+    const canShowPerPhaseStats = hasFrozenPhase ? hasPhaseStats : true;
+
+    const hotSizeInBytes = !canShowPerPhaseStats
+      ? undefined
+      : hasPhaseStats
+      ? phaseStats.hot?.size_in_bytes ?? 0
+      : stats?.sizeBytes;
+    const hotDocsCount = !canShowPerPhaseStats
+      ? undefined
+      : hasPhaseStats
+      ? phaseStats.hot?.docs_count ?? 0
+      : stats?.totalDocs;
+    // Frozen fields only ever come from per-phase stats, so guard them on `hasPhaseStats` alone.
+    // (Hot uses `canShowPerPhaseStats` because it can also fall back to whole-stream totals before
+    // per-phase stats resolve; frozen has no such fallback.)
+    const frozenSizeInBytes = hasPhaseStats ? phaseStats.frozen?.size_in_bytes ?? 0 : undefined;
+    const frozenDocsCount = hasPhaseStats ? phaseStats.frozen?.docs_count ?? 0 : undefined;
 
     return buildLifecyclePhases({
       label: isServerless
@@ -95,11 +163,18 @@ export const useDslLifecycleSummary = ({
             defaultMessage: 'Hot',
           }),
       color: isServerless ? euiTheme.colors.severity.success : ilmPhases.hot.color,
-      size: storageSize,
+      size: hotSizeInBytes !== undefined ? formatBytes(hotSizeInBytes) : undefined,
       retentionPeriod,
+      frozenAfter,
+      frozenLabel: getFrozenPhaseLabel(),
+      frozenColor: ilmPhases.frozen.color,
+      frozenDescription: ilmPhases.frozen.description,
+      frozenSize: frozenSizeInBytes !== undefined ? formatBytes(frozenSizeInBytes) : undefined,
+      frozenSizeInBytes,
+      frozenDocsCount,
       description: isServerless ? '' : ilmPhases.hot.description,
-      sizeInBytes: stats?.sizeBytes,
-      docsCount: stats?.totalDocs,
+      sizeInBytes: hotSizeInBytes,
+      docsCount: hotDocsCount,
       deletePhaseDescription: ilmPhases.delete.description,
       deletePhaseColor: ilmPhases.delete.color,
     });

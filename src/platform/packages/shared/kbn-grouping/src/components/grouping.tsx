@@ -8,6 +8,7 @@
  */
 
 import {
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiProgress,
@@ -18,16 +19,23 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { Filter } from '@kbn/es-query';
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import type { UiCounterMetricType } from '@kbn/analytics';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { defaultUnit, firstNonNullValue } from '../helpers';
 import { createGroupFilter, getNullGroupFilter } from '../containers/query/helpers';
+import { MAX_QUERY_SIZE, PAGE_BATCH_SIZE } from '../containers/query';
 import { GroupPanel } from './accordion_panel';
 import { GroupStats } from './accordion_panel/group_stats';
 import { EmptyGroupingComponent } from './empty_results_panel';
 import { groupingContainerCss, groupingContainerCssLevel } from './styles';
-import { GROUPS_UNIT, NULL_GROUP } from './translations';
+import {
+  GROUPS_LIMITED_TO_MAX,
+  GROUPS_UNIT,
+  NULL_GROUP,
+  LOAD_MORE_PAGES,
+  SHOWING_GROUPS_OF_TOTAL,
+} from './translations';
 import type {
   ParsedGroupingAggregation,
   GroupPanelRenderer,
@@ -119,6 +127,14 @@ const GroupingComponent = <T,>({
   const [trigger, setTrigger] = useState<Record<string, { state: 'open' | 'closed' | undefined }>>(
     {}
   );
+
+  // groups are revealed in batches of PAGE_BATCH_SIZE pages so a table with tens of thousands of
+  // groups doesn't try to paginate past MAX_QUERY_SIZE, where the underlying query always returns
+  // zero buckets. Resets whenever the grouped-by field changes
+  const [revealedBatches, setRevealedBatches] = useState(1);
+  useEffect(() => {
+    setRevealedBatches(1);
+  }, [selectedGroup]);
 
   const unitCount = useMemo(() => data?.unitsCount?.value ?? 0, [data?.unitsCount?.value]);
   const unitCountText = useMemo(() => {
@@ -229,10 +245,25 @@ const GroupingComponent = <T,>({
     ]
   );
 
-  const pageCount = useMemo(
-    () => (groupCount ? Math.ceil(groupCount / itemsPerPage) : 1),
-    [groupCount, itemsPerPage]
-  );
+  // the query backing this component never returns groups beyond
+  // MAX_QUERY_SIZE, so pagination can never be allowed past that point
+  const maxPageCount = Math.max(1, Math.floor(MAX_QUERY_SIZE / itemsPerPage));
+  const totalPageCount = groupCount ? Math.ceil(groupCount / itemsPerPage) : 1;
+  const revealedPageCount = Math.min(revealedBatches * PAGE_BATCH_SIZE, maxPageCount);
+  const pageCount = Math.min(totalPageCount, revealedPageCount);
+  const hasMoreBatchesToReveal = totalPageCount > pageCount && revealedPageCount < maxPageCount;
+  const isLimitedByMaxQuerySize = groupCount > pageCount * itemsPerPage && !hasMoreBatchesToReveal;
+  const clampedActivePage = Math.min(activePage, pageCount - 1);
+  const isOnLastRevealedPage = clampedActivePage === pageCount - 1;
+
+  // reset out-of-range pages caused by a stale activePage (e.g. a bookmarked URL) now that
+  // pageCount is capped. Skipped while loading since `data` (and thus pageCount) may not yet
+  // reflect the real group count.
+  useEffect(() => {
+    if (!isLoading && data && activePage > pageCount - 1 && onChangeGroupsPage) {
+      onChangeGroupsPage(pageCount - 1);
+    }
+  }, [activePage, pageCount, onChangeGroupsPage, isLoading, data]);
 
   const emptyComponent = useMemo(() => {
     return emptyGroupingComponent ? emptyGroupingComponent : <EmptyGroupingComponent />;
@@ -295,7 +326,7 @@ const GroupingComponent = <T,>({
               <>
                 <EuiSpacer size="m" />
                 <EuiTablePagination
-                  activePage={activePage}
+                  activePage={clampedActivePage}
                   data-test-subj={`grouping-level-${groupingLevel}-pagination`}
                   itemsPerPage={itemsPerPage}
                   itemsPerPageOptions={[10, 25, 50, 100]}
@@ -312,6 +343,41 @@ const GroupingComponent = <T,>({
                   pageCount={pageCount}
                   showPerPageOptions
                 />
+                {isOnLastRevealedPage && (hasMoreBatchesToReveal || isLimitedByMaxQuerySize) && (
+                  <p
+                    data-test-subj={`grouping-level-${groupingLevel}-pagination-limit-warning`}
+                    css={css`
+                      display: flex;
+                      flex-direction: row;
+                      align-items: center;
+                      justify-content: center;
+                      margin-top: ${euiTheme.size.s};
+                      background-color: ${euiTheme.colors.lightestShade};
+                      padding: ${hasMoreBatchesToReveal
+                        ? `0 ${euiTheme.size.base}`
+                        : `${euiTheme.size.s} ${euiTheme.size.base}`};
+                      text-align: center;
+                    `}
+                  >
+                    <span>
+                      {isLimitedByMaxQuerySize
+                        ? GROUPS_LIMITED_TO_MAX(pageCount * itemsPerPage)
+                        : SHOWING_GROUPS_OF_TOTAL(pageCount * itemsPerPage, groupCount)}
+                    </span>
+                    {hasMoreBatchesToReveal && (
+                      <EuiButtonEmpty
+                        flush="both"
+                        data-test-subj={`grouping-level-${groupingLevel}-pagination-show-more`}
+                        onClick={() => setRevealedBatches((prev) => prev + 1)}
+                        css={css`
+                          margin-left: ${euiTheme.size.xs};
+                        `}
+                      >
+                        {LOAD_MORE_PAGES}
+                      </EuiButtonEmpty>
+                    )}
+                  </p>
+                )}
               </>
             )}
           </span>

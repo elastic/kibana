@@ -339,7 +339,7 @@ export class CreateSpacePage extends Component<Props, State> {
     );
   };
 
-  private onSolutionViewChange = (space: Partial<Space>) => {
+  private onSolutionViewChange = (space: CustomizeSpaceFormValues) => {
     this.setState((state) => ({ ...state, solution: space.solution }));
     this.onSpaceChange(space);
   };

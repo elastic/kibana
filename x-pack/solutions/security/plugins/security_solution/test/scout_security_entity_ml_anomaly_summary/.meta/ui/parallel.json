@@ -1,0 +1,176 @@
+{
+  "sha1": "b62e4eccc40e5ec37731ec80e84747229d8e659d",
+  "tests": [
+    {
+      "id": "eb8cdfd32189cb5-7013af4c42fe438",
+      "title": "Setup",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_entity_ml_anomaly_summary/ui/parallel_tests/global.setup.ts",
+        "line": 12,
+        "column": 16
+      }
+    },
+    {
+      "id": "ef75c9d696662a7-270f2e5421375ae",
+      "title": "Entity flyout anomalies host right panel shows anomalies section when the entity has anomalies",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_entity_ml_anomaly_summary/ui/parallel_tests/entity_analytics/entity_flyout_anomalies.spec.ts",
+        "line": 60,
+        "column": 14
+      }
+    },
+    {
+      "id": "ef75c9d696662a7-c63ba58eadef6aa",
+      "title": "Entity flyout anomalies host right panel shows anomalies section with an empty state when the entity has no anomalies",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_entity_ml_anomaly_summary/ui/parallel_tests/entity_analytics/entity_flyout_anomalies.spec.ts",
+        "line": 79,
+        "column": 14
+      }
+    },
+    {
+      "id": "ef75c9d696662a7-fffe57646af677c",
+      "title": "Entity flyout anomalies host entity details left panel shows anomalies tab and tab content when the entity has anomalies",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_entity_ml_anomaly_summary/ui/parallel_tests/entity_analytics/entity_flyout_anomalies.spec.ts",
+        "line": 99,
+        "column": 14
+      }
+    },
+    {
+      "id": "ef75c9d696662a7-71eadf7c9f15422",
+      "title": "Entity flyout anomalies host right panel shows an error state in the anomalies section when the anomaly overview API returns an error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_entity_ml_anomaly_summary/ui/parallel_tests/entity_analytics/entity_flyout_anomalies.spec.ts",
+        "line": 133,
+        "column": 14
+      }
+    },
+    {
+      "id": "ef75c9d696662a7-c80864d1ff26932",
+      "title": "Entity flyout anomalies host entity details left panel shows anomalies tab with an empty state when the entity has no anomalies",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_entity_ml_anomaly_summary/ui/parallel_tests/entity_analytics/entity_flyout_anomalies.spec.ts",
+        "line": 147,
+        "column": 14
+      }
+    },
+    {
+      "id": "ef75c9d696662a7-19bedfea7a40829",
+      "title": "Entity flyout anomalies host entity details left panel anomalies tab shows table but not attack chain when entity has no tactic associations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_entity_ml_anomaly_summary/ui/parallel_tests/entity_analytics/entity_flyout_anomalies.spec.ts",
+        "line": 185,
+        "column": 14
+      }
+    },
+    {
+      "id": "ef75c9d696662a7-d5e7903499b19c2",
+      "title": "Entity flyout anomalies clicking the anomalies count link in the right panel opens the entity details left panel on the anomalies tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_entity_ml_anomaly_summary/ui/parallel_tests/entity_analytics/entity_flyout_anomalies.spec.ts",
+        "line": 211,
+        "column": 14
+      }
+    },
+    {
+      "id": "ef75c9d696662a7-ed6f6c2aead2f28",
+      "title": "Entity flyout anomalies anomalies table row actions menu exposes investigation actions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_entity_ml_anomaly_summary/ui/parallel_tests/entity_analytics/entity_flyout_anomalies.spec.ts",
+        "line": 236,
+        "column": 14
+      }
+    },
+    {
+      "id": "ef75c9d696662a7-2985f25d1c114a2",
+      "title": "Entity flyout anomalies Add to timeline row action opens timeline scoped to the anomaly influencers",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_entity_ml_anomaly_summary/ui/parallel_tests/entity_analytics/entity_flyout_anomalies.spec.ts",
+        "line": 286,
+        "column": 14
+      }
+    },
+    {
+      "id": "ef75c9d696662a7-5f89e68fa3275d4",
+      "title": "Entity flyout anomalies selecting and clearing a MITRE tactic on the Anomalies tab filters and restores anomaly results",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_entity_ml_anomaly_summary/ui/parallel_tests/entity_analytics/entity_flyout_anomalies.spec.ts",
+        "line": 359,
+        "column": 14
+      }
+    }
+  ]
+}

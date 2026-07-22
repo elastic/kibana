@@ -9,6 +9,7 @@ import type { AnomalySummaryEntry } from '../../../../../common/api/entity_analy
 import { formatBaselineAndAnomaly, buildDescription, mapSummaryToRow } from './map_summary_to_row';
 
 const makeEntry = (overrides: Partial<AnomalySummaryEntry> = {}): AnomalySummaryEntry => ({
+  recordId: 'rec-1',
   jobId: 'security-job-1',
   jobName: 'Security Job 1',
   detectorIndex: 0,

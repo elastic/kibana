@@ -109,7 +109,13 @@
     "@kbn/logging-mocks",
     "@kbn/alerting-types",
     "@kbn/response-ops-alerts-table",
+    "@kbn/response-ops-alerts-apis",
+    "@kbn/response-ops-alert-snooze",
     "@kbn/streams-plugin",
+    "@kbn/significant-events-schema",
+    "@kbn/significant-events-plugin",
+    "@kbn/investigation-output",
+    "@kbn/react-query",
     "@kbn/response-ops-rule-form",
     "@kbn/data-service",
     "@kbn/ebt-tools",
@@ -139,7 +145,6 @@
     "@kbn/core-http-browser-mocks",
     "@kbn/discover-utils",
     "@kbn/deeplinks-management",
-    "@kbn/react-query",
     "@kbn/content-management-utils",
     "@kbn/maintenance-windows-plugin",
     "@kbn/agent-builder-browser",
@@ -148,8 +153,10 @@
     "@kbn/ai-assistant-common",
     "@kbn/management-settings-ids",
     "@kbn/alerting-v2-utils",
+    "@kbn/deeplinks-workflows",
     "@kbn/observability-agent-builder-plugin",
     "@kbn/kql",
+    "@kbn/shared-ux-ai-components",
     "@kbn/shared-ux-utility",
     "@kbn/lens-common",
     "@kbn/apm-types",
@@ -157,8 +164,7 @@
     "@kbn/cps",
     "@kbn/expressions-plugin",
     "@kbn/ingest-hub-plugin",
-    "@kbn/core-spaces-common",
-    "@kbn/nightshift"
+    "@kbn/core-spaces-common"
   ],
   "exclude": ["target/**/*"]
 }

@@ -14,7 +14,12 @@ import { showErrorToast } from '@kbn/cloud-security-posture';
 import { useContext, useMemo } from 'react';
 import type { EntityType } from '../../../../../../common/entity_analytics/types';
 import { useKibana } from '../../../../../common/lib/kibana';
-import { ENTITY_FIELDS, QUERY_KEY_GROUPING_DATA, QUERY_KEY_ENTITY_ANALYTICS } from '../constants';
+import {
+  ENTITY_FIELDS,
+  QUERY_KEY_GROUPING_DATA,
+  QUERY_KEY_TARGET_METADATA,
+  QUERY_KEY_ENTITY_ANALYTICS,
+} from '../constants';
 import { DataViewContext } from '..';
 
 export type EntitiesGroupingQuery = GroupingQuery | SearchRequest;
@@ -82,6 +87,7 @@ export const getGroupedEntitiesQuery = (query: EntitiesGroupingQuery, indexPatte
   return {
     ...query,
     index: indexPattern,
+    project_routing: '_alias:_origin',
     ignore_unavailable: true,
     size: 0,
   };
@@ -136,8 +142,6 @@ export const useFetchGroupedData = ({
   );
 };
 
-const QUERY_KEY_TARGET_METADATA = 'entity-analytics-resolution-target-metadata';
-
 export const useFetchTargetMetadata = (entityIds: string[]): TargetMetadataMap => {
   const { searchService, toasts, indexPattern } = useEntitySearchParams();
 
@@ -150,6 +154,7 @@ export const useFetchTargetMetadata = (entityIds: string[]): TargetMetadataMap =
         searchService.search<{}, IKibanaSearchResponse<SearchResponse>>({
           params: {
             index: indexPattern,
+            project_routing: '_alias:_origin',
             ignore_unavailable: true,
             size: entityIds.length,
             _source: [

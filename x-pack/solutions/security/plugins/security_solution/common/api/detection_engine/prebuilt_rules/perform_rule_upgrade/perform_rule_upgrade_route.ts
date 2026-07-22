@@ -8,7 +8,7 @@
 import { z } from '@kbn/zod/v4';
 import { mapValues } from 'lodash';
 import { AggregatedPrebuiltRuleError, DiffableAllFields, ThreeWayDiffConflict } from '../model';
-import { RuleObjectId, RuleSignatureId, RuleVersion } from '../../model';
+import { RequiredFieldInput, RuleObjectId, RuleSignatureId, RuleVersion } from '../../model';
 import { PrebuiltRulesFilter } from '../common/prebuilt_rules_filter';
 
 export type Mode = z.infer<typeof Mode>;
@@ -65,9 +65,20 @@ export const DiffableFieldsToOmit = NON_UPGRADEABLE_DIFFABLE_FIELDS.reduce((acc,
  * Specific fields are omitted because they are not upgradeable, and
  * handled under the hood by endpoint logic.
  * See: https://github.com/elastic/kibana/issues/186544
+ *
+ * These field schemas are used exclusively to validate a field's
+ * `resolved_value` on input (i.e. `pick_version: 'RESOLVED'`), so they describe
+ * the input shape, not the response shape. `required_fields` is overridden to
+ * `RequiredFieldInput` (name + type) because its `ecs` boolean is computed by
+ * the server (`addEcsToRequiredFields`) and only present in responses. Reusing
+ * the response schema (`RequiredField`, where `ecs` is mandatory) made resolving
+ * a `required_fields` conflict impossible.
+ * See: https://github.com/elastic/kibana/issues/232614
  */
 export type DiffableUpgradableFields = z.infer<typeof DiffableUpgradableFields>;
-export const DiffableUpgradableFields = DiffableAllFields.omit(DiffableFieldsToOmit);
+export const DiffableUpgradableFields = DiffableAllFields.omit(DiffableFieldsToOmit).extend({
+  required_fields: z.array(RequiredFieldInput),
+});
 
 export type FieldUpgradeSpecifier<T> = z.infer<
   ReturnType<typeof fieldUpgradeSpecifier<z.ZodType<T>>>

@@ -29,7 +29,6 @@ import {
 } from './log_pagination_probe_query_builder';
 import {
   buildLogsExtractionEsqlQuery,
-  buildRemainingLogsCountQuery,
   extractMainPaginationParams,
   HASHED_ID_FIELD,
 } from './logs_extraction_query_builder';
@@ -39,7 +38,7 @@ import {
   resolveMainExtractionWindow,
   validateExtractionWindow,
 } from './extraction_window';
-import { capAtMaxLogsPerWindow } from './effective_page_limits';
+import { capAtMaxLogsPerWindow, pickSampleProbability } from './effective_page_limits';
 import { getLatestEntitiesIndexName } from '../../../common/domain/entity_index';
 import { getUpdatesEntitiesDataStreamName } from '../asset_manager/updates_data_stream';
 import { executeEsqlQuery } from '../../infra/elasticsearch/esql';
@@ -222,41 +221,6 @@ export class LogsExtractionClient {
     });
     await this.globalStateClient.update({ logsExtraction: mergedConfig });
     return mergedConfig;
-  }
-
-  public async getRemainingLogsCount(type: EntityType): Promise<number> {
-    try {
-      const { config, engineState } = await this.getLogExtractionConfigAndState(type);
-      const indexPatterns = await this.getLocalIndexPatterns(
-        config.additionalIndexPatterns,
-        config.excludedIndexPatterns
-      );
-      const { fromDateISO } = resolveMainExtractionWindow({ config, engineState });
-      const toDateISO = moment().utc().toISOString();
-      const logsPageCursorStart = paginationFromOptionalFields(engineState.checkpointTimestamp);
-      const query = buildRemainingLogsCountQuery({
-        indexPatterns,
-        type,
-        fromDateISO,
-        toDateISO,
-        logsPageCursorStart,
-      });
-      const esqlResponse = await executeEsqlQuery({
-        esClient: this.esClient,
-        query,
-      });
-      const countColumnIdx = esqlResponse.columns.findIndex((col) => col.name === 'document_count');
-      if (countColumnIdx === -1 || esqlResponse.values.length === 0) {
-        return 0;
-      }
-      const count = esqlResponse.values[0][countColumnIdx];
-
-      return Number(count);
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      this.logger.error(`Failed to get remaining logs count for entity type "${type}": ${message}`);
-      throw error;
-    }
   }
 
   private async runQueryAndIngestDocs({
@@ -559,6 +523,11 @@ export class LogsExtractionClient {
   }) {
     const effectiveMaxLogsPerPage = capAtMaxLogsPerWindow(maxLogsPerPage, maxLogsPerWindow);
     const effectiveDocsLimit = capAtMaxLogsPerWindow(docsLimit, maxLogsPerWindow);
+    // Escalates above the target probability (up to an exact, unsampled probe) once
+    // maxLogsPerPage is too small for the sampling estimator to be accurate — see
+    // pickSampleProbability. Computed once per loop invocation: effectiveMaxLogsPerPage is
+    // fixed for the whole loop.
+    const effectiveSampleProbability = pickSampleProbability(effectiveMaxLogsPerPage);
     let totalCount = 0;
     let totalLogs = 0;
     let pages = 0;
@@ -607,20 +576,36 @@ export class LogsExtractionClient {
           toDateISO,
           logsPageCursorStart,
           maxLogsPerPage: effectiveMaxLogsPerPage,
+          sampleProbability: effectiveSampleProbability,
           opts,
         });
 
-        if (!probe.hasLogsToProcess) {
+        if (!probe.hasLogsToProcess && effectiveSampleProbability >= 1) {
+          // Sampling wasn't active for this probe (maxLogsPerPage was too small — see
+          // pickSampleProbability), so an empty, exact result is definitive: no real docs
+          // remain. Stop immediately rather than running a redundant sweep extraction.
           break;
         }
 
-        let logsPageCursorEnd = probe.logsPaginationCursor;
         lastLogsPages = probe.isLastLogsPage;
+
+        let logsPageCursorEnd: LogSlicePaginationParams;
+        if (probe.hasLogsToProcess && !probe.isLastLogsPage) {
+          logsPageCursorEnd = probe.logsPaginationCursor;
+        } else {
+          // if the probe doesn't have more pages to process
+          // we keep the natural end of the window as the end cursor
+          // This is important because on low document count
+          // a sampled probe may return 0 documents. We need to still
+          // do a final extraction with the effective end of the window
+          // to ensure we don't miss any documents that may have been missed by the probe.
+          logsPageCursorEnd = { timestampCursor: toDateISO };
+        }
 
         const bumpedCursorEnd = this.detectLogSliceStall(
           logsPageCursorStart,
           logsPageCursorEnd,
-          probe.sliceLogCount,
+          !lastLogsPages,
           effectiveMaxLogsPerPage
         );
         if (bumpedCursorEnd) {
@@ -694,6 +679,7 @@ export class LogsExtractionClient {
     toDateISO,
     logsPageCursorStart,
     maxLogsPerPage,
+    sampleProbability,
     opts,
   }: {
     indexPatterns: string[];
@@ -702,6 +688,7 @@ export class LogsExtractionClient {
     toDateISO: string;
     logsPageCursorStart: LogSlicePaginationParams | undefined;
     maxLogsPerPage: number;
+    sampleProbability: number;
     opts?: LogsExtractionOptions;
   }): Promise<LogPaginationCursor> {
     const logPaginationCursorProbeQuery = buildLogPaginationCursorProbeEsql({
@@ -711,6 +698,7 @@ export class LogsExtractionClient {
       toDateISO,
       logsPageCursorStart,
       maxLogsPerPage,
+      sampleProbability,
     });
 
     const probeStart = Date.now();
@@ -718,6 +706,11 @@ export class LogsExtractionClient {
       esClient: this.esClient,
       query: logPaginationCursorProbeQuery,
       abortController: opts?.abortController,
+      telemetry: {
+        name: 'probe_query',
+        namespace: this.namespace,
+        type,
+      },
     });
     entityStoreMetrics.extractionProbeQueryDurationMs.record(Date.now() - probeStart, {
       entity_type: type,
@@ -729,7 +722,8 @@ export class LogsExtractionClient {
 
     const interpretedLogPaginationCursor = interpretLogPaginationCursorRows(
       parsedLogPaginationCursor,
-      maxLogsPerPage
+      maxLogsPerPage,
+      sampleProbability
     );
 
     if (parsedLogPaginationCursor) {
@@ -738,16 +732,7 @@ export class LogsExtractionClient {
       );
     }
 
-    if (!interpretedLogPaginationCursor.hasLogsToProcess) {
-      return { hasLogsToProcess: false };
-    }
-
-    return {
-      hasLogsToProcess: true,
-      logsPaginationCursor: interpretedLogPaginationCursor.logsPaginationCursor,
-      isLastLogsPage: interpretedLogPaginationCursor.isLastLogsPage,
-      sliceLogCount: interpretedLogPaginationCursor.sliceLogCount,
-    };
+    return interpretedLogPaginationCursor;
   }
 
   /**
@@ -822,6 +807,11 @@ export class LogsExtractionClient {
         esClient: this.esClient,
         query,
         abortController: opts?.abortController,
+        telemetry: {
+          name: 'extraction_query',
+          namespace: this.namespace,
+          type,
+        },
       });
       entityStoreMetrics.extractionQueryDurationMs.record(Date.now() - queryStart, {
         entity_type: type,
@@ -891,21 +881,21 @@ export class LogsExtractionClient {
     };
   }
 
-  /** Returns the bumped slice-end cursor when a stall is detected, null otherwise. Logs a warning on stall. */
+  /**
+   * Returns the bumped slice-end cursor when a stall is detected, null otherwise. Logs a
+   * warning on stall. `isFullPage` is `true` when the (possibly sampled) probe saturated its
+   * limit — i.e. this iteration was not resolved as the last page.
+   */
   private detectLogSliceStall(
     sliceStart: LogSlicePaginationParams | undefined,
     sliceEnd: LogSlicePaginationParams,
-    sliceLogCount: number,
-    maxLogsPerPage: number
+    isFullPage: boolean,
+    effectiveMaxLogsPerPage: number
   ): LogSlicePaginationParams | null {
-    if (
-      sliceStart &&
-      sliceStart.timestampCursor === sliceEnd.timestampCursor &&
-      sliceLogCount >= maxLogsPerPage
-    ) {
+    if (sliceStart && sliceStart.timestampCursor === sliceEnd.timestampCursor && isFullPage) {
       const bumpedTs = moment(sliceEnd.timestampCursor).add(1, 'ms').toISOString();
       this.logger.warn(
-        `Log-slice probe stalled at ${sliceEnd.timestampCursor} with a full page (${sliceLogCount} docs); advancing cursor by 1ms. Docs sharing this timestamp beyond maxLogsPerPage will be dropped.`
+        `Log-slice probe stalled at ${sliceEnd.timestampCursor} with a saturated page; advancing cursor by 1ms. Docs sharing this timestamp beyond the configured per-page limit (${effectiveMaxLogsPerPage}) will be dropped.`
       );
       return { timestampCursor: bumpedTs };
     }

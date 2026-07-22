@@ -8,10 +8,9 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import { I18nProvider } from '@kbn/i18n-react';
-import { MemoryRouter } from 'react-router-dom';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
+import { ListPageTestProviders } from '../../test_utils/test_providers';
 import { ListActionPoliciesPage } from './list_action_policies_page';
 
 const mockNavigateToUrl = jest.fn();
@@ -27,36 +26,48 @@ const mockSettingsClientGet = jest.fn();
 const mockUseFetchWorkflow = jest.fn();
 const mockBulkGet = jest.fn();
 
+const WRITE_CAPABILITIES = { alerting_v2_action_policies: { read: true, all: true } };
+const READ_ONLY_CAPABILITIES = { alerting_v2_action_policies: { read: true, all: false } };
+let mockCapabilities: Record<string, Record<string, boolean>> = WRITE_CAPABILITIES;
+
 jest.mock('../../application/breadcrumb_context', () => ({
   useSetBreadcrumbs: () => jest.fn(),
 }));
 
-jest.mock('@kbn/core-di-browser', () => ({
-  useService: (token: unknown) => {
-    if (token === 'application') {
-      return { navigateToUrl: mockNavigateToUrl, getUrlForApp: mockGetUrlForApp };
-    }
-    if (token === 'chrome') {
-      return { docTitle: { change: jest.fn() } };
-    }
-    if (token === 'http') {
-      return { basePath: { prepend: (path: string) => path } };
-    }
-    if (token === 'settings') {
-      return {
-        client: {
-          get: mockSettingsClientGet,
-        },
-      };
-    }
-    if (token === 'userProfile') {
-      return { bulkGet: mockBulkGet };
-    }
+jest.mock('@kbn/core-di-browser', () => {
+  const { UserCapabilities: ActualUserCapabilities } = jest.requireActual(
+    '../../services/user_capabilities'
+  );
+  return {
+    useService: (token: unknown) => {
+      if (token === ActualUserCapabilities) {
+        return new ActualUserCapabilities({ capabilities: mockCapabilities });
+      }
+      if (token === 'application') {
+        return { navigateToUrl: mockNavigateToUrl, getUrlForApp: mockGetUrlForApp };
+      }
+      if (token === 'chrome') {
+        return { docTitle: { change: jest.fn() } };
+      }
+      if (token === 'http') {
+        return { basePath: { prepend: (path: string) => path } };
+      }
+      if (token === 'settings') {
+        return {
+          client: {
+            get: mockSettingsClientGet,
+          },
+        };
+      }
+      if (token === 'userProfile') {
+        return { bulkGet: mockBulkGet };
+      }
 
-    return {};
-  },
-  CoreStart: (key: string) => key,
-}));
+      return {};
+    },
+    CoreStart: (key: string) => key,
+  };
+});
 
 jest.mock('../../hooks/use_fetch_action_policies', () => ({
   useFetchActionPolicies: (...args: unknown[]) => mockUseFetchActionPolicies(...args),
@@ -150,11 +161,6 @@ jest.mock('../../components/action_policy/details_flyout/action_policy_details_f
   ),
 }));
 
-const createQueryClient = () =>
-  new QueryClient({
-    defaultOptions: { queries: { retry: false } },
-  });
-
 const createPolicy = (overrides: Partial<ActionPolicyResponse> = {}): ActionPolicyResponse => ({
   id: 'policy-1',
   version: 'WzEsMV0=',
@@ -181,18 +187,15 @@ const createPolicy = (overrides: Partial<ActionPolicyResponse> = {}): ActionPoli
 
 const renderPage = () =>
   render(
-    <QueryClientProvider client={createQueryClient()}>
-      <MemoryRouter>
-        <I18nProvider>
-          <ListActionPoliciesPage />
-        </I18nProvider>
-      </MemoryRouter>
-    </QueryClientProvider>
+    <ListPageTestProviders>
+      <ListActionPoliciesPage />
+    </ListPageTestProviders>
   );
 
 describe('ListActionPoliciesPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockCapabilities = WRITE_CAPABILITIES;
 
     mockBulkGet.mockResolvedValue([]);
     mockSettingsClientGet.mockReturnValue('[mock formatted date]');
@@ -221,7 +224,19 @@ describe('ListActionPoliciesPage', () => {
   it('renders the experimental badge in the page header', () => {
     renderPage();
 
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Action Policies');
     expect(screen.getByTestId('alertingV2ExperimentalBadge')).toBeInTheDocument();
+  });
+
+  it('navigates to create action policy when the create button is clicked', async () => {
+    const user = userEvent.setup();
+    renderPage();
+
+    await user.click(screen.getByTestId('createActionPolicyButton'));
+
+    expect(mockNavigateToUrl).toHaveBeenCalledWith(
+      '/app/management/alertingV2/action_policies/create'
+    );
   });
 
   it('formats updatedAt using the user date format setting', () => {
@@ -291,5 +306,49 @@ describe('ListActionPoliciesPage', () => {
     renderPage();
 
     expect(screen.queryByTestId('mockedDetailsFlyout')).toBeNull();
+  });
+
+  describe('when the user has write privilege', () => {
+    it('renders the create button and the snooze popover', () => {
+      renderPage();
+
+      expect(screen.getByTestId('createActionPolicyButton')).toBeInTheDocument();
+      expect(screen.getByText('Snooze popover')).toBeInTheDocument();
+    });
+  });
+
+  describe('when the user only has read privilege', () => {
+    beforeEach(() => {
+      mockCapabilities = READ_ONLY_CAPABILITIES;
+    });
+
+    it('hides the create button', () => {
+      renderPage();
+
+      expect(screen.queryByTestId('createActionPolicyButton')).toBeNull();
+    });
+
+    it('hides the snooze popover in the notify column', () => {
+      renderPage();
+
+      expect(screen.queryByText('Snooze popover')).toBeNull();
+    });
+
+    it('does not render row selection checkboxes', () => {
+      renderPage();
+
+      expect(screen.queryByTestId('checkboxSelectAll')).toBeNull();
+    });
+
+    it('still opens the details flyout from the policy name link', async () => {
+      const user = userEvent.setup();
+      renderPage();
+
+      await user.click(screen.getByTestId('actionPolicyDetailsLink-policy-1'));
+
+      expect(screen.getByTestId('mockedDetailsFlyout')).toHaveTextContent(
+        'Details flyout for policy-1'
+      );
+    });
   });
 });

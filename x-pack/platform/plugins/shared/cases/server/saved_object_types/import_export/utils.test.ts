@@ -14,7 +14,7 @@ import {
 import { getAttachmentsAndUserActionsForCases } from './utils';
 
 describe('import_export utils', () => {
-  it('exports attachments from both attachment saved object types when enabled', async () => {
+  it('always exports attachments from both legacy and unified attachment saved object types', async () => {
     const createPointInTimeFinder = jest.fn().mockReturnValue({
       async *find() {
         yield { saved_objects: [] };
@@ -24,7 +24,7 @@ describe('import_export utils', () => {
       createPointInTimeFinder,
     } as unknown as SavedObjectsClientContract;
 
-    await getAttachmentsAndUserActionsForCases(savedObjectsClient, ['case-id'], true);
+    await getAttachmentsAndUserActionsForCases(savedObjectsClient, ['case-id']);
 
     expect(createPointInTimeFinder).toHaveBeenCalledWith(
       expect.objectContaining({

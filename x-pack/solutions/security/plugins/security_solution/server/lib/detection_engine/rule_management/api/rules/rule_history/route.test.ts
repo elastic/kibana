@@ -36,6 +36,7 @@ describe('Rule changes history route', () => {
     jest.clearAllMocks();
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
+    (clients.core.uiSettings.client.get as jest.Mock).mockResolvedValue(true);
     ruleHistoryRoute(server.router);
   });
 
@@ -104,6 +105,21 @@ describe('Rule changes history route', () => {
       })
     );
     expect(result.badRequest).toHaveBeenCalled();
+  });
+
+  test('returns 403 when the ENABLE_RULE_CHANGES_HISTORY_SETTING advanced setting is disabled', async () => {
+    (clients.core.uiSettings.client.get as jest.Mock).mockResolvedValue(false);
+
+    const response = await server.inject(
+      buildHistoryRequest({
+        params: { ruleId: '6399a03a-9ec2-4c42-8e2a-9e622683cfcd' },
+        query: {},
+      }),
+      requestContextMock.convertContext(context)
+    );
+
+    expect(response.status).toEqual(403);
+    expect(clients.detectionRulesClient.getHistoryForRule).not.toHaveBeenCalled();
   });
 
   test('catches errors thrown by the detection rules client', async () => {
