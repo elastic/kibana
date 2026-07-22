@@ -10,7 +10,14 @@
 import React, { useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { EuiIllustration, EuiLink, EuiButton, EuiButtonIcon, EuiText, useEuiTheme } from '@elastic/eui';
+import {
+  EuiIllustration,
+  EuiLink,
+  EuiButton,
+  EuiButtonIcon,
+  EuiText,
+  useEuiTheme,
+} from '@elastic/eui';
 import { megaphone } from '@elastic/eui-illustrations';
 
 const CLOUD_CONNECT_DOCS_URL = 'https://www.elastic.co/docs/deploy-manage/cloud-connect';
@@ -57,7 +64,11 @@ export const AutoOpsPromotionCallout = ({
 
   const ctaProps = hasPermission
     ? { href: cloudConnectUrl, onClick: onConnectClick }
-    : { href: CLOUD_CONNECT_PORTAL_URL, target: '_blank' as const, rel: 'noopener noreferrer' as const };
+    : {
+        href: CLOUD_CONNECT_PORTAL_URL,
+        target: '_blank' as const,
+        rel: 'noopener noreferrer' as const,
+      };
 
   const illustrationSize = `calc(${euiTheme.size.base} * 5)`;
 
