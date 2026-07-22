@@ -97,12 +97,18 @@ export const getExceptionsOverview = async ({
           must_not: [
             {
               terms: {
-                'exception-list.list_id': [...ENDPOINT_ARTIFACT_LIST_IDS],
+                'exception-list.list_id': [
+                  // filter out all Endpoint artifact lists, except Endpoint Exceptions
+                  ...ENDPOINT_ARTIFACT_LIST_IDS.filter((id) => id !== 'endpoint_list'),
+                ],
               },
             },
             {
               terms: {
-                'exception-list-agnostic.list_id': [...ENDPOINT_ARTIFACT_LIST_IDS],
+                'exception-list-agnostic.list_id': [
+                  // filter out all Endpoint artifact lists, except Endpoint Exceptions
+                  ...ENDPOINT_ARTIFACT_LIST_IDS.filter((id) => id !== 'endpoint_list'),
+                ],
               },
             },
           ],
