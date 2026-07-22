@@ -169,8 +169,6 @@ export const OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED =
   'observability:streamsContinuousKiExtractionEnabled';
 export const OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_INTERVAL_HOURS =
   'observability:streamsContinuousKiExtractionIntervalHours';
-export const OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_EXCLUDED_STREAM_PATTERNS =
-  'observability:streamsContinuousKiExtractionExcludedStreamPatterns';
 export const OBSERVABILITY_STREAMS_CONTINUOUS_KI_ONBOARD_ALL_ELIGIBLE =
   'observability:streamsContinuousKiOnboardAllEligible';
 export const OBSERVABILITY_STREAMS_CONTINUOUS_KI_INCLUDED_STREAM_PATTERNS =

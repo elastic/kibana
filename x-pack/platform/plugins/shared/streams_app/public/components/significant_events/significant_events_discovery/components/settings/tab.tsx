@@ -171,10 +171,13 @@ export function SettingsTab() {
         const { enabled, onboardAllEligible, includedStreamPatterns } = continuousExtraction.draft;
         // In include mode, block a save whose patterns match no onboardable stream:
         // saving it would silently onboard nothing, which is almost never intended.
-        if (enabled && !onboardAllEligible) {
+        // Only run this when the stream list has loaded; if the fetch is pending or
+        // failed we skip the client check and let the server enforce the same rule,
+        // rather than falsely flagging every pattern as unmatched.
+        if (enabled && !onboardAllEligible && streamsData?.streams) {
           const patterns = parseIncludedStreamPatterns(includedStreamPatterns);
           if (patterns.length > 0) {
-            const supportedStreamNames = (streamsData?.streams ?? [])
+            const supportedStreamNames = streamsData.streams
               .map(({ stream }) => stream)
               .filter(isSupportedStream)
               .map((stream) => stream.name);
