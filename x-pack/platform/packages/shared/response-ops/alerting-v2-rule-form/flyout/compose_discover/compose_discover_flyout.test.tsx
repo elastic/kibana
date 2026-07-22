@@ -63,15 +63,6 @@ jest.mock('./compose_discover_form/esql_recovery_content', () => ({
   EsqlRecoveryContent: () => null,
 }));
 
-jest.mock('./compose_discover_time_field_context', () => ({
-  useComposeDiscoverTimeField: () => ({
-    timeFieldOptions: [{ value: '@timestamp', text: '@timestamp' }],
-    isTimeFieldResolved: true,
-  }),
-  ComposeDiscoverTimeFieldContextProvider: ({ children }: { children: React.ReactNode }) =>
-    children,
-}));
-
 const mockComposeDiscoverForm = jest.fn((_props: FormProps) => (
   <div data-test-subj="composeDiscoverFormMock" />
 ));
@@ -83,6 +74,9 @@ jest.mock('./compose_discover_form', () => {
   const { getSteps } = jest.requireActual(
     './compose_discover_form'
   ) as typeof import('./compose_discover_form');
+  const { QueryFieldRules } = jest.requireActual(
+    './compose_discover_form/query_field_rules'
+  ) as typeof import('./compose_discover_form/query_field_rules');
   return {
     getSteps,
     ComposeDiscoverForm: (props: FormProps) => {
@@ -92,6 +86,8 @@ jest.mock('./compose_discover_form', () => {
       readRecoveryStrategy = () => getValues('recoveryStrategy');
       return (
         <div data-test-subj="composeDiscoverFormMock">
+          {/* Keep query rules mounted so validateStep → trigger(['query']) can fail. */}
+          <QueryFieldRules queryCommitted={props.state.queryCommitted} />
           <button
             data-test-subj="mockMakeDirty"
             onClick={() => setValue('metadata.name', 'changed', { shouldDirty: true })}

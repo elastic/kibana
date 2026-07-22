@@ -58,10 +58,12 @@ test.describe('Canvas datasource', { tag: ['@local-stateful-classic'] }, () => {
     });
 
     await test.step(`verify 'logstash-*' is selected and expression updates`, async () => {
-      await expect(page.testSubj.locator('canvasDataViewSelect').locator('input')).toHaveValue(
-        'logstash-*'
-      );
+      // The value is auto-populated asynchronously after switching to esdocs; poll until it settles.
+      await expect
+        .poll(() => page.components.comboBox('canvasDataViewSelect').getSelectedOptions())
+        .toStrictEqual(['logstash-*']);
 
+      // Confirm the auto-populated value to trigger the datasource onChange.
       await page.testSubj.locator('canvasDataViewSelect > comboBoxSearchInput').press('Enter');
       await canvas.saveDatasourceChanges();
       await canvas.openExpressionEditor();

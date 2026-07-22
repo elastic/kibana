@@ -47,7 +47,9 @@ const TITLE_TEXT = EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID(
   CORRELATIONS_DETAILS_RELATED_ATTACKS_SECTION_TEST_ID
 );
 
-const renderRelatedAttacks = (onShowAttack?: (id: string, indexName: string) => void) =>
+const renderRelatedAttacks = (
+  onShowAttack?: (id: string, indexName: string, title?: string) => void
+) =>
   render(
     <TestProviders>
       <DocumentDetailsContext.Provider value={mockContextValue}>
@@ -106,7 +108,7 @@ describe('<RelatedAttacks />', () => {
     getAllByTestId(
       `${CORRELATIONS_DETAILS_RELATED_ATTACKS_SECTION_TEST_ID}AlertPreviewButton`
     )[0].click();
-    expect(mockOnShowAttack).toHaveBeenCalledWith('attack-id-1', 'index');
+    expect(mockOnShowAttack).toHaveBeenCalledWith('attack-id-1', 'index', 'Attack 1');
     expect(
       getByTestId(CORRELATIONS_DETAILS_RELATED_ATTACKS_SECTION_TABLE_TEST_ID)
     ).toBeInTheDocument();

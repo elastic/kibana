@@ -8,6 +8,8 @@
 import type { FC } from 'react';
 import React, { memo, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { getFieldValue } from '@kbn/discover-utils';
 import { EVENT_KIND } from '@kbn/rule-data-utils';
@@ -20,10 +22,31 @@ import { Notes } from '../../shared/components/notes';
 import { DocumentSeverity } from './components/severity';
 import { Timestamp } from '../../shared/components/timestamp';
 import { RiskScore } from './components/risk_score';
-import { ALERT_SUMMARY_PANEL_TEST_ID } from '../../shared/components/test_ids';
+import {
+  ALERT_SUMMARY_PANEL_TEST_ID,
+  DOCUMENT_FLYOUT_HEADER_SHARE_BUTTON_TEST_ID,
+} from '../../shared/components/test_ids';
 import type { CellActionRenderer } from '../../shared/components/cell_actions';
 import { noopCellActionRenderer } from '../../shared/components/cell_actions';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
+import { ShareUrlIconButton } from '../../shared/components/share_url_icon_button';
+import { useGetFlyoutLink } from '../../../flyout/document_details/right/hooks/use_get_flyout_link';
+
+const SHARE_ALERT_LABEL = i18n.translate(
+  'xpack.securitySolution.flyoutV2.document.header.shareAlertLabel',
+  {
+    defaultMessage: 'Share alert',
+  }
+);
+
+// Positioned relative to the flyout itself (the nearest positioned ancestor), matching where EUI
+// places its own close button (`right: euiTheme.size.s` / `top: euiTheme.size.s`). The larger
+// inline-end offset makes room for the close button so the two sit side by side.
+const shareButtonStyles = css`
+  position: absolute;
+  inset-inline-end: 36px;
+  inset-block-start: 8px;
+`;
 
 export interface HeaderProps {
   /**
@@ -57,8 +80,22 @@ export const Header: FC<HeaderProps> = memo(
       [hit]
     );
 
+    const alertDetailsLink = useGetFlyoutLink({
+      eventId: hit.raw._id ?? '',
+      indexName: hit.raw._index ?? '',
+      timestamp: String(hit.flattened?.['@timestamp'] ?? ''),
+    });
+
     return (
       <>
+        <div css={shareButtonStyles}>
+          <ShareUrlIconButton
+            url={isAlert ? alertDetailsLink : null}
+            tooltip={SHARE_ALERT_LABEL}
+            ariaLabel={SHARE_ALERT_LABEL}
+            dataTestSubj={DOCUMENT_FLYOUT_HEADER_SHARE_BUTTON_TEST_ID}
+          />
+        </div>
         <DocumentSeverity hit={hit}>
           <EuiSpacer size="s" />
         </DocumentSeverity>
@@ -93,7 +130,7 @@ export const Header: FC<HeaderProps> = memo(
                 </EuiFlexGroup>
               </EuiFlexItem>
               <EuiFlexItem css={flyoutHeaderBlockStyles}>
-                <EuiFlexGroup direction="row" gutterSize="s" responsive={false}>
+                <EuiFlexGroup direction="row" gutterSize="s" responsive={false} alignItems="center">
                   <EuiFlexItem>
                     <Assignees hit={hit} onAlertUpdated={onAlertUpdated} />
                   </EuiFlexItem>
