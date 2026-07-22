@@ -333,7 +333,11 @@ def render_persona_matrix(rows):
     script_dir = os.path.dirname(os.path.abspath(__file__))
     try:
         with open(os.path.join(script_dir, "dhru_persona.css")) as f:
-            dhru_css = f.read()
+            dhru_raw = f.read()
+            # The file contains <style>...</style> followed by HTML body fragments;
+            # extract only the CSS block so we don't duplicate structural sections.
+            style_end = dhru_raw.find("</style>")
+            dhru_css = dhru_raw[:style_end + len("</style>")] if style_end > 0 else dhru_raw
     except FileNotFoundError:
         dhru_css = ""
     try:
@@ -522,6 +526,56 @@ def render_persona_matrix(rows):
     generated_at = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
     tbody_html = "\n".join(tbody_rows)
 
+    # Build role recommendation cards
+    ROLES = [
+        ("CISO & Security Leadership", {"overall": 0.5, "entity": 0.3, "detrules": 0.2}, "Needs high-level risk context and compliance-ready detection coverage."),
+        ("SOC Manager", {"alert": 0.5, "multistep": 0.3, "wftrig": 0.2}, "Prioritizes fast, accurate alert triage and multi-step incident handling."),
+        ("Threat Hunter", {"hunt": 0.5, "entity": 0.3, "alert": 0.2}, "Values deep entity correlation and hunt-query generation."),
+        ("Detection Engineer", {"detrules": 0.5, "alert": 0.3, "hunt": 0.2}, "Care most about rule authoring quality and threat research grounding."),
+        ("Automation / SOAR Engineer", {"wfauth": 0.6, "wftrig": 0.4}, "Needs reliable workflow creation and action triggering."),
+        ("Incident Response", {"alert": 0.4, "multistep": 0.4, "wftrig": 0.2}, "Fast triage + multi-step playbooks + on-call integration."),
+    ]
+
+    def role_weighted_score(model_data, weights):
+        total = 0
+        wsum = 0
+        for col, w in weights.items():
+            if col == "overall":
+                scores = [r["criteria_score"] for r in rows if r.get("criteria_score") is not None]
+                s = avg(scores) * 10 if scores else 0
+            else:
+                s = avg(model_data["subcat"].get(col, [])) * 10
+            total += s * w
+            wsum += w
+        return total / wsum if wsum else 0
+
+    role_cards = []
+    for role_name, weights, desc in ROLES:
+        scored = []
+        for m in model_order:
+            s = model_stats_map[m]
+            score = role_weighted_score(s, weights)
+            scored.append((m, score, s["tcls"], s["tier"]))
+        scored.sort(key=lambda x: x[1], reverse=True)
+        top = scored[0] if scored else ("N/A", 0, "", "")
+        runners = scored[1:3]
+        runner_text = ""
+        if runners:
+            runner_names = ", ".join(f"{r[0]} ({r[1]:.2f})" for r in runners)
+            runner_text = f'<p class="runner">Runner-up: {runner_names}</p>'
+        
+        role_cards.append(
+            f'<div class="rcard">'
+            f'<h3>{role_name}</h3>'
+            f'<p class="rdesc">{desc}</p>'
+            f'<div class="rtop"><span class="rmodel">{vendor_badge(top[0])}{top[0]}</span>'
+            f'<span class="rscore {score_class(top[1])}">{top[1]:.2f}</span></div>'
+            f'{runner_text}'
+            f'</div>'
+        )
+
+    role_cards_html = '\n'.join(role_cards)
+
     html = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -529,6 +583,20 @@ def render_persona_matrix(rows):
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>LLM performance for Elastic Security &mdash; by your role</title>
 {dhru_css}
+<style>
+  .role-grid {{ display:grid; grid-template-columns:repeat(3, 1fr); gap:18px; margin:18px 0 28px; }}
+  .rcard {{ background:#fff; border:1px solid var(--line); border-radius:10px; padding:16px; box-shadow:var(--shadow); }}
+  .rcard h3 {{ font-size:14px; margin:0 0 6px; }}
+  .rdesc {{ font-size:12px; color:var(--muted); margin:0 0 12px; }}
+  .rtop {{ display:flex; justify-content:space-between; align-items:center; border-top:1px solid var(--line); padding-top:10px; }}
+  .rmodel {{ font-weight:600; font-size:13px; }}
+  .rscore {{ font-size:16px; font-weight:700; padding:3px 10px; border-radius:6px; }}
+  .rscore.sc-high {{ background:#e6f5ec; color:#1a7a3e; }}
+  .rscore.sc-mid {{ background:#fff6e6; color:#a66a00; }}
+  .rscore.sc-low {{ background:#ffeaea; color:#b32424; }}
+  .runner {{ font-size:11px; color:var(--muted); margin:6px 0 0; }}
+  @media (max-width:820px) {{ .role-grid {{ grid-template-columns:1fr; }} }}
+</style>
 </head>
 <body>
 <div class="wrap">
@@ -544,6 +612,15 @@ def render_persona_matrix(rows):
     <span class="pill"><b>judge:</b> {judge_name}</span>
     <span class="pill">generated {generated_at}</span>
   </div>
+
+  <h2 id="roles">Find the model for your role</h2>
+  <p class="hint">Pick a role. We surface the score that matters most for that job and the top model.</p>
+  <div class="role-grid">
+{role_cards_html}
+  </div>
+
+  <h2 id="matrix">Full performance matrix</h2>
+  <p class="hint">Ranked by <b>Overall</b> score. Cells shaded <span style="color:var(--bad);font-weight:600;">red are below 5</span> &mdash; not recommended for that task.</p>
 
   <div class="tablewrap">
   <table class="matrix">
@@ -611,6 +688,15 @@ def render_persona_matrix(rows):
     <br><strong>Judge:</strong> <code>anthropic-claude-5-sonnet</code></p>
   </div>
 </div>
+
+  <div class="methodology" style="margin-top:32px; background:#f7f8fa; border:1px solid #e3e6eb; border-radius:10px; padding:20px;">
+    <h2>How we test</h2>
+    <p><b>Judging:</b> Each response is scored by a judge model on a 0&ndash;10 rubric across relevance, correctness, and completeness.</p>
+    <p><b>Skill invocation:</b> We verify the correct skill was activated for each prompt by inspecting Agent Builder traces.</p>
+    <p><b>Tokens:</b> Input and output tokens are measured from the OTLP trace spans for each conversation turn.</p>
+    <p><b>Models tested:</b> {model_count} model{'s' if model_count != 1 else ''} across {prompt_count} prompts in 7 skill categories.</p>
+  </div>
+
 {dhru_js}
 </body>
 </html>"""
