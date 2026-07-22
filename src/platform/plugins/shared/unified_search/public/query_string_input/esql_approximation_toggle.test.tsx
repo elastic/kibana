@@ -14,9 +14,13 @@ import { EuiThemeProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
+import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { EsqlApproximationToggle } from './esql_approximation_toggle';
 
 const startMock = coreMock.createStart();
+
+const licensingStart = licensingMock.createStart();
+licensingStart.getLicense.mockResolvedValue(licensingMock.createLicenseMock());
 
 const mockServices = {
   ...startMock,
@@ -27,6 +31,7 @@ const mockServices = {
       },
     },
   },
+  licensing: licensingStart,
 };
 
 const renderToggle = (props: React.ComponentProps<typeof EsqlApproximationToggle>) =>
