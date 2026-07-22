@@ -7,13 +7,15 @@
 
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
+/**
+ * Legacy (templates flag OFF) Cases group2 suite.
+ *
+ * Runs only the legacy in-page custom-fields / templates coverage, which is
+ * valid exclusively when `xpack.cases.templates.enabled` is OFF. The default
+ * group2 suite (flag ON) is defined in `index.ts`.
+ */
 export default ({ loadTestFile }: FtrProviderContext) => {
-  describe('Cases', function () {
-    loadTestFile(require.resolve('./list_view'));
-    loadTestFile(require.resolve('./configure'));
-    loadTestFile(require.resolve('./configure_templates_v2'));
-    loadTestFile(require.resolve('./attachment_framework'));
-    loadTestFile(require.resolve('./upgrade'));
-    loadTestFile(require.resolve('./paste_image_to_comment'));
+  describe('Cases - legacy templates', function () {
+    loadTestFile(require.resolve('./configure_legacy'));
   });
 };

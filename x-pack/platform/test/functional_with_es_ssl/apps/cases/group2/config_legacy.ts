@@ -7,24 +7,28 @@
 
 import type { FtrConfigProviderContext } from '@kbn/test';
 
+/**
+ * Legacy Cases group2 functional config, pinned with
+ * `--xpack.cases.templates.enabled=false` so the legacy in-page custom-fields /
+ * templates sections keep rendering once the plugin default flips to ON. This
+ * config runs `index_legacy.ts` (only the legacy `configure_legacy` suite). The
+ * default flag-ON suite runs under `config.ts`.
+ */
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const baseConfig = await readConfigFile(require.resolve('../../../config.base.ts'));
 
   return {
     ...baseConfig.getAll(),
-    testFiles: [require.resolve('.')],
+    testFiles: [require.resolve('./index_legacy')],
     kbnTestServer: {
       ...baseConfig.get('kbnTestServer'),
       serverArgs: [
         ...baseConfig.get('kbnTestServer.serverArgs'),
-        // Pin the templates flag ON explicitly so this suite is deterministic
-        // regardless of the plugin default. The flag-OFF legacy counterpart runs
-        // under `config_legacy.ts`.
-        '--xpack.cases.templates.enabled=true',
+        '--xpack.cases.templates.enabled=false',
       ],
     },
     junit: {
-      reportName: 'Chrome X-Pack UI Functional Tests with ES SSL - Cases - group 2',
+      reportName: 'Chrome X-Pack UI Functional Tests with ES SSL - Cases - group 2 (legacy)',
     },
   };
 }

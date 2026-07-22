@@ -160,7 +160,7 @@ export const ConfigSchema = schema.object({
   // after it was on no longer throws "Missing mappings" errors. Any template /
   // field-definition documents created while enabled remain in the index.
   templates: schema.object({
-    enabled: schema.boolean({ defaultValue: false }),
+    enabled: schema.boolean({ defaultValue: true }),
   }),
   // NOTE: exposed to the Browser via `exposeToBrowser` setting in cases/server/index.ts
   // Temporary feature flag for the Cases UX redesign (elastic/security-team#17398).
