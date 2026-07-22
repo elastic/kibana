@@ -61,16 +61,15 @@ test.describe('navigation', { tag: tags.serverless.security.complete }, () => {
   });
 
   test('navigates to cases app', async ({ page, pageObjects, browserAuth }) => {
-    await expect(async () => {
-      await browserAuth.loginAsPrivilegedUser();
-      await pageObjects.navigation.goToSecurity();
+    await browserAuth.loginAsPrivilegedUser();
+    await pageObjects.navigation.goToSecurity();
 
-      await pageObjects.collapsibleNav.openMoreMenu();
-      await pageObjects.collapsibleNav.clickNavItemByDeepLinkId('securitySolutionUI:cases');
+    await pageObjects.collapsibleNav.openMoreMenu();
+    await pageObjects.collapsibleNav.clickNavItemByDeepLinkId('securitySolutionUI:cases');
 
-      expect(page.url()).toContain('/app/security/cases');
-      await expect(page.testSubj.locator('cases-all-title')).toBeVisible();
-    }).toPass({ timeout: 30000 });
+    await page.waitForURL(/\/app\/security\/cases/);
+    expect(page.url()).toContain('/app/security/cases');
+    await expect(page.testSubj.locator('cases-all-title')).toBeVisible({ timeout: 30000 });
   });
 
   test('navigates to maintenance windows', async ({ browserAuth, pageObjects }) => {
