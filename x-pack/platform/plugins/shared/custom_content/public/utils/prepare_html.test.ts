@@ -11,17 +11,22 @@ import {
   injectCsp,
   sanitizeHtml,
   isValidTemplate,
-  fillTemplate,
-} from './template_fill';
+} from './prepare_html';
 
 describe('injectCsp', () => {
-  it('injects CSP into an existing <head>', () => {
-    const result = injectCsp('<html><head></head><body></body></html>');
+  it('injects CSP and color-scheme meta into an existing <head>', () => {
+    const result = injectCsp('<html><head></head><body></body></html>', 'DARK');
     expect(result).toContain('<head><meta http-equiv="Content-Security-Policy"');
+    expect(result).toContain('color-scheme" content="dark"');
+  });
+
+  it('uses light color-scheme by default', () => {
+    const result = injectCsp('<p>hello</p>');
+    expect(result).toContain('color-scheme" content="light"');
   });
 
   it('prepends CSP when there is no <head>', () => {
-    const result = injectCsp('<p>hello</p>');
+    const result = injectCsp('<p>hello</p>', 'LIGHT');
     expect(result.startsWith('<meta http-equiv="Content-Security-Policy"')).toBe(true);
   });
 
@@ -77,54 +82,6 @@ describe('isValidTemplate', () => {
   it('returns false for plain text with no HTML tag', () => {
     expect(isValidTemplate('just some text')).toBe(false);
     expect(isValidTemplate('')).toBe(false);
-  });
-});
-
-describe('fillTemplate', () => {
-  const columns = [
-    { name: 'host', type: 'keyword' },
-    { name: 'count', type: 'long' },
-  ];
-  const rows = [
-    ['web-1', 100],
-    ['web-2', 50],
-  ];
-
-  it('renders column values via bracket notation', () => {
-    const template =
-      '<html><body>{% for row in rows %}<p>{{ row["host"].value }}: {{ row["count"].value }}</p>{% endfor %}</body></html>';
-    const result = fillTemplate(template, columns, rows);
-    expect(result).toContain('web-1: 100');
-    expect(result).toContain('web-2: 50');
-  });
-
-  it('computes pct as percentage of column max for numeric columns', () => {
-    const template =
-      '<html><body>{% for row in rows %}<div style="width: {{ row["count"].pct }}%"></div>{% endfor %}</body></html>';
-    const result = fillTemplate(template, columns, rows);
-    // web-1 has count 100 = 100% of max(100); web-2 has 50 = 50%
-    expect(result).toContain('width: 100%');
-    expect(result).toContain('width: 50%');
-  });
-
-  it('does not set pct for non-numeric columns', () => {
-    const template =
-      '<html><body>{% for row in rows %}{{ row["host"].pct }}{% endfor %}</body></html>';
-    const result = fillTemplate(template, columns, rows);
-    // pct is undefined for keyword columns — Liquid renders it as empty string
-    expect(result).not.toContain('%');
-  });
-
-  it('handles an empty rows array without throwing', () => {
-    const template = '<html><body>{% if rows.size == 0 %}<p>No data</p>{% endif %}</body></html>';
-    const result = fillTemplate(template, columns, []);
-    expect(result).toContain('No data');
-  });
-
-  it('injects CSP into the rendered output', () => {
-    const template = '<html><head></head><body><p>hi</p></body></html>';
-    const result = fillTemplate(template, columns, rows);
-    expect(result).toContain('Content-Security-Policy');
   });
 });
 

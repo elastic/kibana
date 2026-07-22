@@ -6,28 +6,25 @@
  */
 
 import DOMPurify from 'dompurify';
-import { Liquid } from 'liquidjs';
+import type { EuiThemeColorModeStandard } from '@elastic/eui';
 import { CUSTOM_CONTENT_CSP_META } from '../../common/constants';
 
-const liquid = new Liquid({
-  strictFilters: false,
-  strictVariables: false,
-  dynamicPartials: false,
-  outputEscape: 'escape',
-});
-
-export function injectCsp(html: string): string {
+export function injectCsp(html: string, colorMode?: EuiThemeColorModeStandard): string {
   if (html.includes(CUSTOM_CONTENT_CSP_META)) return html;
+  const colorSchemeMeta = `<meta name="color-scheme" content="${
+    colorMode === 'DARK' ? 'dark' : 'light'
+  }">`;
+  const inject = CUSTOM_CONTENT_CSP_META + colorSchemeMeta;
   const headMatch = html.match(/<head[^>]*>/i);
   if (headMatch?.index !== undefined) {
     const at = headMatch.index + headMatch[0].length;
-    return html.slice(0, at) + CUSTOM_CONTENT_CSP_META + html.slice(at);
+    return html.slice(0, at) + inject + html.slice(at);
   }
-  return CUSTOM_CONTENT_CSP_META + html;
+  return inject + html;
 }
 
-export function prepareHtml(html: string): string {
-  return injectCsp(sanitizeHtml(stripMarkdownFences(html)));
+export function prepareHtml(html: string, colorMode?: EuiThemeColorModeStandard): string {
+  return injectCsp(sanitizeHtml(stripMarkdownFences(html)), colorMode);
 }
 
 export function sanitizeHtml(html: string): string {
@@ -69,44 +66,4 @@ const HTML_TAG_PATTERN = /<[a-zA-Z]/;
 
 export function isValidTemplate(template: string): boolean {
   return HTML_TAG_PATTERN.test(template);
-}
-
-export interface TemplateColumn {
-  name: string;
-  type: string;
-}
-
-export function fillTemplate(
-  template: string,
-  columns: TemplateColumn[],
-  rows: unknown[][]
-): string {
-  const maxValues: Record<string, number> = {};
-  columns.forEach((col, i) => {
-    const nums = rows.map((r) => Number(r[i])).filter((v) => isFinite(v));
-    if (nums.length > 0) maxValues[col.name] = nums.reduce((a, b) => (b > a ? b : a), -Infinity);
-  });
-
-  const rowObjects = rows.map((row) => {
-    const obj: Record<string, { value: unknown; pct?: number }> = {};
-    columns.forEach((col, i) => {
-      const max = maxValues[col.name];
-      let pct: number | undefined;
-      if (max !== undefined) {
-        const num = Number(row[i]);
-        pct =
-          max === 0
-            ? 0
-            : isFinite(num)
-            ? Math.min(100, Math.max(0, Math.round((num / max) * 100)))
-            : 0;
-      }
-      obj[col.name] = { value: row[i], pct };
-    });
-    return obj;
-  });
-
-  const rendered = liquid.parseAndRenderSync(template.trim(), { rows: rowObjects, max: maxValues });
-
-  return prepareHtml(rendered);
 }

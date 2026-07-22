@@ -6,17 +6,15 @@
  */
 
 import type { CoreStart } from '@kbn/core/public';
-import type { ISearchGeneric } from '@kbn/search-types';
 
 interface Services {
   core: CoreStart;
-  search: ISearchGeneric;
 }
 
 let services: Services | undefined;
 
-export const setServices = (core: CoreStart, search: ISearchGeneric) => {
-  services = { core, search };
+export const setServices = (core: CoreStart) => {
+  services = { core };
 };
 
 export const getServices = (): Services => {

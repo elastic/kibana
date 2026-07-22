@@ -11,19 +11,22 @@ import type { EuiThemeColorModeStandard } from '@elastic/eui';
 import type { TimeRange } from '@kbn/es-query';
 import { getServices } from '../services';
 import { streamGenerate } from '../utils/stream_generate';
-import { fetchEsqlData } from '../utils/fetch_esql_data';
-import type { EsqlDataResult } from '../utils/fetch_esql_data';
+import { callRenderRoute } from '../utils/call_render_route';
 import {
-  fillTemplate,
   stripMarkdownFences,
   isValidTemplate,
   containsScript,
   prepareHtml,
-} from '../utils/template_fill';
+} from '../utils/prepare_html';
 
 const SCRIPT_ERROR_MESSAGE = i18n.translate('xpack.customContent.error.templateScript', {
   defaultMessage:
     'The generated panel relied on JavaScript, which this panel type does not support. Try rephrasing the request.',
+});
+
+const RENDER_ERROR_MESSAGE = i18n.translate('xpack.customContent.error.templateRender', {
+  defaultMessage:
+    "Couldn't render the panel. Try simplifying the request — for example, asking for one visualization at a time.",
 });
 
 export interface UseCustomContentHtmlParams {
@@ -68,13 +71,26 @@ export function useCustomContentHtml({
   // wrote so we can skip the echo re-run without also skipping intentional version bumps.
   const selfWrittenTemplateRef = useRef<string | undefined>(undefined);
 
+  // Track the last-rendered timeRange so a timepicker change still triggers a re-fetch even
+  // when savedTemplate hasn't changed (which would otherwise trip the echo-skip guard below).
+  const lastRenderedTimeRangeRef = useRef<TimeRange | undefined>(undefined);
+
   const onTemplateChangeRef = useRef(onTemplateChange);
   useEffect(() => {
     onTemplateChangeRef.current = onTemplateChange;
   }, [onTemplateChange]);
 
   useEffect(() => {
-    if (savedTemplate !== undefined && savedTemplate === selfWrittenTemplateRef.current) {
+    const timeRangeSame =
+      timeRange?.from === lastRenderedTimeRangeRef.current?.from &&
+      timeRange?.to === lastRenderedTimeRangeRef.current?.to;
+    lastRenderedTimeRangeRef.current = timeRange;
+
+    if (
+      savedTemplate !== undefined &&
+      savedTemplate === selfWrittenTemplateRef.current &&
+      timeRangeSame
+    ) {
       return;
     }
 
@@ -82,7 +98,7 @@ export function useCustomContentHtml({
 
     // Fast path — static panel with stored HTML.
     if (template && !esqlQuery) {
-      setHtml(prepareHtml(template));
+      setHtml(prepareHtml(template, colorMode));
       setIsLoading(false);
       setError(undefined);
       return;
@@ -100,59 +116,33 @@ export function useCustomContentHtml({
     setError(undefined);
     setIsAiUnavailable(false);
 
-    const { search, core } = getServices();
+    const { core } = getServices();
 
-    // Fast path — ES|QL panel with stored template: run query only, no LLM.
+    // Fast path — ES|QL panel with stored template: render server-side, no LLM.
     if (template && esqlQuery) {
-      fetchEsqlData(search, core.http, esqlQuery, timeRange, controller.signal)
-        .then(({ columns, values }) => {
+      callRenderRoute(core.http, { template, esqlQuery, timeRange }, controller.signal)
+        .then((rawHtml) => {
           if (controller.signal.aborted) return;
-          try {
-            setHtml(fillTemplate(template, columns, values ?? []));
-          } catch (err) {
-            setError(
-              i18n.translate('xpack.customContent.error.templateRender', {
-                defaultMessage:
-                  "Couldn't render the panel. Try simplifying the request — for example, asking for one visualization at a time.",
-              })
-            );
-          }
+          setHtml(prepareHtml(rawHtml, colorMode));
           setIsLoading(false);
         })
         .catch((err: Error) => {
           if (controller.signal.aborted || err.name === 'AbortError') return;
-          setError(err.message || 'Failed to fetch data');
+          setError(err.message || RENDER_ERROR_MESSAGE);
           setIsLoading(false);
         });
 
       return () => controller.abort();
     }
 
-    // Slow path — LLM generates template; for ES|QL panels data fetch runs in parallel.
-    let esqlData: EsqlDataResult | null = null;
-    let templateDone = false;
-    let dataDone = !esqlQuery;
+    // Slow path — LLM generates the content.
     let hasFailed = false;
+    let templateDone = false;
 
     // Only content-quality failures (invalid/unsupported output) are worth retrying — the LLM
     // gets a concrete reason and a chance to fix it. Transport/connector/data errors are not.
     const MAX_CONTENT_RETRIES = 1;
     let retryCount = 0;
-
-    let intervalRef: ReturnType<typeof setInterval> | undefined;
-    const stopInterval = () => {
-      if (intervalRef) {
-        clearInterval(intervalRef);
-        intervalRef = undefined;
-      }
-    };
-
-    // Stream partial HTML into the iframe for static panels only.
-    if (!renderedHtmlRef.current && !esqlQuery) {
-      intervalRef = setInterval(() => {
-        if (acc) setHtml(prepareHtml(acc));
-      }, 300);
-    }
 
     const retryOrFail = (retryReason: string, fallbackMessage: string) => {
       if (retryCount < MAX_CONTENT_RETRIES) {
@@ -166,13 +156,10 @@ export function useCustomContentHtml({
       }
     };
 
-    const tryFinish = () => {
-      if (!templateDone || !dataDone || hasFailed || controller.signal.aborted) return;
-      stopInterval();
+    const tryFinish = async () => {
+      if (!templateDone || hasFailed || controller.signal.aborted) return;
 
-      let rendered: string;
-
-      if (esqlQuery && esqlData) {
+      if (esqlQuery) {
         const cleaned = stripMarkdownFences(acc);
         if (!isValidTemplate(cleaned)) {
           retryOrFail(
@@ -189,20 +176,25 @@ export function useCustomContentHtml({
           return;
         }
         try {
-          rendered = fillTemplate(cleaned, esqlData.columns, esqlData.values ?? []);
+          const rawHtml = await callRenderRoute(
+            core.http,
+            { template: cleaned, esqlQuery, timeRange },
+            controller.signal
+          );
+          if (controller.signal.aborted) return;
+          selfWrittenTemplateRef.current = cleaned;
+          onTemplateChangeRef.current(cleaned);
+          setHtml(prepareHtml(rawHtml, colorMode));
         } catch (err) {
+          if (controller.signal.aborted || (err instanceof Error && err.name === 'AbortError'))
+            return;
           retryOrFail(
             `the template failed to render: ${err instanceof Error ? err.message : String(err)}`,
-            i18n.translate('xpack.customContent.error.templateRender', {
-              defaultMessage:
-                "Couldn't render the panel. Try simplifying the request — for example, asking for one visualization at a time.",
-            })
+            RENDER_ERROR_MESSAGE
           );
           return;
         }
-        selfWrittenTemplateRef.current = cleaned;
-        onTemplateChangeRef.current(cleaned);
-      } else if (!esqlQuery) {
+      } else {
         if (containsScript(acc)) {
           retryOrFail(
             'the generated HTML used JavaScript, which this panel type does not support',
@@ -210,32 +202,14 @@ export function useCustomContentHtml({
           );
           return;
         }
-        rendered = prepareHtml(acc);
+        const rendered = prepareHtml(acc, colorMode);
         selfWrittenTemplateRef.current = rendered;
         onTemplateChangeRef.current(rendered);
-      } else {
-        return;
+        setHtml(rendered);
       }
 
-      setHtml(rendered);
       setIsLoading(false);
     };
-
-    if (esqlQuery) {
-      fetchEsqlData(search, core.http, esqlQuery, timeRange, controller.signal)
-        .then((data) => {
-          if (controller.signal.aborted) return;
-          esqlData = data;
-          dataDone = true;
-          tryFinish();
-        })
-        .catch((err: Error) => {
-          if (controller.signal.aborted || err.name === 'AbortError') return;
-          hasFailed = true;
-          setError(err.message || 'Failed to fetch data');
-          setIsLoading(false);
-        });
-    }
 
     const runLlmGeneration = (retryReason?: string) => {
       const promptForLlm = retryReason
@@ -253,7 +227,6 @@ export function useCustomContentHtml({
         .catch((err: Error & { code?: string }) => {
           if (err.name !== 'AbortError') {
             hasFailed = true;
-            stopInterval();
             if (err.code === 'no_connector') {
               setIsAiUnavailable(true);
             } else {
@@ -272,7 +245,6 @@ export function useCustomContentHtml({
     runLlmGeneration();
 
     return () => {
-      stopInterval();
       controller.abort();
     };
   }, [embeddableId, prompt, esqlQuery, timeRange, generationVersion, savedTemplate, colorMode]);

@@ -7,6 +7,7 @@
 
 export const CUSTOM_CONTENT_EMBEDDABLE_TYPE = 'custom_content';
 export const CUSTOM_CONTENT_GENERATE_ROUTE = '/internal/custom_content/generate';
+export const CUSTOM_CONTENT_RENDER_ROUTE = '/internal/custom_content/render';
 export const CUSTOM_CONTENT_APP_NAME = 'Custom content';
 
 export const CUSTOM_CONTENT_MAX_PROMPT_LENGTH = 10_000;
@@ -17,7 +18,7 @@ export const CUSTOM_CONTENT_SAMPLE_ROW_COUNT = 3;
 // (DOMPurify WHOLE_DOCUMENT wrappers + CSP <meta> injection) applied before persisting.
 export const CUSTOM_CONTENT_MAX_TEMPLATE_SCHEMA_LENGTH = 510_000;
 
-// injectCsp() in template_fill.ts de-dupes on an exact string match of this value.
+// injectCsp() in prepare_html.ts de-dupes on an exact string match of this value.
 export const CUSTOM_CONTENT_CSP_META =
   '<meta http-equiv="Content-Security-Policy" content="default-src \'none\'; style-src \'unsafe-inline\';">';
 
