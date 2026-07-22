@@ -13,7 +13,6 @@ import type { GraphNodeUnion } from '@kbn/workflows/graph';
 import { isEnterStepTimeoutZone } from '@kbn/workflows/graph';
 import { flushState } from './persistence_loop';
 import type { WorkflowExecutionLoopParams } from './types';
-import { SYNC_WORKFLOW_UNSUPPORTED_MSG } from '../execution_functions/validate_sync_workflow';
 import {
   getHitlIdleDeadlineMsForNode,
   getHitlIdleDeadlineMsForStep,
@@ -180,7 +179,9 @@ export async function handleExecutionDelay(
       stepStatus === ExecutionStatus.WAITING_FOR_CHILD ||
       stepStatus === ExecutionStatus.WAITING)
   ) {
-    throw new Error(`Step "${stepExecutionRuntime.node.stepId}" ${SYNC_WORKFLOW_UNSUPPORTED_MSG}`);
+    throw new Error(
+      `Step "${stepExecutionRuntime.node.stepId}" is not supported in synchronous workflows`
+    );
   }
   if (
     stepStatus === ExecutionStatus.WAITING_FOR_INPUT ||
