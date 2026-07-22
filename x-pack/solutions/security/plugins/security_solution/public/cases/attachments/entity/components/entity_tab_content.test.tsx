@@ -157,7 +157,10 @@ describe('EntityTabContent', () => {
   });
 
   it('shows the "cleared" copy only when the store is not installed', () => {
-    useEntityStoreStatusMock.mockReturnValue({ data: { status: 'not_installed' }, isLoading: false });
+    useEntityStoreStatusMock.mockReturnValue({
+      data: { status: 'not_installed' },
+      isLoading: false,
+    });
 
     renderTab();
 
