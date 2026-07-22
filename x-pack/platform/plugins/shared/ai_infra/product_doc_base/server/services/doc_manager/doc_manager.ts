@@ -168,7 +168,7 @@ export class DocumentationManager implements DocumentationManagerAPI {
       `Ensuring product documentation for default inference ID [${inferenceId}] (status: ${status})`
     );
 
-    if (status === 'uninstalled') {
+    if (status === 'uninstalled' || status === 'error') {
       const license = await this.licensing.getLicense();
       if (!checkLicense(license)) {
         this.logger.debug(
@@ -180,6 +180,14 @@ export class DocumentationManager implements DocumentationManagerAPI {
       return;
     }
 
+    if (status === 'installing' || status === 'uninstalling') {
+      this.logger.debug(
+        `Skipping product documentation for inference ID [${inferenceId}]: installation already in progress (status: ${status})`
+      );
+      return;
+    }
+
+    // 'installed'
     await this.update({ inferenceId });
   }
 

@@ -140,7 +140,6 @@ export class PackageInstaller {
       ? validateOpenApiArtifactArchive(zipArchive, { archivePath })
       : validateArtifactArchive(zipArchive, { archivePath });
     if (!validationResult.valid) {
-      this.log.error(`Artifact archive validation failed: ${validationResult.error}`);
       throw new Error(`Artifact archive validation failed: ${validationResult.error}`);
     }
   }

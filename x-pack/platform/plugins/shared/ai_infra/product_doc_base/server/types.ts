@@ -11,6 +11,7 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import type { CloudStart } from '@kbn/cloud-plugin/server';
 import type { SearchApi } from './services/search';
 import type { ProductDocInstallClient } from './services/doc_install_status';
 import type { PackageInstaller } from './services/package_installer';
@@ -25,6 +26,7 @@ export interface ProductDocBaseSetupDependencies {
 export interface ProductDocBaseStartDependencies {
   licensing: LicensingPluginStart;
   taskManager: TaskManagerStartContract;
+  cloud?: CloudStart;
 }
 
 export interface ProductDocBaseSetupContract {}

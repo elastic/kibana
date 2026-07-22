@@ -31,7 +31,7 @@
     "@kbn/licensing-types",
     "@kbn/fs",
     "@kbn/react-query",
-    "@kbn/agent-builder-common",
-    "@kbn/agent-builder-server"
+    "@kbn/management-settings-ids",
+    "@kbn/cloud-plugin"
   ]
 }

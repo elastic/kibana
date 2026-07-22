@@ -109,16 +109,44 @@ describe('ProductDocBasePlugin', () => {
       });
     });
 
-    it('ensures default inference ID documentation on startup', () => {
+    it('schedules ensureDefaultProductDocumentation and updateAll on startup when AI is enabled', async () => {
       plugin.setup(coreMock.createSetup(), pluginSetupDeps);
       plugin.start(coreMock.createStart(), pluginStartDeps);
+      // Flush async startup tasks (uiSettings.get() → manager calls)
+      await new Promise((resolve) => setImmediate(resolve));
       expect(DocumentationManagerMock().ensureDefaultProductDocumentation).toHaveBeenCalledTimes(1);
+      expect(DocumentationManagerMock().updateAll).toHaveBeenCalledTimes(1);
     });
 
-    it('schedules updateAll and updateSecurityLabsAll on startup', () => {
+    it.each(['NO_DEFAULT_MODEL', 'NO_DEFAULT_CONNECTOR'])(
+      'skips startup tasks when AI features are disabled (%s)',
+      async (disabledSentinel) => {
+        const coreStart = coreMock.createStart();
+        const disabledAiClient = {
+          get: jest.fn().mockImplementation((key: string) => {
+            if (key === 'genAiSettings:defaultAIConnector')
+              return Promise.resolve(disabledSentinel);
+            if (key === 'genAiSettings:defaultAIConnectorOnly') return Promise.resolve(true);
+            return Promise.resolve(undefined);
+          }),
+        };
+        (coreStart.uiSettings.asScopedToClient as jest.Mock).mockReturnValue(disabledAiClient);
+
+        plugin.setup(coreMock.createSetup(), pluginSetupDeps);
+        plugin.start(coreStart, pluginStartDeps);
+        await new Promise((resolve) => setImmediate(resolve));
+
+        expect(DocumentationManagerMock().ensureDefaultProductDocumentation).not.toHaveBeenCalled();
+        expect(DocumentationManagerMock().updateAll).not.toHaveBeenCalled();
+        expect(DocumentationManagerMock().updateSecurityLabsAll).not.toHaveBeenCalled();
+      }
+    );
+
+    it('schedules updateSecurityLabsAll only in non-serverless deployments', async () => {
       plugin.setup(coreMock.createSetup(), pluginSetupDeps);
+      // Default initContext is non-serverless (buildFlavor: 'traditional')
       plugin.start(coreMock.createStart(), pluginStartDeps);
-      expect(DocumentationManagerMock().updateAll).toHaveBeenCalledTimes(1);
+      await new Promise((resolve) => setImmediate(resolve));
       expect(DocumentationManagerMock().updateSecurityLabsAll).toHaveBeenCalledTimes(1);
     });
   });

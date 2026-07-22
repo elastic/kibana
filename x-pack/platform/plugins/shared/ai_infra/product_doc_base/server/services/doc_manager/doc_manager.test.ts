@@ -290,6 +290,47 @@ describe('DocumentationManager', () => {
       });
       expect(scheduleInstallAllTaskMock).not.toHaveBeenCalled();
     });
+
+    it('reinstalls when default inference ID documentation is in error state', async () => {
+      docInstallClient.getInstallationStatus
+        .mockResolvedValueOnce({
+          kibana: { status: 'error' },
+        } as Awaited<ReturnType<ProductDocInstallClient['getInstallationStatus']>>)
+        .mockResolvedValueOnce({
+          kibana: { status: 'error' },
+        } as Awaited<ReturnType<ProductDocInstallClient['getInstallationStatus']>>);
+
+      await docManager.ensureDefaultProductDocumentation();
+
+      expect(scheduleInstallAllTaskMock).toHaveBeenCalledWith({
+        taskManager,
+        logger,
+        inferenceId: defaultInferenceEndpoints.JINAv5,
+      });
+      expect(scheduleEnsureUpToDateTaskMock).not.toHaveBeenCalled();
+    });
+
+    it('skips when default inference ID documentation is currently installing', async () => {
+      docInstallClient.getInstallationStatus.mockResolvedValue({
+        kibana: { status: 'installing' },
+      } as Awaited<ReturnType<ProductDocInstallClient['getInstallationStatus']>>);
+
+      await docManager.ensureDefaultProductDocumentation();
+
+      expect(scheduleInstallAllTaskMock).not.toHaveBeenCalled();
+      expect(scheduleEnsureUpToDateTaskMock).not.toHaveBeenCalled();
+    });
+
+    it('skips when default inference ID documentation is currently uninstalling', async () => {
+      docInstallClient.getInstallationStatus.mockResolvedValue({
+        kibana: { status: 'uninstalling' },
+      } as Awaited<ReturnType<ProductDocInstallClient['getInstallationStatus']>>);
+
+      await docManager.ensureDefaultProductDocumentation();
+
+      expect(scheduleInstallAllTaskMock).not.toHaveBeenCalled();
+      expect(scheduleEnsureUpToDateTaskMock).not.toHaveBeenCalled();
+    });
   });
 
   describe('#updateAll', () => {
