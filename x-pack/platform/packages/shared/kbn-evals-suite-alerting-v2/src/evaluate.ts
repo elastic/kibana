@@ -10,32 +10,34 @@ import { withPhoenixExecutor } from '@kbn/evals-phoenix-executor';
 import { RuleManagementChatClient } from './chat_client';
 import {
   ADMIN_CONSOLE_INDEX,
-  installAdminConsoleDataForge,
-  removeAdminConsoleDataForge,
-} from './admin_console_data';
-import {
   HOST_METRICS_INDEX,
-  installHostMetricsDataForge,
-  removeHostMetricsDataForge,
-} from './host_metrics_data';
+  installFullStackDataForge,
+  removeFullStackDataForge,
+} from './full_stack_data';
 
 const base = withPhoenixExecutor(evalsBase);
 
 export const evaluate = base.extend<
   {
     /**
-     * Seeds the `fake_hosts` data-forge dataset (index {@link HOST_METRICS_INDEX})
-     * before the test and cleans it up afterwards, resolving to the seeded index
-     * pattern. Only tests that destructure this fixture pay the seeding cost, so
-     * routing-only specs stay fast. Use it for compose specs whose ES|QL must
-     * validate against a real metrics index.
+     * Seeds all data-forge eval data (see `full_stack_data.ts`) before the test
+     * and cleans it up afterwards. Only tests that (transitively) destructure
+     * this fixture pay the seeding cost, so routing-only specs stay fast.
+     * Shared by {@link hostMetricsIndex} and {@link adminConsoleIndex} so the
+     * data is seeded at most once per test.
+     */
+    fullStackData: void;
+    /**
+     * Resolves to the seeded host-metrics index pattern
+     * ({@link HOST_METRICS_INDEX}), seeding via {@link fullStackData}. Use it
+     * for compose specs whose ES|QL must validate against a real metrics index.
      */
     hostMetricsIndex: string;
     /**
-     * Seeds the `fake_stack` data-forge dataset (admin-console namespace at
-     * {@link ADMIN_CONSOLE_INDEX}) before the test and cleans it up afterwards.
-     * Use for compose specs where the user refers to "admin console" data by
-     * name and the agent must discover the concrete index / error fields.
+     * Resolves to the seeded admin-console index pattern
+     * ({@link ADMIN_CONSOLE_INDEX}), seeding via {@link fullStackData}. Use for
+     * compose specs where the user refers to "admin console" data by name and
+     * the agent must discover the concrete index / error fields.
      */
     adminConsoleIndex: string;
     /**
@@ -61,25 +63,26 @@ export const evaluate = base.extend<
       scope: 'worker',
     },
   ],
-  hostMetricsIndex: [
+  fullStackData: [
     async ({ esClient, log }, use) => {
-      await installHostMetricsDataForge(esClient, log);
+      await installFullStackDataForge(esClient, log);
       try {
-        await use(HOST_METRICS_INDEX);
+        await use();
       } finally {
-        await removeHostMetricsDataForge(esClient, log);
+        await removeFullStackDataForge(esClient, log);
       }
     },
     { scope: 'test' },
   ],
+  hostMetricsIndex: [
+    async ({ fullStackData }, use) => {
+      await use(HOST_METRICS_INDEX);
+    },
+    { scope: 'test' },
+  ],
   adminConsoleIndex: [
-    async ({ esClient, log }, use) => {
-      await installAdminConsoleDataForge(esClient, log);
-      try {
-        await use(ADMIN_CONSOLE_INDEX);
-      } finally {
-        await removeAdminConsoleDataForge(esClient, log);
-      }
+    async ({ fullStackData }, use) => {
+      await use(ADMIN_CONSOLE_INDEX);
     },
     { scope: 'test' },
   ],
