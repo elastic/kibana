@@ -222,6 +222,37 @@ describe('policy table', () => {
     });
   });
 
+  test('negating the deprecated filter ("-is:") keeps non-deprecated policies visible and does not show deprecated badges', () => {
+    renderWithI18n(<TestComponent testPolicies={policies} />);
+
+    const searchInput = screen.getByPlaceholderText(/Search/i);
+    fireEvent.change(searchInput, { target: { value: '-is:policy.deprecated' } });
+    fireEvent.keyUp(searchInput, { key: 'Enter', keyCode: 13, which: 13 });
+
+    // Non-deprecated policies should still be visible — not an empty table.
+    expect(getPolicyNames().length).toBeGreaterThan(0);
+
+    // No deprecated badges should appear.
+    const deprecatedPolicies = screen.queryAllByTestId('deprecatedPolicyBadge');
+    expect(deprecatedPolicies.length).toBe(0);
+  });
+
+  test('negating the managed filter ("-is:") keeps non-managed policies visible and does not produce an empty table', () => {
+    renderWithI18n(<TestComponent testPolicies={policies} />);
+
+    const searchInput = screen.getByPlaceholderText(/Search/i);
+    fireEvent.change(searchInput, { target: { value: '-is:policy._meta.managed' } });
+    fireEvent.keyUp(searchInput, { key: 'Enter', keyCode: 13, which: 13 });
+
+    // Non-managed, non-deprecated policies should still be visible — not an empty table.
+    expect(getPolicyNames().length).toBeGreaterThan(0);
+
+    // No managed policies should appear when the negated clause is active.
+    const visiblePolicies = getPolicies();
+    const hasManagedPolicies = visiblePolicies.some((p) => p.isManagedPolicy);
+    expect(hasManagedPolicies).toEqual(false);
+  });
+
   test('shows deprecated policies with Deprecated badges', () => {
     renderWithI18n(<TestComponent testPolicies={policies} />);
 

@@ -90,6 +90,7 @@ export const PolicyTable: React.FunctionComponent<Props> = ({ policies }) => {
     SHOW_MANAGED_POLICIES_BY_DEFAULT,
     false
   );
+  const [deprecatedPoliciesVisible, setDeprecatedPoliciesVisible] = useState(false);
   const [query, setQuery] = useState(managedPoliciesVisible ? MANAGED_FILTER_CLAUSE : '');
   const { setListAction } = usePolicyListContext();
 
@@ -104,10 +105,17 @@ export const PolicyTable: React.FunctionComponent<Props> = ({ policies }) => {
   });
 
   const handleOnChange = useCallback<NonNullable<EuiSearchBarProps['onChange']>>(
-    ({ queryText, error }) => {
+    ({ query: parsedQuery, queryText, error }) => {
       if (!error) {
         setQuery(queryText);
-        setManagedPoliciesVisible(queryText.includes(MANAGED_FILTER_CLAUSE));
+        // Use the parsed AST to check clause polarity so that "not is:field" (match: 'must_not')
+        // is not treated as the filter being active.
+        setManagedPoliciesVisible(
+          parsedQuery?.ast.getIsClause(MANAGED_FILTER_FIELD)?.match === 'must'
+        );
+        setDeprecatedPoliciesVisible(
+          parsedQuery?.ast.getIsClause('policy.deprecated')?.match === 'must'
+        );
       }
     },
     [setManagedPoliciesVisible]
@@ -139,20 +147,20 @@ export const PolicyTable: React.FunctionComponent<Props> = ({ policies }) => {
   );
 
   const filteredPolicies = useMemo(() => {
-    // When the query includes a filter clause, show only matching policies.
+    // When the filter is active (positive must clause), show only matching policies.
     // Otherwise hide those policies (they are off by default).
-    let result = query.includes(MANAGED_FILTER_CLAUSE)
+    let result = managedPoliciesVisible
       ? policies.filter((item) => item.policy?._meta?.managed)
       : policies.filter((item) => !item.policy?._meta?.managed);
 
-    if (query.includes('is:policy.deprecated')) {
+    if (deprecatedPoliciesVisible) {
       result = result.filter((item) => item.policy?.deprecated);
     } else {
       result = result.filter((item) => !item.policy?.deprecated);
     }
 
     return result;
-  }, [policies, query]);
+  }, [policies, managedPoliciesVisible, deprecatedPoliciesVisible]);
 
   const columns: Array<EuiBasicTableColumn<PolicyFromES>> = [
     {
