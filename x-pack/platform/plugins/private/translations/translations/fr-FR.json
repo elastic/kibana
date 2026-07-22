@@ -52884,7 +52884,6 @@
     "xpack.transform.deleteTransform.deleteAnalyticsWithDataViewErrorMessage": "Une erreur s'est produite lors de la suppression de la vue de données {destinationIndex}",
     "xpack.transform.deleteTransform.deleteAnalyticsWithIndexErrorMessage": "Une erreur s'est produite lors de la suppression de l'index de destination {destinationIndex}",
     "xpack.transform.deleteTransform.errorWithCheckingIfDataViewExistsNotificationErrorMessage": "Une erreur s’est produite lors de la vérification de l’existence de la vue de données {dataView} : {error}",
-    "xpack.transform.description": "Description",
     "xpack.transform.edit.errorPromptText": "Une erreur s'est produite lors de la vérification de l'existence des données source",
     "xpack.transform.edit.noDataViewErrorPromptText": "Impossible d'obtenir la vue de données pour la transformation {transformId}. Il n'existe aucune vue de données pour {dataViewTitle}.",
     "xpack.transform.forceDeleteTransformMessage": "Supprimer {count} {count, plural, one {transform} other {transformations}}",
