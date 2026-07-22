@@ -6,12 +6,15 @@
  */
 
 import Boom from '@hapi/boom';
+import { asyncMapWithLimit } from '@kbn/std';
 import type { estypes } from '@elastic/elasticsearch';
 
 import { createRouteValidationFunction } from '@kbn/io-ts-utils';
 import type { InfraBackendLibs } from '../../../lib/infra_types';
 
 import { logAnalysisValidationV1 } from '../../../../common/http_api';
+
+const { MAX_CONCURRENT_INDEX_QUERIES } = logAnalysisValidationV1;
 
 export const initValidateLogAnalysisDatasetsRoute = ({
   framework,
@@ -40,8 +43,13 @@ export const initValidateLogAnalysisDatasetsRoute = ({
             data: { indices, timestampField, startTime, endTime, runtimeMappings },
           } = request.body;
 
-          const datasets = await Promise.all(
-            indices.map(async (indexName) => {
+          // Deduplicate the user-provided indices to avoid redundant queries.
+          const uniqueIndices = [...new Set(indices)];
+
+          const datasets = await asyncMapWithLimit(
+            uniqueIndices,
+            MAX_CONCURRENT_INDEX_QUERIES,
+            async (indexName) => {
               const indexDatasets = await logEntries.getLogEntryDatasets(
                 requestContext,
                 timestampField,
@@ -55,7 +63,7 @@ export const initValidateLogAnalysisDatasetsRoute = ({
                 indexName,
                 datasets: indexDatasets,
               };
-            })
+            }
           );
 
           return response.ok({
