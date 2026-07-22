@@ -11,7 +11,11 @@ import { createLogstashLensEditorSuiteSetup, testData } from '../fixtures';
 
 spaceTest.describe('Lens visualize geo field', { tag: tags.stateful.classic }, () => {
   const suiteSetup = createLogstashLensEditorSuiteSetup({
-    timeRange: testData.LOGSTASH_GEO_DATES,
+    // Narrow 4h window matching FTR geo_field coverage.
+    timeRange: {
+      from: 'Sep 22, 2015 @ 00:00:00.000',
+      to: 'Sep 22, 2015 @ 04:00:00.000',
+    },
     dataViewNamePrefix: 'scout-lens-geo-field-dv',
   });
 
@@ -35,9 +39,9 @@ spaceTest.describe('Lens visualize geo field', { tag: tags.stateful.classic }, (
 
       await maps.waitForLayersToLoad();
       await expect(maps.getLayerToggleButton('logstash-*')).toBeVisible();
-      expect(await maps.getLayerTocTooltipMsg('logstash-*')).toBe(
-        'logstash-*\nFound 66 documents.\nResults narrowed by global time'
-      );
+      await expect
+        .poll(async () => maps.getLayerTocTooltipMsg('logstash-*'))
+        .toBe('logstash-*\nFound 66 documents.\nResults narrowed by global time');
       await maps.refreshAndClearUnsavedChangesWarning();
     }
   );

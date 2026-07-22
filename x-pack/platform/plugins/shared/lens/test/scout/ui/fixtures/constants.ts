@@ -21,12 +21,6 @@ export const LOGSTASH_IN_RANGE_DATES = {
   to: 'Sep 23, 2015 @ 18:31:44.000',
 } as const;
 
-/** Narrow window used by Lens→Maps geo field Scout/FTR coverage. */
-export const LOGSTASH_GEO_DATES = {
-  from: 'Sep 22, 2015 @ 00:00:00.000',
-  to: 'Sep 22, 2015 @ 04:00:00.000',
-} as const;
-
 export const LENS_SAVED_OBJECTS = {
   XY_VIS: {
     title: 'lnsXYvis',

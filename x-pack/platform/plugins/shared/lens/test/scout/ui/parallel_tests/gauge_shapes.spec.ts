@@ -71,6 +71,10 @@ spaceTest.describe('Lens gauge shapes', { tag: tags.stateful.classic }, () => {
         await lens.closeDimensionEditor();
 
         await lens.openStyleSettings();
+        const { violations: styleViolations } = await page.checkA11y({
+          include: ['[data-test-subj="lnsApp"]'],
+        });
+        expect(styleViolations).toHaveLength(0);
         await lens.setInputValue('lnsToolbarGaugeLabelMajor', 'custom title');
         await lens.setGaugeMinorLabelMode('custom');
         await lens.setInputValue('lnsToolbarGaugeLabelMinor', 'custom subtitle');
@@ -81,9 +85,7 @@ spaceTest.describe('Lens gauge shapes', { tag: tags.stateful.classic }, () => {
 
         await lens.waitForVisualization('gaugeChart');
         await lens.openDimensionEditor('lnsGauge_goalDimensionPanel > lns-empty-dimension');
-        await page.testSubj.locator('lns-indexPattern-static_value-input').waitFor({
-          state: 'visible',
-        });
+        await lens.waitForStaticValueInput();
         await lens.waitForVisualization('gaugeChart');
         await lens.closeDimensionEditor();
 

@@ -745,25 +745,28 @@ export class LensApp {
 
   async closeSuggestionPanel() {
     const toggle = this.page.testSubj.locator('lensSuggestionsPanelToggleButton');
+    // Toggle is absent when suggestions never mounted for this chart.
     if (!(await toggle.isVisible())) {
       return;
     }
-    // Panel can remain in the DOM when collapsed; prefer aria-expanded when present.
-    const expanded = await toggle.getAttribute('aria-expanded');
-    if (expanded === 'false') {
-      return;
+    if ((await toggle.getAttribute('aria-expanded')) === 'true') {
+      await toggle.click();
     }
-    await toggle.click();
-    if (expanded === 'true') {
-      await this.page.waitForFunction(
-        () => {
-          const el = document.querySelector('[data-test-subj="lensSuggestionsPanelToggleButton"]');
-          return el?.getAttribute('aria-expanded') === 'false';
-        },
-        undefined,
-        { timeout: 5_000 }
-      );
-    }
+    await this.page.waitForFunction(
+      () => {
+        const el = document.querySelector('[data-test-subj="lensSuggestionsPanelToggleButton"]');
+        return el == null || el.getAttribute('aria-expanded') !== 'true';
+      },
+      undefined,
+      { timeout: 5_000 }
+    );
+  }
+
+  /** Waits until the static-value dimension input is visible in the open editor. */
+  async waitForStaticValueInput() {
+    await this.page.testSubj.locator('lns-indexPattern-static_value-input').waitFor({
+      state: 'visible',
+    });
   }
 
   /**
@@ -788,7 +791,7 @@ export class LensApp {
     await switcher.waitFor({ state: 'hidden' });
   }
 
-  getFieldListPanelFieldLocator(field: string) {
+  private getFieldListPanelFieldLocator(field: string) {
     // Prefer the encoded unified-field-list id used by existing Scout DnD, then fall back.
     const encoded = this.page.testSubj.locator(`lnsFieldListPanelField-___${field}___`);
     return encoded.or(this.page.testSubj.locator(`lnsFieldListPanelField-${field}`));
@@ -873,217 +876,8 @@ export class LensApp {
     await this.waitForLensDragDropToFinish();
   }
 
-  async dragFieldToDimensionTrigger(field: string, dimension: string) {
-    const fieldLocator = this.getFieldListPanelFieldLocator(field);
-    const dropTarget = this.page.testSubj.locator(dimension);
-    await fieldLocator.waitFor({ state: 'visible' });
-    await dropTarget.waitFor({ state: 'visible' });
-    await fieldLocator.dragTo(dropTarget);
-    await this.waitForLensDragDropToFinish();
-  }
-
-  async dragDimensionToDimension({ from, to }: { from: string; to: string }) {
-    const fromLocator = this.page.testSubj.locator(from);
-    const toLocator = this.page.testSubj.locator(to);
-    await fromLocator.waitFor({ state: 'visible' });
-    await toLocator.waitFor({ state: 'visible' });
-    await fromLocator.dragTo(toLocator);
-    await this.waitForLensDragDropToFinish();
-  }
-
-  async reorderDimensions(dimension: string, startIndex: number, endIndex: number) {
-    // Indices are 1-based, matching FTR `reorderDimensions`.
-    const dragging = this.page.locator(
-      `[data-test-subj='${dimension}']:nth-of-type(${startIndex}) .domDraggable`
-    );
-    const dropping = this.page.locator(
-      `[data-test-subj='${dimension}']:nth-of-type(${endIndex}) [data-test-subj='lnsDragDrop-reorderableDropLayer']`
-    );
-    await dragging.waitFor({ state: 'visible' });
-    await dragging.dragTo(dropping);
-    await this.waitForLensDragDropToFinish();
-  }
-
-  /**
-   * HTML5 drag that enters a primary droppable then drops on an extra target
-   * (duplicate / swap / combine). Ports FTR `dragEnterDrop`.
-   */
-  async dragEnterDrop(dragging: string, draggedOver: string, dropTarget: string) {
-    await this.page.evaluate(
-      ([fromSel, overSel, toSel]: string[]) => {
-        if (!fromSel || !overSel || !toSel) {
-          throw new Error('dragEnterDrop: missing selector argument');
-        }
-        interface Transfer {
-          data: Record<string, string>;
-          setData: (key: string, value: string) => void;
-          getData: (key: string) => string;
-        }
-
-        function createEvent(typeOfEvent: string) {
-          const event = document.createEvent('CustomEvent') as CustomEvent & {
-            dataTransfer: Transfer;
-          };
-          event.initCustomEvent(typeOfEvent, true, true, null);
-          event.dataTransfer = {
-            data: {},
-            setData(key: string, value: string) {
-              this.data[key] = value;
-            },
-            getData(key: string) {
-              return this.data[key];
-            },
-          };
-          return event;
-        }
-
-        function dispatchEvent(element: Element, event: Event, transferData?: Transfer) {
-          if (transferData !== undefined) {
-            (event as CustomEvent & { dataTransfer: Transfer }).dataTransfer = transferData;
-          }
-          element.dispatchEvent(event);
-        }
-
-        const origin = document.querySelector(fromSel);
-        if (!origin) {
-          throw new Error(`dragEnterDrop: origin not found for ${fromSel}`);
-        }
-        const dragStartEvent = createEvent('dragstart');
-        dispatchEvent(origin, dragStartEvent);
-
-        setTimeout(() => {
-          const over = document.querySelector(overSel);
-          if (!over) {
-            throw new Error(`dragEnterDrop: draggedOver not found for ${overSel}`);
-          }
-          dispatchEvent(over, createEvent('dragenter'), dragStartEvent.dataTransfer);
-          dispatchEvent(over, createEvent('dragover'), dragStartEvent.dataTransfer);
-          setTimeout(() => {
-            const target = document.querySelector(toSel);
-            if (!target) {
-              throw new Error(`dragEnterDrop: dropTarget not found for ${toSel}`);
-            }
-            dispatchEvent(target, createEvent('drop'), dragStartEvent.dataTransfer);
-            dispatchEvent(origin, createEvent('dragend'), dragStartEvent.dataTransfer);
-          }, 50);
-        }, 50);
-      },
-      [dragging, draggedOver, dropTarget]
-    );
-    await this.waitForLensDragDropToFinish();
-  }
-
-  async dragFieldToExtraDropType(
-    field: string,
-    to: string,
-    type: 'duplicate' | 'swap' | 'combine',
-    visDataTestSubj?: string
-  ) {
-    // Match either encoded or plain field list test-subj (same as getFieldListPanelFieldLocator).
-    const from = `[data-test-subj="lnsFieldListPanelField-___${field}___"], [data-test-subj="lnsFieldListPanelField-${field}"]`;
-    await this.dragEnterDrop(
-      from,
-      `[data-test-subj="${to}"] [data-test-subj="lnsDragDrop-domDroppable"]`,
-      `[data-test-subj="${to}"] [data-test-subj="domDragDrop-dropTarget-${type}"]`
-    );
-    if (visDataTestSubj) {
-      await this.waitForVisualization(visDataTestSubj);
-    }
-  }
-
-  async dragDimensionToExtraDropType(
-    from: string,
-    to: string,
-    type: 'duplicate' | 'swap' | 'combine',
-    visDataTestSubj?: string
-  ) {
-    await this.dragEnterDrop(
-      `[data-test-subj="${from}"]`,
-      `[data-test-subj="${to}"] [data-test-subj="lnsDragDrop-domDroppable"]`,
-      `[data-test-subj="${to}"] [data-test-subj="domDragDrop-dropTarget-${type}"]`
-    );
-    if (visDataTestSubj) {
-      await this.waitForVisualization(visDataTestSubj);
-    }
-  }
-
-  async waitForLensDragDropToFinish() {
+  private async waitForLensDragDropToFinish() {
     await this.page.locator('.domDragDrop-isActiveGroup').waitFor({ state: 'hidden' });
-  }
-
-  async dragFieldWithKeyboard(
-    fieldName: string,
-    steps = 1,
-    reverse = false,
-    metaKey?: 'shift' | 'alt' | 'ctrl'
-  ) {
-    const field = this.page.locator(
-      `[data-attr-field="${fieldName}"] [data-test-subj="lnsDragDrop-keyboardHandler"]`
-    );
-    await field.focus();
-    await this.page.keyboard.press('Enter');
-    await this.page.locator('.domDroppable--active').waitFor({ state: 'visible' });
-    for (let i = 0; i < steps; i++) {
-      await this.page.keyboard.press(reverse ? 'ArrowLeft' : 'ArrowRight');
-    }
-    if (metaKey) {
-      await this.pressMetaKey(metaKey);
-    }
-    await this.page.keyboard.press('Enter');
-    await this.waitForLensDragDropToFinish();
-  }
-
-  async dimensionKeyboardDragDrop(
-    group: string,
-    index = 0,
-    steps = 1,
-    reverse = false,
-    metaKey?: 'shift' | 'alt' | 'ctrl'
-  ) {
-    const elements = this.page.locator(
-      `[data-test-subj="${group}"] [data-test-subj="lnsDragDrop-keyboardHandler"]`
-    );
-    await expect.poll(async () => await elements.count()).toBeGreaterThan(index);
-    const handlers = await elements.all();
-    const handler = handlers[index];
-    if (!handler) {
-      throw new Error(`Keyboard drag handler not found at index ${index} in group "${group}"`);
-    }
-    await handler.focus();
-    await this.page.keyboard.press('Enter');
-    for (let i = 0; i < steps; i++) {
-      await this.page.keyboard.press(reverse ? 'ArrowLeft' : 'ArrowRight');
-    }
-    if (metaKey) {
-      await this.pressMetaKey(metaKey);
-    }
-    await this.page.keyboard.press('Enter');
-    await this.waitForLensDragDropToFinish();
-  }
-
-  async dimensionKeyboardReorder(group: string, index = 0, steps = 1, reverse = false) {
-    const elements = this.page.locator(
-      `[data-test-subj="${group}"] [data-test-subj="lnsDragDrop-keyboardHandler"]`
-    );
-    await expect.poll(async () => await elements.count()).toBeGreaterThan(index);
-    const handlers = await elements.all();
-    const handler = handlers[index];
-    if (!handler) {
-      throw new Error(`Keyboard reorder handler not found at index ${index} in group "${group}"`);
-    }
-    await handler.focus();
-    await this.page.keyboard.press('Enter');
-    for (let i = 0; i < steps; i++) {
-      await this.page.keyboard.press(reverse ? 'ArrowUp' : 'ArrowDown');
-    }
-    await this.page.keyboard.press('Enter');
-    await this.waitForLensDragDropToFinish();
-  }
-
-  private async pressMetaKey(metaKey: 'shift' | 'alt' | 'ctrl') {
-    const key = metaKey === 'shift' ? 'Shift' : metaKey === 'alt' ? 'Alt' : 'Control';
-    await this.page.keyboard.down(key);
-    await this.page.keyboard.up(key);
   }
 
   /**

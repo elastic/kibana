@@ -99,20 +99,20 @@ export class MapsPage {
     return layerName.split(' ').join('_');
   }
 
-  /** Waits until Map layer TOC has entries and loading spinners are gone (FTR parity). */
+  /** Waits until Map layer TOC has entries and loading indicators are gone (FTR parity). */
   async waitForLayersToLoad() {
     const tableOfContents = this.page.testSubj.locator('mapLayerTOC');
     await tableOfContents.waitFor({ state: 'visible', timeout: DEFAULT_MAP_LOADING_TIMEOUT });
     const layerToggles = tableOfContents.locator(
       '[data-test-subj^="layerTocActionsPanelToggleButton"]'
     );
-    // Maps renders EuiLoadingSpinner while a layer loads; there is no dedicated
-    // data-test-subj on that icon, so wait for toggles + spinner count (same as FTR).
+    // Maps uses EuiLoadingSpinner (role=progressbar) while a layer loads; there is no
+    // dedicated layer-loading data-test-subj, so wait for toggles + no progressbars.
     await expect
       .poll(
         async () => {
           const layerCount = await layerToggles.count();
-          const spinnerCount = await tableOfContents.locator('.euiLoadingSpinner').count();
+          const spinnerCount = await tableOfContents.getByRole('progressbar').count();
           return layerCount > 0 && spinnerCount === 0;
         },
         { timeout: DEFAULT_MAP_LOADING_TIMEOUT }

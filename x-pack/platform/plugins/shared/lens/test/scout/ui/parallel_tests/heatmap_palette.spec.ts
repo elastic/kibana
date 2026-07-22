@@ -29,7 +29,7 @@ spaceTest.describe('Lens heatmap palette', { tag: tags.stateful.classic }, () =>
 
   spaceTest(
     'edits temperature palette stops, range types, and axis rotation',
-    async ({ browserAuth, context, pageObjects }) => {
+    async ({ browserAuth, context, page, pageObjects }) => {
       const { visualize, lens } = pageObjects;
 
       await enableElasticChartDebug(context);
@@ -85,6 +85,10 @@ spaceTest.describe('Lens heatmap palette', { tag: tags.stateful.classic }, () =>
       await spaceTest.step('reflect stop color changes on the chart', async () => {
         await lens.openDimensionEditor('lnsHeatmap_cellPanel > lns-dimensionTrigger');
         await lens.openPalettePanel();
+        const { violations } = await page.checkA11y({
+          include: ['[data-test-subj="lns-palettePanelFlyout"]'],
+        });
+        expect(violations).toHaveLength(0);
         await lens.setInputValue('lnsPalettePanel_dynamicColoring_range_value_0', '10');
         await expect
           .poll(async () => {
