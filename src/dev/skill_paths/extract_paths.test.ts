@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { classifyToken } from './extract_paths';
+import { classifyToken, extractPaths } from './extract_paths';
 
 describe('classifyToken', () => {
   describe('skip cases', () => {
@@ -159,5 +159,68 @@ describe('classifyToken', () => {
         expect(result.declaredBase).toBe('x-pack/solutions/security');
       }
     });
+  });
+});
+
+describe('extractPaths', () => {
+  it('extracts backtick inline path from plain prose', () => {
+    const results = extractPaths('See `scripts/scout.js` for details.');
+    expect(results).toHaveLength(1);
+    expect(results[0].token).toBe('scripts/scout.js');
+    expect(results[0].line).toBe(1);
+    expect(results[0].tokenKind).toBe('backtick');
+  });
+
+  it('skips paths inside fenced code blocks', () => {
+    const content = [
+      'Some prose.',
+      '```bash',
+      'x-pack/solutions/security/something.ts',
+      '```',
+      'After fence.',
+    ].join('\n');
+    const results = extractPaths(content);
+    const fenceTokens = results.filter((r) => r.token.includes('security/something.ts'));
+    expect(fenceTokens).toHaveLength(0);
+  });
+
+  it('extracts markdown link target; classifyToken strips fragment and assigns anchor=file', () => {
+    const results = extractPaths('[link](references/mode-generate.md#section-name)');
+    expect(results).toHaveLength(1);
+    expect(results[0].tokenKind).toBe('markdown-link');
+    // raw token retains the fragment — classifyToken strips it
+    const classified = classifyToken(
+      results[0].token,
+      results[0].tokenKind,
+      results[0].rawLine,
+      ''
+    );
+    expect(classified.kind).toBe('validate');
+    if (classified.kind === 'validate') {
+      expect(classified.token).toBe('references/mode-generate.md');
+      expect(classified.anchor).toBe('file');
+    }
+  });
+
+  it('respects declared-base comment: classifyToken assigns anchor=declared-base', () => {
+    const content =
+      '<!-- skill-path-base: x-pack/solutions/security -->\n\nSee `plugins/security_solution/` for details.';
+    const results = extractPaths(content);
+    const token = results.find((r) => r.token === 'plugins/security_solution/');
+    expect(token).toBeDefined();
+    if (token) {
+      const classified = classifyToken(token.token, token.tokenKind, token.rawLine, content);
+      expect(classified.kind).toBe('validate');
+      if (classified.kind === 'validate') {
+        expect(classified.anchor).toBe('declared-base');
+      }
+    }
+  });
+
+  it('returns line numbers correctly — path on line 2 reports line=2', () => {
+    const content = 'No path here.\nSee `scripts/scout.js` here.';
+    const results = extractPaths(content);
+    expect(results).toHaveLength(1);
+    expect(results[0].line).toBe(2);
   });
 });

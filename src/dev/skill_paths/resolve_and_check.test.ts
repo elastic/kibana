@@ -29,7 +29,7 @@ describe('resolveAndCheck', () => {
       repoRoot: REPO_ROOT,
     });
     expect(result.exists).toBe(true);
-    expect(result.resolvedPath).toBe(path.join(REPO_ROOT, 'scripts/scout.js'));
+    expect(result.resolvedPath).toBe(path.resolve(REPO_ROOT, 'scripts/scout.js'));
   });
 
   it('resolves a repo-root path that exists (src/dev/run_check_file_casing.ts)', () => {
@@ -40,7 +40,7 @@ describe('resolveAndCheck', () => {
       repoRoot: REPO_ROOT,
     });
     expect(result.exists).toBe(true);
-    expect(result.resolvedPath).toBe(path.join(REPO_ROOT, 'src/dev/run_check_file_casing.ts'));
+    expect(result.resolvedPath).toBe(path.resolve(REPO_ROOT, 'src/dev/run_check_file_casing.ts'));
   });
 
   it('resolves a repo-root path that does NOT exist', () => {
@@ -51,7 +51,7 @@ describe('resolveAndCheck', () => {
       repoRoot: REPO_ROOT,
     });
     expect(result.exists).toBe(false);
-    expect(result.resolvedPath).toBe(path.join(REPO_ROOT, 'scripts/scout_NONEXISTENT_9999.js'));
+    expect(result.resolvedPath).toBe(path.resolve(REPO_ROOT, 'scripts/scout_NONEXISTENT_9999.js'));
   });
 
   it('resolves a markdown-link token relative to the containing file directory', () => {
@@ -65,7 +65,7 @@ describe('resolveAndCheck', () => {
     });
     expect(result.exists).toBe(true);
     expect(result.resolvedPath).toBe(
-      path.join(path.dirname(SKILL_FILE), 'assets/page_object_template.md')
+      path.resolve(path.dirname(SKILL_FILE), 'assets/page_object_template.md')
     );
   });
 
