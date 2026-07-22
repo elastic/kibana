@@ -23,6 +23,7 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { internalTools } from '@kbn/agent-builder-common';
 import type { ToolCallStep as ToolCallStepData } from '@kbn/agent-builder-common/chat/conversation';
+import { isErrorResult } from '@kbn/agent-builder-common/tools/tool_result';
 import { JsonCodeBlock } from '../json_code_block';
 import { ToolResult } from '../results/tool_result';
 
@@ -43,12 +44,17 @@ const resultLabel = i18n.translate(
 
 interface SectionHeaderProps {
   title: string;
+  isError?: boolean;
 }
 
-const SectionHeader: React.FC<SectionHeaderProps> = ({ title }) => (
+const SectionHeader: React.FC<SectionHeaderProps> = ({ title, isError = false }) => (
   <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
     <EuiFlexItem grow={false}>
-      <EuiIcon type="checkInCircleFilled" color="success" aria-hidden={true} />
+      <EuiIcon
+        type={isError ? 'alert' : 'checkInCircleFilled'}
+        color={isError ? 'danger' : 'success'}
+        aria-hidden={true}
+      />
     </EuiFlexItem>
     <EuiFlexItem grow={false}>
       <EuiText size="s">
@@ -106,7 +112,7 @@ export const ToolResponseFlyout: React.FC<ToolResponseFlyoutProps> = ({ step, on
         {showResultSection && (
           <>
             <EuiSpacer size="m" />
-            <SectionHeader title={resultLabel} />
+            <SectionHeader title={resultLabel} isError={step.results.some(isErrorResult)} />
             <EuiSpacer size="s" />
             {step.results.map((result, idx) => (
               <Fragment key={`flyout-result-${idx}`}>
