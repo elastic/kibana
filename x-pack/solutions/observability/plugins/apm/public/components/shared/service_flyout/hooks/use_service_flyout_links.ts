@@ -8,31 +8,19 @@
 import { useMemo } from 'react';
 import type { SloListLocatorParams } from '@kbn/deeplinks-observability';
 import { sloListLocatorID } from '@kbn/deeplinks-observability';
-import type { Environment } from '../../../../../common/environment_rt';
 import { APM_APP_LOCATOR_ID } from '../../../../locator/service_detail_locator';
 import { getManageSlosUrl } from '../../../../hooks/use_manage_slos_url';
 import { useServiceFlyoutContext } from '../service_flyout_context';
 import { useAlertsHref } from '../footer/hooks/use_alerts_href';
 import { useDiscoverHref } from '../../links/discover_links/use_discover_href';
 
-interface ServiceFlyoutLinksParams {
-  serviceName: string;
-  environment: Environment;
-  rangeFrom: string;
-  rangeTo: string;
-  transactionType?: string;
-}
-
-export function useServiceFlyoutLinks({
-  serviceName,
-  environment,
-  rangeFrom,
-  rangeTo,
-  transactionType = '',
-}: ServiceFlyoutLinksParams) {
+export function useServiceFlyoutLinks() {
   const {
     deps: { core, share },
+    service,
+    filters: { environment, rangeFrom, rangeTo, transactionType = '' },
   } = useServiceFlyoutContext();
+  const serviceName = service.name;
   const canReadSlos = !!core.application?.capabilities?.slo?.read;
 
   const apm = useMemo(() => {

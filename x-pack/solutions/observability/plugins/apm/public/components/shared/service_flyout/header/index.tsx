@@ -11,7 +11,6 @@ import React from 'react';
 import { SERVICE_FLYOUT_EBT_ACTIONS, SERVICE_FLYOUT_EBT_ELEMENTS } from '../ebt_constants';
 import { ServiceBadges } from './service_badges';
 import { SERVICE_FLYOUT_TABS, type ServiceFlyoutTabId } from '..';
-import { useServiceFlyoutContext } from '../service_flyout_context';
 import { useServiceFlyoutLinks } from '../hooks/use_service_flyout_links';
 
 interface ServiceFlyoutHeaderProps {
@@ -27,17 +26,7 @@ export function ServiceFlyoutHeader({
   selectedTabId,
   onSelectedTabIdChange,
 }: ServiceFlyoutHeaderProps) {
-  const {
-    service,
-    filters: { environment, rangeFrom, rangeTo },
-  } = useServiceFlyoutContext();
-
-  const { apm } = useServiceFlyoutLinks({
-    serviceName: service.name,
-    rangeFrom,
-    rangeTo,
-    environment,
-  });
+  const { apm } = useServiceFlyoutLinks();
   const serviceOverviewHref = apm.overviewTab;
 
   return (
