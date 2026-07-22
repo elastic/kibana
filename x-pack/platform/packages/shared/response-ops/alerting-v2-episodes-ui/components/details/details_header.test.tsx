@@ -27,7 +27,6 @@ const loadedRuleState: LoadedRuleState = {
 const defaultProps = {
   isLoadingEpisode: false,
   ruleState: loadedRuleState,
-  tags: [] as string[],
   status: undefined,
   severity: undefined,
   episodeAction: undefined,
@@ -35,12 +34,11 @@ const defaultProps = {
 };
 
 describe('AlertEpisodeDetailsHeader', () => {
-  it('renders title, description, status badges, and tags', () => {
+  it('renders title, description, and status badges', () => {
     render(
       <I18nProvider>
         <AlertEpisodeDetailsHeader
           {...defaultProps}
-          tags={['t1']}
           status={ALERT_EPISODE_STATUS.ACTIVE}
           severity={undefined}
           episodeAction={undefined}
@@ -50,8 +48,6 @@ describe('AlertEpisodeDetailsHeader', () => {
     );
     expect(screen.getByRole('heading', { name: 'Rule 1' })).toBeInTheDocument();
     expect(screen.getByText('Some description')).toBeInTheDocument();
-    expect(screen.getByTestId('alertingV2EpisodeDetailsHeaderTags')).toBeInTheDocument();
-    expect(screen.getByText('t1')).toBeInTheDocument();
   });
 
   it('renders the loading title while episode or rule data is loading', () => {
@@ -61,7 +57,6 @@ describe('AlertEpisodeDetailsHeader', () => {
           {...defaultProps}
           isLoadingEpisode={true}
           ruleState={{ status: RuleStateStatus.idle }}
-          tags={[]}
           status={undefined}
           severity={undefined}
           episodeAction={undefined}
@@ -106,7 +101,6 @@ describe('AlertEpisodeDetailsHeader', () => {
       <I18nProvider>
         <AlertEpisodeDetailsHeader
           {...defaultProps}
-          tags={[]}
           status={ALERT_EPISODE_STATUS.ACTIVE}
           severity="high"
           episodeAction={undefined}

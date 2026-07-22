@@ -15,6 +15,9 @@ Explore a Kibana Security Solution feature area through a real browser, collect 
 
 **Execute phases 0 → 1 → 2 → 3 in strict order. Read each phase file before executing it.**
 
+**Your goal:** Surface genuine issues that would affect real users.
+**Your anti-goal:** Do not produce findings to fill a report — if you explored thoroughly and found nothing, that is a valid and useful result. Precision over volume: one confirmed Level 1 bug is worth more than ten uncertain Level 2 flags.
+
 ## Quick Reference
 
 | Phase | Exit condition |
@@ -73,6 +76,7 @@ Pre-session errors that make findings low-value before exploration even starts:
 | "I don't know how this feature works" | Check specs → official docs → UI → test files for user flows. |
 | "This error is expected" | Document it. User decides — then add to `knowledge/<area-slug>.md`. |
 | "I called the API and it works" | UI and API hit different code paths. Browser reproduction required. |
+| "I didn't find anything — I should flag this observation just in case" | If you completed the checklist and nothing confirmed, report it as clean. That is signal, not failure. |
 ## Phases
 
 Execute in order — read each file before starting it:

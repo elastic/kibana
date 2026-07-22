@@ -26,6 +26,7 @@ import type {
   PublishesUnsavedChanges,
   SerializedTitles,
   SerializedTimeRange,
+  SupportsJsonExport,
 } from '@kbn/presentation-publishing';
 import type { LensApiConfig } from '@kbn/lens-embeddable-utils';
 import type { Simplify } from '@kbn/chart-expressions-common';
@@ -128,7 +129,8 @@ export type LensApi = Simplify<
     LensRequestHandlersProps &
     LensApiCallbacks &
     LensHasEditPanel &
-    LegacyLensStateApi
+    LegacyLensStateApi &
+    SupportsJsonExport
 >;
 
 /**
