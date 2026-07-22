@@ -26,7 +26,7 @@ function getRestorableEnvironment(location: Location | undefined): string | unde
   return typeof environment === 'string' ? environment : undefined;
 }
 
-export function RedirectWithRememberedEnvironment({ children }: { children: React.ReactElement }) {
+export function RedirectWithDefaultEnvironment({ children }: { children: React.ReactElement }) {
   const location = useLocation();
   const previousLocation = usePrevious(location);
   const defaultServiceEnvironment = useDefaultEnvironment();

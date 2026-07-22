@@ -10,13 +10,13 @@ import { act, render, waitFor } from '@testing-library/react';
 import type { Location, MemoryHistory } from 'history';
 import { createMemoryHistory } from 'history';
 import qs from 'query-string';
-import { RedirectWithRememberedEnvironment } from '.';
+import { RedirectWithDefaultEnvironment } from '.';
 import { apmRouter } from '../../apm_route_config';
 import * as useApmPluginContextExports from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import { fromQuery } from '../../../shared/links/url_helpers';
 
-describe('RedirectWithRememberedEnvironment', () => {
+describe('RedirectWithDefaultEnvironment', () => {
   let history: MemoryHistory;
 
   const noQuery = '';
@@ -45,9 +45,9 @@ describe('RedirectWithRememberedEnvironment', () => {
 
     return render(
       <RouterProvider history={history} router={apmRouter as any}>
-        <RedirectWithRememberedEnvironment>
+        <RedirectWithDefaultEnvironment>
           <>Foo</>
-        </RedirectWithRememberedEnvironment>
+        </RedirectWithDefaultEnvironment>
       </RouterProvider>
     );
   }
