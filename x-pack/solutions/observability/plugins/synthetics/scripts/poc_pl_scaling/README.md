@@ -4,7 +4,7 @@ Throwaway tooling to demo Option 3 (policy sharding) for
 [synthetics-dev#462](https://github.com/elastic/synthetics-dev/issues/462) /
 [obs-execution#24](https://github.com/elastic/obs-execution/issues/24).
 
-Design: `docs/superpowers/specs/2026-07-15-private-locations-scaling-poc-design.md`.
+Design: `./2026-07-15-private-locations-scaling-poc-design.md`.
 
 ## What this proves
 

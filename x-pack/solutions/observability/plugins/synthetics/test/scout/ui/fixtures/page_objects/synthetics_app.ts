@@ -322,7 +322,7 @@ export class SyntheticsAppPage {
     await this.page.click('button:has-text("Create location")');
     await this.page.testSubj.fill('syntheticsLocationFormFieldText', name);
     await this.page.click('[aria-label="Select agent policy"]');
-    await this.page.click(`button[role="option"]:has-text("${agentPolicy}Agents: 0")`);
+    await this.page.click(`button[role="option"]:has-text("${agentPolicy}")`);
     if (tags?.length) {
       await this.page.click('.euiComboBox__inputWrap');
       for (const tag of tags) {
