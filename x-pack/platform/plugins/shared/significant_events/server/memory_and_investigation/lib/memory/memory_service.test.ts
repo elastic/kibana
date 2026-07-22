@@ -757,6 +757,61 @@ describe('MemoryServiceImpl', () => {
       expect(logger.debug).not.toHaveBeenCalled();
     });
 
+    it('resolves a mixed batch (id, name, unresolved) and preserves input order', async () => {
+      useIncrementingUuids();
+      const { service } = createService();
+
+      const alpha = await service.create({
+        name: 'alpha-page',
+        title: 'Alpha',
+        content: 'a',
+        user,
+      });
+      const beta = await service.create({
+        name: 'beta-page',
+        title: 'Beta',
+        content: 'b',
+        user,
+      });
+
+      // Order: name (beta), unresolved, id (alpha) — expect beta.id, unresolved, alpha.id.
+      const source = await service.create({
+        name: 'source-page',
+        title: 'Source',
+        content: 'mixed references',
+        references: ['beta-page', 'not-a-page', alpha.id],
+        user,
+      });
+
+      await expect(service.get({ id: source.id })).resolves.toMatchObject({
+        references: [beta.id, 'not-a-page', alpha.id],
+      });
+    });
+
+    it('de-duplicates a page referenced by both its id and its name', async () => {
+      useIncrementingUuids();
+      const { service } = createService();
+
+      const target = await service.create({
+        name: 'target-page',
+        title: 'Target',
+        content: 'target',
+        user,
+      });
+
+      const source = await service.create({
+        name: 'source-page',
+        title: 'Source',
+        content: 'references the same page twice',
+        references: [target.id, 'target-page'],
+        user,
+      });
+
+      await expect(service.get({ id: source.id })).resolves.toMatchObject({
+        references: [target.id],
+      });
+    });
+
     it('issues exactly one normalization lookup regardless of reference count (INV-006)', async () => {
       useIncrementingUuids();
       const { service, esClient } = createService();
