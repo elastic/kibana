@@ -253,6 +253,21 @@ apiTest.describe('Upsert action policy API', { tag: '@local-stateful-classic' },
     expect(response).toHaveStatusCode(400);
   });
 
+  apiTest(
+    'validation: rejects body with unknown top-level keys (strict schema)',
+    async ({ apiClient }) => {
+      const response = await apiClient.put(getActionPolicyUrl('upsert-unknown-field'), {
+        headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
+        body: {
+          ...buildCreateActionPolicyData(),
+          unknownField: 'x',
+        },
+      });
+
+      expect(response).toHaveStatusCode(400);
+    }
+  );
+
   apiTest('validation: rejects strategy/groupingMode combo mismatch', async ({ apiClient }) => {
     const response = await apiClient.put(getActionPolicyUrl('upsert-bad-combo'), {
       headers: { ...testData.COMMON_HEADERS, ...writerHeaders },

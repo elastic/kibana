@@ -7,6 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * Migration recommendation: MIGRATE TO SCOUT - this test checks the URL state handling which is a browser-based feature.
+ */
+
 // Serverless test (remove during Scout migration): x-pack/platform/test/serverless/functional/test_suites/discover/group5/_url_state.ts
 
 import expect from '@kbn/expect';

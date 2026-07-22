@@ -4,12 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
-import { type AgentName } from '@kbn/apm-types';
-import { environmentRt } from '@kbn/apm-types';
+import { z } from '@kbn/zod/v4';
+import { type AgentName, environmentSchema } from '@kbn/apm-types';
 import type { TRANSACTION_NAME, SERVICE_NAME } from '@kbn/apm-types';
 import { defineRoute } from '../types';
-import { kueryRt, rangeRt, probabilityRt } from '../../default_api_types';
+import { kuerySchema, rangeSchema, probabilitySchema } from '../../default_api_types';
 
 export type BucketKey = Record<typeof TRANSACTION_NAME | typeof SERVICE_NAME, string>;
 
@@ -28,7 +27,7 @@ export interface TopTracesPrimaryStatsResponse {
 
 export const tracesRoute = defineRoute<TopTracesPrimaryStatsResponse>()({
   endpoint: 'GET /internal/apm/traces',
-  params: t.type({
-    query: t.intersection([environmentRt, kueryRt, rangeRt, probabilityRt]),
+  params: z.object({
+    query: environmentSchema.merge(kuerySchema).merge(rangeSchema).merge(probabilitySchema),
   }),
 });

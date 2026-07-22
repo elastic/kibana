@@ -171,22 +171,11 @@ Several fields are still written to documents (preserved in `_source` for forens
 
 If a future consumer needs to filter or sort on any of these, add them back to the mapping (no document-shape change needed since they are still being written to `_source`).
 
-### Index Lifecycle Management (ILM)
+### Retention
 
-The data stream is linked to a managed ILM policy named:
+`.kibana_change_history` is enrolled in data stream lifecycle with `enabled: true` and no `data_retention`. Change history documents are kept indefinitely by default.
 
-```
-.kibana-change-history-ilm-policy
-```
-
-The default policy ships with a single `hot` phase and no actions — change history documents are kept indefinitely with no automatic rollover or deletion. The policy is installed only when it does not already exist, so cluster admins can customize it in place without their changes being overwritten on the next Kibana startup.
-
-To adjust retention or add a rollover strategy, edit the policy via:
-
-- the Kibana UI: **Stack Management → Index Lifecycle Policies → `.kibana-change-history-ilm-policy`**, or
-- the Elasticsearch API: `PUT _ilm/policy/.kibana-change-history-ilm-policy`.
-
-Edits take effect on existing backing indices on the next ILM poll.
+Cluster admins can add retention later via **Stack Management → Index Management → Data Streams** on both stateful and serverless deployments.
 
 ### Dependencies
 

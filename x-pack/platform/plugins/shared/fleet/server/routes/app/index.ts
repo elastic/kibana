@@ -10,6 +10,7 @@ import path from 'path';
 import type { RequestHandler } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
+import type { GetSpaceResult } from '@kbn/spaces-plugin/common';
 
 import type { ExperimentalFeatures } from '../../../common/experimental_features';
 import type { FleetAuthzRouter } from '../../services/security';
@@ -120,6 +121,27 @@ export const generateServiceTokenHandler: RequestHandler<
   }
 };
 
+/**
+ * The synthetic "all spaces" (`*`) entry appended to the agent-policy spaces
+ * list. It is modeled as a distinct type rather than a {@link GetSpaceResult}
+ * so the `*` sentinel never lives inside a real space's `id` — a prerequisite
+ * for branding `Space.id` as a nominal `SpaceId`
+ * (see https://github.com/elastic/kibana-team/issues/3680).
+ */
+interface AllSpacesEntry {
+  id: typeof ALL_SPACES_ID;
+  name: string;
+  disabledFeatures: string[];
+  color?: string;
+}
+
+const createAllSpacesEntry = (): AllSpacesEntry => ({
+  id: ALL_SPACES_ID,
+  name: 'All spaces',
+  disabledFeatures: [],
+  color: '',
+});
+
 export const getAgentPoliciesSpacesHandler: FleetRequestHandler<
   null,
   null,
@@ -128,24 +150,19 @@ export const getAgentPoliciesSpacesHandler: FleetRequestHandler<
   const spaces = await (await context.fleet).getAllSpaces();
 
   const security = appContextService.getSecurity();
-  const spaceIds = [...spaces.map(({ id }) => id), '*'];
+  const spaceIds = [...spaces.map(({ id }) => id), ALL_SPACES_ID];
   const res = await security.authz.checkPrivilegesWithRequest(request).atSpaces(spaceIds, {
     kibana: [security.authz.actions.api.get(`fleet-agent-policies-all`)],
   });
 
-  const authorizedSpaces = spaces.filter(
+  const authorizedSpaces: Array<GetSpaceResult | AllSpacesEntry> = spaces.filter(
     (space) =>
       res.privileges.kibana.find((privilege) => privilege.resource === space.id)?.authorized ??
       false
   );
 
   if (res.hasAllRequested) {
-    authorizedSpaces.push({
-      id: ALL_SPACES_ID,
-      name: 'All spaces',
-      disabledFeatures: [],
-      color: '',
-    });
+    authorizedSpaces.push(createAllSpacesEntry());
   }
 
   return response.ok({

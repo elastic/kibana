@@ -15,7 +15,10 @@ import {
   type ToolHandlerResult,
 } from '@kbn/agent-builder-server';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
-import { buildAgentBuilderTracesIndexPattern } from '@kbn/agent-builder-plugin/common/traces';
+import {
+  buildAgentBuilderTracesIndexPattern,
+  buildAgentBuilderTraceLogsIndexPattern,
+} from '@kbn/agent-builder-plugin/common/traces';
 
 export const AGENT_BUILDER_TRACES_ESQL_INLINE_TOOL_ID = 'agent-builder-traces.generate_esql';
 
@@ -26,11 +29,17 @@ const tracesEsqlSchema = z.object({
     .describe(
       'Natural language question about Agent Builder OTel traces (token usage, latency, tool calls, errors, etc.).'
     ),
+  dataSource: z
+    .enum(['traces', 'logs'])
+    .describe(
+      'Which index to query: "traces" for spans (tokens, latency, tool calls, errors) or "logs" for span events (user prompts, LLM responses, system prompts, tool results).'
+    ),
 });
 
-const TRACES_QUERY_RULES = `
-This is a set of rules that you must follow strictly when generating ES|QL for Agent Builder traces:
-* Always query the provided traces index exactly — do not use a traces-agent_builder.otel-* wildcard.
+const buildTracesQueryRules = (tracesIndex: string) =>
+  `
+This is a set of rules that you must follow strictly when generating ES|QL for Agent Builder trace spans:
+* Use ONLY this index: ${tracesIndex} — do not use a traces-agent_builder.otel-* wildcard or query any other index.
 * Always constrain the time range with @timestamp to the window the user asked about (default to the last 24 hours when they do not specify one).
 * LLM / token usage spans: span.name LIKE "chat *"
 * Tool call spans: span.name LIKE "execute_tool *"
@@ -40,23 +49,46 @@ This is a set of rules that you must follow strictly when generating ES|QL for A
 * Model: attributes.gen_ai.request.model
 * Provider: attributes.gen_ai.provider.name (do not use attributes.gen_ai.system)
 * Agent id: attributes.gen_ai.agent.id
+* Conversation id: attributes.gen_ai.conversation.id
 * duration is in nanoseconds — divide by 1000000000.0 for seconds
 * status.code == "Error" marks failed spans
 * For percentage calculations, multiply by 100.0 before dividing (e.g. ROUND((total - errors) * 100.0 / total, 2)) to avoid integer division
-* Prefer compact STATS aggregations over returning raw spans
+* Prefer compact STATS aggregations over returning raw spans unless the user asked for individual span details
+`.trim();
+
+const buildLogsQueryRules = (traceLogsIndex: string) =>
+  `
+This is a set of rules that you must follow strictly when generating ES|QL for Agent Builder span-event logs:
+* Use ONLY this index: ${traceLogsIndex} — do not use a logs-agent_builder.otel-* wildcard or query any other index.
+* Always constrain the time range with @timestamp to the window the user asked about (default to the last 24 hours when they do not specify one).
+* Message content (user prompts, LLM responses, system prompts, tool results) is stored as OTel span events in this logs index.
+* User prompt events: event_name == "gen_ai.user.message" — prompt text is in attributes.content (requires agentBuilder:tracing:includeUserPrompts).
+* LLM response events: event_name IN ("gen_ai.assistant.message", "gen_ai.choice") — requires agentBuilder:tracing:includeLlmResponses.
+* System prompt events: event_name == "gen_ai.system.message" — requires agentBuilder:tracing:includeSystemPrompt.
+* Tool result events: event_name == "gen_ai.tool.message" — requires agentBuilder:tracing:includeToolDetails.
+* Span-event log documents link to parent spans via trace_id and span_id.
+* Prefer compact STATS aggregations over returning raw messages unless the user asked for message text
 `.trim();
 
 export const createTracesEsqlTool = (): BuiltinSkillBoundedTool<typeof tracesEsqlSchema> => ({
   id: AGENT_BUILDER_TRACES_ESQL_INLINE_TOOL_ID,
   type: ToolType.builtin,
   description:
-    'Generate and execute ES|QL against the current space Agent Builder OTel traces index. ' +
-    'Use this for all Agent Builder trace questions — it scopes queries to the active Kibana space automatically.',
+    'Generate and execute ES|QL against the current space Agent Builder OTel traces or logs index. ' +
+    'Pass dataSource "traces" for span telemetry or "logs" for message content. ' +
+    'Scopes queries to the active Kibana space automatically.',
   schema: tracesEsqlSchema,
   confirmation: { askUser: 'never' },
-  handler: async ({ prompt }, context) => {
+  handler: async ({ prompt, dataSource }, context) => {
     const { esClient, events, modelProvider, logger, spaceId } = context;
     const tracesIndex = buildAgentBuilderTracesIndexPattern(spaceId);
+    const traceLogsIndex = buildAgentBuilderTraceLogsIndexPattern(spaceId);
+
+    const index = dataSource === 'logs' ? traceLogsIndex : tracesIndex;
+    const additionalContext =
+      dataSource === 'logs'
+        ? buildLogsQueryRules(traceLogsIndex)
+        : buildTracesQueryRules(tracesIndex);
 
     try {
       const model = await modelProvider.getDefaultModel();
@@ -66,8 +98,8 @@ export const createTracesEsqlTool = (): BuiltinSkillBoundedTool<typeof tracesEsq
         events,
         nlQuery: prompt,
         esClient: esClient.asCurrentUser,
-        index: tracesIndex,
-        additionalContext: TRACES_QUERY_RULES,
+        index,
+        additionalContext,
       });
 
       if (esqlResponse.error) {
@@ -85,7 +117,10 @@ export const createTracesEsqlTool = (): BuiltinSkillBoundedTool<typeof tracesEsq
           tool_result_id: getToolResultId(),
           type: ToolResultType.other,
           data: {
-            message: `Agent Builder traces index for this space: ${tracesIndex}`,
+            message:
+              dataSource === 'logs'
+                ? `Agent Builder span-event logs index for this space: ${traceLogsIndex}.`
+                : `Agent Builder traces index for this space: ${tracesIndex}.`,
           },
         },
       ];

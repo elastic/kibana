@@ -35,6 +35,7 @@ import {
   type EntityAttachmentDescriptor,
 } from './entity_attachment_utils';
 import { createToolTelemetryTracker } from './tool_telemetry_tracker';
+import { fetchRiskScoreGrounding } from './risk_score_grounding';
 
 const ENTITY_STORE_KEEP_FIELDS = [
   '@timestamp',
@@ -746,12 +747,21 @@ export const searchEntitiesTool = (
       try {
         const normalized = normalizeParams(params, logger);
 
+        const [, { entityStore }] = await core.getStartServices();
         const client = esClient.asCurrentUser;
         const entityIndex = getEntitiesAlias(ENTITY_LATEST, spaceId);
         const entitySnapshotIndex = getHistorySnapshotIndexPattern(spaceId);
-        const snapshotIndexExists = await client.indices.exists({
-          index: entitySnapshotIndex,
-        });
+
+        const [snapshotIndexExists, grounding] = await Promise.all([
+          client.indices.exists({ index: entitySnapshotIndex }),
+          fetchRiskScoreGrounding({
+            entityStore,
+            namespace: spaceId,
+            logger,
+          }),
+        ]);
+        const groundingResult = grounding ? [grounding] : [];
+
         const query = buildQuery(
           normalized,
           entityIndex,
@@ -770,6 +780,7 @@ export const searchEntitiesTool = (
                   message: 'No entities found matching the specified criteria.',
                 },
               },
+              ...groundingResult,
             ],
           };
         }
@@ -790,7 +801,7 @@ export const searchEntitiesTool = (
 
         telemetryTracker.recordResultCount(values.length);
         return {
-          results: [...esqlResultEntries, ...attachmentSideEffectResults],
+          results: [...esqlResultEntries, ...attachmentSideEffectResults, ...groundingResult],
         };
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Unknown error';

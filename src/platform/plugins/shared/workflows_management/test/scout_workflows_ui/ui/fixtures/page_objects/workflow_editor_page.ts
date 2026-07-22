@@ -267,7 +267,8 @@ export class WorkflowEditorPage {
   }
 
   /**
-   * Wait for the test bridge to be available (set by useAgentBuilderIntegration).
+   * Wait for the test bridge to be available (set by useAgentBuilderIntegration
+   * when experimental features are enabled and embeddable chat access resolves).
    */
   async waitForTestBridge(): Promise<void> {
     await this.page.waitForFunction(
@@ -303,7 +304,7 @@ export class WorkflowEditorPage {
    * Run the workflow and confirm if there are unsaved changes
    */
   async runWorkflowWithUnsavedChanges() {
-    await this.runButton.click();
+    await this.clickRunButton();
     await this.page.testSubj.waitForSelector('runWorkflowWithUnsavedChangesConfirmationModal', {
       state: 'visible',
     });

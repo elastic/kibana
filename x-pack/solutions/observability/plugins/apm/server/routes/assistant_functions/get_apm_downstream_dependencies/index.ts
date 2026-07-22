@@ -5,7 +5,7 @@
  * 2.0.
  */
 import datemath from '@elastic/datemath';
-import type * as t from 'io-ts';
+import type { z } from '@kbn/zod/v4';
 import { termQuery } from '@kbn/observability-plugin/server';
 import type { downstreamDependenciesRouteRt } from '@kbn/apm-types';
 import { type APMDownstreamDependency } from '@kbn/apm-types';
@@ -24,7 +24,7 @@ export async function getApmDownstreamDependencies({
   apmEventClient,
   randomSampler,
 }: {
-  arguments: t.TypeOf<typeof downstreamDependenciesRouteRt>;
+  arguments: z.infer<typeof downstreamDependenciesRouteRt>;
   apmEventClient: APMEventClient;
   randomSampler: RandomSampler;
 }): Promise<APMDownstreamDependency[]> {

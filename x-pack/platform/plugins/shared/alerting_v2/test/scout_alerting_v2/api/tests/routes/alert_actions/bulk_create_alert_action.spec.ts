@@ -28,12 +28,12 @@ apiTest.describe('Bulk create alert actions API', { tag: '@local-stateful-classi
 
   apiTest.beforeEach(async ({ apiServices }) => {
     await apiServices.alertingV2.ruleEvents.cleanUp();
-    await apiServices.alertingV2.alertActions.cleanUp();
+    await apiServices.alertingV2.alertActionsEvents.cleanUp();
   });
 
   apiTest.afterAll(async ({ apiServices }) => {
     await apiServices.alertingV2.ruleEvents.cleanUp();
-    await apiServices.alertingV2.alertActions.cleanUp();
+    await apiServices.alertingV2.alertActionsEvents.cleanUp();
   });
 
   apiTest(
@@ -59,7 +59,7 @@ apiTest.describe('Bulk create alert actions API', { tag: '@local-stateful-classi
       expect(response).toHaveStatusCode(200);
       expect(response.body).toStrictEqual({ processed: 1, total: 1 });
 
-      const actions = await apiServices.alertingV2.alertActions.find({
+      const actions = await apiServices.alertingV2.alertActionsEvents.find({
         ruleId,
         actionTypes: ['ack'],
       });
@@ -112,7 +112,7 @@ apiTest.describe('Bulk create alert actions API', { tag: '@local-stateful-classi
       expect(response).toHaveStatusCode(200);
       expect(response.body).toStrictEqual({ processed: 3, total: 3 });
 
-      const actions = await apiServices.alertingV2.alertActions.find({
+      const actions = await apiServices.alertingV2.alertActionsEvents.find({
         ruleId,
         actionTypes: ['tag', 'snooze', 'ack'],
       });
@@ -164,7 +164,7 @@ apiTest.describe('Bulk create alert actions API', { tag: '@local-stateful-classi
       expect(response).toHaveStatusCode(200);
       expect(response.body).toStrictEqual({ processed: 1, total: 2 });
 
-      const actions = await apiServices.alertingV2.alertActions.find({
+      const actions = await apiServices.alertingV2.alertActionsEvents.find({
         ruleId,
         actionTypes: ['ack'],
       });
@@ -197,7 +197,7 @@ apiTest.describe('Bulk create alert actions API', { tag: '@local-stateful-classi
       expect(response).toHaveStatusCode(200);
       expect(response.body).toStrictEqual({ processed: 0, total: 2 });
 
-      const actions = await apiServices.alertingV2.alertActions.find({
+      const actions = await apiServices.alertingV2.alertActionsEvents.find({
         ruleId,
         actionTypes: ['ack', 'snooze'],
       });
@@ -231,7 +231,7 @@ apiTest.describe('Bulk create alert actions API', { tag: '@local-stateful-classi
       expect(response).toHaveStatusCode(200);
       expect(response.body).toStrictEqual({ processed: 1, total: 1 });
 
-      const actions = await apiServices.alertingV2.alertActions.find({
+      const actions = await apiServices.alertingV2.alertActionsEvents.find({
         ruleId,
         actionTypes: ['deactivate'],
       });
@@ -287,7 +287,7 @@ apiTest.describe('Bulk create alert actions API', { tag: '@local-stateful-classi
       expect(response).toHaveStatusCode(200);
       expect(response.body).toStrictEqual({ processed: 1, total: 1 });
 
-      const actions = await apiServices.alertingV2.alertActions.find({
+      const actions = await apiServices.alertingV2.alertActionsEvents.find({
         ruleId,
         actionTypes: ['activate'],
       });
@@ -355,7 +355,7 @@ apiTest.describe('Bulk create alert actions API', { tag: '@local-stateful-classi
       expect(response).toHaveStatusCode(200);
       expect(response.body).toStrictEqual({ processed: 1, total: 2 });
 
-      const actions = await apiServices.alertingV2.alertActions.find({
+      const actions = await apiServices.alertingV2.alertActionsEvents.find({
         ruleId,
         actionTypes: ['deactivate'],
       });
@@ -395,7 +395,7 @@ apiTest.describe('Bulk create alert actions API', { tag: '@local-stateful-classi
       expect(response).toHaveStatusCode(200);
       expect(response.body).toStrictEqual({ processed: 0, total: 1 });
 
-      const actions = await apiServices.alertingV2.alertActions.find({
+      const actions = await apiServices.alertingV2.alertActionsEvents.find({
         ruleId,
         actionTypes: ['activate'],
       });
@@ -494,6 +494,25 @@ apiTest.describe('Bulk create alert actions API', { tag: '@local-stateful-classi
 
     expect(response).toHaveStatusCode(400);
   });
+
+  apiTest(
+    'schema: rejects an item with unknown body fields (strict mode) with 400',
+    async ({ apiClient }) => {
+      const response = await apiClient.post(BULK_ALERT_ACTION_URL, {
+        headers: writerHeaders,
+        body: [
+          {
+            group_hash: 'any-group',
+            action_type: 'ack',
+            episode_id: 'some-episode',
+            unknownField: 'x',
+          },
+        ],
+      });
+
+      expect(response).toHaveStatusCode(400);
+    }
+  );
 
   apiTest(
     'authorization: returns 403 for a user with read-only alerting_v2 privileges',

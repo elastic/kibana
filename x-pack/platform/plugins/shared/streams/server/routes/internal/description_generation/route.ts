@@ -16,7 +16,6 @@ import {
 import { taskActionSchema } from '../../../lib/tasks/task_action_schema';
 import { resolveConnectorId } from '../../utils/resolve_connector_id';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
-import { assertSignificantEventsAccess } from '../../utils/assert_significant_events_access';
 import { createServerRoute } from '../../create_server_route';
 import { handleTaskAction } from '../../utils/task_helpers';
 
@@ -47,13 +46,10 @@ export const descriptionGenerationStatusRoute = createServerRoute({
     params,
     request,
     getScopedClients,
-    server,
   }): Promise<DescriptionGenerationTaskResult> => {
-    const { streamsClient, licensing, uiSettingsClient, taskClient } = await getScopedClients({
+    const { streamsClient, taskClient } = await getScopedClients({
       request,
     });
-
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
     const {
       path: { name },
@@ -98,14 +94,11 @@ export const descriptionGenerationTaskRoute = createServerRoute({
     params,
     request,
     getScopedClients,
-    server,
     logger,
   }): Promise<DescriptionGenerationTaskResult> => {
-    const { streamsClient, licensing, uiSettingsClient, taskClient } = await getScopedClients({
+    const { streamsClient, uiSettingsClient, taskClient } = await getScopedClients({
       request,
     });
-
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
     const {
       path: { name },

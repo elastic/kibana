@@ -13,6 +13,7 @@ import {
   MetricsExperienceStateContext,
   MetricsExperienceStateProvider,
 } from './metrics_experience_state_context';
+import { METRICS_SORT_BY, METRICS_SORT_DIRECTION } from '../../../../../common/constants';
 
 jest.mock('../../../../../restorable_state', () => {
   const { useState, useCallback } = jest.requireActual('react');
@@ -170,6 +171,123 @@ describe('MetricsExperienceStateProvider', () => {
         result.current.onToggleFullscreen();
       });
       expect(result.current.isFullscreen).toBe(false);
+    });
+  });
+
+  describe('gridSettings', () => {
+    it('defaults to METRICS_GRID_SETTINGS_DEFAULTS when not provided', () => {
+      const { result } = renderHook(() => useMetricsExperienceState(), { wrapper });
+
+      expect(result.current.gridSettings).toEqual({
+        counterAggregation: 'sum',
+        gaugeAggregation: 'avg',
+        histogramPercentile: 'p95',
+      });
+    });
+
+    it('uses the provided gridSettings instead of the defaults', () => {
+      const customWrapper = ({ children }: { children: React.ReactNode }) => (
+        <MetricsExperienceStateProvider
+          profileId="test-profile"
+          gridSettings={{
+            counterAggregation: 'max',
+            gaugeAggregation: 'min',
+            histogramPercentile: 'p50',
+          }}
+        >
+          {children}
+        </MetricsExperienceStateProvider>
+      );
+      const { result } = renderHook(() => useMetricsExperienceState(), { wrapper: customWrapper });
+
+      expect(result.current.gridSettings).toEqual({
+        counterAggregation: 'max',
+        gaugeAggregation: 'min',
+        histogramPercentile: 'p50',
+      });
+    });
+
+    it('forwards updates to the onGridSettingsChange prop', () => {
+      const onGridSettingsChange = jest.fn();
+      const customWrapper = ({ children }: { children: React.ReactNode }) => (
+        <MetricsExperienceStateProvider
+          profileId="test-profile"
+          onGridSettingsChange={onGridSettingsChange}
+        >
+          {children}
+        </MetricsExperienceStateProvider>
+      );
+      const { result } = renderHook(() => useMetricsExperienceState(), { wrapper: customWrapper });
+
+      act(() => {
+        result.current.onGridSettingsChange({ counterAggregation: 'max' });
+      });
+
+      expect(onGridSettingsChange).toHaveBeenCalledWith({ counterAggregation: 'max' });
+    });
+
+    it('does not throw when onGridSettingsChange is not provided', () => {
+      const { result } = renderHook(() => useMetricsExperienceState(), { wrapper });
+
+      expect(() => {
+        act(() => {
+          result.current.onGridSettingsChange({ counterAggregation: 'max' });
+        });
+      }).not.toThrow();
+    });
+  });
+
+  describe('onMetricsSortChange', () => {
+    it('updates metricsSort', () => {
+      const { result } = renderHook(() => useMetricsExperienceState(), { wrapper });
+
+      // Use other option when become available
+      act(() => {
+        result.current.onMetricsSortChange([
+          METRICS_SORT_BY.alphabetically,
+          METRICS_SORT_DIRECTION.desc,
+        ]);
+      });
+
+      expect(result.current.metricsSort).toEqual([
+        METRICS_SORT_BY.alphabetically,
+        METRICS_SORT_DIRECTION.desc,
+      ]);
+    });
+
+    it('resets currentPage to 0 when the sort changes', () => {
+      const { result } = renderHook(() => useMetricsExperienceState(), { wrapper });
+
+      act(() => {
+        result.current.onPageChange(2);
+      });
+      expect(result.current.currentPage).toBe(2);
+
+      act(() => {
+        result.current.onMetricsSortChange([
+          METRICS_SORT_BY.alphabetically,
+          METRICS_SORT_DIRECTION.desc,
+        ]);
+      });
+      expect(result.current.currentPage).toBe(0);
+    });
+
+    it('does not reset currentPage when the sort is unchanged', () => {
+      const { result } = renderHook(() => useMetricsExperienceState(), { wrapper });
+
+      act(() => {
+        result.current.onPageChange(3);
+      });
+      expect(result.current.currentPage).toBe(3);
+
+      // Re-apply the same (default) sort
+      act(() => {
+        result.current.onMetricsSortChange([
+          METRICS_SORT_BY.alphabetically,
+          METRICS_SORT_DIRECTION.asc,
+        ]);
+      });
+      expect(result.current.currentPage).toBe(3);
     });
   });
 });

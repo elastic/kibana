@@ -18,9 +18,11 @@ import type { AppHeaderBadge, AppHeaderMenu, AppHeaderMetadataItems } from '@kbn
 import { RULE_KIND_LABELS } from '@kbn/alerting-v2-constants';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { css } from '@emotion/react';
+import { useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
+import { UserCapabilities } from '../../services/user_capabilities';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useDeleteRule } from '../../hooks/use_delete_rule';
 import { useComposeDiscoverFlyout } from '../../hooks/use_compose_discover_flyout';
@@ -129,6 +131,8 @@ export const RuleDetailPage: React.FunctionComponent = () => {
   useBreadcrumbs('rule_details', { ruleName: rule.metadata?.name });
   const { euiTheme } = useEuiTheme();
 
+  const canWrite = useService(UserCapabilities).canWrite('rules');
+
   const smallMediaQuery = useEuiMaxBreakpoint('s');
   const largeMediaQuery = useEuiMinBreakpoint('m');
 
@@ -220,8 +224,8 @@ export const RuleDetailPage: React.FunctionComponent = () => {
           }),
         }}
         badges={badges}
-        menu={menu}
-        padding="none"
+        menu={canWrite ? menu : undefined}
+        spacing="flush"
         sticky={false}
         metadata={metadata}
       />

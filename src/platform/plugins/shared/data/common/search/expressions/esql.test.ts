@@ -218,6 +218,19 @@ describe('getEsqlFn', () => {
     expect(result?.columns?.[0]?.meta?.esMeta).toBeUndefined();
   });
 
+  it('requests column_metadata from Elasticsearch', async () => {
+    const mockSearchService = getMockSearchService([{ name: 'host', type: 'keyword' }]);
+
+    await createEsqlFn(mockSearchService).fn(
+      null,
+      { query: 'FROM index' },
+      createExecutionContext()
+    );
+
+    const options = mockSearchService.esql.mock.calls[0][1];
+    expect(options?.columnMetadata).toBe(true);
+  });
+
   it('resolves meta.sourceParams.sourceField for STATS BY alias = column', async () => {
     const mockSearchService = getMockSearchService([
       { name: 'cnt', type: 'long' },
@@ -236,5 +249,28 @@ describe('getEsqlFn', () => {
     expect(
       result?.columns?.find((col) => col.name === 'cnt')?.meta?.sourceParams?.sourceField
     ).toBe('cnt');
+  });
+
+  describe('resolves meta.sourceParams.appliedTimeRange for date columns when an input time range is provided', () => {
+    it('sets appliedTimeRange for date columns when an input time range is provided', async () => {
+      const mockSearchService = getMockSearchService([{ name: '@timestamp', type: 'date' }]);
+
+      const input: KibanaContext = {
+        type: 'kibana_context',
+        timeRange: { from: '2026-01-01T00:00:00.000Z', to: '2026-01-02T00:00:00.000Z' },
+      };
+
+      const result = await createEsqlFn(mockSearchService).fn(
+        input,
+        { query: 'FROM index' },
+        createExecutionContext()
+      );
+
+      const sourceParams = result?.columns?.[0]?.meta?.sourceParams;
+      expect(sourceParams).toHaveProperty('appliedTimeRange', {
+        from: '2026-01-01T00:00:00.000Z',
+        to: '2026-01-02T00:00:00.000Z',
+      });
+    });
   });
 });

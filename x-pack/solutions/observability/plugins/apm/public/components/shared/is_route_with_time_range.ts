@@ -5,64 +5,48 @@
  * 2.0.
  */
 import type { Location } from 'history';
-import type * as t from 'io-ts';
+import { isZod, z } from '@kbn/zod/v4';
 import type { ApmRouter } from '../routing/apm_route_config';
 
-// Structural view over the io-ts codecs we introspect (all codecs carry `_tag`).
-interface TaggedCodec {
-  _tag?: string;
-  props?: t.Props;
-  types?: t.Mixed[];
-  type?: t.Mixed;
+// A key is optional when its schema is `ZodOptional` (the zod mirror of io-ts's
+// `t.partial`). This is structural, not value-based: fields like
+// `BooleanFromString.default(false)` accept `undefined` at runtime but are still
+// declared (required) keys, exactly as `toBooleanRt` was inside `t.type`.
+function isOptionalField(schema: z.ZodType): boolean {
+  return schema instanceof z.ZodOptional;
 }
 
-// Collects the keys a codec declares as required (`t.partial`/unions are ignored).
-function collectRequiredKeys(codec: t.Mixed, keys: Set<string>): void {
-  const tagged = codec as TaggedCodec;
-  switch (tagged._tag) {
-    case 'InterfaceType':
-      Object.keys(tagged.props ?? {}).forEach((key) => keys.add(key));
-      break;
-    case 'IntersectionType':
-      (tagged.types ?? []).forEach((member) => collectRequiredKeys(member, keys));
-      break;
-    case 'ExactType':
-    case 'RefinementType':
-      if (tagged.type) {
-        collectRequiredKeys(tagged.type, keys);
-      }
-      break;
-    default:
-      break;
+// Returns the object shape of a zod schema (ZodObject / merged object), or
+// undefined if it isn't object-like. zod flattens `.merge()` into a single
+// object shape, so no intersection walk is needed (unlike the io-ts version).
+function getObjectShape(schema: z.ZodType): Record<string, z.ZodType> | undefined {
+  const shape = (schema as unknown as { shape?: Record<string, z.ZodType> }).shape;
+  return shape && typeof shape === 'object' ? shape : undefined;
+}
+
+// Collects the query keys a route's params declare as required. A `query` in an
+// optional position (io-ts `t.partial`, zod `.optional()`) declares nothing.
+function collectRequiredQueryKeys(params: z.ZodType, keys: Set<string>): void {
+  const shape = getObjectShape(params);
+  const querySchema = shape?.query;
+  if (!querySchema || isOptionalField(querySchema)) {
+    return;
   }
-}
 
-// Finds the codecs assigned to `query` in a required position (`t.partial` query
-// is optional and ignored).
-function collectRequiredQueryCodecs(codec: t.Mixed, out: t.Mixed[]): void {
-  const tagged = codec as TaggedCodec;
-  switch (tagged._tag) {
-    case 'InterfaceType':
-      if (tagged.props && 'query' in tagged.props) {
-        out.push(tagged.props.query);
-      }
-      break;
-    case 'IntersectionType':
-      (tagged.types ?? []).forEach((member) => collectRequiredQueryCodecs(member, out));
-      break;
-    case 'ExactType':
-    case 'RefinementType':
-      if (tagged.type) {
-        collectRequiredQueryCodecs(tagged.type, out);
-      }
-      break;
-    default:
-      break;
+  const queryShape = getObjectShape(querySchema);
+  if (!queryShape) {
+    return;
+  }
+
+  for (const [key, fieldSchema] of Object.entries(queryShape)) {
+    if (!isOptionalField(fieldSchema)) {
+      keys.add(key);
+    }
   }
 }
 
 interface RouteWithParams {
-  params?: t.Mixed;
+  params?: unknown;
 }
 
 // Derives the query params required by any route matching the current location,
@@ -87,12 +71,9 @@ function getRequiredQueryKeys({
   }
 
   for (const route of matchingRoutes) {
-    if (!route.params) {
-      continue;
+    if (route.params && isZod(route.params)) {
+      collectRequiredQueryKeys(route.params, keys);
     }
-    const queryCodecs: t.Mixed[] = [];
-    collectRequiredQueryCodecs(route.params, queryCodecs);
-    queryCodecs.forEach((queryCodec) => collectRequiredKeys(queryCodec, keys));
   }
 
   return keys;

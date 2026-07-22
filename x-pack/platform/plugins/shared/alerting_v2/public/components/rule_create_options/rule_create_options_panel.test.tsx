@@ -12,7 +12,7 @@ import { RuleCreateOptionsPanel, getCreateWithAgentTooltipText } from './rule_cr
 
 const onCreateEsqlRule = jest.fn();
 const onCreateWithAgent = jest.fn();
-const onCreateThresholdAlert = jest.fn();
+const onCreateThresholdRule = jest.fn();
 
 const renderPanel = () =>
   render(
@@ -20,7 +20,7 @@ const renderPanel = () =>
       <RuleCreateOptionsPanel
         onCreateEsqlRule={onCreateEsqlRule}
         onCreateWithAgent={onCreateWithAgent}
-        onCreateThresholdAlert={onCreateThresholdAlert}
+        onCreateThresholdRule={onCreateThresholdRule}
       />
     </I18nProvider>
   );
@@ -61,18 +61,18 @@ describe('RuleCreateOptionsPanel', () => {
     expect(screen.queryByText('Start from a rule builder')).not.toBeInTheDocument();
   });
 
-  it('renders the "Threshold Alert" card', () => {
+  it('renders the "Threshold rule" card', () => {
     renderPanel();
 
-    expect(screen.getByText('Threshold Alert')).toBeInTheDocument();
+    expect(screen.getByText('Threshold rule')).toBeInTheDocument();
   });
 
-  it('calls onCreateThresholdAlert when the "Threshold Alert" card is clicked', () => {
+  it('calls onCreateThresholdRule when the "Threshold rule" card is clicked', () => {
     renderPanel();
 
-    fireEvent.click(screen.getByTestId('createThresholdAlertCard'));
+    fireEvent.click(screen.getByTestId('createThresholdRuleCard'));
 
-    expect(onCreateThresholdAlert).toHaveBeenCalledTimes(1);
+    expect(onCreateThresholdRule).toHaveBeenCalledTimes(1);
   });
 
   it('renders the agent card disabled and does not fire onCreateWithAgent when createWithAgentDisabled is set', () => {
@@ -83,7 +83,7 @@ describe('RuleCreateOptionsPanel', () => {
           onCreateWithAgent={onCreateWithAgent}
           createWithAgentDisabled
           createWithAgentTooltipText="Missing privileges"
-          onCreateThresholdAlert={onCreateThresholdAlert}
+          onCreateThresholdRule={onCreateThresholdRule}
         />
       </I18nProvider>
     );
@@ -104,7 +104,7 @@ describe('RuleCreateOptionsPanel', () => {
           onCreateWithAgent={onCreateWithAgent}
           createWithAgentDisabled
           createWithAgentTooltipText="Missing privileges"
-          onCreateThresholdAlert={onCreateThresholdAlert}
+          onCreateThresholdRule={onCreateThresholdRule}
         />
       </I18nProvider>
     );
@@ -123,7 +123,7 @@ describe('RuleCreateOptionsPanel', () => {
           onCreateWithAgent={onCreateWithAgent}
           createWithAgentDisabled
           createWithAgentTooltipText="Missing privileges"
-          onCreateThresholdAlert={onCreateThresholdAlert}
+          onCreateThresholdRule={onCreateThresholdRule}
         />
       </I18nProvider>
     );
@@ -145,7 +145,7 @@ describe('RuleCreateOptionsPanel', () => {
           onCreateEsqlRule={onCreateEsqlRule}
           onCreateWithAgent={onCreateWithAgent}
           createWithAgentDisabled
-          onCreateThresholdAlert={onCreateThresholdAlert}
+          onCreateThresholdRule={onCreateThresholdRule}
         />
       </I18nProvider>
     );
@@ -164,7 +164,7 @@ describe('RuleCreateOptionsPanel', () => {
           onCreateEsqlRule={onCreateEsqlRule}
           onCreateWithAgent={onCreateWithAgent}
           createWithAgentTooltipText="Extra context"
-          onCreateThresholdAlert={onCreateThresholdAlert}
+          onCreateThresholdRule={onCreateThresholdRule}
         />
       </I18nProvider>
     );

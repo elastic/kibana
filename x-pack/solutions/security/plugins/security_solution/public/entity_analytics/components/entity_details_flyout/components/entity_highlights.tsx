@@ -23,11 +23,17 @@ import {
 import { AiButton, AiIcon } from '@kbn/shared-ux-ai-components';
 import { useFetchAnonymizationFields, useMaybeAssistantContext } from '@kbn/elastic-assistant';
 import React, { Suspense, useCallback, useMemo, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { AddConnectorModal } from '@kbn/elastic-assistant/impl/connectorland/add_connector_modal';
 import { useLoadActionTypes } from '@kbn/elastic-assistant/impl/connectorland/use_load_action_types';
 import type { ActionConnector, ActionType } from '@kbn/triggers-actions-ui-plugin/public';
 import { useLoadConnectors } from '@kbn/inference-connectors';
+import type { EntitySummaryStalenessReason } from '@kbn/entity-store/common';
+import {
+  buildEntitySummaryStaleness,
+  computeEntitySummaryStalenessReasons,
+} from '@kbn/entity-store/common/entity_summary';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
 import { useAgentBuilderAvailability } from '../../../../agent_builder/hooks/use_agent_builder_availability';
@@ -36,13 +42,19 @@ import { useStoredAssistantConnectorId } from '../../../../onboarding/components
 import { useSpaceId } from '../../../../common/hooks/use_space_id';
 import { useHasEntityHighlightsLicense } from '../../../../common/hooks/use_has_entity_highlights_license';
 import { useFetchEntityDetailsHighlights } from '../hooks/use_fetch_entity_details_highlights';
+import { useFetchPersistedAiSummary } from '../hooks/use_fetch_persisted_ai_summary';
 import { EntityHighlightsSettings } from './entity_highlights_settings';
 import { EntityHighlightsResult } from './entity_highlights_result';
+import type { Entity } from '../../../../../common/api/entity_analytics';
+import { buildEntitySummaryStalenessEntitySnapshot } from '../../../../flyout/entity_details/shared/entity_store_risk_utils';
+import type { EntityStoreRecord } from '../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
 
 export const EntityHighlightsAccordion: React.FC<{
   entityIdentifier: string;
   entityType: EntityType;
-}> = ({ entityType, entityIdentifier }) => {
+  entityRecord?: Entity | null;
+  refetchEntityRecord?: () => void;
+}> = ({ entityType, entityIdentifier, entityRecord, refetchEntityRecord }) => {
   // Degrade gracefully on surfaces that render outside `AssistantProvider` (e.g. the Agent
   // Builder attachment Canvas). The Elastic Assistant–backed summary cannot work without it.
   const assistantContext = useMaybeAssistantContext();
@@ -94,17 +106,74 @@ export const EntityHighlightsAccordion: React.FC<{
     [setShowAnonymizedValues]
   );
 
+  // Read the persisted summary from the metadata datastream (may be null if never
+  // generated, or if the user lacks metadata read access — see `canRead`). This
+  // loads on flyout open and does not regenerate on close / click-away.
+  const {
+    summary: storedSummary,
+    canRead: canReadPersistedSummary,
+    refetch: refetchPersistedSummary,
+    isLoading: isPersistedSummaryLoading,
+    isFetching: isPersistedSummaryFetching,
+  } = useFetchPersistedAiSummary({
+    entityType,
+    entityIdentifier,
+  });
+
+  // Snapshot of current entity signals — passed to the hook so they are persisted
+  // alongside the summary at generation time for future staleness detection.
+  const entitySnapshot = useMemo(
+    () =>
+      buildEntitySummaryStalenessEntitySnapshot(
+        entityRecord ? (entityRecord as EntityStoreRecord) : null
+      ),
+    [entityRecord]
+  );
+
   const {
     fetchEntityHighlights,
-    isChatLoading,
+    isGeneratingSummary,
     result: assistantResult,
     error,
+    generationBaseline,
   } = useFetchEntityDetailsHighlights({
     connectorId,
     anonymizationFields: anonymizationFields?.data ?? [],
     entityType,
     entityIdentifier,
+    storedSummary,
+    entitySnapshot,
+    refetchEntityRecord,
+    refetchPersistedSummary,
+    // Persist only when the user can read the metadata index, otherwise keep it in-session only
+    persistSummary: canReadPersistedSummary,
   });
+
+  // Staleness check — compare stored snapshot against current entity signals.
+  // This is computed client-side using already-loaded entity data (no extra API call).
+  // NOTE: Per the RFC, this should move to a dedicated server-side endpoint
+  // before GA so all surfaces (Agent Builder, external clients) share the same logic.
+  const stalenessReasons = useMemo((): EntitySummaryStalenessReason[] => {
+    if (!storedSummary) return [];
+
+    // After in-session generation the entity record is not refetched immediately, so
+    // comparing the old persisted snapshot would false-positive. Suppress until live
+    // signals drift from the generation-time baseline.
+    if (generationBaseline) {
+      const driftSinceGeneration = computeEntitySummaryStalenessReasons(
+        {
+          ...storedSummary,
+          staleness: buildEntitySummaryStaleness(generationBaseline),
+        },
+        entitySnapshot
+      );
+      if (driftSinceGeneration.length === 0) {
+        return [];
+      }
+    }
+
+    return computeEntitySummaryStalenessReasons(storedSummary, entitySnapshot);
+  }, [storedSummary, entitySnapshot, generationBaseline]);
 
   const onAddConnectorClick = useCallback(() => {
     setIsConnectorModalVisible(true);
@@ -132,35 +201,41 @@ export const EntityHighlightsAccordion: React.FC<{
     setPopover(false);
   }, []);
 
-  const disabled = useMemo(() => {
+  const canGenerate = useMemo(() => {
     // No `AssistantProvider` in the tree, e.g. Agent Builder attachment Canvas. Highlights
     // relies on assistant context (anonymization fields, shared state), so hide the UI entirely.
     if (!assistantContext) {
-      return true;
-    }
-
-    if (!hasEntityHighlightsLicense) {
-      return true;
+      return false;
     }
 
     // if user does not have access to connectors, we cannot invoke the inference action
     if (!hasConnectorsReadPrivilege) {
-      return true;
+      return false;
     }
 
-    // if user does not have access to assistant or agent builder, disable entity highlights
-    return !(hasAssistantPrivilege || hasAgentBuilderPrivilege);
+    // the user must have access to assistant or agent builder to be able to generate a summary
+    return hasAssistantPrivilege || hasAgentBuilderPrivilege;
   }, [
     assistantContext,
     hasConnectorsReadPrivilege,
     hasAgentBuilderPrivilege,
     hasAssistantPrivilege,
-    hasEntityHighlightsLicense,
   ]);
 
   const isLoading = useMemo(
-    () => isChatLoading || isAnonymizationFieldsLoading || isLoadingConnectors,
-    [isAnonymizationFieldsLoading, isChatLoading, isLoadingConnectors]
+    () =>
+      isGeneratingSummary ||
+      isPersistedSummaryLoading ||
+      // Connector / anonymization loading only matters for generation, not for
+      // displaying an already-persisted summary to a read-only user.
+      (canGenerate && (isAnonymizationFieldsLoading || isLoadingConnectors)),
+    [
+      canGenerate,
+      isAnonymizationFieldsLoading,
+      isGeneratingSummary,
+      isLoadingConnectors,
+      isPersistedSummaryLoading,
+    ]
   );
 
   const [dismissedError, setDismissedError] = useState<Error | null>(null);
@@ -169,7 +244,33 @@ export const EntityHighlightsAccordion: React.FC<{
     [dismissedError, error]
   );
 
-  if (disabled) {
+  const hasAssistantResult = assistantResult != null;
+  // First paint with nothing to show yet — replace the body with a skeleton.
+  const isLoadingInitialSummary = !hasAssistantResult && isPersistedSummaryLoading;
+  // Content is already on screen; keep it mounted and show a thin progress bar
+  // while the persisted summary refetches in the background
+  const isSummaryRefreshing =
+    hasAssistantResult && isPersistedSummaryFetching && !isGeneratingSummary;
+
+  const hasReadablePersistedSummary =
+    canReadPersistedSummary && (storedSummary != null || hasAssistantResult);
+
+  // Shown if the user has access to generate a summary
+  // and there is no summary yet, no error, and nothing is loading
+  const showSummaryEmptyState =
+    canGenerate &&
+    !hasAssistantResult &&
+    !storedSummary &&
+    !isLoadingInitialSummary &&
+    !isGeneratingSummary &&
+    !showErrorBanner;
+
+  if (!hasEntityHighlightsLicense) {
+    return null;
+  }
+
+  // hide section if user cannot generate a summary and there is no stored summary
+  if (!canGenerate && (isPersistedSummaryLoading || !hasReadablePersistedSummary)) {
     return null;
   }
 
@@ -191,19 +292,24 @@ export const EntityHighlightsAccordion: React.FC<{
         }
         data-test-subj="asset-criticality-selector"
         extraAction={
+          canGenerate &&
           (aiConnectors?.length ?? 0) > 0 && (
-            <EntityHighlightsSettings
-              assistantResult={assistantResult}
-              showAnonymizedValues={showAnonymizedValues}
-              onChangeShowAnonymizedValues={onChangeShowAnonymizedValues}
-              setConnectorId={setStoredConnectorId}
-              connectorId={connectorId}
-              connectorName={connectorName}
-              closePopover={closePopover}
-              openPopover={onButtonClick}
-              isLoading={isLoading}
-              isPopoverOpen={isPopoverOpen}
-            />
+            <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EntityHighlightsSettings
+                  assistantResult={assistantResult}
+                  showAnonymizedValues={showAnonymizedValues}
+                  onChangeShowAnonymizedValues={onChangeShowAnonymizedValues}
+                  setConnectorId={setStoredConnectorId}
+                  connectorId={connectorId}
+                  connectorName={connectorName}
+                  closePopover={closePopover}
+                  openPopover={onButtonClick}
+                  isLoading={isLoading}
+                  isPopoverOpen={isPopoverOpen}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
           )
         }
       >
@@ -249,16 +355,21 @@ export const EntityHighlightsAccordion: React.FC<{
             <EuiSpacer size="m" />
           </>
         )}
-        {assistantResult && !isLoading && (
+
+        {hasAssistantResult && !isGeneratingSummary && (
           <EntityHighlightsResult
             assistantResult={assistantResult}
             showAnonymizedValues={showAnonymizedValues}
             generatedAt={assistantResult?.generatedAt ?? null}
+            generatedBy={assistantResult?.generatedBy ?? ''}
+            stalenessReasons={stalenessReasons}
             onRefresh={fetchEntityHighlights}
+            canRegenerate={canGenerate}
+            isRefreshing={isSummaryRefreshing}
           />
         )}
 
-        {isChatLoading && (
+        {isGeneratingSummary && (
           <EuiPanel hasBorder={true}>
             <EuiText size="xs" color="subdued">
               <FormattedMessage
@@ -271,7 +382,20 @@ export const EntityHighlightsAccordion: React.FC<{
           </EuiPanel>
         )}
 
-        {!assistantResult && !isLoading && !showErrorBanner && (
+        {isLoadingInitialSummary && (
+          <EuiPanel hasBorder={true}>
+            <EuiSkeletonText
+              lines={2}
+              size="xs"
+              contentAriaLabel={i18n.translate(
+                'xpack.securitySolution.flyout.entityDetails.highlights.loadingPersistedAriaLabel',
+                { defaultMessage: 'Entity summary' }
+              )}
+            />
+          </EuiPanel>
+        )}
+
+        {showSummaryEmptyState && (
           <EuiPanel hasBorder={true}>
             <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
               <EuiFlexItem grow={4}>

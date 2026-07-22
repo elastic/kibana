@@ -63,6 +63,7 @@ const convertBaseFromEs = (document: Document) => {
     status: document._source.status,
     read: document._source.read,
     access_control: document._source.access_control ?? getDefaultConversationAccessControl(),
+    ...(document._source.origin ? { origin: document._source.origin } : {}),
     ...(document._source.workspace_id ? { workspace_id: document._source.workspace_id } : {}),
   };
 };
@@ -239,6 +240,7 @@ export const toEs = (conversation: Conversation, space: string): ConversationPro
     status: conversation.status,
     read: conversation.read,
     access_control: conversation.access_control ?? getDefaultConversationAccessControl(),
+    ...(conversation.origin ? { origin: conversation.origin } : {}),
     ...(conversation.workspace_id ? { workspace_id: conversation.workspace_id } : {}),
   };
 };
@@ -289,6 +291,7 @@ export const createRequestToEs = ({
     status: conversation.status,
     read: false,
     access_control: conversation.access_control ?? getDefaultConversationAccessControl(),
+    ...(conversation.origin ? { origin: conversation.origin } : {}),
     ...(conversation.workspace_id ? { workspace_id: conversation.workspace_id } : {}),
   };
 };

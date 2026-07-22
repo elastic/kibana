@@ -6,7 +6,6 @@
  */
 
 import {
-  EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIconTip,
@@ -14,7 +13,9 @@ import {
   EuiSkeletonTitle,
   EuiSpacer,
   EuiTitle,
+  useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { ServiceFlyoutTransactionsSection } from '@kbn/apm-ui-shared';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo, useState } from 'react';
@@ -74,7 +75,6 @@ function ServiceFlyoutChartsSection({
   title,
   description,
   charts,
-  columns = 2,
   rangeFrom,
   rangeTo,
   refreshToken,
@@ -83,11 +83,12 @@ function ServiceFlyoutChartsSection({
   title: string;
   description?: string;
   charts: FlyoutLensChartDefinition[];
-  columns?: 2 | 3;
   rangeFrom: string;
   rangeTo: string;
   refreshToken: number;
 }) {
+  const { euiTheme } = useEuiTheme();
+
   return (
     <>
       <EuiFlexGroup
@@ -108,21 +109,26 @@ function ServiceFlyoutChartsSection({
         ) : null}
       </EuiFlexGroup>
       <EuiSpacer size="s" />
-      <EuiFlexGrid columns={columns} responsive={false} gutterSize="m">
+      <div
+        css={css`
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+          gap: ${euiTheme.size.m};
+        `}
+      >
         {charts.map((chart) => (
-          <EuiFlexItem key={chart.id}>
-            <ServiceFlyoutLensChart
-              id={chart.id}
-              title={chart.title}
-              titleAction={chart.titleAction}
-              config={chart.config}
-              rangeFrom={rangeFrom}
-              rangeTo={rangeTo}
-              refreshToken={refreshToken}
-            />
-          </EuiFlexItem>
+          <ServiceFlyoutLensChart
+            key={chart.id}
+            id={chart.id}
+            title={chart.title}
+            titleAction={chart.titleAction}
+            config={chart.config}
+            rangeFrom={rangeFrom}
+            rangeTo={rangeTo}
+            refreshToken={refreshToken}
+          />
         ))}
-      </EuiFlexGrid>
+      </div>
     </>
   );
 }
@@ -193,7 +199,6 @@ export function ServiceFlyoutOverview({
             id="keyMetrics"
             title={KEY_METRICS_SECTION_TITLE}
             charts={keyMetrics}
-            columns={3}
             rangeFrom={rangeFrom}
             rangeTo={rangeTo}
             refreshToken={refreshToken}

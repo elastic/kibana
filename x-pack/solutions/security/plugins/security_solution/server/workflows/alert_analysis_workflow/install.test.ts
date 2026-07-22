@@ -44,6 +44,7 @@ describe('alert analysis workflow install', () => {
           .mockResolvedValueOnce(0.8)
           .mockResolvedValueOnce(0.95)
           .mockResolvedValueOnce('connector-abc')
+          .mockResolvedValueOnce('elastic-ai-agent')
           .mockResolvedValueOnce(false)
           .mockResolvedValueOnce('alert-analysis'),
       };
@@ -56,6 +57,7 @@ describe('alert analysis workflow install', () => {
         autoCloseConfidenceScoreMinThreshold: 0.8,
         autoCloseConfidenceScoreMaxThreshold: 0.95,
         connectorId: 'connector-abc',
+        agentId: 'elastic-ai-agent',
         createConversation: false,
         tagPrefix: 'alert-analysis',
       });

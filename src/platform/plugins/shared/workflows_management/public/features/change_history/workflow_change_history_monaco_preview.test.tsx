@@ -16,8 +16,8 @@ import { WorkflowChangeHistoryMonacoPreview } from './workflow_change_history_mo
 import type { YamlValidationResult } from '../validate_workflow_yaml/model/types';
 
 jest.mock('@kbn/workflows-ui', () => ({
+  ...jest.requireActual('@kbn/workflows-ui'),
   useDefineWorkflowsMonacoTheme: jest.fn(),
-  WORKFLOWS_MONACO_EDITOR_THEME: 'workflows-theme',
 }));
 
 let mockValidationResults: YamlValidationResult[] = [];

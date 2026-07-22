@@ -18,8 +18,12 @@ import {
 /**
  * Regression guard for the "v1 unaffected when v2 is off" guarantee.
  *
- * This suite runs under the main `spaces_only/config.ts`, where the v2
- * feature flag is at its default (`xpack.cases.analyticsV2.enabled: false`).
+ * This suite runs under `config_analytics_v2_off.ts`, which pins
+ * `xpack.cases.analyticsV2.enabled=false` explicitly. It lives in its own
+ * config (rather than the plain `spaces_only/config.ts`) so the flag-off
+ * behavior is exercised deterministically regardless of the plugin default —
+ * when the default is on, `spaces_only/config.ts` boots v2 ON and cannot host
+ * this guard.
  * The proxy / noop-writer wiring in `cases_analytics_v2/service.ts` already
  * makes this correct in code — every writer call funnels through a stable
  * proxy that delegates to `V2_NOOP_WRITER` when the flag is off, and SO
@@ -39,7 +43,7 @@ export default ({ getService }: FtrProviderContext): void => {
       await deleteAllCaseItems(es);
     });
 
-    it('case create / patch / delete succeeds and `.cases` is never bootstrapped', async () => {
+    it('case create / patch / delete succeeds and no v2 index is bootstrapped', async () => {
       // Create — exercises the analyticsV2Writer.upsertCase hook (noop
       // when v2 is off).
       const created = await createCase(supertestWithoutAuth, getPostCaseRequest(), 200, auth);
@@ -54,15 +58,23 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       // Delete — exercises `bulkDeleteCaseEntities`, which builds the
-      // per-entity status map and dispatches `analyticsV2Writer.bulkDeleteCases`
-      // (noop when v2 is off).
+      // per-entity status map and dispatches both
+      // `analyticsV2Writer.bulkDeleteCases` and the cascade-by-case-id
+      // calls into the activity + attachments writers (all noops when
+      // v2 is off).
       await deleteAllCaseItems(es);
 
-      // `.cases` is the v2 analytics index. With v2 off, plugin start
-      // skips the `ensureCaseIndex` bootstrap entirely — the index must
-      // never exist on this config.
-      const exists = await es.indices.exists({ index: '.cases' });
-      expect(exists).to.eql(false);
+      // None of the v2 analytics indices may exist on this config —
+      // with v2 off, plugin start skips every `ensure*Index` bootstrap.
+      // Asserted in parallel so a regression on any surface fails here.
+      const [casesExists, activityExists, attachmentsExists] = await Promise.all([
+        es.indices.exists({ index: '.cases' }),
+        es.indices.exists({ index: '.cases-activity' }),
+        es.indices.exists({ index: '.cases-attachments' }),
+      ]);
+      expect(casesExists).to.eql(false);
+      expect(activityExists).to.eql(false);
+      expect(attachmentsExists).to.eql(false);
     });
   });
 };

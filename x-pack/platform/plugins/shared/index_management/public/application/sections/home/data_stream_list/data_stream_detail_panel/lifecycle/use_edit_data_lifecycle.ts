@@ -108,6 +108,7 @@ export const useEditDataLifecycle = ({
 
   const [isEditingDataLifecycle, setIsEditingDataLifecycle] = useState(false);
   const [ilmPolicies, setIlmPolicies] = useState<IlmPolicyForFlyout[]>([]);
+  const [hasManageIlm, setHasManageIlm] = useState(true);
   const [selectedIlmPolicyName, setSelectedIlmPolicyName] = useState<string | undefined>(undefined);
   const [lifecycleMethod, setLifecycleMethod] = useState<'dlm' | 'ilm'>('dlm');
   const [failureStoreEnabled, setFailureStoreEnabled] = useState(false);
@@ -138,13 +139,18 @@ export const useEditDataLifecycle = ({
 
   const loadIlmPolicies = useCallback(async () => {
     try {
-      const { data } = await sendRequest<IlmPolicyForFlyout[]>({
+      const { data } = await sendRequest<{
+        hasManageIlm: boolean;
+        policies: IlmPolicyForFlyout[];
+      }>({
         path: `${API_BASE_PATH}/data_streams/ilm_policies`,
         method: 'get',
       });
-      setIlmPolicies(Array.isArray(data) ? data : []);
+      setIlmPolicies(Array.isArray(data?.policies) ? data.policies : []);
+      setHasManageIlm(data?.hasManageIlm ?? false);
     } catch {
       setIlmPolicies([]);
+      setHasManageIlm(false);
     }
   }, []);
 
@@ -808,6 +814,10 @@ export const useEditDataLifecycle = ({
       indexTemplateHref: inheritIndexTemplateHref,
       dlm: {
         defaultValue: successfulDlmDefaultValue,
+        // The cluster-wide maximum retention only constrains DLM retention in Serverless.
+        maximumRetentionPeriod: config.isServerless
+          ? dataStream?.lifecycle?.globalMaxRetention
+          : undefined,
         hasEnterpriseLicense,
         hasDefaultSnapshotRepository: defaultSnapshotRepository !== null,
         defaultSnapshotRepository: defaultSnapshotRepository ?? undefined,
@@ -843,14 +853,18 @@ export const useEditDataLifecycle = ({
             selectedPolicyName: selectedIlmPolicyName,
             onPolicySelect: setSelectedIlmPolicyName,
             onPolicyInspect: (policyName: string) => setInspectedIlmPolicyName(policyName),
+            canManageIlm: hasManageIlm,
+            hasExistingIlmPolicy: isNextGenIlm(dataStream),
           },
     }),
     [
       config.isServerless,
       core,
+      dataStream,
       defaultSnapshotRepository,
       handleInheritSuccessfulLifecycleChange,
       hasEnterpriseLicense,
+      hasManageIlm,
       hasExistingRepositories,
       ilmPolicies,
       inheritIndexTemplateHref,

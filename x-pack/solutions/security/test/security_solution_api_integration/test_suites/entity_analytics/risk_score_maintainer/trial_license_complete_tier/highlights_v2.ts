@@ -39,6 +39,10 @@ export default ({ getService }: FtrProviderContext): void => {
   const hostEuid = `host:${hostName}`;
   const userName = 'highlights-v2-user';
   const userEuid = `user:${userName}`;
+  const unassignedHostName = 'highlights-v2-unassigned-host.example.com';
+  const unassignedHostEuid = `host:${unassignedHostName}`;
+  const explicitUnassignedHostName = 'highlights-v2-explicit-unassigned-host.example.com';
+  const explicitUnassignedHostEuid = `host:${explicitUnassignedHostName}`;
 
   const hostAlertId = uuidv4();
   const userAlertId = uuidv4();
@@ -118,6 +122,37 @@ export default ({ getService }: FtrProviderContext): void => {
           },
           asset: {
             criticality: 'medium_impact',
+          },
+        },
+        // Unassigned criticality: field omitted (UI shows Unassigned)
+        {
+          index: { _index: LATEST_ALIAS, _id: hashEuid(unassignedHostEuid) },
+        },
+        {
+          '@timestamp': new Date().toISOString(),
+          entity: {
+            id: unassignedHostEuid,
+            EngineMetadata: { Type: 'host' },
+          },
+          host: {
+            name: unassignedHostName,
+          },
+        },
+        // Unassigned criticality: field present as unassigned
+        {
+          index: { _index: LATEST_ALIAS, _id: hashEuid(explicitUnassignedHostEuid) },
+        },
+        {
+          '@timestamp': new Date().toISOString(),
+          entity: {
+            id: explicitUnassignedHostEuid,
+            EngineMetadata: { Type: 'host' },
+          },
+          host: {
+            name: explicitUnassignedHostName,
+          },
+          asset: {
+            criticality: 'unassigned',
           },
         },
       ];
@@ -333,21 +368,21 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(body.summary.riskScore).toHaveLength(1);
       expect(body.summary.riskScore[0]).toMatchObject({
         id_field: ['entity.id'],
-        score: [75],
-        asset_criticality_contribution_score: '10',
+        score: ['75.00'],
+        asset_criticality_contribution_score: '10.00',
         alert_inputs: [
           expect.objectContaining({
-            risk_score: ['50'],
-            contribution_score: ['75'],
+            risk_score: ['50.00'],
+            contribution_score: ['75.00'],
           }),
         ],
       });
 
-      // Asset criticality sourced from entity store
+      // Asset criticality sourced from entity store — assigned criticality only
       expect(body.summary.assetCriticality).toBeDefined();
       expect(body.summary.assetCriticality).toHaveLength(1);
-      expect(body.summary.assetCriticality[0]).toMatchObject({
-        'asset.criticality': ['high_impact'],
+      expect(body.summary.assetCriticality[0]).toEqual({
+        'asset.criticality': ['High Impact'],
       });
 
       // Vulnerabilities
@@ -372,7 +407,7 @@ export default ({ getService }: FtrProviderContext): void => {
       // Prompt and replacements
       expect(body.replacements).toBeDefined();
       expect(body.prompt).toContain(
-        'Generate structured information for entity so a Security analyst can act.'
+        'Generate structured information for an entity so a Security analyst can act.'
       );
     });
 
@@ -391,32 +426,26 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(body.summary.riskScore).toHaveLength(1);
       expect(body.summary.riskScore[0]).toMatchObject({
         id_field: ['entity.id'],
-        score: [45],
-        asset_criticality_contribution_score: '0',
+        score: ['45.00'],
+        asset_criticality_contribution_score: '0.00',
         alert_inputs: [
           expect.objectContaining({
-            risk_score: ['30'],
-            contribution_score: ['45'],
+            risk_score: ['30.00'],
+            contribution_score: ['45.00'],
           }),
         ],
       });
 
       expect(body.summary.assetCriticality).toBeDefined();
       expect(body.summary.assetCriticality).toHaveLength(1);
-      expect(body.summary.assetCriticality[0]).toMatchObject({
-        'asset.criticality': ['medium_impact'],
+      expect(body.summary.assetCriticality[0]).toEqual({
+        'asset.criticality': ['Medium Impact'],
       });
 
-      // Vulnerabilities
-      expect(body.summary.vulnerabilities).toBeDefined();
-      expect(body.summary.vulnerabilities).toHaveLength(0);
-      expect(body.summary.vulnerabilitiesTotal).toMatchObject({
-        HIGH: 0,
-        CRITICAL: 0,
-        MEDIUM: 0,
-        LOW: 0,
-        NONE: 0,
-      });
+      // Vulnerabilities only apply to hosts — omitted for users so the LLM
+      // does not render a zeroed-out Vulnerabilities section
+      expect(body.summary.vulnerabilities).toBeUndefined();
+      expect(body.summary.vulnerabilitiesTotal).toBeUndefined();
 
       // Anomalies
       expect(body.summary.anomalies).toBeDefined();
@@ -425,8 +454,36 @@ export default ({ getService }: FtrProviderContext): void => {
       // Prompt and replacements
       expect(body.replacements).toBeDefined();
       expect(body.prompt).toContain(
-        'Generate structured information for entity so a Security analyst can act.'
+        'Generate structured information for an entity so a Security analyst can act.'
       );
+    });
+
+    it('should return empty assetCriticality when criticality is unassigned', async () => {
+      const { body: missingCriticalityBody } = await entityAnalyticsApi
+        .entityDetailsHighlights({
+          body: {
+            ...baseRequestBody,
+            entityType: 'host' as const,
+            entityIdentifier: unassignedHostEuid,
+          },
+        })
+        .expect(200);
+
+      // Entity exists but has no asset.criticality field
+      expect(missingCriticalityBody.summary.assetCriticality).toEqual([]);
+
+      const { body: explicitUnassignedBody } = await entityAnalyticsApi
+        .entityDetailsHighlights({
+          body: {
+            ...baseRequestBody,
+            entityType: 'host' as const,
+            entityIdentifier: explicitUnassignedHostEuid,
+          },
+        })
+        .expect(200);
+
+      // Explicit unassigned value must also yield an empty array.
+      expect(explicitUnassignedBody.summary.assetCriticality).toEqual([]);
     });
 
     it('should return empty highlights for non-existent entity', async () => {
@@ -442,10 +499,11 @@ export default ({ getService }: FtrProviderContext): void => {
 
       expect(body.summary.riskScore).toEqual([]);
       expect(body.summary.assetCriticality).toEqual([]);
-      expect(body.summary.vulnerabilities).toEqual([]);
+      expect(body.summary.vulnerabilities).toBeUndefined();
+      expect(body.summary.vulnerabilitiesTotal).toBeUndefined();
       expect(body.summary.anomalies).toEqual([]);
       expect(body.prompt).toContain(
-        'Generate structured information for entity so a Security analyst can act.'
+        'Generate structured information for an entity so a Security analyst can act.'
       );
     });
 

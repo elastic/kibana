@@ -58,6 +58,7 @@ export function registerStop(router: EntityStorePluginRouter) {
           logger,
           assetManagerClient: assetManager,
           entityMaintainersClient,
+          preferencesClient,
         } = entityStoreCtx;
         const { entityTypes } = req.body;
 
@@ -78,6 +79,8 @@ export function registerStop(router: EntityStorePluginRouter) {
             await entityMaintainersClient.stopAll(req);
           }
         }
+
+        await preferencesClient.update({ autoInstall: false });
 
         return res.ok({
           body: {

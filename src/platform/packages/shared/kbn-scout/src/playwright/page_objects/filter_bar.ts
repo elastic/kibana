@@ -13,7 +13,7 @@ import { expect } from '..';
 interface FilterCreationOptions {
   field: string;
   operator: 'is' | 'is not' | 'is one of' | 'is not one of' | 'exists' | 'does not exist';
-  value: string;
+  value?: string;
 }
 
 interface FilterFormOptions {
@@ -52,12 +52,14 @@ export class FilterBar {
     );
     await this.page.testSubj.click(`filterOperatorOption-${options.operator}`);
     // set value
-    const filterParamsInput = this.page.locator('[data-test-subj="filterParams"] input');
-    await expect(filterParamsInput).not.toHaveAttribute('disabled');
-    // await this.page.waitForTimeout(100); // wait for input to be ready
-    await expect(filterParamsInput).toBeEditable();
-    await filterParamsInput.focus();
-    await this.page.typeWithDelay('[data-test-subj="filterParams"] input', options.value);
+    if (options.value !== undefined) {
+      const filterParamsInput = this.page.locator('[data-test-subj="filterParams"] input');
+      await expect(filterParamsInput).not.toHaveAttribute('disabled');
+      // await this.page.waitForTimeout(100); // wait for input to be ready
+      await expect(filterParamsInput).toBeEditable();
+      await filterParamsInput.focus();
+      await this.page.typeWithDelay('[data-test-subj="filterParams"] input', options.value);
+    }
     // save filter and wait for popover to close
     await this.page.testSubj.click('saveFilter');
     await expect(
@@ -65,10 +67,7 @@ export class FilterBar {
       'Filter popover should close after saving'
     ).toBeHidden();
 
-    await expect(
-      this.page.testSubj.locator('^filter-badge'),
-      'New filter badge should be displayed'
-    ).toBeVisible();
+    await this.page.testSubj.waitForSelector('^filter-badge', { state: 'visible' });
   }
 
   async removeFilter(field: string) {

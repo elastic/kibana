@@ -53,7 +53,7 @@ test.describe(
       await pageObjects.streams.goto();
 
       // Open settings
-      await page.getByRole('button', { name: 'Settings' }).click();
+      await pageObjects.streams.openStreamsSettings();
       await expect(page.getByTestId(WIRED_SWITCH)).toBeVisible();
 
       // Switch should be disabled for editor
@@ -69,7 +69,7 @@ test.describe(
       await pageObjects.streams.goto();
 
       // Open settings
-      await page.getByRole('button', { name: 'Settings' }).click();
+      await pageObjects.streams.openStreamsSettings();
       await expect(page.getByTestId(WIRED_SWITCH)).toBeVisible();
 
       // Switch should be disabled for viewer
@@ -96,7 +96,7 @@ test.describe(
       await pageObjects.streams.verifyStreamsAreInTable(['logs.otel', 'logs.ecs']);
 
       // Open settings
-      await page.getByRole('button', { name: 'Settings' }).click();
+      await pageObjects.streams.openStreamsSettings();
       await expect(page.getByTestId(WIRED_SWITCH)).toBeVisible();
 
       // Switch should show enabled but be disabled for editor
@@ -124,7 +124,7 @@ test.describe(
       await pageObjects.streams.verifyStreamsAreInTable(['logs.otel', 'logs.ecs']);
 
       // Open settings
-      await page.getByRole('button', { name: 'Settings' }).click();
+      await pageObjects.streams.openStreamsSettings();
       await expect(page.getByTestId(WIRED_SWITCH)).toBeVisible();
 
       // Switch should show enabled but be disabled for viewer

@@ -26,7 +26,6 @@ export const Template: FunctionComponent<Props> = ({
     locale,
     darkMode,
     stylesheetPaths,
-    scriptPaths,
     preloadFonts,
     optimizeFontLoading,
     injectedMetadata,
@@ -82,9 +81,6 @@ export const Template: FunctionComponent<Props> = ({
           themeName={injectedMetadata.theme.name}
           stylesheetPaths={stylesheetPaths}
         />
-        {scriptPaths.map((path) => (
-          <script key={path} src={path} />
-        ))}
         {/* Inject stylesheets into the <head> before scripts so that KP plugins with bundled styles will override them */}
         <meta name="add-styles-here" />
         <meta name="add-scripts-here" />

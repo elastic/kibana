@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
-import { environmentRt } from '@kbn/apm-types';
+import { z } from '@kbn/zod/v4';
+import { environmentSchema } from '@kbn/apm-types';
 import { type Coordinate } from '@kbn/apm-types';
 
 import { defineRoute } from '../types';
-import { kueryRt, rangeRt, offsetRt } from '../../default_api_types';
+import { kuerySchema, rangeSchema, offsetSchema } from '../../default_api_types';
 
 export interface HttpRequestsTimeseries {
   currentPeriod: { timeseries: Coordinate[]; value: number | null | undefined };
@@ -18,19 +18,18 @@ export interface HttpRequestsTimeseries {
 
 export const mobileHttpRequestsRoute = defineRoute<HttpRequestsTimeseries>()({
   endpoint: 'GET /internal/apm/mobile-services/{serviceName}/transactions/charts/http_requests',
-  params: t.type({
-    path: t.type({
-      serviceName: t.string,
+  params: z.object({
+    path: z.object({
+      serviceName: z.string(),
     }),
-    query: t.intersection([
-      kueryRt,
-      rangeRt,
-      environmentRt,
-      offsetRt,
-      t.partial({
-        transactionType: t.string,
-        transactionName: t.string,
-      }),
-    ]),
+    query: z
+      .object({
+        transactionType: z.string().optional(),
+        transactionName: z.string().optional(),
+      })
+      .merge(kuerySchema)
+      .merge(rangeSchema)
+      .merge(environmentSchema)
+      .merge(offsetSchema),
   }),
 });

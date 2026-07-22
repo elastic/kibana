@@ -6,7 +6,7 @@
  */
 
 import type { UseEuiTheme } from '@elastic/eui';
-import { EuiButton, EuiCallOut } from '@elastic/eui';
+import { EuiBetaBadge, EuiButton, EuiCallOut, EuiFlexGroup } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React from 'react';
 
@@ -31,7 +31,16 @@ export const ApplicationConnections = () => {
     <>
       <KibanaPageTemplate.Header
         css={headerStyles}
-        pageTitle={labels.page.title}
+        pageTitle={
+          <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+            {labels.page.title}
+            <EuiBetaBadge
+              label={labels.page.techPreviewBadgeLabel}
+              tooltipContent={labels.page.techPreviewBadgeTooltip}
+              size="m"
+            />
+          </EuiFlexGroup>
+        }
         rightSideItems={[
           <EuiButton
             color="text"

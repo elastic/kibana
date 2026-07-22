@@ -7,7 +7,7 @@
 
 import Boom from '@hapi/boom';
 import {
-  rangeRt,
+  rangeSchema,
   routeDefinitions,
   type ServiceAgentResponse,
   type ServiceAlertsCountRouteResponse,
@@ -29,7 +29,7 @@ import {
   type ServiceTransactionTypesResponse,
   type ServiceAnomalyScoreResponse,
 } from '@kbn/apm-api-shared';
-import { isoToEpochRt } from '@kbn/io-ts-utils';
+import { isoToEpoch } from '@kbn/zod-helpers/v4';
 import {
   InsufficientMLCapabilities,
   MLPrivilegesUninitialized,
@@ -37,8 +37,9 @@ import {
 } from '@kbn/ml-plugin/server';
 import type { Annotation } from '@kbn/observability-plugin/common/annotations';
 import type { ScopedAnnotationsClient } from '@kbn/observability-plugin/server';
-import * as t from 'io-ts';
+import { z } from '@kbn/zod/v4';
 import { mergeWith, uniq } from 'lodash';
+import { environmentSchema } from '@kbn/apm-types';
 import { ML_ERRORS } from '../../../common/anomaly_detection';
 import { offsetPreviousPeriodCoordinates } from '../../../common/utils/offset_previous_period_coordinate';
 import { getAnomalyTimeseries } from '../../lib/anomaly_detection/get_anomaly_timeseries';
@@ -52,7 +53,6 @@ import { getSloAlertsClient } from '../../lib/helpers/get_slo_alerts_client';
 import { getSearchTransactionsEvents } from '../../lib/helpers/transactions';
 import { withApmSpan } from '../../utils/with_apm_span';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
-import { environmentRt } from '../default_api_types';
 import { getServiceGroup } from '../service_groups/get_service_group';
 import { getServiceAnnotations } from './annotations';
 import { getServiceAgent } from './get_service_agent';
@@ -75,6 +75,10 @@ import { getServiceAnomalyScoreForService } from './get_services/get_service_ano
 import { getServicesItems } from './get_services/get_services_items';
 import { getServiceTransactionDetailedStatsPeriods } from './get_services_detailed_statistics/get_service_transaction_detailed_statistics';
 import { getThroughput } from './get_throughput';
+
+// Bounds the serviceName path param to satisfy the CodeQL "unbounded string in
+// route validation" rule; 1024 matches the ES keyword default `ignore_above`.
+const MAX_SERVICE_NAME_LENGTH = 1024;
 
 const servicesRoute = createApmServerRoute({
   endpoint: routeDefinitions.services.servicesList.endpoint,
@@ -386,27 +390,29 @@ const serviceAnnotationsCreateRoute = createApmServerRoute({
       requiredPrivileges: ['apm', 'apm_write'],
     },
   },
-  params: t.type({
-    path: t.type({
-      serviceName: t.string,
+  params: z.object({
+    path: z.object({
+      serviceName: z.string().max(MAX_SERVICE_NAME_LENGTH),
     }),
-    body: t.intersection([
-      t.type({
-        '@timestamp': isoToEpochRt,
-        service: t.intersection([
-          t.type({
-            version: t.string,
-          }),
-          t.partial({
-            environment: t.string,
-          }),
-        ]),
-      }),
-      t.partial({
-        message: t.string,
-        tags: t.array(t.string),
-      }),
-    ]),
+    body: z
+      .object({
+        '@timestamp': z.string().max(1024).transform(isoToEpoch),
+        service: z
+          .object({
+            version: z.string().max(1024),
+          })
+          .merge(
+            z.object({
+              environment: z.string().max(1024).optional(),
+            })
+          ),
+      })
+      .merge(
+        z.object({
+          message: z.string().max(10_000).optional(),
+          tags: z.array(z.string().max(1024)).optional(),
+        })
+      ),
   }),
   handler: async (
     resources
@@ -842,9 +848,9 @@ const serviceSlosRoute = createApmServerRoute({
 
 const serviceHasSystemMetricsRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/services/{serviceName}/has_system_metrics',
-  params: t.type({
-    path: t.type({ serviceName: t.string }),
-    query: t.intersection([environmentRt, rangeRt]),
+  params: z.object({
+    path: z.object({ serviceName: z.string().max(MAX_SERVICE_NAME_LENGTH) }),
+    query: environmentSchema.merge(rangeSchema),
   }),
   security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<{ hasSystemMetrics: boolean }> => {

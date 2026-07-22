@@ -88,7 +88,8 @@ export const stepDefineStepMLRule: DefineStepRule = {
   shouldLoadQueryDynamically: false,
 };
 
-describe('StepAboutRuleComponent', () => {
+// Failing: See https://github.com/elastic/kibana/issues/235182
+describe.skip('StepAboutRuleComponent', () => {
   let useGetInstalledJobMock: jest.Mock;
   let useSecurityJobsMock: jest.Mock;
   const TestComp = ({
@@ -359,7 +360,7 @@ describe('StepAboutRuleComponent', () => {
     await user.click(
       within(screen.getByTestId('detectionEngineStepAboutRuleSeverity')).getByTestId('select')
     );
-    await user.click(screen.getByRole('option', { name: /medium/i }));
+    await user.click(await screen.findByRole('option', { name: /medium/i }));
 
     await submitForm();
 

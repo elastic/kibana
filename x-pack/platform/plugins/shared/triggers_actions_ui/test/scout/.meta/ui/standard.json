@@ -1,5 +1,9 @@
 {
-  "sha1": "a257b78c6b80e6ba7fe15bbf541cda1647245077",
+  "sha1": "f8130b9e3d9e854aefc827a8c5b5da72543efb7c",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
   "tests": [
     {
       "id": "9b2dcf397b5bf4d-f3183219f13c400",
@@ -1033,7 +1037,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/connector_tines.spec.ts",
-        "line": 385,
+        "line": 383,
         "column": 7
       }
     },
@@ -2021,7 +2025,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/stack_alerts_page_roles.spec.ts",
-        "line": 52,
+        "line": 77,
         "column": 7
       }
     },
@@ -2035,7 +2039,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/stack_alerts_page_roles.spec.ts",
-        "line": 62,
+        "line": 87,
         "column": 7
       }
     },
@@ -2049,7 +2053,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/stack_alerts_page_roles.spec.ts",
-        "line": 80,
+        "line": 105,
         "column": 7
       }
     },
@@ -2063,7 +2067,63 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/stack_alerts_page_roles.spec.ts",
-        "line": 101,
+        "line": 126,
+        "column": 7
+      }
+    },
+    {
+      "id": "f8c5fbdc13df3f4-72c15e6ebaca2d9",
+      "title": "Stack alerts page roles stackAlertsOnly role sees the Alerts management link but not the Rules link",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/stack_alerts_page_roles.spec.ts",
+        "line": 136,
+        "column": 7
+      }
+    },
+    {
+      "id": "f8c5fbdc13df3f4-e7d647dcdeb0040",
+      "title": "Stack alerts page roles stackAlerts (rules and alerts) role sees both the Rules and Alerts management links",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/stack_alerts_page_roles.spec.ts",
+        "line": 153,
+        "column": 7
+      }
+    },
+    {
+      "id": "f8c5fbdc13df3f4-aa140130ccb1a2b",
+      "title": "Stack alerts page roles stackAlertsOnly role does not see the Rules entry in global search",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/stack_alerts_page_roles.spec.ts",
+        "line": 168,
+        "column": 7
+      }
+    },
+    {
+      "id": "f8c5fbdc13df3f4-700320c6778dec0",
+      "title": "Stack alerts page roles stackAlerts (rules and alerts) role sees the Rules entry in global search",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/stack_alerts_page_roles.spec.ts",
+        "line": 182,
         "column": 7
       }
     }

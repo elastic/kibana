@@ -14,7 +14,6 @@ import {
   EuiFlexItem,
   EuiSpacer,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 
 import type { CaseUserActionsStats } from '../../../../../containers/types';
 import type {
@@ -132,32 +131,25 @@ export const UserActionsFilterBar = React.memo<UserActionsFilterBarProps>(
             </EuiFilterGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
-        {/*
-          Always render this row (instead of conditionally mounting it) and
-          toggle visibility instead, so the toolbar reserves the same space
-          whether or not "Clear filters" is showing and doesn't bounce.
-        */}
-        <EuiSpacer size="xs" />
-        <EuiFlexGroup gutterSize="none" justifyContent="flexStart" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              onClick={handleClearFilters}
-              size="xs"
-              iconSide="left"
-              iconType="cross"
-              flush="left"
-              isDisabled={!hasActiveFilter}
-              tabIndex={hasActiveFilter ? 0 : -1}
-              aria-hidden={!hasActiveFilter}
-              css={css`
-                visibility: ${hasActiveFilter ? 'visible' : 'hidden'};
-              `}
-              data-test-subj="user-actions-filter-bar-clear-filters"
-            >
-              {i18n.CLEAR_FILTERS}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        {hasActiveFilter && (
+          <>
+            <EuiSpacer size="xs" />
+            <EuiFlexGroup gutterSize="none" justifyContent="flexStart" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  onClick={handleClearFilters}
+                  size="xs"
+                  iconSide="left"
+                  iconType="cross"
+                  flush="left"
+                  data-test-subj="user-actions-filter-bar-clear-filters"
+                >
+                  {i18n.CLEAR_FILTERS}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </>
+        )}
       </>
     );
   }

@@ -8,7 +8,12 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { ExecutionType, TerminalExecutionStatuses } from '@kbn/workflows';
+import {
+  ExecutionType,
+  HITL_TOKEN_EXPIRES_AT_INPUT_FIELD,
+  HITL_TOKEN_HASH_INPUT_FIELD,
+  TerminalExecutionStatuses,
+} from '@kbn/workflows';
 import type {
   EsWorkflowStepExecution,
   WorkflowExecutionDto,
@@ -830,7 +835,8 @@ export class WorkflowExecutionQueryService {
             'if (ctx._source.hitl == null) { ctx._source.hitl = [:]; }' +
             'ctx._source.hitl.respondedBy = params.respondedBy;' +
             'ctx._source.hitl.respondedAt = params.respondedAt;' +
-            'ctx._source.hitl.channel = params.channel;',
+            'ctx._source.hitl.channel = params.channel;' +
+            'if (ctx._source.input != null) { ctx._source.input.remove(params.tokenHashField); ctx._source.input.remove(params.tokenExpiresAtField); }',
           lang: 'painless',
           params: {
             spaceId,
@@ -838,6 +844,8 @@ export class WorkflowExecutionQueryService {
             respondedAt: audit.respondedAt,
             channel: audit.channel,
             settledStatuses: SETTLED_STEP_STATUSES,
+            tokenHashField: HITL_TOKEN_HASH_INPUT_FIELD,
+            tokenExpiresAtField: HITL_TOKEN_EXPIRES_AT_INPUT_FIELD,
           },
         },
         refresh: 'wait_for',

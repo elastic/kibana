@@ -353,7 +353,7 @@ export class ActionPolicyClient {
         resolvedTags = ruleTags ?? rule.attributes.metadata.tags ?? [];
       } catch (e) {
         if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
-          return { items: [] };
+          return { items: [], total: 0 };
         }
         throw e;
       }
@@ -400,7 +400,7 @@ export class ActionPolicyClient {
       }
     }
 
-    return { items };
+    return { items, total: allPolicies.total };
   }
 
   public async enableActionPolicy({ id }: { id: string }): Promise<ActionPolicyResponse> {

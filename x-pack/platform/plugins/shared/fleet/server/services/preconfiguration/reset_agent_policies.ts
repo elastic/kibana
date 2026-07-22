@@ -15,11 +15,10 @@ import { setupFleet } from '../setup';
 import {
   AGENT_POLICY_SAVED_OBJECT_TYPE,
   SO_SEARCH_LIMIT,
-  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
 } from '../../constants';
-import { agentPolicyService } from '../agent_policy';
-import { packagePolicyService } from '../package_policy';
+import { agentPolicyService, getAgentPolicySavedObjectType } from '../agent_policy';
+import { packagePolicyService, getPackagePolicySavedObjectType } from '../package_policy';
 import { getAgentsByKuery, forceUnenrollAgent } from '../agents';
 import { listEnrollmentApiKeys, deleteEnrollmentApiKeys } from '../api_keys';
 import type { AgentPolicy } from '../../types';
@@ -64,7 +63,8 @@ async function _deleteGhostPackagePolicies(
     return;
   }
 
-  const objects = policyIds.map((id) => ({ id, type: AGENT_POLICY_SAVED_OBJECT_TYPE }));
+  const savedObjectType = await getAgentPolicySavedObjectType();
+  const objects = policyIds.map((id) => ({ id, type: savedObjectType }));
   const agentPolicyExistsMap = (await soClient.bulkGet(objects)).saved_objects.reduce((acc, so) => {
     if (isSavedObjectErrorResult(so) && so.error.statusCode === 404) {
       acc.set(so.id, false);
@@ -74,6 +74,7 @@ async function _deleteGhostPackagePolicies(
     return acc;
   }, new Map<string, boolean>());
 
+  const packagePolicySavedObjectType = await getPackagePolicySavedObjectType();
   await pMap(
     packagePolicies,
     (packagePolicy) => {
@@ -81,7 +82,12 @@ async function _deleteGhostPackagePolicies(
         packagePolicy.policy_ids.every((policyId) => agentPolicyExistsMap.get(policyId) === false)
       ) {
         logger.info(`Deleting ghost package policy ${packagePolicy.name} (${packagePolicy.id})`);
-        return soClient.delete(PACKAGE_POLICY_SAVED_OBJECT_TYPE, packagePolicy.id);
+        return soClient.delete(packagePolicySavedObjectType, packagePolicy.id).catch((err) => {
+          if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
+            return undefined;
+          }
+          throw err;
+        });
       }
     },
     {

@@ -1169,13 +1169,16 @@ describe('DataStreamDetailPanel', () => {
         }
         if (typeof path === 'string' && path.endsWith('/data_streams/ilm_policies')) {
           return {
-            data: [
-              {
-                name: 'my_policy',
-                phases: {},
-                serializedPolicy: { name: 'my_policy', phases: {} },
-              },
-            ],
+            data: {
+              hasManageIlm: true,
+              policies: [
+                {
+                  name: 'my_policy',
+                  phases: {},
+                  serializedPolicy: { name: 'my_policy', phases: {} },
+                },
+              ],
+            },
           } as any;
         }
         return { data: undefined } as any;

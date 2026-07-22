@@ -13,6 +13,7 @@ import { RULES_API_ALL, RULES_API_READ } from '@kbn/security-solution-features/c
 import { WorkflowsManagementApiActions } from '@kbn/workflows';
 import { SECURITY_ALERT_ANALYSIS_WORKFLOW_ID } from '@kbn/workflows/managed';
 import {
+  SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AGENT_ID,
   SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AUTO_CLOSE_CONFIDENCE_SCORE_MAX_THRESHOLD,
   SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AUTO_CLOSE_CONFIDENCE_SCORE_MIN_THRESHOLD,
   SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AUTO_CLOSE_ENABLED,
@@ -21,11 +22,14 @@ import {
   SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_ENABLED,
   SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_TAG_PREFIX,
 } from '@kbn/management-settings-ids';
+import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import {
   ALERT_ANALYSIS_WORKFLOW_API_VERSION,
   ALERT_ANALYSIS_WORKFLOW_RUNTIME_CONFIG_ROUTE,
   ALERT_ANALYSIS_WORKFLOW_SETTINGS_ROUTE,
   AlertAnalysisWorkflowSettings,
+  isThresholdRangeValid,
+  THRESHOLD_RANGE_REFINEMENT,
 } from '../../../common/workflows/alert_analysis_workflow';
 import { ALERT_ANALYSIS_WORKFLOW_SETTINGS_UPDATED_EVENT } from '../../lib/telemetry/event_based/events';
 import type { SecuritySolutionPluginRouter } from '../../types';
@@ -58,14 +62,14 @@ const AlertAnalysisWorkflowSettingsWithConnectorRequestBody = AlertAnalysisWorkf
   connectorId: z.string().optional(),
   workflowEnabled: z.boolean(),
   createConversation: z.boolean(),
-}).refine(
-  ({ autoCloseConfidenceScoreMinThreshold, autoCloseConfidenceScoreMaxThreshold }) =>
-    autoCloseConfidenceScoreMinThreshold < autoCloseConfidenceScoreMaxThreshold,
-  {
-    message: 'Minimum confidence score must be lower than maximum confidence score',
-    path: ['autoCloseConfidenceScoreMaxThreshold'],
-  }
-);
+})
+  // The threshold range only applies to auto-close, so mirror the client (`index.tsx`
+  // `isThresholdRangeInvalid`) and only enforce min < max when auto-close is enabled. Otherwise the
+  // UI would let the user save an out-of-range pair while the server rejected it with a 400.
+  .refine(
+    (settings) => !settings.autoCloseEnabled || isThresholdRangeValid(settings),
+    THRESHOLD_RANGE_REFINEMENT
+  );
 
 type AlertAnalysisWorkflowSettingsWithConnectorRequestBodyType = z.infer<
   typeof AlertAnalysisWorkflowSettingsWithConnectorRequestBody
@@ -76,6 +80,7 @@ const toWorkflowSettings = ({
   autoCloseConfidenceScoreMinThreshold,
   autoCloseConfidenceScoreMaxThreshold,
   connectorId,
+  agentId,
   workflowEnabled,
   createConversation,
   tagPrefix,
@@ -84,6 +89,7 @@ const toWorkflowSettings = ({
   autoCloseConfidenceScoreMinThreshold,
   autoCloseConfidenceScoreMaxThreshold,
   connectorId: connectorId ?? '',
+  agentId,
   workflowEnabled,
   createConversation,
   tagPrefix,
@@ -208,6 +214,8 @@ export const registerAlertAnalysisWorkflowSettingsRoutes = (
                 autoCloseEnabled: settings.autoCloseEnabled,
                 createConversation: settings.createConversation,
                 connectorConfigured: Boolean(settings.connectorId),
+                // Report only whether a non-default (custom) agent is used, never the agent id.
+                customAgent: settings.agentId !== agentBuilderDefaultAgentId,
                 autoCloseConfidenceScoreMinThreshold: settings.autoCloseConfidenceScoreMinThreshold,
                 autoCloseConfidenceScoreMaxThreshold: settings.autoCloseConfidenceScoreMaxThreshold,
               }
@@ -236,6 +244,7 @@ export const registerAlertAnalysisWorkflowSettingsRoutes = (
             [SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AUTO_CLOSE_CONFIDENCE_SCORE_MAX_THRESHOLD]:
               settings.autoCloseConfidenceScoreMaxThreshold,
             [SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_CONNECTOR_ID]: settings.connectorId,
+            [SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AGENT_ID]: settings.agentId,
             [SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_CREATE_CONVERSATION]:
               settings.createConversation,
             [SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_TAG_PREFIX]: settings.tagPrefix,

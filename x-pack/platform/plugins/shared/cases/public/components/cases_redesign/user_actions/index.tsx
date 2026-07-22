@@ -24,20 +24,35 @@ import { useBuilderContext } from './hooks/use_builder_context';
 import { useCommentsList } from './hooks/use_comments_list';
 import noResultsIllustration from '../../../assets/illustration_product_no_results_magnifying_glass.svg';
 import { NO_SEARCH_RESULTS_BODY, NO_SEARCH_RESULTS_TITLE } from './translations';
+import { useGetCaseConnectors } from '../../../containers/use_get_case_connectors';
+import { useGetCaseUsers } from '../../../containers/use_get_case_users';
+import { useGetCaseConfiguration } from '../../../containers/configure/use_get_case_configuration';
+import { useGetCurrentUserProfile } from '../../../containers/user_profiles/use_get_current_user_profile';
+import { parseCaseUsers } from '../../utils';
 
-export const UserActions = React.memo((props: UserActionTreeProps) => {
+export type UserActionsProps = Omit<
+  UserActionTreeProps,
+  'currentUserProfile' | 'caseConnectors' | 'userProfiles' | 'casesConfiguration'
+>;
+
+export const UserActions = React.memo((props: UserActionsProps) => {
   const {
-    currentUserProfile,
     data: caseData,
     statusActionButton,
     attachActionButton,
     userActivityQueryParams,
     userActionsStats,
-    caseConnectors,
-    userProfiles,
-    casesConfiguration,
   } = props;
   const { detailName: caseId } = useCaseViewParams();
+
+  const { data: caseConnectors = {} } = useGetCaseConnectors(caseData.id);
+  const { data: caseUsers } = useGetCaseUsers(caseData.id);
+  const { data: casesConfiguration } = useGetCaseConfiguration();
+  const { data: currentUserProfile } = useGetCurrentUserProfile();
+  const { userProfiles } = useMemo(
+    () => parseCaseUsers({ caseUsers, createdBy: caseData.createdBy }),
+    [caseUsers, caseData.createdBy]
+  );
 
   const { lastPage } = useLastPage({ userActivityQueryParams, userActionsStats });
 
