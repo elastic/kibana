@@ -257,16 +257,17 @@ export type UserActivity =
 
 export type DashboardInternalApi = ReturnType<
   typeof initializeUnsavedChangesManager
->['internalApi'] & ReturnType<typeof startTrackingHistory<DashboardState>>['api'] & {
-  gridLayout$: BehaviorSubject<GridLayoutData>;
-  serializeLayout: () => Pick<DashboardState, 'panels' | 'pinned_panels'>;
-  isSectionCollapsed: (sectionId?: string) => boolean;
-  dashboardContainerRef$: BehaviorSubject<HTMLElement | null>;
-  setDashboardContainerRef: (ref: HTMLElement | null) => void;
-  publishedEsqlVariables$: PublishingSubject<ESQLControlVariable[]>;
-  unpublishedEsqlVariables$: PublishingSubject<ESQLControlVariable[]>;
-  publishVariables: () => void;
-};
+>['internalApi'] &
+  ReturnType<typeof startTrackingHistory<DashboardState>>['api'] & {
+    gridLayout$: BehaviorSubject<GridLayoutData>;
+    serializeLayout: () => Pick<DashboardState, 'panels' | 'pinned_panels'>;
+    isSectionCollapsed: (sectionId?: string) => boolean;
+    dashboardContainerRef$: BehaviorSubject<HTMLElement | null>;
+    setDashboardContainerRef: (ref: HTMLElement | null) => void;
+    publishedEsqlVariables$: PublishingSubject<ESQLControlVariable[]>;
+    unpublishedEsqlVariables$: PublishingSubject<ESQLControlVariable[]>;
+    publishVariables: () => void;
+  };
 
 export interface DashboardUser {
   uid: string;

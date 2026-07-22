@@ -7,27 +7,28 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject, debounceTime, type Observable } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 
 import { startTrackingHistory } from '@kbn/rxjs-history';
 
 import type { DashboardState } from '../../common';
 import type { initializeDataLoadingManager } from './data_loading_manager';
 import type { initializeTrackOverlay } from './track_overlay';
+import type { initializeUnsavedChangesManager } from './unsaved_changes_manager';
 
 export function initializeHistoryManager({
-  anyStateChange$,
+  unsavedChanges$,
   hasOverlays$,
-  initialState,
   setState,
   getState,
   dataLoadingManager: {
     api: { dataLoading$ },
   },
 }: {
-  anyStateChange$: Observable<void>;
+  unsavedChanges$: ReturnType<
+    typeof initializeUnsavedChangesManager
+  >['internalApi']['unsavedChanges$'];
   hasOverlays$: ReturnType<typeof initializeTrackOverlay>['hasOverlays$'];
-  initialState: DashboardState;
   getState: () => DashboardState;
   setState: (state: DashboardState) => void;
   dataLoadingManager: ReturnType<typeof initializeDataLoadingManager>;
@@ -35,7 +36,7 @@ export function initializeHistoryManager({
   api: ReturnType<typeof startTrackingHistory<DashboardState>>['api'];
   cleanup: () => void;
 } {
-  const dashboardCurrentState$ = new BehaviorSubject<DashboardState>(initialState);
+  const dashboardCurrentState$ = new BehaviorSubject<DashboardState>(getState());
   const { api: historyApi, cleanup: cleanupHistoryTracking } = startTrackingHistory<DashboardState>(
     {
       disableUndoRedo$: hasOverlays$,
@@ -56,10 +57,13 @@ export function initializeHistoryManager({
   );
 
   // when the Dashboard state changes, add the new state to the history stack
-  const onAnyStateChangeSubscription = anyStateChange$
-    .pipe(
-      debounceTime(500) // wait until state updates stabilize before updating history
-    )
+  const onAnyStateChangeSubscription = unsavedChanges$
+    // .pipe(
+    //   filter(([anyStateChange, dataLoading]) => {
+    //     console.log({ dataLoading });
+    //     return !Boolean(dataLoading); // wait until done loading before updating history
+    //   })
+    // )
     .subscribe(() => {
       dashboardCurrentState$.next(getState());
     });

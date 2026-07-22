@@ -535,6 +535,7 @@ export function initializeLayoutManager(
             )
           ),
           map(([[currentLayout, childrenChanges]]) => {
+            // console.log({ currentLayout, childrenChanges });
             const hasPanelChanges =
               childrenChanges.some(
                 (childChanges) =>

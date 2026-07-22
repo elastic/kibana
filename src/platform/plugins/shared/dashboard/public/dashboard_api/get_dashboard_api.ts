@@ -188,15 +188,6 @@ export function getDashboardApi({
     approximationManager.internalApi.anyStateChange$
   );
 
-  const historyManager = initializeHistoryManager({
-    anyStateChange$,
-    hasOverlays$: trackOverlayApi.hasOverlays$,
-    initialState,
-    setState,
-    getState,
-    dataLoadingManager,
-  });
-
   const unsavedChangesManager = initializeUnsavedChangesManager({
     viewMode$: viewModeManager.api.viewMode$,
     storeUnsavedChanges: creationOptions?.useSessionStorageIntegration,
@@ -209,6 +200,14 @@ export function getDashboardApi({
     approximationManager,
     setState,
     onSave$: onSave$.asObservable(),
+  });
+
+  const historyManager = initializeHistoryManager({
+    unsavedChanges$: unsavedChangesManager.internalApi.unsavedChanges$,
+    hasOverlays$: trackOverlayApi.hasOverlays$,
+    setState,
+    getState,
+    dataLoadingManager,
   });
 
   const pauseFetchManager = initializePauseFetchManager(filtersManager);
