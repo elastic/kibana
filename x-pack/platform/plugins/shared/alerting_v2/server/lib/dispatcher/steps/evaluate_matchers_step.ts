@@ -54,6 +54,9 @@ export class EvaluateMatchersStep implements DispatcherStep {
 
     for (const episode of dispatchable) {
       const rule = episode.rule_id ? rules.get(episode.rule_id) : undefined;
+      // Internal episodes whose rule is absent (deleted or failed to fetch) are skipped
+      // to prevent catch-all policies from dispatching spurious notifications.
+      if (episode.rule_id != null && rule == null) continue;
 
       const spacePolicies = policiesBySpace.get(episode.space_id) ?? [];
       let context: MatcherContext | undefined;

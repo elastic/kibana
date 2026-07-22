@@ -17,4 +17,13 @@ export const episodeSubject = ({
 }: {
   source?: string | null;
   rule_id?: string | null;
-}): string => (source == null || source === 'internal' ? rule_id! : source);
+}): string => {
+  if (source != null && source !== 'internal') return source;
+  if (rule_id != null) return rule_id;
+  // Invariant violation: an internal episode must have a rule_id.
+  throw new Error(
+    `episodeSubject: episode has neither a valid source nor a rule_id (source=${JSON.stringify(
+      source
+    )})`
+  );
+};

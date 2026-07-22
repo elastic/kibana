@@ -33,7 +33,7 @@ export class BuildGroupsStep implements DispatcherStep {
 
 export function buildActionGroups(
   matched: readonly MatchedPair[],
-  rules: ReadonlyMap<RuleId, Rule>
+  rules: ReadonlyMap<RuleId, Rule> = new Map()
 ): ActionGroup[] {
   const groupMap = new Map<string, ActionGroup>();
 
@@ -75,9 +75,10 @@ export function buildActionGroups(
 
     const group = groupMap.get(actionGroupId)!;
     group.episodes.push(episode);
-    const rule = episode.rule_id ? rules.get(episode.rule_id) : undefined;
-    if (rule && episode.rule_id) {
-      group.rules[episode.rule_id] = { name: rule.name };
+    const ruleId = episode.rule_id;
+    const rule = ruleId != null ? rules.get(ruleId) : undefined;
+    if (rule && ruleId != null) {
+      group.rules[ruleId] = { name: rule.name };
     }
   }
 

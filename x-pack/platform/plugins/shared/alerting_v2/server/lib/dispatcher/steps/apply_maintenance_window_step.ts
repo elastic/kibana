@@ -53,6 +53,12 @@ export class ApplyMaintenanceWindowStep implements DispatcherStep {
 
     for (const episode of dispatchable) {
       const rule = episode.rule_id ? rules.get(episode.rule_id) : undefined;
+      // Internal episodes whose rule is absent bypass MW so that the evaluate_matchers guard
+      // (not MW suppression) is the reason they never dispatch — preserving pre-PR behavior.
+      if (episode.rule_id != null && rule == null) {
+        newDispatchable.push(episode);
+        continue;
+      }
       const candidates = windowsBySpace.get(episode.space_id);
       if (!candidates) {
         newDispatchable.push(episode);

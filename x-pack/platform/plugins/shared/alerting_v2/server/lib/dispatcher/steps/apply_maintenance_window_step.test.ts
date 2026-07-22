@@ -179,7 +179,7 @@ describe('ApplyMaintenanceWindowStep', () => {
     );
   });
 
-  it('suppresses episode in same space as MW even when the rule is missing from the rules map', async () => {
+  it('passes through an internal episode whose rule is missing from the rules map (rule deleted)', async () => {
     service.getEnabledMaintenanceWindows.mockResolvedValue([buildMw()]);
 
     const ep = createAlertEpisode({
@@ -194,12 +194,8 @@ describe('ApplyMaintenanceWindowStep', () => {
 
     const result = await step.execute(state);
 
-    if (result.type !== 'continue') throw new Error('expected continue');
-    expect(result.data?.dispatchable).toHaveLength(0);
-    expect(result.data?.suppressed).toHaveLength(1);
-    expect(result.data?.suppressed?.[0]).toEqual(
-      expect.objectContaining({ reason: 'maintenance_window:mw-1' })
-    );
+    // Internal episodes with a deleted rule bypass MW; evaluate_matchers will skip them.
+    expect(result).toEqual({ type: 'continue' });
   });
 
   it('appends to existing suppressed array rather than overwriting it', async () => {
@@ -293,6 +289,62 @@ describe('ApplyMaintenanceWindowStep', () => {
         rule_id: null,
         space_id: 'default',
         last_event_timestamp: '2026-01-22T07:30:00.000Z',
+      });
+      const state = createDispatcherPipelineState({
+        dispatchable: [ep],
+        rules: new Map(),
+      });
+
+      const result = await step.execute(state);
+
+      expect(result).toEqual({ type: 'continue' });
+    });
+
+    it('suppresses an external episode matched by a KQL-scoped MW against episode data', async () => {
+      service.getEnabledMaintenanceWindows.mockResolvedValue([
+        buildMw({
+          spaceId: 'default',
+          scope: { alertingV2: { kql: 'data.severity: "critical"' } },
+        }),
+      ]);
+
+      const ep = createAlertEpisode({
+        source: 'pagerduty',
+        rule_id: null,
+        space_id: 'default',
+        last_event_timestamp: '2026-01-22T07:30:00.000Z',
+        data: { severity: 'critical' },
+      });
+      const state = createDispatcherPipelineState({
+        dispatchable: [ep],
+        rules: new Map(),
+        suppressed: [],
+      });
+
+      const result = await step.execute(state);
+
+      if (result.type !== 'continue') throw new Error('expected continue');
+      expect(result.data?.dispatchable).toHaveLength(0);
+      expect(result.data?.suppressed).toHaveLength(1);
+      expect(result.data?.suppressed?.[0]).toEqual(
+        expect.objectContaining({ reason: 'maintenance_window:mw-1' })
+      );
+    });
+
+    it('does not suppress an external episode when the KQL scope does not match', async () => {
+      service.getEnabledMaintenanceWindows.mockResolvedValue([
+        buildMw({
+          spaceId: 'default',
+          scope: { alertingV2: { kql: 'data.severity: "critical"' } },
+        }),
+      ]);
+
+      const ep = createAlertEpisode({
+        source: 'pagerduty',
+        rule_id: null,
+        space_id: 'default',
+        last_event_timestamp: '2026-01-22T07:30:00.000Z',
+        data: { severity: 'low' },
       });
       const state = createDispatcherPipelineState({
         dispatchable: [ep],

@@ -42,14 +42,20 @@ import {
   FetchSuppressionsStep,
   ApplySuppressionStep,
   FetchRulesStep,
+  ApplyMaintenanceWindowStep,
   FetchPoliciesStep,
   EvaluateMatchersStep,
   BuildGroupsStep,
   ApplyThrottlingStep,
   DispatchStep,
   StoreActionsStep,
+  StoreExecutionHistoryStep,
 } from './steps';
 import type { AlertEpisode, AlertEpisodeSuppression } from './types';
+import type { MaintenanceWindowServiceContract } from '../services/maintenance_window_service/maintenance_window_service';
+import { createMaintenanceWindowServiceMock } from '../services/maintenance_window_service/maintenance_window_service.mock';
+import { createEventLogService } from '../services/event_log_service/event_log_service.mock';
+import type { EventLogServiceContract } from '../services/event_log_service/event_log_service';
 
 function mockRulesFindByIds(
   spy: jest.SpyInstance,
@@ -102,6 +108,8 @@ function buildDispatcherService(deps: {
   rulesSoService: RulesSavedObjectServiceContract;
   npSoService: ActionPolicySavedObjectServiceContract;
   workflowsManagement: WorkflowsServerPluginSetup['management'];
+  maintenanceWindowService: MaintenanceWindowServiceContract;
+  eventLogService: EventLogServiceContract;
 }): DispatcherService {
   const { loggerService } = createLoggerService();
 
@@ -110,12 +118,14 @@ function buildDispatcherService(deps: {
     new FetchSuppressionsStep(deps.queryService),
     new ApplySuppressionStep(),
     new FetchRulesStep(deps.rulesSoService),
+    new ApplyMaintenanceWindowStep(deps.maintenanceWindowService),
     new FetchPoliciesStep(deps.npSoService),
     new EvaluateMatchersStep(loggerService),
     new BuildGroupsStep(),
     new ApplyThrottlingStep(deps.queryService, loggerService),
     new DispatchStep(loggerService, deps.workflowsManagement),
     new StoreActionsStep(deps.storageService),
+    new StoreExecutionHistoryStep(deps.eventLogService),
   ]);
   return new DispatcherService(pipeline);
 }
@@ -131,6 +141,8 @@ describe('DispatcherService', () => {
   let mockFindByIds: jest.SpyInstance;
   let mockFindAllDecrypted: jest.SpyInstance;
   let mockWfm: jest.Mocked<WorkflowsServerPluginSetup['management']>;
+  let mockMwService: jest.Mocked<MaintenanceWindowServiceContract>;
+  let mockEventLogService: EventLogServiceContract;
 
   beforeEach(() => {
     ({ queryService, mockEsClient: queryEsClient } = createQueryService());
@@ -147,6 +159,8 @@ describe('DispatcherService', () => {
     mockNpFindAllDecrypted(mockFindAllDecrypted, ['policy_456']);
 
     mockWfm = createMockWorkflowsManagement();
+    mockMwService = createMaintenanceWindowServiceMock();
+    ({ eventLogService: mockEventLogService } = createEventLogService());
 
     dispatcherService = buildDispatcherService({
       queryService,
@@ -154,6 +168,8 @@ describe('DispatcherService', () => {
       rulesSoService,
       npSoService,
       workflowsManagement: mockWfm,
+      maintenanceWindowService: mockMwService,
+      eventLogService: mockEventLogService,
     });
   });
 
@@ -398,6 +414,8 @@ describe('DispatcherService', () => {
       });
 
       mockWfm = createMockWorkflowsManagement();
+      mockMwService = createMaintenanceWindowServiceMock();
+      ({ eventLogService: mockEventLogService } = createEventLogService());
 
       dispatcherService = buildDispatcherService({
         queryService,
@@ -405,6 +423,8 @@ describe('DispatcherService', () => {
         rulesSoService,
         npSoService,
         workflowsManagement: mockWfm,
+        maintenanceWindowService: mockMwService,
+        eventLogService: mockEventLogService,
       });
 
       // Dataset: 5 rules, 9 episodes total

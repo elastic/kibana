@@ -239,7 +239,8 @@ function aggregateUnmatchedBySubject(
 ): Map<string, UnmatchedGroup> {
   const bySubject = new Map<string, UnmatchedGroup>();
   for (const episode of unmatched) {
-    const key = episodeSubject(episode);
+    // Key by (subject, space_id) so external episodes from different spaces get separate log events.
+    const key = `${episodeSubject(episode)}:${episode.space_id}`;
     let group = bySubject.get(key);
     if (!group) {
       group = {

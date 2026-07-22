@@ -30,7 +30,7 @@ export const getDispatchableAlertEventsQuery = (): EsqlRequest => {
           episode_id = COALESCE(episode.id, episode_id),
           episode_status = episode.status,
           data_json = CASE(type IS NOT NULL, JSON_EXTRACT(_source, "$.data"), NULL)
-      | EVAL subject = CASE(source IS NULL OR source == "internal", rule_id, source)
+      | EVAL ${SUBJECT_EVAL}
       | DROP episode.id, rule.id, episode.status, _source
       | INLINE STATS last_fired = max(last_series_event_timestamp) WHERE action_type == "fire" OR action_type == "suppress" OR action_type == "unmatched" BY subject, group_hash
       | WHERE last_fired IS NULL OR last_fired < @timestamp
@@ -51,6 +51,10 @@ export const getDispatchableAlertEventsQuery = (): EsqlRequest => {
 };
 
 const PAIR_SEPARATOR = '::';
+
+// Shared subject-derivation expression used in both dispatchable and suppression queries.
+// null/absent source is treated as 'internal' for backward compat with legacy action rows.
+const SUBJECT_EVAL = esql.exp`subject = CASE(source IS NULL OR source == "internal", rule_id, source)`;
 
 // ES|QL caps statement text at 1 MB. IN-list queries exceed this at production cardinality,
 // producing `parsing_exception: ESQL statement is too large`. Without chunking the dispatcher
@@ -114,7 +118,7 @@ export const getAlertEpisodeSuppressionsQueries = (
     const pairValues = chunk.map((key) => esql.str(key));
 
     return esql`FROM ${ALERT_ACTIONS_DATA_STREAM}
-        | EVAL subject = CASE(source IS NULL OR source == "internal", rule_id, source)
+        | EVAL ${SUBJECT_EVAL}
         | EVAL _pair_key = CONCAT(subject, ${PAIR_SEPARATOR}, group_hash)
         | WHERE _pair_key IN (${pairValues})
         | WHERE action_type IN ("ack", "unack", "deactivate", "activate", "snooze", "unsnooze")
