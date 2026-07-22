@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  ALERTING_TOOL_IDS,
-  RULE_MANAGEMENT_SKILL_ID,
-} from '@kbn/alerting-v2-constants';
+import { ALERTING_TOOL_IDS, RULE_MANAGEMENT_SKILL_ID } from '@kbn/alerting-v2-constants';
 import type { ManageActionPolicyToolDeps } from '../tools/manage_action_policy';
 import { createRuleManagementSkill } from './rule_management_skill';
 
