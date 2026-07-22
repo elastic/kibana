@@ -64,6 +64,13 @@ export const LIST_FIELD_CLOSED = i18n.translate('xpack.cases.casesRedesign.listV
   defaultMessage: 'Closed',
 });
 
+export const SORT_ORDER_ARIA_LABEL = i18n.translate(
+  'xpack.cases.casesRedesign.tableFilters.sortOrderAriaLabel',
+  {
+    defaultMessage: 'Sort order',
+  }
+);
+
 export const SORT_NEWEST_FIRST = i18n.translate(
   'xpack.cases.casesRedesign.tableFilters.newestFirst',
   {

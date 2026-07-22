@@ -22,6 +22,8 @@ import type {
   Template,
   UpdateTemplateInput,
 } from '../../../common/types/domain/template/v1';
+import type { FieldDefinition } from '../../../common/types/domain/field_definition/v1';
+import { isRefField } from '../../../common/types/domain/template/fields';
 import { toFieldDefinitions, trimFieldDefaults } from './utils';
 import { CASE_TEMPLATE_SAVED_OBJECT } from '../../../common/constants';
 import type {
@@ -47,6 +49,11 @@ export class TemplatesService {
        * `V2_NOOP_DATA_VIEW_REFRESHER`).
        */
       refreshAnalyticsV2DataView: () => void;
+      /**
+       * Fetches field-library definitions for the given owner so `$ref` fields
+       * can be resolved into the template's cached `fieldDefinitions` summary.
+       */
+      getFieldDefinitionsForOwner: (owner: string) => Promise<FieldDefinition[]>;
     }
   ) {}
 
@@ -354,6 +361,8 @@ export class TemplatesService {
       owner: input.owner,
     });
 
+    const libraryDefs = await this.getLibraryDefsIfReferenced(parsedDefinition.fields, input.owner);
+
     const templateSavedObject = await this.dependencies.unsecuredSavedObjectsClient.create(
       CASE_TEMPLATE_SAVED_OBJECT,
       {
@@ -370,7 +379,7 @@ export class TemplatesService {
         tags: input.tags,
         author,
         fieldCount: parsedDefinition.fields.length,
-        fieldDefinitions: toFieldDefinitions(parsedDefinition.fields),
+        fieldDefinitions: toFieldDefinitions(parsedDefinition.fields, libraryDefs),
         isEnabled: input.isEnabled ?? true,
       } as Template,
       { refresh: true, id }
@@ -409,6 +418,8 @@ export class TemplatesService {
       excludeTemplateId: currentTemplate.attributes.templateId,
     });
 
+    const libraryDefs = await this.getLibraryDefsIfReferenced(parsedDefinition.fields, input.owner);
+
     const templateSavedObject = await this.dependencies.unsecuredSavedObjectsClient.create(
       CASE_TEMPLATE_SAVED_OBJECT,
       {
@@ -425,7 +436,7 @@ export class TemplatesService {
         tags: input.tags,
         author: currentTemplate.attributes.author,
         fieldCount: parsedDefinition.fields.length,
-        fieldDefinitions: toFieldDefinitions(parsedDefinition.fields),
+        fieldDefinitions: toFieldDefinitions(parsedDefinition.fields, libraryDefs),
         usageCount: currentTemplate.attributes.usageCount,
         lastUsedAt: currentTemplate.attributes.lastUsedAt,
         isEnabled: input.isEnabled ?? currentTemplate.attributes.isEnabled ?? true,
@@ -547,6 +558,22 @@ export class TemplatesService {
     // the propagation hook wired so future changes to the template field
     // collection reach the data view without a code change.
     this.dependencies.refreshAnalyticsV2DataView();
+  }
+
+  /**
+   * Fetches the owner's field library only when the definition actually has `$ref` fields to
+   * resolve — avoids an unnecessary SO `find` round-trip on every create/update for templates
+   * that only use inline fields.
+   */
+  private async getLibraryDefsIfReferenced(
+    fields: ParsedTemplate['definition']['fields'],
+    owner: string
+  ): Promise<FieldDefinition[]> {
+    if (!fields.some(isRefField)) {
+      return [];
+    }
+
+    return this.dependencies.getFieldDefinitionsForOwner(owner);
   }
 
   /**
