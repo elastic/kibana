@@ -16,7 +16,6 @@ interface ContextOverrides {
   featureFlagAvailable?: boolean;
   tierAvailable?: boolean;
   hasEnterpriseLicense?: boolean;
-  uiSettingEnabled?: boolean;
   workflowsExtensionsPlugin?: boolean;
   workflowsManagementPlugin?: boolean;
   inferencePlugin?: boolean;
@@ -28,7 +27,6 @@ const buildArgs = (overrides: ContextOverrides = {}) => {
     featureFlagAvailable = true,
     tierAvailable = true,
     hasEnterpriseLicense = true,
-    uiSettingEnabled = true,
     workflowsExtensionsPlugin = true,
     workflowsManagementPlugin = true,
     inferencePlugin = true,
@@ -52,12 +50,9 @@ const buildArgs = (overrides: ContextOverrides = {}) => {
       .mockResolvedValue({ hasAtLeast: jest.fn().mockReturnValue(hasEnterpriseLicense) }),
   };
 
-  const uiSettingsClient = { get: jest.fn().mockResolvedValue(uiSettingEnabled) };
-
   return {
     server,
     licensing,
-    uiSettingsClient,
   } as unknown as Parameters<typeof assertSignificantEventsAccess>[0];
 };
 
@@ -95,12 +90,6 @@ describe('assertSignificantEventsAccess', () => {
   it('throws a FeatureNotEnabledError (403) when the license is insufficient', async () => {
     await expect(
       assertSignificantEventsAccess(buildArgs({ hasEnterpriseLicense: false }))
-    ).rejects.toBeInstanceOf(FeatureNotEnabledError);
-  });
-
-  it('throws a FeatureNotEnabledError (403) when the UI setting is disabled', async () => {
-    await expect(
-      assertSignificantEventsAccess(buildArgs({ uiSettingEnabled: false }))
     ).rejects.toBeInstanceOf(FeatureNotEnabledError);
   });
 

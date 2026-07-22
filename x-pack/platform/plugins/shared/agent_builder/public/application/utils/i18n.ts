@@ -612,7 +612,7 @@ export const labels = {
       ),
       name: i18n.translate('xpack.agentBuilder.mcpClients.name', { defaultMessage: 'Name' }),
       connections: i18n.translate('xpack.agentBuilder.mcpClients.connections', {
-        defaultMessage: 'Connections',
+        defaultMessage: 'Active connections',
       }),
       status: i18n.translate('xpack.agentBuilder.mcpClients.status', {
         defaultMessage: 'Status',

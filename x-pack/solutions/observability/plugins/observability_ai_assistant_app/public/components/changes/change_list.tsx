@@ -235,7 +235,14 @@ export function ChangeList({ title, items }: ChangeListProps) {
         </EuiTitle>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiBasicTable items={items} columns={columns} tableLayout="auto" />
+        <EuiBasicTable
+          tableCaption={i18n.translate('xpack.observabilityAiAssistant.changesList.tableCaption', {
+            defaultMessage: 'Changes',
+          })}
+          items={items}
+          columns={columns}
+          tableLayout="auto"
+        />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

@@ -9,14 +9,23 @@ import { loggerMock } from '@kbn/logging-mocks';
 import {
   SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID,
+  SIGNIFICANT_EVENTS_MEMORY_CONSOLIDATION_WORKFLOW_ID,
+  SIGNIFICANT_EVENTS_MEMORY_CONVERSATION_SCRAPER_WORKFLOW_ID,
+  SIGNIFICANT_EVENTS_MEMORY_GAP_DETECTION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_MEMORY_SYNTHESIS_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
+import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
 import { createManagedWorkflowsInstaller } from './managed_workflows_installer';
 
-// Base (non memory/investigation) workflows installed by `installWorkflows`.
+// Significant events is gated solely by the availability flag now, so the installer always writes
+// the full set: 8 base workflows + 4 memory workflows (both via `installWorkflows`) + 1 investigation
+// workflow.
 const BASE_WORKFLOW_COUNT = 8;
 const MEMORY_WORKFLOW_COUNT = 4;
+const INVESTIGATION_WORKFLOW_COUNT = 1;
+const TOTAL_WORKFLOW_COUNT =
+  BASE_WORKFLOW_COUNT + MEMORY_WORKFLOW_COUNT + INVESTIGATION_WORKFLOW_COUNT;
 
 const createClientMock = () => {
   const client = {
@@ -39,8 +48,6 @@ const createInstaller = (
   const installer = createManagedWorkflowsInstaller({
     getClient: jest.fn().mockResolvedValue(client),
     isAvailable: jest.fn().mockResolvedValue(true),
-    isMemoryEnabled: jest.fn().mockResolvedValue(false),
-    isInvestigationEnabled: jest.fn().mockResolvedValue(false),
     logger: loggerMock.create(),
     ...overrides,
   });
@@ -70,25 +77,22 @@ describe('createManagedWorkflowsInstaller', () => {
     expect(client.ready).not.toHaveBeenCalled();
 
     await installer.install();
-    expect(client.install).toHaveBeenCalledTimes(BASE_WORKFLOW_COUNT);
+    expect(client.install).toHaveBeenCalledTimes(TOTAL_WORKFLOW_COUNT);
     expect(client.ready).toHaveBeenCalledTimes(1);
   });
 
-  it('installs the base workflow set and calls ready() once when available', async () => {
+  it('installs the full workflow set and calls ready() once when available', async () => {
     const { client, installer } = createInstaller();
 
     await installer.install();
 
     expect(installedIds(client)).toContain(SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID);
-    expect(client.install).toHaveBeenCalledTimes(BASE_WORKFLOW_COUNT);
+    expect(client.install).toHaveBeenCalledTimes(TOTAL_WORKFLOW_COUNT);
     expect(client.ready).toHaveBeenCalledTimes(1);
   });
 
   it('installs the full set before calling ready() so reconciliation never sees a partial set', async () => {
-    const { client, installer } = createInstaller({
-      isMemoryEnabled: jest.fn().mockResolvedValue(true),
-      isInvestigationEnabled: jest.fn().mockResolvedValue(true),
-    });
+    const { client, installer } = createInstaller();
 
     let installCountAtReady = -1;
     client.ready.mockImplementation(async () => {
@@ -98,26 +102,31 @@ describe('createManagedWorkflowsInstaller', () => {
     await installer.install();
 
     // base + memory + investigation, all installed before ready() closes the window.
-    const expectedTotal = BASE_WORKFLOW_COUNT + MEMORY_WORKFLOW_COUNT + 1;
-    expect(client.install).toHaveBeenCalledTimes(expectedTotal);
-    expect(installCountAtReady).toBe(expectedTotal);
+    expect(client.install).toHaveBeenCalledTimes(TOTAL_WORKFLOW_COUNT);
+    expect(installCountAtReady).toBe(TOTAL_WORKFLOW_COUNT);
   });
 
-  it('installs memory workflows only when the memory flag is enabled', async () => {
-    const { client, installer } = createInstaller({
-      isMemoryEnabled: jest.fn().mockResolvedValue(true),
-    });
+  it('installs memory workflows globally when available', async () => {
+    const { client, installer } = createInstaller();
 
     await installer.install();
 
-    expect(installedIds(client)).toContain(SIGNIFICANT_EVENTS_MEMORY_SYNTHESIS_WORKFLOW_ID);
-    expect(client.install).toHaveBeenCalledTimes(BASE_WORKFLOW_COUNT + MEMORY_WORKFLOW_COUNT);
+    const memoryWorkflowIds = [
+      SIGNIFICANT_EVENTS_MEMORY_SYNTHESIS_WORKFLOW_ID,
+      SIGNIFICANT_EVENTS_MEMORY_CONSOLIDATION_WORKFLOW_ID,
+      SIGNIFICANT_EVENTS_MEMORY_CONVERSATION_SCRAPER_WORKFLOW_ID,
+      SIGNIFICANT_EVENTS_MEMORY_GAP_DETECTION_WORKFLOW_ID,
+    ];
+
+    for (const workflowId of memoryWorkflowIds) {
+      expect(client.install).toHaveBeenCalledWith(workflowId, {
+        spaceId: GLOBAL_WORKFLOW_SPACE_ID,
+      });
+    }
   });
 
-  it('installs the investigation workflow only when the investigation flag is enabled', async () => {
-    const { client, installer } = createInstaller({
-      isInvestigationEnabled: jest.fn().mockResolvedValue(true),
-    });
+  it('installs the investigation workflow when available', async () => {
+    const { client, installer } = createInstaller();
 
     await installer.install();
 
@@ -130,7 +139,7 @@ describe('createManagedWorkflowsInstaller', () => {
     await installer.install();
     await installer.install();
 
-    expect(client.install).toHaveBeenCalledTimes(BASE_WORKFLOW_COUNT * 2);
+    expect(client.install).toHaveBeenCalledTimes(TOTAL_WORKFLOW_COUNT * 2);
     expect(client.ready).toHaveBeenCalledTimes(1);
   });
 
@@ -140,7 +149,7 @@ describe('createManagedWorkflowsInstaller', () => {
     await Promise.all([installer.install(), installer.install()]);
 
     expect(client.ready).toHaveBeenCalledTimes(1);
-    expect(client.install).toHaveBeenCalledTimes(BASE_WORKFLOW_COUNT * 2);
+    expect(client.install).toHaveBeenCalledTimes(TOTAL_WORKFLOW_COUNT * 2);
   });
 
   it('propagates install failures and retries reconciliation on the next call', async () => {

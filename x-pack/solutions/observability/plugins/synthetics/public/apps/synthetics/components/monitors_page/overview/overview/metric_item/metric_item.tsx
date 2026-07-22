@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import moment from 'moment';
 import React, { useState, useMemo } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import type { OverviewTrend } from '../../../../../../../../common/types';
 import { useMetricSubtitle } from '../../../../../hooks/use_metric_subtitle';
 import { MetricItemExtra } from './metric_item_extra';
