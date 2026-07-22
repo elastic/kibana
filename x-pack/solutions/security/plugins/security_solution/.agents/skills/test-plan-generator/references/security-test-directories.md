@@ -72,6 +72,8 @@ These skills describe test file conventions, runner commands, authentication pat
 > ```
 >
 > Each namespace has its own `parallel.playwright.config.ts` and `fixtures/` tree. Use `test/scout/<namespace>/ui/` (or `api/`) in place of the generic `test/scout*/ui/` glob when working with Security Solution tests. A structural guard in kbn-scout enforces this: root-level `test/scout/{ui,api}/` and namespace dirs cannot coexist in the same plugin.
+>
+> **Adding tests for a new feature area?** Namespaces map 1-to-1 with top-level source directories under `public/`. If the feature source lives in a directory not already represented (e.g., `public/asset_inventory/`), a new namespace is needed. If it lives inside an existing namespace's scope, add to that namespace. See the **Namespace selection** section in `security-cypress-to-scout-migration` for the full decision table and creation steps.
 
 ---
 

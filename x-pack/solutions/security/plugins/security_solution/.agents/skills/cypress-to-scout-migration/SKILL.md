@@ -87,6 +87,44 @@ When in doubt: if the Cypress test primarily calls `cy.request()` for setup and 
 
 All paths relative to this skill's directory.
 
+## Namespace selection — where does the test belong?
+
+Before scaffolding, decide which namespace the migrated test belongs in.
+
+### Add to an existing namespace when:
+
+- The feature under test lives inside a source directory already represented by a namespace (e.g., anything under `public/entity_analytics/` → `test/scout/entity_analytics/`)
+- The CODEOWNERS for the new file match an existing namespace
+
+Existing namespaces and their source scope:
+
+| Namespace | Source scope |
+|-----------|-------------|
+| `entity_analytics` | `public/entity_analytics/` |
+| `flyout` | `public/flyout/` |
+| `timelines` | `public/timelines/` |
+| `agent_builder` | `public/agent_builder/` |
+| `reports` | `public/reports/` |
+| `workflows` | `public/workflows/` |
+
+### Create a new namespace when:
+
+- The feature source lives in a top-level directory under `public/` not in the table above (e.g., `public/asset_inventory/` → namespace `asset_inventory`)
+- The tests will be owned by a different team than any existing namespace (different CODEOWNERS line)
+- There are 3 or more test specs — single tests do not justify a new Playwright config
+
+### How to create a new namespace:
+
+1. Name it after the top-level source directory (`public/<area>/` → namespace `<area>`)
+2. Copy the directory structure from an existing namespace: `test/scout/timelines/ui/` is a minimal reference
+3. Add a CODEOWNERS entry for `x-pack/solutions/security/plugins/security_solution/test/scout/<area>/`
+4. Add the namespace to the namespace table in `security-test-directories.md` (in this skill set)
+5. Register the new config in CI: update `.buildkite/scout_ci_config.yml` (look for `security_solution` entries)
+
+> **Do not** create a namespace for a sub-component of an existing feature area — add those tests to the parent namespace (e.g., a new risk-score view → `entity_analytics`, not a new `risk_score` namespace).
+
+---
+
 ## Scaffold shortcut
 
 Use the general skill's scaffold with Security Solution defaults. Security Solution tests are organised into namespace sub-directories, so pass the correct `<namespace>` for the feature area being migrated (e.g. `timelines`, `entity_analytics`, `flyout`, `reports`, `workflows`, `agent_builder`):

@@ -90,6 +90,7 @@ Security Solution Scout tests use a namespace sub-directory structure. Each feat
 - Parallel specs go in `test/scout/<namespace>/ui/parallel_tests/`
 - Sequential specs go in `test/scout/<namespace>/ui/tests/`
 - Root-level `test/scout/ui/` or `test/scout/api/` no longer exist in `security_solution`; a structural guard in kbn-scout enforces that root-level and namespace-based layouts cannot coexist
+- If a test is placed in a namespace that doesn't match its source scope (e.g., a flyout test landed in `entity_analytics/`), flag it — see the **Namespace selection** section of `security-cypress-to-scout-migration` for the source-scope table and creation criteria
 
 ## Migration parity (Security-specific additions)
 
