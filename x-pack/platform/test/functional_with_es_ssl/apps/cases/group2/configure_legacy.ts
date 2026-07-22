@@ -28,7 +28,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const find = getService('find');
   const retry = getService('retry');
 
-  describe('Configure - legacy custom fields and templates', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/280016
+  describe.skip('Configure - legacy custom fields and templates', function () {
     before(async () => {
       await cases.navigation.navigateToConfigurationPage();
     });
