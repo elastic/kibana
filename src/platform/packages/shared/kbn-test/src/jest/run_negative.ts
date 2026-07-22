@@ -175,17 +175,23 @@ const runScenario = async (
 ): Promise<ScenarioOutcome> => {
   log.write(`--- Negative canary: ${scenario.name} (${scenario.description})`);
 
+  // Strip BUILDKITE so jest_all's checkpoint/resume can't skip a canary on a step
+  // retry: process_exit_zero exits 0 by design, gets marked "done", and would then be
+  // skipped on the next attempt — dropping the output this canary asserts on.
+  const childEnv: NodeJS.ProcessEnv = {
+    ...process.env,
+    JEST_WARMUP_DELAY_MS: '0',
+    ...scenario.env,
+  };
+  delete childEnv.BUILDKITE;
+
   const started = Date.now();
   const subprocess = execa('node', ['scripts/jest_all', '--configs', scenario.configPath], {
     cwd: REPO_ROOT,
     reject: false,
     all: true,
     detached: true, // detached=true: own process group so a timeout can SIGKILL the whole tree
-    env: {
-      ...process.env,
-      JEST_WARMUP_DELAY_MS: '0',
-      ...scenario.env,
-    },
+    env: childEnv,
   });
 
   let timedOut = false;
