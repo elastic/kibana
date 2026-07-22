@@ -119,13 +119,13 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
         title: 'Reconcile osquery pack schedule IDs onto the Fleet wire',
         timeout: '5m',
         maxAttempts: 3,
-        createTaskRunner: ({ abortController, taskInstance }) => ({
+        createTaskRunner: ({ signal, taskInstance }) => ({
           run: async () =>
             runReconcileTask({
               coreStart: this.coreStart,
               osqueryContext: this.osqueryAppContextService,
               logger: this.logger,
-              abortController,
+              signal,
               isRruleFeatureEnabled: this.rruleSchedulingEnabled,
               taskState: taskInstance?.state,
             }),

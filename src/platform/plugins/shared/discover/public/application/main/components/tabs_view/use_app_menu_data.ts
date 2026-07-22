@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useCallback, useState } from 'react';
-import type { EuiResizeObserverProps } from '@elastic/eui';
+import { useCallback } from 'react';
 import type { UnifiedTabsProps } from '@kbn/unified-tabs';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import { i18n } from '@kbn/i18n';
@@ -17,15 +16,11 @@ import { useInternalStateSelector, selectAllTabs } from '../../state_management/
 import { useTopNavMenuItems } from '../top_nav/use_top_nav_menu_items';
 import { useCurrentTabMenuActions } from '../../hooks/use_current_tab_menu_actions';
 
-const APP_MENU_COLLAPSE_THRESHOLD = 800;
-
 interface UseAppMenuDataParams {
   currentDataView: DataView | undefined;
 }
 
 interface UseAppMenuDataResult {
-  shouldCollapseAppMenu: boolean;
-  onResize: EuiResizeObserverProps['onResize'];
   getTopTabMenuItems: UnifiedTabsProps['getTopTabMenuItems'];
   getAdditionalTabMenuItems: UnifiedTabsProps['getAdditionalTabMenuItems'];
   topNavMenuItems: AppMenuConfig | undefined;
@@ -34,14 +29,8 @@ interface UseAppMenuDataResult {
 export const useAppMenuData = ({ currentDataView }: UseAppMenuDataParams): UseAppMenuDataResult => {
   const allTabs = useInternalStateSelector(selectAllTabs);
   const currentTabId = useInternalStateSelector((state) => state.tabs.unsafeCurrentId);
-  const [shouldCollapseAppMenu, setShouldCollapseAppMenu] = useState(false);
   const { canSwitchLanguageMode, isDataViewMode, openInspector, switchLanguageMode } =
     useCurrentTabMenuActions({ currentDataView });
-
-  const onResize: EuiResizeObserverProps['onResize'] = useCallback((dimensions) => {
-    if (!dimensions) return;
-    setShouldCollapseAppMenu(dimensions.width < APP_MENU_COLLAPSE_THRESHOLD);
-  }, []);
 
   const getTopTabMenuItems = useCallback<NonNullable<UnifiedTabsProps['getTopTabMenuItems']>>(
     (item) => {
@@ -108,8 +97,6 @@ export const useAppMenuData = ({ currentDataView }: UseAppMenuDataParams): UseAp
   const topNavMenuItems = useTopNavMenuItems();
 
   return {
-    shouldCollapseAppMenu,
-    onResize,
     getTopTabMenuItems,
     getAdditionalTabMenuItems,
     topNavMenuItems,
