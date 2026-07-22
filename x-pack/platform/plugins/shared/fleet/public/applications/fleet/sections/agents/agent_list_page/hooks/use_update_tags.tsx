@@ -91,6 +91,7 @@ export const useUpdateTags = () => {
             includeInactive: true,
           }),
         onSuccess,
+        undefined,
         successMessage,
         errorMessage
       );
