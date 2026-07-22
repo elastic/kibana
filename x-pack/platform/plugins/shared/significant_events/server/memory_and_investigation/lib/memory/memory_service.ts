@@ -243,9 +243,9 @@ export class MemoryServiceImpl implements MemoryService {
    * {@link getBacklinks} and {@link search}), so resolve each reference to a page id here:
    * an input matching a live page `id` is kept; one matching a live page `name` is replaced with
    * that page's `id`; anything else is preserved verbatim (legitimate forward references and
-   * pre-existing ids survive). A single collapsed lookup covers every reference (INV-006).
+   * pre-existing ids survive). A single collapsed lookup covers every reference.
    *
-   * On lookup failure the references are returned unchanged (INV-007). `_searchLatest` already
+   * On lookup failure the references are returned unchanged. `_searchLatest` already
    * swallows `index_not_found_exception` by returning zero hits, so a missing index yields
    * verbatim passthrough naturally (no match) without reaching the catch.
    */

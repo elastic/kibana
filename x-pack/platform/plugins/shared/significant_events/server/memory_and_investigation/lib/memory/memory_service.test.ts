@@ -585,7 +585,7 @@ describe('MemoryServiceImpl', () => {
       mockedUuidV4.mockImplementation(() => `uuid-${counter++}`);
     };
 
-    it('stores references that are already ids unchanged (INV-001)', async () => {
+    it('stores references that are already ids unchanged', async () => {
       useIncrementingUuids();
       const { service } = createService();
 
@@ -609,7 +609,7 @@ describe('MemoryServiceImpl', () => {
       });
     });
 
-    it('resolves a reference given as an existing page name to that page id (INV-002)', async () => {
+    it('resolves a reference given as an existing page name to that page id', async () => {
       useIncrementingUuids();
       const { service } = createService();
 
@@ -633,7 +633,7 @@ describe('MemoryServiceImpl', () => {
       });
     });
 
-    it('preserves a reference matching neither an id nor a name verbatim (INV-003)', async () => {
+    it('preserves a reference matching neither an id nor a name verbatim', async () => {
       useIncrementingUuids();
       const { service } = createService();
 
@@ -705,7 +705,7 @@ describe('MemoryServiceImpl', () => {
       });
     });
 
-    it('stores references verbatim and logs at debug when the lookup throws a non-index error (INV-007)', async () => {
+    it('stores references verbatim and logs at debug when the lookup throws a non-index error', async () => {
       useIncrementingUuids();
       const { service, esClient } = createService();
 
@@ -812,7 +812,7 @@ describe('MemoryServiceImpl', () => {
       });
     });
 
-    it('issues exactly one normalization lookup regardless of reference count (INV-006)', async () => {
+    it('issues exactly one normalization lookup regardless of reference count', async () => {
       useIncrementingUuids();
       const { service, esClient } = createService();
 
