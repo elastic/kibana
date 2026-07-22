@@ -1,0 +1,80 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { HttpHandler } from '@kbn/core/public';
+import type { ToolingLog } from '@kbn/tooling-log';
+import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
+import { withRetry } from '@kbn/evals';
+
+interface ConverseStep {
+  type?: string;
+  tool_id?: string;
+  tool_call_id?: string;
+  params?: Record<string, unknown>;
+  results?: unknown[];
+  [k: string]: unknown;
+}
+
+export interface ConverseResponse {
+  message: string;
+  steps: ConverseStep[];
+  conversationId?: string;
+  traceId?: string | null;
+}
+
+interface ConverseApiResponse {
+  conversation_id?: string;
+  trace_id?: string;
+  steps?: ConverseStep[];
+  response?: { message?: string };
+}
+
+export class PersonaMatrixChatClient {
+  constructor(
+    private readonly fetch: HttpHandler,
+    private readonly log: ToolingLog,
+    private readonly connectorId: string
+  ) {}
+
+  async query(input: string, attachment?: string): Promise<ConverseResponse> {
+    const call = async (): Promise<ConverseResponse> => {
+      const body: Record<string, unknown> = {
+        agent_id: agentBuilderDefaultAgentId,
+        connector_id: this.connectorId,
+        input,
+        // Run inline so the eval worker's W3C traceparent propagates
+        // to the agent's server-side gen_ai spans.
+        _execution_mode: 'local',
+      };
+
+      if (attachment) {
+        body.attachments = [{ type: 'text', data: { content: attachment } }];
+      }
+
+      const resp = await this.fetch<ConverseApiResponse>({
+        path: '/api/agent_builder/converse',
+        method: 'POST',
+        version: '2023-10-31',
+        body: JSON.stringify(body),
+      });
+
+      return {
+        message: resp.response?.message ?? '',
+        steps: resp.steps ?? [],
+        conversationId: resp.conversation_id,
+        traceId: resp.trace_id ?? null,
+      };
+    };
+
+    return withRetry(call, {
+      maxAttempts: 3,
+      onRetry: ({ attempt, error }) => {
+        this.log.warning(`[persona-matrix] converse retry (attempt ${attempt}): ${String(error)}`);
+      },
+    });
+  }
+}
