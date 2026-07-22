@@ -12643,6 +12643,21 @@ paths:
               schema:
                 $ref: '#/components/schemas/Cases_response_4xx'
           description: Authorization information is missing or invalid.
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Cases_response_4xx'
+          description: The user does not have access to the case.
+        '404':
+          content:
+            application/json:
+              examples:
+                response404:
+                  $ref: '#/components/examples/Cases_response_404'
+              schema:
+                $ref: '#/components/schemas/Cases_response_4xx'
+          description: The case was not found.
       summary: Get the fields applicable to an existing case
       tags:
         - cases
@@ -13496,6 +13511,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/Cases_applicable_fields_response'
           description: Indicates a successful call.
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Cases_response_4xx'
+          description: The request is invalid, for example when the `templateId` does not exist for the owner or its definition is invalid.
         '401':
           content:
             application/json:
@@ -13505,6 +13526,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/Cases_response_4xx'
           description: Authorization information is missing or invalid.
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Cases_response_4xx'
+          description: The user does not have access to the requested owner.
       summary: Get the fields applicable to a case
       tags:
         - cases
