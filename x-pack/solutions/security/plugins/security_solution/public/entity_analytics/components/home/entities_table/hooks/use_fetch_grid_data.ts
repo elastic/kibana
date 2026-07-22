@@ -100,9 +100,20 @@ export function useFetchGridData(options: UseEntitiesOptions) {
         rawResponse,
         rawResponse: { hits },
       } = await lastValueFrom(
-        data.search.search<LatestEntitiesRequest, LatestEntitiesResponse>({
-          params: queryParams as LatestEntitiesRequest['params'],
-        })
+        data.search.search<LatestEntitiesRequest, LatestEntitiesResponse>(
+          {
+            params: queryParams as LatestEntitiesRequest['params'],
+          },
+          {
+            executionContext: {
+              child: {
+                type: 'security_solution',
+                name: 'entity_analytics-home_page',
+                id: 'entities_table',
+              },
+            },
+          }
+        )
       );
 
       return {
