@@ -12,7 +12,7 @@ import { FEEDBACK_SUBMITTED_EVENT_TYPE } from '../src';
 const feedbackQuestionSchema = schema.object({
   id: schema.string({ minLength: 1, maxLength: 256 }),
   question: schema.string({ maxLength: 1024 }),
-  answer: schema.string({ maxLength: 4096 }),
+  answer: schema.string({ maxLength: 16384 }),
 });
 
 const feedbackBodySchema = schema.object({
