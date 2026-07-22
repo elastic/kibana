@@ -26,18 +26,21 @@ const USER_SCRIPT_RUNNER = `
     const proto = Object.getPrototypeOf(value);
     return proto === Object.prototype || proto === null;
   };
-  const sanitize = (value) => {
-    if (Array.isArray(value)) return value.map(sanitize);
-    if (value === null || typeof value !== 'object' || !isPlainObject(value)) return value;
+  const sanitize = (value, seen) => {
+    if (value === null || typeof value !== 'object') return value;
+    if (seen.has(value)) throw new Error('Script returned a value containing a circular reference');
+    seen.add(value);
+    if (Array.isArray(value)) return value.map((v) => sanitize(v, seen));
+    if (!isPlainObject(value)) return value;
     const clean = {};
     for (const key of Object.keys(value)) {
       if (FORBIDDEN_KEYS.has(key)) continue;
-      clean[key] = sanitize(value[key]);
+      clean[key] = sanitize(value[key], seen);
     }
     return clean;
   };
   const functionResult = new Function($0)();
-  return sanitize(functionResult);
+  return sanitize(functionResult, new WeakSet());
 `;
 
 export const runUserScript = (

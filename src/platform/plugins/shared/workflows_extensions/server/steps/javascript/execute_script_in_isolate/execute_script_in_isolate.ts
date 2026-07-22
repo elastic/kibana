@@ -9,6 +9,7 @@
 
 import ivm from 'isolated-vm';
 import { CONSOLE_BRIDGE_SCRIPT } from './console_bridge_script';
+import { createAbortError } from './create_abort_error';
 import { createIsolateWithCatastrophicHandler } from './create_isolate_with_catastrophic_handler';
 import type { ExecuteScriptInIsolateParams } from './execute_script_in_isolate_params';
 import { normalizeIsolateExecutionError } from './normalize_isolate_execution_error';
@@ -24,6 +25,10 @@ export const executeScriptInIsolate = async ({
   executionTimeoutMs,
   maxConsoleLogCount,
 }: ExecuteScriptInIsolateParams): Promise<unknown> => {
+  if (abortSignal.aborted) {
+    throw createAbortError();
+  }
+
   const { isolate, catastrophicPromise } = createIsolateWithCatastrophicHandler({
     memoryLimitMb,
     logger,

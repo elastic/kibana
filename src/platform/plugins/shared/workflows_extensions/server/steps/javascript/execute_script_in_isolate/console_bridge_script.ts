@@ -33,12 +33,30 @@ export const CONSOLE_BRIDGE_SCRIPT = `
   const emit = (level, args) =>
     logBridge.applySync(undefined, [level, formatArgs(args)], { arguments: { copy: true } });
 
+  const noop = () => {};
   globalThis.console = {
     log: (...args) => emit('info', args),
     info: (...args) => emit('info', args),
     warn: (...args) => emit('warn', args),
     error: (...args) => emit('error', args),
     debug: (...args) => emit('debug', args),
+    table: noop,
+    dir: noop,
+    dirxml: noop,
+    assert: noop,
+    trace: noop,
+    count: noop,
+    countReset: noop,
+    group: noop,
+    groupCollapsed: noop,
+    groupEnd: noop,
+    time: noop,
+    timeEnd: noop,
+    timeLog: noop,
+    timeStamp: noop,
+    profile: noop,
+    profileEnd: noop,
+    clear: noop,
   };
 })();
 `;

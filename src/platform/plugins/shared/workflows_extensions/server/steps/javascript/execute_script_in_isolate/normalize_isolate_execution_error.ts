@@ -58,5 +58,9 @@ export const normalizeIsolateExecutionError = (
     return new Error(error.message);
   }
 
+  if (typeof error === 'string') {
+    return new Error(error || 'Script execution failed');
+  }
+
   return new Error('Script execution failed');
 };

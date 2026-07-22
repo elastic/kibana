@@ -23,7 +23,11 @@ export const raceWithAbort = async <T>(
   }
 
   return new Promise<T>((resolve, reject) => {
+    let settled = false;
+
     const onAbort = () => {
+      if (settled) return;
+      settled = true;
       if (!isolate.isDisposed) {
         isolate.dispose();
       }
@@ -34,10 +38,14 @@ export const raceWithAbort = async <T>(
 
     promise.then(
       (value) => {
+        if (settled) return;
+        settled = true;
         abortSignal.removeEventListener('abort', onAbort);
         resolve(value);
       },
       (error) => {
+        if (settled) return;
+        settled = true;
         abortSignal.removeEventListener('abort', onAbort);
         reject(error);
       }
