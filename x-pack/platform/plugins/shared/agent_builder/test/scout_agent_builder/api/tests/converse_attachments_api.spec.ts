@@ -169,6 +169,7 @@ apiTest.describe(
 
           const conversationId = (conRes.body as { conversation_id: string }).conversation_id;
           expect(conversationId).toBeDefined();
+          conversationIds.push(conversationId);
           const conversation = await getConversation(
             apiClient,
             adminCredentials.apiKeyHeader,
