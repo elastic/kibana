@@ -201,6 +201,30 @@ describe('OverviewPage wiring', () => {
     expect(history.location.pathname).toBe('/overview');
   });
 
+  it('redirects when the only overview entry is a stale saved-object monitor (e.g. just deleted)', () => {
+    // A just-deleted saved-object monitor lingers in the overview status until the
+    // next refetch, but it has no `origin: 'heartbeat'` / `remote`, so it must not
+    // block the Getting Started redirect once `absoluteTotal` has dropped to 0.
+    mockUseMonitorList.mockReturnValue({
+      loading: false,
+      loaded: true,
+      handleFilterChange: jest.fn(),
+      absoluteTotal: 0,
+      syntheticsMonitors: [],
+    });
+    mockUseOverviewStatus.mockReturnValue({
+      status: undefined,
+      error: undefined,
+      loading: false,
+      loaded: true,
+      allConfigs: [{ configId: 'deleted-1' }],
+    });
+
+    const history = renderPage();
+
+    expect(history.location.pathname).toBe('/monitors/getting-started');
+  });
+
   it('does not redirect before the overview status has loaded (avoids the empty-state flash)', () => {
     mockUseMonitorList.mockReturnValue({
       loading: false,

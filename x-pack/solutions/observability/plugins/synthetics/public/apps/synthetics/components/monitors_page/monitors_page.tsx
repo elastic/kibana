@@ -12,6 +12,7 @@ import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 import { MonitorsMWsCallout } from '../common/mws_callout/monitors_mws_callout';
 import { DisabledCallout } from './management/disabled_callout';
 import { useOverviewStatus } from './hooks/use_overview_status';
+import { isExternalOverviewMonitor } from '../../state/overview_status';
 import { GETTING_STARTED_ROUTE } from '../../../../../common/constants';
 
 import { useLocations } from '../../hooks';
@@ -46,7 +47,8 @@ export const MonitorManagementPage: React.FC = () => {
   // Ping-only Heartbeat / Elastic Agent (and CCS remote) monitors have no saved object,
   // so they are absent from `absoluteTotal` but surface in the overview status
   // `allConfigs`. Don't redirect to Getting Started when the only monitors are ping-driven.
-  const hasNoMonitors = absoluteTotal === 0 && overviewLoaded && allConfigs.length === 0;
+  const hasNoMonitors =
+    absoluteTotal === 0 && overviewLoaded && !allConfigs.some(isExternalOverviewMonitor);
 
   if (isEnabled && !monitorsLoading && loaded && hasNoMonitors) {
     return <Redirect to={GETTING_STARTED_ROUTE} />;

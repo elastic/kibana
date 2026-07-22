@@ -45,6 +45,20 @@ export const getStatusByConfig = (
   }
 };
 
+/**
+ * A read-only overview monitor that has no Synthetics saved object: a local
+ * Heartbeat / Elastic Agent autodiscover monitor (`origin: 'heartbeat'`) or a
+ * CCS remote monitor (`remote` set). These are absent from the monitor-list
+ * `absoluteTotal` (which counts saved objects only), so they must be checked
+ * separately when deciding whether the app has any monitors to show.
+ *
+ * Intentionally excludes stale saved-object entries (e.g. a just-deleted
+ * monitor still lingering in the overview status until the next refetch), so
+ * deleting the last saved-object monitor still lands on Getting Started.
+ */
+export const isExternalOverviewMonitor = (monitor: OverviewStatusMetaData): boolean =>
+  monitor.origin === 'heartbeat' || Boolean(monitor.remote);
+
 export const selectOverviewStatus = createSelector(
   (state: SyntheticsAppState) => state.overviewStatus,
   (state: SyntheticsAppState) => state.overview.groupBy.field,

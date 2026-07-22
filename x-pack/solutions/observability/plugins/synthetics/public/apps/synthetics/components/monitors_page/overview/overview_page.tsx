@@ -15,6 +15,7 @@ import { OverviewAlerts } from './overview/overview_alerts';
 import { useEnablement } from '../../../hooks';
 import { selectOverviewView, selectServiceLocationsState } from '../../../state';
 import { getServiceLocations } from '../../../state/service_locations';
+import { isExternalOverviewMonitor } from '../../../state/overview_status';
 import { GETTING_STARTED_ROUTE, MONITORS_ROUTE } from '../../../../../../common/constants';
 
 import { useMonitorList } from '../hooks/use_monitor_list';
@@ -71,10 +72,10 @@ export const OverviewPage: React.FC = () => {
     absoluteTotal,
   } = useMonitorList();
 
-  // Ping-only Heartbeat / Elastic Agent monitors (`origin: 'heartbeat'`, CCS remote
-  // monitors) have no saved object, so they are absent from `absoluteTotal` but present
-  // in the overview status `allConfigs`. Wait for the overview status to load and treat
-  // its entries as monitors so we don't redirect to Getting Started (and flash the grid)
+  // Ping-only Heartbeat / Elastic Agent (and CCS remote) monitors have no saved object,
+  // so they are absent from `absoluteTotal` but present in the overview status
+  // `allConfigs`. Wait for the overview status to load and keep the page mounted when it
+  // holds such monitors, so we don't redirect to Getting Started (and flash the grid)
   // when the only monitors are ping-driven.
   const hasNoMonitors =
     !search &&
@@ -82,7 +83,7 @@ export const OverviewPage: React.FC = () => {
     monitorsLoaded &&
     absoluteTotal === 0 &&
     overviewLoaded &&
-    allConfigs.length === 0;
+    !allConfigs.some(isExternalOverviewMonitor);
 
   if (hasNoMonitors && !monitorsLoading && isEnabled) {
     return <Redirect to={GETTING_STARTED_ROUTE} />;
