@@ -276,16 +276,16 @@ const StatsWithCharts: React.FC = () => {
   const executionChartData = MOCK_EXECUTION_BARS.map((b) => ({
     label: b.hour,
     values: [
-      { value: b.success, color: euiTheme.colors.vis.euiColorVis0 },
-      { value: b.failed, color: euiTheme.colors.vis.euiColorVis9 },
+      { value: b.success, color: euiTheme.colors.success },
+      { value: b.failed, color: euiTheme.colors.danger },
     ],
   }));
 
   const failureChartData = MOCK_FAILURE_BARS.map((b) => ({
     label: b.hour,
     values: [
-      { value: b.rules, color: euiTheme.colors.vis.euiColorVis9 },
-      { value: b.policies, color: euiTheme.colors.vis.euiColorVis5 },
+      { value: b.rules, color: euiTheme.colors.vis.euiColorVis2 },
+      { value: b.policies, color: euiTheme.colors.vis.euiColorVis8 },
     ],
   }));
 
@@ -348,10 +348,10 @@ const StatsWithCharts: React.FC = () => {
               <MiniBarChart data={executionChartData} height={72} />
               <EuiFlexGroup gutterSize="m" responsive={false} css={css({ marginTop: 4 })}>
                 <EuiFlexItem grow={false}>
-                  <ChartLegendDot color={euiTheme.colors.vis.euiColorVis0} label="Success" />
+                  <ChartLegendDot color={euiTheme.colors.success} label="Success" />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <ChartLegendDot color={euiTheme.colors.vis.euiColorVis9} label="Failed" />
+                  <ChartLegendDot color={euiTheme.colors.danger} label="Failed" />
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
@@ -418,10 +418,10 @@ const StatsWithCharts: React.FC = () => {
               <MiniBarChart data={failureChartData} height={72} />
               <EuiFlexGroup gutterSize="m" responsive={false} css={css({ marginTop: 4 })}>
                 <EuiFlexItem grow={false}>
-                  <ChartLegendDot color={euiTheme.colors.vis.euiColorVis9} label="Rules" />
+                  <ChartLegendDot color={euiTheme.colors.vis.euiColorVis2} label="Rules" />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <ChartLegendDot color={euiTheme.colors.vis.euiColorVis5} label="Policies" />
+                  <ChartLegendDot color={euiTheme.colors.vis.euiColorVis8} label="Policies" />
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>

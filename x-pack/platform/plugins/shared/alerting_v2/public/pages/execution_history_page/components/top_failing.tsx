@@ -392,7 +392,16 @@ const MOCK_CHAINS: FailingChain[] = [
         status: 'failed',
         icon: 'editorComment',
         iconColor: '#E67300',
-        meta: 'Action policy · matcher: all alerts · 129 episodes queued',
+        meta: 'Action policy · matcher: all alerts · dispatch failed',
+      },
+      {
+        id: 'workflow-new',
+        label: 'New workflow',
+        type: 'workflow',
+        status: 'warning',
+        icon: 'pipeNoBreaks',
+        iconColor: '#00836D',
+        meta: 'Workflow · not reached · 0 runs',
       },
     ],
     occurrences: 129,
@@ -432,6 +441,7 @@ const buildLinearGraph = (
 
   const edges: Edge[] = [];
   for (let i = 0; i < steps.length - 1; i++) {
+    const sourceStatus = steps[i].status;
     edges.push({
       id: `edge-${i}`,
       source: `step-${i}`,
@@ -439,7 +449,7 @@ const buildLinearGraph = (
       type: 'sequenceArrow',
       markerEnd: { type: MarkerType.ArrowClosed },
       style: {
-        stroke: steps[i + 1].status === 'failed' ? '#BD271E' : '#D3DAE6',
+        stroke: sourceStatus === 'failed' ? '#BD271E' : sourceStatus === 'success' ? '#00BFB3' : '#D3DAE6',
         strokeWidth: 2,
       },
     });
@@ -458,9 +468,15 @@ const buildFanInGraph = (
 ) => {
   const nodes: SequenceStepNode[] = [];
   const edges: Edge[] = [];
-  const totalSteps = sources.length + targets.length;
   const sourcesHeight = sources.length * NODE_HEIGHT + (sources.length - 1) * ROW_GAP;
   const startY = -sourcesHeight / 2 + NODE_HEIGHT / 2;
+
+  const resolveClick = (step: ChainStep) =>
+    step.type === 'rule' && onRuleClick
+      ? () => onRuleClick(step.id)
+      : step.type === 'policy' && onPolicyClick
+      ? () => onPolicyClick(step.id)
+      : undefined;
 
   sources.forEach((step, i) => {
     nodes.push({
@@ -468,17 +484,7 @@ const buildFanInGraph = (
       type: 'sequenceStep',
       position: { x: 0, y: startY + i * (NODE_HEIGHT + ROW_GAP) },
       style: { width: NODE_WIDTH, height: NODE_HEIGHT },
-      data: {
-        ...step,
-        stepIndex: 0,
-        totalSteps: 2,
-        onClickLink:
-          step.type === 'rule' && onRuleClick
-            ? () => onRuleClick(step.id)
-            : step.type === 'policy' && onPolicyClick
-            ? () => onPolicyClick(step.id)
-            : undefined,
-      },
+      data: { ...step, stepIndex: 0, totalSteps: 2, onClickLink: resolveClick(step) },
     });
   });
 
@@ -486,37 +492,47 @@ const buildFanInGraph = (
     nodes.push({
       id: `target-${i}`,
       type: 'sequenceStep',
-      position: { x: NODE_WIDTH + NODE_GAP, y: i * (NODE_HEIGHT + ROW_GAP) - (targets.length > 1 ? ((targets.length - 1) * (NODE_HEIGHT + ROW_GAP)) / 2 : 0) },
+      position: { x: (i + 1) * (NODE_WIDTH + NODE_GAP), y: 0 },
       style: { width: NODE_WIDTH, height: NODE_HEIGHT },
       data: {
         ...step,
-        stepIndex: 1,
-        totalSteps: 2,
-        onClickLink:
-          step.type === 'rule' && onRuleClick
-            ? () => onRuleClick(step.id)
-            : step.type === 'policy' && onPolicyClick
-            ? () => onPolicyClick(step.id)
-            : undefined,
+        stepIndex: i === 0 ? 1 : i + 1,
+        totalSteps: targets.length + 1,
+        onClickLink: resolveClick(step),
       },
     });
   });
 
-  sources.forEach((_, si) => {
-    targets.forEach((target, ti) => {
-      edges.push({
-        id: `edge-s${si}-t${ti}`,
-        source: `source-${si}`,
-        target: `target-${ti}`,
-        type: 'sequenceArrow',
-        markerEnd: { type: MarkerType.ArrowClosed },
-        style: {
-          stroke: target.status === 'failed' ? '#BD271E' : '#D3DAE6',
-          strokeWidth: 2,
-        },
-      });
+  // source → first target edges
+  sources.forEach((source, si) => {
+    edges.push({
+      id: `edge-s${si}-t0`,
+      source: `source-${si}`,
+      target: `target-0`,
+      type: 'sequenceArrow',
+      markerEnd: { type: MarkerType.ArrowClosed },
+      style: {
+        stroke: source.status === 'failed' ? '#BD271E' : source.status === 'success' ? '#00BFB3' : '#D3DAE6',
+        strokeWidth: 2,
+      },
     });
   });
+
+  // target chain edges (e.g. policy → workflow)
+  for (let i = 0; i < targets.length - 1; i++) {
+    const sourceStatus = targets[i].status;
+    edges.push({
+      id: `edge-t${i}-t${i + 1}`,
+      source: `target-${i}`,
+      target: `target-${i + 1}`,
+      type: 'sequenceArrow',
+      markerEnd: { type: MarkerType.ArrowClosed },
+      style: {
+        stroke: sourceStatus === 'failed' ? '#BD271E' : sourceStatus === 'success' ? '#00BFB3' : '#D3DAE6',
+        strokeWidth: 2,
+      },
+    });
+  }
 
   return { nodes, edges };
 };

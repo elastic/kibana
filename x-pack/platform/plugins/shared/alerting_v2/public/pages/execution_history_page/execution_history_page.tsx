@@ -27,7 +27,7 @@ const RULES_TAB_ID = 'rules';
 type TabId = typeof POLICIES_TAB_ID | typeof RULES_TAB_ID;
 
 const EXECUTION_HISTORY_PAGE_TITLE = i18n.translate('xpack.alertingV2.executionHistory.pageTitle', {
-  defaultMessage: 'Execution history',
+  defaultMessage: 'Global execution',
 });
 
 const getExecutionHistoryTabs = ({
