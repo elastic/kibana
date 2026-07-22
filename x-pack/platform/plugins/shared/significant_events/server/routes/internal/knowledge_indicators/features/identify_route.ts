@@ -28,6 +28,35 @@ import {
 } from '../../../../lib/significant_events/features';
 import { shouldIdentifyFeatures } from '../../../../lib/significant_events/features/should_identify_features';
 import { isSignificantEventsSemanticCodeSearchGroundingEnabled } from '../../../../lib/semantic_code_search_grounding/is_significant_events_semantic_code_search_grounding_enabled';
+import type { SyncWorkflowService } from '../../../../lib/workflows/sync_workflow';
+
+// Best-effort bootstrap of the standalone KI sync (groundedness) sweep workflow.
+// Feature extraction is the only ongoing coupling to sync: it runs under a
+// request whose API key can schedule the workflow trigger. `ensureEnabled` is
+// idempotent (early return when already enabled), so this is cheap and safe to
+// call on every identify. Non-blocking: a failure here must never fail extraction.
+const bootstrapSyncWorkflow = async ({
+  syncWorkflowService,
+  request,
+  logger,
+}: {
+  syncWorkflowService: SyncWorkflowService | undefined;
+  request: Parameters<SyncWorkflowService['ensureEnabled']>[0]['request'];
+  logger: { warn: (message: string) => void };
+}): Promise<void> => {
+  if (!syncWorkflowService) {
+    return;
+  }
+  try {
+    await syncWorkflowService.ensureEnabled({ request });
+  } catch (error) {
+    logger.warn(
+      `Failed to ensure KI sync workflow is enabled: ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
+  }
+};
 
 // ---------------------------------------------------------------------------
 // Route 1: Identify inferred features (one iteration: sample + infer + reconcile)
@@ -66,7 +95,15 @@ const identifyInferredFeaturesRoute = createServerRoute({
       .nullable()
       .optional(),
   }),
-  handler: async ({ params, request, getScopedClients, server, logger, telemetry }) => {
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    server,
+    logger,
+    telemetry,
+    syncWorkflowService,
+  }) => {
     const scopedClients = await getScopedClients({ request });
     const {
       scopedClusterClient,
@@ -149,6 +186,9 @@ const identifyInferredFeaturesRoute = createServerRoute({
         diverseOffset,
         trackFeaturesIdentified: (data) => telemetry.trackFeaturesIdentified(data),
       });
+
+      await bootstrapSyncWorkflow({ syncWorkflowService, request, logger: routeLogger });
+
       return { ...result, connectorId };
     } catch (error) {
       routeLogger.error(
@@ -217,7 +257,15 @@ const identifyComputedFeaturesRoute = createServerRoute({
       .nullable()
       .optional(),
   }),
-  handler: async ({ params, request, getScopedClients, server, logger, telemetry }) => {
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    server,
+    logger,
+    telemetry,
+    syncWorkflowService,
+  }) => {
     const scopedClients = await getScopedClients({ request });
     const { scopedClusterClient, streamsClient, licensing } = scopedClients;
 
@@ -254,6 +302,8 @@ const identifyComputedFeaturesRoute = createServerRoute({
           ? { agentBuilderTools: server.agentBuilder?.tools, request, telemetry }
           : {}),
       });
+
+      await bootstrapSyncWorkflow({ syncWorkflowService, request, logger: routeLogger });
 
       return {
         computedFeatures,

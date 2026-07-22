@@ -23,6 +23,7 @@ import type { EbtTelemetryClient } from '../lib/telemetry';
 import type { KnowledgeIndicatorClient } from '../lib/knowledge_indicators';
 import type { SignificantEventsClients } from '../lib/significant_events/significant_events_clients';
 import type { ContinuousKiOnboardingWorkflowService } from '../lib/workflows/continuous_onboarding_workflow';
+import type { SyncWorkflowService } from '../lib/workflows/sync_workflow';
 import type { SignificantEventsScheduledWorkflowsService } from '../lib/workflows/significant_events_scheduled_workflows';
 import type { WorkflowClients } from '../lib/workflows/create_workflow_clients';
 
@@ -53,6 +54,7 @@ export interface RouteDependencies {
   telemetry: EbtTelemetryClient;
   getScopedClients: GetScopedClients;
   continuousKiOnboardingWorkflowService?: ContinuousKiOnboardingWorkflowService;
+  syncWorkflowService?: SyncWorkflowService;
   significantEventsScheduledWorkflowsService?: SignificantEventsScheduledWorkflowsService;
   workflowClients: WorkflowClients;
   getSpaceId: (request: KibanaRequest) => Promise<string>;
