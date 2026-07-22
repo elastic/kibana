@@ -355,3 +355,42 @@ export const GCP_SERVICE_ACCOUNT_SCOPE_HELP_TEXT = i18n.translate(
       'OAuth scope for the access token. Defaults to https://www.googleapis.com/auth/cloud-platform.',
   }
 );
+
+export const ARGOCD_AUTH_LABEL = i18n.translate('connectorSpecs.argocdAuth.label', {
+  defaultMessage: 'API token',
+});
+
+export const ARGOCD_AUTH_TOKEN_LABEL = i18n.translate('connectorSpecs.argocdAuth.token.label', {
+  defaultMessage: 'Token',
+});
+
+export const ARGOCD_AUTH_TOKEN_REQUIRED_MESSAGE = i18n.translate(
+  'connectorSpecs.argocdAuth.token.requiredMessage',
+  {
+    defaultMessage: 'An Argo CD API token is required.',
+  }
+);
+
+export const ARGOCD_AUTH_CA_LABEL = i18n.translate('connectorSpecs.argocdAuth.ca.label', {
+  defaultMessage: 'Server CA certificate (PEM)',
+});
+
+export const ARGOCD_AUTH_CA_HELP_TEXT = i18n.translate('connectorSpecs.argocdAuth.ca.helpText', {
+  defaultMessage:
+    'Paste the PEM-encoded certificate authority used to verify the Argo CD server. Leave empty to rely on the system trust store or to disable verification.',
+});
+
+export const ARGOCD_AUTH_VERIFICATION_MODE_LABEL = i18n.translate(
+  'connectorSpecs.argocdAuth.verificationMode.label',
+  {
+    defaultMessage: 'Verification mode',
+  }
+);
+
+export const ARGOCD_AUTH_VERIFICATION_MODE_HELP_TEXT = i18n.translate(
+  'connectorSpecs.argocdAuth.verificationMode.helpText',
+  {
+    defaultMessage:
+      'How to verify the Argo CD server TLS certificate. "full" verifies the certificate and hostname, "certificate" verifies the certificate only, and "none" disables verification (not recommended).',
+  }
+);
