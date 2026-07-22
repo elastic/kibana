@@ -223,6 +223,11 @@ export const ConnectorIconsMap: Map<
 
   [
     '.ansible_controller',
-    lazy(() => import(/* webpackChunkName: "connectorIconAnsibleController" */ './specs/ansible_controller/icon')),
+    lazy(
+      () =>
+        import(
+          /* webpackChunkName: "connectorIconAnsibleController" */ './specs/ansible_controller/icon'
+        )
+    ),
   ],
 ]);
