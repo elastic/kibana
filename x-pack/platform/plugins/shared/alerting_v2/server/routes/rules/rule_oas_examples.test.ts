@@ -6,10 +6,10 @@
  */
 
 import {
+  bulkByIdsSchema,
   bulkGetRulesParamsSchema,
   bulkGetRulesResponseSchema,
-  bulkOperationParamsSchema,
-  bulkOperationResponseSchema,
+  bulkResponseSchema,
   createRuleDataSchema,
   findRulesResponseSchema,
   ruleResponseSchema,
@@ -41,8 +41,8 @@ describe('rule OAS example payloads', () => {
     expect(bulkGetRulesParamsSchema.safeParse(BULK_GET_RULES_REQUEST).success).toBe(true);
   });
 
-  it('keeps bulk-operation request examples valid against bulkOperationParamsSchema', () => {
-    expect(bulkOperationParamsSchema.safeParse(BULK_OPERATION_REQUEST).success).toBe(true);
+  it('keeps bulk-operation request examples valid against bulkByIdsSchema', () => {
+    expect(bulkByIdsSchema.safeParse(BULK_OPERATION_REQUEST).success).toBe(true);
   });
 
   it('keeps rule response examples valid against ruleResponseSchema', () => {
@@ -57,8 +57,8 @@ describe('rule OAS example payloads', () => {
     expect(bulkGetRulesResponseSchema.safeParse(BULK_GET_RULES_RESPONSE).success).toBe(true);
   });
 
-  it('keeps bulk-operation response example valid against bulkOperationResponseSchema', () => {
-    expect(bulkOperationResponseSchema.safeParse(BULK_OPERATION_RESPONSE).success).toBe(true);
+  it('keeps bulk-operation response example valid against bulkResponseSchema', () => {
+    expect(bulkResponseSchema.safeParse(BULK_OPERATION_RESPONSE).success).toBe(true);
   });
 
   it('keeps rule tags response example valid against ruleTagsResponseSchema', () => {

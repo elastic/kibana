@@ -560,6 +560,19 @@ export class Plugin
       );
     });
 
+    const agentBuilder = pluginsStart.agentBuilder;
+    if (agentBuilder) {
+      void import('./pages/nightshift/agent_builder/significant_event_attachments')
+        .then(({ registerNightshiftAgentBuilderAttachments }) => {
+          registerNightshiftAgentBuilderAttachments({ agentBuilder });
+        })
+        .catch((error) => {
+          this.initContext.logger
+            .get('nightshiftAgentBuilderAttachments')
+            .error(`Failed to register agent builder attachments: ${error}`);
+        });
+    }
+
     return {
       config,
       observabilityRuleTypeRegistry: this.observabilityRuleTypeRegistry,

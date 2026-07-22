@@ -6,10 +6,10 @@
  */
 
 import type {
+  BulkByIdsParams,
   BulkGetRulesParams,
   BulkGetRulesResponse,
-  BulkOperationParams,
-  BulkOperationResponse,
+  BulkResponse,
   CreateRuleDataInput,
   ErrorResponse,
   FindRulesResponse,
@@ -99,7 +99,7 @@ export const BULK_GET_RULES_REQUEST: BulkGetRulesParams = {
   ids: ['rule-1', 'rule-2'],
 };
 
-export const BULK_OPERATION_REQUEST: BulkOperationParams = {
+export const BULK_OPERATION_REQUEST: BulkByIdsParams = {
   ids: ['rule-1', 'rule-2'],
 };
 
@@ -114,8 +114,8 @@ export const BULK_GET_RULES_RESPONSE: BulkGetRulesResponse = {
   rules: [RULE_RESPONSE],
 };
 
-export const BULK_OPERATION_RESPONSE: BulkOperationResponse = {
-  rules: [RULE_RESPONSE],
+export const BULK_OPERATION_RESPONSE: BulkResponse = {
+  affected_count: 2,
   errors: [],
 };
 

@@ -10,7 +10,6 @@ import {
   BULK_OPERATION_REQUEST,
   BULK_OPERATION_RESPONSE,
   INVALID_RULE_DATA_EXAMPLE,
-  RULE_RESPONSE,
   buildRuleOas,
 } from './rule_oas_shared';
 
@@ -25,10 +24,7 @@ export const bulkDisableRulesOasExamples = (): AlertingOasOperationObject =>
       200: {
         name: 'bulkDisableRulesResponse',
         summary: 'Disabled both requested rules',
-        value: {
-          ...BULK_OPERATION_RESPONSE,
-          rules: [{ ...RULE_RESPONSE, enabled: false }],
-        },
+        value: BULK_OPERATION_RESPONSE,
       },
       400: INVALID_RULE_DATA_EXAMPLE,
     },
