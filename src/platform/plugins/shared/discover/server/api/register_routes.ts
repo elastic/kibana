@@ -12,6 +12,7 @@ import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { registerCreateRoute } from './register_create_route';
 import { registerDeleteRoute } from './register_delete_route';
 import { registerGetRoute } from './register_get_route';
+import { registerSearchRoute } from './register_search_route';
 
 export const registerRoutes = (
   http: HttpServiceSetup,
@@ -22,5 +23,6 @@ export const registerRoutes = (
 
   registerCreateRoute(versioned, logger, usageCounter);
   registerGetRoute(versioned, logger, usageCounter);
+  registerSearchRoute(versioned, logger, usageCounter);
   registerDeleteRoute(versioned, logger, usageCounter);
 };
