@@ -299,12 +299,6 @@ export const allowedExperimentalValues = Object.freeze({
   ruleChangesHistoryEnabled: true,
 
   /**
-   * Enables public Detection Engine attacks REST APIs
-   * (`/api/detection_engine/attacks/*`).
-   */
-  publicAttacksApiEnabled: false,
-
-  /**
    * Enables the agent builder `run_rule_preview` tool and the `security.rule.preview`
    * attachment (server type + client renderer). Gates registration so the feature can
    * ship dark and be enabled per environment.
