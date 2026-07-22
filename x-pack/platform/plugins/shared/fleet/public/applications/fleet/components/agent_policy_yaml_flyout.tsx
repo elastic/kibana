@@ -59,11 +59,7 @@ export const AgentPolicyYamlFlyout = memo<{
   const core = useStartServices();
   const authz = useAuthz();
   const canReadSettings = authz.fleet.readSettings;
-  const {
-    isLoading: isLoadingYaml,
-    data: yamlData,
-    error,
-  } = useGetOneAgentPolicyFull(policyId);
+  const { isLoading: isLoadingYaml, data: yamlData, error } = useGetOneAgentPolicyFull(policyId);
   const { data: agentPolicyData } = useGetOneAgentPolicy(policyId);
   const packagePoliciesContainSecrets = agentPolicyData?.item?.package_policies?.some(
     (packagePolicy) => packagePolicy?.secret_references?.length
