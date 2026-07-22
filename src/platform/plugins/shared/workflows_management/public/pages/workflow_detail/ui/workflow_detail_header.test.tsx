@@ -44,6 +44,7 @@ jest.mock('react-router-dom', () => ({
 
 jest.mock('@elastic/eui', () => ({
   ...jest.requireActual('@elastic/eui'),
+  useCurrentEuiBreakpoint: () => 'xl',
   // Keep app menu breakpoint checks on xl so its items render inline in tests.
   useIsWithinBreakpoints: (breakpoints: string[]) => breakpoints.includes('xl'),
 }));
