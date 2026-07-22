@@ -1471,7 +1471,7 @@
     "immer": "11.1.8",
     "immer-v9": "npm:immer@9.0.21",
     "inquirer": "8.2.7",
-    "inversify": "7.11.0",
+    "inversify": "8.2.1",
     "io-ts": "2.2.22",
     "ipaddr.js": "2.3.0",
     "isbinaryfile": "4.0.2",
