@@ -47,16 +47,28 @@ const FIELD_DEFINITIONS_PAGE_SIZE = 100;
 const BOOTSTRAP_CACHE_TTL_MS = 5 * 60 * 1000;
 
 /**
- * Detects the data-views plugin's "id already exists" conflict surface,
- * which surfaces as ES's `version_conflict_engine_exception`. The plugin's
- * `statusCode` coverage varies by the saved-objects code path the conflict
- * crossed, so both message and statusCode are checked.
+ * Detects the "another node already created this data view" outcome of the
+ * bootstrap create, across the two shapes it can take on the
+ * `create` + `createSavedObject` call site:
  *
- * Used only on the `createAndSave` call site so real version conflicts
+ *   1. ES's `version_conflict_engine_exception` — the SO create itself
+ *      lost the race on the deterministic id. The plugin's `statusCode`
+ *      coverage varies by the saved-objects code path the conflict crossed,
+ *      so both message and statusCode are checked.
+ *   2. The data-views plugin's `DuplicateDataViewError` — `createSavedObject`
+ *      runs a `findByName` dupe check before the create, and when the other
+ *      node's SO has already landed it throws this instead of reaching ES.
+ *      It's a plain `Error` with no `statusCode` and message
+ *      `Duplicate data view: Case Analytics`, so it's matched by `name`.
+ *
+ * Both mean the same thing here (the space's view exists), so both are
+ * treated as a benign, self-healing bootstrap race and logged at DEBUG.
+ * Scoped to the bootstrap create call site so real version conflicts
  * elsewhere (e.g. a stale `updateSavedObject` payload) still surface.
  */
 function isVersionConflictError(err: unknown): boolean {
   if (err == null) return false;
+  if ((err as { name?: string })?.name === 'DuplicateDataViewError') return true;
   const status =
     (err as { statusCode?: number })?.statusCode ??
     (err as { meta?: { statusCode?: number } })?.meta?.statusCode;
@@ -73,24 +85,12 @@ interface CasesAnalyticsV2DataViewServiceDeps {
    * reads. Both are hidden SO types, and the request-scoped client passed
    * at ensure time may not include them in `includedHiddenTypes`. The
    * internal client is opted in to `cases`, `cases-templates`, and
-   * `cases-field-definitions` at plugin start — the latter two only when
-   * `templatesEnabled` is true (see below).
+   * `cases-field-definitions` at plugin start.
    *
    * `namespaces: [spaceId]` on the find call scopes results to a single
    * space even though the client itself is unscoped.
    */
   internalSavedObjectsClient: SavedObjectsClientContract;
-  /**
-   * Resolved value of `xpack.cases.templates.enabled`. Gates the per-space
-   * `cases-templates` and `cases-field-definitions` SO walks inside
-   * `collectSnakeKeysForSpace`. When false neither SO type is registered
-   * with core, so calling `internalSavedObjectsClient.find({ type })` for
-   * either would throw "Missing mappings for saved objects types: ...";
-   * the walk short-circuits to an empty list and the data view is
-   * bootstrapped with no runtime field overlay (which is the correct
-   * shape when there are no templates or global fields to project).
-   */
-  templatesEnabled: boolean;
 }
 
 /**
@@ -363,18 +363,40 @@ export class CasesAnalyticsV2DataViewService {
         const spec = buildCaseDataViewSpec(deps.spaceId);
         spec.runtimeFieldMap = desiredRuntimeFieldMap;
 
+        // Deliberately NOT `createAndSave`: that helper unconditionally
+        // calls `setDefault`, which claims the space's global default data
+        // view slot for the first view created when none is set yet
+        // (`setDefault(id, force=false)` only writes when there's no default).
+        // This is a fire-and-forget bootstrap that runs on the first cases
+        // request in a space, so it would race ahead of an admin's or a
+        // test's own data view and silently make the managed "Case Analytics"
+        // view the default — surfacing as the wrong pre-selected view in the
+        // Discover/Lens picker across unrelated surfaces. A managed,
+        // admin-facing analytics view is always selected explicitly, so it
+        // must never touch the default. `create` + `createSavedObject`
+        // reproduce `createAndSave` minus the `setDefault` side effect.
+        //
+        // `skipFetchFields: true` matches the previous `createAndSave` call;
+        // runtime fields come from the spec, not a field-caps refresh.
+        //
         // `overwrite: false` so a concurrent create from another node
         // surfaces a conflict instead of clobbering. Per-process concurrency
         // is already collapsed by `dedupedEnsure`, so the only remaining
-        // source of a 409 is a cross-Kibana-node race: another node
+        // source of a conflict is a cross-Kibana-node race: another node
         // ensured the same space at the same time and won the SO create.
+        // Depending on which node's write lands first the loser sees either
+        // an ES `version_conflict_engine_exception` (the SO create raced) or
+        // the data-views plugin's `DuplicateDataViewError` (the loser's
+        // `createSavedObject` name check saw the winner's doc first);
+        // `isVersionConflictError` treats both as the same benign outcome.
         // Both nodes computed the desired map from the same `find` against
         // the persisted templates, so the winning doc carries the runtime
         // fields this call would have written. Treat as a benign success
         // and let the next refresh path (template lifecycle hook or the
         // post-TTL recompute) reconcile if anything drifts.
         try {
-          await dvService.createAndSave(spec, false, true);
+          const dataView = await dvService.create(spec, true /* skipFetchFields */);
+          await dvService.createSavedObject(dataView, false /* overwrite */);
           this.logger.info(
             `bootstrapped data view ${dataViewId} (space=${deps.spaceId}, runtime_fields=${
               Object.keys(desiredRuntimeFieldMap).length
@@ -476,14 +498,12 @@ export class CasesAnalyticsV2DataViewService {
    * field.
    */
   private async collectSnakeKeysForSpace(spaceId: string): Promise<string[]> {
-    // Templates feature flag is off — neither the `cases-templates` nor the
-    // `cases-field-definitions` SO type is registered with core, so naming
-    // either in `find({ type })` would throw "Missing mappings for saved
-    // objects types: ...". Returning empty here is also semantically
-    // correct: with the feature off there are no extended fields to project
-    // as runtime fields.
-    if (!this.deps.templatesEnabled) return [];
-
+    // Both `cases-templates` and `cases-field-definitions` are always
+    // registered with core, so the reads below are always safe. When the
+    // templates feature is off there simply are no template or field-library
+    // documents, so both collectors return empty and the data view is
+    // bootstrapped with no runtime field overlay.
+    //
     // The field library is needed twice — to resolve template `$ref` fields
     // and to project global fields — so it's loaded once and passed to both
     // collectors.

@@ -139,6 +139,11 @@ export interface LogChangeHistoryOptions {
   fieldsToRedact?: ChangeHistoryFieldsToMask;
   /** Optional indicator to force an ES refresh after changes (affects performance) */
   refresh?: Refresh;
+  /**
+   * Caller-supplied labels attached to every span this method emits. The caller owns the
+   * keys and values, keeping `kbn-change-history` solution-agnostic.
+   */
+  spanLabels?: Record<string, string>;
 }
 
 export interface GetChangeHistoryOptions {
@@ -146,6 +151,11 @@ export interface GetChangeHistoryOptions {
   sort?: SortCombinations[];
   from?: number;
   size?: number;
+  /**
+   * Caller-supplied labels attached to every span this method emits. The caller owns the
+   * keys and values, keeping `kbn-change-history` solution-agnostic.
+   */
+  spanLabels?: Record<string, string>;
 }
 
 /**

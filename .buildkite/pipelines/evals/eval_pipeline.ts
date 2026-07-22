@@ -20,20 +20,17 @@ export interface EvalsSuiteMetadataEntry {
   configPath?: string;
   serverConfigSet?: string;
   weeklyEisModelGroups?: string[];
-  defaultModelGroups?: string[];
+  defaultModelGroups?: string[] | null;
 }
 
 function pathExistsInGitTree(repoRelativePath: string): boolean {
-  try {
-    const output = execFileSync('git', ['ls-tree', '--name-only', 'HEAD', repoRelativePath], {
-      cwd: process.cwd(),
-      encoding: 'utf-8',
-      stdio: ['ignore', 'pipe', 'ignore'],
-    }).trim();
-    return output.length > 0;
-  } catch {
-    return false;
-  }
+  // Non-zero exit = git failed (not "path absent"); let it throw so the caller can log it.
+  const output = execFileSync('git', ['ls-tree', '--name-only', 'HEAD', repoRelativePath], {
+    cwd: process.cwd(),
+    encoding: 'utf-8',
+    stdio: ['ignore', 'pipe', 'ignore'],
+  }).trim();
+  return output.length > 0;
 }
 
 function readEvalsSuiteMetadata(): EvalsSuiteMetadataEntry[] {
@@ -46,7 +43,10 @@ function readEvalsSuiteMetadata(): EvalsSuiteMetadataEntry[] {
       if (!suite?.configPath) return true;
       return pathExistsInGitTree(suite.configPath);
     });
-  } catch {
+  } catch (error) {
+    // Best-effort: log and return no suites rather than abort generation. The parent then skips
+    // the trigger; the child (same gate) turns an empty selection red (see evals_pr/pipeline.ts).
+    console.error('Failed to read eval suite metadata:', error);
     return [];
   }
 }
@@ -79,10 +79,19 @@ function parseGithubPrLabels(raw: string): string[] {
 }
 
 /**
- * Default weekly EIS model set (core tier). Suites without a `weeklyEisModelGroups`
- * override in evals.suites.json use this set when `models:weekly-eis-models` is applied.
- *
- * Keep in sync with &weekly_eis_core_models in llm_evals.yml.
+ * PR labels forwarded to `kibana-evals-pr-llm-evals`, minus any with whitespace or `=`: they ride
+ * `trigger_pipeline.ts`'s `key=value` space-delimited transport, which a spaced (e.g. `good first
+ * issue`) or `=`-bearing label would truncate — dropping the `evals:*`/`models:*` labels.
+ */
+export function getForwardablePrLabels(githubPrLabels: string): string {
+  return parseGithubPrLabels(githubPrLabels)
+    .filter((label) => !/[\s=]/.test(label))
+    .join(',');
+}
+
+/**
+ * Default weekly EIS models for suites without a `weeklyEisModelGroups` override, under
+ * `models:weekly-eis-models`. Keep in sync with &weekly_eis_core_models in llm_evals.yml.
  */
 const DEFAULT_WEEKLY_EIS_MODELS: string[] = [
   'eis/anthropic-claude-4.6-sonnet',
@@ -96,27 +105,40 @@ const DEFAULT_WEEKLY_EIS_MODELS: string[] = [
 const WEEKLY_EIS_MODELS_ALIAS = 'weekly-eis-models';
 
 /**
- * Named model group aliases. These allow a single label (e.g. `models:<alias>`)
- * to expand into multiple individual model groups for the eval fanout.
- *
- * NOTE: `weekly-eis-models` is handled separately — it resolves per-suite via
- * `weeklyEisModelGroups` in evals.suites.json, falling back to DEFAULT_WEEKLY_EIS_MODELS.
+ * Model-group aliases: one `models:<alias>` label expands to several model groups for the fanout.
+ * `weekly-eis-models` is handled separately (resolved per-suite; see above).
  */
 const MODEL_GROUP_ALIASES: Record<string, string[]> = {};
 
 function normalizeEvaluationConnectorId(raw: string): string {
-  // Support `models:judge:eis/<modelId>` where the judge value is a model id, not a connector id.
+  // `models:judge:eis/<modelId>` — judge value is a model id, not a connector id.
   if (raw.startsWith('eis/')) {
     return `eis-${normalizeBuildkiteKey(raw.slice('eis/'.length))}`;
   }
 
-  // Support `models:judge:<modelGroup>` (e.g. `llm-gateway/gpt-5.2`) where the judge value is a model group.
+  // `models:judge:<modelGroup>` (e.g. `llm-gateway/gpt-5.2`) — judge value is a model group.
   if (raw.includes('/')) {
     return `litellm-${normalizeBuildkiteKey(raw)}`;
   }
 
-  // Already a connector id (e.g. `litellm-*` / `eis-*`) or some other explicit id.
+  // Already a connector id (e.g. `litellm-*` / `eis-*`).
   return raw;
+}
+
+/**
+ * Whether heavy eval steps run on preemptible (spot) agents. Defaults to `true` (weekly/on-demand);
+ * PR evals set `EVAL_PREEMPTIBLE=0` so a lost worker/timeout doesn't silently re-run the suite.
+ */
+function isPreemptibleEnabled(): boolean {
+  const raw = (process.env.EVAL_PREEMPTIBLE ?? '').trim().toLowerCase();
+  return !['0', 'false', 'no'].includes(raw);
+}
+
+/**
+ * YAML double-quoted scalar with `$` escaped to `$$` so Buildkite upload won't interpolate it.
+ */
+function toBuildkiteYamlString(value: string): string {
+  return JSON.stringify(value).replace(/\$/g, '$$$$');
 }
 
 function buildEvalsYaml({
@@ -130,17 +152,19 @@ function buildEvalsYaml({
   evaluationConnectorId: string | undefined;
   hasEisJudge: boolean;
 }): string {
+  const preemptible = isPreemptibleEnabled();
   const suiteSteps = selectedSuites
     .map((suite) => {
       const key = `kbn-evals-${normalizeBuildkiteKey(suite.id)}`;
       const label = suite.name ? `Evals: ${suite.name}` : `Evals: ${suite.id}`;
       const suiteModelGroups = resolveModelGroups(suite);
+      // Label-derived values cross a pipeline boundary; serialize as `$`-safe YAML.
       const modelGroupsEnv =
         suiteModelGroups.length > 0
-          ? `          EVAL_MODEL_GROUPS: '${suiteModelGroups.join(',')}'`
+          ? `          EVAL_MODEL_GROUPS: ${toBuildkiteYamlString(suiteModelGroups.join(','))}`
           : null;
       const evaluationConnectorIdEnv = evaluationConnectorId
-        ? `          EVALUATION_CONNECTOR_ID: '${evaluationConnectorId}'`
+        ? `          EVALUATION_CONNECTOR_ID: ${toBuildkiteYamlString(evaluationConnectorId)}`
         : null;
       const includeEisModels =
         hasEisJudge || suiteModelGroups.some((group) => group.startsWith('eis/'));
@@ -148,16 +172,16 @@ function buildEvalsYaml({
         ? `          EVAL_INCLUDE_EIS_MODELS: '1'`
         : null;
       const evalServerConfigSetEnv = suite.serverConfigSet
-        ? `          EVAL_SERVER_CONFIG_SET: '${suite.serverConfigSet}'`
+        ? `          EVAL_SERVER_CONFIG_SET: ${toBuildkiteYamlString(suite.serverConfigSet)}`
         : null;
       return [
-        `      - label: '${label}'`,
+        `      - label: ${toBuildkiteYamlString(label)}`,
         `        key: ${key}`,
         `        command: bash .buildkite/scripts/steps/evals/run_suite.sh`,
         `        env:`,
         `          KBN_EVALS: '1'`,
         `          FTR_EIS_CCM: '1'`,
-        `          EVAL_SUITE_ID: '${suite.id}'`,
+        `          EVAL_SUITE_ID: ${toBuildkiteYamlString(suite.id)}`,
         `          EVAL_FANOUT: '1'`,
         ...(evaluationConnectorIdEnv ? [evaluationConnectorIdEnv] : []),
         ...(includeEisModelsEnv ? [includeEisModelsEnv] : []),
@@ -169,11 +193,12 @@ function buildEvalsYaml({
         `          imageProject: elastic-images-prod`,
         `          provider: gcp`,
         `          machineType: n2-standard-8`,
-        `          preemptible: true`,
+        ...(preemptible ? [`          preemptible: true`] : []),
         `        retry:`,
         `          automatic:`,
-        `            - exit_status: '-1'`,
-        `              limit: 3`,
+        // Preemptible only: retry lost workers (-1). Dropped otherwise so a lost
+        // worker/timeout doesn't silently re-run the whole suite.
+        ...(preemptible ? [`            - exit_status: '-1'`, `              limit: 3`] : []),
         `            - exit_status: '*'`,
         `              limit: 1`,
       ].join('\n');
@@ -181,8 +206,7 @@ function buildEvalsYaml({
     .join('\n');
 
   return [
-    // NOTE: `getPipeline()` strips `steps:` from YAML fragments so they can be concatenated
-    // under the single top-level `steps:` key. This must follow that convention.
+    // `getPipeline()` strips `steps:` so fragments concatenate under one top-level `steps:`.
     `  - group: LLM Evals`,
     `    key: kibana-evals`,
     `    depends_on:`,
@@ -192,12 +216,25 @@ function buildEvalsYaml({
   ].join('\n');
 }
 
+interface EvalSelection {
+  runnableSuites: EvalsSuiteMetadataEntry[];
+  resolveModelGroups: (suite: EvalsSuiteMetadataEntry) => string[];
+  evaluationConnectorId: string | undefined;
+  hasEisJudge: boolean;
+}
+
 /**
- * Reads evals suite metadata and PR labels, then returns a Buildkite YAML group
- * for the matching eval suites.
+ * Which suites/models run for the PR labels, or `null`. Shared by `getEvalPipeline` and
+ * `getEvalTriggerStep` so the label gate lives in one place.
  */
-export function getEvalPipeline(githubPrLabels: string): string | null {
+function resolveEvalSelection(githubPrLabels: string): EvalSelection | null {
   const parsedLabels = parseGithubPrLabels(githubPrLabels);
+
+  // Most PRs carry no eval labels; bail before reading suite metadata so we don't spawn a
+  // `git ls-tree` per suite on every kibana-pull-request pipeline generation.
+  if (!parsedLabels.some((label) => label.startsWith('evals:') || label.startsWith('models:'))) {
+    return null;
+  }
 
   // Run eval suite(s) when their GH label(s) are present (see `evals.suites.json`).
   const evalSuites = readEvalsSuiteMetadata();
@@ -208,11 +245,8 @@ export function getEvalPipeline(githubPrLabels: string): string | null {
         const labels = suite.ciLabels?.length ? suite.ciLabels : [`evals:${suite.id}`];
         return labels.some((label) => parsedLabels.includes(label));
       });
-  // Model filtering for eval fanout (models:* labels).
-  // - No `models:*` labels => evals are skipped (explicit model selection is required).
-  // - One or more `models:<model-group>` labels => only run connectors whose `defaultModel`
-  //   matches one of those model groups.
-  // - Alias labels (e.g. `models:weekly-eis-models`) expand to their predefined model groups.
+  // Model filtering (models:* labels): none => skip (explicit selection required);
+  // `models:<group>` => run those groups; aliases (e.g. `models:weekly-eis-models`) expand.
   const rawEvaluationConnectorId = parsedLabels
     .find((label) => label.startsWith('models:judge:'))
     ?.slice('models:judge:'.length)
@@ -221,9 +255,7 @@ export function getEvalPipeline(githubPrLabels: string): string | null {
     ? normalizeEvaluationConnectorId(rawEvaluationConnectorId)
     : undefined;
 
-  // Extract model groups from labels and expand any aliases.
-  // `weekly-eis-models` is handled separately — it resolves per-suite via
-  // `weeklyEisModelGroups` in evals.suites.json with DEFAULT_WEEKLY_EIS_MODELS fallback.
+  // Extract model groups + expand aliases. `weekly-eis-models` resolves per-suite (see above).
   const rawModelSelectors = parsedLabels
     .filter((label) => label.startsWith('models:') && !label.startsWith('models:judge:'))
     .map((label) => label.slice('models:'.length))
@@ -256,10 +288,8 @@ export function getEvalPipeline(githubPrLabels: string): string | null {
     return null;
   }
 
-  // Require explicit model selection — without models:* labels, evals are skipped
-  // to avoid accidentally running against all models (which is expensive).
-  // Suites with `defaultModelGroups` in evals.suites.json are exempt: they use
-  // their pinned defaults when no models:* labels are present.
+  // Without models:* labels, skip (running all models is expensive) — except suites with
+  // `defaultModelGroups`, which use their pinned defaults.
   const suitesWithDefaults = selectedEvalSuites.filter(
     (suite) => suite.defaultModelGroups && suite.defaultModelGroups.length > 0
   );
@@ -269,10 +299,71 @@ export function getEvalPipeline(githubPrLabels: string): string | null {
 
   const runnableSuites = hasGlobalModelSelection ? selectedEvalSuites : suitesWithDefaults;
 
-  return buildEvalsYaml({
-    selectedSuites: runnableSuites,
+  return {
+    runnableSuites,
     resolveModelGroups,
     evaluationConnectorId,
     hasEisJudge,
+  };
+}
+
+/** Whether any eval suite should run for the given PR labels. */
+export function shouldRunEvals(githubPrLabels: string): boolean {
+  return resolveEvalSelection(githubPrLabels) !== null;
+}
+
+/** Buildkite YAML group for the eval suites matching the PR labels, or `null`. */
+export function getEvalPipeline(githubPrLabels: string): string | null {
+  const selection = resolveEvalSelection(githubPrLabels);
+  if (!selection) {
+    return null;
+  }
+
+  return buildEvalsYaml({
+    selectedSuites: selection.runnableSuites,
+    resolveModelGroups: selection.resolveModelGroups,
+    evaluationConnectorId: selection.evaluationConnectorId,
+    hasEisJudge: selection.hasEisJudge,
   });
+}
+
+/**
+ * Command step (YAML fragment) that fires the dedicated `kibana-evals-pr-llm-evals` pipeline, or `null`.
+ * Emitted by `kibana-pull-request` instead of the inline `LLM Evals` group. `trigger_pr_evals.sh`
+ * creates the child build (forwarding PR context for fork checkout + `KIBANA_BUILD_ID` for artifact
+ * reuse). Fire-and-forget: `depends_on: build` gates on the artifact, `soft_fail` keeps a trigger
+ * hiccup off the PR.
+ */
+export function getEvalTriggerStep(githubPrLabels: string): string | null {
+  // Gate on the SAME filtered set we forward, so the parent's decision matches what the child
+  // re-selects from (a spaced/`=` selection label can't pass here yet vanish before the child).
+  const forwardableLabels = getForwardablePrLabels(githubPrLabels);
+  if (!shouldRunEvals(forwardableLabels)) {
+    return null;
+  }
+
+  // Escaped since raw labels are hostile YAML input; see getForwardablePrLabels for the filtering.
+  const forwardLabelsEnv = toBuildkiteYamlString(forwardableLabels);
+
+  return [
+    // `getPipeline()` strips `steps:` so fragments concatenate under one top-level `steps:`.
+    `  - label: ':robot_face: Trigger LLM Evals'`,
+    `    key: kibana-evals-trigger`,
+    `    depends_on:`,
+    `      - build`,
+    `    command: bash .buildkite/scripts/steps/evals/trigger_pr_evals.sh`,
+    `    env:`,
+    `      GITHUB_PR_LABELS: ${forwardLabelsEnv}`,
+    `    timeout_in_minutes: 10`,
+    `    soft_fail: true`,
+    `    agents:`,
+    `      image: family/kibana-ubuntu-2404`,
+    `      imageProject: elastic-images-prod`,
+    `      provider: gcp`,
+    `      machineType: n2-standard-2`,
+    `    retry:`,
+    `      automatic:`,
+    `        - exit_status: '*'`,
+    `          limit: 1`,
+  ].join('\n');
 }
