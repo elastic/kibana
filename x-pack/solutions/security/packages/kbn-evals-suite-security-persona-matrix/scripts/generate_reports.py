@@ -576,6 +576,61 @@ def render_persona_matrix(rows):
 
     role_cards_html = '\n'.join(role_cards)
 
+    # Build workflow recommendation cards
+    WORKFLOWS = [
+        ("Alert Triage & Investigation", {"alert": 0.5, "entity": 0.3, "hunt": 0.2},
+         "End-to-end: triage, enrich, correlate, and escalate an alert."),
+        ("Threat Hunting", {"hunt": 0.6, "entity": 0.2, "alert": 0.2},
+         "Proactively search for threats using entity pivots and telemetry queries."),
+        ("Detection Engineering", {"detrules": 0.5, "hunt": 0.3, "alert": 0.2},
+         "Author, tune, and validate detection rules with research grounding."),
+        ("Automation & SOAR", {"wfauth": 0.5, "wftrig": 0.3, "multistep": 0.2},
+         "Create, enable, and trigger executable workflows with minimal manual steps."),
+        ("Incident Response", {"multistep": 0.4, "alert": 0.3, "wftrig": 0.3},
+         "Chain multi-step playbooks: triage, investigate, contain, and document."),
+    ]
+
+    workflow_cards = []
+    for wf_name, weights, desc in WORKFLOWS:
+        scored = []
+        for m in model_order:
+            s = model_stats_map[m]
+            score = role_weighted_score(s, weights)
+            scored.append((m, score))
+        scored.sort(key=lambda x: x[1], reverse=True)
+        top = scored[0] if scored else ("N/A", 0)
+        runners = scored[1:3]
+        runner_text = ""
+        if runners:
+            runner_names = ", ".join(f"{r[0]} ({r[1]:.2f})" for r in runners)
+            runner_text = f'<p class="runner">Runner-up: {runner_names}</p>'
+        workflow_cards.append(
+            f'<div class="rcard">'
+            f'<h3>{wf_name}</h3>'
+            f'<p class="rdesc">{desc}</p>'
+            f'<div class="rtop"><span class="rmodel">{vendor_badge(top[0])}{top[0]}</span>'
+            f'<span class="rscore {score_class(top[1])}">{top[1]:.2f}</span></div>'
+            f'{runner_text}'
+            f'</div>'
+        )
+
+    workflow_cards_html = '\n'.join(workflow_cards)
+
+    # Extract provenance from score docs if available
+    commit_sha = "unknown"
+    build_url = ""
+    branch = "unknown"
+    for r in rows[:1]:
+        meta = r.get("_metadata", {})
+        git_info = meta.get("git", {})
+        ci_info = meta.get("ci", {})
+        commit_sha = git_info.get("commit_sha", "unknown")[:12]
+        branch = git_info.get("branch", "unknown")
+        build_url = ci_info.get("build_url", "")
+    provenance_line = f"commit: <code>{commit_sha}</code> · branch: <code>{branch}</code>"
+    if build_url:
+        provenance_line += f' · <a href="{build_url}" style="color:var(--accent);">CI build</a>'
+
     html = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -584,7 +639,8 @@ def render_persona_matrix(rows):
 <title>LLM performance for Elastic Security &mdash; by your role</title>
 {dhru_css}
 <style>
-  .role-grid {{ display:grid; grid-template-columns:repeat(3, 1fr); gap:18px; margin:18px 0 28px; }}
+  .role-grid, .wf-grid {{ display:grid; grid-template-columns:repeat(3, 1fr); gap:18px; margin:18px 0 28px; }}
+  .wf-grid {{ grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); }}
   .rcard {{ background:#fff; border:1px solid var(--line); border-radius:10px; padding:16px; box-shadow:var(--shadow); }}
   .rcard h3 {{ font-size:14px; margin:0 0 6px; }}
   .rdesc {{ font-size:12px; color:var(--muted); margin:0 0 12px; }}
@@ -595,7 +651,12 @@ def render_persona_matrix(rows):
   .rscore.sc-mid {{ background:#fff6e6; color:#a66a00; }}
   .rscore.sc-low {{ background:#ffeaea; color:#b32424; }}
   .runner {{ font-size:11px; color:var(--muted); margin:6px 0 0; }}
-  @media (max-width:820px) {{ .role-grid {{ grid-template-columns:1fr; }} }}
+  .oss-note {{ background:#f7f8fa; border:1px solid var(--line); border-radius:10px; padding:18px 22px; margin:24px 0; }}
+  .oss-note h2 {{ margin:0 0 8px; }}
+  .oss-note p {{ font-size:13px; color:var(--muted); margin:6px 0; }}
+  .provenance {{ font-size:12px; color:var(--muted); border-top:1px solid var(--line); padding-top:16px; margin-top:32px; }}
+  .provenance code {{ font-size:11px; background:#f0f2f5; padding:2px 6px; border-radius:4px; }}
+  @media (max-width:820px) {{ .role-grid, .wf-grid {{ grid-template-columns:1fr; }} }}
 </style>
 </head>
 <body>
@@ -617,6 +678,12 @@ def render_persona_matrix(rows):
   <p class="hint">Pick a role. We surface the score that matters most for that job and the top model.</p>
   <div class="role-grid">
 {role_cards_html}
+  </div>
+
+  <h2 id="workflows">Or choose by workflow</h2>
+  <p class="hint">Pick a workflow you run daily. We rank models by the capabilities it depends on most.</p>
+  <div class="wf-grid">
+{workflow_cards_html}
   </div>
 
   <h2 id="matrix">Full performance matrix</h2>
@@ -677,25 +744,34 @@ def render_persona_matrix(rows):
     &nbsp;|&nbsp; Attack Discovery and Automatic Migration require separate eval suites (C6).
   </p>
 
-  <div class="card">
-    <h2 style="margin-top:0">Methodology</h2>
-    <p>Each prompt was sent to the Elastic Security AI Assistant via <code>/api/agent_builder/converse</code>
-    with the model under test as the connector. The judge model (Claude 5 Sonnet) evaluated
-    each response on relevance, factuality, and sequence accuracy. Trace data (tokens, latency,
-    tool calls) was captured from the golden cluster via OTLP.</p>
-    <p><strong>Suite:</strong> <code>security-persona-matrix</code> (21 examples across 7 categories).
-    <br><strong>Model:</strong> <code>anthropic-claude-4.5-haiku</code>
-    <br><strong>Judge:</strong> <code>anthropic-claude-5-sonnet</code></p>
+  <div class="oss-note">
+    <h2>Open-source models (self-deployable)</h2>
+    <p>For air-gapped or data-sovereignty-constrained environments, self-managed open-source models (e.g. Llama, Qwen, Mistral via vLLM/Ollama) can serve as the inference backend for Elastic Security AI Assistant.</p>
+    <p><b>Results:</b> Open-source model rows will appear in the matrix above when tested. Self-deployment requires a compatible OpenAI-API-compatible inference endpoint configured as an Elastic connector.</p>
   </div>
-</div>
 
   <div class="methodology" style="margin-top:32px; background:#f7f8fa; border:1px solid #e3e6eb; border-radius:10px; padding:20px;">
     <h2>How we test</h2>
     <p><b>Judging:</b> Each response is scored by a judge model on a 0&ndash;10 rubric across relevance, correctness, and completeness.</p>
     <p><b>Skill invocation:</b> We verify the correct skill was activated for each prompt by inspecting Agent Builder traces.</p>
     <p><b>Tokens:</b> Input and output tokens are measured from the OTLP trace spans for each conversation turn.</p>
+    <p><b>Attack Discovery &amp; Automatic Migration:</b> These require separate eval suites (C6) and are not covered by the persona matrix. See the <code>attack_discovery_results.html</code> report for AD model comparison.</p>
     <p><b>Models tested:</b> {model_count} model{'s' if model_count != 1 else ''} across {prompt_count} prompts in 7 skill categories.</p>
+    <p><b>Legend:</b>
+      <span class="high" style="font-weight:600">High (8.0+)</span> &middot;
+      <span class="mid" style="font-weight:600">Good (6.0&ndash;7.9)</span> &middot;
+      <span class="low" style="font-weight:600">Low (&lt;6.0)</span>
+      &nbsp;|&nbsp; Token tiers:
+      <span class="tier tier-lean">Lean &lt;200K</span>
+      <span class="tier tier-mod">Moderate 200&ndash;400K</span>
+      <span class="tier tier-heavy">Heavy 400K+</span>
+    </p>
   </div>
+
+  <div class="provenance">
+    <p>{provenance_line} &middot; generated {generated_at}</p>
+  </div>
+</div>
 
 {dhru_js}
 </body>
@@ -800,6 +876,21 @@ def render_token_usage_matrix(rows):
     cat_grid = "".join(cat_cards)
     cat_descs = "".join(cat_desc_items)
 
+    # Extract provenance
+    commit_sha = "unknown"
+    branch = "unknown"
+    build_url = ""
+    for r in rows[:1]:
+        meta = r.get("_metadata", {})
+        git_info = meta.get("git", {})
+        ci_info = meta.get("ci", {})
+        commit_sha = git_info.get("commit_sha", "unknown")[:12]
+        branch = git_info.get("branch", "unknown")
+        build_url = ci_info.get("build_url", "")
+    provenance = f"commit: {commit_sha} · branch: {branch}"
+    if build_url:
+        provenance += f' · <a href="{build_url}" style="color:#9bb6e0;">CI build</a>'
+
     html = f"""<!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8">
 <title>Agent Builder &mdash; Tokens per Model per Category</title>
@@ -858,7 +949,8 @@ measured across {model_count} model{'s' if model_count != 1 else ''} in our Agen
   <span>Each category is its own table &middot; Input / Output / Total &middot; models sorted heaviest first</span>
 </div>
 <div class="cat-grid">{cat_grid}</div>
-<p class="sub" style="margin-top:36px">Generated {generated_at} &middot; {prompt_count} prompts &middot; {model_count} model{'s' if model_count != 1 else ''}</p>
+<p class="sub" style="margin-top:36px">Generated {generated_at} &middot; {prompt_count} prompts &middot; {model_count} model{'s' if model_count != 1 else ''}<br>
+{provenance}</p>
 </div>
 </body></html>"""
     return html
@@ -948,6 +1040,7 @@ def render_index(rows):
     <p><strong>Judge:</strong> Claude 5 Sonnet via criteria evaluator</p>
     <p><strong>Trace source:</strong> Golden cluster (kbn-evals-serverless) via OTLP</p>
     <p>Data fetched from local ES (:9220) + enriched from golden cluster traces.</p>
+    <p>commit: <code>{rows[0].get('_metadata', {}).get('git', {}).get('commit_sha', 'unknown')[:12] if rows else 'unknown'}</code> · branch: <code>{rows[0].get('_metadata', {}).get('git', {}).get('branch', 'unknown') if rows else 'unknown'}</code></p>
   </div>
 </div>
 </body>
@@ -988,54 +1081,18 @@ def main():
                 f.write(f'{r["prompt_id"]},\n')
         print(f"Wrote {prompts_path}")
 
-    # 5. Run Dhru's render_agent_eval_html.py
-    print("\nRendering agent_eval_full.html via Dhru's script...")
-    html_out = os.path.join(OUTPUT_DIR, "agent_eval_full.html")
-    result = subprocess.run(
-        ["python3", os.path.join(DHRU_DIR, "render_agent_eval_html.py"),
-         "--in", jsonl_path, "--out", html_out],
-        capture_output=True, text=True, cwd=DHRU_DIR
+    # 5. Run standalone AD report generator (no external dependency)
+    print("\nGenerating attack_discovery_results.html...")
+    ad_script = os.path.join(OUTPUT_DIR, "generate_ad_report.py")
+    ad_result = subprocess.run(
+        ["python3", ad_script],
+        capture_output=True, text=True, cwd=OUTPUT_DIR
     )
-    if result.returncode == 0:
-        print(f"  {result.stdout.strip()}")
+    if ad_result.returncode == 0:
+        for line in ad_result.stdout.strip().split("\n"):
+            print(f"  {line}")
     else:
-        print(f"  ERROR: {result.stderr[:500]}", file=sys.stderr)
-
-    # 5b. Post-process: collapse details by default, fix step trace spacing,
-    #     add horizontal scroll wrapper for wide tables
-    if os.path.exists(html_out):
-        with open(html_out, "r") as f:
-            agent_html = f.read()
-
-        original_len = len(agent_html)
-
-        # Collapse all <details> by default (Dhru hardcodes open=""):
-        # Keep first <details class="prompt"> open for preview
-        agent_html = agent_html.replace(' open>', '>')
-        # Re-open just the first prompt for preview
-        idx = agent_html.find('<details class="prompt">')
-        if idx >= 0:
-            agent_html = agent_html[:idx] + '<details class="prompt" open>' + agent_html[idx + len('<details class="prompt">'):]
-
-        # Add gap between step-tag and content (THINK runs into text)
-        agent_html = agent_html.replace(
-            ".step-tag { flex:none; font-size:10px;",
-            ".step-tag { flex:none; font-size:10px; margin-right:4px; min-width:32px;"
-        )
-
-        # Wrap summary table in horizontal scroll container
-        table_scroll_css = "<style>.table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;}</style>"
-        agent_html = agent_html.replace("</head>", table_scroll_css + "</head>")
-        # Wrap the first <table> (summary grid) in scroll div
-        agent_html = agent_html.replace("<table>", '<div class="table-scroll"><table>', 1)
-        # Close the div after the first </table>
-        first_close = agent_html.find("</table>")
-        if first_close > 0:
-            agent_html = agent_html[:first_close + 8] + "</div>" + agent_html[first_close + 8:]
-
-        with open(html_out, "w") as f:
-            f.write(agent_html)
-        print(f"  Post-processed: {original_len:,} -> {len(agent_html):,} bytes (details collapsed, table scroll, step spacing)")
+        print(f"  AD report warning: {ad_result.stderr[:300]}", file=sys.stderr)
 
     # 6. Generate persona matrix
     print("\nGenerating llm_persona_matrix.html...")
