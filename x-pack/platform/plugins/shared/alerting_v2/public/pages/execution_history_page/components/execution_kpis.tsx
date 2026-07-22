@@ -15,8 +15,19 @@ import {
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
+import {
+  Chart,
+  Settings,
+  BarSeries,
+  ScaleType,
+  Position,
+  Tooltip,
+  TooltipType,
+} from '@elastic/charts';
+import type { PartialTheme } from '@elastic/charts';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { useElasticChartsTheme } from '@kbn/charts-theme';
 
 const MOCK_DATA = {
   totalExecutions: 12_847,
@@ -57,82 +68,6 @@ const MOCK_FAILURE_BARS = [
   { hour: '20:00', rules: 16, policies: 9 },
   { hour: '22:00', rules: 12, policies: 6 },
 ];
-
-const MiniBarChart: React.FC<{
-  data: Array<{ label: string; values: Array<{ value: number; color: string }> }>;
-  height?: number;
-}> = ({ data, height = 100 }) => {
-  const maxValue = Math.max(
-    ...data.map((d) => d.values.reduce((sum, v) => sum + v.value, 0))
-  );
-
-  return (
-    <div css={css({ display: 'flex', flexDirection: 'column', height: '100%' })}>
-      <div
-        css={css({
-          display: 'flex',
-          alignItems: 'flex-end',
-          gap: 3,
-          height,
-          flex: 1,
-        })}
-      >
-        {data.map((bar, i) => {
-          const total = bar.values.reduce((sum, v) => sum + v.value, 0);
-          const barHeight = maxValue > 0 ? (total / maxValue) * 100 : 0;
-          return (
-            <div
-              key={i}
-              css={css({
-                flex: 1,
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'flex-end',
-                height: '100%',
-              })}
-              title={`${bar.label}: ${bar.values.map((v) => v.value).join(' / ')}`}
-            >
-              <div
-                css={css({
-                  height: `${barHeight}%`,
-                  minHeight: total > 0 ? 2 : 0,
-                  display: 'flex',
-                  flexDirection: 'column',
-                  borderRadius: '2px 2px 0 0',
-                  overflow: 'hidden',
-                })}
-              >
-                {bar.values.map((v, j) => (
-                  <div
-                    key={j}
-                    css={css({
-                      flex: v.value,
-                      backgroundColor: v.color,
-                    })}
-                  />
-                ))}
-              </div>
-            </div>
-          );
-        })}
-      </div>
-      <div
-        css={css({
-          display: 'flex',
-          justifyContent: 'space-between',
-          marginTop: 4,
-        })}
-      >
-        <EuiText size="xs" color="subdued">
-          {data[0]?.label}
-        </EuiText>
-        <EuiText size="xs" color="subdued">
-          {data[data.length - 1]?.label}
-        </EuiText>
-      </div>
-    </div>
-  );
-};
 
 const StatsOnly: React.FC = () => (
   <EuiFlexGroup gutterSize="m">
@@ -250,36 +185,17 @@ const secondaryStatCss = css({
   '.euiStat__title': { fontSize: '1rem' },
 });
 
-const ChartLegendDot: React.FC<{ color: string; label: string }> = ({ color, label }) => (
-  <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-    <EuiFlexItem grow={false}>
-      <div css={css({ width: 8, height: 8, borderRadius: 2, backgroundColor: color })} />
-    </EuiFlexItem>
-    <EuiFlexItem grow={false}>
-      <EuiText size="xs" color="subdued">{label}</EuiText>
-    </EuiFlexItem>
-  </EuiFlexGroup>
-);
+const compactChartTheme: PartialTheme = {
+  chartMargins: { left: 0, right: 0, top: 4, bottom: 0 },
+  chartPaddings: { left: 0, right: 0, top: 0, bottom: 0 },
+  scales: { barsPadding: 0.25 },
+  background: { color: 'transparent' },
+};
 
 const StatsWithCharts: React.FC = () => {
   const { euiTheme } = useEuiTheme();
   const borderColor = euiTheme.colors.lightShade;
-
-  const executionChartData = MOCK_EXECUTION_BARS.map((b) => ({
-    label: b.hour,
-    values: [
-      { value: b.success, color: euiTheme.colors.success },
-      { value: b.failed, color: euiTheme.colors.danger },
-    ],
-  }));
-
-  const failureChartData = MOCK_FAILURE_BARS.map((b) => ({
-    label: b.hour,
-    values: [
-      { value: b.rules, color: euiTheme.colors.vis.euiColorVis2 },
-      { value: b.policies, color: euiTheme.colors.vis.euiColorVis8 },
-    ],
-  }));
+  const chartBaseTheme = useElasticChartsTheme();
 
   return (
     <EuiFlexGroup gutterSize="m">
@@ -287,10 +203,9 @@ const StatsWithCharts: React.FC = () => {
         <EuiPanel hasBorder paddingSize="none" data-test-subj="executionKpisExecutionsPanel">
           <EuiFlexGroup gutterSize="none" responsive={false} css={css({ height: '100%' })}>
             <EuiFlexItem
-              grow={false}
+              grow={3}
               css={css({
                 padding: euiTheme.size.m,
-                minWidth: 130,
                 backgroundColor: euiTheme.colors.backgroundBaseSubdued,
                 borderRight: `1px solid ${borderColor}`,
               })}
@@ -332,7 +247,7 @@ const StatsWithCharts: React.FC = () => {
                 css={secondaryStatCss}
               />
             </EuiFlexItem>
-            <EuiFlexItem css={css({ padding: euiTheme.size.m })}>
+            <EuiFlexItem grow={7} css={css({ padding: euiTheme.size.m })}>
               <EuiText size="xs" css={css({ marginBottom: 4 })}>
                 <strong>
                   {i18n.translate(
@@ -344,15 +259,40 @@ const StatsWithCharts: React.FC = () => {
                   Last 24 hours
                 </EuiText>
               </EuiText>
-              <MiniBarChart data={executionChartData} height={72} />
-              <EuiFlexGroup gutterSize="m" responsive={false} css={css({ marginTop: 4 })}>
-                <EuiFlexItem grow={false}>
-                  <ChartLegendDot color={euiTheme.colors.success} label="Success" />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <ChartLegendDot color={euiTheme.colors.danger} label="Failed" />
-                </EuiFlexItem>
-              </EuiFlexGroup>
+              <div css={css({ height: 140 })}>
+                <Chart>
+                  <Settings
+                    theme={[compactChartTheme]}
+                    baseTheme={chartBaseTheme}
+                    showLegend
+                    legendPosition={Position.Bottom}
+                    locale={i18n.getLocale()}
+                  />
+                  <Tooltip type={TooltipType.VerticalCursor} />
+                  <BarSeries
+                    id="success"
+                    name="Success"
+                    xScaleType={ScaleType.Ordinal}
+                    yScaleType={ScaleType.Linear}
+                    xAccessor="hour"
+                    yAccessors={['success']}
+                    stackAccessors={[0]}
+                    data={MOCK_EXECUTION_BARS}
+                    color={[euiTheme.colors.success]}
+                  />
+                  <BarSeries
+                    id="failed"
+                    name="Failed"
+                    xScaleType={ScaleType.Ordinal}
+                    yScaleType={ScaleType.Linear}
+                    xAccessor="hour"
+                    yAccessors={['failed']}
+                    stackAccessors={[0]}
+                    data={MOCK_EXECUTION_BARS}
+                    color={[euiTheme.colors.danger]}
+                  />
+                </Chart>
+              </div>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiPanel>
@@ -362,10 +302,9 @@ const StatsWithCharts: React.FC = () => {
         <EuiPanel hasBorder paddingSize="none" data-test-subj="executionKpisFailuresPanel">
           <EuiFlexGroup gutterSize="none" responsive={false} css={css({ height: '100%' })}>
             <EuiFlexItem
-              grow={false}
+              grow={3}
               css={css({
                 padding: euiTheme.size.m,
-                minWidth: 130,
                 backgroundColor: euiTheme.colors.backgroundBaseSubdued,
                 borderRight: `1px solid ${borderColor}`,
               })}
@@ -409,7 +348,7 @@ const StatsWithCharts: React.FC = () => {
                 css={secondaryStatCss}
               />
             </EuiFlexItem>
-            <EuiFlexItem css={css({ padding: euiTheme.size.m })}>
+            <EuiFlexItem grow={7} css={css({ padding: euiTheme.size.m })}>
               <EuiText size="xs" css={css({ marginBottom: 4 })}>
                 <strong>
                   {i18n.translate(
@@ -421,15 +360,40 @@ const StatsWithCharts: React.FC = () => {
                   Last 24 hours
                 </EuiText>
               </EuiText>
-              <MiniBarChart data={failureChartData} height={72} />
-              <EuiFlexGroup gutterSize="m" responsive={false} css={css({ marginTop: 4 })}>
-                <EuiFlexItem grow={false}>
-                  <ChartLegendDot color={euiTheme.colors.vis.euiColorVis2} label="Rules" />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <ChartLegendDot color={euiTheme.colors.vis.euiColorVis8} label="Policies" />
-                </EuiFlexItem>
-              </EuiFlexGroup>
+              <div css={css({ height: 140 })}>
+                <Chart>
+                  <Settings
+                    theme={[compactChartTheme]}
+                    baseTheme={chartBaseTheme}
+                    showLegend
+                    legendPosition={Position.Bottom}
+                    locale={i18n.getLocale()}
+                  />
+                  <Tooltip type={TooltipType.VerticalCursor} />
+                  <BarSeries
+                    id="rules"
+                    name="Rules"
+                    xScaleType={ScaleType.Ordinal}
+                    yScaleType={ScaleType.Linear}
+                    xAccessor="hour"
+                    yAccessors={['rules']}
+                    stackAccessors={[0]}
+                    data={MOCK_FAILURE_BARS}
+                    color={[euiTheme.colors.vis.euiColorVis2]}
+                  />
+                  <BarSeries
+                    id="policies"
+                    name="Policies"
+                    xScaleType={ScaleType.Ordinal}
+                    yScaleType={ScaleType.Linear}
+                    xAccessor="hour"
+                    yAccessors={['policies']}
+                    stackAccessors={[0]}
+                    data={MOCK_FAILURE_BARS}
+                    color={[euiTheme.colors.vis.euiColorVis8]}
+                  />
+                </Chart>
+              </div>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiPanel>
