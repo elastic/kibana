@@ -185,6 +185,17 @@ const secondaryStatCss = css({
   '.euiStat__title': { fontSize: '1rem' },
 });
 
+const ChartLegendDot: React.FC<{ color: string; label: string }> = ({ color, label }) => (
+  <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+    <EuiFlexItem grow={false}>
+      <div css={css({ width: 8, height: 8, borderRadius: '50%', backgroundColor: color })} />
+    </EuiFlexItem>
+    <EuiFlexItem grow={false}>
+      <EuiText size="xs" color="subdued">{label}</EuiText>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+);
+
 const compactChartTheme: PartialTheme = {
   chartMargins: { left: 0, right: 0, top: 4, bottom: 0 },
   chartPaddings: { left: 0, right: 0, top: 0, bottom: 0 },
@@ -248,24 +259,33 @@ const StatsWithCharts: React.FC = () => {
               />
             </EuiFlexItem>
             <EuiFlexItem grow={7} css={css({ padding: euiTheme.size.m })}>
-              <EuiText size="xs" css={css({ marginBottom: 4 })}>
-                <strong>
-                  {i18n.translate(
-                    'xpack.alertingV2.executionHistory.kpis.executionsOverTime',
-                    { defaultMessage: 'Executions over time' }
-                  )}
-                </strong>
-                <EuiText size="xs" color="subdued" css={css({ display: 'inline', marginLeft: 8 })}>
-                  Last 24 hours
-                </EuiText>
-              </EuiText>
-              <div css={css({ height: 140 })}>
+              <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false} css={css({ marginBottom: 4 })}>
+                <EuiFlexItem grow={false}>
+                  <EuiText size="xs"><strong>
+                    {i18n.translate(
+                      'xpack.alertingV2.executionHistory.kpis.executionsOverTime',
+                      { defaultMessage: 'Executions over time' }
+                    )}
+                  </strong></EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <ChartLegendDot color={euiTheme.colors.success} label="Success" />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <ChartLegendDot color={euiTheme.colors.danger} label="Failed" />
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiText size="xs" color="subdued" css={css({ textAlign: 'right' })}>
+                    Last 24 hours
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+              <div css={css({ flex: 1, minHeight: 100 })}>
                 <Chart>
                   <Settings
                     theme={[compactChartTheme]}
                     baseTheme={chartBaseTheme}
-                    showLegend
-                    legendPosition={Position.Bottom}
+                    showLegend={false}
                     locale={i18n.getLocale()}
                   />
                   <Tooltip type={TooltipType.VerticalCursor} />
@@ -349,24 +369,33 @@ const StatsWithCharts: React.FC = () => {
               />
             </EuiFlexItem>
             <EuiFlexItem grow={7} css={css({ padding: euiTheme.size.m })}>
-              <EuiText size="xs" css={css({ marginBottom: 4 })}>
-                <strong>
-                  {i18n.translate(
-                    'xpack.alertingV2.executionHistory.kpis.failuresOverTime',
-                    { defaultMessage: 'Failures over time' }
-                  )}
-                </strong>
-                <EuiText size="xs" color="subdued" css={css({ display: 'inline', marginLeft: 8 })}>
-                  Last 24 hours
-                </EuiText>
-              </EuiText>
-              <div css={css({ height: 140 })}>
+              <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false} css={css({ marginBottom: 4 })}>
+                <EuiFlexItem grow={false}>
+                  <EuiText size="xs"><strong>
+                    {i18n.translate(
+                      'xpack.alertingV2.executionHistory.kpis.failuresOverTime',
+                      { defaultMessage: 'Failures over time' }
+                    )}
+                  </strong></EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <ChartLegendDot color={euiTheme.colors.vis.euiColorVis2} label="Rules" />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <ChartLegendDot color={euiTheme.colors.vis.euiColorVis8} label="Policies" />
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiText size="xs" color="subdued" css={css({ textAlign: 'right' })}>
+                    Last 24 hours
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+              <div css={css({ flex: 1, minHeight: 100 })}>
                 <Chart>
                   <Settings
                     theme={[compactChartTheme]}
                     baseTheme={chartBaseTheme}
-                    showLegend
-                    legendPosition={Position.Bottom}
+                    showLegend={false}
                     locale={i18n.getLocale()}
                   />
                   <Tooltip type={TooltipType.VerticalCursor} />
