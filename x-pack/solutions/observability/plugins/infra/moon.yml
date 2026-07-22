@@ -145,6 +145,8 @@ dependsOn:
   - '@kbn/cps-utils'
   - '@kbn/es-query-constants'
   - '@kbn/cps'
+  - '@kbn/cps'
+  - '@kbn/scout-oblt'
 tags:
   - plugin
   - prod
@@ -156,7 +158,13 @@ fileGroups:
     - common/**/*
     - public/**/*
     - server/**/*
+    - <<<<<<< HEAD
     - types/**/*
+    - =======
+    - types/**/*
+    - test/scenarios/**/*
+    - test/scout/api/**/*
+    - '>>>>>>> 8e9748bbcb4d ([Logs UI] Improve validation in Logs UI ML APIs (#276994))'
     - '!target/**/*'
   jest-config:
     - jest.config.js
