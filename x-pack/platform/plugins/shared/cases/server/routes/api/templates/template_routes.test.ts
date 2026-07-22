@@ -383,11 +383,11 @@ describe('Template Routes', () => {
       );
     });
 
-    it('coerces string isDeleted "true" to boolean true', async () => {
+    it('passes isDeleted boolean true to getAllTemplates', async () => {
       const context = createMockContext();
       const casesClient = await (await context.cases).getCasesClient();
       const request = {
-        query: { page: 1, perPage: 10, isDeleted: 'true' },
+        query: { page: 1, perPage: 10, isDeleted: true },
       };
       const response = createMockResponse();
 
@@ -401,11 +401,11 @@ describe('Template Routes', () => {
       );
     });
 
-    it('coerces page and perPage from string to number', async () => {
+    it('passes page and perPage numbers to getAllTemplates', async () => {
       const context = createMockContext();
       const casesClient = await (await context.cases).getCasesClient();
       const request = {
-        query: { page: '2', perPage: '25', isDeleted: false },
+        query: { page: 2, perPage: 25, isDeleted: false },
       };
       const response = createMockResponse();
 

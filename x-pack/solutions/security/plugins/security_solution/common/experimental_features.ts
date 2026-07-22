@@ -126,7 +126,7 @@ export const allowedExperimentalValues = Object.freeze({
    * Entity Analytics surfaces such as the entity flyout, and registers the
    * `security.entity` unified cases attachment type.
    */
-  entityAttachmentsEnabled: false,
+  entityAttachmentsEnabled: true,
 
   /**
    * Enables AI rule creation feature
@@ -297,12 +297,6 @@ export const allowedExperimentalValues = Object.freeze({
    * records. Both must be enabled for the API to return non-empty results.
    */
   ruleChangesHistoryEnabled: true,
-
-  /**
-   * Enables public Detection Engine attacks REST APIs
-   * (`/api/detection_engine/attacks/*`).
-   */
-  publicAttacksApiEnabled: false,
 
   /**
    * Enables the agent builder `run_rule_preview` tool and the `security.rule.preview`

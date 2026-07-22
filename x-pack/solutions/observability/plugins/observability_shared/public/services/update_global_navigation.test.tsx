@@ -7,26 +7,33 @@
 
 import type { Subject } from 'rxjs';
 import type { App, AppDeepLink, ApplicationStart, AppUpdater } from '@kbn/core/public';
-import { type PricingServiceStart } from '@kbn/core/public';
+import { AppStatus, type PricingServiceStart } from '@kbn/core/public';
 import { casesFeatureId } from '../../common';
 import { updateGlobalNavigation } from './update_global_navigation';
 
 // Used in updater callback
 const app = {} as unknown as App;
-const pricing = {
-  isFeatureAvailable: (featureId: string) => {
-    // Mock implementation for testing purposes
-    return featureId === 'observability:complete_overview';
-  },
-} as unknown as PricingServiceStart;
+
+const createPricing = (completeOverviewEnabled: boolean): PricingServiceStart =>
+  ({
+    isFeatureAvailable: (featureId: string) =>
+      featureId === 'observability:complete_overview' ? completeOverviewEnabled : false,
+  } as unknown as PricingServiceStart);
+
+const pricing = createPricing(true);
+
+const noObservabilityCapabilities = {
+  logs: { show: false },
+  observabilityAlerts: { show: false },
+  navLinks: { apm: false, logs: false, metrics: false, uptime: false },
+} as unknown as ApplicationStart['capabilities'];
 
 describe('updateGlobalNavigation', () => {
   describe('when no observability apps are enabled', () => {
-    it('hides the overview link', () => {
+    it('hides the overview link and marks the app inaccessible', () => {
       const capabilities = {
-        logs: { show: false },
-        observabilityAlerts: { show: false },
-        navLinks: { apm: false, logs: false, metrics: false, uptime: false },
+        [casesFeatureId]: { read_cases: false },
+        ...noObservabilityCapabilities,
       } as unknown as ApplicationStart['capabilities'];
       const deepLinks: AppDeepLink[] = [];
       const callback = jest.fn();
@@ -37,7 +44,91 @@ describe('updateGlobalNavigation', () => {
       updateGlobalNavigation({ capabilities, deepLinks, updater$, pricing });
 
       expect(callback).toHaveBeenCalledWith({
-        deepLinks,
+        deepLinks: [],
+        status: AppStatus.inaccessible,
+        visibleIn: [],
+      });
+    });
+
+    it('marks the app inaccessible when casesFeatureId is absent from capabilities', () => {
+      const callback = jest.fn();
+      const updater$ = {
+        next: (cb: AppUpdater) => callback(cb(app)),
+      } as unknown as Subject<AppUpdater>;
+
+      updateGlobalNavigation({
+        capabilities: noObservabilityCapabilities,
+        deepLinks: [],
+        updater$,
+        pricing,
+      });
+
+      expect(callback).toHaveBeenCalledWith({
+        deepLinks: [],
+        status: AppStatus.inaccessible,
+        visibleIn: [],
+      });
+    });
+
+    it('marks the app inaccessible on non-complete-overview tiers without capabilities', () => {
+      const capabilities = {
+        [casesFeatureId]: { read_cases: false },
+        ...noObservabilityCapabilities,
+      } as unknown as ApplicationStart['capabilities'];
+      const callback = jest.fn();
+      const updater$ = {
+        next: (cb: AppUpdater) => callback(cb(app)),
+      } as unknown as Subject<AppUpdater>;
+
+      updateGlobalNavigation({
+        capabilities,
+        deepLinks: [{ id: 'alerts', title: 'Alerts', order: 8001, path: '/alerts', visibleIn: [] }],
+        updater$,
+        pricing: createPricing(false),
+      });
+
+      expect(callback).toHaveBeenCalledWith({
+        deepLinks: [],
+        status: AppStatus.inaccessible,
+        visibleIn: [],
+      });
+    });
+
+    it('keeps the app accessible when only cases privileges are granted', () => {
+      const capabilities = {
+        [casesFeatureId]: { read_cases: true },
+        ...noObservabilityCapabilities,
+      } as unknown as ApplicationStart['capabilities'];
+
+      const caseRoute = {
+        id: 'cases',
+        title: 'Cases',
+        order: 8003,
+        path: '/cases',
+        visibleIn: [],
+      };
+
+      const deepLinks = [
+        caseRoute,
+        { id: 'alerts', title: 'Alerts', order: 8001, path: '/alerts', visibleIn: [] },
+        { id: 'rules', title: 'Rules', order: 8002, path: '/rules', visibleIn: [] },
+      ];
+      const callback = jest.fn();
+      const updater$ = {
+        next: (cb: AppUpdater) => callback(cb(app)),
+      } as unknown as Subject<AppUpdater>;
+
+      updateGlobalNavigation({ capabilities, deepLinks, updater$, pricing });
+
+      expect(callback).toHaveBeenCalledWith({
+        deepLinks: [
+          {
+            ...caseRoute,
+            visibleIn: ['classicSideNav', 'projectSideNav', 'globalSearch'],
+          },
+        ],
+        status: AppStatus.accessible,
+        // Cases-only access does not surface the overview app or alerts/rules nav
         visibleIn: [],
       });
     });
@@ -59,6 +150,7 @@ describe('updateGlobalNavigation', () => {
 
       expect(callback).toHaveBeenCalledWith({
         deepLinks,
+        status: AppStatus.accessible,
         visibleIn: ['classicSideNav', 'projectSideNav', 'home', 'kibanaOverview', 'globalSearch'],
       });
     });
@@ -95,6 +187,7 @@ describe('updateGlobalNavigation', () => {
               visibleIn: ['classicSideNav', 'projectSideNav', 'globalSearch'], // visibility set
             },
           ],
+          status: AppStatus.accessible,
           visibleIn: ['classicSideNav', 'projectSideNav', 'home', 'kibanaOverview', 'globalSearch'],
         });
       });
@@ -127,6 +220,7 @@ describe('updateGlobalNavigation', () => {
 
         expect(callback).toHaveBeenCalledWith({
           deepLinks: [], // Deeplink has been filtered out
+          status: AppStatus.accessible,
           visibleIn: ['classicSideNav', 'projectSideNav', 'home', 'kibanaOverview', 'globalSearch'],
         });
       });
@@ -166,6 +260,7 @@ describe('updateGlobalNavigation', () => {
               visibleIn: ['classicSideNav', 'projectSideNav', 'globalSearch'],
             },
           ],
+          status: AppStatus.accessible,
           visibleIn: ['classicSideNav', 'projectSideNav', 'home', 'kibanaOverview', 'globalSearch'],
         });
       });
@@ -205,6 +300,7 @@ describe('updateGlobalNavigation', () => {
               visibleIn: ['classicSideNav', 'projectSideNav', 'globalSearch'],
             },
           ],
+          status: AppStatus.accessible,
           visibleIn: ['classicSideNav', 'projectSideNav', 'home', 'kibanaOverview', 'globalSearch'],
         });
       });
@@ -242,6 +338,7 @@ describe('updateGlobalNavigation', () => {
               visibleIn: ['classicSideNav', 'projectSideNav', 'globalSearch'],
             },
           ],
+          status: AppStatus.accessible,
           visibleIn: ['classicSideNav', 'projectSideNav', 'home', 'kibanaOverview', 'globalSearch'],
         });
       });
