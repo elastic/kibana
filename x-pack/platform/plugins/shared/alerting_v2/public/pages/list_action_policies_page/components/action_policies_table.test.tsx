@@ -423,6 +423,73 @@ describe('ActionPoliciesTable', () => {
     });
   });
 
+  describe('Enabled column switch', () => {
+    const getSwitch = () => screen.getByRole('switch', { name: /policy one enabled/i });
+
+    it('renders checked when the policy is enabled', async () => {
+      renderTable();
+
+      await waitFor(() => expect(getSwitch()).toBeChecked());
+    });
+
+    it('renders unchecked when the policy is disabled', async () => {
+      mockFindItems.mockResolvedValue({
+        items: [
+          {
+            ...createPolicy({ enabled: false }),
+            title: 'Policy One',
+            updatedAt: new Date('2026-01-02T03:04:05.000Z'),
+            policy: createPolicy({ enabled: false }),
+          },
+        ],
+        total: 1,
+      });
+      renderTable();
+
+      await waitFor(() => expect(getSwitch()).not.toBeChecked());
+    });
+
+    it('calls disablePolicy when toggled off', async () => {
+      const user = userEvent.setup();
+      renderTable();
+
+      await waitFor(() => expect(getSwitch()).toBeInTheDocument());
+      await user.click(getSwitch());
+
+      expect(mockDisableActionPolicy).toHaveBeenCalledWith('policy-1', expect.anything());
+      expect(mockEnableActionPolicy).not.toHaveBeenCalled();
+    });
+
+    it('calls enablePolicy when toggled on', async () => {
+      mockFindItems.mockResolvedValue({
+        items: [
+          {
+            ...createPolicy({ enabled: false }),
+            title: 'Policy One',
+            updatedAt: new Date('2026-01-02T03:04:05.000Z'),
+            policy: createPolicy({ enabled: false }),
+          },
+        ],
+        total: 1,
+      });
+      const user = userEvent.setup();
+      renderTable();
+
+      await waitFor(() => expect(getSwitch()).toBeInTheDocument());
+      await user.click(getSwitch());
+
+      expect(mockEnableActionPolicy).toHaveBeenCalledWith('policy-1', expect.anything());
+      expect(mockDisableActionPolicy).not.toHaveBeenCalled();
+    });
+
+    it('is disabled for read-only users', async () => {
+      mockCapabilities = READ_ONLY_CAPABILITIES;
+      renderTable();
+
+      await waitFor(() => expect(getSwitch()).toBeDisabled());
+    });
+  });
+
   describe('when the user only has read privilege', () => {
     beforeEach(() => {
       mockCapabilities = READ_ONLY_CAPABILITIES;
