@@ -151,7 +151,7 @@ describe('TemplatesMigrationTaskManager', () => {
     const taskDef = call[0][CASES_TEMPLATES_MIGRATION_TASK_TYPE];
     const runner = taskDef.createTaskRunner({
       taskInstance: { state: state ?? {} },
-      abortController: new AbortController(),
+      signal: new AbortController().signal,
     } as unknown as RunContext);
     return runner.run();
   };
@@ -160,7 +160,9 @@ describe('TemplatesMigrationTaskManager', () => {
     const call = taskManagerSetupMock.registerTaskDefinitions.mock.calls[0];
     const taskDefs = call[0];
     const taskDef = taskDefs[CASES_TEMPLATES_MIGRATION_TASK_TYPE];
-    return taskDef.createTaskRunner({} as unknown as RunContext);
+    return taskDef.createTaskRunner({
+      signal: new AbortController().signal,
+    } as unknown as RunContext);
   };
 
   const buildAndSchedule = async (
@@ -278,6 +280,13 @@ describe('TemplatesMigrationTaskManager', () => {
         name: 'My Template',
         owner: 'cases',
         isLatest: true,
+        fieldDefinitions: [
+          expect.objectContaining({
+            name: 'cf_text',
+            type: 'keyword',
+            control: 'INPUT_TEXT',
+          }),
+        ],
       });
 
       // The field/template phase writes those two flags together...

@@ -601,6 +601,7 @@ export class ActionsPlugin
           unsecuredSavedObjectsClient,
           encryptedSavedObjectsClient,
           logger,
+          configurationUtilities: actionsConfigUtils,
         }),
         async getEventLogClient() {
           return plugins.eventLog.getClient(request);
@@ -743,13 +744,15 @@ export class ActionsPlugin
         getScopedSavedObjectsClientWithoutAccessToActions,
         core.elasticsearch,
         encryptedSavedObjectsClient,
-        (request: KibanaRequest) => this.getUnsecuredSavedObjectsClient(core.savedObjects, request)
+        (request: KibanaRequest) => this.getUnsecuredSavedObjectsClient(core.savedObjects, request),
+        actionsConfigUtils
       ),
       getUnsecuredServices: this.getUnsecuredServicesFactory(
         getInternalSavedObjectsRepositoryWithoutAccessToActions,
         core.elasticsearch,
         encryptedSavedObjectsClient,
-        () => this.getUnsecuredSavedObjectsClientWithFakeRequest(core.savedObjects)
+        () => this.getUnsecuredSavedObjectsClientWithFakeRequest(core.savedObjects),
+        actionsConfigUtils
       ),
       encryptedSavedObjectsClient,
       actionTypeRegistry: actionTypeRegistry!,
@@ -866,7 +869,8 @@ export class ActionsPlugin
     getScopedClient: (request: KibanaRequest) => SavedObjectsClientContract,
     elasticsearch: ElasticsearchServiceStart,
     encryptedSavedObjectsClient: EncryptedSavedObjectsClient,
-    unsecuredSavedObjectsClient: (request: KibanaRequest) => SavedObjectsClientContract
+    unsecuredSavedObjectsClient: (request: KibanaRequest) => SavedObjectsClientContract,
+    configurationUtilities: ActionsConfigurationUtilities
   ): (request: KibanaRequest) => Services {
     return (request) => {
       return {
@@ -876,6 +880,7 @@ export class ActionsPlugin
           unsecuredSavedObjectsClient: unsecuredSavedObjectsClient(request),
           encryptedSavedObjectsClient,
           logger: this.logger,
+          configurationUtilities,
         }),
       };
     };
@@ -885,7 +890,8 @@ export class ActionsPlugin
     getSavedObjectRepository: () => ISavedObjectsRepository,
     elasticsearch: ElasticsearchServiceStart,
     encryptedSavedObjectsClient: EncryptedSavedObjectsClient,
-    unsecuredSavedObjectsRepository: () => SavedObjectsClientContract
+    unsecuredSavedObjectsRepository: () => SavedObjectsClientContract,
+    configurationUtilities: ActionsConfigurationUtilities
   ): () => UnsecuredServices {
     return () => {
       return {
@@ -895,6 +901,7 @@ export class ActionsPlugin
           unsecuredSavedObjectsClient: unsecuredSavedObjectsRepository(),
           encryptedSavedObjectsClient,
           logger: this.logger,
+          configurationUtilities,
         }),
       };
     };
@@ -1035,6 +1042,7 @@ export class ActionsPlugin
               unsecuredSavedObjectsClient,
               encryptedSavedObjectsClient,
               logger,
+              configurationUtilities: actionsConfigUtils,
             }),
             async getEventLogClient() {
               return eventLog.getClient(request);

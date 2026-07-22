@@ -1,5 +1,5 @@
 {
-  "sha1": "d32641f90d0c8bd9ee37dc9af57fa711824a5864",
+  "sha1": "b80ed69224cc547fb98684f8b3455e59fbb52900",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -27,7 +27,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/tests/esql_conversion_enabled.spec.ts",
-        "line": 59,
+        "line": 54,
         "column": 7
       }
     },
@@ -40,7 +40,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/tests/esql_conversion_enabled.spec.ts",
-        "line": 85,
+        "line": 80,
         "column": 7
       }
     },
@@ -53,7 +53,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/tests/esql_conversion_enabled.spec.ts",
-        "line": 124,
+        "line": 119,
         "column": 7
       }
     },
@@ -66,7 +66,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/tests/esql_conversion_enabled.spec.ts",
-        "line": 148,
+        "line": 143,
         "column": 7
       }
     },
@@ -82,6 +82,110 @@
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/tests/metric_trendline_custom_time_field.spec.ts",
         "line": 66,
         "column": 9
+      }
+    },
+    {
+      "id": "8f9c3936788a3bd-105fe7bf8fcfb38",
+      "title": "Lens TSDB query and editor behavior defaults to median without warnings for non-rolled-up metrics",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/tests/tsdb/query_behavior.spec.ts",
+        "line": 69,
+        "column": 7
+      }
+    },
+    {
+      "id": "8f9c3936788a3bd-3c36dec4a485fe5",
+      "title": "Lens TSDB query and editor behavior defaults to average and shows warnings for rolled-up metrics",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/tests/tsdb/query_behavior.spec.ts",
+        "line": 96,
+        "column": 7
+      }
+    },
+    {
+      "id": "8f9c3936788a3bd-238c6acecdfe8f9",
+      "title": "Lens TSDB query and editor behavior allows supported operations and rejects unsupported operations for time series fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/tests/tsdb/query_behavior.spec.ts",
+        "line": 136,
+        "column": 7
+      }
+    },
+    {
+      "id": "8f9c3936788a3bd-587724d93d7d87b",
+      "title": "Lens TSDB query and editor behavior shows time series dimension group only for breakdown field picker",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/tests/tsdb/query_behavior.spec.ts",
+        "line": 219,
+        "column": 7
       }
     }
   ]

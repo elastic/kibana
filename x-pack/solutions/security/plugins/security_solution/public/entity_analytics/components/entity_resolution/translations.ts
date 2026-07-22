@@ -164,3 +164,20 @@ export const ENTITY_HAS_ALIASES_ERROR = i18n.translate(
       'This entity already belongs to another resolution group. Unlink it from its current group before adding it here.',
   }
 );
+
+export const RESOLUTION_GROUP_TABLE_CAPTION = i18n.translate(
+  'xpack.securitySolution.entityResolution.resolutionGroupTableCaption',
+  { defaultMessage: 'Entity resolution group' }
+);
+
+export const RESOLUTION_GROUP_DETAILS_TABLE_CAPTION = i18n.translate(
+  'xpack.securitySolution.entityResolution.resolutionGroupDetailsTableCaption',
+  { defaultMessage: 'Resolution group details' }
+);
+
+export const ADD_ENTITIES_TABLE_CAPTION = i18n.translate(
+  'xpack.securitySolution.entityResolution.addEntitiesTableCaption',
+  {
+    defaultMessage: 'Entities to add',
+  }
+);
