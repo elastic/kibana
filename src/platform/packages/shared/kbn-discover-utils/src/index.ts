@@ -12,6 +12,7 @@ export * as fieldConstants from './field_constants';
 export * from './hooks';
 export * from './utils';
 export * from './data_types';
+export * from './metrics_grid_settings';
 
 export * from './components/custom_control_columns';
 export { ErrorCallout } from './components/error_callout';

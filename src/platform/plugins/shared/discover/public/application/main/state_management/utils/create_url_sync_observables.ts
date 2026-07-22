@@ -24,8 +24,10 @@ import {
 } from '../redux';
 import { internalStateSlice } from '../redux/internal_state';
 import { createTabAppStateObservable } from './create_tab_app_state_observable';
-import type { ProfileStateMap } from '../../../../context_awareness';
-import { ProfileStateType } from '../../../../context_awareness';
+import {
+  ProfileStateType,
+  type ProfileStateMap,
+} from '../../../../../common/context_awareness/profile_state';
 
 /**
  * Create observables and state containers for 2-directional syncing of appState and globalState with the URL

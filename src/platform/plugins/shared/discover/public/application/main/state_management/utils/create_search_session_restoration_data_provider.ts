@@ -11,13 +11,19 @@ import { i18n } from '@kbn/i18n';
 import type { DataPublicPluginStart, SearchSessionInfoProvider } from '@kbn/data-plugin/public';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import type { ReactiveTabRuntimeState, TabState } from '../redux';
+import type { RuntimeStateManager } from '../redux/runtime_state';
+import { selectCurrentProfileLocatorState } from '../redux/runtime_state';
 import { DISCOVER_APP_LOCATOR, type DiscoverAppLocatorParams } from '../../../../../common';
+import type { ProfileStateRegistry } from '../../../../../common/context_awareness/profile_state';
 
 export function createSearchSessionRestorationDataProvider(deps: {
   data: DataPublicPluginStart;
   getPersistedDiscoverSession: () => DiscoverSession | undefined;
   getCurrentTab: () => TabState;
   getCurrentTabRuntimeState: () => ReactiveTabRuntimeState;
+  profileStateRegistry: ProfileStateRegistry;
+  runtimeStateManager: RuntimeStateManager;
+  tabId: string;
 }): SearchSessionInfoProvider {
   return {
     getName: async () => {
@@ -49,15 +55,27 @@ function createUrlGeneratorState({
   getPersistedDiscoverSession,
   getCurrentTab,
   getCurrentTabRuntimeState,
+  profileStateRegistry,
+  runtimeStateManager,
+  tabId,
   shouldRestoreSearchSession,
 }: {
   data: DataPublicPluginStart;
   getPersistedDiscoverSession: () => DiscoverSession | undefined;
   getCurrentTab: () => TabState;
   getCurrentTabRuntimeState: () => ReactiveTabRuntimeState;
+  profileStateRegistry: ProfileStateRegistry;
+  runtimeStateManager: RuntimeStateManager;
+  tabId: string;
   shouldRestoreSearchSession: boolean;
 }): DiscoverAppLocatorParams {
   const appState = getCurrentTab().appState;
+  const profileState = selectCurrentProfileLocatorState({
+    runtimeStateManager,
+    tabId,
+    profileStateMap: getCurrentTab().profileState,
+    profileStateRegistry,
+  });
   const dataView = getCurrentTabRuntimeState().currentDataView$.getValue();
   return {
     filters: data.query.filterManager.getFilters(),
@@ -82,6 +100,7 @@ function createUrlGeneratorState({
     useHash: false,
     viewMode: appState.viewMode,
     hideAggregatedPreview: appState.hideAggregatedPreview,
+    profileState,
     breakdownField: appState.breakdownField,
     dataViewSpec: !dataView?.isPersisted() ? dataView?.toMinimalSpec() : undefined,
     ...(shouldRestoreSearchSession

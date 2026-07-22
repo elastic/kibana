@@ -9,13 +9,16 @@
 
 import { isEqual } from 'lodash';
 import { distinctUntilChanged, from, map, shareReplay } from 'rxjs';
+import type { SerializableRecord } from '@kbn/utility-types';
+import type {
+  ProfileStateDefinition,
+  ProfileStateRegistry,
+} from '../../../../../common/context_awareness/profile_state';
 import type { ContextAwarenessToolkit } from '../../../../context_awareness/toolkit';
 import {
   createProfileStateAdapterFactory,
   type ProfileStateAdapter,
-  type ProfileStateDefinition,
-  type ProfileStateRegistry,
-} from '../../../../context_awareness';
+} from '../../../../context_awareness/profile_state_adapter';
 import type { InternalStateStore } from './internal_state';
 import { internalStateActions } from '.';
 import { selectTab } from './selectors';
@@ -58,7 +61,7 @@ export const createContextAwarenessToolkit = ({
     },
     getStateAdapter: createProfileStateAdapterFactory({
       profileStateRegistry,
-      createAdapter: <TState extends object>(
+      createAdapter: <TState extends SerializableRecord>(
         definition: ProfileStateDefinition<TState>
       ): ProfileStateAdapter<TState> => {
         const getState = () => {

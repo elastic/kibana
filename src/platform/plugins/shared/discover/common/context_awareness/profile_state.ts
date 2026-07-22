@@ -7,38 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { SerializableRecord } from '@kbn/utility-types';
 import { isEqual } from 'lodash';
-import type { Observable } from 'rxjs';
-
-export interface ProfileStateMutationOptions {
-  /**
-   * Controls how URL-backed hosts update browser history for this mutation.
-   */
-  historyMethod?: 'push' | 'replace';
-}
-
-/**
- * Host-backed profile state API exposed to profile extension point implementations.
- */
-export interface ProfileStateAdapter<TState extends object> {
-  /**
-   * Returns the current state, falling back to the definition's default state before any value is
-   * written by the host.
-   */
-  getState: () => TState;
-  /**
-   * Emits the current state and subsequent state changes.
-   */
-  getState$: () => Observable<TState>;
-  /**
-   * Replaces the full state value.
-   */
-  setState: (state: TState, options?: ProfileStateMutationOptions) => void;
-  /**
-   * Applies a shallow immutable update to the current state.
-   */
-  updateState: (stateUpdate: Partial<TState>, options?: ProfileStateMutationOptions) => void;
-}
 
 /**
  * Field-level lifetime preference for profile state values.
@@ -61,7 +31,7 @@ export enum ProfileStateType {
 /**
  * Describes the intended lifetime for each field in a profile state definition.
  */
-export type ProfileStateDescriptor<TState extends object> = {
+export type ProfileStateDescriptor<TState extends SerializableRecord> = {
   [key in keyof TState]: {
     type: ProfileStateType;
   };
@@ -71,7 +41,7 @@ export type ProfileStateDescriptor<TState extends object> = {
  * Typed state definition registered by profile providers and consumed via
  * `ContextAwarenessToolkit.getStateAdapter`.
  */
-export interface ProfileStateDefinition<TState extends object> {
+export interface ProfileStateDefinition<TState extends SerializableRecord> {
   /**
    * Unique storage key for this profile state blob.
    */
@@ -89,51 +59,44 @@ export interface ProfileStateDefinition<TState extends object> {
 /**
  * A map of profile state blobs keyed by their registered definition key.
  */
-export type ProfileStateMap = Record<string, object | undefined>;
+export type ProfileStateMap = Record<string, SerializableRecord | undefined>;
 
 /**
  * Controls how registered default values are handled when filtering profile state.
  */
 export type ProfileStateDefaultsHandling = 'none' | 'expand' | 'strip';
 
-type ProfileStateDescriptorEntry<TState extends object> = [
-  keyof TState,
-  ProfileStateDescriptor<TState>[keyof TState]
-];
-
-const getProfileStateDescriptorEntries = <TState extends object>(
-  descriptor: ProfileStateDescriptor<TState>
-): Array<ProfileStateDescriptorEntry<TState>> => {
-  return Object.entries(descriptor) as Array<ProfileStateDescriptorEntry<TState>>;
-};
+export interface ProfileStateDefinitionReference {
+  key: string;
+  descriptor: Record<string, { type: ProfileStateType }>;
+  defaultState: SerializableRecord;
+}
 
 /**
  * Registry of profile state definitions supported by Discover.
  */
 export class ProfileStateRegistry {
-  private readonly stateDefinitions = new Map<
-    string,
-    ProfileStateDefinition<Record<string, unknown>>
-  >();
+  private readonly stateDefinitions = new Map<string, ProfileStateDefinitionReference>();
 
   /**
    * Registers a profile state definition. Keys must be globally unique.
    */
-  public registerDefinition<TState extends object>(definition: ProfileStateDefinition<TState>) {
+  public registerDefinition<TState extends SerializableRecord>(
+    definition: ProfileStateDefinition<TState>
+  ) {
     if (this.stateDefinitions.has(definition.key)) {
       throw new Error(`State with key ${definition.key} is already registered.`);
     }
 
-    this.stateDefinitions.set(
-      definition.key,
-      definition as ProfileStateDefinition<Record<string, unknown>>
-    );
+    this.stateDefinitions.set(definition.key, definition);
   }
 
   /**
    * Returns true when the requested definition matches the registered descriptor and default state.
    */
-  public hasDefinition<TState extends object>(definition: ProfileStateDefinition<TState>): boolean {
+  public hasDefinition<TState extends SerializableRecord>(
+    definition: ProfileStateDefinition<TState>
+  ): boolean {
     const registeredDefinition = this.stateDefinitions.get(definition.key);
 
     if (!registeredDefinition) {
@@ -149,10 +112,6 @@ export class ProfileStateRegistry {
   /**
    * Filters a profile state map by field lifetime type. Unregistered state keys and entries with no
    * matching fields are omitted from the returned map.
-   *
-   * When `defaultsHandling` is `expand`, each returned entry is merged over the registered default
-   * fields for the requested state types. When `defaultsHandling` is `strip`, default-valued fields
-   * are omitted from returned entries.
    */
   public pickStateByType({
     profileStateMap,
@@ -194,7 +153,7 @@ export class ProfileStateRegistry {
   public mergeState(
     ...profileStateMaps: Array<ProfileStateMap | null | undefined>
   ): ProfileStateMap {
-    const mergedStateMap: Record<string, Record<string, unknown>> = {};
+    const mergedStateMap: ProfileStateMap = {};
 
     for (const profileStateMap of profileStateMaps) {
       if (!profileStateMap) {
@@ -228,45 +187,36 @@ export class ProfileStateRegistry {
   /**
    * Filters one profile state object by field lifetime type using the registered definition for
    * `stateKey`.
-   *
-   * Returns `undefined` when the state key is not registered, the state is missing, or no fields
-   * match the requested type. When `defaultsHandling` is `expand`, the matching fields are merged
-   * over the registered default fields for the requested state types. When `defaultsHandling` is
-   * `strip`, fields equal to the registered defaults are omitted.
    */
-  public filterFieldsByType<TState extends object>({
+  public filterFieldsByType({
     profileState,
     stateKey,
     stateTypes,
     defaultsHandling = 'none',
   }: {
-    profileState: Partial<TState> | undefined;
-    stateKey: ProfileStateDefinition<TState>['key'];
+    profileState: SerializableRecord | undefined;
+    stateKey: string;
     stateTypes: ProfileStateType[] | Set<ProfileStateType>;
     defaultsHandling?: ProfileStateDefaultsHandling;
-  }): Partial<TState> | undefined {
-    const definition = this.stateDefinitions.get(stateKey) as
-      | ProfileStateDefinition<TState>
-      | undefined;
+  }): SerializableRecord | undefined {
+    const definition = this.stateDefinitions.get(stateKey);
 
     if (!definition || !profileState) {
       return undefined;
     }
 
     const stateTypeSet = stateTypes instanceof Set ? stateTypes : new Set(stateTypes);
-    const filteredState: Partial<TState> = {};
+    const filteredState: SerializableRecord = {};
 
     let shouldReturnFilteredState = false;
 
-    for (const [field, descriptor] of getProfileStateDescriptorEntries(definition.descriptor)) {
+    for (const [field, descriptor] of Object.entries(definition.descriptor)) {
       if (!stateTypeSet.has(descriptor.type)) {
         continue;
       }
 
       const profileStateHasField = Object.hasOwn(profileState, field);
 
-      // Expand fills requested defaults but only returns when at least one requested field is
-      // explicit; none preserves explicit fields; strip preserves explicit non-default fields.
       if (defaultsHandling === 'expand') {
         if (profileStateHasField) {
           shouldReturnFilteredState = true;
@@ -287,35 +237,3 @@ export class ProfileStateRegistry {
     return shouldReturnFilteredState ? filteredState : undefined;
   }
 }
-
-/**
- * Creates a definition-validated, cached adapter factory for host-specific state adapters.
- */
-export const createProfileStateAdapterFactory = ({
-  createAdapter,
-  profileStateRegistry,
-}: {
-  createAdapter: <TState extends object>(
-    definition: ProfileStateDefinition<TState>
-  ) => ProfileStateAdapter<TState>;
-  profileStateRegistry: ProfileStateRegistry;
-}) => {
-  const stateAdapters = new Map<string, ProfileStateAdapter<Record<string, unknown>>>();
-
-  return <TState extends object>(definition: ProfileStateDefinition<TState>) => {
-    if (!profileStateRegistry.hasDefinition(definition)) {
-      throw new Error(`State with key ${definition.key} is not registered.`);
-    }
-
-    const existingAdapter = stateAdapters.get(definition.key);
-
-    if (existingAdapter) {
-      return existingAdapter as ProfileStateAdapter<TState>;
-    }
-
-    const adapter = createAdapter(definition);
-    stateAdapters.set(definition.key, adapter as ProfileStateAdapter<Record<string, unknown>>);
-
-    return adapter;
-  };
-};

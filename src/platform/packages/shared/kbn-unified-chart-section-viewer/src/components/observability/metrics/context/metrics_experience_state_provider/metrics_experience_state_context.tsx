@@ -9,8 +9,8 @@
 
 import React, { useCallback } from 'react';
 import { createContext } from 'react';
-import type { Dimension, MetricsGridSettings, MetricsSort } from '../../../../../types';
-import { METRICS_GRID_SETTINGS_DEFAULTS } from '../../../../flyout/metrics_grid_settings_flyout/constants';
+import { METRICS_GRID_SETTINGS_DEFAULTS, type MetricsGridSettings } from '@kbn/discover-utils';
+import type { Dimension, MetricsSort } from '../../../../../types';
 import { DEFAULT_METRICS_SORT } from '../../../../../common/constants';
 import {
   type FlyoutState,
