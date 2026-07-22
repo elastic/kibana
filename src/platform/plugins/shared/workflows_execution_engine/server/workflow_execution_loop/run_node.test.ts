@@ -492,7 +492,7 @@ describe('runNode', () => {
       await runNode(mockParams);
 
       expect(mockOnCancel).toHaveBeenCalledTimes(1);
-      expect(mockParams.workflowRuntime.saveState).toHaveBeenCalled();
+      expect(mockParams.workflowExecutionCursor.captureError).toHaveBeenCalled();
     });
 
     it('should handle synchronous onCancel that throws', async () => {
@@ -530,8 +530,8 @@ describe('runNode', () => {
 
       await runNode(mockParams);
 
-      // Error is caught → setWorkflowError, but the finally block still fires.
-      expect(mockParams.workflowRuntime.setWorkflowError).toHaveBeenCalled();
+      // Error is caught → captureError on the cursor, but the finally block still fires.
+      expect(mockParams.workflowExecutionCursor.captureError).toHaveBeenCalled();
       expect(mockStepExecutionRuntime.contextManager.releaseReadPins).toHaveBeenCalledTimes(1);
     });
 
