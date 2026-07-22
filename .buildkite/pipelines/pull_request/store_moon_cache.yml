@@ -8,5 +8,5 @@ steps:
       machineType: n2-highcpu-8
       diskSizeGb: 130
       image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-qa # TODO(yarn-to-pnpm): QA image for pnpm warmup, revert before merge
+      imageProject: elastic-images-prod
       provider: gcp
