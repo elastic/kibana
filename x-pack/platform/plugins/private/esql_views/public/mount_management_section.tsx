@@ -29,6 +29,7 @@ export const mountManagementSection = (
         notifications={coreStart.notifications}
         http={coreStart.http}
         data={pluginsStart.data}
+        share={pluginsStart.share}
       />
     ),
     element

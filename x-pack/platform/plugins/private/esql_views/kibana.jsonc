@@ -15,7 +15,8 @@
       "dataViews",
       "uiActions",
       "esql",
-      "esqlDataGrid"
+      "esqlDataGrid",
+      "share"
     ]
   }
 }

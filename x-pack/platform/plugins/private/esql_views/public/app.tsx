@@ -6,10 +6,14 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
+import { css } from '@emotion/react';
 import {
+  EuiButton,
   EuiCode,
+  EuiCodeBlock,
   EuiConfirmModal,
   EuiLink,
+  EuiPopover,
   EuiSpacer,
   EuiInMemoryTable,
   useGeneratedHtmlId,
@@ -20,6 +24,8 @@ import { i18n } from '@kbn/i18n';
 import { FormattedRelative } from '@kbn/i18n-react';
 import type { HttpStart, NotificationsStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
+import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { mockEsqlViews, type EsqlView } from './mock_views';
 import {
@@ -33,6 +39,7 @@ export interface EsqlViewsAppProps {
   notifications: NotificationsStart;
   http: HttpStart;
   data: DataPublicPluginStart;
+  share: SharePluginStart;
   /**
    * Lets prototype versions (see `versioned_app.tsx`) swap in an alternate take on the
    * create/edit flyout while reusing this table/list page as-is. Defaults to the V1 flyout.
@@ -44,6 +51,52 @@ interface FlyoutState {
   mode: 'create' | 'edit';
   view?: EsqlView;
 }
+
+const truncatedQueryStyle = css`
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+`;
+
+// Renders the query as a single truncated line; clicking it reveals the full query in a
+// popover so the table stays scannable while keeping the whole query easily accessible.
+const TruncatedQuery: React.FunctionComponent<{ query: string }> = ({ query }) => {
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+
+  return (
+    <EuiPopover
+      button={
+        <EuiCode
+          transparentBackground
+          css={truncatedQueryStyle}
+          onClick={() => setIsPopoverOpen((open) => !open)}
+          data-test-subj="esqlViewsQueryCell"
+        >
+          {query}
+        </EuiCode>
+      }
+      isOpen={isPopoverOpen}
+      closePopover={() => setIsPopoverOpen(false)}
+      anchorPosition="downLeft"
+      panelPaddingSize="s"
+    >
+      <EuiCodeBlock
+        language="esql"
+        fontSize="s"
+        paddingSize="s"
+        css={css`
+          max-width: 480px;
+        `}
+        isCopyable
+      >
+        {query}
+      </EuiCodeBlock>
+    </EuiPopover>
+  );
+};
 
 // Merges the illustrative seed rows with anything created/edited in this browser (cached in
 // localStorage, see `services/local_metadata.ts`), so views created via the real `_query/view`
@@ -75,11 +128,14 @@ export const EsqlViewsApp: React.FunctionComponent<EsqlViewsAppProps> = ({
   notifications,
   http,
   data,
+  share,
   FlyoutComponent = CreateEditEsqlViewFlyout,
 }) => {
+  const discoverLocator = share.url.locators.get(DISCOVER_APP_LOCATOR);
   const [views, setViews] = useState<EsqlView[]>(buildInitialViews);
   const [flyoutState, setFlyoutState] = useState<FlyoutState | null>(null);
-  const [viewPendingDelete, setViewPendingDelete] = useState<EsqlView | null>(null);
+  const [selectedItems, setSelectedItems] = useState<EsqlView[]>([]);
+  const [viewsPendingDelete, setViewsPendingDelete] = useState<EsqlView[] | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const deleteModalTitleId = useGeneratedHtmlId({ prefix: 'esqlViewsDeleteModalTitle' });
 
@@ -103,34 +159,59 @@ export const EsqlViewsApp: React.FunctionComponent<EsqlViewsAppProps> = ({
   }, []);
 
   const handleConfirmDelete = useCallback(async () => {
-    if (!viewPendingDelete) {
+    if (!viewsPendingDelete || viewsPendingDelete.length === 0) {
       return;
     }
     setIsDeleting(true);
-    try {
-      await deleteView(http, viewPendingDelete.name);
-      removeLocalViewMetadata(viewPendingDelete.name);
-      setViews((prev) => prev.filter((view) => view.name !== viewPendingDelete.name));
+
+    const results = await Promise.allSettled(
+      viewsPendingDelete.map(async (view) => {
+        await deleteView(http, view.name);
+        removeLocalViewMetadata(view.name);
+        return view.name;
+      })
+    );
+
+    const deletedNames = new Set(
+      results
+        .filter((result): result is PromiseFulfilledResult<string> => result.status === 'fulfilled')
+        .map((result) => result.value)
+    );
+    const failedCount = results.length - deletedNames.size;
+
+    if (deletedNames.size > 0) {
+      setViews((prev) => prev.filter((view) => !deletedNames.has(view.name)));
+      setSelectedItems((prev) => prev.filter((view) => !deletedNames.has(view.name)));
       notifications.toasts.addSuccess(
-        i18n.translate('esqlViews.deleteModal.successToast', {
-          defaultMessage: 'View "{name}" was deleted.',
-          values: { name: viewPendingDelete.name },
-        })
+        deletedNames.size === 1
+          ? i18n.translate('esqlViews.deleteModal.successToast', {
+              defaultMessage: 'View "{name}" was deleted.',
+              values: { name: [...deletedNames][0] },
+            })
+          : i18n.translate('esqlViews.deleteModal.bulkSuccessToast', {
+              defaultMessage: '{count} views were deleted.',
+              values: { count: deletedNames.size },
+            })
       );
-      setViewPendingDelete(null);
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      notifications.toasts.addDanger({
-        title: i18n.translate('esqlViews.deleteModal.errorToast', {
-          defaultMessage: 'Failed to delete view "{name}"',
-          values: { name: viewPendingDelete.name },
-        }),
-        text: message,
-      });
-    } finally {
-      setIsDeleting(false);
     }
-  }, [http, notifications, viewPendingDelete]);
+
+    if (failedCount > 0) {
+      notifications.toasts.addDanger(
+        viewsPendingDelete.length === 1
+          ? i18n.translate('esqlViews.deleteModal.errorToast', {
+              defaultMessage: 'Failed to delete view "{name}"',
+              values: { name: viewsPendingDelete[0].name },
+            })
+          : i18n.translate('esqlViews.deleteModal.bulkErrorToast', {
+              defaultMessage: 'Failed to delete {count} views.',
+              values: { count: failedCount },
+            })
+      );
+    }
+
+    setIsDeleting(false);
+    setViewsPendingDelete(null);
+  }, [http, notifications, viewsPendingDelete]);
 
   const menu = useMemo(
     () => ({
@@ -166,13 +247,8 @@ export const EsqlViewsApp: React.FunctionComponent<EsqlViewsAppProps> = ({
       {
         field: 'query',
         name: i18n.translate('esqlViews.table.queryColumn', { defaultMessage: 'Query' }),
-        render: (query: string) => <EuiCode transparentBackground>{query}</EuiCode>,
-      },
-      {
-        field: 'createdBy',
-        name: i18n.translate('esqlViews.table.createdByColumn', { defaultMessage: 'Created by' }),
-        sortable: true,
-        width: '140px',
+        width: '30%',
+        render: (query: string) => <TruncatedQuery query={query} />,
       },
       {
         field: 'lastUpdated',
@@ -186,7 +262,7 @@ export const EsqlViewsApp: React.FunctionComponent<EsqlViewsAppProps> = ({
       },
       {
         name: i18n.translate('esqlViews.table.actionsColumn', { defaultMessage: 'Actions' }),
-        width: '80px',
+        width: '120px',
         actions: [
           {
             name: i18n.translate('esqlViews.table.editAction', { defaultMessage: 'Edit' }),
@@ -198,6 +274,20 @@ export const EsqlViewsApp: React.FunctionComponent<EsqlViewsAppProps> = ({
             onClick: openEditFlyout,
           },
           {
+            name: i18n.translate('esqlViews.table.openInDiscoverAction', {
+              defaultMessage: 'Open in Discover',
+            }),
+            description: i18n.translate('esqlViews.table.openInDiscoverActionDescription', {
+              defaultMessage: 'Open this view in Discover',
+            }),
+            icon: 'discoverApp',
+            type: 'icon',
+            enabled: () => Boolean(discoverLocator),
+            onClick: (item: EsqlView) => {
+              discoverLocator?.navigate({ query: { esql: `FROM ${item.name}` } });
+            },
+          },
+          {
             name: i18n.translate('esqlViews.table.deleteAction', { defaultMessage: 'Delete' }),
             description: i18n.translate('esqlViews.table.deleteActionDescription', {
               defaultMessage: 'Delete this view',
@@ -205,12 +295,12 @@ export const EsqlViewsApp: React.FunctionComponent<EsqlViewsAppProps> = ({
             icon: 'trash',
             type: 'icon',
             color: 'danger',
-            onClick: (item: EsqlView) => setViewPendingDelete(item),
+            onClick: (item: EsqlView) => setViewsPendingDelete([item]),
           },
         ],
       },
     ],
-    [openEditFlyout]
+    [openEditFlyout, discoverLocator]
   );
 
   return (
@@ -227,7 +317,30 @@ export const EsqlViewsApp: React.FunctionComponent<EsqlViewsAppProps> = ({
         })}
         items={views}
         columns={columns}
-        search={{ box: { incremental: true, placeholder: 'Search views' } }}
+        search={{
+          box: { incremental: true, placeholder: 'Search views' },
+          toolsLeft:
+            selectedItems.length === 0
+              ? undefined
+              : [
+                  <EuiButton
+                    key="bulkDelete"
+                    color="danger"
+                    iconType="trash"
+                    onClick={() => setViewsPendingDelete(selectedItems)}
+                    data-test-subj="esqlViewsBulkDeleteButton"
+                  >
+                    {i18n.translate('esqlViews.table.bulkDeleteButton', {
+                      defaultMessage: 'Delete {count} views',
+                      values: { count: selectedItems.length },
+                    })}
+                  </EuiButton>,
+                ],
+        }}
+        selection={{
+          selectable: () => true,
+          onSelectionChange: setSelectedItems,
+        }}
         sorting={{ sort: { field: 'lastUpdated', direction: 'desc' } }}
         pagination={{ initialPageSize: 10, pageSizeOptions: [10, 25, 50] }}
         itemId="name"
@@ -244,15 +357,22 @@ export const EsqlViewsApp: React.FunctionComponent<EsqlViewsAppProps> = ({
           onSaved={handleFlyoutSaved}
         />
       )}
-      {viewPendingDelete && (
+      {viewsPendingDelete && viewsPendingDelete.length > 0 && (
         <EuiConfirmModal
-          title={i18n.translate('esqlViews.deleteModal.title', {
-            defaultMessage: 'Delete view "{name}"?',
-            values: { name: viewPendingDelete.name },
-          })}
+          title={
+            viewsPendingDelete.length === 1
+              ? i18n.translate('esqlViews.deleteModal.title', {
+                  defaultMessage: 'Delete view "{name}"?',
+                  values: { name: viewsPendingDelete[0].name },
+                })
+              : i18n.translate('esqlViews.deleteModal.bulkTitle', {
+                  defaultMessage: 'Delete {count} views?',
+                  values: { count: viewsPendingDelete.length },
+                })
+          }
           titleProps={{ id: deleteModalTitleId }}
           aria-labelledby={deleteModalTitleId}
-          onCancel={() => setViewPendingDelete(null)}
+          onCancel={() => setViewsPendingDelete(null)}
           onConfirm={handleConfirmDelete}
           cancelButtonText={i18n.translate('esqlViews.deleteModal.cancelButton', {
             defaultMessage: 'Cancel',
@@ -265,10 +385,16 @@ export const EsqlViewsApp: React.FunctionComponent<EsqlViewsAppProps> = ({
           data-test-subj="esqlViewsDeleteConfirmModal"
         >
           <p>
-            {i18n.translate('esqlViews.deleteModal.body', {
-              defaultMessage:
-                'This permanently deletes the view from Elasticsearch. This action cannot be undone.',
-            })}
+            {viewsPendingDelete.length === 1
+              ? i18n.translate('esqlViews.deleteModal.body', {
+                  defaultMessage:
+                    'This permanently deletes the view from Elasticsearch. This action cannot be undone.',
+                })
+              : i18n.translate('esqlViews.deleteModal.bulkBody', {
+                  defaultMessage:
+                    'This permanently deletes {count} views from Elasticsearch. This action cannot be undone.',
+                  values: { count: viewsPendingDelete.length },
+                })}
           </p>
         </EuiConfirmModal>
       )}

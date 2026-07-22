@@ -21,7 +21,9 @@
     "@kbn/data-views-plugin",
     "@kbn/expressions-plugin",
     "@kbn/field-types",
-    "@kbn/react-kibana-mount"
+    "@kbn/react-kibana-mount",
+    "@kbn/share-plugin",
+    "@kbn/deeplinks-analytics"
   ],
   "exclude": ["target/**/*"]
 }

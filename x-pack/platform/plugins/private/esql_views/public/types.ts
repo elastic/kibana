@@ -8,6 +8,7 @@
 import type { ComponentType } from 'react';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { CreateEditEsqlViewFlyoutProps } from './create_edit_view_flyout';
 
 export interface SetupDependencies {
@@ -16,6 +17,7 @@ export interface SetupDependencies {
 
 export interface StartDependencies {
   data: DataPublicPluginStart;
+  share: SharePluginStart;
 }
 
 /**
