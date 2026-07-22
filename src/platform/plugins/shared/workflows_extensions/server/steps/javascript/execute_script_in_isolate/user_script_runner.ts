@@ -17,41 +17,55 @@ import type ivm from 'isolated-vm';
 // for two reasons:
 //   1. Prototype-pollution prevention: strips own keys named __proto__, constructor,
 //      or prototype so a downstream deep-merge or path-assign cannot pollute
-//      Object.prototype on the host.
+//      Object.prototype on the host. Built-in method references (Set/WeakSet) are
+//      captured before user code runs so user overrides (e.g. Set.prototype.has = ...)
+//      cannot defeat the filter. Non-plain objects (class instances) are also scanned
+//      for forbidden own keys and rebuilt as plain objects when found, because V8's
+//      structured-clone strips the prototype but preserves own data properties.
 //   2. Cycle detection: tracks the ancestor chain of the current DFS path (not all
 //      visited nodes) and throws early when an object appears in its own ancestry.
 //      V8's value serializer (used by the copy-out) cannot handle circular references
 //      at all; throwing here gives a clear error instead of a cryptic serializer
 //      failure. Diamond-shaped graphs (the same object reachable via two paths but
 //      forming no cycle) are allowed.
-// Only plain objects and arrays are rebuilt; other built-ins (Date, Map, etc.) are
-// left untouched so the copy-out preserves their type, and a returned Promise still
+// Non-plain built-ins (Date, Map, etc.) pass through unchanged when they carry no
+// forbidden own keys; the copy-out preserves their type. A returned Promise still
 // fails the copy-out (async scripts remain unsupported).
 const USER_SCRIPT_RUNNER = `
+  const _setHas = Set.prototype.has;
+  const _weakSetHas = WeakSet.prototype.has;
+  const _weakSetAdd = WeakSet.prototype.add;
+  const _weakSetDelete = WeakSet.prototype.delete;
+  const _isArray = Array.isArray;
+  const _objectKeys = Object.keys;
+  const _getProto = Object.getPrototypeOf;
+  const _objectProto = Object.prototype;
+
   const FORBIDDEN_KEYS = new Set(['__proto__', 'constructor', 'prototype']);
   const isPlainObject = (value) => {
-    const proto = Object.getPrototypeOf(value);
-    return proto === Object.prototype || proto === null;
+    const proto = _getProto(value);
+    return proto === _objectProto || proto === null;
   };
   const sanitize = (value, ancestors) => {
     if (value === null || typeof value !== 'object') return value;
-    if (ancestors.has(value)) throw new Error('Script returned a value containing a circular reference');
-    ancestors.add(value);
-    if (Array.isArray(value)) {
+    if (_weakSetHas.call(ancestors, value)) throw new Error('Script returned a value containing a circular reference');
+    _weakSetAdd.call(ancestors, value);
+    if (_isArray(value)) {
       const result = value.map((v) => sanitize(v, ancestors));
-      ancestors.delete(value);
+      _weakSetDelete.call(ancestors, value);
       return result;
     }
-    if (!isPlainObject(value)) {
-      ancestors.delete(value);
+    const keys = _objectKeys(value);
+    if (!isPlainObject(value) && !keys.some((k) => _setHas.call(FORBIDDEN_KEYS, k))) {
+      _weakSetDelete.call(ancestors, value);
       return value;
     }
     const clean = {};
-    for (const key of Object.keys(value)) {
-      if (FORBIDDEN_KEYS.has(key)) continue;
+    for (const key of keys) {
+      if (_setHas.call(FORBIDDEN_KEYS, key)) continue;
       clean[key] = sanitize(value[key], ancestors);
     }
-    ancestors.delete(value);
+    _weakSetDelete.call(ancestors, value);
     return clean;
   };
   const functionResult = new Function($0)();

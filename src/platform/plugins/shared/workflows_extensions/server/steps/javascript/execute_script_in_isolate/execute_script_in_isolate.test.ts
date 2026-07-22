@@ -333,6 +333,45 @@ describe('executeScriptInIsolate', () => {
       expect(Object.prototype.toString.call(result.when)).toBe('[object Date]');
       expect(result.when.toISOString()).toBe(iso);
     });
+
+    it('strips __proto__ even when user code overrides Set.prototype.has before returning', async () => {
+      const result = await runScript(`
+        Set.prototype.has = () => false;
+        return { ['__proto__']: { polluted: true }, safe: 1 };
+      `);
+
+      expect(result).toEqual({ safe: 1 });
+    });
+
+    it('strips __proto__ even when user code overrides WeakSet.prototype.has before returning', async () => {
+      const result = await runScript(`
+        WeakSet.prototype.has = () => false;
+        WeakSet.prototype.add = () => {};
+        WeakSet.prototype.delete = () => {};
+        return { ['__proto__']: { polluted: true }, safe: 2 };
+      `);
+
+      expect(result).toEqual({ safe: 2 });
+    });
+
+    it('strips own __proto__ from a class instance (non-plain object)', async () => {
+      // class instances bypass isPlainObject() but must still be scanned for
+      // forbidden own keys because V8 structured-clone preserves own data
+      // properties while stripping the prototype.
+      const result = await runScript(`
+        class Payload {
+          constructor() {
+            Object.defineProperty(this, '__proto__', { value: { polluted: true }, enumerable: true });
+            this.safe = 3;
+          }
+        }
+        return new Payload();
+      `);
+
+      expect((result as Record<string, unknown>).safe).toBe(3);
+      expect(Object.prototype.toString.call(result)).not.toBe('[object Payload]');
+      expect(JSON.stringify(result)).not.toContain('__proto__');
+    });
   });
 
   describe('circular reference protection', () => {
