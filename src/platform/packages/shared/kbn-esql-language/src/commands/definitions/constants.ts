@@ -89,3 +89,7 @@ export const FULL_TEXT_SEARCH_FUNCTIONS = [
   'qstr',
   'kql',
 ];
+
+export const FULL_TEXT_SEARCH_DEFINITIONS = FULL_TEXT_SEARCH_FUNCTIONS.map((name) =>
+  name === 'match_operator' ? ':' : name
+);
