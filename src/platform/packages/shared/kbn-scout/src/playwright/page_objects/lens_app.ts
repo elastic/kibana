@@ -57,7 +57,12 @@ export class LensApp {
   }
 
   async waitForLensApp() {
-    await expect(this.lensApp).toBeVisible();
+    await this.lensApp.waitFor({ state: 'visible' });
+  }
+
+  async openFullEditor() {
+    await this.page.gotoApp('lens');
+    await this.waitForLensApp();
   }
 
   /**
@@ -98,10 +103,10 @@ export class LensApp {
    * viewport to be visible.
    */
   async saveAndReturn() {
-    await expect(this.saveAndReturnButton).toBeVisible();
+    await this.saveAndReturnButton.waitFor({ state: 'visible' });
     await this.saveAndReturnButton.click();
     await expect(this.lensApp).toBeHidden();
-    await expect(this.page.testSubj.locator('dshDashboardViewport')).toBeVisible();
+    await this.page.testSubj.locator('dshDashboardViewport').waitFor({ state: 'visible' });
   }
 
   async goBackToPreviousApp() {
@@ -132,7 +137,7 @@ export class LensApp {
         }
   ) {
     await this.saveButton.click();
-    await expect(this.saveModal).toBeVisible();
+    await this.saveModal.waitFor({ state: 'visible' });
     await this.savedObjectTitleInput.fill(title);
 
     if (options?.addToDashboard === 'existing') {
@@ -210,6 +215,26 @@ export class LensApp {
   async closeDimensionEditor() {
     await this.closeDimensionEditorButton.click();
     await this.closeDimensionEditorButton.waitFor({ state: 'hidden' });
+  }
+
+  /** Removes all dimensions from the given panel, polling until none remain. */
+  async removeAllDimensions(dimensionTestSubj: string) {
+    const removeLocator = this.page.testSubj.locator(
+      `${dimensionTestSubj} > indexPattern-dimension-remove`
+    );
+    await expect
+      .poll(
+        async () => {
+          const buttons = await removeLocator.all();
+          if (buttons.length > 0) {
+            await buttons[0].hover();
+            await buttons[0].click();
+          }
+          return removeLocator.count();
+        },
+        { timeout: 30_000 }
+      )
+      .toBe(0);
   }
 
   /**
@@ -318,12 +343,12 @@ export class LensApp {
     await this.closeDimensionEditorButton.waitFor({ state: 'visible' });
   }
 
-  private async selectOperation(operation: string, isPreviousIncompatible = false) {
+  async selectOperation(operation: string, isPreviousIncompatible = false) {
     const operationSelector = isPreviousIncompatible
       ? `lns-indexPatternDimension-${operation} incompatible`
       : `lns-indexPatternDimension-${operation}`;
     const operationButton = this.page.testSubj.locator(operationSelector);
-    await expect(operationButton).toBeVisible();
+    await operationButton.waitFor({ state: 'visible' });
     await operationButton.scrollIntoViewIfNeeded();
     await operationButton.click();
     await expect(operationButton).toHaveAttribute('aria-pressed', 'true');
@@ -333,9 +358,14 @@ export class LensApp {
     await this.page.components.comboBox('indexPattern-dimension-field').setSelectedOptions([field]);
   }
 
+  /** Clears the dimension field combo box (removes the currently selected field). */
+  async clearDimensionField() {
+    await this.page.components.comboBox('indexPattern-dimension-field').clear();
+  }
+
   private async openChartSwitchPopover() {
     await this.chartSwitchPopover.click();
-    await expect(this.chartSwitchList).toBeVisible();
+    await this.chartSwitchList.waitFor({ state: 'visible' });
   }
 
   async dragFieldToWorkspace(field: string) {
@@ -525,6 +555,20 @@ export class LensApp {
     }
 
     return data;
+  }
+
+  async openMessageList() {
+    const trigger = this.page.testSubj.locator('lens-message-list-trigger');
+    await trigger.click();
+  }
+
+  async closeMessageList() {
+    const trigger = this.page.testSubj.locator('lens-message-list-trigger');
+    await trigger.click();
+  }
+
+  getMessageListItems(severity: 'warning' | 'error') {
+    return this.page.testSubj.locator(`lens-message-list-${severity}`);
   }
 
   /** Opens the palette panel flyout for the currently active dimension. */

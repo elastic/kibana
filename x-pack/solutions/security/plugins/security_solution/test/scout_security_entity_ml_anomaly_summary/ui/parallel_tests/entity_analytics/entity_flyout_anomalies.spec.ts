@@ -23,12 +23,18 @@ import { expect } from '@kbn/scout-security/ui';
 const ANOMALY_OVERVIEW_ROUTE = `**/internal/entity_analytics/entities/host/${HOST_FLYOUT_ENTITY_ID}/anomaly_overview`;
 const ANOMALY_SUMMARY_ROUTE = `**/internal/entity_analytics/entities/host/${HOST_FLYOUT_ENTITY_ID}/anomaly_summary`;
 const ANOMALY_PRIVILEGES_ROUTE = '**/internal/entity_analytics/anomalies/privileges';
+const ENABLE_NEW_FLYOUT_SETTING = 'securitySolution:enableNewFlyout';
 
 spaceTest.describe(
   'Entity flyout anomalies',
   { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
   () => {
-    spaceTest.beforeAll(async ({ apiServices }) => {
+    spaceTest.beforeAll(async ({ apiServices, scoutSpace }) => {
+      // This suite drives the legacy expandable flyout via `flyout` URL params (host-panel /
+      // host_details / securitySolutionFlyoutAnomaliesTab). Disable the new flyout so those legacy
+      // panels render instead of being consumed by the flyout v2 legacy-URL interop, which drops
+      // the entity details left panel (and its anomalies tab) when translating the URL.
+      await scoutSpace.uiSettings.set({ [ENABLE_NEW_FLYOUT_SETTING]: false });
       await apiServices.entityAnalytics.installEntityStoreV2(['host']);
       await apiServices.entityAnalytics.indexEntityStoreEntry(
         HOST_FLYOUT_ENTITY_ID,
@@ -103,8 +109,9 @@ spaceTest.describe(
       });
     });
 
-    spaceTest.afterAll(async ({ apiServices }) => {
+    spaceTest.afterAll(async ({ apiServices, scoutSpace }) => {
       await apiServices.entityAnalytics.uninstallEntityStoreV2(['host']);
+      await scoutSpace.uiSettings.unset(ENABLE_NEW_FLYOUT_SETTING);
     });
 
     spaceTest(
