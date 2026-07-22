@@ -1,5 +1,5 @@
 {
-  "sha1": "82302109ddcf4699367d8413086678a6ea7b7f30",
+  "sha1": "fe84a7efc2d8621c41b2aeb14560f735bcad8d01",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -483,7 +483,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_access_control_api.spec.ts",
-        "line": 712,
+        "line": 743,
         "column": 12
       }
     },
@@ -963,7 +963,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_callback_api.spec.ts",
-        "line": 241,
+        "line": 239,
         "column": 12
       }
     },
@@ -979,7 +979,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_callback_api.spec.ts",
-        "line": 282,
+        "line": 280,
         "column": 12
       }
     },
@@ -995,7 +995,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_callback_api.spec.ts",
-        "line": 337,
+        "line": 335,
         "column": 12
       }
     },
