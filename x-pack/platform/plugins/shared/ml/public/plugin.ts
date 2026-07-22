@@ -279,6 +279,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
                 core,
                 { telemetry: telemetryClient, ...deps },
                 this.isServerless,
+                pluginsSetup.cps?.cpsEnabled ?? false,
                 this.enabledFeatures,
                 this.nlpSettings,
                 this.experimentalFeatures,

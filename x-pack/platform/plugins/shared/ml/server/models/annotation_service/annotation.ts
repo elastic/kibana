@@ -73,7 +73,11 @@ export interface AggByJob {
   latest_delayed: Pick<estypes.SearchResponse<Annotation>, 'hits'>;
 }
 
-export function annotationProvider({ asInternalUser }: IScopedClusterClient, mlClient: MlClient) {
+export function annotationProvider(
+  { asInternalUser }: IScopedClusterClient,
+  mlClient: MlClient,
+  serverless: ServerlessInfo
+) {
   /**
    * Checks the user has access to the given job(s).
    * Each ID is validated individually so a missing companion ID cannot bypass
