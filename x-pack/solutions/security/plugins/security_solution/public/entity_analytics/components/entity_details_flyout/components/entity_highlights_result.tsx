@@ -208,8 +208,7 @@ export const EntityHighlightsResult: React.FC<EntityHighlightsResultProps> = ({
         </>
       )}
 
-      {/* Stale content is dimmed so the user immediately senses something is off */}
-      <div style={{ opacity: isStale ? 0.45 : 1 }}>
+      <div>
         {anonymizedResult.highlights.length > 0 ? (
           anonymizedResult.highlights.map((highlight, index) => (
             <React.Fragment key={index}>
