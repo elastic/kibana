@@ -185,7 +185,7 @@ export const configSchema = schema.object(
     }),
     /* How often, in milliseconds, the task manager will look for more work. */
     poll_interval: schema.number({
-      defaultValue: DEFAULT_POLL_INTERVAL,
+      defaultValue: MGET_DEFAULT_POLL_INTERVAL,
       min: 100,
     }),
 
