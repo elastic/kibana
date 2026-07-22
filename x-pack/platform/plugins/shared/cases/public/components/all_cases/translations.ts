@@ -345,3 +345,7 @@ export const CLOSE_CASE_MODAL_REASON_OTHER = i18n.translate(
     defaultMessage: 'Other',
   }
 );
+
+export const TABLE_CAPTION = i18n.translate('xpack.cases.caseTable.tableCaption', {
+  defaultMessage: 'Cases',
+});
