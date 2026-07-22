@@ -47,14 +47,6 @@ const waitForAlerts = () => {
   cy.get(DATAGRID_CHANGES_IN_PROGRESS).should('not.be.true');
   cy.get(EVENT_CONTAINER_TABLE_LOADING).should('not.exist');
   cy.waitForNetworkIdle('/internal/search/privateRuleRegistryAlertsSearchStrategy', 500);
-  // Do NOT add a `globalLoadingIndicator` ([data-test-subj="globalLoadingIndicator"]) assertion
-  // here. That chrome-level spinner reflects *any* in-flight HTTP request app-wide (telemetry,
-  // capabilities, session pings, etc.), not just the alerts search. `waitForAlertsToPopulate()`
-  // calls `refreshPage()` in a retry loop, which triggers enough incidental app-wide requests to
-  // keep that spinner mounted almost continuously under CI load, causing spurious 150s timeouts.
-  // The Security Solution copy of this helper (cypress/tasks/alerts.ts) hit this exact issue and
-  // removed the equivalent check in https://github.com/elastic/kibana/pull/274408 — see
-  // https://github.com/elastic/kibana/issues/260562 for a fully worked example failure.
 };
 
 export const waitForAlertsToPopulate = (alertCountThreshold = 1) => {
