@@ -1,0 +1,118 @@
+{
+  "sha1": "",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
+  "tests": [
+    {
+      "id": "bb696bfc1a46610-62e78b299821a45",
+      "title": "Global setup",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution_serverless/test/scout/ui/parallel_tests/global.setup.ts",
+        "line": 10,
+        "column": 16
+      }
+    },
+    {
+      "id": "6fa936d347ac553-74023816eb352fd",
+      "title": "serverless security navigation has security serverless side nav",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution_serverless/test/scout/ui/parallel_tests/serverless_security_navigation.spec.ts",
+        "line": 15,
+        "column": 12
+      }
+    },
+    {
+      "id": "6fa936d347ac553-bde8cbfb95f81a0",
+      "title": "serverless security navigation breadcrumbs reflect navigation state",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution_serverless/test/scout/ui/parallel_tests/serverless_security_navigation.spec.ts",
+        "line": 21,
+        "column": 12
+      }
+    },
+    {
+      "id": "6fa936d347ac553-3674ffc381a0005",
+      "title": "serverless security navigation navigate using search",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution_serverless/test/scout/ui/parallel_tests/serverless_security_navigation.spec.ts",
+        "line": 39,
+        "column": 12
+      }
+    },
+    {
+      "id": "6fa936d347ac553-cf8cb4831e435f0",
+      "title": "serverless security navigation shows cases in sidebar navigation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution_serverless/test/scout/ui/parallel_tests/serverless_security_navigation.spec.ts",
+        "line": 54,
+        "column": 12
+      }
+    },
+    {
+      "id": "6fa936d347ac553-caa8ea7f936e539",
+      "title": "serverless security navigation navigates to cases app",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution_serverless/test/scout/ui/parallel_tests/serverless_security_navigation.spec.ts",
+        "line": 75,
+        "column": 12
+      }
+    },
+    {
+      "id": "6fa936d347ac553-bbe78b0d296a14d",
+      "title": "serverless security navigation navigates to maintenance windows",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution_serverless/test/scout/ui/parallel_tests/serverless_security_navigation.spec.ts",
+        "line": 97,
+        "column": 12
+      }
+    },
+    {
+      "id": "6fa936d347ac553-20246f43808cc39",
+      "title": "serverless security navigation opens panel on legacy management landing page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution_serverless/test/scout/ui/parallel_tests/serverless_security_navigation.spec.ts",
+        "line": 110,
+        "column": 12
+      }
+    }
+  ]
+}
