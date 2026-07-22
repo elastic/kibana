@@ -106,7 +106,7 @@ describe('EbtTelemetryClient', () => {
         alerting_engine: 'v2',
         alerts_source_index: '.rule-events',
         lookback: 'now-30m',
-        bucket_interval: '30s',
+        bucket_interval: '1m',
         space_id: 'default',
       });
 
@@ -121,7 +121,7 @@ describe('EbtTelemetryClient', () => {
           alerting_engine: 'v2',
           alerts_source_index: '.rule-events',
           lookback: 'now-30m',
-          bucket_interval: '30s',
+          bucket_interval: '1m',
           space_id: 'default',
         }
       );

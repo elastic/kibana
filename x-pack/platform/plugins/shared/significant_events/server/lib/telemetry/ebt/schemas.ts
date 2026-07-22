@@ -495,7 +495,7 @@ const detectionScanSchema: RootSchema<DetectionScanProps> = {
   bucket_interval: {
     type: 'keyword',
     _meta: {
-      description: 'The change-point bucket interval (e.g. `30s`)',
+      description: 'The change-point bucket interval (e.g. `1m`)',
     },
   },
   space_id: {

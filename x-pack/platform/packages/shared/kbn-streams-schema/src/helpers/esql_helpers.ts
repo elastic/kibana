@@ -458,16 +458,6 @@ export function deriveQueryType(esql: string): 'match' | 'stats' {
   return hasStatsCommand(esql) ? 'stats' : 'match';
 }
 
-const SAMPLE_FLOOR_AGG_NAMES = new Set([
-  'percentile',
-  'percentile_disc',
-  'percentile_cont',
-  'avg',
-  'median',
-]);
-
-const COMPARISON_OPERATORS = new Set(['>', '<', '>=', '<=']);
-
 function collectFunctionNames(nodes: WalkerAstNode): Set<string> {
   const names = new Set<string>();
   walk(nodes, {
@@ -481,42 +471,6 @@ function collectFunctionNames(nodes: WalkerAstNode): Set<string> {
 function hasRateComputation(nodes: WalkerAstNode): boolean {
   const fns = collectFunctionNames(nodes);
   return fns.has('*') && fns.has('/');
-}
-
-function needsSampleFloor(commandsFromStats: ESQLCommand[]): boolean {
-  const fns = collectFunctionNames(commandsFromStats);
-  const hasStatAgg = [...SAMPLE_FLOOR_AGG_NAMES].some((name) => fns.has(name));
-  return hasStatAgg || hasRateComputation(commandsFromStats);
-}
-
-function countComparisons(whereCommands: ESQLCommand[]): number {
-  let count = 0;
-  walk(
-    whereCommands.flatMap((cmd) => cmd.args),
-    {
-      visitFunction: (node) => {
-        if (COMPARISON_OPERATORS.has(node.name)) {
-          count++;
-        }
-      },
-    }
-  );
-  return count;
-}
-
-function checkSampleSizeFloor(
-  commandsFromStats: ESQLCommand[],
-  whereCommandsAfterStats: ESQLCommand[],
-  hints: string[]
-): void {
-  if (!needsSampleFloor(commandsFromStats)) return;
-  if (whereCommandsAfterStats.length === 0) return;
-
-  if (countComparisons(whereCommandsAfterStats) < 2) {
-    hints.push(
-      'Heuristic warning: This STATS query may lack a sample-size floor (e.g. total > 20). Low-traffic buckets can produce high-variance results that trigger false alerts. This check is approximate — compound predicates may not be detected.'
-    );
-  }
 }
 
 function containsFunction(node: WalkerAstNode, fnName: string): boolean {
@@ -612,15 +566,33 @@ export function getStatsQueryHints(esql: string): string[] {
 
   const commandsAfterStats = commands.slice(statsIdx + 1);
   const hasWhereAfterStats = commandsAfterStats.some((cmd) => cmd.name === 'where');
-  if (!hasWhereAfterStats) {
+
+  // Metric-series contract: continuous series ending in metric_value + bucket.
+  // Do not require breach-threshold WHERE after STATS (change_point replaces thresholds).
+  const bucketColumn = extractBucketColumnName(esql);
+  if (bucketColumn && bucketColumn !== 'bucket') {
     hints.push(
-      'Warning: No threshold filter after STATS. For alerting, add | WHERE <metric> > <threshold> to distinguish normal from anomalous conditions.'
+      'Warning: Temporal bucket column must be named exactly `bucket` (e.g. BY bucket = BUCKET(@timestamp, 1 minute)).'
+    );
+  }
+
+  const bucketIntervalMs = extractBucketIntervalMs(esql);
+  if (bucketIntervalMs != null && bucketIntervalMs !== MS_PER_UNIT.minute) {
+    hints.push(
+      'Warning: Use a 1-minute temporal bucket: BY bucket = BUCKET(@timestamp, 1 minute).'
+    );
+  }
+
+  if (!/\bmetric_value\b/.test(esql)) {
+    hints.push(
+      'Warning: STATS queries must emit a final column named exactly `metric_value` (use EVAL … AS metric_value or name the aggregate metric_value). End with | KEEP bucket, metric_value.'
     );
   }
 
   if (hasWhereAfterStats) {
-    const whereCommandsAfterStats = commandsAfterStats.filter((cmd) => cmd.name === 'where');
-    checkSampleSizeFloor(commandsFromStats, whereCommandsAfterStats, hints);
+    hints.push(
+      'Warning: Avoid WHERE after STATS that drops buckets (thresholds or sample-size floors). Emit a point for every bucket; use CASE for safe rates (e.g. CASE(total > 0, errors * 100.0 / total, 0)).'
+    );
   }
 
   checkIsNotNullDenominator(statsCmd, commandsFromStats, hints);
@@ -631,14 +603,14 @@ export function getStatsQueryHints(esql: string): string[] {
       const fnName = getAssignmentRhsFnName(arg);
       return fnName !== 'bucket' && fnName !== 'tbucket';
     });
-    if (nonBucketByColumns.length > 2) {
+    if (nonBucketByColumns.length > 0) {
       hints.push(
-        `Warning: ${nonBucketByColumns.length} non-temporal GROUP BY dimensions detected. High-cardinality combinations (>50 distinct groups per bucket) cause result explosion. Prefer at most 1–2 entity dimensions.`
+        `Warning: ${nonBucketByColumns.length} non-temporal GROUP BY dimension(s) detected. v0 metric series supports time bucket only — remove entity BY columns (e.g. service.name).`
       );
     }
   }
 
-  const disallowed = ['sort', 'limit', 'keep'];
+  const disallowed = ['sort', 'limit'];
   const found = commandsAfterStats
     .filter((cmd) => disallowed.includes(cmd.name))
     .map((cmd) => cmd.name.toUpperCase());
@@ -646,7 +618,7 @@ export function getStatsQueryHints(esql: string): string[] {
     hints.push(
       `Warning: ${found.join(
         ', '
-      )} after STATS should not be used. The system manages ordering and limits.`
+      )} after STATS should not be used. Prefer | KEEP bucket, metric_value as the final step.`
     );
   }
 

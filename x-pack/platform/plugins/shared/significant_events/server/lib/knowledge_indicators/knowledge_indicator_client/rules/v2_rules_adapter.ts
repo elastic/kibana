@@ -7,10 +7,14 @@
 
 import { isBoom } from '@hapi/boom';
 import { ALERTING_V2_ERROR_CODES, type RulesClientApi } from '@kbn/alerting-v2-plugin/server';
-import { stripMetadata, deriveQueryType } from '@kbn/streams-schema';
+import { deriveQueryType } from '@kbn/streams-schema';
 import { QUERY_TYPE_STATS } from '@kbn/significant-events-schema';
-import { MAX_ALERTS_PER_EXECUTION } from '../../../significant_events/rules/constants';
-import { getRuleLookbackInterval } from '../../../significant_events/rules/schedule';
+import { compileMatchCountBreachQuery } from '../../../significant_events/rules/match_count_query_compiler';
+import {
+  METRIC_SERIES_GROUPING_FIELDS,
+  METRIC_SERIES_LOOKBACK,
+  METRIC_SERIES_RULE_TAG,
+} from '../../../significant_events/rules/metric_series_contract';
 import {
   toStreamTag,
   type IRulesManagementClient,
@@ -100,23 +104,7 @@ export class RulesAdapterV2 implements IRulesManagementClient {
   }
 }
 
-/**
- * v2 grouping fields for SigEvents MATCH queries.
- *
- * Each MATCH row corresponds to one source document; using `_id` makes the group hash
- * stable across overlapping evaluation windows (`lookback` is 2x `every`, so adjacent
- * runs see the same documents). Without explicit grouping, the per-row hash includes the
- * execution UUID and produces a fresh group on every run, which can emit duplicate signals
- * for one source document.
- *
- * The query passed to v2 retains `METADATA _id` (only `_source` is stripped) so that
- * `_id` is present as a column for v2's `buildGroupHash` to read.
- */
-const V2_MATCH_GROUPING_FIELDS = ['_id'] as const;
-
-const V2_QUERY_METADATA_TO_STRIP = ['_source'];
-
-function assertMatchQuery(esqlQuery: string): void {
+function assertNotStatsQuery(esqlQuery: string): void {
   if (deriveQueryType(esqlQuery) === QUERY_TYPE_STATS) {
     throw new Error(
       'STATS queries cannot be installed as v2 signal rules until rule-on-rule provisioning (#265778).'
@@ -124,27 +112,26 @@ function assertMatchQuery(esqlQuery: string): void {
   }
 }
 
-function toV2BreachQuery(esqlQuery: string): string {
-  assertMatchQuery(esqlQuery);
-  const stripped = stripMetadata(esqlQuery, V2_QUERY_METADATA_TO_STRIP);
-  return `${stripped.trimEnd()} | LIMIT ${MAX_ALERTS_PER_EXECUTION}`;
+function toV2BreachQuery(esqlQuery: string, timestampField: string): string {
+  assertNotStatsQuery(esqlQuery);
+  return compileMatchCountBreachQuery(esqlQuery, timestampField);
 }
 
 function toV2CommonBody(definition: SignificantEventsRuleDefinition) {
   return {
     metadata: {
       name: definition.name,
-      tags: [toStreamTag(definition.streamName)],
+      tags: [toStreamTag(definition.streamName), METRIC_SERIES_RULE_TAG],
     },
     time_field: definition.timestampField,
     schedule: {
       every: definition.schedule.interval,
-      lookback: getRuleLookbackInterval(definition.schedule.interval),
+      lookback: METRIC_SERIES_LOOKBACK,
     },
-    grouping: { fields: [...V2_MATCH_GROUPING_FIELDS] },
+    grouping: { fields: [...METRIC_SERIES_GROUPING_FIELDS] },
     query: {
       format: 'standalone' as const,
-      breach: { query: toV2BreachQuery(definition.esqlQuery) },
+      breach: { query: toV2BreachQuery(definition.esqlQuery, definition.timestampField) },
     },
   };
 }

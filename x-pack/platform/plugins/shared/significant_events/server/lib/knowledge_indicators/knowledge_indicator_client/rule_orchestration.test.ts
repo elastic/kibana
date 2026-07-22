@@ -7,6 +7,10 @@
 
 import type { QueryLink } from '@kbn/significant-events-schema';
 import { toRuleDefinition } from './rule_orchestration';
+import {
+  METRIC_SERIES_EVERY,
+  METRIC_SERIES_RULE_NAME_SUFFIX,
+} from '../../significant_events/rules/metric_series_contract';
 
 const makeQueryLink = (severityScore?: number): QueryLink => ({
   query: {
@@ -23,22 +27,22 @@ const makeQueryLink = (severityScore?: number): QueryLink => ({
 });
 
 describe('toRuleDefinition', () => {
-  it.each([
-    [85, '1m'],
-    [80, '1m'],
-    [60, '5m'],
-    [undefined, '5m'],
-  ])('sets schedule for severity %s to %s', (severityScore, expectedInterval) => {
-    expect(toRuleDefinition(makeQueryLink(severityScore)).schedule.interval).toBe(expectedInterval);
-  });
+  it.each([[85], [80], [60], [undefined]])(
+    'always uses metric-series execution interval for severity %s',
+    (severityScore) => {
+      expect(toRuleDefinition(makeQueryLink(severityScore)).schedule.interval).toBe(
+        METRIC_SERIES_EVERY
+      );
+    }
+  );
 
   it('maps a query link to the v2-native Significant Events rule definition', () => {
     expect(toRuleDefinition(makeQueryLink())).toEqual({
-      name: 'Error logs',
+      name: `Error logs${METRIC_SERIES_RULE_NAME_SUFFIX}`,
       streamName: 'logs.test',
       timestampField: '@timestamp',
       esqlQuery: 'FROM logs-* | WHERE level == "error"',
-      schedule: { interval: '5m' },
+      schedule: { interval: METRIC_SERIES_EVERY },
     });
   });
 });

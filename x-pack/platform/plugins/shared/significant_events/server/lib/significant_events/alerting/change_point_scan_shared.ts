@@ -10,8 +10,18 @@ import type {
   AggregationsExtendedBounds,
   AggregationsFieldDateMath,
 } from '@elastic/elasticsearch/lib/api/types';
+import {
+  METRIC_SERIES_BUCKET_RUNTIME_FIELD,
+  METRIC_SERIES_VALUE_RUNTIME_FIELD,
+} from './rule_events_metric_series';
 
 export const RULES_BUCKET_SIZE = 1000;
+
+export {
+  METRIC_SERIES_BUCKET_RUNTIME_FIELD,
+  METRIC_SERIES_VALUE_RUNTIME_FIELD,
+  METRIC_SERIES_RUNTIME_MAPPINGS,
+} from './rule_events_metric_series';
 
 export function buildChangePointHistogramBounds(
   lookback: string,
@@ -20,20 +30,11 @@ export function buildChangePointHistogramBounds(
   return { min: lookback, max: `now-${bucketInterval}` };
 }
 
-export function buildDateHistogramAgg(
-  bucketInterval: string,
-  extendedBounds: AggregationsExtendedBounds<AggregationsFieldDateMath>
-) {
-  return {
-    date_histogram: {
-      field: '@timestamp',
-      fixed_interval: bucketInterval,
-      min_doc_count: 0,
-      extended_bounds: extendedBounds,
-    },
-  };
-}
-
+/**
+ * Histogram on projected source `bucket` with MAX-per-minute then SUM into the
+ * analysis interval, so overlapping MATCH recounts do not double-count and
+ * coarser analysis buckets (e.g. 5m) still sum closed-minute volumes.
+ */
 export function buildChangePointTimeSeriesAggs(
   bucketInterval: string,
   {
@@ -42,11 +43,34 @@ export function buildChangePointTimeSeriesAggs(
     extendedBounds: AggregationsExtendedBounds<AggregationsFieldDateMath>;
   }
 ): Record<string, AggregationsAggregationContainer> {
-  // change_point reads the raw `_count` of the zero-filled histogram — not a `signal_count`
-  // cardinality, which is ~1 per bucket under v2 for ungrouped rules and starves change_point of
-  // variance.
   return {
-    over_time: buildDateHistogramAgg(bucketInterval, extendedBounds),
-    change_points: { change_point: { buckets_path: 'over_time>_count' } },
+    over_time: {
+      date_histogram: {
+        field: METRIC_SERIES_BUCKET_RUNTIME_FIELD,
+        fixed_interval: bucketInterval,
+        min_doc_count: 0,
+        extended_bounds: extendedBounds,
+      },
+      aggs: {
+        by_minute: {
+          date_histogram: {
+            field: METRIC_SERIES_BUCKET_RUNTIME_FIELD,
+            fixed_interval: '1m',
+            min_doc_count: 0,
+          },
+          aggs: {
+            minute_max: {
+              max: { field: METRIC_SERIES_VALUE_RUNTIME_FIELD },
+            },
+          },
+        },
+        volume: {
+          sum_bucket: {
+            buckets_path: 'by_minute>minute_max',
+          },
+        },
+      },
+    },
+    change_points: { change_point: { buckets_path: 'over_time>volume' } },
   };
 }

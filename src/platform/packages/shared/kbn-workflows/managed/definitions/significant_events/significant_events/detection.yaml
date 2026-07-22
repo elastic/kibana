@@ -25,7 +25,7 @@ triggers:
         type: string
         default: "1m"
         required: false
-        description: "Fixed interval for the date_histogram bucketing inside change_point. Must be >= the rule's alert emission cadence — a finer interval leaves alternate buckets empty, producing a 0/N sawtooth whose variance masks real drops (a recovery then misreads as `stationary`)."
+        description: "Fixed interval for the date_histogram bucketing inside change_point. Must be >= 1m (MATCH rules emit closed-minute metric_value points) — a finer interval leaves alternate buckets empty, producing a 0/N sawtooth whose variance masks real drops (a recovery then misreads as `stationary`)."
       - name: detectionIntervalMinutes
         type: number
         default: 10

@@ -107,7 +107,7 @@ describe('QueryRuleOrchestrator', () => {
       expect(rulesManagementClient.createRule).toHaveBeenCalledTimes(1);
       expect(rulesManagementClient.createRule).toHaveBeenCalledWith(
         expect.any(String),
-        expect.objectContaining({ name: 'OOM errors' })
+        expect.objectContaining({ name: 'OOM errors (match count)' })
       );
 
       const bulkOps = (writer.bulk as jest.Mock).mock.calls[0][1];

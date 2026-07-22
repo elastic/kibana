@@ -9,6 +9,8 @@ import type { QueryLink } from '@kbn/significant-events-schema';
 import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import {
   RULES_BUCKET_SIZE,
+  METRIC_SERIES_RUNTIME_MAPPINGS,
+  METRIC_SERIES_VALUE_RUNTIME_FIELD,
   buildChangePointHistogramBounds,
   buildChangePointTimeSeriesAggs,
 } from './change_point_scan_shared';
@@ -16,8 +18,8 @@ import { ALERTS_READER_V2 } from './alerts_reader';
 
 const SPACE_ID = 'default';
 const RULE_UUID = 'rule-abc';
-const LOOKBACK = 'now-30m';
-const BUCKET_INTERVAL = '30s';
+const LOOKBACK = 'now-40m';
+const BUCKET_INTERVAL = '1m';
 
 const makeQueryLink = (
   overrides: {
@@ -51,10 +53,10 @@ function createEsClient() {
 describe('SignificantEventsAlertsReaderV2', () => {
   const reader = ALERTS_READER_V2;
 
-  it('scopes the occurrences ES|QL request by type == "signal" and space_id', () => {
+  it('scopes the occurrences ES|QL request and aggregates MAX then SUM via FIELD_EXTRACT', () => {
     const request = reader.buildOccurrencesEsqlRequest({
       ruleIds: [RULE_UUID],
-      value: 30,
+      value: 5,
       esqlUnit: 'minutes',
       limit: 100,
       spaceId: SPACE_ID,
@@ -63,11 +65,22 @@ describe('SignificantEventsAlertsReaderV2', () => {
     expect(request.query).toContain('type == "signal"');
     expect(request.query).toContain(`space_id == "${SPACE_ID}"`);
     expect(request.query).toContain(`rule.id IN ("${RULE_UUID}")`);
+    expect(request.query).toContain(
+      'EVAL metric_value = TO_INTEGER(FIELD_EXTRACT(data, "metric_value"))'
+    );
+    expect(request.query).toContain(
+      'EVAL bucket = TO_DATETIME(TO_LONG(FIELD_EXTRACT(data, "bucket")))'
+    );
+    expect(request.query).toContain('MAX(metric_value)');
+    expect(request.query).toContain('SUM(minute_value)');
+    expect(request.query).not.toContain('data.bucket');
+    expect(request.query).not.toContain('COUNT_DISTINCT');
+    expect(request.query).not.toContain('group_hash');
   });
 
-  it('counts alerts with a distinct group_hash cardinality aggregation', async () => {
+  it('counts alerts with track_total_hits for the idle gate', async () => {
     const { client, search } = createEsClient();
-    search.mockResolvedValue({ aggregations: { signal_count: { value: 21 } } });
+    search.mockResolvedValue({ hits: { total: { value: 21 } } });
 
     const result = await reader.countAlerts(client, { lookback: LOOKBACK, spaceId: SPACE_ID });
 
@@ -76,7 +89,7 @@ describe('SignificantEventsAlertsReaderV2', () => {
       index: '.rule-events',
       ignore_unavailable: true,
       size: 0,
-      track_total_hits: false,
+      track_total_hits: true,
       query: {
         bool: {
           filter: [
@@ -86,17 +99,12 @@ describe('SignificantEventsAlertsReaderV2', () => {
           ],
         },
       },
-      aggs: {
-        signal_count: {
-          cardinality: { field: 'group_hash' },
-        },
-      },
     });
   });
 
   it('scopes countAlerts to a single rule when ruleUuid is provided', async () => {
     const { client, search } = createEsClient();
-    search.mockResolvedValue({ aggregations: { signal_count: { value: 0 } } });
+    search.mockResolvedValue({ hits: { total: 0 } });
 
     await reader.countAlerts(client, {
       lookback: LOOKBACK,
@@ -116,7 +124,7 @@ describe('SignificantEventsAlertsReaderV2', () => {
     );
   });
 
-  it('normalizes change-point buckets to distinct signal counts and query link metadata', async () => {
+  it('normalizes change-point buckets to metric sums and query link metadata', async () => {
     const { client, search } = createEsClient();
     search.mockResolvedValue({
       took: 17,
@@ -145,12 +153,13 @@ describe('SignificantEventsAlertsReaderV2', () => {
       expect.objectContaining({
         index: '.rule-events',
         track_total_hits: false,
+        runtime_mappings: METRIC_SERIES_RUNTIME_MAPPINGS,
         aggs: {
           by_rule: {
             terms: { field: 'rule.id', size: RULES_BUCKET_SIZE },
             aggs: {
               signal_count: {
-                cardinality: { field: 'group_hash' },
+                sum: { field: METRIC_SERIES_VALUE_RUNTIME_FIELD },
               },
               ...buildChangePointTimeSeriesAggs(BUCKET_INTERVAL, {
                 extendedBounds: buildChangePointHistogramBounds(LOOKBACK, BUCKET_INTERVAL),

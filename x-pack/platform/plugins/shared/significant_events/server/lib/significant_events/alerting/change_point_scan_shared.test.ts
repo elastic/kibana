@@ -6,46 +6,56 @@
  */
 
 import {
+  METRIC_SERIES_BUCKET_RUNTIME_FIELD,
+  METRIC_SERIES_VALUE_RUNTIME_FIELD,
   buildChangePointHistogramBounds,
   buildChangePointTimeSeriesAggs,
-  buildDateHistogramAgg,
 } from './change_point_scan_shared';
 
 describe('buildChangePointHistogramBounds', () => {
   it('pins the date_histogram to the lookback window and excludes the open bucket', () => {
-    expect(buildChangePointHistogramBounds('now-30m', '30s')).toEqual({
-      min: 'now-30m',
-      max: 'now-30s',
-    });
-  });
-});
-
-describe('buildDateHistogramAgg', () => {
-  it('includes extended_bounds so change_point receives enough buckets', () => {
-    const extendedBounds = buildChangePointHistogramBounds('now-30m', '30s');
-
-    expect(buildDateHistogramAgg('30s', extendedBounds)).toEqual({
-      date_histogram: {
-        field: '@timestamp',
-        fixed_interval: '30s',
-        min_doc_count: 0,
-        extended_bounds: extendedBounds,
-      },
+    expect(buildChangePointHistogramBounds('now-40m', '1m')).toEqual({
+      min: 'now-40m',
+      max: 'now-1m',
     });
   });
 });
 
 describe('buildChangePointTimeSeriesAggs', () => {
-  it('threads extended_bounds through over_time and feeds change_point the raw _count, with no recency sub-aggs', () => {
-    const extendedBounds = buildChangePointHistogramBounds('now-30m', '30s');
-    const aggs = buildChangePointTimeSeriesAggs('30s', { extendedBounds });
+  it('aggregates metric_value on source buckets and feeds change_point that volume path', () => {
+    const extendedBounds = buildChangePointHistogramBounds('now-40m', '1m');
+    const aggs = buildChangePointTimeSeriesAggs('1m', { extendedBounds });
 
-    // over_time is a plain histogram (no per-bucket cardinality); change_point reads its `_count`.
-    expect(aggs.over_time).toEqual(buildDateHistogramAgg('30s', extendedBounds));
-    expect(aggs.change_points).toEqual({
-      change_point: { buckets_path: 'over_time>_count' },
+    expect(aggs.over_time).toEqual({
+      date_histogram: {
+        field: METRIC_SERIES_BUCKET_RUNTIME_FIELD,
+        fixed_interval: '1m',
+        min_doc_count: 0,
+        extended_bounds: extendedBounds,
+      },
+      aggs: {
+        by_minute: {
+          date_histogram: {
+            field: METRIC_SERIES_BUCKET_RUNTIME_FIELD,
+            fixed_interval: '1m',
+            min_doc_count: 0,
+          },
+          aggs: {
+            minute_max: {
+              max: { field: METRIC_SERIES_VALUE_RUNTIME_FIELD },
+            },
+          },
+        },
+        volume: {
+          sum_bucket: {
+            buckets_path: 'by_minute>minute_max',
+          },
+        },
+      },
     });
-    // The vestigial last_5m / last_floor_window recency windows are no longer emitted.
+    expect(aggs.change_points).toEqual({
+      change_point: { buckets_path: 'over_time>volume' },
+    });
     expect(Object.keys(aggs).sort()).toEqual(['change_points', 'over_time']);
   });
 });

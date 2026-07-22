@@ -122,7 +122,7 @@ interface DetectionScanProps {
   alerts_source_index: string;
   /** The scan lookback window, e.g. `now-30m`. */
   lookback: string;
-  /** The change-point bucket interval, e.g. `30s`. */
+  /** The change-point bucket interval, e.g. `1m`. */
   bucket_interval: string;
   /** The Kibana space in which the scan ran. */
   space_id: string;

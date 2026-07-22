@@ -6,15 +6,21 @@
  */
 
 import { esql } from '@elastic/esql';
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { QueryLink } from '@kbn/significant-events-schema';
 import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import { toEsqlRequest } from '../../streams/esql';
 import {
   RULES_BUCKET_SIZE,
+  METRIC_SERIES_RUNTIME_MAPPINGS,
+  METRIC_SERIES_VALUE_RUNTIME_FIELD,
   buildChangePointHistogramBounds,
   buildChangePointTimeSeriesAggs,
 } from './change_point_scan_shared';
+import {
+  RULE_EVENTS_INDEX,
+  buildRuleEventsSignalFilter,
+  projectMetricSeriesColumns,
+} from './rule_events_metric_series';
 import type {
   ChangePointRuleBucket,
   ChangePointTypeMap,
@@ -41,21 +47,38 @@ interface RawRuleBucket {
   change_points?: { type?: ChangePointTypeMap };
 }
 
+function hitsTotal(total: number | { value: number } | undefined): number {
+  if (total == null) {
+    return 0;
+  }
+  return typeof total === 'number' ? total : total.value;
+}
+
 export class SignificantEventsAlertsReaderV2 implements ISignificantEventsAlertsReader {
-  readonly index = '.rule-events';
+  readonly index = RULE_EVENTS_INDEX;
   readonly ruleIdColumn = 'rule_id' as const;
 
+  /**
+   * Occurrences over chart buckets: MAX(metric_value) per closed source minute,
+   * then SUM into the requested chart interval (avoids double-counting overlaps).
+   */
   buildOccurrencesEsqlRequest({ ruleIds, value, esqlUnit, limit, spaceId }: OccurrencesEsqlParams) {
     const ruleIdLiterals = ruleIds.map((id) => esql.str(id));
     const ruleIdCol = esql.col(['rule', 'id']);
     const typeCol = esql.col('type');
     const spaceIdCol = esql.col('space_id');
 
+    const scoped = esql
+      .from([this.index])
+      .where`${typeCol} == ${esql.str('signal')} AND ${spaceIdCol} == ${esql.str(
+      spaceId
+    )} AND ${ruleIdCol} IN (${ruleIdLiterals})`;
+
     return toEsqlRequest(
-      esql.from([this.index]).where`${typeCol} == ${esql.str(
-        'signal'
-      )} AND ${spaceIdCol} == ${esql.str(spaceId)} AND ${ruleIdCol} IN (${ruleIdLiterals})`
-        .pipe`STATS count = COUNT_DISTINCT(group_hash) BY rule_id = ${ruleIdCol}, bucket = BUCKET(@timestamp, ${esql.num(
+      projectMetricSeriesColumns(scoped)
+        .pipe`WHERE bucket IS NOT NULL AND metric_value IS NOT NULL`
+        .pipe`STATS minute_value = MAX(metric_value) BY rule_id = ${ruleIdCol}, source_minute = DATE_TRUNC(1 minute, bucket)`
+        .pipe`STATS count = SUM(minute_value) BY rule_id, bucket = BUCKET(source_minute, ${esql.num(
         value
       )} ${esql.kwd(esqlUnit)})`.pipe`SORT bucket ASC`.pipe`LIMIT ${esql.num(limit)}`
     );
@@ -65,29 +88,19 @@ export class SignificantEventsAlertsReaderV2 implements ISignificantEventsAlerts
     esClient: TracedElasticsearchClient,
     { lookback, spaceId, ruleUuid }: CountDetectionAlertsParams
   ): Promise<number> {
-    const filter: QueryDslQueryContainer[] = [
-      { term: { type: 'signal' } },
-      { term: { space_id: spaceId } },
-      { range: { '@timestamp': { gte: lookback } } },
-    ];
-    if (ruleUuid) {
-      filter.push({ term: { 'rule.id': ruleUuid } });
-    }
-
     const response = await esClient.search('significant_events_alerts_v2_count_alerts', {
       index: this.index,
       ignore_unavailable: true,
       size: 0,
-      track_total_hits: false,
-      query: { bool: { filter } },
-      aggs: {
-        signal_count: {
-          cardinality: { field: 'group_hash' },
+      track_total_hits: true,
+      query: {
+        bool: {
+          filter: buildRuleEventsSignalFilter({ lookback, spaceId, ruleUuid }),
         },
       },
     });
 
-    return response.aggregations?.signal_count?.value ?? 0;
+    return hitsTotal(response.hits.total);
   }
 
   async runChangePointScan(
@@ -125,19 +138,11 @@ export class SignificantEventsAlertsReaderV2 implements ISignificantEventsAlerts
     spaceId,
     ruleIds,
   }: ChangePointScanParams) {
-    const filter: Array<Record<string, unknown>> = [
-      { term: { type: 'signal' } },
-      { term: { space_id: spaceId } },
-      { range: { '@timestamp': { gte: lookback } } },
-    ];
-    if (ruleIds?.length) {
-      filter.push({ terms: { 'rule.id': ruleIds } });
-    }
-
     return {
+      runtime_mappings: METRIC_SERIES_RUNTIME_MAPPINGS,
       query: {
         bool: {
-          filter,
+          filter: buildRuleEventsSignalFilter({ lookback, spaceId, ruleIds }),
         },
       },
       aggs: {
@@ -145,7 +150,7 @@ export class SignificantEventsAlertsReaderV2 implements ISignificantEventsAlerts
           terms: { field: 'rule.id', size: RULES_BUCKET_SIZE },
           aggs: {
             signal_count: {
-              cardinality: { field: 'group_hash' },
+              sum: { field: METRIC_SERIES_VALUE_RUNTIME_FIELD },
             },
             ...buildChangePointTimeSeriesAggs(bucketInterval, {
               extendedBounds: buildChangePointHistogramBounds(lookback, bucketInterval),

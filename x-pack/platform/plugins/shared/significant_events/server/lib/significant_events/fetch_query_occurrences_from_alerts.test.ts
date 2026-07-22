@@ -451,7 +451,7 @@ describe('fetchQueryOccurrencesFromAlerts', () => {
       expect(result.aggregated_occurrences).toEqual([]);
     });
 
-    it('queries .rule-events with COUNT_DISTINCT(group_hash)', async () => {
+    it('queries .rule-events with FIELD_EXTRACT + MAX/SUM of metric_value', async () => {
       const link = makeQueryLink({ id: 'qa', rule_id: 'rule-a' });
       const { kiClient, esClient, esql } = createMocks([link]);
 
@@ -464,7 +464,15 @@ describe('fetchQueryOccurrencesFromAlerts', () => {
 
       const calledWith = esql.mock.calls[0][1] as { query: string };
       expect(calledWith.query).toContain('.rule-events');
-      expect(calledWith.query).toContain('COUNT_DISTINCT');
+      expect(calledWith.query).toContain(
+        'EVAL metric_value = TO_INTEGER(FIELD_EXTRACT(data, "metric_value"))'
+      );
+      expect(calledWith.query).toContain(
+        'EVAL bucket = TO_DATETIME(TO_LONG(FIELD_EXTRACT(data, "bucket")))'
+      );
+      expect(calledWith.query).toContain('MAX(metric_value)');
+      expect(calledWith.query).toContain('SUM(minute_value)');
+      expect(calledWith.query).not.toContain('COUNT_DISTINCT');
     });
   });
 });
