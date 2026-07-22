@@ -120,7 +120,7 @@
   resolved "https://registry.yarnpkg.com/@apidevtools/swagger-methods/-/swagger-methods-3.0.2.tgz#b789a362e055b0340d04712eafe7027ddc1ac267"
   integrity sha512-QAkD5kK2b1WfjDS/UQn/qQkbwF31uqRjPTrsCs5ZG9BQGAkjwvqGFjjPqAuzac/IYzpPtRzjCP1WrTuAIjMrXg==
 
-"@apidevtools/swagger-parser@12.1.0", "@apidevtools/swagger-parser@^12.1.0":
+"@apidevtools/swagger-parser@12.1.0":
   version "12.1.0"
   resolved "https://registry.yarnpkg.com/@apidevtools/swagger-parser/-/swagger-parser-12.1.0.tgz#ef73e5f9e32c2becef6d95b90fb4481b0fec8fe4"
   integrity sha512-e5mJoswsnAX0jG+J09xHFYQXb/bUc5S3pLpMxUuRUA2H8T2kni3yEoyz2R3Dltw5f4A6j6rPNMpWTK+iVDFlng==
@@ -6914,19 +6914,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/entities-schema@link:x-pack/platform/packages/shared/kbn-entities-schema":
-  version "0.0.0"
-  uid ""
-
-"@kbn/entity-manager-fixture-plugin@link:x-pack/platform/test/api_integration/apis/entity_manager/fixture_plugin":
-  version "0.0.0"
-  uid ""
-
 "@kbn/entity-store@link:x-pack/solutions/security/plugins/entity_store":
-  version "0.0.0"
-  uid ""
-
-"@kbn/entityManager-plugin@link:x-pack/platform/plugins/shared/entity_manager":
   version "0.0.0"
   uid ""
 
@@ -19359,11 +19347,6 @@ commander@4.1.1:
   resolved "https://registry.yarnpkg.com/commander/-/commander-4.1.1.tgz#9fd602bd936294e9e9ef46a3f4d6964044b18068"
   integrity sha512-NOKm8xhkzAjzFx8B2v5OAHT+u5pRQc2UCa2Vq9jYL/31o2wi9mxBA7LIFs3sV5VSC49z6pEhfbMULvShKj26WA==
 
-commander@6.2.0:
-  version "6.2.0"
-  resolved "https://registry.yarnpkg.com/commander/-/commander-6.2.0.tgz#b990bfb8ac030aedc6d11bc04d1488ffef56db75"
-  integrity sha512-zP4jEKbe8SHzKJYQmq8Y9gYjtO/POJLgIdKgV7B9qNmABVFVc+ctqSX6iXh4mCpJfRBOabiZ2YKPg8ciDw6C+Q==
-
 commander@7, commander@^7.2.0:
   version "7.2.0"
   resolved "https://registry.yarnpkg.com/commander/-/commander-7.2.0.tgz#a36cb57d0b501ce108e4d20559a150a391d97ab7"
@@ -21058,17 +21041,17 @@ dns-packet@^5.2.2:
   dependencies:
     "@leichtgewicht/ip-codec" "^2.0.1"
 
-doctrine@3.0.0, doctrine@^3.0.0:
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/doctrine/-/doctrine-3.0.0.tgz#addebead72a6574db783639dc87a121773973961"
-  integrity sha512-yS+Q5i3hBf7GBkd4KG8a7eBNNWNGLTaEwwYWUijIYM7zrlYDM0BFXHjjPWlWZ1Rg7UaddZeIDmi9jF3HmqiQ2w==
-  dependencies:
-    esutils "^2.0.2"
-
 doctrine@^2.1.0:
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/doctrine/-/doctrine-2.1.0.tgz#5cd01fc101621b42c4cd7f5d1a66243716d3f39d"
   integrity sha512-35mSku4ZXK0vfCuHEDAwt55dg2jNajHZ1odvF+8SSr82EsZY4QmXfuWso8oEd8zRhVObSN18aM0CjSdoBX7zIw==
+  dependencies:
+    esutils "^2.0.2"
+
+doctrine@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/doctrine/-/doctrine-3.0.0.tgz#addebead72a6574db783639dc87a121773973961"
+  integrity sha512-yS+Q5i3hBf7GBkd4KG8a7eBNNWNGLTaEwwYWUijIYM7zrlYDM0BFXHjjPWlWZ1Rg7UaddZeIDmi9jF3HmqiQ2w==
   dependencies:
     esutils "^2.0.2"
 
@@ -22916,7 +22899,7 @@ foreground-child@^2.0.0:
     cross-spawn "^7.0.0"
     signal-exit "^3.0.2"
 
-foreground-child@^3.1.0, foreground-child@^3.3.0, foreground-child@^3.3.1:
+foreground-child@^3.1.0, foreground-child@^3.3.0:
   version "3.3.1"
   resolved "https://registry.yarnpkg.com/foreground-child/-/foreground-child-3.3.1.tgz#32e8e9ed1b68a3497befb9ac2b6adf92a638576f"
   integrity sha512-gIXjKqtFuWEgzFRJA9WCQeSJLZDjgJUOMCMzxtvFq/37KojM1BFGufqsCy0r4qSQmYLsZYMeyRqzIWOMup03sw==
@@ -23418,18 +23401,6 @@ glob-to-regexp@^0.4.1:
   version "0.4.1"
   resolved "https://registry.yarnpkg.com/glob-to-regexp/-/glob-to-regexp-0.4.1.tgz#c75297087c851b9a578bd217dd59a92f59fe546e"
   integrity sha512-lkX1HJXwyMcprw/5YUZc2s7DrpAiHB21/V+E1rHUrVNokkvB6bqMzT0VfV6/86ZNabt1k14YOIaT7nDvOX3Iiw==
-
-glob@11.1.0:
-  version "11.1.0"
-  resolved "https://registry.yarnpkg.com/glob/-/glob-11.1.0.tgz#4f826576e4eb99c7dad383793d2f9f08f67e50a6"
-  integrity sha512-vuNwKSaKiqm7g0THUBu2x7ckSs3XJLXE+2ssL7/MfTGPLLcrJQ/4Uq1CjPTtO5cCIiRxqvN6Twy1qOwhL0Xjcw==
-  dependencies:
-    foreground-child "^3.3.1"
-    jackspeak "^4.1.1"
-    minimatch "^10.1.1"
-    minipass "^7.1.2"
-    package-json-from-dist "^1.0.0"
-    path-scurry "^2.0.0"
 
 glob@^10.0.0, glob@^10.4.5:
   version "10.5.0"
@@ -25414,7 +25385,7 @@ jackspeak@^3.1.2:
   optionalDependencies:
     "@pkgjs/parseargs" "^0.11.0"
 
-jackspeak@^4.1.1, jackspeak@^4.2.3:
+jackspeak@^4.2.3:
   version "4.2.3"
   resolved "https://registry.yarnpkg.com/jackspeak/-/jackspeak-4.2.3.tgz#27ef80f33b93412037c3bea4f8eddf80e1931483"
   integrity sha512-ykkVRwrYvFm1nb2AJfKKYPr0emF6IiXDYUaFx4Zn9ZuIH7MrzEZ3sD5RlqGXNRpHtvUHJyOnCEFxOlNDtGo7wg==
@@ -26773,11 +26744,6 @@ lodash.merge@^4.6.2:
   version "4.6.2"
   resolved "https://registry.yarnpkg.com/lodash.merge/-/lodash.merge-4.6.2.tgz#558aa53b43b661e1925a0afdfa36a9a1085fe57a"
   integrity sha512-0KpjqXRVvrYyCsX1swR/XTK0va6VQkQM6MNo7PqW77ByjAhoARA8EfrP1N4+KlKj8YS0ZUCtRT/YUuhyYDujIQ==
-
-lodash.mergewith@^4.6.2:
-  version "4.6.2"
-  resolved "https://registry.yarnpkg.com/lodash.mergewith/-/lodash.mergewith-4.6.2.tgz#617121f89ac55f59047c7aec1ccd6654c6590f55"
-  integrity sha512-GK3g5RPZWTRSeLSpgP8Xhra+pnjBC56q9FZYe1d5RN3TJ35dbkGy3YqBSMbyCrlbi+CM9Z3Jk5yTL7RCsqboyQ==
 
 lodash.once@^4.0.0, lodash.once@^4.1.1:
   version "4.1.1"
@@ -29484,7 +29450,7 @@ path-scurry@^1.11.1:
     lru-cache "^10.2.0"
     minipass "^5.0.0 || ^6.0.2 || ^7.0.0"
 
-path-scurry@^2.0.0, path-scurry@^2.0.2:
+path-scurry@^2.0.2:
   version "2.0.2"
   resolved "https://registry.yarnpkg.com/path-scurry/-/path-scurry-2.0.2.tgz#6be0d0ee02a10d9e0de7a98bae65e182c9061f85"
   integrity sha512-3O/iVVsJAPsOnpwWIeD+d6z/7PmqApyQePUtCndjatj/9I5LylHvt5qluFaBT3I5h3r1ejfR056c+FCv+NnNXg==
@@ -33878,30 +33844,6 @@ svgo@4.0.1, svgo@^4.0.1:
     picocolors "^1.1.1"
     sax "^1.5.0"
 
-swagger-jsdoc@6.3.0:
-  version "6.3.0"
-  resolved "https://registry.yarnpkg.com/swagger-jsdoc/-/swagger-jsdoc-6.3.0.tgz#ab8e7c1c3a75dbdf9b6ee1c2a61b6dea38149553"
-  integrity sha512-I+iQjVGV3t28pOkQUJv2MncthvOtkEactOn8R76SvSYhxgtIn7FoqfDHwQaN+GBnQdXQLrhgDXseKitmJcHMsA==
-  dependencies:
-    "@apidevtools/swagger-parser" "^12.1.0"
-    commander "6.2.0"
-    doctrine "3.0.0"
-    glob "11.1.0"
-    lodash.mergewith "^4.6.2"
-    yaml "2.0.0-1"
-
-swagger-ui-dist@>=5.0.0:
-  version "5.17.14"
-  resolved "https://registry.yarnpkg.com/swagger-ui-dist/-/swagger-ui-dist-5.17.14.tgz#e2c222e5bf9e15ccf80ec4bc08b4aaac09792fd6"
-  integrity sha512-CVbSfaLpstV65OnSjbXfVd6Sta3q3F7Cj/yYuvHMp1P90LztOLs6PfUnKEVAeiIVQt9u2SaPwv0LiH/OyMjHRw==
-
-swagger-ui-express@5.0.1:
-  version "5.0.1"
-  resolved "https://registry.yarnpkg.com/swagger-ui-express/-/swagger-ui-express-5.0.1.tgz#fb8c1b781d2793a6bd2f8a205a3f4bd6fa020dd8"
-  integrity sha512-SrNU3RiBGTLLmFU8GIJdOdanJTl4TOmT27tt3bWWHppqYmAZ6IDuEuBvMU6nZq0zLEe6b/1rACXCgLZqO6ZfrA==
-  dependencies:
-    swagger-ui-dist ">=5.0.0"
-
 swr@2.3.3:
   version "2.3.3"
   resolved "https://registry.yarnpkg.com/swr/-/swr-2.3.3.tgz#9d6a703355f15f9099f45114db3ef75764444788"
@@ -36532,11 +36474,6 @@ yaml-language-server@1.23.0:
     vscode-languageserver-types "^3.16.0"
     vscode-uri "^3.0.2"
     yaml "2.8.3"
-
-yaml@2.0.0-1:
-  version "2.0.0-1"
-  resolved "https://registry.yarnpkg.com/yaml/-/yaml-2.0.0-1.tgz#8c3029b3ee2028306d5bcf396980623115ff8d18"
-  integrity sha512-W7h5dEhywMKenDJh2iX/LABkbFnBxasD27oyXWDS/feDsxiw0dD5ncXdYXgkvAsXIY2MpW/ZKkr9IU30DBdMNQ==
 
 yaml@2.8.3:
   version "2.8.3"
