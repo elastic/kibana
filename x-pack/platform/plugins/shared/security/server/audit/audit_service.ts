@@ -32,27 +32,70 @@ export const RECORD_USAGE_INTERVAL = 60 * 60 * 1000; // 1 hour
 export const AUDIT_OTEL_FIELD_RENAMES: Record<string, string | string[]> = {
   'kibana.space_id': 'kibana.space.id',
   'kibana.session_id': 'kibana.session.id',
-  'kibana.lookup_realm': 'kibana.lookup.realm',
   'kibana.authentication_type': 'authentication.type',
   'client.ip': ['source.address', 'source.ip'],
-  'trace.id': 'request.id',
-  // OTel semconv: singular 'header' with per-key attributes (not plural 'headers' object)
-  'http.request.headers.x-forwarded-for': 'http.request.header.x-forwarded-for',
+  'trace.id': 'http.request.id',
+  // X-Forwarded-For maps to network.forwarded_ip (ECS / log-delivery convention).
+  'http.request.headers.x-forwarded-for': 'network.forwarded_ip',
 };
 
-// Both fields are excluded on Serverless; stripped from log record and resource attributes.
-export const AUDIT_OTEL_FIELD_DROPS: string[] = ['service.version', 'host.name'];
+// Fields stripped from log record and resource attributes on Serverless:
+// - service.version / host.name: excluded from Serverless audit logs.
+// - kibana.lookup_realm / kibana.authentication_provider / kibana.authentication_realm:
+//   fixed values on Serverless (always cloud-saml-kibana), so they carry no signal.
+// - url.* component fields: replaced by url.original (built via fieldAdditions), which the
+//   ingest pipeline parses back into components.
+// - log.logger / service.id / service.node.roles / service.state / service.type:
+//   belong in resource.attributes, not per-record attributes, on Serverless.
+// - project_name: populated by the otel-delivery-gateway.
+export const AUDIT_OTEL_FIELD_DROPS: string[] = [
+  'service.version',
+  'host.name',
+  'kibana.lookup_realm',
+  'kibana.authentication_provider',
+  'kibana.authentication_realm',
+  'url.domain',
+  'url.path',
+  'url.port',
+  'url.query',
+  'url.scheme',
+  'log.logger',
+  'service.id',
+  'service.node.roles',
+  'service.state',
+  'service.type',
+  'project_name',
+];
 
 // event.type is required on every audit log. Authentication events omit it; default to 'access'.
 // SO/Space events already carry a specific type (e.g. 'creation', 'deletion') so are unaffected.
+// log.type: 'audit' is required on all audit logs per the log-delivery convention.
 export const AUDIT_OTEL_FIELD_DEFAULTS: Record<string, string | string[]> = {
   'event.type': ['access'],
+  'log.type': 'audit',
 };
 
 // OTel semantic conventions require HTTP method to be uppercase (e.g. 'GET' not 'get').
 // Kibana's route method is lowercase; the upstream AuditEvent is left as-is so that
 // non-OTel appenders (file, console) continue to receive the original casing.
 export const AUDIT_OTEL_FIELD_UPPERCASE: string[] = ['http.request.method'];
+
+// url.original is required by the log-delivery convention; the ingest pipeline's url processor
+// parses it back into components. Built OTel-only from the split url.* fields (which are then
+// dropped) so the upstream AuditEvent — and non-OTel appenders — are unaffected. Port and query
+// are intentionally omitted; the template is skipped entirely for events without url.* fields.
+export const AUDIT_OTEL_FIELD_ADDITIONS: Record<string, string> = {
+  'url.original': '{url.scheme}://{url.domain}{url.path}',
+};
+
+// Audit logs ship a deliberately minimal OTel resource: only these attributes, with the shared
+// resource detectors (host/OS/process and the OTEL_RESOURCE_ATTRIBUTES env detector) skipped.
+// service.name identifies the audit signal; service.type identifies the product. Injected via
+// `minimalResource: true` + `attributes` on the OTel appender.
+export const AUDIT_OTEL_RESOURCE_ATTRIBUTES: Record<string, string> = {
+  'service.name': 'serverless-kibana',
+  'service.type': 'kibana',
+};
 
 const normalize = <T>(value: T | T[]): T[] => (Array.isArray(value) ? value : [value]);
 
@@ -203,8 +246,9 @@ export const createLoggingConfig = (config: ConfigType['audit']) =>
       },
     };
     // When the configured appender is OTel, inject audit-specific field transforms
-    // (renames, drops, defaults) to satisfy Serverless audit log field requirements at
-    // the output layer — without touching the upstream AuditEvent type.
+    // (renames, drops, defaults, additions) to satisfy Serverless audit log field requirements
+    // at the output layer — without touching the upstream AuditEvent type. The resource is also
+    // slimmed to the minimal audit attributes so cloud/k8s/process fields are excluded.
     const appender =
       baseAppender.type === 'otel'
         ? {
@@ -213,6 +257,9 @@ export const createLoggingConfig = (config: ConfigType['audit']) =>
             fieldDrops: [...(baseAppender.fieldDrops ?? []), ...AUDIT_OTEL_FIELD_DROPS],
             fieldDefaults: { ...AUDIT_OTEL_FIELD_DEFAULTS, ...baseAppender.fieldDefaults },
             fieldUppercase: [...(baseAppender.fieldUppercase ?? []), ...AUDIT_OTEL_FIELD_UPPERCASE],
+            fieldAdditions: { ...baseAppender.fieldAdditions, ...AUDIT_OTEL_FIELD_ADDITIONS },
+            minimalResource: true,
+            attributes: { ...baseAppender.attributes, ...AUDIT_OTEL_RESOURCE_ATTRIBUTES },
           }
         : baseAppender;
 

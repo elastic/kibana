@@ -100,8 +100,20 @@ export interface OtelAppenderConfig {
    * as `service.name`. Because Kibana expands dotted YAML keys into nested
    * objects, wrap dotted attribute names in `[brackets]`:
    * `"[service.name]": my-kibana`
+   *
+   * When {@link OtelAppenderConfig.minimalResource} is `true`, these attributes are the
+   * *entire* resource — the auto-detected attributes are not included.
    */
   attributes?: Record<string, string>;
+  /**
+   * When `true`, the OTLP resource is built **only** from {@link OtelAppenderConfig.attributes},
+   * skipping the shared OTel resource detectors (host, OS, process, and the
+   * `OTEL_RESOURCE_ATTRIBUTES` env detector). Use for signals that must ship a deliberately
+   * minimal resource (e.g. Serverless audit logs, which carry only `service.name` and
+   * `service.type`) so cloud/k8s/process/host fields are excluded from the emitted document.
+   * Defaults to `false` (full auto-detected resource).
+   */
+  minimalResource?: boolean;
   /**
    * Optional TLS settings for HTTPS/gRPC to the OTLP endpoint, including mutual TLS (client certificates).
    */
@@ -140,4 +152,15 @@ export interface OtelAppenderConfig {
    * Non-string values and absent keys are silently skipped.
    */
   fieldUppercase?: string[];
+  /**
+   * Optional map of target attribute key → template string used to add derived attributes at emit
+   * time. Templates reference other flattened attributes with `{field.path}` placeholders, resolved
+   * from the current record attributes. Applied after `fieldRenames` and before `fieldDrops`, so a
+   * template may reference fields that are subsequently dropped (e.g. build `url.original` from
+   * `url.scheme`/`url.domain`/`url.path`, then drop those components).
+   *
+   * The addition is skipped when any referenced field is missing/nullish/empty, so events that do
+   * not carry the source fields (e.g. non-http events) don't receive a degenerate value.
+   */
+  fieldAdditions?: Record<string, string>;
 }

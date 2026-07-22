@@ -125,7 +125,8 @@ const toAttributes = (
   fieldRenames?: Record<string, string | string[]>,
   fieldDrops?: string[],
   fieldDefaults?: Record<string, string | string[]>,
-  fieldUppercase?: string[]
+  fieldUppercase?: string[],
+  fieldAdditions?: Record<string, string>
 ): Attributes => {
   const attrs: Attributes = {
     'log.logger': record.context,
@@ -188,6 +189,22 @@ const toAttributes = (
     }
   }
 
+  // Derived attributes: build a value from a template referencing other flattened attributes.
+  // Runs after renames (so templates can reference renamed keys) and before drops (so a template
+  // may reference source fields that are then dropped, e.g. url.original from url.scheme/domain/path).
+  if (fieldAdditions) {
+    for (const [key, template] of Object.entries(fieldAdditions)) {
+      const refs = [...template.matchAll(/\{([^}]+)\}/g)].map((match) => match[1]);
+      // Skip when any referenced field is missing/nullish/empty so events that don't carry the
+      // source fields (e.g. non-http events for url.original) don't get a degenerate value.
+      const allPresent = refs.every((ref) => attrs[ref] != null && attrs[ref] !== '');
+      if (!allPresent) {
+        continue;
+      }
+      attrs[key] = template.replace(/\{([^}]+)\}/g, (_, ref) => String(attrs[ref]));
+    }
+  }
+
   if (fieldDrops) {
     for (const key of fieldDrops) {
       delete attrs[key];
@@ -236,6 +253,10 @@ export class OtelAppender implements DisposableAppender {
     layout: schema.maybe(Layouts.configSchema),
     // Optional: user-provided attributes override the service attributes derived from APM config.
     attributes: schema.maybe(schema.recordOf(schema.string(), schema.string())),
+    // When true, the resource is built only from `attributes` (no auto-detected resource).
+    minimalResource: schema.maybe(schema.boolean()),
+    // Template-based derived attributes: target key -> template with {field} placeholders.
+    fieldAdditions: schema.maybe(schema.recordOf(schema.string(), schema.string())),
     fieldRenames: schema.maybe(
       schema.recordOf(
         schema.string(),
@@ -300,6 +321,7 @@ export class OtelAppender implements DisposableAppender {
   private readonly fieldDrops?: string[];
   private readonly fieldDefaults?: Record<string, string | string[]>;
   private readonly fieldUppercase?: string[];
+  private readonly fieldAdditions?: Record<string, string>;
 
   constructor(config: OtelAppenderConfig) {
     const exporter = createExporter(config);
@@ -308,22 +330,33 @@ export class OtelAppender implements DisposableAppender {
     //   2. Derived: service.name / service.version / deployment.environment from the
     //      APM config singleton (mirrors how initTelemetry builds trace resources)
     //   3. User overrides: explicit attributes from kibana.yml (optional)
-    const baseResource = buildOtelResources().merge(
-      resources.resourceFromAttributes(config.attributes ?? {})
-    );
-    // When fieldDrops is configured, rebuild the resource excluding the specified keys
-    // so they are absent from resource.attributes in the OTLP export (not just from
-    // per-record log attributes). getRawAttributes() is used — not resource.attributes —
-    // because it preserves async-resolving entries (e.g. host.id from getMachineId).
-    // resourceFromAttributes() correctly accepts MaybePromise values and the SDK awaits
-    // them at export time, so the rebuilt resource retains all async-detected attributes.
-    const resource = config.fieldDrops?.length
-      ? resources.resourceFromAttributes(
-          Object.fromEntries(
-            baseResource.getRawAttributes().filter(([key]) => !config.fieldDrops!.includes(key))
+    // When minimalResource is set, the resource is built solely from the configured attributes —
+    // the shared resource detectors (host/OS/process and the OTEL_RESOURCE_ATTRIBUTES env detector)
+    // are skipped entirely, so cloud/k8s/process fields are excluded from the emitted document.
+    // Used by Serverless audit logs, which ship only service.name + service.type at the resource
+    // level. config.attributes are plain (synchronous) values, so there are no async-detected
+    // entries to preserve here — getRawAttributes() only matters for the detector-based path below.
+    let resource;
+    if (config.minimalResource) {
+      resource = resources.resourceFromAttributes(config.attributes ?? {});
+    } else {
+      const baseResource = buildOtelResources().merge(
+        resources.resourceFromAttributes(config.attributes ?? {})
+      );
+      // When fieldDrops is configured, rebuild the resource excluding the specified keys
+      // so they are absent from resource.attributes in the OTLP export (not just from
+      // per-record log attributes). getRawAttributes() is used — not resource.attributes —
+      // because it preserves async-resolving entries (e.g. host.id from getMachineId).
+      // resourceFromAttributes() correctly accepts MaybePromise values and the SDK awaits
+      // them at export time, so the rebuilt resource retains all async-detected attributes.
+      resource = config.fieldDrops?.length
+        ? resources.resourceFromAttributes(
+            Object.fromEntries(
+              baseResource.getRawAttributes().filter(([key]) => !config.fieldDrops!.includes(key))
+            )
           )
-        )
-      : baseResource;
+        : baseResource;
+    }
     this.loggerProvider = new LoggerProvider({
       processors: [new BatchLogRecordProcessor(exporter)],
       resource,
@@ -341,6 +374,7 @@ export class OtelAppender implements DisposableAppender {
     this.fieldDrops = config.fieldDrops;
     this.fieldDefaults = config.fieldDefaults;
     this.fieldUppercase = config.fieldUppercase;
+    this.fieldAdditions = config.fieldAdditions;
   }
 
   public append(record: LogRecord): void {
@@ -368,7 +402,8 @@ export class OtelAppender implements DisposableAppender {
         this.fieldRenames,
         this.fieldDrops,
         this.fieldDefaults,
-        this.fieldUppercase
+        this.fieldUppercase,
+        this.fieldAdditions
       ),
     });
   }

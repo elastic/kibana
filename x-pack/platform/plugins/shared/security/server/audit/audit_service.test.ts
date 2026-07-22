@@ -18,9 +18,11 @@ import { asSpaceId } from '@kbn/core-spaces-common';
 import type { AuditEvent } from '@kbn/security-plugin-types-server';
 
 import {
+  AUDIT_OTEL_FIELD_ADDITIONS,
   AUDIT_OTEL_FIELD_DEFAULTS,
   AUDIT_OTEL_FIELD_DROPS,
   AUDIT_OTEL_FIELD_RENAMES,
+  AUDIT_OTEL_RESOURCE_ATTRIBUTES,
   AuditService,
   createLoggingConfig,
   filterEvent,
@@ -751,7 +753,78 @@ describe('#createLoggingConfig', () => {
     });
   });
 
-  test('does not inject fieldDrops or fieldDefaults for non-OTel appenders', async () => {
+  test('injects audit fieldAdditions when using an OTel appender', async () => {
+    const features$ = of({ allowAuditLogging: true });
+
+    const loggingConfig = await lastValueFrom(
+      features$.pipe(
+        createLoggingConfig({
+          enabled: true,
+          include_saved_object_names: false,
+          appender: {
+            type: 'otel',
+            protocol: 'http',
+            url: 'http://collector:4318/v1/logs',
+          },
+        })
+      )
+    );
+
+    const appenders = loggingConfig.appenders as Record<string, AppenderConfigType>;
+    expect((appenders.auditTrailAppender as OtelAppenderConfig).fieldAdditions).toEqual(
+      AUDIT_OTEL_FIELD_ADDITIONS
+    );
+  });
+
+  test('injects minimal resource attributes when using an OTel appender', async () => {
+    const features$ = of({ allowAuditLogging: true });
+
+    const loggingConfig = await lastValueFrom(
+      features$.pipe(
+        createLoggingConfig({
+          enabled: true,
+          include_saved_object_names: false,
+          appender: {
+            type: 'otel',
+            protocol: 'http',
+            url: 'http://collector:4318/v1/logs',
+          },
+        })
+      )
+    );
+
+    const appenders = loggingConfig.appenders as Record<string, AppenderConfigType>;
+    const otelAppender = appenders.auditTrailAppender as OtelAppenderConfig;
+    expect(otelAppender.minimalResource).toBe(true);
+    expect(otelAppender.attributes).toEqual(AUDIT_OTEL_RESOURCE_ATTRIBUTES);
+  });
+
+  test('merges user-provided attributes with audit resource attributes', async () => {
+    const features$ = of({ allowAuditLogging: true });
+
+    const loggingConfig = await lastValueFrom(
+      features$.pipe(
+        createLoggingConfig({
+          enabled: true,
+          include_saved_object_names: false,
+          appender: {
+            type: 'otel',
+            protocol: 'http',
+            url: 'http://collector:4318/v1/logs',
+            attributes: { 'custom.attr': 'value' },
+          },
+        })
+      )
+    );
+
+    const appenders = loggingConfig.appenders as Record<string, AppenderConfigType>;
+    expect((appenders.auditTrailAppender as OtelAppenderConfig).attributes).toEqual({
+      'custom.attr': 'value',
+      ...AUDIT_OTEL_RESOURCE_ATTRIBUTES,
+    });
+  });
+
+  test('does not inject fieldDrops, fieldDefaults, fieldAdditions or minimalResource for non-OTel appenders', async () => {
     const features$ = of({ allowAuditLogging: true });
 
     const loggingConfig = await lastValueFrom(
@@ -770,6 +843,8 @@ describe('#createLoggingConfig', () => {
     const appenders = loggingConfig.appenders as Record<string, AppenderConfigType>;
     expect(appenders.auditTrailAppender).not.toHaveProperty('fieldDrops');
     expect(appenders.auditTrailAppender).not.toHaveProperty('fieldDefaults');
+    expect(appenders.auditTrailAppender).not.toHaveProperty('fieldAdditions');
+    expect(appenders.auditTrailAppender).not.toHaveProperty('minimalResource');
   });
 });
 

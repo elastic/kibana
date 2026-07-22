@@ -17,21 +17,24 @@ const receiver = new OtlpLogReceiver();
 
 /**
  * Asserts the OTel envelope and resource-level fields that are identical across all audit events.
- * These are set by the OTel SDK / resource detectors, not by the individual audit event — they
- * don't need to be re-verified in every test case.
+ * The audit appender ships a deliberately minimal resource (minimalResource: true) carrying only
+ * service.name + service.type — the auto-detected host/OS/process/env attributes are excluded.
  */
 const expectOtelEnvelope = (e: FlatAttributes) => {
   // OTLP envelope fields — top-level log record fields, not logRecord.attributes.
   expect(e.severityNumber).toBe(9); // SeverityNumber.INFO
   expect(e.severityText).toBe('INFO');
-  // Resource-level fields (process.pid, host.id, os.version, etc. are environment-specific; omitted).
-  expect(e['service.name']).toBe('kibana');
-  expect(e['telemetry.sdk.language']).toBe('nodejs');
-  expect(e['process.runtime.name']).toBe('nodejs');
-  expect(e['process.runtime.description']).toBe('Node.js');
-  // Log-record instrumentation fields.
-  expect(e['log.logger']).toBe('plugins.security.audit.ecs');
+  // Minimal resource: only service.name + service.type are emitted.
+  expect(e['service.name']).toBe('serverless-kibana');
   expect(e['service.type']).toBe('kibana');
+  // Auto-detected resource fields are excluded by minimalResource.
+  expect(e['telemetry.sdk.language']).toBeUndefined();
+  expect(e['process.runtime.name']).toBeUndefined();
+  expect(e['process.runtime.description']).toBeUndefined();
+  // log.logger is dropped from per-record attributes and absent from the minimal resource.
+  expect(e['log.logger']).toBeUndefined();
+  // AUDIT_OTEL_FIELD_DEFAULTS: log.type defaults to 'audit' on every audit log.
+  expect(e['log.type']).toBe('audit');
 };
 
 apiTest.describe(
@@ -99,9 +102,10 @@ apiTest.describe(
         expect(e['user.id']).toBeDefined();
         expect(e['user.roles']).toStrictEqual(['superuser']);
 
-        // Auth context — kibana.authentication_provider is not renamed.
-        expect(e['kibana.authentication_provider']).toBe('cloud-basic');
-        expect(e['kibana.authentication_realm']).toBeDefined(); // realm name varies by deployment type
+        // AUDIT_OTEL_FIELD_DROPS: kibana.authentication_provider and kibana.authentication_realm
+        // carry fixed values on Serverless (always cloud-saml-kibana) and are dropped.
+        expect(e['kibana.authentication_provider']).toBeUndefined();
+        expect(e['kibana.authentication_realm']).toBeUndefined();
 
         // AUDIT_OTEL_FIELD_RENAMES: kibana.authentication_type → authentication.type.
         expect(e['authentication.type']).toBe('basic');
@@ -115,8 +119,8 @@ apiTest.describe(
         expect(e['kibana.session.id']).toBeDefined();
         expect(e['kibana.session_id']).toBeUndefined();
 
-        // AUDIT_OTEL_FIELD_RENAMES: kibana.lookup_realm → kibana.lookup.realm.
-        expect(e['kibana.lookup.realm']).toBeDefined();
+        // AUDIT_OTEL_FIELD_DROPS: kibana.lookup_realm is dropped (fixed value on Serverless).
+        expect(e['kibana.lookup.realm']).toBeUndefined();
         expect(e['kibana.lookup_realm']).toBeUndefined();
 
         // AUDIT_OTEL_FIELD_RENAMES: client.ip → source.address + source.ip.
@@ -124,12 +128,14 @@ apiTest.describe(
         expect(e['source.ip']).toBeDefined();
         expect(e['client.ip']).toBeUndefined();
 
-        // Header rename: http.request.headers.x-forwarded-for → http.request.header.x-forwarded-for.
-        expect(e['http.request.header.x-forwarded-for']).toBeDefined();
+        // Header rename: http.request.headers.x-forwarded-for → network.forwarded_ip.
+        expect(e['network.forwarded_ip']).toBeDefined();
         expect(e['http.request.headers.x-forwarded-for']).toBeUndefined();
+        expect(e['http.request.header.x-forwarded-for']).toBeUndefined();
 
-        // AUDIT_OTEL_FIELD_RENAMES: trace.id → request.id.
-        expect(e['request.id']).toBeDefined();
+        // AUDIT_OTEL_FIELD_RENAMES: trace.id → http.request.id.
+        expect(e['http.request.id']).toBeDefined();
+        expect(e['request.id']).toBeUndefined();
         expect(e['trace.id']).toBeUndefined();
       }
     );
@@ -169,8 +175,8 @@ apiTest.describe(
         expect(e['user.name']).toBeUndefined();
         expect(e['user.id']).toBeUndefined();
 
-        // Auth context still present even on failure.
-        expect(e['kibana.authentication_provider']).toBe('cloud-basic');
+        // Auth context — provider dropped on Serverless; authentication.type still present.
+        expect(e['kibana.authentication_provider']).toBeUndefined();
         expect(e['authentication.type']).toBe('basic');
 
         // Error details.
@@ -180,12 +186,12 @@ apiTest.describe(
         // Network.
         expect(e['source.address']).toBeDefined();
         expect(e['source.ip']).toBeDefined();
-        expect(e['request.id']).toBeDefined();
+        expect(e['http.request.id']).toBeDefined();
       }
     );
 
     apiTest(
-      'http_request: request.id present (not trace.id), HTTP method uppercase',
+      'http_request: http.request.id present (not trace.id), HTTP method uppercase',
       async ({ apiClient, samlAuth }) => {
         const snap = receiver.snapshot();
         const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
@@ -196,7 +202,10 @@ apiTest.describe(
         });
 
         const e = await snap.waitForLogRecord(
-          (attrs) => attrs['event.action'] === 'http_request' && attrs['url.path'] === '/api/status'
+          (attrs) =>
+            attrs['event.action'] === 'http_request' &&
+            typeof attrs['url.original'] === 'string' &&
+            (attrs['url.original'] as string).includes('/api/status')
         );
 
         expectOtelEnvelope(e);
@@ -210,11 +219,13 @@ apiTest.describe(
         // fieldDefaults applies event.type (http_request carries no explicit type).
         expect(e['event.type']).toStrictEqual(['access']);
 
-        // Request URL.
-        expect(e['url.path']).toBe('/api/status');
-        expect(e['url.domain']).toBe('localhost');
-        expect(e['url.port']).toBe(5620);
-        expect(e['url.scheme']).toBe('http');
+        // Request URL: fieldAdditions builds url.original from the split url.* fields, which are
+        // then dropped by AUDIT_OTEL_FIELD_DROPS — the ingest pipeline reparses url.original.
+        expect(e['url.original']).toContain('/api/status');
+        expect(e['url.path']).toBeUndefined();
+        expect(e['url.domain']).toBeUndefined();
+        expect(e['url.port']).toBeUndefined();
+        expect(e['url.scheme']).toBeUndefined();
 
         // http.request.method must be uppercase per OTel semantic conventions.
         expect(e['http.request.method']).toBe('GET');
@@ -232,8 +243,9 @@ apiTest.describe(
         expect(e['source.address']).toBe('127.0.0.1');
         expect(e['source.ip']).toBe('127.0.0.1');
 
-        // AUDIT_OTEL_FIELD_RENAMES: trace.id → request.id (avoids OTel TraceId collision).
-        expect(e['request.id']).toBeDefined();
+        // AUDIT_OTEL_FIELD_RENAMES: trace.id → http.request.id (avoids OTel TraceId collision).
+        expect(e['http.request.id']).toBeDefined();
+        expect(e['request.id']).toBeUndefined();
         expect(e['trace.id']).toBeUndefined();
       }
     );
@@ -289,7 +301,7 @@ apiTest.describe(
         // Network.
         expect(e['source.address']).toBe('127.0.0.1');
         expect(e['source.ip']).toBe('127.0.0.1');
-        expect(e['request.id']).toBeDefined();
+        expect(e['http.request.id']).toBeDefined();
       }
     );
 
@@ -318,8 +330,8 @@ apiTest.describe(
         expect(e['user.name']).toBeDefined();
         expect(e['user.id']).toBeDefined();
 
-        // Auth provider — not renamed, stays as kibana.authentication_provider.
-        expect(e['kibana.authentication_provider']).toBeDefined();
+        // Auth provider — dropped on Serverless (fixed value).
+        expect(e['kibana.authentication_provider']).toBeUndefined();
 
         // AUDIT_OTEL_FIELD_RENAMES: kibana.authentication_type → authentication.type.
         expect(e['authentication.type']).toBeDefined();
@@ -332,7 +344,7 @@ apiTest.describe(
         // Network.
         expect(e['source.address']).toBeDefined();
         expect(e['source.ip']).toBeDefined();
-        expect(e['request.id']).toBeDefined();
+        expect(e['http.request.id']).toBeDefined();
       }
     );
   }
