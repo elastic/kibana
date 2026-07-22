@@ -23,7 +23,6 @@ const unsupportedInNextChrome = (method: string): never => {
 export class GlobalNavService extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly find = this.ctx.getService('find');
-  private readonly retry = this.ctx.getService('retry');
 
   /**
    * Visible page title from chrome-next `appHeaderTitle` or legacy `EuiPageHeader` h1.
@@ -45,30 +44,20 @@ export class GlobalNavService extends FtrService {
    * to settle before deciding. Pages without a recognized header retain classic behavior.
    */
   public async isNextProjectChrome(): Promise<boolean> {
-    const detectHeader = async (): Promise<boolean | undefined> => {
-      if (await this.testSubjects.exists('chromeNextGlobalHeader', { timeout: 0 })) {
-        return true;
-      }
-      if (
-        (await this.testSubjects.exists('headerGlobalNav', { timeout: 0 })) ||
-        (await this.testSubjects.exists('kibanaProjectHeader', { timeout: 0 }))
-      ) {
-        return false;
-      }
-      return undefined;
-    };
+    // The chrome shell renders exactly one of these headers once loaded, but none while navigating,
+    // so wait for whichever appears before deciding rather than probing a single header once.
+    const anyHeaderSelector = ['chromeNextGlobalHeader', 'headerGlobalNav', 'kibanaProjectHeader']
+      .map((subj) => `[data-test-subj="${subj}"]`)
+      .join(',');
 
     try {
-      return await this.retry.tryForTime(2000, async () => {
-        const result = await detectHeader();
-        if (result === undefined) {
-          throw new Error('no chrome header has rendered yet');
-        }
-        return result;
-      });
+      await this.find.byCssSelector(anyHeaderSelector, 2000);
     } catch {
-      return (await detectHeader()) ?? false;
+      // No recognized header rendered (e.g. a chrome-less page); retain classic behavior.
+      return false;
     }
+
+    return await this.testSubjects.exists('chromeNextGlobalHeader', { timeout: 0 });
   }
 
   public async moveMouseToLogo(): Promise<void> {
