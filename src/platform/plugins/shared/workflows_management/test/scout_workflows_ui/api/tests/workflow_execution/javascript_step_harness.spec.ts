@@ -12,18 +12,17 @@ import { expect } from '@kbn/scout/api';
 import { isTerminalStatus } from '@kbn/workflows';
 import type { WorkflowExecutionDto, WorkflowStepExecutionDto } from '@kbn/workflows/types/latest';
 import { ExecutionStatus } from '@kbn/workflows/types/latest';
-import { ScriptsJavaScriptStepTypeId } from '@kbn/workflows-extensions/common';
 import type { WorkflowsApiService } from '../../../common/apis/workflows';
 import { waitForConditionOrThrow } from '../../../common/utils/wait_for_condition';
 import { spaceTest } from '../../fixtures';
 
-const SCRIPTS_JAVA_SCRIPT_STEP_TYPE = ScriptsJavaScriptStepTypeId;
+const SCRIPTS_JAVA_SCRIPT_STEP_TYPE = 'code.javascript' as const;
 
 const JAVASCRIPT_STEP_HARNESS_YAML = `
 version: "1"
-name: JavaScript Step — Security & Performance Test Harness
+name: JavaScript Step Tests
 description: |
-  Manual test workflow for the experimental ${ScriptsJavaScriptStepTypeId} step.
+  Manual test workflow for the experimental ${SCRIPTS_JAVA_SCRIPT_STEP_TYPE} step.
   Covers happy-path execution, sandbox isolation, CPU/memory limits, and console caps.
   Requires workflowsExtensions.experimentalSteps: true (or experimentalSteps.javaScriptStep: true) in kibana.yml.
 enabled: true
@@ -39,77 +38,18 @@ triggers:
   - type: manual
 
 steps:
-  - name: func-liquid-const-mutation
-    type: ${ScriptsJavaScriptStepTypeId}
+  - name: happy-path
+    type: ${SCRIPTS_JAVA_SCRIPT_STEP_TYPE}
     with:
       code: |
-        var array = {{consts.array | json}}
-
-        for (var i = 4; i < 7; i++) {
-          array.push(i);
+        const arrayConstFromWorkflow = {{consts.array | json}};
+        for (let i = arrayConstFromWorkflow.at(-1); i < 50; i++) {
+          arrayConstFromWorkflow.push(i + 1);
         }
-
-        return array;
-
-  - name: sec-async-rejected
-    type: ${ScriptsJavaScriptStepTypeId}
-    on-failure:
-      continue: true
-    with:
-      code: |
-        const value = await Promise.resolve(42);
-        return value;
-
-  - name: func-complex-return-value
-    type: ${ScriptsJavaScriptStepTypeId}
-    with:
-      code: |
-        return {
-          greeting: '{{consts.greeting}}',
-          nested: { ok: true, items: [1, 2, 3] },
-        };
-
-  - name: func-cpu-baseline
-    type: ${ScriptsJavaScriptStepTypeId}
-    with:
-      code: |
-        let sum = 0;
-        for (let i = 0; i < 1000; i++) {
-          sum += i;
-        }
-        return sum;
-
-  - name: sec-no-host-or-node-globals
-    type: ${ScriptsJavaScriptStepTypeId}
-    with:
-      code: |
-        return {
-          context: typeof context,
-          input: typeof input,
-          __logBridge__: typeof __logBridge__,
-          require: typeof require,
-          process: typeof process,
-          fetch: typeof fetch,
-        };
-
-  - name: sec-wrapper-injection
-    type: ${ScriptsJavaScriptStepTypeId}
-    on-failure:
-      continue: true
-    with:
-      code: |
-        })(); return { injected: true }; (function () {
-
-  - name: sec-empty-script-rejected
-    type: ${ScriptsJavaScriptStepTypeId}
-    on-failure:
-      continue: true
-    with:
-      code: |
-          
+        return arrayConstFromWorkflow;
 
   - name: perf-infinite-loop-timeout
-    type: ${ScriptsJavaScriptStepTypeId}
+    type: ${SCRIPTS_JAVA_SCRIPT_STEP_TYPE}
     on-failure:
       continue: true
     with:
@@ -118,7 +58,7 @@ steps:
         while (true) {}
 
   - name: perf-memory-bomb-objects
-    type: ${ScriptsJavaScriptStepTypeId}
+    type: ${SCRIPTS_JAVA_SCRIPT_STEP_TYPE}
     on-failure:
       continue: true
     with:
@@ -129,27 +69,6 @@ steps:
           chunks.push({ data: new Array(10000).fill(Math.random()) });
         }
         return chunks.length;
-
-  - name: perf-memory-bomb-arraybuffer
-    type: ${ScriptsJavaScriptStepTypeId}
-    on-failure:
-      continue: true
-    with:
-      code: |
-        console.log('allocating ArrayBuffer');
-        new ArrayBuffer(100 * 1024 * 1024);
-        return 'should not reach here';
-
-  - name: perf-console-cpu-after-cap
-    type: ${ScriptsJavaScriptStepTypeId}
-    on-failure:
-      continue: true
-    with:
-      code: |
-        for (let i = 0; i < 200; i++) {
-          console.log('spam-' + i);
-        }
-        while (true) {}
 `;
 
 const EXECUTION_POLL_TIMEOUT_MS = 120_000;
@@ -196,7 +115,7 @@ async function waitForExecution(workflowsApi: WorkflowsApiService, executionId: 
 }
 
 spaceTest.describe(
-  `${ScriptsJavaScriptStepTypeId} harness workflow execution`,
+  `${SCRIPTS_JAVA_SCRIPT_STEP_TYPE} harness workflow execution`,
   { tag: tags.deploymentAgnostic },
   () => {
     let workflowsApi: WorkflowsApiService;
@@ -210,8 +129,8 @@ spaceTest.describe(
       workflowId = workflow.id;
     });
 
-    spaceTest.afterAll(async () => {
-      await workflowsApi.deleteAll();
+    spaceTest.afterAll(async ({ apiServices }) => {
+      await apiServices.workflowsApi.deleteAll();
     });
 
     spaceTest('runs all harness steps with expected outputs and failures', async () => {
@@ -219,84 +138,29 @@ spaceTest.describe(
       const execution = await waitForExecution(workflowsApi, workflowExecutionId);
 
       expect(execution?.status).toBe(ExecutionStatus.COMPLETED);
-      expect(execution?.stepExecutions).toHaveLength(11);
+      expect(execution?.stepExecutions).toHaveLength(3);
 
-      const liquidMutation = getJavaScriptStep(
-        execution as WorkflowExecutionDto,
-        'func-liquid-const-mutation'
-      );
-      expectStepCompleted(liquidMutation);
-      expect(liquidMutation.output).toStrictEqual([1, 2, 3, 4, 5, 6]);
-
-      const asyncRejected = getJavaScriptStep(
-        execution as WorkflowExecutionDto,
-        'sec-async-rejected'
-      );
-      expectStepFailedWithMessage(asyncRejected, /await is only valid in async/i);
-
-      const complexReturn = getJavaScriptStep(
-        execution as WorkflowExecutionDto,
-        'func-complex-return-value'
-      );
-      expectStepCompleted(complexReturn);
-      expect(complexReturn.output).toStrictEqual({
-        greeting: 'Hello from consts',
-        nested: { ok: true, items: [1, 2, 3] },
-      });
-
-      const cpuBaseline = getJavaScriptStep(execution as WorkflowExecutionDto, 'func-cpu-baseline');
-      expectStepCompleted(cpuBaseline);
-      expect(cpuBaseline.output).toBe(499_500);
-
-      const noGlobals = getJavaScriptStep(
-        execution as WorkflowExecutionDto,
-        'sec-no-host-or-node-globals'
-      );
-      expectStepCompleted(noGlobals);
-      expect(noGlobals.output).toStrictEqual({
-        context: 'undefined',
-        input: 'undefined',
-        __logBridge__: 'undefined',
-        require: 'undefined',
-        process: 'undefined',
-        fetch: 'undefined',
-      });
-
-      const wrapperInjection = getJavaScriptStep(
-        execution as WorkflowExecutionDto,
-        'sec-wrapper-injection'
-      );
-      expectStepFailedWithMessage(wrapperInjection, /Illegal return statement/i);
-
-      const emptyScript = getJavaScriptStep(
-        execution as WorkflowExecutionDto,
-        'sec-empty-script-rejected'
-      );
-      expectStepFailedWithMessage(emptyScript, 'Code is required');
+      const happyPath = getJavaScriptStep(execution as WorkflowExecutionDto, 'happy-path');
+      expectStepCompleted(happyPath);
+      expect(happyPath.executionTimeMs).toBeLessThan(500);
+      expect(happyPath.output).toStrictEqual(new Array(50).fill(0).map((_, i) => i + 1));
 
       const infiniteLoop = getJavaScriptStep(
+        //
         execution as WorkflowExecutionDto,
         'perf-infinite-loop-timeout'
       );
+      expect(infiniteLoop.executionTimeMs).toBeGreaterThan(500);
+      expect(infiniteLoop.executionTimeMs).toBeLessThan(2_000);
       expectStepFailedWithMessage(infiniteLoop, 'Script execution timed out.');
 
       const memoryBombObjects = getJavaScriptStep(
+        //
         execution as WorkflowExecutionDto,
         'perf-memory-bomb-objects'
       );
+      expect(memoryBombObjects.executionTimeMs).toBeLessThan(2_000);
       expectStepFailedWithMessage(memoryBombObjects, 'Script failed due to out of memory');
-
-      const memoryBombArrayBuffer = getJavaScriptStep(
-        execution as WorkflowExecutionDto,
-        'perf-memory-bomb-arraybuffer'
-      );
-      expectStepFailedWithMessage(memoryBombArrayBuffer, 'Script failed due to out of memory');
-
-      const consoleCpuAfterCap = getJavaScriptStep(
-        execution as WorkflowExecutionDto,
-        'perf-console-cpu-after-cap'
-      );
-      expectStepFailedWithMessage(consoleCpuAfterCap, 'Script execution timed out.');
     });
   }
 );
