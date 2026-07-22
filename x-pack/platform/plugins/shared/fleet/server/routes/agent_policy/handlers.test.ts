@@ -239,19 +239,10 @@ describe('Agent policy API handlers', () => {
               'policy-1': {
                 doc_count: 5,
                 unprivileged: { doc_count: 2 },
-                fips: { doc_count: 1 },
-                versions: {
-                  buckets: [
-                    { key: '8.0.0', doc_count: 3 },
-                    { key: '8.1.0', doc_count: 2 },
-                  ],
-                },
               },
               'policy-2': {
                 doc_count: 0,
                 unprivileged: { doc_count: 0 },
-                fips: { doc_count: 0 },
-                versions: { buckets: [] },
               },
             },
           },
@@ -275,19 +266,12 @@ describe('Agent policy API handlers', () => {
         expect.objectContaining({
           agents: 5,
           unprivileged_agents: 2,
-          fips_agents: 1,
-          agents_per_version: [
-            { version: '8.0.0', count: 3 },
-            { version: '8.1.0', count: 2 },
-          ],
         })
       );
       expect(agentPolicies[1]).toEqual(
         expect.objectContaining({
           agents: 0,
           unprivileged_agents: 0,
-          fips_agents: 0,
-          agents_per_version: [],
         })
       );
     });
@@ -306,8 +290,6 @@ describe('Agent policy API handlers', () => {
         expect.objectContaining({
           agents: 0,
           unprivileged_agents: 0,
-          fips_agents: 0,
-          agents_per_version: [],
         })
       );
     });
