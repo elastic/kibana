@@ -183,6 +183,7 @@ export default function ({ getService }: FtrProviderContext) {
         'cases.analyticsV2.fullReset',
         'cases.analyticsV2.reconciliation',
         'cases_incremental_id_assignment',
+        'cases_templates_v2_migration',
         'cloud_security_posture-stats_task',
         'dashboard_telemetry',
         'endpoint:complete-external-response-actions',
