@@ -1007,19 +1007,13 @@ export const InstallPackageFromRegistryRequestSchema = {
   body: schema.nullable(
     schema.object(
       {
-        force: schema.boolean({
-          defaultValue: false,
-          meta: {
-            description:
-              'When true, bypass the already-installed short-circuit, allow unverified packages, restart stuck installs, and skip dependency compatibility checks. Broad recovery-oriented flag — prefer allow_outdated_version for IaC pinned-version installs.',
-          },
-        }),
+        force: schema.boolean({ defaultValue: false }),
         ignore_constraints: schema.boolean({ defaultValue: false }),
         allow_outdated_version: schema.boolean({
           defaultValue: false,
           meta: {
             description:
-              'When true, allow installing a specific package version that is older than the latest available registry version. Unlike force, this bypasses only the out-of-date version check and does not enable reinstall, unverified-package, deployment-mode bypass, or dependency-skip behavior. Intended for IaC workflows that pin a vetted package version.',
+              'When true, allow installing a version older than the latest available. Bypasses only the out-of-date version check.',
           },
         }),
       },
@@ -1073,18 +1067,12 @@ export const BulkInstallPackagesFromRegistryRequestSchema = {
         ]),
         { minSize: 1, maxSize: 1000 }
       ),
-      force: schema.boolean({
-        defaultValue: false,
-        meta: {
-          description:
-            'When true, bypass the already-installed short-circuit and restart stuck installs. Broad recovery-oriented flag — prefer allow_outdated_version for IaC pinned-version installs.',
-        },
-      }),
+      force: schema.boolean({ defaultValue: false }),
       allow_outdated_version: schema.boolean({
         defaultValue: false,
         meta: {
           description:
-            'When true, allow installing a specific package version that is older than the latest available registry version. Unlike force, this bypasses only the out-of-date version check and does not enable reinstall or dependency-skip behavior. Intended for IaC workflows that pin a vetted package version.',
+            'When true, allow installing a version older than the latest available. Bypasses only the out-of-date version check.',
         },
       }),
     },
