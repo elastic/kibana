@@ -20,12 +20,14 @@
     "xpack.banners": "platform/plugins/private/banners",
     "xpack.canvas": "platform/plugins/private/canvas",
     "xpack.cases": "platform/plugins/shared/cases",
+    "xpack.clientApps": "solutions/observability/plugins/client_apps",
     "xpack.cloud": "platform/plugins/shared/cloud",
     "xpack.cloudConnect": "platform/plugins/shared/cloud_connect",
     "xpack.cloudDefend": "solutions/security/plugins/cloud_defend",
     "xpack.cloudLinks": "platform/plugins/private/cloud_integrations/cloud_links",
     "xpack.cloudDataMigration": "platform/plugins/private/cloud_integrations/cloud_data_migration",
     "xpack.contentConnectors": "solutions/search/plugins/content_connectors",
+    "xpack.contextEngine": "platform/plugins/shared/context_engine",
     "xpack.csp": [
       "solutions/security/plugins/cloud_security_posture",
       "packages/kbn-cloud-security-posture-common",
@@ -166,7 +168,8 @@
     "xpack.urlDrilldown": "platform/plugins/private/drilldowns/url_drilldown",
     "xpack.watcher": "platform/plugins/private/watcher",
     "xpack.eventStacktrace": "platform/packages/shared/kbn-event-stacktrace",
-    "xpack.notificationCenter": "platform/plugins/shared/notification_center"
+    "xpack.notificationCenter": "platform/plugins/shared/notification_center",
+    "xpack.customContent": "platform/plugins/shared/custom_content"
   },
   "exclude": ["examples"],
   "translations": [
