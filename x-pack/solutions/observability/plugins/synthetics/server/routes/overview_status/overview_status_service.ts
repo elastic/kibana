@@ -54,6 +54,12 @@ interface LocationStatusEntry {
   // terms sub-agg because the field is wildcard-typed and top_metrics cannot
   // collect it. Falls back to locationId when unavailable.
   locationLabel?: string;
+  // Whether the ping carries `meta.space_id`, which Kibana always stamps onto
+  // monitors it pushes (public + private, UI + project). Standalone Heartbeat /
+  // Elastic Agent autodiscovery pings never have it. Used to avoid classifying
+  // the leftover pings of a *deleted* Kibana monitor as an autodiscovery
+  // (`origin: 'heartbeat'`) monitor once its saved object is gone.
+  hasKibanaManagedFields?: boolean;
   // The latest error reason for the most recent final summary on this
   // (monitor, location). Only populated for down checks where the heartbeat
   // doc has an `error` object — `error.message` is `text` so we collect it
@@ -612,6 +618,18 @@ export class OverviewStatusService {
                       size: 1,
                     },
                   },
+                  // Presence of `meta.space_id` distinguishes a Kibana-pushed
+                  // monitor (always stamped, even for a deleted monitor's
+                  // leftover pings) from a standalone Heartbeat / Agent
+                  // autodiscovery monitor (never stamped). `terms` handles the
+                  // multi-space (array) case; a non-empty bucket list means the
+                  // field is present. Always run, since heartbeat detection is.
+                  space_id: {
+                    terms: {
+                      field: 'meta.space_id',
+                      size: 1,
+                    },
+                  },
                   // _index is a metadata field not supported by top_metrics,
                   // so we use a separate terms agg to determine the source index.
                   // For a given monitor+location bucket the latest ping typically
@@ -725,6 +743,8 @@ export class OverviewStatusService {
           const locationLabel =
             locationNameAgg?.buckets?.[0]?.key ??
             (bKey.locationId == null ? HEARTBEAT_UNMAPPED_LOCATION_LABEL : undefined);
+          const spaceIdAgg = (rest as any).space_id;
+          const hasKibanaManagedFields = (spaceIdAgg?.buckets?.length ?? 0) > 0;
           const kibanaUrl = ccsEnabled ? metrics?.kibanaUrl : undefined;
           const monitorName = metrics?.['monitor.name'];
           const monitorType = metrics?.['monitor.type'];
@@ -745,6 +765,7 @@ export class OverviewStatusService {
             ...(monitorInterval != null ? { monitorIntervalSeconds: Number(monitorInterval) } : {}),
             ...(configId ? { configId: String(configId) } : {}),
             ...(tags ? { tags: Array.isArray(tags) ? tags.map(String) : [String(tags)] } : {}),
+            ...(hasKibanaManagedFields ? { hasKibanaManagedFields } : {}),
             error:
               errorMessage || errorType ? { message: errorMessage, type: errorType } : undefined,
             downSince,
@@ -1049,6 +1070,13 @@ export class OverviewStatusService {
 
         // Local Heartbeat / Elastic Agent managed monitor (no saved object).
         if (!includeHeartbeatMonitors) {
+          return;
+        }
+        // Skip pings that carry Kibana's provenance markers (`meta.space_id`).
+        // Those come from a monitor Kibana pushed; with no saved object it's a
+        // *deleted* Kibana monitor whose pings haven't aged out yet — not an
+        // autodiscovery monitor — so it must not resurrect as `heartbeat`.
+        if (locData.hasKibanaManagedFields) {
           return;
         }
         // Cap the number of distinct monitors we synthesize from ping data.

@@ -2044,6 +2044,10 @@ describe('current status route', () => {
       // the CCS-gated `index_name`). Location-less pings don't rely on it — they
       // fall back to the placeholder label.
       expect(monitorAggs.location_name).toBeDefined();
+      // `space_id` presence tells a deleted Kibana monitor's leftover pings
+      // (always stamped with `meta.space_id`) apart from autodiscovery pings.
+      // Heartbeat detection is always-on, so it runs even on serverless.
+      expect(monitorAggs.space_id).toBeDefined();
 
       // No remote decoration without CCS.
       expect(result.upConfigs.id1).toBeDefined();
@@ -2544,6 +2548,40 @@ describe('current status route', () => {
       expect(entry.tags).toEqual(['kube-system']);
       expect(entry.locations).toEqual([{ id: japanLoc.id, label: 'My K8s Cluster', status: 'up' }]);
       expect(result.up).toBe(1);
+    });
+
+    it('does not surface a deleted Kibana monitor (ping carries meta.space_id) as heartbeat', async () => {
+      // Kibana stamps `meta.space_id` onto every monitor it pushes. A monitor
+      // deleted from Kibana leaves behind pings that still carry it until they
+      // age out — those must NOT resurrect as an autodiscovery (`heartbeat`)
+      // monitor, unlike standalone Heartbeat / Agent pings which never have it.
+      const { esClient, syntheticsEsClient } = getUptimeESMockClient();
+      esClient.search.mockResponseOnce(
+        getEsResponse({
+          buckets: [
+            {
+              ...heartbeatBucket({ monitorId: 'deleted-kb', status: 'up' }),
+              space_id: { buckets: [{ key: 'default', doc_count: 1 }] },
+            },
+          ],
+        })
+      );
+
+      const routeContext: any = {
+        request: { query: {} },
+        syntheticsEsClient,
+        server: {
+          isElasticsearchServerless: false,
+          config: { experimental: { ccs: { enabled: false } } },
+        },
+      };
+      const service = new OverviewStatusService(routeContext);
+      service.getMonitorConfigs = jest.fn().mockResolvedValue([] as any);
+
+      const result = await service.getOverviewStatus();
+
+      expect(result.upConfigs['heartbeat-deleted-kb-asia_japan']).toBeUndefined();
+      expect(result.up).toBe(0);
     });
 
     it('falls back to monitor.id and location id when ping metadata is missing', async () => {
