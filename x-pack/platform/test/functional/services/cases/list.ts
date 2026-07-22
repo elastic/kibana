@@ -32,21 +32,63 @@ export function CasesTableServiceProvider(
     }
   };
 
+  // Matches a single element per case in both the legacy table (`cases-table-row-{id}`) and the
+  // redesign card list (`cases-list-item-clickable-{id}`), so row counts work in either design.
+  const CASE_ROWS_SELECTOR =
+    '[data-test-subj^="cases-table-row-"],[data-test-subj^="cases-list-item-clickable-"]';
+
   return {
     /**
-     * Goes to the first case listed on the table.
+     * Whether the redesign card list view is currently rendered (as opposed to the legacy/redesign
+     * table view which reuses `cases-table`).
+     */
+    async isCardListView() {
+      return await testSubjects.exists('cases-list-view');
+    },
+
+    /**
+     * Ensures the cases list is showing the table view. The redesign defaults to a card list whose
+     * table view reuses the legacy `cases-table` DOM and bulk/row controls, so switching to it lets
+     * the table-based helpers below work unchanged. No-op in the legacy design (no view toggle).
+     */
+    async ensureTableView() {
+      await header.waitUntilLoadingHasFinished();
+      if (!(await this.isCardListView())) {
+        return;
+      }
+      await retry.waitFor('the cases list to switch to the table view', async () => {
+        if (await testSubjects.exists('cases-table')) {
+          return true;
+        }
+        // `table` is the EuiButtonGroup option id rendered by the redesign list view toggle.
+        if (await testSubjects.exists('table')) {
+          await testSubjects.click('table');
+          await header.waitUntilLoadingHasFinished();
+        }
+        return await testSubjects.exists('cases-table');
+      });
+    },
+
+    /**
+     * Goes to the first case listed on the cases list.
      *
-     * This will fail if the table doesn't have any case
+     * This will fail if the list doesn't have any case
      */
     async goToFirstListedCase() {
-      await testSubjects.existOrFail('cases-table');
-      await testSubjects.existOrFail('case-details-link', {
-        timeout: config.get('timeouts.waitFor'),
-      });
-      await testSubjects.click('case-details-link');
-      await testSubjects.existOrFail('case-view-title', {
-        timeout: config.get('timeouts.waitFor'),
-      });
+      if (await this.isCardListView()) {
+        const firstCase = await find.byCssSelector(
+          '[data-test-subj^="cases-list-item-clickable-"]'
+        );
+        await firstCase.click();
+      } else {
+        await testSubjects.existOrFail('cases-table');
+        await testSubjects.existOrFail('case-details-link', {
+          timeout: config.get('timeouts.waitFor'),
+        });
+        await testSubjects.click('case-details-link');
+      }
+
+      await casesCommon.waitForCaseViewToLoad();
     },
 
     async deleteCase(index: number = 0) {
@@ -75,7 +117,7 @@ export function CasesTableServiceProvider(
     },
 
     async selectAndDeleteAllCases() {
-      await header.waitUntilLoadingHasFinished();
+      await this.ensureTableView();
       await testSubjects.existOrFail('cases-table', { timeout: 20 * 1000 });
       let rows: WebElementWrapper[];
       do {
@@ -90,7 +132,7 @@ export function CasesTableServiceProvider(
 
     async validateCasesTableHasNthRows(nrRows: number) {
       await retry.waitFor(`the cases table to have ${nrRows} cases`, async () => {
-        const rows = await find.allByCssSelector('[data-test-subj*="cases-table-row-"');
+        const rows = await find.allByCssSelector(CASE_ROWS_SELECTOR);
         return rows.length === nrRows;
       });
 
@@ -98,9 +140,12 @@ export function CasesTableServiceProvider(
     },
 
     async waitForCasesToBeListed() {
-      await retry.waitFor('cases to appear on the all cases table', async () => {
+      await retry.waitFor('cases to appear on the all cases list', async () => {
         await this.refreshTable();
-        return await testSubjects.exists('case-details-link');
+        return (
+          (await testSubjects.exists('case-details-link')) ||
+          (await testSubjects.exists('cases-list-item-title'))
+        );
       });
       await header.waitUntilLoadingHasFinished();
     },
@@ -115,9 +160,9 @@ export function CasesTableServiceProvider(
     },
 
     async waitForCasesToBeDeleted() {
-      await retry.waitFor('the cases table to be empty', async () => {
+      await retry.waitFor('the cases list to be empty', async () => {
         await this.refreshTable();
-        const rows = await find.allByCssSelector('[data-test-subj*="cases-table-row-"', 100);
+        const rows = await find.allByCssSelector(CASE_ROWS_SELECTOR, 100);
         return rows.length === 0;
       });
     },
@@ -223,6 +268,7 @@ export function CasesTableServiceProvider(
     },
 
     async openRowActions(index: number) {
+      await this.ensureTableView();
       const rows = await find.allByCssSelector(
         '[data-test-subj*="case-action-popover-button-"',
         100
@@ -249,6 +295,7 @@ export function CasesTableServiceProvider(
     },
 
     async selectAllCasesAndOpenBulkActions() {
+      await this.ensureTableView();
       await testSubjects.setCheckbox('checkboxSelectAll', 'check');
       await this.openBulkActions();
     },
@@ -410,7 +457,7 @@ export function CasesTableServiceProvider(
     },
 
     async selectAndChangeStatusOfAllCases(status: CaseStatuses) {
-      await header.waitUntilLoadingHasFinished();
+      await this.ensureTableView();
       await testSubjects.existOrFail('cases-table', { timeout: 20 * 1000 });
       await header.waitUntilLoadingHasFinished();
       await testSubjects.missingOrFail('cases-table-loading', { timeout: 5000 });
@@ -418,7 +465,7 @@ export function CasesTableServiceProvider(
     },
 
     async selectAndChangeSeverityOfAllCases(severity: CaseSeverity) {
-      await header.waitUntilLoadingHasFinished();
+      await this.ensureTableView();
       await testSubjects.existOrFail('cases-table', { timeout: 20 * 1000 });
       await header.waitUntilLoadingHasFinished();
       await testSubjects.missingOrFail('cases-table-loading', { timeout: 5000 });

@@ -30,6 +30,7 @@ export type { ConversationInputShellProps } from './conversation_input_shell';
 export type {
   AgentBuilderPluginSetup,
   AgentBuilderPluginStart,
+  EmbeddableChatAccess,
   EmbeddableConversationProps,
   PublicEmbeddableConversationProps,
   PublicEmbeddableConversationInputProps,
