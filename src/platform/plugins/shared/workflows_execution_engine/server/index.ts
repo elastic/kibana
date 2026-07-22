@@ -22,6 +22,8 @@ export type {
   TriggerEventsContract,
   WorkflowsExecutionEnginePluginSetup,
   WorkflowsExecutionEnginePluginStart,
+  ExecuteWorkflowOptions,
+  WorkflowExecutionMode,
 } from './types';
 
 export type {

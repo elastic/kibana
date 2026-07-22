@@ -87,7 +87,7 @@ async function scheduleWorkflowGlobalTimeoutResumeTask(
 
   await params.workflowTaskManager
     .scheduleWorkflowGlobalTimeoutResumeTask({
-      workflowExecution: workflowExecution as EsWorkflowExecution,
+      workflowExecution,
       resumeAt: new Date(resumeAtMs),
       fakeRequest: params.fakeRequest,
     })
@@ -153,7 +153,7 @@ export async function ensureWorkflowIdleTimeoutResumeAfterLoop(
 
   await params.workflowTaskManager
     .scheduleWorkflowGlobalTimeoutResumeTask({
-      workflowExecution: workflowExecution as EsWorkflowExecution,
+      workflowExecution,
       resumeAt,
       fakeRequest: params.fakeRequest,
     })
@@ -173,6 +173,16 @@ export async function handleExecutionDelay(
   const workflowExecution = params.workflowRuntime.getWorkflowExecution();
 
   const stepStatus = stepExecutionRuntime.stepExecution?.status;
+  if (
+    params.executionMode === 'sync' &&
+    (stepStatus === ExecutionStatus.WAITING_FOR_INPUT ||
+      stepStatus === ExecutionStatus.WAITING_FOR_CHILD ||
+      stepStatus === ExecutionStatus.WAITING)
+  ) {
+    throw new Error(
+      `Step "${stepExecutionRuntime.node.stepId}" is not supported in synchronous workflows`
+    );
+  }
   if (
     stepStatus === ExecutionStatus.WAITING_FOR_INPUT ||
     stepStatus === ExecutionStatus.WAITING_FOR_CHILD

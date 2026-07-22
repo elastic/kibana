@@ -21,9 +21,9 @@ describe('createBaseHandlerContext', () => {
       input,
       rawInput,
       config,
-      defaultTestNode as any,
-      mocks.stepExecutionRuntime as any,
-      mocks.workflowLogger as any
+      defaultTestNode,
+      mocks.stepExecutionRuntime,
+      mocks.workflowLogger
     );
 
     expect(context.input).toBe(input);
@@ -40,9 +40,7 @@ describe('createBaseHandlerContext', () => {
     expect(mocks.stepExecutionRuntime.contextManager.getEsClientAsUser).toHaveBeenCalled();
 
     context.contextManager.renderInputTemplate({ x: 1 });
-    expect(
-      mocks.stepExecutionRuntime.contextManager.renderValueAccordingToContext
-    ).toHaveBeenCalledWith({ x: 1 }, undefined);
+    expect(mocks.renderValueAccordingToContext).toHaveBeenCalledWith({ x: 1 }, undefined);
 
     context.logger.info('hello', { meta: true });
     expect(mocks.workflowLogger.logInfo).toHaveBeenCalledWith('hello', { meta: true });
@@ -55,13 +53,36 @@ describe('createBaseHandlerContext', () => {
       {},
       undefined as unknown as Record<string, unknown>,
       undefined as unknown as Record<string, unknown>,
-      defaultTestNode as any,
-      mocks.stepExecutionRuntime as any,
-      mocks.workflowLogger as any
+      defaultTestNode,
+      mocks.stepExecutionRuntime,
+      mocks.workflowLogger
     );
 
     expect(context.rawInput).toEqual({});
     expect(context.config).toEqual({});
+  });
+
+  it('exposes request-local capabilities directly to the handler', () => {
+    const mocks = createHandlerTestMocks();
+    const capabilities = {
+      id: 'proceed',
+      value: { invoke: jest.fn() },
+    };
+    (
+      mocks.stepExecutionRuntime.contextManager.getExecutionCapabilities as jest.Mock
+    ).mockReturnValue([capabilities]);
+
+    const context = createBaseHandlerContext(
+      {},
+      {},
+      {},
+      defaultTestNode,
+      mocks.stepExecutionRuntime,
+      mocks.workflowLogger
+    );
+
+    expect(context.capabilities).toEqual([capabilities]);
+    expect(context.contextManager.getContext()).not.toHaveProperty('capabilities');
   });
 
   it('forwards callKibanaApi to the execution runtime with abort signal', async () => {
@@ -76,9 +97,9 @@ describe('createBaseHandlerContext', () => {
       {},
       {},
       {},
-      defaultTestNode as any,
-      mocks.stepExecutionRuntime as any,
-      mocks.workflowLogger as any
+      defaultTestNode,
+      mocks.stepExecutionRuntime,
+      mocks.workflowLogger
     );
 
     const result = await context.contextManager.callKibanaApi({
