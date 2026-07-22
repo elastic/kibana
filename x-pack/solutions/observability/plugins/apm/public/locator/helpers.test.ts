@@ -154,6 +154,26 @@ describe('getPathForServiceDetail', () => {
 
       expect(splitPath(path).query.get('errorGroupId')).toBeNull();
     });
+
+    it('forwards comparisonEnabled and offset to the error group deep-link', () => {
+      const path = getPathForServiceDetail(
+        {
+          serviceName: 'svc',
+          serviceOverviewTab: 'errors',
+          errorGroupId: 'group-1',
+          query: {
+            environment: 'prod' as Environment,
+            comparisonEnabled: true,
+            offset: 'expected_bounds',
+          },
+        },
+        defaultOptions
+      );
+      const { query } = splitPath(path);
+
+      expect(query.get('comparisonEnabled')).toBe('true');
+      expect(query.get('offset')).toBe('expected_bounds');
+    });
   });
 
   describe('isMobileAgentName routing', () => {
