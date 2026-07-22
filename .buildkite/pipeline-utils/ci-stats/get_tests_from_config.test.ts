@@ -120,6 +120,18 @@ describe('filterEmptyJestConfigs', () => {
     ]);
   });
 
+  it('normalizes leading-slash testMatch globs under the configured root', () => {
+    writeConfig('pkg/absolute_match/jest.integration.config.js', {
+      roots: ['<rootDir>/pkg/absolute_match'],
+      testMatch: ['/**/integration_tests/**/*.test.{js,mjs,ts,tsx}'],
+    });
+    write('pkg/absolute_match/integration_tests/foo.test.ts', '');
+
+    expect(filterEmptyJestConfigs(['pkg/absolute_match/jest.integration.config.js'])).toEqual([
+      'pkg/absolute_match/jest.integration.config.js',
+    ]);
+  });
+
   it('resolves multiple roots, keeping the config if any root has tests', () => {
     writeConfig('pkg/multi_root/jest.config.js', {
       roots: ['<rootDir>/pkg/multi_root/server', '<rootDir>/pkg/multi_root/common'],

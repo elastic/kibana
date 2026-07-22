@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { dirname, resolve } from 'path';
+import { dirname, isAbsolute, relative, resolve } from 'path';
 import * as globby from 'globby';
 import { getKibanaDir } from '#pipeline-utils';
 
@@ -48,6 +48,7 @@ const UNIT_IGNORE = ['**/node_modules/**', '**/integration_tests/**'];
 const INTEGRATION_IGNORE = ['**/node_modules/**'];
 
 interface JestConfigRules {
+  rootDir: string;
   roots: string[];
   testMatch: string[];
   ignore: string[];
@@ -85,10 +86,28 @@ function parseJestConfigRules(configAbsPath: string): JestConfigRules {
       : UNIT_TEST_MATCH;
 
   return {
+    rootDir,
     roots,
     testMatch,
     ignore: isIntegration ? INTEGRATION_IGNORE : UNIT_IGNORE,
   };
+}
+
+function normalizeTestMatchForRoot(pattern: string, root: string, rootDir: string): string {
+  const expandedPattern = pattern.replace(/<rootDir>/g, rootDir);
+
+  if (expandedPattern.startsWith('/**/')) {
+    return expandedPattern.slice(1);
+  }
+
+  if (isAbsolute(expandedPattern)) {
+    const relativePattern = relative(root, expandedPattern);
+    if (relativePattern && !relativePattern.startsWith('..') && !isAbsolute(relativePattern)) {
+      return relativePattern;
+    }
+  }
+
+  return expandedPattern;
 }
 
 /**
@@ -108,7 +127,10 @@ function hasTestFiles(configAbsPath: string): boolean {
   }
 
   return rules.roots.some((root) => {
-    const matches = globby.sync(rules.testMatch, {
+    const testMatch = rules.testMatch.map((pattern) =>
+      normalizeTestMatchForRoot(pattern, root, rules.rootDir)
+    );
+    const matches = globby.sync(testMatch, {
       cwd: root,
       ignore: rules.ignore,
       onlyFiles: true,
