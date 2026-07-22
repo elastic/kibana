@@ -24,7 +24,9 @@ export const CustomLogsAssetsExtension: PackageAssetsComponent = () => {
   const views: CustomAssetsAccordionProps['views'] = [
     {
       name: i18n.translate('xpack.fleet.assets.customLogs.name', { defaultMessage: 'Logs' }),
-      url: logsLocator.getRedirectUrl({}),
+      // Fleet is reachable from Security projects where the all-logs data view id is not
+      // registered, so request an ad-hoc data view.
+      url: logsLocator.getRedirectUrl({ useAdHocDataView: true }),
       description: i18n.translate('xpack.fleet.assets.customLogs.description', {
         defaultMessage: 'View custom logs data in Discover',
       }),

@@ -143,4 +143,49 @@ describe('LogsLocatorDefinition', () => {
       });
     });
   });
+
+  describe('when useAdHocDataView is true', () => {
+    it('builds and delegates the all-logs ad-hoc data view spec instead of the id', async () => {
+      const locator = createLocator(false);
+      const callerQuery = { language: 'kuery', query: 'host.name: "my-host"' };
+
+      await locator.getLocation({ query: callerQuery, useAdHocDataView: true });
+
+      const delegatedParams = mockGetLocation.mock.calls[0][0];
+      expect(mockGetFlattenedLogSources).toHaveBeenCalled();
+      expect(delegatedParams.dataViewSpec).toEqual(ALL_LOGS_DATA_VIEW_SPEC);
+      expect(delegatedParams).not.toHaveProperty('dataViewId');
+      expect(delegatedParams.query).toEqual(callerQuery);
+    });
+
+    it('does not forward the useAdHocDataView flag to DISCOVER_APP_LOCATOR', async () => {
+      const locator = createLocator(false);
+
+      await locator.getLocation({ useAdHocDataView: true });
+
+      const delegatedParams = mockGetLocation.mock.calls[0][0];
+      expect(delegatedParams).not.toHaveProperty('useAdHocDataView');
+    });
+
+    it('respects a caller-provided data view over the ad-hoc spec', async () => {
+      const locator = createLocator(false);
+
+      await locator.getLocation({ dataViewId: 'metrics-*', useAdHocDataView: true } as any);
+
+      const delegatedParams = mockGetLocation.mock.calls[0][0];
+      expect(delegatedParams).toEqual({ dataViewId: 'metrics-*' });
+      expect(delegatedParams).not.toHaveProperty('dataViewSpec');
+      expect(mockGetFlattenedLogSources).not.toHaveBeenCalled();
+    });
+
+    it('still prefers the ES|QL query when it is the default and no query is provided', async () => {
+      const locator = createLocator(true);
+
+      await locator.getLocation({ useAdHocDataView: true });
+
+      expect(mockGetLocation).toHaveBeenCalledWith({
+        query: { esql: `FROM ${CUSTOM_LOG_PATTERN}` },
+      });
+    });
+  });
 });
