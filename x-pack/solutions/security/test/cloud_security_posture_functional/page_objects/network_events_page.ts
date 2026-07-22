@@ -92,10 +92,12 @@ export class NetworkEventsPageObject extends FtrService {
 
   flyout = {
     expandVisualizations: async (): Promise<void> => {
-      // The visualizations section content can mount slowly under CI load, so wait for
-      // it on the default timeout instead of racing the shorter find budget.
+      // The section content can mount slowly under CI load. It starts collapsed (present
+      // in the DOM but not displayed), so wait for DOM presence with `allowHidden` rather
+      // than for a displayed element, then read its height to decide whether to expand.
       await this.testSubjects.existOrFail(VISUALIZATIONS_SECTION_CONTENT_TEST_ID, {
         timeout: this.defaultTimeoutMs,
+        allowHidden: true,
       });
       const contentEl = await this.testSubjects.find(VISUALIZATIONS_SECTION_CONTENT_TEST_ID);
       const isVisualizationVisible = (await contentEl.getSize()).height > 0;
