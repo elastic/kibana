@@ -43,7 +43,8 @@ const _episodeKeyGuard: Record<keyof AlertEpisode, true> = {
 };
 
 describe('alertingV2NotificationGroup builtin workflow input definition', () => {
-  const schema = builtinWorkflowInputDefinitions[ALERTING_V2_NOTIFICATION_GROUP_INPUT_DEFINITION_ID];
+  const schema =
+    builtinWorkflowInputDefinitions[ALERTING_V2_NOTIFICATION_GROUP_INPUT_DEFINITION_ID];
 
   it('is registered under the expected id', () => {
     expect(schema).toBeDefined();
