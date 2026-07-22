@@ -731,7 +731,7 @@ describe('update()', () => {
       });
 
       expect(connectorTokenClient.deleteConnectorTokens).toHaveBeenCalledWith(
-        expect.objectContaining({ connectorId: 'connector-id' })
+        expect.objectContaining({ connectorId: 'connector-id', skipRevocation: true })
       );
     });
   });

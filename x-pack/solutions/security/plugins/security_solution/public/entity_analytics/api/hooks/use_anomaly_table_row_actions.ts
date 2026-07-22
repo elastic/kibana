@@ -10,7 +10,7 @@ import type { IconType } from '@elastic/eui';
 import { FilterStateStore, escapeQuotes, type Filter } from '@kbn/es-query';
 import type { SerializableRecord } from '@kbn/utility-types';
 import { useInvestigateInTimeline } from '../../../common/hooks/timeline/use_investigate_in_timeline';
-import { useUserPrivileges } from '../../../common/components/user_privileges';
+import { useShowTimeline } from '../../../common/utils/timeline/use_show_timeline';
 import { useKibana } from '../../../common/lib/kibana';
 import type { TableRow } from '../../components/anomalies/table/types';
 import {
@@ -113,9 +113,7 @@ export const useAnomalyTableRowActions = ({
 }: UseAnomalyTableRowActionsArgs): AnomalyTableRowActionsResult => {
   const { services } = useKibana();
   const { ml, share, data } = services;
-  const {
-    timelinePrivileges: { read: canReadTimeline },
-  } = useUserPrivileges();
+  const [canReadTimeline] = useShowTimeline();
   const { investigateInTimeline } = useInvestigateInTimeline();
 
   const cachedRecordRef = useRef<CachedRecord | null>(null);

@@ -21,6 +21,11 @@ describe('getManageSlosUrl', () => {
     return filters.find((filter) => filter.meta.key === 'service.environment');
   };
 
+  const getServiceFilter = (): Filter | undefined => {
+    const [{ filters }] = getRedirectUrl.mock.calls.at(-1) as [{ filters: Filter[] }];
+    return filters.find((filter) => filter.meta.key === 'service.name');
+  };
+
   beforeEach(() => {
     getRedirectUrl.mockClear();
   });
@@ -67,5 +72,29 @@ describe('getManageSlosUrl', () => {
     getManageSlosUrl(sloListLocator, { serviceName: 'frontend' });
 
     expect(getEnvironmentFilter()).toBeUndefined();
+  });
+
+  it('matches service.name and slo.groupings.service.name for grouped SLO instances', () => {
+    getManageSlosUrl(sloListLocator, { serviceName: 'frontend' });
+
+    const serviceFilter = getServiceFilter();
+    expect(serviceFilter).toEqual({
+      meta: {
+        alias: 'service.name: frontend',
+        disabled: false,
+        key: 'service.name',
+        negate: false,
+        type: 'custom',
+      },
+      query: {
+        bool: {
+          minimum_should_match: 1,
+          should: [
+            { match_phrase: { 'service.name': 'frontend' } },
+            { match_phrase: { 'slo.groupings.service.name': 'frontend' } },
+          ],
+        },
+      },
+    });
   });
 });
