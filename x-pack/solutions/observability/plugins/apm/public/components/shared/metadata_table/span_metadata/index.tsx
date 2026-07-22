@@ -48,12 +48,14 @@ export function SpanMetadata({ span, prefetchedMetadata }: Props) {
     [span, spanId, prefetchedMetadata]
   );
 
-  const metadata = prefetchedMetadata?.metadata ?? spanEvent?.metadata ?? {};
   const isLoading = prefetchedMetadata
     ? prefetchedMetadata.isLoading
     : status === FETCH_STATUS.LOADING;
 
-  const sections = useMemo(() => getSectionsFromFields(metadata), [metadata]);
+  const sections = useMemo(
+    () => getSectionsFromFields(prefetchedMetadata?.metadata ?? spanEvent?.metadata ?? {}),
+    [prefetchedMetadata, spanEvent?.metadata]
+  );
 
   return <MetadataTable sections={sections} isLoading={isLoading} />;
 }
