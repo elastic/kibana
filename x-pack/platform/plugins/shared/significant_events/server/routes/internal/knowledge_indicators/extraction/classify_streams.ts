@@ -20,78 +20,97 @@ export interface StreamClassificationResult {
   alreadyRunning: Array<{ streamName: string; scheduledAt: string | null }>;
   candidates: StreamCandidate[];
   upToDate: StreamCandidate[];
-  excluded: string[];
   unsupported: string[];
-  excludePatterns: string[];
 }
 
-export const parseExcludePatterns = (raw: string | undefined): string[] =>
+export const parseStreamPatterns = (raw: string | undefined): string[] =>
   (raw ?? '')
     .split(',')
     .map((p) => p.trim())
     .filter(Boolean);
 
-const matchesExcludePatterns = (name: string, patterns: string[]): boolean =>
+const matchesAnyPattern = (name: string, patterns: string[]): boolean =>
   patterns.some((pattern) => minimatch(name, pattern));
 
 /**
+ * A stream type supported by continuous knowledge indicator onboarding.
+ * Exported so the settings UI can validate include patterns against the same rule.
+ */
+export const isSupportedStream = (stream: Streams.all.Definition): boolean =>
+  Streams.WiredStream.Definition.is(stream) ||
+  Streams.ClassicStream.Definition.is(stream) ||
+  Streams.QueryStream.Definition.is(stream);
+
+/**
  * Selects the streams eligible for continuous knowledge indicator onboarding.
- * Query streams are always included, gated only by the query-streams feature flag;
- * all other stream types are eligible only when their name matches the configured
- * significant events index patterns.
+ *
+ * When `onboardAll` is true (the default), every eligible stream is selected: query
+ * streams gated by the query-streams feature flag, all other types selected when their
+ * name matches the configured significant events index patterns.
+ *
+ * When `onboardAll` is false, selection is opt-in: only supported streams whose name
+ * matches one of `includePatterns` are selected (query streams still gated by the flag).
+ * An empty include list selects nothing.
  */
 export const filterEligibleStreams = ({
   allStreams,
   isQueryStreamsEnabled,
+  onboardAll,
+  includePatterns,
   indexPatterns,
 }: {
   allStreams: Streams.all.Definition[];
   isQueryStreamsEnabled: boolean;
+  onboardAll: boolean;
+  includePatterns: string[];
   indexPatterns: string[];
-}): Streams.all.Definition[] =>
-  allStreams.filter((stream) => {
-    if (Streams.QueryStream.Definition.is(stream)) {
-      return isQueryStreamsEnabled;
+}): Streams.all.Definition[] => {
+  if (onboardAll) {
+    return allStreams.filter((stream) => {
+      if (Streams.QueryStream.Definition.is(stream)) {
+        return isQueryStreamsEnabled;
+      }
+      return streamMatchesIndexPatterns(stream.name, indexPatterns);
+    });
+  }
+
+  if (includePatterns.length === 0) {
+    return [];
+  }
+
+  return allStreams.filter((stream) => {
+    if (Streams.QueryStream.Definition.is(stream) && !isQueryStreamsEnabled) {
+      return false;
     }
-    return streamMatchesIndexPatterns(stream.name, indexPatterns);
+    return isSupportedStream(stream) && matchesAnyPattern(stream.name, includePatterns);
   });
+};
 
 /**
- * Classifies streams into buckets (excluded, already-running, candidates, up-to-date)
+ * Classifies streams into buckets (already-running, candidates, up-to-date, unsupported)
  * by examining the latest onboarding workflow execution for each stream
  * and comparing the finish time against the configured extraction interval.
+ * Stream selection has already happened in `filterEligibleStreams`; this only drops
+ * unsupported types and buckets the rest by execution recency.
  */
 export const classifyStreams = ({
   allStreams,
   executions,
-  excludedStreamPatterns,
   intervalHours,
 }: {
   allStreams: Streams.all.Definition[];
   executions: WorkflowExecutionListItemDto[];
-  excludedStreamPatterns: string;
   intervalHours: number;
 }): StreamClassificationResult => {
-  const excludePatterns = parseExcludePatterns(excludedStreamPatterns);
-
-  const excluded: string[] = [];
   const unsupported: string[] = [];
   const eligibleNames = new Set<string>();
   for (const stream of allStreams) {
     const { name } = stream;
-    const isSupported =
-      Streams.WiredStream.Definition.is(stream) ||
-      Streams.ClassicStream.Definition.is(stream) ||
-      Streams.QueryStream.Definition.is(stream);
-    if (!isSupported) {
+    if (!isSupportedStream(stream)) {
       unsupported.push(name);
       continue;
     }
-    if (matchesExcludePatterns(name, excludePatterns)) {
-      excluded.push(name);
-    } else {
-      eligibleNames.add(name);
-    }
+    eligibleNames.add(name);
   }
 
   // Group executions by stream name (from concurrency key), keeping only the latest per stream
@@ -146,8 +165,6 @@ export const classifyStreams = ({
     alreadyRunning,
     candidates: allCandidates,
     upToDate,
-    excluded,
     unsupported,
-    excludePatterns,
   };
 };

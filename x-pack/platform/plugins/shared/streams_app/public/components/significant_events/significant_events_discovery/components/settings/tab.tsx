@@ -51,6 +51,12 @@ import { useKibana } from '../../../../../hooks/use_kibana';
 import { useModelSettingsUrl } from '../../../../../hooks/use_model_settings_url';
 import { useStreamsPrivileges } from '../../../../../hooks/use_streams_privileges';
 import { getFormattedError } from '../../../../../util/errors';
+import { useFetchStreams } from '../../hooks/use_fetch_streams';
+import {
+  findUnmatchedIncludePatterns,
+  isSupportedStream,
+  parseIncludedStreamPatterns,
+} from './included_streams_validation';
 import { useContinuousExtractionSettings } from './use_continuous_extraction_settings';
 import { useScheduledDiscoverySettings } from './use_scheduled_discovery_settings';
 import {
@@ -107,6 +113,10 @@ export function SettingsTab() {
     http: core.http,
   });
 
+  // Powers include-pattern validation: warn before saving a pattern that matches
+  // no onboardable stream. Only fetched to validate; the list itself isn't shown.
+  const { data: streamsData } = useFetchStreams();
+
   const savedConfigYaml = useMemo(() => {
     try {
       const raw = core.settings.globalClient.get<unknown>(
@@ -158,6 +168,36 @@ export function SettingsTab() {
       }
 
       if (continuousExtraction.hasChanged) {
+        const { enabled, onboardAllEligible, includedStreamPatterns } = continuousExtraction.draft;
+        // In include mode, block a save whose patterns match no onboardable stream:
+        // saving it would silently onboard nothing, which is almost never intended.
+        if (enabled && !onboardAllEligible) {
+          const patterns = parseIncludedStreamPatterns(includedStreamPatterns);
+          if (patterns.length > 0) {
+            const supportedStreamNames = (streamsData?.streams ?? [])
+              .map(({ stream }) => stream)
+              .filter(isSupportedStream)
+              .map((stream) => stream.name);
+            const unmatched = findUnmatchedIncludePatterns(patterns, supportedStreamNames);
+            if (unmatched.length > 0) {
+              core.notifications.toasts.addDanger({
+                title: i18n.translate(
+                  'xpack.streams.significantEventsDiscovery.settings.includedStreamPatternsNoMatchTitle',
+                  { defaultMessage: 'No streams match the included patterns' }
+                ),
+                text: i18n.translate(
+                  'xpack.streams.significantEventsDiscovery.settings.includedStreamPatternsNoMatchText',
+                  {
+                    defaultMessage:
+                      'These patterns match no onboardable stream: {patterns}. Update them or enable "Onboard all eligible streams".',
+                    values: { patterns: unmatched.join(', ') },
+                  }
+                ),
+              });
+              return;
+            }
+          }
+        }
         await continuousExtraction.save();
       }
 
@@ -194,6 +234,7 @@ export function SettingsTab() {
     savedIndexPatterns,
     continuousExtraction,
     scheduledDiscovery,
+    streamsData,
     hasTuningConfigChanges,
     parsedTuningConfig,
   ]);
@@ -711,35 +752,66 @@ export function SettingsTab() {
                   />
                 </EuiFormRow>
                 <EuiFormRow
-                  label={i18n.translate(
-                    'xpack.streams.significantEventsDiscovery.settings.excludedStreamPatternsLabel',
-                    { defaultMessage: 'Excluded streams' }
-                  )}
                   helpText={i18n.translate(
-                    'xpack.streams.significantEventsDiscovery.settings.excludedStreamPatternsHelp',
+                    'xpack.streams.significantEventsDiscovery.settings.onboardAllEligibleHelp',
                     {
                       defaultMessage:
-                        'Comma-separated list of stream names or glob patterns (e.g. logs.debug.*) to skip during continuous onboarding.',
+                        'When on, every eligible managed stream is onboarded automatically. Turn off to onboard only the streams you list below.',
                     }
                   )}
                 >
-                  <EuiTextArea
-                    data-test-subj="streams-settings-excluded-streams"
-                    value={continuousExtraction.draft.excludedStreamPatterns}
+                  <EuiSwitch
+                    data-test-subj="streams-settings-onboard-all-eligible-toggle"
+                    label={i18n.translate(
+                      'xpack.streams.significantEventsDiscovery.settings.onboardAllEligibleLabel',
+                      { defaultMessage: 'Onboard all eligible streams' }
+                    )}
+                    checked={continuousExtraction.draft.onboardAllEligible}
                     onChange={(e) =>
                       continuousExtraction.setDraft((prev) => ({
                         ...prev,
-                        excludedStreamPatterns: e.target.value,
+                        onboardAllEligible: e.target.checked,
                       }))
                     }
                     disabled={!canEditSettings || !continuousExtraction.draft.enabled}
-                    placeholder={i18n.translate(
-                      'xpack.streams.significantEventsDiscovery.settings.excludedStreamPatternsPlaceholder',
-                      { defaultMessage: 'logs.debug.*' }
-                    )}
-                    rows={2}
                   />
                 </EuiFormRow>
+                {!continuousExtraction.draft.onboardAllEligible && (
+                  <EuiFormRow
+                    label={i18n.translate(
+                      'xpack.streams.significantEventsDiscovery.settings.includedStreamPatternsLabel',
+                      { defaultMessage: 'Included streams' }
+                    )}
+                    helpText={i18n.translate(
+                      'xpack.streams.significantEventsDiscovery.settings.includedStreamPatternsHelp',
+                      {
+                        defaultMessage:
+                          'Comma-separated list of stream names or glob patterns (e.g. logs.app.*) to onboard during continuous onboarding. Leave empty to onboard nothing.',
+                      }
+                    )}
+                  >
+                    <EuiTextArea
+                      data-test-subj="streams-settings-included-streams"
+                      value={continuousExtraction.draft.includedStreamPatterns}
+                      onChange={(e) =>
+                        continuousExtraction.setDraft((prev) => ({
+                          ...prev,
+                          includedStreamPatterns: e.target.value,
+                        }))
+                      }
+                      disabled={
+                        !canEditSettings ||
+                        !continuousExtraction.draft.enabled ||
+                        continuousExtraction.draft.onboardAllEligible
+                      }
+                      placeholder={i18n.translate(
+                        'xpack.streams.significantEventsDiscovery.settings.includedStreamPatternsPlaceholder',
+                        { defaultMessage: 'logs.app.*' }
+                      )}
+                      rows={2}
+                    />
+                  </EuiFormRow>
+                )}
               </EuiForm>
             </EuiFlexItem>
           </EuiFlexGroup>

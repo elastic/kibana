@@ -12,6 +12,8 @@ import {
   OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED,
   OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_INTERVAL_HOURS,
   OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_EXCLUDED_STREAM_PATTERNS,
+  OBSERVABILITY_STREAMS_CONTINUOUS_KI_ONBOARD_ALL_ELIGIBLE,
+  OBSERVABILITY_STREAMS_CONTINUOUS_KI_INCLUDED_STREAM_PATTERNS,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_INDEX_PATTERNS,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_TUNING_CONFIG,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED,
@@ -387,6 +389,46 @@ export function registerFeatureFlags(
               {
                 defaultMessage:
                   'Comma-separated list of stream names or glob patterns (e.g. logs.debug.*) to exclude from automatic knowledge indicator extraction.',
+              }
+            ),
+            type: 'string',
+            schema: schema.string(),
+            scope: 'global',
+            solutionViews: ['classic', 'oblt'],
+            readonly: true,
+            readonlyMode: 'ui',
+          },
+          [OBSERVABILITY_STREAMS_CONTINUOUS_KI_ONBOARD_ALL_ELIGIBLE]: {
+            category: ['observability'],
+            name: i18n.translate('xpack.significantEvents.continuousKiOnboardAllEligibleName', {
+              defaultMessage: 'Continuous KI onboarding: onboard all eligible streams',
+            }),
+            value: true,
+            description: i18n.translate(
+              'xpack.significantEvents.continuousKiOnboardAllEligibleDescription',
+              {
+                defaultMessage:
+                  'When enabled, every eligible stream is onboarded automatically. Disable to onboard only the streams matching the included patterns.',
+              }
+            ),
+            type: 'boolean',
+            schema: schema.boolean(),
+            scope: 'global',
+            solutionViews: ['classic', 'oblt'],
+            readonly: true,
+            readonlyMode: 'ui',
+          },
+          [OBSERVABILITY_STREAMS_CONTINUOUS_KI_INCLUDED_STREAM_PATTERNS]: {
+            category: ['observability'],
+            name: i18n.translate('xpack.significantEvents.continuousKiIncludedStreamPatternsName', {
+              defaultMessage: 'Continuous KI onboarding: included streams',
+            }),
+            value: '',
+            description: i18n.translate(
+              'xpack.significantEvents.continuousKiIncludedStreamPatternsDescription',
+              {
+                defaultMessage:
+                  'Comma-separated list of stream names or glob patterns (e.g. logs.nginx.*) to onboard during automatic knowledge indicator extraction. Used only when "onboard all eligible streams" is disabled.',
               }
             ),
             type: 'string',
