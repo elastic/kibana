@@ -7,13 +7,33 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { KibanaRole } from '@kbn/scout';
 import { DISCOVER_SESSION_API_VERSION } from '../../../../common/constants';
 
 export { DISCOVER_SESSION_API_BASE_PATH } from '../../../../common/constants';
 
-export const COMMON_HEADERS = {
+/** Role without access to Discover sessions, used to assert the forbidden (403) path */
+export const DEV_TOOLS_READ_ROLE: KibanaRole = {
+  elasticsearch: {
+    cluster: [],
+  },
+  kibana: [
+    {
+      base: [],
+      feature: { dev_tools: ['read'] },
+      spaces: ['*'],
+    },
+  ],
+};
+
+/** Headers shared by all Discover Scout API requests (no versioned API bound). */
+export const BASE_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',
   'x-elastic-internal-origin': 'kibana',
+} as const;
+
+export const COMMON_HEADERS = {
+  ...BASE_HEADERS,
   'elastic-api-version': DISCOVER_SESSION_API_VERSION,
 } as const;
 

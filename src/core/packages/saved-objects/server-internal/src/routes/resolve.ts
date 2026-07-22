@@ -11,6 +11,10 @@ import path from 'node:path';
 import { schema } from '@kbn/config-schema';
 import type { RouteAccess, RouteDeprecationInfo } from '@kbn/core-http-server';
 import type { SavedObjectConfig } from '@kbn/core-saved-objects-base-server-internal';
+import {
+  MAX_SAVED_OBJECT_ID_LENGTH,
+  MAX_SAVED_OBJECT_TYPE_LENGTH,
+} from '@kbn/core-saved-objects-server';
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
 import type { Logger } from '@kbn/logging';
 import type { InternalSavedObjectRouter } from '../internal_types';
@@ -52,8 +56,14 @@ Under certain circumstances, when Kibana is upgraded, saved object migrations ma
       },
       validate: {
         params: schema.object({
-          type: schema.string({ meta: { description: 'The saved object type.' } }),
-          id: schema.string({ meta: { description: 'The saved object identifier.' } }),
+          type: schema.string({
+            maxLength: MAX_SAVED_OBJECT_TYPE_LENGTH,
+            meta: { description: 'The saved object type.' },
+          }),
+          id: schema.string({
+            maxLength: MAX_SAVED_OBJECT_ID_LENGTH,
+            meta: { description: 'The saved object identifier.' },
+          }),
         }),
       },
     },

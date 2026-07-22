@@ -9,7 +9,7 @@ import type { Discovery } from '@kbn/significant-events-schema';
 
 const CANONICAL_TIMESTAMP = '2026-01-01T00:00:00.000Z';
 
-const slugify = (value: string): string =>
+const normalizeEventIdSegment = (value: string): string =>
   value
     .trim()
     .toLowerCase()
@@ -39,7 +39,7 @@ export const canonicalDiscoveryFromGroundTruth = ({
     '@timestamp': discovery['@timestamp'] ?? CANONICAL_TIMESTAMP,
     kind: discovery.kind ?? 'discovery',
     discovery_id: discovery.discovery_id ?? `${scenarioId}-canonical`,
-    event_id: discovery.event_id ?? `${slugify(scenarioId)}__canonical`,
+    event_id: discovery.event_id ?? `${normalizeEventIdSegment(scenarioId)}__canonical`,
     stream_names: streamNames,
     symptom_hypothesis: discovery.symptom_hypothesis ?? '',
     title: discovery.title ?? '',
