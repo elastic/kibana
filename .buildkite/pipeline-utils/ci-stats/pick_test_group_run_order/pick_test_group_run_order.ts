@@ -20,6 +20,7 @@ import { AGENT_DISK_GIB, DURATION_PERCENTILE, STEP_KEYS } from './const';
 import { loadRunOrderConfig } from './env_config';
 import { getEnabledFtrConfigs } from './ftr_manifests';
 import { discoverJestIntegrationConfigs, discoverJestUnitConfigs } from './jest_configs';
+import { resolveFtrResultReuse, writeCarriedResults } from './ftr_result_reuse';
 import { getRunGroup, getRunGroups, labelJestSubgroups } from './run_groups';
 import { shouldSkipFtrTests } from './selective_ftr';
 import { isScoutTestsOnlyDiff } from './selective_scout';
@@ -111,6 +112,44 @@ export async function pickTestGroupRunOrder() {
         jestIntegrationConfigs,
         selectiveCtx
       );
+    }
+
+    // Reuse green FTR results from the previous build of this PR when the
+    // dist, ES snapshot, and FTR-relevant sources are unchanged (retriggers,
+    // test-only pushes). Fail-open: any error just runs everything.
+    if (ftrConfigsByQueue.size) {
+      const reuse = await resolveFtrResultReuse(
+        bk,
+        [...ftrConfigsByQueue.values()].flat()
+      ).catch((error) => {
+        console.error('FTR result reuse: error resolving, running all configs', error);
+        return null;
+      });
+
+      if (reuse && reuse.reusable.size) {
+        for (const [queue, queueConfigs] of ftrConfigsByQueue) {
+          const remaining = queueConfigs.filter((c) => !reuse.reusable.has(c));
+          if (remaining.length) {
+            ftrConfigsByQueue.set(queue, remaining);
+          } else {
+            ftrConfigsByQueue.delete(queue);
+          }
+        }
+        const total = reuse.reusable.size;
+        console.log(
+          `FTR result reuse: carrying over ${total} green config result(s) from build #${reuse.prevBuild.number}`
+        );
+        bk.setAnnotation(
+          'selective-testing-ftr-reuse',
+          'info',
+          `Selective testing: ${total} FTR config result(s) reused from [build #${reuse.prevBuild.number}](${reuse.prevBuild.web_url}) — dist, ES snapshot, and FTR sources are unchanged.`
+        );
+        try {
+          writeCarriedResults(bk, reuse.reusable);
+        } catch (error) {
+          console.error('FTR result reuse: failed to write carried results', error);
+        }
+      }
     }
   }
 
