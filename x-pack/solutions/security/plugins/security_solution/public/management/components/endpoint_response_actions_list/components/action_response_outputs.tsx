@@ -9,11 +9,13 @@
 
 import React, { memo, useMemo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
+import { KillProcessActionResult } from '../../kill_process_action_result';
 import { CancelActionResults } from '../../cancel_action_results';
 import {
   isCancelAction,
   isExecuteAction,
   isGetFileAction,
+  isKillProcess,
   isMemoryDumpAction,
   isProcessesAction,
   isRunScriptAction,
@@ -158,8 +160,19 @@ export const ActionResponseOutputs = memo<ActionResponseOutputsProps>(
                 );
               }
 
-              // CrowdStrike Isolate/Release actions (runscript has its own output via RunscriptActionResult)
+              if (isKillProcess(action)) {
+                hostOutput = (
+                  <KillProcessActionResult
+                    action={action}
+                    agentId={agentId}
+                    textSize="xs"
+                    data-test-subj={getTestId('killProcessOutput')}
+                  />
+                );
+              }
+
               if (action.agentType === 'crowdstrike' && !isRunScriptAction(action)) {
+                // CrowdStrike Isolate/Release actions (runscript has its own output via RunscriptActionResult)
                 hostOutput = <>{OUTPUT_MESSAGES.submittedSuccessfully(consoleCommandName)}</>;
               }
             }
