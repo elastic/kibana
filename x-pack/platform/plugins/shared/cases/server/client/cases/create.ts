@@ -28,6 +28,11 @@ import {
 import { emptyCaseAssigneesSanitizer } from './sanitizers';
 import { normalizeCreateCaseRequest } from './utils';
 import { mergeCustomFieldsIntoExtendedFields } from '../../../common/utils/template_fields';
+import {
+  applyTemplateDefaultsToCreateRequest,
+  ensureTemplateVersionIsPinned,
+  resolveTemplateForCreate,
+} from './expand_template_defaults';
 
 /**
  * Creates a new case.
@@ -54,7 +59,7 @@ export const create = async (
 
   try {
     const rawQuery = decodeWithExcessOrThrow(CasePostRequestRt)(data);
-    const query = emptyCaseAssigneesSanitizer(rawQuery);
+    let query = emptyCaseAssigneesSanitizer(rawQuery);
     const configurations = await casesClient.configure.get({ owner: data.owner });
     const customFieldsConfiguration = configurations[0]?.customFields;
 
@@ -78,6 +83,54 @@ export const create = async (
       });
     }
 
+    // Expand the template's case defaults and extended_fields defaults into the request
+    // (caller-wins), and pin the resolved template version. Runs AFTER the createCase
+    // authorization so the unsecured template read never becomes an existence oracle for
+    // unauthorized callers, and BEFORE extended_fields validation so the merged map is what
+    // gets validated.
+    let resolvedTemplateFields;
+    // Resolved lazily and reused: template expansion needs it to decide whether to apply template
+    // assignees, and the license-enforcement block below needs it again — resolve at most once.
+    let hasPlatinumLicenseOrGreater: boolean | undefined;
+    if (!clientArgs.config.templates.enabled) {
+      // Without the templates feature there is no expansion to resolve a missing version, and a
+      // stored template reference must always be version-pinned (close-time validation relies
+      // on it).
+      ensureTemplateVersionIsPinned(query.template);
+    } else if (query.template?.id) {
+      const resolvedTemplate = await resolveTemplateForCreate({
+        templateId: query.template.id,
+        version: query.template.version,
+        owner: query.owner,
+        templatesService,
+        fieldDefinitionsService,
+        actionsClient: clientArgs.actionsClient,
+        logger,
+      });
+
+      const callerSentAssignees = query.assignees !== undefined;
+
+      hasPlatinumLicenseOrGreater = await licensingService.isAtLeastPlatinum();
+      query = applyTemplateDefaultsToCreateRequest(query, resolvedTemplate, {
+        hasPlatinumLicenseOrGreater,
+      });
+
+      // The initial decode validated the raw request; template defaults are merged in afterwards
+      // and a template's definition tags are unbounded, so re-decode the expanded request to
+      // enforce the wire limits (e.g. MAX_TAGS_PER_CASE) on the merged result.
+      query = decodeWithExcessOrThrow(CasePostRequestRt)(query);
+      resolvedTemplateFields = resolvedTemplate.resolvedFields;
+
+      // The assignees authorization above ran against the raw request; if the template just
+      // introduced assignees, the assignCase operation still has to be checked.
+      if (!callerSentAssignees && query.assignees && query.assignees.length > 0) {
+        await auth.ensureAuthorized({
+          operation: Operations.assignCase,
+          entities: [{ owner: query.owner, id: savedObjectID }],
+        });
+      }
+    }
+
     if (query.extended_fields) {
       const globalFields = await resolveGlobalFields(query.owner, fieldDefinitionsService);
       await validateCaseExtendedFields({
@@ -87,6 +140,7 @@ export const create = async (
         templatesService,
         fieldDefinitionsService,
         owner: query.owner,
+        preResolvedTemplateFields: resolvedTemplateFields,
       });
     }
 
@@ -95,7 +149,8 @@ export const create = async (
      */
 
     if (query.assignees && query.assignees.length !== 0) {
-      const hasPlatinumLicenseOrGreater = await licensingService.isAtLeastPlatinum();
+      hasPlatinumLicenseOrGreater =
+        hasPlatinumLicenseOrGreater ?? (await licensingService.isAtLeastPlatinum());
 
       if (!hasPlatinumLicenseOrGreater) {
         throw Boom.forbidden(

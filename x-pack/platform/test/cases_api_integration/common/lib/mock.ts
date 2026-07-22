@@ -193,6 +193,9 @@ export const postCaseResp = (
 ): Partial<Case> => ({
   ...req,
   ...(id != null ? { id } : {}),
+  // `req.template` is a creation-request ref (version optional); the persisted/response shape
+  // pins a concrete version. None of these mocks supply a template, so normalize to null.
+  template: null,
   comments: [],
   duration: null,
   severity: req.severity ?? CaseSeverity.LOW,

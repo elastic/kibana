@@ -102,6 +102,9 @@ export function SvlCasesApiServiceProvider({ getService }: FtrProviderContext) {
       return {
         ...request,
         ...(id != null ? { id } : {}),
+        // Creation-request template ref (version optional) vs. persisted/response shape
+        // (version pinned); this helper never sets a template, so normalize to null.
+        template: null,
         comments: [],
         duration: null,
         severity: request.severity ?? CaseSeverity.LOW,
