@@ -476,6 +476,7 @@ module.exports = {
     '@elastic/eui/badge-accessibility-rules': 'error',
     '@elastic/eui/consistent-is-invalid-props': 'error',
     '@elastic/eui/tooltip-no-interactive-content': 'error',
+    '@elastic/eui/require-table-caption': 'error',
   },
 
   overrides: [
