@@ -11338,6 +11338,12 @@
             "description": "Non-default value of setting."
           }
         },
+        "securitySolution:enableAttackDiscoveryWorkflows": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Enables Attack Discovery Workflows for this space."
+          }
+        },
         "securitySolution:enableRuleChangesHistory": {
           "type": "boolean",
           "_meta": {
