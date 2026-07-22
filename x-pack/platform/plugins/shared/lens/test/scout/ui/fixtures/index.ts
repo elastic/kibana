@@ -13,6 +13,7 @@ import { extendPageObjects } from './page_objects';
 export * as testData from './constants';
 export * from './helpers';
 export * from './open_in_lens_helpers';
+export * from './tsdb_helpers';
 
 export interface LensParallelTestFixtures extends ScoutParallelTestFixtures {
   pageObjects: LensPageObjects;
@@ -35,3 +36,4 @@ export const spaceTest = baseSpaceTest.extend<
     await use(extendPageObjects(pageObjects, page));
   },
 });
+
