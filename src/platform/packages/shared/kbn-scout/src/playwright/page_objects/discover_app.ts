@@ -267,6 +267,72 @@ export class DiscoverApp {
     await this.waitUntilTabIsLoaded();
   }
 
+  async setCustomLabel(label: string) {
+    const row = this.page.testSubj.locator('customLabelRow');
+    await row.waitFor({ state: 'visible' });
+    await row.locator('[data-test-subj="toggle"]').click();
+    const input = row.locator('input');
+    await input.waitFor({ state: 'visible' });
+    await input.fill(label);
+  }
+
+  async setCustomDescription(description: string) {
+    const row = this.page.testSubj.locator('customDescriptionRow');
+    await row.waitFor({ state: 'visible' });
+    const toggle = row.locator('[data-test-subj="toggle"]');
+    const input = row.locator('textarea, input');
+    if (!(await input.isVisible())) {
+      await toggle.click();
+    }
+    await input.waitFor({ state: 'visible' });
+    await input.fill(description);
+  }
+
+  getFieldEditorFormError(): Locator {
+    return this.page.testSubj.locator('customDescriptionRow').locator('.euiFormErrorText');
+  }
+
+  async saveOpenFieldEditor({ confirmChange = false }: { confirmChange?: boolean } = {}) {
+    const fieldEditor = this.page.testSubj.locator('fieldEditor');
+    await fieldEditor.waitFor({ state: 'visible' });
+    await this.page.testSubj.click('fieldSaveButton');
+    if (confirmChange) {
+      const confirmButton = this.page.testSubj.locator('confirmModalConfirmButton');
+      await this.page.testSubj.fill('saveModalConfirmText', 'change');
+      await confirmButton.waitFor({ state: 'visible' });
+      await confirmButton.click();
+    }
+    await fieldEditor.waitFor({ state: 'hidden' });
+    await this.waitUntilTabIsLoaded();
+  }
+
+  async discardOpenFieldEditorChanges() {
+    const fieldEditor = this.page.testSubj.locator('fieldEditor');
+    await fieldEditor.waitFor({ state: 'visible' });
+    await this.page.testSubj.click('closeFlyoutButton');
+    const confirmButton = this.page.testSubj.locator('confirmModalConfirmButton');
+    await confirmButton.waitFor({ state: 'visible' });
+    await confirmButton.click();
+    await fieldEditor.waitFor({ state: 'hidden' });
+  }
+
+  async deleteRuntimeField(fieldName: string) {
+    await this.searchFieldInSidebar(fieldName);
+    const field = this.page.testSubj
+      .locator('fieldListGroupedAvailableFields')
+      .locator(`[data-test-subj="field-${fieldName}"]`);
+    await field.waitFor({ state: 'visible' });
+    await field.click();
+    const fieldPopover = this.page.getByRole('dialog');
+    await fieldPopover.waitFor({ state: 'visible' });
+    const deleteButton = fieldPopover.getByRole('button', { name: 'Delete data view field' });
+    await deleteButton.waitFor({ state: 'visible' });
+    await deleteButton.click();
+    await this.page.testSubj.fill('deleteModalConfirmText', 'REMOVE');
+    await this.page.testSubj.click('confirmModalConfirmButton');
+    await this.waitUntilTabIsLoaded();
+  }
+
   async clickAppMenuItem(
     testId: string,
     { isInOverflowMenu }: { isInOverflowMenu?: boolean } = {}
@@ -517,6 +583,28 @@ export class DiscoverApp {
     return this.page.testSubj.innerText('discoverQueryHits');
   }
 
+  getRefreshDataButton(): Locator {
+    return this.page.testSubj.locator('refreshDataButton');
+  }
+
+  getQuerySubmitButton(): Locator {
+    return this.page.testSubj.locator('querySubmitButton');
+  }
+
+  getQueryCancelButton(): Locator {
+    return this.page.testSubj.locator('queryCancelButton');
+  }
+
+  getSearchResponseWarningsEmptyPrompt(): Locator {
+    return this.page.testSubj.locator('searchResponseWarningsEmptyPrompt');
+  }
+
+  async getSearchFetchCount(): Promise<number> {
+    const fetchCounter = this.page.locator('[data-fetch-counter]');
+    await fetchCounter.waitFor({ state: 'attached' });
+    return Number(await fetchCounter.getAttribute('data-fetch-counter'));
+  }
+
   getErrorCalloutMessage(): Locator {
     return this.page.testSubj.locator('discoverErrorCalloutMessage');
   }
@@ -527,6 +615,12 @@ export class DiscoverApp {
     await expect(element).not.toHaveAttribute('data-time-range', /Loading/);
 
     return (await element.getAttribute('data-time-range')) ?? '';
+  }
+
+  async getHistogramSuggestionType(): Promise<string | null> {
+    const chart = this.page.testSubj.locator('unifiedHistogramChart');
+    await chart.waitFor({ state: 'visible' });
+    return chart.getAttribute('data-suggestion-type');
   }
 
   async clickHistogramBar() {
