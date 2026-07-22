@@ -30,7 +30,10 @@ const mockShare = {
         getRedirectUrl: jest
           .fn()
           .mockImplementation(
-            ({ serviceName }: any) => `/services/${serviceName}/overview?comparisonEnabled=true`
+            ({ serviceName, query }: any) =>
+              `/services/${serviceName}/overview?comparisonEnabled=${
+                query?.comparisonEnabled ?? true
+              }`
           ),
       }),
     },

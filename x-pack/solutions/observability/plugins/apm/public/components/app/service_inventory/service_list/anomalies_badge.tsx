@@ -183,7 +183,7 @@ export function AnomaliesBadge({ score, detectorType, navigationProps, ebt }: An
             kuery: '',
             transactionType: navigationProps.transactionType,
             anomalyThreshold: severity === ML_ANOMALY_SEVERITY.UNKNOWN ? undefined : severity,
-            comparisonEnabled: true,
+            comparisonEnabled: navigationProps.comparisonEnabled ?? COMPARISON_ENABLED_DEFAULT,
             offset: 'expected_bounds',
           },
         })
