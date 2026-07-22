@@ -104,7 +104,7 @@ export const ManagementLandingPage = ({
                 cloudConnectUrl={cloudConnectUrl}
                 onConnectClick={handleConnectClick}
                 hasCloudConnectPermission={hasCloudConnectPermission}
-                overrideCalloutProps={{ style: { margin: `0 ${euiTheme.size.l}` } }}
+                style={{ margin: `0 ${euiTheme.size.l}` }}
               />
             </div>
           )}
