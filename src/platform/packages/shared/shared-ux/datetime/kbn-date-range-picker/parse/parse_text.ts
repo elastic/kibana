@@ -31,9 +31,11 @@ import {
   ENGLISH_GRAMMAR,
   findDelimiterSplits,
   getCompiledGrammar,
+  normalizeDigits,
   resolveUnit,
   type CompiledGrammar,
   type CompiledTemplate,
+  type DelimiterSpec,
 } from './locale_grammar';
 
 // ---------------------------------------------------------------------------
@@ -154,7 +156,7 @@ export function matchPreset(
  * locale-invariant.
  */
 export function textToTimeRange(text: string, options?: TimeRangeTransformOptions): TimeRange {
-  const trimmed = text.trim();
+  const trimmed = normalizeDigits(text.trim());
   if (!trimmed) return buildInvalidRange(text);
 
   const { presets = [], delimiter, dateFormat, roundRelativeTime, locale } = options ?? {};
@@ -189,11 +191,19 @@ export function textToTimeRange(text: string, options?: TimeRangeTransformOption
   // (French "il y a 3 jours" contains the accent-less delimiter "a"), in which
   // case the wrong occurrences fail side-parsing and the right one (or the
   // whole-text instant path below) wins.
-  const splitDelimiters = [...(delimiter ? [delimiter] : []), ...compiled.delimiters, '-'];
+  const splitDelimiters: DelimiterSpec[] = [
+    ...(delimiter ? [{ text: delimiter }] : []),
+    ...compiled.delimiters,
+    { text: '-' },
+  ];
   for (const splitDelimiter of splitDelimiters) {
     for (const candidate of findDelimiterSplits(trimmed, splitDelimiter)) {
       const startDateString = instantToDateString(candidate.left, compiled, formats);
-      const endDateString = instantToDateString(candidate.right, compiled, formats);
+      const endDateString = instantToDateString(
+        stripRangeEndSuffix(candidate.right, compiled),
+        compiled,
+        formats
+      );
       if (startDateString && endDateString) {
         const roundedStart = applyStartBoundRounding(startDateString, roundRelativeTime);
         return buildRange(text, roundedStart, endDateString, formats, false);
@@ -291,7 +301,12 @@ function instantToDateString(
   const shorthandMatch = trimmed.match(compiled.shorthandRegex);
   if (shorthandMatch) {
     const unit = resolveUnit(shorthandMatch[4], compiled.unitAliases);
-    if (unit) {
+    // A bare count+unit in a prefix-required unit reads as a calendar date
+    // ("22日" is the 22nd, "2025年" is the year 2025), never a duration —
+    // only the unambiguous now/sign-prefixed forms parse as shorthand. The
+    // bare form falls through and rejects via the vocabulary guard below.
+    const hasPrefix = Boolean(shorthandMatch[1]) || shorthandMatch[2] !== '';
+    if (unit && (hasPrefix || !compiled.shorthandPrefixRequired.has(shorthandMatch[4]))) {
       const operator = shorthandMatch[2] === '+' ? '+' : '-';
       return `now${operator}${shorthandMatch[3]}${unit}${shorthandMatch[5] ?? ''}`;
     }
@@ -322,12 +337,37 @@ function instantToDateString(
   return null;
 }
 
-/** True when any standalone word of `text` is part of the grammar's natural language. */
+/**
+ * Strips a locale range-end suffix from the END side of a delimited range —
+ * the Japanese circumfix "から…まで": "3日前から今まで" splits on the から
+ * delimiter, then まで is stripped here so the side parses as "今". No-ops
+ * when no suffix matches or nothing would remain.
+ */
+function stripRangeEndSuffix(text: string, compiled: CompiledGrammar): string {
+  const trimmed = text.trim();
+  for (const suffix of compiled.rangeEndSuffixes) {
+    if (trimmed.length > suffix.length && trimmed.endsWith(suffix)) {
+      return trimmed.slice(0, -suffix.length).trim();
+    }
+  }
+  return trimmed;
+}
+
+/**
+ * True when any standalone word of `text` is part of the grammar's natural
+ * language, or when `text` CONTAINS a CJK vocabulary word. CJK needs the
+ * substring check because its text has no inter-word spacing — a glued failed
+ * phrase ("最近7天啊") or an unsupported CJK date ("2024年1月22日", deferred)
+ * never splits into a matchable standalone word.
+ */
 function containsGrammarVocabulary(text: string, compiled: CompiledGrammar): boolean {
-  return text
-    .toLowerCase()
-    .split(/[^\p{L}\p{M}\p{N}]+/u)
-    .some((word) => word !== '' && compiled.vocabulary.has(word));
+  const lower = text.toLowerCase();
+  return (
+    lower
+      .split(/[^\p{L}\p{M}\p{N}]+/u)
+      .some((word) => word !== '' && compiled.vocabulary.has(word)) ||
+    compiled.cjkVocabulary.some((word) => lower.includes(word))
+  );
 }
 
 /**
