@@ -217,9 +217,7 @@ export function initAPIAuthorization(
       const missingPrivileges = flattenSecurityPrivileges(requiredPrivileges).filter(
         (privilege) => !kibanaPrivileges[privilege]
       );
-      const forbiddenMessage = `API [${request.route.method.toUpperCase()} ${
-        request.url.pathname
-      }${
+      const forbiddenMessage = `API [${request.route.method.toUpperCase()} ${request.url.pathname}${
         request.url.search
       }] is unauthorized for user, this action is granted by the Kibana privileges [${missingPrivileges}]`;
 
