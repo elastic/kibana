@@ -453,6 +453,39 @@ describe('KubernetesConnector', () => {
         }
       );
 
+      it.each(['exec', 'portforward', 'attach', 'proxy'])(
+        'rejects the %s subresource when a query string is embedded in path',
+        async (sub) => {
+          await expect(
+            KubernetesConnector.actions.request.handler(mockContext, {
+              method: 'POST',
+              path: `/api/v1/namespaces/default/pods/pod-a/${sub}?command=/bin/sh&stdin=true`,
+            })
+          ).rejects.toThrow(`"${sub}" subresource`);
+          expect(mockRequest).not.toHaveBeenCalled();
+        }
+      );
+
+      it('rejects blocked subresources when a fragment is embedded in path', async () => {
+        await expect(
+          KubernetesConnector.actions.request.handler(mockContext, {
+            method: 'GET',
+            path: '/api/v1/namespaces/default/pods/pod-a/exec#fragment',
+          })
+        ).rejects.toThrow('"exec" subresource');
+        expect(mockRequest).not.toHaveBeenCalled();
+      });
+
+      it('rejects paths that do not start with a slash (SSRF host-repoint)', async () => {
+        await expect(
+          KubernetesConnector.actions.request.handler(mockContext, {
+            method: 'GET',
+            path: '@evil.example.com/api/v1/namespaces',
+          })
+        ).rejects.toThrow('must start with "/"');
+        expect(mockRequest).not.toHaveBeenCalled();
+      });
+
       it('allows ordinary paths through', async () => {
         mockRequest.mockResolvedValue(okResponse({ kind: 'PodList', items: [] }));
         await expect(
@@ -488,16 +521,18 @@ describe('KubernetesConnector', () => {
         expect((result.metadata as Record<string, unknown>)?.name).toBe('my-secret');
       });
 
-      it('strips data from each Secret in a SecretList response', async () => {
+      it('strips data from SecretList items that omit kind (real K8s list shape)', async () => {
         mockRequest.mockResolvedValue(
           okResponse({
             kind: 'SecretList',
             apiVersion: 'v1',
             items: [
+              // Kubernetes omits kind/apiVersion on list items — only the
+              // envelope carries kind: "SecretList".
               {
-                kind: 'Secret',
                 metadata: { name: 'sa', namespace: 'default' },
                 data: { token: 'abc123' },
+                stringData: { raw: 'leaked' },
               },
             ],
           })
@@ -510,6 +545,7 @@ describe('KubernetesConnector', () => {
 
         expect(result.kind).toBe('SecretList');
         expect(result.items[0].data).toBeUndefined();
+        expect(result.items[0].stringData).toBeUndefined();
         expect(result.items[0].metadata).toBeDefined();
       });
 

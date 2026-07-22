@@ -101,8 +101,20 @@ interface K8sList {
 /** Interactive subresources that must never be proxied, regardless of RBAC. */
 const BLOCKED_SUBRESOURCES = new Set(['exec', 'portforward', 'attach', 'proxy']);
 
+/**
+ * Validates that `path` cannot repoint the request host and does not target
+ * interactive subresources. Query/fragment suffixes are stripped before the
+ * blocklist check so `.../exec?command=...` cannot bypass it.
+ */
 const assertPathAllowed = (path: string): void => {
-  for (const segment of path.split('/')) {
+  // Require a leading slash so `${apiUrl}${path}` cannot be rewritten via
+  // userinfo (`@evil.com/...`), absolute URLs, or other host-repoint forms.
+  if (!path.startsWith('/')) {
+    throw new Error('Kubernetes API path must start with "/"');
+  }
+
+  const pathOnly = path.split(/[?#]/, 1)[0] ?? path;
+  for (const segment of pathOnly.split('/')) {
     if (BLOCKED_SUBRESOURCES.has(segment)) {
       throw new Error(
         `Requests to the "${segment}" subresource are not permitted via this connector`
@@ -111,21 +123,32 @@ const assertPathAllowed = (path: string): void => {
   }
 };
 
-/** Removes secret payload fields so they are never forwarded to an LLM. */
+/** Strips secret payload fields from a single object (kind-agnostic). */
+const stripSecretPayload = (obj: K8sObject): K8sObject => {
+  const scrubbed = { ...obj };
+  delete scrubbed.data;
+  delete scrubbed.stringData;
+  return scrubbed;
+};
+
+/**
+ * Removes secret payload fields so they are never forwarded to an LLM.
+ * SecretList items omit `kind`/`apiVersion` in real Kubernetes responses, so
+ * list items are scrubbed by envelope kind rather than per-item kind.
+ */
 const scrubSecrets = (response: unknown): unknown => {
   if (!response || typeof response !== 'object') return response;
   const obj = response as K8sObject;
   if (obj.kind === 'Secret') {
-    const scrubbed = { ...obj };
-    delete scrubbed.data;
-    delete scrubbed.stringData;
-    return scrubbed;
+    return stripSecretPayload(obj);
   }
   if (obj.kind === 'SecretList') {
     const list = obj as K8sList;
     return {
       ...list,
-      items: Array.isArray(list.items) ? list.items.map(scrubSecrets) : list.items,
+      items: Array.isArray(list.items)
+        ? list.items.map((item) => stripSecretPayload(item))
+        : list.items,
     };
   }
   return response;

@@ -48,6 +48,7 @@ export const RequestInputSchema = lazySchema(() =>
     path: z
       .string()
       .max(MAX_STRING_LENGTH)
+      .startsWith('/')
       .describe(
         'The Kubernetes API path, starting with a slash. ' +
           'Examples: "/api/v1/namespaces/default/pods", "/apis/apps/v1/namespaces/default/deployments/my-app", ' +
