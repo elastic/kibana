@@ -14,6 +14,7 @@ import {
   type CriteriaWithPagination,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 import { ActionPolicyDetailsFlyoutContainer } from '../../../components/action_policy/details_flyout/action_policy_details_flyout_container';
 import { useFetchExecutionHistory } from '../../../hooks/use_fetch_execution_history';
 import type { PolicyExecutionHistoryItem } from '../../../services/execution_history_api';
@@ -75,6 +76,12 @@ export const EpisodeActionPolicyHistoryTab = ({ episodeId }: Props) => {
         <ExecutionHistoryErrorState onRetry={() => refetch()} />
       ) : (
         <PoliciesExecutionHistoryTable
+          tableCaption={i18n.translate(
+            'xpack.alertingV2.episodeDetails.actionPolicyHistory.tableCaption',
+            {
+              defaultMessage: 'Action policy execution history for this episode',
+            }
+          )}
           items={items}
           loading={isFetching}
           pageIndex={page}

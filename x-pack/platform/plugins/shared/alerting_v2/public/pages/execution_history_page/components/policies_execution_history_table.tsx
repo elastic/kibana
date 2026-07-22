@@ -153,6 +153,7 @@ interface Props {
   noItemsMessage: ReactNode;
   showEpisodeColumns?: boolean;
   showRulesColumn?: boolean;
+  tableCaption?: string;
 }
 
 export const PoliciesExecutionHistoryTable = ({
@@ -168,6 +169,7 @@ export const PoliciesExecutionHistoryTable = ({
   noItemsMessage,
   showEpisodeColumns = true,
   showRulesColumn = true,
+  tableCaption,
 }: Props) => {
   const application = useService(CoreStart('application'));
   const settings = useService(CoreStart('settings'));
@@ -193,6 +195,7 @@ export const PoliciesExecutionHistoryTable = ({
 
   return (
     <EuiBasicTable<PolicyExecutionHistoryItem>
+      tableCaption={tableCaption}
       items={items}
       columns={columns}
       loading={loading}

@@ -9,6 +9,7 @@
 
 import { DurationFormat } from './duration';
 import { expectReactElementWithNull, expectReactElementAsArray } from '../test_utils';
+import { asPrettyString } from '../utils';
 
 describe('Duration Format', () => {
   test('handles missing values', () => {
@@ -33,6 +34,17 @@ describe('Duration Format', () => {
 
     expect(formatter.convertToText(60)).toBe('a minute');
     expect(formatter.convertToReact(60)).toBe('a minute');
+  });
+
+  test('renders object values (e.g. histogram fields) as JSON instead of NaN', () => {
+    const formatter = new DurationFormat(
+      { inputFormat: 'seconds', outputFormat: 'humanize' },
+      jest.fn()
+    );
+    const histogramValue = { scale: 20, sum: 0.000825416, min: 0.000825416, max: 0.000825416 };
+
+    expect(formatter.convertToText(histogramValue)).toBe(asPrettyString(histogramValue));
+    expect(formatter.convertToReact(histogramValue)).toBe(asPrettyString(histogramValue));
   });
 
   test('wraps a multi-value array with bracket notation', () => {

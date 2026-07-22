@@ -136,6 +136,9 @@ export const PoliciesTabContent = ({ onPolicyClick, onRuleClick, activeRuleId }:
       )}
       <TruncatedCallout data={data} searchParam={searchParam} />
       <PoliciesExecutionHistoryTable
+        tableCaption={i18n.translate('xpack.alertingV2.executionHistory.tableCaption', {
+          defaultMessage: 'Execution history policies',
+        })}
         items={items}
         loading={isFetching}
         pageIndex={page}
