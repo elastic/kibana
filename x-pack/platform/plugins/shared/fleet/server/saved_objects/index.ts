@@ -1019,6 +1019,7 @@ export const getSavedObjectTypes = (
               },
             },
           },
+          installed_kibana_version: { type: 'keyword', ignore_above: 1024 },
         },
       },
       modelVersions: {
@@ -1048,6 +1049,16 @@ export const getSavedObjectTypes = (
               type: 'mappings_addition',
               addedMappings: {
                 additional_spaces_installed_kibana: { type: 'flattened', index: false },
+              },
+            },
+          ],
+        },
+        '4': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                installed_kibana_version: { type: 'keyword', ignore_above: 1024 },
               },
             },
           ],
