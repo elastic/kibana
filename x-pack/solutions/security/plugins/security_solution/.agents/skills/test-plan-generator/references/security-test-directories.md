@@ -56,8 +56,8 @@ These skills describe test file conventions, runner commands, authentication pat
 | API integration (FTR) | `x-pack/solutions/security/test/security_solution_api_integration/` | `node scripts/functional_tests` |
 | Functional / E2E (FTR) | `x-pack/solutions/security/test/functional/` | `node scripts/functional_tests` |
 | Cypress E2E | `x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/**/*.cy.ts` | Cypress runner |
-| Scout API | `<plugin>/test/scout/<namespace>/api/**/*.spec.ts` | `node scripts/scout.js run-tests` |
-| Scout UI | `<plugin>/test/scout/<namespace>/ui/**/*.spec.ts` | `node scripts/scout.js run-tests` |
+| Scout API | `<plugin>/test/scout*/api/**/*.spec.ts` | `node scripts/scout.js run-tests` |
+| Scout UI | `<plugin>/test/scout*/ui/**/*.spec.ts` | `node scripts/scout.js run-tests` |
 
 > **Security Solution Scout namespace structure.** Scout tests for `security_solution` are organised into feature-area sub-directories under `test/scout/`:
 >
@@ -72,9 +72,7 @@ These skills describe test file conventions, runner commands, authentication pat
 >   workflows/ui/
 > ```
 >
-> Each namespace has its own `parallel.playwright.config.ts` and `fixtures/` tree. Use `test/scout/<namespace>/ui/` (or `api/`) in place of the generic `test/scout*/ui/` glob when working with Security Solution tests. A root-level `test/scout/ui/` directory exists but holds only `.scout/reports` output — all test specs live under namespace sub-dirs.
->
-> **Adding tests for a new feature area?** Namespaces track feature areas and roughly correspond to top-level source directories under `public/` (e.g., `public/asset_inventory/` has no namespace yet and would need one). Sub-directories of an existing source scope belong in the parent namespace. See the **Namespace selection** section in `security-cypress-to-scout-migration` for the full decision table and creation steps (3 required: create scope, commit manifest, add CODEOWNERS).
+> Each namespace has its own `parallel.playwright.config.ts` and `fixtures/` tree. When searching for Security Solution Scout tests, use the specific feature-area paths in the tables below rather than the generic glob above.
 
 ---
 
