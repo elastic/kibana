@@ -40,6 +40,9 @@ get:
         application/json:
           schema:
             $ref: '../components/schemas/response_4xx.yaml'
+          examples:
+            response400:
+              $ref: '../components/examples/response_400_invalid_template.yaml'
     '401':
       description: Authorization information is missing or invalid.
       content:
@@ -55,3 +58,6 @@ get:
         application/json:
           schema:
             $ref: '../components/schemas/response_4xx.yaml'
+          examples:
+            response403:
+              $ref: '../components/examples/response_403.yaml'

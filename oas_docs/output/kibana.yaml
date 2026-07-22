@@ -12646,6 +12646,9 @@ paths:
         '403':
           content:
             application/json:
+              examples:
+                response403:
+                  $ref: '#/components/examples/Cases_response_403'
               schema:
                 $ref: '#/components/schemas/Cases_response_4xx'
           description: The user does not have access to the case.
@@ -13514,6 +13517,9 @@ paths:
         '400':
           content:
             application/json:
+              examples:
+                response400:
+                  $ref: '#/components/examples/Cases_response_400_invalid_template'
               schema:
                 $ref: '#/components/schemas/Cases_response_4xx'
           description: The request is invalid, for example when the `templateId` does not exist for the owner or its definition is invalid.
@@ -13529,6 +13535,9 @@ paths:
         '403':
           content:
             application/json:
+              examples:
+                response403:
+                  $ref: '#/components/examples/Cases_response_403'
               schema:
                 $ref: '#/components/schemas/Cases_response_4xx'
           description: The user does not have access to the requested owner.
@@ -78554,12 +78563,24 @@ components:
           profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
           username: elastic
         version: WzE3NjgsM10=
+    Cases_response_400_invalid_template:
+      summary: The request is invalid.
+      value:
+        error: Bad Request
+        message: Template [invalid-template-id] not found for owner [cases]
+        statusCode: 400
     Cases_response_401:
       summary: Authorization information is missing or invalid.
       value:
         error: Unauthorized
         message: Unable to authenticate with the provided credentials.
         statusCode: 401
+    Cases_response_403:
+      summary: The user does not have access to the requested resource.
+      value:
+        error: Forbidden
+        message: Unauthorized to access cases
+        statusCode: 403
     Cases_response_404:
       summary: The requested resource was not found.
       value:

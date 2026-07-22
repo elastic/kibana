@@ -983,6 +983,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/response_4xx'
+              examples:
+                response400:
+                  $ref: '#/components/examples/response_400_invalid_template'
         '401':
           description: Authorization information is missing or invalid.
           content:
@@ -998,6 +1001,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/response_4xx'
+              examples:
+                response403:
+                  $ref: '#/components/examples/response_403'
   /api/cases/{caseId}:
     get:
       summary: Get case information
@@ -1064,6 +1070,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/response_4xx'
+              examples:
+                response403:
+                  $ref: '#/components/examples/response_403'
         '404':
           description: The case was not found.
           content:
@@ -4724,6 +4733,18 @@ components:
             displayOnly: true
             source: template
             isGlobal: false
+    response_400_invalid_template:
+      summary: The request is invalid.
+      value:
+        error: Bad Request
+        message: Template [invalid-template-id] not found for owner [cases]
+        statusCode: 400
+    response_403:
+      summary: The user does not have access to the requested resource.
+      value:
+        error: Forbidden
+        message: Unauthorized to access cases
+        statusCode: 403
     get_case_response:
       summary: Get case response. Comments are not included; use the find case comments API. totalComment reflects the actual count.
       value:

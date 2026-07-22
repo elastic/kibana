@@ -35,6 +35,9 @@ get:
         application/json:
           schema:
             $ref: '../components/schemas/response_4xx.yaml'
+          examples:
+            response403:
+              $ref: '../components/examples/response_403.yaml'
     '404':
       description: The case was not found.
       content:
