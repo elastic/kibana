@@ -18,8 +18,7 @@ export const FLIGHTS_KBN_ARCHIVE =
 
 /**
  * Saved searches exercising ES|QL column rendering (initial/custom columns for
- * transformational and non-transformational commands). Consumed by the ES|QL
- * columns specs.
+ * transformational and non-transformational commands).
  */
 export const DISCOVER_ESQL_COLUMNS_KBN_ARCHIVE =
   'src/platform/test/functional/fixtures/kbn_archiver/discover_esql_columns';
