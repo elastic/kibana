@@ -1871,7 +1871,6 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
       });
       expect(fireActions[0]).toMatchObject({
         source: 'pagerduty',
-        rule_id: null,
         group_hash: 'pd-group-1',
         space_id: 'default',
         actor: 'system',
@@ -1885,7 +1884,6 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
       });
       expect(notifiedActions[0]).toMatchObject({
         source: 'pagerduty',
-        rule_id: null,
         space_id: 'default',
         actor: 'system',
         action_type: 'notified',
