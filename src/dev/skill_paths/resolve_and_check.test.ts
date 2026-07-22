@@ -12,7 +12,7 @@ import { resolveAndCheck } from './resolve_and_check';
 
 // The worktree root serves as repoRoot for these tests.
 // It shares the same file tree as the main Kibana repo.
-const REPO_ROOT = path.resolve(__dirname, '../../../../');
+const REPO_ROOT = path.resolve(__dirname, '../../../');
 
 // Absolute path to a real skill file used for markdown-link anchor tests.
 const SKILL_FILE = path.join(
@@ -79,7 +79,7 @@ describe('resolveAndCheck', () => {
     });
     expect(result.exists).toBe(true);
     expect(result.resolvedPath).toBe(
-      path.join(REPO_ROOT, 'x-pack/solutions/security', 'plugins/security_solution/')
+      path.resolve(REPO_ROOT, 'x-pack/solutions/security', 'plugins/security_solution/')
     );
   });
 });
