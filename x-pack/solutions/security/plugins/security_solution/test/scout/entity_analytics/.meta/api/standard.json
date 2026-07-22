@@ -1,5 +1,9 @@
 {
-  "sha1": "7f145cc03e1c85a0a63581f6eaf889595d6d1b14",
+  "sha1": "0ea2f3950fb1acab1da005186b473b63cd8d0c46",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
   "tests": [
     {
       "id": "dddf9b8fd4cf2bb-567a2f8074b6032",
@@ -13,7 +17,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/ai_summary/ai_summary_permissions.spec.ts",
-        "line": 144,
+        "line": 145,
         "column": 12
       }
     },
@@ -29,7 +33,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/ai_summary/ai_summary_permissions.spec.ts",
-        "line": 167,
+        "line": 168,
         "column": 12
       }
     },
@@ -45,7 +49,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/ai_summary/ai_summary_permissions.spec.ts",
-        "line": 191,
+        "line": 192,
         "column": 12
       }
     },
@@ -61,7 +65,23 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/ai_summary/ai_summary_permissions.spec.ts",
-        "line": 227,
+        "line": 228,
+        "column": 12
+      }
+    },
+    {
+      "id": "dddf9b8fd4cf2bb-c42f55507538485",
+      "title": "Entity AI Summary permissions a user WITHOUT metadata read cannot persist (POST returns created: false)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/ai_summary/ai_summary_permissions.spec.ts",
+        "line": 256,
         "column": 12
       }
     },
@@ -77,7 +97,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/ai_summary/ai_summary_permissions.spec.ts",
-        "line": 255,
+        "line": 291,
         "column": 12
       }
     },

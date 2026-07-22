@@ -15,6 +15,7 @@ import { entityStoreMetrics } from '../../../monitor/metrics';
 import type { Entity } from '../../../../common/domain/definitions/entity.gen';
 import {
   EntityType,
+  type EntityField,
   type ManagedEntityDefinition,
 } from '../../../../common/domain/definitions/entity_schema';
 import {
@@ -54,7 +55,7 @@ interface RemoteExtractToUpdatesParams {
   delay: string;
   frequency: string;
   entityDefinition: ManagedEntityDefinition;
-  abortController?: AbortController;
+  signal?: AbortSignal;
   windowOverride?: { fromDateISO: string; toDateISO: string };
   maxTimeWindowSize: string;
   /** Total raw log documents allowed per run. 0 = disabled. */
@@ -126,7 +127,7 @@ export class RemoteLogsExtractionClient {
     delay,
     frequency,
     entityDefinition,
-    abortController,
+    signal,
     windowOverride,
     maxTimeWindowSize,
     maxLogsPerWindow,
@@ -190,7 +191,7 @@ export class RemoteLogsExtractionClient {
         maxLogsPerPage,
         maxLogsPerWindow,
         entityDefinition,
-        abortController,
+        signal,
         effectiveFromDateISO,
         recoveryId,
         skipStateUpdates: true,
@@ -227,7 +228,7 @@ export class RemoteLogsExtractionClient {
 
     let hasNextPage = true;
     while (hasNextPage) {
-      if (abortController?.signal.aborted) {
+      if (signal?.aborted) {
         break;
       }
       if (currentFromDateISO >= effectiveWindowEnd) {
@@ -251,7 +252,7 @@ export class RemoteLogsExtractionClient {
         maxLogsPerPage,
         maxLogsPerWindow: remainingCap,
         entityDefinition,
-        abortController,
+        signal,
         effectiveFromDateISO: currentFromDateISO,
         recoveryId: recoveryIdForFirstSubWindow,
         skipStateUpdates: false,
@@ -326,7 +327,7 @@ export class RemoteLogsExtractionClient {
     maxLogsPerPage,
     maxLogsPerWindow,
     entityDefinition,
-    abortController,
+    signal,
     effectiveFromDateISO: initialFromDateISO,
     recoveryId: initialRecoveryId,
     skipStateUpdates,
@@ -338,7 +339,7 @@ export class RemoteLogsExtractionClient {
     maxLogsPerPage: number;
     maxLogsPerWindow: number;
     entityDefinition: ManagedEntityDefinition;
-    abortController?: AbortController;
+    signal?: AbortSignal;
     effectiveFromDateISO: string;
     recoveryId: string | undefined;
     skipStateUpdates: boolean;
@@ -364,13 +365,13 @@ export class RemoteLogsExtractionClient {
         remote: true,
       });
     };
-    abortController?.signal.addEventListener('abort', onAbort);
+    signal?.addEventListener('abort', onAbort);
 
     let effectiveFromDateISO = initialFromDateISO;
     let recoveryId = initialRecoveryId;
     let sliceStart: LogSlicePaginationParams | undefined;
-
     let isLastLogsPage = false;
+    const destToSourceMap = this.buildDestToSourceMap(type, entityDefinition.fields);
 
     do {
       const logPaginationCursor = await this.runProbe({
@@ -381,7 +382,7 @@ export class RemoteLogsExtractionClient {
         sliceStart,
         maxLogsPerPage: effectiveMaxLogsPerPage,
         sampleProbability: effectiveSampleProbability,
-        abortController,
+        signal,
       });
 
       if (!logPaginationCursor.hasLogsToProcess && effectiveSampleProbability >= 1) {
@@ -431,11 +432,12 @@ export class RemoteLogsExtractionClient {
           toDateISO,
           docsLimit: effectiveDocsLimit,
           entityDefinition,
-          abortController,
+          signal,
           sliceStart,
           sliceEnd,
           recoveryId: recoveryIdForThisSlice,
           skipStateUpdates,
+          destToSourceMap,
         });
 
         totalCount += count;
@@ -490,7 +492,7 @@ export class RemoteLogsExtractionClient {
     sliceStart,
     maxLogsPerPage,
     sampleProbability,
-    abortController,
+    signal,
   }: {
     remoteIndexPatterns: string[];
     type: EntityType;
@@ -499,7 +501,7 @@ export class RemoteLogsExtractionClient {
     sliceStart: LogSlicePaginationParams | undefined;
     maxLogsPerPage: number;
     sampleProbability: number;
-    abortController?: AbortController;
+    signal?: AbortSignal;
   }): Promise<LogPaginationCursor> {
     const probeQuery = buildLogPaginationCursorProbeEsql({
       indexPatterns: remoteIndexPatterns,
@@ -521,7 +523,7 @@ export class RemoteLogsExtractionClient {
     const probeResponse = await executeEsqlQuery({
       esClient: this.strategy.client,
       query: probeQuery,
-      abortController,
+      signal,
       telemetry: {
         name: 'remote_probe_query',
         namespace: this.namespace,
@@ -560,11 +562,12 @@ export class RemoteLogsExtractionClient {
     toDateISO,
     docsLimit,
     entityDefinition,
-    abortController,
+    signal,
     sliceStart,
     sliceEnd,
     recoveryId: initialRecoveryId,
     skipStateUpdates,
+    destToSourceMap,
   }: {
     type: EntityType;
     remoteIndexPatterns: string[];
@@ -572,11 +575,12 @@ export class RemoteLogsExtractionClient {
     toDateISO: string;
     docsLimit: number;
     entityDefinition: ManagedEntityDefinition;
-    abortController?: AbortController;
+    signal?: AbortSignal;
     sliceStart: LogSlicePaginationParams | undefined;
     sliceEnd: LogSlicePaginationParams;
     recoveryId: string | undefined;
     skipStateUpdates: boolean;
+    destToSourceMap: Map<string, string>;
   }): Promise<{ count: number; pages: number }> {
     let count = 0;
     let pages = 0;
@@ -614,7 +618,7 @@ export class RemoteLogsExtractionClient {
       const esqlResponse = await executeEsqlQuery({
         esClient: this.strategy.client,
         query,
-        abortController,
+        signal,
         telemetry: {
           name: 'remote_extraction_query',
           namespace: this.namespace,
@@ -643,9 +647,9 @@ export class RemoteLogsExtractionClient {
           esqlResponse,
           targetIndex: getUpdatesEntitiesDataStreamName(this.namespace),
           logger: this.logger,
-          abortController,
+          signal,
           fieldsToIgnore: [ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD],
-          transformDocument: this.buildTransformDocument(type),
+          transformDocument: this.buildTransformDocument(type, destToSourceMap),
           refresh: false,
           onDropped: () =>
             entityStoreMetrics.extractionBulkDropped.add(1, {
@@ -701,22 +705,65 @@ export class RemoteLogsExtractionClient {
    * picks up these updates in the correct order. This is bounded by the `delay`
    * configured on the main extraction.
    */
-  private buildTransformDocument(type: EntityType) {
-    let timestampIncrement = 1;
+  /**
+   * Builds a map from destination path → entity-relative source path for asymmetric fields.
+   * The remote ESQL result uses destination paths as column names (e.g.
+   * "entity.relationships.administers.raw_identifiers.host.id"), but the main extraction
+   * query reads the updates data stream using source paths
+   * (e.g. "host.entity.relationships.administers.host.id"). For symmetric fields the
+   * re-nesting step in transformDocForUpsert already produces the right result; only
+   * asymmetric fields (where destination ≠ "entity.<source-suffix>") need remapping.
+   * Computed once per extraction run and reused across all slices and pages.
+   */
+  private buildDestToSourceMap(type: EntityType, fields: EntityField[]): Map<string, string> {
+    const entityPrefix = `${type}.entity.`;
+    const destToEntityRelativeSource = new Map<string, string>();
+    for (const field of fields) {
+      if (field.retention.operation === 'managed') continue;
+      if (!field.source.startsWith(entityPrefix)) continue;
+      // Self-identifier fields (e.g. `host.entity.id`) share source and destination and need no
+      // remap; remapping them to `entity.id` would collide with the EUID (`entity.id`) column.
+      if (field.destination === field.source) continue;
+      const entityRelativeSource = `entity.${field.source.slice(entityPrefix.length)}`;
+      if (entityRelativeSource !== field.destination) {
+        destToEntityRelativeSource.set(field.destination, entityRelativeSource);
+      }
+    }
+    return destToEntityRelativeSource;
+  }
+
+  /**
+   * Returns a document transformer that rewrites `@timestamp` to a synthetic value
+   * just past now, incrementing by 1ms per doc, so the next local extraction run
+   * picks up these updates in the correct order. This is bounded by the `delay`
+   * configured on the main extraction.
+   * Called once per page so that `timestampIncrement` resets to 0 for each batch,
+   * keeping synthetic timestamps close to real time.
+   */
+  private buildTransformDocument(type: EntityType, destToSourceMap: Map<string, string>) {
+    let timestampIncrement = 0;
     return (doc: Record<string, unknown>) => {
       timestampIncrement++;
       const timestamp = moment().utc().add(timestampIncrement, 'ms').toISOString();
-      return this.transformDocForUpsert(type, doc, timestamp);
+      return this.transformDocForUpsert(type, doc, timestamp, destToSourceMap);
     };
   }
 
   private transformDocForUpsert(
     type: EntityType,
     data: Partial<Entity>,
-    timestamp: string
+    timestamp: string,
+    destToEntityRelativeSource: Map<string, string> = new Map()
   ): Record<string, unknown> {
+    // Remap asymmetric field destination paths to their entity-relative source paths before
+    // unflattening, so the updates doc matches what the main ESQL query reads.
+    const remapped: Record<string, unknown> = {};
+    for (const [key, value] of Object.entries(data as Record<string, unknown>)) {
+      remapped[destToEntityRelativeSource.get(key) ?? key] = value;
+    }
+
     const doc: Record<string, unknown> = unflattenObject({
-      ...data,
+      ...remapped,
       '@timestamp': timestamp,
     });
 
