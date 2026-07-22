@@ -170,7 +170,10 @@ export async function getFullAgentPolicy(
     secret_references: [...outputSecretReferences, ...packagePolicySecretReferences],
     revision: agentPolicy.revision,
     agent: {
-      download: getBinarySourceSettings(downloadSource, downloadSourceProxy, redactProxySecrets),
+      download: {
+        sourceURI: downloadSourceUri,
+        ...(downloadSourceProxyUri ? { proxy_url: downloadSourceProxyUri } : {}),
+      },
       monitoring: getFullMonitoringSettings(agentPolicy, monitoringOutput),
       features,
       protection: {
@@ -270,8 +273,8 @@ export async function getFullAgentPolicy(
   }, {});
 
   // only add fleet server hosts if not in standalone
-  if (!standalone && fleetServerHost) {
-    fullAgentPolicy.fleet = generateFleetConfig(fleetServerHost, proxies, redactProxySecrets);
+  if (!standalone && fleetServerHosts) {
+    fullAgentPolicy.fleet = generateFleetConfig(fleetServerHosts, proxies);
   }
 
   const settingsValues = getSettingsValuesForAgentPolicy(
@@ -326,9 +329,8 @@ export async function getFullAgentPolicy(
 }
 
 export function generateFleetConfig(
-  fleetServerHost: FleetServerHost,
-  proxies: FleetProxy[],
-  redactProxySecrets = false
+  fleetServerHosts: FleetServerHost,
+  proxies: FleetProxy[]
 ): FullAgentPolicy['fleet'] {
   const config: FullAgentPolicy['fleet'] = {
     hosts: fleetServerHosts.host_urls,
@@ -338,7 +340,7 @@ export function generateFleetConfig(
     : null;
   if (fleetServerHostproxy) {
     config.proxy_url = fleetServerHostproxy.url;
-    if (!redactProxySecrets && fleetServerHostproxy.proxy_headers) {
+    if (fleetServerHostproxy.proxy_headers) {
       config.proxy_headers = fleetServerHostproxy.proxy_headers;
     }
     if (
@@ -353,8 +355,7 @@ export function generateFleetConfig(
           certificate_authorities: [fleetServerHostproxy.certificate_authorities],
         }),
         ...(fleetServerHostproxy.certificate && { certificate: fleetServerHostproxy.certificate }),
-        ...(!redactProxySecrets &&
-          fleetServerHostproxy.certificate_key && { key: fleetServerHostproxy.certificate_key }),
+        ...(fleetServerHostproxy.certificate_key && { key: fleetServerHostproxy.certificate_key }),
       };
     }
   }
@@ -661,157 +662,4 @@ function buildShipperQueueData(shipper: ShipperOutput) {
       },
     },
   };
-}
-
-export function getBinarySourceSettings(
-  downloadSource: DownloadSource,
-  downloadSourceProxy: FleetProxy | undefined,
-  redactProxySecrets = false
-) {
-  const config: FullAgentPolicyDownload = {
-    sourceURI: downloadSource.host,
-  };
-
-  if (downloadSource?.ssl) {
-    config.ssl = {
-      ...(downloadSource.ssl?.certificate_authorities && {
-        certificate_authorities: downloadSource.ssl.certificate_authorities,
-      }),
-      ...(downloadSource.ssl?.certificate && {
-        certificate: downloadSource.ssl.certificate,
-      }),
-      ...(downloadSource.ssl?.key &&
-        !downloadSource?.secrets?.ssl?.key && {
-          key: downloadSource.ssl.key,
-        }),
-    };
-  }
-
-  if (downloadSource?.auth) {
-    const authConfig: FullAgentPolicyDownload['auth'] = {};
-    if (downloadSource.auth.username) {
-      authConfig.username = downloadSource.auth.username;
-    }
-    if (
-      downloadSource.auth.password &&
-      typeof downloadSource?.secrets?.auth?.password !== 'object'
-    ) {
-      authConfig.password = downloadSource.auth.password;
-    }
-    if (downloadSource.auth.api_key && typeof downloadSource?.secrets?.auth?.api_key !== 'object') {
-      authConfig.api_key = downloadSource.auth.api_key;
-    }
-    // Filter out empty headers (both key and value are empty)
-    if (downloadSource.auth.headers && downloadSource.auth.headers.length > 0) {
-      const filteredHeaders = downloadSource.auth.headers.filter(
-        (header) => header.key !== '' || header.value !== ''
-      );
-      if (filteredHeaders.length > 0) {
-        authConfig.headers = filteredHeaders;
-      }
-    }
-    if (Object.keys(authConfig).length > 0) {
-      config.auth = authConfig;
-    }
-  }
-
-  if (downloadSource?.secrets) {
-    const secretsConfig: FullAgentPolicyDownload['secrets'] = {};
-
-    if (downloadSource.secrets?.ssl?.key) {
-      secretsConfig.ssl = {
-        key: downloadSource.secrets.ssl.key,
-      };
-    }
-
-    if (downloadSource.secrets?.auth) {
-      const authSecretsConfig: NonNullable<FullAgentPolicyDownload['secrets']>['auth'] = {};
-      if (typeof downloadSource.secrets.auth.password === 'object') {
-        authSecretsConfig.password = downloadSource.secrets.auth.password;
-      }
-      if (typeof downloadSource.secrets.auth.api_key === 'object') {
-        authSecretsConfig.api_key = downloadSource.secrets.auth.api_key;
-      }
-      if (Object.keys(authSecretsConfig).length > 0) {
-        secretsConfig.auth = authSecretsConfig;
-      }
-    }
-
-    if (Object.keys(secretsConfig).length > 0) {
-      config.secrets = secretsConfig;
-    }
-  }
-
-  if (downloadSourceProxy) {
-    if (downloadSourceProxy.url) {
-      config.proxy_url = downloadSourceProxy.url;
-    }
-    if (!redactProxySecrets && downloadSourceProxy.proxy_headers) {
-      config.proxy_headers = downloadSourceProxy.proxy_headers;
-    }
-    // if the proxy is configured, get the ssl settings from it
-    config.ssl = {
-      ...(downloadSourceProxy?.certificate_authorities && {
-        certificate_authorities: [downloadSourceProxy.certificate_authorities],
-      }),
-      ...(downloadSourceProxy?.certificate && {
-        certificate: downloadSourceProxy.certificate,
-      }),
-      ...(!redactProxySecrets &&
-        downloadSourceProxy?.certificate_key && {
-          key: downloadSourceProxy?.certificate_key,
-        }),
-    };
-  }
-
-  return config;
-}
-
-/**
- * Strip proxy_headers and proxy-derived ssl.key from a FullAgentPolicy that was already
- * composed (e.g. retrieved verbatim from the .fleet-policies index via ?revision=N).
- * Mutates in place and returns the policy for convenience.
- *
- * proxyUrlsWithCertKey: URLs of proxies that have a certificate_key. When provided,
- * ssl.key is redacted on fleet/agent.download sections only if their proxy_url is in this
- * set — distinguishing proxy-derived keys from the entity's own TLS keys. Without this
- * set, ssl.key on fleet/agent.download is left untouched (conservative: avoids
- * over-redaction but may miss proxy keys).
- */
-export function redactProxySecretsFromPolicy(
-  policy: FullAgentPolicy,
-  proxyUrlsWithCertKey?: Set<string>
-): FullAgentPolicy {
-  if (policy.outputs) {
-    for (const output of Object.values(policy.outputs)) {
-      delete output.proxy_headers;
-      // Output ssl.key is always proxy-derived; safe to redact whenever proxy_url is present
-      if (output.proxy_url && output.ssl) {
-        delete output.ssl.key;
-      }
-    }
-  }
-  if (policy.fleet && 'hosts' in policy.fleet) {
-    delete policy.fleet.proxy_headers;
-    // Only redact ssl.key if we can confirm it came from a proxy with a certificate_key
-    if (
-      policy.fleet.proxy_url &&
-      proxyUrlsWithCertKey?.has(policy.fleet.proxy_url) &&
-      policy.fleet.ssl
-    ) {
-      delete policy.fleet.ssl.key;
-    }
-  }
-  if (policy.agent?.download) {
-    delete policy.agent.download.proxy_headers;
-    // Only redact ssl.key if we can confirm it came from a proxy with a certificate_key
-    if (
-      policy.agent.download.proxy_url &&
-      proxyUrlsWithCertKey?.has(policy.agent.download.proxy_url) &&
-      policy.agent.download.ssl
-    ) {
-      delete (policy.agent.download.ssl as Record<string, unknown>).key;
-    }
-  }
-  return policy;
 }

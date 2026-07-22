@@ -63,7 +63,7 @@ export const AgentPolicyYamlFlyout = memo<{
     isLoading: isLoadingYaml,
     data: yamlData,
     error,
-  } = useGetOneAgentPolicyFull(policyId, revision ? { revision } : undefined);
+  } = useGetOneAgentPolicyFull(policyId);
   const { data: agentPolicyData } = useGetOneAgentPolicy(policyId);
   const packagePoliciesContainSecrets = agentPolicyData?.item?.package_policies?.some(
     (packagePolicy) => packagePolicy?.secret_references?.length
