@@ -25,7 +25,6 @@ interface GetDataSourcesResponse {
 const isEmptyValue = (value: unknown): boolean =>
   value === undefined || value === null || (typeof value === 'string' && value.trim() === '');
 
-// todo try to refactor out
 function omitEmptySettingsFields(settings: object): Record<string, unknown> {
   return omitBy(settings as Record<string, unknown>, isEmptyValue);
 }
@@ -112,14 +111,14 @@ export class DataSourcesClient {
     }
 
     const withoutName = omit(dataSource, 'name');
-    const body = omitBy(
+    const body = omitBy<Omit<DataSourceWithSecrets, 'name'>>(
       {
         ...withoutName,
         settings: omitEmptySettingsFields(dataSource.settings),
       },
       isNil
-      // todo types could be better
-    ) as unknown as Omit<DataSourceWithSecrets, 'name'>;
+    );
+
     await this.http.put(getDataSourceByIdApiPath(nameTrimmed), {
       body: JSON.stringify(body),
     });

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { useMemo } from 'react';
 import { useSyntheticsEsSearch } from '../../../hooks/use_synthetics_es_search';
 import { selectEncryptedSyntheticsSavedMonitors } from '../../../state';

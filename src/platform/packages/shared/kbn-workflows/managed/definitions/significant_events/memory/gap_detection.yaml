@@ -1,21 +1,21 @@
 version: "1"
 
-name: Gap Detection
+name: Significant Events Gap Detection
 description: >
-  Audits the sigevents memory knowledge base against 11 required knowledge
+  Audits the significant events memory knowledge base against 11 required knowledge
   dimensions and writes a structured "_gaps/overview" memory page listing
   what is unknown, ambiguous, or missing. Runs on a weekly schedule.
 enabled: false
 settings:
   timeout: "30m"
   concurrency:
-    key: "streams-gap-detection"
+    key: "significant-events-memory-gap-detection"
     strategy: drop
     max: 1
 tags:
   - observability
   - streams
-  - sigevents
+  - significant-events
   - memory
   - gap-detection
 
