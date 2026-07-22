@@ -7,7 +7,13 @@
 
 import React, { useMemo } from 'react';
 import moment from 'moment';
-import { EuiCallOut, EuiEmptyPrompt, EuiFlexItem, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
+import {
+  EuiCallOut,
+  EuiEmptyPrompt,
+  EuiFlexItem,
+  EuiLoadingSpinner,
+  EuiSpacer,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import type { CommonAttachmentTabViewProps } from '@kbn/cases-plugin/public';

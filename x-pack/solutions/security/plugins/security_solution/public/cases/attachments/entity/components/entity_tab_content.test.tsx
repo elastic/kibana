@@ -125,9 +125,7 @@ describe('EntityTabContent', () => {
   it('does not show the disabled callout when the entity store is running', () => {
     renderTab();
 
-    expect(
-      screen.queryByTestId(ENTITY_TAB_STORE_DISABLED_CALLOUT_TEST_ID)
-    ).not.toBeInTheDocument();
+    expect(screen.queryByTestId(ENTITY_TAB_STORE_DISABLED_CALLOUT_TEST_ID)).not.toBeInTheDocument();
   });
 
   it('renders the empty prompt when no entity attachments exist', () => {

@@ -10,7 +10,10 @@ import { lastValueFrom } from 'rxjs';
 import type { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/search-types';
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import { useKibana } from '../../../../common/lib/kibana';
-import { getEntitiesAlias, ENTITY_LATEST } from '../../../../entity_analytics/components/home/constants';
+import {
+  getEntitiesAlias,
+  ENTITY_LATEST,
+} from '../../../../entity_analytics/components/home/constants';
 
 interface MaxAggResponse {
   latest_update: estypes.AggregationsMaxAggregate;
