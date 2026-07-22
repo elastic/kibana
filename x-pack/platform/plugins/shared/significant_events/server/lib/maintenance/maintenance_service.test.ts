@@ -55,11 +55,16 @@ function makeSoClient() {
 function makeManagementApi(options?: {
   executionsByWorkflow?: Record<string, Array<{ id: string }>>;
   failUpdateFor?: string;
-  failEnableFor?: string;
+  /** Static id, or a mutable `{ id }` so a later resume can clear the failure. */
+  failEnableFor?: string | { id?: string };
   failCancelFor?: string;
 }) {
   const enabled = new Map<string, boolean>();
   const stateKey = (id: string, spaceId: string) => `${id}@${spaceId}`;
+  const failEnableId = (): string | undefined =>
+    typeof options?.failEnableFor === 'object'
+      ? options.failEnableFor.id
+      : options?.failEnableFor;
 
   const getWorkflow = jest.fn(async (id: string, spaceId: string) => ({
     id,
@@ -72,7 +77,7 @@ function makeManagementApi(options?: {
       if (options?.failUpdateFor === id) {
         throw new Error(`update failed for ${id}`);
       }
-      if (options?.failEnableFor === id && patch.enabled === true) {
+      if (failEnableId() === id && patch.enabled === true) {
         throw new Error(`enable failed for ${id}`);
       }
       enabled.set(stateKey(id, spaceId), patch.enabled ?? true);
@@ -887,14 +892,17 @@ describe('SignificantEventsMaintenanceService', () => {
 
       expect(summary.state).toBe('enabled');
       expect(summary.partialFailures.length).toBeGreaterThan(0);
-      const lastWrite = soClient.create.mock.calls.at(-1);
-      expect(lastWrite?.[1]).toEqual(
-        expect.objectContaining({
-          state: 'enabled',
-          disabledWorkflows: [],
-          disabledRuleIds: [],
-        })
-      );
+      expect(summary.workflowsDisabled).toBe(1);
+      const lastWrite = soClient.create.mock.calls.at(-1)?.[1] as {
+        state: string;
+        disabledWorkflows: Array<{ id: string }>;
+        disabledRuleIds: string[];
+      };
+      expect(lastWrite.state).toBe('enabled');
+      expect(lastWrite.disabledRuleIds).toEqual([]);
+      expect(lastWrite.disabledWorkflows).toEqual([
+        expect.objectContaining({ id: SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID }),
+      ]);
       await expect(service.getStatus({ request: REQUEST })).resolves.toEqual(
         expect.objectContaining({ state: 'enabled' })
       );
@@ -921,13 +929,14 @@ describe('SignificantEventsMaintenanceService', () => {
 
       expect(summary.state).toBe('enabled');
       expect(summary.partialFailures).toContainEqual({ target: 'rule:rule-1', error: 'boom' });
+      expect(summary.rulesDisabled).toBe(1);
       const lastWrite = soClient.create.mock.calls.at(-1);
       expect(lastWrite?.[1]).toEqual(
-        expect.objectContaining({ state: 'enabled', disabledRuleIds: [] })
+        expect.objectContaining({ state: 'enabled', disabledRuleIds: ['rule-1'] })
       );
     });
 
-    it('reports partialFailures but clears inventory when resume has warnings', async () => {
+    it('reports partialFailures and keeps failed inventory when resume has warnings', async () => {
       const { api } = makeManagementApi({
         failEnableFor: SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID,
       });
@@ -943,9 +952,40 @@ describe('SignificantEventsMaintenanceService', () => {
       const resumeSummary = await service.resume({ request: REQUEST });
 
       expect(resumeSummary.state).toBe('enabled');
-      expect(resumeSummary.workflowsDisabled).toBe(0);
+      expect(resumeSummary.workflowsDisabled).toBe(1);
       expect(resumeSummary.rulesDisabled).toBe(0);
       expect(resumeSummary.partialFailures.length).toBeGreaterThan(0);
+    });
+
+    it('retries leftover inventory on a second resume while already enabled', async () => {
+      const failEnableFor = { id: SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID as string | undefined };
+      const { api, updateWorkflow } = makeManagementApi({ failEnableFor });
+      const { service, soClient } = makeService({ management: api });
+
+      await service.pause({ request: REQUEST });
+      const firstResume = await service.resume({ request: REQUEST });
+      expect(firstResume.state).toBe('enabled');
+      expect(firstResume.workflowsDisabled).toBe(1);
+
+      failEnableFor.id = undefined;
+      updateWorkflow.mockClear();
+      const secondResume = await service.resume({ request: REQUEST });
+
+      expect(secondResume.state).toBe('enabled');
+      expect(secondResume.workflowsDisabled).toBe(0);
+      expect(secondResume.partialFailures).toEqual([]);
+      expect(
+        updateWorkflow.mock.calls.some(
+          (call) =>
+            call[0] === SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID && call[1]?.enabled === true
+        )
+      ).toBe(true);
+      const lastWrite = soClient.create.mock.calls.at(-1)?.[1] as {
+        disabledWorkflows: unknown[];
+        disabledRuleIds: unknown[];
+      };
+      expect(lastWrite.disabledWorkflows).toEqual([]);
+      expect(lastWrite.disabledRuleIds).toEqual([]);
     });
 
     it('flips to enabled with warnings when settings restore fails (no workflow rollback)', async () => {

@@ -74,7 +74,10 @@ export interface SignificantEventsMaintenanceService {
   }): Promise<SignificantEventsMaintenanceSummary>;
   /**
    * Re-enable workflows/rules pause recorded, and restore only the Settings
-   * toggles that were enabled before pause.
+   * toggles that were enabled before pause. Always flips the control plane to
+   * `enabled` (best-effort; no compensating rollback). Targets that fail to
+   * re-enable stay in the disabled snapshot so a later Resume can retry them
+   * even after the deployment is already reported as enabled.
    */
   resume(params: {
     request: KibanaRequest;
@@ -780,44 +783,60 @@ export const createSignificantEventsMaintenanceService = ({
       return withTransitionLock(async () => {
         const soClient = getSoClient(request);
         const existing = await readState(soClient);
+        const currentState = normalizeState(existing?.state);
+        const recordedWorkflows = existing?.disabledWorkflows ?? [];
+        const recordedRuleIds = existing?.disabledRuleIds ?? [];
+        const hasRetryInventory = recordedWorkflows.length > 0 || recordedRuleIds.length > 0;
 
-        // Idempotent: only a paused deployment has anything to resume.
-        if (normalizeState(existing?.state) !== 'paused') {
+        // Idempotent when fully enabled. Also accept a follow-up Resume while
+        // already enabled if a prior partial resume left failed targets recorded.
+        if (currentState !== 'paused' && !hasRetryInventory) {
           return emptySummary('enabled');
         }
 
         const failures: SignificantEventsMaintenanceFailure[] = [];
         const mgmt = server.workflowsManagement?.management;
-        const recordedWorkflows = existing?.disabledWorkflows ?? [];
-        const recordedRuleIds = existing?.disabledRuleIds ?? [];
         const pausedSettings = normalizePausedSettings(existing?.pausedSettings);
+        // First resume from paused gates settings-backed workflows. A retry of
+        // leftover inventory already filtered those once — retry everything left.
+        const isFirstResumeFromPaused = currentState === 'paused';
+        const shouldAttemptWorkflow = (workflow: MaintenanceWorkflowTarget): boolean =>
+          !isFirstResumeFromPaused ||
+          shouldRestoreSettingsBackedWorkflow(workflow, pausedSettings);
 
         // Best-effort restore: re-enable inventory, restore settings, then flip the
         // control plane to enabled. Partial failures are reported as warnings —
-        // no compensating rollback (rollback can fail too).
+        // no compensating rollback (rollback can fail too). Failed targets stay
+        // in the snapshot so a later Resume can retry them.
         let workflowsToggled = 0;
+        const remainingWorkflows: MaintenanceWorkflowTarget[] = [];
         if (mgmt) {
           for (const workflow of recordedWorkflows) {
-            if (!shouldRestoreSettingsBackedWorkflow(workflow, pausedSettings)) {
+            if (!shouldAttemptWorkflow(workflow)) {
               continue;
             }
             const outcome = await reEnableWorkflow(mgmt, workflow, request, failures);
             if (outcome === 'toggled') {
               workflowsToggled += 1;
+            } else if (outcome === 'failed') {
+              remainingWorkflows.push(workflow);
             }
           }
-        } else if (
-          recordedWorkflows.some((workflow) =>
-            shouldRestoreSettingsBackedWorkflow(workflow, pausedSettings)
-          )
-        ) {
-          failures.push({
-            target: 'workflows',
-            error: 'Workflows management plugin is not available',
-          });
+        } else {
+          for (const workflow of recordedWorkflows) {
+            if (shouldAttemptWorkflow(workflow)) {
+              remainingWorkflows.push(workflow);
+            }
+          }
+          if (remainingWorkflows.length > 0) {
+            failures.push({
+              target: 'workflows',
+              error: 'Workflows management plugin is not available',
+            });
+          }
         }
 
-        const { toggledCount: rulesToggled } = await reEnableRules(
+        const { failedIds: remainingRuleIds, toggledCount: rulesToggled } = await reEnableRules(
           request,
           recordedRuleIds,
           failures
@@ -826,7 +845,10 @@ export const createSignificantEventsMaintenanceService = ({
         await featureSettings.resumeFeatureSettings({ request, pausedSettings, failures });
 
         const summary: SignificantEventsMaintenanceSummary = {
-          ...emptySummary('enabled'),
+          state: 'enabled',
+          executionsCancelled: 0,
+          workflowsDisabled: remainingWorkflows.length,
+          rulesDisabled: remainingRuleIds.length,
           partialFailures: failures,
         };
 
@@ -835,8 +857,8 @@ export const createSignificantEventsMaintenanceService = ({
             state: 'enabled',
             updatedAt: new Date().toISOString(),
             updatedBy,
-            disabledWorkflows: [],
-            disabledRuleIds: [],
+            disabledWorkflows: remainingWorkflows,
+            disabledRuleIds: remainingRuleIds,
             lastSummary: summary,
           });
         } catch (writeError) {
@@ -854,7 +876,7 @@ export const createSignificantEventsMaintenanceService = ({
           throw writeError;
         }
 
-        const message = `Significant Events resume completed: toggled on ${workflowsToggled} workflow(s) and ${rulesToggled} rule(s), ${failures.length} failure(s)`;
+        const message = `Significant Events resume completed: toggled on ${workflowsToggled} workflow(s) and ${rulesToggled} rule(s), ${failures.length} failure(s); ${remainingWorkflows.length} workflow(s) / ${remainingRuleIds.length} rule(s) still disabled`;
         if (failures.length === 0) {
           log.info(message);
         } else {
