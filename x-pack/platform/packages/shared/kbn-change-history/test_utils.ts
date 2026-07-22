@@ -5,7 +5,19 @@
  * 2.0.
  */
 
+import type { Client } from '@elastic/elasticsearch';
 import type { ChangeHistoryDocument } from './src/types';
+
+/**
+ * Wrap an Elasticsearch client so its requests carry the Kibana product-origin
+ * header. `.kibana_change_history` is a system data stream
+ * ([elasticsearch#154113](https://github.com/elastic/elasticsearch/pull/154113)),
+ * so direct test access to it must act on Kibana's behalf — a plain superuser
+ * client is rejected. Shared here so both the package integration tests and the
+ * FTR suites use a single source for the header.
+ */
+export const asKibanaClient = (client: Client): Client =>
+  client.child({ headers: { 'x-elastic-product-origin': 'kibana' } });
 
 /**
  * Build a fully-typed {@link ChangeHistoryDocument} for use in unit tests. All

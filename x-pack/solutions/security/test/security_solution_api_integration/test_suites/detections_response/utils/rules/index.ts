@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+export * from './change_history';
 export * from './create_legacy_rule_action';
 export * from './create_rule_with_exception_entries';
 export * from './create_rule_saved_object';

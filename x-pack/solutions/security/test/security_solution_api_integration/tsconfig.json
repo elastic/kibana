@@ -69,5 +69,6 @@
     "@kbn/security-solution-features",
     "@kbn/core-spaces-common",
     "@kbn/entity-store",
+    "@kbn/change-history",
   ]
 }

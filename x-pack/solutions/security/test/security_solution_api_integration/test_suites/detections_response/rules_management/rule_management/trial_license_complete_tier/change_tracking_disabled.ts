@@ -10,11 +10,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { deleteAllRules } from '@kbn/detections-response-ftr-services';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { getCustomQueryRuleParams } from '../../../utils';
-
-const CHANGE_HISTORY_DATA_STREAM = '.kibana_change_history';
-const CHANGE_HISTORY_ES_OPTIONS = {
-  headers: { 'x-elastic-product-origin': 'kibana' },
-};
+import { clearHistory, countHistory, refreshHistory } from '../../../utils/rules/change_history';
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
@@ -22,25 +18,9 @@ export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
   const log = getService('log');
 
-  const clearHistory = async () => {
-    try {
-      await es.deleteByQuery(
-        {
-          index: CHANGE_HISTORY_DATA_STREAM,
-          query: { match_all: {} },
-          conflicts: 'proceed',
-          refresh: true,
-        },
-        CHANGE_HISTORY_ES_OPTIONS
-      );
-    } catch {
-      // Change history index may not exist yet
-    }
-  };
-
   describe('@ess @skipInServerless change tracking with "Enable rule changes history" setting disabled', () => {
     before(async () => {
-      await clearHistory();
+      await clearHistory(es);
     });
 
     beforeEach(async () => {
@@ -73,18 +53,9 @@ export default ({ getService }: FtrProviderContext): void => {
     it('writes no records to the change history data stream on rule create', async () => {
       await detectionsApi.createRule({ body: getCustomQueryRuleParams() }).expect(200);
 
-      await es.indices.refresh(
-        { index: CHANGE_HISTORY_DATA_STREAM, ignore_unavailable: true },
-        CHANGE_HISTORY_ES_OPTIONS
-      );
+      await refreshHistory(es);
 
-      const { count } = await es.count(
-        {
-          index: CHANGE_HISTORY_DATA_STREAM,
-          ignore_unavailable: true,
-        },
-        CHANGE_HISTORY_ES_OPTIONS
-      );
+      const count = await countHistory(es);
 
       expect(count).toBe(0);
     });
