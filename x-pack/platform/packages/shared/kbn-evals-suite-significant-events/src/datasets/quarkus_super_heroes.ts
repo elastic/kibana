@@ -17,6 +17,7 @@ export const quarkusSuperHeroesDataset: DatasetConfig = {
   id: QUARKUS_SUPER_HEROES_NAMESPACE,
   description: 'Quarkus Super Heroes sample microservices application',
   gcs: { bucket: GCS_BUCKET, basePathPrefix: QUARKUS_SUPER_HEROES_GCS_BASE_PATH_PREFIX },
+  e2e: [],
   kiFeatureExtraction: [
     {
       input: {

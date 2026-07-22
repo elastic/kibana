@@ -1,6 +1,6 @@
 # Significant Events Evaluations
 
-Evaluations for Significant Events, which assess the quality of LLM-based Knowledge Indicator (KI) feature extraction, KI query generation, KI feature exclusion, and KI feature deduplication across failure scenarios.
+Evaluations for Significant Events, covering the individual LLM-based pipeline stages (Knowledge Indicator feature extraction, KI query generation, KI feature exclusion/deduplication, discovery, judge) plus an opt-in end-to-end run from replayed logs to raised significant events.
 These evaluations support both qualitative (LLM-as-a-judge + deterministic CODE evaluators) and quantitative (trace-based) metrics.
 
 For general information about writing evaluation tests, configuration, and usage, see the main [`@kbn/evals` documentation](../kbn-evals/README.md).
@@ -13,6 +13,48 @@ For general information about writing evaluation tests, configuration, and usage
 | **KI query generation**      | `ki_query_generation/ki_query_generation.spec.ts`           | Can the LLM produce valid, hit-producing ES\|QL rules for significant event detection?    |
 | **KI feature exclusion**     | `ki_feature_exclusion/ki_feature_exclusion.spec.ts`         | Does the LLM respect excluded features and avoid regenerating them in follow-up runs?     |
 | **KI feature deduplication** | `ki_feature_deduplication/ki_feature_deduplication.spec.ts` | Are KIs stable and semantically unique across independent runs and iterative dedup loops? |
+| **Discovery agent**          | `discovery/discovery.spec.ts`                               | Does the discovery agent group detections into correct, evidence-backed discoveries (incl. continuation over time)? |
+| **Discovery judge**          | `discovery/judge.spec.ts`                                   | Does the judge promote real incidents to open events and dismiss benign noise?            |
+| **End-to-end pipeline**      | `e2e/e2e.spec.ts`                                           | Opt-in (`SIGEVENTS_E2E=true`): full funnel from replayed logs to raised significant events, scored per stage. |
+
+## End-to-end pipeline eval
+
+`evals/e2e/e2e.spec.ts` chains every pipeline stage against the live product instead of testing stages in isolation:
+
+```
+replay logs (timestamps shifted to now)
+  -> seed KIs (snapshot features + canonical rule-backed queries with synthetic rule ids)
+  -> synthesize `.rule-events` signals (bucketed ES|QL per canonical query)
+  -> execute the `system-significant-events-detection` managed workflow (real change-point scan)
+  -> discovery agent via /converse over the detections the workflow actually produced
+  -> execute the `system-significant-events-triage` managed workflow (judge writes events)
+  -> score `.significant_events-events`
+```
+
+Design notes:
+
+- No Alerting rules are installed and no real-time waiting happens: the change-point scan only reads rule-backed KI query links and `.rule-events` signals, both of which the spec seeds. Canonical queries all sit in the critical severity band so the scan honours the lookback/bucket-interval the spec sizes to the replayed window.
+- Discoveries written by the agent's `discovery_write` tool persist to the live discoveries stream, which is exactly what triage picks up — the discovery-to-judge handoff is the real product path.
+- Pipeline data streams (`.rule-events`, `.significant_events-detections/-discoveries/-events`, KI stream) are wiped per scenario, and scenarios run serially.
+- Datasets: bank-of-anthos only for now (`ledger-db-disconnect` checks recall — the cascade must end as an open event; `healthy-baseline` checks precision — no open events allowed).
+
+Checkpoint scoring (`src/evaluators/e2e/`):
+
+- `detection_match` (CODE): per-rule F1 of produced detections vs `expected_detection_rule_uuids`, with an allowlist for benign volume rules.
+- Discovery-stage evaluators reused from `src/evaluators/discovery/` (grouping correctness, evidence collection, tool usage, ES|QL grounding, calibration).
+- `event_outcome` (CODE): F1 over expected events — recall on expected entries (matched by underlying discovery rule_uuids + acceptable status), precision on unjustified `open` events.
+- `funnel_completion` (CODE): fraction of stages (signals, detections, discoveries, events) that produced their expected output — a single trend metric for dashboards.
+- `scenario_criteria` (LLM): scenario criteria judged over the full funnel output.
+
+Run it with:
+
+```bash
+SIGEVENTS_E2E=true SIGEVENTS_DATASET=bank-of-anthos node scripts/evals run \
+  --suite significant-events \
+  --project <connector-id> \
+  --judge <gemini-3-pro-connector-id> \
+  e2e.spec.ts
+```
 
 ## Prerequisites
 
@@ -147,6 +189,7 @@ node scripts/evals run \
 | `KI_QUERY_GENERATION_KI_FEATURE_SOURCE` | KI feature source for KI query generation (`canonical`, `snapshot`, `both`) | `both`                     |
 | `GCS_CREDENTIALS`                       | GCS service account JSON for snapshot access                                | —                          |
 | `SIGEVENTS_TRUST_UPSTREAM`              | When `true`, use dataset examples from the golden cluster instead of upserting from code | `false`                    |
+| `SIGEVENTS_E2E`                         | When `true`, run the end-to-end pipeline spec (`e2e/e2e.spec.ts`); skipped otherwise | `false`                    |
 | `TRACING_ES_URL`                        | Elasticsearch URL for trace queries (if traces are in a separate cluster)   | Falls back to test cluster |
 | `TRACING_ES_API_KEY`                    | API key for the trace Elasticsearch cluster                                 | —                          |
 
@@ -165,6 +208,9 @@ node scripts/evals run \
 | **filter_grounding**                   | KI feature extraction    | Entity filter equality pairs are grounded in input sample documents                       |
 | **ki_query_generation_code_evaluator** | KI query generation      | ES\|QL syntax validity, category/severity compliance, and execution hit rate              |
 | **tool_usage_validation**              | KI query generation      | Validates `get_stream_features` and `add_queries` tool calls were invoked correctly       |
+| **detection_match**                    | End-to-end pipeline      | Per-rule F1 of change-point detections vs the expected/allowed rule sets                  |
+| **event_outcome**                      | End-to-end pipeline      | F1 over expected significant events (status + underlying discovery) and unjustified opens |
+| **funnel_completion**                  | End-to-end pipeline      | Fraction of pipeline stages (signals, detections, discoveries, events) that passed        |
 
 ### LLM-as-a-judge evaluators
 

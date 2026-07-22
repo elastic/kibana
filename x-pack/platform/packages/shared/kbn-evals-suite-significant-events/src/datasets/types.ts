@@ -7,7 +7,7 @@
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { EvaluationCriterionStructured } from '@kbn/evals';
-import type { Detection, Discovery } from '@kbn/significant-events-schema';
+import type { Detection, Discovery, SignificantEventStatus } from '@kbn/significant-events-schema';
 import type { GcsConfig } from '../data_generators/replay';
 import type { ValidKIFeatureType } from '../evaluators/ki_feature_extraction';
 
@@ -130,6 +130,66 @@ export interface DiscoveryJudgeScenario {
   snapshot_source?: SnapshotSourceOverride;
 }
 
+/**
+ * A canonical rule-backed KI query used by the end-to-end eval. Seeded directly into the live
+ * knowledge-indicators stream with a synthetic `rule_uuid` (no Alerting rule is installed —
+ * the change-point scan only reads KI query links and `.rule-events` signals).
+ */
+export interface E2ECanonicalQuery {
+  /** KI query id (document `id` in the knowledge-indicators stream). */
+  query_id: string;
+  /**
+   * Synthetic rule id: `.rule-events` signals reference it and the detection stage groups by it.
+   * Must match the `rule_uuid`s used in the scenario's `expected_discoveries` signal metadata.
+   */
+  rule_uuid: string;
+  title: string;
+  description: string;
+  /** ES|QL breach query over the managed stream. Must compose with an appended `| STATS ...`. */
+  esql: string;
+  /**
+   * Keep >= 80 (critical band): critical-cadence rules honour the detection workflow's
+   * `lookback`/`bucketInterval` inputs, which the e2e spec sizes to the replayed window.
+   * Rules below the critical band fall back to the fixed `now-125m` / `5m` schedule.
+   */
+  severity_score: number;
+}
+
+export interface E2EExpectedEvent {
+  /**
+   * Signal `rule_uuid`s identifying the upstream discovery this event should be judged from.
+   * An event matches when the discovery it was raised from shares at least one of these rules.
+   */
+  rule_uuids: string[];
+  /** Acceptable final statuses for the matched event. */
+  statuses: SignificantEventStatus[];
+}
+
+export interface E2EScenario {
+  input: {
+    scenario_id: string;
+    stream_name: string;
+  };
+  /** Rule-backed KI queries seeded into the live KI stream; signals are synthesized from their ES|QL. */
+  canonical_queries: E2ECanonicalQuery[];
+  output: {
+    criteria: SamplingCriterion[];
+    /** Rules that MUST produce at least one detection (recall side of the detection checkpoint). */
+    expected_detection_rule_uuids: string[];
+    /** Rules allowed to produce detections without a precision penalty (e.g. benign volume rules). */
+    allowed_detection_rule_uuids?: string[];
+    /** Canonical expected discoveries — same shape and role as `DiscoveryScenario.output`. */
+    expected_discoveries?: Array<Partial<Discovery>>;
+    /** Events expected in `.significant_events-events` at the end of the run. */
+    expected_events: E2EExpectedEvent[];
+    /** When true, no event may end the run with status "open" (false-positive check). */
+    expect_no_open_events?: boolean;
+    expected_ground_truth?: string;
+  };
+  metadata: Record<string, unknown> & ScenarioMetadata;
+  snapshot_source?: SnapshotSourceOverride;
+}
+
 export interface DatasetConfig {
   id: string;
   description: string;
@@ -140,4 +200,6 @@ export interface DatasetConfig {
   kiFeatureDeduplication: KIFeatureDeduplicationScenario[];
   discovery: DiscoveryScenario[];
   discoveryJudge: DiscoveryJudgeScenario[];
+  /** End-to-end pipeline scenarios (logs -> detections -> discoveries -> significant events). */
+  e2e: E2EScenario[];
 }

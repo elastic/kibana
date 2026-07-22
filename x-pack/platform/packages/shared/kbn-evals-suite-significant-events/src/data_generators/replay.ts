@@ -38,3 +38,15 @@ export { canonicalKIFeaturesFromExpectedGroundTruth } from './canonical_ki_featu
 export { canonicalDetectionsFromGroundTruth } from './canonical_detections';
 export { canonicalDiscoveryFromGroundTruth } from './canonical_discoveries';
 export { canonicalSignificantEventFromGroundTruth } from './canonical_significant_event';
+
+export { wipePipelineData, RULE_EVENTS_DATA_STREAM } from './wipe_pipeline_data';
+export { seedCanonicalRuleBackedQueries } from './seed_canonical_rule_backed_queries';
+export type { RuleSignalStats } from './synthesize_rule_signals';
+export { synthesizeRuleSignals } from './synthesize_rule_signals';
+export {
+  ensureManagedWorkflowReady,
+  executeManagedWorkflow,
+  SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID,
+  SIGNIFICANT_EVENTS_TRIAGE_WORKFLOW_ID,
+} from './execute_managed_workflow';
+export { readDetections, readLatestSignificantEvents } from './read_pipeline_outputs';
