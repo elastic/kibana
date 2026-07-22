@@ -37,3 +37,4 @@ export {
   resolveDefaultInferenceIdFromInferenceGet,
   resolveInstalledProductDocInferenceId,
 } from './src/default_inference_id';
+export { summarizeBulkErrors } from './src/summarize_bulk_errors';

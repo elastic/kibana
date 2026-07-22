@@ -7,43 +7,12 @@
 
 import { chunk as toChunks } from 'lodash';
 import type { Client } from '@elastic/elasticsearch';
-import type { BulkRequest, BulkResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { BulkRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { summarizeBulkErrors } from '@kbn/product-doc-common';
 import type { IndexedSecurityLabsDocument } from '../types';
 
 const indexingChunkSize = 10;
-
-/**
- * Summarizes bulk item failures without dumping the full response (which can be
- * large/noisy and may include request payloads).
- */
-export const summarizeBulkErrors = (response: BulkResponse): string => {
-  const failures = response.items
-    .map((item) => {
-      const operation = item.index ?? item.create ?? item.update ?? item.delete;
-      if (!operation?.error) {
-        return undefined;
-      }
-      return {
-        status: operation.status,
-        _index: operation._index,
-        _id: operation._id,
-        error: {
-          type: operation.error.type,
-          reason: operation.error.reason,
-          caused_by: operation.error.caused_by
-            ? {
-                type: operation.error.caused_by.type,
-                reason: operation.error.caused_by.reason,
-              }
-            : undefined,
-        },
-      };
-    })
-    .filter((failure): failure is NonNullable<typeof failure> => failure != null);
-
-  return JSON.stringify({ failureCount: failures.length, failures });
-};
 
 /**
  * Indexes Security Labs documents into Elasticsearch.
