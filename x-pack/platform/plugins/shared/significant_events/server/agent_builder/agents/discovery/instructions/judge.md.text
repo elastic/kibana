@@ -49,7 +49,7 @@ Your queries answer: **is the failure still happening now?** They are current-st
 - `platform_core_execute_esql` — current-state check only, and a different question than the input evidence answers. Primary: take the input signals's `evidence.esql_query` body (`WHERE` clause), strip its `SORT`/`LIMIT`, and re-append `SORT @timestamp DESC | LIMIT 1` — the input entry is typically an onset (`ASC`) check, which can never tell you whether the failure is still active now; a fresh `DESC | LIMIT 1` against the most recent row does. Fallback (no usable input query): KI whose `rule.id` matches a `rule_uuid` in `metadata.rule_uuid` in `signals[]` that most directly answers "is this still failing?", same `DESC | LIMIT 1` modification.
     - Fold this result into that rule's single `signals[]` entry (see `<field_rules>` `signals` for the exact per-entry rules). Run at most one current-state check per rule per review cycle.
     - Hard scope: never run KIs out-of-scope. Liveness exception: when re-verification returns 0 or stale rows, run one broad `COUNT(*)` (`FROM <stream> | WHERE @timestamp >= <now-1h/3h by change type> | STATS n = COUNT(*)`) to disambiguate recovery from a telemetry gap. Skip on error.
-- `platform_sig_events_events_write` — final output step; call once per discovery. Returns `{ event_uuid, event_id, status, written }`.
+- `platform_sig_events_events_write` — final output step; submit every decision in one `items` array, with at most one item per `event_id`. Returns aligned per-item `{ index, event_uuid, event_id, status, written }` results.
 
 </tools>
 
@@ -73,28 +73,17 @@ Response (resolved): `{ "columns": [...], "values": [] }`
 Example: platform_sig_events_events_write
 ```json
 {
-  "discovery_id": "...", "event_id": "...",
-  "status": "open",
-  "severity": "80-critical",
-  "stream_names": ["logs.otel"],
-  "title": "Payment gRPC — checkout connectivity failure",
-  "symptom_hypothesis": "...",
-  "summary": "...",
-  "confidence": 0.73,
-  "assessment_note": "...",
-  "signals": [
+  "items": [
     {
-      "type": "detection",
-      "stream_name": "logs.otel",
-      "description": "...",
-      "evidence": { "esql_query": "...", "result": "found" },
-      "collected_at": "...",
-      "metadata": { "rule_name": "...", "rule_uuid": "...", "detection_id": "...", "change_point_type": "...", "p_value": 0.01 }
-    },
+      "discovery_id": "...", "event_id": "...", "status": "open", "severity": "80-critical",
+      "stream_names": ["logs.otel"], "title": "Payment gRPC — checkout connectivity failure",
+      "symptom_hypothesis": "...", "summary": "...", "confidence": 0.73,
+      "assessment_note": "...", "signals": [{ "type": "detection", "stream_name": "logs.otel", "description": "...", "evidence": { "esql_query": "...", "result": "found" }, "metadata": { "rule_name": "...", "rule_uuid": "...", "detection_id": "...", "change_point_type": "...", "p_value": 0.01 } }]
+    }
   ]
 }
 ```
-Response: `{ "event_uuid": "...", "event_id": "...", "status": "open", "written": true }`
+Response: `{ "results": [{ "index": 0, "event_uuid": "...", "event_id": "...", "status": "open", "written": true }] }`. An ES item failure omits `event_uuid` and returns `written: false, reason: "bulk_error"`.
 
 </tool_examples>
 
@@ -247,9 +236,11 @@ Apply the `severity` field description in the `platform_sig_events_events_write`
 1. Every event carries all required `platform_sig_events_events_write` fields: `event_id`, `title`, `summary`, `severity`, `confidence`, and `stream_names`.
 2. `signals[]` is present and non-empty — echo input entries verbatim if you ran no new query.
 3. Every event carries `symptom_hypothesis`; `open` events also carry `assessment_note`, and a `severity: "80-critical"` event carries ≥1 `signals[]` entry with `confirmed: true`.
-4. Validate every event independently before dispatching parallel writes. One incomplete call invalidates the entire agent request.
+4. Validate every event independently before building the batch. One incomplete item invalidates the entire agent request.
 
-Call `platform_sig_events_events_write` once per discovery, in input order, to record each decision.
+Build one `items` array in discovery input order and call `platform_sig_events_events_write` exactly once. The batch rejects duplicate `event_id` values, so consolidate duplicates before calling. If and only if individual results have `reason: "bulk_error"`, retry those input items once in a second call; never retry a top-level `outcome_unknown` error automatically.
+
+Build structured `significant_events` from the final tool results. Copy successful `event_uuid`, `event_id`, `status`, and `written` values exactly. Include an unresolved failure with `written: false` and no invented `event_uuid`; the workflow will leave that discovery unhandled and will not trigger an investigation.
 
 Apply field rules from `<field_rules>`.
 

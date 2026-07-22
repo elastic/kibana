@@ -625,8 +625,7 @@ export default function webhookTest({ getService }: FtrProviderContext) {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/236174
-    describe.skip('OAuth2 client credentials', () => {
+    describe('OAuth2 client credentials', () => {
       let oauth2Server: OAuth2Server;
       let webhookActionId: string = '';
       const clientId = 'test-client-id';
@@ -661,12 +660,8 @@ export default function webhookTest({ getService }: FtrProviderContext) {
         oauth2Server.server.close();
       });
 
-      afterEach(() => {
-        oauth2Server.reset();
-      });
-
-      it('should get access token with client credentials', async () => {
-        const { body: result } = await supertest
+      it('should get access token with client credentials and refresh once expired', async () => {
+        const { body: firstResult } = await supertest
           .post(`/api/actions/connector/${webhookActionId}/_execute`)
           .set('kbn-xsrf', 'test')
           .send({
@@ -677,7 +672,7 @@ export default function webhookTest({ getService }: FtrProviderContext) {
           .expect(200);
 
         // this is the Kibana response to our connector "test" execution
-        expect(result).to.eql({
+        expect(firstResult).to.eql({
           status: 'ok',
           connector_id: webhookActionId,
           data: 'header_as_payload',
@@ -685,7 +680,7 @@ export default function webhookTest({ getService }: FtrProviderContext) {
 
         // this is the request that Kibana did to the auth server
         // before calling the webhook server
-        const tokenRequests = oauth2Server.getTokenRequests();
+        let tokenRequests = oauth2Server.getTokenRequests();
         expect(tokenRequests.length).to.be(1);
         expect(tokenRequests[0].client_id).to.be(clientId);
         expect(tokenRequests[0].client_secret).to.be(clientSecret);
@@ -694,34 +689,20 @@ export default function webhookTest({ getService }: FtrProviderContext) {
 
         // this is the request Kibana did to the webhook server
         // it returns headers because we are sending body: 'header_as_payload'
-        const webhookSimulatorHeadersRaw = await fetch(webhookSimulatorURL);
-        const webhookSimulatorHeaders = await webhookSimulatorHeadersRaw.json();
+        let webhookSimulatorHeadersRaw = await fetch(webhookSimulatorURL);
+        let webhookSimulatorHeaders = await webhookSimulatorHeadersRaw.json();
         expect(webhookSimulatorHeaders.length).to.be(1);
         expect(JSON.parse(webhookSimulatorHeaders[0]).authorization).to.equal(
           'Bearer test-token-1'
         );
-      });
-
-      it('should refresh the token once the previous one has expired', async () => {
-        // first call will generate a token as we could see in the previous test
-        await supertest
-          .post(`/api/actions/connector/${webhookActionId}/_execute`)
-          .set('kbn-xsrf', 'test')
-          .send({
-            params: {
-              body: 'header_as_payload',
-            },
-          })
-          .expect(200);
-
         // waits enough for the token to be expired plus some buffer
         await new Promise((resolve) =>
-          setTimeout(resolve, oauth2Server.getTokenExpirationTime() * 2 * 1000)
+          setTimeout(resolve, oauth2Server.getTokenExpirationTime() * 2 * 1000 + 2500)
         );
 
         // this second call should trigger a second call to the auth server because
         // the token will be expired
-        const { body: result } = await supertest
+        const { body: secondResult } = await supertest
           .post(`/api/actions/connector/${webhookActionId}/_execute`)
           .set('kbn-xsrf', 'test')
           .send({
@@ -732,7 +713,7 @@ export default function webhookTest({ getService }: FtrProviderContext) {
           .expect(200);
 
         // this is the Kibana response to our connector "test" execution
-        expect(result).to.eql({
+        expect(secondResult).to.eql({
           status: 'ok',
           connector_id: webhookActionId,
           data: 'header_as_payload',
@@ -740,7 +721,7 @@ export default function webhookTest({ getService }: FtrProviderContext) {
 
         // this is the request that Kibana did to the auth server
         // before calling the webhook server
-        const tokenRequests = oauth2Server.getTokenRequests();
+        tokenRequests = oauth2Server.getTokenRequests();
         expect(tokenRequests.length).to.be(2);
         expect(tokenRequests[1].client_id).to.be(clientId);
         expect(tokenRequests[1].client_secret).to.be(clientSecret);
@@ -749,10 +730,10 @@ export default function webhookTest({ getService }: FtrProviderContext) {
 
         // this is the request Kibana did to the webhook server
         // it returns headers because we are sending body: 'header_as_payload'
-        const webhookSimulatorHeadersRaw = await fetch(webhookSimulatorURL);
-        const webhookSimulatorHeaders = await webhookSimulatorHeadersRaw.json();
-        expect(webhookSimulatorHeaders.length).to.be(2);
-        expect(JSON.parse(webhookSimulatorHeaders[1]).authorization).to.equal(
+        webhookSimulatorHeadersRaw = await fetch(webhookSimulatorURL);
+        webhookSimulatorHeaders = await webhookSimulatorHeadersRaw.json();
+        expect(webhookSimulatorHeaders.length).to.be(1);
+        expect(JSON.parse(webhookSimulatorHeaders[0]).authorization).to.equal(
           'Bearer test-token-2'
         );
       });

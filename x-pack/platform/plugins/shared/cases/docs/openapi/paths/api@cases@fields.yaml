@@ -1,0 +1,63 @@
+get:
+  summary: Get the fields applicable to a case
+  operationId: getApplicableFieldsDefaultSpace
+  description: >
+    Returns the fields a caller may write to a case's `extended_fields` when creating a case for the
+    given owner. Includes the owner's global (library-wide) fields and, when `templateId` is
+    supplied, that template's fields. Migrated legacy custom fields appear as `global` fields.
+    Requires the Cases feature to be enabled in the space.
+  tags:
+    - cases
+  parameters:
+    - in: query
+      name: owner
+      description: The application that owns the cases (for example `cases`, `observability`, or `securitySolution`).
+      required: true
+      schema:
+        type: string
+        maxLength: 30
+      example: cases
+    - in: query
+      name: templateId
+      description: The identifier of a template to include the template's fields in the response.
+      required: false
+      schema:
+        type: string
+        maxLength: 36
+  responses:
+    '200':
+      description: Indicates a successful call.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/applicable_fields_response.yaml'
+          examples:
+            getCaseApplicableFieldsResponse:
+              $ref: '../components/examples/get_case_applicable_fields_response.yaml'
+    '400':
+      description: The request is invalid, for example when the `templateId` does not exist for the owner or its definition is invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/response_4xx.yaml'
+          examples:
+            response400:
+              $ref: '../components/examples/response_400_invalid_template.yaml'
+    '401':
+      description: Authorization information is missing or invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/response_4xx.yaml'
+          examples:
+            response401:
+              $ref: '../components/examples/response_401.yaml'
+    '403':
+      description: The user does not have access to the requested owner.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/response_4xx.yaml'
+          examples:
+            response403:
+              $ref: '../components/examples/response_403.yaml'

@@ -40,6 +40,16 @@
     }
   },
   {
+    "id": "apm-agent-approvers",
+    "name": "APM Agent Approvers",
+    "github": {
+      "team": "elastic/apm-agent-approvers"
+    },
+    "responsibilities": [
+      "Client Apps plugin"
+    ]
+  },
+  {
     "id": "ai-infra",
     "name": "AI Infrastructure",
     "areas": [
@@ -588,6 +598,23 @@
       "Infrastructure",
       "Universal Profiling",
       "Observability Overview"
+    ]
+  },
+  {
+    "id": "obs-signals-metrics",
+    "name": "Obs UX: Signals & Metrics",
+    "areas": [
+      "observability"
+    ],
+    "github": {
+      "team": "elastic/obs-signals-metrics-team",
+      "label": "Team:obs-signals-metrics"
+    },
+    "responsibilities": [
+      "Infrastructure metrics",
+      "Hosts UI",
+      "Metrics Explorer",
+      "Metrics Experience"
     ]
   },
   {
