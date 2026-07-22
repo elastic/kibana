@@ -30,6 +30,7 @@ import {
   getLiveQueryDetailsRequestQuerySchema,
 } from '../../../common/api';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+import { OSQUERY_SEARCH_STRATEGY } from '../../search_strategy/constants';
 
 export const getLiveQueryDetailsRoute = (
   router: IRouter<DataRequestHandlerContext>,
@@ -77,7 +78,7 @@ export const getLiveQueryDetailsRoute = (
                 factoryQueryType: OsqueryQueries.actionDetails,
                 spaceId,
               },
-              { abortSignal, strategy: 'osquerySearchStrategy' }
+              { abortSignal, strategy: OSQUERY_SEARCH_STRATEGY }
             )
           );
 
