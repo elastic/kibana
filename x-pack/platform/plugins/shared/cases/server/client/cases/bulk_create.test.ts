@@ -1435,11 +1435,7 @@ describe('bulkCreate', () => {
 
     it('rejects a template reference without a pinned version (no server-side expansion on bulkCreate)', async () => {
       await expect(
-        bulkCreate(
-          { cases: getCases({ template: { id: 'tmpl-1' } }) },
-          clientArgs,
-          casesClient
-        )
+        bulkCreate({ cases: getCases({ template: { id: 'tmpl-1' } }) }, clientArgs, casesClient)
       ).rejects.toThrow('template.version is required');
       expect(clientArgs.services.caseService.bulkCreateCases).not.toHaveBeenCalled();
     });
