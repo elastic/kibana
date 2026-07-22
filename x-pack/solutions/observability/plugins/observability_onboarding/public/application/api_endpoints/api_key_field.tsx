@@ -55,7 +55,7 @@ export const ApiKeyField = ({
         >
           <EuiFieldPassword
             fullWidth
-            type="dual"
+            type={hasApiKey ? 'dual' : 'password'}
             value={encodedApiKey ?? ''}
             placeholder={
               wasKeyCreatedBefore

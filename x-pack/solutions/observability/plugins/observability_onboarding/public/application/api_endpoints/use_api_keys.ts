@@ -12,7 +12,7 @@ import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser'
 import { useKibana } from '../../hooks/use_kibana';
 import { callObservabilityOnboardingApi } from '../../services/rest/create_call_api';
 import type { ApiEndpointId } from '../../../common/api_endpoints';
-import { readStoredFlags } from './read_stored_flags';
+import { readStoredFlags, sanitizeStoredFlags } from './read_stored_flags';
 
 const CREATED_KEYS_STORAGE_KEY = 'observabilityOnboarding.apiEndpoints.createdKeys';
 
@@ -74,7 +74,7 @@ export function useApiKeys(): UseApiKeysResult {
 
   return {
     encodedApiKeys,
-    keyCreatedBeforeByEndpointId: createdKeysInStorage ?? {},
+    keyCreatedBeforeByEndpointId: sanitizeStoredFlags(createdKeysInStorage),
     creatingEndpointId,
     createApiKey,
   };

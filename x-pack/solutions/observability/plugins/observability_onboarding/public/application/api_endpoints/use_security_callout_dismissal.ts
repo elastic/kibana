@@ -8,7 +8,7 @@
 import { useCallback } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import type { ApiEndpointId } from '../../../common/api_endpoints';
-import { readStoredFlags } from './read_stored_flags';
+import { readStoredFlags, sanitizeStoredFlags } from './read_stored_flags';
 
 const DISMISSED_CALLOUT_STORAGE_KEY =
   'observabilityOnboarding.apiEndpoints.dismissedSecurityCallout';
@@ -34,7 +34,7 @@ export function useSecurityCalloutDismissal(): UseSecurityCalloutDismissalResult
   );
 
   return {
-    dismissedByEndpointId: dismissedInStorage ?? {},
+    dismissedByEndpointId: sanitizeStoredFlags(dismissedInStorage),
     dismissCallout,
   };
 }

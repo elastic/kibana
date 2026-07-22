@@ -38,4 +38,18 @@ describe('ApiKeyField', () => {
 
     expect(screen.getByDisplayValue('encoded-key')).toBeInTheDocument();
   });
+
+  it('hides the show/hide toggle when there is no key to reveal', () => {
+    render(<ApiKeyField {...defaultProps} wasKeyCreatedBefore={true} />);
+
+    expect(screen.queryByRole('button', { name: /show password/i })).not.toBeInTheDocument();
+  });
+
+  it('shows the show/hide toggle when a key is present in memory', () => {
+    render(
+      <ApiKeyField {...defaultProps} wasKeyCreatedBefore={true} encodedApiKey="encoded-key" />
+    );
+
+    expect(screen.getByRole('button', { name: /show password/i })).toBeInTheDocument();
+  });
 });

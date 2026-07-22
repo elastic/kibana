@@ -83,4 +83,17 @@ describe('useSecurityCalloutDismissal', () => {
       [ApiEndpointId.OpenTelemetry]: true,
     });
   });
+
+  it('ignores stored values that are not strictly true', () => {
+    window.localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({ prometheus: 'false', opentelemetry: true })
+    );
+
+    const { result } = renderHook(() => useSecurityCalloutDismissal());
+
+    expect(result.current.dismissedByEndpointId).toEqual({
+      [ApiEndpointId.OpenTelemetry]: true,
+    });
+  });
 });

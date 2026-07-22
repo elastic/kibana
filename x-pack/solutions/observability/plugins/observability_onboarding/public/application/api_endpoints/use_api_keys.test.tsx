@@ -107,8 +107,8 @@ describe('useApiKeys', () => {
       [ApiEndpointId.Elasticsearch]: true,
     });
     expect(JSON.parse(window.localStorage.getItem(STORAGE_KEY) ?? '{}')).toEqual({
-      [ApiEndpointId.Prometheus]: true,
-      [ApiEndpointId.Elasticsearch]: true,
+      prometheus: true,
+      elasticsearch: true,
     });
   });
 
@@ -121,5 +121,18 @@ describe('useApiKeys', () => {
     expect(
       result.current.keyCreatedBeforeByEndpointId[ApiEndpointId.Elasticsearch]
     ).toBeUndefined();
+  });
+
+  it('ignores stored values that are not strictly true', () => {
+    window.localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({ prometheus: 'false', opentelemetry: 1, elasticsearch: true })
+    );
+
+    const { result } = renderHook(() => useApiKeys());
+
+    expect(result.current.keyCreatedBeforeByEndpointId).toEqual({
+      [ApiEndpointId.Elasticsearch]: true,
+    });
   });
 });
