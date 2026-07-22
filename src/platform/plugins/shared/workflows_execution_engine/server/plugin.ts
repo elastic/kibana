@@ -40,6 +40,7 @@ import {
   checkAndSkipIfExistingScheduledExecution,
   resumeWorkflow,
   runWorkflow,
+  runWorkflowSync,
 } from './execution_functions';
 import { executeWorkflowSync } from './execution_functions/execute_workflow_sync';
 import { handlePostExecutionLoop } from './execution_functions/handle_post_execution_loop';
@@ -63,6 +64,7 @@ import {
 } from './lib/workflow_task_run_event_fields';
 import { WorkflowsMeteringService } from './metering/metering_service';
 import { createDataClientBundle, type DataClientBundle } from './repositories/data_access_layer';
+import { InMemoryExecutionPersistence } from './repositories/execution_persistence';
 import { initializeLogsRepositoryDataStream } from './repositories/logs_repository/data_stream';
 import { StepExecutionRepository } from './repositories/step_execution_repository';
 import { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
@@ -116,6 +118,19 @@ import { createWorkflowTaskAbortController } from './workflow_task_shutdown';
  *   it is not meant as extra user workflow retries after successful interrupt recovery.
  */
 const WORKFLOW_RUN_TASK_MAX_ATTEMPTS = 3;
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
+const getSynchronousWorkflowOutput = (output: unknown): Record<string, unknown> | undefined => {
+  if (output === undefined || output === null) {
+    return undefined;
+  }
+  if (isRecord(output)) {
+    return output;
+  }
+  throw new Error('Synchronous workflow output must be an object');
+};
 
 /**
  * Max Task Manager attempts for `workflow:resume`.
@@ -1032,6 +1047,7 @@ export class WorkflowsExecutionEnginePlugin
       options: {
         refresh: boolean | 'wait_for';
         executionId?: string;
+      metadata?: Record<string, string>;
       } = { refresh: false }
     ): Promise<{
       workflowExecution: WorkflowExecutionForInputRendering;
