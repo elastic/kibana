@@ -48,7 +48,7 @@ interface EntityBadgeProps {
 export const EntityBadge: React.FC<EntityBadgeProps> = ({ entity, scopeId }) => {
   const enableNewFlyout = useIsNewFlyoutEnabled();
   const { openFlyout } = useExpandableFlyoutApi();
-  const { openUserFlyout, openHostFlyout, openServiceFlyout } = useFlyoutApi();
+  const { openEntityFlyout } = useFlyoutApi();
   const { euiTheme } = useEuiTheme();
 
   const badgeContent = (
@@ -109,13 +109,7 @@ export const EntityBadge: React.FC<EntityBadgeProps> = ({ entity, scopeId }) => 
     const sharedParams = { entityId, contextID: scopeId, scopeId };
 
     if (enableNewFlyout) {
-      if (entity.type === EntityType.user) {
-        openUserFlyout({ userName: entity.name, ...sharedParams });
-      } else if (entity.type === EntityType.host) {
-        openHostFlyout({ hostName: entity.name, ...sharedParams });
-      } else if (entity.type === EntityType.service) {
-        openServiceFlyout({ serviceName: entity.name, ...sharedParams });
-      }
+      openEntityFlyout({ engineType: entity.type, entityName: entity.name, ...sharedParams });
       return;
     }
 
