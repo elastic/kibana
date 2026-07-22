@@ -157,6 +157,46 @@ export function SettingsTab() {
   }, [savedIndexPatterns, savedConfigYamlState, continuousExtraction, scheduledDiscovery]);
 
   const handleSave = useCallback(async () => {
+    // Validate include patterns before persisting anything. handleSave writes to
+    // several settings stores in sequence; bailing out mid-way (after the index
+    // patterns are already saved) would leave a confusing partial save. The
+    // server PUT route stores whatever it's given and does not reject unmatched
+    // patterns, so this client-side guard is the only thing standing between the
+    // user and a config that silently onboards nothing.
+    if (continuousExtraction.hasChanged) {
+      const { enabled, onboardAllEligible, includedStreamPatterns } = continuousExtraction.draft;
+      // Only run when the stream list has loaded; if the fetch is pending or
+      // failed, skip the check rather than falsely flagging every pattern as
+      // unmatched.
+      if (enabled && !onboardAllEligible && streamsData?.streams) {
+        const patterns = parseIncludedStreamPatterns(includedStreamPatterns);
+        if (patterns.length > 0) {
+          const supportedStreamNames = streamsData.streams
+            .map(({ stream }) => stream)
+            .filter(isSupportedStream)
+            .map((stream) => stream.name);
+          const unmatched = findUnmatchedIncludePatterns(patterns, supportedStreamNames);
+          if (unmatched.length > 0) {
+            core.notifications.toasts.addDanger({
+              title: i18n.translate(
+                'xpack.streams.significantEventsDiscovery.settings.includedStreamPatternsNoMatchTitle',
+                { defaultMessage: 'No streams match the included patterns' }
+              ),
+              text: i18n.translate(
+                'xpack.streams.significantEventsDiscovery.settings.includedStreamPatternsNoMatchText',
+                {
+                  defaultMessage:
+                    'These patterns match no onboardable stream: {patterns}. Update them or enable "Onboard all eligible streams".',
+                  values: { patterns: unmatched.join(', ') },
+                }
+              ),
+            });
+            return;
+          }
+        }
+      }
+    }
+
     setIsSaving(true);
     try {
       if (indexPatterns !== savedIndexPatterns) {
@@ -168,39 +208,6 @@ export function SettingsTab() {
       }
 
       if (continuousExtraction.hasChanged) {
-        const { enabled, onboardAllEligible, includedStreamPatterns } = continuousExtraction.draft;
-        // In include mode, block a save whose patterns match no onboardable stream:
-        // saving it would silently onboard nothing, which is almost never intended.
-        // Only run this when the stream list has loaded; if the fetch is pending or
-        // failed we skip the client check and let the server enforce the same rule,
-        // rather than falsely flagging every pattern as unmatched.
-        if (enabled && !onboardAllEligible && streamsData?.streams) {
-          const patterns = parseIncludedStreamPatterns(includedStreamPatterns);
-          if (patterns.length > 0) {
-            const supportedStreamNames = streamsData.streams
-              .map(({ stream }) => stream)
-              .filter(isSupportedStream)
-              .map((stream) => stream.name);
-            const unmatched = findUnmatchedIncludePatterns(patterns, supportedStreamNames);
-            if (unmatched.length > 0) {
-              core.notifications.toasts.addDanger({
-                title: i18n.translate(
-                  'xpack.streams.significantEventsDiscovery.settings.includedStreamPatternsNoMatchTitle',
-                  { defaultMessage: 'No streams match the included patterns' }
-                ),
-                text: i18n.translate(
-                  'xpack.streams.significantEventsDiscovery.settings.includedStreamPatternsNoMatchText',
-                  {
-                    defaultMessage:
-                      'These patterns match no onboardable stream: {patterns}. Update them or enable "Onboard all eligible streams".',
-                    values: { patterns: unmatched.join(', ') },
-                  }
-                ),
-              });
-              return;
-            }
-          }
-        }
         await continuousExtraction.save();
       }
 
