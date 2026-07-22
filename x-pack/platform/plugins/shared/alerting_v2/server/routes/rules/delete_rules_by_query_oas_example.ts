@@ -24,8 +24,7 @@ export const deleteRulesByQueryOasExamples = (): AlertingOasOperationObject =>
     responses: {
       200: {
         name: 'deleteRulesByQueryDryRunResponse',
-        summary:
-          'Dry-run preview of matching rules; set `force: true` on the request to execute',
+        summary: 'Dry-run preview of matching rules; set `force: true` on the request to execute',
         value: DRY_RUN_RESPONSE,
       },
 
