@@ -36,7 +36,11 @@ export const languageForContentType = (contentType?: string) => {
   if (!contentType) {
     return TEXT_LANGUAGE_ID;
   }
-  if (isJSONContentType(contentType) || isMapboxVectorTile(contentType) || isNDJSONContentType(contentType)) {
+  if (
+    isJSONContentType(contentType) ||
+    isMapboxVectorTile(contentType) ||
+    isNDJSONContentType(contentType)
+  ) {
     // Using hjson will allow us to use comments in editor output and solves the problem with error markers
     return CONSOLE_OUTPUT_LANG_ID;
   } else if (contentType.indexOf('application/yaml') >= 0) {
