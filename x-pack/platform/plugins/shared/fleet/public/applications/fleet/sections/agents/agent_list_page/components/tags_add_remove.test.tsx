@@ -250,6 +250,24 @@ describe('TagsAddRemove', () => {
     expect(result.getByTitle('tag1').getAttribute('aria-checked')).toEqual('false');
   });
 
+  it('should optimistically check tag when adding for single agent', async () => {
+    const result = renderComponent('agent1');
+    const getTag = (name: string) => result.getByText(name);
+
+    fireEvent.click(getTag('tag2'));
+
+    expect(result.getByTitle('tag2').getAttribute('aria-checked')).toEqual('true');
+  });
+
+  it('should optimistically uncheck tag when removing for single agent', async () => {
+    const result = renderComponent('agent1');
+    const getTag = (name: string) => result.getByText(name);
+
+    fireEvent.click(getTag('tag1'));
+
+    expect(result.getByTitle('tag1').getAttribute('aria-checked')).toEqual('false');
+  });
+
   it('should add new tag when not found in search and button clicked - bulk selection', () => {
     const result = renderComponent(undefined, 'query');
     const searchInput = result.getByRole('combobox');
