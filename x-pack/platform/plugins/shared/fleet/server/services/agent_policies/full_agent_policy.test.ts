@@ -1489,6 +1489,39 @@ ssl.test: 123
       }
     `);
   });
+
+  it('should redact proxy_headers and ssl.key when redactProxySecrets=true', () => {
+    const proxy = {
+      id: 'proxy-1',
+      name: 'proxy1',
+      url: 'https://proxy.fr',
+      certificate_authorities: '/tmp/ssl/ca.crt',
+      proxy_headers: { Authorization: 'Bearer SECRET' },
+      certificate: 'my-cert',
+      certificate_key: 'PRIVATE_KEY',
+      is_preconfigured: false,
+    } as any;
+
+    const policyOutput = transformOutputToFullPolicyOutput(
+      {
+        id: 'id123',
+        proxy_id: 'proxy-1',
+        hosts: ['http://host.fr'],
+        is_default: false,
+        is_default_monitoring: false,
+        name: 'test output',
+        type: 'elasticsearch',
+      } as any,
+      proxy,
+      false,
+      true // redactProxySecrets
+    );
+
+    expect(policyOutput.proxy_url).toBe('https://proxy.fr');
+    expect(policyOutput).not.toHaveProperty('proxy_headers');
+    expect(policyOutput.ssl?.certificate).toBe('my-cert');
+    expect(policyOutput.ssl).not.toHaveProperty('key');
+  });
 });
 
 describe('generateFleetConfig', () => {
@@ -1570,46 +1603,46 @@ describe('generateFleetConfig', () => {
       }
     `);
   });
-});
 
-it('should work with proxy with headers and certificate authorities and certificate and key', () => {
-  const res = generateFleetConfig(
-    {
-      host_urls: ['https://test.fr'],
-      proxy_id: 'proxy-1',
-    } as any,
-    [
+  it('should work with proxy with headers and certificate authorities and certificate and key', () => {
+    const res = generateFleetConfig(
       {
-        id: 'proxy-1',
-        url: 'https://proxy.fr',
-        certificate_authorities: ['/tmp/ssl/ca.crt'],
-        proxy_headers: { Authorization: 'xxx' },
-        certificate: 'my-cert',
-        certificate_key: 'my-key',
+        host_urls: ['https://test.fr'],
+        proxy_id: 'proxy-1',
       } as any,
-    ]
-  );
+      [
+        {
+          id: 'proxy-1',
+          url: 'https://proxy.fr',
+          certificate_authorities: ['/tmp/ssl/ca.crt'],
+          proxy_headers: { Authorization: 'xxx' },
+          certificate: 'my-cert',
+          certificate_key: 'my-key',
+        } as any,
+      ]
+    );
 
-  expect(res).toMatchInlineSnapshot(`
-    Object {
-      "hosts": Array [
-        "https://test.fr",
-      ],
-      "proxy_headers": Object {
-        "Authorization": "xxx",
-      },
-      "proxy_url": "https://proxy.fr",
-      "ssl": Object {
-        "certificate": "my-cert",
-        "certificate_authorities": Array [
-          Array [
-            "/tmp/ssl/ca.crt",
-          ],
+    expect(res).toMatchInlineSnapshot(`
+      Object {
+        "hosts": Array [
+          "https://test.fr",
         ],
-        "key": "my-key",
-        "renegotiation": "never",
-        "verification_mode": "",
-      },
-    }
-  `);
+        "proxy_headers": Object {
+          "Authorization": "xxx",
+        },
+        "proxy_url": "https://proxy.fr",
+        "ssl": Object {
+          "certificate": "my-cert",
+          "certificate_authorities": Array [
+            Array [
+              "/tmp/ssl/ca.crt",
+            ],
+          ],
+          "key": "my-key",
+          "renegotiation": "never",
+          "verification_mode": "",
+        },
+      }
+    `);
+  });
 });
