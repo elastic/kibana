@@ -58,7 +58,7 @@ export const useDocumentFlyoutTitle = ({
   renderCellActions = noopCellActionRenderer,
   onAlertUpdated = noop,
 }: UseDocumentFlyoutTitleOptions): DocumentFlyoutTitleResult => {
-  const { openDocumentFlyoutFromIndexAsChild } = useFlyoutApi();
+  const { openDocumentFlyoutFromIndexAsChild, openAttackFlyoutAsChild } = useFlyoutApi();
 
   // Attack discovery documents are persisted as alerts (event.kind: signal), so detect them by
   // rule type id first — they'd otherwise match the generic alert branch below.
@@ -80,21 +80,41 @@ export const useDocumentFlyoutTitle = ({
   );
   const iconType = isAttack ? 'bolt' : isAlert ? 'warning' : 'analyzeEvent';
 
-  // Open the source document as a child flyout. Route through the shared
-  // `openDocumentFlyoutFromIndexAsChild` API rather than calling `overlays.openSystemFlyout`
-  // directly, so the child descriptor is written to the flyoutV2 URL param (via the API's
-  // internal writeOnOpen('inherit')). Opening it directly here bypassed the URL writer, so the
-  // child was not restored on refresh — only the parent tool flyout reopened.
+  // Open the source document as a child flyout. Route through the flyout API rather than calling
+  // `overlays.openSystemFlyout` directly so the child descriptor is written to the flyoutV2 URL
+  // param (via the API's internal writeOnOpen('inherit')) and restored on refresh.
+  // Attack documents live in alert-specific indices not covered by the default data view, so they
+  // must be opened with openAttackFlyoutAsChild (which fetches via useTimelineEventsDetails against
+  // the specific index). openDocumentFlyoutFromIndexAsChild uses useEsDocSearch against the default
+  // data view and returns NotFound for attack documents.
   const onTitleClick = useCallback(() => {
-    openDocumentFlyoutFromIndexAsChild({
-      documentId: hit.raw._id ?? '',
-      indexName: (hit.raw._index as string) ?? '',
-      renderCellActions,
-      onAlertUpdated,
-      title: sessionTitle,
-      origin: FLYOUT_ORIGIN.TOOL_HEADER_TITLE,
-    });
-  }, [openDocumentFlyoutFromIndexAsChild, hit, renderCellActions, onAlertUpdated, sessionTitle]);
+    if (isAttack) {
+      openAttackFlyoutAsChild({
+        attackId: hit.raw._id ?? '',
+        indexName: (hit.raw._index as string) ?? '',
+        attackTitle: attackTitle ?? undefined,
+        origin: FLYOUT_ORIGIN.TOOL_HEADER_TITLE,
+      });
+    } else {
+      openDocumentFlyoutFromIndexAsChild({
+        documentId: hit.raw._id ?? '',
+        indexName: (hit.raw._index as string) ?? '',
+        renderCellActions,
+        onAlertUpdated,
+        title: sessionTitle,
+        origin: FLYOUT_ORIGIN.TOOL_HEADER_TITLE,
+      });
+    }
+  }, [
+    isAttack,
+    openAttackFlyoutAsChild,
+    openDocumentFlyoutFromIndexAsChild,
+    hit,
+    attackTitle,
+    renderCellActions,
+    onAlertUpdated,
+    sessionTitle,
+  ]);
 
   const badge = <DocumentSeverity hit={hit} />;
   const timestamp = <Timestamp hit={hit} size="xs" />;
