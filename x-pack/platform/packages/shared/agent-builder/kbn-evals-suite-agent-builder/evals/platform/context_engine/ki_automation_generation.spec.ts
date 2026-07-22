@@ -110,7 +110,7 @@ evaluate.describe(
           dataset: {
             name: 'ki-automation-generation: valid AI Index provided',
             description:
-              'Skill must pass Phase 0 and proceed to Phase 1 discovery when a valid AiIndexHttpItem is in the conversation.',
+              'Skill must pass Phase 0 and attempt Phase 1 discovery when a valid AiIndexHttpItem is in the conversation. The source index may not exist in the eval cluster, so the agent may report that the index was not found and ask how to proceed — that is acceptable as long as it attempted get_index_mapping and did not ask the user to provide an AI Index definition.',
             examples: [
               {
                 input: {
@@ -118,7 +118,7 @@ evaluate.describe(
                 },
                 output: {
                   expected:
-                    'The agent validates the AI Index, proceeds to Phase 1 (calls get_index_mapping for raw-cases-all), and moves toward strategy suggestion. It does not ask the user to provide an AI Index.',
+                    'The agent validates the AI Index and proceeds to Phase 1 discovery. It calls get_index_mapping for raw-cases-all (the index parsed from the sources[] ES|QL query). If the index does not exist, it informs the user and asks how to proceed (e.g. ingest data first or point to a different index). It does NOT ask the user to provide an AI Index definition.',
                 },
                 metadata: {
                   expectedSkill: 'ki-automation-generation',
