@@ -50,7 +50,9 @@ describe('MonochromeIcons', () => {
       const isValid =
         typeof value !== 'string' || value === 'test-file-stub' || value.startsWith('data:');
       if (!isValid) {
-        failures.push(`["${id}"] = "${String(value).slice(0, 60)}" (bare EUI name — invalid in CSS url())`);
+        failures.push(
+          `["${id}"] = "${String(value).slice(0, 60)}" (bare EUI name — invalid in CSS url())`
+        );
       }
     }
     expect(failures).toEqual([]);

@@ -99,7 +99,9 @@ test.describe(
     // Note: this shallow check does NOT catch a missing MonochromeIcons entry (a black-fill
     // glyph mis-routed to background-image still contains a data URL and passes here).
     for (const stepType of ['console', 'if', 'foreach', 'http']) {
-      test(`should render "${stepType}" step type icon from a data URL`, async ({ pageObjects }) => {
+      test(`should render "${stepType}" step type icon from a data URL`, async ({
+        pageObjects,
+      }) => {
         await pageObjects.workflowEditor.gotoNewWorkflow();
         await pageObjects.workflowEditor.setYamlEditorValue(
           getMultiStepTypeWorkflowYaml('Step Type Icon Test')

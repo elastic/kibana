@@ -395,9 +395,7 @@ describe('getIconBase64 – hardcoded icon wins over EUI name strings', () => {
     const failures: string[] = [];
     for (const [key, value] of Object.entries(HardcodedIconDataUrls)) {
       const isValid =
-        typeof value !== 'string' ||
-        value === 'test-file-stub' ||
-        value.startsWith('data:');
+        typeof value !== 'string' || value === 'test-file-stub' || value.startsWith('data:');
       if (!isValid) {
         failures.push(`["${key}"] = "${String(value).slice(0, 60)}" (type: ${typeof value})`);
       }

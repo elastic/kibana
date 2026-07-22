@@ -533,7 +533,8 @@ async function injectDynamicShadowIcons(
       if (isTriggerConnector && boltUrl) {
         iconBase64 = boltUrl;
       } else if (isBuiltInTriggerId) {
-        iconBase64 = HardcodedIconDataUrls[connector.actionTypeId] || boltUrl || FALLBACK_BOLT_DATA_URL;
+        iconBase64 =
+          HardcodedIconDataUrls[connector.actionTypeId] || boltUrl || FALLBACK_BOLT_DATA_URL;
       }
     }
     if (isTriggerConnector && iconBase64 !== undefined && !isValidDataUrl(iconBase64) && boltUrl) {
