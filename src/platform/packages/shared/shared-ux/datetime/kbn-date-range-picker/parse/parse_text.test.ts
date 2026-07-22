@@ -166,8 +166,11 @@ describe('textToTimeRange', () => {
       ['tmr', 'now+1d/d', 'now+1d/d'],
       ['td', 'now/d', 'now/d'],
       ['this week', 'now/w', 'now/w'],
+      ['this week until now', 'now/w', 'now'],
       ['this month', 'now/M', 'now/M'],
+      ['this month until now', 'now/M', 'now'],
       ['this year', 'now/y', 'now/y'],
+      ['this year until now', 'now/y', 'now'],
       ['last week', 'now-1w/w', 'now-1w/w'],
       ['last month', 'now-1M/M', 'now-1M/M'],
       ['last year', 'now-1y/y', 'now-1y/y'],
@@ -371,21 +374,21 @@ describe('textToTimeRange', () => {
 
     describe('RFC 2822 variants', () => {
       it.each([
-        ['Sun, 23 Jan 2000 01:23:45 +0000', { year: 2000, month: 0, day: 23 }],
-        ['Sun, 23 Jan 2000 01:23 +0000', { year: 2000, month: 0, day: 23 }],
-        ['23 Jan 2000 01:23:45 +0000', { year: 2000, month: 0, day: 23 }],
-        ['23 Jan 2000 01:23 +0000', { year: 2000, month: 0, day: 23 }],
+        ['Sun, 23 Jan 2000 01:23:45 +0000', { year: 2000, month: 0, day: 23 }, true],
+        ['Sun, 23 Jan 2000 01:23 +0000', { year: 2000, month: 0, day: 23 }, true],
+        ['23 Jan 2000 01:23:45 +0000', { year: 2000, month: 0, day: 23 }, true],
+        ['23 Jan 2000 01:23 +0000', { year: 2000, month: 0, day: 23 }, true],
         ['Sun, 23 Jan 2000 01:23:45', { year: 2000, month: 0, day: 23 }],
         ['23 Jan 2000 01:23', { year: 2000, month: 0, day: 23 }],
-      ])('parses "%s"', (text, expected) => {
+      ])('parses "%s"', (text, expected, hasUTCOffset = false) => {
         const range = textToTimeRange(text);
 
         expect(range.isInvalid).toBe(false);
 
         const d = range.startDate!;
-        expect(d.getFullYear()).toBe(expected.year);
-        expect(d.getMonth()).toBe(expected.month);
-        expect(d.getDate()).toBe(expected.day);
+        expect(hasUTCOffset ? d.getUTCFullYear() : d.getFullYear()).toBe(expected.year);
+        expect(hasUTCOffset ? d.getUTCMonth() : d.getMonth()).toBe(expected.month);
+        expect(hasUTCOffset ? d.getUTCDate() : d.getDate()).toBe(expected.day);
       });
 
       it('parses RFC 2822 with timezone abbreviation via forgiving mode', () => {

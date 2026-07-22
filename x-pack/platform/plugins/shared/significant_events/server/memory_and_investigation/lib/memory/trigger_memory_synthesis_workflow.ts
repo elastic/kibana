@@ -21,7 +21,7 @@ export const triggerMemorySynthesisWorkflow = async ({
   spaces,
   request,
   logger,
-  triggeredBy = 'sigevents-memory-synthesis',
+  triggeredBy = 'significant-events-memory-synthesis',
 }: {
   workflowsManagement?: WorkflowsServerPluginSetup;
   spaces?: SpacesPluginStart;

@@ -26,7 +26,7 @@ import { createToken } from '@kbn/core-di';
 import type { EventBus } from '../event_bus';
 import type { AlertActionEvent } from '../alert_action_event_publisher/events';
 import type { RuleEvent } from '../rule_event_publisher/events';
-import type { RuleExecutionEvent } from '../rule_executor_event_publisher/events';
+import type { RuleExecutorEvent } from '../rule_executor_event_publisher/events';
 
 export type {
   AlertActionEvent,
@@ -77,10 +77,16 @@ export {
 } from '../rule_event_publisher/events';
 
 export type {
-  RuleExecutionEvent,
-  RuleExecutionCompletedPayload,
+  RuleExecutorEvent,
+  RuleExecutionSucceededEvent,
+  RuleExecutionSucceededPayload,
+  RuleExecutionFailedEvent,
+  RuleExecutionFailedPayload,
 } from '../rule_executor_event_publisher/events';
-export { RULE_EXECUTION_COMPLETED_EVENT_TYPE } from '../rule_executor_event_publisher/events';
+export {
+  RULE_EXECUTION_SUCCEEDED_EVENT_TYPE,
+  RULE_EXECUTION_FAILED_EVENT_TYPE,
+} from '../rule_executor_event_publisher/events';
 
 /**
  * Discriminated union of every domain event the alerting framework publishes
@@ -90,7 +96,7 @@ export { RULE_EXECUTION_COMPLETED_EVENT_TYPE } from '../rule_executor_event_publ
  * (and its own envelope shape if it diverges). Extend this union by adding
  * each subdomain's sub-union here.
  */
-export type AlertingDomainEvent = AlertActionEvent | RuleEvent | RuleExecutionEvent;
+export type AlertingDomainEvent = AlertActionEvent | RuleEvent | RuleExecutorEvent;
 
 /**
  * Publisher-side context threaded through every alerting bus publish call.
