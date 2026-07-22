@@ -271,6 +271,13 @@ export const METADATA_LIST_ASSIGNEE_LABEL = i18n.translate(
   }
 );
 
+export const METADATA_LIST_TAGS_LABEL = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.metadataList.tagsLabel',
+  {
+    defaultMessage: 'Tags',
+  }
+);
+
 export const formatMetadataListDuration = (ms: number): string => {
   if (ms < 1000) {
     return i18n.translate('xpack.alertingV2EpisodesUi.details.metadataList.durationMs', {

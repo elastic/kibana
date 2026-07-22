@@ -124,6 +124,10 @@ export const FIELD_DEFAULT_SNIPPETS: DefaultSnippet[] = [
     body: {
       name: '${1:instructions}',
       control: FieldType.MARKDOWN,
+      // `type` is required by the (editor) field schema for every inline control. MARKDOWN's value is
+      // display-only so `keyword` is inert, but it must be present or the inserted field is flagged
+      // "missing property type" — every other snippet already includes it.
+      type: 'keyword',
       metadata: { content: '${2:### Instructions}' },
     },
   },

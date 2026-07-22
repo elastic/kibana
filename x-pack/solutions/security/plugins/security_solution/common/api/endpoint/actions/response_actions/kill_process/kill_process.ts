@@ -20,10 +20,10 @@ export const KillProcessRouteRequestSchema = {
       ...BaseActionRequestSchema,
       parameters: schema.oneOf([
         schema.object({ pid: schema.number({ min: 1 }) }),
-        schema.object({ entity_id: schema.string({ minLength: 1 }) }),
+        schema.object({ entity_id: schema.string({ minLength: 1, maxLength: 256 }) }),
 
         // Process Name currently applies only to SentinelOne (validated below)
-        schema.object({ process_name: schema.string({ minLength: 1 }) }),
+        schema.object({ process_name: schema.string({ minLength: 1, maxLength: 1024 }) }),
       ]),
     },
     {
