@@ -46,9 +46,8 @@ const FlyoutBody = styled(EuiFlyoutBody)`
 
 export const AgentPolicyYamlFlyout = memo<{
   policyId: string;
-  revision?: number | null;
   onClose: () => void;
-}>(({ policyId, revision, onClose }) => {
+}>(({ policyId, onClose }) => {
   const flyoutTitleId = useGeneratedHtmlId();
   const [formatters, setFormatters] = useState<YamlFormatters | null>(null);
 
@@ -63,7 +62,7 @@ export const AgentPolicyYamlFlyout = memo<{
     isLoading: isLoadingYaml,
     data: yamlData,
     error,
-  } = useGetOneAgentPolicyFull(policyId, revision ? { revision } : undefined);
+  } = useGetOneAgentPolicyFull(policyId);
   const { data: agentPolicyData } = useGetOneAgentPolicy(policyId);
   const packagePoliciesContainSecrets = agentPolicyData?.item?.package_policies?.some(
     (packagePolicy) => packagePolicy?.secret_references?.length
@@ -92,10 +91,9 @@ export const AgentPolicyYamlFlyout = memo<{
       </EuiCodeBlock>
     );
 
-  const revisionQueryParam = revision ? `&revision=${revision}` : '';
   const downloadLink =
     core.http.basePath.prepend(agentPolicyRouteService.getInfoFullDownloadPath(policyId)) +
-    `?apiVersion=${API_VERSIONS.public.v1}${revisionQueryParam}`;
+    `?apiVersion=${API_VERSIONS.public.v1}`;
 
   const downloadYaml = useCallback(
     (e: React.MouseEvent) => {

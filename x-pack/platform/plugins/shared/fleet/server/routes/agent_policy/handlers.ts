@@ -17,8 +17,6 @@ import { ALL_SPACES_ID, FIPS_AGENT_KUERY, inputsFormat } from '../../../common/c
 import { HTTPAuthorizationHeader } from '../../../common/http_authorization_header';
 
 import { fullAgentPolicyToYaml } from '../../../common/services';
-import { redactProxySecretsFromPolicy } from '../../services/agent_policies/full_agent_policy';
-import { listFleetProxies } from '../../services/fleet_proxies';
 import {
   appContextService,
   agentPolicyService,
@@ -737,42 +735,7 @@ export const getFullAgentPolicy: FleetRequestHandler<
   const fleetContext = await context.fleet;
   const soClient = fleetContext.internalSoClient;
   const { agentPolicyId } = request.params;
-
-  if (request.query.revision && (request.query.kubernetes || request.query.standalone)) {
-    return response.customError({
-      statusCode: 400,
-      body: { message: 'revision cannot be used with kubernetes or standalone flags' },
-    });
-  }
-
   const canReadSettings = fleetContext.authz.fleet.readSettings;
-
-  if (request.query.revision) {
-    const coreContext = await context.core;
-    const esClient = coreContext.elasticsearch.client.asInternalUser;
-    const fleetServerPolicy = await agentPolicyService.getFleetServerPolicy(
-      esClient,
-      agentPolicyId,
-      request.query.revision
-    );
-    if (!fleetServerPolicy) {
-      return response.customError({
-        statusCode: 404,
-        body: { message: 'Agent policy not found' },
-      });
-    }
-    const item = fleetServerPolicy.data as unknown as FullAgentPolicy;
-    let redactedItem = item;
-    if (!canReadSettings) {
-      const { items: proxies } = await listFleetProxies(soClient);
-      const proxyUrlsWithCertKey = new Set(
-        proxies.filter((p) => p.certificate_key).map((p) => p.url)
-      );
-      redactedItem = redactProxySecretsFromPolicy(item, proxyUrlsWithCertKey);
-    }
-    const body: GetFullAgentPolicyResponse = { item: redactedItem };
-    return response.ok({ body });
-  }
 
   if (request.query.kubernetes === true) {
     const agentVersion =
@@ -827,45 +790,7 @@ export const downloadFullAgentPolicy: FleetRequestHandler<
     params: { agentPolicyId },
   } = request;
 
-  if (request.query.revision && (request.query.kubernetes || request.query.standalone)) {
-    return response.customError({
-      statusCode: 400,
-      body: { message: 'revision cannot be used with kubernetes or standalone flags' },
-    });
-  }
-
   const canReadSettings = fleetContext.authz.fleet.readSettings;
-
-  if (request.query.revision) {
-    const coreContext = await context.core;
-    const esClient = coreContext.elasticsearch.client.asInternalUser;
-    const fleetServerPolicy = await agentPolicyService.getFleetServerPolicy(
-      esClient,
-      agentPolicyId,
-      request.query.revision
-    );
-    if (!fleetServerPolicy) {
-      return response.customError({
-        statusCode: 404,
-        body: { message: 'Agent policy not found' },
-      });
-    }
-    const storedPolicy = fleetServerPolicy.data as unknown as FullAgentPolicy;
-    let policyToSerialize = storedPolicy;
-    if (!canReadSettings) {
-      const { items: proxies } = await listFleetProxies(soClient);
-      const proxyUrlsWithCertKey = new Set(
-        proxies.filter((p) => p.certificate_key).map((p) => p.url)
-      );
-      policyToSerialize = redactProxySecretsFromPolicy(storedPolicy, proxyUrlsWithCertKey);
-    }
-    const body = fullAgentPolicyToYaml(policyToSerialize, yaml);
-    const headers: ResponseHeaders = {
-      'content-type': 'text/x-yaml',
-      'content-disposition': `attachment; filename="elastic-agent.yml"`,
-    };
-    return response.ok({ body, headers });
-  }
 
   if (request.query.kubernetes === true) {
     const agentVersion =
