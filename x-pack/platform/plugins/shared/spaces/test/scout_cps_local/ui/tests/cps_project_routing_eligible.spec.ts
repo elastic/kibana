@@ -56,7 +56,7 @@ test.describe('Spaces CPS project routing - eligible tier', { tag: CPS_ELIGIBLE_
   }) => {
     const token = `cpsall${RUN_ID}`;
     const spaceName = `${token} space`;
-    const spaceId = spaceName.replace(' ', '-');
+    const spaceId = spaceName.replaceAll(' ', '-');
     createdSpaceIds.push(spaceId);
 
     await pageObjects.spaces.gotoCreateSpace();
