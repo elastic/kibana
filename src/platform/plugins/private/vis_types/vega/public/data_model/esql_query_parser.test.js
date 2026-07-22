@@ -298,6 +298,57 @@ describe('EsqlQueryParser.populateData', () => {
     expect(callArgs.filter).toEqual(mockFilters);
   });
 
+  test('applies both time params and a DSL time filter for BUCKET queries', async () => {
+    getESQLTimeFieldFromQuery.mockResolvedValue('timestamp');
+
+    const { parser, searchAPI } = createParser(rangeStart, rangeEnd);
+    const dataObject = { name: 'bucket_query' };
+    const { url } = parser.parseUrl(dataObject, {
+      '%type%': 'esql',
+      query:
+        'FROM kibana_sample_data_flights | STATS count = COUNT(*) BY Date = BUCKET(timestamp, 50, ?_tstart, ?_tend) | SORT Date ASC',
+    });
+
+    searchAPI.searchEsql.mockReturnValue(
+      of([
+        {
+          name: 'bucket_query',
+          rawResponse: {
+            columns: [
+              { name: 'Date', type: 'date' },
+              { name: 'count', type: 'long' },
+            ],
+            values: [[new Date(rangeStart).toISOString(), 1]],
+          },
+        },
+      ])
+    );
+
+    await parser.populateData([{ url, dataObject }]);
+
+    const callArgs = searchAPI.searchEsql.mock.calls[0][0][0];
+    expect(callArgs.params).toHaveLength(2);
+    expect(callArgs.params[0]).toEqual({ _tstart: new Date(rangeStart).toISOString() });
+    expect(callArgs.params[1]).toEqual({ _tend: new Date(rangeEnd).toISOString() });
+    expect(callArgs.filter).toEqual(
+      expect.objectContaining({
+        bool: expect.objectContaining({
+          filter: expect.arrayContaining([
+            {
+              range: {
+                timestamp: {
+                  gte: new Date(rangeStart).toISOString(),
+                  lte: new Date(rangeEnd).toISOString(),
+                  format: 'strict_date_optional_time',
+                },
+              },
+            },
+          ]),
+        }),
+      })
+    );
+  });
+
   test('applies a DSL time filter on the default time field when %timefield% is absent', async () => {
     getESQLTimeFieldFromQuery.mockResolvedValue('timestamp');
 
