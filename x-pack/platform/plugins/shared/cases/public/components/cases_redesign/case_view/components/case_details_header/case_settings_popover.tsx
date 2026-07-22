@@ -10,11 +10,14 @@ import React from 'react';
 import { EuiPopoverTitle, EuiSpacer, EuiSwitch, EuiWrappingPopover } from '@elastic/eui';
 import { useCasesFeatures } from '../../../../../common/use_cases_features';
 import * as i18n from '../../../../case_view/translations';
+import { EXTRACT_OBSERVABLES_LABEL } from '../../../../../common/translations';
 import { SHOW_METRICS } from '../../../translations';
 
 interface CaseSettingsPopoverProps {
   syncAlerts: boolean;
   onSyncAlertsChange: (enabled: boolean) => void;
+  extractObservables: boolean;
+  onExtractObservablesChange: (enabled: boolean) => void;
   showMetrics: boolean;
   onShowMetricsChange: (enabled: boolean) => void;
   isOpen: boolean;
@@ -28,14 +31,22 @@ interface CaseSettingsPopoverProps {
 export const CaseSettingsPopover: FC<CaseSettingsPopoverProps> = ({
   syncAlerts,
   onSyncAlertsChange,
+  extractObservables,
+  onExtractObservablesChange,
   showMetrics,
   onShowMetricsChange,
   isOpen,
   onClose,
   anchorElement,
 }) => {
-  const { isSyncAlertsEnabled, metricsFeatures } = useCasesFeatures();
+  const {
+    isSyncAlertsEnabled,
+    observablesAuthorized,
+    isExtractObservablesEnabled,
+    metricsFeatures,
+  } = useCasesFeatures();
   const hasMetrics = metricsFeatures.length > 0;
+  const showExtractObservables = observablesAuthorized && isExtractObservablesEnabled;
 
   return (
     <EuiWrappingPopover
@@ -56,6 +67,18 @@ export const CaseSettingsPopover: FC<CaseSettingsPopoverProps> = ({
             onChange={(e) => onSyncAlertsChange(e.target.checked)}
             compressed
             data-test-subj="case-settings-sync-alerts-switch"
+          />
+          <EuiSpacer size="m" />
+        </>
+      )}
+      {showExtractObservables && (
+        <>
+          <EuiSwitch
+            label={EXTRACT_OBSERVABLES_LABEL}
+            checked={extractObservables}
+            onChange={(e) => onExtractObservablesChange(e.target.checked)}
+            compressed
+            data-test-subj="case-settings-extract-observables-switch"
           />
           <EuiSpacer size="m" />
         </>

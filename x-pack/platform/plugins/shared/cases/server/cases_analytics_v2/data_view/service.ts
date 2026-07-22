@@ -12,13 +12,27 @@ import type {
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import { isEqual } from 'lodash';
+import { parse as parseYaml } from 'yaml';
 import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import type { DataView, RuntimeField, RuntimeFieldSpec } from '@kbn/data-views-plugin/common';
-import { CASE_TEMPLATE_SAVED_OBJECT } from '../../../common/constants';
+import {
+  CASE_FIELD_DEFINITION_SAVED_OBJECT,
+  CASE_TEMPLATE_SAVED_OBJECT,
+} from '../../../common/constants';
+import type { InlineField } from '../../../common/types/domain/template/fields';
+import { isDisplayOnlyField } from '../../../common/types/domain/template/fields';
+import { ParsedTemplateDefinitionSchema } from '../../../common/types/domain/template/latest';
+import type { FieldDefinition } from '../../../common/types/domain/field_definition/latest';
+import {
+  getFieldSnakeKey,
+  parseFieldDefinitionsToInlineFields,
+  resolveTemplateFields,
+} from '../../../common/utils/template_fields';
 import { buildCaseDataViewSpec, getCaseDataViewId } from './data_view_specs';
 import { buildRuntimeFieldEntry, computeRuntimeFieldsFingerprint } from './runtime_fields';
 
 const TEMPLATES_PAGE_SIZE = 100;
+const FIELD_DEFINITIONS_PAGE_SIZE = 100;
 
 /**
  * How long an "ensured" entry stays trusted before the next request in
@@ -33,16 +47,28 @@ const TEMPLATES_PAGE_SIZE = 100;
 const BOOTSTRAP_CACHE_TTL_MS = 5 * 60 * 1000;
 
 /**
- * Detects the data-views plugin's "id already exists" conflict surface,
- * which surfaces as ES's `version_conflict_engine_exception`. The plugin's
- * `statusCode` coverage varies by the saved-objects code path the conflict
- * crossed, so both message and statusCode are checked.
+ * Detects the "another node already created this data view" outcome of the
+ * bootstrap create, across the two shapes it can take on the
+ * `create` + `createSavedObject` call site:
  *
- * Used only on the `createAndSave` call site so real version conflicts
+ *   1. ES's `version_conflict_engine_exception` — the SO create itself
+ *      lost the race on the deterministic id. The plugin's `statusCode`
+ *      coverage varies by the saved-objects code path the conflict crossed,
+ *      so both message and statusCode are checked.
+ *   2. The data-views plugin's `DuplicateDataViewError` — `createSavedObject`
+ *      runs a `findByName` dupe check before the create, and when the other
+ *      node's SO has already landed it throws this instead of reaching ES.
+ *      It's a plain `Error` with no `statusCode` and message
+ *      `Duplicate data view: Case Analytics`, so it's matched by `name`.
+ *
+ * Both mean the same thing here (the space's view exists), so both are
+ * treated as a benign, self-healing bootstrap race and logged at DEBUG.
+ * Scoped to the bootstrap create call site so real version conflicts
  * elsewhere (e.g. a stale `updateSavedObject` payload) still surface.
  */
 function isVersionConflictError(err: unknown): boolean {
   if (err == null) return false;
+  if ((err as { name?: string })?.name === 'DuplicateDataViewError') return true;
   const status =
     (err as { statusCode?: number })?.statusCode ??
     (err as { meta?: { statusCode?: number } })?.meta?.statusCode;
@@ -55,27 +81,16 @@ interface CasesAnalyticsV2DataViewServiceDeps {
   logger: Logger;
   dataViewsService: DataViewsServerPluginStart;
   /**
-   * Internal (no-request) SO client used for template reads. Templates are
-   * a hidden SO type, and the request-scoped client passed at ensure time
-   * may not include them in `includedHiddenTypes`. The internal client is
-   * opted in to both `cases` and `cases-templates` at plugin start —
-   * the latter only when `templatesEnabled` is true (see below).
+   * Internal (no-request) SO client used for template and field-library
+   * reads. Both are hidden SO types, and the request-scoped client passed
+   * at ensure time may not include them in `includedHiddenTypes`. The
+   * internal client is opted in to `cases`, `cases-templates`, and
+   * `cases-field-definitions` at plugin start.
    *
    * `namespaces: [spaceId]` on the find call scopes results to a single
    * space even though the client itself is unscoped.
    */
   internalSavedObjectsClient: SavedObjectsClientContract;
-  /**
-   * Resolved value of `xpack.cases.templates.enabled`. Gates the
-   * per-space `cases-templates` SO walk inside `collectSnakeKeysForSpace`.
-   * When false the SO type is not registered with core, so calling
-   * `internalSavedObjectsClient.find({ type: 'cases-templates' })` would
-   * throw "Missing mappings for saved objects types: 'cases-templates'";
-   * the walk short-circuits to an empty list and the data view is
-   * bootstrapped with no runtime field overlay (which is the correct
-   * shape when there are no templates to project).
-   */
-  templatesEnabled: boolean;
 }
 
 /**
@@ -98,18 +113,41 @@ interface EnsureForSpaceDeps {
 }
 
 /**
- * Subset of the template SO this service reads. Persisted
- * `attributes.definition` is the raw YAML the user submitted; structured
- * field metadata lives on `attributes.fieldNames`, populated at create /
- * update time by `toFieldNames(parsedDefinition.fields)` (see
- * `services/templates/index.ts`).
+ * Subset of the template SO this service reads. `attributes.definition` is
+ * the raw YAML the user submitted; it's parsed here (rather than reading the
+ * denormalized `attributes.fieldDefinitions`) because `fieldDefinitions`
+ * omits `$ref` library fields — `toFieldDefinitions` persists inline fields
+ * only. Resolving the YAML against the field library instead recovers both
+ * inline and `$ref` fields, matching the case write path
+ * (`v2_template_utils.buildTemplateExtendedFieldsDefaults`).
  *
- * Typed loosely with `unknown` per element so a future template-field type
- * (e.g. `metadata`, `display`, `validation`) that this service doesn't
- * read can land without changing this interface.
+ * `attributes.owner` scopes `$ref` resolution to the template's owner:
+ * library field names are unique only per owner, so refs must resolve
+ * against that owner's library subset (see `collectTemplateSnakeKeys`).
  */
 interface TemplateAttributesLike {
-  fieldNames?: Array<{ name?: unknown; type?: unknown }>;
+  definition?: unknown;
+  owner?: unknown;
+}
+
+/**
+ * Subset of the field-library SO this service reads. Unlike templates, a
+ * field definition stores its field entry as a raw YAML string in
+ * `attributes.definition`; the `{ name, type }` needed for a snake-key is
+ * recovered by parsing that YAML. `attributes.name` is the library field's
+ * identifier — it's what a template `$ref` points at, so it's needed to
+ * resolve refs against this library. `attributes.owner` scopes that
+ * resolution, since library names are unique only per owner.
+ *
+ * `isGlobal` is read from `_source` and filtered in application code — the
+ * boolean isn't reliably indexed for documents created before the mapping
+ * existed, mirroring `FieldDefinitionsService.getFieldDefinitions`.
+ */
+interface FieldDefinitionAttributesLike {
+  name?: unknown;
+  definition?: unknown;
+  owner?: unknown;
+  isGlobal?: unknown;
 }
 
 /**
@@ -133,7 +171,8 @@ interface BootstrapEntry {
 
 /**
  * Manages per-space Cases data views. One data view per space, each
- * carrying a runtime field map derived from that space's templates only.
+ * carrying a runtime field map derived from that space's templates and
+ * its global field-library fields (`isGlobal: true`).
  *
  * Lazy bootstrap: a space's data view is created on the first Cases
  * request in that space; subsequent in-process requests short-circuit via
@@ -324,18 +363,40 @@ export class CasesAnalyticsV2DataViewService {
         const spec = buildCaseDataViewSpec(deps.spaceId);
         spec.runtimeFieldMap = desiredRuntimeFieldMap;
 
+        // Deliberately NOT `createAndSave`: that helper unconditionally
+        // calls `setDefault`, which claims the space's global default data
+        // view slot for the first view created when none is set yet
+        // (`setDefault(id, force=false)` only writes when there's no default).
+        // This is a fire-and-forget bootstrap that runs on the first cases
+        // request in a space, so it would race ahead of an admin's or a
+        // test's own data view and silently make the managed "Case Analytics"
+        // view the default — surfacing as the wrong pre-selected view in the
+        // Discover/Lens picker across unrelated surfaces. A managed,
+        // admin-facing analytics view is always selected explicitly, so it
+        // must never touch the default. `create` + `createSavedObject`
+        // reproduce `createAndSave` minus the `setDefault` side effect.
+        //
+        // `skipFetchFields: true` matches the previous `createAndSave` call;
+        // runtime fields come from the spec, not a field-caps refresh.
+        //
         // `overwrite: false` so a concurrent create from another node
         // surfaces a conflict instead of clobbering. Per-process concurrency
         // is already collapsed by `dedupedEnsure`, so the only remaining
-        // source of a 409 is a cross-Kibana-node race: another node
+        // source of a conflict is a cross-Kibana-node race: another node
         // ensured the same space at the same time and won the SO create.
+        // Depending on which node's write lands first the loser sees either
+        // an ES `version_conflict_engine_exception` (the SO create raced) or
+        // the data-views plugin's `DuplicateDataViewError` (the loser's
+        // `createSavedObject` name check saw the winner's doc first);
+        // `isVersionConflictError` treats both as the same benign outcome.
         // Both nodes computed the desired map from the same `find` against
         // the persisted templates, so the winning doc carries the runtime
         // fields this call would have written. Treat as a benign success
         // and let the next refresh path (template lifecycle hook or the
         // post-TTL recompute) reconcile if anything drifts.
         try {
-          await dvService.createAndSave(spec, false, true);
+          const dataView = await dvService.create(spec, true /* skipFetchFields */);
+          await dvService.createSavedObject(dataView, false /* overwrite */);
           this.logger.info(
             `bootstrapped data view ${dataViewId} (space=${deps.spaceId}, runtime_fields=${
               Object.keys(desiredRuntimeFieldMap).length
@@ -419,11 +480,124 @@ export class CasesAnalyticsV2DataViewService {
   // ----- Internals -----
 
   /**
-   * Pages through every active template SO in the given space and extracts
-   * `<name>_as_<type>` snake-keys from each template's persisted
-   * `attributes.fieldNames` array. `attributes.definition` is YAML on
-   * disk; structured `{ name, type }` only exists as transient parser
-   * output during create / update.
+   * Collects the `<name>_as_<type>` snake-keys that the per-space data view
+   * must project as runtime fields. Two sources feed this set, both of
+   * which land their values in `case.extended_fields`:
+   *   1. Template fields — every live template's resolved field set, inline
+   *      fields plus `$ref` library fields (see `collectTemplateSnakeKeys`).
+   *   2. Global field-library fields (`isGlobal: true`) — applied to every
+   *      case regardless of template, so their runtime fields must be
+   *      published even when no template references them (see
+   *      `collectGlobalFieldSnakeKeys`).
+   *
+   * The field library is loaded once and shared: templates resolve their
+   * `$ref` fields against it, and global fields are filtered out of it. The
+   * resulting lists are concatenated; `buildRuntimeFieldMap` dedupes
+   * identical snake-keys, so a field a template references via `$ref` and a
+   * global field pointing at the same library entry collapse to one runtime
+   * field.
+   */
+  private async collectSnakeKeysForSpace(spaceId: string): Promise<string[]> {
+    // Both `cases-templates` and `cases-field-definitions` are always
+    // registered with core, so the reads below are always safe. When the
+    // templates feature is off there simply are no template or field-library
+    // documents, so both collectors return empty and the data view is
+    // bootstrapped with no runtime field overlay.
+    //
+    // The field library is needed twice — to resolve template `$ref` fields
+    // and to project global fields — so it's loaded once and passed to both
+    // collectors.
+    const fieldLibrary = await this.collectFieldLibrary(spaceId);
+
+    // Group by owner for `$ref` resolution. Library field names are unique
+    // only per owner, so a template must resolve refs against its own
+    // owner's subset — matching the owner-scoped resolution the case write
+    // path uses (`getFieldDefinitions({ owner })`). Resolving against the
+    // merged space-wide library could pick another owner's same-named field
+    // with a different type, producing a snake-key that never matches the
+    // stored value.
+    const libraryByOwner = new Map<string, FieldDefinition[]>();
+    for (const def of fieldLibrary) {
+      const forOwner = libraryByOwner.get(def.owner);
+      if (forOwner) {
+        forOwner.push(def);
+      } else {
+        libraryByOwner.set(def.owner, [def]);
+      }
+    }
+
+    const templateSnakeKeys = await this.collectTemplateSnakeKeys(spaceId, libraryByOwner);
+    const globalFieldSnakeKeys = this.collectGlobalFieldSnakeKeys(fieldLibrary);
+
+    return [...templateSnakeKeys, ...globalFieldSnakeKeys];
+  }
+
+  /**
+   * Pages through every field-library SO in the given space and returns the
+   * ones with a string `definition`, shaped as `FieldDefinition`s for the
+   * shared parser / resolver utilities.
+   *
+   * Reads `attributes.name` (what a template `$ref` points at, see
+   * `resolveTemplateFields`), `attributes.owner` (so `$ref` resolution can
+   * be scoped per owner — library names are unique only per owner), and
+   * `attributes.isGlobal` (so `collectGlobalFieldSnakeKeys` can filter
+   * without a second SO read).
+   *
+   * Uses the internal SO client because the field-library type is hidden and
+   * the request-scoped client may not include it.
+   */
+  private async collectFieldLibrary(spaceId: string): Promise<FieldDefinition[]> {
+    const library: FieldDefinition[] = [];
+    let page = 1;
+
+    while (true) {
+      const response =
+        await this.deps.internalSavedObjectsClient.find<FieldDefinitionAttributesLike>({
+          type: CASE_FIELD_DEFINITION_SAVED_OBJECT,
+          perPage: FIELD_DEFINITIONS_PAGE_SIZE,
+          page,
+          // Single-space scope: this view's runtime fields cover only the
+          // field library in this space (across every owner in it).
+          namespaces: [spaceId],
+          fields: ['name', 'owner', 'definition', 'isGlobal'],
+        });
+
+      const defs = response.saved_objects
+        .filter((fd) => typeof fd.attributes?.definition === 'string')
+        .map((fd) => ({
+          fieldDefinitionId: fd.id,
+          name: typeof fd.attributes?.name === 'string' ? fd.attributes.name : '',
+          owner: typeof fd.attributes?.owner === 'string' ? fd.attributes.owner : '',
+          definition: fd.attributes.definition as string,
+          isGlobal: fd.attributes?.isGlobal === true,
+        }));
+      library.push(...defs);
+
+      if (response.saved_objects.length < FIELD_DEFINITIONS_PAGE_SIZE) break;
+      page++;
+    }
+
+    return library;
+  }
+
+  /**
+   * Pages through every active template SO in the given space and derives
+   * `<name>_as_<type>` snake-keys from each template's resolved field set.
+   *
+   * Reads `attributes.definition` (the raw YAML) rather than the
+   * denormalized `attributes.fieldDefinitions`: the latter is produced by
+   * `toFieldDefinitions`, which persists inline fields only and drops
+   * `$ref` library references. Parsing the YAML and resolving it against the
+   * field library (`resolveTemplateFields`) recovers both inline and `$ref`
+   * fields — the same resolution the case write path uses to compute
+   * `extended_fields`, so the runtime fields match the values actually
+   * stored. Display-only fields (MARKDOWN) hold no value and are excluded.
+   *
+   * `$ref` fields resolve against the template owner's library subset
+   * (`libraryByOwner`), not the merged space-wide library: library names are
+   * unique only per owner, so a space-wide `.find` by name could bind a ref
+   * to another owner's same-named field with a different type. `attributes.owner`
+   * is read for this scoping.
    *
    * Uses the internal SO client because templates are a hidden type the
    * request-scoped client may not include.
@@ -432,20 +606,16 @@ export class CasesAnalyticsV2DataViewService {
    *   - `isLatest: true` excludes old versions that a renamed template no
    *     longer publishes.
    *   - `NOT deletedAt: *` excludes soft-deleted templates.
-   * `fields: ['fieldNames']` keeps the payload limited to the only
-   * attribute this method reads. The SO API skips migrations for
-   * partial-field reads, which is safe here because both filter fields
-   * and `fieldNames` have been on the template SO since its first model
-   * version.
+   * `fields: ['definition', 'owner']` keeps the payload limited to the only
+   * attributes this method reads. The SO API skips migrations for
+   * partial-field reads, which is safe here because the filter fields,
+   * `definition`, and `owner` have all been on the template SO since its
+   * first model version.
    */
-  private async collectSnakeKeysForSpace(spaceId: string): Promise<string[]> {
-    // Templates feature flag is off — the `cases-templates` SO type is not
-    // registered with core, so naming it in `find({ type })` would throw
-    // "Missing mappings for saved objects types: 'cases-templates'".
-    // Returning empty here is also semantically correct: with no templates
-    // there are no extended fields to project as runtime fields.
-    if (!this.deps.templatesEnabled) return [];
-
+  private async collectTemplateSnakeKeys(
+    spaceId: string,
+    libraryByOwner: ReadonlyMap<string, FieldDefinition[]>
+  ): Promise<string[]> {
     const out: string[] = [];
     let page = 1;
 
@@ -458,18 +628,24 @@ export class CasesAnalyticsV2DataViewService {
         // only from templates in this space.
         namespaces: [spaceId],
         filter: `${CASE_TEMPLATE_SAVED_OBJECT}.attributes.isLatest: true AND NOT ${CASE_TEMPLATE_SAVED_OBJECT}.attributes.deletedAt: *`,
-        fields: ['fieldNames'],
+        fields: ['definition', 'owner'],
       });
 
       for (const tpl of response.saved_objects) {
-        const fieldNames = tpl.attributes?.fieldNames ?? [];
-        for (const f of fieldNames) {
-          const name = typeof f?.name === 'string' ? f.name : undefined;
-          const type = typeof f?.type === 'string' ? f.type : undefined;
-          if (name && type) {
-            out.push(`${name}_as_${type}`);
-          }
-        }
+        const owner = typeof tpl.attributes?.owner === 'string' ? tpl.attributes.owner : '';
+        // Resolve refs only against this owner's library. An unknown owner
+        // (no entry) resolves against an empty library — inline fields still
+        // project; refs drop, which is safe.
+        const ownerLibrary = libraryByOwner.get(owner) ?? [];
+        const snakeKeys = this.resolveTemplateFieldsFromDefinition(
+          tpl.attributes?.definition,
+          ownerLibrary
+        )
+          // Display-only fields (MARKDOWN) hold no value and are never
+          // stored on a case, so they get no runtime field.
+          .filter((field) => !isDisplayOnlyField(field))
+          .map((field) => getFieldSnakeKey(field.name, field.type));
+        out.push(...snakeKeys);
       }
 
       if (response.saved_objects.length < TEMPLATES_PAGE_SIZE) break;
@@ -477,6 +653,46 @@ export class CasesAnalyticsV2DataViewService {
     }
 
     return out;
+  }
+
+  /**
+   * Parses a template's raw YAML `definition` and resolves its `fields`
+   * (inline + `$ref`) against the field library into a flat inline-field
+   * list. A malformed or non-string definition yields an empty list — a
+   * single bad template must never break runtime field projection for the
+   * rest of the space.
+   */
+  private resolveTemplateFieldsFromDefinition(
+    definition: unknown,
+    fieldLibrary: readonly FieldDefinition[]
+  ): InlineField[] {
+    if (typeof definition !== 'string') return [];
+    try {
+      const parsed = ParsedTemplateDefinitionSchema.safeParse(parseYaml(definition));
+      if (!parsed.success) return [];
+      return resolveTemplateFields(parsed.data.fields, fieldLibrary);
+    } catch {
+      return [];
+    }
+  }
+
+  /**
+   * Derives `<name>_as_<type>` snake-keys from the global (`isGlobal: true`)
+   * entries of the already-loaded field library. Global fields apply to
+   * every case regardless of template, so their values land in
+   * `case.extended_fields` even when the case uses no template — without
+   * this projection those values would sit in the analytics index untyped
+   * and undiscoverable in Lens / Discover.
+   *
+   * Display-only fields (MARKDOWN) hold no value and are never stored on a
+   * case, so they're excluded to match the write path
+   * (`buildExtendedFieldsDefaults`).
+   */
+  private collectGlobalFieldSnakeKeys(fieldLibrary: readonly FieldDefinition[]): string[] {
+    const globalDefinitions = fieldLibrary.filter((fd) => fd.isGlobal === true);
+    return parseFieldDefinitionsToInlineFields(globalDefinitions)
+      .filter((field) => !isDisplayOnlyField(field))
+      .map((field) => getFieldSnakeKey(field.name, field.type));
   }
 
   private buildRuntimeFieldMap(snakeKeys: string[]): Record<string, RuntimeFieldSpec> {

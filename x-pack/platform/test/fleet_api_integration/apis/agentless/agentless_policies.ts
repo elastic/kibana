@@ -8,6 +8,7 @@
 import expect from '@kbn/expect';
 import type * as http from 'http';
 import { v4 as uuidv4 } from 'uuid';
+import { ECH_AGENTLESS_OUTPUT_ID } from '@kbn/fleet-plugin/common/constants';
 
 import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
@@ -131,6 +132,10 @@ export default function (providerContext: FtrProviderContext) {
 
         const agentPolicy = await apiClient.getAgentPolicy(policy.item.id);
         expect(agentPolicy.item.supports_agentless).to.be(true);
+        // Managed bulk is disabled in this suite's config (config.agentless.ts): agentless
+        // policies must keep using the direct-ES output.
+        expect(agentPolicy.item.data_output_id).to.be(ECH_AGENTLESS_OUTPUT_ID);
+        expect(agentPolicy.item.monitoring_output_id).to.be(ECH_AGENTLESS_OUTPUT_ID);
 
         expect(apiCalls.length).to.be(1);
         expect(apiCalls[0].url).to.be('/agentless-api/api/v1/ess/deployments');

@@ -9,7 +9,7 @@ import React from 'react';
 
 import { act, fireEvent, waitFor } from '@testing-library/react';
 
-import type { AgentPolicy, InMemoryPackagePolicy } from '../types';
+import type { Agent, AgentPolicy, InMemoryPackagePolicy } from '../types';
 import { createIntegrationsTestRendererMock } from '../mock';
 
 import {
@@ -95,12 +95,14 @@ function renderMenu({
   showAddAgent = false,
   defaultIsOpen = true,
   onUpgraded,
+  agent,
 }: {
   agentPolicies: AgentPolicy[];
   packagePolicy: InMemoryPackagePolicy;
   showAddAgent?: boolean;
   defaultIsOpen?: boolean;
   onUpgraded?: () => void;
+  agent?: Agent;
 }) {
   const renderer = createIntegrationsTestRendererMock();
 
@@ -112,11 +114,27 @@ function renderMenu({
       upgradePackagePolicyHref="/test/upgrade-link"
       defaultIsOpen={defaultIsOpen}
       onUpgraded={onUpgraded}
+      agent={agent}
       key="test1"
     />
   );
 
   return { utils };
+}
+
+function createMockAgent(props: Partial<Agent> = {}): Agent {
+  return {
+    id: 'agent-uuid',
+    status: 'online',
+    policy_id: 'some-uuid1',
+    last_checkin: new Date().toISOString(),
+    type: 'PERMANENT',
+    active: true,
+    enrolled_at: new Date().toISOString(),
+    local_metadata: {},
+    user_provided_metadata: {},
+    ...props,
+  } as Agent;
 }
 
 function createMockAgentPolicies(props: Partial<AgentPolicy> = {}): AgentPolicy[] {
@@ -629,6 +647,56 @@ describe('PackagePolicyActionsMenu', () => {
           isServerlessEnabled: false,
           deploymentId: 'abc123def456',
         },
+      });
+    });
+  });
+
+  describe('"Details" action', () => {
+    it('should not render for non-agentless policies', async () => {
+      const agentPolicies = createMockAgentPolicies();
+      const packagePolicy = createMockPackagePolicy({ supports_agentless: false });
+      const { utils } = renderMenu({ agentPolicies, packagePolicy });
+      await waitFor(() => {
+        expect(utils.queryByTestId('PackagePolicyActionsDetailsItem')).toBeNull();
+      });
+    });
+
+    it('should render and be disabled for agentless policies when no agent is enrolled', async () => {
+      const agentPolicies = createMockAgentPolicies({ supports_agentless: true });
+      const packagePolicy = createMockPackagePolicy({ supports_agentless: true });
+      // No `agent` prop — not yet enrolled
+      const { utils } = renderMenu({ agentPolicies, packagePolicy });
+      await waitFor(() => {
+        const detailsItem = utils.getByTestId('PackagePolicyActionsDetailsItem');
+        expect(detailsItem).not.toBeNull();
+        expect(detailsItem).toBeDisabled();
+      });
+    });
+
+    it('should render and be enabled for agentless policies when an agent is enrolled', async () => {
+      const agentPolicies = createMockAgentPolicies({ supports_agentless: true });
+      const packagePolicy = createMockPackagePolicy({ supports_agentless: true });
+      const agent = createMockAgent();
+      const { utils } = renderMenu({ agentPolicies, packagePolicy, agent });
+      await waitFor(() => {
+        const detailsItem = utils.getByTestId('PackagePolicyActionsDetailsItem');
+        expect(detailsItem).not.toBeDisabled();
+      });
+    });
+
+    it('should open the status details flyout when clicked', async () => {
+      const agentPolicies = createMockAgentPolicies({ supports_agentless: true });
+      const packagePolicy = createMockPackagePolicy({ supports_agentless: true });
+      const agent = createMockAgent();
+      const { utils } = renderMenu({ agentPolicies, packagePolicy, agent });
+
+      const detailsItem = await utils.findByTestId('PackagePolicyActionsDetailsItem');
+      await act(async () => {
+        fireEvent.click(detailsItem);
+      });
+
+      await waitFor(() => {
+        expect(utils.getByTestId('agentlessStatusDetailsFlyout')).not.toBeNull();
       });
     });
   });

@@ -5,10 +5,27 @@
  * 2.0.
  */
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo } from 'react';
 
 import type { CaseUI } from '../../../../common';
+import { LOCAL_STORAGE_KEYS } from '../../../../common/constants';
+import { useCasesLocalStorage } from '../../../common/use_cases_local_storage';
 import { getAttachmentAuthorKey } from '../components/helpers';
+
+/**
+ * Attachment-tab filter selections persisted to local storage so they survive
+ * reloads. Kept separate from the activity-tab filters (different key + shape).
+ * The free-text search term is intentionally excluded.
+ */
+export interface AttachmentTabFilters {
+  selectedAttachmentTypes: string[];
+  selectedAuthors: string[];
+}
+
+const DEFAULT_ATTACHMENT_TAB_FILTERS: AttachmentTabFilters = {
+  selectedAttachmentTypes: [],
+  selectedAuthors: [],
+};
 
 export interface CaseViewFiltersParams {
   selectedAttachmentTypes: string[];
@@ -32,8 +49,21 @@ export interface CaseViewFiltersResult extends CaseViewFiltersParams {
  * per-accordion / per-list views.
  */
 export const useCaseViewFilters = (caseData: CaseUI): CaseViewFiltersResult => {
-  const [selectedAttachmentTypes, setSelectedAttachmentTypes] = useState<string[]>([]);
-  const [selectedAuthors, setSelectedAuthors] = useState<string[]>([]);
+  const [persistedFilters, setPersistedFilters] = useCasesLocalStorage<AttachmentTabFilters>(
+    LOCAL_STORAGE_KEYS.attachmentFilters,
+    DEFAULT_ATTACHMENT_TAB_FILTERS
+  );
+  const { selectedAttachmentTypes, selectedAuthors } = persistedFilters;
+
+  const setSelectedAttachmentTypes = useCallback(
+    (next: string[]) => setPersistedFilters((prev) => ({ ...prev, selectedAttachmentTypes: next })),
+    [setPersistedFilters]
+  );
+
+  const setSelectedAuthors = useCallback(
+    (next: string[]) => setPersistedFilters((prev) => ({ ...prev, selectedAuthors: next })),
+    [setPersistedFilters]
+  );
 
   const isTypeFilterActive = selectedAttachmentTypes.length > 0;
   const isAuthorFilterActive = selectedAuthors.length > 0;
@@ -55,10 +85,10 @@ export const useCaseViewFilters = (caseData: CaseUI): CaseViewFiltersResult => {
     [selectedAttachmentTypes, isTypeFilterActive]
   );
 
-  const clearFilters = useCallback(() => {
-    setSelectedAttachmentTypes([]);
-    setSelectedAuthors([]);
-  }, []);
+  const clearFilters = useCallback(
+    () => setPersistedFilters(DEFAULT_ATTACHMENT_TAB_FILTERS),
+    [setPersistedFilters]
+  );
 
   return {
     selectedAttachmentTypes,

@@ -9,13 +9,18 @@ import type { ElasticsearchClient, KibanaRequest, SavedObject } from '@kbn/core/
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { RuntimeFieldSpec } from '@kbn/data-views-plugin/common';
-import { CASE_TEMPLATE_SAVED_OBJECT } from '../../../common/constants';
+import {
+  CASE_FIELD_DEFINITION_SAVED_OBJECT,
+  CASE_TEMPLATE_SAVED_OBJECT,
+} from '../../../common/constants';
 import {
   asDataView,
   makeDataViewsPluginStart,
   makeDataViewWithRuntime,
+  makeFieldDefinition,
   makeMockDvService,
   makeTemplate,
+  stubFindByType,
   stubFindOnePage,
   stubFindWithPages,
   type MockDvService,
@@ -35,10 +40,7 @@ describe('CasesAnalyticsV2DataViewService', () => {
    * and returns the deps any test needs to call `ensureForSpace` /
    * `refreshForSpace`.
    */
-  const setup = (
-    templates: Array<SavedObject<TemplateLike>> = [],
-    { templatesEnabled = true }: { templatesEnabled?: boolean } = {}
-  ) => {
+  const setup = (templates: Array<SavedObject<TemplateLike>> = []) => {
     const internalSoClient = savedObjectsClientMock.create();
     stubFindOnePage(internalSoClient, templates);
 
@@ -50,7 +52,6 @@ describe('CasesAnalyticsV2DataViewService', () => {
       logger,
       dataViewsService,
       internalSavedObjectsClient: internalSoClient,
-      templatesEnabled,
     });
 
     return {
@@ -73,10 +74,10 @@ describe('CasesAnalyticsV2DataViewService', () => {
   };
 
   describe('ensureForSpace', () => {
-    it('reads template field metadata from attributes.fieldNames (not the YAML definition string)', async () => {
-      // The persisted contract is `attributes.fieldNames`; reaching for
-      // `attributes.definition.fields` would be `undefined` (definition
-      // is a YAML string), silently emptying the runtime field map.
+    it('derives runtime fields from the template YAML definition (inline fields)', async () => {
+      // Templates persist their field set as a YAML `definition` string;
+      // the service parses it and resolves fields against the library so
+      // that both inline and `$ref` fields are projected.
       const { service, dvService, deps } = setup([
         makeTemplate('tpl-1', [{ name: 'risk', type: 'long', control: 'INPUT_NUMBER' }]),
       ]);
@@ -84,8 +85,8 @@ describe('CasesAnalyticsV2DataViewService', () => {
 
       await service.ensureForSpace(deps);
 
-      expect(dvService.createAndSave).toHaveBeenCalledTimes(1);
-      const [spec] = dvService.createAndSave.mock.calls[0];
+      expect(dvService.createSavedObject).toHaveBeenCalledTimes(1);
+      const [spec] = dvService.createSavedObject.mock.calls[0];
       expect(Object.keys(spec.runtimeFieldMap ?? {})).toEqual(['case.risk_as_long']);
     });
 
@@ -97,13 +98,40 @@ describe('CasesAnalyticsV2DataViewService', () => {
 
       await service.ensureForSpace(deps);
 
-      expect(dvService.createAndSave).toHaveBeenCalledTimes(1);
-      const [spec, overwrite, skipFetchFields] = dvService.createAndSave.mock.calls[0];
-      expect(spec.id).toBe(dataViewId);
-      expect(spec.runtimeFieldMap).toMatchObject({ 'case.score_as_double': { type: 'double' } });
-      expect(overwrite).toBe(false);
+      // Build (without fetching field caps) then save without overwriting.
+      expect(dvService.create).toHaveBeenCalledTimes(1);
+      const [createSpec, skipFetchFields] = dvService.create.mock.calls[0];
+      expect(createSpec.id).toBe(dataViewId);
+      expect(createSpec.runtimeFieldMap).toMatchObject({
+        'case.score_as_double': { type: 'double' },
+      });
       expect(skipFetchFields).toBe(true);
+
+      expect(dvService.createSavedObject).toHaveBeenCalledTimes(1);
+      const [, overwrite] = dvService.createSavedObject.mock.calls[0];
+      expect(overwrite).toBe(false);
+
       expect(dvService.updateSavedObject).not.toHaveBeenCalled();
+    });
+
+    it('never claims the space default data view (no setDefault / createAndSave on bootstrap)', async () => {
+      // Regression: `createAndSave` unconditionally calls `setDefault`, which
+      // hijacks the space's default data view when none is set yet. Because
+      // this bootstrap fires on the first cases request in a space, it would
+      // silently make the managed "Case Analytics" view the default and
+      // surface as the wrong pre-selected view in the Discover/Lens picker
+      // across unrelated surfaces. The managed view must never touch the
+      // default.
+      const { service, dvService, deps } = setup([
+        makeTemplate('tpl-1', [{ name: 'score', type: 'double', control: 'INPUT_NUMBER' }]),
+      ]);
+      stubMissingDataView(dvService);
+
+      await service.ensureForSpace(deps);
+
+      expect(dvService.createSavedObject).toHaveBeenCalledTimes(1);
+      expect(dvService.setDefault).not.toHaveBeenCalled();
+      expect(dvService.createAndSave).not.toHaveBeenCalled();
     });
 
     it('updates the existing data view when the runtime field map has drifted', async () => {
@@ -126,7 +154,7 @@ describe('CasesAnalyticsV2DataViewService', () => {
       const [newMap] = existing.replaceAllRuntimeFields.mock.calls[0];
       expect(Object.keys(newMap)).toEqual(['case.risk_as_long']);
       expect(dvService.updateSavedObject).toHaveBeenCalledWith(existing);
-      expect(dvService.createAndSave).not.toHaveBeenCalled();
+      expect(dvService.createSavedObject).not.toHaveBeenCalled();
     });
 
     it('short-circuits subsequent same-process calls for the same space (in-memory cache)', async () => {
@@ -138,7 +166,7 @@ describe('CasesAnalyticsV2DataViewService', () => {
 
       // Only one round of work, even though ensure was called twice.
       expect(dvService.get).toHaveBeenCalledTimes(1);
-      expect(dvService.createAndSave).toHaveBeenCalledTimes(1);
+      expect(dvService.createSavedObject).toHaveBeenCalledTimes(1);
     });
 
     it('does not throw past the service boundary on internal failures', async () => {
@@ -147,35 +175,6 @@ describe('CasesAnalyticsV2DataViewService', () => {
 
       await expect(service.ensureForSpace(deps)).resolves.toBeUndefined();
       expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('cluster unavailable'));
-    });
-
-    /**
-     * Regression guard for the "templates off → cases-templates SO type
-     * not registered" path. When `xpack.cases.templates.enabled` is
-     * false, `caseTemplateSavedObjectType` is not registered with core
-     * (see `saved_object_types/index.ts`), so the internal SO client
-     * would throw "Missing mappings for saved objects types:
-     * 'cases-templates'" on any `find({ type: CASE_TEMPLATE_SAVED_OBJECT })`
-     * call. The service must skip the template walk entirely in that
-     * configuration — never touching the SO client for templates — and
-     * bootstrap the per-space data view with an empty runtime field
-     * overlay (the base data view is still useful for ES|QL against
-     * the analytics index; only the extended-field projections are
-     * absent).
-     */
-    it('skips the cases-templates SO walk when templates feature flag is off', async () => {
-      const { service, dvService, internalSoClient, deps } = setup(
-        [makeTemplate('tpl-1', [{ name: 'risk', type: 'long', control: 'INPUT_NUMBER' }])],
-        { templatesEnabled: false }
-      );
-      stubMissingDataView(dvService);
-
-      await service.ensureForSpace(deps);
-
-      expect(internalSoClient.find).not.toHaveBeenCalled();
-      expect(dvService.createAndSave).toHaveBeenCalledTimes(1);
-      const [spec] = dvService.createAndSave.mock.calls[0];
-      expect(Object.keys(spec.runtimeFieldMap ?? {})).toEqual([]);
     });
 
     /**
@@ -200,18 +199,18 @@ describe('CasesAnalyticsV2DataViewService', () => {
       const createPromise = new Promise<void>((resolve) => {
         resolveCreate = resolve;
       });
-      dvService.createAndSave.mockReturnValue(createPromise);
+      dvService.createSavedObject.mockReturnValue(createPromise);
 
       const first = service.ensureForSpace(deps);
       const second = service.ensureForSpace(deps);
-      while (dvService.createAndSave.mock.calls.length === 0) {
+      while (dvService.createSavedObject.mock.calls.length === 0) {
         await new Promise((r) => setImmediate(r));
       }
       resolveCreate();
       await Promise.all([first, second]);
 
       expect(dvService.get).toHaveBeenCalledTimes(1);
-      expect(dvService.createAndSave).toHaveBeenCalledTimes(1);
+      expect(dvService.createSavedObject).toHaveBeenCalledTimes(1);
     });
 
     it('dedupe slot frees up so a later ensure (post-cache-eviction or refresh) re-runs work', async () => {
@@ -269,7 +268,7 @@ describe('CasesAnalyticsV2DataViewService', () => {
         ),
         { statusCode: 409 }
       );
-      dvService.createAndSave.mockRejectedValueOnce(conflictErr);
+      dvService.createSavedObject.mockRejectedValueOnce(conflictErr);
 
       await expect(service.ensureForSpace(deps)).resolves.toBeUndefined();
 
@@ -277,10 +276,41 @@ describe('CasesAnalyticsV2DataViewService', () => {
       expect(logger.warn).not.toHaveBeenCalledWith(expect.stringContaining('version conflict'));
       // The cache slot was populated; the next ensure short-circuits.
       dvService.get.mockClear();
-      dvService.createAndSave.mockClear();
+      dvService.createSavedObject.mockClear();
       await service.ensureForSpace(deps);
       expect(dvService.get).not.toHaveBeenCalled();
-      expect(dvService.createAndSave).not.toHaveBeenCalled();
+      expect(dvService.createSavedObject).not.toHaveBeenCalled();
+    });
+
+    /**
+     * The same cross-node race can surface as the data-views plugin's
+     * `DuplicateDataViewError` rather than an ES 409: `createSavedObject`
+     * runs a `findByName` dupe check before writing, so if the other node's
+     * SO already landed, the loser throws `DuplicateDataViewError` (a plain
+     * `Error`, no `statusCode`, message `Duplicate data view: Case Analytics`)
+     * before ever reaching ES. `isVersionConflictError` matches it by `name`
+     * so it lands on the benign DEBUG path, not the "ensure failed" WARN.
+     */
+    it('treats a DuplicateDataViewError on createSavedObject as a benign bootstrap success', async () => {
+      const { service, dvService, deps, logger } = setup([]);
+      stubMissingDataView(dvService);
+      // Reproduce the plugin's error shape: `name` is the only discriminator
+      // (no statusCode, and the message doesn't match the 409 regex).
+      const dupeErr = Object.assign(new Error('Duplicate data view: Case Analytics'), {
+        name: 'DuplicateDataViewError',
+      });
+      dvService.createSavedObject.mockRejectedValueOnce(dupeErr);
+
+      await expect(service.ensureForSpace(deps)).resolves.toBeUndefined();
+
+      // Benign race — no WARN, and the cache slot is populated so the next
+      // ensure short-circuits without re-hitting create.
+      expect(logger.warn).not.toHaveBeenCalledWith(expect.stringContaining('Duplicate data view'));
+      dvService.get.mockClear();
+      dvService.createSavedObject.mockClear();
+      await service.ensureForSpace(deps);
+      expect(dvService.get).not.toHaveBeenCalled();
+      expect(dvService.createSavedObject).not.toHaveBeenCalled();
     });
 
     it('still surfaces non-conflict createAndSave failures via the WARN path', async () => {
@@ -289,7 +319,7 @@ describe('CasesAnalyticsV2DataViewService', () => {
       // them and the next request should re-attempt.
       const { service, dvService, deps, logger } = setup([]);
       stubMissingDataView(dvService);
-      dvService.createAndSave.mockRejectedValueOnce(
+      dvService.createSavedObject.mockRejectedValueOnce(
         Object.assign(new Error('cluster_block_exception'), { statusCode: 503 })
       );
 
@@ -306,7 +336,7 @@ describe('CasesAnalyticsV2DataViewService', () => {
      * runtime fields forever and the data view would accumulate
      * ghost fields silently.
      */
-    it('filters templates by isLatest=true AND deletedAt=null and only requests the fieldNames attribute', async () => {
+    it('filters templates by isLatest=true AND deletedAt=null and only requests the definition and owner attributes', async () => {
       const { service, dvService, deps, internalSoClient } = setup([]);
       stubMissingDataView(dvService);
 
@@ -316,13 +346,337 @@ describe('CasesAnalyticsV2DataViewService', () => {
         expect.objectContaining({
           type: CASE_TEMPLATE_SAVED_OBJECT,
           namespaces: [spaceId],
-          fields: ['fieldNames'],
+          fields: ['definition', 'owner'],
           filter: expect.stringContaining('isLatest: true'),
         })
       );
-      const findArgs = internalSoClient.find.mock.calls[0]?.[0] as { filter: string };
-      expect(findArgs.filter).toContain('NOT');
-      expect(findArgs.filter).toContain('deletedAt');
+      const templateFindArgs = internalSoClient.find.mock.calls.find(
+        (call) => (call[0] as { type?: string })?.type === CASE_TEMPLATE_SAVED_OBJECT
+      )?.[0] as { filter: string };
+      expect(templateFindArgs.filter).toContain('NOT');
+      expect(templateFindArgs.filter).toContain('deletedAt');
+    });
+  });
+
+  describe('template $ref library fields', () => {
+    /**
+     * A template can reference a field-library entry by `$ref` instead of
+     * defining it inline. Those refs are dropped from the denormalized
+     * `fieldDefinitions` at save time, but their values are still stored in
+     * `case.extended_fields` (the write path resolves them). The data view
+     * must resolve the same way so those values are typed and discoverable.
+     */
+    it('resolves $ref fields against the library and projects them', async () => {
+      const { service, dvService, internalSoClient, deps } = setup([]);
+      stubFindByType(internalSoClient, {
+        templates: [makeTemplate('tpl-1', [{ $ref: 'analyst_tier' }])],
+        fieldDefinitions: [
+          // Non-global library field, referenced purely via $ref.
+          makeFieldDefinition('fd-1', {
+            name: 'analyst_tier',
+            type: 'keyword',
+            isGlobal: false,
+          }),
+        ],
+      });
+      stubMissingDataView(dvService);
+
+      await service.ensureForSpace(deps);
+
+      const [spec] = dvService.createSavedObject.mock.calls[0];
+      expect(Object.keys(spec.runtimeFieldMap ?? {})).toEqual(['case.analyst_tier_as_keyword']);
+    });
+
+    it('applies a $ref name override to the projected snake-key', async () => {
+      const { service, dvService, internalSoClient, deps } = setup([]);
+      stubFindByType(internalSoClient, {
+        templates: [makeTemplate('tpl-1', [{ $ref: 'analyst_tier', name: 'tier_override' }])],
+        fieldDefinitions: [
+          makeFieldDefinition('fd-1', {
+            name: 'analyst_tier',
+            type: 'keyword',
+            isGlobal: false,
+          }),
+        ],
+      });
+      stubMissingDataView(dvService);
+
+      await service.ensureForSpace(deps);
+
+      const [spec] = dvService.createSavedObject.mock.calls[0];
+      expect(Object.keys(spec.runtimeFieldMap ?? {})).toEqual(['case.tier_override_as_keyword']);
+    });
+
+    it('resolves inline and $ref fields together on the same template', async () => {
+      const { service, dvService, internalSoClient, deps } = setup([]);
+      stubFindByType(internalSoClient, {
+        templates: [
+          makeTemplate('tpl-1', [
+            { name: 'risk', type: 'long', control: 'INPUT_NUMBER' },
+            { $ref: 'analyst_tier' },
+          ]),
+        ],
+        fieldDefinitions: [
+          makeFieldDefinition('fd-1', {
+            name: 'analyst_tier',
+            type: 'keyword',
+            isGlobal: false,
+          }),
+        ],
+      });
+      stubMissingDataView(dvService);
+
+      await service.ensureForSpace(deps);
+
+      const [spec] = dvService.createSavedObject.mock.calls[0];
+      expect(new Set(Object.keys(spec.runtimeFieldMap ?? {}))).toEqual(
+        new Set(['case.risk_as_long', 'case.analyst_tier_as_keyword'])
+      );
+    });
+
+    it('drops a $ref that has no matching library field', async () => {
+      const { service, dvService, internalSoClient, deps } = setup([]);
+      stubFindByType(internalSoClient, {
+        templates: [
+          makeTemplate('tpl-1', [
+            { name: 'risk', type: 'long', control: 'INPUT_NUMBER' },
+            { $ref: 'missing_field' },
+          ]),
+        ],
+        fieldDefinitions: [],
+      });
+      stubMissingDataView(dvService);
+
+      await service.ensureForSpace(deps);
+
+      const [spec] = dvService.createSavedObject.mock.calls[0];
+      expect(Object.keys(spec.runtimeFieldMap ?? {})).toEqual(['case.risk_as_long']);
+    });
+
+    it('does not break projection for other templates when one has a malformed definition', async () => {
+      const { service, dvService, internalSoClient, deps } = setup([]);
+      // A template whose YAML definition can't be parsed must be skipped
+      // without aborting the walk for the rest of the space.
+      const malformed = makeTemplate('tpl-bad', []);
+      (malformed.attributes as { definition?: string }).definition = '{invalid: [unclosed';
+      stubFindByType(internalSoClient, {
+        templates: [
+          malformed,
+          makeTemplate('tpl-1', [{ name: 'risk', type: 'long', control: 'INPUT_NUMBER' }]),
+        ],
+        fieldDefinitions: [],
+      });
+      stubMissingDataView(dvService);
+
+      await service.ensureForSpace(deps);
+
+      const [spec] = dvService.createSavedObject.mock.calls[0];
+      expect(Object.keys(spec.runtimeFieldMap ?? {})).toEqual(['case.risk_as_long']);
+    });
+
+    /**
+     * Library field names are unique only per owner. Two owners in the same
+     * space can define a same-named library field with different types, each
+     * referenced by that owner's template. Resolution must be owner-scoped
+     * (like the write path), or a space-wide name match would bind both refs
+     * to whichever owner's field paged in first — projecting the wrong type
+     * for the other owner and reintroducing the untyped-value gap.
+     */
+    it('scopes $ref resolution to the template owner when owners share a field name', async () => {
+      const { service, dvService, internalSoClient, deps } = setup([]);
+      stubFindByType(internalSoClient, {
+        templates: [
+          makeTemplate('tpl-sec', [{ $ref: 'shared' }], { owner: 'securitySolution' }),
+          makeTemplate('tpl-obs', [{ $ref: 'shared' }], { owner: 'observability' }),
+        ],
+        fieldDefinitions: [
+          makeFieldDefinition('fd-sec', {
+            name: 'shared',
+            type: 'keyword',
+            isGlobal: false,
+            owner: 'securitySolution',
+          }),
+          makeFieldDefinition('fd-obs', {
+            name: 'shared',
+            type: 'long',
+            control: 'INPUT_NUMBER',
+            isGlobal: false,
+            owner: 'observability',
+          }),
+        ],
+      });
+      stubMissingDataView(dvService);
+
+      await service.ensureForSpace(deps);
+
+      const [spec] = dvService.createSavedObject.mock.calls[0];
+      // Each owner's ref resolves to its own type — both snake-keys present.
+      // A space-wide (name-only) resolution would yield just one.
+      expect(new Set(Object.keys(spec.runtimeFieldMap ?? {}))).toEqual(
+        new Set(['case.shared_as_keyword', 'case.shared_as_long'])
+      );
+    });
+  });
+
+  describe('global field-library fields', () => {
+    /**
+     * Global fields (`isGlobal: true`) apply to every case regardless of
+     * template, so their values land in `case.extended_fields` even when
+     * the case uses no template. The data view must publish a runtime field
+     * for them — otherwise those values sit in the analytics index untyped
+     * and undiscoverable in Lens / Discover.
+     */
+    it('publishes runtime fields for global fields even when no template references them', async () => {
+      const { service, dvService, internalSoClient, deps } = setup([]);
+      stubFindByType(internalSoClient, {
+        templates: [],
+        fieldDefinitions: [
+          makeFieldDefinition('fd-1', {
+            name: 'risk_score',
+            type: 'long',
+            control: 'INPUT_NUMBER',
+          }),
+        ],
+      });
+      stubMissingDataView(dvService);
+
+      await service.ensureForSpace(deps);
+
+      expect(dvService.createSavedObject).toHaveBeenCalledTimes(1);
+      const [spec] = dvService.createSavedObject.mock.calls[0];
+      expect(Object.keys(spec.runtimeFieldMap ?? {})).toEqual(['case.risk_score_as_long']);
+    });
+
+    it('ignores non-global field definitions', async () => {
+      const { service, dvService, internalSoClient, deps } = setup([]);
+      stubFindByType(internalSoClient, {
+        templates: [],
+        fieldDefinitions: [
+          makeFieldDefinition('fd-1', { name: 'global_one', type: 'keyword', isGlobal: true }),
+          makeFieldDefinition('fd-2', { name: 'scoped_one', type: 'keyword', isGlobal: false }),
+        ],
+      });
+      stubMissingDataView(dvService);
+
+      await service.ensureForSpace(deps);
+
+      const [spec] = dvService.createSavedObject.mock.calls[0];
+      expect(Object.keys(spec.runtimeFieldMap ?? {})).toEqual(['case.global_one_as_keyword']);
+    });
+
+    it('merges template and global field runtime fields, deduping identical snake-keys', async () => {
+      const { service, dvService, internalSoClient, deps } = setup([]);
+      stubFindByType(internalSoClient, {
+        templates: [
+          makeTemplate('tpl-1', [
+            { name: 'risk_score', type: 'long', control: 'INPUT_NUMBER' },
+            { name: 'severity_label', type: 'keyword', control: 'INPUT_TEXT' },
+          ]),
+        ],
+        fieldDefinitions: [
+          // Same snake-key as a template field — must collapse to one entry.
+          makeFieldDefinition('fd-1', {
+            name: 'risk_score',
+            type: 'long',
+            control: 'INPUT_NUMBER',
+          }),
+          makeFieldDefinition('fd-2', { name: 'analyst_tier', type: 'keyword' }),
+        ],
+      });
+      stubMissingDataView(dvService);
+
+      await service.ensureForSpace(deps);
+
+      const [spec] = dvService.createSavedObject.mock.calls[0];
+      expect(new Set(Object.keys(spec.runtimeFieldMap ?? {}))).toEqual(
+        new Set([
+          'case.risk_score_as_long',
+          'case.severity_label_as_keyword',
+          'case.analyst_tier_as_keyword',
+        ])
+      );
+    });
+
+    it('skips display-only (MARKDOWN) global fields, which hold no value', async () => {
+      const { service, dvService, internalSoClient, deps } = setup([]);
+      stubFindByType(internalSoClient, {
+        templates: [],
+        fieldDefinitions: [
+          makeFieldDefinition('fd-1', { name: 'notes', type: 'keyword', control: 'MARKDOWN' }),
+          makeFieldDefinition('fd-2', { name: 'analyst_tier', type: 'keyword' }),
+        ],
+      });
+      stubMissingDataView(dvService);
+
+      await service.ensureForSpace(deps);
+
+      const [spec] = dvService.createSavedObject.mock.calls[0];
+      expect(Object.keys(spec.runtimeFieldMap ?? {})).toEqual(['case.analyst_tier_as_keyword']);
+    });
+
+    it('reads the field-definitions SO type scoped to the requesting space', async () => {
+      const { service, dvService, internalSoClient, deps } = setup([]);
+      stubFindByType(internalSoClient, { templates: [], fieldDefinitions: [] });
+      stubMissingDataView(dvService);
+
+      await service.ensureForSpace(deps);
+
+      expect(internalSoClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: CASE_FIELD_DEFINITION_SAVED_OBJECT,
+          namespaces: [spaceId],
+        })
+      );
+    });
+
+    it('bootstraps an empty runtime field overlay when no templates or field definitions exist', async () => {
+      // The `cases-templates` / `cases-field-definitions` SO types are always
+      // registered, so the walk always runs; with no documents (e.g. the
+      // templates feature is off, or simply nothing created yet) it yields an
+      // empty runtime field map and the base data view is still created.
+      const { service, dvService, internalSoClient, deps } = setup([]);
+      stubFindByType(internalSoClient, { templates: [], fieldDefinitions: [] });
+      stubMissingDataView(dvService);
+
+      await service.ensureForSpace(deps);
+
+      expect(internalSoClient.find).toHaveBeenCalled();
+      expect(dvService.createSavedObject).toHaveBeenCalledTimes(1);
+      const [spec] = dvService.createSavedObject.mock.calls[0];
+      expect(Object.keys(spec.runtimeFieldMap ?? {})).toEqual([]);
+    });
+
+    /**
+     * Positive counterpart to the empty-overlay case above. The
+     * `cases-analyticsV2` service only runs when `analyticsV2.enabled` is
+     * true, and the per-space walk no longer short-circuits on
+     * `templatesEnabled` — it always reads BOTH the `cases-templates` and
+     * `cases-field-definitions` SO types. This locks in that, with documents
+     * present, the always-on walk still *derives* runtime fields (from a
+     * template field and a global field-definition) rather than only handling
+     * the empty case — so the removed short-circuit didn't silently stop
+     * projecting fields.
+     */
+    it('derives runtime fields from the always-on walk when template and field-definition docs are present', async () => {
+      const { service, dvService, internalSoClient, deps } = setup([]);
+      stubFindByType(internalSoClient, {
+        templates: [
+          makeTemplate('tpl-1', [{ name: 'risk', type: 'long', control: 'INPUT_NUMBER' }]),
+        ],
+        fieldDefinitions: [
+          makeFieldDefinition('fd-1', { name: 'sla_breached', type: 'keyword', isGlobal: true }),
+        ],
+      });
+      stubMissingDataView(dvService);
+
+      await service.ensureForSpace(deps);
+
+      expect(internalSoClient.find).toHaveBeenCalled();
+      expect(dvService.createSavedObject).toHaveBeenCalledTimes(1);
+      const [spec] = dvService.createSavedObject.mock.calls[0];
+      expect(new Set(Object.keys(spec.runtimeFieldMap ?? {}))).toEqual(
+        new Set(['case.risk_as_long', 'case.sla_breached_as_keyword'])
+      );
     });
   });
 
@@ -357,7 +711,7 @@ describe('CasesAnalyticsV2DataViewService', () => {
       ]);
       stubMissingDataView(dvService);
       await service.ensureForSpace(deps);
-      dvService.createAndSave.mockClear();
+      dvService.createSavedObject.mockClear();
 
       const existing = makeDataViewWithRuntime(dataViewId, {
         'case.risk_as_long': {
@@ -387,14 +741,14 @@ describe('CasesAnalyticsV2DataViewService', () => {
       stubMissingDataView(dvService);
       await service.ensureForSpace(deps);
       dvService.get.mockClear();
-      dvService.createAndSave.mockClear();
+      dvService.createSavedObject.mockClear();
       dvService.updateSavedObject.mockClear();
 
       await service.refreshForSpace(deps);
 
       // Fingerprint short-circuit kicked in: no DV fetch, no DV update.
       expect(dvService.get).not.toHaveBeenCalled();
-      expect(dvService.createAndSave).not.toHaveBeenCalled();
+      expect(dvService.createSavedObject).not.toHaveBeenCalled();
       expect(dvService.updateSavedObject).not.toHaveBeenCalled();
     });
   });
@@ -410,7 +764,7 @@ describe('CasesAnalyticsV2DataViewService', () => {
       stubMissingDataView(dvService);
       await service.ensureForSpace(deps);
 
-      expect(dvService.createAndSave).toHaveBeenCalledTimes(2);
+      expect(dvService.createSavedObject).toHaveBeenCalledTimes(2);
     });
   });
 
@@ -455,7 +809,7 @@ describe('CasesAnalyticsV2DataViewService', () => {
       ]);
       stubMissingDataView(dvService);
       await service.refreshForSpace(deps);
-      dvService.createAndSave.mockClear();
+      dvService.createSavedObject.mockClear();
 
       const existing = makeDataViewWithRuntime(dataViewId, {
         'case.risk_as_long': {
@@ -490,7 +844,7 @@ describe('CasesAnalyticsV2DataViewService', () => {
       stubMissingDataView(dvService);
       await service.ensureForSpace(deps);
 
-      expect(dvService.createAndSave).toHaveBeenCalledTimes(1);
+      expect(dvService.createSavedObject).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -523,7 +877,6 @@ describe('CasesAnalyticsV2DataViewService', () => {
         logger: parentLogger,
         dataViewsService: makeDataViewsPluginStart(dvService),
         internalSavedObjectsClient: internalSoClient,
-        templatesEnabled: true,
       });
       // `logger.get('dataView')` is what the service holds for its
       // own log calls; the parent mock's `.get` returns a child mock
@@ -542,15 +895,15 @@ describe('CasesAnalyticsV2DataViewService', () => {
       // First ensure creates the data view and adds a fresh cache entry.
       stubMissingDataView(dvService);
       await service.ensureForSpace(deps);
-      expect(dvService.createAndSave).toHaveBeenCalledTimes(1);
+      expect(dvService.createSavedObject).toHaveBeenCalledTimes(1);
 
       // Within TTL: cache short-circuits, no extra get/create.
       dvService.get.mockClear();
-      dvService.createAndSave.mockClear();
+      dvService.createSavedObject.mockClear();
       nowMs += 60_000; // +1 minute
       await service.ensureForSpace(deps);
       expect(dvService.get).not.toHaveBeenCalled();
-      expect(dvService.createAndSave).not.toHaveBeenCalled();
+      expect(dvService.createSavedObject).not.toHaveBeenCalled();
 
       // Past TTL, with the data view deleted out-of-band: ensure
       // re-runs and recreates. The post-TTL re-check logs at DEBUG
@@ -561,7 +914,7 @@ describe('CasesAnalyticsV2DataViewService', () => {
       childLogger?.debug.mockClear?.();
       await service.ensureForSpace(deps);
       expect(dvService.get).toHaveBeenCalledTimes(1);
-      expect(dvService.createAndSave).toHaveBeenCalledTimes(1);
+      expect(dvService.createSavedObject).toHaveBeenCalledTimes(1);
       if (childLogger) {
         const debugCalls = (childLogger.debug as jest.Mock).mock.calls.map(
           ([msg]: [string]) => msg

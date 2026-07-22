@@ -1,5 +1,9 @@
 {
-  "sha1": "3cf9437c9e5aa4e542ccaaa4b1886e8c67ce2766",
+  "sha1": "ae9e85c064d4469458da9371ed2e0156ee9ff561",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
   "tests": [
     {
       "id": "343791488d016cc-1054e603e578b92",
@@ -24,7 +28,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_attacks_alignment/ui/parallel_tests/detections/attacks/attack_flyout.spec.ts",
-        "line": 52,
+        "line": 55,
         "column": 14
       }
     },
@@ -40,7 +44,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_attacks_alignment/ui/parallel_tests/detections/attacks/attack_flyout.spec.ts",
-        "line": 64,
+        "line": 67,
         "column": 14
       }
     },

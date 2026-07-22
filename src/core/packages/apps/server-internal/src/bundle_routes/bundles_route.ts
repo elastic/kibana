@@ -38,7 +38,7 @@ export function registerRouteForBundle(
       },
       validate: {
         params: schema.object({
-          path: schema.string(),
+          path: schema.string({ maxLength: 1024 }),
         }),
       },
       security: {

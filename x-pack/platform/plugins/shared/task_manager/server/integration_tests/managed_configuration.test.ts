@@ -19,6 +19,14 @@ import { ApiKeyType, type TaskManagerConfig } from '../config';
 import { BulkUpdateError } from '../lib/errors';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 
+// This suite exercises managed configuration, not startup task reconciliation.
+// The real reconciliation issues an Elasticsearch fetch on startup that would
+// perturb the mocked ES interaction and startup timing these tests depend on,
+// so stub it out to a no-op.
+jest.mock('../lib/task_reconciliation', () => ({
+  resetInFlightTasksOwnedByThisNode: jest.fn().mockResolvedValue(undefined),
+}));
+
 const mockTaskTypeRunFn = jest.fn();
 const mockCreateTaskRunner = jest.fn();
 const mockTaskType = {
@@ -242,7 +250,7 @@ describe('managed configuration', () => {
         esStart.client.asInternalUser as unknown as Client
       );
       coreStart.savedObjects.createInternalRepository.mockReturnValue(savedObjectsClient);
-      taskManagerStart = taskManager.start(coreStart, {
+      taskManagerStart = await taskManager.start(coreStart, {
         licensing: licensingMock.createStart(),
       });
 

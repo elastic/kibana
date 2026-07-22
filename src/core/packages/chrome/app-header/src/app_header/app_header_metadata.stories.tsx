@@ -36,7 +36,6 @@ const HeaderWithMetadata = ({ title, metadata, width }: AppHeaderMetadataStoryPr
           </EuiTitle>
         }
         metadata={<AppHeaderMetadata metadata={metadata} />}
-        padding="m"
         sticky={false}
       />
     </div>
