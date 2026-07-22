@@ -522,6 +522,20 @@ const ESQLEditorInternal = function ESQLEditor({
   const stableOnToggleVisor = useStableCallback(onToggleVisor);
   const stableOnPrettifyQuery = useStableCallback(onPrettifyQuery);
 
+  const expandToFitContent = useCallback(() => {
+    const editor = editorRef.current;
+    if (!editor) return;
+    const lineHeight = editor.getOption(monaco.editor.EditorOption.lineHeight);
+    const lineCount = editor.getModel()?.getLineCount() || 1;
+    const contentHeight = editor.getTopForLineNumber(lineCount + 1) + lineHeight * 1.25; // Extra line at the bottom, plus a bit more to compensate for hidden vertical
+    setEditorHeight((currentHeight) => {
+      if (contentHeight > currentHeight) {
+        return Math.min(contentHeight, EDITOR_MAX_HEIGHT);
+      }
+      return currentHeight;
+    });
+  }, [setEditorHeight]);
+
   const esqlCallbacks = useEsqlCallbacks({
     core,
     data,
@@ -584,6 +598,7 @@ const ESQLEditorInternal = function ESQLEditor({
     isEnabled: isNlToEsqlEnabled,
     clearGhostHintRef,
     telemetryService,
+    onAfterInsert: expandToFitContent,
   });
 
   const onGenerateFromCommentRef = useRef(onGenerateFromComment);
@@ -645,6 +660,7 @@ const ESQLEditorInternal = function ESQLEditor({
     notifications: core.notifications,
     isEnabled: isNlToEsqlEnabled,
     telemetryService,
+    onAfterInsert: expandToFitContent,
   });
 
   const { lookupIndexBadgeStyle, addLookupIndicesDecorator } = useLookupIndexCommand(
@@ -869,26 +885,6 @@ const ESQLEditorInternal = function ESQLEditor({
                     onCommentLine
                   );
 
-                  const getContentHeight = () => {
-                    const lineHeight = editor.getOption(monaco.editor.EditorOption.lineHeight);
-                    const lineCount = editor.getModel()?.getLineCount() || 1;
-                    return (
-                      editor.getTopForLineNumber(lineCount + 1) + lineHeight * 1.25 // Extra line at the bottom, plus a bit more to compensate for hidden vertical
-                    );
-                  };
-
-                  let prevContentHeight = getContentHeight();
-
-                  const expandToFitContent = () => {
-                    const contentHeight = getContentHeight();
-                    setEditorHeight((currentHeight) => {
-                      if (contentHeight > currentHeight) {
-                        return Math.min(contentHeight, EDITOR_MAX_HEIGHT);
-                      }
-                      return currentHeight;
-                    });
-                  };
-
                   setMeasuredEditorWidth(editor.getLayoutInfo().width);
                   if (expandToFitQueryOnMount) {
                     expandToFitContent();
@@ -900,11 +896,6 @@ const ESQLEditorInternal = function ESQLEditor({
 
                   const modelContentDisposable = editor.onDidChangeModelContent(async () => {
                     trackInputLatencyOnKeystroke(editor.getValue() ?? '');
-                    const contentHeight = getContentHeight();
-                    if (contentHeight > prevContentHeight) {
-                      expandToFitContent();
-                    }
-                    prevContentHeight = contentHeight;
                     await addLookupIndicesDecorator();
                     if (enableResourceBrowser) {
                       addSourcesDecorator();
