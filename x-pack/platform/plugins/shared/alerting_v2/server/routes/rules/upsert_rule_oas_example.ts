@@ -6,11 +6,15 @@
  */
 
 import { ALERTING_V2_ERROR_CODES } from '../../lib/errors/error_codes';
-import { getInvalidRuleDataMessage } from '../../lib/errors/rule_error_messages';
+import {
+  getInvalidRuleDataMessage,
+  getRuleVersionConflictMessage,
+} from '../../lib/errors/rule_error_messages';
 import type { AlertingOasOperationObject } from '../json_oas_example';
 import {
   CREATE_RULE_REQUEST,
-  RULE_UPSERT_CONFLICT_RESPONSE,
+  RULE_NOT_FOUND_RESPONSE,
+  RULE_RESPONSE,
   buildRuleOas,
   invalidResponseExample,
   ruleResponseExample,
@@ -23,6 +27,17 @@ const INVALID_UPSERT_RULE_RESPONSE = invalidResponseExample({
   details: { context: 'upsert', errors: { metadata: ['Required'] } },
 });
 
+const RULE_UPSERT_CONFLICT_RESPONSE = {
+  name: 'ruleVersionConflict',
+  summary: 'Rule was changed concurrently, or immutable fields were modified',
+  value: {
+    code: ALERTING_V2_ERROR_CODES.RULE_VERSION_CONFLICT,
+    error: 'Conflict',
+    message: getRuleVersionConflictMessage(RULE_RESPONSE.id),
+    details: { rule_id: RULE_RESPONSE.id },
+  },
+};
+
 export const upsertRuleOasExamples = (): AlertingOasOperationObject =>
   buildRuleOas({
     requestBody: {
@@ -34,7 +49,7 @@ export const upsertRuleOasExamples = (): AlertingOasOperationObject =>
       200: ruleResponseExample('upsertRuleReplacedResponse', 'Replaced an existing rule'),
       201: ruleResponseExample('upsertRuleCreatedResponse', 'Created a new rule with the given ID'),
       400: INVALID_UPSERT_RULE_RESPONSE,
+      404: RULE_NOT_FOUND_RESPONSE,
       409: RULE_UPSERT_CONFLICT_RESPONSE,
     },
-    errors: [404],
   });

@@ -20,20 +20,8 @@ import type {
   UpdateRuleBody,
 } from '@kbn/alerting-v2-schemas';
 import { ALERTING_V2_ERROR_CODES } from '../../lib/errors/error_codes';
-import {
-  getRuleNotFoundMessage,
-  getRuleVersionConflictMessage,
-} from '../../lib/errors/rule_error_messages';
-import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
+import { getRuleNotFoundMessage } from '../../lib/errors/rule_error_messages';
 import { jsonExample, type AlertingOasOperationObject } from '../json_oas_example';
-import {
-  RULE_NOT_FOUND_DESCRIPTION,
-  RULE_UPSERT_CONFLICT_DESCRIPTION,
-  RULE_VERSION_CONFLICT_DESCRIPTION,
-  RULES_NOT_FOUND_DESCRIPTION,
-} from './rule_response_descriptions';
-
-type RouteErrorStatus = 404 | 409;
 
 export interface OasExampleEntry {
   name: string;
@@ -178,43 +166,15 @@ export const INVALID_BULK_BY_QUERY_RESPONSE = invalidResponseExample({
   },
 });
 
-const RULE_NOT_FOUND_ERROR: ErrorResponse = {
-  code: ALERTING_V2_ERROR_CODES.RULE_NOT_FOUND,
-  error: 'Not Found',
-  message: getRuleNotFoundMessage(SAMPLE_RULE_ID),
-  details: { rule_id: SAMPLE_RULE_ID },
-};
-
-const RULE_VERSION_CONFLICT_ERROR: ErrorResponse = {
-  code: ALERTING_V2_ERROR_CODES.RULE_VERSION_CONFLICT,
-  error: 'Conflict',
-  message: getRuleVersionConflictMessage(SAMPLE_RULE_ID),
-  details: { rule_id: SAMPLE_RULE_ID },
-};
-
-const ERROR_EXAMPLES: Record<RouteErrorStatus, ReturnType<typeof jsonExample<ErrorResponse>>> = {
-  404: jsonExample('ruleNotFound', RULE_NOT_FOUND_DESCRIPTION, RULE_NOT_FOUND_ERROR),
-  409: jsonExample(
-    'ruleVersionConflict',
-    RULE_VERSION_CONFLICT_DESCRIPTION,
-    RULE_VERSION_CONFLICT_ERROR
-  ),
-};
-
-export const RULE_UPSERT_CONFLICT_RESPONSE: OasExampleEntry = {
-  name: 'ruleVersionConflict',
-  summary: RULE_UPSERT_CONFLICT_DESCRIPTION,
-  value: RULE_VERSION_CONFLICT_ERROR,
-};
-
-// Bulk-get rethrows the raw SO Boom; onError derives `NOT_FOUND` + SO message.
-export const RULES_NOT_FOUND_RESPONSE: OasExampleEntry = {
-  name: 'rulesNotFound',
-  summary: RULES_NOT_FOUND_DESCRIPTION,
+/** Shared 404 body for single-rule routes (get/update/delete/upsert). */
+export const RULE_NOT_FOUND_RESPONSE: OasExampleEntry = {
+  name: 'ruleNotFound',
+  summary: 'No rule exists for the given ID',
   value: {
-    code: 'NOT_FOUND',
+    code: ALERTING_V2_ERROR_CODES.RULE_NOT_FOUND,
     error: 'Not Found',
-    message: `Saved object [${RULE_SAVED_OBJECT_TYPE}/${SAMPLE_RULE_ID}] not found`,
+    message: getRuleNotFoundMessage(SAMPLE_RULE_ID),
+    details: { rule_id: SAMPLE_RULE_ID },
   } satisfies ErrorResponse,
 };
 
@@ -228,18 +188,13 @@ export const ruleResponseExample = (
   value: { ...RULE_RESPONSE, ...overrides },
 });
 
-/**
- * Builds an OAS operation object from request/response examples.
- * Status codes listed in `errors` override any matching entry already set in `responses`.
- */
+/** Builds an OAS operation object from request/response examples. */
 export const buildRuleOas = ({
   requestBody,
   responses = {},
-  errors = [],
 }: {
   requestBody?: OasExampleEntry;
   responses?: Record<number, OasExampleEntry>;
-  errors?: RouteErrorStatus[];
 }): AlertingOasOperationObject => {
   const operation: AlertingOasOperationObject = {};
 
@@ -250,10 +205,6 @@ export const buildRuleOas = ({
   const responseEntries: Record<string, ReturnType<typeof jsonExample>> = {};
   for (const [status, example] of Object.entries(responses)) {
     responseEntries[status] = jsonExample(example.name, example.summary, example.value);
-  }
-  // Error examples override any response entry for the same status code.
-  for (const status of errors) {
-    responseEntries[String(status)] = ERROR_EXAMPLES[status];
   }
   if (Object.keys(responseEntries).length > 0) {
     operation.responses = responseEntries;

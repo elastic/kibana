@@ -5,11 +5,12 @@
  * 2.0.
  */
 
+import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import type { AlertingOasOperationObject } from '../json_oas_example';
 import {
   BULK_GET_RULES_REQUEST,
   BULK_GET_RULES_RESPONSE,
-  RULES_NOT_FOUND_RESPONSE,
+  RULE_RESPONSE,
   buildRuleOas,
   invalidResponseExample,
 } from './rule_oas_shared';
@@ -19,6 +20,17 @@ const INVALID_BULK_GET_RULES_RESPONSE = invalidResponseExample({
   message: 'ids: Required',
   details: { errors: { ids: ['Required'] } },
 });
+
+// Bulk-get rethrows the raw SO Boom; onError derives `NOT_FOUND` + SO message.
+const RULES_NOT_FOUND_RESPONSE = {
+  name: 'rulesNotFound',
+  summary: 'One or more requested rule ids could not be found',
+  value: {
+    code: 'NOT_FOUND',
+    error: 'Not Found',
+    message: `Saved object [${RULE_SAVED_OBJECT_TYPE}/${RULE_RESPONSE.id}] not found`,
+  },
+};
 
 export const bulkGetRulesOasExamples = (): AlertingOasOperationObject =>
   buildRuleOas({
