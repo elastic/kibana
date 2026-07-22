@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { compressToEncodedURIComponent } from 'lz-string';
 import React, { useEffect, useMemo, useState } from 'react';
-import { css } from '@emotion/react';
+
 import {
   EuiAccordion,
   EuiButton,
@@ -25,15 +26,17 @@ import {
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { CodeEditor, XJsonLang } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
-import { XJsonLang } from '@kbn/monaco';
-import { compressToEncodedURIComponent } from 'lz-string';
-import { CodeEditor } from '@kbn/code-editor';
+import { coreServices, shareService } from '../../../../../services/kibana_services';
 import type { ExportJsonSanitizedState } from './types';
-import { buildCreateDashboardRequestForConsole } from './export_json_share_utils';
-import { coreServices, shareService } from '../services/kibana_services';
 
-export type ExportJsonPanelProps = ExportJsonSanitizedState & { onRetry: () => void };
+export type ExportJsonPanelProps<SanitizedState extends object> =
+  ExportJsonSanitizedState<SanitizedState> & {
+    apiPath?: string;
+    onRetry: () => void;
+  };
 
 function WarningsCallout({
   warnings,
@@ -106,7 +109,7 @@ function WarningsCallout({
               css={warningsListStyles}
             >
               <ul>
-                {warnings.map((warning, idx) => (
+                {warnings?.map((warning, idx) => (
                   <li key={`${idx}-${warning}`}>{warning}</li>
                 ))}
               </ul>
@@ -151,12 +154,14 @@ function SuccessState({
   openInConsoleRequest,
   jsonValue,
 }: {
-  openInConsoleRequest: string;
+  openInConsoleRequest?: string;
   jsonValue: string;
 }) {
   const useUrl = shareService?.url.locators.useUrl;
 
-  const devToolsDataUri = compressToEncodedURIComponent(openInConsoleRequest);
+  const devToolsDataUri = openInConsoleRequest
+    ? compressToEncodedURIComponent(openInConsoleRequest)
+    : undefined;
   const consoleHref = useUrl?.(
     () => ({
       id: 'CONSOLE_APP_LOCATOR',
@@ -168,7 +173,7 @@ function SuccessState({
   );
 
   const canShowDevTools = Boolean(
-    coreServices.application?.capabilities?.dev_tools?.show && consoleHref !== undefined
+    coreServices.application?.capabilities?.dev_tools?.show && devToolsDataUri !== undefined
   );
 
   return (
@@ -257,8 +262,7 @@ function SuccessState({
   );
 }
 
-function ErrorState({ error, onRetry }: { error: Error | undefined; onRetry: () => void }) {
-  const errorMessage = error?.message ?? 'Unknown error';
+function ErrorState({ error, onRetry }: { error: Error | undefined; onRetry?: () => void }) {
   return (
     <EuiFlexGroup
       direction="column"
@@ -287,25 +291,29 @@ function ErrorState({ error, onRetry }: { error: Error | undefined; onRetry: () 
                   defaultMessage: 'Sorry, there was an error loading the JSON source.',
                 })}
               </p>
-              <p>
-                {i18n.translate('dashboard.exportJson.sanitizeErrorDetails', {
-                  defaultMessage: 'Error: {errorMessage}',
-                  values: { errorMessage },
-                })}
-              </p>
+              {error && (
+                <p>
+                  {i18n.translate('dashboard.exportJson.sanitizeErrorDetails', {
+                    defaultMessage: 'Error: {errorMessage}',
+                    values: { errorMessage: error.message },
+                  })}
+                </p>
+              )}
             </EuiText>
           }
           actions={
-            <EuiButton
-              color="danger"
-              iconType="refresh"
-              onClick={onRetry}
-              data-test-subj="dashboardExportSourceRetryButton"
-            >
-              {i18n.translate('dashboard.exportJson.retryButtonLabel', {
-                defaultMessage: 'Retry',
-              })}
-            </EuiButton>
+            onRetry && (
+              <EuiButton
+                color="danger"
+                iconType="refresh"
+                onClick={onRetry}
+                data-test-subj="dashboardExportSourceRetryButton"
+              >
+                {i18n.translate('dashboard.exportJson.retryButtonLabel', {
+                  defaultMessage: 'Retry',
+                })}
+              </EuiButton>
+            )
           }
         />
       </EuiFlexItem>
@@ -313,13 +321,14 @@ function ErrorState({ error, onRetry }: { error: Error | undefined; onRetry: () 
   );
 }
 
-export const ExportJsonPanel = ({
+export const ExportJsonPanel = <State extends object, SanitizedState extends object>({
+  apiPath,
   status,
   data,
   warnings,
   error,
   onRetry,
-}: ExportJsonPanelProps) => {
+}: ExportJsonPanelProps<SanitizedState>) => {
   const warningsAccordionId = useGeneratedHtmlId({ prefix: 'dashboardExportSourceWarnings' });
   const [isWarningsExpanded, setIsWarningsExpanded] = useState(false);
   const [showWarningsCallout, setShowWarningsCallout] = useState(true);
@@ -331,13 +340,13 @@ export const ExportJsonPanel = ({
   }, [status]);
 
   const jsonValue = useMemo(
-    () => (status === 'success' && data !== undefined ? JSON.stringify(data, null, 2) : ''),
+    () => (status === 'success' && data !== undefined ? JSON.stringify(data, null, 2) : undefined),
     [data, status]
   );
 
   const openInConsoleRequest = useMemo(
-    () => buildCreateDashboardRequestForConsole(jsonValue),
-    [jsonValue]
+    () => (apiPath ? `POST kbn:${apiPath}\n${jsonValue}` : undefined),
+    [apiPath, jsonValue]
   );
 
   return (
@@ -358,10 +367,20 @@ export const ExportJsonPanel = ({
         <EuiFlexItem grow css={{ minHeight: 0 }}>
           {status === 'loading' ? (
             <LoadingState />
-          ) : status === 'success' ? (
+          ) : status === 'error' ? (
+            <ErrorState error={error} onRetry={onRetry} />
+          ) : jsonValue ? (
             <SuccessState openInConsoleRequest={openInConsoleRequest} jsonValue={jsonValue} />
           ) : (
-            <ErrorState error={error} onRetry={onRetry} />
+            <ErrorState
+              error={
+                new Error(
+                  i18n.translate('dashboard.exportJson.noDataError', {
+                    defaultMessage: 'No data was returned. See warnings above for more details.',
+                  })
+                )
+              }
+            />
           )}
         </EuiFlexItem>
       </EuiFlexGroup>

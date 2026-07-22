@@ -7,13 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DashboardState } from '../../server';
-
-export type ExportJsonStatus = 'loading' | 'success' | 'error';
-
-export interface ExportJsonSanitizedState {
-  status: ExportJsonStatus;
-  data: DashboardState | undefined;
-  warnings: string[];
-  error: Error | undefined;
-}
+export { ExportJsonFlyout } from './export_json_flyout';
+export type { ExportJsonSharingData } from './types';

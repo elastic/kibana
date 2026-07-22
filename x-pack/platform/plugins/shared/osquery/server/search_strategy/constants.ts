@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-export {
-  createClient,
-  type UserPromptClient,
-  type UserPrompt,
-  type UserPromptCreateParams,
-  type UserPromptUpdateParams,
-  type FindUserPromptsParams,
-  type FindUserPromptsResult,
-} from './client';
+export const OSQUERY_SEARCH_STRATEGY = Symbol('osquery');
+
+export const OSQUERY_SEARCH_STRATEGY_AUTHZ_ERROR =
+  'User is not authorized to access Osquery search results';
