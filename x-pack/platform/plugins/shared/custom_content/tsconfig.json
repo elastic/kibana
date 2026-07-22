@@ -20,7 +20,6 @@
     "@kbn/sse-utils-client",
     "@kbn/data-plugin",
     "@kbn/esql-utils",
-    "@kbn/search-types",
     "@kbn/es-query",
     "@kbn/es-types",
     "@kbn/datemath"
