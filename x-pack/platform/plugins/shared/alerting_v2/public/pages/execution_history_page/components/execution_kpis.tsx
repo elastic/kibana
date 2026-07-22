@@ -246,8 +246,32 @@ const StatsOnly: React.FC = () => (
   </EuiFlexGroup>
 );
 
+const separatorCss = (borderColor: string) =>
+  css({
+    width: 1,
+    alignSelf: 'stretch',
+    backgroundColor: borderColor,
+    flexShrink: 0,
+  });
+
+const secondaryStatCss = css({
+  '.euiStat__title': { fontSize: '1rem' },
+});
+
+const ChartLegendDot: React.FC<{ color: string; label: string }> = ({ color, label }) => (
+  <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+    <EuiFlexItem grow={false}>
+      <div css={css({ width: 8, height: 8, borderRadius: 2, backgroundColor: color })} />
+    </EuiFlexItem>
+    <EuiFlexItem grow={false}>
+      <EuiText size="xs" color="subdued">{label}</EuiText>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+);
+
 const StatsWithCharts: React.FC = () => {
   const { euiTheme } = useEuiTheme();
+  const borderColor = euiTheme.colors.lightShade;
 
   const executionChartData = MOCK_EXECUTION_BARS.map((b) => ({
     label: b.hour,
@@ -269,15 +293,15 @@ const StatsWithCharts: React.FC = () => {
     <EuiFlexGroup gutterSize="m">
       <EuiFlexItem>
         <EuiPanel hasBorder data-test-subj="executionKpisExecutionsPanel">
-          <EuiTitle size="xxs">
-            <h3>
-              {i18n.translate('xpack.alertingV2.executionHistory.kpis.executionsTitle', {
-                defaultMessage: 'All executions',
-              })}
-            </h3>
-          </EuiTitle>
-          <EuiFlexGroup gutterSize="l" responsive={false}>
-            <EuiFlexItem grow={false} css={css({ minWidth: 140 })}>
+          <EuiFlexGroup gutterSize="none" responsive={false} css={css({ height: '100%' })}>
+            <EuiFlexItem grow={false} css={css({ padding: `0 ${euiTheme.size.m}`, minWidth: 130 })}>
+              <EuiTitle size="xxs">
+                <h3>
+                  {i18n.translate('xpack.alertingV2.executionHistory.kpis.executionsTitle', {
+                    defaultMessage: 'All executions',
+                  })}
+                </h3>
+              </EuiTitle>
               <EuiStat
                 title={MOCK_DATA.totalExecutions.toLocaleString()}
                 description={i18n.translate(
@@ -295,6 +319,7 @@ const StatsWithCharts: React.FC = () => {
                 )}
                 textAlign="left"
                 reverse
+                css={secondaryStatCss}
               />
               <EuiStat
                 title={MOCK_DATA.policyExecutions.toLocaleString()}
@@ -304,10 +329,12 @@ const StatsWithCharts: React.FC = () => {
                 )}
                 textAlign="left"
                 reverse
+                css={secondaryStatCss}
               />
             </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiText size="xs" css={css({ marginBottom: 8 })}>
+            <div css={separatorCss(borderColor)} />
+            <EuiFlexItem css={css({ padding: `0 ${euiTheme.size.m}` })}>
+              <EuiText size="xs" css={css({ marginBottom: 4 })}>
                 <strong>
                   {i18n.translate(
                     'xpack.alertingV2.executionHistory.kpis.executionsOverTime',
@@ -318,41 +345,13 @@ const StatsWithCharts: React.FC = () => {
                   Last 24 hours
                 </EuiText>
               </EuiText>
-              <MiniBarChart data={executionChartData} />
-              <EuiFlexGroup gutterSize="m" responsive={false} css={css({ marginTop: 8 })}>
+              <MiniBarChart data={executionChartData} height={72} />
+              <EuiFlexGroup gutterSize="m" responsive={false} css={css({ marginTop: 4 })}>
                 <EuiFlexItem grow={false}>
-                  <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-                    <EuiFlexItem grow={false}>
-                      <div
-                        css={css({
-                          width: 10,
-                          height: 10,
-                          borderRadius: 2,
-                          backgroundColor: euiTheme.colors.vis.euiColorVis0,
-                        })}
-                      />
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiText size="xs" color="subdued">Success</EuiText>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
+                  <ChartLegendDot color={euiTheme.colors.vis.euiColorVis0} label="Success" />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-                    <EuiFlexItem grow={false}>
-                      <div
-                        css={css({
-                          width: 10,
-                          height: 10,
-                          borderRadius: 2,
-                          backgroundColor: euiTheme.colors.vis.euiColorVis9,
-                        })}
-                      />
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiText size="xs" color="subdued">Failed</EuiText>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
+                  <ChartLegendDot color={euiTheme.colors.vis.euiColorVis9} label="Failed" />
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
@@ -362,15 +361,15 @@ const StatsWithCharts: React.FC = () => {
 
       <EuiFlexItem>
         <EuiPanel hasBorder data-test-subj="executionKpisFailuresPanel">
-          <EuiTitle size="xxs">
-            <h3>
-              {i18n.translate('xpack.alertingV2.executionHistory.kpis.failuresTitle', {
-                defaultMessage: 'Failures',
-              })}
-            </h3>
-          </EuiTitle>
-          <EuiFlexGroup gutterSize="l" responsive={false}>
-            <EuiFlexItem grow={false} css={css({ minWidth: 140 })}>
+          <EuiFlexGroup gutterSize="none" responsive={false} css={css({ height: '100%' })}>
+            <EuiFlexItem grow={false} css={css({ padding: `0 ${euiTheme.size.m}`, minWidth: 130 })}>
+              <EuiTitle size="xxs">
+                <h3>
+                  {i18n.translate('xpack.alertingV2.executionHistory.kpis.failuresTitle', {
+                    defaultMessage: 'Failures',
+                  })}
+                </h3>
+              </EuiTitle>
               <EuiStat
                 title={MOCK_DATA.failedExecutions.toLocaleString()}
                 description={i18n.translate(
@@ -390,6 +389,7 @@ const StatsWithCharts: React.FC = () => {
                 textAlign="left"
                 titleColor="danger"
                 reverse
+                css={secondaryStatCss}
               />
               <EuiStat
                 title={MOCK_DATA.failureRate}
@@ -399,10 +399,12 @@ const StatsWithCharts: React.FC = () => {
                 )}
                 textAlign="left"
                 reverse
+                css={secondaryStatCss}
               />
             </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiText size="xs" css={css({ marginBottom: 8 })}>
+            <div css={separatorCss(borderColor)} />
+            <EuiFlexItem css={css({ padding: `0 ${euiTheme.size.m}` })}>
+              <EuiText size="xs" css={css({ marginBottom: 4 })}>
                 <strong>
                   {i18n.translate(
                     'xpack.alertingV2.executionHistory.kpis.failuresOverTime',
@@ -413,41 +415,13 @@ const StatsWithCharts: React.FC = () => {
                   Last 24 hours
                 </EuiText>
               </EuiText>
-              <MiniBarChart data={failureChartData} />
-              <EuiFlexGroup gutterSize="m" responsive={false} css={css({ marginTop: 8 })}>
+              <MiniBarChart data={failureChartData} height={72} />
+              <EuiFlexGroup gutterSize="m" responsive={false} css={css({ marginTop: 4 })}>
                 <EuiFlexItem grow={false}>
-                  <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-                    <EuiFlexItem grow={false}>
-                      <div
-                        css={css({
-                          width: 10,
-                          height: 10,
-                          borderRadius: 2,
-                          backgroundColor: euiTheme.colors.vis.euiColorVis9,
-                        })}
-                      />
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiText size="xs" color="subdued">Rules</EuiText>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
+                  <ChartLegendDot color={euiTheme.colors.vis.euiColorVis9} label="Rules" />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-                    <EuiFlexItem grow={false}>
-                      <div
-                        css={css({
-                          width: 10,
-                          height: 10,
-                          borderRadius: 2,
-                          backgroundColor: euiTheme.colors.vis.euiColorVis5,
-                        })}
-                      />
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiText size="xs" color="subdued">Policies</EuiText>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
+                  <ChartLegendDot color={euiTheme.colors.vis.euiColorVis5} label="Policies" />
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
