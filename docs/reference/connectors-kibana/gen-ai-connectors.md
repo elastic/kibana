@@ -1,7 +1,7 @@
 ---
 navigation_title: GenAI
 applies_to:
-  stack: deprecated 9.6
+  stack: deprecated 9.5
   serverless: deprecated
 ---
 # Generative AI connectors

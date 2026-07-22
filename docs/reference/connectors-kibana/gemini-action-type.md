@@ -3,7 +3,7 @@ navigation_title: "{{gemini}}"
 mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/gemini-action-type.html
 applies_to:
-  stack: deprecated 9.6
+  stack: deprecated 9.5
   serverless: deprecated
 ---
 
