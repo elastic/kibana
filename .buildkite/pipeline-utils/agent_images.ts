@@ -22,7 +22,9 @@ export const FIPS_140_2_IMAGE = 'family/kibana-fips-140-2-ubuntu-2404';
 export const DEFAULT_AGENT_IMAGE_CONFIG: BuildkiteAgentTargetingRule = {
   provider: 'gcp',
   image: 'family/kibana-ubuntu-2404',
-  imageProject: ELASTIC_IMAGES_PROD_PROJECT,
+  // TODO(yarn-to-pnpm): default to the QA image project to test the pnpm-warmed image.
+  // Revert to ELASTIC_IMAGES_PROD_PROJECT before merge.
+  imageProject: ELASTIC_IMAGES_QA_PROJECT,
   diskSizeGb: 130,
 };
 
