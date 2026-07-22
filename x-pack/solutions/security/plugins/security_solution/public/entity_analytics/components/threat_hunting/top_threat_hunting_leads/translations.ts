@@ -260,8 +260,3 @@ export const VIEW_ENTITY_DETAILS = i18n.translate(
   'xpack.securitySolution.entityAnalytics.threatHunting.leads.viewEntityDetails',
   { defaultMessage: 'View entity details' }
 );
-
-export const VIEW_LEADS_ARCHIVE_INDEX = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.threatHunting.leads.viewLeadsArchiveIndex',
-  { defaultMessage: 'View leads archive index' }
-);
