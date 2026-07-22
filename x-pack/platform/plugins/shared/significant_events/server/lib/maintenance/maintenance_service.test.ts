@@ -63,9 +63,7 @@ function makeManagementApi(options?: {
   const enabled = new Map<string, boolean>();
   const stateKey = (id: string, spaceId: string) => `${id}@${spaceId}`;
   const failEnableId = (): string | undefined =>
-    typeof options?.failEnableFor === 'object'
-      ? options.failEnableFor.id
-      : options?.failEnableFor;
+    typeof options?.failEnableFor === 'object' ? options.failEnableFor.id : options?.failEnableFor;
 
   const getWorkflow = jest.fn(async (id: string, spaceId: string) => ({
     id,
@@ -931,7 +929,9 @@ describe('SignificantEventsMaintenanceService', () => {
     });
 
     it('retries leftover inventory on a second resume while already enabled', async () => {
-      const failEnableFor = { id: SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID as string | undefined };
+      const failEnableFor = {
+        id: SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID as string | undefined,
+      };
       const { api, updateWorkflow } = makeManagementApi({ failEnableFor });
       const { service, soClient } = makeService({ management: api });
 

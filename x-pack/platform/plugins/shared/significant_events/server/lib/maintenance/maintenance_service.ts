@@ -684,8 +684,7 @@ export const createSignificantEventsMaintenanceService = ({
         // leftover inventory already filtered those once — retry everything left.
         const isFirstResumeFromPaused = currentState === 'paused';
         const shouldAttemptWorkflow = (workflow: MaintenanceWorkflowTarget): boolean =>
-          !isFirstResumeFromPaused ||
-          shouldRestoreSettingsBackedWorkflow(workflow, pausedSettings);
+          !isFirstResumeFromPaused || shouldRestoreSettingsBackedWorkflow(workflow, pausedSettings);
 
         // Best-effort restore: re-enable inventory, restore settings, then flip the
         // control plane to enabled. Partial failures are reported as warnings —
