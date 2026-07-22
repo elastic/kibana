@@ -302,4 +302,43 @@ describe('executeScriptInIsolate', () => {
       expect(result.when.toISOString()).toBe(iso);
     });
   });
+
+  describe('circular reference protection', () => {
+    const runScript = (script: string): Promise<unknown> =>
+      executeScriptInIsolate({
+        script,
+        logger: createLogger(),
+        abortSignal: new AbortController().signal,
+        ...defaultIsolateParams,
+      });
+
+    it('rejects an object that directly references itself', async () => {
+      await expect(runScript(`const o = {}; o.self = o; return o;`)).rejects.toThrow(
+        'Script returned a value containing a circular reference'
+      );
+    });
+
+    it('rejects an array that contains itself', async () => {
+      await expect(runScript(`const a = []; a.push(a); return a;`)).rejects.toThrow(
+        'Script returned a value containing a circular reference'
+      );
+    });
+
+    it('rejects a deeply nested circular reference', async () => {
+      await expect(
+        runScript(
+          `const root = { child: { grandchild: {} } }; root.child.grandchild.back = root; return root;`
+        )
+      ).rejects.toThrow('Script returned a value containing a circular reference');
+    });
+
+    it('accepts a diamond-shaped graph (shared reference, no cycle)', async () => {
+      const result = await runScript(`
+        const shared = { value: 42 };
+        return { a: shared, b: shared };
+      `);
+
+      expect(result).toEqual({ a: { value: 42 }, b: { value: 42 } });
+    });
+  });
 });
