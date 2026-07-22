@@ -7,20 +7,15 @@
 
 import expect from '@kbn/expect';
 import { AGENTS_INDEX, AGENT_POLICY_INDEX } from '@kbn/fleet-plugin/common';
-import { GLOBAL_SETTINGS_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common/constants';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
-
-const SETTINGS_SO_ID = 'fleet-default-settings';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
   const es = getService('es');
   const esArchiver = getService('esArchiver');
-  const kibanaServer = getService('kibanaServer');
   const fleetAndAgents = getService('fleetAndAgents');
-  const retry = getService('retry');
 
   describe('fleet_policy_base_id', () => {
     skipIfNoDockerRegistry(providerContext);
@@ -240,10 +235,9 @@ export default function (providerContext: FtrProviderContext) {
 
       before(async () => {
         await esArchiver.load('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
-        await kibanaServer.savedObjects.cleanStandardList();
         await fleetAndAgents.setup();
 
-        // Insert agents without policy_base_id before the backfill guard check
+        // Insert agents without policy_base_id to simulate old fleet-server enrollment
         await es.index({
           index: AGENTS_INDEX,
           id: agentId,
@@ -270,16 +264,7 @@ export default function (providerContext: FtrProviderContext) {
           refresh: 'wait_for',
         });
 
-        // Reset the completed_migrations guard so the backfill runs again
-        await kibanaServer.savedObjects
-          .update({
-            type: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
-            id: SETTINGS_SO_ID,
-            attributes: { completed_migrations: [] },
-          })
-          .catch(() => {});
-
-        // Trigger Fleet setup, which runs runPolicyBaseIdBackfillIfNeeded
+        // Trigger Fleet setup to run the self-limiting backfill
         await supertest.post('/api/fleet/setup').set('kbn-xsrf', 'xxxx').expect(200);
       });
 
@@ -294,82 +279,22 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it('should populate policy_base_id on agents missing the field after setup', async () => {
-        await retry.tryForTime(20000, async () => {
-          const agent = await es.get({ index: AGENTS_INDEX, id: agentId });
-          expect((agent._source as any).policy_base_id).to.eql('backfill-test-policy');
-        });
+        const agent = await es.get({ index: AGENTS_INDEX, id: agentId });
+        expect((agent._source as any).policy_base_id).to.eql('backfill-test-policy');
       });
 
       it('should strip version suffix when populating policy_base_id', async () => {
-        await retry.tryForTime(20000, async () => {
-          const agent = await es.get({ index: AGENTS_INDEX, id: versionedAgentId });
-          expect((agent._source as any).policy_base_id).to.eql('backfill-test-policy');
-        });
+        const agent = await es.get({ index: AGENTS_INDEX, id: versionedAgentId });
+        expect((agent._source as any).policy_base_id).to.eql('backfill-test-policy');
       });
 
-      it('should mark policy_base_id_backfill as completed in ingest_manager_settings', async () => {
-        const so = await kibanaServer.savedObjects.get({
-          type: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
-          id: SETTINGS_SO_ID,
-        });
-        expect((so.attributes as any).completed_migrations).to.contain('policy_base_id_backfill');
-      });
-    });
-
-    // ─── backfill runs only once ───────────────────────────────────────────────
-
-    describe('policy_base_id backfill guard prevents re-run', () => {
-      const postGuardAgentId = `test-no-rerun-pbi-${Date.now()}`;
-
-      before(async () => {
-        await esArchiver.load('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
-        await kibanaServer.savedObjects.cleanStandardList();
-        await fleetAndAgents.setup();
-
-        // At this point completed_migrations should include policy_base_id_backfill.
-        // Insert a new agent without policy_base_id AFTER setup (simulates post-backfill enrollment).
-        await es.index({
-          index: AGENTS_INDEX,
-          id: postGuardAgentId,
-          document: {
-            active: true,
-            policy_id: 'guard-test-policy',
-            last_checkin: new Date().toISOString(),
-            type: 'PERMANENT',
-            agent: { version: '9.0.0' },
-          },
-          refresh: 'wait_for',
-        });
-      });
-
-      after(async () => {
-        await es
-          .delete({ index: AGENTS_INDEX, id: postGuardAgentId, refresh: true })
-          .catch(() => {});
-        await esArchiver.unload(
-          'x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server'
-        );
-      });
-
-      it('should not backfill agents inserted after the guard was set', async () => {
-        // Run setup again — guard should prevent backfill from running
+      it('should not backfill agents that already have policy_base_id on subsequent setup calls', async () => {
+        // Run setup again — self-limiting query should process 0 docs
         await supertest.post('/api/fleet/setup').set('kbn-xsrf', 'xxxx').expect(200);
 
-        // Wait briefly to rule out async backfill
-        await new Promise<void>((resolve) => setTimeout(resolve, 3000));
-
-        const agent = await es.get({ index: AGENTS_INDEX, id: postGuardAgentId });
-        expect((agent._source as any).policy_base_id).to.be(undefined);
-      });
-
-      it('should not duplicate the completed_migrations entry after repeated setup calls', async () => {
-        const so = await kibanaServer.savedObjects.get({
-          type: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
-          id: SETTINGS_SO_ID,
-        });
-        const migrations: string[] = (so.attributes as any).completed_migrations ?? [];
-        const count = migrations.filter((m: string) => m === 'policy_base_id_backfill').length;
-        expect(count).to.eql(1);
+        // Agents should still have correct policy_base_id (unchanged)
+        const agent = await es.get({ index: AGENTS_INDEX, id: agentId });
+        expect((agent._source as any).policy_base_id).to.eql('backfill-test-policy');
       });
     });
   });
