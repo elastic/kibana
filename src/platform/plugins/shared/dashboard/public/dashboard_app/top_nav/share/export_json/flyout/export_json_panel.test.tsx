@@ -8,29 +8,21 @@
  */
 
 import React from 'react';
-import { render, screen, within } from '@testing-library/react';
+
 import '@kbn/code-editor-mock/jest_helper';
-import type { DashboardState } from '../../server';
-import { DEFAULT_DASHBOARD_OPTIONS } from '../../common/constants';
-import { ExportJsonPanel } from './export_json_panel';
+import { render, screen, within } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
+
+import { ExportJsonPanel } from './export_json_panel';
 import type { ExportJsonSanitizedState } from './types';
 
 describe('ExportJsonPanel', () => {
-  const dashboardState: DashboardState = {
-    query: { expression: '', language: 'kql' },
-    title: 'my dashboard',
-    panels: [],
-    pinned_panels: [],
-    options: DEFAULT_DASHBOARD_OPTIONS,
-  };
-
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   it('shows a loading indicator while loading', async () => {
-    const sanitizedState: ExportJsonSanitizedState = {
+    const sanitizedState: ExportJsonSanitizedState<{}> = {
       status: 'loading',
       data: undefined,
       warnings: [],
@@ -42,9 +34,9 @@ describe('ExportJsonPanel', () => {
 
   it('renders warnings when the server reports unsupported panels', async () => {
     const user = userEvent.setup();
-    const sanitizedState: ExportJsonSanitizedState = {
+    const sanitizedState: ExportJsonSanitizedState<{}> = {
       status: 'success',
-      data: dashboardState,
+      data: {},
       warnings: ['Dropped panel panel1, panel schema not available for panel type: foo.'],
       error: undefined,
     };
@@ -65,7 +57,7 @@ describe('ExportJsonPanel', () => {
   });
 
   it('renders an error prompt and hides sanitized JSON', async () => {
-    const sanitizedState: ExportJsonSanitizedState = {
+    const sanitizedState: ExportJsonSanitizedState<{}> = {
       status: 'error',
       data: undefined,
       warnings: [],
@@ -82,7 +74,7 @@ describe('ExportJsonPanel', () => {
   it('calls onRetry when the user clicks Retry', async () => {
     const user = userEvent.setup();
     const onRetry = jest.fn();
-    const sanitizedState: ExportJsonSanitizedState = {
+    const sanitizedState: ExportJsonSanitizedState<{}> = {
       status: 'error',
       data: undefined,
       warnings: [],

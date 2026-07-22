@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DASHBOARD_API_PATH } from '../../common/constants';
-
 const DEFAULT_FILENAME_BASE = 'export';
 
 function normalizeExtension(ext: string): string {
@@ -34,12 +32,4 @@ function sanitizeFilenameBase(input: string): string {
 
 export function buildExportJsonFilename(filenameBase: string, fileExtension: string): string {
   return `${sanitizeFilenameBase(filenameBase)}${normalizeExtension(fileExtension)}`;
-}
-
-/**
- * Builds a Dev Tools Console request string for creating a dashboard via the dashboards API.
- * The console will open with the HTTP verb + kbn: path, followed by a JSON body.
- */
-export function buildCreateDashboardRequestForConsole(jsonBody: string): string {
-  return `POST kbn:${DASHBOARD_API_PATH}\n${jsonBody}`;
 }

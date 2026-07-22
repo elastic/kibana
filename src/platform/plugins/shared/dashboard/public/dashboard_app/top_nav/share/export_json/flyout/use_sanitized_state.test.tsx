@@ -8,14 +8,9 @@
  */
 
 import { act, renderHook, waitFor } from '@testing-library/react';
-import type { DashboardState } from '../../server';
-import { DEFAULT_DASHBOARD_OPTIONS } from '../../common/constants';
-import { sanitizeDashboard } from './sanitize_dashboard';
-import { useSanitizedDashboardState } from './use_sanitized_dashboard_state';
-
-jest.mock('./sanitize_dashboard', () => ({
-  sanitizeDashboard: jest.fn(),
-}));
+import type { DashboardState } from '../../../../../../common';
+import { DEFAULT_DASHBOARD_OPTIONS } from '../../../../../../common/constants';
+import { useSanitizedState } from './use_sanitized_state';
 
 describe('useSanitizedDashboardState', () => {
   const dashboardState: DashboardState = {
@@ -30,12 +25,14 @@ describe('useSanitizedDashboardState', () => {
   });
 
   test('starts loading and then returns a success state', async () => {
-    (sanitizeDashboard as jest.Mock).mockResolvedValue({
+    const sanitizeDashboard = jest.fn().mockResolvedValue({
       data: { ...dashboardState, title: 'my dashboard (sanitized)' },
       warnings: [],
     });
 
-    const { result } = renderHook(() => useSanitizedDashboardState({ dashboardState }));
+    const { result } = renderHook(() =>
+      useSanitizedState({ state: dashboardState, sanitizeState: sanitizeDashboard })
+    );
     expect(result.current.status).toBe('loading');
 
     await waitFor(() => {
@@ -46,15 +43,17 @@ describe('useSanitizedDashboardState', () => {
   });
 
   test('retries when retry is called', async () => {
-    (sanitizeDashboard as jest.Mock)
+    const sanitizeDashboard = jest
+      .fn()
       .mockRejectedValueOnce(new Error('boom'))
       .mockResolvedValueOnce({
         data: { ...dashboardState, title: 'my dashboard (sanitized)' },
         warnings: [],
       });
 
-    const { result } = renderHook(() => useSanitizedDashboardState({ dashboardState }));
-
+    const { result } = renderHook(() =>
+      useSanitizedState({ state: dashboardState, sanitizeState: sanitizeDashboard })
+    );
     await waitFor(() => {
       expect(result.current.status).toBe('error');
     });
