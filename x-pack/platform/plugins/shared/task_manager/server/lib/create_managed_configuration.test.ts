@@ -16,7 +16,7 @@ import {
 } from './create_managed_configuration';
 import { mockLogger } from '../test_utils';
 import type { TaskManagerConfig } from '../config';
-import { CLAIM_STRATEGY_MGET, DEFAULT_CAPACITY, DEFAULT_POLL_INTERVAL } from '../config';
+import { CLAIM_STRATEGY_MGET, DEFAULT_CAPACITY, LOW_UTILIZATION_POLL_INTERVAL } from '../config';
 import { BulkUpdateError, MsearchError } from './errors';
 import { createRunningAveragedStat } from '../monitoring/task_run_calculators';
 
@@ -311,7 +311,7 @@ describe('createManagedConfiguration()', () => {
       });
 
       test('should decrease configuration back to normal incrementally after an error is emitted', async () => {
-        const { subscription, errors$ } = setupScenario(DEFAULT_POLL_INTERVAL, CLAIM_STRATEGY_MGET);
+        const { subscription, errors$ } = setupScenario(LOW_UTILIZATION_POLL_INTERVAL, CLAIM_STRATEGY_MGET);
         errors$.next(SavedObjectsErrorHelpers.createTooManyRequestsError('a', 'b'));
         jest.advanceTimersByTime(ADJUST_THROUGHPUT_INTERVAL * 10);
         expect(subscription).toHaveBeenNthCalledWith(2, 3600);

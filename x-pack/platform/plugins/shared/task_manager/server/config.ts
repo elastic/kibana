@@ -15,7 +15,7 @@ export const MAX_CAPACITY = 50;
 export const MIN_CAPACITY = 5;
 export const DEFAULT_MAX_WORKERS = 10;
 export const MGET_DEFAULT_POLL_INTERVAL = 500;
-export const DEFAULT_POLL_INTERVAL = 3000;
+export const LOW_UTILIZATION_POLL_INTERVAL = 3000;
 export const DEFAULT_VERSION_CONFLICT_THRESHOLD = 80;
 
 // Monitoring Constants
@@ -167,7 +167,7 @@ export const configSchema = schema.object(
     /* The rate at which we emit fresh monitored stats. By default we'll use the poll_interval (+ a slight buffer) */
     monitored_stats_required_freshness: schema.number({
       defaultValue: (config?: unknown) =>
-        ((config as { poll_interval: number })?.poll_interval ?? DEFAULT_POLL_INTERVAL) + 1000,
+        ((config as { poll_interval: number })?.poll_interval ?? MGET_DEFAULT_POLL_INTERVAL) + 1000,
       min: 100,
     }),
     /* The size of the running average window for monitored stats. */
