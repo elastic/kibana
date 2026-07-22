@@ -12,6 +12,7 @@ import {
   buildTelemetry,
   findSimilarFeatures,
   selectPreviouslyIdentifiedFeatures,
+  stripModelAssignedAliases,
 } from './identify_inferred_features';
 
 const createFeature = ({ id, ...overrides }: Partial<Feature> & Pick<Feature, 'id'>): Feature => ({
@@ -90,9 +91,45 @@ describe('buildKnownFeatureIds', () => {
       createFeature({ id: 'kafka', type: 'technology' }),
     ];
 
-    expect(buildKnownFeatureIds(features)).toBe(
-      ['entity: checkout-api', 'technology: kafka, log4j'].join('\n')
-    );
+    const result = buildKnownFeatureIds(features);
+    expect(result.text).toBe(['entity: checkout-api', 'technology: kafka, log4j'].join('\n'));
+    expect(result.droppedCount).toBe(0);
+  });
+
+  it('drops the stalest ids once the character budget is exhausted', () => {
+    const features = [
+      { ...createFeature({ id: 'stale-tech' }), updated_at: '2026-01-01T00:00:00.000Z' },
+      { ...createFeature({ id: 'fresh-tech' }), updated_at: '2026-03-01T00:00:00.000Z' },
+      { ...createFeature({ id: 'newer-tech' }), updated_at: '2026-02-01T00:00:00.000Z' },
+    ];
+
+    // Enough budget for "technology: fresh-tech, newer-tech" but not the third id.
+    const result = buildKnownFeatureIds(features, 36);
+    expect(result.text).toBe('technology: fresh-tech, newer-tech');
+    expect(result.droppedCount).toBe(1);
+  });
+});
+
+describe('stripModelAssignedAliases', () => {
+  it('drops model-written aliases and keeps the rest of meta', () => {
+    const feature = createFeature({
+      id: 'okta',
+      meta: { aliases: ['redis'], note: 'keep me' },
+    });
+
+    expect(stripModelAssignedAliases(feature).meta).toEqual({ note: 'keep me' });
+  });
+
+  it('removes meta entirely when aliases was its only key', () => {
+    const feature = createFeature({ id: 'okta', meta: { aliases: ['redis'] } });
+
+    expect(stripModelAssignedAliases(feature).meta).toBeUndefined();
+  });
+
+  it('returns the feature unchanged when no aliases are present', () => {
+    const feature = createFeature({ id: 'okta', meta: { note: 'keep me' } });
+
+    expect(stripModelAssignedAliases(feature)).toBe(feature);
   });
 });
 

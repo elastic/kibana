@@ -214,6 +214,8 @@ export function mergeFeature(existing: BaseFeature, incoming: BaseFeature): Base
   const existingVersion = existing.properties.version;
   const incomingVersion = incoming.properties.version;
   const versionHistory = getStringArray(existing.meta?.version_history);
+  // Unioning incoming aliases is safe: model-written meta.aliases is stripped at the identify
+  // boundary, so whatever arrives here was assigned by code after a verified reuse.
   const aliases = uniq([
     ...getStringArray(existing.meta?.aliases),
     ...getStringArray(incoming.meta?.aliases),

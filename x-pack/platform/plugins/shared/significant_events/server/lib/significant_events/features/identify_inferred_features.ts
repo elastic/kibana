@@ -91,19 +91,52 @@ export const selectPreviouslyIdentifiedFeatures = (
   return selected;
 };
 
-export const buildKnownFeatureIds = (features: ReadonlyArray<BaseFeature>): string => {
+// ~8k tokens. Worst real stream measured ~15k chars; the store allows up to 10k features
+// x 255 chars, which would blow the prompt without a ceiling.
+export const KNOWN_FEATURE_IDS_MAX_CHARS = 32_000;
+
+export const buildKnownFeatureIds = (
+  features: ReadonlyArray<BaseFeature & { updated_at?: string }>,
+  maxChars: number = KNOWN_FEATURE_IDS_MAX_CHARS
+): { text: string; droppedCount: number } => {
+  // Newest first, so a budget cut drops the stalest ids.
+  const byRecency = [...features].sort((a, b) =>
+    (b.updated_at ?? '').localeCompare(a.updated_at ?? '')
+  );
+
   const idsByType = new Map<string, Set<string>>();
-  for (const feature of features) {
+  const seen = new Set<string>();
+  let usedChars = 0;
+  let budgetExceeded = false;
+  let droppedCount = 0;
+
+  for (const feature of byRecency) {
     const id = normalizeFeatureSlug(feature.id);
     if (id.length === 0) {
       continue;
     }
-    const ids = idsByType.get(feature.type) ?? new Set<string>();
-    ids.add(id);
-    idsByType.set(feature.type, ids);
+    const seenKey = `${feature.type}:${id}`;
+    if (seen.has(seenKey)) {
+      continue;
+    }
+    seen.add(seenKey);
+
+    const ids = idsByType.get(feature.type);
+    const cost = id.length + (ids ? 2 : feature.type.length + 3);
+    if (budgetExceeded || usedChars + cost > maxChars) {
+      budgetExceeded = true;
+      droppedCount++;
+      continue;
+    }
+    usedChars += cost;
+    if (ids) {
+      ids.add(id);
+    } else {
+      idsByType.set(feature.type, new Set([id]));
+    }
   }
 
-  return Array.from(idsByType.entries())
+  const text = Array.from(idsByType.entries())
     .sort(([typeA], [typeB]) => typeA.localeCompare(typeB))
     .map(
       ([type, ids]) =>
@@ -112,6 +145,8 @@ export const buildKnownFeatureIds = (features: ReadonlyArray<BaseFeature>): stri
           .join(', ')}`
     )
     .join('\n');
+
+  return { text, droppedCount };
 };
 
 const getAliases = (meta: Record<string, unknown> | undefined): string[] => {
@@ -366,6 +401,16 @@ type InferenceResult =
     }
   | { success: false };
 
+// Aliases are code-owned matching keys, written only by applySemanticFeatureAliases after a
+// verified reuse. The finalize schema leaves meta free-form, so drop whatever the model put there.
+export const stripModelAssignedAliases = (feature: BaseFeature): BaseFeature => {
+  if (!feature.meta || !('aliases' in feature.meta)) {
+    return feature;
+  }
+  const { aliases, ...meta } = feature.meta;
+  return { ...feature, meta: Object.keys(meta).length > 0 ? meta : undefined };
+};
+
 async function tryIdentifyFeatures(
   args: Parameters<typeof identifyFeatures>[0]
 ): Promise<InferenceResult> {
@@ -373,7 +418,7 @@ async function tryIdentifyFeatures(
     const result = await identifyFeatures(args);
     return {
       success: true,
-      rawFeatures: result.features,
+      rawFeatures: result.features.map(stripModelAssignedAliases),
       ignoredFeatures: result.ignoredFeatures,
       tokensUsed: result.tokensUsed,
     };
@@ -497,7 +542,13 @@ async function runInferredIteration({
     allKnownFeatures,
     maxPreviouslyIdentifiedFeatures
   );
-  const knownFeatureIds = buildKnownFeatureIds(allKnownFeatures);
+  const { text: knownFeatureIds, droppedCount: knownFeatureIdsDropped } =
+    buildKnownFeatureIds(allKnownFeatures);
+  if (knownFeatureIdsDropped > 0) {
+    logger.debug(
+      `known_feature_ids inventory for stream "${streamName}" exceeded its budget; dropped the ${knownFeatureIdsDropped} stalest ids`
+    );
+  }
   const searchRecordsByCandidate = new Map<
     string,
     { candidateId: string; type: string; hitIds: Set<string> }
