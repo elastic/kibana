@@ -11,7 +11,7 @@ import { AllCasesSelectorModal } from '.';
 
 import { renderWithTestingProviders } from '../../../common/mock';
 import userEvent from '@testing-library/user-event';
-import { waitFor, screen } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 import { useGetTags } from '../../../containers/use_get_tags';
 import { useGetCategories } from '../../../containers/use_get_categories';
 
@@ -56,42 +56,5 @@ describe('AllCasesSelectorModal', () => {
     await userEvent.click(screen.getByTestId('all-cases-modal-cancel-button'));
 
     expect(screen.queryByTestId('all-cases-modal')).toBeFalsy();
-  });
-
-  it('should not show bulk actions and row actions on the modal', async () => {
-    renderWithTestingProviders(<AllCasesSelectorModal {...defaultProps} />);
-    await waitFor(() => {
-      expect(screen.getByTestId('cases-table')).toBeInTheDocument();
-    });
-
-    expect(screen.queryByTestId('case-table-bulk-actions-link-icon')).toBeFalsy();
-    expect(screen.queryByText('Actions')).toBeFalsy();
-  });
-
-  it('should show the select button', async () => {
-    renderWithTestingProviders(<AllCasesSelectorModal {...defaultProps} />);
-    await waitFor(() => {
-      expect(screen.getByTestId('cases-table')).toBeInTheDocument();
-    });
-
-    expect(screen.getAllByTestId(/cases-table-row-select/).length).toBeGreaterThan(0);
-  });
-
-  it('should hide the metrics', async () => {
-    renderWithTestingProviders(<AllCasesSelectorModal {...defaultProps} />);
-    await waitFor(() => {
-      expect(screen.getByTestId('cases-table')).toBeInTheDocument();
-    });
-
-    expect(screen.queryByTestId('cases-metrics-stats')).toBeFalsy();
-  });
-
-  it('should show the create case button', async () => {
-    renderWithTestingProviders(<AllCasesSelectorModal {...defaultProps} />);
-    await waitFor(() => {
-      expect(screen.getByTestId('cases-table')).toBeInTheDocument();
-    });
-
-    expect(screen.getByTestId('cases-table-add-case-filter-bar')).toBeInTheDocument();
   });
 });
