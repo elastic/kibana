@@ -56,6 +56,5 @@
     "@kbn/usage-api-plugin",
     "@kbn/workflows-management-plugin",
     "@kbn/navigation-plugin",
-    "@kbn/scout-security"
   ]
 }
