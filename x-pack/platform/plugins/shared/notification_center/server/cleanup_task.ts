@@ -64,6 +64,7 @@ export const registerNotificationCleanupTask = (
             await esClient.deleteByQuery(
               {
                 index: NOTIFICATION_DATA_STREAM_NAME,
+                ignore_unavailable: true,
                 conflicts: 'proceed',
                 refresh: false,
                 query: buildCleanupQuery(),
