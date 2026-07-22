@@ -141,12 +141,9 @@ export const initRoutes = (
   registerDashboardsRoutes(router, logger);
   registerTagsRoutes(router, logger);
 
-  const { previewTelemetryUrlEnabled, publicAttacksApiEnabled } = config.experimentalFeatures;
+  registerAttacksRoutes(router, ruleDataClient, telemetrySender);
 
-  // If publicAttacksApiEnabled is enabled, register the attacks routes.
-  if (publicAttacksApiEnabled) {
-    registerAttacksRoutes(router, ruleDataClient, telemetrySender);
-  }
+  const { previewTelemetryUrlEnabled } = config.experimentalFeatures;
 
   if (previewTelemetryUrlEnabled) {
     // telemetry preview endpoint for e2e integration tests only at the moment.

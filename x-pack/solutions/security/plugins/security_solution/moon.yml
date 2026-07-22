@@ -304,6 +304,7 @@ dependsOn:
   - '@kbn/esql-types'
   - '@kbn/discoveries-schemas'
   - '@kbn/chart-icons'
+  - '@kbn/core-mount-utils-browser'
 tags:
   - plugin
   - prod

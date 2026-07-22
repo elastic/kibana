@@ -303,6 +303,11 @@ export const LOCAL_STORAGE_KEYS = {
   casesUtilityBarHideMaxLimitWarning: 'cases.utilityBar.hideMaxLimitWarning',
   caseViewSidebarOpen: 'cases.caseView.sidebarOpen',
   caseViewSidebarAccordions: 'cases.caseView.sidebarAccordions',
+  // Guided-tour / "what's new" banner state. Keys are version-scoped so a future refresh can
+  // re-trigger the banner/tour by bumping the suffix.
+  casesListBannerDismissed: 'cases.list.banner.dismissed.v1',
+  caseDetailsTourSeen: 'cases.caseView.tour.seen.v1',
+  templateEditorTourSeen: 'cases.templates.editor.tour.seen.v1',
   showLegacyCustomFields: 'cases.showLegacyCustomFields',
 };
 
