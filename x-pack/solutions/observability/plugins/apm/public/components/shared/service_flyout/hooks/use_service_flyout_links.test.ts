@@ -6,7 +6,6 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import type { Environment } from '../../../../../common/environment_rt';
 import { APM_APP_LOCATOR_ID } from '../../../../locator/service_detail_locator';
 import { useServiceFlyoutLinks } from './use_service_flyout_links';
 
@@ -36,22 +35,23 @@ jest.mock('../service_flyout_context', () => ({
   useServiceFlyoutContext: (...args: unknown[]) => mockUseServiceFlyoutContext(...args),
 }));
 
-function makeContext(sloRead = true) {
+function makeContext(overrides: { sloRead?: boolean; transactionType?: string } = {}) {
+  const { sloRead = true, transactionType } = overrides;
   return {
     deps: {
       core: { application: { capabilities: { slo: { read: sloRead } } } },
       share: { url: { locators: { get: mockLocatorsGet } } },
     },
     ingestionType: 'classicApm' as const,
+    service: { name: 'opbeans-java' },
+    filters: {
+      environment: 'production',
+      rangeFrom: 'now-15m',
+      rangeTo: 'now',
+      transactionType,
+    },
   };
 }
-
-const baseParams = {
-  serviceName: 'opbeans-java',
-  environment: 'production' as Environment,
-  rangeFrom: 'now-15m',
-  rangeTo: 'now',
-};
 
 describe('useServiceFlyoutLinks', () => {
   beforeEach(() => {
@@ -66,7 +66,7 @@ describe('useServiceFlyoutLinks', () => {
   });
 
   it('builds apm.overview using the APM locator', () => {
-    renderHook(() => useServiceFlyoutLinks(baseParams));
+    renderHook(() => useServiceFlyoutLinks());
 
     expect(mockLocatorsGet).toHaveBeenCalledWith(APM_APP_LOCATOR_ID);
     expect(mockGetRedirectUrl).toHaveBeenCalledWith({
@@ -76,7 +76,7 @@ describe('useServiceFlyoutLinks', () => {
   });
 
   it('builds apm.alertsTab using the APM locator, dropping the kuery', () => {
-    renderHook(() => useServiceFlyoutLinks(baseParams));
+    renderHook(() => useServiceFlyoutLinks());
 
     expect(mockGetRedirectUrl).toHaveBeenCalledWith({
       serviceName: 'opbeans-java',
@@ -90,7 +90,8 @@ describe('useServiceFlyoutLinks', () => {
   });
 
   it('scopes the Discover traces link to the service, environment, and transactionType', () => {
-    renderHook(() => useServiceFlyoutLinks({ ...baseParams, transactionType: 'request' }));
+    mockUseServiceFlyoutContext.mockReturnValue(makeContext({ transactionType: 'request' }));
+    renderHook(() => useServiceFlyoutLinks());
 
     expect(mockUseDiscoverHref).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -106,7 +107,7 @@ describe('useServiceFlyoutLinks', () => {
   });
 
   it('passes empty string transactionType to the Discover traces link before the type resolves', () => {
-    renderHook(() => useServiceFlyoutLinks(baseParams));
+    renderHook(() => useServiceFlyoutLinks());
 
     expect(mockUseDiscoverHref).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -117,7 +118,7 @@ describe('useServiceFlyoutLinks', () => {
   });
 
   it('scopes the Discover logs link to the service and environment, without transactionType', () => {
-    renderHook(() => useServiceFlyoutLinks(baseParams));
+    renderHook(() => useServiceFlyoutLinks());
 
     const logsCall = mockUseDiscoverHref.mock.calls.find(
       ([args]: [{ indexType: string }]) => args.indexType === 'error'
@@ -131,9 +132,8 @@ describe('useServiceFlyoutLinks', () => {
   });
 
   it('returns all expected link groups with the correct shape', () => {
-    const { result } = renderHook(() =>
-      useServiceFlyoutLinks({ ...baseParams, transactionType: 'request' })
-    );
+    mockUseServiceFlyoutContext.mockReturnValue(makeContext({ transactionType: 'request' }));
+    const { result } = renderHook(() => useServiceFlyoutLinks());
 
     expect(result.current.apm.overviewTab).toEqual('/app/apm/services/opbeans-java/overview');
     expect(result.current.apm.alertsTab).toEqual('/app/apm/services/opbeans-java/alerts');
@@ -144,9 +144,9 @@ describe('useServiceFlyoutLinks', () => {
   });
 
   it('returns undefined slos when the slo.read capability is missing', () => {
-    mockUseServiceFlyoutContext.mockReturnValue(makeContext(false));
+    mockUseServiceFlyoutContext.mockReturnValue(makeContext({ sloRead: false }));
 
-    const { result } = renderHook(() => useServiceFlyoutLinks(baseParams));
+    const { result } = renderHook(() => useServiceFlyoutLinks());
 
     expect(result.current.slos).toBeUndefined();
   });

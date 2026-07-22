@@ -30,7 +30,10 @@ const mockShare = {
         getRedirectUrl: jest
           .fn()
           .mockImplementation(
-            ({ serviceName }: any) => `/services/${serviceName}/overview?comparisonEnabled=true`
+            ({ serviceName, query }: any) =>
+              `/services/${serviceName}/overview?comparisonEnabled=${
+                query?.comparisonEnabled ?? true
+              }`
           ),
       }),
     },
@@ -54,6 +57,11 @@ jest.mock('../../../../hooks/use_apm_params', () => ({
 const mockUseApmServiceContext = jest.fn();
 jest.mock('../../../../context/apm_service/use_apm_service_context', () => ({
   useApmServiceContext: () => mockUseApmServiceContext(),
+}));
+
+const mockUseApmRoutePath = jest.fn();
+jest.mock('../../../../hooks/use_apm_route_path', () => ({
+  useApmRoutePath: () => mockUseApmRoutePath(),
 }));
 
 const mockUseFetcher = jest.fn();
@@ -115,6 +123,9 @@ function setupMocks({
   // caller explicitly passes `agentName: undefined`.
   agentName = 'nodejs' as AgentName | null,
   anomalyEnvironment = 'production',
+  routePath = '/services/{serviceName}/transactions',
+  comparisonEnabled: queryComparisonEnabled,
+  offset: queryOffset,
 }: {
   isAlertingAvailable?: boolean;
   canReadAlerts?: boolean;
@@ -127,7 +138,12 @@ function setupMocks({
   serviceName?: string;
   agentName?: AgentName | null;
   anomalyEnvironment?: string;
+  routePath?: string;
+  comparisonEnabled?: boolean;
+  offset?: string;
 } = {}) {
+  mockUseApmRoutePath.mockReturnValue(routePath);
+
   mockUseApmPluginContext.mockReturnValue({
     core: {
       application: {
@@ -149,7 +165,11 @@ function setupMocks({
 
   mockUseApmParams.mockReturnValue({
     path: { serviceName },
-    query: baseQuery,
+    query: {
+      ...baseQuery,
+      ...(queryComparisonEnabled !== undefined && { comparisonEnabled: queryComparisonEnabled }),
+      ...(queryOffset !== undefined && { offset: queryOffset }),
+    },
   });
 
   mockUseApmServiceContext.mockReturnValue({ agentName: agentName ?? undefined });
@@ -352,5 +372,56 @@ describe('ServiceHeaderBadges', () => {
 
     expect(screen.queryByTestId('serviceHeaderAnomaliesBadge')).not.toBeInTheDocument();
     expect(container.firstChild).toBeNull();
+  });
+
+  describe('anomaly badge toggle behavior', () => {
+    const anomalySetup = {
+      canReadMlJobs: true,
+      alertsCount: 0,
+      anomalyScore: 82,
+      mostCriticalSloStatus: { status: 'noSLOs' as const, count: 0 },
+      sloFetchStatus: FETCH_STATUS.NOT_INITIATED,
+    };
+
+    function getAnomalyBadgeSearchParams(): Record<string, string> {
+      const href = screen.getByTestId('apmAnomaliesBadge').closest('a')?.getAttribute('href');
+      return Object.fromEntries(new URLSearchParams(href!.split('?')[1]));
+    }
+
+    it('always targets expected bounds ON when not on the overview tab', () => {
+      setupMocks({
+        ...anomalySetup,
+        routePath: '/services/{serviceName}/transactions',
+        comparisonEnabled: true,
+        offset: 'expected_bounds',
+      });
+      renderBadges();
+
+      expect(getAnomalyBadgeSearchParams()).toMatchObject({ comparisonEnabled: 'true' });
+    });
+
+    it('targets toggling expected bounds OFF when on overview tab and bounds are showing', () => {
+      setupMocks({
+        ...anomalySetup,
+        routePath: '/services/{serviceName}/overview',
+        comparisonEnabled: true,
+        offset: 'expected_bounds',
+      });
+      renderBadges();
+
+      expect(getAnomalyBadgeSearchParams()).toMatchObject({ comparisonEnabled: 'false' });
+    });
+
+    it('targets toggling expected bounds ON when on overview tab and bounds are not showing', () => {
+      setupMocks({
+        ...anomalySetup,
+        routePath: '/services/{serviceName}/overview',
+        comparisonEnabled: true,
+        offset: '1d',
+      });
+      renderBadges();
+
+      expect(getAnomalyBadgeSearchParams()).toMatchObject({ comparisonEnabled: 'true' });
+    });
   });
 });

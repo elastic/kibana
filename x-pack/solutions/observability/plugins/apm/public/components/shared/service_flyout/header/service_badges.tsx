@@ -34,12 +34,7 @@ export function ServiceBadges() {
   const { capabilities, navigateToUrl } = core.application;
   const canReadSlos = !!capabilities.slo?.read;
 
-  const { slos: slosHref } = useServiceFlyoutLinks({
-    serviceName: service.name,
-    rangeFrom,
-    rangeTo,
-    environment,
-  });
+  const { slos: slosHref } = useServiceFlyoutLinks();
 
   const { alertsCount, anomalyData } = useServiceBadgesData({
     serviceName: service.name,

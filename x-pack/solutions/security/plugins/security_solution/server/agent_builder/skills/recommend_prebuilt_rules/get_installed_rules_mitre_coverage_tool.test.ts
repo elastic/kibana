@@ -150,7 +150,7 @@ describe('buildMitreCoverageFromRules', () => {
     const result = buildMitreCoverageFromRules(
       rules(
         rule([
-          mitre('TA0005', 'Defense Evasion', [
+          mitre('TA0005', 'Stealth', [
             tech('T1055', 'Process Injection', [
               sub('T1055.001', 'Dynamic-link Library Injection'),
               sub('T1055.002', 'Portable Executable Injection'),

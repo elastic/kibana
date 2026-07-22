@@ -24,6 +24,9 @@ import {
 } from '../../../../../common/anomaly_detection';
 import { APM_APP_LOCATOR_ID } from '../../../../locator/service_detail_locator';
 
+const COMPARISON_ENABLED_DEFAULT = true;
+const IS_IN_SERVICE_OVERVIEW_DEFAULT = false;
+
 function getI18nLabel(severity: ML_ANOMALY_SEVERITY): string {
   switch (severity) {
     case ML_ANOMALY_SEVERITY.CRITICAL:
@@ -63,32 +66,60 @@ function getTooltipContent({
   score,
   detectorType,
   href,
+  comparisonEnabled = COMPARISON_ENABLED_DEFAULT,
+  isInServiceOverview = IS_IN_SERVICE_OVERVIEW_DEFAULT,
 }: {
   isNone: boolean;
   score: number | undefined;
   detectorType: AnomalyDetectorType | undefined;
   href: string | undefined;
+  comparisonEnabled: boolean | undefined;
+  isInServiceOverview: boolean | undefined;
 }): string {
-  if (isNone) {
-    return i18n.translate('xpack.apm.anomaliesBadge.tooltip.none', {
-      defaultMessage: 'No anomalies detected for the selected time range.',
-    });
-  }
-
   if (score === undefined) {
     return i18n.translate('xpack.apm.anomaliesBadge.tooltip.unknown', {
       defaultMessage: 'No anomaly score is available for the selected time range.',
     });
   }
 
+  if (isNone) {
+    return i18n.translate('xpack.apm.anomaliesBadge.tooltip.none', {
+      defaultMessage: 'No anomalies detected.',
+    });
+  }
+
+  if (href === undefined) {
+    return i18n.translate('xpack.apm.anomaliesBadge.tooltip.score.noLink', {
+      defaultMessage:
+        'Anomaly score (max.): {score}{detectorType, select, none {} other { - {detectorLabel}}}',
+      values: {
+        score: score.toFixed(2),
+        detectorType: detectorType ?? 'none',
+        detectorLabel: detectorType !== undefined ? getApmMlDetectorLabel(detectorType) : '',
+      },
+    });
+  }
+
+  if (!isInServiceOverview) {
+    return i18n.translate('xpack.apm.anomaliesBadge.tooltip.score.outsideLink', {
+      defaultMessage:
+        'Anomaly score (max.): {score}{detectorType, select, none {} other { - {detectorLabel}}} - Click to view more.',
+      values: {
+        score: score.toFixed(2),
+        detectorType: detectorType ?? 'none',
+        detectorLabel: detectorType !== undefined ? getApmMlDetectorLabel(detectorType) : '',
+      },
+    });
+  }
+
   return i18n.translate('xpack.apm.anomaliesBadge.tooltip.score', {
     defaultMessage:
-      'Anomaly score (max.): {score}{detectorType, select, none {} other { - {detectorLabel}}}{hasHref, select, true { - Click to view more.} other {}}',
+      'Anomaly score (max.): {score}{detectorType, select, none {} other { - {detectorLabel}}}{comparisonEnabled, select, true { - Click to view expected bounds.} other { - Click to hide expected bounds.}}',
     values: {
       score: score.toFixed(2),
       detectorType: detectorType ?? 'none',
       detectorLabel: detectorType !== undefined ? getApmMlDetectorLabel(detectorType) : '',
-      hasHref: href !== undefined ? 'true' : 'false',
+      comparisonEnabled: comparisonEnabled ? 'true' : 'false',
     },
   });
 }
@@ -111,6 +142,13 @@ export interface AnomaliesBadgeNavigationProps {
   rangeTo: string;
   locators: SharePluginStart['url']['locators'];
   transactionType?: string;
+  comparisonEnabled?: boolean;
+  /**
+   * Tooltip content is slightly different when the badge is shown in the service overview page vs. other pages.
+   * The prop is provided by consumers to avoid a direct dependency to `useApmParams` in this component,
+   * which would make it less reusable in other pages.
+   */
+  isInServiceOverview?: boolean;
 }
 
 interface AnomaliesBadgeProps {
@@ -145,13 +183,21 @@ export function AnomaliesBadge({ score, detectorType, navigationProps, ebt }: An
             kuery: '',
             transactionType: navigationProps.transactionType,
             anomalyThreshold: severity === ML_ANOMALY_SEVERITY.UNKNOWN ? undefined : severity,
-            comparisonEnabled: true,
+            comparisonEnabled: navigationProps.comparisonEnabled ?? COMPARISON_ENABLED_DEFAULT,
             offset: 'expected_bounds',
           },
         })
       : undefined;
 
-  const tooltipContent = getTooltipContent({ isNone, score, detectorType, href });
+  const tooltipContent = getTooltipContent({
+    isNone,
+    score,
+    detectorType,
+    href,
+    comparisonEnabled: navigationProps?.comparisonEnabled,
+    isInServiceOverview: navigationProps?.isInServiceOverview,
+  });
+
   const roleProps = href ? { href } : { role: 'img' as const, 'aria-label': text };
   const ebtProps =
     ebt && href

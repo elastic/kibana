@@ -11,26 +11,14 @@ import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import { ActionsContextMenu, type ActionGroups } from '../../actions_context_menu';
 import { SERVICE_FLYOUT_EBT_ELEMENTS } from '../ebt_constants';
-import { useServiceFlyoutContext } from '../service_flyout_context';
 import { useServiceFlyoutLinks } from '../hooks/use_service_flyout_links';
 
 export function ServiceFlyoutFooter() {
   const {
-    service,
-    filters: { environment, rangeFrom, rangeTo, transactionType },
-  } = useServiceFlyoutContext();
-
-  const {
     alerts: alertsHref,
     slos: slosHref,
     discover: { traces: tracesDiscoverHref, logs: logsDiscoverHref },
-  } = useServiceFlyoutLinks({
-    serviceName: service.name,
-    environment,
-    rangeFrom,
-    rangeTo,
-    transactionType,
-  });
+  } = useServiceFlyoutLinks();
 
   const actionGroups = useMemo(() => {
     const groups: ActionGroups = [];

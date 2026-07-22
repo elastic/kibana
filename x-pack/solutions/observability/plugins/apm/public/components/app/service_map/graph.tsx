@@ -192,6 +192,34 @@ function GraphInner({
   const [selectedNodeForPopover, setSelectedNodeForPopover] = useState<ServiceMapNode | null>(null);
   const [selectedServiceNodeForFlyout, setSelectedServiceNodeForFlyout] =
     useState<ServiceMapServiceNode | null>(null);
+  const flyoutProps = useMemo(
+    () =>
+      selectedServiceNodeForFlyout
+        ? {
+            service: {
+              name: selectedServiceNodeForFlyout.data.id,
+              agentName: selectedServiceNodeForFlyout.data.agentName,
+              sloStatus: selectedServiceNodeForFlyout.data.sloStatus,
+              sloCount: selectedServiceNodeForFlyout.data.sloCount,
+            },
+            filters: {
+              environment,
+              rangeFrom: flyoutOptions?.rangeFrom ?? start,
+              rangeTo: flyoutOptions?.rangeTo ?? end,
+              transactionType: flyoutOptions?.transactionType,
+            },
+          }
+        : null,
+    [
+      selectedServiceNodeForFlyout,
+      environment,
+      flyoutOptions?.rangeFrom,
+      flyoutOptions?.rangeTo,
+      flyoutOptions?.transactionType,
+      start,
+      end,
+    ]
+  );
   const [selectedEdgeForPopover, setSelectedEdgeForPopover] = useState<ServiceMapEdgeType | null>(
     null
   );
@@ -915,22 +943,12 @@ function GraphInner({
             alwaysNavigateOnFocus={alwaysNavigateOnPopoverFocus}
             clearKueryOnNavigation={clearKueryOnPopoverNavigation}
           />
-          {selectedServiceNodeForFlyout && (
+          {flyoutProps && (
             <ServiceFlyout
-              key={selectedServiceNodeForFlyout.data.id}
-              service={{
-                name: selectedServiceNodeForFlyout.data.id,
-                agentName: selectedServiceNodeForFlyout.data.agentName,
-                sloStatus: selectedServiceNodeForFlyout.data.sloStatus,
-                sloCount: selectedServiceNodeForFlyout.data.sloCount,
-              }}
+              key={flyoutProps.service.name}
+              service={flyoutProps.service}
               deps={{ core, share, lens, dataViews, alerting: plugins.alerting }}
-              filters={{
-                environment,
-                rangeFrom: flyoutOptions?.rangeFrom ?? start,
-                rangeTo: flyoutOptions?.rangeTo ?? end,
-                transactionType: flyoutOptions?.transactionType,
-              }}
+              filters={flyoutProps.filters}
               telemetry={{ client: telemetry, source: flyoutSource }}
               onClose={handlePopoverClose}
             />

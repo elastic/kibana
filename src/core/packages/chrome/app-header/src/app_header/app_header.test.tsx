@@ -19,7 +19,7 @@ import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 import type { ChromeBadge } from '@kbn/core-chrome-browser';
 import { APP_MENU_TEST_SUBJECTS } from '@kbn/core-chrome-app-menu-components';
 import type { AppHeaderMetadataItems } from '../types';
-import { AppHeaderView } from './app_header';
+import { AppHeaderView, DiscoverAppHeader } from './app_header';
 import { APP_HEADER_TEST_SUBJECTS } from './test_subjects';
 
 const renderAppHeader = (
@@ -128,12 +128,12 @@ describe('AppHeaderView', () => {
     expect(await screen.findByTestId(APP_MENU_TEST_SUBJECTS.root)).toBeInTheDocument();
   });
 
-  it('renders when the only content is a title appendix', () => {
+  it('renders Discover tabs beside the title', () => {
     renderAppHeader(
-      <AppHeaderView titleAppend={<div data-test-subj="titleAppend">Title append</div>} />
+      <DiscoverAppHeader title="Discover" tabsBar={<div data-test-subj="tabsBar">Tabs</div>} />
     );
 
-    expect(screen.getByTestId('titleAppend')).toBeInTheDocument();
+    expect(screen.getByTestId('tabsBar')).toBeInTheDocument();
   });
 
   it('renders legacy badge fallback content', () => {
