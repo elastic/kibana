@@ -13,7 +13,7 @@ import { BehaviorSubject } from 'rxjs';
 import { render, screen } from '@testing-library/react';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
-import type { ChromeBadge } from '@kbn/core-chrome-browser';
+import type { ChromeBadge, ChromeBreadcrumb } from '@kbn/core-chrome-browser';
 import { TestChromeProviders } from '../test_helpers';
 import { useHasChromeAppHeaderContent } from './chrome_app_header';
 
@@ -85,6 +85,46 @@ describe('useHasChromeAppHeaderContent', () => {
     const chrome = chromeServiceMock.createStartContract();
     chrome.getBadge$.mockReturnValue(
       new BehaviorSubject<ChromeBadge>({ text: 'Technical preview', tooltip: '' })
+    );
+
+    render(
+      <TestChromeProviders chrome={chrome}>
+        <HasContent />
+      </TestChromeProviders>
+    );
+
+    expect(screen.getByText('has content')).toBeInTheDocument();
+  });
+
+  it('ignores breadcrumb back targets that resolve to the current location', () => {
+    window.history.replaceState({}, '', '/app/example/page');
+    const chrome = chromeServiceMock.createStartContract();
+    chrome.project.getBreadcrumbs$.mockReturnValue(
+      new BehaviorSubject<ChromeBreadcrumb[]>([
+        { text: 'Absolute', href: window.location.href },
+        { text: 'Relative', href: 'page' },
+        { text: 'Trailing slash', href: '/app/example/page/' },
+        { text: 'Current page' },
+      ])
+    );
+
+    render(
+      <TestChromeProviders chrome={chrome}>
+        <HasContent />
+      </TestChromeProviders>
+    );
+
+    expect(screen.getByText('empty')).toBeInTheDocument();
+  });
+
+  it('keeps breadcrumb back targets that resolve to a different location', () => {
+    window.history.replaceState({}, '', '/app/example/page');
+    const chrome = chromeServiceMock.createStartContract();
+    chrome.project.getBreadcrumbs$.mockReturnValue(
+      new BehaviorSubject<ChromeBreadcrumb[]>([
+        { text: 'Parent', href: '/app/example' },
+        { text: 'Current page' },
+      ])
     );
 
     render(
