@@ -5,21 +5,19 @@
  * 2.0.
  */
 
+import { EMPTY, from, concatMap, catchError, type Observable } from 'rxjs';
 import pRetry, { AbortError } from 'p-retry';
-import { AgentExecutionMode, ExecutionStatus, type ChatEvent } from '@kbn/agent-builder-common';
+import type { Logger } from '@kbn/logging';
+import {
+  AgentExecutionMode,
+  ExecutionStatus,
+  isRequestAbortedError,
+  type ChatEvent,
+} from '@kbn/agent-builder-common';
 import type { PluginSetupContract as ActionsPluginSetup } from '@kbn/actions-plugin/server';
 import type { AgentExecution } from '@kbn/agent-builder-server/execution';
-import type {
-  CallbackPayload,
-  ChatCallbackFailurePayload,
-} from '../../../common/http_api/chat_callback';
-import { buildChatResponseFromEvents } from './utils/chat_response';
-
-/** Callback delivery is only supported for conversation-mode executions. */
-const getCallbackUrl = (execution: AgentExecution): string | undefined =>
-  execution.executionMode === AgentExecutionMode.conversation
-    ? execution.agentParams.callback?.url
-    : undefined;
+import type { ChatCallbackOutboundPayload } from '../../../common/http_api/chat_callback';
+import { serializeExecutionError } from './execution_runner';
 
 const callbackRetryOptions = {
   retries: 2,
@@ -28,11 +26,27 @@ const callbackRetryOptions = {
   randomize: false,
 } as const;
 
+/** Posts a single callback payload, resolving with the response status. */
+export type MakeRequest = (
+  payload: ChatCallbackOutboundPayload,
+  signal: AbortSignal
+) => Promise<{ status: number }>;
+
 export class CallbackDeliveryService {
   private readonly actions: ActionsPluginSetup;
 
   constructor({ actions }: { actions: ActionsPluginSetup }) {
     this.actions = actions;
+  }
+
+  /**
+   * Returns the execution's callback URL, or undefined when no callback is configured.
+   * Callback delivery is only supported for conversation-mode executions.
+   */
+  getCallbackUrl(execution: AgentExecution): string | undefined {
+    return execution.executionMode === AgentExecutionMode.conversation
+      ? execution.agentParams.callback?.url
+      : undefined;
   }
 
   validateCallbackUrl(callbackUrl: string): void {
@@ -44,81 +58,49 @@ export class CallbackDeliveryService {
   }
 
   /**
-   * Delivers a success callback for a completed execution when the execution has a callback
-   * configured. No-op otherwise, including for non-conversation executions.
+   * Creates the {@link MakeRequest} for the callback URL, choosing between the Actions
+   * Relay mTLS client (for Relay origins) and plain fetch.
    */
-  async makeSuccessCallbackRequestIfConfigured({
-    execution,
-    events,
-  }: {
-    execution: AgentExecution;
-    events: ChatEvent[];
-  }): Promise<void> {
-    const callbackUrl = getCallbackUrl(execution);
-    if (!callbackUrl) {
-      return;
+  createMakeRequest(callbackUrl: string): MakeRequest {
+    const relayClient = this.actions.getRelayClient();
+
+    if (relayClient?.isRelayOrigin(callbackUrl)) {
+      return (payload, signal) => relayClient.postCallback(callbackUrl, payload, signal);
     }
 
-    await this.makeCallbackRequest({
-      callbackUrl,
-      payload: {
-        execution_id: execution.executionId,
-        status: ExecutionStatus.completed,
-        response: buildChatResponseFromEvents(events),
-      },
-    });
+    return (payload, signal) =>
+      fetch(callbackUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+        redirect: 'error',
+        signal,
+      });
   }
 
   /**
-   * Delivers a failure callback for a failed or aborted execution when the execution has a
-   * callback configured. No-op otherwise, including for non-conversation executions.
+   * Posts the payload through `makeRequest` with the Actions response timeout, retrying
+   * network errors and 5xx responses.
    */
-  async makeFailureCallbackRequestIfConfigured({
-    execution,
+  async makeCallbackRequest({
     payload,
+    makeRequest,
   }: {
-    execution: AgentExecution;
-    payload: ChatCallbackFailurePayload;
+    payload: ChatCallbackOutboundPayload;
+    makeRequest: MakeRequest;
   }): Promise<void> {
-    const callbackUrl = getCallbackUrl(execution);
-    if (!callbackUrl) {
-      return;
-    }
-
-    await this.makeCallbackRequest({ callbackUrl, payload });
-  }
-
-  private async makeCallbackRequest({
-    callbackUrl,
-    payload,
-  }: {
-    callbackUrl: string;
-    payload: CallbackPayload;
-  }): Promise<void> {
-    this.validateCallbackUrl(callbackUrl);
-
     const { timeout } = this.actions.getActionsConfigurationUtilities().getResponseSettings();
-    const relayClient = this.actions.getRelayClient();
-
-    const headers = {
-      'Content-Type': 'application/json',
-    };
 
     await pRetry(async () => {
       const abortController = new AbortController();
       const timeoutId = setTimeout(() => abortController.abort(), timeout);
 
       let response: { status: number };
+
       try {
-        response = relayClient?.isRelayOrigin(callbackUrl)
-          ? await relayClient.postCallback(callbackUrl, payload, abortController.signal)
-          : await fetch(callbackUrl, {
-              method: 'POST',
-              headers,
-              body: JSON.stringify(payload),
-              redirect: 'error',
-              signal: abortController.signal,
-            });
+        response = await makeRequest(payload, abortController.signal);
       } catch (error) {
         throw error instanceof Error ? error : new Error(String(error));
       } finally {
@@ -130,6 +112,7 @@ export class CallbackDeliveryService {
       }
 
       const error = new Error(`Callback delivery failed with status ${response.status}`);
+
       if (response.status >= 500) {
         throw error;
       }
@@ -138,3 +121,96 @@ export class CallbackDeliveryService {
     }, callbackRetryOptions);
   }
 }
+
+/**
+ * Consumes the event stream and delivers one callback request per event through the
+ * callback delivery service, sequentially and in order, as the events are emitted.
+ * Delivery is best-effort: per-event failures are logged and the stream continues.
+ * When the stream errors, a synthetic failure payload is delivered instead.
+ *
+ * Resolves once all deliveries have drained; never rejects. No-op (without subscribing)
+ * when the execution has no callback configured — callback delivery is only supported
+ * for conversation-mode executions.
+ */
+export const deliverStream = ({
+  execution,
+  events$,
+  callbackDeliveryService,
+  logger,
+}: {
+  execution: AgentExecution;
+  events$: Observable<ChatEvent>;
+  callbackDeliveryService: CallbackDeliveryService;
+  logger: Logger;
+}): Promise<void> => {
+  const callbackUrl = callbackDeliveryService.getCallbackUrl(execution);
+
+  if (!callbackUrl) {
+    return Promise.resolve();
+  }
+
+  try {
+    callbackDeliveryService.validateCallbackUrl(callbackUrl);
+  } catch (error) {
+    logger.error(
+      `Skipping callback delivery for execution ${execution.executionId}: ${error.message}`
+    );
+
+    return Promise.resolve();
+  }
+
+  const makeRequest = callbackDeliveryService.createMakeRequest(callbackUrl);
+
+  return new Promise<void>((resolve) => {
+    events$
+      .pipe(
+        concatMap((event) => {
+          const delivery = callbackDeliveryService.makeCallbackRequest({
+            payload: {
+              execution_id: execution.executionId,
+              status: ExecutionStatus.running,
+              event,
+            },
+            makeRequest,
+          });
+
+          return from(delivery).pipe(
+            catchError((error) => {
+              logger.warn(
+                `Failed to deliver callback event for execution ${execution.executionId}: ${error.message}`
+              );
+
+              return EMPTY;
+            })
+          );
+        }),
+        catchError((error) => {
+          const status = isRequestAbortedError(error)
+            ? ExecutionStatus.aborted
+            : ExecutionStatus.failed;
+
+          const failureDelivery = callbackDeliveryService.makeCallbackRequest({
+            payload: {
+              execution_id: execution.executionId,
+              status,
+              error: serializeExecutionError(error),
+            },
+            makeRequest,
+          });
+
+          return from(failureDelivery).pipe(
+            catchError((deliveryError) => {
+              logger.warn(
+                `Failed to deliver failure callback for execution ${execution.executionId}: ${deliveryError.message}`
+              );
+              return EMPTY;
+            })
+          );
+        })
+      )
+      .subscribe({
+        complete: () => resolve(),
+        error: () => resolve(),
+      });
+  });
+};

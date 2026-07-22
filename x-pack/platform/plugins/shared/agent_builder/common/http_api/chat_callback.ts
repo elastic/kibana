@@ -6,13 +6,14 @@
  */
 
 import type {
+  ChatEvent,
   ConversationOrigin,
   ConversationRoundAuthor,
   ConversationOriginType,
   ExecutionStatus,
   SerializedExecutionError,
 } from '@kbn/agent-builder-common';
-import type { ChatRequestBodyPayload, ChatResponse } from './chat';
+import type { ChatRequestBodyPayload } from './chat';
 
 export interface ChatCallbackRequestBodyPayload extends ChatRequestBodyPayload {
   execution_idempotency_key: string;
@@ -36,10 +37,10 @@ export interface ChatCallbackAcceptedResponse {
   status: ExecutionStatus.scheduled;
 }
 
-export interface ChatCallbackSuccessPayload {
+export interface ChatCallbackEventPayload {
   execution_id: string;
-  status: ExecutionStatus.completed;
-  response: ChatResponse;
+  status: ExecutionStatus.running;
+  event: ChatEvent;
 }
 
 export interface ChatCallbackFailurePayload {
@@ -48,4 +49,4 @@ export interface ChatCallbackFailurePayload {
   error?: SerializedExecutionError;
 }
 
-export type CallbackPayload = ChatCallbackSuccessPayload | ChatCallbackFailurePayload;
+export type ChatCallbackOutboundPayload = ChatCallbackEventPayload | ChatCallbackFailurePayload;

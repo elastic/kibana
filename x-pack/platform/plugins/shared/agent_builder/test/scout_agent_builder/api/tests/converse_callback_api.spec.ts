@@ -13,15 +13,22 @@ import {
   ConversationAccessControlMode,
   ConversationOriginType,
   ExecutionStatus,
+  isConversationCreatedEvent,
+  isConversationUpdatedEvent,
+  isRoundCompleteEvent,
 } from '@kbn/agent-builder-common';
 import { createLlmProxy, type LlmProxy } from '@kbn/ftr-llm-proxy';
 import type {
   ChatCallbackAcceptedResponse,
+  ChatCallbackEventPayload,
   ChatCallbackFailurePayload,
-  ChatCallbackSuccessPayload,
+  ChatCallbackOutboundPayload,
 } from '../../../../common/http_api/chat_callback';
 import type { ListConversationsResponse } from '../../../../common/http_api/conversations';
-import { CallbackTestServer } from '../../../scout_agent_builder_shared/lib/callback_test_server';
+import {
+  CallbackTestServer,
+  type CallbackTestServerRequest,
+} from '../../../scout_agent_builder_shared/lib/callback_test_server';
 import {
   createGenAiConnectorForProxy,
   deleteConnectorById,
@@ -91,6 +98,71 @@ apiTest.describe(
       'elastic-api-version': ELASTIC_API_VERSION,
     });
 
+    const isEventPayload = (
+      payload: ChatCallbackOutboundPayload
+    ): payload is ChatCallbackEventPayload => payload.status === ExecutionStatus.running;
+
+    /**
+     * Consumes streamed callback requests until one matches the predicate,
+     * returning every request received along the way (match included).
+     */
+    const collectCallbackRequestsUntil = async (
+      predicate: (payload: ChatCallbackOutboundPayload) => boolean
+    ): Promise<CallbackTestServerRequest[]> => {
+      const requests: CallbackTestServerRequest[] = [];
+      let matched = false;
+      while (!matched) {
+        const request = await callbackServer.waitForRequest();
+        requests.push(request);
+        matched = predicate(request.body as ChatCallbackOutboundPayload);
+      }
+      return requests;
+    };
+
+    const isConversationEventPayload = (payload: ChatCallbackOutboundPayload): boolean =>
+      isEventPayload(payload) &&
+      (isConversationCreatedEvent(payload.event) || isConversationUpdatedEvent(payload.event));
+
+    /** Consumes streamed callback requests until the conversation event that ends a round. */
+    const collectCompletedRoundRequests = () =>
+      collectCallbackRequestsUntil(isConversationEventPayload);
+
+    /** Waits for the terminal failure payload, skipping streamed running events. */
+    const waitForFailurePayload = async (): Promise<ChatCallbackFailurePayload> => {
+      const requests = await collectCallbackRequestsUntil(
+        (payload) =>
+          payload.status === ExecutionStatus.failed || payload.status === ExecutionStatus.aborted
+      );
+      return requests[requests.length - 1].body as ChatCallbackFailurePayload;
+    };
+
+    const getEvents = (requests: CallbackTestServerRequest[]) =>
+      requests
+        .map((request) => request.body as ChatCallbackOutboundPayload)
+        .filter(isEventPayload)
+        .map(({ event }) => event);
+
+    const getConversationId = (requests: CallbackTestServerRequest[]): string => {
+      const conversationEvent = getEvents(requests).find(
+        (event) => isConversationCreatedEvent(event) || isConversationUpdatedEvent(event)
+      );
+      if (!conversationEvent) {
+        throw new Error('No conversation event was delivered to the callback');
+      }
+      return (conversationEvent.data as { conversation_id: string }).conversation_id;
+    };
+
+    const getRoundCompleteEvent = (requests: CallbackTestServerRequest[]) => {
+      const roundComplete = getEvents(requests).find(isRoundCompleteEvent);
+      if (!roundComplete) {
+        throw new Error('No round_complete event was delivered to the callback');
+      }
+      return roundComplete;
+    };
+
+    const getExecutionId = (requests: CallbackTestServerRequest[]): string =>
+      (requests[0].body as ChatCallbackEventPayload).execution_id;
+
     apiTest('delivers completed response to callback URL', async ({ apiClient }) => {
       const mockedLlmResponse = 'Callback LLM response';
       const mockedLlmTitle = 'Callback Conversation Title';
@@ -124,21 +196,27 @@ apiTest.describe(
       expect(accepted.execution_id.length).toBeGreaterThan(0);
       expect(accepted.status).toBe(ExecutionStatus.scheduled);
 
-      const callbackRequest = await callbackServer.waitForRequest();
+      const callbackRequests = await collectCompletedRoundRequests();
       await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
 
-      expect(callbackRequest.method).toBe('POST');
-      expect(callbackRequest.url).toBe('/callback?token=success');
-      expect(callbackRequest.headers['content-type']).toBe('application/json');
+      for (const callbackRequest of callbackRequests) {
+        expect(callbackRequest.method).toBe('POST');
+        expect(callbackRequest.url).toBe('/callback?token=success');
+        expect(callbackRequest.headers['content-type']).toBe('application/json');
 
-      const callbackPayload = callbackRequest.body as ChatCallbackSuccessPayload;
-      expect(callbackPayload.execution_id).toBe(accepted.execution_id);
-      expect(callbackPayload.status).toBe(ExecutionStatus.completed);
-      expect(callbackPayload.response.response.message).toBe(mockedLlmResponse);
-      expect(typeof callbackPayload.response.conversation_id).toBe('string');
-      expect(callbackPayload.response.conversation_id.length).toBeGreaterThan(0);
+        const payload = callbackRequest.body as ChatCallbackEventPayload;
+        expect(payload.execution_id).toBe(accepted.execution_id);
+        expect(payload.status).toBe(ExecutionStatus.running);
+        expect(payload.event).toBeDefined();
+      }
 
-      conversationIds.add(callbackPayload.response.conversation_id);
+      const roundComplete = getRoundCompleteEvent(callbackRequests);
+      expect(roundComplete.data.round.response.message).toBe(mockedLlmResponse);
+
+      const conversationId = getConversationId(callbackRequests);
+      expect(conversationId.length).toBeGreaterThan(0);
+
+      conversationIds.add(conversationId);
     });
 
     apiTest(
@@ -183,16 +261,15 @@ apiTest.describe(
         const accepted = response.body as ChatCallbackAcceptedResponse;
         expect(accepted.status).toBe(ExecutionStatus.scheduled);
 
-        const callbackPayload = (await callbackServer.waitForRequest())
-          .body as ChatCallbackSuccessPayload;
+        const callbackRequests = await collectCompletedRoundRequests();
 
         await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
 
-        expect(callbackPayload.execution_id).toBe(accepted.execution_id);
-        expect(callbackPayload.status).toBe(ExecutionStatus.completed);
-        expect(callbackPayload.response.response.message).toBe('Callback authorship response');
+        expect(getExecutionId(callbackRequests)).toBe(accepted.execution_id);
+        const roundComplete = getRoundCompleteEvent(callbackRequests);
+        expect(roundComplete.data.round.response.message).toBe('Callback authorship response');
 
-        const { conversation_id: conversationId } = callbackPayload.response;
+        const conversationId = getConversationId(callbackRequests);
         conversationIds.add(conversationId);
 
         const conversation = await getConversation(
@@ -266,13 +343,7 @@ apiTest.describe(
       const accepted = response.body as ChatCallbackAcceptedResponse;
       expect(accepted.status).toBe(ExecutionStatus.scheduled);
 
-      const callbackRequest = await callbackServer.waitForRequest();
-
-      expect(callbackRequest.method).toBe('POST');
-      expect(callbackRequest.url).toBe('/callback?token=failure');
-      expect(callbackRequest.headers['content-type']).toBe('application/json');
-
-      const callbackPayload = callbackRequest.body as ChatCallbackFailurePayload;
+      const callbackPayload = await waitForFailurePayload();
       expect(callbackPayload.execution_id).toBe(accepted.execution_id);
       expect(callbackPayload.status).toBe(ExecutionStatus.failed);
       expect(callbackPayload.error?.code).toBe(AgentBuilderErrorCode.agentExecutionError);
@@ -322,13 +393,7 @@ apiTest.describe(
 
       expect(abortResponse).toHaveStatusCode(200);
 
-      const callbackRequest = await callbackServer.waitForRequest();
-
-      expect(callbackRequest.method).toBe('POST');
-      expect(callbackRequest.url).toBe('/callback?token=abort');
-      expect(callbackRequest.headers['content-type']).toBe('application/json');
-
-      const callbackPayload = callbackRequest.body as ChatCallbackFailurePayload;
+      const callbackPayload = await waitForFailurePayload();
       expect(callbackPayload.execution_id).toBe(accepted.execution_id);
       expect(callbackPayload.status).toBe(ExecutionStatus.aborted);
       expect(callbackPayload.error?.code).toBe(AgentBuilderErrorCode.requestAborted);
@@ -375,15 +440,14 @@ apiTest.describe(
           expect(executionId).toMatch(/^[a-f0-9]{64}$/);
           expect(firstAccepted.status).toBe(ExecutionStatus.scheduled);
 
-          const firstCallback = (await callbackServer.waitForRequest())
-            .body as ChatCallbackSuccessPayload;
+          const firstRequests = await collectCompletedRoundRequests();
 
           await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
 
-          expect(firstCallback.execution_id).toBe(executionId);
-          expect(firstCallback.status).toBe(ExecutionStatus.completed);
+          expect(getExecutionId(firstRequests)).toBe(executionId);
+          expect(getRoundCompleteEvent(firstRequests)).toBeDefined();
 
-          conversationId = firstCallback.response.conversation_id;
+          conversationId = getConversationId(firstRequests);
           conversationIds.add(conversationId);
         });
 
@@ -457,15 +521,14 @@ apiTest.describe(
         const secondAccepted = second.body as ChatCallbackAcceptedResponse;
         expect(firstAccepted.execution_id).toBe(secondAccepted.execution_id);
 
-        const callbackPayload = (await callbackServer.waitForRequest())
-          .body as ChatCallbackSuccessPayload;
+        const callbackRequests = await collectCompletedRoundRequests();
 
         await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
 
-        expect(callbackPayload.execution_id).toBe(firstAccepted.execution_id);
-        expect(callbackPayload.status).toBe(ExecutionStatus.completed);
+        expect(getExecutionId(callbackRequests)).toBe(firstAccepted.execution_id);
+        expect(getRoundCompleteEvent(callbackRequests)).toBeDefined();
 
-        const { conversation_id: conversationId } = callbackPayload.response;
+        const conversationId = getConversationId(callbackRequests);
         conversationIds.add(conversationId);
 
         const conversation = await getConversation(
@@ -512,15 +575,14 @@ apiTest.describe(
           const accepted = response.body as ChatCallbackAcceptedResponse;
           executionIds.push(accepted.execution_id);
 
-          const callbackPayload = (await callbackServer.waitForRequest())
-            .body as ChatCallbackSuccessPayload;
+          const callbackRequests = await collectCompletedRoundRequests();
 
           await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
 
-          expect(callbackPayload.execution_id).toBe(accepted.execution_id);
-          expect(callbackPayload.status).toBe(ExecutionStatus.completed);
+          expect(getExecutionId(callbackRequests)).toBe(accepted.execution_id);
+          expect(getRoundCompleteEvent(callbackRequests)).toBeDefined();
 
-          conversationIds.add(callbackPayload.response.conversation_id);
+          conversationIds.add(getConversationId(callbackRequests));
         }
 
         // The same key on a different origin thread is a different event: both ran.
@@ -562,14 +624,13 @@ apiTest.describe(
         const accepted = response.body as ChatCallbackAcceptedResponse;
         expect(accepted.execution_id).toBe(executionId);
 
-        const callbackPayload = (await callbackServer.waitForRequest())
-          .body as ChatCallbackSuccessPayload;
+        const callbackRequests = await collectCompletedRoundRequests();
 
         await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
 
-        expect(callbackPayload.execution_id).toBe(executionId);
+        expect(getExecutionId(callbackRequests)).toBe(executionId);
 
-        conversationIds.add(callbackPayload.response.conversation_id);
+        conversationIds.add(getConversationId(callbackRequests));
       }
     );
 
@@ -604,15 +665,14 @@ apiTest.describe(
         expect(first).toHaveStatusCode(202);
 
         const firstAccepted = first.body as ChatCallbackAcceptedResponse;
-        const firstCallback = (await callbackServer.waitForRequest())
-          .body as ChatCallbackSuccessPayload;
+        const firstRequests = await collectCompletedRoundRequests();
 
         await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
 
-        expect(firstCallback.execution_id).toBe(firstAccepted.execution_id);
-        expect(firstCallback.status).toBe(ExecutionStatus.completed);
+        expect(getExecutionId(firstRequests)).toBe(firstAccepted.execution_id);
+        expect(getRoundCompleteEvent(firstRequests)).toBeDefined();
 
-        conversationId = firstCallback.response.conversation_id;
+        conversationId = getConversationId(firstRequests);
         conversationIds.add(conversationId);
       });
 
@@ -640,15 +700,15 @@ apiTest.describe(
         expect(second).toHaveStatusCode(202);
 
         const secondAccepted = second.body as ChatCallbackAcceptedResponse;
-        const secondCallback = (await callbackServer.waitForRequest())
-          .body as ChatCallbackSuccessPayload;
+        const secondRequests = await collectCompletedRoundRequests();
 
         await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
 
-        expect(secondCallback.execution_id).toBe(secondAccepted.execution_id);
-        expect(secondCallback.status).toBe(ExecutionStatus.completed);
-        expect(secondCallback.response.conversation_id).toBe(conversationId);
-        expect(secondCallback.response.response.message).toBe('Second callback response');
+        expect(getExecutionId(secondRequests)).toBe(secondAccepted.execution_id);
+        expect(getConversationId(secondRequests)).toBe(conversationId);
+        expect(getRoundCompleteEvent(secondRequests).data.round.response.message).toBe(
+          'Second callback response'
+        );
 
         const conversation = await getConversation(
           apiClient,
