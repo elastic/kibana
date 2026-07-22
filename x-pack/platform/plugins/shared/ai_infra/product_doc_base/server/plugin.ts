@@ -166,10 +166,10 @@ export class ProductDocBasePlugin
         .catch(() => false),
     ]);
 
-    const isAIFeatureDisabled =
+    const isAiDisabled =
       AI_DISABLED_SENTINELS.has(defaultAIConnector) && defaultAIConnectorOnly === true;
 
-    if (isAIFeatureDisabled) {
+    if (isAiDisabled) {
       this.logger.info('Skipping product documentation auto-install: Use AI features is disabled');
       return;
     }
