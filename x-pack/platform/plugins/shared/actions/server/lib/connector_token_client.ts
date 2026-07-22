@@ -10,6 +10,7 @@ import type { Logger, SavedObjectsClientContract, SavedObjectAttributes } from '
 import { SharedConnectorTokenClient } from './shared_connector_token_client';
 import type { ConnectorToken, UserConnectorToken } from '../types';
 import { UserConnectorTokenClient } from './user_connector_token_client';
+import type { ActionsConfigurationUtilities } from '../actions_config';
 
 export const MAX_TOKENS_RETURNED = 1;
 
@@ -23,6 +24,7 @@ interface ConstructorOptions {
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
   logger: Logger;
+  configurationUtilities: ActionsConfigurationUtilities;
 }
 
 interface CreateOptions {
@@ -199,6 +201,9 @@ export class ConnectorTokenClient {
     tokenType?: string;
     credentialType?: string;
     authMode?: typeof PER_USER_TOKEN_SCOPE | typeof SHARED_TOKEN_SCOPE;
+    authType?: string;
+    provider?: string;
+    skipRevocation?: boolean;
   }): Promise<void> {
     const scope = this.getScope(options.profileUid, options.authMode);
     this.log({
@@ -207,13 +212,22 @@ export class ConnectorTokenClient {
       fields: { connectorId: options.connectorId },
     });
     if (scope === PER_USER_TOKEN_SCOPE) {
-      return this.userClient.deleteConnectorTokens(
-        options as Parameters<typeof this.userClient.deleteConnectorTokens>[0]
-      );
+      if (options.profileUid) {
+        return this.userClient.deleteConnectorTokens(
+          options as Parameters<typeof this.userClient.deleteConnectorTokens>[0]
+        );
+      }
+      return this.userClient.deleteAllConnectorTokens({
+        connectorId: options.connectorId,
+        credentialType: options.credentialType,
+        authType: options.authType,
+        provider: options.provider,
+        skipRevocation: options.skipRevocation,
+      });
     }
-    return this.sharedClient.deleteConnectorTokens(
-      options as Parameters<typeof this.sharedClient.deleteConnectorTokens>[0]
-    );
+    return this.sharedClient.deleteConnectorTokens({
+      connectorId: options.connectorId,
+    });
   }
 
   public async updateOrReplace(options: UpdateOrReplaceOptions) {

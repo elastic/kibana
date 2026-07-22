@@ -9,14 +9,13 @@
 
 import type React from 'react';
 
+import { getStepIconType, HardcodedIcons } from '@kbn/workflows-ui';
 import {
   getDataUrlFromReactComponent,
   getIconBase64,
   getTriggerBoltFallbackDataUrl,
   resolveIconToDataUrl,
 } from './get_icon_base64';
-import { getStepIconType } from './get_step_icon_type';
-import { HardcodedIcons } from './hardcoded_icons';
 
 // Mock renderToStaticMarkup from react-dom/server
 jest.mock('react-dom/server', () => ({

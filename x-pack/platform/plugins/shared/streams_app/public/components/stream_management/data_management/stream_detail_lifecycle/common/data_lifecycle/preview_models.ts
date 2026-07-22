@@ -9,23 +9,20 @@ import { i18n } from '@kbn/i18n';
 import type { SerializedPolicy } from '@kbn/index-lifecycle-management-common-shared';
 import type { DownsampleStep } from '@kbn/streams-schema/src/models/ingest/lifecycle';
 import { PHASE_ORDER, type IlmPhase } from '@kbn/data-lifecycle-phases';
-import { buildLifecyclePhases } from './lifecycle_types';
-import { formatBytes } from '../../helpers/format_bytes';
+import { buildLifecyclePhases, getFrozenPhaseLabel } from './lifecycle_types';
 import { getIlmPhaseGrowValues, type GrowValue } from '../../../../../../util/ilm_policy_phases';
-
-const ZERO_SIZE_BYTES = 0;
-const ZERO_SIZE_LABEL = formatBytes(ZERO_SIZE_BYTES);
 
 export type IlmPhasesMap = Record<string, { color: string; description?: string }>;
 
+// The preview timeline is hypothetical (the lifecycle hasn't been applied yet), so per-phase size
+// and document counts — which describe the currently applied lifecycle's data distribution — are
+// intentionally omitted for the whole duration of the preview.
 export const buildIlmPreviewPhases = ({
   policy,
   ilmPhases,
-  stats,
 }: {
   policy: SerializedPolicy;
   ilmPhases: IlmPhasesMap;
-  stats?: { size?: string; sizeBytes?: number; totalDocs?: number };
 }) => {
   const phases: Array<{
     name: IlmPhase;
@@ -94,31 +91,24 @@ export const buildIlmPreviewPhases = ({
       isReadOnly: hasReadOnlyAction,
       searchableSnapshot: searchableSnapshotRepo,
       downsample,
-      // Hot uses stream stats when available; other non-delete phases use 0.0 B
-      size:
-        phaseName === 'delete'
-          ? undefined
-          : phaseName === 'hot'
-          ? stats?.size ?? ZERO_SIZE_LABEL
-          : ZERO_SIZE_LABEL,
-      sizeInBytes:
-        phaseName === 'delete'
-          ? undefined
-          : phaseName === 'hot'
-          ? stats?.sizeBytes ?? ZERO_SIZE_BYTES
-          : ZERO_SIZE_BYTES,
-      docsCount: phaseName === 'hot' ? stats?.totalDocs : undefined,
+      size: undefined,
+      sizeInBytes: undefined,
+      docsCount: undefined,
     };
   });
 };
 
+// The preview timeline is hypothetical (the lifecycle hasn't been applied yet), so per-phase size
+// and document counts are intentionally omitted — only the phase structure is shown.
 export const buildDlmPreviewModel = ({
   isServerless,
   hotColor,
   hotDescription,
   deletePhaseColor,
   deletePhaseDescription,
-  stats,
+  frozenAfter,
+  frozenColor,
+  frozenDescription,
   retentionPeriod,
   downsampleSteps,
   indexMode,
@@ -128,7 +118,9 @@ export const buildDlmPreviewModel = ({
   hotDescription?: string;
   deletePhaseColor: string;
   deletePhaseDescription?: string;
-  stats?: { size?: string; sizeBytes?: number; totalDocs?: number };
+  frozenAfter?: string;
+  frozenColor?: string;
+  frozenDescription?: string;
   retentionPeriod?: string;
   downsampleSteps: DownsampleStep[] | null;
   indexMode: 'standard' | 'time_series' | string;
@@ -139,16 +131,26 @@ export const buildDlmPreviewModel = ({
       })
     : i18n.translate('xpack.streams.streamDetailLifecycle.hot', { defaultMessage: 'Hot' });
 
+  // The frozen phase is only meaningful on stateful (serverless has no tiers). When `frozenAfter` is
+  // configured we forward the frozen styling so the preview matches the applied lifecycle summary.
+  const frozenPhase =
+    !isServerless && frozenAfter !== undefined
+      ? {
+          frozenAfter,
+          frozenLabel: getFrozenPhaseLabel(),
+          frozenColor,
+          frozenDescription,
+        }
+      : {};
+
   const phases = buildLifecyclePhases({
     label,
     color: hotColor,
-    size: stats?.size,
     retentionPeriod,
     description: isServerless ? '' : hotDescription,
-    sizeInBytes: stats?.sizeBytes,
-    docsCount: stats?.totalDocs,
     deletePhaseDescription,
     deletePhaseColor,
+    ...frozenPhase,
   });
 
   return {

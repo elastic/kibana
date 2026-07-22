@@ -76,16 +76,20 @@ const parseFilterParts = (children: ReactNode): ParsedPart[] => {
  * 1. Extract `<Filters>` children from the toolbar's children.
  * 2. Parse declarative `Filter` presets via `filter.parseChildren`.
  * 3. Resolve `SearchFilterConfig` objects via `filter.resolve`.
- * 4. Fall back to default filters (tags + sort) if none are found.
+ * 4. Fall back to default filters (starred + tags + created by + sort) if none are found.
+ *
+ * Custom (consumer-registered) filters are *not* rendered automatically; a
+ * registered filter dimension powers KQL search and facet counts on its own,
+ * and its toolbar control is placed explicitly via `filter.createComponent`
+ * (see `createFilterControl` in `@kbn/content-list-provider-client`).
  *
  * @param children - React children from the toolbar component.
  * @returns Array of EUI search filter configs ready for `EuiSearchBar`.
  */
 export const useFilters = (children: ReactNode): SearchFilterConfig[] => {
   const { isSupported: hasSorting } = useContentListSort();
-  const { features, supports } = useContentListConfig();
+  const { supports } = useContentListConfig();
   const { tags: hasTags, starred: hasStarred, userProfiles: hasCreatedBy } = supports;
-  const toolbarFilters = features.toolbarFilters;
 
   // Note: `children` is used as a memo dependency. React children are often
   // unstable references (new JSX objects each render), so this memo may
@@ -95,27 +99,8 @@ export const useFilters = (children: ReactNode): SearchFilterConfig[] => {
     const parts = parseFilterParts(children);
     const context: FilterContext = { hasSorting, hasTags, hasStarred, hasCreatedBy };
 
-    const resolvedParts = parts
-      .map((part) => ({ part, filterConfig: filter.resolve(part, context) }))
-      .filter(
-        (entry): entry is { part: ParsedPart; filterConfig: SearchFilterConfig } =>
-          entry.filterConfig !== undefined
-      );
-    // `toolbarFilters` is typed `Record<string, unknown>` in the base provider
-    // package to keep `@elastic/eui` out of its public types; the client
-    // provider always populates entries as {@link SearchFilterConfig}, so we
-    // narrow them at the consumption site.
-    const customFilters = Object.values(toolbarFilters ?? {}) as SearchFilterConfig[];
-    if (parts === DEFAULT_PARTS) {
-      const sortIndex = resolvedParts.findIndex((entry) => entry.part.preset === 'sort');
-      if (sortIndex >= 0) {
-        return [
-          ...resolvedParts.slice(0, sortIndex).map(({ filterConfig }) => filterConfig),
-          ...customFilters,
-          ...resolvedParts.slice(sortIndex).map(({ filterConfig }) => filterConfig),
-        ];
-      }
-    }
-    return [...resolvedParts.map(({ filterConfig }) => filterConfig), ...customFilters];
-  }, [children, hasSorting, hasTags, hasStarred, hasCreatedBy, toolbarFilters]);
+    return parts
+      .map((part) => filter.resolve(part, context))
+      .filter((filterConfig): filterConfig is SearchFilterConfig => filterConfig !== undefined);
+  }, [children, hasSorting, hasTags, hasStarred, hasCreatedBy]);
 };

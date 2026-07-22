@@ -39,6 +39,24 @@ export interface DataLifecycleSummaryCapabilities {
   canManageLifecycle: boolean;
 }
 
+export interface FrozenPhaseCallouts {
+  showEnterpriseCallout?: boolean;
+  onUpgradeEnterprise?: () => void;
+  showDefaultRepositoryCallout?: boolean;
+  /** Navigate directly to the create-repository page instead of opening a modal. */
+  createDefaultRepositoryHref?: string;
+  /**
+   * URL to the Snapshot and Restore repositories list. When the user already has repositories
+   * configured (see `hasExistingRepositories`) the callout directs them here to pick one as the
+   * default instead of creating a new repository.
+   */
+  manageRepositoriesUrl?: string;
+  /** Whether the user already has at least one snapshot repository configured. */
+  hasExistingRepositories?: boolean;
+  onRefreshDefaultRepository?: () => void;
+  isRefreshingDefaultRepository?: boolean;
+}
+
 export interface DataLifecycleSummaryPhaseActions {
   onPhaseClick?: (phase: LifecyclePhase, index: number) => void;
   onRemovePhase?: (phaseName: string) => void;
@@ -57,6 +75,8 @@ export interface DataLifecycleSummaryUiState {
   editedPhaseName?: string;
   editedDownsampleStepIndex?: number;
   isEditLifecycleFlyoutOpen?: boolean;
+  /** While true, all click interactions are disabled: no popover opens and no navigation occurs. */
+  disableInteractions?: boolean;
   invalidPhases?: PhaseName[];
   invalidStepIndices?: number[];
 }
@@ -71,6 +91,7 @@ interface DataLifecycleSummaryProps {
   phaseActions?: DataLifecycleSummaryPhaseActions;
   downsamplingActions?: DataLifecycleSummaryDownsamplingActions;
   uiState?: DataLifecycleSummaryUiState;
+  frozenPhaseCallouts?: FrozenPhaseCallouts;
 }
 
 export const DataLifecycleSummary = ({
@@ -83,6 +104,7 @@ export const DataLifecycleSummary = ({
   phaseActions,
   downsamplingActions,
   uiState,
+  frozenPhaseCallouts,
 }: DataLifecycleSummaryProps) => {
   const { phases, downsampleSteps, loading = false, testSubjPrefix } = model;
   const { canManageLifecycle } = capabilities;
@@ -90,6 +112,7 @@ export const DataLifecycleSummary = ({
     editedPhaseName,
     editedDownsampleStepIndex,
     isEditLifecycleFlyoutOpen = false,
+    disableInteractions = false,
     invalidPhases,
     invalidStepIndices,
   } = uiState ?? {};
@@ -167,6 +190,8 @@ export const DataLifecycleSummary = ({
                   testSubjPrefix={testSubjPrefix}
                   canManageLifecycle={canManageLifecycle}
                   isEditLifecycleFlyoutOpen={isEditLifecycleFlyoutOpen}
+                  disableInteractions={disableInteractions}
+                  frozenPhaseCallouts={frozenPhaseCallouts}
                 />
                 {showDownsampling && downsamplingSegments && (
                   <DownsamplingBar
@@ -178,6 +203,7 @@ export const DataLifecycleSummary = ({
                     editedDownsampleStepIndex={editedDownsampleStepIndex}
                     canManageLifecycle={canManageLifecycle}
                     isEditLifecycleFlyoutOpen={isEditLifecycleFlyoutOpen}
+                    disableInteractions={disableInteractions}
                   />
                 )}
                 <EuiSpacer size="xs" />

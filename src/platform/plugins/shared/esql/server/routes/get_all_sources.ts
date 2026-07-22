@@ -26,7 +26,7 @@ export const registerGetSourcesRoute = (router: IRouter, { logger }: PluginIniti
           ),
         }),
         query: schema.object({
-          projectRouting: schema.maybe(schema.string()),
+          projectRouting: schema.maybe(schema.string({ maxLength: 1024 })),
         }),
       },
       security: {

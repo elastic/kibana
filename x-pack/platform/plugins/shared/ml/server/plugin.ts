@@ -144,7 +144,7 @@ export class MlServerPlugin
           'Granting All or Read feature privilege for Machine Learning will also grant the equivalent feature privileges to certain types of Kibana saved objects, namely index patterns, dashboards, saved Discover sessions and visualizations as well as machine learning job, trained model and module saved objects.',
       }),
       management: {
-        insightsAndAlerting: ['jobsListLink', 'triggersActions'],
+        insightsAndAlerting: ['jobsListLink', 'triggersActionsRules', 'triggersActionsAlerts'],
       },
       alerting: alertingFeatures,
       privileges: {

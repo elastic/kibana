@@ -28,6 +28,11 @@ export {
   ALERT_TAGS_MENU_ITEM_TEST_SUBJ,
   INVESTIGATE_IN_TIMELINE_MENU_ITEM_TEST_SUBJ,
 } from './src/playwright/constants/take_action';
+export { FULL_KIBANA_SECURITY_ROLE } from './src/playwright/constants/roles';
+export { ES as SECURITY_ARCHIVES } from './src/playwright/constants/archives';
+
+// Security-specific test enums
+export { AddExceptionButtonType } from './src/playwright/fixtures/test/page_objects';
 
 // re-exported test framework from @kbn/scout
 export { lighthouseTest, apiTest, globalSetupHook, globalTeardownHook, tags } from '@kbn/scout';
@@ -65,6 +70,8 @@ export type {
   SecurityParallelWorkerFixtures,
   ThreatMatchRuleCreatePage,
 } from './src/playwright';
+
+export * from './src/playwright/fixtures/test';
 
 // Re-exported Scout core types
 export type {

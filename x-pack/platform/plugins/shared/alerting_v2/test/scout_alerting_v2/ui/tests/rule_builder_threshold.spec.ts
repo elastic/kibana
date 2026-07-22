@@ -198,7 +198,7 @@ test.describe(
       });
 
       await test.step('create rule button is not visible', async () => {
-        await expect(pageObjects.composeDiscover.createRulePopoverButton).toBeHidden();
+        await expect(pageObjects.composeDiscover.createRuleSplitDropdownButton).toBeHidden();
       });
     });
   }

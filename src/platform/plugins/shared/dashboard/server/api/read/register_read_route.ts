@@ -8,6 +8,7 @@
  */
 
 import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
+import { logRequest } from '@kbn/as-code-utils';
 import { schema } from '@kbn/config-schema';
 import type { VersionedRouter } from '@kbn/core-http-server';
 import type { Logger, RequestHandlerContext } from '@kbn/core/server';
@@ -15,9 +16,9 @@ import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { once } from 'lodash';
 import { getDashboardStateSchema } from '../dashboard_state_schemas';
 import { getRouteConfig } from '../get_route_config';
-import { logRequest } from '../log_request';
 import { read } from './read';
 import { getReadResponseBodySchema } from './schemas';
+import { getUseGASchemas } from '../get_use_ga_schemas';
 
 export function registerReadRoute(
   router: VersionedRouter<RequestHandlerContext>,
@@ -80,12 +81,13 @@ export function registerReadRoute(
     async (ctx, req, res) =>
       telemetryHandler(req, usageCounter, async () => {
         try {
+          const { core } = await ctx.resolve(['core']);
+          const useGASchemas = await getUseGASchemas(core);
           const { body, resolveHeaders } = await read(
-            (
-              await ctx.resolve(['core'])
-            ).core.savedObjects.client,
+            core.savedObjects.client,
             getCachedDashboardStateSchema(),
             req.params.id,
+            useGASchemas,
             req.serverTiming,
             isDashboardAppRequest
           );
@@ -109,13 +111,10 @@ export function registerReadRoute(
             return res.forbidden({ body: { message: e.message } });
           }
 
-          if (e.isBoom && e.output.statusCode === 400) {
-            logRequest(logger, req, 'warn', e.message);
-            return res.badRequest({ body: { message: e.message } });
-          }
-
-          logRequest(logger, req, 'error', e.message);
-          return res.customError({ statusCode: 500, body: { message: e.message } });
+          const message = e.stack ?? e.message;
+          logRequest(logger, req, 'error', message);
+          // Throw so Kibana returns a 500 HTTP response on any uncaught errors.
+          throw e;
         }
       })
   );

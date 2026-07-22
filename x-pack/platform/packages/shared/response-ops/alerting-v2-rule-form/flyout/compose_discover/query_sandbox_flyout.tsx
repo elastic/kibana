@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiFlyout,
   EuiFlyoutBody,
@@ -19,10 +19,14 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { monaco } from '@kbn/code-editor';
 import type { RuleQuery } from '../../form/types';
-import { getBreachQuery } from '../../form/utils/query_helpers';
+import { getBreachQuery, getRecoverQuery } from '../../form/utils/query_helpers';
+import { useRuleFormServices } from '../../form/contexts/rule_form_context';
+import { useEsqlCallbacks } from '../../form/hooks/use_esql_callbacks';
 import type { QueryTab } from './types';
 import { QuerySandbox } from './query_sandbox';
 import type { QuerySandboxProps } from './query_sandbox';
+import { isAlertTabDisabled } from './compose_discover_tabs';
+import { validateTabQueries, type TabValidationError } from './validate_tab_queries';
 
 /**
  * Props for the Discover Sandbox flyout — a full-screen ES|QL editor with live
@@ -78,6 +82,11 @@ export interface QuerySandboxFlyoutProps {
    * Callers are responsible for content and styling (e.g. wrapping in `<EuiText>`).
    */
   helpText?: React.ReactNode;
+  /**
+   * Optional actions rendered right-aligned in the ES|QL query header row — passed through
+   * to `QuerySandbox`. Use for header-level controls such as Split / Merge buttons.
+   */
+  headerActions?: React.ReactNode;
   title?: string;
   onAlertEditorMount?: (editor: monaco.editor.IStandaloneCodeEditor) => void;
   onRecoveryEditorMount?: (editor: monaco.editor.IStandaloneCodeEditor) => void;
@@ -100,6 +109,7 @@ export const QuerySandboxFlyout: React.FC<QuerySandboxFlyoutProps> = ({
   onApply,
   onClose,
   helpText,
+  headerActions,
   onAlertEditorMount,
   onRecoveryEditorMount,
   title = i18n.translate('xpack.alertingV2.composeDiscover.querySandbox.defaultTitle', {
@@ -147,7 +157,71 @@ export const QuerySandboxFlyout: React.FC<QuerySandboxFlyoutProps> = ({
     [query, queryFields, onQueryChange]
   );
 
-  const activeQuery = query.format === 'composed' ? getBreachQuery(query) : query.breach.query;
+  /*
+   * Run whichever pipeline the active tab represents. Unified mode (no tabs)
+   * has no per-tab concept — always run the full breach query.
+   */
+  const activeQuery = (() => {
+    if (!tabs?.length) return getBreachQuery(query);
+    switch (activeTab) {
+      case 'base':
+        return queryFields.base;
+      case 'recovery':
+        return getRecoverQuery(query);
+      default:
+        return getBreachQuery(query);
+    }
+  })();
+
+  /*
+   * Apply is gated on static ES|QL validation of every tab — including ones the
+   * user hasn't switched to. Validation runs on the Apply click rather than on
+   * every keystroke, because the ES|QL callbacks issue real requests to
+   * Elasticsearch; a one-shot check on an explicit action keeps typing snappy.
+   * The Alert tab is skipped while it's disabled (base not yet defined): its
+   * segment isn't part of the active pipeline, so it shouldn't block Apply.
+   */
+  const services = useRuleFormServices();
+  const esqlCallbacks = useEsqlCallbacks({
+    application: services.application,
+    http: services.http,
+    search: services.data.search.search,
+  });
+
+  const validationQueries = useMemo(() => {
+    if (!tabs?.length) {
+      return { alert: getBreachQuery(query) };
+    }
+    return {
+      ...(tabs.includes('base') && { base: queryFields.base }),
+      ...(tabs.includes('alert') &&
+        !isAlertTabDisabled(tabs, query) && { alert: getBreachQuery(query) }),
+      ...(tabs.includes('recovery') && { recovery: getRecoverQuery(query) }),
+    };
+  }, [tabs, query, queryFields.base]);
+
+  const [isValidating, setIsValidating] = useState(false);
+  const [applyErrors, setApplyErrors] = useState<TabValidationError[]>([]);
+  const editingLocked = isReadOnly || isValidating;
+
+  const handleApply = useCallback(async () => {
+    if (!onApply) return;
+    setIsValidating(true);
+    try {
+      const errors = await validateTabQueries(validationQueries, esqlCallbacks);
+      setApplyErrors(errors);
+      if (errors.length === 0) {
+        onApply();
+        return;
+      }
+      const [firstError] = errors;
+      if (firstError.tab !== activeTab) {
+        onTabChange?.(firstError.tab);
+      }
+    } finally {
+      setIsValidating(false);
+    }
+  }, [onApply, validationQueries, esqlCallbacks, activeTab, onTabChange]);
 
   /*
    * Unified composed mode: the editor holds the whole pipeline, so write it to
@@ -161,6 +235,16 @@ export const QuerySandboxFlyout: React.FC<QuerySandboxFlyoutProps> = ({
         ? updateQuery({ base: v, breach: '' })
         : updateQuery({ breach: v }),
     [query.format, updateQuery]
+  );
+
+  /*
+   * The active tab's own validation error, if any. handleApply already moved
+   * the user to the first offending tab, so at most one entry is ever
+   * relevant to what's currently on screen.
+   */
+  const activeValidationError = useMemo(
+    () => applyErrors.find((e) => e.tab === activeTab)?.messages,
+    [applyErrors, activeTab]
   );
 
   const tabProps: QuerySandboxProps['tabProps'] = useMemo(() => {
@@ -177,7 +261,7 @@ export const QuerySandboxFlyout: React.FC<QuerySandboxFlyoutProps> = ({
       onRecoveryBlockChange: (v: string) => updateQuery({ recover: v }),
       onAlertEditorMount,
       onRecoveryEditorMount,
-      readOnly: isReadOnly,
+      readOnly: editingLocked,
     };
   }, [
     tabs,
@@ -187,7 +271,7 @@ export const QuerySandboxFlyout: React.FC<QuerySandboxFlyoutProps> = ({
     updateQuery,
     onAlertEditorMount,
     onRecoveryEditorMount,
-    isReadOnly,
+    editingLocked,
   ]);
 
   return (
@@ -207,7 +291,7 @@ export const QuerySandboxFlyout: React.FC<QuerySandboxFlyoutProps> = ({
       <EuiFlyoutBody>
         <QuerySandbox
           query={activeQuery}
-          onQueryChange={isReadOnly ? undefined : handleQueryChange}
+          onQueryChange={editingLocked ? undefined : handleQueryChange}
           timeField={timeField}
           onTimeFieldChange={onTimeFieldChange}
           timeFieldOptions={timeFieldOptions}
@@ -216,7 +300,9 @@ export const QuerySandboxFlyout: React.FC<QuerySandboxFlyoutProps> = ({
           onDateRangeChange={onDateRangeChange}
           autoRun
           helpText={helpText}
+          headerActions={headerActions}
           tabProps={tabProps}
+          validationError={activeValidationError}
         />
       </EuiFlyoutBody>
 
@@ -224,7 +310,12 @@ export const QuerySandboxFlyout: React.FC<QuerySandboxFlyoutProps> = ({
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
-              <EuiButton fill onClick={onApply} data-test-subj="querySandboxApply">
+              <EuiButton
+                fill
+                onClick={handleApply}
+                isLoading={isValidating}
+                data-test-subj="querySandboxApply"
+              >
                 {i18n.translate('xpack.alertingV2.composeDiscover.querySandbox.applyButtonLabel', {
                   defaultMessage: 'Apply changes',
                 })}

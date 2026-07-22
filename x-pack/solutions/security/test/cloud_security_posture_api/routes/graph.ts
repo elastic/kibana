@@ -29,7 +29,8 @@ import {
   loadAlertArchive,
   dataViewRouteHelpersFactory,
   installCloudAssetInventoryPackage,
-  initEntityEnginesWithRetry,
+  installEntityStoreV2,
+  waitForEntityStoreV2Running,
   waitForEntityDataIndexed,
 } from '../utils';
 import { CspSecurityCommonProvider } from './helper/user_roles_utilites';
@@ -285,7 +286,7 @@ export default function (providerContext: FtrProviderContext) {
         expect(response.body).not.to.have.property('messages');
       });
 
-      describe.skip('Pinning', () => {
+      describe('Pinning', () => {
         const groupAction = 'test.pin.group';
         const soloAction = 'test.pin.solo';
         const groupEventIds = [
@@ -1291,6 +1292,7 @@ export default function (providerContext: FtrProviderContext) {
 
       it('should filter unknown targets', async () => {
         const response = await postGraph(supertest, {
+          showUnknownTarget: false,
           query: {
             indexPatterns: ['.alerts-security.alerts-*', 'logs-*'],
             originEventIds: [],
@@ -2609,7 +2611,7 @@ export default function (providerContext: FtrProviderContext) {
         };
 
         before(async () => {
-          // delete v2 index manually since its not being deleted by the cleanupEntityStore function
+          // delete v2 index manually since it's not being deleted by the v2 install/uninstall cycle
           try {
             await es.indices.delete({
               index: getEntitiesLatestIndexName(entitiesSpaceId),
@@ -2638,12 +2640,14 @@ export default function (providerContext: FtrProviderContext) {
           entitiesSpaceDataView = dataViewRouteHelpersFactory(supertest, entitiesSpaceId);
           await entitiesSpaceDataView.create('security-solution');
 
-          // Initialize entity engine for 'generic' type in entities-space
-          await initEntityEnginesWithRetry({
+          // Install Entity Store V2 in entities-space (covers the generic engine
+          // the asset inventory tests need). v2 install always installs all
+          // entity types; per-type selection is no longer available.
+          await installEntityStoreV2({ supertest, logger, spaceId: entitiesSpaceId });
+          await waitForEntityStoreV2Running({
             supertest,
             retry,
             logger,
-            entityTypes: ['generic'],
             spaceId: entitiesSpaceId,
           });
 
@@ -2673,7 +2677,7 @@ export default function (providerContext: FtrProviderContext) {
               logger,
               retry,
               entitiesIndex: getEntitiesLatestIndexName(entitiesSpaceId),
-              expectedCount: 48,
+              expectedCount: 53,
             });
           });
 
@@ -3161,6 +3165,77 @@ export default function (providerContext: FtrProviderContext) {
               );
             });
 
+            it('should not include unrelated relationships from intermediary nodes (issue #272043)', async () => {
+              // Scenario:
+              //   my-server-1  --resolution.resolved_to-->  my-server-2
+              //   my-server-3  --communicates_with-->        my-server-2   (✓ relevant)
+              //   my-server-3  --communicates_with-->        my-server-5   (✗ unrelated)
+              //   my-server-3  --resolution.resolved_to-->   my-server-4   (✗ unrelated)
+              //
+              // When expanding relationships for my-server-2, only the two edges that
+              // touch my-server-2 should appear. my-server-3's outbound edges to my-server-5
+              // and my-server-4 must be filtered out.
+              const response = await postGraph(
+                supertest,
+                {
+                  query: {
+                    originEventIds: [],
+                    entityIds: [{ id: 'host:my-server-2', isOrigin: false }],
+                    start: 'now-30d',
+                    end: 'now',
+                  },
+                },
+                undefined,
+                entitiesSpaceId
+              ).expect(result(200, logger));
+
+              const allNodes: NodeDataModel[] = response.body.nodes;
+              const allEdges: EdgeDataModel[] = response.body.edges;
+
+              // --- Entity nodes ---
+              const entityNodes = allNodes.filter(
+                (n: NodeDataModel) =>
+                  n.shape === 'hexagon' || n.shape === 'ellipse' || n.shape === 'rectangle'
+              ) as EntityNodeDataModel[];
+
+              const entityIds = entityNodes.map((n) => n.id).sort();
+              expectExpect(entityIds).toEqual(
+                ['host:my-server-1', 'host:my-server-2', 'host:my-server-3'].sort()
+              );
+
+              // --- Relationship nodes ---
+              const relationshipNodes = allNodes.filter(
+                (n: NodeDataModel) => n.shape === 'relationship'
+              ) as RelationshipNodeDataModel[];
+
+              expect(relationshipNodes.length).to.equal(2);
+
+              const resolvedToNode = relationshipNodes.find(
+                (n) => n.id === 'rel(host:my-server-1-resolution.resolved_to)'
+              ) as RelationshipNodeDataModel;
+              expect(resolvedToNode).not.to.be(undefined);
+              expect(resolvedToNode.label).to.equal('Resolved to');
+
+              const communicatesWithNode = relationshipNodes.find(
+                (n) => n.id === 'rel(host:my-server-3-communicates_with)'
+              ) as RelationshipNodeDataModel;
+              expect(communicatesWithNode).not.to.be(undefined);
+              expect(communicatesWithNode.label).to.equal('Communicates with');
+
+              expect(allNodes.length).to.equal(5);
+              expect(allEdges.length).to.equal(4);
+
+              const expectedEdgeIds = [
+                'a(host:my-server-1)-b(rel(host:my-server-1-resolution.resolved_to))',
+                'a(rel(host:my-server-1-resolution.resolved_to))-b(host:my-server-2)',
+                'a(host:my-server-3)-b(rel(host:my-server-3-communicates_with))',
+                'a(rel(host:my-server-3-communicates_with))-b(host:my-server-2)',
+              ].sort();
+
+              const actualEdgeIds = allEdges.map((e: EdgeDataModel) => e.id).sort();
+              expectExpect(actualEdgeIds).toEqual(expectedEdgeIds);
+            });
+
             it('should return hierarchical relationships with grouped targets and events', async () => {
               // Test scenario:
               // - Root user owns 3 entities (Host, Service, Identity) - each with different type
@@ -3489,7 +3564,7 @@ export default function (providerContext: FtrProviderContext) {
               });
             });
 
-            it.skip('should isolate the pinned origin entity and produce correct grouping when showing relationships of a target', async () => {
+            it('should isolate the pinned origin entity and produce correct grouping when showing relationships of a target', async () => {
               // Scenario: user opens the entity flyout for origin-pinned-server (origin/pinned).
               // Then clicks "show entity relationships" on relationship-target-server.
               // The graph API receives:
@@ -3584,7 +3659,7 @@ export default function (providerContext: FtrProviderContext) {
               });
             });
 
-            it.skip('should produce one relationship node when two actors of the same type share the same relationship', async () => {
+            it('should produce one relationship node when two actors of the same type share the same relationship', async () => {
               await retry.tryForTime(enrichmentRetryTimeout, async () => {
                 const response = await postGraph(
                   supertest,
@@ -3703,6 +3778,163 @@ export default function (providerContext: FtrProviderContext) {
             expect(edge.type).equal('solid');
           });
         });
+      });
+    });
+
+    describe('Field type mismatch resilience', () => {
+      // Exercises two failure modes that real integration indices trigger:
+      //
+      //   1. Wrong type — user.id mapped as long (PostgreSQL / AWS IAM pattern).
+      //      The aws_bedrock integration uses `TO_STRING(user.id) LIKE "arn:..."` and
+      //      fetch_events_graph.ts casts `| EVAL user.id = TO_STRING(user.id)` before
+      //      the enrichment query, so both the LIKE condition and the preserve branch
+      //      CASE return type are always keyword regardless of the underlying mapping.
+      //
+      //   2. Absent fields — dozens of integration-specific fields are not in this index.
+      //      Under SET unmapped_fields="NULLIFY" they become null-typed.  Null-typed
+      //      fields in CASE result positions are fine (polymorphic null).  However,
+      //      ES|QL validates ALL function-argument types at plan time regardless of
+      //      branch reachability — so null-typed fields passed to TO_STRING / TO_BOOLEAN /
+      //      TO_LOWER / STARTS_WITH / MV_FIRST / CONCAT etc. trigger errors.
+      //      Every field that appears as a function argument across all integration files
+      //      must have an explicit mapping with any valid non-null type.
+      //      CASE-result-only fields (host.id, service.id, entity.id, etc.) are left
+      //      unmapped since ES|QL accepts null-typed values in result positions.
+      //
+      //      NOTE: SET unmapped_fields="LOAD" is NOT used because ES|QL does not support
+      //      accessing subfields of flattened-type parents under LOAD mode
+      //      (e.g. m365_defender.event.additional_fields.*, snyk.audit_logs.content.*,
+      //      greenhouse.audit.event.meta.name, cisco_meraki.*.vap).  Under NULLIFY those
+      //      subfields are accessible as keyword (flattened maps all leaves to keyword in
+      //      ES|QL).  In production these fields exist in the real integration indices so
+      //      their types come from the merged mapping across all queried indices.
+      const testIndex = 'test-graph-type-mismatch';
+
+      before(async () => {
+        await es.indices.create({
+          index: testIndex,
+          mappings: {
+            properties: {
+              '@timestamp': { type: 'date' },
+              'event.id': { type: 'keyword' },
+              'event.action': { type: 'keyword' },
+              'event.dataset': { type: 'keyword' },
+              'event.kind': { type: 'keyword' },
+              'event.category': { type: 'keyword' },
+              'event.type': { type: 'keyword' },
+              'event.module': { type: 'keyword' },
+              'data_stream.dataset': { type: 'keyword' },
+              'user.name': { type: 'keyword' },
+              // Deliberately wrong type — user.id as long mimics PostgreSQL / AWS IAM.
+              // fetch_events_graph.ts casts it to keyword before enrichment runs.
+              'user.id': { type: 'long' },
+              'user.email': { type: 'keyword' },
+              'user.domain': { type: 'keyword' },
+              'user.target.id': { type: 'keyword' },
+              'user.target.name': { type: 'keyword' },
+              'user.target.email': { type: 'keyword' },
+              'user.target.domain': { type: 'keyword' },
+              'host.name': { type: 'keyword' },
+              'host.id': { type: 'keyword' },
+              'host.hostname': { type: 'keyword' },
+              'host.target.id': { type: 'keyword' },
+              'host.target.name': { type: 'keyword' },
+              'host.target.hostname': { type: 'keyword' },
+              'service.name': { type: 'keyword' },
+              'service.target.name': { type: 'keyword' },
+              'entity.id': { type: 'keyword' },
+              'entity.namespace': { type: 'keyword' },
+              'entity.target.id': { type: 'keyword' },
+              'cloud.provider': { type: 'keyword' },
+              // Integration CASE branch function arguments (TO_STRING, TO_BOOLEAN, TO_LOWER).
+              // All must have a non-null schema type; values are absent from the test document.
+              'source.ip': { type: 'ip' },
+              'destination.ip': { type: 'ip' },
+              'misp.event.orgc_id': { type: 'long' },
+              'greenhouse.audit.event.meta.name': { type: 'keyword' },
+              'gitlab.audit.target_id': { type: 'long' },
+              'jamf_pro.events.event.object_id': { type: 'long' },
+              'jamf_pro.events.event.policy_id': { type: 'long' },
+              'jamf_pro.events.event.jssid': { type: 'long' },
+              'jamf_pro.events.event.patch_policy_id': { type: 'long' },
+              'tanium.action_history.action.id': { type: 'long' },
+              'tanium.endpoint_config.item.id': { type: 'long' },
+              'citrix.cef_format': { type: 'boolean' },
+              'servicenow.event.applied.value': { type: 'boolean' },
+              'zscaler_zia.dns.request.action': { type: 'keyword' },
+              'zscaler_zia.tunnel.action.type': { type: 'keyword' },
+              'container.name': { type: 'keyword' },
+              'destination.domain': { type: 'keyword' },
+              'forgerock.objectId': { type: 'keyword' },
+              'forgerock.principal': { type: 'keyword' },
+              'infoblox_bloxone_ddi.dns_data.source': { type: 'keyword' },
+              'microsoft_intune.audit.properties.target_display_names': { type: 'keyword' },
+              'microsoft_intune.audit.properties.target_object_ids': { type: 'keyword' },
+              'url.domain': { type: 'keyword' },
+              'url.path': { type: 'keyword' },
+            },
+          },
+        });
+
+        await es.index({
+          index: testIndex,
+          id: 'type-mismatch-evt-1',
+          refresh: true,
+          document: {
+            '@timestamp': '2024-09-01T12:00:00.000Z',
+            'event.id': 'type-mismatch-evt-1',
+            'event.action': 'invoke',
+            'event.dataset': 'aws_bedrock.invocation',
+            'data_stream.dataset': 'aws_bedrock.invocation',
+            'user.name': 'test-user',
+            'user.id': 42, // long — exercises wrong-type + LIKE + CASE mismatch paths
+            'host.name': 'bedrock-host',
+            // All other fields absent from the document:
+            // - Function-argument fields (source.ip, etc.) are schema-typed above but
+            //   null-valued here — safe under NULLIFY.
+            // - CASE-result-only fields (host.id, service.id, etc.) are both
+            //   schema-absent and value-absent — null-typed, safe in result positions.
+          },
+        });
+      });
+
+      after(async () => {
+        await es.indices.delete({ index: testIndex, ignore_unavailable: true });
+      });
+
+      it('returns 200 when user.id is mapped as long and many fields are unmapped', async () => {
+        // Without the fix this returns 500 with one of:
+        //   "LIKE does not support type [long]"    (user.id LIKE in aws_bedrock)
+        //   "argument of [CASE] must be [long]"    (preserve branch type mismatch)
+        const response = await postGraph(supertest, {
+          query: {
+            originEventIds: [],
+            indexPatterns: [testIndex],
+            start: '2024-09-01T00:00:00Z',
+            end: '2024-09-02T00:00:00Z',
+            esQuery: {
+              bool: {
+                filter: [{ match_phrase: { 'event.id': 'type-mismatch-evt-1' } }],
+              },
+            },
+          },
+        }).expect(result(200, logger));
+
+        expect(response.body).to.have.property('nodes');
+        expect(response.body.nodes.length).to.be.greaterThan(0);
+
+        // The user entity node must exist and carry user.id as a string (not a number),
+        // confirming that the | EVAL user.id = TO_STRING(user.id) pre-cast ran correctly.
+        const userNode = response.body.nodes.find((n: any) =>
+          n.documentsData?.some(
+            (d: any) => d.type === 'entity' && d.entity?.sourceFields?.['user.id'] !== undefined
+          )
+        );
+        expect(userNode).to.not.be(undefined);
+        const sourceFields = userNode.documentsData.find((d: any) => d.type === 'entity').entity
+          .sourceFields;
+        // user.id was indexed as long 42 but must surface as the string "42" after TO_STRING
+        expect(sourceFields['user.id']).to.equal('42');
       });
     });
   });

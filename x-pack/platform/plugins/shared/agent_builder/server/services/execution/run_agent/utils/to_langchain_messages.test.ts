@@ -21,6 +21,7 @@ import {
 import type { BackgroundExecutionState } from '@kbn/agent-builder-common/chat';
 import { sanitizeToolId, wrapToolResultContent } from '@kbn/agent-builder-genai-utils/langchain';
 import { convertPreviousRounds, groupToolCallSteps } from './to_langchain_messages';
+import { formatDate } from '../prompts/utils/helpers';
 import type { ToolCallResultTransformer } from './tool_summarization';
 import type { ToolResult } from '@kbn/agent-builder-common/tools/tool_result';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
@@ -129,6 +130,86 @@ describe('convertPreviousRounds', () => {
     expect(result[0].content).toBe('hello');
   });
 
+  it('prefixes the next-input user message when conversationTimestamp is provided', async () => {
+    const nextInput = makeRoundInput('hello');
+    const result = await convertPreviousRounds({
+      conversation: createConversation({ nextInput }),
+      conversationTimestamp: now,
+    });
+    expect(result).toHaveLength(1);
+    expect(isHumanMessage(result[0])).toBe(true);
+    expect(result[0].content).toBe(`[Sent: ${formatDate(now)}]\n\nhello`);
+  });
+
+  it('places the next-input date prefix above attachment XML', async () => {
+    const attachment = makeProcessedAttachment(
+      'att-1',
+      'text',
+      { content: 'test content' },
+      'This is the formatted text content'
+    );
+    const nextInput = makeRoundInput('hello with attachment', [attachment]);
+    const result = await convertPreviousRounds({
+      conversation: createConversation({ nextInput }),
+      conversationTimestamp: now,
+    });
+
+    expect(result).toHaveLength(1);
+    expect(isHumanMessage(result[0])).toBe(true);
+
+    const content = result[0].content as string;
+    expect(content.startsWith(`[Sent: ${formatDate(now)}]\n\nhello with attachment`)).toBe(true);
+    expect(content.indexOf('[Sent: ')).toBeLessThan(content.indexOf('<attachments>'));
+  });
+
+  it('uses the pending round timestamp when an awaiting-prompt round is promoted to next input', async () => {
+    const pendingStartedAt = '2026-06-30T12:34:56.000Z';
+    const previousRounds = [
+      createRound({
+        id: 'round-1',
+        status: ConversationRoundStatus.awaitingPrompt,
+        input: makeRoundInput('original user request'),
+        started_at: pendingStartedAt,
+      }),
+    ];
+
+    const result = await convertPreviousRounds({
+      conversation: createConversation({
+        previousRounds,
+        nextInput: makeRoundInput('prompt answer'),
+      }),
+    });
+
+    expect(result).toHaveLength(1);
+    expect(isHumanMessage(result[0])).toBe(true);
+    expect(result[0].content).toBe(
+      `[Sent: ${formatDate(pendingStartedAt)}]\n\noriginal user request`
+    );
+  });
+
+  it('ignores epoch started_at dates', async () => {
+    const epochStartedAt = new Date(0).toISOString();
+    const previousRounds = [
+      createRound({
+        id: 'round-1',
+        input: makeRoundInput('legacy user message'),
+        response: makeAssistantResponse('hello!'),
+        started_at: epochStartedAt,
+      }),
+    ];
+
+    const result = await convertPreviousRounds({
+      conversation: createConversation({
+        previousRounds,
+        nextInput: makeRoundInput('current message'),
+      }),
+    });
+
+    const [firstHumanMessage] = result;
+    expect(isHumanMessage(firstHumanMessage)).toBe(true);
+    expect(firstHumanMessage.content).toBe('legacy user message');
+  });
+
   it('handles a round with only user and assistant messages', async () => {
     const previousRounds = [
       createRound({
@@ -150,7 +231,7 @@ describe('convertPreviousRounds', () => {
 
     const [firstHumanMessage, firstAssistantMessage, secondHumanMessage] = result;
     expect(isHumanMessage(firstHumanMessage)).toBe(true);
-    expect(firstHumanMessage.content).toBe('hi');
+    expect(firstHumanMessage.content).toBe(`[Sent: ${formatDate(now)}]\n\nhi`);
     expect(isAIMessage(firstAssistantMessage)).toBe(true);
     expect(firstAssistantMessage.content).toBe('hello!');
     expect(isHumanMessage(secondHumanMessage)).toBe(true);
@@ -192,7 +273,7 @@ describe('convertPreviousRounds', () => {
       nextHumanMessage,
     ] = result;
     expect(isHumanMessage(firstHumanMessage)).toBe(true);
-    expect(firstHumanMessage.content).toBe('find foo');
+    expect(firstHumanMessage.content).toBe(`[Sent: ${formatDate(now)}]\n\nfind foo`);
     expect(isAIMessage(toolCallAIMessage)).toBe(true);
     expect((toolCallAIMessage as AIMessage).tool_calls).toHaveLength(1);
     expect((toolCallAIMessage as AIMessage).tool_calls![0].id).toBe('call-1');
@@ -262,11 +343,11 @@ describe('convertPreviousRounds', () => {
       lastHumanMessage,
     ] = result;
     expect(isHumanMessage(firstHumanMessage)).toBe(true);
-    expect(firstHumanMessage.content).toBe('hi');
+    expect(firstHumanMessage.content).toBe(`[Sent: ${formatDate(now)}]\n\nhi`);
     expect(isAIMessage(firstAssistantMessage)).toBe(true);
     expect(firstAssistantMessage.content).toBe('hello!');
     expect(isHumanMessage(secondHumanMessage)).toBe(true);
-    expect(secondHumanMessage.content).toBe('search for bar');
+    expect(secondHumanMessage.content).toBe(`[Sent: ${formatDate(now)}]\n\nsearch for bar`);
     expect(isAIMessage(toolCallAIMessage)).toBe(true);
     expect((toolCallAIMessage as AIMessage).tool_calls).toHaveLength(1);
     expect((toolCallAIMessage as AIMessage).tool_calls![0].id).toBe('call-2');

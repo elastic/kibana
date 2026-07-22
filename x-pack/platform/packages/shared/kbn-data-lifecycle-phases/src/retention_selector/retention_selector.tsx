@@ -5,54 +5,65 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useMemo, useRef, useState, type RefObject } from 'react';
 import {
-  EuiFilterButton,
-  EuiFilterGroup,
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiListGroup,
+  EuiIcon,
   EuiPanel,
-  EuiPopover,
   EuiSelectable,
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
+import type { EuiSelectableOption } from '@elastic/eui';
 import type { RetentionOption } from './types';
-import { RetentionSelectableRow } from './retention_selectable_row';
+import {
+  getRetentionSelectableRowTestSubjs,
+  RetentionSelectableInspectButton,
+  RetentionSelectableRow,
+} from './retention_selectable_row';
 import { getRetentionSelectorStyles } from './styles';
 import { retentionSelectorStrings as strings } from './strings';
+import { useFlyoutNestedScrollHeight } from '../hooks/use_flyout_nested_scroll_height';
 
-export type RetentionSelectorMethod = string;
+const NO_FLYOUT_SCROLL_CONTAINER_REF: RefObject<HTMLElement | null> = { current: null };
 
-export interface RetentionSelectorMethodOption {
-  key: RetentionSelectorMethod;
-  label: string;
+export interface RetentionSelectorSearchProps {
+  searchValue: string;
+  onSearchValueChange: (value: string) => void;
+  searchPlaceholder: string;
+  isDisabled?: boolean;
 }
 
-export interface RetentionSelectorMethodFilterConfig {
-  /**
-   * Selected methods. Empty means "all methods".
-   */
-  selectedMethods: RetentionSelectorMethod[];
-  onChangeSelectedMethods: (nextSelectedMethods: RetentionSelectorMethod[]) => void;
-  /**
-   * Optional custom method derivation. Defaults to `option.method`.
-   *
-   * Note: pass a stable function reference (e.g. `useCallback`) to avoid
-   * unnecessary recomputation when the parent re-renders.
-   */
-  getMethodForOption?: (option: RetentionOption) => RetentionSelectorMethod | undefined;
-  /**
-   * Optional list of selectable methods.
-   *
-   * When omitted, options will be derived from the provided `options` list
-   * using `getMethodForOption` (or `option.method` by default).
-   */
-  methodOptions?: RetentionSelectorMethodOption[];
-  /** Optional label override for the filter button. */
-  buttonLabel?: string;
+/**
+ * The search input row, extracted so it can be rendered in a
+ * flyout header. Pair with a `showSearch={false}` `RetentionSelector` sharing
+ * the same `searchValue`/`onSearchValueChange` to keep the list in sync.
+ */
+export const RetentionSelectorSearch = ({
+  searchValue,
+  onSearchValueChange,
+  searchPlaceholder,
+  isDisabled = false,
+}: RetentionSelectorSearchProps) => {
+  return (
+    <EuiFieldSearch
+      placeholder={searchPlaceholder}
+      compressed
+      fullWidth
+      disabled={isDisabled}
+      value={searchValue}
+      onChange={(event) => onSearchValueChange(event.target.value)}
+      data-test-subj="retentionSelectorSearchInput"
+      aria-label={searchPlaceholder}
+    />
+  );
+};
+
+interface RetentionSelectableOptionData {
+  retentionOption: RetentionOption;
+  inspectTestSubj: string;
 }
 
 export interface RetentionSelectorProps {
@@ -62,24 +73,15 @@ export interface RetentionSelectorProps {
   onInspect?: (name: string) => void;
   isDisabled?: boolean;
   height?: number | 'full';
-  /** Hide the search input (useful when the list is read-only / single item). */
   showSearch?: boolean;
-  /** Render the list inside a panel (used for read-only single-row display). */
   listStyle?: 'plain' | 'panel';
-  /** Hide selection + inspect affordances (used for read-only single-row display). */
   showRowActions?: boolean;
   searchPlaceholder: string;
   inspectButtonLabel: (name: string) => string;
-  /**
-   * Optional method/category filter rendered next to the search input.
-   */
-  methodFilter?: RetentionSelectorMethodFilterConfig;
-  /**
-   * Where the inspect affordance is rendered.
-   * - `rowAction`: right-side action icon (default)
-   * - `badge`: inside the row badge (Streams import flyout)
-   */
   inspectPlacement?: 'rowAction' | 'badge';
+  flyoutScrollContainerRef?: RefObject<HTMLElement | null>;
+  searchValue?: string;
+  onSearchValueChange?: (value: string) => void;
 }
 
 export const RetentionSelector = ({
@@ -94,120 +96,104 @@ export const RetentionSelector = ({
   showRowActions = true,
   searchPlaceholder,
   inspectButtonLabel,
-  methodFilter,
   inspectPlacement = 'rowAction',
+  flyoutScrollContainerRef,
+  searchValue: controlledSearchValue,
+  onSearchValueChange,
 }: RetentionSelectorProps) => {
   const { euiTheme } = useEuiTheme();
-  const [searchValue, setSearchValue] = useState('');
-  const [isMethodFilterPopoverOpen, setIsMethodFilterPopoverOpen] = useState(false);
-  const styles = getRetentionSelectorStyles({ euiTheme, height });
-
-  const defaultGetMethodForOption = useCallback(
-    (option: RetentionOption): RetentionSelectorMethod | undefined => option.method,
-    []
+  const [internalSearchValue, setInternalSearchValue] = useState('');
+  const searchValue = controlledSearchValue ?? internalSearchValue;
+  const setSearchValue = onSearchValueChange ?? setInternalSearchValue;
+  const listScrollRef = useRef<HTMLDivElement>(null);
+  const nestedScrollHeight = useFlyoutNestedScrollHeight(
+    flyoutScrollContainerRef ?? NO_FLYOUT_SCROLL_CONTAINER_REF,
+    listScrollRef
   );
-
-  const getMethodForOption = methodFilter?.getMethodForOption ?? defaultGetMethodForOption;
-
-  const selectableMethodOptions = useMemo<RetentionSelectorMethodOption[]>(() => {
-    if (!methodFilter) return [];
-    if (methodFilter.methodOptions) return methodFilter.methodOptions;
-
-    const uniqueKeys = Array.from(
-      new Set(
-        options
-          .map((option) => getMethodForOption(option))
-          .filter((k): k is RetentionSelectorMethod => Boolean(k && k.trim()))
-      )
-    );
-
-    return uniqueKeys.map((key) => ({ key, label: key }));
-  }, [getMethodForOption, methodFilter, options]);
-
-  const methodFilteredOptions = useMemo(() => {
-    const selectedMethods = methodFilter?.selectedMethods ?? [];
-    if (selectedMethods.length === 0) return options;
-    return options.filter((option) => {
-      const method = getMethodForOption(option);
-      return method ? selectedMethods.includes(method) : false;
-    });
-  }, [getMethodForOption, methodFilter?.selectedMethods, options]);
+  const styles = getRetentionSelectorStyles({ euiTheme });
 
   const visibleOptions = useMemo(() => {
-    const normalizedSearchValue = showSearch ? searchValue.trim().toLowerCase() : '';
-    if (!normalizedSearchValue) return methodFilteredOptions;
+    const isSearchActive = showSearch || controlledSearchValue !== undefined;
+    const normalizedSearchValue = isSearchActive ? searchValue.trim().toLowerCase() : '';
+    if (!normalizedSearchValue) return options;
 
-    return methodFilteredOptions.filter((option) =>
-      option.name.toLowerCase().includes(normalizedSearchValue)
-    );
-  }, [methodFilteredOptions, searchValue, showSearch]);
+    return options.filter((option) => option.name.toLowerCase().includes(normalizedSearchValue));
+  }, [controlledSearchValue, options, searchValue, showSearch]);
 
-  const selectedMethodCount = methodFilter?.selectedMethods.length ?? 0;
-
-  const methodFilterControl =
-    methodFilter && selectableMethodOptions.length > 0 ? (
-      <EuiFilterGroup compressed>
-        <EuiPopover
-          aria-label={strings.methodFilterPopoverAriaLabel}
-          isOpen={isDisabled ? false : isMethodFilterPopoverOpen}
-          closePopover={() => setIsMethodFilterPopoverOpen(false)}
-          panelPaddingSize="s"
-          button={
-            <EuiFilterButton
-              iconType="chevronSingleDown"
-              isSelected={isMethodFilterPopoverOpen}
-              onClick={() => setIsMethodFilterPopoverOpen((open) => !open)}
+  const selectableOptions = useMemo<
+    Array<EuiSelectableOption<RetentionSelectableOptionData>>
+  >(() => {
+    return visibleOptions.map((option) => {
+      const { rowTestSubj, inspectTestSubj } = getRetentionSelectableRowTestSubjs(option.name);
+      return {
+        key: option.name,
+        label: option.name,
+        checked: option.name === selectedOptionName ? 'on' : undefined,
+        disabled: isDisabled,
+        'data-test-subj': rowTestSubj,
+        retentionOption: option,
+        inspectTestSubj,
+        prepend: showRowActions ? (
+          <EuiIcon
+            type={option.name === selectedOptionName ? 'check' : 'empty'}
+            size="m"
+            aria-hidden
+          />
+        ) : undefined,
+        append:
+          option.inspectable && showRowActions && onInspect && inspectPlacement === 'rowAction' ? (
+            <RetentionSelectableInspectButton
+              inspectButtonLabel={inspectButtonLabel(option.name)}
+              inspectTestSubj={inspectTestSubj}
+              onInspect={() => onInspect(option.name)}
               isDisabled={isDisabled}
-              hasActiveFilters={selectedMethodCount > 0}
-              numActiveFilters={selectedMethodCount > 0 ? selectedMethodCount : undefined}
-              data-test-subj="retentionSelectorMethodFilterButton"
-            >
-              {methodFilter.buttonLabel ?? strings.methodFilterButtonLabel}
-            </EuiFilterButton>
-          }
-        >
-          <EuiSelectable
-            aria-label={strings.methodFilterSelectableAriaLabel}
-            options={selectableMethodOptions.map(({ key, label }) => ({
-              key,
-              label,
-              checked: methodFilter.selectedMethods.includes(key) ? ('on' as const) : undefined,
-            }))}
-            listProps={{ isVirtualized: false, textWrap: 'wrap' }}
-            onChange={(newOptions) => {
-              const nextSelected = newOptions
-                .filter((o) => o.checked === 'on')
-                .map((o) => o.key as RetentionSelectorMethod);
-              methodFilter.onChangeSelectedMethods(nextSelected);
-            }}
-          >
-            {(list) => <>{list}</>}
-          </EuiSelectable>
-        </EuiPopover>
-      </EuiFilterGroup>
-    ) : null;
+            />
+          ) : undefined,
+      };
+    });
+  }, [
+    inspectButtonLabel,
+    inspectPlacement,
+    isDisabled,
+    onInspect,
+    selectedOptionName,
+    showRowActions,
+    visibleOptions,
+  ]);
+
+  const selectableHeight = height === 'full' ? nestedScrollHeight : height;
 
   const list =
     visibleOptions.length > 0 ? (
-      <EuiListGroup maxWidth={false} wrapText css={styles.list}>
-        {visibleOptions.map((option) => (
+      <EuiSelectable
+        aria-label={strings.listAriaLabel}
+        options={selectableOptions}
+        isPreFiltered
+        height={selectableHeight}
+        css={styles.selectable}
+        listProps={{
+          isVirtualized: false,
+          showIcons: false,
+          textWrap: 'wrap',
+          bordered: false,
+        }}
+        onChange={(_newOptions, _event, changedOption) => {
+          if (!isDisabled) onSelectOption(changedOption.label);
+        }}
+        renderOption={(option, optionSearchValue) => (
           <RetentionSelectableRow
-            key={option.name}
-            option={option}
-            searchValue={searchValue}
-            inspectButtonLabel={inspectButtonLabel(option.name)}
-            onSelect={() => {
-              if (!isDisabled) onSelectOption(option.name);
-            }}
-            onInspect={onInspect ? () => onInspect(option.name) : undefined}
-            isSelected={option.name === selectedOptionName}
+            option={option.retentionOption}
+            searchValue={optionSearchValue || searchValue}
+            inspectButtonLabel={inspectButtonLabel(option.label)}
+            inspectTestSubj={option.inspectTestSubj}
+            onInspect={onInspect ? () => onInspect(option.label) : undefined}
             isDisabled={isDisabled}
-            showSelectionIcon={showRowActions}
-            showInspectAction={showRowActions && onInspect !== undefined}
             inspectPlacement={inspectPlacement}
           />
-        ))}
-      </EuiListGroup>
+        )}
+      >
+        {(selectableList) => <>{selectableList}</>}
+      </EuiSelectable>
     ) : (
       <EuiText color="subdued" size="s" css={styles.noOptionsText}>
         {strings.noOptionsFoundDescription}
@@ -218,23 +204,12 @@ export const RetentionSelector = ({
     <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
       {showSearch && (
         <EuiFlexItem grow={false} css={styles.paddedSection}>
-          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-            <EuiFlexItem>
-              <EuiFieldSearch
-                placeholder={searchPlaceholder}
-                compressed
-                fullWidth
-                disabled={isDisabled}
-                value={searchValue}
-                onChange={(event) => setSearchValue(event.target.value)}
-                data-test-subj="retentionSelectorSearchInput"
-                aria-label={searchPlaceholder}
-              />
-            </EuiFlexItem>
-            {methodFilterControl ? (
-              <EuiFlexItem grow={false}>{methodFilterControl}</EuiFlexItem>
-            ) : null}
-          </EuiFlexGroup>
+          <RetentionSelectorSearch
+            searchValue={searchValue}
+            onSearchValueChange={setSearchValue}
+            searchPlaceholder={searchPlaceholder}
+            isDisabled={isDisabled}
+          />
         </EuiFlexItem>
       )}
       {listStyle === 'panel' ? (
@@ -244,7 +219,14 @@ export const RetentionSelector = ({
           </EuiPanel>
         </EuiFlexItem>
       ) : (
-        <EuiFlexItem css={styles.scrollContainer}>{list}</EuiFlexItem>
+        <EuiFlexItem
+          grow={false}
+          ref={listScrollRef}
+          data-test-subj="retentionSelectorListScroll"
+          css={styles.paddedSection}
+        >
+          {list}
+        </EuiFlexItem>
       )}
     </EuiFlexGroup>
   );

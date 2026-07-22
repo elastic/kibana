@@ -1,5 +1,5 @@
 {
-  "sha1": "9e7f4f067bdc8e58f0a2ea3becbb5cb56164eb57",
+  "sha1": "2833805fdb8f8d01384686a0705ec7379821fd55",
   "tests": [
     {
       "id": "f68be9083a5aaaa-c0035bbeaed0391",
@@ -722,6 +722,22 @@
       }
     },
     {
+      "id": "07d3abb520fbfbc-1d20ba913b64e22",
+      "title": "Composite SLO Lifecycle definition endpoint returns definition-only response and 404 after delete",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/composite_slo_lifecycle.spec.ts",
+        "line": 119,
+        "column": 12
+      }
+    },
+    {
       "id": "07d3abb520fbfbc-ea66eefa499bc32",
       "title": "Composite SLO Lifecycle create multiple composites and verify they are all findable",
       "expectedStatus": "passed",
@@ -733,7 +749,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/composite_slo_lifecycle.spec.ts",
-        "line": 119,
+        "line": 163,
         "column": 12
       }
     },
@@ -749,7 +765,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/composite_slo_lifecycle.spec.ts",
-        "line": 161,
+        "line": 205,
         "column": 12
       }
     },
@@ -765,7 +781,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/composite_slo_lifecycle.spec.ts",
-        "line": 206,
+        "line": 250,
         "column": 12
       }
     },
@@ -781,7 +797,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/composite_slo_lifecycle.spec.ts",
-        "line": 250,
+        "line": 294,
         "column": 12
       }
     },
@@ -797,7 +813,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/composite_slo_lifecycle.spec.ts",
-        "line": 307,
+        "line": 351,
         "column": 12
       }
     },
@@ -813,7 +829,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/composite_slo_lifecycle.spec.ts",
-        "line": 347,
+        "line": 391,
         "column": 12
       }
     },
@@ -829,7 +845,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/composite_slo_lifecycle.spec.ts",
-        "line": 390,
+        "line": 434,
         "column": 12
       }
     },
@@ -845,7 +861,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/composite_slo_lifecycle.spec.ts",
-        "line": 442,
+        "line": 486,
         "column": 12
       }
     },

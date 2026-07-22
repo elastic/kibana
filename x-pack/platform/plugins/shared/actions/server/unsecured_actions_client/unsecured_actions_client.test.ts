@@ -11,7 +11,7 @@ import {
   loggingSystemMock,
   savedObjectsRepositoryMock,
 } from '@kbn/core/server/mocks';
-import { asNotificationExecutionSource } from '../lib';
+import { asNotificationExecutionSource, NOTIFICATIONS_REQUESTER_ID } from '../lib';
 import { actionExecutorMock } from '../lib/action_executor.mock';
 import { UnsecuredActionsClient } from './unsecured_actions_client';
 import type { Logger } from '@kbn/core/server';
@@ -319,7 +319,10 @@ describe('bulkEnqueueExecution()', () => {
 
     const optsWithSource = opts.map((opt) => ({
       ...opt,
-      source: asNotificationExecutionSource({ connectorId: opt.id, requesterId: 'notifications' }),
+      source: asNotificationExecutionSource({
+        connectorId: opt.id,
+        requesterId: NOTIFICATIONS_REQUESTER_ID,
+      }),
     }));
     expect(executionEnqueuer).toHaveBeenCalledWith(internalSavedObjectsRepository, optsWithSource);
   });

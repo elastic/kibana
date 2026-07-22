@@ -144,6 +144,7 @@ export class RequestContextFactory implements IRequestContextFactory {
       inference: startPlugins.inference,
       searchInferenceEndpoints: startPlugins.searchInferenceEndpoints,
       savedObjectsClient,
+      security: startPlugins.security,
       telemetry: core.analytics,
 
       // Note: elserInferenceId is used here to enable setting up the KB using a different ELSER model, which
@@ -188,6 +189,10 @@ export class RequestContextFactory implements IRequestContextFactory {
       getAttackDiscoverySchedulingDataClient: memoize(async () => {
         return this.assistantService.createAttackDiscoverySchedulingDataClient({
           actionsClient,
+          // The public (feature-flag-off) schedule API is the legacy view: it
+          // must only surface its own untagged schedules and exclude schedules
+          // owned by the internal (workflow) API, which tag their alerting rules.
+          filterTags: { excludeTags: ['attack-discovery-schedule', 'attack-discovery-workflow'] },
           logger: this.logger,
           rulesClient,
         });

@@ -28,6 +28,15 @@ import {
   savedObjectTypeRegistryMock,
 } from './run_resilient_migrator.fixtures';
 import { getIndexDetails } from './core/get_index_details';
+import { isMemoryConstrained } from './low_memory';
+
+jest.mock('./low_memory', () => {
+  const actual = jest.requireActual('./low_memory');
+  return {
+    ...actual,
+    isMemoryConstrained: jest.fn(() => false),
+  };
+});
 
 jest.mock('./core', () => {
   const actual = jest.requireActual('./core');
@@ -85,11 +94,17 @@ const mockRunResilientMigrator = runResilientMigrator as jest.MockedFunction<
 >;
 
 const mockGetIndexDetails = getIndexDetails as jest.MockedFunction<typeof getIndexDetails>;
+const mockIsMemoryConstrained = isMemoryConstrained as jest.MockedFunction<
+  typeof isMemoryConstrained
+>;
 
 describe('runV2Migration', () => {
   beforeEach(() => {
     mockCreateIndexMap.mockClear();
-    mockRunResilientMigrator.mockClear();
+    mockRunResilientMigrator.mockReset();
+    mockRunResilientMigrator.mockResolvedValue(V2_SUCCESSFUL_MIGRATION_RESULT[0]);
+    mockIsMemoryConstrained.mockReset();
+    mockIsMemoryConstrained.mockReturnValue(false);
   });
 
   it('rejects if prepare migrations has not been called on the documentMigrator', async () => {
@@ -217,6 +232,80 @@ describe('runV2Migration', () => {
     options.documentMigrator.prepareMigrations();
 
     await expect(runV2Migration(options)).rejects.toThrowError(myTaskIndexMigratorError);
+  });
+
+  describe('when the instance is memory constrained', () => {
+    beforeEach(() => {
+      mockIsMemoryConstrained.mockReturnValue(true);
+    });
+
+    it('reduces the batch size to 100 and passes it to each migrator', async () => {
+      const options = mockOptions();
+      options.migrationConfig = { ...options.migrationConfig, batchSize: 1000 };
+      options.documentMigrator.prepareMigrations();
+
+      await runV2Migration(options);
+
+      expect(runResilientMigrator).toHaveBeenCalledTimes(3);
+      for (let nth = 1; nth <= 3; nth++) {
+        expect(runResilientMigrator).toHaveBeenNthCalledWith(
+          nth,
+          expect.objectContaining({
+            migrationsConfig: expect.objectContaining({ batchSize: 100 }),
+          })
+        );
+      }
+    });
+
+    it('does not increase the batch size when it is already below the reduced value', async () => {
+      const options = mockOptions();
+      options.migrationConfig = { ...options.migrationConfig, batchSize: 20 };
+      options.documentMigrator.prepareMigrations();
+
+      await runV2Migration(options);
+
+      expect(runResilientMigrator).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({
+          migrationsConfig: expect.objectContaining({ batchSize: 20 }),
+        })
+      );
+    });
+
+    it('runs the migrators sequentially rather than in parallel', async () => {
+      const resolvers: Array<(value: MigrationResult) => void> = [];
+      mockRunResilientMigrator.mockImplementation(
+        () => new Promise<MigrationResult>((resolve) => resolvers.push(resolve))
+      );
+
+      const options = mockOptions();
+      options.documentMigrator.prepareMigrations();
+
+      let migrationResults: MigrationResult[] | undefined;
+      runV2Migration(options).then((results) => (migrationResults = results));
+
+      await nextTick();
+      // only the first migrator should have started
+      expect(runResilientMigrator).toHaveBeenCalledTimes(1);
+
+      resolvers[0](V2_SUCCESSFUL_MIGRATION_RESULT[0]);
+      await nextTick();
+      // the second migrator only starts once the first has resolved
+      expect(runResilientMigrator).toHaveBeenCalledTimes(2);
+
+      resolvers[1](V2_SUCCESSFUL_MIGRATION_RESULT[1]);
+      await nextTick();
+      expect(runResilientMigrator).toHaveBeenCalledTimes(3);
+
+      expect(migrationResults).toBeUndefined();
+      resolvers[2](V2_SUCCESSFUL_MIGRATION_RESULT[2]);
+      await nextTick();
+      expect(migrationResults).toEqual([
+        V2_SUCCESSFUL_MIGRATION_RESULT[0],
+        V2_SUCCESSFUL_MIGRATION_RESULT[1],
+        V2_SUCCESSFUL_MIGRATION_RESULT[2],
+      ]);
+    });
   });
 });
 

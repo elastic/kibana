@@ -46,8 +46,11 @@ describe('WorkflowsManagementApi', () => {
       getWorkflowZodSchema: jest.fn(),
       createWorkflow: jest.fn(),
       updateWorkflow: jest.fn(),
+      restoreWorkflowVersion: jest.fn(),
       deleteWorkflows: jest.fn(),
       bulkCreateWorkflows: jest.fn(),
+      disableAllWorkflows: jest.fn(),
+      getHistoryForWorkflow: jest.fn(),
       validateWorkflow: jest.fn(),
       getWorkflowExecution: jest.fn(),
       markStepAsResponded: jest.fn(),
@@ -951,6 +954,68 @@ steps:
     });
   });
 
+  describe('restoreWorkflowVersion', () => {
+    const createWorkflowDto = (overrides: Partial<WorkflowDetailDto> = {}): WorkflowDetailDto => ({
+      id: 'wf-1',
+      name: 'Test Workflow',
+      enabled: true,
+      yaml: 'name: Test Workflow',
+      valid: true,
+      createdAt: '2025-01-01T00:00:00.000Z',
+      createdBy: 'user',
+      lastUpdatedAt: '2025-01-01T00:00:00.000Z',
+      lastUpdatedBy: 'user',
+      definition: null,
+      ...overrides,
+    });
+
+    it('restores a historical workflow version for unmanaged workflows', async () => {
+      const existingWorkflow = createWorkflowDto({ managed: false });
+      const restoreResult = {
+        id: 'wf-1',
+        version: 8,
+        lastUpdatedAt: '2026-01-02T00:00:00.000Z',
+        lastUpdatedBy: 'alice',
+        enabled: true,
+        valid: true,
+        validationErrors: [],
+      };
+
+      mockWorkflowsService.getWorkflow.mockResolvedValue(existingWorkflow);
+      mockWorkflowsService.restoreWorkflowVersion.mockResolvedValue(restoreResult);
+
+      const result = await api.restoreWorkflowVersion('wf-1', 'event-v3', 'default', mockRequest);
+
+      expect(result).toBe(restoreResult);
+      expect(mockWorkflowsService.restoreWorkflowVersion).toHaveBeenCalledWith(
+        'wf-1',
+        'event-v3',
+        'default',
+        mockRequest
+      );
+    });
+
+    it('throws when the workflow is not found', async () => {
+      mockWorkflowsService.getWorkflow.mockResolvedValue(null);
+
+      await expect(
+        api.restoreWorkflowVersion('missing', 'event-v3', 'default', mockRequest)
+      ).rejects.toBeInstanceOf(WorkflowNotFoundError);
+
+      expect(mockWorkflowsService.restoreWorkflowVersion).not.toHaveBeenCalled();
+    });
+
+    it('rejects restore for managed workflows', async () => {
+      mockWorkflowsService.getWorkflow.mockResolvedValue(createWorkflowDto({ managed: true }));
+
+      await expect(
+        api.restoreWorkflowVersion('wf-1', 'event-v3', 'default', mockRequest)
+      ).rejects.toBeInstanceOf(ManagedWorkflowUpdateForbiddenError);
+
+      expect(mockWorkflowsService.restoreWorkflowVersion).not.toHaveBeenCalled();
+    });
+  });
+
   describe('deleteWorkflows', () => {
     const createWorkflowDto = (overrides: Partial<WorkflowDetailDto> = {}): WorkflowDetailDto => ({
       id: 'wf-1',
@@ -1130,6 +1195,10 @@ steps:
       mockWorkflowsService.bulkCreateWorkflows.mockResolvedValue({
         created: [createWorkflowDto({ id: 'wf-b1' }), createWorkflowDto({ id: 'wf-b2' })],
         failed: [],
+        historyActionsById: {
+          'wf-b1': 'create',
+          'wf-b2': 'create',
+        },
       });
 
       await api.bulkCreateWorkflows(
@@ -1147,18 +1216,30 @@ steps:
       );
     });
 
-    it('uses "update" action in bulkCreateWorkflows when overwrite is true', async () => {
+    it('uses per-item create/update actions in bulkCreateWorkflows when overwrite is true', async () => {
       mockWorkflowsService.bulkCreateWorkflows.mockResolvedValue({
-        created: [createWorkflowDto({ id: 'wf-ow' })],
+        created: [createWorkflowDto({ id: 'wf-new' }), createWorkflowDto({ id: 'wf-existing' })],
         failed: [],
+        historyActionsById: {
+          'wf-new': 'create',
+          'wf-existing': 'update',
+        },
       });
 
-      await api.bulkCreateWorkflows([{ yaml: 'name: W1' }], 'default', mockRequest, {
-        overwrite: true,
-      });
+      await api.bulkCreateWorkflows(
+        [{ yaml: 'name: W1' }, { yaml: 'name: W2' }],
+        'default',
+        mockRequest,
+        {
+          overwrite: true,
+        }
+      );
 
       expect(mockSmlIndex).toHaveBeenCalledWith(
-        expect.objectContaining({ originId: 'wf-ow', action: 'update' })
+        expect.objectContaining({ originId: 'wf-new', action: 'create' })
+      );
+      expect(mockSmlIndex).toHaveBeenCalledWith(
+        expect.objectContaining({ originId: 'wf-existing', action: 'update' })
       );
     });
 
@@ -1173,6 +1254,40 @@ steps:
       expect(mockSmlLogger.warn).toHaveBeenCalledWith(
         expect.stringContaining("Failed to create SML index for workflow 'wf-err'")
       );
+    });
+  });
+
+  describe('delegation', () => {
+    it('delegates disableAllWorkflows with spaceId and request', async () => {
+      mockWorkflowsService.disableAllWorkflows.mockResolvedValue({
+        total: 2,
+        disabled: 2,
+        failures: [],
+      });
+
+      const result = await api.disableAllWorkflows('my-space', mockRequest);
+
+      expect(mockWorkflowsService.disableAllWorkflows).toHaveBeenCalledWith(
+        'my-space',
+        mockRequest
+      );
+      expect(result).toEqual({ total: 2, disabled: 2, failures: [] });
+    });
+
+    it('delegates getHistoryForWorkflow with pagination options', async () => {
+      const history = { page: 2, perPage: 10, total: 1, items: [] };
+      mockWorkflowsService.getHistoryForWorkflow.mockResolvedValue(history);
+
+      const result = await api.getHistoryForWorkflow('wf-1', 'default', {
+        page: 2,
+        perPage: 10,
+      });
+
+      expect(mockWorkflowsService.getHistoryForWorkflow).toHaveBeenCalledWith('wf-1', 'default', {
+        page: 2,
+        perPage: 10,
+      });
+      expect(result).toBe(history);
     });
   });
 

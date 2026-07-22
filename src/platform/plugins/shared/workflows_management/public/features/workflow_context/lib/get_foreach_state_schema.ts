@@ -10,7 +10,10 @@
 import type { DynamicStepContextSchema } from '@kbn/workflows';
 import { ForEachContextSchema } from '@kbn/workflows';
 import { getSchemaAtPath } from '@kbn/workflows/common/utils/zod/get_schema_at_path';
-import type { EnterForeachNodeConfiguration } from '@kbn/workflows/graph';
+import type {
+  EnterForeachNodeConfiguration,
+  EnterParallelNodeConfiguration,
+} from '@kbn/workflows/graph';
 import {
   getDetailedTypeDescription,
   getZodTypeName,
@@ -23,9 +26,21 @@ import { parseVariablePath } from '../../../../common/lib/parse_variable_path';
 
 export function getForeachStateSchema(
   stepContextSchema: typeof DynamicStepContextSchema,
-  foreachStep: EnterForeachNodeConfiguration
+  // Both `foreach` and `parallel` enter-node configurations expose the same
+  // `foreach` source (parallel fans out over it), and only that field is read
+  // here — accept either so callers don't need an unsafe cast.
+  foreachStep: EnterForeachNodeConfiguration | EnterParallelNodeConfiguration
 ) {
   let itemSchema: z.ZodType = z.unknown();
+
+  // A static `parallel` step (named `branches`) has no `foreach` source, so there
+  // is no per-item context to derive — fall back to a permissive item schema.
+  if (foreachStep.foreach === undefined) {
+    return ForEachContextSchema.extend({
+      item: itemSchema,
+      items: z.array(itemSchema),
+    });
+  }
 
   try {
     if (Array.isArray(foreachStep.foreach)) {

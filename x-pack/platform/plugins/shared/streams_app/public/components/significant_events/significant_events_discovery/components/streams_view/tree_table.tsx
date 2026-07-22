@@ -22,12 +22,12 @@ import {
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import type { ListStreamDetail } from '@kbn/streams-plugin/server/routes/internal/streams/crud/route';
+import { Streams } from '@kbn/streams-schema';
 import {
-  Streams,
   SignificantEventsWorkflowStatus,
-  STREAMS_KIS_ONBOARDING_IN_PROGRESS_STATUSES,
+  KIS_ONBOARDING_IN_PROGRESS_STATUSES,
   type SignificantEventsWorkflowStatusResult,
-} from '@kbn/streams-schema';
+} from '@kbn/significant-events-schema';
 import React, { useState } from 'react';
 import { useStreamsAppRouter } from '../../../../../hooks/use_streams_app_router';
 import { useStreamsTour } from '../../../../streams_tour';
@@ -345,7 +345,7 @@ export function StreamsTreeTable({
                       <EuiLink
                         data-test-subj={`streamsNameLink-${item.stream.name}`}
                         href={router.link('/{key}/management/{tab}', {
-                          path: { key: item.stream.name, tab: 'significantEvents' },
+                          path: { key: item.stream.name, tab: 'overview' },
                         })}
                       >
                         <EuiHighlight search={searchQuery.text}>{item.stream.name}</EuiHighlight>
@@ -444,7 +444,7 @@ export function StreamsTreeTable({
               render: (_: unknown, item: TableRow) => {
                 const onboardingResult = streamOnboardingResultMap[item.stream.name];
 
-                if (STREAMS_KIS_ONBOARDING_IN_PROGRESS_STATUSES.has(onboardingResult?.status)) {
+                if (KIS_ONBOARDING_IN_PROGRESS_STATUSES.has(onboardingResult?.status)) {
                   return (
                     <EuiToolTip
                       position="top"

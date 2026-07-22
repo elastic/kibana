@@ -6,7 +6,7 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import type { SignificantEvent } from '@kbn/streams-schema';
+import type { SignificantEvent } from '@kbn/significant-events-schema';
 
 export class FocusedSignificantEventService {
   private readonly focusedEventSubject$ = new BehaviorSubject<SignificantEvent | undefined>(
@@ -19,10 +19,10 @@ export class FocusedSignificantEventService {
     this.focusedEventSubject$.next(event);
   }
 
-  public clearFocusedEvent(discoverySlug?: string): void {
+  public clearFocusedEvent(eventId?: string): void {
     const focusedEvent = this.focusedEventSubject$.getValue();
 
-    if (discoverySlug && focusedEvent?.discovery_slug !== discoverySlug) {
+    if (eventId && focusedEvent?.event_id !== eventId) {
       return;
     }
 

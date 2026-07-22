@@ -22,6 +22,7 @@ import { useFetchDataFields } from '../../../hooks/use_fetch_data_fields';
 import { DispatchSection } from './components/dispatch_section';
 import { MatcherInput } from './components/matcher_input';
 import { QuickFilters } from './components/quick_filters';
+import { SimpleWorkflowBuilder } from './components/simple_workflow_builder';
 import { TagsInput } from './components/tags_input';
 import { WorkflowSelector } from './components/workflow_selector';
 import type { ActionPolicyFormState } from './types';
@@ -236,6 +237,8 @@ export const ActionPolicyForm = () => {
         </EuiSplitPanel.Inner>
         <EuiSplitPanel.Inner>
           <WorkflowSelector />
+          <EuiSpacer size="m" />
+          <SimpleWorkflowBuilder />
         </EuiSplitPanel.Inner>
       </EuiSplitPanel.Outer>
     </>

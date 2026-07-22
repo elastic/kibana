@@ -1,0 +1,10 @@
+prs:
+- https://github.com/elastic/kibana/pull/271586
+issues:
+- https://github.com/elastic/security-team/issues/17274
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-07-02
+title: Fix missing manual input dialog for workflow executions in Elastic Security
+description: "Fixes workflow executions that require manual input by showing an input dialog when a workflow run needs user-provided values."

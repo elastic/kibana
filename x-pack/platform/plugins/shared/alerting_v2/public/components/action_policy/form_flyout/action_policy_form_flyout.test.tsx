@@ -27,6 +27,32 @@ jest.mock('@kbn/core-di-browser', () => ({
   CoreStart: (key: string) => key,
 }));
 
+const INLINE_DEFS = [
+  {
+    id: 'email',
+    label: 'Email',
+    iconType: 'email',
+    connectorTypeId: '.email',
+    paramsTemplate: 'to: ""\n',
+  },
+  {
+    id: 'slack',
+    label: 'Slack',
+    iconType: 'logoSlack',
+    connectorTypeId: '.slack',
+    paramsTemplate: 'message: ""\n',
+  },
+];
+
+jest.mock('@kbn/alerting-v2-rule-form', () => ({
+  INLINE_ACTION_STEP_DEFINITIONS: INLINE_DEFS,
+  getInlineActionStepDefinition: (id: string) => INLINE_DEFS.find((d) => d.id === id),
+  isActionValid: () => true,
+  InlineWorkflowEditor: ({ value }: { value: { id: string } }) => (
+    <div data-test-subj={`inlineWorkflowEditor-${value.id}`} />
+  ),
+}));
+
 jest.mock('../form/components/matcher_input', () => ({
   MatcherInput: (props: {
     value: string;
@@ -125,7 +151,14 @@ describe('ActionPolicyFormFlyout', () => {
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
-  it('submits create payload and omits optional empty fields', async () => {
+  it('renders the inline simple workflow builder alongside the existing-workflow selector', () => {
+    renderFlyout({ onClose: jest.fn(), onSave: jest.fn() });
+
+    expect(screen.getByTestId('simpleWorkflowBuilder')).toBeInTheDocument();
+    expect(screen.getByTestId('destinationsInput')).toBeInTheDocument();
+  });
+
+  it('forwards the raw form state (not a payload) to onSave so the host can build it', async () => {
     const user = userEvent.setup({ delay: null });
     const onSave = jest.fn();
 
@@ -149,10 +182,40 @@ describe('ActionPolicyFormFlyout', () => {
     expect(onSave).toHaveBeenCalledWith({
       name: 'Policy from test',
       description: 'Description from test',
+      tags: [],
+      matcher: '',
       groupingMode: 'per_episode',
-      throttle: { strategy: 'on_status_change', interval: null },
+      groupBy: [],
+      throttleStrategy: 'on_status_change',
+      throttleInterval: '',
       destinations: [{ type: 'workflow', id: 'wf-1' }],
+      inlineActions: [],
     });
+  });
+
+  it('forwards inline "simple workflow" drafts to onSave instead of dropping them', async () => {
+    const user = userEvent.setup({ delay: null });
+    const onSave = jest.fn();
+
+    renderFlyout({ onClose: jest.fn(), onSave });
+
+    await user.type(screen.getByTestId(TEST_SUBJ.nameInput), 'Inline policy');
+    await user.tab();
+
+    // Add an inline Slack workflow draft (no existing destination selected).
+    await user.click(screen.getByTestId('simpleWorkflowAdd-slack'));
+
+    const saveButton = screen.getByTestId(TEST_SUBJ.submitButton);
+    await waitFor(() => expect(saveButton).toBeEnabled());
+    await user.click(saveButton);
+
+    await waitFor(() => expect(onSave).toHaveBeenCalledTimes(1));
+    expect(onSave).toHaveBeenCalledWith(
+      expect.objectContaining({
+        destinations: [],
+        inlineActions: [expect.objectContaining({ source: 'inline', stepType: 'slack' })],
+      })
+    );
   });
 
   it('renders edit mode and submits update payload with optional fields and version', async () => {
@@ -196,16 +259,21 @@ describe('ActionPolicyFormFlyout', () => {
     await user.click(updateButton);
 
     await waitFor(() => expect(onUpdate).toHaveBeenCalledTimes(1));
-    expect(onUpdate).toHaveBeenCalledWith('policy-1', {
-      version: 'WzEsMV0=',
-      name: 'Critical production alerts',
-      description: 'Routes critical alerts',
-      groupingMode: 'per_field',
-      tags: ['production'],
-      matcher: 'data.severity : "critical"',
-      groupBy: ['host.name', 'service.name'],
-      throttle: { strategy: 'time_interval', interval: '5m' },
-      destinations: [{ type: 'workflow', id: 'workflow-2' }],
-    });
+    expect(onUpdate).toHaveBeenCalledWith(
+      'policy-1',
+      {
+        name: 'Critical production alerts',
+        description: 'Routes critical alerts',
+        tags: ['production'],
+        matcher: 'data.severity : "critical"',
+        groupingMode: 'per_field',
+        groupBy: ['host.name', 'service.name'],
+        throttleStrategy: 'time_interval',
+        throttleInterval: '5m',
+        destinations: [{ type: 'workflow', id: 'workflow-2' }],
+        inlineActions: [],
+      },
+      'WzEsMV0='
+    );
   });
 });

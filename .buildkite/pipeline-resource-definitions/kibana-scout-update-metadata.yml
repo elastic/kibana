@@ -23,11 +23,16 @@ spec:
         KIBANA_SLACK_NOTIFICATIONS_ENABLED: 'true'
       allow_rebuilds: true
       # Schedules set BUILDKITE_BRANCH; the step uses it as the PR base. Add a schedule per target branch.
-      branch_configuration: main 9.4 9.3 8.19
+      branch_configuration: main 9.5 9.4 9.3 8.19
       cancel_intermediate_builds: true
       default_branch: main
       repository: elastic/kibana
       pipeline_file: .buildkite/pipelines/scout_update_metadata.yml
+      initial_step_plugins:
+        - sparse-checkout#v1.6.0:
+            paths:
+              - .buildkite/pipelines/scout_update_metadata.yml
+            cleanup_sparse_state: true
       provider_settings:
         build_branches: false
         build_pull_requests: false
@@ -49,6 +54,10 @@ spec:
           cronline: 0 0 * * * America/New_York
           message: Daily Scout metadata update
           branch: main
+        Daily (9.5):
+          cronline: 0 0 * * * America/New_York
+          message: Daily Scout metadata update
+          branch: '9.5'
         Daily (9.4):
           cronline: 0 0 * * * America/New_York
           message: Daily Scout metadata update

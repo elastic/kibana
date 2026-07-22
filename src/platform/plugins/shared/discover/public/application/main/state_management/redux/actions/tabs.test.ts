@@ -8,6 +8,9 @@
  */
 
 import { EMPTY_CONTEXT_AWARENESS_TOOLKIT } from '../../../../../context_awareness/toolkit';
+import { TEST_PROFILE_STATE_DEF } from '../../../../../context_awareness/__mocks__/profile_state';
+import type { ProfileStateDefinition } from '../../../../../context_awareness';
+import { ProfileStateType } from '../../../../../context_awareness';
 import { getDiscoverInternalStateMock } from '../../../../../__mocks__/discover_state.mock';
 import { createDiscoverServicesMock } from '../../../../../__mocks__/services';
 import { dataViewMockWithTimeField } from '@kbn/discover-utils/src/__mocks__';
@@ -23,9 +26,26 @@ import {
 } from '..';
 import * as runtimeStateModule from '../runtime_state';
 import * as contextAwarenessToolkitModule from '../context_awareness_toolkit';
+import { PROFILE_STATE_URL_KEY } from '../../../../../../common/constants';
+
+interface SecondaryProfileState {
+  secondaryUrlValue: string;
+}
+
+const SECONDARY_PROFILE_STATE_DEF: ProfileStateDefinition<SecondaryProfileState> = {
+  key: 'secondaryProfileState',
+  descriptor: {
+    secondaryUrlValue: { type: ProfileStateType.Url },
+  },
+  defaultState: {
+    secondaryUrlValue: 'defaultSecondaryUrl',
+  },
+};
 
 const setup = async () => {
   const services = createDiscoverServicesMock();
+  services.profileStateRegistry.registerDefinition(TEST_PROFILE_STATE_DEF);
+  services.profileStateRegistry.registerDefinition(SECONDARY_PROFILE_STATE_DEF);
   const runtimeStateManager = createRuntimeStateManager();
   const toolkit = getDiscoverInternalStateMock({
     services,
@@ -117,12 +137,16 @@ describe('tabs actions', () => {
       const { internalState, getCurrentTab } = await setup();
       const currentTab = getCurrentTab();
       const allTabs = selectAllTabs(internalState.getState());
+      const profileState = {
+        ...TEST_PROFILE_STATE_DEF.defaultState,
+        uiValue: 'primary',
+      };
 
       internalState.dispatch(
         internalStateActions.setProfileState({
           tabId: currentTab.id,
-          key: 'testProfileState',
-          profileState: { color: 'primary' },
+          profileStateDefinition: TEST_PROFILE_STATE_DEF,
+          profileState,
         })
       );
 
@@ -139,8 +163,68 @@ describe('tabs actions', () => {
       );
 
       expect(selectTab(internalState.getState(), duplicatedTab.id).profileState).toEqual({
-        testProfileState: { color: 'primary' },
+        testProfileState: {
+          uiValue: 'primary',
+        },
       });
+    });
+
+    it('replaces profile URL state when switching selected tabs', async () => {
+      const {
+        internalState,
+        stateStorageContainer,
+        initializeSingleTab,
+        getCurrentTab,
+        addNewTab,
+        switchToTab,
+      } = await setup();
+      const currentTab = getCurrentTab();
+      const profileState = {
+        ...TEST_PROFILE_STATE_DEF.defaultState,
+        uiValue: 'ui',
+        urlValue: 'urlFromOtherTab',
+      };
+      const secondaryProfileState = {
+        ...SECONDARY_PROFILE_STATE_DEF.defaultState,
+        secondaryUrlValue: 'secondaryUrlFromOtherTab',
+      };
+
+      await initializeSingleTab({ tabId: currentTab.id, skipWaitForDataFetching: true });
+
+      const otherTab = {
+        ...DEFAULT_TAB_STATE,
+        ...createTabItem(selectAllTabs(internalState.getState())),
+        id: 'other-tab',
+        profileState: {
+          [TEST_PROFILE_STATE_DEF.key]: profileState,
+          [SECONDARY_PROFILE_STATE_DEF.key]: secondaryProfileState,
+        },
+      };
+
+      await addNewTab({ tab: otherTab });
+      await initializeSingleTab({ tabId: otherTab.id });
+
+      const setUrlStateSpy = jest.spyOn(stateStorageContainer, 'set');
+
+      await switchToTab({ tabId: currentTab.id });
+
+      expect(setUrlStateSpy).toHaveBeenCalledWith(PROFILE_STATE_URL_KEY, undefined, {
+        replace: true,
+      });
+
+      setUrlStateSpy.mockClear();
+
+      await switchToTab({ tabId: otherTab.id });
+
+      expect(setUrlStateSpy).toHaveBeenCalledWith(
+        PROFILE_STATE_URL_KEY,
+        {
+          [TEST_PROFILE_STATE_DEF.key]: {
+            urlValue: 'urlFromOtherTab',
+          },
+        },
+        { replace: true }
+      );
     });
 
     it('starts fresh tabs with empty profile state', async () => {
@@ -158,7 +242,7 @@ describe('tabs actions', () => {
       expect(selectTab(internalState.getState(), newTab.id).profileState).toEqual({});
     });
 
-    it('resets profile state when restoring a recently closed tab', async () => {
+    it('restores persistent and url profile state when restoring a recently closed tab', async () => {
       const { internalState, getCurrentTab } = await setup();
       const currentTab = getCurrentTab();
       const allTabs = selectAllTabs(internalState.getState());
@@ -177,8 +261,13 @@ describe('tabs actions', () => {
       internalState.dispatch(
         internalStateActions.setProfileState({
           tabId: currentTab.id,
-          key: 'testProfileState',
-          profileState: { color: 'primary' },
+          profileStateDefinition: TEST_PROFILE_STATE_DEF,
+          profileState: {
+            ...TEST_PROFILE_STATE_DEF.defaultState,
+            uiValue: 'ui',
+            urlValue: 'url',
+            persistentValue: 'persistent',
+          },
         })
       );
       internalState.dispatch(
@@ -201,7 +290,12 @@ describe('tabs actions', () => {
         })
       );
 
-      expect(selectTab(internalState.getState(), restoredTab.id).profileState).toEqual({});
+      expect(selectTab(internalState.getState(), restoredTab.id).profileState).toEqual({
+        testProfileState: {
+          urlValue: 'url',
+          persistentValue: 'persistent',
+        },
+      });
     });
   });
 });

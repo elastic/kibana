@@ -7,6 +7,7 @@
 
 import type { PageObjects, ScoutPage, ScoutTestConfig } from '@kbn/scout';
 import { createLazyPageObject } from '@kbn/scout';
+import { AddExceptionFlyoutPage } from './add_exception_flyout';
 import { AIValueReportPage } from './ai_value_report';
 import { AlertsTablePage } from './alerts_table';
 import { AgentBuilderPage } from './agent_builder';
@@ -32,10 +33,13 @@ import { PrevalenceTool } from './flyout_v2/document/tools/prevalence_tool';
 import { AnalyzerTool } from './flyout_v2/document/tools/analyzer_tool';
 import { NotesTool } from './flyout_v2/document/tools/notes_tool';
 import { ResponseTool } from './flyout_v2/document/tools/response_tool';
+import { EntityFlyoutAnomaliesPage } from './entity_flyout_anomalies_page';
 
 export type { ThreatMatchRuleCreatePage } from './threat_match_rule_create_page';
+export { AddExceptionButtonType } from './add_exception_flyout';
 
 export interface SecurityPageObjects extends PageObjects {
+  addExceptionFlyoutPage: AddExceptionFlyoutPage;
   aiValueReportPage: AIValueReportPage;
   alertsTablePage: AlertsTablePage;
   agentBuilderPage: AgentBuilderPage;
@@ -75,6 +79,8 @@ export interface SecurityPageObjects extends PageObjects {
   notesTool: NotesTool;
   /** Response tool overlay (automated response actions) inside the flyout v2 document flyout. */
   responseTool: ResponseTool;
+  /** Entity flyout anomalies section and tab — requires entityAnalyticsAnomalyDetails feature flag. */
+  entityFlyoutAnomaliesPage: EntityFlyoutAnomaliesPage;
 }
 
 export function extendPageObjects(
@@ -84,6 +90,7 @@ export function extendPageObjects(
 ): SecurityPageObjects {
   return {
     ...pageObjects,
+    addExceptionFlyoutPage: createLazyPageObject(AddExceptionFlyoutPage, page),
     aiValueReportPage: createLazyPageObject(AIValueReportPage, page),
     alertsTablePage: createLazyPageObject(AlertsTablePage, page),
     agentBuilderPage: createLazyPageObject(AgentBuilderPage, page),
@@ -113,5 +120,6 @@ export function extendPageObjects(
     analyzerTool: createLazyPageObject(AnalyzerTool, page),
     notesTool: createLazyPageObject(NotesTool, page),
     responseTool: createLazyPageObject(ResponseTool, page),
+    entityFlyoutAnomaliesPage: createLazyPageObject(EntityFlyoutAnomaliesPage, page),
   };
 }

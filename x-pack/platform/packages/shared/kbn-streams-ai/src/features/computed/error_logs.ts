@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { getSampleDocumentsEsql } from '@kbn/ai-tools';
+import { getSampleDocumentsEsql, DEFAULT_ESQL_QUERY_TIMEOUT_MS } from '@kbn/ai-tools';
 import { esql } from '@elastic/esql';
-import { ERROR_LOGS_FEATURE_TYPE, getStreamSamplingSource } from '@kbn/streams-schema';
+import { getStreamSamplingSource } from '@kbn/streams-schema';
+import { ERROR_LOGS_FEATURE_TYPE } from '@kbn/significant-events-schema';
 import { compact } from 'lodash';
 import type { ComputedFeatureGenerator } from './types';
 import { formatRawDocument } from '../utils/format_raw_document';
@@ -62,6 +63,7 @@ This is useful for understanding error patterns, identifying recurring issues, a
       sampleSize: SAMPLE_SIZE,
       whereCondition: ERROR_WHERE_CONDITION,
       unmappedFields: 'NULLIFY',
+      requestTimeout: DEFAULT_ESQL_QUERY_TIMEOUT_MS,
     });
 
     return {

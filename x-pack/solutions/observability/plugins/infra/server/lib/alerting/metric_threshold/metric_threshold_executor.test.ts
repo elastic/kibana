@@ -33,8 +33,12 @@ import {
   ALERT_GROUP,
   ALERT_GROUPING,
   ALERT_INDEX_PATTERN,
+  ALERT_SEVERITY,
+  ALERT_SEVERITY_CRITICAL,
+  ALERT_SEVERITY_WARNING,
 } from '@kbn/rule-data-utils';
 import { type Group } from '@kbn/alerting-rule-utils';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import type {
   AssetDetailsLocatorParams,
@@ -84,7 +88,7 @@ const mockOptions = {
   startedAtOverridden: false,
   previousStartedAt: null,
   state: {},
-  spaceId: '',
+  spaceId: DEFAULT_SPACE_ID,
   rule: {
     id: '',
     name: '',
@@ -3583,6 +3587,11 @@ describe('The metric threshold rule type', () => {
           : {}),
         [ALERT_REASON]: reason,
         [ALERT_INDEX_PATTERN]: 'metrics-*,metricbeat-*',
+        ...(actionGroup === FIRED_ACTIONS.id
+          ? { [ALERT_SEVERITY]: ALERT_SEVERITY_CRITICAL }
+          : actionGroup === WARNING_ACTIONS.id
+          ? { [ALERT_SEVERITY]: ALERT_SEVERITY_WARNING }
+          : {}),
         ...(tags ? { tags } : {}),
         ...(ecsGroups ? ecsGroups : {}),
         ...(grouping ? { [ALERT_GROUPING]: grouping } : {}),

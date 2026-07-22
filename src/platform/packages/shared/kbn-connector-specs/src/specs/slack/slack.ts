@@ -203,10 +203,23 @@ export const Slack: ConnectorSpec = {
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
     supportedFeatureIds: ['workflows', 'agentBuilder'],
+    docsUrl: `https://www.elastic.co/docs/reference/kibana/connectors-kibana/slack-v2-action-type`,
   },
 
   auth: {
     types: [
+      {
+        type: 'ears',
+        isRecommended: true,
+        overrides: {
+          meta: { scope: { disabled: true } },
+        },
+        defaults: {
+          provider: 'slack',
+          scope:
+            'channels:read channels:history chat:write files:read groups:read groups:history im:read im:history mpim:read mpim:history search:read.files search:read.im search:read.mpim search:read.private search:read.public users:read users:read.email',
+        },
+      },
       {
         type: 'oauth_authorization_code',
         defaults: {
@@ -222,14 +235,27 @@ export const Slack: ConnectorSpec = {
         },
       },
       {
-        type: 'ears',
+        type: 'bearer',
+        defaults: {},
         overrides: {
-          meta: { scope: { disabled: true } },
-        },
-        defaults: {
-          provider: 'slack',
-          scope:
-            'channels:read channels:history chat:write files:read groups:read groups:history im:read im:history mpim:read mpim:history search:read.files search:read.im search:read.mpim search:read.private search:read.public users:read users:read.email',
+          label: i18n.translate('core.kibanaConnectorSpecs.slack.auth.bearer.label', {
+            defaultMessage: 'Bot Token',
+          }),
+          meta: {
+            token: {
+              sensitive: true,
+              label: i18n.translate('core.kibanaConnectorSpecs.slack.auth.bearer.token.label', {
+                defaultMessage: 'Slack Bot Token',
+              }),
+              helpText: i18n.translate(
+                'core.kibanaConnectorSpecs.slack.auth.bearer.token.helpText',
+                {
+                  defaultMessage:
+                    'A Slack bot token starting with xoxb-. Create one at api.slack.com/apps.',
+                }
+              ),
+            },
+          },
         },
       },
     ],
@@ -246,6 +272,15 @@ export const Slack: ConnectorSpec = {
         'Search Slack messages by keyword. Returns matching messages with channel, sender, timestamp, and permalink. Use the dedicated fromUser, inChannel, after, and before parameters for filtering — do not embed Slack search operators in the query string.',
       input: SlackSearchMessagesInputSchema,
       handler: async (ctx, input) => {
+        if (ctx.secrets?.authType === 'bearer') {
+          throw new Error(
+            i18n.translate('core.kibanaConnectorSpecs.slack.searchMessages.botTokenError', {
+              defaultMessage:
+                'searchMessages is not supported with bot token auth — Slack search APIs require a user token. Use getConversationHistory to read messages from a specific channel instead.',
+            })
+          );
+        }
+
         const typedInput: SlackSearchMessagesInput = SlackSearchMessagesInputSchema.parse(input);
 
         const queryParts: string[] = [typedInput.query];
@@ -1105,6 +1140,7 @@ export const Slack: ConnectorSpec = {
 
   skill: [
     'Use whoAmI before any write or "as me" action to confirm the authenticated workspace/user. It is also the cheapest way to translate the implicit "me" to a concrete user_id for listUserConversations or message attribution.',
+    'searchMessages requires a user token (EARS or OAuth). If this connector uses a bot token, searchMessages will fail — use getConversationHistory with a specific channel ID to read recent messages instead.',
     'To list Slack channels or answer which channels exist, use listChannels. When the response has hasMore true, call listChannels again with the nextCursor from the previous response until you have enough context.',
     'When sending to a channel whose name you know but whose ID you do not, call resolveChannelId to get the channel ID, then pass it to sendMessage.',
     'Do not use resolveChannelId to discover channels—for example, do not use contains with a very short partial name to probe the workspace. Use listChannels for discovery instead.',

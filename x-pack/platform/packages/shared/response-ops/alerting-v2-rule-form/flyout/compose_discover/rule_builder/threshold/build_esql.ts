@@ -7,6 +7,7 @@
 
 import { Builder, BasicPrettyPrinter, Parser } from '@elastic/esql';
 import type { ESQLSingleAstItem, BinaryExpressionComparisonOperator } from '@elastic/esql/types';
+import { escapeField } from '../shared/escape_esql_identifier';
 import {
   Aggregation,
   Comparator,
@@ -40,9 +41,6 @@ const parseFragment = (src: string): ESQLSingleAstItem | null => {
   }
   return null;
 };
-
-const escapeField = (field: string): string =>
-  /^[a-zA-Z_][a-zA-Z0-9_.]*$/.test(field) ? field : `\`${field}\``;
 
 const buildAggFragment = (stat: StatDefinition): string => {
   const fnName = AGG_FN_NAME[stat.aggregation] ?? 'COUNT';

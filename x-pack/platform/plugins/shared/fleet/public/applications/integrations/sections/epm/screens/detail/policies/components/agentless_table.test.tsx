@@ -10,7 +10,13 @@ import { useLocation } from 'react-router-dom';
 
 import { AGENTS_PREFIX } from '../../../../../../../../../common/constants';
 import { sendGetAgents } from '../../../../../../hooks';
+// The flyout imports sendGetAgents directly from the top-level public/hooks barrel,
+// which is a different Jest module instance than the integrations hooks barrel the
+// table uses. Import + mock it separately so we can assert the flyout's own agent lookup.
+import { sendGetAgents as sendGetAgentsFromFlyout } from '../../../../../../../../hooks';
 import { createIntegrationsTestRendererMock } from '../../../../../../../../mock';
+import { allowedExperimentalValues } from '../../../../../../../../../common/experimental_features';
+import { ExperimentalFeaturesService } from '../../../../../../services';
 
 import { AgentlessPackagePoliciesTable } from './agentless_table';
 
@@ -25,10 +31,18 @@ jest.mock('../../../../../../hooks', () => ({
   sendGetAgents: jest.fn(),
 }));
 
+jest.mock('../../../../../../../../hooks', () => ({
+  ...jest.requireActual('../../../../../../../../hooks'),
+  sendGetAgents: jest.fn(),
+}));
+
 const mockUseLocation = useLocation as jest.MockedFunction<typeof useLocation>;
 
 describe('AgentlessPackagePoliciesTable', () => {
   const mockSendGetAgents = sendGetAgents as jest.MockedFunction<typeof sendGetAgents>;
+  const mockSendGetAgentsFromFlyout = sendGetAgentsFromFlyout as jest.MockedFunction<
+    typeof sendGetAgentsFromFlyout
+  >;
 
   beforeEach(() => {
     mockUseLocation.mockReturnValue({
@@ -36,6 +50,13 @@ describe('AgentlessPackagePoliciesTable', () => {
       search: '',
       hash: '',
       state: undefined,
+    });
+
+    // The flyout polls for its enrolled agent; return an empty result so it keeps
+    // rendering its header without resolving to a healthy agent.
+    mockSendGetAgentsFromFlyout.mockResolvedValue({
+      data: { items: [], total: 0, page: 1, perPage: 20 },
+      error: null,
     });
 
     mockSendGetAgents.mockResolvedValue({
@@ -130,8 +151,43 @@ describe('AgentlessPackagePoliciesTable', () => {
       <AgentlessPackagePoliciesTable {...defaultProps} packagePolicies={[]} />
     );
     await act(async () => {
-      expect(result.getByText('No agentless integration policies')).toBeInTheDocument();
+      expect(result.getByText('No managed integrations')).toBeInTheDocument();
     });
+  });
+
+  it('shows an error prompt (not the empty message) when the list request fails', async () => {
+    const renderer = createIntegrationsTestRendererMock();
+    const result = renderer.render(
+      <AgentlessPackagePoliciesTable
+        {...defaultProps}
+        packagePolicies={[]}
+        packagePoliciesTotal={0}
+        error={new Error('boom')}
+      />
+    );
+    await act(async () => {
+      expect(result.getByText('Unable to load managed integrations')).toBeInTheDocument();
+      expect(result.getByText('boom')).toBeInTheDocument();
+      expect(result.queryByText('No managed integrations')).not.toBeInTheDocument();
+    });
+  });
+
+  it('retries the list request when the error prompt retry button is clicked', async () => {
+    const refreshPackagePolicies = jest.fn();
+    const renderer = createIntegrationsTestRendererMock();
+    const result = renderer.render(
+      <AgentlessPackagePoliciesTable
+        {...defaultProps}
+        packagePolicies={[]}
+        packagePoliciesTotal={0}
+        error={new Error('boom')}
+        refreshPackagePolicies={refreshPackagePolicies}
+      />
+    );
+    await act(async () => {
+      fireEvent.click(result.getByTestId('agentlessPoliciesLoadErrorRetryButton'));
+    });
+    expect(refreshPackagePolicies).toHaveBeenCalledTimes(1);
   });
 
   it('renders the table with package policies', async () => {
@@ -142,6 +198,30 @@ describe('AgentlessPackagePoliciesTable', () => {
       expect(result.getByText('Package Policy 1')).toBeInTheDocument();
       expect(result.getByText('user1')).toBeInTheDocument();
     });
+  });
+
+  it('appends the isAgentless hint to edit links when the agentless policies UI is enabled', async () => {
+    const renderer = createIntegrationsTestRendererMock();
+    const result = renderer.render(<AgentlessPackagePoliciesTable {...defaultProps} />);
+
+    const nameLink = await result.findByTestId('agentlessIntegrationNameLink');
+    expect(nameLink.getAttribute('href')).toContain('isAgentless=true');
+  });
+
+  it('does not append the isAgentless hint to edit links when the agentless policies UI is disabled', async () => {
+    jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({
+      ...allowedExperimentalValues,
+      enableAgentlessPoliciesUI: false,
+    });
+    const renderer = createIntegrationsTestRendererMock();
+    const result = renderer.render(<AgentlessPackagePoliciesTable {...defaultProps} />);
+
+    const nameLink = await result.findByTestId('agentlessIntegrationNameLink');
+    expect(nameLink.getAttribute('href')).not.toContain('isAgentless');
+    // With the hint suppressed and no `from`, the query string is empty — the href must not
+    // end in a dangling `?`.
+    expect(nameLink.getAttribute('href')).not.toContain('?');
+    jest.mocked(ExperimentalFeaturesService.get).mockRestore();
   });
 
   it('displays agent health status when agents are loaded', async () => {
@@ -168,7 +248,7 @@ describe('AgentlessPackagePoliciesTable', () => {
     await act(async () => {
       fireEvent.click(await result.findByText('Healthy'));
     });
-    expect(result.getByText('Confirm agentless enrollment')).toBeInTheDocument();
+    expect(result.getByText('Confirm managed integration enrollment')).toBeInTheDocument();
   });
 
   it('opens flyout when openEnrollmentFlyout query param matches a package policy id', async () => {
@@ -181,7 +261,7 @@ describe('AgentlessPackagePoliciesTable', () => {
     const renderer = createIntegrationsTestRendererMock();
     const result = renderer.render(<AgentlessPackagePoliciesTable {...defaultProps} />);
     await waitFor(() => {
-      expect(result.getByText('Confirm agentless enrollment')).toBeInTheDocument();
+      expect(result.getByText('Confirm managed integration enrollment')).toBeInTheDocument();
     });
   });
 
@@ -197,6 +277,6 @@ describe('AgentlessPackagePoliciesTable', () => {
     await waitFor(() => {
       expect(mockSendGetAgents).toHaveBeenCalled();
     });
-    expect(result.queryByText('Confirm agentless enrollment')).not.toBeInTheDocument();
+    expect(result.queryByText('Confirm managed integration enrollment')).not.toBeInTheDocument();
   });
 });

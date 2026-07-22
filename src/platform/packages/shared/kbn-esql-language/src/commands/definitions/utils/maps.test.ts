@@ -7,7 +7,58 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { MAP_PARAMS_REGEX, parseMapParams } from './maps';
+import { Parser } from '@elastic/esql';
+import type { ESQLMap } from '@elastic/esql/types';
+import {
+  getMapEntryByStringKeyFromAst,
+  getMapStringListValuesFromAst,
+  MAP_PARAMS_REGEX,
+  parseMapParams,
+} from './maps';
+
+const mapExpression = (query: string): ESQLMap => {
+  const { root } = Parser.parse(query);
+  const command = root.commands[1] as { namedParameters?: ESQLMap };
+  return command.namedParameters as ESQLMap;
+};
+
+describe('getMapEntryByStringKey', () => {
+  it('finds an entry by string key', () => {
+    const map = mapExpression(
+      'FROM a | IP_LOCATION geo = ipField WITH { "properties": ["city_name"] }'
+    );
+
+    expect(getMapEntryByStringKeyFromAst(map, 'properties')?.key.text).toBe('"properties"');
+  });
+
+  it('returns undefined when the key is missing', () => {
+    const map = mapExpression('FROM a | IP_LOCATION geo = ipField WITH { "first_only": true }');
+
+    expect(getMapEntryByStringKeyFromAst(map, 'properties')).toBeUndefined();
+  });
+});
+
+describe('getMapStringListValues', () => {
+  it('returns string values from a list entry', () => {
+    const map = mapExpression(
+      'FROM a | IP_LOCATION geo = ipField WITH { "properties": ["city_name", "country_name"] }'
+    );
+
+    expect(getMapStringListValuesFromAst(map, 'properties')).toEqual(['city_name', 'country_name']);
+  });
+
+  it('returns undefined when the key is missing', () => {
+    const map = mapExpression('FROM a | IP_LOCATION geo = ipField WITH { "first_only": true }');
+
+    expect(getMapStringListValuesFromAst(map, 'properties')).toBeUndefined();
+  });
+
+  it('returns undefined for an empty list literal (parser produces an unknown node)', () => {
+    const map = mapExpression('FROM a | IP_LOCATION geo = ipField WITH { "properties": [] }');
+
+    expect(getMapStringListValuesFromAst(map, 'properties')).toBeUndefined();
+  });
+});
 
 describe('MAP_PARAMS_REGEX', () => {
   const regex = MAP_PARAMS_REGEX;

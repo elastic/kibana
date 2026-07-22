@@ -93,4 +93,26 @@ describe('InspectIlmPolicyFlyout primaryAction', () => {
 
     expect(screen.getByTestId('inspectIlmPolicyFlyoutSelectAndApplyButton')).toBeInTheDocument();
   });
+
+  it('renders the JSON tab in a non-scrolling flyout body with a scrollable code block', async () => {
+    const user = userEvent.setup();
+
+    renderWithTheme(
+      <InspectIlmPolicyFlyout
+        policyName="my-policy"
+        policy={policy}
+        onBack={() => {}}
+        onEditPolicy={() => {}}
+        primaryAction={{
+          label: 'Apply',
+          onClick: () => {},
+        }}
+      />
+    );
+
+    await user.click(screen.getByTestId('flyoutTab-json'));
+
+    expect(screen.getByTestId('ilmPolicyJsonTab')).toBeInTheDocument();
+    expect(screen.getByTestId('ilmPolicyJsonTabCodeBlock')).toBeInTheDocument();
+  });
 });

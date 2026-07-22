@@ -24,9 +24,8 @@ export const TIME_FIELD = '@timestamp';
  * fields the episode pipeline actually fetches.
  */
 export const HISTOGRAM_BREAKDOWN_COLUMNS: DatatableColumn[] = [
-  // Effective status takes into account any resolved action being applied to the episode
   {
-    id: 'effective_status',
+    id: 'episode.status',
     name: i18n.translate('xpack.alertingV2.episodesUi.breakdownByStatus', {
       defaultMessage: 'Status',
     }),

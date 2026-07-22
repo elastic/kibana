@@ -17,6 +17,7 @@ import type { TabItem } from '@kbn/unified-tabs';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import type { UISession } from '@kbn/data-plugin/public/search/session/sessions_mgmt/types';
 import type { OpenInNewTabParams } from '../../../../../context_awareness/types';
+import { ProfileStateType } from '../../../../../context_awareness';
 import { createDataSource } from '../../../../../../common/data_sources/utils';
 import type { DiscoverAppState, TabState } from '../types';
 import { selectAllTabs, selectRecentlyClosedTabs, selectTab } from '../selectors';
@@ -28,6 +29,7 @@ import {
 } from '../internal_state';
 import {
   createTabRuntimeState,
+  selectCurrentProfileUrlState,
   selectTabRuntimeState,
   selectInitialUnifiedHistogramLayoutPropsMap,
   selectTabRuntimeInternalState,
@@ -36,6 +38,7 @@ import {
   APP_STATE_URL_KEY,
   GLOBAL_STATE_URL_KEY,
   NEW_TAB_ID,
+  PROFILE_STATE_URL_KEY,
 } from '../../../../../../common/constants';
 import { createInternalStateAsyncThunk, createTabItem } from '../utils';
 import { setBreadcrumbs } from '../../../../../utils/breadcrumbs';
@@ -84,6 +87,7 @@ export const setTabs: InternalStateThunkActionCreator<
       newRecentlyClosedTab.attributes = cloneDeep(tab.attributes);
       newRecentlyClosedTab.appState = cloneDeep(tab.appState);
       newRecentlyClosedTab.globalState = cloneDeep(tab.globalState);
+      newRecentlyClosedTab.profileState = cloneDeep(tab.profileState);
       justRemovedTabs.push(newRecentlyClosedTab);
 
       dispatch(disconnectTab({ tabId: tab.id }));
@@ -211,6 +215,11 @@ export const updateTabs: InternalStateThunkActionCreator<
         tab.attributes = cloneDeep(recentlyClosedTabToRestore.attributes);
         tab.appState = cloneDeep(recentlyClosedTabToRestore.appState);
         tab.globalState = cloneDeep(recentlyClosedTabToRestore.globalState);
+        tab.profileState = services.profileStateRegistry.pickStateByType({
+          profileStateMap: recentlyClosedTabToRestore.profileState,
+          stateTypes: [ProfileStateType.Persistent, ProfileStateType.Url],
+          defaultsHandling: 'strip',
+        });
       } else if (!('appState' in item)) {
         // the new tab is a fresh one
         const currentQuery = currentTab.appState.query;
@@ -255,6 +264,12 @@ export const updateTabs: InternalStateThunkActionCreator<
       if (nextTab && nextTabDataStateContainer) {
         const { timeRange, refreshInterval, filters: globalFilters } = nextTab.globalState;
         const { filters: appFilters, query } = nextTab.appState;
+        const profileStateForUrl = selectCurrentProfileUrlState({
+          runtimeStateManager,
+          tabId: nextTab.id,
+          profileStateMap: nextTab.profileState,
+          profileStateRegistry: services.profileStateRegistry,
+        });
 
         await Promise.all([
           urlStateStorage.set<QueryState>(
@@ -269,6 +284,7 @@ export const updateTabs: InternalStateThunkActionCreator<
           urlStateStorage.set<DiscoverAppState>(APP_STATE_URL_KEY, nextTab.appState, {
             replace: true,
           }),
+          urlStateStorage.set(PROFILE_STATE_URL_KEY, profileStateForUrl, { replace: true }),
         ]);
 
         services.timefilter.setTime(timeRange ?? services.timefilter.getTimeDefaults());
@@ -304,8 +320,9 @@ export const updateTabs: InternalStateThunkActionCreator<
         }
       } else {
         await Promise.all([
-          urlStateStorage.set(GLOBAL_STATE_URL_KEY, null, { replace: true }),
-          urlStateStorage.set(APP_STATE_URL_KEY, null, { replace: true }),
+          urlStateStorage.set(GLOBAL_STATE_URL_KEY, undefined, { replace: true }),
+          urlStateStorage.set(APP_STATE_URL_KEY, undefined, { replace: true }),
+          urlStateStorage.set(PROFILE_STATE_URL_KEY, undefined, { replace: true }),
         ]);
         searchSessionManager.removeSearchSessionIdFromURL({ replace: true });
         services.data.search.session.reset();

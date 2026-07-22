@@ -7,7 +7,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { type QueryFunctionContext, useQuery } from '@kbn/react-query';
-import type { Discovery } from '@kbn/streams-schema';
+import type { Discovery } from '@kbn/significant-events-schema';
 import type { PaginatedResponse } from '@kbn/streams-plugin/common';
 import { useKibana } from '../use_kibana';
 import { useFetchErrorToast } from '../use_fetch_error_toast';
@@ -59,7 +59,7 @@ export const useFetchDiscoveriesEntities = ({ from, to }: UseFetchDiscoveriesPar
   return { ...query, pagination, setPagination };
 };
 
-export const useFetchDiscoveryHistory = (discoverySlug: string | undefined) => {
+export const useFetchDiscoveryHistory = (eventId: string | undefined) => {
   const {
     dependencies: {
       start: {
@@ -70,17 +70,17 @@ export const useFetchDiscoveryHistory = (discoverySlug: string | undefined) => {
   const showFetchErrorToast = useFetchErrorToast();
 
   return useQuery<{ hits: Discovery[] }, Error>({
-    queryKey: ['discoveryHistory', discoverySlug],
+    queryKey: ['discoveryHistory', eventId],
     queryFn: async ({ signal }) => {
       return streamsRepositoryClient.fetch(
         'GET /internal/significant_events/discoveries/{id}/history',
         {
-          params: { path: { id: discoverySlug! } },
+          params: { path: { id: eventId! } },
           signal: signal ?? null,
         }
       );
     },
-    enabled: !!discoverySlug,
+    enabled: !!eventId,
     onError: showFetchErrorToast,
   });
 };

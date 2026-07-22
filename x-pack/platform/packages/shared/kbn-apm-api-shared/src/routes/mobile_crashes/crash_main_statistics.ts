@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
-import { environmentRt } from '@kbn/apm-types';
+import { z } from '@kbn/zod/v4';
+import { environmentSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
-import { kueryRt, rangeRt } from '../../default_api_types';
+import { kuerySchema, rangeSchema } from '../../default_api_types';
 
 export type MobileCrashGroupMainStatisticsResponse = Array<{
   groupId: string;
@@ -25,18 +25,17 @@ export interface CrashMainStatisticsRouteResponse {
 
 export const crashMainStatisticsRoute = defineRoute<CrashMainStatisticsRouteResponse>()({
   endpoint: 'GET /internal/apm/mobile-services/{serviceName}/crashes/groups/main_statistics',
-  params: t.type({
-    path: t.type({
-      serviceName: t.string,
+  params: z.object({
+    path: z.object({
+      serviceName: z.string(),
     }),
-    query: t.intersection([
-      t.partial({
-        sortField: t.string,
-        sortDirection: t.union([t.literal('asc'), t.literal('desc')]),
-      }),
-      environmentRt,
-      kueryRt,
-      rangeRt,
-    ]),
+    query: z
+      .object({
+        sortField: z.string().optional(),
+        sortDirection: z.union([z.literal('asc'), z.literal('desc')]).optional(),
+      })
+      .merge(environmentSchema)
+      .merge(kuerySchema)
+      .merge(rangeSchema),
   }),
 });
