@@ -210,29 +210,26 @@ export function initAPIAuthorization(
       return kibanaPrivileges[kbPrivilege];
     };
 
-    const requiredPrivilegeNames = new Set(flattenSecurityPrivileges(requiredPrivileges));
+    if (requiredPrivileges.some((privilege) => !hasRequestedPrivilege(privilege))) {
+      // Flatten only for the 403 body. Access above still uses PrivilegeSet-aware checks so
+      // anyRequired alternatives aren't treated as independently required. Extended privileges
+      // are omitted because they are not in requiredPrivileges.
+      const missingPrivileges = flattenSecurityPrivileges(requiredPrivileges).filter(
+        (privilege) => !kibanaPrivileges[privilege]
+      );
+      const forbiddenMessage = `API [${request.route.method.toUpperCase()} ${
+        request.url.pathname
+      }${
+        request.url.search
+      }] is unauthorized for user, this action is granted by the Kibana privileges [${missingPrivileges}]`;
 
-    for (const privilege of requiredPrivileges) {
-      if (!hasRequestedPrivilege(privilege)) {
-        // Only list missing *required* privileges in the 403 body. Extended privileges are
-        // never part of the access decision and must not appear to grant the route.
-        const missingPrivileges = Array.from(requiredPrivilegeNames).filter(
-          (key) => !kibanaPrivileges[key]
-        );
-        const forbiddenMessage = `API [${request.route.method.toUpperCase()} ${
-          request.url.pathname
-        }${
-          request.url.search
-        }] is unauthorized for user, this action is granted by the Kibana privileges [${missingPrivileges}]`;
+      logger.warn(forbiddenMessage);
 
-        logger.warn(forbiddenMessage);
-
-        return response.forbidden({
-          body: {
-            message: forbiddenMessage,
-          },
-        });
-      }
+      return response.forbidden({
+        body: {
+          message: forbiddenMessage,
+        },
+      });
     }
 
     return toolkit.authzResultNext(kibanaPrivileges);
