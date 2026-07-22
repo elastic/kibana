@@ -11,88 +11,7 @@ import {
   loggingSystemMock,
   savedObjectsClientMock,
 } from '@kbn/core/server/mocks';
-import { containsVectorField, fetchDashboardsCount, fetchIndexStats } from './deployment_stats';
-
-describe('containsVectorField', () => {
-  it('returns false for undefined properties', () => {
-    expect(containsVectorField(undefined)).toBe(false);
-  });
-
-  it('returns false for an empty properties map', () => {
-    expect(containsVectorField({})).toBe(false);
-  });
-
-  it('returns true when a top-level field is dense_vector', () => {
-    expect(containsVectorField({ embedding: { type: 'dense_vector' } })).toBe(true);
-  });
-
-  it('returns true when a top-level field is semantic_text', () => {
-    expect(containsVectorField({ body: { type: 'semantic_text' } })).toBe(true);
-  });
-
-  it('returns true when a top-level field is sparse_vector', () => {
-    expect(containsVectorField({ ml_tokens: { type: 'sparse_vector' } })).toBe(true);
-  });
-
-  it('returns false when no vector fields are present', () => {
-    expect(
-      containsVectorField({
-        title: { type: 'text' },
-        count: { type: 'integer' },
-      })
-    ).toBe(false);
-  });
-
-  it('returns true when a vector field is nested inside an object', () => {
-    expect(
-      containsVectorField({
-        metadata: {
-          properties: {
-            embedding: { type: 'dense_vector' },
-          },
-        },
-      })
-    ).toBe(true);
-  });
-
-  it('returns true when a vector field is deeply nested', () => {
-    expect(
-      containsVectorField({
-        level1: {
-          properties: {
-            level2: {
-              properties: {
-                vector: { type: 'dense_vector' },
-              },
-            },
-          },
-        },
-      })
-    ).toBe(true);
-  });
-
-  it('returns false when nested properties contain no vector fields', () => {
-    expect(
-      containsVectorField({
-        metadata: {
-          properties: {
-            author: { type: 'keyword' },
-          },
-        },
-      })
-    ).toBe(false);
-  });
-
-  it('returns true on first match and short-circuits', () => {
-    expect(
-      containsVectorField({
-        title: { type: 'text' },
-        embedding: { type: 'dense_vector' },
-        body: { type: 'text' },
-      })
-    ).toBe(true);
-  });
-});
+import { fetchDashboardsCount, fetchIndexStats } from './deployment_stats';
 
 describe('fetchIndexStats', () => {
   let client: ScopedClusterClientMock;
@@ -118,15 +37,26 @@ describe('fetchIndexStats', () => {
     });
   };
 
+  const mockFieldCaps = (fields: Record<string, Record<string, unknown>>) => {
+    client.asCurrentUser.fieldCaps.mockResolvedValue({ indices: [], fields } as any);
+  };
+
+  const mockEsqlCount = (count: number) => {
+    client.asCurrentUser.esql.query.mockResolvedValue({
+      columns: [{ name: 'count()', type: 'long' }],
+      values: [[count]],
+    } as any);
+  };
+
   it('excludes dot-prefixed indices and aggregates count/size', async () => {
     mockMetering([
       { name: 'products', num_docs: 10, size_in_bytes: 100 },
       { name: '.kibana', num_docs: 999, size_in_bytes: 999 },
     ]);
-    // No vector indices in the mappings.
-    client.asCurrentUser.indices.getMapping.mockResolvedValue({
-      products: { mappings: { properties: { title: { type: 'text' } } } },
-    } as any);
+    // No vector fields.
+    mockFieldCaps({
+      title: { text: { type: 'text', searchable: true, aggregatable: false, inference: false } },
+    });
 
     const result = await fetchIndexStats(client, logger);
 
@@ -134,16 +64,31 @@ describe('fetchIndexStats', () => {
     expect(client.asCurrentUser.esql.query).not.toHaveBeenCalled();
   });
 
-  it('counts vector docs via ES|QL (avoiding nested-doc inflation from metering)', async () => {
+  it('restricts field caps to vector-relevant field types and skips metadata fields', async () => {
+    mockMetering([{ name: 'products', num_docs: 10, size_in_bytes: 100 }]);
+    mockFieldCaps({});
+
+    await fetchIndexStats(client, logger);
+
+    expect(client.asCurrentUser.fieldCaps).toHaveBeenCalledWith({
+      index: ['products'],
+      fields: '*',
+      // `text` is included because `semantic_text` may be reported as `text` + `inference: true`
+      types: ['dense_vector', 'sparse_vector', 'semantic_text', 'semantic', 'text'],
+      filters: '-metadata',
+    });
+  });
+
+  it('detects semantic_text via the field caps inference flag and counts docs via ES|QL', async () => {
     // metering over-reports num_docs (20) for the semantic_text index; ES|QL returns the real 10.
+    // `semantic_text` is reported as `text` by field caps, so it is detected via `inference: true`.
     mockMetering([{ name: 'vectordb', num_docs: 20, size_in_bytes: 500 }]);
-    client.asCurrentUser.indices.getMapping.mockResolvedValue({
-      vectordb: { mappings: { properties: { semantic_content: { type: 'semantic_text' } } } },
-    } as any);
-    client.asCurrentUser.esql.query.mockResolvedValue({
-      columns: [{ name: 'count()', type: 'long' }],
-      values: [[10]],
-    } as any);
+    mockFieldCaps({
+      semantic_content: {
+        text: { type: 'text', searchable: true, aggregatable: false, inference: true },
+      },
+    });
+    mockEsqlCount(10);
 
     const result = await fetchIndexStats(client, logger);
 
@@ -153,19 +98,62 @@ describe('fetchIndexStats', () => {
     expect(result.vectorDocsCount).toBe(10);
   });
 
-  it('only queries the vector indices, not every user index', async () => {
+  it('detects an inference field reported by its own `type` (no inference flag)', async () => {
+    // In some versions/formats field caps reports `semantic_text` by its own type rather than as
+    // `text` + `inference: true`, so the type set must also catch it.
+    mockMetering([{ name: 'vectordb', num_docs: 20, size_in_bytes: 500 }]);
+    mockFieldCaps({
+      semantic_content: {
+        semantic_text: { type: 'semantic_text', searchable: true, aggregatable: false },
+      },
+    });
+    mockEsqlCount(10);
+
+    const result = await fetchIndexStats(client, logger);
+
+    expect(client.asCurrentUser.esql.query).toHaveBeenCalledWith(
+      expect.objectContaining({ query: 'FROM vectordb | STATS count()' })
+    );
+    expect(result.vectorDocsCount).toBe(10);
+  });
+
+  it('detects a `semantic` field via the field caps inference flag', async () => {
+    mockMetering([{ name: 'vectordb', num_docs: 10, size_in_bytes: 500 }]);
+    // `semantic` and `semantic_text` are both inference fields, flagged via `inference: true`.
+    mockFieldCaps({
+      body: {
+        semantic: { type: 'semantic', searchable: true, aggregatable: false, inference: true },
+      },
+    });
+    mockEsqlCount(10);
+
+    const result = await fetchIndexStats(client, logger);
+
+    expect(client.asCurrentUser.esql.query).toHaveBeenCalledWith(
+      expect.objectContaining({ query: 'FROM vectordb | STATS count()' })
+    );
+    expect(result.vectorDocsCount).toBe(10);
+  });
+
+  it('only queries indices whose field caps report a vector field', async () => {
     mockMetering([
       { name: 'vectordb', num_docs: 10, size_in_bytes: 500 },
       { name: 'plain-text', num_docs: 5, size_in_bytes: 50 },
     ]);
-    client.asCurrentUser.indices.getMapping.mockResolvedValue({
-      vectordb: { mappings: { properties: { embedding: { type: 'dense_vector' } } } },
-      'plain-text': { mappings: { properties: { title: { type: 'text' } } } },
-    } as any);
-    client.asCurrentUser.esql.query.mockResolvedValue({
-      columns: [{ name: 'count()', type: 'long' }],
-      values: [[10]],
-    } as any);
+    // `embedding` (dense_vector) only exists in `vectordb`, so field caps scopes it via `indices`.
+    mockFieldCaps({
+      embedding: {
+        dense_vector: {
+          type: 'dense_vector',
+          searchable: true,
+          aggregatable: false,
+          inference: false,
+          indices: ['vectordb'],
+        },
+      },
+      title: { text: { type: 'text', searchable: true, aggregatable: false, inference: false } },
+    });
+    mockEsqlCount(10);
 
     await fetchIndexStats(client, logger);
 
@@ -174,9 +162,34 @@ describe('fetchIndexStats', () => {
     );
   });
 
-  it('returns a null vectorDocsCount (not 0) when mapping/ES|QL lookup fails', async () => {
+  it('treats a vector field with no `indices` as present in every requested index', async () => {
+    mockMetering([
+      { name: 'vectordb-a', num_docs: 10, size_in_bytes: 500 },
+      { name: 'vectordb-b', num_docs: 10, size_in_bytes: 500 },
+    ]);
+    // `indices` is omitted when the field is uniform across all requested indices.
+    mockFieldCaps({
+      embedding: {
+        dense_vector: {
+          type: 'dense_vector',
+          searchable: true,
+          aggregatable: false,
+          inference: false,
+        },
+      },
+    });
+    mockEsqlCount(20);
+
+    await fetchIndexStats(client, logger);
+
+    expect(client.asCurrentUser.esql.query).toHaveBeenCalledWith(
+      expect.objectContaining({ query: 'FROM vectordb-a,vectordb-b | STATS count()' })
+    );
+  });
+
+  it('returns a null vectorDocsCount (not 0) when the vector lookup fails', async () => {
     mockMetering([{ name: 'vectordb', num_docs: 10, size_in_bytes: 500 }]);
-    client.asCurrentUser.indices.getMapping.mockRejectedValue(new Error('boom'));
+    client.asCurrentUser.fieldCaps.mockRejectedValue(new Error('boom'));
 
     const result = await fetchIndexStats(client, logger);
 
@@ -198,14 +211,14 @@ describe('fetchIndexStats', () => {
     expect(logger.warn).toHaveBeenCalled();
   });
 
-  it('skips mapping/ES|QL lookups when there are no user indices', async () => {
+  it('skips vector lookups when there are no user indices', async () => {
     mockMetering([]);
 
     const result = await fetchIndexStats(client, logger);
 
     // a genuinely empty deployment reports real zeros, not null
     expect(result).toEqual({ indicesCount: 0, storeSizeBytes: 0, vectorDocsCount: 0 });
-    expect(client.asCurrentUser.indices.getMapping).not.toHaveBeenCalled();
+    expect(client.asCurrentUser.fieldCaps).not.toHaveBeenCalled();
   });
 });
 

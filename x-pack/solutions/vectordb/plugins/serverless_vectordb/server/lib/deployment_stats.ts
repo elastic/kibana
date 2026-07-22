@@ -6,11 +6,12 @@
  */
 
 import type { IScopedClusterClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import type { FieldCapsFieldCapability } from '@elastic/elasticsearch/lib/api/types';
 
-interface MappingProperty {
-  type?: string;
-  properties?: Record<string, MappingProperty>;
-}
+// Extend the field capability type to include the `inference` flag until the Elasticsearch package version is updated.
+type FieldCapability = FieldCapsFieldCapability & {
+  inference?: boolean;
+};
 
 interface MeteringIndexStat {
   name: string;
@@ -23,7 +24,7 @@ interface MeteringStatsResponse {
   indices: MeteringIndexStat[];
 }
 
-export interface IndexStats {
+interface IndexStats {
   indicesCount: number | null;
   storeSizeBytes: number | null;
   vectorDocsCount: number | null;
@@ -35,15 +36,55 @@ const INDEX_STATS_UNAVAILABLE: IndexStats = {
   vectorDocsCount: null,
 };
 
-const VECTOR_FIELD_TYPES = new Set(['dense_vector', 'sparse_vector', 'semantic_text']);
+const VECTOR_FIELD_TYPES = new Set(['dense_vector', 'sparse_vector', 'semantic_text', 'semantic']);
 
-export const containsVectorField = (properties?: Record<string, MappingProperty>): boolean => {
-  if (!properties) return false;
-  for (const value of Object.values(properties)) {
-    if (value.type && VECTOR_FIELD_TYPES.has(value.type)) return true;
-    if (value.properties && containsVectorField(value.properties)) return true;
+// `semantic_text` fields may be reported by field caps as `text` with `inference: true`, so `text`
+// must be requested alongside the vector types.
+const FIELD_CAPS_TYPES = [...VECTOR_FIELD_TYPES, 'text'];
+
+/**
+ * Determines which of the given indices contain a vector field (`dense_vector`, `sparse_vector`, or
+ * an inference field such as `semantic_text` / `semantic`).
+ *
+ * Uses `_field_caps`, which is far lighter than pulling full mappings: it aggregates fields across
+ * indices and dedupes shared ones, and flattens nested/multi-fields for free. Inference fields are
+ * detected via the `inference` flag, which serverless Elasticsearch always reports.
+ */
+const getVectorIndexNames = async (
+  client: IScopedClusterClient,
+  indexNames: string[]
+): Promise<string[]> => {
+  const fieldCaps = await client.asCurrentUser.fieldCaps({
+    index: indexNames,
+    fields: '*',
+    types: FIELD_CAPS_TYPES,
+    filters: '-metadata',
+  });
+
+  const vectorIndexNames = new Set<string>();
+
+  for (const capabilitiesByType of Object.values(fieldCaps.fields)) {
+    for (const capability of Object.values(capabilitiesByType) as FieldCapability[]) {
+      const isVectorField =
+        VECTOR_FIELD_TYPES.has(capability.type) || capability.inference === true;
+      if (!isVectorField) continue;
+
+      // `indices` is only populated when the field is not uniform across the requested indices; when
+      // absent, the field (with this capability) exists in every requested index, so all of them
+      // qualify and there is nothing left to discover.
+      if (capability.indices === undefined) return indexNames;
+
+      const capabilityIndices = Array.isArray(capability.indices)
+        ? capability.indices
+        : [capability.indices];
+      capabilityIndices.forEach((name) => vectorIndexNames.add(name));
+
+      // Every requested index is already known to contain a vector field so exit early and return all indexes.
+      if (vectorIndexNames.size === indexNames.length) return indexNames;
+    }
   }
-  return false;
+
+  return [...vectorIndexNames];
 };
 
 /**
@@ -81,12 +122,7 @@ export const fetchIndexStats = async (
       const indexNames = userIndices.map((i) => i.name);
 
       try {
-        const mappings = await client.asCurrentUser.indices.getMapping({ index: indexNames });
-        const vectorIndexNames = Object.entries(mappings)
-          .filter(([, mapping]) =>
-            containsVectorField(mapping.mappings?.properties as Record<string, MappingProperty>)
-          )
-          .map(([name]) => name);
+        const vectorIndexNames = await getVectorIndexNames(client, indexNames);
 
         if (vectorIndexNames.length > 0) {
           // `_metering/stats` num_docs counts Lucene documents, which includes the nested chunk
