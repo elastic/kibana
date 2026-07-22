@@ -92,7 +92,10 @@ export function toStoredFieldFormats(
   const fieldFormats: DataViewSpec['fieldFormats'] = {};
   for (const [name, field] of Object.entries(fieldSettings)) {
     if ('format' in field && field.format) {
-      fieldFormats[name] = { id: field.format.type, params: field.format.params };
+      fieldFormats[name] = {
+        id: field.format.type,
+        ...(field.format.params ? { params: field.format.params } : {}),
+      };
     }
     if (!isCompositeRuntimeField(field)) continue;
     for (const [subName, subField] of Object.entries(field.fields)) {
