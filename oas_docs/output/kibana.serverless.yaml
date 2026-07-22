@@ -14649,7 +14649,7 @@ paths:
         > info
         > Rule actions and connectors are included in the exported file, but sensitive information about the connector (such as authentication credentials) is not included. You must re-add missing connector details after importing detection rules.
 
-        > You can use Kibana’s [Saved Objects](https://www.elastic.co/docs/explore-analyze/find-and-organize/saved-objects) UI (Stack Management → Kibana → Saved Objects) or the Saved Objects APIs (experimental) to [export](https://www.elastic.co/docs/api/doc/kibana/operation/operation-exportsavedobjectsdefault) and [import](https://www.elastic.co/docs/api/doc/kibana/operation/operation-importsavedobjectsdefault) any necessary connectors before importing detection rules.
+        > You can use Kibana’s [Saved Objects](https://www.elastic.co/docs/explore-analyze/find-and-organize/saved-objects) UI (Stack Management → Kibana → Saved Objects) or the Saved Objects APIs (experimental) to [export](../operation/operation-post-saved-objects-export) and [import](../operation/operation-post-saved-objects-import) any necessary connectors before importing detection rules.
 
         > Similarly, any value lists used for rule exceptions are not included in rule exports or imports. Use the [Manage value lists](https://www.elastic.co/docs/solutions/security/detect-and-alert/create-manage-value-lists) UI (Rules → Detection rules (SIEM) → Manage value lists) to export and import value lists separately.
       operationId: ExportRules
@@ -14959,7 +14959,7 @@ paths:
         > info
         > Rule actions and connectors are included in the exported file, but sensitive information about the connector (such as authentication credentials) is not included. You must re-add missing connector details after importing detection rules.
 
-        > You can use Kibana’s [Saved Objects](https://www.elastic.co/docs/explore-analyze/find-and-organize/saved-objects) UI (Stack Management → Kibana → Saved Objects) or the Saved Objects APIs (experimental) to [export](https://www.elastic.co/docs/api/doc/kibana/operation/operation-exportsavedobjectsdefault) and [import](https://www.elastic.co/docs/api/doc/kibana/operation/operation-importsavedobjectsdefault) any necessary connectors before importing detection rules.
+        > You can use Kibana’s [Saved Objects](https://www.elastic.co/docs/explore-analyze/find-and-organize/saved-objects) UI (Stack Management → Kibana → Saved Objects) or the Saved Objects APIs (experimental) to [export](../operation/operation-post-saved-objects-export) and [import](../operation/operation-post-saved-objects-import) any necessary connectors before importing detection rules.
 
         > Similarly, any value lists used for rule exceptions are not included in rule exports or imports. Use the [Manage value lists](https://www.elastic.co/docs/solutions/security/detect-and-alert/create-manage-value-lists) UI (Rules → Detection rules (SIEM) → Manage value lists) to export and import value lists separately.
       operationId: ImportRules
@@ -42091,6 +42091,120 @@ paths:
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
+  /api/fleet/uninstall_tokens/{agentPolicyId}/rotate:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/uninstall_tokens/{agentPolicyId}/rotate</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Rotate the uninstall token for an agent policy. Only applicable to policies with tamper protection enabled.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all.
+      operationId: post-fleet-uninstall-tokens-agentpolicyid-rotate
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The ID of the agent policy whose uninstall token should be rotated
+          in: path
+          name: agentPolicyId
+          required: true
+          schema:
+            maxLength: 255
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                rotateUninstallTokenExample:
+                  description: Uninstall token rotated successfully for the given agent policy
+                  value:
+                    message: Uninstall token rotated successfully.
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  message:
+                    type: string
+                required:
+                  - message
+          description: Successful response
+        '400':
+          content:
+            application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
+                notProtectedExample:
+                  description: Agent policy does not have tamper protection enabled
+                  value:
+                    error: Bad Request
+                    message: Agent policy [policy-id-1] does not have tamper protection enabled. Uninstall tokens can only be rotated for protected policies.
+                    statusCode: 400
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes:
+                    nullable: true
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: Bad Request
+        '404':
+          content:
+            application/json:
+              examples:
+                notFoundExample:
+                  description: No agent policy was found with the given ID
+                  value:
+                    error: Not Found
+                    message: Agent policy not found with id policy-id-1
+                    statusCode: 404
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes:
+                    nullable: true
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: Not Found
+      summary: Rotate an uninstall token
+      tags:
+        - Fleet uninstall tokens
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
   /api/fleet/uninstall_tokens/{uninstallTokenId}:
     get:
       description: |-
@@ -65015,6 +65129,13 @@ paths:
         - description: Whether to overwrite existing workflows.
           in: query
           name: overwrite
+          required: false
+          schema:
+            default: false
+            type: boolean
+        - description: 'When true, performs a preflight conflict check only. Returns the subset of the supplied workflow IDs that already exist (including soft-deleted tombstones and cross-space documents) without writing anything. The response body is `{ existingIds: string[] }` instead of the normal `{ created, failed }` shape.'
+          in: query
+          name: dryRun
           required: false
           schema:
             default: false
@@ -133056,7 +133177,10 @@ components:
         hasAuth:
           $ref: '#/components/schemas/has_auth'
         headers:
-          type: string
+          type: object
+          nullable: true
+          additionalProperties:
+            type: string
           description: |
             A set of key-value pairs sent as headers with the request URLs for the create case, update case, get case, and create comment methods.
         updateIncidentJson:
