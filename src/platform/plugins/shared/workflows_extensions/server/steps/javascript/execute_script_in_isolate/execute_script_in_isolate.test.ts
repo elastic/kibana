@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { executeScriptInIsolate, type ScriptLogger } from '.';
+import { executeScriptInIsolate } from './execute_script_in_isolate';
 import {
   createScriptExecutionTimeoutMessage,
   createScriptOutOfMemoryMessage,
 } from './normalize_isolate_execution_error';
+import type { ScriptLogger } from './script_logger';
 import {
   CODE_EXECUTION_TIMEOUT_MS,
   CODE_MAX_CONSOLE_LOG_COUNT,

@@ -8,5 +8,3 @@
  */
 
 export { executeScriptInIsolate } from './execute_script_in_isolate';
-export type { ExecuteScriptInIsolateParams } from './execute_script_in_isolate_params';
-export type { ScriptLogger } from './script_logger';
