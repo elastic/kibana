@@ -5,22 +5,16 @@
  * 2.0.
  */
 
-/* eslint-disable max-classes-per-file -- RulesNotInstalledAdapterV2 is the no-plugin stub paired with RulesAdapterV2 */
-
 import { isBoom } from '@hapi/boom';
-import type { Logger } from '@kbn/core/server';
-import type { RulesClientApi } from '@kbn/alerting-v2-plugin/server';
+import { ALERTING_V2_ERROR_CODES, type RulesClientApi } from '@kbn/alerting-v2-plugin/server';
 import { stripMetadata, deriveQueryType } from '@kbn/streams-schema';
 import { QUERY_TYPE_STATS } from '@kbn/significant-events-schema';
-import { MAX_ALERTS_PER_EXECUTION } from '../../../significant_events/rules/esql/common';
+import { MAX_ALERTS_PER_EXECUTION } from '../../../significant_events/rules/constants';
 import { getRuleLookbackInterval } from '../../../significant_events/rules/schedule';
 import {
-  STREAMS_RULE_CONSUMER,
-  STREAMS_ESQL_RULE_TYPE_ID,
   toStreamTag,
-  type CreateRuleBody,
   type IRulesManagementClient,
-  type UpdateRuleBody,
+  type SignificantEventsRuleDefinition,
 } from './rules_management_client';
 
 const FIND_PAGE_SIZE = 500;
@@ -29,7 +23,7 @@ const FIND_PAGE_SIZE = 500;
  * Wraps alerting_v2 `RulesClientApi` to implement IRulesManagementClient.
  *
  * create/update handle their own 409/404 fallbacks internally so QueryClient does not
- * need to know which framework is in use.
+ * need to know Alerting v2's retry semantics.
  *
  * Space context: the caller must obtain the client with the intended space
  * (SigEvents uses default space), matching the former HTTP client behavior.
@@ -37,21 +31,21 @@ const FIND_PAGE_SIZE = 500;
 export class RulesAdapterV2 implements IRulesManagementClient {
   constructor(private readonly rulesClient: RulesClientApi) {}
 
-  async createRule(id: string, body: CreateRuleBody): Promise<void> {
+  async createRule(id: string, definition: SignificantEventsRuleDefinition): Promise<void> {
     await this.rulesClient
-      .createRule({ data: toV2CreateBody(body), options: { id } })
+      .createRule({ data: toV2CreateBody(definition), options: { id } })
       .catch((error) => {
         if (isBoom(error) && error.output.statusCode === 409) {
-          return this.updateRule(id, toUpdateBodyFromCreate(body));
+          return this.updateRule(id, definition);
         }
         throw error;
       });
   }
 
-  async updateRule(id: string, body: UpdateRuleBody): Promise<void> {
-    await this.rulesClient.updateRule({ id, data: toV2UpdateBody(body) }).catch((error) => {
+  async updateRule(id: string, definition: SignificantEventsRuleDefinition): Promise<void> {
+    await this.rulesClient.updateRule({ id, data: toV2UpdateBody(definition) }).catch((error) => {
       if (isBoom(error) && error.output.statusCode === 404) {
-        return this.createRuleWithoutFallback(id, toCreateBodyFromUpdate(body));
+        return this.createRuleWithoutFallback(id, definition);
       }
       throw error;
     });
@@ -60,7 +54,7 @@ export class RulesAdapterV2 implements IRulesManagementClient {
   async bulkDeleteRules(ids: string[]): Promise<void> {
     if (ids.length === 0) return;
     const { errors } = await this.rulesClient.bulkDeleteRules({ ids });
-    const fatal = errors.filter((e) => e.error.statusCode !== 404);
+    const fatal = errors.filter((e) => e.error.code !== ALERTING_V2_ERROR_CODES.RULE_NOT_FOUND);
     if (fatal.length > 0) {
       const detail = fatal.map((e) => `${e.id}: ${e.error.message}`).join('; ');
       throw new Error(`V2 bulk delete failed for ${fatal.length} rule(s): ${detail}`);
@@ -79,7 +73,7 @@ export class RulesAdapterV2 implements IRulesManagementClient {
       for (const rule of result.items) {
         ids.push(rule.id);
       }
-      if (ids.length >= result.total) break;
+      if (result.items.length === 0 || ids.length >= result.total) break;
       page++;
     }
     return ids;
@@ -91,9 +85,12 @@ export class RulesAdapterV2 implements IRulesManagementClient {
    * fine, the rule exists now. Swallowing keeps this terminal and prevents the
    * create→409→update→404→create cycle the method name promises to avoid.
    */
-  private async createRuleWithoutFallback(id: string, body: CreateRuleBody): Promise<void> {
+  private async createRuleWithoutFallback(
+    id: string,
+    definition: SignificantEventsRuleDefinition
+  ): Promise<void> {
     await this.rulesClient
-      .createRule({ data: toV2CreateBody(body), options: { id } })
+      .createRule({ data: toV2CreateBody(definition), options: { id } })
       .catch((error) => {
         if (isBoom(error) && error.output.statusCode === 409) {
           return;
@@ -104,52 +101,13 @@ export class RulesAdapterV2 implements IRulesManagementClient {
 }
 
 /**
- * Used when the alerting v2 plugin is not installed: `DualCleanupRulesAdapter` still needs
- * a secondary client reference shape; v2 cleanup becomes a no-op.
- */
-export class RulesNotInstalledAdapterV2 implements IRulesManagementClient {
-  constructor(private readonly logger: Logger) {}
-
-  async createRule(): Promise<void> {
-    throw new Error('Alerting v2 plugin is not available');
-  }
-
-  async updateRule(): Promise<void> {
-    throw new Error('Alerting v2 plugin is not available');
-  }
-
-  async bulkDeleteRules(ids: string[]): Promise<void> {
-    if (ids.length === 0) return;
-    this.logger.debug(
-      `Skipping v2 rule cleanup for ${ids.length} id(s): alerting v2 plugin is not available.`
-    );
-  }
-
-  async findOwnedRuleIds(streamName: string): Promise<string[]> {
-    return [];
-  }
-}
-
-/**
- * v1 tags arrive as `['streams', '<streamName>']`. v2 uses a single structured tag
- * `sigevents:stream:<streamName>` for operations and future filtering; significant-events
- * reads scope `.rule-events` by `rule.id` from stored query links, not by this tag.
- */
-function toV2Tags(v1Tags: string[]): string[] {
-  const streamName = v1Tags.find((t) => t !== 'streams');
-  return streamName ? [toStreamTag(streamName)] : v1Tags;
-}
-
-/**
  * v2 grouping fields for SigEvents MATCH queries.
  *
  * Each MATCH row corresponds to one source document; using `_id` makes the group hash
  * stable across overlapping evaluation windows (`lookback` is 2x `every`, so adjacent
- * runs see the same documents). v1 additionally dedupes re-emissions via
- * executor state; v2 may index the same breached row on each run until recovery.
- * Without an explicit grouping, v2 falls
- * back to a per-row hash that includes the execution UUID, producing a fresh group on
- * every run and a duplicate signal per document per evaluation.
+ * runs see the same documents). Without explicit grouping, the per-row hash includes the
+ * execution UUID and produces a fresh group on every run, which can emit duplicate signals
+ * for one source document.
  *
  * The query passed to v2 retains `METADATA _id` (only `_source` is stripped) so that
  * `_id` is present as a column for v2's `buildGroupHash` to read.
@@ -172,76 +130,30 @@ function toV2BreachQuery(esqlQuery: string): string {
   return `${stripped.trimEnd()} | LIMIT ${MAX_ALERTS_PER_EXECUTION}`;
 }
 
-/**
- * `body.enabled` is intentionally not forwarded: the v2 create schema doesn't accept it
- * and `RulesClient.createRule` hardcodes `enabled: true` server-side. Callers that want a
- * disabled rule must call `disableRule` after creation.
- */
-function toV2CreateBody(body: CreateRuleBody) {
-  const esqlQuery = body.params.query;
+function toV2CommonBody(definition: SignificantEventsRuleDefinition) {
+  return {
+    metadata: {
+      name: definition.name,
+      tags: [toStreamTag(definition.streamName)],
+    },
+    time_field: definition.timestampField,
+    schedule: {
+      every: definition.schedule.interval,
+      lookback: getRuleLookbackInterval(definition.schedule.interval),
+    },
+    grouping: { fields: [...V2_MATCH_GROUPING_FIELDS] },
+    query: {
+      format: 'standalone' as const,
+      breach: { query: toV2BreachQuery(definition.esqlQuery) },
+    },
+  };
+}
+
+function toV2CreateBody(definition: SignificantEventsRuleDefinition) {
   return {
     kind: 'signal' as const,
-    metadata: {
-      name: body.name,
-      tags: toV2Tags(body.tags),
-    },
-    time_field: body.params.timestampField,
-    schedule: {
-      every: body.schedule.interval,
-      lookback: getRuleLookbackInterval(body.schedule.interval),
-    },
-    grouping: { fields: [...V2_MATCH_GROUPING_FIELDS] },
-    query: {
-      format: 'standalone' as const,
-      breach: { query: toV2BreachQuery(esqlQuery) },
-    },
+    ...toV2CommonBody(definition),
   };
 }
 
-function toV2UpdateBody(body: UpdateRuleBody) {
-  const esqlQuery = body.params.query;
-  return {
-    metadata: {
-      name: body.name,
-      tags: toV2Tags(body.tags),
-    },
-    time_field: body.params.timestampField,
-    schedule: {
-      every: body.schedule.interval,
-      lookback: getRuleLookbackInterval(body.schedule.interval),
-    },
-    grouping: { fields: [...V2_MATCH_GROUPING_FIELDS] },
-    query: {
-      format: 'standalone' as const,
-      breach: { query: toV2BreachQuery(esqlQuery) },
-    },
-  };
-}
-
-function toUpdateBodyFromCreate(body: CreateRuleBody): UpdateRuleBody {
-  return {
-    name: body.name,
-    actions: [] as never[],
-    params: body.params,
-    tags: body.tags,
-    schedule: body.schedule,
-  };
-}
-
-/**
- * Reconstructs a CreateRuleBody from an UpdateRuleBody for the update→404→create path.
- * `enabled: true` satisfies the v1-shaped `CreateRuleBody` contract; v2 ignores the field
- * and always creates rules enabled (see `toV2CreateBody`).
- */
-function toCreateBodyFromUpdate(body: UpdateRuleBody): CreateRuleBody {
-  return {
-    name: body.name,
-    consumer: STREAMS_RULE_CONSUMER,
-    alertTypeId: STREAMS_ESQL_RULE_TYPE_ID,
-    actions: [] as never[],
-    params: body.params,
-    enabled: true,
-    tags: body.tags,
-    schedule: body.schedule,
-  };
-}
+const toV2UpdateBody = toV2CommonBody;

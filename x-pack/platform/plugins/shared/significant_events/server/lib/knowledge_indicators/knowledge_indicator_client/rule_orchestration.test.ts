@@ -6,7 +6,7 @@
  */
 
 import type { QueryLink } from '@kbn/significant-events-schema';
-import { toCreateRuleBody, toUpdateRuleBody } from './rule_orchestration';
+import { toRuleDefinition } from './rule_orchestration';
 
 const makeQueryLink = (severityScore?: number): QueryLink => ({
   query: {
@@ -22,22 +22,23 @@ const makeQueryLink = (severityScore?: number): QueryLink => ({
   rule_id: 'rule-1',
 });
 
-describe('rule orchestration bodies', () => {
+describe('toRuleDefinition', () => {
   it.each([
     [85, '1m'],
     [80, '1m'],
     [60, '5m'],
     [undefined, '5m'],
-  ])('sets create schedule for severity %s to %s', (severityScore, expectedInterval) => {
-    expect(toCreateRuleBody(makeQueryLink(severityScore)).schedule.interval).toBe(expectedInterval);
+  ])('sets schedule for severity %s to %s', (severityScore, expectedInterval) => {
+    expect(toRuleDefinition(makeQueryLink(severityScore)).schedule.interval).toBe(expectedInterval);
   });
 
-  it.each([
-    [85, '1m'],
-    [80, '1m'],
-    [60, '5m'],
-    [undefined, '5m'],
-  ])('sets update schedule for severity %s to %s', (severityScore, expectedInterval) => {
-    expect(toUpdateRuleBody(makeQueryLink(severityScore)).schedule.interval).toBe(expectedInterval);
+  it('maps a query link to the v2-native Significant Events rule definition', () => {
+    expect(toRuleDefinition(makeQueryLink())).toEqual({
+      name: 'Error logs',
+      streamName: 'logs.test',
+      timestampField: '@timestamp',
+      esqlQuery: 'FROM logs-* | WHERE level == "error"',
+      schedule: { interval: '5m' },
+    });
   });
 });
