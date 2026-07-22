@@ -177,6 +177,7 @@ import { getSpaceForAgentPolicy, getSpaceForAgentPolicySO } from './spaces/helpe
 import {
   getVersionSpecificPolicies,
   getAgentVersionsForVersionSpecificPolicies,
+  reassignAgentsFromVersionSpecificPolicies,
 } from './utils/version_specific_policies';
 import { scheduleReassignAgentsToVersionSpecificPoliciesTask } from './agent_policies/reassign_agents_to_version_specific_policies_task';
 
@@ -332,6 +333,22 @@ class AgentPolicyService {
           },
         ]);
       }
+    }
+
+    // If this policy no longer requires version-specific policies (e.g. the integration/input
+    // that required them was removed), reassign any agents still assigned to a variant policy back
+    // to the base policy and clean up the stale variant documents. Otherwise those agents stay on
+    // a variant policy that is never updated again and get stuck reporting an outdated policy.
+    // See https://github.com/elastic/kibana/issues/276294
+    if (
+      appContextService.getExperimentalFeatures().enableVersionSpecificPolicies &&
+      existingAgentPolicy.has_agent_version_conditions &&
+      options.hasAgentVersionConditions === false
+    ) {
+      logger.debug(
+        `Agent policy [${id}] no longer has agent version conditions, reassigning agents from version-specific policies back to the base policy`
+      );
+      await reassignAgentsFromVersionSpecificPolicies(soClient, esClient, id);
     }
 
     logger.debug(

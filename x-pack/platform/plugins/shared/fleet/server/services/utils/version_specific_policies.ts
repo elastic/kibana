@@ -7,14 +7,15 @@
 
 import { coerce, satisfies } from 'semver';
 
-import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import { escapeKuery } from '@kbn/es-query';
 
 import { appContextService } from '../app_context';
 import * as AgentService from '../agents';
 import type { FleetServerPolicy, FullAgentPolicy, FullAgentPolicyInput } from '../../types';
 import { agentPolicyService } from '../agent_policy';
 import type { PackageInfo, PackagePolicyAssetsMap } from '../../../common/types';
-import { AGENT_POLICY_VERSION_SEPARATOR } from '../../../common/constants';
+import { AGENT_POLICY_INDEX, AGENT_POLICY_VERSION_SEPARATOR } from '../../../common/constants';
 
 export async function getAgentVersionsForVersionSpecificPolicies(): Promise<string[]> {
   const commonVersions = [];
@@ -73,11 +74,17 @@ export async function getVersionSpecificPolicies(
         agentVersion: version,
       });
     }
+    const versionedPolicyId = `${fullPolicy.id}${AGENT_POLICY_VERSION_SEPARATOR}${version}`;
     const versionSpecificPolicy: FleetServerPolicy = {
       ...fleetServerPolicy,
-      policy_id: `${fullPolicy.id}${AGENT_POLICY_VERSION_SEPARATOR}${version}`,
+      policy_id: versionedPolicyId,
       data: {
         ...fleetServerPolicy.data,
+        // The agent reports the policy id from `data.id` on checkin, so it must carry the
+        // version suffix too. Otherwise the agent reports the base id, fleet-server sees a
+        // mismatch against the versioned `agent.policy_id`, and the agent churns on
+        // POLICY_CHANGE actions every checkin. See https://github.com/elastic/kibana/issues/276294
+        id: versionedPolicyId,
         inputs: getInputsForVersion(updatedFullPolicy?.inputs ?? fullPolicy.inputs, version),
       },
     };
@@ -85,6 +92,50 @@ export async function getVersionSpecificPolicies(
   }
 
   return fleetServerPolicies;
+}
+
+/**
+ * Tear down the version-specific policy variants for a parent agent policy that no longer
+ * requires them: reassign any agents still on a variant policy (`<parentId>#<version>`) back to
+ * the base policy so they keep syncing, then delete the now-stale variant `.fleet-policies`
+ * documents.
+ *
+ * Without this, removing the integration/input that required version-specific policies leaves
+ * agents assigned to a variant policy that is never updated again, so they get stuck reporting an
+ * outdated policy. See https://github.com/elastic/kibana/issues/276294
+ */
+export async function reassignAgentsFromVersionSpecificPolicies(
+  soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
+  parentPolicyId: string
+): Promise<void> {
+  const logger = appContextService.getLogger();
+  const variantKuery = `policy_id:${escapeKuery(parentPolicyId)}${AGENT_POLICY_VERSION_SEPARATOR}*`;
+
+  const { total } = await AgentService.getAgentsByKuery(esClient, soClient, {
+    kuery: variantKuery,
+    showInactive: false,
+    perPage: 0,
+  });
+  if (total > 0) {
+    logger.info(
+      `Reassigning ${total} agents from version-specific policies of ${parentPolicyId} back to the base policy`
+    );
+    await AgentService.reassignAgents(
+      soClient,
+      esClient,
+      { kuery: variantKuery, showInactive: false },
+      parentPolicyId
+    );
+  }
+
+  // Remove the now-stale variant documents from .fleet-policies so they don't linger.
+  await esClient.deleteByQuery({
+    index: AGENT_POLICY_INDEX,
+    ignore_unavailable: true,
+    query: { prefix: { policy_id: `${parentPolicyId}${AGENT_POLICY_VERSION_SEPARATOR}` } },
+    refresh: true,
+  });
 }
 
 export function hasAgentVersionConditionInInputTemplate(

@@ -9,6 +9,8 @@ jest.mock('../agents', () => ({
   getAvailableVersions: jest
     .fn()
     .mockResolvedValue(['9.3.0', '9.1.0', '8.6.0', '8.9.0', '8.8.0', '7.17.0']),
+  getAgentsByKuery: jest.fn(),
+  reassignAgents: jest.fn(),
 }));
 
 jest.mock('../app_context', () => ({
@@ -16,6 +18,7 @@ jest.mock('../app_context', () => ({
     getKibanaVersion: () => '9.3.0',
     getLogger: () => ({
       debug: jest.fn(),
+      info: jest.fn(),
     }),
   },
 }));
@@ -44,9 +47,12 @@ jest.mock('../agent_policy', () => ({
   },
 }));
 
+import * as AgentService from '../agents';
+
 import {
   getAgentVersionsForVersionSpecificPolicies,
   getVersionSpecificPolicies,
+  reassignAgentsFromVersionSpecificPolicies,
 } from './version_specific_policies';
 
 describe('getAgentVersionsForVersionSpecificPolicies', () => {
@@ -71,6 +77,7 @@ describe('getVersionSpecificPolicies', () => {
     expect(policies).toEqual([
       {
         data: {
+          id: 'policy1#9.3',
           inputs: [
             {
               meta: {
@@ -85,12 +92,14 @@ describe('getVersionSpecificPolicies', () => {
       },
       {
         data: {
+          id: 'policy1#9.2',
           inputs: [],
         },
         policy_id: 'policy1#9.2',
       },
       {
         data: {
+          id: 'policy1#8.9',
           inputs: [],
         },
         policy_id: 'policy1#8.9',
@@ -115,6 +124,7 @@ describe('getVersionSpecificPolicies', () => {
     expect(policies).toEqual([
       {
         data: {
+          id: 'policy1#9.4',
           inputs: [
             {
               meta: {
@@ -129,6 +139,7 @@ describe('getVersionSpecificPolicies', () => {
       },
       {
         data: {
+          id: 'policy1#9.1',
           inputs: [],
         },
         policy_id: 'policy1#9.1',
@@ -144,6 +155,7 @@ describe('getVersionSpecificPolicies', () => {
     expect(policies).toEqual([
       {
         data: {
+          id: 'policy1#9.3',
           inputs: [
             {
               type: 'cel',
@@ -154,6 +166,7 @@ describe('getVersionSpecificPolicies', () => {
       },
       {
         data: {
+          id: 'policy1#9.2',
           inputs: [
             {
               type: 'cel',
@@ -164,6 +177,7 @@ describe('getVersionSpecificPolicies', () => {
       },
       {
         data: {
+          id: 'policy1#8.9',
           inputs: [],
         },
         policy_id: 'policy1#8.9',
@@ -181,6 +195,7 @@ describe('getVersionSpecificPolicies', () => {
     expect(policies).toEqual([
       {
         data: {
+          id: 'policy1#9.4',
           inputs: [
             {
               type: 'cel',
@@ -191,6 +206,7 @@ describe('getVersionSpecificPolicies', () => {
       },
       {
         data: {
+          id: 'policy1#9.1',
           inputs: [
             {
               type: 'cel',
@@ -215,6 +231,7 @@ describe('getVersionSpecificPolicies', () => {
     expect(policies).toEqual([
       {
         data: {
+          id: 'policyBothConditions#9.3',
           inputs: [
             {
               meta: { package: { agentVersion: '>=9.3.0' } },
@@ -228,6 +245,7 @@ describe('getVersionSpecificPolicies', () => {
       },
       {
         data: {
+          id: 'policyBothConditions#9.2',
           inputs: [
             {
               type: 'cel',
@@ -238,10 +256,61 @@ describe('getVersionSpecificPolicies', () => {
       },
       {
         data: {
+          id: 'policyBothConditions#8.9',
           inputs: [],
         },
         policy_id: 'policyBothConditions#8.9',
       },
     ]);
+  });
+});
+
+describe('reassignAgentsFromVersionSpecificPolicies', () => {
+  const soClient = {} as any;
+  const esClient = { deleteByQuery: jest.fn() } as any;
+  const getAgentsByKueryMock = AgentService.getAgentsByKuery as jest.Mock;
+  const reassignAgentsMock = AgentService.reassignAgents as jest.Mock;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    esClient.deleteByQuery.mockResolvedValue({});
+  });
+
+  it('reassigns agents on variant policies back to the base policy and deletes stale variant docs', async () => {
+    getAgentsByKueryMock.mockResolvedValue({ total: 3 });
+
+    await reassignAgentsFromVersionSpecificPolicies(soClient, esClient, 'policy1');
+
+    expect(getAgentsByKueryMock).toHaveBeenCalledWith(esClient, soClient, {
+      kuery: 'policy_id:policy1#*',
+      showInactive: false,
+      perPage: 0,
+    });
+    expect(reassignAgentsMock).toHaveBeenCalledWith(
+      soClient,
+      esClient,
+      { kuery: 'policy_id:policy1#*', showInactive: false },
+      'policy1'
+    );
+    expect(esClient.deleteByQuery).toHaveBeenCalledWith(
+      expect.objectContaining({
+        index: '.fleet-policies',
+        query: { prefix: { policy_id: 'policy1#' } },
+      })
+    );
+  });
+
+  it('does not reassign when there are no agents on variant policies but still cleans up docs', async () => {
+    getAgentsByKueryMock.mockResolvedValue({ total: 0 });
+
+    await reassignAgentsFromVersionSpecificPolicies(soClient, esClient, 'policy1');
+
+    expect(reassignAgentsMock).not.toHaveBeenCalled();
+    expect(esClient.deleteByQuery).toHaveBeenCalledWith(
+      expect.objectContaining({
+        index: '.fleet-policies',
+        query: { prefix: { policy_id: 'policy1#' } },
+      })
+    );
   });
 });
