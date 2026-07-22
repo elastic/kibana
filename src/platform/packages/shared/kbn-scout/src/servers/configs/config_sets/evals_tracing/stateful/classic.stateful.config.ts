@@ -116,6 +116,10 @@ export const servers: ScoutServerConfig = {
     serverArgs: [
       ...defaultConfig.esTestCluster.serverArgs,
       `xpack.inference.elastic.url=${EIS_QA_URL}`,
+      // Relax disk watermarks for local dev machines with full disks
+      'cluster.routing.allocation.disk.watermark.low=95%',
+      'cluster.routing.allocation.disk.watermark.high=97%',
+      'cluster.routing.allocation.disk.watermark.flood_stage=99%',
     ],
   },
   kbnTestServer: {

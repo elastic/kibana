@@ -146,6 +146,24 @@
       ]
     },
     {
+      "id": "security-persona-matrix",
+      "name": "Security Persona Matrix",
+      "slackChannel": "#security-generative-ai-evals",
+      "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-security-persona-matrix/playwright.config.ts",
+      "tags": [
+        "security",
+        "persona-matrix"
+      ],
+      "ciLabels": [
+        "evals:security-persona-matrix"
+      ],
+      "serverConfigSet": "evals_security_ai_rules",
+      "weeklyEisModelGroups": [
+        "eis/anthropic-claude-4.6-sonnet",
+        "eis/anthropic-claude-4.5-haiku"
+      ]
+    },
+    {
       "id": "endpoint",
       "name": "Endpoint (Elastic Defend)",
       "slackChannel": "#security-defend-workflows-tests",
@@ -365,6 +383,21 @@
       ],
       "ciLabels": [
         "evals:security-multi-step"
+      ],
+      "serverConfigSet": "evals_security_ai_rules"
+    },
+    {
+      "id": "security-threat-intel-hunt",
+      "name": "Security Threat Intel Hunt",
+      "slackChannel": "#security-generative-ai-evals",
+      "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-security-threat-intel-hunt/playwright.config.ts",
+      "tags": [
+        "security",
+        "threat-intel",
+        "hunt"
+      ],
+      "ciLabels": [
+        "evals:security-threat-intel-hunt"
       ],
       "serverConfigSet": "evals_security_ai_rules"
     },

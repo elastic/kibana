@@ -1794,6 +1794,7 @@
     "@kbn/evals-suite-security-automatic-migrations": "link:x-pack/solutions/security/packages/kbn-evals-suite-security-automatic-migrations",
     "@kbn/evals-suite-security-esql-generation-regression": "link:x-pack/solutions/security/packages/kbn-evals-suite-security-esql-generation-regression",
     "@kbn/evals-suite-security-multi-step": "link:x-pack/solutions/security/packages/kbn-evals-suite-security-multi-step",
+    "@kbn/evals-suite-security-persona-matrix": "link:x-pack/solutions/security/packages/kbn-evals-suite-security-persona-matrix",
     "@kbn/evals-suite-security-skills": "link:x-pack/solutions/security/packages/kbn-evals-suite-security-skills",
     "@kbn/evals-suite-siem-readiness": "link:x-pack/solutions/security/packages/kbn-evals-suite-siem-readiness",
     "@kbn/evals-suite-significant-events": "link:x-pack/platform/packages/shared/kbn-evals-suite-significant-events",
