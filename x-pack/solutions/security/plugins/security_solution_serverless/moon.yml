@@ -71,5 +71,6 @@ fileGroups:
     - public/**/*.ts
     - public/**/*.tsx
     - server/**/*.ts
+    - test/scout/**/*
     - '!target/**/*'
 tasks: {}
