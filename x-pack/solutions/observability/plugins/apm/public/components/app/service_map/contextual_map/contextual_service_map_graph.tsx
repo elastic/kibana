@@ -55,6 +55,7 @@ import { ContextualServiceMapControls } from './contextual_service_map_controls'
 import { ServiceFlyout } from '../../../shared/service_flyout';
 import { SERVICE_FLYOUT_SOURCE_SERVICE_MAP } from '../../../shared/service_flyout/constants';
 import type { ServiceFlyoutOptions } from '../../../shared/service_flyout/types';
+import { useServiceMapFlyoutProps } from '../use_service_map_flyout_props';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 
 type ServiceMapServiceNode = Node<ServiceNodeData>;
@@ -171,34 +172,13 @@ function ContextualGraphInner({
     });
   }, [visibleNodes, visibleEdges, highlightedServiceName]);
 
-  const flyoutProps = useMemo(
-    () =>
-      selectedServiceNodeForFlyout
-        ? {
-            service: {
-              name: selectedServiceNodeForFlyout.data.id,
-              agentName: selectedServiceNodeForFlyout.data.agentName,
-              sloStatus: selectedServiceNodeForFlyout.data.sloStatus,
-              sloCount: selectedServiceNodeForFlyout.data.sloCount,
-            },
-            filters: {
-              environment,
-              rangeFrom: flyoutOptions?.rangeFrom ?? start,
-              rangeTo: flyoutOptions?.rangeTo ?? end,
-              transactionType: flyoutOptions?.transactionType,
-            },
-          }
-        : null,
-    [
-      selectedServiceNodeForFlyout,
-      environment,
-      flyoutOptions?.rangeFrom,
-      flyoutOptions?.rangeTo,
-      flyoutOptions?.transactionType,
-      start,
-      end,
-    ]
-  );
+  const flyoutProps = useServiceMapFlyoutProps({
+    selectedServiceNodeForFlyout,
+    environment,
+    flyoutOptions,
+    start,
+    end,
+  });
 
   const [nodes, setNodes, onNodesChange] = useNodesState(layoutedNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(visibleEdges);

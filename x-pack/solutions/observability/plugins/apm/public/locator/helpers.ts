@@ -137,7 +137,11 @@ export function getPathForServiceDetail(
         serviceName: payload.serviceName,
         groupId: payload.errorGroupId,
       },
-      query,
+      query: {
+        ...query,
+        comparisonEnabled: payloadComparisonEnabled ?? isComparisonEnabledByDefault,
+        ...{ offset },
+      },
     });
   }
 
