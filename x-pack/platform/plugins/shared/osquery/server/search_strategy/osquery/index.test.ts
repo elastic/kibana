@@ -45,12 +45,14 @@ describe('osquerySearchStrategyProvider space scoping', () => {
     activeSpaceId = 'default',
     actionsIndexExists = false,
     newDataStreamIndexExists = false,
+    cpsEnabled = false,
   }: {
     authorizedPrivileges?: string[];
     useRbac?: boolean;
     activeSpaceId?: string | null;
     actionsIndexExists?: boolean;
     newDataStreamIndexExists?: boolean;
+    cpsEnabled?: boolean;
   } = {}) => {
     const searchMock = jest.fn().mockReturnValue(of(emptyRawResponse));
     const authorizedActions = new Set(authorizedPrivileges.map((privilege) => `api:${privilege}`));
@@ -102,7 +104,8 @@ describe('osquerySearchStrategyProvider space scoping', () => {
         },
       },
       service: { getActiveSpace },
-    } as unknown as Pick<OsqueryAppContext, 'security' | 'service'>;
+      cpsEnabled,
+    } as unknown as Pick<OsqueryAppContext, 'security' | 'service' | 'cpsEnabled'>;
 
     const provider = osquerySearchStrategyProvider(data, esClient, osqueryContext);
 
@@ -264,6 +267,20 @@ describe('osquerySearchStrategyProvider space scoping', () => {
       expect(searchMock).toHaveBeenCalled();
       expect(getSearchStrategy).not.toHaveBeenCalled();
       expect(searchMock.mock.calls[0][0].params.index).toEqual([
+        `logs-${OSQUERY_INTEGRATION_NAME}.result*`,
+      ]);
+    });
+
+    it('routes osquery result reads to the enhanced strategy when CPS is enabled', async () => {
+      const enhancedSearchMock = jest.fn().mockReturnValue(of(emptyRawResponse));
+      const { provider, searchMock, getSearchStrategy } = setup({ cpsEnabled: true });
+      getSearchStrategy.mockReturnValue({ search: enhancedSearchMock, cancel: jest.fn() });
+
+      await search(provider);
+
+      expect(getSearchStrategy).toHaveBeenCalled();
+      expect(searchMock).not.toHaveBeenCalled();
+      expect(enhancedSearchMock.mock.calls[0][0].params.index).toEqual([
         `logs-${OSQUERY_INTEGRATION_NAME}.result*`,
       ]);
     });

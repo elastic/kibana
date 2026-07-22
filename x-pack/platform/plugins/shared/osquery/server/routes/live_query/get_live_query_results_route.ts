@@ -39,6 +39,7 @@ import {
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
 import { OSQUERY_SEARCH_STRATEGY } from '../../search_strategy/constants';
+import { getScopedSearch } from '../../utils/get_scoped_search';
 import { getLiveQueryResultsResponseSchema } from './response_schemas';
 
 export const getLiveQueryResultsRoute = (
@@ -133,7 +134,12 @@ export const getLiveQueryResultsRoute = (
             }
           }
 
-          const search = await context.search;
+          const search = await getScopedSearch(
+            context,
+            request,
+            osqueryContext.cpsEnabled,
+            osqueryContext.getStartServices
+          );
           const { actionDetails } = await lastValueFrom(
             search.search<ActionDetailsRequestOptions, ActionDetailsStrategyResponse>(
               {

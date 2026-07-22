@@ -61,6 +61,7 @@ describe('findLiveQueryRoute', () => {
     jest.clearAllMocks();
 
     mockOsqueryContext = {
+      cpsEnabled: false,
       service: {
         getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }),
       },

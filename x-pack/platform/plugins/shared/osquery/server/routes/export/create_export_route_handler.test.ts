@@ -74,16 +74,21 @@ const mockSearchSearch = jest.fn();
 const mockSearch: jest.Mocked<IScopedSearchClient> = {
   search: mockSearchSearch,
 } as unknown as jest.Mocked<IScopedSearchClient>;
+const mockCpsSearch = jest.fn().mockReturnValue(mockSearch);
+const mockReadEsClient = {
+  openPointInTime: mockOpenPointInTime,
+  closePointInTime: mockClosePointInTime,
+};
 
 const createContext = () =>
   ({
     core: Promise.resolve({
       elasticsearch: {
         client: {
-          asInternalUser: {
-            openPointInTime: mockOpenPointInTime,
-            closePointInTime: mockClosePointInTime,
-          },
+          asInternalUser: mockReadEsClient,
+          asScoped: jest.fn().mockReturnValue({
+            asCurrentUser: mockReadEsClient,
+          }),
         },
       },
       security: {
@@ -145,15 +150,37 @@ const createOsqueryContext = (options?: {
   getIntegrationNamespaces?: jest.Mock;
   useRbac?: boolean;
   authorizedPrivileges?: string[];
+  cpsEnabled?: boolean;
 }): OsqueryAppContext =>
   ({
     logFactory: { get: () => loggingSystemMock.createLogger() },
     experimentalFeatures: allowedExperimentalValues,
     security: createSecurityMock(options),
+    cpsEnabled: options?.cpsEnabled ?? false,
     service: {
       getIntegrationNamespaces: options?.getIntegrationNamespaces,
     },
-    getStartServices: jest.fn(),
+    getStartServices: jest.fn().mockResolvedValue([
+      {
+        elasticsearch: {
+          client: {
+            asInternalUser: mockReadEsClient,
+            asScoped: jest.fn().mockReturnValue({
+              asCurrentUser: mockReadEsClient,
+              asInternalUser: mockReadEsClient,
+              asSecondaryAuthUser: mockReadEsClient,
+            }),
+          },
+        },
+      },
+      {
+        data: {
+          search: {
+            asScoped: mockCpsSearch,
+          },
+        },
+      },
+    ]),
     config: jest.fn(),
     telemetryEventsSender: {},
     licensing: {},
@@ -527,6 +554,22 @@ describe('createExportRouteHandler', () => {
     expect(response.ok).toHaveBeenCalled();
   });
 
+  it('uses scoped search client when CPS is enabled', async () => {
+    const handler = createExportRouteHandler(createOsqueryContext({ cpsEnabled: true }));
+    const response = httpServerMock.createResponseFactory();
+    const request = createExportRequest({
+      query: { format: 'ndjson' },
+      body: {},
+    });
+
+    await handler(createContext(), request, response, baseParams);
+
+    expect(mockCpsSearch).toHaveBeenCalledWith(request, { projectRouting: 'space' });
+    expect(mockExportResultsToStream).toHaveBeenCalledWith(
+      expect.objectContaining({ search: mockSearch })
+    );
+  });
+
   it('passes context.search client to exportResultsToStream', async () => {
     const handler = createExportRouteHandler(createOsqueryContext());
     const response = httpServerMock.createResponseFactory();
@@ -640,10 +683,8 @@ describe('createExportRouteHandler', () => {
   });
 
   it('closes PIT and returns 500 when context.search rejects after PIT is opened', async () => {
-    const context = {
-      ...createContext(),
-      search: Promise.reject(new Error('Search context unavailable')),
-    } as unknown as ReturnType<typeof createContext>;
+    const context = createContext();
+    context.search = Promise.reject(new Error('Search context unavailable'));
 
     const handler = createExportRouteHandler(createOsqueryContext());
     const response = httpServerMock.createResponseFactory();

@@ -16,6 +16,7 @@ import { API_VERSIONS, ACTIONS_INDEX } from '../../../common/constants';
 import { PLUGIN_ID } from '../../../common';
 import { buildRouteValidation } from '../../utils/build_validation/route_validation';
 import { buildSpaceIdFilter } from '../../utils/build_space_id_filter';
+import { getReadEsClient } from '../../utils/get_read_es_client';
 
 const USERS_PAGE_SIZE = 10;
 
@@ -63,13 +64,15 @@ export const getHistoryUsersRoute = (
       async (context, request, response) => {
         try {
           const [coreStartServices] = await osqueryContext.getStartServices();
-          const esClient = coreStartServices.elasticsearch.client.asInternalUser;
+          const clusterClient = coreStartServices.elasticsearch.client;
+          const internalEsClient = clusterClient.asInternalUser;
+          const readEsClient = getReadEsClient(clusterClient, request, osqueryContext.cpsEnabled);
 
           const spaceId = osqueryContext?.service?.getActiveSpace
             ? (await osqueryContext.service.getActiveSpace(request))?.id || DEFAULT_SPACE_ID
             : DEFAULT_SPACE_ID;
 
-          const actionsIndexExists = await esClient.indices.exists({
+          const actionsIndexExists = await internalEsClient.indices.exists({
             index: `${ACTIONS_INDEX}*`,
           });
 
@@ -89,7 +92,7 @@ export const getHistoryUsersRoute = (
             filter.push({ wildcard: { user_id: `*${escaped}*` } });
           }
 
-          const result = await esClient.search({
+          const result = await readEsClient.search({
             index,
             size: 0,
             query: { bool: { filter } },

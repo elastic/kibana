@@ -29,6 +29,7 @@ import type {
 } from '../../../common/search_strategy';
 import { generateTablePaginationOptions } from '../../../common/utils/build_query';
 import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
+import { getScopedSearch } from '../../utils/get_scoped_search';
 import { OSQUERY_SEARCH_STRATEGY } from '../../search_strategy/constants';
 import { actionResultsResponseSchema } from './response_schemas';
 
@@ -95,7 +96,12 @@ export const getActionResultsRoute = (
             ? (await osqueryContext.service.getActiveSpace(request))?.id ?? DEFAULT_SPACE_ID
             : DEFAULT_SPACE_ID;
 
-          const search = await context.search;
+          const search = await getScopedSearch(
+            context,
+            request,
+            osqueryContext.cpsEnabled,
+            osqueryContext.getStartServices
+          );
 
           // Parse agentIds from query parameter
           const agentIds = request.query.agentIds

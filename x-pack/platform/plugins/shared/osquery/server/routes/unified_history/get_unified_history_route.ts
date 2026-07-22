@@ -26,6 +26,7 @@ import type {
 import { buildLiveActionsQuery } from './query_live_actions_dsl';
 import { buildScheduledResponsesQuery } from './query_scheduled_responses_dsl';
 import { hasConnectedRemoteClusters, prefixIndexPatternsWithCcs } from '../../utils/ccs_utils';
+import { getReadEsClient } from '../../utils/get_read_es_client';
 import { mergeRows } from './merge_rows';
 import { decodeCursor, encodeCursor, computePaginationCursors } from './cursor_utils';
 import { processLiveHistory } from './process_live_history';
@@ -93,9 +94,11 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
       },
       async (context, request, response) => {
         try {
-          const coreContext = await context.core;
-          const esClient = coreContext.elasticsearch.client.asInternalUser;
-          const ccsEnabled = await hasConnectedRemoteClusters(esClient);
+          const [coreStart] = await osqueryContext.getStartServices();
+          const clusterClient = coreStart.elasticsearch.client;
+          const internalEsClient = clusterClient.asInternalUser;
+          const readEsClient = getReadEsClient(clusterClient, request, osqueryContext.cpsEnabled);
+          const ccsEnabled = await hasConnectedRemoteClusters(internalEsClient);
 
           const spaceId = osqueryContext?.service?.getActiveSpace
             ? (await osqueryContext.service.getActiveSpace(request))?.id || DEFAULT_SPACE_ID
@@ -209,7 +212,7 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
 
           const [actionsResult, scheduledResult] = await Promise.all([
             actionsQuery
-              ? esClient.search(
+              ? readEsClient.search(
                   {
                     index: prefixIndexPatternsWithCcs(`${ACTIONS_INDEX}*`, ccsEnabled),
                     ...actionsQuery,
@@ -218,7 +221,7 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
                 )
               : Promise.resolve({ hits: { hits: [] } }),
             scheduledQuery
-              ? esClient
+              ? readEsClient
                   .search(
                     {
                       index: prefixIndexPatternsWithCcs(
@@ -248,6 +251,7 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
           const { liveRows: filteredLiveRows, sortValuesMap } = await processLiveHistory({
             liveHits,
             osqueryContext,
+            request,
             spaceId,
             integrationNamespaces,
             ccsEnabled,

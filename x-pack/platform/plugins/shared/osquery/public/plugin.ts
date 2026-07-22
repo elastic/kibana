@@ -21,6 +21,7 @@ import { useFetchStatus } from './fleet_integration/use_fetch_status';
 import { getLazyOsqueryResult } from './shared_components/lazy_osquery_result';
 import { getLazyOsqueryResults } from './shared_components/lazy_osquery_results';
 import { OsqueryIcon } from './components/osquery_icon';
+import { ProjectRoutingAccess } from '@kbn/cps-utils';
 import type {
   OsqueryPluginSetup,
   OsqueryPluginStart,
@@ -117,6 +118,8 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
   }
 
   public start(core: CoreStart, plugins: StartPlugins): OsqueryPluginStart {
+    plugins.cps?.cpsManager?.registerAppAccess('osquery', () => ProjectRoutingAccess.READONLY);
+
     ExperimentalFeaturesService.init({ experimentalFeatures: this.experimentalFeatures });
 
     if (plugins.fleet) {

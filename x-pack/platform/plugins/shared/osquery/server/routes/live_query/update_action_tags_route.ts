@@ -21,6 +21,7 @@ import {
 import { PLUGIN_ID } from '../../../common';
 import { buildRouteValidation } from '../../utils/build_validation/route_validation';
 import { buildSpaceIdFilter } from '../../utils/build_space_id_filter';
+import { getReadEsClient } from '../../utils/get_read_es_client';
 import { updateActionTagsResponseSchema } from './response_schemas';
 
 const updateActionTagsRequestParamsSchema = t.type({
@@ -91,13 +92,15 @@ export const updateActionTagsRoute = (
           }
 
           const [coreStartServices] = await osqueryContext.getStartServices();
-          const esClient = coreStartServices.elasticsearch.client.asInternalUser;
+          const clusterClient = coreStartServices.elasticsearch.client;
+          const internalEsClient = clusterClient.asInternalUser;
+          const readEsClient = getReadEsClient(clusterClient, request, osqueryContext.cpsEnabled);
 
           const spaceId = osqueryContext?.service?.getActiveSpace
             ? (await osqueryContext.service.getActiveSpace(request))?.id || DEFAULT_SPACE_ID
             : DEFAULT_SPACE_ID;
 
-          const actionsIndexExists = await esClient.indices.exists({
+          const actionsIndexExists = await internalEsClient.indices.exists({
             index: `${ACTIONS_INDEX}*`,
           });
 
@@ -105,7 +108,7 @@ export const updateActionTagsRoute = (
 
           const spaceFilter = buildSpaceIdFilter(spaceId);
 
-          const searchResult = await esClient.search({
+          const searchResult = await readEsClient.search({
             index,
             size: 1,
             query: {
@@ -124,7 +127,7 @@ export const updateActionTagsRoute = (
           const hit = searchResult.hits.hits[0];
 
           if (!hit) {
-            const scheduledCheck = await esClient.search({
+            const scheduledCheck = await readEsClient.search({
               index: `${ACTION_RESPONSES_DATA_STREAM_INDEX}-*`,
               size: 0,
               query: {
@@ -152,7 +155,7 @@ export const updateActionTagsRoute = (
             });
           }
 
-          await esClient.update({
+          await internalEsClient.update({
             index: hit._index,
             id: hit._id as string,
             doc: { tags },

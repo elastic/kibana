@@ -21,6 +21,7 @@ import type {
 import { OsqueryQueries } from '../../../common/search_strategy';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { OSQUERY_SEARCH_STRATEGY } from '../../search_strategy/constants';
+import { getScopedSearch } from '../../utils/get_scoped_search';
 import { createExportRouteHandler } from '../export/create_export_route_handler';
 import {
   exportLiveQueryParamsSchema,
@@ -74,7 +75,12 @@ export const exportLiveQueryResultsRoute = (
         const abortController = new AbortController();
         const sub = request.events.aborted$.subscribe(() => abortController.abort());
         try {
-          const search = await context.search;
+          const search = await getScopedSearch(
+            context,
+            request,
+            osqueryContext.cpsEnabled,
+            osqueryContext.getStartServices
+          );
 
           const { actionDetails } = await lastValueFrom(
             search.search<ActionDetailsRequestOptions, ActionDetailsStrategyResponse>(
