@@ -62,7 +62,7 @@ export function formatDuration(durationMs: number): string {
     result += `${seconds}s `;
   }
   // hide milliseconds if there are any other units
-  if (!result && milliseconds > 0) {
+  if (!result && milliseconds >= 0) {
     result += `${milliseconds}ms`;
   }
   return result;
