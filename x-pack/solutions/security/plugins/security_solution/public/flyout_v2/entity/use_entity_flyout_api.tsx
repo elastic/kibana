@@ -540,7 +540,15 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
           children = <GenericEntity entityId={entityId} scopeId={scopeId} contextID={contextID} />;
           descriptor = { kind: FLYOUT_DESCRIPTOR_KIND.genericEntity, entityId, scopeId };
       }
-      const flyoutTitle = title ?? entityName ?? entityId;
+      const flyoutTitle =
+        title ??
+        (engineType === 'host'
+          ? formatFlyoutTitle(HOST_TITLE, entityName)
+          : engineType === 'user'
+          ? formatFlyoutTitle(USER_TITLE, entityName)
+          : engineType === 'service'
+          ? formatFlyoutTitle(SERVICE_TITLE, entityName)
+          : GENERIC_ENTITY_TITLE);
       writeOnOpen(descriptor);
       const onClose = buildOnClose(null);
       open(
