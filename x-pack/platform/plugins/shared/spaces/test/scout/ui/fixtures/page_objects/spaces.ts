@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Locator, ScoutPage } from '@kbn/scout';
+import type { ScoutPage } from '@kbn/scout';
 
 export type SpaceSolution = 'es' | 'oblt' | 'security' | 'classic';
 
@@ -19,10 +19,6 @@ export type SpaceSolution = 'es' | 'oblt' | 'security' | 'classic';
  */
 export class SpacesPage {
   constructor(private readonly page: ScoutPage) {}
-
-  private async getVisibleVariant(preferred: Locator, fallback: Locator): Promise<Locator> {
-    return (await preferred.isVisible()) ? preferred : fallback;
-  }
 
   async isProjectHeaderVisible() {
     return await this.page.testSubj
@@ -79,11 +75,7 @@ export class SpacesPage {
   }
 
   async getCurrentSpaceTitle() {
-    const selector = await this.getVisibleVariant(
-      this.page.testSubj.locator('contextSwitcherTriggerButton'),
-      this.page.testSubj.locator('spacesNavSelector')
-    );
-    return (await selector.getAttribute('title'))?.trim() ?? null;
+    return (await this.spacesSelectorLocator().getAttribute('title'))?.trim() ?? null;
   }
 
   getCurrentUrl() {
@@ -310,11 +302,10 @@ export class SpacesPage {
   }
 
   async switchToSpaceFromNav(spaceId: string) {
-    const spaceItem = await this.getVisibleVariant(
-      this.page.testSubj.locator(`space-${spaceId}`),
-      this.page.testSubj.locator(`${spaceId}-selectableSpaceItem`)
-    );
-    await spaceItem.click();
+    await this.page.testSubj
+      .locator(`space-${spaceId}`)
+      .or(this.page.testSubj.locator(`${spaceId}-selectableSpaceItem`))
+      .click();
   }
 
   navSearchInputLocator() {
@@ -328,26 +319,18 @@ export class SpacesPage {
   }
 
   async searchSpacesInNav(searchText: string) {
-    const input = await this.getVisibleVariant(
-      this.page.testSubj.locator('contextSwitcherSpacesSearchInput'),
-      this.page.testSubj.locator('spacesMenuSearchInput')
-    );
-    await input.fill(searchText);
+    await this.navSearchInputLocator().fill(searchText);
   }
 
   async getNavSpaceResultCount() {
-    const panel = await this.getVisibleVariant(
-      this.page.testSubj.locator('contextSwitcherPopoverPanel'),
-      this.page.testSubj.locator('spaceMenuPopoverPanel')
-    );
-    return await panel.locator('li[role="option"]').count();
+    return await this.spacesMenuPanelLocator().locator('li[role="option"]').count();
   }
 
   async getNavNoResultsMessage() {
-    const panel = await this.getVisibleVariant(
-      this.page.testSubj.locator('contextSwitcherPopoverPanel'),
-      this.page.testSubj.locator('spaceMenuPopoverPanel')
-    );
-    return (await panel.locator('[data-test-subj="euiSelectableMessage"]').innerText()).trim();
+    return (
+      await this.spacesMenuPanelLocator()
+        .locator('[data-test-subj="euiSelectableMessage"]')
+        .innerText()
+    ).trim();
   }
 }
