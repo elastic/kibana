@@ -118,7 +118,7 @@ export class SlackAppService {
     // only happens on success.
     const existingConnection = await this.readConnection(soClient);
 
-    // Mint a managed, read-only, least-privilege ES API key for the Slack agent. The key
+    // Mint a managed, read-only, least-privilege ES API key for the agent. The key
     // is granted on behalf of the connecting user but survives their deletion (ES keys
     // outlive their owner). Because the grant intersects with the owner's privileges, the
     // connecting user must themselves hold every privilege below or the key is silently
