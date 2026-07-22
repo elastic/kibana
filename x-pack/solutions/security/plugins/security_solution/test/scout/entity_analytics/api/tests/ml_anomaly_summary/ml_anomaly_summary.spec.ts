@@ -28,7 +28,7 @@ import {
   entityTestData,
   ANOMALY_RECORD_IDS,
   SOURCE_EVENT_IDS,
-} from '../../../fixtures/ml_anomaly_summary_test_data';
+} from '../../fixtures/ml_anomaly_summary_test_data';
 
 const ML_ANOMALIES_SHARED_INDEX = '.ml-anomalies-shared';
 const ENTITY_STORE_LATEST_ALIAS = 'entities-latest-default';
