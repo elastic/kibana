@@ -66,6 +66,10 @@ export function registerUpdate(router: EntityStorePluginRouter) {
 
         try {
           await logsExtractionClient.updateConfig(req.body.logExtraction);
+          // Only the frequency drives the task schedule, so reschedule only when it was provided.
+          if (req.body.logExtraction?.frequency !== undefined) {
+            await assetManager.rescheduleLogExtraction();
+          }
         } catch (error) {
           if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
             return res.notFound({ body: { message: 'Entity store is not installed' } });

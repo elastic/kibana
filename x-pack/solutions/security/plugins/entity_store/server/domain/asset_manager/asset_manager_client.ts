@@ -29,9 +29,9 @@ import {
   type EngineDescriptorClient,
   type EntityStoreGlobalStateClient,
   HistorySnapshotState,
-  LogExtractionConfig,
 } from '../saved_objects';
-import type { HistorySnapshotBodyParams, LogExtractionInstallParams } from '../../routes/constants';
+import type { LogExtractionConfigInput } from '../saved_objects';
+import type { HistorySnapshotBodyParams } from '../../routes/constants';
 import {
   ENGINE_STATUS,
   ENTITY_STORE_CLUSTER_PRIVILEGES,
@@ -116,20 +116,15 @@ export class AssetManagerClient {
   public async init(
     request: KibanaRequest,
     entityTypes: EntityType[],
-    logsExtractionParams?: LogExtractionInstallParams,
+    logsExtractionInput?: LogExtractionConfigInput,
     historySnapshotParams?: HistorySnapshotBodyParams
   ) {
     try {
-      const existingState = await this.globalStateClient.find();
-      const logsExtraction = resolveLogsExtractionOnInstall(
-        existingState?.logsExtraction,
-        logsExtractionParams
-      );
       const historySnapshot = HistorySnapshotState.parse(historySnapshotParams ?? {});
 
       // Phase 1: Install shared ES assets/storage and run independent setup tasks.
       await Promise.all([
-        this.globalStateClient.init({ historySnapshot, logsExtraction }),
+        this.globalStateClient.init({ historySnapshot, logsExtraction: logsExtractionInput }),
 
         ...entityTypes.map((type) =>
           stopAndRemoveV1({
@@ -156,7 +151,7 @@ export class AssetManagerClient {
 
       // Phase 2: Initialize engines and start background tasks.
       await Promise.all([
-        ...entityTypes.map((type) => this.initEntity(request, type, logsExtraction)),
+        ...entityTypes.map((type) => this.initEntity(request, type)),
 
         scheduleHistorySnapshotTasks({
           logger: this.logger,
@@ -188,17 +183,18 @@ export class AssetManagerClient {
     }
   }
 
-  public async start(request: KibanaRequest, type: EntityType, { frequency }: LogExtractionConfig) {
+  public async start(request: KibanaRequest, type: EntityType) {
     try {
       this.logger.get(type).debug(`Scheduling extract entity task for type: ${type}`);
 
       await this.engineDescriptorClient.update(type, { status: ENGINE_STATUS.STARTED });
 
+      const { logsExtraction } = await this.globalStateClient.findOrThrow();
       await scheduleExtractEntityTask({
         logger: this.logger,
         taskManager: this.taskManager,
         type,
-        frequency,
+        frequency: logsExtraction.frequency,
         namespace: this.namespace,
         request,
       });
@@ -207,6 +203,19 @@ export class AssetManagerClient {
       await this.engineDescriptorClient.update(type, { status: ENGINE_STATUS.ERROR });
       throw error;
     }
+  }
+
+  public async rescheduleLogExtraction(): Promise<void> {
+    const started = (await this.engineDescriptorClient.getAll()).filter(
+      (engine) => engine.status === ENGINE_STATUS.STARTED
+    );
+    if (started.length === 0) {
+      return;
+    }
+
+    const { logsExtraction } = await this.globalStateClient.findOrThrow();
+    const taskIds = started.map((engine) => getExtractEntityTaskId(engine.type, this.namespace));
+    await this.taskManager.bulkUpdateSchedules(taskIds, { interval: logsExtraction.frequency });
   }
 
   public async stop(type: EntityType) {
@@ -315,19 +324,10 @@ export class AssetManagerClient {
     }
   }
 
-  public async getLogExtractionConfig(): Promise<LogExtractionConfig> {
-    const globalState = await this.globalStateClient.find();
-    return globalState?.logsExtraction ?? LogExtractionConfig.parse({});
-  }
-
-  private async initEntity(
-    request: KibanaRequest,
-    type: EntityType,
-    logsExtractionConfig: LogExtractionConfig
-  ): Promise<boolean> {
+  private async initEntity(request: KibanaRequest, type: EntityType): Promise<boolean> {
     const installed = await this.install(type);
     if (installed) {
-      await this.start(request, type, logsExtractionConfig);
+      await this.start(request, type);
     }
     this.analytics.reportEvent(ENTITY_STORE_INITIALIZATION_EVENT, {
       entityType: type,
@@ -548,18 +548,4 @@ export class AssetManagerClient {
 
     return ENTITY_STORE_STATUS.RUNNING;
   }
-}
-
-function resolveLogsExtractionOnInstall(
-  existing: LogExtractionConfig | undefined,
-  params: LogExtractionInstallParams | undefined
-): LogExtractionConfig {
-  const hasParams = params !== undefined && Object.keys(params).length > 0;
-  if (hasParams) {
-    return LogExtractionConfig.parse(params);
-  }
-  if (existing !== undefined) {
-    return existing;
-  }
-  return LogExtractionConfig.parse({});
 }

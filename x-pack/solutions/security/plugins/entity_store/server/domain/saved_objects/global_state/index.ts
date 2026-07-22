@@ -11,8 +11,14 @@ import type {
 } from '@kbn/core-saved-objects-api-server';
 import { SavedObjectsErrorHelpers, type Logger } from '@kbn/core/server';
 import Boom from '@hapi/boom';
-import { EntityStoreGlobalState, HistorySnapshotState, LogExtractionConfig } from './constants';
+import { HistorySnapshotState, LogExtractionConfig, toLogExtractionOverrides } from './constants';
+import type {
+  LogExtractionConfigInput,
+  StoredEntityStoreGlobalState,
+  EntityStoreGlobalState,
+} from './constants';
 import { EntityStoreGlobalStateTypeName } from './types';
+import { retryOnConflict } from '../../../infra/retry_on_conflict';
 
 export class EntityStoreGlobalStateClient {
   constructor(
@@ -23,71 +29,67 @@ export class EntityStoreGlobalStateClient {
 
   async find(): Promise<EntityStoreGlobalState | undefined> {
     const response = await this.findSO();
-    if (response.total === 0) {
-      return undefined;
-    }
-    // Apply zod defaults to the persisted attributes so that fields added in newer Kibana
-    // versions (e.g. `maxTimeWindowSize`) are populated for SOs that were written before the
-    // field existed. This avoids `undefined` reaching consumers like `parseDurationToMs`.
-    return EntityStoreGlobalState.parse(response.saved_objects[0].attributes);
+    return response.total === 0 ? undefined : this.resolve(response.saved_objects[0].attributes);
   }
 
   async findOrThrow(): Promise<EntityStoreGlobalState> {
-    const response = await this.find();
-    if (response === undefined) {
-      throw SavedObjectsErrorHelpers.createGenericNotFoundError(
-        'No global state found for this namespace'
-      );
-    }
-    return response;
+    return this.resolve((await this.findSOOrThrow()).attributes);
   }
 
-  async init(
-    initialState?: Partial<EntityStoreGlobalState>
-  ): Promise<Partial<EntityStoreGlobalState>> {
-    const existing = await this.find();
-    if (existing !== undefined) {
-      return this.updateInternal(this.getSavedObjectId(), initialState ?? {});
-    }
-
-    const id = this.getSavedObjectId();
-    this.logger.debug(`Creating global state with id ${id}`);
-
+  async init(initialState?: {
+    historySnapshot?: HistorySnapshotState;
+    logsExtraction?: LogExtractionConfigInput;
+  }): Promise<void> {
     const historySnapshot = HistorySnapshotState.parse(initialState?.historySnapshot ?? {});
-    const logsExtraction = LogExtractionConfig.parse(initialState?.logsExtraction ?? {});
-    const defaultState: EntityStoreGlobalState = {
-      historySnapshot,
-      logsExtraction,
-    };
-    const parsed = EntityStoreGlobalState.parse(defaultState);
 
-    const { attributes } = await this.soClient.create<EntityStoreGlobalState>(
-      EntityStoreGlobalStateTypeName,
-      parsed,
-      { id }
-    );
+    // Ensure the SO exists, then persist overrides via the single write path only when params are given:
+    //  - fresh install: create with no overrides, so every field tracks defaults
+    //  - re-install with params: overwrite the stored overrides
+    //  - re-install without params: leave existing overrides untouched
+    const response = await this.findSO();
+    if (response.total === 0) {
+      const id = this.getSavedObjectId();
+      this.logger.debug(`Creating global state with id ${id}`);
+      await this.soClient.create<StoredEntityStoreGlobalState>(
+        EntityStoreGlobalStateTypeName,
+        { historySnapshot, logsExtraction: {} },
+        { id, refresh: 'wait_for' }
+      );
+    } else {
+      await this.update({ historySnapshot });
+    }
 
-    return attributes;
+    const logsExtraction = initialState?.logsExtraction;
+    if (logsExtraction !== undefined) {
+      await retryOnConflict(() => this.writeLogsExtractionOverrides(logsExtraction));
+    }
   }
 
-  async update(partial: Partial<EntityStoreGlobalState>): Promise<Partial<EntityStoreGlobalState>> {
+  async update(partial: Partial<StoredEntityStoreGlobalState>): Promise<void> {
     await this.findOrThrow();
-
-    const id = this.getSavedObjectId();
-    return this.updateInternal(id, partial);
-  }
-
-  private async updateInternal(
-    id: string,
-    partial: Partial<EntityStoreGlobalState>
-  ): Promise<Partial<EntityStoreGlobalState>> {
-    const { attributes } = await this.soClient.update<EntityStoreGlobalState>(
+    await this.soClient.update<StoredEntityStoreGlobalState>(
       EntityStoreGlobalStateTypeName,
-      id,
+      this.getSavedObjectId(),
       partial,
       { refresh: 'wait_for', mergeAttributes: true }
     );
-    return attributes;
+  }
+
+  /**
+   * Persists the config as sparse overrides, replacing `logsExtraction` wholesale (a merge can't
+   * remove a field reset to its default). Reads the doc to preserve `historySnapshot` and writes with
+   * a version guard, so it throws on a concurrent write — callers retry on conflict where it matters.
+   */
+  async writeLogsExtractionOverrides(config: Partial<LogExtractionConfig>): Promise<void> {
+    const logsExtraction = toLogExtractionOverrides(config);
+
+    const { id, version, attributes } = await this.findSOOrThrow();
+    await this.soClient.update<StoredEntityStoreGlobalState>(
+      EntityStoreGlobalStateTypeName,
+      id,
+      { historySnapshot: attributes.historySnapshot, logsExtraction },
+      { refresh: 'wait_for', mergeAttributes: false, version }
+    );
   }
 
   async delete(): Promise<void> {
@@ -108,15 +110,33 @@ export class EntityStoreGlobalStateClient {
     }
   }
 
+  // Only overrides are persisted; every other field is resolved here from the current defaults.
+  private resolve(attributes: StoredEntityStoreGlobalState): EntityStoreGlobalState {
+    return {
+      historySnapshot: HistorySnapshotState.parse(attributes.historySnapshot ?? {}),
+      logsExtraction: LogExtractionConfig.parse(attributes.logsExtraction ?? {}),
+    };
+  }
+
   private getSavedObjectId(): string {
     return `${EntityStoreGlobalStateTypeName}-${this.namespace}`;
   }
 
-  private findSO(): Promise<SavedObjectsFindResponse<EntityStoreGlobalState>> {
-    return this.soClient.find<EntityStoreGlobalState>({
+  private findSO(): Promise<SavedObjectsFindResponse<StoredEntityStoreGlobalState>> {
+    return this.soClient.find<StoredEntityStoreGlobalState>({
       type: EntityStoreGlobalStateTypeName,
       namespaces: [this.namespace],
       perPage: 1,
     });
+  }
+
+  private async findSOOrThrow() {
+    const response = await this.findSO();
+    if (response.total === 0) {
+      throw SavedObjectsErrorHelpers.createGenericNotFoundError(
+        'No global state found for this namespace'
+      );
+    }
+    return response.saved_objects[0];
   }
 }

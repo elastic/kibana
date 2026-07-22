@@ -42,6 +42,7 @@ import { capAtMaxLogsPerWindow, pickSampleProbability } from './effective_page_l
 import { getLatestEntitiesIndexName } from '../../../common/domain/entity_index';
 import { getUpdatesEntitiesDataStreamName } from '../asset_manager/updates_data_stream';
 import { executeEsqlQuery } from '../../infra/elasticsearch/esql';
+import { retryOnConflict } from '../../infra/retry_on_conflict';
 import { ingestEntities } from '../../infra/elasticsearch/ingest';
 import { resolveClosedIndexAdjustments } from '../../infra/elasticsearch/resolve_closed_indices';
 import {
@@ -50,6 +51,7 @@ import {
 } from '../asset_manager/external_indices_contants';
 import {
   type LogExtractionConfig,
+  type LogExtractionConfigInput,
   LogExtractionConfig as LogExtractionConfigSchema,
 } from '../saved_objects';
 import {
@@ -60,7 +62,6 @@ import {
 import { ENGINE_STATUS } from '../constants';
 import type { RemoteLogsExtractionClient } from './remote';
 import { EntityStoreNotRunningError } from '../errors';
-import type { LogExtractionUpdateParams } from '../../routes/constants';
 
 /** Engine state with all cursor fields cleared. Used between sub-window iterations so a fresh
  * sub-window does not re-trigger recovery from cursors persisted by an earlier sub-window. */
@@ -213,14 +214,16 @@ export class LogsExtractionClient {
     }
   }
 
-  public async updateConfig(params: LogExtractionUpdateParams): Promise<LogExtractionConfig> {
+  public async updateConfig(
+    logsExtractionInput: LogExtractionConfigInput
+  ): Promise<LogExtractionConfig> {
     const globalState = await this.globalStateClient.findOrThrow();
-    const mergedConfig = LogExtractionConfigSchema.parse({
-      ...globalState.logsExtraction,
-      ...params,
-    });
-    await this.globalStateClient.update({ logsExtraction: mergedConfig });
-    return mergedConfig;
+    // Shallow merge is intentional: the config is flat (primitives + string arrays, no nested
+    // objects), and arrays should replace wholesale rather than element-merge.
+    const merged = { ...globalState.logsExtraction, ...logsExtractionInput };
+    // Retry only on a version conflict (a concurrent history-snapshot write).
+    await retryOnConflict(() => this.globalStateClient.writeLogsExtractionOverrides(merged));
+    return LogExtractionConfigSchema.parse(merged);
   }
 
   private async runQueryAndIngestDocs({

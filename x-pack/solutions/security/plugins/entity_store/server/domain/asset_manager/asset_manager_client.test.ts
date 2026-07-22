@@ -14,14 +14,17 @@ import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { AssetManagerClient } from './asset_manager_client';
-import { LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT } from '../saved_objects/global_state/constants';
 import {
   installSharedElasticsearchAssets,
   installIndicesAndDataStreams,
   uninstallElasticsearchAssets,
 } from './install_assets';
 import { installEuidStoredScripts, deleteEuidStoredScripts } from './euid_stored_scripts';
-import { scheduleExtractEntityTask, stopExtractEntityTask } from '../../tasks/extract_entity_task';
+import {
+  getExtractEntityTaskId,
+  scheduleExtractEntityTask,
+  stopExtractEntityTask,
+} from '../../tasks/extract_entity_task';
 import {
   scheduleHistorySnapshotTasks,
   stopHistorySnapshotTask,
@@ -89,6 +92,7 @@ describe('AssetManagerClient', () => {
     find: jest.Mock;
     delete: jest.Mock;
   };
+  let mockTaskManager: { bulkUpdateSchedules: jest.Mock };
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -124,10 +128,12 @@ describe('AssetManagerClient', () => {
       delete: jest.fn().mockResolvedValue(undefined),
     };
 
+    mockTaskManager = { bulkUpdateSchedules: jest.fn().mockResolvedValue(undefined) };
+
     client = new AssetManagerClient({
       logger: loggerMock.create(),
       esClient: {} as jest.Mocked<ElasticsearchClient>,
-      taskManager: {} as jest.Mocked<TaskManagerStartContract>,
+      taskManager: mockTaskManager as unknown as jest.Mocked<TaskManagerStartContract>,
       engineDescriptorClient:
         mockEngineDescriptorClient as unknown as import('../saved_objects').EngineDescriptorClient,
       globalStateClient:
@@ -284,106 +290,60 @@ describe('AssetManagerClient', () => {
     });
   });
 
-  describe('logsExtraction resolution on install', () => {
-    const existingLogsExtraction = {
-      additionalIndexPatterns: ['existing-*'],
-      fieldHistoryLength: 99,
-      lookbackPeriod: '12h',
-      delay: '5m',
-      docsLimit: 1234,
-      maxLogsPerPage: 5678,
-      timeout: '60s',
-      frequency: '2m',
-    };
-
-    it('fresh install with no params applies defaults', async () => {
-      mockGlobalStateClient.find.mockResolvedValue(undefined);
-
-      await client.init({} as KibanaRequest, ['host']);
+  describe('log extraction on install', () => {
+    it('forwards the provided input to global state for persistence', async () => {
+      await client.init({} as KibanaRequest, ['host'], { delay: '2m', frequency: '5m' });
 
       expect(mockGlobalStateClient.init).toHaveBeenCalledWith(
-        expect.objectContaining({
-          logsExtraction: expect.objectContaining({
-            additionalIndexPatterns: [],
-            fieldHistoryLength: 10,
-            lookbackPeriod: '3h',
-            delay: '1m',
-            frequency: '1m',
-            docsLimit: 10000,
-            maxLogsPerPage: LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT,
-            timeout: '59s',
-          }),
-        })
+        expect.objectContaining({ logsExtraction: { delay: '2m', frequency: '5m' } })
       );
     });
 
-    it('fresh install with params merges params with defaults', async () => {
-      mockGlobalStateClient.find.mockResolvedValue(undefined);
-
-      await client.init({} as KibanaRequest, ['host'], { delay: '2m', frequency: '1m' });
-
-      expect(mockGlobalStateClient.init).toHaveBeenCalledWith(
-        expect.objectContaining({
-          logsExtraction: expect.objectContaining({
-            delay: '2m',
-            frequency: '1m',
-            lookbackPeriod: '3h',
-            fieldHistoryLength: 10,
-            additionalIndexPatterns: [],
-            docsLimit: 10000,
-            maxLogsPerPage: LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT,
-          }),
-        })
-      );
-    });
-
-    it('re-install with no params preserves existing config', async () => {
-      mockGlobalStateClient.find.mockResolvedValue({
+    it('schedules the extract task with the frequency from the persisted config', async () => {
+      // start reads the resolved config back from global state — that single source drives the schedule.
+      mockGlobalStateClient.findOrThrow.mockResolvedValue({
         historySnapshot: {},
-        logsExtraction: existingLogsExtraction,
+        logsExtraction: { frequency: '7m' },
       });
 
       await client.init({} as KibanaRequest, ['host']);
 
-      expect(mockGlobalStateClient.init).toHaveBeenCalledWith(
-        expect.objectContaining({ logsExtraction: existingLogsExtraction })
+      expect(mockScheduleExtractEntityTask).toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'host', frequency: '7m' })
       );
     });
+  });
 
-    it('re-install with empty params object preserves existing config', async () => {
-      mockGlobalStateClient.find.mockResolvedValue({
-        historySnapshot: {},
-        logsExtraction: existingLogsExtraction,
-      });
-
-      await client.init({} as KibanaRequest, ['host'], {});
-
-      expect(mockGlobalStateClient.init).toHaveBeenCalledWith(
-        expect.objectContaining({ logsExtraction: existingLogsExtraction })
-      );
+  describe('rescheduleLogExtraction', () => {
+    beforeEach(() => {
+      jest.mocked(getExtractEntityTaskId).mockImplementation((type, ns) => `extract:${type}:${ns}`);
     });
 
-    it('re-install with params overwrites existing config with parsed params', async () => {
-      mockGlobalStateClient.find.mockResolvedValue({
+    it('reschedules only the started engines to the configured frequency', async () => {
+      mockEngineDescriptorClient.getAll.mockResolvedValue([
+        { type: 'host', status: 'started' },
+        { type: 'user', status: 'stopped' },
+      ]);
+      mockGlobalStateClient.findOrThrow.mockResolvedValue({
         historySnapshot: {},
-        logsExtraction: existingLogsExtraction,
+        logsExtraction: { frequency: '7m' },
       });
 
-      await client.init({} as KibanaRequest, ['host'], { delay: '2m' });
+      await client.rescheduleLogExtraction();
 
-      expect(mockGlobalStateClient.init).toHaveBeenCalledWith(
-        expect.objectContaining({
-          logsExtraction: expect.objectContaining({
-            delay: '2m',
-            frequency: '1m',
-            lookbackPeriod: '3h',
-            fieldHistoryLength: 10,
-            additionalIndexPatterns: [],
-            docsLimit: 10000,
-            maxLogsPerPage: LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT,
-          }),
-        })
-      );
+      expect(mockTaskManager.bulkUpdateSchedules).toHaveBeenCalledTimes(1);
+      const [taskIds, schedule] = mockTaskManager.bulkUpdateSchedules.mock.calls[0];
+      expect(schedule).toEqual({ interval: '7m' });
+      expect(taskIds).toHaveLength(1);
+      expect(taskIds[0]).toContain('host');
+    });
+
+    it('does nothing when there are no started engines', async () => {
+      mockEngineDescriptorClient.getAll.mockResolvedValue([{ type: 'host', status: 'stopped' }]);
+
+      await client.rescheduleLogExtraction();
+
+      expect(mockTaskManager.bulkUpdateSchedules).not.toHaveBeenCalled();
     });
   });
 });

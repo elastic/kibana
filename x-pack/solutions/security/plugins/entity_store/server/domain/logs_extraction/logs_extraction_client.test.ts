@@ -138,7 +138,12 @@ function createMockGlobalStateClient(
     excludedIndexPatterns: string[];
     additionalIndexPatterns: string[];
   }>
-): jest.Mocked<Pick<EntityStoreGlobalStateClient, 'find' | 'findOrThrow' | 'update'>> {
+): jest.Mocked<
+  Pick<
+    EntityStoreGlobalStateClient,
+    'find' | 'findOrThrow' | 'update' | 'writeLogsExtractionOverrides'
+  >
+> {
   const logsExtraction = LogExtractionConfig.parse({
     docsLimit: 10000,
     additionalIndexPatterns: logExtractionOverrides?.additionalIndexPatterns ?? [],
@@ -157,6 +162,7 @@ function createMockGlobalStateClient(
     find: jest.fn().mockResolvedValue(state),
     findOrThrow: jest.fn().mockResolvedValue(state),
     update: jest.fn().mockResolvedValue({}),
+    writeLogsExtractionOverrides: jest.fn().mockResolvedValue(undefined),
   };
 }
 
@@ -1685,13 +1691,13 @@ describe('LogsExtractionClient', () => {
   });
 
   describe('updateConfig', () => {
-    it('should merge provided params over current config and persist via globalStateClient', async () => {
+    it('should merge provided params over current config and persist sparse overrides', async () => {
       await client.updateConfig({ delay: '5m' });
 
       expect(mockGlobalStateClient.findOrThrow).toHaveBeenCalledTimes(1);
-      expect(mockGlobalStateClient.update).toHaveBeenCalledWith({
-        logsExtraction: expect.objectContaining({ delay: '5m' }),
-      });
+      expect(mockGlobalStateClient.writeLogsExtractionOverrides).toHaveBeenCalledWith(
+        expect.objectContaining({ delay: '5m' })
+      );
     });
 
     it('should return the merged config', async () => {
@@ -1743,7 +1749,7 @@ describe('LogsExtractionClient', () => {
       await expect(client.updateConfig({ delay: '5m' })).rejects.toThrow(
         'No global state found for this namespace'
       );
-      expect(mockGlobalStateClient.update).not.toHaveBeenCalled();
+      expect(mockGlobalStateClient.writeLogsExtractionOverrides).not.toHaveBeenCalled();
     });
   });
 });

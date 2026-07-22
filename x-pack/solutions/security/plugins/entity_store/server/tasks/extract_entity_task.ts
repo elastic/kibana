@@ -9,7 +9,7 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import type { RunContext, RunResult } from '@kbn/task-manager-plugin/server/task';
+import type { IntervalSchedule, RunContext, RunResult } from '@kbn/task-manager-plugin/server/task';
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core/server';
 import moment from 'moment';
@@ -30,7 +30,17 @@ export function getExtractEntityTaskId(entityType: EntityType, namespace: string
   return `${getTaskType(entityType)}:${namespace}`;
 }
 
-async function runTask({
+/** The schedule the task should reschedule to, or undefined when it already matches the config. */
+function getNextInterval(
+  currentInterval: string | undefined,
+  targetInterval: string | undefined
+): IntervalSchedule | undefined {
+  return targetInterval !== undefined && targetInterval !== currentInterval
+    ? { interval: targetInterval }
+    : undefined;
+}
+
+export async function runTask({
   taskInstance,
   fakeRequest,
   abortController,
@@ -107,8 +117,14 @@ async function runTask({
       status: 'success',
     };
 
+    // Self-heal: converge the task interval to the resolved config so a changed default reaches a
+    // running deployment on its next run.
+    const { logsExtraction } = (await logsExtractionClient.globalStateClient.find()) ?? {};
+    const schedule = getNextInterval(taskInstance.schedule?.interval, logsExtraction?.frequency);
+
     return {
       state: updatedState,
+      ...(schedule && { schedule }),
     };
   } catch (e) {
     logger.error(`Error running extract entity task, received ${e.message}`);

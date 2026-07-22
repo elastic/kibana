@@ -5,14 +5,19 @@
  * 2.0.
  */
 
-import type { SavedObjectsFullModelVersion } from '@kbn/core-saved-objects-server';
+import type {
+  SavedObjectsFullModelVersion,
+  SavedObjectModelUnsafeTransformFn,
+} from '@kbn/core-saved-objects-server';
 import type { SavedObjectsType } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import {
   LOG_EXTRACTION_MAX_TIME_WINDOW_SIZE_DEFAULT,
   LOG_EXTRACTION_MAX_LOGS_PER_WINDOW_DEFAULT,
   LOG_EXTRACTION_CAP_BEHAVIOR_DEFAULT,
+  toLogExtractionOverrides,
 } from './constants';
+import type { StoredEntityStoreGlobalState } from './constants';
 
 export const EntityStoreGlobalStateTypeName = 'entity-store-global-state';
 
@@ -120,11 +125,34 @@ const version3: SavedObjectsFullModelVersion = {
   },
 };
 
+// One-time conversion of existing fully-resolved configs into sparse overrides (drop any field equal
+// to the current default). Needs `unsafe_transform` because `data_backfill` can only add, not remove.
+export const sparsifyLogExtractionOverrides: SavedObjectModelUnsafeTransformFn<
+  StoredEntityStoreGlobalState,
+  StoredEntityStoreGlobalState
+> = (doc) => {
+  const logsExtraction = toLogExtractionOverrides(doc.attributes.logsExtraction ?? {});
+  return { document: { ...doc, attributes: { ...doc.attributes, logsExtraction } } };
+};
+
+const version4: SavedObjectsFullModelVersion = {
+  changes: [
+    {
+      type: 'unsafe_transform',
+      transformFn: (typeSafeGuard) => typeSafeGuard(sparsifyLogExtractionOverrides),
+    },
+  ],
+  schemas: {
+    create: globalStateSchemaV3,
+    forwardCompatibility: globalStateSchemaV3.extends({}, { unknowns: 'ignore' }),
+  },
+};
+
 export const EntityStoreGlobalStateType: SavedObjectsType = {
   name: EntityStoreGlobalStateTypeName,
   hidden: false,
   namespaceType: 'multiple-isolated',
   mappings: EntityStoreGlobalStateTypeMappings,
-  modelVersions: { 1: version1, 2: version2, 3: version3 },
+  modelVersions: { 1: version1, 2: version2, 3: version3, 4: version4 },
   hiddenFromHttpApis: true,
 };
