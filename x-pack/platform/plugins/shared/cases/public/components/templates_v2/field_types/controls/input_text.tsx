@@ -22,7 +22,7 @@ import {
   FIELD_PATTERN_MISMATCH,
   FIELD_PATTERN_INVALID,
 } from '../../translations';
-import { OptionalFieldLabel } from '../../../optional_field_label';
+import { getFieldRequirementLabel } from '../../../optional_field_label';
 import { InlineFieldActions } from './inline_field_actions';
 
 type InputTextProps = z.infer<typeof InputTextFieldSchema> & ConditionRenderProps;
@@ -32,6 +32,7 @@ export const InputText = ({
   name,
   type,
   isRequired,
+  isRequiredOnClose,
   patternValidation,
   minLength,
   maxLength,
@@ -92,7 +93,7 @@ export const InputText = ({
           <>
             <EuiFormRow
               label={label}
-              labelAppend={!isRequired ? OptionalFieldLabel : undefined}
+              labelAppend={getFieldRequirementLabel(isRequired, isRequiredOnClose)}
               isInvalid={Boolean(fieldState.error)}
               error={fieldState.error?.message}
               fullWidth

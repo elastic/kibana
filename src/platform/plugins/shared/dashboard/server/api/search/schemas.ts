@@ -56,6 +56,24 @@ export const legacySearchRequestParamsSchema = schema.object({
       },
     })
   ),
+  tag_names: schema.maybe(
+    schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { maxSize: 100 })], {
+      meta: {
+        availability: { stability: 'stable', since: '9.6.0' },
+        description:
+          'A tag name to include. Accepts a single tag name or multiple tag names. When multiple are specified, dashboards matching any of the tag names are included. If the same name is shared by multiple tags, dashboards matching any of those tags are included.',
+      },
+    })
+  ),
+  excluded_tag_names: schema.maybe(
+    schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { maxSize: 100 })], {
+      meta: {
+        availability: { stability: 'stable', since: '9.6.0' },
+        description:
+          'A tag name to exclude. Accepts a single tag name or multiple tag names. When multiple are specified, dashboards matching any of the tag names are excluded. If the same name is shared by multiple tags, dashboards matching any of those tags are excluded.',
+      },
+    })
+  ),
 });
 
 export const legacySearchResponseBodySchema = schema.object({
