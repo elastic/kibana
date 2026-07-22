@@ -9,7 +9,7 @@ import type { Ref } from 'react';
 import React from 'react';
 import type { EuiFieldTextProps } from '@elastic/eui';
 import { EuiFieldText, EuiForm, EuiFormRow, EuiSpacer } from '@elastic/eui';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { i18n } from '@kbn/i18n';
 import { useFormContext, useFormState } from 'react-hook-form';
 import { selectAgentPolicies } from '../../../state/agent_policies';

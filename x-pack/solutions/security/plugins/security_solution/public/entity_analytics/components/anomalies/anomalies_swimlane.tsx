@@ -8,13 +8,17 @@
 import {
   Chart,
   Heatmap,
+  type HeatmapCellDatum,
   type HeatmapStyle,
   type Predicate,
   type RecursivePartial,
   ScaleType,
   Settings,
+  Tooltip,
+  TooltipContainer,
+  type CustomTooltip,
 } from '@elastic/charts';
-import { EuiFlexItem } from '@elastic/eui';
+import { EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
@@ -22,12 +26,14 @@ import { deriveBucketInterval } from '../../../../common/entity_analytics/anomal
 import { getAnomalyChartStyling } from '../recent_anomalies/anomaly_chart_styling';
 import type { AnomalyBand } from '../recent_anomalies/anomaly_bands';
 import {
+  ENTITY_ANOMALIES_SWIMLANE_ANOMALY_COUNT,
   ENTITY_ANOMALIES_SWIMLANE_MAX_SCORE,
   ENTITY_ANOMALIES_SWIMLANE_X_AXIS_LABEL,
 } from './translations';
 
 const SWIMLANE_X_ACCESSOR_KEY = '@timestamp';
 const SWIMLANE_Y_ACCESSOR_KEY = 'record_score';
+const SWIMLANE_COUNT_ACCESSOR_KEY = 'count';
 
 const heatmapComponentStyle: RecursivePartial<HeatmapStyle> = {
   brushTool: {
@@ -61,6 +67,16 @@ const dateLabelFormatter = new Intl.DateTimeFormat(i18n.getLocale(), {
   year: 'numeric',
 });
 
+const dateTimeLabelFormatter = new Intl.DateTimeFormat(i18n.getLocale(), {
+  month: 'long',
+  day: 'numeric',
+  year: 'numeric',
+  hour: '2-digit',
+  minute: '2-digit',
+  hour12: false,
+  timeZone: 'UTC',
+});
+
 /** Formats x-axis ticks as "May 25, 2026". */
 const formatDateTick = (value: string | number): string => {
   const ms = typeof value === 'number' ? value : Number(value);
@@ -69,6 +85,92 @@ const formatDateTick = (value: string | number): string => {
   }
   return dateLabelFormatter.format(new Date(ms));
 };
+
+function getSeverityColor(score: number, bands: AnomalyBand[]): string | undefined {
+  return bands.find((band) => score >= band.start && score < band.end)?.color;
+}
+
+function createSwimlaneTooltip(
+  bucketIntervalMs: number,
+  records: Array<Record<string, unknown>>,
+  yAxisLabel: string,
+  anomalyBands: AnomalyBand[]
+): CustomTooltip<HeatmapCellDatum> {
+  const SwimlaneTooltip: CustomTooltip<HeatmapCellDatum> = ({ values }) => {
+    const { euiTheme } = useEuiTheme();
+    const datum = values[0]?.datum;
+    if (!datum) return null;
+
+    const bucketStart = datum.x as number;
+    const bucketEnd = bucketStart + bucketIntervalMs;
+    const yValue = datum.y as string;
+    const maxScore = datum.value;
+    const count = (records[datum.originalIndex]?.[SWIMLANE_COUNT_ACCESSOR_KEY] as number) ?? 0;
+    const severityColor = getSeverityColor(maxScore, anomalyBands);
+
+    const timeRange = `${dateTimeLabelFormatter.format(
+      bucketStart
+    )} – ${dateTimeLabelFormatter.format(bucketEnd)}`;
+
+    const rows = [
+      { label: yAxisLabel, value: yValue },
+      { label: ENTITY_ANOMALIES_SWIMLANE_ANOMALY_COUNT, value: String(count) },
+      {
+        label: ENTITY_ANOMALIES_SWIMLANE_MAX_SCORE,
+        value: maxScore.toFixed(2),
+        swatch: severityColor,
+      },
+    ];
+
+    return (
+      <TooltipContainer>
+        <div style={{ minWidth: 240 }}>
+          <div
+            style={{
+              fontWeight: euiTheme.font.weight.bold,
+              padding: `${euiTheme.size.s} ${euiTheme.size.m}`,
+              borderBottom: euiTheme.border.thin,
+            }}
+          >
+            {timeRange}
+          </div>
+          <div style={{ padding: `${euiTheme.size.xxs} 0` }}>
+            {rows.map(({ label, value, swatch }) => (
+              <div
+                key={label}
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  gap: euiTheme.size.l,
+                  padding: `1px ${euiTheme.size.m}`,
+                  position: 'relative',
+                }}
+              >
+                {swatch && (
+                  <span
+                    style={{
+                      position: 'absolute',
+                      left: 0,
+                      top: 0,
+                      bottom: 0,
+                      width: 6,
+                      borderRadius: 1,
+                      backgroundColor: swatch,
+                    }}
+                  />
+                )}
+                <span>{label}</span>
+                <span>{value}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </TooltipContainer>
+    );
+  };
+
+  return SwimlaneTooltip;
+}
 
 interface AnomaliesSwimlaneProps {
   anomalyBands: AnomalyBand[];
@@ -96,6 +198,11 @@ export const AnomaliesSwimlane: React.FC<AnomaliesSwimlaneProps> = ({
   const xDomain = useMemo(() => ({ min: from, max: to }), [from, to]);
   const bucketInterval = useMemo(() => deriveBucketInterval(from, to), [from, to]);
 
+  const swimlaneTooltip = useMemo(
+    () => createSwimlaneTooltip(bucketInterval.ms, records, yAxisLabel, anomalyBands),
+    [bucketInterval.ms, records, yAxisLabel, anomalyBands]
+  );
+
   const chartBands = useMemo(
     () => anomalyBands.map(({ start, end, color }) => ({ start, end, color })),
     [anomalyBands]
@@ -111,6 +218,7 @@ export const AnomaliesSwimlane: React.FC<AnomaliesSwimlaneProps> = ({
       }}
     >
       <Chart>
+        <Tooltip customTooltip={swimlaneTooltip} />
         <Settings
           baseTheme={baseTheme}
           locale={i18n.getLocale()}
