@@ -95,15 +95,14 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    it('logs custom fields from the task in the task-run event', async () => {
+    it('logs custom fields from the task under kibana.task.data in the task-run event', async () => {
       const scheduledTask = await scheduleTask({
         taskType: 'sampleTask',
         params: {
           addEventFields: {
-            tags: ['custom-task-run-tag'],
-            kibana: {
-              saved_objects: [{ rel: 'primary', type: 'sample-type', id: 'sample-id' }],
-            },
+            alert_event_count: 5,
+            source: 'sample-source',
+            nested: { value: 'sample-value' },
           },
         },
       });
@@ -129,10 +128,11 @@ export default function ({ getService }: FtrProviderContext) {
 
         const event = response.hits.hits[0]._source as Record<string, any>;
         // custom fields provided by the task
-        expect(event.tags).to.contain('custom-task-run-tag');
-        expect(event.kibana.saved_objects).to.eql([
-          { rel: 'primary', type: 'sample-type', id: 'sample-id' },
-        ]);
+        expect(event.kibana.task.data).to.eql({
+          alert_event_count: 5,
+          source: 'sample-source',
+          nested: { value: 'sample-value' },
+        });
         // task manager owned fields
         expect(event.event.action).to.eql('task-run');
         expect(event.event.outcome).to.eql('success');

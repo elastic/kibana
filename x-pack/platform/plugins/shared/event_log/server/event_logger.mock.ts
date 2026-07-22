@@ -10,7 +10,6 @@ import type { IEventLogger } from './types';
 const createEventLoggerMock = () => {
   const mock: jest.Mocked<IEventLogger> = {
     logEvent: jest.fn(),
-    isValidEvent: jest.fn(),
     updateEvents: jest.fn(),
     startTiming: jest.fn(),
     stopTiming: jest.fn(),

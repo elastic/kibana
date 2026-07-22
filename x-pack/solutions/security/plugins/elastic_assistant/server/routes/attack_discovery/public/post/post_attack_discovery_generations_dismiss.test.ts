@@ -48,7 +48,6 @@ describe('postAttackDiscoveryGenerationsDismissRoute', () => {
     context.elasticAssistant.eventLogIndex = 'event-log-index';
     context.elasticAssistant.eventLogger = {
       logEvent: jest.fn().mockResolvedValue(undefined),
-      isValidEvent: jest.fn(),
       startTiming: jest.fn(),
       stopTiming: jest.fn(),
       updateEvents: jest.fn(),

@@ -15,7 +15,7 @@ import apm from 'elastic-apm-node';
 import { withActiveSpan } from '@kbn/tracing-utils';
 import { v4 as uuidv4 } from 'uuid';
 import { addSpanLabels, withSpan } from '@kbn/apm-utils';
-import { flow, identity, merge, omit } from 'lodash';
+import { flow, identity, omit } from 'lodash';
 import type { ExecutionContextStart, Logger } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { FakeRequestEnricher } from '@kbn/core-security-server';
@@ -1128,22 +1128,6 @@ export class TaskManagerRunner implements TaskRunner {
     this.taskRunEventCustomFields = fields;
   };
 
-  private logEventWithCustomFields(event: Record<string, unknown>): void {
-    if (this.taskRunEventCustomFields) {
-      const enrichedEvent = merge({}, this.taskRunEventCustomFields, event);
-      const isValid = this.eventLogger.isValidEvent(enrichedEvent);
-      if (isValid) {
-        this.eventLogger.logEvent(enrichedEvent);
-        return;
-      } else {
-        this.logger.warn(
-          `Custom event log fields for task ${this.taskType} "${this.id}" are invalid; will log the task manager event without the custom fields.`
-        );
-      }
-    }
-    this.eventLogger.logEvent(event);
-  }
-
   private logTaskRunStartEvent(task: ConcreteTaskInstance, startedAt: Date): void {
     const scheduleDelayNs = task.scheduledAt
       ? millisToNanos(startedAt.getTime() - task.scheduledAt.getTime())
@@ -1181,7 +1165,7 @@ export class TaskManagerRunner implements TaskRunner {
           ...(error.stack ? { stack_trace: error.stack } : {}),
         }
       : {};
-    this.logEventWithCustomFields({
+    this.eventLogger.logEvent({
       event: {
         action: EVENT_LOG_ACTIONS.taskRun,
         outcome,
@@ -1197,6 +1181,7 @@ export class TaskManagerRunner implements TaskRunner {
           scheduled: task.scheduledAt.toISOString(),
           schedule_delay: scheduleDelayNs,
           execution: { uuid: this.uuid },
+          ...(this.taskRunEventCustomFields ? { data: this.taskRunEventCustomFields } : {}),
         },
       },
       message,
@@ -1206,7 +1191,7 @@ export class TaskManagerRunner implements TaskRunner {
 
   private logTaskCancelEvent(task: ConcreteTaskInstance, taskTiming: TaskTiming): void {
     const runDurationNs = millisToNanos(taskTiming.stop - taskTiming.start);
-    this.logEventWithCustomFields({
+    this.eventLogger.logEvent({
       event: {
         action: EVENT_LOG_ACTIONS.taskCancel,
         duration: runDurationNs,
@@ -1219,6 +1204,7 @@ export class TaskManagerRunner implements TaskRunner {
           type: this.taskType,
           scheduled: task.scheduledAt.toISOString(),
           execution: { uuid: this.uuid },
+          ...(this.taskRunEventCustomFields ? { data: this.taskRunEventCustomFields } : {}),
         },
       },
       message: `Task ${this.taskType} "${this.id}" has been cancelled.`,

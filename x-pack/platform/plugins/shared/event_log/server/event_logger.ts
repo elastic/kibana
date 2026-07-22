@@ -61,7 +61,8 @@ export class EventLogger implements IEventLogger {
     event.event.duration = millisToNanos(end - start);
   }
 
-  private buildEvent(eventProperties: IEvent): IEvent {
+  // non-blocking, but spawns an async task to do the work
+  logEvent(eventProperties: IEvent, id?: string): void {
     const event: IEvent = {};
     const fixedProperties = {
       ecs: {
@@ -79,22 +80,6 @@ export class EventLogger implements IEventLogger {
 
     // merge the initial properties and event properties
     merge(event, defaultProperties, this.initialProperties, eventProperties, fixedProperties);
-
-    return event;
-  }
-
-  isValidEvent(eventProperties: IEvent): boolean {
-    try {
-      validateEvent(this.eventLogService, this.buildEvent(eventProperties));
-      return true;
-    } catch (err) {
-      return false;
-    }
-  }
-
-  // non-blocking, but spawns an async task to do the work
-  logEvent(eventProperties: IEvent, id?: string): void {
-    const event = this.buildEvent(eventProperties);
 
     let validatedEvent: IValidatedEvent;
     try {
