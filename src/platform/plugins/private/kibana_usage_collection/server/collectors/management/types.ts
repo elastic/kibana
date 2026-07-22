@@ -95,6 +95,7 @@ export interface UsageStats {
   'securitySolution:defaultValueReportRate': string;
   'securitySolution:defaultValueReportTitle': string;
   'securitySolution:enableAlertsAndAttacksAlignment': boolean;
+  'securitySolution:enableAttackDiscoveryWorkflows': boolean;
   'securitySolution:enableRuleChangesHistory': boolean;
   'search:includeFrozen': boolean;
   'courier:maxConcurrentShardRequests': number;
@@ -226,6 +227,7 @@ export interface UsageStats {
   'securitySolution:alertAnalysisWorkflowAgentId': string;
   'securitySolution:alertAnalysisWorkflowCreateConversation': boolean;
   'securitySolution:alertAnalysisWorkflowTagPrefix': string;
+  'cloudSecurityPosture:graphRuntimeEvaluationsEnabled': boolean;
   'elasticRamen:enabled': boolean;
   'query_activity:minRunningTime': number;
   'genAiSettings:tokenUsageTracking': boolean;
