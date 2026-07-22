@@ -19,7 +19,7 @@ import {
   MAX_TITLE_LENGTH,
 } from '../../significant_events/constants';
 import type { Discovery } from '../../significant_events/discoveries';
-import type { Detection } from '../../significant_events/detections';
+import type { ChangePointType } from '../../significant_events/detections';
 import type { SignificantEvent } from '../../significant_events/events';
 
 /**
@@ -80,10 +80,11 @@ interface SignificantEventsQueriesGenerationResult {
 
 interface LifecycleDetection {
   detection_id: string;
-  rule_name?: string;
-  stream_name?: string;
-  change_point_type?: string;
-  kind: Extract<Detection['kind'], 'detection' | 'quiet'>;
+  rule_name: string;
+  /** Alerting rule that produced the detection; used to match event evidence. */
+  rule_uuid?: string;
+  stream_name: string;
+  change_point_type: ChangePointType;
   '@timestamp': string;
 }
 

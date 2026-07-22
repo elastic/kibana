@@ -8,10 +8,12 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { EntityType } from '../../../../../../common/entity_analytics/types';
+import { useFlyoutApi } from '../../../../use_flyout_api';
 import { MisconfigurationInsights } from '.';
 import { MISCONFIGURATION_INSIGHTS_TOOL_TEST_ID } from './test_ids';
+import { FLYOUT_ORIGIN } from '../../../../../common/lib/telemetry';
 
-const mockOpenSystemFlyout = jest.fn();
+const openMisconfigurationFindingAsChild = jest.fn();
 
 jest.mock('../../../../shared/components/tools_flyout_header', () => ({
   ToolsFlyoutHeader: ({
@@ -50,7 +52,7 @@ jest.mock(
       value: string;
       entityId?: string;
       entityType?: string;
-      onShowFinding?: (resourceId: string, ruleId: string) => void;
+      onShowFinding?: (resourceId: string, ruleId: string, ruleName?: string) => void;
     }) => (
       <button
         type="button"
@@ -59,7 +61,7 @@ jest.mock(
         data-value={value}
         data-entity-id={entityId ?? ''}
         data-entity-type={entityType ?? ''}
-        onClick={() => onShowFinding?.('resource-1', 'rule-1')}
+        onClick={() => onShowFinding?.('resource-1', 'rule-1', 'My Rule')}
       >
         {'misconfiguration-table'}
       </button>
@@ -67,43 +69,14 @@ jest.mock(
   })
 );
 
-jest.mock('../../../../csp/misconfiguration', () => ({
-  Misconfiguration: () => <div data-test-subj="mockMisconfigurationPanel" />,
-}));
-
-jest.mock('../../../../shared/components/flyout_provider', () => ({
-  flyoutProviders: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-}));
-
-jest.mock('../../../../shared/hooks/use_default_flyout_properties', () => ({
-  useDefaultDocumentFlyoutProperties: () => ({ size: 'm' }),
-}));
-
-jest.mock('../../../../../common/hooks/is_in_security_app', () => ({
-  useIsInSecurityApp: () => true,
-}));
-
-jest.mock('react-redux', () => ({
-  ...jest.requireActual('react-redux'),
-  useStore: () => ({}),
-}));
-
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useHistory: () => ({ push: jest.fn() }),
-}));
-
-jest.mock('../../../../../common/lib/kibana', () => ({
-  useKibana: () => ({
-    services: {
-      overlays: { openSystemFlyout: mockOpenSystemFlyout },
-    },
-  }),
-}));
+jest.mock('../../../../use_flyout_api');
 
 describe('<MisconfigurationInsights /> host', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.mocked(useFlyoutApi).mockReturnValue({
+      openMisconfigurationFindingAsChild,
+    } as unknown as ReturnType<typeof useFlyoutApi>);
   });
 
   it('renders the header with the title, host label and storage icon', () => {
@@ -149,15 +122,15 @@ describe('<MisconfigurationInsights /> host', () => {
     expect(onShowEntity).toHaveBeenCalledTimes(1);
   });
 
-  it('opens a child system flyout when a finding row is expanded', () => {
+  it('opens the misconfiguration finding as a child flyout when a row is expanded', () => {
     const { getByTestId } = render(
       <MisconfigurationInsights entityType={EntityType.host} value="my-host" />
     );
     getByTestId('mockMisconfigurationFindingsDetailsTable').click();
-    expect(mockOpenSystemFlyout).toHaveBeenCalledTimes(1);
-    expect(mockOpenSystemFlyout).toHaveBeenCalledWith(
-      expect.anything(),
-      expect.objectContaining({ session: 'inherit', title: 'my-host' })
+    expect(openMisconfigurationFindingAsChild).toHaveBeenCalledTimes(1);
+    expect(openMisconfigurationFindingAsChild).toHaveBeenCalledWith(
+      { resourceId: 'resource-1', ruleId: 'rule-1' },
+      { title: 'Misconfiguration: My Rule', origin: FLYOUT_ORIGIN.MISCONFIGURATION_FINDING }
     );
   });
 });
@@ -165,6 +138,9 @@ describe('<MisconfigurationInsights /> host', () => {
 describe('<MisconfigurationInsights /> user', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.mocked(useFlyoutApi).mockReturnValue({
+      openMisconfigurationFindingAsChild,
+    } as unknown as ReturnType<typeof useFlyoutApi>);
   });
 
   it('renders the header with the user label and user icon', () => {

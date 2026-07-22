@@ -184,6 +184,8 @@ describe('reconcileScheduleIdsToWire', () => {
     expect(packBlock.queries.q1.schedule_id).toBe('sched-q1');
     expect(packBlock.queries.q2.schedule_id).toBe('sched-q2');
     expect(packBlock.pack_id).toBe('pack-1');
+    // Human-readable name is projected onto the wire for scheduled result docs.
+    expect(packBlock.pack_name).toBe('reconcile-pack');
   });
 
   // Regression: the old array-only guard (`queries?.length` → undefined for a

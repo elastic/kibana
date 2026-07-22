@@ -10,7 +10,7 @@
 import type { Template } from 'liquidjs';
 import { i18n } from '@kbn/i18n';
 import type { LiquidSettings } from '@kbn/workflows';
-import { createWorkflowLiquidEngine, pickObjectFields } from '@kbn/workflows';
+import { createWorkflowLiquidEngine } from '@kbn/workflows';
 
 type TemplateVariableSegment = string | number;
 type TemplateVariableSegments = TemplateVariableSegment[];
@@ -54,37 +54,6 @@ export class WorkflowTemplatingEngine {
       parseLimit: liquidSettings?.parseLimit,
       renderLimit: liquidSettings?.renderLimit,
       memoryLimit: liquidSettings?.memoryLimit,
-    });
-
-    // register json_parse filter that converts JSON string to object
-    this.engine.registerFilter('json_parse', (value: unknown): unknown => {
-      if (typeof value !== 'string') {
-        return value;
-      }
-      try {
-        return JSON.parse(value);
-      } catch (error) {
-        return value;
-      }
-    });
-
-    // register entries filter that converts an object into an array of {key, value} pairs
-    this.engine.registerFilter('entries', (value: unknown): unknown => {
-      if (typeof value !== 'object' || value === null || Array.isArray(value)) {
-        return value;
-      }
-      return Object.entries(value).map(([k, v]) => ({ key: k, value: v }));
-    });
-
-    // register pick filter that keeps only the given dotted-path fields of an object,
-    // preserving nested structure and value types. Accepts a single array of paths
-    // (e.g. `| pick: consts.fields`) or several string args (e.g. `| pick: "a", "b"`).
-    this.engine.registerFilter('pick', (value: unknown, ...args: unknown[]): unknown => {
-      const paths = args.length === 1 && Array.isArray(args[0]) ? args[0] : args;
-      return pickObjectFields(
-        value,
-        paths.filter((path): path is string => typeof path === 'string')
-      );
     });
   }
 

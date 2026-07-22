@@ -9,7 +9,7 @@ import type { Discovery } from '@kbn/significant-events-schema';
 
 const CANONICAL_TIMESTAMP = '2026-01-01T00:00:00.000Z';
 
-const slugify = (value: string): string =>
+const normalizeEventIdSegment = (value: string): string =>
   value
     .trim()
     .toLowerCase()
@@ -25,16 +25,13 @@ export const canonicalDiscoveryFromGroundTruth = ({
   scenarioId: string;
   discovery: Partial<Discovery>;
 }): Discovery => {
-  const detections = discovery.detections ?? [];
-  const ruleNames =
-    discovery.rule_names ??
-    Array.from(new Set(detections.map((d) => d.rule_name).filter((n): n is string => Boolean(n))));
+  const signals = discovery.signals ?? [];
   const streamNames =
     discovery.stream_names ??
     Array.from(
       new Set([
         streamName,
-        ...detections.map((d) => d.stream_name).filter((n): n is string => Boolean(n)),
+        ...signals.map((s) => s.stream_name).filter((n): n is string => Boolean(n)),
       ])
     );
 
@@ -42,23 +39,23 @@ export const canonicalDiscoveryFromGroundTruth = ({
     '@timestamp': discovery['@timestamp'] ?? CANONICAL_TIMESTAMP,
     kind: discovery.kind ?? 'discovery',
     discovery_id: discovery.discovery_id ?? `${scenarioId}-canonical`,
-    discovery_slug: discovery.discovery_slug ?? `${slugify(scenarioId)}__canonical`,
-    rule_names: ruleNames,
+    event_id: discovery.event_id ?? `${normalizeEventIdSegment(scenarioId)}__canonical`,
     stream_names: streamNames,
+    symptom_hypothesis: discovery.symptom_hypothesis ?? '',
     title: discovery.title ?? '',
     summary: discovery.summary ?? '',
-    root_cause: discovery.root_cause ?? '',
-    criticality: discovery.criticality ?? 0,
+    severity: discovery.severity ?? '20-low',
     confidence: discovery.confidence ?? 0,
-    impact: discovery.impact ?? '',
-    detections,
     processed: discovery.processed ?? false,
-    ...(discovery.dependency_edges ? { dependency_edges: discovery.dependency_edges } : {}),
-    ...(discovery.infra_components ? { infra_components: discovery.infra_components } : {}),
-    ...(discovery.cause_kis ? { cause_kis: discovery.cause_kis } : {}),
-    ...(discovery.evidences ? { evidences: discovery.evidences } : {}),
-    ...(discovery.parent_discovery_id
-      ? { parent_discovery_id: discovery.parent_discovery_id }
+    // Strip `confirmed` from input signals — per Critical Rule #4 in the judge prompt,
+    // input signals arrive without confirmed stamps; the judge stamps confirmed only
+    // from its own execute_esql results.
+    ...(discovery.signals
+      ? {
+          signals: discovery.signals.map(({ confirmed: _omitted, ...rest }) => rest),
+        }
       : {}),
+    ...(discovery.causal_features ? { causal_features: discovery.causal_features } : {}),
+    ...(discovery.blast_radius ? { blast_radius: discovery.blast_radius } : {}),
   };
 };

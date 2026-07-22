@@ -7,9 +7,9 @@
 
 import type { AgentBuilderPluginSetup, AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type {
-  AgentContextLayerPluginSetup,
-  AgentContextLayerPluginStart,
-} from '@kbn/agent-context-layer-plugin/server';
+  AgentBuilderSmlPluginSetup,
+  AgentBuilderSmlPluginStart,
+} from '@kbn/agent-builder-sml-plugin/server';
 import type {
   PluginSetupContract as ActionsPluginSetup,
   PluginStartContract as ActionsPluginStart,
@@ -19,13 +19,13 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 
 export interface PluginSetupDependencies {
   agentBuilder: AgentBuilderPluginSetup;
-  agentContextLayer: AgentContextLayerPluginSetup;
+  agentBuilderSml: AgentBuilderSmlPluginSetup;
   actions: ActionsPluginSetup;
 }
 
 export interface PluginStartDependencies {
   agentBuilder: AgentBuilderPluginStart;
-  agentContextLayer: AgentContextLayerPluginStart;
+  agentBuilderSml: AgentBuilderSmlPluginStart;
   actions: ActionsPluginStart;
   llmTasks?: LlmTasksPluginStart;
   spaces?: SpacesPluginStart;

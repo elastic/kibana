@@ -51,11 +51,7 @@ export type {
   DiscoverSessionEmbeddableByReferenceState,
   DiscoverSessionEmbeddableState,
 } from './embeddable';
-export {
-  discoverSessionApiRequestBodySchema,
-  discoverSessionApiResponseSchema,
-  discoverSessionApiDataSchema,
-} from './api/schema';
+export { discoverSessionApiResponseSchema, discoverSessionApiDataSchema } from './api/schema';
 export { transformDiscoverSessionIn, transformDiscoverSessionOut } from './api/transforms';
 export type {
   DiscoverSessionApiClassicTab,

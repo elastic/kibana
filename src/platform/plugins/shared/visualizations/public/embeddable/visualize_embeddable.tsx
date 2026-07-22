@@ -98,6 +98,10 @@ export const visualizeEmbeddableFactory: EmbeddablePublicDefinition<
       initialProjectRoutingOverrides
     );
 
+    const usesEsql$ = new BehaviorSubject<boolean>(
+      initialVisInstance.type.usesEsql?.(initialVisInstance.params) ?? false
+    );
+
     const getUsedDataViews = async (visInstance: Vis) => {
       if (visInstance.type.getUsedIndexPattern) {
         return visInstance.type.getUsedIndexPattern(visInstance.params);
@@ -127,6 +131,11 @@ export const visualizeEmbeddableFactory: EmbeddablePublicDefinition<
             if (!isEqual(projectRoutingOverrides$.getValue(), newOverrides)) {
               projectRoutingOverrides$.next(newOverrides);
             }
+          }
+
+          const usesEsql = vis.type.usesEsql?.(vis.params) ?? false;
+          if (usesEsql$.getValue() !== usesEsql) {
+            usesEsql$.next(usesEsql);
           }
 
           try {
@@ -267,6 +276,7 @@ export const visualizeEmbeddableFactory: EmbeddablePublicDefinition<
       dataLoading$,
       dataViews$,
       projectRoutingOverrides$,
+      usesEsql$,
       rendered$: hasRendered$,
       supportedTriggers: () => [
         ON_OPEN_PANEL_MENU,
@@ -355,6 +365,7 @@ export const visualizeEmbeddableFactory: EmbeddablePublicDefinition<
           const projectRouting = apiPublishesProjectRouting(parentApi)
             ? data.projectRouting
             : undefined;
+          const isApproximate = data.isApproximate;
           const searchSessionId = apiPublishesSearchSession(parentApi) ? data.searchSessionId : '';
           searchSessionId$.next(searchSessionId);
           const settings = apiPublishesSettings(parentApi)
@@ -391,6 +402,7 @@ export const visualizeEmbeddableFactory: EmbeddablePublicDefinition<
             return await getExpressionRendererProps({
               unifiedSearch,
               projectRouting,
+              isApproximate,
               vis: vis$.getValue(),
               settings,
               disableTriggers,

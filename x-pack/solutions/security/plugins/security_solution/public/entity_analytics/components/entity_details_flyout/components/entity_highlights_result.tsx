@@ -16,6 +16,7 @@ import {
   EuiIcon,
   EuiMarkdownFormat,
   EuiPanel,
+  EuiProgress,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -47,6 +48,8 @@ interface EntityHighlightsResultProps {
   generatedBy?: string;
   stalenessReasons?: EntitySummaryStalenessReason[];
   onRefresh: () => void;
+  canRegenerate?: boolean;
+  isRefreshing?: boolean;
 }
 
 /**
@@ -105,6 +108,8 @@ export const EntityHighlightsResult: React.FC<EntityHighlightsResultProps> = ({
   generatedBy,
   stalenessReasons,
   onRefresh,
+  canRegenerate = true,
+  isRefreshing = false,
 }) => {
   const anonymizedResult = useAnonymizedResponse(assistantResult, showAnonymizedValues);
   const textToCopy = useMemo(() => formatTextToCopy(anonymizedResult), [anonymizedResult]);
@@ -127,7 +132,15 @@ export const EntityHighlightsResult: React.FC<EntityHighlightsResultProps> = ({
   const stalenessMessages = stalenessReasons?.map(stalenessReasonMessage) ?? [];
 
   return (
-    <EuiPanel hasBorder={true}>
+    <EuiPanel hasBorder={true} css={{ position: 'relative' }}>
+      {isRefreshing && (
+        <EuiProgress
+          size="xs"
+          color="accent"
+          position="absolute"
+          data-test-subj="entity-highlights-refresh-progress"
+        />
+      )}
       {isStale && stalenessReasons && (
         <>
           <EuiCallOut
@@ -159,17 +172,19 @@ export const EntityHighlightsResult: React.FC<EntityHighlightsResultProps> = ({
               )}
             </EuiText>
             <EuiSpacer size="s" />
-            <EuiButton
-              color="warning"
-              iconType="refresh"
-              onClick={onRefresh}
-              data-test-subj="entity-highlights-staleness-regenerate"
-            >
-              <FormattedMessage
-                id="xpack.securitySolution.flyout.entityDetails.highlights.stalenessRegenerate"
-                defaultMessage="Regenerate summary"
-              />
-            </EuiButton>
+            {canRegenerate && (
+              <EuiButton
+                color="warning"
+                iconType="refresh"
+                onClick={onRefresh}
+                data-test-subj="entity-highlights-staleness-regenerate"
+              >
+                <FormattedMessage
+                  id="xpack.securitySolution.flyout.entityDetails.highlights.stalenessRegenerate"
+                  defaultMessage="Regenerate summary"
+                />
+              </EuiButton>
+            )}
           </EuiCallOut>
           <EuiSpacer size="m" />
         </>
@@ -256,25 +271,27 @@ export const EntityHighlightsResult: React.FC<EntityHighlightsResultProps> = ({
 
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="xs" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiToolTip
-                  content={i18n.translate(
-                    'xpack.securitySolution.flyout.entityDetails.highlights.refreshAriaLabel',
-                    { defaultMessage: 'Regenerate summary' }
-                  )}
-                  disableScreenReaderOutput
-                >
-                  <EuiButtonIcon
-                    iconType="refresh"
-                    aria-label={i18n.translate(
+              {canRegenerate && (
+                <EuiFlexItem grow={false}>
+                  <EuiToolTip
+                    content={i18n.translate(
                       'xpack.securitySolution.flyout.entityDetails.highlights.refreshAriaLabel',
                       { defaultMessage: 'Regenerate summary' }
                     )}
-                    onClick={onRefresh}
-                    size="xs"
-                  />
-                </EuiToolTip>
-              </EuiFlexItem>
+                    disableScreenReaderOutput
+                  >
+                    <EuiButtonIcon
+                      iconType="refresh"
+                      aria-label={i18n.translate(
+                        'xpack.securitySolution.flyout.entityDetails.highlights.refreshAriaLabel',
+                        { defaultMessage: 'Regenerate summary' }
+                      )}
+                      onClick={onRefresh}
+                      size="xs"
+                    />
+                  </EuiToolTip>
+                </EuiFlexItem>
+              )}
               {textToCopy && (
                 <EuiFlexItem grow={false}>
                   <EuiCopy textToCopy={textToCopy}>

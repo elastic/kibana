@@ -550,7 +550,10 @@ describe('EntityAnalyticsHomePage', () => {
     expect(screen.queryByTestId('dynamic-risk-level-panel')).toBeInTheDocument();
   });
 
-  it('indicesExist=false still wins over entity store disabled state', () => {
+  it('renders entity store disabled empty prompt when store is not_installed and no indices exist', () => {
+    // Regression test: in a custom (non-default) space the entity-store index does not exist,
+    // so indicesExist=false. The disabled check must take precedence so the onboarding screen
+    // is shown instead of the generic SIEM landing page. See #278680.
     mockUseEntityStoreDataView.mockReturnValue({
       dataView: { id: 'test', matchedIndices: [] },
       status: 'ready',
@@ -567,7 +570,7 @@ describe('EntityAnalyticsHomePage', () => {
       { wrapper: TestProviders }
     );
 
-    expect(screen.queryByTestId('entityStoreDisabledEmptyPrompt')).not.toBeInTheDocument();
+    expect(screen.getByTestId('entityStoreDisabledEmptyPrompt')).toBeInTheDocument();
     expect(screen.queryByTestId('entity-analytics-home-entities-table')).not.toBeInTheDocument();
   });
 

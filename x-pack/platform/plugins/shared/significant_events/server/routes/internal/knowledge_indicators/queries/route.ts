@@ -25,6 +25,7 @@ import { assertSignificantEventsAccess } from '../../../utils/assert_significant
 import { getRequestAbortSignal } from '../../../utils/get_request_abort_signal';
 import { queryStatusSchema, toRuleUnbackedFilter } from '../../../utils/query_status';
 import { BUCKET_SIZE_PATTERN } from '../../../../lib/significant_events/helpers/fill_bucket_gaps';
+import { createSignificantEventsTracedEsClient } from '../../../../lib/significant_events/create_significant_events_traced_es_client';
 import {
   computeOccurrences,
   fetchQueryLinks,
@@ -105,9 +106,9 @@ export const promoteUnbackedQueriesRoute = createServerRoute({
     server,
   }): Promise<{ promoted: number; skipped_stats: number }> => {
     const scopedClients = await getScopedClients({ request });
-    const { streamsClient, licensing, uiSettingsClient } = scopedClients;
+    const { streamsClient, licensing } = scopedClients;
 
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    await assertSignificantEventsAccess({ server, licensing });
 
     const kiClient = await scopedClients.getKnowledgeIndicatorClient();
     const streamDefinitions = new Map(
@@ -148,9 +149,9 @@ export const demoteBackedQueriesRoute = createServerRoute({
     logger,
   }): Promise<{ demoted: number }> => {
     const scopedClients = await getScopedClients({ request });
-    const { streamsClient, licensing, uiSettingsClient } = scopedClients;
+    const { streamsClient, licensing } = scopedClients;
 
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    await assertSignificantEventsAccess({ server, licensing });
 
     const kiClient = await scopedClients.getKnowledgeIndicatorClient();
     // Only rule-backed queries can be demoted; unbacked queries have no rule to remove.
@@ -218,9 +219,9 @@ export const bulkDeleteQueriesRoute = createServerRoute({
     logger,
   }): Promise<{ succeeded: number; failed: number; skipped: number }> => {
     const scopedClients = await getScopedClients({ request });
-    const { streamsClient, licensing, uiSettingsClient } = scopedClients;
+    const { streamsClient, licensing } = scopedClients;
 
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    await assertSignificantEventsAccess({ server, licensing });
 
     const kiClient = await scopedClients.getKnowledgeIndicatorClient();
 
@@ -341,9 +342,9 @@ const reconcileQueriesRoute = createServerRoute({
       request,
       rulesClientOptions: { cloneApiKeysOnCreate },
     });
-    const { streamsClient, licensing, uiSettingsClient } = scopedClients;
+    const { streamsClient, licensing } = scopedClients;
 
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    await assertSignificantEventsAccess({ server, licensing });
 
     const kiClient = await scopedClients.getKnowledgeIndicatorClient();
     const { streamNames } = params.body;
@@ -429,11 +430,12 @@ const getDiscoveryQueriesRoute = createServerRoute({
     getScopedClients,
     getSpaceId,
     server,
+    logger,
   }): Promise<QueriesGetResponse> => {
     const scopedClients = await getScopedClients({ request });
-    const { scopedClusterClient, licensing, uiSettingsClient } = scopedClients;
+    const { scopedClusterClient, licensing } = scopedClients;
 
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    await assertSignificantEventsAccess({ server, licensing });
 
     const {
       from,
@@ -469,10 +471,14 @@ const getDiscoveryQueriesRoute = createServerRoute({
       start >= total ? [] : sortQueryLinksForTable(queryLinks).slice(start, start + perPage);
     const pageRuleIds = [...new Set(pageLinks.map((link) => link.rule_id))];
     const spaceId = await getSpaceId(request);
+    const esClient = createSignificantEventsTracedEsClient({
+      client: scopedClusterClient.asCurrentUser,
+      logger,
+    });
 
     const occurrences = await computeOccurrences(
       { ruleIds: pageRuleIds, from, to, bucketSize, spaceId, alertsReader },
-      { scopedClusterClient }
+      { esClient }
     );
     const queryOccurrences: QueryOccurrences = { queryLinks: pageLinks, ...occurrences };
     const queriesPage = pageLinks.map((queryLink) =>
@@ -507,11 +513,12 @@ const getDiscoveryQueriesOccurrencesRoute = createServerRoute({
     getScopedClients,
     getSpaceId,
     server,
+    logger,
   }): Promise<QueriesOccurrencesGetResponse> => {
     const scopedClients = await getScopedClients({ request });
-    const { scopedClusterClient, licensing, uiSettingsClient } = scopedClients;
+    const { scopedClusterClient, licensing } = scopedClients;
 
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    await assertSignificantEventsAccess({ server, licensing });
 
     const { from, to, bucketSize, query, streamNames } = params.query;
 
@@ -519,6 +526,10 @@ const getDiscoveryQueriesOccurrencesRoute = createServerRoute({
       scopedClients.getKnowledgeIndicatorClient(),
       scopedClients.getSignificantEventsAlertingContext(),
     ]);
+    const esClient = createSignificantEventsTracedEsClient({
+      client: scopedClusterClient.asCurrentUser,
+      logger,
+    });
     const { aggregatedOccurrences: aggregatedOccurrenceBuckets } = await getQueryOccurrences(
       {
         from,
@@ -529,7 +540,7 @@ const getDiscoveryQueriesOccurrencesRoute = createServerRoute({
         alertsReader,
         spaceId: await getSpaceId(request),
       },
-      { kiClient, scopedClusterClient }
+      { kiClient, esClient }
     );
 
     const occurrencesHistogram = aggregatedOccurrenceBuckets.map((bucket) => ({
@@ -565,6 +576,15 @@ const generateQueriesRoute = createServerRoute({
           .number()
           .optional()
           .describe('Max number of existing queries to include as context for the LLM.'),
+        queryValidationTimeoutMs: z
+          .number()
+          .int()
+          .min(1_000)
+          .max(240_000)
+          .optional()
+          .describe(
+            'Per-query deadline (ms) for the ES|QL validation step. When omitted the server-side tuning default is used.'
+          ),
       })
       .nullish(),
   }),
@@ -594,18 +614,22 @@ const generateQueriesRoute = createServerRoute({
       soClient,
       scopedClusterClient,
       licensing,
-      uiSettingsClient,
+      tuningConfig,
     } = scopedClients;
 
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    await assertSignificantEventsAccess({ server, licensing });
 
     const { streamName } = params.path;
-    const { connectorId, maxExistingQueriesForContext } = params.body ?? {};
+    const {
+      connectorId,
+      maxExistingQueriesForContext,
+      queryValidationTimeoutMs = tuningConfig.query_validation_timeout_ms,
+    } = params.body ?? {};
 
     const kiClient = await scopedClients.getKnowledgeIndicatorClient();
 
     const result = await generateKIQueries(
-      { streamName, connectorId, maxExistingQueriesForContext },
+      { streamName, connectorId, maxExistingQueriesForContext, queryValidationTimeoutMs },
       {
         streamsClient,
         inferenceClient,
@@ -658,9 +682,9 @@ const persistQueriesRoute = createServerRoute({
       request,
       rulesClientOptions: { cloneApiKeysOnCreate },
     });
-    const { streamsClient, licensing, uiSettingsClient } = scopedClients;
+    const { streamsClient, licensing } = scopedClients;
 
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    await assertSignificantEventsAccess({ server, licensing });
 
     const { streamName } = params.path;
     const { queries } = params.body;

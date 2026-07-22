@@ -8,7 +8,7 @@
 import { isEqual } from 'lodash';
 import React, { memo, useCallback, useEffect, useMemo } from 'react';
 import { EuiOutsideClickDetector } from '@elastic/eui';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import { css } from '@emotion/css';
 import { PageScope } from '../../../../../data_view_manager/constants';
 import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';

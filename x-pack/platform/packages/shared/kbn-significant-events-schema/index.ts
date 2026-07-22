@@ -77,6 +77,10 @@ export { tokenCountSchema, iterationResultSchema } from './src/api/features';
 
 export {
   type Detection,
+  type ProcessedMarker,
+  type ChangePointType,
+  processedMarkerSchema,
+  CHANGE_POINT_TYPES,
   type Discovery,
   type KnowledgeIndicator,
   type SignificantEvent,
@@ -91,13 +95,18 @@ export {
   SIGNIFICANT_EVENT_STATUS_OPTIONS,
   INVESTIGATION_PROGRESS_UI_EVENT,
   INVESTIGATE_STEP_ID,
+  type BlastRadiusEntry,
+  type CausalFeature,
+  type SignalEntry,
+  type Severity,
+  severitySchema,
+  SEVERITY_OPTIONS,
+  getSeverityLabel,
   detectionSchema,
   discoverySchema,
-  discoveryDetectionSchema,
-  dependencyEdgeSchema,
-  infraComponentSchema,
-  causeKiSchema,
-  evidenceSchema,
+  blastRadiusEntrySchema,
+  causalFeatureSchema,
+  signalEntrySchema,
   significantEventSchema,
   significantEventStatusSchema,
   significantEventsTuningConfigSchema,
@@ -134,10 +143,3 @@ export {
 } from './src/inference_feature_ids';
 
 export type { KnowledgeIndicatorClientContract } from './src/knowledge_indicator_client';
-
-export type {
-  RelayClaimResponse,
-  RelayClientContract,
-  RelayInstallRequest,
-  RelayInstallResponse,
-} from './src/relay_client';

@@ -164,6 +164,16 @@ describe('composeFormToCreateRequest', () => {
     expect(result.no_data_strategy).toBeUndefined();
   });
 
+  it('omits recovery_strategy for signal rules even when set', () => {
+    const values: FormValues = {
+      ...baseFormValues,
+      kind: 'signal',
+      recoveryStrategy: 'no_breach',
+    };
+    const result = composeFormToCreateRequest(values);
+    expect(result.recovery_strategy).toBeUndefined();
+  });
+
   it('returns undefined state_transition for signal rules', () => {
     const values: FormValues = { ...baseFormValues, kind: 'signal' };
     const result = composeFormToCreateRequest(values);
@@ -287,6 +297,24 @@ describe('composeFormToUpdateRequest', () => {
     const result = composeFormToUpdateRequest(values);
     expect(result.recovery_strategy).toBe('no_breach');
     expect(result.no_data_strategy).toBe('recover');
+  });
+
+  it('preserves recovery_strategy: none', () => {
+    const values: FormValues = {
+      ...baseFormValues,
+      recoveryStrategy: 'none',
+    };
+    const result = composeFormToUpdateRequest(values);
+    expect(result.recovery_strategy).toBe('none');
+  });
+
+  it('nullifies recovery_strategy when form recoveryStrategy is unset (do not recover)', () => {
+    const values: FormValues = {
+      ...baseFormValues,
+      recoveryStrategy: undefined,
+    };
+    const result = composeFormToUpdateRequest(values);
+    expect(result.recovery_strategy).toBeNull();
   });
 
   it('infers recovery_strategy: query when user adds recovery via form (recoveryStrategy undefined)', () => {
@@ -549,6 +577,16 @@ describe('round-trip: non-representable fields survive load → save', () => {
     const formValues = mapRuleToComposeFormValues(rule);
     const request = composeFormToCreateRequest(formValues);
     expect(request.recovery_strategy).toBe('no_breach');
+  });
+
+  it('preserves recovery_strategy: none through load → save cycle', () => {
+    const rule: RuleResponse = {
+      ...baseRuleResponse,
+      recovery_strategy: 'none',
+    };
+    const formValues = mapRuleToComposeFormValues(rule);
+    const request = composeFormToCreateRequest(formValues);
+    expect(request.recovery_strategy).toBe('none');
   });
 
   it('preserves no_data_strategy through load → save cycle', () => {

@@ -29,10 +29,10 @@ import { getEntityAnomalies } from './get_anomaly_details';
 import { DEFAULT_OVERVIEW_LOOKBACK_MS, getEntityAnomalyOverview } from './get_anomaly_overview';
 import { _formatPrivileges, hasReadWritePermissions } from '../utils/check_and_format_privileges';
 
-const ONE_YEAR_MS = 365 * 24 * 60 * 60 * 1000;
-
 const getStartOfDayOneYearAgo = (): number => {
-  const d = new Date(Date.now() - ONE_YEAR_MS);
+  const d = new Date();
+  d.setUTCFullYear(d.getUTCFullYear() - 1);
+  d.setUTCDate(d.getUTCDate() - 1); // one extra day tolerance for timezone offsets
   d.setUTCHours(0, 0, 0, 0);
   return d.getTime();
 };
@@ -110,8 +110,7 @@ export const registerAnomalySummaryRoutes = ({
           const {
             from,
             to,
-            min_score: minScore,
-            max_score: maxScore,
+            score_ranges: scoreRanges,
             threat_tactics: threatTactics,
           } = request.body ?? {};
 
@@ -122,10 +121,10 @@ export const registerAnomalySummaryRoutes = ({
             });
           }
 
-          if (minScore !== undefined && maxScore !== undefined && minScore > maxScore) {
+          if (scoreRanges?.some((r) => r.max_score !== undefined && r.min_score > r.max_score)) {
             return siemResponse.error({
               statusCode: 400,
-              body: '`min_score` must not be greater than `max_score`',
+              body: "each `score_ranges` entry's `min_score` must not be greater than its `max_score`",
             });
           }
 
@@ -168,8 +167,7 @@ export const registerAnomalySummaryRoutes = ({
             entityType,
             fromMs: from,
             toMs: to,
-            minScore,
-            maxScore,
+            scoreRanges,
             threatTactics,
             logger,
             ml,
@@ -225,8 +223,7 @@ export const registerAnomalySummaryRoutes = ({
             page_size: pageSize = 100,
             from,
             to,
-            min_score: minScore,
-            max_score: maxScore,
+            score_ranges: scoreRanges,
             job_ids: jobIds,
             threat_tactics: threatTactics,
             sort,
@@ -239,10 +236,10 @@ export const registerAnomalySummaryRoutes = ({
             });
           }
 
-          if (minScore !== undefined && maxScore !== undefined && minScore > maxScore) {
+          if (scoreRanges?.some((r) => r.max_score !== undefined && r.min_score > r.max_score)) {
             return siemResponse.error({
               statusCode: 400,
-              body: '`min_score` must not be greater than `max_score`',
+              body: "each `score_ranges` entry's `min_score` must not be greater than its `max_score`",
             });
           }
 
@@ -284,8 +281,7 @@ export const registerAnomalySummaryRoutes = ({
             esClient,
             fromMs: from,
             toMs: to,
-            minScore,
-            maxScore,
+            scoreRanges,
             jobIds,
             threatTactics,
             logger,

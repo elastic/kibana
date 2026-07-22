@@ -1,0 +1,524 @@
+products:
+- product: cloud-serverless
+  target: 2026-07-09
+  lifecycle: preview
+  repo: kibana
+  owner: elastic
+release-date: 2026-07-09
+entries:
+- file:
+    name: 273439.yaml
+    checksum: 18411bc908ed420088d3f3ca6a1c11067751a2e1
+  type: enhancement
+  title: Add `alert-triage` skill for queue prioritization
+  products:
+  - product: cloud-serverless
+    target: 2026-07-09
+  areas:
+  - Kibana platform
+  prs:
+  - https://github.com/elastic/kibana/pull/273439
+- file:
+    name: 275996.yaml
+    checksum: ebcb3122b5f283d900d06a0ac2d4b68dac58c918
+  type: enhancement
+  title: Use browser default for all environments
+  products:
+  - product: cloud-serverless
+    target: 2026-07-09
+  description: Kibana now uses the browser’s `Accept-Language` preferences to select the UI language when no user profile language or locale cookie is available. If the browser’s preferred language is listed in `i18n.locales`, Kibana uses it; otherwise it falls back to `i18n.defaultLocale` and finally falls back to English. Users can still override the language in their profile; only locales listed in `i18n.locales` are available to choose from.
+  areas:
+  - Kibana platform
+  prs:
+  - https://github.com/elastic/kibana/pull/275996
+  issues:
+  - '# PRIVATE: https://github.com/elastic/kibana-team/issues/3540'
+- file:
+    name: 275187.yaml
+    checksum: 53fbbfd32dcfef45c8b3676af000399eff42d15a
+  type: feature
+  title: Add workflow steps for enabling and disabling detection rules
+  products:
+  - product: cloud-serverless
+    target: 2026-07-09
+  prs:
+  - https://github.com/elastic/kibana/pull/275187
+- file:
+    name: 270219.yaml
+    checksum: 01ee22f443383935b72f1a457aadf2ad454998c0
+  type: feature
+  title: Allow "Close all alerts that match this exception" checkbox when creating an exception from runtime fields
+  products:
+  - product: cloud-serverless
+    target: 2026-07-09
+  prs:
+  - https://github.com/elastic/kibana/pull/270219
+- file:
+    name: 275670.yaml
+    checksum: 285085073445b2534dc66b46c410b9a9aec1338d
+  type: feature
+  title: Add workflow triggers for asset criticality updates and risk score changes
+  products:
+  - product: cloud-serverless
+    target: 2026-07-09
+  prs:
+  - https://github.com/elastic/kibana/pull/275670
+- file:
+    name: 276420.yaml
+    checksum: bf52c76d20cce99b6c7eb6b4357f9da3433c8ae7
+  type: bug-fix
+  title: Fix APM crashes from missing or invalid route query parameters
+  products:
+  - product: cloud-serverless
+    target: 2026-07-09
+  prs:
+  - https://github.com/elastic/kibana/pull/276420
+  issues:
+  - '# PRIVATE: https://github.com/elastic/observability-error-backlog/issues/1318'
+- file:
+    name: 276174.yaml
+    checksum: 76af1f11a69616921d3b69a261fd640e7cbcabdf
+  type: feature
+  title: Enable traces for all users
+  products:
+  - product: cloud-serverless
+    target: 2026-07-09
+  description: Enable OpenTelemetry trace collection in Agent Builder for all users. You can view trace waterfalls for each conversation response, use the built-in traces skill to query token usage and latency, and monitor agent activity in the overview dashboard. Sensitive data such as prompts and tool parameters is excluded by default. To adjust tracing behavior, go to Management > Gen AI Settings > Agent Builder Tracing.
+  areas:
+  - AI and machine Learning
+  prs:
+  - https://github.com/elastic/kibana/pull/276174
+- file:
+    name: 274959.yaml
+    checksum: 029f35994c8913087bda4735556ca5bf7a345a47
+  type: feature
+  title: Add Lens as reference attachment in saved object modal
+  products:
+  - product: cloud-serverless
+    target: 2026-07-09
+  areas:
+  - Alerting and reporting
+  prs:
+  - https://github.com/elastic/kibana/pull/274959
+- file:
+    name: 275523.yaml
+    checksum: ae9a03155f6a800193b714f8d29e900f0541d528
+  type: enhancement
+  title: Improve prebuilt rule installation performance
+  products:
+  - product: cloud-serverless
+    target: 2026-07-09
+  prs:
+  - https://github.com/elastic/kibana/pull/275523
+- file:
+    name: 276092.yaml
+    checksum: 8a58ffd71acd565bec554ab66667ab568982d6df
+  type: feature
+  title: Add workflow step to update asset criticality
+  products:
+  - product: cloud-serverless
+    target: 2026-07-09
+  prs:
+  - https://github.com/elastic/kibana/pull/276092
+- file:
+    name: 275850.yaml
+    checksum: 44c4eac5555376a7b512be5b3ca6930a8dc65c5f
+  type: enhancement
+  title: Lift size restriction for file upload response action
+  products:
+  - product: cloud-serverless
+    target: 2026-07-09
+  prs:
+  - https://github.com/elastic/kibana/pull/275850
+- file:
+    name: 275877.yaml
+    checksum: 392bf91a3e2fbbfc45ffee8ffedc8202fbb34fc5
+  type: bug-fix
+  title: Fix incorrect "1 month ago" label for recent workflow executions
+  products:
+  - product: cloud-serverless
+    target: 2026-07-09
+  prs:
+  - https://github.com/elastic/kibana/pull/275877
+  issues:
+  - https://github.com/elastic/kibana/issues/275866
+- file:
+    name: 275461.yaml
+    checksum: c27419382ba5557049a5e5df940e1e325d6af20c
+  type: feature
+  title: Add Jina V5 support for product documentation artifacts
+  products:
+  - product: cloud-serverless
+    target: 2026-07-09
+  description: Agent Builder now prefers Jina V5 embeddings when installing product documentation artifacts on Elastic Inference Service, and falls back to ELSER when Jina V5 is unavailable.
+  prs:
+  - https://github.com/elastic/kibana/pull/275461
+- file:
+    name: 266410.yaml
+    checksum: 99691c77c8009de4b4dc75c90efa530749b0605b
+  type: breaking-change
+  title: Entity Store v1 HTTP APIs, clients, and server-side components are removed
+  products:
+  - product: cloud-serverless
+    target: 2026-07-09
+  impact: Integrations and automations that call v1 `/api/entity_store/*` routes or rely on v1 engine management must migrate to Entity Store v2.
+  action: Update integrations to use Entity Store v2 APIs provided by the `entity_store` plugin. Remove references to v1 routes such as `/api/entity_store/engines*` and `/entities*`.
+  prs:
+  - https://github.com/elastic/kibana/pull/266410
+- file:
+    name: 276555.yaml
+    checksum: da77a316404182459f7d1dbf53da2d13e53d9399
+  type: enhancement
+  title: Show managed workflows in the alert run workflow panel
+  products:
+  - product: cloud-serverless
+    target: 2026-07-09
+  prs:
+  - https://github.com/elastic/kibana/pull/276555
+- file:
+    name: 276502.yaml
+    checksum: 19339e83dd774750f5d9055433e8b21c5e5cdac5
+  type: bug-fix
+  title: Fix unbounded row counts in Canvas `createTable` expressions
+  products:
+  - product: cloud-serverless
+    target: 2026-07-09
+  description: Adds a maximum `rowCount` of 10,000 to the Canvas `createTable` expression, matching the default Elasticsearch `index.max_result_window`.
+  areas:
+  - Dashboards and visualizations
+  prs:
+  - https://github.com/elastic/kibana/pull/276502
+- file:
+    name: 275197.yaml
+    checksum: 2bc48f69b55a64e2e6cde7e1c40748b7eb4df0ce
+  type: feature
+  title: Allow assigning an ILM policy to an integration namespace
+  products:
+  - product: cloud-serverless
+    target: 2026-07-09
+  areas:
+  - Search and data
+  prs:
+  - https://github.com/elastic/kibana/pull/275197
+- file:
+    name: 275987.yaml
+    checksum: 5c976450108a180d5518eea503254e4ae6f14feb
+  type: bug-fix
+  title: Fix filter popover discard prompt from menu
+  products:
+  - product: cloud-serverless
+    target: 2026-07-09
+  areas:
+  - Dashboards and visualizations
+  prs:
+  - https://github.com/elastic/kibana/pull/275987
+  issues:
+  - https://github.com/elastic/kibana/issues/275959
+- file:
+    name: 273804.yaml
+    checksum: 066214f8bd23ec46ad27754af07cf795d715bf55
+  type: feature
+  title: Add Stack Alerts (`stackAlertsOnly`) feature privilege for alert-only actions
+  products:
+  - product: cloud-serverless
+    target: 2026-07-09
+  areas:
+  - Alerting and reporting
+  prs:
+  - https://github.com/elastic/kibana/pull/273804
+  issues:
+  - https://github.com/elastic/kibana/issues/273247
+- file:
+    name: 275765.yaml
+    checksum: d2261debf2789f4e399c5d07100f6abb7d6f2265
+  type: enhancement
+  title: Improve AI authoring experience in the workflow YAML editor
+  products:
+  - product: cloud-serverless
+    target: 2026-07-09
+  prs:
+  - https://github.com/elastic/kibana/pull/275765
+  issues:
+  - '# PRIVATE: https://github.com/elastic/security-team/issues/17887'
+- file:
+    name: 275875.yaml
+    checksum: 2da2c23cafffc9d97940a4f87bfe5a731eea17c6
+  type: feature
+  title: Add warning severity tier for custom threshold alerts
+  products:
+  - product: cloud-serverless
+    target: 2026-07-09
+  description: Adds a warning severity tier to custom threshold rules and populates `kibana.alert.severity` so severity-based conditional snooze can match these alerts.
+  prs:
+  - https://github.com/elastic/kibana/pull/275875
+  issues:
+  - https://github.com/elastic/kibana/issues/275675
+- file:
+    name: 265526.yaml
+    checksum: 34536b854681e7c3f56931dad79f8ca222d80413
+  type: feature
+  title: Introduce density style config for the Metric chart
+  products:
+  - product: cloud-serverless
+    target: 2026-07-09
+  description: Adds a density option to Lens Metric charts, with a new default preset used by default for newly created charts. Existing charts keep their current compact spacing.
+  areas:
+  - Dashboards and visualizations
+  prs:
+  - https://github.com/elastic/kibana/pull/265526
+  issues:
+  - https://github.com/elastic/kibana/issues/245774
+- file:
+    name: 275273.yaml
+    checksum: e95fd721ff27816792bb8f8f3485de73677649e2
+  type: feature
+  title: Add human-in-the-loop external resume for workflows
+  products:
+  - product: cloud-serverless
+    target: 2026-07-09
+  description: Adds external resume channels for workflow approvals and input, including signed links, Slack notifications, and hosted HTML forms for responders without a Kibana session.
+  prs:
+  - https://github.com/elastic/kibana/pull/275273
+  issues:
+  - '# PRIVATE: https://github.com/elastic/security-team/issues/16140'
+  - '# PRIVATE: https://github.com/elastic/security-team/issues/16712'
+  - '# PRIVATE: https://github.com/elastic/security-team/issues/16708'
+  - '# PRIVATE: https://github.com/elastic/security-team/issues/18035'
+- file:
+    name: 276150.yaml
+    checksum: 939caa86636cf3bb76962b38be6d0dc0b63009c6
+  type: bug-fix
+  title: Fix threat intelligence page layout not using available space
+  products:
+  - product: cloud-serverless
+    target: 2026-07-09
+  prs:
+  - https://github.com/elastic/kibana/pull/276150
+- file:
+    name: 276384.yaml
+    checksum: 6a4cb02b4a89213f1bfca1acfd1ff8ec3681e108
+  type: feature
+  title: Add approximation results in Discover and Dashboards
+  products:
+  - product: cloud-serverless
+    target: 2026-07-09
+  prs:
+  - https://github.com/elastic/kibana/pull/276384
+  issues:
+  - https://github.com/elastic/kibana/issues/275298
+- file:
+    name: 275244.yaml
+    checksum: f7362f5f10019798c8db98cd3b9eb3330fd26792
+  type: feature
+  title: Add OneDrive connector via Microsoft Graph API
+  products:
+  - product: cloud-serverless
+    target: 2026-07-09
+  prs:
+  - https://github.com/elastic/kibana/pull/275244
+  issues:
+  - '# PRIVATE: https://github.com/elastic/search-team/issues/15073'
+- file:
+    name: 276038.yaml
+    checksum: d79f4f025a585681fbef4b5dde6c5da664313658
+  type: feature
+  title: Add persistent Entity AI summaries and warn when risk score changes
+  products:
+  - product: cloud-serverless
+    target: 2026-07-09
+  description: Entity AI summaries are stored in the entity metadata data stream so they no longer regenerate on every flyout open. When an entity's risk score changes after generation, a warning callout prompts you to regenerate the summary.
+  prs:
+  - https://github.com/elastic/kibana/pull/276038
+- file:
+    name: 274793.yaml
+    checksum: 7a645139ed9968fef80696a65e745bd2952a6f82
+  type: enhancement
+  title: Display unsupported MITRE mappings on coverage overview page
+  products:
+  - product: cloud-serverless
+    target: 2026-07-09
+  prs:
+  - https://github.com/elastic/kibana/pull/274793
+- file:
+    name: 276311.yaml
+    checksum: 1490f330956c27b8c4b025c3cff71bb50038f097
+  type: feature
+  title: Add version history for Elastic Workflows
+  products:
+  - product: cloud-serverless
+    target: 2026-07-09
+  description: Every time you save a workflow, Elastic Workflows keeps a record of what changed. You can look back at earlier versions, see exactly what was different, and restore a previous definition when you need to undo a change.
+  prs:
+  - https://github.com/elastic/kibana/pull/276311
+  issues:
+  - '# PRIVATE: https://github.com/elastic/security-team/issues/15776'
+- file:
+    name: 272325.yaml
+    checksum: c1c70e69f034d5d7909dbc698a415ee3278e3c45
+  type: feature
+  title: Add TLS certificate expiry alerts for browser monitors
+  products:
+  - product: cloud-serverless
+    target: 2026-07-09
+  prs:
+  - https://github.com/elastic/kibana/pull/272325
+- file:
+    name: 276245.yaml
+    checksum: 492f7f77e3cadfbeb5d5bb23d3a309171e3623aa
+  type: bug-fix
+  title: Send clone API key metadata before expiration
+  products:
+  - product: cloud-serverless
+    target: 2026-07-09
+  prs:
+  - https://github.com/elastic/kibana/pull/276245
+- file:
+    name: 276547.yaml
+    checksum: 373ac2e8b0c0f56ee9401de794571b0f56388121
+  type: enhancement
+  title: Shorten and make alert analysis workflow tags configurable
+  products:
+  - product: cloud-serverless
+    target: 2026-07-09
+  prs:
+  - https://github.com/elastic/kibana/pull/276547
+- file:
+    name: 275845.yaml
+    checksum: 973c376b47facd241babccb84d8efc5857832667
+  type: enhancement
+  title: Improve lookup join translation for Sentinel
+  products:
+  - product: cloud-serverless
+    target: 2026-07-09
+  description: Improves SIEM migration translations by giving lookup resources field metadata so generated ES|QL can use more accurate `LOOKUP JOIN` clauses.
+  prs:
+  - https://github.com/elastic/kibana/pull/275845
+  issues:
+  - '# PRIVATE: https://github.com/elastic/security-team/issues/16943'
+- file:
+    name: 276697.yaml
+    checksum: 119c2ee51d64ec5c4f4892da39613fc3ec6fd5b8
+  type: bug-fix
+  title: Fix accidental Entity Store data loss when uninstalling partial engines
+  products:
+  - product: cloud-serverless
+    target: 2026-07-09
+  description: Prevents Entity Store indices and data streams from being deleted when you uninstall only some engines. Elasticsearch assets are now removed only when no engines remain.
+  prs:
+  - https://github.com/elastic/kibana/pull/276697
+  issues:
+  - '# PRIVATE: https://github.com/elastic/security-team/issues/18143'
+- file:
+    name: 276377.yaml
+    checksum: 915eaba99cc9815b823aee771310041a5d368e82
+  type: enhancement
+  title: Add `dryRun` preview to Fleet bulk agent API endpoints
+  products:
+  - product: cloud-serverless
+    target: 2026-07-09
+  description: When the optional `dryRun` flag is enabled, the Fleet bulk agent API endpoints return the count of agents that would be affected without making changes.
+  areas:
+  - Search and data
+  prs:
+  - https://github.com/elastic/kibana/pull/276377
+  issues:
+  - https://github.com/elastic/kibana/issues/276168
+- file:
+    name: 269743.yaml
+    checksum: fe07c404ba0e7c2feeaf7520527fb8435d520d14
+  type: enhancement
+  title: Add managed alert analysis workflow in Elastic Security
+  products:
+  - product: cloud-serverless
+    target: 2026-07-09
+  description: Adds a Security alert analysis managed workflow with configuration in the rules section. The workflow searches for related alerts, rule details, and closure context around each alert.
+  prs:
+  - https://github.com/elastic/kibana/pull/269743
+- file:
+    name: 276635.yaml
+    checksum: a2d5b2df5cb0242e1931840af0af82fc9d90d0b8
+  type: feature
+  title: Add "Add to chat" and "Summarize" buttons to the case detail view
+  products:
+  - product: cloud-serverless
+    target: 2026-07-09
+  description: Adds Agent Builder actions to the case detail view so you can send case context to chat or generate a case summary.
+  areas:
+  - Alerting and reporting
+  prs:
+  - https://github.com/elastic/kibana/pull/276635
+- file:
+    name: 276321.yaml
+    checksum: c8e69bc8b2a6829ca1c259f751090f9408ec8cc8
+  type: bug-fix
+  title: Fix OAuth token parsing for 2xx non-200 responses
+  products:
+  - product: cloud-serverless
+    target: 2026-07-09
+  areas:
+  - Alerting and reporting
+  prs:
+  - https://github.com/elastic/kibana/pull/276321
+- file:
+    name: 276423.yaml
+    checksum: beb871725b6913aae1ffadf511d8cf0a793e70d4
+  type: bug-fix
+  title: Fix performance issues in the Lens ES|QL data accordion
+  products:
+  - product: cloud-serverless
+    target: 2026-07-09
+  areas:
+  - Dashboards and visualizations
+  prs:
+  - https://github.com/elastic/kibana/pull/276423
+  issues:
+  - https://github.com/elastic/kibana/issues/276400
+- file:
+    name: 276659.yaml
+    checksum: 52a9c5cf5ea1e7a9a0144e181715af9fd0ecf572
+  type: bug-fix
+  title: Fix edit action availability for managed workflows
+  products:
+  - product: cloud-serverless
+    target: 2026-07-09
+  prs:
+  - https://github.com/elastic/kibana/pull/276659
+  issues:
+  - '# PRIVATE: https://github.com/elastic/security-team/issues/18141'
+- file:
+    name: 276383.yaml
+    checksum: b1b0ddadf4649cdfe5adf318cfd673807a744424
+  type: enhancement
+  title: Add workflow graph visualization in the workflow editor
+  products:
+  - product: cloud-serverless
+    target: 2026-07-09
+  description: Adds a read-only workflow graph that visualizes your workflow as an interactive node graph in the workflow editor. Available when Elastic Workflows experimental features are enabled in Advanced Settings.
+  prs:
+  - https://github.com/elastic/kibana/pull/276383
+- file:
+    name: 275901.yaml
+    checksum: a69841189692e17cbb44980c94a1404dfe9296e2
+  type: bug-fix
+  title: Fix stale requests in the inspector when switching between layouts with charts
+  products:
+  - product: cloud-serverless
+    target: 2026-07-09
+  areas:
+  - Discover and ES|QL
+  prs:
+  - https://github.com/elastic/kibana/pull/275901
+  issues:
+  - https://github.com/elastic/kibana/issues/273454
+- file:
+    name: 275690.yaml
+    checksum: 271415d54600e243d2b22a8bfa01760811b94d53
+  type: feature
+  title: Support default connector and case settings in YAML templates
+  products:
+  - product: cloud-serverless
+    target: 2026-07-09
+  areas:
+  - Alerting and reporting
+  prs:
+  - https://github.com/elastic/kibana/pull/275690

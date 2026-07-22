@@ -19,3 +19,10 @@ export const OVERRIDES_SUBFOLDER = 'overrides';
 export const MANUAL_SUBFOLDER = 'manual';
 
 export const API_DOCS_LINK = 'https://www.elastic.co/docs/api';
+
+// Generated from the Kibana OpenAPI bundle by `node scripts/generate_kibana_api_doc_links.js`,
+// see `server/lib/spec_definitions/kibana_api_doc_links`.
+export const KIBANA_API_DOC_LINKS_FILE = resolve(
+  __dirname,
+  '../../server/lib/spec_definitions/kibana_api_doc_links/generated_kibana_api_doc_links.json'
+);

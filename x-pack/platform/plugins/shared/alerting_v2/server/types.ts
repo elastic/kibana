@@ -28,7 +28,7 @@ import type {
 } from '@kbn/workflows-extensions/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
-import type { AgentContextLayerPluginSetup } from '@kbn/agent-context-layer-plugin/server';
+import type { AgentBuilderSmlPluginSetup } from '@kbn/agent-builder-sml-plugin/server';
 import type { RulesClient } from './lib/rules_client';
 import type { ActionPolicyClient } from './lib/action_policy_client';
 
@@ -62,7 +62,7 @@ export interface AlertingServerSetupDependencies {
   eventLog: IEventLogService;
   usageCollection?: UsageCollectionSetup;
   agentBuilder?: AgentBuilderPluginSetup;
-  agentContextLayer?: AgentContextLayerPluginSetup;
+  agentBuilderSml?: AgentBuilderSmlPluginSetup;
 }
 
 export interface AlertingServerStartDependencies {

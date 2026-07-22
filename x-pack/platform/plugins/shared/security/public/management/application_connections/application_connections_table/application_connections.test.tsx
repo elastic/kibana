@@ -20,6 +20,17 @@ jest.mock('../assets/illustration_empty_state.svg', () => 'illustration-empty-st
   virtual: true,
 });
 
+jest.mock('@kbn/core-user-profile-browser-hooks', () => {
+  const actual = jest.requireActual('@kbn/core-user-profile-browser-hooks');
+  return {
+    ...actual,
+    useCurrentUser: jest.fn(() => ({
+      isLoading: false,
+      user: { username: 'current_user', displayName: 'Current User' },
+    })),
+  };
+});
+
 type CoreStartMock = ReturnType<typeof coreMock.createStart>;
 
 interface GetResponses {
@@ -80,9 +91,12 @@ describe('ApplicationConnections', () => {
       'href',
       '/mock/app/agent_builder/manage/tools/mcp_clients/new'
     );
-    expect(
-      await findByTestId('applicationConnectionsEmptyPromptLearnMoreLink')
-    ).toBeInTheDocument();
+    const learnMoreLink = await findByTestId('applicationConnectionsEmptyPromptLearnMoreLink');
+    expect(learnMoreLink).toBeInTheDocument();
+    expect(learnMoreLink).toHaveAttribute(
+      'href',
+      coreStart.docLinks.links.applicationConnections.oauthClients
+    );
 
     const manageClientsLink = getByTestId('applicationConnectionsManageClientsLink');
     expect(manageClientsLink).toBeInTheDocument();

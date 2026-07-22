@@ -37,7 +37,7 @@ import type { CloudSecurityPostureStartServices } from '../types';
 
 const RULE_PAGE_PATH = '/app/security/rules/id/';
 
-interface TakeActionProps {
+export interface TakeActionProps {
   createRuleFn?: (http: HttpSetup) => Promise<RuleResponse>;
   enableBenchmarkRuleFn?: () => Promise<void>;
   disableBenchmarkRuleFn?: () => Promise<void>;
