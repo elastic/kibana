@@ -8345,7 +8345,6 @@
     "sharedUXPackages.dateRangePicker.settingsPanel.heading": "設定",
     "sharedUXPackages.dateRangePicker.settingsPanel.relativeTimeRangeHeading": "相対的時間範囲",
     "sharedUXPackages.dateRangePicker.settingsPanel.roundRelativeTimeLabel": "相対的時間範囲を四捨五入",
-    "sharedUXPackages.dateRangePicker.settingsPanel.technicalPreviewNotice": "このタイムピッカーはテクニカルプレビュー段階です。",
     "sharedUXPackages.dateRangePicker.settingsPanel.timeFormatDescription": "タイムゾーンは管理者によって{timeZoneLabel}に設定されています。これはスペース内のすべてのユーザーに適用されます。",
     "sharedUXPackages.dateRangePicker.settingsPanel.timeFormatHeading": "時間形式とタイムゾーン",
     "sharedUXPackages.dateRangePicker.settingsPanel.timePrecisionLabel": "時間精度",
