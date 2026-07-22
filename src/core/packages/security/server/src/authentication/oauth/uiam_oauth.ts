@@ -47,6 +47,8 @@ export interface UiamOAuthConnectionResponse {
   revoked?: boolean;
   revocation?: string;
   revocation_reason?: string;
+  expired?: boolean;
+  expiration?: string;
   scopes?: string[];
   user_id?: string;
 }

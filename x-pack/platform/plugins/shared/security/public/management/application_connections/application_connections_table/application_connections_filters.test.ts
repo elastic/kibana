@@ -207,14 +207,23 @@ describe('#applicationConnectionMatchesStatus', () => {
     client: createClient({ revoked: false }),
     connection: createConnection({ revoked: true }),
   });
+  const expired = createApplicationConnection({
+    client: createClient({ revoked: false }),
+    connection: createConnection({ revoked: false, expired: true }),
+  });
+  const expiredAndRevoked = createApplicationConnection({
+    client: createClient({ revoked: false }),
+    connection: createConnection({ revoked: true, expired: true }),
+  });
 
   it('returns true for any row when the filter list is empty', () => {
     expect(applicationConnectionMatchesStatus(active, [])).toBe(true);
     expect(applicationConnectionMatchesStatus(clientRevoked, [])).toBe(true);
+    expect(applicationConnectionMatchesStatus(expired, [])).toBe(true);
   });
 
   describe('with status: ["connected"]', () => {
-    it('matches rows where neither client nor connection is revoked', () => {
+    it('matches rows where neither client nor connection is revoked and not expired', () => {
       expect(applicationConnectionMatchesStatus(active, ['connected'])).toBe(true);
     });
 
@@ -224,6 +233,24 @@ describe('#applicationConnectionMatchesStatus', () => {
 
     it('does not match when the connection is revoked', () => {
       expect(applicationConnectionMatchesStatus(connectionRevoked, ['connected'])).toBe(false);
+    });
+
+    it('does not match when the connection is expired', () => {
+      expect(applicationConnectionMatchesStatus(expired, ['connected'])).toBe(false);
+    });
+  });
+
+  describe('with status: ["expired"]', () => {
+    it('matches an expired connection', () => {
+      expect(applicationConnectionMatchesStatus(expired, ['expired'])).toBe(true);
+    });
+
+    it('does not match an active row', () => {
+      expect(applicationConnectionMatchesStatus(active, ['expired'])).toBe(false);
+    });
+
+    it('does not match a revoked row that is also expired (revoked takes precedence)', () => {
+      expect(applicationConnectionMatchesStatus(expiredAndRevoked, ['expired'])).toBe(false);
     });
   });
 
@@ -236,20 +263,26 @@ describe('#applicationConnectionMatchesStatus', () => {
       expect(applicationConnectionMatchesStatus(connectionRevoked, ['revoked'])).toBe(true);
     });
 
+    it('matches an expired-and-revoked row (revoked takes precedence)', () => {
+      expect(applicationConnectionMatchesStatus(expiredAndRevoked, ['revoked'])).toBe(true);
+    });
+
     it('does not match an active row', () => {
       expect(applicationConnectionMatchesStatus(active, ['revoked'])).toBe(false);
     });
+
+    it('does not match an expired row', () => {
+      expect(applicationConnectionMatchesStatus(expired, ['revoked'])).toBe(false);
+    });
   });
 
-  describe('with status: ["connected", "revoked"]', () => {
+  describe('with status: ["connected", "expired", "revoked"]', () => {
     it('matches every row (OR semantics)', () => {
-      expect(applicationConnectionMatchesStatus(active, ['connected', 'revoked'])).toBe(true);
-      expect(applicationConnectionMatchesStatus(clientRevoked, ['connected', 'revoked'])).toBe(
-        true
-      );
-      expect(applicationConnectionMatchesStatus(connectionRevoked, ['connected', 'revoked'])).toBe(
-        true
-      );
+      const statuses = ['connected', 'expired', 'revoked'] as const;
+      expect(applicationConnectionMatchesStatus(active, [...statuses])).toBe(true);
+      expect(applicationConnectionMatchesStatus(clientRevoked, [...statuses])).toBe(true);
+      expect(applicationConnectionMatchesStatus(connectionRevoked, [...statuses])).toBe(true);
+      expect(applicationConnectionMatchesStatus(expired, [...statuses])).toBe(true);
     });
   });
 });

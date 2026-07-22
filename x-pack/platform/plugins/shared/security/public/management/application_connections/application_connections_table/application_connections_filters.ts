@@ -13,6 +13,15 @@ import type {
   ApplicationConnectionStatusFilter,
 } from '../constants/types';
 
+export const getConnectionStatus = ({
+  client,
+  connection,
+}: ApplicationConnection): ApplicationConnectionStatusFilter => {
+  if (client.revoked || connection.revoked) return 'revoked';
+  if (connection.expired) return 'expired';
+  return 'connected';
+};
+
 export const toApplicationConnectionList = (
   connections: ApplicationConnections[]
 ): ApplicationConnection[] =>
@@ -63,9 +72,5 @@ export const applicationConnectionMatchesStatus = (
   statuses: ApplicationConnectionStatusFilter[]
 ): boolean => {
   if (statuses.length === 0) return true;
-  const isActive =
-    !applicationConnection.client.revoked && !applicationConnection.connection.revoked;
-  return (
-    (statuses.includes('connected') && isActive) || (statuses.includes('revoked') && !isActive)
-  );
+  return statuses.includes(getConnectionStatus(applicationConnection));
 };
