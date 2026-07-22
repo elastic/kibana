@@ -16,24 +16,19 @@ spaceTest.describe('Lens visualize geo field', { tag: tags.stateful.classic }, (
       from: 'Sep 22, 2015 @ 00:00:00.000',
       to: 'Sep 22, 2015 @ 04:00:00.000',
     },
-    dataViewNamePrefix: 'scout-lens-geo-field-dv',
   });
 
   spaceTest.beforeAll(suiteSetup.beforeAll);
+
+  spaceTest.beforeEach(suiteSetup.beforeEach);
 
   spaceTest.afterAll(suiteSetup.afterAll);
 
   spaceTest(
     'visualizes geo fields in Maps with a document-count tooltip',
-    async ({ browserAuth, page, pageObjects }) => {
-      const { visualize, lens, maps } = pageObjects;
+    async ({ page, pageObjects }) => {
+      const { lens, maps } = pageObjects;
 
-      await browserAuth.loginAsPrivilegedUser();
-      // Force URL navigation so Maps→Visualize does not leave stale editor state.
-      await visualize.goto();
-      await visualize.openNewVisualizationWizard();
-      await visualize.clickVisType('lens');
-      await lens.waitForLensApp();
       await lens.switchDataPanelIndexPattern(testData.DATA_VIEW_ID.LOGSTASH);
       await lens.dragFieldToGeoFieldWorkspace('geo.coordinates');
 

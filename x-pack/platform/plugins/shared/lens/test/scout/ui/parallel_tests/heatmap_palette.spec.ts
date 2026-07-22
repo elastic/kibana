@@ -7,14 +7,16 @@
 
 import { spaceTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { createLogstashLensEditorSuiteSetup, enableElasticChartDebug } from '../fixtures';
+import { createLogstashLensEditorSuiteSetup } from '../fixtures';
 
 spaceTest.describe('Lens heatmap palette', { tag: tags.stateful.classic }, () => {
   const suiteSetup = createLogstashLensEditorSuiteSetup({
-    dataViewNamePrefix: 'scout-lens-heatmap-dv',
+    enableChartDebug: true,
   });
 
   spaceTest.beforeAll(suiteSetup.beforeAll);
+
+  spaceTest.beforeEach(suiteSetup.beforeEach);
 
   spaceTest.afterAll(suiteSetup.afterAll);
 
@@ -22,15 +24,8 @@ spaceTest.describe('Lens heatmap palette', { tag: tags.stateful.classic }, () =>
   // stop edits in the same flyout — same sequential state as FTR heatmap.ts.
   spaceTest(
     'edits temperature palette stops, range types, and axis rotation',
-    async ({ browserAuth, context, page, pageObjects }) => {
-      const { visualize, lens } = pageObjects;
-
-      await enableElasticChartDebug(context);
-      await browserAuth.loginAsPrivilegedUser();
-      await visualize.goto();
-      await visualize.openNewVisualizationWizard();
-      await visualize.clickVisType('lens');
-      await lens.waitForLensApp();
+    async ({ page, pageObjects }) => {
+      const { lens } = pageObjects;
 
       await lens.configureDimension({
         dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
@@ -54,7 +49,7 @@ spaceTest.describe('Lens heatmap palette', { tag: tags.stateful.classic }, () =>
         await lens.switchToVisualization('heatmap', { search: 'heat' });
         const debugState = await getHeatmapDebug();
 
-        expect(debugState.axes!.x[0].labels).toStrictEqual([
+        expect(debugState.axes?.x[0].labels).toStrictEqual([
           '97.220.3.248',
           '169.228.188.120',
           '78.83.247.30',
@@ -62,16 +57,16 @@ spaceTest.describe('Lens heatmap palette', { tag: tags.stateful.classic }, () =>
           '93.28.27.24',
           'Other',
         ]);
-        expect(debugState.axes!.y[0].labels).toStrictEqual(['']);
-        expect(debugState.heatmap!.cells).toHaveLength(6);
-        expect(debugState.legend!.items).toStrictEqual([
+        expect(debugState.axes?.y[0].labels).toStrictEqual(['']);
+        expect(debugState.heatmap?.cells).toHaveLength(6);
+        expect(debugState.legend?.items).toStrictEqual([
           { key: '5,722.775 - 8,529.22', name: '5,722.775 - 8,529.22', color: '#61a2ff' },
           { key: '8,529.22 - 11,335.665', name: '8,529.22 - 11,335.665', color: '#cfe1ff' },
           { key: '11,335.665 - 14,142.11', name: '11,335.665 - 14,142.11', color: '#f6f9fc' },
           { key: '14,142.11 - 16,948.555', name: '14,142.11 - 16,948.555', color: '#ffd4cf' },
           { key: '≥ 16,948.555', name: '≥ 16,948.555', color: '#f6726a' },
         ]);
-        expect(debugState.axes!.x[0].rotation).toBe(0);
+        expect(debugState.axes?.x[0].rotation).toBe(0);
       });
 
       await spaceTest.step('reflect stop color changes on the chart', async () => {
@@ -85,11 +80,11 @@ spaceTest.describe('Lens heatmap palette', { tag: tags.stateful.classic }, () =>
         await expect
           .poll(async () => {
             const debugState = await getHeatmapDebug();
-            return debugState.legend!.items[0]?.key;
+            return debugState.legend?.items[0]?.key;
           })
           .toBe('7,125.997 - 8,529.22');
         const debugState = await getHeatmapDebug();
-        expect(debugState.legend!.items).toStrictEqual([
+        expect(debugState.legend?.items).toStrictEqual([
           { key: '7,125.997 - 8,529.22', name: '7,125.997 - 8,529.22', color: '#61a2ff' },
           { key: '8,529.22 - 11,335.665', name: '8,529.22 - 11,335.665', color: '#cfe1ff' },
           { key: '11,335.665 - 14,142.11', name: '11,335.665 - 14,142.11', color: '#f6f9fc' },
@@ -103,11 +98,11 @@ spaceTest.describe('Lens heatmap palette', { tag: tags.stateful.classic }, () =>
         await expect
           .poll(async () => {
             const debugState = await getHeatmapDebug();
-            return debugState.legend!.items[0]?.key;
+            return debugState.legend?.items[0]?.key;
           })
           .toBe('7,125.99 - 8,529.2');
         const debugState = await getHeatmapDebug();
-        expect(debugState.legend!.items).toStrictEqual([
+        expect(debugState.legend?.items).toStrictEqual([
           { key: '7,125.99 - 8,529.2', name: '7,125.99 - 8,529.2', color: '#61a2ff' },
           { key: '8,529.2 - 11,335.66', name: '8,529.2 - 11,335.66', color: '#cfe1ff' },
           { key: '11,335.66 - 14,142.1', name: '11,335.66 - 14,142.1', color: '#f6f9fc' },
@@ -121,11 +116,11 @@ spaceTest.describe('Lens heatmap palette', { tag: tags.stateful.classic }, () =>
         await expect
           .poll(async () => {
             const debugState = await getHeatmapDebug();
-            return debugState.legend!.items[0]?.key;
+            return debugState.legend?.items[0]?.key;
           })
           .toBe('0 - 8,529.2');
         const debugState = await getHeatmapDebug();
-        expect(debugState.legend!.items).toStrictEqual([
+        expect(debugState.legend?.items).toStrictEqual([
           { key: '0 - 8,529.2', name: '0 - 8,529.2', color: '#61a2ff' },
           { key: '8,529.2 - 11,335.66', name: '8,529.2 - 11,335.66', color: '#cfe1ff' },
           { key: '11,335.66 - 14,142.1', name: '11,335.66 - 14,142.1', color: '#f6f9fc' },
@@ -140,20 +135,19 @@ spaceTest.describe('Lens heatmap palette', { tag: tags.stateful.classic }, () =>
         await expect
           .poll(async () => {
             const debugState = await getHeatmapDebug();
-            return debugState.legend!.items[0]?.key;
+            return debugState.legend?.items[0]?.key;
           })
           .toBe('5,722.775 - 8,529.2');
         const debugState = await getHeatmapDebug();
-        expect(debugState.legend!.items).toStrictEqual([
+        expect(debugState.legend?.items).toStrictEqual([
           { key: '5,722.775 - 8,529.2', name: '5,722.775 - 8,529.2', color: '#61a2ff' },
           { key: '8,529.2 - 11,335.66', name: '8,529.2 - 11,335.66', color: '#cfe1ff' },
           { key: '11,335.66 - 14,142.1', name: '11,335.66 - 14,142.1', color: '#f6f9fc' },
           { key: '14,142.1 - 16,948.55', name: '14,142.1 - 16,948.55', color: '#ffd4cf' },
           { key: '≥ 16,948.55', name: '≥ 16,948.55', color: '#f6726a' },
         ]);
-        expect(debugState.heatmap!.cells[debugState.heatmap!.cells.length - 1].fill).toBe(
-          'rgba(97, 162, 255, 1)'
-        );
+        const cells = debugState.heatmap?.cells ?? [];
+        expect(cells[cells.length - 1]?.fill).toBe('rgba(97, 162, 255, 1)');
       });
 
       await spaceTest.step('reset stop numbers when changing palette', async () => {
@@ -161,11 +155,11 @@ spaceTest.describe('Lens heatmap palette', { tag: tags.stateful.classic }, () =>
         await expect
           .poll(async () => {
             const debugState = await getHeatmapDebug();
-            return debugState.legend!.items[0]?.color;
+            return debugState.legend?.items[0]?.color;
           })
           .toBe('#24c292');
         const debugState = await getHeatmapDebug();
-        expect(debugState.legend!.items).toStrictEqual([
+        expect(debugState.legend?.items).toStrictEqual([
           { key: '5,722.775 - 8,529.22', name: '5,722.775 - 8,529.22', color: '#24c292' },
           { key: '8,529.22 - 11,335.665', name: '8,529.22 - 11,335.665', color: '#aee8d2' },
           { key: '11,335.665 - 14,142.11', name: '11,335.665 - 14,142.11', color: '#fcd883' },
@@ -179,11 +173,11 @@ spaceTest.describe('Lens heatmap palette', { tag: tags.stateful.classic }, () =>
         await expect
           .poll(async () => {
             const debugState = await getHeatmapDebug();
-            return debugState.legend!.items[0]?.key;
+            return debugState.legend?.items[0]?.key;
           })
           .toBe('5,722.775 - 8,529.22');
         const debugState = await getHeatmapDebug();
-        expect(debugState.legend!.items).toStrictEqual([
+        expect(debugState.legend?.items).toStrictEqual([
           { key: '5,722.775 - 8,529.22', name: '5,722.775 - 8,529.22', color: '#24c292' },
           { key: '8,529.22 - 11,335.665', name: '8,529.22 - 11,335.665', color: '#aee8d2' },
           { key: '11,335.665 - 14,142.11', name: '11,335.665 - 14,142.11', color: '#fcd883' },
@@ -200,7 +194,7 @@ spaceTest.describe('Lens heatmap palette', { tag: tags.stateful.classic }, () =>
         await expect
           .poll(async () => {
             const debugState = await getHeatmapDebug();
-            return debugState.axes!.x[0].rotation;
+            return debugState.axes?.x[0].rotation;
           })
           .toBe(90);
       });

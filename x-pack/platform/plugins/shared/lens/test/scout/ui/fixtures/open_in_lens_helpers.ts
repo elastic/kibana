@@ -8,10 +8,7 @@
 import type { PageObjects } from '@kbn/scout';
 
 import { DATA_TEST_SUBJECTS, LOGSTASH_IN_RANGE_DATES, DATA_VIEW_ID } from './constants';
-
-interface ElasticChartDebugContext {
-  addInitScript: (script: () => void) => Promise<{ dispose: () => Promise<void> }>;
-}
+import { enableElasticChartDebug, type ElasticChartDebugContext } from './helpers';
 
 export interface ImportedSavedObject {
   id: string;
@@ -149,11 +146,4 @@ export async function canConvertToLensByTitle(
   panelTitle: string
 ): Promise<boolean> {
   return dashboard.panelHasAction(DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION, panelTitle);
-}
-
-/** Enables elastic-charts debug state for subsequent page loads in this browser context. */
-export async function enableElasticChartDebug(context: ElasticChartDebugContext): Promise<void> {
-  await context.addInitScript(() => {
-    (window as unknown as { _echDebugStateFlag?: boolean })._echDebugStateFlag = true;
-  });
 }

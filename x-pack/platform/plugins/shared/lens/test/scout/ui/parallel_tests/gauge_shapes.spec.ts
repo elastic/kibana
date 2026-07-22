@@ -8,14 +8,16 @@
 import { BulletSubtype } from '@elastic/charts';
 import { spaceTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { createLogstashLensEditorSuiteSetup, enableElasticChartDebug } from '../fixtures';
+import { createLogstashLensEditorSuiteSetup } from '../fixtures';
 
 spaceTest.describe('Lens gauge shapes', { tag: tags.stateful.classic }, () => {
   const suiteSetup = createLogstashLensEditorSuiteSetup({
-    dataViewNamePrefix: 'scout-lens-gauge-dv',
+    enableChartDebug: true,
   });
 
   spaceTest.beforeAll(suiteSetup.beforeAll);
+
+  spaceTest.beforeEach(suiteSetup.beforeEach);
 
   spaceTest.afterAll(suiteSetup.afterAll);
 
@@ -23,20 +25,13 @@ spaceTest.describe('Lens gauge shapes', { tag: tags.stateful.classic }, () => {
   // edited gauge config from earlier steps — same sequential state as FTR gauge.ts.
   spaceTest(
     'switches to gauge, edits dimensions/styles, and falls back to table',
-    async ({ browserAuth, context, page, pageObjects }) => {
-      const { visualize, lens } = pageObjects;
+    async ({ page, pageObjects }) => {
+      const { lens } = pageObjects;
 
       const getGaugeBullet = async () => {
         const debugState = await lens.getCurrentChartDebugState('gaugeChart');
         return debugState.bullet?.rows[0][0];
       };
-
-      await enableElasticChartDebug(context);
-      await browserAuth.loginAsPrivilegedUser();
-      await visualize.goto();
-      await visualize.openNewVisualizationWizard();
-      await visualize.clickVisType('lens');
-      await lens.waitForLensApp();
 
       await lens.configureDimension({
         dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',

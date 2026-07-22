@@ -34,6 +34,11 @@ export class LensApp {
   private readonly savedObjectTitleInput;
   private readonly confirmSaveButton;
   private readonly closeDimensionEditorButton;
+  private readonly flyoutBackButton;
+  private readonly styleSettingsButton;
+  /** Style flyout title — Lens uses a DOM id, not a data-test-subj (FTR parity). */
+  private readonly dimensionContainerTitle;
+  private readonly suggestionPanelToggle;
   public readonly applyChangesButton;
   private readonly goBackToAppButton;
   private readonly discardChangesModal;
@@ -51,6 +56,10 @@ export class LensApp {
     this.closeDimensionEditorButton = this.page.testSubj.locator(
       'lns-indexPattern-dimensionContainerClose'
     );
+    this.flyoutBackButton = this.page.testSubj.locator('lns-indexPattern-dimensionContainerBack');
+    this.styleSettingsButton = this.page.locator('button[data-test-subj="style"]');
+    this.dimensionContainerTitle = this.page.locator('#lnsDimensionContainerTitle');
+    this.suggestionPanelToggle = this.page.testSubj.locator('lensSuggestionsPanelToggleButton');
     this.applyChangesButton = this.page.testSubj.locator('lnsApplyChanges__apply');
     this.goBackToAppButton = this.page.testSubj.locator('lnsApp_goBackToAppButton');
     this.discardChangesModal = this.page.testSubj.locator('lnsApp_discardChangesModalOrigin');
@@ -213,23 +222,14 @@ export class LensApp {
     await this.closeDimensionEditor();
   }
 
-  /** Closes the open dimension editor flyout. */
+  /**
+   * Closes the open dimension editor flyout.
+   * Caller must have the dimension editor open.
+   */
   async closeDimensionEditor() {
-    const closeButton = this.closeDimensionEditorButton;
-    if (!(await closeButton.isVisible())) {
-      return;
-    }
-    // Suggested-value dimension panels remount while opening; tolerate a detached
-    // close control only when the flyout already finished closing.
-    // Remount can exceed the 10s actionTimeout before the close control is stable.
-    try {
-      await closeButton.click({ timeout: 15_000 });
-    } catch (error) {
-      if (await closeButton.isVisible()) {
-        throw error;
-      }
-    }
-    await closeButton.waitFor({ state: 'hidden', timeout: 15_000 });
+    // Suggested-value panels can remount and exceed the 10s actionTimeout.
+    await this.closeDimensionEditorButton.click({ timeout: 15_000 });
+    await this.closeDimensionEditorButton.waitFor({ state: 'hidden', timeout: 15_000 });
   }
 
   /** Removes all dimensions from the given panel, polling until none remain. */
@@ -585,15 +585,13 @@ export class LensApp {
     return (await this.chartSwitchPopover.innerText()).trim();
   }
 
-  /** Opens the Lens style settings flyout. */
+  /**
+   * Opens the Lens style settings flyout.
+   * Caller must close any open dimension/palette flyout first.
+   */
   async openStyleSettingsFlyout() {
-    const closeButton = this.closeDimensionEditorButton;
-    if (await closeButton.isVisible()) {
-      await this.closeDimensionEditor();
-    }
-
-    await this.page.locator('button[data-test-subj="style"]').click();
-    await this.page.locator('#lnsDimensionContainerTitle').waitFor({ state: 'visible' });
+    await this.styleSettingsButton.click();
+    await this.dimensionContainerTitle.waitFor({ state: 'visible' });
   }
 
   /** Reads the selected donut hole size from the style settings flyout. */
@@ -683,12 +681,13 @@ export class LensApp {
     });
   }
 
+  /**
+   * Closes the open style/settings flyout via the back control.
+   * Caller must have that flyout open (back button visible).
+   */
   async closeFlyoutWithBackButton() {
-    const backButton = this.page.testSubj.locator('lns-indexPattern-dimensionContainerBack');
-    if (await backButton.isVisible()) {
-      await backButton.click();
-      await backButton.waitFor({ state: 'hidden' });
-    }
+    await this.flyoutBackButton.click();
+    await this.flyoutBackButton.waitFor({ state: 'hidden' });
   }
 
   /**
@@ -777,28 +776,31 @@ export class LensApp {
   async setEuiSwitch(testSubj: string, checked: boolean) {
     const switchLocator = this.page.testSubj.locator(testSubj);
     await switchLocator.waitFor({ state: 'visible' });
-    const isChecked = (await switchLocator.getAttribute('aria-checked')) === 'true';
-    if (isChecked !== checked) {
-      await switchLocator.click();
-    }
+    await switchLocator.setChecked(checked);
   }
 
+  /**
+   * Collapses the suggestions panel.
+   * Caller must have suggestions mounted with the panel expanded.
+   */
   async closeSuggestionPanel() {
-    const toggle = this.page.testSubj.locator('lensSuggestionsPanelToggleButton');
-    // Toggle is absent when suggestions never mounted for this chart.
-    if (!(await toggle.isVisible())) {
-      return;
-    }
-    if ((await toggle.getAttribute('aria-expanded')) === 'true') {
-      await toggle.click();
-    }
+    await this.suggestionPanelToggle.waitFor({ state: 'visible' });
+    // waitForFunction has no Scout default (unlike expect/actionTimeout).
+    await this.page.waitForFunction(
+      () =>
+        document
+          .querySelector('[data-test-subj="lensSuggestionsPanelToggleButton"]')
+          ?.getAttribute('aria-expanded') === 'true',
+      undefined,
+      { timeout: 10_000 }
+    );
+    await this.suggestionPanelToggle.click();
     await this.page.waitForFunction(
       () => {
         const el = document.querySelector('[data-test-subj="lensSuggestionsPanelToggleButton"]');
         return el == null || el.getAttribute('aria-expanded') !== 'true';
       },
       undefined,
-      // waitForFunction has no Scout default (unlike expect/actionTimeout).
       { timeout: 10_000 }
     );
   }
@@ -834,22 +836,21 @@ export class LensApp {
 
   /**
    * Changes the data view in the Lens data panel.
+   * After filtering, either a saved `dataView-{title}` row or "Explore matching indices" appears.
    */
   async switchDataPanelIndexPattern(dataViewTitle: string) {
     const switchLink = this.page.testSubj.locator('lns-dataView-switch-link');
-    const currentValue = (await switchLink.innerText()).trim();
-    if (currentValue === dataViewTitle) {
-      return;
-    }
     await switchLink.click();
     const switcher = this.page.testSubj.locator('indexPattern-switcher');
     await switcher.waitFor({ state: 'visible' });
     await this.page.testSubj.typeWithDelay('indexPattern-switcher--input', dataViewTitle);
     const matching = switcher.locator(`[data-test-subj="dataView-${dataViewTitle}"]`);
+    const exploreMatching = this.page.testSubj.locator('explore-matching-indices-button');
+    await matching.or(exploreMatching).waitFor({ state: 'visible' });
     if (await matching.isVisible()) {
       await matching.click();
     } else {
-      await this.page.testSubj.locator('explore-matching-indices-button').click();
+      await exploreMatching.click();
     }
     await switcher.waitFor({ state: 'hidden' });
   }

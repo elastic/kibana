@@ -35,35 +35,72 @@ interface LogstashSpaceSetupContext {
   };
 }
 
+export interface ElasticChartDebugContext {
+  addInitScript: (script: () => void) => Promise<{ dispose: () => Promise<void> }>;
+}
+
+interface LogstashLensEditorBeforeEachContext {
+  browserAuth: { loginAsPrivilegedUser: () => Promise<void> };
+  context: ElasticChartDebugContext;
+  pageObjects: Pick<PageObjects, 'visualize' | 'lens'>;
+}
+
+/** Enables elastic-charts debug state for subsequent page loads in this browser context. */
+export async function enableElasticChartDebug(context: ElasticChartDebugContext): Promise<void> {
+  await context.addInitScript(() => {
+    (window as unknown as { _echDebugStateFlag?: boolean })._echDebugStateFlag = true;
+  });
+}
+
 /**
  * Creates a space-scoped Logstash data view + common uiSettings so Visualize/Lens
  * do not redirect to the "no data views" empty state.
+ * Returns `beforeEach` that logs in and opens an empty Lens editor (same shape as
+ * `createOpenInLensSuiteSetup`).
  */
 export function createLogstashLensEditorSuiteSetup(options?: {
   timeRange?: { from: string; to: string };
-  dataViewNamePrefix?: string;
+  /** When true, enables elastic-charts debug state before navigating to Lens. */
+  enableChartDebug?: boolean;
 }) {
   const timeRange = options?.timeRange ?? LOGSTASH_IN_RANGE_DATES;
-  const namePrefix = options?.dataViewNamePrefix ?? 'scout-lens-editor-dv';
+  const enableChartDebug = options?.enableChartDebug ?? false;
   let storedDataViewId: string | undefined;
 
   const beforeAll = async ({ scoutSpace, apiServices }: LogstashSpaceSetupContext) => {
+    // Name matches title so Lens data-view switcher rows resolve as `dataView-logstash-*`.
+    const { data: dataView } = await apiServices.dataViews.create({
+      title: DATA_VIEW_ID.LOGSTASH,
+      name: DATA_VIEW_ID.LOGSTASH,
+      timeFieldName: '@timestamp',
+      spaceId: scoutSpace.id,
+    });
+    storedDataViewId = dataView.id;
+
     await scoutSpace.uiSettings.set({
-      defaultIndex: DATA_VIEW_ID.LOGSTASH,
+      defaultIndex: storedDataViewId ?? DATA_VIEW_ID.LOGSTASH,
       'dateFormat:tz': 'UTC',
       'timepicker:timeDefaults': JSON.stringify({
         from: timeRange.from,
         to: timeRange.to,
       }),
     });
+  };
 
-    const { data: dataView } = await apiServices.dataViews.create({
-      title: DATA_VIEW_ID.LOGSTASH,
-      name: `${namePrefix}-${Date.now()}`,
-      timeFieldName: '@timestamp',
-      spaceId: scoutSpace.id,
-    });
-    storedDataViewId = dataView.id;
+  const beforeEach = async ({
+    browserAuth,
+    context,
+    pageObjects,
+  }: LogstashLensEditorBeforeEachContext) => {
+    if (enableChartDebug) {
+      await enableElasticChartDebug(context);
+    }
+    await browserAuth.loginAsPrivilegedUser();
+    // URL navigation resets stale Visualize/Lens editor state (e.g. after Maps).
+    await pageObjects.visualize.goto();
+    await pageObjects.visualize.openNewVisualizationWizard();
+    await pageObjects.visualize.clickVisType('lens');
+    await pageObjects.lens.waitForLensApp();
   };
 
   const afterAll = async ({ scoutSpace, apiServices }: LogstashSpaceSetupContext) => {
@@ -74,7 +111,7 @@ export function createLogstashLensEditorSuiteSetup(options?: {
     await scoutSpace.savedObjects.cleanStandardList();
   };
 
-  return { beforeAll, afterAll };
+  return { beforeAll, beforeEach, afterAll };
 }
 
 export async function openDimensionEditorAndWaitForFlyout(

@@ -25,6 +25,7 @@ export class MapsPage {
   public readonly confirmSaveButton;
   public readonly documentsItem;
   private readonly mapLayerToc;
+  private readonly layerTocTooltip;
 
   constructor(private readonly page: ScoutPage) {
     this.mapContainer = this.page.locator('#maps-plugin');
@@ -41,6 +42,7 @@ export class MapsPage {
     this.confirmSaveButton = this.page.testSubj.locator('confirmSaveSavedObjectButton');
     this.documentsItem = this.page.testSubj.locator('documents');
     this.mapLayerToc = this.page.testSubj.locator('mapLayerTOC');
+    this.layerTocTooltip = this.page.testSubj.locator('layerTocTooltip');
   }
 
   async gotoNewMap() {
@@ -120,10 +122,9 @@ export class MapsPage {
 
   async getLayerTocTooltipMsg(layerName: string): Promise<string> {
     await this.getLayerToggleButton(layerName).hover();
-    const tooltip = this.page.testSubj.locator('layerTocTooltip');
-    await tooltip.waitFor({ state: 'visible' });
+    await this.layerTocTooltip.waitFor({ state: 'visible' });
     // Normalize whitespace — tooltip lines can include leading spaces from TOC layout.
-    return (await tooltip.innerText())
+    return (await this.layerTocTooltip.innerText())
       .split('\n')
       .map((line) => line.trim())
       .filter(Boolean)

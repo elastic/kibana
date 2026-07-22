@@ -10,24 +10,18 @@ import { expect } from '@kbn/scout/ui';
 import { createLogstashLensEditorSuiteSetup } from '../fixtures';
 
 spaceTest.describe('Lens tag cloud filter', { tag: tags.stateful.classic }, () => {
-  const suiteSetup = createLogstashLensEditorSuiteSetup({
-    dataViewNamePrefix: 'scout-lens-tagcloud-dv',
-  });
+  const suiteSetup = createLogstashLensEditorSuiteSetup();
 
   spaceTest.beforeAll(suiteSetup.beforeAll);
+
+  spaceTest.beforeEach(suiteSetup.beforeEach);
 
   spaceTest.afterAll(suiteSetup.afterAll);
 
   spaceTest(
     'renders tags, filters from a tag click, and narrows the cloud',
-    async ({ browserAuth, page, pageObjects }) => {
-      const { visualize, lens, filterBar } = pageObjects;
-
-      await browserAuth.loginAsPrivilegedUser();
-      await visualize.goto();
-      await visualize.openNewVisualizationWizard();
-      await visualize.clickVisType('lens');
-      await lens.waitForLensApp();
+    async ({ page, pageObjects }) => {
+      const { lens, filterBar } = pageObjects;
 
       await lens.switchToVisualization('lnsTagcloud', { search: 'Tag cloud' });
 
