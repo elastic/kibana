@@ -166,6 +166,10 @@ export function getPathForServiceDetail(
 
   return apmRouter.link(apmPath, {
     path: { serviceName: payload.serviceName },
-    query,
+    query: {
+      ...query,
+      comparisonEnabled: payloadComparisonEnabled ?? isComparisonEnabledByDefault,
+      ...{ offset },
+    },
   });
 }
