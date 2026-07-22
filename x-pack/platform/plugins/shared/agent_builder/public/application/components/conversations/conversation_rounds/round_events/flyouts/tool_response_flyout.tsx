@@ -12,12 +12,13 @@ import {
   EuiFlyoutHeader,
   EuiFlyoutBody,
   EuiTitle,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
   EuiSpacer,
+  EuiSteps,
   EuiText,
+  useEuiFontSize,
+  useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { internalTools } from '@kbn/agent-builder-common';
 import type { ToolCallStep as ToolCallStepData } from '@kbn/agent-builder-common/chat/conversation';
@@ -40,38 +41,67 @@ const resultLabel = i18n.translate(
   { defaultMessage: 'Result' }
 );
 
-interface SectionHeaderProps {
-  title: string;
-  isError?: boolean;
-}
-
-const SectionHeader: React.FC<SectionHeaderProps> = ({ title, isError = false }) => (
-  <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-    <EuiFlexItem grow={false}>
-      <EuiIcon
-        type={isError ? 'alert' : 'checkInCircleFilled'}
-        color={isError ? 'danger' : 'success'}
-        aria-hidden={true}
-      />
-    </EuiFlexItem>
-    <EuiFlexItem grow={false}>
-      <EuiText size="s">
-        <strong>{title}</strong>
-      </EuiText>
-    </EuiFlexItem>
-  </EuiFlexGroup>
-);
-
 interface ToolResponseFlyoutProps {
   step: ToolCallStepData;
   onClose: () => void;
 }
 
 export const ToolResponseFlyout: React.FC<ToolResponseFlyoutProps> = ({ step, onClose }) => {
+  const stepTitleSize = useEuiFontSize('s');
+  const { euiTheme } = useEuiTheme();
   const isSubAgentCall = step.tool_id === internalTools.runSubagent;
   const subAgentExecutionId = isSubAgentCall ? getSubAgentExecutionId(step) : undefined;
   const showExecutionSection = Boolean(subAgentExecutionId);
   const showResultSection = step.results.length > 0;
+  const hasErrorResult = step.results.some(isErrorResult);
+
+  const steps = [
+    {
+      title: parametersLabel,
+      status: 'complete' as const,
+      children: (
+        <>
+          <EuiSpacer size="s" />
+          <JsonCodeBlock data={step.params} />
+        </>
+      ),
+    },
+    ...(showExecutionSection
+      ? [
+          {
+            title: executionLabel,
+            status: 'complete' as const,
+            children: (
+              <>
+                <EuiSpacer size="s" />
+                {/* TODO: replace with sub-agent execution drill-down — elastic/search-team#15172 */}
+                {/* <EuiText size="s" color="subdued"><EuiCode>{subAgentExecutionId}</EuiCode></EuiText> */}
+                <EuiText size="s" color="subdued">TODO</EuiText>
+              </>
+            ),
+          },
+        ]
+      : []),
+    ...(showResultSection
+      ? [
+          {
+            title: resultLabel,
+            status: (hasErrorResult ? 'danger' : 'complete') as 'danger' | 'complete',
+            children: (
+              <>
+                <EuiSpacer size="s" />
+                {step.results.map((result, idx) => (
+                  <Fragment key={`flyout-result-${idx}`}>
+                    <ToolResult result={result} />
+                    {idx < step.results.length - 1 && <EuiSpacer size="s" />}
+                  </Fragment>
+                ))}
+              </>
+            ),
+          },
+        ]
+      : []),
+  ];
 
   return (
     <EuiFlyout onClose={onClose} aria-labelledby="toolResponseFlyoutTitle" size="m">
@@ -81,35 +111,20 @@ export const ToolResponseFlyout: React.FC<ToolResponseFlyoutProps> = ({ step, on
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <SectionHeader title={parametersLabel} />
-        <EuiSpacer size="s" />
-        <JsonCodeBlock data={step.params} />
-
-        {showExecutionSection && (
-          <>
-            <EuiSpacer size="m" />
-            <SectionHeader title={executionLabel} />
-            <EuiSpacer size="s" />
-            {/* TODO: drilling into sub-agent execution — see elastic/search-team#15172 */}
-            <EuiText size="s" color="subdued">
-              <EuiCode>{subAgentExecutionId}</EuiCode>
-            </EuiText>
-          </>
-        )}
-
-        {showResultSection && (
-          <>
-            <EuiSpacer size="m" />
-            <SectionHeader title={resultLabel} isError={step.results.some(isErrorResult)} />
-            <EuiSpacer size="s" />
-            {step.results.map((result, idx) => (
-              <Fragment key={`flyout-result-${idx}`}>
-                <ToolResult result={result} />
-                {idx < step.results.length - 1 && <EuiSpacer size="s" />}
-              </Fragment>
-            ))}
-          </>
-        )}
+        <div
+          css={css`
+            .euiStep__title {
+              ${stepTitleSize}
+            }
+            .euiStep__content {
+              margin-block-start: 0;
+              padding-block-start: 0;
+              padding-block-end: ${euiTheme.size.base};
+            }
+          `}
+        >
+          <EuiSteps headingElement="h3" titleSize="xxs" steps={steps} />
+        </div>
       </EuiFlyoutBody>
     </EuiFlyout>
   );
