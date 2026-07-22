@@ -152,33 +152,34 @@ describe('ProductDocBasePlugin', () => {
 
     describe('serverless project gating', () => {
       let serverlessPlugin: ProductDocBasePlugin;
+      let serverlessContext: ReturnType<typeof coreMock.createPluginInitializerContext>;
 
       beforeEach(() => {
-        const serverlessContext = coreMock.createPluginInitializerContext();
+        serverlessContext = coreMock.createPluginInitializerContext();
         (serverlessContext.env.packageInfo as Record<string, unknown>).buildFlavor = 'serverless';
         serverlessPlugin = new ProductDocBasePlugin(serverlessContext);
       });
 
       it('calls updateSecurityLabsAll in serverless security projects', async () => {
-        serverlessPlugin.setup(coreMock.createSetup(), pluginSetupDeps);
-        serverlessPlugin.start(coreMock.createStart(), {
-          ...pluginStartDeps,
+        serverlessPlugin.setup(coreMock.createSetup(), {
+          ...pluginSetupDeps,
           cloud: {
             serverless: { projectType: 'security' },
-          } as ProductDocBaseStartDependencies['cloud'],
+          } as unknown as ProductDocBaseSetupDependencies['cloud'],
         });
+        serverlessPlugin.start(coreMock.createStart(), pluginStartDeps);
         await new Promise((resolve) => setImmediate(resolve));
         expect(DocumentationManagerMock().updateSecurityLabsAll).toHaveBeenCalledTimes(1);
       });
 
       it('skips updateSecurityLabsAll in serverless non-security projects', async () => {
-        serverlessPlugin.setup(coreMock.createSetup(), pluginSetupDeps);
-        serverlessPlugin.start(coreMock.createStart(), {
-          ...pluginStartDeps,
+        serverlessPlugin.setup(coreMock.createSetup(), {
+          ...pluginSetupDeps,
           cloud: {
             serverless: { projectType: 'observability' },
-          } as ProductDocBaseStartDependencies['cloud'],
+          } as unknown as ProductDocBaseSetupDependencies['cloud'],
         });
+        serverlessPlugin.start(coreMock.createStart(), pluginStartDeps);
         await new Promise((resolve) => setImmediate(resolve));
         expect(DocumentationManagerMock().updateSecurityLabsAll).not.toHaveBeenCalled();
       });

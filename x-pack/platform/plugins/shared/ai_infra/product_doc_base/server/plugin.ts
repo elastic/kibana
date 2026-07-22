@@ -45,14 +45,17 @@ export class ProductDocBasePlugin
 {
   private logger: Logger;
   private internalServices?: InternalServices;
+  private cloud?: ProductDocBaseSetupDependencies['cloud'];
 
   constructor(private readonly context: PluginInitializerContext<ProductDocBaseConfig>) {
     this.logger = context.logger.get();
   }
   setup(
     coreSetup: CoreSetup<ProductDocBaseStartDependencies, ProductDocBaseStartContract>,
-    { taskManager }: ProductDocBaseSetupDependencies
+    { taskManager, cloud }: ProductDocBaseSetupDependencies
   ): ProductDocBaseSetupContract {
+    this.cloud = cloud;
+
     const getServices = () => {
       if (!this.internalServices) {
         throw new Error('getServices called before #start');
@@ -78,7 +81,7 @@ export class ProductDocBasePlugin
 
   start(
     core: CoreStart,
-    { licensing, taskManager, cloud }: ProductDocBaseStartDependencies
+    { licensing, taskManager }: ProductDocBaseStartDependencies
   ): ProductDocBaseStartContract {
     const isServerless = this.context.env.packageInfo.buildFlavor === 'serverless';
 
@@ -127,7 +130,7 @@ export class ProductDocBasePlugin
       taskManager,
     };
 
-    void this.runStartupTasks(core, documentationManager, isServerless, cloud);
+    void this.runStartupTasks(core, documentationManager, isServerless, this.cloud);
     return {
       management: {
         install: documentationManager.install.bind(documentationManager),
@@ -152,7 +155,7 @@ export class ProductDocBasePlugin
     core: CoreStart,
     documentationManager: DocumentationManager,
     isServerless: boolean,
-    cloud: ProductDocBaseStartDependencies['cloud']
+    cloud: ProductDocBaseSetupDependencies['cloud']
   ): Promise<void> {
     const uiSettingsSoClient = new SavedObjectsClient(core.savedObjects.createInternalRepository());
     const uiSettingsClient = core.uiSettings.asScopedToClient(uiSettingsSoClient);

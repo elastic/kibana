@@ -76,7 +76,13 @@ export const DocumentationSection: React.FC<DocumentationSectionProps> = ({ prod
         // IMPORTANT: use the shared product-doc-base query key so the existing install/uninstall hooks
         // invalidate these queries automatically (otherwise status only updates on full refresh).
         queryKey: [REACT_QUERY_KEYS.GET_PRODUCT_DOC_STATUS, inferenceId, resourceType],
-        queryFn: async () => doc.getNormalizedStatus({ productDocBase, inferenceId }),
+        queryFn: async () => {
+          if (!inferenceId) {
+            throw new Error('Inference ID is not available');
+          }
+          return doc.getNormalizedStatus({ productDocBase, inferenceId });
+        },
+        enabled: Boolean(inferenceId) && !isInferenceIdLoading,
         keepPreviousData: false,
         refetchOnWindowFocus: false,
         refetchInterval: (queryData?: NormalizedDocStatus) => {

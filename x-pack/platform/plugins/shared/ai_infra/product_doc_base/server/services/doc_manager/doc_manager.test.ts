@@ -68,7 +68,14 @@ describe('DocumentationManager', () => {
     auditService = securityServiceMock.createStart().audit;
     esClient = elasticsearchServiceMock.createElasticsearchClient();
     esClient.inference.get.mockResolvedValue({
-      endpoints: [{ inference_id: defaultInferenceEndpoints.JINAv5 }],
+      endpoints: [
+        {
+          inference_id: defaultInferenceEndpoints.JINAv5,
+          task_type: 'text_embedding',
+          service: 'elasticsearch',
+          service_settings: {},
+        },
+      ],
     });
     packageInstaller = {
       installSecurityLabs: jest.fn().mockResolvedValue(undefined),
