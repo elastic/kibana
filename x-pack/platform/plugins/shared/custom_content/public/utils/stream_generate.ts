@@ -10,6 +10,7 @@ import type { HttpStart } from '@kbn/core/public';
 import { httpResponseIntoObservable } from '@kbn/sse-utils-client';
 import { ServerSentEventError } from '@kbn/sse-utils';
 import type { CustomContentTokenEvent } from '../../common/types';
+import { CUSTOM_CONTENT_GENERATE_ROUTE } from '../../common/constants';
 
 interface GenerateParams {
   prompt: string;
@@ -24,7 +25,7 @@ export function streamGenerate(
 ): Promise<void> {
   return new Promise((resolve, reject) => {
     defer(() =>
-      http.post('/internal/custom_content/generate', {
+      http.post(CUSTOM_CONTENT_GENERATE_ROUTE, {
         body: JSON.stringify(params),
         asResponse: true,
         rawResponse: true,

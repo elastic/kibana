@@ -19,6 +19,7 @@ import {
   CUSTOM_CONTENT_MAX_PROMPT_LENGTH,
   CUSTOM_CONTENT_MAX_TEMPLATE_BYTES,
   CUSTOM_CONTENT_ENABLED_FLAG_KEY,
+  CUSTOM_CONTENT_GENERATE_ROUTE,
 } from '../../common/constants';
 import type { CustomContentTokenEvent } from '../../common/types';
 
@@ -81,7 +82,7 @@ export function registerGenerateRoute(
 ) {
   router.post(
     {
-      path: '/internal/custom_content/generate',
+      path: CUSTOM_CONTENT_GENERATE_ROUTE,
       security: {
         authz: { enabled: false, reason: 'Delegates auth to the inference plugin' },
       },

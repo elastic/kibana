@@ -6,6 +6,7 @@
  */
 
 export const CUSTOM_CONTENT_EMBEDDABLE_TYPE = 'custom_content';
+export const CUSTOM_CONTENT_GENERATE_ROUTE = '/internal/custom_content/generate';
 export const CUSTOM_CONTENT_APP_NAME = 'Custom content';
 
 export const CUSTOM_CONTENT_MAX_PROMPT_LENGTH = 10_000;

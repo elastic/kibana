@@ -219,6 +219,8 @@ describe('registerGenerateRoute', () => {
     registerGenerateRoute(router, getStartServices, logger);
     getDefaultConnector.mockResolvedValue({ connectorId: 'connector-1' });
 
+    // Each CJK character is 1 UTF-16 code unit but 3 UTF-8 bytes, so 200,001 of them
+    // are under the old (length-based) 500,000 threshold but well over the real byte budget.
     const multiByteChunk = '字'.repeat(200_001);
     expect(multiByteChunk.length).toBeLessThan(500_000);
     expect(Buffer.byteLength(multiByteChunk, 'utf8')).toBeGreaterThan(500_000);
