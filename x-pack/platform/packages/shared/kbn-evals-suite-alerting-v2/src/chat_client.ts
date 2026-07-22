@@ -14,14 +14,9 @@ import pRetry from 'p-retry';
 
 type Messages = Array<{ message: string }>;
 
-interface ConverseOptions {
-  agentId?: string;
-}
-
 interface ConverseParams {
   messages: Messages;
   conversationId?: string;
-  options?: ConverseOptions;
   /**
    * Answers to prompts the agent is currently awaiting (e.g. an `ask_user_question`),
    * keyed by prompt id. When provided, the request answers those pending prompts instead
@@ -87,19 +82,16 @@ export class RuleManagementChatClient {
   converse = async ({
     messages,
     conversationId,
-    options = {},
     promptResponses,
   }: ConverseParams): Promise<ConverseResult> => {
     this.log.info('Calling converse');
-
-    const { agentId = agentBuilderDefaultAgentId } = options;
 
     const callConverseApi = async (): Promise<ConverseResult> => {
       const response = await this.fetch('/api/agent_builder/converse', {
         method: 'POST',
         version: '2023-10-31',
         body: JSON.stringify({
-          agent_id: agentId,
+          agent_id: agentBuilderDefaultAgentId,
           connector_id: this.connectorId,
           conversation_id: conversationId,
           // Answer pending prompts by id when provided; otherwise send the turn as a

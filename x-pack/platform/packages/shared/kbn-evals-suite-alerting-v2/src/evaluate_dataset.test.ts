@@ -60,11 +60,10 @@ const makeChatClient = (
 
 const runTask = async (
   client: RuleManagementChatClient,
-  input: { question?: string; turns?: string[] },
-  metadata: Record<string, unknown> | null = null
+  input: { question?: string; turns?: string[] }
 ): Promise<TaskOutput> => {
   const task = createTask(client);
-  return task({ input, metadata } as Parameters<typeof task>[0]);
+  return task({ input, metadata: null } as Parameters<typeof task>[0]);
 };
 
 describe('collectScoredCriteria', () => {
@@ -190,14 +189,6 @@ describe('createTask', () => {
 
     expect(calls[0].conversationId).toBeUndefined();
     expect(calls[1].conversationId).toBe('conv-xyz');
-  });
-
-  it('forwards the agentId from metadata as an option', async () => {
-    const { client, calls } = makeChatClient([converseResult()]);
-
-    await runTask(client, { question: 'hi' }, { agentId: 'my-agent' });
-
-    expect(calls[0].options).toEqual({ agentId: 'my-agent' });
   });
 
   it('aggregates steps, errors, and messages across turns', async () => {

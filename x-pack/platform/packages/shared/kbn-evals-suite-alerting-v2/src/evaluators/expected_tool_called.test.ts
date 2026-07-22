@@ -51,28 +51,6 @@ describe('createExpectedToolCalledEvaluator', () => {
     expect(result.score).toBe(0);
   });
 
-  it('scores 1 when a forbidden tool was not called', async () => {
-    const result = await run(outputWithToolCalls([]), {
-      forbiddenToolId: MANAGE_RULE,
-    });
-    expect(result.score).toBe(1);
-  });
-
-  it('scores 0 when a forbidden tool was called', async () => {
-    const result = await run(outputWithToolCalls([MANAGE_RULE]), {
-      forbiddenToolId: MANAGE_RULE,
-    });
-    expect(result.score).toBe(0);
-  });
-
-  it('requires both expected present and forbidden absent', async () => {
-    const result = await run(outputWithToolCalls([MANAGE_RULE, MANAGE_ACTION_POLICY]), {
-      expectedToolId: MANAGE_RULE,
-      forbiddenToolId: MANAGE_ACTION_POLICY,
-    });
-    expect(result.score).toBe(0);
-  });
-
   it('reports the used tool ids in metadata', async () => {
     const result = await run(outputWithToolCalls([MANAGE_RULE]), {
       expectedToolId: MANAGE_RULE,

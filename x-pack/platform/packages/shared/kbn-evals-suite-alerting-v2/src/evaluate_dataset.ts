@@ -6,7 +6,6 @@
  */
 
 import {
-  getStringMeta,
   selectEvaluators,
   type DefaultEvaluators,
   type EvalsExecutorClient,
@@ -65,11 +64,6 @@ export interface RuleManagementExample extends Example {
     criteria?: string[];
   };
   metadata?: {
-    /**
-     * Agent Builder agent to call. When omitted, the chat client uses the
-     * default `elastic-ai-agent`.
-     */
-    agentId?: string;
     /** The conversation must call this tool at least once. */
     expectedToolId?: string;
     /**
@@ -79,8 +73,6 @@ export interface RuleManagementExample extends Example {
      * `[[get_index_mapping], [index_explorer, list_indices]]`.
      */
     expectedToolGroups?: string[][];
-    /** The conversation must NOT call this tool. */
-    forbiddenToolId?: string;
     /**
      * When true, at least one assistant message must contain a valid
      * `<render_attachment id="…" version="…" />` tag so the UI can display
@@ -186,10 +178,7 @@ export const buildPromptResponses = (
 export const createTask = (
   chatClient: RuleManagementChatClient
 ): ExperimentTask<RuleManagementExample, TaskOutput> => {
-  return async ({ input, metadata }) => {
-    const agentId = getStringMeta(metadata, 'agentId');
-    const options = agentId ? { agentId } : undefined;
-
+  return async ({ input }) => {
     // Both single-turn (`question`) and multi-turn (`turns`) are supported. The
     // turns are sent sequentially over one `conversation_id` so the agent retains
     // context between user messages.
@@ -214,7 +203,6 @@ export const createTask = (
       const response = await chatClient.converse({
         messages: [{ message: turnText }],
         conversationId,
-        options,
         promptResponses:
           pendingPrompts.length > 0 ? buildPromptResponses(pendingPrompts, turnText) : undefined,
       });
