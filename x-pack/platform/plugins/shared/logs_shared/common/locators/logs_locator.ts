@@ -18,7 +18,7 @@ import type { LocatorClient } from '@kbn/share-plugin/common/url_service';
 export const LOGS_LOCATOR_ID = 'LOGS_LOCATOR';
 
 /**
- * Accepts the same parameters as `DiscoverAppLocatorParams`, but automatically sets the `dataViewId` param to all log sources.
+ * Accepts the same parameters as `DiscoverAppLocatorParams`, but automatically sets the data view to all log sources.
  */
 export type LogsLocatorParams = DiscoverAppLocatorParams;
 
@@ -47,8 +47,7 @@ export class LogsLocatorDefinition implements LocatorDefinition<LogsLocatorParam
     const isEsqlDefault = await this.deps.getIsEsqlDefault();
 
     if (isEsqlDefault && !params.query) {
-      const logSourcesService = await this.deps.getLogSourcesService();
-      const flattenedLogSources = await logSourcesService.getFlattenedLogSources();
+      const flattenedLogSources = await this.getFlattenedLogSources();
 
       return discoverAppLocator.getLocation({
         ...params,
@@ -56,9 +55,24 @@ export class LogsLocatorDefinition implements LocatorDefinition<LogsLocatorParam
       });
     }
 
+    // When the caller provides its own data view (e.g. Security passing a `dataViewSpec`, or any
+    // caller passing a `dataViewId`), delegate it untouched.
+    if (params.dataViewId || params.dataViewSpec) {
+      return discoverAppLocator.getLocation(params);
+    }
+
+    // Backward-compatible default: resolve the "All logs" view by its stable id, which the
+    // observability/classic-nav root profiles register as a managed ad hoc data view. Passing an
+    // inline spec here would collide with that profile-managed data view (same id), causing data
+    // view churn that can hang Discover under CI timing.
     return discoverAppLocator.getLocation({
       dataViewId: ALL_LOGS_DATA_VIEW_ID,
       ...params,
     });
   };
+
+  private async getFlattenedLogSources() {
+    const logSourcesService = await this.deps.getLogSourcesService();
+    return logSourcesService.getFlattenedLogSources();
+  }
 }
