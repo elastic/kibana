@@ -8,4 +8,5 @@ products:
   target: 9.5.0
 areas:
 - Alerting and reporting
-title: 'Templates cleanup: default minimal, name uniqueness, and toggle'
+title: Simplify cases templates with unique names and toggle support
+description: Cases templates use a simpler default starter template, support toggles for template fields, and require unique template metadata names.
