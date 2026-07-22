@@ -124,7 +124,7 @@ describe('Agent policy API handlers', () => {
       jest.clearAllMocks();
     });
 
-    describe('main composition path (no revision / no kubernetes)', () => {
+    describe('main composition path (no kubernetes)', () => {
       it('passes redactProxySecrets:true when caller lacks fleet-settings-read', async () => {
         const fleetContext = (await context.fleet) as any;
         fleetContext.authz.fleet.readSettings = false;
