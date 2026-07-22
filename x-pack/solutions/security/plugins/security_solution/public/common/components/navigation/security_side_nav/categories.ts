@@ -41,6 +41,7 @@ export const getNavCategories = (
           : []),
         SecurityPageName.externalLinkWorkflows,
         SecurityPageName.attackDiscovery,
+        SecurityPageName.threatIntelligenceHub,
         SecurityPageName.cloudSecurityPostureFindings,
         SecurityPageName.case,
       ],

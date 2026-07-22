@@ -7,47 +7,47 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
+import { useEuiTheme } from '@elastic/eui';
 import type { ThreatCategory } from '../../../../common/threat_intelligence/hub';
-import {
-  getThreatCategoryBadgeStyle,
-  getThreatCategoryLabel,
-} from '../../../../common/threat_intelligence/hub';
-
-const badgeBaseCss = css({
-  display: 'inline-flex',
-  alignItems: 'center',
-  borderRadius: '9999px',
-  fontWeight: 500,
-  letterSpacing: '0.04em',
-  textTransform: 'uppercase',
-  whiteSpace: 'nowrap',
-});
+import { getThreatCategoryLabel } from '../../../../common/threat_intelligence/hub';
 
 const sizeCss = {
   sm: css({
-    fontSize: '10px',
-    lineHeight: '14px',
+    fontSize: '11px',
+    lineHeight: '16px',
     padding: '2px 8px',
   }),
   md: css({
     fontSize: '12px',
-    lineHeight: '16px',
+    lineHeight: '18px',
     padding: '4px 10px',
   }),
 };
 
+/**
+ * Monochrome category pill matching the Intelligence Hub prototype
+ * (white fill, thin border, dark text). Colorful category styles are
+ * intentionally not used on report cards.
+ */
 export const ThreatCategoryBadge: React.FC<{
   category: ThreatCategory | string;
   size?: 'sm' | 'md';
 }> = ({ category, size = 'sm' }) => {
-  const { background, color } = getThreatCategoryBadgeStyle(category);
+  const { euiTheme } = useEuiTheme();
   const label = getThreatCategoryLabel(category);
+  const badgeCss = css({
+    display: 'inline-flex',
+    alignItems: 'center',
+    borderRadius: '9999px',
+    fontWeight: 500,
+    whiteSpace: 'nowrap',
+    backgroundColor: euiTheme.colors.emptyShade,
+    color: euiTheme.colors.textParagraph,
+    border: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
+  });
 
   return (
-    <span
-      css={[badgeBaseCss, sizeCss[size], css({ backgroundColor: background, color })]}
-      data-test-subj={`threatIntelCategoryBadge-${category}`}
-    >
+    <span css={[badgeCss, sizeCss[size]]} data-test-subj={`threatIntelCategoryBadge-${category}`}>
       {label}
     </span>
   );

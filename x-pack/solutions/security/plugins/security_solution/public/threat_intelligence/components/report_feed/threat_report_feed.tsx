@@ -6,7 +6,8 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiSpacer } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import type { SeverityLevel, ThreatCategory } from '../../../../common/threat_intelligence/hub';
 import { ReportFeedFilterRow } from './report_feed_filter_row';
 import { ReportFeedGrid } from './report_feed_grid';
@@ -28,6 +29,7 @@ export interface ThreatReportFeedProps {
   onClearFilters: () => void;
   sortBy: ReportFeedSort;
   onSortChange: (next: ReportFeedSort) => void;
+  onCorrelate?: (reportId: string) => void;
 }
 
 /**
@@ -47,6 +49,7 @@ export const ThreatReportFeed: React.FC<ThreatReportFeedProps> = ({
   onClearFilters,
   sortBy,
   onSortChange,
+  onCorrelate,
 }) => {
   const severityCounts = useMemo(() => countSeverities(items), [items]);
   const categoryCounts = useMemo(
@@ -65,23 +68,42 @@ export const ThreatReportFeed: React.FC<ThreatReportFeedProps> = ({
     [items, selectedSeverities, selectedCategories, sortBy]
   );
 
+  const sectionTitle = i18n.translate(
+    'xpack.securitySolution.threatIntelligence.reportFeed.sectionTitle',
+    { defaultMessage: 'Threat reports' }
+  );
+
   return (
     <>
       {showFilterRow ? (
         <>
-          <ReportFeedFilterRow
-            severityCounts={severityCounts}
-            categoryCounts={categoryCounts}
-            selectedSeverities={selectedSeverities}
-            selectedCategories={selectedCategories}
-            onToggleSeverity={onToggleSeverity}
-            onToggleCategory={onToggleCategory}
-            onClear={onClearFilters}
-            sortBy={sortBy}
-            onSortChange={onSortChange}
-            totalShown={filteredItems.length}
-            totalAvailable={items.length}
-          />
+          <EuiFlexGroup
+            alignItems="center"
+            justifyContent="spaceBetween"
+            gutterSize="m"
+            responsive={false}
+          >
+            <EuiFlexItem grow={false}>
+              <EuiTitle size="s">
+                <h2 data-test-subj="threatIntelReportFeedSectionTitle">{sectionTitle}</h2>
+              </EuiTitle>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <ReportFeedFilterRow
+                severityCounts={severityCounts}
+                categoryCounts={categoryCounts}
+                selectedSeverities={selectedSeverities}
+                selectedCategories={selectedCategories}
+                onToggleSeverity={onToggleSeverity}
+                onToggleCategory={onToggleCategory}
+                onClear={onClearFilters}
+                sortBy={sortBy}
+                onSortChange={onSortChange}
+                totalShown={filteredItems.length}
+                totalAvailable={items.length}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
           <EuiSpacer size="m" />
         </>
       ) : null}
@@ -89,6 +111,7 @@ export const ThreatReportFeed: React.FC<ThreatReportFeedProps> = ({
         items={filteredItems}
         highlightReportId={highlightReportId}
         emptyMessage={emptyMessage}
+        onCorrelate={onCorrelate}
       />
     </>
   );

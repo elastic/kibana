@@ -82,6 +82,8 @@ export interface DashboardOverviewResponse {
     environment_hits_total: number;
     categories: ThreatCategory[];
     regions: ThreatRegion[];
+    /** Truncated `content.body_text` for the report flyout. */
+    body_text?: string;
   }>;
   environment_impact: {
     /** Sum of `attribution.environment_hits_total` across reports in scope. */

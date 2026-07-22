@@ -5,25 +5,23 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiBadge,
   EuiButtonEmpty,
-  EuiButtonGroup,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPanel,
+  EuiFilterButton,
+  EuiFilterGroup,
+  EuiPopover,
+  EuiPopoverTitle,
   EuiText,
+  useEuiTheme,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
-import {
-  SEVERITY_LEVELS,
-  type SeverityLevel,
-  type ThreatCategory,
-} from '../../../../common/threat_intelligence/hub';
+import type { SeverityLevel, ThreatCategory } from '../../../../common/threat_intelligence/hub';
 import { getThreatCategoryLabel } from '../../../../common/threat_intelligence/hub';
-import { SEVERITY_HEX, type ReportFeedSort } from './constants';
-import { getSeverityLabel } from './severity_labels';
+import type { ReportFeedSort } from './constants';
 
 export const ReportFeedFilterRow: React.FC<{
   severityCounts: Record<SeverityLevel, number>;
@@ -37,45 +35,10 @@ export const ReportFeedFilterRow: React.FC<{
   onSortChange: (next: ReportFeedSort) => void;
   totalShown: number;
   totalAvailable: number;
-}> = ({
-  severityCounts,
-  categoryCounts,
-  selectedSeverities,
-  selectedCategories,
-  onToggleSeverity,
-  onToggleCategory,
-  onClear,
-  sortBy,
-  onSortChange,
-  totalShown,
-  totalAvailable,
-}) => {
-  const sortOptions = useMemo(
-    () => [
-      {
-        id: 'relevance',
-        label: i18n.translate(
-          'xpack.securitySolution.threatIntelligence.reportFeed.sortRelevance',
-          {
-            defaultMessage: 'Relevance',
-          }
-        ),
-      },
-      {
-        id: 'date',
-        label: i18n.translate('xpack.securitySolution.threatIntelligence.reportFeed.sortDate', {
-          defaultMessage: 'Date',
-        }),
-      },
-      {
-        id: 'severity',
-        label: i18n.translate('xpack.securitySolution.threatIntelligence.reportFeed.sortSeverity', {
-          defaultMessage: 'Severity',
-        }),
-      },
-    ],
-    []
-  );
+}> = ({ categoryCounts, selectedCategories, onToggleCategory, onClear }) => {
+  const { euiTheme } = useEuiTheme();
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const popoverId = useGeneratedHtmlId({ prefix: 'threatIntelReportFeedFilter' });
 
   const visibleCategories = useMemo(
     () =>
@@ -85,121 +48,101 @@ export const ReportFeedFilterRow: React.FC<{
     [categoryCounts]
   );
 
-  const hasAnyFilter = selectedSeverities.length > 0 || selectedCategories.length > 0;
+  const activeFilterCount = selectedCategories.length;
+  const hasAnyFilter = activeFilterCount > 0;
+  const optionCount = visibleCategories.length;
+
+  const filterButtonLabel = i18n.translate(
+    'xpack.securitySolution.threatIntelligence.reportFeed.filterButton',
+    { defaultMessage: 'Filter' }
+  );
+
+  const popoverPanelCss = css({
+    minWidth: 220,
+    maxWidth: 280,
+  });
+
+  const optionRowCss = css({
+    padding: `${euiTheme.size.s} ${euiTheme.size.m}`,
+    borderBottom: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
+    display: 'flex',
+    alignItems: 'center',
+  });
 
   return (
-    <EuiPanel hasBorder paddingSize="m" data-test-subj="threatIntelReportFeedFilterRow">
-      <EuiFlexGroup gutterSize="m" wrap alignItems="center" justifyContent="spaceBetween">
-        <EuiFlexItem>
-          <EuiFlexGroup gutterSize="xs" wrap alignItems="center" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiText size="xs" color="subdued">
-                {i18n.translate(
-                  'xpack.securitySolution.threatIntelligence.reportFeed.filterLabel',
+    <EuiPopover
+      id={popoverId}
+      button={
+        <EuiFilterGroup>
+          <EuiFilterButton
+            data-test-subj="threatIntelReportFeedFilterButton"
+            iconType="arrowDown"
+            onClick={() => setIsPopoverOpen((open) => !open)}
+            isSelected={isPopoverOpen}
+            hasActiveFilters={hasAnyFilter}
+            numActiveFilters={hasAnyFilter ? activeFilterCount : optionCount}
+            numFilters={optionCount}
+          >
+            {filterButtonLabel}
+          </EuiFilterButton>
+        </EuiFilterGroup>
+      }
+      isOpen={isPopoverOpen}
+      closePopover={() => setIsPopoverOpen(false)}
+      panelPaddingSize="none"
+      anchorPosition="downRight"
+    >
+      <div css={popoverPanelCss} data-test-subj="threatIntelReportFeedFilterRow">
+        <EuiPopoverTitle paddingSize="s">
+          <EuiText size="xs" color="subdued" textAlign="center">
+            {i18n.translate(
+              'xpack.securitySolution.threatIntelligence.reportFeed.filterOptionsCount',
+              {
+                defaultMessage: '{count} {count, plural, one {option} other {options}}',
+                values: { count: optionCount },
+              }
+            )}
+          </EuiText>
+        </EuiPopoverTitle>
+        {visibleCategories.map(([category]) => {
+          const isSelected = selectedCategories.includes(category);
+          return (
+            <div key={`category-chip-${category}`} css={optionRowCss}>
+              <EuiBadge
+                color={isSelected ? 'primary' : 'hollow'}
+                onClick={() => onToggleCategory(category)}
+                onClickAriaLabel={i18n.translate(
+                  'xpack.securitySolution.threatIntelligence.reportFeed.categoryChipAria',
                   {
-                    defaultMessage: 'Filter:',
+                    defaultMessage: 'Toggle {category} category filter',
+                    values: { category },
                   }
                 )}
-              </EuiText>
-            </EuiFlexItem>
-            {SEVERITY_LEVELS.slice()
-              .reverse()
-              .map((severity) => {
-                const count = severityCounts[severity];
-                if (count === 0) return null;
-                const isSelected = selectedSeverities.includes(severity);
-                return (
-                  <EuiFlexItem key={`severity-chip-${severity}`} grow={false}>
-                    <EuiBadge
-                      color={isSelected ? SEVERITY_HEX[severity] : 'hollow'}
-                      onClick={() => onToggleSeverity(severity)}
-                      onClickAriaLabel={i18n.translate(
-                        'xpack.securitySolution.threatIntelligence.reportFeed.severityChipAria',
-                        {
-                          defaultMessage: 'Toggle {severity} severity filter',
-                          values: { severity },
-                        }
-                      )}
-                      data-test-subj={`threatIntelSeverityChip-${severity}`}
-                    >
-                      <span
-                        style={{
-                          display: 'inline-block',
-                          width: 8,
-                          height: 8,
-                          borderRadius: 4,
-                          marginRight: 6,
-                          background: SEVERITY_HEX[severity],
-                        }}
-                      />
-                      {`${getSeverityLabel(severity)} (${count})`}
-                    </EuiBadge>
-                  </EuiFlexItem>
-                );
-              })}
-            {visibleCategories.map(([category, count]) => {
-              const isSelected = selectedCategories.includes(category);
-              return (
-                <EuiFlexItem key={`category-chip-${category}`} grow={false}>
-                  <EuiBadge
-                    color={isSelected ? 'primary' : 'hollow'}
-                    onClick={() => onToggleCategory(category)}
-                    onClickAriaLabel={i18n.translate(
-                      'xpack.securitySolution.threatIntelligence.reportFeed.categoryChipAria',
-                      {
-                        defaultMessage: 'Toggle {category} category filter',
-                        values: { category },
-                      }
-                    )}
-                    data-test-subj={`threatIntelCategoryChip-${category}`}
-                  >
-                    {`${getThreatCategoryLabel(category)} (${count})`}
-                  </EuiBadge>
-                </EuiFlexItem>
-              );
+                data-test-subj={`threatIntelCategoryChip-${category}`}
+              >
+                {getThreatCategoryLabel(category)}
+              </EuiBadge>
+            </div>
+          );
+        })}
+        <div css={css({ padding: euiTheme.size.s })}>
+          <EuiButtonEmpty
+            size="xs"
+            iconType="cross"
+            flush="left"
+            onClick={() => {
+              onClear();
+              setIsPopoverOpen(false);
+            }}
+            disabled={!hasAnyFilter}
+            data-test-subj="threatIntelReportFeedFilterClearAll"
+          >
+            {i18n.translate('xpack.securitySolution.threatIntelligence.reportFeed.filterClearAll', {
+              defaultMessage: 'Clear all',
             })}
-            {hasAnyFilter ? (
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty size="xs" iconType="cross" onClick={onClear}>
-                  {i18n.translate(
-                    'xpack.securitySolution.threatIntelligence.reportFeed.filterClear',
-                    {
-                      defaultMessage: 'Clear',
-                    }
-                  )}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-            ) : null}
-          </EuiFlexGroup>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiButtonGroup
-                legend={i18n.translate(
-                  'xpack.securitySolution.threatIntelligence.reportFeed.sortLegend',
-                  {
-                    defaultMessage: 'Sort reports by',
-                  }
-                )}
-                options={sortOptions}
-                idSelected={sortBy}
-                onChange={(id) => onSortChange(id as ReportFeedSort)}
-                buttonSize="compressed"
-                data-test-subj="threatIntelReportFeedSort"
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiText size="xs" color="subdued" data-test-subj="threatIntelReportFeedCount">
-                {i18n.translate('xpack.securitySolution.threatIntelligence.reportFeed.countLabel', {
-                  defaultMessage: '{shown} of {total}',
-                  values: { shown: totalShown, total: totalAvailable },
-                })}
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiPanel>
+          </EuiButtonEmpty>
+        </div>
+      </div>
+    </EuiPopover>
   );
 };

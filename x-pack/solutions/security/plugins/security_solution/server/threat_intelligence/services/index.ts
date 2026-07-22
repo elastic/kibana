@@ -76,6 +76,15 @@ export type {
 } from './list_hunt_findings';
 
 export {
+  markHuntFindingDeployed,
+  HuntFindingNotFoundError,
+} from './mark_hunt_finding_deployed';
+export type {
+  MarkHuntFindingDeployedParams,
+  MarkHuntFindingDeployedResult,
+} from './mark_hunt_finding_deployed';
+
+export {
   buildHuntFeedbackDoc,
   computeBoost,
   resolveHuntFeedbackTarget,

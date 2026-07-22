@@ -8,3 +8,4 @@
 export { CorrelationReport } from './components/correlation_report';
 export type { CorrelationReportProps } from './components/correlation_report';
 export { CorrelationReportPage } from './pages/correlation_report_page';
+export type { CorrelationReportPageProps } from './pages/correlation_report_page';

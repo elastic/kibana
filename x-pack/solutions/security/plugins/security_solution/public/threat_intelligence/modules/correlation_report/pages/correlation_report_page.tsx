@@ -332,7 +332,12 @@ const KnnResultView: FC<{ result: KnnDepthResult }> = ({ result }) => {
                   href={meta.url}
                   target="_blank"
                   external
-                  onClick={(event) => onBrowsableReportUrlClick(event, meta.url)}
+                  onClick={(event) => {
+                    const reportUrl = meta.url;
+                    if (reportUrl) {
+                      onBrowsableReportUrlClick(event, reportUrl);
+                    }
+                  }}
                 >
                   {title}
                 </EuiLink>
@@ -415,7 +420,12 @@ const KnnResultView: FC<{ result: KnnDepthResult }> = ({ result }) => {
                     href={meta.url}
                     target="_blank"
                     external
-                    onClick={(event) => onBrowsableReportUrlClick(event, meta.url)}
+                    onClick={(event) => {
+                      const reportUrl = meta.url;
+                      if (reportUrl) {
+                        onBrowsableReportUrlClick(event, reportUrl);
+                      }
+                    }}
                   >
                     <EuiText size="s" component="span">
                       {title}
@@ -458,7 +468,12 @@ const TriageResultView: FC<{ result: TriageDepthResult }> = ({ result }) => {
             href={meta.url}
             target="_blank"
             external
-            onClick={(event) => onBrowsableReportUrlClick(event, meta.url)}
+            onClick={(event) => {
+              const reportUrl = meta.url;
+              if (reportUrl) {
+                onBrowsableReportUrlClick(event, reportUrl);
+              }
+            }}
           >
             {title}
           </EuiLink>
@@ -901,7 +916,23 @@ const RecentsPanel: FC<{
 // CorrelationReportPage
 // ---------------------------------------------------------------------------
 
-export const CorrelationReportPage: FC = () => {
+export interface CorrelationReportPageProps {
+  initialReportId?: string;
+  autoRun?: boolean;
+  /** When true, omit EuiPageTemplate chrome (for flyout embedding). */
+  embedded?: boolean;
+}
+
+const correlationPageTitle = () =>
+  i18n.translate('xpack.securitySolution.threatIntelligence.correlationReport.pageTitle', {
+    defaultMessage: 'Threat correlation',
+  });
+
+export const CorrelationReportPage: FC<CorrelationReportPageProps> = ({
+  initialReportId,
+  autoRun = false,
+  embedded = false,
+}) => {
   const skillEnabled = useIsExperimentalFeatureEnabled('threatIntelligenceSkillEnabled');
   const { http } = useKibana().services;
   const location = useLocation();
@@ -963,30 +994,48 @@ export const CorrelationReportPage: FC = () => {
     [startRun]
   );
 
-  // Prefill (and optionally open-or-create) when navigated from Hub report feed / hunt findings.
+  // Prefill (and optionally open-or-create) from props or URL (deep link).
   useEffect(() => {
     if (!skillEnabled || autoStartedFromUrlRef.current) {
       return;
     }
-    const params = new URLSearchParams(location.search);
-    const reportId = params.get(CORRELATION_REPORT_ID_PARAM)?.trim();
+
+    const reportIdFromProps = initialReportId?.trim();
+    let reportId: string | undefined;
+    let shouldAutoRun = false;
+    let fromUrl = false;
+
+    if (reportIdFromProps) {
+      reportId = reportIdFromProps;
+      shouldAutoRun = autoRun;
+    } else {
+      const params = new URLSearchParams(location.search);
+      reportId = params.get(CORRELATION_REPORT_ID_PARAM)?.trim() ?? undefined;
+      shouldAutoRun = params.get(CORRELATION_AUTO_RUN_PARAM) === '1';
+      fromUrl = Boolean(reportId);
+    }
+
     if (!reportId) {
       return;
     }
 
     setInputText(reportId);
 
-    if (params.get(CORRELATION_AUTO_RUN_PARAM) !== '1') {
+    if (!shouldAutoRun) {
       return;
     }
 
     autoStartedFromUrlRef.current = true;
-    params.delete(CORRELATION_AUTO_RUN_PARAM);
-    const nextSearch = params.toString();
-    history.replace({
-      pathname: location.pathname,
-      search: nextSearch ? `?${nextSearch}` : '',
-    });
+
+    if (fromUrl) {
+      const params = new URLSearchParams(location.search);
+      params.delete(CORRELATION_AUTO_RUN_PARAM);
+      const nextSearch = params.toString();
+      history.replace({
+        pathname: location.pathname,
+        search: nextSearch ? `?${nextSearch}` : '',
+      });
+    }
 
     void openOrCreateCorrelationForReport({
       reportId,
@@ -999,6 +1048,8 @@ export const CorrelationReportPage: FC = () => {
     });
   }, [
     skillEnabled,
+    initialReportId,
+    autoRun,
     location.pathname,
     location.search,
     history,
@@ -1089,57 +1140,55 @@ export const CorrelationReportPage: FC = () => {
 
   const stageLabel = getStageLabel(activeRun?.stage);
 
-  if (!skillEnabled) {
+  const wrapCorrelationChrome = (children: React.ReactNode) => {
+    if (embedded) {
+      return (
+        <div data-test-subj="correlationReportPageEmbedded">{children}</div>
+      );
+    }
     return (
       <EuiPageTemplate restrictWidth={false} grow>
         <EuiPageTemplate.Header
-          pageTitle={i18n.translate(
-            'xpack.securitySolution.threatIntelligence.correlationReport.pageTitle',
-            { defaultMessage: 'Correlation Reports' }
+          pageTitle={correlationPageTitle()}
+          description={i18n.translate(
+            'xpack.securitySolution.threatIntelligence.correlationReport.pageDescription',
+            {
+              defaultMessage:
+                'Correlate a report ID or free-text incident against the knowledge base.',
+            }
           )}
         />
-        <EuiPageTemplate.Section>
-          <EuiCallOut
-            title={i18n.translate(
-              'xpack.securitySolution.threatIntelligence.correlationReport.featureDisabledTitle',
-              { defaultMessage: 'Feature not enabled' }
-            )}
-            color="warning"
-            iconType="lock"
-            data-test-subj="correlationReportFeatureDisabled"
-          >
-            <EuiText size="s">
-              {i18n.translate(
-                'xpack.securitySolution.threatIntelligence.correlationReport.featureDisabledBody',
-                {
-                  defaultMessage:
-                    'The Threat Intelligence Skill feature must be enabled to use this page. Add `threatIntelligenceSkillEnabled` to `xpack.securitySolution.enableExperimental` in your Kibana configuration.',
-                }
-              )}
-            </EuiText>
-          </EuiCallOut>
-        </EuiPageTemplate.Section>
+        <EuiPageTemplate.Section>{children}</EuiPageTemplate.Section>
       </EuiPageTemplate>
+    );
+  };
+
+  if (!skillEnabled) {
+    return wrapCorrelationChrome(
+      <EuiCallOut
+        title={i18n.translate(
+          'xpack.securitySolution.threatIntelligence.correlationReport.featureDisabledTitle',
+          { defaultMessage: 'Feature not enabled' }
+        )}
+        color="warning"
+        iconType="lock"
+        data-test-subj="correlationReportFeatureDisabled"
+      >
+        <EuiText size="s">
+          {i18n.translate(
+            'xpack.securitySolution.threatIntelligence.correlationReport.featureDisabledBody',
+            {
+              defaultMessage:
+                'The Threat Intelligence Skill feature must be enabled to use this page. Add `threatIntelligenceSkillEnabled` to `xpack.securitySolution.enableExperimental` in your Kibana configuration.',
+            }
+          )}
+        </EuiText>
+      </EuiCallOut>
     );
   }
 
-  return (
-    <EuiPageTemplate restrictWidth={false} grow>
-      <EuiPageTemplate.Header
-        pageTitle={i18n.translate(
-          'xpack.securitySolution.threatIntelligence.correlationReport.pageTitle',
-          { defaultMessage: 'Correlation Reports' }
-        )}
-        description={i18n.translate(
-          'xpack.securitySolution.threatIntelligence.correlationReport.pageDescription',
-          {
-            defaultMessage:
-              'Correlate a report ID or free-text incident against the knowledge base.',
-          }
-        )}
-      />
-      <EuiPageTemplate.Section>
-        {/* ---- Input panel ---- */}
+  return wrapCorrelationChrome(
+    <>
         <EuiPanel hasBorder paddingSize="m" data-test-subj="correlationReportInputPanel">
           <EuiFormRow label={i18nText.smartInputLabel()} helpText={i18nText.smartInputHelp()}>
             <EuiTextArea
@@ -1350,7 +1399,6 @@ export const CorrelationReportPage: FC = () => {
             onLoadRun={handleLoadRun}
           />
         </EuiAccordion>
-      </EuiPageTemplate.Section>
-    </EuiPageTemplate>
+    </>
   );
 };

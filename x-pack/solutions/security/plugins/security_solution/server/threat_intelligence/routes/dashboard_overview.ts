@@ -83,7 +83,7 @@ interface ReportsAggregations {
         _source: {
           '@timestamp'?: string;
           source?: { name?: string; url?: string };
-          content?: { title?: string };
+          content?: { title?: string; body_text?: string };
           severity?: { level?: SeverityLevel };
           extracted?: { categories?: ThreatCategory[] };
           geography?: { regions?: ThreatRegion[] };
@@ -170,6 +170,7 @@ const fetchReportsOverview = async (
             'source.name',
             'source.url',
             'content.title',
+            'content.body_text',
             'severity.level',
             'extracted.categories',
             'geography.regions',
@@ -335,17 +336,23 @@ export const registerDashboardOverviewRoute = ({
             }))
             .filter((report) => report.environment_hits_total > 0);
 
-          const recentArticles = (aggs?.recent_articles?.hits.hits ?? []).map((hit) => ({
-            report_id: hit._id,
-            title: hit._source.content?.title ?? '(untitled)',
-            source_name: hit._source.source?.name ?? '<unknown>',
-            ...(hit._source.source?.url ? { source_url: hit._source.source.url } : {}),
-            severity: (hit._source.severity?.level ?? 'medium') as SeverityLevel,
-            '@timestamp': hit._source['@timestamp'] ?? '',
-            environment_hits_total: hit._source.attribution?.environment_hits_total ?? 0,
-            categories: hit._source.extracted?.categories ?? [],
-            regions: hit._source.geography?.regions ?? [],
-          }));
+          const recentArticles = (aggs?.recent_articles?.hits.hits ?? []).map((hit) => {
+            const rawBody = hit._source.content?.body_text?.trim() ?? '';
+            const bodyText =
+              rawBody.length > 1200 ? `${rawBody.slice(0, 1200).trimEnd()}…` : rawBody || undefined;
+            return {
+              report_id: hit._id,
+              title: hit._source.content?.title ?? '(untitled)',
+              source_name: hit._source.source?.name ?? '<unknown>',
+              ...(hit._source.source?.url ? { source_url: hit._source.source.url } : {}),
+              severity: (hit._source.severity?.level ?? 'medium') as SeverityLevel,
+              '@timestamp': hit._source['@timestamp'] ?? '',
+              environment_hits_total: hit._source.attribution?.environment_hits_total ?? 0,
+              categories: hit._source.extracted?.categories ?? [],
+              regions: hit._source.geography?.regions ?? [],
+              ...(bodyText ? { body_text: bodyText } : {}),
+            };
+          });
 
           const reportIdsWithEnvHits = new Set<string>([
             ...topReports.map((report) => report.report_id),

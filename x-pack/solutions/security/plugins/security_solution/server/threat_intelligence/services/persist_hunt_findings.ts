@@ -80,6 +80,7 @@ interface HuntFindingDoc {
   tier1_status: string;
   hunt_run_status: string;
   hunt_run_id: string;
+  status: 'new' | 'deployed';
 }
 
 const toFindingDoc = ({
@@ -119,6 +120,7 @@ const toFindingDoc = ({
     affected_assets: { hosts, users },
     tier1_status: result.tier1.status,
     hunt_run_status: result.status,
+    status: 'new',
     // Stable per orchestrator invocation for correlating sibling findings.
     hunt_run_id: buildFingerprint([
       reportId,
@@ -186,7 +188,9 @@ export const persistHuntFindings = async (
       } else {
         errors += 1;
         logger.warn(
-          `persistHuntFindings failed for report=${reportId} technique=${behavior.technique_id}: ${(err as Error).message}`
+          `persistHuntFindings failed for report=${reportId} technique=${behavior.technique_id}: ${
+            (err as Error).message
+          }`
         );
       }
     }

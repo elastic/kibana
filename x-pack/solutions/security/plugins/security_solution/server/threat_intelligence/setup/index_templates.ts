@@ -200,6 +200,13 @@ import {
  *           cwes (keyword), date_added (date), due_date (date), ransomware_use (keyword).
  *   A `migrateExistingVulnerabilityMappings` call patches pre-v20 backing indices at startup.
  *
+ * v22: adds deploy-status fields to the hunt findings companion index
+ *   (`.kibana-threat-intel-hunt-findings`):
+ *   - `status`            (keyword) — 'new' | 'deployed'
+ *   - `deployed_rule_id`  (keyword) — Detection Engine rule id created from the finding
+ *   - `deployed_at`       (date)    — when the rule was linked
+ *   A `migrateExistingHuntFindingDeployMappings` call patches pre-v22 indices at startup.
+ *
  * v16: adds `extracted.gate.*` (7 fields) — the relevance/evidence gate verdict block.
  *   Note: `primary_links` is deferred — no consumer until Slice-5 link-chasing.
  *   A `migrateExistingGateMappings` call patches pre-v16 backing indices at startup.
@@ -234,7 +241,7 @@ import {
  * (ingest/dedup/extraction) and `attribution` (environment hit rollup);
  * renames `extracted.gate` tier field to `evidence_tier`.
  */
-const TEMPLATE_VERSION = 21;
+const TEMPLATE_VERSION = 22;
 
 /** Keyword sentinel meaning "visible from every space". */
 export const SPACE_ID_GLOBAL = '*' as const;
@@ -864,6 +871,9 @@ const COMPANION_INDEX_TEMPLATES: Array<{
             tier1_status: { type: 'keyword' },
             hunt_run_status: { type: 'keyword' },
             hunt_run_id: { type: 'keyword' },
+            status: { type: 'keyword' },
+            deployed_rule_id: { type: 'keyword' },
+            deployed_at: { type: 'date' },
           },
         },
       },
@@ -1565,6 +1575,55 @@ const migrateExistingVulnerabilityMappings = async (
   }
 };
 
+/**
+ * Patches deploy-status fields onto the hunt findings companion index when it
+ * was created before the v22 template. Safe to re-run: PUT mapping is
+ * idempotent for additive fields. Without this, updates that write `status` /
+ * `deployed_rule_id` / `deployed_at` are rejected by `dynamic: strict`.
+ */
+const migrateExistingHuntFindingDeployMappings = async (
+  esClient: ElasticsearchClient,
+  logger: Logger
+): Promise<void> => {
+  const log = logger.get('hunt-finding-deploy-mapping-migration');
+
+  try {
+    const exists = await esClient.indices.exists({ index: THREAT_INTEL_HUNT_FINDINGS_INDEX });
+    if (!exists) {
+      log.debug(`hunt-finding-deploy-mapping-migration: index not found — skipping`);
+      return;
+    }
+
+    const { [THREAT_INTEL_HUNT_FINDINGS_INDEX]: indexMappings } = await esClient.indices.getMapping({
+      index: THREAT_INTEL_HUNT_FINDINGS_INDEX,
+    });
+    const topLevelProps = indexMappings?.mappings?.properties as
+      | Record<string, unknown>
+      | undefined;
+
+    if (!topLevelProps?.status || !topLevelProps?.deployed_rule_id || !topLevelProps?.deployed_at) {
+      await esClient.indices.putMapping({
+        index: THREAT_INTEL_HUNT_FINDINGS_INDEX,
+        properties: {
+          status: { type: 'keyword' },
+          deployed_rule_id: { type: 'keyword' },
+          deployed_at: { type: 'date' },
+        },
+      });
+      log.info(
+        `Migrated deploy-status mappings on ${THREAT_INTEL_HUNT_FINDINGS_INDEX} (v22 backfill)`
+      );
+    }
+  } catch (err) {
+    log.error(
+      `Failed to migrate deploy-status mappings on ${THREAT_INTEL_HUNT_FINDINGS_INDEX}: ${
+        (err as Error).message
+      }. ` +
+        `Deploy status writes will be rejected by dynamic: strict until the mapping is updated manually.`
+    );
+  }
+};
+
 const ensureCompanionIndex = async (
   esClient: ElasticsearchClient,
   indexName: string,
@@ -1654,6 +1713,8 @@ export const installIndexTemplates = async ({
   await migrateExistingIndicatorSourcesMapping(esClient, log);
   // Patch extracted.vulnerability.* fields onto any pre-v20 backing indices. Safe to re-run.
   await migrateExistingVulnerabilityMappings(esClient, log);
+  // Patch deploy-status fields onto the pre-v22 hunt findings companion index. Safe to re-run.
+  await migrateExistingHuntFindingDeployMappings(esClient, log);
 
   log.info('Threat intelligence index templates installed');
 };

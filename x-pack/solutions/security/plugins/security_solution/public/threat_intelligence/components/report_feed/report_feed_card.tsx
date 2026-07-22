@@ -5,73 +5,65 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedRelative } from '@kbn/i18n-react';
 import {
   EuiBadge,
-  EuiButtonEmpty,
-  EuiButtonIcon,
+  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
-  EuiLink,
   EuiPanel,
   EuiSpacer,
   EuiText,
+  useEuiTheme,
 } from '@elastic/eui';
+import { getThreatCategoryLabel } from '../../../../common/threat_intelligence/hub';
 import { useKibana } from '../../../common/lib/kibana';
 import { navigateToCorrelateReport } from '../../lib/navigate_to_correlation_reports';
 import type { ThreatReportFeedItem } from './types';
-import { SEVERITY_HEX } from './constants';
 import { getSeverityColor, getSeverityLabel } from './severity_labels';
 import { ThreatCategoryBadge } from './threat_category_badge';
-import {
-  getSourceFaviconUrl,
-  isBrowsableReportUrl,
-  onBrowsableReportUrlClick,
-} from './utils';
+import { getSourceFaviconUrl } from './utils';
 
 const metaDividerCss = css({
-  opacity: 0.4,
-  margin: '0 2px',
+  opacity: 0.5,
+  margin: '0 4px',
 });
-
-const MetaDivider: React.FC = () => (
-  <span css={metaDividerCss} aria-hidden>
-    {'|'}
-  </span>
-);
 
 export const ReportFeedCard: React.FC<{
   item: ThreatReportFeedItem;
   isHighlighted?: boolean;
-}> = ({ item, isHighlighted = false }) => {
+  onCorrelate?: (reportId: string) => void;
+  onOpen?: (item: ThreatReportFeedItem) => void;
+}> = ({ item, isHighlighted = false, onCorrelate, onOpen }) => {
+  const { euiTheme } = useEuiTheme();
   const { application } = useKibana().services;
   const cardRef = useRef<HTMLDivElement>(null);
-  const [isExpanded, setIsExpanded] = useState(false);
-  const articleUrl = isBrowsableReportUrl(item.sourceUrl) ? item.sourceUrl : undefined;
   const faviconUrl = getSourceFaviconUrl(item.sourceUrl);
   const displayTitle = item.title || item.reportId;
   const publishedDate = item.publishedAt ? new Date(item.publishedAt) : undefined;
-  const hasExpandableDetails =
-    (item.techniques?.length ?? 0) > 0 ||
-    (item.iocCount ?? 0) > 0 ||
-    (item.relatedReportCount ?? 0) > 0;
   const severityColor = getSeverityColor(item.severity);
+  const primaryCategoryLabel =
+    item.categories.length > 0 ? getThreatCategoryLabel(item.categories[0]) : undefined;
+  const envHits = item.environmentHitsTotal ?? 0;
 
-  const handleCorrelate = useCallback(() => {
-    void navigateToCorrelateReport(application, item.reportId);
-  }, [application, item.reportId]);
-
-  const handleArticleClick = useCallback(
+  const handleCorrelate = useCallback(
     (event: React.MouseEvent) => {
-      if (!articleUrl) return;
-      onBrowsableReportUrlClick(event, articleUrl);
+      event.stopPropagation();
+      if (onCorrelate) {
+        onCorrelate(item.reportId);
+        return;
+      }
+      void navigateToCorrelateReport(application, item.reportId);
     },
-    [articleUrl]
+    [application, item.reportId, onCorrelate]
   );
+
+  const handleOpen = useCallback(() => {
+    onOpen?.(item);
+  }, [item, onOpen]);
 
   useEffect(() => {
     if (isHighlighted && cardRef.current) {
@@ -79,37 +71,51 @@ export const ReportFeedCard: React.FC<{
     }
   }, [isHighlighted]);
 
+  const panelCss = css({
+    borderLeft: `4px solid ${severityColor}`,
+    height: '100%',
+    cursor: onOpen ? 'pointer' : 'default',
+    ...(isHighlighted
+      ? {
+          boxShadow: `0 0 0 2px ${euiTheme.colors.primary}`,
+          backgroundColor: euiTheme.colors.lightestShade,
+        }
+      : {}),
+  });
+
+  const severityBadgeCss = css({
+    backgroundColor: `${severityColor}22`,
+    color: severityColor,
+  });
+
+  const envHitsBadgeCss = css({
+    backgroundColor: euiTheme.colors.backgroundBaseDanger,
+    color: euiTheme.colors.danger,
+  });
+
   return (
     <EuiPanel
       panelRef={cardRef}
       hasBorder
       paddingSize="m"
       data-test-subj={`threatIntelReportCard-${item.reportId}`}
-      style={{
-        borderLeft: `4px solid ${SEVERITY_HEX[item.severity]}`,
-        position: 'relative',
-        ...(isHighlighted
-          ? {
-              boxShadow: '0 0 0 2px var(--euiColorPrimary)',
-              backgroundColor: 'var(--euiColorHighlight)',
+      css={panelCss}
+      onClick={onOpen ? handleOpen : undefined}
+      role={onOpen ? 'button' : undefined}
+      tabIndex={onOpen ? 0 : undefined}
+      onKeyDown={
+        onOpen
+          ? (event) => {
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                handleOpen();
+              }
             }
-          : {}),
-      }}
+          : undefined
+      }
     >
-      <EuiText size="s">
-        {articleUrl ? (
-          <EuiLink
-            href={articleUrl}
-            target="_blank"
-            external
-            onClick={handleArticleClick}
-            data-test-subj={`threatIntelArticleLink-${item.reportId}`}
-          >
-            <strong>{displayTitle}</strong>
-          </EuiLink>
-        ) : (
-          <strong>{displayTitle}</strong>
-        )}
+      <EuiText size="m">
+        <strong>{displayTitle}</strong>
       </EuiText>
       <EuiSpacer size="xs" />
       <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap>
@@ -126,72 +132,34 @@ export const ReportFeedCard: React.FC<{
           </EuiFlexItem>
         ) : null}
         <EuiFlexItem grow={false}>
-          <EuiText size="xs" color="subdued" style={{ fontWeight: 500 }}>
-            {item.sourceName}
-          </EuiText>
-        </EuiFlexItem>
-        {publishedDate && !Number.isNaN(publishedDate.getTime()) ? (
-          <>
-            <EuiFlexItem grow={false}>
-              <MetaDivider />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-                <EuiFlexItem grow={false}>
-                  <EuiIcon type="clock" size="s" color="subdued" aria-hidden />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiText size="xs" color="subdued">
-                    <FormattedRelative value={publishedDate} />
-                  </EuiText>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          </>
-        ) : null}
-        <EuiFlexItem grow={false}>
-          <MetaDivider />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiText size="xs" style={{ color: severityColor, fontWeight: 500 }}>
-            {getSeverityLabel(item.severity)}
-          </EuiText>
-        </EuiFlexItem>
-        {(item.environmentHitsTotal ?? 0) > 0 ? (
-          <>
-            <EuiFlexItem grow={false}>
-              <MetaDivider />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiBadge color="danger" iconType="dot">
-                {i18n.translate(
-                  'xpack.securitySolution.threatIntelligence.reportFeed.envHitsBadge',
-                  {
-                    defaultMessage: '{count} env hits',
-                    values: { count: item.environmentHitsTotal },
-                  }
-                )}
-              </EuiBadge>
-            </EuiFlexItem>
-          </>
-        ) : null}
-        <EuiFlexItem grow style={{ display: 'flex', justifyContent: 'flex-end' }}>
-          <EuiButtonEmpty
+          <EuiText
             size="xs"
-            iconType="inspect"
-            onClick={handleCorrelate}
-            data-test-subj={`threatIntelReportCardCorrelate-${item.reportId}`}
+            color="subdued"
+            data-test-subj={`threatIntelReportCardMeta-${item.reportId}`}
           >
-            {i18n.translate(
-              'xpack.securitySolution.threatIntelligence.reportFeed.correlateAction',
-              { defaultMessage: 'Correlate' }
-            )}
-          </EuiButtonEmpty>
+            {item.sourceName}
+            {primaryCategoryLabel ? (
+              <>
+                <span css={metaDividerCss} aria-hidden>
+                  {'·'}
+                </span>
+                {primaryCategoryLabel}
+              </>
+            ) : null}
+            {publishedDate && !Number.isNaN(publishedDate.getTime()) ? (
+              <>
+                <span css={metaDividerCss} aria-hidden>
+                  {'·'}
+                </span>
+                <FormattedRelative value={publishedDate} />
+              </>
+            ) : null}
+          </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
       {item.categories.length > 0 ? (
         <>
-          <EuiSpacer size="xs" />
+          <EuiSpacer size="s" />
           <EuiFlexGroup gutterSize="xs" alignItems="center" wrap responsive={false}>
             {item.categories.slice(0, 3).map((category) => (
               <EuiFlexItem key={`${item.reportId}-cat-${category}`} grow={false}>
@@ -211,61 +179,55 @@ export const ReportFeedCard: React.FC<{
                 </EuiText>
               </EuiFlexItem>
             ) : null}
-            {hasExpandableDetails ? (
-              <EuiFlexItem grow style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                <EuiButtonIcon
-                  iconType={isExpanded ? 'arrowUp' : 'arrowDown'}
-                  aria-label={
-                    isExpanded
-                      ? i18n.translate(
-                          'xpack.securitySolution.threatIntelligence.reportFeed.collapseCard',
-                          { defaultMessage: 'Collapse report details' }
-                        )
-                      : i18n.translate(
-                          'xpack.securitySolution.threatIntelligence.reportFeed.expandCard',
-                          { defaultMessage: 'Expand report details' }
-                        )
-                  }
-                  onClick={() => setIsExpanded((prev) => !prev)}
-                  data-test-subj={`threatIntelReportCardExpand-${item.reportId}`}
-                />
-              </EuiFlexItem>
-            ) : null}
           </EuiFlexGroup>
         </>
       ) : null}
-      {isExpanded && hasExpandableDetails ? (
-        <>
-          <EuiSpacer size="s" />
-          {(item.techniques?.length ?? 0) > 0 ? (
-            <EuiText size="xs" color="subdued">
-              {i18n.translate(
-                'xpack.securitySolution.threatIntelligence.reportFeed.techniquesLabel',
-                {
-                  defaultMessage: 'Techniques: {techniques}',
-                  values: { techniques: (item.techniques ?? []).slice(0, 6).join(', ') },
-                }
-              )}
-            </EuiText>
-          ) : null}
-          {(item.iocCount ?? 0) > 0 ? (
-            <EuiText size="xs" color="subdued">
-              {i18n.translate('xpack.securitySolution.threatIntelligence.reportFeed.iocLabel', {
-                defaultMessage: '{count, plural, one {# IOC} other {# IOCs}}',
-                values: { count: item.iocCount },
-              })}
-            </EuiText>
-          ) : null}
-          {(item.relatedReportCount ?? 0) > 0 ? (
-            <EuiText size="xs" color="subdued">
-              {i18n.translate('xpack.securitySolution.threatIntelligence.reportFeed.relatedLabel', {
-                defaultMessage: 'Related reports: {count}',
-                values: { count: item.relatedReportCount },
-              })}
-            </EuiText>
-          ) : null}
-        </>
-      ) : null}
+      <EuiSpacer size="m" />
+      <EuiFlexGroup
+        gutterSize="s"
+        alignItems="center"
+        justifyContent="spaceBetween"
+        responsive={false}
+      >
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
+            <EuiFlexItem grow={false}>
+              <EuiBadge
+                css={severityBadgeCss}
+                data-test-subj={`threatIntelReportCardSeverity-${item.reportId}`}
+              >
+                {getSeverityLabel(item.severity)}
+              </EuiBadge>
+            </EuiFlexItem>
+            {envHits > 0 ? (
+              <EuiFlexItem grow={false}>
+                <EuiBadge css={envHitsBadgeCss}>
+                  {i18n.translate(
+                    'xpack.securitySolution.threatIntelligence.reportFeed.envHitsBadge',
+                    {
+                      defaultMessage: '{count} env hits',
+                      values: { count: envHits },
+                    }
+                  )}
+                </EuiBadge>
+              </EuiFlexItem>
+            ) : null}
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            size="s"
+            iconType="inspect"
+            onClick={handleCorrelate}
+            data-test-subj={`threatIntelReportCardCorrelate-${item.reportId}`}
+          >
+            {i18n.translate(
+              'xpack.securitySolution.threatIntelligence.reportFeed.correlateAction',
+              { defaultMessage: 'Correlate' }
+            )}
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </EuiPanel>
   );
 };

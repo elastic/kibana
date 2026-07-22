@@ -8,12 +8,16 @@
 import type { FC } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedRelative } from '@kbn/i18n-react';
 import {
+  EuiBadge,
   EuiButton,
   EuiButtonEmpty,
   EuiButtonGroup,
+  EuiButtonIcon,
+  EuiContextMenu,
   EuiCallOut,
   EuiComboBox,
   type EuiComboBoxOptionOption,
@@ -21,8 +25,11 @@ import {
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutHeader,
   EuiFormRow,
-  EuiIcon,
+  EuiHorizontalRule,
   EuiLoadingSpinner,
   EuiModal,
   EuiModalBody,
@@ -31,14 +38,14 @@ import {
   EuiModalHeaderTitle,
   useGeneratedHtmlId,
   EuiPageTemplate,
-  EuiPanel,
+  EuiPopover,
   EuiSelect,
   EuiSpacer,
+  EuiTab,
+  EuiTabs,
   EuiText,
-  EuiToolTip,
+  useEuiTheme,
 } from '@elastic/eui';
-import { SecurityPageName } from '@kbn/deeplinks-security';
-import { SecuritySolutionLinkButton } from '../../../../common/components/links';
 import {
   DASHBOARD_OVERVIEW_API_PATH,
   HUNT_FINDINGS_API_PATH,
@@ -67,12 +74,17 @@ import { useKibana } from '../../../../common/lib/kibana';
 import type { ReportFeedSort } from '../../../components/report_feed';
 import {
   IntelligenceHubDashboardView,
+  StatsRibbon,
   type IntelligenceHubChipFilters,
 } from '../components/intelligence_hub_dashboard';
-import type {
-  FeedbackLoopSummary,
-  HuntFindingListItem,
-} from '../components/hunt_findings_panel';
+import { ContinuousHuntStatusStrip } from '../components/continuous_hunt_status_strip';
+import { DigestsTab } from '../components/digests_tab';
+import { SourcesTab } from '../components/sources_tab';
+import { HuntFindingsPanel } from '../components/hunt_findings_panel';
+import { CorrelationReportPage } from '../../correlation_report';
+import type { FeedbackLoopSummary, HuntFindingListItem } from '../components/hunt_findings_panel';
+
+type IntelligenceHubTabId = 'overview' | 'hunt_findings' | 'sources' | 'digests';
 
 const emptyFilters: IntelligenceHubChipFilters = {
   regions: [],
@@ -162,12 +174,18 @@ export const IntelligenceHubPage: FC = () => {
   const [activeViewId, setActiveViewId] = useState<string>('');
   const [showSaveModal, setShowSaveModal] = useState(false);
   const [showScheduleModal, setShowScheduleModal] = useState(false);
+  const [savedViewsPopoverOpen, setSavedViewsPopoverOpen] = useState(false);
+  const [selectedTab, setSelectedTab] = useState<IntelligenceHubTabId>('overview');
+  const [correlationFlyoutOpen, setCorrelationFlyoutOpen] = useState(false);
+  const [correlationReportId, setCorrelationReportId] = useState<string | undefined>();
+  const [correlationAutoRun, setCorrelationAutoRun] = useState(false);
   const [savedViewsLoaded, setSavedViewsLoaded] = useState(false);
   const [sortBy, setSortBy] = useState<ReportFeedSort>('relevance');
   const [timeRangePreset, setTimeRangePreset] =
     useState<TimeRangePresetId>(DEFAULT_TIME_RANGE_PRESET);
   const [lastUpdatedAt, setLastUpdatedAt] = useState<number | null>(null);
   const [isGeneratingAdvisory, setIsGeneratingAdvisory] = useState(false);
+  const [headerOverflowOpen, setHeaderOverflowOpen] = useState(false);
 
   useEffect(() => {
     const defaultRegions = (uiSettings.get(DEFAULT_REGIONS_SETTING_KEY, []) ??
@@ -363,13 +381,16 @@ export const IntelligenceHubPage: FC = () => {
 
   const isRefreshing = loading && data !== null;
 
-  const exportToPdf = useCallback(() => {
-    // No hard dependency on the Reporting plugin: trigger the browser's
-    // print-to-PDF flow. Reporting integration is intentionally out of
-    // scope for v1 because it adds a heavyweight optional plugin
-    // dependency; this fallback is good enough for the "Export to PDF"
-    // PRD requirement and is easy to swap to `share.url.locators` later.
-    window.print();
+  const openCorrelationFlyout = useCallback(() => {
+    setCorrelationReportId(undefined);
+    setCorrelationAutoRun(false);
+    setCorrelationFlyoutOpen(true);
+  }, []);
+
+  const onCorrelateReport = useCallback((reportId: string) => {
+    setCorrelationReportId(reportId);
+    setCorrelationAutoRun(true);
+    setCorrelationFlyoutOpen(true);
   }, []);
 
   const toggleSeverity = useCallback((severity: SeverityLevel) => {
@@ -394,7 +415,7 @@ export const IntelligenceHubPage: FC = () => {
     setFilters((prev) => ({ ...prev, severities: [], categories: [] }));
   }, []);
 
-  const content = useMemo(() => {
+  const renderOverviewTab = () => {
     if (loading && !data) {
       return (
         <EuiEmptyPrompt
@@ -451,31 +472,84 @@ export const IntelligenceHubPage: FC = () => {
         http={http}
         notifications={notifications}
         application={application}
+        showHuntFindings={false}
+        onCorrelateReport={onCorrelateReport}
       />
     );
-  }, [
-    data,
-    error,
-    loading,
-    filters,
-    sortBy,
-    toggleSeverity,
-    toggleCategoryChip,
-    clearChipFilters,
-    highlightReportId,
-    onHighlightReport,
-    isGeneratingAdvisory,
-    generateAdvisory,
-    focusSourceReports,
-    huntFindings,
-    huntFindingsFeedbackLoop,
-    isLoadingHuntFindings,
-    http,
-    notifications,
-    application,
-  ]);
+  };
 
-  const sourceCount = data?.stats_ribbon.distinct_source_count ?? 0;
+  const tabs = useMemo(
+    () =>
+      [
+        {
+          id: 'overview' as const,
+          name: i18n.translate('xpack.securitySolution.threatIntelligence.app.tabOverview', {
+            defaultMessage: 'Overview',
+          }),
+        },
+        {
+          id: 'hunt_findings' as const,
+          name: (
+            <span>
+              {i18n.translate('xpack.securitySolution.threatIntelligence.app.tabHuntFindings', {
+                defaultMessage: 'Hunt findings',
+              })}
+              {huntFindings.length > 0 ? (
+                <>
+                  {' '}
+                  <EuiBadge color="accent">
+                    {i18n.translate(
+                      'xpack.securitySolution.threatIntelligence.app.tabHuntFindingsNewBadge',
+                      {
+                        defaultMessage: '{count} new',
+                        values: { count: huntFindings.length },
+                      }
+                    )}
+                  </EuiBadge>
+                </>
+              ) : null}
+            </span>
+          ),
+        },
+        {
+          id: 'sources' as const,
+          name: i18n.translate('xpack.securitySolution.threatIntelligence.app.tabSources', {
+            defaultMessage: 'Sources',
+          }),
+        },
+        {
+          id: 'digests' as const,
+          name: i18n.translate('xpack.securitySolution.threatIntelligence.app.tabDigests', {
+            defaultMessage: 'Digests',
+          }),
+        },
+      ] satisfies Array<{ id: IntelligenceHubTabId; name: React.ReactNode }>,
+    [huntFindings.length]
+  );
+
+  const renderTabPanel = () => {
+    switch (selectedTab) {
+      case 'overview':
+        return renderOverviewTab();
+      case 'hunt_findings':
+        return (
+          <HuntFindingsPanel
+            findings={huntFindings}
+            feedbackLoop={huntFindingsFeedbackLoop}
+            isLoading={isLoadingHuntFindings}
+            onHighlightReport={onHighlightReport}
+            onCorrelateReport={onCorrelateReport}
+            http={http}
+            notifications={notifications}
+            application={application}
+          />
+        );
+      case 'sources':
+        return <SourcesTab http={http} />;
+      case 'digests':
+        return <DigestsTab http={http} />;
+    }
+  };
 
   return (
     <EuiPageTemplate restrictWidth={false} grow={true}>
@@ -483,68 +557,50 @@ export const IntelligenceHubPage: FC = () => {
         pageTitle={i18n.translate('xpack.securitySolution.threatIntelligence.app.pageTitle', {
           defaultMessage: 'Intelligence Hub',
         })}
-        description={i18n.translate(
-          'xpack.securitySolution.threatIntelligence.app.pageDescription',
-          {
-            defaultMessage: 'Threat reports from {timeRange}.',
-            values: { timeRange: timeRangePresetLabel(timeRangePreset) },
-          }
-        )}
         rightSideItems={[
-          <SecuritySolutionLinkButton
-            key="correlation"
-            deepLinkId={SecurityPageName.threatIntelligenceCorrelation}
-            iconType="inspect"
-            data-test-subj="intelligenceHubCorrelationBtn"
-          >
-            {i18n.translate('xpack.securitySolution.threatIntelligence.app.correlationReportBtn', {
-              defaultMessage: 'Correlation Reports',
-            })}
-          </SecuritySolutionLinkButton>,
-          <EuiFlexGroup
-            key="refresh"
-            gutterSize="s"
-            alignItems="center"
-            responsive={false}
-            wrap={false}
-          >
-            <EuiFlexItem grow={false}>
-              <EuiText size="xs" color="subdued" data-test-subj="threatIntelLastUpdated">
-                {isRefreshing ? (
-                  i18n.translate('xpack.securitySolution.threatIntelligence.app.refreshingLabel', {
-                    defaultMessage: 'Refreshing…',
-                  })
-                ) : lastUpdatedAt ? (
-                  <>
-                    {i18n.translate(
-                      'xpack.securitySolution.threatIntelligence.app.lastUpdatedLabel',
-                      { defaultMessage: 'Updated' }
-                    )}
-                    &nbsp;
-                    <FormattedRelative value={new Date(lastUpdatedAt)} />
-                  </>
-                ) : null}
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                iconType="refresh"
-                onClick={() => {
-                  void fetchOverview();
-                }}
-                isLoading={isRefreshing}
+          <EuiPopover
+            key="overflow"
+            isOpen={headerOverflowOpen}
+            closePopover={() => setHeaderOverflowOpen(false)}
+            panelPaddingSize="none"
+            anchorPosition="downRight"
+            button={
+              <EuiButtonIcon
+                display="empty"
+                size="m"
+                iconType="boxesVertical"
                 aria-label={i18n.translate(
-                  'xpack.securitySolution.threatIntelligence.app.refreshAriaLabel',
-                  { defaultMessage: 'Refresh dashboard' }
+                  'xpack.securitySolution.threatIntelligence.app.headerOverflowAriaLabel',
+                  { defaultMessage: 'More actions' }
                 )}
-                data-test-subj="threatIntelRefreshBtn"
-              >
-                {i18n.translate('xpack.securitySolution.threatIntelligence.app.refreshBtn', {
-                  defaultMessage: 'Refresh',
-                })}
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>,
+                onClick={() => setHeaderOverflowOpen((open) => !open)}
+                data-test-subj="intelligenceHubHeaderOverflowBtn"
+              />
+            }
+          >
+            <EuiContextMenu
+              initialPanelId={0}
+              panels={[
+                {
+                  id: 0,
+                  items: [
+                    {
+                      name: i18n.translate(
+                        'xpack.securitySolution.threatIntelligence.app.exportPdfBtn',
+                        { defaultMessage: 'Export to PDF' }
+                      ),
+                      icon: 'exportAction',
+                      'data-test-subj': 'threatIntelExportPdfBtn',
+                      onClick: () => {
+                        setHeaderOverflowOpen(false);
+                        window.print();
+                      },
+                    },
+                  ],
+                },
+              ]}
+            />
+          </EuiPopover>,
           <EuiButton
             key="schedule"
             iconType="email"
@@ -557,29 +613,21 @@ export const IntelligenceHubPage: FC = () => {
             })}
           </EuiButton>,
           <EuiButton
-            key="export"
-            iconType="exportAction"
-            color="text"
-            onClick={exportToPdf}
-            data-test-subj="threatIntelExportPdfBtn"
+            key="correlation"
+            iconType="inspect"
+            onClick={openCorrelationFlyout}
+            data-test-subj="intelligenceHubCorrelationBtn"
           >
-            {i18n.translate('xpack.securitySolution.threatIntelligence.app.exportPdfBtn', {
-              defaultMessage: 'Export to PDF',
-            })}
-          </EuiButton>,
-          <EuiButton
-            key="save"
-            iconType="save"
-            onClick={() => setShowSaveModal(true)}
-            data-test-subj="threatIntelSaveViewBtn"
-          >
-            {i18n.translate('xpack.securitySolution.threatIntelligence.app.saveViewBtn', {
-              defaultMessage: 'Save view',
+            {i18n.translate('xpack.securitySolution.threatIntelligence.app.correlationReportBtn', {
+              defaultMessage: 'Threat correlation',
             })}
           </EuiButton>,
         ]}
+        rightSideGroupProps={{ alignItems: 'center' }}
       />
       <EuiPageTemplate.Section>
+        <ContinuousHuntStatusStrip />
+        <EuiSpacer size="m" />
         <FilterBar
           filters={filters}
           onFiltersChange={setFilters}
@@ -589,11 +637,68 @@ export const IntelligenceHubPage: FC = () => {
           activeViewId={activeViewId}
           onApplySavedView={applySavedView}
           savedViewsLoaded={savedViewsLoaded}
-          sourceCount={sourceCount}
+          savedViewsPopoverOpen={savedViewsPopoverOpen}
+          onSavedViewsPopoverToggle={setSavedViewsPopoverOpen}
+          onOpenSaveViewModal={() => setShowSaveModal(true)}
+          lastUpdatedAt={lastUpdatedAt}
+          isRefreshing={isRefreshing}
+          onRefresh={() => {
+            void fetchOverview();
+          }}
         />
+        {data ? (
+          <>
+            <EuiSpacer size="m" />
+            <StatsRibbon
+              stats={data.stats_ribbon}
+              topCategory={data.by_category[0]?.category}
+              recentArticles={data.recent_articles}
+            />
+          </>
+        ) : null}
+        <EuiSpacer size="m" />
+        <EuiTabs data-test-subj="intelligenceHubTabs">
+          {tabs.map((tab) => (
+            <EuiTab
+              key={tab.id}
+              onClick={() => setSelectedTab(tab.id)}
+              isSelected={selectedTab === tab.id}
+              data-test-subj={`intelligenceHubTab-${tab.id}`}
+            >
+              {tab.name}
+            </EuiTab>
+          ))}
+        </EuiTabs>
         <EuiSpacer size="l" />
-        {content}
+        {renderTabPanel()}
       </EuiPageTemplate.Section>
+      {correlationFlyoutOpen ? (
+        <EuiFlyout
+          onClose={() => setCorrelationFlyoutOpen(false)}
+          size="l"
+          aria-labelledby="intelligenceHubCorrelationFlyoutTitle"
+          data-test-subj="intelligenceHubCorrelationFlyout"
+        >
+          <EuiFlyoutHeader hasBorder>
+            <EuiText size="m">
+              <h2 id="intelligenceHubCorrelationFlyoutTitle">
+                {i18n.translate(
+                  'xpack.securitySolution.threatIntelligence.app.correlationFlyoutTitle',
+                  { defaultMessage: 'Threat correlation' }
+                )}
+              </h2>
+            </EuiText>
+          </EuiFlyoutHeader>
+          <EuiFlyoutBody>
+            <CorrelationReportPage
+              key={`${correlationReportId ?? 'none'}-${correlationAutoRun}`}
+              embedded
+              initialReportId={correlationReportId}
+              autoRun={correlationAutoRun}
+            />
+          </EuiFlyoutBody>
+        </EuiFlyout>
+      ) : null}
       {showSaveModal ? (
         <SaveViewModal onCancel={() => setShowSaveModal(false)} onSave={saveCurrentView} />
       ) : null}
@@ -617,7 +722,12 @@ const FilterBar: React.FC<{
   activeViewId: string;
   onApplySavedView: (id: string) => void;
   savedViewsLoaded: boolean;
-  sourceCount: number;
+  savedViewsPopoverOpen: boolean;
+  onSavedViewsPopoverToggle: (open: boolean) => void;
+  onOpenSaveViewModal: () => void;
+  lastUpdatedAt: number | null;
+  isRefreshing: boolean;
+  onRefresh: () => void;
 }> = ({
   filters,
   onFiltersChange,
@@ -627,8 +737,14 @@ const FilterBar: React.FC<{
   activeViewId,
   onApplySavedView,
   savedViewsLoaded,
-  sourceCount,
+  savedViewsPopoverOpen,
+  onSavedViewsPopoverToggle,
+  onOpenSaveViewModal,
+  lastUpdatedAt,
+  isRefreshing,
+  onRefresh,
 }) => {
+  const { euiTheme } = useEuiTheme();
   const regionOptions = useMemo(() => THREAT_REGIONS.map((r) => ({ label: r, value: r })), []);
   const categoryOptions = useMemo(() => THREAT_CATEGORIES.map((c) => ({ label: c, value: c })), []);
   const timeRangeOptions = useMemo(
@@ -642,15 +758,49 @@ const FilterBar: React.FC<{
 
   const hasFilters = filters.regions.length > 0 || filters.categories.length > 0;
 
+  const savedViewTriggerLabel = i18n.translate(
+    'xpack.securitySolution.threatIntelligence.app.savedViewsPopoverLabel',
+    { defaultMessage: 'Saved view' }
+  );
+
+  const savedViewOptionCss = css({
+    display: 'block',
+    width: '100%',
+    textAlign: 'left',
+    padding: `${euiTheme.size.s} ${euiTheme.size.m}`,
+    border: 'none',
+    background: 'transparent',
+    cursor: 'pointer',
+    color: euiTheme.colors.text,
+    fontSize: euiTheme.size.m,
+    lineHeight: 1.4,
+    '&:hover': {
+      backgroundColor: euiTheme.colors.lightestShade,
+    },
+  });
+
+  const savedViewActiveOptionCss = css({
+    fontWeight: euiTheme.font.weight.semiBold,
+  });
+
+  const savedViewsPanelCss = css({
+    minWidth: 240,
+  });
+
+  const savedViewsPopoverPanelCss = css({
+    border: `${euiTheme.border.width.thick} solid ${euiTheme.colors.primary}`,
+    borderRadius: euiTheme.border.radius.medium,
+  });
+
+  const saveViewFooterCss = css({
+    padding: euiTheme.size.s,
+  });
+
   return (
-    <EuiPanel hasBorder paddingSize="m">
-      <EuiFlexGroup gutterSize="m" wrap alignItems="flexEnd">
-        <EuiFlexItem grow={false}>
-          <EuiFormRow
-            label={i18n.translate('xpack.securitySolution.threatIntelligence.app.filterTimeRange', {
-              defaultMessage: 'Time range',
-            })}
-          >
+    <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false} wrap>
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false} wrap>
+          <EuiFlexItem grow={false}>
             <EuiButtonGroup
               legend={i18n.translate(
                 'xpack.securitySolution.threatIntelligence.app.filterTimeRangeLegend',
@@ -662,15 +812,13 @@ const FilterBar: React.FC<{
               buttonSize="compressed"
               data-test-subj="threatIntelTimeRangeBtnGroup"
             />
-          </EuiFormRow>
-        </EuiFlexItem>
-        <EuiFlexItem style={{ minWidth: 240 }}>
-          <EuiFormRow
-            label={i18n.translate('xpack.securitySolution.threatIntelligence.app.filterRegions', {
-              defaultMessage: 'Regions',
-            })}
-          >
+          </EuiFlexItem>
+          <EuiFlexItem style={{ minWidth: 200 }}>
             <EuiComboBox
+              aria-label={i18n.translate(
+                'xpack.securitySolution.threatIntelligence.app.filterRegions',
+                { defaultMessage: 'Regions' }
+              )}
               options={regionOptions}
               selectedOptions={filters.regions.map((r) => ({ label: r, value: r }))}
               onChange={(opts: Array<EuiComboBoxOptionOption<string>>) =>
@@ -681,23 +829,17 @@ const FilterBar: React.FC<{
               }
               placeholder={i18n.translate(
                 'xpack.securitySolution.threatIntelligence.app.filterRegionsPlaceholder',
-                {
-                  defaultMessage: 'All regions',
-                }
+                { defaultMessage: 'All regions' }
               )}
+              compressed
             />
-          </EuiFormRow>
-        </EuiFlexItem>
-        <EuiFlexItem style={{ minWidth: 240 }}>
-          <EuiFormRow
-            label={i18n.translate(
-              'xpack.securitySolution.threatIntelligence.app.filterCategories',
-              {
-                defaultMessage: 'Categories',
-              }
-            )}
-          >
+          </EuiFlexItem>
+          <EuiFlexItem style={{ minWidth: 200 }}>
             <EuiComboBox
+              aria-label={i18n.translate(
+                'xpack.securitySolution.threatIntelligence.app.filterCategories',
+                { defaultMessage: 'Categories' }
+              )}
               options={categoryOptions}
               selectedOptions={filters.categories.map((c) => ({ label: c, value: c }))}
               onChange={(opts: Array<EuiComboBoxOptionOption<string>>) =>
@@ -708,48 +850,13 @@ const FilterBar: React.FC<{
               }
               placeholder={i18n.translate(
                 'xpack.securitySolution.threatIntelligence.app.filterCategoriesPlaceholder',
-                {
-                  defaultMessage: 'All categories',
-                }
+                { defaultMessage: 'All categories' }
               )}
+              compressed
             />
-          </EuiFormRow>
-        </EuiFlexItem>
-        <EuiFlexItem style={{ minWidth: 220 }}>
-          <EuiFormRow
-            label={i18n.translate('xpack.securitySolution.threatIntelligence.app.filterSavedView', {
-              defaultMessage: 'Saved view',
-            })}
-          >
-            <EuiSelect
-              options={[
-                {
-                  value: '',
-                  text: savedViewsLoaded
-                    ? i18n.translate(
-                        'xpack.securitySolution.threatIntelligence.app.filterSavedViewBlank',
-                        {
-                          defaultMessage: '— none —',
-                        }
-                      )
-                    : i18n.translate(
-                        'xpack.securitySolution.threatIntelligence.app.filterSavedViewLoading',
-                        {
-                          defaultMessage: 'Loading…',
-                        }
-                      ),
-                },
-                ...savedViews.map((v) => ({ value: v.id, text: v.name })),
-              ]}
-              value={activeViewId}
-              onChange={(e) => onApplySavedView(e.target.value)}
-              disabled={!savedViewsLoaded || savedViews.length === 0}
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
-        {hasFilters ? (
-          <EuiFlexItem grow={false}>
-            <EuiFormRow hasEmptyLabelSpace>
+          </EuiFlexItem>
+          {hasFilters ? (
+            <EuiFlexItem grow={false}>
               <EuiButtonEmpty
                 size="s"
                 iconType="cross"
@@ -759,39 +866,135 @@ const FilterBar: React.FC<{
                   defaultMessage: 'Clear',
                 })}
               </EuiButtonEmpty>
-            </EuiFormRow>
-          </EuiFlexItem>
-        ) : null}
-        <EuiFlexItem grow={false}>
-          <EuiToolTip
-            content={i18n.translate(
-              'xpack.securitySolution.threatIntelligence.app.sourceCountTooltip',
-              {
-                defaultMessage:
-                  'Distinct feed sources with reports in the selected time range and filters.',
-              }
-            )}
-          >
-            <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiIcon type="online" color="success" aria-hidden={true} />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiText size="s">
+            </EuiFlexItem>
+          ) : null}
+        </EuiFlexGroup>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap={false}>
+          <EuiFlexItem grow={false}>
+            <EuiText size="xs" color="subdued" data-test-subj="threatIntelLastUpdated">
+              {isRefreshing ? (
+                i18n.translate('xpack.securitySolution.threatIntelligence.app.refreshingLabel', {
+                  defaultMessage: 'Refreshing…',
+                })
+              ) : lastUpdatedAt ? (
+                <>
                   {i18n.translate(
-                    'xpack.securitySolution.threatIntelligence.app.sourceCountLabel',
-                    {
-                      defaultMessage: '{count, plural, one {# source} other {# sources}}',
-                      values: { count: sourceCount },
-                    }
+                    'xpack.securitySolution.threatIntelligence.app.lastRefreshedLabel',
+                    { defaultMessage: 'Last refreshed' }
                   )}
-                </EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiToolTip>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiPanel>
+                  &nbsp;
+                  <FormattedRelative value={new Date(lastUpdatedAt)} />
+                </>
+              ) : null}
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              iconType="refresh"
+              size="s"
+              flush="both"
+              onClick={onRefresh}
+              isLoading={isRefreshing}
+              aria-label={i18n.translate(
+                'xpack.securitySolution.threatIntelligence.app.refreshAriaLabel',
+                { defaultMessage: 'Refresh dashboard' }
+              )}
+              data-test-subj="threatIntelRefreshBtn"
+            >
+              {i18n.translate('xpack.securitySolution.threatIntelligence.app.refreshBtn', {
+                defaultMessage: 'Refresh',
+              })}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiPopover
+              isOpen={savedViewsPopoverOpen}
+              closePopover={() => onSavedViewsPopoverToggle(false)}
+              panelPaddingSize="none"
+              anchorPosition="downRight"
+              ownFocus
+              panelProps={{ css: savedViewsPopoverPanelCss }}
+              button={
+                <EuiButton
+                  size="s"
+                  color="text"
+                  iconType="arrowDown"
+                  iconSide="right"
+                  onClick={() => onSavedViewsPopoverToggle(!savedViewsPopoverOpen)}
+                  data-test-subj="threatIntelSavedViewsPopoverBtn"
+                >
+                  {savedViewTriggerLabel}
+                </EuiButton>
+              }
+            >
+              <div css={savedViewsPanelCss} data-test-subj="threatIntelSavedViewsPopover">
+                {!savedViewsLoaded ? (
+                  <div css={css({ padding: euiTheme.size.m })}>
+                    <EuiText size="s" color="subdued">
+                      {i18n.translate(
+                        'xpack.securitySolution.threatIntelligence.app.filterSavedViewLoading',
+                        { defaultMessage: 'Loading…' }
+                      )}
+                    </EuiText>
+                  </div>
+                ) : savedViews.length === 0 ? (
+                  <div css={css({ padding: euiTheme.size.m })}>
+                    <EuiText size="s" color="subdued">
+                      {i18n.translate(
+                        'xpack.securitySolution.threatIntelligence.app.savedViewsEmpty',
+                        { defaultMessage: 'No saved views yet.' }
+                      )}
+                    </EuiText>
+                  </div>
+                ) : (
+                  <div role="listbox" aria-label={savedViewTriggerLabel}>
+                    {savedViews.map((view) => (
+                      <button
+                        key={view.id}
+                        type="button"
+                        role="option"
+                        aria-selected={activeViewId === view.id}
+                        css={[
+                          savedViewOptionCss,
+                          activeViewId === view.id ? savedViewActiveOptionCss : undefined,
+                        ]}
+                        onClick={() => {
+                          onApplySavedView(view.id);
+                          onSavedViewsPopoverToggle(false);
+                        }}
+                        data-test-subj={`threatIntelSavedViewOption-${view.id}`}
+                      >
+                        {view.name}
+                      </button>
+                    ))}
+                  </div>
+                )}
+                <EuiHorizontalRule margin="none" />
+                <div css={saveViewFooterCss}>
+                  <EuiButton
+                    size="s"
+                    fullWidth
+                    iconType="save"
+                    color="primary"
+                    onClick={() => {
+                      onSavedViewsPopoverToggle(false);
+                      onOpenSaveViewModal();
+                    }}
+                    data-test-subj="threatIntelSaveViewBtn"
+                  >
+                    {i18n.translate('xpack.securitySolution.threatIntelligence.app.saveViewBtn', {
+                      defaultMessage: 'Save view',
+                    })}
+                  </EuiButton>
+                </div>
+              </div>
+            </EuiPopover>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
 

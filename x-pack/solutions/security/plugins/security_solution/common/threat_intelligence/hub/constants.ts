@@ -229,8 +229,10 @@ export const THREAT_INTELLIGENCE_API_BASE = '/api/threat_intelligence' as const;
  * `server/routes/` and by exactly one shared service module in
  * `server/services/`.
  */
-export const FIND_THREAT_REPORTS_API_PATH = `${THREAT_INTELLIGENCE_API_BASE}/find_threat_reports` as const;
-export const CREATE_THREAT_REPORT_API_PATH = `${THREAT_INTELLIGENCE_API_BASE}/create_threat_report` as const;
+export const FIND_THREAT_REPORTS_API_PATH =
+  `${THREAT_INTELLIGENCE_API_BASE}/find_threat_reports` as const;
+export const CREATE_THREAT_REPORT_API_PATH =
+  `${THREAT_INTELLIGENCE_API_BASE}/create_threat_report` as const;
 export const HUNT_BEHAVIOR_API_PATH = `${THREAT_INTELLIGENCE_API_BASE}/hunt_behavior` as const;
 export const HUNT_FOR_THREAT_API_PATH = `${THREAT_INTELLIGENCE_API_BASE}/hunt_for_threat` as const;
 /**
@@ -247,6 +249,12 @@ export const HUNT_ORCHESTRATOR_API_PATH =
  * Backed by `.kibana-threat-intel-hunt-findings`; used by Intelligence Hub.
  */
 export const HUNT_FINDINGS_API_PATH = `${THREAT_INTELLIGENCE_API_BASE}/hunt_findings` as const;
+/**
+ * Mark a hunt finding deployed — POST /api/threat_intelligence/hunt_findings/{findingId}/deploy.
+ * Persists Detection Engine rule linkage on the finding document.
+ */
+export const HUNT_FINDING_DEPLOY_API_PATH =
+  `${THREAT_INTELLIGENCE_API_BASE}/hunt_findings/{findingId}/deploy` as const;
 /**
  * Cross-report advisory synthesis — see
  * {@link THREAT_INTEL_TOOL_IDS.synthesizeAdvisory}. Same
@@ -408,6 +416,8 @@ export const LIST_SUBSCRIPTIONS_API_PATH =
   `${THREAT_INTELLIGENCE_API_BASE}/subscriptions/list` as const;
 export const DELETE_SUBSCRIPTION_API_PATH =
   `${THREAT_INTELLIGENCE_API_BASE}/subscriptions/delete` as const;
+
+export const LIST_SOURCES_API_PATH = `${THREAT_INTELLIGENCE_API_BASE}/sources/list` as const;
 
 /**
  * API path that powers the visual dashboard. Returns the

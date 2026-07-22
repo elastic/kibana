@@ -6,8 +6,8 @@
  */
 
 import React, { useMemo } from 'react';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiBadge,
   EuiFlexGroup,
@@ -27,7 +27,6 @@ import {
 import type { CoreStart } from '@kbn/core/public';
 import {
   SEVERITY_LEVELS,
-  type CoverageRecommendation,
   type DashboardOverviewResponse,
   type SeverityLevel,
   type ThreatCategory,
@@ -72,6 +71,8 @@ export const IntelligenceHubDashboardView: React.FC<{
   http: CoreStart['http'];
   notifications: CoreStart['notifications'];
   application: CoreStart['application'];
+  showHuntFindings?: boolean;
+  onCorrelateReport?: (reportId: string) => void;
 }> = ({
   data,
   filters,
@@ -91,9 +92,9 @@ export const IntelligenceHubDashboardView: React.FC<{
   http,
   notifications,
   application,
+  showHuntFindings = true,
+  onCorrelateReport,
 }) => {
-  const topCategory = data.by_category[0]?.category;
-
   const categoryCounts = useMemo(() => {
     const map = new Map<ThreatCategory, number>();
     for (const bucket of data.by_category) {
@@ -111,12 +112,6 @@ export const IntelligenceHubDashboardView: React.FC<{
 
   return (
     <>
-      <StatsRibbon
-        stats={data.stats_ribbon}
-        topCategory={topCategory}
-        recentArticles={data.recent_articles}
-      />
-      <EuiSpacer size="l" />
       <ExecutiveAdvisoryPanel
         advisory={data.latest_advisory}
         isGenerating={isGeneratingAdvisory}
@@ -125,15 +120,31 @@ export const IntelligenceHubDashboardView: React.FC<{
         onFocusSourceReports={onFocusSourceReports}
       />
       <EuiSpacer size="l" />
-      <EuiFlexGroup gutterSize="l" wrap alignItems="flexStart">
-        <EuiFlexItem style={{ minWidth: 320 }}>
+      <EuiFlexGroup gutterSize="l" alignItems="stretch" responsive={false}>
+        <EuiFlexItem style={{ minWidth: 0, flex: 1 }}>
           <ThreatRadar buckets={data.by_category} />
         </EuiFlexItem>
-        <EuiFlexItem style={{ minWidth: 320 }}>
+        <EuiFlexItem style={{ minWidth: 0, flex: 1 }}>
           <ActivityTimeline buckets={data.severity_timeline} />
         </EuiFlexItem>
-        <EuiFlexItem style={{ minWidth: 320 }}>
+        <EuiFlexItem style={{ minWidth: 0, flex: 1 }}>
           <CategoryBreakdown buckets={data.by_category} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="l" />
+      <EuiFlexGroup gutterSize="l" alignItems="stretch" responsive={false}>
+        <EuiFlexItem style={{ minWidth: 0, flex: 1 }}>
+          <RegionBreakdown buckets={data.by_region} />
+        </EuiFlexItem>
+        <EuiFlexItem style={{ minWidth: 0, flex: 1 }}>
+          <TopTechniques buckets={data.top_techniques} coverageSummary={data.coverage_summary} />
+        </EuiFlexItem>
+        <EuiFlexItem style={{ minWidth: 0, flex: 1 }}>
+          <EnvironmentImpact
+            impact={data.environment_impact}
+            totalReports={data.stats_ribbon.total_reports}
+            onHighlightReport={onHighlightReport}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="l" />
@@ -149,38 +160,29 @@ export const IntelligenceHubDashboardView: React.FC<{
           onClearFilters={onClearChipFilters}
           sortBy={sortBy}
           onSortChange={onSortChange}
+          onCorrelate={onCorrelateReport}
         />
       </div>
-      <EuiSpacer size="l" />
-      <HuntFindingsPanel
-        findings={huntFindings}
-        feedbackLoop={huntFindingsFeedbackLoop}
-        isLoading={isLoadingHuntFindings}
-        onHighlightReport={onHighlightReport}
-        http={http}
-        notifications={notifications}
-        application={application}
-      />
-      <EuiSpacer size="l" />
-      <RegionBreakdown buckets={data.by_region} />
-      <EuiSpacer size="l" />
-      <EuiFlexGroup gutterSize="l" wrap>
-        <EuiFlexItem style={{ minWidth: 360 }}>
-          <TopTechniques buckets={data.top_techniques} coverageSummary={data.coverage_summary} />
-        </EuiFlexItem>
-        <EuiFlexItem style={{ minWidth: 360 }}>
-          <EnvironmentImpact
-            impact={data.environment_impact}
-            totalReports={data.stats_ribbon.total_reports}
+      {showHuntFindings ? (
+        <>
+          <EuiSpacer size="l" />
+          <HuntFindingsPanel
+            findings={huntFindings}
+            feedbackLoop={huntFindingsFeedbackLoop}
+            isLoading={isLoadingHuntFindings}
             onHighlightReport={onHighlightReport}
+            onCorrelateReport={onCorrelateReport}
+            http={http}
+            notifications={notifications}
+            application={application}
           />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+        </>
+      ) : null}
     </>
   );
 };
 
-const StatsRibbon: React.FC<{
+export const StatsRibbon: React.FC<{
   stats: DashboardOverviewResponse['stats_ribbon'];
   topCategory?: ThreatCategory | '<unknown>';
   recentArticles: DashboardOverviewResponse['recent_articles'];
@@ -193,9 +195,38 @@ const StatsRibbon: React.FC<{
     return totals;
   }, [recentArticles]);
 
+  const priorStats = stats as DashboardOverviewResponse['stats_ribbon'] & {
+    total_reports_prior?: number;
+    critical_reports_prior?: number;
+    distinct_source_count_prior?: number;
+  };
+
+  const priorDelta = (
+    current: number,
+    priorKey: 'total_reports_prior' | 'critical_reports_prior' | 'distinct_source_count_prior'
+  ): React.ReactNode => {
+    const prior = priorStats[priorKey];
+    if (prior === undefined) {
+      return null;
+    }
+    const delta = current - prior;
+    if (delta === 0) {
+      return null;
+    }
+    const sign = delta > 0 ? '+' : '';
+    return (
+      <EuiText size="xs" color="subdued">
+        {i18n.translate('xpack.securitySolution.threatIntelligence.app.statVsPriorPeriod', {
+          defaultMessage: '{sign}{delta} vs prior period',
+          values: { sign, delta },
+        })}
+      </EuiText>
+    );
+  };
+
   return (
-    <EuiFlexGroup gutterSize="m" wrap>
-      <EuiFlexItem style={{ minWidth: 160 }}>
+    <EuiFlexGroup gutterSize="m" wrap={false} responsive={false}>
+      <EuiFlexItem grow={true} style={{ minWidth: 0 }}>
         <EuiPanel hasBorder paddingSize="m">
           <EuiStat
             title={stats.total_reports.toLocaleString()}
@@ -204,9 +235,10 @@ const StatsRibbon: React.FC<{
             })}
             titleColor="primary"
           />
+          {priorDelta(stats.total_reports, 'total_reports_prior')}
         </EuiPanel>
       </EuiFlexItem>
-      <EuiFlexItem style={{ minWidth: 160 }}>
+      <EuiFlexItem grow={true} style={{ minWidth: 0 }}>
         <EuiPanel hasBorder paddingSize="m">
           <EuiStat
             title={stats.critical_reports.toLocaleString()}
@@ -218,9 +250,10 @@ const StatsRibbon: React.FC<{
             )}
             titleColor="danger"
           />
+          {priorDelta(stats.critical_reports, 'critical_reports_prior')}
         </EuiPanel>
       </EuiFlexItem>
-      <EuiFlexItem style={{ minWidth: 160 }}>
+      <EuiFlexItem grow={true} style={{ minWidth: 0 }}>
         <EuiPanel hasBorder paddingSize="m">
           <EuiStat
             title={stats.distinct_source_count.toLocaleString()}
@@ -232,12 +265,13 @@ const StatsRibbon: React.FC<{
             )}
             titleColor="accent"
           />
+          {priorDelta(stats.distinct_source_count, 'distinct_source_count_prior')}
         </EuiPanel>
       </EuiFlexItem>
-      <EuiFlexItem style={{ minWidth: 280 }}>
+      <EuiFlexItem grow={true} style={{ minWidth: 0 }}>
         <SeverityDistributionPanel totals={severityTotals} />
       </EuiFlexItem>
-      <EuiFlexItem style={{ minWidth: 200 }}>
+      <EuiFlexItem grow={true} style={{ minWidth: 0 }}>
         <TopThreatPanel topCategory={topCategory} />
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -310,10 +344,9 @@ const SeverityDistributionPanel: React.FC<{ totals: Record<SeverityLevel, number
       <EuiFlexGroup gutterSize="s" wrap responsive={false}>
         {SEVERITY_LEVELS.slice()
           .reverse()
-          .filter((s) => totals[s] > 0)
           .map((s) => (
             <EuiFlexItem key={s} grow={false}>
-              <EuiText size="xs">
+              <EuiText size="xs" color={totals[s] > 0 ? undefined : 'subdued'}>
                 <span
                   style={{
                     display: 'inline-block',
@@ -361,8 +394,15 @@ const TopThreatPanel: React.FC<{ topCategory?: ThreatCategory | '<unknown>' }> =
   </EuiPanel>
 );
 
-/** Matches ThreatRadar SVG height so the three overview panels align. */
+/** Matches ThreatRadar SVG height so the overview chart panels align. */
 const OVERVIEW_PANEL_CONTENT_HEIGHT = 260;
+
+const overviewChartPanelStyle: React.CSSProperties = {
+  minHeight: OVERVIEW_PANEL_CONTENT_HEIGHT + 88,
+  height: '100%',
+  display: 'flex',
+  flexDirection: 'column',
+};
 
 const PanelHeader: React.FC<{ title: string; description?: string }> = ({ title, description }) => (
   <>
@@ -370,11 +410,15 @@ const PanelHeader: React.FC<{ title: string; description?: string }> = ({ title,
       <h3>{title}</h3>
     </EuiTitle>
     {description ? (
-      <EuiText size="xs" color="subdued">
-        {description}
-      </EuiText>
-    ) : null}
-    <EuiHorizontalRule margin="s" />
+      <>
+        <EuiText size="xs" color="subdued">
+          {description}
+        </EuiText>
+        <EuiSpacer size="s" />
+      </>
+    ) : (
+      <EuiSpacer size="s" />
+    )}
   </>
 );
 
@@ -383,17 +427,11 @@ const CategoryBreakdown: React.FC<{ buckets: DashboardOverviewResponse['by_categ
 }) => {
   const max = buckets[0]?.report_count ?? 0;
   return (
-    <EuiPanel hasBorder paddingSize="m">
+    <EuiPanel hasBorder paddingSize="m" style={overviewChartPanelStyle}>
       <PanelHeader
         title={i18n.translate('xpack.securitySolution.threatIntelligence.app.categoryTitle', {
           defaultMessage: 'Categories',
         })}
-        description={i18n.translate(
-          'xpack.securitySolution.threatIntelligence.app.categoryDescription',
-          {
-            defaultMessage: 'Top reported threat categories',
-          }
-        )}
       />
       {buckets.length === 0 ? (
         <EuiText size="s" color="subdued">
@@ -431,76 +469,104 @@ const CategoryBreakdown: React.FC<{ buckets: DashboardOverviewResponse['by_categ
 
 const RegionBreakdown: React.FC<{ buckets: DashboardOverviewResponse['by_region'] }> = ({
   buckets,
-}) => (
-  <EuiPanel hasBorder paddingSize="m">
-    <PanelHeader
-      title={i18n.translate('xpack.securitySolution.threatIntelligence.app.regionTitle', {
-        defaultMessage: 'Geographic regions',
-      })}
-      description={i18n.translate(
-        'xpack.securitySolution.threatIntelligence.app.regionDescription',
-        {
-          defaultMessage: 'Regions mentioned in reports',
-        }
-      )}
-    />
-    {buckets.length === 0 ? (
-      <EuiText size="s" color="subdued">
-        {i18n.translate('xpack.securitySolution.threatIntelligence.app.emptyState', {
-          defaultMessage: 'No data',
-        })}
-      </EuiText>
-    ) : (
-      <EuiFlexGroup gutterSize="s" wrap responsive={false}>
-        {buckets.map((bucket) => (
-          <EuiFlexItem key={bucket.region} grow={false}>
-            <EuiPanel hasBorder paddingSize="s">
-              <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-                <EuiFlexItem grow={false}>
-                  <EuiText size="s">{bucket.region}</EuiText>
-                </EuiFlexItem>
-                {bucket.affects_you ? (
-                  <EuiFlexItem grow={false}>
-                    <EuiBadge color="danger">
-                      {i18n.translate(
-                        'xpack.securitySolution.threatIntelligence.app.affectsYouBadge',
-                        {
-                          defaultMessage: 'Affects you',
-                        }
-                      )}
-                    </EuiBadge>
-                  </EuiFlexItem>
-                ) : null}
-                <EuiFlexItem grow={false}>
-                  <EuiText size="s" color="subdued">
-                    {bucket.report_count}
-                  </EuiText>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiPanel>
-          </EuiFlexItem>
-        ))}
-      </EuiFlexGroup>
-    )}
-  </EuiPanel>
-);
+}) => {
+  const { euiTheme } = useEuiTheme();
+  const max = Math.max(...buckets.map((b) => b.report_count), 1);
 
-const COVERAGE_BADGE_COLOR = (
-  recommendation: CoverageRecommendation
-): 'success' | 'warning' | 'danger' => {
-  if (recommendation === 'covered') {
-    return 'success';
-  }
-  if (recommendation === 'enable_existing') {
-    return 'warning';
-  }
-  return 'danger';
+  const isSecondaryRegion = (region: string) =>
+    region === 'global' || region === '<unknown>' || region.toLowerCase().includes('global');
+
+  const primaryBuckets = buckets.filter((b) => !isSecondaryRegion(String(b.region)));
+  const secondaryBuckets = buckets.filter((b) => isSecondaryRegion(String(b.region)));
+
+  const affectsYouBadgeCss = css({
+    backgroundColor: euiTheme.colors.backgroundBaseWarning,
+    color: euiTheme.colors.warningText ?? euiTheme.colors.warning,
+  });
+
+  const formatRegionLabel = (region: string) => {
+    if (region === 'global' || region.toLowerCase() === 'global') {
+      return i18n.translate(
+        'xpack.securitySolution.threatIntelligence.app.regionGlobalCrossRegion',
+        { defaultMessage: 'Global / cross-region' }
+      );
+    }
+    return region;
+  };
+
+  const renderRegionRow = (
+    bucket: DashboardOverviewResponse['by_region'][number],
+    italic?: boolean
+  ) => (
+    <div key={String(bucket.region)} css={css({ marginBottom: euiTheme.size.s })}>
+      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+        <EuiFlexItem grow={false} style={{ minWidth: 110, maxWidth: 130 }}>
+          <EuiText
+            size="s"
+            style={italic ? { fontStyle: 'italic' } : undefined}
+            color={italic ? 'subdued' : undefined}
+          >
+            {formatRegionLabel(String(bucket.region))}
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiProgress value={bucket.report_count} max={max} size="s" color="primary" />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiText size="s">
+            <strong>{bucket.report_count}</strong>
+          </EuiText>
+        </EuiFlexItem>
+        {bucket.affects_you ? (
+          <EuiFlexItem grow={false}>
+            <EuiBadge css={affectsYouBadgeCss}>
+              {i18n.translate(
+                'xpack.securitySolution.threatIntelligence.app.affectsYouCountBadge',
+                {
+                  defaultMessage: 'Affects you: {count}',
+                  values: { count: bucket.report_count },
+                }
+              )}
+            </EuiBadge>
+          </EuiFlexItem>
+        ) : null}
+      </EuiFlexGroup>
+    </div>
+  );
+
+  return (
+    <EuiPanel hasBorder paddingSize="m" style={overviewChartPanelStyle}>
+      <PanelHeader
+        title={i18n.translate('xpack.securitySolution.threatIntelligence.app.regionTitle', {
+          defaultMessage: 'Geographic regions',
+        })}
+      />
+      {buckets.length === 0 ? (
+        <EuiText size="s" color="subdued">
+          {i18n.translate('xpack.securitySolution.threatIntelligence.app.emptyState', {
+            defaultMessage: 'No data',
+          })}
+        </EuiText>
+      ) : (
+        <div style={{ maxHeight: OVERVIEW_PANEL_CONTENT_HEIGHT, overflowY: 'auto' }}>
+          {primaryBuckets.map((bucket) => renderRegionRow(bucket))}
+          {secondaryBuckets.length > 0 ? (
+            <>
+              <EuiHorizontalRule margin="s" />
+              {secondaryBuckets.map((bucket) => renderRegionRow(bucket, true))}
+            </>
+          ) : null}
+        </div>
+      )}
+    </EuiPanel>
+  );
 };
 
 const TopTechniques: React.FC<{
   buckets: DashboardOverviewResponse['top_techniques'];
   coverageSummary: DashboardOverviewResponse['coverage_summary'];
 }> = ({ buckets, coverageSummary }) => {
+  const { euiTheme } = useEuiTheme();
   const max = buckets[0]?.report_count ?? 0;
   const enrichedBuckets = useMemo(
     () =>
@@ -511,6 +577,16 @@ const TopTechniques: React.FC<{
     [buckets]
   );
 
+  const uncoveredBadgeCss = css({
+    backgroundColor: euiTheme.colors.backgroundBaseWarning,
+    color: euiTheme.colors.warningText ?? euiTheme.colors.warning,
+  });
+
+  const ruleActiveBadgeCss = css({
+    backgroundColor: euiTheme.colors.backgroundBaseSuccess,
+    color: euiTheme.colors.successText ?? euiTheme.colors.success,
+  });
+
   const coverageDescription =
     buckets.length === 0
       ? undefined
@@ -518,7 +594,7 @@ const TopTechniques: React.FC<{
           'xpack.securitySolution.threatIntelligence.app.techniquesCoverageDescription',
           {
             defaultMessage:
-              '{uncovered} uncovered, {enableExisting} with disabled rules to enable, {covered} covered',
+              '{uncovered} uncovered · {enableExisting} with disabled rules to enable · {covered} covered',
             values: {
               uncovered: coverageSummary.uncovered,
               enableExisting: coverageSummary.enable_existing,
@@ -527,8 +603,41 @@ const TopTechniques: React.FC<{
           }
         );
 
+  const coverageBadge = (bucket: (typeof enrichedBuckets)[number]) => {
+    if (bucket.coverage_recommendation === 'covered') {
+      return (
+        <EuiBadge css={ruleActiveBadgeCss}>
+          {i18n.translate(
+            'xpack.securitySolution.threatIntelligence.app.techniqueRuleActiveBadge',
+            { defaultMessage: 'Rule active' }
+          )}
+        </EuiBadge>
+      );
+    }
+    if (bucket.coverage_recommendation === 'enable_existing') {
+      return (
+        <EuiBadge color="warning">
+          {i18n.translate(
+            'xpack.securitySolution.threatIntelligence.app.techniqueEnableExistingBadge',
+            {
+              defaultMessage: 'Enable existing ({count})',
+              values: { count: bucket.matching_disabled_rule_count },
+            }
+          )}
+        </EuiBadge>
+      );
+    }
+    return (
+      <EuiBadge css={uncoveredBadgeCss}>
+        {i18n.translate('xpack.securitySolution.threatIntelligence.app.techniqueUncoveredBadge', {
+          defaultMessage: 'Uncovered',
+        })}
+      </EuiBadge>
+    );
+  };
+
   return (
-    <EuiPanel hasBorder paddingSize="m">
+    <EuiPanel hasBorder paddingSize="m" style={overviewChartPanelStyle}>
       <PanelHeader
         title={i18n.translate('xpack.securitySolution.threatIntelligence.app.techniquesTitle', {
           defaultMessage: 'Top ATT&CK techniques',
@@ -547,116 +656,70 @@ const TopTechniques: React.FC<{
           })}
         </EuiText>
       ) : (
-        <div
-          style={{
-            maxHeight: OVERVIEW_PANEL_CONTENT_HEIGHT,
-            overflowY: 'auto',
-          }}
-        >
-          {enrichedBuckets.map((bucket) => (
-            <div key={bucket.technique_id} style={{ marginBottom: 10 }}>
-              <EuiFlexGroup gutterSize="s" alignItems="flexStart" responsive={false}>
+        <div style={{ maxHeight: OVERVIEW_PANEL_CONTENT_HEIGHT, overflowY: 'auto' }}>
+          {enrichedBuckets.map((bucket, index) => (
+            <div key={bucket.technique_id}>
+              {index > 0 ? <EuiHorizontalRule margin="s" /> : null}
+              <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
                 <EuiFlexItem>
                   <EuiToolTip content={bucket.metadata.name}>
                     <EuiText size="s">
-                      <strong>{bucket.metadata.name}</strong>
+                      {bucket.technique_id}
+                      {' · '}
+                      {bucket.metadata.name}
                     </EuiText>
                   </EuiToolTip>
-                  <EuiSpacer size="xs" />
-                  <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap>
-                    <EuiFlexItem grow={false}>
-                      {bucket.metadata.reference ? (
-                        <EuiBadge color="hollow">
-                          <EuiLink
-                            href={bucket.metadata.reference}
-                            target="_blank"
-                            external
-                            color="text"
-                          >
-                            {bucket.technique_id}
-                          </EuiLink>
-                        </EuiBadge>
-                      ) : (
-                        <EuiBadge color="hollow">{bucket.technique_id}</EuiBadge>
-                      )}
-                    </EuiFlexItem>
-                    {bucket.metadata.tactic_name ? (
-                      <EuiFlexItem grow={false}>
-                        <EuiBadge color="default">{bucket.metadata.tactic_name}</EuiBadge>
-                      </EuiFlexItem>
-                    ) : null}
-                    <EuiFlexItem grow={false}>
-                      <EuiToolTip
-                        content={
-                          bucket.coverage_recommendation === 'enable_existing' &&
-                          bucket.matching_disabled_rule_ids?.length
-                            ? i18n.translate(
-                                'xpack.securitySolution.threatIntelligence.app.techniqueEnableExistingTooltip',
-                                {
-                                  defaultMessage:
-                                    'Enable existing rule(s): {ruleIds}. Do not create a duplicate.',
-                                  values: {
-                                    ruleIds: bucket.matching_disabled_rule_ids.join(', '),
-                                  },
-                                }
-                              )
-                            : bucket.coverage_recommendation === 'covered'
-                            ? i18n.translate(
-                                'xpack.securitySolution.threatIntelligence.app.techniqueCoveredTooltip',
-                                {
-                                  defaultMessage:
-                                    'Covered by {count, plural, one {# enabled rule} other {# enabled rules}}',
-                                  values: { count: bucket.matching_rule_count },
-                                }
-                              )
-                            : i18n.translate(
-                                'xpack.securitySolution.threatIntelligence.app.techniqueUncoveredTooltip',
-                                {
-                                  defaultMessage:
-                                    'No matching Detection Engine rule — consider creating coverage',
-                                }
-                              )
-                        }
-                      >
-                        <EuiBadge color={COVERAGE_BADGE_COLOR(bucket.coverage_recommendation)}>
-                          {bucket.coverage_recommendation === 'enable_existing'
-                            ? i18n.translate(
-                                'xpack.securitySolution.threatIntelligence.app.techniqueEnableExistingBadge',
-                                {
-                                  defaultMessage: 'Enable existing ({count})',
-                                  values: { count: bucket.matching_disabled_rule_count },
-                                }
-                              )
-                            : bucket.coverage_recommendation === 'covered'
-                            ? i18n.translate(
-                                'xpack.securitySolution.threatIntelligence.app.techniqueCoveredBadge',
-                                {
-                                  defaultMessage: 'Covered ({count})',
-                                  values: { count: bucket.matching_rule_count },
-                                }
-                              )
-                            : i18n.translate(
-                                'xpack.securitySolution.threatIntelligence.app.techniqueUncoveredBadge',
-                                {
-                                  defaultMessage: 'Uncovered',
-                                }
-                              )}
-                        </EuiBadge>
-                      </EuiToolTip>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
+                  <div css={css({ maxWidth: 120, marginTop: 4 })}>
+                    <EuiProgress
+                      value={bucket.report_count}
+                      max={max || 1}
+                      size="s"
+                      color="primary"
+                    />
+                  </div>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiText size="s" color="subdued" textAlign="right">
-                    <FormattedMessage
-                      id="xpack.securitySolution.threatIntelligence.app.techniqueReportCount"
-                      defaultMessage="{count, plural, one {# report} other {# reports}}"
-                      values={{ count: bucket.report_count }}
-                    />
+                  <EuiText size="s">
+                    <strong>{bucket.report_count}</strong>
                   </EuiText>
                 </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiToolTip
+                    content={
+                      bucket.coverage_recommendation === 'enable_existing' &&
+                      bucket.matching_disabled_rule_ids?.length
+                        ? i18n.translate(
+                            'xpack.securitySolution.threatIntelligence.app.techniqueEnableExistingTooltip',
+                            {
+                              defaultMessage:
+                                'Enable existing rule(s): {ruleIds}. Do not create a duplicate.',
+                              values: {
+                                ruleIds: bucket.matching_disabled_rule_ids.join(', '),
+                              },
+                            }
+                          )
+                        : bucket.coverage_recommendation === 'covered'
+                        ? i18n.translate(
+                            'xpack.securitySolution.threatIntelligence.app.techniqueCoveredTooltip',
+                            {
+                              defaultMessage:
+                                'Covered by {count, plural, one {# enabled rule} other {# enabled rules}}',
+                              values: { count: bucket.matching_rule_count },
+                            }
+                          )
+                        : i18n.translate(
+                            'xpack.securitySolution.threatIntelligence.app.techniqueUncoveredTooltip',
+                            {
+                              defaultMessage:
+                                'No matching Detection Engine rule — consider creating coverage',
+                            }
+                          )
+                    }
+                  >
+                    <span>{coverageBadge(bucket)}</span>
+                  </EuiToolTip>
+                </EuiFlexItem>
               </EuiFlexGroup>
-              <EuiProgress value={bucket.report_count} max={max || 1} size="xs" color="primary" />
             </div>
           ))}
         </div>
@@ -703,17 +766,11 @@ const ThreatRadar: React.FC<{ buckets: DashboardOverviewResponse['by_category'] 
   });
 
   return (
-    <EuiPanel hasBorder paddingSize="m">
+    <EuiPanel hasBorder paddingSize="m" style={overviewChartPanelStyle}>
       <PanelHeader
         title={i18n.translate('xpack.securitySolution.threatIntelligence.app.threatRadarTitle', {
           defaultMessage: 'Threat radar',
         })}
-        description={i18n.translate(
-          'xpack.securitySolution.threatIntelligence.app.threatRadarDescription',
-          {
-            defaultMessage: 'Category magnitude across the current filter set',
-          }
-        )}
       />
       {radarBuckets.length === 0 ? (
         <EuiText size="s" color="subdued">
@@ -825,17 +882,11 @@ const ActivityTimeline: React.FC<{
   }, [buckets]);
 
   return (
-    <EuiPanel hasBorder paddingSize="m">
+    <EuiPanel hasBorder paddingSize="m" style={overviewChartPanelStyle}>
       <PanelHeader
         title={i18n.translate('xpack.securitySolution.threatIntelligence.app.timelineTitle', {
           defaultMessage: 'Activity timeline',
         })}
-        description={i18n.translate(
-          'xpack.securitySolution.threatIntelligence.app.timelineDescription',
-          {
-            defaultMessage: 'Articles per bucket, plotted by severity',
-          }
-        )}
       />
       {buckets.length === 0 ? (
         <EuiText size="s" color="subdued">
@@ -844,7 +895,16 @@ const ActivityTimeline: React.FC<{
           })}
         </EuiText>
       ) : (
-        <div style={{ display: 'flex', gap: 12 }}>
+        <div
+          style={{
+            display: 'flex',
+            gap: 12,
+            flex: 1,
+            alignItems: 'stretch',
+            minHeight: OVERVIEW_PANEL_CONTENT_HEIGHT,
+            height: OVERVIEW_PANEL_CONTENT_HEIGHT,
+          }}
+        >
           <div
             style={{
               display: 'flex',
@@ -852,7 +912,8 @@ const ActivityTimeline: React.FC<{
               justifyContent: 'space-between',
               fontSize: 10,
               color: euiTheme.colors.darkShade,
-              height: 140,
+              height: '100%',
+              minHeight: OVERVIEW_PANEL_CONTENT_HEIGHT - 24,
               paddingTop: 4,
               paddingBottom: 4,
             }}
@@ -861,7 +922,14 @@ const ActivityTimeline: React.FC<{
               <span key={`label-${severity}`}>{severity.toUpperCase()}</span>
             ))}
           </div>
-          <div style={{ flex: 1, position: 'relative', height: 140 }}>
+          <div
+            style={{
+              flex: 1,
+              position: 'relative',
+              height: '100%',
+              minHeight: OVERVIEW_PANEL_CONTENT_HEIGHT - 24,
+            }}
+          >
             <EuiFlexGroup gutterSize="xs" responsive={false} style={{ height: '100%' }}>
               {buckets.map((bucket) => (
                 <EuiFlexItem key={bucket.bucket}>
@@ -940,23 +1008,39 @@ const EnvironmentImpact: React.FC<{
   impact: DashboardOverviewResponse['environment_impact'];
   totalReports: number;
   onHighlightReport: (reportId: string) => void;
-}> = ({ impact, totalReports, onHighlightReport }) => {
+}> = ({ impact, onHighlightReport }) => {
   const { euiTheme } = useEuiTheme();
-  const { total_hits, layer_1_hits, layer_2_hits, reports_with_hits, top_reports } = impact;
+  const { total_hits, layer_1_hits, layer_2_hits, top_reports } = impact;
   const layer1Share = total_hits > 0 ? layer_1_hits / total_hits : 0;
   const layer2Share = total_hits > 0 ? layer_2_hits / total_hits : 0;
+  const maxReportHits = Math.max(...top_reports.map((r) => r.environment_hits_total), 1);
+
+  // Prototype: Layer 1 = pink/magenta, Layer 2 = blue
+  const layer1Color = euiTheme.colors.accent;
+  const layer2Color = euiTheme.colors.primary;
+
+  const hitCountBadgeCss = css({
+    backgroundColor: euiTheme.colors.backgroundBaseDanger,
+    color: euiTheme.colors.danger,
+    minWidth: 28,
+    justifyContent: 'center',
+  });
 
   return (
-    <EuiPanel hasBorder paddingSize="m">
+    <EuiPanel
+      hasBorder
+      paddingSize="m"
+      style={overviewChartPanelStyle}
+      data-test-subj="threatIntelDetectionEngineAttributions"
+    >
       <PanelHeader
         title={i18n.translate('xpack.securitySolution.threatIntelligence.app.envImpactTitle', {
-          defaultMessage: 'Environment impact',
+          defaultMessage: 'Detection Engine attributions',
         })}
         description={i18n.translate(
           'xpack.securitySolution.threatIntelligence.app.envImpactDescription',
           {
-            defaultMessage:
-              'Detection Engine alerts attributed to ingested reports via IOC indicator match (Layer 1) or overlapping ATT&CK techniques (Layer 2). Counts refresh hourly.',
+            defaultMessage: 'Detection Engine alerts attributed to ingested reports',
           }
         )}
       />
@@ -969,38 +1053,12 @@ const EnvironmentImpact: React.FC<{
         </EuiText>
       ) : (
         <>
-          <EuiFlexGroup gutterSize="m" responsive={false} alignItems="flexEnd">
-            <EuiFlexItem grow={2}>
-              <EuiStat
-                title={total_hits.toLocaleString()}
-                titleSize="m"
-                description={i18n.translate(
-                  'xpack.securitySolution.threatIntelligence.app.envHits',
-                  {
-                    defaultMessage: 'Correlated alert hits',
-                  }
-                )}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={3}>
-              <EuiText size="xs" color="subdued">
-                <FormattedMessage
-                  id="xpack.securitySolution.threatIntelligence.app.envReportsWithHits"
-                  defaultMessage="{reportsWithHits, plural, one {# report} other {# reports}} with hits of {totalReports, plural, one {# report} other {# reports}} in scope"
-                  values={{ reportsWithHits: reports_with_hits, totalReports }}
-                />
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiSpacer size="m" />
-          <EuiText size="xs">
-            <strong>
-              {i18n.translate('xpack.securitySolution.threatIntelligence.app.envLayerBreakdown', {
-                defaultMessage: 'Hit mix by detection layer',
-              })}
-            </strong>
+          <EuiText>
+            <h2 style={{ margin: 0, fontSize: euiTheme.size.xl, lineHeight: 1.2 }}>
+              {total_hits.toLocaleString()}
+            </h2>
           </EuiText>
-          <EuiSpacer size="xs" />
+          <EuiSpacer size="s" />
           <div
             aria-hidden
             style={{
@@ -1012,20 +1070,10 @@ const EnvironmentImpact: React.FC<{
             }}
           >
             {layer_1_hits > 0 ? (
-              <div
-                style={{
-                  width: `${layer1Share * 100}%`,
-                  background: euiTheme.colors.primary,
-                }}
-              />
+              <div style={{ width: `${layer1Share * 100}%`, background: layer1Color }} />
             ) : null}
             {layer_2_hits > 0 ? (
-              <div
-                style={{
-                  width: `${layer2Share * 100}%`,
-                  background: euiTheme.colors.accent,
-                }}
-              />
+              <div style={{ width: `${layer2Share * 100}%`, background: layer2Color }} />
             ) : null}
           </div>
           <EuiSpacer size="xs" />
@@ -1037,8 +1085,8 @@ const EnvironmentImpact: React.FC<{
                     style={{
                       width: 8,
                       height: 8,
-                      borderRadius: 2,
-                      background: euiTheme.colors.primary,
+                      borderRadius: '50%',
+                      background: layer1Color,
                       display: 'inline-block',
                     }}
                   />
@@ -1046,8 +1094,7 @@ const EnvironmentImpact: React.FC<{
                 <EuiFlexItem grow={false}>
                   <EuiText size="xs" color="subdued">
                     {i18n.translate('xpack.securitySolution.threatIntelligence.app.envL1Legend', {
-                      defaultMessage: 'Layer 1 — IOC match ({count, number})',
-                      values: { count: layer_1_hits },
+                      defaultMessage: 'Layer 1 — IOC match',
                     })}
                   </EuiText>
                 </EuiFlexItem>
@@ -1060,8 +1107,8 @@ const EnvironmentImpact: React.FC<{
                     style={{
                       width: 8,
                       height: 8,
-                      borderRadius: 2,
-                      background: euiTheme.colors.accent,
+                      borderRadius: '50%',
+                      background: layer2Color,
                       display: 'inline-block',
                     }}
                   />
@@ -1069,8 +1116,7 @@ const EnvironmentImpact: React.FC<{
                 <EuiFlexItem grow={false}>
                   <EuiText size="xs" color="subdued">
                     {i18n.translate('xpack.securitySolution.threatIntelligence.app.envL2Legend', {
-                      defaultMessage: 'Layer 2 — ATT&CK overlap ({count, number})',
-                      values: { count: layer_2_hits },
+                      defaultMessage: 'Layer 2 — ATT&CK overlap',
                     })}
                   </EuiText>
                 </EuiFlexItem>
@@ -1079,7 +1125,7 @@ const EnvironmentImpact: React.FC<{
           </EuiFlexGroup>
           {top_reports.length > 0 ? (
             <>
-              <EuiHorizontalRule margin="m" />
+              <EuiSpacer size="m" />
               <EuiTitle size="xxs">
                 <h4>
                   {i18n.translate('xpack.securitySolution.threatIntelligence.app.envTopReports', {
@@ -1088,60 +1134,70 @@ const EnvironmentImpact: React.FC<{
                 </h4>
               </EuiTitle>
               <EuiSpacer size="s" />
-              <div
-                style={{
-                  maxHeight: OVERVIEW_PANEL_CONTENT_HEIGHT - 120,
-                  overflowY: 'auto',
-                }}
-              >
-                {top_reports.map((report) => (
-                  <div key={report.report_id} style={{ marginBottom: 10 }}>
+              <div style={{ maxHeight: OVERVIEW_PANEL_CONTENT_HEIGHT - 140, overflowY: 'auto' }}>
+                {top_reports.map((report, index) => (
+                  <div key={report.report_id}>
+                    {index > 0 ? <EuiHorizontalRule margin="s" /> : null}
                     <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
                       <EuiFlexItem>
                         <EuiLink
+                          color="text"
                           onClick={() => onHighlightReport(report.report_id)}
                           data-test-subj={`threatIntelEnvImpactReport-${report.report_id}`}
                         >
-                          <span
-                            style={{
-                              display: '-webkit-box',
-                              WebkitLineClamp: 2,
-                              WebkitBoxOrient: 'vertical',
-                              overflow: 'hidden',
-                            }}
-                          >
-                            {report.title}
-                          </span>
+                          <EuiText size="s">
+                            <span
+                              style={{
+                                display: '-webkit-box',
+                                WebkitLineClamp: 1,
+                                WebkitBoxOrient: 'vertical',
+                                overflow: 'hidden',
+                              }}
+                            >
+                              {report.title}
+                            </span>
+                          </EuiText>
                         </EuiLink>
+                        <EuiFlexGroup gutterSize="xs" responsive={false} wrap>
+                          {report.layer_1_hits > 0 ? (
+                            <EuiFlexItem grow={false}>
+                              <EuiBadge color="hollow">
+                                {i18n.translate(
+                                  'xpack.securitySolution.threatIntelligence.app.envLayer1ShortBadge',
+                                  { defaultMessage: 'L1' }
+                                )}
+                              </EuiBadge>
+                            </EuiFlexItem>
+                          ) : null}
+                          {report.layer_2_hits > 0 ? (
+                            <EuiFlexItem grow={false}>
+                              <EuiBadge color="hollow">
+                                {i18n.translate(
+                                  'xpack.securitySolution.threatIntelligence.app.envLayer2ShortBadge',
+                                  { defaultMessage: 'L2' }
+                                )}
+                              </EuiBadge>
+                            </EuiFlexItem>
+                          ) : null}
+                        </EuiFlexGroup>
+                        <div css={css({ marginTop: 4 })}>
+                          <EuiProgress
+                            value={report.environment_hits_total}
+                            max={maxReportHits}
+                            size="xs"
+                            color="accent"
+                          />
+                        </div>
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
-                        <EuiBadge color="hollow">
+                        <EuiBadge css={hitCountBadgeCss}>
                           {report.environment_hits_total.toLocaleString()}
                         </EuiBadge>
                       </EuiFlexItem>
                     </EuiFlexGroup>
-                    {(report.layer_1_hits > 0 || report.layer_2_hits > 0) && (
-                      <EuiText size="xs" color="subdued">
-                        {i18n.translate(
-                          'xpack.securitySolution.threatIntelligence.app.envReportLayerSplit',
-                          {
-                            defaultMessage: 'L1 {layer1} · L2 {layer2}',
-                            values: {
-                              layer1: report.layer_1_hits.toLocaleString(),
-                              layer2: report.layer_2_hits.toLocaleString(),
-                            },
-                          }
-                        )}
-                      </EuiText>
-                    )}
                   </div>
                 ))}
               </div>
-              <EuiText size="xs" color="subdued">
-                {i18n.translate('xpack.securitySolution.threatIntelligence.app.envTopReportsHint', {
-                  defaultMessage: 'Select a report to highlight it in the article feed above.',
-                })}
-              </EuiText>
             </>
           ) : null}
         </>

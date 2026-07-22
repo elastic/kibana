@@ -17,7 +17,7 @@ import { links as attackDiscoveryLinks } from '../../attack_discovery/links';
 import { links as assetInventoryLinks } from '../../asset_inventory/links';
 import { siemReadinessLinks } from '../../siem_readiness/links';
 import type { AppLinkItems } from '../../common/links/types';
-import { indicatorsLinks } from '../../threat_intelligence/links';
+import { indicatorsLinks, intelligenceHubLinks } from '../../threat_intelligence/links';
 import { alertDetectionsLinks, alertsLink, alertSummaryLink } from '../../detections/links';
 import { links as rulesLinks } from '../../rules/links';
 import { links as siemMigrationsLinks } from '../../siem_migrations/links';
@@ -41,6 +41,7 @@ export const appLinks: AppLinkItems = Object.freeze([
   configurationsLinks,
   timelinesLinks,
   indicatorsLinks,
+  intelligenceHubLinks,
   exploreLinks,
   entityAnalyticsLinks,
   assetInventoryLinks,
@@ -87,6 +88,7 @@ export const getFilteredLinks = async (
     filteredConfigurationsLinks,
     timelinesLinks,
     indicatorsLinks,
+    intelligenceHubLinks,
     exploreLinks,
     experimentalFeatures.entityAnalyticsNewHomePageEnabled
       ? entityAnalyticsV2Links

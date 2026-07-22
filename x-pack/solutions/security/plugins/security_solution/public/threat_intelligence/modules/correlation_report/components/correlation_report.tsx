@@ -530,16 +530,22 @@ const LeadCard: React.FC<{
                 const label = candidateLabels?.[id];
                 const chipText = label !== undefined ? `${label} ${vendor ?? id}` : vendor ?? id;
                 return url ? (
-                  <EuiBadge
-                    key={id}
-                    href={url}
-                    target="_blank"
-                    color="hollow"
-                    onClick={(event) => onBrowsableReportUrlClick(event, url)}
-                    onClickAriaLabel={chipText}
-                  >
-                    {chipText}
-                  </EuiBadge>
+                  url.startsWith('data:') ? (
+                    <EuiBadge
+                      key={id}
+                      color="hollow"
+                      onClick={(event: React.MouseEvent) => {
+                        onBrowsableReportUrlClick(event, url);
+                      }}
+                      onClickAriaLabel={chipText}
+                    >
+                      {chipText}
+                    </EuiBadge>
+                  ) : (
+                    <EuiBadge key={id} href={url} target="_blank" color="hollow">
+                      {chipText}
+                    </EuiBadge>
+                  )
                 ) : (
                   <EuiBadge key={id} color="hollow">
                     {chipText}

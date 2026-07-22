@@ -23,10 +23,12 @@ import { registerHuntBehaviorRoute } from './hunt_behavior';
 import { registerHuntForThreatRoute } from './hunt_for_threat';
 import { registerHuntOrchestratorRoute } from './hunt_orchestrator';
 import { registerHuntFindingsRoute } from './hunt_findings';
+import { registerHuntFindingDeployRoute } from './hunt_finding_deploy';
 import { registerCreateThreatReportRoute } from './create_threat_report';
 import { registerSavedViewsRoutes } from './saved_views';
 import { registerFindThreatReportsRoute } from './find_threat_reports';
 import { registerSubscriptionRoutes } from './subscriptions';
+import { registerListSourcesRoute } from './list_sources';
 import { registerSearchByAnchorsRoute } from './search_by_anchors';
 import { registerSearchByDiamondRoute } from './search_by_diamond';
 import { registerCorrelateThreatRoute } from './correlate_threat';
@@ -74,6 +76,7 @@ export const registerRoutes = (deps: RouteRegistrationDeps): void => {
   registerHuntForThreatRoute(deps);
   registerHuntOrchestratorRoute(deps);
   registerHuntFindingsRoute(deps);
+  registerHuntFindingDeployRoute(deps);
   registerCoverageGapRoute(deps);
   registerGeneralizeFromTelemetryRoute(deps);
   registerExtractIocsRoute(deps);
@@ -92,4 +95,5 @@ export const registerRoutes = (deps: RouteRegistrationDeps): void => {
   registerDashboardOverviewRoute(deps);
   registerSavedViewsRoutes(deps);
   registerFlyoutInsightsRoute(deps);
+  registerListSourcesRoute(deps);
 };

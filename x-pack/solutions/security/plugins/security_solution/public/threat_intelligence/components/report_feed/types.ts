@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { SeverityLevel, ThreatCategory } from '../../../../common/threat_intelligence/hub';
+import type {
+  SeverityLevel,
+  ThreatCategory,
+  ThreatRegion,
+} from '../../../../common/threat_intelligence/hub';
 
 /**
  * Normalized report row for the shared card grid (Intelligence Hub +
@@ -20,6 +24,9 @@ export interface ThreatReportFeedItem {
   /** ISO-8601 publish / ingest time for relative timestamps. */
   publishedAt?: string;
   categories: ThreatCategory[];
+  regions?: ThreatRegion[];
+  /** Truncated report body for the detail flyout. */
+  bodyText?: string;
   environmentHitsTotal?: number;
   techniques?: string[];
   iocCount?: number;

@@ -5,16 +5,14 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 import {
-  EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
   EuiListGroup,
   EuiListGroupItem,
   EuiPanel,
@@ -25,13 +23,15 @@ import {
 import type { DashboardLatestAdvisory } from '../../../../../common/threat_intelligence/hub';
 import { MarkdownRenderer } from '../../../../common/components/markdown_editor';
 
-export const ExecutiveAdvisoryPanel: React.FC<{
+const ExecutiveAdvisoryPanelComponent: React.FC<{
   advisory?: DashboardLatestAdvisory;
   isGenerating: boolean;
   onGenerateSummary: () => void;
   onHighlightReport: (reportId: string) => void;
   onFocusSourceReports: () => void;
 }> = ({ advisory, isGenerating, onGenerateSummary, onHighlightReport, onFocusSourceReports }) => {
+  const [summaryExpanded, setSummaryExpanded] = useState(false);
+
   const handleFirstSourceReport = useCallback(() => {
     const firstId = advisory?.report_ids[0];
     if (firstId) {
@@ -42,9 +42,14 @@ export const ExecutiveAdvisoryPanel: React.FC<{
 
   return (
     <EuiPanel hasBorder paddingSize="m" data-test-subj="threatIntelExecutiveAdvisory">
-      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
+      <EuiFlexGroup
+        alignItems="flexStart"
+        justifyContent="spaceBetween"
+        gutterSize="m"
+        responsive={false}
+      >
         <EuiFlexItem>
-          <EuiTitle size="s">
+          <EuiTitle size="xs">
             <h2>
               {i18n.translate(
                 'xpack.securitySolution.threatIntelligence.app.executiveAdvisoryTitle',
@@ -52,6 +57,7 @@ export const ExecutiveAdvisoryPanel: React.FC<{
               )}
             </h2>
           </EuiTitle>
+          <EuiSpacer size="xs" />
           <EuiText size="xs" color="subdued">
             {i18n.translate(
               'xpack.securitySolution.threatIntelligence.app.executiveAdvisoryDescription',
@@ -63,7 +69,8 @@ export const ExecutiveAdvisoryPanel: React.FC<{
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton
+          <EuiButtonEmpty
+            flush="right"
             size="s"
             iconType="sparkles"
             onClick={onGenerateSummary}
@@ -79,23 +86,28 @@ export const ExecutiveAdvisoryPanel: React.FC<{
                   'xpack.securitySolution.threatIntelligence.app.generateAdvisoryBtn',
                   { defaultMessage: 'Generate summary' }
                 )}
-          </EuiButton>
+          </EuiButtonEmpty>
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      <EuiHorizontalRule margin="m" />
-
       {!advisory ? (
-        <EuiText size="s" color="subdued">
-          {i18n.translate('xpack.securitySolution.threatIntelligence.app.executiveAdvisoryEmpty', {
-            defaultMessage:
-              'No executive summary yet. Generate one to see a narrative and recommended actions for the reports in this view.',
-          })}
-        </EuiText>
+        <>
+          <EuiSpacer size="m" />
+          <EuiText size="s" color="subdued">
+            {i18n.translate(
+              'xpack.securitySolution.threatIntelligence.app.executiveAdvisoryEmpty',
+              {
+                defaultMessage:
+                  'No executive summary yet. Generate one to see a narrative and recommended actions for the reports in this view.',
+              }
+            )}
+          </EuiText>
+        </>
       ) : (
         <>
           {advisory.stale ? (
             <>
+              <EuiSpacer size="m" />
               <EuiCallOut
                 announceOnMount
                 size="s"
@@ -114,38 +126,62 @@ export const ExecutiveAdvisoryPanel: React.FC<{
                   }
                 )}
               </EuiCallOut>
-              <EuiSpacer size="m" />
-            </>
-          ) : null}
-
-          <EuiTitle size="xs">
-            <h3>{advisory.theme_title}</h3>
-          </EuiTitle>
-          <EuiSpacer size="s" />
-          <MarkdownRenderer textSize="s">{advisory.narrative_markdown}</MarkdownRenderer>
-
-          {advisory.recommended_actions.length > 0 ? (
-            <>
-              <EuiSpacer size="m" />
-              <EuiText size="xs">
-                <strong>
-                  {i18n.translate(
-                    'xpack.securitySolution.threatIntelligence.app.executiveAdvisoryActionsTitle',
-                    { defaultMessage: 'What you should do this week' }
-                  )}
-                </strong>
-              </EuiText>
-              <EuiSpacer size="s" />
-              <EuiListGroup bordered={false} maxWidth={false} wrapText>
-                {advisory.recommended_actions.map((action) => (
-                  <EuiListGroupItem key={action} label={action} />
-                ))}
-              </EuiListGroup>
             </>
           ) : null}
 
           <EuiSpacer size="m" />
-          <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false} wrap>
+          <EuiTitle size="xs">
+            <h3>{advisory.theme_title}</h3>
+          </EuiTitle>
+
+          <EuiSpacer size="s" />
+          <EuiButtonEmpty
+            size="xs"
+            flush="left"
+            iconType={summaryExpanded ? 'arrowDown' : 'arrowRight'}
+            onClick={() => setSummaryExpanded((expanded) => !expanded)}
+            data-test-subj="threatIntelExecutiveAdvisoryToggle"
+          >
+            {summaryExpanded
+              ? i18n.translate(
+                  'xpack.securitySolution.threatIntelligence.app.executiveAdvisoryHideFull',
+                  { defaultMessage: 'Hide full summary' }
+                )
+              : i18n.translate(
+                  'xpack.securitySolution.threatIntelligence.app.executiveAdvisoryReadFull',
+                  { defaultMessage: 'Read full summary' }
+                )}
+          </EuiButtonEmpty>
+
+          {summaryExpanded ? (
+            <>
+              <EuiSpacer size="m" />
+              <MarkdownRenderer textSize="s">{advisory.narrative_markdown}</MarkdownRenderer>
+
+              {advisory.recommended_actions.length > 0 ? (
+                <>
+                  <EuiSpacer size="m" />
+                  <EuiText size="xs">
+                    <strong>
+                      {i18n.translate(
+                        'xpack.securitySolution.threatIntelligence.app.executiveAdvisoryActionsTitle',
+                        { defaultMessage: 'What you should do this week' }
+                      )}
+                    </strong>
+                  </EuiText>
+                  <EuiSpacer size="s" />
+                  <EuiListGroup bordered={false} maxWidth={false} wrapText>
+                    {advisory.recommended_actions.map((action) => (
+                      <EuiListGroupItem key={action} label={action} />
+                    ))}
+                  </EuiListGroup>
+                </>
+              ) : null}
+            </>
+          ) : null}
+
+          <EuiSpacer size="m" />
+          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
             <EuiFlexItem grow={false}>
               <EuiText size="xs" color="subdued">
                 <FormattedMessage
@@ -161,7 +197,7 @@ export const ExecutiveAdvisoryPanel: React.FC<{
             </EuiFlexItem>
             {advisory.report_ids.length > 0 ? (
               <EuiFlexItem grow={false}>
-                <EuiButtonEmpty size="xs" onClick={handleFirstSourceReport}>
+                <EuiButtonEmpty size="xs" flush="left" onClick={handleFirstSourceReport}>
                   {i18n.translate(
                     'xpack.securitySolution.threatIntelligence.app.executiveAdvisoryViewSources',
                     { defaultMessage: 'View source reports' }
@@ -175,3 +211,5 @@ export const ExecutiveAdvisoryPanel: React.FC<{
     </EuiPanel>
   );
 };
+
+export const ExecutiveAdvisoryPanel = React.memo(ExecutiveAdvisoryPanelComponent);
