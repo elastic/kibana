@@ -102,9 +102,11 @@ export function SvlCasesApiServiceProvider({ getService }: FtrProviderContext) {
       return {
         ...request,
         ...(id != null ? { id } : {}),
-        // Creation-request template ref (version optional) vs. persisted/response shape
-        // (version pinned); this helper never sets a template, so normalize to null.
-        template: null,
+        // `template` is an optional field on the case response, present only when the case was
+        // created from a template. transformNewCase keeps an absent template absent (rather than
+        // writing `template: null`) and CaseRt models it as an optional key, so a case created
+        // without a template has no `template` key at all. This helper never sets one, so it is
+        // omitted here to match the decoded response (absent, not null).
         comments: [],
         duration: null,
         severity: request.severity ?? CaseSeverity.LOW,

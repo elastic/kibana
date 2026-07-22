@@ -193,9 +193,11 @@ export const postCaseResp = (
 ): Partial<Case> => ({
   ...req,
   ...(id != null ? { id } : {}),
-  // `req.template` is a creation-request ref (version optional); the persisted/response shape
-  // pins a concrete version. None of these mocks supply a template, so normalize to null.
-  template: null,
+  // `template` is an optional field on the case response and is only present when the case was
+  // created from a template. transformNewCase deliberately keeps an absent template absent (rather
+  // than writing `template: null`), and CaseRt models it as an optional key — so a case created
+  // without a template has no `template` key at all. None of these mocks supply one, so it is
+  // omitted here to match the decoded response (absent, not null).
   comments: [],
   duration: null,
   severity: req.severity ?? CaseSeverity.LOW,
