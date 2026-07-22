@@ -63,12 +63,9 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
       await kibanaServer.importExport.load(fixtureDirs.lensDefault);
     });
 
-    // total run time ~ 16m
-    loadTestFile(require.resolve('./drag_and_drop')); // 7m 40s
-    loadTestFile(require.resolve('./geo_field')); // 26s
-    loadTestFile(require.resolve('./formula')); // 5m 52s
-    loadTestFile(require.resolve('./heatmap')); // 51s
-    loadTestFile(require.resolve('./gauge')); // 1m 17s
-    loadTestFile(require.resolve('./tagcloud')); // 1m
+    // Batch 1 (geo_field, tagcloud, gauge, heatmap) migrated to Scout — see #276949.
+    // Remaining: drag_and_drop (~7m 40s) + formula (~5m 52s).
+    loadTestFile(require.resolve('./drag_and_drop'));
+    loadTestFile(require.resolve('./formula'));
   });
 };

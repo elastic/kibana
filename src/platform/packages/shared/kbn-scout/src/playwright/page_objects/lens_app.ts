@@ -193,9 +193,10 @@ export class LensApp {
     field?: string;
     palette?: { mode: 'legacy' | 'colorMapping'; id: string };
     keepOpen?: boolean;
+    isPreviousIncompatible?: boolean;
   }) {
     await this.openDimensionSelector(opts.dimension);
-    await this.selectOperation(opts.operation);
+    await this.selectOperation(opts.operation, opts.isPreviousIncompatible);
     if (opts.field) {
       await this.selectField(opts.field);
     }
@@ -213,8 +214,20 @@ export class LensApp {
 
   /** Closes the open dimension editor flyout. */
   async closeDimensionEditor() {
-    await this.closeDimensionEditorButton.click();
-    await this.closeDimensionEditorButton.waitFor({ state: 'hidden' });
+    const closeButton = this.closeDimensionEditorButton;
+    if (!(await closeButton.isVisible())) {
+      return;
+    }
+    // Suggested-value dimension panels remount while opening; tolerate a detached
+    // close control only when the flyout already finished closing.
+    try {
+      await closeButton.click({ timeout: 15_000 });
+    } catch (error) {
+      if (await closeButton.isVisible()) {
+        throw error;
+      }
+    }
+    await closeButton.waitFor({ state: 'hidden', timeout: 15_000 });
   }
 
   /** Removes all dimensions from the given panel, polling until none remain. */
@@ -280,12 +293,46 @@ export class LensApp {
   }
 
   async setTermsNumberOfValues(value: number) {
-    const input = this.page.locator('input[data-test-subj="indexPattern-terms-values"]');
+    // ValuesInput debounces parent updates; Playwright DOM fills often never reach React.
+    // Call ValuesInput's numeric onChange via the fiber tree so params.size commits.
+    const input = this.page.locator(
+      'input[data-test-subj="indexPattern-terms-values"][type="number"]'
+    );
     await input.waitFor({ state: 'visible' });
+    await input.scrollIntoViewIfNeeded();
     await input.click();
-    await input.fill(`${value}`);
-    await this.page.keyboard.press('Tab');
-    await expect(input).toHaveValue(`${value}`);
+    await input.evaluate((el, nextValue) => {
+      const inputEl = el as HTMLInputElement & Record<string, unknown>;
+      const fiberKey = Object.keys(inputEl).find((key) => key.startsWith('__reactFiber$'));
+      if (!fiberKey) {
+        throw new Error('React fiber not found on indexPattern-terms-values');
+      }
+      interface FiberNode {
+        memoizedProps?: { value?: unknown; onChange?: (v: number) => void };
+        return?: FiberNode | null;
+      }
+      let fiber: FiberNode | null | undefined = inputEl[fiberKey] as FiberNode;
+      while (fiber) {
+        const props = fiber.memoizedProps;
+        if (props && typeof props.value === 'number' && typeof props.onChange === 'function') {
+          props.onChange(Number(nextValue));
+          return;
+        }
+        fiber = fiber.return;
+      }
+      throw new Error('ValuesInput onChange(number) not found in React fiber tree');
+    }, `${value}`);
+    // Wait for Lens to commit size into the dimension trigger label (not an assertion).
+    await this.page.waitForFunction(
+      (expected) => {
+        const triggers = document.querySelectorAll('[data-test-subj="lns-dimensionTrigger"]');
+        return Array.from(triggers).some((el) =>
+          (el.textContent ?? '').replace(/\u200b/g, '').includes(`Top ${expected}`)
+        );
+      },
+      value,
+      { timeout: 5_000 }
+    );
   }
 
   async setTableDynamicColoring(coloringType: 'none' | 'cell' | 'text' | 'badge') {
@@ -458,7 +505,7 @@ export class LensApp {
   }
 
   /** Returns visible labels for all dimension triggers inside a dimension panel. */
-  private async getDimensionTriggersTexts(dimension: string): Promise<string[]> {
+  async getDimensionTriggersTexts(dimension: string): Promise<string[]> {
     const triggersLocator = this.page.testSubj.locator(`${dimension} > lns-dimensionTrigger`);
     await expect.poll(async () => await triggersLocator.count()).toBeGreaterThan(0);
 
@@ -488,8 +535,18 @@ export class LensApp {
   }
 
   private async openStyleSettingsFlyout() {
+    const closeButton = this.closeDimensionEditorButton;
+    if (await closeButton.isVisible()) {
+      await this.closeDimensionEditor();
+    }
+
     await this.page.locator('button[data-test-subj="style"]').click();
     await this.page.locator('#lnsDimensionContainerTitle').waitFor({ state: 'visible' });
+  }
+
+  /** Opens the Lens style settings flyout (public alias for gauge/heatmap style edits). */
+  async openStyleSettings() {
+    await this.openStyleSettingsFlyout();
   }
 
   /** Reads the selected donut hole size from the style settings flyout. */
@@ -578,6 +635,501 @@ export class LensApp {
       state: 'visible',
       timeout: 10_000,
     });
+  }
+
+  async closeFlyoutWithBackButton() {
+    const backButton = this.page.testSubj.locator('lns-indexPattern-dimensionContainerBack');
+    if (await backButton.isVisible()) {
+      await backButton.click();
+      await backButton.waitFor({ state: 'hidden' });
+    }
+  }
+
+  /** Alias matching FTR `openPalettePanel`. */
+  async openPalettePanel() {
+    await this.openPalettePanelFlyout();
+  }
+
+  /** Alias matching FTR `closePalettePanel`. */
+  async closePalettePanel() {
+    await this.closePalettePanelFlyout();
+  }
+
+  /**
+   * Selects a named dynamic-coloring palette (e.g. `status`) from the open palette panel.
+   * Distinct from `setPalette`, which toggles legacy vs color-mapping pickers.
+   */
+  async changePaletteTo(paletteName: string) {
+    await this.page.testSubj.click('lnsPalettePanel_dynamicColoring_palette_picker');
+    await this.page.testSubj.click(`${paletteName}-palette`);
+  }
+
+  async setGaugeShape(value: string) {
+    await this.openStyleSettingsFlyout();
+    await this.page.components.comboBox('lnsToolbarGaugeAngleType').setSelectedOptions([value]);
+    await this.closeFlyoutWithBackButton();
+  }
+
+  async setGaugeOrientation(value: 'horizontal' | 'vertical') {
+    await this.openStyleSettingsFlyout();
+    await this.page.testSubj.click(`lns_gaugeOrientation_${value}Bullet`);
+    await this.closeFlyoutWithBackButton();
+  }
+
+  /** Sets the gauge minor-label mode (`none` / `custom` / …) in an open style flyout. */
+  async setGaugeMinorLabelMode(value: string) {
+    await this.page.testSubj.locator('lnsToolbarGaugeLabelMinor-select').selectOption(value);
+  }
+
+  /** Selects a dynamic-coloring palette range type (`number` or `percent`). */
+  async setPaletteRangeType(rangeType: 'number' | 'percent') {
+    await this.page.testSubj.click(`lnsPalettePanel_dynamicColoring_rangeType_groups_${rangeType}`);
+  }
+
+  /** Sets heatmap/XY axis label orientation from style settings (`horizontal` / `vertical` / `angled`). */
+  async setAxisLabelOrientation(orientation: 'horizontal' | 'vertical' | 'angled') {
+    await this.page.testSubj.click(`axis_orientation_${orientation}`);
+  }
+
+  async setInputValue(testSubj: string, value: string) {
+    const input = this.page.locator(`input[data-test-subj="${testSubj}"]`);
+    await input.waitFor({ state: 'visible' });
+    await input.scrollIntoViewIfNeeded();
+    // fill() clears first (avoids "07747" from incomplete selection on number inputs).
+    await input.fill(value);
+    // Controlled EuiFieldNumber often ignores DOM-only fills — also invoke React onChange
+    // with an explicit value (React hijacks input.value so the event must carry it).
+    await input.evaluate((el, nextValue) => {
+      const inputEl = el as HTMLInputElement & Record<string, unknown>;
+      const propsKey = Object.keys(inputEl).find((key) => key.startsWith('__reactProps$'));
+      if (!propsKey) {
+        return;
+      }
+      const props = inputEl[propsKey] as {
+        onChange?: (e: { target: { value: string }; currentTarget: { value: string } }) => void;
+      };
+      props.onChange?.({ target: { value: nextValue }, currentTarget: { value: nextValue } });
+    }, value);
+    // Sync until React controlled value matches (readiness wait — assertions stay in specs).
+    await this.page.waitForFunction(
+      ({ subj, expected }) => {
+        const el = document.querySelector(
+          `input[data-test-subj="${subj}"]`
+        ) as HTMLInputElement | null;
+        return el?.value === expected;
+      },
+      { subj: testSubj, expected: value },
+      { timeout: 5_000 }
+    );
+    await input.press('Tab');
+    // Blur completed — callers must poll a UI side effect (chart debug, dimension label)
+    // before closing flyouts; useDebouncedValue (~256ms) has no DOM readiness hook here.
+    await this.page.waitForFunction(
+      (subj) => {
+        const el = document.querySelector(`input[data-test-subj="${subj}"]`);
+        return el != null && document.activeElement !== el;
+      },
+      testSubj,
+      { timeout: 5_000 }
+    );
+  }
+
+  async setEuiSwitch(testSubj: string, checked: boolean) {
+    const switchLocator = this.page.testSubj.locator(testSubj);
+    await switchLocator.waitFor({ state: 'visible' });
+    const isChecked = (await switchLocator.getAttribute('aria-checked')) === 'true';
+    if (isChecked !== checked) {
+      await switchLocator.click();
+    }
+  }
+
+  async closeSuggestionPanel() {
+    const toggle = this.page.testSubj.locator('lensSuggestionsPanelToggleButton');
+    if (!(await toggle.isVisible())) {
+      return;
+    }
+    // Panel can remain in the DOM when collapsed; prefer aria-expanded when present.
+    const expanded = await toggle.getAttribute('aria-expanded');
+    if (expanded === 'false') {
+      return;
+    }
+    await toggle.click();
+    if (expanded === 'true') {
+      await this.page.waitForFunction(
+        () => {
+          const el = document.querySelector('[data-test-subj="lensSuggestionsPanelToggleButton"]');
+          return el?.getAttribute('aria-expanded') === 'false';
+        },
+        undefined,
+        { timeout: 5_000 }
+      );
+    }
+  }
+
+  /**
+   * Changes the data view in the Lens data panel.
+   */
+  async switchDataPanelIndexPattern(dataViewTitle: string) {
+    const switchLink = this.page.testSubj.locator('lns-dataView-switch-link');
+    const currentValue = (await switchLink.innerText()).trim();
+    if (currentValue === dataViewTitle) {
+      return;
+    }
+    await switchLink.click();
+    const switcher = this.page.testSubj.locator('indexPattern-switcher');
+    await switcher.waitFor({ state: 'visible' });
+    await this.page.testSubj.typeWithDelay('indexPattern-switcher--input', dataViewTitle);
+    const matching = switcher.locator(`[data-test-subj="dataView-${dataViewTitle}"]`);
+    if (await matching.isVisible()) {
+      await matching.click();
+    } else {
+      await this.page.testSubj.locator('explore-matching-indices-button').click();
+    }
+    await switcher.waitFor({ state: 'hidden' });
+  }
+
+  getFieldListPanelFieldLocator(field: string) {
+    // Prefer the encoded unified-field-list id used by existing Scout DnD, then fall back.
+    const encoded = this.page.testSubj.locator(`lnsFieldListPanelField-___${field}___`);
+    return encoded.or(this.page.testSubj.locator(`lnsFieldListPanelField-${field}`));
+  }
+
+  /**
+   * Geo workspace drop target only mounts after dragstart on a geo field, so
+   * Playwright `dragTo` cannot resolve the target up-front. Mirror FTR
+   * `html5DragAndDrop`: dispatch dragstart, wait for the geo drop zone, drop.
+   */
+  async dragFieldToGeoFieldWorkspace(field: string) {
+    const fieldLocator = this.getFieldListPanelFieldLocator(field);
+    await fieldLocator.waitFor({ state: 'visible' });
+    const fieldTestSubj =
+      (await fieldLocator.getAttribute('data-test-subj')) ?? `lnsFieldListPanelField-${field}`;
+
+    await this.page.evaluate((fromSel: string) => {
+      interface Transfer {
+        data: Record<string, string>;
+        setData: (key: string, value: string) => void;
+        getData: (key: string) => string;
+      }
+
+      function createEvent(typeOfEvent: string) {
+        const event = document.createEvent('CustomEvent') as CustomEvent & {
+          dataTransfer: Transfer;
+        };
+        event.initCustomEvent(typeOfEvent, true, true, null);
+        event.dataTransfer = {
+          data: {},
+          setData(key: string, value: string) {
+            this.data[key] = value;
+          },
+          getData(key: string) {
+            return this.data[key];
+          },
+        };
+        return event;
+      }
+
+      const origin = document.querySelector(`[data-test-subj="${fromSel}"]`);
+      if (!origin) {
+        throw new Error(`dragFieldToGeoFieldWorkspace: origin not found for ${fromSel}`);
+      }
+      const dragStartEvent = createEvent('dragstart');
+      origin.dispatchEvent(dragStartEvent);
+      (window as unknown as { __lensGeoDragTransfer?: Transfer }).__lensGeoDragTransfer =
+        dragStartEvent.dataTransfer;
+    }, fieldTestSubj);
+
+    const dropTarget = this.page.testSubj.locator('lnsGeoFieldWorkspace');
+    await dropTarget.waitFor({ state: 'visible', timeout: 10_000 });
+
+    await this.page.evaluate(() => {
+      interface Transfer {
+        data: Record<string, string>;
+        setData: (key: string, value: string) => void;
+        getData: (key: string) => string;
+      }
+      const transfer = (window as unknown as { __lensGeoDragTransfer?: Transfer })
+        .__lensGeoDragTransfer;
+      const target = document.querySelector('[data-test-subj="lnsGeoFieldWorkspace"]');
+      if (!target || !transfer) {
+        throw new Error('dragFieldToGeoFieldWorkspace: drop target or transfer missing');
+      }
+
+      function createEvent(typeOfEvent: string) {
+        const event = document.createEvent('CustomEvent') as CustomEvent & {
+          dataTransfer: Transfer;
+        };
+        event.initCustomEvent(typeOfEvent, true, true, null);
+        event.dataTransfer = transfer!;
+        return event;
+      }
+
+      target.dispatchEvent(createEvent('dragenter'));
+      target.dispatchEvent(createEvent('dragover'));
+      target.dispatchEvent(createEvent('drop'));
+      delete (window as unknown as { __lensGeoDragTransfer?: Transfer }).__lensGeoDragTransfer;
+    });
+
+    await this.waitForLensDragDropToFinish();
+  }
+
+  async dragFieldToDimensionTrigger(field: string, dimension: string) {
+    const fieldLocator = this.getFieldListPanelFieldLocator(field);
+    const dropTarget = this.page.testSubj.locator(dimension);
+    await fieldLocator.waitFor({ state: 'visible' });
+    await dropTarget.waitFor({ state: 'visible' });
+    await fieldLocator.dragTo(dropTarget);
+    await this.waitForLensDragDropToFinish();
+  }
+
+  async dragDimensionToDimension({ from, to }: { from: string; to: string }) {
+    const fromLocator = this.page.testSubj.locator(from);
+    const toLocator = this.page.testSubj.locator(to);
+    await fromLocator.waitFor({ state: 'visible' });
+    await toLocator.waitFor({ state: 'visible' });
+    await fromLocator.dragTo(toLocator);
+    await this.waitForLensDragDropToFinish();
+  }
+
+  async reorderDimensions(dimension: string, startIndex: number, endIndex: number) {
+    // Indices are 1-based, matching FTR `reorderDimensions`.
+    const dragging = this.page.locator(
+      `[data-test-subj='${dimension}']:nth-of-type(${startIndex}) .domDraggable`
+    );
+    const dropping = this.page.locator(
+      `[data-test-subj='${dimension}']:nth-of-type(${endIndex}) [data-test-subj='lnsDragDrop-reorderableDropLayer']`
+    );
+    await dragging.waitFor({ state: 'visible' });
+    await dragging.dragTo(dropping);
+    await this.waitForLensDragDropToFinish();
+  }
+
+  /**
+   * HTML5 drag that enters a primary droppable then drops on an extra target
+   * (duplicate / swap / combine). Ports FTR `dragEnterDrop`.
+   */
+  async dragEnterDrop(dragging: string, draggedOver: string, dropTarget: string) {
+    await this.page.evaluate(
+      ([fromSel, overSel, toSel]: string[]) => {
+        if (!fromSel || !overSel || !toSel) {
+          throw new Error('dragEnterDrop: missing selector argument');
+        }
+        interface Transfer {
+          data: Record<string, string>;
+          setData: (key: string, value: string) => void;
+          getData: (key: string) => string;
+        }
+
+        function createEvent(typeOfEvent: string) {
+          const event = document.createEvent('CustomEvent') as CustomEvent & {
+            dataTransfer: Transfer;
+          };
+          event.initCustomEvent(typeOfEvent, true, true, null);
+          event.dataTransfer = {
+            data: {},
+            setData(key: string, value: string) {
+              this.data[key] = value;
+            },
+            getData(key: string) {
+              return this.data[key];
+            },
+          };
+          return event;
+        }
+
+        function dispatchEvent(element: Element, event: Event, transferData?: Transfer) {
+          if (transferData !== undefined) {
+            (event as CustomEvent & { dataTransfer: Transfer }).dataTransfer = transferData;
+          }
+          element.dispatchEvent(event);
+        }
+
+        const origin = document.querySelector(fromSel);
+        if (!origin) {
+          throw new Error(`dragEnterDrop: origin not found for ${fromSel}`);
+        }
+        const dragStartEvent = createEvent('dragstart');
+        dispatchEvent(origin, dragStartEvent);
+
+        setTimeout(() => {
+          const over = document.querySelector(overSel);
+          if (!over) {
+            throw new Error(`dragEnterDrop: draggedOver not found for ${overSel}`);
+          }
+          dispatchEvent(over, createEvent('dragenter'), dragStartEvent.dataTransfer);
+          dispatchEvent(over, createEvent('dragover'), dragStartEvent.dataTransfer);
+          setTimeout(() => {
+            const target = document.querySelector(toSel);
+            if (!target) {
+              throw new Error(`dragEnterDrop: dropTarget not found for ${toSel}`);
+            }
+            dispatchEvent(target, createEvent('drop'), dragStartEvent.dataTransfer);
+            dispatchEvent(origin, createEvent('dragend'), dragStartEvent.dataTransfer);
+          }, 50);
+        }, 50);
+      },
+      [dragging, draggedOver, dropTarget]
+    );
+    await this.waitForLensDragDropToFinish();
+  }
+
+  async dragFieldToExtraDropType(
+    field: string,
+    to: string,
+    type: 'duplicate' | 'swap' | 'combine',
+    visDataTestSubj?: string
+  ) {
+    // Match either encoded or plain field list test-subj (same as getFieldListPanelFieldLocator).
+    const from = `[data-test-subj="lnsFieldListPanelField-___${field}___"], [data-test-subj="lnsFieldListPanelField-${field}"]`;
+    await this.dragEnterDrop(
+      from,
+      `[data-test-subj="${to}"] [data-test-subj="lnsDragDrop-domDroppable"]`,
+      `[data-test-subj="${to}"] [data-test-subj="domDragDrop-dropTarget-${type}"]`
+    );
+    if (visDataTestSubj) {
+      await this.waitForVisualization(visDataTestSubj);
+    }
+  }
+
+  async dragDimensionToExtraDropType(
+    from: string,
+    to: string,
+    type: 'duplicate' | 'swap' | 'combine',
+    visDataTestSubj?: string
+  ) {
+    await this.dragEnterDrop(
+      `[data-test-subj="${from}"]`,
+      `[data-test-subj="${to}"] [data-test-subj="lnsDragDrop-domDroppable"]`,
+      `[data-test-subj="${to}"] [data-test-subj="domDragDrop-dropTarget-${type}"]`
+    );
+    if (visDataTestSubj) {
+      await this.waitForVisualization(visDataTestSubj);
+    }
+  }
+
+  async waitForLensDragDropToFinish() {
+    await this.page.locator('.domDragDrop-isActiveGroup').waitFor({ state: 'hidden' });
+  }
+
+  async dragFieldWithKeyboard(
+    fieldName: string,
+    steps = 1,
+    reverse = false,
+    metaKey?: 'shift' | 'alt' | 'ctrl'
+  ) {
+    const field = this.page.locator(
+      `[data-attr-field="${fieldName}"] [data-test-subj="lnsDragDrop-keyboardHandler"]`
+    );
+    await field.focus();
+    await this.page.keyboard.press('Enter');
+    await this.page.locator('.domDroppable--active').waitFor({ state: 'visible' });
+    for (let i = 0; i < steps; i++) {
+      await this.page.keyboard.press(reverse ? 'ArrowLeft' : 'ArrowRight');
+    }
+    if (metaKey) {
+      await this.pressMetaKey(metaKey);
+    }
+    await this.page.keyboard.press('Enter');
+    await this.waitForLensDragDropToFinish();
+  }
+
+  async dimensionKeyboardDragDrop(
+    group: string,
+    index = 0,
+    steps = 1,
+    reverse = false,
+    metaKey?: 'shift' | 'alt' | 'ctrl'
+  ) {
+    const elements = this.page.locator(
+      `[data-test-subj="${group}"] [data-test-subj="lnsDragDrop-keyboardHandler"]`
+    );
+    await expect.poll(async () => await elements.count()).toBeGreaterThan(index);
+    const handlers = await elements.all();
+    const handler = handlers[index];
+    if (!handler) {
+      throw new Error(`Keyboard drag handler not found at index ${index} in group "${group}"`);
+    }
+    await handler.focus();
+    await this.page.keyboard.press('Enter');
+    for (let i = 0; i < steps; i++) {
+      await this.page.keyboard.press(reverse ? 'ArrowLeft' : 'ArrowRight');
+    }
+    if (metaKey) {
+      await this.pressMetaKey(metaKey);
+    }
+    await this.page.keyboard.press('Enter');
+    await this.waitForLensDragDropToFinish();
+  }
+
+  async dimensionKeyboardReorder(group: string, index = 0, steps = 1, reverse = false) {
+    const elements = this.page.locator(
+      `[data-test-subj="${group}"] [data-test-subj="lnsDragDrop-keyboardHandler"]`
+    );
+    await expect.poll(async () => await elements.count()).toBeGreaterThan(index);
+    const handlers = await elements.all();
+    const handler = handlers[index];
+    if (!handler) {
+      throw new Error(`Keyboard reorder handler not found at index ${index} in group "${group}"`);
+    }
+    await handler.focus();
+    await this.page.keyboard.press('Enter');
+    for (let i = 0; i < steps; i++) {
+      await this.page.keyboard.press(reverse ? 'ArrowUp' : 'ArrowDown');
+    }
+    await this.page.keyboard.press('Enter');
+    await this.waitForLensDragDropToFinish();
+  }
+
+  private async pressMetaKey(metaKey: 'shift' | 'alt' | 'ctrl') {
+    const key = metaKey === 'shift' ? 'Shift' : metaKey === 'alt' ? 'Alt' : 'Control';
+    await this.page.keyboard.down(key);
+    await this.page.keyboard.up(key);
+  }
+
+  /**
+   * Reads `@elastic/charts` debug state after the visualization finishes rendering.
+   * Requires `enableElasticChartDebug` before navigation.
+   */
+  async getCurrentChartDebugState(visType: string): Promise<unknown> {
+    await this.waitForVisualization(visType);
+    const chart = this.page.testSubj.locator('lnsWorkspace').getByTestId(visType);
+    await chart.locator('.echChartStatus[data-ech-render-complete="true"]').waitFor({
+      state: 'attached',
+      timeout: 30_000,
+    });
+    const debugJson = await chart.locator('.echChartStatus').getAttribute('data-ech-debug-state');
+    if (!debugJson) {
+      throw new Error('Elastic charts debugState not found — enable chart debug before navigation');
+    }
+    return JSON.parse(debugJson);
+  }
+
+  async getCountOfDatatableColumns(): Promise<number> {
+    // Match FTR: count header cell content nodes (excludes the leading control column).
+    return this.page
+      .locator('[data-test-subj="lnsDataTable"] .euiDataGridHeaderCell__content')
+      .count();
+  }
+
+  async getDatatableHeaderText(index = 0): Promise<string> {
+    // Prefer content nodes — columnheader innerText can include action glyphs like ↵.
+    // Index matches getCountOfDatatableColumns (control column excluded).
+    const headers = this.page.locator(
+      '[data-test-subj="lnsDataTable"] .euiDataGridHeaderCell__content'
+    );
+    await this.page.waitForFunction(
+      ({ minCount }) =>
+        document.querySelectorAll('[data-test-subj="lnsDataTable"] .euiDataGridHeaderCell__content')
+          .length > minCount,
+      { minCount: index },
+      { timeout: 15_000 }
+    );
+    const headerContents = await headers.all();
+    const headerContent = headerContents[index];
+    if (!headerContent) {
+      throw new Error(`Datatable header not found at index ${index}`);
+    }
+    return (await headerContent.innerText()).replace(/\s+/g, ' ').trim();
   }
 
   /** Reads color-stop values and colors from the currently open palette panel. */

@@ -308,6 +308,17 @@ Scout: port as getters/actions; put `expect(...)` in specs.
 
 ## 10. Migration batches
 
+### Execution gate (mandatory)
+
+Execute **one batch at a time**. After a batch:
+
+1. Implement + run that batch’s specs until green.
+2. **Stop.** Do not start the next batch.
+3. Wait for explicit user approval that the batch is fine / not flaky (e.g. “Batch 1 looks good, continue with Batch 2”).
+4. Only then start the next batch.
+
+Do not interpret “looks good” / PR comments / silence as approval to continue — wait for a clear go-ahead naming the next batch (or “continue”).
+
 ### Batch 1: Foundation + simpler chart specs
 
 Extend fixtures/constants; extend `LensApp` / `MapsPage` with methods needed by geo/tagcloud/gauge/heatmap; **also land shared mouse/keyboard DnD primitives early** (even if unused until Batch 3) so Batch 3 is not a giant PO dump + flaky specs in one PR. Prefer splitting “foundation POs” vs “first four specs” across PRs if review size matters.

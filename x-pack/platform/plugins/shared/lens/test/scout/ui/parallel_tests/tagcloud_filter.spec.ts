@@ -1,0 +1,96 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { spaceTest, tags } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
+import {
+  createLogstashLensEditorSuiteSetup,
+  getTagCloudTexts,
+  selectTagCloudTag,
+} from '../fixtures';
+
+const EXPECTED_TAGS = ['97.220.3.248', '78.83.247.30', '226.82.228.233', '93.28.27.24', 'Other'];
+
+spaceTest.describe('Lens tag cloud filter', { tag: tags.stateful.classic }, () => {
+  const suiteSetup = createLogstashLensEditorSuiteSetup({
+    dataViewNamePrefix: 'scout-lens-tagcloud-dv',
+  });
+
+  spaceTest.beforeAll(suiteSetup.beforeAll);
+
+  spaceTest.afterAll(suiteSetup.afterAll);
+
+  spaceTest(
+    'renders tags, filters from a tag click, and narrows the cloud',
+    async ({ browserAuth, page, pageObjects }) => {
+      const { visualize, lens, filterBar } = pageObjects;
+
+      await browserAuth.loginAsPrivilegedUser();
+      await visualize.goto();
+      await visualize.openNewVisualizationWizard();
+      await visualize.clickVisType('lens');
+      await lens.waitForLensApp();
+
+      await lens.switchToVisualization('lnsTagcloud', { search: 'Tag cloud' });
+
+      await lens.configureDimension({
+        dimension: 'lnsTagcloud_tagDimensionPanel > lns-empty-dimension',
+        operation: 'terms',
+        field: 'ip',
+        keepOpen: true,
+      });
+      await lens.setTermsNumberOfValues(5);
+      await lens.closeDimensionEditor();
+
+      await lens.configureDimension({
+        dimension: 'lnsTagcloud_valueDimensionPanel > lns-empty-dimension',
+        operation: 'average',
+        field: 'bytes',
+      });
+      await lens.waitForVisualization('tagCloudVisualization');
+      // Avoid picking up tags in the suggestion panel.
+      await lens.closeSuggestionPanel();
+
+      let renderedTagToFilter = '';
+
+      await spaceTest.step('render tag cloud', async () => {
+        const tagLabels = await getTagCloudTexts(page);
+        expect(tagLabels.length).toBeGreaterThan(3);
+        expect(
+          tagLabels.every((tag) => EXPECTED_TAGS.includes(tag)),
+          `Unexpected tags: ${JSON.stringify(tagLabels)}`
+        ).toBe(true);
+
+        const filterableTags = tagLabels.filter((tag) => tag !== 'Other');
+        expect(
+          filterableTags.length,
+          `Expected at least one filterable tag, got: ${tagLabels.join(', ')}`
+        ).toBeGreaterThan(0);
+        renderedTagToFilter = filterableTags[0];
+      });
+
+      await spaceTest.step('add filter from clicking on tag', async () => {
+        await selectTagCloudTag(page, renderedTagToFilter);
+        await expect
+          .poll(async () => filterBar.hasFilter({ field: 'ip', value: renderedTagToFilter }))
+          .toBe(true);
+      });
+
+      await spaceTest.step('filter results by filter bar', async () => {
+        await lens.waitForVisualization('tagCloudVisualization');
+        await expect
+          .poll(async () => {
+            const filteredTags = await getTagCloudTexts(page);
+            return filteredTags.length;
+          })
+          .toBeLessThan(2);
+        const filteredTags = await getTagCloudTexts(page);
+        expect(filteredTags.every((tag) => tag === renderedTagToFilter)).toBe(true);
+      });
+    }
+  );
+});

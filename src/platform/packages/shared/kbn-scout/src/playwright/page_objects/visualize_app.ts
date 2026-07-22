@@ -43,7 +43,9 @@ export class VisualizeApp {
 
   async goto() {
     await this.page.gotoApp('visualize');
-    await expect(this.landingPage).toBeVisible();
+    // Kibana bootstrap ("Loading Elastic") regularly exceeds the default 10s expect
+    // timeout under parallel Scout load — wait for the listing shell instead.
+    await expect(this.landingPage).toBeVisible({ timeout: 30_000 });
   }
 
   async openNewVisualizationWizard() {

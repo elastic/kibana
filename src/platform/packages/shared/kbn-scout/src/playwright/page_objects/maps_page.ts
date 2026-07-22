@@ -8,6 +8,7 @@
  */
 
 import type { ScoutPage } from '..';
+import { expect } from '..';
 
 // Increased timeout because new map container is not always loaded within default one
 const DEFAULT_MAP_LOADING_TIMEOUT = 20_000;
@@ -92,5 +93,57 @@ export class MapsPage {
     await this.importFileButton.click();
     await this.waitForRenderComplete();
     await this.saveAndReturnButton.click();
+  }
+
+  private escapeLayerName(layerName: string): string {
+    return layerName.split(' ').join('_');
+  }
+
+  /** Waits until Map layer TOC has entries and loading spinners are gone (FTR parity). */
+  async waitForLayersToLoad() {
+    const tableOfContents = this.page.testSubj.locator('mapLayerTOC');
+    await tableOfContents.waitFor({ state: 'visible', timeout: DEFAULT_MAP_LOADING_TIMEOUT });
+    const layerToggles = tableOfContents.locator(
+      '[data-test-subj^="layerTocActionsPanelToggleButton"]'
+    );
+    // Maps renders EuiLoadingSpinner while a layer loads; there is no dedicated
+    // data-test-subj on that icon, so wait for toggles + spinner count (same as FTR).
+    await expect
+      .poll(
+        async () => {
+          const layerCount = await layerToggles.count();
+          const spinnerCount = await tableOfContents.locator('.euiLoadingSpinner').count();
+          return layerCount > 0 && spinnerCount === 0;
+        },
+        { timeout: DEFAULT_MAP_LOADING_TIMEOUT }
+      )
+      .toBe(true);
+  }
+
+  async doesLayerExist(layerName: string): Promise<boolean> {
+    return this.getLayerToggleButton(layerName).isVisible();
+  }
+
+  async getLayerTocTooltipMsg(layerName: string): Promise<string> {
+    const toggle = this.page.testSubj.locator(
+      `layerTocActionsPanelToggleButton${this.escapeLayerName(layerName)}`
+    );
+    await toggle.hover();
+    const tooltip = this.page.testSubj.locator('layerTocTooltip');
+    await tooltip.waitFor({ state: 'visible', timeout: 10_000 });
+    // Normalize whitespace — tooltip lines can include leading spaces from TOC layout.
+    return (await tooltip.innerText())
+      .split('\n')
+      .map((line) => line.trim())
+      .filter(Boolean)
+      .join('\n');
+  }
+
+  /** Reloads the page and dismisses the unsaved-changes browser dialog if present. */
+  async refreshAndClearUnsavedChangesWarning() {
+    this.page.once('dialog', async (dialog) => {
+      await dialog.accept();
+    });
+    await this.page.reload();
   }
 }
