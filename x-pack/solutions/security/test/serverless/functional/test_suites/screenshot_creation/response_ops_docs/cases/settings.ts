@@ -12,6 +12,7 @@ import type { FtrProviderContext } from '../../../../ftr_provider_context';
 export default function ({ getPageObject, getPageObjects, getService }: FtrProviderContext) {
   const pageObjects = getPageObjects(['common', 'header', 'svlCommonPage', 'svlCommonNavigation']);
   const retry = getService('retry');
+  const browser = getService('browser');
   const svlCases = getService('svlCases');
   const svlCommonScreenshots = getService('svlCommonScreenshots');
   const screenshotDirectories = ['response_ops_docs', 'security_cases'];
@@ -29,6 +30,10 @@ export default function ({ getPageObject, getPageObjects, getService }: FtrProvi
     });
 
     it('case settings screenshot', async function () {
+      // With the templates feature flag pinned ON for this suite, custom fields and
+      // templates are managed on the dedicated v2 templates / field-library pages
+      // rather than inline on the Case Settings page. Capture the settings page,
+      // the templates list, and the field library for the docs.
       await navigateToCasesApp(getPageObject, getService, owner);
       // The redesigned settings page drops the custom fields and templates management these
       // screenshots document, so skip while the redesign is on.
@@ -40,39 +45,38 @@ export default function ({ getPageObject, getPageObjects, getService }: FtrProvi
       });
       await testSubjects.click('configure-case-button');
       await pageObjects.header.waitUntilLoadingHasFinished();
-      await retry.waitFor('add-custom-field exist', async () => {
-        return await testSubjects.exists('add-custom-field');
+      await retry.waitFor('case-configure-title exist', async () => {
+        return await testSubjects.exists('case-configure-title');
       });
-      await testSubjects.click('add-custom-field');
-      await svlCommonScreenshots.takeScreenshot(
-        'security-cases-custom-fields',
-        screenshotDirectories,
-        1400,
-        700
-      );
-      await retry.waitFor('custom-field-label-input exist', async () => {
-        return await testSubjects.exists('custom-field-label-input');
-      });
-      await testSubjects.setValue('custom-field-label-input', 'my-field');
-      await retry.waitFor('common-flyout-save exist', async () => {
-        return await testSubjects.exists('common-flyout-save');
-      });
-      await testSubjects.click('common-flyout-save');
       await svlCommonScreenshots.takeScreenshot('security-cases-settings', screenshotDirectories);
-      await retry.waitFor('add-template to exist', async () => {
-        return await testSubjects.isEnabled('add-template');
+
+      // Templates list page — reachable when the templates flag is ON.
+      // Strip any query string / hash so the sub-path is appended cleanly.
+      const configureUrl = (await browser.getCurrentUrl()).split(/[?#]/)[0].replace(/\/$/, '');
+      await browser.get(`${configureUrl}/templates`);
+      await pageObjects.header.waitUntilLoadingHasFinished();
+      await retry.waitFor('templates-table exist', async () => {
+        return await testSubjects.exists('templates-table');
       });
-      await testSubjects.click('add-template');
       await svlCommonScreenshots.takeScreenshot(
         'security-cases-templates',
         screenshotDirectories,
         1400,
         1000
       );
-      await retry.waitFor('common-flyout-cancel to exist', async () => {
-        return await testSubjects.exists('common-flyout-cancel');
+
+      // Field library page — reachable when the templates flag is ON.
+      await browser.get(`${configureUrl}/field_library`);
+      await pageObjects.header.waitUntilLoadingHasFinished();
+      await retry.waitFor('fieldDefinitionsTable exist', async () => {
+        return await testSubjects.exists('fieldDefinitionsTable');
       });
-      await testSubjects.click('common-flyout-cancel');
+      await svlCommonScreenshots.takeScreenshot(
+        'security-cases-field-library',
+        screenshotDirectories,
+        1400,
+        700
+      );
     });
   });
 }

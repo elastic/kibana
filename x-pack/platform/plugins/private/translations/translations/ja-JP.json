@@ -10158,7 +10158,6 @@
     "visTypeVega.emsFileParser.missingNameOfFileErrorMessage": "{dataUrlParamValue} の {dataUrlParam} には {nameParam} パラメーター（ファイル名）が必要です",
     "visTypeVega.esqlQueryParser.emptyQueryErrorMessage": "ES|QL {queryParam}空にすることはできません",
     "visTypeVega.esqlQueryParser.missingQueryErrorMessage": "{dataUrlParam}と{typeParam}にはES|QLクエリを持つ{queryParam}パラメーターが必要です",
-    "visTypeVega.esqlQueryParser.timeFieldWithoutParamsWarning": "{timefieldParam}が指定されましたが、クエリに{tstartParam}または{tendParam}パラメーターが含まれていません",
     "visTypeVega.esqlQueryParser.transformationWarningMessage": "ES|QL応答の変換に失敗しました：{message} 。空のデータを返します。",
     "visTypeVega.esQueryParser.autointervalValueTypeErrorMessage": "{autointerval} は文字 {trueValue} または数字である必要があります",
     "visTypeVega.esQueryParser.dataUrlMustNotHaveLegacyAndBodyQueryValuesAtTheSameTimeErrorMessage": "{dataUrlParam} はレガシー {legacyContext} と {bodyQueryConfigName} の値を同時に含めることができません。",
