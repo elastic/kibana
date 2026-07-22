@@ -49,7 +49,9 @@ export function TransactionMetadata({ transaction, prefetchedMetadata }: Props) 
   );
 
   const metadata = prefetchedMetadata?.metadata ?? transactionEvent?.metadata ?? {};
-  const isLoading = prefetchedMetadata ? prefetchedMetadata.isLoading : status === FETCH_STATUS.LOADING;
+  const isLoading = prefetchedMetadata
+    ? prefetchedMetadata.isLoading
+    : status === FETCH_STATUS.LOADING;
 
   const sections = useMemo(() => getSectionsFromFields(metadata), [metadata]);
 
