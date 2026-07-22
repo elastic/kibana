@@ -65,10 +65,16 @@ describe('runWorkflowSync', () => {
 
     const abortController = new AbortController();
     const request = {} as Parameters<typeof runWorkflowSync>[0]['request'];
+<<<<<<< HEAD
     const dependencies = Object.assign(
       {} as Parameters<typeof runWorkflowSync>[0]['dependencies'],
       { coreStart: {}, workflowsExtensions: { getStepDefinition: jest.fn() } }
     );
+=======
+    const dependencies = {
+      coreStart: {},
+    } as Parameters<typeof runWorkflowSync>[0]['dependencies'];
+>>>>>>> b2c2244a48b2 ([Workflows] Add synchronous execution mode)
     const workflowExecutionRepository = {} as Parameters<
       typeof runWorkflowSync
     >[0]['workflowExecutionRepository'];
@@ -92,15 +98,23 @@ describe('runWorkflowSync', () => {
       })
     ).resolves.toBe(completedExecution);
 
+<<<<<<< HEAD
     expect(validateSyncWorkflow).toHaveBeenCalledWith(
       workflowExecutionGraph,
       dependencies.workflowsExtensions.getStepDefinition
     );
+=======
+    expect(validateSyncWorkflow).toHaveBeenCalledWith(workflowExecutionGraph);
+>>>>>>> b2c2244a48b2 ([Workflows] Add synchronous execution mode)
     expect(workflowRuntime.start).toHaveBeenCalledTimes(1);
     expect(workflowExecutionLoop).toHaveBeenCalledWith(
       expect.objectContaining({
         executionMode: 'sync',
+<<<<<<< HEAD
         signal: abortController.signal,
+=======
+        taskAbortController: abortController,
+>>>>>>> b2c2244a48b2 ([Workflows] Add synchronous execution mode)
         fakeRequest: request,
         workflowExecutionRepository: setup.workflowExecutionPersistence,
       })

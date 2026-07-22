@@ -50,6 +50,7 @@ describe('InMemoryExecutionPersistence', () => {
     ).resolves.toBeNull();
   });
 
+<<<<<<< HEAD
   it('does not share state between execution-scoped instances', async () => {
     const first = new InMemoryExecutionPersistence(execution);
     const secondExecution = { ...execution, id: 'execution-2' };
@@ -62,6 +63,8 @@ describe('InMemoryExecutionPersistence', () => {
     ).resolves.toEqual(expect.objectContaining({ status: ExecutionStatus.PENDING }));
   });
 
+=======
+>>>>>>> b2c2244a48b2 ([Workflows] Add synchronous execution mode)
   it('merges step lifecycle and IO updates without an external repository', async () => {
     const persistence = new InMemoryExecutionPersistence(execution);
     await persistence.bulkUpsert([

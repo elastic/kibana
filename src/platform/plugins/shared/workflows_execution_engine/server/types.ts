@@ -51,7 +51,6 @@ export interface ExecuteWorkflowResponse {
   result?: {
     status: ExecutionStatus;
     output?: Record<string, unknown>;
-    error?: { type: string; message: string; details?: Record<string, unknown> };
   };
 }
 
@@ -89,10 +88,6 @@ export interface TriggerEventsContract {
 }
 
 export interface WorkflowsExecutionEnginePluginStart {
-  /**
-   * Type-level discriminant: callers (e.g. inference plugin) narrow on this
-   * before calling executeWorkflow with executionMode: 'sync'.
-   */
   readonly supportsSynchronousExecution: true;
   __internalStorage: {
     workflowExecutionsDataClient: WorkflowExecutionsDataClient;

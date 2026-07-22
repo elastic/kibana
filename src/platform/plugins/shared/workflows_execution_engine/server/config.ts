@@ -73,6 +73,11 @@ const configSchema = schema.object({
   hitlExternalResume: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
   }),
+  /**
+   * Synchronous workflow execution path — used by the inference anonymization pipeline
+   * to run workflows inline within an HTTP request without persisting execution state to
+   * Elasticsearch. Must be enabled alongside `xpack.inference.anonymization.workflow_driven`.
+   */
   syncExecution: schema.object({
     /**
      * Master switch for the synchronous execution path. Must be set to true alongside
