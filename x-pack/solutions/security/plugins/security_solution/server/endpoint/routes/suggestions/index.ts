@@ -196,6 +196,9 @@ export const getEndpointSuggestionsRequestHandler = (
         });
       }
 
+      // Avoid adding endpoint alerts log access to kibana_system role by using current user,
+      // as the index may contain user data.
+      // (docs.elastic.dev/redacted)
       const elasticsearchClient =
         suggestionType === 'endpointExceptions'
           ? elasticsearch.client.asCurrentUser
