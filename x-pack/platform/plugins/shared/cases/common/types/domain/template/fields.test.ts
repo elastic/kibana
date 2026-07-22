@@ -35,7 +35,7 @@ const baseInputTextField = {
 const baseToggleField = {
   name: 'requires_escalation',
   control: 'TOGGLE' as const,
-  type: 'keyword' as const,
+  type: 'boolean' as const,
 };
 
 describe('ValidationSchema — required_on_close', () => {

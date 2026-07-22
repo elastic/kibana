@@ -40,6 +40,7 @@ import {
   SIGNAL_RULE_NAME_FIELD_NAME,
 } from '../../../timelines/components/timeline/body/renderers/constants';
 import { RemoteDocumentCallout } from './components/remote_document_callout';
+import { FLYOUT_ORIGIN, FLYOUT_TYPE } from '../../../common/lib/telemetry';
 
 const footerStyles = css`
   @media (max-width: 767px) {
@@ -109,6 +110,7 @@ export const DocumentFlyout = memo(
     const { selectedTabId, setSelectedTabId } = useTabs<DocumentFlyoutTabId>({
       validTabIds: VALID_TAB_IDS,
       storageKey: FLYOUT_STORAGE_KEYS.SELECTED_TAB,
+      flyoutType: FLYOUT_TYPE.DOCUMENT,
     });
 
     // The rule flyout is keyed by the rule UUID, but the table/highlighted fields display the rule
@@ -142,8 +144,12 @@ export const DocumentFlyout = memo(
       [ruleId]
     );
 
-    const onShowNotes = useCallback(() => {
-      openNotes({ hit });
+    const onShowNotesFromHeader = useCallback(() => {
+      openNotes({ hit, origin: FLYOUT_ORIGIN.FLYOUT_HEADER });
+    }, [openNotes, hit]);
+
+    const onShowNotesFromFooter = useCallback(() => {
+      openNotes({ hit, origin: FLYOUT_ORIGIN.FOOTER_TAKE_ACTION });
     }, [openNotes, hit]);
 
     if (isAlert && loading) {
@@ -162,7 +168,7 @@ export const DocumentFlyout = memo(
             hit={hit}
             renderCellActions={renderCellActions}
             onAlertUpdated={onAlertUpdated}
-            onShowNotes={onShowNotes}
+            onShowNotes={onShowNotesFromHeader}
           />
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
@@ -211,7 +217,7 @@ export const DocumentFlyout = memo(
           )}
         </EuiFlyoutBody>
         <EuiFlyoutFooter css={footerStyles}>
-          <Footer hit={hit} onAlertUpdated={onAlertUpdated} onShowNotes={onShowNotes} />
+          <Footer hit={hit} onAlertUpdated={onAlertUpdated} onShowNotes={onShowNotesFromFooter} />
         </EuiFlyoutFooter>
       </>
     );
