@@ -5,54 +5,42 @@
  * 2.0.
  */
 
-import type { BuiltInAgentDefinition } from '@kbn/agent-builder-server/agents';
+import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
+import type { AgentTypeDefinition } from '@kbn/agent-builder-server/agents';
 import { platformSignificantEventsTools, platformCoreTools } from '@kbn/agent-builder-common/tools';
-import type { StreamsServer } from '@kbn/streams-plugin/server/types';
 import instructions from './instructions/judge.md.text';
-import { getSignificantEventsAvailability } from '../../../routes/utils/assert_significant_events_access';
 import { SIGNIFICANT_EVENTS_KI_GROUNDING_SKILL_ID } from '../../skills/significant_events_ki_grounding';
 
 export const SIGNIFICANT_EVENTS_JUDGE_AGENT_ID = 'platform.streams.sig-events.discovery-judge';
+export const SIGNIFICANT_EVENTS_JUDGE_AGENT_TYPE_ID = 'platform.sig_events.discovery-judge-type';
 
-export const createSignificantEventsJudgeAgent = ({
-  server,
-}: {
-  server: StreamsServer;
-}): BuiltInAgentDefinition =>
-  ({
-    id: SIGNIFICANT_EVENTS_JUDGE_AGENT_ID,
-    name: 'Significant Events Judge',
-    description:
-      'Reviews proposed discoveries and decides whether to promote, acknowledge, or demote a significant event.',
-    labels: ['observability', 'streams', 'significant-events', 'discovery', 'judge'],
-    avatar_icon: 'logoElastic',
-    availability: {
-      cacheMode: 'space',
-      handler: async (context) => {
-        const availability = await getSignificantEventsAvailability({
-          server,
-          licensing: server.licensing,
-        });
-
-        return availability.available
-          ? { status: 'available' }
-          : { status: 'unavailable', reason: availability.reason };
+export const judgeAgentType = {
+  id: SIGNIFICANT_EVENTS_JUDGE_AGENT_TYPE_ID,
+  name: 'Significant Events Judge',
+  description:
+    'Reviews proposed discoveries and decides whether to promote, acknowledge, or demote a significant event.',
+  avatar_icon: 'logoElastic',
+  baseConfiguration: {
+    instructions,
+    skill_ids: [SIGNIFICANT_EVENTS_KI_GROUNDING_SKILL_ID],
+    // The tool set below is fully explicit — the generic platform_core_* tools are irrelevant
+    // to discovery and only add noise to tool selection, so elastic capabilities stay disabled.
+    enable_elastic_capabilities: false,
+    // Keep connectors empty so admin-selected connectors persist on the derived agent and merge
+    // into this allow-list.
+    connector_ids: [],
+    tools: [
+      {
+        tool_ids: [
+          platformCoreTools.executeEsql,
+          platformSignificantEventsTools.searchKnowledgeIndicators,
+          platformSignificantEventsTools.eventsWrite,
+        ],
       },
-    },
-    configuration: {
-      instructions,
-      skill_ids: [SIGNIFICANT_EVENTS_KI_GROUNDING_SKILL_ID],
-      // The tool set below is fully explicit — the generic platform_core_* tools are irrelevant
-      // to discovery and only add noise to tool selection, so elastic capabilities stay disabled.
-      enable_elastic_capabilities: false,
-      tools: [
-        {
-          tool_ids: [
-            platformCoreTools.executeEsql,
-            platformSignificantEventsTools.searchKnowledgeIndicators,
-            platformSignificantEventsTools.eventsWrite,
-          ],
-        },
-      ],
-    },
-  } as const);
+    ],
+  },
+} as const satisfies AgentTypeDefinition;
+
+export const registerJudgeAgentType = (agentBuilder: AgentBuilderPluginSetup): void => {
+  agentBuilder.agents.registerType(judgeAgentType);
+};
