@@ -8,6 +8,8 @@
 import type { ConverseStep } from '@kbn/evals';
 import { platformCoreTools, platformSignificantEventsTools } from '@kbn/agent-builder-common';
 import {
+  didToolCallReturnRows,
+  extractOrderedToolCalls,
   getToolCallCount,
   extractToolCallIds,
   summarizeEsqlGrounding,
@@ -24,6 +26,7 @@ const steps: ConverseStep[] = [
     type: 'tool_call',
     tool_id: TOOL_ID_KI_SEARCH,
     tool_call_id: 'ki-1',
+    tool_call_group_id: 'ki-group',
     params: { kind: ['feature', 'query'], stream_names: ['logs'] },
     results: [{ type: 'other', data: { knowledge_indicators: [{ kind: 'query' }] } }],
   },
@@ -31,6 +34,7 @@ const steps: ConverseStep[] = [
     type: 'tool_call',
     tool_id: TOOL_ID_EXECUTE_ESQL,
     tool_call_id: 'esql-1',
+    tool_call_group_id: 'esql-group',
     params: { query: 'FROM logs | WHERE body.text : "SQLState"' },
     results: [
       { type: 'query', data: { esql: '…' } },
@@ -41,6 +45,7 @@ const steps: ConverseStep[] = [
     type: 'tool_call',
     tool_id: TOOL_ID_EXECUTE_ESQL,
     tool_call_id: 'esql-2',
+    tool_call_group_id: 'esql-group',
     params: { query: 'FROM logs | WHERE body.text : "Cache error"' },
     results: [{ type: 'esql_results', data: { columns: [{ name: '@timestamp' }], values: [] } }],
   },
@@ -53,6 +58,21 @@ describe('extractToolCallIds', () => {
       TOOL_ID_EXECUTE_ESQL,
       TOOL_ID_EXECUTE_ESQL,
     ]);
+  });
+});
+
+describe('extractOrderedToolCalls', () => {
+  it('preserves step order, parameters, results, and parallel group IDs', () => {
+    const calls = extractOrderedToolCalls(steps);
+
+    expect(calls[0]).toMatchObject({
+      index: 1,
+      toolId: TOOL_ID_KI_SEARCH,
+      groupId: 'ki-group',
+      params: { kind: ['feature', 'query'], stream_names: ['logs'] },
+    });
+    expect(didToolCallReturnRows(calls[1])).toBe(true);
+    expect(didToolCallReturnRows(calls[2])).toBe(false);
   });
 });
 
