@@ -79,6 +79,10 @@ export const CASE_REPORTERS_URL = `${CASES_URL}/reporters` as const;
 export const CASE_TAGS_URL = `${CASES_URL}/tags` as const;
 export const CASE_TEMPLATES_URL = `${CASES_URL}/templates` as const;
 export const CASE_TEMPLATE_DETAILS_URL = `${CASE_TEMPLATES_URL}/{template_id}` as const;
+// Public discovery of the `extended_fields` a caller may apply. `fields` is a static segment,
+// so — like `templates`/`reporters`/`tags` — it resolves ahead of the `{case_id}` param route.
+export const CASE_FIELDS_URL = `${CASES_URL}/fields` as const;
+export const CASE_APPLICABLE_FIELDS_URL = `${CASE_DETAILS_URL}/fields` as const;
 export const CASE_USER_ACTIONS_URL = `${CASE_DETAILS_URL}/user_actions` as const;
 export const CASE_FIND_USER_ACTIONS_URL = `${CASE_USER_ACTIONS_URL}/_find` as const;
 
@@ -197,6 +201,7 @@ export const MAX_CUSTOM_FIELD_KEY_LENGTH = 36 as const; // uuidv4 length
 export const MAX_CUSTOM_FIELD_LABEL_LENGTH = 50 as const;
 export const MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH = 160 as const;
 export const MAX_TEMPLATE_KEY_LENGTH = 36 as const; // uuidv4 length
+export const MAX_CASE_ID_LENGTH = 512 as const; // ES `_id` upper bound; connector-generated case ids are 64-char SHA-256 digests and bulk_create accepts arbitrary ids
 export const MAX_TEMPLATE_VERSION_STRING_LENGTH = 10 as const;
 export const MAX_TEMPLATE_NAME_LENGTH = 50 as const;
 export const MAX_TEMPLATE_DESCRIPTION_LENGTH = 1000 as const;
@@ -303,6 +308,12 @@ export const LOCAL_STORAGE_KEYS = {
   casesUtilityBarHideMaxLimitWarning: 'cases.utilityBar.hideMaxLimitWarning',
   caseViewSidebarOpen: 'cases.caseView.sidebarOpen',
   caseViewSidebarAccordions: 'cases.caseView.sidebarAccordions',
+  // Guided-tour / "what's new" banner state. Keys are version-scoped so a future refresh can
+  // re-trigger the banner/tour by bumping the suffix.
+  casesListBannerDismissed: 'cases.list.banner.dismissed.v1',
+  caseDetailsTourSeen: 'cases.caseView.tour.seen.v1',
+  templateEditorTourSeen: 'cases.templates.editor.tour.seen.v1',
+  showLegacyCustomFields: 'cases.showLegacyCustomFields',
 };
 
 /**
