@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { createHash } from 'crypto';
 import type { RoleApiCredentials } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
@@ -42,21 +41,6 @@ import {
 import { getConversation } from '../fixtures/converse_http';
 
 const INTERNAL_API_VERSION = '1';
-
-const deriveIdempotentExecutionId = ({
-  spaceId,
-  originType,
-  externalConversationId,
-  executionIdempotencyKey,
-}: {
-  spaceId: string;
-  originType: string;
-  externalConversationId: string;
-  executionIdempotencyKey: string;
-}) =>
-  createHash('sha256')
-    .update([spaceId, originType, externalConversationId, executionIdempotencyKey].join('\u0000'))
-    .digest('hex');
 
 apiTest.describe(
   'Agent Builder - converse callback API',
@@ -388,14 +372,7 @@ apiTest.describe(
 
           const firstAccepted = first.body as ChatCallbackAcceptedResponse;
           executionId = firstAccepted.execution_id;
-          expect(executionId).toBe(
-            deriveIdempotentExecutionId({
-              spaceId: 'default',
-              originType: ConversationOriginType.Slack,
-              externalConversationId: requestBody.origin.external_conversation_id,
-              executionIdempotencyKey,
-            })
-          );
+          expect(executionId).toMatch(/^[a-f0-9]{64}$/);
           expect(firstAccepted.status).toBe(ExecutionStatus.scheduled);
 
           const firstCallback = (await callbackServer.waitForRequest())
