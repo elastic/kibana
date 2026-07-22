@@ -551,6 +551,10 @@ export class DiscoverApp {
     return await row.innerText();
   }
 
+  getSearchTermHighlights(): Locator {
+    return this.page.testSubj.locator('docTable').locator('mark');
+  }
+
   async getDocTableField(index: number): Promise<string> {
     const rowIndex = index - 1;
     await this.page.testSubj.click('dataGridFullScreenButton');
