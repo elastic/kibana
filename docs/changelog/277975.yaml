@@ -8,4 +8,5 @@ products:
   target: 9.5.0
 areas:
 - Discover and ES|QL
-title: Hide ES|QL validation errors for canceled queries
+title: "Fix ES|QL validation errors after canceling a query"
+description: "Canceled ES|QL queries no longer leave stale validation errors visible in the editor."

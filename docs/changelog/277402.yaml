@@ -10,4 +10,5 @@ products:
   target: 9.6.0
 areas:
 - Alerting and reporting
-title: "Don't lower alerts-as-data `total_fields.limit` below the already-set value"
+title: "Fix Kibana lowering raised field limits on alert indices"
+description: "When updating alert index mappings, Kibana no longer reduces an already higher `index.mapping.total_fields.limit` on existing `.alerts-*` indices and templates."

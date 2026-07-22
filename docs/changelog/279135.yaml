@@ -8,4 +8,4 @@ products:
   target: 9.5.0
 areas:
 - Discover and ES|QL
-title: Fixes the inline documentation rendering
+title: "Fix inline documentation rendering in ES|QL"

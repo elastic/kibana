@@ -8,5 +8,5 @@ products:
   target: 9.5.0
 areas:
 - Search and data
-title: Enable Inference Preferences FF and add Scout tests for Manage Region Preferences modal
-description: Introduces the Manage Region Preferences modal in the Elastic Inference Service, allowing administrators to configure allowed geos and cloud regions for inference endpoints.
+title: "Add Manage Region Preferences for Elastic Inference Service"
+description: "Administrators can configure allowed geos and cloud regions for Elastic Inference Service endpoints in the Manage Region Preferences modal."

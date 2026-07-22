@@ -6,4 +6,5 @@ products:
   target: 2026-07-21
 - product: kibana
   target: 9.5.0
-title: Fix prototype-collision crash in index fields formatting
+title: "Fix Timeline crash on reserved index field names"
+description: "Index field formatting no longer crashes when a field or index name collides with an `Object.prototype` property such as `constructor`."

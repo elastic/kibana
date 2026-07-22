@@ -1,6 +1,6 @@
 prs:
 - https://github.com/elastic/kibana/pull/277626
-type: feature
+type: enhancement
 products:
 - product: cloud-serverless
   target: 2026-07-21
@@ -8,5 +8,5 @@ products:
   target: 9.5.0
 areas:
 - Alerting and reporting
-title: Simplify cases templates with unique names and toggle support
-description: Cases templates use a simpler default starter template, support toggles for template fields, and require unique template metadata names.
+title: "Improve Cases templates with toggles and unique names"
+description: "Cases templates use a simpler default starter template, support toggle fields, and require unique template metadata names."

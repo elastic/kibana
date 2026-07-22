@@ -10,5 +10,5 @@ products:
   target: 9.5.0
 areas:
 - Alerting and reporting
-title: Hide Rules from global search for users without rules access
-description: Fixed the **Rules** entry appearing in global search for users with alerts-only access (`stackAlertsOnly`).
+title: "Fix Rules appearing in global search for alerts-only users"
+description: "Users with alerts-only access (`stackAlertsOnly`) no longer see the Rules entry in Kibana global search."

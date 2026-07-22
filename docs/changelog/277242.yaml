@@ -10,4 +10,5 @@ products:
   target: 9.5.0
 areas:
 - Discover and ES|QL
-title: Unblock discover on cancel error
+title: "Fix Discover staying blocked after canceling a long-running query"
+description: "Canceling an ES|QL query no longer leaves Discover unresponsive when stopping the async query exceeds the request timeout."

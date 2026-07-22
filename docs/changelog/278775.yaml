@@ -6,4 +6,5 @@ products:
   target: 2026-07-21
 - product: kibana
   target: 9.5.0
-title: Update capabilities for SIEM migrations link
+title: "Fix SIEM migrations link visibility for migration privileges"
+description: "The SIEM migrations navigation link respects migrations privileges so users with the correct access can open Automatic Migrations."

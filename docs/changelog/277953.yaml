@@ -8,5 +8,5 @@ products:
   target: 9.5.0
 areas:
 - Search and data
-title: Fix Fleet skipping asset updates across Kibana upgrades
-description: Fixed an issue where Kibana assets from an installed integration package (such as dashboards used by prebuilt detection rules) could remain stale across a Kibana upgrade because Fleet never overwrote existing assets on reinstall.
+title: "Fix Fleet skipping asset updates across Kibana upgrades"
+description: "Fix an issue where Kibana assets from an installed integration package (such as dashboards used by prebuilt detection rules) could remain stale across a Kibana upgrade because Fleet never overwrote existing assets on reinstall."

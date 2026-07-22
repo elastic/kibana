@@ -10,4 +10,5 @@ products:
   target: 9.5.0
 areas:
 - Alerting and reporting
-title: Pass ES|QL variables to CSV reports
+title: "Fix CSV reports missing ES|QL variables"
+description: "CSV reports generated from ES|QL searches include the ES|QL variables from the original query."

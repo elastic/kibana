@@ -6,4 +6,5 @@ products:
   target: 2026-07-21
 - product: kibana
   target: 9.5.0
-title: Fix intermittent duplicate schedule execution by deduping Fleet package-policy writes
+title: "Fix duplicate Osquery schedule runs from Fleet policy writes"
+description: "Osquery scheduled queries no longer run twice intermittently when concurrent Fleet package-policy writes created duplicate schedule configuration."

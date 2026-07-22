@@ -8,4 +8,5 @@ products:
   target: 9.5.0
 areas:
 - Alerting and reporting
-title: Validate template extended fields in modal before applying
+title: "Fix applying Cases templates with invalid extended fields"
+description: "When you apply or change a case template, required extended fields are validated in the modal before the update is saved."

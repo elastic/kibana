@@ -1,6 +1,6 @@
 prs:
 - https://github.com/elastic/kibana/pull/277291
-type: bug-fix
+type: enhancement
 products:
 - product: cloud-serverless
   target: 2026-07-21
@@ -8,4 +8,5 @@ products:
   target: 9.5.0
 areas:
 - AI and machine Learning
-title: 'Add limit to cases alert API '
+title: "Limit alert IDs accepted by the cases alerts API"
+description: "The cases alerts API enforces a maximum number of alert IDs per request to prevent oversized payloads."

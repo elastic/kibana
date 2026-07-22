@@ -8,4 +8,5 @@ products:
   target: 9.5.0
 areas:
 - Alerting and reporting
-title: Enable cases attachment flag
+title: "Add timeline and saved object attachments to Cases"
+description: "The Cases Attach menu supports timelines and saved objects in addition to files. Workflow authors can use the `cases.addAttachments` step to attach content to a case."

@@ -6,4 +6,5 @@ products:
   target: 2026-07-21
 - product: kibana
   target: 9.5.0
-title: show attack flyout as child (new flyout) or preview (expandable flyout) in correlations
+title: "Open related attacks from the Correlations panel"
+description: "In the alert flyout Correlations section, you can open a related attack document in a child flyout (new flyout) or preview (expandable flyout)."

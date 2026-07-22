@@ -1,6 +1,6 @@
 prs:
 - https://github.com/elastic/kibana/pull/277567
-type: bug-fix
+type: enhancement
 products:
 - product: cloud-serverless
   target: 2026-07-21
@@ -8,4 +8,5 @@ products:
   target: 9.5.0
 areas:
 - Alerting and reporting
-title: File modal improvements
+title: "Improve Cases file upload modal size limits and error handling"
+description: "The Cases file upload modal shows human-readable size limits, clears errors when you select a new file, validates per-file size limits, and can hide the long list of supported file types."

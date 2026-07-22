@@ -10,5 +10,5 @@ products:
   target: 9.5.0
 areas:
 - Search and data
-title: Fix put_mapping nested-field autocomplete scope links
-description: Fixes Console autocomplete not suggesting mapping options for nested object fields and multi-fields in index mapping bodies.
+title: "Fix Console autocomplete for nested mapping fields"
+description: "Console autocomplete suggests mapping options for nested object fields and multi-fields in index mapping bodies."

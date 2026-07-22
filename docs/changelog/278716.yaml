@@ -8,4 +8,5 @@ products:
   target: 9.5.0
 areas:
 - Alerting and reporting
-title: Fix case view and save failing when applied template is soft-deleted
+title: "Fix Cases view and save when the applied template was deleted"
+description: "Opening or saving a case no longer fails when the case still references a template that was deleted."

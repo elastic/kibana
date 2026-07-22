@@ -8,5 +8,5 @@ products:
   target: 9.5.0
 areas:
 - Dashboards and visualizations
-title: Fix ES|QL chart filtering.
-description: Fixes an issue where clicking a value in an ES|QL chart to filter data created an incorrect filter that matched any document containing the field, instead of filtering to the specific clicked value. This fix is only applicable to serverless deployments.
+title: "Fix ES|QL chart filtering"
+description: "Clicking a value in an ES|QL chart no longer creates a filter that matches any document containing the field. The filter targets the clicked value. This fix applies to serverless deployments only."

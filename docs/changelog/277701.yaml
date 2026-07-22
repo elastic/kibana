@@ -8,4 +8,5 @@ products:
   target: 2026-07-21
 - product: kibana
   target: 9.5.0
-title: 'Fix retest_on_failure: false ignored on monitor update'
+title: "Fix Synthetics ignoring `retest_on_failure: false` on monitor update"
+description: "Updating a Synthetics monitor with `retest_on_failure: false` now disables retests. Previously the setting was ignored on update and only took effect when creating a monitor."

@@ -6,5 +6,5 @@ products:
   target: 2026-07-21
 - product: kibana
   target: 9.4.4
-title: Disable install button for non-installable selected rules
-description: '> Fixes an issue where selecting a partially translated rule enabled the "Install selected" button and reported a misleading success message without installing any rule.'
+title: "Fix false install success for partially translated migration rules"
+description: "Selecting a partially translated rule no longer enables the \"Install selected\" button or shows a misleading success message without installing a rule."

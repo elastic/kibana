@@ -8,5 +8,5 @@ products:
   target: 2026-07-21
 - product: kibana
   target: 9.6.0
-title: 'Use slack2 connector in inline actions, remove slack v1 connector '
-description: New Slack actions added in the rule form now use the Slack v2 connector (https://www.elastic.co/docs/reference/kibana/connectors-kibana/slack-v2-action-type)
+title: "Use Slack v2 connector for new rule actions"
+description: "New Slack actions added in the rule form use the Slack v2 connector. See the [Slack (v2) connector documentation](kibana://reference/connectors-kibana/slack-v2-action-type.md)."

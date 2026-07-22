@@ -6,4 +6,5 @@ products:
   target: 2026-07-21
 - product: kibana
   target: 9.5.0
-title: Make `winlog.event_data.LogonType` optional for `security_auth` jobs
+title: "Fix security authentication anomaly jobs failing without Windows logon type"
+description: "Spike in Logon Events anomaly detection jobs run on Linux authentication logs by treating missing `winlog.event_data.LogonType` as optional."

@@ -10,4 +10,4 @@ products:
   target: 9.5.0
 areas:
 - Dashboards and visualizations
-title: fix PDF export uses stale time range after changing the time picker
+title: "Fix PDF export using a stale time range after changing the time picker"
