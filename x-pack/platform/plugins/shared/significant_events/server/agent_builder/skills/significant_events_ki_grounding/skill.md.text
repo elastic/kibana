@@ -16,7 +16,7 @@ Example: platform_sig_events_ki_search call
 Response shape:
 ```json
 {
-  "kIs": [
+  "knowledge_indicators": [
     {
       "kind": "feature",
       "feature": { "id": "...", "type": "dependency", "source": "...", "target": "..." }
@@ -56,13 +56,12 @@ Response when empty:
 
 ### Step 1 — Call platform_sig_events_ki_search
 
-First apply any explicit KI-search skip gate from the calling agent. When the gate applies, skip this step and use the supplied rule-matched queries. Otherwise, make one call for the entire detection batch, with only these parameters:
-- `kind: ["feature", "query"]`
-- `stream_names`: deduplicated union of all `stream_name` values in the batch
+First apply any explicit KI-search skip gate from the calling agent. When the gate applies, skip this step and use the supplied rule-matched queries. Otherwise, dispatch exactly two calls simultaneously in one parallel tool-call group for the entire detection batch:
+- one with `kind: ["feature"]`
+- one with `kind: ["query"]`
+- both with `stream_names`: the same deduplicated union of all `stream_name` values in the batch
 
-**Follow-up rules** (same parameter constraint — `kind` + `stream_names` only):
-- If 0 query KIs returned → fire one follow-up call with `kind: ["query"]`, same `stream_names`.
-- Deferred entity KI follow-up: after recording all results, for each failure domain where (1) the entity KI was absent from the initial search AND (2) ≥1 rule has no confirmed ES|QL rows — fire one `platform_sig_events_ki_search` with `kind: ["feature"]`, same `stream_names`. Dispatch qualifying domains in parallel.
+Use only `kind` + `stream_names`; omit `search_text` and `limit`. Never issue a mixed-kind call or a follow-up KI search. Merge and reuse both results for the remainder of the run.
 
 **Dedup results** by `feature.uuid` / `query.id`. Keep ALL Dependency-type and Infrastructure-type KIs regardless of score. **Discard `dataset_analysis` KIs immediately** — schema field-distribution metadata with no diagnostic value.
 
@@ -95,7 +94,9 @@ Match criteria: `query_ki.rule.id` equals `rule_uuid` **exactly** AND `query_ki.
 
 ### Step 4 — Dispatch platform_core_execute_esql calls
 
-**Dispatch all matched-rule calls simultaneously in a single batch.**
+Build the complete primary verification plan before executing any ES|QL.
+
+Dispatch primary checks in **mandatory parallel waves of up to 10 calls**. In one assistant response, emit one separate `platform_core_execute_esql` call for every check in the current wave; the wave size MUST equal `min(remaining planned primary checks, 10)`. Multiple calls to the same tool in one response are required — never emit one independent primary check and wait for its result before dispatching the rest. A one-call wave is allowed only when exactly one planned check remains.
 
 **Required modifications before executing every query:**
 1. Strip `METADATA _id, _source`.
@@ -113,9 +114,11 @@ Before: FROM logs.* | WHERE body.text : "ECONNREFUSED" | LIMIT 1
 After:  FROM logs.* | WHERE @timestamp >= "2026-06-11T15:03:00Z" AND @timestamp <= NOW() | WHERE body.text : "ECONNREFUSED" | KEEP @timestamp, body.text | SORT @timestamp ASC | LIMIT 1
 ```
 
-**Budget — one call per rule by default.** Run the exact-match KI query with the required `ASC | LIMIT 1` modification.
+**Budget — maximum 2 × matched-rule count.** Run the exact-match KI query with the required `ASC | LIMIT 1` modification: one call per rule in the primary wave.
+After all primary results return, collect every permitted contradiction follow-up and dispatch them together in one second mandatory parallel wave, again up to 10 calls.
 
-**Contradiction follow-up (exception, not routine):** run a second call for the same rule only when the first result contradicts the hypothesis — 0 rows when failure was expected, or only healthy/unrelated rows. Skip additional rules past this exception budget; note them in `summary`.
+**Contradiction follow-up (exception, not routine):** run at most one second call for a rule only when its primary result contradicts the hypothesis — 0 rows when failure was expected, or only healthy/unrelated rows.
+Never retry completed checks or run a third wave. Note any checks skipped because the budget was exhausted in `summary`.
 
 **Deduplication before executing:**
 - Identical query bodies (METADATA stripped, KEEP/SORT/LIMIT appended): execute once, write one `signals` entry per KI.
