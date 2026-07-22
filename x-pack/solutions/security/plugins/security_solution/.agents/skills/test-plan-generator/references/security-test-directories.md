@@ -65,15 +65,16 @@ These skills describe test file conventions, runner commands, authentication pat
 > test/scout/
 >   agent_builder/ui/
 >   entity_analytics/ui/  entity_analytics/api/
+>   exceptions/ui/
 >   flyout/ui/
 >   reports/ui/
 >   timelines/ui/
 >   workflows/ui/
 > ```
 >
-> Each namespace has its own `parallel.playwright.config.ts` and `fixtures/` tree. Use `test/scout/<namespace>/ui/` (or `api/`) in place of the generic `test/scout*/ui/` glob when working with Security Solution tests. A structural guard in kbn-scout enforces this: root-level `test/scout/{ui,api}/` and namespace dirs cannot coexist in the same plugin.
+> Each namespace has its own `parallel.playwright.config.ts` and `fixtures/` tree. Use `test/scout/<namespace>/ui/` (or `api/`) in place of the generic `test/scout*/ui/` glob when working with Security Solution tests. A root-level `test/scout/ui/` directory exists but holds only `.scout/reports` output — all test specs live under namespace sub-dirs.
 >
-> **Adding tests for a new feature area?** Namespaces map 1-to-1 with top-level source directories under `public/`. If the feature source lives in a directory not already represented (e.g., `public/asset_inventory/`), a new namespace is needed. If it lives inside an existing namespace's scope, add to that namespace. See the **Namespace selection** section in `security-cypress-to-scout-migration` for the full decision table and creation steps.
+> **Adding tests for a new feature area?** Namespaces track feature areas and roughly correspond to top-level source directories under `public/` (e.g., `public/asset_inventory/` has no namespace yet and would need one). Sub-directories of an existing source scope belong in the parent namespace. See the **Namespace selection** section in `security-cypress-to-scout-migration` for the full decision table and creation steps (3 required: create scope, commit manifest, add CODEOWNERS).
 
 ---
 
@@ -149,6 +150,7 @@ These skills describe test file conventions, runner commands, authentication pat
 | API integration | `test/security_solution_api_integration/test_suites/lists_and_exception_lists/exception_lists_items/` |
 | API integration | `test/security_solution_api_integration/test_suites/lists_and_exception_lists/lists_items/` |
 | API integration | `test/security_solution_api_integration/test_suites/lists_and_exception_lists/authorization/` |
+| Scout UI | `plugins/security_solution/test/scout/exceptions/ui/` |
 
 ### AI Assistant / GenAI (Attack Discovery, Conversations, Knowledge Base)
 

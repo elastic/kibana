@@ -79,17 +79,18 @@ Security Solution Scout tests use a namespace sub-directory structure. Each feat
 
 | Namespace | Path |
 |-----------|------|
-| `entity_analytics` | `test/scout/entity_analytics/{ui,api}/` |
-| `flyout` | `test/scout/flyout/ui/` |
-| `timelines` | `test/scout/timelines/ui/` |
 | `agent_builder` | `test/scout/agent_builder/ui/` |
+| `entity_analytics` | `test/scout/entity_analytics/{ui,api}/` |
+| `exceptions` | `test/scout/exceptions/ui/` |
+| `flyout` | `test/scout/flyout/ui/` |
 | `reports` | `test/scout/reports/ui/` |
+| `timelines` | `test/scout/timelines/ui/` |
 | `workflows` | `test/scout/workflows/ui/` |
 
 - Timeline UI tests belong in `security_solution/test/scout/timelines/ui/` — the `timelines` plugin only has server-side saved object definitions and APIs
 - Parallel specs go in `test/scout/<namespace>/ui/parallel_tests/`
 - Sequential specs go in `test/scout/<namespace>/ui/tests/`
-- Root-level `test/scout/ui/` or `test/scout/api/` no longer exist in `security_solution`; a structural guard in kbn-scout enforces that root-level and namespace-based layouts cannot coexist
+- Root-level `test/scout/ui/` contains only `.scout/reports` output, not test specs; `test/scout/api/` does not exist — all test specs live under namespace sub-dirs
 - If a test is placed in a namespace that doesn't match its source scope (e.g., a flyout test landed in `entity_analytics/`), flag it — see the **Namespace selection** section of `security-cypress-to-scout-migration` for the source-scope table and creation criteria
 
 ## Migration parity (Security-specific additions)
