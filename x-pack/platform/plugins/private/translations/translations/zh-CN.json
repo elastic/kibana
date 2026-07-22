@@ -53245,7 +53245,6 @@
     "xpack.transform.deleteTransform.deleteAnalyticsWithDataViewErrorMessage": "删除数据视图 {destinationIndex} 时发生错误",
     "xpack.transform.deleteTransform.deleteAnalyticsWithIndexErrorMessage": "删除目标索引 {destinationIndex} 时发生错误",
     "xpack.transform.deleteTransform.errorWithCheckingIfDataViewExistsNotificationErrorMessage": "检查数据视图 {dataView} 是否存在时发生错误：{error}",
-    "xpack.transform.description": "描述",
     "xpack.transform.edit.errorPromptText": "检查源数据视图是否存在时发生错误",
     "xpack.transform.edit.noDataViewErrorPromptText": "无法获取转换 {transformId} 的数据视图。对于 {dataViewTitle}，不存在数据视图。",
     "xpack.transform.forceDeleteTransformMessage": "删除 {count} 个{count, plural, one {transform} other {转换}}",

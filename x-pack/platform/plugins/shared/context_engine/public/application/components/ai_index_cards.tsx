@@ -18,7 +18,6 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 import React from 'react';
 import type { AiIndexHttpItem } from '../../../common/http_api/ai_indices';
@@ -31,16 +30,6 @@ const SKELETON_CARD_COUNT = 3;
 
 const AiIndexCard = ({ aiIndex, href }: { aiIndex: AiIndexHttpItem; href: string }) => {
   const { euiTheme } = useEuiTheme();
-
-  const sourcesLabel = i18n.translate('xpack.contextEngine.landing.card.sourcesCount', {
-    defaultMessage: '{count, plural, one {# source} other {# sources}}',
-    values: { count: aiIndex.sources.length },
-  });
-
-  const automationsLabel = i18n.translate('xpack.contextEngine.landing.card.automationsCount', {
-    defaultMessage: '{count, plural, one {# automation} other {# automations}}',
-    values: { count: aiIndex.automations.length },
-  });
 
   return (
     <EuiCard
@@ -73,12 +62,20 @@ const AiIndexCard = ({ aiIndex, href }: { aiIndex: AiIndexHttpItem; href: string
       >
         <EuiFlexItem grow={false}>
           <EuiBadge color="hollow" iconType="documents" data-test-subj="contextAiIndexCardSources">
-            {sourcesLabel}
+            <FormattedMessage
+              id="xpack.contextEngine.landing.card.sourcesCount"
+              defaultMessage="{count, plural, one {# source} other {# sources}}"
+              values={{ count: aiIndex.sources.length }}
+            />
           </EuiBadge>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiBadge color="hollow" iconType="gear" data-test-subj="contextAiIndexCardAutomations">
-            {automationsLabel}
+            <FormattedMessage
+              id="xpack.contextEngine.landing.card.automationsCount"
+              defaultMessage="{count, plural, one {# automation} other {# automations}}"
+              values={{ count: aiIndex.automations.length }}
+            />
           </EuiBadge>
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -114,9 +111,10 @@ export const AiIndexCards = () => {
         data-test-subj="contextAiIndexCardsError"
         title={
           <h2>
-            {i18n.translate('xpack.contextEngine.landing.errorTitle', {
-              defaultMessage: 'Unable to load AI Indexes',
-            })}
+            <FormattedMessage
+              id="xpack.contextEngine.landing.errorTitle"
+              defaultMessage="Unable to load AI Indexes"
+            />
           </h2>
         }
         body={<p>{error.message}</p>}
@@ -131,17 +129,18 @@ export const AiIndexCards = () => {
         data-test-subj="contextAiIndexCardsEmpty"
         title={
           <h2>
-            {i18n.translate('xpack.contextEngine.landing.emptyTitle', {
-              defaultMessage: 'No AI Indexes yet',
-            })}
+            <FormattedMessage
+              id="xpack.contextEngine.landing.emptyTitle"
+              defaultMessage="No AI Indexes yet"
+            />
           </h2>
         }
         body={
           <p>
-            {i18n.translate('xpack.contextEngine.landing.emptyBody', {
-              defaultMessage:
-                'Create an AI Index to organize and retrieve contextual knowledge for your agents.',
-            })}
+            <FormattedMessage
+              id="xpack.contextEngine.landing.emptyBody"
+              defaultMessage="Create an AI Index to organize and retrieve contextual knowledge for your agents."
+            />
           </p>
         }
         actions={<CreateAiIndexButton />}
