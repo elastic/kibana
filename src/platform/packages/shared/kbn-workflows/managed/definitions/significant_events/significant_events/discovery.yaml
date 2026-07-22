@@ -27,25 +27,12 @@ triggers:
         required: false
         description: 'Max rules per discovery invocation. Caps agent message size; remaining detections are picked up on the next cycle.'
 outputs:
-  - name: candidateCount
-    type: number
   - name: processedCount
     type: number
-  - name: remainingCount
-    type: number
-  - name: hasRemaining
-    type: boolean
-  - name: queueEmpty
-    type: boolean
-  - name: noWork
+  - name: hasWork
     type: boolean
 consts:
   DETECTIONS_INDEX: '.significant_events-detections'
-  SCAN_BATCH_SIZE: 1000
-  # ES default index.max_result_window; large enough that a busy space's processed-marker
-  # count within the lookback window is very unlikely to exceed it (10x SCAN_BATCH_SIZE).
-  PROCESSED_MARKER_FETCH_SIZE: 10000
-  NO_MATCH_IDS: ['__no_processed_marker__']
 
 steps:
   # Copy workflow.spaceId into variables so ES body Liquid expressions can reference it.
@@ -54,169 +41,61 @@ steps:
     with:
       spaceId: '{{ workflow.spaceId }}'
 
-  # -----------------------------------------------------------------------
-  # Step 1: Build the work set from UNPROCESSED change-point detections.
-  # A detection is unprocessed when no processed marker references its detection_id. Detections carry
-  # change_point_type; processed markers carry processed_by — so `exists: change_point_type`
-  # selects detections and `must_not exists: processed_by`... is not enough (marker is a separate doc),
-  # hence we fetch marker ids first and exclude them by detection_id.
-  # size bumped to PROCESSED_MARKER_FETCH_SIZE (10k, ES's default max_result_window) instead of
-  # SCAN_BATCH_SIZE (1k) so a busy space's processed-marker count within the lookback window is
-  # very unlikely to truncate processed_ids and re-surface already-processed detections.
-  # -----------------------------------------------------------------------
-  - name: get_processed_markers
-    type: elasticsearch.request
-    with:
-      method: POST
-      path: '/{{ consts.DETECTIONS_INDEX }}/_search?ignore_unavailable=true'
-      body:
-        size: '${{ consts.PROCESSED_MARKER_FETCH_SIZE }}'
-        _source:
-          includes:
-            - detection_id
-        query:
-          bool:
-            filter:
-              - term:
-                  kibana.space_ids: '{{ variables.spaceId }}'
-              - exists:
-                  field: processed_by
-              - range:
-                  '@timestamp':
-                    gte: '{{ inputs.detectionLookback }}'
-    on-failure:
-      continue: true
-
-  - name: compute_processed_ids
-    type: data.set
-    with:
-      # concat NO_MATCH_IDS so the array is never empty — an empty `terms` value is rejected by ES
-      # (parsing_exception). The sentinel matches no real detection_id, so it never excludes anything.
-      processed_ids: "${{ steps.get_processed_markers.output.hits.hits | default: [] | map: '_source' | map: 'detection_id' | compact | uniq | concat: consts.NO_MATCH_IDS }}"
-
-  # -----------------------------------------------------------------------
-  # Step 3: Materialise the work set — latest UNPROCESSED change-point detection per rule
-  # (collapse rule_uuid). One batch to the agent; the agent reads each row's change_point_type
-  # (+ direction) to decide investigate-vs-resolve. Detections are selected by
-  # `exists: change_point_type` (markers excluded) and processed detections are dropped via
-  # must_not detection_id.
-  # -----------------------------------------------------------------------
+  # Unbounded processed-marker semijoin by detection_id, then reduce to the latest
+  # unprocessed detection per rule (_id tie-break). Score by severity + age.
   - name: get_detections
-    type: elasticsearch.request
+    type: elasticsearch.esql.query
     with:
-      method: POST
-      path: '/{{ consts.DETECTIONS_INDEX }}/_search?ignore_unavailable=true'
-      body:
-        size: '${{ consts.SCAN_BATCH_SIZE }}'
-        collapse:
-          field: rule_uuid
-        sort:
-          - '@timestamp':
-              order: desc
-          - 'p_value':
-              order: asc
-              missing: '_last'
-              unmapped_type: double
-        query:
-          bool:
-            filter:
-              - term:
-                  kibana.space_ids: '{{ variables.spaceId }}'
-              - exists:
-                  field: change_point_type
-              - range:
-                  '@timestamp':
-                    gte: '{{ inputs.detectionLookback }}'
-            must_not:
-              - terms:
-                  detection_id: '${{ steps.compute_processed_ids.output.processed_ids }}'
+      query: |-
+        FROM .significant_events-detections METADATA _id, _source
+        | INLINE STATS processed_count = COUNT(processed_by) BY detection_id
+        | WHERE change_point_type IS NOT NULL AND processed_count == 0
+        | INLINE STATS latest_timestamp = MAX(@timestamp) BY rule_uuid
+        | WHERE @timestamp == latest_timestamp
+        | INLINE STATS latest_id = MAX(_id) BY rule_uuid
+        | WHERE _id == latest_id
+        | EVAL severity_score = COALESCE(severity_score, 0)
+        | EVAL staleness_minutes = DATE_DIFF("minute", @timestamp, NOW())
+        | EVAL score = severity_score + staleness_minutes
+        | SORT score DESC, @timestamp ASC, _id ASC
+        | LIMIT ?1
+        | KEEP rule_uuid, _source, score
+      params:
+        - '${{ inputs.detectionBatchMax }}'
+      filter:
+        bool:
+          filter:
+            - term:
+                kibana.space_ids: '{{ variables.spaceId }}'
+            - range:
+                '@timestamp':
+                  gte: '{{ inputs.detectionLookback }}'
     on-failure:
       continue: true
 
-  - name: compute_unhandled_detection_candidates
+  # Size must be computed separately — comparison operators cannot follow a filter chain.
+  - name: compute_batch_size
     type: data.set
     with:
-      candidates: '${{ steps.get_detections.output.hits.hits | default: [] }}'
+      processedCount: '${{ steps.get_detections.output.values | size | default: 0 }}'
 
-  - name: compute_active_batch
-    # inputs.* is available in ${{ }} as a native type (integer, not string) so it
-    # works correctly as a | slice argument.
+  - name: compute_has_work
     type: data.set
     with:
-      hits: '${{ steps.compute_unhandled_detection_candidates.output.candidates | slice: 0, inputs.detectionBatchMax }}'
+      hasWork: '${{ steps.compute_batch_size.output.processedCount > 0 }}'
 
-  - name: compute_active_batch_rule_uuids
-    # Rule UUIDs the agent handled this cycle
-    type: data.set
-    with:
-      rule_uuids: "${{ steps.compute_active_batch.output.hits | default: [] | map: '_source' | map: 'rule_uuid' | compact | uniq | concat: consts.NO_MATCH_IDS }}"
-
-  - name: get_batch_backlog
-    type: elasticsearch.request
-    with:
-      method: POST
-      path: '/{{ consts.DETECTIONS_INDEX }}/_search?ignore_unavailable=true'
-      body:
-        size: '${{ consts.SCAN_BATCH_SIZE }}'
-        _source:
-          includes:
-            - detection_id
-            - rule_uuid
-        query:
-          bool:
-            filter:
-              - term:
-                  kibana.space_ids: '{{ variables.spaceId }}'
-              - exists:
-                  field: change_point_type
-              - range:
-                  '@timestamp':
-                    gte: '{{ inputs.detectionLookback }}'
-              - terms:
-                  rule_uuid: '${{ steps.compute_active_batch_rule_uuids.output.rule_uuids }}'
-            must_not:
-              - terms:
-                  detection_id: '${{ steps.compute_processed_ids.output.processed_ids }}'
-    on-failure:
-      continue: true
-
-  # NOTE: cross-step references chaining a `.size` property accessor (e.g.
-  # `steps.x.output.hits.size`) resolve to undefined once referenced from the
-  # 3rd+ step of the workflow — an engine quirk with the dot-notation size
-  # getter. The `| size` filter does not have this issue, but filter chains
-  # cannot be followed by comparison operators in the same expression, so raw
-  # sizes are computed here and derived stats are computed from those (plain
-  # number) outputs in a separate step below.
-  - name: compute_queue_sizes
-    type: data.set
-    with:
-      candidateCount: '${{ steps.compute_unhandled_detection_candidates.output.candidates | size | default: 0 }}'
-      processedCount: '${{ steps.compute_active_batch.output.hits | size | default: 0 }}'
-
-  - name: compute_queue_stats
-    type: data.set
-    with:
-      candidateCount: '${{ steps.compute_queue_sizes.output.candidateCount }}'
-      processedCount: '${{ steps.compute_queue_sizes.output.processedCount }}'
-      remainingCount: '${{ steps.compute_queue_sizes.output.candidateCount | minus: steps.compute_queue_sizes.output.processedCount | at_least: 0 }}'
-      hasRemaining: '${{ steps.compute_queue_sizes.output.candidateCount > steps.compute_queue_sizes.output.processedCount }}'
-      queueEmpty: '${{ steps.compute_queue_sizes.output.candidateCount <= steps.compute_queue_sizes.output.processedCount }}'
-      # Work exists when there is at least one detection row in this cycle's batch.
-      hasWork: '${{ steps.compute_queue_sizes.output.processedCount > 0 }}'
-
-  - name: output_no_detections
-    type: workflow.output
-    if: '${{ steps.compute_queue_stats.output.hasWork == false }}'
-    with:
-      candidateCount: '${{ steps.compute_queue_stats.output.candidateCount }}'
-      processedCount: '${{ steps.compute_queue_stats.output.processedCount }}'
-      remainingCount: '${{ steps.compute_queue_stats.output.remainingCount }}'
-      hasRemaining: '${{ steps.compute_queue_stats.output.hasRemaining }}'
-      queueEmpty: '${{ steps.compute_queue_stats.output.queueEmpty }}'
-      noWork: true
+  - name: maybe_exit_no_work
+    type: if
+    condition: '${{ steps.compute_has_work.output.hasWork == false }}'
+    steps:
+      - name: output_no_detections
+        type: workflow.output
+        with:
+          processedCount: '${{ steps.compute_batch_size.output.processedCount }}'
+          hasWork: false
 
   # -----------------------------------------------------------------------
-  # Step 4: Correlate detections into discoveries.
+  # Correlate detections into discoveries.
   # -----------------------------------------------------------------------
   - name: run_discovery_agent
     type: ai.agent
@@ -231,7 +110,9 @@ steps:
     with:
       message: |
         ## Detection batch
-        {{ steps.compute_active_batch.output.hits | map: '_source' | json }}
+
+        Columns: {{ steps.get_detections.output.columns | map: 'name' | json }}
+        Rows: {{ steps.get_detections.output.values | json }}
       schema:
         type: object
         properties:
@@ -258,40 +139,46 @@ steps:
     with:
       written_rule_uuids: '${{ steps.run_discovery_agent.output.structured_output.written_rule_uuids | default: [] }}'
 
-  # -----------------------------------------------------------------------
-  # Step 5: Mark processed detections.
-  # -----------------------------------------------------------------------
-  - name: foreach_stamp_processed
-    if: >-
-      ${{ steps.get_batch_backlog.output.hits.total.value > 0
-      and steps.run_discovery_agent.error == null }}
-    type: foreach
-    foreach: '${{ steps.get_batch_backlog.output.hits.hits }}'
-    steps:
-      - name: check_rule_written
-        type: if
-        condition: '${{ variables.written_rule_uuids contains foreach.item._source.rule_uuid }}'
-        steps:
-          - name: check_marker_exists
-            type: elasticsearch.request
-            with:
-              method: POST
-              path: '/{{ consts.DETECTIONS_INDEX }}/_count?ignore_unavailable=true'
-              body:
-                query:
-                  bool:
-                    filter:
-                      - term:
-                          kibana.space_ids: '{{ variables.spaceId }}'
-                      - exists:
-                          field: processed_by
-                      - term:
-                          detection_id: '{{ foreach.item._source.detection_id }}'
-            on-failure:
-              continue: true
+  # Size must be computed separately — comparison operators cannot follow a filter chain.
+  - name: count_written_rules
+    type: data.set
+    with:
+      writtenCount: '${{ variables.written_rule_uuids | size | default: 0 }}'
 
+  # Mark processed detections for every written rule (one query, not N).
+  # Gate with type: if — step-level `if` is stripped on elasticsearch.* schemas.
+  - name: maybe_stamp_processed
+    type: if
+    condition: '${{ steps.run_discovery_agent.error == null and steps.count_written_rules.output.writtenCount > 0 }}'
+    steps:
+      - name: get_written_rules_backlog
+        type: elasticsearch.esql.query
+        with:
+          query: |-
+            FROM .significant_events-detections
+            | INLINE STATS processed_count = COUNT(processed_by) BY detection_id
+            | WHERE change_point_type IS NOT NULL AND processed_count == 0
+            | KEEP detection_id
+          filter:
+            bool:
+              filter:
+                - term:
+                    kibana.space_ids: '{{ variables.spaceId }}'
+                - terms:
+                    rule_uuid: '${{ variables.written_rule_uuids }}'
+                - range:
+                    '@timestamp':
+                      gte: '{{ inputs.detectionLookback }}'
+        on-failure:
+          continue: false
+
+      - name: foreach_stamp_processed
+        type: foreach
+        foreach: '${{ steps.get_written_rules_backlog.output.values | default: [] }}'
+        iteration-on-failure:
+          continue: true
+        steps:
           - name: write_processed_marker
-            if: '${{ steps.check_marker_exists.output.count == 0 }}'
             type: elasticsearch.request
             with:
               method: POST
@@ -301,7 +188,7 @@ steps:
                 kibana:
                   space_ids:
                     - '{{ variables.spaceId }}'
-                detection_id: '{{ foreach.item._source.detection_id }}'
+                detection_id: '{{ foreach.item[0] }}'
                 processed_by: '{{ execution.id }}'
             on-failure:
               continue: true
@@ -309,9 +196,5 @@ steps:
   - name: output_result
     type: workflow.output
     with:
-      candidateCount: '${{ steps.compute_queue_stats.output.candidateCount }}'
-      processedCount: '${{ steps.compute_queue_stats.output.processedCount }}'
-      remainingCount: '${{ steps.compute_queue_stats.output.remainingCount }}'
-      hasRemaining: '${{ steps.compute_queue_stats.output.hasRemaining }}'
-      queueEmpty: '${{ steps.compute_queue_stats.output.queueEmpty }}'
-      noWork: false
+      processedCount: '${{ steps.compute_batch_size.output.processedCount }}'
+      hasWork: true
