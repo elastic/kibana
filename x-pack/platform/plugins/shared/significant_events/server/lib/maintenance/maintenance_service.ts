@@ -10,7 +10,7 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { NonTerminalExecutionStatuses } from '@kbn/workflows';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
-import type { RulesClientApi } from '@kbn/alerting-v2-plugin/server';
+import { ALERTING_V2_ERROR_CODES, type RulesClientApi } from '@kbn/alerting-v2-plugin/server';
 import type { StreamsServer } from '@kbn/streams-plugin/server/types';
 import type {
   SignificantEventsMaintenanceFailure,
@@ -136,9 +136,9 @@ const logFailures = (
 /**
  * Toggle `enabled` on a set of alerting v2 signal rules. Rule pause/resume
  * targets the v2 engine only (v1 is being removed in a follow-up). Returns the
- * ids that were actually toggled (no error), the ids that failed for a non-404
- * reason, and one failure entry per fatal id. A 404 is treated as "already
- * gone" and reported as neither toggled nor failed.
+ * ids that were actually toggled (no error), the ids that failed for a non-not-found
+ * reason, and one failure entry per fatal id. A missing rule is treated as
+ * "already gone" and reported as neither toggled nor failed.
  */
 const setV2RulesEnabled = async (
   rulesClient: RulesClientApi,
@@ -152,7 +152,9 @@ const setV2RulesEnabled = async (
   const { errors } = enabled
     ? await rulesClient.bulkEnableRules({ ids })
     : await rulesClient.bulkDisableRules({ ids });
-  const fatalErrors = errors.filter((error) => error.error.statusCode !== 404);
+  const fatalErrors = errors.filter(
+    (error) => error.error.code !== ALERTING_V2_ERROR_CODES.RULE_NOT_FOUND
+  );
   const erroredIds = new Set(errors.map((error) => error.id));
   return {
     toggledIds: ids.filter((id) => !erroredIds.has(id)),

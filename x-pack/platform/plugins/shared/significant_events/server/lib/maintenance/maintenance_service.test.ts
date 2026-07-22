@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ALERTING_V2_ERROR_CODES } from '@kbn/alerting-v2-plugin/server';
 import type { KibanaRequest } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import {
@@ -109,7 +110,7 @@ function makeManagementApi(options?: {
 
 interface BulkError {
   id: string;
-  error: { statusCode: number; message: string };
+  error: { code: string; message: string };
 }
 
 // Alerting v2 rules client stub. Records the ids each call received and returns
@@ -435,7 +436,12 @@ describe('SignificantEventsMaintenanceService', () => {
     it('records per-rule failures and only counts the rules that were actually disabled', async () => {
       const { api } = makeManagementApi();
       const v2RulesClient = makeV2RulesClient({
-        disableErrors: [{ id: 'rule-2', error: { statusCode: 500, message: 'boom' } }],
+        disableErrors: [
+          {
+            id: 'rule-2',
+            error: { code: ALERTING_V2_ERROR_CODES.INTERNAL_SERVER_ERROR, message: 'boom' },
+          },
+        ],
       });
       const { service } = makeService({
         management: api,
@@ -449,10 +455,15 @@ describe('SignificantEventsMaintenanceService', () => {
       expect(summary.partialFailures).toContainEqual({ target: 'rule:rule-2', error: 'boom' });
     });
 
-    it('treats a 404 from a backed rule as already-gone (no failure, not counted)', async () => {
+    it('treats RULE_NOT_FOUND from a backed rule as already-gone (no failure, not counted)', async () => {
       const { api } = makeManagementApi();
       const v2RulesClient = makeV2RulesClient({
-        disableErrors: [{ id: 'rule-2', error: { statusCode: 404, message: 'not found' } }],
+        disableErrors: [
+          {
+            id: 'rule-2',
+            error: { code: ALERTING_V2_ERROR_CODES.RULE_NOT_FOUND, message: 'not found' },
+          },
+        ],
       });
       const { service } = makeService({
         management: api,
@@ -892,7 +903,12 @@ describe('SignificantEventsMaintenanceService', () => {
     it('flips to enabled with warnings when a rule cannot be re-enabled', async () => {
       const { api } = makeManagementApi();
       const v2RulesClient = makeV2RulesClient({
-        enableErrors: [{ id: 'rule-1', error: { statusCode: 500, message: 'boom' } }],
+        enableErrors: [
+          {
+            id: 'rule-1',
+            error: { code: ALERTING_V2_ERROR_CODES.INTERNAL_SERVER_ERROR, message: 'boom' },
+          },
+        ],
       });
       const { service, soClient } = makeService({
         management: api,
