@@ -41,7 +41,7 @@ describe('referenceLine', () => {
     const args: ReferenceLineArgs = {
       name: 'some value',
       value: 100,
-      icon: 'warning',
+      icon: 'alert',
       iconPosition: 'below',
       position: 'bottom',
       lineStyle: 'solid',

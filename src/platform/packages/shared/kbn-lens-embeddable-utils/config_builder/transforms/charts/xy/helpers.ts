@@ -83,19 +83,19 @@ export function isLensStateDataLayer(
 type XYApiIconName = NonNullable<ReferenceLineLayerType['thresholds'][number]['icon']>;
 
 export const xyIconCompat = getReversibleMappings<XYApiIconName, AvailableAnnotationIcon>([
-  ['alert', 'warning'],
+  ['alert', 'alert'],
   ['asterisk', 'asterisk'],
   ['bell', 'bell'],
   ['bolt', 'bolt'],
   ['bug', 'bug'],
   ['circle', 'circle'],
-  ['editor_comment', 'comment'],
+  ['editor_comment', 'editorComment'],
   ['flag', 'flag'],
   ['heart', 'heart'],
-  ['map_marker', 'waypoint'],
-  ['pin_filled', 'pinFill'],
-  ['star_empty', 'star'],
-  ['star_filled', 'starFill'],
+  ['map_marker', 'mapMarker'],
+  ['pin_filled', 'pinFilled'],
+  ['star_empty', 'starEmpty'],
+  ['star_filled', 'starFilled'],
   ['tag', 'tag'],
   ['triangle', 'triangle'],
 ]);

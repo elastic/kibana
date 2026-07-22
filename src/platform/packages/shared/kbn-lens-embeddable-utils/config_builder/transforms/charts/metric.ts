@@ -97,23 +97,23 @@ type MetricStyling = NonNullable<MetricConfig['styling']>;
 type MetricIconName = NonNullable<NonNullable<MetricStyling['icon']>['name']>;
 
 export const iconCompat = getReversibleMappings<MetricIconName, string>([
-  ['alert', 'warning'],
+  ['alert', 'alert'],
   ['asterisk', 'asterisk'],
   ['bell', 'bell'],
   ['bolt', 'bolt'],
   ['bug', 'bug'],
-  ['compute', 'processor'],
-  ['editor_comment', 'comment'],
+  ['compute', 'compute'],
+  ['editor_comment', 'editorComment'],
   ['flag', 'flag'],
   ['globe', 'globe'],
   ['heart', 'heart'],
-  ['map_marker', 'waypoint'],
+  ['map_marker', 'mapMarker'],
   ['pin', 'pin'],
   ['sort_down', 'sortDown'],
   ['sort_up', 'sortUp'],
-  ['star_empty', 'star'],
+  ['star_empty', 'starEmpty'],
   ['tag', 'tag'],
-  ['temperature', 'thermometer'],
+  ['temperature', 'temperature'],
 ]);
 
 function getAccessorName(type: 'metric' | 'max' | 'breakdown' | 'secondary') {

@@ -91,7 +91,7 @@ exports[`src/legacy/core_plugins/metrics/public/components/icon_select/icon_sele
 <span>
   <EuiIcon
     aria-hidden={true}
-    type="comment"
+    type="editorComment"
   />
    Comment
 </span>

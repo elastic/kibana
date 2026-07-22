@@ -29,7 +29,7 @@ export const iconsSet: IconSet<AvailableMetricIcon> = [
     }),
   },
   {
-    value: 'processor',
+    value: 'compute',
     label: i18n.translate('xpack.observability.metric.iconSelect.computeLabel', {
       defaultMessage: 'Compute',
     }),
@@ -41,7 +41,7 @@ export const iconsSet: IconSet<AvailableMetricIcon> = [
     }),
   },
   {
-    value: 'thermometer',
+    value: 'temperature',
     label: i18n.translate('xpack.observability.metric.iconSelect.temperatureLabel', {
       defaultMessage: 'Temperature',
     }),
@@ -53,7 +53,7 @@ export const iconsSet: IconSet<AvailableMetricIcon> = [
     }),
   },
   {
-    value: 'warning',
+    value: 'alert',
     label: i18n.translate('xpack.observability.metric.iconSelect.alertIconLabel', {
       defaultMessage: 'Alert',
     }),
@@ -78,7 +78,7 @@ export const iconsSet: IconSet<AvailableMetricIcon> = [
   },
 
   {
-    value: 'comment',
+    value: 'editorComment',
     label: i18n.translate('xpack.observability.metric.iconSelect.commentIconLabel', {
       defaultMessage: 'Comment',
     }),
@@ -103,7 +103,7 @@ export const iconsSet: IconSet<AvailableMetricIcon> = [
     }),
   },
   {
-    value: 'waypoint',
+    value: 'mapMarker',
     label: i18n.translate('xpack.observability.metric.iconSelect.mapMarkerLabel', {
       defaultMessage: 'Map Marker',
     }),
@@ -115,7 +115,7 @@ export const iconsSet: IconSet<AvailableMetricIcon> = [
     }),
   },
   {
-    value: 'star',
+    value: 'starEmpty',
     label: i18n.translate('xpack.observability.metric.iconSelect.starLabel', {
       defaultMessage: 'Star',
     }),
