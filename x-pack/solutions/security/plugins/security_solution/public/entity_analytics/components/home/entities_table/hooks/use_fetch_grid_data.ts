@@ -106,9 +106,11 @@ export function useFetchGridData(options: UseEntitiesOptions) {
           },
           {
             executionContext: {
-              type: 'security_solution',
-              name: 'entity_analytics-home_page',
-              id: 'entities_table',
+              child: {
+                type: 'security_solution',
+                name: 'entity_analytics-home_page',
+                id: 'entities_table',
+              },
             },
           }
         )

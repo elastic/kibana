@@ -113,9 +113,11 @@ const useFilteredEntityIds = (spaceId?: string): FilteredEntityIds => {
         signal,
         filter: filterQuery,
         executionContext: {
-          type: 'security_solution',
-          name: 'entity_analytics-home_page',
-          id: 'anomalies_entity_filter',
+          child: {
+            type: 'security_solution',
+            name: 'entity_analytics-home_page',
+            id: 'anomalies_entity_filter',
+          },
         },
       });
       return esqlResponseToRecords<{ 'entity.id': string }>(esqlResult?.response)
@@ -212,9 +214,11 @@ const useRecentAnomaliesTopRowsQuery = (params: {
         signal,
         timeRange,
         executionContext: {
-          type: 'security_solution',
-          name: 'entity_analytics-home_page',
-          id: 'anomalies_top_rows',
+          child: {
+            type: 'security_solution',
+            name: 'entity_analytics-home_page',
+            id: 'anomalies_top_rows',
+          },
         },
       });
       return {
@@ -311,9 +315,11 @@ export const useRecentAnomaliesQuery = (params: {
         signal,
         timeRange,
         executionContext: {
-          type: 'security_solution',
-          name: 'entity_analytics-home_page',
-          id: 'anomalies_heatmap',
+          child: {
+            type: 'security_solution',
+            name: 'entity_analytics-home_page',
+            id: 'anomalies_heatmap',
+          },
         },
       });
       const anomalyRecords = esqlResponseToRecords<Record<string, string | number>>(

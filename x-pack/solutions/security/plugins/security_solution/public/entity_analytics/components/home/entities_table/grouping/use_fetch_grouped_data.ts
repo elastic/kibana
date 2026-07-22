@@ -130,9 +130,11 @@ export const useFetchGroupedData = ({
           },
           {
             executionContext: {
-              type: 'security_solution',
-              name: 'entity_analytics-home_page',
-              id: 'entities_table_grouped',
+              child: {
+                type: 'security_solution',
+                name: 'entity_analytics-home_page',
+                id: 'entities_table_grouped',
+              },
             },
           }
         )
@@ -184,9 +186,11 @@ export const useFetchTargetMetadata = (entityIds: string[]): TargetMetadataMap =
           },
           {
             executionContext: {
-              type: 'security_solution',
-              name: 'entity_analytics-home_page',
-              id: 'entities_table_target_metadata',
+              child: {
+                type: 'security_solution',
+                name: 'entity_analytics-home_page',
+                id: 'entities_table_target_metadata',
+              },
             },
           }
         )

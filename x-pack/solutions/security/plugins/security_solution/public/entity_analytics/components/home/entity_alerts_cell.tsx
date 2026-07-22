@@ -133,9 +133,11 @@ export const EntityAlertsCell: React.FC<{
           // hasn't supplied one.
           signal: signal ?? new AbortController().signal,
           context: {
-            type: 'security_solution',
-            name: 'entity_analytics-home_page',
-            id: 'entity_alerts_cell',
+            child: {
+              type: 'security_solution',
+              name: 'entity_analytics-home_page',
+              id: 'entity_alerts_cell',
+            },
           },
         });
         endTracking('success');
