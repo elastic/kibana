@@ -117,14 +117,6 @@ steps:
               order: asc
               missing: '_last'
               unmapped_type: double
-        _source:
-          includes:
-            - detection_id
-            - rule_name
-            - rule_uuid
-            - stream_name
-            - change_point_type
-            - p_value
         query:
           bool:
             filter:
@@ -248,7 +240,7 @@ steps:
             items:
               type: string
             description: >-
-              rule_uuid of every entry across every detections[] array from every
+              rule_uuid of every entry across every signals[] array from every
               discovery_write call made this cycle — including calls skipped by
               discovery_write's own deduplication (written: false against an
               existing episode still counts; the rule was accounted for). Used both

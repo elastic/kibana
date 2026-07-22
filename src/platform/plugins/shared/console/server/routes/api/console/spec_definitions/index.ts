@@ -9,6 +9,8 @@
 
 import type { RequestHandler } from '@kbn/core/server';
 import type { RouteDependencies } from '../../..';
+import type { KibanaApiDocLinksMap } from '../../../../../common/types/api_responses';
+import kibanaApiDocLinks from '../../../../lib/spec_definitions/kibana_api_doc_links/generated_kibana_api_doc_links.json';
 
 interface SpecDefinitionsRouteResponse {
   es: {
@@ -16,12 +18,16 @@ interface SpecDefinitionsRouteResponse {
     globals: Record<string, any>;
     endpoints: Record<string, any>;
   };
+  kibana: {
+    docLinks: KibanaApiDocLinksMap;
+  };
 }
 
 export const registerSpecDefinitionsRoute = ({ router, services }: RouteDependencies) => {
   const handler: RequestHandler = async (ctx, request, response) => {
     const specResponse: SpecDefinitionsRouteResponse = {
       es: services.specDefinitionService.asJson(),
+      kibana: { docLinks: kibanaApiDocLinks },
     };
 
     return response.ok({

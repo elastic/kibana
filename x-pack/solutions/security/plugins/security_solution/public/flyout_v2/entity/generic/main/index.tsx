@@ -38,6 +38,7 @@ import { GenericEntityFlyoutContent } from '../../../../flyout/entity_details/ge
 import { GenericEntityFlyoutFooter } from '../../../../flyout/entity_details/generic_right/footer';
 import { GENERIC_FLYOUT_STORAGE_KEYS } from '../../../../flyout/entity_details/generic_right/constants';
 import { useFlyoutApi } from '../../../use_flyout_api';
+import { FLYOUT_ORIGIN } from '../../../../common/lib/telemetry';
 
 export type GenericEntityProps = {
   scopeId: string;
@@ -111,7 +112,7 @@ export const GenericEntity: FC<GenericEntityProps> = memo(function GenericEntity
   }, [getGenericEntity.data?._id]);
 
   const onShowGeneric = useCallback(() => {
-    openGenericEntityFlyoutAsChild({ ...params });
+    openGenericEntityFlyoutAsChild({ ...params, origin: FLYOUT_ORIGIN.TOOL_HEADER_TITLE });
   }, [openGenericEntityFlyoutAsChild, params]);
 
   const openDetailsPanel = useCallback(
@@ -125,6 +126,7 @@ export const GenericEntity: FC<GenericEntityProps> = memo(function GenericEntity
             tableStorageKey: GENERIC_FLYOUT_STORAGE_KEYS.OVERVIEW_FIELDS_TABLE_PINS,
             entityName: value,
             onShowEntity: onShowGeneric,
+            origin: FLYOUT_ORIGIN.FIELDS_SECTION,
           });
         case EntityDetailsLeftPanelTab.CSP_INSIGHTS:
           switch (path.subTab) {
@@ -134,6 +136,7 @@ export const GenericEntity: FC<GenericEntityProps> = memo(function GenericEntity
                 value,
                 entityId: genericInsightsValue,
                 onShowEntity: onShowGeneric,
+                origin: FLYOUT_ORIGIN.INSIGHTS_MISCONFIGURATION,
               });
             case CspInsightLeftPanelSubTab.VULNERABILITIES:
               return openEntityVulnerabilityInsights({
@@ -141,6 +144,7 @@ export const GenericEntity: FC<GenericEntityProps> = memo(function GenericEntity
                 entityId: genericInsightsValue,
                 entityType: EntityType.generic,
                 onShowHost: onShowGeneric,
+                origin: FLYOUT_ORIGIN.INSIGHTS_VULNERABILITY,
               });
             case CspInsightLeftPanelSubTab.ALERTS:
               return openEntityAlertsInsights({
@@ -148,6 +152,7 @@ export const GenericEntity: FC<GenericEntityProps> = memo(function GenericEntity
                 value,
                 entityId: genericInsightsValue,
                 onShowEntity: onShowGeneric,
+                origin: FLYOUT_ORIGIN.INSIGHTS_ALERTS,
               });
           }
       }

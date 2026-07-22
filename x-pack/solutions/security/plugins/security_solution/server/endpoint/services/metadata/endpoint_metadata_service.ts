@@ -11,6 +11,10 @@ import type { SearchResponse, SearchTotalHits } from '@elastic/elasticsearch/lib
 import type { Agent, AgentPolicy, PackagePolicy } from '@kbn/fleet-plugin/common';
 import { AgentNotFoundError } from '@kbn/fleet-plugin/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import {
+  hasVersionSuffix,
+  removeVersionSuffixFromPolicyId,
+} from '@kbn/fleet-plugin/common/services/version_specific_policies_utils';
 import { stringify } from '../../utils/stringify';
 import type {
   HostInfo,
@@ -99,6 +103,46 @@ export class EndpointMetadataService {
       );
       await this.fleetServices.ensureInCurrentSpace({ agentIds });
     }
+  }
+
+  /**
+   * Mutate the `hits` included in a search response against the United metadata index to address
+   * known issue with data populated in the records
+   * @param data
+   * @private
+   */
+  private adjustUnitedIndexSearchResultHits(
+    data: SearchResponse<UnitedAgentMetadataPersistedData>
+  ): SearchResponse<UnitedAgentMetadataPersistedData> {
+    const hits = data.hits?.hits ?? [];
+    const recordsAltered: string[] = [];
+
+    for (const hit of hits) {
+      // If `united.agent.policy_id` includes a suffix, remove it
+      if (
+        hit._source?.united?.agent?.policy_id &&
+        hasVersionSuffix(hit._source?.united?.agent?.policy_id)
+      ) {
+        const existingPolicyId = hit._source.united.agent.policy_id;
+        const adjustedPolicyId = removeVersionSuffixFromPolicyId(existingPolicyId);
+
+        recordsAltered.push(
+          `Agent [${hit._source?.united?.agent?.agent?.id}]: adjusted 'policy_id' property value from [${existingPolicyId}] to [${adjustedPolicyId}]`
+        );
+
+        (hit._source.united.agent.policy_id as string) = adjustedPolicyId;
+      }
+    }
+
+    if (recordsAltered.length > 0) {
+      this.logger
+        .get('adjustUnitedIndexSearchResultHits')
+        .debug(
+          () => `Made ${recordsAltered.length} data adjustments:\n${recordsAltered.join('\n')}`
+        );
+    }
+
+    return data;
   }
 
   /**
@@ -303,7 +347,7 @@ export class EndpointMetadataService {
    */
   async getFleetAgent(agentId: string): Promise<Agent> {
     try {
-      return await this.fleetServices.agent.getAgent(agentId);
+      return await this.fleetServices.fetchAgent(agentId);
     } catch (error) {
       if (error instanceof AgentNotFoundError) {
         throw new FleetAgentNotFoundError(`agent with id ${agentId} not found`, error);
@@ -378,12 +422,13 @@ export class EndpointMetadataService {
 
     let unitedMetadataQueryResponse: SearchResponse<UnitedAgentMetadataPersistedData>;
 
-    logger.debug(() => `Executing query: ${stringify(unitedIndexQuery)}`);
+    logger.debug(() => `Executing query: ${stringify(unitedIndexQuery, 15)}`);
 
     try {
-      unitedMetadataQueryResponse = await this.esClient.search<UnitedAgentMetadataPersistedData>(
-        unitedIndexQuery
-      );
+      unitedMetadataQueryResponse = await this.esClient
+        .search<UnitedAgentMetadataPersistedData>(unitedIndexQuery)
+        .then(this.adjustUnitedIndexSearchResultHits.bind(this));
+
       // FYI: we don't need to run the ES search response through `this.ensureDataValidForSpace()` because
       // the query (`unitedIndexQuery`) above already included a filter with all of the valid policy ids
       // for the current space - thus data is already coped to the space
@@ -468,7 +513,7 @@ export class EndpointMetadataService {
     const ccsEnabled = await this.endpointContext.isCcsEnabled();
     const query = getESQueryHostMetadataByIDs(endpointIDs, ccsEnabled);
 
-    this.logger.get('getMetadataForEndpoints').debug(() => `with query: ${stringify(query)}`);
+    this.logger.get('getMetadataForEndpoints').debug(() => `with query: ${stringify(query, 15)}`);
 
     const searchResult = await this.esClient.search<HostMetadata>(query).catch(catchAndWrapError);
 

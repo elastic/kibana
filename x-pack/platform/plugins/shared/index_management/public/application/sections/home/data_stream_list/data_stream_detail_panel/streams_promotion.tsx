@@ -34,7 +34,7 @@ export function StreamsPromotion({ dataStreamName }: { dataStreamName: string })
   return (
     <EuiBanner
       css={css`
-        margin: ${euiTheme.size.l};
+        margin: ${euiTheme.size.l} ${euiTheme.size.l} 0;
       `}
       title={i18n.translate('xpack.idxMgmt.streamsPromotion.title', {
         defaultMessage: 'A new way to manage streams',

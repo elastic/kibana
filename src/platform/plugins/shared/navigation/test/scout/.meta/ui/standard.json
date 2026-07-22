@@ -1,5 +1,9 @@
 {
-  "sha1": "a9c1be5f30c3e68122a03e94886ae8507375f2c5",
+  "sha1": "57659a7c6b07f823bf0cf2ed850f969ec9e223bf",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
   "tests": [
     {
       "id": "56a87b3c042792d-0f151a046a326da",
@@ -32,98 +36,98 @@
     {
       "id": "9d36407f6b29998-c5ea838e311eff6",
       "title": "navigation has security serverless side nav",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-serverless-security_complete",
         "@cloud-serverless-security_complete"
       ],
       "location": {
         "file": "src/platform/plugins/shared/navigation/test/scout/ui/tests/navigation.spec.ts",
-        "line": 16,
+        "line": 15,
         "column": 7
       }
     },
     {
       "id": "9d36407f6b29998-50f436bf186356b",
       "title": "navigation breadcrumbs reflect navigation state",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-serverless-security_complete",
         "@cloud-serverless-security_complete"
       ],
       "location": {
         "file": "src/platform/plugins/shared/navigation/test/scout/ui/tests/navigation.spec.ts",
-        "line": 22,
+        "line": 21,
         "column": 7
       }
     },
     {
       "id": "9d36407f6b29998-8b0cf971e47353f",
       "title": "navigation navigate using search",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-serverless-security_complete",
         "@cloud-serverless-security_complete"
       ],
       "location": {
         "file": "src/platform/plugins/shared/navigation/test/scout/ui/tests/navigation.spec.ts",
-        "line": 36,
+        "line": 37,
         "column": 7
       }
     },
     {
       "id": "9d36407f6b29998-b43c4bfc123407e",
       "title": "navigation shows cases in sidebar navigation",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-serverless-security_complete",
         "@cloud-serverless-security_complete"
       ],
       "location": {
         "file": "src/platform/plugins/shared/navigation/test/scout/ui/tests/navigation.spec.ts",
-        "line": 51,
+        "line": 52,
         "column": 7
       }
     },
     {
       "id": "9d36407f6b29998-6fca0a62e4a1daa",
       "title": "navigation navigates to cases app",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-serverless-security_complete",
         "@cloud-serverless-security_complete"
       ],
       "location": {
         "file": "src/platform/plugins/shared/navigation/test/scout/ui/tests/navigation.spec.ts",
-        "line": 62,
+        "line": 63,
         "column": 7
       }
     },
     {
       "id": "9d36407f6b29998-c32ec49ee4034cb",
       "title": "navigation navigates to maintenance windows",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-serverless-security_complete",
         "@cloud-serverless-security_complete"
       ],
       "location": {
         "file": "src/platform/plugins/shared/navigation/test/scout/ui/tests/navigation.spec.ts",
-        "line": 75,
+        "line": 76,
         "column": 7
       }
     },
     {
       "id": "9d36407f6b29998-1a35a08787a51e1",
       "title": "navigation opens panel on legacy management landing page",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-serverless-security_complete",
         "@cloud-serverless-security_complete"
       ],
       "location": {
         "file": "src/platform/plugins/shared/navigation/test/scout/ui/tests/navigation.spec.ts",
-        "line": 86,
+        "line": 87,
         "column": 7
       }
     }

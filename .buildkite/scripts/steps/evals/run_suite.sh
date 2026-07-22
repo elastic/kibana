@@ -168,6 +168,11 @@ steps:
     steps:
 EOF
 
+      fanout_preemptible=true
+      if [[ "$(printf '%s' "${EVAL_PREEMPTIBLE:-1}" | tr '[:upper:]' '[:lower:]')" =~ ^(0|false|no)$ ]]; then
+        fanout_preemptible=false
+      fi
+
       fanout_step_keys=()
       while IFS= read -r connector_id; do
         [[ -z "$connector_id" ]] && continue
@@ -207,12 +212,17 @@ EOF
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-8
+EOF
+
+        if [[ "$fanout_preemptible" == "true" ]]; then
+          cat >>"$FANOUT_PIPELINE_FILE" <<EOF
           preemptible: true
         retry:
           automatic:
             - exit_status: "-1"
               limit: 3
 EOF
+        fi
       done <<<"$CONNECTOR_IDS"
 
       # Resolve a PR number (if any) so triage can be posted as a PR comment:

@@ -27,6 +27,7 @@ import {
   useDimensionsWipe,
   useDiscoverFieldForBreakdown,
   useMetricFieldsFilter,
+  useMetricsSort,
   useResetPageOnDimensionsChange,
 } from './hooks';
 import { isSuppressedFetchError } from '../../chart/utils/is_suppressed_fetch_error';
@@ -54,6 +55,7 @@ export const MetricsExperienceGrid = ({
     selectedDimensions,
     onDimensionsChange,
     onPageChange,
+    metricsSort,
     profileId,
     gridSettings,
     onGridSettingsChange,
@@ -76,6 +78,13 @@ export const MetricsExperienceGrid = ({
   const { filteredMetricItems } = useMetricFieldsFilter({
     metricItems,
     searchTerm,
+  });
+
+  const [sortBy, direction] = metricsSort;
+  const { sortedMetricItems } = useMetricsSort({
+    metricItems: filteredMetricItems,
+    sortBy,
+    direction,
   });
 
   useDiscoverFieldForBreakdown(
@@ -191,7 +200,7 @@ export const MetricsExperienceGrid = ({
         onKeyDown={onKeyDown}
       >
         <MetricsExperienceGridContent
-          metricItems={filteredMetricItems}
+          metricItems={sortedMetricItems}
           activeDimensions={activeDimensions}
           services={services}
           discoverFetch$={discoverFetch$}

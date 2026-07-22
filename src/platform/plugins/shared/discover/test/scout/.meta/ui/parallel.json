@@ -1,5 +1,9 @@
 {
-  "sha1": "8d58c3269d2d110f0156b3631d78f25f4e93bd94",
+  "sha1": "1ada770aa9236a776e17ddc47702667ca250850d",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
   "tests": [
     {
       "id": "5f3825f308b4d12-d89fd2ade65d14f",
@@ -427,7 +431,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid/data_grid_pagination_saved_search.spec.ts",
-        "line": 51,
+        "line": 50,
         "column": 14
       }
     },
@@ -440,7 +444,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid/data_grid_pagination_saved_search.spec.ts",
-        "line": 122,
+        "line": 121,
         "column": 14
       }
     },
@@ -648,7 +652,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid/data_grid_sample_size_saved_search_dashboard.spec.ts",
-        "line": 53,
+        "line": 52,
         "column": 14
       }
     },
@@ -661,7 +665,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid/data_grid_sample_size_saved_search_dashboard.spec.ts",
-        "line": 112,
+        "line": 111,
         "column": 14
       }
     },
@@ -674,7 +678,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid/data_grid_sample_size_saved_search_dashboard.spec.ts",
-        "line": 125,
+        "line": 124,
         "column": 14
       }
     },
@@ -848,6 +852,149 @@
       }
     },
     {
+      "id": "2864055bb746b0c-958b3be687e6b1b",
+      "title": "Discover default route can use a saved search as default route",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/default_route.spec.ts",
+        "line": 48,
+        "column": 12
+      }
+    },
+    {
+      "id": "2864055bb746b0c-be60dfd199df2dc",
+      "title": "Discover default route can use a URL with filters as default route",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/default_route.spec.ts",
+        "line": 62,
+        "column": 12
+      }
+    },
+    {
+      "id": "b415c9303d327cd-7ac4102f64101ea",
+      "title": "Discover flyouts closes the doc viewer when opening ES|QL docs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/flyouts.spec.ts",
+        "line": 27,
+        "column": 12
+      }
+    },
+    {
+      "id": "b415c9303d327cd-f083079b60ab38c",
+      "title": "Discover flyouts closes the doc viewer when opening the Lens edit flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/flyouts.spec.ts",
+        "line": 39,
+        "column": 12
+      }
+    },
+    {
+      "id": "b415c9303d327cd-78a9080dd474452",
+      "title": "Discover flyouts closes ES|QL docs when opening the doc viewer",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/flyouts.spec.ts",
+        "line": 51,
+        "column": 12
+      }
+    },
+    {
+      "id": "b415c9303d327cd-e1a8acda5be53bc",
+      "title": "Discover flyouts closes ES|QL docs when opening the Lens edit flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/flyouts.spec.ts",
+        "line": 63,
+        "column": 12
+      }
+    },
+    {
+      "id": "b415c9303d327cd-050933582993d7d",
+      "title": "Discover flyouts closes the Lens edit flyout when opening the doc viewer",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/flyouts.spec.ts",
+        "line": 79,
+        "column": 12
+      }
+    },
+    {
+      "id": "6eb90f184b14d3d-42bdbd699342333",
+      "title": "Discover side nav link saves the last URL when in data view mode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/sidenav_link.spec.ts",
+        "line": 36,
+        "column": 12
+      }
+    },
+    {
+      "id": "6eb90f184b14d3d-8af80798d852a85",
+      "title": "Discover side nav link saves the last URL when in ES|QL mode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/sidenav_link.spec.ts",
+        "line": 47,
+        "column": 12
+      }
+    },
+    {
+      "id": "6eb90f184b14d3d-53b39d00b08807e",
+      "title": "Discover side nav link does not save the last URL if it was an ad-hoc data view",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/sidenav_link.spec.ts",
+        "line": 59,
+        "column": 12
+      }
+    },
+    {
+      "id": "6eb90f184b14d3d-c6d431d3f6edb8e",
+      "title": "Discover side nav link saves the last URL if the session was saved",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/sidenav_link.spec.ts",
+        "line": 72,
+        "column": 12
+      }
+    },
+    {
       "id": "88c32aed1321ce6-66666d295105cc2",
       "title": "Discover context - accessibility should give focus to the Load link when Tab is pressed",
       "expectedStatus": "passed",
@@ -921,7 +1068,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/surrounding_docs/context_discover_navigation.spec.ts",
-        "line": 41,
+        "line": 42,
         "column": 14
       }
     },
@@ -947,7 +1094,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/surrounding_docs/context_discover_navigation.spec.ts",
-        "line": 58,
+        "line": 59,
         "column": 14
       }
     },
@@ -973,7 +1120,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/surrounding_docs/context_discover_navigation.spec.ts",
-        "line": 84,
+        "line": 85,
         "column": 14
       }
     },
@@ -999,7 +1146,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/surrounding_docs/context_discover_navigation.spec.ts",
-        "line": 101,
+        "line": 102,
         "column": 14
       }
     },
@@ -1025,7 +1172,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/surrounding_docs/context_discover_navigation.spec.ts",
-        "line": 113,
+        "line": 114,
         "column": 14
       }
     },
@@ -1316,6 +1463,149 @@
       }
     },
     {
+      "id": "77c1f22d93826b9-e3a39c58a9682df",
+      "title": "Discover tabs - ES|QL controls creates an ES|QL value control and keeps it after refresh",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/tabs/controls.spec.ts",
+        "line": 74,
+        "column": 12
+      }
+    },
+    {
+      "id": "77c1f22d93826b9-2ad8ec3b3d8795b",
+      "title": "Discover tabs - ES|QL controls creates an ES|QL multi-value control and filters grid rows",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/tabs/controls.spec.ts",
+        "line": 95,
+        "column": 12
+      }
+    },
+    {
+      "id": "77c1f22d93826b9-f72894e348e2829",
+      "title": "Discover tabs - ES|QL controls persists controls through saved sessions and unsaved-change revert",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/tabs/controls.spec.ts",
+        "line": 127,
+        "column": 12
+      }
+    },
+    {
+      "id": "77c1f22d93826b9-3093158d607189c",
+      "title": "Discover tabs - ES|QL controls carries controls into Dashboard panels and saved visualizations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/tabs/controls.spec.ts",
+        "line": 157,
+        "column": 12
+      }
+    },
+    {
+      "id": "77c1f22d93826b9-2839e0dd7b01c34",
+      "title": "Discover tabs - ES|QL controls persists saved sessions after removing controls",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/tabs/controls.spec.ts",
+        "line": 185,
+        "column": 12
+      }
+    },
+    {
+      "id": "7bbececb17df289-4570b8c5cdbb2c3",
+      "title": "Discover tabs - data view editing can edit ad hoc data view name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/tabs/data_view_editing.spec.ts",
+        "line": 94,
+        "column": 14
+      }
+    },
+    {
+      "id": "7bbececb17df289-be4175d607449fa",
+      "title": "Discover tabs - data view editing can create runtime fields for the same ad hoc data view in both tabs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/tabs/data_view_editing.spec.ts",
+        "line": 122,
+        "column": 14
+      }
+    },
+    {
+      "id": "7bbececb17df289-dd0e00f2a411e12",
+      "title": "Discover tabs - data view editing can create runtime fields for a different ad hoc data view",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/tabs/data_view_editing.spec.ts",
+        "line": 189,
+        "column": 14
+      }
+    },
+    {
+      "id": "7bbececb17df289-5824454035dd00f",
+      "title": "Discover tabs - data view editing can edit persisted data view name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/tabs/data_view_editing.spec.ts",
+        "line": 94,
+        "column": 14
+      }
+    },
+    {
+      "id": "7bbececb17df289-c611f4d92562a88",
+      "title": "Discover tabs - data view editing can create runtime fields for the same persisted data view in both tabs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/tabs/data_view_editing.spec.ts",
+        "line": 122,
+        "column": 14
+      }
+    },
+    {
+      "id": "7bbececb17df289-bbc276ebf8641a8",
+      "title": "Discover tabs - data view editing can create runtime fields for a different persisted data view",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/tabs/data_view_editing.spec.ts",
+        "line": 189,
+        "column": 14
+      }
+    },
+    {
       "id": "dd4ea491543bf33-77796a3f919c5c0",
       "title": "Discover tabs - deprecated saved objects API compatibility should support Discover sessions without tabs created through the deprecated saved objects API",
       "expectedStatus": "passed",
@@ -1325,6 +1615,110 @@
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/tabs/deprecated_saved_objects_api.spec.ts",
         "line": 28,
+        "column": 14
+      }
+    },
+    {
+      "id": "449b36a3a428ffd-863c52d695249e7",
+      "title": "Discover tabs - filters carries over filters as where clauses when switching to ES|QL mode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/tabs/filters.spec.ts",
+        "line": 28,
+        "column": 12
+      }
+    },
+    {
+      "id": "449b36a3a428ffd-25432ff67850387",
+      "title": "Discover tabs - filters uses the correct query and filters per tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/tabs/filters.spec.ts",
+        "line": 49,
+        "column": 12
+      }
+    },
+    {
+      "id": "37e98b97f0057fb-30514b9909c0e25",
+      "title": "Discover tabs - inspector opens the inspector from the tab context menu",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/tabs/inspector.spec.ts",
+        "line": 28,
+        "column": 12
+      }
+    },
+    {
+      "id": "37e98b97f0057fb-98ea0841cf259f1",
+      "title": "Discover tabs - inspector displays request stats in the inspector",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/tabs/inspector.spec.ts",
+        "line": 35,
+        "column": 12
+      }
+    },
+    {
+      "id": "cc24ec5b9aff1fb-71337924280cc0e",
+      "title": "Discover tabs - navigation goes back to the last active tab when returning from Surrounding Docs page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/tabs/navigation.spec.ts",
+        "line": 33,
+        "column": 12
+      }
+    },
+    {
+      "id": "cc24ec5b9aff1fb-ca1a4d5ac2c4cf9",
+      "title": "Discover tabs - navigation returns to the last active tab from Single Doc page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/tabs/navigation.spec.ts",
+        "line": 92,
+        "column": 12
+      }
+    },
+    {
+      "id": "cc24ec5b9aff1fb-2fa468ec2b3afdd",
+      "title": "Discover tabs - navigation restores the latest tabs when returning via app navigation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/tabs/navigation.spec.ts",
+        "line": 121,
+        "column": 12
+      }
+    },
+    {
+      "id": "21b945935c80527-139d70694ca4bd8",
+      "title": "Discover tabs - new search clears tabs clears saved and unsaved tabs when starting a new session",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/tabs/new_search_clears_tabs.spec.ts",
+        "line": 34,
         "column": 14
       }
     },
@@ -1368,6 +1762,45 @@
       }
     },
     {
+      "id": "6281c4f2794b63f-3ddd9d796fcfb53",
+      "title": "Discover tabs - no custom data view shows tabs bar by default in classic solution type",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/tabs/no_data.spec.ts",
+        "line": 64,
+        "column": 14
+      }
+    },
+    {
+      "id": "6281c4f2794b63f-9f9e8d8780accbd",
+      "title": "Discover tabs - no custom data view shows tabs bar after creating a data view from the non-classic no-data prompt",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/tabs/no_data.spec.ts",
+        "line": 77,
+        "column": 14
+      }
+    },
+    {
+      "id": "6281c4f2794b63f-043e4e562d3af00",
+      "title": "Discover tabs - no custom data view can enter ES query mode in non-classic solution type",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/tabs/no_data.spec.ts",
+        "line": 99,
+        "column": 14
+      }
+    },
+    {
       "id": "22b207faff70a48-3d9829fe04e0e78",
       "title": "Discover tabs - on tab change should maintain separate DocViewer state for different tabs and retain it while switching tabs",
       "expectedStatus": "passed",
@@ -1403,6 +1836,357 @@
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/tabs/on_tab_change.spec.ts",
         "line": 173,
+        "column": 12
+      }
+    },
+    {
+      "id": "e6e7183a2c109fa-3c589b52a58fa7c",
+      "title": "Discover tabs - recently closed tabs restores a tab after it was closed manually",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/tabs/recently_closed_tabs.spec.ts",
+        "line": 70,
+        "column": 14
+      }
+    },
+    {
+      "id": "e6e7183a2c109fa-605efadef4c67e0",
+      "title": "Discover tabs - recently closed tabs restores a tab after a page refresh",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/tabs/recently_closed_tabs.spec.ts",
+        "line": 96,
+        "column": 14
+      }
+    },
+    {
+      "id": "e6e7183a2c109fa-474873024e2db0d",
+      "title": "Discover tabs - recently closed tabs updates recently closed tabs after a discover session is opened",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/tabs/recently_closed_tabs.spec.ts",
+        "line": 125,
+        "column": 14
+      }
+    },
+    {
+      "id": "fdfdef4769aa057-524252b119e54df",
+      "title": "Discover tabs - refresh uninitialized tabs saves and reloads tabs that were not re-initialized after refresh",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/tabs/refresh_uninitialized_tabs.spec.ts",
+        "line": 36,
+        "column": 14
+      }
+    },
+    {
+      "id": "1a5306af1decef8-5aef89744a90f45",
+      "title": "Discover tabs - restorable data grid state restores selected documents per tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/tabs/restorable_state_data_grid.spec.ts",
+        "line": 31,
+        "column": 14
+      }
+    },
+    {
+      "id": "1a5306af1decef8-28a7c8ce21e860e",
+      "title": "Discover tabs - restorable data grid state restores display settings and in-table search per tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/tabs/restorable_state_data_grid.spec.ts",
+        "line": 53,
+        "column": 14
+      }
+    },
+    {
+      "id": "1a5306af1decef8-dae6e391d5c0ebc",
+      "title": "Discover tabs - restorable data grid state restores comparison mode per tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/tabs/restorable_state_data_grid.spec.ts",
+        "line": 111,
+        "column": 14
+      }
+    },
+    {
+      "id": "5a2ec543f01e3a1-b4ac36627b44f8b",
+      "title": "Discover tabs - restorable DocViewer source state restores hide-null-values state for ES|QL tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/tabs/restorable_state_doc_viewer_source.spec.ts",
+        "line": 55,
+        "column": 14
+      }
+    },
+    {
+      "id": "5a2ec543f01e3a1-e68e04e154b9585",
+      "title": "Discover tabs - restorable DocViewer source state restores JSON source content without refetching",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/tabs/restorable_state_doc_viewer_source.spec.ts",
+        "line": 78,
+        "column": 14
+      }
+    },
+    {
+      "id": "5a2ec543f01e3a1-b718e7ac89998d5",
+      "title": "Discover tabs - restorable DocViewer source state restores source viewer scroll position per tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/tabs/restorable_state_doc_viewer_source.spec.ts",
+        "line": 110,
+        "column": 14
+      }
+    },
+    {
+      "id": "7bbd5630267fc60-350af7e596a3b06",
+      "title": "Discover tabs - restorable DocViewer table state restores DocViewer field search and pinned fields per tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/tabs/restorable_state_doc_viewer_table.spec.ts",
+        "line": 40,
+        "column": 14
+      }
+    },
+    {
+      "id": "7bbd5630267fc60-6e02b7301d71230",
+      "title": "Discover tabs - restorable DocViewer table state restores DocViewer field type filters and selected-only state per tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/tabs/restorable_state_doc_viewer_table.spec.ts",
+        "line": 81,
+        "column": 14
+      }
+    },
+    {
+      "id": "7bbd5630267fc60-1c81fcd0d15cbfe",
+      "title": "Discover tabs - restorable DocViewer table state restores DocViewer rows per page and page number per tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/tabs/restorable_state_doc_viewer_table.spec.ts",
+        "line": 135,
+        "column": 14
+      }
+    },
+    {
+      "id": "b7b0640cc5771ce-b5980d60e3233c7",
+      "title": "Discover tabs - restorable existing field cache does not fetch existing fields again when returning to a tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/tabs/restorable_state_field_cache.spec.ts",
+        "line": 35,
+        "column": 14
+      }
+    },
+    {
+      "id": "b7b0640cc5771ce-6ecc86757db7461",
+      "title": "Discover tabs - restorable existing field cache refetches existing fields when returning to an edited data view",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/tabs/restorable_state_field_cache.spec.ts",
+        "line": 79,
+        "column": 14
+      }
+    },
+    {
+      "id": "1213340423727db-1cbf2bb4e05a206",
+      "title": "Discover tabs - restorable search state restores classic query draft and submitted state per tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/tabs/restorable_state_search_bar.spec.ts",
+        "line": 49,
+        "column": 14
+      }
+    },
+    {
+      "id": "1213340423727db-79e897bb5cfa407",
+      "title": "Discover tabs - restorable search state restores ES query draft and submitted state per tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/tabs/restorable_state_search_bar.spec.ts",
+        "line": 100,
+        "column": 14
+      }
+    },
+    {
+      "id": "1213340423727db-2b7f4b5215a998b",
+      "title": "Discover tabs - restorable search state restores an already submitted ES query and a draft ES query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/tabs/restorable_state_search_bar.spec.ts",
+        "line": 151,
+        "column": 14
+      }
+    },
+    {
+      "id": "1213340423727db-e66c6f279937151",
+      "title": "Discover tabs - restorable search state restores ES editor panel state per tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/tabs/restorable_state_search_bar.spec.ts",
+        "line": 189,
+        "column": 14
+      }
+    },
+    {
+      "id": "f39359654f90433-ff6991697d7f3b6",
+      "title": "Discover tabs - restorable sidebar state restores sidebar collapsible state per tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/tabs/restorable_state_sidebar.spec.ts",
+        "line": 31,
+        "column": 14
+      }
+    },
+    {
+      "id": "f39359654f90433-267d9ba4372f517",
+      "title": "Discover tabs - restorable sidebar state restores sidebar width per tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/tabs/restorable_state_sidebar.spec.ts",
+        "line": 52,
+        "column": 14
+      }
+    },
+    {
+      "id": "f39359654f90433-5daa216e1eae0a3",
+      "title": "Discover tabs - restorable sidebar state restores sidebar field filters per tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/tabs/restorable_state_sidebar.spec.ts",
+        "line": 73,
+        "column": 14
+      }
+    },
+    {
+      "id": "8962f8133a22a79-896992325fa5ba1",
+      "title": "Discover tabs - save and load sessions loads a legacy session and saves extra tabs as a new session",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/tabs/save_and_load_sessions.spec.ts",
+        "line": 54,
+        "column": 14
+      }
+    },
+    {
+      "id": "8962f8133a22a79-4f104297171c144",
+      "title": "Discover tabs - save and load sessions saves and reloads data view and ESQL tabs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/tabs/save_and_load_sessions.spec.ts",
+        "line": 95,
+        "column": 14
+      }
+    },
+    {
+      "id": "9ed97dd853c4e22-0bab8144073977b",
+      "title": "Discover tabs - sharing can share an unsaved tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/tabs/sharing.spec.ts",
+        "line": 53,
+        "column": 12
+      }
+    },
+    {
+      "id": "9ed97dd853c4e22-f12d2e7819ba144",
+      "title": "Discover tabs - sharing can share one persisted tab from a persisted session",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/tabs/sharing.spec.ts",
+        "line": 129,
+        "column": 12
+      }
+    },
+    {
+      "id": "9ed97dd853c4e22-339b0918b72bd8d",
+      "title": "Discover tabs - sharing can share one unsaved tab from a persisted session",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/tabs/sharing.spec.ts",
+        "line": 219,
         "column": 12
       }
     },
@@ -1467,7 +2251,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/tabs/tabs_time_range.spec.ts",
-        "line": 106,
+        "line": 95,
         "column": 12
       }
     },
@@ -1480,8 +2264,60 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/tabs/tabs_time_range.spec.ts",
-        "line": 132,
+        "line": 117,
         "column": 12
+      }
+    },
+    {
+      "id": "8ecb6f48c09f208-451a74a2277d38f",
+      "title": "Discover tabs - unsaved changes shows unsaved changes after altering state post-save",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/tabs/unsaved_changes.spec.ts",
+        "line": 39,
+        "column": 12
+      }
+    },
+    {
+      "id": "8ecb6f48c09f208-4b9d96d4f41e6e2",
+      "title": "Discover tabs - unsaved changes persists modified tab indicators across refresh and clears on save",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/tabs/unsaved_changes.spec.ts",
+        "line": 51,
+        "column": 12
+      }
+    },
+    {
+      "id": "8ecb6f48c09f208-495558a9fefda2a",
+      "title": "Discover tabs - unsaved changes refetches a modified tab when switching back after reverting changes",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/tabs/unsaved_changes.spec.ts",
+        "line": 97,
+        "column": 12
+      }
+    },
+    {
+      "id": "b332cf8024f031d-12d54320a6c6e7b",
+      "title": "Discover tabs - unsaved local state locally persists unsaved tab state after refresh",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/tabs/unsaved_local_state.spec.ts",
+        "line": 62,
+        "column": 14
       }
     },
     {
@@ -2435,6 +3271,54 @@
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/metrics_experience/share_session.spec.ts",
         "line": 48,
+        "column": 14
+      }
+    },
+    {
+      "id": "5820ba7cb196e94-f784bf53941747d",
+      "title": "Metrics in Discover - Sorting shows the sort control when the feature flag is enabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/metrics_experience/sort.spec.ts",
+        "line": 54,
+        "column": 14
+      }
+    },
+    {
+      "id": "5820ba7cb196e94-1dadaea18fbb270",
+      "title": "Metrics in Discover - Sorting reorders the grid when toggling sort direction",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/metrics_experience/sort.spec.ts",
+        "line": 67,
         "column": 14
       }
     },
@@ -3595,8 +4479,8 @@
       }
     },
     {
-      "id": "53f97d0c42b6e9b-287bab24f344d0f",
-      "title": "Traces in Discover - Waterfall flyout usage Open in Discover from child flyout sections navigates to the correct data",
+      "id": "53f97d0c42b6e9b-02f76ae6554917d",
+      "title": "Traces in Discover - Waterfall flyout usage Open in Discover from errors section navigates to the correct data",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -3612,7 +4496,51 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/waterfall_flyout_usage.spec.ts",
-        "line": 250,
+        "line": 263,
+        "column": 14
+      }
+    },
+    {
+      "id": "53f97d0c42b6e9b-a4af6525fdd28fb",
+      "title": "Traces in Discover - Waterfall flyout usage Open in Discover from logs section navigates to the correct data",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/waterfall_flyout_usage.spec.ts",
+        "line": 285,
+        "column": 14
+      }
+    },
+    {
+      "id": "53f97d0c42b6e9b-1f61c1c7fc127c9",
+      "title": "Traces in Discover - Waterfall flyout usage Open in Discover from span links section navigates to the correct data",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/waterfall_flyout_usage.spec.ts",
+        "line": 313,
         "column": 14
       }
     }

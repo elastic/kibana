@@ -32,13 +32,13 @@ export const userActivityActions = {
     description: 'User logged in to Kibana.',
     ownerTeam: '@elastic/kibana-core',
     groupName: 'Authentication',
-    versionAddedAt: '9.4',
+    versionAddedAt: '9.5',
   },
   log_out_user: {
     description: 'User logged out of Kibana.',
     ownerTeam: '@elastic/kibana-core',
     groupName: 'Authentication',
-    versionAddedAt: '9.4',
+    versionAddedAt: '9.5',
   },
   dashboard_create: {
     description: 'User created a dashboard.',

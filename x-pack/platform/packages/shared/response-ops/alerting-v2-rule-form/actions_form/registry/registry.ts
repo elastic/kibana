@@ -8,13 +8,16 @@
 import { i18n } from '@kbn/i18n';
 import type { InlineActionStepType } from '../types';
 import type { InlineActionStepDefinition } from './types';
+import { SlackChannelSelectorWrapper } from '../components/slack_channel_selector';
 
 const EMAIL_PARAMS_TEMPLATE = `to: ""
 subject: ""
 message: ""
 `;
 
-const SLACK_PARAMS_TEMPLATE = `message: ""
+// ToDo: add a channel selector to the Slack (v2) step form
+const SLACK2_PARAMS_TEMPLATE = `channel: ""
+text: ""
 `;
 
 export const INLINE_ACTION_STEP_DEFINITIONS: readonly InlineActionStepDefinition[] = [
@@ -34,19 +37,21 @@ export const INLINE_ACTION_STEP_DEFINITIONS: readonly InlineActionStepDefinition
     paramsTemplate: EMAIL_PARAMS_TEMPLATE,
   },
   {
-    id: 'slack',
-    label: i18n.translate('xpack.responseOps.alertingV2RuleForm.actionForm.stepType.slack.label', {
+    id: 'slack2.sendMessage',
+    label: i18n.translate('xpack.responseOps.alertingV2RuleForm.actionForm.stepType.slack2.label', {
       defaultMessage: 'Slack',
     }),
     description: i18n.translate(
-      'xpack.responseOps.alertingV2RuleForm.actionForm.stepType.slack.description',
+      'xpack.responseOps.alertingV2RuleForm.actionForm.stepType.slack2.description',
       {
         defaultMessage: 'Post a Slack message',
       }
     ),
     iconType: 'logoSlack',
-    connectorTypeId: '.slack',
-    paramsTemplate: SLACK_PARAMS_TEMPLATE,
+    connectorTypeId: '.slack2',
+    connectorTypeSubAction: 'sendMessage',
+    paramsTemplate: SLACK2_PARAMS_TEMPLATE,
+    CustomComponent: SlackChannelSelectorWrapper,
   },
 ];
 
