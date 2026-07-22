@@ -67,16 +67,22 @@ export class IndexDataVisualizer {
     expectedFormattedTotalDocCount: string,
     randomSamplerOption: RandomSamplerOption | 'none' = 'dvRandomSamplerOptionOff'
   ) {
-    await expect(this.useFullDataButton).toBeEnabled({ timeout: 30_000 });
-    await this.useFullDataButton.click();
-    await expect(this.applyTimeButton).toBeEnabled({ timeout: 10_000 });
-    await this.applyTimeButton.click();
+    // Match FTR: retry the full use-full-data flow. Saved-search filters can race with the
+    // initial load so the first apply may leave total docs at 0; re-applying recovers.
+    await expect(async () => {
+      await expect(this.useFullDataButton).toBeEnabled({ timeout: 10_000 });
+      await this.useFullDataButton.click();
+      await expect(this.applyTimeButton).toBeEnabled({ timeout: 10_000 });
+      await this.applyTimeButton.click();
 
-    if (randomSamplerOption !== 'none') {
-      await this.setRandomSamplingOption(randomSamplerOption);
-    }
+      if (randomSamplerOption !== 'none') {
+        await this.setRandomSamplingOption(randomSamplerOption);
+      }
 
-    await this.waitForTotalDocumentCount(expectedFormattedTotalDocCount);
+      await expect(this.totalDocCount).toHaveText(expectedFormattedTotalDocCount, {
+        timeout: 10_000,
+      });
+    }).toPass({ timeout: 60_000 });
   }
 
   async waitForTotalDocCountHeader() {

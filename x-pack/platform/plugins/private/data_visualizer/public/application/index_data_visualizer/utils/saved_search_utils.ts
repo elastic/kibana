@@ -117,12 +117,17 @@ export function getEsQueryFromSavedSearch({
   // which might differ from extracted saved search data
   if (savedSearchSource) {
     const currentQuery = userQuery ?? (savedSearchSource.getField('query') as Query);
-    if (savedSearchSource.getField('filter')) {
-      // Rehydrate filter from saved search object into filter manager's store
-      if (filterManager) {
-        filterManager.addFilters(savedSearchSource.getField('filter') as Filter[]);
-      }
-    }
+    const savedFilters = (savedSearchSource.getField('filter') as Filter[] | undefined) ?? [];
+    // Do not call filterManager.addFilters here: this helper runs inside useMemo during
+    // render, and mutating FilterManager notifies UnifiedSearch which setStates mid-render.
+    // That race can clear/rebuild the search with an empty query while the UI still shows
+    // the saved search query/filters, leaving document count at 0.
+    // Include saved-search filters (and any pinned global filters) directly in the DSL.
+    const filtersForQuery = [
+      ...savedFilters,
+      ...(filterManager?.getGlobalFilters?.() ?? []),
+      ...(userFilters ?? []),
+    ];
     try {
       // buildEsQuery throws an exception for a fallible operation (anti-pattern).
       // We MUST always wrap it in a try block to prevent a failed parse from being unhandled &
@@ -130,7 +135,7 @@ export function getEsQueryFromSavedSearch({
       const combinedQuery = buildEsQuery(
         dataView,
         currentQuery,
-        [...(filterManager?.getFilters() ?? []), ...(userFilters ?? [])],
+        filtersForQuery,
         uiSettings ? getEsQueryConfig(uiSettings) : undefined
       );
 

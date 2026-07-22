@@ -43,6 +43,20 @@ export const runIndexDataVisualizerTests = async ({
   await scoutTest.step(`${testData.suiteTitle} displays index details`, async () => {
     await indexDataVisualizer.waitForTimeRangeSelectorSection();
 
+    for (const filter of testData.expected.filters ?? []) {
+      await expect
+        .poll(() =>
+          hasFilterBadge(page, {
+            field: filter.key,
+            value: filter.value,
+            enabled: filter.enabled ?? true,
+            pinned: filter.pinned ?? false,
+            negated: filter.negated ?? false,
+          })
+        )
+        .toBe(true);
+    }
+
     await indexDataVisualizer.clickUseFullDataButton(testData.expected.totalDocCountFormatted);
 
     await indexDataVisualizer.waitForTotalDocCountHeader();
