@@ -1,0 +1,11 @@
+prs:
+- https://github.com/elastic/kibana/pull/277291
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-07-21
+- product: kibana
+  target: 9.5.0
+areas:
+- AI and machine Learning
+title: 'Add limit to cases alert API '

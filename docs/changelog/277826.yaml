@@ -1,0 +1,12 @@
+prs:
+- https://github.com/elastic/kibana/pull/277826
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-07-21
+- product: kibana
+  target: 9.5.0
+areas:
+- Dashboards and visualizations
+title: Fix ES|QL chart filtering.
+description: Fixes an issue where clicking a value in an ES|QL chart to filter data created an incorrect filter that matched any document containing the field, instead of filtering to the specific clicked value. This fix is only applicable to serverless deployments.

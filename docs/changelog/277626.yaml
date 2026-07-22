@@ -1,0 +1,11 @@
+prs:
+- https://github.com/elastic/kibana/pull/277626
+type: feature
+products:
+- product: cloud-serverless
+  target: 2026-07-21
+- product: kibana
+  target: 9.5.0
+areas:
+- Alerting and reporting
+title: 'Templates cleanup: default minimal, name uniqueness, and toggle'
