@@ -27,6 +27,8 @@ import {
 } from '../../../common/constants/index_patterns';
 import { ANNOTATION_EVENT_USER, ANNOTATION_TYPE } from '../../../common/constants/annotations';
 import { DEFAULT_ML_PROJECT_ROUTING } from '../../../common/constants/cps';
+import { isJobIdValid } from '../../../common/util/job_utils';
+import type { MlClient } from '../../lib/ml_client/types';
 
 // TODO All of the following interface/type definitions should
 // eventually be replaced by the proper upstream definitions
@@ -71,12 +73,46 @@ export interface AggByJob {
   latest_delayed: Pick<estypes.SearchResponse<Annotation>, 'hits'>;
 }
 
-export function annotationProvider(
-  { asInternalUser }: IScopedClusterClient,
-  serverless: ServerlessInfo
-) {
-  // Find the index the annotation is stored in.
-  async function fetchAnnotationIndex(id: string) {
+export function annotationProvider({ asInternalUser }: IScopedClusterClient, mlClient: MlClient) {
+  /**
+   * Checks the user has access to the given job(s).
+   * Each ID is validated individually so a missing companion ID cannot bypass
+   * access checks for other (real, inaccessible) jobs in a multi-ID request.
+   * The job may not exist if it was deleted but its annotations were not deleted.
+   */
+  async function checkJobAccess(jobIds: string | string[]) {
+    const ids = (Array.isArray(jobIds) ? jobIds : jobIds.split(',')).map((id) => id.trim());
+
+    if (ids.length === 0 || ids.some((id) => isJobIdValid(id) === false)) {
+      throw Boom.badRequest('No valid job IDs provided');
+    }
+
+    for (const jobId of ids) {
+      try {
+        await mlClient.getJobs({ job_id: jobId });
+      } catch (error) {
+        let jobExists = false;
+        try {
+          await asInternalUser.ml.getJobs({ job_id: jobId });
+          jobExists = true;
+        } catch (existsError) {
+          // Only treat a genuine "not found" as a missing job; any other error
+          // (transient ES failure, etc.) must not silently bypass the access check.
+          if (existsError.statusCode !== 404) {
+            throw existsError;
+          }
+          // Job is missing — proceed for this ID only
+        }
+
+        if (jobExists) {
+          // Job exists but the user does not have access to it
+          throw error;
+        }
+      }
+    }
+  }
+
+  async function getAnnotationById(id: string): Promise<{ annotation: Annotation; index: string }> {
     const searchParams: estypes.SearchRequest = {
       index: ML_ANNOTATIONS_INDEX_ALIAS_READ,
       size: 1,
@@ -87,7 +123,7 @@ export function annotationProvider(
       },
     };
 
-    const body = await asInternalUser.search(searchParams, { maxRetries: 0 });
+    const body = await asInternalUser.search<any>(searchParams, { maxRetries: 0 });
     const totalCount =
       typeof body.hits.total === 'number' ? body.hits.total : body.hits.total!.value;
 
@@ -95,7 +131,20 @@ export function annotationProvider(
       throw Boom.notFound(`Cannot find annotation with ID ${id}`);
     }
 
-    return body.hits.hits[0]._index;
+    const hit = body.hits.hits[0];
+    const annotation: Annotation = {
+      ...hit._source,
+      event: hit._source?.event ?? ANNOTATION_EVENT_USER,
+      _id: hit._id,
+    };
+
+    if (isAnnotation(annotation) === false) {
+      throw new Error('invalid annotation format');
+    }
+
+    await checkJobAccess(annotation.job_id);
+
+    return { annotation, index: hit._index };
   }
 
   async function indexAnnotation(annotation: Annotation, username: string) {
@@ -103,6 +152,8 @@ export function annotationProvider(
       // No need to translate, this will not be exposed in the UI.
       return Promise.reject(new Error('invalid annotation format'));
     }
+
+    await checkJobAccess(annotation.job_id);
 
     if (annotation.create_time === undefined) {
       annotation.create_time = new Date().getTime();
@@ -124,7 +175,7 @@ export function annotationProvider(
 
     if (typeof annotation._id !== 'undefined') {
       params.id = annotation._id;
-      params.index = await fetchAnnotationIndex(annotation._id);
+      params.index = (await getAnnotationById(annotation._id)).index;
       params.require_alias = false;
       delete params.body._id;
       delete params.body.key;
@@ -142,6 +193,8 @@ export function annotationProvider(
     entities,
     event,
   }: IndexAnnotationArgs): Promise<GetResponse> {
+    await checkJobAccess(jobIds);
+
     const obj: GetResponse = {
       success: true,
       annotations: {},
@@ -364,6 +417,12 @@ export function annotationProvider(
     jobIds: string[];
     earliestMs?: number;
   }): Promise<Annotation[]> {
+    if (jobIds.length === 0) {
+      return [];
+    }
+
+    await checkJobAccess(jobIds);
+
     const params: estypes.SearchRequest = {
       index: ML_ANNOTATIONS_INDEX_ALIAS_READ,
       size: 0,
@@ -415,7 +474,7 @@ export function annotationProvider(
   }
 
   async function deleteAnnotation(id: string) {
-    const index = await fetchAnnotationIndex(id);
+    const { index } = await getAnnotationById(id);
 
     const deleteParams: DeleteParams = {
       index,
@@ -431,6 +490,7 @@ export function annotationProvider(
 
   return {
     getAnnotations,
+    getAnnotationById,
     indexAnnotation,
     deleteAnnotation,
     getDelayedDataAnnotations,

@@ -572,7 +572,7 @@ export function getJobsHealthServiceProvider(getGuards: GetGuards, serverless: S
               jobsHealthServiceProvider(
                 mlClient,
                 datafeedsProvider(scopedClient, mlClient),
-                annotationServiceProvider(scopedClient, serverless),
+                annotationServiceProvider(scopedClient, mlClient, serverless),
                 jobAuditMessagesProvider(scopedClient, mlClient, serverless),
                 getFieldsFormatRegistry,
                 logger

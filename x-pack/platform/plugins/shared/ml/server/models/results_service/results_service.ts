@@ -740,7 +740,7 @@ export function resultsServiceProvider(
         ]) || [];
     }
 
-    const { getAnnotations } = annotationServiceProvider(client!, serverless!);
+    const { getAnnotations } = annotationServiceProvider(client!, mlClient);
 
     const [bucketResp, annotationResp] = await Promise.all([
       mlClient.getBuckets({
