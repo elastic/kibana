@@ -6,32 +6,29 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { TemplateV2Response } from '../../../../common/bundled-types.gen';
+import { isBoom } from '@hapi/boom';
 import { CASE_TEMPLATE_DETAILS_URL, MAX_TEMPLATE_KEY_LENGTH } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
 import { DEFAULT_CASES_ROUTE_SECURITY } from '../constants';
-import { parseTemplate } from './parse_template';
 
 /**
- * GET /api/cases/templates/{template_id}
- * Public readonly route — get a single template by ID
+ * DELETE /api/cases/templates/{template_id}
+ * Public route — soft-deletes a template (all versions). Cases created from the template keep
+ * their pinned reference; the template stops appearing in the create flow and find responses.
  */
-export const getPublicTemplateRoute = createCasesRoute({
-  method: 'get',
+export const deletePublicTemplateRoute = createCasesRoute({
+  method: 'delete',
   path: CASE_TEMPLATE_DETAILS_URL,
   security: DEFAULT_CASES_ROUTE_SECURITY,
   routerOptions: {
     access: 'public',
-    summary: 'Get a case template by ID',
+    summary: 'Delete a case template',
     tags: ['oas-tag:cases'],
   },
   params: {
     params: schema.object({
       template_id: schema.string({ maxLength: MAX_TEMPLATE_KEY_LENGTH }),
-    }),
-    query: schema.object({
-      version: schema.maybe(schema.number({ min: 1 })),
     }),
   },
   handler: async ({ context, request, response }) => {
@@ -39,26 +36,16 @@ export const getPublicTemplateRoute = createCasesRoute({
       const caseContext = await context.cases;
       const casesClient = await caseContext.getCasesClient();
 
-      const { template_id: templateId } = request.params;
-      const { version } = request.query;
+      await casesClient.templates.deleteTemplate(request.params.template_id);
 
-      const template = await casesClient.templates.getTemplate(
-        templateId,
-        version !== undefined ? String(version) : undefined
-      );
-
-      if (!template) {
-        return response.notFound({
-          body: { message: `Template with id ${templateId} not found` },
-        });
+      return response.noContent();
+    } catch (error) {
+      if (isBoom(error) && error.output.statusCode === 404) {
+        return response.notFound({ body: { message: error.message } });
       }
 
-      const body: TemplateV2Response = parseTemplate(template.attributes);
-
-      return response.ok({ body });
-    } catch (error) {
       throw createCaseError({
-        message: `Failed to get template: ${error}`,
+        message: `Failed to delete template: ${error}`,
         error,
       });
     }

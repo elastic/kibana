@@ -904,6 +904,64 @@ paths:
               examples:
                 response401:
                   $ref: '#/components/examples/response_401'
+    post:
+      summary: Create a case template
+      operationId: createCaseTemplateDefaultSpace
+      description: |
+        Creates a case template from a YAML definition. You must have the "Manage templates" sub-privilege for the Cases feature of the owning solution. Set `dry_run=true` to run the full validation (body, YAML definition, name uniqueness, authorization) without creating anything. Requires the Cases feature to be enabled in the space.
+      x-state: Technical preview
+      tags:
+        - cases
+      parameters:
+        - in: query
+          name: dry_run
+          description: 'When true, validates the request without creating the template and returns `{"valid": true}`.'
+          required: false
+          schema:
+            type: boolean
+            default: false
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/template_write_request'
+      responses:
+        '200':
+          description: 'Indicates a successful call. Returns the created template, or `{"valid": true}` for a dry run.'
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/template_v2_response'
+                  - $ref: '#/components/schemas/template_dry_run_response'
+        '400':
+          description: The request body, YAML definition, or template name is invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/response_4xx'
+        '401':
+          description: Authorization information is missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/response_4xx'
+              examples:
+                response401:
+                  $ref: '#/components/examples/response_401'
+        '403':
+          description: The user does not have the manage templates privilege for the owner.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/response_4xx'
+        '409':
+          description: A template with the same name already exists for the owner.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/response_4xx'
   /api/cases/templates/{template_id}:
     get:
       summary: Get a case template by ID
@@ -934,6 +992,111 @@ paths:
               examples:
                 response401:
                   $ref: '#/components/examples/response_401'
+        '404':
+          description: The template was not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/response_4xx'
+              examples:
+                response404:
+                  $ref: '#/components/examples/response_404'
+    put:
+      summary: Update a case template
+      operationId: updateCaseTemplateDefaultSpace
+      description: |
+        Fully replaces a case template. Every accepted update creates a new template version; previous versions stay retrievable with the `version` query parameter of the get template API, and cases keep the version they were created with. You must have the "Manage templates" sub-privilege for the Cases feature of the owning solution. Set `dry_run=true` to run the full validation without writing. Requires the Cases feature to be enabled in the space.
+      x-state: Technical preview
+      tags:
+        - cases
+      parameters:
+        - $ref: '#/components/parameters/template_id'
+        - in: query
+          name: dry_run
+          description: 'When true, validates the request without updating the template and returns `{"valid": true}`.'
+          required: false
+          schema:
+            type: boolean
+            default: false
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/template_write_request'
+      responses:
+        '200':
+          description: 'Indicates a successful call. Returns the new template version, or `{"valid": true}` for a dry run.'
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/template_v2_response'
+                  - $ref: '#/components/schemas/template_dry_run_response'
+        '400':
+          description: The request body, YAML definition, or template name is invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/response_4xx'
+        '401':
+          description: Authorization information is missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/response_4xx'
+              examples:
+                response401:
+                  $ref: '#/components/examples/response_401'
+        '403':
+          description: The user does not have the manage templates privilege for the owner.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/response_4xx'
+        '404':
+          description: The template was not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/response_4xx'
+              examples:
+                response404:
+                  $ref: '#/components/examples/response_404'
+        '409':
+          description: A template with the same name already exists for the owner.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/response_4xx'
+    delete:
+      summary: Delete a case template
+      operationId: deleteCaseTemplateDefaultSpace
+      description: |
+        Soft-deletes a case template (all versions). Existing cases keep their pinned template reference; the template stops appearing in the case creation flow and in find responses. You must have the "Manage templates" sub-privilege for the Cases feature of the owning solution. Requires the Cases feature to be enabled in the space.
+      x-state: Technical preview
+      tags:
+        - cases
+      parameters:
+        - $ref: '#/components/parameters/template_id'
+      responses:
+        '204':
+          description: The template was deleted.
+        '401':
+          description: Authorization information is missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/response_4xx'
+              examples:
+                response401:
+                  $ref: '#/components/examples/response_401'
+        '403':
+          description: The user does not have the manage templates privilege for the owner.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/response_4xx'
         '404':
           description: The template was not found.
           content:
@@ -3265,6 +3428,62 @@ components:
         total:
           type: integer
           description: The total number of templates matching the query.
+    template_write_request:
+      title: Template write request
+      description: |
+        The body for creating or fully replacing a case template. Server-managed attributes (author, usage statistics, field summaries, version flags) are computed and cannot be set.
+      type: object
+      required:
+        - owner
+        - definition
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 50
+          description: |
+            The template identity name, unique per owner (case-insensitive). May be omitted when the YAML definition provides a case-default title (`name:`), which is then used as the identity name.
+        owner:
+          $ref: '#/components/schemas/owner'
+        definition:
+          type: string
+          description: |
+            The template definition as a YAML string: case defaults (name, severity, category, tags, assignees, connector, settings) and a `fields` array of inline field definitions or `$ref` entries pointing into the owner's field library. Stored field values appear on cases under `extended_fields` keys shaped `<field_name>_as_<storage_type>`.
+          example: |
+            name: Security incident
+            severity: high
+            tags: [security]
+            fields:
+              - name: priority
+                label: Priority
+                type: keyword
+                control: SELECT_BASIC
+                metadata:
+                  options: [low, medium, high]
+                  default: medium
+              - $ref: risk_score
+        description:
+          type: string
+          maxLength: 1000
+          description: A description of the template.
+        tags:
+          $ref: '#/components/schemas/template_tags'
+        isEnabled:
+          type: boolean
+          default: true
+          description: Disabled templates are hidden from the case creation flow.
+    template_dry_run_response:
+      title: Template write dry run response
+      description: Returned instead of the template when the request was sent with `dry_run=true`.
+      type: object
+      required:
+        - valid
+      properties:
+        valid:
+          type: boolean
+          description: Always `true` — validation failures return a 4xx error instead.
+          enum:
+            - true
     case_response_get_case:
       title: Get case response
       description: |

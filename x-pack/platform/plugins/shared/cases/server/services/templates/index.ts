@@ -577,6 +577,31 @@ export class TemplatesService {
   }
 
   /**
+   * Write-preflight used by the public routes' `dry_run` mode: resolves the identity name the way
+   * `createTemplate`/`updateTemplate` do and asserts it is unique for the owner — without writing
+   * anything. Throws the same Boom errors (400 missing name, 409 conflict) the real write would.
+   */
+  async validateWriteInput(
+    input: Pick<CreateTemplateInput, 'name' | 'owner' | 'definition'>,
+    { excludeTemplateId }: { excludeTemplateId?: string } = {}
+  ): Promise<void> {
+    const normalizedDefinition = trimFieldDefaults(input.definition);
+    const parsedDefinition = parseYaml(normalizedDefinition) as ParsedTemplate['definition'];
+    const templateName = input.name ?? parsedDefinition.name;
+    if (!templateName) {
+      throw Boom.badRequest(
+        'A template name is required: provide `name` or a case-default title in the definition.'
+      );
+    }
+
+    await this.assertTemplateNameIsUnique({
+      name: templateName,
+      owner: input.owner,
+      excludeTemplateId,
+    });
+  }
+
+  /**
    * Enforces that a template's identity `name` is unique per owner within the space, comparing
    * case-insensitively against the latest, non-deleted version of every other template. The
    * case-default title inside the YAML definition is intentionally NOT constrained here — only the
