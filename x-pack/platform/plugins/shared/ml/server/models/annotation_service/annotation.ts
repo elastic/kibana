@@ -20,7 +20,6 @@ import {
   getAnnotationFieldValue,
 } from '@kbn/ml-common-types/annotations';
 import type { JobId } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
-import type { ServerlessInfo } from '../../types';
 import {
   ML_ANNOTATIONS_INDEX_ALIAS_READ,
   ML_ANNOTATIONS_INDEX_ALIAS_WRITE,
@@ -29,6 +28,7 @@ import { ANNOTATION_EVENT_USER, ANNOTATION_TYPE } from '../../../common/constant
 import { DEFAULT_ML_PROJECT_ROUTING } from '../../../common/constants/cps';
 import { isJobIdValid } from '../../../common/util/job_utils';
 import type { MlClient } from '../../lib/ml_client/types';
+import type { ServerlessInfo } from '../../types';
 
 // TODO All of the following interface/type definitions should
 // eventually be replaced by the proper upstream definitions
