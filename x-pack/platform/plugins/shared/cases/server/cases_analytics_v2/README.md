@@ -751,7 +751,7 @@ cases_analytics_v2/
 │   │                        scopes to `default`.
 │   ├── activity_runner.ts      walks user-actions by `created_at > last_run_at`
 │   │                           (immutable SOs — no `updated_at` branch needed).
-│   ├── attachments_runner.ts   walks cases-comments + (when xpack.cases.attachments.enabled) cases-attachments
+│   ├── attachments_runner.ts   walks cases-comments + cases-attachments (both unconditionally)
 │   │                           SOs into the unified analytics index. Same
 │   │                           filter shape as the cases runner (mutable SOs).
 │   ├── reset_runner.ts         shared "walk every surface + seed cursors"
