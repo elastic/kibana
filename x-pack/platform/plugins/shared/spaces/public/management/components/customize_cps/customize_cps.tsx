@@ -85,7 +85,7 @@ export const CustomizeCps: FC<Props> = ({ space, onChange }) => {
               projectRouting={space.projectRouting}
               onProjectRoutingChange={updateProjectRouting}
               projects={projects}
-              isReadonly={!canEdit()}
+              controlsState={canEdit() ? 'enabled' : 'disabled'}
             />
           </EuiPanel>
         </EuiFormRow>

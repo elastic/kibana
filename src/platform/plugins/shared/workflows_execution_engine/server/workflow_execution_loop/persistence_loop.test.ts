@@ -30,7 +30,7 @@ const makeParams = (
     workflowLogger: {
       flushEvents: jest.fn().mockResolvedValue(undefined),
     },
-    taskAbortController: new AbortController(),
+    signal: new AbortController().signal,
   } as unknown as jest.Mocked<WorkflowExecutionLoopParams>;
 };
 
@@ -76,7 +76,7 @@ describe('persistenceLoop', () => {
     const loopPromise = persistenceLoop(params, abortController.signal);
 
     expect(params.workflowLogger.flushEvents).toHaveBeenCalledWith({
-      signal: params.taskAbortController.signal,
+      signal: params.signal,
     });
 
     abortController.abort();

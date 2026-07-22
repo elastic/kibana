@@ -152,7 +152,7 @@ describe('NightshiftApp', () => {
     });
     const { container } = renderWithIntl();
 
-    expect(screen.getByRole('heading', { name: 'Need action' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Needs action' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Resolved' })).toBeInTheDocument();
 
     const resolvedCard = container.querySelector<HTMLElement>(
@@ -264,7 +264,7 @@ describe('NightshiftApp', () => {
     expect(
       screen.getByText('No significant events were detected. Nothing needs your attention.')
     ).toBeInTheDocument();
-    expect(screen.queryByRole('heading', { name: 'Need action' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'Needs action' })).not.toBeInTheDocument();
     expect(screen.queryByRole('heading', { name: 'Resolved' })).not.toBeInTheDocument();
   });
 

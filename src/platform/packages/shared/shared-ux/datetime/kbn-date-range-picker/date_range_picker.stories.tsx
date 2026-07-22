@@ -28,6 +28,13 @@ const meta: Meta<DateRangePickerProps> = {
     onSettingsChange: action('onSettingsChange'),
     settings: { roundRelativeTime: true, timePrecision: 's' },
   },
+  argTypes: {
+    locale: {
+      control: 'select',
+      options: ['en', 'de-DE', 'fr-FR', 'ja-JP', 'zh-CN'],
+      description: 'English input always parses, whichever locale is active.',
+    },
+  },
 };
 
 export default meta;
@@ -50,6 +57,59 @@ export const Playground: Story = {
     timeZone: 'Browser',
   },
   render: (args) => <StatefulDateRangePicker {...args} />,
+};
+
+/**
+ * Presets labelled in each supported locale, so switching `locale` exercises
+ * the preset-label round-trip (a label only renders in the input when it
+ * parses as natural language under the active grammar).
+ */
+const LOCALIZED_PRESETS: Record<string, TimeRangeBoundsOption[]> = {
+  en: [
+    { start: 'now-15m', end: 'now', label: 'Last 15 minutes' },
+    { start: 'now-7d', end: 'now', label: 'Last 7 days' },
+    { start: 'now/d', end: 'now/d', label: 'Today' },
+  ],
+  'de-DE': [
+    { start: 'now-15m', end: 'now', label: 'Letzte 15 Minuten' },
+    { start: 'now-7d', end: 'now', label: 'Letzte 7 Tage' },
+    { start: 'now/d', end: 'now/d', label: 'Heute' },
+  ],
+  'fr-FR': [
+    { start: 'now-15m', end: 'now', label: 'Dernières 15 minutes' },
+    { start: 'now-7d', end: 'now', label: 'Derniers 7 jours' },
+    { start: 'now/d', end: 'now/d', label: "Aujourd'hui" },
+  ],
+  'ja-JP': [
+    { start: 'now-15m', end: 'now', label: '過去15分間' },
+    { start: 'now-7d', end: 'now', label: '過去7日間' },
+    { start: 'now/d', end: 'now/d', label: '今日' },
+  ],
+  'zh-CN': [
+    { start: 'now-15m', end: 'now', label: '最近 15 分钟' },
+    { start: 'now-7d', end: 'now', label: '最近 7 天' },
+    { start: 'now/d', end: 'now/d', label: '今天' },
+  ],
+};
+
+/**
+ * Localization playground: pick a `locale` in the Controls panel and type in
+ * that language (presets are labelled in the active locale too). The picker
+ * remounts on locale switch so presets and internal state stay in sync.
+ */
+export const Localized: Story = {
+  args: {
+    defaultValue: 'last 15 minutes',
+    locale: 'zh-CN',
+    timeZone: 'Browser',
+  },
+  render: (args) => (
+    <StatefulDateRangePicker
+      key={args.locale}
+      {...args}
+      presets={LOCALIZED_PRESETS[args.locale ?? 'en'] ?? []}
+    />
+  ),
 };
 
 export const Presets: Story = {

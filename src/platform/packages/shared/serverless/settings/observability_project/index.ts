@@ -9,6 +9,7 @@
 
 import * as settings from '@kbn/management-settings-ids';
 import {
+  WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID,
   WORKFLOWS_UI_SETTING_ID,
   WORKFLOWS_UI_SHOW_MANAGED_WORKFLOWS_SETTING_ID,
 } from '@kbn/workflows/common/constants';
@@ -58,6 +59,7 @@ export const OBSERVABILITY_STREAMS_TIERED_PROJECT_SETTINGS = [
   // This setting is only registered in complete tier. It's temporary, will be removed on 9.4.0 release.
   WORKFLOWS_UI_SETTING_ID,
   WORKFLOWS_UI_SHOW_MANAGED_WORKFLOWS_SETTING_ID,
+  WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID,
 ];
 
 export const OBSERVABILITY_AI_ASSISTANT_PROJECT_SETTINGS = [
