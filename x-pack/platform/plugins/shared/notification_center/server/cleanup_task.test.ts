@@ -107,6 +107,7 @@ describe('cleanup_task', () => {
       expect(deleteByQuery).toHaveBeenCalledWith(
         {
           index: NOTIFICATION_DATA_STREAM_NAME,
+          ignore_unavailable: true,
           conflicts: 'proceed',
           refresh: false,
           query: buildCleanupQuery(),
