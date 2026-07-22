@@ -238,7 +238,7 @@ const REAL_POLICY_ID = 'f845071f-44f0-4753-be47-963ec9163b03';
 const MOCK_CHAINS: FailingChain[] = [
   {
     id: '1',
-    chain: 'New ESQL rule executed → Action policy to design global execution failed',
+    chain: 'New ESQL rule executed → Action policy beta failed',
     steps: [
       {
         id: REAL_RULE_ID_1,
@@ -251,7 +251,7 @@ const MOCK_CHAINS: FailingChain[] = [
       },
       {
         id: REAL_POLICY_ID,
-        label: 'Action policy to design global execution',
+        label: 'Action policy beta',
         type: 'policy',
         status: 'failed',
         icon: 'reporter',
@@ -267,11 +267,11 @@ const MOCK_CHAINS: FailingChain[] = [
   },
   {
     id: '2',
-    chain: 'asdasf executed → Action policy to design global execution failed',
+    chain: 'asdasf executed → Action policy beta failed',
     steps: [
       {
         id: REAL_RULE_ID_2,
-        label: 'asdasf',
+        label: 'Rule on Kibana data flights',
         type: 'rule',
         status: 'success',
         icon: 'bell',
@@ -280,7 +280,7 @@ const MOCK_CHAINS: FailingChain[] = [
       },
       {
         id: REAL_POLICY_ID,
-        label: 'Action policy to design global execution',
+        label: 'Action policy beta',
         type: 'policy',
         status: 'failed',
         icon: 'reporter',
@@ -296,7 +296,7 @@ const MOCK_CHAINS: FailingChain[] = [
   },
   {
     id: '3',
-    chain: 'New ESQL rule executed → Action policy to design global execution dispatched to → Cleanup workflow',
+    chain: 'New ESQL rule executed → Action policy beta dispatched to → Cleanup workflow',
     steps: [
       {
         id: REAL_RULE_ID_1,
@@ -309,7 +309,7 @@ const MOCK_CHAINS: FailingChain[] = [
       },
       {
         id: REAL_POLICY_ID,
-        label: 'Action policy to design global execution',
+        label: 'Action policy beta',
         type: 'policy',
         status: 'warning',
         icon: 'reporter',
@@ -336,11 +336,11 @@ const MOCK_CHAINS: FailingChain[] = [
   },
   {
     id: '4',
-    chain: 'asdasf executed → Action policy to design global execution failed',
+    chain: 'asdasf executed → Action policy beta failed',
     steps: [
       {
         id: REAL_RULE_ID_2,
-        label: 'asdasf',
+        label: 'Rule on Kibana data flights',
         type: 'rule',
         status: 'success',
         icon: 'bell',
@@ -349,7 +349,7 @@ const MOCK_CHAINS: FailingChain[] = [
       },
       {
         id: REAL_POLICY_ID,
-        label: 'Action policy to design global execution',
+        label: 'Action policy beta',
         type: 'policy',
         status: 'failed',
         icon: 'reporter',
@@ -365,7 +365,7 @@ const MOCK_CHAINS: FailingChain[] = [
   },
   {
     id: '5',
-    chain: 'New ESQL rule executed → Action policy to design global execution dispatched to → Incident triage workflow',
+    chain: 'New ESQL rule executed → Action policy beta dispatched to → Incident triage workflow',
     steps: [
       {
         id: REAL_RULE_ID_1,
@@ -378,7 +378,7 @@ const MOCK_CHAINS: FailingChain[] = [
       },
       {
         id: REAL_POLICY_ID,
-        label: 'Action policy to design global execution',
+        label: 'Action policy beta',
         type: 'policy',
         status: 'warning',
         icon: 'reporter',
@@ -405,7 +405,7 @@ const MOCK_CHAINS: FailingChain[] = [
   },
   {
     id: '6',
-    chain: 'Multiple rules → Action policy to design global execution failed (fan-in)',
+    chain: 'Multiple rules → Action policy beta failed (fan-in)',
     sources: [
       {
         id: REAL_RULE_ID_1,
@@ -418,7 +418,7 @@ const MOCK_CHAINS: FailingChain[] = [
       },
       {
         id: REAL_RULE_ID_2,
-        label: 'asdasf',
+        label: 'Rule on Kibana data flights',
         type: 'rule',
         status: 'success',
         icon: 'bell',
@@ -429,7 +429,7 @@ const MOCK_CHAINS: FailingChain[] = [
     steps: [
       {
         id: REAL_POLICY_ID,
-        label: 'Action policy to design global execution',
+        label: 'Action policy beta',
         type: 'policy',
         status: 'failed',
         icon: 'reporter',
