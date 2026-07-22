@@ -8,10 +8,12 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { LocationShardStats } from '../../../../../../../server/routes/settings/private_locations/get_shard_stats';
 import { getPrivateLocationShardStats } from '../../../../state/private_locations/api';
+import { useSyntheticsRefreshContext } from '../../../../contexts';
 
 export const useShardStats = () => {
   const [data, setData] = useState<LocationShardStats[]>([]);
   const [loading, setLoading] = useState(false);
+  const { lastRefresh } = useSyntheticsRefreshContext();
 
   useEffect(() => {
     let cancelled = false;
@@ -35,7 +37,7 @@ export const useShardStats = () => {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [lastRefresh]);
 
   const byLocation = useMemo(() => {
     const map = new Map<string, LocationShardStats>();

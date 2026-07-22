@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiBadge,
@@ -13,15 +13,19 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHealth,
   EuiInMemoryTable,
+  EuiLoadingSpinner,
   EuiScreenReaderOnly,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import moment from 'moment';
 import { useDispatch } from 'react-redux-v7';
 import type { Criteria } from '@elastic/eui/src/components/basic_table/basic_table';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useSyntheticsRefreshContext } from '../../../contexts';
 import { CopyName } from './copy_name';
 import { ViewLocationMonitors } from './view_location_monitors';
 import { TableTitle } from '../../common/components/table_title';
@@ -74,6 +78,14 @@ export const PrivateLocationsTable = ({
 
   const { locationMonitors, loading } = useLocationMonitors();
   const { byLocation: shardStatsByLocation, loading: shardStatsLoading } = useShardStats();
+  const { refreshApp, lastRefresh } = useSyntheticsRefreshContext();
+
+  // Re-render periodically so the "Updated … ago" caption stays current between refreshes.
+  const [nowTick, setNowTick] = useState(() => Date.now());
+  useEffect(() => {
+    const id = setInterval(() => setNowTick(Date.now()), 30_000);
+    return () => clearInterval(id);
+  }, []);
 
   const toggleRow = (id: string) => {
     setExpandedIds((prev) => {
@@ -119,25 +131,87 @@ export const PrivateLocationsTable = ({
       },
     },
     {
+      name: HEALTH_LABEL,
+      render: (item: ListItem) => {
+        const shards = shardStatsByLocation.get(item.id)?.shards ?? [];
+        if (shards.length === 0) {
+          return shardStatsLoading ? (
+            <EuiLoadingSpinner size="s" />
+          ) : (
+            <EuiText size="s" color="subdued">
+              {'--'}
+            </EuiText>
+          );
+        }
+        const healthy = shards.filter((shard) => shard.healthy).length;
+        const color = healthy === shards.length ? 'success' : healthy === 0 ? 'danger' : 'warning';
+        return (
+          <EuiHealth color={color} className="eui-textNoWrap">
+            {HEALTHY_SHARDS_RATIO(healthy, shards.length)}
+          </EuiHealth>
+        );
+      },
+    },
+    {
       field: 'agentPolicyId',
       name: AGENT_POLICY_LABEL,
       render: (agentPolicyId: string, item: ListItem) => {
         const shardPool = item.agentPolicyIds ?? [];
         if (shardPool.length > 1) {
+          const shards = shardStatsByLocation.get(item.id)?.shards ?? [];
+          const hasStats = shards.length > 0;
+          const healthy = shards.filter((shard) => shard.healthy).length;
+          const badgeColor = !hasStats
+            ? 'hollow'
+            : healthy === shards.length
+            ? 'success'
+            : healthy === 0
+            ? 'danger'
+            : 'warning';
+          const visiblePool = shardPool.slice(0, MAX_VISIBLE_SHARDS);
+          const remaining = shardPool.length - visiblePool.length;
           return (
             <EuiFlexGroup direction="column" gutterSize="xs">
               <EuiFlexItem grow={false}>
                 <span>
-                  <EuiBadge color="primary" iconType="shard">
+                  <EuiBadge color={badgeColor} iconType="shard">
                     {SCALABLE_SHARDS_LABEL(shardPool.length)}
                   </EuiBadge>
                 </span>
               </EuiFlexItem>
-              {shardPool.map((policyId) => (
-                <EuiFlexItem grow={false} key={policyId}>
-                  <PolicyName agentPolicyId={policyId} />
+              {visiblePool.map((policyId) => {
+                const shard = shards.find((s) => s.policyId === policyId);
+                return (
+                  <EuiFlexItem grow={false} key={policyId}>
+                    <EuiFlexGroup
+                      gutterSize="s"
+                      alignItems="center"
+                      responsive={false}
+                      wrap={false}
+                    >
+                      <EuiFlexItem grow={false} className="eui-textTruncate">
+                        <PolicyName agentPolicyId={policyId} />
+                      </EuiFlexItem>
+                      {shard && (
+                        <EuiFlexItem grow={false}>
+                          <EuiHealth color={shard.healthy ? 'success' : 'danger'}>
+                            <EuiText size="xs" color="subdued" className="eui-textNoWrap">
+                              {MONITORS_COUNT_LABEL(shard.monitors)}
+                            </EuiText>
+                          </EuiHealth>
+                        </EuiFlexItem>
+                      )}
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+                );
+              })}
+              {remaining > 0 && (
+                <EuiFlexItem grow={false}>
+                  <EuiText size="xs" color="subdued">
+                    {PLUS_MORE_LABEL(remaining)}
+                  </EuiText>
                 </EuiFlexItem>
-              ))}
+              )}
             </EuiFlexGroup>
           );
         }
@@ -286,6 +360,28 @@ export const PrivateLocationsTable = ({
 
   const renderToolRight = () => {
     return [
+      <EuiFlexGroup
+        gutterSize="s"
+        alignItems="center"
+        responsive={false}
+        key="refreshPrivateLocations"
+      >
+        <EuiFlexItem grow={false}>
+          <EuiText size="xs" color="subdued" className="eui-textNoWrap">
+            {LAST_UPDATED_LABEL(moment(lastRefresh).from(nowTick))}
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            data-test-subj="syntheticsRefreshPrivateLocationsButton"
+            iconType="refresh"
+            onClick={refreshApp}
+            isLoading={shardStatsLoading || loading}
+          >
+            {REFRESH_LABEL}
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>,
       <NoPermissionsTooltip
         canEditSynthetics={canSave}
         canManagePrivateLocations={canManagePrivateLocations}
@@ -397,6 +493,42 @@ const SCALABLE_SHARDS_LABEL = (count: number) =>
   i18n.translate('xpack.synthetics.monitorManagement.scalableShards', {
     defaultMessage: 'Scalable · {count} shards',
     values: { count },
+  });
+
+// Cap how many shard rows we list inline; the rest are summarized as "+N more"
+// and remain visible in the expanded shard-details panel.
+const MAX_VISIBLE_SHARDS = 3;
+
+const HEALTH_LABEL = i18n.translate('xpack.synthetics.monitorManagement.health', {
+  defaultMessage: 'Health',
+});
+
+const HEALTHY_SHARDS_RATIO = (healthy: number, total: number) =>
+  i18n.translate('xpack.synthetics.monitorManagement.healthyShardsRatio', {
+    defaultMessage: '{healthy}/{total} healthy',
+    values: { healthy, total },
+  });
+
+const MONITORS_COUNT_LABEL = (count: number) =>
+  i18n.translate('xpack.synthetics.monitorManagement.shardMonitorsCount', {
+    defaultMessage: '{count, plural, one {# monitor} other {# monitors}}',
+    values: { count },
+  });
+
+const PLUS_MORE_LABEL = (count: number) =>
+  i18n.translate('xpack.synthetics.monitorManagement.plusMoreShards', {
+    defaultMessage: '+{count} more',
+    values: { count },
+  });
+
+const REFRESH_LABEL = i18n.translate('xpack.synthetics.monitorManagement.refresh', {
+  defaultMessage: 'Refresh',
+});
+
+const LAST_UPDATED_LABEL = (time: string) =>
+  i18n.translate('xpack.synthetics.monitorManagement.lastUpdated', {
+    defaultMessage: 'Updated {time}',
+    values: { time },
   });
 
 const DELETE_LOCATION = i18n.translate(
