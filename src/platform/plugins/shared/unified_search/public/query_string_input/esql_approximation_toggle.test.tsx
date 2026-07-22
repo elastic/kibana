@@ -85,6 +85,28 @@ describe('EsqlApproximationToggle', () => {
     await waitFor(() => expect(screen.getByText('Index has 10M+ docs')).toBeInTheDocument());
   });
 
+  describe('invalid license state', () => {
+    beforeEach(() => {
+      const nonEnterpriseLicense = licensingMock.createLicenseMock();
+      nonEnterpriseLicense.hasAtLeast.mockReturnValue(false);
+      licensingStart.getLicense.mockResolvedValueOnce(nonEnterpriseLicense);
+    });
+
+    it('disables the toggle when license is not enterprise', async () => {
+      renderToggle({ isApproximate: false, onChange });
+      await waitFor(() => {
+        expect(screen.getByTestId('esqlApproximationToggleButton')).toBeDisabled();
+      });
+    });
+
+    it('shows unavailable aria-label when license is not enterprise', async () => {
+      renderToggle({ isApproximate: false, onChange });
+      await waitFor(() => {
+        expect(screen.getByLabelText('Fast mode unavailable')).toBeInTheDocument();
+      });
+    });
+  });
+
   describe('disabled state', () => {
     beforeEach(() => {
       renderToggle({ isApproximate: false, onChange, disabled: true });
