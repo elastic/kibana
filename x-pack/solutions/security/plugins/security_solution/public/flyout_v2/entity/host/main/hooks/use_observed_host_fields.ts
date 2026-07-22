@@ -17,7 +17,7 @@ import { cloudFields } from '../fields/cloud_fields';
 
 export const useObservedHostFields = (
   hostData: ObservedEntityData<HostItem>,
-  hideAnomalies?: boolean
+  hideAnomalies: boolean = false
 ): EntityTableRows<ObservedEntityData<HostItem>> => {
   const mlCapabilities = useMlCapabilities();
 

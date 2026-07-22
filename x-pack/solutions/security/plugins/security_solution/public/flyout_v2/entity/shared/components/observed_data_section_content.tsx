@@ -45,8 +45,8 @@ export interface ObservedDataSectionProps {
   scopeId: string;
   /** Query id registered with the inspect button. */
   queryId: string;
-  /** When true, omits the "Max anomaly score by job" row and skips anomaly data fetching. */
-  hideAnomalies?: boolean;
+  /** When true, omits the "Max anomaly score by job" row and skips anomaly data fetching. Defaults to false*/
+  hideAnomalies: boolean;
 }
 
 const resolveEntityAnomalyConfig = ({
@@ -98,7 +98,7 @@ export const ObservedDataSectionContent = memo((props: ObservedDataSectionProps)
     entityRecord,
     contextID,
     scopeId,
-    hideAnomalies,
+    hideAnomalies = false,
   } = props;
 
   const newFlyoutSystemEnabled = useIsNewFlyoutEnabled();

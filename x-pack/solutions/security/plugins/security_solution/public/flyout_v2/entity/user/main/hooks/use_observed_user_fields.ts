@@ -15,7 +15,7 @@ import { basicUserFields } from '../fields/basic_user_fields';
 
 export const useObservedUserFields = (
   userData: ObservedEntityData<UserItem>,
-  hideAnomalies?: boolean
+  hideAnomalies: boolean = false
 ): EntityTableRows<ObservedEntityData<UserItem>> => {
   const mlCapabilities = useMlCapabilities();
 
