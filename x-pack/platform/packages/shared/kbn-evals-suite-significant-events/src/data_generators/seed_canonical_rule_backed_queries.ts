@@ -20,9 +20,13 @@ const TTL_MILLIS = 30 * 24 * 60 * 60 * 1000;
  * stage needs — no Alerting rule entity is installed; `.rule-events` signals referencing
  * `query.rule_id` are synthesized separately.
  *
- * Document shape mirrors the product's `toStoredQuery` serializer (dotted `stream.name` key,
- * `query.*` payload), minus `search_embedding` — semantic text requires an inference endpoint
- * the eval cluster may not have, and the KI snapshot replay strips it for the same reason.
+ * Document shape mirrors the product's `toStoredQuery` serializer in
+ * `x-pack/platform/plugins/shared/significant_events/server/lib/knowledge_indicators/knowledge_indicator_client/serializers.ts`
+ * (dotted `stream.name` key, `query.*` payload; stored type in `../data_stream.ts`), minus
+ * `search_embedding` — semantic text requires an inference endpoint the eval cluster may not
+ * have, and the KI snapshot replay strips it for the same reason. This shape is duplicated
+ * because the serializer lives in plugin server code that packages cannot import; if the scan
+ * stops picking these queries up (`getRuleBackedQueryLinks`), check that file for drift first.
  */
 export async function seedCanonicalRuleBackedQueries(
   esClient: Client,

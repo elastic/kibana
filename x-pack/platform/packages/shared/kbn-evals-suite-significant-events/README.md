@@ -20,6 +20,14 @@ For general information about writing evaluation tests, configuration, and usage
 
 ## End-to-end pipeline eval
 
+> **Warning — destructive: run these e2e specs against a dedicated eval cluster only.**
+> Between scenarios they wipe ALL documents from the live pipeline data streams (`.rule-events`,
+> `.significant_events-detections/-discoveries/-events`, and the knowledge-indicators stream),
+> delete the managed `logs` stream, and the live spec additionally deletes **every alerting v2
+> rule in the space** (`_delete_by_query` with `match_all`) and overrides the significant-events
+> inference feature settings for the duration of the run. Anything a shared cluster has in those
+> stores is lost.
+
 `evals/e2e/e2e.spec.ts` chains every pipeline stage against the live product instead of testing stages in isolation:
 
 ```

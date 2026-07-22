@@ -66,7 +66,10 @@ async function fetchTailSources(
           range: {
             '@timestamp': {
               gte: new Date(cutTimestampMs).toISOString(),
-              lt: new Date(tailEndMs).toISOString(),
+              // Inclusive: with max_tail_minutes == incident_onset_offset_minutes (the shipped
+              // configs) the tail end coincides with the snapshot's max timestamp, and the
+              // final docs — the incident's peak — must stream too.
+              lte: new Date(tailEndMs).toISOString(),
             },
           },
         },
@@ -123,10 +126,11 @@ export async function streamIncidentTail(
 
     // Docs beyond the tail cap never get streamed. For an incident scenario the failure usually
     // sits at the END of the snapshot, so a cap smaller than the onset offset drops exactly the
-    // data the pipeline is supposed to detect — make that loud.
+    // data the pipeline is supposed to detect — make that loud. Strictly-greater-than: the doc
+    // at exactly the tail end IS streamed (see the `lte` fetch above), so it must not warn.
     const beyondCapResponse = await esClient.count({
       index: tempIndices.join(','),
-      query: { range: { '@timestamp': { gte: new Date(tailEndMs).toISOString() } } },
+      query: { range: { '@timestamp': { gt: new Date(tailEndMs).toISOString() } } },
     });
     if (beyondCapResponse.count > 0) {
       log.warning(
@@ -138,14 +142,22 @@ export async function streamIncidentTail(
     }
 
     const streamStartMs = Date.now();
+    let invalidTimestampDocs = 0;
     const docs: TailDoc[] = sources.flatMap((source) => {
       const sourceTs = source['@timestamp'];
-      if (sourceTs == null) {
+      const sourceTsMs = sourceTs == null ? NaN : new Date(String(sourceTs)).getTime();
+      // A NaN mapped timestamp would never become "due" and wedge the streaming loop forever.
+      if (Number.isNaN(sourceTsMs)) {
+        invalidTimestampDocs += 1;
         return [];
       }
-      const sourceTsMs = new Date(String(sourceTs)).getTime();
       return [{ mappedTimestampMs: streamStartMs + (sourceTsMs - cutTimestampMs), source }];
     });
+    if (invalidTimestampDocs > 0) {
+      log.warning(
+        `streamIncidentTail: dropped ${invalidTimestampDocs} doc(s) with missing/unparseable @timestamp`
+      );
+    }
 
     if (docs.length === 0) {
       log.warning('streamIncidentTail: no tail documents found — nothing to stream');

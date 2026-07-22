@@ -18,6 +18,15 @@ import type { E2EEvaluator } from './types';
  * at the replay boundary, so the observed type (spike vs step_change) is an artifact of window
  * placement while the per-rule firing decision is the meaningful signal.
  */
+/**
+ * Change-point outcomes that carry no detection signal: `stationary` means a flat alert rate
+ * (the product's write gate normally excludes it) and `indeterminable` is what ES `change_point`
+ * returns when the histogram has too few buckets (< ~22) — a scan that determined NOTHING must
+ * not count as a successful detection, or a regression that shrinks the scan window would still
+ * score a perfect F1.
+ */
+const NON_SIGNAL_CHANGE_POINT_TYPES = new Set(['stationary', 'indeterminable']);
+
 export const detectionMatchEvaluator: E2EEvaluator = {
   name: 'detection_match',
   kind: 'CODE',
@@ -28,7 +37,10 @@ export const detectionMatchEvaluator: E2EEvaluator = {
       ...(expected?.allowed_detection_rule_uuids ?? []),
     ]);
 
-    const detectedRules = [...new Set((output?.detections ?? []).map((d) => d.rule_uuid))];
+    const signalDetections = (output?.detections ?? []).filter(
+      (detection) => !NON_SIGNAL_CHANGE_POINT_TYPES.has(detection.change_point_type)
+    );
+    const detectedRules = [...new Set(signalDetections.map((d) => d.rule_uuid))];
 
     const detectedExpected = expectedRules.filter((rule) => detectedRules.includes(rule));
     const missingRules = expectedRules.filter((rule) => !detectedRules.includes(rule));

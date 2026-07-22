@@ -40,9 +40,20 @@ const bucketRowsFromEsqlResponse = (columns: Array<{ name: string }>, values: un
 /**
  * Approximate rule firing over the replayed window without running real Alerting rules: for each
  * canonical rule-backed query, bucket its ES|QL hits per minute and write one `breached` signal
- * document per bucket-with-hits into `.rule-events`. The change-point scan aggregates the raw doc
- * count of that series per `rule.id`, so a burst of error-log matches reads as a signal-rate
- * change exactly like real rule executions would produce.
+ * document per bucket-with-hits into `.rule-events`.
+ *
+ * Known simplification: real rule executions write one signal PER MATCHING ROW (grouping by
+ * `_id`), so production series carry error volume; this synthesizer emits a binary 0/1 series
+ * per rule, compressing amplitude — a 1000x error flood and one error per minute look identical
+ * to the change-point scan, and intermittent errors (alternating buckets) read weaker than they
+ * would in production. Sufficient for spike/step transitions on quiet baselines, which is what
+ * the seeded scenarios exercise.
+ *
+ * Signal doc shape mirrors `alertEventSchema` in
+ * `x-pack/platform/plugins/shared/alerting_v2/server/resources/datastreams/alert_events.ts`
+ * (see also the product seed script `significant_events/scripts/seed_sigevents_env/steps/seed_alerts.ts`).
+ * If signal writes start failing or the change-point scan stops seeing them, check that file
+ * for drift first.
  */
 export async function synthesizeRuleSignals(
   esClient: Client,

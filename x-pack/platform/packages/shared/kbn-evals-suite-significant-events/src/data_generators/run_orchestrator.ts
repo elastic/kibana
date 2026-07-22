@@ -14,7 +14,12 @@ const ORCHESTRATOR_STATUS_PATH = '/internal/streams/significant_events/discovery
 const POLL_INTERVAL_MS = 10_000;
 /** Matches the orchestrator workflow's own 40m timeout, plus margin. */
 const DEFAULT_TIMEOUT_MS = 45 * 60 * 1000;
-const TERMINAL_STATUSES = new Set(['completed', 'failed', 'not_started']);
+/**
+ * Statuses meaning an execution is still doing (or undoing) work. Everything else —
+ * completed, failed, canceled, not_started — is settled. Kept as a deny-list of active states
+ * so an unknown new status reads as settled rather than wedging the poll loops.
+ */
+const ACTIVE_STATUSES = new Set(['in_progress', 'running', 'being_canceled']);
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -49,7 +54,7 @@ export async function runOrchestratorToCompletion({
   timeoutMs?: number;
 }): Promise<void> {
   const preexisting = await getStatus(kbnClient);
-  if (preexisting.status && !TERMINAL_STATUSES.has(preexisting.status)) {
+  if (preexisting.status && ACTIVE_STATUSES.has(preexisting.status)) {
     log.warning(
       `Orchestrator execution ${preexisting.executionId} is already ${preexisting.status} — cancelling it before triggering a fresh run`
     );
@@ -59,12 +64,21 @@ export async function runOrchestratorToCompletion({
       body: { action: 'cancel' },
     });
     const cancelDeadline = Date.now() + 2 * 60 * 1000;
+    let settled = false;
     while (Date.now() < cancelDeadline) {
       await sleep(POLL_INTERVAL_MS);
       const status = await getStatus(kbnClient);
-      if (!status.status || TERMINAL_STATUSES.has(status.status)) {
+      if (!status.status || !ACTIVE_STATUSES.has(status.status)) {
+        settled = true;
         break;
       }
+    }
+    // Triggering while a run is still active would silently REUSE that execution instead of
+    // starting a fresh one — exactly the hijack this pre-check exists to prevent.
+    if (!settled) {
+      throw new Error(
+        `A pre-existing orchestrator execution (${preexisting.executionId}) did not settle after cancellation — refusing to trigger into it`
+      );
     }
   }
 
@@ -89,11 +103,11 @@ export async function runOrchestratorToCompletion({
       );
       return;
     }
-    if (status.status === 'failed') {
+    if (status.status === 'failed' || status.status === 'canceled') {
       throw new Error(
-        `Orchestrator execution ${status.executionId} failed: ${JSON.stringify(
-          status.error ?? 'no error detail'
-        )}`
+        `Orchestrator execution ${status.executionId} ended with status "${
+          status.status
+        }": ${JSON.stringify(status.error ?? 'no error detail')}`
       );
     }
     log.info(
