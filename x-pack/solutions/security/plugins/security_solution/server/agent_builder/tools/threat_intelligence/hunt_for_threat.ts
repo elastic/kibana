@@ -87,9 +87,9 @@ export const huntForThreatTool: BuiltinSkillBoundedTool<typeof huntForThreatSche
     'aggregation (unique hosts + users). Agent Builder should call this tool directly; native ' +
     'Workflows and UI surfaces use the matching HTTP route.',
   schema: huntForThreatSchema,
-  handler: async (params, { esClient, logger }) => {
+  handler: async (params, { esClient, logger, spaceId }) => {
     try {
-      const data = await huntForThreat(esClient.asCurrentUser, logger, params);
+      const data = await huntForThreat(esClient.asCurrentUser, logger, { ...params, spaceId });
       return { results: [{ type: ToolResultType.other, data }] };
     } catch (err) {
       logger.warn(`hunt_for_threat failed: ${(err as Error).message}`);

@@ -105,7 +105,7 @@ export const ReportFeedCard: React.FC<{
       tabIndex={onOpen ? 0 : undefined}
       onKeyDown={
         onOpen
-          ? (event) => {
+          ? (event: React.KeyboardEvent<HTMLDivElement>) => {
               if (event.key === 'Enter' || event.key === ' ') {
                 event.preventDefault();
                 handleOpen();

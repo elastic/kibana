@@ -62,15 +62,15 @@ export const IntelligenceHubDashboardView: React.FC<{
   onClearChipFilters: () => void;
   highlightReportId?: string;
   onHighlightReport: (reportId: string) => void;
-  isGeneratingAdvisory: boolean;
-  onGenerateAdvisory: () => void;
-  onFocusSourceReports: () => void;
-  huntFindings: HuntFindingListItem[];
+  isGeneratingAdvisory?: boolean;
+  onGenerateAdvisory?: () => void;
+  onFocusSourceReports?: () => void;
+  huntFindings?: HuntFindingListItem[];
   huntFindingsFeedbackLoop?: FeedbackLoopSummary[];
-  isLoadingHuntFindings: boolean;
-  http: CoreStart['http'];
-  notifications: CoreStart['notifications'];
-  application: CoreStart['application'];
+  isLoadingHuntFindings?: boolean;
+  http?: CoreStart['http'];
+  notifications?: CoreStart['notifications'];
+  application?: CoreStart['application'];
   showHuntFindings?: boolean;
   onCorrelateReport?: (reportId: string) => void;
 }> = ({
@@ -83,16 +83,16 @@ export const IntelligenceHubDashboardView: React.FC<{
   onClearChipFilters,
   highlightReportId,
   onHighlightReport,
-  isGeneratingAdvisory,
-  onGenerateAdvisory,
-  onFocusSourceReports,
-  huntFindings,
+  isGeneratingAdvisory = false,
+  onGenerateAdvisory = () => undefined,
+  onFocusSourceReports = () => undefined,
+  huntFindings = [],
   huntFindingsFeedbackLoop,
-  isLoadingHuntFindings,
+  isLoadingHuntFindings = false,
   http,
   notifications,
   application,
-  showHuntFindings = true,
+  showHuntFindings = false,
   onCorrelateReport,
 }) => {
   const categoryCounts = useMemo(() => {
@@ -163,7 +163,7 @@ export const IntelligenceHubDashboardView: React.FC<{
           onCorrelate={onCorrelateReport}
         />
       </div>
-      {showHuntFindings ? (
+      {showHuntFindings && http && notifications && application ? (
         <>
           <EuiSpacer size="l" />
           <HuntFindingsPanel

@@ -47,6 +47,7 @@ export type SkillsDirectoryStructure = Directory<{
       // discoveries plugin to type-check.
       'attack-discovery': FileDirectory<{}>;
       compliance: FileDirectory<{}>;
+      intel: FileDirectory<{}>;
       rules: FileDirectory;
       entities: FileDirectory<{}>;
       watchlists: FileDirectory<{}>;

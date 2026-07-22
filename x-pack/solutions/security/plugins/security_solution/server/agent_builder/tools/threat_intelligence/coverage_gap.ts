@@ -70,9 +70,15 @@ export const coverageGapTool: BuiltinSkillBoundedTool<typeof coverageGapSchema> 
     'includes a `renderTag` in the tool result. Agent Builder should call this tool directly; ' +
     'native Workflows and UI surfaces use the matching HTTP route.',
   schema: coverageGapSchema,
-  handler: async (params, { esClient, savedObjectsClient, logger, attachments }) => {
+  handler: async (params, { esClient, savedObjectsClient, logger, attachments, spaceId }) => {
     try {
-      const data = await coverageGap(esClient.asCurrentUser, savedObjectsClient, logger, params);
+      const data = await coverageGap(
+        esClient.asCurrentUser,
+        savedObjectsClient,
+        logger,
+        spaceId,
+        params
+      );
 
       let renderTag: string | undefined;
       if (data.techniques.length > 0) {

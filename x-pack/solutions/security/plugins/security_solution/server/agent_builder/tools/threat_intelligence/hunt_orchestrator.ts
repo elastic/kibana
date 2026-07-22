@@ -140,7 +140,7 @@ export const huntOrchestratorTool: BuiltinSkillBoundedTool<typeof huntOrchestrat
     '`hunt_behavior` tools. Agent Builder should call this tool directly; native Workflows ' +
     'and UI surfaces use the matching HTTP route.',
   schema: huntOrchestratorSchema,
-  handler: async (params, { esClient, logger, modelProvider }) => {
+  handler: async (params, { esClient, logger, modelProvider, spaceId }) => {
     let model;
     try {
       model = await modelProvider.getDefaultModel();
@@ -151,7 +151,10 @@ export const huntOrchestratorTool: BuiltinSkillBoundedTool<typeof huntOrchestrat
       model = undefined;
     }
     try {
-      const data = await huntOrchestrator(esClient.asCurrentUser, model, logger, params);
+      const data = await huntOrchestrator(esClient.asCurrentUser, model, logger, {
+        ...params,
+        spaceId,
+      });
       return { results: [{ type: ToolResultType.other, data }] };
     } catch (err) {
       logger.warn(`hunt_orchestrator failed: ${(err as Error).message}`);

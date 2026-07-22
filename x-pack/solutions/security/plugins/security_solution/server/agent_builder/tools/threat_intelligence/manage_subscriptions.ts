@@ -169,7 +169,7 @@ export const manageSubscriptionsTool: BuiltinSkillBoundedTool<typeof manageSubsc
         };
       }
       try {
-        const data = await deleteSubscription(client, input.subscription_id);
+        const data = await deleteSubscription(client, input.subscription_id, spaceId);
         return { results: [{ type: ToolResultType.other, data: { action: 'delete', ...data } }] };
       } catch (err) {
         logger.warn(`manage_subscriptions delete failed: ${(err as Error).message}`);

@@ -666,7 +666,7 @@ const HuntFindingsPanelComponent: React.FC<Props> = ({
                       size="s"
                       iconType="checkInCircleFilled"
                       color="primary"
-                      onClick={(event) => {
+                      onClick={(event: React.MouseEvent) => {
                         stopRowClickPropagation(event);
                         openDeployedRule(deployedRuleId);
                       }}
@@ -681,7 +681,7 @@ const HuntFindingsPanelComponent: React.FC<Props> = ({
                       iconType="plusInCircle"
                       color="text"
                       isLoading={creatingRuleId === finding.id}
-                      onClick={(event) => {
+                      onClick={(event: React.MouseEvent) => {
                         stopRowClickPropagation(event);
                         void handleCreateRule(finding);
                       }}
@@ -697,7 +697,7 @@ const HuntFindingsPanelComponent: React.FC<Props> = ({
                     size="s"
                     iconType="inspect"
                     color="text"
-                    onClick={(event) => {
+                    onClick={(event: React.MouseEvent) => {
                       stopRowClickPropagation(event);
                       handleCorrelateReport(finding.report_id);
                     }}
@@ -712,7 +712,7 @@ const HuntFindingsPanelComponent: React.FC<Props> = ({
                     size="s"
                     iconType="editorCodeBlock"
                     color="text"
-                    onClick={(event) => {
+                    onClick={(event: React.MouseEvent) => {
                       stopRowClickPropagation(event);
                       setSelectedFinding(finding);
                     }}
