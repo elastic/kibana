@@ -69,7 +69,12 @@ test.describe('navigation', { tag: tags.serverless.security.complete }, () => {
 
     await page.waitForURL(/\/app\/security\/cases/);
     expect(page.url()).toContain('/app/security/cases');
-    await expect(page.testSubj.locator('cases-all-title')).toBeVisible({ timeout: 30000 });
+    // The cases list title renders as the legacy `cases-all-title` header or, when the
+    // `casesRedesign` flag is on (as in serverless security), the shared app header
+    // (`appHeaderTitle`). Match either so the assertion holds regardless of the flag.
+    await expect(
+      page.locator('[data-test-subj="cases-all-title"],[data-test-subj="appHeaderTitle"]')
+    ).toBeVisible({ timeout: 30000 });
   });
 
   test('navigates to maintenance windows', async ({ browserAuth, pageObjects }) => {
