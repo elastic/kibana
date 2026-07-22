@@ -555,6 +555,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     });
 
     initUiSettings(core.uiSettings, experimentalFeatures, config.enableUiSettingsValidations);
+
     productFeaturesService.setup(core, plugins);
 
     // Register the deprecated standalone `threatIntelligence` Kibana feature
@@ -1044,7 +1045,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     );
 
     if (plugins.workflowsExtensions) {
-      registerWorkflowSteps(plugins.workflowsExtensions, experimentalFeatures);
+      registerWorkflowSteps(plugins.workflowsExtensions);
       registerSecurityManagedWorkflowOwner(plugins.workflowsExtensions);
     }
 

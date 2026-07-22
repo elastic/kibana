@@ -80,7 +80,7 @@ async function fetchActorPage(
   namespace: string,
   afterKey: CompositeAfterKey | undefined,
   transportOpts: { signal: AbortSignal } | undefined,
-  abortController: AbortController | undefined
+  signal: AbortSignal | undefined
 ): Promise<{ buckets: CompositeBucket[]; newAfterKey: CompositeAfterKey | undefined } | null> {
   try {
     const result = await esClient.search(
@@ -97,7 +97,7 @@ async function fetchActorPage(
       logger.info(`[${config.id}] Index "${config.indexPattern(namespace)}" not found, skipping`);
       return null;
     }
-    if (abortController?.signal.aborted) {
+    if (signal?.aborted) {
       logger.info(`[${config.id}] Aborted during composite aggregation`);
       return null;
     }
@@ -114,7 +114,7 @@ async function fetchTargetsForActors(
   namespace: string,
   buckets: CompositeBucket[],
   transportOpts: { signal: AbortSignal } | undefined,
-  abortController: AbortController | undefined
+  signal: AbortSignal | undefined
 ): Promise<EsqlQueryResult | null> {
   const esqlFilter = {
     bool: {
@@ -140,7 +140,7 @@ async function fetchTargetsForActors(
 
     return { columns: typed.columns, values: typed.values };
   } catch (err) {
-    if (abortController?.signal.aborted) {
+    if (signal?.aborted) {
       logger.info(`[${config.id}] Aborted during ES|QL query`);
       return null;
     }
@@ -172,7 +172,7 @@ async function runIntegration(
   namespace: string,
   crudClient: EntityUpdateClient,
   entityMetadataClient: EntityMetadataClient,
-  abortController: AbortController | undefined,
+  signal: AbortSignal | undefined,
   metadataContext: { scanId: string; observedAt: string }
 ): Promise<{
   buckets: number;
@@ -188,12 +188,12 @@ async function runIntegration(
   let truncated = false;
   let totalBuckets = 0;
   const records: EntityRelationshipRecord[] = [];
-  const transportOpts = abortController ? { signal: abortController.signal } : undefined;
+  const transportOpts = signal ? { signal } : undefined;
   let outcome: 'index_missing' | 'empty' | 'partial' | 'producing' | 'error' = 'producing';
 
   try {
     do {
-      if (abortController?.signal.aborted) {
+      if (signal?.aborted) {
         logger.info(`[${config.id}] Aborted during pagination`);
         outcome = totalBuckets === 0 ? 'empty' : 'partial';
         break;
@@ -213,14 +213,10 @@ async function runIntegration(
         namespace,
         afterKey,
         transportOpts,
-        abortController
+        signal
       );
       if (actorPage === null) {
-        outcome = abortController?.signal.aborted
-          ? totalBuckets === 0
-            ? 'empty'
-            : 'partial'
-          : 'index_missing';
+        outcome = signal?.aborted ? (totalBuckets === 0 ? 'empty' : 'partial') : 'index_missing';
         break;
       }
 
@@ -239,7 +235,7 @@ async function runIntegration(
         namespace,
         buckets,
         transportOpts,
-        abortController
+        signal
       );
       if (esqlResult === null) {
         outcome = 'partial';
@@ -358,7 +354,7 @@ export const runRelationshipMaintainer = async ({
   crudClient,
   entityMetadataClient,
   integrations,
-  abortController,
+  signal,
   telemetryCollector,
 }: {
   esClient: ElasticsearchClient;
@@ -368,7 +364,7 @@ export const runRelationshipMaintainer = async ({
   crudClient: EntityUpdateClient;
   entityMetadataClient: EntityMetadataClient;
   integrations: RelationshipIntegrationConfig[];
-  abortController?: AbortController;
+  signal?: AbortSignal;
   /**
    * Optional. Engine populates one entry per integration into `sources` and
    * accumulates per-rel-type applied counts in `relationshipTypeApplied` for callers
@@ -430,7 +426,7 @@ export const runRelationshipMaintainer = async ({
   let truncated = false;
 
   for (const config of integrations) {
-    if (abortController?.signal.aborted) {
+    if (signal?.aborted) {
       logger.info('Relationship maintainer aborted, skipping remaining integrations');
       break;
     }
@@ -450,7 +446,7 @@ export const runRelationshipMaintainer = async ({
       namespace,
       crudClient,
       entityMetadataClient,
-      abortController,
+      signal,
       metadataContext
     );
 
