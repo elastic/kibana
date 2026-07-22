@@ -18,7 +18,6 @@ import {
   bulkGetAgentPoliciesHandler,
   downloadFullAgentPolicy,
   getFullAgentPolicy,
-  GetListAgentPolicyOutputsHandler,
   populateAssignedAgentsCount,
 } from './handlers';
 
@@ -26,7 +25,7 @@ jest.mock('../../services/agent_policy', () => {
   return {
     agentPolicyService: {
       get: jest.fn(),
-      getByIds: jest.fn(),
+      getByIDs: jest.fn(),
       copy: jest.fn(),
       listAllOutputsForPolicies: jest.fn(),
       getFullAgentPolicy: jest.fn(),
@@ -51,32 +50,16 @@ describe('Agent policy API handlers', () => {
     response = httpServerMock.createResponseFactory();
   });
 
-  describe('GetListAgentPolicyOutputsHandler', () => {
-    it('should deduplicate ids', async () => {
-      const request = httpServerMock.createKibanaRequest({
-        body: {
-          ids: ['1', '1'],
-        },
-      });
-      await GetListAgentPolicyOutputsHandler(context, request, response);
-      expect(agentPolicyServiceMock.getByIds).toHaveBeenCalledWith(
-        expect.anything(),
-        ['1'],
-        expect.anything()
-      );
-    });
-  });
-
   describe('bulkGetAgentPoliciesHandler', () => {
     it('should deduplicate ids', async () => {
-      agentPolicyServiceMock.getByIds.mockResolvedValueOnce([]);
+      agentPolicyServiceMock.getByIDs.mockResolvedValueOnce([]);
       const request = httpServerMock.createKibanaRequest({
         body: {
           ids: ['1', '1'],
         },
       });
       await bulkGetAgentPoliciesHandler(context, request, response);
-      expect(agentPolicyServiceMock.getByIds).toHaveBeenCalledWith(
+      expect(agentPolicyServiceMock.getByIDs).toHaveBeenCalledWith(
         expect.anything(),
         ['1'],
         expect.anything()

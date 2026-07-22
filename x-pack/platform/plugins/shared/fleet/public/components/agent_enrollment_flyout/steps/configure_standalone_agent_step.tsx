@@ -212,7 +212,6 @@ export const ConfigureStandaloneAgentStep = ({
             {!canReadSettings && (
               <>
                 <EuiCallOut
-                  announceOnMount
                   title={i18n.translate(
                     'xpack.fleet.agentEnrollment.secretsRedactedCallout.title',
                     { defaultMessage: 'Some proxy credentials may not be shown' }
