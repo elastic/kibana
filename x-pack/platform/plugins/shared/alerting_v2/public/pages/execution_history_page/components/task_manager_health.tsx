@@ -188,7 +188,7 @@ export const TaskManagerHealth: React.FC = () => {
           {MOCK_HEALTH.status}
         </EuiBadge>
       </EuiFlexItem>
-      <EuiFlexItem grow={false} css={css({ width: 120 })}>
+      <EuiFlexItem css={css({ minWidth: 0 })}>
         <EuiProgress
           value={MOCK_HEALTH.utilization}
           max={100}
@@ -202,6 +202,14 @@ export const TaskManagerHealth: React.FC = () => {
           <strong>{MOCK_HEALTH.utilization}%</strong>{' '}
           <EuiText size="xs" color="subdued" css={css({ display: 'inline' })}>
             utilization
+          </EuiText>
+        </EuiText>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiText size="s">
+          <strong>{MOCK_HEALTH.nodes}</strong>{' '}
+          <EuiText size="xs" color="subdued" css={css({ display: 'inline' })}>
+            nodes
           </EuiText>
         </EuiText>
       </EuiFlexItem>
@@ -227,6 +235,10 @@ export const TaskManagerHealth: React.FC = () => {
         css={css`
           .euiAccordion__triggerWrapper {
             padding: 0;
+          }
+          .euiAccordion__buttonContent {
+            flex: 1;
+            min-width: 0;
           }
         `}
       >

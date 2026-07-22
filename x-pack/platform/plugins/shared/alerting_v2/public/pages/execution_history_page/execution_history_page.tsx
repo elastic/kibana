@@ -6,7 +6,15 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { EuiSpacer, EuiTabs, EuiTab, EuiTitle } from '@elastic/eui';
+import {
+  EuiButtonGroup,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiTabs,
+  EuiTab,
+  EuiTitle,
+} from '@elastic/eui';
 import { AppHeader } from '@kbn/app-header';
 import type { AppHeaderTab } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
@@ -21,7 +29,6 @@ import { PoliciesTabContent, RulesTabContent } from './components';
 import { ExecutionKpis } from './components/execution_kpis';
 import { TaskManagerHealth } from './components/task_manager_health';
 import { TopFailing } from './components/top_failing';
-import { PrototypeOptions, usePrototypeFlags } from './components/prototype_options';
 
 const TIME_RANGE_PRESETS = [
   { start: 'now-1h', end: 'now', label: 'Last 1 hour' },
@@ -34,6 +41,11 @@ const DEFAULT_DATE_PICKER_SETTINGS: DateRangePickerSettings = {
   roundRelativeTime: true,
   timePrecision: 's',
 };
+
+const VIEW_TOGGLE_OPTIONS = [
+  { id: 'stats', label: 'Stats', iconType: 'chartMetric' },
+  { id: 'charts', label: 'Charts', iconType: 'visBarVerticalStacked' },
+];
 
 const POLICIES_TAB_ID = 'policies';
 const RULES_TAB_ID = 'rules';
@@ -80,8 +92,8 @@ export const ExecutionHistoryPage = () => {
   const [datePickerSettings, setDatePickerSettings] = useState<DateRangePickerSettings>(
     DEFAULT_DATE_PICKER_SETTINGS
   );
+  const [viewToggle, setViewToggle] = useState('stats');
   const { flyout: composeFlyout, openEditFlyout, openCloneFlyout } = useComposeDiscoverFlyout();
-  const { flags, setFlags } = usePrototypeFlags();
 
   const handleDatePickerChange = useCallback((args: DateRangePickerOnChangeProps) => {
     if (args.isInvalid) return;
@@ -113,15 +125,38 @@ export const ExecutionHistoryPage = () => {
       <EuiSpacer size="m" />
       <TaskManagerHealth />
       <EuiSpacer size="m" />
-      <DateRangePicker
-        defaultValue="Last 24 hours"
-        presets={TIME_RANGE_PRESETS}
-        settings={datePickerSettings}
-        onChange={handleDatePickerChange}
-        onSettingsChange={setDatePickerSettings}
-      />
+      <EuiFlexGroup alignItems="center" responsive={false}>
+        <EuiFlexItem>
+          <EuiTitle size="xs">
+            <h3>
+              {i18n.translate('xpack.alertingV2.executionHistory.overviewTitle', {
+                defaultMessage: 'Execution overview',
+              })}
+            </h3>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <DateRangePicker
+            defaultValue="Last 24 hours"
+            presets={TIME_RANGE_PRESETS}
+            settings={datePickerSettings}
+            onChange={handleDatePickerChange}
+            onSettingsChange={setDatePickerSettings}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonGroup
+            legend="Toggle chart view"
+            options={VIEW_TOGGLE_OPTIONS}
+            idSelected={viewToggle}
+            onChange={setViewToggle}
+            isIconOnly
+            buttonSize="compressed"
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
       <EuiSpacer size="m" />
-      <ExecutionKpis showCharts={flags.showCharts} />
+      <ExecutionKpis showCharts={viewToggle === 'charts'} />
       <EuiSpacer size="m" />
       <TopFailing onRuleClick={handleRuleClick} onPolicyClick={handlePolicyClick} />
       <EuiSpacer size="m" />
@@ -176,7 +211,6 @@ export const ExecutionHistoryPage = () => {
         />
       )}
       {composeFlyout}
-      <PrototypeOptions flags={flags} onChange={setFlags} />
     </>
   );
 };
