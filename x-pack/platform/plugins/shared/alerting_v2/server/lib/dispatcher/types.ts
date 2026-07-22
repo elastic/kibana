@@ -58,6 +58,8 @@ export interface Rule {
   spaceId: string;
   name: string;
   tags: string[];
+  /** Parent rule ids this rule depends on, for rule-dependency suppression (rna-program#753). */
+  dependsOn: RuleId[];
 }
 
 export interface ActionPolicy {
@@ -80,6 +82,8 @@ export interface ActionPolicy {
     interval?: string | null; // e.g. '1h', '30m', '5m'; null for intervalless strategies
   };
   snoozedUntil?: string | null;
+  /** When true, suppress episodes whose rule depends_on a rule with a currently active episode. */
+  suppressDependentRules?: boolean;
   /** Target destinations to dispatch matched episodes to */
   destinations: ActionPolicyDestination[];
   /** Decrypted base64-encoded API key (id:key) for authenticated workflow dispatch */

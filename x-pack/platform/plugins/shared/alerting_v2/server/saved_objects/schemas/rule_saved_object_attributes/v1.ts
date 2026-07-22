@@ -87,6 +87,11 @@ export const ruleSavedObjectAttributesSchema = schema.object({
     )
   ),
 
+  // POC: raw parent rule ids. Production version denormalizes these into
+  // `references[]` (see rna-program#753 / kibana#280212) instead of storing
+  // ids directly on the attribute.
+  depends_on: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
+
   // Server-managed fields
   enabled: schema.boolean(),
   createdBy: schema.nullable(schema.string()),

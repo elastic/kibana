@@ -174,6 +174,7 @@ const createPolicy = (overrides: Partial<ActionPolicyResponse> = {}): ActionPoli
   groupingMode: null,
   throttle: { strategy: undefined, interval: null },
   snoozedUntil: null,
+  suppressDependentRules: null,
   auth: {
     owner: 'elastic',
     createdByUser: false,

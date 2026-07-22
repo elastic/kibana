@@ -89,6 +89,7 @@ export const buildCreateActionPolicyAttributes = ({
     groupingMode: data.groupingMode ?? null,
     throttle: normalizeThrottle(data.throttle),
     snoozedUntil: null,
+    suppressDependentRules: data.suppressDependentRules ?? null,
     auth,
     createdBy,
     createdAt,
@@ -121,6 +122,10 @@ export const buildUpdateActionPolicyAttributes = ({
     groupingMode: resolveNextNullableField(update.groupingMode, existing.groupingMode),
     throttle: normalizeThrottle(resolveNextNullableField(update.throttle, existing.throttle)),
     snoozedUntil: normalizeNullableField(existing.snoozedUntil),
+    suppressDependentRules: resolveNextNullableField(
+      update.suppressDependentRules,
+      existing.suppressDependentRules
+    ),
     auth,
     createdBy: existing.createdBy,
     updatedBy,
@@ -151,6 +156,7 @@ export const transformActionPolicySoAttributesToApiResponse = ({
     groupingMode: normalizeNullableField(attributes.groupingMode),
     throttle: normalizeThrottle(attributes.throttle),
     snoozedUntil: normalizeNullableField(attributes.snoozedUntil),
+    suppressDependentRules: normalizeNullableField(attributes.suppressDependentRules),
     auth: toAuthResponse(attributes.auth),
     createdBy: attributes.createdBy,
     createdAt: attributes.createdAt,

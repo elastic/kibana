@@ -390,6 +390,8 @@ export const createRuleDataBaseSchema = z
     state_transition: stateTransitionSchema,
     grouping: groupingSchema.optional(),
     artifacts: z.array(artifactSchema).max(100).optional(),
+    // POC (rna-program#753): parent rule ids for dependency suppression.
+    depends_on: z.array(z.string()).max(100).optional(),
   })
   .strict();
 
@@ -538,6 +540,7 @@ export const updateRuleDataSchema = z
     state_transition: stateTransitionSchema.nullable(),
     grouping: groupingSchema.optional().nullable(),
     artifacts: z.array(artifactSchema).max(100).optional().nullable(),
+    depends_on: z.array(z.string()).max(100).optional().nullable(),
     enabled: z.boolean().optional().describe('Whether the rule is enabled.'),
   })
   .strict()

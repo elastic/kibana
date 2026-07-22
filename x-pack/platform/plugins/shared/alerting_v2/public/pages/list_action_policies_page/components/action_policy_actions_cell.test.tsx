@@ -24,6 +24,7 @@ const createPolicy = (overrides: Partial<ActionPolicyResponse> = {}): ActionPoli
   groupingMode: null,
   throttle: { strategy: undefined, interval: null },
   snoozedUntil: null,
+  suppressDependentRules: null,
   auth: { owner: 'elastic', createdByUser: false },
   createdBy: 'elastic_uid',
   createdAt: '2026-01-01T00:00:00.000Z',

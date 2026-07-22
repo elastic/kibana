@@ -121,6 +121,7 @@ export function transformCreateRuleBodyToRuleSoAttributes(
     state_transition: data.state_transition,
     grouping: data.grouping,
     artifacts: data.artifacts,
+    depends_on: data.depends_on,
     ...serverFields,
   };
 }
@@ -194,6 +195,7 @@ export function buildUpdateRuleAttributes(
     // `null` → clear (undefined). SO schema uses `maybe()` without `nullable()`.
     grouping: nullToUndefined(updateData.grouping, existingAttrs.grouping),
     artifacts: nullToEmptyArray(updateData.artifacts, existingAttrs.artifacts),
+    depends_on: nullToEmptyArray(updateData.depends_on, existingAttrs.depends_on),
     enabled: updateData.enabled ?? existingAttrs.enabled,
     // Server-managed fields — preserved as-is except timestamps and user.
     createdBy: existingAttrs.createdBy,
@@ -235,6 +237,7 @@ export function transformRuleSoAttributesToRuleApiResponse(
     state_transition: attrs.state_transition,
     grouping: attrs.grouping,
     artifacts: attrs.artifacts,
+    depends_on: attrs.depends_on,
     enabled: attrs.enabled,
     createdBy: attrs.createdBy,
     createdAt: attrs.createdAt,

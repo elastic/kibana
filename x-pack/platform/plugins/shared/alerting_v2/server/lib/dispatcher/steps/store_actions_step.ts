@@ -38,7 +38,7 @@ export class StoreActionsStep implements DispatcherStep {
       rules,
     } = state;
 
-    const unmatched = getUnmatchedEpisodes(dispatchable, dispatch, throttled);
+    const unmatched = getUnmatchedEpisodes(dispatchable, dispatch, throttled, suppressed);
 
     if (
       suppressed.length === 0 &&

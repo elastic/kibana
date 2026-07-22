@@ -6,6 +6,7 @@
  */
 
 import type { EsqlQueryResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { ActiveParentRule } from '../queries';
 import type { AlertEpisode, AlertEpisodeSuppression, LastNotifiedRecord } from '../types';
 
 export const createDispatchableAlertEventsResponse = (
@@ -49,6 +50,15 @@ export const createAlertEpisodeSuppressionsResponse = (
       suppression.episode_id,
       suppression.should_suppress,
     ]),
+  };
+};
+
+export const createActiveParentRulesResponse = (
+  rows: ActiveParentRule[] = []
+): EsqlQueryResponse => {
+  return {
+    columns: [{ name: 'rule_id', type: 'keyword' }],
+    values: rows.map((r) => [r.rule_id]),
   };
 };
 

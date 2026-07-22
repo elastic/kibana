@@ -13,6 +13,7 @@ export { ApplyMaintenanceWindowStep } from './apply_maintenance_window_step';
 export { FetchRulesStep } from './fetch_rules_step';
 export { FetchPoliciesStep } from './fetch_policies_step';
 export { EvaluateMatchersStep } from './evaluate_matchers_step';
+export { ApplyDependencySuppressionStep } from './apply_dependency_suppression_step';
 export { BuildGroupsStep } from './build_groups_step';
 export { ApplyThrottlingStep } from './apply_throttling_step';
 export { DispatchStep } from './dispatch_step';

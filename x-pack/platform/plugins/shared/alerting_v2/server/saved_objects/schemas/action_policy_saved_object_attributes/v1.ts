@@ -47,6 +47,9 @@ export const actionPolicySavedObjectAttributesSchema = schema.object({
     )
   ),
   snoozedUntil: schema.maybe(schema.nullable(schema.string())),
+  // POC (rna-program#753): when true, suppress notifications for episodes
+  // whose rule depends_on a rule that currently has an active episode.
+  suppressDependentRules: schema.maybe(schema.nullable(schema.boolean())),
   auth: schema.object({
     apiKey: schema.maybe(schema.string()),
     owner: schema.string(),

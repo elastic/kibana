@@ -76,6 +76,7 @@ export class StoreExecutionHistoryStep implements DispatcherStep {
       dispatch = [],
       throttled = [],
       dispatchable = [],
+      suppressed = [],
       dispatchedExecutions,
       rules,
       input,
@@ -109,7 +110,7 @@ export class StoreExecutionHistoryStep implements DispatcherStep {
     }
 
     const unmatched = aggregateUnmatchedByRule(
-      getUnmatchedEpisodes(dispatchable, dispatch, throttled)
+      getUnmatchedEpisodes(dispatchable, dispatch, throttled, suppressed)
     );
     for (const [ruleId, episodeIds] of unmatched) {
       this.emitUnmatchedSummary({ timestamp, executionUuid, ruleId, episodeIds, rules });

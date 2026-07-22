@@ -67,6 +67,7 @@ export function createRule(overrides: Partial<Rule> = {}): Rule {
     spaceId: 'default',
     name: 'Test rule',
     tags: [],
+    dependsOn: [],
     ...overrides,
   };
 }

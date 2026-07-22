@@ -11,7 +11,7 @@ import {
   ALERT_EVENTS_DATA_STREAM,
   type AlertEventType,
 } from '../../resources/datastreams/alert_events';
-import type { AlertEpisode, ActionGroupId } from './types';
+import type { AlertEpisode, ActionGroupId, RuleId } from './types';
 
 // Field-based discrimination (type / action_type IS NULL) instead of `_index LIKE` works around
 // an ES|QL regression where `WHERE _index LIKE` before `STATS` returns 0 rows.
@@ -132,6 +132,27 @@ export const getAlertEpisodeSuppressionsQueries = (
             false
           )
         | KEEP rule_id, group_hash, episode_id, should_suppress, last_ack_action, last_deactivate_action, last_snooze_action`.toRequest();
+  });
+};
+
+export interface ActiveParentRule {
+  rule_id: RuleId;
+}
+
+// Returns one request per chunk (see ESQL_IN_CLAUSE_LITERAL_BUDGET_BYTES). Safe to concat:
+// STATS aggregates by rule.id, the same key used for chunking. Used to determine which
+// of a set of candidate parent rules currently has an active episode, for rule-dependency
+// suppression (rna-program#753). `active` only — pending/recovering parents do not suppress.
+export const getRulesWithActiveEpisodesQuery = (ruleIds: RuleId[]): EsqlRequest[] => {
+  return chunkInClauseLiterals(ruleIds).map((chunk) => {
+    const values = chunk.map((id) => esql.str(id));
+
+    return esql`FROM ${ALERT_EVENTS_DATA_STREAM}
+        | WHERE rule.id IN (${values}) AND episode.status IS NOT NULL
+        | STATS last_episode_status = LAST(episode.status, @timestamp) BY rule.id
+        | WHERE last_episode_status == "active"
+        | EVAL rule_id = rule.id
+        | KEEP rule_id`.toRequest();
   });
 };
 

@@ -43,6 +43,9 @@ export class FetchRulesStep implements DispatcherStep {
         spaceId: savedObjectNamespacesToSpaceId(doc.namespaces),
         name: doc.attributes.metadata.name,
         tags: doc.attributes.metadata.tags ?? [],
+        // POC: read directly from the attribute (raw parent rule ids). Production
+        // resolves this from `references[]` instead (see rna-program#753 / kibana#280212).
+        dependsOn: doc.attributes.depends_on ?? [],
       });
     }
 
