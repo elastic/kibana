@@ -63,16 +63,10 @@ type SequenceStepNode = Node<SequenceStepData, 'sequenceStep'>;
 
 // -- Sequence node component --
 
-const statusBadge: Record<string, { icon: string; color: string; label: string }> = {
-  success: { icon: 'checkInCircleFilled', color: 'success', label: 'OK' },
-  failed: { icon: 'error', color: 'danger', label: 'Failed' },
-  warning: { icon: 'warning', color: 'warning', label: 'Warning' },
-};
-
-const typeIconBg: Record<string, string> = {
-  rule: '#E6F0FA',
-  policy: '#FFF3E0',
-  workflow: '#E8F5E9',
+const statusBadge: Record<string, { icon: string; color: string; label: string; bg: string }> = {
+  success: { icon: 'checkInCircleFilled', color: 'success', label: 'OK', bg: '#c9f3e3' },
+  failed: { icon: 'error', color: 'danger', label: 'Failed', bg: '#fdddd8' },
+  warning: { icon: 'warning', color: 'warning', label: 'Warning', bg: '#fde9b5' },
 };
 
 const SequenceStepComponent: React.FC<NodeProps<SequenceStepNode>> = ({ data }) => {
@@ -89,33 +83,17 @@ const SequenceStepComponent: React.FC<NodeProps<SequenceStepNode>> = ({ data }) 
           width: '100%',
           height: '100%',
           background: euiTheme.colors.emptyShade,
-          borderRadius: euiTheme.border.radius.medium,
+          borderRadius: 4,
           border: `1px solid ${euiTheme.colors.lightShade}`,
           padding: `${euiTheme.size.s} ${euiTheme.size.m}`,
           display: 'flex',
           alignItems: 'center',
-          gap: euiTheme.size.m,
-          boxShadow: `0 1px 3px rgba(0,0,0,0.06)`,
+          gap: euiTheme.size.s,
           pointerEvents: 'all',
         })}
       >
-        {/* Type icon */}
-        <div
-          css={css({
-            width: 36,
-            height: 36,
-            borderRadius: euiTheme.border.radius.medium,
-            backgroundColor: typeIconBg[data.type] ?? typeIconBg.rule,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            flexShrink: 0,
-          })}
-        >
-          <EuiIcon type={data.icon} color={data.iconColor} size="m" />
-        </div>
+        <EuiIcon type={data.icon} size="m" color="subdued" css={css({ flexShrink: 0 })} />
 
-        {/* Name + meta */}
         <div css={css({ flex: 1, minWidth: 0, overflow: 'hidden' })}>
           <EuiLink
             className="nodrag nopan"
@@ -124,13 +102,14 @@ const SequenceStepComponent: React.FC<NodeProps<SequenceStepNode>> = ({ data }) 
               data.onClickLink?.();
             }}
             css={css({
-              fontSize: 13,
+              fontSize: 14,
               fontWeight: 600,
               display: 'block',
               whiteSpace: 'nowrap',
               overflow: 'hidden',
               textOverflow: 'ellipsis',
               cursor: data.onClickLink ? 'pointer' : 'default',
+              color: euiTheme.colors.title,
             })}
           >
             {data.label}
@@ -142,20 +121,27 @@ const SequenceStepComponent: React.FC<NodeProps<SequenceStepNode>> = ({ data }) 
               whiteSpace: 'nowrap',
               overflow: 'hidden',
               textOverflow: 'ellipsis',
-              lineHeight: 1.4,
+              lineHeight: 1.3,
             })}
           >
             {data.meta}
           </EuiText>
         </div>
 
-        {/* Status badge */}
-        <EuiIcon
-          type={badge.icon}
-          color={badge.color}
-          size="m"
-          css={css({ flexShrink: 0 })}
-        />
+        <div
+          css={css({
+            width: 24,
+            height: 24,
+            borderRadius: 4,
+            backgroundColor: badge.bg,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0,
+          })}
+        >
+          <EuiIcon type={badge.icon} color={badge.color} size="s" />
+        </div>
       </div>
       {data.stepIndex < data.totalSteps - 1 && (
         <Handle type="source" position={Position.Right} style={{ visibility: 'hidden' }} />
@@ -176,6 +162,7 @@ const SequenceArrowEdge: React.FC<EdgeProps> = ({
   targetPosition,
   style,
   markerEnd,
+  data,
 }) => {
   const [edgePath] = getBezierPath({
     sourceX,
@@ -226,7 +213,7 @@ const MOCK_CHAINS: FailingChain[] = [
         label: 'Action policy to design global execution',
         type: 'policy',
         status: 'failed',
-        icon: 'editorComment',
+        icon: 'reporter',
         iconColor: '#E67300',
         meta: 'Action policy · 87 failures · last: 2m ago',
       },
@@ -253,7 +240,7 @@ const MOCK_CHAINS: FailingChain[] = [
         label: 'Action policy to design global execution',
         type: 'policy',
         status: 'failed',
-        icon: 'editorComment',
+        icon: 'reporter',
         iconColor: '#E67300',
         meta: 'Action policy · 42 failures · last: 5m ago',
       },
@@ -280,7 +267,7 @@ const MOCK_CHAINS: FailingChain[] = [
         label: 'Action policy to design global execution',
         type: 'policy',
         status: 'warning',
-        icon: 'editorComment',
+        icon: 'reporter',
         iconColor: '#E67300',
         meta: 'Action policy · throttled · last: 12m ago',
       },
@@ -289,7 +276,7 @@ const MOCK_CHAINS: FailingChain[] = [
         label: 'Cleanup workflow',
         type: 'workflow',
         status: 'warning',
-        icon: 'pipeNoBreaks',
+        icon: 'reporter',
         iconColor: '#00836D',
         meta: 'Workflow · pending · 31 runs',
       },
@@ -316,7 +303,7 @@ const MOCK_CHAINS: FailingChain[] = [
         label: 'Action policy to design global execution',
         type: 'policy',
         status: 'failed',
-        icon: 'editorComment',
+        icon: 'reporter',
         iconColor: '#E67300',
         meta: 'Action policy · 28 failures · last: 18m ago',
       },
@@ -343,7 +330,7 @@ const MOCK_CHAINS: FailingChain[] = [
         label: 'Action policy to design global execution',
         type: 'policy',
         status: 'warning',
-        icon: 'editorComment',
+        icon: 'reporter',
         iconColor: '#E67300',
         meta: 'Action policy · throttled · last: 25m ago',
       },
@@ -352,7 +339,7 @@ const MOCK_CHAINS: FailingChain[] = [
         label: 'Incident triage workflow',
         type: 'workflow',
         status: 'warning',
-        icon: 'pipeNoBreaks',
+        icon: 'reporter',
         iconColor: '#00836D',
         meta: 'Workflow · pending · 15 runs',
       },
@@ -390,7 +377,7 @@ const MOCK_CHAINS: FailingChain[] = [
         label: 'Action policy to design global execution',
         type: 'policy',
         status: 'failed',
-        icon: 'editorComment',
+        icon: 'reporter',
         iconColor: '#E67300',
         meta: 'Action policy · matcher: all alerts · dispatch failed',
       },
@@ -399,7 +386,7 @@ const MOCK_CHAINS: FailingChain[] = [
         label: 'New workflow',
         type: 'workflow',
         status: 'warning',
-        icon: 'pipeNoBreaks',
+        icon: 'reporter',
         iconColor: '#00836D',
         meta: 'Workflow · not reached · 0 runs',
       },
@@ -442,15 +429,18 @@ const buildLinearGraph = (
   const edges: Edge[] = [];
   for (let i = 0; i < steps.length - 1; i++) {
     const sourceStatus = steps[i].status;
+    const isWarning = sourceStatus === 'warning';
+    const isFailed = sourceStatus === 'failed';
     edges.push({
       id: `edge-${i}`,
       source: `step-${i}`,
       target: `step-${i + 1}`,
       type: 'sequenceArrow',
-      markerEnd: { type: MarkerType.ArrowClosed },
+      markerEnd: isWarning ? undefined : { type: MarkerType.ArrowClosed, color: isFailed ? '#BD271E' : '#00BFB3' },
       style: {
-        stroke: sourceStatus === 'failed' ? '#BD271E' : sourceStatus === 'success' ? '#00BFB3' : '#D3DAE6',
+        stroke: isFailed ? '#BD271E' : isWarning ? '#D3DAE6' : '#00BFB3',
         strokeWidth: 2,
+        ...(isWarning ? { strokeDasharray: '6 4' } : {}),
       },
     });
   }
@@ -505,15 +495,18 @@ const buildFanInGraph = (
 
   // source → first target edges
   sources.forEach((source, si) => {
+    const isWarning = source.status === 'warning';
+    const isFailed = source.status === 'failed';
     edges.push({
       id: `edge-s${si}-t0`,
       source: `source-${si}`,
       target: `target-0`,
       type: 'sequenceArrow',
-      markerEnd: { type: MarkerType.ArrowClosed },
+      markerEnd: isWarning ? undefined : { type: MarkerType.ArrowClosed, color: isFailed ? '#BD271E' : '#00BFB3' },
       style: {
-        stroke: source.status === 'failed' ? '#BD271E' : source.status === 'success' ? '#00BFB3' : '#D3DAE6',
+        stroke: isFailed ? '#BD271E' : isWarning ? '#D3DAE6' : '#00BFB3',
         strokeWidth: 2,
+        ...(isWarning ? { strokeDasharray: '6 4' } : {}),
       },
     });
   });
@@ -521,15 +514,18 @@ const buildFanInGraph = (
   // target chain edges (e.g. policy → workflow)
   for (let i = 0; i < targets.length - 1; i++) {
     const sourceStatus = targets[i].status;
+    const isWarning = sourceStatus === 'warning';
+    const isFailed = sourceStatus === 'failed';
     edges.push({
       id: `edge-t${i}-t${i + 1}`,
       source: `target-${i}`,
       target: `target-${i + 1}`,
       type: 'sequenceArrow',
-      markerEnd: { type: MarkerType.ArrowClosed },
+      markerEnd: isWarning ? undefined : { type: MarkerType.ArrowClosed, color: isFailed ? '#BD271E' : '#00BFB3' },
       style: {
-        stroke: sourceStatus === 'failed' ? '#BD271E' : sourceStatus === 'success' ? '#00BFB3' : '#D3DAE6',
+        stroke: isFailed ? '#BD271E' : isWarning ? '#D3DAE6' : '#00BFB3',
         strokeWidth: 2,
+        ...(isWarning ? { strokeDasharray: '6 4' } : {}),
       },
     });
   }
@@ -709,7 +705,20 @@ export const TopFailing: React.FC<TopFailingProps> = ({ onRuleClick, onPolicyCli
                         })}
                       >
                         {step.label}
-                        <EuiIcon type={badge.icon} color={badge.color} size="s" />
+                        <span
+                          css={css({
+                            width: 20,
+                            height: 20,
+                            borderRadius: 3,
+                            backgroundColor: badge.bg,
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            flexShrink: 0,
+                          })}
+                        >
+                          <EuiIcon type={badge.icon} color={badge.color} size="s" />
+                        </span>
                       </span>
                     </React.Fragment>
                   );
