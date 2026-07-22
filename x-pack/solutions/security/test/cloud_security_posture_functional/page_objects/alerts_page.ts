@@ -15,8 +15,8 @@ const {
   PREVIEW_SECTION_HEADER_TEST_ID,
   VISUALIZATIONS_SECTION_HEADER_TEST_ID,
   VISUALIZATIONS_SECTION_CONTENT_TEST_ID,
+  GRAPH_PREVIEW_TEST_ID,
   GRAPH_PREVIEW_CONTENT_TEST_ID,
-  GRAPH_PREVIEW_LOADING_TEST_ID,
   GROUPED_ITEM_TEST_ID,
 } = testSubjectIds;
 
@@ -126,7 +126,9 @@ export class AlertsPageObject extends FtrService {
     },
 
     waitGraphIsLoaded: async () => {
-      await this.testSubjects.missingOrFail(GRAPH_PREVIEW_LOADING_TEST_ID, { timeout: 10000 });
+      await this.testSubjects.existOrFail(GRAPH_PREVIEW_TEST_ID, {
+        timeout: this.defaultTimeoutMs,
+      });
     },
 
     assertPreviewPanelIsOpen: async (type: 'alert' | 'event' | 'group') => {
