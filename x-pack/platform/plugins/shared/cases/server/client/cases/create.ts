@@ -25,10 +25,7 @@ import {
   resolveGlobalFields,
   validateCaseExtendedFields,
 } from './validators';
-import type {
-  CreateUserAction,
-  CommonUserActionArgs,
-} from '../../services/user_actions/types';
+import type { CreateUserAction, CommonUserActionArgs } from '../../services/user_actions/types';
 import { emptyCaseAssigneesSanitizer } from './sanitizers';
 import { normalizeCreateCaseRequest } from './utils';
 import { mergeCustomFieldsIntoExtendedFields } from '../../../common/utils/template_fields';
@@ -224,20 +221,21 @@ export const create = async (
     // persisted case. Only runs on the template-expansion path (flag on + a template was applied).
     if (query.template?.id && query.template.version !== undefined) {
       const common = { caseId: newCase.id, user, owner: newCase.attributes.owner };
-      const templateUserActions: Array<CreateUserAction<'template' | 'extended_fields'> & CommonUserActionArgs> =
-        [
-          {
-            ...common,
-            type: UserActionTypes.template,
-            payload: {
-              template: {
-                id: query.template.id,
-                version: query.template.version,
-                ...(appliedTemplateName ? { name: appliedTemplateName } : {}),
-              },
+      const templateUserActions: Array<
+        CreateUserAction<'template' | 'extended_fields'> & CommonUserActionArgs
+      > = [
+        {
+          ...common,
+          type: UserActionTypes.template,
+          payload: {
+            template: {
+              id: query.template.id,
+              version: query.template.version,
+              ...(appliedTemplateName ? { name: appliedTemplateName } : {}),
             },
           },
-        ];
+        },
+      ];
 
       // Record the initial extended_fields exactly as persisted on the case SO (the template ×
       // caller merge, plus any customFields mirror), so the activity log reflects the stored values.

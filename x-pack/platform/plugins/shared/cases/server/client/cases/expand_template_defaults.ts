@@ -199,7 +199,11 @@ export const applyTemplateDefaultsToCreateRequest = async <T extends CasePostReq
   // where it can be applied. Deferring the read here (rather than eagerly in resolveTemplateForCreate)
   // spares callers with their own connector an actions-client round-trip and a spurious debug log.
   if (query.connector.type === ConnectorTypes.none) {
-    const templateConnector = await resolveTemplateConnector(resolved.parsed, actionsClient, logger);
+    const templateConnector = await resolveTemplateConnector(
+      resolved.parsed,
+      actionsClient,
+      logger
+    );
     if (templateConnector !== undefined) {
       expanded.connector = templateConnector;
     }
