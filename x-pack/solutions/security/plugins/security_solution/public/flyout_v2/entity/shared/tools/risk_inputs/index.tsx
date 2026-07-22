@@ -16,6 +16,7 @@ import { useFlyoutApi } from '../../../../use_flyout_api';
 import { cellActionRenderer } from '../../../../shared/components/cell_actions';
 import { RISK_INPUTS_TITLE } from '../../../../shared/constants/flyout_titles';
 import { RISK_INPUTS_TOOL_TEST_ID } from './test_ids';
+import { FLYOUT_ORIGIN } from '../../../../../common/lib/telemetry';
 
 const TITLE = RISK_INPUTS_TITLE;
 
@@ -43,6 +44,7 @@ export const RiskInputs = memo(
           indexName,
           renderCellActions: cellActionRenderer,
           onAlertUpdated: noop,
+          origin: FLYOUT_ORIGIN.RISK_INPUTS_ALERT,
           title,
         });
       },

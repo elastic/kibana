@@ -79,9 +79,14 @@ export class ContextEnginePlugin
       defaultPath: '/',
       async mount(params: AppMountParameters) {
         const { mountApp } = await import('./application');
-        const [coreStart] = await core.getStartServices();
+        const [coreStart, pluginsStart] = await core.getStartServices();
         coreStart.chrome.docTitle.change(APP_TITLE);
-        return mountApp({ core: coreStart, element: params.element, history: params.history });
+        return mountApp({
+          core: coreStart,
+          plugins: pluginsStart,
+          element: params.element,
+          history: params.history,
+        });
       },
     });
 
