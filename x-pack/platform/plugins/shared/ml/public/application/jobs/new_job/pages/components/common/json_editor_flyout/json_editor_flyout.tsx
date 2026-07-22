@@ -188,7 +188,7 @@ export const JsonEditorFlyout: FC<Props> = ({ isDisabled, jobEditorMode, datafee
         originalIndices.every((value, index) => value === datafeed.indices[index]);
       setShowChangedIndicesWarning(valid === false);
 
-      if (cpsManager && allowedProjectsLoaded) {
+      if (cpsManager && allowedProjectsLoaded && datafeed.project_routing !== undefined) {
         const invalidProjectRouting = hasInvalidProjectRouting(
           datafeed.project_routing,
           allowedProjects

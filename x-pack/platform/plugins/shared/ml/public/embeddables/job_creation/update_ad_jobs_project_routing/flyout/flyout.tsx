@@ -31,6 +31,7 @@ import {
 import type { ProjectRouting } from '@kbn/es-query';
 import type { ICPSManager } from '@kbn/cps-utils';
 import { useFetchProjects } from '@kbn/cps-utils';
+import { extractErrorMessage, type ErrorType } from '@kbn/ml-error-utils';
 import { MlProjectPickerPanel } from '@kbn/ml-cps';
 import { showProjectRoutingChangeConfirmModal } from '../../../../application/jobs/components/project_routing_change_confirm';
 import { DEFAULT_ML_PROJECT_ROUTING } from '../../../../../common/constants/cps';
@@ -194,6 +195,26 @@ export const UpdateADJobsProjectRoutingFlyout: FC<Props> = ({
       setUpdateResults(next);
       const successCount = jobIds.filter((id) => next[id]?.success).length;
       const failCount = jobIds.length - successCount;
+
+      for (const id of jobIds) {
+        const restartError = response.results[id]?.restartError;
+        if (restartError != null) {
+          const error =
+            restartError instanceof Error
+              ? restartError
+              : new Error(extractErrorMessage(restartError as ErrorType));
+          toasts.addError(error, {
+            title: i18n.translate(
+              'xpack.ml.embeddables.updateADJobsProjectRoutingFlyout.restartErrorTitle',
+              {
+                defaultMessage: 'Failed to restart datafeed for job {jobId}',
+                values: { jobId: id },
+              }
+            ),
+          });
+        }
+      }
+
       if (failCount === 0) {
         toasts.addSuccess(
           i18n.translate('xpack.ml.embeddables.updateADJobsProjectRoutingFlyout.updateSuccess', {
@@ -214,8 +235,7 @@ export const UpdateADJobsProjectRoutingFlyout: FC<Props> = ({
       } else {
         toasts.addWarning(
           i18n.translate('xpack.ml.embeddables.updateADJobsProjectRoutingFlyout.updatePartial', {
-            defaultMessage:
-              'Project routing was updated for {success} of {total} jobs. See the list for details.',
+            defaultMessage: 'Project routing was updated for {success} of {total} jobs.',
             values: { success: successCount, total: jobIds.length },
           })
         );

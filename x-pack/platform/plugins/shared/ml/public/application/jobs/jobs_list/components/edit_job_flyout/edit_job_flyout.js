@@ -306,10 +306,16 @@ export class EditJobFlyoutUI extends Component {
       customUrls: this.state.jobCustomUrls,
     };
 
-    if (
-      this._initialJobFormState.datafeedProjectRouting !== undefined &&
-      newJobData.datafeedProjectRouting !== this._initialJobFormState.datafeedProjectRouting
-    ) {
+    // Show confirm when project routing changes, except when going from
+    // unset → default origin scope. Expanding from unset → all (or any other
+    // non-default scope) still requires confirmation.
+    const initialProjectRouting = this._initialJobFormState.datafeedProjectRouting;
+    const newProjectRouting = newJobData.datafeedProjectRouting;
+    const projectRoutingChanged = newProjectRouting !== initialProjectRouting;
+    const isSettingDefaultFromUnset =
+      initialProjectRouting === undefined && newProjectRouting === DEFAULT_ML_PROJECT_ROUTING;
+
+    if (projectRoutingChanged && !isSettingDefaultFromUnset) {
       const { overlays, rendering } = this.props.kibana.services;
       try {
         await showProjectRoutingChangeConfirmModal({
