@@ -146,8 +146,8 @@ apiTest.describe(
         const externalConversationId = 'team:T123/channel:C123/thread:callback-authorship';
         const originAuthor = {
           id: 'U123',
-          name: 'Jane Doe',
-          handle: 'jane',
+          full_name: 'Jane Doe',
+          username: 'jane',
         };
 
         await setupAgentDirectAnswer({
@@ -229,11 +229,9 @@ apiTest.describe(
         expect(firstRound.origin).toStrictEqual({
           type: ConversationOriginType.Slack,
         });
+        expect(firstRound.author).toStrictEqual(originAuthor);
         expect(firstRound.input).toMatchObject({
           message: 'Hello from Slack',
-          origin: {
-            author: originAuthor,
-          },
         });
       }
     );

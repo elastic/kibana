@@ -6,14 +6,12 @@
  */
 
 import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
-import type { ExperimentalFeatures } from '../../../common/experimental_features';
 
 /**
  * Registers all security workflow steps with the workflowsExtensions plugin.
  */
 export const registerWorkflowSteps = (
-  workflowsExtensions: WorkflowsExtensionsPublicPluginSetup,
-  experimentalFeatures: ExperimentalFeatures
+  workflowsExtensions: WorkflowsExtensionsPublicPluginSetup
 ): void => {
   workflowsExtensions.registerStepDefinition(() =>
     import('./render_alert_narrative_step').then((m) => m.renderAlertNarrativeStepDefinition)
@@ -37,21 +35,17 @@ export const registerWorkflowSteps = (
     import('./set_alert_tags_step/set_alert_tags_step').then((m) => m.setAlertTagsStepDefinition)
   );
 
-  if (experimentalFeatures.publicAttacksApiEnabled) {
-    workflowsExtensions.registerStepDefinition(() =>
-      import('./assign_attack_step/assign_attack_step').then((m) => m.assignAttackStepDefinition)
-    );
-    workflowsExtensions.registerStepDefinition(() =>
-      import('./set_attack_status_step/set_attack_status_step').then(
-        (m) => m.setAttackStatusStepDefinition
-      )
-    );
-    workflowsExtensions.registerStepDefinition(() =>
-      import('./set_attack_tags_step/set_attack_tags_step').then(
-        (m) => m.setAttackTagsStepDefinition
-      )
-    );
-  }
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./assign_attack_step/assign_attack_step').then((m) => m.assignAttackStepDefinition)
+  );
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./set_attack_status_step/set_attack_status_step').then(
+      (m) => m.setAttackStatusStepDefinition
+    )
+  );
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./set_attack_tags_step/set_attack_tags_step').then((m) => m.setAttackTagsStepDefinition)
+  );
 
   workflowsExtensions.registerStepDefinition(() =>
     import('./enable_rule_step/enable_rule_step').then((m) => m.enableRuleStepDefinition)
