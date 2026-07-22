@@ -439,6 +439,59 @@ describe('ApmServicesTable', () => {
       expect(hasEnvironmentColumn).toBe(false);
     });
 
+    describe('anomaly badge navigation', () => {
+      it('renders anomaly badge with href when locators is provided and service has anomaly score', () => {
+        const mockGetRedirectUrl = jest.fn().mockReturnValue('/services/opbeans-python/overview');
+        const mockLocators = {
+          get: jest.fn().mockReturnValue({ getRedirectUrl: mockGetRedirectUrl }),
+        } as any;
+
+        const columns = getServiceColumns({
+          comparisonDataLoading: false,
+          showAnomaliesColumn: true,
+          query: defaultQuery,
+          showTransactionTypeColumn: false,
+          breakpoints: { isSmall: false, isLarge: false, isXl: false } as Breakpoints,
+          showAlertsColumn: false,
+          showSlosColumn: false,
+          link: apmRouter.link,
+          serviceOverflowCount: 0,
+          onSloBadgeClick: jest.fn(),
+          locators: mockLocators,
+        });
+
+        const anomalyColumn = columns.find((c) => c.field === 'anomalyScore')!;
+        const serviceWithAnomaly: ServiceListItem = {
+          ...mockService,
+          anomalyScore: 85,
+          anomalyEnvironment: 'production',
+        };
+
+        const element = anomalyColumn.render!(
+          serviceWithAnomaly.anomalyScore,
+          serviceWithAnomaly
+        ) as React.ReactNode;
+
+        render(
+          <EuiThemeProvider>
+            <IntlProvider locale="en">{element}</IntlProvider>
+          </EuiThemeProvider>
+        );
+
+        const badge = screen.getByTestId('apmAnomaliesBadge');
+        expect(badge.closest('a')).not.toBeNull();
+        expect(mockGetRedirectUrl).toHaveBeenCalledWith(
+          expect.objectContaining({
+            serviceName: 'opbeans-python',
+            query: expect.objectContaining({
+              environment: 'production',
+              comparisonEnabled: true,
+            }),
+          })
+        );
+      });
+    });
+
     describe('responsive columns', () => {
       const serviceForColumnTest: any = {
         serviceName: 'opbeans-python',
