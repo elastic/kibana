@@ -188,6 +188,15 @@ export const TaskManagerHealth: React.FC = () => {
           {MOCK_HEALTH.status}
         </EuiBadge>
       </EuiFlexItem>
+      <EuiFlexItem grow={false} css={css({ width: 120 })}>
+        <EuiProgress
+          value={MOCK_HEALTH.utilization}
+          max={100}
+          color={STATUS_COLOR[utilizationStatus]}
+          size="m"
+          css={css({ borderRadius: euiTheme.border.radius.small })}
+        />
+      </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiText size="s" color={STATUS_COLOR[utilizationStatus]}>
           <strong>{MOCK_HEALTH.utilization}%</strong>{' '}
@@ -222,36 +231,6 @@ export const TaskManagerHealth: React.FC = () => {
         `}
       >
         <div css={css({ paddingTop: 16 })}>
-          {/* Utilization bar */}
-          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiToolTip content="Percentage of task manager capacity in use across all nodes">
-                <EuiText size="xs" css={css({ fontWeight: 600 })}>Utilization</EuiText>
-              </EuiToolTip>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiProgress
-                value={MOCK_HEALTH.utilization}
-                max={100}
-                color={STATUS_COLOR[utilizationStatus]}
-                size="m"
-                css={css({ borderRadius: euiTheme.border.radius.small })}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiText size="xs" color={STATUS_COLOR[utilizationStatus]}>
-                <strong>{MOCK_HEALTH.utilization}%</strong>
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiText size="xs" color="subdued">
-                {MOCK_HEALTH.nodes} nodes
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-
-          <EuiSpacer size="m" />
-
           {/* Capacity & Queue metrics */}
           <EuiTitle size="xxxs" css={sectionTitleCss}>
             <h4>Capacity &amp; queue</h4>

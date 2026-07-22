@@ -184,12 +184,7 @@ const secondaryStatCss = css({
   '.euiStat__title': { fontSize: '1rem' },
 });
 
-const LegendDot: React.FC<{ color: string; label: string }> = ({ color, label }) => (
-  <span css={css({ display: 'inline-flex', alignItems: 'center', gap: 4 })}>
-    <span css={css({ width: 8, height: 8, borderRadius: '50%', backgroundColor: color, flexShrink: 0 })} />
-    <EuiText size="xs" color="subdued">{label}</EuiText>
-  </span>
-);
+
 
 const compactChartTheme: PartialTheme = {
   chartMargins: { left: 0, right: 0, top: 4, bottom: 0 },
@@ -255,7 +250,7 @@ const StatsWithCharts: React.FC = () => {
               />
             </EuiFlexItem>
             <EuiFlexItem grow={7} css={css({ padding: euiTheme.size.m, display: 'flex', flexDirection: 'column' })}>
-              <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} css={css({ marginBottom: 4 })}>
+              <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false} css={css({ marginBottom: 4 })}>
                 <EuiFlexItem grow={false}>
                   <EuiText size="xs"><strong>
                     {i18n.translate(
@@ -263,12 +258,6 @@ const StatsWithCharts: React.FC = () => {
                       { defaultMessage: 'Executions over time' }
                     )}
                   </strong></EuiText>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <LegendDot color={euiTheme.colors.success} label="Success" />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <LegendDot color={euiTheme.colors.danger} label="Failed" />
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <EuiText size="xs" color="subdued" css={css({ textAlign: 'right' })}>
@@ -281,7 +270,8 @@ const StatsWithCharts: React.FC = () => {
                   <Settings
                     theme={[compactChartTheme]}
                     baseTheme={chartBaseTheme}
-                    showLegend={false}
+                    showLegend
+                    legendPosition={{ direction: 'horizontal', hAlign: 'left', vAlign: 'top', floating: false }}
                     locale={i18n.getLocale()}
                   />
                   <Tooltip type={TooltipType.VerticalCursor} />
@@ -365,7 +355,7 @@ const StatsWithCharts: React.FC = () => {
               />
             </EuiFlexItem>
             <EuiFlexItem grow={7} css={css({ padding: euiTheme.size.m, display: 'flex', flexDirection: 'column' })}>
-              <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} css={css({ marginBottom: 4 })}>
+              <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false} css={css({ marginBottom: 4 })}>
                 <EuiFlexItem grow={false}>
                   <EuiText size="xs"><strong>
                     {i18n.translate(
@@ -373,12 +363,6 @@ const StatsWithCharts: React.FC = () => {
                       { defaultMessage: 'Failures over time' }
                     )}
                   </strong></EuiText>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <LegendDot color={euiTheme.colors.vis.euiColorVis2} label="Rules" />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <LegendDot color={euiTheme.colors.vis.euiColorVis8} label="Policies" />
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <EuiText size="xs" color="subdued" css={css({ textAlign: 'right' })}>
@@ -391,7 +375,8 @@ const StatsWithCharts: React.FC = () => {
                   <Settings
                     theme={[compactChartTheme]}
                     baseTheme={chartBaseTheme}
-                    showLegend={false}
+                    showLegend
+                    legendPosition={{ direction: 'horizontal', hAlign: 'left', vAlign: 'top', floating: false }}
                     locale={i18n.getLocale()}
                   />
                   <Tooltip type={TooltipType.VerticalCursor} />

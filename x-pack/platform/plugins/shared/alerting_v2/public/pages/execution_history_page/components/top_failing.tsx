@@ -670,7 +670,7 @@ export const TopFailing: React.FC<TopFailingProps> = ({ onRuleClick, onPolicyCli
       {
         field: 'chain',
         name: i18n.translate('xpack.alertingV2.executionHistory.topFailing.chainColumn', {
-          defaultMessage: 'Execution chain',
+          defaultMessage: 'Failure path',
         }),
         render: (_chain: string, item: FailingChain) => {
           const allSteps = item.sources
@@ -722,17 +722,26 @@ export const TopFailing: React.FC<TopFailingProps> = ({ onRuleClick, onPolicyCli
       {
         field: 'occurrences',
         name: i18n.translate('xpack.alertingV2.executionHistory.topFailing.occurrencesColumn', {
-          defaultMessage: 'Occurrences',
+          defaultMessage: 'Failures count',
         }),
-        width: '120px',
-        render: (count: number) => (
-          <EuiBadge color={count > 50 ? 'danger' : 'warning'}>{count}</EuiBadge>
-        ),
+        width: '140px',
+        sortable: true,
+        render: (count: number) => {
+          const color =
+            count >= 100
+              ? '#fdddd8'
+              : count >= 50
+              ? '#ffdebf'
+              : count >= 25
+              ? '#fde9b5'
+              : '#cfeef7';
+          return <EuiBadge color={color}>{count}</EuiBadge>;
+        },
       },
       {
         field: 'lastSeen',
         name: i18n.translate('xpack.alertingV2.executionHistory.topFailing.lastSeenColumn', {
-          defaultMessage: 'Last seen',
+          defaultMessage: 'Last failure',
         }),
         width: '120px',
       },
@@ -751,7 +760,7 @@ export const TopFailing: React.FC<TopFailingProps> = ({ onRuleClick, onPolicyCli
       </EuiTitle>
 
       <EuiBasicTable<FailingChain>
-        items={MOCK_CHAINS}
+        items={[...MOCK_CHAINS].sort((a, b) => b.occurrences - a.occurrences)}
         itemId="id"
         columns={columns}
         itemIdToExpandedRowMap={itemIdToExpandedRowMap}

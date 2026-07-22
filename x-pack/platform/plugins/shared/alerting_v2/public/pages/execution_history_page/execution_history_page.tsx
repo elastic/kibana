@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { EuiSpacer, EuiTabs, EuiTab, EuiTitle } from '@elastic/eui';
 import { AppHeader } from '@kbn/app-header';
 import type { AppHeaderTab } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
+import { DateRangePicker } from '@kbn/date-range-picker';
+import type { DateRangePickerOnChangeProps, DateRangePickerSettings } from '@kbn/date-range-picker';
 import { ExperimentalBadge } from '../../components/experimental_badge';
 import { ActionPolicyDetailsFlyoutContainer } from '../../components/action_policy/details_flyout/action_policy_details_flyout_container';
 import { RuleSummaryFlyoutContainer } from '../../components/rule/flyouts/rule_summary_flyout_container';
@@ -20,6 +22,18 @@ import { ExecutionKpis } from './components/execution_kpis';
 import { TaskManagerHealth } from './components/task_manager_health';
 import { TopFailing } from './components/top_failing';
 import { PrototypeOptions, usePrototypeFlags } from './components/prototype_options';
+
+const TIME_RANGE_PRESETS = [
+  { start: 'now-1h', end: 'now', label: 'Last 1 hour' },
+  { start: 'now-24h', end: 'now', label: 'Last 24 hours' },
+  { start: 'now-7d', end: 'now', label: 'Last 7 days' },
+  { start: 'now-30d', end: 'now', label: 'Last 30 days' },
+];
+
+const DEFAULT_DATE_PICKER_SETTINGS: DateRangePickerSettings = {
+  roundRelativeTime: true,
+  timePrecision: 's',
+};
 
 const POLICIES_TAB_ID = 'policies';
 const RULES_TAB_ID = 'rules';
@@ -63,8 +77,15 @@ export const ExecutionHistoryPage = () => {
   const [selectedTabId, setSelectedTabId] = useState<TabId>(RULES_TAB_ID);
   const [policyToViewId, setPolicyToViewId] = useState<string | null>(null);
   const [ruleToViewId, setRuleToViewId] = useState<string | null>(null);
+  const [datePickerSettings, setDatePickerSettings] = useState<DateRangePickerSettings>(
+    DEFAULT_DATE_PICKER_SETTINGS
+  );
   const { flyout: composeFlyout, openEditFlyout, openCloneFlyout } = useComposeDiscoverFlyout();
   const { flags, setFlags } = usePrototypeFlags();
+
+  const handleDatePickerChange = useCallback((args: DateRangePickerOnChangeProps) => {
+    if (args.isInvalid) return;
+  }, []);
 
   const handlePolicyClick = (policyId: string) => {
     setRuleToViewId(null);
@@ -90,9 +111,17 @@ export const ExecutionHistoryPage = () => {
         padding={{ bleed: 'm' }}
       />
       <EuiSpacer size="m" />
-      <ExecutionKpis showCharts={flags.showCharts} />
-      <EuiSpacer size="m" />
       <TaskManagerHealth />
+      <EuiSpacer size="m" />
+      <DateRangePicker
+        defaultValue="Last 24 hours"
+        presets={TIME_RANGE_PRESETS}
+        settings={datePickerSettings}
+        onChange={handleDatePickerChange}
+        onSettingsChange={setDatePickerSettings}
+      />
+      <EuiSpacer size="m" />
+      <ExecutionKpis showCharts={flags.showCharts} />
       <EuiSpacer size="m" />
       <TopFailing onRuleClick={handleRuleClick} onPolicyClick={handlePolicyClick} />
       <EuiSpacer size="m" />
