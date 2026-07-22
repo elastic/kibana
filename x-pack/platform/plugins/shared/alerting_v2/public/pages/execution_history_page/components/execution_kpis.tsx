@@ -20,7 +20,6 @@ import {
   Settings,
   BarSeries,
   ScaleType,
-  Position,
   Tooltip,
   TooltipType,
 } from '@elastic/charts';
@@ -185,15 +184,11 @@ const secondaryStatCss = css({
   '.euiStat__title': { fontSize: '1rem' },
 });
 
-const ChartLegendDot: React.FC<{ color: string; label: string }> = ({ color, label }) => (
-  <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-    <EuiFlexItem grow={false}>
-      <div css={css({ width: 8, height: 8, borderRadius: '50%', backgroundColor: color })} />
-    </EuiFlexItem>
-    <EuiFlexItem grow={false}>
-      <EuiText size="xs" color="subdued">{label}</EuiText>
-    </EuiFlexItem>
-  </EuiFlexGroup>
+const LegendDot: React.FC<{ color: string; label: string }> = ({ color, label }) => (
+  <span css={css({ display: 'inline-flex', alignItems: 'center', gap: 4 })}>
+    <span css={css({ width: 8, height: 8, borderRadius: '50%', backgroundColor: color, flexShrink: 0 })} />
+    <EuiText size="xs" color="subdued">{label}</EuiText>
+  </span>
 );
 
 const compactChartTheme: PartialTheme = {
@@ -201,6 +196,7 @@ const compactChartTheme: PartialTheme = {
   chartPaddings: { left: 0, right: 0, top: 0, bottom: 0 },
   scales: { barsPadding: 0.25 },
   background: { color: 'transparent' },
+  legend: { verticalWidth: 80 },
 };
 
 const StatsWithCharts: React.FC = () => {
@@ -258,8 +254,8 @@ const StatsWithCharts: React.FC = () => {
                 css={secondaryStatCss}
               />
             </EuiFlexItem>
-            <EuiFlexItem grow={7} css={css({ padding: euiTheme.size.m })}>
-              <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false} css={css({ marginBottom: 4 })}>
+            <EuiFlexItem grow={7} css={css({ padding: euiTheme.size.m, display: 'flex', flexDirection: 'column' })}>
+              <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} css={css({ marginBottom: 4 })}>
                 <EuiFlexItem grow={false}>
                   <EuiText size="xs"><strong>
                     {i18n.translate(
@@ -269,10 +265,10 @@ const StatsWithCharts: React.FC = () => {
                   </strong></EuiText>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <ChartLegendDot color={euiTheme.colors.success} label="Success" />
+                  <LegendDot color={euiTheme.colors.success} label="Success" />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <ChartLegendDot color={euiTheme.colors.danger} label="Failed" />
+                  <LegendDot color={euiTheme.colors.danger} label="Failed" />
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <EuiText size="xs" color="subdued" css={css({ textAlign: 'right' })}>
@@ -280,7 +276,7 @@ const StatsWithCharts: React.FC = () => {
                   </EuiText>
                 </EuiFlexItem>
               </EuiFlexGroup>
-              <div css={css({ flex: 1, minHeight: 100 })}>
+              <div css={css({ flex: 1, minHeight: 140 })}>
                 <Chart>
                   <Settings
                     theme={[compactChartTheme]}
@@ -368,8 +364,8 @@ const StatsWithCharts: React.FC = () => {
                 css={secondaryStatCss}
               />
             </EuiFlexItem>
-            <EuiFlexItem grow={7} css={css({ padding: euiTheme.size.m })}>
-              <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false} css={css({ marginBottom: 4 })}>
+            <EuiFlexItem grow={7} css={css({ padding: euiTheme.size.m, display: 'flex', flexDirection: 'column' })}>
+              <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} css={css({ marginBottom: 4 })}>
                 <EuiFlexItem grow={false}>
                   <EuiText size="xs"><strong>
                     {i18n.translate(
@@ -379,10 +375,10 @@ const StatsWithCharts: React.FC = () => {
                   </strong></EuiText>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <ChartLegendDot color={euiTheme.colors.vis.euiColorVis2} label="Rules" />
+                  <LegendDot color={euiTheme.colors.vis.euiColorVis2} label="Rules" />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <ChartLegendDot color={euiTheme.colors.vis.euiColorVis8} label="Policies" />
+                  <LegendDot color={euiTheme.colors.vis.euiColorVis8} label="Policies" />
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <EuiText size="xs" color="subdued" css={css({ textAlign: 'right' })}>
@@ -390,7 +386,7 @@ const StatsWithCharts: React.FC = () => {
                   </EuiText>
                 </EuiFlexItem>
               </EuiFlexGroup>
-              <div css={css({ flex: 1, minHeight: 100 })}>
+              <div css={css({ flex: 1, minHeight: 140 })}>
                 <Chart>
                   <Settings
                     theme={[compactChartTheme]}
