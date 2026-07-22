@@ -15,8 +15,11 @@ import { UsersQueries } from '../../../../../../common/search_strategy/security_
 import type { UserItem } from '../../../../../../common/search_strategy/security_solution/users/common';
 import { NOT_EVENT_KIND_ASSET_FILTER } from '../../../../../../common/search_strategy/security_solution/users/common';
 import { useSearchStrategy } from '../../../../../common/containers/use_search_strategy';
+import { buildExecutionContext } from '../../../../../entity_analytics/common';
 import { useUiSetting } from '../../../../../common/lib/kibana';
 import type { EntityStoreRecord } from '../../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
+
+const OBSERVED_USER_CONTEXT = buildExecutionContext('explore-users_page', 'user_details_observed');
 
 export const OBSERVED_USER_QUERY_ID = 'observedUsersDetailsQuery';
 
@@ -112,6 +115,7 @@ export const useObservedUserDetails = ({
     },
     errorMessage: i18n.FAIL_USER_DETAILS,
     abort: shouldSkip,
+    executionContext: OBSERVED_USER_CONTEXT,
   });
 
   const userDetailsResponse = useMemo(

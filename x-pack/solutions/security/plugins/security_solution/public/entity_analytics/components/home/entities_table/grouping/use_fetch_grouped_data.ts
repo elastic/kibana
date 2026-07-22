@@ -14,6 +14,7 @@ import { showErrorToast } from '@kbn/cloud-security-posture';
 import { useContext, useMemo } from 'react';
 import type { EntityType } from '../../../../../../common/entity_analytics/types';
 import { useKibana } from '../../../../../common/lib/kibana';
+import { buildExecutionContext } from '../../../../common';
 import {
   ENTITY_FIELDS,
   QUERY_KEY_GROUPING_DATA,
@@ -129,13 +130,10 @@ export const useFetchGroupedData = ({
             params: getGroupedEntitiesQuery(query, indexPattern),
           },
           {
-            executionContext: {
-              child: {
-                type: 'security_solution',
-                name: 'entity_analytics-home_page',
-                id: 'entities_table_grouped',
-              },
-            },
+            executionContext: buildExecutionContext(
+              'entity_analytics-home_page',
+              'entities_table_grouped'
+            ),
           }
         )
       );
@@ -185,13 +183,10 @@ export const useFetchTargetMetadata = (entityIds: string[]): TargetMetadataMap =
             },
           },
           {
-            executionContext: {
-              child: {
-                type: 'security_solution',
-                name: 'entity_analytics-home_page',
-                id: 'entities_table_target_metadata',
-              },
-            },
+            executionContext: buildExecutionContext(
+              'entity_analytics-home_page',
+              'entities_table_target_metadata'
+            ),
           }
         )
       );

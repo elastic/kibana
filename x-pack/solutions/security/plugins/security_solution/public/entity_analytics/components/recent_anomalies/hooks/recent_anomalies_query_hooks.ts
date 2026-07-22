@@ -15,6 +15,7 @@ import { ML_ANOMALIES_INDEX } from '../../../../../common/constants';
 import type { ESBoolQuery } from '../../../../../common/typed_json';
 import { useGlobalFilterQuery } from '../../../../common/hooks/use_global_filter_query';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
+import { buildExecutionContext } from '../../../common';
 import { esqlResponseToRecords } from '../../../../common/utils/esql';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useErrorToast } from '../../../../common/hooks/use_error_toast';
@@ -112,13 +113,10 @@ const useFilteredEntityIds = (spaceId?: string): FilteredEntityIds => {
         search,
         signal,
         filter: filterQuery,
-        executionContext: {
-          child: {
-            type: 'security_solution',
-            name: 'entity_analytics-home_page',
-            id: 'anomalies_entity_filter',
-          },
-        },
+        executionContext: buildExecutionContext(
+          'entity_analytics-home_page',
+          'anomalies_entity_filter'
+        ),
       });
       return esqlResponseToRecords<{ 'entity.id': string }>(esqlResult?.response)
         .map((record) => record['entity.id'])
@@ -213,13 +211,7 @@ const useRecentAnomaliesTopRowsQuery = (params: {
         search,
         signal,
         timeRange,
-        executionContext: {
-          child: {
-            type: 'security_solution',
-            name: 'entity_analytics-home_page',
-            id: 'anomalies_top_rows',
-          },
-        },
+        executionContext: buildExecutionContext('entity_analytics-home_page', 'anomalies_top_rows'),
       });
       return {
         records: esqlResponseToRecords<Record<string, string>>(esqlResult?.response),
@@ -314,13 +306,7 @@ export const useRecentAnomaliesQuery = (params: {
         search,
         signal,
         timeRange,
-        executionContext: {
-          child: {
-            type: 'security_solution',
-            name: 'entity_analytics-home_page',
-            id: 'anomalies_heatmap',
-          },
-        },
+        executionContext: buildExecutionContext('entity_analytics-home_page', 'anomalies_heatmap'),
       });
       const anomalyRecords = esqlResponseToRecords<Record<string, string | number>>(
         esqlResult.response

@@ -9,6 +9,12 @@ import { useMemo } from 'react';
 import { useQuery } from '@kbn/react-query';
 import type { PersistedEntityAiSummary } from '@kbn/entity-store/common';
 import { useEntityAnalyticsRoutes } from '../../../api/api';
+import { buildExecutionContext } from '../../../common';
+
+const PERSISTED_AI_SUMMARY_CONTEXT = buildExecutionContext(
+  'entity_analytics-entity_details_flyout',
+  'entity_details_ai_summary_get'
+);
 
 export const PERSISTED_AI_SUMMARY_QUERY_KEY = 'PERSISTED_AI_SUMMARY';
 
@@ -43,7 +49,12 @@ export const useFetchPersistedAiSummary = ({
 
   const { data, isLoading, isFetching, refetch } = useQuery({
     queryKey: [PERSISTED_AI_SUMMARY_QUERY_KEY, entityType, entityIdentifier],
-    queryFn: ({ signal }) => fetchPersistedAiSummary({ entityType, entityIdentifier }, signal),
+    queryFn: ({ signal }) =>
+      fetchPersistedAiSummary({
+        params: { entityType, entityIdentifier },
+        signal,
+        context: PERSISTED_AI_SUMMARY_CONTEXT,
+      }),
     enabled: !skip && Boolean(entityIdentifier),
   });
 

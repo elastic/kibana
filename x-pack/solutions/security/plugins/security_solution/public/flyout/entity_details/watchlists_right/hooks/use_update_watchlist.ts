@@ -10,6 +10,7 @@ import { useMutation, useQueryClient } from '@kbn/react-query';
 import type { CreateWatchlistRequestBodyInput } from '../../../../../common/api/entity_analytics/watchlists/management/create.gen';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useEntityAnalyticsRoutes } from '../../../../entity_analytics/api/api';
+import { buildExecutionContext } from '../../../../entity_analytics/common';
 import { getApiErrorMessage } from '../utils';
 import type { SourceType } from './rule_based_source_helpers';
 
@@ -101,7 +102,10 @@ export const useUpdateWatchlist = ({
       }
 
       // Update the watchlist metadata only after entity sources have succeeded
-      const updatedWatchlist = await updateWatchlist({ id: watchlistId, body: watchlist });
+      const updatedWatchlist = await updateWatchlist(
+        { id: watchlistId, body: watchlist },
+        buildExecutionContext('entity_analytics-watchlists', 'watchlist_update')
+      );
 
       return updatedWatchlist;
     },

@@ -18,6 +18,7 @@ import { useRiskScoreKpi } from '../../../../entity_analytics/api/hooks/use_risk
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
 import { useEntityStoreRiskScoreKpi } from '../../../../entity_analytics/api/hooks/use_entity_store_risk_score_kpi';
 import { useEntityStoreRiskScore } from '../../../../entity_analytics/api/hooks/use_entity_store_risk_score';
+import { buildExecutionContext } from '../../../../entity_analytics/common';
 import { useUiSetting } from '../../../../common/lib/kibana';
 import { EnableRiskScore } from '../../../../entity_analytics/components/enable_risk_score';
 import { manageQuery } from '../../../../common/components/page/manage_query';
@@ -32,6 +33,12 @@ import {
   type RiskScoreSortField,
 } from '../../../../../common/search_strategy';
 import type { HostsComponentsQueryProps } from './types';
+
+const HOSTS_RISK_TAB_CONTEXT = buildExecutionContext('explore-hosts_page', 'hosts_risk_score');
+const HOSTS_RISK_TAB_KPI_CONTEXT = buildExecutionContext(
+  'explore-hosts_page',
+  'hosts_risk_score_kpi'
+);
 
 const HostRiskScoreTableManage = manageQuery(HostRiskScoreTable);
 
@@ -57,6 +64,7 @@ const useHostRiskScoreTabData = ({
     skip: querySkip || entityStoreV2Enabled,
     sort,
     timerange,
+    executionContext: HOSTS_RISK_TAB_CONTEXT,
   });
 
   const entityStoreRiskScore = useEntityStoreRiskScore({
@@ -66,6 +74,7 @@ const useHostRiskScoreTabData = ({
     skip: querySkip || !entityStoreV2Enabled,
     sort,
     timerange,
+    executionContext: HOSTS_RISK_TAB_CONTEXT,
   });
 
   const risk = entityStoreV2Enabled ? entityStoreRiskScore : legacyRiskScore;
@@ -74,12 +83,14 @@ const useHostRiskScoreTabData = ({
     filterQuery,
     skip: querySkip || entityStoreV2Enabled,
     riskEntity: EntityType.host,
+    executionContext: HOSTS_RISK_TAB_KPI_CONTEXT,
   });
 
   const entityStoreKpi = useEntityStoreRiskScoreKpi({
     filterQuery,
     skip: querySkip || !entityStoreV2Enabled,
     riskEntity: EntityType.host,
+    executionContext: HOSTS_RISK_TAB_KPI_CONTEXT,
   });
 
   const kpi = entityStoreV2Enabled ? entityStoreKpi : legacyKpi;

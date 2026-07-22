@@ -29,6 +29,7 @@ import type { IdentityFields } from '../../document_details/shared/utils';
 import { EntityDetailsLeftPanelTab } from '../shared/components/left_panel/left_panel_header';
 import { useNavigateToServiceDetails } from './hooks/use_navigate_to_service_details';
 import { useEntityFromStore } from '../shared/hooks/use_entity_from_store';
+import { buildExecutionContext } from '../../../entity_analytics/common';
 import { getRiskFromEntityRecord } from '../shared/entity_store_risk_utils';
 import { FlyoutBody } from '../../shared/components/flyout_body';
 import { useEntityPanelTabs, TABLE_TAB_ID } from '../shared/hooks/use_entity_panel_tabs';
@@ -55,6 +56,15 @@ const FIRST_RECORD_PAGINATION = {
   querySize: 1,
 };
 
+const SERVICE_ENTITY_FROM_STORE_CONTEXT = buildExecutionContext(
+  'entity_details_flyout-service_right',
+  'entity_from_store'
+);
+const SERVICE_RISK_SCORE_CONTEXT = buildExecutionContext(
+  'entity_details_flyout-service_right',
+  'service_risk_score'
+);
+
 export const ServicePanel = memo(function ServicePanel({
   contextID,
   scopeId,
@@ -72,6 +82,7 @@ export const ServicePanel = memo(function ServicePanel({
     identityFields: serviceStoreIdentityFields,
     entityType: 'service',
     skip: false,
+    executionContext: SERVICE_ENTITY_FROM_STORE_CONTEXT,
   });
 
   const euidApi = useEntityStoreEuidApi();
@@ -94,6 +105,7 @@ export const ServicePanel = memo(function ServicePanel({
     onlyLatest: false,
     pagination: FIRST_RECORD_PAGINATION,
     skip: true,
+    executionContext: SERVICE_RISK_SCORE_CONTEXT,
   });
 
   const { inspect, loading, data: serviceRisk } = riskScoreState;

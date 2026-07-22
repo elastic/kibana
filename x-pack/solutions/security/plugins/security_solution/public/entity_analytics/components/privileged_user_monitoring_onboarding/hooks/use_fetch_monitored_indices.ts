@@ -7,12 +7,20 @@
 
 import { useQuery } from '@kbn/react-query';
 import { useEntityAnalyticsRoutes } from '../../../api/api';
+import { buildExecutionContext } from '../../../common';
 
 export const useFetchMonitoredIndices = () => {
   const { listPrivMonMonitoredIndices } = useEntityAnalyticsRoutes();
   return useQuery(
     ['POST', 'LIST_PRIVILEGED_USER_MONITORED_INDICES'],
-    ({ signal }) => listPrivMonMonitoredIndices({ signal }),
+    ({ signal }) =>
+      listPrivMonMonitoredIndices({
+        signal,
+        context: buildExecutionContext(
+          'entity_analytics-privileged_user_monitoring',
+          'pum_monitored_indices_list'
+        ),
+      }),
     {
       keepPreviousData: true,
       refetchOnWindowFocus: false,

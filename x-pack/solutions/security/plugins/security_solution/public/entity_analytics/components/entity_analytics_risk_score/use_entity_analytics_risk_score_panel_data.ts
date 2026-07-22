@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import type { EntityRiskScore } from '../../../../common/search_strategy';
 import { EntityType } from '../../../../common/entity_analytics/types';
 import type { ESQuery } from '../../../../common/typed_json';
@@ -18,11 +19,17 @@ export const useEntityAnalyticsRiskScorePanelData = <T extends EntityType>({
   toggleStatus,
   filterQuery,
   timerange,
+  executionContext,
 }: {
   riskEntity: T;
   toggleStatus: boolean;
   filterQuery?: ESQuery | string;
   timerange: { from: string; to: string };
+  /**
+   * Optional Kibana execution context forwarded to all four underlying risk-score hooks so slow
+   * logs and APM traces can attribute each query to the calling page/panel.
+   */
+  executionContext?: KibanaExecutionContext;
 }) => {
   // Entity store v2 only carries risk for host/user; service/generic risk
   // continues to flow through the legacy risk-score search strategy.
@@ -33,6 +40,7 @@ export const useEntityAnalyticsRiskScorePanelData = <T extends EntityType>({
     skip: !toggleStatus || isHostOrUserRiskEntity,
     timerange,
     riskEntity,
+    executionContext,
   });
 
   const entityStoreKpi = useEntityStoreRiskScoreKpi({
@@ -40,6 +48,7 @@ export const useEntityAnalyticsRiskScorePanelData = <T extends EntityType>({
     skip: !toggleStatus || !isHostOrUserRiskEntity,
     timerange,
     riskEntity,
+    executionContext,
   });
 
   const kpi = isHostOrUserRiskEntity ? entityStoreKpi : legacyKpi;
@@ -54,6 +63,7 @@ export const useEntityAnalyticsRiskScorePanelData = <T extends EntityType>({
     timerange,
     riskEntity,
     includeAlertsCount: true,
+    executionContext,
   });
 
   const entityStoreRiskScore = useEntityStoreRiskScore({
@@ -65,6 +75,7 @@ export const useEntityAnalyticsRiskScorePanelData = <T extends EntityType>({
     },
     timerange,
     riskEntity: riskEntity as EntityType.host,
+    executionContext,
   });
 
   const riskScore = isHostOrUserRiskEntity ? entityStoreRiskScore : legacyRiskScore;

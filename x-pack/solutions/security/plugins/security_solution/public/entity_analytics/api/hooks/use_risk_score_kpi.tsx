@@ -8,6 +8,7 @@
 import { useCallback, useEffect, useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
+import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import { EntityRiskQueries } from '../../../../common/api/search_strategy';
 import type { EntityType } from '../../../../common/search_strategy';
 import { RiskSeverity, EMPTY_SEVERITY_COUNT } from '../../../../common/search_strategy';
@@ -36,6 +37,11 @@ export interface UseRiskScoreKpiProps {
   skip?: boolean;
   riskEntity: EntityType | EntityType[];
   timerange?: { to: string; from: string };
+  /**
+   * Optional Kibana execution context forwarded to the underlying search strategy so slow logs
+   * and APM traces can attribute the query to the calling page/panel.
+   */
+  executionContext?: KibanaExecutionContext;
 }
 
 export const useRiskScoreKpi = ({
@@ -43,6 +49,7 @@ export const useRiskScoreKpi = ({
   skip,
   riskEntity,
   timerange,
+  executionContext,
 }: UseRiskScoreKpiProps): RiskScoreKpi => {
   const { addError } = useAppToasts();
   const defaultIndex = useGetDefaultRiskIndex();
@@ -60,6 +67,7 @@ export const useRiskScoreKpi = ({
       },
       abort: skip,
       showErrorToast: false,
+      executionContext,
     });
 
   const isModuleDisabled = !!error && isIndexNotFoundError(error);

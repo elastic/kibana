@@ -162,16 +162,24 @@ const createPrivilegeMonitoringTaskRunnerFactory =
       run: async () => {
         const [core] = await deps.getStartServices();
         const config = deps.config;
-        return runPrivilegeMonitoringTask({
-          isCancelled,
-          logger: deps.logger,
-          telemetry: deps.telemetry,
-          taskInstance,
-          experimentalFeatures: deps.experimentalFeatures,
-          core,
-          config,
-          getPrivilegedUserMonitoringDataClient: deps.getPrivilegedUserMonitoringDataClient,
-        });
+        return core.executionContext.withContext(
+          {
+            type: 'security_solution',
+            name: 'entity_analytics-privilege_monitoring_task',
+            id: taskInstance.id,
+          },
+          () =>
+            runPrivilegeMonitoringTask({
+              isCancelled,
+              logger: deps.logger,
+              telemetry: deps.telemetry,
+              taskInstance,
+              experimentalFeatures: deps.experimentalFeatures,
+              core,
+              config,
+              getPrivilegedUserMonitoringDataClient: deps.getPrivilegedUserMonitoringDataClient,
+            })
+        );
       },
       cancel: async () => {
         cancelled = true;

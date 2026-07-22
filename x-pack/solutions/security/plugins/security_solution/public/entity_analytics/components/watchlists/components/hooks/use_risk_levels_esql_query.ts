@@ -14,6 +14,7 @@ import type { ESQLSearchParams, ESQLSearchResponse } from '@kbn/es-types';
 import { useErrorToast } from '../../../../../common/hooks/use_error_toast';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useEsqlGlobalFilterQuery } from '../../../../../common/hooks/esql/use_esql_global_filter';
+import { buildExecutionContext } from '../../../../common';
 import { useGlobalFilterQuery } from '../../../../../common/hooks/use_global_filter_query';
 import { esqlResponseToRecords } from '../../../../../common/utils/esql';
 import { useRiskEngineStatus } from '../../../../api/hooks/use_risk_engine_status';
@@ -91,13 +92,10 @@ export const useRiskLevelsEsqlQuery = ({
             abortSignal: signal,
             strategy: 'esql_async',
             projectRouting: '_alias:_origin',
-            executionContext: {
-              child: {
-                type: 'security_solution',
-                name: 'entity_analytics-home_page',
-                id: 'risk_level_panel',
-              },
-            },
+            executionContext: buildExecutionContext(
+              'entity_analytics-home_page',
+              'risk_level_panel'
+            ),
           }
         )
       );

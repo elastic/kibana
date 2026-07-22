@@ -7,6 +7,7 @@
 
 import type { UseMutationResult, UseQueryResult } from '@kbn/react-query';
 import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
+import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import type { SecurityAppError } from '@kbn/securitysolution-t-grid';
 import type { EntityType } from '../../../../common/entity_analytics/types';
 import { EntityTypeToIdentifierField } from '../../../../common/entity_analytics/types';
@@ -52,15 +53,21 @@ export const useAssetCriticalityFetchList = ({
   idField,
   idValues,
   skip = false,
+  executionContext,
 }: {
   idField: string;
   idValues: string[];
   skip?: boolean;
+  /**
+   * Optional Kibana execution context forwarded to the asset-criticality list fetch so slow logs
+   * and APM traces can attribute the query to the calling page/panel.
+   */
+  executionContext?: KibanaExecutionContext;
 }) => {
   const { fetchAssetCriticalityList } = useEntityAnalyticsRoutes();
   return useQuery<FindAssetCriticalityRecordsResponse>({
     queryKey: [ASSET_CRITICALITY_LIST_KEY],
-    queryFn: () => fetchAssetCriticalityList({ idField, idValues }),
+    queryFn: () => fetchAssetCriticalityList({ idField, idValues, context: executionContext }),
     enabled: !skip && idValues.length > 0,
   });
 };
@@ -69,10 +76,17 @@ export const useAssetCriticalityData = ({
   entity,
   enabled = true,
   onChange,
+  executionContext,
 }: {
   entity: Entity;
   enabled?: boolean;
   onChange?: () => void;
+  /**
+   * Optional Kibana execution context forwarded to the asset-criticality GET so slow logs and
+   * APM traces can attribute the query to the calling page/panel. Only tags the read query; the
+   * create/delete mutation is left per-page for callers to instrument.
+   */
+  executionContext?: KibanaExecutionContext;
 }): State => {
   const QC = useQueryClient();
   const QUERY_KEY = [ASSET_CRITICALITY_KEY, entity.name];
@@ -86,6 +100,7 @@ export const useAssetCriticalityData = ({
       fetchAssetCriticality({
         idField: EntityTypeToIdentifierField[entity.type],
         idValue: entity.name,
+        context: executionContext,
       }),
     retry: (failureCount, error) => error.body.statusCode === 404 && failureCount > 0,
     enabled,

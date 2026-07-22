@@ -67,27 +67,40 @@ export const createMigrationTask =
     return {
       run: async () => {
         const [coreStart] = await getStartServices();
-        const esClient = coreStart.elasticsearch.client.asInternalUser;
-        const soClient = buildScopedInternalSavedObjectsClientUnsafe({ coreStart, namespace: '*' });
+        return coreStart.executionContext.withContext(
+          {
+            type: 'security_solution',
+            name: 'entity_analytics-risk_score_migration',
+            id: TASK_ID,
+          },
+          async () => {
+            const esClient = coreStart.elasticsearch.client.asInternalUser;
+            const soClient = buildScopedInternalSavedObjectsClientUnsafe({
+              coreStart,
+              namespace: '*',
+            });
 
-        const riskScoreClient = new RiskScoreDataClient({
-          esClient,
-          logger,
-          auditLogger,
-          namespace: '*',
-          soClient,
-          kibanaVersion: '*',
-        });
-        const riskScoreResponse = await riskScoreClient.copyTimestampToEventIngestedForRiskScore(
-          abortController.signal
-        );
-        const failures = riskScoreResponse.failures?.map((failure) => failure.cause);
-        const hasFailures = failures && failures?.length > 0;
+            const riskScoreClient = new RiskScoreDataClient({
+              esClient,
+              logger,
+              auditLogger,
+              namespace: '*',
+              soClient,
+              kibanaVersion: '*',
+            });
+            const riskScoreResponse =
+              await riskScoreClient.copyTimestampToEventIngestedForRiskScore(
+                abortController.signal
+              );
+            const failures = riskScoreResponse.failures?.map((failure) => failure.cause);
+            const hasFailures = failures && failures?.length > 0;
 
-        logger.info(
-          `Task "${TASK_TYPE}" finished. Updated documents: ${
-            riskScoreResponse.updated
-          }, failures: ${hasFailures ? failures.join('\n') : 0}`
+            logger.info(
+              `Task "${TASK_TYPE}" finished. Updated documents: ${
+                riskScoreResponse.updated
+              }, failures: ${hasFailures ? failures.join('\n') : 0}`
+            );
+          }
         );
       },
 

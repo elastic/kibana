@@ -9,9 +9,15 @@ import { useMemo } from 'react';
 import type { ManagedUserHits } from '../../../../../common/search_strategy/security_solution/users/managed_details';
 import { UsersQueries } from '../../../../../common/api/search_strategy';
 import { useSearchStrategy } from '../../../../common/containers/use_search_strategy';
+import { buildExecutionContext } from '../../../../entity_analytics/common';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useQueryInspector } from '../../../../common/components/page/manage_query';
 import { MANAGED_USER_QUERY_ID } from '../constants';
+
+const MANAGED_USER_CONTEXT = buildExecutionContext(
+  'entity_details_flyout-user_right',
+  'user_managed_details'
+);
 import * as i18n from '../translations';
 
 export interface ManagedUserData {
@@ -31,6 +37,7 @@ export const useManagedUser = (): ManagedUserData => {
       users: {},
     },
     errorMessage: i18n.FAIL_MANAGED_USER,
+    executionContext: MANAGED_USER_CONTEXT,
   });
 
   useQueryInspector({

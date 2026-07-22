@@ -24,8 +24,18 @@ import { NetworkQueries } from '../../../../../common/search_strategy';
 import type { InspectResponse } from '../../../../types';
 import * as i18n from './translations';
 import { useSearchStrategy } from '../../../../common/containers/use_search_strategy';
+import { buildExecutionContext } from '../../../../entity_analytics/common';
 
 export const ID = 'networkTopNFlowQuery';
+
+const NETWORK_TOP_N_FLOW_CONTEXT = buildExecutionContext(
+  'explore-network_page',
+  'network_top_n_flow'
+);
+const NETWORK_TOP_N_FLOW_COUNT_CONTEXT = buildExecutionContext(
+  'explore-network_page',
+  'network_top_n_flow_count'
+);
 
 export interface NetworkTopNFlowArgs {
   id: string;
@@ -94,6 +104,7 @@ export const useNetworkTopNFlow = ({
     initialResult: { edges: [] },
     errorMessage: i18n.FAIL_NETWORK_TOP_N_FLOW,
     abort: skip,
+    executionContext: NETWORK_TOP_N_FLOW_CONTEXT,
   });
 
   const {
@@ -107,6 +118,7 @@ export const useNetworkTopNFlow = ({
     initialResult: { totalCount: -1 },
     errorMessage: i18n.FAIL_NETWORK_TOP_N_FLOW,
     abort: skip,
+    executionContext: NETWORK_TOP_N_FLOW_COUNT_CONTEXT,
   });
 
   const isLoading = isLoadingData || isLoadingTotalCount;

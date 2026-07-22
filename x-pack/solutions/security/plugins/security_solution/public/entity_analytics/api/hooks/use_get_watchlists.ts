@@ -7,12 +7,17 @@
 
 import { useQuery } from '@kbn/react-query';
 import { useEntityAnalyticsRoutes } from '../api';
+import { buildExecutionContext } from '../../common';
 
 export const useGetWatchlists = () => {
   const { fetchWatchlists } = useEntityAnalyticsRoutes();
 
   return useQuery({
     queryKey: ['GET', 'WATCHLISTS'],
-    queryFn: ({ signal }) => fetchWatchlists({ signal }),
+    queryFn: ({ signal }) =>
+      fetchWatchlists({
+        signal,
+        context: buildExecutionContext('entity_analytics-watchlists', 'watchlists_list'),
+      }),
   });
 };

@@ -6,6 +6,7 @@
  */
 import { useMemo } from 'react';
 import { ENTITY_STORE_ROUTES } from '@kbn/entity-store/public';
+import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import type {
   GetEntityStoreStatusResponse,
   InitEntityStoreResponse,
@@ -44,43 +45,48 @@ export const useEntityStoreRoutes = () => {
       }
     };
 
-    const getEntityStoreStatus = async (withComponents = false) =>
+    const getEntityStoreStatus = async (withComponents = false, context?: KibanaExecutionContext) =>
       http.fetch<GetEntityStoreStatusResponse>(ENTITY_STORE_ROUTES.public.STATUS, {
         method: 'GET',
         version: API_VERSIONS.public.v1,
         query: { include_components: withComponents },
+        context,
       });
 
-    const installEntityStore = async () => {
+    const installEntityStore = async (context?: KibanaExecutionContext) => {
       await tryInstallPrebuiltWatchlistsWithToast();
       return http.fetch<InitEntityStoreResponse>(ENTITY_STORE_ROUTES.public.INSTALL, {
         method: 'POST',
         version: API_VERSIONS.public.v1,
         body: JSON.stringify({}),
+        context,
       });
     };
 
-    const startEntityStore = async () => {
+    const startEntityStore = async (context?: KibanaExecutionContext) => {
       await tryInstallPrebuiltWatchlistsWithToast();
       return http.fetch<StartEntityEngineResponse>(ENTITY_STORE_ROUTES.public.START, {
         method: 'PUT',
         version: API_VERSIONS.public.v1,
         body: JSON.stringify({}),
+        context,
       });
     };
 
-    const stopEntityStore = async () =>
+    const stopEntityStore = async (context?: KibanaExecutionContext) =>
       http.fetch<StopEntityEngineResponse>(ENTITY_STORE_ROUTES.public.STOP, {
         method: 'PUT',
         version: API_VERSIONS.public.v1,
         body: JSON.stringify({}),
+        context,
       });
 
-    const deleteEntityStore = async () =>
+    const deleteEntityStore = async (context?: KibanaExecutionContext) =>
       http.fetch(ENTITY_STORE_ROUTES.public.UNINSTALL, {
         method: 'POST',
         version: API_VERSIONS.public.v1,
         body: JSON.stringify({}),
+        context,
       });
 
     return {

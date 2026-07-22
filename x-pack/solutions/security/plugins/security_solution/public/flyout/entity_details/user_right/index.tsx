@@ -37,6 +37,7 @@ import { useNavigateToUserDetails } from './hooks/use_navigate_to_user_details';
 import { EntityType } from '../../../../common/entity_analytics/types';
 import { useObservedUser } from '../../../flyout_v2/entity/user/main/hooks/use_observed_user';
 import { useEntityFromStore, type EntityStoreRecord } from '../shared/hooks/use_entity_from_store';
+import { buildExecutionContext } from '../../../entity_analytics/common';
 import type { CriticalityLevelWithUnassigned } from '../../../../common/entity_analytics/asset_criticality/types';
 import {
   buildRiskScoreStateFromEntityRecord,
@@ -85,6 +86,15 @@ const FIRST_RECORD_PAGINATION = {
   querySize: 1,
 };
 
+const USER_ENTITY_FROM_STORE_CONTEXT = buildExecutionContext(
+  'entity_details_flyout-user_right',
+  'entity_from_store'
+);
+const USER_RISK_SCORE_CONTEXT = buildExecutionContext(
+  'entity_details_flyout-user_right',
+  'user_risk_score'
+);
+
 export const UserPanel = memo(function UserPanel({
   contextID,
   scopeId,
@@ -110,6 +120,7 @@ export const UserPanel = memo(function UserPanel({
     identityFields: userStoreIdentityFields,
     entityType: 'user',
     skip: isInitializing,
+    executionContext: USER_ENTITY_FROM_STORE_CONTEXT,
   });
 
   const documentEntityIdentifiers = useMemo<IdentityFields>(() => {
@@ -137,6 +148,7 @@ export const UserPanel = memo(function UserPanel({
     onlyLatest: false,
     pagination: FIRST_RECORD_PAGINATION,
     skip: !!observedUser?.entityRecord,
+    executionContext: USER_RISK_SCORE_CONTEXT,
   });
 
   const { inspect, loading } = riskScoreState;

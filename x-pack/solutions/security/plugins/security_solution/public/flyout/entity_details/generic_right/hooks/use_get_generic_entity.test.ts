@@ -87,7 +87,8 @@ describe('fetchGenericEntity', () => {
 
       await fetchGenericEntity(mockDataService, { entityDocId });
 
-      expect(mockDataService.search.search).toHaveBeenCalledWith({
+      expect(mockDataService.search.search).toHaveBeenCalledWith(
+        expect.objectContaining({
         params: {
           index: ASSET_INVENTORY_INDEX_PATTERN,
           query: {
@@ -104,7 +105,9 @@ describe('fetchGenericEntity', () => {
           },
           fields: ['*'],
         },
-      });
+      }),
+        expect.objectContaining({ executionContext: expect.anything() })
+      );
     });
 
     it('should build bool query with entity.id term when only entityId is provided', async () => {
@@ -112,7 +115,8 @@ describe('fetchGenericEntity', () => {
 
       await fetchGenericEntity(mockDataService, { entityId });
 
-      expect(mockDataService.search.search).toHaveBeenCalledWith({
+      expect(mockDataService.search.search).toHaveBeenCalledWith(
+        expect.objectContaining({
         params: {
           index: ASSET_INVENTORY_INDEX_PATTERN,
           query: {
@@ -129,7 +133,9 @@ describe('fetchGenericEntity', () => {
           },
           fields: ['*'],
         },
-      });
+      }),
+        expect.objectContaining({ executionContext: expect.anything() })
+      );
     });
 
     it('should build OR query with both _id and entity.id terms when both are provided', async () => {
@@ -138,7 +144,8 @@ describe('fetchGenericEntity', () => {
 
       await fetchGenericEntity(mockDataService, { entityDocId, entityId });
 
-      expect(mockDataService.search.search).toHaveBeenCalledWith({
+      expect(mockDataService.search.search).toHaveBeenCalledWith(
+        expect.objectContaining({
         params: {
           index: ASSET_INVENTORY_INDEX_PATTERN,
           query: {
@@ -160,7 +167,9 @@ describe('fetchGenericEntity', () => {
           },
           fields: ['*'],
         },
-      });
+      }),
+        expect.objectContaining({ executionContext: expect.anything() })
+      );
     });
 
     it('should handle whitespace-only entityDocId as valid', async () => {
@@ -168,7 +177,8 @@ describe('fetchGenericEntity', () => {
 
       await fetchGenericEntity(mockDataService, { entityDocId });
 
-      expect(mockDataService.search.search).toHaveBeenCalledWith({
+      expect(mockDataService.search.search).toHaveBeenCalledWith(
+        expect.objectContaining({
         params: {
           index: ASSET_INVENTORY_INDEX_PATTERN,
           query: {
@@ -185,7 +195,9 @@ describe('fetchGenericEntity', () => {
           },
           fields: ['*'],
         },
-      });
+      }),
+        expect.objectContaining({ executionContext: expect.anything() })
+      );
     });
   });
 });

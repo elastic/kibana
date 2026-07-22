@@ -111,34 +111,42 @@ export function registerEntityMaintainerTask({
             description,
             timeout: effectiveTimeout,
             createTaskRunner: ({ taskInstance, abortController, fakeRequest }) => ({
-              run: async () => {
-                const status = taskInstance.state;
+              run: async () =>
+                coreStart.executionContext.withContext(
+                  {
+                    type: 'security_solution',
+                    name: 'entity_analytics-entity_maintainers_task',
+                    id: taskInstance.id,
+                  },
+                  async () => {
+                    const status = taskInstance.state;
 
-                if (!fakeRequest) {
-                  logger.error(`No fake request found, skipping run`);
-                  return { state: status };
-                }
+                    if (!fakeRequest) {
+                      logger.error(`No fake request found, skipping run`);
+                      return { state: status };
+                    }
 
-                const result = await executeMaintainerRun({
-                  status,
-                  request: fakeRequest,
-                  taskId: taskInstance.id,
-                  taskAbortController: abortController,
-                  id,
-                  run,
-                  setup,
-                  initialState,
-                  effectiveMinLicense,
-                  type,
-                  coreStart,
-                  licensing: plugins.licensing,
-                  workflowsExtensions: plugins.workflowsExtensions,
-                  analytics,
-                  logger,
-                });
+                    const result = await executeMaintainerRun({
+                      status,
+                      request: fakeRequest,
+                      taskId: taskInstance.id,
+                      taskAbortController: abortController,
+                      id,
+                      run,
+                      setup,
+                      initialState,
+                      effectiveMinLicense,
+                      type,
+                      coreStart,
+                      licensing: plugins.licensing,
+                      workflowsExtensions: plugins.workflowsExtensions,
+                      analytics,
+                      logger,
+                    });
 
-                return result ?? { state: status };
-              },
+                    return result ?? { state: status };
+                  }
+                ),
             }),
           },
         });

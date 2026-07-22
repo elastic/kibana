@@ -9,6 +9,7 @@ import { useMutation, useQueryClient } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
 import { useAppToasts } from '../../../../../../common/hooks/use_app_toasts';
 import { useEntityAnalyticsRoutes } from '../../../../../api/api';
+import { buildExecutionContext } from '../../../../../common';
 
 export const useDeleteWatchlist = (spaceId: string) => {
   const queryClient = useQueryClient();
@@ -16,7 +17,11 @@ export const useDeleteWatchlist = (spaceId: string) => {
   const { deleteWatchlist } = useEntityAnalyticsRoutes();
 
   return useMutation({
-    mutationFn: (id: string) => deleteWatchlist({ id }),
+    mutationFn: (id: string) =>
+      deleteWatchlist(
+        { id },
+        buildExecutionContext('entity_analytics-watchlists', 'watchlist_delete')
+      ),
     onSuccess: async () => {
       addSuccess(
         i18n.translate(

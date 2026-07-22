@@ -22,6 +22,7 @@ import { useErrorToast } from '../../../../common/hooks/use_error_toast';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import type { inputsModel, State } from '../../../../common/store';
 import { useEntityAnalyticsRoutes } from '../../../../entity_analytics/api/api';
+import { buildExecutionContext } from '../../../../entity_analytics/common';
 import { getLimitedPaginationTotalCount } from '../../../components/paginated_table/helpers';
 import type { hostsModel } from '../../store';
 import { hostsSelectors } from '../../store';
@@ -30,6 +31,11 @@ import { HOSTS_ALL_TABLE_QUERY_ID } from './hosts_table_query_types';
 import * as i18n from './translations';
 
 const ENTITY_STORE_HOSTS_LIST_QUERY_KEY = 'ENTITY_STORE_HOSTS_LIST';
+
+const HOSTS_ENTITY_STORE_LIST_CONTEXT = buildExecutionContext(
+  'explore-hosts_page',
+  'hosts_entity_store_list'
+);
 
 const isHostEntityRecord = (
   record: ListEntitiesResponse['records'][number]
@@ -171,6 +177,7 @@ export const useAllEntityStoreHosts = (
           sortField: sortFieldForApi,
           sortOrder: direction,
         },
+        context: HOSTS_ENTITY_STORE_LIST_CONTEXT,
       }),
     enabled: !skip,
     cacheTime: 0,

@@ -66,25 +66,34 @@ export const createMigrationTask =
     return {
       run: async () => {
         const [coreStart] = await getStartServices();
-        const esClient = coreStart.elasticsearch.client.asInternalUser;
-        const assetCrticalityClient = new AssetCriticalityMigrationClient({
-          esClient,
-          logger,
-          auditLogger,
-        });
+        return coreStart.executionContext.withContext(
+          {
+            type: 'security_solution',
+            name: 'entity_analytics-asset_criticality_migration',
+            id: TASK_ID,
+          },
+          async () => {
+            const esClient = coreStart.elasticsearch.client.asInternalUser;
+            const assetCrticalityClient = new AssetCriticalityMigrationClient({
+              esClient,
+              logger,
+              auditLogger,
+            });
 
-        const assetCriticalityResponse =
-          await assetCrticalityClient.copyTimestampToEventIngestedForAssetCriticality(
-            abortController.signal
-          );
+            const assetCriticalityResponse =
+              await assetCrticalityClient.copyTimestampToEventIngestedForAssetCriticality(
+                abortController.signal
+              );
 
-        const failures = assetCriticalityResponse.failures?.map((failure) => failure.cause);
-        const hasFailures = failures && failures?.length > 0;
+            const failures = assetCriticalityResponse.failures?.map((failure) => failure.cause);
+            const hasFailures = failures && failures?.length > 0;
 
-        logger.info(
-          `Task "${TASK_TYPE}" finished. Updated documents: ${
-            assetCriticalityResponse.updated
-          }, failures: ${hasFailures ? failures.join('\n') : 0}`
+            logger.info(
+              `Task "${TASK_TYPE}" finished. Updated documents: ${
+                assetCriticalityResponse.updated
+              }, failures: ${hasFailures ? failures.join('\n') : 0}`
+            );
+          }
         );
       },
 

@@ -14,12 +14,17 @@ import {
   renderWrappedHook,
 } from '../../../management/hooks/test_utils';
 import type { Entity } from './use_asset_criticality';
-import { useAssetCriticalityPrivileges, useAssetCriticalityData } from './use_asset_criticality';
+import {
+  useAssetCriticalityPrivileges,
+  useAssetCriticalityData,
+  useAssetCriticalityFetchList,
+} from './use_asset_criticality';
 import { ENTITY_STORE_ENTITIES_LIST } from '../entity_store/hooks/use_entities_list_query';
 
 const mockFetchAssetCriticalityPrivileges = jest.fn().mockResolvedValue({});
 const mockFetchEntityStoreV2Privileges = jest.fn().mockResolvedValue({});
 const mockFetchAssetCriticality = jest.fn().mockResolvedValue({});
+const mockFetchAssetCriticalityList = jest.fn().mockResolvedValue({});
 const mockDeleteAssetCriticality = jest.fn().mockResolvedValue({});
 const mockCreateAssetCriticality = jest.fn().mockResolvedValue({});
 jest.mock('../../api/api', () => ({
@@ -27,6 +32,7 @@ jest.mock('../../api/api', () => ({
     fetchAssetCriticalityPrivileges: mockFetchAssetCriticalityPrivileges,
     fetchEntityStoreV2Privileges: mockFetchEntityStoreV2Privileges,
     fetchAssetCriticality: mockFetchAssetCriticality,
+    fetchAssetCriticalityList: mockFetchAssetCriticalityList,
     deleteAssetCriticality: mockDeleteAssetCriticality,
     createAssetCriticality: mockCreateAssetCriticality,
   }),
@@ -101,6 +107,27 @@ describe('useAssetCriticality', () => {
       expect(mockCreateAssetCriticality).toHaveBeenCalled();
     });
 
+    it('forwards a caller-supplied executionContext to fetchAssetCriticality', async () => {
+      mockFetchEntityStoreV2Privileges.mockResolvedValue({ has_all_required: true });
+      mockFetchAssetCriticality.mockResolvedValue({});
+      const entity: Entity = { name: 'test_entity_name', type: EntityType.host };
+      const executionContext = {
+        child: {
+          type: 'security_solution',
+          name: 'entity_analytics-asset_criticality',
+          id: 'asset_criticality_get',
+        },
+      };
+
+      await renderWrappedHook(() => useAssetCriticalityData({ entity, executionContext }));
+
+      await waitFor(() =>
+        expect(mockFetchAssetCriticality).toHaveBeenCalledWith(
+          expect.objectContaining({ context: executionContext })
+        )
+      );
+    });
+
     it('invalidates the entity store entities list query on a successful mutation', async () => {
       mockFetchAssetCriticalityPrivileges.mockResolvedValue({ has_all_required: true });
       mockCreateAssetCriticality.mockResolvedValue({});
@@ -124,6 +151,33 @@ describe('useAssetCriticality', () => {
       );
 
       invalidateQueriesSpy.mockRestore();
+    });
+  });
+
+  describe('useAssetCriticalityFetchList', () => {
+    it('forwards a caller-supplied executionContext to fetchAssetCriticalityList', async () => {
+      mockFetchAssetCriticalityList.mockResolvedValue({ records: [], total: 0 });
+      const executionContext = {
+        child: {
+          type: 'security_solution',
+          name: 'entity_analytics-asset_criticality',
+          id: 'asset_criticality_list',
+        },
+      };
+
+      await renderQuery(
+        () =>
+          useAssetCriticalityFetchList({
+            idField: 'host.name',
+            idValues: ['web01'],
+            executionContext,
+          }),
+        'isSuccess'
+      );
+
+      expect(mockFetchAssetCriticalityList).toHaveBeenCalledWith(
+        expect.objectContaining({ context: executionContext })
+      );
     });
   });
 });

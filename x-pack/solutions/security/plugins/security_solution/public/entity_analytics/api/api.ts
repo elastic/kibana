@@ -6,6 +6,7 @@
  */
 
 import { useMemo } from 'react';
+import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common';
 import {
   API_VERSIONS as ENTITY_STORE_API_VERSIONS,
@@ -182,15 +183,18 @@ export const useEntityAnalyticsRoutes = () => {
     const fetchRiskScorePreview = ({
       signal,
       params,
+      context,
     }: {
       signal?: AbortSignal;
       params: RiskScoresPreviewRequest;
+      context?: KibanaExecutionContext;
     }) =>
       http.fetch<RiskScoresPreviewResponse>(RISK_SCORE_PREVIEW_URL, {
         version: '1',
         method: 'POST',
         body: JSON.stringify(params),
         signal,
+        context,
       });
 
     /**
@@ -198,10 +202,12 @@ export const useEntityAnalyticsRoutes = () => {
      */
     const fetchRiskScoreHistory = ({
       signal,
+      context,
       params,
     }: {
       signal?: AbortSignal;
       params: FetchRiskScoreHistoryParams;
+      context?: KibanaExecutionContext;
     }) =>
       http.fetch<RiskScoreHistoryResponse>(RISK_SCORE_HISTORY_URL, {
         version: API_VERSIONS.public.v1,
@@ -215,6 +221,7 @@ export const useEntityAnalyticsRoutes = () => {
           include_contributions: params.includeContributions,
         },
         signal,
+        context,
       });
 
     /**
@@ -247,9 +254,11 @@ export const useEntityAnalyticsRoutes = () => {
     const fetchEntitiesListV2 = ({
       signal,
       params,
+      context,
     }: {
       signal?: AbortSignal;
       params: FetchEntitiesListParams;
+      context?: KibanaExecutionContext;
     }) =>
       http.fetch<ListEntitiesResponse>(ENTITY_STORE_ROUTES.public.CRUD_GET, {
         version: ENTITY_STORE_API_VERSIONS.public.v1,
@@ -263,12 +272,19 @@ export const useEntityAnalyticsRoutes = () => {
           filterQuery: params.filterQuery,
         },
         signal,
+        context,
       });
 
     /**
      * Fetches risks engine status
      */
-    const fetchRiskEngineStatus = async ({ signal }: { signal?: AbortSignal }) => {
+    const fetchRiskEngineStatus = async ({
+      signal,
+      context,
+    }: {
+      signal?: AbortSignal;
+      context?: KibanaExecutionContext;
+    }) => {
       if (isMaintainerRiskScoreV2Enabled) {
         const riskScoreMaintainer = await fetchRiskScoreMaintainer();
         const riskEngineStatus = !riskScoreMaintainer
@@ -301,6 +317,7 @@ export const useEntityAnalyticsRoutes = () => {
         version: '1',
         method: 'GET',
         signal,
+        context,
       });
     };
 
@@ -467,6 +484,7 @@ export const useEntityAnalyticsRoutes = () => {
     const searchPrivMonIndices = async (params: {
       query: string | undefined;
       signal?: AbortSignal;
+      context?: KibanaExecutionContext;
     }) =>
       http.fetch<SearchPrivilegesIndicesResponse>(PRIVMON_INDICES_URL, {
         version: API_VERSIONS.public.v1,
@@ -475,6 +493,7 @@ export const useEntityAnalyticsRoutes = () => {
           searchQuery: params.query,
         },
         signal: params.signal,
+        context: params.context,
       });
 
     /**
@@ -570,12 +589,15 @@ export const useEntityAnalyticsRoutes = () => {
      * Get asset criticality
      */
     const fetchAssetCriticality = async (
-      params: Pick<AssetCriticality, 'idField' | 'idValue'>
+      params: Pick<AssetCriticality, 'idField' | 'idValue'> & {
+        context?: KibanaExecutionContext;
+      }
     ): Promise<AssetCriticalityRecord> => {
       return http.fetch<AssetCriticalityRecord>(ASSET_CRITICALITY_PUBLIC_URL, {
         version: API_VERSIONS.public.v1,
         method: 'GET',
         query: { id_value: params.idValue, id_field: params.idField },
+        context: params.context,
       });
     };
 
@@ -585,6 +607,7 @@ export const useEntityAnalyticsRoutes = () => {
     const fetchAssetCriticalityList = async (params: {
       idField: string;
       idValues: string[];
+      context?: KibanaExecutionContext;
     }): Promise<FindAssetCriticalityRecordsResponse> => {
       const wrapWithQuotes = (each: string) => `"${each}"`;
       const kueryValues = `${params.idValues.map(wrapWithQuotes).join(' OR ')}`;
@@ -596,12 +619,14 @@ export const useEntityAnalyticsRoutes = () => {
         query: {
           kuery,
         },
+        context: params.context,
       });
     };
 
     const uploadAssetCriticalityFile = async (
       fileContent: string,
-      fileName: string
+      fileName: string,
+      context?: KibanaExecutionContext
     ): Promise<UploadAssetCriticalityRecordsResponse> => {
       const file = new File([new Blob([fileContent])], fileName, {
         type: 'text/csv',
@@ -619,6 +644,7 @@ export const useEntityAnalyticsRoutes = () => {
               'Content-Type': undefined, // Lets the browser set the appropriate content type
             },
             body,
+            context,
           }
         );
 
@@ -651,6 +677,7 @@ export const useEntityAnalyticsRoutes = () => {
             'Content-Type': undefined, // Lets the browser set the appropriate content type
           },
           body,
+          context,
         }
       );
     };
@@ -658,11 +685,18 @@ export const useEntityAnalyticsRoutes = () => {
     /**
      * List all data source for privilege monitoring engine
      */
-    const listPrivMonMonitoredIndices = async ({ signal }: { signal?: AbortSignal }) =>
+    const listPrivMonMonitoredIndices = async ({
+      signal,
+      context,
+    }: {
+      signal?: AbortSignal;
+      context?: KibanaExecutionContext;
+    }) =>
       http.fetch<ListEntitySourcesResponse>(MONITORING_ENTITY_LIST_SOURCES_URL, {
         version: API_VERSIONS.public.v1,
         method: 'GET',
         signal,
+        context,
         query: {
           type: 'index',
           managed: false,
@@ -672,7 +706,8 @@ export const useEntityAnalyticsRoutes = () => {
 
     const uploadPrivilegedUserMonitoringFile = async (
       fileContent: string,
-      fileName: string
+      fileName: string,
+      context?: KibanaExecutionContext
     ): Promise<PrivmonBulkUploadUsersCSVResponse> => {
       const file = new File([new Blob([fileContent])], fileName, {
         type: 'text/csv',
@@ -687,6 +722,7 @@ export const useEntityAnalyticsRoutes = () => {
           'Content-Type': undefined, // Lets the browser set the appropriate content type
         },
         body,
+        context,
       });
     };
 
@@ -696,10 +732,13 @@ export const useEntityAnalyticsRoutes = () => {
         method: 'POST',
       });
 
-    const fetchPrivilegeMonitoringEngineStatus = (): Promise<PrivMonHealthResponse> =>
+    const fetchPrivilegeMonitoringEngineStatus = (
+      context?: KibanaExecutionContext
+    ): Promise<PrivMonHealthResponse> =>
       http.fetch<PrivMonHealthResponse>(PRIVMON_HEALTH_URL, {
         version: API_VERSIONS.public.v1,
         method: 'GET',
+        context,
       });
 
     const fetchPrivilegeMonitoringPrivileges = (): Promise<PrivMonPrivilegesResponse> =>
@@ -742,7 +781,11 @@ export const useEntityAnalyticsRoutes = () => {
         body: JSON.stringify(params),
       });
 
-    const fetchEntityDetailsHighlights = (
+    const fetchEntityDetailsHighlights = ({
+      params,
+      signal,
+      context,
+    }: {
       params: {
         entityType: string;
         entityIdentifier: string;
@@ -750,23 +793,30 @@ export const useEntityAnalyticsRoutes = () => {
         from: number;
         to: number;
         connectorId: string;
-      },
-      signal?: AbortSignal
-    ): Promise<EntityDetailsHighlightsResponse> =>
+      };
+      signal?: AbortSignal;
+      context?: KibanaExecutionContext;
+    }): Promise<EntityDetailsHighlightsResponse> =>
       http.fetch(ENTITY_DETAILS_HIGHLIGHT_INTERNAL_URL, {
         version: API_VERSIONS.internal.v1,
         method: 'POST',
         body: JSON.stringify(params),
         signal,
+        context,
       });
 
-    const saveEntityAiSummary = (
-      params: SaveEntityAiSummaryParams
-    ): Promise<{ created: boolean }> =>
+    const saveEntityAiSummary = ({
+      params,
+      context,
+    }: {
+      params: SaveEntityAiSummaryParams;
+      context?: KibanaExecutionContext;
+    }): Promise<{ created: boolean }> =>
       http.fetch(ENTITY_DETAILS_AI_SUMMARY_INTERNAL_URL, {
         version: API_VERSIONS.internal.v1,
         method: 'POST',
         body: JSON.stringify(params),
+        context,
       });
 
     /**
@@ -774,57 +824,82 @@ export const useEntityAnalyticsRoutes = () => {
      * `canRead: false` in the response means the user lacks metadata read access
      * and the caller should fall back to on-demand generation.
      */
-    const fetchPersistedAiSummary = (
-      params: { entityType: string; entityIdentifier: string },
-      signal?: AbortSignal
-    ): Promise<GetPersistedAiSummaryResponse> =>
+    const fetchPersistedAiSummary = ({
+      params,
+      signal,
+      context,
+    }: {
+      params: { entityType: string; entityIdentifier: string };
+      signal?: AbortSignal;
+      context?: KibanaExecutionContext;
+    }): Promise<GetPersistedAiSummaryResponse> =>
       http.fetch(ENTITY_DETAILS_AI_SUMMARY_INTERNAL_URL, {
         version: API_VERSIONS.internal.v1,
         method: 'GET',
         query: { entityId: params.entityIdentifier, entityType: params.entityType },
         signal,
+        context,
       });
 
     /**
      * List all watchlists
      */
-    const fetchWatchlists = async ({ signal }: { signal?: AbortSignal } = {}) =>
+    const fetchWatchlists = async ({
+      signal,
+      context,
+    }: { signal?: AbortSignal; context?: KibanaExecutionContext } = {}) =>
       http.fetch<ListWatchlistsResponse>(`${WATCHLISTS_URL}/list`, {
         version: API_VERSIONS.public.v1,
         method: 'GET',
         signal,
+        context,
       });
 
-    const getWatchlist = async (params: { id: string; signal?: AbortSignal }) =>
+    const getWatchlist = async (params: {
+      id: string;
+      signal?: AbortSignal;
+      context?: KibanaExecutionContext;
+    }) =>
       http.fetch<GetWatchlistResponse>(`${WATCHLISTS_URL}/${params.id}`, {
         version: API_VERSIONS.public.v1,
         method: 'GET',
         signal: params.signal,
+        context: params.context,
       });
 
-    const createWatchlist = async (params: CreateWatchlistRequestBodyInput) =>
+    const createWatchlist = async (
+      params: CreateWatchlistRequestBodyInput,
+      context?: KibanaExecutionContext
+    ) =>
       http.fetch<CreateWatchlistResponse>(WATCHLISTS_URL, {
         version: API_VERSIONS.public.v1,
         method: 'POST',
         body: JSON.stringify(params),
+        context,
       });
 
-    const updateWatchlist = async (params: { id: string; body: UpdateWatchlistRequestBodyInput }) =>
+    const updateWatchlist = async (
+      params: { id: string; body: UpdateWatchlistRequestBodyInput },
+      context?: KibanaExecutionContext
+    ) =>
       http.fetch<UpdateWatchlistResponse>(`${WATCHLISTS_URL}/${params.id}`, {
         version: API_VERSIONS.public.v1,
         method: 'PUT',
         body: JSON.stringify(params.body),
+        context,
       });
 
-    const deleteWatchlist = async (params: { id: string }) =>
+    const deleteWatchlist = async (params: { id: string }, context?: KibanaExecutionContext) =>
       http.fetch<{ deleted: true }>(`${WATCHLISTS_URL}/${params.id}`, {
         version: API_VERSIONS.public.v1,
         method: 'DELETE',
+        context,
       });
 
     const listWatchlistEntitySources = async (params: {
       watchlistId: string;
       signal?: AbortSignal;
+      context?: KibanaExecutionContext;
     }) =>
       http.fetch<ListWatchlistEntitySourcesResponse>(
         `${WATCHLISTS_URL}/${params.watchlistId}/entity_source/list`,
@@ -832,6 +907,7 @@ export const useEntityAnalyticsRoutes = () => {
           version: API_VERSIONS.public.v1,
           method: 'GET',
           signal: params.signal,
+          context: params.context,
         }
       );
 
@@ -906,6 +982,7 @@ export const useEntityAnalyticsRoutes = () => {
     const fetchLeads = ({
       signal,
       params,
+      context,
     }: {
       signal?: AbortSignal;
       params?: {
@@ -915,33 +992,45 @@ export const useEntityAnalyticsRoutes = () => {
         sortOrder?: 'asc' | 'desc';
         status?: 'active' | 'dismissed' | 'expired';
       };
+      context?: KibanaExecutionContext;
     }) =>
       http.fetch<FindLeadsResponse>(GET_LEADS_URL, {
         version: API_VERSIONS.internal.v1,
         method: 'GET',
         query: params,
         signal,
+        context,
       });
 
-    const fetchLeadGenerationStatus = ({ signal }: { signal?: AbortSignal }) =>
+    const fetchLeadGenerationStatus = ({
+      signal,
+      context,
+    }: {
+      signal?: AbortSignal;
+      context?: KibanaExecutionContext;
+    }) =>
       http.fetch<LeadGenerationStatus>(LEAD_GENERATION_STATUS_URL, {
         version: API_VERSIONS.internal.v1,
         method: 'GET',
         signal,
+        context,
       });
 
     const generateLeads = ({
       signal,
       params,
+      context,
     }: {
       signal?: AbortSignal;
       params: { connectorId: string; maxLeads?: number };
+      context?: KibanaExecutionContext;
     }) =>
       http.fetch<GenerateLeadsResponse>(GENERATE_LEADS_URL, {
         version: API_VERSIONS.internal.v1,
         method: 'POST',
         body: JSON.stringify(params),
         signal,
+        context,
       });
 
     const dismissLead = ({ signal, id }: { signal?: AbortSignal; id: string }) =>
@@ -995,11 +1084,13 @@ export const useEntityAnalyticsRoutes = () => {
       entityId,
       body,
       signal,
+      context,
     }: {
       entityType: string;
       entityId: string;
       body?: AnomalySummaryRequestBody;
       signal?: AbortSignal;
+      context?: KibanaExecutionContext;
     }) =>
       http.fetch<AnomalySummaryResponse>(
         ENTITY_ANOMALY_SUMMARY_INTERNAL_URL.replace(
@@ -1011,6 +1102,7 @@ export const useEntityAnalyticsRoutes = () => {
           method: 'POST',
           body: JSON.stringify(body ?? {}),
           signal,
+          context,
         }
       );
 
@@ -1019,11 +1111,13 @@ export const useEntityAnalyticsRoutes = () => {
       entityId,
       body,
       signal,
+      context,
     }: {
       entityType: string;
       entityId: string;
       body?: AnomalyOverviewRequestBody;
       signal?: AbortSignal;
+      context?: KibanaExecutionContext;
     }) =>
       http.fetch<AnomalyOverviewResponse>(
         ENTITY_ANOMALY_OVERVIEW_INTERNAL_URL.replace(
@@ -1035,6 +1129,7 @@ export const useEntityAnalyticsRoutes = () => {
           method: 'POST',
           body: JSON.stringify(body ?? {}),
           signal,
+          context,
         }
       );
 

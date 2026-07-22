@@ -9,7 +9,10 @@ import { useQuery } from '@kbn/react-query';
 import { WATCHLISTS_URL } from '../../../../../../../common/entity_analytics/watchlists/constants';
 import type { MonitoringEntitySource } from '../../../../../../../common/api/entity_analytics/watchlists/data_source/common.gen';
 import { useEntityAnalyticsRoutes } from '../../../../../api/api';
+import { buildExecutionContext } from '../../../../../common';
 import type { WatchlistTableItemType } from '../types';
+
+const WATCHLISTS_PAGE = 'entity_analytics-watchlists';
 
 /**
  * Derives a human-readable source label from an entity source.
@@ -46,7 +49,11 @@ export const useWatchlistsTableData = (
   } = useQuery({
     queryKey: ['watchlists-management-table', spaceId],
     enabled: toggleStatus,
-    queryFn: ({ signal }) => fetchWatchlists({ signal }),
+    queryFn: ({ signal }) =>
+      fetchWatchlists({
+        signal,
+        context: buildExecutionContext(WATCHLISTS_PAGE, 'watchlists_management_table_list'),
+      }),
   });
 
   // Fetch entity sources for every watchlist that has entitySourceIds
@@ -66,6 +73,7 @@ export const useWatchlistsTableData = (
             const { sources } = await listWatchlistEntitySources({
               watchlistId: watchlist.id,
               signal,
+              context: buildExecutionContext(WATCHLISTS_PAGE, 'watchlists_entity_sources_list'),
             });
 
             const labels = sources

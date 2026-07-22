@@ -8,11 +8,17 @@
 import { useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useSearchStrategy } from '../../../../common/containers/use_search_strategy';
+import { buildExecutionContext } from '../../../../entity_analytics/common';
 import type { inputsModel } from '../../../../common/store';
 import type { InspectResponse } from '../../../../types';
 import { ServicesQueries } from '../../../../../common/search_strategy/security_solution/services';
 import type { ServiceItem } from '../../../../../common/search_strategy/security_solution/services/common';
 import { OBSERVED_SERVICE_QUERY_ID } from '../content';
+
+const OBSERVED_SERVICE_DETAILS_CONTEXT = buildExecutionContext(
+  'entity_details_flyout-service_right',
+  'service_observed_details'
+);
 
 export interface ServiceDetailsArgs {
   id: string;
@@ -55,6 +61,7 @@ export const useObservedServiceDetails = ({
       defaultMessage: `Failed to run search on service details`,
     }),
     abort: skip,
+    executionContext: OBSERVED_SERVICE_DETAILS_CONTEXT,
   });
 
   const serviceDetailsResponse = useMemo(

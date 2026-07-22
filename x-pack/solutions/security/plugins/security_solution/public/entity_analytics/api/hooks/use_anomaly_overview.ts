@@ -6,6 +6,7 @@
  */
 
 import { useQuery } from '@kbn/react-query';
+import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import type { AnomalyScoreRange } from '../../../../common/api/entity_analytics';
 import { useEntityAnalyticsRoutes } from '../api';
 
@@ -19,6 +20,11 @@ interface UseAnomalyOverviewParams {
   threatTactics?: string[];
   scoreRanges?: AnomalyScoreRange[];
   enabled?: boolean;
+  /**
+   * Optional Kibana execution context forwarded to the anomaly-overview fetch so slow logs and
+   * APM traces can attribute the query to the calling page/panel.
+   */
+  executionContext?: KibanaExecutionContext;
 }
 
 export const useAnomalyOverview = ({
@@ -29,6 +35,7 @@ export const useAnomalyOverview = ({
   threatTactics,
   scoreRanges,
   enabled = true,
+  executionContext,
 }: UseAnomalyOverviewParams) => {
   const { fetchAnomalyOverview } = useEntityAnalyticsRoutes();
 
@@ -43,7 +50,8 @@ export const useAnomalyOverview = ({
 
   return useQuery(
     [...ANOMALY_OVERVIEW_QUERY_KEY, entityType, entityId, from, to, threatTactics, scoreRanges],
-    ({ signal }) => fetchAnomalyOverview({ entityType, entityId, body, signal }),
+    ({ signal }) =>
+      fetchAnomalyOverview({ entityType, entityId, body, signal, context: executionContext }),
     {
       enabled: enabled && !!entityId,
       keepPreviousData: true,

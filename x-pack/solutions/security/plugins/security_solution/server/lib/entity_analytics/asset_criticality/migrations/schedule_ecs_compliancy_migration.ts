@@ -74,21 +74,30 @@ export const createMigrationTask =
     return {
       run: async () => {
         const [coreStart] = await getStartServices();
-        const esClient = coreStart.elasticsearch.client.asInternalUser;
-        const migrationClient = new AssetCriticalityMigrationClient({
-          esClient,
-          logger,
-          auditLogger,
-        });
+        return coreStart.executionContext.withContext(
+          {
+            type: 'security_solution',
+            name: 'entity_analytics-asset_criticality_ecs_migration',
+            id: TASK_ID,
+          },
+          async () => {
+            const esClient = coreStart.elasticsearch.client.asInternalUser;
+            const migrationClient = new AssetCriticalityMigrationClient({
+              esClient,
+              logger,
+              auditLogger,
+            });
 
-        const response = await migrationClient.migrateEcsData(abortController.signal);
-        const failures = response.failures?.map((failure) => failure.cause);
-        const hasFailures = failures && failures?.length > 0;
+            const response = await migrationClient.migrateEcsData(abortController.signal);
+            const failures = response.failures?.map((failure) => failure.cause);
+            const hasFailures = failures && failures?.length > 0;
 
-        logger.info(
-          `Task "${TASK_TYPE}" finished. Updated documents: ${response.updated}, failures: ${
-            hasFailures ? failures.join('\n') : 0
-          }`
+            logger.info(
+              `Task "${TASK_TYPE}" finished. Updated documents: ${response.updated}, failures: ${
+                hasFailures ? failures.join('\n') : 0
+              }`
+            );
+          }
         );
       },
 

@@ -87,16 +87,18 @@ describe('useHuntingLeads', () => {
       await capturedQueryFn?.({ signal: mockSignal });
     });
 
-    expect(mockFetchLeads).toHaveBeenCalledWith({
-      signal: mockSignal,
-      params: {
-        page: 1,
-        perPage: 20,
-        sortField: 'priority',
-        sortOrder: 'desc',
-        status: 'active',
-      },
-    });
+    expect(mockFetchLeads).toHaveBeenCalledWith(
+      expect.objectContaining({
+        signal: mockSignal,
+        params: {
+          page: 1,
+          perPage: 20,
+          sortField: 'priority',
+          sortOrder: 'desc',
+          status: 'active',
+        },
+      })
+    );
   });
 
   it('returns empty leads array when data is undefined', () => {

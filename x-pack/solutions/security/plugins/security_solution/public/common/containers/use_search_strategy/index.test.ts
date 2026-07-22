@@ -311,5 +311,20 @@ describe('useSearchStrategy', () => {
       expect(mockEndTracking).toBeCalledTimes(1);
       expect(mockEndTracking).toBeCalledWith('aborted');
     });
+
+    it('forwards a caller-supplied executionContext to data.search.search', () => {
+      const executionContext = {
+        child: { type: 'security_solution', name: 'test-page', id: 'test-panel' },
+      };
+      const { result } = renderHook(() =>
+        useSearch<FactoryQueryTypes>(factoryQueryType, executionContext)
+      );
+      result.current({ request, abortSignal: new AbortController().signal }).subscribe();
+
+      expect(mockSearch).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ executionContext })
+      );
+    });
   });
 });

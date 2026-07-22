@@ -154,27 +154,37 @@ export function registerExtractEntityTasks({
           title: config.title,
           timeout: config.timeout,
           createTaskRunner: ({ taskInstance, abortController, fakeRequest, executionUuid }) => ({
-            run: () =>
-              wrapTaskRun({
-                spanName: 'entityStore.task.extract_entity.run',
-                namespace: taskInstance.state.namespace,
-                attributes: {
-                  'entity_store.task.id': taskInstance.id,
-                  'entity_store.task.type': taskType,
-                  'entity_store.entity.type': type,
+            run: async () => {
+              const [coreStart] = await core.getStartServices();
+              return coreStart.executionContext.withContext(
+                {
+                  type: 'security_solution',
+                  name: 'entity_analytics-entity_store_extract_task',
+                  id: taskInstance.id,
                 },
-                run: () =>
-                  runTask({
-                    taskInstance,
-                    abortController,
-                    executionUuid,
-                    logger: logger.get(taskInstance.id),
-                    core,
-                    entityType: type,
-                    fakeRequest,
-                    isServerless,
-                  }),
-              }),
+                () =>
+                  wrapTaskRun({
+                    spanName: 'entityStore.task.extract_entity.run',
+                    namespace: taskInstance.state.namespace,
+                    attributes: {
+                      'entity_store.task.id': taskInstance.id,
+                      'entity_store.task.type': taskType,
+                      'entity_store.entity.type': type,
+                    },
+                    run: () =>
+                      runTask({
+                        taskInstance,
+                        abortController,
+                        executionUuid,
+                        logger: logger.get(taskInstance.id),
+                        core,
+                        entityType: type,
+                        fakeRequest,
+                        isServerless,
+                      }),
+                  })
+              );
+            },
           }),
         },
       });

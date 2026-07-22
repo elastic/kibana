@@ -79,4 +79,49 @@ describe('useEntityFromStore', () => {
       expect(hasHostIdExclusion).toBe(false);
     });
   });
+
+  describe('executionContext propagation', () => {
+    it('forwards the caller-supplied executionContext to fetchEntitiesListV2', async () => {
+      const executionContext = {
+        child: {
+          type: 'security_solution',
+          name: 'entity_details_flyout-host_right',
+          id: 'entity_from_store',
+        },
+      };
+
+      renderHook(
+        () =>
+          useEntityFromStore({
+            identityFields: { 'host.name': 'web01' },
+            entityType: 'host',
+            skip: false,
+            executionContext,
+          }),
+        { wrapper: createWrapper() }
+      );
+
+      await waitFor(() => expect(mockFetchEntitiesListV2).toHaveBeenCalled());
+
+      const [callArg] = mockFetchEntitiesListV2.mock.calls[0];
+      expect(callArg.context).toEqual(executionContext);
+    });
+
+    it('omits context when the caller does not supply executionContext', async () => {
+      renderHook(
+        () =>
+          useEntityFromStore({
+            identityFields: { 'host.name': 'web01' },
+            entityType: 'host',
+            skip: false,
+          }),
+        { wrapper: createWrapper() }
+      );
+
+      await waitFor(() => expect(mockFetchEntitiesListV2).toHaveBeenCalled());
+
+      const [callArg] = mockFetchEntitiesListV2.mock.calls[0];
+      expect(callArg.context).toBeUndefined();
+    });
+  });
 });

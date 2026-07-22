@@ -14,6 +14,7 @@ import { INITIAL_STATE, reducer } from './reducer';
 import { isFilePickerStep, isResultStep, isValidationStep } from './helpers';
 import { AssetCriticalityResultStep } from './components/result_step';
 import { useEntityAnalyticsRoutes } from '../../api/api';
+import { buildExecutionContext } from '../../common';
 import { useFileValidation, useNavigationSteps } from './hooks';
 import type { OnCompleteParams } from './types';
 import { EntityEventTypes } from '../../../common/lib/telemetry';
@@ -105,7 +106,11 @@ export const AssetCriticalityFileUploader: React.FC = () => {
       try {
         const result = await uploadAssetCriticalityFile(
           state.validatedFile.validLines.text,
-          state.validatedFile.name
+          state.validatedFile.name,
+          buildExecutionContext(
+            'entity_analytics-asset_criticality',
+            'asset_criticality_bulk_upload'
+          )
         );
 
         dispatch({

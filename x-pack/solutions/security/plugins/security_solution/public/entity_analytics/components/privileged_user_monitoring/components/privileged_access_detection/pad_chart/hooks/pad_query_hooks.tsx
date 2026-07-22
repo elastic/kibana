@@ -14,6 +14,7 @@ import { useEsqlGlobalFilterQuery } from '../../../../../../../common/hooks/esql
 import { esqlResponseToRecords } from '../../../../../../../common/utils/esql';
 import { useKibana } from '../../../../../../../common/lib/kibana';
 import { useErrorToast } from '../../../../../../../common/hooks/use_error_toast';
+import { buildExecutionContext } from '../../../../../../common';
 import type { AnomalyBand } from '../../../../../recent_anomalies';
 import {
   usePadAnomalyDataEsqlSource,
@@ -59,6 +60,10 @@ const usePrivilegedAccessDetectionTopUsersQuery = (params: {
             search,
             signal,
             filter: filterQuery,
+            executionContext: buildExecutionContext(
+              'entity_analytics-privileged_user_monitoring',
+              'pad_chart_top_users'
+            ),
           })
         )?.response
       );
@@ -109,6 +114,10 @@ export const usePrivilegedAccessDetectionAnomaliesQuery = (params: {
             search,
             signal,
             filter: filterQuery,
+            executionContext: buildExecutionContext(
+              'entity_analytics-privileged_user_monitoring',
+              'pad_chart_anomalies'
+            ),
           })
         ).response
       ).map((eachRawRecord) => ({

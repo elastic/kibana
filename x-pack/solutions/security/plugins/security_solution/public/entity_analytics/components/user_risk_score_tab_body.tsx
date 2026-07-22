@@ -19,6 +19,7 @@ import { useRiskScoreKpi } from '../api/hooks/use_risk_score_kpi';
 import { useRiskScore } from '../api/hooks/use_risk_score';
 import { useEntityStoreRiskScoreKpi } from '../api/hooks/use_entity_store_risk_score_kpi';
 import { useEntityStoreRiskScore } from '../api/hooks/use_entity_store_risk_score';
+import { buildExecutionContext } from '../common';
 import { useUiSetting } from '../../common/lib/kibana';
 import { UserRiskScoreQueryId } from '../common/utils';
 import { EnableRiskScore } from './enable_risk_score';
@@ -33,6 +34,12 @@ import { useMissingRiskEnginePrivileges } from '../hooks/use_missing_risk_engine
 import { RiskEnginePrivilegesCallOut } from './risk_engine_privileges_callout';
 import { useUpsellingComponent } from '../../common/hooks/use_upselling';
 import { RiskScoresNoDataDetected } from './risk_score_no_data_detected';
+
+const USERS_RISK_TAB_CONTEXT = buildExecutionContext('explore-users_page', 'users_risk_score');
+const USERS_RISK_TAB_KPI_CONTEXT = buildExecutionContext(
+  'explore-users_page',
+  'users_risk_score_kpi'
+);
 
 const UserRiskScoreTableManage = manageQuery(UserRiskScoreTable);
 
@@ -58,6 +65,7 @@ const useUserRiskScoreTabData = ({
     skip: querySkip || entityStoreV2Enabled,
     sort,
     timerange,
+    executionContext: USERS_RISK_TAB_CONTEXT,
   });
 
   const entityStoreRiskScore = useEntityStoreRiskScore({
@@ -67,6 +75,7 @@ const useUserRiskScoreTabData = ({
     skip: querySkip || !entityStoreV2Enabled,
     sort,
     timerange,
+    executionContext: USERS_RISK_TAB_CONTEXT,
   });
 
   const risk = entityStoreV2Enabled ? entityStoreRiskScore : legacyRiskScore;
@@ -75,12 +84,14 @@ const useUserRiskScoreTabData = ({
     filterQuery,
     skip: querySkip || entityStoreV2Enabled,
     riskEntity: EntityType.user,
+    executionContext: USERS_RISK_TAB_KPI_CONTEXT,
   });
 
   const entityStoreKpi = useEntityStoreRiskScoreKpi({
     filterQuery,
     skip: querySkip || !entityStoreV2Enabled,
     riskEntity: EntityType.user,
+    executionContext: USERS_RISK_TAB_KPI_CONTEXT,
   });
 
   const kpi = entityStoreV2Enabled ? entityStoreKpi : legacyKpi;

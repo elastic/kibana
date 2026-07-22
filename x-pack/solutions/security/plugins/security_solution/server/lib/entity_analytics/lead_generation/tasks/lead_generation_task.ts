@@ -129,16 +129,24 @@ const createLeadGenerationTaskRunnerFactory =
     return {
       run: async () => {
         const [core, startPlugins] = await deps.getStartServices();
-        return runLeadGenerationTask({
-          isCancelled,
-          logger: deps.logger,
-          taskInstance,
-          fakeRequest,
-          core,
-          startPlugins,
-          kibanaVersion: deps.kibanaVersion,
-          ml: deps.ml,
-        });
+        return core.executionContext.withContext(
+          {
+            type: 'security_solution',
+            name: 'entity_analytics-lead_generation_task',
+            id: taskInstance.id,
+          },
+          () =>
+            runLeadGenerationTask({
+              isCancelled,
+              logger: deps.logger,
+              taskInstance,
+              fakeRequest,
+              core,
+              startPlugins,
+              kibanaVersion: deps.kibanaVersion,
+              ml: deps.ml,
+            })
+        );
       },
       cancel: async () => {
         cancelled = true;

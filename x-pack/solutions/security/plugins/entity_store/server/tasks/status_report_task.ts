@@ -246,24 +246,34 @@ export function registerStatusReportTask({
         title: config.title,
         timeout: config.timeout,
         createTaskRunner: ({ taskInstance, fakeRequest, abortController, executionUuid }) => ({
-          run: () =>
-            wrapTaskRun({
-              spanName: 'entityStore.task.status_report.run',
-              namespace: taskInstance.state.namespace,
-              attributes: {
-                'entity_store.task.id': taskInstance.id,
+          run: async () => {
+            const [coreStart] = await core.getStartServices();
+            return coreStart.executionContext.withContext(
+              {
+                type: 'security_solution',
+                name: 'entity_analytics-entity_store_status_report_task',
+                id: taskInstance.id,
               },
-              run: () =>
-                runTask({
-                  taskInstance,
-                  fakeRequest,
-                  abortController,
-                  executionUuid,
-                  logger: logger.get(taskInstance.id),
-                  core,
-                  telemetryReporter,
-                }),
-            }),
+              () =>
+                wrapTaskRun({
+                  spanName: 'entityStore.task.status_report.run',
+                  namespace: taskInstance.state.namespace,
+                  attributes: {
+                    'entity_store.task.id': taskInstance.id,
+                  },
+                  run: () =>
+                    runTask({
+                      taskInstance,
+                      fakeRequest,
+                      abortController,
+                      executionUuid,
+                      logger: logger.get(taskInstance.id),
+                      core,
+                      telemetryReporter,
+                    }),
+                })
+            );
+          },
         }),
       },
     });

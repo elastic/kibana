@@ -10,6 +10,7 @@ import { getESQLResults } from '@kbn/esql-utils';
 import { getPrivilegedMonitorUsersIndex } from '../../../../../common/entity_analytics/privileged_user_monitoring/utils';
 import { esqlResponseToRecords } from '../../../../common/utils/esql';
 import { useKibana } from '../../../../common/lib/kibana';
+import { buildExecutionContext } from '../../../common';
 
 const getLatestCSVPrivilegedUserUploadQuery = (namespace: string) => {
   return `FROM ${getPrivilegedMonitorUsersIndex(namespace)}
@@ -31,6 +32,10 @@ export const useGetLatestCSVPrivilegedUserUploadQuery = (namespace: string) => {
             esqlQuery: getLatestCSVPrivilegedUserUploadQuery(namespace),
             search,
             signal,
+            executionContext: buildExecutionContext(
+              'entity_analytics-privileged_user_monitoring',
+              'pum_data_sources_latest_csv'
+            ),
           })
         )?.response
       );

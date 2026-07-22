@@ -149,7 +149,13 @@ describe('status report task — usage, resolution state & metadata telemetry', 
     const taskManager = {
       registerTaskDefinitions: jest.fn(),
     } as unknown as TaskManagerSetupContract;
-    const core = { analytics: { reportEvent } } as unknown as EntityStoreCoreSetup;
+    const executionContextMock = {
+      withContext: <T>(_ctx: unknown, fn: () => T) => fn(),
+    };
+    const core = {
+      analytics: { reportEvent },
+      getStartServices: jest.fn().mockResolvedValue([{ executionContext: executionContextMock }]),
+    } as unknown as EntityStoreCoreSetup;
 
     registerStatusReportTask({ taskManager, logger, core });
 

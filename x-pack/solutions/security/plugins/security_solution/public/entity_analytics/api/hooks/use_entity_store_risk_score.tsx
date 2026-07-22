@@ -55,6 +55,7 @@ export function useEntityStoreRiskScore({
   skip = false,
   pagination,
   riskEntity,
+  executionContext,
 }: UseEntityStoreRiskScoreParams):
   | RiskScoreState<EntityType.host>
   | RiskScoreState<EntityType.user> {
@@ -137,6 +138,7 @@ export function useEntityStoreRiskScore({
           sortField,
           sortOrder,
         },
+        context: executionContext,
       }),
     enabled: queryEnabled,
     cacheTime: 0,

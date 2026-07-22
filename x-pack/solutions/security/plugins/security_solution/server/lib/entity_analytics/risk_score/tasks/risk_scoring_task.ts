@@ -134,6 +134,7 @@ export const registerRiskScoringTask = ({
       createTaskRunner: createTaskRunnerFactory({
         logger,
         getRiskScoreService,
+        getStartServices,
         telemetry,
         entityAnalyticsConfig,
         experimentalFeatures,
@@ -423,12 +424,14 @@ const createTaskRunnerFactory =
   ({
     logger,
     getRiskScoreService,
+    getStartServices,
     telemetry,
     entityAnalyticsConfig,
     experimentalFeatures,
   }: {
     logger: Logger;
     getRiskScoreService: GetRiskScoreService;
+    getStartServices: EntityAnalyticsRoutesDeps['getStartServices'];
     telemetry: AnalyticsServiceSetup;
     entityAnalyticsConfig: EntityAnalyticsConfig;
     experimentalFeatures: ExperimentalFeatures;
@@ -437,16 +440,26 @@ const createTaskRunnerFactory =
     let cancelled = false;
     const isCancelled = () => cancelled;
     return {
-      run: async () =>
-        runTask({
-          getRiskScoreService,
-          isCancelled,
-          logger,
-          taskInstance,
-          telemetry,
-          entityAnalyticsConfig,
-          experimentalFeatures,
-        }),
+      run: async () => {
+        const [coreStart] = await getStartServices();
+        return coreStart.executionContext.withContext(
+          {
+            type: 'security_solution',
+            name: 'entity_analytics-risk_scoring_task',
+            id: taskInstance.id,
+          },
+          () =>
+            runTask({
+              getRiskScoreService,
+              isCancelled,
+              logger,
+              taskInstance,
+              telemetry,
+              entityAnalyticsConfig,
+              experimentalFeatures,
+            })
+        );
+      },
       cancel: async () => {
         cancelled = true;
       },

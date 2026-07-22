@@ -97,23 +97,33 @@ export function registerHistorySnapshotTask({
         },
       },
       createTaskRunner: ({ taskInstance, abortController, fakeRequest }) => ({
-        run: () =>
-          wrapTaskRun({
-            spanName: 'entityStore.task.history_snapshot.run',
-            namespace: taskInstance.state.namespace,
-            attributes: {
-              'entity_store.task.id': taskInstance.id,
-              'entity_store.task.type': taskType,
+        run: async () => {
+          const [coreStart] = await core.getStartServices();
+          return coreStart.executionContext.withContext(
+            {
+              type: 'security_solution',
+              name: 'entity_analytics-entity_store_history_snapshot_task',
+              id: taskInstance.id,
             },
-            run: () =>
-              runHistorySnapshotTask({
-                taskInstance,
-                abortController,
-                fakeRequest,
-                core,
-                logger,
-              }),
-          }),
+            () =>
+              wrapTaskRun({
+                spanName: 'entityStore.task.history_snapshot.run',
+                namespace: taskInstance.state.namespace,
+                attributes: {
+                  'entity_store.task.id': taskInstance.id,
+                  'entity_store.task.type': taskType,
+                },
+                run: () =>
+                  runHistorySnapshotTask({
+                    taskInstance,
+                    abortController,
+                    fakeRequest,
+                    core,
+                    logger,
+                  }),
+              })
+          );
+        },
       }),
     },
   });

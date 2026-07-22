@@ -16,6 +16,7 @@ import type { IKibanaSearchResponse, IKibanaSearchRequest } from '@kbn/search-ty
 import type { BaseEsQuery } from '@kbn/cloud-security-posture';
 import { useContext, useMemo } from 'react';
 import { useKibana } from '../../../../../common/lib/kibana';
+import { buildExecutionContext } from '../../../../common';
 import {
   ENTITY_FIELDS,
   ENTITY_TYPE_FILTER,
@@ -105,13 +106,7 @@ export function useFetchGridData(options: UseEntitiesOptions) {
             params: queryParams as LatestEntitiesRequest['params'],
           },
           {
-            executionContext: {
-              child: {
-                type: 'security_solution',
-                name: 'entity_analytics-home_page',
-                id: 'entities_table',
-              },
-            },
+            executionContext: buildExecutionContext('entity_analytics-home_page', 'entities_table'),
           }
         )
       );

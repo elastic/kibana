@@ -95,10 +95,10 @@ describe('useUpdateWatchlist', () => {
       await result.current.mutateAsync();
     });
 
-    expect(mockUpdateWatchlist).toHaveBeenCalledWith({
-      id: 'wl-1',
-      body: baseOpts.watchlist,
-    });
+    expect(mockUpdateWatchlist).toHaveBeenCalledWith(
+      { id: 'wl-1', body: baseOpts.watchlist },
+      expect.objectContaining({ child: expect.anything() })
+    );
   });
 
   it('creates a new entity source when no existing ID is found', async () => {

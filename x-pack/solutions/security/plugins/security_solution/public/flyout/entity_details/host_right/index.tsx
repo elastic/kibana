@@ -37,6 +37,7 @@ import {
   getRiskFromEntityRecord,
 } from '../shared/entity_store_risk_utils';
 import { useEntityFromStore, type EntityStoreRecord } from '../shared/hooks/use_entity_from_store';
+import { buildExecutionContext } from '../../../entity_analytics/common';
 import type { CriticalityLevelWithUnassigned } from '../../../../common/entity_analytics/asset_criticality/types';
 import { ENABLE_ASSET_INVENTORY_SETTING } from '../../../../common/constants';
 import {
@@ -77,6 +78,11 @@ export interface HostPanelExpandableFlyoutProps extends FlyoutPanelProps {
 
 export const HostPreviewPanelKey: HostPanelExpandableFlyoutProps['key'] = 'host-preview-panel';
 
+const HOST_ENTITY_FROM_STORE_CONTEXT = buildExecutionContext(
+  'entity_details_flyout-host_right',
+  'entity_from_store'
+);
+
 const FIRST_RECORD_PAGINATION = {
   cursorStart: 0,
   querySize: 1,
@@ -105,6 +111,7 @@ export const HostPanel = memo(function HostPanel({
     identityFields: hostStoreIdentityFields,
     entityType: 'host',
     skip: isInitializing,
+    executionContext: HOST_ENTITY_FROM_STORE_CONTEXT,
   });
 
   const documentEntityIdentifiers = useMemo<IdentityFields>(() => {

@@ -16,8 +16,11 @@ import * as i18n from './translations';
 import type { InspectResponse } from '../../../../types';
 
 import { useSearchStrategy } from '../../../../common/containers/use_search_strategy';
+import { buildExecutionContext } from '../../../../entity_analytics/common';
 
 export const ID = 'networkDetailsQuery';
+
+const NETWORK_DETAILS_CONTEXT = buildExecutionContext('explore-network_page', 'network_details');
 
 export interface NetworkDetailsArgs {
   id: string;
@@ -55,6 +58,7 @@ export const useNetworkDetails = ({
     },
     errorMessage: i18n.ERROR_NETWORK_DETAILS,
     abort: skip,
+    executionContext: NETWORK_DETAILS_CONTEXT,
   });
 
   const networkDetailsResponse = useMemo(

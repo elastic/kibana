@@ -11,6 +11,7 @@ import { ENTITY_STORE_ROUTES } from '@kbn/entity-store/public';
 import { API_VERSIONS } from '../../../../../common/entity_analytics/constants';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
+import { buildExecutionContext } from '../../../common';
 import {
   ENTITY_REMOVED_TOAST,
   ENTITY_REMOVED_TOAST_TEXT,
@@ -38,6 +39,7 @@ export const useUnlinkEntities = () => {
         version: API_VERSIONS.public.v1,
         method: 'POST',
         body: JSON.stringify(params),
+        context: buildExecutionContext('entity_analytics-entity_resolution', 'resolution_unlink'),
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [RESOLUTION_GROUP_QUERY_KEY] });

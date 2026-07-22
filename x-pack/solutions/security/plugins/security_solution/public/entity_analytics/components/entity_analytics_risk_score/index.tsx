@@ -36,6 +36,7 @@ import { getRiskEntityTranslation } from './translations';
 import { useKibana } from '../../../common/lib/kibana';
 import { useGlobalFilterQuery } from '../../../common/hooks/use_global_filter_query';
 import { useEntityAnalyticsRiskScorePanelData } from './use_entity_analytics_risk_score_panel_data';
+import { buildExecutionContext } from '../../common';
 import { RiskEnginePrivilegesCallOut } from '../risk_engine_privileges_callout';
 import { useMissingRiskEnginePrivileges } from '../../hooks/use_missing_risk_engine_privileges';
 import { EntityEventTypes } from '../../../common/lib/telemetry';
@@ -134,6 +135,10 @@ const EntityAnalyticsRiskScoresComponent = <T extends EntityType>({
     toggleStatus,
     filterQuery,
     timerange,
+    executionContext: useMemo(
+      () => buildExecutionContext('entity_analytics-home_page', `risk_score_panel_${riskEntity}`),
+      [riskEntity]
+    ),
   });
 
   useQueryInspector({

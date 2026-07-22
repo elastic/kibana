@@ -20,7 +20,19 @@ import { getPrivilegedMonitorUsersIndex } from '../../../../../../common/entity_
 import type { CriticalityLevelWithUnassigned } from '../../../../../../common/entity_analytics/asset_criticality/types';
 import type { EntityRiskScore } from '../../../../../../common/search_strategy';
 import { useKibana } from '../../../../../common/lib/kibana';
+import { buildExecutionContext } from '../../../../common';
 import { DEFAULT_PAGE_SIZE } from '.';
+
+const PUM_PAGE = 'entity_analytics-privileged_user_monitoring';
+const PRIVILEGED_USERS_TABLE_CONTEXT = buildExecutionContext(PUM_PAGE, 'privileged_users_table');
+const PRIVILEGED_USERS_RISK_SCORE_CONTEXT = buildExecutionContext(
+  PUM_PAGE,
+  'privileged_users_risk_score'
+);
+const PRIVILEGED_USERS_ASSET_CRITICALITY_CONTEXT = buildExecutionContext(
+  PUM_PAGE,
+  'privileged_users_asset_criticality'
+);
 
 interface RiskScoresByUserName {
   [key: string]: EntityRiskScore<EntityType.user>;
@@ -56,6 +68,7 @@ export const usePrivilegedUsersTableData = (
         esqlQuery: privilegedUsersTableQuery,
         search: data.search.search,
         filter: filterQueryWithoutTimerange,
+        executionContext: PRIVILEGED_USERS_TABLE_CONTEXT,
       });
     },
   });
@@ -81,6 +94,7 @@ export const usePrivilegedUsersTableData = (
       querySize: records.length,
     },
     skip: nameFilterQuery === undefined || records.length === 0,
+    executionContext: PRIVILEGED_USERS_RISK_SCORE_CONTEXT,
   });
 
   const riskScores = riskScoreData && riskScoreData.length > 0 ? riskScoreData : [];
@@ -96,6 +110,7 @@ export const usePrivilegedUsersTableData = (
     idField: 'user.name',
     idValues: records.map((user) => user['user.name']),
     skip: !toggleStatus || records.length === 0,
+    executionContext: PRIVILEGED_USERS_ASSET_CRITICALITY_CONTEXT,
   });
   const assetCriticalityRecords =
     assetCriticalityData && assetCriticalityData.records.length > 0

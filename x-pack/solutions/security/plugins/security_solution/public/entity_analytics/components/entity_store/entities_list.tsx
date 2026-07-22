@@ -23,6 +23,7 @@ import { EntitySourceFilter } from './components/entity_source_filter';
 import { useEntitiesListFilters } from './hooks/use_entities_list_filters';
 import { AssetCriticalityFilter } from '../asset_criticality/asset_criticality_filter';
 import { useEntitiesListQuery } from './hooks/use_entities_list_query';
+import { buildExecutionContext } from '../../common';
 import { ENTITIES_LIST_TABLE_ID, rowItems } from './constants';
 import { useEntitiesListColumns } from './hooks/use_entities_list_columns';
 import type { EntitySourceTag } from './types';
@@ -80,6 +81,10 @@ export const EntitiesList: React.FC = () => {
           filter,
         },
       }),
+      executionContext: buildExecutionContext(
+        'entity_analytics-entity_store_management',
+        'entities_list'
+      ),
     }),
     [entityTypes, activePage, limit, sorting.field, sorting.direction, querySkip, filter]
   );

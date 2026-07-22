@@ -48,10 +48,11 @@ describe('useFetchPersistedAiSummary', () => {
       expect(result.current.summary).toEqual(persisted.summary);
       expect(result.current.canRead).toBe(true);
     });
-    expect(fetchPersistedAiSummary).toHaveBeenCalledWith(
-      { entityType: 'user', entityIdentifier: 'user:alice' },
-      expect.any(AbortSignal)
-    );
+    expect(fetchPersistedAiSummary).toHaveBeenCalledWith({
+      params: { entityType: 'user', entityIdentifier: 'user:alice' },
+      signal: expect.any(AbortSignal),
+      context: expect.objectContaining({ child: expect.anything() }),
+    });
   });
 
   it('exposes canRead: false with a null summary when the user lacks metadata read access', async () => {

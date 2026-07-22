@@ -8,6 +8,7 @@ import { useQuery } from '@kbn/react-query';
 import dateMath from '@kbn/datemath';
 import type { RiskScoresPreviewRequest } from '../../../../common/api/entity_analytics/risk_engine/preview_route.gen';
 import { useEntityAnalyticsRoutes } from '../api';
+import { buildExecutionContext } from '../../common';
 
 export type UseRiskScorePreviewParams = Omit<RiskScoresPreviewRequest, 'data_view_id'> & {
   data_view_id?: RiskScoresPreviewRequest['data_view_id'];
@@ -72,7 +73,14 @@ export const useRiskScorePreview = ({
         params.filters = filters;
       }
 
-      const response = await fetchRiskScorePreview({ signal, params });
+      const response = await fetchRiskScorePreview({
+        signal,
+        params,
+        context: buildExecutionContext(
+          'entity_analytics-risk_score_management',
+          'risk_score_preview'
+        ),
+      });
 
       return response;
     },

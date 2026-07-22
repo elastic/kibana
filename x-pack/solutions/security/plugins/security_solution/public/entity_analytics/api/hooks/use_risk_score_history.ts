@@ -11,6 +11,7 @@ import { useErrorToast } from '../../../common/hooks/use_error_toast';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { useEntityAnalyticsRoutes } from '../api';
 import type { FetchRiskScoreHistoryParams } from '../api';
+import { buildExecutionContext } from '../../common';
 
 export interface UseRiskScoreHistoryParams extends Omit<FetchRiskScoreHistoryParams, 'entityId'> {
   entityId: string | undefined;
@@ -53,6 +54,10 @@ export const useRiskScoreHistory = ({
       return fetchRiskScoreHistory({
         signal,
         params: { entityType, entityId, from, to, scoreType, includeContributions },
+        context: buildExecutionContext(
+          'entity_analytics-risk_score_management',
+          'risk_score_history'
+        ),
       });
     },
     enabled,

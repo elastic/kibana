@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+export { buildExecutionContext } from './execution_context';
 export { userHasRiskEngineReadPermissions } from './user_has_risk_engine_read_permissions';
 export type { SnakeToCamelCase } from './utils';
 export {

@@ -15,6 +15,7 @@ import { useGlobalTime } from '../../../../../common/containers/use_global_time'
 import { useQueryInspector } from '../../../../../common/components/page/manage_query';
 import { esqlResponseToRecords } from '../../../../../common/utils/esql';
 import { useKibana } from '../../../../../common/lib/kibana';
+import { buildExecutionContext } from '../../../../common';
 import type { EsqlQueryOrInvalidFields } from '../../../privileged_user_monitoring/queries/helpers';
 
 export const DASHBOARD_TABLE_QUERY_ID = 'privmonDashboardTableQueryId';
@@ -45,6 +46,10 @@ export const useDashboardTableQuery = <TableItemType extends Record<string, stri
         search: data.search.search,
         signal,
         filter: filterQuery,
+        executionContext: buildExecutionContext(
+          'entity_analytics-privileged_user_monitoring',
+          'pum_onboarding_dashboard_panel'
+        ),
       });
     },
     {

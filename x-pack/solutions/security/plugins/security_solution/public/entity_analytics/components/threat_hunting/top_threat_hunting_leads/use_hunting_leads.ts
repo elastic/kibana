@@ -11,10 +11,13 @@ import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useKibana } from '../../../../common/lib/kibana';
 import { EntityEventTypes } from '../../../../common/lib/telemetry';
 import { useEntityAnalyticsRoutes } from '../../../api/api';
+import { buildExecutionContext } from '../../../common';
 import { useLeadGenerationPrivileges } from '../../../api/hooks/use_lead_generation_privileges';
 import { fromApiLead } from './types';
 import * as i18n from './translations';
 import { MAX_RECENT_LEADS } from './utils';
+
+const LEADS_PAGE = 'entity_analytics-threat_hunting_leads';
 
 const HUNTING_LEADS_QUERY_KEY = 'hunting-leads';
 const LEAD_SCHEDULE_QUERY_KEY = 'lead-generation-status';
@@ -134,7 +137,12 @@ export const useHuntingLeads = (
     refetch,
   } = useQuery({
     queryKey: [HUNTING_LEADS_QUERY_KEY],
-    queryFn: ({ signal }) => fetchLeads({ signal, ...FETCH_LEADS_PARAMS }),
+    queryFn: ({ signal }) =>
+      fetchLeads({
+        signal,
+        ...FETCH_LEADS_PARAMS,
+        context: buildExecutionContext(LEADS_PAGE, 'leads_list'),
+      }),
     enabled: isEnabled,
     onError: (error: Error) => {
       if (isPermissionDenied(error)) {
@@ -187,7 +195,11 @@ export const useHuntingLeads = (
       const { signal } = abortCtrl.current;
 
       telemetry.reportEvent(EntityEventTypes.LeadGenerationGenerateClicked, {});
-      const { executionUuid } = await generateLeadsApi({ params: { connectorId }, signal });
+      const { executionUuid } = await generateLeadsApi({
+        params: { connectorId },
+        signal,
+        context: buildExecutionContext(LEADS_PAGE, 'leads_generate'),
+      });
       writeInFlightGeneration(spaceId, { executionUuid, startedAt: Date.now() });
       return pollForCompletion(executionUuid, signal);
     },
@@ -213,7 +225,11 @@ export const useHuntingLeads = (
 
   const { data: statusData, isLoading: isStatusLoading } = useQuery({
     queryKey: [LEAD_SCHEDULE_QUERY_KEY],
-    queryFn: ({ signal }) => fetchLeadGenerationStatus({ signal }),
+    queryFn: ({ signal }) =>
+      fetchLeadGenerationStatus({
+        signal,
+        context: buildExecutionContext(LEADS_PAGE, 'leads_generation_status'),
+      }),
     enabled: isEnabled,
     onError: (error: Error) => {
       if (isPermissionDenied(error)) {

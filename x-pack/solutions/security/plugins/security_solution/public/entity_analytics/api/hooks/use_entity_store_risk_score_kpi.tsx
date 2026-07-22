@@ -50,6 +50,7 @@ export const useEntityStoreRiskScoreKpi = ({
   skip,
   riskEntity,
   timerange,
+  executionContext,
 }: UseRiskScoreKpiProps) => {
   const { addError } = useAppToasts();
   const { fetchEntitiesListV2 } = useEntityAnalyticsRoutes();
@@ -139,6 +140,7 @@ export const useEntityStoreRiskScoreKpi = ({
             sortField,
             sortOrder: 'asc',
           },
+          context: executionContext,
         });
 
         total = res.total;

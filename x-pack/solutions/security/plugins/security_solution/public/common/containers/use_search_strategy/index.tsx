@@ -11,6 +11,7 @@ import type { Observable } from 'rxjs';
 import { useObservable } from '@kbn/securitysolution-hook-utils';
 import { isRunningResponse } from '@kbn/data-plugin/public';
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
+import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import * as i18n from './translations';
 
 import type {
@@ -44,10 +45,20 @@ const EMPTY_INSPECT = {
 };
 
 export const useSearch = <QueryType extends FactoryQueryTypes>(
-  factoryQueryType: QueryType
+  factoryQueryType: QueryType,
+  executionContext?: KibanaExecutionContext
 ): UseSearchFunction<QueryType> => {
   const { data } = useKibana().services;
   const { startTracking } = useTrackHttpRequest();
+
+  // Hold the latest executionContext in a ref so re-renders that pass a fresh
+  // literal (e.g. `executionContext: buildExecutionContext(...)` inline) don't
+  // change the `search` callback identity, which would cascade into
+  // `useObservable`'s `start` and cause a re-subscribe → refetch loop.
+  // The values here are pure trace labels; there's no correctness cost to
+  // reading them at invocation time rather than closing over them.
+  const executionContextRef = useRef(executionContext);
+  executionContextRef.current = executionContext;
 
   const search = useCallback<UseSearchFunction<QueryType>>(
     ({ abortSignal, request }) => {
@@ -59,7 +70,11 @@ export const useSearch = <QueryType extends FactoryQueryTypes>(
       return data.search
         .search<StrategyRequestInputType<QueryType>, StrategyResponseType<QueryType>>(
           { ...request, factoryQueryType } as StrategyRequestInputType<QueryType>,
-          { strategy: 'securitySolutionSearchStrategy', abortSignal }
+          {
+            strategy: 'securitySolutionSearchStrategy',
+            abortSignal,
+            executionContext: executionContextRef.current,
+          }
         )
         .pipe(
           filter((response) => !isRunningResponse(response)),
@@ -84,6 +99,7 @@ export const useSearchStrategy = <QueryType extends FactoryQueryTypes>({
   errorMessage,
   abort = false,
   showErrorToast = true,
+  executionContext,
 }: {
   factoryQueryType: QueryType;
   /**
@@ -102,12 +118,18 @@ export const useSearchStrategy = <QueryType extends FactoryQueryTypes>({
    * Show error toast when error occurs on search complete
    */
   showErrorToast?: boolean;
+  /**
+   * Optional Kibana execution context forwarded to the underlying data.search.search call so
+   * slow logs and APM traces can attribute the query to the calling page/panel. Callers
+   * typically pass `{ child: { type: 'security_solution', name: '<page>', id: '<panel>' } }`.
+   */
+  executionContext?: KibanaExecutionContext;
 }) => {
   const abortCtrl = useRef(new AbortController());
   const refetch = useRef<inputsModel.Refetch>(noop);
   const { addError } = useAppToasts();
 
-  const search = useSearch(factoryQueryType);
+  const search = useSearch(factoryQueryType, executionContext);
 
   const { start, error, result, loading } = useObservable<
     [UseSearchFunctionParams<QueryType>],

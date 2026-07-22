@@ -17,7 +17,10 @@ import * as i18n from './translations';
 import type { InspectResponse } from '../../../../../types';
 import { useSearchStrategy } from '../../../../../common/containers/use_search_strategy';
 import { useUiSetting } from '../../../../../common/lib/kibana';
+import { buildExecutionContext } from '../../../../../entity_analytics/common';
 import type { EntityStoreRecord } from '../../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
+
+const HOST_DETAILS_CONTEXT = buildExecutionContext('explore-hosts_page', 'host_details');
 
 export const ID = 'hostsDetailsQuery';
 
@@ -114,6 +117,7 @@ export const useHostDetails = ({
     },
     errorMessage: i18n.FAIL_HOST_OVERVIEW,
     abort: shouldSkip,
+    executionContext: HOST_DETAILS_CONTEXT,
   });
 
   const hostDetailsResponse = useMemo(

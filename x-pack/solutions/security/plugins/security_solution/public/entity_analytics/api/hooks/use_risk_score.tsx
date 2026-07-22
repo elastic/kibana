@@ -8,6 +8,7 @@
 import { useCallback, useEffect, useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
+import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import { EntityRiskQueries } from '../../../../common/api/search_strategy';
 import { useLicense } from '../../../common/hooks/use_license';
 import { createFilter } from '../../../common/containers/helpers';
@@ -52,6 +53,11 @@ export interface UseRiskScoreParams {
   skip?: boolean;
   sort?: RiskScoreSortField;
   timerange?: { to: string; from: string };
+  /**
+   * Optional Kibana execution context forwarded to the underlying search strategy so slow logs
+   * and APM traces can attribute the query to the calling page/panel.
+   */
+  executionContext?: KibanaExecutionContext;
 }
 
 interface UseRiskScore<T> extends UseRiskScoreParams {
@@ -72,6 +78,7 @@ export const useRiskScore = <T extends EntityType>({
   pagination,
   riskEntity,
   includeAlertsCount = false,
+  executionContext,
 }: UseRiskScore<T>): RiskScoreState<T> => {
   const defaultIndex = useGetDefaultRiskIndex(onlyLatest);
   const {
@@ -99,6 +106,7 @@ export const useRiskScore = <T extends EntityType>({
     initialResult,
     abort: skip,
     showErrorToast: false,
+    executionContext,
   });
 
   const refetchAll = useCallback(() => {

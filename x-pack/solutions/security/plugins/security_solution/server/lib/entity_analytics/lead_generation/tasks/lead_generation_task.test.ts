@@ -211,7 +211,10 @@ describe('Lead Generation Task', () => {
     } as unknown as ConcreteTaskInstance;
 
     // Re-created in each beforeEach so clearAllMocks() doesn't wipe return values
-    let mockCore: { elasticsearch: { client: { asScoped: jest.Mock } } };
+    let mockCore: {
+      elasticsearch: { client: { asScoped: jest.Mock } };
+      executionContext: { withContext: <T>(ctx: unknown, fn: () => T) => T };
+    };
     let mockStartPlugins: { entityStore: { createCRUDClient: jest.Mock }; inference: object };
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let capturedCreateTaskRunner: any;
@@ -224,6 +227,9 @@ describe('Lead Generation Task', () => {
           client: {
             asScoped: jest.fn().mockReturnValue({ asCurrentUser: {} }),
           },
+        },
+        executionContext: {
+          withContext: <T>(_ctx: unknown, fn: () => T) => fn(),
         },
       };
       mockStartPlugins = {

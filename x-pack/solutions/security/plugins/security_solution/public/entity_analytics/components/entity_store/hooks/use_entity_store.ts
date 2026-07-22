@@ -11,7 +11,10 @@ import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { GetEntityStoreStatusResponse } from '@kbn/entity-store/common';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 import { useEntityStoreRoutes } from '../../../api/entity_store';
+import { buildExecutionContext } from '../../../common';
 import { EntityEventTypes } from '../../../../common/lib/telemetry';
+
+const ENTITY_STORE_MANAGEMENT_PAGE = 'entity_analytics-entity_store_management';
 
 const ENTITY_STORE_STATUS = ['GET', 'ENTITY_STORE_STATUS'];
 
@@ -30,7 +33,11 @@ export const useEntityStoreStatus = (opts: Options = {}) => {
 
   return useQuery<GetEntityStoreStatusResponse, IHttpFetchError>({
     queryKey: [...ENTITY_STORE_STATUS, opts.withComponents],
-    queryFn: () => getEntityStoreStatus(opts.withComponents),
+    queryFn: () =>
+      getEntityStoreStatus(
+        opts.withComponents,
+        buildExecutionContext(ENTITY_STORE_MANAGEMENT_PAGE, 'entity_store_status')
+      ),
     enabled: opts.enabled !== false,
     structuralSharing: opts.structuralSharing,
     refetchInterval:
@@ -60,7 +67,9 @@ export const useInstallEntityStoreMutation = () => {
         timestamp: new Date().toISOString(),
         action: 'start',
       });
-      return installEntityStore();
+      return installEntityStore(
+        buildExecutionContext(ENTITY_STORE_MANAGEMENT_PAGE, 'entity_store_install')
+      );
     },
     {
       mutationKey: INSTALL_ENTITY_STORE_KEY,
@@ -81,7 +90,9 @@ export const useStartEntityStoreMutation = () => {
         timestamp: new Date().toISOString(),
         action: 'start',
       });
-      return startEntityStore();
+      return startEntityStore(
+        buildExecutionContext(ENTITY_STORE_MANAGEMENT_PAGE, 'entity_store_start')
+      );
     },
     {
       mutationKey: START_ENTITY_STORE_KEY,
@@ -102,7 +113,9 @@ export const useStopEntityStoreMutation = () => {
         timestamp: new Date().toISOString(),
         action: 'stop',
       });
-      return stopEntityStore();
+      return stopEntityStore(
+        buildExecutionContext(ENTITY_STORE_MANAGEMENT_PAGE, 'entity_store_stop')
+      );
     },
     {
       mutationKey: STOP_ENTITY_STORE_KEY,
@@ -116,11 +129,15 @@ export const useDeleteEntityStoreMutation = ({ onSuccess }: { onSuccess?: () => 
   const queryClient = useQueryClient();
   const { deleteEntityStore } = useEntityStoreRoutes();
 
-  return useMutation(() => deleteEntityStore(), {
-    mutationKey: DELETE_ENTITY_STORE_KEY,
-    onSuccess: () => {
-      queryClient.refetchQueries({ queryKey: ENTITY_STORE_STATUS });
-      onSuccess?.();
-    },
-  });
+  return useMutation(
+    () =>
+      deleteEntityStore(buildExecutionContext(ENTITY_STORE_MANAGEMENT_PAGE, 'entity_store_delete')),
+    {
+      mutationKey: DELETE_ENTITY_STORE_KEY,
+      onSuccess: () => {
+        queryClient.refetchQueries({ queryKey: ENTITY_STORE_STATUS });
+        onSuccess?.();
+      },
+    }
+  );
 };

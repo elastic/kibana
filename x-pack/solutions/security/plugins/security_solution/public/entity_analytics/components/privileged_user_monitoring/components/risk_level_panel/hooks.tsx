@@ -18,6 +18,7 @@ import { useErrorToast } from '../../../../../common/hooks/use_error_toast';
 import { useEsqlGlobalFilterQuery } from '../../../../../common/hooks/esql/use_esql_global_filter';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useGetDefaultRiskIndex } from '../../../../hooks/use_get_default_risk_index';
+import { buildExecutionContext } from '../../../../common';
 import type { RiskLevelsTableItem, RiskLevelsPrivilegedUsersQueryResult } from './types';
 import { RiskScoreLevel } from '../../../severity/common';
 import type { RiskSeverity } from '../../../../../../common/search_strategy';
@@ -64,6 +65,10 @@ export const useRiskLevelsPrivilegedUserQuery = ({
         search: data.search.search,
         signal,
         filter: filterQuery,
+        executionContext: buildExecutionContext(
+          'entity_analytics-privileged_user_monitoring',
+          'pum_risk_level_panel'
+        ),
       }),
     {
       keepPreviousData: true,

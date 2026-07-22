@@ -22,8 +22,18 @@ import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 import { useCurrentUser } from '../../../../common/lib/kibana';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useEntityAnalyticsRoutes } from '../../../api/api';
+import { buildExecutionContext } from '../../../common';
 import { getAnonymizedEntityIdentifier } from '../utils/helpers';
 import type { EntityHighlightsResponse } from '../types';
+
+const HIGHLIGHTS_CONTEXT = buildExecutionContext(
+  'entity_analytics-entity_details_flyout',
+  'entity_details_highlights'
+);
+const AI_SUMMARY_SAVE_CONTEXT = buildExecutionContext(
+  'entity_analytics-entity_details_flyout',
+  'entity_details_ai_summary_save'
+);
 
 const entityHighlightsSchema = {
   type: 'object',
@@ -166,12 +176,15 @@ export const useFetchEntityDetailsHighlights = ({
       const toDate = Date.now();
       const fromDate = toDate - ENTITY_ANOMALY_DEFAULT_LOOKBACK_DAYS * 24 * 60 * 60 * 1000;
       const { summary, replacements, prompt } = await fetchEntityDetailsHighlights({
-        entityType,
-        entityIdentifier,
-        anonymizationFields,
-        from: fromDate,
-        to: toDate,
-        connectorId,
+        params: {
+          entityType,
+          entityIdentifier,
+          anonymizationFields,
+          from: fromDate,
+          to: toDate,
+          connectorId,
+        },
+        context: HIGHLIGHTS_CONTEXT,
       }).catch((e: Error) => {
         const caughtError = e instanceof Error ? e : new Error(String(e));
         addError(caughtError, {
@@ -232,20 +245,23 @@ export const useFetchEntityDetailsHighlights = ({
       if (persistSummary) {
         // Persist to entity store — fire-and-forget, don't block UI on this
         saveEntityAiSummary({
-          entityId: entityIdentifier,
-          entityType,
-          summary: {
-            highlights,
-            recommended_actions: recommendedActions,
-            generated_at: generatedAt,
-            staleness: buildEntitySummaryStaleness({
-              riskScoreNorm: entitySnapshot?.riskScoreNorm ?? null,
-            }),
+          params: {
+            entityId: entityIdentifier,
+            entityType,
+            summary: {
+              highlights,
+              recommended_actions: recommendedActions,
+              generated_at: generatedAt,
+              staleness: buildEntitySummaryStaleness({
+                riskScoreNorm: entitySnapshot?.riskScoreNorm ?? null,
+              }),
+            },
+            modelOutputCounts: {
+              highlights: modelHighlightsCount,
+              recommendedActions: modelRecommendedActionsCount,
+            },
           },
-          modelOutputCounts: {
-            highlights: modelHighlightsCount,
-            recommendedActions: modelRecommendedActionsCount,
-          },
+          context: AI_SUMMARY_SAVE_CONTEXT,
         })
           .then(() => {
             // Keep `generationBaseline` as the staleness-suppression source for this session.

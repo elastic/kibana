@@ -7,12 +7,21 @@
 
 import { useQuery } from '@kbn/react-query';
 import { useEntityAnalyticsRoutes } from '../../../api/api';
+import { buildExecutionContext } from '../../../common';
 
 export const useFetchPrivilegedUserIndices = (query: string | undefined) => {
   const { searchPrivMonIndices } = useEntityAnalyticsRoutes();
   return useQuery(
     ['POST', 'SEARCH_PRIVILEGED_USER_MONITORING_INDICES', query],
-    ({ signal }) => searchPrivMonIndices({ signal, query }),
+    ({ signal }) =>
+      searchPrivMonIndices({
+        signal,
+        query,
+        context: buildExecutionContext(
+          'entity_analytics-privileged_user_monitoring',
+          'pum_indices_search'
+        ),
+      }),
     {
       keepPreviousData: true,
       cacheTime: 0, // Do not cache the data because it is used by an autocomplete query

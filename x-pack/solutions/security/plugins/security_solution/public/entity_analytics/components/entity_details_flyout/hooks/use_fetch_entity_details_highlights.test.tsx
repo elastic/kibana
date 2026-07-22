@@ -123,12 +123,15 @@ describe('useFetchEntityDetailsHighlights', () => {
     });
 
     expect(mockFetchEntityDetailsHighlights).toHaveBeenCalledWith({
-      entityType: 'user',
-      entityIdentifier: 'test-user',
-      anonymizationFields: mockProps.anonymizationFields,
-      from: expect.any(Number),
-      to: expect.any(Number),
-      connectorId: 'test-connector-id',
+      params: {
+        entityType: 'user',
+        entityIdentifier: 'test-user',
+        anonymizationFields: mockProps.anonymizationFields,
+        from: expect.any(Number),
+        to: expect.any(Number),
+        connectorId: 'test-connector-id',
+      },
+      context: expect.objectContaining({ child: expect.anything() }),
     });
 
     expect(mockInferenceOutput).toHaveBeenCalledWith({
@@ -288,21 +291,24 @@ describe('useFetchEntityDetailsHighlights', () => {
       });
 
       expect(mockSaveEntityAiSummary).toHaveBeenCalledWith({
-        entityId: 'test-user',
-        entityType: 'user',
-        summary: {
-          highlights: mockSuccessfulInferenceOutput.output.highlights,
-          recommended_actions: mockSuccessfulInferenceOutput.output.recommended_actions,
-          generated_at: expect.any(Number),
-          staleness: {
-            enabled_signals: ['risk_score'],
-            snapshot: { risk_score: 55 },
+        params: {
+          entityId: 'test-user',
+          entityType: 'user',
+          summary: {
+            highlights: mockSuccessfulInferenceOutput.output.highlights,
+            recommended_actions: mockSuccessfulInferenceOutput.output.recommended_actions,
+            generated_at: expect.any(Number),
+            staleness: {
+              enabled_signals: ['risk_score'],
+              snapshot: { risk_score: 55 },
+            },
+          },
+          modelOutputCounts: {
+            highlights: 1,
+            recommendedActions: 2,
           },
         },
-        modelOutputCounts: {
-          highlights: 1,
-          recommendedActions: 2,
-        },
+        context: expect.objectContaining({ child: expect.anything() }),
       });
     });
 

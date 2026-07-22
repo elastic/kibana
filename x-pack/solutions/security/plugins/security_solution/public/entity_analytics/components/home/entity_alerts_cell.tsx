@@ -45,6 +45,7 @@ import {
   parseAlertsData,
 } from '../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status';
 import { getFormattedAlertStats } from '../../../flyout_v2/document/main/components/alert_count_insight';
+import { buildExecutionContext } from '../../common';
 
 const QUERY_KEY_ENTITY_ALERTS_BY_STATUS = 'entity-analytics-alerts-by-status';
 
@@ -132,13 +133,7 @@ export const EntityAlertsCell: React.FC<{
           // to a fresh controller so the call type-checks when react-query
           // hasn't supplied one.
           signal: signal ?? new AbortController().signal,
-          context: {
-            child: {
-              type: 'security_solution',
-              name: 'entity_analytics-home_page',
-              id: 'entity_alerts_cell',
-            },
-          },
+          context: buildExecutionContext('entity_analytics-home_page', 'entity_alerts_cell'),
         });
         endTracking('success');
         return response;
