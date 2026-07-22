@@ -165,6 +165,19 @@ const bulkDeleteExceptionListsByIds = async ({
       const id = ids[index];
       notFoundErrors.push({
         error: {
+          message:
+            savedObject.error.statusCode === 404
+              ? getErrorMessageExceptionList({ id, listId: undefined })
+              : savedObject.error.message,
+          status_code: savedObject.error.statusCode ?? 500,
+        },
+        id,
+        list_id: undefined,
+      });
+    } else if (savedObject.attributes.list_type !== 'list') {
+      const id = ids[index];
+      notFoundErrors.push({
+        error: {
           message: getErrorMessageExceptionList({ id, listId: undefined }),
           status_code: 404,
         },
@@ -261,8 +274,16 @@ export const bulkDeleteExceptionList = async ({
   }
 
   if (listIds.length > 0) {
-    return bulkDeleteExceptionListsByListIds({ listIds, namespaceType, savedObjectsClient });
+    return bulkDeleteExceptionListsByListIds({
+      listIds: [...new Set(listIds)],
+      namespaceType,
+      savedObjectsClient,
+    });
   } else {
-    return bulkDeleteExceptionListsByIds({ ids, namespaceType, savedObjectsClient });
+    return bulkDeleteExceptionListsByIds({
+      ids: [...new Set(ids)],
+      namespaceType,
+      savedObjectsClient,
+    });
   }
 };

@@ -18,28 +18,43 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                ids:
-                  type: array
-                  items:
-                    $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionListId'
-                  description: |
-                    Array of exception list saved object identifiers. Cannot be combined with
-                    `list_ids` in the same request.
-                list_ids:
-                  type: array
-                  items:
-                    $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionListHumanId'
-                  description: |
-                    Array of human readable exception list string identifiers. Cannot be combined
-                    with `ids` in the same request.
-                namespace_type:
-                  description: |
-                    `single` deletes lists in the current Kibana space; `agnostic` deletes global
-                    lists. Applies to every list in the request.
-                  $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionNamespaceType'
-                  default: single
+              oneOf:
+                - type: object
+                  additionalProperties: false
+                  required:
+                    - ids
+                  properties:
+                    ids:
+                      type: array
+                      minItems: 1
+                      maxItems: 100
+                      items:
+                        $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionListId'
+                      description: Array of exception list saved object identifiers.
+                    namespace_type:
+                      description: |
+                        `single` deletes lists in the current Kibana space; `agnostic` deletes global
+                        lists. Applies to every list in the request.
+                      $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionNamespaceType'
+                      default: single
+                - type: object
+                  additionalProperties: false
+                  required:
+                    - list_ids
+                  properties:
+                    list_ids:
+                      type: array
+                      minItems: 1
+                      maxItems: 100
+                      items:
+                        $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionListHumanId'
+                      description: Array of human readable exception list string identifiers.
+                    namespace_type:
+                      description: |
+                        `single` deletes lists in the current Kibana space; `agnostic` deletes global
+                        lists. Applies to every list in the request.
+                      $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionNamespaceType'
+                      default: single
               examples:
                 byListIds:
                   value:

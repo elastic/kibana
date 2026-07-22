@@ -63,6 +63,17 @@ const notFoundSavedObject = (id: string): SavedObject<ExceptionListSoSchema> =>
     type: 'exception-list',
   } as unknown as SavedObject<ExceptionListSoSchema>);
 
+const errorSavedObject = (
+  id: string,
+  statusCode: number,
+  message: string
+): SavedObject<ExceptionListSoSchema> =>
+  ({
+    error: { error: 'Saved object error', message, statusCode },
+    id,
+    type: 'exception-list',
+  } as unknown as SavedObject<ExceptionListSoSchema>);
+
 describe('bulkDeleteExceptionList', () => {
   afterEach(() => {
     jest.resetAllMocks();
@@ -143,6 +154,79 @@ describe('bulkDeleteExceptionList', () => {
           list_id: undefined,
         },
       ]);
+    });
+
+    test('it reports a 404 and does not delete when an id belongs to an exception list item', async () => {
+      const item = savedObjectFor(getListMock({ id: 'item-so-id', list_id: 'list-1' }));
+      item.attributes.list_type = 'item';
+
+      const savedObjectsClient = savedObjectsClientMock.create();
+      savedObjectsClient.bulkGet.mockResolvedValue({ saved_objects: [item] });
+
+      const result = await bulkDeleteExceptionList({
+        ids: ['item-so-id'],
+        listIds: [],
+        namespaceType: 'single',
+        savedObjectsClient,
+      });
+
+      expect(result).toEqual({
+        deleted: [],
+        errors: [
+          {
+            error: {
+              message: 'exception list id: "item-so-id" does not exist',
+              status_code: 404,
+            },
+            id: 'item-so-id',
+            list_id: undefined,
+          },
+        ],
+      });
+      expect(deleteExceptionListItemsByListStreamed).not.toHaveBeenCalled();
+      expect(savedObjectsClient.delete).not.toHaveBeenCalled();
+    });
+
+    test('it preserves non-404 bulkGet errors', async () => {
+      const savedObjectsClient = savedObjectsClientMock.create();
+      savedObjectsClient.bulkGet.mockResolvedValue({
+        saved_objects: [errorSavedObject('so-1', 403, 'forbidden')],
+      });
+
+      const result = await bulkDeleteExceptionList({
+        ids: ['so-1'],
+        listIds: [],
+        namespaceType: 'single',
+        savedObjectsClient,
+      });
+
+      expect(result.errors).toEqual([
+        {
+          error: { message: 'forbidden', status_code: 403 },
+          id: 'so-1',
+          list_id: undefined,
+        },
+      ]);
+    });
+
+    test('it deduplicates ids before resolving and deleting lists', async () => {
+      const list = getListMock({ id: 'so-1', list_id: 'list-1' });
+      const savedObjectsClient = savedObjectsClientMock.create();
+      savedObjectsClient.bulkGet.mockResolvedValue({ saved_objects: [savedObjectFor(list)] });
+      (deleteExceptionListItemsByListStreamed as jest.Mock).mockResolvedValue(undefined);
+
+      const result = await bulkDeleteExceptionList({
+        ids: ['so-1', 'so-1'],
+        listIds: [],
+        namespaceType: 'single',
+        savedObjectsClient,
+      });
+
+      expect(savedObjectsClient.bulkGet).toHaveBeenCalledWith([
+        { id: 'so-1', type: 'exception-list' },
+      ]);
+      expect(savedObjectsClient.delete).toHaveBeenCalledTimes(1);
+      expect(result).toEqual({ deleted: [list], errors: [] });
     });
 
     test('it reports a per-list error and skips the container delete when the item cascade fails for that list, without affecting other lists', async () => {
@@ -317,6 +401,28 @@ describe('bulkDeleteExceptionList', () => {
       expect(result.errors).toHaveLength(2);
       expect(savedObjectsClient.delete).not.toHaveBeenCalled();
       expect(deleteExceptionListItemsByListStreamed).not.toHaveBeenCalled();
+    });
+
+    test('it deduplicates list_ids before resolving and deleting lists', async () => {
+      const list = getListMock({ id: 'so-1', list_id: 'list-1' });
+      (resolveExceptionListIds as jest.Mock).mockResolvedValue({ listIds: [], lists: [list] });
+      (deleteExceptionListItemsByListStreamed as jest.Mock).mockResolvedValue(undefined);
+      const savedObjectsClient = savedObjectsClientMock.create();
+
+      const result = await bulkDeleteExceptionList({
+        ids: [],
+        listIds: ['list-1', 'list-1'],
+        namespaceType: 'single',
+        savedObjectsClient,
+      });
+
+      expect(resolveExceptionListIds).toHaveBeenCalledWith({
+        listIds: ['list-1'],
+        namespaceType: 'single',
+        savedObjectsClient,
+      });
+      expect(savedObjectsClient.delete).toHaveBeenCalledTimes(1);
+      expect(result).toEqual({ deleted: [list], errors: [] });
     });
   });
 

@@ -18,32 +18,42 @@ import { z, lazySchema } from '@kbn/zod/v4';
 
 import {
   ExceptionListId,
-  ExceptionListHumanId,
   ExceptionNamespaceType,
+  ExceptionListHumanId,
   ExceptionList,
 } from '../model/exception_list_common.gen';
 
 export const BulkDeleteExceptionListsRequestBody = lazySchema(() =>
-  z.object({
-    /**
-      * Array of exception list saved object identifiers. Cannot be combined with
-`list_ids` in the same request.
-
-      */
-    ids: z.array(ExceptionListId).optional(),
-    /**
-      * Array of human readable exception list string identifiers. Cannot be combined
-with `ids` in the same request.
-
-      */
-    list_ids: z.array(ExceptionListHumanId).optional(),
-    /**
+  z.union([
+    z
+      .object({
+        /**
+         * Array of exception list saved object identifiers.
+         */
+        ids: z.array(ExceptionListId).min(1).max(100),
+        /**
       * `single` deletes lists in the current Kibana space; `agnostic` deletes global
 lists. Applies to every list in the request.
 
       */
-    namespace_type: ExceptionNamespaceType.optional().default('single'),
-  })
+        namespace_type: ExceptionNamespaceType.optional().default('single'),
+      })
+      .strict(),
+    z
+      .object({
+        /**
+         * Array of human readable exception list string identifiers.
+         */
+        list_ids: z.array(ExceptionListHumanId).min(1).max(100),
+        /**
+      * `single` deletes lists in the current Kibana space; `agnostic` deletes global
+lists. Applies to every list in the request.
+
+      */
+        namespace_type: ExceptionNamespaceType.optional().default('single'),
+      })
+      .strict(),
+  ])
 );
 export type BulkDeleteExceptionListsRequestBody = z.infer<
   typeof BulkDeleteExceptionListsRequestBody
