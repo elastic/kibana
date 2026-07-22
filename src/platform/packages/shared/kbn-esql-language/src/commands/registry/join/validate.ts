@@ -19,7 +19,7 @@ import { isBinaryExpression, isIdentifier, isSource } from '@elastic/esql';
 import type { ICommandCallbacks, ICommandContext } from '../types';
 import { errors } from '../../definitions/utils/errors';
 import { validateCommandArguments } from '../../definitions/utils/validation';
-import { COORDINATOR_LOOKUP_JOIN_PREFIX } from '../../definitions/constants';
+import { resolveLookupJoinTarget } from '../../definitions/utils/sources';
 import { getOnOption } from './utils';
 import type { ESQLMessage } from '../../definitions/types';
 
@@ -57,21 +57,19 @@ export const validate = (
     return [errors.unexpected(target.location)];
   }
 
-  const prefix = index.prefix?.valueUnquoted;
+  const { isCoordinator, hasUnsupportedPrefix, indexNode, indexName } =
+    resolveLookupJoinTarget(index);
 
-  if (prefix && prefix !== COORDINATOR_LOOKUP_JOIN_PREFIX) {
+  if (hasUnsupportedPrefix) {
     return [errors.unsupportedJoinIndexPrefix(index)];
   }
 
-  const isCoordinatorTarget = prefix === COORDINATOR_LOOKUP_JOIN_PREFIX;
-  const coordinatorIndex = isCoordinatorTarget ? index.index : undefined;
-  if (isCoordinatorTarget && !coordinatorIndex) {
+  if (isCoordinator && !indexNode) {
     return [errors.unexpected(index.location)];
   }
 
-  const indexName = coordinatorIndex?.valueUnquoted ?? index.name;
-  const indexLocation = coordinatorIndex?.location ?? index.location;
-  const joinSources = isCoordinatorTarget
+  const indexLocation = indexNode?.location ?? index.location;
+  const joinSources = isCoordinator
     ? context?.coordinatorJoinSources ?? []
     : context?.joinSources ?? [];
   const indexExists = joinSources.some(

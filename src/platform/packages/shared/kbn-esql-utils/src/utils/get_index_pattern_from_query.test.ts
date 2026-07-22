@@ -95,6 +95,14 @@ describe('getIndexPatternFromESQLQuery', () => {
     );
     expect(idxPattern23).toBe('kibana_sample_data_logstsdb');
   });
+
+  it('should ignore coordinator lookup join targets', () => {
+    expect(
+      getIndexPatternFromESQLQuery(
+        'FROM my_remote_cluster:customer_orders | LOOKUP JOIN _coordinator:customer_profiles_lookup ON customer_id'
+      )
+    ).toBe('my_remote_cluster:customer_orders');
+  });
 });
 
 describe('getIndexPatternsFromESQLQuery', () => {

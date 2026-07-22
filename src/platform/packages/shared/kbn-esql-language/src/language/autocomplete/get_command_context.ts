@@ -65,7 +65,7 @@ export const getCommandContext = async (
       const joinSources = await callbacks?.getJoinIndices?.();
       context = {
         joinSources: joinSources?.indices || [],
-        coordinatorJoinSources: joinSources?.coordinatorIndices ?? [],
+        coordinatorJoinSources: joinSources?.coordinatorIndices || [],
         supportsControls: callbacks?.canSuggestVariables?.() ?? false,
       };
       break;
@@ -91,7 +91,7 @@ export const getCommandContext = async (
       context = {
         histogramBarTarget: (await callbacks?.getPreferences?.())?.histogramBarTarget || 50,
         joinSources: forkJoinSources?.indices || [],
-        coordinatorJoinSources: forkJoinSources?.coordinatorIndices ?? [],
+        coordinatorJoinSources: forkJoinSources?.coordinatorIndices || [],
         supportsControls: callbacks?.canSuggestVariables?.() ?? false,
         policies: new Map(enrichPolicies.map((policy) => [policy.name, policy])),
         inferenceEndpoints:

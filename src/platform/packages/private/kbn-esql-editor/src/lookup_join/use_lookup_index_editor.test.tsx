@@ -20,7 +20,7 @@ import {
 import { useLookupIndexPrivileges } from './use_lookup_index_privileges';
 import { coreMock } from '@kbn/core/public/mocks';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
-import { getLookupIndicesFromQuery } from '@kbn/esql-utils';
+import { getLookupIndexReferencesFromQuery } from '@kbn/esql-utils';
 import {
   appendIndexToJoinCommandByName,
   appendIndexToJoinCommandByPosition,
@@ -29,7 +29,7 @@ import type { Trigger } from '@kbn/ui-actions-plugin/public';
 
 // Mock dependencies
 jest.mock('@kbn/esql-utils', () => ({
-  getLookupIndicesFromQuery: jest.fn(),
+  getLookupIndexReferencesFromQuery: jest.fn(),
 }));
 
 jest.mock('./use_lookup_index_privileges', () => ({
@@ -83,6 +83,24 @@ describe('getMonacoCommandString', () => {
     });
     expect(result).toBe(
       '[Edit lookup index](command:esql.lookup_index.create?%7B%22indexName%22%3A%22test-index%22%2C%22doesIndexExist%22%3Atrue%2C%22canEditIndex%22%3Atrue%2C%22triggerSource%22%3A%22esql_hover%22%2C%22highestPrivilege%22%3A%22edit%22%7D)'
+    );
+  });
+
+  it('should keep the coordinator source in the editor command', () => {
+    const result = getMonacoCommandString(
+      'test-index',
+      true,
+      {
+        canCreateIndex: false,
+        canEditIndex: true,
+        canReadIndex: true,
+      },
+      false,
+      '_coordinator:test-index'
+    );
+
+    expect(decodeURIComponent(result ?? '')).toContain(
+      '"sourceName":"_coordinator:test-index"'
     );
   });
 
@@ -225,13 +243,20 @@ describe('useLookupIndexCommand', () => {
       getPermissions: mockGetPermissions,
     });
 
-    (getLookupIndicesFromQuery as jest.Mock).mockReturnValue(['test-index']);
+    (getLookupIndexReferencesFromQuery as jest.Mock).mockReturnValue([
+      {
+        sourceName: 'test-index',
+        indexName: 'test-index',
+        isCoordinator: false,
+      },
+    ]);
 
     mockEditorRef.current = mockEditor;
     mockEditorModel.current = mockModel;
 
     mockGetLookupIndices.mockResolvedValue({
       indices: [{ name: 'existing-index' }],
+      coordinatorIndices: [],
     });
 
     mockGetPermissions.mockResolvedValue({
@@ -302,9 +327,52 @@ describe('useLookupIndexCommand', () => {
     );
   });
 
+  it('should use the bare coordinator index name for privileges and existence checks', async () => {
+    (getLookupIndexReferencesFromQuery as jest.Mock).mockReturnValue([
+      {
+        sourceName: '_coordinator:test-index',
+        indexName: 'test-index',
+        isCoordinator: true,
+      },
+    ]);
+    mockGetLookupIndices.mockResolvedValue({
+      indices: [],
+      coordinatorIndices: [{ name: 'test-index' }],
+    });
+    mockGetPermissions.mockResolvedValue({
+      'test-index': { canCreateIndex: false, canEditIndex: true, canReadIndex: true },
+    });
+
+    const { result } = renderHook(
+      () =>
+        useLookupIndexCommand(
+          mockEditorRef,
+          mockEditorModel,
+          mockGetLookupIndices,
+          mockQuery,
+          mockOnIndexCreated
+        ),
+      { wrapper: createWrapper }
+    );
+
+    result.current.addLookupIndicesDecorator();
+    await jest.advanceTimersByTimeAsync(600);
+
+    expect(mockGetPermissions).toHaveBeenCalledWith(['test-index']);
+    expect(mockModel.findMatches).toHaveBeenCalledWith(
+      '_coordinator:test-index',
+      true,
+      false,
+      true,
+      ' ',
+      true
+    );
+  });
+
   it('should show closed warning decoration for a closed lookup index', async () => {
     mockGetLookupIndices.mockResolvedValue({
       indices: [{ name: 'test-index', isClosed: true }],
+      coordinatorIndices: [],
     });
 
     const { result } = renderHook(
@@ -380,6 +448,49 @@ describe('useLookupIndexCommand', () => {
     });
 
     expect(mockOnIndexCreated).toHaveBeenCalledWith('FROM logs | JOIN new-index ON field');
+  });
+
+  it('should use the coordinator source name when updating the query', async () => {
+    (appendIndexToJoinCommandByName as jest.Mock).mockReturnValue(
+      'FROM remote:index | LOOKUP JOIN _coordinator:new-index ON field'
+    );
+
+    renderHook(
+      () =>
+        useLookupIndexCommand(
+          mockEditorRef,
+          mockEditorModel,
+          mockGetLookupIndices,
+          mockQuery,
+          mockOnIndexCreated
+        ),
+      { wrapper: createWrapper }
+    );
+
+    (mockServices.uiActions.executeTriggerActions as jest.Mock).mockImplementation(
+      async (_, context) => {
+        await context.onClose({
+          indexName: 'new-index',
+          indexCreatedDuringFlyout: true,
+        });
+      }
+    );
+
+    const registerCommandCall = jest.mocked(monaco.editor.registerCommand).mock.calls[0];
+    const commandHandler = registerCommandCall[1];
+
+    await commandHandler(undefined, {
+      indexName: 'new-index',
+      sourceName: '_coordinator:new-index',
+      doesIndexExist: false,
+      canEditIndex: false,
+    });
+
+    expect(appendIndexToJoinCommandByName).toHaveBeenCalledWith(
+      mockQuery.esql,
+      '_coordinator:new-index',
+      'new-index'
+    );
   });
 
   it('should handle cursor position when no initial index name', async () => {

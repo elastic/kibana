@@ -56,7 +56,7 @@ export {
   getCategorizeField,
   getKqlSearchQueries,
   getRemoteClustersFromESQLQuery,
-  getLookupIndicesFromQuery,
+  getLookupIndexReferencesFromQuery,
   convertTimeseriesCommandToFrom,
   getESQLStatsQueryMeta,
   constructCascadeQuery,
@@ -100,6 +100,7 @@ export {
   isSingleSource,
   type ESQLSourceKind,
   ensureApproximationLicense,
+  type LookupIndexReference,
 } from './src';
 
 export { ENABLE_ESQL, GROUP_NOT_SET_VALUE } from './constants';

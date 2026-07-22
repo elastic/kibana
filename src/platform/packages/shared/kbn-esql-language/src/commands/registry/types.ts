@@ -214,6 +214,7 @@ export interface ICommandContext {
   sources?: ESQLSourceResult[];
   joinSources?: IndexAutocompleteItem[];
   coordinatorJoinSources?: IndexAutocompleteItem[];
+  hasRemoteIndexSource?: boolean;
   timeSeriesSources?: IndexAutocompleteItem[];
   inferenceEndpoints?: InferenceEndpointAutocompleteItem[];
   policies?: Map<string, ESQLPolicy>;

@@ -11,7 +11,7 @@ not full ES|QL parsing.
 - `getIndexPatternFromESQLQuery` - Read the index pattern from the `from` command.
 - `getESQLWithSafeLimit` - Apply a safe default `limit` if none is present.
 - `replaceESQLQueryIndexPattern` - Swap the `from` index pattern in-place.
-- `getLookupIndicesFromQuery` - Return unique lookup indices referenced in the query.
+- `getLookupIndexReferencesFromQuery` - Return query sources and Elasticsearch index names for lookup joins.
 
 ### Parsing and inspection
 - `getLimitFromESQLQuery` - Extract the explicit or default limit for a query.

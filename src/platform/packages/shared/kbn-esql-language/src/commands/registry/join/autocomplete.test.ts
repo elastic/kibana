@@ -25,6 +25,11 @@ import { SuggestionCategory } from '../../../language/autocomplete/utils/sorting
 
 type ExpectedSuggestions = string[] | { contains?: string[]; notContains?: string[] };
 
+const remoteSourceContext = {
+  ...mockContext,
+  hasRemoteIndexSource: true,
+};
+
 const joinExpectSuggestions = async (
   query: string,
   expected: ExpectedSuggestions,
@@ -89,6 +94,107 @@ describe('JOIN Autocomplete', () => {
   });
 
   describe('... <index> ...', () => {
+    test('suggests the coordinator prefix before typing an index', async () => {
+      const suggestions = await suggest(
+        'FROM remote:index | LOOKUP JOIN ',
+        remoteSourceContext,
+        'join',
+        mockCallbacks,
+        autocomplete
+      );
+      const coordinatorSuggestion = suggestions.find(({ label }) => label === '_coordinator');
+
+      expect(coordinatorSuggestion).toMatchObject({
+        text: '_coordinator:$0',
+        asSnippet: true,
+        kind: 'Reference',
+      });
+    });
+
+    test('does not suggest the coordinator prefix for a local source', async () => {
+      const suggestions = await suggest(
+        'FROM kibana_sample_data_logs | LOOKUP JOIN ',
+        mockContext,
+        'join',
+        mockCallbacks,
+        autocomplete
+      );
+      const labels = suggestions.map(({ label }) => label);
+
+      expect(labels).not.toContain('_coordinator');
+    });
+
+    test('suggests the coordinator prefix after an underscore', async () => {
+      const suggestions = await suggest(
+        'FROM remote:index | LOOKUP JOIN _',
+        remoteSourceContext,
+        'join',
+        mockCallbacks,
+        autocomplete
+      );
+      const coordinatorSuggestion = suggestions.find(({ label }) => label === '_coordinator');
+
+      expect(coordinatorSuggestion).toMatchObject({
+        text: '_coordinator:$0',
+        asSnippet: true,
+        kind: 'Reference',
+      });
+    });
+
+    test('suggests coordinator lookup indices after the coordinator prefix', async () => {
+      const suggestions = await suggest(
+        'FROM remote:index | LOOKUP JOIN _coordinator:',
+        remoteSourceContext,
+        'join',
+        mockCallbacks,
+        autocomplete
+      );
+      const labels = suggestions.map(({ label }) => label);
+
+      expect(labels).toContain('coordinator_only_index');
+      expect(labels).not.toContain('lookup_index');
+    });
+
+    test('replaces only the index fragment after the coordinator prefix', async () => {
+      const query = 'FROM remote:index | LOOKUP JOIN _coordinator:coord';
+      const suggestions = await suggest(
+        query,
+        remoteSourceContext,
+        'join',
+        mockCallbacks,
+        autocomplete
+      );
+      const coordinatorIndexSuggestion = suggestions.find(
+        ({ label }) => label === 'coordinator_only_index'
+      );
+
+      expect(coordinatorIndexSuggestion?.rangeToReplace).toEqual({
+        start: query.lastIndexOf('coord'),
+        end: query.length,
+      });
+    });
+
+    test('suggests creating a coordinator lookup index with its bare name', async () => {
+      const suggestions = await suggest(
+        'FROM remote:index | LOOKUP JOIN _coordinator:new_index',
+        remoteSourceContext,
+        'join',
+        mockCallbacks,
+        autocomplete
+      );
+      const createSuggestion = suggestions.find(
+        ({ label }) => label === 'Create lookup index "new_index"'
+      );
+
+      expect(createSuggestion?.command?.arguments).toEqual([
+        {
+          indexName: 'new_index',
+          sourceName: '_coordinator:new_index',
+        },
+      ]);
+      expect(mockCallbacks.canCreateLookupIndex).toHaveBeenCalledWith('new_index');
+    });
+
     test('can suggest lookup indices (and aliases), and a create index command', async () => {
       const suggestions = await suggest(
         'FROM index | LEFT JOIN ',

@@ -9,8 +9,10 @@
 import { i18n } from '@kbn/i18n';
 import type { ESQLFieldWithMetadata } from '@kbn/esql-types';
 import type { ESQLAstAllCommands, ESQLAstJoinCommand } from '@elastic/esql/types';
-import { withAutoSuggest } from '../../definitions/utils/autocomplete/helpers';
-import { getLookupIndexCreateSuggestion } from '../../definitions/utils/autocomplete/helpers';
+import {
+  getLookupIndexCreateSuggestion,
+  withAutoSuggest,
+} from '../../definitions/utils/autocomplete/helpers';
 import type { ICommandCallbacks } from '../types';
 import { type ISuggestionItem, type ICommandContext, Location } from '../types';
 import { newLineAndPipeCompleteItems, commaCompleteItem } from '../complete_items';
@@ -24,6 +26,17 @@ import {
 import { specialIndicesToSuggestions } from '../../definitions/utils/sources';
 import { esqlCommandRegistry } from '..';
 import { suggestForExpression } from '../../definitions/utils';
+import { COORDINATOR_LOOKUP_JOIN_PREFIX } from '../../definitions/constants';
+
+const coordinatorPrefixSuggestion = withAutoSuggest({
+  label: COORDINATOR_LOOKUP_JOIN_PREFIX,
+  text: `${COORDINATOR_LOOKUP_JOIN_PREFIX}:$0`,
+  asSnippet: true,
+  kind: 'Reference',
+  detail: i18n.translate('kbn-esql-language.esql.autocomplete.join.coordinatorPrefix', {
+    defaultMessage: 'Lookup index on the coordinating cluster',
+  }),
+});
 
 export async function autocomplete(
   query: string,
@@ -71,32 +84,58 @@ export async function autocomplete(
 
     case 'after_mnemonic':
     case 'index': {
-      const words = commandText.split(' ');
-      const indexNameInput = words[words.length - 1] ?? '';
-      const joinSources = context?.joinSources;
-      const suggestions: ISuggestionItem[] = [];
+      const words = commandText.split(/\s+/);
+      const joinTargetInput = words[words.length - 1] ?? '';
+      const coordinatorPrefix = `${COORDINATOR_LOOKUP_JOIN_PREFIX}:`;
+      const isLookupJoin = (command as ESQLAstJoinCommand).commandType === 'lookup';
+      const canSuggestCoordinatorTarget =
+        isLookupJoin && Boolean(context?.hasRemoteIndexSource);
+      const isCoordinatorTarget =
+        canSuggestCoordinatorTarget && joinTargetInput.startsWith(coordinatorPrefix);
 
-      const canCreate = (await callbacks?.canCreateLookupIndex?.(indexNameInput)) ?? false;
+      if (isLookupJoin && joinTargetInput.startsWith('_') && !isCoordinatorTarget) {
+        if (
+          canSuggestCoordinatorTarget &&
+          COORDINATOR_LOOKUP_JOIN_PREFIX.startsWith(joinTargetInput)
+        ) {
+          return [coordinatorPrefixSuggestion];
+        }
 
-      const indexAlreadyExists = joinSources?.some(
-        (source) => source.name === indexNameInput || source.aliases.includes(indexNameInput)
-      );
-      if (canCreate && !indexAlreadyExists) {
-        const createIndexCommandSuggestion = getLookupIndexCreateSuggestion(indexNameInput);
-        suggestions.push(createIndexCommandSuggestion);
+        return [];
       }
 
-      if (joinSources?.length) {
-        const joinIndexesSuggestions = specialIndicesToSuggestions(joinSources);
-        const isCompleteLookupIndex =
-          indexNameInput &&
-          joinIndexesSuggestions.some(
-            ({ label }) => label.toLocaleLowerCase() === indexNameInput.toLocaleLowerCase()
-          );
+      const indexNameInput = isCoordinatorTarget
+        ? joinTargetInput.slice(coordinatorPrefix.length)
+        : joinTargetInput;
+      const joinSources =
+        (isCoordinatorTarget ? context?.coordinatorJoinSources : context?.joinSources) ?? [];
+      const suggestions: ISuggestionItem[] = [];
 
-        if (!isCompleteLookupIndex) {
-          suggestions.push(...joinIndexesSuggestions);
+      const normalizedIndexNameInput = indexNameInput.toLocaleLowerCase();
+      const matchesInput = (existingName: string) =>
+        existingName.toLocaleLowerCase() === normalizedIndexNameInput;
+      const matchesExistingIndex =
+        indexNameInput.length > 0 &&
+        joinSources.some(({ name, aliases }) => matchesInput(name) || aliases.some(matchesInput));
+
+      if (canSuggestCoordinatorTarget && !joinTargetInput) {
+        suggestions.push(coordinatorPrefixSuggestion);
+      }
+
+      const canSuggestCreate =
+        !matchesExistingIndex && (!isCoordinatorTarget || indexNameInput.length > 0);
+
+      if (canSuggestCreate) {
+        const canCreate = (await callbacks?.canCreateLookupIndex?.(indexNameInput)) ?? false;
+
+        if (canCreate) {
+          const sourceName = isCoordinatorTarget ? joinTargetInput : undefined;
+          suggestions.push(getLookupIndexCreateSuggestion(indexNameInput, sourceName));
         }
+      }
+
+      if (!matchesExistingIndex) {
+        suggestions.push(...specialIndicesToSuggestions(joinSources));
       }
 
       return suggestions;
@@ -156,7 +195,6 @@ export async function autocomplete(
 
       // Filter out AS operator - it's not valid in boolean expressions
       const filteredSuggestions = suggestions.filter(({ label }) => label !== 'AS');
-
       const { expressionType, isComplete, insideFunction } = computed;
 
       if (expressionRoot && !insideFunction) {

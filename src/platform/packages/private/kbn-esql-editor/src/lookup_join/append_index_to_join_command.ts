@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BasicPrettyPrinter, Parser, isSource, mutate } from '@elastic/esql';
+import { BasicPrettyPrinter, Builder, Parser, isSource, mutate } from '@elastic/esql';
 import type {
   ESQLAstItem,
   ESQLAstJoinCommand,
@@ -31,18 +31,11 @@ function modifyJoinCommand(
   createdIndexName: string
 ): string {
   const { joinCmd, src, firstArg } = selectedJoin;
-
-  const newSource: ESQLSource = {
-    type: 'source',
-    sourceType: 'index',
-    incomplete: false,
-    location: src?.location ?? {
-      min: joinCmd.location?.min ?? 0,
-      max: (joinCmd.location?.min ?? 0) + createdIndexName.length,
-    },
-    text: createdIndexName,
-    name: createdIndexName,
-  };
+  const newSource = Builder.expression.source.index(
+    createdIndexName,
+    src?.prefix,
+    src?.selector
+  );
 
   if (src) {
     const idx = joinCmd.args.indexOf(firstArg);
@@ -130,7 +123,8 @@ function appendIndexToJoinCommand(
 
   if (!selectedJoin) return query;
 
-  if (selectedJoin.src && selectedJoin.src.name === createdIndexName) return query;
+  const currentIndexName = selectedJoin.src?.index?.valueUnquoted ?? selectedJoin.src?.name;
+  if (currentIndexName === createdIndexName) return query;
 
   return modifyJoinCommand(root, selectedJoin, createdIndexName);
 }

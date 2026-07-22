@@ -27,6 +27,28 @@ describe('appendIndexToJoinCommandByName', () => {
   | LOOKUP JOIN customer_data ON customer_id
   | LOOKUP JOIN new_index`);
   });
+
+  it('preserves the coordinator prefix after creating an index', () => {
+    const query = 'FROM remote:index | LOOKUP JOIN _coordinator:new_index ON id';
+    const result = appendIndexToJoinCommandByName(
+      query,
+      '_coordinator:new_index',
+      'new_index'
+    );
+
+    expect(result).toBe(query);
+  });
+
+  it('preserves the coordinator prefix when the created index name changes', () => {
+    const result = appendIndexToJoinCommandByName(
+      'FROM remote:index | LOOKUP JOIN _coordinator:old_index ON id',
+      '_coordinator:old_index',
+      'new_index'
+    );
+
+    expect(result).toBe(`FROM remote:index
+  | LOOKUP JOIN _coordinator:new_index ON id`);
+  });
 });
 
 describe('appendIndexToJoinCommandByPosition', () => {

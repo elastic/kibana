@@ -265,7 +265,12 @@ function createMultiCommand(
   };
 }
 
-export function getLookupIndexCreateSuggestion(indexName?: string): ISuggestionItem {
+export function getLookupIndexCreateSuggestion(
+  indexName?: string,
+  sourceName?: string
+): ISuggestionItem {
+  const commandArguments = sourceName ? { indexName, sourceName } : { indexName };
+
   return {
     label: indexName
       ? i18n.translate(
@@ -308,7 +313,7 @@ export function getLookupIndexCreateSuggestion(indexName?: string): ISuggestionI
         }
       ),
 
-      arguments: [{ indexName }],
+      arguments: [commandArguments],
     },
 
     incomplete: true,

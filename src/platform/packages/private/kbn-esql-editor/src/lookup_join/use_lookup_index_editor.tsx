@@ -10,8 +10,11 @@
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { AggregateQuery } from '@kbn/es-query';
-import type { IndexAutocompleteItem } from '@kbn/esql-types';
-import { getLookupIndicesFromQuery } from '@kbn/esql-utils';
+import type { LookupIndicesAutocompleteResult } from '@kbn/esql-types';
+import {
+  getLookupIndexReferencesFromQuery,
+  type LookupIndexReference,
+} from '@kbn/esql-utils';
 import { i18n } from '@kbn/i18n';
 import type { EditLookupIndexContentContext } from '@kbn/index-editor';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -37,6 +40,7 @@ export const COMMAND_ID = 'esql.lookup_index.create';
 
 export interface IndexEditorCommandArgs {
   indexName: string;
+  sourceName?: string;
   doesIndexExist?: boolean;
   canEditIndex?: boolean;
   triggerSource?: string;
@@ -57,7 +61,8 @@ export function getMonacoCommandString(
   indexName: string,
   isExistingIndex: boolean,
   indexPrivileges: LookupIndexPrivileges,
-  isClosedIndex?: boolean
+  isClosedIndex?: boolean,
+  sourceName?: string
 ): string | undefined {
   if (isClosedIndex) {
     return i18n.translate('esqlEditor.lookupIndex.closed', {
@@ -91,15 +96,20 @@ export function getMonacoCommandString(
   }
 
   const highestPrivilege = getHighestPrivilegeLevel(indexPrivileges);
+  const commandArguments: IndexEditorCommandArgs = {
+    indexName,
+    doesIndexExist: isExistingIndex,
+    canEditIndex,
+    triggerSource: 'esql_hover',
+    highestPrivilege,
+  };
+
+  if (sourceName && sourceName !== indexName) {
+    commandArguments.sourceName = sourceName;
+  }
 
   return `[${actionLabel}](command:${COMMAND_ID}?${encodeURIComponent(
-    JSON.stringify({
-      indexName,
-      doesIndexExist: isExistingIndex,
-      canEditIndex,
-      triggerSource: 'esql_hover',
-      highestPrivilege,
-    })
+    JSON.stringify(commandArguments)
   )})`;
 }
 
@@ -144,7 +154,7 @@ const DEBOUNCE_OPTIONS_FOR_DECORATOR = { wait: 500 };
 export const useLookupIndexCommand = (
   editorRef: React.MutableRefObject<monaco.editor.IStandaloneCodeEditor | undefined>,
   editorModel: React.MutableRefObject<monaco.editor.ITextModel | undefined>,
-  getLookupIndices: (() => Promise<{ indices: IndexAutocompleteItem[] }>) | undefined,
+  getLookupIndices: (() => Promise<LookupIndicesAutocompleteResult>) | undefined,
   query: AggregateQuery,
   onIndexCreated: (resultQuery: string) => Promise<void>,
   onNewFieldsAddedToIndex?: (indexName: string) => void,
@@ -156,14 +166,14 @@ export const useLookupIndexCommand = (
   } = useKibana<ESQLEditorDeps>();
   const { getPermissions } = useLookupIndexPrivileges();
 
-  const inQueryLookupIndices = useRef<string[]>([]);
+  const lookupIndexReferences = useRef<LookupIndexReference[]>([]);
   const decorationIdsRef = useRef<string[]>([]);
 
   useEffect(
     function parseIndicesOnChange() {
-      const updated = getLookupIndicesFromQuery(query.esql);
-      if (!isEqual(updated, inQueryLookupIndices.current)) {
-        inQueryLookupIndices.current = updated;
+      const updated = getLookupIndexReferencesFromQuery(query.esql);
+      if (!isEqual(updated, lookupIndexReferences.current)) {
+        lookupIndexReferences.current = updated;
       }
     },
     [query.esql]
@@ -198,28 +208,41 @@ export const useLookupIndexCommand = (
       return false;
     }
 
-    const existingIndices = getLookupIndices ? await getLookupIndices() : { indices: [] };
-    const lookupIndices: string[] = inQueryLookupIndices.current;
-    const nonClosedIndices = lookupIndices.filter(
-      (name) => !existingIndices.indices.find((i) => i.name === name)?.isClosed
+    const existingIndices = getLookupIndices
+      ? await getLookupIndices()
+      : { indices: [], coordinatorIndices: [] };
+    const lookupIndicesWithState = lookupIndexReferences.current.map((lookupIndex) => {
+      const availableIndices = lookupIndex.isCoordinator
+        ? existingIndices.coordinatorIndices
+        : existingIndices.indices;
+
+      return {
+        ...lookupIndex,
+        existingIndex: availableIndices.find(({ name }) => name === lookupIndex.indexName),
+      };
+    });
+    const nonClosedIndexNames = Array.from(
+      new Set(
+        lookupIndicesWithState
+          .filter(({ existingIndex }) => !existingIndex?.isClosed)
+          .map(({ indexName }) => indexName)
+      )
     );
-    const permissions = await getPermissions(nonClosedIndices);
+    const permissions = await getPermissions(nonClosedIndexNames);
     const newDecorations: monaco.editor.IModelDeltaDecoration[] = [];
 
-    for (let i = 0; i < lookupIndices.length; i++) {
-      const lookupIndex = lookupIndices[i];
-
-      const existingIndex = existingIndices.indices.find((index) => index.name === lookupIndex);
+    for (const { sourceName, indexName, existingIndex } of lookupIndicesWithState) {
       const isExistingIndex = !!existingIndex;
       const isClosedIndex = existingIndex?.isClosed;
       const matches =
-        editorModel.current?.findMatches(lookupIndex, true, false, true, ' ', true) || [];
+        editorModel.current?.findMatches(sourceName, true, false, true, ' ', true) || [];
 
       const commandString = getMonacoCommandString(
-        lookupIndex,
+        indexName,
         isExistingIndex,
-        permissions[lookupIndex],
-        isClosedIndex
+        permissions[indexName],
+        isClosedIndex,
+        sourceName
       );
 
       if (!commandString) continue;
@@ -259,7 +282,7 @@ export const useLookupIndexCommand = (
 
   const onFlyoutClose = useCallback(
     async (
-      initialIndexName: string | undefined,
+      initialSourceName: string | undefined,
       resultIndexName: string | null,
       indexCreated: boolean,
       indexHasNewFields: boolean
@@ -272,13 +295,13 @@ export const useLookupIndexCommand = (
 
       const cursorPosition = editorRef.current?.getPosition();
 
-      if (!initialIndexName && !cursorPosition) {
+      if (!initialSourceName && !cursorPosition) {
         throw new Error('Could not find a cursor position in the editor');
       }
 
       let resultQuery: string;
-      if (initialIndexName) {
-        resultQuery = appendIndexToJoinCommandByName(query.esql, initialIndexName, resultIndexName);
+      if (initialSourceName) {
+        resultQuery = appendIndexToJoinCommandByName(query.esql, initialSourceName, resultIndexName);
       } else {
         resultQuery = appendIndexToJoinCommandByPosition(
           query.esql,
@@ -299,12 +322,13 @@ export const useLookupIndexCommand = (
   );
 
   const openFlyout = useCallback(
-    async (
-      indexName: string,
-      doesIndexExist?: boolean,
+    async ({
+      indexName,
+      sourceName,
+      doesIndexExist,
       canEditIndex = true,
-      triggerSource = 'esql_autocomplete'
-    ) => {
+      triggerSource = 'esql_autocomplete',
+    }: IndexEditorCommandArgs) => {
       await uiActions.executeTriggerActions('EDIT_LOOKUP_INDEX_CONTENT_TRIGGER_ID', {
         indexName,
         doesIndexExist,
@@ -316,7 +340,7 @@ export const useLookupIndexCommand = (
           indexHasNewFields,
         }) => {
           await onFlyoutClose(
-            indexName,
+            sourceName ?? indexName,
             resultIndexName,
             indexCreatedDuringFlyout,
             indexHasNewFields
@@ -337,8 +361,7 @@ export const useLookupIndexCommand = (
     const disposable = monaco.editor.registerCommand(
       COMMAND_ID,
       async (_, args: IndexEditorCommandArgs) => {
-        const { indexName, doesIndexExist, canEditIndex, triggerSource } = args;
-        await openFlyoutRef.current(indexName, doesIndexExist, canEditIndex, triggerSource);
+        await openFlyoutRef.current(args);
       }
     );
     return () => {

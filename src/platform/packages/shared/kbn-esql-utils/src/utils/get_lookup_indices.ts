@@ -7,29 +7,37 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLSource } from '@elastic/esql/types';
-import { Parser, isSource } from '@elastic/esql';
+import { Parser, Walker, isSource } from '@elastic/esql';
+import { resolveLookupJoinTarget } from '@kbn/esql-language';
 
-/**
- * Extracts and returns a list of unique lookup indices from the provided ESQL query by parsing the query and traversing its AST.
- *
- * @param {string} esqlQuery - The ESQL query string to parse and analyze for lookup indices.
- * @return {string[]} An array of unique lookup index names found in the query.
- */
-export function getLookupIndicesFromQuery(esqlQuery: string): string[] {
-  const indexNames: string[] = [];
+export interface LookupIndexReference {
+  /** Source as it appears in the ES|QL query. */
+  sourceName: string;
+  /** Index name used by Elasticsearch APIs. */
+  indexName: string;
+  isCoordinator: boolean;
+}
 
-  // parse esql query and find lookup indices in the query, traversing the AST
+/** Returns the lookup indices referenced by JOIN commands, including the ones inside FORK branches. */
+export function getLookupIndexReferencesFromQuery(esqlQuery: string): LookupIndexReference[] {
+  const references = new Map<string, LookupIndexReference>();
   const { root } = Parser.parse(esqlQuery);
-  // find all join commands
-  root.commands.forEach((command) => {
-    if (command.name === 'join') {
-      const indexName = command.args.find<ESQLSource>(isSource);
-      if (indexName?.name) {
-        indexNames.push(indexName.name);
-      }
-    }
-  });
+  const joinCommands = Walker.matchAll(root, { type: 'command', name: 'join' });
 
-  return Array.from(new Set(indexNames));
+  for (const command of joinCommands) {
+    const source = Walker.match(command, { type: 'source' });
+    if (!isSource(source) || !source.name) {
+      continue;
+    }
+
+    const { isCoordinator, indexName } = resolveLookupJoinTarget(source);
+
+    references.set(source.name, {
+      sourceName: source.name,
+      indexName,
+      isCoordinator,
+    });
+  }
+
+  return [...references.values()];
 }

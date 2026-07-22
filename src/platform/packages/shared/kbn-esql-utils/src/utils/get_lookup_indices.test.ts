@@ -7,45 +7,124 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getLookupIndicesFromQuery } from './get_lookup_indices';
+import { getLookupIndexReferencesFromQuery } from './get_lookup_indices';
 
-describe('getLookupIndicesFromQuery', () => {
-  it('should return an empty array for an empty query', () => {
-    const query = '';
-    expect(getLookupIndicesFromQuery(query)).toEqual([]);
+describe('getLookupIndexReferencesFromQuery', () => {
+  it('returns an empty array for an empty query', () => {
+    expect(getLookupIndexReferencesFromQuery('')).toEqual([]);
   });
 
-  it('should return an empty array for a query with no join commands', () => {
+  it('returns an empty array for a query with no join commands', () => {
     const query = 'FROM my_index | WHERE status = 200';
-    expect(getLookupIndicesFromQuery(query)).toEqual([]);
+
+    expect(getLookupIndexReferencesFromQuery(query)).toEqual([]);
   });
 
-  it('should return an empty array for a query with join commands but no indices', () => {
+  it('returns an empty array for a join command with no index', () => {
     const query = `FROM kibana_sample_data_ecommerce
   | EVAL customer_id = TO_LONG(customer_id)
   | LOOKUP JOIN `;
-    expect(getLookupIndicesFromQuery(query)).toEqual([]);
+
+    expect(getLookupIndexReferencesFromQuery(query)).toEqual([]);
   });
 
-  it('should extract a single lookup index from a simple join query', () => {
+  it('extracts a single lookup index from a simple join query', () => {
     const query = 'FROM my_index | LOOKUP JOIN lookup_index ON id';
-    expect(getLookupIndicesFromQuery(query)).toEqual(['lookup_index']);
+
+    expect(getLookupIndexReferencesFromQuery(query)).toEqual([
+      { sourceName: 'lookup_index', indexName: 'lookup_index', isCoordinator: false },
+    ]);
   });
 
-  it('should extract multiple lookup indices from a query with multiple joins', () => {
+  it('extracts multiple lookup indices from a query with multiple joins', () => {
     const query = `FROM my_index
     | LOOKUP JOIN lookup1 ON id
     | LOOKUP JOIN lookup2 ON user`;
-    expect(getLookupIndicesFromQuery(query)).toEqual(['lookup1', 'lookup2']);
+
+    expect(getLookupIndexReferencesFromQuery(query).map(({ indexName }) => indexName)).toEqual([
+      'lookup1',
+      'lookup2',
+    ]);
   });
 
-  it('should return unique lookup indices if the same index is used multiple times', () => {
+  it('returns a single reference if the same index is used multiple times', () => {
     const query = 'FROM my_index | LOOKUP JOIN lookup1 ON id | LOOKUP JOIN lookup1 ON user';
-    expect(getLookupIndicesFromQuery(query)).toEqual(['lookup1']);
+
+    expect(getLookupIndexReferencesFromQuery(query)).toHaveLength(1);
   });
 
-  it('should handle different casing for JOIN keyword', () => {
+  it('handles different casing for the JOIN keyword', () => {
     const query = 'FROM my_index | lookup join lookup_index ON id';
-    expect(getLookupIndicesFromQuery(query)).toEqual(['lookup_index']);
+
+    expect(getLookupIndexReferencesFromQuery(query).map(({ indexName }) => indexName)).toEqual([
+      'lookup_index',
+    ]);
+  });
+
+  it('separates the query source from the coordinator index name', () => {
+    const query = 'FROM remote:index | LOOKUP JOIN _coordinator:lookup_index ON id';
+
+    expect(getLookupIndexReferencesFromQuery(query)).toEqual([
+      {
+        sourceName: '_coordinator:lookup_index',
+        indexName: 'lookup_index',
+        isCoordinator: true,
+      },
+    ]);
+  });
+
+  it('extracts a coordinator index with a JOIN alias', () => {
+    const query = 'FROM remote:index | LOOKUP JOIN _coordinator:lookup_index AS lookup ON id';
+
+    expect(getLookupIndexReferencesFromQuery(query)).toEqual([
+      {
+        sourceName: '_coordinator:lookup_index',
+        indexName: 'lookup_index',
+        isCoordinator: true,
+      },
+    ]);
+  });
+
+  it('uses the same source and index name for an unprefixed target', () => {
+    const query = 'FROM index | LOOKUP JOIN lookup_index ON id';
+
+    expect(getLookupIndexReferencesFromQuery(query)).toEqual([
+      {
+        sourceName: 'lookup_index',
+        indexName: 'lookup_index',
+        isCoordinator: false,
+      },
+    ]);
+  });
+
+  it('keeps distinct references for prefixed and unprefixed targets of the same index', () => {
+    const query =
+      'FROM remote:index | LOOKUP JOIN lookup1 ON id | LOOKUP JOIN _coordinator:lookup1 ON user';
+
+    expect(getLookupIndexReferencesFromQuery(query)).toEqual([
+      { sourceName: 'lookup1', indexName: 'lookup1', isCoordinator: false },
+      { sourceName: '_coordinator:lookup1', indexName: 'lookup1', isCoordinator: true },
+    ]);
+  });
+
+  it('does not treat other prefixes as coordinator targets', () => {
+    const query = 'FROM my_index | LOOKUP JOIN remote1:lookup_index ON id';
+
+    expect(getLookupIndexReferencesFromQuery(query)).toEqual([
+      {
+        sourceName: 'remote1:lookup_index',
+        indexName: 'remote1:lookup_index',
+        isCoordinator: false,
+      },
+    ]);
+  });
+
+  it('extracts lookup indices from joins inside FORK branches', () => {
+    const query = `FROM my_index
+    | FORK (LOOKUP JOIN lookup1 ON id) (WHERE status == 200)`;
+
+    expect(getLookupIndexReferencesFromQuery(query)).toEqual([
+      { sourceName: 'lookup1', indexName: 'lookup1', isCoordinator: false },
+    ]);
   });
 });

@@ -394,6 +394,20 @@ export const specialIndicesToSuggestions = (
   return [...mainSuggestions, ...aliasSuggestions];
 };
 
+/** Classifies a LOOKUP JOIN target against the `_coordinator:` prefix rule. */
+export const resolveLookupJoinTarget = (source: ESQLSource) => {
+  const prefix = source.prefix?.valueUnquoted;
+  const isCoordinator = prefix === COORDINATOR_LOOKUP_JOIN_PREFIX;
+  const indexNode = isCoordinator ? source.index : undefined;
+
+  return {
+    isCoordinator,
+    hasUnsupportedPrefix: Boolean(prefix) && !isCoordinator,
+    indexNode,
+    indexName: indexNode?.valueUnquoted ?? source.name,
+  };
+};
+
 /** Returns the source used to fetch the fields of a LOOKUP JOIN target. */
 export const getLookupJoinSource = (command: ESQLAstJoinCommand): string | undefined => {
   const firstArg = command.args[0];
@@ -407,11 +421,10 @@ export const getLookupJoinSource = (command: ESQLAstJoinCommand): string | undef
     return undefined;
   }
 
-  const isCoordinatorTarget = sourceNode.prefix?.valueUnquoted === COORDINATOR_LOOKUP_JOIN_PREFIX;
   // FROM does not support the _coordinator prefix used by LOOKUP JOIN.
-  const sourceToPrint = isCoordinatorTarget && sourceNode.index ? sourceNode.index : sourceNode;
+  const { indexNode } = resolveLookupJoinTarget(sourceNode);
 
-  return LeafPrinter.print(sourceToPrint);
+  return LeafPrinter.print(indexNode ?? sourceNode);
 };
 
 export function getIndexSourcesFromQuery(query: string): string[] {
