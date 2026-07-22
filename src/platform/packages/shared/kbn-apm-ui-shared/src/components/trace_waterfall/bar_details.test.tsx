@@ -535,6 +535,28 @@ describe('BarDetails', () => {
     });
   });
 
+  describe('in case of token usage', () => {
+    it('renders input and output token badges when present', () => {
+      const mockItemWithTokens = {
+        ...mockItem,
+        inputTokens: 19,
+        outputTokens: 58,
+      } as unknown as TraceWaterfallItem;
+
+      const { getByTestId, getByText } = render(<BarDetails item={mockItemWithTokens} left={10} />);
+      expect(getByTestId('apmBarDetailsInputTokensBadge')).toBeInTheDocument();
+      expect(getByTestId('apmBarDetailsOutputTokensBadge')).toBeInTheDocument();
+      expect(getByText('input.tokens: 19')).toBeInTheDocument();
+      expect(getByText('output.tokens: 58')).toBeInTheDocument();
+    });
+
+    it('does not render token badges when token fields are missing', () => {
+      const { queryByTestId } = render(<BarDetails item={mockItem} left={10} />);
+      expect(queryByTestId('apmBarDetailsInputTokensBadge')).not.toBeInTheDocument();
+      expect(queryByTestId('apmBarDetailsOutputTokensBadge')).not.toBeInTheDocument();
+    });
+  });
+
   describe('in case of service name badge', () => {
     it('renders service name badge when serviceName is present', () => {
       const mockItemWithServiceName = {

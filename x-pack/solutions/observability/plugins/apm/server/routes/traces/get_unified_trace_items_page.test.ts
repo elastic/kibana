@@ -6,7 +6,14 @@
  */
 
 import type { APMEventClient } from '@kbn/apm-data-access-plugin/server';
-import { DURATION, KIND, SPAN_ID, TRANSACTION_ID } from '../../../common/es_fields/apm';
+import {
+  ATTRIBUTE_GEN_AI_USAGE_INPUT_TOKENS,
+  ATTRIBUTE_GEN_AI_USAGE_OUTPUT_TOKENS,
+  DURATION,
+  KIND,
+  SPAN_ID,
+  TRANSACTION_ID,
+} from '../../../common/es_fields/apm';
 import { getUnifiedTraceItemsPaginated } from './get_unified_trace_items_page';
 
 // Use a small page size so tests don't need thousands of hits
@@ -233,6 +240,21 @@ describe('getUnifiedTraceItemsPaginated', () => {
       const callArgs = (mockApmEventClient.search as jest.Mock).mock.calls[0][1];
       expect(callArgs.fields).not.toContain(DURATION);
       expect(callArgs.fields).not.toContain(KIND);
+    });
+
+    // PoC: GenAI usage attrs are temporarily in `ecsOnlyOptionalFields` so the waterfall
+    // (which hardcodes ecsOnly=true) can render token badges. Skip asserting that until we
+    // revisit ecsOnly vs optionalFields for OTel attributes — see comment on ecsOnlyOptionalFields.
+    it.skip('includes GenAI token fields when ecsOnly=true', async () => {
+      (mockApmEventClient.search as jest.Mock).mockResolvedValueOnce(
+        makeSearchResponse([makeHit('span-1')], 1)
+      );
+
+      await getUnifiedTraceItemsPaginated({ ...defaultParams, ecsOnly: true });
+
+      const callArgs = (mockApmEventClient.search as jest.Mock).mock.calls[0][1];
+      expect(callArgs.fields).toContain(ATTRIBUTE_GEN_AI_USAGE_INPUT_TOKENS);
+      expect(callArgs.fields).toContain(ATTRIBUTE_GEN_AI_USAGE_OUTPUT_TOKENS);
     });
 
     it('includes OTel fields when ecsOnly=false', async () => {

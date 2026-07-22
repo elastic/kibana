@@ -12,6 +12,8 @@ import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
 import {
   AGENT_NAME,
   AT_TIMESTAMP,
+  ATTRIBUTE_GEN_AI_USAGE_INPUT_TOKENS,
+  ATTRIBUTE_GEN_AI_USAGE_OUTPUT_TOKENS,
   ATTRIBUTE_HTTP_SCHEME,
   ATTRIBUTE_HTTP_STATUS_CODE,
   DURATION,
@@ -71,6 +73,16 @@ export const ecsOnlyOptionalFields = asMutableArray([
   SPAN_COMPOSITE_COMPRESSION_STRATEGY,
   SPAN_DESTINATION_SERVICE_RESOURCE,
   SERVICE_ENVIRONMENT,
+  // PoC exception (token usage badges in the APM waterfall):
+  // These are OTel `attributes.*` fields and would normally live only in `optionalFields`
+  // next to `ATTRIBUTE_HTTP_*`. The unified waterfall fetcher currently hardcodes
+  // `ecsOnly: true`, so fields exclusive to `optionalFields` are never requested.
+  // Rather than flipping `ecsOnly` (query shape, processor-event filter, sort) for this
+  // PoC, we include the GenAI usage attrs here so they are returned with the default UI path.
+  // Follow-up: reconsider `ecsOnly` for the unified waterfall, or a narrower way to opt into
+  // specific OTel attributes without the full non-ECS query.
+  ATTRIBUTE_GEN_AI_USAGE_INPUT_TOKENS,
+  ATTRIBUTE_GEN_AI_USAGE_OUTPUT_TOKENS,
 ] as const);
 
 export const optionalFields = asMutableArray([
