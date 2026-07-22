@@ -898,4 +898,3 @@ export function getBinarySourceSettings(
 
   return config;
 }
-
