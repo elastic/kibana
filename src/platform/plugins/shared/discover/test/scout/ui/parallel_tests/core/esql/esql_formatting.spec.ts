@@ -70,9 +70,7 @@ spaceTest.describe(
           async () => {
             await unifiedFieldList.clickFieldListItemAdd('DistanceMiles');
             await discover.waitUntilTabIsLoaded();
-            await expect(
-              dataGrid.getCell(0, 'DistanceMiles').locator('.unifiedDataTable__cellValue')
-            ).toHaveText(EXPECTED_VALUE);
+            await expect(dataGrid.getCellValue(0, 'DistanceMiles')).toHaveText(EXPECTED_VALUE);
           }
         );
 
