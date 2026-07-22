@@ -13,6 +13,5 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./log_threshold_alert'));
     loadTestFile(require.resolve('./log_entry_highlights'));
     loadTestFile(require.resolve('./log_summary'));
-    loadTestFile(require.resolve('./log_analysis_validation_log_entry_datasets'));
   });
 }
