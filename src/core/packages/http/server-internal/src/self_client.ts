@@ -229,6 +229,7 @@ class InternalHttpSelfScopedClient implements HttpSelfScopedClient {
     addHeaders(headers, options.headers);
 
     headers.delete('cookie');
+    // Strip the internal-origin header from all self calls before optionally adding Core's marker below.
     headers.delete(X_ELASTIC_INTERNAL_ORIGIN_REQUEST);
     headers.set(KIBANA_VERSION_HEADER, this.params.kibanaVersion);
     headers.set(SELF_CALL_HEADER, 'true');

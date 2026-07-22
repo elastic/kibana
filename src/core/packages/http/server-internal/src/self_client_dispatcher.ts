@@ -33,6 +33,7 @@ export class SelfHttpDispatcherProvider {
     const usesLocalTarget =
       this.params.target === 'local' ||
       (this.params.target === 'auto' && !this.params.basePath.publicBaseUrl);
+    // Local self calls loop back to this listener, so trust its leaf certificate directly.
     const additionalCertificateAuthorities = usesLocalTarget
       ? [config.ssl.certificate, ...(config.ssl.certificateAuthorities ?? [])]
       : config.selfHttp.ssl.certificateAuthorities ?? [];

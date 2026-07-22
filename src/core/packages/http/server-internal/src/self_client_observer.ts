@@ -56,7 +56,7 @@ export const createSelfCallPreResponseHandler = (log: Logger): Lifecycle.Method 
   return (request: Request, responseToolkit: ResponseToolkit) => {
     const requestWithObservation = request as RequestWithObservation;
     const observation = requestWithObservation.app[SELF_CALL_OBSERVATION];
-    if (!observation) {
+    if (!observation || !request.response) {
       return responseToolkit.continue;
     }
 
