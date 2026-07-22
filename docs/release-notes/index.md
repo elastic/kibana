@@ -42,6 +42,8 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Set a resizable custom width for Agent Builder attachment canvas flyouts in full-screen view and overlay mode in the sidebar [#265200]({{kib-pull}}265200).
 * Limit which connectors an agent can use with optional `connector_ids`, so `@` autocomplete and connector search respect the agent's allowed set [#267333]({{kib-pull}}267333).
 * Show permitted system indices and aliases in Agent Builder index selection, including alerts, ML anomaly results, SLOs, the entity store, exception lists, SIEM signals, and {{stack-monitor-app}} [#265819]({{kib-pull}}265819).
+* Run several Agent Builder conversations at the same time, and track each conversation's status in the chats panel with **In progress**, **Awaiting your input**, **Unread**, and **Error** indicators [#267980]({{kib-pull}}267980) [#271689]({{kib-pull}}271689).
+* Route low-effort Agent Builder operations such as {{esql}} generation and conversation title generation to a configurable fast model, set per feature in **Feature settings**, with automatic fallback to the default model [#265520]({{kib-pull}}265520) [#274849]({{kib-pull}}274849) [#275607]({{kib-pull}}275607).
 
 **Alerting and cases**:
 * Snooze and unsnooze individual alerts with optional expiry or auto-unsnooze conditions [#264090]({{kib-pull}}264090).
