@@ -63,6 +63,7 @@ interface Dependencies {
   handler: RequestHandlerEnhanced<unknown, unknown, unknown, RouteMethod>;
   log: Logger;
   method: RouteMethod;
+  isDev: boolean;
 }
 
 export function buildRoute({
@@ -71,12 +72,23 @@ export function buildRoute({
   route,
   router,
   method,
+  isDev,
 }: Dependencies): InternalRouterRoute {
   route = prepareRouteConfigValidation(route);
-  // Defer schema construction to first request so that lazily-declared
-  // validate thunks (e.g. () => RouteValidator) are not materialized during
-  // plugin.setup(). once() ensures the cost is paid exactly once.
-  const getRouteSchemas = once(() => routeSchemasFromRouteConfig(route, method));
+  // In development, build schemas eagerly at registration time so config errors
+  // surface immediately at plugin.setup(). In production, defer to first request
+  // to avoid loading all schemas into memory upfront. once() ensures the cost
+  // is paid exactly once, even with multiple requests.
+  let getRouteSchemas: () => RouteValidator<unknown, unknown, unknown> | undefined;
+  if (isDev) {
+    // Eager path — build immediately, throw at registration if invalid
+    const routeSchemas = routeSchemasFromRouteConfig(route, method);
+    getRouteSchemas = () => routeSchemas;
+  } else {
+    // Deferred path (production) — schema construction on first request
+    getRouteSchemas = once(() => routeSchemasFromRouteConfig(route, method));
+  }
+
   return {
     handler: async (req) => {
       return await handle(req, {
@@ -85,6 +97,7 @@ export function buildRoute({
         method,
         route,
         router,
+        isDev,
         routeSchemas: getRouteSchemas(),
       });
     },
