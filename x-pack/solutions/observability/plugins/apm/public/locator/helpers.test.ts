@@ -259,6 +259,47 @@ describe('getPathForServiceDetail', () => {
       expect(query.get('offset')).toBe('expected_bounds');
       expect(query.get('anomalyThreshold')).toBe('major');
     });
+
+    it.each(['alerts', 'logs', 'metrics', 'traces', 'transactions', 'errors'] as const)(
+      'forwards comparisonEnabled and offset to the %s tab route',
+      (serviceOverviewTab) => {
+        const path = getPathForServiceDetail(
+          {
+            serviceName: 'svc',
+            serviceOverviewTab,
+            query: {
+              environment: 'prod' as Environment,
+              comparisonEnabled: true,
+              offset: 'expected_bounds',
+            },
+          },
+          defaultOptions
+        );
+        const { query } = splitPath(path);
+
+        expect(query.get('comparisonEnabled')).toBe('true');
+        expect(query.get('offset')).toBe('expected_bounds');
+      }
+    );
+
+    it.each(['alerts', 'logs', 'metrics', 'traces', 'transactions', 'errors'] as const)(
+      'does not forward anomalyThreshold to the %s tab route',
+      (serviceOverviewTab) => {
+        const path = getPathForServiceDetail(
+          {
+            serviceName: 'svc',
+            serviceOverviewTab,
+            query: {
+              environment: 'prod' as Environment,
+              anomalyThreshold: ML_ANOMALY_SEVERITY.CRITICAL,
+            },
+          },
+          defaultOptions
+        );
+
+        expect(splitPath(path).query.get('anomalyThreshold')).not.toBe('critical');
+      }
+    );
   });
 
   describe('query merging', () => {
