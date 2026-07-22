@@ -113,14 +113,19 @@ export class LensApp {
     await this.goBackToAppButton.click();
   }
 
+  getDiscardChangesModal() {
+    return this.discardChangesModal;
+  }
+
   async confirmDiscardChangesModal() {
     await this.discardChangesModal.waitFor({ state: 'visible' });
     await this.confirmModalConfirmButton.click();
+    await this.discardChangesModal.waitFor({ state: 'hidden' });
   }
 
   /**
    * Opens the Lens save modal, fills in the title, optionally selects
-   * a dashboard target, and confirms.
+   * a dashboard target, and confirms. Waits for the modal to close.
    */
   async save(
     title: string,
@@ -153,7 +158,7 @@ export class LensApp {
     }
 
     await this.confirmSaveButton.click();
-    await expect(this.saveModal).toBeHidden();
+    await this.saveModal.waitFor({ state: 'hidden' });
   }
 
   async configureXYDimensions(options?: {
@@ -215,6 +220,26 @@ export class LensApp {
   async closeDimensionEditor() {
     await this.closeDimensionEditorButton.click();
     await this.closeDimensionEditorButton.waitFor({ state: 'hidden' });
+  }
+
+  /** Removes all dimensions from the given panel, polling until none remain. */
+  async removeAllDimensions(dimensionTestSubj: string) {
+    const removeLocator = this.page.testSubj.locator(
+      `${dimensionTestSubj} > indexPattern-dimension-remove`
+    );
+    await expect
+      .poll(
+        async () => {
+          const buttons = await removeLocator.all();
+          if (buttons.length > 0) {
+            await buttons[0].hover();
+            await buttons[0].click();
+          }
+          return removeLocator.count();
+        },
+        { timeout: 30_000 }
+      )
+      .toBe(0);
   }
 
   /**

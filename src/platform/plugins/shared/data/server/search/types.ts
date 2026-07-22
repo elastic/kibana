@@ -53,7 +53,7 @@ export interface ISearchSetup {
     SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest,
     SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse
   >(
-    name: string,
+    name: string | symbol,
     strategy: ISearchStrategy<SearchStrategyRequest, SearchStrategyResponse>
   ) => void;
 
