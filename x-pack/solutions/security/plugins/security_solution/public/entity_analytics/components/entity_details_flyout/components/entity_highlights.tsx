@@ -362,6 +362,7 @@ export const EntityHighlightsAccordion: React.FC<{
             showAnonymizedValues={showAnonymizedValues}
             generatedAt={assistantResult?.generatedAt ?? null}
             generatedBy={assistantResult?.generatedBy ?? ''}
+            authorProfileUid={assistantResult?.authorProfileUid}
             stalenessReasons={stalenessReasons}
             onRefresh={fetchEntityHighlights}
             canRegenerate={canGenerate}
