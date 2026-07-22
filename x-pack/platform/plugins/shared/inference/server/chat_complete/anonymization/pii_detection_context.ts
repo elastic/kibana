@@ -6,19 +6,9 @@
  */
 
 import type { AnonymizationRule } from '@kbn/inference-common';
+import type { DetectedPiiEntity, PiiTextRecord } from '../../workflow_anonymization_capabilities';
 
-export interface PiiTextRecord {
-  id: string;
-  text: string;
-}
-
-export interface DetectedPiiEntity {
-  recordId: string;
-  start: number;
-  end: number;
-  value: string;
-  entityClass: string;
-}
+export type { DetectedPiiEntity, PiiTextRecord };
 
 export interface PiiDetectionContext {
   detectEntities(options: {
