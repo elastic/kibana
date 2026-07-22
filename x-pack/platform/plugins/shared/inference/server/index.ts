@@ -21,6 +21,16 @@ import type {
 
 export type { InferenceServerSetup, InferenceServerStart };
 export type { InferenceEndpoint } from './util/get_inference_endpoints';
+export {
+  INFERENCE_PROCEED_CAPABILITY_ID,
+  PII_TOKENIZATION_CAPABILITY_ID,
+  type DetectedPiiEntity,
+  type InferenceProceedCapability,
+  type InferenceProceedInput,
+  type InferenceTokenMapEntry,
+  type PiiTextRecord,
+  type PiiTokenizationContext,
+} from './workflow_anonymization_capabilities';
 
 export {
   naturalLanguageToEsql,
