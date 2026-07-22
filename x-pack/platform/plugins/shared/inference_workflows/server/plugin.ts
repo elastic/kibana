@@ -15,6 +15,7 @@ import { aroundCompletionTriggerDefinition } from '../common/workflow_anonymizat
 import { aiPiiStepDefinition } from './workflow_anonymization/ai_pii_step';
 import { callSiteProceedStepDefinition } from './workflow_anonymization/call_site_proceed_step';
 import { piiRestoreStepDefinition } from './workflow_anonymization/pii_restore_step';
+import { createWorkflowAnonymizationProvider } from './workflow_anonymization/create_workflow_anonymization_provider';
 
 export class InferenceWorkflowsPlugin
   implements Plugin<{}, {}, InferenceWorkflowsSetupDeps, InferenceWorkflowsStartDeps>
@@ -27,6 +28,9 @@ export class InferenceWorkflowsPlugin
     deps.workflowsExtensions.registerStepDefinition(callSiteProceedStepDefinition);
     deps.workflowsExtensions.registerStepDefinition(piiRestoreStepDefinition);
     deps.workflowsExtensions.registerTriggerDefinition(aroundCompletionTriggerDefinition);
+    deps.inference.registerWorkflowAnonymizationProvider(
+      createWorkflowAnonymizationProvider({ management: deps.workflowsManagement.management })
+    );
 
     if (deps.searchInferenceEndpoints) {
       registerInferenceFeatures(deps.searchInferenceEndpoints);

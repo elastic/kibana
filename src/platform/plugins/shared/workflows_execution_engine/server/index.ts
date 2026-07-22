@@ -28,6 +28,7 @@ export type {
   WorkflowsExecutionEnginePluginSetup,
   WorkflowsExecutionEnginePluginStart,
   ExecuteWorkflowOptions,
+  ExecuteWorkflowResponse,
   WorkflowExecutionMode,
 } from './types';
 
@@ -43,6 +44,10 @@ export type {
 export type { IWorkflowEventLoggerService } from './workflow_event_logger';
 
 export { resolveWorkflowEventsModeFromOn } from './trigger_events/lib/resolve_workflow_events_mode_from_on';
+export {
+  classifyWorkflowTriggerMatch,
+  type WorkflowTriggerMatchOutcome,
+} from './trigger_events/filter_workflows_by_trigger_condition';
 
 export type {
   SearchTriggerEventLogHit,

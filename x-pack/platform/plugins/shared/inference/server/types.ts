@@ -36,8 +36,7 @@ import type {
   AnonymizationPluginSetup,
 } from '@kbn/anonymization-plugin/server';
 import type { InferenceEndpoint } from './util/get_inference_endpoints';
-
-/* eslint-disable @typescript-eslint/no-empty-interface*/
+import type { WorkflowAnonymizationProvider } from './workflow_anonymization_provider';
 
 export interface InferenceSetupDependencies {
   actions: ActionsPluginSetup;
@@ -52,7 +51,9 @@ export interface InferenceStartDependencies {
 /**
  * Setup contract of the inference plugin.
  */
-export interface InferenceServerSetup {}
+export interface InferenceServerSetup {
+  registerWorkflowAnonymizationProvider(provider: WorkflowAnonymizationProvider): void;
+}
 
 /**
  * Options to create an inference client using the {@link InferenceServerStart.getClient} API.
