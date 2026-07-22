@@ -8,6 +8,8 @@ on:
   issues:
     types: [labeled]
 
+permissions: {}
+
 env:
   CONTEXT_RESEARCH_PROJECT_ID: 'PVT_kwDOAGc3Zs4BbAmj'
   WORKSTREAM_FIELD_ID: 'PVTSSF_lADOAGc3Zs4BbAmjzhWPSno'
