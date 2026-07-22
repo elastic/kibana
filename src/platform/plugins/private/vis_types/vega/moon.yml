@@ -51,6 +51,8 @@ dependsOn:
   - '@kbn/visualizations-common'
   - '@kbn/es-types'
   - '@kbn/esql-utils'
+  - '@kbn/presentation-util'
+  - '@kbn/presentation-publishing-schemas'
 tags:
   - plugin
   - prod
@@ -61,6 +63,7 @@ fileGroups:
   src:
     - server/**/*
     - public/**/*
+    - common/**/*
     - '*.ts'
     - public/test_utils/vega_map_test.json
     - public/test_utils/vegalite_graph.json

@@ -1,0 +1,206 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import React from 'react';
+import { render, waitFor } from '@testing-library/react';
+import { coreMock } from '@kbn/core/public/mocks';
+import { initializeDrilldownsManager } from '@kbn/embeddable-plugin/public/drilldowns/drilldowns_manager';
+import type { ExpressionRendererParams } from '@kbn/expressions-plugin/public';
+import { openLazyFlyout } from '@kbn/presentation-util';
+import { BehaviorSubject } from 'rxjs';
+import { VEGA_EMBEDDABLE_TYPE, VEGA_EMBEDDABLE_SUPPORTED_TRIGGERS } from '../../common/constants';
+import { vegaEmbeddableFactory, type VegaEmbeddableApi } from './vega_embeddable';
+
+jest.mock('@kbn/presentation-util', () => ({ openLazyFlyout: jest.fn() }));
+
+const mockOpenLazyFlyout = jest.mocked(openLazyFlyout);
+
+describe('vegaEmbeddableFactory', () => {
+  const query$ = new BehaviorSubject({ language: 'kuery', query: '' });
+  const filters$ = new BehaviorSubject([]);
+  const timeRange$ = new BehaviorSubject({ from: 'now-15m', to: 'now', mode: 'relative' as const });
+  const reload$ = new BehaviorSubject<void>(undefined);
+  const removePanel = jest.fn();
+  const parentApi = {
+    addNewPanel: jest.fn(),
+    children$: new BehaviorSubject({}),
+    filters$,
+    query$,
+    reload$,
+    removePanel,
+    replacePanel: jest.fn(),
+    timeRange$,
+  };
+  const executeTriggerActions = jest.fn();
+  const inspector = { isAvailable: jest.fn(), open: jest.fn() };
+  let latestRendererParams: ExpressionRendererParams | undefined;
+
+  const buildEmbeddable = async () => {
+    latestRendererParams = undefined;
+    const factory = vegaEmbeddableFactory(coreMock.createStart(), {
+      expressions: {
+        ReactExpressionRenderer: (params: ExpressionRendererParams): null => {
+          latestRendererParams = params;
+          return null;
+        },
+      },
+      uiActions: { executeTriggerActions },
+      inspector,
+    });
+    const uuid = 'vega-panel';
+
+    return factory.buildEmbeddable({
+      initializeDrilldownsManager,
+      initialState: { spec: '{ mark: point }', title: 'Initial title' },
+      finalizeApi: (api) => ({
+        ...api,
+        uuid,
+        type: VEGA_EMBEDDABLE_TYPE,
+        parentApi,
+        phase$: new BehaviorSubject(undefined),
+      }),
+      parentApi,
+      uuid,
+    });
+  };
+
+  beforeEach(() => {
+    query$.next({ language: 'kuery', query: '' });
+    filters$.next([]);
+    timeRange$.next({ from: 'now-15m', to: 'now', mode: 'relative' });
+    executeTriggerActions.mockReset();
+    inspector.isAvailable.mockReset();
+    inspector.open.mockReset();
+    mockOpenLazyFlyout.mockReset();
+    removePanel.mockReset();
+  });
+
+  it('serializes and applies its state', async () => {
+    const { api } = await buildEmbeddable();
+
+    api.applySerializedState({
+      spec: '{ mark: bar }',
+      title: 'Updated title',
+      time_range: {
+        from: '2025-01-01T00:00:00.000Z',
+        to: '2025-01-02T00:00:00.000Z',
+        mode: 'absolute',
+      },
+    });
+
+    expect(api.serializeState()).toEqual(
+      expect.objectContaining({
+        spec: '{ mark: bar }',
+        title: 'Updated title',
+        time_range: {
+          from: '2025-01-01T00:00:00.000Z',
+          to: '2025-01-02T00:00:00.000Z',
+          mode: 'absolute',
+        },
+      })
+    );
+  });
+
+  it('rerenders with refreshed Dashboard query, filters, and time range and cancels superseded requests', async () => {
+    const { api, Component } = await buildEmbeddable();
+    const view = render(<Component />);
+
+    await waitFor(() => expect(latestRendererParams).toBeDefined());
+    const initialAbortController = latestRendererParams?.abortController;
+    query$.next({ language: 'kuery', query: 'response: 200' });
+
+    await waitFor(() => {
+      expect(latestRendererParams?.searchContext?.query).toEqual({
+        language: 'kuery',
+        query: 'response: 200',
+      });
+    });
+    expect(initialAbortController?.signal.aborted).toBe(true);
+
+    filters$.next([{ meta: { alias: 'status filter' }, query: { match: { status: 200 } } }]);
+    await waitFor(() => {
+      expect(latestRendererParams?.searchContext?.filters).toEqual([
+        { meta: { alias: 'status filter' }, query: { match: { status: 200 } } },
+      ]);
+    });
+
+    timeRange$.next({ from: 'now-1h', to: 'now', mode: 'relative' });
+    await waitFor(() => {
+      expect(latestRendererParams?.searchContext?.timeRange).toEqual({
+        from: 'now-1h',
+        to: 'now',
+        mode: 'relative',
+      });
+    });
+
+    view.unmount();
+    expect(latestRendererParams?.abortController?.signal.aborted).toBe(true);
+    expect(api.rendered$.getValue()).toBe(false);
+  });
+
+  it('publishes render completion, opens the Vega inspector, and routes filter events', async () => {
+    const { api, Component } = await buildEmbeddable();
+    render(<Component />);
+
+    await waitFor(() => expect(latestRendererParams).toBeDefined());
+    latestRendererParams?.onRender$?.(1);
+    expect(api.rendered$.getValue()).toBe(true);
+
+    inspector.isAvailable.mockReturnValue(true);
+    api.openInspector();
+    expect(inspector.open).toHaveBeenCalledWith(expect.anything(), { title: 'Initial title' });
+
+    await latestRendererParams?.onEvent?.({
+      name: 'applyFilter',
+      data: { filters: [{ meta: {}, query: { match_all: {} } }] },
+    });
+    expect(api.supportedTriggers()).toEqual(VEGA_EMBEDDABLE_SUPPORTED_TRIGGERS);
+    expect(executeTriggerActions).toHaveBeenCalledWith(VEGA_EMBEDDABLE_SUPPORTED_TRIGGERS[0], {
+      embeddable: api as VegaEmbeddableApi,
+      filters: [{ meta: {}, query: { match_all: {} } }],
+    });
+  });
+
+  it('restores the original spec when editing is cancelled', async () => {
+    const { api } = await buildEmbeddable();
+    const closeFlyout = jest.fn();
+
+    api.onEdit();
+    const flyout = mockOpenLazyFlyout.mock.calls[0][0];
+    const content = (await flyout.loadContent({
+      ariaLabelledBy: 'vega-flyout-title',
+      closeFlyout,
+    })) as React.ReactElement<{
+      onCancel: () => void;
+      onChange: (spec: string) => void;
+    }>;
+
+    content.props.onChange('{ mark: bar }');
+    expect(api.serializeState().spec).toBe('{ mark: bar }');
+    content.props.onCancel();
+    expect(api.serializeState().spec).toBe('{ mark: point }');
+    expect(closeFlyout).toHaveBeenCalledTimes(1);
+  });
+
+  it('keeps the edited spec when saving', async () => {
+    const { api } = await buildEmbeddable();
+    const closeFlyout = jest.fn();
+
+    api.onEdit();
+    const flyout = mockOpenLazyFlyout.mock.calls[0][0];
+    const content = (await flyout.loadContent({
+      ariaLabelledBy: 'vega-flyout-title',
+      closeFlyout,
+    })) as React.ReactElement<{ onSave: (spec: string) => void }>;
+
+    content.props.onSave('{ mark: bar }');
+
+    expect(api.serializeState().spec).toBe('{ mark: bar }');
+  });
+});

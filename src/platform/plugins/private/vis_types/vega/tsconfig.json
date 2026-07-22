@@ -49,6 +49,8 @@
     "@kbn/visualizations-common",
     "@kbn/es-types",
     "@kbn/esql-utils",
+    "@kbn/presentation-util",
+    "@kbn/presentation-publishing-schemas",
   ],
   "exclude": [
     "target/**/*",

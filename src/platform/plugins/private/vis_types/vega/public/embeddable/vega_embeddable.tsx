@@ -84,9 +84,15 @@ export interface VegaEmbeddableApi
   openInspector: () => unknown;
 }
 
+interface VegaEmbeddableDependencies {
+  expressions: Pick<VegaPluginStartDependencies['expressions'], 'ReactExpressionRenderer'>;
+  inspector: Pick<VegaPluginStartDependencies['inspector'], 'isAvailable' | 'open'>;
+  uiActions: Pick<VegaPluginStartDependencies['uiActions'], 'executeTriggerActions'>;
+}
+
 export const vegaEmbeddableFactory = (
   core: CoreStart,
-  deps: VegaPluginStartDependencies
+  deps: VegaEmbeddableDependencies
 ): EmbeddablePublicDefinition<VegaByValueState, VegaEmbeddableApi> => ({
   type: VEGA_EMBEDDABLE_TYPE,
   buildEmbeddable: async ({
@@ -174,6 +180,20 @@ export const vegaEmbeddableFactory = (
       isEditingEnabled: () => true,
       onEdit: ({ isNewPanel = false } = {}) => {
         const initialSpec = spec$.getValue();
+        let cancelled = false;
+        const save = (spec: string) => {
+          cancelled = true;
+          spec$.next(spec);
+        };
+        const cancel = () => {
+          if (cancelled) return;
+          cancelled = true;
+          if (isNewPanel && apiIsPresentationContainer(parentApi)) {
+            parentApi.removePanel(api.uuid);
+          } else {
+            spec$.next(initialSpec);
+          }
+        };
         openLazyFlyout({
           core,
           parentApi,
@@ -190,14 +210,10 @@ export const vegaEmbeddableFactory = (
                 initialSpec={initialSpec}
                 onChange={(spec) => spec$.next(spec)}
                 onCancel={() => {
-                  if (isNewPanel && apiIsPresentationContainer(parentApi)) {
-                    parentApi.removePanel(api.uuid);
-                  } else {
-                    spec$.next(initialSpec);
-                  }
+                  cancel();
                   closeFlyout();
                 }}
-                onSave={() => undefined}
+                onSave={save}
               />
             );
           },

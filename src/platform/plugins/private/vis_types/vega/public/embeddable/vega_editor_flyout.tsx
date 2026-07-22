@@ -19,6 +19,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 import { VegaSpecEditor } from '../components/vega_vis_editor';
 
 const bodyCss = css({
@@ -71,18 +72,23 @@ export const VegaEditorFlyout = ({
         <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty flush="left" onClick={onCancel ?? closeFlyout}>
-              Cancel
+              {i18n.translate('visTypeVega.dashboard.cancelButtonLabel', {
+                defaultMessage: 'Cancel',
+              })}
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
+              data-test-subj="vegaEditorFlyoutSaveButton"
               fill
               onClick={() => {
                 onSave(spec);
                 closeFlyout();
               }}
             >
-              Save
+              {i18n.translate('visTypeVega.dashboard.saveButtonLabel', {
+                defaultMessage: 'Save',
+              })}
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
