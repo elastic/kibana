@@ -9,8 +9,6 @@ import { z } from '@kbn/zod/v4';
 import {
   OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED,
   OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_INTERVAL_HOURS,
-  OBSERVABILITY_STREAMS_CONTINUOUS_KI_ONBOARD_ALL_ELIGIBLE,
-  OBSERVABILITY_STREAMS_CONTINUOUS_KI_INCLUDED_STREAM_PATTERNS,
   OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_INDEX_PATTERNS,
 } from '@kbn/management-settings-ids';
@@ -31,7 +29,6 @@ import { FeatureNotEnabledError } from '../../../../lib/errors/feature_not_enabl
 import {
   classifyStreams,
   filterEligibleStreams,
-  parseStreamPatterns,
   type StreamCandidate,
   type StreamClassificationResult,
 } from './classify_streams';
@@ -48,8 +45,6 @@ export interface EligibleStreamsResponse {
   settings: {
     enabled: boolean;
     intervalHours: number;
-    onboardAll: boolean;
-    includePatterns: string[];
   };
   connectorId: string;
   timeRange: {
@@ -120,21 +115,9 @@ const eligibleStreamsRoute = createServerRoute({
       throw new StatusError('Continuous KI extraction is disabled', 400);
     }
 
-    const [intervalHoursSetting, onboardAllSetting, includedStreamPatterns] = await Promise.all([
-      globalUiSettingsClient.get<number>(
-        OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_INTERVAL_HOURS
-      ),
-      globalUiSettingsClient.get<boolean>(OBSERVABILITY_STREAMS_CONTINUOUS_KI_ONBOARD_ALL_ELIGIBLE),
-      globalUiSettingsClient.get<string>(
-        OBSERVABILITY_STREAMS_CONTINUOUS_KI_INCLUDED_STREAM_PATTERNS
-      ),
-    ]);
-
-    // Default to onboarding all eligible when the setting was never written (e.g. a
-    // cluster upgraded before this setting existed), matching the uiSetting default
-    // and preserving today's behaviour for existing setups.
-    const onboardAll = onboardAllSetting ?? true;
-    const includePatterns = parseStreamPatterns(includedStreamPatterns);
+    const intervalHoursSetting = await globalUiSettingsClient.get<number>(
+      OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_INTERVAL_HOURS
+    );
 
     const maxStreams = query.maxScheduledStreams ?? MAX_SCHEDULED_STREAMS;
     const lookbackHours = query.lookbackHours ?? DEFAULT_LOOKBACK_HOURS;
@@ -158,8 +141,6 @@ const eligibleStreamsRoute = createServerRoute({
     const eligibleStreams = filterEligibleStreams({
       allStreams,
       isQueryStreamsEnabled,
-      onboardAll,
-      includePatterns,
       indexPatterns,
     });
 
@@ -188,8 +169,6 @@ const eligibleStreamsRoute = createServerRoute({
       settings: {
         enabled,
         intervalHours: intervalHoursSetting ?? DEFAULT_EXTRACTION_INTERVAL_HOURS,
-        onboardAll,
-        includePatterns,
       },
       connectorId,
       timeRange: {

@@ -6,12 +6,9 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
 import {
   OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED,
   OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_INTERVAL_HOURS,
-  OBSERVABILITY_STREAMS_CONTINUOUS_KI_ONBOARD_ALL_ELIGIBLE,
-  OBSERVABILITY_STREAMS_CONTINUOUS_KI_INCLUDED_STREAM_PATTERNS,
 } from '@kbn/management-settings-ids';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
@@ -25,8 +22,6 @@ const putContinuousKiExtractionSettingsBodySchema = z.object({
   continuousKiExtraction: z.object({
     enabled: z.boolean().optional(),
     intervalHours: z.number().min(MIN_EXTRACTION_INTERVAL_HOURS).optional(),
-    onboardAllEligible: z.boolean().optional(),
-    includedStreamPatterns: z.string().max(MAX_TEXT_LENGTH).optional(),
   }),
 });
 
@@ -36,7 +31,7 @@ export const putContinuousKIExtractionSettingsRoute = createServerRoute({
     access: 'internal',
     summary: 'Update continuous KI extraction settings',
     description:
-      'Updates continuous KI extraction settings (enabled, interval, stream selection) and ensures the extraction workflow is created or updated accordingly.',
+      'Updates continuous KI extraction settings (enabled, interval) and ensures the extraction workflow is created or updated accordingly.',
   },
   security: {
     authz: {
@@ -75,14 +70,6 @@ export const putContinuousKIExtractionSettingsRoute = createServerRoute({
       updates[OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_INTERVAL_HOURS] =
         continuousKiExtraction.intervalHours;
     }
-    if (continuousKiExtraction.onboardAllEligible !== undefined) {
-      updates[OBSERVABILITY_STREAMS_CONTINUOUS_KI_ONBOARD_ALL_ELIGIBLE] =
-        continuousKiExtraction.onboardAllEligible;
-    }
-    if (continuousKiExtraction.includedStreamPatterns !== undefined) {
-      updates[OBSERVABILITY_STREAMS_CONTINUOUS_KI_INCLUDED_STREAM_PATTERNS] =
-        continuousKiExtraction.includedStreamPatterns;
-    }
 
     const previousValues: Record<string, boolean | number | string> = {};
     const keys = Object.keys(updates);
@@ -95,8 +82,8 @@ export const putContinuousKIExtractionSettingsRoute = createServerRoute({
     }
 
     // Only reconcile the workflow on an actual enabled-state transition so the
-    // legacy and managed workflows never run at the same time. Interval and
-    // stream-selection changes are picked up by the running workflow at execution time.
+    // legacy and managed workflows never run at the same time. Interval changes are
+    // picked up by the running workflow at execution time.
     const previousEnabled = allSettings[
       OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED
     ] as boolean;

@@ -13,6 +13,7 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
+  EuiConfirmModal,
   EuiFieldNumber,
   EuiFlexGroup,
   EuiFlexItem,
@@ -24,13 +25,15 @@ import {
   EuiSwitch,
   EuiText,
   EuiTextArea,
+  EuiTextColor,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
+  OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_INDEX_PATTERNS,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_TUNING_CONFIG,
 } from '@kbn/management-settings-ids';
-import { DEFAULT_INDEX_PATTERNS } from '@kbn/streams-schema';
+import { DEFAULT_INDEX_PATTERNS, parseIndexPatterns } from '@kbn/streams-schema';
 import {
   DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG,
   type SignificantEventsTuningConfig,
@@ -52,13 +55,9 @@ import { useModelSettingsUrl } from '../../../../../hooks/use_model_settings_url
 import { useStreamsPrivileges } from '../../../../../hooks/use_streams_privileges';
 import { getFormattedError } from '../../../../../util/errors';
 import { useFetchStreams } from '../../hooks/use_fetch_streams';
-import {
-  findUnmatchedIncludePatterns,
-  isSupportedStream,
-  parseIncludedStreamPatterns,
-} from './included_streams_validation';
 import { useContinuousExtractionSettings } from './use_continuous_extraction_settings';
 import { useScheduledDiscoverySettings } from './use_scheduled_discovery_settings';
+import { summarizeIndexPatternsMatch } from './index_patterns_feedback';
 import {
   SignificantEventsTuningConfigEditor,
   configToAnnotatedYaml,
@@ -104,6 +103,22 @@ export function SettingsTab() {
   );
   const [indexPatterns, setIndexPatterns] = useState<string>(savedIndexPatterns);
 
+  const isQueryStreamsEnabled = useMemo(
+    () => core.settings.client.get<boolean>(OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS, false),
+    [core.settings.client]
+  );
+
+  const { data: streamsData } = useFetchStreams();
+  const indexPatternsMatch = useMemo(() => {
+    if (!streamsData) {
+      return undefined;
+    }
+    return summarizeIndexPatternsMatch(
+      parseIndexPatterns(indexPatterns),
+      streamsData.streams.map((item) => item.stream)
+    );
+  }, [indexPatterns, streamsData]);
+
   const continuousExtraction = useContinuousExtractionSettings({
     globalClient: core.settings.globalClient,
     http: core.http,
@@ -112,10 +127,6 @@ export function SettingsTab() {
     client: core.settings.client,
     http: core.http,
   });
-
-  // Powers include-pattern validation: warn before saving a pattern that matches
-  // no onboardable stream. Only fetched to validate; the list itself isn't shown.
-  const { data: streamsData } = useFetchStreams();
 
   const savedConfigYaml = useMemo(() => {
     try {
@@ -140,6 +151,7 @@ export function SettingsTab() {
   const [savedConfigYamlState, setSavedConfigYamlState] = useState<string>(savedConfigYaml);
 
   const [isSaving, setIsSaving] = useState(false);
+  const [isConfirmingZeroMatch, setIsConfirmingZeroMatch] = useState(false);
 
   const hasTuningConfigChanges = draftConfigYaml !== savedConfigYamlState;
   const hasChanges =
@@ -156,55 +168,17 @@ export function SettingsTab() {
     setParsedTuningConfig(null);
   }, [savedIndexPatterns, savedConfigYamlState, continuousExtraction, scheduledDiscovery]);
 
-  const handleSave = useCallback(async () => {
-    // Validate include patterns before persisting anything. handleSave writes to
-    // several settings stores in sequence; bailing out mid-way (after the index
-    // patterns are already saved) would leave a confusing partial save. The
-    // server PUT route stores whatever it's given and does not reject unmatched
-    // patterns, so this client-side guard is the only thing standing between the
-    // user and a config that silently onboards nothing.
-    if (continuousExtraction.hasChanged) {
-      const { enabled, onboardAllEligible, includedStreamPatterns } = continuousExtraction.draft;
-      // Only run when the stream list has loaded; if the fetch is pending or
-      // failed, skip the check rather than falsely flagging every pattern as
-      // unmatched.
-      if (enabled && !onboardAllEligible && streamsData?.streams) {
-        const patterns = parseIncludedStreamPatterns(includedStreamPatterns);
-        if (patterns.length > 0) {
-          const supportedStreamNames = streamsData.streams
-            .map(({ stream }) => stream)
-            .filter(isSupportedStream)
-            .map((stream) => stream.name);
-          const unmatched = findUnmatchedIncludePatterns(patterns, supportedStreamNames);
-          if (unmatched.length > 0) {
-            core.notifications.toasts.addDanger({
-              title: i18n.translate(
-                'xpack.streams.significantEventsDiscovery.settings.includedStreamPatternsNoMatchTitle',
-                { defaultMessage: 'No streams match the included patterns' }
-              ),
-              text: i18n.translate(
-                'xpack.streams.significantEventsDiscovery.settings.includedStreamPatternsNoMatchText',
-                {
-                  defaultMessage:
-                    'These patterns match no onboardable stream: {patterns}. Update them or enable "Onboard all eligible streams".',
-                  values: { patterns: unmatched.join(', ') },
-                }
-              ),
-            });
-            return;
-          }
-        }
-      }
-    }
-
+  const performSave = useCallback(async () => {
     setIsSaving(true);
     try {
-      if (indexPatterns !== savedIndexPatterns) {
+      const normalizedIndexPatterns = parseIndexPatterns(indexPatterns).join(', ');
+      setIndexPatterns(normalizedIndexPatterns);
+      if (normalizedIndexPatterns !== savedIndexPatterns) {
         await core.settings.client.set(
           OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_INDEX_PATTERNS,
-          indexPatterns
+          normalizedIndexPatterns
         );
-        setSavedIndexPatterns(indexPatterns);
+        setSavedIndexPatterns(normalizedIndexPatterns);
       }
 
       if (continuousExtraction.hasChanged) {
@@ -244,10 +218,36 @@ export function SettingsTab() {
     savedIndexPatterns,
     continuousExtraction,
     scheduledDiscovery,
-    streamsData,
     hasTuningConfigChanges,
     parsedTuningConfig,
   ]);
+
+  const handleSave = useCallback(() => {
+    // Index patterns are forward-looking (they may match streams that don't
+    // exist yet), so zero current matches is a confirmable nudge, not a hard
+    // block. Only prompt when the patterns actually changed and the stream list
+    // has loaded, so a failed/pending fetch can't wrongly block a valid save.
+    // Query streams are always eligible independent of patterns, so don't prompt
+    // when enabled query streams mean something will still be onboarded.
+    const patternsChanged = parseIndexPatterns(indexPatterns).join(', ') !== savedIndexPatterns;
+    const queryStreamsEligible =
+      isQueryStreamsEnabled && (indexPatternsMatch?.queryStreamCount ?? 0) > 0;
+    if (
+      patternsChanged &&
+      indexPatternsMatch &&
+      indexPatternsMatch.matchedStreamCount === 0 &&
+      !queryStreamsEligible
+    ) {
+      setIsConfirmingZeroMatch(true);
+      return;
+    }
+    void performSave();
+  }, [indexPatterns, savedIndexPatterns, indexPatternsMatch, isQueryStreamsEnabled, performSave]);
+
+  const handleConfirmZeroMatch = useCallback(() => {
+    setIsConfirmingZeroMatch(false);
+    void performSave();
+  }, [performSave]);
 
   return (
     <>
@@ -641,6 +641,39 @@ export function SettingsTab() {
                     disabled={!canEditSettings}
                   />
                 </EuiFormRow>
+                {indexPatternsMatch && (
+                  <EuiText size="xs" data-test-subj="streams-settings-index-patterns-feedback">
+                    {indexPatternsMatch.matchedStreamCount > 0 && (
+                      <p>
+                        {i18n.translate(
+                          'xpack.streams.significantEventsDiscovery.settings.indexPatternsMatchCount',
+                          {
+                            defaultMessage:
+                              'Matches {count, plural, one {# stream} other {# streams}}.',
+                            values: { count: indexPatternsMatch.matchedStreamCount },
+                          }
+                        )}
+                      </p>
+                    )}
+                    {indexPatternsMatch.unmatchedPatterns.length > 0 && (
+                      <p>
+                        <EuiTextColor color="warning">
+                          {i18n.translate(
+                            'xpack.streams.significantEventsDiscovery.settings.indexPatternsNoMatch',
+                            {
+                              defaultMessage:
+                                '{count, plural, one {# pattern matches} other {# patterns match}} no current streams: {patterns}',
+                              values: {
+                                count: indexPatternsMatch.unmatchedPatterns.length,
+                                patterns: indexPatternsMatch.unmatchedPatterns.join(', '),
+                              },
+                            }
+                          )}
+                        </EuiTextColor>
+                      </p>
+                    )}
+                  </EuiText>
+                )}
               </EuiForm>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -743,6 +776,33 @@ export function SettingsTab() {
                 </EuiFormRow>
                 {continuousExtraction.draft.enabled && (
                   <>
+                    <EuiFormRow>
+                      <EuiText color="subdued" size="xs">
+                        <p>
+                          {i18n.translate(
+                            'xpack.streams.significantEventsDiscovery.settings.continuousKiOnboardingScopeHelp',
+                            {
+                              defaultMessage:
+                                'Onboards the streams matching your index patterns in the Data sources section above.',
+                            }
+                          )}
+                        </p>
+                        {isQueryStreamsEnabled &&
+                          indexPatternsMatch &&
+                          indexPatternsMatch.queryStreamCount > 0 && (
+                            <p data-test-subj="streams-settings-onboarding-query-streams-note">
+                              {i18n.translate(
+                                'xpack.streams.significantEventsDiscovery.settings.continuousKiOnboardingQueryStreamsNote',
+                                {
+                                  defaultMessage:
+                                    'Also onboards {count, plural, one {# query stream} other {# query streams}}, which are always eligible regardless of index patterns.',
+                                  values: { count: indexPatternsMatch.queryStreamCount },
+                                }
+                              )}
+                            </p>
+                          )}
+                      </EuiText>
+                    </EuiFormRow>
                     <EuiFormRow
                       label={i18n.translate(
                         'xpack.streams.significantEventsDiscovery.settings.onboardingIntervalLabel',
@@ -772,63 +832,6 @@ export function SettingsTab() {
                         disabled={!canEditSettings}
                       />
                     </EuiFormRow>
-                    <EuiFormRow
-                      helpText={i18n.translate(
-                        'xpack.streams.significantEventsDiscovery.settings.onboardAllEligibleHelp',
-                        {
-                          defaultMessage:
-                            'When on, every eligible managed stream is onboarded automatically. Turn off to onboard only the streams you list below.',
-                        }
-                      )}
-                    >
-                      <EuiSwitch
-                        data-test-subj="streams-settings-onboard-all-eligible-toggle"
-                        label={i18n.translate(
-                          'xpack.streams.significantEventsDiscovery.settings.onboardAllEligibleLabel',
-                          { defaultMessage: 'Onboard all eligible streams' }
-                        )}
-                        checked={continuousExtraction.draft.onboardAllEligible}
-                        onChange={(e) =>
-                          continuousExtraction.setDraft((prev) => ({
-                            ...prev,
-                            onboardAllEligible: e.target.checked,
-                          }))
-                        }
-                        disabled={!canEditSettings}
-                      />
-                    </EuiFormRow>
-                    {!continuousExtraction.draft.onboardAllEligible && (
-                      <EuiFormRow
-                        label={i18n.translate(
-                          'xpack.streams.significantEventsDiscovery.settings.includedStreamPatternsLabel',
-                          { defaultMessage: 'Included streams' }
-                        )}
-                        helpText={i18n.translate(
-                          'xpack.streams.significantEventsDiscovery.settings.includedStreamPatternsHelp',
-                          {
-                            defaultMessage:
-                              'Comma-separated list of stream names or glob patterns (e.g. logs.app.*) to onboard during continuous onboarding. Leave empty to onboard nothing.',
-                          }
-                        )}
-                      >
-                        <EuiTextArea
-                          data-test-subj="streams-settings-included-streams"
-                          value={continuousExtraction.draft.includedStreamPatterns}
-                          onChange={(e) =>
-                            continuousExtraction.setDraft((prev) => ({
-                              ...prev,
-                              includedStreamPatterns: e.target.value,
-                            }))
-                          }
-                          disabled={!canEditSettings}
-                          placeholder={i18n.translate(
-                            'xpack.streams.significantEventsDiscovery.settings.includedStreamPatternsPlaceholder',
-                            { defaultMessage: 'logs.app.*' }
-                          )}
-                          rows={2}
-                        />
-                      </EuiFormRow>
-                    )}
                   </>
                 )}
               </EuiForm>
@@ -895,6 +898,37 @@ export function SettingsTab() {
       </EuiPanel>
 
       {isAppsEnabled && <AppsSection canEdit={canEditSettings} />}
+
+      {isConfirmingZeroMatch && (
+        <EuiConfirmModal
+          data-test-subj="streams-settings-zero-match-confirm"
+          title={i18n.translate(
+            'xpack.streams.significantEventsDiscovery.settings.zeroMatchConfirmTitle',
+            { defaultMessage: 'No streams match these patterns' }
+          )}
+          onCancel={() => setIsConfirmingZeroMatch(false)}
+          onConfirm={handleConfirmZeroMatch}
+          cancelButtonText={i18n.translate(
+            'xpack.streams.significantEventsDiscovery.settings.zeroMatchConfirmCancel',
+            { defaultMessage: 'Keep editing' }
+          )}
+          confirmButtonText={i18n.translate(
+            'xpack.streams.significantEventsDiscovery.settings.zeroMatchConfirmConfirm',
+            { defaultMessage: 'Save anyway' }
+          )}
+          buttonColor="warning"
+        >
+          <p>
+            {i18n.translate(
+              'xpack.streams.significantEventsDiscovery.settings.zeroMatchConfirmBody',
+              {
+                defaultMessage:
+                  'None of your index patterns match any current stream, so Significant Events will not detect or onboard anything yet. Patterns can match streams created later. Save anyway?',
+              }
+            )}
+          </p>
+        </EuiConfirmModal>
+      )}
 
       {hasChanges && (
         <EuiBottomBar data-test-subj="streams-significant-events-settings-bottom-bar">

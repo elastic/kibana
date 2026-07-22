@@ -7,7 +7,6 @@
 
 import { Streams, streamMatchesIndexPatterns } from '@kbn/streams-schema';
 import type { WorkflowExecutionListItemDto } from '@kbn/workflows';
-import { minimatch } from 'minimatch';
 import { isTerminalStatus } from '@kbn/workflows';
 import { parseStreamNameFromConcurrencyKey } from '../../../../lib/workflows/onboarding_workflow_client';
 
@@ -23,18 +22,8 @@ export interface StreamClassificationResult {
   unsupported: string[];
 }
 
-export const parseStreamPatterns = (raw: string | undefined): string[] =>
-  (raw ?? '')
-    .split(',')
-    .map((p) => p.trim())
-    .filter(Boolean);
-
-const matchesAnyPattern = (name: string, patterns: string[]): boolean =>
-  patterns.some((pattern) => minimatch(name, pattern));
-
 /**
  * A stream type supported by continuous knowledge indicator onboarding.
- * Exported so the settings UI can validate include patterns against the same rule.
  */
 export const isSupportedStream = (stream: Streams.all.Definition): boolean =>
   Streams.WiredStream.Definition.is(stream) ||
@@ -44,47 +33,26 @@ export const isSupportedStream = (stream: Streams.all.Definition): boolean =>
 /**
  * Selects the streams eligible for continuous knowledge indicator onboarding.
  *
- * When `onboardAll` is true (the default), every eligible stream is selected: query
- * streams gated by the query-streams feature flag, all other types selected when their
- * name matches the configured significant events index patterns.
- *
- * When `onboardAll` is false, selection is opt-in: only supported streams whose name
- * matches one of `includePatterns` are selected (query streams still gated by the flag).
- * An empty include list selects nothing.
+ * Query streams are selected when the query-streams feature flag is enabled; every
+ * other supported type is selected when its name matches the configured significant
+ * events index patterns. This mirrors the discovery Streams list, so onboarding and
+ * the list stay aligned by construction.
  */
 export const filterEligibleStreams = ({
   allStreams,
   isQueryStreamsEnabled,
-  onboardAll,
-  includePatterns,
   indexPatterns,
 }: {
   allStreams: Streams.all.Definition[];
   isQueryStreamsEnabled: boolean;
-  onboardAll: boolean;
-  includePatterns: string[];
   indexPatterns: string[];
-}): Streams.all.Definition[] => {
-  if (onboardAll) {
-    return allStreams.filter((stream) => {
-      if (Streams.QueryStream.Definition.is(stream)) {
-        return isQueryStreamsEnabled;
-      }
-      return streamMatchesIndexPatterns(stream.name, indexPatterns);
-    });
-  }
-
-  if (includePatterns.length === 0) {
-    return [];
-  }
-
-  return allStreams.filter((stream) => {
-    if (Streams.QueryStream.Definition.is(stream) && !isQueryStreamsEnabled) {
-      return false;
+}): Streams.all.Definition[] =>
+  allStreams.filter((stream) => {
+    if (Streams.QueryStream.Definition.is(stream)) {
+      return isQueryStreamsEnabled;
     }
-    return isSupportedStream(stream) && matchesAnyPattern(stream.name, includePatterns);
+    return streamMatchesIndexPatterns(stream.name, indexPatterns);
   });
-};
 
 /**
  * Classifies streams into buckets (already-running, candidates, up-to-date, unsupported)

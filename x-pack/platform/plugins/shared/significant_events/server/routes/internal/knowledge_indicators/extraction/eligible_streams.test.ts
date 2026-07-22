@@ -8,12 +8,7 @@
 import type { Streams } from '@kbn/streams-schema';
 import { ExecutionStatus } from '@kbn/workflows';
 import type { WorkflowExecutionListItemDto } from '@kbn/workflows';
-import {
-  classifyStreams,
-  filterEligibleStreams,
-  isSupportedStream,
-  parseStreamPatterns,
-} from './classify_streams';
+import { classifyStreams, filterEligibleStreams, isSupportedStream } from './classify_streams';
 
 const STUB_STREAM_FIELDS = {
   description: '',
@@ -64,24 +59,6 @@ const candidateNames = (result: ReturnType<typeof classifyStreams>) =>
 
 const streamNames = (streams: Streams.all.Definition[]) => streams.map((s) => s.name);
 
-describe('parseStreamPatterns', () => {
-  it('splits comma-separated patterns and trims whitespace', () => {
-    expect(parseStreamPatterns('logs.app.*, metrics.* , traces-*')).toEqual([
-      'logs.app.*',
-      'metrics.*',
-      'traces-*',
-    ]);
-  });
-
-  it('returns empty array for undefined', () => {
-    expect(parseStreamPatterns(undefined)).toEqual([]);
-  });
-
-  it('returns empty array for empty string', () => {
-    expect(parseStreamPatterns('')).toEqual([]);
-  });
-});
-
 describe('isSupportedStream', () => {
   it('accepts classic and query streams', () => {
     expect(isSupportedStream(makeStream('logs.app'))).toBe(true);
@@ -95,134 +72,64 @@ describe('isSupportedStream', () => {
 });
 
 describe('filterEligibleStreams', () => {
-  describe('onboardAll mode (default behaviour)', () => {
-    const baseArgs = {
-      onboardAll: true,
-      includePatterns: [] as string[],
-    };
-
-    it('includes non-query streams whose name matches the index patterns', () => {
-      const result = filterEligibleStreams({
-        ...baseArgs,
-        allStreams: [makeStream('logs.app'), makeStream('metrics.app')],
-        isQueryStreamsEnabled: false,
-        indexPatterns: ['logs.*'],
-      });
-
-      expect(streamNames(result)).toEqual(['logs.app']);
+  it('includes non-query streams whose name matches the index patterns', () => {
+    const result = filterEligibleStreams({
+      allStreams: [makeStream('logs.app'), makeStream('metrics.app')],
+      isQueryStreamsEnabled: false,
+      indexPatterns: ['logs.*'],
     });
 
-    it('excludes non-query streams that do not match any index pattern', () => {
-      const result = filterEligibleStreams({
-        ...baseArgs,
-        allStreams: [makeStream('traces.app')],
-        isQueryStreamsEnabled: true,
-        indexPatterns: ['logs*'],
-      });
-
-      expect(result).toEqual([]);
-    });
-
-    it('always includes query streams when query streams are enabled, regardless of index patterns', () => {
-      const result = filterEligibleStreams({
-        ...baseArgs,
-        allStreams: [makeStream('my-query', { query: true }), makeStream('logs.app')],
-        isQueryStreamsEnabled: true,
-        indexPatterns: ['logs*'],
-      });
-
-      expect(streamNames(result)).toEqual(['my-query', 'logs.app']);
-    });
-
-    it('excludes query streams when query streams are disabled', () => {
-      const result = filterEligibleStreams({
-        ...baseArgs,
-        allStreams: [makeStream('my-query', { query: true }), makeStream('logs.app')],
-        isQueryStreamsEnabled: false,
-        indexPatterns: ['logs*'],
-      });
-
-      expect(streamNames(result)).toEqual(['logs.app']);
-    });
-
-    it('matches multiple index patterns', () => {
-      const result = filterEligibleStreams({
-        ...baseArgs,
-        allStreams: [makeStream('logs.app'), makeStream('metrics.app'), makeStream('traces.app')],
-        isQueryStreamsEnabled: false,
-        indexPatterns: ['logs*', 'metrics*'],
-      });
-
-      expect(streamNames(result)).toEqual(['logs.app', 'metrics.app']);
-    });
-
-    it('ignores include patterns entirely when onboarding all', () => {
-      const result = filterEligibleStreams({
-        allStreams: [makeStream('logs.app'), makeStream('metrics.app')],
-        isQueryStreamsEnabled: false,
-        onboardAll: true,
-        includePatterns: ['metrics.*'],
-        indexPatterns: ['logs.*'],
-      });
-
-      expect(streamNames(result)).toEqual(['logs.app']);
-    });
+    expect(streamNames(result)).toEqual(['logs.app']);
   });
 
-  describe('include mode (onboardAll = false)', () => {
-    it('selects only streams matching an include pattern, ignoring index patterns', () => {
-      const result = filterEligibleStreams({
-        allStreams: [makeStream('logs.app'), makeStream('logs.debug'), makeStream('metrics.app')],
-        isQueryStreamsEnabled: false,
-        onboardAll: false,
-        includePatterns: ['logs.app', 'metrics.*'],
-        indexPatterns: ['logs.*'],
-      });
-
-      expect(streamNames(result)).toEqual(['logs.app', 'metrics.app']);
+  it('excludes non-query streams that do not match any index pattern', () => {
+    const result = filterEligibleStreams({
+      allStreams: [makeStream('traces.app')],
+      isQueryStreamsEnabled: true,
+      indexPatterns: ['logs*'],
     });
 
-    it('supports glob include patterns', () => {
-      const result = filterEligibleStreams({
-        allStreams: [makeStream('logs.app.a'), makeStream('logs.app.b'), makeStream('other')],
-        isQueryStreamsEnabled: false,
-        onboardAll: false,
-        includePatterns: ['logs.app.*'],
-        indexPatterns: [],
-      });
+    expect(result).toEqual([]);
+  });
 
-      expect(streamNames(result)).toEqual(['logs.app.a', 'logs.app.b']);
+  it('always includes query streams when query streams are enabled, regardless of index patterns', () => {
+    const result = filterEligibleStreams({
+      allStreams: [makeStream('my-query', { query: true }), makeStream('logs.app')],
+      isQueryStreamsEnabled: true,
+      indexPatterns: ['logs*'],
     });
 
-    it('selects nothing when the include list is empty', () => {
-      const result = filterEligibleStreams({
-        allStreams: [makeStream('logs.app'), makeStream('metrics.app')],
-        isQueryStreamsEnabled: true,
-        onboardAll: false,
-        includePatterns: [],
-        indexPatterns: ['logs.*'],
-      });
+    expect(streamNames(result)).toEqual(['my-query', 'logs.app']);
+  });
 
-      expect(result).toEqual([]);
+  it('excludes query streams when query streams are disabled', () => {
+    const result = filterEligibleStreams({
+      allStreams: [makeStream('my-query', { query: true }), makeStream('logs.app')],
+      isQueryStreamsEnabled: false,
+      indexPatterns: ['logs*'],
     });
 
-    it('includes matching query streams only when query streams are enabled', () => {
-      const args = {
-        allStreams: [makeStream('my-query', { query: true }), makeStream('logs.app')],
-        onboardAll: false as const,
-        includePatterns: ['my-query', 'logs.app'],
-        indexPatterns: [],
-      };
+    expect(streamNames(result)).toEqual(['logs.app']);
+  });
 
-      expect(streamNames(filterEligibleStreams({ ...args, isQueryStreamsEnabled: true }))).toEqual([
-        'my-query',
-        'logs.app',
-      ]);
-
-      expect(streamNames(filterEligibleStreams({ ...args, isQueryStreamsEnabled: false }))).toEqual(
-        ['logs.app']
-      );
+  it('matches multiple index patterns', () => {
+    const result = filterEligibleStreams({
+      allStreams: [makeStream('logs.app'), makeStream('metrics.app'), makeStream('traces.app')],
+      isQueryStreamsEnabled: false,
+      indexPatterns: ['logs*', 'metrics*'],
     });
+
+    expect(streamNames(result)).toEqual(['logs.app', 'metrics.app']);
+  });
+
+  it('selects nothing when the index patterns are empty and query streams are disabled', () => {
+    const result = filterEligibleStreams({
+      allStreams: [makeStream('logs.app'), makeStream('metrics.app')],
+      isQueryStreamsEnabled: false,
+      indexPatterns: [],
+    });
+
+    expect(result).toEqual([]);
   });
 });
 
