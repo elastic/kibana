@@ -7,9 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+export const CONSOLE_LOG_MAX_MESSAGE_LENGTH = 1_024;
+
 export const CONSOLE_BRIDGE_SCRIPT = `
 (function () {
   const logBridge = __logBridge__;
+  const MAX_LENGTH = ${CONSOLE_LOG_MAX_MESSAGE_LENGTH};
   const formatArgs = (args) =>
     args
       .map((arg) => {
@@ -30,8 +33,11 @@ export const CONSOLE_BRIDGE_SCRIPT = `
       })
       .join(' ');
 
-  const emit = (level, args) =>
-    logBridge.applySync(undefined, [level, formatArgs(args)], { arguments: { copy: true } });
+  const emit = (level, args) => {
+    const raw = formatArgs(args);
+    const message = raw.length > MAX_LENGTH ? raw.slice(0, MAX_LENGTH) + ' [truncated]' : raw;
+    logBridge.applySync(undefined, [level, message], { arguments: { copy: true } });
+  };
 
   const noop = () => {};
   globalThis.console = {

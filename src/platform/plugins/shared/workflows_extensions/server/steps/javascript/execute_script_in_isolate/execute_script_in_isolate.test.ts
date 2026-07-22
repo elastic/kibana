@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { CONSOLE_LOG_MAX_MESSAGE_LENGTH } from './console_bridge_script';
 import { executeScriptInIsolate } from './execute_script_in_isolate';
 import {
   createScriptExecutionTimeoutMessage,
@@ -71,6 +72,36 @@ describe('executeScriptInIsolate', () => {
     expect(logger.warn).toHaveBeenCalledWith('warn message');
     expect(logger.error).toHaveBeenCalledWith('error message');
     expect(logger.debug).toHaveBeenCalledWith('debug message');
+  });
+
+  it('truncates console messages longer than CONSOLE_LOG_MAX_MESSAGE_LENGTH and appends [truncated]', async () => {
+    const logger = createLogger();
+
+    await executeScriptInIsolate({
+      script: `console.log('x'.repeat(${CONSOLE_LOG_MAX_MESSAGE_LENGTH + 100})); return true;`,
+      logger,
+      abortSignal: new AbortController().signal,
+      ...defaultIsolateParams,
+    });
+
+    const logged = (logger.info as jest.Mock).mock.calls[0][0] as string;
+    expect(logged).toHaveLength(CONSOLE_LOG_MAX_MESSAGE_LENGTH + ' [truncated]'.length);
+    expect(logged.endsWith(' [truncated]')).toBe(true);
+  });
+
+  it('does not truncate console messages at exactly CONSOLE_LOG_MAX_MESSAGE_LENGTH', async () => {
+    const logger = createLogger();
+
+    await executeScriptInIsolate({
+      script: `console.log('x'.repeat(${CONSOLE_LOG_MAX_MESSAGE_LENGTH})); return true;`,
+      logger,
+      abortSignal: new AbortController().signal,
+      ...defaultIsolateParams,
+    });
+
+    const logged = (logger.info as jest.Mock).mock.calls[0][0] as string;
+    expect(logged).toHaveLength(CONSOLE_LOG_MAX_MESSAGE_LENGTH);
+    expect(logged.endsWith(' [truncated]')).toBe(false);
   });
 
   it('silently drops console logs after the cap is reached', async () => {
