@@ -1,0 +1,12 @@
+prs:
+- https://github.com/elastic/kibana/pull/261826
+issues:
+- https://github.com/elastic/kibana/issues/237546
+type: bug-fix
+products:
+- product: cloud-serverless
+- product: kibana
+  target: 9.5.0
+areas:
+- Kibana platform
+title: Allow space color to be cleared, falling back to default

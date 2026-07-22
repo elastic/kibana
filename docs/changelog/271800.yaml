@@ -4,6 +4,8 @@ type: bug-fix
 products:
 - product: cloud-serverless
   target: 2026-06-16
+- product: kibana
+  target: 9.5.0
 areas:
 - Search and data
 title: Fix broken references when an integration is re-installed or upgraded in a different space

@@ -1,0 +1,8 @@
+prs:
+- https://github.com/elastic/kibana/pull/279300
+type: feature
+products:
+- product: cloud-serverless
+- product: kibana
+  target: 9.5.0
+title: enable the advanced setting for the new flyout system

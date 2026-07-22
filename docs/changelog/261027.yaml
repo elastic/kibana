@@ -1,0 +1,11 @@
+prs:
+- https://github.com/elastic/kibana/pull/261027
+issues:
+- https://github.com/elastic/kibana/issues/260991
+type: bug-fix
+products:
+- product: cloud-serverless
+- product: kibana
+  target: 9.5.0
+title: Re-validate EQL query when index pattern changes
+description: Fixes EQL rule creation so the query field re-validates after changing the index pattern, clearing errors when the query is valid for the newly selected data view.

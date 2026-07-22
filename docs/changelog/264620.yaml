@@ -1,0 +1,9 @@
+prs:
+- https://github.com/elastic/kibana/pull/264620
+type: bug-fix
+products:
+- product: cloud-serverless
+- product: kibana
+  target: 9.5.0
+title: Fix embeddable filter actions popover not closing after opening edit flyout
+description: Fixes an issue where the edit filters quick action popover in embeddables would remain open after the edit flyout is displayed, obstructing the panel edit UI

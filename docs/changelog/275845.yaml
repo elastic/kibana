@@ -6,5 +6,7 @@ type: enhancement
 products:
 - product: cloud-serverless
   target: 2026-07-09
+- product: kibana
+  target: 9.5.0
 title: Improve lookup join translation for Sentinel
 description: "Improves SIEM migration translations by giving lookup resources field metadata so generated ES|QL can use more accurate `LOOKUP JOIN` clauses."

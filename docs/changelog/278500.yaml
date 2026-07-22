@@ -1,0 +1,8 @@
+prs:
+- https://github.com/elastic/kibana/pull/278500
+type: bug-fix
+products:
+- product: cloud-serverless
+- product: kibana
+  target: 9.5.0
+title: Make `winlog.event_data.LogonType` optional for `security_auth` jobs

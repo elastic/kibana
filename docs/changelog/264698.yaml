@@ -1,0 +1,13 @@
+prs:
+- https://github.com/elastic/kibana/pull/264698
+issues:
+- https://github.com/elastic/kibana/issues/249880
+type: enhancement
+products:
+- product: cloud-serverless
+- product: kibana
+  target: 9.5.0
+areas:
+- Search and data
+title: Add force merge settings to searchable snapshot
+description: Improves the ILM policy editor by exposing searchable snapshot force_merge_index and force_merge_on_clone options for hot, cold and frozen phases.

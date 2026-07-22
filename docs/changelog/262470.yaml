@@ -1,0 +1,11 @@
+prs:
+- https://github.com/elastic/kibana/pull/262470
+issues:
+- https://github.com/elastic/security-team/issues/16782
+type: bug-fix
+products:
+- product: cloud-serverless
+- product: kibana
+  target: 9.5.0
+title: Restore CrowdStrike runscript output display
+description: Fix CrowdStrike `runscript` response actions to correctly display script output (stdout/stderr) in the Response Console and Action History views.

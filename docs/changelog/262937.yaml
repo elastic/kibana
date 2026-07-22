@@ -1,0 +1,10 @@
+prs:
+- https://github.com/elastic/kibana/pull/262937
+issues:
+- https://github.com/elastic/obs-ai-team/issues/562
+type: deprecation
+products:
+- product: cloud-serverless
+- product: kibana
+  target: 9.5.0
+title: Remove Obs Agent

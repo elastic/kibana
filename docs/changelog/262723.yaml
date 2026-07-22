@@ -1,0 +1,13 @@
+prs:
+- https://github.com/elastic/kibana/pull/262723
+issues:
+- https://github.com/elastic/kibana/issues/262333
+- https://github.com/elastic/kibana/issues/256211
+- https://github.com/elastic/kibana/issues/256072
+- https://github.com/elastic/kibana/issues/256190
+type: bug-fix
+products:
+- product: cloud-serverless
+- product: kibana
+  target: 9.5.0
+title: Fix APM routing and settings

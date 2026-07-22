@@ -4,4 +4,6 @@ type: feature
 products:
 - product: cloud-serverless
   target: 2026-05-26
+- product: kibana
+  target: 9.5.0
 title: Add CSV export button to the **Alerts** table

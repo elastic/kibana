@@ -1,0 +1,9 @@
+prs:
+- https://github.com/elastic/kibana/pull/260570
+type: enhancement
+products:
+- product: cloud-serverless
+- product: kibana
+  target: 9.5.0
+title: Add AI Agent announcement modal with opt-out to classic assistant
+description: '**Security and Observability:** The default chat experience is now **AI Agent** in these contexts. A one-time announcement appears for users who have not seen it yet in the current space, explaining the change, what to expect, and how to return to the classic **AI Assistant** via GenAI Settings if they prefer. The dismissal state is remembered per space.'

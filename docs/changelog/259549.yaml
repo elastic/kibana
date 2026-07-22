@@ -1,0 +1,13 @@
+prs:
+- https://github.com/elastic/kibana/pull/259549
+issues:
+- https://github.com/elastic/search-team/issues/13426
+- https://github.com/elastic/search-team/issues/13427
+type: feature
+products:
+- product: cloud-serverless
+- product: kibana
+  target: 9.5.0
+areas:
+- Alerting and reporting
+title: Enable OAuth on Github and Slack connectors

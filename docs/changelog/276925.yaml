@@ -1,0 +1,11 @@
+prs:
+- https://github.com/elastic/kibana/pull/276925
+type: deprecation
+products:
+- product: cloud-serverless
+- product: kibana
+  target: 9.5.0
+areas:
+- Search and data
+title: 'agentless: rename agentless_policies API endpoint to managed_integrat…'
+description: 'Adds a dedicated managed integrations API for managed integrations deployments with full CRUD: list and get, full-replace update, and bulk upgrade with dry-run preview.'

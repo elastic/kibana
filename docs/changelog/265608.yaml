@@ -6,6 +6,8 @@ type: feature
 products:
 - product: cloud-serverless
   target: 2026-06-01
+- product: kibana
+  target: 9.5.0
 areas:
 - Search and data
 title: Add URI parts processor in Streams

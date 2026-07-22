@@ -6,6 +6,8 @@ type: feature
 products:
 - product: cloud-serverless
   target: 2026-05-19
+- product: kibana
+  target: 9.5.0
 areas:
 - Search and data
 title: Add a "Remove collector" action for OpAMP collectors in the Fleet agents list

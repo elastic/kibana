@@ -1,0 +1,9 @@
+prs:
+- https://github.com/elastic/kibana/pull/263322
+type: enhancement
+products:
+- product: cloud-serverless
+- product: kibana
+  target: 9.5.0
+title: Add OpenAPI examples and descriptions to all Security AI Assistant routes
+description: '**User-facing:** Improves OpenAPI documentation for the Security AI Assistant and Elastic Assistant HTTP APIs (examples, descriptions, and accuracy of schemas). No change to runtime API behavior from this PR.'

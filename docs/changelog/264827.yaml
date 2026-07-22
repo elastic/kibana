@@ -1,0 +1,11 @@
+prs:
+- https://github.com/elastic/kibana/pull/264827
+type: feature
+products:
+- product: cloud-serverless
+- product: kibana
+  target: 9.5.0
+areas:
+- Alerting and reporting
+title: Snowflake Connector
+description: Adds a technical-preview Snowflake connector that supports SQL execution, data discovery over databases/schemas/tables/views, and semantic search via Cortex Search. Available for Workflows and Agent Builder.

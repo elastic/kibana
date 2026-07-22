@@ -1,0 +1,13 @@
+prs:
+- https://github.com/elastic/kibana/pull/263883
+issues:
+- https://github.com/elastic/kibana/issues/207004
+type: bug-fix
+products:
+- product: cloud-serverless
+- product: kibana
+  target: 9.5.0
+areas:
+- Search and data
+title: Component templates tab monitor privilege access
+description: Users with cluster monitor but not manage_index_template privileges can now view component templates in index management.

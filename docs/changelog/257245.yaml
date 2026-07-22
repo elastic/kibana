@@ -1,0 +1,11 @@
+prs:
+- https://github.com/elastic/kibana/pull/257245
+issues:
+- https://github.com/elastic/kibana/issues/256295
+type: bug-fix
+products:
+- product: cloud-serverless
+- product: kibana
+  target: 9.5.0
+title: Implement self-healing mechanism for malformed urls
+description: Fixes an issue where some plugins would crash when receiving malformed urls. This instances will now attempt to recover automatically avoiding crashes whenever possible

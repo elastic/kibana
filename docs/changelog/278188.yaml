@@ -1,0 +1,10 @@
+prs:
+- https://github.com/elastic/kibana/pull/278188
+issues:
+- https://github.com/elastic/kibana/issues/277820
+type: bug-fix
+products:
+- product: cloud-serverless
+- product: kibana
+  target: 9.5.0
+title: Fix foreach read-undefined when source evicted between `if:` guard and loop entry

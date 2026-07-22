@@ -1,0 +1,10 @@
+prs:
+- https://github.com/elastic/kibana/pull/261353
+type: feature
+products:
+- product: cloud-serverless
+- product: kibana
+  target: 9.5.0
+areas:
+- Search and data
+title: Rename Cloud Connector → Federated Identity in UX

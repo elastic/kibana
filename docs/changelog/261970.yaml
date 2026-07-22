@@ -1,0 +1,10 @@
+prs:
+- https://github.com/elastic/kibana/pull/261970
+type: enhancement
+products:
+- product: cloud-serverless
+- product: kibana
+  target: 9.5.0
+areas:
+- Discover and ES|QL
+title: Integration with agent builder and deep analysis

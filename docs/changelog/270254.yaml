@@ -1,0 +1,10 @@
+prs:
+- https://github.com/elastic/kibana/pull/270254
+issues:
+- https://github.com/elastic/eui-private/issues/675
+type: enhancement
+products:
+- product: cloud-serverless
+- product: kibana
+  target: 9.5.0
+title: Add new presets to timepicker:quickRanges + migrate custom lists

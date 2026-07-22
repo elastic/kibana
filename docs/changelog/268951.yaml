@@ -6,6 +6,8 @@ type: breaking-change
 products:
 - product: cloud-serverless
   target: 2026-07-07
+- product: kibana
+  target: 9.5.0
 areas:
 - Dashboards and visualizations
 title: Dashboards API search endpoint uses a new response schema and enforces a page size limit

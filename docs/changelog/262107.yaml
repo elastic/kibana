@@ -1,0 +1,14 @@
+prs:
+- https://github.com/elastic/kibana/pull/262107
+issues:
+- https://github.com/elastic/kibana/issues/257872
+type: bug-fix
+products:
+- product: cloud-serverless
+- product: kibana
+  target: 9.5.0
+areas:
+- Dashboards and visualizations
+- Alerting and reporting
+title: Fix need for refresh after adding vis to current dashboard
+description: Fixes a bug where saving a visualization from an AI agent chat to the current dashboard sometimes required a manual page refresh

@@ -4,6 +4,8 @@ type: bug-fix
 products:
 - product: cloud-serverless
   target: 2026-05-20
+- product: kibana
+  target: 9.5.0
 areas:
 - AI and machine Learning
 title: Fix ARM ELSER model selection during product doc installation

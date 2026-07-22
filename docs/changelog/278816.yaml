@@ -1,0 +1,11 @@
+prs:
+- https://github.com/elastic/kibana/pull/278816
+type: feature
+products:
+- product: cloud-serverless
+- product: kibana
+  target: 9.5.0
+areas:
+- Search and data
+title: Enable enableOtelUI feature flag by default
+description: OTel collector UI is now enabled by default in Fleet. When an OpAMP-managed collector is enrolled, its agent details page shows dedicated Health, Info, and Config tabs instead of the standard agent view.

@@ -6,4 +6,6 @@ type: enhancement
 products:
 - product: cloud-serverless
   target: 2026-06-01
+- product: kibana
+  target: 9.5.0
 title: "Add developer support for `kbn-evals` Vault"

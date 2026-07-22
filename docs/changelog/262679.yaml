@@ -1,0 +1,11 @@
+prs:
+- https://github.com/elastic/kibana/pull/262679
+type: bug-fix
+products:
+- product: cloud-serverless
+- product: kibana
+  target: 9.5.0
+areas:
+- Search and data
+title: Changing default model will not require a hard page refresh
+description: Fixes an issue where changing the default AI connector in settings did not take effect until the page was refreshed. The connector list and default selection now update automatically when settings are changed.

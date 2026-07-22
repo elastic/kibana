@@ -1,0 +1,9 @@
+prs:
+- https://github.com/elastic/kibana/pull/278052
+type: feature
+products:
+- product: cloud-serverless
+- product: kibana
+  target: 9.5.0
+title: Enable Rule Changes History by default
+description: Detection rule changes history is now generally available.

@@ -1,0 +1,11 @@
+prs:
+- https://github.com/elastic/kibana/pull/278461
+type: feature
+products:
+- product: cloud-serverless
+- product: kibana
+  target: 9.5.0
+areas:
+- Search and data
+title: Enable Inference Preferences FF and add Scout tests for Manage Region Preferences modal
+description: Introduces the Manage Region Preferences modal in the Elastic Inference Service, allowing administrators to configure allowed geos and cloud regions for inference endpoints.

@@ -1,0 +1,11 @@
+prs:
+- https://github.com/elastic/kibana/pull/261851
+type: enhancement
+products:
+- product: cloud-serverless
+- product: kibana
+  target: 9.5.0
+areas:
+- Search and data
+title: Remove elasticsearch and elastic services from External Inference page
+description: Improves the External Inference page by hiding the Elasticsearch service provider from the Add Inference Endpoint flyout, since Elasticsearch endpoints are managed internally and not shown on this page.

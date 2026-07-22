@@ -6,4 +6,6 @@ type: bug-fix
 products:
 - product: cloud-serverless
   target: 2026-06-16
+- product: kibana
+  target: 9.5.0
 title: Fix delete all limit for deprecated prebuilt rules

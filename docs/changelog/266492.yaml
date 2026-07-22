@@ -6,6 +6,8 @@ type: feature
 products:
 - product: cloud-serverless
   target: 2026-06-30
+- product: kibana
+  target: 9.5.0
 areas:
 - Dashboards and visualizations
 title: Add ES|QL prefiltering option for data controls

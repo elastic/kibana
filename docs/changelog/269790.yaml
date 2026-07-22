@@ -6,4 +6,6 @@ type: enhancement
 products:
 - product: cloud-serverless
   target: 2026-05-26
-title: Improve consistency in the **View details** flyout in Discover
+- product: kibana
+  target: 9.5.0
+title: Improve consistency in the View details flyout in Discover

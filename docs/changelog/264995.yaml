@@ -1,0 +1,9 @@
+prs:
+- https://github.com/elastic/kibana/pull/264995
+type: enhancement
+products:
+- product: cloud-serverless
+- product: kibana
+  target: 9.5.0
+title: Redesign announcement modal with three A/B variants
+description: '> Redesigns the AI Agent announcement modal into three tailored layouts based on whether the user has prior AI Assistant history and whether they can revert the space-level chat experience, improving contextual clarity at onboarding.'

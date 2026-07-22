@@ -6,6 +6,8 @@ type: feature
 products:
 - product: cloud-serverless
   target: 2026-07-09
+- product: kibana
+  target: 9.5.0
 areas:
 - Alerting and reporting
 title: Add Stack Alerts (`stackAlertsOnly`) feature privilege for alert-only actions

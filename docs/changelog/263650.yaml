@@ -1,0 +1,11 @@
+prs:
+- https://github.com/elastic/kibana/pull/263650
+type: bug-fix
+products:
+- product: cloud-serverless
+- product: kibana
+  target: 9.5.0
+areas:
+- Search and data
+title: Index template tab - support for monitor priv without manage_index_template
+description: Users with cluster monitor but not manage_index_template privileges can now view index templates in index management.

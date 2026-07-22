@@ -6,5 +6,7 @@ type: bug-fix
 products:
 - product: cloud-serverless
   target: 2026-07-16
+- product: kibana
+  target: 9.5.0
 title: Fix missing additional context for flat dotted fields in threshold rules
 description: Flat dotted keys in source data are now included in alert context for threshold rules.

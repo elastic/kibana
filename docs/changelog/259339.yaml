@@ -1,0 +1,10 @@
+prs:
+- https://github.com/elastic/kibana/pull/259339
+issues:
+- https://github.com/elastic/security-team/issues/16445
+type: enhancement
+products:
+- product: cloud-serverless
+- product: kibana
+  target: 9.5.0
+title: Add go-to-definition for workflow YAML editor

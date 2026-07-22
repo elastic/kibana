@@ -6,6 +6,8 @@ type: feature
 products:
 - product: cloud-serverless
   target: 2026-06-16
+- product: kibana
+  target: 9.5.0
 areas:
 - Kibana platform
 title: Persist and restore last selected space via user profile

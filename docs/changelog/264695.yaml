@@ -1,0 +1,8 @@
+prs:
+- https://github.com/elastic/kibana/pull/264695
+type: enhancement
+products:
+- product: cloud-serverless
+- product: kibana
+  target: 9.5.0
+title: 'Add name validation for query stream creation '

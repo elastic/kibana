@@ -6,4 +6,6 @@ type: bug-fix
 products:
 - product: cloud-serverless
   target: 2026-06-01
+- product: kibana
+  target: 9.5.0
 title: Show read-privileges callout for leads on the home page

@@ -1,0 +1,10 @@
+prs:
+- https://github.com/elastic/kibana/pull/263107
+issues:
+- https://github.com/elastic/kibana/issues/262082
+type: feature
+products:
+- product: cloud-serverless
+- product: kibana
+  target: 9.5.0
+title: 'feat(apm): Service map Alert badges links and adding SLO and Alerts badges in the popover'

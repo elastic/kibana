@@ -1,0 +1,13 @@
+prs:
+- https://github.com/elastic/kibana/pull/265727
+issues:
+- https://github.com/elastic/search-team/issues/14181
+type: feature
+products:
+- product: cloud-serverless
+- product: kibana
+  target: 9.5.0
+areas:
+- Alerting and reporting
+title: Enable EARS auth on MicrosoftTeams and SharepointOnline connectors
+description: Reduces the default OAuth 2.0 scope for the SharePoint Online connector from `Sites.Read.All` to `Sites.Selected` for more granular site access control.

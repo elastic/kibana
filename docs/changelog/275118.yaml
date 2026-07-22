@@ -4,4 +4,6 @@ type: feature
 products:
 - product: cloud-serverless
   target: 2026-07-07
+- product: kibana
+  target: 9.5.0
 title: Add click interactions to anomalies table in entity flyouts

@@ -1,0 +1,13 @@
+prs:
+- https://github.com/elastic/kibana/pull/263717
+issues:
+- https://github.com/elastic/ingest-dev/issues/7478
+- https://github.com/elastic/kibana/issues/262491
+type: bug-fix
+products:
+- product: cloud-serverless
+- product: kibana
+  target: 9.5.0
+areas:
+- Search and data
+title: 'Fix package policy count filters: use NOT latest_revision:false instead of latest_revision:true'

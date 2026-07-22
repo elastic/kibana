@@ -1,0 +1,12 @@
+prs:
+- https://github.com/elastic/kibana/pull/261875
+issues:
+- https://github.com/elastic/kibana/issues/248544
+type: bug-fix
+products:
+- product: cloud-serverless
+- product: kibana
+  target: 9.5.0
+areas:
+- Search and data
+title: Show all source_index entries when source_index is an array

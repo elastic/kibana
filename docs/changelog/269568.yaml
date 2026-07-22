@@ -6,7 +6,9 @@ type: enhancement
 products:
 - product: cloud-serverless
   target: 2026-06-01
+- product: kibana
+  target: 9.5.0
+title: Move the Rules page to Admin and settings
 areas:
 - Alerting and reporting
 - Kibana platform
-title: Move the Rules page to Admin and settings

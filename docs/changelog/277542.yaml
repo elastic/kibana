@@ -1,0 +1,10 @@
+prs:
+- https://github.com/elastic/kibana/pull/277542
+type: deprecation
+products:
+- product: cloud-serverless
+- product: kibana
+  target: 9.5.0
+areas:
+- Alerting and reporting
+title: 'Deprecate include comments in workflow step'

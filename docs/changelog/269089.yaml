@@ -4,4 +4,6 @@ type: feature
 products:
 - product: cloud-serverless
   target: 2026-06-16
-title: Add find-security-rules skill for Agent Builder
+- product: kibana
+  target: 9.5.0
+title: Add `find-security-rules` skill for Agent Builder

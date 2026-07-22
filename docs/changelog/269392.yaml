@@ -6,6 +6,8 @@ type: enhancement
 products:
 - product: cloud-serverless
   target: 2026-06-01
+- product: kibana
+  target: 9.5.0
 areas:
 - Search and data
 title: "Move `ai.prompt`, `ai.summarize`, and `ai.classify` workflows to the inference plugin"

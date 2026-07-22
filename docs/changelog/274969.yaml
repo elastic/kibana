@@ -4,7 +4,9 @@ type: bug-fix
 products:
 - product: cloud-serverless
   target: 2026-06-30
+- product: kibana
+  target: 9.5.0
 areas:
 - Alerting and reporting
 title: Fix observables auto-extraction when attaching alerts with the cases comments API
-description: Attaching alerts through `/api/cases/{caseId}/comments` now triggers observables auto-extraction, matching behavior available in other case attachment flows.
+description: "Attaching alerts through `/api/cases/{caseId}/comments` now triggers observables auto-extraction, matching behavior available in other case attachment flows."

@@ -6,7 +6,9 @@ type: enhancement
 products:
 - product: cloud-serverless
   target: 2026-06-01
+- product: kibana
+  target: 9.5.0
 areas:
 - Search and data
 title: Use managed OTLP endpoint in the Add Collector flyout
-description: Fleet's Add Collector flyout now generates a collector configuration that ships data through the Elastic Cloud Managed OTLP Endpoint when available.
+description: "Fleet's Add Collector flyout now generates a collector configuration that ships data through the Elastic Cloud Managed OTLP Endpoint when available."

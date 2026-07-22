@@ -1,0 +1,11 @@
+prs:
+- https://github.com/elastic/kibana/pull/263657
+type: bug-fix
+products:
+- product: cloud-serverless
+- product: kibana
+  target: 9.5.0
+areas:
+- Kibana platform
+title: Fix read-only Indicator Filter definitions on the Rule Details page(s)
+description: Fixes bug with Indicator Filters in the Rule Details readonly UI, where referencing the wrong backing indices caused incorrect warnings to be displayed on hover.

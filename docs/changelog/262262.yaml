@@ -1,0 +1,11 @@
+prs:
+- https://github.com/elastic/kibana/pull/262262
+type: feature
+products:
+- product: cloud-serverless
+- product: kibana
+  target: 9.5.0
+areas:
+- Search and data
+title: Feature settings shows invalid endpoints
+description: Adds warnings to Feature Settings page for models that are invalid.

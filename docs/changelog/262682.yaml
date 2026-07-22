@@ -1,0 +1,9 @@
+prs:
+- https://github.com/elastic/kibana/pull/262682
+type: bug-fix
+products:
+- product: cloud-serverless
+- product: kibana
+  target: 9.5.0
+title: prevent flyout scroll jump when hover actions focus panel
+description: (for the label / changelog)

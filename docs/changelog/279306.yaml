@@ -1,0 +1,8 @@
+prs:
+- https://github.com/elastic/kibana/pull/279306
+type: enhancement
+products:
+- product: cloud-serverless
+- product: kibana
+  target: 9.5.0
+title: show attack flyout as child (new flyout) or preview (expandable flyout) in correlations

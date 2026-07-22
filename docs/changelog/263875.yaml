@@ -1,0 +1,8 @@
+prs:
+- https://github.com/elastic/kibana/pull/263875
+type: enhancement
+products:
+- product: cloud-serverless
+- product: kibana
+  target: 9.5.0
+title: enable find action to old Security Solution alert flyout

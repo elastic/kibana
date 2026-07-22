@@ -1,0 +1,12 @@
+prs:
+- https://github.com/elastic/kibana/pull/263096
+issues:
+- https://github.com/elastic/kibana/issues/263048
+type: bug-fix
+products:
+- product: cloud-serverless
+- product: kibana
+  target: 9.5.0
+areas:
+- Kibana platform
+title: Set auto_expand_replicas to fix yellow health on single-node ES clusters

@@ -6,6 +6,8 @@ type: bug-fix
 products:
 - product: cloud-serverless
   target: 2026-06-25
+- product: kibana
+  target: 9.5.0
 areas:
 - Alerting and reporting
 title: "Fix incorrect Kibana version on alerts CSV report info panel"

@@ -1,0 +1,8 @@
+prs:
+- https://github.com/elastic/kibana/pull/264985
+type: feature
+products:
+- product: cloud-serverless
+- product: kibana
+  target: 9.5.0
+title: Add Chat-First experience to Entity Analytics

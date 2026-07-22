@@ -1,0 +1,11 @@
+prs:
+- https://github.com/elastic/kibana/pull/263176
+type: bug-fix
+products:
+- product: cloud-serverless
+- product: kibana
+  target: 9.5.0
+areas:
+- Search and data
+title: Fix inference UI sidenav casing
+description: Fixed incorrect capitalization of "Elastic Inference" and other Model Management labels in the serverless project sidebar.

@@ -1,0 +1,10 @@
+prs:
+- https://github.com/elastic/kibana/pull/267237
+type: bug-fix
+products:
+- product: cloud-serverless
+- product: kibana
+  target: 9.5.0
+areas:
+- Discover and ES|QL
+title: Abort getColumns query on the editor unmount

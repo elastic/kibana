@@ -4,6 +4,8 @@ type: bug-fix
 products:
 - product: cloud-serverless
   target: 2026-07-14
+- product: kibana
+  target: 9.5.0
 areas:
 - AI and machine Learning
 title: "Fix clear audit messages API accepting non-notification indices"

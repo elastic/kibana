@@ -1,0 +1,11 @@
+prs:
+- https://github.com/elastic/kibana/pull/263706
+issues:
+- https://github.com/elastic/search-team/issues/13925
+type: feature
+products:
+- product: cloud-serverless
+- product: kibana
+  target: 9.5.0
+title: Move search.rerank workflow step from workplace_ai to agent_builder
+description: Adds a `search.rerank` workflow step that reorders documents by relevance using a rerank inference endpoint.

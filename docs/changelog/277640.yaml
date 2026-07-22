@@ -1,0 +1,13 @@
+prs:
+- https://github.com/elastic/kibana/pull/277640
+issues:
+- https://github.com/elastic/search-team/issues/15270
+type: enhancement
+products:
+- product: cloud-serverless
+- product: kibana
+  target: 9.5.0
+areas:
+- AI and machine Learning
+title: Upgrade traces to match the newest otel standard
+description: Internal tracing schema change — no user-facing behavior change.

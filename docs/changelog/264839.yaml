@@ -1,0 +1,9 @@
+prs:
+- https://github.com/elastic/kibana/pull/264839
+type: enhancement
+products:
+- product: cloud-serverless
+- product: kibana
+  target: 9.5.0
+title: Remove "Switch to AI Agent" confirmation modal
+description: '> Removes the confirmation modal that appeared when switching to AI Agent mode; the switch now takes effect immediately without a confirmation step.'

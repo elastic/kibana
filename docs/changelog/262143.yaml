@@ -1,0 +1,12 @@
+prs:
+- https://github.com/elastic/kibana/pull/262143
+issues:
+- https://github.com/elastic/search-team/issues/12372
+type: enhancement
+products:
+- product: cloud-serverless
+- product: kibana
+  target: 9.5.0
+areas:
+- Search and data
+title: Small UI improvements to Add/Edit endpoint flyout

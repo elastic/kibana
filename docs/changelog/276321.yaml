@@ -4,6 +4,8 @@ type: bug-fix
 products:
 - product: cloud-serverless
   target: 2026-07-09
+- product: kibana
+  target: 9.5.0
 areas:
 - Alerting and reporting
 title: Fix OAuth token parsing for 2xx non-200 responses

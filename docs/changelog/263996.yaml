@@ -1,0 +1,9 @@
+prs:
+- https://github.com/elastic/kibana/pull/263996
+type: deprecation
+products:
+- product: cloud-serverless
+- product: kibana
+  target: 9.5.0
+title: Remove threat hunting agent and fix agent builder defaults
+description: '> Removes the Threat Hunting Agent from the Agent Builder. Security AI workflows now use the Elastic AI Agent with skills.'

@@ -1,0 +1,13 @@
+prs:
+- https://github.com/elastic/kibana/pull/266841
+issues:
+- https://github.com/elastic/kibana/issues/266180
+type: bug-fix
+products:
+- product: cloud-serverless
+- product: kibana
+  target: 9.5.0
+areas:
+- Search and data
+title: Fix integration knowledge ES asset reference race condition for input packages
+description: Fix a race condition where async knowledge base installation could overwrite installed ES asset references for input packages, causing the Assets tab to appear blank.

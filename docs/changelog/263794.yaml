@@ -1,0 +1,10 @@
+prs:
+- https://github.com/elastic/kibana/pull/263794
+type: bug-fix
+products:
+- product: cloud-serverless
+- product: kibana
+  target: 9.5.0
+areas:
+- AI and machine Learning
+title: Upgrade hono and @hono/node-server dependency

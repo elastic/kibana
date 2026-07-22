@@ -1,0 +1,13 @@
+prs:
+- https://github.com/elastic/kibana/pull/265819
+issues:
+- https://github.com/elastic/search-team/issues/12780
+type: enhancement
+products:
+- product: cloud-serverless
+- product: kibana
+  target: 9.5.0
+areas:
+- AI and machine Learning
+title: 'fix(agent builder): use allow list for searching across system indices'
+description: Agent Builder index selection now exposes user-facing system indices and aliases (alerts, ML anomaly results, SLOs, entity store, exception lists, legacy SIEM signals, Stack Monitoring) that were previously hidden by a blanket dot-prefix filter. Truly internal indices (.kibana_*, .tasks, .reporting-*, .fleet-*, internal alert backing indices, etc.) remain hidden.

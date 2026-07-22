@@ -1,0 +1,12 @@
+prs:
+- https://github.com/elastic/kibana/pull/263632
+issues:
+- https://github.com/elastic/kibana/issues/263631
+type: bug-fix
+products:
+- product: cloud-serverless
+- product: kibana
+  target: 9.5.0
+areas:
+- AI and machine Learning
+title: 'Anomaly detection: Fixes display of chart markers in Single Metric Viewer for sparse data points'

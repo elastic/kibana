@@ -1,0 +1,12 @@
+prs:
+- https://github.com/elastic/kibana/pull/263531
+issues:
+- https://github.com/elastic/kibana/issues/262464
+- https://github.com/elastic/kibana/issues/262511
+- https://github.com/elastic/kibana/issues/263029
+type: feature
+products:
+- product: cloud-serverless
+- product: kibana
+  target: 9.5.0
+title: 'feat: APM service map options panel, find-in-page, and filters'

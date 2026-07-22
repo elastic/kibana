@@ -1,0 +1,9 @@
+prs:
+- https://github.com/elastic/kibana/pull/260956
+type: feature
+products:
+- product: cloud-serverless
+- product: kibana
+  target: 9.5.0
+title: Add token usage logging and dashboard for inference plugin
+description: Adds token consumption tracking for all inference calls in Kibana, and a dashboard breaking down the token logging.

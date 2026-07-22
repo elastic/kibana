@@ -1,0 +1,12 @@
+prs:
+- https://github.com/elastic/kibana/pull/263634
+issues:
+- https://github.com/elastic/kibana/issues/252451
+type: bug-fix
+products:
+- product: cloud-serverless
+- product: kibana
+  target: 9.5.0
+areas:
+- Alerting and reporting
+title: OpenAPI alerting rule params schemas missing accepted keys for burn-rate windows and ES query sourceFields

@@ -1,0 +1,13 @@
+prs:
+- https://github.com/elastic/kibana/pull/262001
+issues:
+- https://github.com/elastic/kibana/issues/260478
+type: bug-fix
+products:
+- product: cloud-serverless
+- product: kibana
+  target: 9.5.0
+areas:
+- Search and data
+- Discover and ES|QL
+title: Reset the time field when the updated index pattern does not have it

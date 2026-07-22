@@ -1,0 +1,10 @@
+prs:
+- https://github.com/elastic/kibana/pull/262538
+issues:
+- https://github.com/elastic/kibana/issues/262019
+type: feature
+products:
+- product: cloud-serverless
+- product: kibana
+  target: 9.5.0
+title: 'feat: APM service map SLO badge opens flyout and merge badge data'

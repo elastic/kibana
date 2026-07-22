@@ -1,0 +1,10 @@
+prs:
+- https://github.com/elastic/kibana/pull/263317
+issues:
+- https://github.com/elastic/kibana/issues/263319
+type: bug-fix
+products:
+- product: cloud-serverless
+- product: kibana
+  target: 9.5.0
+title: 'fix(synthetics): update Failed Tests by Step panel to respect time range changes'

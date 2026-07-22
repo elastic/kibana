@@ -6,4 +6,6 @@ type: bug-fix
 products:
 - product: cloud-serverless
   target: 2026-05-12
+- product: kibana
+  target: 9.5.0
 title: Align service map anomaly severity colors with ML

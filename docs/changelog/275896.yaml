@@ -1,0 +1,9 @@
+prs:
+- https://github.com/elastic/kibana/pull/275896
+type: feature
+products:
+- product: cloud-serverless
+- product: kibana
+  target: 9.5.0
+title: Enable recurrence-based scheduling for Osquery packs by default
+description: "Osquery pack forms now include date-and-time recurrence scheduling (daily or custom) with optional start date, stop-after, and splay. Individual queries can override the pack schedule. This capability is on by default and no longer requires an experimental feature flag."

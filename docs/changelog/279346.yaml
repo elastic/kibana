@@ -1,0 +1,10 @@
+prs:
+- https://github.com/elastic/kibana/pull/279346
+type: feature
+products:
+- product: cloud-serverless
+- product: kibana
+  target: 9.5.0
+areas:
+- Alerting and reporting
+title: Autocomplete and validation for the template YAML editor

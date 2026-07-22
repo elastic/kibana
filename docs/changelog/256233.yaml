@@ -1,0 +1,11 @@
+prs:
+- https://github.com/elastic/kibana/pull/256233
+type: bug-fix
+products:
+- product: cloud-serverless
+- product: kibana
+  target: 9.5.0
+areas:
+- Kibana platform
+title: 'Fix: prevent JSON logger scalar meta field explosion'
+description: 'We fixed an issue where the Kibana JSON logger could print a JSON object with a large number of numbered keys like `{ "1": "s", "2": "t", ... }`.'

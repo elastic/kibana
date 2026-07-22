@@ -1,0 +1,11 @@
+prs:
+- https://github.com/elastic/kibana/pull/265275
+issues:
+- https://github.com/elastic/kibana/issues/265104
+- https://github.com/elastic/kibana/issues/265095
+type: bug-fix
+products:
+- product: cloud-serverless
+- product: kibana
+  target: 9.5.0
+title: 'fix(APM): service map filter relayout, controls UI, and fit-view icon'

@@ -1,0 +1,8 @@
+prs:
+- https://github.com/elastic/kibana/pull/261195
+type: feature
+products:
+- product: cloud-serverless
+- product: kibana
+  target: 9.5.0
+title: Service map dashboard embeddable

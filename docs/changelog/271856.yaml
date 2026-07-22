@@ -6,7 +6,9 @@ type: enhancement
 products:
 - product: cloud-serverless
   target: 2026-07-07
+- product: kibana
+  target: 9.5.0
 areas:
 - Dashboards and visualizations
-title: Implement default handling for `includeEmptyRows` based on visualization type
-description: Lens now defaults the _Include empty rows_ option off for visualization types
+title: 'Implement default handling for `includeEmptyRows` based on visualization type'
+description: 'Lens now defaults the "Include empty rows" option off for visualization types'

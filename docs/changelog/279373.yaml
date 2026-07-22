@@ -1,0 +1,10 @@
+prs:
+- https://github.com/elastic/kibana/pull/279373
+type: enhancement
+products:
+- product: cloud-serverless
+- product: kibana
+  target: 9.5.0
+areas:
+- Alerting and reporting
+title: Link case-templates docs via doclinks service

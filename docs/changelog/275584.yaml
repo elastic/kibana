@@ -1,0 +1,12 @@
+prs:
+- https://github.com/elastic/kibana/pull/275584
+issues:
+- https://github.com/elastic/kibana/issues/254672
+type: enhancement
+products:
+- product: cloud-serverless
+- product: kibana
+  target: 9.5.0
+areas:
+- Dashboards and visualizations
+title: Add dashboard controls operations

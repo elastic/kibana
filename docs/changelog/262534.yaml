@@ -1,0 +1,10 @@
+prs:
+- https://github.com/elastic/kibana/pull/262534
+type: bug-fix
+products:
+- product: cloud-serverless
+- product: kibana
+  target: 9.5.0
+areas:
+- Alerting and reporting
+title: Fix index template update failing due to system-managed fields

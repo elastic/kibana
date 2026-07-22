@@ -1,0 +1,10 @@
+prs:
+- https://github.com/elastic/kibana/pull/263694
+issues:
+- https://github.com/elastic/security-team/issues/16816
+type: deprecation
+products:
+- product: cloud-serverless
+- product: kibana
+  target: 9.5.0
+title: Deprecate direct AI connector step types in favor of ai.prompt

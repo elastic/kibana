@@ -1,0 +1,11 @@
+prs:
+- https://github.com/elastic/kibana/pull/260092
+type: feature
+products:
+- product: cloud-serverless
+- product: kibana
+  target: 9.5.0
+areas:
+- Discover and ES|QL
+title: Save to Dashboard feature
+description: Adds a new Save to Dashboard feature in Discover, allowing you to save your Discover sessions directly to a dashboard. The save modal now consistently shows dashboard options based on context, making it easier to organize and access your saved sessions within dashboards.

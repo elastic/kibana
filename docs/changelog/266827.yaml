@@ -4,6 +4,8 @@ type: bug-fix
 products:
 - product: cloud-serverless
   target: 2026-05-12
+- product: kibana
+  target: 9.5.0
 areas:
 - Alerting and reporting
 title: Fix phrase search in All Cases view

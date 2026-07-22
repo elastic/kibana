@@ -1,0 +1,10 @@
+prs:
+- https://github.com/elastic/kibana/pull/262240
+issues:
+- https://github.com/elastic/kibana/issues/256171
+type: bug-fix
+products:
+- product: cloud-serverless
+- product: kibana
+  target: 9.5.0
+title: Handle Dagre layout failures on service map

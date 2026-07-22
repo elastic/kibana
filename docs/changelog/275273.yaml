@@ -9,5 +9,7 @@ type: feature
 products:
 - product: cloud-serverless
   target: 2026-07-09
+- product: kibana
+  target: 9.5.0
 title: Add human-in-the-loop external resume for workflows
 description: "Adds external resume channels for workflow approvals and input, including signed links, Slack notifications, and hosted HTML forms for responders without a Kibana session."

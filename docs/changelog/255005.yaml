@@ -1,4 +1,4 @@
-﻿prs:
+prs:
 - https://github.com/elastic/kibana/pull/255005
 issues:
 - https://github.com/elastic/kibana/issues/216605
@@ -6,6 +6,8 @@ type: bug-fix
 products:
 - product: cloud-serverless
   target: 2026-05-06
+- product: kibana
+  target: 9.5.0
 areas:
 - Kibana platform
 title: Adhere to user selected time range for CSV exports

@@ -1,0 +1,11 @@
+prs:
+- https://github.com/elastic/kibana/pull/261596
+type: bug-fix
+products:
+- product: cloud-serverless
+- product: kibana
+  target: 9.5.0
+areas:
+- Dashboards and visualizations
+title: Move markdown help button tooltip to bottom
+description: Fixes the tooltip position for the help button on dashboard markdown editors so it no longer blocks the preview toggle

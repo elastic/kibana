@@ -1,0 +1,12 @@
+prs:
+- https://github.com/elastic/kibana/pull/264713
+issues:
+- https://github.com/elastic/kibana/issues/250172
+type: enhancement
+products:
+- product: cloud-serverless
+- product: kibana
+  target: 9.5.0
+areas:
+- Discover and ES|QL
+title: Suggest the LOAD option on wired streams, when the editor errors out with unknown column

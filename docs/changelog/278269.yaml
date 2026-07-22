@@ -1,0 +1,12 @@
+prs:
+- https://github.com/elastic/kibana/pull/278269
+issues:
+- https://github.com/elastic/kibana/issues/183448
+type: bug-fix
+products:
+- product: cloud-serverless
+- product: kibana
+  target: 9.5.0
+areas:
+- AI and machine Learning
+title: 'SMV in Dashboard: Ensure Single Metric Viewer dashboard pdf/png export shows up correctly'

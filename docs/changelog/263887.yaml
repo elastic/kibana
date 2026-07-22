@@ -1,0 +1,12 @@
+prs:
+- https://github.com/elastic/kibana/pull/263887
+issues:
+- https://github.com/elastic/kibana/issues/263878
+type: bug-fix
+products:
+- product: cloud-serverless
+- product: kibana
+  target: 9.5.0
+areas:
+- Alerting and reporting
+title: Fix stale uiamApiKey leaking through object spread in rule updates

@@ -1,0 +1,13 @@
+prs:
+- https://github.com/elastic/kibana/pull/275203
+issues:
+- https://github.com/elastic/kibana/issues/202828
+type: bug-fix
+products:
+- product: cloud-serverless
+- product: kibana
+  target: 9.5.0
+areas:
+- Dashboards and visualizations
+title: Fix rendering colors for Legacy Metric
+description: This PR fixes incorrect color rendering for non-custom palettes in the legacy metric visualization, where colors were applied against a stale, edit-time range instead of the live data.

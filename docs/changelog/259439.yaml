@@ -1,0 +1,13 @@
+prs:
+- https://github.com/elastic/kibana/pull/259439
+issues:
+- https://github.com/elastic/search-team/issues/13161
+type: feature
+products:
+- product: cloud-serverless
+- product: kibana
+  target: 9.5.0
+areas:
+- Alerting and reporting
+title: Add Azure Blob Storage connector
+description: Adds Azure Blob Storage as a new connector, enabling AI agents to list containers and blobs, retrieve blob content, and search across blob storage via the Azure Blob Service REST API.
