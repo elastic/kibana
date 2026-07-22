@@ -62,6 +62,7 @@ export function createAddChangePointChartAction(
       openLazyFlyout({
         core: coreStart,
         parentApi: context.embeddable,
+        returnFocus: context.returnFocus,
         flyoutProps: {
           'data-test-subj': 'aiopsChangePointChartEmbeddableInitializer',
           'aria-labelledby': 'changePointConfig',

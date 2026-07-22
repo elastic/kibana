@@ -83,6 +83,7 @@ describe('Workflow routes', () => {
       getWorkflow: jest.fn(),
       getWorkflowsByIds: jest.fn(),
       getWorkflowsSourceByIds: jest.fn(),
+      findExistingWorkflowIds: jest.fn(),
       createWorkflow: jest.fn(),
       updateWorkflow: jest.fn(),
       deleteWorkflows: jest.fn(),
@@ -548,6 +549,78 @@ describe('Workflow routes', () => {
       await routeHandlers[key].handler(context, request, response);
 
       expect(handleRouteError).toHaveBeenCalledWith(response, err);
+    });
+
+    it('dryRun=true returns existingIds without writing', async () => {
+      mockApi.findExistingWorkflowIds.mockResolvedValue(['a']);
+      const workflows = [
+        { id: 'a', yaml: 'name: A' },
+        { id: 'b', yaml: 'name: B' },
+      ];
+      const request = httpServerMock.createKibanaRequest({
+        method: 'post',
+        path: '/api/workflows',
+        query: { overwrite: false, dryRun: true },
+        body: { workflows },
+      });
+      (request as any).authzResult = {
+        [WorkflowsManagementApiActions.create]: true,
+        [WorkflowsManagementApiActions.update]: true,
+      };
+      const response = mockResponse();
+      const context = createLicensingContext() as any;
+
+      await routeHandlers[key].handler(context, request, response);
+
+      // Must call findExistingWorkflowIds with only the IDs derived from the body
+      expect(mockApi.findExistingWorkflowIds).toHaveBeenCalledWith(['a', 'b']);
+      // Must NOT attempt a real write
+      expect(mockApi.bulkCreateWorkflows).not.toHaveBeenCalled();
+      expect(response.ok).toHaveBeenCalledWith({ body: { existingIds: ['a'] } });
+    });
+
+    it('dryRun=true ignores workflows without an id', async () => {
+      mockApi.findExistingWorkflowIds.mockResolvedValue([]);
+      const workflows = [
+        { yaml: 'name: NoId' }, // no id field — server would generate one on real import
+        { id: 'has-id', yaml: 'name: HasId' },
+      ];
+      const request = httpServerMock.createKibanaRequest({
+        method: 'post',
+        path: '/api/workflows',
+        query: { overwrite: false, dryRun: true },
+        body: { workflows },
+      });
+      (request as any).authzResult = { [WorkflowsManagementApiActions.create]: true };
+      const response = mockResponse();
+      const context = createLicensingContext() as any;
+
+      await routeHandlers[key].handler(context, request, response);
+
+      // Only the workflow with an explicit id is checked — auto-IDs cannot conflict
+      expect(mockApi.findExistingWorkflowIds).toHaveBeenCalledWith(['has-id']);
+      expect(response.ok).toHaveBeenCalledWith({ body: { existingIds: [] } });
+    });
+
+    it('dryRun=false still performs a real bulkCreate', async () => {
+      const result = { created: [{ id: 'a' }], failed: [] };
+      mockApi.bulkCreateWorkflows.mockResolvedValue(result);
+      const workflows = [{ id: 'a', yaml: 'name: A' }];
+      const request = httpServerMock.createKibanaRequest({
+        method: 'post',
+        path: '/api/workflows',
+        query: { overwrite: false, dryRun: false },
+        body: { workflows },
+      });
+      (request as any).authzResult = { [WorkflowsManagementApiActions.create]: true };
+      const response = mockResponse();
+      const context = createLicensingContext() as any;
+
+      await routeHandlers[key].handler(context, request, response);
+
+      expect(mockApi.bulkCreateWorkflows).toHaveBeenCalledTimes(1);
+      expect(mockApi.findExistingWorkflowIds).not.toHaveBeenCalled();
+      expect(response.ok).toHaveBeenCalledWith({ body: result });
     });
   });
 
