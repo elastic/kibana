@@ -119,9 +119,9 @@ export function replaceLayerList(newLayerList: LayerDescriptor[]) {
       });
     }
 
-    // Preserve transient tile-loaded state so cached tiles don't re-trigger isLayerLoading
     const tileStateByLayerId = new Map<string, boolean | undefined>();
     getLayerListRaw(getState()).forEach(({ id, __areTilesLoaded }) => {
+      // preserve tile-loaded state so cached tiles don't re-trigger `isLayerLoading`
       tileStateByLayerId.set(id!, __areTilesLoaded);
       dispatch(removeLayerFromLayerList(id));
     });
