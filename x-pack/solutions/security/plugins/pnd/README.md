@@ -13,9 +13,24 @@ xpack.pnd.enabled: true
 - **`xpack.pnd.enabled`** — sole enablement switch (default `false`). When false, the plugin registers no app, routes, or features; Security nav nodes for PND are omitted automatically.
 - **`xpack.pnd.ui.useMockData`** — optional data-source toggle (default `true`). Not required for enablement; leave unset for mock fixtures. Set `false` later when wiring live Workflows / Agent Builder projection.
 
-PR cloud deploys set `xpack.pnd.enabled: true` via `.buildkite/scripts/steps/cloud/deploy.json` (label `ci:cloud-deploy`).
+PR cloud deploys set `xpack.pnd.enabled: true` via `.buildkite/scripts/steps/cloud/deploy.json` (label `ci:cloud-deploy`). **Revert that enablement before merge** so production/default builds stay off.
 
 Restart Kibana after changing config, then open `/app/pnd` (or use the Security left rail).
+
+### When disabled (`xpack.pnd.enabled: false`) — no production pollution
+
+| Surface | Behavior |
+|---------|----------|
+| HTTP `/internal/pnd/*` | Not registered |
+| Kibana feature / privileges | Not registered |
+| Browser app `/app/pnd` | Not registered (nav links to `pnd` / `pnd:*` are removed by chrome) |
+| Managed workflow **owner** | Not registered (`registerManagedWorkflowOwner` skipped) |
+| Managed watch **install** | Not called (`installStatic` no-ops) |
+| Leftover installed watches | Global Workflows orphan cleanup removes docs whose owner is unregistered |
+
+Definitions still exist in `@kbn/workflows/managed` (code registry only). They are **not** installed into `.workflows-*` and do not appear in the Watch catalog unless PND is enabled and `install` / `ready` run.
+
+The only always-on cost of a soft flag is the tiny public plugin entry bundle (~page-load limit); it registers nothing when disabled.
 
 ### Live mode caveats (`useMockData: false`)
 
@@ -90,6 +105,17 @@ Owner plugin id: `pnd`. Catalog definitions:
 - `system-security-watch-deep`
 
 YAML + registry entries: `src/platform/packages/shared/kbn-workflows/managed/definitions/pnd/`. Visibility: `selector:watch` + `solution:security`.
+
+### Managed definition `version` vs product “v1”
+
+Two different version fields:
+
+| Field | Where | Meaning |
+|-------|--------|---------|
+| YAML `version: "1"` | Top of each `watch_*.yaml` | Workflow document schema / format version (stays `"1"` until the YAML language changes). |
+| Definition `version: N` | `managed/definitions/pnd/index.ts` | **Managed reconciliation counter** for `@kbn/workflows/managed`. Bump when you need install/`ready()` to re-apply the definition (`versionStrategy: 'auto'`). |
+
+POC bumps (4, 5, …) are expected while iterating — they are not a product SemVer and do **not** mean “Watch Floor v5”. Keep bumping on intentional definition changes; do not reset counters on clusters that already installed higher versions unless you intentionally wipe those managed docs.
 
 ## Working-group contribution map
 
