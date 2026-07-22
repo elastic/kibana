@@ -129,7 +129,18 @@ export async function reassignAgentsFromVersionSpecificPolicies(
     );
   }
 
-  // Remove the now-stale variant documents from .fleet-policies so they don't linger.
+  await deleteVersionSpecificFleetServerPolicies(esClient, parentPolicyId);
+}
+
+/**
+ * Delete the version-specific (`<parentId>#<version>`) documents for a parent agent policy from
+ * the `.fleet-policies` index. Used when a policy no longer requires version-specific policies so
+ * the now-stale variant documents don't linger.
+ */
+export async function deleteVersionSpecificFleetServerPolicies(
+  esClient: ElasticsearchClient,
+  parentPolicyId: string
+): Promise<void> {
   await esClient.deleteByQuery({
     index: AGENT_POLICY_INDEX,
     ignore_unavailable: true,
