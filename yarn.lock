@@ -2283,9 +2283,10 @@
     tree-dump "1.1.0"
     tslib "2.8.1"
 
-"@elastic/eui-test-helpers@link:../eui/packages/test-helpers":
-  version "0.0.0"
-  uid ""
+"@elastic/eui-test-helpers@1.1.0-snapshot.1784694381157":
+  version "1.1.0-snapshot.1784694381157"
+  resolved "https://registry.yarnpkg.com/@elastic/eui-test-helpers/-/eui-test-helpers-1.1.0-snapshot.1784694381157.tgz#9d543c3a6f58ad356eb16666a3b62690e44aafd2"
+  integrity sha512-npUeYyHFT3lsgMZvRkcz0XRbkV2JrVDVfG0GTzmcM9iYmsSE46RzUjKWZVbj2GH6BgJbGWhkrqhz7KJqa8mF8w==
 
 "@elastic/eui-theme-borealis@8.0.0":
   version "8.0.0"
