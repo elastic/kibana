@@ -140,6 +140,8 @@ exports[`DonutChart component passes correct props without errors for valid prop
                   "visible": true,
                 },
               },
+              "maxExtent": "100%",
+              "minExtent": 0,
               "tickLabel": Object {
                 "alignment": Object {
                   "horizontal": "near",
@@ -149,6 +151,8 @@ exports[`DonutChart component passes correct props without errors for valid prop
                 "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                 "fontSize": 10,
                 "fontStyle": "normal",
+                "lineHeight": 1.2,
+                "minLength": 12,
                 "offset": Object {
                   "reference": "local",
                   "x": 0,
@@ -159,7 +163,9 @@ exports[`DonutChart component passes correct props without errors for valid prop
                   "outer": 8,
                 },
                 "rotation": 0,
+                "truncate": false,
                 "visible": true,
+                "wrapLines": 1,
               },
               "tickLine": Object {
                 "padding": 10,
