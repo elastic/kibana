@@ -71,8 +71,14 @@ export default ({ getService }: FtrProviderContext): void => {
     it('applies template defaults and pins the latest version when version is omitted', async () => {
       const template = await createTemplate(kitchenSinkDefinition);
 
+      // Expansion is caller-wins: template severity/tags only apply when the request omits them.
+      // getPostCaseRequest pins severity: LOW and tags: ['defacement'], so strip severity and send
+      // empty tags to exercise the defaults path (matching the unit test's minimalRequest).
+      const { severity, ...baseRequest } = getPostCaseRequest({ owner: OWNER });
+
       const createdCase = await createCase(supertest, {
-        ...getPostCaseRequest({ owner: OWNER }),
+        ...baseRequest,
+        tags: [],
         template: { id: template.templateId },
       });
 
@@ -93,7 +99,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const template = await createTemplate(kitchenSinkDefinition);
 
       const createdCase = await createCase(supertest, {
-        ...getPostCaseRequest({ owner: OWNER }),
+        ...getPostCaseRequest({ owner: OWNER, tags: ['caller-tag'] }),
         template: { id: template.templateId, version: template.templateVersion },
         severity: CaseSeverity.CRITICAL,
         category: 'incident',
@@ -102,6 +108,8 @@ export default ({ getService }: FtrProviderContext): void => {
 
       expect(createdCase.severity).to.eql(CaseSeverity.CRITICAL);
       expect(createdCase.category).to.eql('incident');
+      // Caller-sent tags win outright: the template's 'template-tag' is not merged in.
+      expect(createdCase.tags).to.eql(['caller-tag']);
       expect(createdCase.extended_fields).to.eql({
         priority_as_keyword: 'urgent',
         effort_as_integer: '',
