@@ -131,7 +131,7 @@ export const RiskInputsTab = <T extends EntityType>({
 
   // Keeps the expandable-flyout URL state in sync with the user's manual tab
   // toggle so that clicking the same flyout link twice still forces a remount.
-  const syncSubTab = useCallback(
+  const onSubTabChange = useCallback(
     (newSubTab: RiskScoreLeftPanelSubTab) => {
       if (!isRiskScoreFlyoutPanelProps(panels.left)) return;
       openLeftPanel({
@@ -271,7 +271,7 @@ export const RiskInputsTab = <T extends EntityType>({
       resolutionGroup={resolutionGroup}
       watchlistNamesById={watchlistNamesById}
       onShowAlert={onShowAlert}
-      syncSubTab={syncSubTab}
+      onSubTabChange={onSubTabChange}
     />
   );
 };
@@ -295,7 +295,7 @@ interface RiskInputsTabContentProps<T extends EntityType> {
   resolutionGroup: ReturnType<typeof useResolutionGroup>['data'];
   watchlistNamesById: Map<string, string>;
   onShowAlert: (id: string, indexName: string) => void;
-  syncSubTab: (subTab: RiskScoreLeftPanelSubTab) => void;
+  onSubTabChange: (subTab: RiskScoreLeftPanelSubTab) => void;
 }
 
 const RiskInputsTabContent = <T extends EntityType>({
@@ -315,7 +315,7 @@ const RiskInputsTabContent = <T extends EntityType>({
   resolutionGroup,
   watchlistNamesById,
   onShowAlert,
-  syncSubTab,
+  onSubTabChange,
 }: RiskInputsTabContentProps<T>) => {
   const { setQuery, deleteQuery } = useGlobalTime();
   const euidApi = useEntityStoreEuidApi();
@@ -390,9 +390,9 @@ const RiskInputsTabContent = <T extends EntityType>({
       // Keep the expandable-flyout URL state in sync so that clicking the same
       // right-panel link again produces a URL change, which forces a remount and
       // resets userSelectedView to the correct value (v1 mode only; no-op in v2).
-      syncSubTab(newSubTab);
+      onSubTabChange(newSubTab);
     },
-    [syncSubTab]
+    [onSubTabChange]
   );
 
   const latestRiskScore = isResolutionView ? resolutionRiskScore : entityRiskScore;
