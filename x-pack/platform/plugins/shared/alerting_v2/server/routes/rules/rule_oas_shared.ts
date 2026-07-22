@@ -7,10 +7,12 @@
 
 import type {
   BulkByIdsParams,
+  BulkByQueryParams,
   BulkGetRulesParams,
   BulkGetRulesResponse,
   BulkResponse,
   CreateRuleDataInput,
+  DryRunResponse,
   ErrorResponse,
   FindRulesResponse,
   RuleResponse,
@@ -103,6 +105,10 @@ export const BULK_OPERATION_REQUEST: BulkByIdsParams = {
   ids: ['rule-1', 'rule-2'],
 };
 
+export const BULK_BY_QUERY_REQUEST: BulkByQueryParams = {
+  filter: 'tags: production',
+};
+
 export const LIST_RULES_RESPONSE: FindRulesResponse = {
   items: [RULE_RESPONSE],
   total: 1,
@@ -117,6 +123,11 @@ export const BULK_GET_RULES_RESPONSE: BulkGetRulesResponse = {
 export const BULK_OPERATION_RESPONSE: BulkResponse = {
   affected_count: 2,
   errors: [],
+};
+
+export const DRY_RUN_RESPONSE: DryRunResponse = {
+  match_count: 2,
+  sample: ['rule-1', 'rule-2'],
 };
 
 export const RULE_TAGS_RESPONSE: RuleTagsResponse = {

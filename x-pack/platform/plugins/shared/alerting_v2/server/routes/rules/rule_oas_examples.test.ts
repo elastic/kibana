@@ -7,21 +7,25 @@
 
 import {
   bulkByIdsSchema,
+  bulkByQuerySchema,
   bulkGetRulesParamsSchema,
   bulkGetRulesResponseSchema,
   bulkResponseSchema,
   createRuleDataSchema,
+  dryRunResponseSchema,
   findRulesResponseSchema,
   ruleResponseSchema,
   ruleTagsResponseSchema,
   updateRuleBodySchema,
 } from '@kbn/alerting-v2-schemas';
 import {
+  BULK_BY_QUERY_REQUEST,
   BULK_GET_RULES_REQUEST,
   BULK_GET_RULES_RESPONSE,
   BULK_OPERATION_REQUEST,
   BULK_OPERATION_RESPONSE,
   CREATE_RULE_REQUEST,
+  DRY_RUN_RESPONSE,
   LIST_RULES_RESPONSE,
   RULE_RESPONSE,
   RULE_TAGS_RESPONSE,
@@ -45,6 +49,10 @@ describe('rule OAS example payloads', () => {
     expect(bulkByIdsSchema.safeParse(BULK_OPERATION_REQUEST).success).toBe(true);
   });
 
+  it('keeps by-query request examples valid against bulkByQuerySchema', () => {
+    expect(bulkByQuerySchema.safeParse(BULK_BY_QUERY_REQUEST).success).toBe(true);
+  });
+
   it('keeps rule response examples valid against ruleResponseSchema', () => {
     expect(ruleResponseSchema.safeParse(RULE_RESPONSE).success).toBe(true);
   });
@@ -59,6 +67,10 @@ describe('rule OAS example payloads', () => {
 
   it('keeps bulk-operation response example valid against bulkResponseSchema', () => {
     expect(bulkResponseSchema.safeParse(BULK_OPERATION_RESPONSE).success).toBe(true);
+  });
+
+  it('keeps dry-run response example valid against dryRunResponseSchema', () => {
+    expect(dryRunResponseSchema.safeParse(DRY_RUN_RESPONSE).success).toBe(true);
   });
 
   it('keeps rule tags response example valid against ruleTagsResponseSchema', () => {
