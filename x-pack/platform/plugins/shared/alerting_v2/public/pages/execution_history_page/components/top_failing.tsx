@@ -732,6 +732,7 @@ export const TopFailing: React.FC<TopFailingProps> = ({ onRuleClick, onPolicyCli
             ? [...item.sources, ...item.steps]
             : item.steps;
           const sourceCount = item.sources?.length ?? 0;
+          const firstFailIdx = allSteps.findIndex((s) => s.status !== 'success');
 
           return (
             <EuiText size="s">
@@ -748,23 +749,27 @@ export const TopFailing: React.FC<TopFailingProps> = ({ onRuleClick, onPolicyCli
                   const badge = statusBadge[step.status];
                   const showComma = item.sources && i > 0 && i < sourceCount;
                   const showArrow = i > 0 && !showComma;
+                  const isAfterFail = firstFailIdx >= 0 && i > firstFailIdx;
+                  const isFailed = step.status !== 'success';
+
                   return (
                     <React.Fragment key={`${step.id}-${i}`}>
                       {showComma && (
-                        <span css={css({ color: '#69707D', marginLeft: -4 })}>,</span>
+                        <span css={css({ color: '#798eaf', marginLeft: -4 })}>,</span>
                       )}
                       {showArrow && (
-                        <EuiIcon type="sortRight" size="s" color="subdued" />
+                        <span css={css({ color: isAfterFail ? '#798eaf' : '#69707D' })}>→</span>
                       )}
                       <span
                         css={css({
                           display: 'inline-flex',
                           alignItems: 'center',
                           gap: 4,
+                          color: isAfterFail ? '#798eaf' : 'inherit',
                         })}
                       >
                         {step.label}
-                        {step.status !== 'success' && (
+                        {isFailed && !isAfterFail && (
                           <span
                             css={css({
                               width: 20,
@@ -796,17 +801,7 @@ export const TopFailing: React.FC<TopFailingProps> = ({ onRuleClick, onPolicyCli
         }),
         width: '140px',
         sortable: true,
-        render: (count: number) => {
-          const color =
-            count >= 100
-              ? '#fdddd8'
-              : count >= 50
-              ? '#ffdebf'
-              : count >= 25
-              ? '#fde9b5'
-              : '#cfeef7';
-          return <EuiBadge color={color}>{count}</EuiBadge>;
-        },
+        render: (count: number) => count.toLocaleString(),
       },
       {
         field: 'lastSeen',
