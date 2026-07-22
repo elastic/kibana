@@ -69,9 +69,10 @@ export const bulkOverwriteTransformedDocuments =
     | UnavailableShardsException,
     'bulk_index_succeeded'
   > =>
-  () => {
-    return client
-      .bulk({
+  async () => {
+    let res: Awaited<ReturnType<typeof client.bulk>>;
+    try {
+      res = await client.bulk({
         // Because we only add aliases in the MARK_VERSION_INDEX_READY step we
         // can't bulkIndex to an alias with require_alias=true. This means if
         // users tamper during this operation (delete indices or restore a
@@ -87,44 +88,89 @@ export const bulkOverwriteTransformedDocuments =
         filter_path: ['items.*.error'],
         // we need to unwrap the existing BulkIndexOperationTuple's
         operations: operations.flat(),
-      })
-      .then((res) => {
-        // Filter out version_conflict_engine_exception since these just mean
-        // that another instance already updated these documents
-        const errors: estypes.ErrorCause[] = (res.items ?? [])
-          .filter((item) => item.index?.error)
-          .map((item) => item.index!.error!)
-          .filter(({ type }) => type !== 'version_conflict_engine_exception');
+      });
+    } catch (error) {
+      if (error instanceof esErrors.ResponseError && error.statusCode === 413) {
+        return Either.left({ type: 'request_entity_too_large_exception' as const });
+      }
+      return catchRetryableEsClientErrors(error as esErrors.ElasticsearchClientError);
+    }
 
-        if (errors.length === 0) {
-          return Either.right('bulk_index_succeeded' as const);
-        } else {
-          if (errors.every(isWriteBlockException)) {
-            return Either.left({
-              type: 'target_index_had_write_block' as const,
-            });
-          }
-          if (errors.every(isIndexNotFoundException)) {
-            return Either.left({
-              type: 'index_not_found_exception' as const,
-              index,
-            });
-          }
-          if (errors.every(isUnavailableShardsException)) {
-            return Either.left({
-              type: 'unavailable_shards_exception' as const,
-              message: `[${index}] Not enough active copies to meet shard count of [ALL]`,
-            });
-          }
-          throw new Error(JSON.stringify(errors));
-        }
-      })
-      .catch((error) => {
-        if (error instanceof esErrors.ResponseError && error.statusCode === 413) {
-          return Either.left({ type: 'request_entity_too_large_exception' as const });
-        } else {
-          throw error;
-        }
-      })
-      .catch(catchRetryableEsClientErrors);
+    // Filter out version_conflict_engine_exception since these just mean
+    // that another instance already updated these documents
+    const errors: estypes.ErrorCause[] = (res.items ?? [])
+      .filter((item) => item.index?.error)
+      .map((item) => item.index!.error!)
+      .filter(({ type }) => type !== 'version_conflict_engine_exception');
+
+    if (errors.length === 0) {
+      return Either.right('bulk_index_succeeded' as const);
+    }
+
+    if (errors.every(isWriteBlockException)) {
+      return Either.left({ type: 'target_index_had_write_block' as const });
+    }
+
+    if (errors.every(isIndexNotFoundException)) {
+      return Either.left({ type: 'index_not_found_exception' as const, index });
+    }
+
+    if (errors.every(isUnavailableShardsException)) {
+      // Fetch the allocation explanation so operators can see WHY shards are
+      // unavailable (e.g. disk watermark, recovery throttling) rather than
+      // just a generic "not enough copies" message on every retry.
+      let allocationReason = '';
+      try {
+        const explain = await client.cluster.allocationExplain({ index });
+        allocationReason = formatAllocationExplanation(explain);
+      } catch {
+        // Best-effort: if the explain call fails for any reason (permissions,
+        // network, no unassigned shards found), fall through with the base message.
+      }
+      return Either.left({
+        type: 'unavailable_shards_exception' as const,
+        message: allocationReason
+          ? `[${index}] Not enough active copies to meet shard count of [ALL]. Shard allocation explain: ${allocationReason}`
+          : `[${index}] Not enough active copies to meet shard count of [ALL]`,
+      });
+    }
+
+    throw new Error(JSON.stringify(errors));
   };
+
+/**
+ * Formats the allocation explanation response into a human-readable string
+ * suitable for inclusion in a log message.
+ */
+function formatAllocationExplanation(
+  explain: estypes.ClusterAllocationExplainResponse
+): string {
+  const parts: string[] = [];
+
+  if (explain.allocate_explanation) {
+    parts.push(explain.allocate_explanation);
+  }
+
+  if (explain.node_allocation_decisions) {
+    const seen = new Set<string>();
+    const blockingReasons: string[] = [];
+
+    for (const node of explain.node_allocation_decisions) {
+      for (const decider of node.deciders ?? []) {
+        if (decider.decision === 'NO' || decider.decision === 'THROTTLE') {
+          const key = `${decider.decider}: ${decider.explanation}`;
+          if (!seen.has(key)) {
+            seen.add(key);
+            blockingReasons.push(`[${decider.decider}] ${decider.decision}: ${decider.explanation}`);
+          }
+        }
+      }
+    }
+
+    if (blockingReasons.length > 0) {
+      parts.push(`blocking deciders: ${blockingReasons.join('; ')}`);
+    }
+  }
+
+  return parts.join('. ');
+}

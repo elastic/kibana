@@ -252,6 +252,7 @@ describe('bulkOverwriteTransformedDocuments', () => {
         ],
       })
     );
+    client.cluster.allocationExplain.mockRejectedValueOnce(new Error('explain unavailable'));
 
     const task = bulkOverwriteTransformedDocuments({
       client,
@@ -265,6 +266,101 @@ describe('bulkOverwriteTransformedDocuments', () => {
     expect(Either.isLeft(result)).toBe(true);
     expect((result as Either.Left<any>).left.type).toEqual('unavailable_shards_exception');
     expect((result as Either.Left<any>).left.message).toContain('new_index');
+  });
+
+  it('includes allocation explain detail in the message when allocationExplain succeeds', async () => {
+    const client = elasticsearchClientMock.createInternalClient(
+      Promise.resolve({
+        items: [
+          {
+            index: {
+              error: {
+                type: 'unavailable_shards_exception',
+                reason:
+                  '[.kibana_9.0.1_001][0] Not enough active copies to meet shard count of [ALL]',
+              },
+            },
+          },
+        ],
+      })
+    );
+    client.cluster.allocationExplain.mockResolvedValueOnce({
+      index: 'new_index',
+      shard: 0,
+      primary: false,
+      current_state: 'unassigned',
+      allocate_explanation:
+        'cannot allocate because allocation is not permitted to any of the nodes',
+      node_allocation_decisions: [
+        {
+          node_id: 'abc',
+          node_name: 'instance-0000000003',
+          node_decision: 'no' as any,
+          node_attributes: {},
+          roles: [] as any,
+          transport_address: '10.0.0.1:9300',
+          deciders: [
+            {
+              decider: 'disk_threshold',
+              decision: 'NO' as const,
+              explanation:
+                'the node is above the high watermark cluster setting [90%], free: 4gb [8.3%]',
+            },
+          ],
+        },
+      ],
+    } as any);
+
+    const task = bulkOverwriteTransformedDocuments({
+      client,
+      index: 'new_index',
+      operations: [],
+      refresh: 'wait_for',
+    });
+
+    const result = await task();
+
+    expect(client.cluster.allocationExplain).toHaveBeenCalledWith({ index: 'new_index' });
+    expect(Either.isLeft(result)).toBe(true);
+    const left = (result as Either.Left<any>).left;
+    expect(left.type).toEqual('unavailable_shards_exception');
+    expect(left.message).toContain('Shard allocation explain:');
+    expect(left.message).toContain('disk_threshold');
+    expect(left.message).toContain('90%');
+  });
+
+  it('falls back to base message when allocationExplain call fails', async () => {
+    const client = elasticsearchClientMock.createInternalClient(
+      Promise.resolve({
+        items: [
+          {
+            index: {
+              error: {
+                type: 'unavailable_shards_exception',
+                reason:
+                  '[.kibana_9.0.1_001][0] Not enough active copies to meet shard count of [ALL]',
+              },
+            },
+          },
+        ],
+      })
+    );
+    client.cluster.allocationExplain.mockRejectedValueOnce(new Error('403 Forbidden'));
+
+    const task = bulkOverwriteTransformedDocuments({
+      client,
+      index: 'new_index',
+      operations: [],
+      refresh: 'wait_for',
+    });
+
+    const result = await task();
+
+    expect(Either.isLeft(result)).toBe(true);
+    const left = (result as Either.Left<any>).left;
+    expect(left.type).toEqual('unavailable_shards_exception');
+    expect(left.message).toContain('new_index');
+    expect(left.message).not.toContain('Shard allocation explain:');
   });
 
   it('resolves with `left:unavailable_shards_exception` when mixed with version_conflict_engine_exception', async () => {
@@ -291,6 +387,7 @@ describe('bulkOverwriteTransformedDocuments', () => {
         ],
       })
     );
+    client.cluster.allocationExplain.mockRejectedValueOnce(new Error('explain unavailable'));
 
     const task = bulkOverwriteTransformedDocuments({
       client,
