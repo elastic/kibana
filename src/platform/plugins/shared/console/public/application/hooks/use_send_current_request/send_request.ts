@@ -39,6 +39,19 @@ export interface RequestResult<V = unknown> {
 const getContentType = (response: Response | undefined) =>
   (response?.headers.get('Content-Type') as BaseResponseType) ?? '';
 
+const formatNdjson = (text: string): string =>
+  text
+    .split('\n')
+    .filter((line) => line.trim())
+    .map((line) => {
+      try {
+        return JSON.stringify(JSON.parse(line), null, 2);
+      } catch {
+        return line;
+      }
+    })
+    .join('\n');
+
 const extractStatusCodeAndText = (response: Response | undefined, path: string) => {
   const isKibanaApiRequest = path.startsWith(KIBANA_API_PREFIX);
   // Kibana API requests don't go through the proxy, so we can use the response status code and text.
@@ -129,6 +142,7 @@ export function sendRequest(args: RequestArgs): Promise<RequestResult[]> {
         }
 
         if (response) {
+          const contentType = getContentType(response);
           let value;
           if (statusCode === 200 && !body) {
             // If the request resolves with a 200 status code but has an empty or null body,
@@ -138,6 +152,10 @@ export function sendRequest(args: RequestArgs): Promise<RequestResult[]> {
           // check if object is ArrayBuffer
           else if (body instanceof ArrayBuffer) {
             value = body;
+          } else if (body instanceof Blob) {
+            // ndjson (and zip) responses arrive as a Blob from the core HTTP client
+            const text = await body.text();
+            value = contentType.includes('ndjson') ? formatNdjson(text) : text;
           } else {
             value = typeof body === 'string' ? body : JSON.stringify(body, null, 2);
           }
@@ -158,7 +176,7 @@ export function sendRequest(args: RequestArgs): Promise<RequestResult[]> {
               timeMs: Date.now() - startTime,
               statusCode,
               statusText,
-              contentType: getContentType(response),
+              contentType,
               value,
             },
             request: {
@@ -179,6 +197,10 @@ export function sendRequest(args: RequestArgs): Promise<RequestResult[]> {
 
         if (statusCode === 200 && !errorBody) {
           value = 'OK';
+        } else if (errorBody instanceof Blob) {
+          const errorContentType = getContentType(response);
+          const text = await errorBody.text();
+          value = errorContentType.includes('ndjson') ? formatNdjson(text) : text;
         } else if (errorBody) {
           value = JSON.stringify(errorBody, null, 2);
         } else {
