@@ -552,7 +552,8 @@
         "settings": {},
         "time_series": {
           "end_time": "",
-          "start_time": ""
+          "start_time": "",
+          "temporality_field": ""
         },
         "queries": {
           "cache": {

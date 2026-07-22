@@ -10,8 +10,18 @@
     },
     "data_autocomplete_rules": {
       "synonyms_set": {
-        "id": "",
-        "synonyms": ""
+        "__one_of": [
+          {
+            "id": "",
+            "synonyms": ""
+          },
+          [
+            {
+              "id": "",
+              "synonyms": ""
+            }
+          ]
+        ]
       }
     },
     "methods": [

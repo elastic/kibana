@@ -184,24 +184,51 @@
             }
           ],
           "global": {
-            "application": {
-              "manage": {
-                "applications": []
-              }
-            },
-            "data_source": [
+            "__one_of": [
               {
-                "names": [],
-                "privileges": {
-                  "__any_of": [
-                    "create",
-                    "delete",
-                    "read_metadata",
-                    "read",
-                    "manage"
+                "application": {
+                  "manage": {
+                    "applications": []
+                  }
+                },
+                "data_source": [
+                  {
+                    "names": [],
+                    "privileges": {
+                      "__any_of": [
+                        "create",
+                        "delete",
+                        "read_metadata",
+                        "read",
+                        "manage"
+                      ]
+                    }
+                  }
+                ]
+              },
+              [
+                {
+                  "application": {
+                    "manage": {
+                      "applications": []
+                    }
+                  },
+                  "data_source": [
+                    {
+                      "names": [],
+                      "privileges": {
+                        "__any_of": [
+                          "create",
+                          "delete",
+                          "read_metadata",
+                          "read",
+                          "manage"
+                        ]
+                      }
+                    }
                   ]
                 }
-              }
+              ]
             ]
           },
           "applications": [

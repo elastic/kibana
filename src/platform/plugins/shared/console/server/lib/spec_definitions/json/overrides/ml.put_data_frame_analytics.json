@@ -3,7 +3,7 @@
     "data_autocomplete_rules": {
       "source": {
         "index": { "__one_of": ["SOURCE_INDEX_NAME", []] },
-        "query": {}
+        "query": { "__scope_link": "GLOBAL.query" }
       },
       "dest": {
         "index": "",

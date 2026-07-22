@@ -62,6 +62,20 @@
           true,
           false
         ]
+      },
+      "settings": {
+        "time_zone": "",
+        "approximation": {
+          "__one_of": [
+            {
+              "rows": "",
+              "confidence_level": ""
+            },
+            true,
+            false
+          ]
+        },
+        "column_metadata": ""
       }
     },
     "methods": [

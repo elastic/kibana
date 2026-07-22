@@ -87,11 +87,17 @@ export const generateBodyParams = (
 const isAvailableInEndpointEnvironments = (
   availability: SpecificationTypes.Availabilities | undefined,
   context: ConversionContext
-): boolean =>
-  !availability ||
-  context.endpointEnvironments.every((environment) =>
+): boolean => {
+  if (!availability) {
+    return true;
+  }
+  if (context.endpointEnvironments.length === 0) {
+    return false;
+  }
+  return context.endpointEnvironments.every((environment) =>
     isAvailabilityPublic(availability[environment])
   );
+};
 
 const convertProperties = (
   properties: SpecificationTypes.Property[],
@@ -298,12 +304,18 @@ const convertUnion = (
         : [];
     })
   );
+  const arrayValues = uniqueValues(
+    converted.filter((value) => Array.isArray(value) || isAnyOf(value))
+  );
   if (objectValues.length === 1) {
-    // keep the primitive/enum choices of the remaining union branches
-    // alongside the single object branch
-    return choices.length > 0
-      ? oneOf(uniqueValues([objectValues[0], ...choices]))
-      : objectValues[0];
+    // keep representable primitive, enum, and array alternatives alongside
+    // the single object branch
+    const alternatives = uniqueValues([
+      objectValues[0],
+      ...choices,
+      ...(arrayValues.length === 1 ? arrayValues : []),
+    ]);
+    return alternatives.length > 1 ? oneOf(alternatives) : objectValues[0];
   }
   if (objectValues.length > 1) {
     return intersectObjectValues(objectValues);
@@ -312,9 +324,6 @@ const convertUnion = (
     return oneOf(choices);
   }
 
-  const arrayValues = uniqueValues(
-    converted.filter((value) => Array.isArray(value) || isAnyOf(value))
-  );
   if (arrayValues.length === 1) {
     return arrayValues[0];
   }

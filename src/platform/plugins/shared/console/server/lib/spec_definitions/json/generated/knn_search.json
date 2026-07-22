@@ -42,9 +42,6 @@
       },
       "stored_fields": "",
       "fields": "",
-      "filter": {
-        "__scope_link": "GLOBAL.query"
-      },
       "knn": {
         "field": "",
         "query_vector": [],

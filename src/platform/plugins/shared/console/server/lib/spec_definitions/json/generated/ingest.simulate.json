@@ -1169,8 +1169,18 @@
                 }
               },
               "input_output": {
-                "input_field": "",
-                "output_field": ""
+                "__one_of": [
+                  {
+                    "input_field": "",
+                    "output_field": ""
+                  },
+                  [
+                    {
+                      "input_field": "",
+                      "output_field": ""
+                    }
+                  ]
+                ]
               },
               "ignore_missing": {
                 "__one_of": [
@@ -3323,8 +3333,18 @@
                 }
               },
               "input_output": {
-                "input_field": "",
-                "output_field": ""
+                "__one_of": [
+                  {
+                    "input_field": "",
+                    "output_field": ""
+                  },
+                  [
+                    {
+                      "input_field": "",
+                      "output_field": ""
+                    }
+                  ]
+                ]
               },
               "ignore_missing": {
                 "__one_of": [

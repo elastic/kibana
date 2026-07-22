@@ -16,6 +16,30 @@
         "0"
       ]
     },
+    "data_autocomplete_rules": {
+      "data_source": "",
+      "resource": "",
+      "description": "",
+      "mappings": {
+        "dynamic": {
+          "__one_of": [
+            "true",
+            "false"
+          ]
+        },
+        "properties": {
+          "*": {
+            "type": "",
+            "path": "",
+            "format": ""
+          }
+        },
+        "_id": {
+          "path": ""
+        }
+      },
+      "settings": {}
+    },
     "methods": [
       "PUT"
     ],

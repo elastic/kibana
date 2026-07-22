@@ -117,19 +117,12 @@
       },
       "description": "",
       "model_plot": {
-        "annotations_enabled": {
-          "__one_of": [
-            true,
-            false
-          ]
-        },
         "enabled": {
           "__one_of": [
             true,
             false
           ]
-        },
-        "terms": ""
+        }
       },
       "model_snapshot_id": "",
       "model_snapshot_retention_days": "",

@@ -112,6 +112,17 @@ describe('generateBodyParams', () => {
         stack_only: '',
       });
     });
+
+    it('SHOULD omit annotated properties when the endpoint has no public environment', () => {
+      const requestType = makeRequestWithBody([
+        {
+          ...getMockProperty({ propertyName: 'stack_only' }),
+          availability: { stack: {} },
+        },
+      ]);
+
+      expect(generateBodyParams(requestType, mockSchema, {})).toEqual({});
+    });
   });
 
   it('generates __one_of for enum properties', () => {
@@ -604,6 +615,37 @@ describe('generateBodyParams', () => {
     expect(generateBodyParams(requestType, schema)).toEqual({
       doc_values: {
         __one_of: [{ format: '' }, true, false],
+      },
+    });
+  });
+
+  it('WHEN a union has an interface and an array of that interface SHOULD keep both forms', () => {
+    const knnSearch: SpecificationTypes.Interface = {
+      kind: 'interface',
+      name: { name: 'KnnSearch', namespace: '_types' },
+      properties: [getMockProperty({ propertyName: 'field' })],
+      specLocation: '',
+    };
+    const schema: SpecificationTypes.Model = { ...mockSchema, types: [knnSearch] };
+    const requestType = makeRequestWithBody([
+      getMockProperty({
+        propertyName: 'knn',
+        type: {
+          kind: 'union_of',
+          items: [
+            { kind: 'instance_of', type: knnSearch.name },
+            {
+              kind: 'array_of',
+              value: { kind: 'instance_of', type: knnSearch.name },
+            },
+          ],
+        },
+      }),
+    ]);
+
+    expect(generateBodyParams(requestType, schema)).toEqual({
+      knn: {
+        __one_of: [{ field: '' }, [{ field: '' }]],
       },
     });
   });

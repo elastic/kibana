@@ -634,12 +634,26 @@
               "missing": "",
               "offset": "",
               "order": {
-                "*": {
-                  "__one_of": [
-                    "asc",
-                    "desc"
+                "__one_of": [
+                  {
+                    "*": {
+                      "__one_of": [
+                        "asc",
+                        "desc"
+                      ]
+                    }
+                  },
+                  [
+                    {
+                      "*": {
+                        "__one_of": [
+                          "asc",
+                          "desc"
+                        ]
+                      }
+                    }
                   ]
-                }
+                ]
               },
               "params": {},
               "script": {
@@ -793,9 +807,18 @@
             },
             "filters": {
               "filters": {
-                "*": {
-                  "__scope_link": "GLOBAL.query"
-                }
+                "__one_of": [
+                  {
+                    "*": {
+                      "__scope_link": "GLOBAL.query"
+                    }
+                  },
+                  [
+                    {
+                      "__scope_link": "GLOBAL.query"
+                    }
+                  ]
+                ]
               },
               "other_bucket": {
                 "__one_of": [
@@ -957,12 +980,26 @@
               "missing": "",
               "offset": "",
               "order": {
-                "*": {
-                  "__one_of": [
-                    "asc",
-                    "desc"
+                "__one_of": [
+                  {
+                    "*": {
+                      "__one_of": [
+                        "asc",
+                        "desc"
+                      ]
+                    }
+                  },
+                  [
+                    {
+                      "*": {
+                        "__one_of": [
+                          "asc",
+                          "desc"
+                        ]
+                      }
+                    }
                   ]
-                }
+                ]
               },
               "script": {
                 "__one_of": [
@@ -1258,12 +1295,26 @@
                 ]
               },
               "order": {
-                "*": {
-                  "__one_of": [
-                    "asc",
-                    "desc"
+                "__one_of": [
+                  {
+                    "*": {
+                      "__one_of": [
+                        "asc",
+                        "desc"
+                      ]
+                    }
+                  },
+                  [
+                    {
+                      "*": {
+                        "__one_of": [
+                          "asc",
+                          "desc"
+                        ]
+                      }
+                    }
                   ]
-                }
+                ]
               },
               "min_doc_count": "",
               "shard_min_doc_count": "",
@@ -1970,12 +2021,26 @@
               },
               "value_type": "",
               "order": {
-                "*": {
-                  "__one_of": [
-                    "asc",
-                    "desc"
+                "__one_of": [
+                  {
+                    "*": {
+                      "__one_of": [
+                        "asc",
+                        "desc"
+                      ]
+                    }
+                  },
+                  [
+                    {
+                      "*": {
+                        "__one_of": [
+                          "asc",
+                          "desc"
+                        ]
+                      }
+                    }
                   ]
-                }
+                ]
               },
               "script": {
                 "__one_of": [
@@ -2150,73 +2215,148 @@
                   ]
                 },
                 "fields": {
-                  "*": {
-                    "type": {
-                      "__one_of": [
-                        "plain",
-                        "fvh",
-                        "unified"
-                      ]
+                  "__one_of": [
+                    {
+                      "*": {
+                        "type": {
+                          "__one_of": [
+                            "plain",
+                            "fvh",
+                            "unified"
+                          ]
+                        },
+                        "boundary_chars": "",
+                        "boundary_max_scan": "",
+                        "boundary_scanner": {
+                          "__one_of": [
+                            "chars",
+                            "sentence",
+                            "word"
+                          ]
+                        },
+                        "boundary_scanner_locale": "",
+                        "force_source": {
+                          "__one_of": [
+                            true,
+                            false
+                          ]
+                        },
+                        "fragmenter": {
+                          "__one_of": [
+                            "simple",
+                            "span"
+                          ]
+                        },
+                        "fragment_size": "",
+                        "highlight_filter": {
+                          "__one_of": [
+                            true,
+                            false
+                          ]
+                        },
+                        "highlight_query": {
+                          "__scope_link": "GLOBAL.query"
+                        },
+                        "max_fragment_length": "",
+                        "max_analyzed_offset": "",
+                        "no_match_size": "",
+                        "number_of_fragments": "",
+                        "options": {},
+                        "order": {
+                          "__one_of": [
+                            "score"
+                          ]
+                        },
+                        "phrase_limit": "",
+                        "post_tags": [],
+                        "pre_tags": [],
+                        "require_field_match": {
+                          "__one_of": [
+                            true,
+                            false
+                          ]
+                        },
+                        "tags_schema": {
+                          "__one_of": [
+                            "styled"
+                          ]
+                        },
+                        "fragment_offset": "",
+                        "matched_fields": ""
+                      }
                     },
-                    "boundary_chars": "",
-                    "boundary_max_scan": "",
-                    "boundary_scanner": {
-                      "__one_of": [
-                        "chars",
-                        "sentence",
-                        "word"
-                      ]
-                    },
-                    "boundary_scanner_locale": "",
-                    "force_source": {
-                      "__one_of": [
-                        true,
-                        false
-                      ]
-                    },
-                    "fragmenter": {
-                      "__one_of": [
-                        "simple",
-                        "span"
-                      ]
-                    },
-                    "fragment_size": "",
-                    "highlight_filter": {
-                      "__one_of": [
-                        true,
-                        false
-                      ]
-                    },
-                    "highlight_query": {
-                      "__scope_link": "GLOBAL.query"
-                    },
-                    "max_fragment_length": "",
-                    "max_analyzed_offset": "",
-                    "no_match_size": "",
-                    "number_of_fragments": "",
-                    "options": {},
-                    "order": {
-                      "__one_of": [
-                        "score"
-                      ]
-                    },
-                    "phrase_limit": "",
-                    "post_tags": [],
-                    "pre_tags": [],
-                    "require_field_match": {
-                      "__one_of": [
-                        true,
-                        false
-                      ]
-                    },
-                    "tags_schema": {
-                      "__one_of": [
-                        "styled"
-                      ]
-                    },
-                    "fragment_offset": "",
-                    "matched_fields": ""
-                  }
+                    [
+                      {
+                        "*": {
+                          "type": {
+                            "__one_of": [
+                              "plain",
+                              "fvh",
+                              "unified"
+                            ]
+                          },
+                          "boundary_chars": "",
+                          "boundary_max_scan": "",
+                          "boundary_scanner": {
+                            "__one_of": [
+                              "chars",
+                              "sentence",
+                              "word"
+                            ]
+                          },
+                          "boundary_scanner_locale": "",
+                          "force_source": {
+                            "__one_of": [
+                              true,
+                              false
+                            ]
+                          },
+                          "fragmenter": {
+                            "__one_of": [
+                              "simple",
+                              "span"
+                            ]
+                          },
+                          "fragment_size": "",
+                          "highlight_filter": {
+                            "__one_of": [
+                              true,
+                              false
+                            ]
+                          },
+                          "highlight_query": {
+                            "__scope_link": "GLOBAL.query"
+                          },
+                          "max_fragment_length": "",
+                          "max_analyzed_offset": "",
+                          "no_match_size": "",
+                          "number_of_fragments": "",
+                          "options": {},
+                          "order": {
+                            "__one_of": [
+                              "score"
+                            ]
+                          },
+                          "phrase_limit": "",
+                          "post_tags": [],
+                          "pre_tags": [],
+                          "require_field_match": {
+                            "__one_of": [
+                              true,
+                              false
+                            ]
+                          },
+                          "tags_schema": {
+                            "__one_of": [
+                              "styled"
+                            ]
+                          },
+                          "fragment_offset": "",
+                          "matched_fields": ""
+                        }
+                      }
+                    ]
+                  ]
                 }
               },
               "script_fields": {
@@ -2377,7 +2517,16 @@
                 ]
               },
               "metrics": {
-                "field": ""
+                "__one_of": [
+                  {
+                    "field": ""
+                  },
+                  [
+                    {
+                      "field": ""
+                    }
+                  ]
+                ]
               },
               "size": "",
               "sort": ""
@@ -3412,12 +3561,26 @@
                 "missing": "",
                 "offset": "",
                 "order": {
-                  "*": {
-                    "__one_of": [
-                      "asc",
-                      "desc"
+                  "__one_of": [
+                    {
+                      "*": {
+                        "__one_of": [
+                          "asc",
+                          "desc"
+                        ]
+                      }
+                    },
+                    [
+                      {
+                        "*": {
+                          "__one_of": [
+                            "asc",
+                            "desc"
+                          ]
+                        }
+                      }
                     ]
-                  }
+                  ]
                 },
                 "params": {},
                 "script": {
@@ -3571,9 +3734,18 @@
               },
               "filters": {
                 "filters": {
-                  "*": {
-                    "__scope_link": "GLOBAL.query"
-                  }
+                  "__one_of": [
+                    {
+                      "*": {
+                        "__scope_link": "GLOBAL.query"
+                      }
+                    },
+                    [
+                      {
+                        "__scope_link": "GLOBAL.query"
+                      }
+                    ]
+                  ]
                 },
                 "other_bucket": {
                   "__one_of": [
@@ -3735,12 +3907,26 @@
                 "missing": "",
                 "offset": "",
                 "order": {
-                  "*": {
-                    "__one_of": [
-                      "asc",
-                      "desc"
+                  "__one_of": [
+                    {
+                      "*": {
+                        "__one_of": [
+                          "asc",
+                          "desc"
+                        ]
+                      }
+                    },
+                    [
+                      {
+                        "*": {
+                          "__one_of": [
+                            "asc",
+                            "desc"
+                          ]
+                        }
+                      }
                     ]
-                  }
+                  ]
                 },
                 "script": {
                   "__one_of": [
@@ -4036,12 +4222,26 @@
                   ]
                 },
                 "order": {
-                  "*": {
-                    "__one_of": [
-                      "asc",
-                      "desc"
+                  "__one_of": [
+                    {
+                      "*": {
+                        "__one_of": [
+                          "asc",
+                          "desc"
+                        ]
+                      }
+                    },
+                    [
+                      {
+                        "*": {
+                          "__one_of": [
+                            "asc",
+                            "desc"
+                          ]
+                        }
+                      }
                     ]
-                  }
+                  ]
                 },
                 "min_doc_count": "",
                 "shard_min_doc_count": "",
@@ -4748,12 +4948,26 @@
                 },
                 "value_type": "",
                 "order": {
-                  "*": {
-                    "__one_of": [
-                      "asc",
-                      "desc"
+                  "__one_of": [
+                    {
+                      "*": {
+                        "__one_of": [
+                          "asc",
+                          "desc"
+                        ]
+                      }
+                    },
+                    [
+                      {
+                        "*": {
+                          "__one_of": [
+                            "asc",
+                            "desc"
+                          ]
+                        }
+                      }
                     ]
-                  }
+                  ]
                 },
                 "script": {
                   "__one_of": [
@@ -4928,73 +5142,148 @@
                     ]
                   },
                   "fields": {
-                    "*": {
-                      "type": {
-                        "__one_of": [
-                          "plain",
-                          "fvh",
-                          "unified"
-                        ]
+                    "__one_of": [
+                      {
+                        "*": {
+                          "type": {
+                            "__one_of": [
+                              "plain",
+                              "fvh",
+                              "unified"
+                            ]
+                          },
+                          "boundary_chars": "",
+                          "boundary_max_scan": "",
+                          "boundary_scanner": {
+                            "__one_of": [
+                              "chars",
+                              "sentence",
+                              "word"
+                            ]
+                          },
+                          "boundary_scanner_locale": "",
+                          "force_source": {
+                            "__one_of": [
+                              true,
+                              false
+                            ]
+                          },
+                          "fragmenter": {
+                            "__one_of": [
+                              "simple",
+                              "span"
+                            ]
+                          },
+                          "fragment_size": "",
+                          "highlight_filter": {
+                            "__one_of": [
+                              true,
+                              false
+                            ]
+                          },
+                          "highlight_query": {
+                            "__scope_link": "GLOBAL.query"
+                          },
+                          "max_fragment_length": "",
+                          "max_analyzed_offset": "",
+                          "no_match_size": "",
+                          "number_of_fragments": "",
+                          "options": {},
+                          "order": {
+                            "__one_of": [
+                              "score"
+                            ]
+                          },
+                          "phrase_limit": "",
+                          "post_tags": [],
+                          "pre_tags": [],
+                          "require_field_match": {
+                            "__one_of": [
+                              true,
+                              false
+                            ]
+                          },
+                          "tags_schema": {
+                            "__one_of": [
+                              "styled"
+                            ]
+                          },
+                          "fragment_offset": "",
+                          "matched_fields": ""
+                        }
                       },
-                      "boundary_chars": "",
-                      "boundary_max_scan": "",
-                      "boundary_scanner": {
-                        "__one_of": [
-                          "chars",
-                          "sentence",
-                          "word"
-                        ]
-                      },
-                      "boundary_scanner_locale": "",
-                      "force_source": {
-                        "__one_of": [
-                          true,
-                          false
-                        ]
-                      },
-                      "fragmenter": {
-                        "__one_of": [
-                          "simple",
-                          "span"
-                        ]
-                      },
-                      "fragment_size": "",
-                      "highlight_filter": {
-                        "__one_of": [
-                          true,
-                          false
-                        ]
-                      },
-                      "highlight_query": {
-                        "__scope_link": "GLOBAL.query"
-                      },
-                      "max_fragment_length": "",
-                      "max_analyzed_offset": "",
-                      "no_match_size": "",
-                      "number_of_fragments": "",
-                      "options": {},
-                      "order": {
-                        "__one_of": [
-                          "score"
-                        ]
-                      },
-                      "phrase_limit": "",
-                      "post_tags": [],
-                      "pre_tags": [],
-                      "require_field_match": {
-                        "__one_of": [
-                          true,
-                          false
-                        ]
-                      },
-                      "tags_schema": {
-                        "__one_of": [
-                          "styled"
-                        ]
-                      },
-                      "fragment_offset": "",
-                      "matched_fields": ""
-                    }
+                      [
+                        {
+                          "*": {
+                            "type": {
+                              "__one_of": [
+                                "plain",
+                                "fvh",
+                                "unified"
+                              ]
+                            },
+                            "boundary_chars": "",
+                            "boundary_max_scan": "",
+                            "boundary_scanner": {
+                              "__one_of": [
+                                "chars",
+                                "sentence",
+                                "word"
+                              ]
+                            },
+                            "boundary_scanner_locale": "",
+                            "force_source": {
+                              "__one_of": [
+                                true,
+                                false
+                              ]
+                            },
+                            "fragmenter": {
+                              "__one_of": [
+                                "simple",
+                                "span"
+                              ]
+                            },
+                            "fragment_size": "",
+                            "highlight_filter": {
+                              "__one_of": [
+                                true,
+                                false
+                              ]
+                            },
+                            "highlight_query": {
+                              "__scope_link": "GLOBAL.query"
+                            },
+                            "max_fragment_length": "",
+                            "max_analyzed_offset": "",
+                            "no_match_size": "",
+                            "number_of_fragments": "",
+                            "options": {},
+                            "order": {
+                              "__one_of": [
+                                "score"
+                              ]
+                            },
+                            "phrase_limit": "",
+                            "post_tags": [],
+                            "pre_tags": [],
+                            "require_field_match": {
+                              "__one_of": [
+                                true,
+                                false
+                              ]
+                            },
+                            "tags_schema": {
+                              "__one_of": [
+                                "styled"
+                              ]
+                            },
+                            "fragment_offset": "",
+                            "matched_fields": ""
+                          }
+                        }
+                      ]
+                    ]
                   }
                 },
                 "script_fields": {
@@ -5155,7 +5444,16 @@
                   ]
                 },
                 "metrics": {
-                  "field": ""
+                  "__one_of": [
+                    {
+                      "field": ""
+                    },
+                    [
+                      {
+                        "field": ""
+                      }
+                    ]
+                  ]
                 },
                 "size": "",
                 "sort": ""

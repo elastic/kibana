@@ -14,23 +14,48 @@
         ]
       },
       "criteria": {
-        "type": {
-          "__one_of": [
-            "global",
-            "exact",
-            "fuzzy",
-            "prefix",
-            "suffix",
-            "contains",
-            "lt",
-            "lte",
-            "gt",
-            "gte",
-            "always"
+        "__one_of": [
+          {
+            "type": {
+              "__one_of": [
+                "global",
+                "exact",
+                "fuzzy",
+                "prefix",
+                "suffix",
+                "contains",
+                "lt",
+                "lte",
+                "gt",
+                "gte",
+                "always"
+              ]
+            },
+            "metadata": "",
+            "values": []
+          },
+          [
+            {
+              "type": {
+                "__one_of": [
+                  "global",
+                  "exact",
+                  "fuzzy",
+                  "prefix",
+                  "suffix",
+                  "contains",
+                  "lt",
+                  "lte",
+                  "gt",
+                  "gte",
+                  "always"
+                ]
+              },
+              "metadata": "",
+              "values": []
+            }
           ]
-        },
-        "metadata": "",
-        "values": []
+        ]
       },
       "actions": {
         "ids": [],

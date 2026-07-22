@@ -41,7 +41,16 @@
       "timestamp_field": "",
       "fetch_size": "",
       "filter": {
-        "__scope_link": "GLOBAL.query"
+        "__one_of": [
+          {
+            "__scope_link": "GLOBAL.query"
+          },
+          [
+            {
+              "__scope_link": "GLOBAL.query"
+            }
+          ]
+        ]
       },
       "keep_alive": "",
       "keep_on_completion": {

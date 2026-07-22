@@ -5,8 +5,7 @@
       "string": "",
       "size": "",
       "timeout": "",
-      "case_insensitive": { "__one_of": [true, false] },
-      "index_filter": ""
+      "case_insensitive": { "__one_of": [true, false] }
     }
   }
 }

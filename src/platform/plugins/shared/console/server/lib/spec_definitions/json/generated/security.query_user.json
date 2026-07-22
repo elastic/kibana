@@ -18,17 +18,53 @@
           "boost": "",
           "_name": "",
           "filter": {
-            "__scope_link": "GLOBAL.query"
+            "__one_of": [
+              {
+                "__scope_link": "GLOBAL.query"
+              },
+              [
+                {
+                  "__scope_link": "GLOBAL.query"
+                }
+              ]
+            ]
           },
           "minimum_should_match": "",
           "must": {
-            "__scope_link": "GLOBAL.query"
+            "__one_of": [
+              {
+                "__scope_link": "GLOBAL.query"
+              },
+              [
+                {
+                  "__scope_link": "GLOBAL.query"
+                }
+              ]
+            ]
           },
           "must_not": {
-            "__scope_link": "GLOBAL.query"
+            "__one_of": [
+              {
+                "__scope_link": "GLOBAL.query"
+              },
+              [
+                {
+                  "__scope_link": "GLOBAL.query"
+                }
+              ]
+            ]
           },
           "should": {
-            "__scope_link": "GLOBAL.query"
+            "__one_of": [
+              {
+                "__scope_link": "GLOBAL.query"
+              },
+              [
+                {
+                  "__scope_link": "GLOBAL.query"
+                }
+              ]
+            ]
           }
         },
         "exists": {
@@ -189,10 +225,15 @@
           "boost": "",
           "_name": "",
           "*": {
-            "index": "",
-            "id": "",
-            "path": "",
-            "routing": ""
+            "__one_of": [
+              {
+                "index": "",
+                "id": "",
+                "path": "",
+                "routing": ""
+              },
+              []
+            ]
           }
         },
         "wildcard": {

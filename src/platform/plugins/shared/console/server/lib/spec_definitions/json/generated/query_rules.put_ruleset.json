@@ -8,42 +8,136 @@
     },
     "data_autocomplete_rules": {
       "rules": {
-        "rule_id": "",
-        "type": {
-          "__one_of": [
-            "pinned",
-            "exclude"
-          ]
-        },
-        "criteria": {
-          "type": {
-            "__one_of": [
-              "global",
-              "exact",
-              "fuzzy",
-              "prefix",
-              "suffix",
-              "contains",
-              "lt",
-              "lte",
-              "gt",
-              "gte",
-              "always"
-            ]
+        "__one_of": [
+          {
+            "rule_id": "",
+            "type": {
+              "__one_of": [
+                "pinned",
+                "exclude"
+              ]
+            },
+            "criteria": {
+              "__one_of": [
+                {
+                  "type": {
+                    "__one_of": [
+                      "global",
+                      "exact",
+                      "fuzzy",
+                      "prefix",
+                      "suffix",
+                      "contains",
+                      "lt",
+                      "lte",
+                      "gt",
+                      "gte",
+                      "always"
+                    ]
+                  },
+                  "metadata": "",
+                  "values": []
+                },
+                [
+                  {
+                    "type": {
+                      "__one_of": [
+                        "global",
+                        "exact",
+                        "fuzzy",
+                        "prefix",
+                        "suffix",
+                        "contains",
+                        "lt",
+                        "lte",
+                        "gt",
+                        "gte",
+                        "always"
+                      ]
+                    },
+                    "metadata": "",
+                    "values": []
+                  }
+                ]
+              ]
+            },
+            "actions": {
+              "ids": [],
+              "docs": [
+                {
+                  "_id": "",
+                  "_index": ""
+                }
+              ]
+            },
+            "priority": ""
           },
-          "metadata": "",
-          "values": []
-        },
-        "actions": {
-          "ids": [],
-          "docs": [
+          [
             {
-              "_id": "",
-              "_index": ""
+              "rule_id": "",
+              "type": {
+                "__one_of": [
+                  "pinned",
+                  "exclude"
+                ]
+              },
+              "criteria": {
+                "__one_of": [
+                  {
+                    "type": {
+                      "__one_of": [
+                        "global",
+                        "exact",
+                        "fuzzy",
+                        "prefix",
+                        "suffix",
+                        "contains",
+                        "lt",
+                        "lte",
+                        "gt",
+                        "gte",
+                        "always"
+                      ]
+                    },
+                    "metadata": "",
+                    "values": []
+                  },
+                  [
+                    {
+                      "type": {
+                        "__one_of": [
+                          "global",
+                          "exact",
+                          "fuzzy",
+                          "prefix",
+                          "suffix",
+                          "contains",
+                          "lt",
+                          "lte",
+                          "gt",
+                          "gte",
+                          "always"
+                        ]
+                      },
+                      "metadata": "",
+                      "values": []
+                    }
+                  ]
+                ]
+              },
+              "actions": {
+                "ids": [],
+                "docs": [
+                  {
+                    "_id": "",
+                    "_index": ""
+                  }
+                ]
+              },
+              "priority": ""
             }
           ]
-        },
-        "priority": ""
+        ]
       }
     },
     "methods": [

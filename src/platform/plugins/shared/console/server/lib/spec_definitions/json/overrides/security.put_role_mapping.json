@@ -3,8 +3,7 @@
     "data_autocomplete_rules": {
       "enabled": true,
       "metadata": {},
-      "roles": [],
-      "rules": {}
+      "roles": []
     }
   }
 }
