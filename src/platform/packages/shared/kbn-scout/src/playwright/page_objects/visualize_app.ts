@@ -24,6 +24,7 @@ export class VisualizeApp {
   private readonly confirmSaveButton;
   private readonly visualizationLoader;
   private readonly dashboardPicker;
+  private readonly editInLensButton;
 
   constructor(private readonly page: ScoutPage) {
     this.landingPage = this.page.testSubj.locator('visualizationLandingPage');
@@ -37,6 +38,7 @@ export class VisualizeApp {
     this.confirmSaveButton = this.page.testSubj.locator('confirmSaveSavedObjectButton');
     this.visualizationLoader = this.page.testSubj.locator('visualizationLoader');
     this.dashboardPicker = this.page.testSubj.locator('open-dashboard-picker');
+    this.editInLensButton = this.page.testSubj.locator('visualizeEditInLensButton');
   }
 
   async goto() {
@@ -159,5 +161,13 @@ export class VisualizeApp {
     await this.clickLegacyTab();
     await this.clickVisType('metrics');
     await this.waitForVisualizationLoaded();
+  }
+
+  async clickEditInLensButton() {
+    await this.editInLensButton.click();
+  }
+
+  getEditInLensButton() {
+    return this.editInLensButton;
   }
 }

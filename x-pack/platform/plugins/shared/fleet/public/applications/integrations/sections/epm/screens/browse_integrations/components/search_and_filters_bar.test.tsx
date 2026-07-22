@@ -29,6 +29,12 @@ jest.mock('../hooks/url_categories', () => ({
 
 jest.mock('../../../../../hooks', () => ({}));
 
+const mockUseAgentless = jest.fn();
+jest.mock(
+  '../../../../../../fleet/sections/agent_policy/create_package_policy_page/single_page_layout/hooks/setup_technology',
+  () => ({ useAgentless: () => mockUseAgentless() })
+);
+
 import { SearchAndFiltersBar } from './search_and_filters_bar';
 
 describe('SearchAndFiltersBar', () => {
@@ -48,6 +54,7 @@ describe('SearchAndFiltersBar', () => {
     });
     mockUseSetUrlCategory.mockReturnValue(jest.fn());
     mockUseUrlDefaultCategories.mockReturnValue([]);
+    mockUseAgentless.mockReturnValue({ isAgentlessEnabled: true });
   });
 
   function renderSearchAndFiltersBar() {
@@ -205,6 +212,22 @@ describe('SearchAndFiltersBar', () => {
       const sortButton = getByTestId('browseIntegrations.searchBar.sortBtn');
 
       expect(sortButton).toHaveTextContent('A-Z');
+    });
+  });
+
+  describe('Setup Method (Ingestion Method) Filter', () => {
+    it('renders the ingestion method filter button when agentless is enabled', () => {
+      mockUseAgentless.mockReturnValue({ isAgentlessEnabled: true });
+
+      const { getByTestId } = renderSearchAndFiltersBar();
+      expect(getByTestId('browseIntegrations.searchBar.setupMethodBtn')).toBeInTheDocument();
+    });
+
+    it('does not render the ingestion method filter button when agentless is disabled', () => {
+      mockUseAgentless.mockReturnValue({ isAgentlessEnabled: false });
+
+      const { queryByTestId } = renderSearchAndFiltersBar();
+      expect(queryByTestId('browseIntegrations.searchBar.setupMethodBtn')).not.toBeInTheDocument();
     });
   });
 

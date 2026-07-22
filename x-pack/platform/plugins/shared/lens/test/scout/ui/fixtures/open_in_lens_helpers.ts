@@ -51,6 +51,16 @@ export async function setupLogstashOpenInLensDefaults({
   await uiSettings.set({ 'dateFormat:tz': 'UTC' });
 }
 
+/** Unsets UI settings applied by `setupLogstashOpenInLensDefaults`. */
+export async function cleanupLogstashOpenInLensDefaults({
+  uiSettings,
+}: LogstashOpenInLensSetupContext): Promise<void> {
+  if (!uiSettings.unset) {
+    throw new Error('scoutSpace.uiSettings.unset is required');
+  }
+  await uiSettings.unset(...OPEN_IN_LENS_UI_SETTINGS);
+}
+
 export function createOpenInLensSuiteSetup({
   archivePath,
   dashboardTitles,
@@ -99,10 +109,10 @@ export function createOpenInLensSuiteSetup({
   };
 
   const afterAll = async ({ scoutSpace }: { scoutSpace: LogstashOpenInLensSetupContext }) => {
-    if (!scoutSpace.savedObjects || !scoutSpace.uiSettings.unset) {
-      throw new Error('scoutSpace saved object cleanup and uiSettings.unset are required');
+    if (!scoutSpace.savedObjects) {
+      throw new Error('scoutSpace.savedObjects is required to clean up Open in Lens fixtures');
     }
-    await scoutSpace.uiSettings.unset(...OPEN_IN_LENS_UI_SETTINGS);
+    await cleanupLogstashOpenInLensDefaults(scoutSpace);
     await scoutSpace.savedObjects.cleanStandardList();
   };
 
