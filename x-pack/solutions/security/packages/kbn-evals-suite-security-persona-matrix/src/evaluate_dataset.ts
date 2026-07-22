@@ -44,8 +44,8 @@ export function createEvaluatePersonaMatrixDataset({
     const expectedSkills = Array.from(
       new Set(
         dataset.examples
-          .map((e) => (e.metadata as Record<string, string> | undefined)?.expectedSkill)
-          .filter((s): s is string => !!s)
+          .map((e) => (e.metadata as Record<string, unknown> | undefined)?.expectedSkill)
+          .filter((s): s is string => typeof s === 'string')
       )
     );
 
@@ -55,8 +55,9 @@ export function createEvaluatePersonaMatrixDataset({
         log,
         skillName,
         resolveContext: (args) => {
-          const expectedSkill = (args.metadata as Record<string, string> | undefined)?.expectedSkill;
-          return { expectedSkill };
+          const expectedSkill = (args.metadata as Record<string, unknown> | undefined)
+            ?.expectedSkill;
+          return { expectedSkill: typeof expectedSkill === 'string' ? expectedSkill : undefined };
         },
       })
     );

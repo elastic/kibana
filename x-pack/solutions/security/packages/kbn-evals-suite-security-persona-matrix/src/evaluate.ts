@@ -6,9 +6,9 @@
  */
 
 import { evaluate as base } from '@kbn/evals';
+import type { EvaluationDataset } from '@kbn/evals';
 import { PersonaMatrixChatClient } from './chat_client';
 import { createEvaluatePersonaMatrixDataset } from './evaluate_dataset';
-import type { EvaluationDataset } from '@kbn/evals';
 import type { PersonaMatrixExample } from './datasets/persona_matrix_prompts';
 
 export type EvaluatePersonaMatrixDataset = (params: {
