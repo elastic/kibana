@@ -178,7 +178,7 @@ describe('when calling the Suggestions route handler', () => {
           1,
           expect.any(Object),
           expect.any(Object),
-          mockScopedEsClient.asCurrentUser,
+          mockScopedEsClient.asInternalUser,
           mockIndexPattern,
           fieldName,
           'test-query',
@@ -318,6 +318,7 @@ describe('when calling the Suggestions route handler', () => {
         mockSecuritySolutionContext = {
           getInternalFleetServices: jest.fn().mockReturnValue(mockFleetServices),
           getSpaceId: jest.fn().mockReturnValue('default'),
+          getEndpointAuthz: jest.fn().mockResolvedValue(getEndpointAuthzInitialStateMock()),
         };
 
         applyActionsEsSearchMock(mockScopedEsClient.asInternalUser);
@@ -739,7 +740,7 @@ describe('when calling the Suggestions route handler', () => {
           1,
           expect.any(Object),
           expect.any(Object),
-          mockScopedEsClient.asCurrentUser,
+          mockScopedEsClient.asInternalUser,
           mockIndexPattern,
           fieldName,
           'test-query',
@@ -764,7 +765,7 @@ describe('when calling the Suggestions route handler', () => {
         );
       });
 
-      it('should use the current user es client for trusted apps suggestions', async () => {
+      it('should use the internal user es client for trusted apps suggestions', async () => {
         const spaceId = 'custom-space';
         const mockIntegrationNamespaces = { endpoint: ['custom-namespace'] };
         const mockIndexPattern = 'logs-endpoint.events.*-custom-namespace';
@@ -815,7 +816,7 @@ describe('when calling the Suggestions route handler', () => {
           1,
           expect.any(Object),
           expect.any(Object),
-          mockScopedEsClient.asCurrentUser,
+          mockScopedEsClient.asInternalUser,
           mockIndexPattern,
           fieldName,
           'test-query',
@@ -1050,7 +1051,7 @@ describe('when calling the Suggestions route handler', () => {
         expect(termsEnumSuggestionsMock).toHaveBeenCalledWith(
           expect.any(Object),
           expect.any(Object),
-          mockScopedEsClient.asCurrentUser,
+          mockScopedEsClient.asInternalUser,
           `${mockIndexPattern},*:${mockIndexPattern}`,
           'process.id',
           'test-query',
@@ -1172,6 +1173,48 @@ describe('when calling the Suggestions route handler', () => {
         });
 
         expect(mockResponse.forbidden).toBeCalled();
+      });
+    });
+
+    describe('when the user is not authorized for the requested suggestion type', () => {
+      beforeEach(() => {
+        suggestionsRouteHandler = getEndpointSuggestionsRequestHandler(
+          config$,
+          mockEndpointContext
+        );
+      });
+
+      it('should respond with forbidden and not query for suggestions', async () => {
+        const mockContext = requestContextMock.convertContext(
+          createRouteHandlerContext(mockScopedEsClient, mockSavedObjectClient, {
+            endpointAuthz: {
+              canWriteEventFilters: false,
+              canWriteTrustedApplications: false,
+              canWriteTrustedDevices: false,
+              canWriteEndpointExceptions: true,
+              canReadEndpointList: false,
+            },
+          })
+        );
+
+        const mockRequest = httpServerMock.createKibanaRequest<
+          TypeOf<typeof EndpointSuggestionsSchema.params>,
+          never,
+          never
+        >({
+          params: { suggestion_type: 'eventFilters' },
+          body: {
+            field: 'process.args',
+            query: 'test-query',
+            filters: [],
+            fieldMeta: 'test-field-meta',
+          },
+        });
+
+        await suggestionsRouteHandler(mockContext, mockRequest, mockResponse);
+
+        expect(mockResponse.forbidden).toHaveBeenCalled();
+        expect(termsEnumSuggestionsMock).not.toHaveBeenCalled();
       });
     });
   });

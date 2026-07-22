@@ -33,6 +33,7 @@ import {
 } from '../../../../common/endpoint/constants';
 import { withEndpointAuthz } from '../with_endpoint_authz';
 import { errorHandler } from '../error_handler';
+import { EndpointAuthorizationError } from '../../errors';
 import { buildIndexNameWithNamespace } from '../../../../common/endpoint/utils/index_name_utilities';
 import { buildBaseEndpointMetadataFilter } from '../../../../common/endpoint/utils/endpoint_metadata_filter';
 import { prefixIndexPatternsWithCcs } from '../../utils/ccs_utils';
@@ -113,6 +114,22 @@ export const getEndpointSuggestionsRequestHandler = (
 
       const suggestionType = request.params.suggestion_type;
 
+      const endpointAuthz = await securitySolutionContext.getEndpointAuthz();
+      const isAuthorizedForSuggestionType: Record<
+        EndpointSuggestionsParams['suggestion_type'],
+        boolean
+      > = {
+        eventFilters: endpointAuthz.canWriteEventFilters,
+        trustedApps: endpointAuthz.canWriteTrustedApplications,
+        trustedDevices: endpointAuthz.canWriteTrustedDevices,
+        endpointExceptions: endpointAuthz.canWriteEndpointExceptions,
+        endpoints: endpointAuthz.canReadEndpointList,
+      };
+
+      if (!isAuthorizedForSuggestionType[suggestionType]) {
+        throw new EndpointAuthorizationError();
+      }
+
       if (
         suggestionType === 'eventFilters' ||
         (isTrustedAppsAdvancedModeFFEnabled && suggestionType === 'trustedApps') ||
@@ -179,13 +196,10 @@ export const getEndpointSuggestionsRequestHandler = (
         });
       }
 
-      // The endpoints metadata index is internal and already scoped by an agent-policy filter, so
-      // it uses the internal user. All other suggestion types run as the current user.
-      // https://docs.elastic.dev/kibana-dev-docs/key-concepts/security-kibana-system-user
       const elasticsearchClient =
-        suggestionType === 'endpoints'
-          ? elasticsearch.client.asInternalUser
-          : elasticsearch.client.asCurrentUser;
+        suggestionType === 'endpointExceptions'
+          ? elasticsearch.client.asCurrentUser
+          : elasticsearch.client.asInternalUser;
 
       const abortSignal = getRequestAbortedSignal(request.events.aborted$);
       const body = await suggestionMethod(
