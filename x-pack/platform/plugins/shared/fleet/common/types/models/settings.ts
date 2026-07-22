@@ -26,7 +26,6 @@ export interface BaseSettings {
     synthetics?: 'success' | null;
   };
   integration_knowledge_enabled?: boolean;
-  completed_migrations?: string[];
 }
 
 export interface Settings extends BaseSettings {

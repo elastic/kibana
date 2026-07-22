@@ -44,7 +44,6 @@ function mapSettingsSO(settingsSo: SavedObject<SettingsSOAttributes>): Settings 
     delete_unenrolled_agents: settingsSo.attributes.delete_unenrolled_agents,
     ilm_migration_status: settingsSo.attributes.ilm_migration_status,
     integration_knowledge_enabled: settingsSo.attributes.integration_knowledge_enabled,
-    completed_migrations: settingsSo.attributes.completed_migrations,
   };
 }
 
