@@ -87,7 +87,7 @@ describe('callbackConversePayloadSchema', () => {
   const basePayload = {
     agent_id: 'agent-1',
     input: 'Hello',
-    idempotency_key: 'Ev0PV23K4AB1',
+    execution_idempotency_key: 'Ev0PV23K4AB1',
     origin: {
       type: ConversationOriginType.Slack,
       external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
@@ -190,27 +190,27 @@ describe('callbackConversePayloadSchema', () => {
     expect(() =>
       callbackConversePayloadSchema.validate({
         ...basePayload,
-        idempotency_key: undefined,
+        execution_idempotency_key: undefined,
       })
-    ).toThrow(/idempotency_key/);
+    ).toThrow(/execution_idempotency_key/);
   });
 
   it('rejects an empty idempotency key', () => {
     expect(() =>
       callbackConversePayloadSchema.validate({
         ...basePayload,
-        idempotency_key: '',
+        execution_idempotency_key: '',
       })
-    ).toThrow(/idempotency_key/);
+    ).toThrow(/execution_idempotency_key/);
   });
 
   it('limits idempotency key length', () => {
     expect(() =>
       callbackConversePayloadSchema.validate({
         ...basePayload,
-        idempotency_key: 'x'.repeat(257),
+        execution_idempotency_key: 'x'.repeat(257),
       })
-    ).toThrow(/idempotency_key/);
+    ).toThrow(/execution_idempotency_key/);
   });
 
   it('identifies callback request payloads', () => {
@@ -318,7 +318,7 @@ describe('registerChatRoutes', () => {
         body: {
           agent_id: 'agent-1',
           input: 'Hello',
-          idempotency_key: 'Ev0PV23K4AB1',
+          execution_idempotency_key: 'Ev0PV23K4AB1',
           origin,
           callback: {
             url: 'https://relay.example.com/events?token=abc',
@@ -406,7 +406,7 @@ describe('registerChatRoutes', () => {
         body: {
           agent_id: 'agent-1',
           input: 'Hello',
-          idempotency_key: 'Ev0PV23K4AB1',
+          execution_idempotency_key: 'Ev0PV23K4AB1',
           origin: {
             type: ConversationOriginType.Slack,
             external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
@@ -435,7 +435,7 @@ describe('registerChatRoutes', () => {
             ].join('\u0000')
           )
           .digest('hex'),
-        metadata: { idempotency_key: 'Ev0PV23K4AB1' },
+        metadata: { execution_idempotency_key: 'Ev0PV23K4AB1' },
         useTaskManager: true,
         params: expect.objectContaining({
           origin: {
@@ -508,7 +508,7 @@ describe('registerChatRoutes', () => {
           agent_id: 'agent-1',
           input: 'Hello',
           execution_id: '5c48249e-28e9-4711-b9c8-0a09a1a35c02',
-          idempotency_key: 'Ev0PV23K4AB1',
+          execution_idempotency_key: 'Ev0PV23K4AB1',
           origin: {
             type: ConversationOriginType.Slack,
             external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
@@ -531,7 +531,7 @@ describe('registerChatRoutes', () => {
     expect(executeAgent).toHaveBeenCalledWith(
       expect.objectContaining({
         executionId: '5c48249e-28e9-4711-b9c8-0a09a1a35c02',
-        metadata: { idempotency_key: 'Ev0PV23K4AB1' },
+        metadata: { execution_idempotency_key: 'Ev0PV23K4AB1' },
       })
     );
   });

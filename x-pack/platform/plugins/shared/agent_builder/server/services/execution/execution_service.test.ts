@@ -496,12 +496,12 @@ describe('AgentExecutionService', () => {
   });
 
   describe('executeAgent with an idempotency key', () => {
-    const executeWithKey = (idempotencyKey: string) =>
+    const executeWithKey = (executionIdempotencyKey: string) =>
       service.executeAgent({
         mode: AgentExecutionMode.conversation,
         request: httpServerMock.createKibanaRequest(),
         executionId: 'exec-1',
-        metadata: { idempotency_key: idempotencyKey },
+        metadata: { execution_idempotency_key: executionIdempotencyKey },
         params: { agentId: 'agent-1', nextInput: { message: 'hello' } },
         useTaskManager: true,
       });

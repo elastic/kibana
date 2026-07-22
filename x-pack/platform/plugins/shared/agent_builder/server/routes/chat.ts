@@ -306,7 +306,7 @@ export const conversePayloadSchema = schema.object({
 });
 
 export const callbackConversePayloadSchema = conversePayloadSchema.extends({
-  idempotency_key: schema.string({
+  execution_idempotency_key: schema.string({
     minLength: 1,
     maxLength: 256,
     meta: {
@@ -406,7 +406,7 @@ export function registerChatRoutes({
     spaceId: string
   ): ResolvedExecutionOptions => {
     const {
-      idempotency_key: idempotencyKey,
+      execution_idempotency_key: executionIdempotencyKey,
       conversation_id: conversationId,
       execution_id: providedExecutionId,
       origin,
@@ -416,7 +416,7 @@ export function registerChatRoutes({
     const executionId =
       providedExecutionId ??
       createHash('sha256')
-        .update([spaceId, origin?.type ?? '', scopeId, idempotencyKey].join('\u0000'))
+        .update([spaceId, origin?.type ?? '', scopeId, executionIdempotencyKey].join('\u0000'))
         .digest('hex');
 
     return {
@@ -424,7 +424,7 @@ export function registerChatRoutes({
       origin,
       callback: payload.callback,
       executionId,
-      metadata: { idempotency_key: idempotencyKey },
+      metadata: { execution_idempotency_key: executionIdempotencyKey },
     };
   };
 

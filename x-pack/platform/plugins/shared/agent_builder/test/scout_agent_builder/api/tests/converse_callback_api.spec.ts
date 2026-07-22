@@ -47,15 +47,15 @@ const deriveIdempotentExecutionId = ({
   spaceId,
   originType,
   externalConversationId,
-  idempotencyKey,
+  executionIdempotencyKey,
 }: {
   spaceId: string;
   originType: string;
   externalConversationId: string;
-  idempotencyKey: string;
+  executionIdempotencyKey: string;
 }) =>
   createHash('sha256')
-    .update([spaceId, originType, externalConversationId, idempotencyKey].join('\u0000'))
+    .update([spaceId, originType, externalConversationId, executionIdempotencyKey].join('\u0000'))
     .digest('hex');
 
 apiTest.describe(
@@ -121,7 +121,7 @@ apiTest.describe(
         body: {
           input: 'Hello callback Agent Builder',
           connector_id: connectorId,
-          idempotency_key: 'Ev-callback-success',
+          execution_idempotency_key: 'Ev-callback-success',
           origin: {
             type: ConversationOriginType.Slack,
             external_conversation_id: 'team:T123/channel:C123/thread:callback-success',
@@ -178,7 +178,7 @@ apiTest.describe(
           body: {
             input: 'Hello from Slack',
             connector_id: connectorId,
-            idempotency_key: 'Ev-callback-authorship',
+            execution_idempotency_key: 'Ev-callback-authorship',
             access_control: {
               access_mode: ConversationAccessControlMode.Public,
             },
@@ -265,7 +265,7 @@ apiTest.describe(
         body: {
           input: 'Hello callback failure',
           connector_id: connectorId,
-          idempotency_key: 'Ev-callback-failure',
+          execution_idempotency_key: 'Ev-callback-failure',
           origin: {
             type: ConversationOriginType.Slack,
             external_conversation_id: 'team:T123/channel:C123/thread:callback-failure',
@@ -307,7 +307,7 @@ apiTest.describe(
         body: {
           input: 'Hello callback abort',
           connector_id: connectorId,
-          idempotency_key: 'Ev-callback-abort',
+          execution_idempotency_key: 'Ev-callback-abort',
           origin: {
             type: ConversationOriginType.Slack,
             external_conversation_id: 'team:T123/channel:C123/thread:callback-abort',
@@ -355,11 +355,11 @@ apiTest.describe(
     apiTest(
       'returns the existing execution for a replayed idempotency key',
       async ({ apiClient }) => {
-        const idempotencyKey = 'Ev-callback-replay';
+        const executionIdempotencyKey = 'Ev-callback-replay';
         const requestBody = {
           input: 'Hello idempotent callback',
           connector_id: connectorId,
-          idempotency_key: idempotencyKey,
+          execution_idempotency_key: executionIdempotencyKey,
           origin: {
             type: ConversationOriginType.Slack,
             external_conversation_id: 'team:T123/channel:C123/thread:callback-idempotency',
@@ -393,7 +393,7 @@ apiTest.describe(
               spaceId: 'default',
               originType: ConversationOriginType.Slack,
               externalConversationId: requestBody.origin.external_conversation_id,
-              idempotencyKey,
+              executionIdempotencyKey,
             })
           );
           expect(firstAccepted.status).toBe(ExecutionStatus.scheduled);
@@ -450,7 +450,7 @@ apiTest.describe(
         const requestBody = {
           input: 'Hello concurrent idempotent callback',
           connector_id: connectorId,
-          idempotency_key: 'Ev-callback-concurrent',
+          execution_idempotency_key: 'Ev-callback-concurrent',
           origin: {
             type: ConversationOriginType.Slack,
             external_conversation_id: 'team:T123/channel:C123/thread:callback-concurrency',
@@ -503,7 +503,7 @@ apiTest.describe(
     apiTest(
       'schedules separate executions for the same key on different origins',
       async ({ apiClient }) => {
-        const idempotencyKey = 'Ev-callback-cross-origin';
+        const executionIdempotencyKey = 'Ev-callback-cross-origin';
         const executionIds: string[] = [];
 
         for (const thread of ['cross-origin-a', 'cross-origin-b']) {
@@ -518,7 +518,7 @@ apiTest.describe(
             body: {
               input: 'Hello cross origin idempotent callback',
               connector_id: connectorId,
-              idempotency_key: idempotencyKey,
+              execution_idempotency_key: executionIdempotencyKey,
               origin: {
                 type: ConversationOriginType.Slack,
                 external_conversation_id: `team:T123/channel:C123/thread:${thread}`,
@@ -568,7 +568,7 @@ apiTest.describe(
             input: 'Hello execution id precedence callback',
             connector_id: connectorId,
             execution_id: executionId,
-            idempotency_key: 'Ev-callback-precedence',
+            execution_idempotency_key: 'Ev-callback-precedence',
             origin: {
               type: ConversationOriginType.Slack,
               external_conversation_id: 'team:T123/channel:C123/thread:callback-precedence',
@@ -615,7 +615,7 @@ apiTest.describe(
           body: {
             input: 'Start callback thread',
             connector_id: connectorId,
-            idempotency_key: 'Ev-callback-continuation-first',
+            execution_idempotency_key: 'Ev-callback-continuation-first',
             origin,
             callback: {
               url: `${callbackServerUrl}/callback?token=continuation-first`,
@@ -651,7 +651,7 @@ apiTest.describe(
           body: {
             input: 'Continue callback thread',
             connector_id: connectorId,
-            idempotency_key: 'Ev-callback-continuation-second',
+            execution_idempotency_key: 'Ev-callback-continuation-second',
             origin,
             callback: {
               url: `${callbackServerUrl}/callback?token=continuation-second`,

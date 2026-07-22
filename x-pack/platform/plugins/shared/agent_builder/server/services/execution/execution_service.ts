@@ -99,7 +99,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       });
     } catch (err) {
       if (err?.meta?.statusCode === 409) {
-        if (metadata?.idempotency_key) {
+        if (metadata?.execution_idempotency_key) {
           this.logger.debug(
             `Duplicate idempotency key detected, returning existing execution ${executionId}`
           );
@@ -107,6 +107,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
           // Repairs executions left in `scheduled` when the original delivery
           // failed before scheduling the task.
           const existing = await executionClient.peek(executionId);
+
           if (existing?.status === ExecutionStatus.scheduled) {
             await this.deps.taskManager.ensureScheduled(this.buildRunAgentTask(executionId), {
               request,
