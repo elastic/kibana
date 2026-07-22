@@ -216,7 +216,7 @@ export const EntitiesDataTable = ({
       }
 
       const { entityType, entityName, entityId } = getEntityFields(doc);
-      if (!entityType || !entityName) return;
+      if (!entityType || !entityName || !entityId) return;
 
       // Generic entities have no dedicated panel in this table.
       if (!EntityPanelKeyByType[entityType]) return;
