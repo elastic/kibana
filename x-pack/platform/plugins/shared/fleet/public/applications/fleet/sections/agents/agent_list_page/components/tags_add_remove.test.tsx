@@ -209,6 +209,7 @@ describe('TagsAddRemove', () => {
       ['tag2'],
       [],
       expect.anything(),
+      expect.anything(),
       undefined,
       undefined
     );
@@ -227,6 +228,7 @@ describe('TagsAddRemove', () => {
       ['agent1', 'agent2'],
       [],
       ['tag1'],
+      expect.anything(),
       expect.anything(),
       undefined,
       undefined
@@ -290,6 +292,7 @@ describe('TagsAddRemove', () => {
       ['newTag'],
       [],
       expect.anything(),
+      undefined,
       'Tag created',
       'Tag creation failed'
     );
@@ -320,6 +323,7 @@ describe('TagsAddRemove', () => {
       ['newTag'],
       [],
       expect.anything(),
+      undefined,
       'Tag created',
       'Tag creation failed'
     );
@@ -329,6 +333,7 @@ describe('TagsAddRemove', () => {
       ['newTag2'],
       [],
       expect.anything(),
+      undefined,
       'Tag created',
       'Tag creation failed'
     );
@@ -352,6 +357,7 @@ describe('TagsAddRemove', () => {
       [],
       ['tag1'],
       expect.anything(),
+      expect.anything(),
       undefined,
       undefined
     );
@@ -360,6 +366,7 @@ describe('TagsAddRemove', () => {
       '',
       [],
       ['tag2'],
+      expect.anything(),
       expect.anything(),
       undefined,
       undefined

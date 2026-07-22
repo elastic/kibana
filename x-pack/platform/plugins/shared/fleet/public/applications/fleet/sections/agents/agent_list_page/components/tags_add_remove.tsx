@@ -128,6 +128,7 @@ export const TagsAddRemove: React.FC<Props> = ({
         tagsToAdd,
         tagsToRemove,
         (hasCompleted) => handleTagsUpdated(tagsToAdd, tagsToRemove, hasCompleted),
+        onError,
         successMessage,
         errorMessage
       );

@@ -79,6 +79,7 @@ export const useUpdateTags = () => {
       tagsToAdd: string[],
       tagsToRemove: string[],
       onSuccess: (hasCompleted?: boolean) => void,
+      onError?: () => void,
       successMessage?: string,
       errorMessage?: string
     ) => {
@@ -91,7 +92,7 @@ export const useUpdateTags = () => {
             includeInactive: true,
           }),
         onSuccess,
-        undefined,
+        onError,
         successMessage,
         errorMessage
       );
