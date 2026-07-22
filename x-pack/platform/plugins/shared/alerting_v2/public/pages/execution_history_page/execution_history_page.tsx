@@ -19,6 +19,7 @@ import { PoliciesTabContent, RulesTabContent } from './components';
 import { ExecutionKpis } from './components/execution_kpis';
 import { TaskManagerHealth } from './components/task_manager_health';
 import { TopFailing } from './components/top_failing';
+import { PrototypeOptions, usePrototypeFlags } from './components/prototype_options';
 
 const POLICIES_TAB_ID = 'policies';
 const RULES_TAB_ID = 'rules';
@@ -63,6 +64,7 @@ export const ExecutionHistoryPage = () => {
   const [policyToViewId, setPolicyToViewId] = useState<string | null>(null);
   const [ruleToViewId, setRuleToViewId] = useState<string | null>(null);
   const { flyout: composeFlyout, openEditFlyout, openCloneFlyout } = useComposeDiscoverFlyout();
+  const { flags, setFlags } = usePrototypeFlags();
 
   const handlePolicyClick = (policyId: string) => {
     setRuleToViewId(null);
@@ -88,7 +90,7 @@ export const ExecutionHistoryPage = () => {
         padding={{ bleed: 'm' }}
       />
       <EuiSpacer size="m" />
-      <ExecutionKpis />
+      <ExecutionKpis showCharts={flags.showCharts} />
       <EuiSpacer size="m" />
       <TaskManagerHealth />
       <EuiSpacer size="m" />
@@ -137,6 +139,7 @@ export const ExecutionHistoryPage = () => {
         />
       )}
       {composeFlyout}
+      <PrototypeOptions flags={flags} onChange={setFlags} />
     </>
   );
 };
