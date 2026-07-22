@@ -747,6 +747,7 @@ export function XYChart({
     style.tickLabel = {
       ...style.tickLabel,
       truncate: xAxisConfig?.truncate ? 'end' : undefined,
+      ...(xAxisConfig?.truncate ? { maxLength: xAxisConfig.truncate } : {}),
       rotation: xAxisConfig?.labelsOrientation,
       padding: linesPaddings.bottom != null ? { inner: linesPaddings.bottom } : undefined,
     };
@@ -763,7 +764,7 @@ export function XYChart({
       style.maxExtent = style.maxExtent ?? '50%';
       style.tickLabel = {
         ...style.tickLabel,
-        truncate: 'middle',
+        truncate: style.tickLabel.truncate ?? 'middle',
       };
       if (!isHorizontalChart(dataLayers)) {
         style.tickLabel = {
