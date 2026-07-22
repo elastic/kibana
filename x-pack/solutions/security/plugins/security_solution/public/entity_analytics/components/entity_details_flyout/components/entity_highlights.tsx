@@ -34,12 +34,12 @@ import {
   buildEntitySummaryStaleness,
   computeEntitySummaryStalenessReasons,
 } from '@kbn/entity-store/common/entity_summary';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
 import { useAgentBuilderAvailability } from '../../../../agent_builder/hooks/use_agent_builder_availability';
 import type { EntityType } from '../../../../../common/search_strategy';
 import { useStoredAssistantConnectorId } from '../../../../onboarding/components/hooks/use_stored_state';
-import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { useSpaceId } from '../../../../common/hooks/use_space_id';
 import { useHasEntityHighlightsLicense } from '../../../../common/hooks/use_has_entity_highlights_license';
 import { useFetchEntityDetailsHighlights } from '../hooks/use_fetch_entity_details_highlights';
@@ -179,7 +179,9 @@ export const EntityHighlightsAccordion: React.FC<{
   // Dismiss state — stored per-entity per-space so dismiss is local to this browser session
   // and does not affect other users. The stored value is the risk score at dismissal time;
   // if the score changes again the callout re-appears automatically.
-  const staleDismissKey = `securitySolution.entitySummary.staleness.dismissed.${spaceId ?? 'default'}.${entityType}.${entityIdentifier}`;
+  const staleDismissKey = `securitySolution.entitySummary.staleness.dismissed.${
+    spaceId ?? 'default'
+  }.${entityType}.${entityIdentifier}`;
   const [dismissedAtScore, setDismissedAtScore] = useLocalStorage<number>(staleDismissKey);
 
   const riskScoreReason = useMemo(
