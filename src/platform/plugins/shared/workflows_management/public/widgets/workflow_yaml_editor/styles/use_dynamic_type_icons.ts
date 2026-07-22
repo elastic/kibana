@@ -11,7 +11,7 @@ import { useEuiTheme, type UseEuiTheme } from '@elastic/eui';
 import type React from 'react';
 import { useEffect, useRef } from 'react';
 import { type TriggerType, TriggerTypes } from '@kbn/workflows';
-import { HardcodedIcons } from '@kbn/workflows-ui';
+import { HardcodedIconDataUrls, HardcodedIcons } from '@kbn/workflows-ui';
 import { buildSuggestTechPreviewBadgeRules } from './get_suggest_tech_preview_badge_styles';
 import type { ConnectorsResponse } from '../../../entities/connectors/model/types';
 import { useKibana } from '../../../hooks/use_kibana';
@@ -312,7 +312,7 @@ export function useDynamicTypeIcons(
 // large extension families (data.*, ai.*, cases.*, security.*).
 const MONOCHROME_PREFIXES = ['data.', 'ai.', 'cases.', 'security.', 'search.'];
 
-const isMonochromeActionType = (actionTypeId: string): boolean =>
+export const isMonochromeActionType = (actionTypeId: string): boolean =>
   MonochromeIcons.has(actionTypeId) ||
   MONOCHROME_PREFIXES.some((prefix) => actionTypeId.startsWith(prefix));
 
@@ -501,7 +501,7 @@ async function injectDynamicShadowIcons(
   }
 
   for (const triggerId of TriggerTypes) {
-    const iconUrl = HardcodedIcons[triggerId] || boltUrl || FALLBACK_BOLT_DATA_URL;
+    const iconUrl = HardcodedIconDataUrls[triggerId] || boltUrl || FALLBACK_BOLT_DATA_URL;
     const notCustom = ':not([class*="type-ct-"])';
     cssToInject += `
   ${inlineScope}.type-inline-highlight.type-${triggerId}${notCustom}::after {
@@ -533,7 +533,7 @@ async function injectDynamicShadowIcons(
       if (isTriggerConnector && boltUrl) {
         iconBase64 = boltUrl;
       } else if (isBuiltInTriggerId) {
-        iconBase64 = HardcodedIcons[connector.actionTypeId] || boltUrl || FALLBACK_BOLT_DATA_URL;
+        iconBase64 = HardcodedIconDataUrls[connector.actionTypeId] || boltUrl || FALLBACK_BOLT_DATA_URL;
       }
     }
     if (isTriggerConnector && iconBase64 !== undefined && !isValidDataUrl(iconBase64) && boltUrl) {

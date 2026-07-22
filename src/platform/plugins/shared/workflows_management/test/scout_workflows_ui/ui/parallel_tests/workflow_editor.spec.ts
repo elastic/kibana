@@ -16,6 +16,7 @@ import {
   getDummyWorkflowYaml,
   getIncompleteStepTypeYaml,
   getInvalidWorkflowYaml,
+  getMultiStepTypeWorkflowYaml,
   getRootLevelAutocompleteYaml,
   getWorkflowWithCommentedVariablesYaml,
 } from '../fixtures/workflows';
@@ -92,20 +93,27 @@ test.describe(
       await expect(validationAccordion).toContainText('No validation errors');
     });
 
-    test('should render step type icons from data URLs', async ({ pageObjects }) => {
-      await pageObjects.workflowEditor.gotoNewWorkflow();
-      await pageObjects.workflowEditor.setYamlEditorValue(
-        getDummyWorkflowYaml('Step Type Icon Test')
-      );
+    // Regression guard: these step types previously had bare EUI glyph names (e.g. 'commandLine',
+    // 'branch', 'refresh') used in CSS url(), rendering nothing in the Monaco editor.
+    // Each test verifies the decoration resolves to an actual data URL in background or mask.
+    // Note: this shallow check does NOT catch a missing MonochromeIcons entry (a black-fill
+    // glyph mis-routed to background-image still contains a data URL and passes here).
+    for (const stepType of ['console', 'if', 'foreach', 'http']) {
+      test(`should render "${stepType}" step type icon from a data URL`, async ({ pageObjects }) => {
+        await pageObjects.workflowEditor.gotoNewWorkflow();
+        await pageObjects.workflowEditor.setYamlEditorValue(
+          getMultiStepTypeWorkflowYaml('Step Type Icon Test')
+        );
 
-      await expect
-        .poll(async () => {
-          const { backgroundImage, maskImage } =
-            await pageObjects.workflowEditor.getStepTypeIconStyles('console');
-          return backgroundImage.includes('data:image') || maskImage.includes('data:image');
-        })
-        .toBe(true);
-    });
+        await expect
+          .poll(async () => {
+            const { backgroundImage, maskImage } =
+              await pageObjects.workflowEditor.getStepTypeIconStyles(stepType);
+            return backgroundImage.includes('data:image') || maskImage.includes('data:image');
+          })
+          .toBe(true);
+      });
+    }
 
     test('should show step type autocompletion suggestions', async ({ pageObjects, page }) => {
       await pageObjects.workflowEditor.gotoNewWorkflow();

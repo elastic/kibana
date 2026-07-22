@@ -7,35 +7,52 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/*
+ * Coverage map for MonochromeIcons regressions:
+ *
+ * (i)  Over-masking a colored logo: tested below — if a logo like `.slack` or `elasticsearch`
+ *      is added to MonochromeIcons, those `false` assertions fail immediately.
+ *
+ * (ii) Monochrome id wired to a bare EUI glyph name in CSS: tested below — if an id in
+ *      MonochromeIcons maps to e.g. `'commandLine'` in HardcodedIconDataUrls, the check fails.
+ *
+ * NOT covered here (by design):
+ *      A *missing* monochrome entry — a new black-fill glyph step added without a corresponding
+ *      entry in MonochromeIcons. Jest stubs all SVG imports to 'test-file-stub', so fill-based
+ *      detection is impossible. This gap is NOT closed by the shallow scout check in
+ *      workflow_editor.spec.ts either. It relies on manual/visual dark-mode review.
+ */
+
+import { HardcodedIconDataUrls } from '@kbn/workflows-ui';
 import { MonochromeIcons } from './monochrome_icons';
 
-/**
- * Pin the set of base-type step ids that MUST be theme-adaptive in the Monaco editor.
- *
- * These ids correspond to SVGs whose paths have no `fill` attribute (defaulting to black)
- * and therefore MUST go through the `mask-image` + `background-color: currentColor` CSS path
- * (controlled by MonochromeIcons) rather than `background-image`.
- *
- * If you add a new base-type step with a black-fill SVG icon, add it here and to MonochromeIcons.
- */
-const BASE_TYPE_MONOCHROME_IDS = [
-  'while',
-  // dedicated SVG glyphs (database.svg, product_streams_wired.svg, user.svg)
-  'data.set',
-  'switch',
-  'waitForInput',
-  'waitForApproval',
-  // http falls back to plugs.svg (no fill); loop steps use controls.svg (no fill)
-  'http',
-  'loop.break',
-  'loop.continue',
-];
-
 describe('MonochromeIcons', () => {
-  it.each(BASE_TYPE_MONOCHROME_IDS)(
-    '"%s" is in MonochromeIcons so its SVG icon is masked with currentColor in dark mode',
+  // (i) Over-masking guard: colored logos must NEVER be in the monochrome set.
+  // Masking a multi-color logo collapses it to a solid currentColor silhouette — wrong in any mode.
+  it.each(['.slack', '.slack_api', 'elasticsearch', 'kibana'])(
+    '"%s" is a colored logo and must NOT be in MonochromeIcons',
     (id) => {
-      expect(MonochromeIcons.has(id)).toBe(true);
+      expect(MonochromeIcons.has(id)).toBe(false);
     }
   );
+
+  // (ii) Name-in-CSS guard: every monochrome id that has a HardcodedIconDataUrls entry must
+  // resolve to a data URL (or the Jest SVG stub), never a bare EUI glyph name string.
+  // A bare name like 'commandLine' in a CSS url() renders nothing — the original bug.
+  it('every MonochromeIcons entry with a HardcodedIconDataUrls value is a data URL (not a bare EUI name)', () => {
+    const failures: string[] = [];
+    for (const id of MonochromeIcons) {
+      const value = HardcodedIconDataUrls[id];
+      if (value === undefined) {
+        // Connector-only ids (.http, .gen-ai, .bedrock) have no entry in HardcodedIconDataUrls — skip.
+        continue;
+      }
+      const isValid =
+        typeof value !== 'string' || value === 'test-file-stub' || value.startsWith('data:');
+      if (!isValid) {
+        failures.push(`["${id}"] = "${String(value).slice(0, 60)}" (bare EUI name — invalid in CSS url())`);
+      }
+    }
+    expect(failures).toEqual([]);
+  });
 });

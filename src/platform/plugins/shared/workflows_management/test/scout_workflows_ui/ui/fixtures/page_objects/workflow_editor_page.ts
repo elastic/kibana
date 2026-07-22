@@ -293,10 +293,16 @@ export class WorkflowEditorPage {
     await typeDecoration.waitFor({ state: 'visible' });
 
     return typeDecoration.evaluate((element) => {
-      const iconStyles = getComputedStyle(element, '::after');
+      const s = getComputedStyle(element, '::after');
+      // Chromium may populate only the vendor-prefixed property — coalesce both.
+      const unprefixed = s.getPropertyValue('mask-image');
+      const maskImage =
+        unprefixed && unprefixed !== 'none'
+          ? unprefixed
+          : s.getPropertyValue('-webkit-mask-image') || 'none';
       return {
-        backgroundImage: iconStyles.backgroundImage,
-        maskImage: iconStyles.maskImage,
+        backgroundImage: s.backgroundImage,
+        maskImage,
       };
     });
   }

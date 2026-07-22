@@ -61,7 +61,9 @@ export async function getTypeIconDataUrl({
   }
 
   const hardcoded =
-    HardcodedIconDataUrls[type] ?? HardcodedIconDataUrls[baseType] ?? HardcodedIconDataUrls[`.${baseType}`];
+    HardcodedIconDataUrls[type] ??
+    HardcodedIconDataUrls[baseType] ??
+    HardcodedIconDataUrls[`.${baseType}`];
   if (hardcoded) {
     return hardcoded;
   }
