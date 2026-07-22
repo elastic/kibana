@@ -8,9 +8,9 @@
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { apiHasAppContext } from '@kbn/presentation-publishing';
 import { ADD_PANEL_VISUALIZATION_GROUP } from '@kbn/embeddable-plugin/public';
+import { i18n } from '@kbn/i18n';
 import type { LensPluginStartDependencies } from '../plugin';
 import { lensVisTypeAlias } from '../vis_type_alias';
-import { i18n } from '@kbn/i18n';
 
 export function getAddLensPanelAction(deps: LensPluginStartDependencies) {
   return {
@@ -34,11 +34,13 @@ export function getAddLensPanelAction(deps: LensPluginStartDependencies) {
       });
     },
     grouping: [ADD_PANEL_VISUALIZATION_GROUP],
-    getDisplayName: () => i18n.translate('xpack.lens.app.createVisualizationTitle', {
-      defaultMessage: 'Create visualization',
-    }),
-    getDisplayNameTooltip: () => i18n.translate('xpack.lens.app.createVisualizationDescription', {
-      defaultMessage: 'Point-and-click editor',
-    }),
+    getDisplayName: () =>
+      i18n.translate('xpack.lens.app.createVisualizationTitle', {
+        defaultMessage: 'Create visualization',
+      }),
+    getDisplayNameTooltip: () =>
+      i18n.translate('xpack.lens.app.createVisualizationDescription', {
+        defaultMessage: 'Point-and-click editor',
+      }),
   };
 }
