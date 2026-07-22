@@ -1,0 +1,176 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { ToolingLog } from '@kbn/tooling-log';
+import type { HttpHandler } from '@kbn/core/public';
+import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
+import type { PromptRequest, PromptResponse } from '@kbn/agent-builder-common/agents';
+import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
+import pRetry from 'p-retry';
+
+type Messages = Array<{ message: string }>;
+
+interface ConverseOptions {
+  agentId?: string;
+}
+
+interface ConverseParams {
+  messages: Messages;
+  conversationId?: string;
+  options?: ConverseOptions;
+  /**
+   * Answers to prompts the agent is currently awaiting (e.g. an `ask_user_question`),
+   * keyed by prompt id. When provided, the request answers those pending prompts instead
+   * of sending a new free-text `input` message — required to continue a conversation that
+   * ended in the `awaiting_prompt` status.
+   */
+  promptResponses?: Record<string, PromptResponse>;
+}
+
+export interface ConverseResult {
+  conversationId?: string;
+  messages: Messages;
+  errors: unknown[];
+  steps?: unknown[];
+  traceId?: string;
+  /**
+   * Structured prompts the agent asked the user to answer (e.g. `ask_user_question`
+   * or `confirmation`). Present when the round ended in the `awaiting_prompt` status.
+   * When non-empty, the conversation cannot be continued with a plain free-text turn —
+   * the API requires the caller to answer these prompts by id.
+   */
+  prompts: PromptRequest[];
+}
+
+/**
+ * Minimal Agent Builder chat client used to drive the rule-management skill through the
+ * non-streaming `/api/agent_builder/converse` endpoint. Intentionally self-contained so the
+ * suite does not depend on the (private) agent-builder eval suite package.
+ */
+export class RuleManagementChatClient {
+  constructor(
+    private readonly fetch: HttpHandler,
+    private readonly log: ToolingLog,
+    private readonly connectorId: string
+  ) {}
+
+  private async executeWithRetry<T>(operationName: string, fn: () => Promise<T>): Promise<T> {
+    return pRetry(fn, {
+      retries: 2,
+      minTimeout: 2000,
+      onFailedAttempt: (error) => {
+        const isLastAttempt = error.attemptNumber === error.retriesLeft + error.attemptNumber;
+        if (isLastAttempt) {
+          this.log.error(
+            new Error(`Failed to call ${operationName} API after ${error.attemptNumber} attempts`, {
+              cause: error,
+            })
+          );
+          throw error;
+        }
+        this.log.warning(
+          new Error(
+            `${operationName} API call failed on attempt ${error.attemptNumber}; retrying...`,
+            {
+              cause: error,
+            }
+          )
+        );
+      },
+    });
+  }
+
+  converse = async ({
+    messages,
+    conversationId,
+    options = {},
+    promptResponses,
+  }: ConverseParams): Promise<ConverseResult> => {
+    this.log.info('Calling converse');
+
+    const { agentId = agentBuilderDefaultAgentId } = options;
+
+    const callConverseApi = async (): Promise<ConverseResult> => {
+      const response = await this.fetch('/api/agent_builder/converse', {
+        method: 'POST',
+        version: '2023-10-31',
+        body: JSON.stringify({
+          agent_id: agentId,
+          connector_id: this.connectorId,
+          conversation_id: conversationId,
+          // Answer pending prompts by id when provided; otherwise send the turn as a
+          // normal user message.
+          ...(promptResponses
+            ? { prompts: promptResponses }
+            : { input: messages[messages.length - 1].message }),
+        }),
+      });
+
+      const chatResponse = response as {
+        conversation_id: string;
+        trace_id?: string;
+        steps: unknown[];
+        response: { message: string; prompts?: PromptRequest[] };
+      };
+
+      return {
+        conversationId: chatResponse.conversation_id,
+        messages: [...messages, chatResponse.response],
+        steps: chatResponse.steps,
+        traceId: chatResponse.trace_id,
+        prompts: chatResponse.response.prompts ?? [],
+        errors: [],
+      };
+    };
+
+    try {
+      return await this.executeWithRetry('converse', callConverseApi);
+    } catch (error) {
+      this.log.error('Error occurred while calling converse API');
+      return {
+        conversationId,
+        steps: [],
+        prompts: [],
+        messages: [
+          ...messages,
+          {
+            message:
+              'This question could not be answered as an internal error occurred. Please try again.',
+          },
+        ],
+        errors: [
+          {
+            error: {
+              message: error instanceof Error ? error.message : 'Unknown error',
+              stack: error instanceof Error ? error.stack : undefined,
+            },
+            type: 'error',
+          },
+        ],
+      };
+    }
+  };
+
+  /**
+   * Lists attachments persisted on a conversation (including rule drafts created by
+   * `manage_rule`). Used by compose evaluators that assert on the attachment payload
+   * itself, not only the `<render_attachment>` tag in the assistant message.
+   */
+  listAttachments = async (conversationId: string): Promise<VersionedAttachment[]> => {
+    this.log.info(`Listing attachments for conversation ${conversationId}`);
+
+    const response = await this.executeWithRetry('listAttachments', async () => {
+      return this.fetch(`/api/agent_builder/conversations/${conversationId}/attachments`, {
+        method: 'GET',
+        version: '2023-10-31',
+      });
+    });
+
+    const body = response as { results?: VersionedAttachment[] };
+    return body.results ?? [];
+  };
+}

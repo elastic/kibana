@@ -23,7 +23,7 @@ export const createRuleManagementSkill = (deps: ManageActionPolicyToolDeps) =>
     name: 'rule-management',
     basePath: 'skills/platform/alerting',
     description:
-      'Compose, discover, and modify alerting V2 rules and action policies (notification policies) within a conversation.',
+      'Compose, discover, and modify alerting V2 rules and action policies (notification policies) within a conversation. Use when the user wants to be alerted or notified about conditions in their data — metrics, logs, or any index ("create an alert rule that fires when...", "alert me when CPU goes above...", "notify me if there are more than N errors", "set up alerting on my data"). Covers threshold, aggregation, and grouped conditions over any Elasticsearch index. Not for Security/SIEM detection rules (threat detection, MITRE ATT&CK) — use the detection-rule-edit skill for those.',
     experimental: true,
     uiSettingRequired: ALERTING_V2_ENABLED_SETTING_ID,
     referencedContent: [
@@ -176,6 +176,26 @@ Do **not** use this skill for:
 - Classic (V1) Kibana stack rules or Security detection rules.
 - Action connector configuration (connectors are managed separately).
 - Querying or analyzing data — use data exploration skills for that.
+
+---
+
+## Getting Started (Ambiguous or Vague Alerting Requests)
+
+When a user wants help "setting up alerting" / "creating an alerting rule" but has not specified Alerting V2 vs Security detection rules (or is unsure where to start), **clarify intent first — before orienting them or collecting any setup details.**
+
+**Skip the Alerting V2 vs Security clarification entirely when this skill was requested specifically** — e.g. the user named the rule-management skill or Alerting V2 explicitly, or the conversation was started from an Alerting V2 entry point (such as the rules page "Create with AI Agent" flow). Intent is already established; go straight to step 2 (orientation and what to monitor).
+
+1. **Clarify Alerting V2 vs Security before anything else.** Elastic has two separate systems: **Alerting V2** (observability / ops — metrics, logs, general conditions) and Elastic **Security detection rules** (SIEM / threat detection). Which one the user wants determines which skill should handle the request, so resolve it up front rather than assuming Alerting V2. This is a good use of a structured \`ask_user_question\` prompt with two options:
+   - **Alerting V2**
+   - **Security detection rules**
+
+   If they choose Security detection rules, load the Security detection-rule skill.
+2. **Once they confirm Alerting V2**, give a brief orientation (a couple of sentences, in prose) and ask what they want to monitor:
+   - **Alert rules** (\`kind: alert\`): stateful detection with episode lifecycle; can drive notifications via action policies.
+   - **Signal rules** (\`kind: signal\`): observation-only detection; no episode lifecycle and no notifications.
+   - **Action policies** (notification policies): space-wide routing of alert episodes to workflows (email, Slack, etc.) — not embedded in the rule.
+
+Only **after** intent is established and the user has described what they want to monitor should you gather concrete build details. That is the appropriate point to use a focused \`ask_user_question\` prompt (e.g. for the index, the metric field, and the breach threshold/duration) before composing the rule with ${alertingTools.manageRule}.
 
 ---
 
