@@ -16,8 +16,10 @@ import { getMenuItems } from './use_menu_item_groups';
 
 export const useFeaturedItems = ({
   dashboardApi,
+  returnFocus,
 }: {
   dashboardApi: DashboardApi;
+  returnFocus?: () => void;
 }): { featuredItems: MenuItem[]; loading: boolean } => {
   const [featuredItems, setFeaturedItems] = useState<MenuItem[]>([]);
   const [loading, setLoading] = useState(false);
@@ -31,6 +33,7 @@ export const useFeaturedItems = ({
       trigger: {
         id: FEATURED_ADD_PANEL_TRIGGER,
       },
+      returnFocus,
     };
 
     uiActionsService
@@ -51,7 +54,7 @@ export const useFeaturedItems = ({
     return () => {
       canceled = true;
     };
-  }, [dashboardApi]);
+  }, [dashboardApi, returnFocus]);
 
   return { loading, featuredItems };
 };
