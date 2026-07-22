@@ -19,14 +19,6 @@ Write `$SESSION_DIR/report.md` using this template:
 **Session duration:** <total elapsed — compute: now minus session_started_at>
 **Session cap:** <session_timeout_minutes from config.json> min
 
-## Summary
-- Level 1 (confirmed bugs): N
-- Level 2 (suspicious — your review needed): N
-- Level 3 (observations): N
-- Known / suppressed: N
-- **Flows completed:** N of N
-- **Flows not fully completed:** N — list each with its status
-
 ## Timing & Cost
 
 Compute per-flow duration from the `<!-- flow: ... | started: <ISO> | ended: <ISO> -->` header in each findings file. Compute total session duration as `report_written_at − session_started_at`.
@@ -48,6 +40,17 @@ Compute per-flow duration from the `<!-- flow: ... | started: <ISO> | ended: <IS
 - **Over?** for individual flows: ⚠️ if `Duration > Budget`
 - **Over?** for total session: ⚠️ if `Session duration > session_timeout_minutes`
 - Flows cut short by the session cap are a signal to either raise `Session-timeout:` or reduce the number / scope of flows
+
+**Token usage (Claude Code session):** input <N> · output <N> · cache-create <N> · cache-read <N> · **total <N>**
+_Populate from `scripts/session-token-usage.py` output (reformat: `cache_create=N` → `cache-create N`, etc.). If the script exits non-zero or prints nothing (non-Claude-Code harness, transcript unavailable), write:_ `**Token usage:** not available` _— never omit this line. In parallel mode, sub-agent tokens are not included — orchestrator session only._
+
+## Summary
+- Level 1 (confirmed bugs): N
+- Level 2 (suspicious — your review needed): N
+- Level 3 (observations): N
+- Known / suppressed: N
+- **Flows completed:** N of N
+- **Flows not fully completed:** N — list each with its status
 
 ## Level 1 — Confirmed Bugs
 <all Level 1 findings in full finding format>

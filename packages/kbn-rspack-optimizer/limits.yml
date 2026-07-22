@@ -35,6 +35,7 @@ pageLoadAssetSize:
   core: 320
   cps: 5002
   crossClusterReplication: 7691
+  customContent: 1037
   customIntegrations: 636
   dashboard: 452
   dashboardMarkdown: 4012

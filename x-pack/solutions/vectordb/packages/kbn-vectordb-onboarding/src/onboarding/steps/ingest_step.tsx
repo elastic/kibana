@@ -6,19 +6,19 @@
  */
 
 import React from 'react';
-import { Redirect, useHistory, useLocation } from 'react-router-dom';
+import { Redirect } from 'react-router-dom';
 import { useKibana } from '../../services';
 import { ApiStep } from '../components/api_step';
 import { getStepContent } from '../components/onboarding_data';
 import { StepLayout } from '../components/step_layout';
-import { pathQuery, useWizardPath } from '../../hooks/use_wizard_path';
-import { TUTORIALS_PATH, ONBOARDING_PATH } from '../../routes';
+import { pathQuery, useReturnPath, useWizardPath } from '../../hooks/use_wizard_path';
+import { useOnboardingNavigate } from '../../hooks/use_onboarding_navigate';
+import { ONBOARDING_PATH } from '../../routes';
 
 export const IngestStep = () => {
-  const history = useHistory();
-  const { state } = useLocation<{ from?: string }>();
+  const origin = useReturnPath();
+  const navigate = useOnboardingNavigate(origin);
   const path = useWizardPath();
-  const from = state?.from ?? TUTORIALS_PATH;
   const {
     services: { docLinks },
   } = useKibana();
@@ -26,7 +26,7 @@ export const IngestStep = () => {
   if (!path) return <Redirect to={ONBOARDING_PATH} />;
 
   const contentKey = path === 'generate-vectors' ? 'generate' : 'have_vectors';
-  const { title, description, api, infoPanel } = getStepContent(docLinks)[contentKey].ingest;
+  const { title, description, api, docsPanel, pills } = getStepContent(docLinks)[contentKey].ingest;
   const step = 'ingest';
 
   return (
@@ -36,20 +36,15 @@ export const IngestStep = () => {
       step={step}
       title={title}
       description={description}
-      onBack={() => history.push(from)}
-      onNext={() =>
-        history.push({
-          pathname: `${ONBOARDING_PATH}/search`,
-          search: pathQuery(path),
-          state: { from },
-        })
-      }
+      onBack={() => navigate(origin)}
+      onNext={() => navigate(`${ONBOARDING_PATH}/search${pathQuery(path)}`)}
     >
       <ApiStep
         snippets={api.snippets}
         consoleRequest={api.request}
         consoleComment={api.consoleComment}
-        infoPanel={infoPanel}
+        docsPanel={docsPanel}
+        pills={pills}
         step={step}
         path={path}
       />

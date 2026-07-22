@@ -28,9 +28,9 @@ describe('config validation', () => {
             "enabled": true,
           },
           "casesRedesign": Object {
-            "details": false,
-            "list": false,
-            "settings": false,
+            "details": true,
+            "list": true,
+            "settings": true,
           },
           "chat": Object {
             "enabled": true,
@@ -140,7 +140,7 @@ describe('config validation', () => {
             "enabled": true,
           },
           "templates": Object {
-            "enabled": false,
+            "enabled": true,
           },
         }
       `);
@@ -169,6 +169,16 @@ describe('config validation', () => {
     it('allows chat.enabled to be set to false', () => {
       const config = ConfigSchema.validate({ chat: { enabled: false } });
       expect(config.chat.enabled).toBe(false);
+    });
+
+    it('sets templates.enabled default to true', () => {
+      const config = ConfigSchema.validate({});
+      expect(config.templates.enabled).toBe(true);
+    });
+
+    it('allows templates.enabled to be set to false explicitly', () => {
+      const config = ConfigSchema.validate({ templates: { enabled: false } });
+      expect(config.templates.enabled).toBe(false);
     });
   });
 });
