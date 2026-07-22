@@ -27,10 +27,21 @@ export type NormalizableFieldSchema =
   | JsonModelSchemaType
   | Array<LegacyWorkflowInput | WorkflowOutput>;
 
-export type RenderInputValue = (value: unknown) => unknown;
+/**
+ * Indicates where an input value being rendered came from:
+ * - 'default': a default defined in the workflow's input schema (author-controlled)
+ * - 'provided': a value supplied by the caller at execution time (runtime data)
+ */
+export type RenderInputValueSource = 'default' | 'provided';
 
-function renderValue(value: unknown, renderInputValue?: RenderInputValue): unknown {
-  return renderInputValue ? renderInputValue(value) : value;
+export type RenderInputValue = (value: unknown, source: RenderInputValueSource) => unknown;
+
+function renderValue(
+  value: unknown,
+  renderInputValue: RenderInputValue | undefined,
+  source: RenderInputValueSource
+): unknown {
+  return renderInputValue ? renderInputValue(value, source) : value;
 }
 
 /**
@@ -224,7 +235,7 @@ function applyDefaultToObjectProperty(
 ): unknown {
   if (currentValue === undefined) {
     if (prop.default !== undefined) {
-      return renderValue(prop.default, renderInputValue);
+      return renderValue(prop.default, renderInputValue, 'default');
     }
     if (prop.type === 'object' && prop.properties) {
       return applyDefaultFromSchema(prop, undefined, inputsSchema, renderInputValue);
@@ -241,7 +252,7 @@ function applyDefaultToObjectProperty(
     return applyDefaultFromSchema(prop, currentValue, inputsSchema, renderInputValue);
   }
 
-  return renderValue(currentValue, renderInputValue);
+  return renderValue(currentValue, renderInputValue, 'provided');
 }
 
 /**
@@ -414,12 +425,12 @@ function applyDefaultFromSchema(
         renderInputValue
       );
     }
-    return renderValue(value, renderInputValue);
+    return renderValue(value, renderInputValue, 'provided');
   }
 
   // If value is not provided, use default if available
   if (schema.default !== undefined) {
-    return renderValue(schema.default, renderInputValue);
+    return renderValue(schema.default, renderInputValue, 'default');
   }
 
   // For objects, create object with defaults for required properties or properties with defaults

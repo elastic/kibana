@@ -295,7 +295,7 @@ describe('validateWorkflowInputs', () => {
     });
   });
 
-  it('should render provided input values before validation', async () => {
+  it('should render provided input values using the explicit expression form before validation', async () => {
     setInputsSchema({
       properties: {
         severity: { type: 'string', enum: ['low', 'medium', 'high'] },
@@ -304,7 +304,7 @@ describe('validateWorkflowInputs', () => {
     });
 
     const workflowExecution = createWorkflowExecution(
-      { inputs: { severity: '{{ consts.default_severity }}' } },
+      { inputs: { severity: '${{ consts.default_severity }}' } },
       {
         workflowDefinition: {
           ...stubWorkflowExecution.workflowDefinition,
@@ -323,6 +323,63 @@ describe('validateWorkflowInputs', () => {
       id: executionId,
       context: { inputs: { severity: 'high' } },
     });
+  });
+
+  it('should pass through provided values whose text is not valid Liquid instead of failing', async () => {
+    setInputsSchema({
+      properties: {
+        summary_markdown: { type: 'string' },
+      },
+      required: ['summary_markdown'],
+    });
+
+    // Attack discovery markdown uses `{{ field.name value }}` field-reference syntax,
+    // which is not valid Liquid (`field.name value` is not a Liquid expression).
+    const fieldSyntaxMarkdown =
+      'Malware on {{ host.name SRVWIN07 }} run by {{ user.name James_01 }}';
+
+    const workflowExecution = createWorkflowExecution({
+      inputs: { summary_markdown: fieldSyntaxMarkdown },
+    });
+
+    const result = await callValidate(workflowExecution);
+
+    expect(result).toBe(true);
+    expect(workflowExecution.context.inputs).toEqual({
+      summary_markdown: fieldSyntaxMarkdown,
+    });
+    expect(mockRepository.updateWorkflowExecution).not.toHaveBeenCalledWith(
+      expect.objectContaining({ status: ExecutionStatus.FAILED })
+    );
+  });
+
+  it('should pass through provided values nested in arrays and objects when not valid Liquid', async () => {
+    setInputsSchema({
+      properties: {
+        attack_discoveries: {
+          type: 'array',
+          items: { type: 'object', additionalProperties: true },
+        },
+      },
+      required: ['attack_discoveries'],
+    });
+
+    const discoveries = [
+      {
+        title: 'Credential theft',
+        details_markdown: '- {{ process.name mimikatz.exe }} on {{ host.name SRVWIN07 }}',
+        entity_summary_markdown: '{{ host.name SRVWIN07 }} {{ user.name James_01 }}',
+      },
+    ];
+
+    const workflowExecution = createWorkflowExecution({
+      inputs: { attack_discoveries: discoveries },
+    });
+
+    const result = await callValidate(workflowExecution);
+
+    expect(result).toBe(true);
+    expect(workflowExecution.context.inputs).toEqual({ attack_discoveries: discoveries });
   });
 
   it('should return false and mark execution as FAILED when a default input template is invalid', async () => {
