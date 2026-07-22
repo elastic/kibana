@@ -82,7 +82,7 @@ const SequenceStepComponent: React.FC<NodeProps<SequenceStepNode>> = ({ data }) 
       <EuiText size="xs">
         <p css={css({ fontWeight: 600, marginBottom: 4 })}>{data.error}</p>
         {data.resolution && (
-          <p css={css({ color: euiTheme.colors.subduedText })}>{data.resolution}</p>
+          <p css={css({ color: '#fff' })}>{data.resolution}</p>
         )}
       </EuiText>
     </div>
