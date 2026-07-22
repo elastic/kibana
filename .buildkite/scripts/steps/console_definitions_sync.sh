@@ -23,16 +23,41 @@ main() {
   .buildkite/scripts/bootstrap.sh
 
   echo "--- Generating console definitions"
-  node scripts/generate_console_definitions.js --source "$PARENT_DIR/elasticsearch-specification" --emptyDest
+  node scripts/generate_console_definitions.js \
+    --source "$PARENT_DIR/elasticsearch-specification" \
+    --emptyDest \
+    --skipOverrideAudit
+
+  echo "--- Auditing curated override conflicts"
+  local audit_output
+  local audit_status
+  set +e
+  audit_output=$(node scripts/audit_console_definition_overrides.js 2>&1)
+  audit_status=$?
+  set -e
+  echo "$audit_output"
+
+  local auto_merge=true
+  local pr_body='This PR updates the console definitions to match the latest ones from the @elastic/elasticsearch-specification repo.'
+  if [ $audit_status -ne 0 ]; then
+    echo "Override conflict audit requires human review; creating a PR without auto-merge."
+    auto_merge=false
+    pr_body+=$'\n\n## Override conflict audit\n\nThis specification update changes generated body rules that curated overrides replace. Review each conflict, fix stale overrides, and update the approved conflict baseline only when the remaining replacements are intentional.\n\n```\n'
+    pr_body+="$audit_output"
+    pr_body+=$'\n```'
+  fi
 
   create_sync_pr \
     "$GIT_SCOPE" \
     "[Console] Update console definitions (${BUILDKITE_BRANCH})" \
-    'This PR updates the console definitions to match the latest ones from the @elastic/elasticsearch-specification repo.' \
+    "$pr_body" \
     "console_definitions_sync" \
     "Update console definitions" \
     "console_defs_existing_pr" \
+    "$auto_merge" \
     'backport:skip' 'release_note:skip' 'Feature:Console' 'Team:Kibana Management'
+
+  return $audit_status
 }
 
 main

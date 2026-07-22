@@ -7,6 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './src/cli';
-export * from './src/audit_overrides_cli';
-export * from './src/generate_kibana_api_doc_links_cli';
+require('@kbn/setup-node-env');
+require('@kbn/generate-console-definitions').runAuditConsoleDefinitionOverridesCli();

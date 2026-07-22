@@ -14,13 +14,17 @@ import { createFlagError } from '@kbn/dev-cli-errors';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { AUTOCOMPLETE_DEFINITIONS_FOLDER } from '@kbn/console-plugin/common/constants';
 import { generateConsoleDefinitions } from './generate_console_definitions';
+import { auditConsoleDefinitionOverrides } from './audit_overrides_cli';
 
 export function runGenerateConsoleDefinitionsCli() {
   run(
     (context) => {
       const { log, flags } = context;
       log.info('starting console definitions generation');
-      const { source, dest, emptyDest } = flags;
+      const { source, dest, emptyDest, skipOverrideAudit, updateOverrideAudit } = flags;
+      if (skipOverrideAudit && updateOverrideAudit) {
+        throw createFlagError(`--skipOverrideAudit cannot be used with --updateOverrideAudit`);
+      }
       if (!source) {
         throw createFlagError(`Missing --source argument`);
       }
@@ -54,6 +58,13 @@ export function runGenerateConsoleDefinitionsCli() {
       }
       log.info(`ES specification repo folder ${source}`);
       generateConsoleDefinitions({ specsRepo, definitionsFolder, log });
+      if (!skipOverrideAudit) {
+        auditConsoleDefinitionOverrides({
+          generatedFolder: definitionsFolder,
+          updateOverrideAudit: Boolean(updateOverrideAudit),
+          log,
+        });
+      }
       log.info('completed console definitions generation');
     },
     {
@@ -61,15 +72,19 @@ export function runGenerateConsoleDefinitionsCli() {
       usage: `
 node scripts/generate_console_definitions.js --help
 node scripts/generate_console_definitions.js --source <ES_SPECIFICATION_REPO>
-node scripts/generate_console_definitions.js --source <ES_SPECIFICATION_REPO> [--dest <DEFINITIONS_FOLDER] [--emptyDest]
+node scripts/generate_console_definitions.js --source <ES_SPECIFICATION_REPO> [--dest <DEFINITIONS_FOLDER] [--emptyDest] [--updateOverrideAudit]
 `,
       flags: {
         string: ['source', 'dest'],
-        boolean: ['emptyDest'],
+        boolean: ['emptyDest', 'skipOverrideAudit', 'updateOverrideAudit'],
         help: `
 --source        Folder containing the root of the Elasticsearch specification repo
 --dest          Folder where console autocomplete definitions will be generated (relative to the Kibana repo root)
 --emptyDest     Flag to empty definitions folder if it already contains any files
+--skipOverrideAudit
+                Generate definitions without auditing curated override conflicts
+--updateOverrideAudit
+                Update the approved generated/override conflict baseline after reviewing every reported change
 `,
       },
     }
