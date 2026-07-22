@@ -8,7 +8,6 @@
  */
 
 import type { ScoutPage } from '..';
-import { expect } from '..';
 
 // Increased timeout because new map container is not always loaded within default one
 const DEFAULT_MAP_LOADING_TIMEOUT = 20_000;
@@ -25,6 +24,7 @@ export class MapsPage {
   public readonly returnToOriginSwitch;
   public readonly confirmSaveButton;
   public readonly documentsItem;
+  private readonly mapLayerToc;
 
   constructor(private readonly page: ScoutPage) {
     this.mapContainer = this.page.locator('#maps-plugin');
@@ -40,6 +40,7 @@ export class MapsPage {
     this.returnToOriginSwitch = this.page.testSubj.locator('returnToOriginModeSwitch');
     this.confirmSaveButton = this.page.testSubj.locator('confirmSaveSavedObjectButton');
     this.documentsItem = this.page.testSubj.locator('documents');
+    this.mapLayerToc = this.page.testSubj.locator('mapLayerTOC');
   }
 
   async gotoNewMap() {
@@ -95,40 +96,30 @@ export class MapsPage {
     await this.saveAndReturnButton.click();
   }
 
-  private escapeLayerName(layerName: string): string {
-    return layerName.split(' ').join('_');
-  }
-
   /** Waits until Map layer TOC has entries and loading indicators are gone (FTR parity). */
   async waitForLayersToLoad() {
-    const tableOfContents = this.page.testSubj.locator('mapLayerTOC');
-    await tableOfContents.waitFor({ state: 'visible', timeout: DEFAULT_MAP_LOADING_TIMEOUT });
-    const layerToggles = tableOfContents.locator(
-      '[data-test-subj^="layerTocActionsPanelToggleButton"]'
-    );
+    await this.mapLayerToc.waitFor({ state: 'visible', timeout: DEFAULT_MAP_LOADING_TIMEOUT });
     // Maps uses EuiLoadingSpinner (role=progressbar) while a layer loads; there is no
     // dedicated layer-loading data-test-subj, so wait for toggles + no progressbars.
-    await expect
-      .poll(
-        async () => {
-          const layerCount = await layerToggles.count();
-          const spinnerCount = await tableOfContents.getByRole('progressbar').count();
-          return layerCount > 0 && spinnerCount === 0;
-        },
-        { timeout: DEFAULT_MAP_LOADING_TIMEOUT }
-      )
-      .toBe(true);
-  }
-
-  async doesLayerExist(layerName: string): Promise<boolean> {
-    return this.getLayerToggleButton(layerName).isVisible();
+    await this.page.waitForFunction(
+      () => {
+        const toc = document.querySelector('[data-test-subj="mapLayerTOC"]');
+        if (!toc) {
+          return false;
+        }
+        const layerCount = toc.querySelectorAll(
+          '[data-test-subj^="layerTocActionsPanelToggleButton"]'
+        ).length;
+        const spinnerCount = toc.querySelectorAll('[role="progressbar"]').length;
+        return layerCount > 0 && spinnerCount === 0;
+      },
+      undefined,
+      { timeout: DEFAULT_MAP_LOADING_TIMEOUT }
+    );
   }
 
   async getLayerTocTooltipMsg(layerName: string): Promise<string> {
-    const toggle = this.page.testSubj.locator(
-      `layerTocActionsPanelToggleButton${this.escapeLayerName(layerName)}`
-    );
-    await toggle.hover();
+    await this.getLayerToggleButton(layerName).hover();
     const tooltip = this.page.testSubj.locator('layerTocTooltip');
     await tooltip.waitFor({ state: 'visible', timeout: 10_000 });
     // Normalize whitespace — tooltip lines can include leading spaces from TOC layout.

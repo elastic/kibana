@@ -505,7 +505,7 @@ export class LensApp {
   }
 
   /** Returns visible labels for all dimension triggers inside a dimension panel. */
-  async getDimensionTriggersTexts(dimension: string): Promise<string[]> {
+  private async getDimensionTriggersTexts(dimension: string): Promise<string[]> {
     const triggersLocator = this.page.testSubj.locator(`${dimension} > lns-dimensionTrigger`);
     await expect.poll(async () => await triggersLocator.count()).toBeGreaterThan(0);
 
@@ -645,16 +645,6 @@ export class LensApp {
     }
   }
 
-  /** Alias matching FTR `openPalettePanel`. */
-  async openPalettePanel() {
-    await this.openPalettePanelFlyout();
-  }
-
-  /** Alias matching FTR `closePalettePanel`. */
-  async closePalettePanel() {
-    await this.closePalettePanelFlyout();
-  }
-
   /**
    * Selects a named dynamic-coloring palette (e.g. `status`) from the open palette panel.
    * Distinct from `setPalette`, which toggles legacy vs color-mapping pickers.
@@ -767,6 +757,28 @@ export class LensApp {
     await this.page.testSubj.locator('lns-indexPattern-static_value-input').waitFor({
       state: 'visible',
     });
+  }
+
+  /** Returns visible tag labels from the Lens tag cloud workspace. */
+  async getTagCloudTexts(): Promise<string[]> {
+    // SVG <text> nodes — use css= so Playwright does not treat "text" as a text-engine query.
+    const tags = this.page.testSubj.locator('tagCloudVisualization').locator('css=text');
+    return tags.evaluateAll((elements) =>
+      elements.map((el) => (el.textContent ?? '').trim()).filter((text) => text.length > 0)
+    );
+  }
+
+  /** Clicks a tag cloud label matching `tagDisplayText`. */
+  async selectTagCloudTag(tagDisplayText: string): Promise<void> {
+    const escaped = tagDisplayText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const tag = this.page.testSubj
+      .locator('tagCloudVisualization')
+      .locator('css=text')
+      .filter({ hasText: new RegExp(`^${escaped}$`) });
+    await tag.waitFor({ state: 'visible' });
+    // SVG <text> hit boxes from Elastic Charts are often too thin for Playwright's
+    // actionability hit-test; dispatch a DOM click instead of { force: true }.
+    await tag.dispatchEvent('click');
   }
 
   /**

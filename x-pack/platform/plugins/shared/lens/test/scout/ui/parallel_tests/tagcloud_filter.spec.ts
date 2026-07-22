@@ -7,11 +7,7 @@
 
 import { spaceTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import {
-  createLogstashLensEditorSuiteSetup,
-  getTagCloudTexts,
-  selectTagCloudTag,
-} from '../fixtures';
+import { createLogstashLensEditorSuiteSetup } from '../fixtures';
 
 const EXPECTED_TAGS = ['97.220.3.248', '78.83.247.30', '226.82.228.233', '93.28.27.24', 'Other'];
 
@@ -26,7 +22,7 @@ spaceTest.describe('Lens tag cloud filter', { tag: tags.stateful.classic }, () =
 
   spaceTest(
     'renders tags, filters from a tag click, and narrows the cloud',
-    async ({ browserAuth, page, pageObjects }) => {
+    async ({ browserAuth, pageObjects }) => {
       const { visualize, lens, filterBar } = pageObjects;
 
       await browserAuth.loginAsPrivilegedUser();
@@ -58,7 +54,7 @@ spaceTest.describe('Lens tag cloud filter', { tag: tags.stateful.classic }, () =
       let renderedTagToFilter = '';
 
       await spaceTest.step('render tag cloud', async () => {
-        const tagLabels = await getTagCloudTexts(page);
+        const tagLabels = await lens.getTagCloudTexts();
         expect(tagLabels.length).toBeGreaterThan(3);
         expect(
           tagLabels.every((tag) => EXPECTED_TAGS.includes(tag)),
@@ -74,7 +70,7 @@ spaceTest.describe('Lens tag cloud filter', { tag: tags.stateful.classic }, () =
       });
 
       await spaceTest.step('add filter from clicking on tag', async () => {
-        await selectTagCloudTag(page, renderedTagToFilter);
+        await lens.selectTagCloudTag(renderedTagToFilter);
         await expect
           .poll(async () => filterBar.hasFilter({ field: 'ip', value: renderedTagToFilter }))
           .toBe(true);
@@ -84,11 +80,11 @@ spaceTest.describe('Lens tag cloud filter', { tag: tags.stateful.classic }, () =
         await lens.waitForVisualization('tagCloudVisualization');
         await expect
           .poll(async () => {
-            const filteredTags = await getTagCloudTexts(page);
+            const filteredTags = await lens.getTagCloudTexts();
             return filteredTags.length;
           })
           .toBeLessThan(2);
-        const filteredTags = await getTagCloudTexts(page);
+        const filteredTags = await lens.getTagCloudTexts();
         expect(filteredTags.every((tag) => tag === renderedTagToFilter)).toBe(true);
       });
     }

@@ -130,28 +130,3 @@ export async function convertToEsqlViaModal({
   await expect(page.getByTestId('ESQLEditor')).toBeVisible();
   await expect(page.getByText('ES|QL Query Results')).toBeVisible();
 }
-
-/** Returns visible tag labels from the Lens tag cloud workspace. */
-export async function getTagCloudTexts(page: ScoutPage): Promise<string[]> {
-  // SVG <text> nodes — use css= so Playwright does not treat "text" as a text-engine query.
-  const tags = page.testSubj.locator('tagCloudVisualization').locator('css=text');
-  return tags.evaluateAll((elements) =>
-    elements.map((el) => (el.textContent ?? '').trim()).filter((text) => text.length > 0)
-  );
-}
-
-/** Clicks a tag cloud label matching `tagDisplayText`. */
-export async function selectTagCloudTag(page: ScoutPage, tagDisplayText: string): Promise<void> {
-  const tag = page.testSubj
-    .locator('tagCloudVisualization')
-    .locator('css=text')
-    .filter({ hasText: new RegExp(`^${escapeRegExp(tagDisplayText)}$`) });
-  await tag.waitFor({ state: 'visible' });
-  // SVG <text> hit boxes from Elastic Charts are often too thin for Playwright's
-  // actionability hit-test; dispatch a DOM click instead of { force: true }.
-  await tag.dispatchEvent('click');
-}
-
-function escapeRegExp(value: string): string {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}

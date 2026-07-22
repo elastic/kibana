@@ -84,7 +84,7 @@ spaceTest.describe('Lens heatmap palette', { tag: tags.stateful.classic }, () =>
 
       await spaceTest.step('reflect stop color changes on the chart', async () => {
         await lens.openDimensionEditor('lnsHeatmap_cellPanel > lns-dimensionTrigger');
-        await lens.openPalettePanel();
+        await lens.openPalettePanelFlyout();
         const { violations } = await page.checkA11y({
           include: ['[data-test-subj="lns-palettePanelFlyout"]'],
         });
@@ -201,7 +201,7 @@ spaceTest.describe('Lens heatmap palette', { tag: tags.stateful.classic }, () =>
       });
 
       await spaceTest.step('change x-axis label rotation', async () => {
-        await lens.closePalettePanel();
+        await lens.closePalettePanelFlyout();
         await lens.closeDimensionEditor();
         await lens.openStyleSettings();
         await lens.setAxisLabelOrientation('vertical');
