@@ -85,7 +85,12 @@ export interface RetentionSelectorProps {
   flyoutScrollContainerRef?: RefObject<HTMLElement | null>;
   searchValue?: string;
   onSearchValueChange?: (value: string) => void;
-  /** When true, shows a filter toggle to include/exclude managed policies. Defaults to true when any option has isManaged=true. */
+  /**
+   * Controls managed-policy filtering. When true (the default when any option has `isManaged=true`
+   * and the search bar is visible), managed policies are hidden by default and a "Managed" toggle
+   * lets the user reveal them. When false, managed policies are always shown and no toggle is
+   * rendered.
+   */
   showManagedFilter?: boolean;
 }
 
