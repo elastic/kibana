@@ -38,7 +38,7 @@ describe('config validation', () => {
           "level": "debug",
           "warn_delayed_task_start_in_seconds": 60,
         },
-        "monitored_stats_required_freshness": 1500
+        "monitored_stats_required_freshness": 1500,
         "monitored_stats_running_average_window": 50,
         "monitored_task_execution_thresholds": Object {
           "custom": Object {},
