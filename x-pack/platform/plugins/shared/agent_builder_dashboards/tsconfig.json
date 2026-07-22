@@ -35,6 +35,7 @@
     "@kbn/test-jest-helpers",
     "@kbn/esql-utils",
     "@kbn/presentation-publishing",
+    "@kbn/ui-callout",
   ],
   "exclude": ["target/**/*"]
 }

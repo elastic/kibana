@@ -9,12 +9,11 @@
 
 import React, { useCallback, useState } from 'react';
 import type { EuiSelectableOption } from '@elastic/eui';
-import { EuiButtonEmpty, EuiPopover, EuiSelectable } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { EuiSelectable } from '@elastic/eui';
 import type { ESQLColumn } from '@kbn/es-types';
 import { DataControlEditorStrings } from '../data_control_constants';
 
-export function ChooseColumnPopover({
+export function useChooseColumnPopover({
   columns,
   updateQuery,
 }: {
@@ -29,18 +28,6 @@ export function ChooseColumnPopover({
   const onButtonClick = () => setIsPopoverOpen((status) => !status);
   const closePopover = () => setIsPopoverOpen(false);
 
-  const button = (
-    <EuiButtonEmpty
-      css={css`
-        vertical-align: top;
-      `}
-      onClick={onButtonClick}
-      data-test-subj="chooseColumnBtn"
-    >
-      {DataControlEditorStrings.manageControl.dataSource.valuesPreview.getSelectAColumnText()}
-    </EuiButtonEmpty>
-  );
-
   const onColumnChange = useCallback(
     (newOptions: EuiSelectableOption[]) => {
       setOptions(newOptions);
@@ -53,34 +40,41 @@ export function ChooseColumnPopover({
     [updateQuery]
   );
 
-  return (
-    <EuiPopover
-      aria-label={DataControlEditorStrings.manageControl.dataSource.valuesPreview.getColumnsListLabel()}
-      button={button}
-      isOpen={isPopoverOpen}
-      closePopover={closePopover}
-    >
-      <EuiSelectable
-        aria-label={DataControlEditorStrings.manageControl.dataSource.valuesPreview.getSelectAColumnText()}
-        searchable
-        searchProps={{
-          'data-test-subj': 'selectableColumnSearch',
-        }}
-        listProps={{
-          'data-test-subj': 'selectableColumnList',
-        }}
-        singleSelection="always"
-        options={options}
-        onChange={onColumnChange}
-        data-test-subj="selectableColumnContainer"
-      >
-        {(list, search) => (
-          <>
-            {search}
-            {list}
-          </>
-        )}
-      </EuiSelectable>
-    </EuiPopover>
-  );
+  const buttonProps = {
+    children:
+      DataControlEditorStrings.manageControl.dataSource.valuesPreview.getSelectAColumnText(),
+    'data-test-subj': 'chooseColumnBtn',
+    onClick: onButtonClick,
+    popoverProps: {
+      'aria-label':
+        DataControlEditorStrings.manageControl.dataSource.valuesPreview.getColumnsListLabel(),
+      isOpen: isPopoverOpen,
+      closePopover,
+      children: (
+        <EuiSelectable
+          aria-label={DataControlEditorStrings.manageControl.dataSource.valuesPreview.getSelectAColumnText()}
+          searchable
+          searchProps={{
+            'data-test-subj': 'selectableColumnSearch',
+          }}
+          listProps={{
+            'data-test-subj': 'selectableColumnList',
+          }}
+          singleSelection="always"
+          options={options}
+          onChange={onColumnChange}
+          data-test-subj="selectableColumnContainer"
+        >
+          {(list, search) => (
+            <>
+              {search}
+              {list}
+            </>
+          )}
+        </EuiSelectable>
+      ),
+    },
+  };
+
+  return { buttonProps };
 }

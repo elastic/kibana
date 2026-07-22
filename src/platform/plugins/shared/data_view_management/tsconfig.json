@@ -54,6 +54,7 @@
     "@kbn/cps",
     "@kbn/discover-utils",
     "@kbn/scout",
+    "@kbn/ui-callout",
   ],
   "exclude": [
     "target/**/*",

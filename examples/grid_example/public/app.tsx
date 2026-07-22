@@ -19,7 +19,6 @@ import {
   EuiBadge,
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPageTemplate,
@@ -37,6 +36,7 @@ import { i18n } from '@kbn/i18n';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 
 import { GridLayoutOptions } from './grid_layout_options';
 import {
@@ -195,25 +195,23 @@ export const GridExample = ({
             css: { flexGrow: 1, display: 'flex', flexDirection: 'column' },
           }}
         >
-          <EuiCallOut
+          <KbnInfoCallout
             title={i18n.translate('examples.gridExample.sessionStorageCallout', {
               defaultMessage:
                 'This example uses session storage to persist saved state and unsaved changes',
             })}
-          >
-            <EuiButton
-              color="accent"
-              size="s"
-              onClick={() => {
-                clearSerializedDashboardState();
-                window.location.reload();
-              }}
-            >
-              {i18n.translate('examples.gridExample.resetExampleButton', {
-                defaultMessage: 'Reset example',
-              })}
-            </EuiButton>
-          </EuiCallOut>
+            actionProps={{
+              primary: {
+                children: i18n.translate('examples.gridExample.resetExampleButton', {
+                  defaultMessage: 'Reset example',
+                }),
+                onClick: () => {
+                  clearSerializedDashboardState();
+                  window.location.reload();
+                },
+              },
+            }}
+          />
           <EuiSpacer size="m" />
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
             <EuiFlexItem grow={false}>

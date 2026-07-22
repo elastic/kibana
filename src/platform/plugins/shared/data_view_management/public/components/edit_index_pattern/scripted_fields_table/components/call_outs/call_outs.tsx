@@ -9,8 +9,9 @@
 
 import React from 'react';
 
-import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
+import { EuiLink, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 
 interface CallOutsProps {
   deprecatedLangsInUse: string[];
@@ -25,17 +26,14 @@ export const CallOuts = ({ deprecatedLangsInUse, painlessDocLink }: CallOutsProp
   return (
     <>
       <EuiSpacer size="m" />
-      <EuiCallOut
+      <KbnDangerCallout
         title={
           <FormattedMessage
             id="indexPatternManagement.editIndexPattern.scripted.deprecatedLangHeader"
             defaultMessage="Deprecated languages in use"
           />
         }
-        color="danger"
-        iconType="cross"
-      >
-        <p>
+        text={
           <FormattedMessage
             id="indexPatternManagement.editIndexPattern.scripted.deprecationLangLabel.deprecationLangDetail"
             defaultMessage="The following deprecated languages are in use: {deprecatedLangsInUse}. Support for these languages will be
@@ -52,8 +50,8 @@ export const CallOuts = ({ deprecatedLangsInUse, painlessDocLink }: CallOutsProp
               ),
             }}
           />
-        </p>
-      </EuiCallOut>
+        }
+      />
     </>
   );
 };

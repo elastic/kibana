@@ -19,7 +19,8 @@
     "@kbn/core-lifecycle-browser",
     "@kbn/presentation-util",
     "@kbn/shared-ux-utility",
-    "@kbn/scout"
+    "@kbn/scout",
+    "@kbn/ui-callout"
   ],
   "exclude": [
     "target/**/*",

@@ -18,7 +18,6 @@ import {
   EuiText,
   EuiSpacer,
   EuiTitle,
-  EuiCallOut,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -28,6 +27,7 @@ import { buildEsQuery } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { context as contextType } from '@kbn/kibana-react-plugin/public';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import type { IndexPatternManagmentContextValue } from '../../../../types';
 import type { ExecuteScript } from '../../types';
 
@@ -128,13 +128,11 @@ export class TestScript extends Component<TestScriptProps, TestScriptState> {
 
     if (previewData.error) {
       return (
-        <EuiCallOut
+        <KbnDangerCallout
           announceOnMount
           title={i18n.translate('indexPatternManagement.testScript.errorMessage', {
             defaultMessage: `There's an error in your script`,
           })}
-          color="danger"
-          iconType="cross"
         >
           <EuiCodeBlock
             language="json"
@@ -143,7 +141,7 @@ export class TestScript extends Component<TestScriptProps, TestScriptState> {
           >
             {JSON.stringify(previewData.error, null, ' ')}
           </EuiCodeBlock>
-        </EuiCallOut>
+        </KbnDangerCallout>
       );
     }
 
