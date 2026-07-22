@@ -138,7 +138,6 @@ spaceTest.describe('Discover tabs - ES|QL controls', { tag: '@local-stateful-cla
 
       await discover.clickNewSearch();
       await discover.loadSavedSearch(savedSession);
-      await discover.waitUntilTabIsLoaded();
       await expect(dashboard.getControlsGroupLocator()).toBeVisible();
       await expect(dashboard.getControlFramesLocator()).toHaveCount(1);
 
@@ -149,7 +148,6 @@ spaceTest.describe('Discover tabs - ES|QL controls', { tag: '@local-stateful-cla
 
       await expect(discover.unsavedChangesIndicator()).toBeVisible();
       await discover.revertUnsavedChanges();
-      await discover.waitUntilTabIsLoaded();
       await expect(discover.unsavedChangesIndicator()).toBeHidden();
     }
   );
@@ -168,7 +166,6 @@ spaceTest.describe('Discover tabs - ES|QL controls', { tag: '@local-stateful-cla
 
       await discover.clickNewSearch();
       await discover.loadSavedSearch(savedSession);
-      await discover.waitUntilTabIsLoaded();
       await expect(dashboard.getControlsGroupLocator()).toBeVisible();
 
       await discover.saveVisualizationToNewDashboard(savedChart);
@@ -204,7 +201,6 @@ spaceTest.describe('Discover tabs - ES|QL controls', { tag: '@local-stateful-cla
       await discover.waitUntilTabIsLoaded();
       await discover.clickNewSearch();
       await discover.loadSavedSearch(savedSession);
-      await discover.waitUntilTabIsLoaded();
 
       await expect(dashboard.getControlsGroupLocator()).toBeHidden();
       await expect(dashboard.getControlFramesLocator()).toHaveCount(0);

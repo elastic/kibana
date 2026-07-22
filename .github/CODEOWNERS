@@ -1325,6 +1325,7 @@ x-pack/solutions/observability/packages/utils-common @elastic/observability-ui
 x-pack/solutions/observability/packages/utils-server @elastic/observability-ui
 x-pack/solutions/observability/plugins/apm @elastic/obs-signals-traces-team
 x-pack/solutions/observability/plugins/apm_data_access @elastic/obs-signals-traces-team
+x-pack/solutions/observability/plugins/client_apps @elastic/apm-agent-approvers
 x-pack/solutions/observability/plugins/exploratory_view @elastic/actionable-obs-team
 x-pack/solutions/observability/plugins/infra @elastic/obs-signals-metrics-team
 x-pack/solutions/observability/plugins/metrics_data_access @elastic/obs-signals-metrics-team
@@ -3010,7 +3011,7 @@ x-pack/solutions/security/test/serverless/functional/configs/config.trial_compan
 
 ## Security Solution sub teams - Cloud Security Posture
 
-x-pack/solutions/security/plugins/security_solution/public/asset_inventory @elastic/contextual-security-apps
+x-pack/solutions/security/plugins/security_solution/public/asset_inventory @elastic/security-entity-analytics
 x-pack/solutions/security/plugins/security_solution/public/siem_readiness @elastic/contextual-security-apps
 x-pack/solutions/security/plugins/security_solution/public/cloud_defend @elastic/contextual-security-apps
 
@@ -3515,16 +3516,16 @@ x-pack/solutions/security/test/security_solution_api_integration/test_suites/exp
 
 /x-pack/solutions/security/packages/test-api-clients/supertest/entity_analytics.gen.ts @elastic/security-entity-analytics
 
-## Security Solution sub teams - Entity Store / Maintainers / Entity Details (contextual-security-apps co-ownership)
-x-pack/solutions/security/plugins/security_solution/public/flyout/entity_details @elastic/contextual-security-apps @elastic/security-entity-analytics
-x-pack/solutions/security/plugins/security_solution/public/entity_analytics/components/home @elastic/contextual-security-apps @elastic/security-entity-analytics
-x-pack/solutions/security/plugins/security_solution/public/entity_analytics/components/entity_details_flyout @elastic/contextual-security-apps @elastic/security-entity-analytics
-x-pack/solutions/security/plugins/security_solution/public/entity_analytics/components/entity_store @elastic/contextual-security-apps @elastic/security-entity-analytics
+## Security Solution sub teams - Entity Store / Maintainers / Entity Details
+x-pack/solutions/security/plugins/security_solution/public/flyout/entity_details @elastic/security-entity-analytics
+x-pack/solutions/security/plugins/security_solution/public/entity_analytics/components/home @elastic/security-entity-analytics
+x-pack/solutions/security/plugins/security_solution/public/entity_analytics/components/entity_details_flyout @elastic/security-entity-analytics
+x-pack/solutions/security/plugins/security_solution/public/entity_analytics/components/entity_store @elastic/security-entity-analytics
 x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/maintainers @elastic/contextual-security-apps @elastic/security-entity-analytics
-x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/api @elastic/contextual-security-apps @elastic/security-entity-analytics
-x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store @elastic/contextual-security-apps @elastic/security-entity-analytics
-x-pack/solutions/security/plugins/security_solution/server/agent_builder/skills/entity_analytics @elastic/contextual-security-apps @elastic/security-entity-analytics
-x-pack/solutions/security/plugins/security_solution/server/agent_builder/tools/entity_analytics @elastic/contextual-security-apps @elastic/security-entity-analytics
+x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/api @elastic/security-entity-analytics
+x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store @elastic/security-entity-analytics
+x-pack/solutions/security/plugins/security_solution/server/agent_builder/skills/entity_analytics @elastic/security-entity-analytics
+x-pack/solutions/security/plugins/security_solution/server/agent_builder/tools/entity_analytics @elastic/security-entity-analytics
 
 ## Security Solution sub teams - Entity Resolution (contextual-security-apps co-ownership)
 x-pack/solutions/security/plugins/security_solution/public/entity_analytics/components/entity_resolution @elastic/contextual-security-apps @elastic/security-entity-analytics
@@ -3535,12 +3536,12 @@ x-pack/solutions/security/test/security_solution_api_integration/test_suites/ent
 
 ## Security Solution sub teams - entity_analytics test tree per-feature overrides
 x-pack/solutions/security/test/security_solution_api_integration/test_suites/entity_analytics/entity_store @elastic/core-analysis
-x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/entity_analytics/entity_flyout.cy.ts @elastic/contextual-security-apps @elastic/security-entity-analytics
-x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/entity_analytics/entity_flyout @elastic/contextual-security-apps @elastic/security-entity-analytics
-x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/entity_analytics/entity_analytics_home/entity_analytics_home_page.cy.ts @elastic/contextual-security-apps @elastic/security-entity-analytics
-x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/entity_analytics/entity_analytics_home/entities_table.cy.ts @elastic/contextual-security-apps @elastic/security-entity-analytics
-x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/entity_analytics/entity_analytics_home/entities_table_grouping.cy.ts @elastic/contextual-security-apps @elastic/security-entity-analytics
-x-pack/solutions/security/test/security_solution_cypress/cypress/tasks/entity_analytics/entity_analytics_home.ts @elastic/contextual-security-apps @elastic/security-entity-analytics
+x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/entity_analytics/entity_flyout.cy.ts @elastic/security-entity-analytics
+x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/entity_analytics/entity_flyout @elastic/security-entity-analytics
+x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/entity_analytics/entity_analytics_home/entity_analytics_home_page.cy.ts @elastic/security-entity-analytics
+x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/entity_analytics/entity_analytics_home/entities_table.cy.ts @elastic/security-entity-analytics
+x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/entity_analytics/entity_analytics_home/entities_table_grouping.cy.ts @elastic/security-entity-analytics
+x-pack/solutions/security/test/security_solution_cypress/cypress/tasks/entity_analytics/entity_analytics_home.ts @elastic/security-entity-analytics
 x-pack/solutions/security/test/security_solution_cypress/cypress/tasks/entity_analytics/entity_flyout_resolution.ts @elastic/contextual-security-apps
 
 ## Security Solution sub teams - GenAI
@@ -3565,7 +3566,7 @@ x-pack/platform/test/automatic_import_api_integration @elastic/integration-exper
 x-pack/solutions/security/plugins/security_solution/public/common/components/sessions_viewer @elastic/contextual-security-apps
 x-pack/solutions/security/plugins/security_solution/public/cloud_security_posture @elastic/contextual-security-apps
 x-pack/solutions/security/plugins/security_solution/public/kubernetes @elastic/contextual-security-apps
-x-pack/solutions/security/plugins/security_solution/server/lib/asset_inventory @elastic/contextual-security-apps
+x-pack/solutions/security/plugins/security_solution/server/lib/asset_inventory @elastic/security-entity-analytics
 x-pack/solutions/security/plugins/security_solution/server/lib/siem_readiness @elastic/contextual-security-apps
 x-pack/solutions/security/plugins/security_solution/public/flyout/entity_details/generic_right @elastic/contextual-security-apps
 /x-pack/solutions/security/plugins/security_solution/public/flyout/csp_details @elastic/contextual-security-apps
@@ -3596,9 +3597,9 @@ x-pack/solutions/security/test/serverless/api_integration/test_suites/cloud_secu
 
 x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/cloud_security_posture/misconfiguration_contextual_flyout.cy.ts @elastic/contextual-security-apps
 x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/cloud_security_posture/vulnerabilities_contextual_flyout.cy.ts @elastic/contextual-security-apps
-x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/asset_inventory @elastic/contextual-security-apps
-x-pack/solutions/security/test/security_solution_cypress/cypress/screens/asset_inventory @elastic/contextual-security-apps
-x-pack/solutions/security/test/security_solution_cypress/cypress/tasks/asset_inventory @elastic/contextual-security-apps
+x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/asset_inventory @elastic/security-entity-analytics
+x-pack/solutions/security/test/security_solution_cypress/cypress/screens/asset_inventory @elastic/security-entity-analytics
+x-pack/solutions/security/test/security_solution_cypress/cypress/tasks/asset_inventory @elastic/security-entity-analytics
 
 # Security integrations
 x-pack/solutions/security/plugins/security_solution/common/security_integrations @elastic/integration-experience
