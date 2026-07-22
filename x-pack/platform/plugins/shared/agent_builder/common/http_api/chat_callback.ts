@@ -7,7 +7,7 @@
 
 import type {
   ConversationOrigin,
-  ConversationOriginAuthor,
+  ConversationRoundAuthor,
   ConversationOriginType,
   ExecutionStatus,
   SerializedExecutionError,
@@ -17,7 +17,7 @@ import type { ChatRequestBodyPayload, ChatResponse } from './chat';
 export interface ChatCallbackRequestBodyPayload extends ChatRequestBodyPayload {
   origin?: ConversationOrigin & {
     type: ConversationOriginType;
-    author?: ConversationOriginAuthor;
+    author?: ConversationRoundAuthor;
   };
   callback: {
     url: string;

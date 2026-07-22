@@ -9,6 +9,7 @@ import React, { memo, useCallback } from 'react';
 import { type DataTableRecord } from '@kbn/discover-utils';
 import { useFlyoutApi } from '../../../use_flyout_api';
 import { ResponseSectionContent } from './response_section_content';
+import { FLYOUT_ORIGIN } from '../../../../common/lib/telemetry';
 
 export interface ResponseSectionProps {
   /**
@@ -29,7 +30,7 @@ export const ResponseSection = memo<ResponseSectionProps>(({ hit, isRulePreview 
   const { openDocumentResponse } = useFlyoutApi();
 
   const onShowResponseDetails = useCallback(() => {
-    openDocumentResponse({ hit });
+    openDocumentResponse({ hit, origin: FLYOUT_ORIGIN.RESPONSE_SECTION });
   }, [openDocumentResponse, hit]);
 
   return (
