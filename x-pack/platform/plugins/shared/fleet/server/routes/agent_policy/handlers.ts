@@ -16,7 +16,7 @@ import yaml from 'yaml';
 import { ALL_SPACES_ID, FIPS_AGENT_KUERY, inputsFormat } from '../../../common/constants';
 import {
   removeVersionSuffixFromPolicyId,
-  buildPolicyBaseIdKuery,
+  buildPolicyIdOrVariantsKuery,
 } from '../../../common/services/version_specific_policies_utils';
 
 import { fullAgentPolicyToYaml } from '../../../common/services';
@@ -106,7 +106,10 @@ export async function populateAssignedAgentsCount(
   // (keyed by policy id), each with sub-aggregations for the unprivileged/FIPS counts and the
   // per-version breakdown. This keeps the work to one ES request regardless of page size.
   const policyKueryById = new Map(
-    agentPolicies.map((agentPolicy) => [agentPolicy.id, buildPolicyBaseIdKuery(agentPolicy.id)])
+    agentPolicies.map((agentPolicy) => [
+      agentPolicy.id,
+      buildPolicyIdOrVariantsKuery(agentPolicy.id),
+    ])
   );
 
   const { aggregations } = await agentClient.listAgents({
