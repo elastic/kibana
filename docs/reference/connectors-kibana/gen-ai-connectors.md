@@ -1,7 +1,6 @@
 ---
 navigation_title: GenAI
 applies_to:
-  stack: all
   stack: deprecated 9.6
   serverless: deprecated
 ---
