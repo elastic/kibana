@@ -20,9 +20,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { Handle, Position, type NodeProps } from '@xyflow/react';
 import type { DestinationNode as DestinationNodeType } from '../types';
+import { DESTINATION_NODE_WIDTH } from '../canvas_constants';
 import { getNodeCardStyles } from './node_card_styles';
-
-const DESTINATION_NODE_WIDTH = 184;
 
 const processingLabel = i18n.translate('xpack.streams.canvas.destinationNode.processingLabel', {
   defaultMessage: 'Processing',
@@ -35,6 +34,9 @@ export function DestinationNode({ data, selected, dragging }: NodeProps<Destinat
     <>
       <Handle type="target" position={Position.Left} isConnectable={false} />
       <EuiPanel
+        // `nokey` stops React Flow from arming a marquee when a Shift+drag starts
+        // on the card, so Shift+click multi-select stays stable.
+        className="nokey"
         hasShadow={false}
         hasBorder
         paddingSize="m"

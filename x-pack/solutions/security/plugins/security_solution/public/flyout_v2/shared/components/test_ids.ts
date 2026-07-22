@@ -49,3 +49,5 @@ export const GRAPH_PREVIEW_TEST_ID = `${PREFIX}GraphPreview` as const;
 export const GRAPH_PREVIEW_LOADING_TEST_ID = `${GRAPH_PREVIEW_TEST_ID}Loading` as const;
 export const GRAPH_PREVIEW_TECHNICAL_PREVIEW_TEST_ID =
   `${GRAPH_PREVIEW_TEST_ID}TechnicalPreview` as const;
+
+export const DOCUMENT_FLYOUT_HEADER_SHARE_BUTTON_TEST_ID = `${PREFIX}HeaderShareButton` as const;

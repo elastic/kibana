@@ -182,6 +182,24 @@ const knowledgeIndicatorFeaturesIdentifiedSchema: RootSchema<KnowledgeIndicatorF
         description: 'Existing features updated in this iteration',
       },
     },
+    features_remapped: {
+      type: 'long',
+      _meta: {
+        description: 'Features remapped to a previously known id in this iteration',
+      },
+    },
+    semantic_verify_calls: {
+      type: 'long',
+      _meta: {
+        description: 'Calls to semantic duplicate verification in this iteration',
+      },
+    },
+    semantic_verify_reuses: {
+      type: 'long',
+      _meta: {
+        description: 'Semantic verifications that reused a known feature id',
+      },
+    },
     input_tokens_used: {
       type: 'long',
       _meta: {
@@ -477,8 +495,7 @@ const detectionScanSchema: RootSchema<DetectionScanProps> = {
   alerting_engine: {
     type: 'keyword',
     _meta: {
-      description:
-        'Resolved alerting engine backing the read: `v2` reads `.rule-events`, `v1` reads `.alerts-*`',
+      description: 'Alerting engine backing the read; Significant Events always uses v2',
     },
   },
   alerts_source_index: {

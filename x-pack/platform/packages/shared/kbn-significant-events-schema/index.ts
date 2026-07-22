@@ -66,6 +66,7 @@ export {
   isFeatureWithFilter,
   mergeFeature,
   normalizeFeatureSlug,
+  normalizeFeatureSlugForMatching,
   toBaseFeature,
 } from './src/feature';
 
@@ -143,10 +144,3 @@ export {
 } from './src/inference_feature_ids';
 
 export type { KnowledgeIndicatorClientContract } from './src/knowledge_indicator_client';
-
-export type {
-  RelayClaimResponse,
-  RelayClientContract,
-  RelayInstallRequest,
-  RelayInstallResponse,
-} from './src/relay_client';
