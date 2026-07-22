@@ -110,12 +110,6 @@ export const Main: FunctionComponent = () => {
         spacing="bleed"
         docLink={DOCS_LINK}
       />
-      <EuiSpacer size="l" />
-
-      <EuiText color="subdued" size="s">
-        <p>{mainTranslations.pageDescription}</p>
-      </EuiText>
-      <EuiSpacer size="m" />
 
       <Routes>
         <Route

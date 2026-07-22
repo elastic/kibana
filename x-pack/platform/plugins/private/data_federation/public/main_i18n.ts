@@ -12,11 +12,6 @@ export const mainTranslations = {
     defaultMessage: 'ES|QL Data Federation',
   }),
 
-  pageDescription: i18n.translate('xpack.dataFederation.pageDescription', {
-    defaultMessage:
-      'Connect to external data sources and add specific datasets to query with ES|QL, just like your indexed data. No ingestion required.',
-  }),
-
   technicalPreview: i18n.translate('xpack.dataFederation.technicalPreview', {
     defaultMessage: 'Technical Preview',
   }),
