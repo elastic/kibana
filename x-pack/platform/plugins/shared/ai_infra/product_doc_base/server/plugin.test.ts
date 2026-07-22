@@ -114,5 +114,12 @@ describe('ProductDocBasePlugin', () => {
       plugin.start(coreMock.createStart(), pluginStartDeps);
       expect(DocumentationManagerMock().ensureDefaultProductDocumentation).toHaveBeenCalledTimes(1);
     });
+
+    it('schedules updateAll and updateSecurityLabsAll on startup', () => {
+      plugin.setup(coreMock.createSetup(), pluginSetupDeps);
+      plugin.start(coreMock.createStart(), pluginStartDeps);
+      expect(DocumentationManagerMock().updateAll).toHaveBeenCalledTimes(1);
+      expect(DocumentationManagerMock().updateSecurityLabsAll).toHaveBeenCalledTimes(1);
+    });
   });
 });

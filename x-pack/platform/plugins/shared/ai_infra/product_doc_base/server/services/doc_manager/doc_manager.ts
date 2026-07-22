@@ -176,7 +176,7 @@ export class DocumentationManager implements DocumentationManagerAPI {
         );
         return;
       }
-      await this.install({ inferenceId, wait: true });
+      await this.install({ inferenceId });
       return;
     }
 

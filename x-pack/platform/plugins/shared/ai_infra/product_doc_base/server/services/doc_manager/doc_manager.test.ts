@@ -262,9 +262,6 @@ describe('DocumentationManager', () => {
         } as Awaited<ReturnType<ProductDocInstallClient['getInstallationStatus']>>)
         .mockResolvedValueOnce({
           kibana: { status: 'uninstalled' },
-        } as Awaited<ReturnType<ProductDocInstallClient['getInstallationStatus']>>)
-        .mockResolvedValueOnce({
-          kibana: { status: 'installed' },
         } as Awaited<ReturnType<ProductDocInstallClient['getInstallationStatus']>>);
 
       await docManager.ensureDefaultProductDocumentation();
@@ -274,7 +271,7 @@ describe('DocumentationManager', () => {
         logger,
         inferenceId: defaultInferenceEndpoints.JINAv5,
       });
-      expect(waitUntilTaskCompletedMock).toHaveBeenCalledTimes(1);
+      expect(waitUntilTaskCompletedMock).not.toHaveBeenCalled();
       expect(scheduleEnsureUpToDateTaskMock).not.toHaveBeenCalled();
     });
 

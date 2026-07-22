@@ -123,6 +123,12 @@ export class ProductDocBasePlugin
         `Error ensuring product documentation for default inference ID: ${err.message}`
       );
     });
+    documentationManager.updateAll().catch((err) => {
+      this.logger.error(`Error scheduling product documentation updateAll task: ${err.message}`);
+    });
+    documentationManager.updateSecurityLabsAll().catch((err) => {
+      this.logger.error(`Error scheduling Security Labs update task: ${err.message}`);
+    });
     return {
       management: {
         install: documentationManager.install.bind(documentationManager),
