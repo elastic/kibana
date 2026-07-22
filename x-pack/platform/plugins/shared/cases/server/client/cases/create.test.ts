@@ -1390,6 +1390,12 @@ describe('create', () => {
       // No expansion: template defaults must not appear.
       expect(createArgs.attributes.extended_fields).toBeUndefined();
       expect(createArgs.attributes.category).toBeNull();
+      // Flag-off creation must stay byte-for-byte as before this PR: a caller-pinned template is
+      // stored verbatim but the template/extended_fields user actions are NOT emitted (that path
+      // is gated on the templates flag).
+      expect(
+        clientArgs.services.userActionService.creator.bulkCreateUserAction
+      ).not.toHaveBeenCalled();
     });
 
     it('validates the merged extended_fields (template fetched once)', async () => {

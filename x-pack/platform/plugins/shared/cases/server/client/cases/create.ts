@@ -218,8 +218,14 @@ export const create = async (
     // (CreateCaseUserActionRt strips them), so a case created from a template would otherwise leave
     // no trace in the activity log of which template it came from or its initial template fields.
     // Emit the dedicated template + extended_fields user actions so the audit trail matches the
-    // persisted case. Only runs on the template-expansion path (flag on + a template was applied).
-    if (query.template?.id && query.template.version !== undefined) {
+    // persisted case. Gated on the flag so it only runs on the template-expansion path: flag-off
+    // creation with a caller-pinned template stays byte-for-byte as it was before this PR (no extra
+    // activity-log entries), and expansion always stamps a concrete version so the guard holds.
+    if (
+      clientArgs.config.templates.enabled &&
+      query.template?.id &&
+      query.template.version !== undefined
+    ) {
       const common = { caseId: newCase.id, user, owner: newCase.attributes.owner };
       const templateUserActions: Array<
         CreateUserAction<'template' | 'extended_fields'> & CommonUserActionArgs
