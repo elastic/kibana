@@ -46,7 +46,10 @@ export const useEntityLastSeen = ({
     queryKey: ['entity_last_seen', entityIds, spaceId],
     enabled: enabled && !!spaceId && entityIds.length > 0,
     queryFn: async (): Promise<string | null> => {
-      const index = getEntitiesAlias(ENTITY_LATEST, spaceId!);
+      if (!spaceId) {
+        return null;
+      }
+      const index = getEntitiesAlias(ENTITY_LATEST, spaceId);
 
       const { rawResponse } = await lastValueFrom(
         data.search.search<LastSeenRequest, LastSeenResponse>({

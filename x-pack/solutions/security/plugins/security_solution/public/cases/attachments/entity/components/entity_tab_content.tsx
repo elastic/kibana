@@ -135,6 +135,7 @@ const EntityTabTable = ({ entityIds }: { entityIds: string[] }) => {
     <>
       <EuiSpacer size="s" />
       <EuiCallOut
+        announceOnMount
         data-test-subj={ENTITY_TAB_STORE_DISABLED_CALLOUT_TEST_ID}
         color="warning"
         iconType="warning"
@@ -146,12 +147,19 @@ const EntityTabTable = ({ entityIds }: { entityIds: string[] }) => {
         }
       >
         <p>
-          {isEntityStoreStopped && lastSeen ? (
-            <FormattedMessage
-              id="xpack.securitySolution.entityAnalytics.cases.tab.storeDisabled.stopped.body"
-              defaultMessage="These entities were last updated {relativeTime} and are no longer being refreshed."
-              values={{ relativeTime: moment(lastSeen).fromNow() }}
-            />
+          {isEntityStoreStopped ? (
+            lastSeen ? (
+              <FormattedMessage
+                id="xpack.securitySolution.entityAnalytics.cases.tab.storeDisabled.stopped.body"
+                defaultMessage="These entities were last seen {relativeTime} and are no longer being refreshed."
+                values={{ relativeTime: moment(lastSeen).fromNow() }}
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.securitySolution.entityAnalytics.cases.tab.storeDisabled.stopped.noTimestamp.body"
+                defaultMessage="These entities are no longer being refreshed."
+              />
+            )
           ) : (
             <FormattedMessage
               id="xpack.securitySolution.entityAnalytics.cases.tab.storeDisabled.notInstalled.body"
