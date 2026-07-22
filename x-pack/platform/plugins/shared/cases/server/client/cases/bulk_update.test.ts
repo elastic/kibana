@@ -2739,6 +2739,113 @@ describe('update', () => {
     });
   });
 
+  describe('Template extended_fields — per-owner getFieldDefinitions dedup', () => {
+    const clientArgs = createCasesClientMockArgs();
+
+    // Two cases sharing the same owner, backed by different mockCase fixtures.
+    const secCase1 = {
+      ...mockCases[0],
+      attributes: { ...mockCases[0].attributes, owner: SECURITY_SOLUTION_OWNER },
+    };
+    const secCase2 = {
+      ...mockCases[1],
+      attributes: { ...mockCases[1].attributes, owner: SECURITY_SOLUTION_OWNER },
+    };
+
+    // Template whose definition contains a $ref field that must be resolved against the
+    // field library — this is the code path that triggers getFieldDefinitions(owner) with
+    // no options inside validateCaseExtendedFields.
+    const templateSO = {
+      attributes: {
+        name: 'Ref Template',
+        definition: yamlStringify({ name: 'Ref Template', fields: [{ $ref: 'resolution' }] }),
+      },
+    } as unknown as Awaited<ReturnType<typeof clientArgs.services.templatesService.getTemplate>>;
+
+    const resolutionFieldDef = {
+      fieldDefinitionId: 'fd-resolution',
+      name: 'resolution',
+      owner: SECURITY_SOLUTION_OWNER,
+      description: '',
+      definition: yamlStringify({
+        control: 'INPUT_TEXT',
+        name: 'resolution',
+        label: 'Resolution',
+        type: 'keyword',
+      }),
+    };
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      clientArgs.services.caseService.getCases.mockResolvedValue({
+        saved_objects: [secCase1, secCase2],
+      });
+      clientArgs.services.caseService.getAllCaseComments.mockResolvedValue({
+        saved_objects: [],
+        total: 0,
+        per_page: 10,
+        page: 1,
+      });
+      clientArgs.services.caseService.patchCases.mockResolvedValue({
+        saved_objects: [secCase1, secCase2],
+      });
+      clientArgs.services.attachmentService.getter.getCaseAttatchmentStats.mockResolvedValue(
+        new Map()
+      );
+      clientArgs.services.userActionService.getMultipleCasesUserActionsTotal.mockResolvedValue({
+        [secCase1.id]: 0,
+        [secCase2.id]: 0,
+      });
+      clientArgs.services.templatesService.getTemplate.mockResolvedValue(templateSO);
+      // Discriminate the two getFieldDefinitions call sites:
+      //   resolveGlobalFields  → called with { isGlobal: true }  → returns [] (no global fields)
+      //   template pre-fetch   → called with no options           → returns resolutionFieldDef
+      // Without the pre-fetch pass-through, the per-case fallback in validateCaseExtendedFields
+      // also calls the no-options variant — once per case — so the count rises from 1 to N+1.
+      clientArgs.services.fieldDefinitionsService.getFieldDefinitions.mockImplementation(
+        async (_owner: string | string[], options?: { isGlobal?: boolean }) => {
+          if (options?.isGlobal) {
+            return { fieldDefinitions: [], total: 0 };
+          }
+          return { fieldDefinitions: [resolutionFieldDef], total: 1 };
+        }
+      );
+    });
+
+    it('calls getFieldDefinitions (no options) once per owner, not once per case, when extended_fields reference a template $ref field', async () => {
+      await bulkUpdate(
+        {
+          cases: [
+            {
+              id: secCase1.id,
+              version: secCase1.version ?? '',
+              template: { id: 'tmpl-1', version: 1 },
+              extended_fields: { resolution_as_keyword: 'Fixed upstream' },
+            },
+            {
+              id: secCase2.id,
+              version: secCase2.version ?? '',
+              template: { id: 'tmpl-1', version: 1 },
+              extended_fields: { resolution_as_keyword: 'Restarted service' },
+            },
+          ],
+        },
+        clientArgs,
+        casesClientMock
+      );
+
+      // The per-owner pre-fetch fires getFieldDefinitions(owner) [no options] exactly once,
+      // regardless of how many cases share that owner. If the fieldDefinitions pass-through
+      // is dropped, the fallback inside validateCaseExtendedFields fires once per case,
+      // turning this count from 1 to N+1.
+      const noOptionCalls =
+        clientArgs.services.fieldDefinitionsService.getFieldDefinitions.mock.calls.filter(
+          ([, options]) => options == null
+        );
+      expect(noOptionCalls).toHaveLength(1);
+    });
+  });
+
   describe('Metrics', () => {
     const clientArgs = createCasesClientMockArgs();
 

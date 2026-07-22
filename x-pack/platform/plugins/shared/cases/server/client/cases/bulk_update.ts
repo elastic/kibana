@@ -624,6 +624,28 @@ export const bulkUpdate = async (
       )
     );
 
+    // Pre-fetch all field definitions once per owner for cases that have extended_fields with an
+    // effective template. validateCaseExtendedFields uses these to resolve $ref entries; without
+    // pre-fetching, every case in the Promise.all below would issue an identical SO query.
+    const uniqueOwnersNeedingAllFields = [
+      ...casesToUpdate.reduce((owners, { updateReq, originalCase }) => {
+        if (!updateReq.extended_fields) return owners;
+        const hasEffectiveTemplate =
+          updateReq.template !== null &&
+          (updateReq.template != null || originalCase.attributes.template != null);
+        if (hasEffectiveTemplate) owners.add(originalCase.attributes.owner);
+        return owners;
+      }, new Set<string>()),
+    ];
+    const allFieldDefinitionsByOwner = new Map(
+      await Promise.all(
+        uniqueOwnersNeedingAllFields.map(async (owner) => {
+          const { fieldDefinitions } = await fieldDefinitionsService.getFieldDefinitions(owner);
+          return [owner, fieldDefinitions] as const;
+        })
+      )
+    );
+
     await Promise.all(
       casesToUpdate.map(({ updateReq, originalCase }) =>
         validateExtendedFieldsInRequest({
@@ -632,6 +654,7 @@ export const bulkUpdate = async (
           templatesService,
           fieldDefinitionsService,
           globalFields: globalFieldsByOwner.get(originalCase.attributes.owner) ?? [],
+          fieldDefinitions: allFieldDefinitionsByOwner.get(originalCase.attributes.owner),
         })
       )
     );

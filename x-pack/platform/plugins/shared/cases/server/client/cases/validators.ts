@@ -15,6 +15,7 @@ import type {
   CaseRequestCustomFields,
   CasesSearchRequest,
 } from '../../../common/types/api';
+import type { FieldDefinition } from '../../../common/types/domain/field_definition/latest';
 import { validateDuplicatedKeysInRequest } from '../validators';
 import type { ICasesCustomField } from '../../custom_fields';
 import { casesCustomFields } from '../../custom_fields';
@@ -212,6 +213,7 @@ export const validateCaseExtendedFields = async ({
   fieldDefinitionsService,
   owner,
   partial = false,
+  fieldDefinitions: preloadedFieldDefinitions,
 }: {
   extendedFields: Record<string, string>;
   templateId: string | null | undefined;
@@ -221,6 +223,8 @@ export const validateCaseExtendedFields = async ({
   owner: string;
   /** Pass `true` for update paths where only a subset of fields may be present. */
   partial?: boolean;
+  /** Pre-fetched field definitions for the owner. When provided, skips the SO query. */
+  fieldDefinitions?: FieldDefinition[];
 }): Promise<void> => {
   const globalKeySet = new Set(globalFields.map((f) => getFieldSnakeKey(f.name, f.type)));
 
@@ -257,7 +261,9 @@ export const validateCaseExtendedFields = async ({
 
   // Resolve $ref entries in the template definition against the field library so
   // that keys from library-referenced fields are recognised during validation.
-  const { fieldDefinitions } = await fieldDefinitionsService.getFieldDefinitions(owner);
+  const fieldDefinitions =
+    preloadedFieldDefinitions ??
+    (await fieldDefinitionsService.getFieldDefinitions(owner)).fieldDefinitions;
   const resolvedTemplateFields = resolveTemplateFields(
     parsedTemplate.definition.fields,
     fieldDefinitions
@@ -292,12 +298,15 @@ export const validateExtendedFieldsInRequest = async ({
   templatesService,
   fieldDefinitionsService,
   globalFields,
+  fieldDefinitions,
 }: {
   updateReq: CasePatchRequest;
   originalCase: CaseSavedObjectTransformed;
   templatesService: TemplatesService;
   fieldDefinitionsService: FieldDefinitionsService;
   globalFields: InlineField[];
+  /** Pre-fetched field definitions for the owner. When provided, skips the SO query. */
+  fieldDefinitions?: FieldDefinition[];
 }): Promise<void> => {
   if (!updateReq.extended_fields) return;
 
@@ -315,6 +324,7 @@ export const validateExtendedFieldsInRequest = async ({
     fieldDefinitionsService,
     owner: originalCase.attributes.owner,
     partial: true,
+    fieldDefinitions,
   });
 };
 
