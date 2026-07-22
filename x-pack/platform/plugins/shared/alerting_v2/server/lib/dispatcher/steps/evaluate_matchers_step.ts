@@ -32,7 +32,11 @@ export class EvaluateMatchersStep implements DispatcherStep {
   constructor(@inject(LoggerServiceToken) private readonly logger: LoggerServiceContract) {}
 
   public async execute(state: Readonly<DispatcherPipelineState>): Promise<DispatcherStepOutput> {
-    const { dispatchable = [], rules = new Map(), policies = new Map() } = state;
+    const {
+      dispatchable = [],
+      rules = new Map<RuleId, Rule>(),
+      policies = new Map<ActionPolicyId, ActionPolicy>(),
+    } = state;
 
     const matched = this.evaluateMatchers(dispatchable, rules, policies);
 

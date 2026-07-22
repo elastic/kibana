@@ -17,6 +17,7 @@ import type {
   DispatcherStep,
   DispatcherStepOutput,
   Rule,
+  RuleId,
 } from '../types';
 import { createMatcherContext } from './utils/matcher_context';
 
@@ -36,7 +37,7 @@ export class ApplyMaintenanceWindowStep implements DispatcherStep {
   ) {}
 
   public async execute(state: Readonly<DispatcherPipelineState>): Promise<DispatcherStepOutput> {
-    const { dispatchable = [], suppressed = [], rules = new Map() } = state;
+    const { dispatchable = [], suppressed = [], rules = new Map<RuleId, Rule>() } = state;
     if (dispatchable.length === 0) {
       return { type: 'continue' };
     }

@@ -23,7 +23,7 @@ export class BuildGroupsStep implements DispatcherStep {
   public readonly name = 'build_groups';
 
   public async execute(state: Readonly<DispatcherPipelineState>): Promise<DispatcherStepOutput> {
-    const { matched = [], rules } = state;
+    const { matched = [], rules = new Map<RuleId, Rule>() } = state;
 
     const groups = buildActionGroups(matched, rules);
 
@@ -33,7 +33,7 @@ export class BuildGroupsStep implements DispatcherStep {
 
 export function buildActionGroups(
   matched: readonly MatchedPair[],
-  rules?: Map<RuleId, Rule>
+  rules: ReadonlyMap<RuleId, Rule>
 ): ActionGroup[] {
   const groupMap = new Map<string, ActionGroup>();
 
@@ -75,7 +75,7 @@ export function buildActionGroups(
 
     const group = groupMap.get(actionGroupId)!;
     group.episodes.push(episode);
-    const rule = episode.rule_id ? rules?.get(episode.rule_id) : undefined;
+    const rule = episode.rule_id ? rules.get(episode.rule_id) : undefined;
     if (rule && episode.rule_id) {
       group.rules[episode.rule_id] = { name: rule.name };
     }
