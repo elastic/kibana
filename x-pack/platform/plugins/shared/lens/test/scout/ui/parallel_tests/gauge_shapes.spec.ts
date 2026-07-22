@@ -20,6 +20,8 @@ spaceTest.describe('Lens gauge shapes', { tag: tags.stateful.classic }, () => {
 
   spaceTest.afterAll(suiteSetup.afterAll);
 
+  // One spaceTest with steps (not separate cases): later shape/table checks depend on the
+  // edited gauge config from earlier steps — same sequential state as FTR gauge.ts.
   spaceTest(
     'switches to gauge, edits dimensions/styles, and falls back to table',
     async ({ browserAuth, context, page, pageObjects }) => {

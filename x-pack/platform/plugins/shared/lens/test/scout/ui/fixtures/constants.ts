@@ -21,17 +21,8 @@ export const LOGSTASH_IN_RANGE_DATES = {
   to: 'Sep 23, 2015 @ 18:31:44.000',
 } as const;
 
-export const LENS_SAVED_OBJECTS = {
-  XY_VIS: {
-    title: 'lnsXYvis',
-    id: '76fc4200-cf44-11e9-b933-fd84270f3ac2',
-  },
-} as const;
-
 export const KBN_ARCHIVE_PATHS = {
   ESQL_CONVERSION_DASHBOARD: `${LENS_SCOUT_FIXTURES_DIR}/esql_conversion_dashboard.json`,
-  LENS_BASIC: 'x-pack/platform/test/functional/fixtures/kbn_archives/lens/lens_basic.json',
-  LENS_DEFAULT: 'x-pack/platform/test/functional/fixtures/kbn_archives/lens/default',
   OPEN_IN_LENS: {
     TSVB: {
       METRIC: `${OPEN_IN_LENS_KBN_ARCHIVES_DIR}/tsvb/metric.json`,

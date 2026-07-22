@@ -7,16 +7,8 @@
 
 import { spaceTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
+import type { DebugState } from '@elastic/charts';
 import { createLogstashLensEditorSuiteSetup, enableElasticChartDebug } from '../fixtures';
-
-interface HeatmapDebugState {
-  axes?: {
-    x: Array<{ labels: string[]; rotation: number }>;
-    y: Array<{ labels: string[] }>;
-  };
-  heatmap?: { cells: Array<{ fill: string }> };
-  legend?: { items: Array<{ key: string; name: string; color: string }> };
-}
 
 spaceTest.describe('Lens heatmap palette', { tag: tags.stateful.classic }, () => {
   const suiteSetup = createLogstashLensEditorSuiteSetup({
@@ -27,6 +19,8 @@ spaceTest.describe('Lens heatmap palette', { tag: tags.stateful.classic }, () =>
 
   spaceTest.afterAll(suiteSetup.afterAll);
 
+  // One spaceTest with steps (not separate cases): palette/range assertions build on prior
+  // stop edits in the same flyout — same sequential state as FTR heatmap.ts.
   spaceTest(
     'edits temperature palette stops, range types, and axis rotation',
     async ({ browserAuth, context, page, pageObjects }) => {
@@ -55,8 +49,8 @@ spaceTest.describe('Lens heatmap palette', { tag: tags.stateful.classic }, () =>
       });
       await lens.waitForVisualization('xyVisChart');
 
-      const getHeatmapDebug = async (): Promise<HeatmapDebugState> =>
-        (await lens.getCurrentChartDebugState('heatmapChart')) as HeatmapDebugState;
+      const getHeatmapDebug = async (): Promise<DebugState> =>
+        (await lens.getCurrentChartDebugState('heatmapChart')) as DebugState;
 
       await spaceTest.step('render heatmap with temperature palette', async () => {
         await lens.switchToVisualization('heatmap', { search: 'heat' });
@@ -212,6 +206,10 @@ spaceTest.describe('Lens heatmap palette', { tag: tags.stateful.classic }, () =>
           })
           .toBe(90);
       });
+
+      // FTR also had a skipped case: axis title mode Auto → expect y-axis title
+      // "Average of bytes". Not migrated — Elastic Charts was not reporting the title
+      // (`it.skip` in heatmap.ts: "Skip for now as EC is not reporting title").
     }
   );
 });

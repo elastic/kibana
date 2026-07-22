@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { DebugState } from '@elastic/charts';
-import type { PageObjects, ScoutPage } from '@kbn/scout';
+import type { PageObjects } from '@kbn/scout';
 
 import { DATA_TEST_SUBJECTS, LOGSTASH_IN_RANGE_DATES, DATA_VIEW_ID } from './constants';
 
@@ -157,25 +156,4 @@ export async function enableElasticChartDebug(context: ElasticChartDebugContext)
   await context.addInitScript(() => {
     (window as unknown as { _echDebugStateFlag?: boolean })._echDebugStateFlag = true;
   });
-}
-
-/** Reads `@elastic/charts` debug state from a rendered chart test subject. */
-export async function getChartDebugData(
-  page: ScoutPage,
-  chartTestSubj: string
-): Promise<DebugState> {
-  const chart = page.testSubj.locator('lnsWorkspace').getByTestId(chartTestSubj);
-  await chart.locator('.echChartStatus[data-ech-render-complete="true"]').waitFor({
-    state: 'attached',
-    timeout: 30_000,
-  });
-
-  const debugJson = await chart.locator('.echChartStatus').getAttribute('data-ech-debug-state');
-  if (!debugJson) {
-    throw new Error(
-      'Elastic charts debugState not found — call enableElasticChartDebug() before navigation'
-    );
-  }
-
-  return JSON.parse(debugJson) as DebugState;
 }

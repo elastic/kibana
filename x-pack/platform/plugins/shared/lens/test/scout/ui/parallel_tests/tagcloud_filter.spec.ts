@@ -9,8 +9,6 @@ import { spaceTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { createLogstashLensEditorSuiteSetup } from '../fixtures';
 
-const EXPECTED_TAGS = ['97.220.3.248', '78.83.247.30', '226.82.228.233', '93.28.27.24', 'Other'];
-
 spaceTest.describe('Lens tag cloud filter', { tag: tags.stateful.classic }, () => {
   const suiteSetup = createLogstashLensEditorSuiteSetup({
     dataViewNamePrefix: 'scout-lens-tagcloud-dv',
@@ -22,7 +20,7 @@ spaceTest.describe('Lens tag cloud filter', { tag: tags.stateful.classic }, () =
 
   spaceTest(
     'renders tags, filters from a tag click, and narrows the cloud',
-    async ({ browserAuth, pageObjects }) => {
+    async ({ browserAuth, page, pageObjects }) => {
       const { visualize, lens, filterBar } = pageObjects;
 
       await browserAuth.loginAsPrivilegedUser();
@@ -51,13 +49,25 @@ spaceTest.describe('Lens tag cloud filter', { tag: tags.stateful.classic }, () =
       // Avoid picking up tags in the suggestion panel.
       await lens.closeSuggestionPanel();
 
+      const { violations: workspaceViolations } = await page.checkA11y({
+        include: ['[data-test-subj="lnsApp"]'],
+      });
+      expect(workspaceViolations).toHaveLength(0);
+
       let renderedTagToFilter = '';
 
       await spaceTest.step('render tag cloud', async () => {
+        const expectedTags = [
+          '97.220.3.248',
+          '78.83.247.30',
+          '226.82.228.233',
+          '93.28.27.24',
+          'Other',
+        ];
         const tagLabels = await lens.getTagCloudTexts();
         expect(tagLabels.length).toBeGreaterThan(3);
         expect(
-          tagLabels.every((tag) => EXPECTED_TAGS.includes(tag)),
+          tagLabels.every((tag) => expectedTags.includes(tag)),
           `Unexpected tags: ${JSON.stringify(tagLabels)}`
         ).toBe(true);
 

@@ -362,9 +362,9 @@ export class LensApp {
 
   async closePalettePanelFlyout() {
     await this.page.testSubj.click('lns-indexPattern-SettingWithSiblingFlyoutBack');
-    await expect(
-      this.page.testSubj.locator('lns-indexPattern-SettingWithSiblingFlyoutBack')
-    ).toBeHidden();
+    await this.page.testSubj
+      .locator('lns-indexPattern-SettingWithSiblingFlyoutBack')
+      .waitFor({ state: 'hidden' });
   }
 
   private async openDimensionSelector(dimension: string) {
@@ -377,7 +377,29 @@ export class LensApp {
     const editorsLocator = this.page.testSubj.locator(
       `lns-layerPanel-${layerIndex} > ${dimension}`
     );
-    await expect.poll(async () => await editorsLocator.count()).toBeGreaterThan(dimensionIndex);
+    await this.page.waitForFunction(
+      ({ layerPanel, segments, minCount }) => {
+        const layer = document.querySelector(`[data-test-subj="${layerPanel}"]`);
+        if (!layer) {
+          return false;
+        }
+        let nodes: Element[] = [layer];
+        for (const segment of segments) {
+          const next: Element[] = [];
+          for (const node of nodes) {
+            next.push(...Array.from(node.querySelectorAll(`[data-test-subj="${segment}"]`)));
+          }
+          nodes = next;
+        }
+        return nodes.length > minCount;
+      },
+      {
+        layerPanel: `lns-layerPanel-${layerIndex}`,
+        segments: dimension.split('>').map((part) => part.trim()),
+        minCount: dimensionIndex,
+      },
+      { timeout: 15_000 }
+    );
 
     const editors = await editorsLocator.all();
     const editor = editors[dimensionIndex];
@@ -398,7 +420,13 @@ export class LensApp {
     await operationButton.waitFor({ state: 'visible' });
     await operationButton.scrollIntoViewIfNeeded();
     await operationButton.click();
-    await expect(operationButton).toHaveAttribute('aria-pressed', 'true');
+    await this.page.waitForFunction(
+      (selector) =>
+        document.querySelector(`[data-test-subj="${selector}"]`)?.getAttribute('aria-pressed') ===
+        'true',
+      operationSelector,
+      { timeout: 10_000 }
+    );
   }
 
   private async selectField(field: string) {
@@ -466,26 +494,34 @@ export class LensApp {
     const container = workspace.getByTestId(chartSubj);
     await container.waitFor({ state: 'visible' });
 
-    let prevCount: string | null = null;
-    await expect
-      .poll(
-        async () => {
-          const count = await container.getAttribute('data-rendering-count');
-          if (count === null) {
-            return true;
-          }
-          if (count === '0') {
-            return false;
-          }
-          if (prevCount === count) {
-            return true;
-          }
-          prevCount = count;
+    await this.page.waitForFunction(
+      (subj) => {
+        const workspaceEl = document.querySelector('[data-test-subj="lnsWorkspace"]');
+        const el = workspaceEl?.querySelector(`[data-test-subj="${subj}"]`);
+        if (!el) {
           return false;
-        },
-        { intervals: [500] }
-      )
-      .toBe(true);
+        }
+        const count = el.getAttribute('data-rendering-count');
+        if (count === null) {
+          return true;
+        }
+        if (count === '0') {
+          delete (window as unknown as { __lensScoutPrevRenderCount?: string })
+            .__lensScoutPrevRenderCount;
+          return false;
+        }
+        const win = window as unknown as { __lensScoutPrevRenderCount?: string };
+        const prev = win.__lensScoutPrevRenderCount;
+        win.__lensScoutPrevRenderCount = count;
+        return prev === count;
+      },
+      chartSubj,
+      { polling: 500, timeout: 60_000 }
+    );
+    await this.page.evaluate(() => {
+      delete (window as unknown as { __lensScoutPrevRenderCount?: string })
+        .__lensScoutPrevRenderCount;
+    });
   }
 
   /** Returns the number of layers in the Lens editor (unified-tabs row is hidden for a single layer). */
@@ -507,7 +543,14 @@ export class LensApp {
   /** Returns visible labels for all dimension triggers inside a dimension panel. */
   private async getDimensionTriggersTexts(dimension: string): Promise<string[]> {
     const triggersLocator = this.page.testSubj.locator(`${dimension} > lns-dimensionTrigger`);
-    await expect.poll(async () => await triggersLocator.count()).toBeGreaterThan(0);
+    await this.page.waitForFunction(
+      (panel) => {
+        const root = document.querySelector(`[data-test-subj="${panel}"]`);
+        return (root?.querySelectorAll('[data-test-subj="lns-dimensionTrigger"]').length ?? 0) > 0;
+      },
+      dimension,
+      { timeout: 15_000 }
+    );
 
     const triggers = await triggersLocator.all();
     const texts: string[] = [];
@@ -666,7 +709,10 @@ export class LensApp {
     await this.closeFlyoutWithBackButton();
   }
 
-  /** Sets the gauge minor-label mode (`none` / `custom` / …) in an open style flyout. */
+  /**
+   * Sets the gauge minor-label mode (`none` / `custom` / …).
+   * Requires the style-settings flyout to already be open; does not open or close it.
+   */
   async setGaugeMinorLabelMode(value: string) {
     await this.page.testSubj.locator('lnsToolbarGaugeLabelMinor-select').selectOption(value);
   }
@@ -889,16 +935,19 @@ export class LensApp {
   }
 
   private async waitForLensDragDropToFinish() {
+    // Lens DnD active-group class has no data-test-subj; matches FTR html5DragAndDrop settle wait.
     await this.page.locator('.domDragDrop-isActiveGroup').waitFor({ state: 'hidden' });
   }
 
   /**
    * Reads `@elastic/charts` debug state after the visualization finishes rendering.
-   * Requires `enableElasticChartDebug` before navigation.
+   * Requires `enableElasticChartDebug` (or equivalent init script) before navigation.
+   * Prefer this over plugin-local helpers when `pageObjects.lens` is available.
    */
-  async getCurrentChartDebugState(visType: string): Promise<unknown> {
+  async getCurrentChartDebugState(visType: string): Promise<Record<string, unknown>> {
     await this.waitForVisualization(visType);
     const chart = this.page.testSubj.locator('lnsWorkspace').getByTestId(visType);
+    // Elastic Charts status node — no Lens data-test-subj; same signal as FTR / open-in-Lens helpers.
     await chart.locator('.echChartStatus[data-ech-render-complete="true"]').waitFor({
       state: 'attached',
       timeout: 30_000,
@@ -907,11 +956,12 @@ export class LensApp {
     if (!debugJson) {
       throw new Error('Elastic charts debugState not found — enable chart debug before navigation');
     }
-    return JSON.parse(debugJson);
+    return JSON.parse(debugJson) as Record<string, unknown>;
   }
 
   async getCountOfDatatableColumns(): Promise<number> {
-    // Match FTR: count header cell content nodes (excludes the leading control column).
+    // FTR parity: EuiDataGrid has no per-column test subj for content cells; `.euiDataGridHeaderCell__content`
+    // excludes the leading control column (same selector as FTR `getCountOfDatatableColumns`).
     return this.page
       .locator('[data-test-subj="lnsDataTable"] .euiDataGridHeaderCell__content')
       .count();
@@ -920,6 +970,7 @@ export class LensApp {
   async getDatatableHeaderText(index = 0): Promise<string> {
     // Prefer content nodes — columnheader innerText can include action glyphs like ↵.
     // Index matches getCountOfDatatableColumns (control column excluded).
+    // FTR parity: EUI class selector until Lens exposes header content test subjects.
     const headers = this.page.locator(
       '[data-test-subj="lnsDataTable"] .euiDataGridHeaderCell__content'
     );

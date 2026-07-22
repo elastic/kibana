@@ -25,7 +25,7 @@ spaceTest.describe('Lens visualize geo field', { tag: tags.stateful.classic }, (
 
   spaceTest(
     'visualizes geo fields in Maps with a document-count tooltip',
-    async ({ browserAuth, pageObjects }) => {
+    async ({ browserAuth, page, pageObjects }) => {
       const { visualize, lens, maps } = pageObjects;
 
       await browserAuth.loginAsPrivilegedUser();
@@ -42,6 +42,12 @@ spaceTest.describe('Lens visualize geo field', { tag: tags.stateful.classic }, (
       await expect
         .poll(async () => maps.getLayerTocTooltipMsg('logstash-*'))
         .toBe('logstash-*\nFound 66 documents.\nResults narrowed by global time');
+
+      const { violations } = await page.checkA11y({
+        include: ['#maps-plugin'],
+      });
+      expect(violations).toHaveLength(0);
+
       await maps.refreshAndClearUnsavedChangesWarning();
     }
   );
