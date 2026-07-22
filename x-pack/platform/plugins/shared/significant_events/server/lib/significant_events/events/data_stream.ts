@@ -26,6 +26,16 @@ export const eventsMappings = {
     severity: mappings.keyword(),
     title: mappings.text(),
     summary: mappings.text(),
+    // Mapped so triage can gate re-investigation with a server-side `exists` filter.
+    // `exists` on this object matches only when at least one sub-field has a value, so an
+    // empty investigations array does not count as "investigated".
+    investigations: mappings.object({
+      properties: {
+        workflow_execution_id: { type: 'keyword' as const },
+        started_at: { type: 'date' as const },
+        completed_at: { type: 'date' as const },
+      },
+    }),
   },
 } satisfies MappingsDefinition;
 export type StoredEvent = GetFieldsOf<typeof eventsMappings>;
@@ -45,7 +55,8 @@ export const storedEventSchema = significantEventSchema.transform((doc) => ({
 
 export const eventsDataStream: DataStreamDefinition<typeof eventsMappings, StoredEvent> = {
   name: EVENTS_DATA_STREAM,
-  version: 7,
+  // v8: map `investigations` so triage can gate re-investigation with an `exists` filter.
+  version: 8,
   hidden: true,
   template: {
     priority: 500,

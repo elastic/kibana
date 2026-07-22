@@ -30,8 +30,8 @@ export const notificationDataStreamMappings = {
     /** Idempotency key */
     notification_id: mappings.keyword(),
     event_timestamp: mappings.date(),
+    namespace: mappings.keyword(),
     type: mappings.keyword(),
-    source_app_id: mappings.keyword(),
     severity: mappings.keyword(),
   },
 } satisfies MappingsDefinition;

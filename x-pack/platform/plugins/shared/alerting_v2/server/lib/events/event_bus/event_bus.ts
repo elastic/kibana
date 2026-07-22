@@ -7,6 +7,7 @@
 
 import { EventEmitterAsyncResource } from 'node:events';
 import { inject, injectable } from 'inversify';
+import { ALERTING_V2_LOG_CODES } from '../../errors/error_codes';
 import {
   LoggerServiceToken,
   type LoggerServiceContract,
@@ -23,7 +24,9 @@ const ASYNC_RESOURCE_NAME = 'AsyncDomainEventBus';
 
 type AnyHandler = (event: DomainEvent, ...extra: unknown[]) => Promise<void> | void;
 
-type EventBusErrorCode = 'EVENT_BUS_HANDLER_FAILURE' | 'EVENT_BUS_EMITTER_ERROR';
+type EventBusErrorCode =
+  | typeof ALERTING_V2_LOG_CODES.EVENT_BUS_HANDLER_FAILURE
+  | typeof ALERTING_V2_LOG_CODES.EVENT_BUS_EMITTER_ERROR;
 
 interface EventBusErrorContext {
   /** Stable machine-readable identifier used for log correlation. */
@@ -100,7 +103,10 @@ export class AsyncDomainEventBus<TEvent extends DomainEvent = DomainEvent, TCont
     // safe regardless of what is published or what `captureRejections`
     // routes here.
     this.#emitter.on('error', (err) =>
-      this.#logError(err, { code: 'EVENT_BUS_EMITTER_ERROR', scope: 'internal' })
+      this.#logError(err, {
+        code: ALERTING_V2_LOG_CODES.EVENT_BUS_EMITTER_ERROR,
+        scope: 'internal',
+      })
     );
   }
 
@@ -146,7 +152,10 @@ export class AsyncDomainEventBus<TEvent extends DomainEvent = DomainEvent, TCont
         try {
           await (handler as (...args: unknown[]) => Promise<void> | void)(event, ...extra);
         } catch (err) {
-          this.#logError(err, { code: 'EVENT_BUS_HANDLER_FAILURE', scope: event.type });
+          this.#logError(err, {
+            code: ALERTING_V2_LOG_CODES.EVENT_BUS_HANDLER_FAILURE,
+            scope: event.type,
+          });
         }
       });
     };
