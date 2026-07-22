@@ -16,6 +16,7 @@ export interface OperationExecutionContext {
   logger: Logger;
   failures: PanelFailure[];
   resolvedPanelCreationRequests: Map<number, ResolvedPanelCreationRequest[]>;
+  contentResolvedPanelIds: Set<string>;
   resolvePanelContent?: ResolvePanelContent;
 }
 

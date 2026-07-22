@@ -8,6 +8,7 @@
 import { dashboardTools } from '../../../common';
 import type { DashboardGuidanceModule } from '../guidance_module';
 import { dashboardDesignGuidancePrompt } from './design';
+import { prettifyingExistingDashboardReference } from './prettifying_existing_dashboard';
 
 const guidance = `## Building a Dashboard
 
@@ -65,6 +66,10 @@ Do not add controls to dashboards already scoped to a single entity (one host, o
 
 **Removing controls:** use \`remove_controls\` with the \`id\` values from the \`controls[]\` list in the tool result.
 
+## Prettifying an Existing Dashboard
+
+When the user asks to prettify, polish, or clean up an existing dashboard, consult the [prettifying-existing-dashboard reference](./references/prettifying-existing-dashboard.md).
+
 ## Generation Edge Cases
 
 - Never invent a \`source: "config"\` payload for content you have not actually resolved. If you cannot obtain a panel's configuration, report it clearly instead of fabricating one.
@@ -86,4 +91,5 @@ Do not add controls to dashboards already scoped to a single entity (one host, o
  */
 export const dashboardGeneration: DashboardGuidanceModule = {
   guidance,
+  referencedContent: [prettifyingExistingDashboardReference],
 };

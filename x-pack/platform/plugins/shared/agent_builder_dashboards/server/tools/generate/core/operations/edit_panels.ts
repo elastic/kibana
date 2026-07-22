@@ -173,6 +173,7 @@ export const editPanelsOperation = defineOperation({
         continue;
       }
 
+      context.contentResolvedPanelIds.add(panelInput.panelId);
       nextDashboardData = updateResult.dashboardData;
     }
 

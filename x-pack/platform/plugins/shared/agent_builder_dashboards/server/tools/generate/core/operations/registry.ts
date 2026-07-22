@@ -66,6 +66,7 @@ export const prepareOperationExecution = async ({
     logger,
     failures,
     resolvedPanelCreationRequests,
+    contentResolvedPanelIds: new Set(),
     resolvePanelContent,
   };
 };

@@ -88,6 +88,7 @@ export const createVisPanelResolver = ({
     index,
     chartType,
     esql,
+    additionalChartConfigInstructions,
     renderer: requestedRenderer,
     existingPanel,
   }: VisPanelResolutionRequest): Promise<PanelContentAttempt> => {
@@ -140,6 +141,8 @@ export const createVisPanelResolver = ({
         existingConfig: existingConfig ? JSON.stringify(existingConfig) : undefined,
         parsedExistingConfig: existingConfig,
         includeTimeRange: false,
+        additionalChartConfigInstructions,
+        includeChangeSummary: operationType === 'prettify_panel_configs',
         modelProvider,
         logger,
         events,
@@ -152,6 +155,7 @@ export const createVisPanelResolver = ({
           type: LENS_EMBEDDABLE_TYPE,
           config: result.validatedConfig,
         },
+        ...(result.changeSummary && { changeSummary: result.changeSummary }),
       };
     } catch (error) {
       return createPanelFailureResult(operationType, identifier, getErrorMessage(error));

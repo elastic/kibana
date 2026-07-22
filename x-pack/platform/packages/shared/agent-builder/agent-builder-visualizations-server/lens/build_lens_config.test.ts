@@ -122,4 +122,37 @@ describe('buildLensConfig', () => {
     expect(mockedValidateEsqlQuery).not.toHaveBeenCalled();
     expect(invoke.mock.calls[0][0]).toMatchObject({ esqlQuery: '' });
   });
+
+  it('returns a changeSummary from the graph when present', async () => {
+    invoke.mockResolvedValue({
+      validatedConfig: { type: 'metric' },
+      error: null,
+      currentAttempt: 1,
+      esqlQuery: PROVIDED_ESQL,
+      changeSummary: 'Right-aligned the metric value.',
+      timeRange: null,
+    });
+
+    const result = await buildLensConfig({
+      nlQuery: 'polish metric',
+      chartType: SupportedChartType.Metric,
+      existingConfig: JSON.stringify({ type: 'metric' }),
+      includeChangeSummary: true,
+      modelProvider,
+      logger,
+      events,
+      esClient,
+    });
+
+    expect(mockedCreateGraph).toHaveBeenCalledWith(
+      modelProvider,
+      logger,
+      events,
+      esClient,
+      true,
+      undefined,
+      true
+    );
+    expect(result.changeSummary).toBe('Right-aligned the metric value.');
+  });
 });

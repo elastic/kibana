@@ -10,7 +10,7 @@ import { generateEsql } from '@kbn/agent-builder-genai-utils';
 import type { ToolEventEmitter } from '@kbn/agent-builder-server';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
-import { createVisualizationGraph } from './graph_lens';
+import { createVisualizationGraph, parseGeneratedConfigResponse } from './graph_lens';
 import type { VisualizationConfig } from './types';
 
 jest.mock('@kbn/agent-builder-genai-utils', () => ({
@@ -291,5 +291,74 @@ describe('createVisualizationGraph', () => {
     for (const layer of validated.layers ?? []) {
       expect(layer.data_source).toEqual({ type: 'esql', query: canonicalQuery });
     }
+  });
+
+  it('unwraps config + changeSummary when includeChangeSummary is enabled', async () => {
+    const wrappedResponse =
+      '```json\n' +
+      JSON.stringify({
+        config: { type: 'metric', title: 'Requests' },
+        changeSummary: 'Right-aligned the metric value and applied compact number formatting.',
+      }) +
+      '\n```';
+    const graph = await createVisualizationGraph(
+      createMockModel(wrappedResponse) as never,
+      logger,
+      events,
+      esClient,
+      false,
+      undefined,
+      true
+    );
+
+    const finalState = await graph.invoke({
+      nlQuery: 'Polish this metric',
+      index: 'logs-*',
+      chartType: SupportedChartType.Metric,
+      schema: {},
+      existingConfig: JSON.stringify({ type: 'metric' }),
+      parsedExistingConfig: { type: 'metric' } as VisualizationConfig,
+      esqlQuery: 'FROM logs-* | STATS count = COUNT(*)',
+      currentAttempt: 0,
+      actions: [],
+      validatedConfig: null,
+      error: null,
+    });
+
+    expect(finalState.validatedConfig).toEqual(
+      expect.objectContaining({ type: 'metric', title: 'Requests' })
+    );
+    expect(finalState.changeSummary).toBe(
+      'Right-aligned the metric value and applied compact number formatting.'
+    );
+  });
+});
+
+describe('parseGeneratedConfigResponse', () => {
+  it('returns the object as config when change summary is not requested', () => {
+    expect(parseGeneratedConfigResponse({ type: 'metric' }, false)).toEqual({
+      config: { type: 'metric' },
+    });
+  });
+
+  it('unwraps config and changeSummary when requested', () => {
+    expect(
+      parseGeneratedConfigResponse(
+        {
+          config: { type: 'metric' },
+          changeSummary: 'Aligned values to the right.',
+        },
+        true
+      )
+    ).toEqual({
+      config: { type: 'metric' },
+      changeSummary: 'Aligned values to the right.',
+    });
+  });
+
+  it('falls back to the whole object as config when the wrapped shape is missing', () => {
+    expect(parseGeneratedConfigResponse({ type: 'metric' }, true)).toEqual({
+      config: { type: 'metric' },
+    });
   });
 });

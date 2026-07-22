@@ -18,6 +18,7 @@ export const createGenerateConfigPrompt = ({
   existingConfig,
   additionalChartConfigInstructions,
   additionalContext,
+  includeChangeSummary = false,
 }: {
   nlQuery: string;
   esqlQuery: string;
@@ -26,10 +27,29 @@ export const createGenerateConfigPrompt = ({
   existingConfig?: string;
   additionalChartConfigInstructions?: string;
   additionalContext?: string;
+  includeChangeSummary?: boolean;
 }): BaseMessageLike[] => {
   const chartTypeConfigPromptContent = getChartTypeConfigPromptContent(chartType);
   const colorPalettesPromptContent = getColorPalettesPromptContent(chartType);
   const esqlQueryJson = JSON.stringify(esqlQuery);
+  const requestChangeSummary = includeChangeSummary && Boolean(existingConfig);
+
+  const outputInstructions = requestChangeSummary
+    ? `IMPORTANT: Return ONLY a JSON object wrapped in a markdown code block like this:
+\`\`\`json
+{
+  "config": {
+    // your ${chartType} visualization configuration here
+  },
+  "changeSummary": "1-2 concrete sentences describing what you changed vs the existing configuration (e.g. colors, alignment, formatting, titles, legend). Do not claim ES|QL or chart-type changes."
+}
+\`\`\``
+    : `IMPORTANT: Return ONLY the JSON configuration wrapped in a markdown code block like this:
+\`\`\`json
+{
+  // your configuration here
+}
+\`\`\``;
 
   return [
     [
@@ -84,12 +104,7 @@ ${nlQuery}
 
 Generate the ${chartType} visualization configuration.
 
-IMPORTANT: Return ONLY the JSON configuration wrapped in a markdown code block like this:
-\`\`\`json
-{
-  // your configuration here
-}
-\`\`\`
+${outputInstructions}
 
 ${additionalContext ?? ''}`,
     ],

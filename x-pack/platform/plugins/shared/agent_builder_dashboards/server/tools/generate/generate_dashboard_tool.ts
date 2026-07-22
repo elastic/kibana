@@ -14,6 +14,7 @@ import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import {
   DASHBOARD_ATTACHMENT_TYPE,
   isSection,
+  type AttachmentPanel,
   type DashboardAttachmentData,
 } from '@kbn/agent-builder-dashboards-common';
 
@@ -26,20 +27,47 @@ import {
   hasValidCreateMetadataOperations,
   dashboardOperationSchema,
 } from './core';
+import { indexPanelsById } from './core/dashboard_state';
+import { summarizePanelConfig } from './core/panel_config';
+import { prettifyPanelConfigs, type ConfigGeneratorChange } from './core/prettify_panel_configs';
 import { applyDefaultDashboardTimeRange } from './time_range';
 
 const newDashboardMetadataErrorMessage =
   'New dashboards require a set_metadata operation with a non-empty title.';
 
-const generateDashboardSchema = z.object({
-  dashboardAttachmentId: z
-    .string()
-    .max(256)
-    .optional()
-    .describe(
-      '(optional) The id of the dashboard attachment to update. Omit to create a new dashboard. The tool reads the current dashboard payload from this reference, so you never have to pass the full payload back in.'
-    ),
-  operations: z.array(dashboardOperationSchema).min(1),
+const generateDashboardSchema = z
+  .object({
+    dashboardAttachmentId: z
+      .string()
+      .max(256)
+      .optional()
+      .describe(
+        '(optional) The id of the dashboard attachment to update. Omit to create a new dashboard. The tool reads the current dashboard payload from this reference, so you never have to pass the full payload back in.'
+      ),
+    operations: z.array(dashboardOperationSchema),
+    prettifyPanelConfigs: z
+      .boolean()
+      .optional()
+      .describe(
+        '(optional) Refresh surviving pre-existing ES|QL Lens panel configs. Strong default: do not set this for normal create or update requests because generated panels already follow chart best practices. Set it only when the user explicitly asks to prettify, polish, or improve the visualization configs of an existing dashboard.'
+      ),
+  })
+  .check((ctx) => {
+    if (ctx.value.operations.length === 0 && !ctx.value.prettifyPanelConfigs) {
+      ctx.issues.push({
+        code: 'custom',
+        message: 'At least one operation or prettifyPanelConfigs: true is required.',
+        input: ctx.value,
+        path: ['operations'],
+      });
+    }
+  });
+
+const summarizePanel = (panel: AttachmentPanel) => ({
+  type: panel.type,
+  id: panel.id,
+  grid: panel.grid,
+  config: summarizePanelConfig(panel.config),
 });
 
 /**
@@ -49,7 +77,7 @@ const generateDashboardSchema = z.object({
  * id); the LLM only ever sees this slim summary, so it never has to re-emit the
  * heavy payload into a follow-up tool call.
  */
-const summarizeDashboard = (dashboardData: DashboardAttachmentData) => ({
+export const summarizeDashboard = (dashboardData: DashboardAttachmentData) => ({
   title: dashboardData.title,
   description: dashboardData.description,
   panels: dashboardData.panels.map((widget) => {
@@ -59,18 +87,10 @@ const summarizeDashboard = (dashboardData: DashboardAttachmentData) => ({
         title: widget.title,
         collapsed: widget.collapsed,
         grid: widget.grid,
-        panels: widget.panels.map((panel) => ({
-          type: panel.type,
-          id: panel.id,
-          grid: panel.grid,
-        })),
+        panels: widget.panels.map(summarizePanel),
       };
     }
-    return {
-      type: widget.type,
-      id: widget.id,
-      grid: widget.grid,
-    };
+    return summarizePanel(widget);
   }),
   controls: (dashboardData.pinned_panels ?? []).map((control) => {
     const c = control as { id?: string; type?: string; config?: { title?: string } };
@@ -110,12 +130,15 @@ Use operations[] to:
 7. add / remove controls (interactive filters pinned above the dashboard: dropdown, range slider, or time slider)`,
     schema: generateDashboardSchema,
     handler: async (
-      { dashboardAttachmentId: previousAttachmentId, operations },
+      { dashboardAttachmentId: previousAttachmentId, operations, prettifyPanelConfigs: prettify },
       { logger, attachments, events, esClient, modelProvider }
     ) => {
       try {
         const latestVersion = retrieveLatestVersion(attachments, previousAttachmentId);
         const isNewDashboard = !latestVersion;
+        const existingPanels = latestVersion
+          ? [...indexPanelsById(latestVersion.data.panels).values()]
+          : [];
 
         if (isNewDashboard && !hasValidCreateMetadataOperations(operations)) {
           logger.error(newDashboardMetadataErrorMessage);
@@ -123,18 +146,34 @@ Use operations[] to:
         }
 
         const dashboardAttachmentId = previousAttachmentId ?? uuidv4();
+        const resolvePanelContent = createVisPanelResolver({
+          logger,
+          modelProvider,
+          events,
+          esClient,
+        });
 
-        const { dashboardData, failures } = await executeDashboardOperations({
+        const operationResult = await executeDashboardOperations({
           dashboardData: latestVersion?.data,
           operations,
           logger,
-          resolvePanelContent: createVisPanelResolver({
-            logger,
-            modelProvider,
-            events,
-            esClient,
-          }),
+          resolvePanelContent,
         });
+        let dashboardData = operationResult.dashboardData;
+        const { failures, contentResolvedPanelIds } = operationResult;
+        let configGeneratorChanges: ConfigGeneratorChange[] = [];
+
+        if (prettify) {
+          const prettifyResult = await prettifyPanelConfigs({
+            dashboardData,
+            existingPanels,
+            resolvePanelContent,
+            skipPanelIds: contentResolvedPanelIds,
+          });
+          dashboardData = prettifyResult.dashboardData;
+          failures.push(...prettifyResult.failures);
+          configGeneratorChanges = prettifyResult.configGeneratorChanges;
+        }
 
         // Data-aware default time range computation
         const finalDashboardData = await applyDefaultDashboardTimeRange({
@@ -172,6 +211,8 @@ Use operations[] to:
                 version: attachment.current_version ?? 1,
                 dashboard: summarizeDashboard(finalDashboardData),
                 failures: failures.length > 0 ? failures : undefined,
+                configGeneratorChanges:
+                  configGeneratorChanges.length > 0 ? configGeneratorChanges : undefined,
               },
             },
           ],
@@ -185,7 +226,11 @@ Use operations[] to:
               type: ToolResultType.error,
               data: {
                 message: `Failed to generate dashboard: ${errorMessage}`,
-                metadata: { dashboardAttachmentId: previousAttachmentId, operations },
+                metadata: {
+                  dashboardAttachmentId: previousAttachmentId,
+                  operations,
+                  prettifyPanelConfigs: prettify,
+                },
               },
             },
           ],

@@ -34,6 +34,35 @@ import { createGenerateConfigPrompt } from './prompts';
 // Regex to extract JSON from markdown code blocks
 const INLINE_JSON_REGEX = /```(?:json)?\s*([\s\S]*?)\s*```/gm;
 
+export const parseGeneratedConfigResponse = (
+  parsed: unknown,
+  includeChangeSummary: boolean
+): { config: Record<string, unknown>; changeSummary?: string } => {
+  if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+    throw new Error('Response is not a valid JSON object');
+  }
+
+  const obj = parsed as Record<string, unknown>;
+  if (
+    includeChangeSummary &&
+    'config' in obj &&
+    obj.config &&
+    typeof obj.config === 'object' &&
+    !Array.isArray(obj.config)
+  ) {
+    const changeSummary =
+      typeof obj.changeSummary === 'string' && obj.changeSummary.trim().length > 0
+        ? obj.changeSummary.trim()
+        : undefined;
+    return {
+      config: obj.config as Record<string, unknown>,
+      changeSummary,
+    };
+  }
+
+  return { config: obj };
+};
+
 const validateConfigForChartType = (
   chartType: SupportedChartType,
   config: unknown
@@ -93,6 +122,10 @@ const VisualizationStateAnnotation = Annotation.Root({
   }),
   // outputs
   validatedConfig: Annotation<VisualizationConfig | null>(),
+  changeSummary: Annotation<string | null>({
+    reducer: (_, newValue) => newValue,
+    default: () => null,
+  }),
   timeRange: Annotation<{ from: string; to: string } | null>(),
   error: Annotation<string | null>(),
 });
@@ -105,7 +138,8 @@ export const createVisualizationGraph = async (
   events: ToolEventEmitter,
   esClient: IScopedClusterClient,
   includeTimeRange = true,
-  additionalChartConfigInstructions?: string
+  additionalChartConfigInstructions?: string,
+  includeChangeSummary = false
 ) => {
   const defaultModel = await modelProvider.getDefaultModel();
 
@@ -202,6 +236,7 @@ export const createVisualizationGraph = async (
       existingConfig: state.existingConfig,
       additionalChartConfigInstructions,
       additionalContext,
+      includeChangeSummary,
     });
 
     let action: GenerateConfigAction;
@@ -212,19 +247,19 @@ export const createVisualizationGraph = async (
 
       // Try to extract JSON from markdown code blocks
       const jsonMatches = Array.from(responseText.matchAll(INLINE_JSON_REGEX));
-      let configResponse: any;
+      let parsedResponse: unknown;
 
       if (jsonMatches.length > 0) {
         const jsonText = jsonMatches[0][1].trim();
-        configResponse = JSON.parse(jsonText);
+        parsedResponse = JSON.parse(jsonText);
       } else {
-        configResponse = JSON.parse(responseText);
+        parsedResponse = JSON.parse(responseText);
       }
 
-      // Verify it's a valid object
-      if (!configResponse || typeof configResponse !== 'object') {
-        throw new Error('Response is not a valid JSON object');
-      }
+      const { config: configResponse, changeSummary } = parseGeneratedConfigResponse(
+        parsedResponse,
+        includeChangeSummary
+      );
 
       // Pin the validated ES|QL query before config validation. ES|QL generation owns the query;
       // config generation only binds columns from it.
@@ -238,6 +273,7 @@ export const createVisualizationGraph = async (
         type: 'generate_config',
         success: true,
         config: configResponse,
+        changeSummary,
         attempt,
       };
     } catch (error) {
@@ -401,6 +437,7 @@ What is the most appropriate time range for this visualization?`,
   // Node: Finalize - extract outputs from actions
   const finalizeNode = async (state: VisualizationState) => {
     const lastValidateAction = [...state.actions].reverse().find(isValidateConfigAction);
+    const lastGenerateConfigAction = [...state.actions].reverse().find(isGenerateConfigAction);
     const lastGenerateEsqlAction = [...state.actions].reverse().find(isGenerateEsqlAction);
     const lastTimeRangeAction = [...state.actions]
       .reverse()
@@ -417,6 +454,10 @@ What is the most appropriate time range for this visualization?`,
 
     return {
       validatedConfig: lastValidateAction?.success ? lastValidateAction.config : null,
+      changeSummary:
+        lastValidateAction?.success && lastGenerateConfigAction?.success
+          ? lastGenerateConfigAction.changeSummary ?? null
+          : null,
       error: lastValidateAction?.success ? null : lastValidateAction?.error || esqlError,
       esqlQuery: lastGenerateEsqlAction?.query || state.esqlQuery,
       timeRange: lastTimeRangeAction?.timeRange ?? null,

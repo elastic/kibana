@@ -43,6 +43,8 @@ export interface VisPanelResolutionRequest extends PanelResolutionRequestBase {
   chartType?: SupportedChartType;
   /** ES|QL query to back the visualization; generated when omitted. */
   esql?: string;
+  /** Additional internal guidance for chart config generation. */
+  additionalChartConfigInstructions?: string;
   /**
    * Which engine renders the panel. Honored when adding a new panel (defaults to
    * Lens when omitted); ignored on edits, which keep the existing panel's

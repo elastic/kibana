@@ -99,7 +99,11 @@ export const getColorPalettesPromptContent = (chartType: SupportedChartType): st
   const supportsCategorical = coloringOptions?.categorical ?? false;
 
   if (!supportsDynamic && !supportsCategorical) {
-    return '';
+    return [
+      'COLOR RULES:',
+      '- Do not add optional color, palette, color-mapping, or explicit color configuration unless the user explicitly requests colors.',
+      '- Omit those fields and let Lens assign its automatic default colors.',
+    ].join('\n');
   }
 
   const stepsCount = dynamicColoringOptions?.recommendedStepCount ?? 5;

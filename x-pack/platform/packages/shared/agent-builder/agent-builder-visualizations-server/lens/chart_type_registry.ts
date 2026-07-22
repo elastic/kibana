@@ -82,6 +82,9 @@ export const chartTypeRegistry: Record<SupportedChartType, ChartTypeRegistryEntr
           "Choose 'metric' for single numerical statistics, aggregations, counts, or KPIs without ranges",
       },
       config: {
+        perChartTypeRules: [
+          "Align metric values to the right by default: set 'styling.primary.value.alignment' to 'right' and, when secondary metrics are present, set 'styling.secondary.value.alignment' to 'right'. Use 'left' or 'center' only when the user explicitly requests that value alignment.",
+        ],
         options: {
           coloring: {
             dynamic: { recommendedStepCount: 3 },

@@ -31,4 +31,22 @@ describe('registerSkills', () => {
     expect(dashboardManagementSkill.content).toContain('Dashboard Composition Guidelines');
     expect(dashboardManagementSkill.content).toContain('Grid Packing Rules');
   });
+
+  it('keeps the prettify design pass as referenced content', () => {
+    expect(dashboardManagementSkill.content).toContain(
+      './references/prettifying-existing-dashboard.md'
+    );
+    expect(dashboardManagementSkill.content).not.toContain('prettifyPanelConfigs');
+    expect(dashboardManagementSkill.referencedContent).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          name: 'prettifying-existing-dashboard',
+          relativePath: './references',
+          content: expect.stringMatching(
+            /do not set `prettifyPanelConfigs`[\s\S]*inner visualization agent[\s\S]*configGeneratorChanges/
+          ),
+        }),
+      ])
+    );
+  });
 });
