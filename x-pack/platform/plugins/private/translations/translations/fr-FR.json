@@ -10125,7 +10125,6 @@
     "visTypeVega.emsFileParser.missingNameOfFileErrorMessage": "{dataUrlParam} avec {dataUrlParamValue} requiert le paramètre {nameParam} (nom du fichier)",
     "visTypeVega.esqlQueryParser.emptyQueryErrorMessage": "Le paramètre {queryParam} ES|QL ne peut pas être vide",
     "visTypeVega.esqlQueryParser.missingQueryErrorMessage": "{dataUrlParam} avec {typeParam} requiert un paramètre {queryParam} avec une requête ES|QL",
-    "visTypeVega.esqlQueryParser.timeFieldWithoutParamsWarning": "{timefieldParam} a été spécifié mais la requête ne contient ni {tstartParam} ni {tendParam}",
     "visTypeVega.esqlQueryParser.transformationWarningMessage": "Échec de la transformation de la réponse ES|QL : {message}. Données vides renvoyées.",
     "visTypeVega.esQueryParser.autointervalValueTypeErrorMessage": "{autointerval} doit être {trueValue} ou un nombre",
     "visTypeVega.esQueryParser.dataUrlMustNotHaveLegacyAndBodyQueryValuesAtTheSameTimeErrorMessage": "{dataUrlParam} ne doit pas avoir de {legacyContext} existant et de valeurs {bodyQueryConfigName} en même temps",
