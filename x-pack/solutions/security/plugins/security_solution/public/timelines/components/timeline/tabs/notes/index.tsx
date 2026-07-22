@@ -7,7 +7,6 @@
 
 import React, { useCallback, useEffect, useMemo } from 'react';
 import {
-  EuiAvatar,
   EuiComment,
   EuiFlexGroup,
   EuiFlexItem,
@@ -43,6 +42,7 @@ import {
 import type { Note } from '../../../../../../common/api/timeline';
 import { TimelineStatusEnum } from '../../../../../../common/api/timeline';
 import { NotesList } from '../../../../../notes/components/notes_list';
+import { NoteAvatar } from '../../../../../notes/components/note_avatar';
 import { Participants } from '../../../notes/participants';
 import { NOTES } from '../../../notes/translations';
 import { useShallowEqualSelector } from '../../../../../common/hooks/use_selector';
@@ -146,7 +146,7 @@ const NotesTabContentComponent: React.FC<NotesTabContentProps> = React.memo(({ t
             </>
           }
           event={ADDED_A_DESCRIPTION}
-          timelineAvatar={<EuiAvatar size="l" name={timeline.updatedBy || '?'} />}
+          timelineAvatar={<NoteAvatar size="l" displayName={timeline.updatedBy} />}
           data-test-subj={TIMELINE_DESCRIPTION_COMMENT_TEST_ID}
         >
           <EuiText size="s">{timeline.description}</EuiText>

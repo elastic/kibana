@@ -8,7 +8,6 @@
 import React, { useCallback, useMemo, useEffect } from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
-  EuiAvatar,
   EuiBasicTable,
   EuiEmptyPrompt,
   EuiFlexGroup,
@@ -49,6 +48,7 @@ import * as i18n from './translations';
 import { OpenFlyoutButtonIcon } from '../components/open_flyout_button';
 import { OpenTimelineButtonIcon } from '../components/open_timeline_button';
 import { NoteContent } from '../components/note_content';
+import { NoteAvatar } from '../components/note_avatar';
 import { useLicense } from '../../common/hooks/use_license';
 
 const columns: Array<EuiBasicTableColumn<Note>> = [
@@ -93,7 +93,7 @@ const columns: Array<EuiBasicTableColumn<Note>> = [
   {
     field: 'createdBy',
     name: i18n.CREATED_BY_COLUMN,
-    render: (createdBy: Note['createdBy']) => <EuiAvatar name={createdBy || ''} size="s" />,
+    render: (createdBy: Note['createdBy']) => <NoteAvatar displayName={createdBy} size="s" />,
     width: '100px',
     align: 'center',
   },

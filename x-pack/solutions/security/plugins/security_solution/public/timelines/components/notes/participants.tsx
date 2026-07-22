@@ -7,7 +7,6 @@
 
 import { filter, uniqBy } from 'lodash/fp';
 import {
-  EuiAvatar,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
@@ -26,6 +25,7 @@ import {
   TIMELINE_PARTICIPANT_TITLE_TEST_ID,
 } from './test_ids';
 import { type Note } from '../../../../common/api/timeline';
+import { NoteAvatar } from '../../../notes/components/note_avatar';
 
 export const PARTICIPANTS = i18n.translate(
   'xpack.securitySolution.timeline.notes.participantsTitle',
@@ -66,7 +66,7 @@ const UsernameWithAvatar: React.FC<UsernameWithAvatar> = React.memo(
         data-test-subj={dataTestSubj}
       >
         <EuiFlexItem grow={false}>
-          <EuiAvatar data-test-subj="avatar" name={username} size="l" />
+          <NoteAvatar data-test-subj="avatar" displayName={username} size="l" />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiText

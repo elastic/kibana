@@ -22,6 +22,10 @@ import type { State } from '../../../../../common/store';
 jest.mock('../../../../../common/components/user_privileges');
 const useUserPrivilegesMock = useUserPrivileges as jest.Mock;
 
+jest.mock('../../../../../common/components/user_profiles/use_suggest_users', () => ({
+  useSuggestUsers: () => ({ isLoading: false, data: [] }),
+}));
+
 const mockAddError = jest.fn();
 jest.mock('../../../../../common/hooks/use_app_toasts', () => ({
   useAppToasts: () => ({
