@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { DebugState } from '@elastic/charts';
 import { BulletSubtype } from '@elastic/charts';
 import { spaceTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
@@ -28,7 +27,7 @@ spaceTest.describe('Lens gauge shapes', { tag: tags.stateful.classic }, () => {
       const { visualize, lens } = pageObjects;
 
       const getGaugeBullet = async () => {
-        const debugState = (await lens.getCurrentChartDebugState('gaugeChart')) as DebugState;
+        const debugState = await lens.getCurrentChartDebugState('gaugeChart');
         return debugState.bullet?.rows[0][0];
       };
 
@@ -72,7 +71,7 @@ spaceTest.describe('Lens gauge shapes', { tag: tags.stateful.classic }, () => {
         await lens.setEuiSwitch('lnsDynamicColoringGaugeSwitch', true);
         await lens.closeDimensionEditor();
 
-        await lens.openStyleSettings();
+        await lens.openStyleSettingsFlyout();
         const { violations: styleViolations } = await page.checkA11y({
           include: ['[data-test-subj="lnsApp"]'],
         });

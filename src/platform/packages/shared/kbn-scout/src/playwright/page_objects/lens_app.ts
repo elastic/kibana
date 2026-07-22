@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { DebugState } from '@elastic/charts';
 import type { ScoutPage } from '..';
 import { expect } from '..';
 
@@ -220,6 +221,7 @@ export class LensApp {
     }
     // Suggested-value dimension panels remount while opening; tolerate a detached
     // close control only when the flyout already finished closing.
+    // Remount can exceed the 10s actionTimeout before the close control is stable.
     try {
       await closeButton.click({ timeout: 15_000 });
     } catch (error) {
@@ -245,6 +247,7 @@ export class LensApp {
           }
           return removeLocator.count();
         },
+        // Sequential remove+re-render per dimension can exceed the 10s expect timeout.
         { timeout: 30_000 }
       )
       .toBe(0);
@@ -323,6 +326,7 @@ export class LensApp {
       throw new Error('ValuesInput onChange(number) not found in React fiber tree');
     }, `${value}`);
     // Wait for Lens to commit size into the dimension trigger label (not an assertion).
+    // waitForFunction has no Scout default (unlike expect/actionTimeout).
     await this.page.waitForFunction(
       (expected) => {
         const triggers = document.querySelectorAll('[data-test-subj="lns-dimensionTrigger"]');
@@ -331,7 +335,7 @@ export class LensApp {
         );
       },
       value,
-      { timeout: 5_000 }
+      { timeout: 10_000 }
     );
   }
 
@@ -398,7 +402,8 @@ export class LensApp {
         segments: dimension.split('>').map((part) => part.trim()),
         minCount: dimensionIndex,
       },
-      { timeout: 15_000 }
+      // waitForFunction has no Scout default (unlike expect/actionTimeout).
+      { timeout: 10_000 }
     );
 
     const editors = await editorsLocator.all();
@@ -425,6 +430,7 @@ export class LensApp {
         document.querySelector(`[data-test-subj="${selector}"]`)?.getAttribute('aria-pressed') ===
         'true',
       operationSelector,
+      // waitForFunction has no Scout default (unlike expect/actionTimeout).
       { timeout: 10_000 }
     );
   }
@@ -516,7 +522,8 @@ export class LensApp {
         return prev === count;
       },
       chartSubj,
-      { polling: 500, timeout: 60_000 }
+      // Chart data + render-count settle often exceeds the 10s actionTimeout; keep below the 60s test timeout.
+      { polling: 500, timeout: 30_000 }
     );
     await this.page.evaluate(() => {
       delete (window as unknown as { __lensScoutPrevRenderCount?: string })
@@ -549,7 +556,8 @@ export class LensApp {
         return (root?.querySelectorAll('[data-test-subj="lns-dimensionTrigger"]').length ?? 0) > 0;
       },
       dimension,
-      { timeout: 15_000 }
+      // waitForFunction has no Scout default (unlike expect/actionTimeout).
+      { timeout: 10_000 }
     );
 
     const triggers = await triggersLocator.all();
@@ -577,7 +585,8 @@ export class LensApp {
     return (await this.chartSwitchPopover.innerText()).trim();
   }
 
-  private async openStyleSettingsFlyout() {
+  /** Opens the Lens style settings flyout. */
+  async openStyleSettingsFlyout() {
     const closeButton = this.closeDimensionEditorButton;
     if (await closeButton.isVisible()) {
       await this.closeDimensionEditor();
@@ -585,11 +594,6 @@ export class LensApp {
 
     await this.page.locator('button[data-test-subj="style"]').click();
     await this.page.locator('#lnsDimensionContainerTitle').waitFor({ state: 'visible' });
-  }
-
-  /** Opens the Lens style settings flyout (public alias for gauge/heatmap style edits). */
-  async openStyleSettings() {
-    await this.openStyleSettingsFlyout();
   }
 
   /** Reads the selected donut hole size from the style settings flyout. */
@@ -676,7 +680,6 @@ export class LensApp {
     await this.page.testSubj.click('lns_colorEditing_trigger');
     await this.page.testSubj.locator('lns-palettePanelFlyout').waitFor({
       state: 'visible',
-      timeout: 10_000,
     });
   }
 
@@ -747,6 +750,7 @@ export class LensApp {
       props.onChange?.({ target: { value: nextValue }, currentTarget: { value: nextValue } });
     }, value);
     // Sync until React controlled value matches (readiness wait — assertions stay in specs).
+    // waitForFunction has no Scout default (unlike expect/actionTimeout).
     await this.page.waitForFunction(
       ({ subj, expected }) => {
         const el = document.querySelector(
@@ -755,7 +759,7 @@ export class LensApp {
         return el?.value === expected;
       },
       { subj: testSubj, expected: value },
-      { timeout: 5_000 }
+      { timeout: 10_000 }
     );
     await input.press('Tab');
     // Blur completed — callers must poll a UI side effect (chart debug, dimension label)
@@ -766,7 +770,7 @@ export class LensApp {
         return el != null && document.activeElement !== el;
       },
       testSubj,
-      { timeout: 5_000 }
+      { timeout: 10_000 }
     );
   }
 
@@ -794,7 +798,8 @@ export class LensApp {
         return el == null || el.getAttribute('aria-expanded') !== 'true';
       },
       undefined,
-      { timeout: 5_000 }
+      // waitForFunction has no Scout default (unlike expect/actionTimeout).
+      { timeout: 10_000 }
     );
   }
 
@@ -901,7 +906,7 @@ export class LensApp {
     }, fieldTestSubj);
 
     const dropTarget = this.page.testSubj.locator('lnsGeoFieldWorkspace');
-    await dropTarget.waitFor({ state: 'visible', timeout: 10_000 });
+    await dropTarget.waitFor({ state: 'visible' });
 
     await this.page.evaluate(() => {
       interface Transfer {
@@ -942,21 +947,19 @@ export class LensApp {
   /**
    * Reads `@elastic/charts` debug state after the visualization finishes rendering.
    * Requires `enableElasticChartDebug` (or equivalent init script) before navigation.
-   * Prefer this over plugin-local helpers when `pageObjects.lens` is available.
    */
-  async getCurrentChartDebugState(visType: string): Promise<Record<string, unknown>> {
+  async getCurrentChartDebugState(visType: string): Promise<DebugState> {
     await this.waitForVisualization(visType);
     const chart = this.page.testSubj.locator('lnsWorkspace').getByTestId(visType);
     // Elastic Charts status node — no Lens data-test-subj; same signal as FTR / open-in-Lens helpers.
     await chart.locator('.echChartStatus[data-ech-render-complete="true"]').waitFor({
       state: 'attached',
-      timeout: 30_000,
     });
     const debugJson = await chart.locator('.echChartStatus').getAttribute('data-ech-debug-state');
     if (!debugJson) {
       throw new Error('Elastic charts debugState not found — enable chart debug before navigation');
     }
-    return JSON.parse(debugJson) as Record<string, unknown>;
+    return JSON.parse(debugJson) as DebugState;
   }
 
   async getCountOfDatatableColumns(): Promise<number> {
@@ -979,7 +982,8 @@ export class LensApp {
         document.querySelectorAll('[data-test-subj="lnsDataTable"] .euiDataGridHeaderCell__content')
           .length > minCount,
       { minCount: index },
-      { timeout: 15_000 }
+      // waitForFunction has no Scout default (unlike expect/actionTimeout).
+      { timeout: 10_000 }
     );
     const headerContents = await headers.all();
     const headerContent = headerContents[index];
@@ -1038,6 +1042,7 @@ export class LensApp {
           prevColorStopsJson = colorStopsJson;
           return false;
         },
+        // Palette stops can take several debounce cycles to stabilize after edits.
         { intervals: [500], timeout: 20_000 }
       )
       .toBe(true);

@@ -93,9 +93,7 @@ spaceTest.describe('Lens open in Lens — agg-based Pie', { tag: tags.deployment
     await expect
       .poll(
         async () =>
-          getPieChartLabels(
-            (await lens.getCurrentChartDebugState('partitionVisChart')) as DebugState
-          ).sort(),
+          getPieChartLabels(await lens.getCurrentChartDebugState('partitionVisChart')).sort(),
         { timeout: 20_000 }
       )
       .toStrictEqual([...expectedLabels].sort());

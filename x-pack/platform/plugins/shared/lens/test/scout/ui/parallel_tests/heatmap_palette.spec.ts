@@ -7,7 +7,6 @@
 
 import { spaceTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import type { DebugState } from '@elastic/charts';
 import { createLogstashLensEditorSuiteSetup, enableElasticChartDebug } from '../fixtures';
 
 spaceTest.describe('Lens heatmap palette', { tag: tags.stateful.classic }, () => {
@@ -49,8 +48,7 @@ spaceTest.describe('Lens heatmap palette', { tag: tags.stateful.classic }, () =>
       });
       await lens.waitForVisualization('xyVisChart');
 
-      const getHeatmapDebug = async (): Promise<DebugState> =>
-        (await lens.getCurrentChartDebugState('heatmapChart')) as DebugState;
+      const getHeatmapDebug = () => lens.getCurrentChartDebugState('heatmapChart');
 
       await spaceTest.step('render heatmap with temperature palette', async () => {
         await lens.switchToVisualization('heatmap', { search: 'heat' });
@@ -197,7 +195,7 @@ spaceTest.describe('Lens heatmap palette', { tag: tags.stateful.classic }, () =>
       await spaceTest.step('change x-axis label rotation', async () => {
         await lens.closePalettePanelFlyout();
         await lens.closeDimensionEditor();
-        await lens.openStyleSettings();
+        await lens.openStyleSettingsFlyout();
         await lens.setAxisLabelOrientation('vertical');
         await expect
           .poll(async () => {

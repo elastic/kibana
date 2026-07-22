@@ -73,6 +73,7 @@ export class VisualizeApp {
   }
 
   async waitForVisualizationLoaded() {
+    // Agg-based / legacy visualizations can exceed the 10s expect timeout while rendering.
     await expect(this.visualizationLoader).toHaveAttribute('data-render-complete', 'true', {
       timeout: 30_000,
     });

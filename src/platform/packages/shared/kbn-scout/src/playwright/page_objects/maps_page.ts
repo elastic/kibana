@@ -9,7 +9,7 @@
 
 import type { ScoutPage } from '..';
 
-// Increased timeout because new map container is not always loaded within default one
+// Maps first paint regularly exceeds Scout's 10s actionTimeout under parallel load.
 const DEFAULT_MAP_LOADING_TIMEOUT = 20_000;
 
 export class MapsPage {
@@ -121,7 +121,7 @@ export class MapsPage {
   async getLayerTocTooltipMsg(layerName: string): Promise<string> {
     await this.getLayerToggleButton(layerName).hover();
     const tooltip = this.page.testSubj.locator('layerTocTooltip');
-    await tooltip.waitFor({ state: 'visible', timeout: 10_000 });
+    await tooltip.waitFor({ state: 'visible' });
     // Normalize whitespace — tooltip lines can include leading spaces from TOC layout.
     return (await tooltip.innerText())
       .split('\n')

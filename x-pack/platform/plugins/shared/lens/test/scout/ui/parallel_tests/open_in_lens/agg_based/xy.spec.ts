@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { DebugState } from '@elastic/charts';
 import { spaceTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import {
@@ -203,9 +202,9 @@ spaceTest.describe('Lens open in Lens — agg-based XY', { tag: tags.deploymentA
     await expect
       .poll(
         async () =>
-          ((await lens.getCurrentChartDebugState('xyVisChart')) as DebugState).legend?.items.map(
-            (item) => item.name
-          ),
+          (
+            await lens.getCurrentChartDebugState('xyVisChart')
+          ).legend?.items.map((item) => item.name),
         { timeout: 20_000 }
       )
       .toStrictEqual(expectedLegend);
@@ -226,9 +225,9 @@ spaceTest.describe('Lens open in Lens — agg-based XY', { tag: tags.deploymentA
     await expect
       .poll(
         async () =>
-          ((await lens.getCurrentChartDebugState('xyVisChart')) as DebugState).legend?.items.map(
-            (item) => item.name
-          ),
+          (
+            await lens.getCurrentChartDebugState('xyVisChart')
+          ).legend?.items.map((item) => item.name),
         { timeout: 20_000 }
       )
       .toStrictEqual(expectedLegend);
