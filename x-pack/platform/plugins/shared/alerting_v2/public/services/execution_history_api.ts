@@ -42,6 +42,7 @@ export class ExecutionHistoryApi {
           search: params.search,
           ruleIds: params.ruleIds,
           outcome: params.outcome,
+          episodeIds: params.episodeIds,
         },
       }
     );

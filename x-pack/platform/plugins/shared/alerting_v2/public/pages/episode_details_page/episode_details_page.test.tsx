@@ -29,6 +29,22 @@ jest.mock('react-router-dom', () => ({
   useParams: jest.fn(),
 }));
 
+let mockCanReadExecutionHistory = true;
+
+jest.mock('@kbn/core-di-browser', () => ({
+  useService: (token: unknown) => {
+    if (typeof token === 'function') {
+      return {
+        canRead: () => mockCanReadExecutionHistory,
+        canWrite: () => mockCanReadExecutionHistory,
+        can: () => mockCanReadExecutionHistory,
+      };
+    }
+    return {};
+  },
+  CoreStart: (key: string) => key,
+}));
+
 jest.mock('@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_query', () => ({
   useFetchEpisodeQuery: jest.fn(),
 }));
@@ -81,6 +97,10 @@ jest.mock('@kbn/alerting-v2-episodes-ui/components/details/severity_heatmap_sect
 
 jest.mock('@kbn/alerting-v2-episodes-ui/components/details/metadata_section', () => ({
   AlertEpisodeMetadataSection: () => <div data-test-subj="stubMetadataSection" />,
+}));
+
+jest.mock('./components/episode_action_policy_history_tab', () => ({
+  EpisodeActionPolicyHistoryTab: () => <div data-test-subj="stubEpisodeActionPolicyHistoryTab" />,
 }));
 
 jest.mock('../../hooks/use_breadcrumbs', () => ({
@@ -159,6 +179,7 @@ const renderPage = () =>
 
 beforeEach(() => {
   jest.clearAllMocks();
+  mockCanReadExecutionHistory = true;
   mockUseParams.mockReturnValue({ episodeId });
   mockUseFetchEpisodeQuery.mockReturnValue(episodeQuery);
   mockUseFetchRule.mockReturnValue(fetchRuleResult);
@@ -273,6 +294,33 @@ describe('EpisodeDetailsPage', () => {
     expect(screen.queryByTestId(APP_HEADER_TEST_SUBJECTS.metadata)).not.toBeInTheDocument();
     expect(
       screen.queryByTestId('alertingV2EpisodeDetailsHeaderDescription')
+    ).not.toBeInTheDocument();
+  });
+
+  it('renders the action policy history tab in the header', () => {
+    renderPage();
+
+    expect(
+      screen.getByTestId('alertingV2EpisodeDetailsMainTabActionPolicyHistory')
+    ).toBeInTheDocument();
+  });
+
+  it('shows the action policy history content when its tab is selected', async () => {
+    renderPage();
+
+    await userEvent.click(screen.getByTestId('alertingV2EpisodeDetailsMainTabActionPolicyHistory'));
+
+    expect(screen.getByTestId('stubEpisodeActionPolicyHistoryTab')).toBeInTheDocument();
+  });
+
+  it('hides the action policy history tab when the user cannot read execution history', () => {
+    mockCanReadExecutionHistory = false;
+
+    renderPage();
+
+    expect(screen.getByTestId('alertingV2EpisodeDetailsMainTabOverview')).toBeInTheDocument();
+    expect(
+      screen.queryByTestId('alertingV2EpisodeDetailsMainTabActionPolicyHistory')
     ).not.toBeInTheDocument();
   });
 

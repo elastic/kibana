@@ -25,6 +25,7 @@ import {
 import type { AppHeaderMetadataItems } from '@kbn/app-header';
 import { AppHeader } from '@kbn/app-header';
 import { useQueryClient } from '@kbn/react-query';
+import { useService } from '@kbn/core-di-browser';
 import { getBreachEsqlQuery } from '@kbn/alerting-v2-schemas';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useFetchEpisodeQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_query';
@@ -49,6 +50,7 @@ import { CenterJustifiedSpinner } from '../../components/center_justified_spinne
 import { paths } from '../../constants';
 import type { AlertEpisodesKibanaServices } from '../../episodes_kibana_services';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
+import { UserCapabilities } from '../../services/user_capabilities';
 import { getDiscoverHrefForRuleAndEpisodeTimestamp } from '../../utils/discover_href_for_episode';
 import { getEpisodeHeaderBadges } from './utils/get_episode_header_badges';
 import { getEpisodeHeaderMenu } from './utils/get_episode_header_menu';
@@ -57,6 +59,7 @@ import {
   type EpisodeDetailsMainPanel,
 } from './utils/get_episode_header_tabs';
 import { EpisodeTimelineTab } from './components/episode_timeline_tab';
+import { EpisodeActionPolicyHistoryTab } from './components/episode_action_policy_history_tab';
 import * as i18n from './translations';
 
 interface EpisodeRouteParams {
@@ -80,6 +83,8 @@ export function EpisodeDetailsPage() {
   const largeMediaQuery = useEuiMinBreakpoint('m');
 
   const invalidateEpisodeQueries = useInvalidateEpisodeQueries();
+
+  const canReadExecutionHistory = useService(UserCapabilities).canRead('executionHistory');
 
   const {
     data: episode,
@@ -119,7 +124,10 @@ export function EpisodeDetailsPage() {
   useBreadcrumbs('episode_details', { ruleName: episodeBreadcrumbTitle });
 
   const actualMainPanel: EpisodeDetailsMainPanel =
-    mainPanel === 'metadata' && !showRuleDependentUi ? 'overview' : mainPanel;
+    (mainPanel === 'metadata' && !showRuleDependentUi) ||
+    (mainPanel === 'action_policy_history' && !canReadExecutionHistory)
+      ? 'overview'
+      : mainPanel;
 
   const actualSidebarPanel: EpisodeDetailsSidebarPanel =
     sidebarPanel === 'runbook' && !showRuleDependentUi ? 'episode_details' : sidebarPanel;
@@ -191,9 +199,10 @@ export function EpisodeDetailsPage() {
       getEpisodeHeaderTabs({
         actualMainPanel,
         showRuleDependentUi,
+        showActionPolicyHistory: canReadExecutionHistory,
         onSelect: setMainPanel,
       }),
-    [actualMainPanel, showRuleDependentUi]
+    [actualMainPanel, showRuleDependentUi, canReadExecutionHistory]
   );
 
   const headerBadges = useMemo(
@@ -465,6 +474,8 @@ export function EpisodeDetailsPage() {
                   groupHash={groupHash}
                   services={{ data, spaces, userProfile: services.userProfile }}
                 />
+              ) : actualMainPanel === 'action_policy_history' ? (
+                <EpisodeActionPolicyHistoryTab episodeId={episodeId} />
               ) : actualMainPanel === 'metadata' ? (
                 <AlertEpisodeMetadataSection episodeId={episodeId} services={metadataServices} />
               ) : (
