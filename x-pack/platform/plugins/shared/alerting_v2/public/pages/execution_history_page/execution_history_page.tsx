@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo, useState } from 'react';
-import { EuiSpacer } from '@elastic/eui';
+import { EuiSpacer, EuiTabs, EuiTab } from '@elastic/eui';
 import { AppHeader } from '@kbn/app-header';
 import type { AppHeaderTab } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
@@ -86,14 +86,26 @@ export const ExecutionHistoryPage = () => {
         title={EXECUTION_HISTORY_PAGE_TITLE}
         titleAppend={<ExperimentalBadge />}
         padding={{ bleed: 'm' }}
-        tabs={tabs}
       />
       <EuiSpacer size="m" />
       <ExecutionKpis />
       <EuiSpacer size="m" />
+      <TaskManagerHealth />
+      <EuiSpacer size="m" />
       <TopFailing />
       <EuiSpacer size="m" />
-      <TaskManagerHealth />
+      <EuiTabs>
+        {tabs.map((tab) => (
+          <EuiTab
+            key={tab.id}
+            isSelected={tab.isSelected}
+            onClick={tab.onClick}
+            data-test-subj={tab['data-test-subj']}
+          >
+            {tab.label}
+          </EuiTab>
+        ))}
+      </EuiTabs>
       <EuiSpacer size="m" />
       {selectedTabId === RULES_TAB_ID ? (
         <RulesTabContent onRuleClick={handleRuleClick} />
