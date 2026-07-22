@@ -1646,4 +1646,3 @@ describe('generateFleetConfig', () => {
     `);
   });
 });
-
