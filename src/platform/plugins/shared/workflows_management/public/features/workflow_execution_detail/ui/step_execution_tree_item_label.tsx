@@ -85,7 +85,7 @@ export function StepExecutionTreeItemLabel({
           <TokenUsageBadge usage={usage} compact data-test-subj="workflowStepTreeTokenUsage" />
         </EuiFlexItem>
       )}
-      {typeof executionTimeMs === 'number' &&
+      {executionTimeMs != null &&
         Number.isFinite(executionTimeMs) &&
         executionTimeMs >= 0 &&
         status !== ExecutionStatus.WAITING_FOR_INPUT &&
