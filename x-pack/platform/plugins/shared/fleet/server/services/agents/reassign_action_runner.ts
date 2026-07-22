@@ -17,6 +17,8 @@ import { agentPolicyService } from '../agent_policy';
 
 import { ActionRunner } from './action_runner';
 
+import { removeVersionSuffixFromPolicyId } from '../../../common/services/version_specific_policies_utils';
+
 import { bulkUpdateAgents } from './crud';
 import { createErrorActionResults, createAgentAction } from './actions';
 import { getHostedPolicies, isHostedAgent } from './hosted_agent';
@@ -84,6 +86,7 @@ export async function reassignBatch(
       agentId: agent.id,
       data: {
         policy_id: options.newAgentPolicyId,
+        policy_base_id: removeVersionSuffixFromPolicyId(options.newAgentPolicyId),
         policy_revision: null,
         ...(newAgentPolicy?.space_ids ? { namespaces: newAgentPolicy.space_ids } : {}),
       },
