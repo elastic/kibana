@@ -13,6 +13,7 @@ import { EntityTabContent } from './entity_tab_content';
 import {
   ENTITY_TAB_EMPTY_TEST_ID,
   ENTITY_TAB_NO_PRIVILEGES_TEST_ID,
+  ENTITY_TAB_STORE_DISABLED_CALLOUT_TEST_ID,
   ENTITY_TAB_TABLE_TEST_ID,
 } from '../../../../../common/cases/attachments/entity/test_ids';
 import { TestProvidersComponent } from '../../../../threat_intelligence/mocks/test_providers';
@@ -94,6 +95,39 @@ describe('EntityTabContent', () => {
       isLoading: false,
       hasAllRequiredPrivileges: true,
     });
+  });
+
+  it('shows a warning callout and still renders the table when the entity store is disabled', () => {
+    useEntityStoreStatusMock.mockReturnValue({
+      data: { status: 'stopped' },
+      isLoading: false,
+    });
+
+    renderTab();
+
+    expect(screen.getByTestId(ENTITY_TAB_STORE_DISABLED_CALLOUT_TEST_ID)).toBeInTheDocument();
+    expect(screen.getByTestId(ENTITY_TAB_TABLE_TEST_ID)).toBeInTheDocument();
+    expect(screen.queryByTestId(ENTITY_TAB_EMPTY_TEST_ID)).not.toBeInTheDocument();
+  });
+
+  it('shows a warning callout and still renders the table when the entity store is not installed', () => {
+    useEntityStoreStatusMock.mockReturnValue({
+      data: { status: 'not_installed' },
+      isLoading: false,
+    });
+
+    renderTab();
+
+    expect(screen.getByTestId(ENTITY_TAB_STORE_DISABLED_CALLOUT_TEST_ID)).toBeInTheDocument();
+    expect(screen.getByTestId(ENTITY_TAB_TABLE_TEST_ID)).toBeInTheDocument();
+  });
+
+  it('does not show the disabled callout when the entity store is running', () => {
+    renderTab();
+
+    expect(
+      screen.queryByTestId(ENTITY_TAB_STORE_DISABLED_CALLOUT_TEST_ID)
+    ).not.toBeInTheDocument();
   });
 
   it('renders the empty prompt when no entity attachments exist', () => {
