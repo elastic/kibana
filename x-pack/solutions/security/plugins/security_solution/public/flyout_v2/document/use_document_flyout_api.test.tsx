@@ -41,14 +41,28 @@ jest.mock('../shared/hooks/use_default_flyout_properties', () => ({
   defaultToolsFlyoutProperties: { size: 'm' },
 }));
 
+const mockWriteOnOpen = jest.fn();
+const mockBuildOnClose = jest.fn(() => jest.fn());
+jest.mock('../shared/url_state/flyout_v2_url_writer', () => ({
+  useFlyoutV2UrlWriter: jest.fn(() => ({
+    writeOnOpen: mockWriteOnOpen,
+    buildOnClose: mockBuildOnClose,
+  })),
+}));
+
 const mockOpenSystemFlyout = jest.fn();
 const mockReportEvent = jest.fn();
-const hit = { id: '1', raw: { _id: '1' }, flattened: {} } as unknown as DataTableRecord;
+const hit = {
+  id: '1',
+  raw: { _id: 'doc-id', _index: 'doc-index' },
+  flattened: {},
+} as unknown as DataTableRecord;
 
 describe('useDocumentFlyoutApi', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockOpenSystemFlyout.mockReturnValue({ onClose: Promise.resolve(), close: jest.fn() });
+    mockBuildOnClose.mockReturnValue(jest.fn());
     (useKibana as jest.Mock).mockReturnValue({
       services: {
         overlays: { openSystemFlyout: mockOpenSystemFlyout },
@@ -215,7 +229,6 @@ describe('useDocumentFlyoutApi', () => {
       hit,
       investigationFields: [],
       scopeId: '',
-      columns: [],
     });
 
     expect(mockOpenSystemFlyout).toHaveBeenCalledWith(
@@ -234,11 +247,7 @@ describe('useDocumentFlyoutApi', () => {
     ['openDocumentThreatIntelligence', 'threat_intelligence', () => ({ hit })],
     ['openDocumentInvestigationGuide', 'investigation_guide', () => ({ hit })],
     ['openDocumentGraph', 'graph', () => ({ hit })],
-    [
-      'openDocumentPrevalence',
-      'prevalence',
-      () => ({ hit, investigationFields: [], scopeId: '', columns: [] }),
-    ],
+    ['openDocumentPrevalence', 'prevalence', () => ({ hit, investigationFields: [], scopeId: '' })],
   ] as const)('%s opens a tools flyout as a new session', (method, tool, buildParams) => {
     const { result } = renderHook(() => useDocumentFlyoutApi());
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -282,7 +291,7 @@ describe('useDocumentFlyoutApi', () => {
       'openDocumentPrevalence',
       'prevalence',
       'insights_prevalence',
-      () => ({ hit, investigationFields: [], scopeId: '', columns: [] }),
+      () => ({ hit, investigationFields: [], scopeId: '' }),
     ],
   ] as const)('%s forwards the given origin', (method, tool, origin, buildParams) => {
     const { result } = renderHook(() => useDocumentFlyoutApi());
@@ -301,5 +310,125 @@ describe('useDocumentFlyoutApi', () => {
     result.current.openAnalyzer({ hit });
 
     expect(getProperties().historyKey).toBe(DOC_VIEWER_FLYOUT_HISTORY_KEY);
+  });
+
+  describe('URL descriptor capture', () => {
+    it('openDocumentFlyoutFromIndex writes a document descriptor with null fallback', () => {
+      const { result } = renderHook(() => useDocumentFlyoutApi());
+      result.current.openDocumentFlyoutFromIndex({ documentId: 'doc-id', indexName: 'doc-index' });
+
+      expect(mockWriteOnOpen).toHaveBeenCalledWith({
+        kind: 'document',
+        documentId: 'doc-id',
+        indexName: 'doc-index',
+      });
+      expect(mockBuildOnClose).toHaveBeenCalledWith(null);
+      expect(getProperties().onClose).toBeDefined();
+    });
+
+    it('openDocumentFlyoutFromIndex uses empty string for undefined indexName', () => {
+      const { result } = renderHook(() => useDocumentFlyoutApi());
+      result.current.openDocumentFlyoutFromIndex({ documentId: 'doc-id', indexName: undefined });
+
+      expect(mockWriteOnOpen).toHaveBeenCalledWith(
+        expect.objectContaining({ kind: 'document', indexName: '' })
+      );
+    });
+
+    it('openDocumentFlyoutFromPattern writes a documentFromPattern descriptor with null fallback', () => {
+      const { result } = renderHook(() => useDocumentFlyoutApi());
+      result.current.openDocumentFlyoutFromPattern({ documentId: 'doc-id', indexName: 'logs-*' });
+
+      expect(mockWriteOnOpen).toHaveBeenCalledWith({
+        kind: 'documentFromPattern',
+        documentId: 'doc-id',
+        indexName: 'logs-*',
+      });
+      expect(mockBuildOnClose).toHaveBeenCalledWith(null);
+    });
+
+    it('openDocumentFlyoutFromIndexAsChild writes in inherit mode and uses parent as fallback', () => {
+      const { result } = renderHook(() => useDocumentFlyoutApi());
+      result.current.openDocumentFlyoutFromIndexAsChild({
+        documentId: 'doc-id',
+        indexName: 'doc-index',
+      });
+
+      expect(mockWriteOnOpen).toHaveBeenCalledWith(
+        { kind: 'document', documentId: 'doc-id', indexName: 'doc-index' },
+        'inherit'
+      );
+      // buildOnClose is called with the parent descriptor (null when URL has no prior state)
+      expect(mockBuildOnClose).toHaveBeenCalledTimes(1);
+    });
+
+    it.each([
+      ['openAnalyzer', 'analyzer', () => ({ hit })],
+      ['openSessionView', 'sessionView', () => ({ hit })],
+      ['openDocumentEntities', 'documentEntities', () => ({ hit })],
+      ['openDocumentResponse', 'documentResponse', () => ({ hit })],
+      ['openDocumentThreatIntelligence', 'documentThreatIntelligence', () => ({ hit })],
+      ['openDocumentInvestigationGuide', 'documentInvestigationGuide', () => ({ hit })],
+      ['openDocumentGraph', 'documentGraph', () => ({ hit })],
+    ] as const)(
+      '%s writes its descriptor and clears the param on close (session:start root)',
+      (method, expectedKind, buildParams) => {
+        const { result } = renderHook(() => useDocumentFlyoutApi());
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (result.current[method] as (params: any) => void)(buildParams());
+
+        expect(mockWriteOnOpen).toHaveBeenCalledWith(
+          expect.objectContaining({
+            kind: expectedKind,
+            documentId: 'doc-id',
+            indexName: 'doc-index',
+          })
+        );
+        // A tool is a session:'start' root; closing it clears the param (no parent to revert to).
+        expect(mockBuildOnClose).toHaveBeenCalledWith(null);
+        expect(getProperties().onClose).toBeDefined();
+      }
+    );
+
+    it('openDocumentCorrelations writes its descriptor and clears the param on close', () => {
+      const { result } = renderHook(() => useDocumentFlyoutApi());
+      result.current.openDocumentCorrelations({
+        hit,
+        scopeId: 'scope-1',
+        isRulePreview: false,
+        onShowAlert: jest.fn(),
+      });
+
+      expect(mockWriteOnOpen).toHaveBeenCalledWith(
+        expect.objectContaining({
+          kind: 'documentCorrelations',
+          documentId: 'doc-id',
+          indexName: 'doc-index',
+          scopeId: 'scope-1',
+          isRulePreview: false,
+        })
+      );
+      expect(mockBuildOnClose).toHaveBeenCalledWith(null);
+    });
+
+    it('openDocumentPrevalence writes its descriptor (without columns, built internally) and clears the param on close', () => {
+      const { result } = renderHook(() => useDocumentFlyoutApi());
+      result.current.openDocumentPrevalence({
+        hit,
+        investigationFields: ['host.name'],
+        scopeId: 'scope-1',
+      });
+
+      expect(mockWriteOnOpen).toHaveBeenCalledWith(
+        expect.objectContaining({
+          kind: 'documentPrevalence',
+          documentId: 'doc-id',
+          indexName: 'doc-index',
+          scopeId: 'scope-1',
+          investigationFields: ['host.name'],
+        })
+      );
+      expect(mockBuildOnClose).toHaveBeenCalledWith(null);
+    });
   });
 });

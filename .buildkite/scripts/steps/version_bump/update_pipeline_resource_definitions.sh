@@ -13,12 +13,59 @@ FILES=(
   ".buildkite/pipeline-resource-definitions/kibana-console-definitions-sync.yml"
   ".buildkite/pipeline-resource-definitions/kibana-es-snapshots.yml"
   ".buildkite/pipeline-resource-definitions/kibana-on-merge.yml"
+  ".buildkite/pipeline-resource-definitions/kibana-scout-update-metadata.yml"
 )
 
 for file in "${FILES[@]}"; do
   echo "Updating branch_configuration in $file"
   sed -i "s/branch_configuration: main/branch_configuration: main ${BRANCH}/" "$file"
 done
+
+echo "Adding ${BRANCH} daily schedule to kibana-es-snapshots.yml"
+es_snapshots=".buildkite/pipeline-resource-definitions/kibana-es-snapshots.yml"
+if grep -q "branch: '${BRANCH}'" "$es_snapshots"; then
+  echo "Schedule for ${BRANCH} already exists in kibana-es-snapshots.yml, skipping"
+else
+  awk -v branch="$BRANCH" '
+    !done && /^          branch: main$/ {
+      print
+      print "        Daily build (" branch "):"
+      print "          cronline: 0 22 * * * America/New_York"
+      print "          message: Daily build"
+      print "          branch: \047" branch "\047"
+      done = 1
+      next
+    }
+    { print }
+  ' "$es_snapshots" > "${es_snapshots}.tmp" && mv "${es_snapshots}.tmp" "$es_snapshots"
+  if ! grep -q "branch: '${BRANCH}'" "$es_snapshots"; then
+    echo "ERROR: Failed to insert ${BRANCH} schedule into kibana-es-snapshots.yml — 'branch: main' pattern not found" >&2
+    exit 1
+  fi
+fi
+
+echo "Adding ${BRANCH} daily schedule to kibana-scout-update-metadata.yml"
+scout_metadata=".buildkite/pipeline-resource-definitions/kibana-scout-update-metadata.yml"
+if grep -q "branch: '${BRANCH}'" "$scout_metadata"; then
+  echo "Schedule for ${BRANCH} already exists in kibana-scout-update-metadata.yml, skipping"
+else
+  awk -v branch="$BRANCH" '
+    !done && /^          branch: main$/ {
+      print
+      print "        Daily (" branch "):"
+      print "          cronline: 0 0 * * * America/New_York"
+      print "          message: Daily Scout metadata update"
+      print "          branch: \047" branch "\047"
+      done = 1
+      next
+    }
+    { print }
+  ' "$scout_metadata" > "${scout_metadata}.tmp" && mv "${scout_metadata}.tmp" "$scout_metadata"
+  if ! grep -q "branch: '${BRANCH}'" "$scout_metadata"; then
+    echo "ERROR: Failed to insert ${BRANCH} schedule into kibana-scout-update-metadata.yml — 'branch: main' pattern not found" >&2
+    exit 1
+  fi
+fi
 
 echo --- Committing pipeline resource definition changes
 

@@ -39,7 +39,6 @@ export function cancellableTask(
           );
 
           if (task.status === TaskStatus.BeingCanceled) {
-            runContext.abortController.abort();
             resolve('canceled' as const);
           }
         }, 5000);
@@ -64,9 +63,6 @@ export function cancellableTask(
          *    canceled. In this case, the signal may not have been aborted yet.
          */
         if (task.status === TaskStatus.BeingCanceled) {
-          if (!runContext.abortController.signal.aborted) {
-            runContext.abortController.abort();
-          }
           await taskClient.markCanceled(task);
         }
       });
