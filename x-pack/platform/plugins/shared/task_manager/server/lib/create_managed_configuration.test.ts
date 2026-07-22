@@ -311,7 +311,10 @@ describe('createManagedConfiguration()', () => {
       });
 
       test('should decrease configuration back to normal incrementally after an error is emitted', async () => {
-        const { subscription, errors$ } = setupScenario(LOW_UTILIZATION_POLL_INTERVAL, CLAIM_STRATEGY_MGET);
+        const { subscription, errors$ } = setupScenario(
+          LOW_UTILIZATION_POLL_INTERVAL,
+          CLAIM_STRATEGY_MGET
+        );
         errors$.next(SavedObjectsErrorHelpers.createTooManyRequestsError('a', 'b'));
         jest.advanceTimersByTime(ADJUST_THROUGHPUT_INTERVAL * 10);
         expect(subscription).toHaveBeenNthCalledWith(2, 3600);

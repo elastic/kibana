@@ -144,7 +144,10 @@ export function createPollIntervalScan(
           // If the task claim strategy is mget, increase the poll interval if the the avg used capacity over 15s is less than 25%.
           const queue = tmUtilizationQueue(tmUtilization);
           avgTmUtilization = stats.mean(queue);
-          if (claimStrategy === CLAIM_STRATEGY_MGET && newPollInterval < LOW_UTILIZATION_POLL_INTERVAL) {
+          if (
+            claimStrategy === CLAIM_STRATEGY_MGET &&
+            newPollInterval < LOW_UTILIZATION_POLL_INTERVAL
+          ) {
             updatedForCapacity = true;
             if (avgTmUtilization < 25) {
               newPollInterval = LOW_UTILIZATION_POLL_INTERVAL;
