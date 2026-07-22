@@ -73,11 +73,9 @@ spaceTest.describe(
       'restores columns correctly when switching between saved searches',
       async ({ pageObjects }) => {
         await pageObjects.discover.loadSavedSearch('nonTransformationalInitialColumns');
-        await pageObjects.discover.waitUntilSearchingHasFinished();
         expect(await pageObjects.discover.getDocHeader()).toStrictEqual(['@timestamp', 'Summary']);
 
         await pageObjects.discover.loadSavedSearch('nonTransformationalCustomColumns');
-        await pageObjects.discover.waitUntilSearchingHasFinished();
         expect(await pageObjects.discover.getDocHeader()).toStrictEqual([
           '@timestamp',
           'bytes',
