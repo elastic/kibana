@@ -99,6 +99,9 @@ describe('bulkCreate', () => {
     });
 
     const clientArgs = createCasesClientMockArgs();
+    // This suite asserts the exact bulkCreateCases payload; the extended_fields
+    // mirroring (templates flag ON) is covered by dedicated tests below.
+    clientArgs.config = { ...clientArgs.config, templates: { enabled: false } };
 
     clientArgs.services.caseService.bulkCreateCases.mockResolvedValue({
       saved_objects: [caseSO],
@@ -1476,7 +1479,7 @@ describe('bulkCreate', () => {
     it('does not mirror customFields into extended_fields when templates flag is disabled', async () => {
       // FAILURE SCENARIO: adapter runs unconditionally — extended_fields written when flag is off.
       const clientArgs = createCasesClientMockArgs();
-      // config.templates.enabled defaults to false in the mock
+      clientArgs.config = { ...clientArgs.config, templates: { enabled: false } };
       clientArgs.services.caseService.bulkCreateCases.mockResolvedValue({
         saved_objects: [caseSO],
       });

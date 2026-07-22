@@ -989,6 +989,8 @@
       "@kbn/css-utils/*": ["./src/platform/packages/shared/kbn-css-utils/*"],
       "@kbn/custom-branding-plugin": ["./x-pack/platform/plugins/private/custom_branding"],
       "@kbn/custom-branding-plugin/*": ["./x-pack/platform/plugins/private/custom_branding/*"],
+      "@kbn/custom-content-plugin": ["./x-pack/platform/plugins/shared/custom_content"],
+      "@kbn/custom-content-plugin/*": ["./x-pack/platform/plugins/shared/custom_content/*"],
       "@kbn/custom-icons": ["./src/platform/packages/shared/kbn-custom-icons"],
       "@kbn/custom-icons/*": ["./src/platform/packages/shared/kbn-custom-icons/*"],
       "@kbn/custom-integrations-plugin": ["./src/platform/plugins/shared/custom_integrations"],
