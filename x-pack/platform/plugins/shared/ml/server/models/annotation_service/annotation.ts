@@ -20,7 +20,6 @@ import {
   getAnnotationFieldValue,
 } from '@kbn/ml-common-types/annotations';
 import type { JobId } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
-import type { ServerlessInfo } from '../../types';
 import {
   ML_ANNOTATIONS_INDEX_ALIAS_READ,
   ML_ANNOTATIONS_INDEX_ALIAS_WRITE,
