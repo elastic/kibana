@@ -1,5 +1,5 @@
 {
-  "sha1": "b81a6e23ddf8223b5eaa9aab14d40bc0c23c1a8c",
+  "sha1": "643f47633b2a78f06618461256191295d1e736bb",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -209,7 +209,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/api/tests/get_discover_session.spec.ts",
-        "line": 49,
+        "line": 37,
         "column": 10
       }
     },
@@ -235,7 +235,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/api/tests/get_discover_session.spec.ts",
-        "line": 101,
+        "line": 89,
         "column": 10
       }
     },
@@ -261,7 +261,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/api/tests/get_discover_session.spec.ts",
-        "line": 116,
+        "line": 104,
         "column": 10
       }
     },
@@ -287,7 +287,189 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/api/tests/get_discover_session.spec.ts",
-        "line": 131,
+        "line": 119,
+        "column": 10
+      }
+    },
+    {
+      "id": "35efccaae7173ba-44abdd371c3ee56",
+      "title": "GET /api/discover_sessions returns paginated Discover session summaries",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/api/tests/search_discover_sessions.spec.ts",
+        "line": 43,
+        "column": 10
+      }
+    },
+    {
+      "id": "35efccaae7173ba-803871dd4b2ac3e",
+      "title": "GET /api/discover_sessions paginates beyond the first page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/api/tests/search_discover_sessions.spec.ts",
+        "line": 72,
+        "column": 10
+      }
+    },
+    {
+      "id": "35efccaae7173ba-030e4e3f8ae5961",
+      "title": "GET /api/discover_sessions applies default pagination when page and per_page are omitted",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/api/tests/search_discover_sessions.spec.ts",
+        "line": 93,
+        "column": 10
+      }
+    },
+    {
+      "id": "35efccaae7173ba-0abab9340a60f37",
+      "title": "GET /api/discover_sessions returns no results when the query matches nothing",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/api/tests/search_discover_sessions.spec.ts",
+        "line": 114,
+        "column": 10
+      }
+    },
+    {
+      "id": "35efccaae7173ba-7de45faed1212f4",
+      "title": "GET /api/discover_sessions requires all query terms to match (AND operator)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/api/tests/search_discover_sessions.spec.ts",
+        "line": 128,
+        "column": 10
+      }
+    },
+    {
+      "id": "35efccaae7173ba-e0b8c96d3ce622b",
+      "title": "GET /api/discover_sessions rejects per page limits above the maximum",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/api/tests/search_discover_sessions.spec.ts",
+        "line": 153,
+        "column": 10
+      }
+    },
+    {
+      "id": "35efccaae7173ba-78c54e88713c56a",
+      "title": "GET /api/discover_sessions returns an empty result set when the user cannot read Discover sessions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/api/tests/search_discover_sessions.spec.ts",
+        "line": 165,
         "column": 10
       }
     }
