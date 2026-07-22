@@ -85,6 +85,13 @@ export interface CallWithRequestParams extends estypes.RequestBase {
   query?: string | object;
   track_total_hits?: boolean | number;
   body?: any;
+  /**
+   * Transport-level request timeout (e.g. '30s') applied to the underlying
+   * Elasticsearch client call. Not part of the request body — it is
+   * extracted and forwarded as a transport option so the call can't hang
+   * indefinitely against a slow or unreachable cluster.
+   */
+  requestTimeout?: string | number;
 }
 
 export type InfraResponse = Lifecycle.ReturnValue;

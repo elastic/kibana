@@ -7,10 +7,13 @@
 import type { ChangeEvent } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
+  EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiFieldSearch,
   EuiFormRow,
   EuiIconTip,
+  EuiLoadingSpinner,
   EuiPanel,
   EuiRadioGroup,
   EuiSpacer,
@@ -148,8 +151,13 @@ export const getNoDataBehaviorValue = (
 
 export const Expressions: React.FC<Props> = (props) => {
   const { setRuleParams, ruleParams, errors, metadata } = props;
-  const { source } = useSourceContext();
-  const { metricsView } = useMetricsDataViewContext();
+  const { source, error: sourceError, isLoading: isSourceLoading, loadSource } = useSourceContext();
+  const {
+    metricsView,
+    error: metricsViewError,
+    loading: isMetricsViewLoading,
+    refetch: refetchMetricsView,
+  } = useMetricsDataViewContext();
   const [timeSize, setTimeSize] = useState<number | undefined>(1);
   const [timeUnit, setTimeUnit] = useState<TimeUnitChar | undefined>('m');
 
@@ -338,6 +346,20 @@ export const Expressions: React.FC<Props> = (props) => {
     [onFilterChange]
   );
 
+  // `metricsView` depends on the source configuration having resolved first
+  // (see `useSourceContext`/`useMetricsDataViewContext`). Without explicit
+  // loading/error states here, a slow or failing `/api/metrics/source`
+  // request just left the conditions section silently empty, making it
+  // impossible to tell "still loading" from "no conditions configured" from
+  // "something broke". See https://github.com/elastic/kibana/issues/279610
+  const isMetricsViewInitializing = isSourceLoading || isMetricsViewLoading;
+  const metricsViewLoadError = sourceError || metricsViewError?.message;
+
+  const retryLoadingMetricsView = useCallback(() => {
+    loadSource();
+    refetchMetricsView();
+  }, [loadSource, refetchMetricsView]);
+
   return (
     <>
       <EuiSpacer size="m" />
@@ -350,7 +372,38 @@ export const Expressions: React.FC<Props> = (props) => {
         </h4>
       </EuiText>
       <EuiSpacer size="xs" />
-      {metricsView &&
+      {isMetricsViewInitializing ? (
+        <div>
+          <EuiSpacer size="m" />
+          <EuiLoadingSpinner size="l" data-test-subj="infraMetricThresholdConditionsLoading" />
+          <EuiSpacer size="m" />
+        </div>
+      ) : metricsViewLoadError ? (
+        <>
+          <EuiCallOut
+            announceOnMount
+            data-test-subj="infraMetricThresholdConditionsError"
+            title={i18n.translate('xpack.infra.metricThreshold.rule.metricsViewError.title', {
+              defaultMessage: 'Sorry, there was a problem loading the conditions',
+            })}
+            color="danger"
+            iconType="warning"
+          >
+            <p>{metricsViewLoadError}</p>
+            <EuiButton
+              data-test-subj="infraMetricThresholdConditionsErrorTryAgain"
+              onClick={retryLoadingMetricsView}
+              iconType="refresh"
+            >
+              {i18n.translate('xpack.infra.metricThreshold.rule.metricsViewError.tryAgain', {
+                defaultMessage: 'Try again',
+              })}
+            </EuiButton>
+          </EuiCallOut>
+          <EuiSpacer size="m" />
+        </>
+      ) : (
+        metricsView &&
         ruleParams.criteria.map((e, idx) => {
           let metricExpression = [
             {
@@ -404,7 +457,8 @@ export const Expressions: React.FC<Props> = (props) => {
               />
             </ExpressionRow>
           );
-        })}
+        })
+      )}
 
       <div style={{ marginLeft: 28 }}>
         <ForLastExpression

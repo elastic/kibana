@@ -64,6 +64,11 @@ export class InfraElasticsearchSourceStatusAdapter implements InfraSourceStatusA
         terminate_after: 1,
         track_total_hits: 1,
         query: { bool: { filter } },
+        // Without a bound, this search can hang indefinitely against an
+        // overloaded/unhealthy cluster or an unreachable remote-cluster
+        // pattern in a customized index alias. See
+        // https://github.com/elastic/kibana/issues/279610
+        requestTimeout: '30s',
       })
       .then(
         (response) => {

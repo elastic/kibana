@@ -27,21 +27,35 @@ const mockDataView = {
   toSpec: () => ({}),
 } as jest.Mocked<DataView>;
 
+const mockLoadSource = jest.fn();
+const mockRefetchMetricsView = jest.fn();
+
+const defaultUseSourceContext = {
+  source: { id: 'default' },
+  isLoading: false,
+  error: undefined,
+  loadSource: mockLoadSource,
+};
+
+const defaultUseMetricsDataViewContext = {
+  metricsView: {
+    indices: 'metricbeat-*',
+    timeFieldName: mockDataView.timeFieldName,
+    fields: mockDataView.fields,
+    dataViewReference: mockDataView,
+  } as ResolvedDataView,
+  loading: false,
+  error: undefined,
+  refetch: mockRefetchMetricsView,
+};
+
+const mockUseSourceContext = jest.fn(() => defaultUseSourceContext);
+const mockUseMetricsDataViewContext = jest.fn(() => defaultUseMetricsDataViewContext);
+
 jest.mock('../../../containers/metrics_source', () => ({
   withSourceProvider: () => jest.fn,
-  useSourceContext: () => ({
-    source: { id: 'default' },
-  }),
-  useMetricsDataViewContext: () => ({
-    metricsView: {
-      indices: 'metricbeat-*',
-      timeFieldName: mockDataView.timeFieldName,
-      fields: mockDataView.fields,
-      dataViewReference: mockDataView,
-    } as ResolvedDataView,
-    loading: false,
-    error: undefined,
-  }),
+  useSourceContext: () => mockUseSourceContext(),
+  useMetricsDataViewContext: () => mockUseMetricsDataViewContext(),
 }));
 
 jest.mock('../../../hooks/use_kibana', () => ({
@@ -54,6 +68,13 @@ jest.mock('../../../hooks/use_kibana', () => ({
 }));
 
 describe('Expression', () => {
+  beforeEach(() => {
+    mockUseSourceContext.mockReturnValue(defaultUseSourceContext);
+    mockUseMetricsDataViewContext.mockReturnValue(defaultUseMetricsDataViewContext);
+    mockLoadSource.mockClear();
+    mockRefetchMetricsView.mockClear();
+  });
+
   async function setup(currentOptions: {
     metrics?: MetricsExplorerMetric[];
     filterQuery?: string;
@@ -121,6 +142,80 @@ describe('Expression', () => {
         aggType: 'cardinality',
       },
     ]);
+  });
+
+  it('should show a loading indicator while the source configuration is being fetched', async () => {
+    mockUseSourceContext.mockReturnValue({
+      ...defaultUseSourceContext,
+      isLoading: true,
+    });
+    mockUseMetricsDataViewContext.mockReturnValue({
+      ...defaultUseMetricsDataViewContext,
+      metricsView: undefined,
+      loading: true,
+    });
+
+    const { wrapper } = await setup({});
+
+    expect(
+      wrapper.find('[data-test-subj="infraMetricThresholdConditionsLoading"]').exists()
+    ).toBe(true);
+    expect(
+      wrapper.find('[data-test-subj="infraMetricThresholdConditionsError"]').exists()
+    ).toBe(false);
+  });
+
+  it('should show a loading indicator while the metrics data view is being resolved', async () => {
+    mockUseMetricsDataViewContext.mockReturnValue({
+      ...defaultUseMetricsDataViewContext,
+      metricsView: undefined,
+      loading: true,
+    });
+
+    const { wrapper } = await setup({});
+
+    expect(
+      wrapper.find('[data-test-subj="infraMetricThresholdConditionsLoading"]').exists()
+    ).toBe(true);
+  });
+
+  it('should show an error callout with a retry action when the source configuration fails to load', async () => {
+    mockUseSourceContext.mockReturnValue({
+      ...defaultUseSourceContext,
+      error: 'Internal Server Error',
+    });
+    mockUseMetricsDataViewContext.mockReturnValue({
+      ...defaultUseMetricsDataViewContext,
+      metricsView: undefined,
+    });
+
+    const { wrapper } = await setup({});
+
+    expect(
+      wrapper.find('[data-test-subj="infraMetricThresholdConditionsError"]').exists()
+    ).toBe(true);
+    expect(
+      wrapper.find('[data-test-subj="infraMetricThresholdConditionsLoading"]').exists()
+    ).toBe(false);
+
+    wrapper.find('[data-test-subj="infraMetricThresholdConditionsErrorTryAgain"]').first().simulate('click');
+
+    expect(mockLoadSource).toHaveBeenCalled();
+    expect(mockRefetchMetricsView).toHaveBeenCalled();
+  });
+
+  it('should show an error callout when the metrics data view fails to resolve', async () => {
+    mockUseMetricsDataViewContext.mockReturnValue({
+      ...defaultUseMetricsDataViewContext,
+      metricsView: undefined,
+      error: new Error('Failed to resolve data view'),
+    });
+
+    const { wrapper } = await setup({});
+
+    expect(
+      wrapper.find('[data-test-subj="infraMetricThresholdConditionsError"]').exists()
+    ).toBe(true);
   });
 });
 
