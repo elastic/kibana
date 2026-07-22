@@ -246,14 +246,6 @@ const StatsOnly: React.FC = () => (
   </EuiFlexGroup>
 );
 
-const separatorCss = (borderColor: string) =>
-  css({
-    width: 1,
-    alignSelf: 'stretch',
-    backgroundColor: borderColor,
-    flexShrink: 0,
-  });
-
 const secondaryStatCss = css({
   '.euiStat__title': { fontSize: '1rem' },
 });
@@ -292,9 +284,17 @@ const StatsWithCharts: React.FC = () => {
   return (
     <EuiFlexGroup gutterSize="m">
       <EuiFlexItem>
-        <EuiPanel hasBorder data-test-subj="executionKpisExecutionsPanel">
+        <EuiPanel hasBorder paddingSize="none" data-test-subj="executionKpisExecutionsPanel">
           <EuiFlexGroup gutterSize="none" responsive={false} css={css({ height: '100%' })}>
-            <EuiFlexItem grow={false} css={css({ padding: `0 ${euiTheme.size.m}`, minWidth: 130 })}>
+            <EuiFlexItem
+              grow={false}
+              css={css({
+                padding: euiTheme.size.m,
+                minWidth: 130,
+                backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+                borderRight: `1px solid ${borderColor}`,
+              })}
+            >
               <EuiTitle size="xxs">
                 <h3>
                   {i18n.translate('xpack.alertingV2.executionHistory.kpis.executionsTitle', {
@@ -332,8 +332,7 @@ const StatsWithCharts: React.FC = () => {
                 css={secondaryStatCss}
               />
             </EuiFlexItem>
-            <div css={separatorCss(borderColor)} />
-            <EuiFlexItem css={css({ padding: `0 ${euiTheme.size.m}` })}>
+            <EuiFlexItem css={css({ padding: euiTheme.size.m })}>
               <EuiText size="xs" css={css({ marginBottom: 4 })}>
                 <strong>
                   {i18n.translate(
@@ -360,9 +359,17 @@ const StatsWithCharts: React.FC = () => {
       </EuiFlexItem>
 
       <EuiFlexItem>
-        <EuiPanel hasBorder data-test-subj="executionKpisFailuresPanel">
+        <EuiPanel hasBorder paddingSize="none" data-test-subj="executionKpisFailuresPanel">
           <EuiFlexGroup gutterSize="none" responsive={false} css={css({ height: '100%' })}>
-            <EuiFlexItem grow={false} css={css({ padding: `0 ${euiTheme.size.m}`, minWidth: 130 })}>
+            <EuiFlexItem
+              grow={false}
+              css={css({
+                padding: euiTheme.size.m,
+                minWidth: 130,
+                backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+                borderRight: `1px solid ${borderColor}`,
+              })}
+            >
               <EuiTitle size="xxs">
                 <h3>
                   {i18n.translate('xpack.alertingV2.executionHistory.kpis.failuresTitle', {
@@ -402,8 +409,7 @@ const StatsWithCharts: React.FC = () => {
                 css={secondaryStatCss}
               />
             </EuiFlexItem>
-            <div css={separatorCss(borderColor)} />
-            <EuiFlexItem css={css({ padding: `0 ${euiTheme.size.m}` })}>
+            <EuiFlexItem css={css({ padding: euiTheme.size.m })}>
               <EuiText size="xs" css={css({ marginBottom: 4 })}>
                 <strong>
                   {i18n.translate(
