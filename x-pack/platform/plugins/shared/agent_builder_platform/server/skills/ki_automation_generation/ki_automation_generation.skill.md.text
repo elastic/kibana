@@ -37,7 +37,7 @@ Apply these when deciding what KIs to generate and what each one should contain.
    wrong answers. For those, provide an access pattern that reads live data.
 
 3. **Access patterns must be grounded and validated.** Build every query from the index's real
-   mapping and sample documents — never invented field names. 
+   mapping and sample documents — never invented field names.
 
 4. **The Context Engine is more like a cache than a database.** Avoid generating KIs for the entire corpus
    eagerly. Prefer data views. Best practice is to apply a filter before starting: a time window (e.g. last 90 days), a status
@@ -125,8 +125,6 @@ resource attached to this skill. It must have at minimum:
 - `name` (string)
 - `dest` object with `type` (`"data_stream"` or `"index"`) and `value` (string)
 - `sources` array of objects each with `type: "esql"` and `value` (string)
-- `automations` array of objects each with `type: "workflow"` and `value` (string)
-- `date_created` and `date_modified` (strings)
 
 **If no AI Index definition is present:**
 
@@ -151,7 +149,7 @@ Explain what a valid definition looks like. Do not proceed until a valid one is 
 Extract and hold these values for the rest of the conversation:
 - `dest.value` — the target index/data stream where KIs will be written
 - `dest.type` — whether it is a data stream or index
-- `sources[]` — the declared data sources (ES|QL queries or future connector sources)
+- `sources[]` — the declared data sources
 - `name` and `description` — the AI Index's stated purpose
 
 Proceed to Phase 1.
@@ -160,23 +158,22 @@ Proceed to Phase 1.
 
 Using the validated AI Index definition, gather context about the declared sources:
 
-1. Parse the index or data stream names referenced in each `sources[]` entry whose `type` is
-   `"esql"`. Extract them from the `FROM` clause of each ES|QL query (e.g.
-   `FROM my-index-* | WHERE ...` → `my-index-*`).
-2. Call `platform.core.get_index_mapping` for each of those index/data stream names.
-3. Call `platform.workflows.get_connectors` to list configured connectors. (Connector source
-   types will appear in `sources[]` as the API matures — handle them here when present.)
+1. For each `sources[]` entry, attempt to extract out where the data comes from. For example,
+   if `type` is `"esql"`,  extract them from the `value` the `FROM` clause of each ES|QL query (e.g.
+  `FROM my-index-* | WHERE ...` → `my-index-*`).
+2. For each source, attempt to understand the schema of that source.
+   For example, for an index/datastream name or pattern, Call `platform.core.get_index_mapping`.
 
 Do **not** call `platform.core.list_indices` to broadly explore all indices. The AI Index
 already declares which sources matter.
 
 Do **not** ask the user what data sources they care about — the AI Index already answers that.
 
-After gathering mappings, proceed directly to Phase 2.
+After gathering an understanding of each source's schema, proceed directly to Phase 2.
 
 ### Phase 2 — Suggest strategies
 
-Based on the declared sources (from `sources[]`), their mappings, and the AI Index's
+Based on the declared sources (from `sources[]`), their schemas, and the AI Index's
 `name` and `description`, propose a coherent set of KI generation strategies that serves the
 AI Index's stated purpose as a whole.
 
