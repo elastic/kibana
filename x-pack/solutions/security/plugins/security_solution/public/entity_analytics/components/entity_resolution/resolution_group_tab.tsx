@@ -16,7 +16,7 @@ import {
 } from '../../../flyout/entity_details/shared/constants';
 import { useIsNewFlyoutEnabled } from '../../../common/hooks/use_is_new_flyout_enabled';
 import { useFlyoutApi } from '../../../flyout_v2/use_flyout_api';
-import { EntityType as SecurityEntityType } from '../../../../common/entity_analytics/types';
+import type { EntityType as SecurityEntityType } from '../../../../common/entity_analytics/types';
 import { useKibana } from '../../../common/lib/kibana/kibana_react';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import { useResolutionGroup, RESOLUTION_GROUP_ROUTE } from './hooks/use_resolution_group';
@@ -64,7 +64,7 @@ export const ResolutionGroupTab: React.FC<ResolutionGroupTabProps> = ({
   const { addError } = useAppToasts();
   const enableNewFlyout = useIsNewFlyoutEnabled();
   const { openFlyout } = useExpandableFlyoutApi();
-  const { openUserFlyout, openHostFlyout, openServiceFlyout } = useFlyoutApi();
+  const { openEntityFlyout } = useFlyoutApi();
   const { data: group, isLoading, isFetching, isError } = useResolutionGroup(entityId);
   const linkEntities = useLinkEntities();
   const createGroup = useLinkEntities({
@@ -115,13 +115,11 @@ export const ResolutionGroupTab: React.FC<ResolutionGroupTabProps> = ({
       const sharedParams = { entityId: clickedEntityId, contextID: scopeId, scopeId };
 
       if (enableNewFlyout) {
-        if (secEntityType === SecurityEntityType.user) {
-          openUserFlyout({ userName: clickedEntityName ?? '', ...sharedParams });
-        } else if (secEntityType === SecurityEntityType.host) {
-          openHostFlyout({ hostName: clickedEntityName ?? '', ...sharedParams });
-        } else if (secEntityType === SecurityEntityType.service) {
-          openServiceFlyout({ serviceName: clickedEntityName ?? '', ...sharedParams });
-        }
+        openEntityFlyout({
+          engineType: secEntityType,
+          entityName: clickedEntityName,
+          ...sharedParams,
+        });
         return;
       }
 
@@ -133,16 +131,7 @@ export const ResolutionGroupTab: React.FC<ResolutionGroupTabProps> = ({
         });
       }
     },
-    [
-      onShowEntity,
-      enableNewFlyout,
-      openFlyout,
-      openUserFlyout,
-      openHostFlyout,
-      openServiceFlyout,
-      entityType,
-      scopeId,
-    ]
+    [onShowEntity, enableNewFlyout, openFlyout, openEntityFlyout, entityType, scopeId]
   );
 
   const handleRemoveEntity = useCallback(

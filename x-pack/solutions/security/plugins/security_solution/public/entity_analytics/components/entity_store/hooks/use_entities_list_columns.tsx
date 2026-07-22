@@ -52,7 +52,7 @@ export type EntitiesListColumns = [
 export const useEntitiesListColumns = (): EntitiesListColumns => {
   const enableNewFlyout = useIsNewFlyoutEnabled();
   const { openFlyout } = useExpandableFlyoutApi();
-  const { openUserFlyout, openHostFlyout, openServiceFlyout } = useFlyoutApi();
+  const { openEntityFlyout } = useFlyoutApi();
   const { euiTheme } = useEuiTheme();
 
   return [
@@ -78,13 +78,13 @@ export const useEntitiesListColumns = (): EntitiesListColumns => {
           };
 
           if (enableNewFlyout) {
-            if (entityType === EntityType.user) {
-              openUserFlyout({ userName: value ?? '', ...sharedParams });
-            } else if (entityType === EntityType.host) {
-              openHostFlyout({ hostName: value ?? '', ...sharedParams });
-            } else if (entityType === EntityType.service) {
-              openServiceFlyout({ serviceName: value ?? '', ...sharedParams });
-            }
+            openEntityFlyout({
+              engineType: entityType,
+              entityName: value ?? '',
+              entityId: record.entity?.id ?? '',
+              contextID: ENTITIES_LIST_TABLE_ID,
+              scopeId: ENTITIES_LIST_TABLE_ID,
+            });
             return;
           }
 

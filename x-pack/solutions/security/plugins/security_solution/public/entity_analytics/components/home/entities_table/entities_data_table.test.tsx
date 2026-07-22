@@ -63,10 +63,7 @@ jest.mock('../../../../common/hooks/use_is_new_flyout_enabled', () => ({
 
 jest.mock('../../../../flyout_v2/use_flyout_api', () => ({
   useFlyoutApi: () => ({
-    openUserFlyout: jest.fn(),
-    openHostFlyout: jest.fn(),
-    openServiceFlyout: jest.fn(),
-    openGenericEntityFlyout: jest.fn(),
+    openEntityFlyout: jest.fn(),
   }),
 }));
 

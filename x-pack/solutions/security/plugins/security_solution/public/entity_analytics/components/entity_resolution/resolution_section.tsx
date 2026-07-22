@@ -8,7 +8,7 @@
 import React, { useCallback } from 'react';
 import { EuiAccordion, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { EntityType } from '../../../../common/entity_analytics/types';
+import type { EntityType } from '../../../../common/entity_analytics/types';
 import { ExpandablePanel } from '../../../flyout_v2/shared/components/expandable_panel';
 import { EntityDetailsLeftPanelTab } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import type { EntityDetailsPath } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
@@ -66,7 +66,7 @@ export const ResolutionSection: React.FC<ResolutionSectionProps> = ({
 
   const enableNewFlyout = useIsNewFlyoutEnabled();
   const { openFlyout } = useExpandableFlyoutApi();
-  const { openUserFlyout, openHostFlyout, openServiceFlyout } = useFlyoutApi();
+  const { openEntityFlyout } = useFlyoutApi();
 
   const handleOpenResolutionTab = useCallback(() => {
     openDetailsPanel?.({ tab: EntityDetailsLeftPanelTab.RESOLUTION_GROUP });
@@ -91,13 +91,11 @@ export const ResolutionSection: React.FC<ResolutionSectionProps> = ({
       const sharedParams = { entityId: clickedEntityId, contextID: scopeId, scopeId };
 
       if (enableNewFlyout) {
-        if (entityType === EntityType.user) {
-          openUserFlyout({ userName: clickedEntityName ?? '', ...sharedParams });
-        } else if (entityType === EntityType.host) {
-          openHostFlyout({ hostName: clickedEntityName ?? '', ...sharedParams });
-        } else if (entityType === EntityType.service) {
-          openServiceFlyout({ serviceName: clickedEntityName ?? '', ...sharedParams });
-        }
+        openEntityFlyout({
+          engineType: entityType,
+          entityName: clickedEntityName,
+          ...sharedParams,
+        });
         return;
       }
 
@@ -109,16 +107,7 @@ export const ResolutionSection: React.FC<ResolutionSectionProps> = ({
         });
       }
     },
-    [
-      onShowEntity,
-      enableNewFlyout,
-      openFlyout,
-      openUserFlyout,
-      openHostFlyout,
-      openServiceFlyout,
-      entityType,
-      scopeId,
-    ]
+    [onShowEntity, enableNewFlyout, openFlyout, openEntityFlyout, entityType, scopeId]
   );
 
   const targetEntityId = group?.target ? getEntityId(group.target) : undefined;

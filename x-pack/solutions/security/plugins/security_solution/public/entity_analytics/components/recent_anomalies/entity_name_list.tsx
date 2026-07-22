@@ -10,7 +10,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { getAnomalyChartStyling } from './anomaly_chart_styling';
-import { EntityType } from '../../../../common/entity_analytics/types';
+import type { EntityType } from '../../../../common/entity_analytics/types';
 import {
   EntityPanelKeyByType,
   EntityPanelParamByType,
@@ -32,7 +32,7 @@ export const EntityNameList: React.FC<EntityNameListProps> = ({
 }) => {
   const enableNewFlyout = useIsNewFlyoutEnabled();
   const { openFlyout } = useExpandableFlyoutApi();
-  const { openUserFlyout, openHostFlyout, openServiceFlyout } = useFlyoutApi();
+  const { openEntityFlyout } = useFlyoutApi();
   const styling = getAnomalyChartStyling(compressed);
 
   const handleOpenEntityFlyout = (entity: EntityMetadata) => {
@@ -46,13 +46,7 @@ export const EntityNameList: React.FC<EntityNameListProps> = ({
     };
 
     if (enableNewFlyout) {
-      if (entityType === EntityType.user) {
-        openUserFlyout({ userName: entity.entityName, ...sharedParams });
-      } else if (entityType === EntityType.host) {
-        openHostFlyout({ hostName: entity.entityName, ...sharedParams });
-      } else if (entityType === EntityType.service) {
-        openServiceFlyout({ serviceName: entity.entityName, ...sharedParams });
-      }
+      openEntityFlyout({ engineType: entityType, entityName: entity.entityName, ...sharedParams });
       return;
     }
 

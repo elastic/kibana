@@ -112,6 +112,8 @@ export interface OpenEntityDetailsParams extends WithTitle {
   entityName: string | undefined;
   /** Scope id for downstream containers and queries. */
   scopeId: string;
+  /** Optional context ID forwarded to cell-action filters inside the flyout. */
+  contextID?: string;
 }
 
 // Entity tool flyouts — each reuses the tool component's own props, plus an optional title.
@@ -143,6 +145,11 @@ export interface EntityFlyoutApi {
   openGenericEntityFlyout: (params: OpenGenericEntityFlyoutParams) => void;
   /** Opens the generic entity details flyout as a child of the currently open flyout. */
   openGenericEntityFlyoutAsChild: (params: OpenGenericEntityFlyoutParams) => void;
+  /**
+   * Opens the matching entity details flyout (host/user/service/generic, by `engineType`) as a
+   * new, top-level flyout. Use when navigating to an entity from a table or list.
+   */
+  openEntityFlyout: (params: OpenEntityDetailsParams) => void;
   /**
    * Opens the matching entity details flyout (host/user/service/generic, by `engineType`) as a
    * child of the currently open flyout. Use for related-entity navigation (graph, resolution).
@@ -309,23 +316,85 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
     [open, mainProperties]
   );
 
-  const openEntityDetailsAsChild = useCallback(
-    ({ engineType, entityId, entityName, scopeId, title }: OpenEntityDetailsParams) => {
+  const openEntityFlyout = useCallback(
+    ({ engineType, entityId, entityName, scopeId, contextID, title }: OpenEntityDetailsParams) => {
       let children: ReactNode;
       switch (engineType) {
         case 'host':
-          children = <Host hostName={entityName ?? ''} entityId={entityId} scopeId={scopeId} />;
+          children = (
+            <Host
+              hostName={entityName ?? ''}
+              entityId={entityId}
+              scopeId={scopeId}
+              contextID={contextID}
+            />
+          );
           break;
         case 'user':
-          children = <User userName={entityName ?? ''} entityId={entityId} scopeId={scopeId} />;
+          children = (
+            <User
+              userName={entityName ?? ''}
+              entityId={entityId}
+              scopeId={scopeId}
+              contextID={contextID}
+            />
+          );
           break;
         case 'service':
           children = (
-            <Service serviceName={entityName ?? ''} entityId={entityId} scopeId={scopeId} />
+            <Service
+              serviceName={entityName ?? ''}
+              entityId={entityId}
+              scopeId={scopeId}
+              contextID={contextID}
+            />
           );
           break;
         default:
-          children = <GenericEntity entityId={entityId} scopeId={scopeId} />;
+          children = <GenericEntity entityId={entityId} scopeId={scopeId} contextID={contextID} />;
+      }
+      const flyoutTitle = title ?? entityName ?? entityId;
+      open(children, mainProperties(undefined, flyoutTitle));
+    },
+    [open, mainProperties]
+  );
+
+  const openEntityDetailsAsChild = useCallback(
+    ({ engineType, entityId, entityName, scopeId, contextID, title }: OpenEntityDetailsParams) => {
+      let children: ReactNode;
+      switch (engineType) {
+        case 'host':
+          children = (
+            <Host
+              hostName={entityName ?? ''}
+              entityId={entityId}
+              scopeId={scopeId}
+              contextID={contextID}
+            />
+          );
+          break;
+        case 'user':
+          children = (
+            <User
+              userName={entityName ?? ''}
+              entityId={entityId}
+              scopeId={scopeId}
+              contextID={contextID}
+            />
+          );
+          break;
+        case 'service':
+          children = (
+            <Service
+              serviceName={entityName ?? ''}
+              entityId={entityId}
+              scopeId={scopeId}
+              contextID={contextID}
+            />
+          );
+          break;
+        default:
+          children = <GenericEntity entityId={entityId} scopeId={scopeId} contextID={contextID} />;
       }
       const childTitle = title ?? entityName ?? entityId;
       open(children, mainProperties('inherit', buildFlyoutNavTitle(childTitle)), 'inherit');
@@ -425,6 +494,7 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
       openServiceFlyoutAsChild,
       openGenericEntityFlyout,
       openGenericEntityFlyoutAsChild,
+      openEntityFlyout,
       openEntityDetailsAsChild,
       openEntityRiskInputs,
       openEntityAnomalyInsights,
@@ -446,6 +516,7 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
       openServiceFlyoutAsChild,
       openGenericEntityFlyout,
       openGenericEntityFlyoutAsChild,
+      openEntityFlyout,
       openEntityDetailsAsChild,
       openEntityRiskInputs,
       openEntityAnomalyInsights,

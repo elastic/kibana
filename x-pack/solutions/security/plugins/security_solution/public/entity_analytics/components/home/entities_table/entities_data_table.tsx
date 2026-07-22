@@ -199,7 +199,7 @@ export const EntitiesDataTable = ({
 
   const { closeFlyout, openFlyout } = useExpandableFlyoutApi();
   const enableNewFlyout = useIsNewFlyoutEnabled();
-  const { openUserFlyout, openHostFlyout, openServiceFlyout } = useFlyoutApi();
+  const { openEntityFlyout } = useFlyoutApi();
   const {
     timelinePrivileges: { read: canUseTimeline },
     alertsPrivileges: {
@@ -225,13 +225,7 @@ export const EntitiesDataTable = ({
       const sharedParams = { entityId, contextID: tableId, scopeId: tableId };
 
       if (enableNewFlyout) {
-        if (entityType === EntityType.user) {
-          openUserFlyout({ userName: entityName, ...sharedParams });
-        } else if (entityType === EntityType.host) {
-          openHostFlyout({ hostName: entityName, ...sharedParams });
-        } else if (entityType === EntityType.service) {
-          openServiceFlyout({ serviceName: entityName, ...sharedParams });
-        }
+        openEntityFlyout({ engineType: entityType, entityName, ...sharedParams });
         return;
       }
 
@@ -243,15 +237,7 @@ export const EntitiesDataTable = ({
         });
       }
     },
-    [
-      enableNewFlyout,
-      openFlyout,
-      openUserFlyout,
-      openHostFlyout,
-      openServiceFlyout,
-      closeFlyout,
-      tableId,
-    ]
+    [enableNewFlyout, openFlyout, openEntityFlyout, closeFlyout, tableId]
   );
 
   const {

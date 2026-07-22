@@ -28,7 +28,6 @@ import { useIsNewFlyoutEnabled } from '../../../../../common/hooks/use_is_new_fl
 import { useFlyoutApi } from '../../../../../flyout_v2/use_flyout_api';
 import { ENTITY_ANALYTICS_TABLE_ID } from '../../constants';
 import { RISK_SCORE_NOT_AVAILABLE } from '../../../entity_resolution/translations';
-import { EntityType } from '../../../../../../common/entity_analytics/types';
 import { getRiskLevel } from '../../../../../../common/entity_analytics/risk_engine';
 import { formatRiskScore } from '../../../../common/utils';
 import { getRiskScoreColors } from '../risk_score_cell';
@@ -61,7 +60,7 @@ const ResolutionGroupPanel = ({
 }) => {
   const enableNewFlyout = useIsNewFlyoutEnabled();
   const { openFlyout } = useExpandableFlyoutApi();
-  const { openUserFlyout, openHostFlyout, openServiceFlyout } = useFlyoutApi();
+  const { openEntityFlyout } = useFlyoutApi();
 
   const entityId = String(bucket.key_as_string ?? bucket.key);
   const metadata = targetMetadata.get(entityId);
@@ -82,13 +81,7 @@ const ResolutionGroupPanel = ({
       const sharedParams = { entityId, contextID: tableId, scopeId: tableId };
 
       if (enableNewFlyout) {
-        if (entityType === EntityType.user) {
-          openUserFlyout({ userName: targetEntityName, ...sharedParams });
-        } else if (entityType === EntityType.host) {
-          openHostFlyout({ hostName: targetEntityName, ...sharedParams });
-        } else if (entityType === EntityType.service) {
-          openServiceFlyout({ serviceName: targetEntityName, ...sharedParams });
-        }
+        openEntityFlyout({ engineType: entityType, entityName: targetEntityName, ...sharedParams });
         return;
       }
 
@@ -100,17 +93,7 @@ const ResolutionGroupPanel = ({
         });
       }
     },
-    [
-      enableNewFlyout,
-      openFlyout,
-      openUserFlyout,
-      openHostFlyout,
-      openServiceFlyout,
-      targetEntityName,
-      entityType,
-      entityId,
-      tableId,
-    ]
+    [enableNewFlyout, openFlyout, openEntityFlyout, targetEntityName, entityType, entityId, tableId]
   );
 
   return (
