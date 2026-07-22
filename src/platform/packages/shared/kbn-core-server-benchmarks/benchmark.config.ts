@@ -17,6 +17,7 @@ const config: InitialBenchConfig = {
       name: 'warm_start',
       module: require.resolve('./benchmarks/warm_start.bench.ts'),
       compare: {
+        exists: 'lhs',
         missing: 'lhs',
       },
     },
@@ -25,6 +26,7 @@ const config: InitialBenchConfig = {
       name: 'cold_start',
       module: require.resolve('./benchmarks/cold_start.bench.ts'),
       compare: {
+        exists: 'lhs',
         missing: 'lhs',
       },
     },

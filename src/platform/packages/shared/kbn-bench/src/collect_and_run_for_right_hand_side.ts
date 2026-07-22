@@ -135,6 +135,10 @@ function toVirtual<T extends Benchmark>(
       return script.replace(left.workspaceDir, right.workspaceDir);
     }
 
+    if (typeof script === 'function') {
+      return script;
+    }
+
     return {
       ...script,
       cmd: script.cmd.replace(left.workspaceDir, right.workspaceDir),
@@ -154,7 +158,7 @@ function toVirtual<T extends Benchmark>(
     before: replaceWorkspaceDir(left.benchmark.before),
     after: replaceWorkspaceDir(left.benchmark.after),
     afterAll: replaceWorkspaceDir(left.benchmark.afterAll),
-    beforeAll: replaceWorkspaceDir(left.benchmark.afterAll),
+    beforeAll: replaceWorkspaceDir(left.benchmark.beforeAll),
     run: replaceWorkspaceDir(left.benchmark.run),
   };
 }
