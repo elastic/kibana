@@ -705,20 +705,22 @@ export const TopFailing: React.FC<TopFailingProps> = ({ onRuleClick, onPolicyCli
                         })}
                       >
                         {step.label}
-                        <span
-                          css={css({
-                            width: 20,
-                            height: 20,
-                            borderRadius: 3,
-                            backgroundColor: badge.bg,
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            flexShrink: 0,
-                          })}
-                        >
-                          <EuiIcon type={badge.icon} color={badge.color} size="s" />
-                        </span>
+                        {step.status !== 'success' && (
+                          <span
+                            css={css({
+                              width: 20,
+                              height: 20,
+                              borderRadius: 3,
+                              backgroundColor: badge.bg,
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              flexShrink: 0,
+                            })}
+                          >
+                            <EuiIcon type={badge.icon} color={badge.color} size="s" />
+                          </span>
+                        )}
                       </span>
                     </React.Fragment>
                   );
