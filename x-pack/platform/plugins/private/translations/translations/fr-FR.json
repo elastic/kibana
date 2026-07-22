@@ -8318,7 +8318,6 @@
     "sharedUXPackages.dateRangePicker.settingsPanel.heading": "Paramètres",
     "sharedUXPackages.dateRangePicker.settingsPanel.relativeTimeRangeHeading": "Période relative",
     "sharedUXPackages.dateRangePicker.settingsPanel.roundRelativeTimeLabel": "Arrondir les plages horaires relatives",
-    "sharedUXPackages.dateRangePicker.settingsPanel.technicalPreviewNotice": "Ce sélecteur d'heure est en version d'évaluation technique.",
     "sharedUXPackages.dateRangePicker.settingsPanel.timeFormatDescription": "Le fuseau horaire est réglé sur {timeZoneLabel} par votre administrateur. Cela s'applique à tous les utilisateurs de l'espace.",
     "sharedUXPackages.dateRangePicker.settingsPanel.timeFormatHeading": "Format horaire et fuseau horaire",
     "sharedUXPackages.dateRangePicker.settingsPanel.timePrecisionLabel": "Précision temporelle",
