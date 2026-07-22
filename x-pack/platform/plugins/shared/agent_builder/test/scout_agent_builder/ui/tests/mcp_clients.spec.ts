@@ -22,19 +22,11 @@ test.describe(
     let authHeaders: Record<string, string>;
     const createdClientIds: string[] = [];
 
-    test.beforeAll(async ({ apiClient, kbnClient, samlAuth }) => {
+    test.beforeAll(async ({ kbnClient, samlAuth }) => {
       await kbnClient.uiSettings.update({
         [AGENT_BUILDER_UIAM_OAUTH_CLIENT_MANAGEMENT_SETTING_ID]: true,
       });
       authHeaders = await createUiamAuthHeaders(samlAuth);
-
-      // Warm up the UIAM/Cosmos DB write path via the API so the first UI-driven create
-      // doesn't pay the emulator's lazy container cold-start cost inside a 10s waitForResponse.
-      const warmup = await createOAuthClient(apiClient, authHeaders, {
-        clientName: uniqueClientName('scout-warmup'),
-        clientType: 'public',
-      });
-      createdClientIds.push(warmup.id);
     });
 
     test.beforeEach(async ({ browserAuth }) => {

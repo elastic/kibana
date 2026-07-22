@@ -747,10 +747,14 @@ export class AgentBuilderApp {
 
   async submitMcpClientCreate(): Promise<string> {
     const [response] = await Promise.all([
+      // On a freshly-booted serverless stack the first create POST pays a one-time
+      // UIAM/Cosmos cold-start that can exceed Playwright's 10s waitForResponse default;
+      // the request still completes, so allow it the test-budget headroom instead.
       this.page.waitForResponse(
         (res) =>
           res.url().includes('/internal/security/oauth/clients') &&
-          res.request().method() === 'POST'
+          res.request().method() === 'POST',
+        { timeout: 45_000 }
       ),
       this.page.testSubj.click('mcpClientCreateButton'),
     ]);
