@@ -95,4 +95,51 @@ describe('buildDslDownsamplingColumns', () => {
     ];
     expect(buildDslDownsamplingColumns(phases, lateSteps)).toBeNull();
   });
+
+  describe('frozen sweep across steps', () => {
+    const sweepSteps: DownsampleStep[] = [
+      { after: '1d', fixed_interval: '1h' },
+      { after: '20d', fixed_interval: '1h' },
+      { after: '40d', fixed_interval: '1h' },
+    ];
+    const build = (frozenAfter: string) =>
+      buildDslDownsamplingColumns(
+        [hot, { ...frozen, min_age: frozenAfter }, deletePhase('80d')],
+        sweepSteps
+      );
+
+    it('keeps a constant track count and the frozen marker at every frozen_after', () => {
+      const trackCounts = new Set<number>();
+      for (const frozenAfter of ['1d', '19d', '20d', '21d', '45d', '60d']) {
+        const result = build(frozenAfter);
+        expect(result).not.toBeNull();
+        trackCounts.add(result!.gridTemplateColumns.split(' ').length);
+        const frozenMarker = result!.timelineSegments.find((segment) => segment.isFrozen);
+        expect(frozenMarker?.leftValue).toBe(frozenAfter);
+      }
+      expect(trackCounts.size).toBe(1); // never snaps
+    });
+
+    it('collapses the coincident region to 0fr when frozen_after lands on a step', () => {
+      const result = build('20d')!;
+      // The step@20d region between the 20d step and the frozen boundary has zero duration.
+      expect(result.gridTemplateColumns.split(' ')).toContain('0fr');
+      expect(result.timelineSegments.some((segment) => segment.isFrozen)).toBe(true);
+    });
+  });
+
+  it('lays out steps that fall inside the frozen phase instead of bailing to null', () => {
+    const insideSteps: DownsampleStep[] = [
+      { after: '10d', fixed_interval: '1h' },
+      { after: '30d', fixed_interval: '1h' },
+    ];
+    const result = buildDslDownsamplingColumns(
+      [hot, { ...frozen, min_age: '20d' }, deletePhase('50d')],
+      insideSteps
+    );
+    expect(result).not.toBeNull();
+    expect(
+      result!.timelineSegments.some((segment) => segment.isFrozen && segment.leftValue === '20d')
+    ).toBe(true);
+  });
 });
