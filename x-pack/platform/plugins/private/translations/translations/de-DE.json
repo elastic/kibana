@@ -8317,7 +8317,6 @@
     "sharedUXPackages.dateRangePicker.settingsPanel.heading": "Einstellungen",
     "sharedUXPackages.dateRangePicker.settingsPanel.relativeTimeRangeHeading": "Relativer Zeitbereich",
     "sharedUXPackages.dateRangePicker.settingsPanel.roundRelativeTimeLabel": "Runde relative Zeitbereiche",
-    "sharedUXPackages.dateRangePicker.settingsPanel.technicalPreviewNotice": "Diese Zeitauswahl befindet sich in einer technischen Vorschau.",
     "sharedUXPackages.dateRangePicker.settingsPanel.timeFormatDescription": "Die Zeitzone wurde von Ihrem Administrator auf {timeZoneLabel} eingestellt. Das gilt für alle Nutzer in diesem Bereich.",
     "sharedUXPackages.dateRangePicker.settingsPanel.timeFormatHeading": "Zeitformat und Zeitzone",
     "sharedUXPackages.dateRangePicker.settingsPanel.timePrecisionLabel": "Zeitgenauigkeit",
