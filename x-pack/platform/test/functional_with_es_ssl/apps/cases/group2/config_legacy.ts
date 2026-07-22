@@ -25,6 +25,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       serverArgs: [
         ...baseConfig.get('kbnTestServer.serverArgs'),
         '--xpack.cases.templates.enabled=false',
+        '--xpack.cases.casesRedesign.settings=false',
       ],
     },
     junit: {
