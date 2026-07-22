@@ -137,6 +137,28 @@ describe('SyntheticsIndicesCache', () => {
     expect(marketingResolver).toHaveBeenCalledTimes(1);
   });
 
+  it('does not repopulate entries when invalidate() races an in-flight resolve', async () => {
+    const cache = new SyntheticsIndicesCache({ ttlMs: 60_000, now });
+    let resolvePending: (value: string) => void = () => {};
+    const resolver = jest
+      .fn()
+      .mockImplementationOnce(
+        () =>
+          new Promise<string>((resolve) => {
+            resolvePending = resolve;
+          })
+      )
+      .mockResolvedValueOnce('synthetics-*,fresh:synthetics-*');
+
+    const inflight = cache.get('default', resolver);
+    cache.invalidate('default');
+    resolvePending('synthetics-*,stale:synthetics-*');
+    await inflight;
+
+    expect(await cache.get('default', resolver)).toBe('synthetics-*,fresh:synthetics-*');
+    expect(resolver).toHaveBeenCalledTimes(2);
+  });
+
   it('invalidate() with no key clears every entry', async () => {
     const cache = new SyntheticsIndicesCache({ ttlMs: 60_000, now });
     const defaultResolver = jest

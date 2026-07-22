@@ -45,7 +45,8 @@ export const resolveHeartbeatIndices = async ({
       return indices;
     });
   } catch (e) {
-    server.logger.warn(`Failed to resolve CCS indices, falling back to local: ${e.message}`);
+    const message = e instanceof Error ? e.message : String(e);
+    server.logger.warn(`Failed to resolve CCS indices, falling back to local: ${message}`);
     return SYNTHETICS_INDEX_PATTERN;
   }
 };
