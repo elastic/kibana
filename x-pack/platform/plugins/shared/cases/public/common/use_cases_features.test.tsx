@@ -50,6 +50,9 @@ describe('useCasesFeatures', () => {
         isObservablesFeatureEnabled: true,
         isExtractObservablesEnabled: false,
         connectorsAuthorized: false,
+        // Only sync alerts can be on here (observables need platinum, no metrics),
+        // so case settings availability tracks sync alerts.
+        hasCaseSettings: isSyncAlertsEnabled,
       });
     }
   );
@@ -84,6 +87,8 @@ describe('useCasesFeatures', () => {
         isObservablesFeatureEnabled,
         isExtractObservablesEnabled,
         connectorsAuthorized: false,
+        // Sync alerts default to on in these cases, so case settings are available.
+        hasCaseSettings: true,
       });
     }
   );
@@ -107,6 +112,45 @@ describe('useCasesFeatures', () => {
       isObservablesFeatureEnabled: true,
       isExtractObservablesEnabled: false,
       connectorsAuthorized: false,
+      hasCaseSettings: true,
+    });
+  });
+
+  describe('hasCaseSettings', () => {
+    it('is false when no case setting is enabled (e.g. Observability/Stack)', () => {
+      const { result } = renderHook(() => useCasesFeatures(), {
+        wrapper: ({ children }) => (
+          <TestProviders
+            features={{
+              alerts: { sync: false },
+              observables: { enabled: false },
+              metrics: [],
+            }}
+          >
+            {children}
+          </TestProviders>
+        ),
+      });
+
+      expect(result.current.hasCaseSettings).toBe(false);
+    });
+
+    it('is true when metrics are enabled even though sync and observables are off', () => {
+      const { result } = renderHook(() => useCasesFeatures(), {
+        wrapper: ({ children }) => (
+          <TestProviders
+            features={{
+              alerts: { sync: false },
+              observables: { enabled: false },
+              metrics: [CaseMetricsFeature.CONNECTORS],
+            }}
+          >
+            {children}
+          </TestProviders>
+        ),
+      });
+
+      expect(result.current.hasCaseSettings).toBe(true);
     });
   });
 

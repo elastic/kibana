@@ -611,7 +611,7 @@ export const BULK_DELETE_MESSAGE = (count: number) =>
   i18n.translate('xpack.cases.templates.bulkDeleteMessage', {
     values: { count },
     defaultMessage:
-      'This action will permanently delete {count, plural, one {this template} other {these {count} templates}}.',
+      '{count, plural, one {This template} other {These {count} templates}} will no longer apply to new cases. Cases already using {count, plural, one {it} other {them}} keep their values. Export first if you want to keep a copy.',
   });
 
 export const SHOWING = i18n.translate('xpack.cases.templates.showing', {
@@ -627,15 +627,16 @@ export const CASES = i18n.translate('xpack.cases.templates.cases', {
 });
 
 export const DELETE_TITLE = (name: string) =>
-  i18n.translate('xpack.cases.configuration.deleteTitle', {
+  i18n.translate('xpack.cases.templates.deleteTitle', {
     values: { name },
     defaultMessage: 'Delete {name}?',
   });
 
 export const DELETE_MESSAGE = (name: string) =>
-  i18n.translate('xpack.cases.configuration.deleteMessage', {
+  i18n.translate('xpack.cases.templates.deleteMessage', {
     values: { name },
-    defaultMessage: 'This action will permanently delete {name}.',
+    defaultMessage:
+      '{name} will no longer apply to new cases. Cases already using it keep their values. Export it first if you want to keep a copy.',
   });
 export const NO_TEMPLATES_BODY = i18n.translate('xpack.cases.templates.noTemplatesBody', {
   defaultMessage: 'Create templates that automatically populate values in new cases.',

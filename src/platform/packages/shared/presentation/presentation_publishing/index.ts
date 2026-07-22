@@ -295,3 +295,5 @@ export { apiCanFocusPanel, type CanFocusPanel } from './interfaces/containers/ca
 
 export { apiPublishesESQLQuery, type PublishesESQLQuery } from './interfaces/publishes_esql_query';
 export { apiPublishesEsqlUsage, type PublishesEsqlUsage } from './interfaces/publishes_esql_usage';
+
+export { apiSupportsJsonExport, type SupportsJsonExport } from './interfaces/supports_json_export';
