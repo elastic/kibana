@@ -9,9 +9,11 @@ import {
   significantEventSchema,
   significantEventInvestigationSchema,
   significantEventStatusSchema,
+  CHANGE_POINT_TYPES,
+  severitySchema,
+  type ChangePointType,
   type Detection,
   type SignificantEvent,
-  type Discovery,
   type LifecycleDetection,
   type EventLifecycleResponse,
 } from '@kbn/significant-events-schema';
@@ -25,23 +27,46 @@ import type { PaginatedResponse } from '../../../lib/significant_events/query_ut
 import { createServerRoute } from '../../create_server_route';
 import { assertSignificantEventsAccess } from '../../utils/assert_significant_events_access';
 
-const toArray = (val: string | string[] | undefined): string[] | undefined =>
+const toArray = <T extends string>(val: T | T[] | undefined): T[] | undefined =>
   val === undefined ? undefined : Array.isArray(val) ? val : [val];
 
-const isLifecycleDetection = (
-  hit: Detection
-): hit is Detection & { kind: LifecycleDetection['kind'] } => hit.kind !== 'handled';
+const hasChangePointType = (hit: Detection): boolean => hit.change_point_type != null;
 
-const collectEmbeddedDetections = (discoveries: Discovery[]) => {
+const parseChangePointType = (value: string | undefined): ChangePointType | undefined => {
+  if (!value) {
+    return undefined;
+  }
+  return CHANGE_POINT_TYPES.includes(value as ChangePointType)
+    ? (value as ChangePointType)
+    : undefined;
+};
+
+const collectEmbeddedDetections = (events: SignificantEvent[]) => {
   const seen = new Set<string>();
-  const result: Array<Omit<LifecycleDetection, 'kind' | '@timestamp'>> = [];
+  const result: Array<Omit<LifecycleDetection, '@timestamp'>> = [];
 
-  for (const discovery of discoveries) {
-    for (const det of discovery.detections ?? []) {
-      const { detection_id, rule_name, stream_name, change_point_type } = det;
-      if (!detection_id || seen.has(detection_id)) continue;
+  for (const event of events) {
+    for (const signal of event.signals ?? []) {
+      if (signal.type !== 'detection') continue;
+      const { detection_id, rule_name, change_point_type } = signal.metadata;
+      const streamName = signal.stream_name;
+      const parsedChangePointType = parseChangePointType(change_point_type);
+      if (
+        !detection_id ||
+        !rule_name ||
+        !streamName ||
+        !parsedChangePointType ||
+        seen.has(detection_id)
+      ) {
+        continue;
+      }
       seen.add(detection_id);
-      result.push({ detection_id, rule_name, stream_name, change_point_type });
+      result.push({
+        detection_id,
+        rule_name,
+        stream_name: streamName,
+        change_point_type: parsedChangePointType,
+      });
     }
   }
 
@@ -66,9 +91,12 @@ const eventsSearchRoute = createServerRoute({
       to: z.iso.datetime().optional(),
       page: z.coerce.number().int().min(1).optional(),
       perPage: z.coerce.number().int().min(1).max(1000).optional(),
-      status: z.union([z.string().max(50), z.array(z.string().max(50)).max(50)]).optional(),
+      status: z
+        .union([significantEventStatusSchema, z.array(significantEventStatusSchema).max(3)])
+        .optional(),
       stream: z.union([z.string().max(255), z.array(z.string().max(255)).max(50)]).optional(),
       search: z.string().max(500).optional(),
+      severity: z.union([severitySchema, z.array(severitySchema).max(4)]).optional(),
     }),
   }),
   handler: async ({
@@ -77,16 +105,17 @@ const eventsSearchRoute = createServerRoute({
     getScopedClients,
     server,
   }): Promise<PaginatedResponse<SignificantEvent>> => {
-    const { getEventClient, licensing, uiSettingsClient } = await getScopedClients({ request });
+    const { getEventClient, licensing } = await getScopedClients({ request });
 
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    await assertSignificantEventsAccess({ server, licensing });
 
-    const { status, stream, search, ...rest } = params.query;
+    const { status, stream, search, severity, ...rest } = params.query;
 
-    return getEventClient().findLatestPaginated({
+    return getEventClient().findLatestByCurrentStatePaginated({
       ...rest,
       status: toArray(status),
       stream: toArray(stream),
+      severity: toArray(severity),
       search: search || undefined,
     });
   },
@@ -115,11 +144,11 @@ const eventsHistoryRoute = createServerRoute({
     getScopedClients,
     server,
   }): Promise<{ hits: SignificantEvent[] }> => {
-    const { getEventClient, licensing, uiSettingsClient } = await getScopedClients({ request });
+    const { getEventClient, licensing } = await getScopedClients({ request });
 
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    await assertSignificantEventsAccess({ server, licensing });
 
-    return getEventClient().findById(params.path.id);
+    return getEventClient().findByEventUuid(params.path.id);
   },
 });
 
@@ -139,9 +168,9 @@ const eventsBulkCreateRoute = createServerRoute({
     body: z.array(significantEventSchema),
   }),
   handler: async ({ params, request, getScopedClients, server }) => {
-    const { getEventClient, licensing, uiSettingsClient } = await getScopedClients({ request });
+    const { getEventClient, licensing } = await getScopedClients({ request });
 
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    await assertSignificantEventsAccess({ server, licensing });
 
     return getEventClient().bulkCreate(params.body);
   },
@@ -171,29 +200,29 @@ const eventsLifecycleRoute = createServerRoute({
     getScopedClients,
     server,
   }): Promise<EventLifecycleResponse> => {
-    const { getEventClient, getDiscoveryClient, getDetectionClient, licensing, uiSettingsClient } =
+    const { getEventClient, getDiscoveryClient, getDetectionClient, licensing } =
       await getScopedClients({ request });
 
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    await assertSignificantEventsAccess({ server, licensing });
 
-    const { hits: initialHits } = await getEventClient().findById(params.path.id);
+    const { hits: initialHits } = await getEventClient().findByEventUuid(params.path.id);
     if (initialHits.length === 0) {
       return { detections: [], discoveries: [], events: [] };
     }
 
-    const { discovery_slug: slug } = initialHits[0];
+    const { event_id: eventId } = initialHits[0];
 
     const [{ hits: events }, { hits: discoveries }] = await Promise.all([
-      getEventClient().findByDiscoverySlug(slug),
-      getDiscoveryClient().findBySlug(slug),
+      getEventClient().findByEventId(eventId),
+      getDiscoveryClient().findByEventId(eventId),
     ]);
 
-    const embedded = collectEmbeddedDetections(discoveries);
+    const embedded = collectEmbeddedDetections(events);
     const { hits: allDetectionHits } = await getDetectionClient().findByIds(
-      embedded.map((e) => e.detection_id).filter(Boolean)
+      embedded.map((e) => e.detection_id)
     );
     const hitsByDetectionId = new Map(
-      allDetectionHits.filter(isLifecycleDetection).map((h) => [h.detection_id, h])
+      allDetectionHits.filter(hasChangePointType).map((h) => [h.detection_id, h])
     );
 
     const detections: LifecycleDetection[] = embedded.flatMap(
@@ -203,13 +232,18 @@ const eventsLifecycleRoute = createServerRoute({
           return [];
         }
 
+        const hitChangePointType = parseChangePointType(hit.change_point_type);
+        if (!hitChangePointType) {
+          return [];
+        }
+
         return [
           {
             detection_id,
             rule_name: hit.rule_name ?? rule_name,
+            rule_uuid: hit.rule_uuid,
             stream_name: hit.stream_name ?? stream_name,
-            change_point_type,
-            kind: hit.kind,
+            change_point_type: hitChangePointType,
             '@timestamp': hit['@timestamp'],
           },
         ];
@@ -245,13 +279,13 @@ const eventsAttachInvestigationRoute = createServerRoute({
     body: significantEventInvestigationSchema,
   }),
   handler: async ({ params, request, getScopedClients, server }) => {
-    const { getEventClient, licensing, uiSettingsClient } = await getScopedClients({ request });
+    const { getEventClient, licensing } = await getScopedClients({ request });
 
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    await assertSignificantEventsAccess({ server, licensing });
 
     return attachInvestigationToEvent({
       eventClient: getEventClient(),
-      eventId: params.path.id,
+      eventUuid: params.path.id,
       investigation: params.body,
     });
   },
@@ -282,17 +316,18 @@ const eventsTriggerInvestigationRoute = createServerRoute({
     server,
     logger,
   }): Promise<{ executionId: string }> => {
-    const { getEventClient, licensing, uiSettingsClient } = await getScopedClients({ request });
+    const { getEventClient, licensing } = await getScopedClients({ request });
 
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    await assertSignificantEventsAccess({ server, licensing });
 
-    const { hits } = await getEventClient().findById(params.path.id);
+    const { hits } = await getEventClient().findByEventUuid(params.path.id);
     if (hits.length === 0) {
       throw notFound(`Significant event "${params.path.id}" not found.`);
     }
 
     const executionId = await triggerInvestigationWorkflow({
       workflowsManagement: server.workflowsManagement,
+      agentBuilder: server.agentBuilder,
       spaces: server.spaces,
       request,
       logger,
@@ -331,13 +366,13 @@ const eventsUpdateRoute = createServerRoute({
     }),
   }),
   handler: async ({ params, request, getScopedClients, server }) => {
-    const { getEventClient, licensing, uiSettingsClient } = await getScopedClients({ request });
+    const { getEventClient, licensing } = await getScopedClients({ request });
 
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    await assertSignificantEventsAccess({ server, licensing });
 
     return updateSignificantEventStatus({
       eventClient: getEventClient(),
-      eventId: params.path.id,
+      eventUuid: params.path.id,
       status: params.body.status,
     });
   },

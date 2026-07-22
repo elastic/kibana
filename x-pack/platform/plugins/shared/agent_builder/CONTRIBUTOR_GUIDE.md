@@ -348,6 +348,16 @@ const textAttachmentType: AttachmentTypeDefinition = {
 Refer to [`AttachmentTypeDefinition`](https://github.com/elastic/kibana/blob/main/x-pack/platform/packages/shared/agent-builder/agent-builder-server/attachments/type_definition.ts)
 for the full list of available configuration options.
 
+#### Adding the attachment type to the allow list
+
+Similar to tools and agents, we keep a hardcoded list of registered attachment types to trigger a code review from the team when
+attachment types are added.
+
+To add an attachment type to the allow list, simply add the attachment type's id to the `AGENT_BUILDER_BUILTIN_ATTACHMENTS` array,
+in `x-pack/platform/packages/shared/agent-builder/agent-builder-server/allow_lists.ts`
+
+(Kibana will fail to start otherwise, with an explicit error message explaining what to do)
+
 #### `getAgentDescription` — describing inline rendering to the agent
 
 When your attachment type supports inline rendering, `getAgentDescription` should tell

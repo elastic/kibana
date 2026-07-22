@@ -1526,4 +1526,42 @@ describe('ConfigureCases', () => {
       expect(screen.queryByTestId('configure-cases-back-to-cases')).not.toBeInTheDocument();
     });
   });
+
+  describe('legacy templates and custom fields sections', () => {
+    beforeEach(() => {
+      useGetCaseConfigurationMock.mockImplementation(() => useCaseConfigureResponse);
+      usePersistConfigurationMock.mockImplementation(() => usePersistConfigurationMockResponse);
+      useGetConnectorsMock.mockImplementation(() => ({
+        ...useConnectorsResponse,
+        data: [],
+        isLoading: false,
+      }));
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it('does not render when the templates feature flag is enabled', () => {
+      jest.spyOn(KibanaServices, 'getConfig').mockReturnValue({
+        templates: { enabled: true },
+      } as ReturnType<typeof KibanaServices.getConfig>);
+
+      renderWithTestingProviders(<ConfigureCases />);
+
+      expect(screen.queryByTestId('custom-fields-form-group')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('templates-form-group')).not.toBeInTheDocument();
+    });
+
+    it('renders when the templates feature flag is disabled', () => {
+      jest.spyOn(KibanaServices, 'getConfig').mockReturnValue({
+        templates: { enabled: false },
+      } as ReturnType<typeof KibanaServices.getConfig>);
+
+      renderWithTestingProviders(<ConfigureCases />);
+
+      expect(screen.getByTestId('custom-fields-form-group')).toBeInTheDocument();
+      expect(screen.getByTestId('templates-form-group')).toBeInTheDocument();
+    });
+  });
 });

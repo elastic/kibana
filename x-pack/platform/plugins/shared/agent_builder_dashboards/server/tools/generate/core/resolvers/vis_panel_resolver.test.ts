@@ -113,7 +113,11 @@ describe('createVisPanelResolver', () => {
 
   it('creates a Vega panel in the attachment API shape (config.spec) when renderer is "vega"', async () => {
     const spec = '{"$schema":"https://vega.github.io/schema/vega-lite/v6.json"}';
-    mockedBuildVegaConfig.mockResolvedValue({ spec, esqlQuery: 'FROM logs-*' });
+    mockedBuildVegaConfig.mockResolvedValue({
+      spec,
+      title: 'Requests by host',
+      esqlQuery: 'FROM logs-*',
+    });
 
     const resolveVisPanel = createVisPanelResolver({ logger, modelProvider, events, esClient });
 
@@ -130,7 +134,7 @@ describe('createVisPanelResolver', () => {
       type: 'success',
       panelContent: {
         type: VEGA_VIS_TYPE,
-        config: { spec },
+        config: { spec, title: 'Requests by host' },
       },
     });
     expect(mockedBuildVegaConfig).toHaveBeenCalledWith(

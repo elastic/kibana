@@ -1,0 +1,9 @@
+prs:
+- https://github.com/elastic/kibana/pull/276420
+issues:
+- https://github.com/elastic/observability-error-backlog/issues/1318
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-07-09
+title: Fix APM crashes from missing or invalid route query parameters

@@ -8,7 +8,6 @@
  */
 
 import type { ScoutPage } from '..';
-import { EuiComboBoxWrapper } from '..';
 
 // Increased timeout because new map container is not always loaded within default one
 const DEFAULT_MAP_LOADING_TIMEOUT = 20_000;
@@ -88,8 +87,8 @@ export class MapsPage {
     await this.addLayerButton.click();
     await this.layerAddForm.waitFor({ state: 'visible' });
     await this.documentsItem.click();
-    const comboBox = new EuiComboBoxWrapper(this.page, 'mapGeoIndexPatternSelect');
-    await comboBox.selectSingleOption(documentSelector);
+    const comboBox = this.page.components.comboBox('mapGeoIndexPatternSelect');
+    await comboBox.setSelectedOptions([documentSelector]);
     await this.importFileButton.click();
     await this.waitForRenderComplete();
     await this.saveAndReturnButton.click();

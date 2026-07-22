@@ -13,7 +13,10 @@ import type {
 } from '@kbn/core/server';
 import type { EntityType } from '@kbn/entity-store/common';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
-import type { AnomalySummaryEntry } from '../../../../common/api/entity_analytics';
+import type {
+  AnomalyScoreRange,
+  AnomalySummaryEntry,
+} from '../../../../common/api/entity_analytics';
 import type {
   AnomalySortField,
   AnomalySortOrder,
@@ -60,8 +63,7 @@ interface GetEntityAnomaliesParams {
   esClient: ElasticsearchClient;
   fromMs?: number;
   toMs?: number;
-  minScore?: number;
-  maxScore?: number;
+  scoreRanges?: AnomalyScoreRange[];
   jobIds?: string[];
   threatTactics?: string[];
   logger: Logger;
@@ -84,8 +86,7 @@ export const getEntityAnomalies = async ({
   esClient,
   fromMs,
   toMs,
-  minScore,
-  maxScore,
+  scoreRanges,
   jobIds,
   threatTactics,
   logger,
@@ -124,8 +125,7 @@ export const getEntityAnomalies = async ({
     entityId,
     fromMs,
     toMs,
-    minScore,
-    maxScore,
+    scoreRanges,
     jobIds: resolvedJobIds,
     sort,
     from: offset,

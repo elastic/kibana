@@ -1,5 +1,9 @@
 {
-  "sha1": "1ef4bdf2321f2b6d2014f655b793cce6587cec7f",
+  "sha1": "3ba55add8f0035d74164662a23dd94b141433d5a",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
   "tests": [
     {
       "id": "f3ddbbb53c28ebe-f2cd2d3cdc77643",
@@ -173,7 +177,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/alert_details_rbac.spec.ts",
-        "line": 91,
+        "line": 102,
         "column": 9
       }
     },
@@ -189,7 +193,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/alert_details_rbac.spec.ts",
-        "line": 112,
+        "line": 123,
         "column": 9
       }
     },
@@ -205,7 +209,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/alert_details_rbac.spec.ts",
-        "line": 133,
+        "line": 144,
         "column": 9
       }
     },
@@ -729,7 +733,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/rules/rule_details_page/rule_details_page.admin.spec.ts",
-        "line": 162,
+        "line": 163,
         "column": 9
       }
     },
@@ -798,8 +802,8 @@
       }
     },
     {
-      "id": "c30849bf17a1231-b87bedab0eccd3a",
-      "title": "Rule Details Page - Viewer should not show actions button for viewer user",
+      "id": "c30849bf17a1231-f5df63d939c7a0e",
+      "title": "Rule Details Page - Viewer should not show edit or delete actions for viewer user",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",

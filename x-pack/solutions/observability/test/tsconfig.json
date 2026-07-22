@@ -93,6 +93,7 @@
     "@kbn/product-doc-common",
     "@kbn/kbn-client",
     "@kbn/apm-types",
-    "@kbn/apm-api-shared"
+    "@kbn/apm-api-shared",
+    "@kbn/apm-types-shared"
   ]
 }

@@ -25,6 +25,7 @@ import type {
 import { getFetchParamsMock, getFetch$Mock } from '@kbn/unified-histogram/__mocks__/fetch_params';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { EsqlResponseError } from '../../../common/errors/esql_response_error';
+import { DEFAULT_METRICS_SORT } from '../../../common/constants';
 import {
   ExternalServicesProvider,
   type ExternalServices,
@@ -38,6 +39,8 @@ import type {
 import { fieldsMetadataPluginPublicMock } from '@kbn/fields-metadata-plugin/public/mocks';
 import * as metricsExperienceStateProvider from './context/metrics_experience_state_provider';
 import { METRICS_GRID_SETTINGS_DEFAULTS } from '../../flyout/metrics_grid_settings_flyout/constants';
+import { FEATURE_FLAGS } from '../../../common/constants';
+import { createFeatureFlagsMock } from '../../../test_utils/create_feature_flags_mock';
 
 jest.mock('./context/metrics_experience_state_provider');
 jest.mock('@kbn/ebt-tools', () => ({
@@ -210,6 +213,12 @@ const TestWrapper = ({
   </EuiProvider>
 );
 
+// The "Edit grid of metrics" button is gated behind a feature flag (disabled by
+// default); this mock resolves it to `true` for tests that exercise the button.
+const editGridSettingsEnabledFeatureFlags = createFeatureFlagsMock({
+  [FEATURE_FLAGS.IS_EDIT_GRID_SETTINGS_ENABLED]: true,
+});
+
 const dimensions: Dimension[] = [{ name: 'foo' }, { name: 'qux' }];
 const metricItems: ParsedMetricItem[] = [
   {
@@ -285,6 +294,8 @@ describe('MetricsExperienceGrid', () => {
       flyoutState: undefined,
       onFlyoutStateChange: jest.fn(),
       onFlyoutSelectedTabChange: jest.fn(),
+      metricsSort: DEFAULT_METRICS_SORT,
+      onMetricsSortChange: jest.fn(),
       profileId: 'test-profile-id',
       gridSettings: METRICS_GRID_SETTINGS_DEFAULTS,
       onGridSettingsChange: jest.fn(),
@@ -462,6 +473,8 @@ describe('MetricsExperienceGrid', () => {
       flyoutState: undefined,
       onFlyoutStateChange: jest.fn(),
       onFlyoutSelectedTabChange: jest.fn(),
+      metricsSort: DEFAULT_METRICS_SORT,
+      onMetricsSortChange: jest.fn(),
       profileId: 'test-profile-id',
       gridSettings: METRICS_GRID_SETTINGS_DEFAULTS,
       onGridSettingsChange: jest.fn(),
@@ -510,6 +523,8 @@ describe('MetricsExperienceGrid', () => {
       flyoutState: undefined,
       onFlyoutStateChange: jest.fn(),
       onFlyoutSelectedTabChange: jest.fn(),
+      metricsSort: DEFAULT_METRICS_SORT,
+      onMetricsSortChange: jest.fn(),
       profileId: 'test-profile-id',
       gridSettings: METRICS_GRID_SETTINGS_DEFAULTS,
       onGridSettingsChange: jest.fn(),
@@ -553,6 +568,8 @@ describe('MetricsExperienceGrid', () => {
         flyoutState: undefined,
         onFlyoutStateChange: jest.fn(),
         onFlyoutSelectedTabChange: jest.fn(),
+        metricsSort: DEFAULT_METRICS_SORT,
+        onMetricsSortChange: jest.fn(),
         profileId: 'test-profile-id',
         gridSettings: METRICS_GRID_SETTINGS_DEFAULTS,
         onGridSettingsChange: jest.fn(),
@@ -595,6 +612,8 @@ describe('MetricsExperienceGrid', () => {
         flyoutState: undefined,
         onFlyoutStateChange: jest.fn(),
         onFlyoutSelectedTabChange: jest.fn(),
+        metricsSort: DEFAULT_METRICS_SORT,
+        onMetricsSortChange: jest.fn(),
         profileId: 'test-profile-id',
         gridSettings: METRICS_GRID_SETTINGS_DEFAULTS,
         onGridSettingsChange: jest.fn(),
@@ -642,6 +661,8 @@ describe('MetricsExperienceGrid', () => {
         flyoutState: undefined,
         onFlyoutStateChange: jest.fn(),
         onFlyoutSelectedTabChange: jest.fn(),
+        metricsSort: DEFAULT_METRICS_SORT,
+        onMetricsSortChange: jest.fn(),
         profileId: 'test-profile-id',
         gridSettings: METRICS_GRID_SETTINGS_DEFAULTS,
         onGridSettingsChange: jest.fn(),
@@ -665,6 +686,14 @@ describe('MetricsExperienceGrid', () => {
   });
 
   describe('grid settings flyout', () => {
+    it('hides the edit button when the host does not provide featureFlags (safe default)', () => {
+      const { queryByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {
+        wrapper: IntlProvider,
+      });
+
+      expect(queryByTestId('metricsExperienceEditGridButton')).not.toBeInTheDocument();
+    });
+
     it('opens the flyout when the edit button is clicked and forwards its callbacks to state', () => {
       const onGridSettingsChange = jest.fn();
 
@@ -683,10 +712,16 @@ describe('MetricsExperienceGrid', () => {
         profileId: 'test-profile-id',
         gridSettings: METRICS_GRID_SETTINGS_DEFAULTS,
         onGridSettingsChange,
+        metricsSort: DEFAULT_METRICS_SORT,
+        onMetricsSortChange: jest.fn(),
       });
 
       const { getByTestId, queryByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {
-        wrapper: IntlProvider,
+        wrapper: ({ children }) => (
+          <TestWrapper externalServices={{ featureFlags: editGridSettingsEnabledFeatureFlags }}>
+            {children}
+          </TestWrapper>
+        ),
       });
 
       expect(queryByTestId('metricsExperienceGridSettingsFlyout')).not.toBeInTheDocument();

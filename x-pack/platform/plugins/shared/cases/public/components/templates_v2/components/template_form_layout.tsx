@@ -6,7 +6,6 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { AppHeader } from '@kbn/app-header';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { isEqual } from 'lodash';
 import type { UseFormReturn } from 'react-hook-form';
@@ -14,10 +13,12 @@ import { FormProvider } from 'react-hook-form';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { kbnFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
-import { isMap, parseDocument, type YAMLMap } from 'yaml';
+import { isMap, parseDocument } from 'yaml';
 import { useCasesLocalStorage } from '../../../common/use_cases_local_storage';
+import { useKibana } from '../../../common/lib/kibana';
 import type { YamlEditorFormValues } from './template_form';
 import { useCasesTemplatesNavigation } from '../../../common/navigation';
+import { CasesAppHeader } from '../../app/cases_app_header';
 import { useDebouncedYamlEdit } from '../hooks/use_debounced_yaml_edit';
 import * as i18n from '../translations';
 import { componentStyles } from './template_form_layout.styles';
@@ -25,17 +26,19 @@ import { TEMPLATE_PREVIEW_WIDTH_KEY } from '../constants';
 import { TemplateResetModal } from './template_reset_modal';
 import { getTemplateFormBadges, getTemplateFormMenu } from './header_menu';
 import { TemplateEditorLayout } from './template_editor_layout';
+import { TemplateEditorTour } from '../tour/template_editor_tour';
 import {
   type FieldDefaultValue,
   updateYamlFieldDefault,
   removeYamlFieldDefault,
 } from '../utils/update_yaml_field_default';
 import { validateTemplateDefinitionYaml } from '../utils/validate_template_definition';
-import { computeChangedLines } from '../hooks/use_line_differences_decorations';
 import {
   FieldType,
   UserPickerDefaultSchema,
 } from '../../../../common/types/domain/template/fields';
+import { SECURITY_SOLUTION_OWNER } from '../../../../common/constants';
+import { useCasesContext } from '../../cases_context/use_cases_context';
 import { normalizeYamlString } from '../utils/normalize_yaml_string';
 import {
   getTemplateSettingsAndConnectorFromYaml,
@@ -47,6 +50,7 @@ import {
 } from '../utils/template_settings_yaml';
 import { normalizeTemplateCaseDefaultsYaml } from '../utils/normalize_template_case_defaults';
 import { seedRequiredTemplateBlocks } from '../utils/seed_template_definition';
+import { reorderTemplateDefinitionKeys } from '../utils/reorder_template_definition_keys';
 import type { CaseConnectorWithoutName } from '../../../../common/types/domain_zod/connector/v1';
 import type { CaseAssignees } from '../../../../common/types/domain_zod/user/v1';
 import type { TemplateSettings } from '../../../../common/types/domain/template/v1';
@@ -98,17 +102,21 @@ interface TemplateFormLayoutProps {
   initialSettings?: TemplateSettings;
 }
 
-// Full-height offset for the editor wrapper. Chrome that `--kbn-application--content-height` does
-// not already subtract must be reserved here:
-//  - the Security Solution app header row (~48px "Add integrations"/breadcrumbs) is NOT subtracted
-//    from `--kbn-application--content-height`; the surrounding EuiPageSection adds 24px of bottom
-//    padding which we bleed away (see the wrapper style's negative marginBottom), so the net
-//    app-header reservation is 48px − 24px = 24px; and
-//  - the Security Solution timeline bottom bar (~57px) overlays the page bottom. We reserve space
-//    for it rather than mutating Security Solution's DOM to hide it.
-const APP_HEADER_OFFSET = '24px';
-const TIMELINE_BOTTOM_BAR_OFFSET = '57px';
-const FULL_BODY_HEIGHT_OFFSET = `calc(${APP_HEADER_OFFSET} + ${TIMELINE_BOTTOM_BAR_OFFSET})`;
+// The template editor is always rendered `fullHeight` (see CasesPageLayout). On Security Solution a
+// fixed "timeline" bottom bar overlays the bottom of every page (~57px), so the editor reserves that
+// space to avoid being hidden behind it. No other solution (Observability, Stack) renders that bar,
+// so reserving the space elsewhere would only leave dead space at the bottom — the offset is applied
+// for the Security Solution owner only. (Cases can't read the bar's height generically: it is
+// Security-owned and exposes no shared signal, so this is keyed on owner rather than the DOM.)
+const SECURITY_TIMELINE_BOTTOM_BAR_OFFSET = '57px';
+const NO_BODY_OFFSET = '0px';
+
+/**
+ * The full-height body offset for the template editor: the Security Solution timeline bottom-bar
+ * reservation for the Security owner, otherwise none. Exported for testing.
+ */
+export const getTemplateEditorBodyOffset = (owner: string[]): string =>
+  owner.includes(SECURITY_SOLUTION_OWNER) ? SECURITY_TIMELINE_BOTTOM_BAR_OFFSET : NO_BODY_OFFSET;
 const LEGACY_SETTINGS_GUIDANCE_COMMENT =
   '# Case settings (sync alerts, extract observables) and the default connector are configured in the\n' +
   '# Settings tab of the preview panel, not here.';
@@ -137,27 +145,32 @@ const updateYamlCaseDefault = (
 ) => {
   try {
     const doc = parseDocument(definitionYaml ?? '');
-    if (!isMap(doc.contents)) {
+    // A non-null, non-map buffer (malformed / scalar YAML) is left untouched so a case-default edit
+    // never clobbers content the author is mid-editing. An empty or comment-only buffer parses to
+    // `null` contents; the document-level `set`/`delete` below initialize it into a map, so an edit
+    // made after the author cleared every case default is written back instead of silently dropped.
+    if (doc.contents != null && !isMap(doc.contents)) {
       return definitionYaml;
     }
 
-    const root = doc.contents as YAMLMap<unknown, unknown>;
-
     if (field === 'assignees') {
-      root.set('assignees', doc.createNode(value as CaseAssignees));
-      return doc.toString();
+      doc.set('assignees', doc.createNode(value as CaseAssignees));
+    } else if (field === 'tags') {
+      doc.set('tags', doc.createNode(value as string[]));
+    } else {
+      // A cleared case-default scalar is removed entirely rather than written as `null` — the editor
+      // YAML never presents `null` as a value.
+      const stringValue = value as string;
+      if (stringValue.length === 0) {
+        doc.delete(field);
+      } else {
+        doc.set(field, stringValue);
+      }
     }
 
-    if (field === 'tags') {
-      root.set('tags', doc.createNode(value as string[]));
-      return doc.toString();
-    }
-
-    // Case-default scalars stay present (forced-present); a cleared value is written as `null`
-    // ("no default") rather than deleting the key. `name` cleared to null surfaces as a validation
-    // error because a case-default title is required.
-    const stringValue = value as string;
-    root.set(field, stringValue.length === 0 ? null : stringValue);
+    // Keep the buffer canonical: a newly added case default slots into render-panel order (rather
+    // than being appended at the bottom) and the custom `fields` block stays last.
+    reorderTemplateDefinitionKeys(doc);
     return doc.toString();
   } catch {
     return definitionYaml;
@@ -179,6 +192,7 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
   initialSettings,
 }) => {
   const styles = useMemoCss(componentStyles);
+  const { docLinks } = useKibana().services;
   const { getCasesTemplatesUrl, navigateToCasesTemplates } = useCasesTemplatesNavigation();
 
   const defaultPreviewWidth = Math.floor(window.innerWidth * 0.3);
@@ -282,11 +296,12 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
   connectorRef.current = connector;
 
   const hasChanges = useMemo(() => {
+    // A pure diff: any change to the YAML (added, modified, OR removed lines) marks the editor dirty.
+    // Comparing the normalized strings directly is intentional — a line-level "changed lines" count
+    // misses pure deletions (removing a field leaves no changed line in the current doc), which would
+    // hide the revert action even though the definition changed.
     const yamlChanged =
-      computeChangedLines(
-        normalizeYamlString(initialDefinitionYaml),
-        normalizeYamlString(normalizedYamlValue)
-      ).length > 0;
+      normalizeYamlString(initialDefinitionYaml) !== normalizeYamlString(normalizedYamlValue);
     const metadataChanged = !isEqual(
       normalizeTemplateMetadata(metadata),
       normalizeTemplateMetadata(initialMetadata)
@@ -396,6 +411,8 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
       let parsedValue: FieldDefaultValue;
       if (control === FieldType.INPUT_NUMBER) {
         parsedValue = Number(value.trim());
+      } else if (control === FieldType.TOGGLE) {
+        parsedValue = value === 'true';
       } else if (control === FieldType.CHECKBOX_GROUP) {
         try {
           parsedValue = JSON.parse(value) as string[];
@@ -566,31 +583,34 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
     [getCasesTemplatesUrl, navigateToCasesTemplates]
   );
 
+  // Only Security Solution renders the fixed timeline bottom bar, so only it needs the reservation.
+  const { owner } = useCasesContext();
+  const bodyHeightOffset = getTemplateEditorBodyOffset(owner);
+
   return (
     <FormProvider {...form}>
       <EuiFlexGroup
         direction="column"
         gutterSize="none"
-        // Reserve space for the in-flow app header and the Security Solution timeline bottom bar
-        // (see FULL_BODY_HEIGHT_OFFSET) so the split editor runs to the page bottom without
-        // reaching into another plugin's DOM.
-        css={[kbnFullBodyHeightCss(FULL_BODY_HEIGHT_OFFSET), styles.wrapper]}
+        // Reserve space for the Security Solution timeline bottom bar (only present for that owner —
+        // see bodyHeightOffset) so the split editor runs to the page bottom without overlapping the
+        // bar on Security or leaving dead space elsewhere.
+        css={kbnFullBodyHeightCss(bodyHeightOffset)}
       >
+        <TemplateEditorTour enabled={!isLoading} />
         <EuiFlexItem grow={false}>
-          <AppHeader
+          <CasesAppHeader
             title={title}
             back={templateFormBack}
             badges={templateFormBadges}
             menu={templateFormMenu}
-            sticky={false}
-            // Breaks the header out to the surrounding EuiPageSection's edges (top/left/right)
-            // and re-insets its content by the same amount, so it runs edge-to-edge while the
-            // title/menu stay aligned with the page gutter.
-            padding={{ bleed: 'l' }}
+            // Surfaces a native "Documentation" item in the header overflow menu (matching other
+            // Kibana editors), linking to the case-templates guide via the doclinks service.
+            docLink={docLinks.links.cases.manageCaseTemplates}
           />
         </EuiFlexItem>
 
-        <EuiFlexItem css={styles.editorWrapper}>
+        <EuiFlexItem css={styles.fullHeightEditorWrapper}>
           <TemplateEditorLayout
             isLoading={isLoading}
             yamlValue={normalizedYamlValue}
@@ -610,6 +630,7 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
             metadataErrors={metadataErrors}
             onMetadataChange={handleMetadataChange}
             formResetKey={formResetKey}
+            fieldsHaveErrors={hasValidationErrors}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

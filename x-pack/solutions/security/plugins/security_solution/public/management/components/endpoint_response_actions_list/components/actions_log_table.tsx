@@ -346,51 +346,55 @@ export const ActionsLogTable = memo<ActionsLogTableProps>(
             );
           },
         },
-        {
-          field: '',
-          width: '65px',
-          name: TABLE_COLUMN_NAMES.actions,
-          actions: [
-            {
-              render: (actionDetailsItem: ActionDetails) => {
-                if (actionDetailsItem.isCompleted) {
-                  return <></>;
-                }
+        ...(authz.canWriteActionsLogManagement
+          ? [
+              {
+                field: '',
+                width: '65px',
+                name: TABLE_COLUMN_NAMES.actions,
+                actions: [
+                  {
+                    render: (actionDetailsItem: ActionDetails) => {
+                      if (actionDetailsItem.isCompleted) {
+                        return <></>;
+                      }
 
-                let tooltipText: React.ReactNode = UX_MESSAGES.cancelAction;
-                const buttonProps: React.ComponentProps<typeof EuiButtonIcon> = {
-                  iconType: 'stop',
-                  'data-test-subj': 'responseActionRowActions',
-                  'aria-label': UX_MESSAGES.cancelAction,
-                  isDisabled: !!actionToCancel,
-                };
+                      let tooltipText: React.ReactNode = UX_MESSAGES.cancelAction;
+                      const buttonProps: React.ComponentProps<typeof EuiButtonIcon> = {
+                        iconType: 'minusInCircle',
+                        'data-test-subj': 'responseActionRowActions',
+                        'aria-label': UX_MESSAGES.cancelAction,
+                        isDisabled: !!actionToCancel,
+                      };
 
-                if (
-                  !isResponseActionCancelable(
-                    actionDetailsItem.command,
-                    actionDetailsItem.agentType
-                  )
-                ) {
-                  buttonProps.isDisabled = true;
-                  tooltipText = UX_MESSAGES.cancelActionNotSupportedTooltip;
-                } else if (!canUserCancelCommand(authz, actionDetailsItem.command)) {
-                  buttonProps.isDisabled = true;
-                  tooltipText = UX_MESSAGES.cancelActionNotPermittedTooltip;
-                } else {
-                  buttonProps.onClick = () => {
-                    setActionToCancel(actionDetailsItem);
-                  };
-                }
+                      if (
+                        !isResponseActionCancelable(
+                          actionDetailsItem.command,
+                          actionDetailsItem.agentType
+                        )
+                      ) {
+                        buttonProps.isDisabled = true;
+                        tooltipText = UX_MESSAGES.cancelActionNotSupportedTooltip;
+                      } else if (!canUserCancelCommand(authz, actionDetailsItem.command)) {
+                        buttonProps.isDisabled = true;
+                        tooltipText = UX_MESSAGES.cancelActionNotPermittedTooltip;
+                      } else {
+                        buttonProps.onClick = () => {
+                          setActionToCancel(actionDetailsItem);
+                        };
+                      }
 
-                return (
-                  <EuiToolTip content={tooltipText}>
-                    <EuiButtonIcon {...buttonProps} />
-                  </EuiToolTip>
-                );
+                      return (
+                        <EuiToolTip content={tooltipText}>
+                          <EuiButtonIcon {...buttonProps} />
+                        </EuiToolTip>
+                      );
+                    },
+                  },
+                ],
               },
-            },
-          ],
-        },
+            ]
+          : []),
       ];
 
       // filter out the `hosts` column

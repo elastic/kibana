@@ -11,6 +11,7 @@ import {
   LENS_METRIC_BREAKDOWN_DEFAULT_MAX_COLUMNS,
   buildTrendlineQueryWithMetricFieldMap,
   buildTrendlineBucketExpression,
+  LENS_METRIC_DEFAULT_COLOR_STEPS,
   type FormBasedPersistedState,
   type MetricVisualizationState,
   type PersistedIndexPatternLayer,
@@ -251,17 +252,27 @@ function buildVisualizationState(config: MetricConfig): MetricVisualizationState
     throw new Error('The second metric must be the secondary metric.');
   }
 
+  // Without a max (bar background) or breakdown there is no data range to color
+  // against, so a named palette colors a single value across an absolute range.
+  const useNumericRangeForPalette =
+    !layer.breakdown_by && primaryMetric.background_chart?.type !== 'bar';
   return {
     layerId: DEFAULT_LAYER_ID,
     layerType: 'data',
     metricAccessor: getAccessorName('metric'),
+    ...(primaryMetric.apply_color_to ? { applyColorTo: primaryMetric.apply_color_to } : {}),
     ...(primaryMetric.color?.type === 'static'
       ? fromStaticColorAPIToLensState(primaryMetric.color)
       : {}),
     ...(isColorByValueColor(primaryMetric.color)
-      ? { palette: fromColorByValueAPIToLensState(primaryMetric.color) }
+      ? {
+          palette: fromColorByValueAPIToLensState(
+            primaryMetric.color,
+            LENS_METRIC_DEFAULT_COLOR_STEPS,
+            useNumericRangeForPalette
+          ),
+        }
       : {}),
-    ...(primaryMetric.apply_color_to ? { applyColorTo: primaryMetric.apply_color_to } : {}),
     ...(primaryMetric.subtitle ? { subtitle: primaryMetric.subtitle } : {}),
     showBar: false,
     ...convertStylingToStateFormat(layer.styling, !!secondaryMetric),
@@ -484,19 +495,27 @@ function enrichConfigurationWithVisualizationProperties(
       primaryMetric.background_chart = { type: 'trend' };
     }
 
+    if (visualization.applyColorTo === 'value' || visualization.applyColorTo === 'background') {
+      primaryMetric.apply_color_to = visualization.applyColorTo;
+    }
+
+    // The color/palette is derived from its own state presence, mirroring rendering: a color/palette
+    // set without `apply_color_to` still paints the background.
     if (visualization.palette) {
       const colorByValue = fromColorByValueLensStateToAPI(visualization.palette);
-      const isValidRange = state.breakdown_by || colorByValue?.range === 'absolute';
-      primaryMetric.color = colorByValue && isValidRange ? colorByValue : AUTO_COLOR;
+      // A percentage-ranged palette (custom or named) only makes sense when there is a data range
+      // to color against: a breakdown or a max (bar background). On a single value with neither,
+      // only an absolute-ranged palette (`rangeType: 'number'`) is acceptable; otherwise the
+      // coloring is dropped entirely (the palette falls back to AUTO).
+      const isPercentagePalette = visualization.palette.params?.rangeType === 'percent';
+      const isSingleValue = !state.breakdown_by && !visualization.maxAccessor;
+      const hasInvalidRangeType = isPercentagePalette && isSingleValue;
+
+      primaryMetric.color = colorByValue && !hasInvalidRangeType ? colorByValue : AUTO_COLOR;
     } else if (visualization.color) {
       primaryMetric.color = fromStaticColorLensStateToAPI(visualization.color);
     } else {
       primaryMetric.color = AUTO_COLOR;
-    }
-
-    // Check for valid enum, some integration panels have applyColorTo === 'bar', which is not a valid API enum; treat unknown values as unselected.
-    if (visualization.applyColorTo === 'value' || visualization.applyColorTo === 'background') {
-      primaryMetric.apply_color_to = visualization.applyColorTo;
     }
   }
 

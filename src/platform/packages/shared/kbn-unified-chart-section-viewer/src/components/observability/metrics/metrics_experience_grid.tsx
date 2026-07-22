@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { keys } from '@elastic/eui';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { i18n } from '@kbn/i18n';
+import useToggle from 'react-use/lib/useToggle';
 import { useFetchMetricsData } from './hooks/use_fetch_metrics_data';
 import { METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ } from '../../../common/constants';
 import { useMetricsExperienceState } from './context/metrics_experience_state_provider';
@@ -26,6 +27,7 @@ import {
   useDimensionsWipe,
   useDiscoverFieldForBreakdown,
   useMetricFieldsFilter,
+  useMetricsSort,
   useResetPageOnDimensionsChange,
 } from './hooks';
 import { isSuppressedFetchError } from '../../chart/utils/is_suppressed_fetch_error';
@@ -53,17 +55,12 @@ export const MetricsExperienceGrid = ({
     selectedDimensions,
     onDimensionsChange,
     onPageChange,
+    metricsSort,
     profileId,
     gridSettings,
     onGridSettingsChange,
   } = useMetricsExperienceState();
-
-  const [isGridSettingsFlyoutOpen, setIsGridSettingsFlyoutOpen] = useState(false);
-  const toggleGridSettingsFlyout = useCallback(
-    () => setIsGridSettingsFlyoutOpen((isOpen) => !isOpen),
-    []
-  );
-
+  const [isGridSettingsFlyoutOpen, toggleGridSettingsFlyout] = useToggle(false);
   const {
     metricItems,
     allDimensions,
@@ -81,6 +78,13 @@ export const MetricsExperienceGrid = ({
   const { filteredMetricItems } = useMetricFieldsFilter({
     metricItems,
     searchTerm,
+  });
+
+  const [sortBy, direction] = metricsSort;
+  const { sortedMetricItems } = useMetricsSort({
+    metricItems: filteredMetricItems,
+    sortBy,
+    direction,
   });
 
   useDiscoverFieldForBreakdown(
@@ -196,7 +200,7 @@ export const MetricsExperienceGrid = ({
         onKeyDown={onKeyDown}
       >
         <MetricsExperienceGridContent
-          metricItems={filteredMetricItems}
+          metricItems={sortedMetricItems}
           activeDimensions={activeDimensions}
           services={services}
           discoverFetch$={discoverFetch$}

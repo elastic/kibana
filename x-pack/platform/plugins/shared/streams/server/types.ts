@@ -7,7 +7,10 @@
 
 import type { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plugin/server';
 import type { AlertingServerStart as AlertingV2ServerStart } from '@kbn/alerting-v2-plugin/server';
-import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import type {
+  PluginStartContract as ActionsPluginStart,
+  RelayClientContract,
+} from '@kbn/actions-plugin/server';
 import type { CoreStart, ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { AgentBuilderPluginSetup, AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type {
@@ -48,7 +51,6 @@ import type {
   SearchInferenceEndpointsPluginSetup,
   SearchInferenceEndpointsPluginStart,
 } from '@kbn/search-inference-endpoints/server';
-import type { RelayClientContract } from '@kbn/significant-events-schema';
 import type { StreamsConfig } from '../common/config';
 
 export interface StreamsServer {
@@ -67,10 +69,15 @@ export interface StreamsServer {
   workflowsManagement?: WorkflowsServerPluginSetup;
   agentBuilder?: AgentBuilderPluginStart;
   spaces?: SpacesPluginStart;
+  cloud?: CloudSetup;
   /**
-   * Singleton client for the Relay service. Built and populated by the
-   * significant_events plugin (see `RelayClientContract`'s doc); `streams` only
-   * holds the type-only reference so the shared server context compiles.
+   * The running Kibana's version, e.g. `9.2.0`. Populated by the
+   * significant_events plugin, which needs it to identify the connecting
+   * deployment to the Relay service.
+   */
+  kibanaVersion: string;
+  /**
+   * Singleton client for the Relay service, owned by the Actions plugin.
    */
   relayClient?: RelayClientContract;
 }

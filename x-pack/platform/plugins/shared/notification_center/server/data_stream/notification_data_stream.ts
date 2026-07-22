@@ -10,6 +10,7 @@ import type {
   DataStreamsStart,
   IDataStreamClient,
 } from '@kbn/core-data-streams-server';
+import type { DataStreamDefinition } from '@kbn/data-streams';
 import { mappings, type MappingsDefinition } from '@kbn/es-mappings';
 import type { Notification } from '../../common/types';
 
@@ -29,27 +30,28 @@ export const notificationDataStreamMappings = {
     /** Idempotency key */
     notification_id: mappings.keyword(),
     event_timestamp: mappings.date(),
+    namespace: mappings.keyword(),
     type: mappings.keyword(),
-    source_app_id: mappings.keyword(),
     severity: mappings.keyword(),
   },
 } satisfies MappingsDefinition;
 
-export const registerNotificationDataStream = (dataStreams: DataStreamsSetup) => {
-  return dataStreams.registerDataStream({
-    name: NOTIFICATION_DATA_STREAM_NAME,
-    // bump on any mapping or lifecycle change
-    version: 1,
-    hidden: true,
-    template: {
-      priority: 500,
-      lifecycle: {
-        data_retention: NOTIFICATION_DATA_RETENTION,
-      },
-      mappings: notificationDataStreamMappings,
+export const notificationDataStreamDefinition = {
+  name: NOTIFICATION_DATA_STREAM_NAME,
+  // bump on any mapping or lifecycle change
+  version: 1,
+  hidden: true,
+  template: {
+    priority: 500,
+    lifecycle: {
+      data_retention: NOTIFICATION_DATA_RETENTION,
     },
-  });
-};
+    mappings: notificationDataStreamMappings,
+  },
+} satisfies DataStreamDefinition<typeof notificationDataStreamMappings, Notification>;
+
+export const registerNotificationDataStream = (dataStreams: DataStreamsSetup) =>
+  dataStreams.registerDataStream(notificationDataStreamDefinition);
 
 export type NotificationDataStreamClient = IDataStreamClient<
   typeof notificationDataStreamMappings,

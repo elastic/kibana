@@ -61,6 +61,7 @@ function createPassthroughStepIoService(state: WorkflowExecutionState): StepIoSe
     hasEvictedOutputs: jest.fn().mockReturnValue(false),
     rehydrateOutputs: jest.fn().mockResolvedValue(undefined),
     prepareForRead: jest.fn().mockResolvedValue(undefined),
+    releaseReadPins: jest.fn(),
     releaseTransientlyRehydratedOutputs: jest.fn(),
   } as unknown as StepIoService;
 }

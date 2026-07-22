@@ -1,5 +1,9 @@
 {
-  "sha1": "13856acd307e1b5c02db8beefaa9eea9285e460e",
+  "sha1": "f1abc32df46dc0b7331e8384ae51f7fd5775f1e2",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
   "tests": [
     {
       "id": "2bb84514b03b333-1054e603e578b92",
@@ -77,44 +81,44 @@
       }
     },
     {
-      "id": "2cb41e0daf4ee37-56821f8e3bcf968",
-      "title": "Entity attachment cases – flyout add-to-case actions and Entities tab adds a host entity to a new case and the Entities tab shows the attached entity",
-      "expectedStatus": "skipped",
+      "id": "2cb41e0daf4ee37-cd814a171131ef1",
+      "title": "Entity attachment cases – flyout add-to-case actions and Entities accordion adds a host entity to a new case and the Entities accordion shows the attached entity",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/entity_cases.spec.ts",
-        "line": 92,
+        "line": 88,
         "column": 14
       }
     },
     {
-      "id": "2cb41e0daf4ee37-fa57af88a08f22e",
-      "title": "Entity attachment cases – flyout add-to-case actions and Entities tab Entities tab renders the entity table when attachments were added via API",
-      "expectedStatus": "skipped",
+      "id": "2cb41e0daf4ee37-a37741bc64b3f83",
+      "title": "Entity attachment cases – flyout add-to-case actions and Entities accordion Entities accordion renders when entity attachments were added via API",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/entity_cases.spec.ts",
-        "line": 121,
+        "line": 119,
         "column": 14
       }
     },
     {
-      "id": "2cb41e0daf4ee37-45a5507cb509b37",
-      "title": "Entity attachment cases – flyout add-to-case actions and Entities tab Entities tab renders the empty state when a case has no entity attachments",
-      "expectedStatus": "skipped",
+      "id": "2cb41e0daf4ee37-3cf8d4a6f282359",
+      "title": "Entity attachment cases – flyout add-to-case actions and Entities accordion renders no Entities accordion when a case has no entity attachments",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/entity_cases.spec.ts",
-        "line": 158,
+        "line": 137,
         "column": 14
       }
     },

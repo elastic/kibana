@@ -151,7 +151,7 @@ describe('TemplatesMigrationTaskManager', () => {
     const taskDef = call[0][CASES_TEMPLATES_MIGRATION_TASK_TYPE];
     const runner = taskDef.createTaskRunner({
       taskInstance: { state: state ?? {} },
-      abortController: new AbortController(),
+      signal: new AbortController().signal,
     } as unknown as RunContext);
     return runner.run();
   };
@@ -160,7 +160,9 @@ describe('TemplatesMigrationTaskManager', () => {
     const call = taskManagerSetupMock.registerTaskDefinitions.mock.calls[0];
     const taskDefs = call[0];
     const taskDef = taskDefs[CASES_TEMPLATES_MIGRATION_TASK_TYPE];
-    return taskDef.createTaskRunner({} as unknown as RunContext);
+    return taskDef.createTaskRunner({
+      signal: new AbortController().signal,
+    } as unknown as RunContext);
   };
 
   const buildAndSchedule = async (
@@ -278,6 +280,13 @@ describe('TemplatesMigrationTaskManager', () => {
         name: 'My Template',
         owner: 'cases',
         isLatest: true,
+        fieldDefinitions: [
+          expect.objectContaining({
+            name: 'cf_text',
+            type: 'keyword',
+            control: 'INPUT_TEXT',
+          }),
+        ],
       });
 
       // The field/template phase writes those two flags together...
@@ -331,8 +340,8 @@ describe('TemplatesMigrationTaskManager', () => {
 
       expect(textDef.metadata?.default).toBe('hello');
       expect(numDef.metadata?.default).toBe(42);
-      expect(toggleDef.control).toBe('RADIO_GROUP');
-      expect(toggleDef.metadata?.default).toBe('true');
+      expect(toggleDef.control).toBe('TOGGLE');
+      expect(toggleDef.metadata?.default).toBe(true);
     });
 
     it('preserves template metadata while keeping case defaults as top-level definition keys', async () => {
@@ -1011,15 +1020,45 @@ describe('TemplatesMigrationTaskManager', () => {
         CASE_SAVED_OBJECT,
         expect.objectContaining({ namespaces: ['my-space'] })
       );
-      // ...and the case scan filters by owner within that PIT.
+      // ...and the case scan filters by owner within that PIT, scoped to the same namespace as the
+      // PIT. `namespaces` must be on the `find` too: the migration's internal repo is unscoped (no
+      // spaces extension), and without it `find` defaults to the `default` space — returning the
+      // wrong space's cases, which then 404 on bulkUpdate against this space.
       const caseFind = repo.find.mock.calls.find((c) => c[0]?.type === CASE_SAVED_OBJECT);
       expect(caseFind?.[0]).toEqual(
         expect.objectContaining({
           type: CASE_SAVED_OBJECT,
+          namespaces: ['my-space'],
           filter: `${CASE_SAVED_OBJECT}.attributes.owner: "securitySolution"`,
           pit: expect.objectContaining({ id: 'pit-1' }),
         })
       );
+    });
+
+    it('backfills a non-default space in its own namespace (find + bulkUpdate stay on the same space)', async () => {
+      // Regression guard for the "37/37 not found (404)" bug: the find must be scoped to the space's
+      // namespace, and the resulting bulkUpdate must target that same namespace so the cases the
+      // scan returned actually resolve.
+      const configSO = buildConfigureSO({
+        owner: 'securitySolution',
+        namespaces: ['analytics-1'],
+        customFields: [buildLegacyCustomField('cf_text')],
+      });
+      mockFindByType(configSO, [
+        buildCaseSO('case-1', [{ key: 'cf_text', type: CustomFieldTypes.TEXT, value: 'hello' }]),
+      ]);
+
+      const manager = await buildAndSchedule();
+      await getTaskRunner(manager).run();
+
+      const caseFind = repo.find.mock.calls.find((c) => c[0]?.type === CASE_SAVED_OBJECT);
+      expect(caseFind?.[0]).toEqual(expect.objectContaining({ namespaces: ['analytics-1'] }));
+
+      // The update lands in the space's namespace — not the default namespace.
+      expect(repo.bulkUpdate).toHaveBeenCalledTimes(1);
+      expect(repo.bulkUpdate.mock.calls[0][0]).toEqual([
+        expect.objectContaining({ id: 'case-1', namespace: 'analytics-1' }),
+      ]);
     });
 
     it('backfills cases for a space a prior release already marked field/template-migrated', async () => {
@@ -1628,6 +1667,194 @@ describe('TemplatesMigrationTaskManager', () => {
       expect(counter.incrementCounter).not.toHaveBeenCalledWith(
         expect.objectContaining({ counterName: 'configureMigrationSuccess' })
       );
+    });
+  });
+
+  // The onCaseBackfillComplete hook is how the templates migration tells cases-analytics v2 to run a
+  // one-time full re-index once existing cases' extended_fields are backfilled. It must fire exactly
+  // once per real migration, never on a no-op restart (which would trigger an expensive full re-index
+  // every startup), and never break or retry the migration task if it fails.
+  describe('analytics backfill completion hook (onCaseBackfillComplete)', () => {
+    const buildCaseSO = (
+      id: string,
+      customFields: unknown[],
+      extendedFields?: Record<string, unknown> | null
+    ) => ({
+      id,
+      type: CASE_SAVED_OBJECT,
+      references: [],
+      attributes: { owner: 'cases', customFields, extended_fields: extendedFields ?? null },
+    });
+
+    const mockFindByType = (configSO: unknown, caseSOs: unknown[]) => {
+      repo.find.mockImplementation((opts: { type: string }) => {
+        if (opts.type === CASE_CONFIGURE_SAVED_OBJECT) {
+          return Promise.resolve({ saved_objects: [configSO], total: 1 });
+        }
+        if (opts.type === CASE_SAVED_OBJECT) {
+          return Promise.resolve({ saved_objects: caseSOs, total: caseSOs.length });
+        }
+        return Promise.resolve({ saved_objects: [], total: 0 });
+      });
+    };
+
+    const buildWithHook = async (hook: () => Promise<void> | void) => {
+      const manager = new TemplatesMigrationTaskManager(
+        taskManagerSetupMock,
+        logger,
+        undefined,
+        hook
+      );
+      await manager.scheduleMigrationTask(
+        taskManagerStartMock as unknown as TaskManagerStartContract,
+        core as unknown as CoreStart
+      );
+      return manager;
+    };
+
+    it('fires once when a completing run backfilled existing cases', async () => {
+      const configSO = buildConfigureSO({ customFields: [buildLegacyCustomField('cf_text')] });
+      mockFindByType(configSO, [
+        buildCaseSO('case-1', [{ key: 'cf_text', type: CustomFieldTypes.TEXT, value: 'hello' }]),
+      ]);
+      const hook = jest.fn().mockResolvedValue(undefined);
+
+      const result = await getTaskRunner(await buildWithHook(hook)).run();
+
+      expect(repo.bulkUpdate).toHaveBeenCalledTimes(1);
+      expect(hook).toHaveBeenCalledTimes(1);
+      expect(result).toEqual(expect.objectContaining({ shouldDeleteTask: true }));
+    });
+
+    it('fires when the space had pending backfill work even if this run wrote nothing (multi-run finish / post-restart re-scan)', async () => {
+      // Space is pending (customFields present, legacyCasesMigrated not set) but every case already
+      // has its extended_fields — the boundary case where the completing run writes 0 cases yet the
+      // migration genuinely finished outstanding work. The hook must still fire, keyed on the
+      // restart-durable pending flags rather than a per-run write count.
+      const configSO = buildConfigureSO({ customFields: [buildLegacyCustomField('cf_text')] });
+      mockFindByType(configSO, [
+        buildCaseSO('case-1', [{ key: 'cf_text', type: CustomFieldTypes.TEXT, value: 'x' }], {
+          cf_text_as_keyword: 'x',
+        }),
+      ]);
+      const hook = jest.fn().mockResolvedValue(undefined);
+
+      const result = await getTaskRunner(await buildWithHook(hook)).run();
+
+      expect(repo.bulkUpdate).not.toHaveBeenCalled();
+      expect(hook).toHaveBeenCalledTimes(1);
+      expect(result).toEqual(expect.objectContaining({ shouldDeleteTask: true }));
+    });
+
+    it('does NOT fire on a no-op restart where every space is already fully migrated', async () => {
+      // Custom fields present, but the space was already backfilled in a prior run — the exact shape
+      // of every Kibana restart after the migration is done. Firing here would run a full analytics
+      // re-index on every single startup.
+      const configSO = buildConfigureSO({
+        customFields: [buildLegacyCustomField('cf_text')],
+        legacyTemplatesMigrated: true,
+        legacyCustomFieldsMigrated: true,
+        legacyCasesMigrated: true,
+      });
+      mockFindByType(configSO, []);
+      const hook = jest.fn().mockResolvedValue(undefined);
+
+      await getTaskRunner(await buildWithHook(hook)).run();
+
+      expect(hook).not.toHaveBeenCalled();
+    });
+
+    it('does NOT fire when no space has custom fields (nothing to backfill)', async () => {
+      const configSO = buildConfigureSO({
+        customFields: [],
+        templates: [buildLegacyTemplate('T')],
+      });
+      mockFindByType(configSO, []);
+      const hook = jest.fn().mockResolvedValue(undefined);
+
+      await getTaskRunner(await buildWithHook(hook)).run();
+
+      expect(hook).not.toHaveBeenCalled();
+    });
+
+    it('does NOT fire while the backfill is still rescheduling (not a terminal run)', async () => {
+      // Full 1000-case pages so the scan budget stops the run mid-backfill: it reschedules rather
+      // than completing, so the analytics re-index must wait for the terminal run.
+      const configSO = buildConfigureSO({ customFields: [buildLegacyCustomField('cf_text')] });
+      const fullPage = {
+        saved_objects: Array.from({ length: 1000 }, (_, i) => ({
+          id: `c-${i}`,
+          type: CASE_SAVED_OBJECT,
+          references: [],
+          attributes: { owner: 'cases', customFields: [], extended_fields: null },
+          sort: [i],
+        })),
+        total: 1000,
+        pit_id: 'pit-1',
+      };
+      repo.find.mockImplementation((opts: { type: string }) =>
+        opts.type === CASE_CONFIGURE_SAVED_OBJECT
+          ? Promise.resolve({ saved_objects: [configSO], total: 1 })
+          : opts.type === CASE_SAVED_OBJECT
+          ? Promise.resolve(fullPage)
+          : Promise.resolve({ saved_objects: [], total: 0 })
+      );
+      const hook = jest.fn().mockResolvedValue(undefined);
+
+      const result = await getTaskRunner(await buildWithHook(hook)).run();
+
+      expect(result).toEqual(expect.objectContaining({ runAt: expect.any(Date) }));
+      expect(hook).not.toHaveBeenCalled();
+    });
+
+    it('fires on the give-up path when there was pending backfill work', async () => {
+      const configSO = buildConfigureSO({ customFields: [buildLegacyCustomField('cf_text')] });
+      mockFindByType(configSO, [
+        buildCaseSO('c1', [{ key: 'cf_text', type: CustomFieldTypes.TEXT, value: 'v' }]),
+      ]);
+      // Every update fails → resuming one run short of the cap makes this run give up and delete.
+      repo.bulkUpdate.mockResolvedValue({
+        saved_objects: [{ id: 'c1', type: CASE_SAVED_OBJECT, error: { message: 'boom' } }],
+      });
+      const hook = jest.fn().mockResolvedValue(undefined);
+
+      const result = await runTask(await buildWithHook(hook), {
+        state: { failedRuns: MAX_CASE_BACKFILL_FAILED_RUNS - 1 },
+      });
+
+      expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('Giving up'));
+      expect(hook).toHaveBeenCalledTimes(1);
+      expect(result).toEqual(expect.objectContaining({ shouldDeleteTask: true }));
+    });
+
+    it('swallows a hook rejection and still completes + deletes the task (no retry loop)', async () => {
+      const configSO = buildConfigureSO({ customFields: [buildLegacyCustomField('cf_text')] });
+      mockFindByType(configSO, [
+        buildCaseSO('case-1', [{ key: 'cf_text', type: CustomFieldTypes.TEXT, value: 'hello' }]),
+      ]);
+      const hook = jest.fn().mockRejectedValue(new Error('analytics down'));
+
+      const result = await getTaskRunner(await buildWithHook(hook)).run();
+
+      // The migration is unaffected: it still reports complete and deletes the one-shot task, so
+      // Task Manager does not retry and re-fire the hook.
+      expect(result).toEqual(expect.objectContaining({ shouldDeleteTask: true }));
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('onCaseBackfillComplete hook failed'),
+        expect.objectContaining({ error: expect.any(Error) })
+      );
+    });
+
+    it('does not require a hook — a completing backfill with no hook configured still deletes the task', async () => {
+      const configSO = buildConfigureSO({ customFields: [buildLegacyCustomField('cf_text')] });
+      mockFindByType(configSO, [
+        buildCaseSO('case-1', [{ key: 'cf_text', type: CustomFieldTypes.TEXT, value: 'hello' }]),
+      ]);
+
+      const manager = await buildAndSchedule(); // constructed without an onCaseBackfillComplete hook
+      const result = await getTaskRunner(manager).run();
+
+      expect(result).toEqual(expect.objectContaining({ shouldDeleteTask: true }));
     });
   });
 });
