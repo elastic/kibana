@@ -53,7 +53,11 @@ describe.each([EntityType.host, EntityType.user])('Risk Tab Body entityType: %s'
     mockUseRiskScore.mockReturnValue(riskScoreState);
     mockUseEntityRiskScores.mockReturnValue({
       base: riskScoreState,
-      resolution: { state: riskScoreState, hasResolutionGroup: false, resolutionTargetEntityId: undefined },
+      resolution: {
+        state: riskScoreState,
+        hasResolutionGroup: false,
+        resolutionTargetEntityId: undefined,
+      },
       refetch: jest.fn(),
     });
     mockUseQueryToggle.mockReturnValue({ toggleStatus: true, setToggleStatus: jest.fn() });
