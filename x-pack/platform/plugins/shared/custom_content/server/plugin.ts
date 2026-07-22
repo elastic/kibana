@@ -7,10 +7,12 @@
 
 import type { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import { registerGenerateRoute } from './routes/generate_route';
 
 interface StartDeps {
   inference: InferenceServerStart;
+  data: DataPluginStart;
 }
 
 export class CustomContentPlugin implements Plugin<void, void, {}, StartDeps> {

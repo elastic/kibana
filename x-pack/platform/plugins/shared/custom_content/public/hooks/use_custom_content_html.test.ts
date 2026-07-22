@@ -22,18 +22,29 @@ jest.mock('../utils/template_fill', () => ({
 }));
 
 import type { HttpStart } from '@kbn/core/public';
+import type { CustomContentTokenEvent } from '../../common/types';
 import { getServices } from '../services';
 import { streamGenerate } from '../utils/stream_generate';
 import { fetchEsqlData } from '../utils/fetch_esql_data';
+import type { EsqlDataResult } from '../utils/fetch_esql_data';
 import { fillTemplate } from '../utils/template_fill';
 import { useCustomContentHtml } from './use_custom_content_html';
+
+function makeHttp(events: CustomContentTokenEvent[]) {
+  return (_http: unknown, _params: unknown, onToken: (t: string) => void) => {
+    events.forEach((e) => {
+      if (e.type === 'token' && e.token) onToken(e.token as string);
+    });
+    return Promise.resolve();
+  };
+}
 
 const mockFetchEsqlData = fetchEsqlData as jest.MockedFunction<typeof fetchEsqlData>;
 const mockFillTemplate = fillTemplate as jest.MockedFunction<typeof fillTemplate>;
 
 const mockHttp = {} as unknown as HttpStart;
 
-const ESQL_DATA = {
+const ESQL_DATA: EsqlDataResult = {
   columns: [{ name: 'revenue', type: 'double' }],
   values: [[42000]],
 };
@@ -42,7 +53,7 @@ beforeEach(() => {
   jest.clearAllMocks();
   (getServices as jest.Mock).mockReturnValue({ core: { http: mockHttp }, search: jest.fn() });
   (streamGenerate as jest.Mock).mockResolvedValue(undefined);
-  mockFetchEsqlData.mockResolvedValue(ESQL_DATA as any);
+  mockFetchEsqlData.mockResolvedValue(ESQL_DATA);
   mockFillTemplate.mockReturnValue('<div>rendered</div>');
 });
 
@@ -83,10 +94,7 @@ describe('useCustomContentHtml', () => {
     it('calls streamGenerate and saves the result via onTemplateChange', async () => {
       const onTemplateChange = jest.fn();
       (streamGenerate as jest.Mock).mockImplementation(
-        (_http: unknown, _params: unknown, onToken: (t: string) => void) => {
-          onToken(VALID_HTML);
-          return Promise.resolve();
-        }
+        makeHttp([{ type: 'token', token: VALID_HTML }])
       );
 
       const { result } = renderHook(() =>
@@ -110,10 +118,12 @@ describe('useCustomContentHtml', () => {
 
     it('shows a script-not-supported error instead of silently rendering blank', async () => {
       (streamGenerate as jest.Mock).mockImplementation(
-        (_http: unknown, _params: unknown, onToken: (t: string) => void) => {
-          onToken('<html><body><div id="chart"></div><script>doStuff()</script></body></html>');
-          return Promise.resolve();
-        }
+        makeHttp([
+          {
+            type: 'token',
+            token: '<html><body><div id="chart"></div><script>doStuff()</script></body></html>',
+          },
+        ])
       );
 
       const { result } = renderHook(() => useCustomContentHtml({ ...baseParams }));
@@ -199,10 +209,7 @@ describe('useCustomContentHtml', () => {
     it('calls both streamGenerate and fetchEsqlData, renders via fillTemplate, saves the Liquid template', async () => {
       const onTemplateChange = jest.fn();
       (streamGenerate as jest.Mock).mockImplementation(
-        (_http: unknown, _params: unknown, onToken: (t: string) => void) => {
-          onToken(LIQUID_TEMPLATE);
-          return Promise.resolve();
-        }
+        makeHttp([{ type: 'token', token: LIQUID_TEMPLATE }])
       );
 
       const { result } = renderHook(() =>
@@ -226,10 +233,7 @@ describe('useCustomContentHtml', () => {
     it('passes esqlQuery and timeRange to streamGenerate', async () => {
       const timeRange = { from: 'now-7d', to: 'now' };
       (streamGenerate as jest.Mock).mockImplementation(
-        (_http: unknown, _params: unknown, onToken: (t: string) => void) => {
-          onToken(LIQUID_TEMPLATE);
-          return Promise.resolve();
-        }
+        makeHttp([{ type: 'token', token: LIQUID_TEMPLATE }])
       );
 
       renderHook(() => useCustomContentHtml({ ...esqlParams, timeRange }));
@@ -251,6 +255,52 @@ describe('useCustomContentHtml', () => {
       await waitFor(() => expect(result.current.error).toBe('query failed'));
       expect(result.current.isLoading).toBe(false);
       expect(mockFillTemplate).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('retry logic', () => {
+    it('retries once when static LLM output contains a script tag, succeeds on second attempt', async () => {
+      const SCRIPT_HTML = '<html><body><script>bad()</script></body></html>';
+      const VALID_HTML_RETRY = '<html><body><p>fixed</p></body></html>';
+      (streamGenerate as jest.Mock)
+        .mockImplementationOnce(makeHttp([{ type: 'token', token: SCRIPT_HTML }]))
+        .mockImplementation(makeHttp([{ type: 'token', token: VALID_HTML_RETRY }]));
+
+      const onTemplateChange = jest.fn();
+      const { result } = renderHook(() =>
+        useCustomContentHtml({ ...baseParams, onTemplateChange })
+      );
+
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+      expect(streamGenerate).toHaveBeenCalledTimes(2);
+      expect(result.current.error).toBeUndefined();
+      expect(result.current.html).toContain('fixed');
+      expect(onTemplateChange).toHaveBeenCalledTimes(1);
+    });
+
+    it('retries once when ES|QL LLM output is invalid HTML, succeeds on second attempt', async () => {
+      const LIQUID_TEMPLATE =
+        '<html><body>{% for row in rows %}<p>{{ row["revenue"].value }}</p>{% endfor %}</body></html>';
+      (streamGenerate as jest.Mock)
+        // First attempt: plain text (no HTML tags) — fails isValidTemplate
+        .mockImplementationOnce(makeHttp([{ type: 'token', token: 'just text, no tags' }]))
+        .mockImplementation(makeHttp([{ type: 'token', token: LIQUID_TEMPLATE }]));
+
+      const onTemplateChange = jest.fn();
+      const { result } = renderHook(() =>
+        useCustomContentHtml({
+          ...baseParams,
+          esqlQuery: 'FROM logs | STATS revenue = SUM(amount)',
+          onTemplateChange,
+        })
+      );
+
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+      expect(streamGenerate).toHaveBeenCalledTimes(2);
+      expect(result.current.error).toBeUndefined();
+      expect(result.current.html).toBe('<div>rendered</div>');
+      // Saves the Liquid template from the successful retry
+      expect(onTemplateChange).toHaveBeenCalledWith(LIQUID_TEMPLATE);
     });
   });
 

@@ -7,15 +7,15 @@
 
 import { of, throwError } from 'rxjs';
 import { ChatCompletionEventType, MessageRole } from '@kbn/inference-common';
+import { getESQLResults } from '@kbn/esql-utils';
 import { registerGenerateRoute } from './generate_route';
 
-jest.mock('../utils/esql_query', () => ({
-  ...jest.requireActual('../utils/esql_query'),
-  runEsqlQuery: jest.fn(),
+jest.mock('@kbn/esql-utils', () => ({
+  ...jest.requireActual('@kbn/esql-utils'),
+  getESQLResults: jest.fn(),
 }));
 
-const mockRunEsqlQuery = jest.requireMock('../utils/esql_query')
-  .runEsqlQuery as jest.MockedFunction<typeof import('../utils/esql_query').runEsqlQuery>;
+const mockGetESQLResults = getESQLResults as jest.MockedFunction<typeof getESQLResults>;
 
 const chunkEvent = (content: string) => ({
   type: ChatCompletionEventType.ChatCompletionChunk,
@@ -62,13 +62,11 @@ function buildMocks({ featureFlagEnabled = true }: { featureFlagEnabled?: boolea
       getBooleanValue: jest.fn().mockReturnValue(featureFlagEnabled),
     },
   };
-  const getStartServices = jest.fn().mockResolvedValue([coreStart, { inference }]);
+  const scopedSearch = jest.fn();
+  const data = { search: { asScoped: jest.fn().mockReturnValue({ search: scopedSearch }) } };
+  const getStartServices = jest.fn().mockResolvedValue([coreStart, { inference, data }]);
 
-  const context = {
-    core: Promise.resolve({
-      elasticsearch: { client: { asCurrentUser: {} } },
-    }),
-  };
+  const context = {};
 
   const abortedUnsubscribe = jest.fn();
   const request = {
@@ -107,7 +105,10 @@ function buildMocks({ featureFlagEnabled = true }: { featureFlagEnabled?: boolea
 describe('registerGenerateRoute', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockRunEsqlQuery.mockResolvedValue({ columns: [], values: [] });
+    mockGetESQLResults.mockResolvedValue({
+      response: { columns: [], values: [] },
+      params: { query: '' },
+    } as Awaited<ReturnType<typeof getESQLResults>>);
   });
 
   it('registers a POST handler at the internal generate path', () => {
@@ -219,13 +220,16 @@ describe('registerGenerateRoute', () => {
     registerGenerateRoute(router, getStartServices, logger);
     getDefaultConnector.mockResolvedValue({ connectorId: 'connector-1' });
     chatComplete.mockReturnValue(of(chunkEvent('<div>ok</div>')));
-    mockRunEsqlQuery.mockResolvedValue({
-      columns: [
-        { name: 'host', type: 'keyword' },
-        { name: 'count', type: 'long' },
-      ],
-      values: [['web-1', 42]],
-    });
+    mockGetESQLResults.mockResolvedValue({
+      response: {
+        columns: [
+          { name: 'host', type: 'keyword' },
+          { name: 'count', type: 'long' },
+        ],
+        values: [['web-1', 42]],
+      },
+      params: { query: '' },
+    } as Awaited<ReturnType<typeof getESQLResults>>);
     request.body = {
       prompt: 'Show as table',
       colorMode: 'LIGHT',
@@ -260,7 +264,7 @@ describe('registerGenerateRoute', () => {
     registerGenerateRoute(router, getStartServices, logger);
     getDefaultConnector.mockResolvedValue({ connectorId: 'connector-1' });
     chatComplete.mockReturnValue(of(chunkEvent('<p>fallback</p>')));
-    mockRunEsqlQuery.mockRejectedValue(new Error('index_not_found_exception'));
+    mockGetESQLResults.mockRejectedValue(new Error('index_not_found_exception'));
     request.body = {
       prompt: 'Show data',
       colorMode: 'LIGHT',

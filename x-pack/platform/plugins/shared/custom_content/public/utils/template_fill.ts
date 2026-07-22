@@ -63,6 +63,8 @@ export function containsScript(template: string): boolean {
   return SCRIPT_TAG_PATTERN.test(template);
 }
 
+// LLMs can return plain text, markdown, or empty strings — any of which would render blank.
+// Require at least one HTML tag so the retry path kicks in for those non-renderable outputs.
 const HTML_TAG_PATTERN = /<[a-zA-Z]/;
 
 export function isValidTemplate(template: string): boolean {
