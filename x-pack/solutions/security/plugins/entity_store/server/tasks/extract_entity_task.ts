@@ -33,7 +33,7 @@ export function getExtractEntityTaskId(entityType: EntityType, namespace: string
 async function runTask({
   taskInstance,
   fakeRequest,
-  abortController,
+  signal,
   entityType,
   logger,
   core,
@@ -72,7 +72,7 @@ async function runTask({
 
     const extractionStart = Date.now();
     const extractionResult = await logsExtractionClient.extractLogs(entityType, {
-      abortController,
+      signal,
     });
     const extractionDuration = moment().diff(extractionStart, 'milliseconds');
 
@@ -155,7 +155,7 @@ export function registerExtractEntityTasks({
           timeout: config.timeout,
           createTaskRunner: ({
             taskInstance,
-            abortController,
+            signal,
             fakeRequest,
             executionUuid,
             setCustomTaskRunEventFields,
@@ -172,7 +172,7 @@ export function registerExtractEntityTasks({
                 run: () =>
                   runTask({
                     taskInstance,
-                    abortController,
+                    signal,
                     executionUuid,
                     setCustomTaskRunEventFields,
                     logger: logger.get(taskInstance.id),

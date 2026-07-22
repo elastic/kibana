@@ -22,7 +22,6 @@ import {
   useEuiMaxBreakpoint,
   useEuiTheme,
 } from '@elastic/eui';
-import type { AppHeaderMetadataItems } from '@kbn/app-header';
 import { AppHeader } from '@kbn/app-header';
 import { useQueryClient } from '@kbn/react-query';
 import { getBreachEsqlQuery } from '@kbn/alerting-v2-schemas';
@@ -32,6 +31,7 @@ import { useFetchEpisodeQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_fet
 import { useFetchEpisodeActions } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_actions';
 import { useFetchGroupActions } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_group_actions';
 import { useFetchRule } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_rule';
+import { useEpisodeFlapping } from '@kbn/alerting-v2-episodes-ui/hooks/use_episode_flapping';
 import { isRuleLoaded } from '@kbn/alerting-v2-episodes-ui/types/rule_state';
 import { useInvalidateEpisodeQueries } from '@kbn/alerting-v2-episodes-ui/hooks/use_invalidate_episode_queries';
 import { createEpisodeActions, type EpisodeAction } from '@kbn/alerting-v2-episodes-ui/actions';
@@ -114,9 +114,13 @@ export function EpisodeDetailsPage() {
     services: { expressions: services.expressions, spaces: services.spaces },
   });
 
+  const { isFlapping } = useEpisodeFlapping({
+    episodeId,
+    services: { data, spaces },
+  });
+
   const episodeAction = episodeId ? episodeActionsMap?.get(episodeId) : undefined;
   const groupAction = groupHash ? groupActionsMap?.get(groupHash) : undefined;
-  const tags = useMemo(() => groupAction?.tags ?? [], [groupAction]);
 
   const showRuleDependentUi = isRuleLoaded(ruleState);
 
@@ -213,11 +217,11 @@ export function EpisodeDetailsPage() {
       getEpisodeHeaderBadges({
         status: episode?.['episode.status'],
         severity: episode?.severity,
-        tags,
         episodeAction,
         groupAction,
+        isFlapping,
       }),
-    [episode, tags, episodeAction, groupAction]
+    [episode, episodeAction, groupAction, isFlapping]
   );
 
   const headerMenu = useMemo(
@@ -229,8 +233,6 @@ export function EpisodeDetailsPage() {
       }),
     [applicableActions, episode, invalidateEpisodeQueries]
   );
-
-  const ruleDescription = showRuleDependentUi ? ruleState.rule.metadata.description : undefined;
 
   const episodesListHref = services.http.basePath.prepend(paths.alertEpisodesList);
 
@@ -373,20 +375,6 @@ export function EpisodeDetailsPage() {
     </EuiSplitPanel.Inner>
   );
 
-  // AppHeaderMetadata bolds `label` (it's meant to be the key of a label/value pair) and renders
-  // `value` at a lighter weight, so the description is passed as `value` with an empty `label`
-  // to get the lighter weight without touching the shared app-header component.
-  const metadata = ruleDescription
-    ? ([
-        {
-          type: 'text',
-          label: '',
-          value: ruleDescription,
-          'data-test-subj': 'alertingV2EpisodeDetailsHeaderDescription',
-        },
-      ] as AppHeaderMetadataItems)
-    : undefined;
-
   return (
     <KibanaPageTemplate
       paddingSize="none"
@@ -403,7 +391,6 @@ export function EpisodeDetailsPage() {
       <AppHeader
         sticky={false}
         title={episodeBreadcrumbTitle}
-        metadata={metadata}
         back={{
           href: episodesListHref,
           label: i18n.EPISODES_LIST_BACK_LABEL,

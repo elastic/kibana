@@ -145,6 +145,8 @@ export const EntityHighlightsAccordion: React.FC<{
     entitySnapshot,
     refetchEntityRecord,
     refetchPersistedSummary,
+    // Persist only when the user can read the metadata index, otherwise keep it in-session only
+    persistSummary: canReadPersistedSummary,
   });
 
   // Staleness check — compare stored snapshot against current entity signals.
@@ -360,6 +362,7 @@ export const EntityHighlightsAccordion: React.FC<{
             showAnonymizedValues={showAnonymizedValues}
             generatedAt={assistantResult?.generatedAt ?? null}
             generatedBy={assistantResult?.generatedBy ?? ''}
+            authorProfileUid={assistantResult?.authorProfileUid}
             stalenessReasons={stalenessReasons}
             onRefresh={fetchEntityHighlights}
             canRegenerate={canGenerate}
