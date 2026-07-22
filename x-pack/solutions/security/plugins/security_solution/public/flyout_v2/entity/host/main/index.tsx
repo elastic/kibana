@@ -13,10 +13,7 @@ import type { DataTableRecord } from '@kbn/discover-utils';
 import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { useUpdateAssetCriticality } from '../../../../entity_analytics/api/hooks/use_update_asset_criticality';
 import { useAssetCriticalityPrivileges } from '../../../../entity_analytics/components/asset_criticality/use_asset_criticality';
-import { useRefetchQueryById } from '../../../../entity_analytics/api/hooks/use_refetch_query_by_id';
-import type { Refetch } from '../../../../common/types';
 import { useEntityRiskScoreRecalculation } from '../../../../entity_analytics/api/hooks/use_entity_risk_score_recalculation';
-import { ENTITY_ANALYTICS_TABLE_ID } from '../../../../entity_analytics/components/home/constants';
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
 import { useQueryInspector } from '../../../../common/components/page/manage_query';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
@@ -174,11 +171,6 @@ export const Host: FC<HostProps> = memo(function Host({
     entityStoreV2Enabled ? entityFromStoreResult : undefined
   );
 
-  const refetchEntitiesTable = useRefetchQueryById(ENTITY_ANALYTICS_TABLE_ID);
-  const onRecalculation = useCallback(() => {
-    (refetchEntitiesTable as Refetch | null)?.();
-  }, [refetchEntitiesTable]);
-
   const { entityRiskScores, recalculatingScore, calculateEntityRiskScore } =
     useEntityRiskScoreRecalculation({
       entityType: EntityType.host,
@@ -187,13 +179,11 @@ export const Host: FC<HostProps> = memo(function Host({
       entityStoreV2Enabled,
       entityFromStoreResult,
       riskScoreState,
-      onRecalculation,
     });
 
   const onAssetCriticalityChanged = useCallback(() => {
-    (refetchEntitiesTable as Refetch | null)?.();
     calculateEntityRiskScore();
-  }, [calculateEntityRiskScore, refetchEntitiesTable]);
+  }, [calculateEntityRiskScore]);
 
   const { updateAssetCriticalityLevel } = useUpdateAssetCriticality('host', {
     onSuccess: onAssetCriticalityChanged,
@@ -262,7 +252,7 @@ export const Host: FC<HostProps> = memo(function Host({
   ) : undefined;
 
   const onShowHost = useCallback(() => {
-    openHostFlyoutAsChild({ hostName, entityId, scopeId, title: hostName });
+    openHostFlyoutAsChild({ hostName, entityId, scopeId });
   }, [openHostFlyoutAsChild, hostName, entityId, scopeId]);
 
   const onShowRelatedEntity = useCallback(
@@ -290,7 +280,6 @@ export const Host: FC<HostProps> = memo(function Host({
             entityName: hostName,
             entityId: entityStoreEntityId,
             onShowEntity: onShowHost,
-            title: hostName,
           });
         case EntityDetailsLeftPanelTab.ANOMALIES:
           return openEntityAnomalyInsights({
@@ -298,7 +287,6 @@ export const Host: FC<HostProps> = memo(function Host({
             value: hostName,
             entityId: entityStoreEntityId,
             onOpenEntity: onShowHost,
-            title: hostName,
           });
         case EntityDetailsLeftPanelTab.CSP_INSIGHTS:
           switch (path.subTab) {
@@ -307,7 +295,6 @@ export const Host: FC<HostProps> = memo(function Host({
                 value: hostName,
                 entityId: panelDisplayEntityId,
                 onShowHost,
-                title: hostName,
               });
             case CspInsightLeftPanelSubTab.ALERTS:
               return openEntityAlertsInsights({
@@ -315,7 +302,6 @@ export const Host: FC<HostProps> = memo(function Host({
                 value: hostName,
                 entityId: panelDisplayEntityId,
                 onShowEntity: onShowHost,
-                title: hostName,
               });
             case CspInsightLeftPanelSubTab.MISCONFIGURATIONS:
               return openEntityMisconfigurationInsights({
@@ -323,7 +309,6 @@ export const Host: FC<HostProps> = memo(function Host({
                 value: hostName,
                 entityId: panelDisplayEntityId,
                 onShowEntity: onShowHost,
-                title: hostName,
               });
           }
           return;
@@ -335,7 +320,6 @@ export const Host: FC<HostProps> = memo(function Host({
             entityName: hostName,
             onShowEntity: onShowRelatedEntity,
             onShowOriginatingEntity: onShowHost,
-            title: hostName,
           });
         case EntityDetailsLeftPanelTab.RESOLUTION_GROUP:
           if (!entityStoreEntityId) return;
@@ -346,7 +330,6 @@ export const Host: FC<HostProps> = memo(function Host({
             scopeId,
             onShowEntity: onShowHost,
             onShowRelatedEntity,
-            title: hostName,
           });
       }
     },
@@ -418,7 +401,11 @@ export const Host: FC<HostProps> = memo(function Host({
       </EuiFlyoutBody>
       {assetInventoryEnabled && (
         <EuiFlyoutFooter>
-          <Footer identityFields={documentEntityIdentifiers} entity={entityFromStore} />
+          <Footer
+            hostName={hostName}
+            identityFields={documentEntityIdentifiers}
+            entity={entityFromStore}
+          />
         </EuiFlyoutFooter>
       )}
     </>

@@ -8,41 +8,15 @@
  */
 
 import type { JsonArray, JsonObject, JsonValue } from '@kbn/utility-types';
-import { createWorkflowLiquidEngine, pickObjectFields } from '@kbn/workflows';
+import { createWorkflowLiquidEngine } from '@kbn/workflows';
 import { resolvePathValue } from './resolve_path_value';
 import type { ExecutionContext } from '../execution_context/build_execution_context';
 
-// Create a liquid engine instance with the same configuration as the server
+// Create a liquid engine instance with the same configuration as the server.
+// Custom filters (json_parse, entries, pick) are registered inside createWorkflowLiquidEngine.
 const liquidEngine = createWorkflowLiquidEngine({
   strictFilters: true, // Match server-side behavior - error on unknown filters
   strictVariables: false,
-});
-
-// Register custom filters that match server-side exactly
-liquidEngine.registerFilter('json_parse', (value: unknown): unknown => {
-  if (typeof value !== 'string') {
-    return value;
-  }
-  try {
-    return JSON.parse(value);
-  } catch (error) {
-    return value;
-  }
-});
-
-liquidEngine.registerFilter('entries', (value: unknown): unknown => {
-  if (typeof value !== 'object' || value === null || Array.isArray(value)) {
-    return value;
-  }
-  return Object.entries(value).map(([k, v]) => ({ key: k, value: v }));
-});
-
-liquidEngine.registerFilter('pick', (value: unknown, ...args: unknown[]): unknown => {
-  const paths = args.length === 1 && Array.isArray(args[0]) ? args[0] : args;
-  return pickObjectFields(
-    value,
-    paths.filter((path): path is string => typeof path === 'string')
-  );
 });
 
 export interface EvaluateExpressionOptions {

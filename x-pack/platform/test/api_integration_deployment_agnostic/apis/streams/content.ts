@@ -17,10 +17,7 @@ import type { ContentPack, ContentPackEntry, ContentPackStream } from '@kbn/cont
 import { ROOT_STREAM_ID } from '@kbn/content-packs-schema';
 import type { FieldDefinition, RoutingDefinition, Streams } from '@kbn/streams-schema';
 import { emptyAssets } from '@kbn/streams-schema';
-import {
-  OBSERVABILITY_STREAMS_ENABLE_CONTENT_PACKS,
-  OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS,
-} from '@kbn/management-settings-ids';
+import { OBSERVABILITY_STREAMS_ENABLE_CONTENT_PACKS } from '@kbn/management-settings-ids';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
 import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
@@ -205,9 +202,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     before(async () => {
       await kibanaServer.uiSettings.update({
         [OBSERVABILITY_STREAMS_ENABLE_CONTENT_PACKS]: true,
-        // Significant events are seeded via the queries API in some tests below to prove export
-        // never carries them; that API is gated behind this feature flag.
-        [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS]: true,
       });
       await kibanaServer.uiSettings.waitForEventualCacheRefresh();
 
@@ -274,10 +268,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     after(async () => {
       await disableStreams(apiClient);
-      await kibanaServer.uiSettings.update({
-        [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS]: false,
-      });
-      await kibanaServer.uiSettings.waitForEventualCacheRefresh();
     });
 
     describe('Export', () => {

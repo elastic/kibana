@@ -91,7 +91,7 @@ describe('extractEventSearchCandidateCount', () => {
         tool_id: TOOL_ID_EVENT_SEARCH,
         tool_call_id: 'event-search-1',
         params: { state: 'open', stream_names: ['logs'] },
-        results: [{ type: 'other', data: { events: [{ discovery_slug: 'a' }], total: 1 } }],
+        results: [{ type: 'other', data: { events: [{ event_id: 'a' }], total: 1 } }],
       },
     ];
     expect(extractEventSearchCandidateCount(withEventSearch)).toBe(1);
@@ -104,9 +104,7 @@ describe('extractEventSearchCandidateCount', () => {
         tool_id: TOOL_ID_EVENT_SEARCH,
         tool_call_id: 'event-search-1',
         params: { state: 'open', stream_names: ['logs'] },
-        results: [
-          { type: 'other', data: { events: [{ discovery_slug: 'a' }, { discovery_slug: 'b' }] } },
-        ],
+        results: [{ type: 'other', data: { events: [{ event_id: 'a' }, { event_id: 'b' }] } }],
       },
     ];
     expect(extractEventSearchCandidateCount(withEventSearch)).toBe(2);

@@ -277,7 +277,6 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
           : 'UTC',
         locale,
         include_execution_metadata: true,
-        settings: { column_metadata: true },
       };
 
       if (input) {
@@ -364,7 +363,6 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
             approximation: input?.isApproximate,
             dropNullColumns: true,
             includeExecutionMetadata: true,
-            columnMetadata: true,
           }
         );
 

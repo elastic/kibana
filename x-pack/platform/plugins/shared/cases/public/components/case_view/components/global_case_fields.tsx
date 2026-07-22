@@ -47,7 +47,8 @@ export const GlobalCaseFields = React.memo<GlobalCaseFieldsProps>(({ caseData, o
   // React Query deduplicates this fetch — TemplateFields makes the same call.
   const { data: templateData, isLoading: isLoadingTemplate } = useGetTemplate(
     caseData.template?.id,
-    caseData.template?.version
+    caseData.template?.version,
+    { includeDeleted: true }
   );
 
   const templateRefNames = useMemo<ReadonlySet<string>>(

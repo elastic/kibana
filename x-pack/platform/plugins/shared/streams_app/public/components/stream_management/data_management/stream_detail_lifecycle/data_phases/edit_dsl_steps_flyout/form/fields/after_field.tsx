@@ -17,13 +17,9 @@ import {
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect } from '@elastic/eui';
 
+import { getTimingBoundHelpText, type HelpTextBound } from '@kbn/data-lifecycle-phases';
 import type { PreservedTimeUnit, TimeUnit } from '../types';
-import {
-  formatDuration,
-  getTimingBoundHelpText,
-  getUnitSelectOptions,
-  type HelpTextBound,
-} from '../../../shared';
+import { formatDuration, getUnitSelectOptions } from '../../../shared';
 import { getStepIndexFromArrayItemPath, toMilliseconds } from '../utils';
 import { MAX_DOWNSAMPLE_STEPS } from '../constants';
 import {
@@ -122,7 +118,7 @@ const AfterFieldControl = ({
   return (
     <EuiFormRow
       label={i18n.translate('xpack.streams.editDslStepsFlyout.afterLabel', {
-        defaultMessage: 'Downsample after data stored',
+        defaultMessage: 'Downsample after',
       })}
       helpText={helpText}
       isInvalid={isInvalid}
@@ -135,7 +131,7 @@ const AfterFieldControl = ({
             fullWidth
             min={0}
             aria-label={i18n.translate('xpack.streams.editDslStepsFlyout.afterAriaLabel', {
-              defaultMessage: 'Downsample after data stored value',
+              defaultMessage: 'Downsample after value',
             })}
             value={draftValue}
             isInvalid={isInvalid}

@@ -6,6 +6,7 @@
  */
 
 import { deleteAlertsAndRules } from '../../../../../tasks/api_calls/common';
+import { disableNewFlyout } from '../../../../../tasks/api_calls/kibana_advanced_settings';
 import { getNewThreatIndicatorRule, indicatorRuleMatchingDoc } from '../../../../../objects/rule';
 import { login } from '../../../../../tasks/login';
 import {
@@ -38,6 +39,7 @@ describe('Threat Match Enrichment', { tags: ['@ess', '@serverless', '@skipInServ
   });
 
   beforeEach(() => {
+    disableNewFlyout();
     deleteAlertsAndRules();
 
     cy.task('esArchiverLoad', { archiveName: 'threat_indicator' });

@@ -46,6 +46,7 @@ import {
   EpmPackagesSchemaV9,
   EpmPackagesSchemaV10,
   EpmPackagesSchemaV11,
+  EpmPackagesSchemaV12,
   SettingsSchemaV5,
   SettingsSchemaV6,
   SettingsSchemaV7,
@@ -1464,6 +1465,7 @@ export const getSavedObjectTypes = (
             dynamic: false,
             properties: {},
           },
+          installed_kibana_version: { type: 'keyword', ignore_above: 1024 },
         },
       },
       modelVersions: {
@@ -1609,6 +1611,20 @@ export const getSavedObjectTypes = (
           schemas: {
             forwardCompatibility: EpmPackagesSchemaV11.extends({}, { unknowns: 'ignore' }),
             create: EpmPackagesSchemaV11,
+          },
+        },
+        '12': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                installed_kibana_version: { type: 'keyword', ignore_above: 1024 },
+              },
+            },
+          ],
+          schemas: {
+            forwardCompatibility: EpmPackagesSchemaV12.extends({}, { unknowns: 'ignore' }),
+            create: EpmPackagesSchemaV12,
           },
         },
       },

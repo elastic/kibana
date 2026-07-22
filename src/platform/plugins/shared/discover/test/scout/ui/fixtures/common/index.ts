@@ -12,7 +12,9 @@ import type {
   ScoutParallelWorkerFixtures,
   ScoutSpaceParallelFixture,
 } from '@kbn/scout';
-import { spaceTest as spaceBaseTest, tags } from '@kbn/scout';
+import { createLazyPageObject, spaceTest as spaceBaseTest, tags } from '@kbn/scout';
+import { Inspector } from '@kbn/inspector-plugin/test/scout/ui/fixtures/page_objects';
+import { UnifiedFieldList } from '@kbn/unified-field-list/test/scout/ui/fixtures/page_objects';
 import * as testData from './constants';
 
 export interface DiscoverScoutSpace extends ScoutSpaceParallelFixture {
@@ -24,7 +26,25 @@ export type DiscoverWorkerFixtures = ScoutParallelWorkerFixtures & {
   discoverScoutSpace: DiscoverScoutSpace;
 };
 
-export const spaceTest = spaceBaseTest.extend<ScoutParallelTestFixtures, DiscoverWorkerFixtures>({
+export type DiscoverPageObjects = ScoutParallelTestFixtures['pageObjects'] & {
+  inspector: Inspector;
+  unifiedFieldList: UnifiedFieldList;
+};
+
+export interface DiscoverTestFixtures extends ScoutParallelTestFixtures {
+  pageObjects: DiscoverPageObjects;
+}
+
+export const spaceTest = spaceBaseTest.extend<DiscoverTestFixtures, DiscoverWorkerFixtures>({
+  pageObjects: async ({ pageObjects, page }, use) => {
+    const extendedPageObjects: DiscoverPageObjects = {
+      ...pageObjects,
+      inspector: createLazyPageObject(Inspector, page),
+      unifiedFieldList: createLazyPageObject(UnifiedFieldList, page),
+    };
+
+    await use(extendedPageObjects);
+  },
   discoverScoutSpace: [
     async ({ scoutSpace }, use) => {
       const discoverScoutSpace: DiscoverScoutSpace = {

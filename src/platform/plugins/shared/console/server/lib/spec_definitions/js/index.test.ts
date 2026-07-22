@@ -78,4 +78,95 @@ describe('console query DSL autocomplete globals', () => {
       });
     });
   });
+
+  // The `put_mapping` rules predate the Elasticsearch 7.x removal of mapping
+  // types, but its nested-object and multi-field scope links still pointed at
+  // the removed `type` level (`put_mapping.type.properties`). That path no
+  // longer exists in the rule tree, so sub-field autocomplete inside
+  // `properties.<field>.properties` and `properties.<field>.fields` resolved
+  // to nothing. The links must target the real top-level `properties` key.
+  describe('put_mapping nested field scope links', () => {
+    it('points nested object properties at the put_mapping properties rules', () => {
+      expect(endpoints.put_mapping.data_autocomplete_rules).toMatchObject({
+        properties: {
+          '*': {
+            properties: { __scope_link: 'put_mapping.properties' },
+            fields: { '*': { __scope_link: 'put_mapping.properties.field' } },
+          },
+        },
+      });
+    });
+
+    it('does not reference the removed mapping `type` level anywhere', () => {
+      expect(JSON.stringify(endpoints.put_mapping.data_autocomplete_rules)).not.toContain(
+        'put_mapping.type'
+      );
+    });
+  });
+
+  describe('WHEN generating put_mapping autocomplete rules', () => {
+    const dynamicTemplateMatchTypeValues = [
+      '*',
+      'string',
+      'object',
+      'long',
+      'double',
+      'boolean',
+      'date',
+      'binary',
+    ];
+
+    it('SHOULD expose dynamic mapping and dynamic template suggestions', () => {
+      expect(endpoints.put_mapping.data_autocomplete_rules).toMatchObject({
+        dynamic: {
+          __one_of: ['true', 'false', 'strict', 'runtime'],
+        },
+        dynamic_templates: [
+          {
+            '*': {
+              mapping: expect.any(Object),
+              runtime: expect.any(Object),
+              match: '',
+              match_pattern: {
+                __one_of: ['simple', 'regex'],
+              },
+              match_mapping_type: {
+                __one_of: [
+                  {
+                    __one_of: dynamicTemplateMatchTypeValues,
+                  },
+                  [
+                    {
+                      __one_of: dynamicTemplateMatchTypeValues,
+                    },
+                  ],
+                ],
+              },
+              path_match: '',
+              path_unmatch: '',
+              unmatch: '',
+              unmatch_mapping_type: {
+                __one_of: [
+                  {
+                    __one_of: dynamicTemplateMatchTypeValues,
+                  },
+                  [
+                    {
+                      __one_of: dynamicTemplateMatchTypeValues,
+                    },
+                  ],
+                ],
+              },
+            },
+          },
+        ],
+      });
+    });
+
+    it('SHOULD link the generated indices.put_mapping endpoint to the put_mapping body rules', () => {
+      expect(endpoints['indices.put_mapping'].data_autocomplete_rules).toEqual({
+        __scope_link: 'put_mapping',
+      });
+    });
+  });
 });

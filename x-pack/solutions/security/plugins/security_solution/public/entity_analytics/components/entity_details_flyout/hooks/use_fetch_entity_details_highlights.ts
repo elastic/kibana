@@ -113,7 +113,7 @@ export const useFetchEntityDetailsHighlights = ({
   const { fetchEntityDetailsHighlights, saveEntityAiSummary } = useEntityAnalyticsRoutes();
   const { addError } = useAppToasts();
   const currentUser = useCurrentUser();
-  const [isChatLoading, setIsChatLoading] = useState(false);
+  const [isGeneratingSummary, setIsGeneratingSummary] = useState(false);
   const [abortController, setAbortController] = useState<AbortController | null>(null);
   const [error, setError] = useState<Error | null>(null);
   const [assistantResult, setAssistantResult] = useState<AssistantResult>(() =>
@@ -158,7 +158,7 @@ export const useFetchEntityDetailsHighlights = ({
     // re-clicked while entity data is gathered. The try/finally below always resets it.
     const controller = new AbortController();
     setAbortController(controller);
-    setIsChatLoading(true);
+    setIsGeneratingSummary(true);
 
     try {
       const toDate = Date.now();
@@ -277,7 +277,7 @@ export const useFetchEntityDetailsHighlights = ({
       });
       setError(caughtError);
     } finally {
-      setIsChatLoading(false);
+      setIsGeneratingSummary(false);
       setAbortController(null);
     }
   }, [
@@ -299,13 +299,13 @@ export const useFetchEntityDetailsHighlights = ({
     if (abortController) {
       abortController.abort();
       setAbortController(null);
-      setIsChatLoading(false);
+      setIsGeneratingSummary(false);
     }
   }, [abortController]);
 
   return {
     fetchEntityHighlights,
-    isChatLoading,
+    isGeneratingSummary,
     abortStream,
     result: assistantResult,
     error,

@@ -18,3 +18,4 @@ export { persistentContextFixture } from './context/persistent_context';
 export { pageContextFixture } from './context/page_context';
 export { perfTrackerFixture } from './performance';
 export type { PerfTrackerFixture } from './performance';
+export { networkFixture, type NetworkFixture } from './network';

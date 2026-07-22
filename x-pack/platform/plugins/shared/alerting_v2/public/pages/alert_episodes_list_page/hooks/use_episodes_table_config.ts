@@ -7,10 +7,12 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
+import type { EpisodesSortState } from '@kbn/alerting-v2-episodes-ui/queries/episodes_query';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import deepEqual from 'fast-deep-equal';
 import {
+  DEFAULT_EPISODES_TABLE_CONFIG,
   type EpisodesTableConfig,
   mergeEpisodesTableConfig,
   readEpisodesTableConfigFromStorage,
@@ -20,8 +22,8 @@ import {
 } from '../utils/episodes_table_config';
 
 /**
- * Persists episode table display options (currently just row height) to both the URL
- * (`_a.episodesTable`) and localStorage, so they survive reloads and are shareable via URL.
+ * Persists episode table display options (columns, sort, row height, column widths) to both
+ * the URL (`_a.episodesTable`) and localStorage, so they survive reloads and are shareable via URL.
  *
  * Precedence on load (and on re-sync from browser Back/Forward): URL > localStorage > default.
  * Every setter writes to both stores, so the two stay in sync going forward.
@@ -69,6 +71,24 @@ export const useEpisodesTableConfig = (storage: Storage) => {
     [storage, urlStateStorage]
   );
 
+  const setVisibleColumns = useCallback(
+    (visibleColumns: string[]) => {
+      const next: EpisodesTableConfig = { ...configRef.current, visibleColumns };
+      setConfigInternal(next);
+      void persistConfig(next);
+    },
+    [persistConfig]
+  );
+
+  const setSort = useCallback(
+    (sort: EpisodesSortState) => {
+      const next: EpisodesTableConfig = { ...configRef.current, sort };
+      setConfigInternal(next);
+      void persistConfig(next);
+    },
+    [persistConfig]
+  );
+
   const setRowHeight = useCallback(
     (rowHeight: number) => {
       const next: EpisodesTableConfig = { ...configRef.current, rowHeight };
@@ -78,8 +98,39 @@ export const useEpisodesTableConfig = (storage: Storage) => {
     [persistConfig]
   );
 
+  const onResize = useCallback(
+    ({ columnId, width }: { columnId: string; width: number | undefined }) => {
+      const prevColumnSettings = configRef.current.columnSettings;
+      const next: EpisodesTableConfig = {
+        ...configRef.current,
+        columnSettings: {
+          ...prevColumnSettings,
+          [columnId]: {
+            ...prevColumnSettings[columnId],
+            width,
+          },
+        },
+      };
+      setConfigInternal(next);
+      void persistConfig(next);
+    },
+    [persistConfig]
+  );
+
+  const resetToDefaults = useCallback(() => {
+    setConfigInternal(DEFAULT_EPISODES_TABLE_CONFIG);
+    void persistConfig(DEFAULT_EPISODES_TABLE_CONFIG);
+  }, [persistConfig]);
+
   return {
+    visibleColumns: config.visibleColumns,
+    sort: config.sort,
     rowHeight: config.rowHeight,
+    columnSettings: config.columnSettings,
+    setVisibleColumns,
+    setSort,
     setRowHeight,
+    onResize,
+    resetToDefaults,
   };
 };

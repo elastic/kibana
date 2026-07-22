@@ -18,6 +18,7 @@ import type {
 } from '@kbn/agent-builder-common';
 import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
 import type { RunAgentFn } from '@kbn/agent-builder-server';
+import type { ExecutionConversationOrigin } from '@kbn/agent-builder-server/execution';
 import type { ConnectorTelemetryMetadata } from '@kbn/inference-common';
 
 export const executeAgent$ = ({
@@ -30,6 +31,7 @@ export const executeAgent$ = ({
   runAgent,
   conversation,
   nextInput,
+  origin,
   abortSignal,
   defaultConnectorId,
   telemetryMetadata,
@@ -48,6 +50,7 @@ export const executeAgent$ = ({
   runAgent: RunAgentFn;
   conversation?: Conversation;
   nextInput: ConverseInput;
+  origin?: ExecutionConversationOrigin;
   abortSignal?: AbortSignal;
   defaultConnectorId?: string;
   telemetryMetadata?: ConnectorTelemetryMetadata;
@@ -70,6 +73,7 @@ export const executeAgent$ = ({
       agentParams: {
         nextInput,
         conversation,
+        origin,
         capabilities,
         browserApiTools,
         configurationOverrides,

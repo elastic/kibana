@@ -15,13 +15,13 @@ import {
   EuiHorizontalRule,
   EuiLink,
   EuiPageBody,
-  EuiPageSection,
   EuiPanel,
   EuiSpacer,
   useEuiTheme,
 } from '@elastic/eui';
 
 import { useKibana } from '../../../common/lib/kibana';
+import { CasesPageBody } from '../../app/cases_page_body';
 import { Connectors } from '../../configure_cases/connectors';
 import * as configureCasesI18n from '../../configure_cases/translations';
 import { useConfigureCasesController } from '../../configure_cases/use_configure_cases_controller';
@@ -91,115 +91,117 @@ export const ConfigureCasesRedesign: React.FC = React.memo(() => {
     hasMinimumLicensePermissionsForObservables && isObservablesFeatureEnabled;
 
   return (
-    <EuiPageSection paddingSize="none">
+    <>
       <ConfigureCasesAppHeader />
-      <EuiPageBody restrictWidth={false}>
-        <div css={getFormWrapperCss(euiTheme)}>
-          {hasMinimumLicensePermissions && !connectorIsValid && (
-            <>
-              <div css={contentWrapperCss}>
-                <EuiCallOut
-                  announceOnMount
-                  title={configureCasesI18n.WARNING_NO_CONNECTOR_TITLE}
-                  color="warning"
-                  iconType="question"
-                  data-test-subj="configure-cases-warning-callout"
-                >
-                  <FormattedMessage
-                    defaultMessage="The selected connector has been deleted or you do not have the {appropriateLicense} to use it. Either select a different connector or create a new one."
-                    id="xpack.cases.configure.connectorDeletedOrLicenseWarning"
-                    values={{
-                      appropriateLicense: (
-                        <EuiLink href={docLinks.links.subscriptions} target="_blank">
-                          {configureCasesI18n.LINK_APPROPRIATE_LICENSE}
-                        </EuiLink>
-                      ),
-                    }}
-                  />
-                </EuiCallOut>
-              </div>
-              <EuiSpacer size="xl" />
-            </>
-          )}
-          <div css={contentWrapperCss}>
-            <EuiPanel hasBorder paddingSize="m" data-test-subj="cases-redesign-settings-panel">
-              {hasMinimumLicensePermissions && (
-                <SettingsSection
-                  data-test-subj="cases-redesign-external-incident-management-section"
-                  title={configureCasesI18n.INCIDENT_MANAGEMENT_SYSTEM_TITLE}
-                  description={configureCasesI18n.INCIDENT_MANAGEMENT_SYSTEM_DESC}
-                >
-                  <Connectors
-                    actionTypes={actionTypes}
-                    connectors={connectors ?? []}
-                    disabled={
-                      isPersistingConfiguration || isLoadingConnectors || !permissions.settings
-                    }
-                    handleShowEditFlyout={onClickUpdateConnector}
-                    hideTitle
-                    isLoading={isLoadingAny}
-                    mappings={mappings}
-                    onChangeConnector={onChangeConnector}
-                    selectedConnector={connector}
-                    updateConnectorDisabled={updateConnectorDisabled || !permissions.settings}
-                    onAddNewConnector={onAddNewConnector}
-                  />
-                </SettingsSection>
-              )}
+      <CasesPageBody>
+        <EuiPageBody restrictWidth={false}>
+          <div css={getFormWrapperCss(euiTheme)}>
+            {hasMinimumLicensePermissions && !connectorIsValid && (
+              <>
+                <div css={contentWrapperCss}>
+                  <EuiCallOut
+                    announceOnMount
+                    title={configureCasesI18n.WARNING_NO_CONNECTOR_TITLE}
+                    color="warning"
+                    iconType="question"
+                    data-test-subj="configure-cases-warning-callout"
+                  >
+                    <FormattedMessage
+                      defaultMessage="The selected connector has been deleted or you do not have the {appropriateLicense} to use it. Either select a different connector or create a new one."
+                      id="xpack.cases.configure.connectorDeletedOrLicenseWarning"
+                      values={{
+                        appropriateLicense: (
+                          <EuiLink href={docLinks.links.subscriptions} target="_blank">
+                            {configureCasesI18n.LINK_APPROPRIATE_LICENSE}
+                          </EuiLink>
+                        ),
+                      }}
+                    />
+                  </EuiCallOut>
+                </div>
+                <EuiSpacer size="xl" />
+              </>
+            )}
+            <div css={contentWrapperCss}>
+              <EuiPanel hasBorder paddingSize="m" data-test-subj="cases-redesign-settings-panel">
+                {hasMinimumLicensePermissions && (
+                  <SettingsSection
+                    data-test-subj="cases-redesign-external-incident-management-section"
+                    title={configureCasesI18n.INCIDENT_MANAGEMENT_SYSTEM_TITLE}
+                    description={configureCasesI18n.INCIDENT_MANAGEMENT_SYSTEM_DESC}
+                  >
+                    <Connectors
+                      actionTypes={actionTypes}
+                      connectors={connectors ?? []}
+                      disabled={
+                        isPersistingConfiguration || isLoadingConnectors || !permissions.settings
+                      }
+                      handleShowEditFlyout={onClickUpdateConnector}
+                      hideTitle
+                      isLoading={isLoadingAny}
+                      mappings={mappings}
+                      onChangeConnector={onChangeConnector}
+                      selectedConnector={connector}
+                      updateConnectorDisabled={updateConnectorDisabled || !permissions.settings}
+                      onAddNewConnector={onAddNewConnector}
+                    />
+                  </SettingsSection>
+                )}
 
-              {hasMinimumLicensePermissions && <EuiHorizontalRule margin="l" />}
+                {hasMinimumLicensePermissions && <EuiHorizontalRule margin="l" />}
 
-              {hasMinimumLicensePermissions && (
-                <SettingsSection
-                  data-test-subj="cases-redesign-case-closures-section"
-                  title={configureCasesI18n.CASE_CLOSURE_OPTIONS_TITLE}
-                  description={configureCasesI18n.CASE_CLOSURE_OPTIONS_DESC}
-                >
-                  <AutomaticClosureSwitch
-                    closureTypeSelected={closureType}
-                    disabled={
-                      isPersistingConfiguration || isLoadingConnectors || !permissions.settings
-                    }
-                    onChangeClosureType={onChangeClosureType}
-                  />
-                </SettingsSection>
-              )}
+                {hasMinimumLicensePermissions && (
+                  <SettingsSection
+                    data-test-subj="cases-redesign-case-closures-section"
+                    title={configureCasesI18n.CASE_CLOSURE_OPTIONS_TITLE}
+                    description={configureCasesI18n.CASE_CLOSURE_OPTIONS_DESC}
+                  >
+                    <AutomaticClosureSwitch
+                      closureTypeSelected={closureType}
+                      disabled={
+                        isPersistingConfiguration || isLoadingConnectors || !permissions.settings
+                      }
+                      onChangeClosureType={onChangeClosureType}
+                    />
+                  </SettingsSection>
+                )}
 
-              {hasMinimumLicensePermissions && showObservableTypesSection && (
-                <EuiHorizontalRule margin="l" />
-              )}
+                {hasMinimumLicensePermissions && showObservableTypesSection && (
+                  <EuiHorizontalRule margin="l" />
+                )}
 
-              {showObservableTypesSection && (
-                <SettingsSection
-                  data-test-subj="cases-redesign-observable-types-section"
-                  title={observableTypesI18n.TITLE}
-                  description={observableTypesI18n.DESCRIPTION}
-                >
-                  <ObservableTypes
-                    observableTypes={observableTypes}
-                    isLoading={isLoadingCaseConfiguration}
-                    disabled={isLoadingCaseConfiguration}
-                    hideTitle
-                    useLineSeparators
-                    handleAddObservableType={() =>
-                      setFlyOutVisibility({ type: 'observableTypes', visible: true })
-                    }
-                    handleDeleteObservableType={onDeleteObservableType}
-                    handleEditObservableType={onEditObservableType}
-                  />
-                </SettingsSection>
-              )}
-            </EuiPanel>
+                {showObservableTypesSection && (
+                  <SettingsSection
+                    data-test-subj="cases-redesign-observable-types-section"
+                    title={observableTypesI18n.TITLE}
+                    description={observableTypesI18n.DESCRIPTION}
+                  >
+                    <ObservableTypes
+                      observableTypes={observableTypes}
+                      isLoading={isLoadingCaseConfiguration}
+                      disabled={isLoadingCaseConfiguration}
+                      hideTitle
+                      useLineSeparators
+                      handleAddObservableType={() =>
+                        setFlyOutVisibility({ type: 'observableTypes', visible: true })
+                      }
+                      handleDeleteObservableType={onDeleteObservableType}
+                      handleEditObservableType={onEditObservableType}
+                    />
+                  </SettingsSection>
+                )}
+              </EuiPanel>
+            </div>
+
+            <EuiSpacer size="xl" />
+
+            {ConnectorAddFlyout}
+            {ConnectorEditFlyout}
+            {AddOrEditObservableTypeFlyout}
           </div>
-
-          <EuiSpacer size="xl" />
-
-          {ConnectorAddFlyout}
-          {ConnectorEditFlyout}
-          {AddOrEditObservableTypeFlyout}
-        </div>
-      </EuiPageBody>
-    </EuiPageSection>
+        </EuiPageBody>
+      </CasesPageBody>
+    </>
   );
 });
 

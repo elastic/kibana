@@ -19,6 +19,7 @@ export const SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID =
 export interface SignificantEventsScheduledDetectionWorkflowTemplateValues
   extends ManagedWorkflowTemplateValues {
   detectionIntervalMinutes: number;
+  targetCoverageMinutes: number;
 }
 
 export interface SignificantEventsScheduledReviewWorkflowTemplateValues
@@ -55,12 +56,13 @@ const renderTemplate = (template: string, values: Record<string, string | number
 export const SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW = {
   id: SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
   pluginId: 'significant_events',
-  version: 2,
+  version: 3,
   billable: false,
-  yamlTemplate: ({ detectionIntervalMinutes }) =>
+  yamlTemplate: ({ detectionIntervalMinutes, targetCoverageMinutes }) =>
     renderTemplate(SCHEDULED_DETECTION_YAML, {
       __DETECTION_INTERVAL_MINUTES__: detectionIntervalMinutes,
       __DETECTION_LOOKBACK_MINUTES__: getDetectionLookbackMinutes(detectionIntervalMinutes),
+      __TARGET_COVERAGE_MINUTES__: targetCoverageMinutes,
     }),
   management: SCHEDULED_SIGNIFICANT_EVENTS_WORKFLOW_MANAGEMENT,
 } as const satisfies ManagedWorkflowDefinition<SignificantEventsScheduledDetectionWorkflowTemplateValues>;

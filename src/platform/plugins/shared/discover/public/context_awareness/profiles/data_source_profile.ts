@@ -14,6 +14,7 @@ import type { AsyncProfileProvider, ContextWithProfileId } from '../profile_serv
 import { AsyncProfileService } from '../profile_service';
 import type { Profile } from '../types';
 import type { RootContext } from './root_profile';
+import type { ProfileStateDefinition } from '../profile_state';
 
 /**
  * Indicates the category of the data source (e.g. logs, alerts, etc.)
@@ -60,6 +61,10 @@ export interface DataSourceContext {
    * The category of the current data source
    */
   category: DataSourceCategory;
+  /**
+   * Optional profile state definition whose URL fields should sync with Discover's URL.
+   */
+  profileState?: ProfileStateDefinition<object>;
 }
 
 export type DataSourceProfileProvider<TProviderContext = {}> = AsyncProfileProvider<

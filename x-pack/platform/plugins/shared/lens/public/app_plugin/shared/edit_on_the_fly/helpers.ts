@@ -127,7 +127,6 @@ export const getGridAttrs = async (
     variables: esqlVariables,
     timezone,
     ...(approximation !== undefined ? { approximation } : {}),
-    includeColumnMetadata: true,
   });
 
   const { all_columns: allColumns = [], columns: valueColumns = [], values } = results.response;

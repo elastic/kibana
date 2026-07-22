@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 export const FILE_DISPLAY_NAME = i18n.translate('xpack.cases.attachments.file.displayName', {
   defaultMessage: 'Files',
@@ -76,6 +78,60 @@ export const SEARCH_PLACEHOLDER = i18n.translate('xpack.cases.caseView.files.sea
 export const FAILED_UPLOAD = i18n.translate('xpack.cases.caseView.files.failedUpload', {
   defaultMessage: 'Failed to upload file',
 });
+
+export const SUPPORTED_FORMATS = (
+  <FormattedMessage
+    id="xpack.cases.caseView.files.supportedFormats"
+    defaultMessage="<b>Supported formats:</b> Images, Documents, and Archives."
+    values={{ b: (chunks) => <strong>{chunks}</strong> }}
+  />
+);
+
+export const SUPPORTED_FORMATS_TOOLTIP_ARIA_LABEL = i18n.translate(
+  'xpack.cases.caseView.files.supportedFormatsTooltipAriaLabel',
+  {
+    defaultMessage: 'View commonly supported file formats',
+  }
+);
+
+export const SUPPORTED_FORMATS_FULL_LIST = (
+  <>
+    <FormattedMessage
+      id="xpack.cases.caseView.files.supportedFormatsImages"
+      defaultMessage="<b>Images:</b> PNG, JPEG, JPEG 2000, WebP, SVG, TIFF, BMP, AVIF, ICO, APNG, HEIC/HEIF, DjVu, DICOM, DWG, DXF, PSD, and other specialized formats."
+      values={{ b: (chunks) => <strong>{chunks}</strong> }}
+    />
+    <br />
+    <br />
+    <FormattedMessage
+      id="xpack.cases.caseView.files.supportedFormatsDocuments"
+      defaultMessage="<b>Documents:</b> PDF, Text, CSV, JSON."
+      values={{ b: (chunks) => <strong>{chunks}</strong> }}
+    />
+    <br />
+    <br />
+    <FormattedMessage
+      id="xpack.cases.caseView.files.supportedFormatsArchives"
+      defaultMessage="<b>Archives:</b> ZIP, GZIP, BZIP/BZIP2, 7Z, TAR."
+      values={{ b: (chunks) => <strong>{chunks}</strong> }}
+    />
+  </>
+);
+
+export const UNSUPPORTED_FILE_TYPE_TITLE = i18n.translate(
+  'xpack.cases.caseView.files.unsupportedFileTypeTitle',
+  {
+    defaultMessage: 'Unsupported file type',
+  }
+);
+
+export const UNSUPPORTED_FILE_TYPE = (
+  <FormattedMessage
+    id="xpack.cases.caseView.files.unsupportedFileType"
+    defaultMessage="The file type you are trying to upload is not supported.{br}{br}Supported formats include Images, Documents and Archives."
+    values={{ br: <br /> }}
+  />
+);
 
 export const UNKNOWN_MIME_TYPE = i18n.translate('xpack.cases.caseView.files.unknownMimeType', {
   defaultMessage: 'Unknown',

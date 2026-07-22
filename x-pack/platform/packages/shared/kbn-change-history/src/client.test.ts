@@ -62,3 +62,45 @@ describe('ChangeHistoryClient.initialize', () => {
     expect(client.isInitialized()).toBe(true);
   });
 });
+
+describe('ChangeHistoryClient.logBulk', () => {
+  const logger = loggingSystemMock.createLogger();
+  const defaultConstructorOpts = {
+    module: 'workflows',
+    dataset: 'definitions',
+    logger,
+    kibanaVersion: '9.4.0',
+  };
+
+  beforeEach(() => {
+    FLAGS.FEATURE_ENABLED = true;
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('re-throws the original ES error without wrapping so retry classifiers can read .name', async () => {
+    const noLivingConnections = Object.assign(new Error('There are no living connections'), {
+      name: 'NoLivingConnectionsError',
+    });
+    const dataStreamClient = {
+      create: jest.fn().mockRejectedValue(noLivingConnections),
+    };
+    DataStreamClientMock.initialize.mockResolvedValue(dataStreamClient as never);
+
+    const client = new ChangeHistoryClient(defaultConstructorOpts);
+    await client.initialize(elasticsearchServiceMock.createElasticsearchClient());
+
+    const thrown = await client
+      .logBulk([{ objectType: 'workflow', objectId: 'w1', snapshot: { name: 'w1' } }], {
+        action: 'install',
+        username: 'kibana',
+        spaceId: 'default',
+      })
+      .catch((err) => err);
+
+    expect(thrown).toBe(noLivingConnections);
+    expect(thrown.name).toBe('NoLivingConnectionsError');
+  });
+});

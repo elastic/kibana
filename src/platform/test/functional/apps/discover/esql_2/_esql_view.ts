@@ -286,7 +286,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // chart and time picker updated
         await elasticChart.waitForRenderingCount(renderingCount + 1);
         const newDurationHours = await timePicker.getTimeDurationInHours();
-        expect(Math.round(newDurationHours)).to.be(17);
+        expect(Math.round(newDurationHours)).to.be(18);
       });
     });
 

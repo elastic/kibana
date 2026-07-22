@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
-import { EuiDescriptionList, useEuiTheme } from '@elastic/eui';
+import { EuiDescriptionList, EuiText, useEuiTheme } from '@elastic/eui';
 import { ALERT_EPISODE_ACTION_TYPE } from '@kbn/alerting-v2-schemas';
 import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import type { DataView } from '@kbn/data-views-plugin/common';
@@ -18,11 +18,17 @@ import { EMPTY_VALUE } from '../../constants';
 import { formatDateTime } from '../../utils/format_date_time';
 import * as i18n from './translations';
 
+/**
+ * Controls the grouping row, which is derived from the rule.
+ */
+export type GroupingRowStatus = 'visible' | 'hidden' | 'error';
+
 export interface AlertEpisodeOverviewListProps {
   groupingFields: string[];
   groupingData: Record<string, unknown>;
   /** Source data view used to format grouping values with their field's `fieldFormats` formatter. */
   groupingDataView?: DataView;
+  groupingStatus?: GroupingRowStatus;
   triggeredAt: string | undefined;
   durationMs: number | undefined;
   assigneeUid: string | undefined;
@@ -36,6 +42,7 @@ export const AlertEpisodeOverviewList = ({
   groupingFields,
   groupingData,
   groupingDataView,
+  groupingStatus = 'visible',
   triggeredAt,
   durationMs,
   assigneeUid,
@@ -63,17 +70,30 @@ export const AlertEpisodeOverviewList = ({
         }
       `}
       listItems={[
-        {
-          title: i18n.METADATA_LIST_GROUPING_LABEL,
-          description: (
-            <AlertingEpisodeGroupingTags
-              fields={groupingFields}
-              data={groupingData}
-              dataView={groupingDataView}
-              data-test-subj="alertingV2EpisodeDetailsOverviewListGroupingTags"
-            />
-          ),
-        },
+        ...(groupingStatus === 'hidden'
+          ? []
+          : [
+              {
+                title: i18n.METADATA_LIST_GROUPING_LABEL,
+                description:
+                  groupingStatus === 'error' ? (
+                    <EuiText
+                      size="s"
+                      color="danger"
+                      data-test-subj="alertingV2EpisodeDetailsOverviewListGroupingError"
+                    >
+                      {i18n.METADATA_LIST_GROUPING_ERROR}
+                    </EuiText>
+                  ) : (
+                    <AlertingEpisodeGroupingTags
+                      fields={groupingFields}
+                      data={groupingData}
+                      dataView={groupingDataView}
+                      data-test-subj="alertingV2EpisodeDetailsOverviewListGroupingTags"
+                    />
+                  ),
+              },
+            ]),
         {
           title: i18n.METADATA_LIST_TRIGGERED_LABEL,
           description: triggeredAt ? formatDateTime(triggeredAt, dateFormat) : EMPTY_VALUE,

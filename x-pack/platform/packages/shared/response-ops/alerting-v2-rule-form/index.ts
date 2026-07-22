@@ -61,27 +61,25 @@ export type {
 
 export {
   buildInlineWorkflowYaml,
+  buildRuleScopedMatcher,
   InlineWorkflowEditor,
   INLINE_ACTION_STEP_DEFINITIONS,
   getInlineActionStepDefinition,
   getDefaultInlineActionStepDefinition,
   isActionValid,
-  buildRuleScopedMatcher,
-  selectRuleSimpleActionPolicies,
   isExplicitlyLinkedToRule,
   isRuleScopedCatchAllMatcher,
   summarizeExplicitlyLinkedActionPolicies,
 } from './actions_form';
 export type {
   ActionDraft,
-  ActionDraftOrigin,
-  RuleScopedSimpleActionPolicy,
   LinkedActionPolicySummary,
   InlineActionStepDefinition,
   InlineActionStepType,
   InlineWorkflowActionDraft,
 } from './actions_form';
-export { getRuleNotificationDraftsQueryKey } from './flyout/compose_discover/compose_discover_form/use_rule_notification_drafts';
+export { useMatchedActionPolicies } from './flyout/compose_discover/compose_discover_form/use_matched_action_policies';
+export type { UseMatchedActionPoliciesResult } from './flyout/compose_discover/compose_discover_form/use_matched_action_policies';
 
 // Threshold rule-builder ES|QL parser + types — consumed by the episode trend chart
 export { parseThresholdEsql } from './flyout/compose_discover/rule_builder/threshold/parse_esql';

@@ -77,6 +77,42 @@ describe('AnomaliesBadge', () => {
     );
   });
 
+  it('renders "None" when the anomaly score is zero', () => {
+    renderBadge(<AnomaliesBadge score={0} detectorType={AnomalyDetectorType.txLatency} />);
+
+    expect(screen.getByTestId('apmAnomaliesBadge')).toHaveTextContent('None');
+  });
+
+  it('renders "None" when the anomaly score displays as 0.00', () => {
+    renderBadge(<AnomaliesBadge score={0.004} detectorType={AnomalyDetectorType.txLatency} />);
+
+    expect(screen.getByTestId('apmAnomaliesBadge')).toHaveTextContent('None');
+  });
+
+  it('renders "Low" when the anomaly score is above the none threshold', () => {
+    renderBadge(<AnomaliesBadge score={0.01} detectorType={AnomalyDetectorType.txLatency} />);
+
+    expect(screen.getByTestId('apmAnomaliesBadge')).toHaveTextContent('Low (0)');
+  });
+
+  it('shows the none tooltip when the anomaly score is zero', async () => {
+    renderBadge(<AnomaliesBadge score={0} detectorType={AnomalyDetectorType.txLatency} />);
+
+    expect(await getTooltipText()).toBe('No anomalies detected for the selected time range.');
+  });
+
+  it('renders as non-interactive when the anomaly score is zero', () => {
+    renderBadge(
+      <AnomaliesBadge
+        score={0}
+        detectorType={AnomalyDetectorType.txLatency}
+        navigationProps={regularClickProps}
+      />
+    );
+
+    expect(screen.getByTestId('apmAnomaliesBadge').closest('a')).toBeNull();
+  });
+
   it('links to the regular service overview with proper params', () => {
     renderBadge(
       <AnomaliesBadge

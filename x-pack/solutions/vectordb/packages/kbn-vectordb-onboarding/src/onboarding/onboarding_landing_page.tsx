@@ -13,6 +13,7 @@ import {
   EuiText,
   EuiTitle,
   useEuiTheme,
+  EuiIcon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useHistory } from 'react-router-dom';
@@ -34,11 +35,12 @@ export const OnboardingLandingPage = () => {
     <EuiPageTemplate panelled={false} grow={false}>
       <EuiPageTemplate.Section paddingSize="xl" grow={false}>
         <EuiSpacer size="xxl" />
-        <EuiSpacer size="m" />
+        <EuiIcon size="xxl" type="logoVectorDB" aria-hidden={true} />
+        <EuiSpacer size="l" />
         <EuiTitle size="l">
           <h1>
             {i18n.translate('vectordbOnboarding.pathSelection.title', {
-              defaultMessage: 'The fastest path to vector search',
+              defaultMessage: 'Set up your Elasticsearch Vector Database',
             })}
           </h1>
         </EuiTitle>
@@ -47,7 +49,7 @@ export const OnboardingLandingPage = () => {
           <p>
             {i18n.translate('vectordbOnboarding.pathSelection.description', {
               defaultMessage:
-                'Production-grade defaults for vector workloads, hybrid search and two ways to get embeddings.',
+                'Production-grade defaults, hybrid search, and your choice of generating embeddings or bringing your own.',
             })}
           </p>
         </EuiText>

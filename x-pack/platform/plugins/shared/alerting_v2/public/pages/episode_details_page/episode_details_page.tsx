@@ -52,6 +52,10 @@ import type { AlertEpisodesKibanaServices } from '../../episodes_kibana_services
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { UserCapabilities } from '../../services/user_capabilities';
 import { getDiscoverHrefForRuleAndEpisodeTimestamp } from '../../utils/discover_href_for_episode';
+import {
+  filterEpisodeActionsByPrivilege,
+  EPISODE_ACTIONS_PRIVILEGE,
+} from '../../utils/filter_episode_actions_by_privilege';
 import { getEpisodeHeaderBadges } from './utils/get_episode_header_badges';
 import { getEpisodeHeaderMenu } from './utils/get_episode_header_menu';
 import {
@@ -76,6 +80,9 @@ export function EpisodeDetailsPage() {
 
   const { services } = useKibana<AlertEpisodesKibanaServices>();
   const queryClient = useQueryClient();
+  const alertsCapability = useService(UserCapabilities).canWrite('alerts')
+    ? EPISODE_ACTIONS_PRIVILEGE.all
+    : EPISODE_ACTIONS_PRIVILEGE.read;
   const { data, http, spaces } = services;
   const history = useHistory();
 
@@ -163,27 +170,30 @@ export function EpisodeDetailsPage() {
 
   const episodeActions: EpisodeAction[] = useMemo(
     () =>
-      createEpisodeActions({
-        http: services.http,
-        overlays: services.overlays,
-        notifications: services.notifications,
-        rendering: services.rendering,
-        application: services.application,
-        userProfile: services.userProfile,
-        docLinks: services.docLinks,
-        expressions: services.expressions,
-        spaces: services.spaces,
-        queryClient,
-        getDiscoverHref: ({ episodeIsoTimestamp: ts }) =>
-          getDiscoverHrefForRuleAndEpisodeTimestamp({
-            share: services.share,
-            capabilities: services.application.capabilities,
-            uiSettings: services.uiSettings,
-            ruleEsql: showRuleDependentUi ? getBreachEsqlQuery(ruleState.rule.query) : undefined,
-            episodeIsoTimestamp: ts,
-          }),
-      }),
-    [services, queryClient, showRuleDependentUi, ruleState]
+      filterEpisodeActionsByPrivilege(
+        createEpisodeActions({
+          http: services.http,
+          overlays: services.overlays,
+          notifications: services.notifications,
+          rendering: services.rendering,
+          application: services.application,
+          userProfile: services.userProfile,
+          docLinks: services.docLinks,
+          expressions: services.expressions,
+          spaces: services.spaces,
+          queryClient,
+          getDiscoverHref: ({ episodeIsoTimestamp: ts }) =>
+            getDiscoverHrefForRuleAndEpisodeTimestamp({
+              share: services.share,
+              capabilities: services.application.capabilities,
+              uiSettings: services.uiSettings,
+              ruleEsql: showRuleDependentUi ? getBreachEsqlQuery(ruleState.rule.query) : undefined,
+              episodeIsoTimestamp: ts,
+            }),
+        }),
+        alertsCapability
+      ),
+    [services, queryClient, showRuleDependentUi, ruleState, alertsCapability]
   );
 
   const applicableActions = useMemo(
@@ -408,7 +418,7 @@ export function EpisodeDetailsPage() {
         badges={headerBadges}
         menu={headerMenu}
         tabs={headerTabs}
-        padding={{ bleed: 'm' }}
+        spacing="bleed"
       />
       <EuiSpacer size="m" />
       {isLoading ? (

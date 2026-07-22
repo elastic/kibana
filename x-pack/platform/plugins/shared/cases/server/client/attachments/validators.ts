@@ -13,8 +13,6 @@ import {
   isCommentRequestTypePersistableState,
   isLegacyAttachmentRequest,
   isUnifiedAttachmentRequest,
-  isUnifiedReferenceAttachmentRequest,
-  isUnifiedValueAttachmentRequest,
   isPersistableType,
   toUnifiedPersistableStateAttachmentType,
 } from '../../../common/utils/attachments';
@@ -122,24 +120,11 @@ export const validateUnifiedRegisteredAttachments = ({
     );
   }
 
-  // Prefer `schema`; fall back to the slice-based `schemaValidator` below.
-  if (attachmentType.schema) {
-    parseUnifiedAttachmentWithSchema(attachmentType.schema, query, query.type);
-    return;
+  if (!attachmentType.schema) {
+    throw Boom.badRequest(`Attachment type '${query.type}' does not define a schema.`);
   }
 
-  if (!attachmentType.schemaValidator) {
-    throw Boom.badRequest(`Attachment type '${query.type}' does not define a schema validator.`);
-  }
-  if (isUnifiedValueAttachmentRequest(query)) {
-    attachmentType.schemaValidator(query.data);
-  } else if (isUnifiedReferenceAttachmentRequest(query)) {
-    attachmentType.schemaValidator(query.metadata ?? null);
-  } else {
-    throw Boom.badRequest(
-      `Invalid unified attachment request: expected value (data) or reference (attachmentId) shape.`
-    );
-  }
+  parseUnifiedAttachmentWithSchema(attachmentType.schema, query, query.type);
 };
 
 export const validateRegisteredAttachments = ({
