@@ -30,11 +30,11 @@ import { shouldIdentifyFeatures } from '../../../../lib/significant_events/featu
 import { isSignificantEventsSemanticCodeSearchGroundingEnabled } from '../../../../lib/semantic_code_search_grounding/is_significant_events_semantic_code_search_grounding_enabled';
 import type { SyncWorkflowService } from '../../../../lib/workflows/sync_workflow';
 
-// Best-effort bootstrap of the standalone KI sync (groundedness) sweep workflow.
-// Feature extraction is the only ongoing coupling to sync: it runs under a
-// request whose API key can schedule the workflow trigger. `ensureEnabled` is
-// idempotent (early return when already enabled), so this is cheap and safe to
-// call on every identify. Non-blocking: a failure here must never fail extraction.
+// Best-effort bootstrap of the standalone KI sync (groundedness) sweep workflow,
+// which runs under a request whose API key can schedule the workflow trigger.
+// Only the inferred route bootstraps: it runs at least once per identification
+// pass and always precedes computed identification, so hooking it covers every
+// path. Idempotent and non-blocking — a failure here must never fail extraction.
 const bootstrapSyncWorkflow = async ({
   syncWorkflowService,
   request,
@@ -257,15 +257,7 @@ const identifyComputedFeaturesRoute = createServerRoute({
       .nullable()
       .optional(),
   }),
-  handler: async ({
-    params,
-    request,
-    getScopedClients,
-    server,
-    logger,
-    telemetry,
-    syncWorkflowService,
-  }) => {
+  handler: async ({ params, request, getScopedClients, server, logger, telemetry }) => {
     const scopedClients = await getScopedClients({ request });
     const { scopedClusterClient, streamsClient, licensing } = scopedClients;
 
@@ -302,8 +294,6 @@ const identifyComputedFeaturesRoute = createServerRoute({
           ? { agentBuilderTools: server.agentBuilder?.tools, request, telemetry }
           : {}),
       });
-
-      await bootstrapSyncWorkflow({ syncWorkflowService, request, logger: routeLogger });
 
       return {
         computedFeatures,

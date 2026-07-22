@@ -9,7 +9,6 @@ import {
   SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID,
   getManagedWorkflowDefinition,
 } from '@kbn/workflows/managed';
-import { KI_SYNC_INTERVAL_MINUTES } from '../../../common/constants';
 
 // The KI sync workflow YAML lives in the managed workflow definition
 // (kbn-workflows/managed/definitions/significant_events/knowledge_indicators/sync.yaml).
@@ -29,21 +28,13 @@ const assertYamlContains = (expected: string) => {
   expect(WORKFLOW_YAML).toContain(expected);
 };
 
-describe('sync.yaml stays in sync with constants', () => {
+describe('sync.yaml managed workflow definition', () => {
   it('is registered as a restorable managed workflow', () => {
     expect(definition?.management.enablement).toBe('restorable');
   });
 
   it('is disabled by default so SyncWorkflowService controls enablement', () => {
     assertYamlContains('enabled: false');
-  });
-
-  it('uses the correct timeout (1 minute shorter than the interval)', () => {
-    assertYamlContains(`timeout: '${KI_SYNC_INTERVAL_MINUTES - 1}m'`);
-  });
-
-  it('uses the correct schedule interval', () => {
-    assertYamlContains(`every: '${KI_SYNC_INTERVAL_MINUTES}m'`);
   });
 
   it('drops overlapping runs via a single-instance concurrency key', () => {

@@ -9,9 +9,6 @@
 # Per-stream failures do not abort the sweep (iteration-on-failure: continue),
 # and each _reconcile call retries transient failures on its own.
 #
-# Values below (timeout, interval) must stay in sync with the constants in
-# significant_events/common/constants.ts — see sync_workflow.test.ts.
-#
 # This is a managed workflow installed by the significant_events plugin. It is
 # created disabled and enabled on demand by SyncWorkflowService.ensureEnabled,
 # bootstrapped from the feature-extraction path. Once enabled it keeps running on
@@ -28,8 +25,8 @@ tags:
   - knowledge-indicators
   - sync
 settings:
-  # Timeout is 1 minute shorter than the schedule to avoid overlapping runs.
-  timeout: '59m'
+  # Max duration of one sweep — independent of the schedule interval below.
+  timeout: '60m'
   # Only one instance of this workflow runs at a time; overlapping triggers are dropped.
   concurrency:
     key: significant-events-ki-sync
@@ -38,7 +35,7 @@ settings:
 triggers:
   - type: scheduled
     with:
-      every: '60m'
+      every: '24h'
   - type: manual
 steps:
   # Step 1: Fetch every stream that has knowledge indicators.

@@ -69,16 +69,6 @@ export const MAX_SCHEDULED_STREAMS = 5;
 export const POLL_DELAY_SECONDS = 30;
 
 /**
- * KI sync (groundedness) sweep workflow.
- *
- * A standalone scheduled workflow, independent of the continuous-extraction
- * toggle, that sweeps every stream with knowledge indicators and reconciles it
- * via the per-stream `_reconcile` route. Runs every KI_SYNC_INTERVAL_MINUTES
- * with a timeout 1 minute shorter to avoid overlapping runs.
- */
-export const KI_SYNC_INTERVAL_MINUTES = 60;
-
-/**
  * Significant Events scheduled discovery workflow.
  *
  * Detection runs at the alert-window cadence. Review runs more frequently and
