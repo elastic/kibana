@@ -21,12 +21,12 @@ import { ALERTING_V2_RULE_API_PATH } from '../constants';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { ruleIdParamsSchema } from './route_schemas';
-import { UPDATE_RULE_SUMMARY, updateRuleOasExamples } from './rule_oas_examples';
+import { INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION } from '../route_response_descriptions';
 import {
-  INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
   RULE_NOT_FOUND_DESCRIPTION,
   RULE_VERSION_CONFLICT_DESCRIPTION,
-} from '../route_response_descriptions';
+} from './rule_response_descriptions';
+import { updateRuleOasExamples } from './update_rule_oas_example';
 
 @injectable()
 export class UpdateRuleRoute extends BaseAlertingRoute {
@@ -38,7 +38,7 @@ export class UpdateRuleRoute extends BaseAlertingRoute {
     },
   };
   static routeOptions = {
-    summary: UPDATE_RULE_SUMMARY,
+    summary: 'Update a rule',
     oasOperationObject: updateRuleOasExamples,
   } as const;
   static schemas = {

@@ -23,7 +23,5 @@ export const getRuleAlreadyExistsMessage = (id: string): string =>
 export const getRuleVersionConflictMessage = (id: string): string =>
   `Rule with id "${id}" has already been updated by another user`;
 
-export const getInvalidRuleDataMessage = (
-  context: RuleValidationContext,
-  zodError: string
-): string => `Error validating ${context} rule data - ${zodError}`;
+export const getInvalidRuleDataMessage = (context: RuleValidationContext, error: string): string =>
+  `Error validating ${context} rule data - ${error}`;

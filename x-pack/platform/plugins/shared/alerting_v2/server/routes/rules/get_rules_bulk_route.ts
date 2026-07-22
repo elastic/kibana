@@ -19,11 +19,9 @@ import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { ALERTING_V2_RULE_API_PATH } from '../constants';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
-import { BULK_GET_RULES_SUMMARY, bulkGetRulesOasExamples } from './rule_oas_examples';
-import {
-  INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
-  RULES_NOT_FOUND_DESCRIPTION,
-} from '../route_response_descriptions';
+import { INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION } from '../route_response_descriptions';
+import { RULES_NOT_FOUND_DESCRIPTION } from './rule_response_descriptions';
+import { bulkGetRulesOasExamples } from './bulk_get_rules_oas_example';
 
 @injectable()
 export class BulkGetRulesRoute extends BaseAlertingRoute {
@@ -35,7 +33,7 @@ export class BulkGetRulesRoute extends BaseAlertingRoute {
     },
   };
   static routeOptions = {
-    summary: BULK_GET_RULES_SUMMARY,
+    summary: 'Get rules in bulk',
     oasOperationObject: bulkGetRulesOasExamples,
   } as const;
   static schemas = {

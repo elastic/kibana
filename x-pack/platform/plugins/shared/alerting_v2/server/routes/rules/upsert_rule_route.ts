@@ -21,12 +21,12 @@ import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { ruleIdParamsSchema } from './route_schemas';
 import { RulesClient } from '../../lib/rules_client/rules_client';
-import { UPSERT_RULE_SUMMARY, upsertRuleOasExamples } from './rule_oas_examples';
+import { INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION } from '../route_response_descriptions';
 import {
-  INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
   RULE_NOT_FOUND_DESCRIPTION,
   RULE_UPSERT_CONFLICT_DESCRIPTION,
-} from '../route_response_descriptions';
+} from './rule_response_descriptions';
+import { upsertRuleOasExamples } from './upsert_rule_oas_example';
 
 @injectable()
 export class UpsertRuleRoute extends BaseAlertingRoute {
@@ -38,7 +38,7 @@ export class UpsertRuleRoute extends BaseAlertingRoute {
     },
   };
   static routeOptions = {
-    summary: UPSERT_RULE_SUMMARY,
+    summary: 'Create or replace a rule',
     description:
       'Creates a rule with the given identifier, or fully replaces it if one already exists.',
     oasOperationObject: upsertRuleOasExamples,

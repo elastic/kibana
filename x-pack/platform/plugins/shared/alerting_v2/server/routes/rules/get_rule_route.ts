@@ -17,8 +17,8 @@ import { ALERTING_V2_RULE_API_PATH } from '../constants';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { ruleIdParamsSchema } from './route_schemas';
-import { GET_RULE_SUMMARY, getRuleOasExamples } from './rule_oas_examples';
-import { RULE_NOT_FOUND_DESCRIPTION } from '../route_response_descriptions';
+import { RULE_NOT_FOUND_DESCRIPTION } from './rule_response_descriptions';
+import { getRuleOasExamples } from './get_rule_oas_example';
 
 @injectable()
 export class GetRuleRoute extends BaseAlertingRoute {
@@ -30,7 +30,7 @@ export class GetRuleRoute extends BaseAlertingRoute {
     },
   };
   static routeOptions = {
-    summary: GET_RULE_SUMMARY,
+    summary: 'Get a rule',
     oasOperationObject: getRuleOasExamples,
   } as const;
   static schemas = {

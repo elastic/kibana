@@ -10,7 +10,7 @@
  * Narrower than the OpenAPI `ReferenceObject | MediaTypeObject` union so
  * callers can read `content` without casts.
  */
-export interface AlertingV2OasOperationObject {
+export interface AlertingOasOperationObject {
   requestBody?: {
     content?: {
       'application/json'?: {
