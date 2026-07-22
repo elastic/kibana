@@ -59,21 +59,6 @@ These skills describe test file conventions, runner commands, authentication pat
 | Scout API | `<plugin>/test/scout*/api/**/*.spec.ts` | `node scripts/scout.js run-tests` |
 | Scout UI | `<plugin>/test/scout*/ui/**/*.spec.ts` | `node scripts/scout.js run-tests` |
 
-> **Security Solution Scout namespace structure.** Scout tests for `security_solution` are organised into feature-area sub-directories under `test/scout/`:
->
-> ```
-> test/scout/
->   agent_builder/ui/
->   entity_analytics/ui/  entity_analytics/api/
->   exceptions/ui/
->   flyout/ui/
->   reports/ui/
->   timelines/ui/
->   workflows/ui/
-> ```
->
-> Each namespace has its own `parallel.playwright.config.ts` and `fixtures/` tree. When searching for Security Solution Scout tests, use the specific feature-area paths in the tables below rather than the generic glob above.
-
 ---
 
 ## Feature area → test directory mapping
