@@ -71,12 +71,20 @@ These coverage areas are **evaluated on every generation run**, not included on 
 
 Use `TARGET_VERSION` (detected in Step 2) as the target version.
 
-**Resolve source versions from `<repo-root>/versions.json`** — this file is the authoritative list of currently-supported release branches and is updated as the release train advances. Resolve the two placeholders below at generation time from that file (never hardcode version numbers):
+**Resolve source versions from `elastic/kibana`'s `versions.json`** — the authoritative list of currently-supported release branches, updated as the release train advances. At generation time, fetch the file from:
 
-- `PREVIOUS_MAJOR_LAST_MINOR` — the `version` of the entry with `branchType: "release"` whose major is exactly one less than `TARGET_VERSION`'s major (e.g. `8.19.19` when `TARGET_VERSION` is on the `9.x` line).
+```
+https://raw.githubusercontent.com/elastic/kibana/main/versions.json
+```
+
+Fetching from `main` guarantees the values are current regardless of which branch the agent is invoked from. If the remote fetch fails (offline, network error, GitHub unavailable), fall back to reading `<repo-root>/versions.json` from the local checkout. Never hardcode version numbers.
+
+Resolve the two placeholders below from the fetched file:
+
+- `PREVIOUS_MAJOR_LAST_MINOR` — the `version` of the highest-numbered entry with `branchType: "release"` whose major is exactly one less than `TARGET_VERSION`'s major (e.g. `8.19.19` when `TARGET_VERSION` is on the `9.x` line).
 - `CURRENT_MAJOR_LAST_MINOR` — the `version` of the highest-numbered entry with `branchType: "release"` whose major equals `TARGET_VERSION`'s major and whose minor is strictly less than `TARGET_VERSION`'s minor (e.g. `9.5.0` when `TARGET_VERSION` is `9.6`).
 
-If either placeholder cannot be resolved from `versions.json` (no eligible entry — e.g. `TARGET_VERSION` is the first minor of a new major cycle, so no `CURRENT_MAJOR_LAST_MINOR` exists yet), record it under *Assumptions* with a `⚠️` and ask the user to confirm before publishing — do not drop the scenario.
+If both remote and local fetches fail, or if either placeholder has no eligible entry in the file (e.g. `TARGET_VERSION` is the first minor of a new major cycle, so no `CURRENT_MAJOR_LAST_MINOR` exists yet), record the affected placeholder under *Assumptions* with a `⚠️` and ask the user to confirm before publishing — do not drop the scenario.
 
 ```gherkin
 @upgrade

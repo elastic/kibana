@@ -2,7 +2,7 @@
 
 This file is a worked example of a correctly-formed test plan for a **UI feature with a linked PR**. Use it as a reference when generating plans — it shows the correct structure, scenario format, automation coverage lines, and summary table for a realistic Security Solution feature. For a backend / parser feature without UI or a linked PR, see [`example-test-plan-backend.md`](example-test-plan-backend.md).
 
-The example is **abbreviated** (6 scenarios, 2 feature areas) but **complete** — every required section is present, optional sections are omitted where the fictional issue does not warrant them (upgrade coverage would apply — see *Known Limitations*), and all self-review checks pass.
+The example is **abbreviated** (6 scenarios, 2 feature areas) but **complete** — every required section is present, optional sections are omitted where the fictional issue does not warrant them, and all self-review checks pass. (Upgrade coverage does apply here — see *Known Limitations* — but the concrete scenarios are abbreviated for brevity.)
 
 ---
 
