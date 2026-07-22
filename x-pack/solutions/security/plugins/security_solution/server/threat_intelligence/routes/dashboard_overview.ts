@@ -384,6 +384,8 @@ export const registerDashboardOverviewRoute = ({
               total_reports: totalReports,
               critical_reports: severityCount('critical'),
               high_reports: severityCount('high'),
+              medium_reports: severityCount('medium'),
+              low_reports: severityCount('low'),
               affects_you_total: environmentHitsTotal,
               distinct_source_count: distinctSourceCount,
             },

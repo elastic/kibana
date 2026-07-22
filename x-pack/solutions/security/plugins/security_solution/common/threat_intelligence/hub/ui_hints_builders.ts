@@ -17,7 +17,7 @@ export const buildSearchReportsUiHints = ({
   total,
 }: {
   params: {
-    query: string;
+    query?: string;
     time_range?: { from: string; to: string };
     categories?: ThreatCategory[];
     regions?: ThreatRegion[];
@@ -29,13 +29,14 @@ export const buildSearchReportsUiHints = ({
   if (total === 0 || reports.length === 0) {
     return [];
   }
+  const queryLabel = params.query?.trim() || 'browse';
   return [
     {
       type: THREAT_INTEL_ATTACHMENT_TYPES.reportTable,
       payload: buildReportTablePayloadFromSearch({
         params,
         reports,
-        attachmentLabel: `Threat intel: ${params.query}`,
+        attachmentLabel: `Threat intel: ${queryLabel}`,
       }),
     },
   ];

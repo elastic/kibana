@@ -48,6 +48,7 @@ import {
 } from '@elastic/eui';
 import {
   DASHBOARD_OVERVIEW_API_PATH,
+  FIND_THREAT_REPORTS_API_PATH,
   HUNT_FINDINGS_API_PATH,
   SYNTHESIZE_ADVISORY_API_PATH,
   DEFAULT_REGIONS_SETTING_KEY,
@@ -63,6 +64,7 @@ import {
   THREAT_REGIONS,
   getSubscriptionTemplate,
   type DashboardOverviewResponse,
+  type ReportSortBy,
   type SavedViewSummary,
   type SeverityLevel,
   type SubscriptionTemplate,
@@ -71,7 +73,11 @@ import {
   type TimeRangePresetId,
 } from '../../../../../common/threat_intelligence/hub';
 import { useKibana } from '../../../../common/lib/kibana';
-import type { ReportFeedSort } from '../../../components/report_feed';
+import {
+  fromFindThreatReportHit,
+  type ReportFeedSort,
+  type ThreatReportFeedItem,
+} from '../../../components/report_feed';
 import {
   IntelligenceHubDashboardView,
   StatsRibbon,
@@ -90,6 +96,26 @@ const emptyFilters: IntelligenceHubChipFilters = {
   regions: [],
   categories: [],
   severities: [],
+};
+
+/** Matches former overview `recent_articles` top_hits window. */
+const THREAT_REPORT_FEED_PAGE_SIZE = 12;
+
+/**
+ * Map Hub feed sort UI → `find_threat_reports` `sort_by`.
+ * Browse mode (no free-text query) cannot use RRF; `relevance` → `recency`
+ * so the default matches the old `@timestamp desc` sample.
+ */
+const mapReportFeedSortToApi = (sort: ReportFeedSort): ReportSortBy => {
+  switch (sort) {
+    case 'severity':
+      return 'severity';
+    case 'date':
+      return 'recency';
+    case 'relevance':
+    default:
+      return 'recency';
+  }
 };
 
 const timeRangePresetLabel = (preset: TimeRangePresetId): string => {
@@ -136,10 +162,10 @@ const timeRangePresetLabel = (preset: TimeRangePresetId): string => {
  * toggle, 3-column article grid with severity accent bars, then
  * Environment Impact lower down. A free-text
  * "ask for a brief" entry point belongs at the top of the page, but is
- * intentionally absent until the dashboard read accepts a `q` parameter
- * (or until the article grid is rehosted on `FIND_THREAT_REPORTS_API_PATH`)
- * — a prominent input that only client-side-filters the small
- * `recent_articles` sample is misleading and was removed.
+ * intentionally absent until the dashboard read accepts a `q` parameter.
+ * The Threat reports grid is backed by paginated `FIND_THREAT_REPORTS_API_PATH`
+ * (same time range + region/category filters as overview stats), not the
+ * overview `recent_articles` top_hits sample.
  *
  * `data-test-subj` values (`threatIntelExport*`, `threatIntelSaveView*`)
  * are preserved intentionally so existing functional tests keep
@@ -162,6 +188,10 @@ export const IntelligenceHubPage: FC = () => {
     [history, location]
   );
   const [data, setData] = useState<DashboardOverviewResponse | null>(null);
+  const [feedItems, setFeedItems] = useState<ThreatReportFeedItem[]>([]);
+  const [feedTotal, setFeedTotal] = useState(0);
+  const [feedPageIndex, setFeedPageIndex] = useState(0);
+  const [isLoadingFeed, setIsLoadingFeed] = useState(false);
   const [huntFindings, setHuntFindings] = useState<HuntFindingListItem[]>([]);
   const [huntFindingsFeedbackLoop, setHuntFindingsFeedbackLoop] = useState<FeedbackLoopSummary[]>(
     []
@@ -230,6 +260,52 @@ export const IntelligenceHubPage: FC = () => {
       setIsLoadingHuntFindings(false);
     }
   }, [http, filters.regions, filters.categories, timeRangePreset]);
+
+  const fetchThreatReportFeed = useCallback(
+    async (pageIndex: number) => {
+      setIsLoadingFeed(true);
+      const { from, to } = resolveTimeRangeFromPreset(timeRangePreset);
+      try {
+        const response = await http.post<{
+          total: number;
+          reports: Array<Parameters<typeof fromFindThreatReportHit>[0]>;
+        }>(FIND_THREAT_REPORTS_API_PATH, {
+          version: '2023-10-31',
+          body: JSON.stringify({
+            size: THREAT_REPORT_FEED_PAGE_SIZE,
+            from: pageIndex * THREAT_REPORT_FEED_PAGE_SIZE,
+            time_range: { from, to },
+            sort_by: mapReportFeedSortToApi(sortBy),
+            ...(filters.regions.length ? { regions: filters.regions } : {}),
+            ...(filters.categories.length ? { categories: filters.categories } : {}),
+            ...(filters.severities.length ? { severities: filters.severities } : {}),
+          }),
+        });
+        setFeedItems((response.reports ?? []).map(fromFindThreatReportHit));
+        setFeedTotal(response.total ?? 0);
+      } catch (err) {
+        setFeedItems([]);
+        setFeedTotal(0);
+        notifications.toasts.addError(err as Error, {
+          title: i18n.translate(
+            'xpack.securitySolution.threatIntelligence.app.threatReportFeedError',
+            { defaultMessage: 'Failed to load threat reports' }
+          ),
+        });
+      } finally {
+        setIsLoadingFeed(false);
+      }
+    },
+    [
+      filters.categories,
+      filters.regions,
+      filters.severities,
+      http,
+      notifications.toasts,
+      sortBy,
+      timeRangePreset,
+    ]
+  );
 
   const generateAdvisory = useCallback(async () => {
     setIsGeneratingAdvisory(true);
@@ -318,6 +394,11 @@ export const IntelligenceHubPage: FC = () => {
   }, [fetchOverview]);
 
   useEffect(() => {
+    setFeedPageIndex(0);
+    void fetchThreatReportFeed(0);
+  }, [fetchThreatReportFeed]);
+
+  useEffect(() => {
     fetchSavedViews();
   }, [fetchSavedViews]);
 
@@ -393,6 +474,18 @@ export const IntelligenceHubPage: FC = () => {
     setCorrelationFlyoutOpen(true);
   }, []);
 
+  const onFeedPageChange = useCallback(
+    (pageIndex: number) => {
+      setFeedPageIndex(pageIndex);
+      void fetchThreatReportFeed(pageIndex);
+    },
+    [fetchThreatReportFeed]
+  );
+
+  const onFeedSortChange = useCallback((next: ReportFeedSort) => {
+    setSortBy(next);
+  }, []);
+
   const toggleSeverity = useCallback((severity: SeverityLevel) => {
     setFilters((prev) => ({
       ...prev,
@@ -453,9 +546,17 @@ export const IntelligenceHubPage: FC = () => {
     return (
       <IntelligenceHubDashboardView
         data={data}
+        feedItems={feedItems}
+        feedPagination={{
+          pageIndex: feedPageIndex,
+          pageSize: THREAT_REPORT_FEED_PAGE_SIZE,
+          totalItemCount: feedTotal,
+          onChangePage: onFeedPageChange,
+        }}
+        isLoadingFeed={isLoadingFeed}
         filters={filters}
         sortBy={sortBy}
-        onSortChange={setSortBy}
+        onSortChange={onFeedSortChange}
         onToggleSeverity={toggleSeverity}
         onToggleCategory={toggleCategoryChip}
         onClearChipFilters={clearChipFilters}
@@ -649,11 +750,7 @@ export const IntelligenceHubPage: FC = () => {
         {data ? (
           <>
             <EuiSpacer size="m" />
-            <StatsRibbon
-              stats={data.stats_ribbon}
-              topCategory={data.by_category[0]?.category}
-              recentArticles={data.recent_articles}
-            />
+            <StatsRibbon stats={data.stats_ribbon} topCategory={data.by_category[0]?.category} />
           </>
         ) : null}
         <EuiSpacer size="m" />

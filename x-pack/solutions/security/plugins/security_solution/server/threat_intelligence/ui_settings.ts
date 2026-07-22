@@ -74,9 +74,10 @@ export const threatIntelligenceUiSettings: Record<string, UiSettingsParams> = {
       'xpack.securitySolution.threatIntelligence.uiSettings.diamondGateConnector.description',
       {
         defaultMessage:
-          'GenAI connector ID used for the per-report taxonomy enrichment step ' +
+          'GenAI connector ID used for lightweight enrich steps ' +
           '(enrich_taxonomy — categories, regions, relevance, detection_actionability, ' +
-          'diamond_suitable). Defaults to the EIS-platform Haiku connector; override to ' +
+          'diamond_suitable; classify_severity — severity.level/score; assess_relevance). ' +
+          'Defaults to the EIS-platform Haiku connector; override to ' +
           'pin a different connector for this space. Falls back to genAi:defaultAIConnector ' +
           'if the configured connector is unavailable on this deployment.',
       }

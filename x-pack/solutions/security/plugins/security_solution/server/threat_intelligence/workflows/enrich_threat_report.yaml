@@ -6,8 +6,9 @@
 # pass doesn't lag the ingestion pass.
 # Purpose:  For each freshly-ingested report (where extraction_method == 'pending'),
 #           extract IOCs and behaviors via internal threat-intelligence routes
-#           (deterministic IOC regex + catalog-validated hunt_behavior), and the closed-set
-#           threat-category + geographic-region tags via a stage-2 LLM step.
+#           (deterministic IOC regex + catalog-validated hunt_behavior), the closed-set
+#           threat-category + geographic-region tags via a stage-2 LLM step, and
+#           operational severity (low|medium|high|critical) via classify_severity.
 #           Skip documents whose content_fingerprint has already been processed
 #           (dedup gate).
 # =============================================================================
@@ -39,7 +40,6 @@ steps:
       # already-extracted docs skip without ever fetching their body).
       _source:
         - content_fingerprint
-        - severity.score
       query:
         bool:
           must:
@@ -77,17 +77,22 @@ steps:
                 - term:
                     content_fingerprint: "{{ foreach.item._source.content_fingerprint }}"
               must_not:
+                # Still pending (including LLM fail-open retries) is not a
+                # completed enrich — only a *different* non-pending doc with
+                # the same fingerprint should suppress this item.
                 - term:
                     lineage.extraction_method: pending
-
+                - ids:
+                    values:
+                      - "{{ foreach.item._id }}"
       - name: skip_already_extracted
         type: loop.continue
         if: "steps.check_already_extracted.output.hits.total.value > 0"
 
       # Fetch the full document body for this item. Runs AFTER skip_already_extracted
       # so already-extracted docs skip without paying the body fetch cost.
-      # load_pending_reports returns only light fields (content_fingerprint,
-      # severity.score) to keep the batch loader output under the engine's
+      # load_pending_reports returns only light fields (content_fingerprint)
+      # to keep the batch loader output under the engine's
       # 10 MB step cap; body consumers below reference
       # steps.load_full_doc.output.hits.hits[0]._source.content.* instead of
       # foreach.item._source.content.*.
@@ -230,26 +235,41 @@ steps:
         on-failure:
           # Enrichment is best-effort — a stale connector or an over-quota
           # LLM should not block the rest of the extraction pipeline.
-          # When enrichment fails, `capture_ranking_signals` below falls
-          # back to a neutral relevance of 0.5 so the report still gets
-          # a usable rank_score (severity.score * 0.5) instead of being
-          # silently dropped from sort_by='rank' results.
+          # When taxonomy fails, `capture_ranking_signals` falls back to a
+          # neutral relevance of 0.5. Severity / rank_score are only written
+          # later by `persist_classified_severity` after a successful classify.
+          continue: true
+
+      # Severity classification — refine adapter-default `medium` / 40 from
+      # title + body (+ taxonomy categories / IOC count when available).
+      # On success, `persist_classified_severity` writes level/score/rank_score.
+      # On failure (5xx / missing inference), leave ingest severity alone and
+      # keep the report `pending` for a later enrich pass.
+      - name: classify_severity
+        type: kibana.request
+        with:
+          method: POST
+          path: /api/threat_intelligence/classify_severity
+          headers:
+            elastic-api-version: "2023-10-31"
+            x-elastic-internal-origin: "kibana"
+          body:
+            text: "{{ steps.load_full_doc.output.hits.hits[0]._source.content.body_text | slice: 0, 30000 }}"
+            report_id: "{{ foreach.item._id }}"
+            title: "{{ steps.load_full_doc.output.hits.hits[0]._source.content.title }}"
+            categories: "${{ steps.enrich_taxonomy.output.categories }}"
+            ioc_count: "${{ steps.extract_iocs.output.count | default: 0 }}"
+        on-failure:
           continue: true
 
       # Compute and hoist the ranking signals so `persist_extractions`
-      # can write a single composite `rank_score` to the doc without
-      # reaching back into the LLM step's output (and so the rest of the
-      # workflow doesn't pay the cost of repeatedly evaluating the
-      # multiplicative expression). The neutral defaults match the
-      # "best-effort" stance of `enrich_taxonomy`'s `on-failure:
-      # continue: true` — a missing relevance yields a baseline rank of
-      # `severity.score * 0.5`, never a NaN or 0 that would hide the
-      # report from sort_by='rank' results.
+      # can write taxonomy fields without repeatedly evaluating the LLM
+      # step output. Neutral defaults apply when `enrich_taxonomy` hit
+      # `on-failure: continue: true` — they do NOT invent a severity.
       #
       # `"${{ ... }}"` (dollar-prefixed) takes the evaluateExpression()
-      # branch of WorkflowTemplatingEngine so the multiplication
-      # returns a number rather than a coerced string — same pattern
-      # used in `persist_extractions` below for the arrays.
+      # branch of WorkflowTemplatingEngine so numbers stay numbers —
+      # same pattern used in `persist_extractions` below for the arrays.
       - name: capture_ranking_signals
         type: data.set
         with:
@@ -259,7 +279,6 @@ steps:
           # absent. False is also Liquid-falsy so `default:` fires correctly for both absent
           # and explicit-false, giving the correct gate behaviour in both cases.
           diamond_suitable: "${{ steps.enrich_taxonomy.output.diamond_suitable | default: false }}"
-          severity_score: "${{ foreach.item._source.severity.score | default: 0 }}"
           # Hoist the technique-id list with a sentinel fallback so the
           # `find_related_reports` `terms` clause downstream never receives
           # an empty array. Elasticsearch's query parser rejects an empty
@@ -292,6 +311,22 @@ steps:
           # `${{ … }}` (dollar-prefixed) preserves the JS array via
           # `evaluateExpression` rather than coercing to a string.
           technique_ids: "${{ steps.extract_behaviors.output.indexed_behaviors | map: 'technique_id' | join: ',' | default: '__no_techniques__' | split: ',' }}"
+
+      # Only mark fully enriched when taxonomy + severity LLM steps both
+      # returned usable output. Missing inference / 5xx leaves step output
+      # empty (`on-failure: continue`) — keep `pending` so the next enrich
+      # run retries after GenAI is available. Do not invent severity.
+      - name: mark_llm_enrich_complete
+        type: data.set
+        if: "steps.classify_severity.output.level : * and steps.enrich_taxonomy.output.detection_actionability : *"
+        with:
+          extraction_method: workflow_v2
+
+      - name: mark_llm_enrich_incomplete
+        type: data.set
+        if: "NOT steps.classify_severity.output.level : * OR NOT steps.enrich_taxonomy.output.detection_actionability : *"
+        with:
+          extraction_method: pending
 
       # Diamond Model extraction — heavy single-call with per-vertex fallback.
       # Only runs for threat-positive reports (`diamond_suitable: true`).
@@ -507,22 +542,40 @@ steps:
                 assessed_at: "${{ now }}"
             geography:
               regions: "${{ steps.enrich_taxonomy.output.regions }}"
-            # Top-level multiplicative composite (`severity.score *
-            # extracted.relevance`) — the tradecraft-style ranking signal.
-            # Consumed by `find_threat_reports` when `sort_by: 'rank'` and by
-            # the dashboard's "Top reports" panel. Computed at extraction
-            # time rather than at query time so the read path stays a
-            # single `_search` with a regular `sort` clause (no painless,
-            # no script_score).
-            rank_score: "${{ variables.severity_score | times: variables.relevance }}"
+            # Severity + rank_score are written only by
+            # `persist_classified_severity` when classify_severity succeeded.
+            # Incomplete LLM runs leave adapter ingest severity untouched.
             lineage:
               extracted_at: "${{ now }}"
-              extraction_method: workflow_v2
+              # `workflow_v2` only when mark_llm_enrich_complete ran; otherwise
+              # stay `pending` so a later enrich pass can retry after GenAI
+              # recovers. Default pending if neither mark step ran.
+              extraction_method: "{{ variables.extraction_method | default: 'pending' }}"
               related_reports: "${{ steps.find_related_reports.output.hits.hits | map: '_id' }}"
               # `find_related_reports` runs with `on-failure: continue: true`
               # so its output type is unknown to the validator. Default to 0
               # so the consumer remains numeric even when the search step
               # was skipped.
               related_reports_count: "${{ steps.find_related_reports.output.hits.total.value | default: 0 }}"
+        on-failure:
+          continue: true
+
+      # Write classified severity only after a successful classify_severity
+      # call. Separated from `persist_extractions` so inference outages do
+      # not overwrite the adapter ingest default with a fake medium.
+      - name: persist_classified_severity
+        type: elasticsearch.update
+        if: "steps.classify_severity.output.level : *"
+        with:
+          index: "{{ foreach.item._index }}"
+          id: "{{ foreach.item._id }}"
+          doc:
+            severity:
+              level: "{{ steps.classify_severity.output.level }}"
+              score: "${{ steps.classify_severity.output.score }}"
+            # Top-level multiplicative composite (`severity.score *
+            # extracted.relevance`) — tradecraft-style ranking signal for
+            # `find_threat_reports` when `sort_by: 'rank'`.
+            rank_score: "${{ steps.classify_severity.output.score | times: variables.relevance }}"
         on-failure:
           continue: true

@@ -75,10 +75,7 @@ export type {
   FeedbackLoopSummary,
 } from './list_hunt_findings';
 
-export {
-  markHuntFindingDeployed,
-  HuntFindingNotFoundError,
-} from './mark_hunt_finding_deployed';
+export { markHuntFindingDeployed, HuntFindingNotFoundError } from './mark_hunt_finding_deployed';
 export type {
   MarkHuntFindingDeployedParams,
   MarkHuntFindingDeployedResult,
@@ -160,6 +157,17 @@ export {
 
 export { enrichTaxonomy, taxonomyOutputSchema } from './enrich_taxonomy';
 export type { EnrichTaxonomyParams, TaxonomyOutput } from './enrich_taxonomy';
+
+export {
+  classifySeverity,
+  classifySeverityLlmOutputSchema,
+  toSeverityResult,
+} from './classify_severity';
+export type {
+  ClassifySeverityParams,
+  ClassifySeverityResult,
+  ClassifySeverityLlmOutput,
+} from './classify_severity';
 
 export { assessRelevance, relevanceOutputSchema } from './assess_relevance';
 export type { AssessRelevanceParams, RelevanceOutput } from './assess_relevance';

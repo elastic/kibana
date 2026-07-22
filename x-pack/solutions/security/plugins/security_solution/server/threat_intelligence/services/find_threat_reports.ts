@@ -29,10 +29,21 @@ import {
  */
 
 export interface FindThreatReportsParams {
-  query: string;
+  /**
+   * Free-text discovery query. Empty / omitted enables browse mode (filter +
+   * sort only), used by the Intelligence Hub Threat reports feed.
+   */
+  query?: string;
   size?: number;
+  /** Result offset for pagination (Hub feed). */
+  from?: number;
   source_types?: SourceType[];
   min_severity?: SeverityLevel;
+  /**
+   * Exact severity multi-select (Hub chip filters). Prefer this over
+   * `min_severity` when the caller wants specific levels, not a floor.
+   */
+  severities?: SeverityLevel[];
   time_range?: { from: string; to: string };
   categories?: ThreatCategory[];
   regions?: ThreatRegion[];
@@ -63,7 +74,8 @@ export interface FindThreatReportsParams {
    * In every mode except `'relevance'` (RRF), the free-text `query`
    * is still applied as a `multi_match` filter so the result set is
    * scoped to documents that mention the query terms — only the
-   * ordering changes.
+   * ordering changes. When `query` is empty, field-sorted modes use
+   * `match_all` (browse / Hub pagination).
    */
   sort_by?: ReportSortBy;
 }
@@ -86,7 +98,16 @@ const SEVERITY_RANK: Record<SeverityLevel, number> = {
   critical: 3,
 };
 
-const buildSeverityFilter = (minSeverity?: SeverityLevel): Array<Record<string, unknown>> => {
+const buildSeverityFilter = ({
+  minSeverity,
+  severities,
+}: {
+  minSeverity?: SeverityLevel;
+  severities?: SeverityLevel[];
+}): Array<Record<string, unknown>> => {
+  if (severities?.length) {
+    return [{ terms: { 'severity.level': severities } }];
+  }
   if (!minSeverity) return [];
   const allowed = SEVERITY_LEVELS.filter(
     (level) => SEVERITY_RANK[level] >= SEVERITY_RANK[minSeverity]
@@ -100,6 +121,7 @@ const SOURCE_FIELDS: string[] = [
   '@timestamp',
   'source',
   'content.title',
+  'content.body_text',
   'severity',
   'rank_score',
   'corroborated_rank_score',
@@ -111,7 +133,19 @@ const SOURCE_FIELDS: string[] = [
   'geography.regions',
   'content_fingerprint',
   'feedback',
+  'attribution.environment_hits_total',
 ];
+
+const truncateBodyText = (raw: unknown): string | undefined => {
+  if (typeof raw !== 'string') {
+    return undefined;
+  }
+  const trimmed = raw.trim();
+  if (!trimmed) {
+    return undefined;
+  }
+  return trimmed.length > 1200 ? `${trimmed.slice(0, 1200).trimEnd()}…` : trimmed;
+};
 
 /**
  * Lexical-only query targets for the BM25 retriever branch and for field-sorted
@@ -167,16 +201,21 @@ export const findThreatReports = async (
   params: FindThreatReportsParams
 ): Promise<FindThreatReportsResult> => {
   const {
-    query,
+    query: rawQuery,
     size = 10,
+    from = 0,
     source_types: sourceTypes,
     min_severity: minSeverity,
+    severities,
     time_range: timeRange,
     categories,
     regions,
     detection_actionability: detectionActionability,
     sort_by: sortBy,
   } = params;
+
+  const query = rawQuery?.trim() ?? '';
+  const hasQuery = query.length > 0;
 
   const filters: Array<Record<string, unknown>> = [
     { terms: { space_id: [spaceId, GLOBAL_SPACE_ID] } },
@@ -190,26 +229,49 @@ export const findThreatReports = async (
   if (detectionActionability?.length) {
     filters.push({ terms: { 'extracted.detection_actionability': detectionActionability } });
   }
-  filters.push(...buildSeverityFilter(minSeverity));
+  filters.push(...buildSeverityFilter({ minSeverity, severities }));
 
   const sharedFilter = filters.length ? { bool: { filter: filters } } : undefined;
-  // `undefined` and the explicit `'relevance'` both mean "use the RRF
-  // retriever ranking". Any other value switches to a field-sorted
-  // bool query. The result echoes the effective mode so the caller can
-  // render an unambiguous label.
-  const effectiveSort: ReportSortBy = sortBy ?? 'relevance';
+  // Browse mode (no query) cannot use RRF; fall back to recency unless the
+  // caller already picked a field sort. Explicit `'relevance'` with a query
+  // still uses the hybrid retriever.
+  const effectiveSort: ReportSortBy = !hasQuery
+    ? sortBy && sortBy !== 'relevance'
+      ? sortBy
+      : 'recency'
+    : sortBy ?? 'relevance';
 
-  if (effectiveSort === 'relevance') {
+  const mapHits = (
+    hits: Array<{ _id?: string; _score?: number | null; _source?: unknown }>
+  ) =>
+    hits.map((hit) => {
+      const source = (hit._source ?? {}) as Record<string, unknown>;
+      const content = (source.content as Record<string, unknown> | undefined) ?? {};
+      const bodyText = truncateBodyText(content.body_text);
+      return {
+        report_id: hit._id,
+        score: hit._score,
+        ...source,
+        content: {
+          ...content,
+          ...(bodyText ? { body_text: bodyText } : { body_text: undefined }),
+        },
+      };
+    });
+
+  if (effectiveSort === 'relevance' && hasQuery) {
     // RRF retriever combines a BM25 multi_match against the mirror fields with a
     // semantic retriever against the semantic_text fields. RRF degrades gracefully
     // if inference is unavailable — BM25 hits still surface.
     const response = await esClient.search({
       index: THREAT_REPORTS_INDEX_PATTERN,
       size,
+      from,
+      track_total_hits: true,
       _source: SOURCE_FIELDS,
       retriever: {
         rrf: {
-          rank_window_size: Math.max(size * 4, 50),
+          rank_window_size: Math.max((from + size) * 4, 50),
           rank_constant: 60,
           retrievers: [
             {
@@ -248,15 +310,11 @@ export const findThreatReports = async (
       },
     } as Parameters<typeof esClient.search>[0]);
 
-    const hits = (response.hits.hits ?? []).map((hit) => ({
-      report_id: hit._id,
-      score: hit._score,
-      ...(hit._source as Record<string, unknown>),
-    }));
+    const hits = mapHits(response.hits.hits ?? []);
 
     logger.debug(
       `find_threat_reports returned ${hits.length} hits for query="${query}" ` +
-        `in space="${spaceId}" sort_by="relevance"`
+        `in space="${spaceId}" sort_by="relevance" from=${from}`
     );
 
     return {
@@ -269,47 +327,39 @@ export const findThreatReports = async (
     };
   }
 
-  // Field-sorted mode. The free-text `query` becomes a BM25 must-match so
-  // we still scope to documents that mention the query terms — only the
-  // ordering switches from RRF to the chosen field. Skipping the semantic
-  // retriever here is deliberate: when the caller asked for "top N by rank
-  // score" they don't want semantic re-ordering of the result set.
-  //
-  // Cast mirrors the RRF branch's `as Parameters<typeof esClient.search>[0]`
-  // and exists because `buildSortClause` returns
-  // `Array<Record<string, unknown>>` which is a structural superset of the
-  // ES client's narrower `SortCombinations` union; a precise type would
-  // require re-deriving the union here for no read-side benefit.
+  // Field-sorted mode. With a free-text query, BM25 must-match scopes the
+  // set; with an empty query (Hub browse), match_all + filters only.
   const response = await esClient.search({
     index: THREAT_REPORTS_INDEX_PATTERN,
     size,
+    from,
     track_total_hits: true,
     _source: SOURCE_FIELDS,
-    sort: buildSortClause(effectiveSort),
+    sort: buildSortClause(effectiveSort as Exclude<ReportSortBy, 'relevance'>),
     query: {
       bool: {
-        must: [
-          {
-            multi_match: {
-              query,
-              fields: [...BM25_QUERY_FIELDS],
-            },
-          },
-        ],
+        ...(hasQuery
+          ? {
+              must: [
+                {
+                  multi_match: {
+                    query,
+                    fields: [...BM25_QUERY_FIELDS],
+                  },
+                },
+              ],
+            }
+          : {}),
         ...(sharedFilter ? { filter: sharedFilter.bool.filter } : {}),
       },
     },
   } as Parameters<typeof esClient.search>[0]);
 
-  const hits = (response.hits.hits ?? []).map((hit) => ({
-    report_id: hit._id,
-    score: hit._score,
-    ...(hit._source as Record<string, unknown>),
-  }));
+  const hits = mapHits(response.hits.hits ?? []);
 
   logger.debug(
-    `find_threat_reports returned ${hits.length} hits for query="${query}" ` +
-      `in space="${spaceId}" sort_by="${effectiveSort}"`
+    `find_threat_reports returned ${hits.length} hits for query="${query || '*'}" ` +
+      `in space="${spaceId}" sort_by="${effectiveSort}" from=${from}`
   );
 
   return {

@@ -11,26 +11,16 @@ import type { LinkItem } from '../common/links';
 import { getSecuritySolutionLink } from './utils/security_solution_links';
 
 /**
- * Indicators table (legacy Threat Intelligence entry). Kept as its own
- * deep link so existing role bindings and bookmarks continue to work.
- */
-export const indicatorsLinks: LinkItem = {
-  ...getSecuritySolutionLink<SecurityPageName>('indicators'),
-  globalNavPosition: 10,
-  capabilities: [`${SECURITY_FEATURE_ID}.threat-intelligence`],
-};
-
-/**
- * Intelligence Hub is the primary Threat Intelligence surface in the
- * solution side nav (lightbulb icon). Correlation Reports stay registered
- * as a deep-link child but are hidden from the side nav because the hub
- * opens correlation in a flyout.
+ * Intelligence Hub deep link. Nested under classic-nav "Intelligence"
+ * (`indicatorsLinks`) so it appears as a sub-item without an icon.
+ *
+ * Solution nav still surfaces Hub as a top-level item with a lightbulb via
+ * `navigation_tree.ts` (ESS / serverless), which hard-codes `icon: 'bulb'`.
+ * Correlation Reports stay registered as a deep-link child but are hidden
+ * from the side nav because the hub opens correlation in a flyout.
  */
 export const intelligenceHubLinks: LinkItem = {
   ...getSecuritySolutionLink<SecurityPageName>('intelligenceHub'),
-  // Immediately after Attack Discovery (globalNavPosition: 4) so Hub stays above the fold.
-  globalNavPosition: 5,
-  sideNavIcon: 'bulb',
   hideTimeline: true,
   capabilities: [`${SECURITY_FEATURE_ID}.threat-intelligence`],
   links: [
@@ -41,4 +31,19 @@ export const intelligenceHubLinks: LinkItem = {
       hideTimeline: true,
     },
   ],
+};
+
+/**
+ * Classic-nav "Intelligence" entry (indicators table). Hub is a child so the
+ * classic Security side nav shows `Intelligence > Intelligence Hub`.
+ *
+ * The top-level page id stays `SecurityPageName.threatIntelligence` so existing
+ * role bindings keyed on `${SECURITY_FEATURE_ID}.threat-intelligence` continue
+ * to gate the area without migration.
+ */
+export const indicatorsLinks: LinkItem = {
+  ...getSecuritySolutionLink<SecurityPageName>('indicators'),
+  globalNavPosition: 10,
+  capabilities: [`${SECURITY_FEATURE_ID}.threat-intelligence`],
+  links: [intelligenceHubLinks],
 };

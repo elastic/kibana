@@ -18,8 +18,12 @@ import {
   EuiFlexItem,
   EuiInMemoryTable,
   EuiLoadingSpinner,
+  EuiSpacer,
+  EuiSwitch,
   EuiText,
+  type Criteria,
   type EuiBasicTableColumn,
+  type Pagination,
 } from '@elastic/eui';
 import { LIST_SOURCES_API_PATH } from '../../../../../common/threat_intelligence/hub';
 
@@ -37,6 +41,9 @@ export interface ThreatIntelSourceRow {
   tags?: string[];
   updated_at?: string;
   created_at?: string;
+  report_count: number;
+  last_ingested_at?: string;
+  env_hits_total: number;
 }
 
 interface ListSourcesResponse {
@@ -48,10 +55,16 @@ interface SourcesTabProps {
   http: CoreStart['http'];
 }
 
+const DEFAULT_PAGE_SIZE = 25;
+const PAGE_SIZE_OPTIONS = [10, 25, 50, 100];
+
 const SourcesTabComponent: React.FC<SourcesTabProps> = ({ http }) => {
   const [sources, setSources] = useState<ThreatIntelSourceRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showDisabled, setShowDisabled] = useState(false);
+  const [pageIndex, setPageIndex] = useState(0);
+  const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
 
   useEffect(() => {
     let cancelled = false;
@@ -62,10 +75,19 @@ const SourcesTabComponent: React.FC<SourcesTabProps> = ({ http }) => {
       try {
         const response = await http.post<ListSourcesResponse>(LIST_SOURCES_API_PATH, {
           version: '2023-10-31',
-          body: JSON.stringify({ size: 100 }),
+          body: JSON.stringify({ size: 500 }),
         });
         if (!cancelled) {
-          setSources(response.sources ?? []);
+          setSources(
+            (response.sources ?? []).map((source) => ({
+              ...source,
+              name: source.name ?? source.source_id,
+              adapter_type: source.adapter_type ?? '—',
+              enabled: Boolean(source.enabled),
+              report_count: source.report_count ?? 0,
+              env_hits_total: source.env_hits_total ?? 0,
+            }))
+          );
         }
       } catch (err) {
         if (!cancelled) {
@@ -91,6 +113,31 @@ const SourcesTabComponent: React.FC<SourcesTabProps> = ({ http }) => {
     };
   }, [http]);
 
+  const visibleSources = useMemo(() => {
+    const filtered = showDisabled
+      ? sources
+      : sources.filter(
+          (source) => source.enabled || source.report_count > 0 || source.env_hits_total > 0
+        );
+
+    return [...filtered].sort((a, b) => {
+      if (a.enabled !== b.enabled) {
+        return a.enabled ? -1 : 1;
+      }
+      if (b.report_count !== a.report_count) {
+        return b.report_count - a.report_count;
+      }
+      if (b.env_hits_total !== a.env_hits_total) {
+        return b.env_hits_total - a.env_hits_total;
+      }
+      return a.name.localeCompare(b.name);
+    });
+  }, [showDisabled, sources]);
+
+  useEffect(() => {
+    setPageIndex(0);
+  }, [showDisabled, visibleSources.length]);
+
   const columns = useMemo((): Array<EuiBasicTableColumn<ThreatIntelSourceRow>> => {
     return [
       {
@@ -106,6 +153,7 @@ const SourcesTabComponent: React.FC<SourcesTabProps> = ({ http }) => {
           defaultMessage: 'Type',
         }),
         sortable: true,
+        width: '12%',
       },
       {
         field: 'enabled',
@@ -113,6 +161,8 @@ const SourcesTabComponent: React.FC<SourcesTabProps> = ({ http }) => {
           'xpack.securitySolution.threatIntelligence.app.sourcesTabColumnEnabled',
           { defaultMessage: 'Enabled' }
         ),
+        sortable: true,
+        width: '8%',
         render: (enabled: ThreatIntelSourceRow['enabled']) =>
           enabled
             ? i18n.translate('xpack.securitySolution.threatIntelligence.app.sourcesTabEnabledYes', {
@@ -123,18 +173,48 @@ const SourcesTabComponent: React.FC<SourcesTabProps> = ({ http }) => {
               }),
       },
       {
-        field: 'url',
-        name: i18n.translate('xpack.securitySolution.threatIntelligence.app.sourcesTabColumnUrl', {
-          defaultMessage: 'URL',
-        }),
-        render: (url: ThreatIntelSourceRow['url']) => <EuiText size="s">{url ?? '—'}</EuiText>,
+        field: 'report_count',
+        name: i18n.translate(
+          'xpack.securitySolution.threatIntelligence.app.sourcesTabColumnReports',
+          { defaultMessage: 'Reports' }
+        ),
+        sortable: true,
+        width: '8%',
+      },
+      {
+        field: 'env_hits_total',
+        name: i18n.translate(
+          'xpack.securitySolution.threatIntelligence.app.sourcesTabColumnEnvHits',
+          { defaultMessage: 'Env hits' }
+        ),
+        sortable: true,
+        width: '8%',
+        render: (envHits: ThreatIntelSourceRow['env_hits_total']) =>
+          envHits > 0 ? (
+            <EuiBadge color="danger" data-test-subj="threatIntelSourcesTabEnvHits">
+              {envHits}
+            </EuiBadge>
+          ) : (
+            '0'
+          ),
+      },
+      {
+        field: 'last_ingested_at',
+        name: i18n.translate(
+          'xpack.securitySolution.threatIntelligence.app.sourcesTabColumnLastIngested',
+          { defaultMessage: 'Last ingested' }
+        ),
+        sortable: true,
+        width: '12%',
+        render: (lastIngested: ThreatIntelSourceRow['last_ingested_at']) =>
+          lastIngested ? <FormattedRelative value={new Date(lastIngested)} /> : '—',
       },
       {
         field: 'tags',
         name: i18n.translate('xpack.securitySolution.threatIntelligence.app.sourcesTabColumnTags', {
           defaultMessage: 'Tags',
         }),
-        width: '28%',
+        width: '22%',
         truncateText: false,
         render: (tags: ThreatIntelSourceRow['tags']) => {
           if (!tags?.length) {
@@ -153,29 +233,25 @@ const SourcesTabComponent: React.FC<SourcesTabProps> = ({ http }) => {
           );
         },
       },
-      {
-        field: 'updated_at',
-        name: i18n.translate(
-          'xpack.securitySolution.threatIntelligence.app.sourcesTabColumnUpdated',
-          { defaultMessage: 'Updated' }
-        ),
-        render: (updatedAt: ThreatIntelSourceRow['updated_at']) =>
-          updatedAt ? <FormattedRelative value={new Date(updatedAt)} /> : '—',
-      },
     ];
   }, []);
 
   const pagination = useMemo(
-    () => ({
-      pageIndex: 0,
-      pageSize: 25,
-      totalItemCount: sources.length,
-      pageSizeOptions: [10, 25, 50, 100],
+    (): Pagination => ({
+      pageIndex,
+      pageSize,
+      totalItemCount: visibleSources.length,
+      pageSizeOptions: PAGE_SIZE_OPTIONS,
     }),
-    [sources.length]
+    [pageIndex, pageSize, visibleSources.length]
   );
 
-  const onTableChange = useCallback(() => {}, []);
+  const onTableChange = useCallback((criteria: Criteria<ThreatIntelSourceRow>) => {
+    if (criteria.page) {
+      setPageIndex(criteria.page.index);
+      setPageSize(criteria.page.size);
+    }
+  }, []);
 
   if (loading) {
     return (
@@ -230,7 +306,7 @@ const SourcesTabComponent: React.FC<SourcesTabProps> = ({ http }) => {
           <p>
             {i18n.translate('xpack.securitySolution.threatIntelligence.app.sourcesTabEmptyBody', {
               defaultMessage:
-                'Configured ingestion sources will appear here once the sources API is available.',
+                'Configured ingestion sources will appear here once the sources catalog is seeded. Restart Kibana after wiping Elasticsearch, or generate demo sources with yarn data:generate --threat-intel.',
             })}
           </p>
         }
@@ -239,14 +315,66 @@ const SourcesTabComponent: React.FC<SourcesTabProps> = ({ http }) => {
   }
 
   return (
-    <EuiInMemoryTable
-      data-test-subj="threatIntelSourcesTabTable"
-      items={sources}
-      columns={columns}
-      pagination={pagination}
-      onTableChange={onTableChange}
-      itemId="source_id"
-    />
+    <>
+      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="m" wrap>
+        <EuiFlexItem grow={false}>
+          <EuiText size="s" color="subdued" data-test-subj="threatIntelSourcesTabSummary">
+            {i18n.translate('xpack.securitySolution.threatIntelligence.app.sourcesTabSummary', {
+              defaultMessage:
+                'Showing {visible} of {total} sources. Report counts and env hits come from ingested threat reports.',
+              values: { visible: visibleSources.length, total: sources.length },
+            })}
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiSwitch
+            compressed
+            label={i18n.translate(
+              'xpack.securitySolution.threatIntelligence.app.sourcesTabShowDisabled',
+              { defaultMessage: 'Show disabled catalog sources' }
+            )}
+            checked={showDisabled}
+            onChange={(event) => setShowDisabled(event.target.checked)}
+            data-test-subj="threatIntelSourcesTabShowDisabled"
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="m" />
+      {visibleSources.length === 0 ? (
+        <EuiEmptyPrompt
+          data-test-subj="threatIntelSourcesTabFilteredEmpty"
+          title={
+            <h2>
+              {i18n.translate(
+                'xpack.securitySolution.threatIntelligence.app.sourcesTabFilteredEmptyTitle',
+                { defaultMessage: 'No active sources yet' }
+              )}
+            </h2>
+          }
+          body={
+            <p>
+              {i18n.translate(
+                'xpack.securitySolution.threatIntelligence.app.sourcesTabFilteredEmptyBody',
+                {
+                  defaultMessage:
+                    'Enabled sources and sources with ingested reports appear here.',
+                }
+              )}
+            </p>
+          }
+        />
+      ) : (
+        <EuiInMemoryTable
+          data-test-subj="threatIntelSourcesTabTable"
+          items={visibleSources}
+          columns={columns}
+          pagination={pagination}
+          onTableChange={onTableChange}
+          sorting={true}
+          itemId="source_id"
+        />
+      )}
+    </>
   );
 };
 

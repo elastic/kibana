@@ -30,8 +30,9 @@ import type { RouteRegistrationDeps } from '.';
 const enumLiterals = <T extends string>(values: readonly T[]): string => values.join(', ');
 
 const findThreatReportsBodySchema = schema.object({
-  query: schema.string({ minLength: 1 }),
-  size: schema.maybe(schema.number({ min: 1, max: 50 })),
+  query: schema.maybe(schema.string({ maxLength: 2000 })),
+  size: schema.maybe(schema.number({ min: 1, max: 100 })),
+  from: schema.maybe(schema.number({ min: 0, max: 10_000 })),
   source_types: schema.maybe(
     schema.arrayOf(
       schema.string({
@@ -49,6 +50,16 @@ const findThreatReportsBodySchema = schema.object({
           ? undefined
           : `must be one of: ${enumLiterals(SEVERITY_LEVELS)}`,
     })
+  ),
+  severities: schema.maybe(
+    schema.arrayOf(
+      schema.string({
+        validate: (value) =>
+          (SEVERITY_LEVELS as readonly string[]).includes(value)
+            ? undefined
+            : `must be one of: ${enumLiterals(SEVERITY_LEVELS)}`,
+      })
+    )
   ),
   time_range: schema.maybe(
     schema.object({
@@ -131,8 +142,10 @@ export const registerFindThreatReportsRoute = ({
           const searchParams = {
             query: request.body.query,
             size: request.body.size,
+            from: request.body.from,
             source_types: request.body.source_types as SourceType[] | undefined,
             min_severity: request.body.min_severity as SeverityLevel | undefined,
+            severities: request.body.severities as SeverityLevel[] | undefined,
             time_range: request.body.time_range,
             categories: request.body.categories as ThreatCategory[] | undefined,
             regions: request.body.regions as ThreatRegion[] | undefined,

@@ -11,12 +11,13 @@ import type { SeverityLevel } from '../../../common/threat_intelligence/hub';
  * Default severity for adapter-emitted reports.
  *
  * Matches the legacy YAML which hard-coded `medium` / `40` for every
- * branch. Real per-adapter severity classification (CVSS for NVD,
- * STIX confidence, vendor-specific scoring) is out of scope until the
- * `enrich_threat_report` workflow lands its severity refinement
- * pass; until then, `medium` is the safe default — it doesn't fire
- * digests' `high+` filters and it doesn't hide rows in the dashboard's
- * `>= medium` default view.
+ * branch. Per-adapter severity (CVSS for NVD, STIX confidence, vendor
+ * scoring) remains optional at ingest; the `enrich_threat_report`
+ * workflow's `classify_severity` step refines `severity.level` /
+ * `severity.score` (and `rank_score`) from report content after IOCs
+ * and taxonomy are available. Until that enrich pass runs, `medium` is
+ * the safe default — it doesn't fire digests' `high+` filters and it
+ * doesn't hide rows in the dashboard's `>= medium` default view.
  */
 export const DEFAULT_SEVERITY_LEVEL: SeverityLevel = 'medium';
 export const DEFAULT_SEVERITY_SCORE = 40;

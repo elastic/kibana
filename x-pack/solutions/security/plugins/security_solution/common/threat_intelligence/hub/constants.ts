@@ -390,6 +390,15 @@ export const ASSESS_RELEVANCE_API_PATH =
 export const ENRICH_TAXONOMY_API_PATH = `${THREAT_INTELLIGENCE_API_BASE}/enrich_taxonomy` as const;
 
 /**
+ * Severity classification route — POST /api/threat_intelligence/classify_severity.
+ * Invoked by `enrich_threat_report` after taxonomy enrichment. On success sets
+ * `severity.level` / `severity.score` (and `rank_score`). Missing inference
+ * returns 5xx so enrich leaves ingest severity alone and stays `pending`.
+ */
+export const CLASSIFY_SEVERITY_API_PATH =
+  `${THREAT_INTELLIGENCE_API_BASE}/classify_severity` as const;
+
+/**
  * Backfill route — POST /api/threat_intelligence/backfill_diamond.
  * Two-call API: `{ dry_run: true }` → `{ run_id, estimate }`; `{ run_id }` → 202.
  * Gated by `manageSources` privilege.

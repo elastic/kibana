@@ -10,7 +10,10 @@ import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { useKibana } from '../../../../common/lib/kibana';
 import { navigateToCorrelateReport } from '../../../lib/navigate_to_correlation_reports';
-import { HuntFindingsPanel, type HuntFindingListItem } from './hunt_findings_panel';
+import {
+  HuntFindingsPanel,
+  type HuntFindingListItem,
+} from './hunt_findings_panel';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../lib/navigate_to_correlation_reports', () => ({
@@ -40,9 +43,7 @@ const defaultProps = {
   isLoading: false,
   onHighlightReport: jest.fn(),
   http: {} as never,
-  notifications: {
-    toasts: { addSuccess: jest.fn(), addError: jest.fn(), addDanger: jest.fn() },
-  } as never,
+  notifications: { toasts: { addSuccess: jest.fn(), addError: jest.fn(), addDanger: jest.fn() } } as never,
   application: { navigateToApp: jest.fn() } as never,
 };
 

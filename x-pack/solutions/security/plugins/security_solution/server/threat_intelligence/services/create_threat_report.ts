@@ -13,6 +13,7 @@ import {
   type SeverityLevel,
 } from '../../../common/threat_intelligence/hub';
 import { buildReportContent } from '../adapters/text';
+import { severityScore } from '../adapters/severity';
 
 /**
  * Domain capability module for the `create_threat_report` action.
@@ -48,20 +49,6 @@ export type CreateThreatReportResult =
 
 const fingerprint = (text: string): string =>
   createHash('sha256').update(text.trim().normalize('NFKC')).digest('hex');
-
-const severityScore = (severity: SeverityLevel): number => {
-  switch (severity) {
-    case 'critical':
-      return 90;
-    case 'high':
-      return 70;
-    case 'medium':
-      return 40;
-    case 'low':
-    default:
-      return 20;
-  }
-};
 
 export const createThreatReport = async (
   esClient: ElasticsearchClient,

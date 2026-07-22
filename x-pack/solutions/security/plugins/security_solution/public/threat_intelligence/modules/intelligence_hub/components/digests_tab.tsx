@@ -19,7 +19,9 @@ import {
   EuiInMemoryTable,
   EuiLoadingSpinner,
   EuiText,
+  type Criteria,
   type EuiBasicTableColumn,
+  type Pagination,
 } from '@elastic/eui';
 import { LIST_SUBSCRIPTIONS_API_PATH } from '../../../../../common/threat_intelligence/hub';
 
@@ -48,10 +50,15 @@ interface DigestsTabProps {
   http: CoreStart['http'];
 }
 
+const DEFAULT_PAGE_SIZE = 25;
+const PAGE_SIZE_OPTIONS = [10, 25, 50];
+
 const DigestsTabComponent: React.FC<DigestsTabProps> = ({ http }) => {
   const [subscriptions, setSubscriptions] = useState<DigestSubscriptionRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [pageIndex, setPageIndex] = useState(0);
+  const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
 
   useEffect(() => {
     let cancelled = false;
@@ -183,16 +190,21 @@ const DigestsTabComponent: React.FC<DigestsTabProps> = ({ http }) => {
   }, []);
 
   const pagination = useMemo(
-    () => ({
-      pageIndex: 0,
-      pageSize: 25,
+    (): Pagination => ({
+      pageIndex,
+      pageSize,
       totalItemCount: subscriptions.length,
-      pageSizeOptions: [10, 25, 50],
+      pageSizeOptions: PAGE_SIZE_OPTIONS,
     }),
-    [subscriptions.length]
+    [pageIndex, pageSize, subscriptions.length]
   );
 
-  const onTableChange = useCallback(() => {}, []);
+  const onTableChange = useCallback((criteria: Criteria<DigestSubscriptionRow>) => {
+    if (criteria.page) {
+      setPageIndex(criteria.page.index);
+      setPageSize(criteria.page.size);
+    }
+  }, []);
 
   if (loading) {
     return (

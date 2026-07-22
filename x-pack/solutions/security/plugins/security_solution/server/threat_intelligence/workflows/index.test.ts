@@ -158,7 +158,9 @@ describe('installBuiltinWorkflows', () => {
 // ---------------------------------------------------------------------------
 describe('threat-intel-continuous-threat-hunt', () => {
   it('registers with tier2_when always on the scheduled hunt path', () => {
-    const workflow = BUILTIN_WORKFLOWS.find((wf) => wf.id === 'threat-intel-continuous-threat-hunt');
+    const workflow = BUILTIN_WORKFLOWS.find(
+      (wf) => wf.id === 'threat-intel-continuous-threat-hunt'
+    );
     expect(workflow).toBeDefined();
     expect(workflow?.yaml).toContain('tier2_when: always');
     expect(workflow?.yaml).toContain('/api/threat_intelligence/hunt_orchestrator');
@@ -166,9 +168,7 @@ describe('threat-intel-continuous-threat-hunt', () => {
 });
 
 describe('enrich_threat_report — structured-method isolation boundary (stix + text_indicator_list)', () => {
-  const nlWorkflow = BUILTIN_WORKFLOWS.find(
-    (wf) => wf.id === 'threat-intel-enrich-threat-report'
-  );
+  const nlWorkflow = BUILTIN_WORKFLOWS.find((wf) => wf.id === 'threat-intel-enrich-threat-report');
   // Guard: if the workflow entry itself is removed this fails with a clear message.
   if (!nlWorkflow) {
     it('threat-intel-enrich-threat-report is present in BUILTIN_WORKFLOWS', () => {
@@ -224,6 +224,55 @@ describe('enrich_threat_report — structured-method isolation boundary (stix + 
       // The filter must NOT use 'exists:' or 'match:' (which would include
       // text_indicator_list docs). The two assertions above already verify
       // term: semantics — this comment makes the protection explicit.
+    });
+
+    it('classify_severity step calls the classify_severity API after enrich_taxonomy', () => {
+      const step = stepText(yaml, 'classify_severity');
+      expect(step).not.toBe('');
+      expect(step).toContain('/api/threat_intelligence/classify_severity');
+      expect(step).toContain('continue: true');
+      // Runs after taxonomy so categories can be forwarded.
+      expect(yaml.indexOf('name: enrich_taxonomy')).toBeLessThan(
+        yaml.indexOf('name: classify_severity')
+      );
+    });
+
+    it('capture_ranking_signals hoists taxonomy signals without inventing severity', () => {
+      const step = stepText(yaml, 'capture_ranking_signals');
+      expect(step).toContain('steps.enrich_taxonomy.output.relevance');
+      expect(step).toContain('default: 0.5');
+      expect(step).not.toContain('severity_level');
+      expect(step).not.toContain("default: 'medium'");
+      expect(step).not.toContain('default: 40');
+      expect(step).not.toContain('foreach.item._source.severity.score');
+    });
+
+    it('persist_classified_severity writes severity only when classify_severity succeeded', () => {
+      const severityPersist = stepText(yaml, 'persist_classified_severity');
+      expect(severityPersist).toContain('if: "steps.classify_severity.output.level : *"');
+      expect(severityPersist).toContain('severity:');
+      expect(severityPersist).toContain('rank_score:');
+      expect(severityPersist).toContain(
+        'steps.classify_severity.output.score | times: variables.relevance'
+      );
+    });
+
+    it('keeps extraction_method pending when LLM enrich is incomplete so retries can run', () => {
+      const complete = stepText(yaml, 'mark_llm_enrich_complete');
+      const incomplete = stepText(yaml, 'mark_llm_enrich_incomplete');
+      const persist = stepText(yaml, 'persist_extractions');
+      expect(complete).toContain('steps.classify_severity.output.level : *');
+      expect(complete).toContain('extraction_method: workflow_v2');
+      expect(incomplete).toContain('extraction_method: pending');
+      expect(incomplete).toContain('NOT steps.classify_severity.output.level : *');
+      expect(persist).toContain("variables.extraction_method | default: 'pending'");
+      expect(persist).not.toMatch(/extraction_method:\s*workflow_v2\s*$/m);
+    });
+
+    it('check_already_extracted excludes the current doc id so incomplete retries are not self-skipped', () => {
+      const step = stepText(yaml, 'check_already_extracted');
+      expect(step).toContain('foreach.item._id');
+      expect(step).toContain('ids:');
     });
   }
 });

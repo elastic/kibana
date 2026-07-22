@@ -12,6 +12,15 @@ export {
   type ReportFeedSort,
 } from './constants';
 export type { ThreatReportFeedItem } from './types';
-export { ThreatReportFeed, type ThreatReportFeedProps } from './threat_report_feed';
+export {
+  ThreatReportFeed,
+  type ThreatReportFeedProps,
+  type ThreatReportFeedPagination,
+} from './threat_report_feed';
 export { ThreatCategoryBadge } from './threat_category_badge';
-export { fromDashboardArticle, fromReportTableRow, isBrowsableReportUrl } from './utils';
+export {
+  fromDashboardArticle,
+  fromFindThreatReportHit,
+  fromReportTableRow,
+  isBrowsableReportUrl,
+} from './utils';

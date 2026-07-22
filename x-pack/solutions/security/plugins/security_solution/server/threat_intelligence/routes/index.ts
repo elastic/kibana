@@ -16,6 +16,7 @@ import { registerDashboardOverviewRoute } from './dashboard_overview';
 import { registerExtractIocsRoute } from './extract_iocs';
 import { registerExtractDiamondRoute } from './extract_diamond';
 import { registerEnrichTaxonomyRoute } from './enrich_taxonomy';
+import { registerClassifySeverityRoute } from './classify_severity';
 import { registerAssessRelevanceRoute } from './assess_relevance';
 import { registerFlyoutInsightsRoute } from './flyout_insights';
 import { registerGeneralizeFromTelemetryRoute } from './generalize_from_telemetry';
@@ -82,6 +83,7 @@ export const registerRoutes = (deps: RouteRegistrationDeps): void => {
   registerExtractIocsRoute(deps);
   registerExtractDiamondRoute(deps);
   registerEnrichTaxonomyRoute(deps);
+  registerClassifySeverityRoute(deps);
   registerAssessRelevanceRoute(deps);
   registerAnalyseEnvironmentRoute(deps);
   registerSynthesizeAdvisoryRoute(deps);

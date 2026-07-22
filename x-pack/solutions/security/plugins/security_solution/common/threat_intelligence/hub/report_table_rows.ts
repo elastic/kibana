@@ -98,7 +98,7 @@ export const buildReportTablePayloadFromSearch = ({
   attachmentLabel,
 }: {
   params: {
-    query: string;
+    query?: string;
     time_range?: { from: string; to: string };
     categories?: ThreatCategory[];
     regions?: ThreatRegion[];
@@ -110,7 +110,7 @@ export const buildReportTablePayloadFromSearch = ({
   ...(attachmentLabel ? { attachmentLabel } : {}),
   time_range_label: formatTimeRangeLabel(params.time_range),
   scope: {
-    query: params.query,
+    query: params.query?.trim() || '*',
     ...(params.time_range ? { time_range: params.time_range } : {}),
     ...(params.categories?.length ? { categories: params.categories } : {}),
     ...(params.regions?.length ? { regions: params.regions } : {}),

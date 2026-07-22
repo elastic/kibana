@@ -37,6 +37,8 @@ import {
   ThreatReportFeed,
   fromDashboardArticle,
   type ReportFeedSort,
+  type ThreatReportFeedItem,
+  type ThreatReportFeedPagination,
 } from '../../../components/report_feed';
 import { getMitreTechniqueMetadata } from '../mitre_technique_metadata';
 import { ExecutiveAdvisoryPanel } from './executive_advisory_panel';
@@ -54,6 +56,13 @@ export interface IntelligenceHubChipFilters {
 
 export const IntelligenceHubDashboardView: React.FC<{
   data: DashboardOverviewResponse;
+  /**
+   * Paginated feed from `find_threat_reports`. When omitted (Agent Builder
+   * canvas), falls back to overview `recent_articles` with client-side filter.
+   */
+  feedItems?: ThreatReportFeedItem[];
+  feedPagination?: ThreatReportFeedPagination;
+  isLoadingFeed?: boolean;
   filters: IntelligenceHubChipFilters;
   sortBy: ReportFeedSort;
   onSortChange: (next: ReportFeedSort) => void;
@@ -75,6 +84,9 @@ export const IntelligenceHubDashboardView: React.FC<{
   onCorrelateReport?: (reportId: string) => void;
 }> = ({
   data,
+  feedItems: feedItemsProp,
+  feedPagination,
+  isLoadingFeed = false,
   filters,
   sortBy,
   onSortChange,
@@ -95,6 +107,7 @@ export const IntelligenceHubDashboardView: React.FC<{
   showHuntFindings = false,
   onCorrelateReport,
 }) => {
+  const { euiTheme } = useEuiTheme();
   const categoryCounts = useMemo(() => {
     const map = new Map<ThreatCategory, number>();
     for (const bucket of data.by_category) {
@@ -105,9 +118,45 @@ export const IntelligenceHubDashboardView: React.FC<{
     return map;
   }, [data.by_category]);
 
-  const feedItems = useMemo(
+  const severityCounts = useMemo(
+    (): Record<SeverityLevel, number> => ({
+      critical: data.stats_ribbon.critical_reports,
+      high: data.stats_ribbon.high_reports,
+      medium: data.stats_ribbon.medium_reports,
+      low: data.stats_ribbon.low_reports,
+    }),
+    [
+      data.stats_ribbon.critical_reports,
+      data.stats_ribbon.high_reports,
+      data.stats_ribbon.low_reports,
+      data.stats_ribbon.medium_reports,
+    ]
+  );
+
+  const fallbackFeedItems = useMemo(
     () => data.recent_articles.map(fromDashboardArticle),
     [data.recent_articles]
+  );
+  const serverDriven = feedItemsProp !== undefined;
+  const feedItems = feedItemsProp ?? fallbackFeedItems;
+
+  /**
+   * One grid for all six overview charts so 2-column mode is always
+   * 1 2 / 3 4 / 5 6 (two separate flex rows used to leave a full-width orphan).
+   * auto-fit collapses to 3 → 2 → 1 columns from container width.
+   */
+  const overviewChartsGridCss = useMemo(
+    () =>
+      css({
+        display: 'grid',
+        gap: euiTheme.size.l,
+        gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 320px), 1fr))',
+        alignItems: 'stretch',
+        '> *': {
+          minWidth: 0,
+        },
+      }),
+    [euiTheme.size.l]
   );
 
   return (
@@ -120,38 +169,27 @@ export const IntelligenceHubDashboardView: React.FC<{
         onFocusSourceReports={onFocusSourceReports}
       />
       <EuiSpacer size="l" />
-      <EuiFlexGroup gutterSize="l" alignItems="stretch" responsive={false}>
-        <EuiFlexItem style={{ minWidth: 0, flex: 1 }}>
-          <ThreatRadar buckets={data.by_category} />
-        </EuiFlexItem>
-        <EuiFlexItem style={{ minWidth: 0, flex: 1 }}>
-          <ActivityTimeline buckets={data.severity_timeline} />
-        </EuiFlexItem>
-        <EuiFlexItem style={{ minWidth: 0, flex: 1 }}>
-          <CategoryBreakdown buckets={data.by_category} />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="l" />
-      <EuiFlexGroup gutterSize="l" alignItems="stretch" responsive={false}>
-        <EuiFlexItem style={{ minWidth: 0, flex: 1 }}>
-          <RegionBreakdown buckets={data.by_region} />
-        </EuiFlexItem>
-        <EuiFlexItem style={{ minWidth: 0, flex: 1 }}>
-          <TopTechniques buckets={data.top_techniques} coverageSummary={data.coverage_summary} />
-        </EuiFlexItem>
-        <EuiFlexItem style={{ minWidth: 0, flex: 1 }}>
-          <EnvironmentImpact
-            impact={data.environment_impact}
-            totalReports={data.stats_ribbon.total_reports}
-            onHighlightReport={onHighlightReport}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <div css={overviewChartsGridCss} data-test-subj="threatIntelOverviewChartsGrid">
+        <ThreatRadar buckets={data.by_category} />
+        <ActivityTimeline buckets={data.severity_timeline} timeRangeLabel={data.time_range_label} />
+        <CategoryBreakdown buckets={data.by_category} />
+        <RegionBreakdown buckets={data.by_region} />
+        <TopTechniques buckets={data.top_techniques} coverageSummary={data.coverage_summary} />
+        <EnvironmentImpact
+          impact={data.environment_impact}
+          totalReports={data.stats_ribbon.total_reports}
+          onHighlightReport={onHighlightReport}
+        />
+      </div>
       <EuiSpacer size="l" />
       <div id="threat-intel-report-feed" data-test-subj="threatIntelReportFeedSection">
         <ThreatReportFeed
           items={feedItems}
+          serverDriven={serverDriven}
+          isLoading={isLoadingFeed}
+          severityCounts={severityCounts}
           categoryCounts={categoryCounts}
+          pagination={feedPagination}
           highlightReportId={highlightReportId}
           selectedSeverities={filters.severities}
           selectedCategories={filters.categories}
@@ -185,15 +223,16 @@ export const IntelligenceHubDashboardView: React.FC<{
 export const StatsRibbon: React.FC<{
   stats: DashboardOverviewResponse['stats_ribbon'];
   topCategory?: ThreatCategory | '<unknown>';
-  recentArticles: DashboardOverviewResponse['recent_articles'];
-}> = ({ stats, topCategory, recentArticles }) => {
-  const severityTotals = useMemo(() => {
-    const totals: Record<SeverityLevel, number> = { low: 0, medium: 0, high: 0, critical: 0 };
-    for (const article of recentArticles) {
-      totals[article.severity] = (totals[article.severity] ?? 0) + 1;
-    }
-    return totals;
-  }, [recentArticles]);
+}> = ({ stats, topCategory }) => {
+  const severityTotals = useMemo(
+    (): Record<SeverityLevel, number> => ({
+      critical: stats.critical_reports,
+      high: stats.high_reports,
+      medium: stats.medium_reports,
+      low: stats.low_reports,
+    }),
+    [stats.critical_reports, stats.high_reports, stats.low_reports, stats.medium_reports]
+  );
 
   const priorStats = stats as DashboardOverviewResponse['stats_ribbon'] & {
     total_reports_prior?: number;
@@ -859,15 +898,38 @@ const ThreatRadar: React.FC<{ buckets: DashboardOverviewResponse['by_category'] 
 };
 
 /**
- * Scatter-style activity timeline. Each timeline bucket gets a column;
- * within the column each severity row gets a single dot sized
- * proportionally to that severity's article count for the bucket. Keeps
- * the temporal-density-by-severity story the bespoke prototype's
- * scatter view conveys without bringing in a charting dependency.
+ * Scatter-style activity timeline. Events are absolutely positioned by
+ * bucket timestamp so marker size stays readable when the panel is narrow
+ * (equal-width flex columns used to shrink dots to 1px with many daily buckets).
  */
+const TIMELINE_DOT_MIN_PX = 6;
+const TIMELINE_DOT_MAX_PX = 14;
+
+const formatTimelineAxisLabel = (value: string): string => {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return value;
+  }
+  return date.toLocaleString(undefined, {
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+  });
+};
+
+const parseTimeRangeLabel = (timeRangeLabel: string): { start?: string; end?: string } => {
+  const [start, end] = timeRangeLabel.split(/\s*→\s*/);
+  return {
+    ...(start ? { start: start.trim() } : {}),
+    ...(end ? { end: end.trim() } : {}),
+  };
+};
+
 const ActivityTimeline: React.FC<{
   buckets: DashboardOverviewResponse['severity_timeline'];
-}> = ({ buckets }) => {
+  timeRangeLabel: string;
+}> = ({ buckets, timeRangeLabel }) => {
   const { euiTheme } = useEuiTheme();
   const rowOrder: SeverityLevel[] = ['critical', 'high', 'medium', 'low'];
   const maxCount = useMemo(() => {
@@ -881,8 +943,34 @@ const ActivityTimeline: React.FC<{
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [buckets]);
 
+  const {
+    start: rangeStart,
+    end: rangeEnd,
+    startMs,
+    rangeMs,
+  } = useMemo(() => {
+    const parsed = parseTimeRangeLabel(timeRangeLabel);
+    const start = parsed.start ?? buckets[0]?.bucket;
+    const end = parsed.end ?? buckets[buckets.length - 1]?.bucket;
+    const parsedStartMs = start ? new Date(start).getTime() : Number.NaN;
+    const parsedEndMs = end ? new Date(end).getTime() : Number.NaN;
+    const safeStartMs = Number.isFinite(parsedStartMs) ? parsedStartMs : 0;
+    const safeEndMs = Number.isFinite(parsedEndMs) ? parsedEndMs : safeStartMs;
+    return {
+      start,
+      end,
+      startMs: safeStartMs,
+      rangeMs: Math.max(safeEndMs - safeStartMs, 1),
+    };
+  }, [buckets, timeRangeLabel]);
+
   return (
-    <EuiPanel hasBorder paddingSize="m" style={overviewChartPanelStyle}>
+    <EuiPanel
+      hasBorder
+      paddingSize="m"
+      style={{ ...overviewChartPanelStyle, overflow: 'hidden' }}
+      data-test-subj="threatIntelActivityTimeline"
+    >
       <PanelHeader
         title={i18n.translate('xpack.securitySolution.threatIntelligence.app.timelineTitle', {
           defaultMessage: 'Activity timeline',
@@ -896,108 +984,115 @@ const ActivityTimeline: React.FC<{
         </EuiText>
       ) : (
         <div
-          style={{
-            display: 'flex',
-            gap: 12,
+          css={css({
+            display: 'grid',
+            gridTemplateColumns: 'auto minmax(0, 1fr)',
+            gridTemplateRows: 'minmax(0, 1fr) auto',
+            columnGap: euiTheme.size.m,
+            rowGap: euiTheme.size.xs,
             flex: 1,
-            alignItems: 'stretch',
-            minHeight: OVERVIEW_PANEL_CONTENT_HEIGHT,
+            minHeight: 0,
             height: OVERVIEW_PANEL_CONTENT_HEIGHT,
-          }}
+            overflow: 'hidden',
+          })}
         >
           <div
-            style={{
+            css={css({
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'space-between',
               fontSize: 10,
               color: euiTheme.colors.darkShade,
-              height: '100%',
-              minHeight: OVERVIEW_PANEL_CONTENT_HEIGHT - 24,
-              paddingTop: 4,
-              paddingBottom: 4,
-            }}
+              paddingTop: euiTheme.size.xs,
+              paddingBottom: euiTheme.size.xs,
+              minHeight: 0,
+            })}
           >
             {rowOrder.map((severity) => (
               <span key={`label-${severity}`}>{severity.toUpperCase()}</span>
             ))}
           </div>
           <div
-            style={{
-              flex: 1,
+            css={css({
+              minWidth: 0,
+              minHeight: 0,
+              overflow: 'hidden',
               position: 'relative',
-              height: '100%',
-              minHeight: OVERVIEW_PANEL_CONTENT_HEIGHT - 24,
-            }}
+            })}
+            data-test-subj="threatIntelActivityTimelinePlot"
           >
-            <EuiFlexGroup gutterSize="xs" responsive={false} style={{ height: '100%' }}>
-              {buckets.map((bucket) => (
-                <EuiFlexItem key={bucket.bucket}>
-                  <div
-                    style={{
-                      display: 'grid',
-                      gridTemplateRows: `repeat(${rowOrder.length}, 1fr)`,
-                      height: '100%',
-                      position: 'relative',
-                    }}
-                    title={`${bucket.bucket}\nCritical: ${bucket.critical}\nHigh: ${bucket.high}\nMedium: ${bucket.medium}\nLow: ${bucket.low}`}
-                  >
-                    {rowOrder.map((severity) => {
-                      const count = bucket[severity];
-                      if (count === 0) {
-                        return <div key={`${bucket.bucket}-${severity}`} />;
-                      }
-                      const ratio = maxCount === 0 ? 0 : count / maxCount;
-                      const diameter = 4 + Math.round(ratio * 10);
-                      return (
-                        <div
-                          key={`${bucket.bucket}-${severity}`}
-                          style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                          }}
-                        >
-                          <span
-                            style={{
-                              width: diameter,
-                              height: diameter,
-                              borderRadius: '50%',
-                              background: SEVERITY_HEX[severity],
-                              boxShadow: '0 0 0 1px rgba(0,0,0,0.2)',
-                            }}
-                          />
-                        </div>
-                      );
+            {buckets.flatMap((bucket) => {
+              const bucketMs = new Date(bucket.bucket).getTime();
+              if (!Number.isFinite(bucketMs)) {
+                return [];
+              }
+              const leftPct = Math.min(100, Math.max(0, ((bucketMs - startMs) / rangeMs) * 100));
+              return rowOrder.flatMap((severity, rowIndex) => {
+                const count = bucket[severity];
+                if (count === 0) {
+                  return [];
+                }
+                const ratio = maxCount === 0 ? 0 : count / maxCount;
+                const diameter = Math.max(
+                  TIMELINE_DOT_MIN_PX,
+                  Math.min(TIMELINE_DOT_MIN_PX + Math.round(ratio * 8), TIMELINE_DOT_MAX_PX)
+                );
+                const topPct = ((rowIndex + 0.5) / rowOrder.length) * 100;
+                return [
+                  <span
+                    key={`${bucket.bucket}-${severity}`}
+                    title={`${bucket.bucket}\n${severity}: ${count}`}
+                    css={css({
+                      position: 'absolute',
+                      left: `${leftPct}%`,
+                      top: `${topPct}%`,
+                      width: diameter,
+                      height: diameter,
+                      borderRadius: '50%',
+                      transform: 'translate(-50%, -50%)',
+                      background: SEVERITY_HEX[severity],
+                      boxShadow: `0 0 0 1px ${euiTheme.colors.emptyShade}`,
+                      pointerEvents: 'auto',
                     })}
-                  </div>
-                </EuiFlexItem>
-              ))}
-            </EuiFlexGroup>
-            <EuiFlexGroup
-              gutterSize="xs"
-              responsive={false}
-              style={{ marginTop: 6, fontSize: 10, color: euiTheme.colors.darkShade }}
-            >
-              {buckets.map((bucket, idx) => (
-                <EuiFlexItem key={`xlabel-${bucket.bucket}`}>
-                  <span style={{ textAlign: 'center' }}>
-                    {idx === 0
-                      ? i18n.translate(
-                          'xpack.securitySolution.threatIntelligence.app.timelineFirstBucket',
-                          { defaultMessage: 'Oldest' }
-                        )
-                      : idx === buckets.length - 1
-                      ? i18n.translate(
-                          'xpack.securitySolution.threatIntelligence.app.timelineLastBucket',
-                          { defaultMessage: 'Now' }
-                        )
-                      : ''}
-                  </span>
-                </EuiFlexItem>
-              ))}
-            </EuiFlexGroup>
+                  />,
+                ];
+              });
+            })}
           </div>
+          <div />
+          <EuiFlexGroup
+            justifyContent="spaceBetween"
+            gutterSize="none"
+            responsive={false}
+            css={css({
+              minWidth: 0,
+              fontSize: 10,
+              color: euiTheme.colors.darkShade,
+              gap: euiTheme.size.s,
+            })}
+            data-test-subj="threatIntelActivityTimelineAxis"
+          >
+            <EuiFlexItem grow={false} css={css({ minWidth: 0 })}>
+              <span css={css({ whiteSpace: 'nowrap' })}>
+                {rangeStart
+                  ? formatTimelineAxisLabel(rangeStart)
+                  : i18n.translate(
+                      'xpack.securitySolution.threatIntelligence.app.timelineFirstBucket',
+                      { defaultMessage: 'Oldest' }
+                    )}
+              </span>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false} css={css({ minWidth: 0 })}>
+              <span css={css({ whiteSpace: 'nowrap' })}>
+                {rangeEnd
+                  ? formatTimelineAxisLabel(rangeEnd)
+                  : i18n.translate(
+                      'xpack.securitySolution.threatIntelligence.app.timelineLastBucket',
+                      { defaultMessage: 'Now' }
+                    )}
+              </span>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </div>
       )}
     </EuiPanel>

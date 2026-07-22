@@ -37,6 +37,8 @@ export interface DashboardOverviewResponse {
     total_reports: number;
     critical_reports: number;
     high_reports: number;
+    medium_reports: number;
+    low_reports: number;
     affects_you_total: number;
     /** Distinct `source.name` values in the overview query scope (time + filters). */
     distinct_source_count: number;

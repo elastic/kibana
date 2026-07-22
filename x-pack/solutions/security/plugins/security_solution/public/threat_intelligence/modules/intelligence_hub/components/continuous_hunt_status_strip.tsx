@@ -301,7 +301,10 @@ const ContinuousHuntStatusStripComponent: React.FC = () => {
                   <span css={huntingDotCss} aria-hidden />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiText size="s" css={css({ color: euiTheme.colors.primary, lineHeight: 1.2 })}>
+                  <EuiText
+                    size="s"
+                    css={css({ color: euiTheme.colors.primary, lineHeight: 1.2 })}
+                  >
                     <strong data-test-subj="threatIntelContinuousHuntHuntingTitle">
                       {i18n.translate(
                         'xpack.securitySolution.threatIntelligence.app.continuousHuntHuntingNow',

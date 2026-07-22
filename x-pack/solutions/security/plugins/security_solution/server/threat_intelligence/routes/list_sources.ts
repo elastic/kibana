@@ -6,10 +6,12 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import {
   LIST_SOURCES_API_PATH,
   THREAT_INTEL_SOURCES_INDEX,
   THREAT_INTELLIGENCE_API_PRIVILEGES,
+  THREAT_REPORTS_INDEX_PATTERN,
 } from '../../../common/threat_intelligence/hub';
 import { buildSpaceFilterTerms, resolveCurrentSpaceId } from '../lib/space_filter';
 import type { RouteRegistrationDeps } from '.';
@@ -39,12 +41,24 @@ export interface ListSourcesItem {
   created_at?: string;
   updated_at?: string;
   space_id?: string;
+  /** Count of threat reports attributed to this source name. */
+  report_count: number;
+  /** Latest `lineage.ingested_at` across reports for this source. */
+  last_ingested_at?: string;
+  /** Sum of `attribution.environment_hits_total` across reports for this source. */
+  env_hits_total: number;
+}
+
+interface SourceReportStats {
+  report_count: number;
+  last_ingested_at?: string;
+  env_hits_total: number;
 }
 
 const mapSourceHit = (hit: {
   _id?: string;
   _source?: ThreatIntelSourceDoc;
-}): ListSourcesItem => {
+}): Omit<ListSourcesItem, 'report_count' | 'last_ingested_at' | 'env_hits_total'> => {
   const source = hit._source ?? {};
   const configUrl = source.config?.url;
   return {
@@ -60,8 +74,94 @@ const mapSourceHit = (hit: {
   };
 };
 
+const emptyStats = (): SourceReportStats => ({
+  report_count: 0,
+  env_hits_total: 0,
+});
+
 /**
- * POST `/api/threat_intelligence/sources/list` — lightweight source catalog for Hub.
+ * Aggregate report activity per `source.name` so the Hub Sources tab can show
+ * whether a catalog entry has produced useful data.
+ */
+export const loadSourceReportStatsByName = async ({
+  esClient,
+  spaceId,
+  logger,
+}: {
+  esClient: ElasticsearchClient;
+  spaceId: string;
+  logger: Logger;
+}): Promise<Map<string, SourceReportStats>> => {
+  const statsByName = new Map<string, SourceReportStats>();
+
+  try {
+    const response = await esClient.search({
+      index: THREAT_REPORTS_INDEX_PATTERN,
+      ignore_unavailable: true,
+      size: 0,
+      track_total_hits: false,
+      query: {
+        bool: {
+          filter: [buildSpaceFilterTerms(spaceId)],
+        },
+      },
+      aggs: {
+        by_source_name: {
+          terms: {
+            field: 'source.name',
+            size: 500,
+          },
+          aggs: {
+            last_ingested: {
+              max: { field: 'lineage.ingested_at' },
+            },
+            env_hits: {
+              sum: { field: 'attribution.environment_hits_total' },
+            },
+          },
+        },
+      },
+    });
+
+    const buckets =
+      (
+        response.aggregations?.by_source_name as
+          | {
+              buckets?: Array<{
+                key: string | number;
+                doc_count: number;
+                last_ingested?: { value?: number | null; value_as_string?: string };
+                env_hits?: { value?: number | null };
+              }>;
+            }
+          | undefined
+      )?.buckets ?? [];
+
+    for (const bucket of buckets) {
+      const name = String(bucket.key);
+      const lastIngested =
+        bucket.last_ingested?.value_as_string ??
+        (typeof bucket.last_ingested?.value === 'number'
+          ? new Date(bucket.last_ingested.value).toISOString()
+          : undefined);
+      statsByName.set(name, {
+        report_count: bucket.doc_count,
+        ...(lastIngested ? { last_ingested_at: lastIngested } : {}),
+        env_hits_total: Math.round(bucket.env_hits?.value ?? 0),
+      });
+    }
+  } catch (err) {
+    logger.warn(
+      `list_sources report enrichment failed: ${(err as Error).message}; returning catalog only`
+    );
+  }
+
+  return statsByName;
+};
+
+/**
+ * POST `/api/threat_intelligence/sources/list` — source catalog for Hub, enriched
+ * with report counts / last ingest / env hits from `.kibana-threat-reports*`.
  */
 export const registerListSourcesRoute = ({
   router,
@@ -87,23 +187,37 @@ export const registerListSourcesRoute = ({
         const core = await context.core;
         const esClient = core.elasticsearch.client.asCurrentUser;
         const spaceId = resolveCurrentSpaceId(getSpacesService(), request);
-        const size = request.body.size ?? 100;
+        const size = request.body.size ?? 500;
 
         try {
-          const searchResponse = await esClient.search<ThreatIntelSourceDoc>({
-            index: THREAT_INTEL_SOURCES_INDEX,
-            ignore_unavailable: true,
-            size,
-            track_total_hits: true,
-            sort: [{ name: { order: 'asc' } }],
-            query: {
-              bool: {
-                filter: [buildSpaceFilterTerms(spaceId)],
+          const [searchResponse, reportStatsByName] = await Promise.all([
+            esClient.search<ThreatIntelSourceDoc>({
+              index: THREAT_INTEL_SOURCES_INDEX,
+              ignore_unavailable: true,
+              size,
+              track_total_hits: true,
+              sort: [{ name: { order: 'asc' } }],
+              query: {
+                bool: {
+                  filter: [buildSpaceFilterTerms(spaceId)],
+                },
               },
-            },
+            }),
+            loadSourceReportStatsByName({ esClient, spaceId, logger }),
+          ]);
+
+          const sources = (searchResponse.hits.hits ?? []).map((hit) => {
+            const base = mapSourceHit(hit);
+            const stats =
+              (base.name ? reportStatsByName.get(base.name) : undefined) ?? emptyStats();
+            return {
+              ...base,
+              report_count: stats.report_count,
+              ...(stats.last_ingested_at ? { last_ingested_at: stats.last_ingested_at } : {}),
+              env_hits_total: stats.env_hits_total,
+            };
           });
 
-          const sources = (searchResponse.hits.hits ?? []).map(mapSourceHit);
           const total =
             typeof searchResponse.hits.total === 'number'
               ? searchResponse.hits.total

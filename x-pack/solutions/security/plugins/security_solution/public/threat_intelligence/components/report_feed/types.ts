@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import type {
-  SeverityLevel,
-  ThreatCategory,
-  ThreatRegion,
-} from '../../../../common/threat_intelligence/hub';
+import type { SeverityLevel, ThreatCategory, ThreatRegion } from '../../../../common/threat_intelligence/hub';
 
 /**
  * Normalized report row for the shared card grid (Intelligence Hub +

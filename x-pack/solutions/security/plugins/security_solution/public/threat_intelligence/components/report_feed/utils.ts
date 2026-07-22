@@ -10,6 +10,7 @@ import type {
   ReportTablePayload,
   SeverityLevel,
   ThreatCategory,
+  ThreatRegion,
 } from '../../../../common/threat_intelligence/hub';
 import type { ThreatReportFeedItem } from './types';
 import { SEVERITY_RANK, type ReportFeedSort } from './constants';
@@ -116,6 +117,33 @@ export const fromDashboardArticle = (
   bodyText: article.body_text,
   environmentHitsTotal: article.environment_hits_total,
 });
+
+/** Map a `find_threat_reports` hit into the shared card grid row. */
+export const fromFindThreatReportHit = (hit: {
+  report_id?: string;
+  '@timestamp'?: string;
+  source?: { name?: string; url?: string };
+  content?: { title?: string; body_text?: string };
+  severity?: { level?: SeverityLevel };
+  extracted?: { categories?: ThreatCategory[] };
+  geography?: { regions?: ThreatRegion[] };
+  attribution?: { environment_hits_total?: number };
+}): ThreatReportFeedItem => {
+  const reportId = hit.report_id ?? '';
+  const severity = hit.severity?.level ?? 'medium';
+  return {
+    reportId,
+    title: hit.content?.title || reportId || '(untitled)',
+    sourceName: hit.source?.name || 'unknown',
+    sourceUrl: hit.source?.url,
+    severity,
+    publishedAt: hit['@timestamp'],
+    categories: hit.extracted?.categories ?? [],
+    regions: hit.geography?.regions,
+    bodyText: hit.content?.body_text,
+    environmentHitsTotal: hit.attribution?.environment_hits_total,
+  };
+};
 
 export const fromReportTableRow = (
   row: ReportTablePayload['reports'][number]
