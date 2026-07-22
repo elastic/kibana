@@ -165,6 +165,7 @@
     "@kbn/expressions-plugin",
     "@kbn/ingest-hub-plugin",
     "@kbn/core-spaces-common",
+    "@kbn/agent-builder-plugin",
     "@kbn/app-header",
     "@kbn/core-chrome-app-menu-components"
   ],
