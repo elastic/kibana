@@ -18,7 +18,7 @@ import {
   type StoredTombstone,
 } from '../data_stream';
 import type { SignificantEventsAlertingContext } from '../../significant_events/alerting/significant_events_alerting_context';
-import { ALERTS_READER_V1 } from '../../significant_events/alerting/alerts_reader';
+import { ALERTS_READER_V2 } from '../../significant_events/alerting/alerts_reader';
 import { KI_TYPE_FEATURE, KI_TYPE_QUERY } from '../fields';
 
 jest.mock('../../significant_events/latest_source_query', () => {
@@ -88,8 +88,7 @@ function createAlertingContext(
   rulesManagementClient: SignificantEventsAlertingContext['rulesClient']
 ): SignificantEventsAlertingContext {
   return {
-    alertingV2Active: false,
-    alertsReader: ALERTS_READER_V1,
+    alertsReader: ALERTS_READER_V2,
     rulesClient: rulesManagementClient,
   };
 }
@@ -649,8 +648,8 @@ describe('KnowledgeIndicatorClient.findIndicators search', () => {
     expect(query).not.toContain('query.esql');
     expect(query).not.toContain('query.features.id');
     expect(query).toContain('EVAL _score = CASE');
-    expect(query).toContain('CASE(TO_LOWER(title) LIKE "*checkout*", 3, 0.0)');
-    expect(query).toContain('CASE(TO_LOWER(description) LIKE "*checkout*", 2, 0.0)');
+    expect(query).toContain('CASE(TO_LOWER(title) LIKE "*checkout*", 3.0, 0.0)');
+    expect(query).toContain('CASE(TO_LOWER(description) LIKE "*checkout*", 2.0, 0.0)');
   });
 
   it('uses only query fields when type is [query]', async () => {
@@ -687,9 +686,24 @@ describe('KnowledgeIndicatorClient.findIndicators search', () => {
     const { query } = rankRequest(rankEsql);
     // Substring form: join the multivalue then apply the shared `*<query>*` pattern.
     expect(query).toContain('MV_CONCAT(TO_LOWER(tags), " ") LIKE "*client*"');
-    expect(query).toContain('CASE(MV_CONCAT(TO_LOWER(tags), " ") LIKE "*client*", 1, 0.0)');
+    expect(query).toContain('CASE(MV_CONCAT(TO_LOWER(tags), " ") LIKE "*client*", 1.0, 0.0)');
     // The exact-element form must be gone.
     expect(query).not.toContain('MV_CONTAINS');
+  });
+
+  it('uses double keyword scores in hybrid search', async () => {
+    const { client, runEsql, rankEsql } = makeClientWithRanker();
+    runEsql.mockResolvedValueOnce({ hits: [createFeatureDoc()] });
+
+    await client.findIndicators(STREAM, 'checkout service', {
+      types: [KI_TYPE_FEATURE],
+      searchMode: 'hybrid',
+    });
+
+    const { query } = rankRequest(rankEsql);
+    expect(query).toContain('FUSE RRF');
+    expect(query).toContain('CASE(TO_LOWER(title) LIKE "*checkout service*", 3.0, 0.0)');
+    expect(query).toContain('CASE(TO_LOWER(description) LIKE "*checkout service*", 2.0, 0.0)');
   });
 
   it('normalizes and thresholds semantic scores in ES|QL', async () => {

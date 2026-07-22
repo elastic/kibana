@@ -15,7 +15,6 @@ import {
   EuiFlyoutHeader,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLink,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -24,10 +23,14 @@ import {
 import { i18n } from '@kbn/i18n';
 import { AiButton } from '@kbn/shared-ux-ai-components';
 import type { SignificantEvent } from '@kbn/significant-events-schema';
+import { DetectionFlyout } from './detection_flyout';
 import { DetectionsList } from './detections_list';
-import { EventInvestigations } from './event_investigations';
+import { EventInvestigation } from './event_investigation';
 import { InvestigationStatusBadge } from './investigation_status_badge';
+import { TruncatableSummary } from './truncatable_summary';
 import { formatTimestamp } from '../format_timestamp';
+import { useFetchEventLifecycle } from '../hooks/use_fetch_event_lifecycle';
+import { findDetectionSignal } from '../resolve_detection_signal';
 import { isNeedsActionStatus } from '../significant_event_status';
 
 export interface EventFlyoutProps {
@@ -36,22 +39,35 @@ export interface EventFlyoutProps {
   onChatClick?: (event: SignificantEvent) => void;
 }
 
-const MAX_SUMMARY_LENGTH = 300;
-
 export function EventFlyout({ event, onClose, onChatClick }: EventFlyoutProps): React.ReactElement {
   const { euiTheme } = useEuiTheme();
-  const [summaryExpanded, setSummaryExpanded] = useState(false);
+  const [selectedDetectionId, setSelectedDetectionId] = useState<string>();
+  const lifecycleQuery = useFetchEventLifecycle(event.event_uuid);
 
-  // Code points, not UTF-16 units, so truncation cannot split an emoji in half.
-  const summaryCharacters = useMemo(() => Array.from(event.summary), [event.summary]);
-  const isSummaryLong = summaryCharacters.length > MAX_SUMMARY_LENGTH;
-  const displaySummary =
-    isSummaryLong && !summaryExpanded
-      ? summaryCharacters.slice(0, MAX_SUMMARY_LENGTH).join('') + '...'
-      : event.summary;
+  const selectedDetection = useMemo(
+    () =>
+      lifecycleQuery.data?.detections.find(
+        (detection) => detection.detection_id === selectedDetectionId
+      ),
+    [lifecycleQuery.data?.detections, selectedDetectionId]
+  );
 
-  const toggleSummary = useCallback(() => {
-    setSummaryExpanded((prev) => !prev);
+  const selectedDetectionSignal = useMemo(() => {
+    if (!selectedDetection) {
+      return undefined;
+    }
+    return findDetectionSignal(selectedDetection, {
+      discoveries: lifecycleQuery.data?.discoveries,
+      eventSignals: event.signals,
+    });
+  }, [event.signals, lifecycleQuery.data?.discoveries, selectedDetection]);
+
+  const closeDetectionFlyout = useCallback(() => {
+    setSelectedDetectionId(undefined);
+  }, []);
+
+  const handleDetectionClick = useCallback((detectionId: string) => {
+    setSelectedDetectionId((current) => (current === detectionId ? undefined : detectionId));
   }, []);
 
   return (
@@ -72,7 +88,7 @@ export function EventFlyout({ event, onClose, onChatClick }: EventFlyoutProps): 
           <EuiFlexItem grow={false}>
             <EuiBadge color="default">
               {i18n.translate('xpack.observability.nightshift.flyout.badge.significantEventLabel', {
-                defaultMessage: 'Significant event',
+                defaultMessage: 'Significant Event',
               })}
             </EuiBadge>
           </EuiFlexItem>
@@ -111,30 +127,31 @@ export function EventFlyout({ event, onClose, onChatClick }: EventFlyoutProps): 
           </h3>
         </EuiTitle>
         <EuiSpacer size="s" />
-        <EuiText size="s">
-          <p>{displaySummary}</p>
-        </EuiText>
-        {isSummaryLong && (
-          // eslint-disable-next-line @elastic/eui/require-href-for-link
-          <EuiLink data-test-subj="nightshiftEventFlyoutSummaryToggle" onClick={toggleSummary}>
-            {summaryExpanded
-              ? i18n.translate('xpack.observability.nightshift.flyout.showLessButtonText', {
-                  defaultMessage: 'Show less',
-                })
-              : i18n.translate('xpack.observability.nightshift.flyout.showMoreButtonText', {
-                  defaultMessage: 'Show more',
-                })}
-          </EuiLink>
-        )}
+        <TruncatableSummary summary={event.summary} />
 
         <EuiSpacer size="l" />
 
-        <DetectionsList eventUuid={event.event_uuid} />
+        <DetectionsList
+          eventUuid={event.event_uuid}
+          lifecycleQuery={lifecycleQuery}
+          selectedDetectionId={selectedDetectionId}
+          onDetectionClick={(detection) => handleDetectionClick(detection.detection_id)}
+        />
 
         <EuiSpacer size="l" />
 
-        <EventInvestigations event={event} />
+        <EventInvestigation event={event} />
       </EuiFlyoutBody>
+
+      {selectedDetection && (
+        <DetectionFlyout
+          key={selectedDetection.detection_id}
+          detection={selectedDetection}
+          event={event}
+          signal={selectedDetectionSignal}
+          onClose={closeDetectionFlyout}
+        />
+      )}
 
       {onChatClick && (
         <EuiFlyoutFooter
