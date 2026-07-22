@@ -89,7 +89,8 @@ describe('useResolveTimeField', () => {
     );
 
     await waitFor(() => {
-      expect(getESQLTimeField).toHaveBeenCalledWith('FROM kibana_sample_data_flights', {
+      expect(getESQLTimeField).toHaveBeenCalledWith({
+        query: 'FROM kibana_sample_data_flights',
         http: defaultParams.http,
       });
       expect(result.current.timeFieldOptions).toEqual([{ value: 'timestamp', text: 'timestamp' }]);

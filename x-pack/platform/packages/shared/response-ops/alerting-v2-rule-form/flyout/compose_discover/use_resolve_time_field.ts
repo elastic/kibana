@@ -63,7 +63,7 @@ export const useResolveTimeField = ({
 
   const { data: apiTimeField, isLoading: isLoadingApiTimeField } = useQuery({
     queryKey: ruleFormKeys.composeDiscoverApiTimeField(fromSourceQuery),
-    queryFn: () => getESQLTimeField(fromSourceQuery, { http }),
+    queryFn: () => getESQLTimeField({ query: fromSourceQuery, http }),
     enabled: needsApiTimeField,
     refetchOnWindowFocus: false,
     retry: false,

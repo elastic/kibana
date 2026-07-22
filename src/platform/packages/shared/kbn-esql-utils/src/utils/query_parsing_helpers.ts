@@ -208,7 +208,9 @@ export function convertTimeseriesCommandToFrom(esql?: string): string {
  * Parses the ES|QL query and returns the column used with `?_tstart`/`?_tend` named params.
  * Returns `undefined` when the query contains no time filter params.
  *
- * @deprecated Prefer `getESQLTimeField` instead.
+ * Use this for synchronous/server-side contexts where only local parsing is needed.
+ * For client-side code with HTTP access that also needs `fieldCaps` fallback,
+ * use `getESQLTimeField` instead.
  */
 export const parseTimeFieldFromESQLQuery = (esql: string) => {
   const { root } = Parser.parse(esql);
