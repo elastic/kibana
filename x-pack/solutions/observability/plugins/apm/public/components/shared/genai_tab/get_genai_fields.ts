@@ -65,11 +65,33 @@ export function hasGenAiData(metadata: Record<string, unknown>): boolean {
   return Object.keys(metadata).some((key) => GEN_AI_PATTERN.test(key));
 }
 
-/** Reads the first element of an array-valued field from the event_metadata map. */
+/**
+ * Reads the first element of an array-valued field from the event_metadata map.
+ * Tries three key shapes in order:
+ *   1. attributes.gen_ai.*  — OTel / EDOT ingest
+ *   2. gen_ai.*             — bare OTel (no attributes. prefix)
+ *   3. labels.gen_ai_*      — APM Server ingest (dots → underscores)
+ */
 function first<T>(metadata: Record<string, unknown>, key: string): T | undefined {
-  const val = metadata[key];
-  if (Array.isArray(val)) return val[0] as T | undefined;
-  return val as T | undefined;
+  const read = (k: string) => {
+    const val = metadata[k];
+    if (val === undefined) return undefined;
+    return (Array.isArray(val) ? val[0] : val) as T | undefined;
+  };
+
+  const direct = read(key);
+  if (direct !== undefined) return direct;
+
+  if (key.startsWith('attributes.')) {
+    const bare = key.slice('attributes.'.length); // gen_ai.request.model
+    const fromBare = read(bare);
+    if (fromBare !== undefined) return fromBare;
+
+    const labelsKey = 'labels.' + bare.replace(/\./g, '_'); // labels.gen_ai_request_model
+    return read(labelsKey);
+  }
+
+  return undefined;
 }
 
 export function parseGenAiMessages(raw: unknown): GenAiMessage[] {

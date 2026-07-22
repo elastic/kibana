@@ -132,4 +132,26 @@ describe('getGenAiFields', () => {
     const fields = getGenAiFields({ 'attributes.gen_ai.system': ['azure'] });
     expect(fields.provider).toBe('azure');
   });
+
+  it('reads bare gen_ai.* keys (no attributes. prefix)', () => {
+    const fields = getGenAiFields({
+      'gen_ai.operation.name': ['chat'],
+      'gen_ai.request.model': ['gpt-4o'],
+      'gen_ai.usage.input_tokens': [50],
+    });
+    expect(fields.operationName).toBe('chat');
+    expect(fields.requestModel).toBe('gpt-4o');
+    expect(fields.inputTokens).toBe(50);
+  });
+
+  it('reads labels.gen_ai_* keys (APM Server ingest, dots→underscores)', () => {
+    const fields = getGenAiFields({
+      'labels.gen_ai_operation_name': ['chat'],
+      'labels.gen_ai_request_model': ['claude-3'],
+      'labels.gen_ai_system': ['anthropic'],
+    });
+    expect(fields.operationName).toBe('chat');
+    expect(fields.requestModel).toBe('claude-3');
+    expect(fields.provider).toBe('anthropic');
+  });
 });
