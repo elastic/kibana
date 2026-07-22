@@ -392,15 +392,17 @@ export async function createUiamSessionTokens({
         platform: [],
         organization: [],
         user: [],
+        // One grant per project type so the session can reach cross-project (CPS) linked
+        // projects of any type, not just the type of the Kibana instance being logged in to.
         project: [
-          {
-            role_id: 'cloud-role-id',
-            organization_id: organizationId,
-            project_type: projectType,
-            application_roles: roles,
-            project_scope: { scope: 'all' },
-          },
-        ],
+          ...new Set([projectType, 'elasticsearch', 'observability', 'security', 'vectordb']),
+        ].map((grantedProjectType) => ({
+          role_id: 'cloud-role-id',
+          organization_id: organizationId,
+          project_type: grantedProjectType,
+          application_roles: roles,
+          project_scope: { scope: 'all' },
+        })),
       },
 
       nbf: iat,
@@ -508,15 +510,17 @@ export async function createUiamOAuthAccessToken({
         platform: [],
         organization: [],
         user: [],
+        // One grant per project type so the session can reach cross-project (CPS) linked
+        // projects of any type, not just the type of the Kibana instance being logged in to.
         project: [
-          {
-            role_id: 'cloud-role-id',
-            organization_id: organizationId,
-            project_type: projectType,
-            application_roles: roles,
-            project_scope: { scope: 'all' },
-          },
-        ],
+          ...new Set([projectType, 'elasticsearch', 'observability', 'security', 'vectordb']),
+        ].map((grantedProjectType) => ({
+          role_id: 'cloud-role-id',
+          organization_id: organizationId,
+          project_type: grantedProjectType,
+          application_roles: roles,
+          project_scope: { scope: 'all' },
+        })),
       },
 
       nbf: iat,

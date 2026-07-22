@@ -122,17 +122,25 @@ function createUserDocument(userData: TestUserData): PersistableUser {
     ],
     role_assignments: {
       user: [],
+      // One grant per project type so the test user can reach cross-project (CPS) linked
+      // projects of any type, not just the type of the Kibana instance they logged in to.
       project: [
-        {
-          role_id: userData.roleId,
-          organization_id: userData.organizationId,
-          project_scope: {
-            scope: 'all',
-          },
-          project_type: userData.projectType,
-          application_roles: userData.applicationRoles,
+        ...new Set([
+          userData.projectType,
+          'elasticsearch',
+          'observability',
+          'security',
+          'vectordb',
+        ]),
+      ].map((projectType) => ({
+        role_id: userData.roleId,
+        organization_id: userData.organizationId,
+        project_scope: {
+          scope: 'all' as const,
         },
-      ],
+        project_type: projectType,
+        application_roles: userData.applicationRoles,
+      })),
       deployment: [],
       platform: [],
       organization: [],
