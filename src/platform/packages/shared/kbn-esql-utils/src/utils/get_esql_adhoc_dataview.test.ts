@@ -367,8 +367,16 @@ describe('getIndexForESQLQuery', () => {
     expect(await getIndexForESQLQuery({ http })).toBe('visible');
   });
 
-  it('all three sources are queried in parallel', async () => {
+  it('only queries local when a local index is found', async () => {
     const http = makeHttp([{ name: 'logs-2024', hidden: false }], [], []);
+    await getIndexForESQLQuery({ http });
+    expect(http.get).toHaveBeenCalledWith(LOCAL_ROUTE);
+    expect(http.get).not.toHaveBeenCalledWith(REMOTE_ROUTE);
+    expect(http.get).not.toHaveBeenCalledWith(DATASETS_ROUTE);
+  });
+
+  it('queries remote and datasets in parallel when no local indices exist', async () => {
+    const http = makeHttp([], [{ name: 'cluster:index', hidden: false }], []);
     await getIndexForESQLQuery({ http });
     expect(http.get).toHaveBeenCalledWith(LOCAL_ROUTE);
     expect(http.get).toHaveBeenCalledWith(REMOTE_ROUTE);

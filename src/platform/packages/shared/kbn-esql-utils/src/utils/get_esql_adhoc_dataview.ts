@@ -130,17 +130,17 @@ export async function getIndexForESQLQuery(deps: { http: HttpStart }): Promise<s
       .then((res) => res.datasets)
       .catch((): EsqlDatasetsResult['datasets'] => []);
 
-  const [local, remote, datasets] = await Promise.all([
-    fetchIndices('local'),
-    fetchIndices('remote'),
-    fetchDatasets(),
-  ]);
-
+  // Phase 1: fetch local indices first. If a usable local index is found,
+  // return immediately without waiting for remote or FDS datasets.
+  const local = await fetchIndices('local');
   const hasLocalLogs = local.some(
     (source) => !source.name.includes(':') && source.name.startsWith('logs')
   );
   if (hasLocalLogs) return 'logs*';
   if (local.length > 0) return local[0].name;
+
+  // Phase 2: no local indices — fan out to remote and FDS datasets in parallel.
+  const [remote, datasets] = await Promise.all([fetchIndices('remote'), fetchDatasets()]);
   if (remote.length > 0) return remote[0].name;
   return datasets[0]?.name ?? null;
 }
