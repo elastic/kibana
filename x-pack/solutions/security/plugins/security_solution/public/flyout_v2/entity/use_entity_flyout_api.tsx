@@ -497,7 +497,12 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
               contextID={contextID}
             />
           );
-          descriptor = { kind: FLYOUT_DESCRIPTOR_KIND.host, hostName: entityName ?? '', entityId, scopeId };
+          descriptor = {
+            kind: FLYOUT_DESCRIPTOR_KIND.host,
+            hostName: entityName ?? '',
+            entityId,
+            scopeId,
+          };
           break;
         case 'user':
           children = (
@@ -508,7 +513,12 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
               contextID={contextID}
             />
           );
-          descriptor = { kind: FLYOUT_DESCRIPTOR_KIND.user, userName: entityName ?? '', entityId, scopeId };
+          descriptor = {
+            kind: FLYOUT_DESCRIPTOR_KIND.user,
+            userName: entityName ?? '',
+            entityId,
+            scopeId,
+          };
           break;
         case 'service':
           children = (
