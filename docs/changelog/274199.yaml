@@ -7,4 +7,5 @@ products:
   target: 9.5.0
 areas:
 - AI and machine Learning
-title: Fixing unbounded string in schema validation part 2
+title: Limit unbounded string fields in machine learning API schemas
+description: Machine learning API string fields now enforce maximum lengths, including tighter limits on the index-exists endpoint, to reduce oversized request risk.

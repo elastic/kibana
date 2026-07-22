@@ -8,4 +8,4 @@ products:
   target: 9.5.0
 areas:
 - Search and data
-title: Fix missing .otel suffix on named OTel inputs
+title: "Fix missing `.otel` suffix on named OTel inputs"

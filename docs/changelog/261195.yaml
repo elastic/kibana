@@ -5,4 +5,5 @@ products:
 - product: cloud-serverless
 - product: kibana
   target: 9.5.0
-title: Service map dashboard embeddable
+title: Add an APM service map panel to dashboards
+description: "You can add an APM service map as a dashboard panel. The panel supports `service.name`, `service.environment`, and KQL filters."

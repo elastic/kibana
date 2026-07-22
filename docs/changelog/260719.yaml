@@ -9,4 +9,5 @@ products:
   target: 9.5.0
 areas:
 - Kibana platform
-title: 'A11y: Fix inactive component template row focus and badge a11y labels'
+title: Fix focus and badge labels for inactive component template rows
+description: Inactive component template rows are no longer keyboard-activatable, and content indicator badges announce meaningful descriptions to screen readers.

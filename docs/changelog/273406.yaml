@@ -6,4 +6,4 @@ products:
   target: 2026-06-30
 - product: kibana
   target: 9.5.0
-title: Add Compare metrics in Discover button to infrastructure metrics tables
+title: Add compare metrics in Discover button to infrastructure metrics tables

@@ -7,5 +7,5 @@ products:
 - product: cloud-serverless
 - product: kibana
   target: 9.5.0
-title: Move search.rerank workflow step from workplace_ai to agent_builder
-description: Adds a `search.rerank` workflow step that reorders documents by relevance using a rerank inference endpoint.
+title: "Make the `search.rerank` workflow step available across Kibana solutions"
+description: "You can use the `search.rerank` workflow step outside Workplace AI, including in Agent Builder and Serverless. It reorders documents by relevance using a rerank inference endpoint. Existing workflows that use this step are unchanged."

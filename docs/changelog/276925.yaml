@@ -7,5 +7,5 @@ products:
   target: 9.5.0
 areas:
 - Search and data
-title: 'agentless: rename agentless_policies API endpoint to managed_integrat…'
-description: 'Adds a dedicated managed integrations API for managed integrations deployments with full CRUD: list and get, full-replace update, and bulk upgrade with dry-run preview.'
+title: Rename the agentless policies API to managed integrations
+description: The agentless policies API is renamed to managed integrations, with list, get, full-replace update, and bulk upgrade endpoints including dry-run preview.

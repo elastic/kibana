@@ -9,4 +9,4 @@ products:
   target: 9.5.0
 areas:
 - Search and data
-title: 'A11y: announce data streams stats toggle change'
+title: Announce data stream stats toggle changes to screen readers

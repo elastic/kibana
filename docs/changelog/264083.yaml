@@ -9,4 +9,5 @@ products:
   target: 9.5.0
 areas:
 - Search and data
-title: 'fix: URL-encode YAML in downloadYaml to prevent # truncation'
+title: "Fix YAML policy downloads truncating at `#` characters"
+description: "Downloading a Fleet agent policy as YAML URL-encodes the content so `#` characters in comments or anchors are no longer treated as URL fragments and dropped from the file."

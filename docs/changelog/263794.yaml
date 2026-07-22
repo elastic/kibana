@@ -7,4 +7,4 @@ products:
   target: 9.5.0
 areas:
 - AI and machine Learning
-title: Upgrade hono and @hono/node-server dependency
+title: "Upgrade `hono` and `@hono/node-server` for the Agent Builder MCP server"

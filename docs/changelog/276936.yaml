@@ -7,4 +7,4 @@ products:
   target: 9.5.0
 areas:
 - AI and machine Learning
-title: Fix ML saved objects API privileges
+title: Fix machine learning saved objects API privileges

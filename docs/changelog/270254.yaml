@@ -7,4 +7,5 @@ products:
 - product: cloud-serverless
 - product: kibana
   target: 9.5.0
-title: Add new presets to timepicker:quickRanges + migrate custom lists
+title: Add more quick time range presets to the date picker
+description: "The date picker includes additional quick ranges such as Yesterday, Last 3 hours, Last 12 hours, Last 3 days, and this week, month, and year options. Spaces with a custom quick ranges list in Advanced Settings receive the new presets on upgrade."

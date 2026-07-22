@@ -9,4 +9,5 @@ products:
   target: 9.5.0
 areas:
 - AI and machine Learning
-title: Attachment canvas custom width
+title: Allow custom widths for Agent Builder attachment canvases
+description: Agent Builder UI attachments can define a custom canvas width (default 50% of the screen, minimum 300px), with resizable overlays outside the sidebar on larger viewports.

@@ -7,4 +7,7 @@ products:
 - product: cloud-serverless
 - product: kibana
   target: 9.5.0
-title: Deprecate direct AI connector step types in favor of ai.prompt
+title: "Deprecate direct AI connector workflow steps in favor of `ai.prompt`"
+description: "Direct AI connector step types such as `inference.*`, `bedrock.*`, `gen-ai.*`, and `gemini.*` are deprecated and hidden from new step selection. Existing workflows that use them continue to run."
+impact: New workflows should not use the deprecated direct AI connector step types.
+action: "Use the `ai.prompt` step (and related purpose-built `ai.*` steps) when adding AI actions to workflows."

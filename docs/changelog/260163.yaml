@@ -7,5 +7,5 @@ products:
 - product: cloud-serverless
 - product: kibana
   target: 9.5.0
-title: '`DateRangePicker` integration'
+title: Add a technical preview date range picker to Discover and Dashboard
 description: Introduces a new date range picker in Discover and Dashboard, in technical preview behind a feature flag. The new picker lets you type time ranges directly into a text input using flexible formats — combine relative and absolute dates like `8 weeks ago to Apr 7, 2026`, use plain expressions like `last 20 minutes`, or use the new shorthand syntax like `-6mo` for the last 6 months. It supports the same quick presets, absolute dates, recently used ranges, and auto-refresh as before.

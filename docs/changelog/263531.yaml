@@ -9,4 +9,5 @@ products:
 - product: cloud-serverless
 - product: kibana
   target: 9.5.0
-title: 'feat: APM service map options panel, find-in-page, and filters'
+title: Add options panel, find-in-page, and filters to the APM service map
+description: "The APM service map includes an options panel with alert, SLO, and anomaly status filters, horizontal or vertical layout, and show/hide controls. Find-in-page search (including Ctrl/Cmd+K) helps you locate services on the map."

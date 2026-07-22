@@ -7,5 +7,5 @@ products:
   target: 9.5.0
 areas:
 - Search and data
-title: 'fix(search-applications): remove markup rendering from doc explorer'
+title: Stop rendering markup in Search Applications document explorer
 description: Fixes Search Applications document explorer to not render markup from fields.

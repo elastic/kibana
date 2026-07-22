@@ -7,4 +7,7 @@ products:
 - product: cloud-serverless
 - product: kibana
   target: 9.5.0
-title: Remove Obs Agent
+title: Remove the Observability Agent in favor of Elastic Agent skills
+description: The standalone Observability Agent is removed. Observability investigation and related capabilities continue through Elastic Agent and skills in Agent Builder.
+impact: Any configuration or workflows that depended on the Observability Agent as a separate agent experience no longer apply.
+action: Use Elastic Agent with Observability skills in Agent Builder for investigation and related tasks.

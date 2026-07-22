@@ -9,4 +9,4 @@ products:
   target: 9.5.0
 areas:
 - AI and machine Learning
-title: 'SMV in Dashboard: Ensure Single Metric Viewer dashboard pdf/png export shows up correctly'
+title: Fix Single Metric Viewer PDF and PNG exports on dashboards

@@ -9,5 +9,5 @@ products:
   target: 9.5.0
 areas:
 - AI and machine Learning
-title: 'fix(agent builder): use allow list for searching across system indices'
+title: Expose user-facing system indices in Agent Builder index selection
 description: Agent Builder index selection now exposes user-facing system indices and aliases (alerts, ML anomaly results, SLOs, entity store, exception lists, legacy SIEM signals, Stack Monitoring) that were previously hidden by a blanket dot-prefix filter. Truly internal indices (.kibana_*, .tasks, .reporting-*, .fleet-*, internal alert backing indices, etc.) remain hidden.

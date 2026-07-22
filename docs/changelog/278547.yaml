@@ -5,4 +5,4 @@ products:
 - product: cloud-serverless
 - product: kibana
   target: 9.5.0
-title: Updates kibana MITRE mappings to `v19.1`
+title: Update Kibana MITRE mappings to `v19.1`

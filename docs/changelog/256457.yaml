@@ -7,4 +7,5 @@ products:
   target: 9.5.0
 areas:
 - AI and machine Learning
-title: Adding maxSize to all array schemas
+title: "Limit machine learning array schema sizes with `maxSize`"
+description: Machine learning API array fields now enforce size limits (typically 10,000 items; up to 50,000 for some file upload schemas) to prevent oversized request payloads.

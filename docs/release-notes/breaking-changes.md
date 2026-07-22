@@ -36,6 +36,12 @@ If you are migrating from a version prior to version 9.0, you must first upgrade
 % 4. You can then call the link from any Kibana code. For example: `href: docLinks.links.upgradeAssistant.id`
 % Check https://docs.elastic.dev/docs/kibana-doc-links (internal) for more details about the Doc links service.
 
+:::{changelog} /releases/kibana
+:config: /changelog.yml
+:type: breaking-change
+:subsections:
+:::
+
 ## 9.4.0 [kibana-9.4.0-breaking-changes]
 
 $$$kibana-255122-9.4.0$$$

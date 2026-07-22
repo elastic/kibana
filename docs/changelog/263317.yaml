@@ -7,4 +7,4 @@ products:
 - product: cloud-serverless
 - product: kibana
   target: 9.5.0
-title: 'fix(synthetics): update Failed Tests by Step panel to respect time range changes'
+title: Fix Failed Tests by Step panel ignoring time range changes in Synthetics

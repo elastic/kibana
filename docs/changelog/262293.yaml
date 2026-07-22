@@ -5,4 +5,5 @@ products:
 - product: cloud-serverless
 - product: kibana
   target: 9.5.0
-title: observability.investigation skill
+title: Add an Observability investigation skill to Agent Builder
+description: "Agent Builder can use a structured Observability investigation skill to answer questions about services, alerts, and infrastructure, and to diagnose problems such as high error rates or slow services."

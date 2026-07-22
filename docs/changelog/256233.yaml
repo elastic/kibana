@@ -7,5 +7,5 @@ products:
   target: 9.5.0
 areas:
 - Kibana platform
-title: 'Fix: prevent JSON logger scalar meta field explosion'
-description: 'We fixed an issue where the Kibana JSON logger could print a JSON object with a large number of numbered keys like `{ "1": "s", "2": "t", ... }`.'
+title: Prevent JSON logger scalar meta field explosion
+description: "The Kibana JSON logger no longer expands scalar meta values into large objects with numbered keys such as `{ \"1\": \"s\", \"2\": \"t\", ... }`, which could inflate log volume."

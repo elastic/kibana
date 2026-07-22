@@ -9,4 +9,5 @@ products:
   target: 9.5.0
 areas:
 - Kibana platform
-title: Set auto_expand_replicas to fix yellow health on single-node ES clusters
+title: Fix yellow cluster health on single-node Elasticsearch deployments
+description: "Storage index adapters set `auto_expand_replicas` so system indices no longer leave single-node clusters in yellow health."

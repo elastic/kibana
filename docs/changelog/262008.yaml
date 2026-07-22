@@ -5,4 +5,4 @@ products:
 - product: cloud-serverless
 - product: kibana
   target: 9.5.0
-title: " [Osquery] extend query execution timeout to 24h"
+title: Extend Osquery query execution timeout to 24 hours

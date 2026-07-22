@@ -5,4 +5,4 @@ products:
 - product: cloud-serverless
 - product: kibana
   target: 9.5.0
-title: Add Chat-First experience to Entity Analytics
+title: Add chat-first experience to Entity Analytics

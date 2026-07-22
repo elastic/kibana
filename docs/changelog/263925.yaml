@@ -9,4 +9,4 @@ products:
   target: 9.5.0
 areas:
 - AI and machine Learning
-title: 'Anomaly Explorer: Ensure single metric chart shows anomaly actions correctly'
+title: Fix anomaly actions on the Anomaly Explorer single metric chart

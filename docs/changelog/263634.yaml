@@ -9,4 +9,5 @@ products:
   target: 9.5.0
 areas:
 - Alerting and reporting
-title: OpenAPI alerting rule params schemas missing accepted keys for burn-rate windows and ES query sourceFields
+title: "Fix OpenAPI schemas for SLO burn-rate windows and Elasticsearch query `sourceFields`"
+description: "Published OpenAPI rule parameter schemas now document accepted keys for SLO burn-rate multi-window payloads and Elasticsearch query `sourceFields`."

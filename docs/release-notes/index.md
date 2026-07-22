@@ -24,6 +24,11 @@ To check for security updates, go to [Security announcements for the Elastic sta
 % FEATURES, ENHANCEMENTS, FIXES
 % Paste in index.md
 
+:::{changelog} /releases/kibana
+:config: /changelog.yml
+:subsections:
+:::
+
 ## 9.4.4 [kibana-9.4.4-release-notes]
 
 % ::::{NOTE}
