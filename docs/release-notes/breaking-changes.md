@@ -86,12 +86,12 @@ View [#268942]({{kib-pull}}268942).
 ::::
 
 $$$kibana-267517$$$
-::::{dropdown} Replace HTML output from field formatters
-**Details**<br> The field formatters plugin removes the HTML converter, `'html'` content type, and related utilities. Formatters now expose `convertToText()` and `convertToReact()` only. Discover and other consumers use React or plain-text formatting paths.
+::::{dropdown} Update external plugins that use field formatter HTML output
+**Details**<br> {{kib}} 9.5 removes HTML string output from field formatters, including the `'html'` content type and related conversion utilities. Field formatters now return plain text or React elements. This change does not affect formatted values in the {{kib}} UI.
 
-**Impact**<br> Custom plugins that call field formatters with the `'html'` content type or depend on HTML string output break at upgrade. End users see the same formatted values in the UI through React rendering.
+**Impact**<br> External plugins that request `'html'` output or consume HTML strings from field formatters must be updated for {{kib}} 9.5.
 
-**Action**<br> Replace HTML formatting calls with `convertToText()` or `convertToReact()`, or use `formatFieldValueText` or `formatFieldValueReact` from `@kbn/discover-utils`. Remove any `dangerouslySetInnerHTML` paths that consumed formatter HTML strings.
+**Action**<br> When updating your external plugin, replace HTML formatting calls with `convertToText()` or `convertToReact()`. For `@kbn/discover-utils`, use `formatFieldValueText` or `formatFieldValueReact`.
 
 View [#267517]({{kib-pull}}267517).
 ::::
