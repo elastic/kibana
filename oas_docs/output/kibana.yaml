@@ -57452,10 +57452,29 @@ paths:
           name: product_name
   /api/security_solution/initialize:
     post:
+      description: |
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/security_solution/initialize</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Run one or more Security Solution initialization flows for the current space.
+        Each flow provisions a specific set of assets, for example list indices,
+        security data views, prebuilt detection rules, endpoint protection, AI prompts,
+        or detection rule monitoring assets. Only the requested flows are run, and the
+        response reports a result for each one.
       operationId: InitializeSecuritySolution
       requestBody:
         content:
           application/json:
+            examples:
+              default:
+                value:
+                  flows:
+                    - init-prebuilt-rules
+                    - init-endpoint-protection
+                    - init-ai-prompts
             schema:
               type: object
               properties:
@@ -57466,11 +57485,34 @@ paths:
                   type: array
               required:
                 - flows
+        description: The initialization flows to run.
         required: true
       responses:
         '200':
           content:
             application/json:
+              examples:
+                default:
+                  value:
+                    flows:
+                      init-ai-prompts:
+                        payload:
+                          install_status: installed
+                          name: security_ai_prompts
+                          version: 8.17.1
+                        status: ready
+                      init-endpoint-protection:
+                        payload:
+                          install_status: already_installed
+                          name: endpoint
+                          version: 8.17.1
+                        status: ready
+                      init-prebuilt-rules:
+                        payload:
+                          install_status: installed
+                          name: security_detection_engine
+                          version: 8.17.1
+                        status: ready
               schema:
                 type: object
                 properties:
@@ -57478,19 +57520,13 @@ paths:
                     $ref: '#/components/schemas/Security_Solution_Initialization_API_InitializationFlowsResult'
                 required:
                   - flows
-          description: OK
+          description: Indicates a successful call. Returns a result for each requested flow.
       summary: Initialize security solution flows
       tags:
         - Security Solution Initialization API
       x-metaTags:
         - content: Kibana
           name: product_name
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/security_solution/initialize</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
   /api/security/entity_store:
     put:
       description: |-
