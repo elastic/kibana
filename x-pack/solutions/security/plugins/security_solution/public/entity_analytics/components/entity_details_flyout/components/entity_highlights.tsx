@@ -182,7 +182,8 @@ export const EntityHighlightsAccordion: React.FC<{
   const staleDismissKey = `securitySolution.entitySummary.staleness.dismissed.${
     spaceId ?? 'default'
   }.${entityType}.${entityIdentifier}`;
-  const [dismissedAtScore, setDismissedAtScore] = useLocalStorage<number>(staleDismissKey);
+  const [dismissedAtScore, setDismissedAtScore, removeDismissedAtScore] =
+    useLocalStorage<number>(staleDismissKey);
 
   const riskScoreReason = useMemo(
     () => stalenessReasons.find((r) => r.signal === 'risk_score'),
@@ -196,6 +197,15 @@ export const EntityHighlightsAccordion: React.FC<{
       setDismissedAtScore(riskScoreReason.currentScore);
     }
   }, [riskScoreReason, setDismissedAtScore]);
+
+  // Generating a new summary invalidates any prior staleness dismissal, which was tied to the
+  // previous summary's risk score. Clearing it prevents the callout from staying hidden if the
+  // score later returns to the previously dismissed-at value (dismiss at Y → regenerate at Z →
+  // score returns to Y would otherwise be wrongly treated as still-dismissed).
+  const onGenerateSummary = useCallback(() => {
+    removeDismissedAtScore();
+    fetchEntityHighlights();
+  }, [removeDismissedAtScore, fetchEntityHighlights]);
 
   const activeStalenessReasons = isStalenessCalloutDismissed ? [] : stalenessReasons;
 
@@ -366,7 +376,7 @@ export const EntityHighlightsAccordion: React.FC<{
               <EuiButtonEmpty
                 size="s"
                 iconType="refresh"
-                onClick={fetchEntityHighlights}
+                onClick={onGenerateSummary}
                 isDisabled={!connectorId || isLoading}
                 data-test-subj="entity-highlights-error-regenerate"
               >
@@ -388,7 +398,7 @@ export const EntityHighlightsAccordion: React.FC<{
             generatedBy={assistantResult?.generatedBy ?? ''}
             authorProfileUid={assistantResult?.authorProfileUid}
             stalenessReasons={activeStalenessReasons}
-            onRefresh={fetchEntityHighlights}
+            onRefresh={onGenerateSummary}
             onDismiss={onDismissStalenessCallout}
             canRegenerate={canGenerate}
             isRefreshing={isSummaryRefreshing}
@@ -442,7 +452,7 @@ export const EntityHighlightsAccordion: React.FC<{
               {(aiConnectors?.length ?? 0) > 0 ? (
                 <EuiFlexItem grow={1}>
                   <AiButton
-                    onClick={fetchEntityHighlights}
+                    onClick={onGenerateSummary}
                     isDisabled={!connectorId}
                     size="s"
                     iconType="sparkles"
