@@ -17,6 +17,7 @@ import {
   EuiPanel,
   EuiText,
   EuiTitle,
+  EuiToolTip,
   useEuiTheme,
   type EuiBasicTableColumn,
   type UseEuiTheme,
@@ -51,6 +52,8 @@ interface ChainStep {
   icon: string;
   iconColor: string;
   meta: string;
+  error?: string;
+  resolution?: string;
 }
 
 interface SequenceStepData extends ChainStep, Record<string, unknown> {
@@ -72,6 +75,36 @@ const statusBadge: Record<string, { icon: string; color: string; label: string; 
 const SequenceStepComponent: React.FC<NodeProps<SequenceStepNode>> = ({ data }) => {
   const { euiTheme } = useEuiTheme();
   const badge = statusBadge[data.status] ?? statusBadge.success;
+  const hasError = data.status !== 'success' && data.error;
+
+  const tooltipContent = hasError ? (
+    <div css={css({ maxWidth: 280 })}>
+      <EuiText size="xs">
+        <p css={css({ fontWeight: 600, marginBottom: 4 })}>{data.error}</p>
+        {data.resolution && (
+          <p css={css({ color: euiTheme.colors.successText })}>{data.resolution}</p>
+        )}
+      </EuiText>
+    </div>
+  ) : undefined;
+
+  const statusBadgeEl = (
+    <div
+      css={css({
+        width: 24,
+        height: 24,
+        borderRadius: 4,
+        backgroundColor: badge.bg,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        flexShrink: 0,
+        cursor: hasError ? 'help' : 'default',
+      })}
+    >
+      <EuiIcon type={badge.icon} color={badge.color} size="s" />
+    </div>
+  );
 
   return (
     <>
@@ -92,7 +125,7 @@ const SequenceStepComponent: React.FC<NodeProps<SequenceStepNode>> = ({ data }) 
           pointerEvents: 'all',
         })}
       >
-        <EuiIcon type={data.icon} size="m" color="subdued" css={css({ flexShrink: 0 })} />
+        <EuiIcon type={data.icon} size="m" color="subdued" css={css({ flexShrink: 0, alignSelf: hasError ? 'flex-start' : 'center', marginTop: hasError ? 2 : 0 })} />
 
         <div css={css({ flex: 1, minWidth: 0, overflow: 'hidden' })}>
           <EuiLink
@@ -126,22 +159,30 @@ const SequenceStepComponent: React.FC<NodeProps<SequenceStepNode>> = ({ data }) 
           >
             {data.meta}
           </EuiText>
+          {hasError && (
+            <EuiText
+              size="xs"
+              color="danger"
+              css={css({
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                lineHeight: 1.3,
+                marginTop: 2,
+              })}
+            >
+              {data.error}
+            </EuiText>
+          )}
         </div>
 
-        <div
-          css={css({
-            width: 24,
-            height: 24,
-            borderRadius: 4,
-            backgroundColor: badge.bg,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            flexShrink: 0,
-          })}
-        >
-          <EuiIcon type={badge.icon} color={badge.color} size="s" />
-        </div>
+        {tooltipContent ? (
+          <EuiToolTip content={tooltipContent} position="top" className="nodrag nopan">
+            {statusBadgeEl}
+          </EuiToolTip>
+        ) : (
+          statusBadgeEl
+        )}
       </div>
       {data.stepIndex < data.totalSteps - 1 && (
         <Handle type="source" position={Position.Right} style={{ visibility: 'hidden' }} />
@@ -216,6 +257,8 @@ const MOCK_CHAINS: FailingChain[] = [
         icon: 'reporter',
         iconColor: '#E67300',
         meta: 'Action policy · 87 failures · last: 2m ago',
+        error: 'Connector timeout after 30s — Slack webhook unreachable',
+        resolution: 'Check Slack connector settings and verify the webhook URL is still valid',
       },
     ],
     occurrences: 87,
@@ -243,6 +286,8 @@ const MOCK_CHAINS: FailingChain[] = [
         icon: 'reporter',
         iconColor: '#E67300',
         meta: 'Action policy · 42 failures · last: 5m ago',
+        error: 'Email action failed: SMTP authentication error',
+        resolution: 'Update SMTP credentials in the email connector configuration',
       },
     ],
     occurrences: 42,
@@ -270,6 +315,8 @@ const MOCK_CHAINS: FailingChain[] = [
         icon: 'reporter',
         iconColor: '#E67300',
         meta: 'Action policy · throttled · last: 12m ago',
+        error: 'Action throttled — rate limit exceeded (5/min)',
+        resolution: 'Increase the throttle interval or reduce rule execution frequency',
       },
       {
         id: 'workflow-cleanup',
@@ -279,6 +326,8 @@ const MOCK_CHAINS: FailingChain[] = [
         icon: 'reporter',
         iconColor: '#00836D',
         meta: 'Workflow · pending · 31 runs',
+        error: 'Waiting on upstream — not yet dispatched',
+        resolution: 'Resolve the upstream throttle to unblock this workflow',
       },
     ],
     occurrences: 31,
@@ -306,6 +355,8 @@ const MOCK_CHAINS: FailingChain[] = [
         icon: 'reporter',
         iconColor: '#E67300',
         meta: 'Action policy · 28 failures · last: 18m ago',
+        error: 'Index action failed: index [alerts-v2] is read-only',
+        resolution: 'Remove the read-only block on the target index or update the ILM policy',
       },
     ],
     occurrences: 28,
@@ -333,6 +384,8 @@ const MOCK_CHAINS: FailingChain[] = [
         icon: 'reporter',
         iconColor: '#E67300',
         meta: 'Action policy · throttled · last: 25m ago',
+        error: 'Circuit breaker open — 3 consecutive failures',
+        resolution: 'Fix the underlying connector issue, then the circuit breaker will auto-reset',
       },
       {
         id: 'workflow-triage',
@@ -342,6 +395,8 @@ const MOCK_CHAINS: FailingChain[] = [
         icon: 'reporter',
         iconColor: '#00836D',
         meta: 'Workflow · pending · 15 runs',
+        error: 'Blocked — upstream policy has open circuit breaker',
+        resolution: 'Resolve the upstream policy failures first',
       },
     ],
     occurrences: 15,
@@ -380,6 +435,8 @@ const MOCK_CHAINS: FailingChain[] = [
         icon: 'reporter',
         iconColor: '#E67300',
         meta: 'Action policy · matcher: all alerts · dispatch failed',
+        error: 'Dispatch failed: too many alerts matched (limit: 1000)',
+        resolution: 'Narrow the alert matcher filter or increase the dispatch batch size',
       },
       {
         id: 'workflow-new',
@@ -389,6 +446,8 @@ const MOCK_CHAINS: FailingChain[] = [
         icon: 'reporter',
         iconColor: '#00836D',
         meta: 'Workflow · not reached · 0 runs',
+        error: 'Not reached — upstream dispatch failed',
+        resolution: 'Fix the upstream policy dispatch issue',
       },
     ],
     occurrences: 129,
@@ -399,8 +458,8 @@ const MOCK_CHAINS: FailingChain[] = [
 
 // -- Layout --
 
-const NODE_WIDTH = 260;
-const NODE_HEIGHT = 56;
+const NODE_WIDTH = 280;
+const NODE_HEIGHT = 68;
 const NODE_GAP = 100;
 
 const buildLinearGraph = (
