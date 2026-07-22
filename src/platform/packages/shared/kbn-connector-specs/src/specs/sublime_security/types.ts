@@ -73,83 +73,97 @@ const idSchema = (description: string) =>
 // =============================================================================
 
 export const SearchMessageGroupsInputSchema = lazySchema(() =>
-  z.object({
-    flagged: z
-      .boolean()
-      .optional()
-      .describe(
-        'Only return message groups with at least one message flagged by a detection rule. Defaults to true unless userReported is set (the API requires flagged or userReported)'
-      ),
-    userReported: z
-      .boolean()
-      .optional()
-      .describe(
-        'Only return message groups with at least one user-reported message (the abuse-mailbox queue)'
-      ),
-    reviewed: z
-      .boolean()
-      .optional()
-      .describe('Filter by review state: true for reviewed groups, false for unreviewed groups'),
-    senderEmail: z
-      .string()
-      .max(320)
-      .optional()
-      .describe(
-        'Exact sender email address to filter by, e.g. attacker@evil.example. One value per call'
-      ),
-    senderDomain: z
-      .string()
-      .max(253)
-      .optional()
-      .describe('Exact sender domain to filter by, e.g. evil.example. One value per call'),
-    recipientEmail: z
-      .string()
-      .max(320)
-      .optional()
-      .describe('Exact recipient email address to filter by. One value per call'),
-    attachmentSha256: z
-      .string()
-      .max(64)
-      .optional()
-      .describe(
-        'SHA-256 hash of an attachment to filter by (64 hex characters). One value per call'
-      ),
-    attackScoreVerdict: z
-      .enum(ATTACK_SCORE_VERDICTS)
-      .optional()
-      .describe('Only return message groups with this Attack Score verdict'),
-    flaggedRuleSeverity: z
-      .enum(FLAGGED_RULE_SEVERITIES)
-      .optional()
-      .describe('Only return message groups flagged by a rule of this severity'),
-    createdAtGte: z
-      .string()
-      .max(64)
-      .optional()
-      .describe(
-        `Inclusive start of the creation-time window; defaults to 30 days ago when omitted (the API requires a start time). ${ISO_DATE_DESCRIPTION}`
-      ),
-    createdAtLt: z
-      .string()
-      .max(64)
-      .optional()
-      .describe(`Exclusive end of the creation-time window. ${ISO_DATE_DESCRIPTION}`),
-    limit: z
-      .number()
-      .int()
-      .min(1)
-      .max(500)
-      .default(20)
-      .describe(
-        'Maximum number of message groups to return (1-500, default 20). Prefer 50 or less and page with offset; large pages can exceed the response size limit'
-      ),
-    offset: z
-      .number()
-      .int()
-      .min(0)
-      .default(0)
-      .describe('Zero-based offset for pagination; combine with limit to page through results'),
-  })
+  z
+    .object({
+      flagged: z
+        .boolean()
+        .optional()
+        .describe(
+          'Only return message groups with at least one message flagged by a detection rule. Defaults to true unless userReported is set. The Sublime API requires flagged or userReported to be true, so flagged: false is only valid together with userReported: true'
+        ),
+      userReported: z
+        .boolean()
+        .optional()
+        .describe(
+          'Only return message groups with at least one user-reported message (the abuse-mailbox queue)'
+        ),
+      reviewed: z
+        .boolean()
+        .optional()
+        .describe('Filter by review state: true for reviewed groups, false for unreviewed groups'),
+      senderEmail: z
+        .string()
+        .max(320)
+        .optional()
+        .describe(
+          'Exact sender email address to filter by, e.g. attacker@evil.example. One value per call'
+        ),
+      senderDomain: z
+        .string()
+        .max(253)
+        .optional()
+        .describe('Exact sender domain to filter by, e.g. evil.example. One value per call'),
+      recipientEmail: z
+        .string()
+        .max(320)
+        .optional()
+        .describe('Exact recipient email address to filter by. One value per call'),
+      mailboxEmail: z
+        .string()
+        .max(320)
+        .optional()
+        .describe(
+          'Exact email address of a Sublime-protected mailbox to filter by, as returned by listMailboxes. One value per call'
+        ),
+      attachmentSha256: z
+        .string()
+        .max(64)
+        .optional()
+        .describe(
+          'SHA-256 hash of an attachment to filter by (64 hex characters). One value per call'
+        ),
+      attackScoreVerdict: z
+        .enum(ATTACK_SCORE_VERDICTS)
+        .optional()
+        .describe('Only return message groups with this Attack Score verdict'),
+      flaggedRuleSeverity: z
+        .enum(FLAGGED_RULE_SEVERITIES)
+        .optional()
+        .describe('Only return message groups flagged by a rule of this severity'),
+      createdAtGte: z
+        .string()
+        .max(64)
+        .optional()
+        .describe(
+          `Inclusive start of the creation-time window; defaults to 30 days ago when omitted (the API requires a start time). ${ISO_DATE_DESCRIPTION}`
+        ),
+      createdAtLt: z
+        .string()
+        .max(64)
+        .optional()
+        .describe(`Exclusive end of the creation-time window. ${ISO_DATE_DESCRIPTION}`),
+      limit: z
+        .number()
+        .int()
+        .min(1)
+        .max(500)
+        .default(20)
+        .describe(
+          'Maximum number of message groups to return (1-500, default 20). Prefer 50 or less and page with offset; large pages can exceed the response size limit'
+        ),
+      offset: z
+        .number()
+        .int()
+        .min(0)
+        .default(0)
+        .describe('Zero-based offset for pagination; combine with limit to page through results'),
+    })
+    // The Sublime API rejects searches where neither flagged nor user_reported
+    // is true, so catch the one combination Kibana would otherwise let through.
+    .refine((value) => !(value.flagged === false && value.userReported !== true), {
+      message:
+        'flagged: false is only valid together with userReported: true (the Sublime API requires at least one of flagged or userReported to be true)',
+    })
 );
 export type SearchMessageGroupsInput = z.infer<typeof SearchMessageGroupsInputSchema>;
 

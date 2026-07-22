@@ -10,6 +10,7 @@
 import type { AxiosInstance } from 'axios';
 import type { ActionContext } from '../../connector_spec';
 import { SublimeSecurityConnector } from './sublime_security';
+import { SearchMessageGroupsInputSchema } from './types';
 import type { SublimeMessageGroupSummary } from './types';
 
 const BASE_URL = 'https://platform.sublime.security';
@@ -129,6 +130,52 @@ describe('SublimeSecurityConnector', () => {
       expect(mockClient.get).toHaveBeenCalledWith(`${BASE_URL}/v0/message-groups`, {
         params: expect.objectContaining(expectedParams),
       });
+    });
+
+    it('maps mailboxEmail to the mailbox_email__is query param', async () => {
+      (mockClient.get as jest.Mock).mockResolvedValue({
+        data: { total: 0, count: 0, message_groups: [] },
+      });
+
+      await SublimeSecurityConnector.actions.searchMessageGroups.handler(mockContext, {
+        mailboxEmail: 'user@corp.example',
+        limit: 20,
+        offset: 0,
+      });
+
+      const [, options] = (mockClient.get as jest.Mock).mock.calls[0];
+      expect(options.params.mailbox_email__is).toBe('user@corp.example');
+    });
+
+    it('rejects flagged: false unless userReported is true', () => {
+      const base = { limit: 20, offset: 0 };
+
+      expect(SearchMessageGroupsInputSchema.safeParse({ ...base, flagged: false }).success).toBe(
+        false
+      );
+      expect(
+        SearchMessageGroupsInputSchema.safeParse({ ...base, flagged: false, userReported: false })
+          .success
+      ).toBe(false);
+      expect(
+        SearchMessageGroupsInputSchema.safeParse({ ...base, flagged: false, userReported: true })
+          .success
+      ).toBe(true);
+      expect(SearchMessageGroupsInputSchema.safeParse(base).success).toBe(true);
+    });
+
+    it('preserves stats_limit_exceeded so callers can page past a lower-bound total', async () => {
+      (mockClient.get as jest.Mock).mockResolvedValue({
+        data: { total: 10000, count: 20, stats_limit_exceeded: true, message_groups: [] },
+      });
+
+      const result = (await SublimeSecurityConnector.actions.searchMessageGroups.handler(
+        mockContext,
+        { limit: 20, offset: 0 }
+      )) as { total: number; stats_limit_exceeded?: boolean };
+
+      expect(result.total).toBe(10000);
+      expect(result.stats_limit_exceeded).toBe(true);
     });
 
     it('trims groups to summaries with at most 5 sample messages and no organization_id', async () => {
@@ -261,6 +308,28 @@ describe('SublimeSecurityConnector', () => {
       expect(result.id).toBe('msg-1');
       expect(result.mailbox_email).toBe('user@corp.example');
       expect(result.message_source_id).toBeUndefined();
+    });
+
+    it('reconstructs sender explicitly instead of passing it through raw', async () => {
+      (mockClient.get as jest.Mock).mockResolvedValue({
+        data: {
+          id: 'msg-1',
+          sender: {
+            email: 'attacker@evil.example',
+            display_name: 'IT Support',
+            internal_routing: 'x',
+          },
+        },
+      });
+
+      const result = (await SublimeSecurityConnector.actions.getMessage.handler(mockContext, {
+        messageId: 'msg-1',
+      })) as { sender?: Record<string, unknown> };
+
+      expect(result.sender).toEqual({
+        email: 'attacker@evil.example',
+        display_name: 'IT Support',
+      });
     });
   });
 
@@ -418,6 +487,24 @@ describe('SublimeSecurityConnector', () => {
         error: undefined,
         created_at: '2026-07-14T15:09:26Z',
       });
+    });
+
+    it('fails when the task response is missing id or state', async () => {
+      (mockClient.get as jest.Mock).mockResolvedValue({
+        data: { id: 'task-9' },
+      });
+
+      await expect(
+        SublimeSecurityConnector.actions.getTask.handler(mockContext, { taskId: 'task-9' })
+      ).rejects.toThrow('unexpected task response for task task-9: missing state');
+
+      (mockClient.get as jest.Mock).mockResolvedValue({
+        data: { state: 'succeeded' },
+      });
+
+      await expect(
+        SublimeSecurityConnector.actions.getTask.handler(mockContext, { taskId: 'task-9' })
+      ).rejects.toThrow('unexpected task response for task task-9: missing id');
     });
   });
 

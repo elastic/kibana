@@ -207,7 +207,8 @@ Typical response flow:
 4. getTask with the returned task_id to verify the action succeeded before reporting the outcome.
 
 Gotchas:
-- searchMessageGroups paginates with limit/offset; total in the response is the full match count.
+- searchMessageGroups paginates with limit/offset. total is the match count, but when stats_limit_exceeded is true it is only a lower bound — keep paging until a page returns fewer than limit groups instead of stopping at offset >= total.
+- searchMessageGroups requires flagged or userReported to be true; flagged: false is only valid together with userReported: true.
 - Message body content is not returned by any action here; responses carry metadata, verdicts, and rule matches only.
 - A mutation can occasionally return a server_timeout error while still completing server-side. Check the group state with getMessageGroup before assuming it failed; retrying the same mutation is safe (same target state).`,
 
@@ -216,11 +217,12 @@ Gotchas:
       isTool: true,
       description:
         'Search Sublime Security message groups (campaign-like clusters of deduplicated email). ' +
-        'Filter by sender, domain, recipient, attachment SHA-256, Attack Score verdict, rule severity, review state, or time window. ' +
+        'Filter by sender, domain, recipient, mailbox, attachment SHA-256, Attack Score verdict, rule severity, review state, or time window. ' +
         'Searches flagged groups by default; set userReported instead to search the user-reported queue. ' +
         'The time window defaults to the last 30 days when createdAtGte is omitted. ' +
         'Use this first to find the group IDs that other actions operate on. ' +
-        'Returns id, state, classification, review fields, flagged rule names, message count, and up to 5 sample messages per group, plus the total match count for pagination.',
+        'Returns id, state, classification, review fields, flagged rule names, message count, and up to 5 sample messages per group. ' +
+        'Also returns total (the match count) and stats_limit_exceeded; when stats_limit_exceeded is true, total is only a lower bound, so keep paging until a page returns fewer than limit groups instead of stopping at offset >= total.',
       input: SearchMessageGroupsInputSchema,
       handler: async (ctx, input: SearchMessageGroupsInput) => {
         try {
@@ -242,6 +244,7 @@ Gotchas:
           params.sender_email__is = input.senderEmail;
           params.sender_domain__is = input.senderDomain;
           params.recipient_email__is = input.recipientEmail;
+          params.mailbox_email__is = input.mailboxEmail;
           params.attachment_sha256__is = input.attachmentSha256;
           params.attack_score_verdict__is = input.attackScoreVerdict;
           params.flagged_rule_severity__is = input.flaggedRuleSeverity;
@@ -254,11 +257,16 @@ Gotchas:
           const data = response.data as {
             total?: number;
             count?: number;
+            stats_limit_exceeded?: boolean;
             message_groups?: RawMessageGroup[];
           };
           return {
             total: data.total,
             count: data.count,
+            // When true, total is only a lower bound: a workflow paging until
+            // offset >= total would stop early and leave matching groups
+            // unprocessed. Preserved so callers can page to exhaustion instead.
+            stats_limit_exceeded: data.stats_limit_exceeded,
             message_groups: (data.message_groups ?? []).map((group) =>
               trimMessageGroup(group, MAX_MESSAGES_IN_SUMMARY)
             ),
@@ -317,7 +325,9 @@ Gotchas:
             canonical_id: message.canonical_id,
             external_id: message.external_id,
             subject: message.subject,
-            sender: message.sender,
+            sender: message.sender
+              ? { email: message.sender.email, display_name: message.sender.display_name }
+              : undefined,
             recipients: (message.recipients ?? []).map((recipient) => ({
               email: recipient.email,
             })),
@@ -523,6 +533,16 @@ Gotchas:
             error?: string;
             created_at?: string;
           };
+          // A task response without id or state cannot be acted on (callers
+          // poll on state), so treat it as a failure rather than returning
+          // an ambiguous partial result.
+          if (!data.id || !data.state) {
+            throw new Error(
+              `Sublime Security returned an unexpected task response for task ${
+                input.taskId
+              }: missing ${!data.id ? 'id' : 'state'}`
+            );
+          }
           return {
             id: data.id,
             state: data.state,

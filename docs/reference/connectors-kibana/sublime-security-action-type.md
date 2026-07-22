@@ -20,10 +20,10 @@ You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.
 Sublime Security connectors authenticate with an **API key**, sent as a bearer token. In {{kib}}, you provide:
 
 API base URL
-:   Your Sublime Platform API base URL. This is region-specific for Sublime Cloud (for example, `https://platform.sublime.security` for NA-East or `https://eu.platform.sublime.security` for EU) or the address of your self-hosted instance. Find it in the Sublime dashboard under **Automate > API**.
+:   Your Sublime Platform API base URL. This is region-specific for Sublime Cloud (for example, `https://platform.sublime.security` for NA-East or `https://eu.platform.sublime.security` for EU) or the address of your self-hosted instance. Find it in the Sublime dashboard under **Automate → API**.
 
 API key
-:   A Sublime API key, created in the Sublime dashboard under **Automate > API**.
+:   A Sublime API key, created in the Sublime dashboard under **Automate → API**.
 
 ## Test connectors [sublime-security-action-configuration]
 
@@ -31,15 +31,17 @@ The Sublime Security connector has the following actions:
 
 Search message groups
 :   Search message groups (campaign-like clusters of deduplicated email) with filters.
-    - `flagged` (optional): Only return groups with at least one message flagged by a detection rule.
+    - `flagged` (optional): Only return groups with at least one message flagged by a detection rule. Defaults to `true` unless `userReported` is set. The Sublime API requires `flagged` or `userReported` to be `true`, so `flagged: false` is only valid together with `userReported: true`.
     - `userReported` (optional): Only return groups with at least one user-reported message.
     - `reviewed` (optional): Filter by review state.
-    - `senderEmail`, `senderDomain`, `recipientEmail` (optional): Exact-match filters.
+    - `senderEmail`, `senderDomain`, `recipientEmail`, `mailboxEmail` (optional): Exact-match filters.
     - `attachmentSha256` (optional): SHA-256 hash of an attachment.
     - `attackScoreVerdict` (optional): One of `unknown`, `likely_benign`, `suspicious`, `malicious`, `graymail`, `spam`.
     - `flaggedRuleSeverity` (optional): One of `informational`, `low`, `medium`, `high`, `critical`.
     - `createdAtGte`, `createdAtLt` (optional): UTC ISO 8601 time window bounds.
     - `limit` (optional): Maximum groups to return (1-500, default 20). `offset` (optional): Zero-based pagination offset.
+
+    The response includes `total` (the number of matching groups) and `stats_limit_exceeded`. When `stats_limit_exceeded` is `true`, `total` is only a lower bound: continue paging until a page returns fewer than `limit` groups rather than stopping at `offset >= total`.
 
 Get message group
 :   Retrieve one message group by its canonical ID, including flagged rules, review state, user report and link click counts, and up to 50 member messages.
@@ -76,7 +78,7 @@ Restore message groups
 :   Restore previously quarantined or trashed message groups back to user mailboxes. Same parameters as quarantine. Returns a `task_id`.
 
 Get task
-:   Retrieve the status of an asynchronous task (`pending`, `started`, `succeeded`, `failed`, or `retrying`). Quarantine, trash, and restore run asynchronously; poll this action with the returned `task_id` to confirm the outcome.
+:   Retrieve the status of an asynchronous task (`pending`, `started`, `succeeded`, `failed`, or `retrying`). Quarantine, trash, and restore run asynchronously. Poll this action with the returned `task_id` to confirm the outcome.
     - `taskId` (required): The task ID.
 
 ## Connector networking configuration [sublime-security-connector-networking-configuration]
