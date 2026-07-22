@@ -19,6 +19,7 @@ import {
   EuiFlexItem,
   EuiHorizontalRule,
   EuiIcon,
+  EuiIconTip,
   EuiLink,
   EuiLoadingSpinner,
   EuiPopover,
@@ -31,7 +32,11 @@ import {
   type EuiBasicTableColumn,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { BULK_FILTER_MAX_RULES, getRootEsqlQuery, type RuleKind } from '@kbn/alerting-v2-schemas';
+import {
+  BULK_FILTER_MAX_RESOURCES,
+  getRootEsqlQuery,
+  type RuleKind,
+} from '@kbn/alerting-v2-schemas';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
@@ -550,39 +555,52 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
                 />
               </EuiPopover>
             </EuiFlexItem>
-            {isAllSelected && totalItemCount > BULK_FILTER_MAX_RULES ? (
-              <EuiFlexItem grow={false}>
-                <EuiText size="xs" color="subdued" data-test-subj="bulkSelectAllLimitDisclosure">
-                  <FormattedMessage
-                    id="xpack.alertingV2.rulesList.bulkSelectAllLimitDisclosure"
-                    defaultMessage="Only the first {maxRules, number} rules can be selected for bulk actions."
-                    values={{ maxRules: BULK_FILTER_MAX_RULES }}
-                  />
-                </EuiText>
-              </EuiFlexItem>
-            ) : null}
             {!isAllSelected ? (
+              // Above the cap, bulk-by-query rejects the whole request
+              // (all-or-nothing), so cross-page "select all" is disabled rather
+              // than hidden — a help tip explains why and how to proceed.
+              // Explicit per-page/row selection stays available regardless.
               <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  size="xs"
-                  iconType="pagesSelect"
-                  onClick={onSelectAll}
-                  data-test-subj="selectAllRulesButton"
-                >
-                  {totalItemCount > BULK_FILTER_MAX_RULES ? (
-                    <FormattedMessage
-                      id="xpack.alertingV2.rulesList.selectFirstMaxRules"
-                      defaultMessage="Select first {maxRules, number} rules"
-                      values={{ maxRules: BULK_FILTER_MAX_RULES }}
-                    />
-                  ) : (
-                    <FormattedMessage
-                      id="xpack.alertingV2.rulesList.selectAll"
-                      defaultMessage="Select all {total} {total, plural, one {rule} other {rules}}"
-                      values={{ total: totalItemCount }}
-                    />
-                  )}
-                </EuiButtonEmpty>
+                <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonEmpty
+                      size="xs"
+                      iconType="pagesSelect"
+                      onClick={onSelectAll}
+                      isDisabled={totalItemCount > BULK_FILTER_MAX_RESOURCES}
+                      data-test-subj="selectAllRulesButton"
+                    >
+                      <FormattedMessage
+                        id="xpack.alertingV2.rulesList.selectAll"
+                        defaultMessage="Select all {total} {total, plural, one {rule} other {rules}}"
+                        values={{ total: totalItemCount }}
+                      />
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                  {totalItemCount > BULK_FILTER_MAX_RESOURCES ? (
+                    <EuiFlexItem grow={false}>
+                      <EuiIconTip
+                        type="question"
+                        color="subdued"
+                        position="top"
+                        anchorProps={{ 'data-test-subj': 'bulkSelectAllLimitTooltip' }}
+                        aria-label={i18n.translate(
+                          'xpack.alertingV2.rulesList.bulkSelectAllLimitAriaLabel',
+                          { defaultMessage: 'Why is Select all disabled?' }
+                        )}
+                        content={
+                          <span data-test-subj="bulkSelectAllLimitDisclosure">
+                            <FormattedMessage
+                              id="xpack.alertingV2.rulesList.bulkSelectAllLimitDisclosure"
+                              defaultMessage="Select all is available only when {maxRules, number} or fewer rules match. Narrow your filter to select every matching rule."
+                              values={{ maxRules: BULK_FILTER_MAX_RESOURCES }}
+                            />
+                          </span>
+                        }
+                      />
+                    </EuiFlexItem>
+                  ) : null}
+                </EuiFlexGroup>
               </EuiFlexItem>
             ) : null}
             <EuiFlexItem grow={false}>

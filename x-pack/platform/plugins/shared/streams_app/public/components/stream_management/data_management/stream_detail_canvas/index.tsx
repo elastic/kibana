@@ -5,56 +5,49 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { css } from '@emotion/react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  EuiBadge,
-  EuiDescriptionList,
   EuiEmptyPrompt,
   EuiFlexGroup,
-  EuiFlexItem,
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiFlyoutHeader,
   EuiLoadingSpinner,
-  EuiPanel,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
+  EuiProgress,
+  EuiScreenReaderOnly,
   useEuiTheme,
 } from '@elastic/eui';
-import type { UseEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Streams } from '@kbn/streams-schema';
 import {
-  Background,
-  Controls,
-  ReactFlow,
-  ReactFlowProvider,
   useEdgesState,
   useNodesState,
-  type Edge,
-  type Node,
+  type NodeChange,
   type NodeMouseHandler,
 } from '@xyflow/react';
-import '@xyflow/react/dist/style.css';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../../../hooks/use_streams_app_fetch';
 import { buildClassicStreamsGraph } from './build_graph';
-import { CanvasContextMenu, type ContextMenuPosition } from './canvas_context_menu';
-import { canvasEdgeTypes, canvasNodeTypes } from './registry';
+import {
+  CanvasContextMenu,
+  type CanvasContextMenuTarget,
+  type ContextMenuPosition,
+} from './canvas_context_menu';
+import { CanvasShell, getCanvasContainerStyles } from './canvas_shell';
+import { CanvasToolbar } from './canvas_toolbar';
+import { applyLayout } from './layout';
+import { MockStreamCanvas } from './placeholder_stream_canvas';
+import { useCanvasKeyboardShortcuts } from './use_canvas_a11y';
+import { useCanvasHistory } from './use_canvas_history';
 import type { ClassicCanvasNode } from './types';
+
+const KEYBOARD_INSTRUCTIONS_ID = 'streamsCanvasKbdInstructions';
+
+interface CanvasContextMenuState {
+  position: ContextMenuPosition;
+  target: CanvasContextMenuTarget;
+}
 
 interface StreamDetailCanvasProps {
   definition: Streams.ingest.all.GetResponse;
 }
-
-const getCanvasContainerStyles = (euiTheme: UseEuiTheme['euiTheme']) => css`
-  position: relative;
-  height: calc(100vh - 230px);
-  min-height: 520px;
-  background: ${euiTheme.colors.backgroundBaseSubdued};
-`;
 
 /**
  * For classic streams the canvas renders every classic stream as an inferred
@@ -89,30 +82,143 @@ function ClassicStreamsCanvas() {
 
   // Local (non-persisted) node state so nodes can be dragged around the canvas.
   // Positions reset to the inferred layout whenever the fetched streams change.
-  const [nodes, setNodes, onNodesChange] = useNodesState(graph.nodes);
+  const [nodes, setNodes, applyNodesChange] = useNodesState(graph.nodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(graph.edges);
+
+  const { record, undo, redo, reset, canUndo, canRedo } = useCanvasHistory({
+    nodes,
+    edges,
+    setNodes,
+    setEdges,
+  });
 
   useEffect(() => {
     setNodes(graph.nodes);
     setEdges(graph.edges);
-  }, [graph, setNodes, setEdges]);
+    // The old positions no longer apply once the streams change.
+    reset();
+  }, [graph, setNodes, setEdges, reset]);
 
-  const [contextMenuPosition, setContextMenuPosition] = useState<ContextMenuPosition | null>(null);
+  // Tracks whether a pointer drag is in progress so we snapshot each gesture
+  // exactly once.
+  const isPointerDraggingRef = useRef(false);
 
-  const closeContextMenu = useCallback(() => setContextMenuPosition(null), []);
+  const onNodesChange = useCallback(
+    (changes: Array<NodeChange<ClassicCanvasNode>>) => {
+      const positionChanges = changes.filter((change) => change.type === 'position');
+      const isDragStart = positionChanges.some((change) => 'dragging' in change && change.dragging);
+      const isDragEnd = positionChanges.some(
+        (change) => 'dragging' in change && change.dragging === false
+      );
 
-  const onNodeContextMenu = useCallback<NodeMouseHandler<ClassicCanvasNode>>((event) => {
-    event.preventDefault();
-    setContextMenuPosition({ x: event.clientX, y: event.clientY });
-  }, []);
+      let shouldRecord = false;
+      if (isDragStart) {
+        // First move of a pointer drag: snapshot the pre-drag state once.
+        if (!isPointerDraggingRef.current) {
+          isPointerDraggingRef.current = true;
+          shouldRecord = true;
+        }
+      } else if (isDragEnd) {
+        if (isPointerDraggingRef.current) {
+          // Ends a pointer drag; already snapshotted at drag start.
+          isPointerDraggingRef.current = false;
+        } else {
+          // A keyboard-driven move with no preceding drag.
+          shouldRecord = true;
+        }
+      }
 
-  const onPaneContextMenu = useCallback(
-    (event: MouseEvent | React.MouseEvent) => {
+      if (shouldRecord) {
+        record();
+      }
+      applyNodesChange(changes);
+    },
+    [applyNodesChange, record]
+  );
+
+  const [contextMenu, setContextMenu] = useState<CanvasContextMenuState | null>(null);
+
+  const closeContextMenu = useCallback(() => setContextMenu(null), []);
+
+  // A single node has no tidy action, so suppress the native menu without
+  // opening ours. Should be updated once we have more actions
+  const onNodeContextMenu = useCallback<NodeMouseHandler<ClassicCanvasNode>>(
+    (event) => {
       event.preventDefault();
       closeContextMenu();
     },
     [closeContextMenu]
   );
+
+  const onPaneContextMenu = useCallback((event: MouseEvent | React.MouseEvent) => {
+    event.preventDefault();
+    setContextMenu({ position: { x: event.clientX, y: event.clientY }, target: 'pane' });
+  }, []);
+
+  // React Flow fires this (instead of onNodeContextMenu) when the right-click
+  // lands on the multi-selection overlay. Only offer "Tidy up selection" for a
+  // genuine multi-selection (two or more nodes).
+  const onSelectionContextMenu = useCallback(
+    (event: React.MouseEvent, selectedNodes: ClassicCanvasNode[]) => {
+      event.preventDefault();
+      if (selectedNodes.length < 2) {
+        closeContextMenu();
+        return;
+      }
+      setContextMenu({ position: { x: event.clientX, y: event.clientY }, target: 'selection' });
+    },
+    [closeContextMenu]
+  );
+
+  const reopenContextMenu = useCallback(
+    (position: ContextMenuPosition) => setContextMenu({ position, target: 'pane' }),
+    []
+  );
+
+  // Tidy the whole graph (pane) or just the current multi-selection, snapshotting
+  // first so it undoes as one step.
+  const onTidyUp = useCallback(() => {
+    if (!contextMenu) {
+      return;
+    }
+    const { target } = contextMenu;
+    record();
+    setNodes((current) => {
+      if (target === 'pane') {
+        return applyLayout(current, edges);
+      }
+      const selectedIds = new Set(current.filter((node) => node.selected).map((node) => node.id));
+      return applyLayout(current, edges, { onlyIds: selectedIds });
+    });
+    closeContextMenu();
+  }, [contextMenu, record, setNodes, edges, closeContextMenu]);
+
+  // Guarded so keyboard shortcuts do not fire when there is nothing to undo/redo.
+  const handleUndo = useCallback(() => {
+    if (!canUndo) {
+      return;
+    }
+    undo();
+  }, [canUndo, undo]);
+
+  const handleRedo = useCallback(() => {
+    if (!canRedo) {
+      return;
+    }
+    redo();
+  }, [canRedo, redo]);
+
+  // Escape closes the context menu and clears any node selection.
+  const onEscape = useCallback(() => {
+    closeContextMenu();
+    setNodes((current) =>
+      current.some((node) => node.selected)
+        ? current.map((node) => (node.selected ? { ...node, selected: false } : node))
+        : current
+    );
+  }, [closeContextMenu, setNodes]);
+
+  useCanvasKeyboardShortcuts({ onUndo: handleUndo, onRedo: handleRedo, onEscape });
 
   if (loading && !value) {
     return (
@@ -150,211 +256,46 @@ function ClassicStreamsCanvas() {
   }
 
   return (
-    <ReactFlowProvider>
-      <EuiPanel
-        hasShadow={false}
-        hasBorder={false}
-        paddingSize="none"
-        css={getCanvasContainerStyles(euiTheme)}
-        data-test-subj="streamsCanvasTab"
-      >
-        <ReactFlow
-          nodes={nodes}
-          edges={edges}
-          onNodesChange={onNodesChange}
-          onEdgesChange={onEdgesChange}
-          onNodeContextMenu={onNodeContextMenu}
-          onPaneContextMenu={onPaneContextMenu}
-          nodeTypes={canvasNodeTypes}
-          edgeTypes={canvasEdgeTypes}
-          fitView
-          fitViewOptions={{ padding: 0.2 }}
-          nodesConnectable={false}
-        >
-          <Background />
-          <Controls showInteractive={false} />
-        </ReactFlow>
-        <CanvasContextMenu position={contextMenuPosition} onClose={closeContextMenu} />
-      </EuiPanel>
-    </ReactFlowProvider>
-  );
-}
-
-type MockCanvasNodeType = 'source' | 'pipeline' | 'route' | 'destination';
-
-interface MockCanvasNodeData extends Record<string, unknown> {
-  label: string;
-  type: MockCanvasNodeType;
-  description: string;
-  status: string;
-}
-
-type MockCanvasNode = Node<MockCanvasNodeData>;
-type MockCanvasEdge = Edge;
-
-const nodeTypeLabels: Record<MockCanvasNodeType, string> = {
-  source: i18n.translate('xpack.streams.canvas.nodeType.source', {
-    defaultMessage: 'Source',
-  }),
-  pipeline: i18n.translate('xpack.streams.canvas.nodeType.pipeline', {
-    defaultMessage: 'Pipeline',
-  }),
-  route: i18n.translate('xpack.streams.canvas.nodeType.route', {
-    defaultMessage: 'Route',
-  }),
-  destination: i18n.translate('xpack.streams.canvas.nodeType.destination', {
-    defaultMessage: 'Destination',
-  }),
-};
-
-function MockStreamCanvas({ streamName }: { streamName: string }) {
-  const { euiTheme } = useEuiTheme();
-  const [selectedNode, setSelectedNode] = useState<MockCanvasNode | null>(null);
-
-  const nodes = useMemo<MockCanvasNode[]>(
-    () => [
-      {
-        id: 'source-default',
-        position: { x: 0, y: 120 },
-        data: {
-          label: 'Default source',
-          type: 'source',
-          description: i18n.translate('xpack.streams.canvas.mockSourceDescription', {
-            defaultMessage: 'Managed input endpoint where data enters the topology.',
-          }),
-          status: i18n.translate('xpack.streams.canvas.mockStatus.live', {
-            defaultMessage: 'Live',
-          }),
-        },
-      },
-      {
-        id: 'pipeline-default',
-        position: { x: 280, y: 120 },
-        data: {
-          label: 'Processing',
-          type: 'pipeline',
-          description: i18n.translate('xpack.streams.canvas.mockPipelineDescription', {
-            defaultMessage:
-              'Streamlang processing placement for this stream. This will house what used to be the Processing tab.',
-          }),
-          status: i18n.translate('xpack.streams.canvas.mockStatus.mocked', {
-            defaultMessage: 'Mocked',
-          }),
-        },
-      },
-      {
-        id: 'route-default',
-        position: { x: 560, y: 120 },
-        data: {
-          label: 'Routing',
-          type: 'route',
-          description: i18n.translate('xpack.streams.canvas.mockRouteDescription', {
-            defaultMessage:
-              'Conditional path selection or fan-out rules. This will house what used to be the Partitioning tab.',
-          }),
-          status: i18n.translate('xpack.streams.canvas.mockStatus.mocked', {
-            defaultMessage: 'Mocked',
-          }),
-        },
-      },
-      {
-        id: 'destination-default',
-        position: { x: 840, y: 120 },
-        data: {
-          label: streamName,
-          type: 'destination',
-          description: i18n.translate('xpack.streams.canvas.mockDestinationDescription', {
-            defaultMessage: 'Elasticsearch destination (v0) for indexed data.',
-          }),
-          status: i18n.translate('xpack.streams.canvas.mockStatus.active', {
-            defaultMessage: 'Active',
-          }),
-        },
-      },
-    ],
-    [streamName]
-  );
-
-  const edges = useMemo<MockCanvasEdge[]>(
-    () => [
-      { id: 'source-pipeline', source: 'source-default', target: 'pipeline-default' },
-      { id: 'pipeline-route', source: 'pipeline-default', target: 'route-default' },
-      { id: 'route-destination', source: 'route-default', target: 'destination-default' },
-    ],
-    []
-  );
-
-  const handleNodeClick = useCallback<NodeMouseHandler<MockCanvasNode>>((_event, node) => {
-    setSelectedNode(node);
-  }, []);
-
-  return (
-    <ReactFlowProvider>
-      <EuiPanel
-        hasShadow={false}
-        hasBorder={false}
-        paddingSize="none"
-        css={getCanvasContainerStyles(euiTheme)}
-        data-test-subj="streamsCanvasTab"
-      >
-        <ReactFlow
-          nodes={nodes}
-          edges={edges}
-          fitView
-          fitViewOptions={{ padding: 0.2 }}
-          onNodeClick={handleNodeClick}
-          nodesDraggable={false}
-          nodesConnectable={false}
-          elementsSelectable
-        >
-          <Background />
-          <Controls />
-        </ReactFlow>
-      </EuiPanel>
-      {selectedNode && (
-        <EuiFlyout
-          onClose={() => setSelectedNode(null)}
-          size="s"
-          data-test-subj="streamsCanvasNodeFlyout"
-          aria-labelledby="streamsCanvasNodeFlyoutTitle"
-        >
-          <EuiFlyoutHeader hasBorder>
-            <EuiFlexGroup alignItems="center" gutterSize="s">
-              <EuiFlexItem>
-                <EuiTitle size="m">
-                  <h2 id="streamsCanvasNodeFlyoutTitle">{selectedNode.data.label}</h2>
-                </EuiTitle>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiBadge color="hollow">{nodeTypeLabels[selectedNode.data.type]}</EuiBadge>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlyoutHeader>
-          <EuiFlyoutBody>
-            <EuiText size="s">
-              <p>{selectedNode.data.description}</p>
-            </EuiText>
-            <EuiSpacer size="m" />
-            <EuiDescriptionList
-              type="column"
-              listItems={[
-                {
-                  title: i18n.translate('xpack.streams.canvas.nodeFlyout.typeLabel', {
-                    defaultMessage: 'Type',
-                  }),
-                  description: nodeTypeLabels[selectedNode.data.type],
-                },
-                {
-                  title: i18n.translate('xpack.streams.canvas.nodeFlyout.statusLabel', {
-                    defaultMessage: 'Status',
-                  }),
-                  description: selectedNode.data.status,
-                },
-              ]}
-            />
-          </EuiFlyoutBody>
-        </EuiFlyout>
+    <CanvasShell<ClassicCanvasNode>
+      nodes={nodes}
+      edges={edges}
+      onNodesChange={onNodesChange}
+      onEdgesChange={onEdgesChange}
+      onNodeContextMenu={onNodeContextMenu}
+      onPaneContextMenu={onPaneContextMenu}
+      onSelectionContextMenu={onSelectionContextMenu}
+      ariaLabel={i18n.translate('xpack.streams.canvas.regionAriaLabel', {
+        defaultMessage: 'Streams canvas',
+      })}
+      ariaDescribedById={KEYBOARD_INSTRUCTIONS_ID}
+    >
+      {loading && (
+        <EuiProgress
+          size="xs"
+          color="primary"
+          position="absolute"
+          data-test-subj="streamsCanvasRefreshing"
+          aria-label={i18n.translate('xpack.streams.canvas.refreshingLabel', {
+            defaultMessage: 'Refreshing streams',
+          })}
+        />
       )}
-    </ReactFlowProvider>
+      <EuiScreenReaderOnly>
+        <p id={KEYBOARD_INSTRUCTIONS_ID}>
+          {i18n.translate('xpack.streams.canvas.keyboardInstructions', {
+            defaultMessage:
+              'Use Tab to move between nodes. Use the arrow keys to reposition the focused node. Press Control or Command plus Z to undo, add Shift to redo. Press Escape to close menus and clear the selection.',
+          })}
+        </p>
+      </EuiScreenReaderOnly>
+      <CanvasToolbar onUndo={handleUndo} onRedo={handleRedo} canUndo={canUndo} canRedo={canRedo} />
+      <CanvasContextMenu
+        position={contextMenu?.position ?? null}
+        target={contextMenu?.target ?? 'pane'}
+        onTidyUp={onTidyUp}
+        onReopen={reopenContextMenu}
+        onClose={closeContextMenu}
+      />
+    </CanvasShell>
   );
 }
