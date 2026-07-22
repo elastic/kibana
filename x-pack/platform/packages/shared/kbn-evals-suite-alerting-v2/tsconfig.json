@@ -14,7 +14,6 @@
     "@kbn/tooling-log",
     "@kbn/core",
     "@kbn/scout",
-    "@kbn/test",
     "@kbn/data-forge"
   ]
 }
