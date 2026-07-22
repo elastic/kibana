@@ -4,18 +4,35 @@ set -euo pipefail
 
 source .buildkite/scripts/common/util.sh
 
-# TODO(yarn-to-pnpm): temporary bootstrap structure diagnostics. Maps node_modules
-# across three phases — the baked starting point, after the normal bootstrap, and
-# after a clean (rm -rf node_modules) bootstrap — to catch a "fast but improper"
-# bootstrap that leaves node_modules incomplete (e.g. @elastic/esql missing, which
-# crashes Kibana boot). Runs on the build step or when BOOTSTRAP_DIAG=1. Snapshots
-# are saved under bootstrap_diag/ and uploaded as artifacts. Never fails the build.
-# Remove before merge.
+# TODO(yarn-to-pnpm): temporary bootstrap structure diagnostics. Snapshots the
+# node_modules structure (baked starting point + after bootstrap) and the agent
+# image marker (~/kibana-image-info.txt), uploaded under bootstrap_diag/. On the
+# build step it additionally does a clean (rm -rf node_modules) rebootstrap to
+# compare structures. Enabled on the build step, FTR config steps, or when
+# BOOTSTRAP_DIAG=1. The clean-rebootstrap phase is build-step only (or
+# BOOTSTRAP_DIAG_CLEAN=1) to avoid doubling bootstrap across 200+ FTR jobs.
+# Never fails the build. Remove before merge.
 DIAG_ENABLED=""
-if [[ "${BOOTSTRAP_DIAG:-}" || "${BUILDKITE_STEP_KEY:-}" == "build" ]]; then
+if [[ "${BOOTSTRAP_DIAG:-}" || "${BUILDKITE_STEP_KEY:-}" == "build" || "${BUILDKITE_STEP_KEY:-}" == ftr_configs* ]]; then
   DIAG_ENABLED="true"
 fi
+DIAG_CLEAN=""
+if [[ "$DIAG_ENABLED" && ( "${BOOTSTRAP_DIAG_CLEAN:-}" || "${BUILDKITE_STEP_KEY:-}" == "build" ) ]]; then
+  DIAG_CLEAN="true"
+fi
 DIAG_DIR="${KIBANA_DIR:-$(pwd)}/bootstrap_diag"
+
+# Capture the agent image marker baked into the -qa image (~/kibana-image-info.txt).
+if [[ "$DIAG_ENABLED" ]]; then
+  mkdir -p "$DIAG_DIR"
+  if [[ -f "$HOME/kibana-image-info.txt" ]]; then
+    echo "--- 🔬 kibana image info (~/kibana-image-info.txt)"
+    cat "$HOME/kibana-image-info.txt" || true
+    cp "$HOME/kibana-image-info.txt" "$DIAG_DIR/kibana-image-info.txt" || true
+  else
+    echo "🔬 ~/kibana-image-info.txt not present on this agent"
+  fi
+fi
 
 map_node_modules() {
   local phase="$1"
@@ -127,7 +144,8 @@ map_node_modules "phase1-after-bootstrap"
 
 # Phase 2: clean bootstrap — remove node_modules and bootstrap from scratch to see
 # whether the cache-reusing bootstrap produced a different (incomplete) structure.
-if [[ "$DIAG_ENABLED" ]]; then
+# Build-step only (or BOOTSTRAP_DIAG_CLEAN=1); too expensive across 200+ FTR jobs.
+if [[ "$DIAG_CLEAN" ]]; then
   echo "--- 🔬 clean bootstrap (rm -rf node_modules, bootstrap again)"
   rm -rf node_modules
   pnpm kbn bootstrap --force-install || pnpm kbn bootstrap || true
