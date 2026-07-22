@@ -38,6 +38,7 @@ dependsOn:
   - '@kbn/kibana-utils-plugin'
   - '@kbn/resizable-layout'
   - '@kbn/search-errors'
+  - '@kbn/utility-types'
 tags:
   - shared-common
   - package
