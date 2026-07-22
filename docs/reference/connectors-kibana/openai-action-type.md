@@ -3,7 +3,6 @@ navigation_title: "OpenAI"
 mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/openai-action-type.html
 applies_to:
-  stack: all
   stack: deprecated 9.6
   serverless: deprecated
 ---
