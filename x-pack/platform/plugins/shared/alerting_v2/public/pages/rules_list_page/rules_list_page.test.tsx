@@ -25,6 +25,7 @@ jest.mock('../../application/breadcrumb_context', () => ({
 
 let mockAgentBuilderShow = true;
 let mockExperimentalFeaturesEnabled = true;
+let mockCanWriteRules = true;
 
 jest.mock('@kbn/core-di-browser', () => ({
   useService: (token: unknown) => {
@@ -68,7 +69,12 @@ jest.mock('@kbn/core-di-browser', () => ({
       return {};
     }
     if (typeof token === 'function') {
-      return {};
+      // UserCapabilities service token
+      return {
+        canWrite: (feature: string) => (feature === 'rules' ? mockCanWriteRules : true),
+        canRead: () => true,
+        can: () => mockCanWriteRules,
+      };
     }
     throw new Error(`Unexpected token in useService mock: ${String(token)}`);
   },
@@ -162,6 +168,7 @@ describe('RulesListPage', () => {
     jest.clearAllMocks();
     mockAgentBuilderShow = true;
     mockExperimentalFeaturesEnabled = true;
+    mockCanWriteRules = true;
     mockUseDeleteRule.mockReturnValue({
       mutate: mockDeleteMutate,
       isLoading: false,
@@ -1129,6 +1136,70 @@ describe('RulesListPage', () => {
       await waitFor(() => {
         expect(screen.getByTestId('bulkActionsButton')).toHaveTextContent('2 Selected');
       });
+    });
+  });
+
+  describe('when the user only has read privilege', () => {
+    beforeEach(() => {
+      mockCanWriteRules = false;
+    });
+
+    it('hides the header create controls even when rules exist', () => {
+      mockUseFetchRules.mockReturnValue({
+        data: { items: mockRules, total: 2, page: 1, perPage: 20 },
+        isLoading: false,
+        isError: false,
+        error: null,
+      });
+
+      renderPage();
+
+      expect(screen.getByTestId('rulesListTable')).toBeInTheDocument();
+      expect(screen.queryByTestId('createRuleButton')).not.toBeInTheDocument();
+    });
+
+    it('shows a read-only empty prompt (not the create panel) when there are no rules', () => {
+      mockUseFetchRules.mockReturnValue({
+        data: { items: [], total: 0, page: 1, perPage: 20 },
+        isLoading: false,
+        isError: false,
+        error: null,
+      });
+
+      renderPage();
+
+      expect(screen.getByTestId('rulesListReadOnlyEmpty')).toBeInTheDocument();
+      expect(screen.queryByTestId('createEsqlRuleCard')).not.toBeInTheDocument();
+    });
+
+    it('hides row selection, quick edit, and actions menu affordances', () => {
+      mockUseFetchRules.mockReturnValue({
+        data: { items: mockRules, total: 2, page: 1, perPage: 20 },
+        isLoading: false,
+        isError: false,
+        error: null,
+      });
+
+      renderPage();
+
+      expect(screen.queryByTestId('selectAllRulesOnPage')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('checkboxSelectRow-rule-1')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('quickEditRule-rule-1')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('ruleActionsButton-rule-1')).not.toBeInTheDocument();
+    });
+
+    it('hides the enabled switch and shows a read-only status badge instead', () => {
+      mockUseFetchRules.mockReturnValue({
+        data: { items: mockRules, total: 2, page: 1, perPage: 20 },
+        isLoading: false,
+        isError: false,
+        error: null,
+      });
+
+      renderPage();
+
+      expect(screen.queryByTestId('ruleEnabledSwitch-rule-1')).not.toBeInTheDocument();
+      expect(screen.getByTestId('ruleEnabledBadge-rule-1')).toHaveTextContent('Enabled');
     });
   });
 

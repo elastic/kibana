@@ -12,7 +12,7 @@ export const ATTACH_BUTTON_LABEL = i18n.translate('xpack.cases.caseView.attach.b
 });
 
 export const ATTACH_MENU_FILE = i18n.translate('xpack.cases.caseView.attach.menu.file', {
-  defaultMessage: 'Upload file',
+  defaultMessage: 'File',
 });
 
 export const ATTACH_MENU_TIMELINE = i18n.translate('xpack.cases.caseView.attach.menu.timeline', {

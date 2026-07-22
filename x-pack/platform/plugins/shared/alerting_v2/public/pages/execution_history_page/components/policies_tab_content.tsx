@@ -21,6 +21,7 @@ import moment from 'moment';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import { WORKFLOWS_APP_ID } from '@kbn/deeplinks-workflows';
 import type { PolicyExecutionOutcomeFilter } from '@kbn/alerting-v2-schemas';
+import { UserCapabilities } from '../../../services/user_capabilities';
 import { useCountNewExecutionHistoryEvents } from '../../../hooks/use_count_new_execution_history_events';
 import { useFetchExecutionHistory } from '../../../hooks/use_fetch_execution_history';
 import type { PolicyExecutionHistoryItem } from '../../../services/execution_history_api';
@@ -40,7 +41,8 @@ const buildColumns = (
   onRuleClick: (ruleId: string) => void,
   activeRuleId: string | null,
   getWorkflowUrl: (workflowId: string) => string,
-  formatTimestamp: (value: string) => string
+  formatTimestamp: (value: string) => string,
+  canReadRules: boolean
 ): Array<EuiBasicTableColumn<PolicyExecutionHistoryItem>> => [
   {
     field: '@timestamp',
@@ -81,6 +83,7 @@ const buildColumns = (
         totalRuleCount={item.totalRuleCount}
         activeRuleId={activeRuleId}
         onRuleClick={onRuleClick}
+        canReadRules={canReadRules}
       />
     ),
   },
@@ -163,6 +166,7 @@ export const PoliciesTabContent = ({ onPolicyClick, onRuleClick, activeRuleId }:
   const application = useService(CoreStart('application'));
   const settings = useService(CoreStart('settings'));
   const dateTimeFormat = settings.client.get<string>('dateFormat');
+  const canReadRules = useService(UserCapabilities).canRead('rules');
 
   // Once the list refetch settles, hide the banner by advancing the lastSeenAt anchor.
   useEffect(() => {
@@ -221,7 +225,8 @@ export const PoliciesTabContent = ({ onPolicyClick, onRuleClick, activeRuleId }:
     onRuleClick,
     activeRuleId,
     getWorkflowUrl,
-    formatTimestamp
+    formatTimestamp,
+    canReadRules
   );
 
   return (

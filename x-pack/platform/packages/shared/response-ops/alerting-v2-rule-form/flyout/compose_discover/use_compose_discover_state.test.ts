@@ -72,6 +72,15 @@ describe('createInitialState', () => {
     expect(withSignal.recoveryType).toBe('default');
   });
 
+  it('applies initialRecoveryType none for alert rules', () => {
+    const state = createInitialState({
+      mode: 'edit',
+      initialKind: 'alert',
+      initialRecoveryType: 'none',
+    });
+    expect(state.recoveryType).toBe('none');
+  });
+
   it('opens the query preview in create mode', () => {
     const state = createInitialState({ mode: 'create' });
 

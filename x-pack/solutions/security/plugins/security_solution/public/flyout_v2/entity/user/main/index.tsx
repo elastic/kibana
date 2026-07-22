@@ -13,10 +13,7 @@ import type { DataTableRecord } from '@kbn/discover-utils';
 import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { useUpdateAssetCriticality } from '../../../../entity_analytics/api/hooks/use_update_asset_criticality';
 import { useAssetCriticalityPrivileges } from '../../../../entity_analytics/components/asset_criticality/use_asset_criticality';
-import { useRefetchQueryById } from '../../../../entity_analytics/api/hooks/use_refetch_query_by_id';
-import type { Refetch } from '../../../../common/types';
 import { useEntityRiskScoreRecalculation } from '../../../../entity_analytics/api/hooks/use_entity_risk_score_recalculation';
-import { ENTITY_ANALYTICS_TABLE_ID } from '../../../../entity_analytics/components/home/constants';
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
 import { useQueryInspector } from '../../../../common/components/page/manage_query';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
@@ -176,11 +173,6 @@ export const User: FC<UserProps> = memo(function User({
     entityStoreV2Enabled ? entityFromStoreResult : undefined
   );
 
-  const refetchEntitiesTable = useRefetchQueryById(ENTITY_ANALYTICS_TABLE_ID);
-  const onRecalculation = useCallback(() => {
-    (refetchEntitiesTable as Refetch | null)?.();
-  }, [refetchEntitiesTable]);
-
   const { entityRiskScores, recalculatingScore, calculateEntityRiskScore } =
     useEntityRiskScoreRecalculation({
       entityType: EntityType.user,
@@ -189,13 +181,11 @@ export const User: FC<UserProps> = memo(function User({
       entityStoreV2Enabled,
       entityFromStoreResult,
       riskScoreState,
-      onRecalculation,
     });
 
   const onAssetCriticalityChanged = useCallback(() => {
-    (refetchEntitiesTable as Refetch | null)?.();
     calculateEntityRiskScore();
-  }, [calculateEntityRiskScore, refetchEntitiesTable]);
+  }, [calculateEntityRiskScore]);
 
   const { updateAssetCriticalityLevel } = useUpdateAssetCriticality('user', {
     onSuccess: onAssetCriticalityChanged,
@@ -264,7 +254,7 @@ export const User: FC<UserProps> = memo(function User({
   ) : undefined;
 
   const onOpenUser = useCallback(() => {
-    openUserFlyoutAsChild({ userName, entityId, scopeId, title: userName });
+    openUserFlyoutAsChild({ userName, entityId, scopeId });
   }, [openUserFlyoutAsChild, userName, entityId, scopeId]);
 
   const onShowRelatedEntity = useCallback(
@@ -292,7 +282,6 @@ export const User: FC<UserProps> = memo(function User({
             entityName: userName,
             entityId: entityStoreEntityId,
             onShowEntity: onOpenUser,
-            title: userName,
           });
         case EntityDetailsLeftPanelTab.ANOMALIES:
           return openEntityAnomalyInsights({
@@ -300,7 +289,6 @@ export const User: FC<UserProps> = memo(function User({
             value: userName,
             entityId: entityStoreEntityId,
             onOpenEntity: onOpenUser,
-            title: userName,
           });
         case EntityDetailsLeftPanelTab.CSP_INSIGHTS:
           switch (path.subTab) {
@@ -310,7 +298,6 @@ export const User: FC<UserProps> = memo(function User({
                 value: userName,
                 entityId: panelDisplayEntityId,
                 onShowEntity: onOpenUser,
-                title: userName,
               });
             case CspInsightLeftPanelSubTab.MISCONFIGURATIONS:
               return openEntityMisconfigurationInsights({
@@ -318,7 +305,6 @@ export const User: FC<UserProps> = memo(function User({
                 value: userName,
                 entityId: panelDisplayEntityId,
                 onShowEntity: onOpenUser,
-                title: userName,
               });
           }
           break;
@@ -330,7 +316,6 @@ export const User: FC<UserProps> = memo(function User({
             entityName: userName,
             onShowEntity: onShowRelatedEntity,
             onShowOriginatingEntity: onOpenUser,
-            title: userName,
           });
         case EntityDetailsLeftPanelTab.RESOLUTION_GROUP:
           if (!entityStoreEntityId) return;
@@ -341,7 +326,6 @@ export const User: FC<UserProps> = memo(function User({
             scopeId,
             onShowEntity: onOpenUser,
             onShowRelatedEntity,
-            title: userName,
           });
         // TODO: currently dead (v1 accessed through left pane tabs, need to perhaps add preview?)
         case EntityDetailsLeftPanelTab.OKTA: {
@@ -351,7 +335,6 @@ export const User: FC<UserProps> = memo(function User({
               managedUser: oktaManagedUser,
               value: userName,
               onOpenUser,
-              title: userName,
             });
           }
           break;
@@ -363,7 +346,6 @@ export const User: FC<UserProps> = memo(function User({
               managedUser: entraManagedUser,
               value: userName,
               onOpenUser,
-              title: userName,
             });
           }
           break;
@@ -441,7 +423,11 @@ export const User: FC<UserProps> = memo(function User({
       </EuiFlyoutBody>
       {assetInventoryEnabled && (
         <EuiFlyoutFooter>
-          <Footer identityFields={documentEntityIdentifiers} entity={entityFromStore} />
+          <Footer
+            userName={userName}
+            identityFields={documentEntityIdentifiers}
+            entity={entityFromStore}
+          />
         </EuiFlyoutFooter>
       )}
     </>

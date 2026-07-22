@@ -17,6 +17,7 @@ import {
   formatAlertDelay,
   formatNoDataStrategy,
   formatRecoveryDelay,
+  formatRecoveryStrategy,
   getRecoverEsqlSegment,
 } from '../utils';
 import { RuleDetailsTable } from './rule_details_table';
@@ -106,14 +107,7 @@ export const RuleConditions: React.FunctionComponent<RuleConditionsProps> = ({
             title: i18n.translate('xpack.alertingV2.ruleDetails.recovery', {
               defaultMessage: 'Recovery',
             }),
-            description:
-              rule.recovery_strategy === 'query'
-                ? i18n.translate('xpack.alertingV2.ruleDetails.recoveryCustom', {
-                    defaultMessage: 'Custom',
-                  })
-                : i18n.translate('xpack.alertingV2.ruleDetails.recoveryDefault', {
-                    defaultMessage: 'Default',
-                  }),
+            description: formatRecoveryStrategy(rule.recovery_strategy),
             'data-test-subj': 'alertingV2RuleDetailsRecovery',
           },
           {

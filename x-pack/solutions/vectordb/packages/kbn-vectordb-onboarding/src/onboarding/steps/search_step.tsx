@@ -26,8 +26,7 @@ export const SearchStep = () => {
   if (!path) return <Redirect to={ONBOARDING_PATH} />;
 
   const contentKey = path === 'generate-vectors' ? 'generate' : 'have_vectors';
-  const { title, description, docsLabel, docsHref, api, infoPanel } =
-    getStepContent(docLinks)[contentKey].search;
+  const { title, description, api, infoPanel } = getStepContent(docLinks)[contentKey].search;
   const step = 'search';
 
   return (
@@ -37,8 +36,6 @@ export const SearchStep = () => {
       step={step}
       title={title}
       description={description}
-      docsLabel={docsLabel}
-      docsHref={docsHref}
       onBack={() =>
         history.push({
           pathname: `${ONBOARDING_PATH}/ingest`,

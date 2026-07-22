@@ -6,4 +6,4 @@ type: feature
 products:
 - product: cloud-serverless
   target: 2026-07-07
-title: Add observabilityAlerts feature privilege
+title: Add Observability Alerts (`observabilityAlerts`) feature privilege

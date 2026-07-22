@@ -12,6 +12,15 @@ import { RuleExecutorTaskRunner } from './task_runner';
 import type { RuleExecutionPipelineContract } from './execution_pipeline';
 import { createRulePipelineState } from './test_utils';
 import { createLoggerService } from '../services/logger_service/logger_service.mock';
+import type { RuleExecutionMetricsSnapshot } from './metrics/types';
+
+const createEmptyMetricsSnapshot = (): RuleExecutionMetricsSnapshot => ({
+  executionId: 'execution-uuid',
+  startedAt: '2025-01-01T00:00:00.000Z',
+  endedAt: '2025-01-01T00:00:00.001Z',
+  durationMs: 1,
+  counters: {},
+});
 
 describe('RuleExecutorTaskRunner', () => {
   let runner: RuleExecutorTaskRunner;
@@ -39,6 +48,7 @@ describe('RuleExecutorTaskRunner', () => {
       pipeline.execute.mockResolvedValue({
         completed: true,
         finalState: createRulePipelineState(),
+        metrics: createEmptyMetricsSnapshot(),
       });
 
       await runner.run({ taskInstance, abortController });
@@ -60,6 +70,7 @@ describe('RuleExecutorTaskRunner', () => {
       pipeline.execute.mockResolvedValue({
         completed: true,
         finalState: createRulePipelineState(),
+        metrics: createEmptyMetricsSnapshot(),
       });
 
       // @ts-expect-error: testing the scheduledAt as a string
@@ -78,6 +89,7 @@ describe('RuleExecutorTaskRunner', () => {
       pipeline.execute.mockResolvedValue({
         completed: true,
         finalState: createRulePipelineState(),
+        metrics: createEmptyMetricsSnapshot(),
       });
 
       const result = await runner.run({ taskInstance, abortController });
@@ -90,6 +102,7 @@ describe('RuleExecutorTaskRunner', () => {
         completed: false,
         haltReason: 'rule_deleted',
         finalState: createRulePipelineState(),
+        metrics: createEmptyMetricsSnapshot(),
       });
 
       const result = await runner.run({ taskInstance, abortController }).catch((error) => error);
@@ -103,6 +116,7 @@ describe('RuleExecutorTaskRunner', () => {
         completed: false,
         haltReason: 'rule_disabled',
         finalState: createRulePipelineState(),
+        metrics: createEmptyMetricsSnapshot(),
       });
 
       const result = await runner.run({ taskInstance, abortController });
@@ -114,6 +128,7 @@ describe('RuleExecutorTaskRunner', () => {
       pipeline.execute.mockResolvedValue({
         completed: true,
         finalState: createRulePipelineState(),
+        metrics: createEmptyMetricsSnapshot(),
       });
 
       await expect(runner.run({ taskInstance, abortController })).resolves.toEqual({ state: {} });
@@ -124,6 +139,7 @@ describe('RuleExecutorTaskRunner', () => {
         completed: false,
         haltReason: undefined,
         finalState: createRulePipelineState(),
+        metrics: createEmptyMetricsSnapshot(),
       });
 
       const result = await runner.run({ taskInstance, abortController });

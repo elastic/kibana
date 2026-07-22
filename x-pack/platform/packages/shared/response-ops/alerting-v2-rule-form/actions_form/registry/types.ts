@@ -7,12 +7,16 @@
 
 import type { InlineActionStepType } from '../types';
 
+type Slack2SubAction = 'sendMessage';
+type ConnectorTypeSubAction = Slack2SubAction | (string & {});
+
 export interface InlineActionStepDefinition {
   id: InlineActionStepType;
   label: string;
   description?: string;
   iconType?: string;
   connectorTypeId: string;
+  connectorTypeSubAction?: ConnectorTypeSubAction;
   paramsTemplate: string;
 }
 

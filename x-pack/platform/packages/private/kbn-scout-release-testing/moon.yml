@@ -18,7 +18,6 @@ project:
   sourceRoot: x-pack/platform/packages/private/kbn-scout-release-testing
 dependsOn:
   - '@kbn/scout'
-  - '@kbn/test'
   - '@kbn/unified-doc-viewer'
 tags:
   - functional-tests

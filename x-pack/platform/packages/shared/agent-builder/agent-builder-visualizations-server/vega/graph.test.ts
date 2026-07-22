@@ -65,10 +65,15 @@ describe('createVegaGraph', () => {
     // without a REFERENCE EXAMPLES block. Individual tests override this.
     selectInvoke = jest.fn().mockResolvedValue({ exampleIds: [] });
     withStructuredOutput = jest.fn(() => ({ invoke: selectInvoke }));
+    // The default and low-effort models share a connector so the default-model
+    // fallback in `generateVisualizationEsql` stays out of these tests.
+    const scopedModel = {
+      connector: { connectorId: 'default-connector' },
+      chatModel: { invoke, withStructuredOutput },
+    };
     modelProvider = {
-      getDefaultModel: jest.fn().mockResolvedValue({
-        chatModel: { invoke, withStructuredOutput },
-      }),
+      getDefaultModel: jest.fn().mockResolvedValue(scopedModel),
+      selectModel: jest.fn().mockResolvedValue(scopedModel),
     } as unknown as ModelProvider;
     mockedGenerateEsql.mockResolvedValue({ query: GENERATED_ESQL } as Awaited<
       ReturnType<typeof generateEsql>
@@ -92,17 +97,24 @@ describe('createVegaGraph', () => {
       currentAttempt: 0,
       actions: [],
       spec: null,
+      title: null,
       error: null,
     });
   };
 
   it('generates ES|QL then authors and normalizes a spec', async () => {
-    invoke.mockResolvedValue(asCodeBlock({ mark: 'bar', encoding: { x: { field: 'status' } } }));
+    invoke.mockResolvedValue(
+      asCodeBlock({
+        title: 'Counts by status',
+        spec: { mark: 'bar', encoding: { x: { field: 'status' } } },
+      })
+    );
 
     const state = await run();
 
     expect(mockedGenerateEsql).toHaveBeenCalledTimes(1);
     expect(state.error).toBeNull();
+    expect(state.title).toBe('Counts by status');
     const spec = JSON.parse(state.spec!);
     expect(spec.$schema).toBe(VEGA_LITE_SCHEMA);
     expect(spec.data).toEqual({
@@ -110,6 +122,26 @@ describe('createVegaGraph', () => {
     });
     expect(spec.mark).toBe('bar');
     expect(state.esqlQuery).toBe(GENERATED_ESQL);
+  });
+
+  it('keeps panel title out of a faceted Vega-Lite nested spec', async () => {
+    invoke.mockResolvedValue(
+      asCodeBlock({
+        title: 'Latency by region',
+        spec: {
+          facet: { field: 'region', type: 'nominal' },
+          spec: { mark: 'bar', encoding: { x: { field: 'latency' } } },
+        },
+      })
+    );
+
+    const state = await run({ esqlQuery: PROVIDED_ESQL });
+
+    expect(state.title).toBe('Latency by region');
+    const spec = JSON.parse(state.spec!);
+    expect(spec.facet).toEqual({ field: 'region', type: 'nominal' });
+    expect(spec.spec.mark).toBe('bar');
+    expect(spec).not.toHaveProperty('title');
   });
 
   it('injects the model-selected reference example into the authoring prompt', async () => {
@@ -230,13 +262,14 @@ describe('createVegaGraph', () => {
 
   it('rejects an authored spec with no renderable view and retries', async () => {
     invoke
-      .mockResolvedValueOnce(asCodeBlock({ title: 'no mark here' }))
-      .mockResolvedValueOnce(asCodeBlock({ mark: 'arc' }));
+      .mockResolvedValueOnce(asCodeBlock({ title: 'no mark here', spec: { description: 'empty' } }))
+      .mockResolvedValueOnce(asCodeBlock({ title: 'Arc chart', spec: { mark: 'arc' } }));
 
     const state = await run({ esqlQuery: PROVIDED_ESQL });
 
     expect(invoke).toHaveBeenCalledTimes(2);
     expect(state.error).toBeNull();
+    expect(state.title).toBe('Arc chart');
     expect(JSON.parse(state.spec!).mark).toBe('arc');
   });
 

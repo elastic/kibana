@@ -21,6 +21,7 @@ export type {
   SmlSearchFilters,
   SmlSearchHttpResponse,
   SmlAutocompleteHttpResponse,
+  SmlAutocompleteHttpResultItem,
 } from '../common/http_api/sml';
 
 export const plugin: PluginInitializer<

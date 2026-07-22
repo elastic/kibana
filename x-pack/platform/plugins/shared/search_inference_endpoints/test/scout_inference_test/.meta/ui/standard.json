@@ -1,5 +1,9 @@
 {
-  "sha1": "279bb3242b0e4d1bfb808fd2d010f83f822878ae",
+  "sha1": "c1685d9156fc8e1c556cbb7aa6a46c43e2e00ee6",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
   "tests": [
     {
       "id": "42293a2b206815f-21f4f530da45d0c",
@@ -773,6 +777,246 @@
       }
     },
     {
+      "id": "e7575b12bba67de-5be68b632af3ea6",
+      "title": "Manage Region Preferences modal Manage regions button is visible in the page header",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-stateful-search",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/manage_regions_modal.spec.ts",
+        "line": 34,
+        "column": 7
+      }
+    },
+    {
+      "id": "e7575b12bba67de-526c4594650a15a",
+      "title": "Manage Region Preferences modal clicking the button opens the modal",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-stateful-search",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/manage_regions_modal.spec.ts",
+        "line": 38,
+        "column": 7
+      }
+    },
+    {
+      "id": "e7575b12bba67de-1ab73a4e03b15e5",
+      "title": "Manage Region Preferences modal Cancel button closes the modal without saving",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-stateful-search",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/manage_regions_modal.spec.ts",
+        "line": 45,
+        "column": 7
+      }
+    },
+    {
+      "id": "e7575b12bba67de-37c690fa3cce548",
+      "title": "Manage Region Preferences modal Geo tab is active by default and all geos are pre-selected",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-stateful-search",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/manage_regions_modal.spec.ts",
+        "line": 55,
+        "column": 7
+      }
+    },
+    {
+      "id": "e7575b12bba67de-c1a3c4293530319",
+      "title": "Manage Region Preferences modal info callout is shown by default and is dismissible",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-stateful-search",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/manage_regions_modal.spec.ts",
+        "line": 75,
+        "column": 7
+      }
+    },
+    {
+      "id": "e7575b12bba67de-a0122d3602cb7ba",
+      "title": "Manage Region Preferences modal Save button is enabled for a new policy (all geos selected = isNewPolicy)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-stateful-search",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/manage_regions_modal.spec.ts",
+        "line": 85,
+        "column": 7
+      }
+    },
+    {
+      "id": "e7575b12bba67de-24a69740eb7e298",
+      "title": "Manage Region Preferences modal deselecting all geos disables the Save button",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-stateful-search",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/manage_regions_modal.spec.ts",
+        "line": 96,
+        "column": 7
+      }
+    },
+    {
+      "id": "e7575b12bba67de-f97bfe9a0ad7dde",
+      "title": "Manage Region Preferences modal clicking Save opens the confirmation modal listing pending geos",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-stateful-search",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/manage_regions_modal.spec.ts",
+        "line": 107,
+        "column": 7
+      }
+    },
+    {
+      "id": "e7575b12bba67de-1f8341a458689d5",
+      "title": "Manage Region Preferences modal cancelling the confirmation modal dismisses it and keeps the main modal open",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-stateful-search",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/manage_regions_modal.spec.ts",
+        "line": 133,
+        "column": 7
+      }
+    },
+    {
+      "id": "e7575b12bba67de-70395a0a09bab78",
+      "title": "Manage Region Preferences modal confirming the geo save closes both modals",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-stateful-search",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/manage_regions_modal.spec.ts",
+        "line": 150,
+        "column": 7
+      }
+    },
+    {
+      "id": "e7575b12bba67de-7f99ea879ab1e36",
+      "title": "Manage Region Preferences modal switching to the Regions tab shows zone accordion panels",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-stateful-search",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/manage_regions_modal.spec.ts",
+        "line": 165,
+        "column": 7
+      }
+    },
+    {
+      "id": "e7575b12bba67de-06ff792e6d39bc5",
+      "title": "Manage Region Preferences modal Expand all on the Regions tab reveals individual region checkboxes",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-stateful-search",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/manage_regions_modal.spec.ts",
+        "line": 184,
+        "column": 7
+      }
+    },
+    {
+      "id": "e7575b12bba67de-f15f7eed5a573ab",
+      "title": "Manage Region Preferences modal Save on Regions tab opens confirmation with a region list",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-stateful-search",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/manage_regions_modal.spec.ts",
+        "line": 208,
+        "column": 7
+      }
+    },
+    {
+      "id": "e7575b12bba67de-12521d3fe53b15f",
+      "title": "Manage Region Preferences modal existing geo policy pre-selects matching geos and Save is disabled (not dirty)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-stateful-search",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/manage_regions_modal.spec.ts",
+        "line": 227,
+        "column": 7
+      }
+    },
+    {
+      "id": "e7575b12bba67de-e1083b9649d136d",
+      "title": "Manage Region Preferences modal existing regions policy switches to Regions tab and pre-selects matching regions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-stateful-search",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/manage_regions_modal.spec.ts",
+        "line": 255,
+        "column": 7
+      }
+    },
+    {
+      "id": "e7575b12bba67de-ef9bff448b2f3f6",
+      "title": "Manage Region Preferences modal error callout is displayed when region policy fetch fails",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-stateful-search",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/manage_regions_modal.spec.ts",
+        "line": 285,
+        "column": 7
+      }
+    },
+    {
       "id": "68d451451493487-058290624b65263",
       "title": "Model Detail Flyout opens flyout with model details, task badges, and author",
       "expectedStatus": "passed",
@@ -863,6 +1107,51 @@
       }
     },
     {
+      "id": "68d451451493487-d9ec89911c25293",
+      "title": "Model Detail Flyout flyout shows geo region badges for a model with regions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-stateful-search",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/model_detail_flyout.spec.ts",
+        "line": 161,
+        "column": 7
+      }
+    },
+    {
+      "id": "68d451451493487-2f74859428dda31",
+      "title": "Model Detail Flyout flyout shows no region badges for a model without regions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-stateful-search",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/model_detail_flyout.spec.ts",
+        "line": 185,
+        "column": 7
+      }
+    },
+    {
+      "id": "68d451451493487-d4d7f98a3ba2a5e",
+      "title": "Model Detail Flyout flyout shows correct region badges for ELSER v2",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-stateful-search",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/model_detail_flyout.spec.ts",
+        "line": 198,
+        "column": 7
+      }
+    },
+    {
       "id": "68d451451493487-a7f4daa29d4e5a6",
       "title": "Model Detail Flyout opens view endpoint modal from flyout",
       "expectedStatus": "passed",
@@ -873,7 +1162,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/model_detail_flyout.spec.ts",
-        "line": 161,
+        "line": 218,
         "column": 7
       }
     }

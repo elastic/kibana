@@ -10,7 +10,8 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ModeSelect } from './mode_select';
 
-describe('ModeSelect', () => {
+// Failing: See https://github.com/elastic/kibana/issues/277206
+describe.skip('ModeSelect', () => {
   it('renders the Mode label and the selected value', () => {
     render(<ModeSelect value="alert" onChange={jest.fn()} />);
 

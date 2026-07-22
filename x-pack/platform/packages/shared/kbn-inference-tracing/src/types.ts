@@ -15,8 +15,6 @@ export enum GenAISemanticConventions {
   GenAIOperationName = 'gen_ai.operation.name',
   GenAIResponseModel = 'gen_ai.response.model',
   GenAIRequestModel = 'gen_ai.request.model',
-  /** @deprecated Use GenAIProviderName instead */
-  GenAISystem = 'gen_ai.system',
   GenAIProviderName = 'gen_ai.provider.name',
   GenAIOutputType = 'gen_ai.output.type',
   GenAIToolCallId = 'gen_ai.tool.call.id',
@@ -26,11 +24,12 @@ export enum GenAISemanticConventions {
   GenAIToolDescription = 'gen_ai.tool.description',
   GenAIToolType = 'gen_ai.tool.type',
   GenAIToolDefinitions = 'gen_ai.tool.definitions',
-  GenAISystemMessage = 'gen_ai.system.message',
-  GenAIUserMessage = 'gen_ai.user.message',
-  GenAIAssistantMessage = 'gen_ai.assistant.message',
-  GenAIToolMessage = 'gen_ai.tool.message',
-  GenAIChoice = 'gen_ai.choice',
+
+  /** v1.37.0+ structured attributes — replace per-message events */
+  GenAIInputMessages = 'gen_ai.input.messages',
+  GenAIOutputMessages = 'gen_ai.output.messages',
+  GenAISystemInstructions = 'gen_ai.system_instructions',
+
   GenAIAgentId = 'gen_ai.agent.id',
   GenAIAgentName = 'gen_ai.agent.name',
   GenAIConversationId = 'gen_ai.conversation.id',
@@ -64,6 +63,9 @@ export interface GenAISemConvAttributes {
   [GenAISemanticConventions.GenAIToolDescription]?: string;
   [GenAISemanticConventions.GenAIToolType]?: string;
   [GenAISemanticConventions.GenAIToolDefinitions]?: string;
+  [GenAISemanticConventions.GenAIInputMessages]?: string;
+  [GenAISemanticConventions.GenAIOutputMessages]?: string;
+  [GenAISemanticConventions.GenAISystemInstructions]?: string;
   [GenAISemanticConventions.GenAIAgentId]?: string;
   [GenAISemanticConventions.GenAIAgentName]?: string;
   [GenAISemanticConventions.GenAIConversationId]?: string;
@@ -72,90 +74,39 @@ export interface GenAISemConvAttributes {
   [ElasticGenAIAttributes.ToolChoice]?: string;
 }
 
-interface GenAISemConvEvent<
-  TName extends string,
-  TBody extends {},
-  TAttributeName extends keyof GenAISemConvAttributes
-> {
-  name: TName;
-  body: TBody;
-  attributes?: {
-    [key in TAttributeName]: GenAISemConvAttributes[TAttributeName];
-  };
+/**
+ * OTel GenAI semconv v1.37.0+ message schema using `parts[]`.
+ */
+export interface GenAITextPart {
+  type: 'text';
+  content: string;
 }
 
-export type SystemMessageEvent = GenAISemConvEvent<
-  GenAISemanticConventions.GenAISystemMessage,
-  {
-    role: 'system';
-    content: string;
-  },
-  GenAISemanticConventions.GenAIProviderName
->;
+export interface GenAIToolCallPart {
+  type: 'tool_call';
+  id: string;
+  name: string;
+  arguments: string;
+}
 
-export type UserMessageEvent = GenAISemConvEvent<
-  GenAISemanticConventions.GenAIUserMessage,
-  {
-    role: 'user';
-    content: string;
-  },
-  GenAISemanticConventions.GenAIProviderName
->;
+export interface GenAIToolCallResponsePart {
+  type: 'tool_call_response';
+  id: string;
+  response: string;
+}
 
-export type AssistantMessageEvent = GenAISemConvEvent<
-  GenAISemanticConventions.GenAIAssistantMessage,
-  {
-    content?: unknown;
-    role: 'assistant';
-    tool_calls?: Array<{
-      function: {
-        arguments: string;
-        name: string;
-      };
-      id: string;
-      type: 'function';
-    }>;
-  },
-  GenAISemanticConventions.GenAIProviderName
->;
+export type GenAIMessagePart = GenAITextPart | GenAIToolCallPart | GenAIToolCallResponsePart;
 
-export type ToolMessageEvent = GenAISemConvEvent<
-  GenAISemanticConventions.GenAIToolMessage,
-  {
-    content?: string;
-    id: string;
-    role: 'tool' | 'function';
-  },
-  GenAISemanticConventions.GenAIProviderName
->;
+export interface GenAIInputMessage {
+  role: 'user' | 'assistant' | 'tool';
+  parts: GenAIMessagePart[];
+}
 
-export type ChoiceEvent = GenAISemConvEvent<
-  GenAISemanticConventions.GenAIChoice,
-  {
-    index: number;
-    finish_reason: 'stop' | 'tool_calls';
-    message: {
-      content?: string | null;
-      role: 'assistant';
-      tool_calls?: Array<{
-        function: {
-          name: string;
-          arguments: string;
-        };
-        id: string;
-        type: 'function';
-      }>;
-    };
-  },
-  GenAISemanticConventions.GenAIProviderName
->;
-
-export type MessageEvent =
-  | SystemMessageEvent
-  | UserMessageEvent
-  | AssistantMessageEvent
-  | ToolMessageEvent
-  | ChoiceEvent;
+export interface GenAIOutputMessage {
+  role: 'assistant';
+  finish_reason: 'stop' | 'tool_calls';
+  parts: GenAIMessagePart[];
+}
 
 export interface InferenceSpanInit {
   span: Span;

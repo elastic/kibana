@@ -30,6 +30,12 @@ export interface DataViewOptions {
   adHoc?: boolean;
 }
 
+interface TimeoutOptions {
+  timeout?: number;
+}
+
+const DEFAULT_SAVE_MODAL_TIMEOUT = 30_000;
+
 export class DiscoverApp {
   public readonly codeEditor: KibanaCodeEditorWrapper;
   private readonly dataGrid: DataGrid;
@@ -58,7 +64,11 @@ export class DiscoverApp {
 
     // There should be exactly one visible data view switch.
     // If both are visible (bug), fail explicitly instead of picking one
-    await expect(discoverSwitch.or(fallbackSwitch)).toBeVisible();
+    await this.page
+      .locator(
+        '[data-test-subj="discover-dataView-switch-link"], [data-test-subj="dataView-switch-link"]'
+      )
+      .waitFor({ state: 'visible' });
 
     const discoverVisible = await discoverSwitch.isVisible();
     const fallbackVisible = await fallbackSwitch.isVisible();
@@ -72,24 +82,37 @@ export class DiscoverApp {
     return discoverVisible ? discoverSwitch : fallbackSwitch;
   }
 
+  private async hideTabPreview() {
+    await this.page.mouse.move(0, 0);
+    await this.page.testSubj.locator('unifiedTabs_tabPreview_contentPanel').waitFor({
+      state: 'hidden',
+    });
+  }
+
+  private async openDataViewSwitcher() {
+    const dataViewSwitch = await this.getVisibleDataViewSwitch();
+    await this.hideTabPreview();
+    await dataViewSwitch.click();
+  }
+
   async selectDataView(name: string) {
     const dataViewSwitch = await this.getVisibleDataViewSwitch();
     const currentValue = await dataViewSwitch.innerText();
     if (currentValue === name) {
       return;
     }
+    await this.hideTabPreview();
     await dataViewSwitch.click();
-    await expect(this.page.testSubj.locator('indexPattern-switcher')).toBeVisible();
+    const switcher = this.page.testSubj.locator('indexPattern-switcher');
+    await switcher.waitFor({ state: 'visible' });
     await this.page.testSubj.typeWithDelay('indexPattern-switcher--input', name);
-    const matchingDataViewLocator = this.page.testSubj
-      .locator('indexPattern-switcher')
-      .locator(`[data-test-subj="dataView-${name}"]`);
+    const matchingDataViewLocator = switcher.locator(`[data-test-subj="dataView-${name}"]`);
     if (await matchingDataViewLocator.isVisible()) {
       await matchingDataViewLocator.click();
     } else {
       await this.page.testSubj.locator('explore-matching-indices-button').click();
     }
-    await expect(this.page.testSubj.locator('indexPattern-switcher')).toBeHidden();
+    await switcher.waitFor({ state: 'hidden' });
     await this.waitUntilFieldListHasCountOfFields();
   }
 
@@ -145,10 +168,103 @@ export class DiscoverApp {
    * (classic mode only). The editor appends `*` to the title automatically.
    */
   async createDataViewFromSearchBar(options: DataViewOptions) {
-    const dataViewSwitch = await this.getVisibleDataViewSwitch();
-    await dataViewSwitch.click();
+    await this.openDataViewSwitcher();
     await this.page.testSubj.click('dataview-create-new');
     await this.fillAndSubmitDataViewEditor(options);
+  }
+
+  async createDataViewFromNoDataPrompt(options: DataViewOptions) {
+    await this.page.testSubj.click('createDataViewButton');
+    await this.fillAndSubmitDataViewEditor(options);
+  }
+
+  async getAvailableDataViewsFromSearchBar(): Promise<string[]> {
+    await this.openDataViewSwitcher();
+    const switcher = this.page.testSubj.locator('indexPattern-switcher');
+    await switcher.waitFor({ state: 'visible' });
+
+    const dataViews = await switcher
+      .locator('.euiSelectableListItem[data-test-subj^="dataView-"]')
+      .evaluateAll((items) =>
+        items
+          .map((item) => item.getAttribute('data-test-subj')?.slice('dataView-'.length))
+          .filter((name): name is string => Boolean(name))
+      );
+
+    await this.page.keyboard.press('Escape');
+    await switcher.waitFor({ state: 'hidden' });
+
+    return dataViews;
+  }
+
+  async isCurrentDataViewAdHoc(): Promise<boolean> {
+    const dataViewSwitch = await this.getVisibleDataViewSwitch();
+    const dataViewTitle = await dataViewSwitch.getAttribute('title');
+
+    if (!dataViewTitle) {
+      throw new Error('Current data view switch is missing a title attribute');
+    }
+
+    await this.openDataViewSwitcher();
+    const switcher = this.page.testSubj.locator('indexPattern-switcher');
+    await switcher.waitFor({ state: 'visible' });
+    const isAdHoc = await this.page.testSubj
+      .locator(`dataViewItemTempBadge-${dataViewTitle}`)
+      .isVisible();
+    await this.page.keyboard.press('Escape');
+    await switcher.waitFor({ state: 'hidden' });
+
+    return isAdHoc;
+  }
+
+  async editCurrentDataViewName(
+    name: string,
+    { withConfirmation = false }: { withConfirmation?: boolean } = {}
+  ) {
+    await this.openDataViewSwitcher();
+    await this.page.testSubj.click('indexPattern-manage-field');
+    const flyout = this.page.testSubj.locator('indexPatternEditorFlyout');
+    await flyout.waitFor({ state: 'visible' });
+    const nameInput = this.page.testSubj.locator('createIndexPatternNameInput');
+    await nameInput.fill(name);
+    await expect(nameInput).toHaveValue(name);
+    await this.page.testSubj.click('saveIndexPatternButton');
+    if (withConfirmation) {
+      const confirmButton = this.page.testSubj.locator('confirmModalConfirmButton');
+      await confirmButton.waitFor({ state: 'visible' });
+      await confirmButton.click();
+    }
+    await flyout.waitFor({ state: 'hidden' });
+    await this.waitUntilTabIsLoaded();
+  }
+
+  async createRuntimeField(fieldName: string, script: string) {
+    await this.openDataViewSwitcher();
+    await this.page.testSubj.click('indexPattern-add-field');
+    const fieldEditor = this.page.getByRole('dialog', { name: 'Create field' });
+    await fieldEditor.waitFor({ state: 'visible' });
+
+    await fieldEditor.getByRole('textbox', { name: 'Name field' }).fill(fieldName);
+    await fieldEditor.getByRole('switch', { name: 'Set value' }).click();
+    await fieldEditor
+      .getByRole('textbox', { name: /Editor content/ })
+      .waitFor({ state: 'visible' });
+    await this.codeEditor.setCodeEditorValue(script);
+    await fieldEditor.getByRole('button', { name: 'Save' }).click();
+    await fieldEditor.waitFor({ state: 'hidden' });
+    await this.waitUntilTabIsLoaded();
+  }
+
+  async renameRuntimeField(newFieldName: string) {
+    const fieldEditor = this.page.getByRole('dialog', { name: /Edit .* field/ });
+    await fieldEditor.waitFor({ state: 'visible' });
+
+    await fieldEditor.getByRole('textbox', { name: 'Name field' }).fill(newFieldName);
+    await this.page.testSubj.click('fieldSaveButton');
+    await this.page.testSubj.fill('saveModalConfirmText', 'change');
+    await this.page.testSubj.click('confirmModalConfirmButton');
+    await fieldEditor.waitFor({ state: 'hidden' });
+    await this.waitUntilTabIsLoaded();
   }
 
   private async clickAppMenuItem(
@@ -198,6 +314,14 @@ export class DiscoverApp {
     await this.waitUntilTabIsLoaded();
   }
 
+  private async confirmSaveModal(options?: TimeoutOptions) {
+    const saveModal = this.page.testSubj.locator('savedObjectSaveModal');
+    await this.page.testSubj.click('confirmSaveSavedObjectButton');
+    await expect(saveModal).toBeHidden({
+      timeout: options?.timeout ?? DEFAULT_SAVE_MODAL_TIMEOUT,
+    });
+  }
+
   async saveSearch(name: string, { storeTimeRange }: { storeTimeRange?: boolean } = {}) {
     await this.page.testSubj.click('discoverSaveButton');
     await this.page.testSubj.fill('savedObjectTitle', name);
@@ -209,8 +333,7 @@ export class DiscoverApp {
         await switchControl.click();
       }
     }
-    await this.page.testSubj.click('confirmSaveSavedObjectButton');
-    await this.page.testSubj.waitForSelector('savedObjectSaveModal', { state: 'hidden' });
+    await this.confirmSaveModal();
   }
 
   async saveSearchAsNew(name: string) {
@@ -220,16 +343,44 @@ export class DiscoverApp {
     if (!(await checkbox.isChecked())) {
       await checkbox.click();
     }
-    await this.page.testSubj.click('confirmSaveSavedObjectButton');
-    await this.page.testSubj.waitForSelector('savedObjectSaveModal', { state: 'hidden' });
+    await this.confirmSaveModal();
   }
 
   async saveUnsavedChanges() {
     await this.page.testSubj.click('discoverSaveButton');
     await this.page.testSubj.waitForSelector('confirmSaveSavedObjectButton', { state: 'visible' });
-    await this.page.testSubj.click('confirmSaveSavedObjectButton');
-    await this.page.testSubj.waitForSelector('savedObjectSaveModal', { state: 'hidden' });
+    await this.confirmSaveModal();
     await this.waitUntilSearchingHasFinished();
+  }
+
+  async getSharedUrl(): Promise<string> {
+    await this.clickAppMenuItem('shareTopNavButton');
+
+    const copyButton = this.page.testSubj.locator('copyShareUrlButton');
+
+    await copyButton.waitFor({ state: 'visible' });
+    await copyButton.click();
+
+    const sharedUrl = await this.page.waitForFunction(() => {
+      return document
+        .querySelector('[data-test-subj="copyShareUrlButton"]')
+        ?.getAttribute('data-share-url');
+    });
+
+    const url = await sharedUrl.jsonValue();
+    if (typeof url !== 'string') {
+      throw new Error('Share URL was not available on the copy button');
+    }
+    return url;
+  }
+
+  async closeShareModal() {
+    const shareModal = this.page.testSubj.locator('shareContextModal');
+
+    if (await shareModal.isVisible()) {
+      await shareModal.getByLabel(/Close/).click();
+      await shareModal.waitFor({ state: 'hidden' });
+    }
   }
 
   /**
@@ -244,8 +395,7 @@ export class DiscoverApp {
     // Clicking the EuiRadio wrapper does not toggle the underlying input
     // reliably; clicking the associated label does.
     await this.page.locator('label[for="new-dashboard-option"]').click();
-    await this.page.testSubj.click('confirmSaveSavedObjectButton');
-    await expect(this.page.testSubj.locator('savedObjectSaveModal')).toBeHidden();
+    await this.confirmSaveModal();
   }
 
   async waitUntilFieldListHasCountOfFields() {
@@ -350,6 +500,10 @@ export class DiscoverApp {
   async getHitCountInt(): Promise<number> {
     const hitCount = await this.page.testSubj.innerText('discoverQueryHits');
     return parseInt(hitCount.replace(/,/g, ''), 10);
+  }
+
+  async getHitCount(): Promise<string> {
+    return this.page.testSubj.innerText('discoverQueryHits');
   }
 
   async getChartTimespan(): Promise<string> {
@@ -629,6 +783,25 @@ export class DiscoverApp {
     await this.codeEditor.waitCodeEditorReady('ESQLEditor');
   }
 
+  async selectClassicMode() {
+    const currentMode = await this.getCurrentQueryMode();
+
+    if (currentMode !== 'classic') {
+      await this.clickAppMenuItem('select-classic-mode-btn');
+      await this.page.testSubj.waitForSelector('discover-esql-to-dataview-modal', {
+        state: 'visible',
+      });
+      await this.page.testSubj.click('discover-esql-to-dataview-no-save-btn');
+      await this.page.testSubj.waitForSelector('discover-esql-to-dataview-modal', {
+        state: 'hidden',
+      });
+    }
+
+    await this.waitUntilSearchingHasFinished();
+    const queryMode = await this.getCurrentQueryMode();
+    expect(queryMode).toBe('classic');
+  }
+
   async writeAndSubmitEsqlQuery(query: string) {
     await this.selectTextBaseLang();
     await this.codeEditor.setCodeEditorValue(query);
@@ -642,7 +815,12 @@ export class DiscoverApp {
    * `waitUntilSearchingHasFinished()` or `waitUntilTabIsLoaded()` as appropriate.
    */
   async submitQuery() {
+    await this.hideTabPreview();
     await this.page.testSubj.click('querySubmitButton');
+  }
+
+  async getQuerySubmitButtonLabel(): Promise<string | null> {
+    return this.page.testSubj.locator('querySubmitButton').getAttribute('aria-label');
   }
 
   async waitForDataGridRowWithRefresh(rowLocator: Locator, timeout = 30_000) {
@@ -689,6 +867,85 @@ export class DiscoverApp {
   async openSidebar() {
     await this.page.testSubj.locator('dscShowSidebarButton').click();
     await this.waitUntilFieldListHasCountOfFields();
+  }
+
+  async closeSidebar() {
+    await this.page.testSubj.locator('dscHideSidebarButton').click();
+    await this.page.testSubj.locator('fieldList').waitFor({ state: 'hidden' });
+  }
+
+  async isSidebarPanelOpen(): Promise<boolean> {
+    return this.page.testSubj
+      .locator('fieldList')
+      .waitFor({ state: 'visible', timeout: 1_000 })
+      .then(() => true)
+      .catch(() => false);
+  }
+
+  async getSidebarWidth(): Promise<number> {
+    const sidebar = this.page.testSubj.locator('discover-sidebar');
+    await sidebar.waitFor({ state: 'visible' });
+    const box = await sidebar.boundingBox();
+    if (!box) {
+      throw new Error('Unable to measure Discover sidebar width');
+    }
+    return Math.round(box.width);
+  }
+
+  async resizeSidebarBy(distance: number) {
+    const resizeButton = this.page.testSubj.locator('discoverLayoutResizableButton');
+    await resizeButton.waitFor({ state: 'visible' });
+    const box = await resizeButton.boundingBox();
+    if (!box) {
+      throw new Error('Unable to find Discover sidebar resize handle');
+    }
+    const startX = box.x + box.width / 2;
+    const startY = box.y + box.height / 2;
+    await this.page.mouse.move(startX, startY);
+    await this.page.mouse.down();
+    await this.page.mouse.move(startX + distance, startY, { steps: 10 });
+    await this.page.mouse.up();
+  }
+
+  async isEsqlHistoryPanelOpen(): Promise<boolean> {
+    return this.page.testSubj
+      .locator('ESQLEditor-history-container')
+      .waitFor({ state: 'visible', timeout: 1_000 })
+      .then(() => true)
+      .catch(() => false);
+  }
+
+  async toggleEsqlHistoryPanel() {
+    const wasOpen = await this.isEsqlHistoryPanelOpen();
+    await this.page.testSubj.locator('ESQLEditor-toggle-query-history-icon').click();
+    await this.page.testSubj
+      .locator('ESQLEditor-history-container')
+      .waitFor({ state: wasOpen ? 'hidden' : 'visible' });
+  }
+
+  async getEsqlEditorHeight(): Promise<number> {
+    const editor = this.page.testSubj.locator('ESQLEditor');
+    await editor.waitFor({ state: 'visible' });
+    const box = await editor.boundingBox();
+    if (!box) {
+      throw new Error('Unable to measure ES|QL editor height');
+    }
+    return Math.round(box.height);
+  }
+
+  async resizeEsqlEditorBy(distance: number) {
+    const resizeButton = this.page.testSubj.locator('ESQLEditor-resize');
+    await resizeButton.waitFor({ state: 'visible' });
+    const box = await resizeButton.boundingBox();
+    if (!box) {
+      throw new Error('Unable to find ES|QL editor resize handle');
+    }
+    const startX = box.x + box.width / 2;
+    const startY = box.y + box.height / 2;
+    await this.page.mouse.move(startX, startY);
+    await this.page.mouse.down();
+    await this.page.mouse.move(startX, startY + distance, { steps: 10 });
+    await this.page.mouse.up();
   }
 
   async addBreakdownFieldFromSidebar(

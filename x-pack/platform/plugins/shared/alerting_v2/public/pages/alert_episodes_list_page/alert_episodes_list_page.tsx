@@ -37,10 +37,10 @@ import { css } from '@emotion/react';
 import deepEqual from 'fast-deep-equal';
 import { useQueryClient } from '@kbn/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useService } from '@kbn/core-di-browser';
 import { useFetchAlertingEpisodesQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_alerting_episodes_query';
 import { ALERT_EPISODES_LIST_PAGE_SIZE } from '@kbn/alerting-v2-episodes-ui/constants';
 import { useInvalidateEpisodeQueries } from '@kbn/alerting-v2-episodes-ui/hooks/use_invalidate_episode_queries';
-import type { EpisodesSortState } from '@kbn/alerting-v2-episodes-ui/queries/episodes_query';
 import { useAlertingRulesCache } from '@kbn/alerting-v2-episodes-ui/hooks/use_alerting_rules_cache';
 import { useAlertingRuleSourceDataViews } from '@kbn/alerting-v2-episodes-ui/hooks/use_alerting_rule_source_data_views';
 import { getBreachEsqlQuery } from '@kbn/alerting-v2-schemas';
@@ -53,7 +53,9 @@ import {
   EpisodeSeverityCell,
 } from '@kbn/alerting-v2-episodes-ui/components/episodes_table_cell_renderers';
 import { AlertEpisodeAssigneeCell } from '@kbn/alerting-v2-episodes-ui/components/assignee_cell';
-import { ExperimentalBadge } from '../../components/experimental_badge';
+import { DEFAULT_EPISODES_TABLE_SORT } from './utils/episodes_table_config';
+import { useEpisodesTableConfig } from './hooks/use_episodes_table_config';
+import { experimentalBadge } from '../../components/experimental_badge';
 import { paths } from '../../constants';
 import type { AlertEpisodesKibanaServices } from '../../episodes_kibana_services';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
@@ -64,12 +66,14 @@ import { EpisodesHistogram } from './components/episodes_histogram';
 import { alertEpisodeToDataTableRecord } from './utils';
 import { dataTableRecordToEpisode } from './utils/data_table_record_to_episode';
 import { getDiscoverHrefForRuleAndEpisodeTimestamp } from '../../utils/discover_href_for_episode';
+import {
+  filterEpisodeActionsByPrivilege,
+  EPISODE_ACTIONS_PRIVILEGE,
+} from '../../utils/filter_episode_actions_by_privilege';
+import { UserCapabilities } from '../../services/user_capabilities';
 import { useEpisodesListUrlState } from './hooks/use_episodes_list_url_state';
 import { useEpisodesBulkActions } from './hooks/use_episodes_bulk_actions';
-import { useEpisodesTableConfig } from './hooks/use_episodes_table_config';
 import { DEFAULT_EPISODES_LIST_FILTER } from './utils/episodes_list_url_state';
-
-const DEFAULT_SORT: EpisodesSortState = { sortField: '@timestamp', sortDirection: 'desc' };
 
 const getEpisodesListMenu = ({ manageRulesHref }: { manageRulesHref: string }): AppHeaderMenu => ({
   primaryActionItem: {
@@ -80,15 +84,6 @@ const getEpisodesListMenu = ({ manageRulesHref }: { manageRulesHref: string }): 
     testId: 'alertingV2EpisodesListManageRules',
   },
 });
-
-const ALERT_EPISODES_TABLE_SETTINGS: UnifiedDataTableSettings = {
-  columns: {
-    duration: { width: 110 },
-    assignees: { width: 120 },
-    'episode.status': { width: 110 },
-    severity: { width: 100 },
-  },
-};
 
 const CUSTOM_GRID_COLUMNS_CONFIGURATION: CustomGridColumnsConfiguration = {
   tags: ({ column }: { column: EuiDataGridColumn }): EuiDataGridColumn => ({
@@ -134,6 +129,9 @@ const getTableCss = (euiTheme: EuiThemeComputed) => css`
 export const AlertEpisodesListPage = () => {
   const services = useKibana<AlertEpisodesKibanaServices>().services;
   const queryClient = useQueryClient();
+  const alertsCapability = useService(UserCapabilities).canWrite('alerts')
+    ? EPISODE_ACTIONS_PRIVILEGE.all
+    : EPISODE_ACTIONS_PRIVILEGE.read;
   const invalidateEpisodeQueries = useInvalidateEpisodeQueries();
   const { euiTheme } = useEuiTheme();
   const timefilter = services.data.query.timefilter.timefilter;
@@ -158,17 +156,16 @@ export const AlertEpisodesListPage = () => {
     setFilterState({ ...DEFAULT_EPISODES_LIST_FILTER });
   }, [setFilterState]);
 
-  const [sortState, setSortState] = useState<EpisodesSortState>(DEFAULT_SORT);
-  const [columns, setColumns] = useState<string[]>([
-    'episode.status',
-    'severity',
-    '@timestamp',
-    'rule.id',
-    'duration',
-    'tags',
-    'assignees',
-  ]);
-  const { rowHeight, setRowHeight } = useEpisodesTableConfig(services.storage);
+  const {
+    visibleColumns,
+    sort: sortState,
+    rowHeight,
+    columnSettings,
+    setVisibleColumns,
+    setSort,
+    setRowHeight,
+    onResize,
+  } = useEpisodesTableConfig(services.storage);
   const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>();
   const closeFlyout = useCallback(() => setExpandedDoc(undefined), []);
 
@@ -193,21 +190,26 @@ export const AlertEpisodesListPage = () => {
     [sortState.sortField, sortState.sortDirection]
   );
 
+  const settings: UnifiedDataTableSettings = useMemo(
+    () => ({ columns: columnSettings }),
+    [columnSettings]
+  );
+
   const onSort = useCallback(
     (nextSort: string[][]) => {
       if (!nextSort.length) {
-        setSortState(DEFAULT_SORT);
+        setSort(DEFAULT_EPISODES_TABLE_SORT);
         return;
       }
       const [field, dir] = nextSort[nextSort.length - 1];
       if (field != null && dir != null) {
-        setSortState({
+        setSort({
           sortField: String(field),
           sortDirection: dir === 'asc' ? 'asc' : 'desc',
         });
       }
     },
-    [setSortState]
+    [setSort]
   );
 
   const ruleIds = useMemo(
@@ -279,29 +281,32 @@ export const AlertEpisodesListPage = () => {
 
   const episodeActions: EpisodeAction[] = useMemo(
     () =>
-      createEpisodeActions({
-        http: services.http,
-        overlays: services.overlays,
-        notifications: services.notifications,
-        rendering: services.rendering,
-        application: services.application,
-        userProfile: services.userProfile,
-        docLinks: services.docLinks,
-        expressions: services.expressions,
-        spaces: services.spaces,
-        queryClient,
-        getDiscoverHref: ({ episodeIsoTimestamp, ruleId }) =>
-          getDiscoverHrefForRuleAndEpisodeTimestamp({
-            share: services.share,
-            capabilities: services.application.capabilities,
-            uiSettings: services.uiSettings,
-            ruleEsql: rulesCache[ruleId]?.query
-              ? getBreachEsqlQuery(rulesCache[ruleId]!.query)
-              : undefined,
-            episodeIsoTimestamp,
-          }),
-      }),
-    [services, queryClient, rulesCache]
+      filterEpisodeActionsByPrivilege(
+        createEpisodeActions({
+          http: services.http,
+          overlays: services.overlays,
+          notifications: services.notifications,
+          rendering: services.rendering,
+          application: services.application,
+          userProfile: services.userProfile,
+          docLinks: services.docLinks,
+          expressions: services.expressions,
+          spaces: services.spaces,
+          queryClient,
+          getDiscoverHref: ({ episodeIsoTimestamp, ruleId }) =>
+            getDiscoverHrefForRuleAndEpisodeTimestamp({
+              share: services.share,
+              capabilities: services.application.capabilities,
+              uiSettings: services.uiSettings,
+              ruleEsql: rulesCache[ruleId]?.query
+                ? getBreachEsqlQuery(rulesCache[ruleId]!.query)
+                : undefined,
+              episodeIsoTimestamp,
+            }),
+        }),
+        alertsCapability
+      ),
+    [services, queryClient, rulesCache, alertsCapability]
   );
 
   const renderDocumentView = useCallback<RenderDocumentViewCallback>(
@@ -364,9 +369,12 @@ export const AlertEpisodesListPage = () => {
     [episodesData]
   );
 
-  const onSetColumns = useCallback((cols: string[], _hideTimeCol: boolean) => {
-    setColumns(cols);
-  }, []);
+  const onSetColumns = useCallback(
+    (cols: string[], _hideTimeCol: boolean) => {
+      setVisibleColumns(cols);
+    },
+    [setVisibleColumns]
+  );
 
   const externalCustomRenderers = useMemo<CustomCellRenderer>(
     () => ({
@@ -414,8 +422,8 @@ export const AlertEpisodesListPage = () => {
       <AppHeader
         sticky={false}
         title={i18n.EPISODES_LIST_PAGE_TITLE}
-        titleAppend={<ExperimentalBadge />}
-        padding={{ bleed: 'm' }}
+        badges={[experimentalBadge]}
+        spacing="bleed"
         menu={episodesMenu}
       />
       <EuiSpacer size="m" />
@@ -480,7 +488,7 @@ export const AlertEpisodesListPage = () => {
                 ) : (
                   <UnifiedDataTable
                     ariaLabelledBy="alertingEpisodesTableAriaLabel"
-                    settings={ALERT_EPISODES_TABLE_SETTINGS}
+                    settings={settings}
                     css={getTableCss(euiTheme)}
                     gridStyleOverride={{
                       stripes: false,
@@ -488,7 +496,7 @@ export const AlertEpisodesListPage = () => {
                       header: 'shade',
                     }}
                     dataView={dataView}
-                    columns={columns}
+                    columns={visibleColumns}
                     onSetColumns={onSetColumns}
                     canDragAndDropColumns
                     showTimeCol={!!dataView.timeFieldName}
@@ -503,6 +511,7 @@ export const AlertEpisodesListPage = () => {
                     isSortEnabled
                     sort={sort}
                     onSort={onSort}
+                    onResize={onResize}
                     rowHeightState={rowHeight}
                     onUpdateRowHeight={setRowHeight}
                     configRowHeight={rowHeight}

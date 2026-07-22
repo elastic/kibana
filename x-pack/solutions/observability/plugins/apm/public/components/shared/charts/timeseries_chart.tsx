@@ -34,10 +34,10 @@ import React, { useMemo } from 'react';
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import { useHistory } from 'react-router-dom';
 import { useChartThemes } from '@kbn/observability-shared-plugin/public';
+import { unit } from '@kbn/apm-common';
 import { isExpectedBoundsComparison } from '../time_comparison/get_comparison_options';
 
 import { useChartPointerEventContext } from '../../../context/chart_pointer_event/use_chart_pointer_event_context';
-import { unit } from '../../../utils/style';
 import { ChartContainer } from './chart_container';
 import {
   EXPECTED_BOUNDS_SERIES_ID,

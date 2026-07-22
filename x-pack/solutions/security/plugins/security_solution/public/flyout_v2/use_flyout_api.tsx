@@ -8,6 +8,8 @@
 import { useMemo } from 'react';
 import type { AttackFlyoutApi } from './attack/use_attack_flyout_api';
 import { useAttackFlyoutApi } from './attack/use_attack_flyout_api';
+import type { CspFlyoutApi } from './csp/use_csp_flyout_api';
+import { useCspFlyoutApi } from './csp/use_csp_flyout_api';
 import type { DocumentFlyoutApi } from './document/use_document_flyout_api';
 import { useDocumentFlyoutApi } from './document/use_document_flyout_api';
 import type { EntityFlyoutApi } from './entity/use_entity_flyout_api';
@@ -18,6 +20,8 @@ import type { NetworkFlyoutApi } from './network/use_network_flyout_api';
 import { useNetworkFlyoutApi } from './network/use_network_flyout_api';
 import type { RuleFlyoutApi } from './rule/use_rule_flyout_api';
 import { useRuleFlyoutApi } from './rule/use_rule_flyout_api';
+import type { SharedToolsFlyoutApi } from './shared/tools/use_shared_tools_flyout_api';
+import { useSharedToolsFlyoutApi } from './shared/tools/use_shared_tools_flyout_api';
 
 /**
  * The single developer-facing API for opening any new (EUI-based) Security Solution flyout.
@@ -41,28 +45,34 @@ import { useRuleFlyoutApi } from './rule/use_rule_flyout_api';
  */
 export type FlyoutApi = DocumentFlyoutApi &
   AttackFlyoutApi &
+  CspFlyoutApi &
   EntityFlyoutApi &
   IocFlyoutApi &
   NetworkFlyoutApi &
-  RuleFlyoutApi;
+  RuleFlyoutApi &
+  SharedToolsFlyoutApi;
 
 export const useFlyoutApi = (): FlyoutApi => {
   const documentApi = useDocumentFlyoutApi();
   const attack = useAttackFlyoutApi();
+  const csp = useCspFlyoutApi();
   const entity = useEntityFlyoutApi();
   const ioc = useIocFlyoutApi();
   const network = useNetworkFlyoutApi();
   const rule = useRuleFlyoutApi();
+  const sharedTools = useSharedToolsFlyoutApi();
 
   return useMemo(
     () => ({
       ...documentApi,
       ...attack,
+      ...csp,
       ...entity,
       ...ioc,
       ...network,
       ...rule,
+      ...sharedTools,
     }),
-    [documentApi, attack, entity, ioc, network, rule]
+    [documentApi, attack, csp, entity, ioc, network, rule, sharedTools]
   );
 };

@@ -67,6 +67,7 @@ export interface DocLinks {
   };
   readonly console: {
     readonly guide: string;
+    readonly kibanaApiReference: string;
   };
   readonly dashboard: {
     readonly guide: string;

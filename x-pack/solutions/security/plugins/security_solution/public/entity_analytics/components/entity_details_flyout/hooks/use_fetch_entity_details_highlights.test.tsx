@@ -103,7 +103,7 @@ describe('useFetchEntityDetailsHighlights', () => {
 
     expect(result.current).toEqual({
       fetchEntityHighlights: expect.any(Function),
-      isChatLoading: false,
+      isGeneratingSummary: false,
       abortStream: expect.any(Function),
       result: null,
       error: null,

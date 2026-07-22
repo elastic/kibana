@@ -134,6 +134,13 @@ export interface EntityFromStoreResult<T> {
   firstSeen: string | null;
   lastSeen: string | null;
   isLoading: boolean;
+  /**
+   * True only while an initial fetch is actually in flight (react-query v4 `isLoading && isFetching`).
+   * Unlike `isLoading`, this is `false` for idle/disabled queries — in react-query v4 a disabled query
+   * with no cached data reports `isLoading: true` indefinitely, so callers gating side effects on "still
+   * resolving" must use this flag to avoid hanging forever.
+   */
+  isInitialLoading: boolean;
   error: IHttpFetchError | null;
   inspect?: { dsl: string[]; response: string[] };
   refetch: () => void;
@@ -234,7 +241,7 @@ export function useEntityFromStore(
     enabled: !skip && (Boolean(entityId) || Boolean(storeFilter)),
   });
 
-  const { data, isLoading, error, refetch } = queryResult;
+  const { data, isLoading, isInitialLoading, error, refetch } = queryResult;
   const record = data?.records?.[0] as HostEntity | UserEntity | undefined;
   const entityField = record?.entity;
 
@@ -262,10 +269,21 @@ export function useEntityFromStore(
       firstSeen,
       lastSeen,
       isLoading,
+      isInitialLoading,
       error: error as IHttpFetchError | null,
       inspect: data?.inspect,
       refetch,
     }),
-    [mappedDetails, record, firstSeen, lastSeen, isLoading, error, data?.inspect, refetch]
+    [
+      mappedDetails,
+      record,
+      firstSeen,
+      lastSeen,
+      isLoading,
+      isInitialLoading,
+      error,
+      data?.inspect,
+      refetch,
+    ]
   );
 }
