@@ -142,12 +142,46 @@ describe('ProductDocBasePlugin', () => {
       }
     );
 
-    it('schedules updateSecurityLabsAll only in non-serverless deployments', async () => {
+    it('schedules updateSecurityLabsAll in non-serverless deployments', async () => {
       plugin.setup(coreMock.createSetup(), pluginSetupDeps);
       // Default initContext is non-serverless (buildFlavor: 'traditional')
       plugin.start(coreMock.createStart(), pluginStartDeps);
       await new Promise((resolve) => setImmediate(resolve));
       expect(DocumentationManagerMock().updateSecurityLabsAll).toHaveBeenCalledTimes(1);
+    });
+
+    describe('serverless project gating', () => {
+      let serverlessPlugin: ProductDocBasePlugin;
+
+      beforeEach(() => {
+        const serverlessContext = coreMock.createPluginInitializerContext();
+        (serverlessContext.env.packageInfo as Record<string, unknown>).buildFlavor = 'serverless';
+        serverlessPlugin = new ProductDocBasePlugin(serverlessContext);
+      });
+
+      it('calls updateSecurityLabsAll in serverless security projects', async () => {
+        serverlessPlugin.setup(coreMock.createSetup(), pluginSetupDeps);
+        serverlessPlugin.start(coreMock.createStart(), {
+          ...pluginStartDeps,
+          cloud: {
+            serverless: { projectType: 'security' },
+          } as ProductDocBaseStartDependencies['cloud'],
+        });
+        await new Promise((resolve) => setImmediate(resolve));
+        expect(DocumentationManagerMock().updateSecurityLabsAll).toHaveBeenCalledTimes(1);
+      });
+
+      it('skips updateSecurityLabsAll in serverless non-security projects', async () => {
+        serverlessPlugin.setup(coreMock.createSetup(), pluginSetupDeps);
+        serverlessPlugin.start(coreMock.createStart(), {
+          ...pluginStartDeps,
+          cloud: {
+            serverless: { projectType: 'observability' },
+          } as ProductDocBaseStartDependencies['cloud'],
+        });
+        await new Promise((resolve) => setImmediate(resolve));
+        expect(DocumentationManagerMock().updateSecurityLabsAll).not.toHaveBeenCalled();
+      });
     });
   });
 });

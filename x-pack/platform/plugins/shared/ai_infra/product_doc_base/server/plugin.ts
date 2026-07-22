@@ -127,9 +127,7 @@ export class ProductDocBasePlugin
       taskManager,
     };
 
-    this.runStartupTasks(core, documentationManager, isServerless, cloud).catch((err: Error) => {
-      this.logger.error(`Error during product documentation startup: ${err.message}`);
-    });
+    void this.runStartupTasks(core, documentationManager, isServerless, cloud);
     return {
       management: {
         install: documentationManager.install.bind(documentationManager),

@@ -70,7 +70,7 @@ export const registerInstallationRoutes = ({
     },
     async (ctx, req, res) => {
       const { logger } = getServices();
-      const esClient = (await ctx.core).elasticsearch.client.asCurrentUser;
+      const esClient = (await ctx.core).elasticsearch.client.asInternalUser;
       const resourceType = req.query?.resourceType as ResourceType;
 
       try {

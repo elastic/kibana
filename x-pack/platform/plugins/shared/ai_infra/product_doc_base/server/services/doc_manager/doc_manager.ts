@@ -187,8 +187,10 @@ export class DocumentationManager implements DocumentationManagerAPI {
       return;
     }
 
-    // 'installed'
-    await this.update({ inferenceId });
+    // 'installed' — updateAll() on startup handles updates for all installed IDs including this one
+    this.logger.debug(
+      `Product documentation for inference ID [${inferenceId}] is already installed; update will be handled by updateAll`
+    );
   }
 
   async updateAll(options?: DocUpdateAllOptions): Promise<{ inferenceIds: string[] }> {

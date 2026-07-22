@@ -275,20 +275,16 @@ describe('DocumentationManager', () => {
       expect(scheduleEnsureUpToDateTaskMock).not.toHaveBeenCalled();
     });
 
-    it('updates when default inference ID documentation is already installed', async () => {
+    it('schedules no task when default inference ID documentation is already installed', async () => {
       docInstallClient.getInstallationStatus.mockResolvedValue({
         kibana: { status: 'installed' },
       } as Awaited<ReturnType<ProductDocInstallClient['getInstallationStatus']>>);
 
       await docManager.ensureDefaultProductDocumentation();
 
-      expect(scheduleEnsureUpToDateTaskMock).toHaveBeenCalledWith({
-        taskManager,
-        logger,
-        inferenceId: defaultInferenceEndpoints.JINAv5,
-        forceUpdate: undefined,
-      });
+      // Updates for already-installed IDs are handled by updateAll() on startup
       expect(scheduleInstallAllTaskMock).not.toHaveBeenCalled();
+      expect(scheduleEnsureUpToDateTaskMock).not.toHaveBeenCalled();
     });
 
     it('reinstalls when default inference ID documentation is in error state', async () => {
