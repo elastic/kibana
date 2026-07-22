@@ -115,7 +115,7 @@ export const esqlAsyncSearchStrategyProvider = (
 
     if (!validLicense && options.approximation) {
       logger.warn(
-        'Dropping approximation:true from ESQL search because approximation its not supported at your license level. Upgrade to Enterpise license to enable fast mode.'
+        'Dropping approximation:true from ESQL search because approximation is not supported at your license level. Upgrade to Enterprise license to enable fast mode.'
       );
     }
 
