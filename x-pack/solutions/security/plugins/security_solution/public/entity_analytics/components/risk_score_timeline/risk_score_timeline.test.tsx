@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, render } from '@testing-library/react';
+import { act, render } from '@testing-library/react';
 import { TestProviders } from '../../../common/mock';
 import { EntityType } from '../../../../common/entity_analytics/types';
 import { RiskScoreTimeline } from './risk_score_timeline';
@@ -14,6 +14,15 @@ import { RiskScoreTimeline } from './risk_score_timeline';
 const mockSettings = jest.fn();
 const mockLineSeries = jest.fn();
 const mockLineAnnotation = jest.fn();
+const mockSuperDatePicker = jest.fn();
+
+jest.mock('@elastic/eui', () => ({
+  ...jest.requireActual('@elastic/eui'),
+  EuiSuperDatePicker: (props: Record<string, unknown>) => {
+    mockSuperDatePicker(props);
+    return <div data-test-subj="riskScoreTimeline-RangeSelect" />;
+  },
+}));
 
 jest.mock('@elastic/charts', () => {
   const original = jest.requireActual('@elastic/charts');
@@ -81,7 +90,7 @@ describe('RiskScoreTimeline', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseRiskScoreHistory.mockReturnValue({
-      data: { entity_id: 'user:test-id', entity_type: 'user', entries },
+      data: { entity_id: 'user:test-id', entity_type: 'user', interval: '1d', entries },
       isLoading: false,
       error: undefined,
     });
@@ -195,16 +204,38 @@ describe('RiskScoreTimeline', () => {
     expect(annotationIds).not.toContain('riskScoreTimelineSelection');
   });
 
-  it('notifies range changes from the preset buttons', () => {
-    const onRangeChange = jest.fn();
-    const { getByRole } = renderTimeline({ onRangeChange });
+  it('renders the date picker', () => {
+    const { getByTestId } = renderTimeline();
 
-    fireEvent.click(getByRole('button', { name: '30d' }));
-
-    expect(onRangeChange).toHaveBeenCalledWith('now-30d');
+    expect(getByTestId('riskScoreTimeline-RangeSelect')).toBeInTheDocument();
+    expect(mockSuperDatePicker).toHaveBeenCalledWith(
+      expect.objectContaining({ start: 'now-90d', end: 'now' })
+    );
   });
 
-  it('fetches history for the given range', () => {
+  it('propagates a valid range change through onTimeChange', () => {
+    const onRangeChange = jest.fn();
+    renderTimeline({ onRangeChange });
+
+    const { onTimeChange } = mockSuperDatePicker.mock.calls[0][0];
+    act(() => {
+      onTimeChange({ start: 'now-7d', end: 'now', isInvalid: false });
+    });
+
+    expect(onRangeChange).toHaveBeenCalledWith({ from: 'now-7d', to: 'now' });
+  });
+
+  it('ignores invalid range changes', () => {
+    const onRangeChange = jest.fn();
+    renderTimeline({ onRangeChange });
+
+    const { onTimeChange } = mockSuperDatePicker.mock.calls[0][0];
+    onTimeChange({ start: 'bad', end: 'worse', isInvalid: true });
+
+    expect(onRangeChange).not.toHaveBeenCalled();
+  });
+
+  it('fetches history for the given range without a page size', () => {
     renderTimeline();
 
     expect(mockUseRiskScoreHistory).toHaveBeenCalledWith(
@@ -213,7 +244,20 @@ describe('RiskScoreTimeline', () => {
         entityId: 'user:test-id',
         from: 'now-90d',
         to: 'now',
-        pageSize: 1000,
+      })
+    );
+    expect(mockUseRiskScoreHistory).not.toHaveBeenCalledWith(
+      expect.objectContaining({ pageSize: expect.anything() })
+    );
+  });
+
+  it('feeds the aggregated interval to the chart x-domain as minInterval', () => {
+    renderTimeline();
+
+    // '1d' → 86_400_000 ms
+    expect(mockSettings).toHaveBeenCalledWith(
+      expect.objectContaining({
+        xDomain: expect.objectContaining({ minInterval: 86_400_000 }),
       })
     );
   });

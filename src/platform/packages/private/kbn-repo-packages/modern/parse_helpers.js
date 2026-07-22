@@ -17,6 +17,7 @@ const PACKAGE_TYPE_MAP = {
   'shared-scss': true,
   'shared-server': true,
   'test-helper': true,
+  tooling: true,
 };
 
 const PACKAGE_TYPES = /** @type {Array<import('./types').KibanaPackageType>} */ (

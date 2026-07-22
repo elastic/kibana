@@ -1285,6 +1285,227 @@
         }
       }
     },
+    "/api/cases/templates": {
+      "get": {
+        "summary": "Get all case templates",
+        "operationId": "getCaseTemplatesDefaultSpace",
+        "description": "Returns a paginated list of case templates. Requires the Cases feature to be enabled in the space.\n",
+        "tags": [
+          "cases"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/page_index"
+          },
+          {
+            "$ref": "#/components/parameters/page_size"
+          },
+          {
+            "$ref": "#/components/parameters/template_sort_field"
+          },
+          {
+            "$ref": "#/components/parameters/sort_order"
+          },
+          {
+            "$ref": "#/components/parameters/search"
+          },
+          {
+            "$ref": "#/components/parameters/owner_filter"
+          },
+          {
+            "$ref": "#/components/parameters/template_tags"
+          },
+          {
+            "$ref": "#/components/parameters/template_author"
+          },
+          {
+            "$ref": "#/components/parameters/template_is_enabled"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/get_case_templates_response"
+                },
+                "examples": {
+                  "getCaseTemplatesResponse": {
+                    "$ref": "#/components/examples/get_case_templates_response"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authorization information is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/response_4xx"
+                },
+                "examples": {
+                  "response401": {
+                    "$ref": "#/components/examples/response_401"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/cases/templates/{template_id}": {
+      "get": {
+        "summary": "Get a case template by ID",
+        "operationId": "getCaseTemplateDefaultSpace",
+        "description": "Returns the details of a case template. Requires the Cases feature to be enabled in the space.\n",
+        "tags": [
+          "cases"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/template_id"
+          },
+          {
+            "$ref": "#/components/parameters/template_version"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/template_v2_response"
+                },
+                "examples": {
+                  "getCaseTemplateResponse": {
+                    "$ref": "#/components/examples/get_case_template_response"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authorization information is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/response_4xx"
+                },
+                "examples": {
+                  "response401": {
+                    "$ref": "#/components/examples/response_401"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The template was not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/response_4xx"
+                },
+                "examples": {
+                  "response404": {
+                    "$ref": "#/components/examples/response_404"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/cases/fields": {
+      "get": {
+        "summary": "Get the fields applicable to a case",
+        "operationId": "getApplicableFieldsDefaultSpace",
+        "description": "Returns the fields a caller may write to a case's `extended_fields` when creating a case for the given owner. Includes the owner's global (library-wide) fields and, when `templateId` is supplied, that template's fields. Migrated legacy custom fields appear as `global` fields. Requires the Cases feature to be enabled in the space.\n",
+        "tags": [
+          "cases"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "owner",
+            "description": "The application that owns the cases (for example `cases`, `observability`, or `securitySolution`).",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "maxLength": 30
+            },
+            "example": "cases"
+          },
+          {
+            "in": "query",
+            "name": "templateId",
+            "description": "The identifier of a template to include the template's fields in the response.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 36
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/applicable_fields_response"
+                },
+                "examples": {
+                  "getCaseApplicableFieldsResponse": {
+                    "$ref": "#/components/examples/get_case_applicable_fields_response"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The request is invalid, for example when the `templateId` does not exist for the owner or its definition is invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/response_4xx"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authorization information is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/response_4xx"
+                },
+                "examples": {
+                  "response401": {
+                    "$ref": "#/components/examples/response_401"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The user does not have access to the requested owner.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/response_4xx"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/cases/{caseId}": {
       "get": {
         "summary": "Get case information",
@@ -1327,6 +1548,78 @@
                 "examples": {
                   "response401": {
                     "$ref": "#/components/examples/response_401"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/cases/{caseId}/fields": {
+      "get": {
+        "summary": "Get the fields applicable to an existing case",
+        "operationId": "getCaseApplicableFieldsDefaultSpace",
+        "description": "Returns the fields a caller may write to the case's `extended_fields`. The owner and any applied template are derived from the case itself, so the response includes the owner's global (library-wide) fields and, when the case has a template applied, that template's fields. Requires the Cases feature to be enabled in the space.\n",
+        "tags": [
+          "cases"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/case_id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/applicable_fields_response"
+                },
+                "examples": {
+                  "getCaseApplicableFieldsResponse": {
+                    "$ref": "#/components/examples/get_case_applicable_fields_response"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authorization information is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/response_4xx"
+                },
+                "examples": {
+                  "response401": {
+                    "$ref": "#/components/examples/response_401"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The user does not have access to the case.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/response_4xx"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The case was not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/response_4xx"
+                },
+                "examples": {
+                  "response404": {
+                    "$ref": "#/components/examples/response_404"
                   }
                 }
               }
@@ -2291,6 +2584,93 @@
           "example": "3297a0f0-b5ec-11ec-b141-0fdb20a7f9a9"
         }
       },
+      "template_sort_field": {
+        "in": "query",
+        "name": "sortField",
+        "description": "Determines which field is used to sort the results.",
+        "required": false,
+        "schema": {
+          "type": "string",
+          "enum": [
+            "templateId",
+            "name",
+            "templateVersion",
+            "owner",
+            "deletedAt",
+            "author",
+            "usageCount",
+            "fieldCount",
+            "lastUsedAt",
+            "isDefault",
+            "isLatest"
+          ],
+          "default": "name"
+        },
+        "example": "name"
+      },
+      "template_tags": {
+        "in": "query",
+        "name": "tags",
+        "description": "Filters the returned templates by tags.",
+        "schema": {
+          "oneOf": [
+            {
+              "$ref": "#/components/schemas/string"
+            },
+            {
+              "$ref": "#/components/schemas/string_array"
+            }
+          ]
+        },
+        "example": "tag-1"
+      },
+      "template_author": {
+        "in": "query",
+        "name": "author",
+        "description": "Filters the returned templates by author username.",
+        "schema": {
+          "oneOf": [
+            {
+              "$ref": "#/components/schemas/string"
+            },
+            {
+              "$ref": "#/components/schemas/string_array"
+            }
+          ]
+        },
+        "example": "elastic"
+      },
+      "template_is_enabled": {
+        "in": "query",
+        "name": "isEnabled",
+        "description": "Filters the returned templates by their enabled state.",
+        "schema": {
+          "type": "boolean"
+        },
+        "example": true
+      },
+      "template_id": {
+        "in": "path",
+        "name": "template_id",
+        "description": "The identifier for the template.",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "maxLength": 36
+        },
+        "example": "9da1ea2a-09f8-4d0e-bf9d-09bf8c9d0f42"
+      },
+      "template_version": {
+        "in": "query",
+        "name": "version",
+        "description": "The version number of the template to retrieve. If omitted, the latest version is returned.",
+        "required": false,
+        "schema": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "example": 1
+      },
       "case_id": {
         "in": "path",
         "name": "caseId",
@@ -3100,6 +3480,98 @@
           }
         }
       },
+      "case_response_created_by_properties": {
+        "title": "Case response properties for created_by",
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "example": null,
+            "nullable": true
+          },
+          "full_name": {
+            "type": "string",
+            "example": null,
+            "nullable": true
+          },
+          "username": {
+            "type": "string",
+            "example": "elastic",
+            "nullable": true
+          },
+          "profile_uid": {
+            "type": "string",
+            "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
+          }
+        },
+        "required": [
+          "email",
+          "full_name",
+          "username"
+        ]
+      },
+      "case_response_pushed_by_properties": {
+        "title": "Case response properties for pushed_by",
+        "type": "object",
+        "nullable": true,
+        "properties": {
+          "email": {
+            "type": "string",
+            "example": null,
+            "nullable": true
+          },
+          "full_name": {
+            "type": "string",
+            "example": null,
+            "nullable": true
+          },
+          "username": {
+            "type": "string",
+            "example": "elastic",
+            "nullable": true
+          },
+          "profile_uid": {
+            "type": "string",
+            "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
+          }
+        },
+        "required": [
+          "email",
+          "full_name",
+          "username"
+        ]
+      },
+      "case_response_updated_by_properties": {
+        "title": "Case response properties for updated_by",
+        "type": "object",
+        "nullable": true,
+        "properties": {
+          "email": {
+            "type": "string",
+            "example": null,
+            "nullable": true
+          },
+          "full_name": {
+            "type": "string",
+            "example": null,
+            "nullable": true
+          },
+          "username": {
+            "type": "string",
+            "example": "elastic",
+            "nullable": true
+          },
+          "profile_uid": {
+            "type": "string",
+            "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
+          }
+        },
+        "required": [
+          "email",
+          "full_name",
+          "username"
+        ]
+      },
       "event_comment_response_properties": {
         "title": "Case response properties for event comments",
         "type": "object",
@@ -3223,98 +3695,6 @@
             "example": "WzIwNDMxLDFd"
           }
         }
-      },
-      "case_response_created_by_properties": {
-        "title": "Case response properties for created_by",
-        "type": "object",
-        "properties": {
-          "email": {
-            "type": "string",
-            "example": null,
-            "nullable": true
-          },
-          "full_name": {
-            "type": "string",
-            "example": null,
-            "nullable": true
-          },
-          "username": {
-            "type": "string",
-            "example": "elastic",
-            "nullable": true
-          },
-          "profile_uid": {
-            "type": "string",
-            "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
-          }
-        },
-        "required": [
-          "email",
-          "full_name",
-          "username"
-        ]
-      },
-      "case_response_pushed_by_properties": {
-        "title": "Case response properties for pushed_by",
-        "type": "object",
-        "nullable": true,
-        "properties": {
-          "email": {
-            "type": "string",
-            "example": null,
-            "nullable": true
-          },
-          "full_name": {
-            "type": "string",
-            "example": null,
-            "nullable": true
-          },
-          "username": {
-            "type": "string",
-            "example": "elastic",
-            "nullable": true
-          },
-          "profile_uid": {
-            "type": "string",
-            "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
-          }
-        },
-        "required": [
-          "email",
-          "full_name",
-          "username"
-        ]
-      },
-      "case_response_updated_by_properties": {
-        "title": "Case response properties for updated_by",
-        "type": "object",
-        "nullable": true,
-        "properties": {
-          "email": {
-            "type": "string",
-            "example": null,
-            "nullable": true
-          },
-          "full_name": {
-            "type": "string",
-            "example": null,
-            "nullable": true
-          },
-          "username": {
-            "type": "string",
-            "example": "elastic",
-            "nullable": true
-          },
-          "profile_uid": {
-            "type": "string",
-            "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
-          }
-        },
-        "required": [
-          "email",
-          "full_name",
-          "username"
-        ]
       },
       "external_service": {
         "type": "object",
@@ -4270,6 +4650,264 @@
           }
         }
       },
+      "template_v2_response": {
+        "type": "object",
+        "description": "A case template (v2).",
+        "required": [
+          "templateId",
+          "name",
+          "owner",
+          "definition",
+          "definitionString",
+          "templateVersion",
+          "deletedAt",
+          "isLatest",
+          "latestVersion"
+        ],
+        "properties": {
+          "templateId": {
+            "type": "string",
+            "maxLength": 36,
+            "description": "The unique identifier of the template, shared across all versions."
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 100,
+            "description": "The display name of the template."
+          },
+          "owner": {
+            "type": "string",
+            "maxLength": 50,
+            "description": "The owning solution (e.g. cases, observability, securitySolution)."
+          },
+          "definition": {
+            "description": "The parsed template definition."
+          },
+          "definitionString": {
+            "type": "string",
+            "maxLength": 30000,
+            "description": "The raw YAML definition string."
+          },
+          "templateVersion": {
+            "type": "integer",
+            "description": "The version number of this template revision."
+          },
+          "deletedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "The date the template was soft-deleted, or null if active."
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 30000,
+            "description": "A human-readable description of the template."
+          },
+          "tags": {
+            "$ref": "#/components/schemas/template_tags"
+          },
+          "author": {
+            "type": "string",
+            "maxLength": 1000,
+            "description": "The username of the template author."
+          },
+          "usageCount": {
+            "type": "integer",
+            "description": "The number of times this template has been used to create a case."
+          },
+          "fieldCount": {
+            "type": "integer",
+            "description": "The number of fields defined in the template."
+          },
+          "fieldDefinitions": {
+            "type": "array",
+            "description": "Metadata about each field defined in the template.",
+            "items": {
+              "type": "object",
+              "required": [
+                "name",
+                "label",
+                "type",
+                "control"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "maxLength": 256
+                },
+                "label": {
+                  "type": "string",
+                  "maxLength": 256
+                },
+                "type": {
+                  "type": "string",
+                  "maxLength": 50
+                },
+                "control": {
+                  "type": "string",
+                  "maxLength": 50
+                }
+              }
+            }
+          },
+          "lastUsedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The date the template was last used to create a case."
+          },
+          "isDefault": {
+            "type": "boolean",
+            "description": "Whether this is the default template for its owner."
+          },
+          "isLatest": {
+            "type": "boolean",
+            "description": "Whether this is the latest version of the template."
+          },
+          "isEnabled": {
+            "type": "boolean",
+            "description": "Whether the template is enabled."
+          },
+          "latestVersion": {
+            "type": "integer",
+            "description": "The latest version number of this template."
+          }
+        }
+      },
+      "get_case_templates_response": {
+        "type": "object",
+        "description": "Response returned by the get all case templates API.",
+        "required": [
+          "templates",
+          "page",
+          "perPage",
+          "total"
+        ],
+        "properties": {
+          "templates": {
+            "type": "array",
+            "items": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/template_v2_response"
+                },
+                {
+                  "type": "object",
+                  "required": [
+                    "fieldSearchMatches"
+                  ],
+                  "properties": {
+                    "fieldSearchMatches": {
+                      "type": "boolean",
+                      "description": "Whether the search query matched a field name in this template."
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "page": {
+            "type": "integer",
+            "description": "The page number of the returned results."
+          },
+          "perPage": {
+            "type": "integer",
+            "description": "The number of results per page."
+          },
+          "total": {
+            "type": "integer",
+            "description": "The total number of templates matching the query."
+          }
+        }
+      },
+      "applicable_fields_response": {
+        "type": "object",
+        "description": "The fields a caller may apply to a case's `extended_fields`. When no template is in scope, this is the owner's global (library-wide) fields; when a template is applied, it also includes that template's fields. Migrated legacy custom fields appear here as `global` fields, so existing automations can look up the exact key to write.\n",
+        "required": [
+          "fields"
+        ],
+        "properties": {
+          "fields": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "key",
+                "name",
+                "label",
+                "type",
+                "control",
+                "required",
+                "requiredOnClose",
+                "displayOnly",
+                "source",
+                "isGlobal"
+              ],
+              "properties": {
+                "key": {
+                  "type": "string",
+                  "description": "The storage key to write in the case `extended_fields` map. Follows the `<field_name>_as_<storage_type>` convention (for example `priority_as_keyword`).\n",
+                  "example": "priority_as_keyword"
+                },
+                "name": {
+                  "type": "string",
+                  "description": "The field name as authored in the field definition.",
+                  "example": "priority"
+                },
+                "label": {
+                  "type": "string",
+                  "description": "The human-readable label. Falls back to `name` when no label is authored.",
+                  "example": "Priority"
+                },
+                "type": {
+                  "type": "string",
+                  "description": "The storage type: `keyword`, `integer`, `long`, `boolean`, or `date`.",
+                  "example": "keyword"
+                },
+                "control": {
+                  "type": "string",
+                  "description": "The UI control for the field, such as `INPUT_TEXT`, `INPUT_NUMBER`, `SELECT_BASIC`, `TOGGLE`, or `MARKDOWN`.\n",
+                  "example": "SELECT_BASIC"
+                },
+                "required": {
+                  "type": "boolean",
+                  "description": "Whether a value must be supplied at write time."
+                },
+                "requiredOnClose": {
+                  "type": "boolean",
+                  "description": "Whether the field must be filled before the case can be closed."
+                },
+                "displayOnly": {
+                  "type": "boolean",
+                  "description": "When `true` the field is display-only (for example a `MARKDOWN` block): it is returned so the full form shape is visible, but it holds no value and its `key` cannot be written to `extended_fields`.\n"
+                },
+                "options": {
+                  "type": "array",
+                  "description": "The allowed values for `SELECT_BASIC`, `RADIO_GROUP`, and `CHECKBOX_GROUP` fields.",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "defaultValue": {
+                  "type": "string",
+                  "description": "The default value, as a string, when the field definition declares one."
+                },
+                "source": {
+                  "type": "string",
+                  "enum": [
+                    "global",
+                    "template"
+                  ],
+                  "description": "Where the field comes from: `global` for a library-wide (`isGlobal`) definition writable on any case, or `template` for a field contributed by the applied template.\n"
+                },
+                "isGlobal": {
+                  "type": "boolean",
+                  "description": "Whether the field is a global (library-wide) definition."
+                }
+              }
+            }
+          }
+        }
+      },
       "case_response_get_case": {
         "title": "Get case response",
         "description": "Case details returned by the get case API. The comments property is not included in the response. Use the find case comments API to retrieve comments. totalComment reflects the actual number of user comments.\n",
@@ -4502,6 +5140,59 @@
           }
         }
       },
+      "alert_identifiers": {
+        "title": "Alert identifiers",
+        "description": "The alert identifiers. It is required only when `type` is `alert`. You can use an array of strings to add multiple alerts to a case, provided that they all relate to the same rule; `index` must also be an array with the same length or number of elements. Adding multiple alerts in this manner is recommended rather than calling the API multiple times. This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 1000
+          }
+        ],
+        "x-state": "Technical preview",
+        "example": "6b24c4dc44bc720cfc92797f3d61fff952f2b2627db1fb4f8cc49f4530c4ff42"
+      },
+      "alert_indices": {
+        "title": "Alert indices",
+        "description": "The alert indices. It is required only when `type` is `alert`. If you are adding multiple alerts to a case, use an array of strings; the position of each index name in the array must match the position of the corresponding alert identifier in the `alertId` array.  This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 1000
+          }
+        ],
+        "x-state": "Technical preview"
+      },
+      "rule": {
+        "title": "Alerting rule",
+        "description": "The rule that is associated with the alerts. It is required only when `type` is `alert`. This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
+        "type": "object",
+        "x-state": "Technical preview",
+        "properties": {
+          "id": {
+            "description": "The rule identifier.",
+            "type": "string",
+            "example": "94d80550-aaf4-11ec-985f-97e55adae8b9"
+          },
+          "name": {
+            "description": "The rule name.",
+            "type": "string",
+            "example": "security_rule"
+          }
+        }
+      },
       "add_alert_comment_request_properties": {
         "title": "Add case comment request properties for alerts",
         "required": [
@@ -4564,59 +5255,6 @@
           "owner",
           "type"
         ]
-      },
-      "alert_identifiers": {
-        "title": "Alert identifiers",
-        "description": "The alert identifiers. It is required only when `type` is `alert`. You can use an array of strings to add multiple alerts to a case, provided that they all relate to the same rule; `index` must also be an array with the same length or number of elements. Adding multiple alerts in this manner is recommended rather than calling the API multiple times. This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
-        "oneOf": [
-          {
-            "type": "string"
-          },
-          {
-            "type": "array",
-            "items": {
-              "type": "string"
-            },
-            "maxItems": 1000
-          }
-        ],
-        "x-state": "Technical preview",
-        "example": "6b24c4dc44bc720cfc92797f3d61fff952f2b2627db1fb4f8cc49f4530c4ff42"
-      },
-      "alert_indices": {
-        "title": "Alert indices",
-        "description": "The alert indices. It is required only when `type` is `alert`. If you are adding multiple alerts to a case, use an array of strings; the position of each index name in the array must match the position of the corresponding alert identifier in the `alertId` array.  This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
-        "oneOf": [
-          {
-            "type": "string"
-          },
-          {
-            "type": "array",
-            "items": {
-              "type": "string"
-            },
-            "maxItems": 1000
-          }
-        ],
-        "x-state": "Technical preview"
-      },
-      "rule": {
-        "title": "Alerting rule",
-        "description": "The rule that is associated with the alerts. It is required only when `type` is `alert`. This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
-        "type": "object",
-        "x-state": "Technical preview",
-        "properties": {
-          "id": {
-            "description": "The rule identifier.",
-            "type": "string",
-            "example": "94d80550-aaf4-11ec-985f-97e55adae8b9"
-          },
-          "name": {
-            "description": "The rule name.",
-            "type": "string",
-            "example": "security_rule"
-          }
-        }
       },
       "add_case_comment_request": {
         "title": "Add case comment request",
@@ -5960,6 +6598,99 @@
           "tag 1",
           "tag 2"
         ]
+      },
+      "get_case_templates_response": {
+        "summary": "A paginated list of case templates.",
+        "value": {
+          "page": 1,
+          "perPage": 20,
+          "total": 1,
+          "templates": [
+            {
+              "templateId": "9da1ea2a-09f8-4d0e-bf9d-09bf8c9d0f42",
+              "name": "My Template",
+              "owner": "cases",
+              "definition": {},
+              "definitionString": "fields: []",
+              "templateVersion": 1,
+              "deletedAt": null,
+              "isLatest": true,
+              "latestVersion": 1,
+              "fieldSearchMatches": false
+            }
+          ]
+        }
+      },
+      "get_case_template_response": {
+        "summary": "A case template.",
+        "value": {
+          "templateId": "9da1ea2a-09f8-4d0e-bf9d-09bf8c9d0f42",
+          "name": "My Template",
+          "owner": "cases",
+          "definition": {},
+          "definitionString": "fields: []",
+          "templateVersion": 1,
+          "deletedAt": null,
+          "isLatest": true,
+          "latestVersion": 1
+        }
+      },
+      "response_404": {
+        "summary": "The requested resource was not found.",
+        "value": {
+          "error": "Not Found",
+          "message": "Saved object [cases-template/9da1ea2a-09f8-4d0e-bf9d-09bf8c9d0f42] not found",
+          "statusCode": 404
+        }
+      },
+      "get_case_applicable_fields_response": {
+        "summary": "Fields applicable to a case",
+        "value": {
+          "fields": [
+            {
+              "key": "priority_as_keyword",
+              "name": "priority",
+              "label": "Priority",
+              "type": "keyword",
+              "control": "SELECT_BASIC",
+              "required": true,
+              "requiredOnClose": false,
+              "displayOnly": false,
+              "options": [
+                "low",
+                "medium",
+                "high"
+              ],
+              "defaultValue": "medium",
+              "source": "global",
+              "isGlobal": true
+            },
+            {
+              "key": "rollout_notes_as_keyword",
+              "name": "rollout_notes",
+              "label": "Rollout notes",
+              "type": "keyword",
+              "control": "TEXTAREA",
+              "required": false,
+              "requiredOnClose": true,
+              "displayOnly": false,
+              "source": "template",
+              "isGlobal": false
+            },
+            {
+              "key": "instructions_as_keyword",
+              "name": "instructions",
+              "label": "Instructions",
+              "type": "keyword",
+              "control": "MARKDOWN",
+              "required": false,
+              "requiredOnClose": false,
+              "displayOnly": true,
+              "source": "template",
+              "isGlobal": false
+            }
+          ]
+        }
       },
       "get_case_response": {
         "summary": "Get case response. Comments are not included; use the find case comments API. totalComment reflects the actual count.",

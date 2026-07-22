@@ -81,6 +81,7 @@ dependsOn:
   - '@kbn/scout'
   - '@kbn/object-utils'
   - '@kbn/alerting-v2-constants'
+  - '@kbn/alerting-v2-utils'
   - '@kbn/alerting-v2-episodes-ui'
   - '@kbn/kibana-react-plugin'
   - '@kbn/kibana-utils-plugin'
@@ -129,6 +130,9 @@ dependsOn:
   - '@kbn/es-types'
   - '@kbn/app-header'
   - '@kbn/core-chrome-browser-context-mocks'
+  - '@kbn/content-list'
+  - '@kbn/content-list-provider'
+  - '@kbn/content-list-toolbar'
 tags:
   - plugin
   - prod

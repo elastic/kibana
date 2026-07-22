@@ -1332,7 +1332,7 @@ describe('utils', () => {
 
   describe('getCountsAndMaxAlertsData', () => {
     const savedObjectsClient = savedObjectsRepositoryMock.create();
-    savedObjectsClient.find.mockResolvedValue({
+    const legacyResponse = {
       total: 3,
       saved_objects: [],
       per_page: 1,
@@ -1428,14 +1428,26 @@ describe('utils', () => {
           ],
         },
       },
-    });
+    };
+
+    // Default the unified (cases-attachments) query to empty so the merge with
+    // the legacy (cases-comments) query is a no-op unless a test overrides it.
+    const emptyResponse = {
+      total: 0,
+      saved_objects: [],
+      per_page: 0,
+      page: 0,
+    };
 
     beforeEach(() => {
       jest.clearAllMocks();
+      savedObjectsClient.find.mockResolvedValue(emptyResponse);
     });
 
     it('returns the correct counts and max data', async () => {
       const telemetrySavedObjectsClient = new TelemetrySavedObjectsClient(savedObjectsClient);
+
+      savedObjectsClient.find.mockResolvedValueOnce(legacyResponse);
 
       const res = await getCountsAndMaxAlertsData({
         savedObjectsClient: telemetrySavedObjectsClient,

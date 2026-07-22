@@ -40,6 +40,12 @@ interface ChangeAppliedTemplateArgs {
   caseData: CaseUI;
   /** Pass null to remove the applied template. `settings` are the template's raw definition values. */
   newTemplate: NewAppliedTemplate;
+  /**
+   * Pre-validated extended field values (snake_case keys) collected from the fields form.
+   * When provided, used directly instead of computing carry-over values via
+   * `computeNewExtendedFields`. Only meaningful when `newTemplate` is non-null.
+   */
+  extendedFields?: Record<string, string>;
 }
 
 /**
@@ -79,12 +85,13 @@ export const computeNewExtendedFields = (
 };
 
 export const useChangeAppliedTemplate = () => {
-  const { showErrorToast } = useCasesToast();
+  const { showErrorToast, showInfoToast } = useCasesToast();
 
   return useMutation(
-    ({ caseData, newTemplate }: ChangeAppliedTemplateArgs) => {
+    ({ caseData, newTemplate, extendedFields }: ChangeAppliedTemplateArgs) => {
       const newExtendedFields = newTemplate
-        ? computeNewExtendedFields(newTemplate.fields, caseData.extendedFields ?? {})
+        ? extendedFields ??
+          computeNewExtendedFields(newTemplate.fields, caseData.extendedFields ?? {})
         : {};
       return patchCase({
         caseId: caseData.id,
@@ -103,9 +110,22 @@ export const useChangeAppliedTemplate = () => {
       mutationKey: casesMutationsKeys.changeAppliedTemplate,
       onSuccess: () => {
         // Applying a template changes case fields and settings that several independently-cached
-        // components render. A full page reload is the simplest reliable way to reflect all of the
-        // updates at once (react-query cache invalidation alone left some components stale).
-        window.location.reload();
+        // components render. Rather than forcing a disruptive automatic reload, surface a persistent
+        // notification with a "Reload page" action so the user can refresh when ready to see all of
+        // the updates at once (react-query cache invalidation alone leaves some components stale).
+        showInfoToast(
+          i18n.TEMPLATE_UPDATED_TITLE,
+          i18n.TEMPLATE_UPDATED_TEXT,
+          {
+            primary: {
+              onClick: () => window.location.reload(),
+              'data-test-subj': 'cases-change-template-reload-button',
+              children: i18n.RELOAD_PAGE,
+            },
+          },
+          // Keep the toast until the user reloads or dismisses it.
+          { toastLifeTimeMs: Infinity }
+        );
       },
       onError: (error: ServerError) => {
         showErrorToast(error, { title: i18n.ERROR_CHANGING_TEMPLATE });

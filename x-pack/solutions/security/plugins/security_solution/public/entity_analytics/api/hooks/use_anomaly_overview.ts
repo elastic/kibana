@@ -44,6 +44,12 @@ export const useAnomalyOverview = ({
   return useQuery(
     [...ANOMALY_OVERVIEW_QUERY_KEY, entityType, entityId, from, to, threatTactics, scoreRanges],
     ({ signal }) => fetchAnomalyOverview({ entityType, entityId, body, signal }),
-    { enabled: enabled && !!entityId, keepPreviousData: true, refetchOnWindowFocus: false }
+    {
+      enabled: enabled && !!entityId,
+      keepPreviousData: true,
+      refetchOnWindowFocus: false,
+      retry: (failureCount, error) =>
+        failureCount < 3 && (error as { response?: { status?: number } })?.response?.status !== 400,
+    }
   );
 };

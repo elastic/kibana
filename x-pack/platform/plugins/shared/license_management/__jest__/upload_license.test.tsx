@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { Provider } from 'react-redux';
+import { Provider } from 'react-redux-v7';
 import type { LocationDescriptorObject } from 'history';
 import { coreMock, httpServiceMock, scopedHistoryMock } from '@kbn/core/public/mocks';
 import { act, render, screen } from '@testing-library/react';

@@ -1,5 +1,5 @@
 {
-  "sha1": "d59b368b754c9ac1caa01e6f412dca08790e3afc",
+  "sha1": "a79874bde03c796c832bf8e95664cce43cef70bd",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -12,7 +12,7 @@
       "tags": [],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/global.teardown.ts",
-        "line": 12,
+        "line": 11,
         "column": 19
       }
     },
@@ -23,7 +23,7 @@
       "tags": [],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/global.setup.ts",
-        "line": 12,
+        "line": 11,
         "column": 16
       }
     },
