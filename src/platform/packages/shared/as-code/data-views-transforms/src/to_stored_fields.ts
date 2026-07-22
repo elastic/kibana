@@ -123,41 +123,34 @@ export function toStoredFieldAttributes(
   fieldSettings: AsCodeDataViewSpec['field_settings'] | AsCodeSavedDataView['field_settings'] = {}
 ): DataViewSpec['fieldAttrs'] {
   const fieldAttrs: DataViewSpec['fieldAttrs'] = {};
+
+  const assignAttrs = (key: string, field: AsCodeFieldSettings | AsCodeSavedFieldSettings) => {
+    const attrs = buildFieldAttrs(field);
+    if (Object.keys(attrs).length > 0) {
+      fieldAttrs[key] = attrs;
+    }
+  };
+
   for (const [name, field] of Object.entries(fieldSettings)) {
-    if (isRuntimeField(field)) {
-      if (!isCompositeRuntimeField(field)) {
-        const attrs = {
-          ...(field.custom_label && { customLabel: field.custom_label }),
-          ...(field.custom_description && { customDescription: field.custom_description }),
-          ...getPopularity(field),
-        };
-        if (Object.keys(attrs).length > 0) {
-          fieldAttrs[name] = attrs;
-        }
-      } else {
-        for (const [subName, subField] of Object.entries(field.fields)) {
-          const attrs = {
-            ...(subField.custom_label && { customLabel: subField.custom_label }),
-            ...(subField.custom_description && { customDescription: subField.custom_description }),
-            ...getPopularity(subField),
-          };
-          if (Object.keys(attrs).length > 0) {
-            fieldAttrs[`${name}.${subName}`] = attrs;
-          }
-        }
+    if (isCompositeRuntimeField(field)) {
+      for (const [subName, subField] of Object.entries(field.fields)) {
+        assignAttrs(`${name}.${subName}`, subField);
       }
-    } else if ('custom_label' in field || 'custom_description' in field || 'popularity' in field) {
-      const attrs = {
-        ...(field.custom_label && { customLabel: field.custom_label }),
-        ...(field.custom_description && { customDescription: field.custom_description }),
-        ...getPopularity(field),
-      };
-      if (Object.keys(attrs).length > 0) {
-        fieldAttrs[name] = attrs;
-      }
+    } else {
+      assignAttrs(name, field);
     }
   }
+
   return fieldAttrs;
+}
+
+function buildFieldAttrs(field: AsCodeFieldSettings | AsCodeSavedFieldSettings) {
+  return {
+    ...('custom_label' in field && field.custom_label && { customLabel: field.custom_label }),
+    ...('custom_description' in field &&
+      field.custom_description && { customDescription: field.custom_description }),
+    ...getPopularity(field),
+  };
 }
 
 function getPopularity(field: AsCodeFieldSettings | AsCodeSavedFieldSettings) {
