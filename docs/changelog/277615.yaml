@@ -8,5 +8,5 @@ products:
   target: 2026-07-21
 - product: kibana
   target: 9.6.0
-title: "Fix Query Sandbox rejecting ES|QL Data Federation datasets"
-description: "Query Sandbox ES|QL autocomplete and validation now resolve Data Federation datasets and views instead of reporting them as unknown data sources."
+title: "Fix query sandbox rejecting ES|QL data federation datasets"
+description: "Query sandbox ES|QL autocomplete and validation now resolve data federation datasets and views instead of reporting them as unknown data sources."

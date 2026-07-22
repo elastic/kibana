@@ -8,4 +8,4 @@ products:
   target: 2026-07-21
 - product: kibana
   target: 9.6.0
-title: Drop skill.id from the UI and use skill.name instead
+title: Drop `skill.id` from the UI and use `skill.name` instead

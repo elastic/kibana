@@ -8,4 +8,4 @@ products:
   target: 2026-07-21
 - product: kibana
   target: 9.6.0
-title: Fix Disk Usage alerting rule by ignoring frozen nodes
+title: Fix disk usage alerting rule by ignoring frozen nodes

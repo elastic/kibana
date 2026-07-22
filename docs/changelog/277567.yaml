@@ -8,5 +8,5 @@ products:
   target: 9.5.0
 areas:
 - Alerting and reporting
-title: "Improve Cases file upload modal size limits and error handling"
-description: "The Cases file upload modal shows human-readable size limits, clears errors when you select a new file, validates per-file size limits, and can hide the long list of supported file types."
+title: "Improve cases file upload modal size limits and error handling"
+description: "The cases file upload modal shows human-readable size limits, clears errors when you select a new file, validates per-file size limits, and can hide the long list of supported file types."

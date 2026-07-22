@@ -34,9 +34,9 @@ entries:
   - https://github.com/elastic/kibana/pull/274333
 - file:
     name: 278716.yaml
-    checksum: 19627dce0b850090b32ea5837d60afeedf754069
+    checksum: 60d1116de2b3aa05105ca5ef80c4afc49420045f
   type: bug-fix
-  title: Fix Cases view and save when the applied template was deleted
+  title: Fix cases view and save when the applied template was deleted
   products:
   - product: cloud-serverless
     target: 2026-07-21
@@ -191,9 +191,9 @@ entries:
   - https://github.com/elastic/kibana/issues/183448
 - file:
     name: 277626.yaml
-    checksum: b2aa96163c7dd7f55fe6c95e191ba5a84e3e592a
+    checksum: e818bf0579d1c1d77ed178d286d2276aa4e33319
   type: enhancement
-  title: Improve Cases templates with toggles and unique names
+  title: Improve cases templates with toggles and unique names
   products:
   - product: cloud-serverless
     target: 2026-07-21
@@ -274,9 +274,9 @@ entries:
   - https://github.com/elastic/kibana/pull/277851
 - file:
     name: 277040.yaml
-    checksum: e27a0501ca3e0a89ce9bac7f75dd86031ac57079
+    checksum: d255e349dc0a2484a07dca40f25dba5a4ef8e2cd
   type: feature
-  title: Add timeline and saved object attachments to Cases
+  title: Add timeline and saved object attachments to cases
   products:
   - product: cloud-serverless
     target: 2026-07-21
@@ -303,9 +303,9 @@ entries:
   - https://github.com/elastic/kibana/pull/277685
 - file:
     name: 278065.yaml
-    checksum: 530b9f1ee8b29527e639083f1d3cd030e5f6b867
+    checksum: 8d070aab473b08702a7d59828a9c9101c9caf245
   type: bug-fix
-  title: Drop skill.id from the UI and use skill.name instead
+  title: Drop `skill.id` from the UI and use `skill.name` instead
   products:
   - product: cloud-serverless
     target: 2026-07-21
@@ -563,9 +563,9 @@ entries:
   - https://github.com/elastic/kibana/issues/276356
 - file:
     name: 278374.yaml
-    checksum: 672f25b64558a10bdf9fac83f1086d58027f0a79
+    checksum: 14b9912257cca898c7f0d501310968a9f08bfaa3
   type: bug-fix
-  title: Fix Disk Usage alerting rule by ignoring frozen nodes
+  title: Fix disk usage alerting rule by ignoring frozen nodes
   products:
   - product: cloud-serverless
     target: 2026-07-21
@@ -648,9 +648,9 @@ entries:
   - https://github.com/elastic/kibana/pull/278972
 - file:
     name: 278499.yaml
-    checksum: 4032feb3afecc1b361a6e0540d81acc65bbd2bcb
+    checksum: 8b98316c7ba697de3515fc74de0402d896336d99
   type: bug-fix
-  title: Fix applying Cases templates with invalid extended fields
+  title: Fix applying cases templates with invalid extended fields
   products:
   - product: cloud-serverless
     target: 2026-07-21
@@ -810,15 +810,15 @@ entries:
   - https://github.com/elastic/kibana/pull/278329
 - file:
     name: 277567.yaml
-    checksum: 43ce08c06735e64d33888168804b98e5fa188732
+    checksum: 96865b48eeac6ebc09d6800413c430f612a3f926
   type: enhancement
-  title: Improve Cases file upload modal size limits and error handling
+  title: Improve cases file upload modal size limits and error handling
   products:
   - product: cloud-serverless
     target: 2026-07-21
   - product: kibana
     target: 9.5.0
-  description: The Cases file upload modal shows human-readable size limits, clears errors when you select a new file, validates per-file size limits, and can hide the long list of supported file types.
+  description: The cases file upload modal shows human-readable size limits, clears errors when you select a new file, validates per-file size limits, and can hide the long list of supported file types.
   areas:
   - Alerting and reporting
   prs:
@@ -878,15 +878,15 @@ entries:
   - https://github.com/elastic/kibana/pull/278775
 - file:
     name: 277615.yaml
-    checksum: 7e2204d20b9d8162b1dc0e6e4a380eebb5498b62
+    checksum: 68cd2f628f05e929177ec439447faa375b1c2139
   type: bug-fix
-  title: Fix Query Sandbox rejecting ES|QL Data Federation datasets
+  title: Fix query sandbox rejecting ES|QL data federation datasets
   products:
   - product: cloud-serverless
     target: 2026-07-21
   - product: kibana
     target: 9.6.0
-  description: Query Sandbox ES|QL autocomplete and validation now resolve Data Federation datasets and views instead of reporting them as unknown data sources.
+  description: Query sandbox ES|QL autocomplete and validation now resolve data federation datasets and views instead of reporting them as unknown data sources.
   prs:
   - https://github.com/elastic/kibana/pull/277615
   issues:

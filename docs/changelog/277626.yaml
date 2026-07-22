@@ -8,5 +8,5 @@ products:
   target: 9.5.0
 areas:
 - Alerting and reporting
-title: "Improve Cases templates with toggles and unique names"
+title: "Improve cases templates with toggles and unique names"
 description: "Cases templates use a simpler default starter template, support toggle fields, and require unique template metadata names."
