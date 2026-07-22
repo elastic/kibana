@@ -20,7 +20,6 @@ spec:
     spec:
       env:
         KBN_EVALS: '1'
-        CI_STATS_DISABLE_PR_REPORT: 'true'
         # Heavy eval steps run on non-preemptible agents here so a lost spot worker
         # or timeout does not silently re-run the whole suite (agents are controlled
         # independently now that evals run outside kibana-pull-request).
