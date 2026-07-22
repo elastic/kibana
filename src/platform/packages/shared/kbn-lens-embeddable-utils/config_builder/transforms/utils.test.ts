@@ -558,7 +558,7 @@ describe('getAdHocDataViewSpec', () => {
       timeFieldName: '@timestamp',
       allowHidden: true,
     });
-    expect(spec).toEqual(spec);
+    expect(spec).toHaveProperty('allowHidden', true);
   });
 
   test('omits allowHidden when not provided', () => {
