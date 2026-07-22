@@ -773,13 +773,6 @@ describe('Run Single Report Task', () => {
           jobtype: 'test1',
           status: 'pending',
         } as never);
-      jest
-        // @ts-expect-error TS compilation fails: this overrides a protected method of the RunSingleReportTask instance
-        .spyOn(task, 'getEventTracker')
-        // @ts-ignore
-        .mockReturnValue(
-          new EventTracker(coreSetupMock.analytics, 'jobId', 'exportTypeId', 'appId')
-        );
       await task.init(taskManagerMock.createStart());
 
       const taskDef = task.getTaskDefinition();
