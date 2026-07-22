@@ -72,6 +72,9 @@ export interface RiskInputsTabProps<T extends EntityType> {
   entityId?: string;
   /** Navigates to the alert preview for a risk-input row. */
   onShowAlert: (id: string, indexName: string) => void;
+  /** Initial sub-tab to select. Takes precedence over the expandable-flyout URL state. Used by
+   *  the v2 tool flyout which has no expandable-flyout state. */
+  subTab?: RiskScoreLeftPanelSubTab;
 }
 
 const FIRST_RECORD_PAGINATION = {
@@ -116,11 +119,13 @@ export const RiskInputsTab = <T extends EntityType>({
   entityName,
   entityId,
   onShowAlert,
+  subTab: subTabProp,
 }: RiskInputsTabProps<T>) => {
   const panels = useStableExpandableFlyoutState();
-  const subTab = isRiskScoreFlyoutPanelProps(panels.left)
+  const subTabFromState = isRiskScoreFlyoutPanelProps(panels.left)
     ? panels.left.params.path.subTab
     : undefined;
+  const subTab = subTabFromState ?? subTabProp;
 
   const { data: watchlists } = useGetWatchlists();
 
