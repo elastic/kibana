@@ -34,6 +34,7 @@ async function runBackfill(esClient: ElasticsearchClient, index: string, label: 
   try {
     const result = await esClient.updateByQuery({
       index,
+      ignore_unavailable: true,
       conflicts: 'proceed',
       script: {
         lang: 'painless',
