@@ -235,6 +235,8 @@ These skills describe test file conventions, runner commands, authentication pat
 |---|---|
 | Scout UI | `plugins/security_solution/test/scout/reports/ui/` |
 
+> Note: there is also a separate `test/scout_ai_value_report/` directory (a sibling of `test/scout/`, outside the namespace structure) owned by the same team. That path uses an older naming convention and is distinct from the `reports` namespace above.
+
 ### Workflows
 
 | Test type | Directory |

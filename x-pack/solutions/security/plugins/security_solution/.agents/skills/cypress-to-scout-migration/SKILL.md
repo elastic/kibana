@@ -117,11 +117,11 @@ A different owning team reinforces the decision but is not required on its own.
 
 ### How to create a new namespace (3 required steps):
 
-1. **Create the directory structure.** Copy from `test/scout/timelines/ui/` (UI-only reference) or `test/scout/entity_analytics/` (UI + API reference). Each namespace needs its own `parallel.playwright.config.ts` (or `playwright.config.ts`), `fixtures/index.ts`, and specs.
-2. **Generate and commit the config manifest.** Run `node scripts/scout update-test-config-manifests` from the repo root. This writes `.meta/(ui|api)/*.json` under the namespace dir. Without it, CI discovery and selective testing will not see the new config. Commit the generated file.
+1. **Create the directory structure.** Copy from `test/scout/timelines/ui/` (UI-only reference) or `test/scout/entity_analytics/` (UI + API reference; also has a `common/` dir for shared fixtures). Each namespace needs its own `parallel.playwright.config.ts` (or `playwright.config.ts`), `fixtures/index.ts`, and specs.
+2. **Generate and commit the config manifest.** Run `node scripts/scout.js update-test-config-manifests` from the repo root. This writes `.meta/(ui|api)/*.json` under the namespace dir. Without it, CI discovery and selective testing will not see the new config. Commit the generated file.
 3. **Add a CODEOWNERS entry.** Add `/x-pack/solutions/security/plugins/security_solution/test/scout/<namespace>/ @elastic/<team>` to `.github/CODEOWNERS`. If omitted, ownership falls through to the umbrella entry `@elastic/security-engineering-productivity` — easy to forget (the `exceptions` namespace currently has no dedicated entry for this reason).
 
-> **No `.buildkite/scout_ci_config.yml` edit is needed.** The `security_solution` plugin is already registered; new namespace configs are discovered automatically by glob.
+> **No `.buildkite/scout_ci_config.yml` edit is needed.** The `security_solution` plugin is already registered in the `enabled` plugins list in that file. CI auto-discovers all `playwright.config.ts` files within registered plugins — only entries under `excluded_configs` are skipped. New namespace configs are picked up automatically.
 
 **Then:** add the namespace to the source-scope table in `security-test-directories.md` (in this skill set) and the namespace table in `scout-best-practices-reviewer`.
 
