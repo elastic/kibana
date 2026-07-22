@@ -21,10 +21,7 @@ import {
 const INVALID_UPDATE_RULE_RESPONSE = invalidResponseExample({
   summary: 'Update body includes an unrecognized field',
   code: ALERTING_V2_ERROR_CODES.INVALID_RULE_DATA,
-  message: getInvalidRuleDataMessage(
-    'update',
-    "Unrecognized key(s) in object: 'unknownField'"
-  ),
+  message: getInvalidRuleDataMessage('update', "Unrecognized key(s) in object: 'unknownField'"),
   details: { context: 'update', errors: { unknownField: ['Unrecognized key'] } },
 });
 
