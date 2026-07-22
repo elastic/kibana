@@ -15,12 +15,6 @@ import React from 'react';
 import { CONTEXT_ENGINE_APP_ID } from '../../../common/features';
 import { CreateAiIndexPage } from './create_ai_index_page';
 
-jest.mock('@kbn/try-in-console', () => ({
-  TryInConsoleButton: () => (
-    <button data-test-subj="contextCreateAiIndexDestButton" type="button" />
-  ),
-}));
-
 jest.mock('@kbn/esql/public', () => ({
   ESQLLangEditor: ({
     query,
@@ -66,16 +60,37 @@ describe('CreateAiIndexPage', () => {
     jest.clearAllMocks();
   });
 
-  it('keeps the create button disabled until a name and a source are provided', () => {
+  it('keeps the create button disabled until a name is provided, without requiring a source', () => {
     renderWithProviders(coreMock.createStart());
 
-    expect(screen.getByTestId('contextContinueButton')).toBeDisabled();
-
-    addEsqlSource('FROM logs-* | LIMIT 10');
-    expect(screen.getByTestId('contextContinueButton')).toBeDisabled();
+    expect(screen.getByTestId('contextCreateAiIndexButton')).toBeDisabled();
 
     typeName('Support triage');
-    expect(screen.getByTestId('contextContinueButton')).toBeEnabled();
+    expect(screen.getByTestId('contextCreateAiIndexButton')).toBeEnabled();
+  });
+
+  it('creates an AI index without any source', async () => {
+    const services = coreMock.createStart();
+    services.http.put.mockResolvedValue({ status: 'created' });
+
+    renderWithProviders(services);
+
+    typeName('Support triage');
+    fireEvent.click(screen.getByTestId('contextCreateAiIndexButton'));
+
+    await waitFor(() => {
+      expect(services.http.put).toHaveBeenCalledWith(
+        '/api/context_engine/ai_index/support-triage',
+        expect.objectContaining({
+          body: JSON.stringify({
+            name: 'Support triage',
+            dest: { type: 'index', value: 'ai-index-idx-support-triage' },
+            automations: [],
+            sources: [],
+          }),
+        })
+      );
+    });
   });
 
   it('creates an index-backed AI index and navigates to its detail page', async () => {
@@ -86,7 +101,7 @@ describe('CreateAiIndexPage', () => {
 
     typeName('Support triage');
     addEsqlSource('FROM logs-* | LIMIT 10');
-    fireEvent.click(screen.getByTestId('contextContinueButton'));
+    fireEvent.click(screen.getByTestId('contextCreateAiIndexButton'));
 
     await waitFor(() => {
       expect(services.http.put).toHaveBeenCalledWith(
@@ -116,7 +131,7 @@ describe('CreateAiIndexPage', () => {
     typeName('Support triage');
     addEsqlSource('FROM logs-* | LIMIT 10');
     fireEvent.click(screen.getByTestId('contextAiIndexStorageType-data_stream'));
-    fireEvent.click(screen.getByTestId('contextContinueButton'));
+    fireEvent.click(screen.getByTestId('contextCreateAiIndexButton'));
 
     await waitFor(() => {
       expect(services.http.put).toHaveBeenCalledWith(
@@ -141,7 +156,7 @@ describe('CreateAiIndexPage', () => {
 
     typeName('Support triage');
     addEsqlSource('FROM logs-* | LIMIT 10');
-    fireEvent.click(screen.getByTestId('contextContinueButton'));
+    fireEvent.click(screen.getByTestId('contextCreateAiIndexButton'));
 
     await waitFor(() => {
       expect(services.notifications.toasts.addError).toHaveBeenCalled();

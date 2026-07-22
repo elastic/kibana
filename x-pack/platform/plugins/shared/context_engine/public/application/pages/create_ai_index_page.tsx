@@ -23,13 +23,11 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import { TryInConsoleButton } from '@kbn/try-in-console';
 import React, { useState } from 'react';
 import type { AiIndexType } from '../../../common/http_api/ai_indices';
 import { SourcePicker } from '../components/source_picker';
 import type { SelectedSource } from '../components/source_picker';
 import { useCreateAiIndex } from '../hooks/use_create_ai_index';
-import { useKibana } from '../hooks/use_kibana';
 import { useNavigation } from '../hooks/use_navigation';
 import { getAiIndexDetailPath } from '../paths';
 import { getAiIndexDest } from '../utils/ai_index_dest';
@@ -67,25 +65,7 @@ const STORAGE_TYPES: Array<{
   },
 ];
 
-const buildCreateDestRequest = (storageType: AiIndexType, destValue: string): string =>
-  storageType === 'data_stream'
-    ? `# Create an index template so the data stream gets created with the right settings
-PUT _index_template/ai-index-ds-template
-{
-  "index_patterns": ["ai-index-ds-*"],
-  "data_stream": {},
-  "priority": 500
-}
-
-# Create the backing data stream used by the "Continue" button below
-PUT _data_stream/${destValue}`
-    : `# Create the backing index used by the "Continue" button below
-PUT ${destValue}`;
-
 export const CreateAiIndexPage = () => {
-  const {
-    services: { application, share, console: consolePlugin },
-  } = useKibana();
   const { navigateToContextEngine } = useNavigation();
   const { createAiIndex, isCreating } = useCreateAiIndex();
   const [selectedSources, setSelectedSources] = useState<SelectedSource[]>([]);
@@ -95,7 +75,7 @@ export const CreateAiIndexPage = () => {
 
   const trimmedName = name.trim();
   const destValue = getAiIndexDest(storageType, trimmedName || 'namespace').value;
-  const isDisabled = !trimmedName || selectedSources.length === 0;
+  const isDisabled = !trimmedName;
 
   const createAndContinue = async () => {
     const created = await createAiIndex({ name, storageType, sources: selectedSources });
@@ -222,25 +202,11 @@ export const CreateAiIndexPage = () => {
           responsive={false}
         >
           <EuiFlexItem grow={false}>
-            <TryInConsoleButton
-              type="emptyButton"
-              iconType="plusInCircle"
-              request={buildCreateDestRequest(storageType, destValue)}
-              application={application}
-              sharePlugin={share}
-              consolePlugin={consolePlugin}
-              data-test-subj="contextCreateAiIndexDestButton"
-              content={i18n.translate('xpack.contextEngine.createAiIndex.createDestButton', {
-                defaultMessage: 'Create AI index dest',
-              })}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
             <EuiButton
               fill
               iconType="arrowRight"
               iconSide="right"
-              data-test-subj="contextContinueButton"
+              data-test-subj="contextCreateAiIndexButton"
               onClick={createAndContinue}
               isLoading={isCreating}
               isDisabled={isDisabled}

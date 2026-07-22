@@ -41,7 +41,8 @@ jest.mock('@kbn/esql/public', () => ({
 
 const aiIndex: GetAiIndexResponse = {
   id: 'my-ai-index',
-  dest: { type: 'data_stream', value: '.ai-index-ds-my-ai-index' },
+  name: 'My AI index',
+  dest: { type: 'data_stream', value: 'ai-index-ds-my-ai-index' },
   automations: [],
   sources: [{ type: 'esql', value: 'FROM My view' }],
   date_created: '2026-01-01T00:00:00.000Z',
@@ -70,7 +71,7 @@ describe('AiIndexDetailPage', () => {
     jest.clearAllMocks();
   });
 
-  it('fetches the AI index and renders its id and sources', async () => {
+  it('fetches the AI index and renders its name and sources', async () => {
     const services = coreMock.createStart();
     services.http.get.mockResolvedValue(aiIndex);
 
@@ -82,7 +83,7 @@ describe('AiIndexDetailPage', () => {
       '/api/context_engine/ai_index/my-ai-index',
       expect.objectContaining({ version: expect.any(String) })
     );
-    expect(screen.getByText('my-ai-index')).toBeInTheDocument();
+    expect(screen.getByText('My AI index')).toBeInTheDocument();
     expect(screen.getByTestId('contextAiIndexSourceRow')).toHaveTextContent('FROM My view');
     // The non-editable detail list shows the generic ES|QL source type.
     expect(screen.getByTestId('contextAiIndexSourceType')).toHaveTextContent('ES|QL');
@@ -130,7 +131,7 @@ describe('AiIndexDetailPage', () => {
         expect.objectContaining({
           body: JSON.stringify({
             name: 'My AI index',
-            dest: { type: 'data_stream', value: '.ai-index-ds-my-ai-index' },
+            dest: { type: 'data_stream', value: 'ai-index-ds-my-ai-index' },
             automations: [],
             sources: [{ type: 'esql', value: 'FROM My view' }],
             description: 'A brand new description',
@@ -184,7 +185,8 @@ describe('AiIndexDetailPage', () => {
         '/api/context_engine/ai_index/my-ai-index',
         expect.objectContaining({
           body: JSON.stringify({
-            dest: { type: 'data_stream', value: '.ai-index-ds-my-ai-index' },
+            name: 'My AI index',
+            dest: { type: 'data_stream', value: 'ai-index-ds-my-ai-index' },
             automations: [],
             sources: [{ type: 'esql', value: 'FROM My view' }],
           }),
