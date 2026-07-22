@@ -8,7 +8,6 @@
 import { httpServerMock } from '@kbn/core/server/mocks';
 
 import { agentPolicyService } from '../../services';
-import { listFleetProxies } from '../../services/fleet_proxies';
 
 import type { FleetRequestHandlerContext } from '../..';
 import { xpackMocks } from '../../mocks';
@@ -17,7 +16,6 @@ import type { AgentPolicy } from '../../types';
 
 import {
   bulkGetAgentPoliciesHandler,
-  downloadFullAgentPolicy,
   getFullAgentPolicy,
   GetListAgentPolicyOutputsHandler,
   populateAssignedAgentsCount,
