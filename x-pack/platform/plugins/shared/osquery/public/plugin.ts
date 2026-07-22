@@ -118,7 +118,9 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
   }
 
   public start(core: CoreStart, plugins: StartPlugins): OsqueryPluginStart {
-    plugins.cps?.cpsManager?.registerAppAccess('osquery', () => ProjectRoutingAccess.READONLY);
+    if (this.experimentalFeatures.crossProjectSearch) {
+      plugins.cps?.cpsManager?.registerAppAccess('osquery', () => ProjectRoutingAccess.READONLY);
+    }
 
     ExperimentalFeaturesService.init({ experimentalFeatures: this.experimentalFeatures });
 

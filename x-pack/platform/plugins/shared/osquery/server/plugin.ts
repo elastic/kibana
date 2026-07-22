@@ -89,7 +89,7 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
       security: plugins.security,
       telemetryEventsSender: this.telemetryEventsSender,
       licensing: plugins.licensing,
-      cpsEnabled: plugins.cps?.getCpsEnabled() ?? false,
+      cpsEnabled: (plugins.cps?.getCpsEnabled() ?? false) && experimentalFeatures.crossProjectSearch,
     };
 
     initSavedObjects(core.savedObjects);
