@@ -407,6 +407,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
                     contextID={PageScope.explore}
                     scopeId={PageScope.explore}
                     queryId={USER_PANEL_OBSERVED_USER_QUERY_ID}
+                    hideAnomalies={false}
                   />
                   <EuiHorizontalRule />
                   <EuiSpacer />
