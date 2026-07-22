@@ -10155,7 +10155,6 @@
     "visTypeVega.emsFileParser.missingNameOfFileErrorMessage": "具有 {dataUrlParamValue} 的 {dataUrlParam} 需要 {nameParam} 参数（文件名）",
     "visTypeVega.esqlQueryParser.emptyQueryErrorMessage": "ES|QL {queryParam} 不能为空",
     "visTypeVega.esqlQueryParser.missingQueryErrorMessage": "{dataUrlParam} 与 {typeParam} 需要一个带有 ES|QL 查询的 {queryParam} 参数",
-    "visTypeVega.esqlQueryParser.timeFieldWithoutParamsWarning": "{timefieldParam} 已指定，但查询不包含 {tstartParam} 或 {tendParam} 参数",
     "visTypeVega.esqlQueryParser.transformationWarningMessage": "无法转换 ES|QL 响应：{message}。返回空数据。",
     "visTypeVega.esQueryParser.autointervalValueTypeErrorMessage": "{autointerval} 必须为 {trueValue} 或数字",
     "visTypeVega.esQueryParser.dataUrlMustNotHaveLegacyAndBodyQueryValuesAtTheSameTimeErrorMessage": "{dataUrlParam} 不得同时具有旧的 {legacyContext} 和 {bodyQueryConfigName} 值",
