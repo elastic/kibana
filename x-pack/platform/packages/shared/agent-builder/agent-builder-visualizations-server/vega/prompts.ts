@@ -74,8 +74,9 @@ ${existingSpec}
 }
 DATA SOURCE RULES:
 1. Bind the data with Kibana's inline ES|QL source: a top-level "data": { "url": { "%type%": "esql", "query": <the exact query below> } }. Use the query verbatim — do not modify it; the system re-binds and validates it.
-2. The spec is built around this ES|QL query; its result columns are the only fields you may reference in encodings: ${esqlQueryJson}
-3. Reference each column by its exact name as produced by the query. If the query uses the time-picker params (?_tstart / ?_tend), add "%timefield%": "@timestamp" to the url so Kibana binds the time range.
+2. Do not add secondary or nested data sources. In particular, never use lookup.from.data.url, another ES|QL source, or an external URL; transforms must use the top-level query results.
+3. The spec is built around this ES|QL query; its result columns are the only fields you may reference in encodings: ${esqlQueryJson}
+4. Reference each column by its exact name as produced by the query. If the query uses the time-picker params (?_tstart / ?_tend), add "%timefield%": "@timestamp" to the url so Kibana binds the time range.
 
 Columns available in the data (reference these EXACT names):
 <columns>

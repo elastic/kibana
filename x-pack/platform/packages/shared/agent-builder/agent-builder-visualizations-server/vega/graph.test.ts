@@ -10,11 +10,16 @@ import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
 import { generateEsql, executeEsql } from '@kbn/agent-builder-genai-utils';
 import { VEGA_LITE_SCHEMA } from './normalize_spec';
+import { validateVegaSpec } from './vega_validator';
 import { createVegaGraph } from './graph';
 
 jest.mock('@kbn/agent-builder-genai-utils', () => ({
   generateEsql: jest.fn(),
   executeEsql: jest.fn(),
+}));
+
+jest.mock('./vega_validator', () => ({
+  validateVegaSpec: jest.fn(),
 }));
 
 jest.mock('@kbn/agent-builder-genai-utils/tools/utils/esql', () => ({
@@ -31,6 +36,7 @@ jest.mock('../shared/esql_instructions', () => ({
 
 const mockedGenerateEsql = jest.mocked(generateEsql);
 const mockedExecuteEsql = jest.mocked(executeEsql);
+const mockedValidateVegaSpec = jest.mocked(validateVegaSpec);
 
 const createMockLogger = (): Logger =>
   ({ debug: jest.fn(), error: jest.fn(), info: jest.fn(), warn: jest.fn() } as unknown as Logger);
@@ -75,6 +81,7 @@ describe('createVegaGraph', () => {
     mockedExecuteEsql.mockResolvedValue({ columns: [], values: [] } as Awaited<
       ReturnType<typeof executeEsql>
     >);
+    mockedValidateVegaSpec.mockResolvedValue({ warnings: [] });
   });
 
   const run = async (
@@ -251,6 +258,117 @@ describe('createVegaGraph', () => {
     expect(invoke).toHaveBeenCalledTimes(2);
     expect(state.error).toBeNull();
     expect(JSON.parse(state.spec!).mark).toBe('line');
+  });
+
+  it('retries authoring when Vega rejects the normalized spec', async () => {
+    invoke
+      .mockResolvedValueOnce(asCodeBlock({ title: 'Broken chart', spec: { mark: 'bar' } }))
+      .mockResolvedValueOnce(asCodeBlock({ title: 'Fixed chart', spec: { mark: 'line' } }));
+    mockedValidateVegaSpec
+      .mockResolvedValueOnce({ error: 'Unknown transform op: bogus', warnings: [] })
+      .mockResolvedValueOnce({ warnings: [] });
+
+    const state = await run({ esqlQuery: PROVIDED_ESQL });
+
+    expect(invoke).toHaveBeenCalledTimes(2);
+    expect(JSON.stringify(invoke.mock.calls[1][0])).toContain('Unknown transform op: bogus');
+    expect(state.error).toBeNull();
+    expect(state.title).toBe('Fixed chart');
+    expect(JSON.parse(state.spec!).mark).toBe('line');
+  });
+
+  describe('render warnings', () => {
+    it('hands every warning to the agent for one review pass, then finalizes its result', async () => {
+      invoke
+        .mockResolvedValueOnce(
+          asCodeBlock({
+            mark: 'line',
+            encoding: {
+              theta: { field: 'metric', type: 'nominal' },
+              radius: { field: 'value', type: 'quantitative' },
+            },
+          })
+        )
+        .mockResolvedValueOnce(
+          asCodeBlock({
+            mark: 'line',
+            encoding: {
+              x: { field: 'metric', type: 'nominal' },
+              y: { field: 'value', type: 'quantitative' },
+            },
+          })
+        );
+      mockedValidateVegaSpec
+        .mockResolvedValueOnce({
+          warnings: [
+            'theta dropped as it is incompatible with "line".',
+            'radius dropped as it is incompatible with "line".',
+          ],
+        })
+        .mockResolvedValueOnce({ warnings: [] });
+
+      const state = await run({ esqlQuery: PROVIDED_ESQL });
+
+      expect(invoke).toHaveBeenCalledTimes(2);
+      expect(state.error).toBeNull();
+      expect(JSON.parse(state.spec!).encoding).toHaveProperty('x');
+      const secondPrompt = JSON.stringify(invoke.mock.calls[1][0]);
+      expect(secondPrompt).toContain('theta dropped as it is incompatible');
+      expect(secondPrompt).toContain('radius dropped as it is incompatible');
+      expect(secondPrompt).toContain('decide for yourself');
+    });
+
+    it('makes a single review pass and accepts the spec when the agent keeps its warnings', async () => {
+      invoke.mockResolvedValue(asCodeBlock({ mark: 'text', encoding: { x2: { value: 1 } } }));
+      mockedValidateVegaSpec.mockResolvedValue({
+        warnings: ['Infinite extent for field "count": [Infinity, -Infinity]'],
+      });
+
+      const state = await run({ esqlQuery: PROVIDED_ESQL });
+
+      expect(invoke).toHaveBeenCalledTimes(2);
+      expect(state.error).toBeNull();
+      expect(state.spec).not.toBeNull();
+    });
+
+    it('retries when the warning review introduces an unsupported nested data source', async () => {
+      invoke
+        .mockResolvedValueOnce(asCodeBlock({ mark: 'bar' }))
+        .mockResolvedValueOnce(
+          asCodeBlock({
+            transform: [
+              {
+                lookup: 'OriginCountry',
+                from: {
+                  data: { url: { '%type%': 'esql', query: PROVIDED_ESQL } },
+                  key: 'OriginCountry',
+                },
+              },
+            ],
+            mark: 'bar',
+          })
+        )
+        .mockResolvedValueOnce(asCodeBlock({ mark: 'point' }));
+      mockedValidateVegaSpec
+        .mockResolvedValueOnce({
+          warnings: ['Infinite extent for field "count": [Infinity, -Infinity]'],
+        })
+        .mockResolvedValueOnce({
+          error:
+            'Nested or external data loading is not supported; use only the top-level ES|QL data source.',
+          warnings: [],
+        })
+        .mockResolvedValueOnce({ warnings: [] });
+
+      const state = await run({ esqlQuery: PROVIDED_ESQL });
+
+      expect(invoke).toHaveBeenCalledTimes(3);
+      expect(JSON.stringify(invoke.mock.calls[2][0])).toContain(
+        'Nested or external data loading is not supported'
+      );
+      expect(state.error).toBeNull();
+      expect(JSON.parse(state.spec!).mark).toBe('point');
+    });
   });
 
   it('rejects an authored spec with no renderable view and retries', async () => {

@@ -34,6 +34,12 @@ describe('createAuthorVegaSpecPrompt', () => {
     expect(systemText('any chart')).toContain('DOTS IN FIELD NAMES');
   });
 
+  it('forbids secondary and nested data sources', () => {
+    const text = systemText('any chart');
+    expect(text).toContain('Do not add secondary or nested data sources');
+    expect(text).toContain('lookup.from.data.url');
+  });
+
   it('guides faceting: columns as a sibling and explicit per-cell sizing', () => {
     const text = systemText('small multiples of bytes by client ip');
     expect(text).toContain('FACETING / SMALL MULTIPLES');

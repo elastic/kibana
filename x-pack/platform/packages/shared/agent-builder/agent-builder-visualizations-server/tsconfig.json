@@ -4,7 +4,7 @@
     "outDir": "target/types",
     "types": ["jest", "node"]
   },
-  "include": ["**/*.ts"],
+  "include": ["**/*.ts", "**/*.cjs", "jest.integration.config.js"],
   "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/agent-builder-common",
@@ -15,6 +15,7 @@
     "@kbn/lens-embeddable-utils",
     "@kbn/logging",
     "@kbn/palettes",
-    "@kbn/zod"
+    "@kbn/zod",
+    "@kbn/setup-node-env"
   ]
 }

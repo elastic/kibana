@@ -26,6 +26,7 @@ dependsOn:
   - '@kbn/logging'
   - '@kbn/palettes'
   - '@kbn/zod'
+  - '@kbn/setup-node-env'
 tags:
   - shared-server
   - package
@@ -36,6 +37,8 @@ tags:
 fileGroups:
   src:
     - '**/*.ts'
+    - '**/*.cjs'
+    - jest.integration.config.js
     - '!target/**/*'
   jest-config:
     - jest.config.js
