@@ -8,7 +8,7 @@
 import type { DataViewsContract, DataViewField, DataViewSpec } from '@kbn/data-views-plugin/public';
 import type { TextBasedPersistedState } from '@kbn/lens-common';
 import type { HttpStart } from '@kbn/core/public';
-import { getESQLTimeFieldFromQuery } from '@kbn/esql-utils';
+import { getESQLTimeField } from '@kbn/esql-utils';
 import {
   ensureIndexPattern,
   ensureESQLTimeFieldOnAdHocDataViews,
@@ -20,11 +20,11 @@ import { sampleIndexPatterns, mockDataViewsService } from './mocks';
 import { documentField } from '../datasources/form_based/document_field';
 
 jest.mock('@kbn/esql-utils', () => ({
-  getESQLTimeFieldFromQuery: jest.fn(),
+  getESQLTimeField: jest.fn(),
 }));
 
-const mockGetESQLTimeFieldFromQuery = getESQLTimeFieldFromQuery as jest.MockedFunction<
-  typeof getESQLTimeFieldFromQuery
+const mockGetESQLTimeFieldFromQuery = getESQLTimeField as jest.MockedFunction<
+  typeof getESQLTimeField
 >;
 
 describe('loader', () => {

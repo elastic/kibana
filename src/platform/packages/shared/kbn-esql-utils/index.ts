@@ -9,7 +9,7 @@
 
 export {
   getESQLAdHocDataview,
-  getESQLTimeFieldFromQuery,
+  getESQLTimeField,
   getIndexPatternFromESQLQuery,
   getIndexPatternsFromESQLQuery,
   getSourceCommandFromESQLQuery,
@@ -31,7 +31,7 @@ export {
   getESQLQueryColumnsRaw,
   getESQLResults,
   formatESQLColumns,
-  getTimeFieldFromESQLQuery,
+  parseTimeFieldFromESQLQuery,
   getStartEndParams,
   hasStartEndParams,
   getNamedParams,

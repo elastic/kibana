@@ -9,6 +9,7 @@
 import type { HttpStart } from '@kbn/core/public';
 import { TIMEFIELD_ROUTE } from '@kbn/esql-types';
 import { LRUCache } from 'lru-cache';
+import { parseTimeFieldFromESQLQuery } from './query_parsing_helpers';
 
 // Caches the in-flight or resolved TIMEFIELD_ROUTE promise by query.
 // Storing the Promise (not the resolved value) deduplicates concurrent calls:
@@ -17,27 +18,31 @@ import { LRUCache } from 'lru-cache';
 const timeFieldCache = new LRUCache<string, Promise<string | undefined>>({ max: 100 });
 
 /**
- * Resolves the default time field for an ES|QL query by calling the timefield API.
+ * Resolves the time field for an ES|QL query.
  *
- * When `http` is omitted, returns `undefined` (unless a prior successful request
- * for the same query left a value in the in-memory cache).
+ * Without `http`: parses the query locally for `?_tstart`/`?_tend` named params —
+ * fast, sync-equivalent, works server-side. Returns `undefined` when the query
+ * has no time filter params.
  *
- * Concurrent requests for the same query share one HTTP request via an LRU-backed promise cache.
+ * With `http`: calls the timefield API, which does the same local parse first and
+ * then falls back to `fieldCaps` to detect `@timestamp` on the backing index.
+ * Concurrent requests for the same query share one HTTP request via an LRU-backed
+ * promise cache.
  */
-export async function getESQLTimeFieldFromQuery({
-  query,
-  http,
-}: {
-  query: string;
-  http?: HttpStart;
-}): Promise<string | undefined> {
+export async function getESQLTimeField(
+  query: string,
+  options?: { http?: HttpStart }
+): Promise<string | undefined> {
+  if (!options?.http) {
+    return parseTimeFieldFromESQLQuery(query);
+  }
+
+  const { http } = options;
   const cached = timeFieldCache.get(query);
   if (cached !== undefined) {
     return cached;
   }
-  if (!http) {
-    return undefined;
-  }
+
   const pendingRequest = http
     .post(TIMEFIELD_ROUTE, { body: JSON.stringify({ query }) })
     .then((response) => (response as { timeField?: string } | undefined)?.timeField)
