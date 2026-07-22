@@ -3,10 +3,18 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["../../../../../typings/**/*", "common/**/*", "server/**/*", "test/scout/**/*"],
+  "include": [
+    "../../../../../typings/**/*",
+    "common/**/*",
+    "public/**/*",
+    "server/**/*",
+    "test/scout/**/*"
+  ],
   "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/core",
+    "@kbn/core-http-browser",
+    "@kbn/react-query",
     "@kbn/scout",
     "@kbn/logging",
     "@kbn/config-schema",
@@ -15,6 +23,15 @@
     "@kbn/features-plugin",
     "@kbn/storage-adapter",
     "@kbn/es-errors",
-    "@kbn/management-settings-ids"
+    "@kbn/management-settings-ids",
+    "@kbn/shared-ux-router",
+    "@kbn/shared-ux-page-kibana-template",
+    "@kbn/i18n-react",
+    "@kbn/kibana-react-plugin",
+    "@kbn/esql",
+    "@kbn/es-query",
+    "@kbn/try-in-console",
+    "@kbn/share-plugin",
+    "@kbn/console-plugin"
   ]
 }
