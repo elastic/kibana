@@ -41,6 +41,7 @@ export class DashboardApp {
   private readonly controlsGroup;
   private readonly controlFrame;
   private readonly optionsListControlSearchInput;
+  private readonly tryEsqlLink;
 
   // Add panel flow
   private readonly addTopNavButton;
@@ -93,6 +94,7 @@ export class DashboardApp {
     this.optionsListControlSearchInput = this.page.testSubj.locator(
       'optionsList-control-search-input'
     );
+    this.tryEsqlLink = this.page.testSubj.locator('tryESQLLink');
 
     // Add panel flow
     this.addTopNavButton = this.page.testSubj.locator('dashboardAddTopNavButton');
@@ -151,6 +153,13 @@ export class DashboardApp {
   async openNewDashboard(options?: TimeoutOptions) {
     await this.page.gotoApp('dashboards', { hash: '/create' });
     await expect(this.addTopNavButton).toBeVisible({ timeout: options?.timeout ?? 20_000 });
+  }
+
+  async openTryEsqlDashboard() {
+    await this.goto();
+    await this.page.testSubj.locator('dashboardNoDataPageLoaded').waitFor({ state: 'attached' });
+    await this.tryEsqlLink.click();
+    await this.waitForPanelsToLoad(1);
   }
 
   private getSettingsFlyout() {

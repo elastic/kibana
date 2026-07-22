@@ -47,6 +47,22 @@ export class StreamsApp {
   public readonly queryStreamDeletedSuccessToast;
   public readonly queryStreamCreateErrorToast;
   public readonly fetchMoreMatchingSamplesButton;
+  // Canvas
+  public readonly canvasTab;
+  public readonly canvasZoomControls;
+  public readonly canvasZoomIn;
+  public readonly canvasZoomOut;
+  public readonly canvasFitToScreen;
+  public readonly canvasMinimap;
+  public readonly canvasMinimapCollapse;
+  public readonly canvasMinimapExpand;
+  public readonly canvasToolbar;
+  public readonly canvasUndo;
+  public readonly canvasRedo;
+  public readonly canvasAddSource;
+  public readonly canvasAddDestination;
+  public readonly canvasContextMenu;
+  public readonly canvasContextMenuTidyUp;
 
   constructor(private readonly page: ScoutPage) {
     this.processorFieldComboBox = this.page.components.comboBox(
@@ -100,6 +116,22 @@ export class StreamsApp {
     this.fetchMoreMatchingSamplesButton = this.page.getByTestId(
       'streamsAppFetchMoreMatchingSamplesButton'
     );
+    // Canvas locators
+    this.canvasTab = this.page.testSubj.locator('streamsCanvasTab');
+    this.canvasZoomControls = this.page.testSubj.locator('streamsCanvasZoomControls');
+    this.canvasZoomIn = this.page.testSubj.locator('streamsCanvasZoomIn');
+    this.canvasZoomOut = this.page.testSubj.locator('streamsCanvasZoomOut');
+    this.canvasFitToScreen = this.page.testSubj.locator('streamsCanvasFitToScreen');
+    this.canvasMinimap = this.page.testSubj.locator('streamsCanvasMinimap');
+    this.canvasMinimapCollapse = this.page.testSubj.locator('streamsCanvasMinimapCollapse');
+    this.canvasMinimapExpand = this.page.testSubj.locator('streamsCanvasMinimapExpand');
+    this.canvasToolbar = this.page.testSubj.locator('streamsCanvasToolbar');
+    this.canvasUndo = this.page.testSubj.locator('streamsCanvasUndo');
+    this.canvasRedo = this.page.testSubj.locator('streamsCanvasRedo');
+    this.canvasAddSource = this.page.testSubj.locator('streamsCanvasAddSource');
+    this.canvasAddDestination = this.page.testSubj.locator('streamsCanvasAddDestination');
+    this.canvasContextMenu = this.page.testSubj.locator('streamsCanvasContextMenu');
+    this.canvasContextMenuTidyUp = this.page.testSubj.locator('streamsCanvasContextMenuTidyUp');
   }
 
   async goto() {
@@ -144,6 +176,42 @@ export class StreamsApp {
 
   async gotoCanvasTab(streamName: string) {
     await this.gotoStreamManagementTab(streamName, 'canvas');
+  }
+
+  // Canvas utility methods
+  getCanvasSourceNode(streamName: string) {
+    return this.page.testSubj.locator('streamsCanvasSourceNode').filter({ hasText: streamName });
+  }
+
+  getCanvasDestinationNode(streamName: string) {
+    return this.page.testSubj
+      .locator('streamsCanvasDestinationNode')
+      .filter({ hasText: streamName });
+  }
+
+  getCanvasProcessingGlyph(streamName: string) {
+    return this.getCanvasDestinationNode(streamName).getByTestId('streamsCanvasProcessingGlyph');
+  }
+
+  getCanvasNodeByAriaLabel(ariaLabel: string) {
+    return this.page.locator(`.react-flow__node[aria-label="${ariaLabel}"]`);
+  }
+
+  async rightClickCanvasNode(node: Locator) {
+    await node.click({ button: 'right' });
+  }
+
+  async openCanvasPaneContextMenu() {
+    await this.page
+      .locator('.react-flow__pane')
+      .click({ button: 'right', position: { x: 5, y: 5 } });
+    await expect(this.canvasContextMenu).toBeVisible();
+  }
+
+  async tidyUpCanvasFromPane() {
+    await this.openCanvasPaneContextMenu();
+    await this.canvasContextMenuTidyUp.click();
+    await expect(this.canvasContextMenu).toHaveCount(0);
   }
 
   async clickStreamNameLink(streamName: string) {

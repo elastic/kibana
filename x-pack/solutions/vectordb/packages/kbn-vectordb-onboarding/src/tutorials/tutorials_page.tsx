@@ -27,6 +27,7 @@ import { useTutorialProgress } from './use_tutorial_progress';
 import { ConnectToProject } from '../connection_details/connect_to_project';
 import { useOnboardingCredentials } from '../hooks/use_onboarding_credentials';
 import { OnboardingPaths } from '../onboarding/components/onboarding_paths';
+import { TUTORIALS_PATH } from '../routes';
 
 const ALL_TOPICS_ID = 'all';
 
@@ -84,7 +85,7 @@ export const TutorialsPage = () => {
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="l" />
-        <OnboardingPaths />
+        <OnboardingPaths origin={TUTORIALS_PATH} />
         <EuiHorizontalRule margin="xl" />
         <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
           <EuiFlexItem>
