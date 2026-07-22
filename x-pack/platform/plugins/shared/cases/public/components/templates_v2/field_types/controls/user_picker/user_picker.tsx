@@ -37,6 +37,7 @@ export const UserPicker: React.FC<UserPickerProps> = ({
   type,
   metadata,
   isRequired,
+  isRequiredOnClose,
   onConfirm,
   isSaving,
   isSaveDisabled,
@@ -111,6 +112,7 @@ export const UserPicker: React.FC<UserPickerProps> = ({
               isLoading={isLoading}
               isMultiple={isMultiple}
               isRequired={isRequired ?? false}
+              isRequiredOnClose={isRequiredOnClose ?? false}
               isDisabled={isSaving}
               selectedUsers={selectedUsers}
               suggestedProfiles={suggestedProfiles}
@@ -147,6 +149,7 @@ interface UserPickerComboboxWithProfilesProps {
   isLoading: boolean;
   isMultiple: boolean;
   isRequired: boolean;
+  isRequiredOnClose?: boolean;
   isDisabled?: boolean;
   selectedUsers: SelectedUser[];
   suggestedProfiles: UserProfileWithAvatar[];

@@ -78,8 +78,8 @@ describe('scoreToolUsageContinuation', () => {
 
   it('scores 1 when every cycle called all expected tools (reuses scoreToolUsage per cycle)', () => {
     const result = scoreToolUsageContinuation([
-      { producedSlugs: ['svc__a-1111'], steps: allExpectedTools },
-      { producedSlugs: ['svc__a-1111'], steps: allExpectedTools },
+      { producedEventIds: ['svc__a-1111'], steps: allExpectedTools },
+      { producedEventIds: ['svc__a-1111'], steps: allExpectedTools },
     ]);
     expect(result.score).toBe(1);
   });
@@ -87,8 +87,8 @@ describe('scoreToolUsageContinuation', () => {
   it('averages per-cycle scores rather than treating one bad cycle as a total failure', () => {
     const missingEventSearch = allExpectedTools.filter((s) => s.tool_id !== TOOL_ID_EVENT_SEARCH);
     const result = scoreToolUsageContinuation([
-      { producedSlugs: ['svc__a-1111'], steps: allExpectedTools },
-      { producedSlugs: ['svc__a-1111'], steps: missingEventSearch }, // missing 1 of 3 → 2/3
+      { producedEventIds: ['svc__a-1111'], steps: allExpectedTools },
+      { producedEventIds: ['svc__a-1111'], steps: missingEventSearch }, // missing 1 of 3 → 2/3
     ]);
     expect(result.score).toBeCloseTo((1 + 2 / 3) / 2);
     expect(result.label).toBe('partial');
@@ -96,7 +96,7 @@ describe('scoreToolUsageContinuation', () => {
   });
 
   it('treats a cycle with no recorded steps as having called nothing', () => {
-    const result = scoreToolUsageContinuation([{ producedSlugs: [] }]);
+    const result = scoreToolUsageContinuation([{ producedEventIds: [] }]);
     expect(result.score).toBeLessThan(1);
   });
 });
