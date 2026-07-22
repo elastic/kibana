@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { JsonOutputParser } from '@langchain/core/output_parsers';
+import { JsonOutputParser, OutputParserException } from '@langchain/core/output_parsers';
 import { HumanMessage, AIMessage } from '@langchain/core/messages';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import type { ToolEventEmitter } from '@kbn/agent-builder-server';
@@ -52,7 +52,7 @@ export const createRuleNameAndDescriptionNode = ({
 
       if (isValidOutput(firstAttempt)) {
         events?.reportProgress('Rule name and description generated successfully');
-        return { rule: firstAttempt };
+        return { rule: { name: firstAttempt.name, description: firstAttempt.description } };
       }
 
       events?.reportProgress('Retrying rule name and description generation with feedback...');
@@ -75,7 +75,7 @@ export const createRuleNameAndDescriptionNode = ({
 
       if (isValidOutput(retryAttempt)) {
         events?.reportProgress('Rule name and description generated successfully');
-        return { rule: retryAttempt };
+        return { rule: { name: retryAttempt.name, description: retryAttempt.description } };
       }
 
       events?.reportProgress('Failed to generate valid rule name and description after retry');
@@ -86,6 +86,15 @@ export const createRuleNameAndDescriptionNode = ({
         },
       };
     } catch (e) {
+      if (e instanceof OutputParserException) {
+        events?.reportProgress('Model returned malformed JSON for rule name and description');
+        return {
+          rejectionReason: {
+            code: 'INVALID_OUTPUT' as RejectionCode,
+            message: 'Model returned malformed JSON for rule name and description',
+          },
+        };
+      }
       events?.reportProgress(`Failed to create rule name and description: ${e.message}`);
       return {
         errors: [`Failed to create rule name and description: ${e.message}`],

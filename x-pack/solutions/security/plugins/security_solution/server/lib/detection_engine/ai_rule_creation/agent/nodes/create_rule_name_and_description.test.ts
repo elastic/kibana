@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { OutputParserException } from '@langchain/core/output_parsers';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import type { RuleCreationState } from '../state';
 
@@ -25,6 +26,7 @@ jest.mock('./prompts', () => ({
 }));
 
 jest.mock('@langchain/core/output_parsers', () => ({
+  ...jest.requireActual('@langchain/core/output_parsers'),
   JsonOutputParser: jest.fn().mockImplementation(() => ({
     invoke: mockJsonParserInvoke,
   })),
@@ -136,7 +138,21 @@ describe('createRuleNameAndDescriptionNode', () => {
     expect(mockChainInvoke).not.toHaveBeenCalled();
   });
 
-  it('returns an error when the model chain throws', async () => {
+  it('rejects with INVALID_OUTPUT when the chain throws an OutputParserException', async () => {
+    mockChainInvoke.mockRejectedValue(new OutputParserException('Failed to parse JSON output'));
+
+    const node = createRuleNameAndDescriptionNode({ model: mockModel, events: mockEvents });
+    const result = await node(createState());
+
+    expect(result).toEqual({
+      rejectionReason: {
+        code: 'INVALID_OUTPUT',
+        message: 'Model returned malformed JSON for rule name and description',
+      },
+    });
+  });
+
+  it('returns an error when the model chain throws a non-parse error', async () => {
     mockChainInvoke.mockRejectedValue(new Error('Model unavailable'));
 
     const node = createRuleNameAndDescriptionNode({ model: mockModel, events: mockEvents });

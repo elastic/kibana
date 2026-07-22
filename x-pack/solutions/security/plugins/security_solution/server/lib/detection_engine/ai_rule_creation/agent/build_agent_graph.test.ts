@@ -73,7 +73,8 @@ describe('rejectionNode', () => {
     );
 
     expect(result).toEqual({
-      rejectionMessage: 'I built a rule but it failed validation. Please retry or rephrase.',
+      rejectionMessage:
+        'I built a rule but it failed validation: Generated rule name or description was empty or invalid after retry. Please retry or rephrase.',
     });
   });
 

@@ -127,7 +127,7 @@ export const resolveRejectionRoute = (
 
 export const rejectionNode = async (state: RuleCreationState) => {
   if (!state.rejectionReason) return {};
-  const { code, details } = state.rejectionReason;
+  const { code, message, details } = state.rejectionReason;
   const { userQuery } = state;
 
   switch (code) {
@@ -138,7 +138,7 @@ export const rejectionNode = async (state: RuleCreationState) => {
     case 'INVALID_OUTPUT':
       return {
         rejectionMessage: `I built a rule but it failed validation${
-          details ? `: ${details}` : ''
+          details ? `: ${details}` : message ? `: ${message}` : ''
         }. Please retry or rephrase.`,
       };
     case 'INCOHERENT':
@@ -149,5 +149,7 @@ export const rejectionNode = async (state: RuleCreationState) => {
       return {
         rejectionMessage: `This doesn't look like a security detection scenario. Try describing suspicious behavior, attack patterns, or anomalies.`,
       };
+    default:
+      return {};
   }
 };
