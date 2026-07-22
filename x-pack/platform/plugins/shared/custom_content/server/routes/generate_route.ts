@@ -17,11 +17,13 @@ import { observableIntoEventSourceStream } from '@kbn/sse-utils-server';
 import { ServerSentEventError } from '@kbn/sse-utils';
 import {
   CUSTOM_CONTENT_MAX_PROMPT_LENGTH,
+  CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH,
   CUSTOM_CONTENT_MAX_TEMPLATE_BYTES,
   CUSTOM_CONTENT_ENABLED_FLAG_KEY,
   CUSTOM_CONTENT_GENERATE_ROUTE,
 } from '../../common/constants';
 import type { CustomContentTokenEvent } from '../../common/types';
+import { runEsqlQuery, sanitizeCellValue, type ESQLColumn } from '../utils/esql_query';
 
 const SOCKET_TIMEOUT_MS = 5 * 60 * 1000;
 
@@ -71,6 +73,54 @@ CONTENT RULES:
 - For status indicators: use colored badges/pills with CSS background-color.`;
 }
 
+function formatSampleTable(columns: ESQLColumn[], rows: unknown[][]): string {
+  const header = columns.map((c) => sanitizeCellValue(c.name)).join(' | ');
+  const separator = columns.map(() => '---').join(' | ');
+  const dataRows = rows.map((row) => row.map(sanitizeCellValue).join(' | ')).join('\n');
+  return `${header}\n${separator}\n${dataRows}`;
+}
+
+function buildSystemPromptTemplate(colorMode: ColorMode): string {
+  return `You are a data visualization assistant embedded in a Kibana dashboard panel.
+
+Generate a reusable HTML template using Liquid template syntax. The template is filled with real ES|QL query results at render time — do NOT embed literal data values.
+
+DATA MODEL available in the template:
+- rows: array of row objects. Access a column with its EXACT name (as given in the schema below) using bracket notation: row["exact column name"].
+  Each column access resolves to an object: .value is the raw cell value, .pct is that column's value as a percentage (0–100) of its max across all rows (numeric columns only).
+- max: object of column max values, also keyed by exact column name. e.g. max["total_revenue"]
+
+LIQUID SYNTAX:
+- Loop rows:     {% for row in rows %}...{% endfor %}
+- Empty state:   {% if rows.size == 0 %}...{% endif %}
+- Conditionals:  {% if row["revenue"].value >= 10000 %}...{% elsif row["revenue"].value >= 5000 %}...{% else %}...{% endif %}
+- Output value:  {{ row["column name"].value }}
+- Bar width:     <div style="width: {{ row["column name"].pct }}%; ..."></div>
+- Filters:       {{ row["column name"].value | round: 2 }}
+
+OUTPUT RULES:
+- Output ONLY the HTML template. No markdown fences, no explanation.
+- All CSS inline in <style> tags.
+- ABSOLUTE, NON-NEGOTIABLE RULE: this template renders inside a sandboxed iframe with scripting disabled. ANY JavaScript you write — a <script> tag, an inline event handler (onclick, onmouseover, ...), or building any part of the chart's markup at runtime via document.getElementById/innerHTML/addEventListener/JSON.parse/fetch — will NEVER RUN. It is not slower, not degraded, not partially working: it is completely dead code, and everything that depends on it (including the chart itself, if you generate its SVG/HTML from inside a <script>) will render as a BLANK PANEL. If you catch yourself writing a <script> tag for ANY reason — including to aggregate, group, sort, or otherwise compute over \`rows\` before drawing it — stop and do it differently instead:
+  - Aggregation/grouping/sorting: this template only receives \`rows\` and \`max\` as given — it cannot re-run the query. If the data needs grouping that isn't already reflected in \`rows\`, that has to happen upstream in the ES|QL query (STATS ... BY ...), not in the template.
+  - Any markup you want on screen must be written directly as static HTML/SVG, generated via Liquid \`{% for row in rows %}\` loops with \`{{ }}\`/filters — never assembled as a string in JavaScript and injected via innerHTML.
+  - Interactivity (tooltips, highlighting on hover): CSS \`:hover\` only — see below.
+- If the prompt asks for hover interactivity (e.g. "show a tooltip with the value on hover"), this IS possible with CSS alone — do NOT skip it and do NOT reach for JavaScript. Give the element a nested tooltip element that is invisible by default (\`opacity: 0\`) and reveal it with a \`:hover\` rule, e.g. \`.bar:hover .tooltip { opacity: 1; }\`.
+- No external resources (no CDN, no Google Fonts, no image URLs). Do NOT use <img> tags with an external \`src\` — the panel's CSP blocks outbound network requests, so it will silently fail to render. For an image, icon, or illustration, draw it with inline SVG, pure CSS shapes, or a Unicode emoji/symbol character instead.
+- For charts use pure CSS or inline SVG.
+
+${colorSection(colorMode)}
+
+CONTENT RULES:
+- Pick the best visualization for the schema and prompt. Full panel width; height fits content naturally. No title.
+- Status board example:
+  {% for row in rows %}
+  <div class="card {% if row["revenue"].value >= 10000 %}card-green{% elsif row["revenue"].value >= 5000 %}card-yellow{% else %}card-red{% endif %}">
+    <span>{{ row["category"].value }}</span><span>{{ row["revenue"].value }}</span>
+  </div>
+  {% endfor %}`;
+}
+
 interface StartDeps {
   inference: InferenceServerStart;
 }
@@ -92,10 +142,16 @@ export function registerGenerateRoute(
       },
       validate: {
         body: schema.object({
-          prompt: schema.string({ minLength: 1, maxLength: CUSTOM_CONTENT_MAX_PROMPT_LENGTH }),
+          prompt: schema.maybe(
+            schema.string({ minLength: 1, maxLength: CUSTOM_CONTENT_MAX_PROMPT_LENGTH })
+          ),
           colorMode: schema.oneOf([schema.literal('LIGHT'), schema.literal('DARK')], {
             defaultValue: 'LIGHT',
           }),
+          esqlQuery: schema.maybe(
+            schema.string({ maxLength: CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH })
+          ),
+          timeRange: schema.maybe(schema.object({ from: schema.string(), to: schema.string() })),
         }),
       },
     },
@@ -106,11 +162,55 @@ export function registerGenerateRoute(
         return response.notFound();
       }
 
-      const { prompt, colorMode } = request.body;
+      const { prompt, colorMode, esqlQuery, timeRange } = request.body;
+
+      if (!prompt && !esqlQuery) {
+        return response.badRequest({
+          body: i18n.translate('xpack.customContent.generateRoute.missingInputError', {
+            defaultMessage: 'Either prompt or esqlQuery is required',
+          }),
+        });
+      }
 
       const defaultConnector = await inference.getDefaultConnector(request).catch(() => null);
       const connector =
         defaultConnector ?? (await inference.getConnectorList(request).catch(() => []))[0] ?? null;
+
+      let esqlColumns: ESQLColumn[] = [];
+      let esqlValues: unknown[][] = [];
+      if (esqlQuery) {
+        try {
+          const esCore = await context.core;
+          const esClient = esCore.elasticsearch.client.asCurrentUser;
+          const result = await runEsqlQuery(esClient, esqlQuery, timeRange);
+          esqlColumns = result.columns;
+          esqlValues = result.values;
+        } catch {
+          // Non-fatal — generate template from prompt + partial schema.
+        }
+      }
+
+      let systemPrompt: string;
+      let userContent: string;
+
+      if (esqlQuery) {
+        systemPrompt = buildSystemPromptTemplate(colorMode);
+
+        if (esqlColumns.length > 0) {
+          // Column names must NOT be sanitized here — they must match the exact keys used in fillTemplate.
+          const schemaLines = esqlColumns.map((c) => `  - ${c.name} (${c.type})`).join('\n');
+          const sampleSection =
+            esqlValues.length > 0
+              ? `\n\nSample rows:\n${formatSampleTable(esqlColumns, esqlValues)}`
+              : '\n\nNote: no rows available for the current time range.';
+          userContent = `${prompt}\n\nData schema:\n${schemaLines}${sampleSection}\n\nGenerate an HTML template that accesses each column via bracket notation using its exact name, e.g. row["${esqlColumns[0].name}"].value.`;
+        } else {
+          userContent = `${prompt}\n\nNote: schema unavailable. Generate a suitable template based on the prompt.`;
+        }
+      } else {
+        systemPrompt = buildSystemPromptStatic(colorMode);
+        userContent = prompt!;
+      }
 
       const abortController = new AbortController();
       const abortSub = request.events.aborted$.subscribe(() => abortController.abort());
@@ -130,7 +230,6 @@ export function registerGenerateRoute(
         }
 
         const { connectorId } = connector;
-        const systemPrompt = buildSystemPromptStatic(colorMode);
         const client = inference.getClient({ request });
 
         let accHtmlBytes = 0;
@@ -138,7 +237,7 @@ export function registerGenerateRoute(
         const inferenceEvents$ = client.chatComplete({
           connectorId,
           system: systemPrompt,
-          messages: [{ role: MessageRole.User, content: prompt }],
+          messages: [{ role: MessageRole.User, content: userContent }],
           stream: true,
           abortSignal: abortController.signal,
         });

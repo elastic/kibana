@@ -15,23 +15,42 @@ jest.mock('dompurify', () => ({
 
 jest.mock('../services');
 jest.mock('../utils/stream_generate');
+jest.mock('../utils/fetch_esql_data');
+jest.mock('../utils/template_fill', () => ({
+  ...jest.requireActual('../utils/template_fill'),
+  fillTemplate: jest.fn(),
+}));
 
 import type { HttpStart } from '@kbn/core/public';
 import { getServices } from '../services';
 import { streamGenerate } from '../utils/stream_generate';
+import { fetchEsqlData } from '../utils/fetch_esql_data';
+import { fillTemplate } from '../utils/template_fill';
 import { useCustomContentHtml } from './use_custom_content_html';
+
+const mockFetchEsqlData = fetchEsqlData as jest.MockedFunction<typeof fetchEsqlData>;
+const mockFillTemplate = fillTemplate as jest.MockedFunction<typeof fillTemplate>;
 
 const mockHttp = {} as unknown as HttpStart;
 
+const ESQL_DATA = {
+  columns: [{ name: 'revenue', type: 'double' }],
+  values: [[42000]],
+};
+
 beforeEach(() => {
   jest.clearAllMocks();
-  (getServices as jest.Mock).mockReturnValue({ core: { http: mockHttp } });
+  (getServices as jest.Mock).mockReturnValue({ core: { http: mockHttp }, search: jest.fn() });
   (streamGenerate as jest.Mock).mockResolvedValue(undefined);
+  mockFetchEsqlData.mockResolvedValue(ESQL_DATA as any);
+  mockFillTemplate.mockReturnValue('<div>rendered</div>');
 });
 
 const baseParams = {
   embeddableId: 'panel-1',
   prompt: 'Show revenue by category',
+  esqlQuery: undefined,
+  timeRange: undefined,
   generationVersion: 0,
   savedTemplate: undefined,
   colorMode: 'LIGHT' as const,
@@ -133,6 +152,105 @@ describe('useCustomContentHtml', () => {
       rerender({ version: 1 });
 
       await waitFor(() => expect(result.current.isAiUnavailable).toBe(false));
+    });
+  });
+
+  describe('fast path — ES|QL panel with stored template', () => {
+    const esqlParams = {
+      ...baseParams,
+      esqlQuery: 'FROM logs | STATS revenue = SUM(amount)',
+      savedTemplate: '{% for row in rows %}{{ row["revenue"].value }}{% endfor %}',
+    };
+
+    it('fetches live data and fills the template without calling the LLM', async () => {
+      const { result } = renderHook(() => useCustomContentHtml(esqlParams));
+
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+      expect(mockFetchEsqlData).toHaveBeenCalledTimes(1);
+      expect(mockFillTemplate).toHaveBeenCalledWith(
+        esqlParams.savedTemplate,
+        ESQL_DATA.columns,
+        ESQL_DATA.values
+      );
+      expect(result.current.html).toBe('<div>rendered</div>');
+      expect(streamGenerate).not.toHaveBeenCalled();
+    });
+
+    it('surfaces a fetch error without calling the LLM', async () => {
+      mockFetchEsqlData.mockRejectedValue(new Error('index not found'));
+
+      const { result } = renderHook(() => useCustomContentHtml(esqlParams));
+
+      await waitFor(() => expect(result.current.error).toBe('index not found'));
+      expect(result.current.isLoading).toBe(false);
+      expect(streamGenerate).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('slow path — ES|QL panel, LLM + data fetch in parallel', () => {
+    const LIQUID_TEMPLATE =
+      '<html><body>{% for row in rows %}{{ row["revenue"].value }}{% endfor %}</body></html>';
+    const esqlParams = {
+      ...baseParams,
+      esqlQuery: 'FROM logs | STATS revenue = SUM(amount)',
+    };
+
+    it('calls both streamGenerate and fetchEsqlData, renders via fillTemplate, saves the Liquid template', async () => {
+      const onTemplateChange = jest.fn();
+      (streamGenerate as jest.Mock).mockImplementation(
+        (_http: unknown, _params: unknown, onToken: (t: string) => void) => {
+          onToken(LIQUID_TEMPLATE);
+          return Promise.resolve();
+        }
+      );
+
+      const { result } = renderHook(() =>
+        useCustomContentHtml({ ...esqlParams, onTemplateChange })
+      );
+
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+      expect(streamGenerate).toHaveBeenCalledTimes(1);
+      expect(mockFetchEsqlData).toHaveBeenCalledTimes(1);
+      expect(mockFillTemplate).toHaveBeenCalledWith(
+        LIQUID_TEMPLATE,
+        ESQL_DATA.columns,
+        ESQL_DATA.values
+      );
+      expect(result.current.html).toBe('<div>rendered</div>');
+      // Saves the raw Liquid template, not the rendered HTML
+      expect(onTemplateChange).toHaveBeenCalledWith(LIQUID_TEMPLATE);
+    });
+
+    it('passes esqlQuery and timeRange to streamGenerate', async () => {
+      const timeRange = { from: 'now-7d', to: 'now' };
+      (streamGenerate as jest.Mock).mockImplementation(
+        (_http: unknown, _params: unknown, onToken: (t: string) => void) => {
+          onToken(LIQUID_TEMPLATE);
+          return Promise.resolve();
+        }
+      );
+
+      renderHook(() => useCustomContentHtml({ ...esqlParams, timeRange }));
+
+      await waitFor(() => expect(streamGenerate).toHaveBeenCalledTimes(1));
+      expect(streamGenerate).toHaveBeenCalledWith(
+        mockHttp,
+        expect.objectContaining({ esqlQuery: esqlParams.esqlQuery, timeRange }),
+        expect.any(Function),
+        expect.any(AbortSignal)
+      );
+    });
+
+    it('surfaces a data fetch error and does not render', async () => {
+      mockFetchEsqlData.mockRejectedValue(new Error('query failed'));
+
+      const { result } = renderHook(() => useCustomContentHtml(esqlParams));
+
+      await waitFor(() => expect(result.current.error).toBe('query failed'));
+      expect(result.current.isLoading).toBe(false);
+      expect(mockFillTemplate).not.toHaveBeenCalled();
     });
   });
 

@@ -7,14 +7,17 @@
 
 import { defer } from 'rxjs';
 import type { HttpStart } from '@kbn/core/public';
+import type { TimeRange } from '@kbn/es-query';
 import { httpResponseIntoObservable } from '@kbn/sse-utils-client';
 import { ServerSentEventError } from '@kbn/sse-utils';
 import type { CustomContentTokenEvent } from '../../common/types';
 import { CUSTOM_CONTENT_GENERATE_ROUTE } from '../../common/constants';
 
 interface GenerateParams {
-  prompt: string;
+  prompt?: string;
   colorMode: 'LIGHT' | 'DARK';
+  esqlQuery?: string;
+  timeRange?: TimeRange;
 }
 
 export function streamGenerate(

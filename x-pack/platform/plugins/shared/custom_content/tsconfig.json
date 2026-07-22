@@ -17,7 +17,13 @@
     "@kbn/logging",
     "@kbn/sse-utils",
     "@kbn/sse-utils-server",
-    "@kbn/sse-utils-client"
+    "@kbn/sse-utils-client",
+    "@kbn/data-plugin",
+    "@kbn/esql-utils",
+    "@kbn/search-types",
+    "@kbn/es-query",
+    "@kbn/es-types",
+    "@kbn/datemath"
   ],
   "exclude": ["target/**/*"]
 }
