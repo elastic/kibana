@@ -49,4 +49,26 @@ export {
   SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_TRIAGE_WORKFLOW_ID,
 } from './execute_managed_workflow';
-export { readDetections, readLatestSignificantEvents } from './read_pipeline_outputs';
+export {
+  readDetections,
+  readLatestDiscoveries,
+  readLatestSignificantEvents,
+  readSignalCountsByRule,
+} from './read_pipeline_outputs';
+
+export type { BaselineSliceReplayResult } from './replay_baseline_slice';
+export { replayBaselineSliceIntoManagedStream } from './replay_baseline_slice';
+export type { TailStreamStats } from './stream_incident_tail';
+export { streamIncidentTail } from './stream_incident_tail';
+export { deleteAllSignalRules } from './delete_signal_rules';
+export type { GeneratedRuleBackedQuery, LiveOnboardingResult } from './run_live_onboarding';
+export { runLiveOnboarding, readGeneratedRuleBackedQueries } from './run_live_onboarding';
+export type { LiveStageTokenUsage } from './live_token_usage';
+export { addStageTokenUsage, emptyStageTokenUsage } from './live_token_usage';
+export {
+  pinInferenceFeaturesToConnector,
+  clearInferenceFeaturePins,
+} from './pin_inference_features';
+export { runOrchestratorToCompletion } from './run_orchestrator';
+export type { AgentConversationData } from './fetch_agent_conversations';
+export { fetchAgentConversationData } from './fetch_agent_conversations';

@@ -165,6 +165,24 @@ export interface E2EExpectedEvent {
   statuses: SignificantEventStatus[];
 }
 
+/**
+ * Configuration for the fully live e2e spec (`e2e_live.spec.ts`): no seeded queries and no
+ * synthetic signals — LLM onboarding generates the queries and real alerting rules fire while
+ * the incident tail is streamed at 1x wall clock.
+ */
+export interface E2ELiveConfig {
+  /**
+   * Minutes before the snapshot's max `@timestamp` where the incident begins. Docs older than
+   * this cut are bulk-replayed as the baseline (onboarding runs on them); newer docs are the
+   * streamed tail.
+   */
+  incident_onset_offset_minutes: number;
+  /** Cap on the streamed tail duration (wall-clock minutes). Defaults to 15. */
+  max_tail_minutes?: number;
+  /** Live-mode LLM criteria judged over the full funnel output. */
+  criteria: SamplingCriterion[];
+}
+
 export interface E2EScenario {
   input: {
     scenario_id: string;
@@ -172,6 +190,8 @@ export interface E2EScenario {
   };
   /** Rule-backed KI queries seeded into the live KI stream; signals are synthesized from their ES|QL. */
   canonical_queries: E2ECanonicalQuery[];
+  /** Present when the scenario also runs in the fully live e2e spec. */
+  live?: E2ELiveConfig;
   output: {
     criteria: SamplingCriterion[];
     /** Rules that MUST produce at least one detection (recall side of the detection checkpoint). */
