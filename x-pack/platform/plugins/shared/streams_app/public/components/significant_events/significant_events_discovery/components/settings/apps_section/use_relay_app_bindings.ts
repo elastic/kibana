@@ -46,7 +46,7 @@ export function useRelayAppBindings(enabled: boolean): UseRelayAppBindings {
   });
 
   return {
-    bindings: (query.data?.bindings ?? []).filter((b) => !b.isDefault),
+    bindings: query.data?.bindings ?? [],
     isLoading: query.isLoading && enabled,
   };
 }

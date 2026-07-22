@@ -60,11 +60,11 @@ describe('useRelayAppBindings', () => {
     expect(httpGet).not.toHaveBeenCalled();
   });
 
-  it('fetches the bindings route when enabled is true, filtering out the DEFAULT binding', async () => {
+  it('fetches the bindings route when enabled is true', async () => {
     const response: SlackAppBindingsResponse = {
       bindings: [
-        { isDefault: true, status: 'bound_to_self' },
         { channel: 'C123', displayName: 'general', status: 'bound_to_self' },
+        { channel: 'C456', status: 'bound_to_other_target' },
       ],
     };
     httpGet.mockResolvedValue(response);
@@ -78,6 +78,7 @@ describe('useRelayAppBindings', () => {
     );
     expect(result.current.bindings).toEqual([
       { channel: 'C123', displayName: 'general', status: 'bound_to_self' },
+      { channel: 'C456', status: 'bound_to_other_target' },
     ]);
     expect(result.current.isLoading).toBe(false);
   });

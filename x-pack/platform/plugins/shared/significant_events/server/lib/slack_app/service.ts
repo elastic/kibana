@@ -283,8 +283,9 @@ export class SlackAppService {
       return { bindings: [] };
     }
 
-    // Fetch bound entries (DEFAULT + SUB) and the bot's member channel list concurrently.
-    // The channels call is best-effort: failure degrades to showing only bound entries.
+    // Fetch the SUB bound entries and the bot's member channel list concurrently.
+    // The channels call is best-effort: failure degrades to showing only bound entries
+    // (without their human-readable channel names).
     const [bindingsResult, channelsResult] = await Promise.allSettled([
       relayClient.listBindings(connection.tenantKey),
       relayClient.listChannels(connection.tenantKey),
@@ -306,25 +307,28 @@ export class SlackAppService {
       );
     }
     const memberChannels = channelsResult.status === 'fulfilled' ? channelsResult.value : [];
+    // The bindings endpoint no longer enriches entries with a channel name, so join bound
+    // channel ids against the member-channels list to recover human-readable names.
+    const channelNamesById = new Map(memberChannels.map((ch) => [ch.id, ch.name]));
 
     const bindings: SlackAppBindingsResponse['bindings'] = [];
     // Track channel ids that already have an explicit binding so we don't duplicate them.
     const boundChannelIds = new Set<string>();
 
     for (const entry of rawBindings) {
-      if (entry.scope_type === 'DEFAULT') {
-        bindings.push({ isDefault: true, status: entry.status });
-      } else if (entry.scope_id != null) {
-        const binding: SlackAppBindingsResponse['bindings'][number] = {
-          channel: entry.scope_id,
-          status: entry.status,
-        };
-        if (entry.displayName != null) {
-          binding.displayName = entry.displayName;
-        }
-        bindings.push(binding);
-        boundChannelIds.add(entry.scope_id);
+      if (entry.scope_id == null) {
+        continue;
       }
+      const binding: SlackAppBindingsResponse['bindings'][number] = {
+        channel: entry.scope_id,
+        status: entry.status,
+      };
+      const displayName = channelNamesById.get(entry.scope_id);
+      if (displayName != null) {
+        binding.displayName = displayName;
+      }
+      bindings.push(binding);
+      boundChannelIds.add(entry.scope_id);
     }
 
     // Synthesize not_bound entries from the channels the bot is a member of that are

@@ -100,16 +100,15 @@ describe('RelayClient', () => {
   });
 
   describe('listBindings', () => {
-    it('GETs the per-tenant bindings endpoint and maps display_name to displayName', async () => {
+    it('GETs the per-tenant bindings endpoint and maps SUB entries', async () => {
       requestMock.mockResolvedValue({
         status: 200,
         data: {
           bindings: [
-            { scope_type: 'DEFAULT', status: 'bound_to_self' },
             {
               scope_type: 'SUB',
               scope_id: 'C123',
-              display_name: 'general',
+              target_ref: 'target-1',
               status: 'bound_to_self',
             },
             { scope_type: 'SUB', scope_id: 'C456', status: 'bound_to_other_target' },
@@ -118,17 +117,88 @@ describe('RelayClient', () => {
       } as never);
 
       await expect(createClient().listBindings('team-A')).resolves.toEqual([
-        { scope_type: 'DEFAULT', status: 'bound_to_self' },
-        { scope_type: 'SUB', scope_id: 'C123', displayName: 'general', status: 'bound_to_self' },
-        { scope_type: 'SUB', scope_id: 'C456', status: 'bound_to_other_target' },
+        {
+          scope_type: 'SUB',
+          scope_id: 'C123',
+          target_ref: 'target-1',
+          status: 'bound_to_self',
+        },
+        {
+          scope_type: 'SUB',
+          scope_id: 'C456',
+          target_ref: undefined,
+          status: 'bound_to_other_target',
+        },
       ]);
 
       expect(requestMock).toHaveBeenCalledWith(
         expect.objectContaining({
-          url: 'https://relay.test/v1/slack/tenants/team-A/bindings',
+          url: 'https://relay.test/v1/slack/tenants/team-A/bindings?limit=200',
           method: 'get',
         })
       );
+    });
+
+    it('follows next_cursor to aggregate every page', async () => {
+      requestMock
+        .mockResolvedValueOnce({
+          status: 200,
+          data: {
+            bindings: [{ scope_type: 'SUB', scope_id: 'C123', status: 'bound_to_self' }],
+            next_cursor: 'cursor-1',
+          },
+        } as never)
+        .mockResolvedValueOnce({
+          status: 200,
+          data: {
+            bindings: [{ scope_type: 'SUB', scope_id: 'C456', status: 'bound_to_other_target' }],
+          },
+        } as never);
+
+      await expect(createClient().listBindings('team-A')).resolves.toEqual([
+        { scope_type: 'SUB', scope_id: 'C123', target_ref: undefined, status: 'bound_to_self' },
+        {
+          scope_type: 'SUB',
+          scope_id: 'C456',
+          target_ref: undefined,
+          status: 'bound_to_other_target',
+        },
+      ]);
+
+      expect(requestMock).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({
+          url: 'https://relay.test/v1/slack/tenants/team-A/bindings?limit=200',
+        })
+      );
+      expect(requestMock).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({
+          url: 'https://relay.test/v1/slack/tenants/team-A/bindings?limit=200&cursor=cursor-1',
+        })
+      );
+    });
+
+    it('stops paginating and warns when the Relay repeats a cursor', async () => {
+      const warn = jest.fn();
+      const client = new RelayClient({
+        baseUrl: 'https://relay.test',
+        configurationUtilities,
+        logger: { warn } as unknown as Logger,
+      });
+      requestMock.mockResolvedValue({
+        status: 200,
+        data: {
+          bindings: [{ scope_type: 'SUB', scope_id: 'C123', status: 'bound_to_self' }],
+          next_cursor: 'loop',
+        },
+      } as never);
+
+      await client.listBindings('team-A');
+
+      // First page (no cursor) sees `loop`; second page repeats `loop` and halts.
+      expect(requestMock).toHaveBeenCalledTimes(2);
+      expect(warn).toHaveBeenCalledTimes(1);
     });
 
     it('encodes special characters in the tenantKey path segment', async () => {
@@ -138,7 +208,7 @@ describe('RelayClient', () => {
 
       expect(requestMock).toHaveBeenCalledWith(
         expect.objectContaining({
-          url: 'https://relay.test/v1/slack/tenants/team%2Fwith%20spaces/bindings',
+          url: 'https://relay.test/v1/slack/tenants/team%2Fwith%20spaces/bindings?limit=200',
         })
       );
     });
@@ -168,8 +238,32 @@ describe('RelayClient', () => {
 
       expect(requestMock).toHaveBeenCalledWith(
         expect.objectContaining({
-          url: 'https://relay.test/v1/slack/tenants/team-A/channels',
+          url: 'https://relay.test/v1/slack/tenants/team-A/channels?limit=200',
           method: 'get',
+        })
+      );
+    });
+
+    it('follows next_cursor to aggregate every page', async () => {
+      requestMock
+        .mockResolvedValueOnce({
+          status: 200,
+          data: { channels: [{ id: 'C111', name: 'general' }], next_cursor: 'cursor-1' },
+        } as never)
+        .mockResolvedValueOnce({
+          status: 200,
+          data: { channels: [{ id: 'C222', name: 'alerts' }] },
+        } as never);
+
+      await expect(createClient().listChannels('team-A')).resolves.toEqual([
+        { id: 'C111', name: 'general' },
+        { id: 'C222', name: 'alerts' },
+      ]);
+
+      expect(requestMock).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({
+          url: 'https://relay.test/v1/slack/tenants/team-A/channels?limit=200&cursor=cursor-1',
         })
       );
     });
@@ -194,7 +288,7 @@ describe('RelayClient', () => {
   });
 
   describe('bind', () => {
-    it('POSTs to the per-channel bind endpoint', async () => {
+    it('PUTs to the per-channel bind endpoint', async () => {
       requestMock.mockResolvedValue({ status: 200, data: { status: 'bound' } } as never);
 
       await createClient().bind('team-A', 'C123');
@@ -202,7 +296,7 @@ describe('RelayClient', () => {
       expect(requestMock).toHaveBeenCalledWith(
         expect.objectContaining({
           url: 'https://relay.test/v1/slack/tenants/team-A/bindings/C123/bind',
-          method: 'post',
+          method: 'put',
         })
       );
     });
@@ -221,7 +315,7 @@ describe('RelayClient', () => {
   });
 
   describe('unbindChannel', () => {
-    it('POSTs to the per-channel unbind endpoint', async () => {
+    it('DELETEs the per-channel unbind endpoint', async () => {
       requestMock.mockResolvedValue({ status: 200, data: { status: 'unbound' } } as never);
 
       await createClient().unbindChannel('team-A', 'C123');
@@ -229,7 +323,7 @@ describe('RelayClient', () => {
       expect(requestMock).toHaveBeenCalledWith(
         expect.objectContaining({
           url: 'https://relay.test/v1/slack/tenants/team-A/bindings/C123/unbind',
-          method: 'post',
+          method: 'delete',
         })
       );
     });

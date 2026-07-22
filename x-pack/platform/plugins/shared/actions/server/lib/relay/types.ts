@@ -28,12 +28,15 @@ export interface RelayCallbackResponse {
 
 /** A single entry from the Relay bindings list (`GET /v1/slack/tenants/:tenantKey/bindings`). */
 export interface RelayBinding {
-  /** Binding scope type from the Relay: `"DEFAULT"` for workspace-wide or `"SUB"` for channel-specific. */
+  /** Binding scope type from the Relay: always `"SUB"` for channel-specific bindings. */
   scope_type?: string;
   /** Channel id — present for `SUB`-scope entries. */
   scope_id?: string;
-  /** Human-readable channel name — present when the Relay's channel enrichment is wired in. */
-  displayName?: string;
+  /**
+   * Target ref of the owning deployment — only returned by the Relay for the caller's own
+   * bindings (i.e. when `status` is `bound_to_self`).
+   */
+  target_ref?: string;
   /**
    * Caller-relative binding status from the Relay wire contract.
    * `not_bound` is NOT emitted by this endpoint — that status is derived on the
@@ -57,10 +60,10 @@ export interface RelayClientContract {
   /** Unbind a single workspace binding identified by its tenant key. */
   unbind(tenantKey: string): Promise<void>;
   /**
-   * List the bindings for a given Slack workspace (tenant), as seen from this deployment's
-   * perspective. Filters to DEFAULT + SUB scopes; status is caller-relative (`bound_to_self`
-   * or `bound_to_other_target`). `not_bound` entries are NOT in this list — derive them by
-   * joining against `listChannels`.
+   * List the SUB (channel-scoped) bindings for a given Slack workspace (tenant), across all
+   * deployments, with caller-relative status (`bound_to_self` or `bound_to_other_target`).
+   * Walks every page of the cursor-paginated endpoint. `not_bound` entries are NOT in this
+   * list — derive them by joining against `listChannels`.
    */
   listBindings(tenantKey: string): Promise<RelayBinding[]>;
   /**

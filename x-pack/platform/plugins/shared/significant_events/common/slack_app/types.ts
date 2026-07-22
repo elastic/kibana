@@ -40,7 +40,7 @@ export interface SlackAppDisconnectResponse {
 
 /**
  * Binding status as reported by the Relay:
- * - `bound_to_self` — this channel (or default route) is already claimed by this deployment.
+ * - `bound_to_self` — this channel is already claimed by this deployment.
  * - `bound_to_other_target` — claimed by a different deployment; no action possible.
  * - `not_bound` — the bot is a member but the channel is unclaimed; can be bound.
  */
@@ -48,18 +48,16 @@ export type SlackChannelBindingStatus = 'bound_to_self' | 'bound_to_other_target
 
 /**
  * A single binding entry for a connected workspace, as returned by the bindings route.
- * `isDefault` = the workspace-wide DEFAULT route (rendered as `*`).
  * `channel` = Slack channel id for a SUB-scope binding; `displayName` = channel name when available.
- * `status` reflects the relay's binding state for this entry.
+ * `bound_to_self` / `bound_to_other_target` come from the Relay; `not_bound` is derived on the
+ * Kibana side by joining member channels against the bound entries.
  */
 export interface SlackChannelBinding {
-  /** True for the workspace-wide default binding (`DEFAULT` scope, rendered as `*`). */
-  isDefault?: boolean;
   /** Slack channel id for a channel-specific binding (`SUB` scope or `not_bound`). */
   channel?: string;
-  /** Human-readable channel name; only present when the Relay's enrichment is configured. */
+  /** Human-readable channel name; present when derived from the bot's member-channel list. */
   displayName?: string;
-  /** Relay-reported binding status for this entry. */
+  /** Binding status for this entry (Relay-reported for bound entries, derived for `not_bound`). */
   status: SlackChannelBindingStatus;
 }
 
