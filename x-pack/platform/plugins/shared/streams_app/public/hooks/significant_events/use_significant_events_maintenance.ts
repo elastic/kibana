@@ -49,11 +49,6 @@ const RESUME_WARNINGS_TOAST_TITLE = i18n.translate(
   { defaultMessage: 'Resumed Significant Events activity with warnings' }
 );
 
-const RESUME_STILL_PAUSED_TOAST_TITLE = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.maintenance.resumeStillPausedToastTitle',
-  { defaultMessage: 'Resume did not complete; Significant Events activity is still paused' }
-);
-
 const partialFailuresText = (count: number) =>
   i18n.translate('xpack.streams.significantEventsDiscovery.maintenance.partialFailuresText', {
     defaultMessage:
@@ -158,14 +153,9 @@ export const useSignificantEventsMaintenanceActions = () => {
         signal: null,
       }),
     onSuccess: (summary) => {
-      if (summary.state !== 'enabled') {
-        toasts.addWarning({
-          title: RESUME_STILL_PAUSED_TOAST_TITLE,
-          ...(summary.partialFailures.length > 0
-            ? { text: partialFailuresText(summary.partialFailures.length) }
-            : {}),
-        });
-      } else if (summary.partialFailures.length > 0) {
+      // Resume always flips the control plane to enabled (or throws). Partial
+      // re-enable failures are warnings, not a lingering paused state.
+      if (summary.partialFailures.length > 0) {
         toasts.addWarning({
           title: RESUME_WARNINGS_TOAST_TITLE,
           text: partialFailuresText(summary.partialFailures.length),

@@ -32,9 +32,8 @@ function PausedCallout({ status }: { status: SignificantEventsMaintenanceStatus 
   const { updatedBy, lastSummary } = status;
   const workflowsDisabled = lastSummary?.workflowsDisabled ?? 0;
   const rulesDisabled = lastSummary?.rulesDisabled ?? 0;
-  const executionsCancelled = lastSummary?.executionsCancelled ?? 0;
   const failureCount = lastSummary?.partialFailures.length ?? 0;
-  const hasCounts = workflowsDisabled > 0 || rulesDisabled > 0 || executionsCancelled > 0;
+  const hasCounts = workflowsDisabled > 0 || rulesDisabled > 0;
   return (
     <EuiCallOut
       announceOnMount
@@ -60,8 +59,8 @@ function PausedCallout({ status }: { status: SignificantEventsMaintenanceStatus 
         <p>
           <FormattedMessage
             id="xpack.streams.significantEventsDiscovery.settings.maintenance.pausedSummary"
-            defaultMessage="Disabled {workflowsDisabled} workflow(s) and {rulesDisabled} rule(s), cancelled {executionsCancelled} in-flight execution(s)."
-            values={{ workflowsDisabled, rulesDisabled, executionsCancelled }}
+            defaultMessage="Disabled {workflowsDisabled} workflow(s) and {rulesDisabled} rule(s)."
+            values={{ workflowsDisabled, rulesDisabled }}
           />
         </p>
       )}

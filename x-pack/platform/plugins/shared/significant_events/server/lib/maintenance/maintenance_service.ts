@@ -8,7 +8,7 @@
 import type { KibanaRequest, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
-import { NonTerminalExecutionStatuses } from '@kbn/workflows';
+import { WorkflowNotFoundError } from '@kbn/workflows/common/errors';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { ALERTING_V2_ERROR_CODES, type RulesClientApi } from '@kbn/alerting-v2-plugin/server';
 import type { StreamsServer } from '@kbn/streams-plugin/server/types';
@@ -40,10 +40,6 @@ import {
 } from './managed_workflow_targets';
 
 type ManagementApi = WorkflowsServerPluginSetup['management'];
-
-const RUNNING_EXECUTIONS_PAGE_SIZE = 1000;
-/** Caps cancel rounds that re-query page 1 after each batch (status lag). */
-const MAX_CANCEL_ROUNDS = 50;
 
 /**
  * Pauses and resumes all Significant Events background activity from a single
@@ -295,132 +291,23 @@ export const createSignificantEventsMaintenanceService = ({
     }
   };
 
+  /**
+   * Best-effort cancel of every non-terminal execution for a workflow target.
+   * Delegates paging/cancel to workflows management; missing workflows are a no-op.
+   */
   const cancelTargetExecutions = async (
     mgmt: ManagementApi,
     { id, spaceId }: MaintenanceWorkflowTarget,
     request: KibanaRequest,
     failures: SignificantEventsMaintenanceFailure[]
-  ): Promise<number> => {
+  ): Promise<void> => {
     try {
-      let cancelled = 0;
-      const attemptedIds = new Set<string>();
-      const failedCancelIds = new Set<string>();
-
-      const cancelBatch = async (executions: Array<{ id: string }>): Promise<number> => {
-        const pending = executions.filter((execution) => !attemptedIds.has(execution.id));
-        if (pending.length === 0) {
-          return 0;
-        }
-        for (const execution of pending) {
-          attemptedIds.add(execution.id);
-        }
-        const outcomes = await Promise.all(
-          pending.map((execution) =>
-            mgmt.cancelWorkflowExecution(execution.id, spaceId, request).then(
-              () => true,
-              (error) => {
-                failedCancelIds.add(execution.id);
-                failures.push({
-                  target: `execution:${execution.id}@${spaceId}`,
-                  error: toMessage(error),
-                });
-                return false;
-              }
-            )
-          )
-        );
-        return outcomes.filter(Boolean).length;
-      };
-
-      const recordBacklogIfStuck = (results: Array<{ id: string }>, detail: string): void => {
-        // Successful cancels may still appear briefly (status lag). Only surface a
-        // backlog failure when cancels actually failed and those ids remain.
-        const stuckFailed = results.filter((execution) => failedCancelIds.has(execution.id));
-        if (stuckFailed.length === 0) {
-          return;
-        }
-        failures.push({
-          target: `execution-backlog:${id}@${spaceId}`,
-          error: `${detail}: ${stuckFailed.length} non-terminal execution(s) remain after failed cancel`,
-        });
-      };
-
-      // Pass 1: page forward through the known backlog.
-      for (let page = 1; ; page++) {
-        const { results, total } = await mgmt.getWorkflowExecutions(
-          {
-            workflowId: id,
-            statuses: [...NonTerminalExecutionStatuses],
-            page,
-            size: RUNNING_EXECUTIONS_PAGE_SIZE,
-          },
-          spaceId
-        );
-        if (results.length === 0) {
-          break;
-        }
-        cancelled += await cancelBatch(results);
-        if (
-          results.length < RUNNING_EXECUTIONS_PAGE_SIZE ||
-          page * RUNNING_EXECUTIONS_PAGE_SIZE >= total
-        ) {
-          break;
-        }
-      }
-
-      // Pass 2: re-check page 1 for any ids that were not seen in pass 1 (e.g.
-      // status lag left earlier pages non-empty while newer work was queued).
-      // Attempted-id tracking prevents infinite re-cancels of the same execution.
-      let rounds = 0;
-      for (; rounds < MAX_CANCEL_ROUNDS; rounds++) {
-        const { results } = await mgmt.getWorkflowExecutions(
-          {
-            workflowId: id,
-            statuses: [...NonTerminalExecutionStatuses],
-            page: 1,
-            size: RUNNING_EXECUTIONS_PAGE_SIZE,
-          },
-          spaceId
-        );
-        const accepted = await cancelBatch(results);
-        if (accepted === 0) {
-          recordBacklogIfStuck(results, 'Cancel backlog not drained');
-          break;
-        }
-        cancelled += accepted;
-      }
-
-      if (rounds >= MAX_CANCEL_ROUNDS) {
-        const { results } = await mgmt.getWorkflowExecutions(
-          {
-            workflowId: id,
-            statuses: [...NonTerminalExecutionStatuses],
-            page: 1,
-            size: RUNNING_EXECUTIONS_PAGE_SIZE,
-          },
-          spaceId
-        );
-        if (results.length > 0) {
-          recordBacklogIfStuck(
-            results,
-            `Cancel backlog not drained after ${MAX_CANCEL_ROUNDS} rounds`
-          );
-          // Cancels may have all "succeeded" while new/lagging executions keep
-          // appearing — still surface a backlog so pause is not reported clean.
-          const backlogTarget = `execution-backlog:${id}@${spaceId}`;
-          if (!failures.some((failure) => failure.target === backlogTarget)) {
-            failures.push({
-              target: backlogTarget,
-              error: `Cancel backlog not drained after ${MAX_CANCEL_ROUNDS} rounds: ${results.length} non-terminal execution(s) remain`,
-            });
-          }
-        }
-      }
-
-      return cancelled;
+      await mgmt.cancelAllActiveWorkflowExecutions(id, spaceId, request);
     } catch (error) {
+      if (error instanceof WorkflowNotFoundError) {
+        return;
+      }
       failures.push({ target: `execution:${id}@${spaceId}`, error: toMessage(error) });
-      return 0;
     }
   };
 
@@ -550,7 +437,6 @@ export const createSignificantEventsMaintenanceService = ({
   }): Promise<{
     disabledWorkflows: MaintenanceWorkflowTarget[];
     disabledRuleIds: string[];
-    executionsCancelled: number;
     workflowsDisabledThisSweep: number;
     rulesDisabledThisSweep: number;
     failures: SignificantEventsMaintenanceFailure[];
@@ -562,7 +448,6 @@ export const createSignificantEventsMaintenanceService = ({
     // to be turned off per space even when workflows management is down.
     const spaceIds = await getAllSpaceIds(request, failures);
     const newlyDisabled: MaintenanceWorkflowTarget[] = [];
-    let executionsCancelled = 0;
 
     if (mgmt) {
       for (const target of buildDisableTargets(spaceIds)) {
@@ -571,7 +456,7 @@ export const createSignificantEventsMaintenanceService = ({
         }
       }
       for (const target of buildCancelTargets(spaceIds)) {
-        executionsCancelled += await cancelTargetExecutions(mgmt, target, request, failures);
+        await cancelTargetExecutions(mgmt, target, request, failures);
       }
     } else {
       failures.push({
@@ -595,7 +480,6 @@ export const createSignificantEventsMaintenanceService = ({
     return {
       disabledWorkflows: [...workflowByKey.values()],
       disabledRuleIds,
-      executionsCancelled,
       workflowsDisabledThisSweep: newlyDisabled.length,
       rulesDisabledThisSweep: newlyDisabledRuleIds.length,
       failures,
@@ -700,10 +584,11 @@ export const createSignificantEventsMaintenanceService = ({
     }
 
     // Snapshot lengths (not this-sweep deltas) so a clean re-pause still shows
-    // how much is currently off; accumulate cancel counts across re-pauses.
+    // how much is currently off. Cancel is best-effort via
+    // cancelAllActiveWorkflowExecutions and does not return a count.
     const summary: SignificantEventsMaintenanceSummary = {
       state: 'paused',
-      executionsCancelled: (previousSummary?.executionsCancelled ?? 0) + sweep.executionsCancelled,
+      executionsCancelled: 0,
       workflowsDisabled: sweep.disabledWorkflows.length,
       rulesDisabled: sweep.disabledRuleIds.length,
       partialFailures: sweep.failures,
@@ -732,9 +617,7 @@ export const createSignificantEventsMaintenanceService = ({
         log,
         `Significant Events ${mode} snapshot persist failed after sweep (state remains paused): newly disabled ${
           sweep.workflowsDisabledThisSweep
-        } workflow(s) / ${sweep.rulesDisabledThisSweep} rule(s), cancelled ${
-          sweep.executionsCancelled
-        } execution(s), snapshot would have ${
+        } workflow(s) / ${sweep.rulesDisabledThisSweep} rule(s), snapshot would have ${
           sweep.disabledWorkflows.length
         } workflow(s); write error: ${toMessage(writeError)}`,
         failuresWithSnapshot
@@ -772,7 +655,7 @@ export const createSignificantEventsMaintenanceService = ({
 
         logFailures(
           log,
-          `Significant Events paused: disabled ${summary.workflowsDisabled} workflow(s) and ${summary.rulesDisabled} rule(s) (this sweep: ${sweep.workflowsDisabledThisSweep}/${sweep.rulesDisabledThisSweep}), cancelled ${sweep.executionsCancelled} execution(s) this sweep, ${sweep.failures.length} failure(s)`,
+          `Significant Events paused: disabled ${summary.workflowsDisabled} workflow(s) and ${summary.rulesDisabled} rule(s) (this sweep: ${sweep.workflowsDisabledThisSweep}/${sweep.rulesDisabledThisSweep}), ${sweep.failures.length} failure(s)`,
           sweep.failures
         );
         return summary;

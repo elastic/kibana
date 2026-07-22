@@ -11,8 +11,8 @@ import type { SignificantEventsMaintenanceState } from './state_machine';
 export interface SignificantEventsMaintenanceFailure {
   /**
    * Prefixed identifier of what failed, e.g. `workflow:<id>@<space>`,
-   * `rule:<id>`, `execution:<id>@<space>`, `execution-backlog:<workflow>@<space>`,
-   * `spaces`, `workflows`, `rules`, or `reassert`.
+   * `rule:<id>`, `execution:<id>@<space>`, `spaces`, `workflows`, `rules`,
+   * or `reassert`.
    */
   target: string;
   error: string;
@@ -21,10 +21,11 @@ export interface SignificantEventsMaintenanceFailure {
 /**
  * Structured result of a state transition (or the last pause/reassert snapshot).
  * While `state` is `paused`, `workflowsDisabled` / `rulesDisabled` are the
- * sizes of the current disabled snapshots (not only the last sweep’s deltas),
- * and `executionsCancelled` accumulates across re-pauses. On a successful
- * resume those counts are zero. On an incomplete resume they reflect what is
- * still recorded as disabled after the resume attempt.
+ * sizes of the current disabled snapshots (not only the last sweep’s deltas).
+ * `executionsCancelled` is reserved for compatibility and is always 0 — pause
+ * cancels in-flight work best-effort without returning a count. On a successful
+ * resume workflow/rule counts are zero. On an incomplete resume they reflect
+ * what is still recorded as disabled after the resume attempt.
  */
 export interface SignificantEventsMaintenanceSummary {
   state: SignificantEventsMaintenanceState;

@@ -14,6 +14,7 @@ import {
 } from '@kbn/management-settings-ids';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { StreamsServer } from '@kbn/streams-plugin/server/types';
+import { WorkflowNotFoundError } from '@kbn/workflows/common/errors';
 import {
   SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID,
@@ -53,11 +54,11 @@ function makeSoClient() {
 // Stateful workflows management mock: tracks each workflow's `enabled` flag so a
 // pause→resume round-trip reads back what the previous step wrote.
 function makeManagementApi(options?: {
-  executionsByWorkflow?: Record<string, Array<{ id: string }>>;
   failUpdateFor?: string;
   /** Static id, or a mutable `{ id }` so a later resume can clear the failure. */
   failEnableFor?: string | { id?: string };
-  failCancelFor?: string;
+  /** Workflow ids for which cancelAllActiveWorkflowExecutions should throw. */
+  failCancelAllFor?: string;
 }) {
   const enabled = new Map<string, boolean>();
   const stateKey = (id: string, spaceId: string) => `${id}@${spaceId}`;
@@ -92,24 +93,20 @@ function makeManagementApi(options?: {
     }
   );
 
-  const getWorkflowExecutions = jest.fn(async (params: { workflowId: string }) => {
-    const results = options?.executionsByWorkflow?.[params.workflowId] ?? [];
-    return { results, total: results.length };
-  });
-
-  const cancelWorkflowExecution = jest.fn(async (executionId: string) => {
-    if (options?.failCancelFor === executionId) {
-      throw new Error(`cancel failed for ${executionId}`);
+  const cancelAllActiveWorkflowExecutions = jest.fn(
+    async (workflowId: string, _spaceId: string, _request: unknown) => {
+      if (options?.failCancelAllFor === workflowId) {
+        throw new Error(`cancel-all failed for ${workflowId}`);
+      }
+      return undefined;
     }
-    return undefined;
-  });
+  );
 
   return {
-    api: { getWorkflow, updateWorkflow, getWorkflowExecutions, cancelWorkflowExecution },
+    api: { getWorkflow, updateWorkflow, cancelAllActiveWorkflowExecutions },
     getWorkflow,
     updateWorkflow,
-    getWorkflowExecutions,
-    cancelWorkflowExecution,
+    cancelAllActiveWorkflowExecutions,
   };
 }
 
@@ -274,11 +271,7 @@ describe('SignificantEventsMaintenanceService', () => {
 
   describe('pause', () => {
     it('disables workflows and v2-backed rules, cancels executions, and persists the paused state', async () => {
-      const { api, updateWorkflow, cancelWorkflowExecution } = makeManagementApi({
-        executionsByWorkflow: {
-          [SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID]: [{ id: 'exec-1' }],
-        },
-      });
+      const { api, updateWorkflow, cancelAllActiveWorkflowExecutions } = makeManagementApi();
       const { service, soClient, v2RulesClient, globalUiSettingsClient, spaceUiSettingsClient } =
         makeService({
           management: api,
@@ -292,7 +285,7 @@ describe('SignificantEventsMaintenanceService', () => {
       expect(summary.state).toBe('paused');
       expect(summary.workflowsDisabled).toBeGreaterThan(0);
       expect(summary.rulesDisabled).toBe(2);
-      expect(summary.executionsCancelled).toBe(1);
+      expect(summary.executionsCancelled).toBe(0);
       expect(summary.partialFailures).toEqual([]);
 
       // every disable is an enablement-only update
@@ -304,7 +297,11 @@ describe('SignificantEventsMaintenanceService', () => {
       );
       // deduped rule ids, disabled in bulk on the v2 engine
       expect(v2RulesClient?.bulkDisableRules).toHaveBeenCalledWith({ ids: ['rule-1', 'rule-2'] });
-      expect(cancelWorkflowExecution).toHaveBeenCalledWith('exec-1', expect.any(String), REQUEST);
+      expect(cancelAllActiveWorkflowExecutions).toHaveBeenCalledWith(
+        SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID,
+        expect.any(String),
+        REQUEST
+      );
 
       // Settings toggles turned off; prior-enabled flags stored for resume.
       expect(globalUiSettingsClient.set).toHaveBeenCalledWith(
@@ -371,11 +368,7 @@ describe('SignificantEventsMaintenanceService', () => {
       const api = {
         getWorkflow,
         updateWorkflow,
-        getWorkflowExecutions: jest.fn(async (_params: { workflowId: string }) => ({
-          results: [] as Array<{ id: string }>,
-          total: 0,
-        })),
-        cancelWorkflowExecution: jest.fn(),
+        cancelAllActiveWorkflowExecutions: jest.fn(),
       };
       const { service } = makeService({ management: api });
 
@@ -499,22 +492,40 @@ describe('SignificantEventsMaintenanceService', () => {
       });
     });
 
-    it('counts only the executions that were actually cancelled', async () => {
+    it('records a failure when cancel-all for a workflow target throws', async () => {
       const { api } = makeManagementApi({
-        executionsByWorkflow: {
-          [SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID]: [{ id: 'exec-1' }, { id: 'exec-2' }],
-        },
-        failCancelFor: 'exec-2',
+        failCancelAllFor: SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID,
       });
       const { service } = makeService({ management: api });
 
       const summary = await service.pause({ request: REQUEST });
 
-      expect(summary.executionsCancelled).toBe(1);
+      expect(summary.state).toBe('paused');
       expect(summary.partialFailures).toContainEqual({
-        target: expect.stringContaining('execution:exec-2'),
-        error: expect.stringContaining('cancel failed'),
+        target: expect.stringContaining(
+          `execution:${SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID}@`
+        ),
+        error: expect.stringContaining('cancel-all failed'),
       });
+    });
+
+    it('treats a missing workflow during cancel-all as already gone', async () => {
+      const { api, cancelAllActiveWorkflowExecutions } = makeManagementApi();
+      cancelAllActiveWorkflowExecutions.mockImplementation(async (workflowId: string) => {
+        if (workflowId === SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID) {
+          throw new WorkflowNotFoundError(workflowId);
+        }
+      });
+      const { service } = makeService({ management: api });
+
+      const summary = await service.pause({ request: REQUEST });
+
+      expect(summary.state).toBe('paused');
+      expect(
+        summary.partialFailures.some((failure) =>
+          failure.target.includes(`execution:${SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID}@`)
+        )
+      ).toBe(false);
     });
 
     it('surfaces a failure (and processes the default space) when spaces cannot be enumerated', async () => {
@@ -545,44 +556,6 @@ describe('SignificantEventsMaintenanceService', () => {
       // Scheduled workflow documents are space-suffixed; both spaces should be hit.
       const disabledDocumentIds = updateWorkflow.mock.calls.map((call) => call[0] as string);
       expect(disabledDocumentIds.some((id) => id.includes('space-a'))).toBe(true);
-    });
-
-    it('records a backlog failure when cancel pass-2 cannot drain remaining executions', async () => {
-      const { api } = makeManagementApi({
-        executionsByWorkflow: {
-          [SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID]: [{ id: 'stuck-exec' }],
-        },
-        failCancelFor: 'stuck-exec',
-      });
-      const { service } = makeService({ management: api });
-
-      const summary = await service.pause({ request: REQUEST });
-
-      expect(summary.partialFailures).toContainEqual({
-        target: expect.stringContaining('execution-backlog:'),
-        error: expect.stringContaining('Cancel backlog not drained'),
-      });
-    });
-
-    it('records a backlog failure when cancel pass-2 hits the round cap with remaining executions', async () => {
-      let call = 0;
-      const { api } = makeManagementApi();
-      api.getWorkflowExecutions.mockImplementation(async (params: { workflowId: string }) => {
-        if (params.workflowId !== SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID) {
-          return { results: [], total: 0 };
-        }
-        call += 1;
-        // Every re-check returns a brand-new id so cancel always accepts until the cap.
-        return { results: [{ id: `exec-${call}` }], total: 1 };
-      });
-      const { service } = makeService({ management: api });
-
-      const summary = await service.pause({ request: REQUEST });
-
-      expect(summary.partialFailures).toContainEqual({
-        target: expect.stringContaining('execution-backlog:'),
-        error: expect.stringContaining('after 50 rounds'),
-      });
     });
 
     it('records restore flags when settings were enabled even if set(false) fails', async () => {
