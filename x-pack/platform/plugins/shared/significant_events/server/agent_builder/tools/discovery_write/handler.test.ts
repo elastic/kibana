@@ -547,6 +547,10 @@ describe('discoveryWriteBulkHandler — continuation snapshot merge', () => {
       findByEventId: jest.fn(),
       bulkCreate: jest.fn().mockImplementation(successfulBulkCreate),
     };
+    const signals = [
+      createSignal('ruleA', { detection_id: 'detection-1' }),
+      createSignal('ruleA', { detection_id: 'detection-2' }),
+    ];
 
     await writeOne({
       discoveryClient: discoveryClient as never,
@@ -555,12 +559,12 @@ describe('discoveryWriteBulkHandler — continuation snapshot merge', () => {
         kind: 'handled',
         event_id: 'otel__x-abc12345',
         previous_discovery_id: 'source-discovery-id',
-        signals: [],
+        signals,
       },
     });
 
     expect(discoveryClient.findByEventId).not.toHaveBeenCalled();
-    expect(discoveryClient.bulkCreate.mock.calls[0][0][0].signals).toEqual([]);
+    expect(discoveryClient.bulkCreate.mock.calls[0][0][0].signals).toEqual(signals);
     expect(discoveryClient.bulkCreate.mock.calls[0][0][0].previous_discovery_id).toBe(
       'source-discovery-id'
     );

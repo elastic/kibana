@@ -50,7 +50,7 @@ const toolCallSteps = (steps: ConverseStep[], toolId: string) =>
 
 const getBulkItems = <T>(params: Record<string, unknown> | undefined, toolId: string): T[] => {
   if (!Array.isArray(params?.items)) {
-    throw new Error(`${toolId} input and result arrays are not aligned`);
+    throw new Error(`${toolId}: expected params.items to be an array, got ${typeof params?.items}`);
   }
   return params.items as T[];
 };

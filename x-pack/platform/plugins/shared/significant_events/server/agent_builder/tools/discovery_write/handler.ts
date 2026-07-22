@@ -290,11 +290,11 @@ export async function discoveryWriteBulkHandler({
       })
   );
 
-  const timestamp = new Date().toISOString();
+  const timestamp = now.toISOString();
   const pendingWrites = inputsToCreate.map((prepared) => {
     const { dedup_window: _dedupWindow, event_id: _eventId, ...rest } = prepared.input;
     const signals =
-      prepared.input.event_id !== undefined
+      prepared.input.event_id !== undefined && prepared.input.kind !== 'handled'
         ? mergeSignalsLatestPerRule(
             priorDocsByEventId.get(prepared.eventId) ?? [],
             prepared.input.signals ?? [],

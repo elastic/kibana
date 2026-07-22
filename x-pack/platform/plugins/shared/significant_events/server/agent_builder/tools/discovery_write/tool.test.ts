@@ -11,7 +11,7 @@ import type { GetScopedClients } from '../../../routes/types';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
 import { createMockToolContext, invokeHandler } from '../../utils/test_helpers';
 import { BulkWriteError, MAX_BULK_WRITE_ITEMS } from '../bulk_write';
-import { discoveryWriteBulkHandler } from './handler';
+import { discoveryWriteBulkHandler, type DiscoveryWriteInput } from './handler';
 import { createDiscoveryWriteTool, discoveryWriteSchema } from './tool';
 
 jest.mock('../../../routes/utils/assert_significant_events_access', () => ({
@@ -23,14 +23,14 @@ jest.mock('./handler', () => ({
 }));
 
 const input = {
-  kind: 'discovery' as const,
+  kind: 'discovery',
   title: 'Test discovery',
   summary: 'Test summary',
   stream_names: ['logs.test'],
-  severity: '60-high' as const,
+  severity: '60-high',
   confidence: 0.8,
   signals: [],
-};
+} satisfies DiscoveryWriteInput;
 
 const createTool = (telemetry: { trackAgentToolDiscoveryWrite: jest.Mock }) => {
   const getScopedClients = jest.fn().mockResolvedValue({

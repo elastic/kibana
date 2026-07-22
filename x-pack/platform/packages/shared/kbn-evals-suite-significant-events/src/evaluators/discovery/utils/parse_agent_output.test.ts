@@ -21,6 +21,21 @@ describe('extractDiscoveriesFromToolCall', () => {
     expect(extractDiscoveriesFromToolCall(steps)).toEqual([]);
   });
 
+  it('reports invalid bulk input parameters', () => {
+    const steps: ConverseStep[] = [
+      {
+        type: 'tool_call',
+        tool_id: TOOL_ID_DISCOVERY_WRITE,
+        tool_call_id: 'dw-invalid-params',
+        params: { items: 'not-an-array' },
+      },
+    ];
+
+    expect(() => extractDiscoveriesFromToolCall(steps)).toThrow(
+      'discovery_write: expected params.items to be an array, got string'
+    );
+  });
+
   it('extracts aligned bulk results and omits failed items', () => {
     const steps: ConverseStep[] = [
       {
