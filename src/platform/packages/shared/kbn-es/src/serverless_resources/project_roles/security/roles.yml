@@ -31,7 +31,6 @@ viewer:
         - endgame-*
         - filebeat-*
         - logs-*
-        - .logs-osquery_manager.actions-*
         - .logs-osquery_manager.action.responses-*
         - packetbeat-*
         - winlogbeat-*
@@ -105,7 +104,6 @@ editor:
         - endgame-*
         - filebeat-*
         - logs-*
-        - .logs-osquery_manager.actions-*
         - .logs-osquery_manager.action.responses-*
         - packetbeat-*
         - winlogbeat-*
@@ -223,7 +221,6 @@ t1_analyst:
         - endgame-*
         - filebeat-*
         - logs-*
-        - .logs-osquery_manager.actions-*
         - .logs-osquery_manager.action.responses-*
         - packetbeat-*
         - winlogbeat-*
@@ -302,7 +299,6 @@ t2_analyst:
         - endgame-*
         - filebeat-*
         - logs-*
-        - .logs-osquery_manager.actions-*
         - .logs-osquery_manager.action.responses-*
         - packetbeat-*
         - winlogbeat-*
@@ -368,7 +364,6 @@ t3_analyst:
         - endgame-*
         - filebeat-*
         - logs-*
-        - .logs-osquery_manager.actions-*
         - .logs-osquery_manager.action.responses-*
         - packetbeat-*
         - winlogbeat-*
@@ -470,7 +465,6 @@ threat_intelligence_analyst:
         - endgame-*
         - filebeat-*
         - logs-*
-        - .logs-osquery_manager.actions-*
         - .logs-osquery_manager.action.responses-*
         - packetbeat-*
         - winlogbeat-*
@@ -561,7 +555,6 @@ rule_author:
         - endgame-*
         - filebeat-*
         - logs-*
-        - .logs-osquery_manager.actions-*
         - .logs-osquery_manager.action.responses-*
         - packetbeat-*
         - winlogbeat-*
@@ -655,7 +648,6 @@ soc_manager:
         - endgame-*
         - filebeat-*
         - logs-*
-        - .logs-osquery_manager.actions-*
         - .logs-osquery_manager.action.responses-*
         - packetbeat-*
         - winlogbeat-*
@@ -755,7 +747,6 @@ detections_admin:
         - endgame-*
         - filebeat-*
         - logs-*
-        - .logs-osquery_manager.actions-*
         - .logs-osquery_manager.action.responses-*
         - packetbeat-*
         - winlogbeat-*
@@ -836,7 +827,6 @@ platform_engineer:
         - endgame-*
         - filebeat-*
         - logs-*
-        - .logs-osquery_manager.actions-*
         - .logs-osquery_manager.action.responses-*
         - packetbeat-*
         - winlogbeat-*
@@ -930,7 +920,6 @@ endpoint_operations_analyst:
         - endgame-*
         - filebeat-*
         - logs-*
-        - .logs-osquery_manager.actions-*
         - .logs-osquery_manager.action.responses-*
         - packetbeat-*
         - winlogbeat-*
@@ -1036,7 +1025,6 @@ endpoint_policy_manager:
         - endgame-*
         - filebeat-*
         - logs-*
-        - .logs-osquery_manager.actions-*
         - .logs-osquery_manager.action.responses-*
         - packetbeat-*
         - winlogbeat-*
