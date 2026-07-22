@@ -17,6 +17,10 @@ overrides:
   '@elastic/charts>react-redux': npm:react-redux@7.2.8
   '@elastic/charts>redux': npm:redux@4.2.1
   '@elastic/elasticsearch@9>@elastic/transport': 9.3.7
+  '@elastic/esql-grammar': 4.14.0
+  '@elastic/esql-promql-grammar': 4.14.0
+  '@elastic/esql-types': 4.14.0
+  '@elastic/pretty-printer': 4.14.0
   '@emnapi/core': 1.11.1
   '@emnapi/runtime': 1.11.1
   '@emotion/sheet': npm:@elastic/emotion-sheet@1.4.1
