@@ -1,0 +1,9 @@
+steps:
+  - label: ':book: Check Skill Path Drift'
+    command: .buildkite/scripts/steps/checks/skill_path_check.sh
+    timeout_in_minutes: 15
+    agents:
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-2
