@@ -17,9 +17,7 @@ import {
   EuiIcon,
   EuiSpacer,
   EuiText,
-  useEuiTheme,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { internalTools } from '@kbn/agent-builder-common';
 import type { ToolCallStep as ToolCallStepData } from '@kbn/agent-builder-common/chat/conversation';
@@ -70,23 +68,13 @@ interface ToolResponseFlyoutProps {
 }
 
 export const ToolResponseFlyout: React.FC<ToolResponseFlyoutProps> = ({ step, onClose }) => {
-  const { euiTheme } = useEuiTheme();
-
   const isSubAgentCall = step.tool_id === internalTools.runSubagent;
   const subAgentExecutionId = isSubAgentCall ? getSubAgentExecutionId(step) : undefined;
   const showExecutionSection = Boolean(subAgentExecutionId);
   const showResultSection = step.results.length > 0;
 
   return (
-    <EuiFlyout
-      onClose={onClose}
-      aria-labelledby="toolResponseFlyoutTitle"
-      size="m"
-      maskProps={{ style: 'background: transparent' }}
-      css={css`
-        z-index: ${Number(euiTheme.levels.flyout) + 4};
-      `}
-    >
+    <EuiFlyout onClose={onClose} aria-labelledby="toolResponseFlyoutTitle" size="m">
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
           <h2 id="toolResponseFlyoutTitle">tool: {step.tool_id}</h2>
