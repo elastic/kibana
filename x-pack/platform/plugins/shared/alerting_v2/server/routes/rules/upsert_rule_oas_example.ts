@@ -5,14 +5,23 @@
  * 2.0.
  */
 
+import { ALERTING_V2_ERROR_CODES } from '../../lib/errors/error_codes';
+import { getInvalidRuleDataMessage } from '../../lib/errors/rule_error_messages';
 import type { AlertingOasOperationObject } from '../json_oas_example';
 import {
   CREATE_RULE_REQUEST,
-  INVALID_RULE_DATA_EXAMPLE,
-  RULE_UPSERT_CONFLICT_EXAMPLE,
+  RULE_UPSERT_CONFLICT_RESPONSE,
   buildRuleOas,
+  invalidResponseExample,
   ruleResponseExample,
 } from './rule_oas_shared';
+
+const INVALID_UPSERT_RULE_RESPONSE = invalidResponseExample({
+  summary: 'Upsert body is missing required rule metadata',
+  code: ALERTING_V2_ERROR_CODES.INVALID_RULE_DATA,
+  message: getInvalidRuleDataMessage('upsert', 'metadata: Required'),
+  details: { context: 'upsert', errors: { metadata: ['Required'] } },
+});
 
 export const upsertRuleOasExamples = (): AlertingOasOperationObject =>
   buildRuleOas({
@@ -24,8 +33,8 @@ export const upsertRuleOasExamples = (): AlertingOasOperationObject =>
     responses: {
       200: ruleResponseExample('upsertRuleReplacedResponse', 'Replaced an existing rule'),
       201: ruleResponseExample('upsertRuleCreatedResponse', 'Created a new rule with the given ID'),
-      400: INVALID_RULE_DATA_EXAMPLE,
-      409: RULE_UPSERT_CONFLICT_EXAMPLE,
+      400: INVALID_UPSERT_RULE_RESPONSE,
+      409: RULE_UPSERT_CONFLICT_RESPONSE,
     },
     errors: [404],
   });

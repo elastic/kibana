@@ -9,7 +9,7 @@ import type { AlertingOasOperationObject } from '../json_oas_example';
 import {
   BULK_OPERATION_REQUEST,
   BULK_OPERATION_RESPONSE,
-  INVALID_RULE_DATA_EXAMPLE,
+  INVALID_BULK_OPERATION_RESPONSE,
   buildRuleOas,
 } from './rule_oas_shared';
 
@@ -26,6 +26,6 @@ export const bulkDeleteRulesOasExamples = (): AlertingOasOperationObject =>
         summary: 'Deleted both requested rules',
         value: BULK_OPERATION_RESPONSE,
       },
-      400: INVALID_RULE_DATA_EXAMPLE,
+      400: INVALID_BULK_OPERATION_RESPONSE,
     },
   });

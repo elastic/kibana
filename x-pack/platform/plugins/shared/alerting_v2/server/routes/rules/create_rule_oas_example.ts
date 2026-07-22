@@ -5,13 +5,22 @@
  * 2.0.
  */
 
+import { ALERTING_V2_ERROR_CODES } from '../../lib/errors/error_codes';
+import { getInvalidRuleDataMessage } from '../../lib/errors/rule_error_messages';
 import type { AlertingOasOperationObject } from '../json_oas_example';
 import {
   CREATE_RULE_REQUEST,
-  INVALID_RULE_DATA_EXAMPLE,
   buildRuleOas,
+  invalidResponseExample,
   ruleResponseExample,
 } from './rule_oas_shared';
+
+const INVALID_CREATE_RULE_RESPONSE = invalidResponseExample({
+  summary: 'Missing required rule metadata',
+  code: ALERTING_V2_ERROR_CODES.INVALID_RULE_DATA,
+  message: getInvalidRuleDataMessage('create', 'metadata: Required'),
+  details: { context: 'create', errors: { metadata: ['Required'] } },
+});
 
 export const createRuleOasExamples = (): AlertingOasOperationObject =>
   buildRuleOas({
@@ -22,6 +31,6 @@ export const createRuleOasExamples = (): AlertingOasOperationObject =>
     },
     responses: {
       201: ruleResponseExample('createRuleResponse', 'Created host CPU threshold rule'),
-      400: INVALID_RULE_DATA_EXAMPLE,
+      400: INVALID_CREATE_RULE_RESPONSE,
     },
   });

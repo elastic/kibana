@@ -6,7 +6,13 @@
  */
 
 import type { AlertingOasOperationObject } from '../json_oas_example';
-import { INVALID_RULE_DATA_EXAMPLE, LIST_RULES_RESPONSE, buildRuleOas } from './rule_oas_shared';
+import { LIST_RULES_RESPONSE, buildRuleOas, invalidResponseExample } from './rule_oas_shared';
+
+const INVALID_LIST_RULES_RESPONSE = invalidResponseExample({
+  summary: 'List query uses an invalid page number',
+  message: 'page: Number must be greater than or equal to 1',
+  details: { errors: { page: ['Number must be greater than or equal to 1'] } },
+});
 
 export const listRulesOasExamples = (): AlertingOasOperationObject =>
   buildRuleOas({
@@ -16,6 +22,6 @@ export const listRulesOasExamples = (): AlertingOasOperationObject =>
         summary: 'Paginated list containing one matching rule',
         value: LIST_RULES_RESPONSE,
       },
-      400: INVALID_RULE_DATA_EXAMPLE,
+      400: INVALID_LIST_RULES_RESPONSE,
     },
   });

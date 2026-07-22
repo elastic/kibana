@@ -9,10 +9,16 @@ import type { AlertingOasOperationObject } from '../json_oas_example';
 import {
   BULK_GET_RULES_REQUEST,
   BULK_GET_RULES_RESPONSE,
-  INVALID_RULE_DATA_EXAMPLE,
-  RULES_NOT_FOUND_EXAMPLE,
+  RULES_NOT_FOUND_RESPONSE,
   buildRuleOas,
+  invalidResponseExample,
 } from './rule_oas_shared';
+
+const INVALID_BULK_GET_RULES_RESPONSE = invalidResponseExample({
+  summary: 'Request body is missing required rule ids',
+  message: 'ids: Required',
+  details: { errors: { ids: ['Required'] } },
+});
 
 export const bulkGetRulesOasExamples = (): AlertingOasOperationObject =>
   buildRuleOas({
@@ -27,7 +33,7 @@ export const bulkGetRulesOasExamples = (): AlertingOasOperationObject =>
         summary: 'Returned the requested rules',
         value: BULK_GET_RULES_RESPONSE,
       },
-      400: INVALID_RULE_DATA_EXAMPLE,
-      404: RULES_NOT_FOUND_EXAMPLE,
+      400: INVALID_BULK_GET_RULES_RESPONSE,
+      404: RULES_NOT_FOUND_RESPONSE,
     },
   });

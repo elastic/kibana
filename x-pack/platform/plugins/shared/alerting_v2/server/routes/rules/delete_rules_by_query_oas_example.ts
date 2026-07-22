@@ -9,7 +9,7 @@ import type { AlertingOasOperationObject } from '../json_oas_example';
 import {
   BULK_BY_QUERY_REQUEST,
   DRY_RUN_RESPONSE,
-  INVALID_RULE_DATA_EXAMPLE,
+  INVALID_BULK_BY_QUERY_RESPONSE,
   buildRuleOas,
 } from './rule_oas_shared';
 
@@ -27,7 +27,6 @@ export const deleteRulesByQueryOasExamples = (): AlertingOasOperationObject =>
         summary: 'Dry-run preview of matching rules; set `force: true` on the request to execute',
         value: DRY_RUN_RESPONSE,
       },
-
-      400: INVALID_RULE_DATA_EXAMPLE,
+      400: INVALID_BULK_BY_QUERY_RESPONSE,
     },
   });

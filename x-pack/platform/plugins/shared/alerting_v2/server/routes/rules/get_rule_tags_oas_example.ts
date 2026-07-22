@@ -6,7 +6,13 @@
  */
 
 import type { AlertingOasOperationObject } from '../json_oas_example';
-import { INVALID_RULE_DATA_EXAMPLE, RULE_TAGS_RESPONSE, buildRuleOas } from './rule_oas_shared';
+import { RULE_TAGS_RESPONSE, buildRuleOas, invalidResponseExample } from './rule_oas_shared';
+
+const INVALID_RULE_TAGS_RESPONSE = invalidResponseExample({
+  summary: 'Tags query filter exceeds the maximum length',
+  message: 'filter: String must contain at most 1024 character(s)',
+  details: { errors: { filter: ['String must contain at most 1024 character(s)'] } },
+});
 
 export const ruleTagsOasExamples = (): AlertingOasOperationObject =>
   buildRuleOas({
@@ -16,6 +22,6 @@ export const ruleTagsOasExamples = (): AlertingOasOperationObject =>
         summary: 'Unique tags across matching rules',
         value: RULE_TAGS_RESPONSE,
       },
-      400: INVALID_RULE_DATA_EXAMPLE,
+      400: INVALID_RULE_TAGS_RESPONSE,
     },
   });
