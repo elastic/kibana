@@ -47,7 +47,7 @@ spaceTest.describe(
 
     spaceTest(
       'should navigate between Visualize and Lens',
-      async ({ page, pageObjects: { visualize, lens }, scoutSpace }) => {
+      async ({ pageObjects: { visualize, lens }, scoutSpace }) => {
         const openInLens = async () => {
           await visualize.clickEditInLensButton();
           await lens.waitForVisualization('xyVisChart');
@@ -72,24 +72,9 @@ spaceTest.describe(
         await spaceTest.step('return with no modal after saving in Lens', async () => {
           await openInLens();
           await lens.configureDimension(TIMESTAMP_X_AXIS_DIMENSION);
-
-          // Library save redirects to #/edit/{id} and reloads the SO into persistedDoc.
-          // Go-back dirty-check needs that reload; register the waiter before save.
-          const savedVisLoaded = page.waitForResponse((response) => {
-            if (response.request().method() !== 'GET' || !response.ok()) {
-              return false;
-            }
-            return /\/internal\/lens\/visualizations\/[^/?]+/.test(
-              new URL(response.url()).pathname
-            );
-          });
-
           await lens.save(`Migrated Viz saved in Lens ${scoutSpace.id}`, {
             addToDashboard: 'none',
           });
-          await page.waitForURL(/#\/edit\//);
-          await savedVisLoaded;
-          await lens.waitForVisualization('xyVisChart');
           await lens.goBackToPreviousApp();
           await expect(lens.getDiscardChangesModal()).toBeHidden();
           await expect(visualize.getEditInLensButton()).toBeVisible();
