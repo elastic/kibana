@@ -53060,7 +53060,6 @@
     "xpack.transform.deleteTransform.deleteAnalyticsWithDataViewErrorMessage": "Beim Löschen der Datenansicht {destinationIndex} ist ein Fehler aufgetreten",
     "xpack.transform.deleteTransform.deleteAnalyticsWithIndexErrorMessage": "Beim Löschen des Zielindex {destinationIndex} ist ein Fehler aufgetreten",
     "xpack.transform.deleteTransform.errorWithCheckingIfDataViewExistsNotificationErrorMessage": "Bei der Prüfung, ob die Datenansicht {dataView} vorhanden ist, ist ein Fehler aufgetreten: {error}",
-    "xpack.transform.description": "Beschreibung",
     "xpack.transform.edit.errorPromptText": "Beim Überprüfen, ob die Quelldatenansicht existiert, ist ein Fehler aufgetreten",
     "xpack.transform.edit.noDataViewErrorPromptText": "Die Datenansicht für die Transformation {transformId} konnte nicht abgerufen werden. Es existiert keine Datenansicht für {dataViewTitle}.",
     "xpack.transform.forceDeleteTransformMessage": "Löschen Sie {count} {count, plural, one {transform} other {Transformationen}}",
