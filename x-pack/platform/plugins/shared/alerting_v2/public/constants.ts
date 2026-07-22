@@ -39,6 +39,7 @@ export {
   ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_API_PATH,
   ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_COUNT_API_PATH,
   ALERTING_V2_EXECUTION_HISTORY_RULES_API_PATH,
+  CREATE_WITH_AGENT_INITIAL_PROMPT,
 } from '@kbn/alerting-v2-constants';
 
 export interface AlertEpisodesListLinkOptions {
@@ -57,9 +58,6 @@ export interface AlertEpisodesListLinkOptions {
   /** Time range embedded in `_a.episodesList.{timeFrom,timeTo}`. */
   timeRange?: { from: string; to: string };
 }
-
-export const CREATE_WITH_AGENT_INITIAL_PROMPT =
-  'Load the rule-management skill and help me create a new alerting v2 rule. Ask me what I want to monitor and guide me through the setup.';
 
 export const AGENT_BUILDER_NEW_CONVERSATION_PATH = '/agents/elastic-ai-agent/conversations/new';
 

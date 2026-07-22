@@ -10,6 +10,7 @@
     "@kbn/evals",
     "@kbn/evals-phoenix-executor",
     "@kbn/agent-builder-common",
+    "@kbn/alerting-v2-constants",
     "@kbn/alerting-v2-schemas",
     "@kbn/tooling-log",
     "@kbn/core",

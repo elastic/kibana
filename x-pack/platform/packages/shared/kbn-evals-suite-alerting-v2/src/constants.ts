@@ -7,29 +7,11 @@
 
 import { platformCoreTools } from '@kbn/agent-builder-common';
 
-/**
- * Tool ids exposed by the Alerting V2 rule-management skill.
- *
- * These mirror the constants defined in the alerting_v2 plugin
- * (`server/agent_builder/common/constants.ts`). They are duplicated here on
- * purpose: that file lives under the plugin's `server` path and is not a public
- * package export, so importing it into a test package would couple this suite to
- * plugin internals. Keep these values in sync with the plugin.
- */
-export const ALERTING_TOOL_IDS = {
-  manageRule: 'platform.alerting.manage_rule',
-  manageActionPolicy: 'platform.alerting.manage_action_policy',
-} as const;
-
-/**
- * Skill id for the Alerting V2 rule-management skill.
- *
- * Mirrors `createRuleManagementSkill` in the alerting_v2 plugin
- * (`server/agent_builder/skills/rule_management_skill.ts`). Duplicated here for
- * the same reason as {@link ALERTING_TOOL_IDS}: the plugin server path is not a
- * public package export.
- */
-export const RULE_MANAGEMENT_SKILL_ID = 'rule-management';
+export {
+  ALERTING_TOOL_IDS,
+  CREATE_WITH_AGENT_INITIAL_PROMPT,
+  RULE_MANAGEMENT_SKILL_ID,
+} from '@kbn/alerting-v2-constants';
 
 /**
  * Security detection-rule skill that commonly competes with Alerting V2
@@ -47,24 +29,10 @@ export const DETECTION_RULE_EDIT_SKILL_ID = 'detection-rule-edit';
  * `skills/platform/workflows`)".
  *
  * Mirrors `workflowAuthoringSkill` in agent_builder_workflows
- * (`server/skills/workflow_authoring_skill.ts`). Duplicated here for the same
- * reason as {@link ALERTING_TOOL_IDS}: the plugin server path is not a public
- * package export. Keep this value in sync with the plugin.
+ * (`server/skills/workflow_authoring_skill.ts`). Keep this value in sync with
+ * the plugin — exporting it from that package is a decision for the owning team.
  */
 export const WORKFLOW_AUTHORING_SKILL_ID = 'workflow-authoring';
-
-/**
- * Initial message sent to the Agent Builder when the user clicks "Create with
- * AI Agent" on the Alerting V2 rules list page / create-rule flyout.
- *
- * Mirrors `CREATE_WITH_AGENT_INITIAL_PROMPT` in the alerting_v2 plugin
- * (`public/constants.ts`). Duplicated here for the same reason as
- * {@link ALERTING_TOOL_IDS}: the plugin path is not a public package export.
- * Keep this value in sync with the plugin — the eval exercises the exact
- * prompt the UI sends.
- */
-export const CREATE_WITH_AGENT_INITIAL_PROMPT =
-  'Load the rule-management skill and help me create a new alerting v2 rule. Ask me what I want to monitor and guide me through the setup.';
 
 /**
  * Built-in Agent Builder tool that returns an index's field types/mappings —
