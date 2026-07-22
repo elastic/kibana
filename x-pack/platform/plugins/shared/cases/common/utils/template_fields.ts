@@ -15,6 +15,7 @@ import {
 } from '../types/domain/template/fields';
 import type { Field, InlineField, RefField } from '../types/domain/template/fields';
 import type { FieldDefinition } from '../types/domain/field_definition/latest';
+import { CustomFieldTypes } from '../types/domain/custom_field/v1';
 
 export const getFieldSnakeKey = (name: string, type: string): string => `${name}_as_${type}`;
 
@@ -150,4 +151,118 @@ export const buildExtendedFieldsDefaults = (
     }
   }
   return out;
+};
+
+// ---------------------------------------------------------------------------
+// customFields → extended_fields adapter utilities
+//
+// These helpers are used by:
+//   1. The one-shot Task Manager backfill
+//      (`server/tasks/templates_migration/run_case_backfill.ts`)
+//   2. The write-time adapter in the cases client
+//      (`server/client/cases/create.ts`, `bulk_create.ts`, `bulk_update.ts`,
+//       `replace_custom_field.ts`)
+// ---------------------------------------------------------------------------
+
+// Mirrors the persisted SO shape (`CasePersistedCustomFields` in server/common/types/case.ts).
+// `type` is intentionally `string` rather than `CustomFieldTypes` so the function is resilient
+// to unknown future types (they fall through to the `'keyword'` default in getV2FieldType).
+interface LegacyCaseCustomField {
+  key: string;
+  type: string;
+  value: unknown;
+}
+
+/**
+ * Maps a legacy `customFields` type string to the v2 field-definition `type` string used as the
+ * `_as_<type>` suffix in `extended_fields` storage keys.
+ *
+ * - `'number'` → `'integer'`  (v1 numbers are integer-only; matches the v2 integer field type)
+ * - `'toggle'` → `'boolean'`  (matches the native v2 TOGGLE field's `type`)
+ * - everything else → `'keyword'`
+ *
+ * Shared between the one-shot migration and the write-time adapter so that the key each path
+ * derives for a given field is always identical.
+ */
+export const getV2FieldType = (legacyType: string): 'integer' | 'boolean' | 'keyword' => {
+  if (legacyType === CustomFieldTypes.NUMBER) return 'integer';
+  if (legacyType === CustomFieldTypes.TOGGLE) return 'boolean';
+  return 'keyword';
+};
+
+/**
+ * Computes the `extended_fields` entries to add to a case from its legacy `customFields`.
+ *
+ * Semantics — **existing wins, nulls skipped**:
+ * - A key already present in `existingExtendedFields` is left as-is (a value set through the v2
+ *   system takes precedence over the legacy mirror).
+ * - A `customFields` entry whose value is `null` or `undefined` is skipped — the case left the
+ *   field empty; the v2 field then renders empty rather than being forced to a value.
+ *
+ * Returns only the *additions* (keys not yet present). Callers are responsible for spreading the
+ * result over the existing map; see {@link mergeCustomFieldsIntoExtendedFields} for the combined
+ * helper.
+ */
+export const buildExtendedFieldsBackfill = (
+  customFields: LegacyCaseCustomField[] | undefined,
+  existingExtendedFields: Record<string, unknown> | null | undefined
+): Record<string, string> => {
+  const existing = existingExtendedFields ?? {};
+  const additions: Record<string, string> = {};
+
+  for (const cf of customFields ?? []) {
+    const hasValue = cf.value !== null && cf.value !== undefined;
+    if (hasValue) {
+      const snakeKey = getFieldSnakeKey(cf.key, getV2FieldType(cf.type));
+      if (!(snakeKey in existing)) {
+        additions[snakeKey] = String(cf.value);
+      }
+    }
+  }
+
+  return additions;
+};
+
+/**
+ * Mirrors `customFields` values into an existing `extended_fields` map with
+ * **customFields-win** semantics — the live write-time counterpart of {@link buildExtendedFieldsBackfill}.
+ *
+ * Rules applied for each customField entry:
+ * - non-null / non-undefined value → override (or add) the mirror key with `String(value)`.
+ * - null / undefined value → delete the mirror key so the v2 field renders empty rather than
+ *   retaining a stale value.
+ *
+ * Returns:
+ * - `existingExtendedFields` unchanged (same reference) when every key in the result would be
+ *   identical to the current map — callers use reference equality to detect a no-op and skip
+ *   the SO write.
+ * - a new merged map otherwise.
+ *
+ * Note: the one-shot migration backfill ({@link buildExtendedFieldsBackfill}) retains
+ * existing-wins semantics so it never clobbers values written through the v2 system.
+ */
+export const mergeCustomFieldsIntoExtendedFields = (
+  customFields: LegacyCaseCustomField[] | undefined,
+  existingExtendedFields: Record<string, unknown> | null | undefined
+): Record<string, string> | null | undefined => {
+  const existing = existingExtendedFields ?? {};
+  const merged: Record<string, string> = { ...existing } as Record<string, string>;
+
+  for (const cf of customFields ?? []) {
+    const snakeKey = getFieldSnakeKey(cf.key, getV2FieldType(cf.type));
+    if (cf.value !== null && cf.value !== undefined) {
+      merged[snakeKey] = String(cf.value);
+    } else {
+      delete merged[snakeKey];
+    }
+  }
+
+  // Return the same reference when the result is value-identical — signals no-op to callers.
+  const existingKeys = Object.keys(existing);
+  const mergedKeys = Object.keys(merged);
+  const isNoOp =
+    existingKeys.length === mergedKeys.length &&
+    mergedKeys.every((k) => merged[k] === (existing as Record<string, string>)[k]);
+
+  return isNoOp ? (existingExtendedFields as Record<string, string> | null | undefined) : merged;
 };

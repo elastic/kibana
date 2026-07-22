@@ -178,7 +178,7 @@ export const TemplateEditorLayout: React.FC<TemplateEditorLayoutProps> = ({
     <ResizableLayout
       className="eui-fullHeight"
       flexPanel={
-        <div css={styles.editorPanel}>
+        <div css={styles.editorPanel} data-test-subj="templateYamlEditorPanel">
           <TemplateYamlEditor
             value={yamlValue}
             onChange={onYamlChange}
