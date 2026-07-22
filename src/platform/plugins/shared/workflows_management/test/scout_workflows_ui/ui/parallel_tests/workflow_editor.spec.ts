@@ -95,11 +95,12 @@ test.describe(
 
     // Regression guard: these step types previously had bare EUI glyph names (e.g. 'commandLine',
     // 'branch', 'refresh') used in CSS url(), rendering nothing in the Monaco editor.
-    // Each test verifies the decoration resolves to an actual data URL in background or mask.
-    // Note: this shallow check does NOT catch a missing MonochromeIcons entry (a black-fill
-    // glyph mis-routed to background-image still contains a data URL and passes here).
+    // Each test verifies the decoration resolves to a valid image URL (data URL or SVG asset URL)
+    // in background-image or mask-image of the ::after pseudo-element.
+    // Bare EUI icon-name strings (e.g. 'commandLine') resolve to page-relative URLs that contain
+    // neither 'data:image' nor '.svg', so they correctly fail this check.
     for (const stepType of ['console', 'if', 'foreach', 'http']) {
-      test(`should render "${stepType}" step type icon from a data URL`, async ({
+      test(`should render "${stepType}" step type icon from a valid image URL`, async ({
         pageObjects,
       }) => {
         await pageObjects.workflowEditor.gotoNewWorkflow();
@@ -111,7 +112,8 @@ test.describe(
           .poll(async () => {
             const { backgroundImage, maskImage } =
               await pageObjects.workflowEditor.getStepTypeIconStyles(stepType);
-            return backgroundImage.includes('data:image') || maskImage.includes('data:image');
+            const hasValidImage = (s: string) => s.includes('data:image') || s.includes('.svg');
+            return hasValidImage(backgroundImage) || hasValidImage(maskImage);
           })
           .toBe(true);
       });

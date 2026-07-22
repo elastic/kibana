@@ -290,7 +290,9 @@ export class WorkflowEditorPage {
   }> {
     const typeClass = stepType.replaceAll('.', '-');
     const typeDecoration = this.yamlEditor.locator(`.type-inline-highlight.type-${typeClass}`);
-    await typeDecoration.waitFor({ state: 'visible' });
+    // Short timeout so each expect.poll attempt doesn't consume the entire poll budget.
+    // The poll itself handles retrying until the element appears.
+    await typeDecoration.waitFor({ state: 'visible', timeout: 1000 });
 
     return typeDecoration.evaluate((element) => {
       const s = getComputedStyle(element, '::after');
