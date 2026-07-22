@@ -16,6 +16,7 @@ import { createMockWorkflowEventLoggerService } from './workflow_event_logger/mo
 export const workflowsExecutionEngineMock = {
   createSetup: jest.fn().mockReturnValue({} as jest.Mocked<WorkflowsExecutionEnginePluginSetup>),
   createStart: jest.fn().mockReturnValue({
+    supportsSynchronousExecution: true,
     workflowEventLoggerService: createMockWorkflowEventLoggerService(),
     executeWorkflow: jest.fn(),
     executeWorkflowStep: jest.fn(),

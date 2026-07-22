@@ -87,6 +87,10 @@ export async function resumeWorkflow({
     workflowExecutionCursor,
   } = setupResult;
 
+  if (!workflowExecutionRepository) {
+    throw new Error('Persistent workflow execution repository is unavailable');
+  }
+
   const loadedExecution = workflowExecutionState.getWorkflowExecution();
   if (isTerminalStatus(loadedExecution.status)) {
     logger.info(

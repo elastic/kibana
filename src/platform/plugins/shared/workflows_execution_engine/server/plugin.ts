@@ -40,6 +40,7 @@ import {
   checkAndSkipIfExistingScheduledExecution,
   resumeWorkflow,
   runWorkflow,
+  runWorkflowSync,
 } from './execution_functions';
 import { handlePostExecutionLoop } from './execution_functions/handle_post_execution_loop';
 import { buildWorkflowExecutionDocument } from './lib/build_workflow_execution_document';
@@ -55,6 +56,7 @@ import {
 import { WorkflowExecutionTelemetryClient } from './lib/telemetry/workflow_execution_telemetry_client';
 import { validateWorkflowInputs } from './lib/validate_workflow_inputs';
 import { WorkflowsMeteringService } from './metering/metering_service';
+import { InMemoryExecutionPersistence } from './repositories/execution_persistence';
 import { initializeLogsRepositoryDataStream } from './repositories/logs_repository/data_stream';
 import { StepExecutionRepository } from './repositories/step_execution_repository';
 import { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
@@ -109,6 +111,19 @@ import { createIndexes } from '../common';
  *   it is not meant as extra user workflow retries after successful interrupt recovery.
  */
 const WORKFLOW_RUN_TASK_MAX_ATTEMPTS = 3;
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
+const getSynchronousWorkflowOutput = (output: unknown): Record<string, unknown> | undefined => {
+  if (output === undefined || output === null) {
+    return undefined;
+  }
+  if (isRecord(output)) {
+    return output;
+  }
+  throw new Error('Synchronous workflow output must be an object');
+};
 
 /**
  * Max Task Manager attempts for `workflow:resume`.
@@ -693,7 +708,10 @@ export class WorkflowsExecutionEnginePlugin
     return {};
   }
 
-  public start(coreStart: CoreStart, plugins: WorkflowsExecutionEnginePluginStartDeps) {
+  public start(
+    coreStart: CoreStart,
+    plugins: WorkflowsExecutionEnginePluginStartDeps
+  ): WorkflowsExecutionEnginePluginStart {
     this.logger.debug('workflows-execution-engine: Start');
 
     if (!this.setupDependencies) {
@@ -765,7 +783,11 @@ export class WorkflowsExecutionEnginePlugin
       context: Record<string, unknown>,
       defaultTriggeredBy: string,
       request: KibanaRequest,
-      options: { refresh: boolean | 'wait_for' } = { refresh: false }
+      options: {
+        refresh: boolean | 'wait_for';
+        executionId?: string;
+        metadata?: Record<string, string>;
+      } = { refresh: false }
     ): Promise<{
       workflowExecution: WorkflowExecutionForInputRendering;
       repository: WorkflowExecutionRepository;
@@ -780,13 +802,19 @@ export class WorkflowsExecutionEnginePlugin
         coreStart.elasticsearch.client
       );
 
+      const executionContext = options.metadata
+        ? { ...context, metadata: options.metadata }
+        : context;
       const workflowExecution = await buildExecutionDocument({
         workflow,
-        context,
+        context: executionContext,
         defaultTriggeredBy,
         authenticatedUser,
         now: new Date(),
       });
+      if (options.executionId) {
+        workflowExecution.id = options.executionId;
+      }
 
       await maybeDrainConcurrencyQueueBeforeEnqueue({
         workflowExecution,
@@ -830,8 +858,110 @@ export class WorkflowsExecutionEnginePlugin
       };
     };
 
-    const executeWorkflow: ExecuteWorkflow = async (workflow, context, request) => {
+    const executeWorkflow: ExecuteWorkflow = async (workflow, context, request, options = {}) => {
       await checkLicense(plugins.licensing);
+
+      if (
+        options.executionMode !== 'sync' &&
+        (options.capabilities !== undefined || options.abortSignal !== undefined)
+      ) {
+        throw new Error('Request-local capabilities and abort signals require sync execution');
+      }
+
+      if (options.executionMode === 'sync') {
+        if (!request) {
+          throw new Error('Synchronous workflows cannot be executed without the user context');
+        }
+
+        const spaceId = typeof context.spaceId === 'string' ? context.spaceId : 'default';
+        await ensureWorkflowEnabled(workflow, spaceId);
+        const authenticatedUser = await getAuthenticatedUser(
+          request,
+          coreStart.security,
+          coreStart.elasticsearch.client
+        );
+        const syncContext = {
+          ...context,
+          ...(options.metadata ? { metadata: options.metadata } : {}),
+        };
+        const workflowExecution = await buildExecutionDocument({
+          workflow,
+          context: syncContext,
+          defaultTriggeredBy: 'manual',
+          authenticatedUser,
+          now: new Date(),
+        });
+        if (options.executionId) {
+          workflowExecution.id = options.executionId;
+        }
+        if (!workflowExecution.workflowDefinition) {
+          throw new Error('Synchronous workflow execution requires a workflow definition');
+        }
+        const syncWorkflowExecution: EsWorkflowExecution = {
+          ...workflowExecution,
+          isTestRun: workflowExecution.isTestRun ?? false,
+          status: workflowExecution.status ?? ExecutionStatus.PENDING,
+          context: workflowExecution.context ?? syncContext,
+          workflowDefinition: workflowExecution.workflowDefinition,
+          yaml: workflowExecution.yaml ?? workflow.yaml,
+          scopeStack: workflowExecution.scopeStack ?? [],
+          error: workflowExecution.error ?? null,
+          startedAt: workflowExecution.startedAt ?? workflowExecution.createdAt,
+          finishedAt: workflowExecution.finishedAt ?? '',
+          cancelRequested: workflowExecution.cancelRequested ?? false,
+          duration: workflowExecution.duration ?? 0,
+        };
+
+        const syncExecutionPersistence = new InMemoryExecutionPersistence(syncWorkflowExecution);
+        const inputsValid = await validateWorkflowInputs(
+          syncWorkflowExecution,
+          syncExecutionPersistence,
+          this.logger,
+          coreStart,
+          { ...dependencies, capabilities: options.capabilities }
+        );
+        if (!inputsValid) {
+          return {
+            workflowExecutionId: syncWorkflowExecution.id,
+            result: { status: ExecutionStatus.FAILED },
+          };
+        }
+        const abortController = new AbortController();
+        const abort = () => abortController.abort(options.abortSignal?.reason);
+        options.abortSignal?.addEventListener('abort', abort, { once: true });
+        if (options.abortSignal?.aborted) {
+          abort();
+        }
+
+        try {
+          if (!this.coreSetup) {
+            throw new Error('Core setup not available');
+          }
+          const [, , workflowsExecutionEngine] = await this.coreSetup.getStartServices();
+          const result = await runWorkflowSync({
+            workflowExecution: syncWorkflowExecution,
+            request,
+            abortController,
+            logger: this.logger,
+            config: this.config,
+            dependencies: { ...dependencies, capabilities: options.capabilities },
+            workflowsExecutionEngine,
+            workflowExecutionRepository: syncExecutionPersistence,
+            stepExecutionRepository: syncExecutionPersistence,
+          });
+
+          const output = getSynchronousWorkflowOutput(result.context?.output);
+          return {
+            workflowExecutionId: result.id,
+            result: {
+              status: result.status,
+              ...(output ? { output } : {}),
+            },
+          };
+        } finally {
+          options.abortSignal?.removeEventListener('abort', abort);
+        }
+      }
 
       // AUTO-DETECT: Check if we're already running in a Task Manager context
       const isRunningInTaskManager =
@@ -864,7 +994,11 @@ export class WorkflowsExecutionEnginePlugin
         context,
         'manual',
         request,
-        { refresh: true }
+        {
+          refresh: true,
+          executionId: options.executionId,
+          metadata: options.metadata,
+        }
       );
 
       const inputsValid = await validateWorkflowInputs(
@@ -1426,6 +1560,7 @@ export class WorkflowsExecutionEnginePlugin
     };
 
     return {
+      supportsSynchronousExecution: true,
       workflowEventLoggerService,
       executeWorkflow,
       executeWorkflowStep,

@@ -76,20 +76,26 @@ export async function workflowExecutionLoop(params: WorkflowExecutionLoopParams)
     workflowExecutionCursor.start();
     // Run execution and persistence loops in parallel
     // When execution finishes, signal persistence loop to exit immediately
-    await Promise.all([
-      executionFlowLoop(params).finally(() => {
-        // Signal persistence loop to stop waiting and exit
-        persistenceAbortController.abort();
-      }),
-      persistenceLoop(params, persistenceAbortController.signal),
-    ]);
+    if (params.executionMode === 'sync') {
+      await executionFlowLoop(params);
+    } else {
+      await Promise.all([
+        executionFlowLoop(params).finally(() => {
+          // Signal persistence loop to stop waiting and exit
+          persistenceAbortController.abort();
+        }),
+        persistenceLoop(params, persistenceAbortController.signal),
+      ]);
+    }
   } catch (error) {
     workflowExecutionCursor.captureError(error);
   } finally {
     const finalFlushSpan = apm.startSpan('final flush state', 'workflow', 'persistence');
-    await flushState(params, {
-      workflowLogFlushSignal: params.signal,
-    });
+    if (params.executionMode !== 'sync') {
+      await flushState(params, {
+        workflowLogFlushSignal: params.signal,
+      });
+    }
     finalFlushSpan?.end();
   }
 

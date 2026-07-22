@@ -17,8 +17,13 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import type { UsageApiSetup } from '@kbn/usage-api-plugin/server';
-import type { BulkScheduleWorkflowResult, WorkflowExecutionEngineModel } from '@kbn/workflows';
 import type {
+  BulkScheduleWorkflowResult,
+  ExecutionStatus,
+  WorkflowExecutionEngineModel,
+} from '@kbn/workflows';
+import type {
+  WorkflowExecutionCapabilities,
   WorkflowsExtensionsServerPluginSetup,
   WorkflowsExtensionsServerPluginStart,
 } from '@kbn/workflows-extensions/server';
@@ -31,6 +36,20 @@ import type { IWorkflowEventLoggerService } from './workflow_event_logger';
 
 export interface ExecuteWorkflowResponse {
   workflowExecutionId: string;
+  result?: {
+    status: ExecutionStatus;
+    output?: Record<string, unknown>;
+  };
+}
+
+export type WorkflowExecutionMode = 'async' | 'sync';
+
+export interface ExecuteWorkflowOptions {
+  executionMode?: WorkflowExecutionMode;
+  executionId?: string;
+  metadata?: Record<string, string>;
+  capabilities?: WorkflowExecutionCapabilities;
+  abortSignal?: AbortSignal;
 }
 
 export interface ExecuteWorkflowStepResponse {
@@ -58,6 +77,7 @@ export interface TriggerEventsContract {
 }
 
 export interface WorkflowsExecutionEnginePluginStart {
+  readonly supportsSynchronousExecution: true;
   executeWorkflow: ExecuteWorkflow;
   executeWorkflowStep: ExecuteWorkflowStep;
   cancelWorkflowExecution: CancelWorkflowExecution;
@@ -88,7 +108,8 @@ export interface WorkflowsExecutionEnginePluginStartDeps {
 export type ExecuteWorkflow = (
   workflow: WorkflowExecutionEngineModel,
   context: Record<string, unknown>,
-  request: KibanaRequest
+  request: KibanaRequest,
+  options?: ExecuteWorkflowOptions
 ) => Promise<ExecuteWorkflowResponse>;
 
 export type ExecuteWorkflowStep = (
