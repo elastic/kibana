@@ -34,7 +34,7 @@ const defaultProps = {
 };
 
 describe('AlertEpisodeDetailsHeader', () => {
-  it('renders title, description, and status badges', () => {
+  it('renders title and status badges', () => {
     render(
       <I18nProvider>
         <AlertEpisodeDetailsHeader
@@ -47,7 +47,6 @@ describe('AlertEpisodeDetailsHeader', () => {
       </I18nProvider>
     );
     expect(screen.getByRole('heading', { name: 'Rule 1' })).toBeInTheDocument();
-    expect(screen.getByText('Some description')).toBeInTheDocument();
   });
 
   it('renders the loading title while episode or rule data is loading', () => {

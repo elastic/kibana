@@ -21,16 +21,10 @@ import { useIsChromeNextProjectHeader } from './use_is_chrome_next_project_heade
 interface ChromeAppHeaderProps {
   menu?: AppMenuConfig;
   tabsBar?: ReactNode;
-  isCollapsed?: boolean;
   hasTabs?: boolean;
 }
 
-export const ChromeAppHeader = ({
-  menu,
-  tabsBar,
-  isCollapsed,
-  hasTabs = false,
-}: ChromeAppHeaderProps) => {
+export const ChromeAppHeader = ({ menu, tabsBar, hasTabs = false }: ChromeAppHeaderProps) => {
   const { embeddableEditor } = useDiscoverServices();
   const isChromeNextProjectHeader = useIsChromeNextProjectHeader();
   const persistedDiscoverSession = useInternalStateSelector(
@@ -57,7 +51,6 @@ export const ChromeAppHeader = ({
 
     return {
       ...menu,
-      isCollapsed,
       items: menu?.items?.map((item) => {
         // We need more space for the tabs as the title is now in the same row. Move all items to the
         // overflow menu. (Except switch language)
@@ -74,7 +67,7 @@ export const ChromeAppHeader = ({
         return { ...item, overflow } as AppMenuItemType;
       }),
     };
-  }, [isCollapsed, menu]);
+  }, [menu]);
 
   if (!isChromeNextProjectHeader) {
     return null;
