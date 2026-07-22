@@ -38,9 +38,17 @@ export class StatsQuery extends BaseResolverQuery {
     indexPatterns,
     timeRange,
     isInternalRequest,
+    shouldExcludeColdAndFrozenTiers,
     agentId,
   }: ResolverQueryParams) {
-    super({ schema, indexPatterns, timeRange, isInternalRequest, agentId });
+    super({
+      schema,
+      indexPatterns,
+      timeRange,
+      isInternalRequest,
+      shouldExcludeColdAndFrozenTiers,
+      agentId,
+    });
   }
 
   private query(nodes: NodeID[]): JsonObject {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isEmpty, partition } from 'lodash';
+import { isEmpty, noop, partition } from 'lodash';
 import agent from 'elastic-apm-node';
 
 import type { estypes } from '@elastic/elasticsearch';
@@ -118,6 +118,8 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
   }) =>
   (type) => {
     const { alertIgnoreFields: ignoreFields, alertMergeStrategy: mergeStrategy } = config;
+    // Rule preview must stay non-operational, similar to regular actions
+    const responseActionsService = isPreview ? noop : scheduleNotificationResponseActionsService;
     const persistenceRuleType = createPersistenceRuleTypeWrapper({
       ruleDataClient,
       logger,
@@ -501,7 +503,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                     ignoreFieldsRegexes,
                     eventsTelemetry,
                     licensing,
-                    scheduleNotificationResponseActionsService,
+                    scheduleNotificationResponseActionsService: responseActionsService,
                   },
                 });
 

@@ -8,7 +8,7 @@
 import type { TypeOf } from '@kbn/config-schema';
 import type { KibanaRequest, RequestHandler, ResponseHeaders } from '@kbn/core/server';
 import { escapeQuotes, fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
-import { dump } from 'js-yaml';
+import yaml from 'yaml';
 
 import { isEmpty, uniq } from 'lodash';
 
@@ -734,6 +734,8 @@ export const getFullAgentPolicy: FleetRequestHandler<
 > = async (context, request, response) => {
   const fleetContext = await context.fleet;
   const soClient = fleetContext.internalSoClient;
+  const { agentPolicyId } = request.params;
+  const canReadSettings = fleetContext.authz.fleet.readSettings;
 
   if (request.query.kubernetes === true) {
     const agentVersion =
@@ -742,7 +744,7 @@ export const getFullAgentPolicy: FleetRequestHandler<
       soClient,
       request.params.agentPolicyId,
       agentVersion,
-      { standalone: request.query.standalone === true }
+      { standalone: request.query.standalone === true, redactProxySecrets: !canReadSettings }
     );
     if (fullAgentConfigMap) {
       const body: GetFullAgentConfigMapResponse = {
@@ -758,13 +760,10 @@ export const getFullAgentPolicy: FleetRequestHandler<
       });
     }
   } else {
-    const fullAgentPolicy = await agentPolicyService.getFullAgentPolicy(
-      soClient,
-      request.params.agentPolicyId,
-      {
-        standalone: request.query.standalone === true,
-      }
-    );
+    const fullAgentPolicy = await agentPolicyService.getFullAgentPolicy(soClient, agentPolicyId, {
+      standalone: request.query.standalone === true,
+      redactProxySecrets: !canReadSettings,
+    });
     if (fullAgentPolicy) {
       const body: GetFullAgentPolicyResponse = {
         item: fullAgentPolicy,
@@ -791,6 +790,8 @@ export const downloadFullAgentPolicy: FleetRequestHandler<
     params: { agentPolicyId },
   } = request;
 
+  const canReadSettings = fleetContext.authz.fleet.readSettings;
+
   if (request.query.kubernetes === true) {
     const agentVersion =
       await fleetContext.agentClient.asInternalUser.getLatestAgentAvailableDockerImageVersion();
@@ -798,7 +799,7 @@ export const downloadFullAgentPolicy: FleetRequestHandler<
       soClient,
       request.params.agentPolicyId,
       agentVersion,
-      { standalone: request.query.standalone === true }
+      { standalone: request.query.standalone === true, redactProxySecrets: !canReadSettings }
     );
     if (fullAgentConfigMap) {
       const body = fullAgentConfigMap;
@@ -819,9 +820,10 @@ export const downloadFullAgentPolicy: FleetRequestHandler<
   } else {
     const fullAgentPolicy = await agentPolicyService.getFullAgentPolicy(soClient, agentPolicyId, {
       standalone: request.query.standalone === true,
+      redactProxySecrets: !canReadSettings,
     });
     if (fullAgentPolicy) {
-      const body = fullAgentPolicyToYaml(fullAgentPolicy, dump);
+      const body = fullAgentPolicyToYaml(fullAgentPolicy, yaml);
       const headers: ResponseHeaders = {
         'content-type': 'text/x-yaml',
         'content-disposition': `attachment; filename="elastic-agent.yml"`,

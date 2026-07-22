@@ -6,7 +6,7 @@
  */
 
 import type { PhoenixClient } from '@arizeai/phoenix-client';
-import type { Example } from '@arizeai/phoenix-client/dist/esm/types/datasets';
+import type { Example } from '@arizeai/phoenix-client/types/datasets';
 import type { ExampleWithId } from '../types';
 import { diffExamples } from './diff_examples';
 

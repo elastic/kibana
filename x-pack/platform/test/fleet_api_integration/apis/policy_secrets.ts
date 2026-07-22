@@ -1159,6 +1159,46 @@ export default function (providerContext: FtrProviderContext) {
         ).to.eql(true);
       });
 
+      it('should clean up secrets no longer referenced after package upgrade removes a var', async () => {
+        // `package_var_multi_secret` only exists in package version 1.0.0. Upgrading to 1.1.0
+        // drops it from the package spec, so the package policy update triggered by the upgrade
+        // goes through packagePolicyService.bulkUpdate -> deleteSecretsIfNotReferenced ->
+        // findPackagePoliciesUsingSecrets, which queries by the two now-orphaned secret ids.
+        const agentPolicy = await createAgentPolicy();
+
+        const { fleetServerAgentPolicy } = await createFleetServerAgentPolicy();
+        await createFleetServerAgent(fleetServerAgentPolicy.id, 'server_4', '8.12.0');
+        await callFleetSetup();
+
+        const packagePolicyWithSecrets = await createPackagePolicyWithSecrets(agentPolicy.id);
+        const oldPackageVarMultiIds = packagePolicyWithSecrets.vars.package_var_multi_secret.value
+          .ids as string[];
+
+        await supertest
+          .post('/api/fleet/epm/packages/secrets/1.1.0')
+          .set('kbn-xsrf', 'xxxx')
+          .send({ force: true })
+          .expect(200);
+
+        await supertest
+          .post(`/api/fleet/package_policies/upgrade`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            packagePolicyIds: [packagePolicyWithSecrets.id],
+          })
+          .expect(200);
+
+        // Secret deletion is async — retry until the orphaned secrets are gone.
+        let searchRes: Awaited<ReturnType<typeof getSecrets>> | undefined;
+        for (let i = 0; i < 5; i++) {
+          searchRes = await getSecrets(oldPackageVarMultiIds);
+          if (searchRes.hits.hits.length === 0) break;
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+        }
+
+        expect(searchRes!.hits.hits.length).to.eql(0);
+      });
+
       it('should store secrets if additional fleet server does not meet minimum version, but is unenrolled', async () => {
         const { fleetServerAgentPolicy } = await createFleetServerAgentPolicy();
         await createFleetServerAgent(fleetServerAgentPolicy.id, 'server_1', '8.12.0');

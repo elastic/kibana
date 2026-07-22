@@ -132,7 +132,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
       if (typeof path === 'string' && path.endsWith('package.json')) {
         return JSON.stringify({ name: 'kibana', version: '1.0.0' });
       }
-      // For yaml files (used by search_configs)
+      // For YAML files (used by search_configs)
       if (typeof path === 'string' && path.endsWith('.yml')) {
         return 'mock yaml content';
       }
@@ -165,10 +165,12 @@ describe('runDiscoverPlaywrightConfigs', () => {
             path: 'x-pack/platform/plugins/private/pluginA/test/scout/ui/playwright.config.ts',
             category: 'ui',
             type: 'playwright',
+            namespace: undefined,
             manifest: {
               path: 'x-pack/platform/plugins/private/pluginA/test/scout/ui/playwright.config.ts',
               exists: true,
               sha1: 'abc123',
+              testChannels: [],
               tests: [
                 {
                   id: 'test1',
@@ -198,10 +200,12 @@ describe('runDiscoverPlaywrightConfigs', () => {
             path: 'x-pack/platform/plugins/private/pluginA/test/scout/ui/parallel.playwright.config.ts',
             category: 'ui',
             type: 'playwright',
+            namespace: undefined,
             manifest: {
               path: 'x-pack/platform/plugins/private/pluginA/test/scout/ui/parallel.playwright.config.ts',
               exists: true,
               sha1: 'def456',
+              testChannels: [],
               tests: [
                 {
                   id: 'test3',
@@ -229,10 +233,12 @@ describe('runDiscoverPlaywrightConfigs', () => {
             path: 'x-pack/platform/plugins/shared/pluginB/test/scout/api/playwright.config.ts',
             category: 'api',
             type: 'playwright',
+            namespace: undefined,
             manifest: {
               path: 'x-pack/platform/plugins/shared/pluginB/test/scout/api/playwright.config.ts',
               exists: true,
               sha1: 'ghi789',
+              testChannels: [],
               tests: [
                 {
                   id: 'test4',
@@ -260,10 +266,12 @@ describe('runDiscoverPlaywrightConfigs', () => {
             path: 'src/platform/packages/shared/packageA/test/scout/api/playwright.config.ts',
             category: 'api',
             type: 'playwright',
+            namespace: undefined,
             manifest: {
               path: 'src/platform/packages/shared/packageA/test/scout/api/playwright.config.ts',
               exists: true,
               sha1: 'jkl012',
+              testChannels: [],
               tests: [
                 {
                   id: 'test5',
@@ -291,8 +299,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
     flagsReader.enum.mockReturnValue('all');
     flagsReader.boolean.mockImplementation((flag) => {
       if (flag === 'save') return false;
-      if (flag === 'validate') return true;
-      return false;
+      return flag === 'validate';
     });
 
     runDiscoverPlaywrightConfigs(flagsReader, log);
@@ -406,10 +413,12 @@ describe('runDiscoverPlaywrightConfigs', () => {
           path: 'x-pack/platform/plugins/private/pluginLocalServerless/test/scout/ui/playwright.config.ts',
           category: 'ui',
           type: 'playwright',
+          namespace: undefined,
           manifest: {
             path: 'x-pack/platform/plugins/private/pluginLocalServerless/test/scout/ui/playwright.config.ts',
             exists: true,
             sha1: 'local789',
+            testChannels: [],
             tests: [
               {
                 id: 'localServerlessTest',
@@ -474,10 +483,12 @@ describe('runDiscoverPlaywrightConfigs', () => {
             path: 'x-pack/platform/plugins/private/pluginCustom/test/scout_custom/ui/playwright.config.ts',
             category: 'ui',
             type: 'playwright',
+            namespace: undefined,
             manifest: {
               path: 'x-pack/platform/plugins/private/pluginCustom/test/scout_custom/ui/playwright.config.ts',
               exists: true,
               sha1: 'custom123',
+              testChannels: [],
               tests: [
                 {
                   id: 'customTest1',
@@ -496,10 +507,12 @@ describe('runDiscoverPlaywrightConfigs', () => {
             path: 'x-pack/platform/plugins/private/pluginCustom/test/scout/ui/playwright.config.ts',
             category: 'ui',
             type: 'playwright',
+            namespace: undefined,
             manifest: {
               path: 'x-pack/platform/plugins/private/pluginCustom/test/scout/ui/playwright.config.ts',
               exists: true,
               sha1: 'normal456',
+              testChannels: [],
               tests: [
                 {
                   id: 'normalTest1',
@@ -555,10 +568,12 @@ describe('runDiscoverPlaywrightConfigs', () => {
             path: excludedConfigPath,
             category: 'ui',
             type: 'playwright',
+            namespace: undefined,
             manifest: {
               path: 'x-pack/solutions/security/plugins/cloud_security_posture/test/scout_cspm_agentless/.meta/ui/parallel.json',
               exists: true,
               sha1: 'exclude123',
+              testChannels: [],
               tests: [
                 {
                   id: 'excludedTest',
@@ -577,10 +592,12 @@ describe('runDiscoverPlaywrightConfigs', () => {
             path: 'x-pack/solutions/security/plugins/cloud_security_posture/test/scout/ui/playwright.config.ts',
             category: 'ui',
             type: 'playwright',
+            namespace: undefined,
             manifest: {
               path: 'x-pack/solutions/security/plugins/cloud_security_posture/test/scout/ui/playwright.config.ts',
               exists: true,
               sha1: 'include456',
+              testChannels: [],
               tests: [
                 {
                   id: 'includedTest',
@@ -667,10 +684,12 @@ describe('runDiscoverPlaywrightConfigs', () => {
             path: 'x-pack/platform/plugins/private/pluginNoMatch/test/scout/ui/playwright.config.ts',
             category: 'ui',
             type: 'playwright',
+            namespace: undefined,
             manifest: {
               path: 'x-pack/platform/plugins/private/pluginNoMatch/test/scout/ui/playwright.config.ts',
               exists: true,
               sha1: 'mno345',
+              testChannels: [],
               tests: [
                 {
                   id: 'testNoMatch',
@@ -718,6 +737,61 @@ describe('runDiscoverPlaywrightConfigs', () => {
     );
   });
 
+  it('preserves test channel metadata when saving configs', () => {
+    flagsReader.enum.mockReturnValue('all');
+    flagsReader.boolean.mockImplementation((flag) => {
+      if (flag === 'save') return true;
+      if (flag === 'validate') return false;
+      return false;
+    });
+
+    (filterModulesByScoutCiConfig as jest.Mock).mockImplementation((_log, modules) => modules);
+
+    mockTestableModules.modules = [
+      {
+        name: 'pluginChannels',
+        group: 'groupChannels',
+        type: 'plugin' as const,
+        visibility: 'private' as const,
+        root: 'x-pack/platform/plugins/private/pluginChannels',
+        configs: [
+          {
+            path: 'x-pack/platform/plugins/private/pluginChannels/test/scout/ui/playwright.config.ts',
+            category: 'ui',
+            type: 'playwright',
+            namespace: undefined,
+            manifest: {
+              path: 'x-pack/platform/plugins/private/pluginChannels/test/scout/ui/playwright.config.ts',
+              exists: true,
+              sha1: 'channels123',
+              testChannels: ['ci-on-commit', 'ci-batch-daily'],
+              tests: [
+                {
+                  id: 'channelTest',
+                  title: 'Channel Test',
+                  expectedStatus: 'passed',
+                  location: { file: 'channel.spec.ts', line: 1, column: 1 },
+                  tags: ['@local-stateful-classic'],
+                },
+              ],
+            },
+            server: {
+              configSet: 'default',
+            },
+          },
+        ],
+      },
+    ];
+
+    runDiscoverPlaywrightConfigs(flagsReader, log);
+
+    const writeCall = (fs.writeFileSync as jest.Mock).mock.calls[0];
+    const savedData = JSON.parse(writeCall[1]);
+
+    expect(savedData).toHaveLength(1);
+    expect(savedData[0].configs[0].testChannels).toEqual(['ci-on-commit', 'ci-batch-daily']);
+  });
+
   it('filters out modules with no matching configs after tag filtering', () => {
     flagsReader.enum.mockReturnValue('ech'); // @cloud-stateful-* tags only
     flagsReader.boolean.mockReturnValue(false);
@@ -752,10 +826,12 @@ describe('runDiscoverPlaywrightConfigs', () => {
             path: 'x-pack/platform/plugins/private/pluginNoTests/test/scout/ui/playwright.config.ts',
             category: 'ui',
             type: 'playwright',
+            namespace: undefined,
             manifest: {
               path: 'x-pack/platform/plugins/private/pluginNoTests/test/scout/ui/playwright.config.ts',
               exists: true,
               sha1: 'pqr678',
+              testChannels: [],
               tests: [
                 {
                   id: 'testFailed',
@@ -807,10 +883,12 @@ describe('runDiscoverPlaywrightConfigs', () => {
             path: 'x-pack/platform/plugins/private/pluginMixedTests/test/scout/ui/playwright.config.ts',
             category: 'ui',
             type: 'playwright',
+            namespace: undefined,
             manifest: {
               path: 'x-pack/platform/plugins/private/pluginMixedTests/test/scout/ui/playwright.config.ts',
               exists: true,
               sha1: 'stu901',
+              testChannels: [],
               tests: [
                 {
                   id: 'test1',
@@ -912,10 +990,12 @@ describe('runDiscoverPlaywrightConfigs', () => {
             path: 'x-pack/platform/plugins/private/pluginTestModes/test/scout/ui/playwright.config.ts',
             category: 'ui',
             type: 'playwright',
+            namespace: undefined,
             manifest: {
               path: 'x-pack/platform/plugins/private/pluginTestModes/test/scout/ui/playwright.config.ts',
               exists: true,
               sha1: 'vwx234',
+              testChannels: [],
               tests: [
                 {
                   id: 'testModes1',
@@ -938,10 +1018,12 @@ describe('runDiscoverPlaywrightConfigs', () => {
             path: 'x-pack/platform/plugins/private/pluginTestModes/test/scout/api/playwright.config.ts',
             category: 'api',
             type: 'playwright',
+            namespace: undefined,
             manifest: {
               path: 'x-pack/platform/plugins/private/pluginTestModes/test/scout/api/playwright.config.ts',
               exists: true,
               sha1: 'yza567',
+              testChannels: [],
               tests: [
                 {
                   id: 'testModes2',
@@ -990,10 +1072,12 @@ describe('runDiscoverPlaywrightConfigs', () => {
               path: 'x-pack/platform/plugins/private/pluginSearch/test/scout/ui/playwright.config.ts',
               category: 'ui',
               type: 'playwright',
+              namespace: undefined,
               manifest: {
                 path: 'x-pack/platform/plugins/private/pluginSearch/test/scout/ui/playwright.config.ts',
                 exists: true,
                 sha1: 'bcd234',
+                testChannels: [],
                 tests: [
                   {
                     id: 'flattenTest1',
@@ -1012,10 +1096,12 @@ describe('runDiscoverPlaywrightConfigs', () => {
               path: 'x-pack/platform/plugins/private/pluginSearch/test/scout/api/playwright.config.ts',
               category: 'api',
               type: 'playwright',
+              namespace: undefined,
               manifest: {
                 path: 'x-pack/platform/plugins/private/pluginSearch/test/scout/api/playwright.config.ts',
                 exists: true,
                 sha1: 'cde345',
+                testChannels: [],
                 tests: [
                   {
                     id: 'flattenTest2',
@@ -1043,10 +1129,12 @@ describe('runDiscoverPlaywrightConfigs', () => {
               path: 'x-pack/platform/plugins/private/pluginPlatform/test/scout/ui/playwright.config.ts',
               category: 'ui',
               type: 'playwright',
+              namespace: undefined,
               manifest: {
                 path: 'x-pack/platform/plugins/private/pluginPlatform/test/scout/ui/playwright.config.ts',
                 exists: true,
                 sha1: 'def456',
+                testChannels: [],
                 tests: [
                   {
                     id: 'flattenTest3',
@@ -1074,10 +1162,12 @@ describe('runDiscoverPlaywrightConfigs', () => {
               path: 'x-pack/solutions/observability/plugins/pluginOblt/test/scout/ui/playwright.config.ts',
               category: 'ui',
               type: 'playwright',
+              namespace: undefined,
               manifest: {
                 path: 'x-pack/solutions/observability/plugins/pluginOblt/test/scout/ui/playwright.config.ts',
                 exists: true,
                 sha1: 'efg567',
+                testChannels: [],
                 tests: [
                   {
                     id: 'flattenTest4',
@@ -1100,8 +1190,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
     it('logs flattened structure when "--flatten" is set without "--save"', () => {
       flagsReader.enum.mockReturnValue('all');
       flagsReader.boolean.mockImplementation((flag) => {
-        if (flag === 'flatten') return true;
-        return false;
+        return flag === 'flatten';
       });
 
       runDiscoverPlaywrightConfigs(flagsReader, log);
@@ -1122,8 +1211,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
       flagsReader.enum.mockReturnValue('all');
       flagsReader.boolean.mockImplementation((flag) => {
         if (flag === 'flatten') return true;
-        if (flag === 'save') return true;
-        return false;
+        return flag === 'save';
       });
 
       (filterModulesByScoutCiConfig as jest.Mock).mockReturnValue(
@@ -1183,8 +1271,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
       flagsReader.enum.mockReturnValue('all');
       flagsReader.boolean.mockImplementation((flag) => {
         if (flag === 'flatten') return true;
-        if (flag === 'save') return true;
-        return false;
+        return flag === 'save';
       });
 
       (filterModulesByScoutCiConfig as jest.Mock).mockReturnValue(
@@ -1280,8 +1367,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
       flagsReader.enum.mockReturnValue('all');
       flagsReader.boolean.mockImplementation((flag) => {
         if (flag === 'flatten') return true;
-        if (flag === 'save') return true;
-        return false;
+        return flag === 'save';
       });
 
       // Set up a module with a config that has multiple serverRunFlags
@@ -1297,10 +1383,12 @@ describe('runDiscoverPlaywrightConfigs', () => {
               path: 'x-pack/platform/plugins/private/pluginMultiMode/test/scout/ui/playwright.config.ts',
               category: 'ui',
               type: 'playwright',
+              namespace: undefined,
               manifest: {
                 path: 'x-pack/platform/plugins/private/pluginMultiMode/test/scout/ui/playwright.config.ts',
                 exists: true,
                 sha1: 'fgh678',
+                testChannels: [],
                 tests: [
                   {
                     id: 'multiModeTest',

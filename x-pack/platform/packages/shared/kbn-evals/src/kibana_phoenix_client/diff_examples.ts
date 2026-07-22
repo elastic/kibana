@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Example } from '@arizeai/phoenix-client/dist/esm/types/datasets';
+import type { Example } from '@arizeai/phoenix-client/types/datasets';
 import objectHash from 'object-hash';
 import { isEmpty, omitBy } from 'lodash';
 import type { ExampleWithId } from '../types';

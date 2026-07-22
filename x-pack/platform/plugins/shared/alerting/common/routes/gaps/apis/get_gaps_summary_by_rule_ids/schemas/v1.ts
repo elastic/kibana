@@ -5,12 +5,15 @@
  * 2.0.
  */
 import { schema } from '@kbn/config-schema';
+import { MAX_ID_LENGTH, MAX_ARRAY_FIELDS, ISO_DATE_MAX_LENGTH } from '../../../../../constants';
 
 export const getGapsSummaryByRuleIdsBodySchema = schema.object(
   {
-    end: schema.string(),
-    start: schema.string(),
-    rule_ids: schema.arrayOf(schema.string(), { maxSize: 100 }),
+    end: schema.string({ maxLength: ISO_DATE_MAX_LENGTH }),
+    start: schema.string({ maxLength: ISO_DATE_MAX_LENGTH }),
+    rule_ids: schema.arrayOf(schema.string({ maxLength: MAX_ID_LENGTH }), {
+      maxSize: MAX_ARRAY_FIELDS,
+    }),
   },
   {
     validate({ start, end }) {

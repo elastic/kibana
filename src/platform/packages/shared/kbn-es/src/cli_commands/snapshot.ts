@@ -34,7 +34,7 @@ export const snapshot: Command = {
       -E                Additional key=value settings to pass to Elasticsearch
       --download-only   Download the snapshot but don't actually start it
       --ssl             Sets up SSL on Elasticsearch
-      --use-cached      Skips cache verification and use cached ES snapshot.
+      --use-cached      Prefer locally cached ES snapshots instead of downloading promoted snapshots.
       --skip-ready-check  Disable the ready check,
       --ready-timeout   Customize the ready check timeout, in seconds or "Xm" format, defaults to 1m
       --es-log-level    Log level for ES stdout output (all, info, warn, error, silent) [default: info]

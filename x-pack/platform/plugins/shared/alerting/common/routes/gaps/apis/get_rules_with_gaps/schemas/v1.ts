@@ -5,12 +5,12 @@
  * 2.0.
  */
 import { schema } from '@kbn/config-schema';
-import { gapFillStatus, gapStatus } from '../../../../../constants';
+import { gapFillStatus, gapStatus, ISO_DATE_MAX_LENGTH } from '../../../../../constants';
 
 export const getRuleIdsWithGapBodySchema = schema.object(
   {
-    end: schema.string(),
-    start: schema.string(),
+    end: schema.string({ maxLength: ISO_DATE_MAX_LENGTH }),
+    start: schema.string({ maxLength: ISO_DATE_MAX_LENGTH }),
     // Filters the underlying gap documents before aggregation. Matches the raw
     // per-gap statuses.
     statuses: schema.maybe(
@@ -19,7 +19,8 @@ export const getRuleIdsWithGapBodySchema = schema.object(
           schema.literal(gapStatus.UNFILLED),
           schema.literal(gapStatus.PARTIALLY_FILLED),
           schema.literal(gapStatus.FILLED),
-        ])
+        ]),
+        { maxSize: 3 }
       )
     ),
     // Filters by the derived, per-rule status that is calculated from gap
@@ -30,7 +31,8 @@ export const getRuleIdsWithGapBodySchema = schema.object(
           schema.literal(gapFillStatus.UNFILLED),
           schema.literal(gapFillStatus.IN_PROGRESS),
           schema.literal(gapFillStatus.FILLED),
-        ])
+        ]),
+        { maxSize: 3 }
       )
     ),
     has_unfilled_intervals: schema.maybe(schema.boolean()),

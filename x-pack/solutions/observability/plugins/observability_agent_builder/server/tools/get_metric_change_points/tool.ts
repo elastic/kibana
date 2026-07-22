@@ -16,6 +16,11 @@ import type {
 } from '../../types';
 import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
 import { timeRangeSchemaRequired } from '../../utils/tool_schemas';
+import {
+  MAX_INDEX_PATTERN_LENGTH,
+  MAX_KQL_FILTER_LENGTH,
+  MAX_SHORT_STRING_LENGTH,
+} from '../../utils/schema_limits';
 import { getMetricsIndices } from '../../utils/get_metrics_indices';
 import { getToolHandler } from './handler';
 
@@ -24,15 +29,21 @@ export const OBSERVABILITY_GET_METRIC_CHANGE_POINTS_TOOL_ID =
 
 const getMetricChangePointsSchema = z.object({
   ...timeRangeSchemaRequired,
-  index: z.string().describe('The index or index pattern to find the metrics').optional(),
+  index: z
+    .string()
+    .max(MAX_INDEX_PATTERN_LENGTH)
+    .describe('The index or index pattern to find the metrics')
+    .optional(),
   kqlFilter: z
     .string()
+    .max(MAX_KQL_FILTER_LENGTH)
     .describe('A KQL filter to filter the metric documents, e.g.: my_field:foo')
     .optional(),
   aggregation: z
     .object({
       field: z
         .string()
+        .max(MAX_SHORT_STRING_LENGTH)
         .describe(
           `Numeric field to aggregate and observe for changes (e.g., 'transaction.duration.us').`
         ),
@@ -42,7 +53,7 @@ const getMetricChangePointsSchema = z.object({
     })
     .optional(),
   groupBy: z
-    .array(z.string())
+    .array(z.string().max(MAX_SHORT_STRING_LENGTH))
     .describe(
       `Optional keyword fields to break down metrics by to identify which specific group experienced a change.
 Use only low-cardinality fields. Using many fields or high-cardinality fields can cause a large number of groups and severely impact performance.

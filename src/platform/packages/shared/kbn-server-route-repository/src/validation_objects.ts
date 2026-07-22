@@ -10,7 +10,10 @@
 import { z } from '@kbn/zod';
 import { PassThroughAny } from '@kbn/zod-helpers';
 
-export const passThroughValidationObject = {
+export const passThroughValidationObject: Record<
+  'body' | 'params' | 'query',
+  typeof PassThroughAny
+> = {
   body: PassThroughAny,
   params: PassThroughAny,
   query: PassThroughAny,

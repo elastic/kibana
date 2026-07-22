@@ -12,24 +12,18 @@ import type { ScoutLogger } from '../../common';
 import type { KibanaUrl } from '../../common/services/kibana_url';
 import type { ScoutTestConfig } from '../../types';
 import { CollapsibleNav } from './collapsible_nav';
-import { CopySavedObjectsToSpaceFlyout } from './copy_saved_objects_to_space_flyout';
 import { DashboardApp } from './dashboard_app';
 import { DataViewsManagementPage } from './data_views_management_page';
-import { DashboardLinks } from './dashboard_links';
 import { DatePicker } from './date_picker';
 import { DiscoverApp } from './discover_app';
 import { FilterBar } from './filter_bar';
 import { HomePage } from './home_page';
 import { MapsPage } from './maps_page';
 import { RenderablePage } from './renderable_page';
-import { SavedObjectsManagementPage } from './saved_objects_management_page';
 import { Toasts } from './toasts';
 import { createLazyPageObject } from './utils';
-import { Inspector } from './inspector';
 import { LensApp } from './lens_app';
 import { VisualizeApp } from './visualize_app';
-
-export { CopySavedObjectsToSpaceFlyout, SavedObjectsManagementPage };
 
 export interface PageObjectsFixtures {
   page: ScoutPage;
@@ -43,16 +37,12 @@ export interface PageObjects {
   dataViewsManagement: DataViewsManagementPage;
   discover: DiscoverApp;
   dashboard: DashboardApp;
-  dashboardLinks: DashboardLinks;
   filterBar: FilterBar;
   home: HomePage;
   maps: MapsPage;
   renderable: RenderablePage;
-  savedObjectsManagement: SavedObjectsManagementPage;
-  copySavedObjectsToSpaceFlyout: CopySavedObjectsToSpaceFlyout;
   collapsibleNav: CollapsibleNav;
   toasts: Toasts;
-  inspector: Inspector;
   lens: LensApp;
   visualize: VisualizeApp;
 }
@@ -68,24 +58,13 @@ export function createCorePageObjects(fixtures: PageObjectsFixtures): PageObject
     datePicker: createLazyPageObject(DatePicker, fixtures.page),
     dataViewsManagement: createLazyPageObject(DataViewsManagementPage, fixtures.page),
     dashboard: createLazyPageObject(DashboardApp, fixtures.page),
-    dashboardLinks: createLazyPageObject(DashboardLinks, fixtures.page),
     discover: createLazyPageObject(DiscoverApp, fixtures.page),
     filterBar: createLazyPageObject(FilterBar, fixtures.page),
     home: createLazyPageObject(HomePage, fixtures.page),
     maps: createLazyPageObject(MapsPage, fixtures.page),
     renderable: createLazyPageObject(RenderablePage, fixtures.page),
-    savedObjectsManagement: createLazyPageObject(
-      SavedObjectsManagementPage,
-      fixtures.page,
-      fixtures.kbnUrl
-    ),
-    copySavedObjectsToSpaceFlyout: createLazyPageObject(
-      CopySavedObjectsToSpaceFlyout,
-      fixtures.page
-    ),
     collapsibleNav: createLazyPageObject(CollapsibleNav, fixtures.page, fixtures.config),
     toasts: createLazyPageObject(Toasts, fixtures.page),
-    inspector: createLazyPageObject(Inspector, fixtures.page),
     lens: createLazyPageObject(LensApp, fixtures.page),
     visualize: createLazyPageObject(VisualizeApp, fixtures.page),
   };

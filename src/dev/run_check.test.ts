@@ -443,6 +443,39 @@ describe('run_check', () => {
     expect(output).toContain('node scripts/jest --config packages/foo/jest.config.js');
   });
 
+  it('surfaces an OOM note instead of treating a worker crash as a plain failure', async () => {
+    mockRunJestViaMoon.mockResolvedValue({
+      taskCount: 1,
+      cachedCount: 0,
+      totalTests: 0,
+      failed: [
+        {
+          project: '@kbn/foo',
+          configPath: 'packages/foo/jest.config.js',
+          cached: false,
+          passed: false,
+          testCount: 0,
+          failures: [
+            {
+              file: 'packages/foo/src/bar.test.ts',
+              name: 'Test suite failed to run',
+              message: 'Jest worker encountered 4 child process exceptions, exceeding retry limit',
+              oom: true,
+            },
+          ],
+        },
+      ],
+      exitCode: 1,
+    });
+
+    await handler(createArgs());
+
+    expect(process.exitCode).toBe(1);
+    const output = stdoutSpy.mock.calls.map(([text]: [string]) => text).join('');
+    expect(output).toContain('This looks like a Jest worker ran out of memory');
+    expect(output).toContain('NODE_OPTIONS=--max-old-space-size=8192');
+  });
+
   it('uses the repo root tsconfig in the tsc rerun command when no nearer config exists', async () => {
     mockExistsSync.mockImplementation(
       (p: string) => p === '/repo/packages/foo/jest.config.js' || p === '/repo/tsconfig.json'

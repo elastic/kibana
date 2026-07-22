@@ -39,6 +39,10 @@ describe('getCustomAgents', () => {
     const { httpAgent, httpsAgent } = getCustomAgents(configurationUtilities, logger, targetUrl);
     expect(httpAgent instanceof HttpProxyAgent).toBeTruthy();
     expect(httpsAgent instanceof HttpsProxyAgent).toBeTruthy();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    expect((httpAgent as any)?.proxy?.hostname).toBe('someproxyhost');
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    expect((httpsAgent as any)?.proxy?.hostname).toBe('someproxyhost');
   });
 
   test('return default agents for invalid proxy URL', () => {

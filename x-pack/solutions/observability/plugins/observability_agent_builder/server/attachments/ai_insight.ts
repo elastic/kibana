@@ -10,10 +10,11 @@ import dedent from 'dedent';
 import type { Attachment } from '@kbn/onechat-common/attachments';
 import type { AttachmentTypeDefinition } from '@kbn/onechat-server/attachments';
 import { OBSERVABILITY_AI_INSIGHT_ATTACHMENT_TYPE_ID } from '../../common';
+import { MAX_TEXT_LENGTH } from '../utils/schema_limits';
 
 const aiInsightAttachmentDataSchema = z.object({
-  context: z.string(),
-  summary: z.string(),
+  context: z.string().max(MAX_TEXT_LENGTH),
+  summary: z.string().max(MAX_TEXT_LENGTH),
   attachmentLabel: z.string().optional(),
 });
 

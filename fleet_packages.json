@@ -34,7 +34,7 @@
   },
   {
     "name": "endpoint",
-    "version": "9.3.1"
+    "version": "9.3.2"
   },
   {
     "name": "fleet_server",
@@ -56,7 +56,7 @@
   },
   {
     "name": "security_detection_engine",
-    "version": "9.3.13"
+    "version": "9.3.16"
   },
   {
     "name": "security_ai_prompts",

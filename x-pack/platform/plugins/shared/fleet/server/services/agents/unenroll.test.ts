@@ -25,6 +25,7 @@ import { unenrollAgent, unenrollAgents } from './unenroll';
 import { invalidateAPIKeysForAgents, isAgentUnenrolled } from './unenroll_action_runner';
 import { createClientMock } from './action.mock';
 import * as crud from './crud';
+import * as unenrollActionRunner from './unenroll_action_runner';
 
 jest.mock('../api_keys');
 
@@ -245,7 +246,7 @@ describe('unenroll', () => {
         agentIds: idsToUnenroll,
         revoke: true,
       });
-      expect(unenrolledResponse.actionId).toBeDefined();
+      expect(unenrolledResponse).toHaveProperty('actionId');
 
       // calls ES update with correct values
       const onlyRegular = [agentInRegularDoc._id, agentInRegularDoc2._id];
@@ -309,7 +310,7 @@ describe('unenroll', () => {
         force: true,
       });
 
-      expect(unenrolledResponse.actionId).toBeDefined();
+      expect(unenrolledResponse).toHaveProperty('actionId');
 
       // calls ES update with correct values
       const calledWith = esClient.bulk.mock.calls[0][0];
@@ -460,5 +461,144 @@ describe('unenrollAgents kuery construction', () => {
         kuery: `(namespaces:custom_space) AND (${kuery})`,
       })
     );
+  });
+});
+
+describe('unenrollAgents kuery path — sync/async branching', () => {
+  let mockGetAgentsByKuery: jest.SpyInstance;
+  let mockOpenPointInTime: jest.SpyInstance;
+  let mockUnenrollBatch: jest.SpyInstance;
+  let mockUnenrollActionRunner: jest.SpyInstance;
+
+  beforeEach(async () => {
+    const { soClient } = createClientMock();
+    appContextService.start(
+      createAppContextStartContractMock({}, false, {
+        withoutSpaceExtensions: soClient,
+      })
+    );
+    mockGetAgentsByKuery = jest.spyOn(crud, 'getAgentsByKuery');
+    mockOpenPointInTime = jest.spyOn(crud, 'openPointInTime').mockResolvedValue('pit-id');
+    mockUnenrollBatch = jest
+      .spyOn(unenrollActionRunner, 'unenrollBatch')
+      .mockResolvedValue({ actionId: 'test-action-id' });
+    mockUnenrollActionRunner = jest
+      .spyOn(unenrollActionRunner, 'UnenrollActionRunner')
+      .mockImplementation(
+        () =>
+          ({
+            runActionAsyncTask: jest.fn().mockResolvedValue({ actionId: 'async-action-id' }),
+          } as any)
+      );
+  });
+
+  afterEach(() => {
+    mockGetAgentsByKuery.mockRestore();
+    mockOpenPointInTime.mockRestore();
+    mockUnenrollBatch.mockRestore();
+    mockUnenrollActionRunner.mockRestore();
+    appContextService.stop();
+  });
+
+  it('runs inline and fetches agents when total <= batchSize', async () => {
+    const { soClient, esClient } = createClientMock();
+    const agents = [{ id: 'agent-1' } as any];
+    mockGetAgentsByKuery.mockResolvedValue({ agents, total: 5, page: 1, perPage: SO_SEARCH_LIMIT });
+
+    await unenrollAgents(soClient, esClient, { kuery: 'status:online' });
+
+    expect(mockGetAgentsByKuery).toHaveBeenCalledWith(
+      esClient,
+      soClient,
+      expect.objectContaining({ perPage: SO_SEARCH_LIMIT })
+    );
+    expect(mockUnenrollBatch).toHaveBeenCalledWith(soClient, esClient, agents, expect.anything());
+    expect(mockUnenrollActionRunner).not.toHaveBeenCalled();
+  });
+
+  it('schedules async task and returns actionId immediately when total > batchSize', async () => {
+    const { soClient, esClient } = createClientMock();
+    const batchSize = 100;
+    mockGetAgentsByKuery.mockResolvedValue({ agents: [], total: 500, page: 1, perPage: batchSize });
+
+    const result = await unenrollAgents(soClient, esClient, {
+      kuery: 'status:online',
+      batchSize,
+    });
+
+    expect(result).toEqual({ actionId: 'async-action-id' });
+    expect(mockGetAgentsByKuery).toHaveBeenCalledTimes(1);
+    expect(mockUnenrollActionRunner).toHaveBeenCalledWith(
+      esClient,
+      soClient,
+      expect.objectContaining({ batchSize, total: 500 }),
+      expect.anything()
+    );
+    expect(mockUnenrollBatch).not.toHaveBeenCalled();
+  });
+
+  it('uses caller-supplied batchSize as the async threshold', async () => {
+    const { soClient, esClient } = createClientMock();
+    const batchSize = 50;
+    mockGetAgentsByKuery.mockResolvedValue({ agents: [], total: 60, page: 1, perPage: batchSize });
+
+    const result = await unenrollAgents(soClient, esClient, {
+      kuery: 'status:online',
+      batchSize,
+    });
+
+    expect(result).toEqual({ actionId: 'async-action-id' });
+    expect(mockUnenrollActionRunner).toHaveBeenCalledWith(
+      esClient,
+      soClient,
+      expect.objectContaining({ batchSize, total: 60 }),
+      expect.anything()
+    );
+  });
+
+  it('runs inline when total equals batchSize (boundary)', async () => {
+    const { soClient, esClient } = createClientMock();
+    const batchSize = 100;
+    mockGetAgentsByKuery.mockResolvedValue({ agents: [], total: 100, page: 1, perPage: batchSize });
+
+    await unenrollAgents(soClient, esClient, { kuery: 'status:online', batchSize });
+
+    expect(mockUnenrollBatch).toHaveBeenCalled();
+    expect(mockUnenrollActionRunner).not.toHaveBeenCalled();
+  });
+
+  it('dry run (kuery) returns count without writing', async () => {
+    const { soClient, esClient } = createClientMock();
+    mockGetAgentsByKuery.mockResolvedValue({
+      agents: [],
+      total: 42,
+      page: 1,
+      perPage: SO_SEARCH_LIMIT,
+    });
+
+    const result = await unenrollAgents(soClient, esClient, {
+      kuery: 'status:online',
+      dryRun: true,
+    });
+
+    expect(result).toEqual({ count: 42 });
+    expect(mockUnenrollBatch).not.toHaveBeenCalled();
+    expect(mockUnenrollActionRunner).not.toHaveBeenCalled();
+  });
+
+  it('dry run (agentIds) returns count of found agents only', async () => {
+    const { soClient, esClient } = createClientMock();
+    const mockGetAgents = jest
+      .spyOn(crud, 'getAgents')
+      .mockResolvedValue([{ id: 'agent-1' }, { id: 'agent-2' }] as any);
+
+    const result = await unenrollAgents(soClient, esClient, {
+      agentIds: ['agent-1', 'agent-2', 'missing-1'],
+      dryRun: true,
+    });
+
+    expect(result).toEqual({ count: 2 });
+    expect(mockUnenrollBatch).not.toHaveBeenCalled();
+    mockGetAgents.mockRestore();
   });
 });
