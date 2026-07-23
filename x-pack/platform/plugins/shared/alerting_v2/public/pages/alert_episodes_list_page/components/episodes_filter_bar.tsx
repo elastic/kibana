@@ -75,8 +75,8 @@ export const EpisodesFilterBar = ({
     [queryStringInput]
   );
 
-  const onStatusChange = useCallback(
-    (status: string | undefined) => {
+  const onStatusesChange = useCallback(
+    (status: string[] | undefined) => {
       onFilterChange((prev) => ({ ...prev, status }));
     },
     [onFilterChange]
@@ -137,8 +137,8 @@ export const EpisodesFilterBar = ({
           <EuiFlexItem grow={false}>
             <EuiFilterGroup compressed>
               <AlertEpisodesStatusFilter
-                selectedStatus={filterState.status}
-                onStatusChange={onStatusChange}
+                selectedStatuses={filterState.status}
+                onStatusesChange={onStatusesChange}
                 data-test-subj="episodesFilterBar-status"
               />
 
