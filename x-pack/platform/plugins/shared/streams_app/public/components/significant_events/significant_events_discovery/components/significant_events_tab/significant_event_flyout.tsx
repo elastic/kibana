@@ -30,11 +30,12 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { SignificantEvent } from '@kbn/significant-events-schema';
+import { getSeverityLabel, type SignificantEvent } from '@kbn/significant-events-schema';
 import { useFetchSignificantEventLifecycle } from '../../../../../hooks/significant_events/use_fetch_significant_event_lifecycle';
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { useTriggerInvestigation } from '../../../../../hooks/significant_events/use_trigger_investigation';
 import { useUpdateSignificantEvent } from '../../../../../hooks/significant_events/use_update_significant_event';
+import { useBlocksNewActivity } from '../../../../../hooks/significant_events/use_significant_events_maintenance';
 import { FlyoutToolbarHeader } from '../../../../flyout_components/flyout_toolbar_header';
 import { LifecycleTimeline } from './lifecycle_timeline';
 import { getSignificantEventStatusColor } from '../shared/status_display';
@@ -87,8 +88,8 @@ const RESTART_INVESTIGATION_TOOLTIP = i18n.translate(
     defaultMessage: 'This will cancel the running investigation and start a new one.',
   }
 );
-const CRITICALITY_LABEL = i18n.translate('xpack.streams.sigEventsTab.flyout.criticalityLabel', {
-  defaultMessage: 'Criticality',
+const SEVERITY_LABEL = i18n.translate('xpack.streams.sigEventsTab.flyout.severityLabel', {
+  defaultMessage: 'Severity',
 });
 const CONFIDENCE_LABEL = i18n.translate('xpack.streams.sigEventsTab.flyout.confidenceLabel', {
   defaultMessage: 'Confidence',
@@ -109,13 +110,13 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
     isLoading: isLifecycleLoading,
     isError: isLifecycleError,
     refetch: refetchLifecycle,
-  } = useFetchSignificantEventLifecycle(event.event_id);
+  } = useFetchSignificantEventLifecycle(event.event_uuid);
 
   const flyoutTitleId = useGeneratedHtmlId({ prefix: 'significantEventFlyout' });
   const [isActionsMenuOpen, setIsActionsMenuOpen] = useState(false);
 
   // Use the latest event version from the lifecycle response — lifecycle fetches all
-  // versions via findByDiscoverySlug (no time filter), so it captures newly-written
+  // versions via findByEventId (no time filter), so it captures newly-written
   // versions that fall outside the time-filtered list query used by the parent table.
   const latestEvent = useMemo(() => lifecycleData?.events.at(-1) ?? event, [lifecycleData, event]);
 
@@ -142,6 +143,7 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
   }, []);
 
   const { triggerInvestigation, isTriggering } = useTriggerInvestigation({ onTriggerSuccess });
+  const { blocksActivity, activityBlockTooltip } = useBlocksNewActivity();
   const { updateEventStatus, isUpdating } = useUpdateSignificantEvent({
     onUpdateSuccess: onClose,
   });
@@ -157,7 +159,7 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
     focusedSignificantEventService.setFocusedEvent(latestEvent);
 
     return () => {
-      focusedSignificantEventService.clearFocusedEvent(latestEvent.discovery_slug);
+      focusedSignificantEventService.clearFocusedEvent(latestEvent.event_id);
     };
   }, [latestEvent, focusedSignificantEventService]);
 
@@ -195,7 +197,7 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
                     onClick={() => {
                       if (!isUpdating) {
                         setIsActionsMenuOpen(false);
-                        updateEventStatus({ eventId: latestEvent.event_id, status: 'closed' });
+                        updateEventStatus({ eventUuid: latestEvent.event_uuid, status: 'closed' });
                       }
                     }}
                     data-test-subj="sigEventCloseButton"
@@ -248,7 +250,7 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
           </EuiTitle>
           <EuiText size="xs" color="subdued">
             {formatTimestamp(event['@timestamp'])}
-            {event.criticality != null && ` · ${CRITICALITY_LABEL}: ${event.criticality}`}
+            {` · ${SEVERITY_LABEL}: ${getSeverityLabel(event.severity)}`}
             {event.confidence != null &&
               ` · ${CONFIDENCE_LABEL}: ${Math.round(event.confidence * 100)}%`}
           </EuiText>
@@ -290,14 +292,18 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
         <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
           <EuiFlexItem grow={false}>
             <EuiToolTip
-              content={isInvestigationRunning ? RESTART_INVESTIGATION_TOOLTIP : undefined}
+              content={
+                activityBlockTooltip ??
+                (isInvestigationRunning ? RESTART_INVESTIGATION_TOOLTIP : undefined)
+              }
             >
               <EuiButton
                 iconType="inspect"
                 onClick={() => {
-                  if (!isTriggering) triggerInvestigation(latestEvent.event_id);
+                  if (!isTriggering) triggerInvestigation(latestEvent.event_uuid);
                 }}
-                isDisabled={isTriggering}
+                isDisabled={isTriggering || blocksActivity}
+                hasAriaDisabled={blocksActivity}
                 isLoading={isTriggering}
                 fill
                 size="s"

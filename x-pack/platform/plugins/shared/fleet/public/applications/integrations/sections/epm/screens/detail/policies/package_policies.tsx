@@ -178,6 +178,7 @@ export const PackagePoliciesPage = ({
       : agentBasedData.items.map(mapPoliciesData);
     setAgentBasedPackageAndAgentPolicies(mappedPoliciesData);
   }, [agentBasedData, mapPoliciesData]);
+  const hasAgentBasedPolicies = (agentBasedData?.total ?? 0) > 0;
 
   // States and data for agentless policies table
   // If agentless is not supported or not an agentless integration, this block and
@@ -366,53 +367,57 @@ export const PackagePoliciesPage = ({
                   />
                 </EuiPanel>
               </EuiAccordion>
-              <EuiSpacer size="l" />
-              <EuiAccordion
-                id="agentBasedAccordion"
-                initialIsOpen={true}
-                buttonContent={
-                  <EuiFlexGroup
-                    justifyContent="center"
-                    alignItems="center"
-                    gutterSize="s"
-                    responsive={false}
+              {hasAgentBasedPolicies && (
+                <>
+                  <EuiSpacer size="l" />
+                  <EuiAccordion
+                    id="agentBasedAccordion"
+                    initialIsOpen={true}
+                    buttonContent={
+                      <EuiFlexGroup
+                        justifyContent="center"
+                        alignItems="center"
+                        gutterSize="s"
+                        responsive={false}
+                      >
+                        <EuiFlexItem grow={false}>
+                          <EuiText size="m">
+                            <h4>
+                              <FormattedMessage
+                                id="xpack.fleet.epm.packageDetails.integrationList.agentBasedHeader"
+                                defaultMessage="Agent-based"
+                              />
+                            </h4>
+                          </EuiText>
+                        </EuiFlexItem>
+                        <EuiFlexItem grow={false}>
+                          <EuiNotificationBadge color="subdued" size="m">
+                            <h4>{agentBasedData?.total ?? 0}</h4>
+                          </EuiNotificationBadge>
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    }
                   >
-                    <EuiFlexItem grow={false}>
-                      <EuiText size="m">
-                        <h4>
-                          <FormattedMessage
-                            id="xpack.fleet.epm.packageDetails.integrationList.agentBasedHeader"
-                            defaultMessage="Agent-based"
-                          />
-                        </h4>
-                      </EuiText>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiNotificationBadge color="subdued" size="m">
-                        <h4>{agentBasedData?.total ?? 0}</h4>
-                      </EuiNotificationBadge>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                }
-              >
-                <EuiSpacer size="m" />
-                <EuiPanel hasBorder={true} hasShadow={false}>
-                  <AgentBasedPackagePoliciesTable
-                    isLoading={agentBasedIsLoading}
-                    packagePolicies={agentBasedPackageAndAgentPolicies}
-                    packagePoliciesTotal={agentBasedData?.total ?? 0}
-                    refreshPackagePolicies={refreshAgentBasedPolicies}
-                    pagination={{
-                      pagination: agentBasedPagination,
-                      pageSizeOptions: agentBasedPageSizeOptions,
-                      setPagination: agentBasedSetPagination,
-                    }}
-                    addAgentToPolicyIdFromParams={addAgentToPolicyIdFromParams}
-                    showAddAgentHelpForPolicyId={showAddAgentHelpForPolicyId}
-                    from={embedded ? 'installed-integrations' : undefined}
-                  />
-                </EuiPanel>
-              </EuiAccordion>
+                    <EuiSpacer size="m" />
+                    <EuiPanel hasBorder={true} hasShadow={false}>
+                      <AgentBasedPackagePoliciesTable
+                        isLoading={agentBasedIsLoading}
+                        packagePolicies={agentBasedPackageAndAgentPolicies}
+                        packagePoliciesTotal={agentBasedData?.total ?? 0}
+                        refreshPackagePolicies={refreshAgentBasedPolicies}
+                        pagination={{
+                          pagination: agentBasedPagination,
+                          pageSizeOptions: agentBasedPageSizeOptions,
+                          setPagination: agentBasedSetPagination,
+                        }}
+                        addAgentToPolicyIdFromParams={addAgentToPolicyIdFromParams}
+                        showAddAgentHelpForPolicyId={showAddAgentHelpForPolicyId}
+                        from={embedded ? 'installed-integrations' : undefined}
+                      />
+                    </EuiPanel>
+                  </EuiAccordion>
+                </>
+              )}
             </>
           )}
         </EuiFlexItem>

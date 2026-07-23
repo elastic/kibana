@@ -11,10 +11,14 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 import { appContextService } from '../../services';
 
-import { getAgentStatusForAgentPolicy } from '../../services/agents/status';
+import {
+  getAgentStatusForAgentPolicy,
+  getIncomingDataByAgentsId,
+} from '../../services/agents/status';
 import { fetchAndAssignAgentMetrics } from '../../services/agents/agent_metrics';
+import { getPackageInfo } from '../../services/epm/packages';
 
-import { getAgentEffectiveConfigHandler } from './handlers';
+import { getAgentEffectiveConfigHandler, getAgentDataHandler } from './handlers';
 
 import {
   getAgentStatusForAgentPolicyHandler,
@@ -44,10 +48,15 @@ jest.mock('../../services/spaces/helpers', () => ({
 
 jest.mock('../../services/agents/status', () => ({
   getAgentStatusForAgentPolicy: jest.fn(),
+  getIncomingDataByAgentsId: jest.fn(),
 }));
 
 jest.mock('../../services/agents/agent_metrics', () => ({
   fetchAndAssignAgentMetrics: jest.fn(),
+}));
+
+jest.mock('../../services/epm/packages', () => ({
+  getPackageInfo: jest.fn(),
 }));
 
 describe('Handlers', () => {
@@ -421,6 +430,91 @@ describe('Handlers', () => {
       await expect(
         getAgentEffectiveConfigHandler(mockContext, request as any, mockResponse)
       ).rejects.toThrow('agent-1 not found in namespace');
+    });
+  });
+
+  describe('getAgentDataHandler', () => {
+    let mockResponse: any;
+    let mockContext: any;
+
+    beforeEach(() => {
+      (getIncomingDataByAgentsId as jest.Mock).mockResolvedValue({ items: [], dataPreview: [] });
+      mockResponse = httpServerMock.createResponseFactory();
+      mockContext = {
+        core: Promise.resolve({
+          elasticsearch: { client: { asCurrentUser: {} } },
+          savedObjects: { client: { getCurrentNamespace: jest.fn().mockReturnValue('default') } },
+        }),
+      };
+    });
+
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('passes dataStreamPattern: undefined when the package has empty data_streams (prevents empty string reaching hasPrivileges)', async () => {
+      (getPackageInfo as jest.Mock).mockResolvedValue({ data_streams: [] });
+
+      await getAgentDataHandler(
+        mockContext,
+        {
+          query: {
+            agentsIds: ['agent-1'],
+            pkgName: 'aws_cloudwatch_input_otel',
+            pkgVersion: '0.5.0',
+            previewData: false,
+          },
+        } as any,
+        mockResponse
+      );
+
+      expect(getIncomingDataByAgentsId).toHaveBeenCalledWith(
+        expect.objectContaining({ dataStreamPattern: undefined })
+      );
+    });
+
+    it('passes dataStreamPattern: undefined when data_streams is absent from the package info', async () => {
+      (getPackageInfo as jest.Mock).mockResolvedValue({});
+
+      await getAgentDataHandler(
+        mockContext,
+        {
+          query: {
+            agentsIds: ['agent-1'],
+            pkgName: 'aws_cloudwatch_input_otel',
+            pkgVersion: '0.5.0',
+            previewData: false,
+          },
+        } as any,
+        mockResponse
+      );
+
+      expect(getIncomingDataByAgentsId).toHaveBeenCalledWith(
+        expect.objectContaining({ dataStreamPattern: undefined })
+      );
+    });
+
+    it('passes a non-empty dataStreamPattern when the package has data_streams', async () => {
+      (getPackageInfo as jest.Mock).mockResolvedValue({
+        data_streams: [{ type: 'logs', dataset: 'aws.cloudwatch' }],
+      });
+
+      await getAgentDataHandler(
+        mockContext,
+        {
+          query: {
+            agentsIds: ['agent-1'],
+            pkgName: 'aws',
+            pkgVersion: '1.0.0',
+            previewData: false,
+          },
+        } as any,
+        mockResponse
+      );
+
+      const [[{ dataStreamPattern }]] = (getIncomingDataByAgentsId as jest.Mock).mock.calls;
+      expect(dataStreamPattern).toBeDefined();
+      expect(dataStreamPattern).not.toBe('');
     });
   });
 });
