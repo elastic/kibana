@@ -15,7 +15,7 @@ import {
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { EVALS_API_PRIVILEGES } from '../../../common';
 import type { RouteDependencies } from '../register_routes';
-import { escapeWildcard } from './utils';
+import { escapeWildcard, getEsErrorLogDetails } from './utils';
 
 export const registerGetTracingProjectsRoute = ({ router, logger }: RouteDependencies) => {
   router.versioned
@@ -60,23 +60,33 @@ export const registerGetTracingProjectsRoute = ({ router, logger }: RouteDepende
             });
           }
 
-          const searchResponse = await esClient.search({
+          // Query that isolates evaluation root spans. Shared between the paging
+          // pass and the per-page trace-id pass so both operate on the exact
+          // same set of documents.
+          const buildRootSpanQuery = (additionalFilters: Array<Record<string, unknown>> = []) => ({
+            bool: {
+              must_not: [
+                { exists: { field: 'parent_span_id' } },
+                { exists: { field: 'attributes.evaluator.name' } },
+              ],
+              filter: [
+                ...extraFilters,
+                ...additionalFilters,
+                {
+                  terms: { 'scope.name': ['@kbn/evals', 'inference'] },
+                },
+              ],
+            },
+          });
+
+          // Pass 1: page over candidate projects with cheap per-project metrics.
+          // The `trace_ids` sub-agg is omitted here on purpose - nesting it under
+          // the `size: 1000` terms agg scales buckets as `project_count ×
+          // maxTraceIdsPerProject` and trips `search.max_buckets`.
+          const pagingResponse = await esClient.search({
             index: TRACES_INDEX_PATTERN,
             size: 0,
-            query: {
-              bool: {
-                must_not: [
-                  { exists: { field: 'parent_span_id' } },
-                  { exists: { field: 'attributes.evaluator.name' } },
-                ],
-                filter: [
-                  ...extraFilters,
-                  {
-                    terms: { 'scope.name': ['@kbn/evals', 'inference'] },
-                  },
-                ],
-              },
-            },
+            query: buildRootSpanQuery(),
             aggs: {
               project_count: {
                 cardinality: { field: 'name' },
@@ -100,9 +110,6 @@ export const registerGetTracingProjectsRoute = ({ router, logger }: RouteDepende
                       percents: [50, 99],
                     },
                   },
-                  trace_ids: {
-                    terms: { field: 'trace_id', size: maxTraceIdsPerProject },
-                  },
                   error_count: {
                     filter: {
                       term: { 'status.code': 'ERROR' },
@@ -118,7 +125,7 @@ export const registerGetTracingProjectsRoute = ({ router, logger }: RouteDepende
             },
           });
 
-          const aggs = searchResponse.aggregations as Record<string, unknown> | undefined;
+          const aggs = pagingResponse.aggregations as Record<string, unknown> | undefined;
           const projectsAgg = aggs?.projects as { buckets: Array<Record<string, unknown>> };
           const projectCountAgg = aggs?.project_count as { value: number };
           const totalProjects = projectCountAgg?.value ?? 0;
@@ -126,14 +133,40 @@ export const registerGetTracingProjectsRoute = ({ router, logger }: RouteDepende
           const allBuckets = projectsAgg?.buckets ?? [];
           const startIndex = (page - 1) * perPage;
           const pagedBuckets = allBuckets.slice(startIndex, startIndex + perPage);
+          const pagedProjectNames = pagedBuckets.map((bucket) => bucket.key as string);
 
+          // Pass 2: collect root-span trace ids for the current page only. Scoping
+          // to `pagedProjectNames` bounds buckets by `perPage`, not project count.
           const traceIdToProject: Record<string, string> = {};
-          for (const bucket of pagedBuckets) {
-            const projectName = bucket.key as string;
-            const traceIdBuckets =
-              (bucket.trace_ids as { buckets: Array<{ key: string }> })?.buckets ?? [];
-            for (const tb of traceIdBuckets) {
-              traceIdToProject[tb.key] = projectName;
+          if (pagedProjectNames.length > 0) {
+            const traceIdsResponse = await esClient.search({
+              index: TRACES_INDEX_PATTERN,
+              size: 0,
+              query: buildRootSpanQuery([{ terms: { name: pagedProjectNames } }]),
+              aggs: {
+                projects: {
+                  terms: {
+                    field: 'name',
+                    size: pagedProjectNames.length,
+                  },
+                  aggs: {
+                    trace_ids: {
+                      terms: { field: 'trace_id', size: maxTraceIdsPerProject },
+                    },
+                  },
+                },
+              },
+            });
+
+            const traceIdsAgg = traceIdsResponse?.aggregations?.projects as
+              | { buckets: Array<{ key: string; trace_ids: { buckets: Array<{ key: string }> } }> }
+              | undefined;
+
+            for (const bucket of traceIdsAgg?.buckets ?? []) {
+              const projectName = bucket.key;
+              for (const tb of bucket.trace_ids?.buckets ?? []) {
+                traceIdToProject[tb.key] = projectName;
+              }
             }
           }
 
@@ -162,7 +195,7 @@ export const registerGetTracingProjectsRoute = ({ router, logger }: RouteDepende
               },
             });
 
-            const perTraceAgg = tokenResponse.aggregations?.per_trace as {
+            const perTraceAgg = tokenResponse?.aggregations?.per_trace as {
               buckets: Array<{
                 key: string;
                 input_tokens: { value: number };
@@ -217,7 +250,8 @@ export const registerGetTracingProjectsRoute = ({ router, logger }: RouteDepende
             },
           });
         } catch (error) {
-          logger.error(`Failed to get tracing projects: ${error}`);
+          const { message, meta } = getEsErrorLogDetails(error);
+          logger.error(`Failed to get tracing projects: ${message}`, meta);
           return response.customError({
             statusCode: 500,
             body: { message: 'Failed to get tracing projects' },
