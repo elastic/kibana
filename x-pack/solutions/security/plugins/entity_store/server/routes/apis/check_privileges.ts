@@ -41,16 +41,23 @@ export function registerCheckPrivileges(router: EntityStorePluginRouter) {
         const entityStoreCtx = await ctx.entityStore;
         const security = entityStoreCtx.security;
         const spaceId = entityStoreCtx.namespace;
+        const assetManager = entityStoreCtx.assetManagerClient;
 
-        const response = await checkEntityStoreIndexPrivileges({
-          request: req,
-          security,
-          spaceId,
-          includeMetadataPrivileges: true,
-        });
+        const [response, installPrivileges] = await Promise.all([
+          checkEntityStoreIndexPrivileges({
+            request: req,
+            security,
+            spaceId,
+            includeMetadataPrivileges: true,
+          }),
+          // Mirror the exact server-side enforcement used by the install and
+          // entity_maintainers/init routes (`enforceEntityStorePrivileges`), so clients can
+          // gate write POSTs on the same aggregate check the routes perform.
+          assetManager.getPrivileges(req),
+        ]);
 
         return res.ok({
-          body: response,
+          body: { ...response, has_install_permissions: installPrivileges.hasAllRequested },
         });
       })
     );

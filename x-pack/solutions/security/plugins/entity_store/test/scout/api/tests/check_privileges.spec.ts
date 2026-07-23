@@ -42,6 +42,7 @@ apiTest.describe('Entity Store check privileges API', { tag: ENTITY_STORE_TAGS }
       has_all_required: true,
       has_read_permissions: true,
       has_write_permissions: true,
+      has_install_permissions: true,
     });
   });
 
@@ -86,6 +87,7 @@ apiTest.describe('Entity Store check privileges API', { tag: ENTITY_STORE_TAGS }
         has_all_required: false,
         has_read_permissions: false,
         has_write_permissions: false,
+        has_install_permissions: false,
       });
     }
   );
@@ -117,6 +119,7 @@ apiTest.describe('Entity Store check privileges API', { tag: ENTITY_STORE_TAGS }
         has_all_required: false,
         has_read_permissions: false,
         has_write_permissions: false,
+        has_install_permissions: false,
       });
     }
   );
@@ -153,6 +156,7 @@ apiTest.describe('Entity Store check privileges API', { tag: ENTITY_STORE_TAGS }
         has_all_required: false,
         has_read_permissions: true,
         has_write_permissions: false,
+        has_install_permissions: false,
       });
     }
   );
@@ -190,6 +194,7 @@ apiTest.describe('Entity Store check privileges API', { tag: ENTITY_STORE_TAGS }
         has_all_required: false,
         has_read_permissions: true,
         has_write_permissions: false,
+        has_install_permissions: false,
       });
     }
   );
@@ -226,6 +231,10 @@ apiTest.describe('Entity Store check privileges API', { tag: ENTITY_STORE_TAGS }
         has_all_required: false,
         has_read_permissions: true,
         has_write_permissions: true,
+        // `write` on the entity indices is NOT what install/init enforce (read + manage +
+        // manage_index_templates + SO create + source read/view_index_metadata), so a
+        // write-only role must still report has_install_permissions: false.
+        has_install_permissions: false,
       });
     }
   );

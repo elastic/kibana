@@ -64,9 +64,15 @@ export const isEntityStoreV1Installed = async (http: HttpSetup): Promise<boolean
   return response.total > 0;
 };
 
-const hasEntityStoreWritePrivileges = async (http: HttpSetup): Promise<boolean> => {
-  const privileges = await http.get<{ has_write_permissions?: boolean }>(getPrivilegesRequest);
-  return privileges.has_write_permissions === true;
+// Gate auto-install / maintainers-init on the same privilege set the install and
+// entity_maintainers/init routes enforce server-side (read + manage on the target
+// alias, manage_index_templates cluster, saved-object create, and read/
+// view_index_metadata on source indices) — surfaced as `has_install_permissions`.
+// `has_write_permissions` is a different set (write on the entity indices) and would
+// both false-negative (skip for a role the server accepts) and false-positive (still 403).
+const hasEntityStoreInstallPrivileges = async (http: HttpSetup): Promise<boolean> => {
+  const privileges = await http.get<{ has_install_permissions?: boolean }>(getPrivilegesRequest);
+  return privileges.has_install_permissions === true;
 };
 
 /**
@@ -85,7 +91,7 @@ export const useInstallEntityStoreV2 = (services: Services) => {
 
         // Entity store already installed → init entity maintainers only.
         if (isEntityStoreV2Installed) {
-          if (!(await hasEntityStoreWritePrivileges(services.http))) return;
+          if (!(await hasEntityStoreInstallPrivileges(services.http))) return;
           await services.http.post(initEntityMaintainersRequest);
           return;
         }
@@ -97,8 +103,8 @@ export const useInstallEntityStoreV2 = (services: Services) => {
           if (!hadV1) return;
         }
 
-        // Skip preferences + install for users without write privileges
-        if (!(await hasEntityStoreWritePrivileges(services.http))) return;
+        // Skip preferences + install for users without install privileges
+        if (!(await hasEntityStoreInstallPrivileges(services.http))) return;
 
         const { autoInstall } = await services.http.get<{ autoInstall: boolean }>(
           getPreferencesRequest

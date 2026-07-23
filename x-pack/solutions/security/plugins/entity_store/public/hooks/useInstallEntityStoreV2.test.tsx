@@ -35,17 +35,17 @@ const mockHttpGet = (
   {
     status,
     autoInstall = true,
-    hasWritePermissions = true,
+    hasInstallPermissions = true,
   }: {
     status: EntityStoreStatus;
     autoInstall?: boolean;
-    hasWritePermissions?: boolean;
+    hasInstallPermissions?: boolean;
   }
 ) => {
   mockServices.http.get.mockImplementation((opts: { path: string }) => {
     if (opts.path === ENTITY_STORE_ROUTES.public.STATUS) return Promise.resolve({ status });
     if (opts.path === ENTITY_STORE_ROUTES.internal.CHECK_PRIVILEGES) {
-      return Promise.resolve({ has_write_permissions: hasWritePermissions });
+      return Promise.resolve({ has_install_permissions: hasInstallPermissions });
     }
     if (opts.path === ENTITY_STORE_ROUTES.internal.PREFERENCES) {
       return Promise.resolve({ autoInstall });
@@ -227,13 +227,13 @@ describe('useInstallEntityStoreV2', () => {
     );
   });
 
-  it('should not POST /install when the user lacks write privileges', async () => {
+  it('should not POST /install when the user lacks install privileges', async () => {
     const mockServices = createMockServices();
 
     mockServices.spaces.getActiveSpace.mockResolvedValue({ id: 'default' });
     mockHttpGet(mockServices, {
       status: EntityStoreStatusEnum.enum.not_installed,
-      hasWritePermissions: false,
+      hasInstallPermissions: false,
     });
 
     renderHook(() => useInstallEntityStoreV2(asServices(mockServices)));
@@ -252,13 +252,13 @@ describe('useInstallEntityStoreV2', () => {
     expect(mockServices.logger.error).not.toHaveBeenCalled();
   });
 
-  it('should not POST entity_maintainers/init when the user lacks write privileges', async () => {
+  it('should not POST entity_maintainers/init when the user lacks install privileges', async () => {
     const mockServices = createMockServices();
 
     mockServices.spaces.getActiveSpace.mockResolvedValue({ id: 'default' });
     mockHttpGet(mockServices, {
       status: EntityStoreStatusEnum.enum.running,
-      hasWritePermissions: false,
+      hasInstallPermissions: false,
     });
 
     renderHook(() => useInstallEntityStoreV2(asServices(mockServices)));
