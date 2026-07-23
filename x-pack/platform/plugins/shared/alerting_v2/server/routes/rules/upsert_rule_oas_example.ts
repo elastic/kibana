@@ -31,7 +31,7 @@ const INVALID_UPSERT_RULE_RESPONSE = invalidResponseExample({
 
 const RULE_UPSERT_CONFLICT_RESPONSE = {
   name: 'ruleVersionConflict',
-  summary: 'Rule was changed concurrently, or immutable fields were modified',
+  summary: 'Rule was changed concurrently by another caller',
   value: {
     code: ALERTING_V2_ERROR_CODES.RULE_VERSION_CONFLICT,
     error: 'Conflict',
