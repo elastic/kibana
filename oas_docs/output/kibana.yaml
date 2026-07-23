@@ -100826,6 +100826,10 @@ components:
     Kibana_HTTP_APIs_kbn-data-view-spec-schema:
       additionalProperties: false
       properties:
+        allow_hidden_indices:
+          description: When `true`, allows the data view to match hidden indices.
+          title: Allow hidden and system indices
+          type: boolean
         field_settings:
           additionalProperties:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-field-settings-entry'
