@@ -27,11 +27,21 @@ import type { EntityNodeViewModel, LabelNodeViewModel } from '..';
 import { GRAPH_ENTITY_NODE_BUTTON_ID } from '../test_ids';
 
 /**
- * The total height of an entity node including the shape and details below, in pixels.
- * Required to calculate total node's height in layout_graph.ts
- * Must be a multiple of `GRID_SIZE * 2`.
+ * The width of the redesigned entity node card, in pixels. Used both to render
+ * the card and to size the node in layout_graph.ts so neighbouring nodes and
+ * relationship connectors are spaced to fit the full-detail card without
+ * overlap. Must be a multiple of `GRID_SIZE * 2`.
  */
-export const ENTITY_NODE_TOTAL_HEIGHT = 200;
+export const ENTITY_NODE_WIDTH = 300;
+
+/**
+ * The total height reserved for an entity node in the layout, in pixels. Sized to
+ * the tallest (grouped, full-metadata) detailed card so cards never overlap
+ * vertically. The simplified (zoomed-out) tile is smaller and simply sits within
+ * this reserved footprint. Required to calculate total node's height in
+ * layout_graph.ts. Must be a multiple of `GRID_SIZE * 2`.
+ */
+export const ENTITY_NODE_TOTAL_HEIGHT = 320;
 
 /**
  * The width of a node in the graph, in pixels.
@@ -183,6 +193,51 @@ export const NodeContainer = styled.div`
 `;
 
 /**
+ * Root container for the redesigned EntityNode. Always occupies the fixed footprint
+ * the layout reserves for an entity node (`ENTITY_NODE_WIDTH` × `ENTITY_NODE_TOTAL_HEIGHT`)
+ * and centers its content (detailed card or simplified tile) within it — in both detail
+ * levels. Centering keeps the rendered content's visual center on the Dagre node
+ * centerline, so connector (relationship/label) nodes line up with the entity both
+ * horizontally and vertically regardless of zoom.
+ *
+ * Referenced by NodeExpandButtonContainer's hover selectors so the expand button
+ * reveals on hover.
+ */
+export const EntityNodeContainer = styled.div`
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: ${ENTITY_NODE_WIDTH}px;
+  height: ${ENTITY_NODE_TOTAL_HEIGHT}px;
+`;
+
+/**
+ * Inner wrapper that shrinks to the rendered content (detailed card or simplified
+ * tile). It is the positioning context for the expand button, click overlay, and
+ * connection handles, so they track the actual visible element in both detail
+ * levels while the outer EntityNodeContainer keeps everything centered.
+ */
+export const EntityNodeContent = styled.div`
+  position: relative;
+  display: inline-flex;
+`;
+
+/**
+ * Positions the expand ("+") button centered on the right edge of the entity
+ * content. Uses a z-index above the full-size click overlay (`StyledNodeContainer`,
+ * z-index 1) so the button stays clickable — this matters most in the simplified
+ * (small tile) view, where the overlay and button nearly coincide.
+ */
+export const EntityNodeExpandButtonWrapper = styled.div`
+  position: absolute;
+  top: 50%;
+  left: 100%;
+  transform: translate(-50%, -50%);
+  z-index: 2;
+`;
+
+/**
  * Gets the background, border and text colors for label nodes based on color prop
  */
 export const getLabelColors = (
@@ -257,6 +312,7 @@ interface ButtonContainerProps extends CommonProps {
 
 export interface NodeButtonProps extends ButtonContainerProps {
   onClick?: React.MouseEventHandler<HTMLButtonElement>;
+  style?: React.CSSProperties;
 }
 
 export const NodeButton = ({ onClick, width, height, ...props }: NodeButtonProps) => (
@@ -303,7 +359,8 @@ export const NodeExpandButtonContainer = styled.div<NodeExpandButtonContainerPro
 
   /* Only show hover effects for interactive nodes */
   .react-flow__node:not(.non-interactive) ${NodeShapeContainer}:hover &,
-  .react-flow__node:not(.non-interactive) ${LabelNodeContainer}:hover & {
+  .react-flow__node:not(.non-interactive) ${LabelNodeContainer}:hover &,
+  .react-flow__node:not(.non-interactive) ${EntityNodeContent}:hover & {
     opacity: 1; /* Show on hover */
   }
 
@@ -366,25 +423,30 @@ export const NodeIcon = ({ icon, color, x, y }: NodeIconProps) => {
 
 export const ExpandButtonSize = 18;
 
+/** Larger hit area for the filled (entity node) expand button, per the 9.5 design. */
+export const FilledExpandButtonSize = 28;
+
 export const RoundEuiButtonIcon = styled(EuiButtonIcon, {
-  shouldForwardProp: (propName) => propName !== 'backgroundColor',
-})<{ backgroundColor: string }>`
+  shouldForwardProp: (propName) => propName !== 'backgroundColor' && propName !== 'filled',
+})<{ backgroundColor?: string; filled?: boolean }>`
   border-radius: 50%;
-  background-color: ${(props) => props.backgroundColor};
-  width: ${ExpandButtonSize}px;
-  height: ${ExpandButtonSize}px;
+  width: ${({ filled }) => (filled ? FilledExpandButtonSize : ExpandButtonSize)}px;
+  height: ${({ filled }) => (filled ? FilledExpandButtonSize : ExpandButtonSize)}px;
+
+  /* Only force a background when one is provided (outline style). When omitted or
+     transparent, EUI's display="fill" provides its own (e.g. blue) background. */
+  ${({ backgroundColor }) =>
+    backgroundColor && backgroundColor !== 'transparent'
+      ? `background-color: ${backgroundColor};
+         :hover, :focus, :active { background-color: ${backgroundColor}; }`
+      : ''}
 
   > svg {
     position: absolute;
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
-  }
-
-  :hover,
-  :focus,
-  :active {
-    background-color: ${(props) => props.backgroundColor};
+    ${({ filled }) => (filled ? `width: 18px; height: 18px;` : '')}
   }
 `;
 

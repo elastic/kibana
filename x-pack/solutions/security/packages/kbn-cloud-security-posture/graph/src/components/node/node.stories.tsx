@@ -11,7 +11,7 @@ import { ReactFlow, Controls, Background } from '@xyflow/react';
 import type { Meta, StoryFn, StoryObj } from '@storybook/react';
 import type { NodeViewModel } from '../types';
 import { GlobalStylesStorybookDecorator } from '../../../.storybook/decorators';
-import { HexagonNode, PentagonNode, EllipseNode, RectangleNode, DiamondNode } from '.';
+import { EntityNode } from '.';
 
 import '@xyflow/react/dist/style.css';
 import { GlobalGraphStyles } from '../graph/styles';
@@ -54,11 +54,11 @@ const meta: Meta<NodeViewModel> = {
 export default meta;
 
 const nodeTypes = {
-  hexagon: HexagonNode,
-  pentagon: PentagonNode,
-  ellipse: EllipseNode,
-  rectangle: RectangleNode,
-  diamond: DiamondNode,
+  hexagon: EntityNode,
+  pentagon: EntityNode,
+  ellipse: EntityNode,
+  rectangle: EntityNode,
+  diamond: EntityNode,
 };
 
 const Template: StoryFn<NodeViewModel> = (args: NodeViewModel) => (

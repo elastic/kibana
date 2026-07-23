@@ -27,6 +27,14 @@ import { NODE_HEIGHT, NODE_WIDTH, NODE_LABEL_HEIGHT, NODE_LABEL_WIDTH } from '..
 import type { NodeViewModel } from '../types';
 import { graphSample } from '../mock/graph_sample';
 
+// Turn off the optimization that culls nodes outside the viewport. jsdom has no
+// real layout, so with the full-size entity node footprint most nodes would be
+// treated as off-screen and skipped, making node-count assertions flaky.
+jest.mock('../constants', () => ({
+  ...jest.requireActual('../constants'),
+  ONLY_RENDER_VISIBLE_ELEMENTS: false,
+}));
+
 describe('Minimap', () => {
   it('should render empty', () => {
     render(

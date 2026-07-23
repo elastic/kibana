@@ -19,21 +19,12 @@ import type { Edge, FitViewOptions, Node, ReactFlowInstance, FitView } from '@xy
 import { useGeneratedHtmlId } from '@elastic/eui';
 import type { CommonProps } from '@elastic/eui';
 import { SvgDefsMarker } from '../edge/markers';
-import {
-  HexagonNode,
-  PentagonNode,
-  EllipseNode,
-  RectangleNode,
-  DiamondNode,
-  LabelNode,
-  EdgeGroupNode,
-  RelationshipNode,
-} from '../node';
+import { LabelNode, EdgeGroupNode, RelationshipNode, EntityNode } from '../node';
 import { layoutGraph } from './layout_graph';
 import { DefaultEdge } from '../edge';
 import { Minimap } from '../minimap/minimap';
 import type { EdgeViewModel, NodeViewModel } from '../types';
-import { isConnectorShape } from '../utils';
+import { isConnectorShape, isEntityNode, enrichEntityNodeData } from '../utils';
 import { ONLY_RENDER_VISIBLE_ELEMENTS, GRID_SIZE } from '../constants';
 
 import '@xyflow/react/dist/style.css';
@@ -81,11 +72,12 @@ export interface GraphProps extends CommonProps {
 }
 
 const nodeTypes = {
-  hexagon: HexagonNode,
-  pentagon: PentagonNode,
-  ellipse: EllipseNode,
-  rectangle: RectangleNode,
-  diamond: DiamondNode,
+  hexagon: EntityNode,
+  pentagon: EntityNode,
+  ellipse: EntityNode,
+  rectangle: EntityNode,
+  diamond: EntityNode,
+  entity: EntityNode,
   label: LabelNode,
   group: EdgeGroupNode,
   relationship: RelationshipNode,
@@ -367,6 +359,8 @@ const processGraph = (
       node.extent = 'parent';
       node.expandParent = false;
       node.draggable = false;
+    } else if (isEntityNode(nodeData)) {
+      node.data = enrichEntityNodeData(nodeData, interactive);
     }
 
     return node;

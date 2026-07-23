@@ -15,6 +15,7 @@ import {
   STACK_NODE_VERTICAL_PADDING,
   STACK_NODE_HORIZONTAL_PADDING,
   NODE_HEIGHT,
+  ENTITY_NODE_WIDTH,
   ENTITY_NODE_TOTAL_HEIGHT,
   NODE_LABEL_TOTAL_HEIGHT,
   NODE_WIDTH,
@@ -82,7 +83,7 @@ export const layoutGraph = (
         nodesById[child.data.id] = child;
       });
     } else if (isEntityNode(node.data)) {
-      size.height = ENTITY_NODE_TOTAL_HEIGHT;
+      size = { width: ENTITY_NODE_WIDTH, height: ENTITY_NODE_TOTAL_HEIGHT };
     }
 
     if (!nodesById[node.id]) {
@@ -138,7 +139,7 @@ export const layoutGraph = (
 
     if (isEntityNode(node.data)) {
       const x = snapped(Math.round(dagreNode.x - (dagreNode.width ?? 0) / 2));
-      const y = Math.round(dagreNode.y - NODE_HEIGHT / 2);
+      const y = Math.round(dagreNode.y - ENTITY_NODE_TOTAL_HEIGHT / 2);
 
       return {
         ...node,

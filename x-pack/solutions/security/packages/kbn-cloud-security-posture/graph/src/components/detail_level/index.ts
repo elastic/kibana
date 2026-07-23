@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-export { LabelNode } from './label_node/label_node';
-export { EdgeGroupNode } from './edge_group_node';
-export { RelationshipNode } from './relationship_node/relationship_node';
-export { EntityNode } from './entity_node';
+export { getDetailLevel, DETAIL_LEVEL_ZOOM_THRESHOLD } from './detail_level';
+export type { DetailLevel } from './detail_level';
+export { useDetailLevel } from './use_detail_level';
