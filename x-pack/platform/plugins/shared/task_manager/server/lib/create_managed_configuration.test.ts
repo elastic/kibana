@@ -16,7 +16,7 @@ import {
 } from './create_managed_configuration';
 import { mockLogger } from '../test_utils';
 import type { TaskManagerConfig } from '../config';
-import { CLAIM_STRATEGY_MGET, DEFAULT_CAPACITY, LOW_UTILIZATION_POLL_INTERVAL } from '../config';
+import { CLAIM_STRATEGY_MGET, DEFAULT_CAPACITY, MGET_DEFAULT_POLL_INTERVAL } from '../config';
 import { BulkUpdateError, MsearchError } from './errors';
 import { createRunningAveragedStat } from '../monitoring/task_run_calculators';
 
@@ -312,45 +312,44 @@ describe('createManagedConfiguration()', () => {
 
       test('should decrease configuration back to normal incrementally after an error is emitted', async () => {
         const { subscription, errors$ } = setupScenario(
-          LOW_UTILIZATION_POLL_INTERVAL,
+          MGET_DEFAULT_POLL_INTERVAL,
           CLAIM_STRATEGY_MGET
         );
         errors$.next(SavedObjectsErrorHelpers.createTooManyRequestsError('a', 'b'));
         jest.advanceTimersByTime(ADJUST_THROUGHPUT_INTERVAL * 10);
-        expect(subscription).toHaveBeenNthCalledWith(2, 3600);
-        expect(subscription).toHaveBeenNthCalledWith(3, 3420);
-        expect(subscription).toHaveBeenNthCalledWith(4, 3249);
-        expect(subscription).toHaveBeenNthCalledWith(5, 3086);
-        expect(subscription).toHaveBeenNthCalledWith(6, 3000);
+        expect(subscription).toHaveBeenNthCalledWith(2, 600);
+        expect(subscription).toHaveBeenNthCalledWith(3, 500);
         // No new calls due to value not changing and usage of distinctUntilChanged()
-        expect(subscription).toHaveBeenCalledTimes(6);
+        expect(subscription).toHaveBeenCalledTimes(3);
       });
 
       test('should decrease configuration after error and reset to initial poll interval when poll interval < default and TM utilization > 25%', async () => {
-        const { subscription, errors$ } = setupScenario(2800, CLAIM_STRATEGY_MGET);
+        const { subscription, errors$ } = setupScenario(
+          MGET_DEFAULT_POLL_INTERVAL - 100,
+          CLAIM_STRATEGY_MGET
+        );
         errors$.next(SavedObjectsErrorHelpers.createTooManyRequestsError('a', 'b'));
         jest.advanceTimersByTime(ADJUST_THROUGHPUT_INTERVAL * 10);
-        expect(subscription).toHaveBeenNthCalledWith(2, 3360);
-        expect(subscription).toHaveBeenNthCalledWith(3, 3192);
-        expect(subscription).toHaveBeenNthCalledWith(4, 3032);
-        expect(subscription).toHaveBeenNthCalledWith(5, 2800);
+        expect(subscription).toHaveBeenNthCalledWith(2, 480);
+        expect(subscription).toHaveBeenNthCalledWith(3, 400);
         // No new calls due to value not changing and usage of distinctUntilChanged()
-        expect(subscription).toHaveBeenCalledTimes(5);
+        expect(subscription).toHaveBeenCalledTimes(3);
       });
 
-      test('should decrease configuration after error and reset to default poll interval when poll interval < default and TM utilization < 25%', async () => {
-        const { subscription, errors$, utilization$ } = setupScenario(2800, CLAIM_STRATEGY_MGET);
+      test('should decrease configuration after error and reset to low utilization poll interval when poll interval < default and TM utilization < 25%', async () => {
+        const { subscription, errors$, utilization$ } = setupScenario(
+          MGET_DEFAULT_POLL_INTERVAL - 20,
+          CLAIM_STRATEGY_MGET
+        );
         errors$.next(SavedObjectsErrorHelpers.createTooManyRequestsError('a', 'b'));
         for (let i = 0; i < 10; i++) {
           utilization$.next(20);
           jest.advanceTimersByTime(ADJUST_THROUGHPUT_INTERVAL);
         }
-        expect(subscription).toHaveBeenNthCalledWith(2, 3360);
-        expect(subscription).toHaveBeenNthCalledWith(3, 3192);
-        expect(subscription).toHaveBeenNthCalledWith(4, 3032);
-        expect(subscription).toHaveBeenNthCalledWith(5, 3000);
+        expect(subscription).toHaveBeenNthCalledWith(2, 576);
+        expect(subscription).toHaveBeenNthCalledWith(3, 3000);
         // No new calls due to value not changing and usage of distinctUntilChanged()
-        expect(subscription).toHaveBeenCalledTimes(5);
+        expect(subscription).toHaveBeenCalledTimes(3);
       });
 
       test('should change configuration based on TM utilization', async () => {
