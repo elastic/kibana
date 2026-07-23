@@ -21,8 +21,6 @@ export class VisualizeApp {
   private readonly legacyTab;
   private readonly visualizeSaveButton;
   private readonly visualizationLoader;
-  private readonly dashboardPicker;
-  private readonly editInLensButton;
   /** Save modal locators/actions, shared with other apps (e.g. Maps) via `SavedObjectSaveModal`. */
   readonly saveModal: SavedObjectSaveModal;
 
@@ -34,8 +32,6 @@ export class VisualizeApp {
     this.legacyTab = this.page.testSubj.locator('groupModalLegacyTab');
     this.visualizeSaveButton = this.page.testSubj.locator('visualizeSaveButton');
     this.visualizationLoader = this.page.testSubj.locator('visualizationLoader');
-    this.dashboardPicker = this.page.testSubj.locator('open-dashboard-picker');
-    this.editInLensButton = this.page.testSubj.locator('visualizeEditInLensButton');
     this.saveModal = new SavedObjectSaveModal(this.page);
   }
 
