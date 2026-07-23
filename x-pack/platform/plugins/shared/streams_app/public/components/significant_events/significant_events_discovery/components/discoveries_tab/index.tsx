@@ -19,6 +19,7 @@ import {
 } from '../../../../../hooks/significant_events/use_fetch_discoveries_entities';
 import { useTimefilter } from '../../../../../hooks/use_timefilter';
 import { useSignificantEventsDiscoveryContext } from '../../context/significant_events_discovery_context';
+import { useBlocksNewActivity } from '../../../../../hooks/significant_events/use_significant_events_maintenance';
 import { DiscoveryFlyout } from './discovery_flyout';
 import { FindSignificantEventsButton } from '../streams_view/find_significant_events_button';
 import { StreamsAppSearchBar } from '../../../../streams_app_search_bar';
@@ -118,6 +119,7 @@ const columns: Array<EuiBasicTableColumn<Discovery>> = [
 
 export const DiscoveriesTab = () => {
   const { timeState } = useTimefilter();
+  const { blocksActivity, activityBlockTooltip } = useBlocksNewActivity();
 
   const { isRunning, isCanceling, handleRun, handleCancel } =
     useSignificantEventsDiscoveryContext();
@@ -161,7 +163,8 @@ export const DiscoveriesTab = () => {
               onCancel={handleCancel}
               isRunning={isRunning}
               isCanceling={isCanceling}
-              isDisabled={isRunning}
+              isDisabled={isRunning || blocksActivity}
+              disabledTooltip={activityBlockTooltip}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
