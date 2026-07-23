@@ -68,8 +68,6 @@ export const isEntityStoreV1Installed = async (http: HttpSetup): Promise<boolean
 // entity_maintainers/init routes enforce server-side (read + manage on the target
 // alias, manage_index_templates cluster, saved-object create, and read/
 // view_index_metadata on source indices) — surfaced as `has_install_permissions`.
-// `has_write_permissions` is a different set (write on the entity indices) and would
-// both false-negative (skip for a role the server accepts) and false-positive (still 403).
 const hasEntityStoreInstallPrivileges = async (http: HttpSetup): Promise<boolean> => {
   const privileges = await http.get<{ has_install_permissions?: boolean }>(getPrivilegesRequest);
   return privileges.has_install_permissions === true;

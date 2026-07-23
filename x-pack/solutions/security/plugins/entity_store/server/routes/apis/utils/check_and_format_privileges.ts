@@ -32,11 +32,9 @@ export const Privileges = z.object({
   has_all_required: z.boolean(),
   has_read_permissions: z.boolean().optional(),
   has_write_permissions: z.boolean().optional(),
-  // Whether the user passes the install / entity_maintainers-init routes' own aggregate check.
   has_install_permissions: z.boolean().optional(),
   has_kibana_feature_access: z.boolean().optional(),
   privileges: PrivilegesDetail,
-  // Detailed breakdown behind has_install_permissions, for the "enable Entity Store" callout.
   install_privileges: PrivilegesDetail.optional(),
 });
 

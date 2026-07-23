@@ -185,7 +185,7 @@ describe('EnablementConfirmationModal', () => {
       mockUseMissingRiskEnginePrivileges.mockReturnValue(missingRiskEnginePrivileges);
     });
 
-    it('disables the enable button', () => {
+    it('renders the enable button disabled', () => {
       render(<EnablementConfirmationModal {...defaultProps} />, { wrapper: Wrapper });
       expect(screen.getByTestId('entityAnalyticsEnablementConfirmButton')).toBeDisabled();
     });
@@ -205,7 +205,7 @@ describe('EnablementConfirmationModal', () => {
       mockUseMissingRiskEnginePrivileges.mockReturnValue(allRiskEnginePrivileges);
     });
 
-    it('disables the enable button', () => {
+    it('renders the enable button disabled', () => {
       render(<EnablementConfirmationModal {...defaultProps} />, { wrapper: Wrapper });
       expect(screen.getByTestId('entityAnalyticsEnablementConfirmButton')).toBeDisabled();
     });

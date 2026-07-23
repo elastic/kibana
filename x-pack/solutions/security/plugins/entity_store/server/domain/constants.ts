@@ -10,16 +10,6 @@ import type { EntityStoreStatus } from './types';
 
 export const ECS_MAPPINGS_COMPONENT_TEMPLATE = 'ecs@mappings';
 
-export const ENTITY_STORE_SOURCE_INDICES_PRIVILEGES = ['read', 'view_index_metadata'];
-export const ENTITY_STORE_TARGET_INDICES_PRIVILEGES = ['read', 'manage'];
-// Install creates index templates + component templates (manage_index_templates) and the
-// latest/metadata ingest pipelines (manage_ingest_pipelines). Both are enforced as the
-// requesting user, so both must be part of the enable-store privilege check.
-export const ENTITY_STORE_CLUSTER_PRIVILEGES = [
-  'manage_index_templates',
-  'manage_ingest_pipelines',
-];
-
 export const ENGINE_STATUS: Record<Uppercase<EngineStatus>, EngineStatus> = {
   INSTALLING: 'installing',
   STARTED: 'started',

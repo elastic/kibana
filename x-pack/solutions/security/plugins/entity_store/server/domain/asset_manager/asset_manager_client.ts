@@ -16,6 +16,11 @@ import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { CheckPrivilegesResponse } from '@kbn/security-plugin-types-server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { EntityType } from '../../../common';
+import {
+  ENTITY_STORE_CLUSTER_PRIVILEGES,
+  ENTITY_STORE_SOURCE_INDICES_PRIVILEGES,
+  ENTITY_STORE_TARGET_INDICES_PRIVILEGES,
+} from '../../../common';
 import { scheduleExtractEntityTask, stopExtractEntityTask } from '../../tasks/extract_entity_task';
 import {
   scheduleHistorySnapshotTasks,
@@ -32,13 +37,7 @@ import {
   LogExtractionConfig,
 } from '../saved_objects';
 import type { HistorySnapshotBodyParams, LogExtractionInstallParams } from '../../routes/constants';
-import {
-  ENGINE_STATUS,
-  ENTITY_STORE_CLUSTER_PRIVILEGES,
-  ENTITY_STORE_SOURCE_INDICES_PRIVILEGES,
-  ENTITY_STORE_STATUS,
-  ENTITY_STORE_TARGET_INDICES_PRIVILEGES,
-} from '../constants';
+import { ENGINE_STATUS, ENTITY_STORE_STATUS } from '../constants';
 import type {
   EntityStoreStatus,
   EngineComponentStatus,
@@ -364,14 +363,13 @@ export class AssetManagerClient {
       'create'
     );
 
-    // Build the index privilege map, unioning privileges when an index is both a target and a
-    // source. Install creates the concrete `.entities.v2.*` latest index (+ alias) and the
-    // updates/metadata data streams as the requesting user, so `manage` is required on each;
-    // the updates data stream is additionally read as an extraction source, so a plain spread
-    // would drop its `manage` requirement. `_has_privileges` treats a leading `-` as a literal
-    // index name (negative patterns are query-time only), so those are stripped.
+    // Install creates the concrete `.entities.v2.*` latest index (+ alias) and the
+    // updates/metadata data streams as the requesting user, so each needs `read` + `manage`.
+    // The updates data stream is also an extraction source (`view_index_metadata`), so we
+    // merge privileges into one map. Patterns starting with `-` are stripped: `_has_privileges`
+    // treats them as literal index names, not exclusions.
     const index: Record<string, string[]> = {};
-    const requirePrivileges = (name: string, privileges: string[]) => {
+    const unionPrivileges = (name: string, privileges: string[]) => {
       index[name] = Array.from(new Set([...(index[name] ?? []), ...privileges]));
     };
 
@@ -380,11 +378,11 @@ export class AssetManagerClient {
       getLatestEntityIndexPattern(this.namespace),
       getUpdatesEntitiesDataStreamName(this.namespace),
       getMetadataEntitiesDataStreamName(this.namespace),
-    ].forEach((name) => requirePrivileges(name, ENTITY_STORE_TARGET_INDICES_PRIVILEGES));
+    ].forEach((name) => unionPrivileges(name, ENTITY_STORE_TARGET_INDICES_PRIVILEGES));
 
     sourceIndexPatterns
       .filter((idx) => !idx.startsWith('-'))
-      .forEach((idx) => requirePrivileges(idx, ENTITY_STORE_SOURCE_INDICES_PRIVILEGES));
+      .forEach((idx) => unionPrivileges(idx, ENTITY_STORE_SOURCE_INDICES_PRIVILEGES));
 
     return checkPrivileges({
       kibana: [kibanaPrivileges],

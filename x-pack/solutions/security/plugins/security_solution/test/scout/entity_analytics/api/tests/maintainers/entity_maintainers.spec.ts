@@ -16,6 +16,9 @@ import {
   ENTITY_LATEST,
   ENTITY_METADATA,
   ENTITY_SCHEMA_VERSION_V2,
+  ENTITY_STORE_SOURCE_INDICES_PRIVILEGES,
+  ENTITY_STORE_TARGET_INDICES_PRIVILEGES,
+  ENTITY_STORE_CLUSTER_PRIVILEGES,
 } from '@kbn/entity-store/common';
 
 import {
@@ -26,14 +29,6 @@ import {
   UPDATES_INDEX,
 } from '../../fixtures/maintainers/constants';
 import { clearEntityStoreIndices } from '../../fixtures/maintainers/helpers';
-
-// Keep in sync with the enforcement constants in
-// `x-pack/solutions/security/plugins/entity_store/server/domain/constants.ts`.
-const ENTITY_STORE_SOURCE_INDICES_PRIVILEGES = ['read', 'view_index_metadata'];
-const ENTITY_STORE_TARGET_INDICES_PRIVILEGES = ['read', 'manage'];
-// Install creates index/component templates (manage_index_templates) and the latest/metadata
-// ingest pipelines (manage_ingest_pipelines) as the requesting user, so both are enforced.
-const ENTITY_STORE_CLUSTER_PRIVILEGES = ['manage_index_templates', 'manage_ingest_pipelines'];
 
 const TARGET_INDEX_LATEST = getEntitiesAlias(ENTITY_LATEST, 'default');
 const TARGET_INDEX_LATEST_PATTERN = getLatestEntityIndexPattern('default');

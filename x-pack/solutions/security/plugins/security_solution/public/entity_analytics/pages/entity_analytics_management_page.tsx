@@ -100,15 +100,16 @@ export const EntityAnalyticsManagementPage = () => {
     'hasAllRequiredPrivileges' in riskEnginePrivileges &&
     riskEnginePrivileges.hasAllRequiredPrivileges;
 
-  // Enabling the Entity Store runs the install / maintainers-init routes, which enforce the
-  // install privilege set (has_install_permissions), not entity-index read+write (has_all_required).
-  const userHasEntityStorePrivileges = entityEnginePrivileges?.has_install_permissions ?? false;
+  const userHasEntityStoreInstallPrivileges =
+    entityEnginePrivileges?.has_install_permissions ?? false;
+
   // Turning the toggle ON enables BOTH the risk score maintainer and the Entity Store in a single
   // action (see useToggleEntityAnalytics), so enablement requires both privilege sets. With an OR
   // the toggle would look enabled while the half the user isn't privileged for fails server-side
   // (e.g. an install-only user hitting a risk engine 500). The toggle applies this only to the ON
   // direction — turning OFF just stops the store and stays available.
-  const hasEnablementPrivileges = userHasRiskEnginePrivileges && userHasEntityStorePrivileges;
+  const hasEnablementPrivileges =
+    userHasRiskEnginePrivileges && userHasEntityStoreInstallPrivileges;
 
   const canRunEngine =
     (!riskEnginePrivileges.isLoading &&
