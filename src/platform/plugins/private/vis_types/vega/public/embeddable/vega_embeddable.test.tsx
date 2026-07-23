@@ -178,10 +178,10 @@ describe('vegaEmbeddableFactory', () => {
       closeFlyout,
     })) as React.ReactElement<{
       onCancel: () => void;
-      onChange: (spec: string) => void;
+      onApply: (spec: string) => void;
     }>;
 
-    content.props.onChange('{ mark: bar }');
+    content.props.onApply('{ mark: bar }');
     expect(api.serializeState().spec).toBe('{ mark: bar }');
     content.props.onCancel();
     expect(api.serializeState().spec).toBe('{ mark: point }');

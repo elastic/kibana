@@ -208,7 +208,7 @@ export const vegaEmbeddableFactory = (
                 ariaLabelledBy={ariaLabelledBy}
                 closeFlyout={closeFlyout}
                 initialSpec={initialSpec}
-                onChange={(spec) => spec$.next(spec)}
+                onApply={(spec) => spec$.next(spec)}
                 onCancel={() => {
                   cancel();
                   closeFlyout();

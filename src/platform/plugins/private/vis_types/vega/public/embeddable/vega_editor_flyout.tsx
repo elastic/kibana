@@ -40,21 +40,23 @@ export const VegaEditorFlyout = ({
   ariaLabelledBy,
   closeFlyout,
   initialSpec,
+  onApply,
   onCancel,
-  onChange,
   onSave,
 }: {
   ariaLabelledBy: string;
   closeFlyout: () => void;
   initialSpec: string;
+  onApply: (spec: string) => void;
   onCancel?: () => void;
-  onChange?: (spec: string) => void;
   onSave: (spec: string) => void;
 }) => {
   const [spec, setSpec] = useState(initialSpec);
-  const updateSpec = (nextSpec: string) => {
-    setSpec(nextSpec);
-    onChange?.(nextSpec);
+  const [appliedSpec, setAppliedSpec] = useState(initialSpec);
+  const isDirty = spec !== appliedSpec;
+  const applyPreview = () => {
+    onApply(spec);
+    setAppliedSpec(spec);
   };
   return (
     <>
@@ -65,7 +67,7 @@ export const VegaEditorFlyout = ({
       </EuiFlyoutHeader>
       <EuiFlyoutBody css={bodyCss}>
         <div css={editorContainerCss}>
-          <VegaSpecEditor editorValue={spec} onChange={updateSpec} />
+          <VegaSpecEditor editorValue={spec} onChange={setSpec} />
         </div>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
@@ -78,18 +80,33 @@ export const VegaEditorFlyout = ({
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton
-              data-test-subj="vegaEditorFlyoutSaveButton"
-              fill
-              onClick={() => {
-                onSave(spec);
-                closeFlyout();
-              }}
-            >
-              {i18n.translate('visTypeVega.dashboard.saveButtonLabel', {
-                defaultMessage: 'Save',
-              })}
-            </EuiButton>
+            <EuiFlexGroup gutterSize="s" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  data-test-subj="vegaEditorFlyoutApplyButton"
+                  disabled={!isDirty}
+                  onClick={applyPreview}
+                >
+                  {i18n.translate('visTypeVega.dashboard.applyButtonLabel', {
+                    defaultMessage: 'Apply',
+                  })}
+                </EuiButton>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  data-test-subj="vegaEditorFlyoutSaveButton"
+                  fill
+                  onClick={() => {
+                    onSave(spec);
+                    closeFlyout();
+                  }}
+                >
+                  {i18n.translate('visTypeVega.dashboard.saveButtonLabel', {
+                    defaultMessage: 'Save',
+                  })}
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutFooter>
