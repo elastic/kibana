@@ -31,7 +31,7 @@ const ESQL_DEFAULT_ROW_LIMIT = 1_000;
 // Entity IDs accepted for relationship/enrichment lookups. Enrichment is chunked
 // at 1,000 IDs per ES|QL query (`fetch_entity_enrichment.ts`); 5,000 caps the
 // request at five chunks.
-const ENTITY_IDS_MAX_SIZE = 5_000;
+export const ENTITY_IDS_MAX_SIZE = 5_000;
 
 // Origin event IDs that seed graph traversal — bounded by the number of events a
 // single graph can display (the events query `LIMIT 1000`).
@@ -74,51 +74,42 @@ export const DETAIL_PAGE_SIZE_MAX = 100;
 // String length ceilings (`maxLength`) for `schema.string` — DoS protection.
 // ---------------------------------------------------------------------------
 
-// Single entity / document identifiers (Kibana saved-object IDs, Elasticsearch
-// _id fields, UUID format, entity EUIDs). ES enforces a 512-byte document-ID
-// limit; UUIDs are 36 chars. 512 is generous but safe across all ES ID formats.
-export const ENTITY_ID_MAX_LENGTH = 512;
+// Elasticsearch document `_id` values used to seed graph traversal and fetch
+// event details. Elasticsearch limits `_id` values to 512 bytes.
+export const ES_DOCUMENT_ID_MAX_LENGTH = 512;
 
-// Composite graph node/edge identifiers are *derived* from entity IDs, not raw
-// IDs: edge ids are `a(<source>)-b(<target>)` and group/label node ids nest
-// those (e.g. `grp(a(<euid>)-b(<euid>))`, `label(<action>)ln(<edge-id>)...`),
-// so a single id can embed two or more `ENTITY_ID_MAX_LENGTH` values plus
-// wrapper/action text. 8192 comfortably covers the deepest nesting the graph
-// builder produces while remaining bounded for DoS protection.
+// Individual index-pattern strings (e.g. "logs-*",
+// ".alerts-security.alerts-*"). ES index/data-stream names are capped at
+// 255 bytes; 256 covers patterns with a trailing wildcard.
+export const INDEX_PATTERN_MAX_LENGTH = 256;
+
+// ISO 8601 / epoch-ms timestamp strings used as range bounds (`start`, `end`).
+// Millisecond-precision ISO is 24 chars; epoch-ms as a string is 13 digits;
+// 100 covers all valid forms with generous headroom.
+export const TIMESTAMP_STRING_MAX_LENGTH = 100;
+
+// Full entity EUIDs passed to entity-detail endpoints. EUIDs are compound
+// strings (e.g. "user~name~domain~host") and can exceed typical ID lengths;
+// 1024 is a conservative ceiling.
+export const ENTITY_EUID_MAX_LENGTH = 1024;
+
+// Composite graph node/edge identifiers can nest multiple entity IDs, so their
+// bound must accommodate the deepest generated graph identifier.
 export const GRAPH_NODE_ID_MAX_LENGTH = 8192;
 
-// Elasticsearch index / data-stream names are capped at 255 bytes.
-export const INDEX_NAME_MAX_LENGTH = 255;
-
-// ISO 8601 datetime strings: millisecond precision is 24 chars
-// ("2024-01-01T00:00:00.000Z"), while nanosecond precision (ES `date_nanos`) with a
-// numeric UTC offset reaches ~36 chars ("2024-01-01T00:00:00.000000000+05:30");
-// epoch-ms as a string is 13 digits. 64 covers all valid forms with generous
-// headroom and matches the ISO-timestamp ceiling used by the entity-store task-state
-// schemas (`ISO_TIMESTAMP_MAX_LENGTH`).
-export const TIMESTAMP_STRING_MAX_LENGTH = 64;
-
-// Enum-like display strings (entity type, icon name, ECS field name) drawn from
-// a fixed, code-defined set whose longest member is well under 64 characters;
-// 64 gives generous headroom.
+// Enum-like display strings (entity type, icon name, ECS field name).
 export const ENUM_LIKE_MAX_LENGTH = 64;
 
-// Entity sub_type is populated from entity-store ES data and, unlike `type`, is
-// not restricted to a code-defined set: generic/third-party entities carry
-// vendor-defined values (e.g. multi-level cloud resource types such as
-// `Microsoft.Network/networkManagers/connectivityConfigurations`) that can
-// exceed 64 characters. 256 comfortably fits the longest known resource types
-// without rejecting legitimate server output.
+// Vendor-defined entity sub-types can exceed enum-like values.
 export const SUB_TYPE_MAX_LENGTH = 256;
 
-// Free-text display strings (entity name, rule name, label, tag). Generous
-// ceiling that comfortably fits all realistic values.
+// Free-text display strings (entity name, rule name, label, tag).
 export const LABEL_MAX_LENGTH = 1024;
 
-// IPv4 (15 chars) and IPv6 (39 chars, "ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff").
+// IPv4 is at most 15 chars and IPv6 at most 39 chars.
 export const IP_ADDRESS_MAX_LENGTH = 39;
 
-// ISO 3166-1 alpha-2 country codes are 2 chars; 10 allows for extended variants.
+// ISO 3166-1 alpha-2 country codes are two chars; allow extended variants.
 export const COUNTRY_CODE_MAX_LENGTH = 10;
 
 /**
@@ -137,7 +128,7 @@ export type ProjectRouting = typeof PROJECT_ROUTING_ORIGIN | typeof PROJECT_ROUT
  * (relevant when opening graph from entity flyout).
  */
 export const entityIdSchema = schema.object({
-  id: schema.string({ maxLength: ENTITY_ID_MAX_LENGTH }),
+  id: schema.string({ maxLength: ENTITY_EUID_MAX_LENGTH }),
   isOrigin: schema.boolean(),
 });
 
@@ -146,7 +137,7 @@ export const graphRequestSchema = schema.object({
   showUnknownTarget: schema.maybe(schema.boolean()),
   query: schema.object({
     pinnedIds: schema.maybe(
-      schema.arrayOf(schema.string({ maxLength: ENTITY_ID_MAX_LENGTH }), {
+      schema.arrayOf(schema.string({ maxLength: ENTITY_EUID_MAX_LENGTH }), {
         maxSize: PINNED_IDS_MAX_SIZE,
       })
     ),
@@ -154,7 +145,7 @@ export const graphRequestSchema = schema.object({
     originEventIds: schema.maybe(
       schema.arrayOf(
         schema.object({
-          id: schema.string({ maxLength: ENTITY_ID_MAX_LENGTH }),
+          id: schema.string({ maxLength: ES_DOCUMENT_ID_MAX_LENGTH }),
           isAlert: schema.boolean(),
         }),
         {
@@ -172,7 +163,7 @@ export const graphRequestSchema = schema.object({
       schema.arrayOf(
         schema.string({
           minLength: 1,
-          maxLength: INDEX_NAME_MAX_LENGTH,
+          maxLength: INDEX_PATTERN_MAX_LENGTH,
           validate: (value) => {
             if (!INDEX_PATTERN_REGEX.test(value)) {
               return `Invalid index pattern: ${value}. Contains illegal characters.`;
@@ -248,16 +239,16 @@ export const entitySchema = schema.object({
 });
 
 export const nodeDocumentDataSchema = schema.object({
-  id: schema.string({ maxLength: ENTITY_ID_MAX_LENGTH }),
+  id: schema.string({ maxLength: ES_DOCUMENT_ID_MAX_LENGTH }),
   type: schema.oneOf([
     schema.literal(DOCUMENT_TYPE_EVENT),
     schema.literal(DOCUMENT_TYPE_ALERT),
     schema.literal(DOCUMENT_TYPE_ENTITY),
   ]),
-  index: schema.maybe(schema.string({ maxLength: INDEX_NAME_MAX_LENGTH })),
+  index: schema.maybe(schema.string({ maxLength: INDEX_PATTERN_MAX_LENGTH })),
   event: schema.maybe(
     schema.object({
-      id: schema.string({ maxLength: ENTITY_ID_MAX_LENGTH }),
+      id: schema.string({ maxLength: ES_DOCUMENT_ID_MAX_LENGTH }),
     })
   ),
   alert: schema.maybe(

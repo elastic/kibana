@@ -26,14 +26,15 @@ import {
   EVENT_ACTION_END,
   EVENT_ACTION_EXEC,
   EVENT_ACTION_FORK,
-  INDEX_NAME_MAX_LENGTH,
-  SESSION_ENTITY_ID_MAX_LENGTH,
-  TIMESTAMP_STRING_MAX_LENGTH,
-  CURSOR_STRING_MAX_LENGTH,
 } from '../../common/constants';
 import type { ProcessEvent } from '../../common';
 import { searchAlerts } from './alerts_route';
 import { searchProcessWithIOEvents } from './io_events_route';
+import {
+  sessionEntityIdSchema,
+  sessionTimestampSchema,
+  sessionViewIndexPatternSchema,
+} from './validation';
 import { normalizeEventProcessArgs } from '../../common/utils/process_args_normalizer';
 
 export const registerProcessEventsRoute = (
@@ -58,10 +59,10 @@ export const registerProcessEventsRoute = (
         validate: {
           request: {
             query: schema.object({
-              index: schema.string({ maxLength: INDEX_NAME_MAX_LENGTH }),
-              sessionEntityId: schema.string({ maxLength: SESSION_ENTITY_ID_MAX_LENGTH }),
-              sessionStartTime: schema.string({ maxLength: TIMESTAMP_STRING_MAX_LENGTH }),
-              cursor: schema.maybe(schema.string({ maxLength: CURSOR_STRING_MAX_LENGTH })),
+              index: sessionViewIndexPatternSchema,
+              sessionEntityId: sessionEntityIdSchema,
+              sessionStartTime: sessionTimestampSchema,
+              cursor: schema.maybe(sessionTimestampSchema),
               forward: schema.maybe(schema.boolean()),
               pageSize: schema.maybe(schema.number({ min: 1, max: PROCESS_EVENTS_PER_PAGE })), // currently only set in FTR tests to test pagination
             }),

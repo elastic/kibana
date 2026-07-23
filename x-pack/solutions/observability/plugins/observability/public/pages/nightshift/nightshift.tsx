@@ -5,29 +5,28 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_DISCOVERY } from '@kbn/management-settings-ids';
-import { NightshiftApp } from '@kbn/nightshift';
+import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '@kbn/streams-plugin/common';
+import { NightshiftApp } from './components/nightshift_app';
 import { useKibana } from '../../utils/kibana_react';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { OVERVIEW_PATH } from '../../../common/locators/paths';
 
-export function NightshiftPage() {
+export function NightshiftPage(): React.ReactElement | null {
   const {
     http: { basePath },
-    uiSettings,
+    featureFlags,
     serverless,
   } = useKibana().services;
   const { ObservabilityPageTemplate } = usePluginContext();
   const history = useHistory();
 
-  const isEnabled = uiSettings.get<boolean>(
-    OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_DISCOVERY,
-    false
-  );
+  // Availability is owned by this flag alone — the /available endpoint is the same
+  // gate on the server, so a second client probe would only duplicate it.
+  const isEnabled = featureFlags.getBooleanValue(STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG, false);
 
   useBreadcrumbs(
     [
@@ -42,13 +41,24 @@ export function NightshiftPage() {
     { serverless }
   );
 
+  useEffect(() => {
+    if (!isEnabled) {
+      history.replace(OVERVIEW_PATH);
+    }
+  }, [history, isEnabled]);
+
   if (!isEnabled) {
-    history.replace(OVERVIEW_PATH);
     return null;
   }
 
   return (
-    <ObservabilityPageTemplate data-test-subj="nightshiftPage" isEmptyState>
+    <ObservabilityPageTemplate
+      data-test-subj="nightshiftPage"
+      restrictWidth="900px"
+      pageSectionProps={{
+        color: 'subdued',
+      }}
+    >
       <NightshiftApp />
     </ObservabilityPageTemplate>
   );

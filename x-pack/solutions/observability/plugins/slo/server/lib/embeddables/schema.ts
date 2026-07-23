@@ -15,9 +15,11 @@ import { SLO_EMBEDDABLE_SUPPORTED_TRIGGERS } from '../../../common/embeddables/o
 
 const SingleOverviewCustomSchema = schema.object({
   slo_id: schema.string({
+    maxLength: 64,
     meta: { description: 'The ID of the SLO' },
   }),
   slo_instance_id: schema.string({
+    maxLength: 512,
     defaultValue: ALL_VALUE,
     meta: {
       description:
@@ -26,6 +28,7 @@ const SingleOverviewCustomSchema = schema.object({
   }),
   remote_name: schema.maybe(
     schema.string({
+      maxLength: 256,
       meta: { description: 'The name of the remote SLO' },
     })
   ),
@@ -47,10 +50,10 @@ const GroupOverviewCustomSchema = schema.object({
     {
       group_by: groupBySchema,
       // Bounded to avoid unbounded-array warnings; 100 aligns with other embeddable list limits.
-      groups: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
+      groups: schema.maybe(schema.arrayOf(schema.string({ maxLength: 256 }), { maxSize: 100 })),
       // Bounded to avoid unbounded-array warnings; 500 matches dashboard filters limit.
       filters: schema.maybe(schema.arrayOf(asCodeFilterSchema, { maxSize: 500 })),
-      kql_query: schema.maybe(schema.string()),
+      kql_query: schema.maybe(schema.string({ maxLength: 2048 })),
     },
     { defaultValue: { group_by: 'status' } }
   ),

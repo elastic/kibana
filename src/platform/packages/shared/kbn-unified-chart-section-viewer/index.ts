@@ -25,4 +25,13 @@ export type {
   Dimension,
   MetricUnit,
   UnifiedMetricsGridProps,
+  MetricsGridSettings,
+  SimpleAggregation,
+  HistogramPercentile,
 } from './src/types';
+export {
+  METRICS_GRID_SETTINGS_DEFAULTS,
+  SIMPLE_AGGREGATION_OPTIONS,
+  HISTOGRAM_PERCENTILE_OPTIONS,
+  HISTOGRAM_PERCENTILE_VALUES,
+} from './src/components/flyout/metrics_grid_settings_flyout';

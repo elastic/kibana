@@ -17,6 +17,7 @@ export {
   getIterationLoopWorkflowYaml,
   getManyIterationsWorkflowYaml,
   getDummyWorkflowYaml,
+  getMultiStepTypeWorkflowYaml,
   getInvalidWorkflowYaml,
   getIncompleteStepTypeYaml,
   getRootLevelAutocompleteYaml,
@@ -40,6 +41,10 @@ export {
   getDataMapWithInvalidVariable,
 } from './data_map_validation_workflows';
 export { getLargePerfWorkflowYaml } from './large_perf_workflow';
+export {
+  getStaticBranchesParallelWorkflowYaml,
+  getForeachFanOutParallelWorkflowYaml,
+} from './parallel_workflows';
 export { getInfosecDemoWorkflowYaml } from './infosec_demo_workflow';
 export {
   getAssignAfterUseSameLine,

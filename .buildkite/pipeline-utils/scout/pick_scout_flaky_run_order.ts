@@ -9,7 +9,7 @@
 
 import Fs from 'fs';
 import { expandAgentQueue } from '../agent_images';
-import { BuildkiteClient, type BuildkiteCommandStep } from '../buildkite';
+import { BuildkiteClient, retryOnPreemption, type BuildkiteCommandStep } from '../buildkite';
 import { collectEnvFromLabels } from '../pr_labels';
 import type { ModuleDiscoveryInfo } from './pick_scout_test_group_run_order';
 
@@ -125,9 +125,7 @@ const buildSteps = (
         agents: expandAgentQueue(entry.usesParallelWorkers ? 'n2-8-spot' : 'n2-4-spot'),
         depends_on: options.dependsOn ?? ['build'],
         timeout_in_minutes: 60,
-        retry: {
-          automatic: [{ exit_status: '-1', limit: 3 }],
-        },
+        retry: retryOnPreemption(2),
       });
     }
   }
@@ -141,7 +139,8 @@ const buildSteps = (
  * resulting steps via the Buildkite agent.
  *
  * The manifest must already exist on disk; the caller is responsible for placing it
- * there (e.g. by downloading the artifact uploaded by the discovery step).
+ * there. In the flaky runner it is produced by a scoped
+ * `scout discover-playwright-configs --configs <paths>` run (only the requested configs).
  */
 export async function pickScoutFlakyRunOrder(
   scoutConfigsPath: string,

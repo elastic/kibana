@@ -1,6 +1,6 @@
 openapi: 3.0.0
 info:
-  version: '1'
+  version: '2023-10-31'
   title: Risk Score History API
   description: Retrieve historical risk score changes for an entity.
 paths:
@@ -50,15 +50,16 @@ paths:
           schema:
             type: string
             enum: [base, propagated, resolution]
-        - name: page_size
+        - name: include_contributions
           in: query
           required: false
-          description: Maximum number of history entries to return per request.
+          description: >-
+            When true, each entry also includes the contributions recorded for that
+            scoring run (`inputs`, `modifiers`, category 2 fields, and `criticality_level`),
+            when present on the underlying document.
           schema:
-            type: integer
-            minimum: 1
-            maximum: 1000
-            default: 100
+            type: boolean
+            default: false
       responses:
         '200':
           description: Successful response
@@ -114,12 +115,30 @@ components:
           format: double
         category_1_count:
           type: integer
+        inputs:
+          type: array
+          description: Present only when requested with `include_contributions=true`.
+          items:
+            $ref: '../common/common.schema.yaml#/components/schemas/RiskScoreInput'
+        modifiers:
+          type: array
+          description: Present only when requested with `include_contributions=true`.
+          items:
+            $ref: '../common/common.schema.yaml#/components/schemas/RiskScoreModifier'
+        category_2_score:
+          type: number
+          format: double
+        category_2_count:
+          type: integer
+        criticality_level:
+          $ref: '../asset_criticality/common.schema.yaml#/components/schemas/AssetCriticalityLevel'
 
     RiskScoreHistoryResponse:
       type: object
       required:
         - entity_id
         - entity_type
+        - interval
         - entries
       properties:
         entity_id:
@@ -127,6 +146,13 @@ components:
           maxLength: 1000
         entity_type:
           $ref: '../common/common.schema.yaml#/components/schemas/IdentifierType'
+        interval:
+          type: string
+          maxLength: 10
+          description: >-
+            The effective Elasticsearch `date_histogram` interval expression the
+            entries were aggregated into (for example `3h`, `1d`, `1w`), derived
+            from the requested time range.
         entries:
           type: array
           items:

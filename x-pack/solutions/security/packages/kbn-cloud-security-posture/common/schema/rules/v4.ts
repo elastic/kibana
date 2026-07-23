@@ -8,7 +8,15 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import type { BenchmarksCisId } from '../../types/benchmark';
-import { DEFAULT_BENCHMARK_RULES_PER_PAGE } from './v3';
+import {
+  BENCHMARK_VERSION_MAX_LENGTH,
+  DEFAULT_BENCHMARK_RULES_PER_PAGE,
+  RULE_FIELD_NAME_MAX_LENGTH,
+  RULE_ID_MAX_LENGTH,
+  RULE_NUMBER_MAX_LENGTH,
+  RULE_SEARCH_MAX_LENGTH,
+  RULE_SECTION_MAX_LENGTH,
+} from './v3';
 export type {
   cspBenchmarkRuleMetadataSchema,
   CspBenchmarkRuleMetadata,
@@ -21,27 +29,12 @@ export type {
 // String length ceilings for rules schemas — DoS protection.
 // ---------------------------------------------------------------------------
 
-// Rule/benchmark identifiers (IDs, rego_rule_id, benchmark version, rule number).
-// Typical values are UUIDs (36 chars) or short slugs; 256 is generous but safe.
-const RULE_ID_MAX_LENGTH = 256;
-
-// Rule name, section name, and other short display labels.
-const RULE_NAME_MAX_LENGTH = 1_024;
-
-// Version strings (e.g. "1.4.1", "v1.0.0") — 64 chars is very generous.
-const RULE_VERSION_MAX_LENGTH = 64;
-
-// Elasticsearch simple_query_string for rule search — 2 KB is generous.
-const RULE_SEARCH_MAX_LENGTH = 2_048;
-
-// Saved-object field name strings ("metadata.name", "metadata.section", etc.).
-const FIELD_NAME_MAX_LENGTH = 256;
-
 // Rule state record key is the composite `benchmark_id;benchmark_version;rule_number`
 // (see buildRuleKey). It must fit the largest key the bulk-action request schema can
 // produce, so it sums the component ceilings plus the two `;` separators — otherwise a
 // request that passes validation could build a key that fails cspSettingsSchema.
-const RULE_STATE_KEY_MAX_LENGTH = RULE_ID_MAX_LENGTH + RULE_VERSION_MAX_LENGTH + RULE_ID_MAX_LENGTH + 2;
+const RULE_STATE_KEY_MAX_LENGTH =
+  RULE_ID_MAX_LENGTH + BENCHMARK_VERSION_MAX_LENGTH + RULE_NUMBER_MAX_LENGTH + 2;
 
 export type FindCspBenchmarkRuleRequest = TypeOf<typeof findCspBenchmarkRuleRequestSchema>;
 
@@ -78,7 +71,7 @@ export const findCspBenchmarkRuleRequestSchema = schema.object({
    */
   // maxSize is set to 50 to cover all available fields with room for future additions
   fields: schema.maybe(
-    schema.arrayOf(schema.string({ maxLength: FIELD_NAME_MAX_LENGTH }), { maxSize: 50 })
+    schema.arrayOf(schema.string({ maxLength: RULE_FIELD_NAME_MAX_LENGTH }), { maxSize: 50 })
   ),
 
   /**
@@ -134,13 +127,13 @@ export const findCspBenchmarkRuleRequestSchema = schema.object({
   /**
    * benchmark version
    */
-  benchmarkVersion: schema.maybe(schema.string({ maxLength: RULE_VERSION_MAX_LENGTH })),
+  benchmarkVersion: schema.maybe(schema.string({ maxLength: BENCHMARK_VERSION_MAX_LENGTH })),
 
   /**
    * rule section
    */
-  section: schema.maybe(schema.string({ maxLength: RULE_NAME_MAX_LENGTH })),
-  ruleNumber: schema.maybe(schema.string({ maxLength: RULE_ID_MAX_LENGTH })),
+  section: schema.maybe(schema.string({ maxLength: RULE_SECTION_MAX_LENGTH })),
+  ruleNumber: schema.maybe(schema.string({ maxLength: RULE_NUMBER_MAX_LENGTH })),
 });
 
 export interface BenchmarkRuleSelectParams {
@@ -159,8 +152,8 @@ export const rulesToUpdate = schema.arrayOf(
   schema.object({
     rule_id: schema.string({ maxLength: RULE_ID_MAX_LENGTH }),
     benchmark_id: schema.string({ maxLength: RULE_ID_MAX_LENGTH }),
-    benchmark_version: schema.string({ maxLength: RULE_VERSION_MAX_LENGTH }),
-    rule_number: schema.string({ maxLength: RULE_ID_MAX_LENGTH }),
+    benchmark_version: schema.string({ maxLength: BENCHMARK_VERSION_MAX_LENGTH }),
+    rule_number: schema.string({ maxLength: RULE_NUMBER_MAX_LENGTH }),
   }),
   { maxSize: 500 }
 );
@@ -179,8 +172,8 @@ export interface CspBenchmarkRulesBulkActionResponse {
 const ruleStateAttributes = schema.object({
   muted: schema.boolean(),
   benchmark_id: schema.string({ maxLength: RULE_ID_MAX_LENGTH }),
-  benchmark_version: schema.string({ maxLength: RULE_VERSION_MAX_LENGTH }),
-  rule_number: schema.string({ maxLength: RULE_ID_MAX_LENGTH }),
+  benchmark_version: schema.string({ maxLength: BENCHMARK_VERSION_MAX_LENGTH }),
+  rule_number: schema.string({ maxLength: RULE_NUMBER_MAX_LENGTH }),
   rule_id: schema.string({ maxLength: RULE_ID_MAX_LENGTH }),
 });
 

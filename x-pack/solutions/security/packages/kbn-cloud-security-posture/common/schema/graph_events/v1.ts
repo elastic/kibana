@@ -10,9 +10,10 @@ import {
   COUNTRY_CODE_MAX_LENGTH,
   COUNTRY_CODES_MAX_SIZE,
   DETAIL_PAGE_SIZE_MAX,
-  ENTITY_ID_MAX_LENGTH,
+  ENTITY_IDS_MAX_SIZE,
+  ES_DOCUMENT_ID_MAX_LENGTH,
   ENUM_LIKE_MAX_LENGTH,
-  INDEX_NAME_MAX_LENGTH,
+  INDEX_PATTERN_MAX_LENGTH,
   INDEX_PATTERN_REGEX,
   INDEX_PATTERNS_MAX_SIZE,
   IP_ADDRESS_MAX_LENGTH,
@@ -26,7 +27,7 @@ import {
 // ============================================
 
 const actorOrTargetSchema = schema.object({
-  id: schema.string({ maxLength: ENTITY_ID_MAX_LENGTH }),
+  id: schema.string({ maxLength: ES_DOCUMENT_ID_MAX_LENGTH }),
   icon: schema.maybe(schema.string({ maxLength: ENUM_LIKE_MAX_LENGTH })),
   name: schema.maybe(schema.string({ maxLength: LABEL_MAX_LENGTH })),
 });
@@ -36,9 +37,9 @@ const actorOrTargetSchema = schema.object({
 // ============================================
 
 export const eventOrAlertItemSchema = schema.object({
-  id: schema.string({ maxLength: ENTITY_ID_MAX_LENGTH }),
+  id: schema.string({ maxLength: ES_DOCUMENT_ID_MAX_LENGTH }),
   isAlert: schema.boolean(),
-  index: schema.maybe(schema.string({ maxLength: INDEX_NAME_MAX_LENGTH })),
+  index: schema.maybe(schema.string({ maxLength: INDEX_PATTERN_MAX_LENGTH })),
   timestamp: schema.maybe(schema.string({ maxLength: TIMESTAMP_STRING_MAX_LENGTH })),
   action: schema.maybe(schema.string({ maxLength: LABEL_MAX_LENGTH })),
   actor: schema.maybe(actorOrTargetSchema),
@@ -61,9 +62,9 @@ export const eventsRequestSchema = schema.object({
     size: schema.number({ min: 1, max: DETAIL_PAGE_SIZE_MAX }),
   }),
   query: schema.object({
-    eventIds: schema.arrayOf(schema.string({ maxLength: ENTITY_ID_MAX_LENGTH }), {
+    eventIds: schema.arrayOf(schema.string({ maxLength: ES_DOCUMENT_ID_MAX_LENGTH }), {
       minSize: 1,
-      maxSize: 5000,
+      maxSize: ENTITY_IDS_MAX_SIZE,
     }),
     start: schema.oneOf([
       schema.number(),
@@ -74,7 +75,7 @@ export const eventsRequestSchema = schema.object({
       schema.arrayOf(
         schema.string({
           minLength: 1,
-          maxLength: INDEX_NAME_MAX_LENGTH,
+          maxLength: INDEX_PATTERN_MAX_LENGTH,
           validate: (value) => {
             if (!INDEX_PATTERN_REGEX.test(value)) {
               return `Invalid index pattern: ${value}. Contains illegal characters.`;

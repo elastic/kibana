@@ -145,7 +145,7 @@ export const GET_CASE_STEP_DOCUMENTATION_DETAILS = i18n.translate(
   'xpack.cases.workflowSteps.getCase.documentation.details',
   {
     defaultMessage:
-      'This step retrieves a complete case object from the cases system using its ID. You can optionally include comments and attachments in the response.',
+      'This step retrieves a complete case object from the cases system using its ID. The `include_comments` parameter is deprecated; use the `cases.getAllAttachments` step to retrieve case attachments.',
   }
 );
 
@@ -325,6 +325,28 @@ export const ADD_EVENTS_STEP_DOCUMENTATION_DETAILS = i18n.translate(
   {
     defaultMessage:
       'This step adds event attachments to an existing case. Each event requires an `eventId` and source `index`.',
+  }
+);
+
+export const ADD_ATTACHMENTS_STEP_LABEL = i18n.translate(
+  'xpack.cases.workflowSteps.addAttachments.label',
+  {
+    defaultMessage: 'Cases - Add attachments to case',
+  }
+);
+
+export const ADD_ATTACHMENTS_STEP_DESCRIPTION = i18n.translate(
+  'xpack.cases.workflowSteps.addAttachments.description',
+  {
+    defaultMessage: 'Adds one or more attachments of any registered type to a case in one request',
+  }
+);
+
+export const ADD_ATTACHMENTS_STEP_DOCUMENTATION_DETAILS = i18n.translate(
+  'xpack.cases.workflowSteps.addAttachments.documentation.details',
+  {
+    defaultMessage:
+      'This step adds one or more attachments to an existing case in a single bulk request. Each `attachments` entry is a per-type payload whose shape is chosen by its `type` discriminator (`comment`, `stack.alert`, `security.event`, etc.); the YAML editor narrows the available fields once a type is picked.',
   }
 );
 

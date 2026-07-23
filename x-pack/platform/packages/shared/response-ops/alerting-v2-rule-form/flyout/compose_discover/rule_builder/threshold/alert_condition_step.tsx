@@ -20,6 +20,7 @@ import {
   EuiFlexItem,
   EuiFormErrorText,
   EuiFormRow,
+  EuiHorizontalRule,
   EuiPanel,
   EuiSelect,
   EuiSpacer,
@@ -27,6 +28,9 @@ import {
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
+import { useDebouncedValue } from '@kbn/react-hooks';
+import { DEFAULT_TIME_FIELD } from '@kbn/alerting-v2-constants';
+import { resolveTimeField } from '@kbn/alerting-v2-utils';
 import type { FormValues } from '../../../../form/types';
 import { useDataFields } from '../../../../form/hooks/use_data_fields';
 import { useIndexSources } from '../../../../form/hooks/use_index_sources';
@@ -53,8 +57,10 @@ import {
   isStatLabelValid,
   isStatFieldValid,
   generateId,
+  getAvailableMetricLabels,
 } from './form_types';
 import { buildThresholdEsql, buildRecoveryBlock } from './build_esql';
+import { EvaluationExpressionField } from './evaluation_expression_field';
 import { splitQuery } from '../../use_heuristic_split';
 import {
   AGGREGATION_OPTIONS,
@@ -63,6 +69,7 @@ import {
   STAT_FIELD_REQUIRED_ERROR,
   STAT_LABEL_REQUIRED_ERROR,
 } from './translations';
+import { getInvalidExpressionReferences } from './validate_metric_references';
 
 export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
   state,
@@ -108,18 +115,34 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
     [fieldMap]
   );
 
-  const dateFields = useMemo(() => {
-    const dates = Object.values(fieldMap)
-      .filter((f) => f.type === 'date')
-      .map((f) => f.name)
-      .sort();
-    if (dates.length === 0) return ['@timestamp'];
-    return dates;
-  }, [fieldMap]);
+  const dateFields = useMemo(
+    () =>
+      Object.values(fieldMap)
+        .filter((f) => f.type === 'date')
+        .map((f) => f.name)
+        .sort(),
+    [fieldMap]
+  );
 
+  // Show real date fields when known, otherwise fall back to the default.
+  const timeFieldOptions = dateFields.length > 0 ? dateFields : [DEFAULT_TIME_FIELD];
+
+  // Auto-correct the selected time field once real date fields load, so we never
+  // build ES|QL against a non-existent `@timestamp`. The
+  // builder always needs a runnable time field, so when the current selection
+  // isn't on the index (e.g. the default `@timestamp` against an index that only
+  // has `timestamp`) we fall back to auto-picking an available date field rather
+  // than forcing an extra manual pick. Only runs when fields are known to avoid
+  // clobbering during loading.
   useEffect(() => {
-    if (dateFields.length > 0 && !dateFields.includes(thresholdValues.timeField)) {
-      onThresholdValuesChange({ ...thresholdValues, timeField: dateFields[0] });
+    if (dateFields.length === 0) {
+      return;
+    }
+    const resolved =
+      resolveTimeField({ dateFields, currentTimeField: thresholdValues.timeField }) ??
+      resolveTimeField({ dateFields });
+    if (resolved !== null && resolved !== thresholdValues.timeField) {
+      onThresholdValuesChange({ ...thresholdValues, timeField: resolved });
     }
   }, [dateFields, thresholdValues, onThresholdValuesChange]);
 
@@ -361,12 +384,22 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
 
   // ── Alert condition helpers ──
   const metricOptions = useMemo(() => {
-    const statLabels = thresholdValues.stats.filter((s) => s.label.trim()).map((s) => s.label);
-    const evalLabels = thresholdValues.evaluations
-      .filter((e) => e.label.trim())
-      .map((e) => e.label);
-    return [...statLabels, ...evalLabels];
+    return getAvailableMetricLabels(thresholdValues.stats, thresholdValues.evaluations);
   }, [thresholdValues.stats, thresholdValues.evaluations]);
+
+  // Debounced so warnings don't flash on every keystroke while the user is still typing.
+  const debouncedEvaluations = useDebouncedValue(thresholdValues.evaluations, 500);
+
+  const evaluationInvalidRefs = useMemo(() => {
+    const map = new Map<string, string[]>();
+    debouncedEvaluations.forEach((evaluation) => {
+      const invalidRefs = getInvalidExpressionReferences(evaluation.expression, metricOptions);
+      if (invalidRefs.length > 0) {
+        map.set(evaluation.id, invalidRefs);
+      }
+    });
+    return map;
+  }, [debouncedEvaluations, metricOptions]);
 
   const updateCondition = useCallback(
     (index: number, updates: Partial<AlertCondition>) => {
@@ -477,7 +510,7 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
         <EuiSelect
           fullWidth
           compressed
-          options={dateFields.map((name) => ({ value: name, text: name }))}
+          options={timeFieldOptions.map((name) => ({ value: name, text: name }))}
           value={thresholdValues.timeField}
           onChange={(e) => update('timeField', e.target.value)}
           data-test-subj="ruleBuilderTimeField"
@@ -530,7 +563,7 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
       </EuiFormRow>
 
       {/* ── Stats ── */}
-      <EuiSpacer size="m" />
+      <EuiHorizontalRule margin="m" />
       <EuiTitle size="xxs">
         <h4>
           <FormattedMessage id="xpack.alertingV2.ruleBuilder.statsTitle" defaultMessage="Stats" />
@@ -721,7 +754,7 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
       {thresholdValues.evaluations.map((ev, idx) => (
         <React.Fragment key={ev.id}>
           <EuiPanel paddingSize="s" hasBorder>
-            <EuiFlexGroup gutterSize="s" alignItems="flexEnd">
+            <EuiFlexGroup gutterSize="s">
               <EuiFlexItem grow={2}>
                 <EuiFormRow
                   label={i18n.translate('xpack.alertingV2.ruleBuilder.evaluations.labelLabel', {
@@ -739,27 +772,16 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
                 </EuiFormRow>
               </EuiFlexItem>
               <EuiFlexItem grow={4}>
-                <EuiFormRow
-                  label={i18n.translate(
-                    'xpack.alertingV2.ruleBuilder.evaluations.expressionLabel',
-                    { defaultMessage: 'Expression' }
-                  )}
-                  fullWidth
-                >
-                  <EuiFieldText
-                    fullWidth
-                    compressed
-                    value={ev.expression}
-                    onChange={(e) => updateEvaluation(idx, { expression: e.target.value })}
-                    placeholder={i18n.translate(
-                      'xpack.alertingV2.ruleBuilder.evaluations.expressionPlaceholder',
-                      { defaultMessage: 'e.g. errors / total * 100' }
-                    )}
-                    data-test-subj={`ruleBuilderEvalExpression-${idx}`}
-                  />
-                </EuiFormRow>
+                <EvaluationExpressionField
+                  index={idx}
+                  currentEvaluation={ev}
+                  onChange={(expression) => updateEvaluation(idx, { expression })}
+                  stats={thresholdValues.stats}
+                  evaluations={thresholdValues.evaluations}
+                  evaluationInvalidRefs={evaluationInvalidRefs}
+                />
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
+              <EuiFlexItem grow={false} style={{ justifyContent: 'center' }}>
                 <EuiToolTip
                   content={i18n.translate(
                     'xpack.alertingV2.ruleBuilder.evaluations.removeEvaluation',

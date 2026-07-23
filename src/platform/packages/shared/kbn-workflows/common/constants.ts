@@ -17,7 +17,6 @@ export const WORKFLOWS_MANAGEMENT_FEATURE_ID = 'workflowsManagement';
  */
 export const WORKFLOWS_UI_SETTING_ID = 'workflows:ui:enabled';
 export const WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID = 'workflows:experimentalFeatures';
-export const WORKFLOWS_UI_VISUAL_EDITOR_SETTING_ID = 'workflows:ui:visualEditor:enabled';
 export const WORKFLOWS_UI_EXECUTION_GRAPH_SETTING_ID = 'workflows:ui:executionGraph:enabled';
 export const WORKFLOWS_UI_SHOW_EXECUTOR_SETTING_ID = 'workflows:ui:showExecutor:enabled';
 export const WORKFLOWS_UI_SHOW_MANAGED_WORKFLOWS_SETTING_ID = 'workflows:ui:showManagedWorkflows';
@@ -28,11 +27,6 @@ export const WORKFLOWS_UI_SHOW_MANAGED_WORKFLOWS_SETTING_ID = 'workflows:ui:show
 export const WORKFLOW_EXECUTION_STATS_BAR_SETTING_ID = 'workflows:executionStatsBar:enabled';
 
 /**
- * Hidden Advanced Setting gate for workflow versioning (change-history writes and read routes).
- */
-export const WORKFLOWS_VERSIONING_SETTING_ID = 'workflows:versioning:enabled';
-
-/**
  * Global Advanced Setting gating the Workflow Template Library tech preview.
  *
  * Registered as a global uiSetting (not per-space) so the same toggle is
@@ -41,6 +35,17 @@ export const WORKFLOWS_VERSIONING_SETTING_ID = 'workflows:versioning:enabled';
  * runtime dep on `workflows_management`.
  */
 export const WORKFLOWS_LIBRARY_ENABLED_SETTING_ID = 'workflowsManagement:library:enabled';
+
+/**
+ * Global Advanced Setting gating the global Workflow Executions view
+ * (`/app/workflows/executions`).
+ *
+ * Registered as a global uiSetting (not per-space) so the same toggle is
+ * readable from any browser plugin that consumes the workflows UI without
+ * taking a runtime dep on `workflows_management`.
+ */
+export const WORKFLOWS_GLOBAL_EXECUTIONS_VIEW_ENABLED_SETTING_ID =
+  'workflowsManagement:globalExecutionsView:enabled';
 
 /**
  * Map of regular (saved object) connector types -> their system connector equivalents.

@@ -52,6 +52,7 @@ export function collectTechPreviewSuggestAriaPrefixes(): string[] {
   for (const trigger of triggerSchemas.getTriggerDefinitions()) {
     if (getExtensionStability(trigger) === 'tech_preview') {
       addAriaPrefix(prefixes, trigger.id);
+      addAriaPrefix(prefixes, trigger.title);
     }
   }
 

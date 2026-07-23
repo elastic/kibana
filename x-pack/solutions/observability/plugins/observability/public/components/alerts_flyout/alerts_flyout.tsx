@@ -22,13 +22,7 @@ import {
 } from '@elastic/eui';
 import { EuiFlyout, EuiFlyoutHeader } from '@elastic/eui';
 import type { Alert } from '@kbn/alerting-types';
-import {
-  ALERT_RULE_CATEGORY,
-  ALERT_RULE_CONSUMER,
-  ALERT_RULE_NAME,
-  ALERT_RULE_TYPE_ID,
-  ALERT_RULE_UUID,
-} from '@kbn/rule-data-utils';
+import { ALERT_RULE_CATEGORY, ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import { i18n } from '@kbn/i18n';
 import { SLO_ALERTS_TABLE_ID } from '@kbn/observability-shared-plugin/common';
 import { AlertFieldsTable, ScrollableFlyoutTabbedContent } from '@kbn/alerts-ui-shared';
@@ -68,15 +62,9 @@ export function AlertsFlyout({
       basePath: { prepend },
     },
   } = useKibana().services;
-  const authorizedToReadRuleType = useAuthorizedToReadRuleType();
+  const { authorizedToReadRuleForAlert } = useAuthorizedToReadRuleType();
 
-  // Rule read is authorized per rule type (and consumer), so gate the "View rule"
-  // link on the specific rule behind this alert rather than a coarse "any rules" flag.
-  const alertRuleTypeId = alert?.[ALERT_RULE_TYPE_ID]?.[0] as string | undefined;
-  const alertConsumer = alert?.[ALERT_RULE_CONSUMER]?.[0] as string | undefined;
-  const canReadAlertRule = Boolean(
-    alertRuleTypeId && authorizedToReadRuleType(alertRuleTypeId, alertConsumer)
-  );
+  const canReadAlertRule = alert ? authorizedToReadRuleForAlert(alert) : false;
 
   const parsedAlert = alert ? parseAlert(observabilityRuleTypeRegistry)(alert) : null;
 

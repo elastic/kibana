@@ -22,14 +22,11 @@ import {
   ALERT_ORIGINAL_TIME_PROPERTY,
   PREVIEW_ALERTS_INDEX,
   ALERT_FIELDS,
-  SESSION_ENTITY_ID_MAX_LENGTH,
-  TIMESTAMP_STRING_MAX_LENGTH,
-  ALERT_UUID_MAX_LENGTH,
-  CURSOR_STRING_MAX_LENGTH,
 } from '../../common/constants';
 
 import { expandDottedObject } from '../../common/utils/expand_dotted_object';
 import { normalizeEventProcessArgs } from '../../common/utils/process_args_normalizer';
+import { alertIdSchema, sessionEntityIdSchema, sessionTimestampSchema } from './validation';
 
 export const registerAlertsRoute = (
   router: IRouter,
@@ -52,12 +49,10 @@ export const registerAlertsRoute = (
         validate: {
           request: {
             query: schema.object({
-              sessionEntityId: schema.string({ maxLength: SESSION_ENTITY_ID_MAX_LENGTH }),
-              sessionStartTime: schema.string({ maxLength: TIMESTAMP_STRING_MAX_LENGTH }),
-              investigatedAlertId: schema.maybe(
-                schema.string({ maxLength: ALERT_UUID_MAX_LENGTH })
-              ),
-              cursor: schema.maybe(schema.string({ maxLength: CURSOR_STRING_MAX_LENGTH })),
+              sessionEntityId: sessionEntityIdSchema,
+              sessionStartTime: sessionTimestampSchema,
+              investigatedAlertId: schema.maybe(alertIdSchema),
+              cursor: schema.maybe(sessionTimestampSchema),
             }),
           },
         },

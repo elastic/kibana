@@ -8,7 +8,7 @@
 import { useEffect, useMemo } from 'react';
 import { useFetchActiveMaintenanceWindows } from '@kbn/alerts-ui-shared';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import type { MaintenanceWindow } from '@kbn/alerts-ui-shared/src/maintenance_window_callout/types';
 import { useSyncInterval } from './use_sync_interval';
 import type { ClientPluginsStart } from '../../../../../plugin';

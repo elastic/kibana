@@ -10,7 +10,7 @@ import { z } from '@kbn/zod/v4';
 import type { ResourceDefinition } from './types';
 
 export const ALERT_EVENTS_DATA_STREAM = '.rule-events';
-export const ALERT_EVENTS_DATA_STREAM_VERSION = 4;
+export const ALERT_EVENTS_DATA_STREAM_VERSION = 5;
 export const ALERT_EVENTS_BACKING_INDEX = '.ds-.rule-events-*';
 
 const mappings: MappingsDefinition = {
@@ -63,7 +63,7 @@ export const alertEventSchema = z.object({
     version: z.number(),
   }),
   group_hash: z.string(),
-  data: z.record(z.string(), z.any()),
+  data: z.record(z.string(), z.unknown()),
   status: alertEventStatusSchema,
   source: z.string(),
   type: alertEventTypeSchema,
@@ -83,6 +83,30 @@ export type AlertEventStatus = z.infer<typeof alertEventStatusSchema>;
 export type AlertEventType = z.infer<typeof alertEventTypeSchema>;
 export type AlertEpisodeStatus = z.infer<typeof alertEpisodeStatusSchema>;
 export type AlertEventSeverity = z.infer<typeof alertEventSeveritySchema>;
+
+export const buildRuleEventDocument = (params: AlertEvent): AlertEvent => {
+  const { scheduled_timestamp, episode, severity, ...required } = params;
+
+  const doc: AlertEvent = { ...required };
+
+  if (scheduled_timestamp !== undefined) {
+    doc.scheduled_timestamp = scheduled_timestamp;
+  }
+
+  if (episode !== undefined) {
+    doc.episode = {
+      id: episode.id,
+      status: episode.status,
+      ...(episode.status_count != null ? { status_count: episode.status_count } : {}),
+    };
+  }
+
+  if (severity !== undefined) {
+    doc.severity = severity;
+  }
+
+  return doc;
+};
 
 export const getAlertEventsResourceDefinition = (): ResourceDefinition => ({
   key: `data_stream:${ALERT_EVENTS_DATA_STREAM}`,

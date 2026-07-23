@@ -8,7 +8,7 @@
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { DETECTION_ENGINE_SIGNALS_STATUS_URL } from '../../../../common/constants';
 import { setAlertStatusStepCommonDefinition } from '../../../../common/workflows/step_types/set_alert_status_step/set_alert_status_step_common';
-import { toAlertApiExecutionError } from '../to_alert_api_execution_error';
+import { toApiExecutionError } from '../../utils/to_api_execution_error';
 
 export const setAlertStatusStepDefinition = createServerStepDefinition({
   ...setAlertStatusStepCommonDefinition,
@@ -40,7 +40,7 @@ export const setAlertStatusStepDefinition = createServerStepDefinition({
         },
       };
     } catch (error) {
-      throw toAlertApiExecutionError(error, 'set alert status');
+      throw toApiExecutionError(error, 'set alert status');
     }
   },
 });

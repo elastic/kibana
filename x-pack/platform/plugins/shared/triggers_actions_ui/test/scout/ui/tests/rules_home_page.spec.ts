@@ -11,7 +11,7 @@ import { expect } from '@kbn/scout/ui';
 import { test, makeEsQueryRule } from '../fixtures';
 
 const RULES_APP = 'rules';
-const APP_TITLE_SUBJ = 'appTitle';
+const APP_TITLE_SUBJ = 'appHeaderTitle';
 const RULES_LIST_SUBJ = 'rulesList';
 const RULES_TAB_SUBJ = 'rulesTab';
 

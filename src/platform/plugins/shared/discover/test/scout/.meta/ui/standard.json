@@ -1,0 +1,59 @@
+{
+  "sha1": "9c37bf0d149ce6a9ac3e86a65af0ca41b21ceaae",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
+  "tests": [
+    {
+      "id": "9a9cb745a2410ae-70753e6cedbcd4d",
+      "title": "Setup Discover tests data",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/tests/global.setup.ts",
+        "line": 12,
+        "column": 16
+      }
+    },
+    {
+      "id": "b872d4dcb31c133-5eb77bbe1f0516b",
+      "title": "Discover feature controls — index alias access blocks direct index access but allows access via a permitted alias",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/tests/feature_controls/discover_index_alias_access.spec.ts",
+        "line": 50,
+        "column": 9
+      }
+    },
+    {
+      "id": "824488486da5bce-4972361234be3d6",
+      "title": "Discover query mode (default: esql) opens Discover in esql mode when no default query mode is stored",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/tests/query_mode.spec.ts",
+        "line": 74,
+        "column": 16
+      }
+    },
+    {
+      "id": "824488486da5bce-ee762dda94f98e6",
+      "title": "Discover query mode (default: classic) opens Discover in classic mode when no default query mode is stored",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/tests/query_mode.spec.ts",
+        "line": 74,
+        "column": 16
+      }
+    }
+  ]
+}

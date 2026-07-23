@@ -49,7 +49,7 @@ import { StepDefineRule } from '../../components/step_define_rule';
 import { useExperimentalFeatureFieldsTransform } from '../../components/step_define_rule/use_experimental_feature_fields_transform';
 import { StepScheduleRule } from '../../components/step_schedule_rule';
 import { StepRuleActions } from '../../../rule_creation/components/step_rule_actions';
-import { formatRule } from '../rule_creation/helpers';
+import { formatRule, getApiOnlyThreatMatchFields } from '../rule_creation/helpers';
 import {
   getActionMessageParams,
   getStepsData,
@@ -167,6 +167,8 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
     scheduleStepData,
     actionsStepData,
     actionTypeRegistry: triggersActionsUi.actionTypeRegistry,
+    // From the URL, not `rule?.id` — available synchronously at mount, before the rule loads.
+    pageRuleId: ruleId,
   });
 
   const { modal: confirmSavingWithWarningModal, confirmValidationErrors } =
@@ -420,8 +422,9 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
 
     const updatedRule = await updateRule({
       ...formattedRule,
+      ...getApiOnlyThreatMatchFields(rule),
       ...(ruleId ? { id: ruleId } : {}),
-    });
+    } as RuleUpdateProps);
 
     const aiSession = aiRuleCreation.getSession();
     const isAiEdited = isAiRuleUpdateRef.current;
@@ -564,6 +567,7 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
           scheduleStepData={scheduleStepData}
           actionsStepData={actionsStepData}
           actionTypeRegistry={triggersActionsUi.actionTypeRegistry}
+          existingRuleId={rule?.id}
           pathway="rule_editing"
         />
       ) : null,
@@ -574,6 +578,7 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
       scheduleStepData,
       actionsStepData,
       triggersActionsUi.actionTypeRegistry,
+      rule?.id,
     ]
   );
 

@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { useEuiTheme } from '@elastic/eui';
 import type { NodeProps } from '@xyflow/react';
 import { Handle, Position } from '@xyflow/react';
 import React, { memo } from 'react';
-import { EDGE_STROKE_DEFAULT } from './workflow_graph_edge';
 
 /**
  * Invisible layout-only node rendered for the missing branch lane of an `if`
@@ -24,6 +24,7 @@ import { EDGE_STROKE_DEFAULT } from './workflow_graph_edge';
  */
 function WorkflowGraphBypassLaneNodeInner(props: NodeProps) {
   const { targetPosition = Position.Top, sourcePosition = Position.Bottom } = props;
+  const { euiTheme } = useEuiTheme();
 
   return (
     <>
@@ -37,7 +38,7 @@ function WorkflowGraphBypassLaneNodeInner(props: NodeProps) {
           height: 12,
           width: 1,
           transform: 'translateX(-50%)',
-          background: EDGE_STROKE_DEFAULT,
+          background: euiTheme.colors.borderBasePlain,
           pointerEvents: 'none',
         }}
       />

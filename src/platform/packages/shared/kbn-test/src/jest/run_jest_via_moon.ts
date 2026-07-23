@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { existsSync } from 'fs';
+import { existsSync, mkdirSync, writeFileSync } from 'fs';
 import Os from 'os';
 import Path from 'path';
 
@@ -34,6 +34,8 @@ export interface JestFailedTest {
   line?: number;
   name: string;
   message: string;
+  /** True when the failure message matches a known Jest worker OOM/crash signature. */
+  oom?: boolean;
 }
 
 export interface MoonJestTaskResult {
@@ -54,6 +56,8 @@ export interface MoonJestResult {
   verboseDetail?: string;
   failureExcerpt?: string[];
   warnings?: string[];
+  /** REPO_ROOT-relative path to the full captured Moon/Jest output, written on failure. */
+  logPath?: string;
 }
 
 export interface MoonJestProgress {
@@ -68,6 +72,53 @@ export interface MoonJestParseResult {
 // ── Helpers ────────────────────────────────────────────────────────────────
 
 const stripAnsi = (s: string) => s.replace(/\x1B\[[0-9;]*[A-Za-z]/g, '');
+
+export const MOON_JEST_LOG_PATH = 'target/kibana-check-jest-output.log';
+
+const writeMoonJestLog = (output: string): string | undefined => {
+  try {
+    const absPath = Path.resolve(REPO_ROOT, MOON_JEST_LOG_PATH);
+    mkdirSync(Path.dirname(absPath), { recursive: true });
+    writeFileSync(absPath, stripAnsi(output));
+    return MOON_JEST_LOG_PATH;
+  } catch {
+    return undefined;
+  }
+};
+
+/** Mirrors CI's unit-test heap cap (`.buildkite/scripts/steps/test/jest_parallel.sh`). */
+export const JEST_WORKER_MAX_OLD_SPACE_MB = 4096;
+
+/** Leave headroom for the OS, IDE, browser, and Kibana dev server sharing the machine. */
+const AVAILABLE_MEMORY_FRACTION = 0.75;
+
+/**
+ * Node/V8 takes the last of duplicate `--max-old-space-size` flags in NODE_OPTIONS, so the
+ * default must come first: it acts as a floor when NODE_OPTIONS is unset, but a caller who
+ * already set their own `--max-old-space-size` (e.g. following the OOM remediation message
+ * run_check.ts prints) still wins.
+ */
+export const buildJestNodeOptions = (existingNodeOptions?: string): string =>
+  [`--max-old-space-size=${JEST_WORKER_MAX_OLD_SPACE_MB}`, existingNodeOptions]
+    .filter(Boolean)
+    .join(' ');
+
+/**
+ * Matches the literal errors jest-worker raises for a crashed/OOM-killed worker
+ * (see `_onExit`/`_detectOutOfMemoryCrash` in jest-worker's ChildProcessWorker and
+ * NodeThreadsWorker) once Jest has wrapped them into a suite's testExecError/message.
+ * These are the strings that actually show up in `--json` output; the raw V8
+ * "heap out of memory" crash text never reaches this field, see RAW_OOM_SIGNATURE_RE below.
+ */
+const WORKER_OOM_MESSAGE_RE =
+  /Jest worker encountered \d+ child process exceptions, exceeding retry limit|Jest worker ran out of memory and crashed/i;
+
+/**
+ * Mirrors jest-worker's own out-of-memory heuristic (`_detectOutOfMemoryCrash`, which
+ * scans a crashed child's raw stderr for these substrings). Used to recognize an OOM
+ * when the whole Jest process dies before producing any JSON for us to parse.
+ */
+const RAW_OOM_SIGNATURE_RE = /heap out of memory|allocation failure;|Last few GCs/i;
 
 /** Walk up from a test file to find the nearest jest config. */
 export const findJestConfig = (testFilePath: string): string | undefined => {
@@ -133,14 +184,26 @@ const resolveAffectedPackageInfo = async (files: string[]): Promise<AffectedPack
  * want the 1 uncached Jest process to keep most cores instead of reserving them
  * for Moon slots that finish immediately.
  *
+ * maxWorkers is also capped by available memory: on high-core, lower-RAM machines,
+ * sizing purely off `cpus` can schedule more concurrent Jest worker processes than
+ * the machine can actually hold (each capped at JEST_WORKER_MAX_OLD_SPACE_MB), which
+ * OOM-kills a worker without it looking any different from a real test failure.
+ *
  * - maxWorkers never drops below 2
  * - Moon concurrency caps at 2
  */
 export const computeJestParallelism = (estimatedTasks: number) => {
   const cpus = Os.cpus().length;
+  const availableMemMb = (Os.totalmem() / (1024 * 1024)) * AVAILABLE_MEMORY_FRACTION;
   const safeEstimatedTasks = Math.max(1, estimatedTasks);
   const concurrency = Math.min(safeEstimatedTasks, 2);
-  const maxWorkers = Math.max(2, Math.floor(cpus / concurrency));
+
+  const cpuBoundWorkers = Math.floor(cpus / concurrency);
+  const memoryBoundWorkers = Math.floor(
+    availableMemMb / JEST_WORKER_MAX_OLD_SPACE_MB / concurrency
+  );
+
+  const maxWorkers = Math.max(2, Math.min(cpuBoundWorkers, memoryBoundWorkers));
   return { concurrency, maxWorkers };
 };
 
@@ -154,15 +217,16 @@ export const parseMoonJestOutput = (output: string): MoonJestParseResult => {
   for (const rawLine of output.split('\n')) {
     const stripped = stripAnsi(rawLine).trim();
 
-    // "pass RunTask(@kbn/foo:jest) (cached, ...)" from --summary detailed
-    const cachedMatch = stripped.match(/^pass RunTask\((@[^:]+):jest\) \(cached/);
+    // "pass RunTask(@kbn/foo:jest) (cached, ...)" from --summary detailed.
+    // Project ids aren't always @-scoped (e.g. `kibana-buildkite`), so match any non-space id.
+    const cachedMatch = stripped.match(/^pass RunTask\(([^\s():|]+):jest\) \(cached/);
     if (cachedMatch) {
       cachedProjects.add(cachedMatch[1]);
       continue;
     }
 
     // Jest --json output: either prefixed "@kbn/foo:jest | {...}" or unprefixed "{...}"
-    const jsonPrefixMatch = stripped.match(/^(@[^:]+):jest \| \{/);
+    const jsonPrefixMatch = stripped.match(/^([^\s():|]+):jest \| \{/);
     const isUnprefixedJson = !jsonPrefixMatch && stripped.startsWith('{"num');
     if (jsonPrefixMatch || isUnprefixedJson) {
       const project = jsonPrefixMatch ? jsonPrefixMatch[1] : '_single';
@@ -173,7 +237,9 @@ export const parseMoonJestOutput = (output: string): MoonJestParseResult => {
 
         for (const suite of json.testResults ?? []) {
           const file = Path.relative(REPO_ROOT, suite.name);
-          for (const assertion of suite.assertionResults ?? []) {
+          const assertionResults = suite.assertionResults ?? [];
+
+          for (const assertion of assertionResults) {
             if (assertion.status === 'failed') {
               const message = (assertion.failureMessages ?? []).join('\n');
               const lineMatch = stripAnsi(message).match(
@@ -184,8 +250,22 @@ export const parseMoonJestOutput = (output: string): MoonJestParseResult => {
                 line: lineMatch ? parseInt(lineMatch[1], 10) : undefined,
                 name: assertion.fullName ?? assertion.title ?? 'unknown',
                 message,
+                oom: WORKER_OOM_MESSAGE_RE.test(message),
               });
             }
+          }
+
+          // A crashed worker can kill a suite before it runs any assertions; Jest's
+          // formatTestResults flattens that suite-level testExecError into `message`
+          // (there is no separate `testExecError` key in the --json output).
+          if (assertionResults.length === 0 && suite.status === 'failed') {
+            const message = suite.message ?? '';
+            failures.push({
+              file,
+              name: 'Test suite failed to run',
+              message,
+              oom: WORKER_OOM_MESSAGE_RE.test(message),
+            });
           }
         }
 
@@ -238,20 +318,51 @@ const extractMoonFailureExcerpt = (output: string) => {
     .slice(-8);
 };
 
+/**
+ * When Moon exits non-zero and no Jest task JSON was parsed at all, the Jest process
+ * likely crashed before it could report anything. Check the raw output for the same
+ * V8 crash signature jest-worker itself looks for (RAW_OOM_SIGNATURE_RE) so we can tell
+ * the user "this was OOM" instead of a generic "no output parsed" message.
+ */
+export const buildMoonJestWarnings = ({
+  output,
+  exitCode,
+  taskCount,
+  parseFailures,
+}: {
+  output: string;
+  exitCode: number;
+  taskCount: number;
+  parseFailures: string[];
+}): string[] | undefined => {
+  if (taskCount === 0 && exitCode !== 0) {
+    const noOutputMessage = RAW_OOM_SIGNATURE_RE.test(output)
+      ? `Moon exited with code ${exitCode} and the output contains a Node/V8 out-of-memory ` +
+        `crash signature. The Jest process likely ran out of heap before producing any JSON ` +
+        `output; try freeing up memory or narrowing the affected files so fewer configs run ` +
+        `at once.`
+      : `Moon exited with code ${exitCode} but no Jest task output was parsed. ` +
+        `The Jest task may have failed before producing JSON output, run jest directly to verify.`;
+    return [noOutputMessage, ...parseFailures];
+  }
+
+  return parseFailures.length > 0 ? parseFailures : undefined;
+};
+
 const parseMoonJestProgressProject = (rawLine: string) => {
   const stripped = stripAnsi(rawLine).trim();
 
-  const cachedSummaryMatch = stripped.match(/^pass RunTask\((@[^:]+):jest\) \(cached/);
+  const cachedSummaryMatch = stripped.match(/^pass RunTask\(([^\s():|]+):jest\) \(cached/);
   if (cachedSummaryMatch) {
     return cachedSummaryMatch[1];
   }
 
-  const summaryMatch = stripped.match(/^(?:pass|fail) RunTask\((@[^:]+):jest\) \(/);
+  const summaryMatch = stripped.match(/^(?:pass|fail) RunTask\(([^\s():|]+):jest\) \(/);
   if (summaryMatch) {
     return summaryMatch[1];
   }
 
-  const jsonPrefixMatch = stripped.match(/^(@[^:]+):jest \| \{/);
+  const jsonPrefixMatch = stripped.match(/^([^\s():|]+):jest \| \{/);
   if (jsonPrefixMatch) {
     return jsonPrefixMatch[1];
   }
@@ -344,6 +455,10 @@ export const runJestViaMoon = async ({
         ...process.env,
         CI_STATS_DISABLED: 'true',
         FORCE_COLOR: '1',
+        // Cap each Jest worker's heap explicitly (mirrors CI) instead of relying on Node's
+        // per-machine default, which isn't sized for `concurrency * maxWorkers` processes
+        // running at once and can silently OOM a worker.
+        NODE_OPTIONS: buildJestNodeOptions(process.env.NODE_OPTIONS),
       },
     }
   );
@@ -387,26 +502,29 @@ export const runJestViaMoon = async ({
 
   const cachedCount = tasks.filter((t) => t.cached).length;
   const ranCount = tasks.length - cachedCount;
-  const warnings =
-    tasks.length === 0 && result.exitCode !== 0
-      ? [
-          `Moon exited with code ${result.exitCode} but no Jest task output was parsed. ` +
-            `The Jest task may have failed before producing JSON output — run jest directly to verify.`,
-          ...parseFailures,
-        ]
-      : parseFailures.length > 0
-      ? parseFailures
-      : undefined;
+  const exitCode = result.exitCode ?? 0;
+  const warnings = buildMoonJestWarnings({
+    output,
+    exitCode,
+    taskCount: tasks.length,
+    parseFailures,
+  });
+
+  // Persist the full log on any failure so the complete output survives even when parsing
+  // couldn't attribute failures to individual tests.
+  const hasFailure = exitCode !== 0 || failed.length > 0;
+  const logPath = hasFailure ? writeMoonJestLog(output) : undefined;
 
   return {
     taskCount: tasks.length,
     cachedCount,
     totalTests: tasks.reduce((sum, t) => sum + t.testCount, 0),
     failed,
-    exitCode: result.exitCode ?? 0,
+    exitCode,
     failureExcerpt:
-      tasks.length === 0 && result.exitCode !== 0 ? extractMoonFailureExcerpt(output) : undefined,
+      tasks.length === 0 && exitCode !== 0 ? extractMoonFailureExcerpt(output) : undefined,
     warnings,
+    logPath,
     verboseDetail: verbose
       ? `${packageInfo.jestDirs.length} packages, ${ranCount} ran, ${cachedCount} cached, ${cpus} cpus → concurrency=${concurrency}, maxWorkers=${maxWorkers}`
       : undefined,

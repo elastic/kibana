@@ -29,6 +29,10 @@ export interface Benchmark {
 }
 
 export const DEFAULT_BENCHMARKS_PER_PAGE = 20;
+
+// Package policy names are user-defined strings displayed in the UI.
+// 256 is a generous ceiling that blocks abusive inputs.
+const PACKAGE_POLICY_NAME_MAX_LENGTH = 256;
 export const BENCHMARK_PACKAGE_POLICY_PREFIX = 'package_policy.';
 
 // Fleet package policy name max length matches the general label/name limit

@@ -10,7 +10,7 @@
 import type { PublishingSubject } from '../../publishing_subject';
 
 export interface PublishesApproximation {
-  isApproximate$: PublishingSubject<boolean | undefined>;
+  isApproximate$: PublishingSubject<boolean>;
 }
 
 export const apiPublishesApproximation = (

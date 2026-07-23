@@ -25,3 +25,7 @@ export {
 export { listLeadsTool, SECURITY_LIST_LEADS_TOOL_ID } from './leads/list_leads_tool';
 export { generateLeadsTool, SECURITY_GENERATE_LEADS_TOOL_ID } from './leads/generate_leads_tool';
 export { dismissLeadTool, SECURITY_DISMISS_LEAD_TOOL_ID } from './leads/dismiss_lead_tool';
+export {
+  setAssetCriticalityTool,
+  SECURITY_SET_ASSET_CRITICALITY_TOOL_ID,
+} from './set_asset_criticality_tool';

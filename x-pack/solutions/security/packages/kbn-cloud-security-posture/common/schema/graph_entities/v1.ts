@@ -10,9 +10,10 @@ import {
   COUNTRY_CODE_MAX_LENGTH,
   COUNTRY_CODES_MAX_SIZE,
   DETAIL_PAGE_SIZE_MAX,
-  ENTITY_ID_MAX_LENGTH,
+  ENTITY_EUID_MAX_LENGTH,
   ENUM_LIKE_MAX_LENGTH,
-  INDEX_NAME_MAX_LENGTH,
+  ENTITY_IDS_MAX_SIZE,
+  INDEX_PATTERN_MAX_LENGTH,
   INDEX_PATTERN_REGEX,
   INDEX_PATTERNS_MAX_SIZE,
   IP_ADDRESS_MAX_LENGTH,
@@ -27,7 +28,7 @@ import {
 // ============================================
 
 export const entityItemSchema = schema.object({
-  id: schema.string({ maxLength: ENTITY_ID_MAX_LENGTH }),
+  id: schema.string({ maxLength: ENTITY_EUID_MAX_LENGTH }),
   timestamp: schema.maybe(schema.string({ maxLength: TIMESTAMP_STRING_MAX_LENGTH })),
   name: schema.maybe(schema.string({ maxLength: LABEL_MAX_LENGTH })),
   type: schema.maybe(schema.string({ maxLength: ENUM_LIKE_MAX_LENGTH })),
@@ -60,9 +61,9 @@ export const entitiesRequestSchema = schema.object({
     size: schema.number({ min: 1, max: DETAIL_PAGE_SIZE_MAX }),
   }),
   query: schema.object({
-    entityIds: schema.arrayOf(schema.string({ maxLength: ENTITY_ID_MAX_LENGTH }), {
+    entityIds: schema.arrayOf(schema.string({ maxLength: ENTITY_EUID_MAX_LENGTH }), {
       minSize: 1,
-      maxSize: 5000,
+      maxSize: ENTITY_IDS_MAX_SIZE,
     }),
     start: schema.oneOf([
       schema.number(),
@@ -73,7 +74,7 @@ export const entitiesRequestSchema = schema.object({
       schema.arrayOf(
         schema.string({
           minLength: 1,
-          maxLength: INDEX_NAME_MAX_LENGTH,
+          maxLength: INDEX_PATTERN_MAX_LENGTH,
           validate: (value) => {
             if (!INDEX_PATTERN_REGEX.test(value)) {
               return `Invalid index pattern: ${value}. Contains illegal characters.`;

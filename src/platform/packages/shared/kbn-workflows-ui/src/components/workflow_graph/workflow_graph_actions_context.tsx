@@ -11,14 +11,17 @@ import { createContext, type ReactNode, useContext } from 'react';
 
 /**
  * Render-prop type for injecting a custom icon resolver into the graph canvas.
- * Callers (plugin call sites) return whatever React element they want; the
- * graph-node CSS box provides the tint via `currentColor` so plain monochrome
- * icons inherit the step/trigger palette color automatically.
+ * Callers (plugin call sites) return whatever React element they want. The
+ * graph node passes an explicit `color` (the step/trigger palette tone) so
+ * mask-based monochrome icons can be tinted to match the node, without changing
+ * the shared icon's neutral default in other contexts.
  */
 export type RenderStepIcon = (args: {
   stepType: string;
   isTrigger: boolean;
   size?: 'm' | 'l';
+  /** Palette tint for monochrome (mask-based) icons; ignored by multi-color logos. */
+  color?: string;
 }) => ReactNode;
 
 export interface WorkflowGraphActions {

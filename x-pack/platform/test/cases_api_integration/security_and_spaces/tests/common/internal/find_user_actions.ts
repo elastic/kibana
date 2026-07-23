@@ -310,7 +310,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await findInternalCaseUserActions({
           caseID: theCase.id,
           supertest,
-          options: { author: 'a'.repeat(MAX_USER_ACTION_AUTHOR_LENGTH + 1) },
+          options: { authors: ['a'.repeat(MAX_USER_ACTION_AUTHOR_LENGTH + 1)] },
           expectedHttpCode: 400,
         });
       });
@@ -899,7 +899,7 @@ export default ({ getService }: FtrProviderContext): void => {
             caseID: theCase.id,
             supertest,
             options: {
-              author: 'elastic',
+              authors: ['elastic'],
             },
           });
 
@@ -915,7 +915,7 @@ export default ({ getService }: FtrProviderContext): void => {
             caseID: theCase.id,
             supertest,
             options: {
-              author: 'nonexistent_user',
+              authors: ['nonexistent_user'],
             },
           });
 
@@ -1039,7 +1039,7 @@ export default ({ getService }: FtrProviderContext): void => {
             supertest,
             options: {
               search: 'cool comment',
-              author: 'elastic',
+              authors: ['elastic'],
             },
           });
 

@@ -7,20 +7,46 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { RequestHandlerContext } from '@kbn/core/server';
+import { asCodeIdSchema } from '@kbn/as-code-shared-schemas';
+import { SavedObjectsErrorHelpers, type RequestHandlerContext } from '@kbn/core/server';
+
 import { MARKDOWN_SAVED_OBJECT_TYPE } from '../../../common/constants';
-import type { MarkdownUpdateRequestBody, MarkdownUpdateResponseBody } from './types';
+import type { StoredMarkdownState } from '../../markdown_saved_object';
+import type { MarkdownCreateResponseBody } from '../create';
+import { create } from '../create/create';
 import { getMarkdownCRUResponseBody } from '../get_cru_response_body';
-import type { MarkdownAttributes } from '../../markdown_saved_object';
+import type { MarkdownUpdateRequestBody, MarkdownUpdateResponseBody } from './types';
 
 export async function update(
   requestCtx: RequestHandlerContext,
   id: string,
   updateBody: MarkdownUpdateRequestBody
-): Promise<MarkdownUpdateResponseBody> {
+): Promise<{
+  body: MarkdownCreateResponseBody | MarkdownUpdateResponseBody;
+  operation: 'create' | 'update';
+}> {
   const { core } = await requestCtx.resolve(['core']);
 
-  const savedObject = await core.savedObjects.client.update<MarkdownAttributes>(
+  // Determine whether the library item already exists.
+  let isNewLibraryItem = false;
+  try {
+    await core.savedObjects.client.get<StoredMarkdownState>(MARKDOWN_SAVED_OBJECT_TYPE, id);
+  } catch (e) {
+    if (!SavedObjectsErrorHelpers.isNotFoundError(e)) {
+      throw e;
+    }
+    isNewLibraryItem = true;
+  }
+
+  // Create path
+  if (isNewLibraryItem) {
+    asCodeIdSchema.validate(id);
+    const body = await create(requestCtx, updateBody, id);
+    return { body, operation: 'create' };
+  }
+
+  // Update path (existing library item)
+  const savedObject = await core.savedObjects.client.update<StoredMarkdownState>(
     MARKDOWN_SAVED_OBJECT_TYPE,
     id,
     updateBody,
@@ -31,5 +57,5 @@ export async function update(
     }
   );
 
-  return getMarkdownCRUResponseBody(savedObject);
+  return { body: getMarkdownCRUResponseBody(savedObject), operation: 'update' };
 }

@@ -259,4 +259,106 @@ describe('useChangeHistoryList', () => {
     });
     expect(result.current.total).toBe(8);
   });
+
+  it('prepends a pending row when unsavedChanges is enabled', async () => {
+    const pendingChange = {
+      id: '__pending__',
+      timestamp: '2026-07-03T12:00:00.000Z',
+      actor: { name: 'You' },
+      action: 'Unsaved changes',
+      snapshot: { content: 'draft' },
+    };
+
+    const listChanges = jest.fn().mockResolvedValue({
+      items: [
+        {
+          id: 'evt-current',
+          timestamp: '2026-06-16T12:00:00.000Z',
+          actor: { name: 'Alice' },
+          action: 'Updated',
+          isCurrent: true,
+          metadata: { version: 3 },
+        },
+      ],
+      total: 1,
+    });
+
+    const adapter: ChangeHistoryAdapter = {
+      listChanges,
+      getChange: jest.fn(),
+      getPendingChange: () => pendingChange,
+    };
+
+    const { wrapper } = createChangeHistoryHookWrapper({
+      adapter,
+      features: { unsavedChanges: true },
+    });
+
+    const { result } = renderHook(
+      () =>
+        useChangeHistoryList({
+          adapter,
+          objectId: TEST_OBJECT_ID,
+        }),
+      { wrapper }
+    );
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    expect(result.current.items).toHaveLength(2);
+    expect(result.current.items[0]?.id).toBe('__pending__');
+    expect(result.current.items[0]?.isCurrent).toBe(true);
+    expect(result.current.items[1]?.isCurrent).toBeUndefined();
+  });
+
+  it('ignores getPendingChange when unsavedChanges is disabled', async () => {
+    const listChanges = jest.fn().mockResolvedValue({
+      items: [
+        {
+          id: 'evt-current',
+          timestamp: '2026-06-16T12:00:00.000Z',
+          actor: { name: 'Alice' },
+          action: 'Updated',
+          isCurrent: true,
+          metadata: { version: 3 },
+        },
+      ],
+      total: 1,
+    });
+
+    const adapter: ChangeHistoryAdapter = {
+      listChanges,
+      getChange: jest.fn(),
+      getPendingChange: () => ({
+        id: '__pending__',
+        timestamp: '2026-07-03T12:00:00.000Z',
+        actor: { name: 'You' },
+        action: 'Unsaved changes',
+        snapshot: { content: 'draft' },
+      }),
+    };
+
+    const { wrapper } = createChangeHistoryHookWrapper({
+      adapter,
+      features: { unsavedChanges: false },
+    });
+
+    const { result } = renderHook(
+      () =>
+        useChangeHistoryList({
+          adapter,
+          objectId: TEST_OBJECT_ID,
+        }),
+      { wrapper }
+    );
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    expect(result.current.items).toHaveLength(1);
+    expect(result.current.items[0]?.id).toBe('evt-current');
+  });
 });

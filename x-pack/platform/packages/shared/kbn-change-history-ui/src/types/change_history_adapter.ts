@@ -12,6 +12,7 @@ import type {
   ListChangeHistoryResult,
 } from './list_change_history_params';
 import type { RestoreChangeParams } from './restore_change_params';
+import type { ChangeHistoryPendingChange } from './change_history_pending_change';
 
 /** Integration surface between a domain plugin and the shared UI. */
 export interface ChangeHistoryAdapter {
@@ -32,4 +33,9 @@ export interface ChangeHistoryAdapter {
    */
   getChange: (params: GetChangeParams) => Promise<ChangeHistoryDetail>;
   restoreChange?: (params: RestoreChangeParams) => Promise<void>;
+  /**
+   * Returns in-editor state not yet committed to change history.
+   * Used only when `features.unsavedChanges` is true on `ChangeHistoryProvider`.
+   */
+  getPendingChange?: () => ChangeHistoryPendingChange | undefined;
 }

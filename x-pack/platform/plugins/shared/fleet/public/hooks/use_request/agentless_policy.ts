@@ -70,13 +70,33 @@ export const sendBulkUpgradeAgentlessPolicies = (policyIds: string[]) => {
   });
 };
 
-export const sendUpgradeAgentlessPoliciesDryRun = (policyIds: string[]) => {
+export const sendUpgradeAgentlessPoliciesDryRun = (policyIds: string[], pkgVersion?: string) => {
   return sendRequestForRq<AgentlessPolicyUpgradeDryRunResponse>({
     path: agentlessPolicyRouteService.getUpgradeDryRunPath(),
     method: 'post',
     version: API_VERSIONS.public.v1,
-    body: JSON.stringify({ policyIds }),
+    body: JSON.stringify(pkgVersion ? { policyIds, pkgVersion } : { policyIds }),
   });
+};
+
+export const useUpgradeAgentlessPoliciesDryRunQuery = (
+  policyIds: string[],
+  pkgVersion?: string,
+  { enabled = policyIds.length > 0 }: Partial<{ enabled: boolean }> = {}
+) => {
+  return useQuery<AgentlessPolicyUpgradeDryRunResponse, RequestError>(
+    // The ids are sorted in the key so a refetch of the source list that merely reorders items
+    // doesn't register as a new query (each new key fires another dry-run POST).
+    ['upgradeAgentlessPoliciesDryRun', [...policyIds].sort(), pkgVersion],
+    () => sendUpgradeAgentlessPoliciesDryRun(policyIds, pkgVersion),
+    {
+      enabled,
+      // Don't refire the dry-run POST every time the browser window regains focus: it gates a
+      // user action, so freshness comes from mounting the settings tab, not from tab switching.
+      // Failure retries and mount refetches keep the react-query defaults.
+      refetchOnWindowFocus: false,
+    }
+  );
 };
 
 export const useBulkGetAgentlessPolicyThroughput = (policyIds: string[]) => {

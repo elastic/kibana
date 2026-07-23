@@ -8,6 +8,7 @@ import { merge } from 'lodash';
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { accessKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
+import type { ServiceInstanceMetadataDetailsResponse } from '@kbn/apm-api-shared';
 import {
   AGENT_NAME,
   AT_TIMESTAMP,
@@ -22,12 +23,6 @@ import {
   getProcessorEventForTransactions,
 } from '../../lib/helpers/transactions';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
-import type { Agent } from '../../../typings/es_schemas/ui/fields/agent';
-import type { Service } from '../../../typings/es_schemas/raw/fields/service';
-import type { Container } from '../../../typings/es_schemas/raw/fields/container';
-import type { Kubernetes } from '../../../typings/es_schemas/raw/fields/kubernetes';
-import type { Host } from '../../../typings/es_schemas/raw/fields/host';
-import type { Cloud } from '../../../typings/es_schemas/raw/fields/cloud';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import {
   SERVICE_METADATA_CLOUD_KEYS,
@@ -35,16 +30,6 @@ import {
   SERVICE_METADATA_INFRA_METRICS_KEYS,
   SERVICE_METADATA_SERVICE_KEYS,
 } from '../../../common/service_metadata';
-
-export interface ServiceInstanceMetadataDetailsResponse {
-  '@timestamp': string;
-  agent?: Agent;
-  service?: Service;
-  container?: Container;
-  kubernetes?: Kubernetes;
-  host?: Host;
-  cloud?: Cloud;
-}
 
 export async function getServiceInstanceMetadataDetails({
   serviceName,

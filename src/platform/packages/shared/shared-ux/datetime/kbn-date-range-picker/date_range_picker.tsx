@@ -77,6 +77,13 @@ export interface DateRangePickerProps {
   onChange: (props: DateRangePickerOnChangeProps) => void;
   /** Additional format string for parsing absolute dates (does not affect display). */
   dateFormat?: string;
+  /**
+   * Locale used to recognise and generate named ranges, natural-language
+   * durations/instants, and delimiters. English is always recognised
+   * alongside the active locale.
+   * @default `i18n.getLocale()`
+   */
+  locale?: string;
   /** Show invalid state */
   isInvalid?: boolean;
   /**

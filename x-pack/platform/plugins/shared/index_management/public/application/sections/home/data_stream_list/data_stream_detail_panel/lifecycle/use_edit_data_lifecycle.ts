@@ -16,6 +16,11 @@ import {
   isInheritFailureStore,
   isEnabledFailureStore,
 } from '@kbn/streams-schema';
+import {
+  CLOUD_SUBSCRIPTION_FEATURES_URL,
+  CONTACT_US_URL,
+  SUBSCRIPTION_FEATURES_URL,
+} from '@kbn/data-lifecycle-phases';
 import type { IlmPolicyForFlyout } from '@kbn/data-lifecycle-phases';
 import type { IndexManagementLocatorParams } from '@kbn/index-management-shared-types';
 
@@ -29,6 +34,7 @@ import {
   updateDataLifecycle,
   updateDataStreamSettings,
   updateIndexSettings,
+  loadSnapshotRepositories,
 } from '../../../../../services/api';
 import { sendRequest } from '../../../../../services/use_request';
 // Import the constant directly from its module (not the public barrel `../../../../../..`)
@@ -97,16 +103,18 @@ export const useEditDataLifecycle = ({
   resolvedLifecycle,
   onClose,
 }: UseEditDataLifecycleArgs) => {
-  const { config, core, docLinks, plugins, services, url } = useAppContext();
+  const { config, core, plugins, services, url } = useAppContext();
   const locator = url.locators.get<IndexManagementLocatorParams>(INDEX_MANAGEMENT_LOCATOR_ID);
 
   const [isEditingDataLifecycle, setIsEditingDataLifecycle] = useState(false);
   const [ilmPolicies, setIlmPolicies] = useState<IlmPolicyForFlyout[]>([]);
+  const [hasManageIlm, setHasManageIlm] = useState(true);
   const [selectedIlmPolicyName, setSelectedIlmPolicyName] = useState<string | undefined>(undefined);
   const [lifecycleMethod, setLifecycleMethod] = useState<'dlm' | 'ilm'>('dlm');
   const [failureStoreEnabled, setFailureStoreEnabled] = useState(false);
   const [hasEnterpriseLicense, setHasEnterpriseLicense] = useState(false);
   const [defaultSnapshotRepository, setDefaultSnapshotRepository] = useState<string | null>(null);
+  const [hasExistingRepositories, setHasExistingRepositories] = useState(false);
   const [inheritSuccessfulLifecycle, setInheritSuccessfulLifecycle] = useState(false);
   const [inheritFailedLifecycle, setInheritFailedLifecycle] = useState(false);
   const [flyoutSeed, setFlyoutSeed] = useState<FlyoutSeed>({});
@@ -116,25 +124,33 @@ export const useEditDataLifecycle = ({
 
   const loadDefaultSnapshotRepository = useCallback(async () => {
     try {
-      const { data } = await sendRequest<{ repositoryName: string | null }>({
-        path: '/api/snapshot_restore/default_repository',
-        method: 'get',
-      });
-      setDefaultSnapshotRepository(data?.repositoryName ?? null);
+      const { data } = await loadSnapshotRepositories();
+      setDefaultSnapshotRepository(data?.defaultRepository ?? null);
+      // Treat repositories as existing when the list reports any, or (as a fallback for users who
+      // cannot list repositories) when a default repository is configured.
+      setHasExistingRepositories(
+        Boolean(data?.hasRepositories) || Boolean(data?.defaultRepository)
+      );
     } catch {
       setDefaultSnapshotRepository(null);
+      setHasExistingRepositories(false);
     }
   }, []);
 
   const loadIlmPolicies = useCallback(async () => {
     try {
-      const { data } = await sendRequest<IlmPolicyForFlyout[]>({
+      const { data } = await sendRequest<{
+        hasManageIlm: boolean;
+        policies: IlmPolicyForFlyout[];
+      }>({
         path: `${API_BASE_PATH}/data_streams/ilm_policies`,
         method: 'get',
       });
-      setIlmPolicies(Array.isArray(data) ? data : []);
+      setIlmPolicies(Array.isArray(data?.policies) ? data.policies : []);
+      setHasManageIlm(data?.hasManageIlm ?? false);
     } catch {
       setIlmPolicies([]);
+      setHasManageIlm(false);
     }
   }, []);
 
@@ -798,9 +814,14 @@ export const useEditDataLifecycle = ({
       indexTemplateHref: inheritIndexTemplateHref,
       dlm: {
         defaultValue: successfulDlmDefaultValue,
+        // The cluster-wide maximum retention only constrains DLM retention in Serverless.
+        maximumRetentionPeriod: config.isServerless
+          ? dataStream?.lifecycle?.globalMaxRetention
+          : undefined,
         hasEnterpriseLicense,
         hasDefaultSnapshotRepository: defaultSnapshotRepository !== null,
         defaultSnapshotRepository: defaultSnapshotRepository ?? undefined,
+        hasExistingRepositories,
         manageRepositoriesUrl: core.getUrlForApp('management', {
           path: '/data/snapshot_restore/repositories',
         }),
@@ -814,7 +835,12 @@ export const useEditDataLifecycle = ({
           canManageLicense:
             core.application.capabilities.management?.stack?.license_management === true,
           trialDaysLeft: plugins.cloud?.trialDaysLeft?.(),
-          subscriptionFeaturesUrl: docLinks.links.subscriptions,
+          subscriptionFeaturesUrl: plugins.cloud?.isCloudEnabled
+            ? CLOUD_SUBSCRIPTION_FEATURES_URL
+            : SUBSCRIPTION_FEATURES_URL,
+          onUpgrade: plugins.cloud?.isCloudEnabled
+            ? undefined
+            : () => window.open(CONTACT_US_URL, '_blank', 'noopener'),
         },
         onRefreshDefaultSnapshotRepository: loadDefaultSnapshotRepository,
       },
@@ -827,15 +853,19 @@ export const useEditDataLifecycle = ({
             selectedPolicyName: selectedIlmPolicyName,
             onPolicySelect: setSelectedIlmPolicyName,
             onPolicyInspect: (policyName: string) => setInspectedIlmPolicyName(policyName),
+            canManageIlm: hasManageIlm,
+            hasExistingIlmPolicy: isNextGenIlm(dataStream),
           },
     }),
     [
       config.isServerless,
       core,
+      dataStream,
       defaultSnapshotRepository,
-      docLinks.links.subscriptions,
       handleInheritSuccessfulLifecycleChange,
       hasEnterpriseLicense,
+      hasManageIlm,
+      hasExistingRepositories,
       ilmPolicies,
       inheritIndexTemplateHref,
       inheritLabel,

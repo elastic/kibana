@@ -8,6 +8,7 @@
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test, testData } from '../../fixtures';
+import { assertFlyoutChartsRendered } from '../../fixtures/service_flyout_helpers';
 import { EXTENDED_TIMEOUT } from '../../fixtures/constants';
 
 const APM_DASHBOARD_DATA_VIEW_TITLE = 'traces-apm*,logs-apm*,metrics-apm*';
@@ -132,12 +133,9 @@ test.describe(
 
         // Suggestions can be empty under load on cloud/serverless, but the
         // control supports committing typed values via onCreateOption.
-        await pageObjects.serviceMapPage.serviceMapEditorServiceNameComboBox.setCustomSingleOption(
-          SERVICE_MAP_TEST_SERVICE,
-          {
-            useFill: true,
-            settleTimeoutMs: EXTENDED_TIMEOUT,
-          }
+        await pageObjects.serviceMapPage.serviceMapEditorServiceNameComboBox.setCustomSelectedOptions(
+          [SERVICE_MAP_TEST_SERVICE],
+          { timeout: EXTENDED_TIMEOUT }
         );
 
         await expect
@@ -188,7 +186,7 @@ test.describe(
         });
         await expect(pageObjects.serviceFlyoutPage.title).toHaveText(SERVICE_MAP_TEST_SERVICE);
         await expect(pageObjects.serviceFlyoutPage.actions).toBeVisible();
-        await pageObjects.serviceFlyoutPage.expectChartsRendered([
+        await assertFlyoutChartsRendered(pageObjects.serviceFlyoutPage, [
           'latency',
           'throughput',
           'failedTransactionRate',
@@ -299,9 +297,9 @@ test.describe(
           })
           .toBe(0);
 
-        await pageObjects.serviceMapPage.serviceMapEditorServiceNameComboBox.setCustomSingleOption(
-          SERVICE_MAP_TEST_SERVICE,
-          { useFill: true, settleTimeoutMs: EXTENDED_TIMEOUT }
+        await pageObjects.serviceMapPage.serviceMapEditorServiceNameComboBox.setCustomSelectedOptions(
+          [SERVICE_MAP_TEST_SERVICE],
+          { timeout: EXTENDED_TIMEOUT }
         );
         await pageObjects.serviceMapPage.selectServiceMapEditorEnvironment(
           SERVICE_MAP_TEST_ENVIRONMENT_STAGING
@@ -322,7 +320,7 @@ test.describe(
 
         // A failed save (e.g. schema validation rejecting the panel config) shows an
         // error toast and keeps the dashboard dirty; assert success instead.
-        await expect(page.getByTestId('errorToastMessage')).toBeHidden();
+        await expect(page.getByTestId('saveDashboardFailure')).toBeHidden();
         await expect(page).toHaveURL(/\/app\/dashboards#\/view\//);
 
         const dashboardUrlMatch = page.url().match(/\/view\/([^/?]+)/);

@@ -8,16 +8,19 @@
  */
 
 import type { UseEuiTheme } from '@elastic/eui';
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { changeHistoryPreviewTypography } from './change_history_preview_typography';
-import type { WorkflowChangeHistoryCompareIndicator } from './get_workflow_change_history_compare_indicator';
+import type {
+  WorkflowChangeHistoryCompareBadgeColor,
+  WorkflowChangeHistoryCompareIndicator,
+} from './get_workflow_change_history_compare_indicator';
 import {
   COMPARING_WITH_LABEL,
-  CURRENT_VERSION_LABEL,
   PREVIOUS_VERSION_LABEL,
+  SELECTED_VERSION_LABEL,
   VERSION_BADGE,
   VERSION_BADGE_FALLBACK,
 } from './translations';
@@ -28,15 +31,33 @@ export interface WorkflowChangeHistoryCompareIndicatorProps {
 
 const VersionBadge = ({
   version,
+  badgeLabel,
+  badgeColor = 'hollow',
   testSubj,
 }: {
   version?: number;
+  badgeLabel?: string;
+  badgeColor?: WorkflowChangeHistoryCompareBadgeColor;
   testSubj: string;
-}): JSX.Element => {
+}): JSX.Element | null => {
+  const { euiTheme } = useEuiTheme();
+
   if (version != null) {
     return (
       <EuiBadge color="hollow" css={versionBadgeStyle} data-test-subj={testSubj}>
         {VERSION_BADGE(version)}
+      </EuiBadge>
+    );
+  }
+
+  if (badgeLabel) {
+    return (
+      <EuiBadge
+        color={badgeColor === 'warning' ? euiTheme.colors.backgroundLightWarning : 'hollow'}
+        css={versionBadgeStyle}
+        data-test-subj={testSubj}
+      >
+        {badgeLabel}
       </EuiBadge>
     );
   }
@@ -107,12 +128,14 @@ export const WorkflowChangeHistoryCompareSplitPaneLabels = ({
         <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiText size="s" css={styles.label}>
-              {CURRENT_VERSION_LABEL}
+              {SELECTED_VERSION_LABEL}
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <VersionBadge
               version={indicator.currentVersion}
+              badgeLabel={indicator.currentBadgeLabel}
+              badgeColor={indicator.currentBadgeColor}
               testSubj="workflowChangeHistoryCompareSplitCurrentBadge"
             />
           </EuiFlexItem>

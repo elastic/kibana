@@ -17,6 +17,7 @@ import { useToasts } from '../../../../hooks/use_toasts';
 import { useConversationStream } from '../../../../hooks/use_conversation_stream';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useExperimentalFeatures } from '../../../../hooks/use_experimental_features';
+import { useTracingEnabled } from '../../../../hooks/use_tracing_enabled';
 import { RoundMetadataPopover } from './round_metadata_popover';
 import { RoundTraceButton } from './round_trace_button';
 
@@ -51,6 +52,7 @@ export const RoundResponseActions: React.FC<RoundResponseActionsProps> = ({
   const { regenerate, isRegenerating, isResponseLoading } = useConversationStream();
   const { services } = useKibana();
   const isExperimentalEnabled = useExperimentalFeatures();
+  const isTracingEnabled = useTracingEnabled();
 
   const handleCopy = useCallback(() => {
     const isSuccess = copy(content);
@@ -90,7 +92,7 @@ export const RoundResponseActions: React.FC<RoundResponseActionsProps> = ({
     });
   }, [rawRound, services.plugins.evals, traceId]);
 
-  const showTraceButton = isExperimentalEnabled && Boolean(traceId);
+  const showTraceButton = isTracingEnabled && Boolean(traceId);
   const showAddToDatasetButton = isExperimentalEnabled && addToDatasetAction !== null;
 
   return (

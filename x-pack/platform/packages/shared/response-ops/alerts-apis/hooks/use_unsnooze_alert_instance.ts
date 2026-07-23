@@ -21,6 +21,7 @@ const ERROR_TITLE = i18n.translate('alertsApis.unsnoozeAlert.error', {
 export interface UseUnsnoozeAlertInstanceParams {
   http: HttpStart;
   notifications: NotificationsStart;
+  skipAlertsQueryContext?: boolean;
 }
 
 export const getKey = mutationKeys.unsnoozeAlertInstance;
@@ -28,13 +29,14 @@ export const getKey = mutationKeys.unsnoozeAlertInstance;
 export const useUnsnoozeAlertInstance = ({
   http,
   notifications: { toasts },
+  skipAlertsQueryContext,
 }: UseUnsnoozeAlertInstanceParams) => {
   return useMutation(
     ({ ruleId, alertInstanceId }: ToggleAlertParams) =>
       unsnoozeAlertInstance({ http, id: ruleId, instanceId: alertInstanceId }),
     {
       mutationKey: getKey(),
-      context: AlertsQueryContext,
+      context: skipAlertsQueryContext ? undefined : AlertsQueryContext,
       onSuccess() {
         toasts.addSuccess(
           i18n.translate('xpack.responseOpsAlertsApis.alertsTable.alertUnsnoozed', {
