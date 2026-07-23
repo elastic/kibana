@@ -45,12 +45,10 @@ const tryResolveFallbackConnector = async ({
   searchInferenceEndpoints,
   inference,
   request,
-  prefetchedConnectors,
 }: {
   searchInferenceEndpoints: SearchInferenceEndpointsPluginStart;
   inference: InferenceServerStart;
   request: KibanaRequest;
-  prefetchedConnectors?: InferenceConnector[];
 }): Promise<string | undefined> => {
   // First, try feature-registered endpoints (admin SO overrides or recommended endpoints)
   try {
@@ -65,8 +63,7 @@ const tryResolveFallbackConnector = async ({
     // Ignore errors — fall through to connector list fallback
   }
 
-  const connectors =
-    prefetchedConnectors ?? (await inference.getConnectorList(request).catch(() => undefined));
+  const connectors = await inference.getConnectorList(request).catch(() => undefined);
   if (connectors && connectors.length > 0) {
     return selectFallbackConnector(connectors);
   }
@@ -106,12 +103,7 @@ export const resolveSelectedConnectorId = async ({
         `Connector ID [${connectorId}] does not match the configured default connector ID [${defaultConnectorSetting}].`
       );
     }
-    const connectors = await inference.getConnectorList(request).catch(() => null);
-    if (connectors !== null && !connectors.some((c) => c.connectorId === defaultConnectorSetting)) {
-      throw new Error(
-        `The configured default connector [${defaultConnectorSetting}] no longer exists. Please update the AI connector configuration.`
-      );
-    }
+
     return defaultConnectorSetting;
   }
   if (connectorId) {
@@ -119,18 +111,10 @@ export const resolveSelectedConnectorId = async ({
   }
   if (hasValidDefaultConnector) {
     try {
-      const connectors = await inference.getConnectorList(request);
-      if (connectors.some((c) => c.connectorId === defaultConnectorSetting)) {
-        return defaultConnectorSetting;
-      }
-      return tryResolveFallbackConnector({
-        searchInferenceEndpoints,
-        inference,
-        request,
-        prefetchedConnectors: connectors,
-      });
-    } catch {
+      await inference.getConnectorById(defaultConnectorSetting, request);
       return defaultConnectorSetting;
+    } catch {
+      return tryResolveFallbackConnector({ searchInferenceEndpoints, inference, request });
     }
   }
 

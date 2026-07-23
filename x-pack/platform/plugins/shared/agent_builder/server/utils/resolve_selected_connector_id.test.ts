@@ -94,10 +94,6 @@ describe('resolveSelectedConnectorId', () => {
       const inference = inferenceMock.createStartContract();
       const searchInferenceEndpoints = createSearchInferenceEndpointsMock();
 
-      (inference.getConnectorList as jest.Mock).mockResolvedValue([
-        { connectorId: 'default-id' } as InferenceConnector,
-      ]);
-
       const result = await resolveSelectedConnectorId({
         uiSettings,
         savedObjects,
@@ -108,42 +104,17 @@ describe('resolveSelectedConnectorId', () => {
       });
 
       expect(result).toBe('default-id');
+      expect(inference.getConnectorById).not.toHaveBeenCalled();
+      expect(inference.getConnectorList).not.toHaveBeenCalled();
     });
 
-    it('throws a clear error when defaultOnly=true and the locked connector no longer exists', async () => {
+    it('returns stored default when defaultOnly=true even if the connector no longer exists', async () => {
       const { savedObjects, uiSettings, request } = setupCoreMocks({
         [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR]: 'stale-connector-id',
         [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY]: true,
       });
       const inference = inferenceMock.createStartContract();
       const searchInferenceEndpoints = createSearchInferenceEndpointsMock();
-
-      (inference.getConnectorList as jest.Mock).mockResolvedValue([
-        { connectorId: 'some-other-connector' } as InferenceConnector,
-      ]);
-
-      await expect(
-        resolveSelectedConnectorId({
-          uiSettings,
-          savedObjects,
-          request,
-          inference,
-          searchInferenceEndpoints,
-        })
-      ).rejects.toThrow(
-        'The configured default connector [stale-connector-id] no longer exists. Please update the AI connector configuration.'
-      );
-    });
-
-    it('trusts the stored default when defaultOnly=true and getConnectorList throws', async () => {
-      const { savedObjects, uiSettings, request } = setupCoreMocks({
-        [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR]: 'default-id',
-        [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY]: true,
-      });
-      const inference = inferenceMock.createStartContract();
-      const searchInferenceEndpoints = createSearchInferenceEndpointsMock();
-
-      (inference.getConnectorList as jest.Mock).mockRejectedValue(new Error('network error'));
 
       const result = await resolveSelectedConnectorId({
         uiSettings,
@@ -153,7 +124,9 @@ describe('resolveSelectedConnectorId', () => {
         searchInferenceEndpoints,
       });
 
-      expect(result).toBe('default-id');
+      expect(result).toBe('stale-connector-id');
+      expect(inference.getConnectorById).not.toHaveBeenCalled();
+      expect(inference.getConnectorList).not.toHaveBeenCalled();
     });
 
     it('returns explicit connectorId when provided and defaultOnly=false', async () => {
@@ -176,7 +149,7 @@ describe('resolveSelectedConnectorId', () => {
       expect(result).toBe('explicit-id');
     });
 
-    it('returns stored default when it exists in the live connector list', async () => {
+    it('returns stored default when getConnectorById confirms it exists', async () => {
       const { savedObjects, uiSettings, request } = setupCoreMocks({
         [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR]: 'default-id',
         [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY]: false,
@@ -184,9 +157,9 @@ describe('resolveSelectedConnectorId', () => {
       const inference = inferenceMock.createStartContract();
       const searchInferenceEndpoints = createSearchInferenceEndpointsMock();
 
-      (inference.getConnectorList as jest.Mock).mockResolvedValue([
-        { connectorId: 'default-id' } as InferenceConnector,
-      ]);
+      (inference.getConnectorById as jest.Mock).mockResolvedValue({
+        connectorId: 'default-id',
+      } as InferenceConnector);
 
       const result = await resolveSelectedConnectorId({
         uiSettings,
@@ -197,11 +170,12 @@ describe('resolveSelectedConnectorId', () => {
       });
 
       expect(result).toBe('default-id');
+      expect(inference.getConnectorById).toHaveBeenCalledWith('default-id', request);
     });
   });
 
   describe('dynamic connector validation', () => {
-    it('falls through to fallback when stored default is not in the live connector list', async () => {
+    it('falls through to fallback when getConnectorById rejects for stored default', async () => {
       const { savedObjects, uiSettings, request } = setupCoreMocks({
         [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR]: 'stale-connector-id',
         [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY]: false,
@@ -212,8 +186,35 @@ describe('resolveSelectedConnectorId', () => {
         endpoints: [{ connectorId: kibanaDefault } as InferenceConnector],
       });
 
+      (inference.getConnectorById as jest.Mock).mockRejectedValue(
+        new Error("No connector or inference endpoint found for ID 'stale-connector-id'")
+      );
+
+      const result = await resolveSelectedConnectorId({
+        uiSettings,
+        savedObjects,
+        request,
+        inference,
+        searchInferenceEndpoints,
+      });
+
+      // Stale ID rejected → falls through to feature endpoint fallback
+      expect(result).toBe(kibanaDefault);
+      expect(inference.getConnectorById).toHaveBeenCalledWith('stale-connector-id', request);
+    });
+
+    it('falls through to connector list fallback when getConnectorById throws during validation', async () => {
+      const { savedObjects, uiSettings, request } = setupCoreMocks({
+        [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR]: 'default-id',
+        [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY]: false,
+      });
+      const inference = inferenceMock.createStartContract();
+      const kibanaDefault = defaultInferenceEndpoints.KIBANA_DEFAULT_CHAT_COMPLETION;
+      const searchInferenceEndpoints = createSearchInferenceEndpointsMock();
+
+      (inference.getConnectorById as jest.Mock).mockRejectedValue(new Error('network error'));
       (inference.getConnectorList as jest.Mock).mockResolvedValue([
-        { connectorId: 'some-other-connector' } as InferenceConnector,
+        { connectorId: kibanaDefault } as InferenceConnector,
       ]);
 
       const result = await resolveSelectedConnectorId({
@@ -224,29 +225,7 @@ describe('resolveSelectedConnectorId', () => {
         searchInferenceEndpoints,
       });
 
-      // Stale ID not found → falls through to feature endpoint fallback
       expect(result).toBe(kibanaDefault);
-    });
-
-    it('returns stored default unchanged when getConnectorList throws during validation', async () => {
-      const { savedObjects, uiSettings, request } = setupCoreMocks({
-        [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR]: 'default-id',
-        [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY]: false,
-      });
-      const inference = inferenceMock.createStartContract();
-      const searchInferenceEndpoints = createSearchInferenceEndpointsMock();
-
-      (inference.getConnectorList as jest.Mock).mockRejectedValue(new Error('network error'));
-
-      const result = await resolveSelectedConnectorId({
-        uiSettings,
-        savedObjects,
-        request,
-        inference,
-        searchInferenceEndpoints,
-      });
-
-      expect(result).toBe('default-id');
     });
   });
 
