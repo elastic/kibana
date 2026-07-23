@@ -233,6 +233,7 @@ export default function (providerContext: FtrProviderContext) {
     describe('policy_base_id backfill on Fleet setup', () => {
       const agentId = `test-backfill-pbi-${Date.now()}`;
       const versionedAgentId = `test-backfill-versioned-pbi-${Date.now()}`;
+      const hashNonVersionAgentId = `test-backfill-hash-pbi-${Date.now()}`;
 
       before(async () => {
         await esArchiver.load('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
@@ -265,6 +266,21 @@ export default function (providerContext: FtrProviderContext) {
           refresh: 'wait_for',
         });
 
+        // Agent whose policy_id contains '#' but NOT a version suffix (e.g. 'foo#bar').
+        // policy_base_id should equal the full policy_id, not just the part before '#'.
+        await es.index({
+          index: AGENTS_INDEX,
+          id: hashNonVersionAgentId,
+          document: {
+            active: true,
+            policy_id: 'backfill-test-policy#notaversion',
+            last_checkin: new Date().toISOString(),
+            type: 'PERMANENT',
+            agent: { version: '9.0.0' },
+          },
+          refresh: 'wait_for',
+        });
+
         // Trigger Fleet setup to run the self-limiting backfill
         await supertest.post('/api/fleet/setup').set('kbn-xsrf', 'xxxx').expect(200);
       });
@@ -273,6 +289,9 @@ export default function (providerContext: FtrProviderContext) {
         await es.delete({ index: AGENTS_INDEX, id: agentId, refresh: true }).catch(() => {});
         await es
           .delete({ index: AGENTS_INDEX, id: versionedAgentId, refresh: true })
+          .catch(() => {});
+        await es
+          .delete({ index: AGENTS_INDEX, id: hashNonVersionAgentId, refresh: true })
           .catch(() => {});
         await esArchiver.unload(
           'x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server'
@@ -287,6 +306,11 @@ export default function (providerContext: FtrProviderContext) {
       it('should strip version suffix when populating policy_base_id', async () => {
         const agent = await es.get({ index: AGENTS_INDEX, id: versionedAgentId });
         expect((agent._source as any).policy_base_id).to.eql('backfill-test-policy');
+      });
+
+      it('should not strip # segments that are not a version suffix', async () => {
+        const agent = await es.get({ index: AGENTS_INDEX, id: hashNonVersionAgentId });
+        expect((agent._source as any).policy_base_id).to.eql('backfill-test-policy#notaversion');
       });
 
       it('should not backfill agents that already have policy_base_id on subsequent setup calls', async () => {
