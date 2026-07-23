@@ -3,7 +3,7 @@ navigation_title: "Kubernetes"
 type: reference
 description: "Use the Kubernetes connector to read and modify resources in a Kubernetes cluster through its REST API."
 applies_to:
-  stack: preview 9.4
+  stack: preview 9.6
   serverless: preview
 ---
 
