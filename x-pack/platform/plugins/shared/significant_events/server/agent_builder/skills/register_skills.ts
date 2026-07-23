@@ -8,6 +8,7 @@
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/core/server';
 import type { EbtTelemetryClient } from '../../lib/telemetry/ebt';
+import type { SignificantEventsMaintenanceService } from '../../lib/maintenance/maintenance_service';
 import type { SignificantEventsKIsOnboardingClient } from '../../lib/workflows/onboarding_workflow_client';
 import type { MemoryToolsOptions } from '../../memory_and_investigation/tools/memory';
 import { knowledgeIndicatorsManagementSkill } from './knowledge_indicators_management';
@@ -26,6 +27,7 @@ interface RegisterSignificantEventsSkillsOptions {
   agentBuilder: AgentBuilderPluginStart;
   telemetry: EbtTelemetryClient;
   streamsKIsOnboardingClient?: SignificantEventsKIsOnboardingClient;
+  maintenanceService?: SignificantEventsMaintenanceService;
   memoryToolsOptions: MemoryToolsOptions;
   logger: Logger;
   isAvailable: () => Promise<boolean>;
@@ -51,6 +53,7 @@ export const registerSignificantEventsSkills = async ({
   agentBuilder,
   telemetry,
   streamsKIsOnboardingClient,
+  maintenanceService,
   memoryToolsOptions,
   logger,
   isAvailable,
@@ -61,8 +64,14 @@ export const registerSignificantEventsSkills = async ({
     knowledgeIndicatorsManagementSkill,
     significantEventsKIGroundingSkill,
     significantEventsManagementSkill,
-    ...(streamsKIsOnboardingClient
-      ? [createKiIdentificationManagementSkill({ telemetry, streamsKIsOnboardingClient })]
+    ...(streamsKIsOnboardingClient && maintenanceService
+      ? [
+          createKiIdentificationManagementSkill({
+            telemetry,
+            streamsKIsOnboardingClient,
+            maintenanceService,
+          }),
+        ]
       : []),
     createSignificantEventsOnboardingSkill(memoryToolsOptions),
     createGapDetectionSkill(memoryToolsOptions),

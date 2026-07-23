@@ -22,7 +22,7 @@ import type {
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
 
-import { getIndexPatternFromESQLQuery, getTimeFieldFromESQLQuery } from '@kbn/esql-utils';
+import { getIndexPatternFromESQLQuery, parseTimeFieldFromESQLQuery } from '@kbn/esql-utils';
 
 import {
   LENS_IGNORE_GLOBAL_FILTERS_DEFAULT_VALUE,
@@ -55,14 +55,6 @@ const COMMON_STATE_IGNORE_PATHS = [
   'state.datasourceStates.textBased.layers.*.columns.*.meta', // meta is inferred by the transform -> originals may have it, miss it, or have different values
   'state.datasourceStates.textBased.layers.*.allColumns', // runtime-only property, not persisted or produced by transform
   'state.datasourceStates.textBased.layers.*.timeField', // inferred at runtime from the data view -> original may have undefined while transform sets @timestamp from query.esql
-  // TODO: check missing/different properties on adHocDataViews
-  'state.adHocDataViews.*.timeFieldName', // not saved in API re-derived at runtime
-  'state.adHocDataViews.*.fieldAttrs',
-  'state.adHocDataViews.*.managed',
-  'state.adHocDataViews.*.allowNoIndex', // hardcoded to false by transform; if original was true, missing indices would error instead of returning empty
-  'state.adHocDataViews.*.allowHidden', // hardcoded to false by transform; if original was true, hidden indices would no longer be queried
-  'state.adHocDataViews.*.fieldFormats', // custom field formats (e.g. url formatters) will be lost
-  'state.adHocDataViews.*.runtimeFieldMap', // runtime field definitions will be lost
   // TODO: check missing/different properties on colorMapping
   'state.visualization.columns.*.colorMapping.assignments.*.touched', // dropped at state -> API and only applied from API -> State, hardcoded to false by transform
   'state.visualization.columns.*.colorMapping.specialAssignments.*.touched',
@@ -126,7 +118,7 @@ function normalizeESQLAdHocDataViews(
       const adHocDataView: DataViewSpec = attributes.state.adHocDataViews[oldIndex];
       // Use the same logic as the transform: derive timeField from the ES|QL query
       const timeFieldName = esqlQuery
-        ? getTimeFieldFromESQLQuery(esqlQuery)
+        ? parseTimeFieldFromESQLQuery(esqlQuery)
         : adHocDataView.timeFieldName ?? layer.timeField ?? undefined;
       // The transform re-derives the index pattern (and the data view title/name) from the ES|QL
       // query, so a stale persisted name (e.g. a broader multi-index pattern) is normalized away.
@@ -144,6 +136,10 @@ function normalizeESQLAdHocDataViews(
       adHocDataView.id = newId;
       adHocDataView.name = indexPattern;
       adHocDataView.title = indexPattern;
+      // The transform re-derives the time field from the ES|QL query rather than trusting the
+      // persisted value (getAdHocDataViewSpec <- getDataSourceIndex.esql), so align the stored
+      // timeFieldName here instead of skipping it entirely.
+      adHocDataView.timeFieldName = timeFieldName;
       // Transform always sets type: 'esql' on ESQL adHocDataViews (via getAdHocDataViewSpec)
       adHocDataView.type = 'esql';
       attributes.state.adHocDataViews[newId] = adHocDataView;
@@ -158,7 +154,7 @@ function normalizeESQLAdHocDataViews(
         index: indexPattern,
         dataSourceType: 'esql',
         esqlQuery,
-        timeFieldName: getTimeFieldFromESQLQuery(esqlQuery),
+        timeFieldName: parseTimeFieldFromESQLQuery(esqlQuery),
       });
 
       layer.index = spec.id;
@@ -269,6 +265,39 @@ function pruneEmptyColumnTextBasedLayers(attributes: LensAttributes) {
   }
 }
 
+/**
+ * Normalize ad-hoc data view spec noise the SO -> API -> SO round-trip introduces.
+ *
+ * DROP verdicts — not carried by the embedded API, loss is accepted:
+ * - `managed`: leaked saved-object metadata, never authored on a Lens ad-hoc data view and stripped from
+ *   the public data-views API anyway.
+ * - `allowNoIndex`: a field-fetch option (ES|`allow_no_indices`), not something authored on an
+ *   ad-hoc data-view. The embedded API has no field for it and the transform always emits `false`, so a
+ *   stored `true` (e.g. Fleet dashboards shipped before their indices exist) can't survive the
+ *   round-trip. Coerce the original to `false` to match the transform.
+ * - `allowHidden` on ES|QL DataViews: an ES|QL ad-hoc DataView serializes as an `{ type: 'esql', query }`
+ *   datasource that carries no `allow_hidden_indices`, so the flag is dropped on that path. Strip
+ *   it here. Form-based DataViews round-trip `allowHidden` faithfully and are compared directly.
+ */
+function normalizeAdHocDataViewSpec(dv: DataViewSpec) {
+  delete dv.managed;
+  dv.allowNoIndex = false;
+
+  if (dv.type === 'esql' && dv.allowHidden === false) {
+    delete dv.allowHidden;
+  }
+
+  if (Object.keys(dv.fieldAttrs ?? {}).length === 0) {
+    delete dv.fieldAttrs;
+  }
+  if (Object.keys(dv.fieldFormats ?? {}).length === 0) {
+    delete dv.fieldFormats;
+  }
+  if (Object.keys(dv.runtimeFieldMap ?? {}).length === 0) {
+    delete dv.runtimeFieldMap;
+  }
+}
+
 function normalizeAdHocDataViews(attributes: LensAttributes) {
   // Clear empty typeMeta objects
   for (const dv of Object.values(attributes.state.adHocDataViews ?? {})) {
@@ -281,6 +310,12 @@ function normalizeAdHocDataViews(attributes: LensAttributes) {
   removeOrphanedAdHocDataViews(attributes, internalReferences);
   internalReferences = normalizeESQLAdHocDataViews(attributes, internalReferences);
   internalReferences = normalizeFormBasedAdHocDataViews(attributes, internalReferences);
+
+  // Normalize spec noise last so it covers every ad-hoc data view (both the ES|QL and form-based paths
+  // rebuild/remap specs above).
+  for (const dv of Object.values(attributes.state.adHocDataViews ?? {})) {
+    normalizeAdHocDataViewSpec(dv);
+  }
 
   if (Object.keys(attributes.state.adHocDataViews ?? {}).length === 0) {
     delete attributes.state.adHocDataViews;
