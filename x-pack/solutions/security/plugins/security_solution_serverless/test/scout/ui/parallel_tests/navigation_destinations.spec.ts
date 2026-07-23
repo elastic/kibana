@@ -18,6 +18,8 @@ spaceTest.describe(
       await browserAuth.loginAsPrivilegedUser();
       await serverlessProjectChromePage.navigateToSecuritySolutionHomeForChromeNav();
 
+      // spaceTest runs each test in its own space, so app URLs (including the
+      // one on the search result) are space-prefixed rather than root-relative.
       await serverlessProjectChromePage.openNavSearch();
       await serverlessProjectChromePage.searchNav('security dashboards');
       await serverlessProjectChromePage
@@ -42,6 +44,12 @@ spaceTest.describe(
       ).toBeVisible();
     });
 
+    // Deliberately asserts only the navigation contract (URL + active nav-item highlight),
+    // not that a specific Cases page landmark renders. An earlier version of this test
+    // asserted the `cases-all-title` test-subj, which is owned by `@kbn/cases-plugin` and
+    // broke when the Cases redesign changed that page's internals (kibana#266915). Nav
+    // tests shouldn't reach into another plugin's page internals — that coverage belongs
+    // in a Cases-owned suite.
     spaceTest('navigates to cases app', async ({ page, pageObjects, browserAuth }) => {
       const { serverlessProjectChromePage } = pageObjects;
 
