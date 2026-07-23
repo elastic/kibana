@@ -23,13 +23,17 @@ export const DrilldownHelloBar: React.FC<DrilldownHelloBarProps> = ({ docsLink, 
     <KbnInfoCallout
       title={txtHelpTitle}
       text={txtHelpText}
-      actionProps={{
-        primary: {
-          href: docsLink,
-          target: '_blank',
-          children: txtViewDocsLinkLabel,
-        },
-      }}
+      actionProps={
+        docsLink
+          ? {
+              primary: {
+                href: docsLink,
+                target: '_blank',
+                children: txtViewDocsLinkLabel,
+              },
+            }
+          : undefined
+      }
       onDismiss={onHideClick}
       dismissButtonProps={{
         'aria-label': txtHideHelpButtonLabel,
