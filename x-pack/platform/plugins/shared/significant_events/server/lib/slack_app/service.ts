@@ -252,6 +252,22 @@ export class SlackAppService {
       try {
         const claim = await relayClient.fetchClaim(connection.claimId);
         if (claim.status === 'complete') {
+          // A completed claim must carry a tenant key: it's what every connected
+          // operation (listBindings / bind / unbind / disconnect) keys off. Marking
+          // the connection `connected` without one would strand it in a permanently
+          // broken state that never self-heals (getStatus only polls while in
+          // progress). Treat a tenant-less completion as a terminal install failure.
+          if (!claim.tenant_key) {
+            return this.failInProgressInstall(
+              soClient,
+              connection,
+              new RelayRequestError(
+                '/v1/slack/install/claim',
+                502,
+                'completed claim has no tenant key'
+              )
+            );
+          }
           await this.writeConnection(soClient, {
             ...connection,
             tenantKey: claim.tenant_key,

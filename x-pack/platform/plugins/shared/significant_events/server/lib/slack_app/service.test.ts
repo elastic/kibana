@@ -388,6 +388,36 @@ describe('SlackAppService', () => {
         status: RELAY_APP_CONNECTION_STATUS.connected,
       });
     });
+
+    it('fails the install terminally when a completed claim carries no tenant key', async () => {
+      const { server, soClient, invalidateAsInternalUser } = createHarness();
+      soClient.get.mockResolvedValue({
+        attributes: {
+          status: RELAY_APP_CONNECTION_STATUS.oauthInProgress,
+          apiKeyId: 'key-1',
+          claimId: 'claim-1',
+        },
+      });
+      fetchClaim.mockResolvedValue({ status: 'complete', tenant_key: undefined });
+
+      const result = await new SlackAppService(server).getStatus(request);
+
+      expect(invalidateAsInternalUser).toHaveBeenCalledWith({ ids: ['key-1'] });
+      expect(soClient.create).toHaveBeenCalledWith(
+        RELAY_APP_CONNECTION_SO_TYPE,
+        expect.objectContaining({
+          status: RELAY_APP_CONNECTION_STATUS.error,
+          apiKeyId: null,
+          error: 'completed claim has no tenant key',
+        }),
+        { id: RELAY_APP_CONNECTION_SO_ID, overwrite: true }
+      );
+      expect(result).toMatchObject({
+        available: true,
+        status: RELAY_APP_CONNECTION_STATUS.error,
+        error: 'completed claim has no tenant key',
+      });
+    });
   });
 
   describe('disconnect', () => {
