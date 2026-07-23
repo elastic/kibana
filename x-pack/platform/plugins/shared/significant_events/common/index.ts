@@ -75,3 +75,17 @@ export type {
   SlackChannelBinding,
   SlackChannelBindingStatus,
 } from './slack_app/types';
+
+export type {
+  SignificantEventsMaintenanceFailure,
+  SignificantEventsMaintenanceSummary,
+  SignificantEventsMaintenanceStatus,
+  SignificantEventsMaintenanceFeatureSettings,
+} from './maintenance/types';
+
+export {
+  DEFAULT_MAINTENANCE_STATE,
+  isMaintenanceState,
+  stateBlocksNewActivity,
+} from './maintenance/state_machine';
+export type { SignificantEventsMaintenanceState } from './maintenance/state_machine';
