@@ -145,13 +145,14 @@ export const createEntityAttachmentDefinition = ({
   return {
     ...baseDefinition,
     canvasWidth: ENTITY_CANVAS_WIDTH,
-    renderCanvasContent: (props: AttachmentRenderProps<EntityAttachment>) => (
+    renderCanvasContent: (props: AttachmentRenderProps<EntityAttachment>, { closeCanvas }) => (
       <EntityAnalyticsAgentNavigationProvider
         application={resolvedApplication}
         agentBuilder={agentBuilder}
         chrome={chrome}
         openSidebarConversation={props.openSidebarConversation}
         searchSession={searchSession}
+        closeCanvas={closeCanvas}
       >
         <React.Suspense
           fallback={
@@ -165,16 +166,18 @@ export const createEntityAttachmentDefinition = ({
           <LazyEntityAttachmentCanvasContent
             {...props}
             experimentalFeatures={experimentalFeatures}
-            application={resolvedApplication}
-            agentBuilder={agentBuilder}
-            chrome={chrome}
             resolveSecurityCanvasContext={resolvedResolveCanvasContext}
-            searchSession={searchSession}
           />
         </React.Suspense>
       </EntityAnalyticsAgentNavigationProvider>
     ),
-    getActionButtons: ({ attachment, isCanvas, openCanvas, openSidebarConversation }) => {
+    getActionButtons: ({
+      attachment,
+      isCanvas,
+      openCanvas,
+      openSidebarConversation,
+      closeCanvas,
+    }) => {
       const parsed = normaliseEntityAttachment(attachment);
       if (!parsed || !parsed.isSingle) {
         return [];
@@ -190,6 +193,7 @@ export const createEntityAttachmentDefinition = ({
             icon: 'popout',
             type: ActionButtonType.SECONDARY,
             handler: () => {
+              closeCanvas?.();
               const rightPanel = buildEntityRightPanel(identifier);
               if (rightPanel) {
                 navigateToEntityAnalyticsWithFlyoutInApp({

@@ -30,6 +30,34 @@ export enum EnabledActionTypes {
 const MAX_MAX_ATTEMPTS = 10;
 const MIN_MAX_ATTEMPTS = 1;
 
+function tlsCertRequiresKeyValidator(configPath: string) {
+  return function validate(rawConfig: { certificate?: string; key?: string }): string | undefined {
+    if (rawConfig.certificate && !rawConfig.key) {
+      return `must specify [${configPath}.key] when [${configPath}.certificate] is specified`;
+    }
+    if (rawConfig.key && !rawConfig.certificate) {
+      return `must specify [${configPath}.certificate] when [${configPath}.key] is specified`;
+    }
+  };
+}
+
+const tlsVerificationModeSchema = schema.oneOf(
+  [schema.literal('none'), schema.literal('certificate'), schema.literal('full')],
+  { defaultValue: 'full' }
+);
+
+const relaySSLConfigSchema = schema.object(
+  {
+    verificationMode: tlsVerificationModeSchema,
+    certificateAuthorities: schema.maybe(
+      schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { minSize: 1 })])
+    ),
+    certificate: schema.maybe(schema.string()),
+    key: schema.maybe(schema.string()),
+  },
+  { validate: tlsCertRequiresKeyValidator('relay.ssl') }
+);
+
 const MIN_QUEUED_MAX = 1;
 export const DEFAULT_QUEUED_MAX = 1000000;
 
@@ -120,6 +148,12 @@ export const configSchema = schema.object({
   maxResponseContentLength: schema.byteSize({ defaultValue: '1mb' }),
   responseTimeout: schema.duration({ defaultValue: '60s' }),
   customHostSettings: schema.maybe(schema.arrayOf(customHostSettingsSchema)),
+  relay: schema.maybe(
+    schema.object({
+      url: schema.uri({ scheme: ['https'] }),
+      ssl: schema.maybe(relaySSLConfigSchema),
+    })
+  ),
   microsoftGraphApiUrl: schema.string({ defaultValue: DEFAULT_MICROSOFT_GRAPH_API_URL }),
   microsoftGraphApiScope: schema.string({ defaultValue: DEFAULT_MICROSOFT_GRAPH_API_SCOPE }),
   microsoftExchangeUrl: schema.string({ defaultValue: DEFAULT_MICROSOFT_EXCHANGE_URL }),
@@ -224,25 +258,11 @@ export const configSchema = schema.object({
         ssl: schema.maybe(
           schema.object(
             {
-              verificationMode: schema.maybe(
-                schema.oneOf(
-                  [schema.literal('none'), schema.literal('certificate'), schema.literal('full')],
-                  { defaultValue: 'full' }
-                )
-              ),
+              verificationMode: tlsVerificationModeSchema,
               certificate: schema.maybe(schema.string()),
               key: schema.maybe(schema.string()),
             },
-            {
-              validate: (rawConfig) => {
-                if (rawConfig.certificate && !rawConfig.key) {
-                  return 'must specify [auth.ears.ssl.key] when [auth.ears.ssl.certificate] is specified';
-                }
-                if (rawConfig.key && !rawConfig.certificate) {
-                  return 'must specify [auth.ears.ssl.certificate] when [auth.ears.ssl.key] is specified';
-                }
-              },
-            }
+            { validate: tlsCertRequiresKeyValidator('auth.ears.ssl') }
           )
         ),
       })

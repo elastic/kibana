@@ -21,7 +21,7 @@ import { ApmDocumentType } from '../../../../../common/document_type';
 import type { Environment } from '../../../../../common/environment_rt';
 import { getTransactionType } from '../../../../context/apm_service/apm_service_context';
 import { useServiceTransactionTypesFetcher } from '../../../../context/apm_service/use_service_transaction_types_fetcher';
-import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
+import { useServiceFlyoutContext } from '../service_flyout_context';
 import { useEnvironmentsFetcher } from '../../../../hooks/use_environments_fetcher';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { usePreferredDataSourceAndBucketSize } from '../../../../hooks/use_preferred_data_source_and_bucket_size';
@@ -29,47 +29,34 @@ import { useTimeRange } from '../../../../hooks/use_time_range';
 import type { TimePickerQuickRange } from '../../date_picker/typings';
 import { EnvironmentSelect } from '../../environment_select';
 
-interface ServiceFlyoutQueryControlsProps {
-  agentName?: string;
-  environment: Environment;
-  serviceName: string;
-  kuery: string;
-  rangeFrom: string;
-  rangeTo: string;
-  transactionType: string;
-  onEnvironmentChange: (environment: Environment) => void;
-  onTransactionTypeChange: (transactionType: string) => void;
-  onRangeChange: (range: { rangeFrom: string; rangeTo: string }) => void;
-  onRefresh: () => void;
-}
+export function ServiceFlyoutQueryControls() {
+  const {
+    deps: { core },
+    service,
+    filters: {
+      environment,
+      rangeFrom,
+      rangeTo,
+      transactionType = '',
+      setEnvironment,
+      setRange,
+      onRefresh,
+      setTransactionType,
+    },
+  } = useServiceFlyoutContext();
 
-export function ServiceFlyoutQueryControls({
-  agentName,
-  environment,
-  serviceName,
-  kuery,
-  rangeFrom,
-  rangeTo,
-  transactionType,
-  onEnvironmentChange,
-  onTransactionTypeChange,
-  onRangeChange,
-  onRefresh,
-}: ServiceFlyoutQueryControlsProps) {
-  const { core } = useApmPluginContext();
-
-  const { start = '', end = '' } = useTimeRange({ rangeFrom, rangeTo, optional: true });
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const preferred = usePreferredDataSourceAndBucketSize({
     start,
     end,
-    kuery,
+    kuery: '',
     type: ApmDocumentType.TransactionMetric,
     numBuckets: 100,
   });
 
   const { transactionTypes, status: transactionTypeStatus } = useServiceTransactionTypesFetcher({
-    serviceName,
+    serviceName: service.name,
     start,
     end,
     documentType: preferred?.source.documentType,
@@ -77,7 +64,7 @@ export function ServiceFlyoutQueryControls({
   });
 
   const { environments, status: environmentsStatus } = useEnvironmentsFetcher({
-    serviceName,
+    serviceName: service.name,
     start,
     end,
   });
@@ -94,15 +81,19 @@ export function ServiceFlyoutQueryControls({
   }, [core?.uiSettings]);
 
   const selectedTransactionType = useMemo(
-    () => getTransactionType({ transactionType, transactionTypes, agentName }),
-    [agentName, transactionType, transactionTypes]
+    () => getTransactionType({ transactionType, transactionTypes, agentName: service.agentName }),
+    [service.agentName, transactionType, transactionTypes]
   );
 
   useEffect(() => {
-    if (selectedTransactionType !== undefined && selectedTransactionType !== transactionType) {
-      onTransactionTypeChange(selectedTransactionType);
+    if (
+      setTransactionType &&
+      selectedTransactionType !== undefined &&
+      selectedTransactionType !== transactionType
+    ) {
+      setTransactionType(selectedTransactionType);
     }
-  }, [onTransactionTypeChange, selectedTransactionType, transactionType]);
+  }, [setTransactionType, selectedTransactionType, transactionType]);
 
   const transactionTypeOptions = transactionTypes.map((type) => ({ value: type, text: type }));
   const isTransactionTypeDisabled =
@@ -116,7 +107,7 @@ export function ServiceFlyoutQueryControls({
             start={start || rangeFrom}
             end={end || rangeTo}
             onTimeChange={({ start: nextRangeFrom, end: nextRangeTo }) => {
-              onRangeChange({ rangeFrom: nextRangeFrom, rangeTo: nextRangeTo });
+              setRange({ rangeFrom: nextRangeFrom, rangeTo: nextRangeTo });
             }}
             onRefresh={onRefresh}
             showUpdateButton
@@ -158,7 +149,7 @@ export function ServiceFlyoutQueryControls({
                     : transactionTypeOptions
                 }
                 value={isTransactionTypeDisabled ? '' : selectedTransactionType ?? ''}
-                onChange={(event) => onTransactionTypeChange(event.currentTarget.value)}
+                onChange={(event) => setTransactionType?.(event.currentTarget.value)}
               />
             </EuiFlexItem>
             <EuiFlexItem>
@@ -168,10 +159,10 @@ export function ServiceFlyoutQueryControls({
                 status={environmentsStatus}
                 environment={environment}
                 availableEnvironments={environments}
-                serviceName={serviceName}
+                serviceName={service.name}
                 rangeFrom={rangeFrom ?? ''}
                 rangeTo={rangeTo ?? ''}
-                onChange={(nextEnvironment) => onEnvironmentChange(nextEnvironment as Environment)}
+                onChange={(nextEnvironment) => setEnvironment(nextEnvironment as Environment)}
               />
             </EuiFlexItem>
           </EuiFlexGrid>
