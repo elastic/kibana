@@ -55,6 +55,12 @@ const typeName = (name: string) => {
   fireEvent.change(screen.getByTestId('contextAiIndexNameInput'), { target: { value: name } });
 };
 
+const typeDescription = (description: string) => {
+  fireEvent.change(screen.getByTestId('contextAiIndexDescriptionInput'), {
+    target: { value: description },
+  });
+};
+
 describe('CreateAiIndexPage', () => {
   afterEach(() => {
     jest.clearAllMocks();
@@ -93,6 +99,32 @@ describe('CreateAiIndexPage', () => {
     });
   });
 
+  it('includes the description in the create request when provided', async () => {
+    const services = coreMock.createStart();
+    services.http.put.mockResolvedValue({ status: 'created' });
+
+    renderWithProviders(services);
+
+    typeName('Support triage');
+    typeDescription('Context for triaging support tickets');
+    fireEvent.click(screen.getByTestId('contextCreateAiIndexButton'));
+
+    await waitFor(() => {
+      expect(services.http.put).toHaveBeenCalledWith(
+        '/api/context_engine/ai_index/support-triage',
+        expect.objectContaining({
+          body: JSON.stringify({
+            name: 'Support triage',
+            description: 'Context for triaging support tickets',
+            dest: { type: 'index', value: 'ai-index-idx-support-triage' },
+            automations: [],
+            sources: [],
+          }),
+        })
+      );
+    });
+  });
+
   it('creates an index-backed AI index and navigates to its detail page', async () => {
     const services = coreMock.createStart();
     services.http.put.mockResolvedValue({ status: 'created' });
@@ -118,7 +150,7 @@ describe('CreateAiIndexPage', () => {
     });
 
     expect(services.application.navigateToApp).toHaveBeenCalledWith(CONTEXT_ENGINE_APP_ID, {
-      path: '/indexes/support-triage',
+      path: '/ai_index/support-triage',
     });
   });
 

@@ -103,7 +103,7 @@ describe('ContextLandingPage', () => {
     expect(cards).toHaveLength(2);
 
     const firstLink = screen.getByRole('link', { name: /First index/ });
-    expect(firstLink).toHaveAttribute('href', '/app/context_engine/indexes/first');
+    expect(firstLink).toHaveAttribute('href', '/app/context_engine/ai_index/first');
 
     const [firstSources, secondSources] = screen.getAllByTestId('contextAiIndexCardSources');
     expect(firstSources).toHaveTextContent('2 sources');

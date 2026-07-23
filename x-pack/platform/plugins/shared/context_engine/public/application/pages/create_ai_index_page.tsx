@@ -17,6 +17,7 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiText,
+  EuiTextArea,
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
@@ -24,6 +25,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import React, { useState } from 'react';
+import { MAX_AI_INDEX_DESCRIPTION_LENGTH } from '../../../common/constants';
 import type { AiIndexType } from '../../../common/http_api/ai_indices';
 import { SourcePicker } from '../components/source_picker';
 import type { SelectedSource } from '../components/source_picker';
@@ -70,6 +72,7 @@ export const CreateAiIndexPage = () => {
   const { createAiIndex, isCreating } = useCreateAiIndex();
   const [selectedSources, setSelectedSources] = useState<SelectedSource[]>([]);
   const [name, setName] = useState('');
+  const [description, setDescription] = useState('');
   const [storageType, setStorageType] = useState<AiIndexType>('index');
   const storageGroupName = useGeneratedHtmlId({ prefix: 'aiIndexStorageType' });
 
@@ -78,7 +81,12 @@ export const CreateAiIndexPage = () => {
   const isDisabled = !trimmedName;
 
   const createAndContinue = async () => {
-    const created = await createAiIndex({ name, storageType, sources: selectedSources });
+    const created = await createAiIndex({
+      name,
+      description,
+      storageType,
+      sources: selectedSources,
+    });
     if (created) {
       navigateToContextEngine(getAiIndexDetailPath(created.id));
     }
@@ -140,6 +148,43 @@ export const CreateAiIndexPage = () => {
               aria-label={i18n.translate('xpack.contextEngine.createAiIndex.name.ariaLabel', {
                 defaultMessage: 'AI index name',
               })}
+            />
+          </EuiFormRow>
+        </EuiPanel>
+
+        <EuiSpacer size="l" />
+
+        <EuiPanel hasBorder paddingSize="l">
+          <EuiTitle size="s">
+            <h2>
+              {i18n.translate('xpack.contextEngine.createAiIndex.description.title', {
+                defaultMessage: 'Description',
+              })}
+            </h2>
+          </EuiTitle>
+          <EuiSpacer size="m" />
+          <EuiFormRow
+            fullWidth
+            helpText={i18n.translate('xpack.contextEngine.createAiIndex.description.helpText', {
+              defaultMessage: 'Optional — describe what this AI index is for.',
+            })}
+          >
+            <EuiTextArea
+              fullWidth
+              value={description}
+              onChange={(event) => setDescription(event.target.value)}
+              maxLength={MAX_AI_INDEX_DESCRIPTION_LENGTH}
+              data-test-subj="contextAiIndexDescriptionInput"
+              placeholder={i18n.translate(
+                'xpack.contextEngine.createAiIndex.description.placeholder',
+                { defaultMessage: 'Describe what this AI index is for.' }
+              )}
+              aria-label={i18n.translate(
+                'xpack.contextEngine.createAiIndex.description.ariaLabel',
+                {
+                  defaultMessage: 'AI index description',
+                }
+              )}
             />
           </EuiFormRow>
         </EuiPanel>

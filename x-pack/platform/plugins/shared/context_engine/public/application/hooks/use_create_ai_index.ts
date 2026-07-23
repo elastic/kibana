@@ -23,6 +23,7 @@ interface CreatedAiIndex {
 
 export interface CreateAiIndexArgs {
   name: string;
+  description: string;
   storageType: AiIndexType;
   sources: SelectedSource[];
 }
@@ -34,10 +35,11 @@ export const useCreateAiIndex = () => {
   const queryClient = useQueryClient();
 
   const { mutateAsync, isLoading } = useMutation<CreatedAiIndex, Error, CreateAiIndexArgs>({
-    mutationFn: async ({ name, storageType, sources }) => {
+    mutationFn: async ({ name, description, storageType, sources }) => {
       const id = slugifyAiIndexName(name);
       const properties: AiIndexProperties = {
         name: name.trim(),
+        description: description.trim() || undefined,
         dest: getAiIndexDest(storageType, name),
         automations: [],
         sources: toAiIndexSources(sources),

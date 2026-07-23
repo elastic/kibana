@@ -20,6 +20,7 @@ import {
 } from '@testing-library/react';
 import React from 'react';
 import type { GetAiIndexResponse } from '../../../common/http_api/ai_indices';
+import { CONTEXT_ENGINE_APP_ID } from '../../../common/features';
 import { CONTEXT_ENGINE_PATHS, getAiIndexDetailPath } from '../paths';
 import { AiIndexDetailPage } from './ai_index_detail_page';
 
@@ -87,6 +88,27 @@ describe('AiIndexDetailPage', () => {
     expect(screen.getByTestId('contextAiIndexSourceRow')).toHaveTextContent('FROM My view');
     // The non-editable detail list shows the generic ES|QL source type.
     expect(screen.getByTestId('contextAiIndexSourceType')).toHaveTextContent('ES|QL');
+  });
+
+  it('renders a back button linking to the AI indexes landing page', async () => {
+    const services = coreMock.createStart();
+    services.http.get.mockResolvedValue(aiIndex);
+    services.application.getUrlForApp.mockImplementation(
+      (appId, options) => `/app/${appId}${options?.path ?? ''}`
+    );
+
+    renderWithProviders(services);
+
+    await waitForElementToBeRemoved(() => screen.queryByTestId('contextAiIndexTitleLoading'));
+
+    expect(services.application.getUrlForApp).toHaveBeenCalledWith(
+      CONTEXT_ENGINE_APP_ID,
+      expect.objectContaining({ path: CONTEXT_ENGINE_PATHS.landing })
+    );
+    expect(screen.getByTestId('contextAiIndexBackToListButton')).toHaveAttribute(
+      'href',
+      '/app/context_engine/'
+    );
   });
 
   it('renders an empty state when there are no sources', async () => {
