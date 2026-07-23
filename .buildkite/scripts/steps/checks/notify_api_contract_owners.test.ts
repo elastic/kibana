@@ -14,81 +14,89 @@ jest.mock('#pipeline-utils', () => ({
 import { buildCommentBody, type ImpactEntry } from './notify_api_contract_owners';
 
 const entry = (overrides: Partial<ImpactEntry> = {}): ImpactEntry => ({
-  path: '/api/spaces/space',
-  method: 'GET',
+  path: '/api/x',
+  method: 'POST',
   reason: 'Endpoint removed',
-  terraformResource: 'elasticstack_kibana_space',
-  owners: ['@elastic/kibana-security'],
+  tier: 'stable',
   ...overrides,
 });
 
 describe('buildCommentBody', () => {
-  it('renders a markdown table with one entry', () => {
+  it('renders a stable section with a tier heading and table header', () => {
     const body = buildCommentBody([entry()]);
 
-    expect(body).toContain('## API Contract Breaking Changes');
-    expect(body).toContain('| `/api/spaces/space` `GET`');
-    expect(body).toContain('elasticstack_kibana_space');
-    expect(body).toContain('@elastic/kibana-security');
-    expect(body).toContain('| oasdiffId | Source |');
+    expect(body).toContain('## API Contract Breaking Changes — Stable & Technical Preview');
+    expect(body).toContain('### Stable (GA) (1)');
+    expect(body).toContain(
+      '| Endpoint | Reason | oasdiffId | Source | Terraform Resource | Owners |'
+    );
+    expect(body).toContain('| `/api/x` `POST` |');
   });
 
-  it('deduplicates owners in the cc line', () => {
-    const entries = [
-      entry({ owners: ['@elastic/kibana-security'] }),
-      entry({ path: '/api/spaces/space/{id}', owners: ['@elastic/kibana-security'] }),
-    ];
-    const body = buildCommentBody(entries);
+  it('groups changes into separate stable and tech_preview sections', () => {
+    const body = buildCommentBody([
+      entry({ path: '/api/stable' }),
+      entry({ path: '/api/preview', tier: 'tech_preview' }),
+    ]);
 
-    const ccLine = body.split('\n').find((l) => l.startsWith('cc '))!;
-    const mentions = ccLine.replace('cc ', '').trim().split(' ');
-    expect(mentions).toEqual(['@elastic/kibana-security']);
+    expect(body).toContain('### Stable (GA) (1)');
+    expect(body).toContain('### Technical Preview (1)');
+    // stable section rendered before tech_preview
+    expect(body.indexOf('### Stable (GA)')).toBeLessThan(body.indexOf('### Technical Preview'));
   });
 
-  it('aggregates multiple distinct owners', () => {
-    const entries = [
-      entry({ owners: ['@elastic/kibana-security'] }),
+  it('omits a tier section entirely when it has no entries', () => {
+    const body = buildCommentBody([entry({ tier: 'tech_preview' })]);
+
+    expect(body).toContain('### Technical Preview (1)');
+    expect(body).not.toContain('### Stable (GA)');
+  });
+
+  it('flags a change that also affects the Terraform provider', () => {
+    const body = buildCommentBody([
       entry({
-        path: '/api/fleet/agent_policies',
-        method: 'POST',
-        terraformResource: 'elasticstack_fleet_agent_policy',
-        owners: ['@elastic/fleet'],
+        terraformResource: 'elasticstack_kibana_space',
+        owners: ['@elastic/kibana-security'],
       }),
-    ];
-    const body = buildCommentBody(entries);
+    ]);
 
+    expect(body).toContain('`elasticstack_kibana_space`');
     expect(body).toContain('@elastic/kibana-security');
-    expect(body).toContain('@elastic/fleet');
   });
 
-  it('shows _unknown_ when no owners exist', () => {
-    const body = buildCommentBody([entry({ owners: [] })]);
+  it('leaves the Terraform cell empty when the change maps to no provider API', () => {
+    const body = buildCommentBody([entry()]);
+    const dataRow = body.split('\n').find((l) => l.includes('`/api/x`'))!;
 
-    expect(body).toContain('cc _unknown_');
+    // trailing "| <terraform> | <owners> |" both empty
+    expect(dataRow).toMatch(/\|\s*\|\s*\|$/);
   });
 
-  it('escapes pipe characters in the reason field', () => {
-    const body = buildCommentBody([entry({ reason: 'field|was|removed' })]);
-
-    expect(body).toContain('field\\|was\\|removed');
-    expect(body).not.toContain('field|was|removed');
+  it('ccs deduplicated owners and falls back to _unknown_ when none', () => {
+    expect(
+      buildCommentBody([
+        entry({ owners: ['@elastic/fleet'] }),
+        entry({ path: '/api/y', owners: ['@elastic/fleet'] }),
+      ])
+    ).toContain('cc @elastic/fleet\n');
+    expect(buildCommentBody([entry()])).toContain('cc _unknown_');
   });
 
-  it('escapes newlines in the reason field', () => {
-    const body = buildCommentBody([entry({ reason: 'line1\nline2' })]);
+  it('escapes pipe characters and newlines in the reason field', () => {
+    const body = buildCommentBody([entry({ reason: 'a|b\nc' })]);
 
-    expect(body).toContain('line1 line2');
-    expect(body).not.toContain('line1\nline2');
+    expect(body).toContain('a\\|b c');
+    expect(body).not.toContain('a|b');
   });
 
-  it('omits method badge when method is undefined', () => {
+  it('omits the method badge when method is undefined', () => {
     const body = buildCommentBody([entry({ method: undefined })]);
 
-    expect(body).toContain('| `/api/spaces/space` |');
+    expect(body).toContain('| `/api/x` |');
     expect(body).not.toMatch(/`GET`|`POST`|`PUT`|`DELETE`/);
   });
 
-  it('renders oasdiffId and source in the table when present', () => {
+  it('renders oasdiffId and source when present', () => {
     const body = buildCommentBody([
       entry({
         oasdiffId: 'request-property-removed',
@@ -98,13 +106,6 @@ describe('buildCommentBody', () => {
 
     expect(body).toContain('`request-property-removed`');
     expect(body).toContain('`/components/schemas/Output/properties/name`');
-  });
-
-  it('renders empty cells when oasdiffId and source are missing', () => {
-    const body = buildCommentBody([entry()]);
-    const dataRow = body.split('\n').find((l) => l.includes('`/api/spaces/space`'))!;
-
-    expect(dataRow).toContain('|  |  |');
   });
 
   it('includes granular suppression guidance in the what-to-do section', () => {
