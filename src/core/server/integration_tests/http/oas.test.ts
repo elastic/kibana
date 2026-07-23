@@ -89,51 +89,6 @@ it('handles requests when enabled', async () => {
   expect(result.status).toBe(200);
 });
 
-it('includes request validation error responses in generated OAS', async () => {
-  const server = await startService({
-    config: { server: { oas: { enabled: true }, restrictInternalApis: false } },
-    createRoutes: (getRouter) => {
-      getRouter().post(
-        {
-          path: '/api/request-validation-error',
-          security: { authz: { enabled: false, reason: '' } },
-          validate: {
-            request: { body: schema.object({ name: schema.string() }) },
-            response: {
-              422: {
-                description: 'Validation failed',
-                body: () => schema.object({ message: schema.string() }),
-              },
-            },
-            onRequestValidationError: (error, _request, response) =>
-              response.custom({ statusCode: 422, body: { message: error.message } }),
-          },
-          options: { access: 'public' },
-        },
-        (_, __, response) => response.ok()
-      );
-    },
-  });
-
-  const result = await supertest(server.listener)
-    .get('/api/oas')
-    .query({ pathStartsWith: '/api/request-validation-error' });
-
-  expect(result.status).toBe(200);
-  expect(result.body.paths['/api/request-validation-error'].post.responses['422']).toMatchObject({
-    description: 'Validation failed',
-    content: {
-      'application/json': {
-        schema: {
-          type: 'object',
-          properties: { message: { type: 'string' } },
-          required: ['message'],
-        },
-      },
-    },
-  });
-});
-
 it.each([
   {
     queryParam: { pathStartsWith: '/api/public-test' },

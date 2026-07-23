@@ -213,9 +213,9 @@ export const handle = async (
       onRequestValidationError,
       responseFactory: kibanaResponseFactory,
       log,
-      validateResponse: isDevMode
-        ? (response) => validateOnRequestValidationErrorResponse(responseValidation, response)
-        : undefined,
+      isDevMode,
+      validateResponse: (response) =>
+        validateOnRequestValidationErrorResponse(responseValidation, response),
     });
     if (isPublicAccessApiRoute(route.options)) {
       injectVersionHeader(BASE_PUBLIC_VERSION, customResponse);
@@ -262,6 +262,7 @@ export async function handleRequestValidationFailure({
   onRequestValidationError,
   responseFactory,
   log,
+  isDevMode,
   validateResponse,
 }: {
   failure: ValidationFailure;
@@ -269,14 +270,15 @@ export async function handleRequestValidationFailure({
   onRequestValidationError: OnRequestValidationError;
   responseFactory: KibanaResponseFactory;
   log: Logger;
-  validateResponse?: (response: IKibanaResponse) => string | undefined;
+  isDevMode: boolean;
+  validateResponse: (response: IKibanaResponse) => string | undefined;
 }): Promise<IKibanaResponse> {
   const customResponse = await onRequestValidationError(
     failure.error,
     failure.request,
     responseFactory
   );
-  const validationErrorMessage = validateResponse?.(customResponse);
+  const validationErrorMessage = isDevMode ? validateResponse(customResponse) : undefined;
   if (validationErrorMessage) {
     return responseFactory.custom({
       statusCode: 500,
