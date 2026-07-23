@@ -9,13 +9,13 @@ import type { ServiceAnomalyScoreResponse } from '@kbn/apm-api-shared';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
-import type { ServiceNodeData } from '../../../../../common/service_map';
+import type { ServiceFlyoutService } from '..';
 import { ServiceBadges } from './service_badges';
 
 const mockNavigateToUrl = jest.fn();
-const mockUseApmPluginContext = jest.fn();
-jest.mock('../../../../context/apm_plugin/use_apm_plugin_context', () => ({
-  useApmPluginContext: () => mockUseApmPluginContext(),
+const mockUseServiceFlyoutContext = jest.fn();
+jest.mock('../service_flyout_context', () => ({
+  useServiceFlyoutContext: () => mockUseServiceFlyoutContext(),
 }));
 
 const mockUseServiceBadgesData = jest.fn();
@@ -23,36 +23,57 @@ jest.mock('../hooks/use_service_badges_data', () => ({
   useServiceBadgesData: (...args: unknown[]) => mockUseServiceBadgesData(...args),
 }));
 
-const mockLink = jest.fn(
-  (path: string, { path: pathParams, query }: { path: Record<string, string>; query: unknown }) =>
-    `${path.replace('{serviceName}', pathParams.serviceName)}?${new URLSearchParams(
-      query as Record<string, string>
-    ).toString()}`
-);
-jest.mock('../../../../hooks/use_apm_router', () => ({
-  useApmRouter: () => ({ link: mockLink }),
+const mockUseServiceFlyoutLinks = jest.fn();
+jest.mock('../hooks/use_service_flyout_links', () => ({
+  useServiceFlyoutLinks: (...args: unknown[]) => mockUseServiceFlyoutLinks(...args),
 }));
 
-const mockUseManageSlosUrl = jest.fn();
-jest.mock('../../../../hooks/use_manage_slos_url', () => ({
-  useManageSlosUrl: (...args: unknown[]) => mockUseManageSlosUrl(...args),
-}));
-
-const baseNodeData: ServiceNodeData = {
-  id: 'opbeans-java',
-  label: 'opbeans-java',
-  isService: true,
+const baseNodeData: ServiceFlyoutService = {
+  name: 'opbeans-java',
   agentName: 'java',
 };
 
-function setupContext({ canReadSlos = true }: { canReadSlos?: boolean } = {}) {
-  mockUseApmPluginContext.mockReturnValue({
-    core: {
-      application: {
-        navigateToUrl: mockNavigateToUrl,
-        capabilities: { slo: { read: canReadSlos } },
+function setupContext({
+  canReadSlos = true,
+  service = baseNodeData,
+  transactionType,
+  locators = { get: jest.fn() },
+}: {
+  canReadSlos?: boolean;
+  service?: ServiceFlyoutService;
+  transactionType?: string;
+  locators?: { get: jest.Mock };
+} = {}) {
+  mockUseServiceFlyoutContext.mockReturnValue({
+    deps: {
+      core: {
+        application: {
+          navigateToUrl: mockNavigateToUrl,
+          capabilities: { slo: { read: canReadSlos } },
+        },
+        http: { basePath: { prepend: (path: string) => path } },
       },
+      share: { url: { locators } },
     },
+    service,
+    filters: {
+      environment: 'production',
+      rangeFrom: 'now-15m',
+      rangeTo: 'now',
+      transactionType,
+    },
+  });
+}
+
+function setupLinks({
+  alertsHref = '/app/apm/services/opbeans-java/alerts',
+  slosHref = '/app/slos/slos-href',
+}: { alertsHref?: string; slosHref?: string } = {}) {
+  mockUseServiceFlyoutLinks.mockReturnValue({
+    apm: { overview: '/app/apm/services/opbeans-java/overview', alertsTab: alertsHref },
+    alerts: undefined,
+    slos: slosHref,
+    discover: { traces: undefined, logs: undefined },
   });
 }
 
@@ -63,16 +84,10 @@ function setupBadgesData({
   mockUseServiceBadgesData.mockReturnValue({ alertsCount, anomalyData });
 }
 
-function renderBadges({ service = baseNodeData }: { service?: ServiceNodeData } = {}) {
+function renderBadges() {
   return render(
     <IntlProvider locale="en">
-      <ServiceBadges
-        service={service}
-        environment="production"
-        kuery=""
-        rangeFrom="now-15m"
-        rangeTo="now"
-      />
+      <ServiceBadges />
     </IntlProvider>
   );
 }
@@ -80,7 +95,7 @@ function renderBadges({ service = baseNodeData }: { service?: ServiceNodeData } 
 describe('ServiceBadges', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseManageSlosUrl.mockReturnValue('/app/slos/slos-href');
+    setupLinks();
   });
 
   it('always renders the service badge', () => {
@@ -91,21 +106,21 @@ describe('ServiceBadges', () => {
   });
 
   describe('alerts badge', () => {
-    it('shows the alerts count and navigates to the alerts tab on click', () => {
-      setupContext();
+    it('shows the alerts count and renders a link to the alerts tab', () => {
+      const mockGetRedirectUrl = jest.fn().mockReturnValue('/app/apm/services/opbeans-java/alerts');
+      setupContext({
+        locators: { get: jest.fn().mockReturnValue({ getRedirectUrl: mockGetRedirectUrl }) },
+      });
       setupBadgesData({ alertsCount: 3 });
       renderBadges();
 
       const badge = screen.getByTestId('serviceFlyoutAlertsBadge');
       expect(badge).toHaveTextContent('3');
-
       expect(badge).toHaveAttribute('data-ebt-action', 'viewAlerts');
       expect(badge).toHaveAttribute('data-ebt-element', 'serviceFlyoutAlertsBadge');
-
-      fireEvent.click(badge);
-      expect(mockNavigateToUrl).toHaveBeenCalled();
-      const href = mockNavigateToUrl.mock.calls[0][0] as string;
-      expect(href).toContain('/services/opbeans-java/alerts');
+      expect(mockGetRedirectUrl).toHaveBeenCalledWith(
+        expect.objectContaining({ serviceOverviewTab: 'alerts' })
+      );
     });
 
     it('hides the alerts badge when the hook returns no count', () => {
@@ -119,9 +134,9 @@ describe('ServiceBadges', () => {
 
   describe('SLO badge', () => {
     it('shows the SLO badge from node data and navigates to the SLO list on click', () => {
-      setupContext();
+      setupContext({ service: { ...baseNodeData, sloStatus: 'violated', sloCount: 2 } });
       setupBadgesData();
-      renderBadges({ service: { ...baseNodeData, sloStatus: 'violated', sloCount: 2 } });
+      renderBadges();
 
       const badge = screen.getByTestId('apmSloBadge');
       expect(badge).toHaveAttribute('data-slo-status', 'violated');
@@ -133,9 +148,9 @@ describe('ServiceBadges', () => {
     });
 
     it('shows the "No SLOs" badge when the node has no SLO status', () => {
-      setupContext();
+      setupContext({ service: { ...baseNodeData, sloStatus: undefined } });
       setupBadgesData();
-      renderBadges({ service: { ...baseNodeData, sloStatus: undefined } });
+      renderBadges();
 
       const badge = screen.getByTestId('apmSloBadge');
 
@@ -144,9 +159,12 @@ describe('ServiceBadges', () => {
     });
 
     it('hides the SLO badge when the user cannot read SLOs', () => {
-      setupContext({ canReadSlos: false });
+      setupContext({
+        canReadSlos: false,
+        service: { ...baseNodeData, sloStatus: 'violated', sloCount: 1 },
+      });
       setupBadgesData();
-      renderBadges({ service: { ...baseNodeData, sloStatus: 'violated', sloCount: 1 } });
+      renderBadges();
 
       expect(screen.queryByTestId('apmSloBadge')).not.toBeInTheDocument();
     });
@@ -167,6 +185,24 @@ describe('ServiceBadges', () => {
       renderBadges();
 
       expect(screen.queryByTestId('serviceFlyoutAnomaliesBadge')).not.toBeInTheDocument();
+    });
+
+    it('passes transactionType from context to the anomaly badge navigation link', () => {
+      const mockGetRedirectUrl = jest
+        .fn()
+        .mockReturnValue('/app/apm/services/opbeans-java/overview');
+      setupContext({
+        transactionType: 'request',
+        locators: { get: jest.fn().mockReturnValue({ getRedirectUrl: mockGetRedirectUrl }) },
+      });
+      setupBadgesData({ anomalyData: { anomalyScore: 75, anomalyEnvironment: 'production' } });
+      renderBadges();
+
+      expect(mockGetRedirectUrl).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: expect.objectContaining({ transactionType: 'request' }),
+        })
+      );
     });
   });
 });
