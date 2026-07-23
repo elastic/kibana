@@ -15,7 +15,7 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { Providers } from './plugin';
 import { VerificationCodeForm } from './verification_code_form';
 
-jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
+jest.mock('@elastic/eui/test-env/services/accessibility/html_id_generator', () => ({
   htmlIdGenerator: () => () => `id-${Math.random()}`,
   useGeneratedHtmlId: () => `id-${Math.random()}`,
 }));

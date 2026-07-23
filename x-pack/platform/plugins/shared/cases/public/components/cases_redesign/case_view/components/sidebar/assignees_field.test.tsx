@@ -14,7 +14,7 @@ import React from 'react';
 import { noAssignCasesPermissions, renderWithTestingProviders } from '../../../../../common/mock';
 import type { AssigneesFieldProps } from './assignees_field';
 import { AssigneesField } from './assignees_field';
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import { waitForEuiPopoverOpen } from '@elastic/eui/test-env/test/rtl';
 
 jest.mock('../../../../../containers/user_profiles/use_suggest_user_profiles');
 jest.mock('../../../../../containers/user_profiles/use_get_current_user_profile');

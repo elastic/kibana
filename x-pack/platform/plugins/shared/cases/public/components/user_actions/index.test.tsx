@@ -8,7 +8,7 @@
 import React from 'react';
 import { screen, within, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import { waitForEuiPopoverOpen } from '@elastic/eui/test-env/test/rtl';
 // eslint-disable-next-line @kbn/eslint/module_migration
 import routeData from 'react-router';
 

@@ -12,8 +12,8 @@ import { mockUxSeries, render } from '../../rtl_helpers';
 import { SeriesName } from './series_name';
 
 // ensures that fields appropriately match to their label
-jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
-  ...jest.requireActual('@elastic/eui/lib/services/accessibility/html_id_generator'),
+jest.mock('@elastic/eui/test-env/services/accessibility/html_id_generator', () => ({
+  ...jest.requireActual('@elastic/eui/test-env/services/accessibility/html_id_generator'),
   htmlIdGenerator: () => () => `id-${Math.random()}`,
 }));
 

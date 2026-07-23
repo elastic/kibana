@@ -11,7 +11,7 @@ import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { load, type CheerioAPI } from 'cheerio';
 
-import { icon as EuiLogoElasticIcon } from '@elastic/eui/lib/components/icon/assets/logo_elastic';
+import { icon as EuiLogoElasticIcon } from '@elastic/eui/test-env/components/icon/assets/logo_elastic';
 
 import { Logo } from './logo';
 
@@ -40,7 +40,7 @@ describe('Logo (boot splash)', () => {
   // Drift guard: rather than hard-coding the palette, compare our inlined
   // SSR copy of the logo against the actual `logoElastic` asset shipped
   // by `@elastic/eui` (the same one `<EuiLoadingElastic />` uses under
-  // the hood, see node_modules/@elastic/eui/lib/components/icon/assets/
+  // the hood, see node_modules/@elastic/eui/es/components/icon/assets/
   // logo_elastic.js). If EUI rebrands the logo, this test fails and the
   // next person knows to re-copy the SVG paths into logo.tsx.
   it('stays byte-for-byte in sync with @elastic/eui logoElastic', () => {

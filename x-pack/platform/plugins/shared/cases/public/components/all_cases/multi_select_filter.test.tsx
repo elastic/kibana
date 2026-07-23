@@ -8,7 +8,7 @@ import React from 'react';
 import { MultiSelectFilter } from './multi_select_filter';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import { waitForEuiPopoverOpen } from '@elastic/eui/test-env/test/rtl';
 
 // Failing: See https://github.com/elastic/kibana/issues/183663
 describe('multi select filter', () => {

@@ -12,7 +12,7 @@ import {
 } from '@kbn/core/public/mocks';
 import { render, screen, waitFor } from '@testing-library/react';
 import { useKibana } from '@kbn/reporting-public';
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import { waitForEuiPopoverOpen } from '@elastic/eui/test-env/test/rtl';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import type { RecursivePartial, UseEuiTheme } from '@elastic/eui';

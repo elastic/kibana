@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { act, fireEvent, render, waitFor } from '@testing-library/react';
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import { waitForEuiPopoverOpen } from '@elastic/eui/test-env/test/rtl';
 import { mockBrowserFields } from '../../mock';
 import { FIELD_BROWSER_WIDTH } from '../../helpers';
 import { FieldBrowserComponent } from './field_browser';

@@ -56,6 +56,10 @@ module.exports = (request, options) => {
     return module.exports(request.replace('@elastic/eui/lib/', '@elastic/eui/test-env/'), options);
   }
 
+  if (request.startsWith('@elastic/eui/es/')) {
+    return module.exports(request.replace('@elastic/eui/es/', '@elastic/eui/test-env/'), options);
+  }
+
   if (request === 'axios') {
     return resolve.sync('axios/dist/node/axios.cjs', {
       basedir: options.basedir,

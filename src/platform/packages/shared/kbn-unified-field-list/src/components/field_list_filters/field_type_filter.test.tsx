@@ -13,7 +13,7 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { type DataViewField } from '@kbn/data-views-plugin/common';
 import { FieldTypeFilter, type FieldTypeFilterProps } from './field_type_filter';
 import { screen, within } from '@testing-library/react';
-import { render } from '@elastic/eui/lib/test/rtl';
+import { render } from '@elastic/eui/test-env/test/rtl';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { userEvent } from '@testing-library/user-event';
 

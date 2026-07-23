@@ -8,7 +8,7 @@ import React from 'react';
 import { render, waitFor } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
 import userEvent from '@testing-library/user-event';
-import { showEuiComboBoxOptions } from '@elastic/eui/lib/test/rtl';
+import { showEuiComboBoxOptions } from '@elastic/eui/test-env/test/rtl';
 import { TestProvider } from '../../test/test_provider';
 import { ControlGeneralViewResponse } from '.';
 import type { Response, Selector } from '../../../common';

@@ -9,7 +9,7 @@ import React from 'react';
 import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
-import { showEuiComboBoxOptions } from '@elastic/eui/lib/test/rtl';
+import { showEuiComboBoxOptions } from '@elastic/eui/test-env/test/rtl';
 import { useAlertsDataView } from '@kbn/alerts-ui-shared/src/common/hooks/use_alerts_data_view';
 import { useApplication } from '../../../common/lib/kibana/use_application';
 import { CasesParamsFields } from './cases_params';

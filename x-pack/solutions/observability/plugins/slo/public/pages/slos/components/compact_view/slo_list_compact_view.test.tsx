@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import { waitForEuiPopoverOpen } from '@elastic/eui/test-env/test/rtl';
 import { fireEvent, screen } from '@testing-library/react';
 import React from 'react';
 import { buildHealthySummary } from '../../../../data/slo/common';

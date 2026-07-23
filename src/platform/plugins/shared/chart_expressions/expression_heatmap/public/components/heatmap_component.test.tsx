@@ -21,7 +21,7 @@ import { createDatatableUtilitiesMock } from '@kbn/data-plugin/common/mocks';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import type { Datatable } from '@kbn/expressions-plugin/public';
 import { mountWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
-import { findTestSubject } from '@elastic/eui/lib/test';
+import { findTestSubject } from '@elastic/eui/test-env/test';
 import { act } from 'react-dom/test-utils';
 import type { HeatmapRenderProps, HeatmapArguments } from '../../common';
 import HeatmapComponent, {

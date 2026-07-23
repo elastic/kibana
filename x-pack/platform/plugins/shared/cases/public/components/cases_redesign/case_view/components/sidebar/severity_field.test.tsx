@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import { waitForEuiPopoverOpen } from '@elastic/eui/test-env/test/rtl';
 import userEvent from '@testing-library/user-event';
 import { CaseSeverity } from '../../../../../../common/types/domain';
 import { SeverityField } from './severity_field';

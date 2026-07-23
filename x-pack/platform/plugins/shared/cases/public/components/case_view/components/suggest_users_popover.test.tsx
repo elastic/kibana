@@ -12,7 +12,7 @@ import userEvent from '@testing-library/user-event';
 import type { SuggestUsersPopoverProps } from './suggest_users_popover';
 import { SuggestUsersPopover } from './suggest_users_popover';
 import { userProfiles } from '../../../containers/user_profiles/api.mock';
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import { waitForEuiPopoverOpen } from '@elastic/eui/test-env/test/rtl';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import type { AssigneeWithProfile } from '../../user_profiles/types';
 import { renderWithTestingProviders } from '../../../common/mock';

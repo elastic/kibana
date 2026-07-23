@@ -16,7 +16,7 @@ import { decodeEnrollmentToken, EnrollmentTokenForm } from './enrollment_token_f
 import { Providers } from './plugin';
 import type { EnrollmentToken } from '../common';
 
-jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
+jest.mock('@elastic/eui/test-env/services/accessibility/html_id_generator', () => ({
   htmlIdGenerator: () => () => `id-${Math.random()}`,
   useGeneratedHtmlId: () => `id-${Math.random()}`,
 }));

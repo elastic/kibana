@@ -11,6 +11,6 @@
 // modules. We import `logo_elastic` from `logo.test.tsx` solely to compare its rendered
 // SVG against our SSR-safe copy in `logo.tsx` (drift guard). This ambient declaration
 // gives TypeScript just enough to type that import without resorting to `@ts-expect-error`.
-declare module '@elastic/eui/lib/components/icon/assets/logo_elastic' {
+declare module '@elastic/eui/test-env/components/icon/assets/logo_elastic' {
   export const icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
 }

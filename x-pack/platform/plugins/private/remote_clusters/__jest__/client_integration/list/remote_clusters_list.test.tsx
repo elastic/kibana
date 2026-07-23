@@ -21,7 +21,7 @@ import { RemoteClusterList } from '../../../public/application/sections/remote_c
 import { setupEnvironment } from '../helpers/setup_environment';
 import { renderRemoteClustersRoute } from '../helpers/render';
 
-jest.mock('@elastic/eui/lib/components/search_bar/search_box', () => {
+jest.mock('@elastic/eui/test-env/components/search_bar/search_box', () => {
   return {
     EuiSearchBox: (props: { 'data-test-subj'?: string; onSearch: (value: string) => void }) => (
       <input

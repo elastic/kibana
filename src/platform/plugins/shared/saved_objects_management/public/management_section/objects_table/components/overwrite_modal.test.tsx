@@ -11,7 +11,7 @@ import React from 'react';
 import { shallowWithI18nProvider, mountWithIntl } from '@kbn/test-jest-helpers';
 import type { OverwriteModalProps } from './overwrite_modal';
 import { OverwriteModal } from './overwrite_modal';
-import { findTestSubject } from '@elastic/eui/lib/test';
+import { findTestSubject } from '@elastic/eui/test-env/test';
 
 describe('OverwriteModal', () => {
   const obj = { type: 'foo', id: 'bar', meta: { title: 'baz' } };

@@ -15,7 +15,7 @@ import type { CaseConnectors } from '../../containers/types';
 import { useGetChoices } from '../connectors/servicenow/use_get_choices';
 import { choices } from '../connectors/mock';
 import userEvent from '@testing-library/user-event';
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import { waitForEuiPopoverOpen } from '@elastic/eui/test-env/test/rtl';
 import { useGetFields } from '../connectors/resilient/use_get_fields';
 import { renderWithTestingProviders } from '../../common/mock';
 import { useGetFieldsResponse } from '../connectors/resilient/mocks';

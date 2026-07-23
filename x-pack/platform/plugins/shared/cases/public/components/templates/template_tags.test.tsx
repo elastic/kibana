@@ -12,7 +12,7 @@ import userEvent from '@testing-library/user-event';
 import { renderWithTestingProviders } from '../../common/mock';
 import { FormTestComponent } from '../../common/test_utils';
 import { TemplateTags } from './template_tags';
-import { showEuiComboBoxOptions } from '@elastic/eui/lib/test/rtl';
+import { showEuiComboBoxOptions } from '@elastic/eui/test-env/test/rtl';
 
 describe('TemplateTags', () => {
   const onSubmit = jest.fn();

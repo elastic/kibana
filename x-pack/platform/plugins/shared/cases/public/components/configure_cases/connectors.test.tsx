@@ -15,7 +15,7 @@ import { connectors, actionTypes } from './__mock__';
 import { ConnectorTypes } from '../../../common/types/domain';
 import userEvent from '@testing-library/user-event';
 import { useApplicationCapabilities } from '../../common/lib/kibana';
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import { waitForEuiPopoverOpen } from '@elastic/eui/test-env/test/rtl';
 
 const useApplicationCapabilitiesMock = useApplicationCapabilities as jest.Mocked<
   typeof useApplicationCapabilities

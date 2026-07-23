@@ -8,7 +8,7 @@
 import React from 'react';
 import { screen, cleanup, act, fireEvent, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import { waitForEuiPopoverOpen } from '@elastic/eui/test-env/test/rtl';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { OperatingSystem, TrustedDeviceConditionEntryField } from '@kbn/securitysolution-utils';
 import type {

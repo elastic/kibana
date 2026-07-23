@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { waitFor, within, screen, act } from '@testing-library/react';
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import { waitForEuiPopoverOpen } from '@elastic/eui/test-env/test/rtl';
 
 import { useKibana } from '../../common/lib/kibana';
 

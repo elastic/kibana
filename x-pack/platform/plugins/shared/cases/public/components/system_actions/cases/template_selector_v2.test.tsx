@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
-import { showEuiComboBoxOptions } from '@elastic/eui/lib/test/rtl';
+import { showEuiComboBoxOptions } from '@elastic/eui/test-env/test/rtl';
 import { TemplateSelectorV2 } from './template_selector_v2';
 
 const mockUseGetTemplates = jest.fn().mockReturnValue({

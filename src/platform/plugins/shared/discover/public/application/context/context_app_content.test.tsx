@@ -11,7 +11,7 @@ import React from 'react';
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import { waitForEuiPopoverOpen } from '@elastic/eui/test-env/test/rtl';
 import type { GetStateReturn } from './services/context_state';
 import type { SortDirection } from '@kbn/data-plugin/public';
 import type { ContextAppContentProps } from './context_app_content';
