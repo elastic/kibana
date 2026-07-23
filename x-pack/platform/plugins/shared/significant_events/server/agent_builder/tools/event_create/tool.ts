@@ -21,18 +21,15 @@ import { createEventToolHandler } from './handler';
 
 export const SIGNIFICANT_EVENTS_EVENT_CREATE_TOOL_ID = platformSignificantEventsTools.createEvent;
 
-const createEventSchema = significantEventSchema
-  .pick({
-    status: true,
-    title: true,
-    summary: true,
-    root_cause: true,
-    stream_names: true,
-    criticality: true,
-    confidence: true,
-    recommendations: true,
-  })
-  .partial({ status: true, recommendations: true });
+const createEventSchema = significantEventSchema.pick({
+  status: true,
+  title: true,
+  symptom_hypothesis: true,
+  summary: true,
+  stream_names: true,
+  severity: true,
+  confidence: true,
+});
 
 export function createEventTool({
   getScopedClients,
@@ -92,8 +89,8 @@ export function createEventTool({
     handler: async (toolParams, context) => {
       const { request } = context;
       try {
-        const { getEventClient, licensing, uiSettingsClient } = await getScopedClients({ request });
-        await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+        const { getEventClient, licensing } = await getScopedClients({ request });
+        await assertSignificantEventsAccess({ server, licensing });
 
         const data = await createEventToolHandler({
           eventClient: getEventClient(),

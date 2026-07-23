@@ -116,7 +116,7 @@ describe('parseTemplate', () => {
   it('omits optional top-level defaults when not present in the definition', () => {
     const template = createTemplate({
       definition: yamlStringify({
-        // `name` is the required case-default title; the rest are optional.
+        // Every case default is optional; `name` is just provided here to assert the others are omitted.
         name: 'Case default title',
         fields: [],
       }),

@@ -6,20 +6,28 @@
  */
 
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
-import type { StreamsServer } from '@kbn/streams-plugin/server/types';
-import { createSignificantEventsDiscoveryAgent } from './discovery';
-import { createSignificantEventsJudgeAgent } from './judge';
+import { registerDiscoveryAgentType } from './discovery';
+import { registerJudgeAgentType } from './judge';
 
-export { SIGNIFICANT_EVENTS_DISCOVERY_AGENT_ID } from './discovery';
-export { SIGNIFICANT_EVENTS_JUDGE_AGENT_ID } from './judge';
+export {
+  SIGNIFICANT_EVENTS_DISCOVERY_AGENT_ID,
+  SIGNIFICANT_EVENTS_DISCOVERY_AGENT_TYPE_ID,
+  discoveryAgentType,
+  registerDiscoveryAgentType,
+} from './discovery';
+export {
+  SIGNIFICANT_EVENTS_JUDGE_AGENT_ID,
+  SIGNIFICANT_EVENTS_JUDGE_AGENT_TYPE_ID,
+  judgeAgentType,
+  registerJudgeAgentType,
+} from './judge';
+export { installDiscoveryAgents } from './install_discovery_agents';
 
-export const registerSignificantEventsDiscoveryAgents = ({
+export const registerSignificantEventsDiscoveryAgentTypes = ({
   agentBuilder,
-  server,
 }: {
   agentBuilder: AgentBuilderPluginSetup;
-  server: StreamsServer;
 }): void => {
-  agentBuilder.agents.register(createSignificantEventsDiscoveryAgent({ server }));
-  agentBuilder.agents.register(createSignificantEventsJudgeAgent({ server }));
+  registerDiscoveryAgentType(agentBuilder);
+  registerJudgeAgentType(agentBuilder);
 };

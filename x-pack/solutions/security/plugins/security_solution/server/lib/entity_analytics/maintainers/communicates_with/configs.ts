@@ -44,6 +44,12 @@ export const COMMUNICATES_WITH_INTEGRATION_RELATIONSHIP_CONFIGS: RelationshipInt
     relationshipKey: 'communicates_with',
     targetEntityType: 'host',
     requireTargetEntityIdExists: true,
+    // SSH auth events use local-namespace EUID: `user.name@host.id@local`.
+    // `user.id` is not part of the EUID for local entities — including it in
+    // the composite agg sources causes bucket explosion (the same username
+    // appears with dozens of distinct Unix UIDs / Windows SIDs across hosts),
+    // multiplying Step 1 pages and Step 2 ES|QL queries for zero benefit.
+    customActor: { fields: ['user.email', 'user.name'] },
     // `event.category` is multivalued in ECS (Elastic Agent's syslog SSH events
     // emit `["authentication", "session"]`). ES|QL `IN` returns NULL for a
     // multivalued left-hand side, so `event.category IN (...)` silently drops

@@ -16,6 +16,7 @@ import type { TypeOf } from '@kbn/typed-react-router-config';
 import { omit } from 'lodash';
 import React, { useCallback, useMemo, useState } from 'react';
 import type { AgentName } from '@kbn/elastic-agent-utils';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { EmptyCellValue } from '@kbn/shared-ux-column-presets';
 import type { APIReturnType } from '@kbn/apm-api-shared';
 import { AlertingFlyout } from '../../../alerting/ui_components/alerting_flyout';
@@ -78,6 +79,7 @@ export function getServiceColumns({
   link,
   serviceOverflowCount,
   onSloBadgeClick,
+  locators,
 }: {
   query: TypeOf<ApmRoutes, '/services'>['query'];
   showTransactionTypeColumn: boolean;
@@ -90,6 +92,7 @@ export function getServiceColumns({
   link: any;
   serviceOverflowCount: number;
   onSloBadgeClick: (serviceName: string, agentName?: AgentName) => void;
+  locators: SharePluginStart['url']['locators'] | undefined;
 }): Array<ITableColumn<ServiceListItem>> {
   const { isSmall, isLarge, isXl } = breakpoints;
   const showWhenSmallOrGreaterThanLarge = isSmall || !isLarge;
@@ -219,12 +222,15 @@ export function getServiceColumns({
                   score={anomalyScore}
                   detectorType={detectorType}
                   navigationProps={
-                    agentName && anomalyEnvironment
+                    agentName && anomalyEnvironment && locators
                       ? {
                           serviceName,
                           agentName,
                           anomalyEnvironment,
-                          query: { ...query, transactionType },
+                          transactionType,
+                          rangeFrom: query.rangeFrom,
+                          rangeTo: query.rangeTo,
+                          locators,
                         }
                       : undefined
                   }
@@ -399,6 +405,7 @@ export function ApmServicesTable({
   const breakpoints = useBreakpoints();
   const { core, share } = useApmPluginContext();
   const discoverLocator = share?.url?.locators?.get(DISCOVER_APP_LOCATOR);
+  const locators = share?.url?.locators;
   const { slo } = useKibana<ApmPluginStartDeps>().services;
   const { indexSettings = [] } = useApmIndexSettingsContext();
   const { link } = useApmRouter();
@@ -501,6 +508,7 @@ export function ApmServicesTable({
       link,
       serviceOverflowCount,
       onSloBadgeClick: openSloOverviewFlyout,
+      locators,
     });
   }, [
     query,
@@ -514,6 +522,7 @@ export function ApmServicesTable({
     link,
     serviceOverflowCount,
     openSloOverviewFlyout,
+    locators,
   ]);
 
   const isTableSearchBarEnabled = core?.uiSettings?.get<boolean>(

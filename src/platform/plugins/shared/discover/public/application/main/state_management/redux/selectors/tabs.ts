@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createSelector } from '@reduxjs/toolkit';
+import { createSelector } from 'redux-toolkit-v1';
 import { isOfAggregateQueryType, type Filter } from '@kbn/es-query';
 import { cloneDeep } from 'lodash';
 import type { DiscoverInternalState, TabState } from '../types';

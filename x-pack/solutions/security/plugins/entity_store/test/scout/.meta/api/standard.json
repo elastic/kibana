@@ -1,5 +1,5 @@
 {
-  "sha1": "d74484b40806ce3e27ee8e35aa2b0c960c9fef8c",
+  "sha1": "770d92edf55346625838d6f3f4f16290e0ae23c4",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -3075,6 +3075,38 @@
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/related_user_alias_resolution.spec.ts",
         "line": 237,
         "column": 12
+      }
+    },
+    {
+      "id": "f2f47c41c1d7903-c83e24790d7389e",
+      "title": "Entity Store remove_v1 SO cleanup install removes legacy entity-definition SO documents from .kibana",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/remove_v1.spec.ts",
+        "line": 57,
+        "column": 10
+      }
+    },
+    {
+      "id": "f2f47c41c1d7903-434909608e0054f",
+      "title": "Entity Store remove_v1 SO cleanup install succeeds with no legacy entity-definition SOs present",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/remove_v1.spec.ts",
+        "line": 111,
+        "column": 10
       }
     },
     {

@@ -318,7 +318,7 @@ describe('entity_maintainer task', () => {
           status: expect.objectContaining({
             state: {},
           }),
-          abortController: expect.any(AbortController),
+          signal: expect.any(AbortSignal),
           logger: expect.anything(),
           fakeRequest: expect.anything(),
           esClient: expect.anything(),

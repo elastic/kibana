@@ -7,54 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
-import { writeErrorHandler } from '@kbn/as-code-utils';
-import type { HttpServiceSetup, Logger } from '@kbn/core/server';
+import type { HttpServiceSetup, Logger, RequestHandlerContext } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
-import { createDiscoverSession } from './session_create';
-import { getRouteConfig } from './get_route_config';
-import { discoverSessionApiDataSchema, discoverSessionApiResponseSchema } from './schema';
+import { registerCreateRoute } from './register_create_route';
+import { registerDeleteRoute } from './register_delete_route';
+import { registerGetRoute } from './register_get_route';
+import { registerUpsertRoute } from './register_upsert_route';
+import { registerSearchRoute } from './register_search_route';
 
 export const registerRoutes = (
   http: HttpServiceSetup,
   logger: Logger,
   usageCounter: UsageCounter | undefined
 ) => {
-  const { versioned } = http.createRouter();
-  const { basePath, routeConfig, routeVersion } = getRouteConfig();
+  const { versioned } = http.createRouter<RequestHandlerContext>();
 
-  versioned
-    .post({
-      path: basePath,
-      summary: 'Create a Discover session',
-      ...routeConfig,
-    })
-    .addVersion(
-      {
-        version: routeVersion,
-        validate: {
-          request: {
-            body: discoverSessionApiDataSchema,
-          },
-          response: {
-            201: {
-              body: () => discoverSessionApiResponseSchema,
-              description: 'Created',
-            },
-            400: { description: 'Invalid request' },
-            403: { description: 'Forbidden' },
-          },
-        },
-      },
-      async (context, request, response) =>
-        telemetryHandler(request, usageCounter, async () => {
-          try {
-            const body = await createDiscoverSession(context, request.body);
-
-            return response.created({ body });
-          } catch (error) {
-            return writeErrorHandler(error, response, logger, request);
-          }
-        })
-    );
+  registerCreateRoute(versioned, logger, usageCounter);
+  registerUpsertRoute(versioned, logger, usageCounter);
+  registerGetRoute(versioned, logger, usageCounter);
+  registerSearchRoute(versioned, logger, usageCounter);
+  registerDeleteRoute(versioned, logger, usageCounter);
 };

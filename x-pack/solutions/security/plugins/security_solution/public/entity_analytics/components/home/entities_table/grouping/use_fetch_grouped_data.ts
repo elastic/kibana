@@ -14,7 +14,12 @@ import { showErrorToast } from '@kbn/cloud-security-posture';
 import { useContext, useMemo } from 'react';
 import type { EntityType } from '../../../../../../common/entity_analytics/types';
 import { useKibana } from '../../../../../common/lib/kibana';
-import { ENTITY_FIELDS, QUERY_KEY_GROUPING_DATA, QUERY_KEY_ENTITY_ANALYTICS } from '../constants';
+import {
+  ENTITY_FIELDS,
+  QUERY_KEY_GROUPING_DATA,
+  QUERY_KEY_TARGET_METADATA,
+  QUERY_KEY_ENTITY_ANALYTICS,
+} from '../constants';
 import { DataViewContext } from '..';
 
 export type EntitiesGroupingQuery = GroupingQuery | SearchRequest;
@@ -124,9 +129,12 @@ export const useFetchGroupedData = ({
         })
       );
 
-      if (!aggregations) throw new Error('Failed to aggregate by, missing resource id');
-
-      return aggregations;
+      // A successful search against a missing/empty index (e.g. the entity store has been
+      // cleared or was never installed) comes back with no `aggregations`. Treat that as
+      // "no groups" so the grouped view degrades to the empty state — matching the
+      // non-grouped table — instead of throwing, which surfaced an error toast and left the
+      // group list stuck in its loading placeholder.
+      return aggregations ?? {};
     },
     {
       onError: (err: Error) => showErrorToast(toasts, err),
@@ -136,8 +144,6 @@ export const useFetchGroupedData = ({
     }
   );
 };
-
-const QUERY_KEY_TARGET_METADATA = 'entity-analytics-resolution-target-metadata';
 
 export const useFetchTargetMetadata = (entityIds: string[]): TargetMetadataMap => {
   const { searchService, toasts, indexPattern } = useEntitySearchParams();
