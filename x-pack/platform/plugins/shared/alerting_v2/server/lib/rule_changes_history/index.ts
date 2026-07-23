@@ -13,6 +13,7 @@ export {
   RULE_CHANGES_HISTORY_OBJECT_TYPE,
   RULE_VERSION_FALLBACK,
 } from './constants';
+export { createChangeHistoryClient } from './create_change_history_client';
 export type {
   LogRuleChangesParams,
   RuleChangesHistoryAuthor,

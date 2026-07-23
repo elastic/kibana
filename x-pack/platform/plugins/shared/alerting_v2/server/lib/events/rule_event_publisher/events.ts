@@ -28,8 +28,11 @@ export interface RuleEventPayload {
    * triggers fire, but nothing orderable can be logged to change history).
    */
   readonly rule?: RuleResponse;
-  /** Shared id linking events emitted by the same (bulk) operation. */
-  readonly correlationId: string;
+  /**
+   * Shared id linking events emitted by the same bulk operation. Only present
+   * for bulk emits.
+   */
+  readonly correlationId?: string;
 }
 
 /**

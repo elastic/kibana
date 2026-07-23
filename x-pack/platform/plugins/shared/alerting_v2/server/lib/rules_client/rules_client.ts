@@ -126,7 +126,7 @@ export class RulesClient {
    * index / `rule.version` on rule events. Always advances, independently of
    * whether change-history logging is enabled.
    */
-  private nextVersion(current?: number): number {
+  private getNextVersion(current?: number): number {
     return (current ?? 0) + 1;
   }
 
@@ -300,7 +300,7 @@ export class RulesClient {
     const userProfileUid = await this.userService.getCurrentUserProfileUid();
 
     const nowIso = new Date().toISOString();
-    const ruleVersion = this.nextVersion();
+    const ruleVersion = this.getNextVersion();
 
     const ruleAttributes = transformCreateRuleBodyToRuleSoAttributes(parsed, {
       enabled: true,
@@ -373,7 +373,7 @@ export class RulesClient {
       });
     }
 
-    const ruleVersion = this.nextVersion(existingAttrs.metadata.version);
+    const ruleVersion = this.getNextVersion(existingAttrs.metadata.version);
     const nextAttrs = buildUpdateRuleAttributes(existingAttrs, parsed, {
       updatedBy: userProfileUid,
       updatedAt: nowIso,
@@ -400,10 +400,6 @@ export class RulesClient {
 
     const rule = transformRuleSoAttributesToRuleApiResponse(id, nextAttrs, newVersion);
 
-    // Always emit `ruleUpdated` after a successful write — including empty
-    // PATCHes — so `version` / change-history `object.sequence` stay in
-    // lockstep. Lifecycle enable/disable events are owned by the dedicated
-    // enableRule/disableRule endpoints, not this path.
     this.ruleEventPublisher.emitRuleUpdated(this.request, [
       { ruleId: rule.id, spaceId: this.spaceId, rule },
     ]);
@@ -466,7 +462,7 @@ export class RulesClient {
       ...existingAttrs,
       metadata: {
         ...existingAttrs.metadata,
-        version: this.nextVersion(existingAttrs.metadata.version),
+        version: this.getNextVersion(existingAttrs.metadata.version),
       },
     });
     this.ruleEventPublisher.emitRuleDeleted(this.request, [
@@ -490,7 +486,7 @@ export class RulesClient {
     const userProfileUid = await this.userService.getCurrentUserProfileUid();
     const nowIso = new Date().toISOString();
 
-    const ruleVersion = this.nextVersion(existingAttrs.metadata.version);
+    const ruleVersion = this.getNextVersion(existingAttrs.metadata.version);
     const nextAttrs: RuleSavedObjectAttributes = {
       ...existingAttrs,
       enabled: true,
@@ -537,7 +533,7 @@ export class RulesClient {
     const userProfileUid = await this.userService.getCurrentUserProfileUid();
     const nowIso = new Date().toISOString();
 
-    const ruleVersion = this.nextVersion(existingAttrs.metadata.version);
+    const ruleVersion = this.getNextVersion(existingAttrs.metadata.version);
     const nextAttrs: RuleSavedObjectAttributes = {
       ...existingAttrs,
       enabled: false,
@@ -720,7 +716,7 @@ export class RulesClient {
                 ...attrs,
                 metadata: {
                   ...attrs.metadata,
-                  version: this.nextVersion(attrs.metadata.version),
+                  version: this.getNextVersion(attrs.metadata.version),
                 },
               }),
             }
@@ -774,7 +770,7 @@ export class RulesClient {
         continue;
       }
 
-      const ruleVersion = this.nextVersion(doc.attributes.metadata.version);
+      const ruleVersion = this.getNextVersion(doc.attributes.metadata.version);
       const nextAttrs: RuleSavedObjectAttributes = {
         ...doc.attributes,
         enabled: true,
@@ -899,7 +895,7 @@ export class RulesClient {
         continue;
       }
 
-      const ruleVersion = this.nextVersion(doc.attributes.metadata.version);
+      const ruleVersion = this.getNextVersion(doc.attributes.metadata.version);
       const nextAttrs: RuleSavedObjectAttributes = {
         ...doc.attributes,
         enabled: false,
@@ -975,7 +971,7 @@ export class RulesClient {
 
     assertImmutableUnchanged(parsed, existingAttrs);
 
-    const ruleVersion = this.nextVersion(existingAttrs.metadata.version);
+    const ruleVersion = this.getNextVersion(existingAttrs.metadata.version);
     const nextAttrs = transformCreateRuleBodyToRuleSoAttributes(parsed, {
       enabled: existingAttrs.enabled,
       createdBy: existingAttrs.createdBy,

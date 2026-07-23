@@ -15,7 +15,6 @@ import {
   SavedObjectsClientFactory,
 } from '@kbn/core-di-server';
 import type { ContainerModuleLoadOptions } from 'inversify';
-import { ChangeHistoryClient } from '@kbn/change-history';
 import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '@kbn/maintenance-windows-plugin/common';
 import { AlertActionsClient } from '../lib/alert_actions_client';
 import { DirectorService } from '../lib/director/director';
@@ -34,8 +33,7 @@ import {
 } from '../lib/execution_history_client';
 import { RulesClient } from '../lib/rules_client';
 import {
-  RULE_CHANGES_HISTORY_DATASET,
-  RULE_CHANGES_HISTORY_MODULE,
+  createChangeHistoryClient,
   RuleChangesHistoryClientToken,
   RuleChangesHistoryService,
   RuleChangesHistoryServiceToken,
@@ -140,12 +138,7 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
     .toDynamicValue(({ get }) => {
       const logger = get(Logger).get('rule_changes_history');
       const { version: kibanaVersion } = get(PluginInitializer('env')).packageInfo;
-      return new ChangeHistoryClient({
-        module: RULE_CHANGES_HISTORY_MODULE,
-        dataset: RULE_CHANGES_HISTORY_DATASET,
-        logger,
-        kibanaVersion,
-      });
+      return createChangeHistoryClient({ logger, kibanaVersion });
     })
     .inSingletonScope();
   bind(RuleChangesHistoryService).toSelf().inSingletonScope();

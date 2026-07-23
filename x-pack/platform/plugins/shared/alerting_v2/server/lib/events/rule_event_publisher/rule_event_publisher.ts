@@ -90,9 +90,7 @@ export class RuleEventPublisher implements RuleEventPublisherContract {
     eventType: RuleEvent['type'],
     rules: EventRule[]
   ): void {
-    // One correlationId per emit call so all events from the same (bulk)
-    // operation share it. Single operations get a unique id too.
-    const correlationId = uuidv4();
+    const correlationId = rules.length > 1 ? uuidv4() : undefined;
     for (const rule of rules) {
       this.publish(request, {
         type: eventType,
@@ -101,12 +99,12 @@ export class RuleEventPublisher implements RuleEventPublisherContract {
     }
   }
 
-  private toEventPayload(rule: EventRule, correlationId: string): RuleEventPayload {
+  private toEventPayload(rule: EventRule, correlationId?: string): RuleEventPayload {
     const { ruleId, spaceId, rule: domainRule } = rule;
     return {
       ruleId,
       spaceId,
-      correlationId,
+      ...(correlationId ? { correlationId } : {}),
       ...(domainRule ? { rule: domainRule } : {}),
     };
   }

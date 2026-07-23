@@ -64,7 +64,7 @@ describe('RuleEventPublisher', () => {
   ];
 
   describe.each(cases)('$name', ({ type, emit }) => {
-    it('emits the matching event type with the { ruleId, spaceId, correlationId } envelope', () => {
+    it('emits the matching event type with a { ruleId, spaceId } envelope and no correlationId for a single rule', () => {
       emit(publisher, request, [{ ruleId: 'rule-1', spaceId: 'space-1' }]);
 
       expect(eventBus.publish).toHaveBeenCalledTimes(1);
@@ -74,11 +74,12 @@ describe('RuleEventPublisher', () => {
           payload: {
             ruleId: 'rule-1',
             spaceId: 'space-1',
-            correlationId: expect.any(String),
           },
         },
         { request }
       );
+      const [singleEvent] = eventBus.publish.mock.calls[0];
+      expect((singleEvent.payload as RuleEventPayload).correlationId).toBeUndefined();
     });
 
     it('carries the full domain rule when provided', () => {
@@ -117,6 +118,7 @@ describe('RuleEventPublisher', () => {
           payload: expect.objectContaining({ ruleId: 'rule-2', spaceId: 'space-1' }),
         })
       );
+      expect(firstPayload.correlationId).toEqual(expect.any(String));
       expect(firstPayload.correlationId).toBe(secondPayload.correlationId);
     });
 
