@@ -86,7 +86,24 @@ function ImportWorkflowsCallouts({
   }
   return (
     <>
-      {hasConflicts ? (
+      {preflightResult.conflictCheckFailed ? (
+        <>
+          <EuiSpacer size="m" />
+          <EuiCallOut
+            announceOnMount
+            title={i18n.translate('workflows.importFlyout.conflictCheckFailed', {
+              defaultMessage:
+                'Could not check for existing workflow conflicts. The import may fail if any of the workflow IDs are already in use.',
+            })}
+            color="warning"
+            iconType="warning"
+            size="s"
+            data-test-subj="import-workflows-conflict-check-failed"
+          />
+        </>
+      ) : null}
+
+      {!preflightResult.conflictCheckFailed && hasConflicts ? (
         <>
           <EuiSpacer size="m" />
           <EuiCallOut
@@ -268,7 +285,7 @@ export const ImportWorkflowsFlyout: React.FC<ImportWorkflowsFlyoutProps> = ({ on
   const hasWorkflowPreviews = (preflightResult?.workflows?.length ?? 0) > 0;
 
   const conflictIds = useMemo(
-    () => new Set(preflightResult?.conflicts.map((c) => c.id) ?? []),
+    () => new Set(preflightResult?.conflicts ?? []),
     [preflightResult?.conflicts]
   );
 
