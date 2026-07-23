@@ -7,12 +7,8 @@
 
 import {
   assignShard,
-  assignWeightedShard,
   balanceShardsByCost,
   getMonitorCostMib,
-  getShardPool,
-  isScalableLocation,
-  shardCapacityMib,
   BROWSER_COST_MIB,
   LIGHTWEIGHT_COST_MIB,
 } from './assign_shards';
@@ -79,77 +75,11 @@ describe('assignShard', () => {
   });
 });
 
-describe('assignWeightedShard', () => {
-  const equal = [
-    { id: 'a', capacity: 1000 },
-    { id: 'b', capacity: 1000 },
-    { id: 'c', capacity: 1000 },
-  ];
-
-  it('returns undefined / the only shard for degenerate pools', () => {
-    expect(assignWeightedShard('m-1', [])).toBeUndefined();
-    expect(assignWeightedShard('m-1', [{ id: 'only', capacity: 500 }])).toBe('only');
-  });
-
-  it('always assigns to one of the provided shards', () => {
-    for (let i = 0; i < 100; i++) {
-      expect(equal.map((s) => s.id)).toContain(assignWeightedShard(`monitor-${i}`, equal));
-    }
-  });
-
-  it('is deterministic and order-independent', () => {
-    const reversed = [...equal].reverse();
-    for (let i = 0; i < 100; i++) {
-      const id = `monitor-${i}`;
-      expect(assignWeightedShard(id, equal)).toBe(assignWeightedShard(id, reversed));
-    }
-  });
-
-  it('gives a higher-capacity shard proportionally more monitors', () => {
-    const shards = [
-      { id: 'small', capacity: 1000 },
-      { id: 'big', capacity: 4000 },
-    ];
-    const counts: Record<string, number> = { small: 0, big: 0 };
-    const total = 5000;
-    for (let i = 0; i < total; i++) {
-      counts[assignWeightedShard(`monitor-${i}`, shards)!]++;
-    }
-    // ~4:1 in expectation; assert a comfortably loose band around it.
-    const ratio = counts.big / counts.small;
-    expect(ratio).toBeGreaterThan(2.5);
-    expect(ratio).toBeLessThan(6);
-  });
-
-  it('minimizes churn when a shard is removed (rendezvous property)', () => {
-    const ids = Array.from({ length: 1000 }, (_, i) => `monitor-${i}`);
-    const before = new Map(ids.map((id) => [id, assignWeightedShard(id, equal)!]));
-    const remaining = equal.filter((s) => s.id !== 'c');
-
-    ids.forEach((id) => {
-      const after = assignWeightedShard(id, remaining)!;
-      if (after !== before.get(id)) {
-        // Only monitors previously on the removed shard may move.
-        expect(before.get(id)).toBe('c');
-      }
-    });
-  });
-});
-
 describe('cost model', () => {
   it('prices a browser monitor ~50x a lightweight one', () => {
     expect(getMonitorCostMib('http')).toBe(LIGHTWEIGHT_COST_MIB);
     expect(getMonitorCostMib('browser')).toBe(BROWSER_COST_MIB);
     expect(getMonitorCostMib('browser') / getMonitorCostMib('http')).toBe(50);
-  });
-
-  it('reserves browser runtime headroom in shard capacity', () => {
-    const ram = 2048;
-    expect(shardCapacityMib(ram, false)).toBeGreaterThan(shardCapacityMib(ram, true));
-  });
-
-  it('never reports a non-positive capacity', () => {
-    expect(shardCapacityMib(100, true)).toBe(1);
   });
 });
 
@@ -254,33 +184,5 @@ describe('balanceShardsByCost', () => {
     };
     const rendezvous = new Map(monitors.map((m) => [m.id, assignShard(m.id, shards)!]));
     expect(spread(balanceShardsByCost(monitors, shards))).toBeLessThanOrEqual(spread(rendezvous));
-  });
-});
-
-describe('getShardPool', () => {
-  it('falls back to agentPolicyId when no pool', () => {
-    expect(getShardPool({ agentPolicyId: 'single' })).toEqual(['single']);
-  });
-
-  it('uses agentPolicyIds when present', () => {
-    expect(getShardPool({ agentPolicyId: 'single', agentPolicyIds: ['a', 'b'] })).toEqual([
-      'a',
-      'b',
-    ]);
-  });
-
-  it('ignores empty pool and falls back', () => {
-    expect(getShardPool({ agentPolicyId: 'single', agentPolicyIds: [] })).toEqual(['single']);
-  });
-});
-
-describe('isScalableLocation', () => {
-  it('is false without a pool or with a single shard', () => {
-    expect(isScalableLocation({})).toBe(false);
-    expect(isScalableLocation({ agentPolicyIds: ['a'] })).toBe(false);
-  });
-
-  it('is true with more than one shard', () => {
-    expect(isScalableLocation({ agentPolicyIds: ['a', 'b'] })).toBe(true);
   });
 });

@@ -17,6 +17,7 @@ import {
   EuiHealth,
   EuiText,
   EuiSpacer,
+  EuiSwitch,
   EuiButtonEmpty,
   EuiCallOut,
 } from '@elastic/eui';
@@ -29,7 +30,7 @@ import type { PrivateLocation } from '../../../../../../common/runtime_types';
 import { selectAgentPolicies } from '../../../state/agent_policies';
 
 export const AGENT_POLICY_FIELD_NAME = 'agentPolicyId';
-export const AGENT_POLICY_IDS_FIELD_NAME = 'agentPolicyIds';
+export const AGENT_CONDITION_SHARDING_FIELD_NAME = 'agentConditionSharding';
 
 type PolicyOption = EuiComboBoxOptionOption<string>;
 
@@ -47,27 +48,20 @@ export const PolicyHostsField = ({
     control,
     formState: { isSubmitted },
     trigger,
-    setValue,
-    getValues,
   } = useFormContext<PrivateLocation>();
 
-  const { isTouched, error } = control.getFieldState(AGENT_POLICY_IDS_FIELD_NAME);
+  const { isTouched, error } = control.getFieldState(AGENT_POLICY_FIELD_NAME);
   const showFieldInvalid = (isSubmitted || isTouched) && !!error;
 
-  // Reactive view of the selected pool so callouts update as the user selects.
-  const watchedIds = useWatch({ control, name: AGENT_POLICY_IDS_FIELD_NAME });
-  const selectedIds = watchedIds?.length
-    ? watchedIds
-    : [getValues(AGENT_POLICY_FIELD_NAME)].filter(Boolean);
+  const selectedId = useWatch({ control, name: AGENT_POLICY_FIELD_NAME });
 
-  // A policy already backing another location can't be reused as a shard.
+  // A policy already backing another location can't be reused.
   const usedByOtherLocations = useMemo(() => {
     const used = new Set<string>();
     privateLocations.forEach((location) => {
       if (location.agentPolicyId) {
         used.add(location.agentPolicyId);
       }
-      location.agentPolicyIds?.forEach((id) => used.add(id));
     });
     return used;
   }, [privateLocations]);
@@ -84,10 +78,10 @@ export const PolicyHostsField = ({
         // Coalesce: EuiComboBox lowercases labels for search and throws on undefined.
         label: item.name ?? item.id ?? '',
         value: item.id,
-        disabled: usedByOtherLocations.has(item.id) && !selectedIds.includes(item.id),
+        disabled: usedByOtherLocations.has(item.id) && item.id !== selectedId,
         'data-test-subj': item.name,
       })) ?? [],
-    [data, usedByOtherLocations, selectedIds]
+    [data, usedByOtherLocations, selectedId]
   );
 
   const renderOption = (option: PolicyOption) => {
@@ -117,8 +111,8 @@ export const PolicyHostsField = ({
     );
   };
 
-  const isScalable = selectedIds.length > 1;
-  const hasEmptyPolicy = selectedIds.some((id) => policyById.get(id)?.agents === 0);
+  const hasEmptyPolicy = selectedId ? policyById.get(selectedId)?.agents === 0 : false;
+  const conditionSharding = useWatch({ control, name: AGENT_CONDITION_SHARDING_FIELD_NAME });
 
   return (
     <>
@@ -141,30 +135,24 @@ export const PolicyHostsField = ({
         error={showFieldInvalid ? SELECT_POLICY_HOSTS : undefined}
       >
         <Controller
-          name={AGENT_POLICY_IDS_FIELD_NAME}
+          name={AGENT_POLICY_FIELD_NAME}
           control={control}
-          rules={{ validate: (val?: string[]) => (val && val.length > 0) || SELECT_POLICY_HOSTS }}
+          rules={{ validate: (val?: string) => Boolean(val) || SELECT_POLICY_HOSTS }}
           render={({ field }) => (
             <EuiComboBox<string>
               data-test-subj="syntheticsAgentPolicySelect"
               isDisabled={isDisabled}
               fullWidth
+              singleSelection={{ asPlainText: true }}
               aria-label={SELECT_POLICY_HOSTS}
               placeholder={SELECT_POLICY_HOSTS}
               isInvalid={showFieldInvalid}
               options={options}
-              selectedOptions={options.filter((opt) => selectedIds.includes(opt.value ?? ''))}
+              selectedOptions={options.filter((opt) => opt.value === selectedId)}
               renderOption={renderOption}
               rowHeight={40}
               onChange={(selected) => {
-                const ids = selected.map((opt) => opt.value ?? '').filter(Boolean);
-                field.onChange(ids);
-                // Keep the legacy primary agent policy in sync (first selected).
-                // Spaces filtering and classic (single-shard) behaviour rely on it.
-                setValue(AGENT_POLICY_FIELD_NAME, ids[0] ?? '', {
-                  shouldDirty: true,
-                  shouldValidate: isSubmitted,
-                });
+                field.onChange(selected[0]?.value ?? '');
               }}
               onBlur={async () => {
                 field.onBlur();
@@ -175,21 +163,41 @@ export const PolicyHostsField = ({
         />
       </EuiFormRow>
       <EuiSpacer />
-      {isScalable && (
+      {Boolean(selectedId) && (
         <>
-          <EuiCallOut
-            data-test-subj="syntheticsScalableLocationCallout"
-            title={SCALABLE_CALLOUT_TITLE}
-            size="s"
-            color="primary"
-            iconType="shard"
-          >
-            <FormattedMessage
-              id="xpack.synthetics.monitorManagement.scalableLocationCallout.content"
-              defaultMessage="Monitors will be sharded across these {count} agent policies for at-most-once execution and failover. Enroll one agent per policy."
-              values={{ count: selectedIds.length }}
-            />
-          </EuiCallOut>
+          <Controller
+            name={AGENT_CONDITION_SHARDING_FIELD_NAME}
+            control={control}
+            render={({ field }) => (
+              <EuiSwitch
+                data-test-subj="syntheticsConditionShardingSwitch"
+                label={CONDITION_SHARDING_LABEL}
+                checked={Boolean(field.value)}
+                onChange={(e) => field.onChange(e.target.checked)}
+              />
+            )}
+          />
+          <EuiSpacer size="xs" />
+          <EuiText size="xs" color="subdued">
+            {CONDITION_SHARDING_HELP_TEXT}
+          </EuiText>
+          {Boolean(conditionSharding) && (
+            <>
+              <EuiSpacer />
+              <EuiCallOut
+                data-test-subj="syntheticsConditionShardingCallout"
+                title={CONDITION_SHARDING_CALLOUT_TITLE}
+                size="s"
+                color="primary"
+                iconType="cluster"
+              >
+                <FormattedMessage
+                  id="xpack.synthetics.monitorManagement.conditionShardingCallout.content"
+                  defaultMessage="Enroll multiple agents into this single policy. Kibana distributes monitors across them with a per-monitor host condition, so each monitor runs on exactly one agent (no duplicate runs) and moves to a healthy agent on failover."
+                />
+              </EuiCallOut>
+            </>
+          )}
           <EuiSpacer />
         </>
       )}
@@ -217,17 +225,32 @@ const POLICY_HOSTS_HELP_TEXT = i18n.translate(
   'xpack.synthetics.monitorManagement.selectPolicyHosts.poolHelpText',
   {
     defaultMessage:
-      'Select one agent policy for a standard location, or several to shard monitors across a pool of agents (one agent per policy).',
+      'Select the agent policy for this location. To scale out, enroll several agents into that policy and turn on the option below.',
   }
 );
 
 const POLICY_HOST_LABEL = i18n.translate('xpack.synthetics.monitorManagement.policyHost', {
-  defaultMessage: 'Agent policies',
+  defaultMessage: 'Agent policy',
 });
 
-const SCALABLE_CALLOUT_TITLE = i18n.translate(
-  'xpack.synthetics.monitorManagement.scalableLocationCallout.title',
+const CONDITION_SHARDING_LABEL = i18n.translate(
+  'xpack.synthetics.monitorManagement.conditionSharding.label',
   {
-    defaultMessage: 'Scalable private location',
+    defaultMessage: 'Scale with multiple agents on this policy',
+  }
+);
+
+const CONDITION_SHARDING_HELP_TEXT = i18n.translate(
+  'xpack.synthetics.monitorManagement.conditionSharding.helpText',
+  {
+    defaultMessage:
+      'Run several agents under this one policy and let Kibana shard monitors across them for at-most-once execution and failover.',
+  }
+);
+
+const CONDITION_SHARDING_CALLOUT_TITLE = i18n.translate(
+  'xpack.synthetics.monitorManagement.conditionShardingCallout.title',
+  {
+    defaultMessage: 'Condition-based sharding',
   }
 );

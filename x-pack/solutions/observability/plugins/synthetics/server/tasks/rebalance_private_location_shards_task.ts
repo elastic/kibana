@@ -7,11 +7,10 @@
 
 import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server/plugin';
 import type { ConcreteTaskInstance, IntervalSchedule } from '@kbn/task-manager-plugin/server';
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import pRetry from 'p-retry';
 import { getPrivateLocations } from '../synthetics_service/get_private_locations';
-import { isScalableLocation } from '../synthetics_service/private_location/assign_shards';
+import { isConditionShardedLocation } from '../synthetics_service/private_location/assign_by_condition';
 import type { SyntheticsMonitorClient } from '../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import type { SyntheticsServerSetup } from '../types';
 
@@ -19,164 +18,99 @@ const TASK_TYPE = 'Synthetics:Rebalance-Private-Location-Shards';
 export const REBALANCE_SHARDS_TASK_ID = `${TASK_TYPE}-single-instance`;
 export const DEFAULT_REBALANCE_SCHEDULE = '1m';
 
-// Agents poll Fleet roughly every 30s. We treat a shard as stale when no agent
-// has checked in within 3 poll intervals. This is time-based (a sustained
-// absence), which is both the failure signal and the blip tolerance — far
-// tighter than Fleet's built-in offline status (12 intervals ≈ 6 min), whose lag
-// otherwise dominates failover time. Kept conservative on purpose: a false
-// eviction of a still-live agent risks brief double execution of a monitor.
+// Agents poll Fleet roughly every 30s. We treat an agent as stale when it hasn't
+// checked in within 3 poll intervals. This is time-based (a sustained absence),
+// which is both the failure signal and the blip tolerance — far tighter than
+// Fleet's built-in offline status (12 intervals ≈ 6 min), whose lag otherwise
+// dominates failover time. Kept conservative on purpose: a false eviction of a
+// still-live agent risks brief double execution of a monitor.
 export const STALE_CHECKIN_MS = 90_000;
 
-// Anti-flap hysteresis: a shard that has just transitioned unhealthy→healthy
+// Anti-flap hysteresis: an agent that has just transitioned unhealthy→healthy
 // must stay healthy for this long before it becomes eligible to *receive*
 // recovery redistribution. Without it, an agent that flaps down↔up faster than
 // this window would repeatedly trigger a full-scan cost rebalance onto itself,
 // churning Fleet package policies (and re-deploying browser runtimes) on every
 // bounce. Kept a few check-in intervals wide so it outlasts transient blips;
-// failover (evicting a *dead* shard's monitors) ignores this and stays immediate.
+// failover (evicting a *dead* agent's monitors) ignores this and stays immediate.
 export const RECOVERY_STABILITY_MS = 3 * 60_000;
 
 interface RebalanceTaskState {
   /**
-   * policyId → epoch ms when the shard's current healthy streak began. A shard
-   * absent from the map was not healthy on the previous run, so the next time it
-   * is seen healthy its streak (and stability grace window) restarts. Persisted
-   * across runs to drive the recovery hysteresis above.
+   * `${agentPolicyId}:${host}` → epoch ms when the agent's current healthy
+   * streak began. An agent absent from the map was not healthy on the previous
+   * run, so the next time it is seen healthy its streak (and stability grace
+   * window) restarts. Persisted across runs to drive the recovery hysteresis.
    */
   healthySince?: Record<string, number>;
 }
 
-/**
- * Fetches the freshest agent `last_checkin` per shard policy in a single
- * aggregation query, rather than N per-shard status calls. Empty result for a
- * shard (no agents, or none ever checked in) is treated as stale by callers.
- */
-export const getShardLastCheckins = async (
-  server: SyntheticsServerSetup,
-  shardIds: string[]
-): Promise<Map<string, number>> => {
-  const checkins = new Map<string, number>();
-  if (shardIds.length === 0) {
-    return checkins;
-  }
-
-  const res = await server.fleet.agentService.asInternalUser.listAgents({
-    showInactive: false,
-    perPage: 0,
-    kuery: `policy_id:(${shardIds.map((id) => `"${id}"`).join(' or ')})`,
-    aggregations: {
-      by_policy: {
-        terms: { field: 'policy_id', size: shardIds.length },
-        aggs: { last_checkin: { max: { field: 'last_checkin' } } },
-      },
-    },
-  });
-
-  const buckets =
-    (
-      res.aggregations?.by_policy as
-        | { buckets?: Array<{ key: string; last_checkin?: { value?: number | null } }> }
-        | undefined
-    )?.buckets ?? [];
-
-  for (const bucket of buckets) {
-    const value = bucket.last_checkin?.value;
-    if (typeof value === 'number') {
-      checkins.set(bucket.key, value);
-    }
-  }
-
-  return checkins;
-};
-
 const BYTES_PER_MIB = 1024 * 1024;
 
+export interface AgentHostInfo {
+  /** Freshest `last_checkin` (epoch ms) for the host. */
+  lastCheckin: number;
+  /**
+   * Total host RAM (MiB) from agent metadata (`host.memory`,
+   * elastic/elastic-agent#15708), or null when the agent doesn't report it.
+   * Feeds capacity-aware placement so bigger agents take proportionally more
+   * load; unknown hosts fall back to uniform capacity in the balancer.
+   */
+  memoryMib: number | null;
+}
+
 /**
- * Total host RAM (MiB) per shard policy, sourced from `system.memory.total` in
- * `metrics-system.memory-*`. Correlated to policies through `agent.id`, since
- * the metrics docs carry the agent id but not the policy id. When a policy has
- * several agents we take the max (a shard runs on one agent; the largest is the
- * safest capacity estimate).
- *
- * This only returns a value when the System integration ships memory metrics for
- * the agent. Policies without it are simply absent from the map — callers treat
- * that as "unknown" (uniform capacity for sharding, "N/A" in the UI) rather than
- * assuming zero.
- *
- * `esClient` must be able to read `metrics-system.memory-*`. The Kibana internal
- * user (`kibana_system`) has no `read` on those data streams, so the UI route
- * passes the request user's client; the background task has only the internal
- * user and thus legitimately gets an empty map (falls back to uniform capacity).
+ * Per enrolled agent host (for a single agent policy): freshest `last_checkin`
+ * and total host RAM. Host names are lowercased to match what the agent's own
+ * `host` provider reports for `${host.name}` at runtime (i.e. the value stamped
+ * into a monitor's condition). An agent with no parseable check-in is omitted
+ * (treated as stale by callers). Read from the same `listAgents` call — no
+ * extra query. The internal user can't read `metrics-system.memory-*`, so RAM
+ * here comes only from agent metadata (older agents without it stay uniform).
  */
-export const getShardTotalMemoryMib = async (
+export const getAgentHostInfo = async (
   server: SyntheticsServerSetup,
-  shardIds: string[],
-  esClient: ElasticsearchClient
-): Promise<Map<string, number>> => {
-  const memoryByPolicy = new Map<string, number>();
-  if (shardIds.length === 0) {
-    return memoryByPolicy;
-  }
+  agentPolicyId: string
+): Promise<Map<string, AgentHostInfo>> => {
+  const byHost = new Map<string, AgentHostInfo>();
 
   const { agents } = await server.fleet.agentService.asInternalUser.listAgents({
     showInactive: false,
     perPage: 1000,
-    kuery: `policy_id:(${shardIds.map((id) => `"${id}"`).join(' or ')})`,
+    kuery: `policy_id:"${agentPolicyId}"`,
   });
 
-  const policyByAgent = new Map<string, string>();
   for (const agent of agents) {
-    if (agent.policy_id) {
-      policyByAgent.set(agent.id, agent.policy_id);
-    }
-  }
-  if (policyByAgent.size === 0) {
-    return memoryByPolicy;
-  }
-
-  const res = await esClient.search<
-    unknown,
-    { by_agent: { buckets: Array<{ key: string; total?: { value?: number | null } }> } }
-  >({
-    index: 'metrics-system.memory-*',
-    // The data stream may not exist (System integration disabled) — don't error.
-    ignore_unavailable: true,
-    allow_no_indices: true,
-    size: 0,
-    query: {
-      bool: {
-        filter: [
-          { terms: { 'agent.id': [...policyByAgent.keys()] } },
-          { range: { '@timestamp': { gte: 'now-10m' } } },
-        ],
-      },
-    },
-    aggregations: {
-      by_agent: {
-        terms: { field: 'agent.id', size: policyByAgent.size },
-        aggregations: { total: { max: { field: 'system.memory.total' } } },
-      },
-    },
-  });
-
-  for (const bucket of res.aggregations?.by_agent?.buckets ?? []) {
-    const bytes = bucket.total?.value;
-    const policyId = policyByAgent.get(bucket.key);
-    if (policyId && typeof bytes === 'number' && bytes > 0) {
-      const mib = Math.round(bytes / BYTES_PER_MIB);
-      memoryByPolicy.set(policyId, Math.max(memoryByPolicy.get(policyId) ?? 0, mib));
+    const host = (
+      agent.local_metadata as
+        | { host?: { name?: string; hostname?: string; memory?: number } }
+        | undefined
+    )?.host;
+    const name = (host?.name ?? host?.hostname)?.toLowerCase();
+    const last = agent.last_checkin ? Date.parse(agent.last_checkin) : NaN;
+    if (name && !Number.isNaN(last)) {
+      const memoryMib =
+        typeof host?.memory === 'number' && host.memory > 0
+          ? Math.round(host.memory / BYTES_PER_MIB)
+          : null;
+      const prev = byHost.get(name);
+      byHost.set(name, {
+        lastCheckin: Math.max(prev?.lastCheckin ?? 0, last),
+        memoryMib: memoryMib ?? prev?.memoryMib ?? null,
+      });
     }
   }
 
-  return memoryByPolicy;
+  return byHost;
 };
 
 /**
- * POC: keeps monitor→shard assignment aligned with the set of healthy agents for
- * scalable private locations. Health is derived from raw agent check-ins (see
- * {@link getShardLastCheckins}); the assignment itself lives in `assignShard`
- * (rendezvous hashing), applied in `rebalanceShards`. Intentionally separate from
- * the already-overloaded `Synthetics:Sync-Private-Location-Monitors` task.
+ * Keeps monitor→agent assignment aligned with the set of healthy agents for
+ * scalable (condition-sharded) private locations. Health is derived from raw
+ * agent check-ins ({@link getAgentHostInfo}); the assignment itself lives in
+ * `rebalanceShards`, which rewrites each moved monitor's `${host.name}`
+ * condition. Intentionally separate from the already-overloaded
+ * `Synthetics:Sync-Private-Location-Monitors` task.
  */
 export class RebalancePrivateLocationShardsTask {
   constructor(
@@ -189,7 +123,7 @@ export class RebalancePrivateLocationShardsTask {
       [TASK_TYPE]: {
         title: 'Synthetics Rebalance Private Location Shards Task',
         description:
-          'Reassigns monitors across the healthy agent-policy shards of scalable private locations for at-most-once execution and failover.',
+          'Reassigns monitors across the healthy agents of scalable private locations (by rewriting per-monitor host conditions) for at-most-once execution and failover.',
         timeout: '10m',
         maxAttempts: 1,
         createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => ({
@@ -213,102 +147,80 @@ export class RebalancePrivateLocationShardsTask {
     try {
       const soClient = coreStart.savedObjects.createInternalRepository();
       const allPrivateLocations = await getPrivateLocations(soClient, ALL_SPACES_ID);
-      const scalableLocations = allPrivateLocations.filter(isScalableLocation);
+      const scalableLocations = allPrivateLocations.filter(isConditionShardedLocation);
 
       if (scalableLocations.length === 0) {
         return { state: taskInstance.state, schedule };
       }
 
       const now = Date.now();
-      const allShardIds = [
-        ...new Set(scalableLocations.flatMap((loc) => loc.agentPolicyIds ?? [])),
-      ];
-
-      // One aggregation query for every shard across all scalable locations.
-      let checkins: Map<string, number> | undefined;
-      try {
-        checkins = await getShardLastCheckins(this.serverSetup, allShardIds);
-      } catch (e) {
-        this.debugLog(
-          `Aggregated check-in query failed; falling back to Fleet aggregate status: ${e.message}`
-        );
-      }
-
-      // Per-shard host RAM (from the System integration) → capacity weight, so
-      // bigger agents take proportionally more monitor memory. The background task
-      // only has the internal user (`kibana_system`), which can't read
-      // `metrics-system.memory-*`, so in practice this returns empty here and the
-      // rebalance falls back to uniform (cost-only) capacity — the UI route, which
-      // runs as the request user, is what surfaces real RAM.
-      let memoryByPolicy = new Map<string, number>();
-      try {
-        memoryByPolicy = await getShardTotalMemoryMib(
-          this.serverSetup,
-          allShardIds,
-          coreStart.elasticsearch.client.asInternalUser
-        );
-      } catch (e) {
-        this.debugLog(`Host memory query failed; sharding uniformly by cost: ${e.message}`);
-      }
-
-      // Recovery hysteresis (anti-flap): carry each shard's healthy streak across
-      // runs so a shard only becomes eligible to *receive* recovery work once it
-      // has stayed healthy for RECOVERY_STABILITY_MS. Only maintained on the
-      // aggregated check-in path; the status fallback keeps prior streaks intact.
+      // Recovery hysteresis (anti-flap): carry each agent's healthy streak across
+      // runs so a host only becomes eligible to *receive* recovery work once it
+      // has stayed healthy for RECOVERY_STABILITY_MS. Rebuilt each run for the
+      // currently-healthy hosts; a host that drops out is forgotten so its streak
+      // restarts on the next recovery.
       const priorHealthySince =
         (taskInstance.state as RebalanceTaskState | undefined)?.healthySince ?? {};
-      const nextHealthySince: Record<string, number> = checkins ? {} : { ...priorHealthySince };
-      if (checkins) {
-        for (const id of allShardIds) {
-          const last = checkins.get(id);
-          if (last !== undefined && now - last <= STALE_CHECKIN_MS) {
-            // Continue an existing streak, or start one now for a fresh recovery.
-            nextHealthySince[id] = priorHealthySince[id] ?? now;
-          }
-        }
-      }
-      const isStableShard = (id: string): boolean => {
-        const since = nextHealthySince[id];
-        return since !== undefined && now - since >= RECOVERY_STABILITY_MS;
-      };
+      const nextHealthySince: Record<string, number> = {};
 
       for (const location of scalableLocations) {
-        const shardIds = location.agentPolicyIds ?? [];
-        const healthyShards = checkins
-          ? shardIds.filter((id) => {
-              const last = checkins!.get(id);
-              return last !== undefined && now - last <= STALE_CHECKIN_MS;
-            })
-          : await this.getHealthyShardsFromStatus(shardIds);
-
-        // Stable subset eligible to receive recovery redistribution. On the
-        // status fallback (no per-shard timestamps) every healthy shard qualifies.
-        const recoveryShards = checkins ? healthyShards.filter(isStableShard) : healthyShards;
-
-        this.debugLog(
-          `location ${location.id}: healthy=${healthyShards.length}/${shardIds.length}, recovery-eligible=${recoveryShards.length}`
-        );
-
-        if (healthyShards.length === 0) {
-          logger.warn(
-            `[RebalanceShards] No healthy shards for private location ${location.id} (${location.label}); skipping rebalance.`
+        let hostInfo: Map<string, AgentHostInfo>;
+        try {
+          hostInfo = await getAgentHostInfo(this.serverSetup, location.agentPolicyId);
+        } catch (e) {
+          this.debugLog(
+            `Agent check-in query failed for location ${location.id}; skipping: ${e.message}`
           );
           continue;
         }
 
-        // Idempotent: only monitors whose assigned shard changed are rewritten.
-        // Steady state (all shards healthy) performs zero writes. rebalanceShards
-        // converts raw RAM into a usable-capacity weight (reserving browser
-        // runtime headroom when the location runs browser monitors).
-        const { total, moved } = await privateLocationAPI.rebalanceShards({
-          location,
-          healthyShards,
-          recoveryShards,
-          agentRamMibByShard: memoryByPolicy.size > 0 ? memoryByPolicy : undefined,
+        const healthyHosts = [...hostInfo.entries()]
+          .filter(([, info]) => now - info.lastCheckin <= STALE_CHECKIN_MS)
+          .map(([host]) => host);
+
+        // Capacity-aware placement: weight each host by its total RAM so bigger
+        // agents take proportionally more load. Hosts without reported memory
+        // are omitted and fall back to uniform capacity in the balancer.
+        const capacities = new Map<string, number>();
+        for (const [host, info] of hostInfo) {
+          if (info.memoryMib != null) {
+            capacities.set(host, info.memoryMib);
+          }
+        }
+
+        const stableKey = (host: string) => `${location.agentPolicyId}:${host}`;
+        for (const host of healthyHosts) {
+          const key = stableKey(host);
+          // Continue an existing streak, or start one now for a fresh recovery.
+          nextHealthySince[key] = priorHealthySince[key] ?? now;
+        }
+        const recoveryHosts = healthyHosts.filter((host) => {
+          const since = nextHealthySince[stableKey(host)];
+          return since !== undefined && now - since >= RECOVERY_STABILITY_MS;
         });
 
         this.debugLog(
-          `Location ${location.id}: moved ${moved}/${total} monitors over ${healthyShards.length}/${shardIds.length} healthy shards`
+          `location ${location.id}: healthy=${healthyHosts.length}, recovery-eligible=${recoveryHosts.length}`
+        );
+
+        if (healthyHosts.length === 0) {
+          logger.warn(
+            `[RebalanceShards] No healthy agents for private location ${location.id} (${location.label}); skipping rebalance.`
+          );
+          continue;
+        }
+
+        // Idempotent: only monitors whose assigned host changed are rewritten.
+        // Steady state (all agents healthy) performs zero writes.
+        const { total, moved } = await privateLocationAPI.rebalanceShards({
+          location,
+          healthyHosts,
+          recoveryHosts,
+          capacities,
+        });
+
+        this.debugLog(
+          `Location ${location.id}: moved ${moved}/${total} monitors over ${healthyHosts.length} healthy agents`
         );
       }
 
@@ -323,23 +235,6 @@ export class RebalancePrivateLocationShardsTask {
     }
 
     return { state: taskInstance.state, schedule };
-  }
-
-  /** Fallback health check via Fleet's aggregate online status (used if the check-in query fails). */
-  private async getHealthyShardsFromStatus(shardIds: string[]): Promise<string[]> {
-    const { fleet } = this.serverSetup;
-    const statuses = await Promise.all(
-      shardIds.map(async (id) => {
-        try {
-          const status = await fleet.agentService.asInternalUser.getAgentStatusForAgentPolicy(id);
-          return { id, online: status.online };
-        } catch (e) {
-          this.debugLog(`Failed to read agent status for shard ${id}: ${e.message}`);
-          return { id, online: 0 };
-        }
-      })
-    );
-    return statuses.filter(({ online }) => online > 0).map(({ id }) => id);
   }
 
   start = async () => {

@@ -40,6 +40,10 @@ jest.mock('../../monitor_details/monitor_summary/locations_status', () => ({
   LocationsStatus: () => <div data-test-subj="locationsStatusStub" />,
 }));
 
+jest.mock('./monitor_assigned_agents', () => ({
+  MonitorAssignedAgents: () => <div data-test-subj="monitorAssignedAgentsStub" />,
+}));
+
 jest.mock('@kbn/observability-shared-plugin/public', () => ({
   TagsList: ({ tags }: { tags: string[] }) => (
     <div data-test-subj="tagsListStub">{tags.join(',')}</div>

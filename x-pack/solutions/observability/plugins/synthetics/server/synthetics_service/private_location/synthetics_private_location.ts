@@ -42,14 +42,14 @@ import {
 import { stringifyString } from '../formatters/private_formatters/formatting_utils';
 import type { PrivateLocationAttributes } from '../../runtime_types/private_locations';
 import { PackagePolicyService } from './package_policy_service';
+import { getMonitorCostMib } from './assign_shards';
 import {
-  assignShard,
-  balanceShardsByCost,
-  getMonitorCostMib,
-  getShardPool,
-  isScalableLocation,
-  shardCapacityMib,
-} from './assign_shards';
+  assignAgentByHost,
+  balanceAgentsByCost,
+  hostFromCondition,
+  hostNameCondition,
+  isConditionShardedLocation,
+} from './assign_by_condition';
 import { runRebalanceShardsTaskSoon } from '../../tasks/rebalance_private_location_shards_task';
 
 export interface PrivateConfig {
@@ -210,7 +210,11 @@ export class SyntheticsPrivateLocation {
     globalParams: Record<string, string>,
     maintenanceWindows: MaintenanceWindow[],
     testRunId?: string,
-    runOnce?: boolean
+    runOnce?: boolean,
+    /** Enrolled agent host names for the location's single agent policy, when
+     * it is condition-sharded (scalable). Threaded in once per batch by the
+     * caller so we don't query Fleet per monitor. */
+    conditionHosts?: string[]
   ): Promise<NewPackagePolicy | null> {
     const { label: locName } = privateLocation;
 
@@ -218,12 +222,19 @@ export class SyntheticsPrivateLocation {
 
     try {
       newPolicy.is_managed = true;
-      // POC: for scalable private locations, shard the monitor onto exactly one
-      // agent policy in the pool (at-most-once execution). Falls back to the
-      // single agentPolicyId for classic locations.
-      const assignedPolicyId = assignShard(config.id, getShardPool(privateLocation)) ?? '';
-      newPolicy.policy_id = assignedPolicyId;
-      newPolicy.policy_ids = [assignedPolicyId];
+      // Every monitor is pinned to the location's single agent policy. For a
+      // scalable (condition-sharded) location we additionally gate it to its
+      // assigned agent with a `${host.name}` Elastic Agent condition, so exactly
+      // one agent runs it (at-most-once, no duplicate runs). With no enrolled
+      // agents yet we leave it unconditioned — it then runs on all agents until
+      // one is assigned by a later create/edit pass or the rebalance task.
+      newPolicy.policy_id = privateLocation.agentPolicyId;
+      newPolicy.policy_ids = [privateLocation.agentPolicyId];
+      if (isConditionShardedLocation(privateLocation)) {
+        newPolicy.condition = conditionHosts?.length
+          ? assignAgentByHost(config.id, conditionHosts)?.condition ?? null
+          : null;
+      }
       if (testRunId) {
         newPolicy.name =
           config.type === 'browser' ? BROWSER_TEST_NOW_RUN : LIGHTWEIGHT_TEST_NOW_RUN;
@@ -268,6 +279,51 @@ export class SyntheticsPrivateLocation {
     }
   }
 
+  /**
+   * Enrolled agent host names for a single agent policy, read from Fleet agent
+   * `local_metadata`. Lowercased to match what the agent's own `host` provider
+   * reports for `${host.name}` at runtime.
+   */
+  private async getEnrolledAgentHosts(agentPolicyId: string): Promise<string[]> {
+    const { agents } = await this.server.fleet.agentService.asInternalUser.listAgents({
+      showInactive: false,
+      perPage: 1000,
+      kuery: `policy_id:"${agentPolicyId}"`,
+    });
+    const hosts = new Set<string>();
+    for (const agent of agents) {
+      const host = (
+        agent.local_metadata as { host?: { name?: string; hostname?: string } } | undefined
+      )?.host;
+      const name = host?.name ?? host?.hostname;
+      if (name) {
+        hosts.add(name.toLowerCase());
+      }
+    }
+    return [...hosts];
+  }
+
+  /**
+   * Resolve enrolled hosts once per batch for every condition-sharded location
+   * touched, so {@link generateNewPolicy} can stamp a host condition without a
+   * per-monitor Fleet query.
+   */
+  private async getConditionHostsByLocation(
+    locations: Array<{ id: string; agentPolicyId: string; agentConditionSharding?: boolean }>
+  ): Promise<Map<string, string[]>> {
+    const conditionLocations = [
+      ...new Map(
+        locations.filter((loc) => loc.agentConditionSharding).map((loc) => [loc.id, loc])
+      ).values(),
+    ];
+    const entries = await Promise.all(
+      conditionLocations.map(
+        async (loc) => [loc.id, await this.getEnrolledAgentHosts(loc.agentPolicyId)] as const
+      )
+    );
+    return new Map(entries);
+  }
+
   async createPackagePolicies(
     configs: PrivateConfig[],
     privateLocations: SyntheticsPrivateLocations,
@@ -282,6 +338,8 @@ export class SyntheticsPrivateLocation {
     const newPolicies: NewPackagePolicyWithId[] = [];
     const newPolicyTemplate = await this.buildNewPolicy(spaceId);
     let touchedScalableLocation = false;
+    // One Fleet query per condition-sharded (scalable) location.
+    const conditionHostsByLocation = await this.getConditionHostsByLocation(privateLocations);
 
     for (const { config, globalParams } of configs) {
       try {
@@ -295,7 +353,7 @@ export class SyntheticsPrivateLocation {
               `Unable to find Synthetics private location for agentId ${privateLocation.id}`
             );
           }
-          if (isScalableLocation(location)) {
+          if (isConditionShardedLocation(location)) {
             touchedScalableLocation = true;
           }
 
@@ -307,7 +365,8 @@ export class SyntheticsPrivateLocation {
             globalParams,
             maintenanceWindows,
             testRunId,
-            runOnce
+            runOnce,
+            conditionHostsByLocation.get(location.id)
           );
 
           if (!newPolicy) {
@@ -347,10 +406,10 @@ export class SyntheticsPrivateLocation {
         // ignore await here, we don't want to wait for this to finish
         void scheduleCleanUpTask(this.server);
       }
-      // New monitors are sharded across the full pool (stable rendezvous), so one
-      // may land on a currently-offline shard. For real (non-test) monitors on a
+      // New monitors are assigned to enrolled agents via rendezvous, so one may
+      // land on a currently-offline agent. For real (non-test) monitors on a
       // scalable location, kick the rebalance now to relocate those onto healthy
-      // shards promptly rather than waiting for the scheduled tick.
+      // agents promptly rather than waiting for the scheduled tick.
       if (!testRunId && !runOnce && touchedScalableLocation) {
         void runRebalanceShardsTaskSoon({ server: this.server });
       }
@@ -433,6 +492,8 @@ export class SyntheticsPrivateLocation {
     const policiesToUpdate: UpdatePackagePolicyWithId[] = [];
     const policiesToCreate: NewPackagePolicyWithId[] = [];
     const policiesToDelete: string[] = [];
+    // One Fleet query per condition-sharded (scalable) location.
+    const conditionHostsByLocation = await this.getConditionHostsByLocation(allPrivateLocations);
 
     for (const { config, globalParams } of configs) {
       const { locations } = config;
@@ -454,7 +515,10 @@ export class SyntheticsPrivateLocation {
               newPolicyTemplate,
               spaceId,
               globalParams,
-              maintenanceWindows
+              maintenanceWindows,
+              undefined,
+              undefined,
+              conditionHostsByLocation.get(privateLocation.id)
             );
 
             if (!newPolicy) {
@@ -546,92 +610,88 @@ export class SyntheticsPrivateLocation {
   }
 
   /**
-   * POC: idempotent shard rebalance for a scalable private location.
+   * Idempotent rebalance for a scalable (condition-sharded) private location.
    *
-   * Moves only the monitors whose rendezvous-assigned shard changed (e.g. their
-   * shard went offline), reusing existing package policy content and flipping
-   * only `policy_ids` — it never decrypts or regenerates monitor configs like
-   * {@link editMonitors}.
+   * Every monitor is pinned to the location's single agent policy; distribution
+   * is expressed as a per-monitor `${host.name}` Elastic Agent condition. This
+   * rewrites only the conditions of monitors whose assigned host changed (e.g.
+   * their agent went offline, or a recovered agent should take a share). It
+   * reuses the existing package policy content and flips only `condition` — it
+   * never decrypts or regenerates monitor configs like {@link editMonitors}.
    *
-   * To keep failover cheap it first takes a counts-only snapshot per shard, then:
-   *  - steady state (nothing on a stale shard, every healthy shard has work) →
-   *    no document fetch, no write;
-   *  - failover (a configured shard is unhealthy) → fetches and moves only that
-   *    shard's monitors via count-based rendezvous ({@link assignShard}), which
-   *    leaves monitors on healthy shards untouched (locality over perfect
-   *    balance, since we only see the stale shard's monitors here);
-   *  - recovery (a healthy shard is empty) → full scan, so we have every
-   *    monitor's cost and can redistribute memory-fairly with
-   *    {@link balanceShardsByCost} (browser ≈ 50× a lightweight check), instead
-   *    of count-based hashing that could pile browsers onto one agent.
+   *  - steady state (every monitor on a healthy host, every recovery host has
+   *    work) → no write;
+   *  - failover (a monitor's host is stale/unassigned) → reassign those via
+   *    count-based rendezvous ({@link assignAgentByHost}) onto healthy hosts,
+   *    leaving monitors already on a healthy host untouched (locality);
+   *  - recovery (a healthy, stability-gated host is empty) → full cost-balanced
+   *    redistribution ({@link balanceAgentsByCost}, browser ≈ 50× a lightweight
+   *    check) across the recovery hosts.
    *
-   * Recovery only ever targets `recoveryShards` (a stability-gated subset of
-   * `healthyShards`); failover always uses the full live `healthyShards`, so a
+   * Recovery only ever targets `recoveryHosts` (a stability-gated subset of
+   * `healthyHosts`); failover always uses the full live `healthyHosts`, so a
    * flapping agent can't repeatedly pull a full redistribution onto itself while
    * a dead agent's monitors still evacuate immediately.
    */
   async rebalanceShards({
     location,
-    healthyShards,
-    recoveryShards,
-    agentRamMibByShard,
+    healthyHosts,
+    recoveryHosts,
+    capacities,
   }: {
-    location: { id: string; label?: string; agentPolicyIds?: string[] };
-    healthyShards: string[];
-    /** Subset of `healthyShards` eligible to *receive* recovery redistribution
-     * (anti-flap hysteresis — a freshly recovered shard is excluded until it has
-     * proven stable). Defaults to `healthyShards`. Failover ignores this. */
-    recoveryShards?: string[];
-    /** Optional per-shard host RAM (MiB). Converted to a usable-capacity weight
-     * for cost balancing, reserving browser runtime headroom when the location
-     * runs browser monitors. */
-    agentRamMibByShard?: ReadonlyMap<string, number>;
+    location: { id: string; label?: string };
+    /** Host names of agents that have checked in recently. */
+    healthyHosts: string[];
+    /** Subset of `healthyHosts` eligible to *receive* recovery redistribution
+     * (anti-flap hysteresis — a freshly recovered host is excluded until it has
+     * proven stable). Defaults to `healthyHosts`. Failover ignores this. */
+    recoveryHosts?: string[];
+    /** Per-host capacity weight (total RAM in MiB) for cost-balanced recovery, so
+     * bigger agents take proportionally more load. Hosts missing an entry fall
+     * back to uniform capacity. */
+    capacities?: ReadonlyMap<string, number>;
   }): Promise<{ total: number; moved: number }> {
-    const configuredShards = location.agentPolicyIds ?? healthyShards;
-    const healthySet = new Set(healthyShards);
-    const staleShards = configuredShards.filter((shard) => !healthySet.has(shard));
-    const recoveryTargets = recoveryShards ?? healthyShards;
+    if (healthyHosts.length === 0) {
+      return { total: 0, moved: 0 };
+    }
+    const healthySet = new Set(healthyHosts);
+    const recoveryTargets = recoveryHosts ?? healthyHosts;
 
-    const countsByShard = await this.packagePolicyService.countByShard({
-      shardIds: [...new Set([...configuredShards, ...healthyShards])],
+    const pkgPolicies = await this.packagePolicyService.listByLocation({
+      locationId: location.id,
     });
-    const totalMonitors = [...countsByShard.values()].reduce((sum, count) => sum + count, 0);
+    const totalMonitors = pkgPolicies.length;
+    if (totalMonitors === 0) {
+      return { total: 0, moved: 0 };
+    }
 
-    const hasStaleWork = staleShards.some((shard) => (countsByShard.get(shard) ?? 0) > 0);
-    const hasRecoveryWork =
-      totalMonitors > 0 && recoveryTargets.some((shard) => (countsByShard.get(shard) ?? 0) === 0);
+    const suffixLength = location.id.length + 1; // strip trailing `-${locationId}`
+
+    // Count monitors currently pinned to each healthy host (unassigned or
+    // stale-host monitors don't count toward a healthy host's load).
+    const countByHost = new Map<string, number>(healthyHosts.map((host) => [host, 0]));
+    for (const pp of pkgPolicies) {
+      const host = hostFromCondition(pp.condition);
+      if (host && healthySet.has(host)) {
+        countByHost.set(host, (countByHost.get(host) ?? 0) + 1);
+      }
+    }
+
+    const hasStaleWork = pkgPolicies.some((pp) => {
+      const host = hostFromCondition(pp.condition);
+      return !host || !healthySet.has(host);
+    });
+    const hasRecoveryWork = recoveryTargets.some((host) => (countByHost.get(host) ?? 0) === 0);
 
     if (!hasStaleWork && !hasRecoveryWork) {
       return { total: totalMonitors, moved: 0 };
     }
 
-    const pkgPolicies = hasRecoveryWork
-      ? await this.packagePolicyService.listByLocation({ locationId: location.id })
-      : await this.packagePolicyService.listByShards({ shardIds: staleShards });
-
-    const suffixLength = location.id.length + 1; // strip trailing `-${locationId}`
-
-    // On the full-scan (recovery) path we see every monitor's cost, so redistribute
-    // memory-fairly. Failover only sees the stale shard's monitors, so it keeps the
-    // cheaper, locality-preserving count-based rendezvous.
-    let costBalanced: Map<string, string> | undefined;
+    // Recovery sees every monitor's cost, so redistribute memory-fairly. Failover
+    // keeps the cheaper, locality-preserving count-based rendezvous.
+    let costBalanced: Map<string, { host: string; condition: string }> | undefined;
     if (hasRecoveryWork) {
-      // A browser monitor forces a ~200 MiB runtime reservation per shard that
-      // runs one; reserve it across the pool when the location has any browser
-      // so we don't overstate usable RAM and overpack heavy monitors.
-      const locationHasBrowser = pkgPolicies.some((pp) => monitorTypeOfPolicy(pp) === 'browser');
-      const capacities =
-        agentRamMibByShard && agentRamMibByShard.size > 0
-          ? new Map<string, number>(
-              recoveryTargets.flatMap((id) => {
-                const ram = agentRamMibByShard.get(id);
-                return ram !== undefined
-                  ? [[id, shardCapacityMib(ram, locationHasBrowser)] as const]
-                  : [];
-              })
-            )
-          : undefined;
-      costBalanced = balanceShardsByCost(
+      costBalanced = balanceAgentsByCost(
         pkgPolicies.flatMap((pp) => {
           const id = pp.id.slice(0, pp.id.length - suffixLength);
           return id ? [{ id, cost: getMonitorCostMib(monitorTypeOfPolicy(pp)) }] : [];
@@ -649,21 +709,20 @@ export class SyntheticsPrivateLocation {
         continue;
       }
 
-      const desired = costBalanced
-        ? costBalanced.get(monitorId)
-        : assignShard(monitorId, healthyShards);
-      if (!desired) {
+      const desiredHost = costBalanced
+        ? costBalanced.get(monitorId)?.host
+        : assignAgentByHost(monitorId, healthyHosts)?.host;
+      if (!desiredHost) {
         continue;
       }
 
-      const current = pp.policy_ids ?? [];
-      if (current.length === 1 && current[0] === desired) {
-        continue; // already on the right shard → no write
+      if (hostFromCondition(pp.condition) === desiredHost) {
+        continue; // already on the right host → no write
       }
 
       const spaceId = pp.spaceIds?.[0] ?? DEFAULT_SPACE_ID;
       const updates = updatesBySpace.get(spaceId) ?? [];
-      updates.push(toShardUpdate(pp, desired));
+      updates.push(toConditionUpdate(pp, hostNameCondition(desiredHost)));
       updatesBySpace.set(spaceId, updates);
     }
 
@@ -772,13 +831,6 @@ export class SyntheticsPrivateLocation {
 }
 
 /**
- * Builds a minimal update payload that only re-targets a package policy to a
- * different shard (`policy_ids`). It carries over the existing content
- * (inputs/vars/package) unchanged and drops saved-object metadata Fleet
- * recomputes on update, so the compiled config stays identical and only the
- * agent-policy association changes.
- */
-/**
  * Monitor type of a synthetics package policy, read from its single enabled
  * input (`synthetics/${type}`). Only `browser` vs. lightweight matters for the
  * memory cost model, so anything non-browser is treated as lightweight.
@@ -788,7 +840,14 @@ const monitorTypeOfPolicy = (pp: PackagePolicy): 'browser' | 'http' =>
     ? 'browser'
     : 'http';
 
-const toShardUpdate = (pp: PackagePolicy, shardId: string): UpdatePackagePolicyWithId => ({
+/**
+ * Builds a minimal update payload that only re-targets a package policy to a
+ * different agent by rewriting its `${host.name}` condition. It carries over the
+ * existing content (inputs/vars/package) and single-policy binding unchanged and
+ * drops saved-object metadata Fleet recomputes on update, so the compiled config
+ * stays identical and only the runtime host condition changes.
+ */
+const toConditionUpdate = (pp: PackagePolicy, condition: string): UpdatePackagePolicyWithId => ({
   id: pp.id,
   name: pp.name,
   description: pp.description,
@@ -804,8 +863,9 @@ const toShardUpdate = (pp: PackagePolicy, shardId: string): UpdatePackagePolicyW
   elasticsearch: pp.elasticsearch,
   overrides: pp.overrides,
   additional_datastreams_permissions: pp.additional_datastreams_permissions,
-  policy_id: shardId,
-  policy_ids: [shardId],
+  policy_id: pp.policy_id,
+  policy_ids: pp.policy_ids,
+  condition,
 });
 
 const throwAddEditError = (hasPolicy: boolean, location?: string, name?: string) => {

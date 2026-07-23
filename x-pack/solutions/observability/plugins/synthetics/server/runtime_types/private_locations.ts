@@ -15,10 +15,11 @@ export const PrivateLocationAttributesCodec = t.intersection([
     isServiceManaged: t.boolean,
   }),
   t.partial({
-    // POC: pool of Fleet agent policies (shards) backing a scalable private
-    // location. When present with >1 entry, monitors are sharded across these
-    // policies for at-most-once execution. Falls back to agentPolicyId otherwise.
-    agentPolicyIds: t.array(t.string),
+    // Scalable private location: a single agent policy backs many enrolled
+    // agents, and monitors are sharded across them via a per-monitor Elastic
+    // Agent `condition` on host.name (see assign_by_condition.ts) for
+    // at-most-once execution.
+    agentConditionSharding: t.boolean,
     tags: t.array(t.string),
     geo: t.interface({
       lat: t.number,

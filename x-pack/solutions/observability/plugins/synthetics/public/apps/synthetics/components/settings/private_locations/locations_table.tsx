@@ -13,10 +13,7 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHealth,
   EuiInMemoryTable,
-  EuiLoadingSpinner,
-  EuiScreenReaderOnly,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
@@ -35,8 +32,8 @@ import { PrivateLocationDocsLink, START_ADDING_LOCATIONS_DESCRIPTION } from './e
 import type { PrivateLocation } from '../../../../../../common/runtime_types';
 import { NoPermissionsTooltip } from '../../common/components/permissions';
 import { useLocationMonitors } from './hooks/use_location_monitors';
-import { useShardStats } from './hooks/use_shard_stats';
-import { LocationShardDetails } from './location_shard_details';
+import { useAgentStats } from './hooks/use_agent_stats';
+import { LocationAgentDetails } from './location_agent_details';
 import { PolicyName } from './policy_name';
 import { LOCATION_NAME_LABEL } from './location_form';
 import { setIsPrivateLocationFlyoutVisible } from '../../../state/private_locations/actions';
@@ -74,20 +71,14 @@ export const PrivateLocationsTable = ({
     useMonitorIntegrationHealth();
 
   const [locationPendingDelete, setLocationPendingDelete] = useState<string | null>(null);
-  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
 
   const { locationMonitors, loading } = useLocationMonitors();
-  const { byLocation: shardStatsByLocation, loading: shardStatsLoading } = useShardStats();
+  const { byLocation: agentStatsByLocation, loading: agentStatsLoading } = useAgentStats();
   const { refreshApp, lastRefresh } = useSyntheticsRefreshContext();
 
-  // Re-render periodically so the "Updated … ago" caption stays current between refreshes.
-  const [nowTick, setNowTick] = useState(() => Date.now());
-  useEffect(() => {
-    const id = setInterval(() => setNowTick(Date.now()), 30_000);
-    return () => clearInterval(id);
-  }, []);
-
-  const toggleRow = (id: string) => {
+  // Expanded rows: per-agent stats breakdown for condition-sharded locations.
+  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
+  const toggleRow = (id: string) =>
     setExpandedIds((prev) => {
       const next = new Set(prev);
       if (next.has(id)) {
@@ -97,7 +88,13 @@ export const PrivateLocationsTable = ({
       }
       return next;
     });
-  };
+
+  // Re-render periodically so the "Updated … ago" caption stays current between refreshes.
+  const [nowTick, setNowTick] = useState(() => Date.now());
+  useEffect(() => {
+    const id = setInterval(() => setNowTick(Date.now()), 30_000);
+    return () => clearInterval(id);
+  }, []);
 
   const { canSave, canManagePrivateLocations } = useSyntheticsSettingsContext();
 
@@ -131,87 +128,41 @@ export const PrivateLocationsTable = ({
       },
     },
     {
-      name: HEALTH_LABEL,
-      render: (item: ListItem) => {
-        const shards = shardStatsByLocation.get(item.id)?.shards ?? [];
-        if (shards.length === 0) {
-          return shardStatsLoading ? (
-            <EuiLoadingSpinner size="s" />
-          ) : (
-            <EuiText size="s" color="subdued">
-              {'--'}
-            </EuiText>
-          );
-        }
-        const healthy = shards.filter((shard) => shard.healthy).length;
-        const color = healthy === shards.length ? 'success' : healthy === 0 ? 'danger' : 'warning';
-        return (
-          <EuiHealth color={color} className="eui-textNoWrap">
-            {HEALTHY_SHARDS_RATIO(healthy, shards.length)}
-          </EuiHealth>
-        );
-      },
-    },
-    {
       field: 'agentPolicyId',
       name: AGENT_POLICY_LABEL,
       render: (agentPolicyId: string, item: ListItem) => {
-        const shardPool = item.agentPolicyIds ?? [];
-        if (shardPool.length > 1) {
-          const shards = shardStatsByLocation.get(item.id)?.shards ?? [];
-          const hasStats = shards.length > 0;
-          const healthy = shards.filter((shard) => shard.healthy).length;
-          const badgeColor = !hasStats
-            ? 'hollow'
-            : healthy === shards.length
-            ? 'success'
-            : healthy === 0
-            ? 'danger'
-            : 'warning';
-          const visiblePool = shardPool.slice(0, MAX_VISIBLE_SHARDS);
-          const remaining = shardPool.length - visiblePool.length;
+        if (item.agentConditionSharding) {
+          const isExpanded = expandedIds.has(item.id);
+          const agentCount = agentStatsByLocation.get(item.id)?.agents.length ?? 0;
           return (
             <EuiFlexGroup direction="column" gutterSize="xs">
               <EuiFlexItem grow={false}>
-                <span>
-                  <EuiBadge color={badgeColor} iconType="shard">
-                    {SCALABLE_SHARDS_LABEL(shardPool.length)}
-                  </EuiBadge>
-                </span>
-              </EuiFlexItem>
-              {visiblePool.map((policyId) => {
-                const shard = shards.find((s) => s.policyId === policyId);
-                return (
-                  <EuiFlexItem grow={false} key={policyId}>
-                    <EuiFlexGroup
-                      gutterSize="s"
-                      alignItems="center"
-                      responsive={false}
-                      wrap={false}
-                    >
-                      <EuiFlexItem grow={false} className="eui-textTruncate">
-                        <PolicyName agentPolicyId={policyId} />
-                      </EuiFlexItem>
-                      {shard && (
-                        <EuiFlexItem grow={false}>
-                          <EuiHealth color={shard.healthy ? 'success' : 'danger'}>
-                            <EuiText size="xs" color="subdued" className="eui-textNoWrap">
-                              {MONITORS_COUNT_LABEL(shard.monitors)}
-                            </EuiText>
-                          </EuiHealth>
-                        </EuiFlexItem>
-                      )}
-                    </EuiFlexGroup>
+                <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonIcon
+                      data-test-subj="syntheticsExpandLocationAgents"
+                      size="xs"
+                      iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
+                      aria-label={isExpanded ? COLLAPSE_ROW_LABEL : EXPAND_ROW_LABEL}
+                      onClick={() => toggleRow(item.id)}
+                    />
                   </EuiFlexItem>
-                );
-              })}
-              {remaining > 0 && (
-                <EuiFlexItem grow={false}>
-                  <EuiText size="xs" color="subdued">
-                    {PLUS_MORE_LABEL(remaining)}
-                  </EuiText>
-                </EuiFlexItem>
-              )}
+                  <EuiFlexItem grow={false}>
+                    <EuiBadge color="primary" iconType="cluster">
+                      {agentCount > 0
+                        ? CONDITION_SHARDED_WITH_COUNT_LABEL(agentCount)
+                        : CONDITION_SHARDED_LABEL}
+                    </EuiBadge>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false} className="eui-textTruncate">
+                <PolicyName
+                  agentPolicyId={agentPolicyId}
+                  locationStats={agentStatsByLocation.get(item.id)}
+                  hideAgentCount
+                />
+              </EuiFlexItem>
             </EuiFlexGroup>
           );
         }
@@ -316,27 +267,6 @@ export const PrivateLocationsTable = ({
         },
       ],
     },
-    {
-      align: 'right',
-      width: '40px',
-      isExpander: true,
-      name: (
-        <EuiScreenReaderOnly>
-          <span>{EXPAND_ROW_LABEL}</span>
-        </EuiScreenReaderOnly>
-      ),
-      render: (item: ListItem) => {
-        const isExpanded = expandedIds.has(item.id);
-        return (
-          <EuiButtonIcon
-            data-test-subj="syntheticsLocationExpandRow"
-            onClick={() => toggleRow(item.id)}
-            aria-label={isExpanded ? COLLAPSE_ROW_LABEL : EXPAND_ROW_LABEL}
-            iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
-          />
-        );
-      },
-    },
   ];
 
   const items = privateLocations.map((location) => ({
@@ -345,11 +275,14 @@ export const PrivateLocationsTable = ({
   }));
 
   const itemIdToExpandedRowMap = items.reduce<Record<string, React.ReactNode>>((acc, item) => {
-    if (expandedIds.has(item.id)) {
+    if (item.agentConditionSharding && expandedIds.has(item.id)) {
       acc[item.id] = (
-        <LocationShardDetails
-          stats={shardStatsByLocation.get(item.id)}
-          loading={shardStatsLoading}
+        <LocationAgentDetails
+          stats={agentStatsByLocation.get(item.id)}
+          loading={agentStatsLoading}
+          agentPolicyId={item.agentPolicyId}
+          locationLabel={item.label}
+          locationMonitorCount={item.monitors}
         />
       );
     }
@@ -360,28 +293,15 @@ export const PrivateLocationsTable = ({
 
   const renderToolRight = () => {
     return [
-      <EuiFlexGroup
-        gutterSize="s"
-        alignItems="center"
-        responsive={false}
+      <EuiButton
+        data-test-subj="syntheticsRefreshPrivateLocationsButton"
+        iconType="refresh"
+        onClick={refreshApp}
+        isLoading={loading || agentStatsLoading}
         key="refreshPrivateLocations"
       >
-        <EuiFlexItem grow={false}>
-          <EuiText size="xs" color="subdued" className="eui-textNoWrap">
-            {LAST_UPDATED_LABEL(moment(lastRefresh).from(nowTick))}
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            data-test-subj="syntheticsRefreshPrivateLocationsButton"
-            iconType="refresh"
-            onClick={refreshApp}
-            isLoading={shardStatsLoading || loading}
-          >
-            {REFRESH_LABEL}
-          </EuiButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>,
+        {REFRESH_LABEL}
+      </EuiButton>,
       <NoPermissionsTooltip
         canEditSynthetics={canSave}
         canManagePrivateLocations={canManagePrivateLocations}
@@ -407,6 +327,14 @@ export const PrivateLocationsTable = ({
         {START_ADDING_LOCATIONS_DESCRIPTION} <PrivateLocationDocsLink label={LEARN_MORE} />
       </EuiText>
       <EuiSpacer size="m" />
+      <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiText size="xs" color="subdued" className="eui-textNoWrap">
+            {LAST_UPDATED_LABEL(moment(lastRefresh).from(nowTick))}
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="xs" />
       <EuiInMemoryTable<ListItem>
         itemId={'id'}
         tableLayout="auto"
@@ -489,37 +417,26 @@ export const AGENT_POLICY_LABEL = i18n.translate('xpack.synthetics.monitorManage
   defaultMessage: 'Agent Policy',
 });
 
-const SCALABLE_SHARDS_LABEL = (count: number) =>
-  i18n.translate('xpack.synthetics.monitorManagement.scalableShards', {
-    defaultMessage: 'Scalable · {count} shards',
+const CONDITION_SHARDED_LABEL = i18n.translate(
+  'xpack.synthetics.monitorManagement.conditionSharded',
+  {
+    defaultMessage: 'Scalable · condition',
+  }
+);
+
+const CONDITION_SHARDED_WITH_COUNT_LABEL = (count: number) =>
+  i18n.translate('xpack.synthetics.monitorManagement.conditionShardedWithCount', {
+    defaultMessage: 'Scalable · {count, plural, one {# agent} other {# agents}}',
     values: { count },
   });
 
-// Cap how many shard rows we list inline; the rest are summarized as "+N more"
-// and remain visible in the expanded shard-details panel.
-const MAX_VISIBLE_SHARDS = 3;
-
-const HEALTH_LABEL = i18n.translate('xpack.synthetics.monitorManagement.health', {
-  defaultMessage: 'Health',
+const EXPAND_ROW_LABEL = i18n.translate('xpack.synthetics.monitorManagement.expandRow', {
+  defaultMessage: 'Expand per-agent stats',
 });
 
-const HEALTHY_SHARDS_RATIO = (healthy: number, total: number) =>
-  i18n.translate('xpack.synthetics.monitorManagement.healthyShardsRatio', {
-    defaultMessage: '{healthy}/{total} healthy',
-    values: { healthy, total },
-  });
-
-const MONITORS_COUNT_LABEL = (count: number) =>
-  i18n.translate('xpack.synthetics.monitorManagement.shardMonitorsCount', {
-    defaultMessage: '{count, plural, one {# monitor} other {# monitors}}',
-    values: { count },
-  });
-
-const PLUS_MORE_LABEL = (count: number) =>
-  i18n.translate('xpack.synthetics.monitorManagement.plusMoreShards', {
-    defaultMessage: '+{count} more',
-    values: { count },
-  });
+const COLLAPSE_ROW_LABEL = i18n.translate('xpack.synthetics.monitorManagement.collapseRow', {
+  defaultMessage: 'Collapse per-agent stats',
+});
 
 const REFRESH_LABEL = i18n.translate('xpack.synthetics.monitorManagement.refresh', {
   defaultMessage: 'Refresh',
@@ -562,19 +479,5 @@ const RESET_MONITORS_LABEL = i18n.translate(
   'xpack.synthetics.settingsRoute.privateLocations.resetMonitors',
   {
     defaultMessage: 'Reset monitors',
-  }
-);
-
-const EXPAND_ROW_LABEL = i18n.translate(
-  'xpack.synthetics.settingsRoute.privateLocations.expandRow',
-  {
-    defaultMessage: 'Expand shard details',
-  }
-);
-
-const COLLAPSE_ROW_LABEL = i18n.translate(
-  'xpack.synthetics.settingsRoute.privateLocations.collapseRow',
-  {
-    defaultMessage: 'Collapse shard details',
   }
 );

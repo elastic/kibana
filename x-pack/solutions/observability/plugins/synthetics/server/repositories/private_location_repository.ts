@@ -8,7 +8,6 @@ import { i18n } from '@kbn/i18n';
 import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
 import { isEmpty } from 'lodash';
 import { getAgentPoliciesAsInternalUser } from '../routes/settings/private_locations/get_agent_policies';
-import { getShardPool } from '../synthetics_service/private_location/assign_shards';
 import type { PrivateLocationAttributes } from '../runtime_types/private_locations';
 import type { PrivateLocationObject } from '../routes/settings/private_locations/add_private_location';
 import type { RouteContext } from '../routes/types';
@@ -95,15 +94,14 @@ export class PrivateLocationRepository {
       spaces: loc.attributes.spaces || loc.namespaces,
     }));
 
-    // POC: scalable private locations declare a pool of agent policies (shards),
-    // so the "one agent policy per location" uniqueness check doesn't apply.
-    const isScalable = (location.agentPolicyIds?.length ?? 0) > 1;
-
+    // A scalable (condition-sharded) location still uses a single agent policy
+    // with many agents, so the "one agent policy per location" uniqueness check
+    // applies here too.
     const locWithAgentPolicyId = locations.find(
       (loc) => loc.agentPolicyId === location.agentPolicyId
     );
 
-    if (!isScalable && locWithAgentPolicyId) {
+    if (locWithAgentPolicyId) {
       errorMessages = i18n.translate(
         'xpack.synthetics.privateLocations.create.errorMessages.policyExists',
         {
@@ -128,17 +126,9 @@ export class PrivateLocationRepository {
       );
     }
 
-    // Validate every shard in the pool exists, not just the primary — a scalable
-    // location that points at a missing policy would silently shard monitors onto
-    // a non-existent shard.
-    const poolIds = getShardPool(location);
-    const missingPolicyIds = poolIds.filter(
-      (id) => !agentPolicies?.some((policy) => policy.id === id)
-    );
-    if (missingPolicyIds.length > 0) {
-      errorMessages = `Agent ${
-        missingPolicyIds.length > 1 ? 'policies' : 'policy'
-      } with id ${missingPolicyIds.join(', ')} does not exist`;
+    // Validate the location's agent policy exists.
+    if (!agentPolicies?.some((policy) => policy.id === location.agentPolicyId)) {
+      errorMessages = `Agent policy with id ${location.agentPolicyId} does not exist`;
     }
     if (errorMessages) {
       return response.badRequest({

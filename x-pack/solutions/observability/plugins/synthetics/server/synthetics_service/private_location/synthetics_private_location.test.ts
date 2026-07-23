@@ -16,6 +16,7 @@ import {
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import { SyntheticsPrivateLocation } from './synthetics_private_location';
 import { assignShard } from './assign_shards';
+import { hostNameCondition } from './assign_by_condition';
 import { testMonitorPolicy } from './test_policy';
 import { formatSyntheticsPolicy } from '../formatters/private_formatters/format_synthetics_policy';
 import { handleMultilineStringFormatter } from '../formatters/formatting_utils';
@@ -466,38 +467,34 @@ describe('SyntheticsPrivateLocation', () => {
 
   describe('rebalanceShards', () => {
     const LOCATION_ID = 'loc1';
-    const makePkgPolicy = (monitorId: string, shardId: string): PackagePolicy =>
+    const AGENT_POLICY = 'ap1';
+    // A package policy pinned to the single agent policy, optionally carrying a
+    // host.name condition (undefined = unassigned, runs on every agent).
+    const makePkgPolicy = (monitorId: string, host?: string): PackagePolicy =>
       ({
         id: `${monitorId}-${LOCATION_ID}`,
         name: monitorId,
         namespace: 'default',
         enabled: true,
         is_managed: true,
-        policy_id: shardId,
-        policy_ids: [shardId],
+        policy_id: AGENT_POLICY,
+        policy_ids: [AGENT_POLICY],
+        condition: host ? hostNameCondition(host) : undefined,
         spaceIds: ['default'],
         inputs: [],
         package: { name: 'synthetics', version: '1.0.0', title: 'Synthetics' },
       } as unknown as PackagePolicy);
 
-    // Mimics fleet's package policy list: honours the `policy_ids` kuery so the
-    // rebalance's counts-only snapshot and targeted (per-shard) fetches behave
-    // like the real service instead of always returning every item.
+    // Condition-mode always lists every package policy for the location (the
+    // service filters by the `-${locationId}` id suffix), so the list mock just
+    // returns the seeded items.
     const makeServer = (items: PackagePolicy[], bulkUpdate: jest.Mock) => {
-      const list = jest.fn(
-        async (_soClient: unknown, { kuery, perPage }: { kuery: string; perPage: number }) => {
-          const multi = kuery.match(/policy_ids:\(([^)]+)\)/);
-          const single = kuery.match(/policy_ids:"([^"]+)"/);
-          let filtered = items;
-          if (multi) {
-            const shards = multi[1].split(' or ').map((s) => s.replace(/"/g, '').trim());
-            filtered = items.filter((it) => shards.includes((it.policy_ids ?? [])[0]));
-          } else if (single) {
-            filtered = items.filter((it) => (it.policy_ids ?? [])[0] === single[1]);
-          }
-          return { items: filtered, total: filtered.length, page: 1, perPage };
-        }
-      );
+      const list = jest.fn(async (_soClient: unknown, { perPage }: { perPage: number }) => ({
+        items,
+        total: items.length,
+        page: 1,
+        perPage,
+      }));
 
       return {
         ...serverMock,
@@ -513,126 +510,198 @@ describe('SyntheticsPrivateLocation', () => {
     };
 
     const monitorIds = Array.from({ length: 20 }, (_, i) => `m${i + 1}`);
+    const hostOf = (pp: PackagePolicy): string | undefined =>
+      (pp.condition as string | undefined)?.match(/'([^']+)'/)?.[1];
 
-    it('performs zero writes when every monitor is already on its assigned healthy shard', async () => {
-      const shards = ['s1', 's2', 's3'];
-      const items = monitorIds.map((m) => makePkgPolicy(m, assignShard(m, shards)!));
+    it('performs zero writes when every monitor is already on its assigned healthy agent', async () => {
+      const hosts = ['h1', 'h2', 'h3'];
+      const items = monitorIds.map((m) => makePkgPolicy(m, assignShard(m, hosts)!));
       const bulkUpdate = jest.fn().mockResolvedValue({ failedPolicies: [] });
 
       const spl = new SyntheticsPrivateLocation(makeServer(items, bulkUpdate));
       const result = await spl.rebalanceShards({
-        location: { id: LOCATION_ID, agentPolicyIds: shards },
-        healthyShards: shards,
+        location: { id: LOCATION_ID },
+        healthyHosts: hosts,
       });
 
       expect(result).toEqual({ total: monitorIds.length, moved: 0 });
       expect(bulkUpdate).not.toHaveBeenCalled();
     });
 
-    it('moves only monitors whose assigned shard changed when a shard goes offline', async () => {
-      const allShards = ['s1', 's2', 's3'];
-      const healthyShards = ['s1', 's2']; // s3 offline
-      const items = monitorIds.map((m) => makePkgPolicy(m, assignShard(m, allShards)!));
+    it('moves only monitors whose assigned agent changed when an agent goes offline', async () => {
+      const allHosts = ['h1', 'h2', 'h3'];
+      const healthyHosts = ['h1', 'h2']; // h3 offline
+      const items = monitorIds.map((m) => makePkgPolicy(m, assignShard(m, allHosts)!));
       const bulkUpdate = jest.fn().mockResolvedValue({ failedPolicies: [] });
 
       const expectedMovers = monitorIds.filter(
-        (m) => assignShard(m, allShards) !== assignShard(m, healthyShards)
+        (m) => assignShard(m, allHosts) !== assignShard(m, healthyHosts)
       );
       expect(expectedMovers.length).toBeGreaterThan(0); // sanity: the scenario actually moves work
 
       const spl = new SyntheticsPrivateLocation(makeServer(items, bulkUpdate));
       const result = await spl.rebalanceShards({
-        location: { id: LOCATION_ID, label: 'Test Location', agentPolicyIds: allShards },
-        healthyShards,
+        location: { id: LOCATION_ID, label: 'Test Location' },
+        healthyHosts,
       });
 
       expect(result).toEqual({ total: monitorIds.length, moved: expectedMovers.length });
 
-      // Only the movers were written, each re-targeted to its rendezvous shard.
+      // Only the movers were written, each re-conditioned to its rendezvous host.
       const updated = bulkUpdate.mock.calls.flatMap((call) => call[2] as PackagePolicy[]);
       expect(updated.map((p) => p.id).sort()).toEqual(
         expectedMovers.map((m) => `${m}-${LOCATION_ID}`).sort()
       );
       updated.forEach((p) => {
         const monitorId = p.name;
-        expect(p.policy_ids).toEqual([assignShard(monitorId, healthyShards)]);
-        expect(p.policy_id).toEqual(assignShard(monitorId, healthyShards));
+        expect(p.condition).toBe(hostNameCondition(assignShard(monitorId, healthyHosts)!));
+        // The single-policy binding is preserved.
+        expect(p.policy_ids).toEqual([AGENT_POLICY]);
       });
     });
 
-    it('re-targets every monitor when its shard is offline and the healthy shards are empty', async () => {
-      const allShards = ['s1', 's2', 's3'];
-      const healthyShards = ['s1', 's2'];
-      // All monitors currently pinned to the offline shard; healthy shards empty
+    it('re-conditions every monitor when its agent is offline and the healthy agents are empty', async () => {
+      const healthyHosts = ['h1', 'h2'];
+      // All monitors currently pinned to an offline host; healthy hosts empty
       // → recovery path (full scan) pulls work back onto them.
-      const items = monitorIds.map((m) => makePkgPolicy(m, 's3'));
+      const items = monitorIds.map((m) => makePkgPolicy(m, 'h3'));
       const bulkUpdate = jest.fn().mockResolvedValue({ failedPolicies: [] });
 
       const spl = new SyntheticsPrivateLocation(makeServer(items, bulkUpdate));
       const result = await spl.rebalanceShards({
-        location: { id: LOCATION_ID, agentPolicyIds: allShards },
-        healthyShards,
+        location: { id: LOCATION_ID },
+        healthyHosts,
       });
 
       expect(result.moved).toBe(monitorIds.length);
       const updated = bulkUpdate.mock.calls.flatMap((call) => call[2] as PackagePolicy[]);
       updated.forEach((p) => {
-        expect(healthyShards).toContain(p.policy_ids![0]);
+        expect(healthyHosts).toContain(hostOf(p));
       });
     });
 
-    it('fetches only the offline shard when healthy shards already hold work', async () => {
-      const allShards = ['s1', 's2', 's3'];
-      const healthyShards = ['s1', 's2'];
-      const items = monitorIds.map((m) => makePkgPolicy(m, assignShard(m, allShards)!));
-      const bulkUpdate = jest.fn().mockResolvedValue({ failedPolicies: [] });
-
-      const server = makeServer(items, bulkUpdate);
-      const spl = new SyntheticsPrivateLocation(server);
-      await spl.rebalanceShards({
-        location: { id: LOCATION_ID, agentPolicyIds: allShards },
-        healthyShards,
-      });
-
-      // Failover path must never do the full-location scan (a kuery without a
-      // policy_ids filter); it only queries per-shard counts + the stale shard.
-      const listCalls = (server.fleet.packagePolicyService.list as jest.Mock).mock.calls;
-      expect(listCalls.every(([, { kuery }]) => kuery.includes('policy_ids'))).toBe(true);
-    });
-
-    it('does not redistribute onto a healthy shard that is not yet recovery-eligible', async () => {
-      const shards = ['s1', 's2', 's3'];
-      // All work currently on s1/s2; s3 is healthy but freshly recovered (empty)
-      // and excluded from recovery by the hysteresis window.
-      const items = monitorIds.map((m) => makePkgPolicy(m, assignShard(m, ['s1', 's2'])!));
+    it('assigns unconditioned monitors onto a healthy agent', async () => {
+      const healthyHosts = ['h1', 'h2', 'h3'];
+      // Monitors created before any agent enrolled carry no condition.
+      const items = monitorIds.map((m) => makePkgPolicy(m, undefined));
       const bulkUpdate = jest.fn().mockResolvedValue({ failedPolicies: [] });
 
       const spl = new SyntheticsPrivateLocation(makeServer(items, bulkUpdate));
       const result = await spl.rebalanceShards({
-        location: { id: LOCATION_ID, agentPolicyIds: shards },
-        healthyShards: shards,
-        recoveryShards: ['s1', 's2'],
+        location: { id: LOCATION_ID },
+        healthyHosts,
+      });
+
+      expect(result.moved).toBe(monitorIds.length);
+      const updated = bulkUpdate.mock.calls.flatMap((call) => call[2] as PackagePolicy[]);
+      updated.forEach((p) => {
+        expect(healthyHosts).toContain(hostOf(p));
+      });
+    });
+
+    it('does not redistribute onto a healthy agent that is not yet recovery-eligible', async () => {
+      const hosts = ['h1', 'h2', 'h3'];
+      // All work currently on h1/h2; h3 is healthy but freshly recovered (empty)
+      // and excluded from recovery by the hysteresis window.
+      const items = monitorIds.map((m) => makePkgPolicy(m, assignShard(m, ['h1', 'h2'])!));
+      const bulkUpdate = jest.fn().mockResolvedValue({ failedPolicies: [] });
+
+      const spl = new SyntheticsPrivateLocation(makeServer(items, bulkUpdate));
+      const result = await spl.rebalanceShards({
+        location: { id: LOCATION_ID },
+        healthyHosts: hosts,
+        recoveryHosts: ['h1', 'h2'],
       });
 
       expect(result.moved).toBe(0);
       expect(bulkUpdate).not.toHaveBeenCalled();
     });
 
-    it('redistributes onto a recovered shard once it becomes recovery-eligible', async () => {
-      const shards = ['s1', 's2', 's3'];
-      const items = monitorIds.map((m) => makePkgPolicy(m, assignShard(m, ['s1', 's2'])!));
+    it('redistributes onto a recovered agent once it becomes recovery-eligible', async () => {
+      const hosts = ['h1', 'h2', 'h3'];
+      const items = monitorIds.map((m) => makePkgPolicy(m, assignShard(m, ['h1', 'h2'])!));
       const bulkUpdate = jest.fn().mockResolvedValue({ failedPolicies: [] });
 
       const spl = new SyntheticsPrivateLocation(makeServer(items, bulkUpdate));
       const result = await spl.rebalanceShards({
-        location: { id: LOCATION_ID, agentPolicyIds: shards },
-        healthyShards: shards,
-        recoveryShards: shards,
+        location: { id: LOCATION_ID },
+        healthyHosts: hosts,
+        recoveryHosts: hosts,
       });
 
       expect(result.moved).toBeGreaterThan(0);
       const updated = bulkUpdate.mock.calls.flatMap((call) => call[2] as PackagePolicy[]);
-      expect(updated.some((p) => p.policy_ids?.[0] === 's3')).toBe(true);
+      expect(updated.some((p) => hostOf(p) === 'h3')).toBe(true);
+    });
+  });
+
+  describe('generateNewPolicy (condition-sharding)', () => {
+    const conditionLocation = {
+      id: 'cond-loc',
+      label: 'Condition Location',
+      agentPolicyId: 'single-policy',
+      isServiceManaged: false,
+      agentConditionSharding: true,
+    } as unknown as PrivateLocationAttributes;
+
+    it('pins to the single agent policy and stamps a host.name condition for the assigned agent', async () => {
+      const spl = new SyntheticsPrivateLocation(serverMock);
+      const hosts = ['host-a', 'host-b', 'host-c'];
+
+      const policy = await spl.generateNewPolicy(
+        testConfig,
+        conditionLocation,
+        testMonitorPolicy as any,
+        'default',
+        {},
+        [],
+        undefined,
+        undefined,
+        hosts
+      );
+
+      const assigned = assignShard(testConfig.id, hosts)!;
+      expect(policy?.policy_id).toBe('single-policy');
+      expect(policy?.policy_ids).toEqual(['single-policy']);
+      expect(policy?.condition).toBe(`\${host.name} == '${assigned}'`);
+    });
+
+    it('leaves the monitor unconditioned when no agents are enrolled yet', async () => {
+      const spl = new SyntheticsPrivateLocation(serverMock);
+
+      const policy = await spl.generateNewPolicy(
+        testConfig,
+        conditionLocation,
+        testMonitorPolicy as any,
+        'default',
+        {},
+        [],
+        undefined,
+        undefined,
+        []
+      );
+
+      expect(policy?.policy_ids).toEqual(['single-policy']);
+      expect(policy?.condition).toBeNull();
+    });
+
+    it('ignores condition sharding for classic locations (keeps shard/single-policy binding)', async () => {
+      const spl = new SyntheticsPrivateLocation(serverMock);
+
+      const policy = await spl.generateNewPolicy(
+        testConfig,
+        mockPrivateLocation as unknown as PrivateLocationAttributes,
+        testMonitorPolicy as any,
+        'default',
+        {},
+        [],
+        undefined,
+        undefined,
+        ['host-a', 'host-b']
+      );
+
+      expect(policy?.policy_ids).toEqual(['policyId']);
+      expect(policy?.condition).toBeUndefined();
     });
   });
 

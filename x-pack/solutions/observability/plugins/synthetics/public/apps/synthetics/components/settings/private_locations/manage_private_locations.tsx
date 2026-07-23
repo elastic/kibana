@@ -30,11 +30,6 @@ import type { ClientPluginsStart } from '../../../../../plugin';
 
 const getEmptyFunctionComponent: React.FC<SpacesContextProps> = ({ children }) => <>{children}</>;
 
-const toShardPool = (loc: { agentPolicyId?: string; agentPolicyIds?: string[] }): string[] => {
-  const pool = loc.agentPolicyIds?.filter(Boolean) ?? [];
-  return pool.length > 0 ? pool : [loc.agentPolicyId].filter((id): id is string => Boolean(id));
-};
-
 export const ManagePrivateLocations = () => {
   const dispatch = useDispatch();
   const { services } = useKibana<ClientPluginsStart>();
@@ -74,16 +69,18 @@ export const ManagePrivateLocations = () => {
     if (privateLocationToEdit) {
       const isLabelChanged = formData.label !== privateLocationToEdit.label;
       const areTagsChanged = !isEqual(formData.tags, privateLocationToEdit.tags);
-      const existingPool = toShardPool(privateLocationToEdit);
-      const newPool = toShardPool(formData);
-      const isPoolChanged = !isEqual(existingPool, newPool);
-      if (!isLabelChanged && !areTagsChanged && !isPoolChanged) {
+      const isConditionShardingChanged =
+        Boolean(formData.agentConditionSharding) !==
+        Boolean(privateLocationToEdit.agentConditionSharding);
+      if (!isLabelChanged && !areTagsChanged && !isConditionShardingChanged) {
         onCloseFlyout();
       } else {
         onEditLocationAPI(privateLocationToEdit.id, {
           label: formData.label,
           tags: formData.tags,
-          ...(isPoolChanged ? { agentPolicyId: newPool[0], agentPolicyIds: newPool } : {}),
+          ...(isConditionShardingChanged
+            ? { agentConditionSharding: Boolean(formData.agentConditionSharding) }
+            : {}),
         });
       }
     } else {

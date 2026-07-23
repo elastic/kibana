@@ -13,9 +13,7 @@ import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
 import { getPrivateLocations } from '../../../synthetics_service/get_private_locations';
-import { getShardPool } from '../../../synthetics_service/private_location/assign_shards';
 import { runRebalanceShardsTaskSoon } from '../../../tasks/rebalance_private_location_shards_task';
-import { getAgentPoliciesAsInternalUser } from './get_agent_policies';
 import type { PrivateLocationAttributes } from '../../../runtime_types/private_locations';
 import { PrivateLocationRepository } from '../../../repositories/private_location_repository';
 import { PRIVATE_LOCATION_WRITE_API } from '../../../feature';
@@ -33,13 +31,10 @@ const EditPrivateLocationSchema = schema.object({
     })
   ),
   tags: schema.maybe(schema.arrayOf(schema.string())),
-  // POC: scalable private locations shard monitors across a pool of agent
-  // policies. `agentPolicyId` remains the primary/first shard for backwards
-  // compatibility (spaces filtering, classic single-shard locations).
   agentPolicyId: schema.maybe(schema.string({ maxLength: 1024 })),
-  agentPolicyIds: schema.maybe(
-    schema.arrayOf(schema.string({ maxLength: 1024 }), { maxSize: 100 })
-  ),
+  // Scalable private location: single agent policy + many agents, sharded via a
+  // per-monitor host.name condition for at-most-once execution.
+  agentConditionSharding: schema.maybe(schema.boolean()),
 });
 
 const EditPrivateLocationQuery = schema.object({
@@ -128,7 +123,7 @@ export const editPrivateLocationRoute: SyntheticsRestApiRouteFactory<
     const {
       label: newLocationLabel,
       tags: newTags,
-      agentPolicyIds: newAgentPolicyIds,
+      agentConditionSharding: newConditionSharding,
     } = request.body;
 
     const repo = new PrivateLocationRepository(routeContext);
@@ -145,42 +140,11 @@ export const editPrivateLocationRoute: SyntheticsRestApiRouteFactory<
         }),
       ]);
 
-      const existingPool = getShardPool(existingLocation.attributes);
-      const requestedPool = newAgentPolicyIds?.filter(Boolean);
-      const isPoolChanged = requestedPool !== undefined && !isEqual(existingPool, requestedPool);
-
-      if (isPoolChanged && requestedPool!.length === 0) {
-        return response.badRequest({
-          body: {
-            message: i18n.translate('xpack.synthetics.editPrivateLocation.emptyPool', {
-              defaultMessage: 'A private location must have at least one agent policy.',
-            }),
-          },
-        });
-      }
-
-      // Reject a pool that references agent policies that don't exist, otherwise
-      // monitors would be sharded onto a non-existent shard and silently fail.
-      if (isPoolChanged) {
-        const agentPolicies = await getAgentPoliciesAsInternalUser({
-          server: routeContext.server,
-          spaceId: routeContext.spaceId,
-        });
-        const missingPolicyIds = requestedPool!.filter(
-          (id) => !agentPolicies?.some((policy) => policy.id === id)
-        );
-        if (missingPolicyIds.length > 0) {
-          return response.badRequest({
-            body: {
-              message: i18n.translate('xpack.synthetics.editPrivateLocation.missingAgentPolicies', {
-                defaultMessage:
-                  'Agent {count, plural, one {policy} other {policies}} with id {ids} does not exist.',
-                values: { count: missingPolicyIds.length, ids: missingPolicyIds.join(', ') },
-              }),
-            },
-          });
-        }
-      }
+      // Toggling condition sharding changes how monitors bind to agents (adds or
+      // removes the per-monitor host.name condition), so it must re-sync monitors.
+      const isConditionShardingChanged =
+        newConditionSharding !== undefined &&
+        newConditionSharding !== Boolean(existingLocation.attributes.agentConditionSharding);
 
       const labelChanged = isPrivateLocationLabelChanged(
         existingLocation.attributes.label,
@@ -191,12 +155,12 @@ export const editPrivateLocationRoute: SyntheticsRestApiRouteFactory<
 
       if (
         isPrivateLocationChanged({ privateLocation: existingLocation, newParams: request.body }) ||
-        isPoolChanged
+        isConditionShardingChanged
       ) {
-        // Both a label change and a pool change rewrite the monitors in this
-        // location (label denormalization / re-sharding of package policies), so
-        // require monitor bulk-update rights in every affected space for either.
-        if ((labelChanged || isPoolChanged) && monitorsInLocation.length) {
+        // A label or condition-sharding change rewrites the monitors in this
+        // location (label denormalization / (un)stamping host conditions), so
+        // require monitor bulk-update rights in every affected space.
+        if ((labelChanged || isConditionShardingChanged) && monitorsInLocation.length) {
           await checkPrivileges({
             routeContext,
             monitorsSpaces: monitorsInLocation.map(({ namespaces }) => namespaces![0]),
@@ -206,15 +170,13 @@ export const editPrivateLocationRoute: SyntheticsRestApiRouteFactory<
         newLocation = await repo.editPrivateLocation(locationId, {
           label: newLocationLabel || existingLocation.attributes.label,
           tags: newTags || existingLocation.attributes.tags,
-          ...(isPoolChanged
-            ? { agentPolicyId: requestedPool![0], agentPolicyIds: requestedPool }
-            : {}),
+          ...(isConditionShardingChanged ? { agentConditionSharding: newConditionSharding } : {}),
         });
 
-        // Re-sync monitors when the label OR the shard pool changed: the label is
-        // denormalized onto each monitor, and a pool change re-shards the monitors'
-        // package policies across the new pool via rendezvous hashing.
-        if (labelChanged || isPoolChanged) {
+        // Re-sync monitors when the label OR condition sharding changed: the
+        // label is denormalized onto each monitor, and a condition-mode change
+        // re-binds the monitors' package policies.
+        if (labelChanged || isConditionShardingChanged) {
           await updatePrivateLocationMonitors({
             locationId,
             newLocationLabel: newLocationLabel || existingLocation.attributes.label,
@@ -224,10 +186,10 @@ export const editPrivateLocationRoute: SyntheticsRestApiRouteFactory<
           });
         }
 
-        // A pool change can shard monitors onto an offline agent policy; kick the
-        // rebalance task now (instead of waiting up to a scheduled tick) so they
-        // land on a healthy shard promptly. Fire-and-forget: it retries internally.
-        if (isPoolChanged) {
+        // Enabling condition sharding assigns monitors to agents via rendezvous,
+        // so one may land on a currently-offline agent; kick the rebalance task
+        // now so it moves onto a healthy agent promptly. Fire-and-forget.
+        if (isConditionShardingChanged && newConditionSharding) {
           void runRebalanceShardsTaskSoon({ server: routeContext.server });
         }
       }

@@ -6,19 +6,19 @@
  */
 
 import { useEffect, useMemo, useState } from 'react';
-import type { LocationShardStats } from '../../../../../../../server/routes/settings/private_locations/get_shard_stats';
-import { getPrivateLocationShardStats } from '../../../../state/private_locations/api';
+import type { LocationAgentStats } from '../../../../../../../server/routes/settings/private_locations/get_agent_stats';
+import { getPrivateLocationAgentStats } from '../../../../state/private_locations/api';
 import { useSyntheticsRefreshContext } from '../../../../contexts';
 
-export const useShardStats = () => {
-  const [data, setData] = useState<LocationShardStats[]>([]);
+export const useAgentStats = () => {
+  const [data, setData] = useState<LocationAgentStats[]>([]);
   const [loading, setLoading] = useState(false);
   const { lastRefresh } = useSyntheticsRefreshContext();
 
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
-    getPrivateLocationShardStats()
+    getPrivateLocationAgentStats()
       .then((stats) => {
         if (!cancelled) {
           setData(stats);
@@ -40,7 +40,7 @@ export const useShardStats = () => {
   }, [lastRefresh]);
 
   const byLocation = useMemo(() => {
-    const map = new Map<string, LocationShardStats>();
+    const map = new Map<string, LocationAgentStats>();
     data.forEach((entry) => map.set(entry.locationId, entry));
     return map;
   }, [data]);
