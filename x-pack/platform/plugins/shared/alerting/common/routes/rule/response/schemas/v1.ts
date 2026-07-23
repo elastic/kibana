@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { ruleParamsSchemaV1 } from '@kbn/response-ops-rule-params';
-import { rRuleResponseSchemaV1 } from '../../../r_rule';
+import { rRuleResponseSchemaV1 } from '@kbn/response-ops-schedule-schema';
 import { alertsFilterQuerySchemaV1 } from '../../../alerts_filter_query';
 import {
   MAX_SNOOZED_INSTANCE_CONDITIONS,

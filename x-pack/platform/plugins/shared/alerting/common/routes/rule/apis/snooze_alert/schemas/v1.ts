@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { ISO_DATE_REGEX } from '../../../../schedule/constants';
+import { ISO_DATE_REGEX } from '@kbn/response-ops-schedule-schema';
 import {
   MAX_ID_LENGTH,
   MAX_SNOOZED_INSTANCE_CONDITIONS,
