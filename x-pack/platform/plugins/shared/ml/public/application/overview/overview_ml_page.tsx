@@ -42,6 +42,7 @@ import { useEnabledFeatures } from '../contexts/ml';
 import { DataVisualizerGrid } from './data_visualizer_grid';
 import { OverviewFooterItem } from './components/overview_ml_footer_item';
 import { usePermissionCheck } from '../capabilities/check_capabilities';
+import { DatePicker } from '../components/ml_page/date_picker';
 
 export const useOverviewPageCustomCss = () => {
   const {
@@ -142,16 +143,21 @@ export const OverviewPage: FC = () => {
         title={i18n.translate('xpack.ml.overview.welcomeBanner.header.title', {
           defaultMessage: 'Machine Learning',
         })}
-        showDatePicker
       />
       <EuiPageBody restrictWidth={1200}>
+        <EuiFlexGroup justifyContent="flexEnd">
+          <EuiFlexItem grow={false}>
+            <DatePicker />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer size="l" />
         <UpgradeWarning />
         <EuiFlexGroup gutterSize="m" direction="column">
           {isADEnabled || isDFAEnabled ? (
             <>
               <EuiFlexGroup direction="column">
                 <EuiFlexItem>
-                  <EuiTitle size="m">
+                  <EuiTitle size="s">
                     <h2>
                       {i18n.translate('xpack.ml.overview.analyzeYourDataTitle', {
                         defaultMessage: 'Analyze your data',
@@ -181,7 +187,7 @@ export const OverviewPage: FC = () => {
           {canUseAiops ? (
             <>
               <EuiFlexGroup direction="column">
-                <EuiTitle size="m">
+                <EuiTitle size="s">
                   <h2>
                     {i18n.translate('xpack.ml.overview.aiopsLabsTitle', {
                       defaultMessage: 'Surface insights',
@@ -318,7 +324,7 @@ export const OverviewPage: FC = () => {
             </>
           ) : null}
           <EuiFlexGroup direction="column">
-            <EuiTitle size="m">
+            <EuiTitle size="s">
               <h2>
                 {i18n.translate('xpack.ml.overview.visualizeYourDataTitle', {
                   defaultMessage: 'Visualize your data',

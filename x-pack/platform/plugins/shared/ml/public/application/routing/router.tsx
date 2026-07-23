@@ -43,7 +43,6 @@ export interface MlRoute {
   /**
    * Indicated if page contains a global date picker.
    */
-  enableDatePicker?: boolean;
   'data-test-subj'?: string;
   actionMenu?: React.ReactNode;
   disabled?: boolean;
