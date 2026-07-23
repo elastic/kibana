@@ -164,7 +164,9 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({ isCrawler }) => 
               anchorProps={tooltipAncherProps}
               content={getRunningJobsTooltip(inProgressCount, isCrawler)}
             >
-              <EuiBadge tabIndex={0}>{getRunningJobsBadgeLabel(inProgressCount, isCrawler)}</EuiBadge>
+              <EuiBadge tabIndex={0}>
+                {getRunningJobsBadgeLabel(inProgressCount, isCrawler)}
+              </EuiBadge>
             </EuiToolTip>
 
             {!isCrawler && (

@@ -317,7 +317,10 @@ export const useCasesColumns = ({
             if (isAlreadyAttached) {
               return (
                 <EuiToolTip content={i18n.ALREADY_ATTACHED_TOOLTIP}>
-                  <span tabIndex={0} data-test-subj={`cases-table-row-select-tooltip-${theCase.id}`}>
+                  <span
+                    tabIndex={0}
+                    data-test-subj={`cases-table-row-select-tooltip-${theCase.id}`}
+                  >
                     {selectButton}
                   </span>
                 </EuiToolTip>
