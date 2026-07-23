@@ -12,11 +12,11 @@ import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { getCustomQueryRuleParams, importRules } from '../../../utils';
 
 /**
- * Scale regression guard at the import size cap. Runs under a dedicated FTR
- * config (long mocha timeout). Expect this to be slow or flaky on the legacy
- * per-rule import path — that is the point of putting it on the pipeline.
+ * Scale regression guard well above import chunk size. Dedicated long-timeout
+ * config. Legacy path may be slow/flaky — intentional. Stays under the
+ * exclusive 10000 cap (`createRulesLimitStream` rejects at `>= 10000`).
  */
-const RULE_COUNT = 10000;
+const RULE_COUNT = 8000;
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');

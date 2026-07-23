@@ -18,7 +18,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ...functionalConfig.get('kbnTestServer'),
       serverArgs: [
         ...functionalConfig.get('kbnTestServer.serverArgs'),
-        // Headroom over the default 10MB; 10k compact rules are ~3MB today.
+        // Headroom over the default 10MB; large compact imports are a few MB.
         '--xpack.securitySolution.maxRuleImportPayloadBytes=20971520',
       ],
     },
