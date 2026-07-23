@@ -171,6 +171,27 @@ export function getMlClient(
     }
   }
 
+  /**
+   * Check to see if the supplied deployment IDs are also being used as model IDs.
+   * If they are, then check to see if the user has access to the model in the current space.
+   * This is needed to avoid a situation where a user supplies a deployment ID that is also being used as a model ID,
+   * and the user does not have access to the model in the current space.
+   */
+  async function deploymentIdsCheck(p: MlClientParams, allowWildcards: boolean = false) {
+    const deploymentIds = filterAll(getDeploymentIdsFromRequest(p));
+    if (deploymentIds.length === 0) {
+      return;
+    }
+
+    const models = await mlSavedObjectService.getAllTrainedModelObjectsForAllSpaces(deploymentIds);
+    const existingModelIds = new Set(models.map((m) => m.attributes.model_id));
+    const knownDeploymentIds = deploymentIds.filter((id) => existingModelIds.has(id));
+
+    if (knownDeploymentIds.length) {
+      await checkModelIds(knownDeploymentIds, allowWildcards);
+    }
+  }
+
   // @ts-expect-error promise and TransportRequestPromise are incompatible. missing abort
   return {
     async closeJob(...p: Parameters<MlClient['closeJob']>) {
@@ -575,6 +596,7 @@ export function getMlClient(
     },
     async stopTrainedModelDeployment(...p: Parameters<MlClient['stopTrainedModelDeployment']>) {
       await modelIdsCheck(p);
+      await deploymentIdsCheck(p);
       switchDeploymentId(p);
 
       return auditLogger.wrapTask(
@@ -585,6 +607,7 @@ export function getMlClient(
     },
     async inferTrainedModel(...p: Parameters<MlClient['inferTrainedModel']>) {
       await modelIdsCheck(p);
+      await deploymentIdsCheck(p);
       switchDeploymentId(p);
       // Temporary workaround for the incorrect inferTrainedModelDeployment function in the esclient
       if (
@@ -769,6 +792,15 @@ export function getDFAJobIdsFromRequest([params]: MlGetDFAParams): string[] {
 
 export function getModelIdsFromRequest([params]: MlGetTrainedModelParams): string[] {
   const id = params?.model_id;
+  const ids = Array.isArray(id) ? id : id?.split(',');
+  return ids || [];
+}
+
+export function getDeploymentIdsFromRequest([params]: MlClientParams): string[] {
+  const id =
+    params && 'deployment_id' in params
+      ? (params as { deployment_id?: string | string[] }).deployment_id
+      : undefined;
   const ids = Array.isArray(id) ? id : id?.split(',');
   return ids || [];
 }
