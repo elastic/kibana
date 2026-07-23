@@ -6,7 +6,11 @@
  */
 
 import { each } from 'lodash';
-import type { EndpointRunScriptActionRequestParams } from '../../../../common/api/endpoint';
+import type {
+  EndpointRunScriptActionRequestParams,
+  KillProcessRequestBody,
+  SuspendProcessRequestBody,
+} from '../../../../common/api/endpoint';
 import { EndpointError } from '../../../../common/endpoint/errors';
 import { stringify } from '../../../endpoint/utils/stringify';
 import type {
@@ -21,11 +25,7 @@ import {
 } from './utils';
 import type { AlertsAction, ResponseActionAlerts } from './types';
 import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
-import type {
-  AutomatedRunScriptConfig,
-  ResponseActionParametersWithEntityId,
-  ResponseActionParametersWithPid,
-} from '../../../../common/endpoint/types';
+import type { AutomatedRunScriptConfig } from '../../../../common/endpoint/types';
 
 export const endpointResponseAction = async (
   responseAction: RuleResponseEndpointAction,
@@ -126,23 +126,29 @@ export const endpointResponseAction = async (
                 )}`
               );
 
-              return responseActionsClient[
-                command === 'kill-process' ? 'killProcess' : 'suspendProcess'
-              ](
-                {
-                  comment,
-                  endpoint_ids,
-                  alert_ids,
-                  parameters: parameters as
-                    | ResponseActionParametersWithPid
-                    | ResponseActionParametersWithEntityId,
-                },
-                {
-                  hosts,
-                  ruleId,
-                  ruleName,
-                  error,
-                }
+              const requestBody = {
+                comment,
+                endpoint_ids,
+                alert_ids,
+                parameters,
+              };
+              const requestOptions = {
+                hosts,
+                ruleId,
+                ruleName,
+                error,
+              };
+
+              return (
+                command === 'kill-process'
+                  ? responseActionsClient.killProcess(
+                      requestBody as KillProcessRequestBody,
+                      requestOptions
+                    )
+                  : responseActionsClient.suspendProcess(
+                      requestBody as SuspendProcessRequestBody,
+                      requestOptions
+                    )
               ).catch((err) => {
                 return processResponseActionClientError(err, endpoint_ids);
               });

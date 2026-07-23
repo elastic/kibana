@@ -259,12 +259,16 @@ export interface ResponseActionParametersWithPid {
   pid: number;
   entity_id?: never;
   process_name?: never;
+  /** Also terminate the descendent (child) processes. Valid for `endpoint` agent type only. */
+  kill_descendants?: boolean;
 }
 
 export interface ResponseActionParametersWithEntityId {
   pid?: never;
   process_name?: never;
   entity_id: string;
+  /** Also terminate the descendent (child) processes. Valid for `endpoint` agent type only. */
+  kill_descendants?: boolean;
 }
 
 export interface ResponseActionParametersWithProcessName {
