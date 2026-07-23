@@ -16,7 +16,7 @@ import { MlProjectPickerPanel } from '@kbn/ml-cps';
 import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
 import type { FinderAttributes, SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
 import { isEsqlSavedSearch, type DiscoverSessionFinderAttributes } from '@kbn/discover-utils';
-import { PageTitle } from '../../../../components/page_title';
+import { MlAppHeader } from '../../../../components/ml_app_header';
 import { CreateDataViewButton } from '../../../../components/create_data_view_button';
 import {
   useMlKibana,
@@ -101,17 +101,14 @@ export const Page: FC<PageProps> = ({ nextStepPath, extraButtons }) => {
   };
 
   return (
-    <div data-test-subj="mlPageSourceSelection" css={{ maxWidth: '800px', margin: '0 auto' }}>
-      <EuiPageBody>
-        <PageTitle
-          title={
-            <FormattedMessage
-              id="xpack.ml.newJob.wizard.selectDataViewOrSavedSearch"
-              defaultMessage="Select project scope and data source"
-            />
-          }
+    <div data-test-subj="mlPageSourceSelection">
+      <EuiPageBody restrictWidth={1200}>
+        <MlAppHeader
+          title={i18n.translate('xpack.ml.newJob.wizard.selectDataViewOrSavedSearch', {
+            defaultMessage: 'Select data view or saved Discover session',
+          })}
         />
-        <EuiPanel hasShadow={false}>
+        <EuiPanel hasShadow={false} hasBorder>
           {totalProjectCount > 1 && projects ? (
             <>
               <EuiFormRow

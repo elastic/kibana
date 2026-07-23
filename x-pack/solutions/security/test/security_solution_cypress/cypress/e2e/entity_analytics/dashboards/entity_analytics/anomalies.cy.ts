@@ -23,7 +23,8 @@ import {
   waitForAnomaliesToBeLoaded,
 } from '../../../../tasks/entity_analytics';
 
-describe(
+// Failing: See https://github.com/elastic/kibana/issues/279202
+describe.skip(
   'Entity Analytics Dashboard',
   {
     tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
