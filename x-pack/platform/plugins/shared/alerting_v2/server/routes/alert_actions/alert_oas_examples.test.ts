@@ -81,9 +81,9 @@ describe('alert OAS example payloads', () => {
   });
 
   it('keeps bulk request example valid against bulkCreateAlertActionBodySchema', () => {
-    expect(bulkCreateAlertActionBodySchema.safeParse(BULK_CREATE_ALERT_ACTION_REQUEST).success).toBe(
-      true
-    );
+    expect(
+      bulkCreateAlertActionBodySchema.safeParse(BULK_CREATE_ALERT_ACTION_REQUEST).success
+    ).toBe(true);
   });
 
   it('keeps bulk response example valid against bulkCreateAlertActionResponseSchema', () => {
