@@ -4,18 +4,7 @@ Use this format when invoking the Scout Best Practices Reviewer skill directly (
 
 Output **only** the applicable sections below. Use headings and lists (**no tables**). Group issues by priority: `blocker` → `major` → `minor` → `nit`. Omit empty priorities.
 
-## 1. Critical checks
-
-Report any hits from the **Critical checks** workflow in `SKILL.md` here, before ordinary findings. Wrap each one in a GitHub `> [!IMPORTANT]` alert. Omit this section entirely if no critical check was triggered or none produced a hit.
-
-> [!IMPORTANT]
-> **<Critical check name (e.g. Scout custom server config additions)> — <short summary>**
-> - **Explanation**: <1-3 concise, actionable sentences>
-> - **Evidence**: `<file:line>`
-> - **Suggested change**: <Specific change; e.g. move flags to `apiServices.core.settings(...)`>
-> - **Reference**: <doc path/anchor>
-
-## 2. Findings
+## 1. Findings
 
 ### Blocker
 
@@ -45,7 +34,7 @@ Report any hits from the **Critical checks** workflow in `SKILL.md` here, before
   - **Evidence**: `<file:line>`
   - **Suggested change**: <...>
 
-## 3. Migration parity (only if a test migration is detected and action is required)
+## 2. Migration parity (only if a test migration is detected and action is required)
 
 Include this section only when the PR removes/changes FTR tests alongside new/changed Scout specs **and** you found at least one parity issue that requires someone to step in (code change or an explicit de-scope/sign-off decision).
 Do **not** output an FYI parity map. If everything is equivalent (or differences are clearly benign), omit this section.
