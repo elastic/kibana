@@ -147,6 +147,19 @@ describe('registerRenderRoute', () => {
     );
   });
 
+  it('passes timeRange to getESQLResults so ?_tstart/?_tend named params are resolved', async () => {
+    const { router, handler, getStartServices, logger, context, request, response } = buildMocks();
+    registerRenderRoute(router, getStartServices, logger);
+    const timeRange = { from: 'now-7d', to: 'now' };
+    request.body = { ...request.body, timeRange };
+
+    await handler(context, request, response);
+
+    expect(mockGetESQLResults).toHaveBeenCalledWith(
+      expect.objectContaining({ timeRange })
+    );
+  });
+
   it('builds and forwards a range filter when timeField and timeRange are both provided', async () => {
     const { router, handler, getStartServices, logger, context, request, response } = buildMocks();
     registerRenderRoute(router, getStartServices, logger);

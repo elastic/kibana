@@ -74,6 +74,7 @@ export function registerRenderRoute(
           search,
           esqlQuery: boundedQuery,
           filter,
+          timeRange,
         });
         const html = await fillTemplate(
           template,
