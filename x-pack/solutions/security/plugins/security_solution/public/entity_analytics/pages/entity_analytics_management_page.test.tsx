@@ -154,10 +154,10 @@ jest.mock(
 );
 
 jest.mock('../components/entity_analytics_toggle', () => ({
-  EntityAnalyticsToggle: (props: { hasAllRequiredPrivileges: boolean }) => (
+  EntityAnalyticsToggle: (props: { hasEnablementPrivileges: boolean }) => (
     <span
       data-test-subj="mock-entity-analytics-toggle"
-      data-has-all-required={String(props.hasAllRequiredPrivileges)}
+      data-has-enablement-privileges={String(props.hasEnablementPrivileges)}
     >
       {'Entity analytics toggle'}
     </span>
@@ -427,9 +427,10 @@ describe('EntityAnalyticsManagementPage', () => {
     expect(screen.getByTestId('mock-watchlists-tab')).toBeInTheDocument();
   });
 
-  // The toggle enables both the risk score maintainer and the Entity Store in one action, so it is
-  // only enabled when the user holds BOTH privilege sets (an OR would let an install-only user flip
-  // it and then hit a risk engine 500).
+  // Turning the toggle ON enables both the risk score maintainer and the Entity Store in one
+  // action, so enablement requires BOTH privilege sets (an OR would let an install-only user flip
+  // it and then hit a risk engine 500). EntityAnalyticsToggle applies this only to the ON
+  // direction; turning OFF stays available (see entity_analytics_toggle.test.tsx).
   describe('Entity Analytics toggle gating', () => {
     const missingRiskEnginePrivileges = {
       isLoading: false,
@@ -440,7 +441,7 @@ describe('EntityAnalyticsManagementPage', () => {
       },
     };
 
-    it('enables the toggle when the user has both risk engine and entity store install privileges', () => {
+    it('grants enablement when the user has both risk engine and entity store install privileges', () => {
       mockUseMissingRiskEnginePrivileges.mockReturnValue({
         isLoading: false,
         hasAllRequiredPrivileges: true,
@@ -450,24 +451,24 @@ describe('EntityAnalyticsManagementPage', () => {
       });
       render(pageComponent());
       expect(screen.getByTestId('mock-entity-analytics-toggle')).toHaveAttribute(
-        'data-has-all-required',
+        'data-has-enablement-privileges',
         'true'
       );
     });
 
-    it('disables the toggle when the user has entity store install privileges but is missing risk engine privileges', () => {
+    it('denies enablement when the user has entity store install privileges but is missing risk engine privileges', () => {
       mockUseMissingRiskEnginePrivileges.mockReturnValue(missingRiskEnginePrivileges);
       mockUseEntityEnginePrivileges.mockReturnValue({
         data: { has_all_required: false, has_install_permissions: true },
       });
       render(pageComponent());
       expect(screen.getByTestId('mock-entity-analytics-toggle')).toHaveAttribute(
-        'data-has-all-required',
+        'data-has-enablement-privileges',
         'false'
       );
     });
 
-    it('disables the toggle when the user has risk engine privileges but is missing entity store install privileges', () => {
+    it('denies enablement when the user has risk engine privileges but is missing entity store install privileges', () => {
       mockUseMissingRiskEnginePrivileges.mockReturnValue({
         isLoading: false,
         hasAllRequiredPrivileges: true,
@@ -477,7 +478,7 @@ describe('EntityAnalyticsManagementPage', () => {
       });
       render(pageComponent());
       expect(screen.getByTestId('mock-entity-analytics-toggle')).toHaveAttribute(
-        'data-has-all-required',
+        'data-has-enablement-privileges',
         'false'
       );
     });

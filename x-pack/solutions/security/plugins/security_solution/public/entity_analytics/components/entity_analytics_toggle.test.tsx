@@ -90,7 +90,7 @@ describe('EntityAnalyticsErrorPanel', () => {
 
 describe('EntityAnalyticsToggle', () => {
   const defaultProps = {
-    hasAllRequiredPrivileges: true,
+    hasEnablementPrivileges: true,
     isPrivilegesLoading: false,
     selectedSettingsMatchSavedSettings: true,
     onSaveSettings: jest.fn().mockResolvedValue(undefined),
@@ -148,10 +148,10 @@ describe('EntityAnalyticsToggle', () => {
     expect(toggle).toBeDisabled();
   });
 
-  it('disables the switch when privileges are missing', () => {
+  it('disables the switch when enablement privileges are missing and the toggle is off', () => {
     const props = {
       ...defaultProps,
-      hasAllRequiredPrivileges: false,
+      hasEnablementPrivileges: false,
     };
 
     render(<EntityAnalyticsToggle {...props} />, { wrapper: Wrapper });
@@ -159,7 +159,24 @@ describe('EntityAnalyticsToggle', () => {
     expect(toggle).toBeDisabled();
   });
 
-  it('disables the switch when privileges are still loading', () => {
+  // Turning OFF only stops the store (feature-privilege gated server-side), so a user who can no
+  // longer (re-)enable must still be able to disable a running Entity Analytics.
+  it('keeps the switch usable for turning off when enablement privileges are missing', () => {
+    mockUseToggleReturn.status = 'enabled';
+    const props = {
+      ...defaultProps,
+      hasEnablementPrivileges: false,
+    };
+
+    render(<EntityAnalyticsToggle {...props} />, { wrapper: Wrapper });
+    const toggle = screen.getByTestId(ENTITY_ANALYTICS_SWITCH_TEST_ID);
+    expect(toggle).toBeChecked();
+    expect(toggle).not.toBeDisabled();
+    fireEvent.click(toggle);
+    expect(mockToggle).toHaveBeenCalledTimes(1);
+  });
+
+  it('disables the switch when privileges are still loading and the toggle is off', () => {
     const props = {
       ...defaultProps,
       isPrivilegesLoading: true,
@@ -170,13 +187,13 @@ describe('EntityAnalyticsToggle', () => {
     expect(toggle).toBeDisabled();
   });
 
-  it('renders checked and disabled when enabled but privileges are loading', () => {
+  it('keeps an enabled switch usable while privileges are loading', () => {
     mockUseToggleReturn.status = 'enabled';
     const props = { ...defaultProps, isPrivilegesLoading: true };
     render(<EntityAnalyticsToggle {...props} />, { wrapper: Wrapper });
     const toggle = screen.getByTestId(ENTITY_ANALYTICS_SWITCH_TEST_ID);
     expect(toggle).toBeChecked();
-    expect(toggle).toBeDisabled();
+    expect(toggle).not.toBeDisabled();
   });
 
   it('renders unchecked and disabled when status is error', () => {
