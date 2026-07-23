@@ -199,7 +199,9 @@ export class CoreVersionedRoute implements VersionedRoute {
       });
     }
     const validation = extractValidationSchemaFromHandler(handler);
-    this.validateOnRequestValidationError(version, validation);
+    if (typeof handler.options.validate === 'function') {
+      this.validateOnRequestValidationError(version, validation);
+    }
     const onRequestValidationError = validation?.onRequestValidationError;
 
     const { error, ok: kibanaRequest } = validateHapiRequest(hapiRequest, {
