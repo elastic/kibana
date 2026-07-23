@@ -20,11 +20,9 @@ import { routeDefinitionParamsMock } from '../index.mock';
 
 describe('List OAuth Connections route', () => {
   function getMockContext(
-    licenseCheckResult: { state: string; message?: string } = { state: 'valid' },
-    { oauthManagementEnabled = true }: { oauthManagementEnabled?: boolean } = {}
+    licenseCheckResult: { state: string; message?: string } = { state: 'valid' }
   ) {
     const coreContext = coreMock.createRequestHandlerContext();
-    (coreContext.uiSettings.client.get as jest.Mock).mockResolvedValue(oauthManagementEnabled);
     return coreMock.createCustomRequestHandlerContext({
       core: coreContext,
       licensing: { license: { check: jest.fn().mockReturnValue(licenseCheckResult) } },
@@ -54,6 +52,29 @@ describe('List OAuth Connections route', () => {
         {
           id: 'conn1',
           client_id: 'c1',
+          resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
+        },
+      ],
+    };
+    oauthMock.listConnections.mockResolvedValue(mockResponse);
+
+    const response = await routeHandler(
+      getMockContext(),
+      httpServerMock.createKibanaRequest({ query: {} }),
+      kibanaResponseFactory
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.payload).toEqual(mockResponse);
+  });
+
+  it('passes through the client_name from the connection response', async () => {
+    const mockResponse = {
+      connections: [
+        {
+          id: 'conn1',
+          client_id: 'non-owned-client',
+          client_name: 'Other user app',
           resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
         },
       ],
@@ -243,18 +264,6 @@ describe('List OAuth Connections route', () => {
 
     expect(response.status).toBe(404);
   });
-
-  it('returns 404 when uiamOAuthClientManagement setting is disabled', async () => {
-    const response = await routeHandler(
-      getMockContext({ state: 'valid' }, { oauthManagementEnabled: false }),
-      httpServerMock.createKibanaRequest({ query: {} }),
-      kibanaResponseFactory
-    );
-
-    expect(response.status).toBe(404);
-    expect(oauthMock.listConnections).not.toHaveBeenCalled();
-  });
-
   it('returns error from service', async () => {
     oauthMock.listConnections.mockRejectedValue(Boom.internal('Server error'));
 

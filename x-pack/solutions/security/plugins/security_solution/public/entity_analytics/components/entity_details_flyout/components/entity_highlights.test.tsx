@@ -9,6 +9,7 @@ import React from 'react';
 import { render, screen, fireEvent, within } from '@testing-library/react';
 import { EntityHighlightsAccordion } from './entity_highlights';
 import type { EntityType } from '../../../../../common/search_strategy';
+import type { Entity } from '../../../../../common/api/entity_analytics';
 import { TestProviders } from '../../../../common/mock';
 
 // Mock the hooks
@@ -147,6 +148,9 @@ describe('EntityHighlights', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    // The staleness callout dismiss state is persisted per-entity/per-space in local storage.
+    // Clear it so tests don't leak dismissal state into one another.
+    window.localStorage.clear();
 
     mockUseFetchAnonymizationFields.mockReturnValue(defaultAnonymizationFields);
     mockUseAssistantContext.mockReturnValue(defaultAssistantContext);
@@ -575,5 +579,123 @@ describe('EntityHighlights', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Regenerate' }));
 
     expect(mockFetchEntityHighlights).toHaveBeenCalled();
+  });
+
+  describe('staleness callout dismiss (per-entity/per-space local storage)', () => {
+    // Persisted summary whose captured risk snapshot (70) differs from the entity's current
+    // normalized risk (90 below), so the summary is considered stale and the callout renders.
+    const stalePersistedSummary = {
+      summary: {
+        highlights: [{ title: 'Key Insights', text: 'User has high risk activity' }],
+        recommended_actions: null,
+        generated_at: Date.now(),
+        generated_by: 'test_user',
+        staleness: {
+          enabled_signals: ['risk_score'],
+          snapshot: { risk_score: 70 },
+        },
+      },
+      canRead: true,
+      isLoading: false,
+      isFetching: false,
+      refetch: jest.fn(),
+    };
+
+    // Current entity signals — normalized risk score of 90 drifts from the snapshot's 70.
+    const staleEntityRecord = {
+      entity: { risk: { calculated_score_norm: 90 } },
+    } as unknown as Entity;
+
+    // The key mirrors the one built in entity_highlights.tsx:
+    // `securitySolution.entitySummary.staleness.dismissed.${space}.${entityType}.${entityId}`
+    const dismissKey = 'securitySolution.entitySummary.staleness.dismissed.default.user.test-user';
+
+    const renderStale = () => {
+      mockUseFetchPersistedAiSummary.mockReturnValue(stalePersistedSummary);
+      mockUseFetchEntityDetailsHighlights.mockReturnValue({
+        ...defaultFetchEntityDetailsHighlights,
+        result: createAssistantResult(),
+      });
+
+      return render(
+        <EntityHighlightsAccordion {...defaultProps} entityRecord={staleEntityRecord} />,
+        { wrapper: TestProviders }
+      );
+    };
+
+    it('shows the staleness callout when the persisted snapshot drifts from the current risk', () => {
+      renderStale();
+
+      expect(screen.getByTestId('entity-highlights-staleness-callout')).toBeInTheDocument();
+    });
+
+    it('hides the callout and persists the dismissal at the current score when dismissed', () => {
+      renderStale();
+
+      const callout = screen.getByTestId('entity-highlights-staleness-callout');
+      fireEvent.click(within(callout).getByLabelText('Dismiss this callout'));
+
+      expect(screen.queryByTestId('entity-highlights-staleness-callout')).not.toBeInTheDocument();
+      // The dismissed score (current normalized risk) is stored so the same drift stays dismissed.
+      expect(window.localStorage.getItem(dismissKey)).toBe('90');
+    });
+
+    it('keeps the callout hidden when local storage already records a dismissal at the current score', () => {
+      window.localStorage.setItem(dismissKey, '90');
+
+      renderStale();
+
+      expect(screen.queryByTestId('entity-highlights-staleness-callout')).not.toBeInTheDocument();
+    });
+
+    it('re-shows the callout when the risk score changed since the previous dismissal', () => {
+      // Dismissed at 55 previously, but the current score is 90 → the dismissal no longer applies.
+      window.localStorage.setItem(dismissKey, '55');
+
+      renderStale();
+
+      expect(screen.getByTestId('entity-highlights-staleness-callout')).toBeInTheDocument();
+    });
+
+    it('scopes the dismissal to the current space', () => {
+      // A dismissal recorded under a different space must not suppress the callout here.
+      window.localStorage.setItem(
+        'securitySolution.entitySummary.staleness.dismissed.other-space.user.test-user',
+        '90'
+      );
+
+      renderStale();
+
+      expect(screen.getByTestId('entity-highlights-staleness-callout')).toBeInTheDocument();
+    });
+
+    it('scopes the dismissal to the current entity', () => {
+      // A dismissal recorded for a different entity must not suppress the callout here.
+      window.localStorage.setItem(
+        'securitySolution.entitySummary.staleness.dismissed.default.user.other-user',
+        '90'
+      );
+
+      renderStale();
+
+      expect(screen.getByTestId('entity-highlights-staleness-callout')).toBeInTheDocument();
+    });
+
+    it('clears the persisted dismissal when the summary is regenerated', () => {
+      // Regression guard for: dismiss at score Y → regenerate at Z → score later returns to Y.
+      // The old dismissal was tied to the previous summary, so regenerating must clear it,
+      // otherwise a genuine future drift back to Y would be wrongly treated as still-dismissed.
+      renderStale();
+
+      const callout = screen.getByTestId('entity-highlights-staleness-callout');
+      fireEvent.click(within(callout).getByLabelText('Dismiss this callout'));
+      expect(window.localStorage.getItem(dismissKey)).toBe('90');
+
+      // Regenerate via the summary's refresh control (also wired to onGenerateSummary).
+      fireEvent.click(screen.getByLabelText('Regenerate summary'));
+
+      expect(mockFetchEntityHighlights).toHaveBeenCalled();
+      expect(window.localStorage.getItem(dismissKey)).toBeNull();
+    });
   });
 });
