@@ -5,12 +5,6 @@
  * 2.0.
  */
 
-/**
- * Action-policy route response `description` values, reused as the `summary` of
- * the matching OAS error examples. Importing these in both the route schema and
- * the OAS example keeps the documented shape aligned with what clients receive.
- */
-
 export const ACTION_POLICY_NOT_FOUND_DESCRIPTION =
   'Indicates an action policy with the given ID does not exist.';
 
