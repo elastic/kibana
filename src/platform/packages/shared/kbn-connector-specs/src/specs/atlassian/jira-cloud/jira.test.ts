@@ -319,6 +319,23 @@ describe('JiraConnector', () => {
       expect(result).toEqual({});
     });
 
+    it('should use OAuth base URL when authType is oauth_authorization_code', async () => {
+      const oauthContext = {
+        ...mockContext,
+        config: { subdomain: 'mycompany', cloudId: '11223344-a1b2-3c33-d444-ef1234567890' },
+        secrets: { authType: 'oauth_authorization_code' },
+      } as unknown as ActionContext;
+      mockClient.get.mockResolvedValue({ data: { accountId: 'abc123', displayName: 'Alice' } });
+
+      if (!JiraConnector.test) throw new Error('Test handler not defined');
+      const result = await JiraConnector.test.handler(oauthContext);
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://api.atlassian.com/ex/jira/11223344-a1b2-3c33-d444-ef1234567890/rest/api/3/myself'
+      );
+      expect(result).toEqual({});
+    });
+
     it('should throw when the API call fails', async () => {
       mockClient.get.mockRejectedValue(new Error('Unauthorized'));
 

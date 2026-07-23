@@ -189,4 +189,32 @@ describe('ConfluenceCloudConnector', () => {
       expect(result).toEqual(mockResponse.data);
     });
   });
+
+  // ===========================================================================
+  // test handler
+  // ===========================================================================
+
+  describe('test handler', () => {
+    it('should call /wiki/api/v2/spaces and return {}', async () => {
+      mockClient.get.mockResolvedValue({ data: { results: [] } });
+
+      if (!ConfluenceCloudConnector.test) throw new Error('Test handler not defined');
+      const result = await ConfluenceCloudConnector.test.handler(mockContext);
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://mycompany.atlassian.net/wiki/api/v2/spaces',
+        { params: { limit: 1 } }
+      );
+      expect(result).toEqual({});
+    });
+
+    it('should throw when the API call fails', async () => {
+      mockClient.get.mockRejectedValue(new Error('Unauthorized'));
+
+      if (!ConfluenceCloudConnector.test) throw new Error('Test handler not defined');
+      await expect(ConfluenceCloudConnector.test.handler(mockContext)).rejects.toThrow(
+        'Unauthorized'
+      );
+    });
+  });
 });
