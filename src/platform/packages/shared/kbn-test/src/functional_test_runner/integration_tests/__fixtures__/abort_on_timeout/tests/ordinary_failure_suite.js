@@ -13,6 +13,13 @@ export default function () {
       throw new Error('$ORDINARY_FAILING_TEST_ERROR$');
     });
 
+    // Mimics a supertest/superagent request timeout, whose error message
+    // ("Timeout of <ms>ms exceeded") is indistinguishable from a real Mocha
+    // timeout by message text alone. This must NOT be treated as a Mocha timeout.
+    it('$TIMEOUT_LOOKALIKE_TEST$', () => {
+      throw new Error('Timeout of 5000ms exceeded');
+    });
+
     it('$SHOULD_STILL_RUN$', () => {
       console.log('$SHOULD_STILL_RUN_RAN$');
     });
