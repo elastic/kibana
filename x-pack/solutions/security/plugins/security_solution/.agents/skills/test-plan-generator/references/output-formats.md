@@ -167,29 +167,29 @@ Records the token count of the run that produced the current test plan comment. 
 - A machine-readable HTML comment marker in the published GitHub comment.
 - A human-readable line rendered in the chat after the Sources Summary.
 
-Both are produced from a single invocation of `scripts/session-token-usage.py` at draft-save time — [`SKILL.md` Step 3 sub-step 7](../SKILL.md#saving-the-draft) for generate mode, [`mode-update.md` Step 6](mode-update.md) for update mode. If the script exits non-zero — non-Claude-Code harness, missing transcript, or transcript without `usage` blocks — both artifacts fall back to their "not available" form. No silent `total=0`.
+Both are produced from `x-pack/solutions/security/plugins/security_solution/.agents/scripts/session-token-usage.py`. If the script exits non-zero — non-Claude-Code harness, missing transcript, or transcript without `usage` blocks — both artifacts fall back to their "not available" form.
 
 ### Comment marker format
 
 Prepended as the **first line** of the draft file at draft-save time, *before* `<!-- test-plan-generated -->` and `<!-- generated-by: … -->`. Step 4 (publish) does not invoke the script or modify this marker — its presence is set at draft-save time, and its absence is a legitimate signal that the generation ran on a harness without a session transcript.
 
 ```
-<!-- tokens: input=X output=Y cache_read=Z cache_create=W total=T -->
+<!-- tokens: input=X output=Y cache_create=W cache_read=Z total=T -->
 ```
 
-- Fields must appear in this order: `input`, `output`, `cache_read`, `cache_create`, `total`. **Note:** the underlying script emits `cache_create` before `cache_read`; reorder when prepending the marker.
+- Field order matches the script output (`input`, `output`, `cache_create`, `cache_read`, `total`).
 - Values are non-negative integers (raw token counts, no thousand separators).
 - **Absence is meaningful** — if the marker is missing from a published comment, the generation run had no measurable token usage available.
-- **Refreshed on each publish.** Every generate/update cycle overwrites the marker with the values from the run that produced the current comment. There is no historical delta — the marker always reflects the latest run.
+- **Refreshed on each publish.** Always reflects the current run; no historical delta.
 
 Final marker order in the published comment after Step 4 publish:
 ```
 <!-- test-plan-generated -->
 <!-- generated-by: <model-identifier> -->
-<!-- tokens: input=… output=… cache_read=… cache_create=… total=… -->
+<!-- tokens: input=… output=… cache_create=… cache_read=… total=… -->
 ```
 
-Step 4's "Ensure the first two lines are …" check prepends `<!-- test-plan-generated -->` and `<!-- generated-by: … -->` above the tokens marker whenever they are missing — preserve the tokens marker unmodified during that step.
+Step 4 prepends `<!-- test-plan-generated -->` and `<!-- generated-by: … -->` above the tokens marker — preserve the marker unmodified.
 
 ### Chat line format
 
@@ -197,17 +197,17 @@ Rendered right after the Sources Summary and Issue Clarity Assessment blocks in 
 
 **On script success:**
 ```
-**Token usage:** input=X, output=Y, cache_read=Z, cache_create=W, **total=T**
+**Token usage:** input=X, output=Y, cache_create=W, cache_read=Z, **total=T**
 ```
 
-Note: commas between fields, bold on the `**Token usage:**` label and on the `**total=T**` tail. Field order matches the marker (`cache_read` before `cache_create`).
+Note: commas between fields, bold on the `**Token usage:**` label and on the `**total=T**` tail. Field order matches the marker.
 
 **On script failure (fallback):**
 ```
 **Token usage:** not available for this session
 ```
 
-The fallback string is the only signal the user gets that tokens were unmeasurable for this run. Do not emit `total=0` as a substitute.
+Never emit `total=0` — this string is the only valid fallback.
 
 ---
 
