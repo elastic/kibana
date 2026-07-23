@@ -10,35 +10,38 @@ pageLoadAssetSize:
   aiAssistantManagementSelection: 11569
   aiops: 15227
   alerting: 22371
-  alertingVTwo: 56591
+  alertingVTwo: 27673
   apm: 53172
-  apmShared: 5923
-  apmSourcesAccess: 2600
+  apmShared: 5950
+  apmSourcesAccess: 2747
   automaticImport: 18629
-  banners: 3999
+  banners: 4006
   canvas: 14881
   cases: 310000
   charts: 40269
+  clientApps: 4688
   cloud: 11743
   cloudConnect: 9149
   cloudDataMigration: 5687
   cloudDefend: 8146
-  cloudExperiments: 98406
+  cloudExperiments: 98888
   cloudFullStory: 4752
   cloudLinks: 42432
   cloudSecurityPosture: 19743
   console: 31191
   contentConnectors: 33014
-  contentManagement: 8323
+  contentManagement: 8350
+  contextEngine: 5837
   controls: 10300
-  core: 606422
+  core: 563984
   cps: 9205
   crossClusterReplication: 12662
+  customContent: 4765
   customIntegrations: 11715
   dashboard: 20000
   dashboardMarkdown: 8613
-  data: 511023
-  dataFederation: 8500
+  data: 511931
+  dataFederation: 9029
   dataQuality: 11469
   datasetQuality: 49315
   dataUsage: 8743
@@ -53,8 +56,8 @@ pageLoadAssetSize:
   discoverEnhanced: 5353
   discoveries: 35780
   discoverShared: 2322
-  elasticAssistant: 299510
-  elasticAssistantSharedState: 4877
+  elasticAssistant: 299772
+  elasticAssistantSharedState: 4881
   elasticConsole: 4442
   embeddable: 19587
   embeddableAlertsTable: 6524
@@ -63,7 +66,7 @@ pageLoadAssetSize:
   esql: 29469
   esqlDataGrid: 10209
   esUiShared: 101220
-  evals: 6106
+  evals: 6117
   eventAnnotation: 22334
   eventAnnotationListing: 13164
   exploratoryView: 45042
@@ -75,7 +78,7 @@ pageLoadAssetSize:
   expressions: 104955
   expressionTagcloud: 14009
   expressionXY: 45000
-  features: 4141
+  features: 4145
   feedback: 7642
   fieldFormats: 64634
   fieldsMetadata: 5483
@@ -124,7 +127,7 @@ pageLoadAssetSize:
   mapsEms: 6734
   metricsDataAccess: 44950
   ml: 99842
-  mockIdpPlugin: 7393
+  mockIdpPlugin: 7421
   monitoring: 28983
   navigation: 18600
   newsfeed: 11110
@@ -141,8 +144,8 @@ pageLoadAssetSize:
   osquery: 48128
   painlessLab: 6299
   presentationUtil: 8391
-  productDocBase: 6762
-  productIntercept: 9849
+  productDocBase: 6767
+  productIntercept: 9860
   profiling: 20716
   queryActivity: 4854
   reindexService: 3469
@@ -150,7 +153,7 @@ pageLoadAssetSize:
   reporting: 48178
   rollup: 12692
   runtimeFields: 11828
-  sampleDataIngest: 2637
+  sampleDataIngest: 2640
   savedObjects: 11735
   savedObjectsFinder: 4319
   savedObjectsManagement: 22361
@@ -170,7 +173,7 @@ pageLoadAssetSize:
   searchQueryRules: 6689
   searchSynonyms: 6371
   security: 79863
-  securitySolution: 189500
+  securitySolution: 210408
   securitySolutionEss: 42592
   securitySolutionServerless: 57112
   serverless: 7412
@@ -180,7 +183,7 @@ pageLoadAssetSize:
   serverlessWorkplaceAI: 4855
   sessionView: 47912
   share: 64059
-  significant_events: 3601
+  significant_events: 4270
   slo: 40437
   snapshotRestore: 22068
   spaces: 28871
