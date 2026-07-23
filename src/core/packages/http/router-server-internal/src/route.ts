@@ -204,11 +204,9 @@ export const handle = async (
     shouldLogDefaultValidationError: !onRequestValidationError,
   });
   if (error) {
-    if (!onRequestValidationError) {
-      return error;
-    }
     const customResponse = await handleRequestValidationFailure({
       failure,
+      defaultResponse: error,
       hapiRequest: request,
       onRequestValidationError,
       responseFactory: kibanaResponseFactory,
@@ -258,6 +256,7 @@ function normalizeRequestValidationError(rawError: unknown): RequestValidationEr
 
 export async function handleRequestValidationFailure({
   failure,
+  defaultResponse,
   hapiRequest,
   onRequestValidationError,
   responseFactory,
@@ -266,13 +265,18 @@ export async function handleRequestValidationFailure({
   validateResponse,
 }: {
   failure: ValidationFailure;
+  defaultResponse: IKibanaResponse;
   hapiRequest: Request;
-  onRequestValidationError: OnRequestValidationError;
+  onRequestValidationError?: OnRequestValidationError;
   responseFactory: KibanaResponseFactory;
   log: Logger;
   isDevMode: boolean;
   validateResponse: (response: IKibanaResponse) => string | undefined;
 }): Promise<IKibanaResponse> {
+  if (!onRequestValidationError) {
+    return defaultResponse;
+  }
+
   const customResponse = await onRequestValidationError(
     failure.error,
     failure.request,

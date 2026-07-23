@@ -217,11 +217,9 @@ export class CoreVersionedRoute implements VersionedRoute {
       shouldLogDefaultValidationError: !onRequestValidationError,
     });
     if (error) {
-      if (!onRequestValidationError) {
-        return injectVersionHeader(version, error);
-      }
       const customResponse = await handleRequestValidationFailure({
         failure,
+        defaultResponse: error,
         hapiRequest,
         onRequestValidationError,
         responseFactory,
