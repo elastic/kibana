@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/event-stacktrace'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/obs-presentation-team'
+  defaultOwner: '@elastic/obs-signals-traces-team'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/event-stacktrace'
   description: Moon project for @kbn/event-stacktrace
   channel: ''
-  owner: '@elastic/obs-presentation-team'
+  owner: '@elastic/obs-signals-traces-team'
   sourceRoot: x-pack/platform/packages/shared/kbn-event-stacktrace
 dependsOn:
   - '@kbn/i18n'

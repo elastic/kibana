@@ -6,6 +6,7 @@
  */
 import globby from 'globby';
 import path from 'path';
+import { installApmPackage } from '../common/bootstrap_apm_synthtrace';
 import { FtrProviderContext } from '../common/ftr_provider_context';
 
 const cwd = path.join(__dirname);
@@ -25,11 +26,19 @@ function getGlobPattern() {
 
 export default function apmApiIntegrationTests({ getService, loadTestFile }: FtrProviderContext) {
   const registry = getService('registry');
+  const synthtraceKibanaClient = getService('synthtraceKibanaClient');
 
   // DO NOT SKIP
   // Skipping here will skip the entire apm api test suite
   // Instead skip (flaky) tests individually
   describe('APM API tests', function () {
+    // Install after FTR beforeTests (docker registry is up). Must not run during
+    // providers.loadAll() — that races the local fleet registryUrl.
+    before(async function () {
+      this.timeout(10 * 60 * 1000);
+      await installApmPackage(synthtraceKibanaClient);
+    });
+
     const filePattern = getGlobPattern();
     const tests = globby.sync(filePattern, { cwd });
 
