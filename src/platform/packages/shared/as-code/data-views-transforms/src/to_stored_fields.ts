@@ -26,7 +26,6 @@ import {
   type AsCodeDataViewSpec,
   type AsCodeFieldSettings,
   type AsCodeRuntimeField,
-  type AsCodeSavedFieldSettings,
 } from '@kbn/as-code-data-views-schema';
 
 export function isRuntimeField(field: AsCodeFieldSettings): field is AsCodeRuntimeField {
@@ -119,7 +118,7 @@ export function toStoredFieldAttributes(
 ): DataViewSpec['fieldAttrs'] {
   const fieldAttrs: DataViewSpec['fieldAttrs'] = {};
 
-  const assignAttrs = (key: string, field: AsCodeFieldSettings | AsCodeSavedFieldSettings) => {
+  const assignAttrs = (key: string, field: AsCodeFieldSettings) => {
     const attrs = buildFieldAttrs(field);
     if (Object.keys(attrs).length > 0) {
       fieldAttrs[key] = attrs;
@@ -139,7 +138,7 @@ export function toStoredFieldAttributes(
   return fieldAttrs;
 }
 
-function buildFieldAttrs(field: AsCodeFieldSettings | AsCodeSavedFieldSettings) {
+function buildFieldAttrs(field: AsCodeFieldSettings) {
   return {
     ...('custom_label' in field && field.custom_label && { customLabel: field.custom_label }),
     ...('custom_description' in field &&
