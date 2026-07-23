@@ -617,6 +617,7 @@
     "@kbn/datemath": "link:src/platform/packages/shared/kbn-datemath",
     "@kbn/deeplinks-agent-builder": "link:src/platform/packages/shared/deeplinks/agent_builder",
     "@kbn/deeplinks-analytics": "link:src/platform/packages/shared/deeplinks/analytics",
+    "@kbn/deeplinks-context-engine": "link:src/platform/packages/shared/deeplinks/context-engine",
     "@kbn/deeplinks-devtools": "link:src/platform/packages/shared/deeplinks/devtools",
     "@kbn/deeplinks-fleet": "link:src/platform/packages/shared/deeplinks/fleet",
     "@kbn/deeplinks-management": "link:src/platform/packages/shared/deeplinks/management",
