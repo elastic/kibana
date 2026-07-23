@@ -12,7 +12,7 @@ import {
 } from './v1';
 
 /**
- * v3 adds the server-managed `metadata.version` counter. It is incremented on
+ * v2 adds the server-managed `metadata.version` counter. It is incremented on
  * every successful mutation and used as `object.sequence` in the change history
  * index and as `rule.version` on emitted rule events. The field is optional so
  * rules created before v3 (which have no counter yet) remain valid; readers

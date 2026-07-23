@@ -8,7 +8,7 @@
 import type { SavedObjectsModelVersionMap } from '@kbn/core-saved-objects-server';
 import {
   ruleSavedObjectAttributesSchemaV1,
-  ruleSavedObjectAttributesSchemaV3,
+  ruleSavedObjectAttributesSchemaV2,
 } from '../schemas/rule_saved_object_attributes';
 
 export const ruleModelVersions: SavedObjectsModelVersionMap = {
@@ -53,8 +53,8 @@ export const ruleModelVersions: SavedObjectsModelVersionMap = {
       },
     ],
     schemas: {
-      forwardCompatibility: ruleSavedObjectAttributesSchemaV3.extends({}, { unknowns: 'ignore' }),
-      create: ruleSavedObjectAttributesSchemaV3,
+      forwardCompatibility: ruleSavedObjectAttributesSchemaV2.extends({}, { unknowns: 'ignore' }),
+      create: ruleSavedObjectAttributesSchemaV2,
     },
   },
 };
