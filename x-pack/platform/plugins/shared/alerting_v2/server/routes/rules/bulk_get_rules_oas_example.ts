@@ -7,11 +7,8 @@
 
 import type { BulkGetRulesParams, BulkGetRulesResponse } from '@kbn/alerting-v2-schemas';
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
-import {
-  buildRuleOas,
-  invalidResponseExample,
-  type AlertingOasOperationObject,
-} from '../oas_utils';
+import { buildOasOperation, invalidResponseExample } from '../oas_utils';
+import type { AlertingOasOperationObject } from '../oas_types';
 import { RULE_RESPONSE } from './rule_oas_shared_examples';
 
 export const BULK_GET_RULES_REQUEST: BulkGetRulesParams = {
@@ -40,7 +37,7 @@ const RULES_NOT_FOUND_RESPONSE = {
 };
 
 export const bulkGetRulesOasExamples = (): AlertingOasOperationObject =>
-  buildRuleOas({
+  buildOasOperation({
     requestBody: {
       name: 'bulkGetRulesRequest',
       summary: 'Fetch two rules by ID',

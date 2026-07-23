@@ -10,11 +10,8 @@ import {
   getInvalidRuleDataMessage,
   getRuleVersionConflictMessage,
 } from '../../lib/errors/rule_error_messages';
-import {
-  buildRuleOas,
-  invalidResponseExample,
-  type AlertingOasOperationObject,
-} from '../oas_utils';
+import { buildOasOperation, invalidResponseExample } from '../oas_utils';
+import type { AlertingOasOperationObject } from '../oas_types';
 import {
   CREATE_RULE_REQUEST,
   RULE_NOT_FOUND_RESPONSE,
@@ -41,7 +38,7 @@ const RULE_UPSERT_CONFLICT_RESPONSE = {
 };
 
 export const upsertRuleOasExamples = (): AlertingOasOperationObject =>
-  buildRuleOas({
+  buildOasOperation({
     requestBody: {
       name: 'upsertRuleRequest',
       summary: 'Create or replace a host CPU threshold rule',

@@ -6,11 +6,8 @@
  */
 
 import type { FindRulesResponse } from '@kbn/alerting-v2-schemas';
-import {
-  buildRuleOas,
-  invalidResponseExample,
-  type AlertingOasOperationObject,
-} from '../oas_utils';
+import { buildOasOperation, invalidResponseExample } from '../oas_utils';
+import type { AlertingOasOperationObject } from '../oas_types';
 import { RULE_RESPONSE } from './rule_oas_shared_examples';
 
 export const LIST_RULES_RESPONSE: FindRulesResponse = {
@@ -27,7 +24,7 @@ const INVALID_LIST_RULES_RESPONSE = invalidResponseExample({
 });
 
 export const listRulesOasExamples = (): AlertingOasOperationObject =>
-  buildRuleOas({
+  buildOasOperation({
     responses: {
       200: {
         name: 'listRulesResponse',

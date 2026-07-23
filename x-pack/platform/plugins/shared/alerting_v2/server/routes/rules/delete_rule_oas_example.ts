@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { buildRuleOas, type AlertingOasOperationObject } from '../oas_utils';
+import type { AlertingOasOperationObject } from '../oas_types';
+import { buildOasOperation } from '../oas_utils';
 import { RULE_NOT_FOUND_RESPONSE } from './rule_oas_shared_examples';
 
 export const deleteRuleOasExamples = (): AlertingOasOperationObject =>
-  buildRuleOas({
+  buildOasOperation({
     responses: {
       404: RULE_NOT_FOUND_RESPONSE,
     },

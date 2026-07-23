@@ -11,11 +11,8 @@ import {
   getInvalidRuleDataMessage,
   getRuleVersionConflictMessage,
 } from '../../lib/errors/rule_error_messages';
-import {
-  buildRuleOas,
-  invalidResponseExample,
-  type AlertingOasOperationObject,
-} from '../oas_utils';
+import { buildOasOperation, invalidResponseExample } from '../oas_utils';
+import type { AlertingOasOperationObject } from '../oas_types';
 import {
   RULE_NOT_FOUND_RESPONSE,
   RULE_RESPONSE,
@@ -52,7 +49,7 @@ const RULE_VERSION_CONFLICT_RESPONSE = {
 };
 
 export const updateRuleOasExamples = (): AlertingOasOperationObject =>
-  buildRuleOas({
+  buildOasOperation({
     requestBody: {
       name: 'updateRuleRequest',
       summary: 'Update a rule name and description',

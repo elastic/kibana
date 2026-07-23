@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { buildRuleOas, type AlertingOasOperationObject } from '../oas_utils';
+import type { AlertingOasOperationObject } from '../oas_types';
+import { buildOasOperation } from '../oas_utils';
 import {
   BULK_OPERATION_REQUEST,
   BULK_OPERATION_RESPONSE,
@@ -13,7 +14,7 @@ import {
 } from './rule_oas_shared_examples';
 
 export const bulkDisableRulesOasExamples = (): AlertingOasOperationObject =>
-  buildRuleOas({
+  buildOasOperation({
     requestBody: {
       name: 'bulkDisableRulesRequest',
       summary: 'Disable two rules by ID',

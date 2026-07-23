@@ -6,26 +6,7 @@
  */
 
 import type { ErrorResponse } from '@kbn/alerting-v2-schemas';
-
-export interface AlertingOasOperationObject {
-  requestBody?: {
-    content?: {
-      'application/json'?: {
-        examples?: Record<string, { summary?: string; value?: unknown }>;
-      };
-    };
-  };
-  responses?: Record<
-    string,
-    {
-      content?: {
-        'application/json'?: {
-          examples?: Record<string, { summary?: string; value?: unknown }>;
-        };
-      };
-    }
-  >;
-}
+import type { AlertingOasOperationObject, OasExampleEntry } from './oas_types';
 
 /**
  * Builds an OpenAPI media-type object with a single named JSON example.
@@ -43,12 +24,6 @@ export const jsonExample = <T>(name: string, summary: string, value: T) => ({
     },
   },
 });
-
-export interface OasExampleEntry {
-  name: string;
-  summary: string;
-  value: unknown;
-}
 
 /**
  * Validation errors currently return Kibana core's Boom shape, but Core will
@@ -77,7 +52,7 @@ export const invalidResponseExample = ({
 });
 
 /** Builds an OAS operation object from request/response examples. */
-export const buildRuleOas = ({
+export const buildOasOperation = ({
   requestBody,
   responses = {},
 }: {

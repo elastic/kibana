@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { buildRuleOas, type AlertingOasOperationObject } from '../oas_utils';
+import type { AlertingOasOperationObject } from '../oas_types';
+import { buildOasOperation } from '../oas_utils';
 import { RULE_NOT_FOUND_RESPONSE, ruleResponseExample } from './rule_oas_shared_examples';
 
 export const getRuleOasExamples = (): AlertingOasOperationObject =>
-  buildRuleOas({
+  buildOasOperation({
     responses: {
       200: ruleResponseExample('getRuleResponse', 'Retrieved host CPU threshold rule'),
       404: RULE_NOT_FOUND_RESPONSE,
