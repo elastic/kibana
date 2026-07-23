@@ -71,6 +71,7 @@ export const prepareWorkflowDocumentFromYaml = (params: {
   authenticatedUser: string;
   now: Date;
   spaceId: string;
+  originManagedWorkflowId?: string;
   triggerDefinitions?: Array<{ id: string; eventSchema: z.ZodType }>;
   nameFallback?: string;
 }): { id: string; workflowData: WorkflowProperties; definition?: WorkflowYaml } => {
@@ -81,6 +82,7 @@ export const prepareWorkflowDocumentFromYaml = (params: {
     authenticatedUser,
     now,
     spaceId,
+    originManagedWorkflowId,
     triggerDefinitions,
     nameFallback,
   } = params;
@@ -124,7 +126,7 @@ export const prepareWorkflowDocumentFromYaml = (params: {
     managed: false,
     managedBy: null,
     definitionHash: null,
-    originManagedWorkflowId: null,
+    originManagedWorkflowId: originManagedWorkflowId ?? null,
     lifecycle: null,
     valid: workflowToCreate.valid,
     deleted_at: null,
