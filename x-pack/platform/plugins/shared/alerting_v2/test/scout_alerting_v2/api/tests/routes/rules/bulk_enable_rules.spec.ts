@@ -13,14 +13,13 @@ import {
   ALERTING_V2_RULES_READ_ROLE,
   apiTest,
   buildCreateRuleData,
-  expectNoBulkTruncationMetadata,
   NO_ACCESS_ROLE,
   testData,
 } from '../../../fixtures';
 
 const BULK_ENABLE_URL = `${testData.RULE_API_PATH}/_bulk_enable`;
 
-apiTest.describe('Bulk enable rules API', { tag: '@local-stateful-classic' }, () => {
+apiTest.describe('Bulk enable rules by IDs API', { tag: '@local-stateful-classic' }, () => {
   let writerCredentials: RoleApiCredentials;
   let writerHeaders: Record<string, string>;
 
@@ -51,39 +50,11 @@ apiTest.describe('Bulk enable rules API', { tag: '@local-stateful-classic' }, ()
       body: { ids: [ruleA.id, ruleB.id] },
     });
     expect(response).toHaveStatusCode(200);
-    expect(response.body.errors).toStrictEqual([]);
-    expect(response.body.rules).toHaveLength(2);
-    expectNoBulkTruncationMetadata(response.body);
-    const returnedIds = response.body.rules.map((rule: { id: string }) => rule.id);
-    expect(returnedIds.sort()).toStrictEqual([ruleA.id, ruleB.id].sort());
+    expect(response.body).toStrictEqual({ affected_count: 2, errors: [] });
     // Verify the side effect: both rules are now enabled.
     const remaining = await apiServices.alertingV2.rules.find({ perPage: 100 });
     expect(remaining.items.every((rule) => rule.enabled)).toBe(true);
   });
-
-  apiTest(
-    'enable: should enable only rules matching the filter',
-    async ({ apiClient, apiServices }) => {
-      const prodRule = await apiServices.alertingV2.rules.create(
-        buildCreateRuleData({ metadata: { name: 'prod-rule', tags: ['production'] } })
-      );
-      const devRule = await apiServices.alertingV2.rules.create(
-        buildCreateRuleData({ metadata: { name: 'dev-rule', tags: ['development'] } })
-      );
-      await apiServices.alertingV2.rules.bulkDisable({ ids: [prodRule.id, devRule.id] });
-      const response = await apiClient.post(BULK_ENABLE_URL, {
-        headers: writerHeaders,
-        body: { filter: 'metadata.tags: "production"' },
-      });
-      expect(response).toHaveStatusCode(200);
-      expect(response.body.errors).toStrictEqual([]);
-      expect(response.body.rules).toHaveLength(1);
-      expect(response.body.rules[0].id).toBe(prodRule.id);
-      // The dev rule should still be disabled.
-      const stored = await apiServices.alertingV2.rules.get(devRule.id);
-      expect(stored.enabled).toBe(false);
-    }
-  );
 
   apiTest(
     'enable: should be idempotent when called on already-enabled rules',
@@ -97,15 +68,16 @@ apiTest.describe('Bulk enable rules API', { tag: '@local-stateful-classic' }, ()
         body: { ids: [rule.id] },
       });
       expect(response).toHaveStatusCode(200);
-      expect(response.body.errors).toStrictEqual([]);
-      expect(response.body.rules).toHaveLength(1);
-      expect(response.body.rules[0].id).toBe(rule.id);
-      expect(response.body.rules[0].enabled).toBe(true);
+      // Already-enabled rules still count as affected: the operation is
+      // idempotent and clients should not have to special-case them.
+      expect(response.body).toStrictEqual({ affected_count: 1, errors: [] });
+      const stored = await apiServices.alertingV2.rules.get(rule.id);
+      expect(stored.enabled).toBe(true);
     }
   );
 
   apiTest(
-    'enable: should report unknown ids in the errors array',
+    'enable: should report unknown ids in the errors array with RULE_NOT_FOUND code',
     async ({ apiClient, apiServices }) => {
       const rule = await apiServices.alertingV2.rules.create(
         buildCreateRuleData({ metadata: { name: 'existing-rule' } })
@@ -116,76 +88,12 @@ apiTest.describe('Bulk enable rules API', { tag: '@local-stateful-classic' }, ()
         body: { ids: [rule.id, 'does-not-exist'] },
       });
       expect(response).toHaveStatusCode(200);
-      expect(response.body.rules).toHaveLength(1);
-      expect(response.body.rules[0].id).toBe(rule.id);
+      expect(response.body.affected_count).toBe(1);
       expect(response.body.errors).toHaveLength(1);
       expect(response.body.errors[0]).toMatchObject({
         id: 'does-not-exist',
-        error: { statusCode: 404 },
+        error: { code: 'RULE_NOT_FOUND' },
       });
-    }
-  );
-
-  apiTest(
-    'enable: should enable all rules with match_all: true',
-    async ({ apiClient, apiServices }) => {
-      const ruleA = await apiServices.alertingV2.rules.create(
-        buildCreateRuleData({ metadata: { name: 'rule-a' } })
-      );
-      const ruleB = await apiServices.alertingV2.rules.create(
-        buildCreateRuleData({ metadata: { name: 'rule-b' } })
-      );
-      await apiServices.alertingV2.rules.bulkDisable({ ids: [ruleA.id, ruleB.id] });
-      const response = await apiClient.post(BULK_ENABLE_URL, {
-        headers: writerHeaders,
-        body: { match_all: true },
-      });
-      expect(response).toHaveStatusCode(200);
-      expect(response.body.errors).toStrictEqual([]);
-      expect(response.body.rules).toHaveLength(2);
-      const remaining = await apiServices.alertingV2.rules.find({ perPage: 100 });
-      expect(remaining.items.every((rule) => rule.enabled)).toBe(true);
-    }
-  );
-
-  apiTest(
-    'enable: should enable only rules matching a `kind` filter',
-    async ({ apiClient, apiServices }) => {
-      const alertRule = await apiServices.alertingV2.rules.create(
-        buildCreateRuleData({ kind: 'alert', metadata: { name: 'alert-rule' } })
-      );
-      const signalRule = await apiServices.alertingV2.rules.create(
-        // Signal rules must opt out of the default `state_transition`,
-        // which the schema only allows for `kind: 'alert'`.
-        buildCreateRuleData({
-          kind: 'signal',
-          state_transition: undefined,
-          recovery_strategy: undefined,
-          query: {
-            format: 'standalone',
-            breach: { query: 'FROM logs-* | LIMIT 10' },
-          },
-          metadata: { name: 'signal-rule' },
-        })
-      );
-      await apiServices.alertingV2.rules.bulkDisable({
-        ids: [alertRule.id, signalRule.id],
-      });
-
-      const response = await apiClient.post(BULK_ENABLE_URL, {
-        headers: writerHeaders,
-        body: { filter: 'kind: signal' },
-      });
-
-      expect(response).toHaveStatusCode(200);
-      expect(response.body.errors).toStrictEqual([]);
-      expect(response.body.rules).toHaveLength(1);
-      expect(response.body.rules[0].id).toBe(signalRule.id);
-      expectNoBulkTruncationMetadata(response.body);
-
-      // The alert rule must still be disabled.
-      const stored = await apiServices.alertingV2.rules.get(alertRule.id);
-      expect(stored.enabled).toBe(false);
     }
   );
 
@@ -197,7 +105,7 @@ apiTest.describe('Bulk enable rules API', { tag: '@local-stateful-classic' }, ()
     expect(response).toHaveStatusCode(400);
   });
 
-  apiTest('validation: should reject body without any selector', async ({ apiClient }) => {
+  apiTest('validation: should reject a body with no ids field', async ({ apiClient }) => {
     const response = await apiClient.post(BULK_ENABLE_URL, {
       headers: writerHeaders,
       body: {},
@@ -205,18 +113,10 @@ apiTest.describe('Bulk enable rules API', { tag: '@local-stateful-classic' }, ()
     expect(response).toHaveStatusCode(400);
   });
 
-  apiTest('validation: should reject combining ids with filter', async ({ apiClient }) => {
+  apiTest('validation: should reject unknown fields (strict schema)', async ({ apiClient }) => {
     const response = await apiClient.post(BULK_ENABLE_URL, {
       headers: writerHeaders,
-      body: { ids: ['some-id'], filter: 'metadata.tags: "x"' },
-    });
-    expect(response).toHaveStatusCode(400);
-  });
-
-  apiTest('validation: should reject combining match_all with ids', async ({ apiClient }) => {
-    const response = await apiClient.post(BULK_ENABLE_URL, {
-      headers: writerHeaders,
-      body: { match_all: true, ids: ['some-id'] },
+      body: { ids: ['some-id'], unknown: 'value' },
     });
     expect(response).toHaveStatusCode(400);
   });
@@ -243,20 +143,6 @@ apiTest.describe('Bulk enable rules API', { tag: '@local-stateful-classic' }, ()
   );
 
   apiTest(
-    'validation: should reject unknown top-level body fields (strict)',
-    async ({ apiClient, apiServices }) => {
-      const rule = await apiServices.alertingV2.rules.create(
-        buildCreateRuleData({ metadata: { name: 'bulk-strict-top-level' } })
-      );
-      const response = await apiClient.post(BULK_ENABLE_URL, {
-        headers: writerHeaders,
-        body: { ids: [rule.id], unknownField: 'x' },
-      });
-      expect(response).toHaveStatusCode(400);
-    }
-  );
-
-  apiTest(
     'authorization: should return 200 for a user with full alerting_v2 privileges',
     async ({ apiClient, apiServices }) => {
       const rule = await apiServices.alertingV2.rules.create(
@@ -268,7 +154,7 @@ apiTest.describe('Bulk enable rules API', { tag: '@local-stateful-classic' }, ()
         body: { ids: [rule.id] },
       });
       expect(response).toHaveStatusCode(200);
-      expect(response.body.rules[0].id).toBe(rule.id);
+      expect(response.body).toStrictEqual({ affected_count: 1, errors: [] });
     }
   );
 

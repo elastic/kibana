@@ -18,6 +18,7 @@ import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useIsNewFlyoutEnabled } from '../../common/hooks/use_is_new_flyout_enabled';
 import { useFlyoutApi } from '../../flyout_v2/use_flyout_api';
 import { createFlyoutApiMock } from '../../flyout_v2/use_flyout_api.mock';
+import { FLYOUT_ORIGIN } from '../../common/lib/telemetry';
 
 jest.mock('../../common/hooks/use_is_new_flyout_enabled');
 jest.mock('../../flyout_v2/use_flyout_api');
@@ -86,6 +87,7 @@ describe('NetworkDetails', () => {
     expect(flyoutApi.openNetworkFlyout).toHaveBeenCalledWith({
       ip: '1.2.3.4',
       flowTarget: FlowTargetSourceDest.source,
+      origin: FLYOUT_ORIGIN.TABLE_FIELD_LINK,
     });
     expect(mockOpenFlyout).not.toHaveBeenCalled();
   });

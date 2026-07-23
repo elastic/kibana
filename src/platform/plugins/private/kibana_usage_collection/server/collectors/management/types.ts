@@ -58,7 +58,6 @@ export interface UsageStats {
   'agentBuilder:experimentalFeatures': boolean;
   'agentBuilder:bashSupport': boolean;
   'contextEngine:enabled': boolean;
-  'agentBuilder:uiamOAuthClientManagement': boolean;
   'agentBuilder:tracing:enabled': boolean;
   'agentBuilder:tracing:includeLlmResponses': boolean;
   'agentBuilder:tracing:includeRealIds': boolean;
@@ -95,6 +94,7 @@ export interface UsageStats {
   'securitySolution:defaultValueReportRate': string;
   'securitySolution:defaultValueReportTitle': string;
   'securitySolution:enableAlertsAndAttacksAlignment': boolean;
+  'securitySolution:enableAttackDiscoveryWorkflows': boolean;
   'securitySolution:enableRuleChangesHistory': boolean;
   'search:includeFrozen': boolean;
   'courier:maxConcurrentShardRequests': number;
