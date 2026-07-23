@@ -110,7 +110,7 @@ describe('formatAttachmentsMetadata', () => {
       [{ attachment_id: 'missing-id', version: 1 }],
       stateManager
     );
-    
+
     expect(result).toBe('');
   });
 
