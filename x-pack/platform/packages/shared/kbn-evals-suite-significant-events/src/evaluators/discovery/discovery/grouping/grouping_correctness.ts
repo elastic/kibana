@@ -7,8 +7,8 @@
 
 import type { DiscoveryEvaluator } from '../../types';
 
-function detectionKey(d: { rule_uuid?: string }): string {
-  return d.rule_uuid ?? '';
+function detectionKey(d: { rule_uuid?: string; metadata?: { rule_uuid?: string } }): string {
+  return d.rule_uuid ?? d.metadata?.rule_uuid ?? '';
 }
 
 /** Unordered same-group detection-key pairs ("a|b", a<b), order/count-independent. */
@@ -41,9 +41,9 @@ export const groupingCorrectnessEvaluator: DiscoveryEvaluator = {
   kind: 'CODE',
   evaluate: ({ output, expected }) => {
     // Derive the expected grouping from the canonical expected_discoveries: each discovery's
-    // detections form one group, keyed by rule_uuid (or rule_name as fallback).
+    // detection signals form one group, keyed by rule_uuid from signal metadata.
     const expectedGroups = expected?.expected_discoveries?.map((discovery) =>
-      (discovery.detections ?? []).map((d) => detectionKey(d)).filter(Boolean)
+      (discovery.signals ?? []).map((s) => detectionKey(s.metadata ?? {})).filter(Boolean)
     );
     if (!expectedGroups || expectedGroups.length === 0) {
       return Promise.resolve({
@@ -62,8 +62,8 @@ export const groupingCorrectnessEvaluator: DiscoveryEvaluator = {
       });
     }
     const actualGroups = discoveries.map((discovery) => {
-      const detections = discovery.detections ?? [];
-      return detections.map((d) => detectionKey(d)).filter(Boolean);
+      const signals = discovery.signals ?? [];
+      return signals.map((s) => detectionKey(s.metadata ?? {})).filter(Boolean);
     });
 
     const totalRules = new Set(expectedGroups.flat()).size;

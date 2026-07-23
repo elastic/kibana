@@ -18,6 +18,7 @@ import {
   EuiSwitch,
   EuiFlyoutFooter,
   EuiIconTip,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -59,6 +60,7 @@ type RuleTab = (typeof tabs)[number]['id'];
 
 export const RuleFlyout = ({ onClose, rule }: RuleFlyoutProps) => {
   const [tab, setTab] = useState<RuleTab>('overview');
+  const titleId = useGeneratedHtmlId({ prefix: 'ruleFlyoutTitle' });
 
   const isRuleMuted = rule?.state === 'muted';
   const { mutate: mutateRuleState } = useChangeCspRuleState();
@@ -87,10 +89,11 @@ export const RuleFlyout = ({ onClose, rule }: RuleFlyoutProps) => {
       onClose={onClose}
       data-test-subj={TEST_SUBJECTS.CSP_RULES_FLYOUT_CONTAINER}
       outsideClickCloses
+      aria-labelledby={titleId}
     >
       <EuiFlyoutHeader>
         <EuiTitle size="l">
-          <h2>{rule.metadata.name}</h2>
+          <h2 id={titleId}>{rule.metadata.name}</h2>
         </EuiTitle>
         <EuiTabs>
           {tabs.map((item) => (

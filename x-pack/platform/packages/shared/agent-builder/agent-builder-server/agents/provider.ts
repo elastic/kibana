@@ -10,6 +10,7 @@ import type { Logger } from '@kbn/logging';
 import type {
   Conversation,
   ConversationRound,
+  ConversationRoundAuthor,
   ConverseInput,
   ChatAgentEvent,
   AgentCapabilities,
@@ -42,7 +43,7 @@ import type {
   IBashService,
 } from '../runner';
 import type { AttachmentStateManager } from '../attachments';
-import type { ExecutionConversationSource } from '../execution/types';
+import type { ExecutionConversationOrigin } from '../execution/types';
 import type { AgentBuilderHooks } from '../hooks/types';
 import type { ToolRegistry } from '../tools';
 import type { AgentBuilderAnalytics, AgentBuilderTracking } from '../telemetry';
@@ -269,9 +270,14 @@ export interface AgentParams {
    */
   nextInput: ConverseInput;
   /**
-   * External source that initiated this execution, when it originated outside Kibana.
+   * External origin that initiated this execution, when it originated outside Kibana.
    */
-  source?: ExecutionConversationSource;
+  origin?: ExecutionConversationOrigin;
+  /**
+   * Resolved author for the round input (external system author, or the Kibana user for
+   * public conversations). Stamped onto the completed round.
+   */
+  author?: ConversationRoundAuthor;
   /**
    * Agent capabilities to enable.
    */

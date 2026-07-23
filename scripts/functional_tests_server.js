@@ -7,5 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 require('@kbn/setup-node-env');
-require('../src/cli/kibana/apm')('functional-test-server', []);
+require('@kbn/cli/kibana/apm')('functional-test-server', []);
 require('@kbn/test').startServersCli();

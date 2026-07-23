@@ -13,13 +13,13 @@
     "requiredPlugins": [
       "actions",
       "alerting",
+      "alertingVTwo",
       "console",
       "data",
       "encryptedSavedObjects",
       "features",
       "inference",
       "licensing",
-      "ruleRegistry",
       "security",
       "streams",
       "taskManager",
@@ -29,7 +29,6 @@
     "optionalPlugins": [
       "agentBuilder",
       "agentBuilderSml",
-      "alertingVTwo",
       "cloud",
       "esql",
       "serverless",
