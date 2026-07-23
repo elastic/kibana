@@ -425,6 +425,7 @@ export class TaskManagerRunner implements TaskRunner {
 
         const modifiedContext = await this.beforeRun({
           taskInstance: stateValidationResult.taskInstance,
+          executionUuid: this.uuid,
         });
 
         this.onTaskEvent(
@@ -447,16 +448,19 @@ export class TaskManagerRunner implements TaskRunner {
             modifiedContext.taskInstance
           );
           const userProfileId = modifiedContext.taskInstance.userScope?.userProfileId;
+          const userName = modifiedContext.taskInstance.userScope?.userName;
 
           const fakeRequest = buildTaskFakeRequest({
             apiKey: apiKeyForRequest,
             spaceId: modifiedContext.taskInstance.userScope?.spaceId,
             userProfileId,
+            userName,
             enrichFakeRequest: this.enrichFakeRequest,
           });
 
           const enrichRequest = buildChildRequestEnricher({
             userProfileId,
+            userName,
             enrichFakeRequest: this.enrichFakeRequest,
           });
 
@@ -465,8 +469,9 @@ export class TaskManagerRunner implements TaskRunner {
           this.task = definition.createTaskRunner({
             taskInstance: sanitizedTaskInstance,
             fakeRequest,
-            abortController,
+            signal: abortController.signal,
             enrichRequest,
+            executionUuid: this.uuid,
           });
 
           const originalTaskCancel = this.task.cancel;
@@ -583,7 +588,22 @@ export class TaskManagerRunner implements TaskRunner {
     // mget claim strategy sets the task to `running` during the claim cycle
     // so this update to mark the task as running is unnecessary
     if (this.claimStrategy === CLAIM_STRATEGY_MGET) {
-      this.instance = asReadyToRun(this.instance.task as ConcreteTaskInstanceWithStartedAt);
+      const { task } = this.instance;
+      // A ready-to-run mget task should always have a `startedAt`; log if it doesn't
+      // so we can diagnose the issue.
+      if (task.startedAt == null) {
+        this.logger.warn(
+          `Task ${this} is ready to run (mget) without a startedAt, which breaks the running-task invariant. ` +
+            `status=${task.status} attempts=${task.attempts} ` +
+            `runAt=${task.runAt?.toISOString() ?? 'null'} ` +
+            `retryAt=${task.retryAt?.toISOString() ?? 'null'} ` +
+            `scheduledAt=${task.scheduledAt?.toISOString() ?? 'null'} ` +
+            `ownerId=${task.ownerId ?? 'null'} version=${task.version ?? 'null'} ` +
+            `schedule=${task.schedule ? JSON.stringify(task.schedule) : 'null'}`,
+          { tags: [this.taskType, this.id] }
+        );
+      }
+      this.instance = asReadyToRun(task as ConcreteTaskInstanceWithStartedAt);
       return true;
     }
 
@@ -605,6 +625,7 @@ export class TaskManagerRunner implements TaskRunner {
         try {
           const { taskInstance } = await this.beforeMarkRunning({
             taskInstance: this.instance.task,
+            executionUuid: this.uuid,
           });
 
           const attempts = taskInstance.attempts + 1;
@@ -836,6 +857,7 @@ export class TaskManagerRunner implements TaskRunner {
       await this.removeTask();
     } else {
       const { shouldValidate = true } = unwrap(result);
+      const label = `${this.taskType}:${this.instance.task.id}`;
 
       let shouldUpdateTask: boolean = false;
       let partialTask: PartialConcreteTaskInstance = {
@@ -869,7 +891,6 @@ export class TaskManagerRunner implements TaskRunner {
         shouldUpdateTask = true;
 
         if (shouldTaskBeDisabled) {
-          const label = `${this.taskType}:${this.instance.task.id}`;
           this.logger.warn(`Disabling task ${label} as it indicated it should disable itself`, {
             tags: [this.taskType],
           });
@@ -887,12 +908,29 @@ export class TaskManagerRunner implements TaskRunner {
       }
 
       if (shouldUpdateTask) {
-        this.instance = asRan(
-          await this.bufferedTaskStore.partialUpdate(partialTask, {
-            validate: shouldValidate,
-            doc: this.instance.task,
-          })
-        );
+        try {
+          this.instance = asRan(
+            await this.bufferedTaskStore.partialUpdate(partialTask, {
+              validate: shouldValidate,
+              doc: this.instance.task,
+            })
+          );
+        } catch (error) {
+          const isVersionConflict =
+            SavedObjectsErrorHelpers.isConflictError(error) ||
+            error.status === 409 ||
+            error.statusCode === 409 ||
+            error.error?.type === 'version_conflict_engine_exception';
+
+          if ((this.isExpired || this.isCancelled) && isVersionConflict) {
+            this.logger.debug(
+              `Skipping the update of expired/cancelled task ${label} because it was reclaimed by another Kibana while running.`,
+              { tags: [this.id, this.taskType] }
+            );
+          } else {
+            throw error;
+          }
+        }
       }
     }
 
@@ -1116,6 +1154,7 @@ export class TaskManagerRunner implements TaskRunner {
           type: this.taskType,
           scheduled: task.scheduledAt.toISOString(),
           ...(scheduleDelayNs != null ? { schedule_delay: scheduleDelayNs } : {}),
+          execution: { uuid: this.uuid },
         },
       },
       message: `Task ${this.taskType} "${this.id}" started.`,
@@ -1152,6 +1191,7 @@ export class TaskManagerRunner implements TaskRunner {
           type: this.taskType,
           scheduled: task.scheduledAt.toISOString(),
           schedule_delay: scheduleDelayNs,
+          execution: { uuid: this.uuid },
         },
       },
       message,
@@ -1173,6 +1213,7 @@ export class TaskManagerRunner implements TaskRunner {
           id: this.id,
           type: this.taskType,
           scheduled: task.scheduledAt.toISOString(),
+          execution: { uuid: this.uuid },
         },
       },
       message: `Task ${this.taskType} "${this.id}" has been cancelled.`,

@@ -132,6 +132,42 @@ describe('FrozenPhaseCard', () => {
     expect(getByRole('button', { name: 'Refresh snapshot repositories' })).toBeInTheDocument();
   });
 
+  it('directs the modal to create a repository when none exist', () => {
+    const { getByTestId, queryByTestId } = renderFrozenPhaseCard({
+      duration: { ...defaultDuration, enabled: false },
+      hasDefaultSnapshotRepository: false,
+      hasExistingRepositories: false,
+      manageRepositoriesHref: '/app/management/data/snapshot_restore/repositories',
+    });
+
+    fireEvent.click(getByTestId('defaultRepositoryRequiredBadge'));
+
+    expect(
+      getByTestId('defaultSnapshotRepositoryRequiredModalCreateDefaultRepositoryButton')
+    ).toHaveAttribute('href', '/app/management/data/snapshot_restore/add_repository');
+    expect(
+      queryByTestId('defaultSnapshotRepositoryRequiredModalManageRepositoriesButton')
+    ).not.toBeInTheDocument();
+  });
+
+  it('directs the modal to the repositories list when repositories already exist', () => {
+    const { getByTestId, queryByTestId } = renderFrozenPhaseCard({
+      duration: { ...defaultDuration, enabled: false },
+      hasDefaultSnapshotRepository: false,
+      hasExistingRepositories: true,
+      manageRepositoriesHref: '/app/management/data/snapshot_restore/repositories',
+    });
+
+    fireEvent.click(getByTestId('defaultRepositoryRequiredBadge'));
+
+    expect(
+      getByTestId('defaultSnapshotRepositoryRequiredModalManageRepositoriesButton')
+    ).toHaveAttribute('href', '/app/management/data/snapshot_restore/repositories');
+    expect(
+      queryByTestId('defaultSnapshotRepositoryRequiredModalCreateDefaultRepositoryButton')
+    ).not.toBeInTheDocument();
+  });
+
   it('shows the default repository badge (not enterprise) when only the repository is missing', () => {
     const { getByTestId, queryByTestId } = renderFrozenPhaseCard({
       duration: { ...defaultDuration, enabled: false },
@@ -157,18 +193,37 @@ describe('FrozenPhaseCard', () => {
       ).toBeInTheDocument();
     });
 
-    it('renders the default repository callout and opens the create-repository modal', () => {
-      const { getByTestId, queryByTestId, getByRole } = renderFrozenPhaseCard({
+    it('renders the default repository callout with a direct create-repository link', () => {
+      const { getByTestId, queryByTestId } = renderFrozenPhaseCard({
         hasDefaultSnapshotRepository: false,
         defaultSnapshotRepository: 'my-repo',
+        createDefaultRepositoryUrl: '/app/management/data/snapshot_restore/add_repository',
       });
 
       expect(getByTestId('frozenDefaultRepositoryRequiredCallout')).toBeInTheDocument();
       expect(queryByTestId('frozenSearchableSnapshotInfo')).not.toBeInTheDocument();
 
-      fireEvent.click(getByTestId('frozenCreateDefaultRepositoryButton'));
-      // The modal (not the callout) exposes a "Refresh snapshot repositories" button.
-      expect(getByRole('button', { name: 'Refresh snapshot repositories' })).toBeInTheDocument();
+      // The create button links directly to the repository creation page (no modal).
+      expect(getByTestId('frozenCreateDefaultRepositoryButton')).toHaveAttribute(
+        'href',
+        '/app/management/data/snapshot_restore/add_repository'
+      );
+    });
+
+    it('renders the default repository callout with a manage-repositories link when other repositories already exist', () => {
+      const { getByTestId, queryByTestId } = renderFrozenPhaseCard({
+        hasDefaultSnapshotRepository: false,
+        defaultSnapshotRepository: 'my-repo',
+        createDefaultRepositoryUrl: '/app/management/data/snapshot_restore/add_repository',
+        manageRepositoriesHref: '/app/management/data/snapshot_restore/repositories',
+        hasExistingRepositories: true,
+      });
+
+      expect(getByTestId('frozenManageRepositoriesButton')).toHaveAttribute(
+        'href',
+        '/app/management/data/snapshot_restore/repositories'
+      );
+      expect(queryByTestId('frozenCreateDefaultRepositoryButton')).not.toBeInTheDocument();
     });
 
     it('disables the create repository action when the user cannot create one', () => {

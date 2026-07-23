@@ -182,6 +182,19 @@ export const attacksGenerateClickedEvent: AttacksTelemetryEvent = {
   },
 };
 
+export const attacksGenerationsControlCenterOpenedEvent: AttacksTelemetryEvent = {
+  eventType: AttacksEventTypes.GenerationsControlCenterOpened,
+  schema: {
+    source: {
+      type: 'keyword',
+      _meta: {
+        description: 'The source of the generations control center open',
+        optional: false,
+      },
+    },
+  },
+};
+
 export const attacksFeaturePromotionCalloutActionEvent: AttacksTelemetryEvent = {
   eventType: AttacksEventTypes.FeaturePromotionCalloutAction,
   schema: {
@@ -214,6 +227,36 @@ export const attacksTypeFilterChangedEvent: AttacksTelemetryEvent = {
   },
 };
 
+export const attacksTourCalloutActionEvent: AttacksTelemetryEvent = {
+  eventType: AttacksEventTypes.TourCalloutAction,
+  schema: {
+    action: {
+      type: 'keyword',
+      _meta: {
+        description: 'The action taken on the tour callout (view/start_tour/view_docs/dismiss)',
+        optional: false,
+      },
+    },
+  },
+};
+
+export const attacksTourStepActionEvent: AttacksTelemetryEvent = {
+  eventType: AttacksEventTypes.TourStepAction,
+  schema: {
+    action: {
+      type: 'keyword',
+      _meta: {
+        description: 'The action taken on a tour step (advance/dismiss/finish)',
+        optional: false,
+      },
+    },
+    step: {
+      type: 'integer',
+      _meta: { description: 'The tour step the action was taken on', optional: false },
+    },
+  },
+};
+
 export const attacksTelemetryEvents = [
   attacksTableSortChangedEvent,
   attacksViewOptionChangedEvent,
@@ -229,8 +272,11 @@ export const attacksTelemetryEvents = [
   attacksScheduleFlyoutOpenedEvent,
   attacksSettingsFlyoutOpenedEvent,
   attacksGenerateClickedEvent,
+  attacksGenerationsControlCenterOpenedEvent,
   attacksScheduleDetailsFlyoutOpenedEvent,
   attacksFeaturePromotionCalloutActionEvent,
   attacksWorkflowRunTriggeredEvent,
   attacksTypeFilterChangedEvent,
+  attacksTourCalloutActionEvent,
+  attacksTourStepActionEvent,
 ];

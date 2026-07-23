@@ -134,6 +134,8 @@ xpack.remote_clusters.enabled: false
 xpack.snapshot_restore.enabled: false
 xpack.license_management.enabled: false
 xpack.cloud_connect.enabled: false
+xpack.dataFederation.enabled: true
+xpack.dataFederation.enableFederatedIdentityAuth: true
 xpack.reindex_service.rollupsEnabled: false
 
 # Management team UI configurations
@@ -199,6 +201,8 @@ xpack.ml.nlp:
 
 # Enforce restring access to internal APIs see https://github.com/elastic/kibana/issues/151940
 server.restrictInternalApis: true
+# Allow API key and Bearer token authenticated requests to bypass the XSRF check
+server.xsrf.allowedSchemes: ['apikey', 'bearer']
 # Telemetry enabled by default and not disableable via UI
 telemetry.optIn: true
 telemetry.allowChangingOptInStatus: false
@@ -300,3 +304,4 @@ xpack.genAiSettings:
   showAiBreadcrumb: false
   showSpacesIntegration: false
   showAiAssistantsVisibilitySetting: false
+

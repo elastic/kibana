@@ -17,11 +17,11 @@ import {
 } from '@elastic/eui';
 
 import type { CustomCellRenderer } from '@kbn/unified-data-table';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import type { FindRulesResponse } from '@kbn/alerting-v2-schemas';
 import { getBreachEsqlQuery } from '@kbn/alerting-v2-schemas';
 import type { AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
-import type { EpisodeActionState } from '../types/action';
-import type { AlertEpisodeGroupAction } from '../types/action';
+import type { EpisodeActionState, EpisodeStatusGroupAction } from '../types/action';
 
 import { parseEpisodeDataJson } from '../utils/episode_grouping_data';
 import { AlertingEpisodeGroupingTags } from './grouping/alerting_episode_grouping_tags';
@@ -45,15 +45,9 @@ export const EpisodeStatusCell = ({ row, columnId }: CellRendererProps) => {
     lastAckActor: (row.flattened.last_ack_actor as string | undefined) ?? null,
   };
 
-  const groupAction: AlertEpisodeGroupAction = {
-    groupHash: row.flattened.group_hash as string,
-    ruleId: row.flattened['rule.id'] as string | null,
-    lastDeactivateAction: (row.flattened.last_deactivate_action as string | undefined) ?? null,
+  const groupAction: EpisodeStatusGroupAction = {
     lastSnoozeAction: (row.flattened.last_snooze_action as string | undefined) ?? null,
     snoozeExpiry: (row.flattened.snooze_expiry as string | undefined) ?? null,
-    tags: (row.flattened.last_tags as string[] | undefined) ?? [],
-    lastSnoozeActor: (row.flattened.last_snooze_actor as string | undefined) ?? null,
-    lastDeactivateActor: (row.flattened.last_deactivate_actor as string | undefined) ?? null,
   };
 
   return (
@@ -81,6 +75,8 @@ export interface EpisodeRuleCellProps extends CellRendererProps {
   rulesCache: Record<string, Rule>;
   isLoadingRules: boolean;
   rowHeight: number;
+  /** Source data views keyed by rule id, used to format grouping values via `fieldFormats`. */
+  sourceDataViewsByRule?: Map<string, DataView>;
 }
 
 export const EpisodeRuleCell = ({
@@ -89,6 +85,7 @@ export const EpisodeRuleCell = ({
   rulesCache,
   isLoadingRules,
   rowHeight,
+  sourceDataViewsByRule,
 }: EpisodeRuleCellProps) => {
   const { euiTheme } = useEuiTheme();
 
@@ -129,6 +126,7 @@ export const EpisodeRuleCell = ({
               <AlertingEpisodeGroupingTags
                 fields={groupingFields}
                 data={episodeData}
+                dataView={sourceDataViewsByRule?.get(ruleId)}
                 data-test-subj="episodeRuleCellGroupingTags"
               />
             </EuiFlexItem>

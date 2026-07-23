@@ -127,7 +127,7 @@ export class SampleTaskManagerFixturePlugin
                 schema.nullable(
                   schema.object({
                     profileUid: schema.maybe(schema.string()),
-                    usernameWasUndefined: schema.boolean(),
+                    username: schema.maybe(schema.string()),
                   })
                 )
               ),
@@ -135,7 +135,7 @@ export class SampleTaskManagerFixturePlugin
                 schema.nullable(
                   schema.object({
                     profileUid: schema.maybe(schema.string()),
-                    usernameWasUndefined: schema.boolean(),
+                    username: schema.maybe(schema.string()),
                   })
                 )
               ),
@@ -157,9 +157,8 @@ export class SampleTaskManagerFixturePlugin
               if (!user) {
                 return null;
               }
-              // Verify identity fields are suppressed (read returns undefined).
-              const usernameWasUndefined = user.username === undefined;
-              return { profileUid: user.profile_uid, usernameWasUndefined };
+              // Capture the enriched identity fields exposed on the fake request.
+              return { profileUid: user.profile_uid, username: user.username };
             };
 
             const resolvedFromTaskRequest = resolveUser(fakeRequest);
@@ -357,6 +356,34 @@ export class SampleTaskManagerFixturePlugin
             },
           };
         },
+      },
+      sampleRecurringTaskWhichOverrunsRetryAt: {
+        title: 'Sample Recurring Task that overruns its retryAt',
+        description:
+          'A recurring task that records each run start, has a short timeout, and runs longer than its retryAt so Task Manager reclaims and re-runs it while the original run is still in flight. It intentionally does not support cancellation.',
+        timeout: '3s',
+        createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => ({
+          async run() {
+            const { state } = taskInstance;
+
+            const [{ elasticsearch }] = await core.getStartServices();
+            await elasticsearch.client.asInternalUser.index({
+              index: '.kibana_task_manager_test_result',
+              document: {
+                type: 'task',
+                taskId: taskInstance.id,
+                state: JSON.stringify(state),
+                ranAt: new Date(),
+              },
+              refresh: true,
+            });
+            await new Promise((resolve) => setTimeout(resolve, 10000)); // 10 seconds
+
+            return {
+              state: {},
+            };
+          },
+        }),
       },
       sampleRecurringTaskThatDeletesItself: {
         title: 'Sample Recurring Task that Times Out',

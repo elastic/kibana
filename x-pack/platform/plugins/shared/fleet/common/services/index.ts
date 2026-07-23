@@ -51,7 +51,11 @@ export {
   MINIMUM_PRIVILEGE_LEVEL_CHANGE_AGENT_VERSION,
   isAgentEligibleForPrivilegeLevelChange,
 } from './agent_privilege_level_change_helpers';
-export { syncDataStreamTypeFromVar } from './simplified_package_policy_helper';
+export {
+  syncDataStreamTypeFromVar,
+  toNewAgentlessPolicy,
+  agentlessPolicyToPackagePolicy,
+} from './simplified_package_policy_helper';
 export {
   addUseAPMVarIfNotPresent,
   DATA_STREAM_USE_APM_VAR,
@@ -151,6 +155,8 @@ export { getOtelCollectorDisplayName, getOtelCollectorConfigName } from './otel_
 
 export { isNamespaceAllowedByPrefixes } from './namespace_prefixes';
 
+export { getAgentlessThroughputIndexPatterns } from './agentless_throughput_helper';
+
 export type { YamlModule } from './yaml_utils';
 export { createYamlKeysSorter, toYaml } from './yaml_utils';
 export {
@@ -158,3 +164,10 @@ export {
   packagePolicyHasOtelInputs,
   OTEL_INPUTS_MINIMUM_VERSION,
 } from './otelcol_helpers';
+
+export {
+  hasVersionSuffix,
+  removeVersionSuffixFromPolicyId,
+  buildPolicyIdOrVariantsKuery,
+  buildPolicyIdsOrVariantsKuery,
+} from './version_specific_policies_utils';

@@ -113,6 +113,7 @@ import {
 } from '../../services/epm/packages/rollback';
 import { updatePackage, reviewUpgrade } from '../../services/epm/packages/update';
 import { scheduleSyncNamespaceTemplatesTask } from '../../tasks/sync_namespace_templates_task';
+import { scheduleSyncIlmPolicyTask } from '../../tasks/sync_ilm_policy_task';
 import { getGpgKeyIdOrUndefined } from '../../services/epm/packages/package_verification';
 import type {
   ReauthorizeTransformRequestSchema,
@@ -337,8 +338,12 @@ export const updatePackageHandler: FleetRequestHandler<
 
   // Gate both added and removed namespaces on the current space's allowed_namespace_prefixes.
   const requestedList = request.body.namespace_customization_enabled_for;
-  if (requestedList) {
-    const installation = await getInstallation({ savedObjectsClient, pkgName });
+  const requestedSettings = request.body.namespace_customization_settings;
+  let installation: Awaited<ReturnType<typeof getInstallation>> | undefined;
+  if (requestedList || requestedSettings) {
+    installation = await getInstallation({ savedObjectsClient, pkgName });
+  }
+  if (requestedList && installation !== undefined) {
     const currentList = installation?.namespace_customization_enabled_for ?? [];
     const added = requestedList.filter((ns) => !currentList.includes(ns));
     const removed = currentList.filter((ns) => !requestedList.includes(ns));
@@ -355,8 +360,55 @@ export const updatePackageHandler: FleetRequestHandler<
       }
     }
   }
+  if (requestedSettings) {
+    // The effective opted-in list is the incoming one (if also being updated) or the current one.
+    const effectiveOptInList =
+      requestedList ?? installation?.namespace_customization_enabled_for ?? [];
+    const notOptedIn = Object.keys(requestedSettings).filter(
+      (ns) => !effectiveOptInList.includes(ns)
+    );
+    if (notOptedIn.length > 0) {
+      throw new PolicyNamespaceValidationError(
+        `Cannot set ILM policy for namespace(s) not opted in for namespace customization: ${notOptedIn.join(
+          ', '
+        )}`
+      );
+    }
 
-  const { packageInfo, namespaceCustomizationDiff } = await updatePackage({
+    // Reject ILM policies that don't exist: a component template pointing at a
+    // non-existent lifecycle is silently broken (ES accepts it, but rollover never applies).
+    const requestedIlmPolicies = [
+      ...new Set(
+        Object.values(requestedSettings)
+          .map((settings) => settings.ilm_policy)
+          .filter((ilmPolicy): ilmPolicy is string => !!ilmPolicy)
+      ),
+    ];
+    if (requestedIlmPolicies.length > 0) {
+      const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+      // Enforce the manage_ilm privilege on the write path. Without this the privilege
+      // gate would be UI-only: the route is authorized with integration-install privileges
+      // and syncIlmPolicy runs as the Fleet internal user, so a caller lacking manage_ilm
+      // could otherwise assign an ILM policy to every backing index by calling the API directly.
+      const { has_all_requested: hasManageIlm } = await esClient.security.hasPrivileges({
+        cluster: ['manage_ilm'],
+      });
+      if (!hasManageIlm) {
+        throw new FleetUnauthorizedError(
+          'The manage_ilm cluster privilege is required to assign an ILM policy.'
+        );
+      }
+      const existingLifecycles = await esClient.ilm.getLifecycle();
+      const missing = requestedIlmPolicies.filter((ilmPolicy) => !existingLifecycles[ilmPolicy]);
+      if (missing.length > 0) {
+        throw new PolicyNamespaceValidationError(
+          `The following ILM policies do not exist: ${missing.join(', ')}`
+        );
+      }
+    }
+  }
+
+  const { packageInfo, namespaceCustomizationDiff, ilmPolicyChanges } = await updatePackage({
     savedObjectsClient,
     pkgName,
     ...request.body,
@@ -371,6 +423,14 @@ export const updatePackageHandler: FleetRequestHandler<
       packageName: pkgName,
       addedNamespaces: namespaceCustomizationDiff.addedNamespaces,
       removedNamespaces: namespaceCustomizationDiff.removedNamespaces,
+    });
+  }
+
+  for (const { namespace } of ilmPolicyChanges) {
+    await scheduleSyncIlmPolicyTask(getTaskManagerStart(), {
+      spaceId,
+      packageName: pkgName,
+      namespace,
     });
   }
 
@@ -803,6 +863,7 @@ const soToInstallationInfo = (pkg: PackageListItem | PackageInfo) => {
       pending_upgrade_review: attributes.pending_upgrade_review,
       keep_policies_up_to_date: attributes.keep_policies_up_to_date,
       namespace_customization_enabled_for: attributes.namespace_customization_enabled_for,
+      namespace_customization_settings: attributes.namespace_customization_settings,
     };
 
     return {

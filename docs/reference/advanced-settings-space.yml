@@ -104,6 +104,11 @@ groups:
         id: theme-darkmode
         description: |
           The UI theme that the {{product.kibana}} UI should use. Set to `enabled` or `disabled` to enable or disable the dark theme. Set to `system` to have the {{product.kibana}} UI theme follow the system theme. You must refresh the page to apply the setting.
+
+          The default value depends on your version:
+
+          * {applies_to}`stack: ga 9.5+` Defaults to `system`.
+          * {applies_to}`stack: ga 9.0-9.4` Defaults to `disabled`.
         datatype: enum
         options:
           - option: enabled
@@ -627,12 +632,15 @@ groups:
         datatype: bool
         default: false
         applies_to:
-          stack: ga
+          stack: experimental
           ech: ga
           ece: ga
           eck: ga
           self: ga
           serverless: unavailable
+        note: |
+          :applies_to: stack: ga 9.4.3!+
+          From version 9.4.3, all panels load immediately regardless of this setting. Deferred loading of below-the-fold panels is disabled because enabling it can cause some dashboards to fail to load.
 
       - setting: "labs:canvas:byValueEmbeddable"
         id: labs-canvas-by-value-embeddable
@@ -1742,12 +1750,14 @@ groups:
         datatype: bool
         default: false
         applies_to:
-          stack: preview
+          stack: preview, removed 9.6
           ech: ga
           ece: ga
           eck: ga
           self: ga
-          observability: preview
+        note: |
+          :applies_to: stack: ga 9.6
+          From this version, you can no longer control Significant Events availability using this setting.
 
   - group: Reporting
     id: kibana-reporting-settings

@@ -1,0 +1,10 @@
+prs:
+- https://github.com/elastic/kibana/pull/270540
+issues:
+- https://github.com/elastic/kibana/issues/270477
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-05-26
+title: Fix monitor health API for monitors in non-default spaces
+description: When using Kibana Spaces, the Synthetics monitor health endpoint could incorrectly report monitors as unhealthy — showing errors such as "missing location", "missing agent policy", or "missing package policy" — even when everything was properly configured. This happened because the health check was only looking for monitors, private locations, and Fleet policies in the current space, missing resources that existed in other spaces.

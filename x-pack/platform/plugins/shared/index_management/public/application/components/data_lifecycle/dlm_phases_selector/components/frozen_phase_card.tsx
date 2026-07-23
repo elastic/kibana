@@ -34,6 +34,7 @@ export interface FrozenPhaseCardProps {
   hasDefaultSnapshotRepository: boolean;
   canCreateDefaultSnapshotRepository: boolean;
   createDefaultRepositoryUrl: string;
+  hasExistingRepositories?: boolean;
   enterprise: DlmPhasesSelectorEnterpriseConfig;
   onRefreshDefaultSnapshotRepository?: () => void | Promise<void>;
   onChange: (duration: DlmPhaseDuration) => void;
@@ -52,6 +53,7 @@ export const FrozenPhaseCard = ({
   hasDefaultSnapshotRepository,
   canCreateDefaultSnapshotRepository,
   createDefaultRepositoryUrl,
+  hasExistingRepositories = false,
   enterprise,
   onRefreshDefaultSnapshotRepository,
   onChange,
@@ -115,6 +117,7 @@ export const FrozenPhaseCard = ({
         description={strings.frozenPhaseDescription}
         icon={<EuiIcon type="dot" color={color} size="m" aria-hidden />}
         badges={disabledBadge}
+        preserveBadgeColors={Boolean(disabledBadge)}
         onChange={(checked) => onChange({ ...duration, enabled: checked })}
       >
         {showConfig && (
@@ -143,14 +146,10 @@ export const FrozenPhaseCard = ({
 
             <EuiSpacer size="m" />
 
-            <EuiText size="s" data-test-subj="frozenSearchableSnapshotLabel">
+            <EuiText size="xs" data-test-subj="frozenSearchableSnapshotLabel">
               <strong>
                 {strings.searchableSnapshotLabel}{' '}
-                <EuiIconTip
-                  content={strings.searchableSnapshotTooltip}
-                  type="info"
-                  color="subdued"
-                />
+                <EuiIconTip content={strings.searchableSnapshotTooltip} type="info" />
               </strong>
             </EuiText>
 
@@ -159,11 +158,16 @@ export const FrozenPhaseCard = ({
                 <EuiSpacer size="s" />
 
                 <FrozenDefaultRepositoryRequiredCallout
-                  onCreateDefaultRepository={openCreateDefaultRepositoryModal}
+                  createDefaultRepositoryHref={
+                    canCreateDefaultSnapshotRepository ? createDefaultRepositoryUrl : undefined
+                  }
+                  manageRepositoriesUrl={manageRepositoriesHref}
+                  hasExistingRepositories={hasExistingRepositories}
                   onRefresh={refreshDefaultRepository}
                   isRefreshing={isRefreshingDefaultRepository}
                   calloutTestSubj="frozenDefaultRepositoryRequiredCallout"
                   createButtonTestSubj="frozenCreateDefaultRepositoryButton"
+                  manageRepositoriesButtonTestSubj="frozenManageRepositoriesButton"
                   refreshButtonTestSubj="frozenRefreshDefaultRepositoryButton"
                 />
               </>
@@ -172,7 +176,7 @@ export const FrozenPhaseCard = ({
                 <>
                   <EuiSpacer size="xs" />
 
-                  <EuiText size="s" color="subdued" data-test-subj="frozenSearchableSnapshotInfo">
+                  <EuiText size="xs" data-test-subj="frozenSearchableSnapshotInfo">
                     <SearchableSnapshotRepositoryInfo
                       defaultRepository={defaultSnapshotRepository}
                       manageRepositoriesHref={manageRepositoriesHref}
@@ -201,6 +205,8 @@ export const FrozenPhaseCard = ({
       {openModal === 'defaultRepository' && (
         <DefaultSnapshotRepositoryRequiredModal
           createDefaultRepositoryUrl={createDefaultRepositoryUrl}
+          manageRepositoriesUrl={manageRepositoriesHref}
+          hasExistingRepositories={hasExistingRepositories}
           isRefreshing={isRefreshingDefaultRepository}
           onCancel={closeModal}
           onRefresh={refreshDefaultRepository}

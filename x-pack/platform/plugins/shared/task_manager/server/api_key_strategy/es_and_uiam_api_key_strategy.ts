@@ -16,7 +16,12 @@ import { HTTPAuthorizationHeader, isUiamCredential } from '@kbn/core-security-se
 import { truncate } from 'lodash';
 import { ApiKeyType } from '../config';
 import type { ConcreteTaskInstance, TaskInstance } from '../task';
-import { createApiKey, getApiKeyFromRequest, hasApiKey } from '../lib/api_key_utils';
+import {
+  createApiKey,
+  getApiKeyFromRequest,
+  hasApiKey,
+  shouldCloneApiKeyFromRequest,
+} from '../lib/api_key_utils';
 import type {
   ApiKeySOFields,
   ApiKeyStrategy,
@@ -29,6 +34,7 @@ import {
   UIAM_LOGS_GRANT_TAGS,
   UIAM_LOGS_USAGE_TAGS,
 } from '../constants';
+import { taskManagerUiamTelemetry } from '../otel/uiam_telemetry';
 
 interface UiamApiKeyResult {
   apiKey: string;
@@ -71,16 +77,70 @@ export class EsAndUiamApiKeyStrategy implements ApiKeyStrategy {
     // `uiamApiKeyCreatedByUser`) with matching per-credential checks in
     // `getApiKeyIdsForInvalidation`.
     const user = security.authc.getCurrentUser(request);
-    const apiKeyCreatedByUser = hasApiKey(user, request);
+    const cloneApiKey = shouldCloneApiKeyFromRequest(security, request, opts, user);
+    // When cloning, both the ES and UIAM credentials are freshly minted/Task-Manager-owned, so
+    // apiKeyCreatedByUser must be false (the caller's transient key is not reused).
+    const apiKeyCreatedByUser = hasApiKey(user, request) && !cloneApiKey;
 
-    const esKeys = await createApiKey(taskInstances, request, security, {
+    // Shared shape for the saved-object `userScope`, kept in one place so the
+    // clone-UIAM and ES paths below cannot drift apart.
+    const toUserScope = (apiKeyId: string, uiamApiKeyId?: string) => ({
+      apiKeyId,
+      ...(uiamApiKeyId ? { uiamApiKeyId } : {}),
+      spaceId: request.spaceId,
+      apiKeyCreatedByUser,
+      userProfileId: user?.profile_uid,
+      userName: user?.username,
+    });
+
+    // When cloning a UIAM-authenticated request there is no Elasticsearch API key to clone:
+    // `cloneAsInternalUser` hits the native ES clone endpoint, which rejects raw `essu_`
+    // credentials. Persist a single freshly granted UIAM key and skip the ES clone path
+    // entirely. Non-clone requests keep the existing ES (+ optional UIAM) behavior.
+    const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request);
+    const isUiamRequest = !!authorizationHeader && isUiamCredential(authorizationHeader);
+    const cloneUiamRequest = isUiamRequest && cloneApiKey && opts?.onEsKey !== true;
+
+    if (cloneUiamRequest) {
+      const uiamOnlyKeys = await this.grantUiamApiKeys(
+        taskInstances,
+        request,
+        user,
+        apiKeyCreatedByUser,
+        isUiamRequest
+      );
+
+      const uiamOnlyResult = new Map<string, ApiKeySOFields>();
+      taskInstances.forEach((task) => {
+        const uiamKey = uiamOnlyKeys.get(task.id!);
+        // Fail loud, matching the ES path (`createApiKey` throws). A missing key here
+        // would otherwise schedule a task that can never authenticate at run time.
+        if (!uiamKey) {
+          throw new Error(`Failed to grant UIAM API key for cloned task "${task.id}"`);
+        }
+        uiamOnlyResult.set(task.id!, {
+          uiamApiKey: uiamKey.apiKey,
+          userScope: toUserScope(uiamKey.apiKeyId, uiamKey.apiKeyId),
+        });
+      });
+
+      return uiamOnlyResult;
+    }
+
+    const esKeys = await createApiKey(taskInstances, request, security, opts, {
       user,
       apiKeyCreatedByUser,
     });
     const uiamKeys =
       opts?.onEsKey === true
         ? new Map<string, UiamApiKeyResult>()
-        : await this.grantUiamApiKeys(taskInstances, request, user, apiKeyCreatedByUser);
+        : await this.grantUiamApiKeys(
+            taskInstances,
+            request,
+            user,
+            apiKeyCreatedByUser,
+            isUiamRequest
+          );
 
     const result = new Map<string, ApiKeySOFields>();
     taskInstances.forEach((task) => {
@@ -90,13 +150,7 @@ export class EsAndUiamApiKeyStrategy implements ApiKeyStrategy {
         result.set(task.id!, {
           apiKey: esKey.apiKey,
           ...(uiamKey ? { uiamApiKey: uiamKey.apiKey } : {}),
-          userScope: {
-            apiKeyId: esKey.apiKeyId,
-            ...(uiamKey ? { uiamApiKeyId: uiamKey.apiKeyId } : {}),
-            spaceId: request.spaceId,
-            apiKeyCreatedByUser,
-            userProfileId: user?.profile_uid,
-          },
+          userScope: toUserScope(esKey.apiKeyId, uiamKey?.apiKeyId),
         });
       }
     });
@@ -108,7 +162,8 @@ export class EsAndUiamApiKeyStrategy implements ApiKeyStrategy {
     taskInstances: TaskInstance[],
     request: KibanaRequest,
     user: AuthenticatedUser | null,
-    apiKeyCreatedByUser: boolean
+    apiKeyCreatedByUser: boolean,
+    isUiamRequest: boolean
   ): Promise<Map<string, UiamApiKeyResult>> {
     const uiam = this.security.authc.apiKeys.uiam;
     const uiamKeyByTaskIdMap = new Map<string, UiamApiKeyResult>();
@@ -130,8 +185,7 @@ export class EsAndUiamApiKeyStrategy implements ApiKeyStrategy {
       return uiamKeyByTaskIdMap;
     }
 
-    const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request);
-    if (!authorizationHeader || !isUiamCredential(authorizationHeader)) {
+    if (!isUiamRequest) {
       this.logger.debug(
         'Request credential is not UIAM-compatible, skipping UIAM API key grant. Only ES API keys will be used.',
         { tags: UIAM_LOGS_CREDENTIALS_TAGS }
@@ -187,23 +241,23 @@ export class EsAndUiamApiKeyStrategy implements ApiKeyStrategy {
       }
 
       // No UIAM key available even though the strategy is configured to use UIAM.
-      // Fall back to the ES API key so the task can still run, but emit
-      // observability so we can detect UIAM regressions in production:
-      //   - If the task was scheduled with a user-supplied ES API key
-      //     (`apiKeyCreatedByUser: true`), it is *expected* not to have a UIAM
-      //     key attached. Emit a debug-level message.
-      //   - Otherwise, the task should have had a UIAM key. Emit a warn-level
-      //     message so the fallback is actioned.
+      // Fall back to the ES API key so the task can still run. Some deployments
+      // legitimately cannot mint UIAM keys, so this fallback is expected in the
+      // wild and is logged at debug level to avoid noise. Volume and reason are
+      // tracked via the `kibana.task_manager.task_run.uiam_api_key_fallback.count`
+      // OTel counter instead, which is broken down per project.
       // Mirrors the alerting rule loader behavior (see PR #264434).
       const { userScope, apiKey } = taskInstance;
       if (apiKey) {
         if (userScope?.apiKeyCreatedByUser) {
+          taskManagerUiamTelemetry.recordUiamApiKeyFallback('user_created_key');
           this.logger.debug(
             'UIAM API key is not provided to create a fake request, falling back to ES API key created by the user.',
             { tags: UIAM_LOGS_USAGE_TAGS }
           );
         } else {
-          this.logger.warn(
+          taskManagerUiamTelemetry.recordUiamApiKeyFallback('unexpected');
+          this.logger.debug(
             'UIAM API key is not provided to create a fake request, falling back to regular API key.',
             { tags: UIAM_LOGS_USAGE_TAGS }
           );
@@ -211,11 +265,24 @@ export class EsAndUiamApiKeyStrategy implements ApiKeyStrategy {
       }
       return apiKey;
     }
+
+    // A cloned UIAM request persists only a UIAM key (no ES `apiKey`) even when the
+    // strategy's `typeToUse` is ES (`grant_uiam_api_keys=true` while `api_key_type`
+    // defaults to `es`). Fall back to the UIAM key so the task can still authenticate
+    // at run time instead of yielding an undefined credential.
+    if (!taskInstance.apiKey && taskInstance.uiamApiKey) {
+      this.logger.debug(
+        'ES API key is not provided to create a fake request, falling back to UIAM API key.',
+        { tags: UIAM_LOGS_USAGE_TAGS }
+      );
+      return taskInstance.uiamApiKey;
+    }
+
     return taskInstance.apiKey;
   }
 
   getApiKeyIdsForInvalidation(taskInstance: ConcreteTaskInstance): InvalidationTarget[] {
-    const { userScope, uiamApiKey } = taskInstance;
+    const { userScope, uiamApiKey, apiKey } = taskInstance;
     // `apiKeyCreatedByUser` gates invalidation for BOTH the ES and UIAM keys.
     // See the invariant documented in `grantApiKeys`: both credentials are
     // currently persisted with the same ownership, so a single flag is
@@ -224,7 +291,16 @@ export class EsAndUiamApiKeyStrategy implements ApiKeyStrategy {
       return [];
     }
 
-    const targets: InvalidationTarget[] = [{ apiKeyId: userScope.apiKeyId }];
+    const targets: InvalidationTarget[] = [];
+
+    // Skip the ES invalidation target when no ES key material (`apiKey`) was persisted.
+    // UIAM-only tasks have only a UIAM key; their `userScope.apiKeyId` actually holds the
+    // UIAM key id (mirrored for the in-use guard query), so a bare `{ apiKeyId }` target
+    // would be sent to ES-native invalidation, which cannot revoke a UIAM key. The UIAM
+    // key is invalidated below via the `uiamApiKeyId` + `uiamApiKey` target.
+    if (apiKey) {
+      targets.push({ apiKeyId: userScope.apiKeyId });
+    }
 
     if (userScope.uiamApiKeyId && uiamApiKey) {
       targets.push({ apiKeyId: userScope.uiamApiKeyId, uiamApiKey });

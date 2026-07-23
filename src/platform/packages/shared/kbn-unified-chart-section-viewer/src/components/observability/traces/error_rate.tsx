@@ -72,6 +72,7 @@ const ErrorRateChartContent = ({
   return (
     <Chart
       id="errorRate"
+      isSelected={false}
       esqlQuery={query}
       size="s"
       discoverFetch$={discoverFetch$}
@@ -84,7 +85,6 @@ const ErrorRateChartContent = ({
       chartLayers={chartLayers}
       legend={breakdownField ? BREAKDOWN_LEGEND_CONFIG : undefined}
       syncCursor
-      syncTooltips
       yBounds={ERROR_RATE_Y_BOUNDS}
       extraDisabledActions={[ACTION_OPEN_IN_DISCOVER]}
       profileId={profileId}

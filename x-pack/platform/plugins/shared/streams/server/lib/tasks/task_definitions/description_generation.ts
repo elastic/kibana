@@ -15,7 +15,7 @@ import { parseError } from '../../streams/errors/parse_error';
 import { formatInferenceProviderError } from '../../../routes/utils/create_connector_sse_error';
 import type { TaskContext } from '.';
 import type { TaskParams } from '../types';
-import { PromptsConfigService } from '../../sig_events/saved_objects/prompts_config_service';
+import { PromptsConfigService } from '../../prompts/prompts_config_service';
 import { cancellableTask } from '../cancellable_task';
 
 export const DESCRIPTION_GENERATION_TASK_TYPE = 'streams_description_generation';
@@ -65,7 +65,7 @@ export function createStreamsDescriptionGenerationTask(taskContext: TaskContext)
                   inferenceClient: inferenceClient.bindTo({ connectorId }),
                   start,
                   end,
-                  signal: runContext.abortController.signal,
+                  signal: runContext.signal,
                   logger: taskContext.logger.get('stream_description'),
                   systemPrompt: descriptionPromptOverride,
                 });

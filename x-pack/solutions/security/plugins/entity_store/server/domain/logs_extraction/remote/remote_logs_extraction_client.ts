@@ -10,10 +10,12 @@ import moment from 'moment';
 import { unflattenObject } from '@kbn/object-utils';
 import { get } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
+import { isResponseError, type ElasticsearchErrorDetails } from '@kbn/es-errors';
 import { entityStoreMetrics } from '../../../monitor/metrics';
 import type { Entity } from '../../../../common/domain/definitions/entity.gen';
 import {
   EntityType,
+  type EntityField,
   type ManagedEntityDefinition,
 } from '../../../../common/domain/definitions/entity_schema';
 import {
@@ -33,14 +35,16 @@ import {
 } from '../log_pagination_probe_query_builder';
 import { executeEsqlQuery } from '../../../infra/elasticsearch/esql';
 import { ingestEntities } from '../../../infra/elasticsearch/ingest';
+import { resolveClosedIndexAdjustments } from '../../../infra/elasticsearch/resolve_closed_indices';
 import { getUpdatesEntitiesDataStreamName } from '../../asset_manager/updates_data_stream';
 import {
   applyMaxLagCutoff,
   capExtractionWindowEnd,
   resolveRemoteExtractionWindow,
 } from '../extraction_window';
-import { capAtMaxLogsPerWindow } from '../effective_page_limits';
+import { capAtMaxLogsPerWindow, pickSampleProbability } from '../effective_page_limits';
 import type { RemoteExtractionStrategy } from './strategies';
+import { getErrorMessage } from '../../../../common';
 
 interface RemoteExtractToUpdatesParams {
   type: EntityType;
@@ -51,7 +55,7 @@ interface RemoteExtractToUpdatesParams {
   delay: string;
   frequency: string;
   entityDefinition: ManagedEntityDefinition;
-  abortController?: AbortController;
+  signal?: AbortSignal;
   windowOverride?: { fromDateISO: string; toDateISO: string };
   maxTimeWindowSize: string;
   /** Total raw log documents allowed per run. 0 = disabled. */
@@ -67,6 +71,20 @@ interface RemoteExtractToUpdatesResult {
   error?: Error;
   logsCapApplied?: boolean;
 }
+
+const getEsErrorType = (error: unknown): string | undefined =>
+  isResponseError(error) ? (error.body as ElasticsearchErrorDetails)?.error?.type : undefined;
+
+// CPS is not enabled, so '_origin' can't be resolved
+const isNoSuchRemoteClusterError = (type?: string) => type === 'no_such_remote_cluster_exception';
+
+// no linked projects, so '-_origin:*' resolves to an empty scope, ESQL throws 500
+const isNoSuchElementError = (type?: string) => type === 'no_such_element_exception';
+
+const isRemoteUnavailableError = (error: unknown): boolean => {
+  const type = getEsErrorType(error);
+  return isNoSuchElementError(type) || isNoSuchRemoteClusterError(type);
+};
 
 export class RemoteLogsExtractionClient {
   private readonly logger: Logger;
@@ -85,8 +103,15 @@ export class RemoteLogsExtractionClient {
     try {
       return await this.doExtractToUpdates(params);
     } catch (error) {
+      const message = getErrorMessage(error);
+      if (this.strategy.id === 'cps' && isRemoteUnavailableError(error)) {
+        this.logger.warn(
+          `remote extraction unavailable (no linked projects or CPS disabled): ${message}. Returning empty result.`
+        );
+        return { count: 0, pages: 0 };
+      }
       const wrappedError = new Error(
-        `Failed to extract to updates from remote indices: ${error.message}`
+        `Failed to extract to updates from remote indices: ${message}`
       );
       this.logger.error(wrappedError);
       return { count: 0, pages: 0, error: wrappedError };
@@ -102,7 +127,7 @@ export class RemoteLogsExtractionClient {
     delay,
     frequency,
     entityDefinition,
-    abortController,
+    signal,
     windowOverride,
     maxTimeWindowSize,
     maxLogsPerWindow,
@@ -111,6 +136,16 @@ export class RemoteLogsExtractionClient {
     if (remoteIndexPatterns.length === 0) {
       return { count: 0, pages: 0 };
     }
+
+    const { openBackingIndices, negations: closedNegations } = await resolveClosedIndexAdjustments(
+      this.strategy.client,
+      remoteIndexPatterns,
+      this.logger
+    );
+    const effectiveRemoteIndexPatterns =
+      openBackingIndices.length > 0 || closedNegations.length > 0
+        ? [...remoteIndexPatterns, ...openBackingIndices, ...closedNegations]
+        : remoteIndexPatterns;
 
     const state =
       windowOverride != null
@@ -150,13 +185,13 @@ export class RemoteLogsExtractionClient {
       // Manual windowOverride runs as a single pass without persisting checkpoint.
       const result = await this.runLogsPaginationOuterLoop({
         type,
-        remoteIndexPatterns,
+        remoteIndexPatterns: effectiveRemoteIndexPatterns,
         toDateISO: effectiveWindowEnd,
         docsLimit,
         maxLogsPerPage,
         maxLogsPerWindow,
         entityDefinition,
-        abortController,
+        signal,
         effectiveFromDateISO,
         recoveryId,
         skipStateUpdates: true,
@@ -193,7 +228,7 @@ export class RemoteLogsExtractionClient {
 
     let hasNextPage = true;
     while (hasNextPage) {
-      if (abortController?.signal.aborted) {
+      if (signal?.aborted) {
         break;
       }
       if (currentFromDateISO >= effectiveWindowEnd) {
@@ -211,13 +246,13 @@ export class RemoteLogsExtractionClient {
       const remainingCap = maxLogsPerWindow > 0 ? maxLogsPerWindow - totalLogs : 0;
       const subResult = await this.runLogsPaginationOuterLoop({
         type,
-        remoteIndexPatterns,
+        remoteIndexPatterns: effectiveRemoteIndexPatterns,
         toDateISO: subWindowEnd,
         docsLimit,
         maxLogsPerPage,
         maxLogsPerWindow: remainingCap,
         entityDefinition,
-        abortController,
+        signal,
         effectiveFromDateISO: currentFromDateISO,
         recoveryId: recoveryIdForFirstSubWindow,
         skipStateUpdates: false,
@@ -292,7 +327,7 @@ export class RemoteLogsExtractionClient {
     maxLogsPerPage,
     maxLogsPerWindow,
     entityDefinition,
-    abortController,
+    signal,
     effectiveFromDateISO: initialFromDateISO,
     recoveryId: initialRecoveryId,
     skipStateUpdates,
@@ -304,13 +339,18 @@ export class RemoteLogsExtractionClient {
     maxLogsPerPage: number;
     maxLogsPerWindow: number;
     entityDefinition: ManagedEntityDefinition;
-    abortController?: AbortController;
+    signal?: AbortSignal;
     effectiveFromDateISO: string;
     recoveryId: string | undefined;
     skipStateUpdates: boolean;
   }): Promise<RemoteExtractToUpdatesResult> {
     const effectiveMaxLogsPerPage = capAtMaxLogsPerWindow(maxLogsPerPage, maxLogsPerWindow);
     const effectiveDocsLimit = capAtMaxLogsPerWindow(docsLimit, maxLogsPerWindow);
+    // Escalates above the target probability (up to an exact, unsampled probe) once
+    // maxLogsPerPage is too small for the sampling estimator to be accurate — see
+    // pickSampleProbability. Computed once per loop invocation: effectiveMaxLogsPerPage is
+    // fixed for the whole loop.
+    const effectiveSampleProbability = pickSampleProbability(effectiveMaxLogsPerPage);
     let totalCount = 0;
     let totalPages = 0;
     let totalLogs = 0;
@@ -325,13 +365,13 @@ export class RemoteLogsExtractionClient {
         remote: true,
       });
     };
-    abortController?.signal.addEventListener('abort', onAbort);
+    signal?.addEventListener('abort', onAbort);
 
     let effectiveFromDateISO = initialFromDateISO;
     let recoveryId = initialRecoveryId;
     let sliceStart: LogSlicePaginationParams | undefined;
-
     let isLastLogsPage = false;
+    const destToSourceMap = this.buildDestToSourceMap(type, entityDefinition.fields);
 
     do {
       const logPaginationCursor = await this.runProbe({
@@ -341,20 +381,34 @@ export class RemoteLogsExtractionClient {
         toDateISO,
         sliceStart,
         maxLogsPerPage: effectiveMaxLogsPerPage,
-        abortController,
+        sampleProbability: effectiveSampleProbability,
+        signal,
       });
 
-      if (!logPaginationCursor.hasLogsToProcess) {
+      if (!logPaginationCursor.hasLogsToProcess && effectiveSampleProbability >= 1) {
+        // Sampling wasn't active for this probe (maxLogsPerPage was too small — see
+        // pickSampleProbability), so an empty, exact result is definitive: no real docs
+        // remain. Stop immediately rather than running a redundant sweep extraction.
         break;
       }
 
-      let { logsPaginationCursor: sliceEnd } = logPaginationCursor;
+      // A saturated probe (the scaled LIMIT was filled) means ~maxLogsPerPage+ real docs likely
+      // remain: more pages follow, bounded by the sampled boundary. Otherwise — the sample fell
+      // short of the limit, or retained zero rows at all (hasLogsToProcess: false) — fewer real
+      // docs remain than maxLogsPerPage, so this is the last page. It is swept all the way to
+      // the window top (not the undershooting/absent sampled boundary) so nothing past it is
+      // silently dropped: a probe with zero sampled rows does not prove zero real docs remain
+      // (e.g. a couple of docs, ~90% chance neither gets sampled at the default p=0.1).
       isLastLogsPage = logPaginationCursor.isLastLogsPage;
+      let sliceEnd: LogSlicePaginationParams =
+        logPaginationCursor.hasLogsToProcess && !logPaginationCursor.isLastLogsPage
+          ? logPaginationCursor.logsPaginationCursor
+          : { timestampCursor: toDateISO };
 
       const bumpedSliceEnd = this.detectLogSliceStall(
         sliceStart,
         sliceEnd,
-        logPaginationCursor.sliceLogCount,
+        !isLastLogsPage,
         effectiveMaxLogsPerPage
       );
       if (bumpedSliceEnd) {
@@ -378,11 +432,12 @@ export class RemoteLogsExtractionClient {
           toDateISO,
           docsLimit: effectiveDocsLimit,
           entityDefinition,
-          abortController,
+          signal,
           sliceStart,
           sliceEnd,
           recoveryId: recoveryIdForThisSlice,
           skipStateUpdates,
+          destToSourceMap,
         });
 
         totalCount += count;
@@ -436,7 +491,8 @@ export class RemoteLogsExtractionClient {
     toDateISO,
     sliceStart,
     maxLogsPerPage,
-    abortController,
+    sampleProbability,
+    signal,
   }: {
     remoteIndexPatterns: string[];
     type: EntityType;
@@ -444,7 +500,8 @@ export class RemoteLogsExtractionClient {
     toDateISO: string;
     sliceStart: LogSlicePaginationParams | undefined;
     maxLogsPerPage: number;
-    abortController?: AbortController;
+    sampleProbability: number;
+    signal?: AbortSignal;
   }): Promise<LogPaginationCursor> {
     const probeQuery = buildLogPaginationCursorProbeEsql({
       indexPatterns: remoteIndexPatterns,
@@ -453,6 +510,7 @@ export class RemoteLogsExtractionClient {
       toDateISO,
       logsPageCursorStart: sliceStart,
       maxLogsPerPage,
+      sampleProbability,
     });
 
     this.logger.info(
@@ -465,7 +523,12 @@ export class RemoteLogsExtractionClient {
     const probeResponse = await executeEsqlQuery({
       esClient: this.strategy.client,
       query: probeQuery,
-      abortController,
+      signal,
+      telemetry: {
+        name: 'remote_probe_query',
+        namespace: this.namespace,
+        type,
+      },
     });
     entityStoreMetrics.extractionProbeQueryDurationMs.record(Date.now() - probeStart, {
       entity_type: type,
@@ -475,7 +538,8 @@ export class RemoteLogsExtractionClient {
 
     return interpretLogPaginationCursorRows(
       parseLogPaginationCursorRow(probeResponse),
-      maxLogsPerPage
+      maxLogsPerPage,
+      sampleProbability
     );
   }
 
@@ -498,11 +562,12 @@ export class RemoteLogsExtractionClient {
     toDateISO,
     docsLimit,
     entityDefinition,
-    abortController,
+    signal,
     sliceStart,
     sliceEnd,
     recoveryId: initialRecoveryId,
     skipStateUpdates,
+    destToSourceMap,
   }: {
     type: EntityType;
     remoteIndexPatterns: string[];
@@ -510,11 +575,12 @@ export class RemoteLogsExtractionClient {
     toDateISO: string;
     docsLimit: number;
     entityDefinition: ManagedEntityDefinition;
-    abortController?: AbortController;
+    signal?: AbortSignal;
     sliceStart: LogSlicePaginationParams | undefined;
     sliceEnd: LogSlicePaginationParams;
     recoveryId: string | undefined;
     skipStateUpdates: boolean;
+    destToSourceMap: Map<string, string>;
   }): Promise<{ count: number; pages: number }> {
     let count = 0;
     let pages = 0;
@@ -552,7 +618,12 @@ export class RemoteLogsExtractionClient {
       const esqlResponse = await executeEsqlQuery({
         esClient: this.strategy.client,
         query,
-        abortController,
+        signal,
+        telemetry: {
+          name: 'remote_extraction_query',
+          namespace: this.namespace,
+          type,
+        },
       });
       entityStoreMetrics.extractionQueryDurationMs.record(Date.now() - queryStart, {
         entity_type: type,
@@ -576,9 +647,9 @@ export class RemoteLogsExtractionClient {
           esqlResponse,
           targetIndex: getUpdatesEntitiesDataStreamName(this.namespace),
           logger: this.logger,
-          abortController,
+          signal,
           fieldsToIgnore: [ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD],
-          transformDocument: this.buildTransformDocument(type),
+          transformDocument: this.buildTransformDocument(type, destToSourceMap),
           refresh: false,
           onDropped: () =>
             entityStoreMetrics.extractionBulkDropped.add(1, {
@@ -605,23 +676,23 @@ export class RemoteLogsExtractionClient {
     return { count, pages };
   }
 
-  /** Returns the bumped slice-end cursor when a stall is detected, null otherwise. Logs a warning on stall. */
+  /**
+   * Returns the bumped slice-end cursor when a stall is detected, null otherwise. Logs a
+   * warning on stall. `isFullPage` is `true` when the (possibly sampled) probe saturated its
+   * limit — i.e. this iteration was not resolved as the last page.
+   */
   private detectLogSliceStall(
     sliceStart: LogSlicePaginationParams | undefined,
     sliceEnd: LogSlicePaginationParams,
-    sliceLogCount: number,
-    maxLogsPerPage: number
+    isFullPage: boolean,
+    effectiveMaxLogsPerPage: number
   ): LogSlicePaginationParams | null {
-    if (
-      sliceStart &&
-      sliceStart.timestampCursor === sliceEnd.timestampCursor &&
-      sliceLogCount >= maxLogsPerPage
-    ) {
+    if (sliceStart && sliceStart.timestampCursor === sliceEnd.timestampCursor && isFullPage) {
       const bumpedTs = moment(sliceEnd.timestampCursor).add(1, 'ms').toISOString();
       this.logger.warn(
         `${this.strategy.id.toUpperCase()} log-slice probe stalled at ${
           sliceEnd.timestampCursor
-        } with a full page (${sliceLogCount} docs); advancing cursor by 1ms. Docs sharing this timestamp beyond maxLogsPerPage will be dropped.`
+        } with a saturated page; advancing cursor by 1ms. Docs sharing this timestamp beyond the configured per-page limit (${effectiveMaxLogsPerPage}) will be dropped.`
       );
       return { timestampCursor: bumpedTs };
     }
@@ -634,22 +705,65 @@ export class RemoteLogsExtractionClient {
    * picks up these updates in the correct order. This is bounded by the `delay`
    * configured on the main extraction.
    */
-  private buildTransformDocument(type: EntityType) {
-    let timestampIncrement = 1;
+  /**
+   * Builds a map from destination path → entity-relative source path for asymmetric fields.
+   * The remote ESQL result uses destination paths as column names (e.g.
+   * "entity.relationships.administers.raw_identifiers.host.id"), but the main extraction
+   * query reads the updates data stream using source paths
+   * (e.g. "host.entity.relationships.administers.host.id"). For symmetric fields the
+   * re-nesting step in transformDocForUpsert already produces the right result; only
+   * asymmetric fields (where destination ≠ "entity.<source-suffix>") need remapping.
+   * Computed once per extraction run and reused across all slices and pages.
+   */
+  private buildDestToSourceMap(type: EntityType, fields: EntityField[]): Map<string, string> {
+    const entityPrefix = `${type}.entity.`;
+    const destToEntityRelativeSource = new Map<string, string>();
+    for (const field of fields) {
+      if (field.retention.operation === 'managed') continue;
+      if (!field.source.startsWith(entityPrefix)) continue;
+      // Self-identifier fields (e.g. `host.entity.id`) share source and destination and need no
+      // remap; remapping them to `entity.id` would collide with the EUID (`entity.id`) column.
+      if (field.destination === field.source) continue;
+      const entityRelativeSource = `entity.${field.source.slice(entityPrefix.length)}`;
+      if (entityRelativeSource !== field.destination) {
+        destToEntityRelativeSource.set(field.destination, entityRelativeSource);
+      }
+    }
+    return destToEntityRelativeSource;
+  }
+
+  /**
+   * Returns a document transformer that rewrites `@timestamp` to a synthetic value
+   * just past now, incrementing by 1ms per doc, so the next local extraction run
+   * picks up these updates in the correct order. This is bounded by the `delay`
+   * configured on the main extraction.
+   * Called once per page so that `timestampIncrement` resets to 0 for each batch,
+   * keeping synthetic timestamps close to real time.
+   */
+  private buildTransformDocument(type: EntityType, destToSourceMap: Map<string, string>) {
+    let timestampIncrement = 0;
     return (doc: Record<string, unknown>) => {
       timestampIncrement++;
       const timestamp = moment().utc().add(timestampIncrement, 'ms').toISOString();
-      return this.transformDocForUpsert(type, doc, timestamp);
+      return this.transformDocForUpsert(type, doc, timestamp, destToSourceMap);
     };
   }
 
   private transformDocForUpsert(
     type: EntityType,
     data: Partial<Entity>,
-    timestamp: string
+    timestamp: string,
+    destToEntityRelativeSource: Map<string, string> = new Map()
   ): Record<string, unknown> {
+    // Remap asymmetric field destination paths to their entity-relative source paths before
+    // unflattening, so the updates doc matches what the main ESQL query reads.
+    const remapped: Record<string, unknown> = {};
+    for (const [key, value] of Object.entries(data as Record<string, unknown>)) {
+      remapped[destToEntityRelativeSource.get(key) ?? key] = value;
+    }
+
     const doc: Record<string, unknown> = unflattenObject({
-      ...data,
+      ...remapped,
       '@timestamp': timestamp,
     });
 

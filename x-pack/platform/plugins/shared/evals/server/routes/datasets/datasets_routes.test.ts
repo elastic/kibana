@@ -11,6 +11,7 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { MockedVersionedRouter } from '@kbn/core-http-router-server-mocks';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 
 jest.mock('../../remote_kibana/forward_to_remote_kibana', () => {
   const actual = jest.requireActual('../../remote_kibana/forward_to_remote_kibana');
@@ -143,12 +144,50 @@ describe('dataset routes', () => {
       const response = await handler(context as any, request, kibanaResponseFactory);
 
       expect(datasetService.getClient).toHaveBeenCalledWith();
-      expect(datasetClient.list).toHaveBeenCalledWith({ page: 2, perPage: 5 });
+      expect(datasetClient.list).toHaveBeenCalledWith({
+        page: 2,
+        perPage: 5,
+        search: undefined,
+        sortField: undefined,
+        sortOrder: undefined,
+      });
       expect(response.status).toBe(200);
       expect(response.payload).toEqual({
         datasets: [{ ...dataset, examples_count: 3 }],
         total: 1,
       });
+    });
+
+    it('passes search and sort params to the client', async () => {
+      const { handler, context, datasetClient } = buildRouteSetup({
+        registerRoute: registerListDatasetsRoute,
+        method: 'get',
+        path: EVALS_DATASETS_URL,
+      });
+      datasetClient.list.mockResolvedValueOnce({ datasets: [], total: 0 });
+
+      const request = httpServerMock.createKibanaRequest({
+        method: 'get',
+        path: EVALS_DATASETS_URL,
+        query: {
+          page: 1,
+          per_page: 25,
+          search: 'kibana',
+          sort_field: 'name',
+          sort_order: 'asc',
+        },
+      });
+
+      const response = await handler(context as any, request, kibanaResponseFactory);
+
+      expect(datasetClient.list).toHaveBeenCalledWith({
+        page: 1,
+        perPage: 25,
+        search: 'kibana',
+        sortField: 'name',
+        sortOrder: 'asc',
+      });
+      expect(response.status).toBe(200);
     });
 
     it('returns 500 when listing fails', async () => {
@@ -926,6 +965,9 @@ describe('dataset routes', () => {
         router,
         logger,
         canEncrypt,
+        evaluatorRegistry: { list: () => [], get: () => undefined },
+        getInferenceStart: async () =>
+          ({ getClient: jest.fn() } as unknown as InferenceServerStart),
         getEncryptedSavedObjectsStart: async () => encryptedSavedObjectsMock.createStart(),
         getInternalRemoteConfigsSoClient: async () => savedObjectsClientMock.create(),
       });

@@ -2,7 +2,7 @@
 
 This file is a worked example of a correctly-formed test plan for a **UI feature with a linked PR**. Use it as a reference when generating plans — it shows the correct structure, scenario format, automation coverage lines, and summary table for a realistic Security Solution feature. For a backend / parser feature without UI or a linked PR, see [`example-test-plan-backend.md`](example-test-plan-backend.md).
 
-The example is **abbreviated** (6 scenarios, 2 feature areas) but **complete** — every required section is present, optional sections are omitted because the fictional issue does not warrant them, and all self-review checks pass.
+The example is **abbreviated** (6 scenarios, 2 feature areas) but **complete** — every required section is present, optional sections are omitted where the fictional issue does not warrant them, and all self-review checks pass. (Upgrade coverage does apply here — see *Known Limitations* — but the concrete scenarios are abbreviated for brevity.)
 
 ---
 
@@ -16,7 +16,7 @@ The example is **abbreviated** (6 scenarios, 2 feature areas) but **complete** �
 - A case where no tests exist (`Manual only`)
 - A `Known Limitations` entry for an inaccessible source (no Figma)
 - A `Known Limitations` entry for a coverage gap (no API integration tests)
-- Optional sections (RBAC, upgrade, CCS, multi-space) omitted — the fictional issue does not mention them
+- Optional sections (RBAC, CCS, multi-space) omitted — the fictional issue does not mention them. Upgrade coverage would be **in scope** per the always-evaluated rule in [`optional-scenarios.md`](optional-scenarios.md#always-evaluated-coverage) (the feature ships a new `alert-notes` saved-object type), but the concrete `@upgrade` scenarios are abbreviated out of this example — see *Known Limitations*
 - An *Issue Clarity Assessment* section showing the canonical layout for a single-issue plan, with combined readability matching the per-issue score and no Actionable feedback bullets (the issue scored 4/5 and the Coverage Ratio is above 60%, so the bullets are intentionally omitted per the rules in [`output-formats.md`](output-formats.md#issue-clarity-assessment-section))
 - The footer with model identifier and date
 
@@ -81,6 +81,7 @@ Security analysts often need to record observations or hand-off context on an al
 
 - ⚠️ No Figma designs were available — scenarios are based on the issue description and PR diff only. UI layout details (e.g. character limit enforcement in the UI vs. the API) were inferred from the PR code.
 - ⚠️ No error handling scenarios are included for the `alert-notes` write path (e.g. save object store unavailable). This is intentional to keep the example concise — a real test plan for a write/modify feature must include at least one error handling scenario per the coverage guidance in `references/optional-scenarios.md`. No integration or API integration tests exist for this API; all API-level coverage is at the unit level only.
+- ⚠️ Upgrade scenarios are abbreviated out of this example for brevity. In a real plan for the Alert Notes feature, `@upgrade` scenarios from `PREVIOUS_MAJOR_LAST_MINOR` and `CURRENT_MAJOR_LAST_MINOR` to `TARGET_VERSION` are **in scope** per the always-evaluated rule (the feature introduces a new `alert-notes` saved-object type) — see the Upgrade template and version-resolution rules in [`optional-scenarios.md`](optional-scenarios.md#upgrade-scenarios).
 
 ## Test Scenarios
 
@@ -101,6 +102,13 @@ Then the note appears in the Notes panel with the user's name and the current ti
 And the note persists after the user refreshes the page
 ```
 
+**Execution:**
+- [ ] ✅ Pass
+- [ ] ❌ Fail
+- [ ] 🚫 Blocked
+
+_If Fail or Blocked, reply to this comment with details (env, build, repro steps)._
+
 ---
 
 #### Scenario: User cannot submit an empty note
@@ -116,6 +124,13 @@ Then the submit action is unavailable
 And no note is created
 ```
 
+**Execution:**
+- [ ] ✅ Pass
+- [ ] ❌ Fail
+- [ ] 🚫 Blocked
+
+_If Fail or Blocked, reply to this comment with details (env, build, repro steps)._
+
 ---
 
 #### Scenario: Note text at the maximum character limit is accepted
@@ -129,6 +144,13 @@ Given the user has the alert detail flyout open
 When the user enters a note of exactly 10 000 characters and submits
 Then the note is saved and displayed in full in the Notes panel
 ```
+
+**Execution:**
+- [ ] ✅ Pass
+- [ ] ❌ Fail
+- [ ] 🚫 Blocked
+
+_If Fail or Blocked, reply to this comment with details (env, build, repro steps)._
 
 </details>
 
@@ -150,6 +172,13 @@ When User B opens the alert detail flyout
 Then User B sees User A's note with the correct author name and timestamp
 ```
 
+**Execution:**
+- [ ] ✅ Pass
+- [ ] ❌ Fail
+- [ ] 🚫 Blocked
+
+_If Fail or Blocked, reply to this comment with details (env, build, repro steps)._
+
 ---
 
 #### Scenario: User can delete their own note but not another user's note
@@ -166,6 +195,13 @@ And selecting delete removes their note from the panel
 And the other user's note remains unchanged
 ```
 
+**Execution:**
+- [ ] ✅ Pass
+- [ ] ❌ Fail
+- [ ] 🚫 Blocked
+
+_If Fail or Blocked, reply to this comment with details (env, build, repro steps)._
+
 ---
 
 #### Scenario: Notes panel shows an empty state when no notes exist
@@ -180,6 +216,13 @@ When the user opens the alert detail flyout
 Then the Notes panel shows an empty state message
 And no note rows are rendered
 ```
+
+**Execution:**
+- [ ] ✅ Pass
+- [ ] ❌ Fail
+- [ ] 🚫 Blocked
+
+_If Fail or Blocked, reply to this comment with details (env, build, repro steps)._
 
 </details>
 

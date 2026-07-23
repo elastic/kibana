@@ -34,22 +34,7 @@ export const SkillContextMenu: React.FC<SkillContextMenuProps> = ({
   const panels = useMemo(() => {
     const items = [];
 
-    if (skill.readonly) {
-      items.push({
-        name: labels.skills.viewSkillButtonLabel,
-        icon: 'eye',
-        onClick: () => {
-          navigateToAgentBuilderUrl(appPaths.skills.details({ skillId: skill.id }));
-          closePopover();
-        },
-        'data-test-subj': `agentBuilderSkillViewButton-${skill.id}`,
-        ...getEbtProps({
-          element: AGENT_BUILDER_UI_EBT.element.pageContent,
-          action: AGENT_BUILDER_UI_EBT.action.globalManagement.MANAGE_ENTITY_VIEW,
-          detail: AGENT_BUILDER_UI_EBT.entity.SKILL,
-        }),
-      });
-    } else {
+    if (!skill.readonly && canManage) {
       items.push({
         name: labels.skills.editSkillButtonLabel,
         icon: 'pencil',
@@ -65,22 +50,35 @@ export const SkillContextMenu: React.FC<SkillContextMenuProps> = ({
         }),
       });
 
-      if (canManage) {
-        items.push({
-          name: labels.skills.deleteSkillButtonLabel,
-          icon: 'trash',
-          onClick: () => {
-            onDelete(skill.id);
-            closePopover();
-          },
-          'data-test-subj': `agentBuilderSkillDeleteButton-${skill.id}`,
-          ...getEbtProps({
-            element: AGENT_BUILDER_UI_EBT.element.pageContent,
-            action: AGENT_BUILDER_UI_EBT.action.globalManagement.MANAGE_ENTITY_DELETE,
-            detail: AGENT_BUILDER_UI_EBT.entity.SKILL,
-          }),
-        });
-      }
+      items.push({
+        name: labels.skills.deleteSkillButtonLabel,
+        icon: 'trash',
+        onClick: () => {
+          onDelete(skill.id);
+          closePopover();
+        },
+        'data-test-subj': `agentBuilderSkillDeleteButton-${skill.id}`,
+        ...getEbtProps({
+          element: AGENT_BUILDER_UI_EBT.element.pageContent,
+          action: AGENT_BUILDER_UI_EBT.action.globalManagement.MANAGE_ENTITY_DELETE,
+          detail: AGENT_BUILDER_UI_EBT.entity.SKILL,
+        }),
+      });
+    } else {
+      items.push({
+        name: labels.skills.viewSkillButtonLabel,
+        icon: 'eye',
+        onClick: () => {
+          navigateToAgentBuilderUrl(appPaths.skills.details({ skillId: skill.id }));
+          closePopover();
+        },
+        'data-test-subj': `agentBuilderSkillViewButton-${skill.id}`,
+        ...getEbtProps({
+          element: AGENT_BUILDER_UI_EBT.element.pageContent,
+          action: AGENT_BUILDER_UI_EBT.action.globalManagement.MANAGE_ENTITY_VIEW,
+          detail: AGENT_BUILDER_UI_EBT.entity.SKILL,
+        }),
+      });
     }
 
     return [{ id: 0, items }];

@@ -15,7 +15,10 @@ import {
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
 import { RuleProvider } from '../../components/rule_details/rule_context';
-import { RuleHeaderDescription } from '../../components/rule_details/rule_header_description';
+import {
+  RuleHeaderDescription,
+  RuleTagsList,
+} from '../../components/rule_details/rule_summary_header';
 import { RuleSidebar } from '../../components/rule_details/sidebar/rule_sidebar';
 import { paths } from '../../constants';
 import { RulesApi, type RuleApiResponse } from '../../services/rules_api';
@@ -120,8 +123,18 @@ export const RuleCanvasContent = ({
   return (
     <RuleProvider rule={data as unknown as RuleApiResponse}>
       <EuiPanel paddingSize="l" hasShadow={false}>
-        <RuleHeaderDescription />
-        <EuiSpacer size="m" />
+        {data.metadata.description && (
+          <>
+            <RuleHeaderDescription />
+            <EuiSpacer size="m" />
+          </>
+        )}
+        {data.metadata.tags && data.metadata.tags.length > 0 && (
+          <>
+            <RuleTagsList />
+            <EuiSpacer size="m" />
+          </>
+        )}
         <RuleSidebar showQueryPreview />
       </EuiPanel>
     </RuleProvider>

@@ -20,6 +20,7 @@ import type {
   AppMenuConfig,
   AppMenuItemType,
   AppMenuPrimaryActionItem,
+  AppMenuRunActionParams,
 } from '@kbn/core-chrome-app-menu-components';
 import { useDashboardExportItems } from './share/use_dashboard_export_items';
 import { getAccessControlClient } from '../../services/access_control_service';
@@ -33,6 +34,7 @@ import { coreServices, shareService, dataService } from '../../services/kibana_s
 import { getDashboardCapabilities } from '../../utils/get_dashboard_capabilities';
 import { topNavStrings } from '../_dashboard_app_strings';
 import { ShowShareModal } from './share/show_share_modal';
+import { useShareOptions } from './share/use_share_options';
 
 export const useDashboardMenuItems = ({
   isLabsShown,
@@ -53,9 +55,8 @@ export const useDashboardMenuItems = ({
 
   const dashboardApi = useDashboardApi();
 
-  const [dashboardTitle, hasOverlays, hasUnsavedChanges, lastSavedId, viewMode, accessControl] =
+  const [hasOverlays, hasUnsavedChanges, lastSavedId, viewMode, accessControl] =
     useBatchedPublishingSubjects(
-      dashboardApi.title$,
       dashboardApi.hasOverlays$,
       dashboardApi.hasUnsavedChanges$,
       dashboardApi.savedObjectId$,
@@ -158,28 +159,34 @@ export const useDashboardMenuItems = ({
     }
   }, [quickSaveDashboard, dashboardInteractiveSave, lastSavedId]);
 
-  const openAddPanelFlyout = useCallback(() => {
-    openLazyFlyout({
-      core: coreServices,
-      parentApi: dashboardApi,
-      loadContent: async ({ closeFlyout, ariaLabelledBy }) => {
-        const { AddPanelFlyout } = await import('./add_panel_button/components/add_panel_flyout');
+  const openAddPanelFlyout = useCallback(
+    (params?: AppMenuRunActionParams) => {
+      openLazyFlyout({
+        core: coreServices,
+        parentApi: dashboardApi,
+        returnFocus: params?.returnFocus,
+        loadContent: async ({ closeFlyout, ariaLabelledBy }) => {
+          const { AddPanelFlyout } = await import('./add_panel_button/components/add_panel_flyout');
 
-        return <AddPanelFlyout dashboardApi={dashboardApi} ariaLabelledBy={ariaLabelledBy} />;
-      },
-      flyoutProps: {
-        'data-test-subj': 'dashboardAddPanel',
-        triggerId: 'dashboardAddTopNavButton',
-      },
-    });
-  }, [dashboardApi]);
+          return (
+            <AddPanelFlyout
+              dashboardApi={dashboardApi}
+              ariaLabelledBy={ariaLabelledBy}
+              returnFocus={params?.returnFocus}
+            />
+          );
+        },
+        flyoutProps: {
+          'data-test-subj': 'dashboardAddPanel',
+        },
+      });
+    },
+    [dashboardApi]
+  );
 
-  const exportItems = useDashboardExportItems({
-    dashboardApi,
-    objectId: lastSavedId,
-    isDirty: Boolean(hasUnsavedChanges),
-    dashboardTitle,
-  });
+  const shareOptions = useShareOptions();
+
+  const exportItems = useDashboardExportItems(shareOptions);
 
   const hasExportMenuItems = exportItems.length > 0;
 
@@ -188,9 +195,7 @@ export const useDashboardMenuItems = ({
    */
   const showShare = useCallback(() => {
     ShowShareModal({
-      dashboardTitle,
-      savedObjectId: lastSavedId,
-      isDirty: Boolean(hasUnsavedChanges) && viewMode === 'edit',
+      shareOptions,
       canSave: (canManageAccessControl || isInEditAccessMode) && Boolean(hasUnsavedChanges),
       accessControl,
       createdBy: dashboardApi.createdBy,
@@ -200,9 +205,7 @@ export const useDashboardMenuItems = ({
       changeAccessMode: dashboardApi.changeAccessMode,
     });
   }, [
-    dashboardTitle,
     hasUnsavedChanges,
-    lastSavedId,
     isInEditAccessMode,
     canManageAccessControl,
     accessControl,
@@ -211,7 +214,7 @@ export const useDashboardMenuItems = ({
     dashboardApi.createdBy,
     accessControlClient,
     dashboardApi.isManaged,
-    viewMode,
+    shareOptions,
   ]);
 
   const getEditTooltip = useCallback(() => {
@@ -364,7 +367,7 @@ export const useDashboardMenuItems = ({
         testId: 'dashboardSettingsButton',
         disableButton: disableTopNav,
         htmlId: 'dashboardSettingsButton',
-        run: () => openSettingsFlyout(dashboardApi),
+        run: (params) => openSettingsFlyout(dashboardApi, params?.returnFocus),
       } as AppMenuItemType,
 
       // Action items

@@ -8,9 +8,13 @@
  */
 
 import stripAnsi from 'strip-ansi';
+import { getCodeOwnersEntries, getOwningTeamsForPath } from '@kbn/code-owners';
+import type { CodeOwnersEntry } from '@kbn/code-owners';
 
 import type { FailedTestCase, TestReport } from './test_report';
-import { makeFailedTestCaseIter } from './test_report';
+import { makeFailedTestCaseWithSuiteIter } from './test_report';
+
+export type JUnitTestType = 'ftr' | 'jest' | 'cypress';
 
 export type TestFailure = FailedTestCase['$'] & {
   failure: string;
@@ -19,7 +23,9 @@ export type TestFailure = FailedTestCase['$'] & {
   githubIssue?: string;
   failureCount?: number;
   commandLine?: string;
-  owners?: any;
+  owners?: string;
+  testType?: JUnitTestType;
+  location?: string;
 };
 
 const getText = (node?: Array<string | { _: string }>) => {
@@ -35,6 +41,68 @@ const getText = (node?: Array<string | { _: string }>) => {
 
   return stripAnsi(String(nodeWrapped));
 };
+
+/**
+ * The report name is the human readable prefix of a `classname` attribute, e.g.
+ * "Chrome X-Pack UI Functional Tests" in
+ * "Chrome X-Pack UI Functional Tests.x-pack/.../sample_data·js".
+ */
+export function getReportNameFromClassname(classname: string): string {
+  const idx = classname.indexOf('.');
+  return idx === -1 ? classname : classname.slice(0, idx);
+}
+
+/**
+ * The source location is encoded in the `classname` attribute as
+ * `${reportName}.${path}` where the path has its `.` characters replaced by the
+ * `·` character (see the JUnit reporters and the Cypress junit_transformer).
+ * This decodes the path back into a repo relative location.
+ */
+export function getLocationFromClassname(classname: string): string {
+  const idx = classname.indexOf('.');
+  if (idx === -1) {
+    return '';
+  }
+  return classname.slice(idx + 1).replace(/·/g, '.');
+}
+
+/**
+ * Best-effort detection of the test framework that produced a failure so it can
+ * be surfaced in the issue metadata. Scout failures are handled separately.
+ */
+function getTestType(rootName: string | undefined, classname: string): JUnitTestType | undefined {
+  if (/cypress/i.test(getReportNameFromClassname(classname))) {
+    return 'cypress';
+  }
+  if (rootName === 'jest' || rootName === 'ftr') {
+    return rootName;
+  }
+  return undefined;
+}
+
+function getRootSuiteName(report: TestReport): string | undefined {
+  return 'testsuites' in report ? report.testsuites?.$?.name : undefined;
+}
+
+/**
+ * Resolve code owners from a repository-relative location. JUnit reporters only stamp the
+ * `owners` attribute on FTR failures, so this fills the gap for Jest and Cypress.
+ */
+function getOwnersFromLocation(
+  location: string,
+  codeOwnersEntries: CodeOwnersEntry[]
+): string | undefined {
+  if (!location || location === 'unknown') {
+    return undefined;
+  }
+
+  try {
+    const teams = getOwningTeamsForPath(location, codeOwnersEntries);
+    return teams.length > 0 ? teams.join(',') : undefined;
+  } catch {
+    return undefined;
+  }
+}
 
 const isLikelyIrrelevant = (name: string, failure: string) => {
   if (
@@ -80,11 +148,29 @@ export function getFailures(report: TestReport) {
   const failures: TestFailure[] = [];
 
   const commandLine = getCommandLineFromReport(report);
+  const rootName = getRootSuiteName(report);
 
-  for (const testCase of makeFailedTestCaseIter(report)) {
+  // Cache code owner entries once per report for the owners fallback lookup.
+  let codeOwnersEntries: CodeOwnersEntry[] = [];
+  try {
+    codeOwnersEntries = getCodeOwnersEntries();
+  } catch {
+    codeOwnersEntries = [];
+  }
+
+  for (const { testCase, testSuite } of makeFailedTestCaseWithSuiteIter(report)) {
     const failure = getText(testCase.failure);
     const likelyIrrelevant = isLikelyIrrelevant(testCase.$.name, failure);
-    const owners = testCase.$.owners;
+    const testType = getTestType(rootName, testCase.$.classname);
+    // Jest classnames contain only the test directory, while the enclosing suite
+    // name contains the repository-relative test file path.
+    const location =
+      testType === 'jest' && testSuite.$.name
+        ? testSuite.$.name
+        : getLocationFromClassname(testCase.$.classname);
+    // FTR stamps `owners` in the JUnit report, but Jest and Cypress do not, so
+    // fall back to resolving them from the source location.
+    const owners = testCase.$.owners || getOwnersFromLocation(location, codeOwnersEntries);
 
     const failureObj = {
       // unwrap xml weirdness
@@ -95,6 +181,8 @@ export function getFailures(report: TestReport) {
       'system-out': getText(testCase['system-out']),
       commandLine,
       owners,
+      testType,
+      location,
     };
 
     // cleaning up duplicates

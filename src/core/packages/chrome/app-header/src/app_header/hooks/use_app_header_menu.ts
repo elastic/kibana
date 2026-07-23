@@ -8,17 +8,14 @@
  */
 
 import { useMemo } from 'react';
-import type {
-  AppMenuConfig,
-  AppMenuItemType,
-  AppMenuStaticItem,
-} from '@kbn/core-chrome-app-menu-components';
+import type { AppMenuConfig, AppMenuStaticItem } from '@kbn/core-chrome-app-menu-components';
 import { APP_MENU_SHARE_ID, getTooltip, isDisabled } from '@kbn/core-chrome-app-menu-components';
 import { useChromeService } from '@kbn/core-chrome-browser-context';
 import { useObservable } from '@kbn/use-observable';
 import { i18n } from '@kbn/i18n';
 
 import { useBasePath } from './chrome';
+import { APP_HEADER_TEST_SUBJECTS } from '../test_subjects';
 
 const createIntegrationsMenuItem = (href: string): AppMenuStaticItem => ({
   label: i18n.translate('core.chrome.appHeader.addIntegrationsMenuItemLabel', {
@@ -28,6 +25,7 @@ const createIntegrationsMenuItem = (href: string): AppMenuStaticItem => ({
   iconType: 'indexOpen',
   order: 0,
   href,
+  testId: APP_HEADER_TEST_SUBJECTS.menuAddIntegrations,
 });
 
 const createFeedbackMenuItem = (feedbackHandler: () => void): AppMenuStaticItem => ({
@@ -39,6 +37,7 @@ const createFeedbackMenuItem = (feedbackHandler: () => void): AppMenuStaticItem 
   order: 1,
   run: feedbackHandler,
   global: true,
+  testId: APP_HEADER_TEST_SUBJECTS.menuFeedback,
 });
 
 const createDocumentationMenuItem = (href: string): AppMenuStaticItem => ({
@@ -50,20 +49,16 @@ const createDocumentationMenuItem = (href: string): AppMenuStaticItem => ({
   order: 2,
   href,
   target: '_blank',
+  testId: APP_HEADER_TEST_SUBJECTS.menuDocumentation,
 });
 
-interface ResolvedAppMenu {
-  menu: AppMenuConfig | undefined;
-  shareItem: AppMenuItemType | undefined;
-}
-
-const useStaticItems = ({
+export const useAppHeaderStaticItems = ({
   docLink: explicitDocLink,
   showAddIntegrations,
 }: {
   docLink?: string;
   showAddIntegrations?: boolean;
-}) => {
+}): AppMenuStaticItem[] => {
   const chrome = useChromeService();
   const basePath = useBasePath();
   const feedbackHandler = useObservable(chrome.next.getFeedbackHandler$(), undefined);
@@ -96,41 +91,6 @@ const useStaticItems = ({
   }, [basePath, explicitDocLink, helpExtension, showAddIntegrations, feedbackHandler]);
 };
 
-const useResolvedAppMenu = (menu: AppMenuConfig | undefined): ResolvedAppMenu => {
-  return useMemo((): ResolvedAppMenu => {
-    if (!menu) return { menu: undefined, shareItem: undefined };
-
-    // Temporary bridge: share is still modeled as a legacy app-menu item.
-    // Replace this with a typed app-header action once share requirements are clear.
-    // https://github.com/elastic/kibana/issues/271401
-    const shareItem = menu.items?.find((item) => item.id === APP_MENU_SHARE_ID);
-
-    if (!shareItem) return { menu, shareItem: undefined };
-
-    return {
-      menu: { ...menu, items: menu.items?.filter((item) => item.id !== APP_MENU_SHARE_ID) },
-      shareItem,
-    };
-  }, [menu]);
-};
-
-export function useAppHeaderMenu(
-  pageAppMenu: AppMenuConfig | undefined,
-  docLink?: string,
-  showAddIntegrations?: boolean
-): {
-  config: AppMenuConfig | undefined;
-  staticItems: AppMenuStaticItem[];
-} {
-  const { menu } = useResolvedAppMenu(pageAppMenu);
-  const staticItems = useStaticItems({ docLink, showAddIntegrations });
-
-  return {
-    config: menu,
-    staticItems,
-  };
-}
-
 export interface ShareAction {
   onClick: (triggerElement: HTMLElement) => void;
   tooltipContent?: string;
@@ -140,7 +100,11 @@ export interface ShareAction {
 }
 
 export function useShareAction(pageAppMenu: AppMenuConfig | undefined): ShareAction | undefined {
-  const { shareItem } = useResolvedAppMenu(pageAppMenu);
+  // Temporary bridge: share is still modeled as a legacy app-menu item. The item stays in the
+  // menu (owned by the app); here we only read it to render the title-row share button.
+  // Replace this with a typed app-header action once share requirements are clear.
+  // https://github.com/elastic/kibana/issues/271401
+  const shareItem = pageAppMenu?.items?.find((item) => item.id === APP_MENU_SHARE_ID);
 
   return useMemo(() => {
     if (!shareItem) return undefined;

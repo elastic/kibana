@@ -6,7 +6,7 @@
  */
 
 import { getTimeFieldResolutionQuery } from './get_time_field_resolution_query';
-import type { RuleQuery } from './compose_form_types';
+import type { RuleQuery } from '../../form/types';
 
 const composedQuery: RuleQuery = {
   format: 'composed',
@@ -26,6 +26,12 @@ describe('getTimeFieldResolutionQuery', () => {
 
   it('returns the breach query in signal mode when committed', () => {
     expect(getTimeFieldResolutionQuery(standaloneQuery, false, true)).toBe(
+      standaloneQuery.breach.query
+    );
+  });
+
+  it('returns the breach query for standalone alert rules when committed', () => {
+    expect(getTimeFieldResolutionQuery(standaloneQuery, true, true)).toBe(
       standaloneQuery.breach.query
     );
   });

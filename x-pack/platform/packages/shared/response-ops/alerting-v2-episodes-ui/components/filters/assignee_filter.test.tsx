@@ -11,6 +11,7 @@ import userEvent from '@testing-library/user-event';
 import { AlertEpisodesAssigneeFilter } from './assignee_filter';
 import * as inlineFilterPopoverModule from './inline_filter_popover';
 import * as useBulkGetProfilesModule from '../../hooks/use_bulk_get_profiles';
+import * as useCurrentUserProfileModule from '../../hooks/use_current_user_profile';
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useKibana: () => ({
@@ -21,20 +22,38 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
   }),
 }));
 
+jest.mock('@kbn/user-profile-components', () => ({
+  UserAvatar: () => null,
+}));
+
 jest.mock('../../hooks/use_bulk_get_profiles', () => ({
   useBulkGetProfiles: jest.fn(),
 }));
 
+jest.mock('../../hooks/use_current_user_profile', () => ({
+  useCurrentUserProfile: jest.fn(),
+}));
+
 const mockUseBulkGetProfiles = jest.mocked(useBulkGetProfilesModule.useBulkGetProfiles);
+const mockUseCurrentUserProfile = jest.mocked(useCurrentUserProfileModule.useCurrentUserProfile);
 const InlineFilterPopoverSpy = jest.spyOn(inlineFilterPopoverModule, 'InlineFilterPopover');
 
 const mockProfiles = [
   {
     uid: 'uid-alice',
     user: { full_name: 'Alice Smith', email: 'alice@example.com', username: 'alice' },
+    data: { avatar: undefined },
   },
-  { uid: 'uid-bob', user: { full_name: '', email: 'bob@example.com', username: 'bob' } },
-  { uid: 'uid-charlie', user: { full_name: '', email: '', username: 'charlie' } },
+  {
+    uid: 'uid-bob',
+    user: { full_name: '', email: 'bob@example.com', username: 'bob' },
+    data: { avatar: undefined },
+  },
+  {
+    uid: 'uid-charlie',
+    user: { full_name: '', email: '', username: 'charlie' },
+    data: { avatar: undefined },
+  },
 ];
 
 describe('AlertEpisodesAssigneeFilter', () => {
@@ -54,6 +73,9 @@ describe('AlertEpisodesAssigneeFilter', () => {
       isFetching: false,
       isLoading: false,
     } as unknown as ReturnType<typeof useBulkGetProfilesModule.useBulkGetProfiles>);
+    mockUseCurrentUserProfile.mockReturnValue({
+      data: null,
+    } as unknown as ReturnType<typeof useCurrentUserProfileModule.useCurrentUserProfile>);
   });
 
   const openPopover = () => user.click(screen.getByTestId('test-assignee-filter-button'));
@@ -80,13 +102,65 @@ describe('AlertEpisodesAssigneeFilter', () => {
     expect(InlineFilterPopoverSpy).toHaveBeenCalledWith(
       expect.objectContaining({
         options: [
-          { label: 'Alice Smith', value: 'uid-alice' },
-          { label: 'bob@example.com', value: 'uid-bob' },
-          { label: 'charlie', value: 'uid-charlie' },
+          expect.objectContaining({ label: 'Alice Smith', value: 'uid-alice' }),
+          expect.objectContaining({ label: 'bob@example.com', value: 'uid-bob' }),
+          expect.objectContaining({ label: 'charlie', value: 'uid-charlie' }),
         ],
       }),
       {}
     );
+  });
+
+  it('includes a prepend avatar for each option', async () => {
+    render(<AlertEpisodesAssigneeFilter {...defaultProps} />);
+    await openPopover();
+    const { options } = InlineFilterPopoverSpy.mock.calls[0][0];
+    expect(options.every((o) => 'prepend' in o)).toBe(true);
+  });
+
+  it('places the current user first in the options list', async () => {
+    mockUseCurrentUserProfile.mockReturnValue({
+      data: { uid: 'uid-bob' },
+    } as unknown as ReturnType<typeof useCurrentUserProfileModule.useCurrentUserProfile>);
+
+    render(<AlertEpisodesAssigneeFilter {...defaultProps} />);
+    await openPopover();
+
+    expect(InlineFilterPopoverSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        options: [
+          expect.objectContaining({ value: 'uid-bob' }),
+          expect.objectContaining({ value: 'uid-alice' }),
+          expect.objectContaining({ value: 'uid-charlie' }),
+        ],
+      }),
+      {}
+    );
+  });
+
+  it('limits the displayed options to 10', async () => {
+    const manyProfiles = Array.from({ length: 11 }, (_, i) => ({
+      uid: `uid-${i}`,
+      user: { full_name: `User ${i}`, email: `user${i}@example.com`, username: `user${i}` },
+      data: { avatar: undefined },
+    }));
+
+    mockUseBulkGetProfiles.mockReturnValue({
+      data: manyProfiles,
+      isFetching: false,
+      isLoading: false,
+    } as unknown as ReturnType<typeof useBulkGetProfilesModule.useBulkGetProfiles>);
+
+    render(
+      <AlertEpisodesAssigneeFilter
+        {...defaultProps}
+        assigneeUids={manyProfiles.map((p) => p.uid)}
+      />
+    );
+    await openPopover();
+
+    const { options } = InlineFilterPopoverSpy.mock.calls[0][0];
+    expect(options).toHaveLength(11);
   });
 
   it('calls onAssigneeChange with uid when a value is selected', async () => {
@@ -126,7 +200,7 @@ describe('AlertEpisodesAssigneeFilter', () => {
 
     expect(InlineFilterPopoverSpy).toHaveBeenLastCalledWith(
       expect.objectContaining({
-        options: [{ label: 'Alice Smith', value: 'uid-alice' }],
+        options: [expect.objectContaining({ label: 'Alice Smith', value: 'uid-alice' })],
       }),
       {}
     );

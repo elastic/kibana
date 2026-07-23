@@ -60,7 +60,13 @@ import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { ReportingStart } from '@kbn/reporting-plugin/public';
 
 import type { FleetAuthz } from '../common';
-import { appRoutesService, INTEGRATIONS_PLUGIN_ID, PLUGIN_ID, setupRouteService } from '../common';
+import {
+  appRoutesService,
+  INTEGRATIONS_PLUGIN_ID,
+  PLUGIN_ID,
+  setupRouteService,
+  registerAwsOnboardingEvents,
+} from '../common';
 import {
   calculateAuthz,
   calculateEndpointExceptionsPrivilegesFromCapabilities,
@@ -178,6 +184,9 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
     const config = this.config;
     const kibanaVersion = this.kibanaVersion;
     const extensions = this.extensions;
+
+    // registerEventType is on AnalyticsServiceSetup (setup), not AnalyticsServiceStart (start).
+    registerAwsOnboardingEvents(core.analytics);
 
     setCustomIntegrations(deps.customIntegrations);
 

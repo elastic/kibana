@@ -1,0 +1,14 @@
+{
+  "type": "plugin",
+  "id": "@kbn/agent-builder-sml-plugin",
+  "owner": "@elastic/workchat-eng",
+  "group": "platform",
+  "visibility": "shared",
+  "plugin": {
+    "id": "agentBuilderSml",
+    "server": true,
+    "browser": true,
+    "requiredPlugins": ["features", "taskManager"],
+    "optionalPlugins": ["security", "spaces"]
+  }
+}

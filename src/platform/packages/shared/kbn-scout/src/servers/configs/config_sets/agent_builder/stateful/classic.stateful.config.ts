@@ -18,9 +18,10 @@ const AGENT_BUILDER_GITHUB_MOCK_PORT = 18387;
 
 /**
  * Stateful Kibana + Elasticsearch defaults with Agent Builder test settings:
- * experimental Agent Builder UI flags, verbose Agent Builder plugin logging,
- * `xpack.agentBuilder.githubBaseUrl` pointing at the local plugin registry mock,
- * AI agents feature flag, and AI Assistant chat experience set to agent mode.
+ * experimental Agent Builder UI flags, the Context Engine flag, verbose Agent
+ * Builder plugin logging, `xpack.agentBuilder.githubBaseUrl` pointing at the
+ * local plugin registry mock, AI agents feature flag, and AI Assistant chat
+ * experience set to agent mode.
  */
 export const servers: ScoutServerConfig = {
   ...defaultConfig,
@@ -41,8 +42,17 @@ export const servers: ScoutServerConfig = {
         },
       ])}`,
       '--uiSettings.overrides.agentBuilder:experimentalFeatures=true',
+      '--uiSettings.overrides.contextEngine:enabled=true',
+      '--uiSettings.overrides.agentBuilder:tracing:enabled=true',
+      '--uiSettings.overrides.agentBuilder:tracing:includeUserPrompts=true',
+      '--uiSettings.overrides.agentBuilder:tracing:includeSystemPrompt=true',
+      '--uiSettings.overrides.agentBuilder:tracing:includeLlmResponses=true',
+      '--uiSettings.overrides.agentBuilder:tracing:includeToolDetails=true',
+      '--uiSettings.overrides.agentBuilder:tracing:includeRealNames=true',
+      '--uiSettings.overrides.agentBuilder:tracing:includeRealIds=true',
       '--feature_flags.overrides.aiAssistant.aiAgents.enabled=true',
       '--uiSettings.overrides.aiAssistant:preferredChatExperience=agent',
+      '--xpack.agentBuilder.tracing.scheduledDelay=500',
       `--xpack.agentBuilder.githubBaseUrl=http://localhost:${AGENT_BUILDER_GITHUB_MOCK_PORT}`,
     ],
   },

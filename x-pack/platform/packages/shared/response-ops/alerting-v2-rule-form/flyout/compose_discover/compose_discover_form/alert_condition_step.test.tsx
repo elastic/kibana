@@ -6,25 +6,27 @@
  */
 
 import React from 'react';
-import { useForm, FormProvider } from 'react-hook-form';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { useForm, FormProvider, type UseFormReturn } from 'react-hook-form';
+import { act, render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { QueryClientProvider } from '@kbn/react-query';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { createTestQueryClient, createMockServices } from '../../../test_utils';
 import { RuleFormProvider, type RuleFormServices } from '../../../form/contexts';
 import { createInitialState } from '../use_compose_discover_state';
 import type { ComposeDiscoverState } from '../types';
-import type { ComposeFormValues, RuleQuery } from '../compose_form_types';
+import type { FormValues, RuleQuery } from '../../../form/types';
 import { AlertConditionStep } from './alert_condition_step';
-import { ComposeDiscoverTimeFieldContextProvider } from '../compose_discover_time_field_context';
-
-jest.mock('@kbn/code-editor', () => ({
-  ...jest.requireActual('@kbn/code-editor'),
-  CodeEditor: ({ value }: { value: string }) => <pre data-test-subj="codeEditorMock">{value}</pre>,
-}));
+import { QueryFieldRules } from './query_field_rules';
 
 jest.mock('@kbn/esql-utils', () => ({
   getEsqlColumns: jest.fn(async () => []),
+}));
+
+jest.mock('../use_compose_discover_time_field', () => ({
+  useComposeDiscoverTimeField: () => ({
+    timeFieldOptions: [{ value: '@timestamp', text: '@timestamp' }],
+    isTimeFieldResolved: true,
+  }),
 }));
 
 const BASE_QUERY = 'FROM logs-*';
@@ -35,7 +37,7 @@ const createState = (overrides: Partial<ComposeDiscoverState> = {}): ComposeDisc
   ...overrides,
 });
 
-const BASE_COMPOSE_VALUES: ComposeFormValues = {
+const BASE_COMPOSE_VALUES: FormValues = {
   kind: 'alert',
   metadata: { name: '', enabled: true },
   timeField: '@timestamp',
@@ -50,30 +52,29 @@ const BASE_COMPOSE_VALUES: ComposeFormValues = {
 };
 
 const createComposeFormWrapper = (
-  formValueOverrides: Partial<ComposeFormValues> = {},
-  services: RuleFormServices = createMockServices()
+  formValueOverrides: Partial<FormValues> = {},
+  services: RuleFormServices = createMockServices(),
+  formRef?: { current: UseFormReturn<FormValues> | null },
+  queryCommitted = true
 ) => {
   const queryClient = createTestQueryClient();
-  const defaultValues: ComposeFormValues = {
+  const defaultValues: FormValues = {
     ...BASE_COMPOSE_VALUES,
     ...formValueOverrides,
   };
 
   const Wrapper = ({ children }: { children: React.ReactNode }) => {
-    const form = useForm<ComposeFormValues>({ defaultValues });
+    const form = useForm<FormValues>({ defaultValues, mode: 'onBlur' });
+    if (formRef) {
+      formRef.current = form;
+    }
     return (
       <IntlProvider locale="en">
         <QueryClientProvider client={queryClient}>
           <FormProvider {...form}>
             <RuleFormProvider services={services} meta={{ layout: 'flyout' }}>
-              <ComposeDiscoverTimeFieldContextProvider
-                value={{
-                  timeFieldOptions: [{ value: '@timestamp', text: '@timestamp' }],
-                  isTimeFieldResolved: true,
-                }}
-              >
-                {children}
-              </ComposeDiscoverTimeFieldContextProvider>
+              <QueryFieldRules queryCommitted={queryCommitted} />
+              {children}
             </RuleFormProvider>
           </FormProvider>
         </QueryClientProvider>
@@ -86,7 +87,7 @@ const createComposeFormWrapper = (
 
 interface RenderOptions {
   isEditing?: boolean;
-  formValueOverrides?: Partial<ComposeFormValues>;
+  formValueOverrides?: Partial<FormValues>;
 }
 
 const renderStep = (
@@ -99,6 +100,7 @@ const renderStep = (
   });
   const dispatch = jest.fn();
   const services = createMockServices();
+  const formRef: { current: UseFormReturn<FormValues> | null } = { current: null };
 
   render(
     <AlertConditionStep
@@ -107,10 +109,17 @@ const renderStep = (
       services={services}
       isEditing={isEditing}
     />,
-    { wrapper: createComposeFormWrapper(formValueOverrides, services) }
+    {
+      wrapper: createComposeFormWrapper(
+        formValueOverrides,
+        services,
+        formRef,
+        state.queryCommitted
+      ),
+    }
   );
 
-  return { dispatch, state };
+  return { dispatch, state, formRef };
 };
 
 const STANDALONE_QUERY: RuleQuery = {
@@ -132,11 +141,12 @@ const COMPOSED_QUERY_EMPTY_BASE: RuleQuery = {
 
 describe('AlertConditionStep', () => {
   describe('query display', () => {
-    it('shows "No query defined yet" when query is not committed', () => {
+    it('shows the before-apply summary state when query is not committed (alert)', () => {
       renderStep({ queryCommitted: false });
 
-      expect(screen.getByText('No query defined yet')).toBeInTheDocument();
-      expect(screen.getByTestId('composeDiscoverOpenEditor')).toBeInTheDocument();
+      expect(screen.getByTestId('esqlQuerySummarySection-before_apply')).toBeInTheDocument();
+      expect(screen.getByText('Open the editor to write your ES|QL query')).toBeInTheDocument();
+      expect(screen.getByTestId('esqlSummaryOpenEditor')).toBeInTheDocument();
     });
 
     it('shows standalone query summary for signal kind', () => {
@@ -148,15 +158,16 @@ describe('AlertConditionStep', () => {
       expect(screen.getByTestId('composeDiscoverEditQuery')).toBeInTheDocument();
     });
 
-    it('shows base and alert condition summaries for alert kind', () => {
+    it('shows the success state with base and alert condition for alert kind', () => {
       renderStep(
         { queryCommitted: true },
         { formValueOverrides: { kind: 'alert', query: COMPOSED_QUERY } }
       );
 
+      expect(screen.getByTestId('esqlQuerySummarySection-success')).toBeInTheDocument();
       expect(screen.getByText('Base query')).toBeInTheDocument();
       expect(screen.getByText('Alert condition')).toBeInTheDocument();
-      expect(screen.getByTestId('composeDiscoverEditQueries')).toBeInTheDocument();
+      expect(screen.getByTestId('esqlSummaryOpenEditor')).toBeInTheDocument();
     });
 
     it('shows split-failed callout when base query is empty', () => {
@@ -165,12 +176,13 @@ describe('AlertConditionStep', () => {
         { formValueOverrides: { kind: 'alert', query: COMPOSED_QUERY_EMPTY_BASE } }
       );
 
+      expect(screen.getByTestId('esqlQuerySummarySection-split_failed')).toBeInTheDocument();
       expect(
         screen.getByText(/Couldn't automatically separate base query from alert condition/)
       ).toBeInTheDocument();
     });
 
-    it('shows alert-condition-missing callout when base query is present but alert condition is empty', () => {
+    it('shows the no-alert-condition callout when base is present but alert condition is empty', () => {
       renderStep(
         { queryCommitted: true },
         {
@@ -181,16 +193,33 @@ describe('AlertConditionStep', () => {
         }
       );
 
-      expect(screen.getByTestId('composeDiscoverAlertQueryMissing')).toBeInTheDocument();
-      expect(screen.getByText('Alert condition required')).toBeInTheDocument();
+      expect(screen.getByTestId('esqlSummaryNoAlertConditionCallout')).toBeInTheDocument();
+      expect(screen.getByText('No alert condition')).toBeInTheDocument();
       expect(
         screen.getByText(
-          'Define an alert condition in the query editor before continuing to the next step.'
+          'Without an alert condition, every row returned by the base query is treated as a breach.'
         )
       ).toBeInTheDocument();
     });
 
-    it('does not show alert-condition-missing callout when splitFailed callout is already shown', () => {
+    it('shows the no-alert-condition state for an alert persisted as a standalone query', () => {
+      renderStep(
+        { queryCommitted: true },
+        {
+          formValueOverrides: {
+            kind: 'alert',
+            query: { format: 'standalone', breach: { query: 'FROM logs-* | STATS c = COUNT(*)' } },
+          },
+        }
+      );
+
+      expect(screen.getByTestId('esqlQuerySummarySection-no_alert_condition')).toBeInTheDocument();
+      expect(screen.getByTestId('esqlSummaryNoAlertConditionCallout')).toBeInTheDocument();
+      // The standalone breach query is surfaced as the base query block.
+      expect(screen.getByText(/FROM logs-\* \| STATS c = COUNT/)).toBeInTheDocument();
+    });
+
+    it('shows the empty-query callout when both base and alert condition are empty', () => {
       renderStep(
         { queryCommitted: true },
         {
@@ -201,53 +230,29 @@ describe('AlertConditionStep', () => {
         }
       );
 
-      expect(
-        screen.getByText(/Couldn't automatically separate base query from alert condition/)
-      ).toBeInTheDocument();
-      expect(screen.queryByTestId('composeDiscoverAlertQueryMissing')).not.toBeInTheDocument();
+      expect(screen.getByTestId('esqlQuerySummarySection-empty')).toBeInTheDocument();
+      expect(screen.getByTestId('esqlSummaryEmptyCallout')).toBeInTheDocument();
+      expect(screen.queryByTestId('esqlSummaryNoAlertConditionCallout')).not.toBeInTheDocument();
     });
 
-    it('does not show alert-query-missing callout when both queries are defined', () => {
+    it('does not show the no-alert-condition callout when both queries are defined', () => {
       renderStep(
         { queryCommitted: true },
         { formValueOverrides: { kind: 'alert', query: COMPOSED_QUERY } }
       );
 
-      expect(screen.queryByTestId('composeDiscoverAlertQueryMissing')).not.toBeInTheDocument();
-    });
-
-    it('does not show alert-query-missing callout for signal kind', () => {
-      renderStep(
-        { queryCommitted: true },
-        { formValueOverrides: { kind: 'signal', query: STANDALONE_QUERY } }
-      );
-
-      expect(screen.queryByTestId('composeDiscoverAlertQueryMissing')).not.toBeInTheDocument();
-    });
-
-    it('does not show alert-query-missing callout when query is not committed', () => {
-      renderStep(
-        { queryCommitted: false },
-        {
-          formValueOverrides: {
-            kind: 'alert',
-            query: { format: 'composed', base: 'FROM logs-*', breach: { segment: '' } },
-          },
-        }
-      );
-
-      expect(screen.queryByTestId('composeDiscoverAlertQueryMissing')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('esqlSummaryNoAlertConditionCallout')).not.toBeInTheDocument();
     });
   });
 
   describe('editor buttons', () => {
-    it('disables "Open query editor" when child flyout is open', () => {
+    it('disables the edit CTA when child flyout is open (alert before apply)', () => {
       renderStep({ queryCommitted: false, childOpen: true });
 
-      expect(screen.getByTestId('composeDiscoverOpenEditor')).toBeDisabled();
+      expect(screen.getByTestId('esqlSummaryOpenEditor')).toBeDisabled();
     });
 
-    it('disables "Edit query" when child flyout is open', () => {
+    it('disables "Edit query" when child flyout is open (signal)', () => {
       renderStep(
         { queryCommitted: true, childOpen: true },
         { formValueOverrides: { kind: 'signal', query: STANDALONE_QUERY } }
@@ -256,19 +261,19 @@ describe('AlertConditionStep', () => {
       expect(screen.getByTestId('composeDiscoverEditQuery')).toBeDisabled();
     });
 
-    it('disables "Edit queries" when child flyout is open', () => {
+    it('disables the edit CTA when child flyout is open (alert committed)', () => {
       renderStep(
         { queryCommitted: true, childOpen: true },
         { formValueOverrides: { kind: 'alert', query: COMPOSED_QUERY } }
       );
 
-      expect(screen.getByTestId('composeDiscoverEditQueries')).toBeDisabled();
+      expect(screen.getByTestId('esqlSummaryOpenEditor')).toBeDisabled();
     });
 
-    it('dispatches OPEN_CHILD_FOR_STEP on "Open query editor" click', () => {
+    it('dispatches OPEN_CHILD_FOR_STEP on edit CTA click', () => {
       const { dispatch, state } = renderStep({ queryCommitted: false, childOpen: false });
 
-      fireEvent.click(screen.getByTestId('composeDiscoverOpenEditor'));
+      fireEvent.click(screen.getByTestId('esqlSummaryOpenEditor'));
 
       expect(dispatch).toHaveBeenCalledWith({
         type: 'OPEN_CHILD_FOR_STEP',
@@ -359,6 +364,73 @@ describe('AlertConditionStep', () => {
         expect(comboBox).toBeInTheDocument();
       });
       expect(comboBox.querySelectorAll('[data-test-subj="euiComboBoxPill"]')).toHaveLength(0);
+    });
+  });
+
+  describe('query field validation', () => {
+    it('surfaces an inline error when trigger fails for an incomplete alert query', async () => {
+      const { formRef } = renderStep(
+        { queryCommitted: true },
+        {
+          formValueOverrides: {
+            kind: 'alert',
+            query: {
+              format: 'composed',
+              base: 'FROM logs-*',
+              breach: { segment: '' },
+            },
+          },
+        }
+      );
+
+      let valid = true;
+      await act(async () => {
+        valid = await formRef.current!.trigger('query');
+      });
+
+      expect(valid).toBe(false);
+      await waitFor(() => {
+        expect(screen.getByTestId('composeDiscoverQueryFieldError')).toHaveTextContent(
+          'Add an alert condition to the query before continuing'
+        );
+      });
+    });
+
+    it('passes trigger for a valid composed alert query', async () => {
+      const { formRef } = renderStep(
+        { queryCommitted: true },
+        { formValueOverrides: { kind: 'alert', query: COMPOSED_QUERY } }
+      );
+
+      let valid = false;
+      await act(async () => {
+        valid = await formRef.current!.trigger('query');
+      });
+
+      expect(valid).toBe(true);
+      expect(screen.queryByTestId('composeDiscoverQueryFieldError')).not.toBeInTheDocument();
+    });
+
+    it('fails trigger for a standalone alert query (no separate alert condition)', async () => {
+      const { formRef } = renderStep(
+        { queryCommitted: true },
+        {
+          formValueOverrides: {
+            kind: 'alert',
+            query: { format: 'standalone', breach: { query: 'FROM logs-*' } },
+          },
+        }
+      );
+
+      let valid = true;
+      await act(async () => {
+        valid = await formRef.current!.trigger('query');
+      });
+
+      expect(valid).toBe(false);
+      await waitFor(() => {
+        expect(screen.getByTestId('composeDiscoverQueryFieldError')).toBeInTheDocument();
+      });
     });
   });
 });

@@ -138,13 +138,6 @@ export const useStateProps = ({
     }
   }, [breakdownField, localStorageKeyPrefix, services.storage]);
 
-  // Clear the Lens request adapter when the chart is hidden
-  useEffect(() => {
-    if (chartHidden || !chart) {
-      stateService?.setLensRequestAdapter(undefined);
-    }
-  }, [chart, chartHidden, stateService]);
-
   return {
     topPanelHeight,
     hits,

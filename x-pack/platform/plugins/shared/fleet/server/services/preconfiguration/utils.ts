@@ -17,3 +17,17 @@ export function isDifferent(val1: any, val2: any) {
 
   return !isEqual(val1, val2);
 }
+
+/**
+ * For each key listed in `allowEdit`, copy the current runtime value from `source`
+ * into `target`, preventing the preconfig sync from overwriting user-editable fields.
+ */
+export function applyAllowEditOverrides(
+  target: Record<string, unknown>,
+  source: Record<string, unknown>,
+  allowEdit: string[]
+): void {
+  for (const key of allowEdit) {
+    target[key] = source[key];
+  }
+}

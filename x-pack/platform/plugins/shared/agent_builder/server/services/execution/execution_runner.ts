@@ -117,11 +117,14 @@ const handleConversationExecution = async ({
     outputSchema,
     storeConversation = true,
     autoCreateConversationWithId = false,
+    origin,
     nextInput,
     browserApiTools,
     configurationOverrides,
     action,
     telemetryMetadata,
+    maxContentLength,
+    accessControl,
   } = execution.agentParams;
 
   const { logger, runAgent, trackingService, analyticsService, meteringService, agentService } =
@@ -136,12 +139,20 @@ const handleConversationExecution = async ({
     ...deps,
   });
 
-  // Get conversation
+  // Get conversation — only the conversation-level part of the origin is persisted on it
   const conversation = await getConversation({
     agentId,
     conversationId,
     autoCreateConversationWithId,
     conversationClient,
+    accessControl,
+    origin: origin ? { external_conversation_id: origin.external_conversation_id } : undefined,
+  });
+
+  const author = await deps.conversationService.getConversationRoundAuthor({
+    request,
+    conversation,
+    origin,
   });
 
   // Emit conversation ID for new conversations (only when persisting)
@@ -156,6 +167,8 @@ const handleConversationExecution = async ({
     executionId: execution.executionId,
     request,
     nextInput,
+    origin,
+    author,
     capabilities,
     structuredOutput,
     outputSchema,
@@ -163,6 +176,7 @@ const handleConversationExecution = async ({
     conversation,
     defaultConnectorId: selectedConnectorId,
     telemetryMetadata,
+    maxContentLength,
     runAgent,
     browserApiTools,
     configurationOverrides,
@@ -182,19 +196,13 @@ const handleConversationExecution = async ({
   // Persist conversation (optional)
   const persistenceEvents$ = storeConversation
     ? buildPersistenceEvents({
-        agentId,
         conversation,
         conversationClient,
-        conversationId,
         title$,
         agentEvents$,
         action,
       })
     : EMPTY;
-
-  // Merge all event streams
-  const effectiveConversationId =
-    conversation.operation === 'CREATE' ? conversation.id : conversationId;
 
   const chatModel = (await modelProvider.getDefaultModel()).chatModel;
   const connectorProvider = getConnectorProvider(chatModel.getConnector());
@@ -217,7 +225,7 @@ const handleConversationExecution = async ({
       agentId,
       agentName,
       providerName: connectorProvider,
-      conversationId: effectiveConversationId,
+      conversationId: conversation.id,
       spaceId,
       opikHeaders,
     },
@@ -235,7 +243,7 @@ const handleConversationExecution = async ({
               // metering
               meteringService
                 .reportExecution({
-                  conversationId: effectiveConversationId,
+                  conversationId: conversation.id,
                   executionId: execution.executionId,
                   roundCount: currentRoundCount,
                   agentId,
@@ -247,13 +255,11 @@ const handleConversationExecution = async ({
                 });
 
               // snapshot telemetry tracking
-              if (effectiveConversationId) {
-                trackingService?.trackConversationRound(effectiveConversationId, currentRoundCount);
-              }
+              trackingService?.trackConversationRound(conversation.id, currentRoundCount);
 
               // EBT tracking
               analyticsService?.reportRoundComplete({
-                conversationId: effectiveConversationId,
+                conversationId: conversation.id,
                 executionId: execution.executionId,
                 roundCount: currentRoundCount,
                 agentId,
@@ -271,7 +277,7 @@ const handleConversationExecution = async ({
           analyticsService,
           trackingService,
           modelProvider: connectorProvider,
-          conversationId: effectiveConversationId,
+          conversationId: conversation.id,
           executionId: execution.executionId,
         })
       )
@@ -280,7 +286,7 @@ const handleConversationExecution = async ({
 
 /**
  * Subscribe to the event stream and append events to the execution document with 200ms batching.
- * Returns a promise that resolves when the observable completes and all events are flushed.
+ * Returns a promise that resolves with the collected events when the observable completes and all events are flushed.
  */
 export const collectAndWriteEvents = ({
   events$,
@@ -292,8 +298,9 @@ export const collectAndWriteEvents = ({
   execution: AgentExecution;
   executionClient: AgentExecutionClient;
   logger: Logger;
-}): Promise<void> => {
-  return new Promise<void>((resolve, reject) => {
+}): Promise<ChatEvent[]> => {
+  return new Promise<ChatEvent[]>((resolve, reject) => {
+    const collectedEvents: ChatEvent[] = [];
     let pendingEvents: ChatEvent[] = [];
     let flushTimer: ReturnType<typeof setTimeout> | undefined;
     let flushInProgress: Promise<void> | undefined;
@@ -329,6 +336,7 @@ export const collectAndWriteEvents = ({
 
     events$.subscribe({
       next: (event) => {
+        collectedEvents.push(event);
         pendingEvents.push(event);
         scheduleFlush();
       },
@@ -344,7 +352,7 @@ export const collectAndWriteEvents = ({
           }
           await flush();
         };
-        finalFlush().then(resolve, reject);
+        finalFlush().then(() => resolve(collectedEvents), reject);
       },
     });
   });
@@ -388,18 +396,14 @@ const getHttpStatusFromError = (error: unknown): number | undefined => {
 };
 
 const buildPersistenceEvents = ({
-  agentId,
   conversation,
   conversationClient,
-  conversationId,
   title$,
   agentEvents$,
   action,
 }: {
-  agentId: string;
   conversation: ConversationWithOperation;
   conversationClient: ConversationClient;
-  conversationId?: string;
   title$: Observable<string>;
   agentEvents$: Observable<ChatEvent>;
   action?: ConversationAction;
@@ -408,9 +412,8 @@ const buildPersistenceEvents = ({
 
   if (conversation.operation === 'CREATE') {
     return createConversation$({
-      agentId,
+      conversation,
       conversationClient,
-      conversationId: conversationId || conversation.id,
       title$,
       roundCompletedEvents$,
     });
@@ -442,7 +445,7 @@ const handleStandaloneExecution = async ({
 }): Promise<Observable<ChatEvent>> => {
   const agentId = execution.agentId;
   const { logger, runAgent } = deps;
-  const { telemetryMetadata } = execution.agentParams;
+  const { telemetryMetadata, maxContentLength } = execution.agentParams;
 
   const { selectedConnectorId } = await resolveServices({
     agentId,
@@ -462,6 +465,7 @@ const handleStandaloneExecution = async ({
     conversation: undefined,
     defaultConnectorId: selectedConnectorId,
     telemetryMetadata,
+    maxContentLength,
     runAgent,
     executionMode: AgentExecutionMode.standalone,
   });
