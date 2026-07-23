@@ -24,6 +24,7 @@ import type { JoinCommandPosition, JoinStaticPosition } from './types';
 import { SuggestionCategory } from '../../../language/autocomplete/utils/sorting/types';
 import { getLookupJoinSource } from '../../definitions/utils/sources';
 import { endsWithComma } from '../../definitions/utils/regex';
+import { COORDINATOR_LOOKUP_JOIN_PREFIX } from '../../definitions/constants';
 
 const REGEX =
   /^(?<type>\w+((?<after_type>\s+((?<mnemonic>(JOIN|JOI|JO|J)((?<after_mnemonic>\s+((?<index>\S+((?<after_index>\s+(?<as>(AS|A))?(?<after_as>\s+(((?<alias>\S+)?(?<after_alias>\s+)?)?))?((?<on>(ON|O))?))?))?))?))?))?))?/i;
@@ -55,6 +56,21 @@ export const getFullCommandMnemonics = (
     `${type.name.toUpperCase()} ${command.name.toUpperCase()}`,
     type.description ?? command.metadata.description,
   ]);
+};
+
+/** Splits the typed JOIN target into its coordinator-prefix facts and bare index name. */
+export const parseJoinTargetInput = (commandText: string, canUseCoordinator: boolean) => {
+  const words = commandText.split(/\s+/);
+  const targetInput = words[words.length - 1] ?? '';
+  const coordinatorPrefix = `${COORDINATOR_LOOKUP_JOIN_PREFIX}:`;
+  const isCoordinator = canUseCoordinator && targetInput.startsWith(coordinatorPrefix);
+
+  return {
+    targetInput,
+    isCoordinator,
+    isPrefixFragment: Boolean(targetInput) && COORDINATOR_LOOKUP_JOIN_PREFIX.startsWith(targetInput),
+    indexNameInput: isCoordinator ? targetInput.slice(coordinatorPrefix.length) : targetInput,
+  };
 };
 
 // facilitates fast checks for the existence of fields in the lookup index

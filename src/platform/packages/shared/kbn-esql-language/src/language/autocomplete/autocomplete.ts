@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { ControlTriggerSource, ESQLVariableType, type ESQLCallbacks } from '@kbn/esql-types';
-import { isNonLocalIndexName } from '@kbn/es-query';
 import type { LicenseType } from '@kbn/licensing-types';
 import { EsqlQuery, isHeaderCommand, Walker } from '@elastic/esql';
 import type {
@@ -37,7 +36,7 @@ import type { ColumnsMap, GetColumnMapFn } from '../shared/columns_retrieval_hel
 import { getColumnsByTypeRetriever } from '../shared/columns_retrieval_helpers';
 import { getUnmappedFieldsStrategy } from '../../commands/definitions/utils/settings';
 import { isTimeseriesSourceCommand } from '../../commands/definitions/utils/timeseries_check';
-import { getSourcesFromCommands } from '../../commands/definitions/utils/sources';
+import { hasRemoteIndexSource } from '../../commands/definitions/utils/sources';
 import { attachReplacementRanges, ReplacementRangeStrategyKind } from './utils/prefix_range';
 
 function isSourceCommandSuggestion({ label }: { label: string }) {
@@ -50,11 +49,6 @@ function isSourceCommandSuggestion({ label }: { label: string }) {
 function isHeaderCommandSuggestion({ label }: { label: string }) {
   return label === 'SET';
 }
-
-const hasRemoteIndexSource = (commands: ESQLAstAllCommands[]) =>
-  getSourcesFromCommands(commands, 'index').some(
-    (source) => Boolean(source.prefix) || isNonLocalIndexName(source.name)
-  );
 
 const orderingEngine = new SuggestionOrderingEngine();
 

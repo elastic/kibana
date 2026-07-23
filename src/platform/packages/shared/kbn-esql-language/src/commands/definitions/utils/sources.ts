@@ -16,6 +16,7 @@ import type {
 import { SOURCES_TYPES } from '@kbn/esql-types';
 import { EsqlQuery } from '@elastic/esql';
 import { i18n } from '@kbn/i18n';
+import { isNonLocalIndexName } from '@kbn/es-query';
 import type { ESQLAstAllCommands, ESQLAstJoinCommand, ESQLSource } from '@elastic/esql/types';
 import { isAsExpression, isSource, Walker, LeafPrinter, Parser } from '@elastic/esql';
 import type { ISuggestionItem } from '../../registry/types';
@@ -226,6 +227,12 @@ export function getSourcesFromCommands(
   const sourceCommand = commands.find(({ name }) => name === 'from' || name === 'ts');
   const args = (sourceCommand?.args ?? []) as ESQLSource[];
   return args.filter((arg) => arg.sourceType === sourceType && arg.name !== '');
+}
+
+export function hasRemoteIndexSource(commands: ESQLAstAllCommands[]): boolean {
+  return getSourcesFromCommands(commands, 'index').some((source) => {
+    return Boolean(source.prefix) || isNonLocalIndexName(source.name);
+  });
 }
 
 /**

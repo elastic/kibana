@@ -11,10 +11,7 @@ import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { AggregateQuery } from '@kbn/es-query';
 import type { LookupIndicesAutocompleteResult } from '@kbn/esql-types';
-import {
-  getLookupIndexReferencesFromQuery,
-  type LookupIndexReference,
-} from '@kbn/esql-utils';
+import { getLookupIndexReferencesFromQuery, type LookupIndexReference } from '@kbn/esql-utils';
 import { i18n } from '@kbn/i18n';
 import type { EditLookupIndexContentContext } from '@kbn/index-editor';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -211,7 +208,8 @@ export const useLookupIndexCommand = (
     const existingIndices = getLookupIndices
       ? await getLookupIndices()
       : { indices: [], coordinatorIndices: [] };
-    const lookupIndicesWithState = lookupIndexReferences.current.map((lookupIndex) => {
+    const editableLookupIndices = lookupIndexReferences.current.filter(({ isRemote }) => !isRemote);
+    const lookupIndicesWithState = editableLookupIndices.map((lookupIndex) => {
       const availableIndices = lookupIndex.isCoordinator
         ? existingIndices.coordinatorIndices
         : existingIndices.indices;
@@ -301,7 +299,11 @@ export const useLookupIndexCommand = (
 
       let resultQuery: string;
       if (initialSourceName) {
-        resultQuery = appendIndexToJoinCommandByName(query.esql, initialSourceName, resultIndexName);
+        resultQuery = appendIndexToJoinCommandByName(
+          query.esql,
+          initialSourceName,
+          resultIndexName
+        );
       } else {
         resultQuery = appendIndexToJoinCommandByPosition(
           query.esql,

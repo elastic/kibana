@@ -109,6 +109,7 @@ describe('JOIN Autocomplete', () => {
         asSnippet: true,
         kind: 'Reference',
       });
+      expect(suggestions.map(({ label }) => label)).toContain('Create lookup index');
     });
 
     test('does not suggest the coordinator prefix for a local source', async () => {
@@ -152,6 +153,7 @@ describe('JOIN Autocomplete', () => {
       const labels = suggestions.map(({ label }) => label);
 
       expect(labels).toContain('coordinator_only_index');
+      expect(labels).toContain('Create lookup index');
       expect(labels).not.toContain('lookup_index');
     });
 

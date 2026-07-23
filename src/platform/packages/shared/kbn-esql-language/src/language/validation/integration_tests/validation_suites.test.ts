@@ -8,7 +8,11 @@
  */
 
 import pMap from 'p-map';
+import { BasicPrettyPrinter, synth } from '@elastic/esql';
+import type { ESQLCommand } from '@elastic/esql/types';
+import type { ESQLFieldWithMetadata, EsqlFieldType } from '@kbn/esql-types';
 import type { ESQLMessage } from '../../../commands';
+import { columnsAfter } from '../../../commands/registry/from/columns_after';
 import { createValidationTestSetup, type Setup } from '../__tests__/helpers';
 import { runColumnExistenceValidationSuite } from '../__tests__/column_existence_suite';
 import { runCommandsValidationSuite } from '../__tests__/commands_suite';
@@ -79,6 +83,82 @@ describe('ES|QL validation integration suites', () => {
   runSubqueriesValidationSuite(setup);
   runValidationCommandsLicenseSuite(setup);
   runValidationParamsSuite(setup);
+
+  it('uses Elasticsearch multi-source semantics for conflicting fields', async () => {
+    if (!esqlEnv) {
+      throw new Error('ES|QL integration environment has not been initialized.');
+    }
+
+    const { esClient } = esqlEnv.integrationEnv;
+    const keywordIndex = 'esql-language-conflict-keyword';
+    const longIndex = 'esql-language-conflict-long';
+    const command = synth.cmd`FROM ${keywordIndex}, ${longIndex}`;
+
+    await esClient.indices.create({
+      index: keywordIndex,
+      mappings: {
+        properties: {
+          shared_field: { type: 'keyword' },
+          only_keyword: { type: 'keyword' },
+        },
+      },
+    });
+    await esClient.indices.create({
+      index: longIndex,
+      mappings: {
+        properties: {
+          shared_field: { type: 'long' },
+          only_long: { type: 'long' },
+        },
+      },
+    });
+
+    try {
+      const expectedResponse = await esClient.esql.query({
+        query: `${BasicPrettyPrinter.command(command)} | LIMIT 0`,
+      });
+      const fromFrom = jest.fn(
+        async (fromCommand: ESQLCommand): Promise<ESQLFieldWithMetadata[]> => {
+          const response = await esClient.esql.query({
+            query: `${BasicPrettyPrinter.command(fromCommand)} | LIMIT 0`,
+          });
+
+          return response.columns.map(({ name, type }) => ({
+            name,
+            type: type as EsqlFieldType,
+            userDefined: false,
+          }));
+        }
+      );
+
+      const columns = await columnsAfter(command, [], '', {
+        fromFrom,
+        fromJoin: async () => [],
+        fromEnrich: async () => [],
+      });
+
+      expect(fromFrom).toHaveBeenCalledTimes(1);
+      expect(columns).toEqual(
+        expectedResponse.columns.map(({ name, type }) => ({
+          name,
+          type,
+          userDefined: false,
+        }))
+      );
+      expect(columns).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ name: 'only_keyword', type: 'keyword' }),
+          expect.objectContaining({ name: 'only_long', type: 'long' }),
+          expect.objectContaining({ name: 'shared_field', type: 'unsupported' }),
+        ])
+      );
+    } finally {
+      await esClient.indices.delete({
+        index: [keywordIndex, longIndex],
+        ignore_unavailable: true,
+      });
+    }
+  });
 
   it('when Elasticsearch accepts a query, the client validator does not report errors', async () => {
     if (!esqlEnv) {

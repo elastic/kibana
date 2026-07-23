@@ -49,6 +49,10 @@ describe('JOIN Validation', () => {
           []
         );
         joinExpectErrors(
+          'FROM remote_cluster:index | LOOKUP JOIN _coordinator:coordinator_only_index ON keywordField',
+          []
+        );
+        joinExpectErrors(
           'FROM remote_cluster:index | LOOKUP JOIN _coordinator:join_index_alias_1 ON keywordField',
           []
         );
@@ -57,7 +61,9 @@ describe('JOIN Validation', () => {
       test('validates coordinator targets against coordinator lookup indices', () => {
         joinExpectErrors(
           'FROM remote_cluster:index | LOOKUP JOIN _coordinator:lookup_index ON keywordField',
-          ['"lookup_index" is not a valid JOIN index. Please use a "lookup" mode index.']
+          [
+            '"lookup_index" on the coordinating cluster is not a valid JOIN index. Please use a "lookup" mode index.',
+          ]
         );
       });
 

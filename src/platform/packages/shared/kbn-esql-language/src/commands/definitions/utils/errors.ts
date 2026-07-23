@@ -372,6 +372,14 @@ Expected one of:
           values: { identifier: out.identifier },
         }),
       };
+    case 'invalidCoordinatorJoinIndex':
+      return {
+        message: i18n.translate('kbn-esql-language.esql.validation.invalidCoordinatorJoinIndex', {
+          defaultMessage:
+            '"{identifier}" on the coordinating cluster is not a valid JOIN index. Please use a "lookup" mode index.',
+          values: { identifier: out.identifier },
+        }),
+      };
     case 'unsupportedJoinIndexPrefix':
       return {
         message: i18n.translate('kbn-esql-language.esql.validation.unsupportedJoinIndexPrefix', {
@@ -678,6 +686,12 @@ export const errors = {
   invalidJoinIndex: (indexName: string, location: ESQLLocation): ESQLMessage =>
     tagSemanticError(
       errors.byId('invalidJoinIndex', location, { identifier: indexName }),
+      'getJoinIndices'
+    ),
+
+  invalidCoordinatorJoinIndex: (indexName: string, location: ESQLLocation): ESQLMessage =>
+    tagSemanticError(
+      errors.byId('invalidCoordinatorJoinIndex', location, { identifier: indexName }),
       'getJoinIndices'
     ),
 

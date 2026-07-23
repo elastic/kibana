@@ -8,7 +8,7 @@
  */
 
 import { Parser, Walker, isSource } from '@elastic/esql';
-import { resolveLookupJoinTarget } from '@kbn/esql-language';
+import { hasRemoteIndexSource, resolveLookupJoinTarget } from '@kbn/esql-language';
 
 export interface LookupIndexReference {
   /** Source as it appears in the ES|QL query. */
@@ -16,12 +16,19 @@ export interface LookupIndexReference {
   /** Index name used by Elasticsearch APIs. */
   indexName: string;
   isCoordinator: boolean;
+  isRemote: boolean;
 }
 
-/** Returns the lookup indices referenced by JOIN commands, including the ones inside FORK branches. */
+/**
+ * Extracts and returns a list of unique lookup indices from the provided ESQL query by parsing the query and traversing its AST.
+ *
+ * @param {string} esqlQuery - The ESQL query string to parse and analyze for lookup join references.
+ * @return {LookupIndexReference[]} An array of unique lookup indices found in the query.
+ */
 export function getLookupIndexReferencesFromQuery(esqlQuery: string): LookupIndexReference[] {
   const references = new Map<string, LookupIndexReference>();
   const { root } = Parser.parse(esqlQuery);
+  const hasRemoteSource = hasRemoteIndexSource(root.commands);
   const joinCommands = Walker.matchAll(root, { type: 'command', name: 'join' });
 
   for (const command of joinCommands) {
@@ -31,11 +38,13 @@ export function getLookupIndexReferencesFromQuery(esqlQuery: string): LookupInde
     }
 
     const { isCoordinator, indexName } = resolveLookupJoinTarget(source);
+    const isRemote = !isCoordinator && hasRemoteSource;
 
     references.set(source.name, {
       sourceName: source.name,
       indexName,
       isCoordinator,
+      isRemote,
     });
   }
 

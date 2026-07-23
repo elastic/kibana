@@ -22,7 +22,11 @@ export { ESQL_APPLY_TEXT_REPLACEMENT_COMMAND } from './registry/constants';
 export { METADATA_FIELDS } from './registry/options/metadata';
 export { TIME_SYSTEM_PARAMS } from './definitions/utils/literals';
 export { withAutoSuggest } from './definitions/utils/autocomplete/helpers';
-export { getIndexSourcesFromQuery, resolveLookupJoinTarget } from './definitions/utils/sources';
+export {
+  getIndexSourcesFromQuery,
+  hasRemoteIndexSource,
+  resolveLookupJoinTarget,
+} from './definitions/utils/sources';
 export { getPromqlBracketsToClose } from './definitions/utils/ast';
 export { escapeEsqlColumnName } from './definitions/utils/columns';
 export {

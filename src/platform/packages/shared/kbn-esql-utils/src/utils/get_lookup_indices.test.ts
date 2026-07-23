@@ -32,7 +32,12 @@ describe('getLookupIndexReferencesFromQuery', () => {
     const query = 'FROM my_index | LOOKUP JOIN lookup_index ON id';
 
     expect(getLookupIndexReferencesFromQuery(query)).toEqual([
-      { sourceName: 'lookup_index', indexName: 'lookup_index', isCoordinator: false },
+      {
+        sourceName: 'lookup_index',
+        indexName: 'lookup_index',
+        isCoordinator: false,
+        isRemote: false,
+      },
     ]);
   });
 
@@ -69,6 +74,7 @@ describe('getLookupIndexReferencesFromQuery', () => {
         sourceName: '_coordinator:lookup_index',
         indexName: 'lookup_index',
         isCoordinator: true,
+        isRemote: false,
       },
     ]);
   });
@@ -81,6 +87,7 @@ describe('getLookupIndexReferencesFromQuery', () => {
         sourceName: '_coordinator:lookup_index',
         indexName: 'lookup_index',
         isCoordinator: true,
+        isRemote: false,
       },
     ]);
   });
@@ -93,6 +100,20 @@ describe('getLookupIndexReferencesFromQuery', () => {
         sourceName: 'lookup_index',
         indexName: 'lookup_index',
         isCoordinator: false,
+        isRemote: false,
+      },
+    ]);
+  });
+
+  it('marks unprefixed lookup indices as remote when the query source is remote', () => {
+    const query = 'FROM remote:index | LOOKUP JOIN lookup_index ON id';
+
+    expect(getLookupIndexReferencesFromQuery(query)).toEqual([
+      {
+        sourceName: 'lookup_index',
+        indexName: 'lookup_index',
+        isCoordinator: false,
+        isRemote: true,
       },
     ]);
   });
@@ -102,8 +123,13 @@ describe('getLookupIndexReferencesFromQuery', () => {
       'FROM remote:index | LOOKUP JOIN lookup1 ON id | LOOKUP JOIN _coordinator:lookup1 ON user';
 
     expect(getLookupIndexReferencesFromQuery(query)).toEqual([
-      { sourceName: 'lookup1', indexName: 'lookup1', isCoordinator: false },
-      { sourceName: '_coordinator:lookup1', indexName: 'lookup1', isCoordinator: true },
+      { sourceName: 'lookup1', indexName: 'lookup1', isCoordinator: false, isRemote: true },
+      {
+        sourceName: '_coordinator:lookup1',
+        indexName: 'lookup1',
+        isCoordinator: true,
+        isRemote: false,
+      },
     ]);
   });
 
@@ -115,6 +141,7 @@ describe('getLookupIndexReferencesFromQuery', () => {
         sourceName: 'remote1:lookup_index',
         indexName: 'remote1:lookup_index',
         isCoordinator: false,
+        isRemote: false,
       },
     ]);
   });
@@ -124,7 +151,7 @@ describe('getLookupIndexReferencesFromQuery', () => {
     | FORK (LOOKUP JOIN lookup1 ON id) (WHERE status == 200)`;
 
     expect(getLookupIndexReferencesFromQuery(query)).toEqual([
-      { sourceName: 'lookup1', indexName: 'lookup1', isCoordinator: false },
+      { sourceName: 'lookup1', indexName: 'lookup1', isCoordinator: false, isRemote: false },
     ]);
   });
 });

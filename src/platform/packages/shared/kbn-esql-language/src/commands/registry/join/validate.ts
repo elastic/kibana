@@ -77,7 +77,11 @@ export const validate = (
   );
 
   if (!indexExists) {
-    return [errors.invalidJoinIndex(indexName, indexLocation)];
+    return [
+      isCoordinator
+        ? errors.invalidCoordinatorJoinIndex(indexName, indexLocation)
+        : errors.invalidJoinIndex(indexName, indexLocation),
+    ];
   }
 
   // Validate JOIN ON expressions

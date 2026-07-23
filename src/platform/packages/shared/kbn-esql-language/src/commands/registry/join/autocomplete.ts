@@ -22,6 +22,7 @@ import {
   getFullCommandMnemonics,
   getPosition,
   isCommonField,
+  parseJoinTargetInput,
 } from './utils';
 import { specialIndicesToSuggestions } from '../../definitions/utils/sources';
 import { esqlCommandRegistry } from '..';
@@ -84,33 +85,15 @@ export async function autocomplete(
 
     case 'after_mnemonic':
     case 'index': {
-      const words = commandText.split(/\s+/);
-      const joinTargetInput = words[words.length - 1] ?? '';
-      const coordinatorPrefix = `${COORDINATOR_LOOKUP_JOIN_PREFIX}:`;
       const isLookupJoin = (command as ESQLAstJoinCommand).commandType === 'lookup';
-      const canSuggestCoordinatorTarget =
-        isLookupJoin && Boolean(context?.hasRemoteIndexSource);
-      const isCoordinatorTarget =
-        canSuggestCoordinatorTarget && joinTargetInput.startsWith(coordinatorPrefix);
+      const canUseCoordinator = isLookupJoin && Boolean(context?.hasRemoteIndexSource);
+      const { targetInput, isCoordinator, isPrefixFragment, indexNameInput } = parseJoinTargetInput(
+        commandText,
+        canUseCoordinator
+      );
 
-      if (isLookupJoin && joinTargetInput.startsWith('_') && !isCoordinatorTarget) {
-        if (
-          canSuggestCoordinatorTarget &&
-          COORDINATOR_LOOKUP_JOIN_PREFIX.startsWith(joinTargetInput)
-        ) {
-          return [coordinatorPrefixSuggestion];
-        }
-
-        return [];
-      }
-
-      const indexNameInput = isCoordinatorTarget
-        ? joinTargetInput.slice(coordinatorPrefix.length)
-        : joinTargetInput;
       const joinSources =
-        (isCoordinatorTarget ? context?.coordinatorJoinSources : context?.joinSources) ?? [];
-      const suggestions: ISuggestionItem[] = [];
-
+        (isCoordinator ? context?.coordinatorJoinSources : context?.joinSources) ?? [];
       const normalizedIndexNameInput = indexNameInput.toLocaleLowerCase();
       const matchesInput = (existingName: string) =>
         existingName.toLocaleLowerCase() === normalizedIndexNameInput;
@@ -118,20 +101,18 @@ export async function autocomplete(
         indexNameInput.length > 0 &&
         joinSources.some(({ name, aliases }) => matchesInput(name) || aliases.some(matchesInput));
 
-      if (canSuggestCoordinatorTarget && !joinTargetInput) {
+      const suggestions: ISuggestionItem[] = [];
+
+      if (canUseCoordinator && (!targetInput || isPrefixFragment)) {
         suggestions.push(coordinatorPrefixSuggestion);
       }
 
-      const canSuggestCreate =
-        !matchesExistingIndex && (!isCoordinatorTarget || indexNameInput.length > 0);
+      const canSuggestCreate = !matchesExistingIndex && !isPrefixFragment;
 
-      if (canSuggestCreate) {
-        const canCreate = (await callbacks?.canCreateLookupIndex?.(indexNameInput)) ?? false;
-
-        if (canCreate) {
-          const sourceName = isCoordinatorTarget ? joinTargetInput : undefined;
-          suggestions.push(getLookupIndexCreateSuggestion(indexNameInput, sourceName));
-        }
+      if (canSuggestCreate && (await callbacks?.canCreateLookupIndex?.(indexNameInput))) {
+        suggestions.push(
+          getLookupIndexCreateSuggestion(indexNameInput, isCoordinator ? targetInput : undefined)
+        );
       }
 
       if (!matchesExistingIndex) {

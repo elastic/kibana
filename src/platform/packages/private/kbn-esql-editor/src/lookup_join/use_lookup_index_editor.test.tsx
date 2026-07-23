@@ -99,9 +99,7 @@ describe('getMonacoCommandString', () => {
       '_coordinator:test-index'
     );
 
-    expect(decodeURIComponent(result ?? '')).toContain(
-      '"sourceName":"_coordinator:test-index"'
-    );
+    expect(decodeURIComponent(result ?? '')).toContain('"sourceName":"_coordinator:test-index"');
   });
 
   it('should return view command for existing index with read permissions only', () => {
