@@ -230,7 +230,7 @@ export const WorkflowExecutionsDataGrid = ({
 
   const toolbarVisibility = useMemo<EuiDataGridToolBarVisibilityOptions>(
     () => ({
-      showColumnSelector: true,
+      showColumnSelector: { allowHide: false },
       showSortSelector: true,
       showDisplaySelector: false,
       showFullScreenSelector: false,
