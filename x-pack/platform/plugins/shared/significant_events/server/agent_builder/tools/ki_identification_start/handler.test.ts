@@ -8,10 +8,12 @@
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { startKiIdentificationToolHandler } from './handler';
 import { KIsOnboardingStep } from '@kbn/significant-events-schema';
+import { SignificantEventsPausedError } from '../../../lib/errors/significant_events_paused_error';
+import type { SignificantEventsMaintenanceService } from '../../../lib/maintenance/maintenance_service';
 import { SignificantEventsKIsOnboardingClient } from '../../../lib/workflows/onboarding_workflow_client';
 
 describe('startKiIdentificationToolHandler', () => {
-  const setup = () => {
+  const setup = (maintenanceState: 'enabled' | 'paused' = 'enabled') => {
     const managementApi = {
       getWorkflow: jest.fn().mockResolvedValue({
         id: 'system-streams-ki-onboarding',
@@ -27,21 +29,26 @@ describe('startKiIdentificationToolHandler', () => {
       managementApi: managementApi as never,
       telemetry,
     });
+    const maintenanceService = {
+      getState: jest.fn().mockResolvedValue(maintenanceState),
+    } as unknown as SignificantEventsMaintenanceService;
 
     return {
       managementApi,
       streamsKIsOnboardingClient,
+      maintenanceService,
       request: httpServerMock.createKibanaRequest(),
     };
   };
 
   it('triggers onboarding workflow and returns tracking Kibana path', async () => {
-    const { managementApi, streamsKIsOnboardingClient, request } = setup();
+    const { managementApi, streamsKIsOnboardingClient, maintenanceService, request } = setup();
 
     const result = await startKiIdentificationToolHandler({
       streamName: 'logs.nginx',
       steps: [KIsOnboardingStep.FeaturesIdentification, KIsOnboardingStep.QueriesGeneration],
       streamsKIsOnboardingClient,
+      maintenanceService,
       request,
     });
 
@@ -62,8 +69,25 @@ describe('startKiIdentificationToolHandler', () => {
     );
   });
 
+  it('rejects with SignificantEventsPausedError while paused', async () => {
+    const { managementApi, streamsKIsOnboardingClient, maintenanceService, request } =
+      setup('paused');
+
+    await expect(
+      startKiIdentificationToolHandler({
+        streamName: 'logs.nginx',
+        steps: [KIsOnboardingStep.FeaturesIdentification],
+        streamsKIsOnboardingClient,
+        maintenanceService,
+        request,
+      })
+    ).rejects.toBeInstanceOf(SignificantEventsPausedError);
+
+    expect(managementApi.runWorkflow).not.toHaveBeenCalled();
+  });
+
   it('throws when workflow is not found', async () => {
-    const { managementApi, streamsKIsOnboardingClient, request } = setup();
+    const { managementApi, streamsKIsOnboardingClient, maintenanceService, request } = setup();
     managementApi.getWorkflow.mockResolvedValue(null);
 
     await expect(
@@ -71,6 +95,7 @@ describe('startKiIdentificationToolHandler', () => {
         streamName: 'logs.nginx',
         steps: [KIsOnboardingStep.FeaturesIdentification],
         streamsKIsOnboardingClient,
+        maintenanceService,
         request,
       })
     ).rejects.toThrow(/Workflow .+ not found/);
