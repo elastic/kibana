@@ -36,9 +36,10 @@ jest.mock('../../../common/hooks/use_monitor_integration_health', () => ({
 const useCanEditSyntheticsMock = useCanEditSynthetics as jest.MockedFunction<
   typeof useCanEditSynthetics
 >;
-const useCanUsePublicLocationsPermissionMock = useCanUsePublicLocationsPermission as jest.MockedFunction<
-  typeof useCanUsePublicLocationsPermission
->;
+const useCanUsePublicLocationsPermissionMock =
+  useCanUsePublicLocationsPermission as jest.MockedFunction<
+    typeof useCanUsePublicLocationsPermission
+  >;
 const useEnablementMock = useEnablement as jest.MockedFunction<typeof useEnablement>;
 const useMonitorIntegrationHealthMock = useMonitorIntegrationHealth as jest.MockedFunction<
   typeof useMonitorIntegrationHealth
