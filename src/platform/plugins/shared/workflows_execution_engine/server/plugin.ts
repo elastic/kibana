@@ -997,6 +997,7 @@ export class WorkflowsExecutionEnginePlugin
 
     const buildExecutionDocument = async (args: {
       workflow: WorkflowExecutionEngineModel;
+      executionId?: string;
       context: Record<string, unknown>;
       defaultTriggeredBy: string;
       authenticatedUser: string;
@@ -1044,15 +1045,12 @@ export class WorkflowsExecutionEnginePlugin
         : context;
       const workflowExecution = await buildExecutionDocument({
         workflow,
+        executionId: options.executionId,
         context: executionContext,
         defaultTriggeredBy,
         authenticatedUser,
         now: new Date(),
       });
-      if (options.executionId) {
-        workflowExecution.id = options.executionId;
-      }
-
       await maybeDrainConcurrencyQueueBeforeEnqueue({
         workflowExecution,
         workflowExecutionRepository,

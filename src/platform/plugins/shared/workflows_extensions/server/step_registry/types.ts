@@ -326,6 +326,8 @@ export function createPollServerStepDefinition<
 >(
   definition: ServerPollStepDefinition<Input, Output, Config, State>
 ): ServerPollStepDefinition<Input, Output, Config, State> {
+  definition.supportedExecutionModes = ['async'];
+
   if (!definition.ceilings) {
     definition.ceilings = PollStepDefaults.ceilings;
   }
