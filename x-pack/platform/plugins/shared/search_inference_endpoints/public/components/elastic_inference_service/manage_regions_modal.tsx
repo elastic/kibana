@@ -34,8 +34,8 @@ interface ManageRegionsModalProps {
   onClose: () => void;
 }
 
-const modalStyles = ({ euiTheme }: UseEuiTheme) => css`
-  width: ${euiTheme.base * 45}px;
+const bodyContentStyles = ({ euiTheme }: UseEuiTheme) => css`
+  min-width: ${euiTheme.base * 45}px;
 `;
 
 export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose }) => {
@@ -96,7 +96,6 @@ export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose 
   return (
     <>
       <EuiModal
-        css={modalStyles}
         onClose={showConfirmation ? handleCancelConfirmation : onClose}
         aria-labelledby={modalTitleId}
         data-test-subj="manageRegionsModal"
@@ -109,7 +108,7 @@ export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose 
           </EuiModalHeaderTitle>
         </EuiModalHeader>
 
-        <EuiModalBody>
+        <EuiModalBody css={bodyContentStyles}>
           {isError && (
             <EuiCallOut
               announceOnMount={false}
