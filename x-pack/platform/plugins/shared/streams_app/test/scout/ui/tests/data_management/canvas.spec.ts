@@ -72,40 +72,100 @@ test.describe(
       });
     });
 
-    test('renders inferred source and destination nodes for classic streams', async ({ page }) => {
-      await expect(page.locator('[data-test-subj="streamsCanvasTab"]')).toBeVisible();
+    test('renders inferred source and destination nodes for classic streams', async ({
+      pageObjects: { streams },
+    }) => {
+      await expect(streams.canvasTab).toBeVisible();
 
       // The inferred source node is labeled from the stream name.
-      await expect(
-        page.locator('[data-test-subj="streamsCanvasSourceNode"]', { hasText: PLAIN_STREAM })
-      ).toBeVisible();
+      await expect(streams.getCanvasSourceNode(PLAIN_STREAM)).toBeVisible();
 
       // Both seeded streams render as their own destination node.
-      await expect(
-        page.locator('[data-test-subj="streamsCanvasDestinationNode"]', { hasText: PLAIN_STREAM })
-      ).toBeVisible();
-      await expect(
-        page.locator('[data-test-subj="streamsCanvasDestinationNode"]', {
-          hasText: PROCESSING_STREAM,
-        })
-      ).toBeVisible();
+      await expect(streams.getCanvasDestinationNode(PLAIN_STREAM)).toBeVisible();
+      await expect(streams.getCanvasDestinationNode(PROCESSING_STREAM)).toBeVisible();
     });
 
-    test('shows the processing glyph only on destinations with processing', async ({ page }) => {
-      const processingDestination = page.locator(
-        '[data-test-subj="streamsCanvasDestinationNode"]',
-        { hasText: PROCESSING_STREAM }
-      );
+    test('renders a minimap that collapses and reopens', async ({ pageObjects: { streams } }) => {
+      await expect(streams.canvasMinimap).toBeVisible();
+
+      await streams.canvasMinimapCollapse.click();
+      await expect(streams.canvasMinimap).toHaveCount(0);
+      await expect(streams.canvasMinimapExpand).toBeVisible();
+
+      await streams.canvasMinimapExpand.click();
+      await expect(streams.canvasMinimap).toBeVisible();
+    });
+
+    test('tidies up the whole graph from the pane menu and enables undo', async ({
+      pageObjects: { streams },
+    }) => {
+      // A single node has no tidy action, so right-clicking one opens no menu.
+      await streams.rightClickCanvasNode(streams.getCanvasDestinationNode(PLAIN_STREAM));
+      await expect(streams.canvasContextMenu).toHaveCount(0);
+
+      // Right-clicking the empty canvas offers "Tidy up" for the whole graph.
+      await streams.openCanvasPaneContextMenu();
+      await expect(streams.canvasContextMenuTidyUp).toBeVisible();
+
+      await streams.canvasContextMenuTidyUp.click();
+      await expect(streams.canvasContextMenu).toHaveCount(0);
+      // Tidying records a history step, so undo becomes available.
+      await expect(streams.canvasUndo).toBeEnabled();
+    });
+
+    test('renders the canvas toolbar with undo/redo and add-node placeholders', async ({
+      pageObjects: { streams },
+    }) => {
+      await expect(streams.canvasToolbar).toBeVisible();
+
+      // Undo/redo start disabled since nothing has been changed yet.
+      await expect(streams.canvasUndo).toBeDisabled();
+      await expect(streams.canvasRedo).toBeDisabled();
+
+      await expect(streams.canvasAddSource).toBeVisible();
+      await expect(streams.canvasAddDestination).toBeVisible();
+    });
+
+    test('exposes accessible node labels and keyboard controls', async ({
+      page,
+      pageObjects: { streams },
+    }) => {
+      // Nodes carry a screen-reader label so Tab-focusing announces what they are.
       await expect(
-        processingDestination.locator('[data-test-subj="streamsCanvasProcessingGlyph"]')
+        streams.getCanvasNodeByAriaLabel(`Source: ${PLAIN_STREAM}, async bulk ingest`)
       ).toBeVisible();
 
-      const plainDestination = page.locator('[data-test-subj="streamsCanvasDestinationNode"]', {
-        hasText: PLAIN_STREAM,
-      });
-      await expect(
-        plainDestination.locator('[data-test-subj="streamsCanvasProcessingGlyph"]')
-      ).toHaveCount(0);
+      // Escape closes an open context menu.
+      await streams.openCanvasPaneContextMenu();
+      await page.keyboard.press('Escape');
+      await expect(streams.canvasContextMenu).toHaveCount(0);
+
+      // Tidy up records a history step; Ctrl+Z (focus inside the canvas) undoes it.
+      await streams.tidyUpCanvasFromPane();
+      await expect(streams.canvasUndo).toBeEnabled();
+
+      await streams.getCanvasDestinationNode(PLAIN_STREAM).click();
+      await page.keyboard.press('Control+z');
+      await expect(streams.canvasUndo).toBeDisabled();
+    });
+
+    test('undoes a keyboard-driven node reposition', async ({ page, pageObjects: { streams } }) => {
+      // Selecting + focusing a node lets the arrow keys reposition it.
+      await streams.getCanvasDestinationNode(PLAIN_STREAM).click();
+      await page.keyboard.press('ArrowRight');
+
+      // The keyboard move records a history step even though no pointer drag ran,
+      // so undo becomes available and Ctrl+Z reverts it.
+      await expect(streams.canvasUndo).toBeEnabled();
+      await page.keyboard.press('Control+z');
+      await expect(streams.canvasUndo).toBeDisabled();
+    });
+
+    test('shows the processing glyph only on destinations with processing', async ({
+      pageObjects: { streams },
+    }) => {
+      await expect(streams.getCanvasProcessingGlyph(PROCESSING_STREAM)).toBeVisible();
+      await expect(streams.getCanvasProcessingGlyph(PLAIN_STREAM)).toHaveCount(0);
     });
   }
 );

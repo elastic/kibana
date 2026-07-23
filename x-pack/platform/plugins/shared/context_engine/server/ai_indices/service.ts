@@ -20,9 +20,9 @@ import { createAiIndexStorageClient } from './storage';
 
 /**
  * Backing data streams and indices follow type-specific naming conventions,
- * both sharing the common `.ai-index-` base.
+ * both sharing the common `ai-index-` base.
  */
-const DEST_INDEX_PREFIX = '.ai-index-';
+const DEST_INDEX_PREFIX = 'ai-index-';
 const DATA_STREAM_PREFIX = `${DEST_INDEX_PREFIX}ds-`;
 const INDEX_PREFIX = `${DEST_INDEX_PREFIX}idx-`;
 
@@ -147,10 +147,8 @@ export class AiIndexService {
   }
 
   /**
-   * The dest value must exist and match the declared `type`, and follow the
-   * type-specific naming convention. Only `system` indices are rejected (via
-   * the flag ES reports); `hidden` is allowed, since many legitimate customer
-   * indices are hidden.
+   * The dest value must follow the type-specific naming convention and match
+   * the declared `type`.
    */
   private async assertValidDest({ type, value }: AiIndexDest): Promise<void> {
     if (type === 'data_stream') {
@@ -162,9 +160,7 @@ export class AiIndexService {
 
   /**
    * Every expression in the dest value must start with the type-specific
-   * prefix. Checked before resolving against the cluster so that names of
-   * indices outside the allowed prefix are never echoed back to the caller
-   * (dest validation runs as the internal user).
+   * prefix.
    */
   private assertDestValueHasPrefix(value: string, prefix: string): void {
     const invalid = value.split(',').find((expression) => !expression.startsWith(prefix));
@@ -178,38 +174,31 @@ export class AiIndexService {
   private async assertValidDataStreamDest(value: string): Promise<void> {
     this.assertDestValueHasPrefix(value, DATA_STREAM_PREFIX);
 
-    let dataStreams: estypes.IndicesDataStream[] = [];
+    let indices: estypes.IndicesResolveIndexResolveIndexItem[] = [];
+    let dataStreams: estypes.IndicesResolveIndexResolveIndexDataStreamsItem[] = [];
     try {
-      const response = await this.esClient.indices.getDataStream({
+      const resolved = await this.esClient.indices.resolveIndex({
         name: value,
-        expand_wildcards: 'all',
+        expand_wildcards: ['open', 'hidden', 'closed'],
       });
-      dataStreams = response.data_streams;
+      indices = resolved.indices;
+      dataStreams = resolved.data_streams;
     } catch (error) {
       if (!(isResponseError(error) && error.statusCode === 404)) {
         throw error;
       }
     }
 
-    if (dataStreams.length === 0) {
+    if (indices.length > 0) {
       throw new InvalidAiIndexDestError(
-        `dest.value '${value}' must resolve to an existing data stream`
+        `dest.value '${value}' is not allowed: '${indices[0].name}' is not a data stream`
       );
     }
 
-    const invalidPrefix = dataStreams.find(
-      (dataStream) => !dataStream.name.startsWith(DATA_STREAM_PREFIX)
-    );
+    const invalidPrefix = dataStreams.find((ds) => !ds.name.startsWith(DATA_STREAM_PREFIX));
     if (invalidPrefix) {
       throw new InvalidAiIndexDestError(
         `dest.value '${value}' is not allowed: '${invalidPrefix.name}' must start with '${DATA_STREAM_PREFIX}'`
-      );
-    }
-
-    const system = dataStreams.find((dataStream) => dataStream.system);
-    if (system) {
-      throw new InvalidAiIndexDestError(
-        `dest.value '${value}' is not allowed: '${system.name}' is a system data stream`
       );
     }
   }
@@ -218,21 +207,23 @@ export class AiIndexService {
     this.assertDestValueHasPrefix(value, INDEX_PREFIX);
 
     let indices: estypes.IndicesResolveIndexResolveIndexItem[] = [];
+    let dataStreams: estypes.IndicesResolveIndexResolveIndexDataStreamsItem[] = [];
     try {
       const resolved = await this.esClient.indices.resolveIndex({
         name: value,
         expand_wildcards: ['open', 'hidden', 'closed'],
       });
       indices = resolved.indices;
+      dataStreams = resolved.data_streams;
     } catch (error) {
       if (!(isResponseError(error) && error.statusCode === 404)) {
         throw error;
       }
     }
 
-    if (indices.length === 0) {
+    if (dataStreams.length > 0) {
       throw new InvalidAiIndexDestError(
-        `dest.value '${value}' must match at least one existing index`
+        `dest.value '${value}' is not allowed: '${dataStreams[0].name}' is not an index`
       );
     }
 

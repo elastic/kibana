@@ -7,9 +7,6 @@
 
 import React from 'react';
 import type { AttachmentRenderProps } from '@kbn/agent-builder-browser/attachments';
-import type { ApplicationStart } from '@kbn/core-application-browser';
-import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
-import type { ISessionService } from '@kbn/data-plugin/public';
 import { QueryClientProvider } from '@kbn/react-query';
 import { EuiPanel } from '@elastic/eui';
 import type { ExperimentalFeatures } from '../../../../common/experimental_features';
@@ -23,16 +20,11 @@ import {
   type SecurityCanvasEmbeddedBundle,
 } from '../../components/security_redux_embedded_provider';
 import { EntityCardFlyoutOverviewCanvas } from '../../components/entity_card_flyout_overview_canvas';
-import type { SecurityAgentBuilderChrome } from '../entity_explore_navigation';
 
 export interface EntityAttachmentCanvasContentProps
   extends AttachmentRenderProps<EntityAttachment> {
   experimentalFeatures: ExperimentalFeatures;
-  application: ApplicationStart;
-  agentBuilder?: AgentBuilderPluginStart;
-  chrome?: SecurityAgentBuilderChrome;
   resolveSecurityCanvasContext: () => Promise<SecurityCanvasEmbeddedBundle>;
-  searchSession?: ISessionService;
 }
 
 /**
@@ -51,12 +43,7 @@ export interface EntityAttachmentCanvasContentProps
 export const EntityAttachmentCanvasContent: React.FC<EntityAttachmentCanvasContentProps> = ({
   attachment,
   experimentalFeatures,
-  application,
-  agentBuilder,
-  chrome,
   resolveSecurityCanvasContext,
-  openSidebarConversation,
-  searchSession,
 }) => {
   const parsed = normaliseEntityAttachment(attachment);
   const watchlistsEnabled = experimentalFeatures.entityAnalyticsWatchlistEnabled;
@@ -103,11 +90,6 @@ export const EntityAttachmentCanvasContent: React.FC<EntityAttachmentCanvasConte
         <QueryClientProvider client={entityAttachmentQueryClient}>
           <EntityCardFlyoutOverviewCanvas
             identifier={identifier}
-            application={application}
-            agentBuilder={agentBuilder}
-            chrome={chrome}
-            openSidebarConversation={openSidebarConversation}
-            searchSession={searchSession}
             riskStats={parsed.riskStats}
             resolutionRiskStats={parsed.resolutionRiskStats}
           />

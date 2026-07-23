@@ -359,11 +359,12 @@ describe('oauthCallbackRoute', () => {
       undefined
     );
 
-    // Verify token storage
+    // Verify token storage (skipRevocation: true — new token shares the same grant)
     expect(mockConnectorTokenClientInstance.deleteConnectorTokens).toHaveBeenCalledWith({
       connectorId: 'connector-1',
       tokenType: 'access_token',
       profileUid: 'test-profile-uid',
+      skipRevocation: true,
     });
     expect(mockConnectorTokenClientInstance.createWithRefreshToken).toHaveBeenCalledWith({
       connectorId: 'connector-1',
@@ -437,9 +438,14 @@ describe('oauthCallbackRoute', () => {
         ),
       },
     });
+    // On re-auth the old saved object is removed without revoking the provider
+    // grant (the new token shares the same grant).
+    expect(mockConnectorTokenClientInstance.deleteConnectorTokens).toHaveBeenCalledWith(
+      expect.objectContaining({ skipRevocation: true })
+    );
   });
 
-  it('redirects with error surfacing the underlying message on token exchange failure', async () => {
+  it('logs the underlying error and redirects with a generic message on token exchange failure', async () => {
     const mockOAuthState = {
       id: 'state-id',
       state: 'valid-state',
@@ -478,15 +484,16 @@ describe('oauthCallbackRoute', () => {
 
     await handler(context, req, res);
 
+    expect(mockLogger.error).toHaveBeenCalledWith('OAuth callback failed: Token exchange failed');
     expect(res.redirected).toHaveBeenCalledWith({
       headers: {
         location:
-          'https://kibana.example.com/app/connectors?oauth_authorization=error&connector_id=connector-1&status_code=500&error=Token+exchange+failed',
+          'https://kibana.example.com/app/connectors?oauth_authorization=error&connector_id=connector-1&status_code=500&error=OAuth+authorization+failed',
       },
     });
   });
 
-  it('redirects with error when connector is missing required OAuth config', async () => {
+  it('redirects with a generic error when connector is missing required OAuth config', async () => {
     const mockOAuthState = {
       id: 'state-id',
       state: 'valid-state',
@@ -519,10 +526,15 @@ describe('oauthCallbackRoute', () => {
 
     await handler(context, req, res);
 
+    expect(mockLogger.error).toHaveBeenCalledWith(
+      expect.stringContaining(
+        'OAuth callback failed: Connector missing required OAuth configuration'
+      )
+    );
     expect(res.redirected).toHaveBeenCalledWith({
       headers: {
         location:
-          'https://kibana.example.com/app/connectors?oauth_authorization=error&connector_id=connector-1&status_code=500&error=Connector+missing+required+OAuth+configuration+%28clientId%2C+clientSecret%2C+tokenUrl%29',
+          'https://kibana.example.com/app/connectors?oauth_authorization=error&connector_id=connector-1&status_code=500&error=OAuth+authorization+failed',
       },
     });
   });
