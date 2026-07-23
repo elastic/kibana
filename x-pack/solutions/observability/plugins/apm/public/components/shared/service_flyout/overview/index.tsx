@@ -128,6 +128,7 @@ export function ServiceFlyoutOverview() {
   const { dataView } = useAdHocApmDataView();
   const indexes = dataView?.getIndexPattern();
   const { hasSystemMetrics, isLoading: isSystemMetricsLoading } = useServiceHasSystemMetrics({
+    http: core.http,
     serviceName: service.name,
     environment,
     rangeFrom,

@@ -6,20 +6,12 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useServiceHasSystemMetrics } from './use_service_has_system_metrics';
 
-const mockUseFetcher = jest.fn();
+const mockUseAbortableAsync = jest.fn();
 
-jest.mock('../../../../hooks/use_fetcher', () => ({
-  FETCH_STATUS: {
-    LOADING: 'loading',
-    SUCCESS: 'success',
-    FAILURE: 'failure',
-    NOT_INITIATED: 'not_initiated',
-  },
-  isPending: (status: string) => status === 'loading' || status === 'not_initiated',
-  useFetcher: (...args: unknown[]) => mockUseFetcher(...args),
+jest.mock('@kbn/react-hooks', () => ({
+  useAbortableAsync: (...args: unknown[]) => mockUseAbortableAsync(...args),
 }));
 
 jest.mock('../../../../hooks/use_time_range', () => ({
@@ -29,7 +21,10 @@ jest.mock('../../../../hooks/use_time_range', () => ({
   }),
 }));
 
+const mockHttp = { fetch: jest.fn() };
+
 const baseParams = {
+  http: mockHttp as any,
   serviceName: 'opbeans-java',
   environment: 'production' as const,
   rangeFrom: 'now-1h',
@@ -38,19 +33,12 @@ const baseParams = {
 
 describe('useServiceHasSystemMetrics', () => {
   beforeEach(() => {
-    mockUseFetcher.mockClear();
+    mockUseAbortableAsync.mockClear();
+    mockHttp.fetch.mockClear();
   });
 
   it('returns isLoading true and hasSystemMetrics undefined while the fetch is loading', () => {
-    mockUseFetcher.mockReturnValue({ data: undefined, status: FETCH_STATUS.LOADING });
-
-    const { result } = renderHook(() => useServiceHasSystemMetrics(baseParams));
-
-    expect(result.current).toEqual({ hasSystemMetrics: undefined, isLoading: true });
-  });
-
-  it('returns isLoading true when the fetch has not yet been initiated', () => {
-    mockUseFetcher.mockReturnValue({ data: undefined, status: FETCH_STATUS.NOT_INITIATED });
+    mockUseAbortableAsync.mockReturnValue({ value: undefined, loading: true });
 
     const { result } = renderHook(() => useServiceHasSystemMetrics(baseParams));
 
@@ -58,9 +46,9 @@ describe('useServiceHasSystemMetrics', () => {
   });
 
   it('returns true when the service has system metrics', () => {
-    mockUseFetcher.mockReturnValue({
-      data: { hasSystemMetrics: true },
-      status: FETCH_STATUS.SUCCESS,
+    mockUseAbortableAsync.mockReturnValue({
+      value: { hasSystemMetrics: true },
+      loading: false,
     });
 
     const { result } = renderHook(() => useServiceHasSystemMetrics(baseParams));
@@ -69,9 +57,9 @@ describe('useServiceHasSystemMetrics', () => {
   });
 
   it('returns false when the service has no system metrics', () => {
-    mockUseFetcher.mockReturnValue({
-      data: { hasSystemMetrics: false },
-      status: FETCH_STATUS.SUCCESS,
+    mockUseAbortableAsync.mockReturnValue({
+      value: { hasSystemMetrics: false },
+      loading: false,
     });
 
     const { result } = renderHook(() => useServiceHasSystemMetrics(baseParams));
@@ -80,7 +68,11 @@ describe('useServiceHasSystemMetrics', () => {
   });
 
   it('returns isLoading false when the fetch fails, so the skeleton does not get stuck', () => {
-    mockUseFetcher.mockReturnValue({ data: undefined, status: FETCH_STATUS.FAILURE });
+    mockUseAbortableAsync.mockReturnValue({
+      value: undefined,
+      loading: false,
+      error: new Error('fail'),
+    });
 
     const { result } = renderHook(() => useServiceHasSystemMetrics(baseParams));
 
@@ -88,25 +80,23 @@ describe('useServiceHasSystemMetrics', () => {
   });
 
   it('calls the correct endpoint with the right params', () => {
-    mockUseFetcher.mockReturnValue({ data: undefined, status: FETCH_STATUS.LOADING });
+    mockUseAbortableAsync.mockReturnValue({ value: undefined, loading: true });
 
     renderHook(() => useServiceHasSystemMetrics(baseParams));
 
-    const [fetcherFn] = mockUseFetcher.mock.calls[0];
-    const mockCallApmApi = jest.fn().mockResolvedValue({ hasSystemMetrics: true });
-    fetcherFn(mockCallApmApi);
+    const [fetcherFn] = mockUseAbortableAsync.mock.calls[0];
+    const signal = new AbortController().signal;
+    fetcherFn({ signal });
 
-    expect(mockCallApmApi).toHaveBeenCalledWith(
-      'GET /internal/apm/services/{serviceName}/has_system_metrics',
+    expect(mockHttp.fetch).toHaveBeenCalledWith(
+      '/internal/apm/services/opbeans-java/has_system_metrics',
       {
-        params: {
-          path: { serviceName: 'opbeans-java' },
-          query: {
-            environment: 'production',
-            start: '2024-01-01T00:00:00.000Z',
-            end: '2024-01-01T01:00:00.000Z',
-          },
+        query: {
+          environment: 'production',
+          start: '2024-01-01T00:00:00.000Z',
+          end: '2024-01-01T01:00:00.000Z',
         },
+        signal,
       }
     );
   });
