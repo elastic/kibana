@@ -9,9 +9,11 @@ import {
   isCancelAction,
   isExecuteAction,
   isGetFileAction,
+  isKillProcess,
   isMemoryDumpAction,
   isProcessesAction,
   isRunScriptAction,
+  isSuspendProcess,
   isUploadAction,
 } from './type_guards';
 import type { ActionDetails } from '../../types';
@@ -105,6 +107,28 @@ describe('type_guards', () => {
     it('should return false for other commands', () => {
       expect(isMemoryDumpAction(makeAction('isolate'))).toBe(false);
       expect(isMemoryDumpAction(makeAction('cancel'))).toBe(false);
+    });
+  });
+
+  describe('isKillProcess()', () => {
+    it('should return true for command `kill-process`', () => {
+      expect(isKillProcess(makeAction('kill-process'))).toBe(true);
+    });
+
+    it('should return false for other commands', () => {
+      expect(isKillProcess(makeAction('suspend-process'))).toBe(false);
+      expect(isKillProcess(makeAction('isolate'))).toBe(false);
+    });
+  });
+
+  describe('isSuspendProcess()', () => {
+    it('should return true for command `suspend-process`', () => {
+      expect(isSuspendProcess(makeAction('suspend-process'))).toBe(true);
+    });
+
+    it('should return false for other commands', () => {
+      expect(isSuspendProcess(makeAction('kill-process'))).toBe(false);
+      expect(isSuspendProcess(makeAction('isolate'))).toBe(false);
     });
   });
 });
