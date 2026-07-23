@@ -19,9 +19,6 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import type {
   SmlTypeDefinition,
-  SmlSearchResult,
-  SmlSearchFilters,
-  SmlSearchConstraints,
   SmlIndexAction,
   SmlDeleteScope,
   SmlIndexAttachmentOriginMode,
@@ -45,23 +42,6 @@ export interface AgentBuilderSmlPluginSetup {
 }
 
 export interface AgentBuilderSmlPluginStart {
-  search: (params: {
-    query: string;
-    size?: number;
-    spaceId: string;
-    esClient: IScopedClusterClient;
-    request: KibanaRequest;
-    /**
-     * Optional subset of fields to return. Omit for all fields. Valid optional
-     * values: `'content'`, `'description'`, `'tags'`, `'references'`.
-     */
-    fields?: string[];
-    /** Runtime-imposed per-type id-allowlist constraints. */
-    constraints?: SmlSearchConstraints;
-    /** Agent-discoverable filters (`types[]`, `tags[]`). */
-    filters?: SmlSearchFilters;
-  }) => Promise<{ results: SmlSearchResult[] }>;
-
   getTypeDefinition: (typeId: string) => SmlTypeDefinition | undefined;
 
   resolveSmlAttachItems: (params: {

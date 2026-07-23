@@ -435,34 +435,6 @@ export interface SmlIndexerDeleteAttachmentParams {
 export interface SmlService {
   /** Get the crawler instance (for task manager integration) */
   getCrawler: () => SmlCrawler;
-  /**
-   * Hybrid search the SML index (RRF over BM25 + semantic), filtering results
-   * by space, constraints, agent-supplied filters, and permissions.
-   *
-   * `constraints` and `filters` are kept as separate parameters so the trust
-   * boundary is visible at the API layer: `constraints` is runtime-imposed
-   * (wrapper-applied from caller context — agent SO `connector_ids`, future
-   * allowed-indices, RBAC) and the agent can't bypass it; `filters` is the
-   * agent-discoverable refinement (`types[]`, `tags[]`). Both are combined
-   * server-side; agent filters never widen the scope.
-   */
-  search: (params: {
-    query: string;
-    size?: number;
-    spaceId: string;
-    esClient: IScopedClusterClient;
-    request: KibanaRequest;
-    /**
-     * Optional fields to include beyond the baseline (`id`, `type`, `title`,
-     * `description`). Valid opt-in values: `'content'`, `'tags'`,
-     * `'references'`, `'spaces'`, `'permissions'`.
-     */
-    fields?: string[];
-    /** Runtime-imposed per-type id-allowlist constraints. See {@link SmlSearchConstraints}. */
-    constraints?: SmlSearchConstraints;
-    /** Agent-discoverable filters. See {@link SmlSearchFilters}. */
-    filters?: SmlSearchFilters;
-  }) => Promise<{ results: SmlSearchResult[] }>;
 
   /**
    * Autocomplete / typeahead against the SML index. A single nested

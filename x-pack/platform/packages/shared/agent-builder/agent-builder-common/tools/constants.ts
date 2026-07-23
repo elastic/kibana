@@ -35,7 +35,6 @@ export const platformCoreTools = {
   cases: platformCoreTool('cases'),
   integrationKnowledge: platformCoreTool('integration_knowledge'),
   // SML tools
-  smlSearch: platformCoreTool('sml_search'),
   smlAttach: platformCoreTool('sml_attach'),
   // Connector tools
   executeConnectorSubAction: platformCoreTool('execute_connector_sub_action'),
@@ -142,7 +141,8 @@ export const defaultAgentToolIds = [
   platformCoreTools.listWorkflowExecutions,
   platformCoreTools.generateWorkflow,
   platformCoreTools.executeWorkflow,
-  platformCoreTools.smlSearch,
+  // KI retrieval is done via execute_esql against the "Elastic" ai-index (DLS-scoped),
+  // not a bespoke sml_search tool.
   platformCoreTools.smlAttach,
   platformCoreTools.executeConnectorSubAction,
 ];

@@ -15,7 +15,6 @@ import type {
 } from './types';
 import { registerFeatures } from './features';
 import { registerUISettings } from './ui_settings';
-import { registerSearchRoute } from './routes/search';
 import { registerAutocompleteRoute } from './routes/autocomplete';
 import { createSmlService, type SmlServiceInstance } from './services/sml/sml_service';
 import {
@@ -78,12 +77,9 @@ export class AgentBuilderSmlPlugin
     };
 
     const router = coreSetup.http.createRouter();
-    registerSearchRoute({
-      router,
-      coreSetup,
-      logger: this.logger,
-      getSmlService,
-    });
+    // Note: the internal `_search` route is removed — KI retrieval is now DLS-scoped
+    // as-user ES|QL against the ai-index. Only autocomplete (the @-mention typeahead)
+    // remains served here.
     registerAutocompleteRoute({
       router,
       coreSetup,
@@ -174,7 +170,6 @@ export class AgentBuilderSmlPlugin
     });
 
     const startContract: AgentBuilderSmlPluginStart = {
-      search: smlService.search,
       getTypeDefinition: smlService.getTypeDefinition,
       resolveSmlAttachItems: (params) => resolveSmlAttachItems({ ...params, sml: smlService }),
       indexAttachment: buildIndexAttachment({

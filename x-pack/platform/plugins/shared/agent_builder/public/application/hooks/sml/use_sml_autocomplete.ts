@@ -38,7 +38,8 @@ export interface UseSmlAutocompleteOptions {
  * per-row `matched_discovery_labels` (with `kind` for UI badging, and
  * `highlighted` when ES is able to produce a snippet).
  *
- * For full retrieval (LLM tool, content search), see `useSmlSearch`.
+ * This is the @-mention typeahead only. Full KI retrieval is done by agents via
+ * DLS-scoped ES|QL against the "Elastic" ai-index, not a browser search client.
  */
 export const useSmlAutocomplete = (query: string, options?: UseSmlAutocompleteOptions) => {
   const { services } = useKibana();

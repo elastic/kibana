@@ -14,7 +14,7 @@ import {
   type AgentBuilderSmlPublicPluginStartDeps,
 } from './plugin';
 
-export { smlSearchPath, smlAutocompletePath } from '../common/constants';
+export { smlAutocompletePath } from '../common/constants';
 export { SML_HTTP_SEARCH_QUERY_MAX_LENGTH, SmlSearchFilterType } from '../common/http_api/sml';
 export type {
   SmlSearchConstraints,

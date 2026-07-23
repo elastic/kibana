@@ -7,7 +7,6 @@
 
 import { platformCoreTools } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
-import { createSmlSearchTool } from './sml_search';
 import { createSmlAttachTool } from './sml_attach';
 import type { SmlToolsOptions } from './types';
 
@@ -15,12 +14,17 @@ export type { SmlToolsOptions } from './types';
 
 /**
  * All SML tool IDs.
+ *
+ * Note: knowledge-item *retrieval* is no longer a bespoke tool. Agents retrieve KIs by
+ * running ES|QL as the user against the "Elastic" ai-index (via the generic
+ * `platform.core.execute_esql` tool), with Elasticsearch DLS enforcing space + privilege
+ * scoping. Only the attach tool remains SML-specific (id -> conversation attachment).
  */
-export const smlToolIds = [platformCoreTools.smlSearch, platformCoreTools.smlAttach] as const;
+export const smlToolIds = [platformCoreTools.smlAttach] as const;
 
 /**
  * Creates all SML tools with the given options.
  */
 export const createSmlTools = (options: SmlToolsOptions): BuiltinToolDefinition<any>[] => {
-  return [createSmlSearchTool(options), createSmlAttachTool(options)];
+  return [createSmlAttachTool(options)];
 };
