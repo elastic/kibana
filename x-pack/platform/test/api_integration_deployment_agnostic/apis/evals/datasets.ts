@@ -131,58 +131,19 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(found?.description).to.eql('updated description');
       });
 
-      let exampleId = '';
-
-      it('adds examples to a dataset', async () => {
-        const { body } = await adminClient
-          .post(examplesPath(datasetId))
-          .send({
-            examples: [
-              { input: { question: 'a' }, output: { answer: '1' } },
-              { input: { question: 'b' }, output: { answer: '2' } },
-            ],
-          })
+      it('allows listing datasets with read_evals (viewer)', async () => {
+        const { body } = await viewerClient
+          .get(EVALS_DATASETS_URL)
+          .query({ search: datasetName })
           .expect(200);
 
-        const result = body as AddEvaluationDatasetExamplesResponse;
-        expect(result.added).to.eql(2);
-
-        const { body: datasetBody } = await adminClient.get(datasetPath(datasetId)).expect(200);
-        const dataset = datasetBody as GetEvaluationDatasetResponse;
-        expect(dataset.examples.length).to.eql(2);
-        exampleId = dataset.examples[0].id;
+        const listing = body as GetEvaluationDatasetsResponse;
+        expect(listing.datasets.some((dataset) => dataset.id === datasetId)).to.be(true);
       });
 
-      it('rejects adding examples without manage_evals privileges (viewer)', async () => {
-        await viewerClient
-          .post(examplesPath(datasetId))
-          .send({ examples: [{ input: { question: 'c' } }] })
-          .expect(403);
-      });
-
-      let updatedExampleId = '';
-
-      it('updates a dataset example', async () => {
-        const { body } = await adminClient
-          .put(examplePath(datasetId, exampleId))
-          .send({ input: { question: 'a-updated' }, output: { answer: '1-updated' } })
-          .expect(200);
-
-        const updated = body as UpdateEvaluationDatasetExampleResponse;
-        expect(updated.dataset_id).to.eql(datasetId);
-        expect(updated.input).to.eql({ question: 'a-updated' });
-        // example id is a content hash, so an update yields a new id
-        updatedExampleId = updated.id;
-      });
-
-      it('deletes a dataset example', async () => {
-        const { body } = await adminClient
-          .delete(examplePath(datasetId, updatedExampleId))
-          .expect(200);
-        expect((body as DeleteEvaluationDatasetExampleResponse).success).to.be(true);
-
-        const { body: datasetBody } = await adminClient.get(datasetPath(datasetId)).expect(200);
-        expect((datasetBody as GetEvaluationDatasetResponse).examples.length).to.eql(1);
+      it('allows reading a dataset by id with read_evals (viewer)', async () => {
+        const { body } = await viewerClient.get(datasetPath(datasetId)).expect(200);
+        expect((body as GetEvaluationDatasetResponse).id).to.eql(datasetId);
       });
 
       it('rejects deleting a dataset without manage_evals privileges (viewer)', async () => {
@@ -195,6 +156,84 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         await adminClient.get(datasetPath(datasetId)).expect(404);
         datasetId = '';
+      });
+    });
+
+    describe('examples', () => {
+      const exampleDatasetName = `FTR Examples Dataset ${suffix}`;
+      let exampleDatasetId = '';
+      let exampleId = '';
+      let updatedExampleId = '';
+
+      before(async () => {
+        const { body: createdBody } = await adminClient
+          .post(EVALS_DATASETS_URL)
+          .send({ name: exampleDatasetName, description: 'examples fixture' })
+          .expect(200);
+        exampleDatasetId = (createdBody as CreateEvaluationDatasetResponse).dataset_id;
+
+        const { body: addBody } = await adminClient
+          .post(examplesPath(exampleDatasetId))
+          .send({
+            examples: [
+              { input: { question: 'a' }, output: { answer: '1' } },
+              { input: { question: 'b' }, output: { answer: '2' } },
+            ],
+          })
+          .expect(200);
+        expect((addBody as AddEvaluationDatasetExamplesResponse).added).to.eql(2);
+
+        const { body: datasetBody } = await adminClient
+          .get(datasetPath(exampleDatasetId))
+          .expect(200);
+        exampleId = (datasetBody as GetEvaluationDatasetResponse).examples[0].id;
+      });
+
+      after(async () => {
+        if (exampleDatasetId) {
+          await adminClient.delete(datasetPath(exampleDatasetId)).catch(() => {
+            // best-effort cleanup
+          });
+        }
+      });
+
+      it('exposes the added examples', async () => {
+        const { body } = await adminClient.get(datasetPath(exampleDatasetId)).expect(200);
+        const dataset = body as GetEvaluationDatasetResponse;
+        expect(dataset.examples.length).to.eql(2);
+        expect(dataset.examples.map((example) => example.id)).to.contain(exampleId);
+      });
+
+      it('rejects adding examples without manage_evals privileges (viewer)', async () => {
+        await viewerClient
+          .post(examplesPath(exampleDatasetId))
+          .send({ examples: [{ input: { question: 'c' } }] })
+          .expect(403);
+      });
+
+      it('updates a dataset example', async () => {
+        const { body } = await adminClient
+          .put(examplePath(exampleDatasetId, exampleId))
+          .send({ input: { question: 'a-updated' }, output: { answer: '1-updated' } })
+          .expect(200);
+
+        const updated = body as UpdateEvaluationDatasetExampleResponse;
+        expect(updated.dataset_id).to.eql(exampleDatasetId);
+        expect(updated.input).to.eql({ question: 'a-updated' });
+        // example id is a content hash, so an update yields a new id
+        updatedExampleId = updated.id;
+      });
+
+      it('deletes a dataset example', async () => {
+        const { body } = await adminClient
+          .delete(examplePath(exampleDatasetId, updatedExampleId))
+          .expect(200);
+        expect((body as DeleteEvaluationDatasetExampleResponse).success).to.be(true);
+
+        const { body: datasetBody } = await adminClient
+          .get(datasetPath(exampleDatasetId))
+          .expect(200);
+        expect((datasetBody as GetEvaluationDatasetResponse).examples.length).to.eql(1);
       });
     });
 

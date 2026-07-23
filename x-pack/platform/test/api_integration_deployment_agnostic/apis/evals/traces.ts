@@ -79,6 +79,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(trace.duration_ms).to.eql(5);
     });
 
+    // the route resolves spans by trace id, so an unknown id is a valid empty result (200), not a 404
     it('returns an empty span list for an unknown trace', async () => {
       const { body } = await adminClient.get(tracePath(`missing-${suffix}`)).expect(200);
 

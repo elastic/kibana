@@ -13,7 +13,7 @@ export type EvalsSupertestClient = SupertestWithRoleScopeType;
 
 export async function getEvalsApiClientForRole(
   roleScopedSupertest: ReturnType<typeof RoleScopedSupertestProvider>,
-  role: 'admin' | 'editor' | 'viewer'
+  role: 'admin' | 'viewer'
 ): Promise<EvalsSupertestClient> {
   return roleScopedSupertest.getSupertestWithRoleScope(role, {
     useCookieHeader: true,

@@ -85,6 +85,8 @@ export interface SeedTraceSpan {
 }
 
 // Creates a `traces-*` index (keyword `trace_id` is required for the route's term query) and seeds spans.
+// Note: this writes a concrete `traces-*` index, which can clash with data-stream templates on some
+// clusters; fine locally, but revisit if the traces suite is ever enabled on MKI (skipMKI today).
 export const seedTrace = async (
   esClient: Client,
   index: string,

@@ -13,12 +13,14 @@ import {
   EVALS_EXPERIMENT_SCORES_URL,
   EVALS_EXPERIMENT_DATASET_EXAMPLES_URL,
   EVALS_EXPERIMENTS_COMPARE_URL,
+  EVALS_EXAMPLE_SCORES_URL,
   EvaluationIndices,
   type CompareExperimentsResponse,
   type GetEvaluationExperimentResponse,
   type GetEvaluationExperimentScoresResponse,
   type GetEvaluationExperimentDatasetExamplesResponse,
   type GetEvaluationExperimentsResponse,
+  type GetExampleScoresResponse,
 } from '@kbn/evals-common';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import type { SupertestWithRoleScopeType } from '../../services';
@@ -30,6 +32,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const es = getService('es');
 
   let adminClient: SupertestWithRoleScopeType;
+  let viewerClient: SupertestWithRoleScopeType;
 
   describe('Evals - Experiments', function () {
     const suiteId = `ftr-experiments-${uniqueSuffix()}`;
@@ -63,12 +66,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     before(async () => {
       adminClient = await getEvalsApiClientForRole(roleScopedSupertest, 'admin');
+      viewerClient = await getEvalsApiClientForRole(roleScopedSupertest, 'viewer');
       await ingest(baselineExperimentId, [1, 0.5, 0]);
       await ingest(targetExperimentId, [0.8, 0.6, 0.4]);
     });
 
     after(async () => {
       await adminClient.destroy();
+      await viewerClient.destroy();
       await es
         .deleteByQuery({
           index: EvaluationIndices.SCORES,
@@ -104,6 +109,15 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const listing = body as GetEvaluationExperimentsResponse;
         expect(listing.total).to.eql(2);
         expect(listing.experiments.length).to.eql(1);
+      });
+
+      it('allows listing experiments with read_evals (viewer)', async () => {
+        const { body } = await viewerClient
+          .get(EVALS_EXPERIMENTS_URL)
+          .query({ suite_id: suiteId })
+          .expect(200);
+
+        expect((body as GetEvaluationExperimentsResponse).total).to.eql(2);
       });
     });
 
@@ -197,6 +211,22 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             target_id: `missing-${suiteId}`,
           })
           .expect(404);
+      });
+    });
+
+    describe('example scores', () => {
+      it('returns the score history for a seeded example id', async () => {
+        const path = EVALS_EXAMPLE_SCORES_URL.replace(
+          '{exampleId}',
+          encodeURIComponent(exampleIds[0])
+        );
+        const { body } = await adminClient.get(path).expect(200);
+
+        const response = body as GetExampleScoresResponse;
+        expect(response.total).to.be.greaterThan(0);
+        const experimentIds = response.scores.map((score) => score.experiment_id);
+        expect(experimentIds).to.contain(baselineExperimentId);
+        expect(experimentIds).to.contain(targetExperimentId);
       });
     });
   });
