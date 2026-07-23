@@ -41,8 +41,7 @@ const loadApprovedStepHash = (stepId: string): string | null => {
   }
 };
 
-// Failing: See https://github.com/elastic/kibana/issues/265012
-apiTest.describe.skip(
+apiTest.describe(
   'Workflows Extensions - Custom Step Definitions Approval',
   {
     tag: [
