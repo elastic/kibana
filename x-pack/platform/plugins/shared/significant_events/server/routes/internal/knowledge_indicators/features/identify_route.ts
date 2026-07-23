@@ -29,6 +29,8 @@ import {
 import { shouldIdentifyFeatures } from '../../../../lib/significant_events/features/should_identify_features';
 import { isSignificantEventsSemanticCodeSearchGroundingEnabled } from '../../../../lib/semantic_code_search_grounding/is_significant_events_semantic_code_search_grounding_enabled';
 import type { SyncWorkflowService } from '../../../../lib/workflows/sync_workflow';
+import type { SignificantEventsMaintenanceService } from '../../../../lib/maintenance/maintenance_service';
+import { stateBlocksNewActivity } from '../../../../../common/maintenance/state_machine';
 
 // Best-effort bootstrap of the standalone KI sync (groundedness) sweep workflow,
 // which runs under a request whose API key can schedule the workflow trigger.
@@ -37,10 +39,12 @@ import type { SyncWorkflowService } from '../../../../lib/workflows/sync_workflo
 // path. Idempotent and non-blocking — a failure here must never fail extraction.
 const bootstrapSyncWorkflow = async ({
   syncWorkflowService,
+  maintenanceService,
   request,
   logger,
 }: {
   syncWorkflowService: SyncWorkflowService | undefined;
+  maintenanceService: SignificantEventsMaintenanceService;
   request: Parameters<SyncWorkflowService['ensureEnabled']>[0]['request'];
   logger: { warn: (message: string) => void };
 }): Promise<void> => {
@@ -48,6 +52,10 @@ const bootstrapSyncWorkflow = async ({
     return;
   }
   try {
+    const state = await maintenanceService.getState({ request });
+    if (stateBlocksNewActivity(state)) {
+      return;
+    }
     await syncWorkflowService.ensureEnabled({ request });
   } catch (error) {
     logger.warn(
@@ -103,6 +111,7 @@ const identifyInferredFeaturesRoute = createServerRoute({
     logger,
     telemetry,
     syncWorkflowService,
+    maintenanceService,
   }) => {
     const scopedClients = await getScopedClients({ request });
     const {
@@ -187,7 +196,12 @@ const identifyInferredFeaturesRoute = createServerRoute({
         trackFeaturesIdentified: (data) => telemetry.trackFeaturesIdentified(data),
       });
 
-      await bootstrapSyncWorkflow({ syncWorkflowService, request, logger: routeLogger });
+      await bootstrapSyncWorkflow({
+        syncWorkflowService,
+        maintenanceService,
+        request,
+        logger: routeLogger,
+      });
 
       return { ...result, connectorId };
     } catch (error) {
