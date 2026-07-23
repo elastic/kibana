@@ -11,7 +11,7 @@ import type { ElasticsearchClient, IRouter, PluginInitializerContext } from '@kb
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { FieldCapsResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger } from '@kbn/logging';
-import { getIndexPatternFromESQLQuery, getTimeFieldFromESQLQuery } from '@kbn/esql-utils';
+import { getIndexPatternFromESQLQuery, parseTimeFieldFromESQLQuery } from '@kbn/esql-utils';
 import { Parser, isSubQuery } from '@elastic/esql';
 import { TIMEFIELD_ROUTE } from '@kbn/esql-types';
 import { EsqlService } from '@kbn/esql-server-utils';
@@ -74,7 +74,7 @@ const resolveTimeField = async (
 ): Promise<{ timeField: string | undefined }> => {
   // Query is of the form "from index | where timefield >= ?_tstart".
   // At this point we just want to extract the timefield if present in the query
-  const timeField = getTimeFieldFromESQLQuery(query);
+  const timeField = parseTimeFieldFromESQLQuery(query);
   if (timeField) {
     return { timeField };
   }

@@ -8,6 +8,7 @@
 import type { ZodObject } from '@kbn/zod/v4';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type {
+  AgentCreateRequest,
   Conversation,
   ConversationWithoutRounds,
   ConversationListOptions,
@@ -119,6 +120,11 @@ export interface AgentsStart {
    * Return an agent registry scoped to the current user and context.
    */
   getRegistry: (opts: { request: KibanaRequest }) => Promise<AgentRegistry>;
+  /**
+   * Ensure a system-owned persisted agent exists in a space without overwriting later edits.
+   * Intended for code-owned startup installation; does not require a user request.
+   */
+  ensure: (opts: { spaceId: string; agent: AgentCreateRequest }) => Promise<void>;
 }
 
 /**

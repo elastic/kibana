@@ -27,19 +27,14 @@ test.describe('Lens Convert to ES|QL button', { tag: '@local-stateful-classic' }
 
   test('should not display button for inline visualizations when feature flag is set to false', async ({
     browserAuth,
-    page,
     pageObjects,
   }) => {
     await browserAuth.loginAsPrivilegedUser();
 
     const { dashboard, lens } = pageObjects;
 
-    await dashboard.goto();
-    await page
-      .getByTestId(testData.DATA_TEST_SUBJECTS.ESQL_CONVERSION_DASHBOARD_TITLE_LINK)
-      .click();
+    await dashboard.openDashboardWithIdInEditMode(testData.ESQL_CONVERSION_DASHBOARD_ID);
     await dashboard.waitForPanelsToLoad(2);
-    await dashboard.switchToEditMode();
 
     await openInlineEditorAndWaitVisible(
       pageObjects,

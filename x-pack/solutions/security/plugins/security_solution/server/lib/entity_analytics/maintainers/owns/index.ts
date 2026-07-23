@@ -25,7 +25,7 @@ export const ownsMaintainer: RegisterEntityMaintainerConfig = {
     status,
     crudClient,
     entityMetadataClient,
-    abortController,
+    signal,
     telemetry,
   }) => {
     const namespace = status.metadata.namespace;
@@ -35,9 +35,9 @@ export const ownsMaintainer: RegisterEntityMaintainerConfig = {
         : undefined;
 
     if (lastProcessedTimestamp) {
-      logger.info(`Starting owns maintainer run (incremental from ${lastProcessedTimestamp})`);
+      logger.info(`[owns] Starting run (incremental from ${lastProcessedTimestamp})`);
     } else {
-      logger.info('Starting owns maintainer run (full scan — first run)');
+      logger.info('[owns] Starting run (full scan — first run)');
     }
 
     const collector: RelationshipMaintainerTelemetryCollector = {
@@ -52,7 +52,7 @@ export const ownsMaintainer: RegisterEntityMaintainerConfig = {
       crudClient,
       entityMetadataClient,
       integrations: buildOwnsConfigs(lastProcessedTimestamp),
-      abortController,
+      signal,
       telemetryCollector: collector,
     });
 
@@ -80,12 +80,12 @@ export const ownsMaintainer: RegisterEntityMaintainerConfig = {
     });
 
     logger.info(
-      `Completed run: ${result.totalBuckets} buckets, ${result.totalRecords} records, ${result.totalWritten} entities written, ${result.totalDroppedTargets} targets dropped, ${result.totalMetadataDocsApplied} metadata docs appended`
+      `[owns] Completed run: ${result.totalBuckets} buckets, ${result.totalRecords} records, ${result.totalWritten} entities written, ${result.totalDroppedTargets} targets dropped, ${result.totalMetadataDocsApplied} metadata docs appended`
     );
 
     // Do not advance the watermark if the run was aborted — the next run should
     // re-process the same window to avoid missing entities.
-    if (abortController.signal.aborted) {
+    if (signal.aborted) {
       logger.info('Run was aborted; watermark not advanced');
       return status.state;
     }

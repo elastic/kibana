@@ -9,13 +9,19 @@ import React, { type ReactNode } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiImage,
-  EuiPanel,
   EuiSplitPanel,
   EuiText,
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import {
+  outerPanelStyle,
+  iconContainerStyle,
+  getStartedTextStyle,
+} from './onboarding_path_panel.styles';
 
 interface OnboardingPathPanelProps {
   icon: string;
@@ -37,42 +43,53 @@ export const OnboardingPathPanel = ({
   const { euiTheme } = useEuiTheme();
 
   return (
-    // The EuiPanel wrapper here is a temporary fix as there is an EUI bug which causes a style
-    // conflict with direction="row" on EuiSplitPanel.Outer when an onClick is added
-    <EuiPanel
-      element="div"
+    <EuiSplitPanel.Outer
+      direction="row"
       onClick={onClick}
       data-test-subj={dataTestSubj}
       data-telemetry-id={telemetryId}
       hasBorder
-      paddingSize="none"
+      hasShadow={false}
+      color="plain"
+      css={outerPanelStyle}
     >
-      <EuiSplitPanel.Outer
-        direction="row"
-        hasBorder={false}
-        hasShadow={false}
-        css={{ height: '100%' }}
+      <EuiSplitPanel.Inner
+        color="subdued"
+        grow={false}
+        paddingSize="l"
+        className="vectordbOnboardingPathIconPanel"
       >
-        <EuiSplitPanel.Inner color="subdued" grow={false} paddingSize="l">
-          <EuiFlexGroup alignItems="center" justifyContent="center" css={{ height: '100%' }}>
-            <EuiFlexItem grow={false}>
-              <EuiImage size={euiTheme.base * 4} src={icon} alt="" />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiSplitPanel.Inner>
-        <EuiSplitPanel.Inner paddingSize="l">
-          <EuiFlexGroup direction="column" alignItems="flexStart" gutterSize="s">
-            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-              <EuiTitle size="s">
-                <h2>{title}</h2>
-              </EuiTitle>
-            </EuiFlexGroup>
+        <EuiFlexGroup alignItems="center" justifyContent="center" css={iconContainerStyle}>
+          <EuiFlexItem grow={false}>
+            <EuiImage size={euiTheme.base * 4} src={icon} alt="" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiSplitPanel.Inner>
+      <EuiSplitPanel.Inner paddingSize="l" color="plain">
+        <EuiFlexGroup direction="column" alignItems="flexStart" gutterSize="m">
+          <EuiFlexGroup gutterSize="s" direction="column" alignItems="flexStart" responsive={false}>
+            <EuiTitle size="s">
+              <h2>{title}</h2>
+            </EuiTitle>
             <EuiText color="subdued" size="s">
               {description}
             </EuiText>
           </EuiFlexGroup>
-        </EuiSplitPanel.Inner>
-      </EuiSplitPanel.Outer>
-    </EuiPanel>
+
+          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiText size="s" css={getStartedTextStyle}>
+                {i18n.translate('vectordbOnboarding.pathSelection.getStarted', {
+                  defaultMessage: 'Get started',
+                })}
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiIcon type="sortRight" size="m" aria-hidden={true} />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexGroup>
+      </EuiSplitPanel.Inner>
+    </EuiSplitPanel.Outer>
   );
 };

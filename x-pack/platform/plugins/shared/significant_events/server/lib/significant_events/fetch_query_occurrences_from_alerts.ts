@@ -20,7 +20,7 @@ import type { RuleUnbackedFilter } from '../knowledge_indicators';
 import { parseError } from '../streams/parse_error';
 import { SecurityError } from '../errors/security_error';
 import { getColumnIndex } from '../streams/esql';
-import { type ISignificantEventsAlertsReader, ALERTS_READER_V1 } from './alerting/alerts_reader';
+import { type ISignificantEventsAlertsReader, ALERTS_READER_V2 } from './alerting/alerts_reader';
 import { ESQL_UNITS, MAX_FILL_BUCKETS, parseBucketSize } from './helpers/fill_bucket_gaps';
 
 export interface SparseBucket {
@@ -69,7 +69,7 @@ const EMPTY_OCCURRENCES: SparseBucket[] = [];
 const EMPTY_CHANGE_POINTS = { type: {} } as const;
 
 // ES|QL caps results at result_truncation_max_size (default 10k) per request.
-// Grouping by (rule_uuid × bucket) silently drops rules past the cap, so we
+// Grouping by (rule_id × bucket) silently drops rules past the cap, so we
 // batch rules under it and run batches in parallel.
 const RESULT_CEILING = 10_000;
 
@@ -133,7 +133,7 @@ export async function computeOccurrences(
     to,
     bucketSize,
     spaceId,
-    alertsReader = ALERTS_READER_V1,
+    alertsReader = ALERTS_READER_V2,
   }: {
     ruleIds: string[];
     from: Date;
@@ -258,7 +258,7 @@ export async function getQueryOccurrences(
   dependencies: SignificantEventsDependencies
 ): Promise<QueryOccurrences> {
   const { kiClient, esClient } = dependencies;
-  const { from, to, bucketSize, spaceId, alertsReader = ALERTS_READER_V1 } = params;
+  const { from, to, bucketSize, spaceId, alertsReader = ALERTS_READER_V2 } = params;
 
   const queryLinks = await fetchQueryLinks(params, kiClient);
   if (isEmpty(queryLinks)) {

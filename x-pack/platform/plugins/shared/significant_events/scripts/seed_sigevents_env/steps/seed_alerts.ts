@@ -78,27 +78,22 @@ export async function seedAlerts(
 
       const doc = {
         '@timestamp': timestamp,
-        'kibana.alert.rule.uuid': seededQuery.ruleId,
-        'kibana.alert.uuid': deterministicId(String(logDocId), seededQuery.ruleId),
-        'kibana.alert.rule.name': seededQuery.title,
-        'kibana.alert.rule.type.id': 'streams.rules.esql',
-        'kibana.alert.rule.consumer': 'streams',
-        'kibana.alert.rule.producer': 'streams',
-        'kibana.alert.status': 'active',
-        'kibana.alert.workflow_status': 'open',
-        'kibana.alert.instance.id': '*',
-        'kibana.alert.start': new Date(failureStartMs).toISOString(),
-        'kibana.alert.flapping': false,
-        'kibana.alert.flapping_history': [],
-        'kibana.space_ids': [ctx.space],
-        'event.kind': 'signal',
-        'event.action': 'active',
-        original_source: originalSource,
+        scheduled_timestamp: timestamp,
+        rule: {
+          id: seededQuery.ruleId,
+          version: 1,
+        },
+        group_hash: deterministicId(logDocId, seededQuery.ruleId),
+        data: originalSource,
+        status: 'breached',
+        source: 'internal',
+        type: 'signal',
+        space_id: ctx.space,
       };
 
       bulkOps.push({
         index: {
-          _index: '.alerts-streams.alerts-default',
+          _index: '.rule-events',
           _id: alertDocId,
         },
       });
@@ -124,9 +119,5 @@ export async function seedAlerts(
     throw new Error(`Alert bulk indexing failed (${failedItems.length} item(s)): ${reasons}`);
   }
 
-  log.info(
-    `seedAlerts: indexed ${
-      bulkOps.length / 2
-    } alert document(s) into .alerts-streams.alerts-default`
-  );
+  log.info(`seedAlerts: indexed ${bulkOps.length / 2} alert event(s) into .rule-events`);
 }

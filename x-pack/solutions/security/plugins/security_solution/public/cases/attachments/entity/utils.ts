@@ -6,10 +6,7 @@
  */
 
 import { SECURITY_ENTITY_ATTACHMENT_TYPE, type CaseUI } from '@kbn/cases-plugin/common';
-import type {
-  EntityAttachmentMetadata,
-  EntityAttachmentPayload,
-} from '../../../../common/cases/attachments/entity';
+import type { EntityAttachmentPayload } from '../../../../common/cases/attachments/entity';
 import type { EntitiesTableConfig } from '../../../entity_analytics/components/home/entities_table';
 
 export type CaseAttachment = CaseUI['comments'][number];
@@ -31,9 +28,19 @@ export const isEntityAttachment = (
   );
 };
 
-/** Case-insensitive match against an entity's name, type, and risk level. */
-export const matchesSearchTerm = (metadata: EntityAttachmentMetadata, searchTerm: string) => {
-  const searchableText = `${metadata.entityName} ${metadata.entityType} ${
+/**
+ * Case-insensitive match against an entity's id (EUID), name, type, and risk level.
+ *
+ * The EUID is included so colon-notation searches like `host:web01` match: the user is
+ * typing a fragment of the canonical id (e.g. `host:web01.acme.com`). Matching happens on
+ * the raw id string, so the colon is treated as a literal rather than a field separator.
+ */
+export const matchesSearchTerm = (
+  attachment: Pick<EntityAttachmentPayload, 'attachmentId' | 'metadata'>,
+  searchTerm: string
+) => {
+  const { attachmentId, metadata } = attachment;
+  const searchableText = `${attachmentId} ${metadata.entityName} ${metadata.entityType} ${
     metadata.riskLevel ?? ''
   }`.toLowerCase();
   return searchableText.includes(searchTerm.toLowerCase());
