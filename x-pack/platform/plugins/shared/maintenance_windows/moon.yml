@@ -51,6 +51,7 @@ dependsOn:
   - '@kbn/core-http-browser'
   - '@kbn/core-ui-settings-server-mocks'
   - '@kbn/response-ops-recurring-schedule-form'
+  - '@kbn/response-ops-schedule-schema'
   - '@kbn/react-query'
   - '@kbn/shared-ux-router'
   - '@kbn/response-ops-rules-apis'
