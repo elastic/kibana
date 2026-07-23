@@ -22,10 +22,10 @@ import {
 import { loadOas } from '../src/input/load_oas';
 import { formatFailure } from '../src/report/format_failure';
 import { writeImpactReport } from '../src/report/write_impact_report';
+import type { ImpactReportEntry } from '../src/report/write_impact_report';
 import { loadAllowlist } from '../src/allowlist/load_allowlist';
 import { checkTerraformImpact } from '../src/terraform/check_terraform_impact';
-import { loadTerraformApis } from '../src/terraform/load_terraform_apis';
-import { buildMatchPath } from '../src/terraform/build_match_path';
+import { resolveTier } from '../src/stability';
 
 type Distribution = 'stack' | 'serverless';
 
@@ -187,16 +187,11 @@ run(
 
     try {
       const currentPath = resolve(process.cwd(), opts.specPath);
-      const terraformApis = loadTerraformApis(opts.terraformApisPath);
-      const matchPath = buildMatchPath(terraformApis);
-      if (matchPath) {
-        log.info(`Filtering oasdiff to ${terraformApis.length} Terraform provider API paths`);
-      }
       let diffEntries;
       let structuralDiff: unknown;
       try {
-        diffEntries = runOasdiff(basePath, currentPath, { matchPath });
-        structuralDiff = runOasdiffStructural(basePath, currentPath, { matchPath });
+        diffEntries = runOasdiff(basePath, currentPath);
+        structuralDiff = runOasdiffStructural(basePath, currentPath);
       } catch (error: unknown) {
         // Some older branch specs (e.g. 9.3) have example objects incorrectly
         // placed under `#/components/schemas/` instead of `#/components/examples/`.
@@ -229,54 +224,88 @@ run(
         return;
       }
 
-      const terraformImpact = checkTerraformImpact(allBreakingChanges, opts.terraformApisPath);
-
-      const tfBreakingChanges = terraformImpact.hasImpact
-        ? terraformImpact.impactedChanges.map((i) => i.change)
-        : [];
-
-      if (tfBreakingChanges.length === 0) {
-        log.success(
-          `${allBreakingChanges.length} breaking change(s) detected, none affect Terraform provider APIs`
-        );
-        return;
-      }
-
+      // Suppress approved breaks across the whole surface. The allowlist is the
+      // per-change escape hatch, tier-agnostic: an entry here clears the change
+      // whether it is stable or tech_preview.
       const allowlist = loadAllowlist(opts.allowlistPath);
-      const { breakingChanges, allowlistedChanges } = applyAllowlist(tfBreakingChanges, allowlist);
+      const { breakingChanges, allowlistedChanges } = applyAllowlist(allBreakingChanges, allowlist);
 
       if (allowlistedChanges.length > 0) {
         log.info(`${allowlistedChanges.length} allowlisted change(s) ignored`);
       }
 
       if (breakingChanges.length === 0) {
-        log.success('All Terraform-impacting breaking changes are allowlisted');
+        log.success('All breaking changes are allowlisted');
         return;
       }
 
-      const filteredImpact = {
-        hasImpact: true,
-        impactedChanges: terraformImpact.impactedChanges.filter((i) =>
-          breakingChanges.includes(i.change)
-        ),
-      };
+      // Tier from the base spec (the API as it existed before the break).
+      const baseOas = await loadOas(basePath);
+
+      // Terraform impact is ownership enrichment, never a gate: attach the owning
+      // resource and owners to changes that map to a provider API.
+      const terraformImpact = checkTerraformImpact(breakingChanges, opts.terraformApisPath);
+      const ownershipByChange = new Map(
+        terraformImpact.impactedChanges.map((impact) => [impact.change, impact])
+      );
+
+      // Only stable and tech_preview breaks are caught. Experimental breaks are
+      // excluded entirely: not reported, not counted.
+      const entries: ImpactReportEntry[] = [];
+      for (const change of breakingChanges) {
+        const { tier, since } = resolveTier(baseOas, change);
+        if (tier === 'experimental') {
+          continue;
+        }
+        const ownership = ownershipByChange.get(change);
+        const entry: ImpactReportEntry = {
+          path: change.path,
+          method: change.method,
+          reason: change.reason,
+          oasdiffId: change.oasdiffId,
+          source: change.source,
+          tier,
+        };
+        if (since !== undefined) {
+          entry.since = since;
+        }
+        if (ownership) {
+          entry.terraformResource = ownership.terraformResource;
+          entry.owners = ownership.owners;
+        }
+        entries.push(entry);
+      }
 
       if (opts.reportPath) {
-        writeImpactReport(opts.reportPath, filteredImpact);
+        writeImpactReport(opts.reportPath, { entries });
         log.info(`Impact report written to ${opts.reportPath}`);
       }
 
-      const report = formatFailure(breakingChanges, filteredImpact);
-      log.error(report);
+      const experimentalCount = breakingChanges.length - entries.length;
+      if (experimentalCount > 0) {
+        log.info(`${experimentalCount} experimental-tier breaking change(s) excluded`);
+      }
+
+      if (entries.length === 0) {
+        log.success('No breaking changes detected in stable or tech_preview APIs');
+        return;
+      }
+
+      const stableCount = entries.filter((e) => e.tier === 'stable').length;
+      const techPreviewCount = entries.length - stableCount;
+
+      log.error(formatFailure(entries));
       throw new Error(
-        `Found ${breakingChanges.length} breaking change(s) affecting Terraform provider APIs`
+        `Caught ${entries.length} breaking change(s) in stable/tech_preview APIs: ` +
+          `${stableCount} stable, ${techPreviewCount} tech_preview`
       );
     } finally {
       cleanup(basePath);
     }
   },
   {
-    description: 'Check API contracts for breaking changes affecting Terraform provider APIs',
+    description:
+      'Check API contracts for breaking changes across the stable and tech_preview API surface',
     flags: {
       string: [
         'distribution',
@@ -293,7 +322,7 @@ run(
         --baseBranch         Base branch to compare against (default: main)
         --mergeBase          Merge base commit SHA (used in CI, skips remote resolution)
         --allowlistPath      Override allowlist path (default: packages/kbn-api-contracts/allowlist.json)
-        --terraformApisPath  Override Terraform provider APIs config path
+        --terraformApisPath  Override Terraform provider APIs config path (ownership enrichment only)
         --reportPath         Write a JSON impact report to this path (used by CI for PR notifications)
 
         Examples:

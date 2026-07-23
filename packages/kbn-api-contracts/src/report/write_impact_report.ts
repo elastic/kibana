@@ -9,23 +9,37 @@
 
 import { writeFileSync, mkdirSync } from 'fs';
 import { resolve } from 'path';
-import type { TerraformImpactResult } from '../terraform/check_terraform_impact';
 
-export const writeImpactReport = (
-  reportPath: string,
-  terraformImpact: TerraformImpactResult
-): void => {
-  const report = {
-    impactedChanges: terraformImpact.impactedChanges.map((impact) => ({
-      path: impact.change.path,
-      method: impact.change.method,
-      reason: impact.change.reason,
-      oasdiffId: impact.change.oasdiffId,
-      source: impact.change.source,
-      terraformResource: impact.terraformResource,
-      owners: impact.owners,
-    })),
-  };
+/**
+ * Tiers the checker acts on. Experimental breaking changes are dropped upstream
+ * (in check_contracts) and never reach the report, so a reported entry is always
+ * stable or tech_preview.
+ */
+export type CaughtTier = 'stable' | 'tech_preview';
+
+/**
+ * A single caught breaking change, tier-classified. Terraform fields are
+ * ownership enrichment, present only when the change maps to a provider API;
+ * they never affect whether the change is caught.
+ */
+export interface ImpactReportEntry {
+  path: string;
+  method?: string;
+  reason: string;
+  oasdiffId?: string;
+  source?: string;
+  tier: CaughtTier;
+  since?: string;
+  terraformResource?: string;
+  owners?: string[];
+}
+
+export interface ImpactReport {
+  entries: ImpactReportEntry[];
+}
+
+/** Write the tier-labeled impact report consumed by the PR notifier. */
+export const writeImpactReport = (reportPath: string, report: ImpactReport): void => {
   mkdirSync(resolve(reportPath, '..'), { recursive: true });
   writeFileSync(reportPath, JSON.stringify(report, null, 2));
 };

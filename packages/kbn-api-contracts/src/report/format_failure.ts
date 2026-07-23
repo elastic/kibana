@@ -7,23 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { BreakingChange } from '../diff/breaking_rules';
-import type { TerraformImpactResult, TerraformImpact } from '../terraform/check_terraform_impact';
+import type { ImpactReportEntry, CaughtTier } from './write_impact_report';
 import { ESCALATION_LINK } from './links';
 
 const HEADER = `
 ╔════════════════════════════════════════════════════════════════════════════╗
-║                     API CONTRACT BREAKING CHANGES DETECTED                 ║
+║                     API CONTRACT BREAKING CHANGES CAUGHT                   ║
 ╚════════════════════════════════════════════════════════════════════════════╝
-
-`.split('\n');
-
-const TERRAFORM_HEADER = `
-╔════════════════════════════════════════════════════════════════════════════╗
-║                        TERRAFORM PROVIDER IMPACT                           ║
-╚════════════════════════════════════════════════════════════════════════════╝
-
-⚠️  The following breaking changes affect Terraform Provider APIs:
 
 `.split('\n');
 
@@ -33,61 +23,59 @@ const FOOTER = `
 What to do next:
 
 1. Review the breaking changes above
-2. If intentional, add an allowlist entry with approval
-3. If unintentional, revert the changes
+2. If unintentional, revert the change
+3. If intentional, add an approved allowlist entry and coordinate with the owning team
 
 Need help? ${ESCALATION_LINK}
 
 `.split('\n');
-const formatBreakingChange = (change: BreakingChange, idx: number): string[] => {
-  const lines = [`${idx + 1}. ${change.reason}`, `   Path: ${change.path}`];
 
-  if (change.method) {
-    lines.push(`   Method: ${change.method.toUpperCase()}`);
+const TIER_LABEL: Record<CaughtTier, string> = {
+  stable: 'Stable (GA)',
+  tech_preview: 'Technical Preview',
+};
+
+const formatEntry = (entry: ImpactReportEntry, idx: number): string[] => {
+  const lines = [
+    `${idx + 1}. ${entry.reason}`,
+    `   Path: ${entry.path}`,
+    `   Tier: ${TIER_LABEL[entry.tier]}`,
+  ];
+
+  if (entry.method) {
+    lines.push(`   Method: ${entry.method.toUpperCase()}`);
   }
 
-  if (change.details) {
-    lines.push(`   Details: ${JSON.stringify(change.details, null, 2).split('\n').join('\n   ')}`);
+  if (entry.terraformResource) {
+    lines.push(
+      `   Terraform Resource: ${entry.terraformResource} (also affects the Terraform provider)`
+    );
+  }
+
+  if (entry.owners && entry.owners.length > 0) {
+    lines.push(`   Owners: ${entry.owners.join(', ')}`);
   }
 
   return [...lines, ''];
 };
 
-const formatTerraformImpact = (impact: TerraformImpact): string[] => {
-  const method = impact.change.method ? ` ${impact.change.method.toUpperCase()}` : '';
-  const lines = [
-    `• ${impact.change.path}${method}`,
-    `  Terraform Resource: ${impact.terraformResource}`,
-    `  Reason: ${impact.change.reason}`,
-  ];
-  if (impact.owners.length > 0) {
-    lines.push(`  Owners: ${impact.owners.join(', ')}`);
-  }
-  lines.push('');
-  return lines;
-};
-
-export function formatFailure(
-  breakingChanges: BreakingChange[],
-  terraformImpact?: TerraformImpactResult
-): string {
-  const breakingSection = breakingChanges.flatMap(formatBreakingChange);
-
-  const terraformSection = terraformImpact?.hasImpact
-    ? [
-        ...TERRAFORM_HEADER,
-        ...terraformImpact.impactedChanges.flatMap(formatTerraformImpact),
-        'Coordinate with @elastic/terraform-provider before merging.',
-        '',
-      ]
-    : [];
+/**
+ * Format the CI-log summary for caught breaking changes, ordered by tier
+ * (stable first, then tech_preview) and flagging any change that also affects a
+ * Terraform provider API. Entries are already tier-classified and enriched by
+ * check_contracts, so this is presentation only.
+ */
+export function formatFailure(entries: ImpactReportEntry[]): string {
+  const stable = entries.filter((e) => e.tier === 'stable');
+  const techPreview = entries.filter((e) => e.tier === 'tech_preview');
+  const ordered = [...stable, ...techPreview];
 
   return [
     ...HEADER,
-    `Found ${breakingChanges.length} breaking change(s):`,
+    `Caught ${entries.length} breaking change(s) in stable/tech_preview APIs ` +
+      `(${stable.length} stable, ${techPreview.length} tech_preview):`,
     '',
-    ...breakingSection,
-    ...terraformSection,
+    ...ordered.flatMap(formatEntry),
     ...FOOTER,
   ].join('\n');
 }
