@@ -23,9 +23,7 @@ jest.mock('@kbn/esql-utils', () => ({
   getESQLTimeField: jest.fn(),
 }));
 
-const mockGetESQLTimeFieldFromQuery = getESQLTimeField as jest.MockedFunction<
-  typeof getESQLTimeField
->;
+const mockGetESQLTimeField = getESQLTimeField as jest.MockedFunction<typeof getESQLTimeField>;
 
 describe('loader', () => {
   describe('loadIndexPatternRefs', () => {
@@ -364,7 +362,7 @@ describe('loader', () => {
     const mockDataViews = mockDataViewsService() as unknown as DataViewsContract;
 
     beforeEach(() => {
-      mockGetESQLTimeFieldFromQuery.mockReset();
+      mockGetESQLTimeField.mockReset();
       (mockDataViews.clearInstanceCache as jest.Mock).mockClear();
     });
 
@@ -381,7 +379,7 @@ describe('loader', () => {
       });
 
       expect(result).toBe(adHocDataViews);
-      expect(mockGetESQLTimeFieldFromQuery).not.toHaveBeenCalled();
+      expect(mockGetESQLTimeField).not.toHaveBeenCalled();
     });
 
     it('should return adHocDataViews unchanged when layers is empty', async () => {
@@ -397,7 +395,7 @@ describe('loader', () => {
       });
 
       expect(result).toEqual(adHocDataViews);
-      expect(mockGetESQLTimeFieldFromQuery).not.toHaveBeenCalled();
+      expect(mockGetESQLTimeField).not.toHaveBeenCalled();
     });
 
     it('should skip layers without an ES|QL query', async () => {
@@ -416,7 +414,7 @@ describe('loader', () => {
       });
 
       expect(result).toEqual({});
-      expect(mockGetESQLTimeFieldFromQuery).not.toHaveBeenCalled();
+      expect(mockGetESQLTimeField).not.toHaveBeenCalled();
     });
 
     it('should skip enrichment when the existing spec already has a timeFieldName', async () => {
@@ -437,7 +435,7 @@ describe('loader', () => {
       });
 
       expect(result).toEqual(adHocDataViews);
-      expect(mockGetESQLTimeFieldFromQuery).not.toHaveBeenCalled();
+      expect(mockGetESQLTimeField).not.toHaveBeenCalled();
       expect(mockDataViews.clearInstanceCache).not.toHaveBeenCalled();
     });
 
@@ -451,7 +449,7 @@ describe('loader', () => {
         },
       } as unknown as TextBasedPersistedState;
 
-      mockGetESQLTimeFieldFromQuery.mockResolvedValue('@timestamp');
+      mockGetESQLTimeField.mockResolvedValue('@timestamp');
 
       const result = await ensureESQLTimeFieldOnAdHocDataViews({
         adHocDataViews,
@@ -460,7 +458,7 @@ describe('loader', () => {
         http: mockHttp,
       });
 
-      expect(mockGetESQLTimeFieldFromQuery).toHaveBeenCalledWith({
+      expect(mockGetESQLTimeField).toHaveBeenCalledWith({
         query: 'FROM logs-*',
         http: mockHttp,
       });
@@ -476,7 +474,7 @@ describe('loader', () => {
         },
       } as unknown as TextBasedPersistedState;
 
-      mockGetESQLTimeFieldFromQuery.mockResolvedValue('@timestamp');
+      mockGetESQLTimeField.mockResolvedValue('@timestamp');
 
       const result = await ensureESQLTimeFieldOnAdHocDataViews({
         adHocDataViews,
@@ -501,7 +499,7 @@ describe('loader', () => {
         },
       } as unknown as TextBasedPersistedState;
 
-      mockGetESQLTimeFieldFromQuery.mockResolvedValue('@timestamp');
+      mockGetESQLTimeField.mockResolvedValue('@timestamp');
 
       const result = await ensureESQLTimeFieldOnAdHocDataViews({
         adHocDataViews,
@@ -510,8 +508,8 @@ describe('loader', () => {
         http: mockHttp,
       });
 
-      expect(mockGetESQLTimeFieldFromQuery).toHaveBeenCalledTimes(1);
-      expect(mockGetESQLTimeFieldFromQuery).toHaveBeenCalledWith({
+      expect(mockGetESQLTimeField).toHaveBeenCalledTimes(1);
+      expect(mockGetESQLTimeField).toHaveBeenCalledWith({
         query: 'FROM metrics-*',
         http: mockHttp,
       });
@@ -531,7 +529,7 @@ describe('loader', () => {
         },
       } as unknown as TextBasedPersistedState;
 
-      mockGetESQLTimeFieldFromQuery.mockResolvedValue('@timestamp');
+      mockGetESQLTimeField.mockResolvedValue('@timestamp');
 
       const result = await ensureESQLTimeFieldOnAdHocDataViews({
         adHocDataViews,
@@ -554,7 +552,7 @@ describe('loader', () => {
         },
       } as unknown as TextBasedPersistedState;
 
-      mockGetESQLTimeFieldFromQuery.mockResolvedValue(undefined);
+      mockGetESQLTimeField.mockResolvedValue(undefined);
 
       const result = await ensureESQLTimeFieldOnAdHocDataViews({
         adHocDataViews,
