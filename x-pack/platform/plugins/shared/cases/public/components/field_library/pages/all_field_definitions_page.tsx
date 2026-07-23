@@ -246,6 +246,7 @@ export const AllFieldDefinitionsPage: React.FC<AllFieldDefinitionsPageProps> = (
         ) : (
           <EuiBasicTable
             items={fieldDefinitions}
+            tableCaption={i18n.FIELD_DEFINITIONS_TABLE_CAPTION}
             rowHeader="name"
             columns={columns}
             data-test-subj="fieldDefinitionsTable"

@@ -41,6 +41,8 @@ import {
   CANNOT_REMOVE_TARGET_TOOLTIP,
   RESOLUTION_EMPTY_STATE,
   RESOLUTION_FETCH_ERROR,
+  RESOLUTION_GROUP_TABLE_CAPTION,
+  RESOLUTION_GROUP_DETAILS_TABLE_CAPTION,
 } from './translations';
 import {
   RESOLUTION_GROUP_TABLE_TEST_ID,
@@ -246,6 +248,7 @@ export const ResolutionGroupTable: React.FC<ResolutionGroupTableProps> = ({
 
     return (
       <EuiBasicTable
+        tableCaption={RESOLUTION_GROUP_TABLE_CAPTION}
         data-test-subj={RESOLUTION_EMPTY_STATE_TEST_ID}
         items={[]}
         columns={emptyColumns}
@@ -257,6 +260,7 @@ export const ResolutionGroupTable: React.FC<ResolutionGroupTableProps> = ({
 
   return (
     <EuiBasicTable
+      tableCaption={RESOLUTION_GROUP_DETAILS_TABLE_CAPTION}
       data-test-subj={RESOLUTION_GROUP_TABLE_TEST_ID}
       items={items}
       columns={columns}

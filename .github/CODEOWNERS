@@ -3065,6 +3065,12 @@ x-pack/solutions/security/plugins/entity_store @elastic/security-entity-analytic
 /x-pack/solutions/security/plugins/security_solution/public/flyout/shared @elastic/security-threat-hunting
 /x-pack/solutions/security/plugins/security_solution/public/flyout/rule_details @elastic/security-threat-hunting
 /x-pack/solutions/security/plugins/security_solution/public/flyout_v2 @elastic/security-threat-hunting
+/x-pack/solutions/security/plugins/security_solution/public/flyout_v2/attack @elastic/security-threat-hunting
+/x-pack/solutions/security/plugins/security_solution/public/flyout_v2/document @elastic/security-threat-hunting
+/x-pack/solutions/security/plugins/security_solution/public/flyout_v2/ioc @elastic/security-threat-hunting
+/x-pack/solutions/security/plugins/security_solution/public/flyout_v2/network @elastic/security-threat-hunting
+/x-pack/solutions/security/plugins/security_solution/public/flyout_v2/rule @elastic/security-threat-hunting
+/x-pack/solutions/security/plugins/security_solution/public/flyout_v2/shared @elastic/security-threat-hunting
 /x-pack/solutions/security/plugins/security_solution/public/notes @elastic/security-threat-hunting
 /x-pack/solutions/security/plugins/security_solution/public/one_discover @elastic/security-threat-hunting
 /x-pack/solutions/security/plugins/security_solution/public/overview @elastic/security-threat-hunting
@@ -3413,7 +3419,6 @@ x-pack/platform/plugins/shared/actions/server/lib/token_tracking @elastic/securi
 /x-pack/solutions/security/plugins/security_solution/public/common/components/endpoint/ @elastic/security-defend-workflows
 /x-pack/solutions/security/plugins/security_solution/public/common/hooks/endpoint/ @elastic/security-defend-workflows
 /x-pack/solutions/security/plugins/security_solution/public/common/mock/endpoint @elastic/security-defend-workflows
-/x-pack/solutions/security/plugins/security_solution/public/flyout/document_details/isolate_host/ @elastic/security-defend-workflows
 /x-pack/solutions/security/plugins/security_solution/common/endpoint/ @elastic/security-defend-workflows
 /x-pack/solutions/security/plugins/security_solution/common/api/endpoint/ @elastic/security-defend-workflows
 /x-pack/solutions/security/plugins/security_solution/server/endpoint/ @elastic/security-defend-workflows
@@ -3461,6 +3466,7 @@ x-pack/solutions/security/plugins/security_solution/public/entity_analytics @ela
 x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ @elastic/security-entity-analytics
 x-pack/solutions/security/plugins/security_solution/public/explore @elastic/security-entity-analytics
 x-pack/solutions/security/plugins/security_solution/public/flyout/entity_details @elastic/security-entity-analytics
+x-pack/solutions/security/plugins/security_solution/public/flyout_v2/entity @elastic/security-entity-analytics
 
 x-pack/solutions/security/packages/navigation/src/navigation_tree/entity_analytics_navigation_tree.ts @elastic/security-entity-analytics
 
@@ -3489,6 +3495,7 @@ x-pack/solutions/security/test/security_solution_api_integration/test_suites/exp
 
 ## Security Solution sub teams - Entity Store / Maintainers / Entity Details (contextual-security-apps co-ownership)
 x-pack/solutions/security/plugins/security_solution/public/flyout/entity_details @elastic/contextual-security-apps @elastic/security-entity-analytics
+x-pack/solutions/security/plugins/security_solution/public/flyout_v2/entity @elastic/contextual-security-apps @elastic/security-entity-analytics
 x-pack/solutions/security/plugins/security_solution/public/entity_analytics/components/home @elastic/contextual-security-apps @elastic/security-entity-analytics
 x-pack/solutions/security/plugins/security_solution/public/entity_analytics/components/entity_details_flyout @elastic/contextual-security-apps @elastic/security-entity-analytics
 x-pack/solutions/security/plugins/security_solution/public/entity_analytics/components/entity_store @elastic/contextual-security-apps @elastic/security-entity-analytics
@@ -3540,7 +3547,9 @@ x-pack/solutions/security/plugins/security_solution/public/kubernetes @elastic/c
 x-pack/solutions/security/plugins/security_solution/server/lib/asset_inventory @elastic/contextual-security-apps
 x-pack/solutions/security/plugins/security_solution/server/lib/siem_readiness @elastic/contextual-security-apps
 x-pack/solutions/security/plugins/security_solution/public/flyout/entity_details/generic_right @elastic/contextual-security-apps
+x-pack/solutions/security/plugins/security_solution/public/flyout_v2/entity/generic @elastic/contextual-security-apps
 /x-pack/solutions/security/plugins/security_solution/public/flyout/csp_details @elastic/contextual-security-apps
+/x-pack/solutions/security/plugins/security_solution/public/flyout_v2/csp @elastic/contextual-security-apps
 
 ## Fleet plugin (co-owned with Fleet team)
 x-pack/platform/plugins/shared/fleet/public/components/cloud_security_posture @elastic/fleet @elastic/contextual-security-apps

@@ -22,7 +22,7 @@ import {
 import type { RulesSavedObjectService } from '../services/rules_saved_object_service/rules_saved_object_service';
 import { createRulesSavedObjectService } from '../services/rules_saved_object_service/rules_saved_object_service.mock';
 import type { UserService } from '../services/user_service/user_service';
-import { createUserProfile, createUserService } from '../services/user_service/user_service.mock';
+import { createUserService } from '../services/user_service/user_service.mock';
 import type { LoggerService } from '../services/logger_service/logger_service';
 import { createLoggerService } from '../services/logger_service/logger_service.mock';
 import { ActionPolicyClient } from './action_policy_client';
@@ -84,7 +84,7 @@ describe('ActionPolicyClient', () => {
       loggerService
     );
 
-    userProfileService.getCurrent.mockResolvedValue(createUserProfile('elastic_profile_uid'));
+    userProfileService.getCurrentProfileId.mockResolvedValue('elastic_profile_uid');
 
     mockSavedObjectsClient.create.mockResolvedValue({
       id: 'policy-id-default',

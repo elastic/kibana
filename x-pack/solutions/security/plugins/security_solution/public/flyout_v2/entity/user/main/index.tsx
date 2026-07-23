@@ -313,6 +313,7 @@ export const User: FC<UserProps> = memo(function User({
             entityId: entityStoreEntityId,
             onShowEntity: onOpenUser,
             title: userName,
+            subTab: path.subTab as RiskScoreLeftPanelSubTab | undefined,
             origin:
               path.subTab === RiskScoreLeftPanelSubTab.RESOLUTION
                 ? FLYOUT_ORIGIN.RISK_SUMMARY_RESOLUTION
@@ -465,6 +466,7 @@ export const User: FC<UserProps> = memo(function User({
             entityStoreEntityId={entityStoreEntityId}
             onShowEntity={onShowRelatedEntityFromResolution}
             hideHeaderIcons
+            riskScoreQueryId={USER_PANEL_RISK_SCORE_QUERY_ID}
           />
         )}
       </EuiFlyoutBody>
