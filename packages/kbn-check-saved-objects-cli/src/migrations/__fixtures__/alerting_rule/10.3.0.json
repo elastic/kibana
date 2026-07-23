@@ -5,7 +5,9 @@
       "metadata": {
         "name": "test rule",
         "description": "a test alerting v2 rule",
-        "tags": ["test"]
+        "tags": [
+          "test"
+        ]
       },
       "time_field": "@timestamp",
       "schedule": {
@@ -24,7 +26,9 @@
         "recovering_count": 0
       },
       "grouping": {
-        "fields": ["host.name"]
+        "fields": [
+          "host.name"
+        ]
       },
       "enabled": true,
       "createdBy": "elastic",
@@ -39,7 +43,10 @@
       "metadata": {
         "name": "test rule",
         "description": "a test alerting v2 rule",
-        "tags": ["test"]
+        "tags": [
+          "test"
+        ],
+        "version": 1
       },
       "time_field": "@timestamp",
       "schedule": {
@@ -58,14 +65,15 @@
         "recovering_count": 0
       },
       "grouping": {
-        "fields": ["host.name"]
+        "fields": [
+          "host.name"
+        ]
       },
       "enabled": true,
       "createdBy": "elastic",
       "updatedBy": "elastic",
       "createdAt": "2025-01-01T00:00:00.000Z",
-      "updatedAt": "2025-01-01T00:00:00.000Z",
-      "revision": 1
+      "updatedAt": "2025-01-01T00:00:00.000Z"
     }
   ]
 }
