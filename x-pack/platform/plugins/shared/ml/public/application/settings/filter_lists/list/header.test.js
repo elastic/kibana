@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderWithI18n } from '@kbn/test-jest-helpers';
+import { renderWithI18n } from '../../../test_utils/render_with_ml_context';
 import React from 'react';
 
 // Mock the Kibana context
