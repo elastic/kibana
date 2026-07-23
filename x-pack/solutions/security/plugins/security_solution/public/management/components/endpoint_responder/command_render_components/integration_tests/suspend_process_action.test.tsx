@@ -262,6 +262,83 @@ describe('When using the suspend-process action from response actions console', 
       );
     });
   });
+  it('should display the process result output content returned by the action', async () => {
+    await render();
+    await enterConsoleCommand(renderResult, user, 'suspend-process --pid 123');
+
+    await waitFor(() => {
+      expect(renderResult.getByTestId('killProcessResponseOutput')).toBeTruthy();
+    });
+
+    const output = renderResult.getByTestId('killProcessResponseOutput').textContent ?? '';
+
+    expect(output).toContain('Process ID: 5');
+    expect(output).toContain('Entity ID: entity-foo');
+  });
+
+  it('should display the response code message as the result title', async () => {
+    const detailResponse = apiMocks.responseProvider.actionDetails({
+      path: '/api/endpoint/action/a.b.c',
+    }) as ActionDetailsApiResponse<SuspendProcessActionOutputContent>;
+    detailResponse.data.command = 'suspend-process';
+    detailResponse.data.isCompleted = true;
+    detailResponse.data.wasSuccessful = true;
+    detailResponse.data.outputs = {
+      'agent-a': {
+        type: 'json',
+        content: {
+          code: 'ra_suspend-process_success_done',
+          pid: 5,
+          entity_id: 'entity-foo',
+        },
+      },
+    };
+    apiMocks.responseProvider.actionDetails.mockReturnValue(detailResponse);
+
+    await render();
+    await enterConsoleCommand(renderResult, user, 'suspend-process --pid 123');
+
+    await waitFor(() => {
+      expect(renderResult.getByTestId('test-commandExecutionResult')).toHaveTextContent(
+        endpointActionResponseCodes['ra_suspend-process_success_done']
+      );
+    });
+    expect(renderResult.getByTestId('killProcessResponseOutput')).toHaveTextContent(
+      'Process ID: 5'
+    );
+  });
+
+  it('should only display output fields that are present in the content', async () => {
+    const detailResponse = apiMocks.responseProvider.actionDetails({
+      path: '/api/endpoint/action/a.b.c',
+    }) as ActionDetailsApiResponse<SuspendProcessActionOutputContent>;
+    detailResponse.data.command = 'suspend-process';
+    detailResponse.data.isCompleted = true;
+    detailResponse.data.wasSuccessful = true;
+    detailResponse.data.outputs = {
+      'agent-a': {
+        type: 'json',
+        content: {
+          code: 'ra_suspend-process_success_done',
+          pid: 5,
+        },
+      },
+    };
+    apiMocks.responseProvider.actionDetails.mockReturnValue(detailResponse);
+
+    await render();
+    await enterConsoleCommand(renderResult, user, 'suspend-process --pid 123');
+
+    await waitFor(() => {
+      expect(renderResult.getByTestId('killProcessResponseOutput')).toBeTruthy();
+    });
+
+    const output = renderResult.getByTestId('killProcessResponseOutput').textContent ?? '';
+
+    expect(output).toContain('Process ID: 5');
+    expect(output).not.toContain('Entity ID:');
+    expect(output).not.toContain('Process name:');
+  });
 
   it('should show error if suspend-process failed to complete successfully', async () => {
     const pendingDetailResponse = apiMocks.responseProvider.actionDetails({
