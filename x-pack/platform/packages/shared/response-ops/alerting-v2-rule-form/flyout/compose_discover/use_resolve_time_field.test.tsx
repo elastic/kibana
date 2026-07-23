@@ -143,7 +143,9 @@ describe('useResolveTimeField', () => {
     expect(result.current.isTimeFieldResolved).toBe(false);
   });
 
-  it('reports isTimeFieldResolved false until timeField matches @timestamp fallback', async () => {
+  it('keeps isTimeFieldResolved false when no date field exists, even if timeField is @timestamp', async () => {
+    // fieldMap is empty and API returns nothing (default mocks in beforeEach).
+    // resolvedTimeField is null, so no timeField value can be considered resolved.
     const { result, rerender } = renderHook(
       ({ timeField }: { timeField: string }) =>
         useResolveTimeField({
@@ -162,8 +164,10 @@ describe('useResolveTimeField', () => {
 
     rerender({ timeField: '@timestamp' });
 
+    // Still false — no date fields were discovered so resolvedTimeField is null,
+    // and no timeField value can be considered "resolved".
     await waitFor(() => {
-      expect(result.current.isTimeFieldResolved).toBe(true);
+      expect(result.current.isTimeFieldResolved).toBe(false);
     });
   });
 
@@ -366,7 +370,7 @@ describe('useResolveTimeField', () => {
     expect(useDataFields).toHaveBeenCalledWith(expect.objectContaining({ search: undefined }));
   });
 
-  it('recognizes date_nanos fields as temporal when resolving time field', async () => {
+  it('recognizes date_nanos fields as temporal and offers them for selection', async () => {
     const onTimeFieldChange = jest.fn();
     (useDataFields as jest.Mock).mockReturnValue({
       data: {
@@ -380,7 +384,10 @@ describe('useResolveTimeField', () => {
       isLoading: false,
     });
 
-    renderHook(
+    // defaultParams has timeField: '@timestamp' which is not on this index.
+    // The hook clears the invalid field (does not auto-pick) and surfaces event_time
+    // as an option for the user to select.
+    const { result } = renderHook(
       () =>
         useResolveTimeField({
           ...defaultParams,
@@ -390,11 +397,13 @@ describe('useResolveTimeField', () => {
     );
 
     await waitFor(() => {
-      expect(onTimeFieldChange).toHaveBeenCalledWith('event_time');
+      expect(onTimeFieldChange).toHaveBeenCalledWith('');
     });
+    expect(result.current.timeFieldOptions).toEqual([{ value: 'event_time', text: 'event_time' }]);
+    expect(result.current.isTimeFieldResolved).toBe(false);
   });
 
-  it('recognizes ES|QL datetime columns as temporal when resolving time field', async () => {
+  it('recognizes ES|QL datetime columns as temporal and offers them for selection', async () => {
     const onTimeFieldChange = jest.fn();
     (useDataFields as jest.Mock).mockReturnValue({
       data: {
@@ -408,7 +417,10 @@ describe('useResolveTimeField', () => {
       isLoading: false,
     });
 
-    renderHook(
+    // defaultParams has timeField: '@timestamp' which is not on this index.
+    // The hook clears the invalid field (does not auto-pick) and surfaces event_time
+    // as an option for the user to select.
+    const { result } = renderHook(
       () =>
         useResolveTimeField({
           ...defaultParams,
@@ -418,7 +430,9 @@ describe('useResolveTimeField', () => {
     );
 
     await waitFor(() => {
-      expect(onTimeFieldChange).toHaveBeenCalledWith('event_time');
+      expect(onTimeFieldChange).toHaveBeenCalledWith('');
     });
+    expect(result.current.timeFieldOptions).toEqual([{ value: 'event_time', text: 'event_time' }]);
+    expect(result.current.isTimeFieldResolved).toBe(false);
   });
 });
