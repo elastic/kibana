@@ -19,6 +19,9 @@ import {
 } from '../__mocks__/request_responses';
 import type { SecuritySolutionRequestHandlerContextMock } from '../__mocks__/request_context';
 import { requestContextMock, serverMock, requestMock } from '../__mocks__';
+import { ATTACKS_API_CALL_EVENT } from '../../../telemetry/event_based/events';
+import { createMockTelemetryEventsSender } from '../../../telemetry/__mocks__';
+import type { ITelemetryEventsSender } from '../../../telemetry/sender';
 import { searchAttacksRoute } from './search_attacks_route';
 
 const getAttacksSearchQueryRequest = () =>
@@ -38,6 +41,8 @@ const getAttacksSearchAggsRequest = () =>
 describe('search for attacks', () => {
   let server: ReturnType<typeof serverMock.create>;
   let context: SecuritySolutionRequestHandlerContextMock;
+  let telemetrySenderMock: ITelemetryEventsSender;
+  let reportEBT: jest.Mock;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -51,7 +56,13 @@ describe('search for attacks', () => {
       getEmptySignalsResponse() as any
     );
 
-    searchAttacksRoute(server.router);
+    reportEBT = jest.fn();
+    telemetrySenderMock = {
+      ...createMockTelemetryEventsSender(),
+      reportEBT,
+    } as unknown as ITelemetryEventsSender;
+
+    searchAttacksRoute(server.router, telemetrySenderMock);
   });
 
   afterEach(() => {
@@ -167,6 +178,104 @@ describe('search for attacks', () => {
         message: '"value" must have at least 1 children',
         status_code: 400,
       });
+    });
+  });
+
+  describe('telemetry', () => {
+    test('reports success telemetry on search', async () => {
+      await server.inject(
+        getAttacksSearchQueryRequest(),
+        requestContextMock.convertContext(context)
+      );
+
+      expect(reportEBT).toHaveBeenCalledTimes(1);
+      expect(reportEBT).toHaveBeenCalledWith(
+        ATTACKS_API_CALL_EVENT,
+        expect.objectContaining({
+          endpoint: DETECTION_ENGINE_ATTACKS_SEARCH_URL,
+          operation: 'search',
+          has_aggregations: false,
+          has_ids_filter: false,
+        })
+      );
+    });
+
+    test('reports aggregations and ids filter in telemetry', async () => {
+      const attackId = '40980216-cf98-4447-af57-894c0e7c39b4';
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_ATTACKS_SEARCH_URL,
+        body: {
+          query: { ids: { values: [attackId] } },
+          aggs: { status: { terms: { field: 'status' } } },
+        },
+      });
+
+      await server.inject(request, requestContextMock.convertContext(context));
+
+      expect(reportEBT).toHaveBeenCalledWith(
+        ATTACKS_API_CALL_EVENT,
+        expect.objectContaining({
+          operation: 'search',
+          has_aggregations: true,
+          has_ids_filter: true,
+        })
+      );
+    });
+
+    test('does not count empty aggs object as aggregations', async () => {
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_ATTACKS_SEARCH_URL,
+        body: { aggs: {}, query: { match_all: {} } },
+      });
+
+      await server.inject(request, requestContextMock.convertContext(context));
+
+      expect(reportEBT).toHaveBeenCalledWith(
+        ATTACKS_API_CALL_EVENT,
+        expect.objectContaining({
+          operation: 'search',
+          has_aggregations: false,
+        })
+      );
+    });
+
+    test('reports error telemetry on validation failure', async () => {
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_ATTACKS_SEARCH_URL,
+        body: {},
+      });
+
+      await server.inject(request, requestContextMock.convertContext(context));
+
+      expect(reportEBT).toHaveBeenCalledWith(
+        ATTACKS_API_CALL_EVENT,
+        expect.objectContaining({
+          operation: 'search',
+          error: expect.any(String),
+        })
+      );
+    });
+
+    test('reports error telemetry on ES failure', async () => {
+      context.core.elasticsearch.client.asCurrentUser.search.mockRejectedValue(
+        new Error('Test error')
+      );
+
+      await server.inject(
+        getAttacksSearchAggsRequest(),
+        requestContextMock.convertContext(context)
+      );
+
+      expect(reportEBT).toHaveBeenCalledWith(
+        ATTACKS_API_CALL_EVENT,
+        expect.objectContaining({
+          operation: 'search',
+          error: 'Test error',
+        })
+      );
     });
   });
 });
