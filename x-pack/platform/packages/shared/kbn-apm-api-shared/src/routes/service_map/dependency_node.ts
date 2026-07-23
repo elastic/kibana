@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
+import { z } from '@kbn/zod/v4';
 import type { NodeStats } from '@kbn/apm-types';
-import { environmentRt } from '@kbn/apm-types';
+import { environmentSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
-import { rangeRt, offsetRt } from '../../default_api_types';
+import { rangeSchema, offsetSchema } from '../../default_api_types';
 
 export interface ServiceMapServiceDependencyInfoResponse {
   currentPeriod: NodeStats;
@@ -18,16 +18,15 @@ export interface ServiceMapServiceDependencyInfoResponse {
 export const serviceMapDependencyNodeRoute = defineRoute<ServiceMapServiceDependencyInfoResponse>()(
   {
     endpoint: 'GET /internal/apm/service-map/dependency',
-    params: t.type({
-      query: t.intersection([
-        t.type({
-          dependencies: t.union([t.string, t.array(t.string)]),
-        }),
-        t.partial({ sourceServiceName: t.string }),
-        environmentRt,
-        rangeRt,
-        offsetRt,
-      ]),
+    params: z.object({
+      query: z
+        .object({
+          dependencies: z.union([z.string(), z.array(z.string())]),
+        })
+        .merge(z.object({ sourceServiceName: z.string() }).partial())
+        .merge(environmentSchema)
+        .merge(rangeSchema)
+        .merge(offsetSchema),
     }),
   }
 );

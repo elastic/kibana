@@ -13,6 +13,7 @@ export {
   getIndexPatternFromESQLQuery,
   getIndexPatternsFromESQLQuery,
   getSourceCommandFromESQLQuery,
+  getAnySourceCommandFromESQLQuery,
   hasTransformationalCommand,
   getLimitFromESQLQuery,
   removeDropCommandsFromESQLQuery,
@@ -20,6 +21,8 @@ export {
   getInitialESQLQuery,
   getESQLWithSafeLimit,
   appendToESQLQuery,
+  escapeStringValue,
+  buildJoinedFilter,
   appendWhereClauseToESQLQuery,
   appendStatsByToQuery,
   appendLimitToQuery,
@@ -39,6 +42,7 @@ export {
   isESQLColumnGroupable,
   isESQLFieldGroupable,
   sanitazeESQLInput,
+  escapeEsqlColumnName,
   queryCannotBeSampled,
   mapVariableToColumn,
   getValuesFromQueryField,
@@ -95,6 +99,7 @@ export {
   classifyESQLSource,
   isSingleSource,
   type ESQLSourceKind,
+  ensureApproximationLicense,
 } from './src';
 
 export { ENABLE_ESQL, GROUP_NOT_SET_VALUE } from './constants';

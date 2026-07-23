@@ -208,6 +208,10 @@ export function ChatFlyout({
           {!hideConversationList ? (
             <EuiFlexItem className={breakpoint === 'xs' ? hideClassName : sidebarClass}>
               <EuiPopover
+                aria-label={i18n.translate(
+                  'xpack.aiAssistant.chatFlyout.conversationListPopoverAriaLabel',
+                  { defaultMessage: 'Conversation list' }
+                )}
                 anchorPosition="downLeft"
                 className={expandButtonContainerClassName}
                 button={
@@ -255,6 +259,10 @@ export function ChatFlyout({
                 />
               ) : (
                 <EuiPopover
+                  aria-label={i18n.translate(
+                    'xpack.aiAssistant.chatFlyout.newConversationPopoverAriaLabel',
+                    { defaultMessage: 'New conversation' }
+                  )}
                   anchorPosition="downLeft"
                   button={
                     <EuiToolTip

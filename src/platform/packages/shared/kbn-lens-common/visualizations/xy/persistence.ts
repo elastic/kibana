@@ -9,8 +9,10 @@
 
 import { LENS_LAYER_TYPES } from '../constants';
 import type {
+  XYByReferenceAnnotationLayerConfig,
   XYByValueAnnotationLayerConfig,
   XYDataLayerConfig,
+  XYLayerConfig,
   XYReferenceLineLayerConfig,
   XYVisualizationState,
 } from './types';
@@ -83,3 +85,7 @@ export const isPersistedByValueAnnotationsLayer = (
 ): layer is XYPersistedByValueAnnotationLayerConfig =>
   isPersistedAnnotationsLayer(layer) &&
   (layer.persistanceType === 'byValue' || !layer.persistanceType);
+
+export const isRuntimeByReferenceAnnotationsLayer = (
+  layer: XYLayerConfig | XYPersistedLayerConfig
+): layer is XYByReferenceAnnotationLayerConfig => 'annotationGroupId' in layer;

@@ -17,6 +17,7 @@ project:
   owner: '@elastic/obs-sig-events-team'
   sourceRoot: x-pack/platform/packages/shared/kbn-evals-suite-significant-events
 dependsOn:
+  - '@kbn/agent-builder-common'
   - '@kbn/evals'
   - '@kbn/evals-phoenix-executor'
   - '@kbn/tooling-log'
@@ -36,7 +37,7 @@ dependsOn:
   - '@kbn/ai-tools'
   - '@kbn/std'
   - '@kbn/streamlang'
-  - '@kbn/streams-plugin'
+  - '@kbn/significant-events-plugin'
 tags:
   - functional-tests
   - package

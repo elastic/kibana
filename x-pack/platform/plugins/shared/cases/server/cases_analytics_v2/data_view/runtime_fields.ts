@@ -28,10 +28,10 @@ export const RUNTIME_FIELDS_BUILD_VERSION = 1;
  *
  * `keyword` is included so keyword-typed template fields surface as
  * discoverable fields in Kibana data views. Their indexed values live
- * inside `cases.extended_fields` (mapped as `flattened`, see
+ * inside `case.extended_fields` (mapped as `flattened`, see
  * `mappings/case.ts`), and Kibana data views don't expose `flattened`
  * sub-keys directly — only the parent shows up in Discover / Lens. The
- * runtime field at `cases.<name>_as_keyword` re-publishes each value as
+ * runtime field at `case.<name>_as_keyword` re-publishes each value as
  * a typed leaf.
  *
  * `unsigned_long` collapses to `long`; values past `Long.MAX_VALUE` lose
@@ -101,10 +101,10 @@ export const splitSnakeKey = (snakeKey: string): { name: string; suffix: string 
 };
 
 /**
- * Painless source that reads `cases.extended_fields.<snakeKey>` and emits
+ * Painless source that reads `case.extended_fields.<snakeKey>` and emits
  * a parsed value of the target runtime type.
  *
- * Access pattern is `doc['cases.extended_fields.<snakeKey>']`: ES exposes
+ * Access pattern is `doc['case.extended_fields.<snakeKey>']`: ES exposes
  * `flattened` sub-keys as doc-values-backed paths under the parent
  * (see "Retrieving flattened fields" in the ES docs). Walking
  * `params._source` returns nothing on `index.mode: lookup` indices like
@@ -115,16 +115,27 @@ export const splitSnakeKey = (snakeKey: string): { name: string; suffix: string 
  * publish every value, and swallows per-value parse failures so a single
  * bad value doesn't break the field for every doc in Lens / Discover.
  *
+ * The `doc[path]` access is wrapped in try/catch: a `flattened` sub-key
+ * isn't in the index field infos until some document indexes it, so until
+ * then `doc[...]` throws `No field found for [...] in mapping` instead of
+ * returning empty, aborting the whole request. Runtime fields are published
+ * eagerly from template metadata — before any case populates the field — so
+ * the guard treats a not-yet-indexed sub-key like an absent value: return.
+ *
  * `${snakeKey}` is interpolated verbatim into the Painless string literal;
  * `splitSnakeKey` restricts it to `[A-Za-z0-9_]+` so the literal stays
  * safe.
  */
 export const buildPainlessSource = (snakeKey: string, runtimeType: RuntimeType): string => {
-  const fieldPath = `cases.extended_fields.${snakeKey}`;
-  // `doc[path]` returns a `ScriptDocValues` instance. `.empty` short-circuits
-  // when no value is present; iteration yields the typed leaf values (Strings
-  // for keyword-backed fields, which is how ES indexes flattened sub-keys).
-  const guard = `def vals = doc['${fieldPath}']; if (vals == null || vals.empty) { return; }`;
+  const fieldPath = `case.extended_fields.${snakeKey}`;
+  // `doc[path]` throws if the flattened sub-key was never indexed, so the
+  // access is wrapped in try/catch and treated as "no value". `.empty`
+  // handles the key-exists-but-unset case; iteration yields the typed leaf
+  // values (Strings for keyword-backed flattened sub-keys).
+  const guard =
+    `def vals; ` +
+    `try { vals = doc['${fieldPath}']; } catch (Exception e) { return; } ` +
+    `if (vals == null || vals.empty) { return; }`;
 
   switch (runtimeType) {
     case 'long':
@@ -188,7 +199,7 @@ export const buildPainlessSource = (snakeKey: string, runtimeType: RuntimeType):
 
 /** A runtime field ready to merge into a data view's `runtimeFieldMap`. */
 export interface RuntimeFieldEntry {
-  /** Published name in the data view — a direct child of `cases`, e.g. `cases.score_as_long`. */
+  /** Published name in the data view — a direct child of `case`, e.g. `case.score_as_long`. */
   fieldName: string;
   spec: RuntimeFieldSpec;
 }
@@ -198,19 +209,19 @@ export interface RuntimeFieldEntry {
  * data view's `runtimeFieldMap`, or `null` when the snake-key isn't shaped
  * like `<name>_as_<type>` or its suffix is unknown.
  *
- * Publication path is `cases.<snakeKey>` (e.g. `cases.riskScore_as_long`),
- * sitting alongside `cases.title`, `cases.severity`, etc. The Painless
- * reads the value via `doc['cases.extended_fields.<snakeKey>']` — the
+ * Publication path is `case.<snakeKey>` (e.g. `case.riskScore_as_long`),
+ * sitting alongside `case.title`, `case.severity`, etc. The Painless
+ * reads the value via `doc['case.extended_fields.<snakeKey>']` — the
  * indexed value lives inside a `flattened` field (see `mappings/case.ts`),
  * and ES exposes flattened sub-keys as doc-values-backed paths under the
  * parent's value stream.
  *
- * The publication path is `cases.<snakeKey>` rather than the indexed path
- * `cases.extended_fields.<snakeKey>` because Kibana data views resolve a
+ * The publication path is `case.<snakeKey>` rather than the indexed path
+ * `case.extended_fields.<snakeKey>` because Kibana data views resolve a
  * field name by merging `{ ...runtime, ...mapped }`: mapped fields take
  * precedence, so a runtime field at the indexed path would be shadowed by
  * the keyword mapping and Lens would lose the typed filter operators.
- * `mappings/schema_drift.test.ts` enforces that no direct child of `cases`
+ * `mappings/schema_drift.test.ts` enforces that no direct child of `case`
  * ends in `_as_<type>` for any supported suffix, bounding the collision
  * risk for the publication path.
  */
@@ -222,7 +233,7 @@ export const buildRuntimeFieldEntry = (snakeKey: string): RuntimeFieldEntry | nu
   if (runtimeType === undefined) return null;
 
   return {
-    fieldName: `cases.${snakeKey}`,
+    fieldName: `case.${snakeKey}`,
     spec: {
       type: runtimeType,
       script: { source: buildPainlessSource(snakeKey, runtimeType) },

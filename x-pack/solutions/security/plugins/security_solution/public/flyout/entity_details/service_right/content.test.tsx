@@ -31,7 +31,7 @@ jest.mock(
     AssetCriticalityAccordion: () => null,
   })
 );
-jest.mock('../shared/components/observed_entity', () => ({
+jest.mock('../../../flyout_v2/entity/shared/components/observed_entity', () => ({
   ObservedEntity: () => null,
 }));
 jest.mock('./hooks/use_observed_service_items', () => ({
@@ -50,6 +50,7 @@ const defaultProps = {
   openDetailsPanel: () => {},
   isPreviewMode: false,
   entityStoreEntityId: 'service:nginx@okta',
+  riskScoreQueryId: 'servicePanelRiskScoreQuery',
 };
 
 describe('ServicePanelContent — resolution license gating', () => {

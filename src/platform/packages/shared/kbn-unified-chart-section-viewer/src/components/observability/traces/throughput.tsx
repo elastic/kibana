@@ -52,6 +52,7 @@ const ThroughputChartContent = ({
   return (
     <Chart
       id="throughput"
+      isSelected={false}
       esqlQuery={esqlQuery}
       size="s"
       discoverFetch$={discoverFetch$}

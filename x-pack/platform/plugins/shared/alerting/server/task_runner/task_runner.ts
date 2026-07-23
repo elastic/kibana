@@ -7,12 +7,12 @@
 
 import apm from 'elastic-apm-node';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
-import { v4 as uuidv4 } from 'uuid';
 import type { ISavedObjectsRepository, Logger } from '@kbn/core/server';
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { addSpanLabels } from '@kbn/apm-utils';
 import { nanosToMillis } from '@kbn/event-log-plugin/server';
 import { ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/elastic-assistant-common';
+import { DEFAULT_SPACE_ID, type SpaceId, brandSpaceId } from '@kbn/core-spaces-common';
 import { ActionScheduler, type RunResult } from './action_scheduler';
 import type {
   RuleRunnerErrorStackTraceLog,
@@ -111,6 +111,7 @@ interface TaskRunnerConstructorParams<
     AlertData
   >;
   taskInstance: ConcreteTaskInstance;
+  executionUuid: string;
 }
 
 export class TaskRunner<
@@ -168,6 +169,7 @@ export class TaskRunner<
     internalSavedObjectsRepository,
     ruleType,
     taskInstance,
+    executionUuid,
   }: TaskRunnerConstructorParams<
     Params,
     ExtractedParams,
@@ -188,7 +190,7 @@ export class TaskRunner<
     this.ruleTypeRegistry = context.ruleTypeRegistry;
     this.searchAbortController = new AbortController();
     this.cancelled = false;
-    this.executionId = uuidv4();
+    this.executionId = executionUuid;
     this.inMemoryMetrics = inMemoryMetrics;
     this.internalSavedObjectsRepository = internalSavedObjectsRepository;
     this.timer = new TaskRunnerTimer({ logger: this.logger });
@@ -349,9 +351,13 @@ export class TaskRunner<
     });
 
     const {
-      params: { alertId: ruleId, spaceId },
+      params: { alertId: ruleId, spaceId: maybeSpaceId },
       state: { previousStartedAt },
     } = this.taskInstance;
+    // spaceId is optional in the persisted task params (legacy), but is always
+    // populated for tasks scheduled by the rules client. Default to the built-in
+    // space at this trusted boundary so the branded SpaceId flows downstream.
+    const spaceId: SpaceId = brandSpaceId(maybeSpaceId ?? DEFAULT_SPACE_ID);
 
     const { queryDelaySettings, flappingSettings: spaceFlappingSettings } =
       await this.context.rulesSettingsService.getSettings(fakeRequest, spaceId);

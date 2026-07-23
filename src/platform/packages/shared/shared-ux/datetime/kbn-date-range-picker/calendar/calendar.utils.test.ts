@@ -12,6 +12,7 @@ import {
   getMonthFromIndex,
   getIndexFromDate,
   getScrollDirectionIcon,
+  getMonthInViewFocusTarget,
 } from './calendar.utils';
 import { TODAY_INDEX } from './calendar.constants';
 
@@ -130,6 +131,114 @@ describe('Calendar utility functions', () => {
 
     it('returns undefined for none direction', () => {
       expect(getScrollDirectionIcon('none')).toBeUndefined();
+    });
+  });
+
+  describe('getMonthInViewFocusTarget', () => {
+    const MONTH_HEIGHT = 280;
+    const MONTH_GAP = 20;
+
+    interface ScrollerOptions {
+      monthCount: number;
+      scrollTop: number;
+      clientHeight: number;
+      /** Month indices whose day button gets `tabindex="0"`; others get -1. */
+      tabbableMonths?: number[];
+    }
+
+    function buildScroller({
+      monthCount,
+      scrollTop,
+      clientHeight,
+      tabbableMonths = Array.from({ length: monthCount }, (_, index) => index),
+    }: ScrollerOptions): HTMLElement {
+      const scroller = document.createElement('div');
+      Object.defineProperty(scroller, 'scrollTop', { configurable: true, get: () => scrollTop });
+      Object.defineProperty(scroller, 'clientHeight', {
+        configurable: true,
+        get: () => clientHeight,
+      });
+
+      for (let index = 0; index < monthCount; index++) {
+        const monthItem = document.createElement('div');
+        monthItem.setAttribute('data-month-index', String(index));
+        Object.defineProperty(monthItem, 'offsetTop', {
+          configurable: true,
+          get: () => index * (MONTH_HEIGHT + MONTH_GAP),
+        });
+        Object.defineProperty(monthItem, 'offsetHeight', {
+          configurable: true,
+          get: () => MONTH_HEIGHT,
+        });
+
+        const dayButton = document.createElement('button');
+        dayButton.setAttribute('tabindex', tabbableMonths.includes(index) ? '0' : '-1');
+        dayButton.setAttribute('data-day-of-month', String(index));
+        monthItem.appendChild(dayButton);
+        scroller.appendChild(monthItem);
+      }
+
+      return scroller;
+    }
+
+    it('returns the tabindex=0 day of the month containing the viewport centerline', () => {
+      const scroller = buildScroller({
+        monthCount: 5,
+        // Centerline at 2 * (280 + 20) + 140 = 740, inside month 2.
+        scrollTop: 2 * (MONTH_HEIGHT + MONTH_GAP),
+        clientHeight: MONTH_HEIGHT,
+      });
+
+      const target = getMonthInViewFocusTarget(scroller);
+
+      expect(target?.getAttribute('data-day-of-month')).toBe('2');
+    });
+
+    it('picks the nearest month when the centerline falls between month items', () => {
+      const scroller = buildScroller({
+        monthCount: 5,
+        // Centerline at 280 + 5 = 285, in the gap after month 0 but closer to it
+        // (month 1 starts at 300).
+        scrollTop: 145,
+        clientHeight: MONTH_HEIGHT,
+      });
+
+      const target = getMonthInViewFocusTarget(scroller);
+
+      expect(target?.getAttribute('data-day-of-month')).toBe('0');
+    });
+
+    it('falls back to the scroller-wide tabindex=0 when the month in view has none', () => {
+      const scroller = buildScroller({
+        monthCount: 5,
+        scrollTop: 2 * (MONTH_HEIGHT + MONTH_GAP),
+        clientHeight: MONTH_HEIGHT,
+        tabbableMonths: [4],
+      });
+
+      const target = getMonthInViewFocusTarget(scroller);
+
+      expect(target?.getAttribute('data-day-of-month')).toBe('4');
+    });
+
+    it('falls back to the scroller-wide tabindex=0 when there are no month items', () => {
+      const scroller = document.createElement('div');
+      const dayButton = document.createElement('button');
+      dayButton.setAttribute('tabindex', '0');
+      scroller.appendChild(dayButton);
+
+      expect(getMonthInViewFocusTarget(scroller)).toBe(dayButton);
+    });
+
+    it('returns null when nothing is tabbable', () => {
+      const scroller = buildScroller({
+        monthCount: 3,
+        scrollTop: 0,
+        clientHeight: MONTH_HEIGHT,
+        tabbableMonths: [],
+      });
+
+      expect(getMonthInViewFocusTarget(scroller)).toBeNull();
     });
   });
 });

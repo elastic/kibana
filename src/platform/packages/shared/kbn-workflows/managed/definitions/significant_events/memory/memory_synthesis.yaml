@@ -1,0 +1,61 @@
+version: "1"
+
+name: Significant Events Memory Synthesis
+description: >
+  Synthesizes significant events knowledge indicators into wiki pages using the
+  streams-memory-synthesis skill. The default Agent Builder agent loads the skill,
+  reads existing pages and insights via skill tools, and writes updates via memory_write.
+enabled: false
+settings:
+  timeout: "30m"
+  concurrency:
+    key: "significant-events-memory-synthesis"
+    strategy: drop
+    max: 1
+tags:
+  - observability
+  - streams
+  - significant-events
+  - memory
+
+triggers:
+  - type: manual
+
+steps:
+  - name: synthesize_memory
+    type: ai.agent
+    # connector-id-by-feature: shared memory connector (SIGNIFICANT_EVENTS_MEMORY_INFERENCE_FEATURE_ID).
+    # plugin-id: step-specific cost attribution; aggregate-by: SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID.
+    connector-id-by-feature: "significant_events_memory"
+    plugin-id: "significant_events_memory_synthesis"
+    aggregate-by: "significant_events"
+    create-conversation: true
+    timeout: 1800s
+    with:
+      message: |
+        First, call the load_skill tool with skill path skills/platform/streams/streams-memory-synthesis.
+        Wait for the skill to load before calling any other tools.
+
+        Then review the current state of the memory wiki and the latest significant events insights, and synthesize new or updated wiki pages.
+      schema:
+        type: object
+        properties:
+          pages_written:
+            type: array
+            description: page_name values of pages written or updated in this run.
+            items:
+              type: string
+          pages_deleted:
+            type: array
+            description: page_name values of pages soft-deleted in this run.
+            items:
+              type: string
+          summary:
+            type: string
+            description: Brief summary of what was synthesized and why.
+        required:
+          - pages_written
+          - pages_deleted
+          - summary
+    on-failure:
+      continue: false

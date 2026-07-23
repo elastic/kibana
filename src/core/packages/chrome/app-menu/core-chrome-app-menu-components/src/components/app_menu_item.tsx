@@ -34,6 +34,7 @@ export const AppMenuItem = ({
   href,
   target,
   isLoading,
+  isSelected,
   tooltipContent,
   tooltipTitle,
   items,
@@ -71,8 +72,10 @@ export const AppMenuItem = ({
   const routerLinkProps =
     href && run ? getRouterLinkProps({ href, onClick: handleClick }) : { onClick: handleClick };
 
+  const showAsSelected = hasItems ? isPopoverOpen : Boolean(isSelected);
+
   const buttonCss = css`
-    background-color: ${isPopoverOpen
+    background-color: ${showAsSelected
       ? getIsSelectedColor({
           color: 'text',
           euiTheme,
@@ -96,7 +99,7 @@ export const AppMenuItem = ({
         iconSize="m"
         color="text"
         aria-haspopup={hasItems ? 'menu' : undefined}
-        isSelected={hasItems ? isPopoverOpen : undefined}
+        isSelected={showAsSelected}
         css={buttonCss}
         {...routerLinkProps}
       >

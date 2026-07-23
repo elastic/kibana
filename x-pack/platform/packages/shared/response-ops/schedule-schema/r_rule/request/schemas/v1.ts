@@ -24,8 +24,8 @@ export const getRRuleRequestSchema = ({
 }: GetRRuleRequestSchemaOptions = {}) =>
   schema.object(
     {
-      dtstart: schema.string({ validate: validateStartDateV1 }),
-      tzid: schema.string({ validate: validateTimezone }),
+      dtstart: schema.string({ validate: validateStartDateV1, maxLength: 100 }),
+      tzid: schema.string({ validate: validateTimezone, maxLength: 64 }),
       freq: schema.maybe(
         schema.oneOf([
           schema.literal(0),
@@ -45,7 +45,7 @@ export const getRRuleRequestSchema = ({
           min: 1,
         })
       ),
-      until: schema.maybe(schema.string({ validate: validateEndDateV1 })),
+      until: schema.maybe(schema.string({ validate: validateEndDateV1, maxLength: 100 })),
       count: schema.maybe(
         schema.number({
           validate: (count: number) => {
@@ -57,13 +57,18 @@ export const getRRuleRequestSchema = ({
         })
       ),
       byweekday: schema.maybe(
-        schema.arrayOf(schema.string(), {
+        schema.arrayOf(schema.string({ maxLength: 10 }), {
           minSize: 1,
+          maxSize: 50,
           validate: validateRecurrenceByWeekdayV1,
         })
       ),
-      bymonthday: schema.maybe(schema.arrayOf(schema.number({ min: 1, max: 31 }), { minSize: 1 })),
-      bymonth: schema.maybe(schema.arrayOf(schema.number({ min: 1, max: 12 }), { minSize: 1 })),
+      bymonthday: schema.maybe(
+        schema.arrayOf(schema.number({ min: 1, max: 31 }), { minSize: 1, maxSize: 31 })
+      ),
+      bymonth: schema.maybe(
+        schema.arrayOf(schema.number({ min: 1, max: 12 }), { minSize: 1, maxSize: 12 })
+      ),
     },
     meta ? { meta } : undefined
   );

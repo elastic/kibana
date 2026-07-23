@@ -20,7 +20,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { ClassNames, css } from '@emotion/react';
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import { changeHistoryPreviewTypography } from './change_history_preview_typography';
@@ -40,6 +40,9 @@ const SECTION_LABEL_GAP = 8;
 const TILE_GAP = 16;
 const TILE_FOOTER_PADDING_X = 10;
 const SELECTED_TILE_TINT_ALPHA = 0.04;
+
+const PANEL_CLASS = 'workflowChangeHistoryPreviewSettingsPopoverPanel';
+const SETTINGS_BUTTON_TEST_SUBJ = 'workflowChangeHistoryPreviewSettingsButton';
 
 const ILLUSTRATION_BAR_HEIGHT = 8;
 const ILLUSTRATION_BAR_GROUP_HEIGHT = 36;
@@ -173,6 +176,8 @@ export interface WorkflowChangeHistoryPreviewSettingsPopoverProps {
   onCompareModeChange: (compareMode: WorkflowChangeHistoryCompareMode) => void;
   highlightValidationErrors: boolean;
   onHighlightValidationErrorsChange: (highlightValidationErrors: boolean) => void;
+  isOpen: boolean;
+  onIsOpenChange: (isOpen: boolean) => void;
 }
 
 export const WorkflowChangeHistoryPreviewSettingsPopover = ({
@@ -181,10 +186,11 @@ export const WorkflowChangeHistoryPreviewSettingsPopover = ({
   onCompareModeChange,
   highlightValidationErrors,
   onHighlightValidationErrorsChange,
+  isOpen,
+  onIsOpenChange,
 }: WorkflowChangeHistoryPreviewSettingsPopoverProps): JSX.Element => {
   const { euiTheme } = useEuiTheme();
   const styles = useMemoCss(componentStyles);
-  const [isOpen, setIsOpen] = useState(false);
   const unifiedTileRef = useRef<HTMLButtonElement>(null);
   const splitTileRef = useRef<HTMLButtonElement>(null);
 
@@ -197,6 +203,38 @@ export const WorkflowChangeHistoryPreviewSettingsPopover = ({
   const compareModeGroupLabelId = useGeneratedHtmlId({
     prefix: 'workflowChangeHistoryCompareModeGroup',
   });
+
+  // Monaco can swallow bubble-phase outside clicks; close only on true outside mousedown.
+  useEffect(() => {
+    if (!isOpen) {
+      return undefined;
+    }
+
+    const handler = (event: MouseEvent): void => {
+      const target = event.target as HTMLElement | null;
+      if (!target) {
+        return;
+      }
+      if (target.closest(`[data-test-subj="${SETTINGS_BUTTON_TEST_SUBJ}"]`)) {
+        return;
+      }
+      if (target.closest(`.${PANEL_CLASS}`)) {
+        return;
+      }
+      onIsOpenChange(false);
+    };
+
+    document.addEventListener('mousedown', handler, true);
+    return () => document.removeEventListener('mousedown', handler, true);
+  }, [isOpen, onIsOpenChange]);
+
+  const handleHighlightValidationErrorsChange = useCallback(
+    (checked: boolean): void => {
+      onHighlightValidationErrorsChange(checked);
+      // Intentionally keep the popover open (same as compare mode tiles).
+    },
+    [onHighlightValidationErrorsChange]
+  );
 
   const settingsLabel = i18n.translate(
     'xpack.workflowsManagement.changeHistory.preview.settings.label',
@@ -225,6 +263,7 @@ export const WorkflowChangeHistoryPreviewSettingsPopover = ({
   const selectCompareMode = useCallback(
     (mode: WorkflowChangeHistoryCompareMode, shouldFocus = false): void => {
       onCompareModeChange(mode);
+      // Intentionally keep the popover open so users can switch unified/split without reopening.
       if (shouldFocus) {
         focusCompareTile(mode);
       }
@@ -332,10 +371,12 @@ export const WorkflowChangeHistoryPreviewSettingsPopover = ({
       data-test-subj="workflowChangeHistoryPreviewSettingsPopover"
       aria-labelledby={popoverTitleId}
       isOpen={isOpen}
-      closePopover={() => setIsOpen(false)}
+      closePopover={() => onIsOpenChange(false)}
       anchorPosition="upRight"
       panelPaddingSize="none"
+      panelClassName={PANEL_CLASS}
       panelStyle={{ width: 'auto' }}
+      repositionOnScroll={false}
       button={
         <EuiToolTip content={settingsLabel} disableScreenReaderOutput>
           <EuiButtonIcon
@@ -343,7 +384,7 @@ export const WorkflowChangeHistoryPreviewSettingsPopover = ({
             iconType="controlsHorizontal"
             color="primary"
             data-test-subj="workflowChangeHistoryPreviewSettingsButton"
-            onClick={() => setIsOpen((open) => !open)}
+            onClick={() => onIsOpenChange(!isOpen)}
             aria-label={settingsLabel}
           />
         </EuiToolTip>
@@ -395,7 +436,7 @@ export const WorkflowChangeHistoryPreviewSettingsPopover = ({
               { defaultMessage: 'Highlight the validation errors' }
             )}
             checked={highlightValidationErrors}
-            onChange={(event) => onHighlightValidationErrorsChange(event.target.checked)}
+            onChange={(event) => handleHighlightValidationErrorsChange(event.target.checked)}
           />
         </EuiText>
       </EuiText>

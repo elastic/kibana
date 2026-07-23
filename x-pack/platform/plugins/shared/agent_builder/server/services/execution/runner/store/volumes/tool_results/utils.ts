@@ -40,7 +40,7 @@ export const getToolCallDirPath = ({
  * Result file name within a call directory. Mixed convention: a single result is
  * `result.json`; multiple results are `result_1.json … result_N.json` (1-based).
  */
-const getResultFileName = (index: number, total: number): string => {
+export const getResultFileName = (index: number, total: number): string => {
   return total === 1 ? 'result.json' : `result_${index + 1}.json`;
 };
 

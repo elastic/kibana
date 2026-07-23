@@ -10,12 +10,23 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { TakeAction } from '../../../../flyout/entity_details/shared/components/take_action';
 import { EntityIdentifierFields, EntityType } from '../../../../../common/entity_analytics/types';
+import type { RiskSeverity } from '../../../../../common/search_strategy';
 import type { IdentityFields } from '../../../../flyout/document_details/shared/utils';
 import type { EntityStoreRecord } from '../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
 import { useIsInSecurityApp } from '../../../../common/hooks/is_in_security_app';
 import { AiAssistantButton } from '../../../../entity_analytics/components/ai_assistant_button/ai_assistant_button';
+import { getRiskFromEntityRecord } from '../../../../flyout/entity_details/shared/entity_store_risk_utils';
+import type { EntityToAttach } from '../../../../cases/attachments/entity';
+import { useEntityCaseTakeActionItems } from '../../../../cases/attachments/entity/hooks/use_entity_case_take_action_items';
 
 export interface FooterProps {
+  /**
+   * Display name the flyout was opened with. Used for the "Add to chat" attachment so it
+   * matches the identifier the risk-score tab's AiAssistantButton sends for the same entity —
+   * `identityFields` can resolve to a bare id when the entity's higher-ranked EUID field
+   * (e.g. host.id) is populated, which would make the two "Add to chat" buttons disagree.
+   */
+  hostName: string;
   identityFields: IdentityFields;
   /** When entity store v2 is enabled: entity record from the store. */
   entity?: EntityStoreRecord;
@@ -24,9 +35,9 @@ export interface FooterProps {
 /**
  * Footer for the host details flyout containing the asset-inventory TakeAction button.
  */
-export const Footer = ({ identityFields, entity }: FooterProps) => {
+export const Footer = ({ hostName, identityFields, entity }: FooterProps) => {
   const isInSecurityApp = useIsInSecurityApp();
-  const hostName = useMemo(
+  const identityHostName = useMemo(
     () => identityFields[EntityIdentifierFields.hostName] || Object.values(identityFields)[0] || '',
     [identityFields]
   );
@@ -39,6 +50,17 @@ export const Footer = ({ identityFields, entity }: FooterProps) => {
     return euidApi.euid.kql.getEuidFilterBasedOnDocument('host', entity);
   }, [euidApi?.euid, entity]);
 
+  const entityStoreId = entity?.entity?.id;
+  const risk = entity ? getRiskFromEntityRecord(entity) : undefined;
+  const riskLevel = risk?.calculated_level as RiskSeverity | undefined;
+  const riskScore = risk?.calculated_score_norm;
+
+  const entityToAttach = useMemo<EntityToAttach>(
+    () => ({ id: entityStoreId ?? '', name: identityHostName, type: 'host', riskLevel, riskScore }),
+    [entityStoreId, identityHostName, riskLevel, riskScore]
+  );
+  const additionalItems = useEntityCaseTakeActionItems(entityToAttach);
+
   return (
     <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
       <EuiFlexItem grow={false}>
@@ -50,8 +72,9 @@ export const Footer = ({ identityFields, entity }: FooterProps) => {
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <TakeAction
-          isDisabled={!hostName || !isInSecurityApp}
-          kqlQuery={euidEntityFilter ?? `host.name: "${hostName}"`}
+          isDisabled={!identityHostName || !isInSecurityApp}
+          kqlQuery={euidEntityFilter ?? `host.name: "${identityHostName}"`}
+          additionalItems={additionalItems}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

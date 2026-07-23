@@ -10,14 +10,15 @@ import { AnnotationDomainType, LineAnnotation, Position } from '@elastic/charts'
 import React from 'react';
 import { EuiIcon, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { unit } from '@kbn/apm-common';
 import { asAbsoluteDateTime } from '../../../../common/utils/formatters';
 import { useAnnotationsContext } from '../../../context/annotations/use_annotations_context';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import type { ServiceAnomalyTimeseries } from '../../../../common/anomaly_detection/service_anomaly_timeseries';
+import type { AnomalyThreshold } from '../../../../common/anomaly_detection/anomaly_threshold';
 import type { Coordinate, TimeSeries } from '../../../../typings/timeseries';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import type { FETCH_STATUS } from '../../../hooks/use_fetcher';
-import { unit } from '../../../utils/style';
 import { getTimeZone } from './helper/timezone';
 import { TimeseriesChart } from './timeseries_chart';
 
@@ -41,6 +42,7 @@ export interface TimeseriesChartWithContextProps {
   showAnnotations?: boolean;
   yDomain?: YDomainRange;
   anomalyTimeseries?: AnomalyTimeseries;
+  anomalyThreshold?: AnomalyThreshold;
   customTheme?: Record<string, unknown>;
   anomalyTimeseriesColor?: string;
 }
@@ -56,6 +58,7 @@ export function TimeseriesChartWithContext({
   showAnnotations = true,
   yDomain,
   anomalyTimeseries,
+  anomalyThreshold,
   customTheme = {},
 }: TimeseriesChartWithContextProps) {
   const {
@@ -99,6 +102,7 @@ export function TimeseriesChartWithContext({
       annotations={timeseriesAnnotations}
       yDomain={yDomain}
       anomalyTimeseries={anomalyTimeseries}
+      anomalyThreshold={anomalyThreshold}
       customTheme={customTheme}
       timeZone={timeZone}
       comparisonEnabled={comparisonEnabled}

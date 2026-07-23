@@ -1,6 +1,45 @@
 {
-  "sha1": "2fd013cb86d878dfb51ef7931ea6a4b1672ccd01",
+  "sha1": "5cbec8da79ff7f9ac5fd6a2de5cb701d84349511",
   "tests": [
+    {
+      "id": "83ee0201f304e1d-f77aa9e072947e6",
+      "title": "bm_classification source index document count ft_bank_marketing has exactly 9314 documents",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/data_frame_analytics/bm_classification_source_count.spec.ts",
+        "line": 30,
+        "column": 12
+      }
+    },
+    {
+      "id": "b374279b8141de2-0a95d9ea875e7b0",
+      "title": "egs_regression source index document count ft_egs_regression has exactly 2000 documents",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/data_frame_analytics/egs_regression_source_count.spec.ts",
+        "line": 28,
+        "column": 12
+      }
+    },
+    {
+      "id": "f0a78a1bec6292c-81902e2c2be7f5e",
+      "title": "ihp_outlier source index document count ft_ihp_outlier has exactly 1460 documents",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/data_frame_analytics/ihp_outlier_source_count.spec.ts",
+        "line": 28,
+        "column": 12
+      }
+    },
     {
       "id": "993254e341ff769-79593c552c24fe9",
       "title": "Machine Learning feature controls global:all sees Machine Learning navlink and ml management entry",

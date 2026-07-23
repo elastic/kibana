@@ -5,19 +5,13 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIconTip,
-  EuiPageHeader,
-  EuiSpacer,
-  EuiTab,
-  EuiTabs,
-} from '@elastic/eui';
+import React, { useMemo, useState } from 'react';
+import { EuiSpacer, euiFontSize, useEuiTheme } from '@elastic/eui';
+import { AppHeader, APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import type { AppHeaderTab } from '@kbn/app-header';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { ExperimentalBadge } from '../../components/experimental_badge';
+import { experimentalBadge } from '../../components/experimental_badge';
 import { ActionPolicyDetailsFlyoutContainer } from '../../components/action_policy/details_flyout/action_policy_details_flyout_container';
 import { RuleSummaryFlyoutContainer } from '../../components/rule/flyouts/rule_summary_flyout_container';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
@@ -29,48 +23,49 @@ const RULES_TAB_ID = 'rules';
 
 type TabId = typeof POLICIES_TAB_ID | typeof RULES_TAB_ID;
 
+const EXECUTION_HISTORY_PAGE_TITLE = i18n.translate('xpack.alertingV2.executionHistory.pageTitle', {
+  defaultMessage: 'Execution history',
+});
+
+const getExecutionHistoryTabs = ({
+  selectedTabId,
+  onSelect,
+}: {
+  selectedTabId: TabId;
+  onSelect: (id: TabId) => void;
+}): AppHeaderTab[] => [
+  {
+    id: RULES_TAB_ID,
+    label: i18n.translate('xpack.alertingV2.executionHistory.tabs.rulesLabel', {
+      defaultMessage: 'Rules',
+    }),
+    isSelected: selectedTabId === RULES_TAB_ID,
+    onClick: () => onSelect(RULES_TAB_ID),
+    'data-test-subj': 'executionHistoryRulesTab',
+  },
+  {
+    id: POLICIES_TAB_ID,
+    label: i18n.translate('xpack.alertingV2.executionHistory.tabs.policiesLabel', {
+      defaultMessage: 'Policies',
+    }),
+    isSelected: selectedTabId === POLICIES_TAB_ID,
+    onClick: () => onSelect(POLICIES_TAB_ID),
+    'data-test-subj': 'executionHistoryPoliciesTab',
+  },
+];
+
 export const ExecutionHistoryPage = () => {
   useBreadcrumbs('execution_history_list');
+  const euiThemeContext = useEuiTheme();
+  const { fontSize: titleFontSize, lineHeight: titleLineHeight } = euiFontSize(
+    euiThemeContext,
+    'm'
+  );
 
   const [selectedTabId, setSelectedTabId] = useState<TabId>(RULES_TAB_ID);
   const [policyToViewId, setPolicyToViewId] = useState<string | null>(null);
   const [ruleToViewId, setRuleToViewId] = useState<string | null>(null);
   const { flyout: composeFlyout, openEditFlyout, openCloneFlyout } = useComposeDiscoverFlyout();
-
-  const tabs: Array<{ id: TabId; label: React.ReactNode }> = [
-    {
-      id: RULES_TAB_ID,
-      label: i18n.translate('xpack.alertingV2.executionHistory.tabs.rulesLabel', {
-        defaultMessage: 'Rules',
-      }),
-    },
-    {
-      id: POLICIES_TAB_ID,
-      label: (
-        <EuiFlexGroup component="span" alignItems="center" gutterSize="xs" responsive={false}>
-          <EuiFlexItem grow={false} component="span">
-            {i18n.translate('xpack.alertingV2.executionHistory.tabs.policiesLabel', {
-              defaultMessage: 'Policies',
-            })}
-          </EuiFlexItem>
-          <EuiFlexItem grow={false} component="span">
-            <span data-test-subj="executionHistoryDenormalizationTip">
-              <EuiIconTip
-                type="info"
-                content={i18n.translate(
-                  'xpack.alertingV2.executionHistory.denormalizationTooltip',
-                  {
-                    defaultMessage:
-                      'Pagination is by event. A single event may show as multiple rows — one per rule referenced by the event.',
-                  }
-                )}
-              />
-            </span>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      ),
-    },
-  ];
 
   const handlePolicyClick = (policyId: string) => {
     setRuleToViewId(null);
@@ -82,40 +77,39 @@ export const ExecutionHistoryPage = () => {
     setRuleToViewId(ruleId);
   };
 
+  const tabs = useMemo(
+    () => getExecutionHistoryTabs({ selectedTabId, onSelect: setSelectedTabId }),
+    [selectedTabId]
+  );
+
+  const pageStyles = useMemo(
+    () => css`
+      [data-test-subj='${APP_HEADER_TEST_SUBJECTS.root}'] h1 {
+        font-size: ${titleFontSize};
+        line-height: ${titleLineHeight};
+      }
+    `,
+    [titleFontSize, titleLineHeight]
+  );
+
   return (
-    <>
-      <EuiPageHeader
-        pageTitle={
-          <EuiFlexGroup component="span" alignItems="center" gutterSize="s" responsive={false}>
-            <EuiFlexItem grow={false} component="span">
-              <FormattedMessage
-                id="xpack.alertingV2.executionHistory.pageTitle"
-                defaultMessage="Execution history"
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false} component="span">
-              <ExperimentalBadge />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        }
+    <div css={pageStyles} data-test-subj="executionHistoryPage">
+      <AppHeader
+        sticky={false}
+        title={EXECUTION_HISTORY_PAGE_TITLE}
+        badges={[experimentalBadge]}
+        spacing="bleed"
+        tabs={tabs}
       />
-      <EuiSpacer size="l" />
-      <EuiTabs>
-        {tabs.map((tab) => (
-          <EuiTab
-            key={tab.id}
-            isSelected={tab.id === selectedTabId}
-            onClick={() => setSelectedTabId(tab.id)}
-          >
-            {tab.label}
-          </EuiTab>
-        ))}
-      </EuiTabs>
       <EuiSpacer size="m" />
       {selectedTabId === RULES_TAB_ID ? (
         <RulesTabContent onRuleClick={handleRuleClick} />
       ) : (
-        <PoliciesTabContent onPolicyClick={handlePolicyClick} onRuleClick={handleRuleClick} />
+        <PoliciesTabContent
+          onPolicyClick={handlePolicyClick}
+          onRuleClick={handleRuleClick}
+          activeRuleId={ruleToViewId}
+        />
       )}
       {policyToViewId && (
         <ActionPolicyDetailsFlyoutContainer
@@ -138,6 +132,6 @@ export const ExecutionHistoryPage = () => {
         />
       )}
       {composeFlyout}
-    </>
+    </div>
   );
 };

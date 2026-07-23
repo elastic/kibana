@@ -24,11 +24,11 @@ const INTERNAL_HEADERS = {
 } as const;
 
 /**
- * `/reset` is the administrator escape hatch. It returns 202 and runs
- * the backfill walk asynchronously in a one-shot Task Manager task. The
- * synchronous portion (drop + recreate index, delete data views, clear
- * cache) happens in-handler; only the `O(documents)` walk is moved out.
- * Tests assert both phases.
+ * `/reset` is the administrator escape hatch. It returns 202 and runs the
+ * backfill walk asynchronously in a one-shot Task Manager task. The
+ * synchronous portion (drop + recreate indices, delete data views,
+ * clear cache) happens in-handler; only the `O(documents)` walk is
+ * moved out. Tests assert both phases.
  */
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
@@ -53,7 +53,6 @@ export default ({ getService }: FtrProviderContext): void => {
         .set(INTERNAL_HEADERS)
         .expect(202);
 
-      expect(response.body.reset).to.eql(CASE_INDEX);
       expect(response.body.reset_task).to.have.property('id', 'cases-analyticsV2-reset');
       expect(response.body.reset_task).to.have.property('task_type', 'cases.analyticsV2.fullReset');
       expect(response.body.reset_task).to.have.property('scheduled_at');
@@ -61,6 +60,12 @@ export default ({ getService }: FtrProviderContext): void => {
         'poll',
         '/internal/cases/_analyticsV2/state'
       );
+
+      // Per-surface confirmation block — pinned shape so a regression
+      // that drops a surface from the response is caught here.
+      expect(response.body.surfaces.cases.reset).to.eql('.cases');
+      expect(response.body.surfaces.activity.reset).to.eql('.cases-activity');
+      expect(response.body.surfaces.attachments.reset).to.eql('.cases-attachments');
 
       // The index exists again (recreated by the synchronous
       // portion before the response returned).
@@ -137,10 +142,10 @@ export default ({ getService }: FtrProviderContext): void => {
 
       // Without `/reset`, the cursor would now be ahead of
       // `oldCase.created_at` and a periodic tick wouldn't re-emit
-      // oldCase. `/reset` schedules a full backfill (`lastRunAt:
-      // undefined → no filter → walk every case`), so the
-      // pre-existing case lands in `.cases` again after the reset
-      // task completes.
+      // oldCase. `/reset` schedules a full backfill
+      // (lastRunAt: undefined → no filter → walk every case), so
+      // the pre-existing case lands in `.cases` again after the
+      // reset task completes.
       await resetV2(supertest);
 
       await waitForAnalyticsCase(es, oldCase.id, { expect: 'present' });

@@ -76,6 +76,7 @@ describe('createFakeRequestEnrichment', () => {
       'elastic_cloud_user',
       'operator',
       'api_key',
+      'http_authentication_scheme',
     ])('returns undefined when reading "%s" off the enriched user', (property) => {
       const { enrichRequestWithUserProfile, getOverride } = createFakeRequestEnrichment(logger);
       const request = httpServerMock.createFakeKibanaRequest({});

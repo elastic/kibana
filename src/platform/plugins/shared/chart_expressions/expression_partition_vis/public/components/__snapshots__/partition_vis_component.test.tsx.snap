@@ -231,7 +231,6 @@ exports[`PartitionVisComponent should render correct structure for donut 1`] = `
                 },
                 "fit": Object {
                   "area": Object {
-                    "fill": "__use__series__color__",
                     "opacity": 0.15,
                     "visible": true,
                   },
@@ -703,6 +702,7 @@ exports[`PartitionVisComponent should render correct structure for donut 1`] = `
                 "minHeight": 64,
                 "minValueFontSize": 12,
                 "nonFiniteText": "N/A",
+                "spacing": "small",
                 "textDarkColor": "#111C2C",
                 "textExtraDarkColor": "#1D2A3E",
                 "textExtraLightColor": "#CAD3E2",
@@ -1186,7 +1186,6 @@ exports[`PartitionVisComponent should render correct structure for mosaic 1`] = 
                 },
                 "fit": Object {
                   "area": Object {
-                    "fill": "__use__series__color__",
                     "opacity": 0.15,
                     "visible": true,
                   },
@@ -1658,6 +1657,7 @@ exports[`PartitionVisComponent should render correct structure for mosaic 1`] = 
                 "minHeight": 64,
                 "minValueFontSize": 12,
                 "nonFiniteText": "N/A",
+                "spacing": "small",
                 "textDarkColor": "#111C2C",
                 "textExtraDarkColor": "#1D2A3E",
                 "textExtraLightColor": "#CAD3E2",
@@ -2201,7 +2201,6 @@ exports[`PartitionVisComponent should render correct structure for multi-metric 
                 },
                 "fit": Object {
                   "area": Object {
-                    "fill": "__use__series__color__",
                     "opacity": 0.15,
                     "visible": true,
                   },
@@ -2673,6 +2672,7 @@ exports[`PartitionVisComponent should render correct structure for multi-metric 
                 "minHeight": 64,
                 "minValueFontSize": 12,
                 "nonFiniteText": "N/A",
+                "spacing": "small",
                 "textDarkColor": "#111C2C",
                 "textExtraDarkColor": "#1D2A3E",
                 "textExtraLightColor": "#CAD3E2",
@@ -3218,7 +3218,6 @@ exports[`PartitionVisComponent should render correct structure for pie 1`] = `
                 },
                 "fit": Object {
                   "area": Object {
-                    "fill": "__use__series__color__",
                     "opacity": 0.15,
                     "visible": true,
                   },
@@ -3690,6 +3689,7 @@ exports[`PartitionVisComponent should render correct structure for pie 1`] = `
                 "minHeight": 64,
                 "minValueFontSize": 12,
                 "nonFiniteText": "N/A",
+                "spacing": "small",
                 "textDarkColor": "#111C2C",
                 "textExtraDarkColor": "#1D2A3E",
                 "textExtraLightColor": "#CAD3E2",
@@ -4173,7 +4173,6 @@ exports[`PartitionVisComponent should render correct structure for treemap 1`] =
                 },
                 "fit": Object {
                   "area": Object {
-                    "fill": "__use__series__color__",
                     "opacity": 0.15,
                     "visible": true,
                   },
@@ -4645,6 +4644,7 @@ exports[`PartitionVisComponent should render correct structure for treemap 1`] =
                 "minHeight": 64,
                 "minValueFontSize": 12,
                 "nonFiniteText": "N/A",
+                "spacing": "small",
                 "textDarkColor": "#111C2C",
                 "textExtraDarkColor": "#1D2A3E",
                 "textExtraLightColor": "#CAD3E2",
@@ -5083,7 +5083,6 @@ exports[`PartitionVisComponent should render correct structure for waffle 1`] = 
                 },
                 "fit": Object {
                   "area": Object {
-                    "fill": "__use__series__color__",
                     "opacity": 0.15,
                     "visible": true,
                   },
@@ -5555,6 +5554,7 @@ exports[`PartitionVisComponent should render correct structure for waffle 1`] = 
                 "minHeight": 64,
                 "minValueFontSize": 12,
                 "nonFiniteText": "N/A",
+                "spacing": "small",
                 "textDarkColor": "#111C2C",
                 "textExtraDarkColor": "#1D2A3E",
                 "textExtraLightColor": "#CAD3E2",

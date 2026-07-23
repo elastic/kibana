@@ -9,3 +9,7 @@ export { CasesAnalyticsV2Service, V2_NOOP_DATA_VIEW_REFRESHER } from './service'
 export type { CasesAnalyticsV2DataViewRefresher } from './service';
 export { V2_NOOP_WRITER } from './writer';
 export type { CasesAnalyticsV2WriterContract } from './writer';
+export { V2_NOOP_ACTIVITY_WRITER } from './writer/activity';
+export type { CasesActivityV2WriterContract } from './writer/activity';
+export { V2_NOOP_ATTACHMENTS_WRITER } from './writer/attachments';
+export type { CasesAttachmentsV2WriterContract } from './writer/attachments';

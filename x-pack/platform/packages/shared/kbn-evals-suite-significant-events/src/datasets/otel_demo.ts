@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG } from '@kbn/streams-plugin/common/significant_events_tuning_config';
+import { DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG } from '@kbn/significant-events-schema';
 import { GCS_BUCKET, OTEL_DEMO_GCS_BASE_PATH_PREFIX, OTEL_DEMO_NAMESPACE } from '../constants';
 import type { DatasetConfig } from './types';
 
@@ -600,6 +600,8 @@ export const otelDemoDataset: DatasetConfig = {
       },
     },
   ],
+  discovery: [],
+  discoveryJudge: [],
   kiQueryGeneration: [
     {
       input: {

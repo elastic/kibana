@@ -6,7 +6,7 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import { test, tags } from '@kbn/scout';
+import { test } from '../../fixtures';
 import { SavedObjectsTracker } from '../../helpers';
 
 // Sample data for `kibana_sample_data_logs` is generated relative to the install
@@ -41,7 +41,7 @@ const CONTROLS_GROUP_WRAPPER = 'controls-group-wrapper';
 
 const tracker = new SavedObjectsTracker();
 
-test.describe('Discover ES|QL', { tag: tags.stateful.classic }, () => {
+test.describe('Discover ES|QL', { tag: '@local-stateful-classic' }, () => {
   test.beforeEach(async ({ browserAuth, pageObjects, uiSettings }) => {
     await browserAuth.loginAsAdmin();
     await uiSettings.set({
@@ -290,8 +290,8 @@ test.describe('Discover ES|QL', { tag: tags.stateful.classic }, () => {
       // Expanding a row proves the embedded saved-search grid is fully
       // interactive end-to-end: rows are rendered, the expand action
       // surfaces, and the document-viewer flyout opens for the row.
-      await pageObjects.dataGrid.openAndWaitForDocViewerFlyout({ rowIndex: 0 });
-      await pageObjects.dataGrid.closeDocViewerFlyout();
+      await pageObjects.docViewer.openAndWaitForFlyout({ rowIndex: 0 });
+      await pageObjects.docViewer.close();
     });
   });
 

@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
+import { z } from '@kbn/zod/v4';
 import { defineRoute } from '../types';
-import { dependencyChartQueryRt } from './types';
+import { dependencyChartQuerySchema } from './types';
 
 export interface DependencyErrorRateChartsResponse {
   currentTimeseries: Array<{ x: number; y: number }>;
@@ -15,5 +15,5 @@ export interface DependencyErrorRateChartsResponse {
 
 export const dependencyErrorRateChartsRoute = defineRoute<DependencyErrorRateChartsResponse>()({
   endpoint: 'GET /internal/apm/dependencies/charts/error_rate',
-  params: t.type({ query: dependencyChartQueryRt }),
+  params: z.object({ query: dependencyChartQuerySchema }),
 });

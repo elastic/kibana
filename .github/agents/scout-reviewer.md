@@ -21,13 +21,16 @@ Do not run this check on backport PRs (they usually have `backport` label and/or
 
 Follow `.claude/skills/scout-best-practices-reviewer/SKILL.md` for the checklist, reuse rules, and migration parity. Ignore any output formatting in that file — use the format below. Use the GitHub tools and local file inspection to explore as needed.
 
+If any changed files match `x-pack/solutions/security/**/test/scout*/**` or `**/kbn-scout-security/**`, also apply `x-pack/solutions/security/plugins/security_solution/.agents/skills/scout-best-practices-reviewer/SKILL.md` for Security Solution-specific checks. Apply it after the general skill — do not run the general skill a second time.
+
 On PR updates, review only the new changes and stay high-signal — not nitpicky.
 
 ## Non-negotiable checks
 
 These rules must be verified on every applicable Scout test file (UI and API). Do not skip them:
 
-- **Pick the right test type**: confirm Scout API and UI tests are the right layer for what the test verifies. Recommend the target layer explicitly in the inline comment and suggest what the test should assert instead. See complete guidance in `docs/extend/scout/best-practices.md#pick-the-right-test-type`. Find all opportunities for a UI test to be converted into an API or RTL component test.
+- **Pick the right test type**: confirm Scout API and UI tests are the right layer for what the test verifies. Recommend the target layer explicitly in the inline comment and suggest what the test should assert instead. See complete guidance in `docs/extend/testing/scout-best-practices.md#pick-the-right-test-type`. Find all opportunities for a UI test to be converted into an API or RTL component test.
+- **Don't circumvent the linter**: flag any attempt to silence a lint rule rather than fix it — `eslint-disable` comments, or swapping a flagged pattern for a hack that hides the root cause. Sanctioned escape hatches (e.g. `dispatchEvent('click')` for a documented app bug) are acceptable only with an explicit documented justification. Do not re-flag plain lint violations themselves — CI already gates those.
 
 ## Review process
 
@@ -72,9 +75,9 @@ If the finding genuinely fits in one line (e.g. a nit about a typo'd constant na
 
 Scout best practices live in three files. Don't guess from keywords — read the actual headings to find the matching section:
 
-- UI tests: `docs/extend/scout/ui-best-practices.md` → `https://www.elastic.co/docs/extend/kibana/scout/ui-best-practices`
-- API tests: `docs/extend/scout/api-best-practices.md` → `https://www.elastic.co/docs/extend/kibana/scout/api-best-practices`
-- General (applies to both UI and API): `docs/extend/scout/best-practices.md` → `https://www.elastic.co/docs/extend/kibana/scout/best-practices`
+- UI tests: `docs/extend/testing/ui-best-practices.md` → `https://www.elastic.co/docs/extend/kibana/testing/ui-best-practices`
+- API tests: `docs/extend/testing/api-best-practices.md` → `https://www.elastic.co/docs/extend/kibana/testing/api-best-practices`
+- General (applies to both UI and API): `docs/extend/testing/scout-best-practices.md` → `https://www.elastic.co/docs/extend/kibana/testing/scout-best-practices`
 
 When a section with the same intent exists in both the specific doc and the general doc, prefer the specific one.
 
@@ -85,7 +88,7 @@ If you do include a rule link, it must be a **section-scoped URL**, not the doc 
 Format the citation as a Markdown link using the section heading text as the link label:
 
 ```
-[Use Playwright auto-waiting](https://www.elastic.co/docs/extend/kibana/scout/ui-best-practices#leverage-playwright-auto-waiting)
+[Use Playwright auto-waiting](https://www.elastic.co/docs/extend/kibana/testing/ui-best-practices#leverage-playwright-auto-waiting)
 ```
 
 Do **not** use bare parenthetical labels like `(best practices)` or `(ui best practices)`, do **not** link to the doc root, and do **not** force-fit a loosely-related section just to have a link. If no specific section fits, omit the rule link line entirely (per the inline-comment structure above) rather than linking to the wrong document.
@@ -99,9 +102,9 @@ On each re-run, walk the existing inline review comments authored by this workfl
   2. Post **one short reply** on that thread via `reply-to-pull-request-review-comment` with exactly:
      `Addressed in <commit-sha-link>`
      where `<commit-sha-link>` is a Markdown link with the 7-char short SHA as the label and the URL `https://github.com/<owner>/<repo>/pull/<pr>/commits/<full-sha>` (read `<owner>/<repo>` from `pr-metadata.json.url` and `<pr>` from `GH_AW_GITHUB_EVENT_PULL_REQUEST_NUMBER`).
-  3. Immediately call `resolve-pull-request-review-thread` with the thread id of that comment.
+  3. Queue `resolve-pull-request-review-thread` with the thread id of that comment.
 - **Still open**: the finding still applies on the current code. Do not re-comment, do not reply, do not resolve.
-- **Stale (line removed entirely)**: the file or block was deleted. Resolve the thread without posting a reply.
+- **Stale (line removed entirely)**: the file or block was deleted. Queue a thread-resolution request without posting a reply.
 
 Other re-run rules:
 
@@ -115,6 +118,7 @@ These rules translate the **Output** contract above into the gh-aw safe-output c
 - For each finding, call `create-pull-request-review-comment` with the inline comment body in the structure above.
 - If at least one inline comment is posted, submit a single non-blocking review with `submit-pull-request-review` (event `COMMENT`, body **empty** — the MacroScope review body never carried prose, only inline pointers).
 - If no findings, call `noop` with the message `No issues found`. Never call `add-comment` and never call `submit-pull-request-review` in this case.
-- For dispatched follow-up runs (`workflow_dispatch` with a non-empty `REVIEWER_COMMENT_ID`), respond to a single `@scout` comment instead of reviewing. These runs originate from `issue_comment` or `pull_request_review_comment` events, but those low-permission fork events only run the Reviewer Comment Router; the elevated Reviewer Comment Dispatcher validates the live comment, PR labels, and commenter permissions, then dispatches this workflow with `pr_number` and `comment_id`. Locate the triggering comment by matching `REVIEWER_COMMENT_ID` in `pr-issue-comments.json` and `pr-review-comments.json` under `/tmp/gh-aw/agent/`. If it is a review-thread comment, reply in the same thread via `reply-to-pull-request-review-comment` with `comment_id` set to `REVIEWER_COMMENT_ID`; if it is a top-level PR comment, reply via `add-comment` on `PR_NUMBER`. Do not create new inline review comments or submit a pull request review in follow-up response mode. If the request is not actionable, call `noop` with a brief reason.
-- For an inline comment whose finding has been addressed in a new commit on the PR, post a one-line reply via `reply-to-pull-request-review-comment` (`Addressed in <commit-link>`) and then call `resolve-pull-request-review-thread` with the thread id. Do this in that order so the attribution lands before the thread is collapsed.
+- For dispatched follow-up runs (`workflow_dispatch` with a non-empty `REVIEWER_COMMENT_ID`), respond to a single `@scout` comment instead of reviewing. These runs originate from `issue_comment` or `pull_request_review_comment` events, but those low-permission fork events only run the Reviewer Comment Router; the elevated Reviewer Comment Dispatcher validates the live comment, PR labels, and commenter permissions, then dispatches this workflow with `pr_number`, `comment_id`, and `comment_type`. When `REVIEWER_COMMENT_TYPE` is set, use it to select the artifact: for `issue_comment`, find `REVIEWER_COMMENT_ID` in `pr-issue-comments.json`; for `pull_request_review_comment`, find it in `pr-review-comments.json`; treat any other non-empty value as invalid. If the importing workflow does not expose `REVIEWER_COMMENT_TYPE`, match `REVIEWER_COMMENT_ID` across both files. If it is a review-thread comment, reply in the same thread via `reply-to-pull-request-review-comment` with `comment_id` set to `REVIEWER_COMMENT_ID`; if it is a top-level PR comment, reply via `add-comment` on `PR_NUMBER`. Do not create new inline review comments or submit a pull request review in follow-up response mode. If the request is not actionable, call `noop` with a brief reason.
+- For an inline comment whose finding has been addressed in a new commit on the PR, post a one-line reply via `reply-to-pull-request-review-comment` (`Addressed in <commit-link>`) and then queue `resolve-pull-request-review-thread` with the thread id. Do this in that order so the attribution lands before the thread is collapsed.
+- Safe outputs are processed after the agent session. Describe queued resolutions as requested, never as completed.
 - If the request is not actionable, call `noop` with a brief reason.

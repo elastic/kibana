@@ -16,6 +16,7 @@ const KIBANAMACHINE_LOGIN = 'kibanamachine';
 const VERSION_BUMP_FILE_MATCHERS = [
   /^versions\.json$/,
   /^\.backportrc\.json$/,
+  /^\.github\/CODEOWNERS$/,
   /^package\.json$/,
   /^x-pack\/package\.json$/,
   /^x-pack\/solutions\/search\/plugins\/enterprise_search\/common\/__mocks__\/initial_app_data\.ts$/,

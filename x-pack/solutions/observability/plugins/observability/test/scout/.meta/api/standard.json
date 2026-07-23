@@ -1,5 +1,5 @@
 {
-  "sha1": "fc4a39c5ee2d1fb22dd44fb7970d2887e04933ea",
+  "sha1": "4d2e6260504dc9f66f77b8ab66642fca22bb800d",
   "tests": [
     {
       "id": "2d983a450230de2-481578a854c377f",
@@ -515,6 +515,1782 @@
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/metric_threshold_rule.spec.ts",
         "line": 339,
         "column": 10
+      }
+    },
+    {
+      "id": "c5e86a72525b623-ab14af9c65657fc",
+      "title": "Observability alerts – all privilege cannot create a apm.error_rate rule",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_all.spec.ts",
+        "line": 41,
+        "column": 14
+      }
+    },
+    {
+      "id": "c5e86a72525b623-a4b19ae92a0022a",
+      "title": "Observability alerts – all privilege cannot create a apm.transaction_error_rate rule",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_all.spec.ts",
+        "line": 41,
+        "column": 14
+      }
+    },
+    {
+      "id": "c5e86a72525b623-fa4e15b09bd5357",
+      "title": "Observability alerts – all privilege cannot create a apm.transaction_duration rule",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_all.spec.ts",
+        "line": 41,
+        "column": 14
+      }
+    },
+    {
+      "id": "c5e86a72525b623-d950693d19a0468",
+      "title": "Observability alerts – all privilege cannot create a apm.anomaly rule",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_all.spec.ts",
+        "line": 41,
+        "column": 14
+      }
+    },
+    {
+      "id": "c5e86a72525b623-8930aa7f1e62feb",
+      "title": "Observability alerts – all privilege cannot create a metrics.alert.threshold rule",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_all.spec.ts",
+        "line": 41,
+        "column": 14
+      }
+    },
+    {
+      "id": "c5e86a72525b623-7f00e5bde100a22",
+      "title": "Observability alerts – all privilege cannot create a metrics.alert.inventory.threshold rule",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_all.spec.ts",
+        "line": 41,
+        "column": 14
+      }
+    },
+    {
+      "id": "c5e86a72525b623-02f4f7f8618b596",
+      "title": "Observability alerts – all privilege cannot create a logs.alert.document.count rule",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_all.spec.ts",
+        "line": 41,
+        "column": 14
+      }
+    },
+    {
+      "id": "c5e86a72525b623-d472ca65f383af2",
+      "title": "Observability alerts – all privilege cannot create a .es-query rule",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_all.spec.ts",
+        "line": 41,
+        "column": 14
+      }
+    },
+    {
+      "id": "c5e86a72525b623-17bdca0042fec8a",
+      "title": "Observability alerts – all privilege cannot create a observability.rules.custom_threshold rule",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_all.spec.ts",
+        "line": 41,
+        "column": 14
+      }
+    },
+    {
+      "id": "c5e86a72525b623-9602f72ed7b28ad",
+      "title": "Observability alerts – all privilege cannot create a xpack.uptime.alerts.tls rule",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_all.spec.ts",
+        "line": 41,
+        "column": 14
+      }
+    },
+    {
+      "id": "c5e86a72525b623-936df571933ebfa",
+      "title": "Observability alerts – all privilege cannot create a xpack.uptime.alerts.tlsCertificate rule",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_all.spec.ts",
+        "line": 41,
+        "column": 14
+      }
+    },
+    {
+      "id": "c5e86a72525b623-35c174aafbc6333",
+      "title": "Observability alerts – all privilege cannot create a xpack.uptime.alerts.monitorStatus rule",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_all.spec.ts",
+        "line": 41,
+        "column": 14
+      }
+    },
+    {
+      "id": "c5e86a72525b623-ab370bf6ce30ca7",
+      "title": "Observability alerts – all privilege cannot create a xpack.synthetics.alerts.monitorStatus rule",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_all.spec.ts",
+        "line": 41,
+        "column": 14
+      }
+    },
+    {
+      "id": "c5e86a72525b623-b608ccfec4aac16",
+      "title": "Observability alerts – all privilege cannot create a xpack.synthetics.alerts.tls rule",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_all.spec.ts",
+        "line": 41,
+        "column": 14
+      }
+    },
+    {
+      "id": "c5e86a72525b623-c474744583750e9",
+      "title": "Observability alerts – all privilege cannot update a rule",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_all.spec.ts",
+        "line": 62,
+        "column": 12
+      }
+    },
+    {
+      "id": "c5e86a72525b623-a455b226507a227",
+      "title": "Observability alerts – all privilege cannot delete a rule",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_all.spec.ts",
+        "line": 79,
+        "column": 12
+      }
+    },
+    {
+      "id": "c5e86a72525b623-2c9cf36c1464e9b",
+      "title": "Observability alerts – all privilege cannot mute all alerts on a rule",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_all.spec.ts",
+        "line": 88,
+        "column": 12
+      }
+    },
+    {
+      "id": "c5e86a72525b623-882dd5514b68751",
+      "title": "Observability alerts – all privilege cannot snooze a rule",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_all.spec.ts",
+        "line": 96,
+        "column": 12
+      }
+    },
+    {
+      "id": "c5e86a72525b623-26273919aebd46f",
+      "title": "Observability alerts – all privilege can mute an alert instance for apm.error_rate",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_all.spec.ts",
+        "line": 116,
+        "column": 14
+      }
+    },
+    {
+      "id": "c5e86a72525b623-717e9abf7e9710d",
+      "title": "Observability alerts – all privilege can unmute an alert instance for apm.error_rate",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_all.spec.ts",
+        "line": 128,
+        "column": 14
+      }
+    },
+    {
+      "id": "c5e86a72525b623-3ac8d001975d06b",
+      "title": "Observability alerts – all privilege can mute an alert instance for apm.transaction_error_rate",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_all.spec.ts",
+        "line": 116,
+        "column": 14
+      }
+    },
+    {
+      "id": "c5e86a72525b623-0d32ed4bf9ab48c",
+      "title": "Observability alerts – all privilege can unmute an alert instance for apm.transaction_error_rate",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_all.spec.ts",
+        "line": 128,
+        "column": 14
+      }
+    },
+    {
+      "id": "c5e86a72525b623-4a5ebd2d5dc3aa5",
+      "title": "Observability alerts – all privilege can mute an alert instance for apm.transaction_duration",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_all.spec.ts",
+        "line": 116,
+        "column": 14
+      }
+    },
+    {
+      "id": "c5e86a72525b623-fb8a7a7aea307fc",
+      "title": "Observability alerts – all privilege can unmute an alert instance for apm.transaction_duration",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_all.spec.ts",
+        "line": 128,
+        "column": 14
+      }
+    },
+    {
+      "id": "c5e86a72525b623-346623ed46b9114",
+      "title": "Observability alerts – all privilege can mute an alert instance for apm.anomaly",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_all.spec.ts",
+        "line": 116,
+        "column": 14
+      }
+    },
+    {
+      "id": "c5e86a72525b623-ae4d409f2f9d701",
+      "title": "Observability alerts – all privilege can unmute an alert instance for apm.anomaly",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_all.spec.ts",
+        "line": 128,
+        "column": 14
+      }
+    },
+    {
+      "id": "c5e86a72525b623-753940f17099140",
+      "title": "Observability alerts – all privilege can mute an alert instance for metrics.alert.threshold",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_all.spec.ts",
+        "line": 116,
+        "column": 14
+      }
+    },
+    {
+      "id": "c5e86a72525b623-72060a691ab6d32",
+      "title": "Observability alerts – all privilege can unmute an alert instance for metrics.alert.threshold",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_all.spec.ts",
+        "line": 128,
+        "column": 14
+      }
+    },
+    {
+      "id": "c5e86a72525b623-ccbf5caa873fff5",
+      "title": "Observability alerts – all privilege can mute an alert instance for metrics.alert.inventory.threshold",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_all.spec.ts",
+        "line": 116,
+        "column": 14
+      }
+    },
+    {
+      "id": "c5e86a72525b623-425a3ad8735ea36",
+      "title": "Observability alerts – all privilege can unmute an alert instance for metrics.alert.inventory.threshold",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_all.spec.ts",
+        "line": 128,
+        "column": 14
+      }
+    },
+    {
+      "id": "c5e86a72525b623-c493c293780794a",
+      "title": "Observability alerts – all privilege can mute an alert instance for logs.alert.document.count",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_all.spec.ts",
+        "line": 116,
+        "column": 14
+      }
+    },
+    {
+      "id": "c5e86a72525b623-a693a97e8769d40",
+      "title": "Observability alerts – all privilege can unmute an alert instance for logs.alert.document.count",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_all.spec.ts",
+        "line": 128,
+        "column": 14
+      }
+    },
+    {
+      "id": "c5e86a72525b623-a428448fb6a513e",
+      "title": "Observability alerts – all privilege can mute an alert instance for .es-query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_all.spec.ts",
+        "line": 116,
+        "column": 14
+      }
+    },
+    {
+      "id": "c5e86a72525b623-731239e18010ce0",
+      "title": "Observability alerts – all privilege can unmute an alert instance for .es-query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_all.spec.ts",
+        "line": 128,
+        "column": 14
+      }
+    },
+    {
+      "id": "c5e86a72525b623-538f7709dca0694",
+      "title": "Observability alerts – all privilege can mute an alert instance for observability.rules.custom_threshold",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_all.spec.ts",
+        "line": 116,
+        "column": 14
+      }
+    },
+    {
+      "id": "c5e86a72525b623-a9be5624fece8a3",
+      "title": "Observability alerts – all privilege can unmute an alert instance for observability.rules.custom_threshold",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_all.spec.ts",
+        "line": 128,
+        "column": 14
+      }
+    },
+    {
+      "id": "c5e86a72525b623-0de5d6d2b10f792",
+      "title": "Observability alerts – all privilege can mute an alert instance for xpack.uptime.alerts.tls",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_all.spec.ts",
+        "line": 116,
+        "column": 14
+      }
+    },
+    {
+      "id": "c5e86a72525b623-d9063d4e8b43a87",
+      "title": "Observability alerts – all privilege can unmute an alert instance for xpack.uptime.alerts.tls",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_all.spec.ts",
+        "line": 128,
+        "column": 14
+      }
+    },
+    {
+      "id": "c5e86a72525b623-dbce1eb6995a4f6",
+      "title": "Observability alerts – all privilege can mute an alert instance for xpack.uptime.alerts.tlsCertificate",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_all.spec.ts",
+        "line": 116,
+        "column": 14
+      }
+    },
+    {
+      "id": "c5e86a72525b623-fe82f45f7617244",
+      "title": "Observability alerts – all privilege can unmute an alert instance for xpack.uptime.alerts.tlsCertificate",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_all.spec.ts",
+        "line": 128,
+        "column": 14
+      }
+    },
+    {
+      "id": "c5e86a72525b623-eba44c146c14d6d",
+      "title": "Observability alerts – all privilege can mute an alert instance for xpack.uptime.alerts.monitorStatus",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_all.spec.ts",
+        "line": 116,
+        "column": 14
+      }
+    },
+    {
+      "id": "c5e86a72525b623-d7fca7aba67b440",
+      "title": "Observability alerts – all privilege can unmute an alert instance for xpack.uptime.alerts.monitorStatus",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_all.spec.ts",
+        "line": 128,
+        "column": 14
+      }
+    },
+    {
+      "id": "c5e86a72525b623-b801cb3e60e3339",
+      "title": "Observability alerts – all privilege can mute an alert instance for xpack.synthetics.alerts.monitorStatus",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_all.spec.ts",
+        "line": 116,
+        "column": 14
+      }
+    },
+    {
+      "id": "c5e86a72525b623-5cdc95046a5e16c",
+      "title": "Observability alerts – all privilege can unmute an alert instance for xpack.synthetics.alerts.monitorStatus",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_all.spec.ts",
+        "line": 128,
+        "column": 14
+      }
+    },
+    {
+      "id": "c5e86a72525b623-818ce84813948b1",
+      "title": "Observability alerts – all privilege can mute an alert instance for xpack.synthetics.alerts.tls",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_all.spec.ts",
+        "line": 116,
+        "column": 14
+      }
+    },
+    {
+      "id": "c5e86a72525b623-20d53e9602975f0",
+      "title": "Observability alerts – all privilege can unmute an alert instance for xpack.synthetics.alerts.tls",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_all.spec.ts",
+        "line": 128,
+        "column": 14
+      }
+    },
+    {
+      "id": "c5e86a72525b623-3b29f75c164adeb",
+      "title": "Observability alerts – all privilege can find alerts via RAC",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_all.spec.ts",
+        "line": 141,
+        "column": 12
+      }
+    },
+    {
+      "id": "c5e86a72525b623-9887dc85385b4e4",
+      "title": "Observability alerts – all privilege can acknowledge a real alert via bulk update",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_all.spec.ts",
+        "line": 167,
+        "column": 12
+      }
+    },
+    {
+      "id": "c5e86a72525b623-c99b735d20c7c88",
+      "title": "Observability alerts – all privilege can read muted alert state via _find_muted_alerts",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_all.spec.ts",
+        "line": 180,
+        "column": 12
+      }
+    },
+    {
+      "id": "c7e4e7d399ecfe6-12835bcf00c4ab2",
+      "title": "Observability alerts – no privilege cannot mute an alert instance for apm.error_rate",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_none.spec.ts",
+        "line": 41,
+        "column": 14
+      }
+    },
+    {
+      "id": "c7e4e7d399ecfe6-7229e3cab45ffb1",
+      "title": "Observability alerts – no privilege cannot unmute an alert instance for apm.error_rate",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_none.spec.ts",
+        "line": 53,
+        "column": 14
+      }
+    },
+    {
+      "id": "c7e4e7d399ecfe6-573c0ca2c31dfed",
+      "title": "Observability alerts – no privilege cannot mute an alert instance for apm.transaction_error_rate",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_none.spec.ts",
+        "line": 41,
+        "column": 14
+      }
+    },
+    {
+      "id": "c7e4e7d399ecfe6-5a6bdddddb08d52",
+      "title": "Observability alerts – no privilege cannot unmute an alert instance for apm.transaction_error_rate",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_none.spec.ts",
+        "line": 53,
+        "column": 14
+      }
+    },
+    {
+      "id": "c7e4e7d399ecfe6-3cde8b675b0a6cc",
+      "title": "Observability alerts – no privilege cannot mute an alert instance for apm.transaction_duration",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_none.spec.ts",
+        "line": 41,
+        "column": 14
+      }
+    },
+    {
+      "id": "c7e4e7d399ecfe6-085fb7ac314b452",
+      "title": "Observability alerts – no privilege cannot unmute an alert instance for apm.transaction_duration",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_none.spec.ts",
+        "line": 53,
+        "column": 14
+      }
+    },
+    {
+      "id": "c7e4e7d399ecfe6-db13ee6047acb2f",
+      "title": "Observability alerts – no privilege cannot mute an alert instance for apm.anomaly",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_none.spec.ts",
+        "line": 41,
+        "column": 14
+      }
+    },
+    {
+      "id": "c7e4e7d399ecfe6-83394bf909f1161",
+      "title": "Observability alerts – no privilege cannot unmute an alert instance for apm.anomaly",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_none.spec.ts",
+        "line": 53,
+        "column": 14
+      }
+    },
+    {
+      "id": "c7e4e7d399ecfe6-b82dcff9206d4ca",
+      "title": "Observability alerts – no privilege cannot mute an alert instance for metrics.alert.threshold",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_none.spec.ts",
+        "line": 41,
+        "column": 14
+      }
+    },
+    {
+      "id": "c7e4e7d399ecfe6-f4227b3d8c8c538",
+      "title": "Observability alerts – no privilege cannot unmute an alert instance for metrics.alert.threshold",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_none.spec.ts",
+        "line": 53,
+        "column": 14
+      }
+    },
+    {
+      "id": "c7e4e7d399ecfe6-00bfbe0b3d37a0a",
+      "title": "Observability alerts – no privilege cannot mute an alert instance for metrics.alert.inventory.threshold",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_none.spec.ts",
+        "line": 41,
+        "column": 14
+      }
+    },
+    {
+      "id": "c7e4e7d399ecfe6-7587fc99e8c4df2",
+      "title": "Observability alerts – no privilege cannot unmute an alert instance for metrics.alert.inventory.threshold",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_none.spec.ts",
+        "line": 53,
+        "column": 14
+      }
+    },
+    {
+      "id": "c7e4e7d399ecfe6-29c7fc5ded080e4",
+      "title": "Observability alerts – no privilege cannot mute an alert instance for logs.alert.document.count",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_none.spec.ts",
+        "line": 41,
+        "column": 14
+      }
+    },
+    {
+      "id": "c7e4e7d399ecfe6-6c8aa55a9dae449",
+      "title": "Observability alerts – no privilege cannot unmute an alert instance for logs.alert.document.count",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_none.spec.ts",
+        "line": 53,
+        "column": 14
+      }
+    },
+    {
+      "id": "c7e4e7d399ecfe6-2393e3d8b8fd738",
+      "title": "Observability alerts – no privilege cannot mute an alert instance for .es-query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_none.spec.ts",
+        "line": 41,
+        "column": 14
+      }
+    },
+    {
+      "id": "c7e4e7d399ecfe6-a56c785751c2dc4",
+      "title": "Observability alerts – no privilege cannot unmute an alert instance for .es-query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_none.spec.ts",
+        "line": 53,
+        "column": 14
+      }
+    },
+    {
+      "id": "c7e4e7d399ecfe6-d8995172c6d368b",
+      "title": "Observability alerts – no privilege cannot mute an alert instance for observability.rules.custom_threshold",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_none.spec.ts",
+        "line": 41,
+        "column": 14
+      }
+    },
+    {
+      "id": "c7e4e7d399ecfe6-cb27c2525e0a9a9",
+      "title": "Observability alerts – no privilege cannot unmute an alert instance for observability.rules.custom_threshold",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_none.spec.ts",
+        "line": 53,
+        "column": 14
+      }
+    },
+    {
+      "id": "c7e4e7d399ecfe6-e6819d1a2775510",
+      "title": "Observability alerts – no privilege cannot mute an alert instance for xpack.uptime.alerts.tls",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_none.spec.ts",
+        "line": 41,
+        "column": 14
+      }
+    },
+    {
+      "id": "c7e4e7d399ecfe6-6ef3464b954fa78",
+      "title": "Observability alerts – no privilege cannot unmute an alert instance for xpack.uptime.alerts.tls",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_none.spec.ts",
+        "line": 53,
+        "column": 14
+      }
+    },
+    {
+      "id": "c7e4e7d399ecfe6-66083d6ea8f1583",
+      "title": "Observability alerts – no privilege cannot mute an alert instance for xpack.uptime.alerts.tlsCertificate",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_none.spec.ts",
+        "line": 41,
+        "column": 14
+      }
+    },
+    {
+      "id": "c7e4e7d399ecfe6-b33740487ff4144",
+      "title": "Observability alerts – no privilege cannot unmute an alert instance for xpack.uptime.alerts.tlsCertificate",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_none.spec.ts",
+        "line": 53,
+        "column": 14
+      }
+    },
+    {
+      "id": "c7e4e7d399ecfe6-4676a0af89290be",
+      "title": "Observability alerts – no privilege cannot mute an alert instance for xpack.uptime.alerts.monitorStatus",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_none.spec.ts",
+        "line": 41,
+        "column": 14
+      }
+    },
+    {
+      "id": "c7e4e7d399ecfe6-68db4a340a9f91f",
+      "title": "Observability alerts – no privilege cannot unmute an alert instance for xpack.uptime.alerts.monitorStatus",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_none.spec.ts",
+        "line": 53,
+        "column": 14
+      }
+    },
+    {
+      "id": "c7e4e7d399ecfe6-90cbb4edd14ec8e",
+      "title": "Observability alerts – no privilege cannot mute an alert instance for xpack.synthetics.alerts.monitorStatus",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_none.spec.ts",
+        "line": 41,
+        "column": 14
+      }
+    },
+    {
+      "id": "c7e4e7d399ecfe6-1e628a0d26843ea",
+      "title": "Observability alerts – no privilege cannot unmute an alert instance for xpack.synthetics.alerts.monitorStatus",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_none.spec.ts",
+        "line": 53,
+        "column": 14
+      }
+    },
+    {
+      "id": "c7e4e7d399ecfe6-5622eb4cf51f867",
+      "title": "Observability alerts – no privilege cannot mute an alert instance for xpack.synthetics.alerts.tls",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_none.spec.ts",
+        "line": 41,
+        "column": 14
+      }
+    },
+    {
+      "id": "c7e4e7d399ecfe6-545851dc9509ea0",
+      "title": "Observability alerts – no privilege cannot unmute an alert instance for xpack.synthetics.alerts.tls",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_none.spec.ts",
+        "line": 53,
+        "column": 14
+      }
+    },
+    {
+      "id": "c7e4e7d399ecfe6-170ae2be9e39798",
+      "title": "Observability alerts – no privilege cannot find alerts via RAC",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_none.spec.ts",
+        "line": 66,
+        "column": 12
+      }
+    },
+    {
+      "id": "c7e4e7d399ecfe6-6a7cf819b9d9714",
+      "title": "Observability alerts – no privilege cannot acknowledge an alert via bulk update",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_none.spec.ts",
+        "line": 80,
+        "column": 12
+      }
+    },
+    {
+      "id": "c7e4e7d399ecfe6-42b81244286f3a3",
+      "title": "Observability alerts – no privilege cannot read muted alert state via _find_muted_alerts",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_none.spec.ts",
+        "line": 93,
+        "column": 12
+      }
+    },
+    {
+      "id": "7cc7a004f470f7c-38b45d8b564946c",
+      "title": "Observability alerts – read privilege can find the alert via RAC",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_read.spec.ts",
+        "line": 40,
+        "column": 12
+      }
+    },
+    {
+      "id": "7cc7a004f470f7c-8abaf346b69ed70",
+      "title": "Observability alerts – read privilege can read muted alert state via _find_muted_alerts",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_read.spec.ts",
+        "line": 63,
+        "column": 12
+      }
+    },
+    {
+      "id": "7cc7a004f470f7c-c315b7a972880d3",
+      "title": "Observability alerts – read privilege cannot mute an alert instance for apm.error_rate",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_read.spec.ts",
+        "line": 79,
+        "column": 14
+      }
+    },
+    {
+      "id": "7cc7a004f470f7c-bb28a53fff93775",
+      "title": "Observability alerts – read privilege cannot mute an alert instance for apm.transaction_error_rate",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_read.spec.ts",
+        "line": 79,
+        "column": 14
+      }
+    },
+    {
+      "id": "7cc7a004f470f7c-02a5e8e9a4333a4",
+      "title": "Observability alerts – read privilege cannot mute an alert instance for apm.transaction_duration",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_read.spec.ts",
+        "line": 79,
+        "column": 14
+      }
+    },
+    {
+      "id": "7cc7a004f470f7c-3095b3a88cb953c",
+      "title": "Observability alerts – read privilege cannot mute an alert instance for apm.anomaly",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_read.spec.ts",
+        "line": 79,
+        "column": 14
+      }
+    },
+    {
+      "id": "7cc7a004f470f7c-9fd6b95b0f9a91a",
+      "title": "Observability alerts – read privilege cannot mute an alert instance for metrics.alert.threshold",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_read.spec.ts",
+        "line": 79,
+        "column": 14
+      }
+    },
+    {
+      "id": "7cc7a004f470f7c-635d5a8a5020ea8",
+      "title": "Observability alerts – read privilege cannot mute an alert instance for metrics.alert.inventory.threshold",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_read.spec.ts",
+        "line": 79,
+        "column": 14
+      }
+    },
+    {
+      "id": "7cc7a004f470f7c-c71ccecc2070973",
+      "title": "Observability alerts – read privilege cannot mute an alert instance for logs.alert.document.count",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_read.spec.ts",
+        "line": 79,
+        "column": 14
+      }
+    },
+    {
+      "id": "7cc7a004f470f7c-a79e41c7a80dd49",
+      "title": "Observability alerts – read privilege cannot mute an alert instance for .es-query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_read.spec.ts",
+        "line": 79,
+        "column": 14
+      }
+    },
+    {
+      "id": "7cc7a004f470f7c-8adb4608ffaf483",
+      "title": "Observability alerts – read privilege cannot mute an alert instance for observability.rules.custom_threshold",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_read.spec.ts",
+        "line": 79,
+        "column": 14
+      }
+    },
+    {
+      "id": "7cc7a004f470f7c-98cb6ea6cb15a71",
+      "title": "Observability alerts – read privilege cannot mute an alert instance for xpack.uptime.alerts.tls",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_read.spec.ts",
+        "line": 79,
+        "column": 14
+      }
+    },
+    {
+      "id": "7cc7a004f470f7c-8b90c2ca37ef888",
+      "title": "Observability alerts – read privilege cannot mute an alert instance for xpack.uptime.alerts.tlsCertificate",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_read.spec.ts",
+        "line": 79,
+        "column": 14
+      }
+    },
+    {
+      "id": "7cc7a004f470f7c-a78ccd1781d3a59",
+      "title": "Observability alerts – read privilege cannot mute an alert instance for xpack.uptime.alerts.monitorStatus",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_read.spec.ts",
+        "line": 79,
+        "column": 14
+      }
+    },
+    {
+      "id": "7cc7a004f470f7c-f900c2d9f0204f4",
+      "title": "Observability alerts – read privilege cannot mute an alert instance for xpack.synthetics.alerts.monitorStatus",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_read.spec.ts",
+        "line": 79,
+        "column": 14
+      }
+    },
+    {
+      "id": "7cc7a004f470f7c-9959f2f1a5b19e4",
+      "title": "Observability alerts – read privilege cannot mute an alert instance for xpack.synthetics.alerts.tls",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_read.spec.ts",
+        "line": 79,
+        "column": 14
+      }
+    },
+    {
+      "id": "7cc7a004f470f7c-eab5656d59362cf",
+      "title": "Observability alerts – read privilege cannot acknowledge an alert via bulk update",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_read.spec.ts",
+        "line": 92,
+        "column": 12
+      }
+    },
+    {
+      "id": "7cc7a004f470f7c-60508916a97e31f",
+      "title": "Observability alerts – read privilege cannot create a apm.error_rate rule",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_read.spec.ts",
+        "line": 106,
+        "column": 14
+      }
+    },
+    {
+      "id": "7cc7a004f470f7c-f3deebeee0fead5",
+      "title": "Observability alerts – read privilege cannot create a apm.transaction_error_rate rule",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_read.spec.ts",
+        "line": 106,
+        "column": 14
+      }
+    },
+    {
+      "id": "7cc7a004f470f7c-7c1dad813358336",
+      "title": "Observability alerts – read privilege cannot create a apm.transaction_duration rule",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_read.spec.ts",
+        "line": 106,
+        "column": 14
+      }
+    },
+    {
+      "id": "7cc7a004f470f7c-c417b8324f6c49d",
+      "title": "Observability alerts – read privilege cannot create a apm.anomaly rule",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_read.spec.ts",
+        "line": 106,
+        "column": 14
+      }
+    },
+    {
+      "id": "7cc7a004f470f7c-bb7b8ed15825033",
+      "title": "Observability alerts – read privilege cannot create a metrics.alert.threshold rule",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_read.spec.ts",
+        "line": 106,
+        "column": 14
+      }
+    },
+    {
+      "id": "7cc7a004f470f7c-c0df41f69f6e617",
+      "title": "Observability alerts – read privilege cannot create a metrics.alert.inventory.threshold rule",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_read.spec.ts",
+        "line": 106,
+        "column": 14
+      }
+    },
+    {
+      "id": "7cc7a004f470f7c-26aace8a82a0774",
+      "title": "Observability alerts – read privilege cannot create a logs.alert.document.count rule",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_read.spec.ts",
+        "line": 106,
+        "column": 14
+      }
+    },
+    {
+      "id": "7cc7a004f470f7c-1116f49189304fe",
+      "title": "Observability alerts – read privilege cannot create a .es-query rule",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_read.spec.ts",
+        "line": 106,
+        "column": 14
+      }
+    },
+    {
+      "id": "7cc7a004f470f7c-9d43fedf02b36b2",
+      "title": "Observability alerts – read privilege cannot create a observability.rules.custom_threshold rule",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_read.spec.ts",
+        "line": 106,
+        "column": 14
+      }
+    },
+    {
+      "id": "7cc7a004f470f7c-63fbadc84485b4a",
+      "title": "Observability alerts – read privilege cannot create a xpack.uptime.alerts.tls rule",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_read.spec.ts",
+        "line": 106,
+        "column": 14
+      }
+    },
+    {
+      "id": "7cc7a004f470f7c-886861d1b640fd8",
+      "title": "Observability alerts – read privilege cannot create a xpack.uptime.alerts.tlsCertificate rule",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_read.spec.ts",
+        "line": 106,
+        "column": 14
+      }
+    },
+    {
+      "id": "7cc7a004f470f7c-2a502a6df7e7b8c",
+      "title": "Observability alerts – read privilege cannot create a xpack.uptime.alerts.monitorStatus rule",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_read.spec.ts",
+        "line": 106,
+        "column": 14
+      }
+    },
+    {
+      "id": "7cc7a004f470f7c-8b675f0a11318b4",
+      "title": "Observability alerts – read privilege cannot create a xpack.synthetics.alerts.monitorStatus rule",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_read.spec.ts",
+        "line": 106,
+        "column": 14
+      }
+    },
+    {
+      "id": "7cc7a004f470f7c-941677f203b2dc7",
+      "title": "Observability alerts – read privilege cannot create a xpack.synthetics.alerts.tls rule",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/obs_alerts_privilege_read.spec.ts",
+        "line": 106,
+        "column": 14
       }
     },
     {

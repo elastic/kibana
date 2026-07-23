@@ -5,7 +5,13 @@
  * 2.0.
  */
 
+jest.mock('../../../telemetry/insights', () => ({
+  ...jest.requireActual('../../../telemetry/insights'),
+  getSessionIDfromKibanaRequest: jest.fn(),
+}));
+
 import type { estypes } from '@elastic/elasticsearch';
+import type { AuthenticatedUser } from '@kbn/core/server';
 import {
   ALERT_ATTACK_DISCOVERY_ALERT_IDS,
   ATTACK_DISCOVERY_ADHOC_ALERTS_COMMON_INDEX_PREFIX,
@@ -18,6 +24,12 @@ import { DETECTION_ENGINE_ATTACKS_STATUS_URL } from '../../../../../common/const
 import { getSuccessfulSignalUpdateResponse } from '../__mocks__/request_responses';
 import type { SecuritySolutionRequestHandlerContextMock } from '../__mocks__/request_context';
 import { requestContextMock, serverMock, requestMock } from '../__mocks__';
+import { ATTACKS_API_CALL_EVENT } from '../../../telemetry/event_based/events';
+import { ATTACKS_INVALID_CLOSING_REASON_ERROR } from './attacks_ebt_helpers';
+import { INSIGHTS_CHANNEL } from '../../../telemetry/constants';
+import { createMockTelemetryEventsSender } from '../../../telemetry/__mocks__';
+import type { ITelemetryEventsSender } from '../../../telemetry/sender';
+import * as insights from '../../../telemetry/insights';
 import { setAttacksStatusRoute } from './set_attacks_status_route';
 
 const SCHEDULED_INDEX = `${ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX}-default`;
@@ -49,11 +61,15 @@ const getRequest = (body: Record<string, unknown>) =>
   });
 
 const defaultBody = { ids: ['attack1', 'attack2'], status: 'acknowledged' };
+const mockCurrentUser = { username: 'testuser' } as AuthenticatedUser;
 
 describe('set attacks workflow status', () => {
   let server: ReturnType<typeof serverMock.create>;
   let context: SecuritySolutionRequestHandlerContextMock;
   let ruleDataClient: RuleDataClientMock;
+  let telemetrySenderMock: ITelemetryEventsSender;
+  let reportEBT: jest.Mock;
+  let sendOnDemand: jest.Mock;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -65,7 +81,17 @@ describe('set attacks workflow status', () => {
     );
     ruleDataClient = ruleRegistryMocks.createRuleDataClient('.alerts-security.alerts');
 
-    setAttacksStatusRoute(server.router, ruleDataClient);
+    reportEBT = jest.fn();
+    sendOnDemand = jest.fn();
+    telemetrySenderMock = {
+      ...createMockTelemetryEventsSender(),
+      reportEBT,
+      sendOnDemand,
+      getClusterID: jest.fn().mockReturnValue('test-cluster-id'),
+      isTelemetryOptedIn: jest.fn().mockResolvedValue(true),
+    } as unknown as ITelemetryEventsSender;
+
+    setAttacksStatusRoute(server.router, ruleDataClient, telemetrySenderMock);
   });
 
   afterEach(() => {
@@ -110,9 +136,8 @@ describe('set attacks workflow status', () => {
 
   describe('update_related_alerts: true (cascade)', () => {
     beforeEach(() => {
-      context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        getSearchResponse([{ _id: 'attack1', alertIds: ['alertA', 'alertB'] }]) as any
+      context.core.elasticsearch.client.asCurrentUser.search.mockResponse(
+        getSearchResponse([{ _id: 'attack1', alertIds: ['alertA', 'alertB'] }])
       );
     });
 
@@ -174,9 +199,8 @@ describe('set attacks workflow status', () => {
     });
 
     test('updates attacks only when the attack doc has no related alert ids', async () => {
-      context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        getSearchResponse([{ _id: 'attack1' }]) as any
+      context.core.elasticsearch.client.asCurrentUser.search.mockResponse(
+        getSearchResponse([{ _id: 'attack1' }])
       );
 
       await server.inject(
@@ -255,6 +279,130 @@ describe('set attacks workflow status', () => {
       const result = server.validate(getRequest({ ids: ['attack1'] }));
 
       expect(result.badRequest).toHaveBeenCalled();
+    });
+  });
+
+  describe('telemetry', () => {
+    test('reports success telemetry on status update', async () => {
+      await server.inject(getRequest(defaultBody), requestContextMock.convertContext(context));
+
+      expect(reportEBT).toHaveBeenCalledTimes(1);
+      expect(reportEBT).toHaveBeenCalledWith(
+        ATTACKS_API_CALL_EVENT,
+        expect.objectContaining({
+          endpoint: DETECTION_ENGINE_ATTACKS_STATUS_URL,
+          operation: 'status',
+          ids_count: 2,
+          update_related_alerts: false,
+          status: 'acknowledged',
+        })
+      );
+    });
+
+    test('reports error telemetry on validation failure', async () => {
+      await server.inject(
+        getRequest({ ids: ['attack1'], status: 'closed', reason: 'invalid_reason' }),
+        requestContextMock.convertContext(context)
+      );
+
+      expect(reportEBT).toHaveBeenCalledWith(
+        ATTACKS_API_CALL_EVENT,
+        expect.objectContaining({
+          operation: 'status',
+          error: ATTACKS_INVALID_CLOSING_REASON_ERROR,
+        })
+      );
+    });
+
+    test('reports error telemetry on ES failure', async () => {
+      context.core.elasticsearch.client.asCurrentUser.updateByQuery.mockRejectedValue(
+        new Error('Test error')
+      );
+
+      await server.inject(getRequest(defaultBody), requestContextMock.convertContext(context));
+
+      expect(reportEBT).toHaveBeenCalledWith(
+        ATTACKS_API_CALL_EVENT,
+        expect.objectContaining({
+          operation: 'status',
+          error: 'Test error',
+        })
+      );
+    });
+
+    test('sends insights telemetry when opted in', async () => {
+      jest.mocked(insights.getSessionIDfromKibanaRequest).mockReturnValue('test-session-id');
+      context.core.security.authc.getCurrentUser.mockReturnValue(mockCurrentUser);
+
+      await server.inject(getRequest(defaultBody), requestContextMock.convertContext(context));
+
+      expect(sendOnDemand).toHaveBeenCalledWith(
+        INSIGHTS_CHANNEL,
+        expect.arrayContaining([
+          expect.objectContaining({
+            state: expect.objectContaining({
+              route: DETECTION_ENGINE_ATTACKS_STATUS_URL,
+              cluster_id: 'test-cluster-id',
+            }),
+            action: expect.objectContaining({
+              alert_status: 'acknowledged',
+            }),
+          }),
+        ])
+      );
+    });
+
+    test('does not send insights telemetry when opted out', async () => {
+      jest.mocked(insights.getSessionIDfromKibanaRequest).mockReturnValue('test-session-id');
+      telemetrySenderMock.isTelemetryOptedIn = jest.fn().mockResolvedValue(false);
+      context.core.security.authc.getCurrentUser.mockReturnValue(mockCurrentUser);
+
+      await server.inject(getRequest(defaultBody), requestContextMock.convertContext(context));
+
+      expect(sendOnDemand).not.toHaveBeenCalled();
+    });
+
+    test('does not send insights telemetry when closing reason validation fails', async () => {
+      jest.mocked(insights.getSessionIDfromKibanaRequest).mockReturnValue('test-session-id');
+      context.core.security.authc.getCurrentUser.mockReturnValue(mockCurrentUser);
+
+      await server.inject(
+        getRequest({ ids: ['attack1'], status: 'closed', reason: 'invalid_reason' }),
+        requestContextMock.convertContext(context)
+      );
+
+      expect(sendOnDemand).not.toHaveBeenCalled();
+    });
+
+    test('sends insights telemetry before ES update even when update fails', async () => {
+      jest.mocked(insights.getSessionIDfromKibanaRequest).mockReturnValue('test-session-id');
+      context.core.security.authc.getCurrentUser.mockReturnValue(mockCurrentUser);
+      context.core.elasticsearch.client.asCurrentUser.updateByQuery.mockRejectedValue(
+        new Error('Test error')
+      );
+
+      await server.inject(getRequest(defaultBody), requestContextMock.convertContext(context));
+
+      expect(sendOnDemand).toHaveBeenCalledWith(INSIGHTS_CHANNEL, expect.any(Array));
+    });
+
+    test('reports cascade fields in telemetry when update_related_alerts is true', async () => {
+      context.core.elasticsearch.client.asCurrentUser.search.mockResponse(
+        getSearchResponse([{ _id: 'attack1', alertIds: ['alertA'] }])
+      );
+
+      await server.inject(
+        getRequest({ ...defaultBody, update_related_alerts: true }),
+        requestContextMock.convertContext(context)
+      );
+
+      expect(reportEBT).toHaveBeenCalledWith(
+        ATTACKS_API_CALL_EVENT,
+        expect.objectContaining({
+          operation: 'status',
+          update_related_alerts: true,
+        })
+      );
     });
   });
 });

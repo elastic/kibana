@@ -1,0 +1,174 @@
+# Continuous KI (Knowledge Indicator) onboarding workflow.
+#
+# Runs on a schedule and orchestrates onboarding across managed streams:
+#   1. Fetches eligible streams from the _eligible API endpoint (respects
+#      interval, exclusions, concurrency).
+#   2. Starts the managed onboarding workflow for ALL candidate streams via
+#      workflow.executeAsync (features AND queries generation), confirming each
+#      reaches in_progress before moving to the next.
+#   3. Polls each stream sequentially until it reaches a terminal state
+#      (completed/failed), then captures the result.
+#
+# Values below (timeouts, intervals, defaults) must stay in sync with the
+# constants in streams/common/constants.ts — see continuous_onboarding_workflow.test.ts.
+#
+# This is a managed workflow installed by the streams (and later significant_events) plugin. It is created
+# disabled and enabled/disabled via the continuous KI extraction setting.
+
+version: '1'
+name: 'Continuous KI Onboarding'
+enabled: false
+description: 'This workflow is used by the system and should not be modified.'
+tags:
+  - observability
+  - streams
+  - significant-events
+  - knowledge-indicators
+  - continuous-onboarding
+consts:
+  maxScheduledStreams: 5
+  lookbackHours: 24
+settings:
+  # Timeout is 1 minute shorter than the schedule to avoid overlapping runs.
+  timeout: '34m'
+  # Only one instance of this workflow runs at a time; overlapping triggers are dropped.
+  concurrency:
+    key: significant-events-continuous-ki-onboarding
+    strategy: drop
+    max: 1
+triggers:
+  - type: scheduled
+    with:
+      every: '35m'
+  - type: manual
+    inputs:
+      - name: maxScheduledStreams
+        type: number
+        default: 5
+        description: 'Max streams to schedule per run; remaining eligible streams are skipped.'
+      - name: lookbackHours
+        type: number
+        default: 24
+        description: 'Hours of data to sample when identifying KIs.'
+      - name: extractionIntervalHours
+        type: number
+        description: 'Override for the min hours between extractions per stream. When omitted the Advanced Setting is used.'
+      - name: excludedStreamPatterns
+        type: string
+        description: 'Override for the comma-separated exclude patterns. When omitted the Advanced Setting is used.'
+steps:
+  # Step 1: Fetch eligible streams from the classification endpoint.
+  - name: get_eligible
+    type: kibana.request
+    with:
+      method: GET
+      path: |-
+        /internal/streams/_extraction/_eligible?maxScheduledStreams={{ inputs.maxScheduledStreams | default: consts.maxScheduledStreams }}&lookbackHours={{ inputs.lookbackHours | default: consts.lookbackHours }}
+        {%- if inputs.extractionIntervalHours %}&extractionIntervalHours={{ inputs.extractionIntervalHours }}{% endif -%}
+        {%- if inputs.excludedStreamPatterns %}&excludedStreamPatterns={{ inputs.excludedStreamPatterns }}{% endif -%}
+      headers:
+        x-elastic-internal-origin: 'kibana'
+    on-failure:
+      retry:
+        max-attempts: 3
+        delay: '5s'
+        strategy: exponential
+
+  # Step 2: Only proceed if there are candidates to schedule.
+  - name: has_candidates
+    type: if
+    condition: 'steps.get_eligible.output.candidates[0].streamName:*'
+    steps:
+      # Phase 1: Schedule all candidate streams, confirming each reaches in_progress.
+      - name: schedule_all
+        type: foreach
+        foreach: '${{ steps.get_eligible.output.candidates }}'
+        iteration-on-failure:
+          continue: true
+        steps:
+          # Start the managed onboarding workflow directly (fire-and-forget).
+          # Both features identification and queries generation run; status is
+          # tracked via the _status endpoint below.
+          - name: schedule_onboarding
+            type: workflow.executeAsync
+            with:
+              workflow-id: 'system-streams-ki-onboarding'
+              inputs:
+                streamName: '${{ foreach.item.streamName }}'
+                skipFeatures: false
+                skipQueries: false
+                # Align the feature-recency guard with the user's onboarding
+                # interval so features refresh on the same cadence eligibility uses.
+                featuresRecencyThresholdHours: '${{ steps.get_eligible.output.settings.intervalHours }}'
+                # onboarding expects epoch ms; the eligibility endpoint returns
+                # ISO timestamps, so convert here (date '%s' yields epoch seconds).
+                featuresStart: "${{ steps.get_eligible.output.timeRange.from | date: '%s' | times: 1000 }}"
+                featuresEnd: "${{ steps.get_eligible.output.timeRange.to | date: '%s' | times: 1000 }}"
+          - name: await_in_progress
+            type: while
+            condition: "${{ steps.verify_status.output.status == 'not_started' }}"
+            steps:
+              - name: verify_status
+                type: kibana.request
+                with:
+                  method: GET
+                  path: '/internal/streams/{{ foreach.item.streamName }}/onboarding/_status'
+                  headers:
+                    x-elastic-internal-origin: 'kibana'
+              - name: if_not_started_delay
+                type: if
+                condition: "${{ steps.verify_status.output.status == 'not_started' }}"
+                steps:
+                  - name: startup_delay
+                    type: wait
+                    with:
+                      duration: '1s'
+
+      # Phase 2: Poll each stream until it reaches a terminal state.
+      - name: collect_results
+        type: foreach
+        foreach: '${{ steps.get_eligible.output.candidates }}'
+        iteration-on-failure:
+          continue: true
+        steps:
+          - name: poll_onboarding
+            type: while
+            condition: "${{ steps.check_status.output.status == 'in_progress' }}"
+            steps:
+              - name: check_status
+                type: kibana.request
+                with:
+                  method: GET
+                  path: '/internal/streams/{{ foreach.item.streamName }}/onboarding/_status'
+                  headers:
+                    x-elastic-internal-origin: 'kibana'
+                on-failure:
+                  retry:
+                    max-attempts: 3
+                    delay: '5s'
+                    strategy: exponential
+              # Only wait if onboarding is still running; skip the delay on terminal status.
+              - name: if_poll_delay
+                type: if
+                condition: "${{ steps.check_status.output.status == 'in_progress' }}"
+                steps:
+                  - name: poll_delay
+                    type: wait
+                    with:
+                      duration: '30s'
+          # Capture the final onboarding result for this stream.
+          - name: onboarding_result
+            type: data.set
+            with:
+              streamName: '{{ foreach.item.streamName }}'
+              status: '${{ steps.check_status.output.status }}'
+              features:
+                skipped: '${{ steps.check_status.output.features.skipped }}'
+                discovered: '${{ steps.check_status.output.features.discovered }}'
+                connectorUsed: '${{ steps.check_status.output.features.connectorUsed }}'
+                tokensUsed: '${{ steps.check_status.output.features.tokensUsed }}'
+              queries:
+                skipped: '${{ steps.check_status.output.queries.skipped }}'
+                persisted: '${{ steps.check_status.output.queries.persisted }}'
+                connectorUsed: '${{ steps.check_status.output.queries.connectorUsed }}'
+                tokensUsed: '${{ steps.check_status.output.queries.tokensUsed }}'

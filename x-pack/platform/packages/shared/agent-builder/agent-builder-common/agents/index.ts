@@ -7,13 +7,12 @@
 
 export {
   AgentType,
+  chatAgentTypeId,
   agentBuilderDefaultAgentId,
   type AgentDefinition,
   type AgentConfiguration,
   type AgentConfigurationOverrides,
   type RuntimeAgentConfigurationOverrides,
-  type AgentResearchStepConfiguration,
-  type AgentAnswerStepConfiguration,
 } from './definition';
 export {
   ACCESS_CONTROL_MODE_ICON,
@@ -29,7 +28,7 @@ export {
   type AgentAccessControl,
   type AgentAccessControlEntry,
   type AgentAccessControlPrincipalType,
-} from './access_control/types';
+} from './access_control';
 export { agentIdRegexp, agentIdMaxLength, validateAgentId } from './agent_ids';
 export {
   type AgentCapabilities,

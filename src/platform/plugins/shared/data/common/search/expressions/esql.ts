@@ -127,6 +127,8 @@ function mapResponseToDatatable(
         ? KBN_FIELD_TYPES.CONFLICT
         : esFieldTypeToKibanaFieldType(type);
 
+      const isSourceFieldFilterable =
+        !querySummary.newColumns.has(name) || (renameSourceFieldMap?.has(name) ?? false);
       const sourceField = renameSourceFieldMap?.get(name) ?? name;
 
       return {
@@ -142,10 +144,12 @@ function mapResponseToDatatable(
                   params: {},
                   indexPattern,
                   sourceField,
+                  isSourceFieldFilterable,
                 }
               : {
                   indexPattern,
                   sourceField,
+                  isSourceFieldFilterable,
                 },
           params: {
             id: kibanaFieldType,
@@ -273,6 +277,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
           : 'UTC',
         locale,
         include_execution_metadata: true,
+        settings: { column_metadata: true },
       };
 
       if (input) {
@@ -356,9 +361,10 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
             sessionId: getSearchSessionId(),
             executionContext: getExecutionContext(),
             projectRouting: input?.projectRouting,
-            approximation: input?.useApproximation,
+            approximation: input?.isApproximate,
             dropNullColumns: true,
             includeExecutionMetadata: true,
+            columnMetadata: true,
           }
         );
 
@@ -406,7 +412,10 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
                 },
               }),
           })
-          .json(params)
+          .json({
+            ...params,
+            ...(input?.isApproximate !== undefined && { approximation: input.isApproximate }),
+          })
           .ok({ json: { rawResponse }, requestParams });
 
         // Map to Datatable
@@ -414,7 +423,10 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
       } catch (error) {
         // Inspector logging on error
         logInspectorRequest()
-          .json(params)
+          .json({
+            ...params,
+            ...(input?.isApproximate !== undefined && { approximation: input.isApproximate }),
+          })
           .error({
             json: 'attributes' in error ? error.attributes : { message: error.message },
           });

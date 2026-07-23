@@ -43,19 +43,19 @@ node scripts/capture_sigevents_env_snapshot.js \
 
 1. Creates a temporary Elasticsearch user (`restore_sigevents_env_snapshot_tmp`) with the `system_indices_superuser` role. This user is deleted on script exit (success or failure).
 2. Resolves wildcard patterns to concrete index names via `GET _resolve/index`.
-3. For each fixed system index (`.kibana_streams_tasks-*`) and each Significant Events data stream (`.significant_events-knowledge_indicators`, `.significant_events-discoveries`, `.significant_events-detections`), fetches its mapping, creates a `snapshot-*` copy, and reindexes the data. `--logs-index` and `--alert-indices` targets are included directly in the snapshot without reindexing.
+3. For each fixed system index (`.kibana_streams_tasks-*`) and each SigEvents data stream, fetches the mapping, creates a `snapshot-*` copy, and reindexes the data. Discoveries and detections are skipped silently when absent — the user may not have run the discovery workflow. `--logs-index` and `--alert-indices` targets are included directly without reindexing.
 4. Registers a GCS snapshot repository and creates the snapshot containing all captured indices.
 
 ### Naming convention
 
-System indices and the Significant Events data streams are reindexed under a renamed copy. Leading `.` is replaced with `snapshot-`:
+System indices and SigEvents data streams are reindexed to a `snapshot-*` copy (leading `.` is replaced). Discoveries/detections are omitted entirely when not captured:
 
 | Source index | Snapshot index |
 | --- | --- |
 | `.kibana_streams_tasks-000001` | `snapshot-kibana_streams_tasks-000001` |
 | `.significant_events-knowledge_indicators` | `snapshot-significant_events-knowledge_indicators` |
-| `.significant_events-discoveries` | `snapshot-significant_events-discoveries` |
-| `.significant_events-detections` | `snapshot-significant_events-detections` |
+| `.significant_events-discoveries` | `snapshot-significant_events-discoveries` (if workflow was run) |
+| `.significant_events-detections` | `snapshot-significant_events-detections` (if workflow was run) |
 | `.internal.alerts-streams.alerts-default-000001` | `.internal.alerts-streams.alerts-default-000001` (no change) |
 | `logs.otel` | `logs.otel` (no change) |
 
@@ -74,7 +74,7 @@ See [`restore_env_snapshot/README.md`](../restore_env_snapshot/README.md) for th
 
 ## Required privileges
 
-The script automatically creates and deletes a temporary `system_indices_superuser` user. The credentials you pass (`--es-username` / `--es-password`) only need the `manage_security` cluster privilege to do so — the built-in `elastic` superuser works out of the box.
+The script automatically creates and deletes a temporary `system_indices_superuser` user. On self-managed Elasticsearch the `system_indices_superuser` role may not exist; the script creates it automatically on first run (it is a built-in on Elastic Cloud). The credentials you pass (`--es-username` / `--es-password`) only need the `manage_security` cluster privilege — the built-in `elastic` superuser works out of the box.
 
 ## Why aliases can't be baked into the snapshot
 

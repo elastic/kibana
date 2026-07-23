@@ -1,0 +1,57 @@
+{
+  "sha1": "494b4ceee5efce568fe97077741564ad2c7b206e",
+  "tests": [
+    {
+      "id": "adc95c83352db02-9a16baae7c78495",
+      "title": "[NON-MKI] Security — Application Connections management shows connections in grouped and list views",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_oauth_local/ui/tests/application_connections.spec.ts",
+        "line": 84,
+        "column": 9
+      }
+    },
+    {
+      "id": "adc95c83352db02-1ce241ee086d714",
+      "title": "[NON-MKI] Security — Application Connections management edits a connection name inline and persists it",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_oauth_local/ui/tests/application_connections.spec.ts",
+        "line": 104,
+        "column": 9
+      }
+    },
+    {
+      "id": "adc95c83352db02-c31ffafbaeb34eb",
+      "title": "[NON-MKI] Security — Application Connections management revokes an individual connection",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_oauth_local/ui/tests/application_connections.spec.ts",
+        "line": 119,
+        "column": 9
+      }
+    },
+    {
+      "id": "adc95c83352db02-22c48d8d1f8d85b",
+      "title": "[NON-MKI] Security — Application Connections management bulk revokes multiple selected connections",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_oauth_local/ui/tests/application_connections.spec.ts",
+        "line": 135,
+        "column": 9
+      }
+    }
+  ]
+}
