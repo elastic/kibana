@@ -169,9 +169,7 @@ create-require@1.1.1
 crypto-browserify@3.12.1
 css-box-model@1.2.1
 css-color-keywords@1.0.0
-css-loader@7.1.2
 css-to-react-native@3.2.0
-cssesc@3.0.0
 csstype@3.0.7
 d3-array@1.2.4
 d3-array@2.12.1
@@ -262,7 +260,6 @@ hmac-drbg@1.0.1
 hoist-non-react-statics@3.3.2
 html-void-elements@1.0.5
 https-browserify@1.0.0
-icss-utils@5.1.0
 ieee754@1.2.1
 immer@11.1.8
 immer@9.0.21
@@ -323,14 +320,12 @@ merge-stream@2.0.0
 miller-rabin@4.0.1
 mime-db@1.52.0
 mime-types@2.1.35
-mini-css-extract-plugin@2.9.1
 minimalistic-assert@1.0.1
 minimalistic-crypto-utils@1.0.1
 minimatch@3.1.5
 moment-timezone@0.6.1
 moment@2.30.1
 ms@2.1.3
-nanoid@3.3.11
 neo-async@2.6.2
 node-emoji@1.10.0
 node-releases@2.0.27
@@ -369,13 +364,7 @@ pinkie-promise@2.0.1
 pinkie@2.0.4
 pkg-dir@5.0.0
 possible-typed-array-names@1.0.0
-postcss-modules-extract-imports@3.1.0
-postcss-modules-local-by-default@4.0.5
-postcss-modules-scope@3.2.0
-postcss-modules-values@4.0.0
-postcss-selector-parser@6.1.2
 postcss-value-parser@4.2.0
-postcss@8.5.14
 prismjs@1.27.0
 process-nextick-args@2.0.1
 process@0.11.10
@@ -446,7 +435,6 @@ safe-regex-test@1.1.0
 scheduler@0.23.2
 schema-utils@3.3.0
 schema-utils@4.3.2
-semver@7.8.5
 set-function-length@1.2.2
 setimmediate@1.0.5
 sha.js@2.4.12
@@ -455,7 +443,6 @@ side-channel-list@1.0.0
 side-channel-map@1.0.1
 side-channel-weakmap@1.0.2
 side-channel@1.1.0
-source-map-js@1.2.1
 source-map-support@0.5.21
 source-map@0.5.7
 source-map@0.6.1
