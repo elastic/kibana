@@ -7,6 +7,7 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import {
+  EuiBadge,
   EuiBasicTable,
   EuiButtonIcon,
   EuiConfirmModal,
@@ -22,6 +23,7 @@ import { parse as parseYaml } from 'yaml';
 import type { Owner } from '../../../../common/bundled-types.gen';
 import type { FieldDefinition } from '../../../../common/types/domain/field_definition/v1';
 import { FieldSchema, isRefField } from '../../../../common/types/domain/template/fields';
+import type { InlineField } from '../../../../common/types/domain/template/fields';
 import { useCasesContext } from '../../cases_context/use_cases_context';
 import { useCasesTemplatesNavigation } from '../../../common/navigation';
 import { useGetFieldDefinitions } from '../hooks/use_get_field_definitions';
@@ -37,18 +39,18 @@ import { CasesPageBody } from '../../app/cases_page_body';
 export type AllFieldDefinitionsPageProps = Record<string, never>;
 
 /**
- * The field library table stores each field's `label` inside its `definition` YAML (a single
- * FieldSchema entry), not as a top-level attribute. Parse it out for the Label column, tolerating
- * malformed/legacy definitions by returning `undefined` so the row still renders.
+ * The field library table stores each field's `label` and validation flags inside its `definition`
+ * YAML (a single FieldSchema entry), not as top-level attributes. Parse the inline field out for
+ * the Label and Required columns, tolerating malformed/legacy definitions (and `$ref` entries,
+ * which carry neither) by returning `undefined` so the row still renders.
  */
-const getFieldDefinitionLabel = (definition: string): string | undefined => {
+const parseInlineFieldDefinition = (definition: string): InlineField | undefined => {
   try {
     const result = FieldSchema.safeParse(parseYaml(definition));
-    // `$ref` entries carry no label; only inline field definitions do.
     if (!result.success || isRefField(result.data)) {
       return undefined;
     }
-    return result.data.label;
+    return result.data;
   } catch {
     return undefined;
   }
@@ -137,7 +139,7 @@ export const AllFieldDefinitionsPage: React.FC<AllFieldDefinitionsPageProps> = (
       truncateText: true,
       'data-test-subj': 'fieldDefinitionLabelCell',
       render: (fd: FieldDefinition) => {
-        const label = getFieldDefinitionLabel(fd.definition);
+        const label = parseInlineFieldDefinition(fd.definition)?.label;
         return (
           <EuiText size="s" color={label ? 'default' : 'subdued'}>
             {label ?? '—'}
@@ -153,6 +155,40 @@ export const AllFieldDefinitionsPage: React.FC<AllFieldDefinitionsPageProps> = (
           {description ?? '—'}
         </EuiText>
       ),
+    },
+    {
+      name: i18n.REQUIRED_COLUMN,
+      'data-test-subj': 'fieldDefinitionRequiredCell',
+      render: (fd: FieldDefinition) => {
+        const validation = parseInlineFieldDefinition(fd.definition)?.validation;
+        const isRequired = validation?.required === true;
+        const isRequiredOnClose = validation?.required_on_close === true;
+        if (!isRequired && !isRequiredOnClose) {
+          return (
+            <EuiText size="s" color="subdued">
+              {'—'}
+            </EuiText>
+          );
+        }
+        return (
+          <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
+            {isRequired && (
+              <EuiFlexItem grow={false}>
+                <EuiBadge data-test-subj="fieldDefinitionRequiredBadge">
+                  {i18n.REQUIRED_BADGE}
+                </EuiBadge>
+              </EuiFlexItem>
+            )}
+            {isRequiredOnClose && (
+              <EuiFlexItem grow={false}>
+                <EuiBadge data-test-subj="fieldDefinitionRequiredOnCloseBadge">
+                  {i18n.REQUIRED_ON_CLOSE_BADGE}
+                </EuiBadge>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        );
+      },
     },
     {
       field: 'isGlobal',
