@@ -1174,6 +1174,25 @@ describe('when calling the Suggestions route handler', () => {
 
         expect(mockResponse.forbidden).toBeCalled();
       });
+
+      it('should respond with forbidden for endpoints', async () => {
+        await callRoute(SUGGESTIONS_INTERNAL_ROUTE, {
+          params: { suggestion_type: 'endpoints' },
+          authz: {
+            canReadEventFilters: true,
+            canWriteEventFilters: false,
+            canReadTrustedApplications: true,
+            canWriteTrustedApplications: false,
+            canReadTrustedDevices: true,
+            canWriteTrustedDevices: false,
+            canReadEndpointExceptions: true,
+            canWriteEndpointExceptions: false,
+            canReadEndpointList: false,
+          },
+        });
+
+        expect(mockResponse.forbidden).toBeCalled();
+      });
     });
 
     describe('when the user is not authorized for the requested suggestion type', () => {
