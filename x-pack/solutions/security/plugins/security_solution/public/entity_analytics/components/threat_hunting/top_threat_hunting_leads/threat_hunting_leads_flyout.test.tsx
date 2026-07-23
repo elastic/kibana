@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render as rtlRender, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render as rtlRender, screen, fireEvent } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 
 import { ThreatHuntingLeadsFlyout } from './threat_hunting_leads_flyout';
@@ -29,26 +29,12 @@ jest.mock('@kbn/expandable-flyout', () => ({
   }),
 }));
 
-const mockGetRedirectUrl = jest.fn().mockResolvedValue('https://kibana.test/app/discover#/');
-const mockLocatorsGet = jest.fn().mockReturnValue({ getRedirectUrl: mockGetRedirectUrl });
 jest.mock('../../../../common/lib/kibana', () => ({
   useKibana: () => ({
-    services: {
-      share: {
-        url: {
-          locators: {
-            get: mockLocatorsGet,
-          },
-        },
-      },
-    },
+    services: {},
   }),
   useDateFormat: jest.fn(() => 'MMM D, YYYY @ HH:mm:ss.SSS'),
   useTimeZone: jest.fn(() => 'UTC'),
-}));
-
-jest.mock('../../../../common/hooks/use_space_id', () => ({
-  useSpaceId: jest.fn(() => 'default'),
 }));
 
 const mockUseQuery = jest.requireMock('@kbn/react-query').useQuery as jest.Mock;
@@ -325,45 +311,5 @@ describe('ThreatHuntingLeadsFlyout', () => {
     render(<ThreatHuntingLeadsFlyout {...defaultProps} />);
 
     expect(screen.queryByTestId('leadsFlyoutGeneratedTimestamp')).not.toBeInTheDocument();
-  });
-
-  it('opens the leads archive index in Discover when the link is clicked', async () => {
-    const openSpy = jest.spyOn(window, 'open').mockImplementation();
-
-    render(<ThreatHuntingLeadsFlyout {...defaultProps} />);
-
-    fireEvent.click(screen.getByTestId('viewLeadsArchiveIndexButton'));
-
-    expect(mockLocatorsGet).toHaveBeenCalledWith('DISCOVER_APP_LOCATOR');
-    await waitFor(() => expect(mockGetRedirectUrl).toHaveBeenCalled());
-    expect(mockGetRedirectUrl).toHaveBeenCalledWith(
-      expect.objectContaining({
-        dataViewSpec: expect.objectContaining({
-          id: 'entity-analytics-threat-hunting-leads-archive-default',
-          title:
-            '.entity_analytics.entity-leads-adhoc.entity-default,.entity_analytics.entity-leads-scheduled.entity-default',
-          allowHidden: true,
-        }),
-      })
-    );
-    await waitFor(() =>
-      expect(openSpy).toHaveBeenCalledWith(
-        'https://kibana.test/app/discover#/',
-        '_blank',
-        'noopener,noreferrer'
-      )
-    );
-
-    openSpy.mockRestore();
-  });
-
-  it('disables the leads archive index link while the space id has not resolved yet', () => {
-    const mockUseSpaceId = jest.requireMock('../../../../common/hooks/use_space_id')
-      .useSpaceId as jest.Mock;
-    mockUseSpaceId.mockReturnValueOnce(undefined);
-
-    render(<ThreatHuntingLeadsFlyout {...defaultProps} />);
-
-    expect(screen.getByTestId('viewLeadsArchiveIndexButton')).toBeDisabled();
   });
 });

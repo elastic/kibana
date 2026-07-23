@@ -26,7 +26,7 @@ const meta: Meta<DateRangePickerProps> = {
     onChange: action('onChange'),
     onInputChange: action('onInputChange'),
     onSettingsChange: action('onSettingsChange'),
-    settings: { roundRelativeTime: true, timePrecision: 's' },
+    settings: { roundRelativeTime: false, timePrecision: 's' },
   },
 };
 
@@ -72,7 +72,7 @@ export const AutoRefresh: Story = {
   args: {
     defaultValue: 'last 15 minutes',
     settings: {
-      roundRelativeTime: true,
+      roundRelativeTime: false,
       timePrecision: 's',
       autoRefresh: {
         isEnabled: true,
