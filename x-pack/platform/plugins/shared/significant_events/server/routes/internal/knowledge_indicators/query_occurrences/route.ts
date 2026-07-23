@@ -13,7 +13,7 @@ import { fetchQueryOccurrencesFromAlerts } from '../../../../lib/significant_eve
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { searchModeSchema } from '../../../utils/search_mode';
 import { assertValidDateRange, makeIsoDateFromString } from '../../../utils/iso_date_param';
-import { resolveStreamNamesForSearch } from '../../../utils/resolve_stream_names_for_search';
+import { resolveStreamNames } from '../../../utils/resolve_stream_names';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 
@@ -73,7 +73,7 @@ const readQueryOccurrencesRoute = createServerRoute({
     const { from, to, bucketSize, query, streamNames, searchMode } = params.query;
     assertValidDateRange(from, to);
 
-    const resolvedStreamNames = await resolveStreamNamesForSearch(streamNames, query, () =>
+    const resolvedStreamNames = await resolveStreamNames(streamNames, () =>
       scopedClients.streamsClient.listStreams()
     );
 

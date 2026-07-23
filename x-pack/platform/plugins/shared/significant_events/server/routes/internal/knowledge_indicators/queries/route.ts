@@ -36,7 +36,7 @@ import {
 } from '../../../../lib/significant_events/fetch_query_occurrences_from_alerts';
 import { searchModeSchema } from '../../../utils/search_mode';
 import { assertValidDateRange, makeIsoDateFromString } from '../../../utils/iso_date_param';
-import { resolveStreamNamesForSearch } from '../../../utils/resolve_stream_names_for_search';
+import { resolveStreamNames } from '../../../utils/resolve_stream_names';
 import type { PersistQueriesResult } from '../../../../lib/significant_events/persist_queries';
 import { persistQueries } from '../../../../lib/significant_events/persist_queries';
 import { queryFromLink } from '../../../../lib/knowledge_indicators/knowledge_indicator_client/serializers';
@@ -459,7 +459,7 @@ const getDiscoveryQueriesRoute = createServerRoute({
     } = params.query;
     assertValidDateRange(from, to);
 
-    const resolvedStreamNames = await resolveStreamNamesForSearch(streamNames, query, () =>
+    const resolvedStreamNames = await resolveStreamNames(streamNames, () =>
       scopedClients.streamsClient.listStreams()
     );
 
@@ -537,7 +537,7 @@ const getDiscoveryQueriesOccurrencesRoute = createServerRoute({
     const { from, to, bucketSize, query, streamNames } = params.query;
     assertValidDateRange(from, to);
 
-    const resolvedStreamNames = await resolveStreamNamesForSearch(streamNames, query, () =>
+    const resolvedStreamNames = await resolveStreamNames(streamNames, () =>
       scopedClients.streamsClient.listStreams()
     );
 

@@ -6,21 +6,16 @@
  */
 
 /**
- * `findQueries` early-returns on an empty stream list, while `getQueryLinks`
- * treats empty/undefined as "all streams". Resolve accessible stream names only
- * when a text query is present (search path). Unfiltered list/histogram calls
- * keep `undefined` so readers do not build a giant `IN` clause.
+ * `findQueries` / `findIndicators` early-return on an empty stream list, while
+ * `getQueryLinks` treats empty as "all streams". Resolve accessible stream names
+ * (same pattern as `listAllFeaturesRoute`) so search and list stay aligned.
  */
-export async function resolveStreamNamesForSearch(
+export async function resolveStreamNames(
   streamNames: string[] | undefined,
-  textQuery: string | undefined,
   listStreams: () => Promise<Array<{ name: string }>>
-): Promise<string[] | undefined> {
+): Promise<string[]> {
   if (streamNames?.length) {
     return streamNames;
-  }
-  if (!textQuery) {
-    return undefined;
   }
   return (await listStreams()).map((stream) => stream.name);
 }

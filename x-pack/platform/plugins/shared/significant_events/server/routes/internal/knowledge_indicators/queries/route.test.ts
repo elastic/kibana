@@ -284,15 +284,13 @@ describe('getDiscoveryQueriesRoute stream resolution', () => {
     );
   });
 
-  it('keeps streamNames undefined on the unfiltered list path (no text query)', async () => {
+  it('resolves streams for the unfiltered list path when streamNames is omitted', async () => {
     await discoveryQueriesRoute.handler(makeDiscoveryHandlerParams({ ...discoveryBaseQuery }));
 
-    // Unfiltered list keeps undefined so readers skip a giant stream IN clause;
-    // only the search path (text query present) resolves accessible streams.
-    expect(listStreams).not.toHaveBeenCalled();
+    expect(listStreams).toHaveBeenCalled();
     expect(mockFetchQueryLinks).toHaveBeenCalledWith(
       expect.objectContaining({
-        streamNames: undefined,
+        streamNames: ['logs.a', 'logs.b'],
         query: undefined,
       }),
       kiClient
