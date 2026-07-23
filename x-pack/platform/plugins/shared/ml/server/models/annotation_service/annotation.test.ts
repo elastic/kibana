@@ -24,7 +24,7 @@ const serverlessMock = {
   cpsEnabled: false,
 };
 
-const jobIdMock = 'jobIdMock';
+const jobIdMock = 'job-id-mock';
 
 describe('annotation_service', () => {
   let mlClusterClientSpy = {} as any;
