@@ -8,12 +8,12 @@
  */
 
 import { of } from 'rxjs';
-import { getESQLTimeFieldFromQuery } from '@kbn/esql-utils';
+import { getESQLTimeField } from '@kbn/esql-utils';
 import { EsqlQueryParser } from './esql_query_parser';
 
 jest.mock('@kbn/esql-utils', () => ({
   ...jest.requireActual('@kbn/esql-utils'),
-  getESQLTimeFieldFromQuery: jest.fn(),
+  getESQLTimeField: jest.fn(),
 }));
 
 const rangeStart = 1000000;
@@ -52,8 +52,8 @@ jest.mock('../services', () => ({
 }));
 
 beforeEach(() => {
-  getESQLTimeFieldFromQuery.mockReset();
-  getESQLTimeFieldFromQuery.mockResolvedValue(undefined);
+  getESQLTimeField.mockReset();
+  getESQLTimeField.mockResolvedValue(undefined);
 });
 
 describe('EsqlQueryParser.parseUrl', () => {
@@ -299,7 +299,7 @@ describe('EsqlQueryParser.populateData', () => {
   });
 
   test('applies both time params and a DSL time filter for BUCKET queries', async () => {
-    getESQLTimeFieldFromQuery.mockResolvedValue('timestamp');
+    getESQLTimeField.mockResolvedValue('timestamp');
 
     const { parser, searchAPI } = createParser(rangeStart, rangeEnd);
     const dataObject = { name: 'bucket_query' };
@@ -350,7 +350,7 @@ describe('EsqlQueryParser.populateData', () => {
   });
 
   test('applies a DSL time filter on the default time field when %timefield% is absent', async () => {
-    getESQLTimeFieldFromQuery.mockResolvedValue('timestamp');
+    getESQLTimeField.mockResolvedValue('timestamp');
 
     const { parser, searchAPI } = createParser(rangeStart, rangeEnd);
     const dataObject = { name: 'default_time_query' };
@@ -373,7 +373,7 @@ describe('EsqlQueryParser.populateData', () => {
 
     await parser.populateData([{ url, dataObject }]);
 
-    expect(getESQLTimeFieldFromQuery).toHaveBeenCalled();
+    expect(getESQLTimeField).toHaveBeenCalled();
     const callArgs = searchAPI.searchEsql.mock.calls[0][0][0];
     expect(callArgs.filter).toEqual(
       expect.objectContaining({
@@ -395,7 +395,7 @@ describe('EsqlQueryParser.populateData', () => {
   });
 
   test('does not apply a time filter when no default time field exists', async () => {
-    getESQLTimeFieldFromQuery.mockResolvedValue(undefined);
+    getESQLTimeField.mockResolvedValue(undefined);
 
     const { parser, searchAPI } = createParser(rangeStart, rangeEnd);
     const dataObject = { name: 'no_time_query' };
