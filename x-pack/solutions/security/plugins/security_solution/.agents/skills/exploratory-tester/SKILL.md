@@ -31,6 +31,8 @@ Explore a Kibana Security Solution feature area through a real browser, collect 
 
 **Mode:** Single for new areas. Parallel when `knowledge/` is populated — see `phases/2-explore.md`.
 
+Example (replace area, flows, and role with your targets):
+
 ```
 Read and follow x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/SKILL.md
 Area: Entity Analytics
@@ -43,6 +45,7 @@ Setup: role: t2_analyst
 
 All optional fields (Environment, Specs, Session-timeout, Session-dir, Session-config, isolate): `templates/session.example.yaml`.
 Guided intake runs automatically if `Area` or `Flows` is missing.
+
 ## Phases
 
 Execute in order — read each file before starting it:

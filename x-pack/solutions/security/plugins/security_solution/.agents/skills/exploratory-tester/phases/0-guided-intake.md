@@ -1,11 +1,15 @@
 # Guided Intake
 
-Run this when `Area` or `Flows` is missing from the invocation and not covered by a `Session-config:` file (`phases/0-setup.md` Step 0b item 4), or when GitHub mode found a PR/issue but no `## Exploratory testing scope` comment.
+Run this when `Area` or `Flows` is missing from the invocation and not covered by a `Session-config:` file (see the Session-config check in `phases/0-setup.md`), or when GitHub mode found a PR/issue but no `## Exploratory testing scope` comment.
 
 Ask the following questions **one at a time** with defaults shown in brackets. Record each answer immediately before asking the next.
 
 1. **Area** (if missing):
-   > _"What feature area do you want to test? (e.g. Entity Analytics, SIEM Migrations, Alerts)"_
+   - If called from GitHub mode (a PR/issue was fetched but no scope comment found), offer the PR/issue title as a pre-filled default:
+     > _"I'll use `<title>` as the feature area — is that right, or would you like to change it?"_
+     Skip the open-ended question below if the user confirms.
+   - Otherwise:
+     > _"What feature area do you want to test? (e.g. Entity Analytics, SIEM Migrations, Alerts)"_
 
 2. **Flows — source**:
    > _"How would you like to define the flows?_
