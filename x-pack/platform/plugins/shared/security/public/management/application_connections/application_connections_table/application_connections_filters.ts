@@ -22,6 +22,9 @@ export const getConnectionStatus = ({
   return 'connected';
 };
 
+export const isRevocable = (applicationConnection: ApplicationConnection): boolean =>
+  getConnectionStatus(applicationConnection) !== 'revoked';
+
 export const toApplicationConnectionList = (
   connections: ApplicationConnections[]
 ): ApplicationConnection[] =>

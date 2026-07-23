@@ -9,6 +9,8 @@ import {
   applicationConnectionMatchesFreeText,
   applicationConnectionMatchesStatus,
   applicationConnectionsMatchesFreeText,
+  getConnectionStatus,
+  isRevocable,
   toApplicationConnectionList,
 } from './application_connections_filters';
 import type { ApplicationConnection, ApplicationConnections } from '../constants/types';
@@ -284,5 +286,124 @@ describe('#applicationConnectionMatchesStatus', () => {
       expect(applicationConnectionMatchesStatus(connectionRevoked, [...statuses])).toBe(true);
       expect(applicationConnectionMatchesStatus(expired, [...statuses])).toBe(true);
     });
+  });
+});
+
+describe('#getConnectionStatus', () => {
+  it('returns "connected" when neither client nor connection is revoked or expired', () => {
+    expect(
+      getConnectionStatus(
+        createApplicationConnection({
+          client: createClient({ revoked: false }),
+          connection: createConnection({ revoked: false, expired: false }),
+        })
+      )
+    ).toBe('connected');
+  });
+
+  it('returns "expired" when the connection is expired but not revoked', () => {
+    expect(
+      getConnectionStatus(
+        createApplicationConnection({
+          connection: createConnection({ revoked: false, expired: true }),
+        })
+      )
+    ).toBe('expired');
+  });
+
+  it('returns "revoked" when the connection is revoked', () => {
+    expect(
+      getConnectionStatus(
+        createApplicationConnection({
+          connection: createConnection({ revoked: true }),
+        })
+      )
+    ).toBe('revoked');
+  });
+
+  it('returns "revoked" when the client is revoked', () => {
+    expect(
+      getConnectionStatus(
+        createApplicationConnection({
+          client: createClient({ revoked: true }),
+          connection: createConnection({ revoked: false }),
+        })
+      )
+    ).toBe('revoked');
+  });
+
+  it('prefers "revoked" over "expired" when the connection is both revoked and expired', () => {
+    expect(
+      getConnectionStatus(
+        createApplicationConnection({
+          connection: createConnection({ revoked: true, expired: true }),
+        })
+      )
+    ).toBe('revoked');
+  });
+
+  it('prefers "revoked" over "expired" when the client is revoked and the connection is expired', () => {
+    expect(
+      getConnectionStatus(
+        createApplicationConnection({
+          client: createClient({ revoked: true }),
+          connection: createConnection({ revoked: false, expired: true }),
+        })
+      )
+    ).toBe('revoked');
+  });
+});
+
+describe('#isRevocable', () => {
+  it('is revocable when neither client nor connection is revoked', () => {
+    expect(
+      isRevocable(
+        createApplicationConnection({
+          client: createClient({ revoked: false }),
+          connection: createConnection({ revoked: false }),
+        })
+      )
+    ).toBe(true);
+  });
+
+  it('stays revocable when the connection is expired but not revoked', () => {
+    expect(
+      isRevocable(
+        createApplicationConnection({
+          connection: createConnection({ revoked: false, expired: true }),
+        })
+      )
+    ).toBe(true);
+  });
+
+  it('is not revocable when the connection is revoked', () => {
+    expect(
+      isRevocable(
+        createApplicationConnection({
+          connection: createConnection({ revoked: true }),
+        })
+      )
+    ).toBe(false);
+  });
+
+  it('is not revocable when the client is revoked', () => {
+    expect(
+      isRevocable(
+        createApplicationConnection({
+          client: createClient({ revoked: true }),
+          connection: createConnection({ revoked: false }),
+        })
+      )
+    ).toBe(false);
+  });
+
+  it('is not revocable when the connection is both expired and revoked', () => {
+    expect(
+      isRevocable(
+        createApplicationConnection({
+          connection: createConnection({ revoked: true, expired: true }),
+        })
+      )
+    ).toBe(false);
   });
 });
