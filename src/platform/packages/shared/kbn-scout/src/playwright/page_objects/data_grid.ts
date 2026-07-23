@@ -131,6 +131,16 @@ export class DataGrid {
     );
   }
 
+  /**
+   * Returns the leaf value node of a data-grid cell. Prefer this over
+   * `getCell` when asserting on the rendered value: the gridcell wrapper's
+   * text content concatenates child nodes (adding stray newlines), whereas the
+   * value node holds the formatted value exactly.
+   */
+  getCellValue(rowIndex: number, columnId: string): Locator {
+    return this.getCell(rowIndex, columnId).locator('.unifiedDataTable__cellValue');
+  }
+
   getColumnHeader(name: string): Locator {
     return this.page.testSubj.locator(`dataGridHeaderCell-${name}`);
   }

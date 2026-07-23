@@ -381,6 +381,14 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await kibanaServer.importExport.load(
           'x-pack/platform/test/functional/fixtures/kbn_archives/lens/lens_basic.json'
         );
+        // Pin the default data view to logstash. `createAndAddLensFromDashboard`
+        // opens Lens against whatever data view is default and immediately
+        // configures dimensions on logstash fields (bytes / @timestamp / ip).
+        // With cases analytics v2 enabled, the managed "Case Analytics" data
+        // view can otherwise win the default slot (the data-views default
+        // resolver auto-selects the first view when none is set), leaving Lens
+        // pointed at a view without those fields and failing this hook.
+        await kibanaServer.uiSettings.update({ defaultIndex: 'logstash-*' });
 
         await common.navigateToApp('dashboard');
         await dashboard.preserveCrossAppState();
@@ -405,6 +413,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await kibanaServer.importExport.unload(
           'x-pack/platform/test/functional/fixtures/kbn_archives/lens/lens_basic.json'
         );
+        await kibanaServer.uiSettings.unset('defaultIndex');
 
         await cases.api.deleteAllCases();
       });

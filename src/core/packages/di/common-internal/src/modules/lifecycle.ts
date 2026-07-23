@@ -7,12 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  ContainerModule,
-  type ContainerModuleLoadOptions,
-  type ServiceIdentifier,
-} from 'inversify';
+import { ContainerModule, type ContainerModuleLoadOptions } from 'inversify';
 import type { LoggerFactory } from '@kbn/logging';
+import type { ServiceToken } from '@kbn/core-di';
 import { PluginSetup, PluginStart } from '@kbn/core-di';
 
 /** @internal */
@@ -21,7 +18,9 @@ export interface InternalPluginInitializerContext {
 }
 
 /** @internal */
-export type ServiceIdentifierFactory<T> = <K extends keyof T>(key: K) => ServiceIdentifier<T[K]>;
+export type ServiceIdentifierFactory<TBase> = <T extends TBase, K extends keyof T>(
+  key: K
+) => ServiceToken<T[K]>;
 
 function loadEach<T extends object>(
   { bind }: ContainerModuleLoadOptions,

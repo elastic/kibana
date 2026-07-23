@@ -289,6 +289,45 @@ describe('action policy events queries', () => {
       });
     });
 
+    describe('episodeIds', () => {
+      it('adds an AND terms filter on episode_ids when episodeIds are provided', () => {
+        const filters = filtersOf(
+          buildCountActionPolicyEventsQuery({ ...baseParams, episodeIds: ['ep-1', 'ep-2'] })
+        );
+        expect(filters).toEqual(
+          expect.arrayContaining([
+            { terms: { 'kibana.alerting_v2.dispatcher.episode_ids': ['ep-1', 'ep-2'] } },
+          ])
+        );
+      });
+
+      it('omits the episode_ids terms filter when episodeIds is not provided', () => {
+        const filters = filtersOf(buildCountActionPolicyEventsQuery(baseParams));
+        expect(
+          filters.find((clause) =>
+            Boolean(
+              clause?.terms &&
+                'kibana.alerting_v2.dispatcher.episode_ids' in (clause.terms as object)
+            )
+          )
+        ).toBeUndefined();
+      });
+
+      it('omits the episode_ids terms filter when episodeIds is empty', () => {
+        const filters = filtersOf(
+          buildCountActionPolicyEventsQuery({ ...baseParams, episodeIds: [] })
+        );
+        expect(
+          filters.find((clause) =>
+            Boolean(
+              clause?.terms &&
+                'kibana.alerting_v2.dispatcher.episode_ids' in (clause.terms as object)
+            )
+          )
+        ).toBeUndefined();
+      });
+    });
+
     it('sorts by @timestamp desc', () => {
       const body = buildCountActionPolicyEventsQuery(baseParams);
       expect(body.sort).toEqual([{ '@timestamp': { order: 'desc' } }]);
