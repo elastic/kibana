@@ -429,14 +429,7 @@ export class TemplatesService {
 
     this.assertFieldCountWithinLimit(parsedDefinition.fields.length);
 
-    // Each update persists a new version SO and marks the prior one `isLatest: false`, so the
-    // stored snapshot count tracks `templateVersion`. Cap it so an automated edit loop can't grow
-    // a single template's version history without bound.
-    if (currentTemplate.attributes.templateVersion >= MAX_VERSIONS_PER_TEMPLATE) {
-      throw Boom.badRequest(
-        `Cannot create more than ${MAX_VERSIONS_PER_TEMPLATE} versions of a template.`
-      );
-    }
+    this.assertVersionCountWithinLimit(currentTemplate.attributes.templateVersion);
 
     await this.assertTemplateNameIsUnique({
       name: templateName,
@@ -605,11 +598,16 @@ export class TemplatesService {
   /**
    * Write-preflight used by the public routes' `dry_run` mode: resolves the identity name the way
    * `createTemplate`/`updateTemplate` do and asserts it is unique for the owner — without writing
-   * anything. Throws the same Boom errors (400 missing name, 409 conflict) the real write would.
+   * anything. Throws the same Boom errors (400 missing name / resource-limit, 409 conflict) the
+   * real write would, so a `{ valid: true }` dry_run is a reliable predictor of a successful write.
+   *
+   * `currentVersion` is passed for the update preflight (it mirrors `updateTemplate`'s version cap);
+   * when omitted the call is treated as a create preflight and the per-owner count cap is asserted
+   * instead — matching which cap each real write path enforces.
    */
   async validateWriteInput(
     input: Pick<CreateTemplateInput, 'name' | 'owner' | 'definition'>,
-    { excludeTemplateId }: { excludeTemplateId?: string } = {}
+    { excludeTemplateId, currentVersion }: { excludeTemplateId?: string; currentVersion?: number } = {}
   ): Promise<void> {
     const normalizedDefinition = trimFieldDefaults(input.definition);
     const parsedDefinition = parseYaml(normalizedDefinition) as ParsedTemplate['definition'];
@@ -620,15 +618,24 @@ export class TemplatesService {
       );
     }
 
-    // Keep dry_run faithful to the real write: the field-count cap is enforced on both
-    // create and update, so surface it here too.
+    // Keep dry_run faithful to the real write: mirror the same resource-limit assertions each write
+    // path runs. Field count is capped on both create and update; the version cap is update-only and
+    // the per-owner count cap is create-only, so gate those on whether this is an update preflight.
     this.assertFieldCountWithinLimit(parsedDefinition.fields?.length ?? 0);
+
+    if (currentVersion !== undefined) {
+      this.assertVersionCountWithinLimit(currentVersion);
+    }
 
     await this.assertTemplateNameIsUnique({
       name: templateName,
       owner: input.owner,
       excludeTemplateId,
     });
+
+    if (currentVersion === undefined) {
+      await this.assertOwnerTemplateCountWithinLimit(input.owner);
+    }
   }
 
   /**
@@ -646,9 +653,32 @@ export class TemplatesService {
   }
 
   /**
+   * Caps a single template's version history. Each update persists a new version SO and marks the
+   * prior one `isLatest: false`, so the version number tracks the count of stored snapshots and
+   * bounding it stops an automated edit loop from growing history without limit. Enforced on update
+   * writes and the update `dry_run` preflight, never on read.
+   *
+   * NOTE: this bounds the version *number*, which is monotonic and never reset — there is no
+   * snapshot-pruning path today. If one is ever added, this cap becomes "highest version ever
+   * reached" rather than "current snapshot count"; revisit the semantics then.
+   */
+  private assertVersionCountWithinLimit(currentVersion: number): void {
+    if (currentVersion >= MAX_VERSIONS_PER_TEMPLATE) {
+      throw Boom.badRequest(
+        `Cannot create more than ${MAX_VERSIONS_PER_TEMPLATE} versions of a template.`
+      );
+    }
+  }
+
+  /**
    * Caps the number of distinct, non-deleted templates an owner may have in a space. Counts by
    * `isLatest` version (one per live template) so version history doesn't inflate the total. New
    * templates only — existing owners already over the cap are never forced to delete.
+   *
+   * NOTE: like `assertTemplateNameIsUnique`, this is a best-effort read-then-write check, not an
+   * atomic constraint. Two concurrent creates at count `limit - 1` can both pass and persist,
+   * overshooting by one. Accepted trade-off: template creation is a low-frequency administrative
+   * action and `refresh: true` writes keep the read current, so the overshoot is bounded and small.
    */
   private async assertOwnerTemplateCountWithinLimit(owner: string): Promise<void> {
     const escapedOwner = escapeKuery(owner);

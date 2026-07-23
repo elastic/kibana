@@ -181,6 +181,7 @@ export const createTemplatesSubClient = (clientArgs: CasesClientArgs): Templates
       await ensureCanManageTargetOwner(template, input);
       await templatesService.validateWriteInput(input, {
         excludeTemplateId: template.attributes.templateId,
+        currentVersion: template.attributes.templateVersion,
       });
     },
 

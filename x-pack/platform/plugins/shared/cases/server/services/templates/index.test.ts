@@ -1581,6 +1581,26 @@ describe('TemplatesService', () => {
 
         expect(unsecuredSavedObjectsClient.create).toHaveBeenCalled();
       });
+
+      it('surfaces the per-owner count cap on the create dry_run preflight', async () => {
+        const service = createService();
+        unsecuredSavedObjectsClient.find.mockResolvedValue({
+          page: 1,
+          per_page: 0,
+          total: 200,
+          saved_objects: [],
+        } as unknown as SavedObjectsFindResponse<Template>);
+
+        await expect(
+          service.validateWriteInput({
+            name: 'One Too Many',
+            owner: 'securitySolution',
+            definition: buildDefinition('One Too Many'),
+          })
+        ).rejects.toThrow('Cannot create more than 200 templates per owner.');
+
+        expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+      });
     });
 
     describe('MAX_FIELDS_PER_TEMPLATE', () => {
@@ -1722,6 +1742,23 @@ describe('TemplatesService', () => {
           expect.objectContaining({ templateVersion: 100 }),
           expect.any(Object)
         );
+      });
+
+      it('surfaces the version cap on the update dry_run preflight', async () => {
+        const service = createService();
+
+        await expect(
+          service.validateWriteInput(
+            {
+              name: 'Busy Template',
+              owner: 'securitySolution',
+              definition: buildDefinition('Busy Template'),
+            },
+            { excludeTemplateId: 'template-id', currentVersion: 100 }
+          )
+        ).rejects.toThrow('Cannot create more than 100 versions of a template.');
+
+        expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
       });
     });
   });
