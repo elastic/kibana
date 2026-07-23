@@ -619,9 +619,9 @@ entries:
   - https://github.com/elastic/kibana/issues/243891
 - file:
     name: 277812.yaml
-    checksum: ad8cace46a9f78147a0a8ba3bc74fc0b0b98d061
+    checksum: 0231d1927e8238c53fe579f6a413dbfeafa68515
   type: enhancement
-  title: Merge Status and Content filters into a single More filter
+  title: Merge Status and Content filters into a single More filter on the Browse integrations page.
   products:
   - product: cloud-serverless
     target: 2026-07-21
