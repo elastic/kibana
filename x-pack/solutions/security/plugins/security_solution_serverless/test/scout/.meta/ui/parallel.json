@@ -1,5 +1,5 @@
 {
-  "sha1": "",
+  "sha1": "6550752fe7809f935e11d87e4f680e83e3753acd",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -26,8 +26,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution_serverless/test/scout/ui/parallel_tests/serverless_security_navigation.spec.ts",
-        "line": 15,
-        "column": 12
+        "line": 22,
+        "column": 14
       }
     },
     {
@@ -40,8 +40,50 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution_serverless/test/scout/ui/parallel_tests/serverless_security_navigation.spec.ts",
-        "line": 21,
-        "column": 12
+        "line": 28,
+        "column": 14
+      }
+    },
+    {
+      "id": "6fa936d347ac553-c6ca0e098797183",
+      "title": "serverless security navigation shows a flat Alerts link when alerts-and-attacks alignment is disabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution_serverless/test/scout/ui/parallel_tests/serverless_security_navigation.spec.ts",
+        "line": 52,
+        "column": 14
+      }
+    },
+    {
+      "id": "6fa936d347ac553-ead5dde6ed567bf",
+      "title": "serverless security navigation opens the Launchpad footer panel and navigates to its items",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution_serverless/test/scout/ui/parallel_tests/serverless_security_navigation.spec.ts",
+        "line": 69,
+        "column": 14
+      }
+    },
+    {
+      "id": "6fa936d347ac553-141d3e2a9185ca9",
+      "title": "serverless security navigation highlights the active top-level nav item after navigating",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution_serverless/test/scout/ui/parallel_tests/serverless_security_navigation.spec.ts",
+        "line": 90,
+        "column": 14
       }
     },
     {
@@ -54,8 +96,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution_serverless/test/scout/ui/parallel_tests/serverless_security_navigation.spec.ts",
-        "line": 39,
-        "column": 12
+        "line": 105,
+        "column": 14
       }
     },
     {
@@ -68,8 +110,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution_serverless/test/scout/ui/parallel_tests/serverless_security_navigation.spec.ts",
-        "line": 54,
-        "column": 12
+        "line": 124,
+        "column": 14
       }
     },
     {
@@ -82,8 +124,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution_serverless/test/scout/ui/parallel_tests/serverless_security_navigation.spec.ts",
-        "line": 75,
-        "column": 12
+        "line": 143,
+        "column": 14
       }
     },
     {
@@ -96,8 +138,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution_serverless/test/scout/ui/parallel_tests/serverless_security_navigation.spec.ts",
-        "line": 97,
-        "column": 12
+        "line": 165,
+        "column": 14
       }
     },
     {
@@ -110,8 +152,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution_serverless/test/scout/ui/parallel_tests/serverless_security_navigation.spec.ts",
-        "line": 110,
-        "column": 12
+        "line": 178,
+        "column": 14
       }
     }
   ]

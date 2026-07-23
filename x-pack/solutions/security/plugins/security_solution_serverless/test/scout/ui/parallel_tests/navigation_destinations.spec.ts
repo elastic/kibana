@@ -9,34 +9,10 @@ import { spaceTest, tags } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/ui';
 
 spaceTest.describe(
-  'serverless security navigation',
+  'serverless security navigation destinations',
   { tag: [...tags.serverless.security.complete] },
   () => {
-    spaceTest('has security serverless side nav', async ({ pageObjects, browserAuth }) => {
-      await browserAuth.loginAsPrivilegedUser();
-      await pageObjects.serverlessProjectChromePage.navigateToSecuritySolutionHomeForChromeNav();
-      await expect(pageObjects.serverlessProjectChromePage.primaryNav).toBeVisible();
-    });
-
-    spaceTest('breadcrumbs reflect navigation state', async ({ pageObjects, browserAuth }) => {
-      const { serverlessProjectChromePage, collapsibleNav } = pageObjects;
-
-      await browserAuth.loginAsPrivilegedUser();
-      await serverlessProjectChromePage.navigateToSecuritySolutionHomeForChromeNav();
-
-      await expect(serverlessProjectChromePage.breadcrumbs).toBeVisible();
-      await expect(serverlessProjectChromePage.getBreadcrumbByText('Get started')).toBeVisible();
-
-      // Alerts is nested inside the "Detections" panel opener; open it before clicking Alerts.
-      await collapsibleNav.getNavItemById('securityGroup:alertDetections').click();
-      await collapsibleNav.clickNavItemByDeepLinkId('securitySolutionUI:alerts');
-      await expect(serverlessProjectChromePage.getBreadcrumbByText('Alerts')).toBeVisible();
-
-      await serverlessProjectChromePage.clickLogo();
-      await expect(serverlessProjectChromePage.getBreadcrumbByText('Get started')).toBeVisible();
-    });
-
-    spaceTest('navigate using search', async ({ page, pageObjects, browserAuth }) => {
+    spaceTest('navigate using search', async ({ page, pageObjects, browserAuth, scoutSpace }) => {
       const { serverlessProjectChromePage } = pageObjects;
 
       await browserAuth.loginAsPrivilegedUser();
@@ -44,7 +20,9 @@ spaceTest.describe(
 
       await serverlessProjectChromePage.openNavSearch();
       await serverlessProjectChromePage.searchNav('security dashboards');
-      await serverlessProjectChromePage.getNavSearchOptionByUrl('/app/security/dashboards').click();
+      await serverlessProjectChromePage
+        .getNavSearchOptionByUrl(`/s/${scoutSpace.id}/app/security/dashboards`)
+        .click();
       await serverlessProjectChromePage.closeNavSearch();
 
       await page.waitForURL(/app\/security\/dashboards/);
