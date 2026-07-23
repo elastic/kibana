@@ -2253,7 +2253,7 @@ groups:
         description: |
           Enables the new flyout system for document details in Security Solution.
         datatype: bool
-        default: false
+        default: true
         applies_to:
           stack: preview 9.5
           ech: ga
