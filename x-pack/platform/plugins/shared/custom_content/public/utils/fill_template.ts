@@ -12,23 +12,12 @@ export interface TemplateColumn {
   type: string;
 }
 
-const partialsDisabled = () => {
-  throw new Error('partials are disabled');
-};
-
 const liquid = new Liquid({
   strictFilters: false,
   strictVariables: false,
   dynamicPartials: false,
   relativeReference: false,
   outputEscape: 'escape',
-  fs: {
-    readFileSync: partialsDisabled,
-    readFile: async () => partialsDisabled(),
-    existsSync: () => false,
-    exists: async () => false,
-    resolve: partialsDisabled,
-  },
 });
 
 export async function fillTemplate(
