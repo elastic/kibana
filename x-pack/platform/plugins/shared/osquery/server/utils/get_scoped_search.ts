@@ -17,6 +17,7 @@ export const getScopedSearch = async (
 ) => {
   if (cpsEnabled) {
     const [, { data }] = await getStartServices();
+
     return data.search.asScoped(request, { projectRouting: 'space' });
   }
 

@@ -299,9 +299,7 @@ describe('osquerySearchStrategyProvider space scoping', () => {
         actionsIndexExists: true,
       });
 
-      await lastValueFrom(
-        provider.search(actionsRequest, {} as never, { request: {} } as never)
-      );
+      await lastValueFrom(provider.search(actionsRequest, {} as never, { request: {} } as never));
 
       expect(searchMock).toHaveBeenCalled();
       expect(getSearchStrategy).not.toHaveBeenCalled();

@@ -13,10 +13,7 @@ export const isOsqueryDataIndex = (index: string): boolean =>
   !index.includes('fleet') &&
   !isOsqueryActionsMetadataIndex(index);
 
-export const shouldUseInternalSearchClient = (
-  indices: string[],
-  cpsEnabled: boolean
-): boolean => {
+export const shouldUseInternalSearchClient = (indices: string[], cpsEnabled: boolean): boolean => {
   if (!cpsEnabled) {
     return indices.some((index) => index.includes('fleet') || index.includes('osquery_manager'));
   }

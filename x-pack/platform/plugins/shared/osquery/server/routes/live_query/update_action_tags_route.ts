@@ -94,7 +94,11 @@ export const updateActionTagsRoute = (
           const [coreStartServices] = await osqueryContext.getStartServices();
           const clusterClient = coreStartServices.elasticsearch.client;
           const internalEsClient = clusterClient.asInternalUser;
-          const dataReadEsClient = getReadEsClient(clusterClient, request, osqueryContext.cpsEnabled);
+          const dataReadEsClient = getReadEsClient(
+            clusterClient,
+            request,
+            osqueryContext.cpsEnabled
+          );
 
           const spaceId = osqueryContext?.service?.getActiveSpace
             ? (await osqueryContext.service.getActiveSpace(request))?.id || DEFAULT_SPACE_ID

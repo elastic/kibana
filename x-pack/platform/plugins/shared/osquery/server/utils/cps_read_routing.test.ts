@@ -43,9 +43,7 @@ describe('cps_read_routing', () => {
 
   describe('shouldUseInternalSearchClient', () => {
     it('keeps the legacy non-CPS selector', () => {
-      expect(
-        shouldUseInternalSearchClient(['logs-osquery_manager.result-prod'], false)
-      ).toBe(true);
+      expect(shouldUseInternalSearchClient(['logs-osquery_manager.result-prod'], false)).toBe(true);
       expect(shouldUseInternalSearchClient(['.fleet-actions*'], false)).toBe(true);
     });
 
@@ -54,15 +52,13 @@ describe('cps_read_routing', () => {
     });
 
     it('uses internal search for actions metadata when CPS is enabled', () => {
-      expect(
-        shouldUseInternalSearchClient(['.logs-osquery_manager.actions-default'], true)
-      ).toBe(true);
+      expect(shouldUseInternalSearchClient(['.logs-osquery_manager.actions-default'], true)).toBe(
+        true
+      );
     });
 
     it('uses enhanced search for osquery data indices when CPS is enabled', () => {
-      expect(
-        shouldUseInternalSearchClient(['logs-osquery_manager.result-prod'], true)
-      ).toBe(false);
+      expect(shouldUseInternalSearchClient(['logs-osquery_manager.result-prod'], true)).toBe(false);
       expect(
         shouldUseInternalSearchClient(['logs-osquery_manager.action.responses-prod'], true)
       ).toBe(false);
