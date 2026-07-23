@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { defineConvertApiKeyRoutes } from './convert';
 import { defineCreateApiKeyRoutes } from './create';
 import { defineEnabledApiKeysRoutes } from './enabled';
 import { defineHasApiKeysRoutes } from './has_active';
@@ -28,4 +29,5 @@ export function defineApiKeysRoutes(params: RouteDefinitionParams) {
   defineUpdateApiKeyRoutes(params);
   defineInvalidateApiKeysRoutes(params);
   defineQueryApiKeysAndAggregationsRoute(params);
+  defineConvertApiKeyRoutes(params);
 }
