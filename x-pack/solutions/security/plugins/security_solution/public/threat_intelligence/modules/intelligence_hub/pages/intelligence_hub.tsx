@@ -86,9 +86,17 @@ import {
 import { ContinuousHuntStatusStrip } from '../components/continuous_hunt_status_strip';
 import { DigestsTab } from '../components/digests_tab';
 import { SourcesTab } from '../components/sources_tab';
-import { HuntFindingsPanel } from '../components/hunt_findings_panel';
+import {
+  DEFAULT_HUNT_FINDINGS_PAGE_SIZE,
+  emptyHuntFindingsFilters,
+  HuntFindingsPanel,
+  type FeedbackLoopSummary,
+  type HuntFindingListItem,
+  type HuntFindingsSortBy,
+  type HuntFindingsSortOrder,
+  type HuntFindingsTableFilters,
+} from '../components/hunt_findings_panel';
 import { CorrelationReportPage } from '../../correlation_report';
-import type { FeedbackLoopSummary, HuntFindingListItem } from '../components/hunt_findings_panel';
 
 type IntelligenceHubTabId = 'overview' | 'hunt_findings' | 'sources' | 'digests';
 
@@ -193,10 +201,18 @@ export const IntelligenceHubPage: FC = () => {
   const [feedPageIndex, setFeedPageIndex] = useState(0);
   const [isLoadingFeed, setIsLoadingFeed] = useState(false);
   const [huntFindings, setHuntFindings] = useState<HuntFindingListItem[]>([]);
+  const [huntFindingsTotal, setHuntFindingsTotal] = useState(0);
+  const [huntFindingsNewTotal, setHuntFindingsNewTotal] = useState(0);
   const [huntFindingsFeedbackLoop, setHuntFindingsFeedbackLoop] = useState<FeedbackLoopSummary[]>(
     []
   );
   const [isLoadingHuntFindings, setIsLoadingHuntFindings] = useState(false);
+  const [huntFindingsPageIndex, setHuntFindingsPageIndex] = useState(0);
+  const [huntFindingsPageSize, setHuntFindingsPageSize] = useState(DEFAULT_HUNT_FINDINGS_PAGE_SIZE);
+  const [huntFindingsSortBy, setHuntFindingsSortBy] = useState<HuntFindingsSortBy>('recency');
+  const [huntFindingsSortOrder, setHuntFindingsSortOrder] = useState<HuntFindingsSortOrder>('desc');
+  const [huntFindingsFilters, setHuntFindingsFilters] =
+    useState<HuntFindingsTableFilters>(emptyHuntFindingsFilters);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState<IntelligenceHubChipFilters>(emptyFilters);
@@ -227,39 +243,104 @@ export const IntelligenceHubPage: FC = () => {
 
   const fetchOverview = useCallback(async () => {
     setLoading(true);
-    setIsLoadingHuntFindings(true);
     setError(null);
     const { from, to } = resolveTimeRangeFromPreset(timeRangePreset);
     try {
-      const [response, huntResponse] = await Promise.all([
-        http.get<DashboardOverviewResponse>(DASHBOARD_OVERVIEW_API_PATH, {
-          version: '2023-10-31',
-          query: {
-            from,
-            to,
-            ...(filters.regions.length ? { regions: filters.regions } : {}),
-            ...(filters.categories.length ? { categories: filters.categories } : {}),
-          },
-        }),
-        http.get<{
-          findings: HuntFindingListItem[];
-          feedback_loop?: FeedbackLoopSummary[];
-        }>(HUNT_FINDINGS_API_PATH, {
-          version: '2023-10-31',
-          query: { from, to, size: 25 },
-        }),
-      ]);
+      const response = await http.get<DashboardOverviewResponse>(DASHBOARD_OVERVIEW_API_PATH, {
+        version: '2023-10-31',
+        query: {
+          from,
+          to,
+          ...(filters.regions.length ? { regions: filters.regions } : {}),
+          ...(filters.categories.length ? { categories: filters.categories } : {}),
+        },
+      });
       setData(response);
-      setHuntFindings(huntResponse.findings ?? []);
-      setHuntFindingsFeedbackLoop(huntResponse.feedback_loop ?? []);
       setLastUpdatedAt(Date.now());
     } catch (err) {
       setError(err?.body?.message ?? err?.message ?? 'Unknown error');
     } finally {
       setLoading(false);
-      setIsLoadingHuntFindings(false);
     }
   }, [http, filters.regions, filters.categories, timeRangePreset]);
+
+  const fetchHuntFindings = useCallback(
+    async (pageIndex: number, pageSize: number) => {
+      setIsLoadingHuntFindings(true);
+      const { from, to } = resolveTimeRangeFromPreset(timeRangePreset);
+      try {
+        const response = await http.get<{
+          findings: HuntFindingListItem[];
+          total: number;
+          feedback_loop?: FeedbackLoopSummary[];
+        }>(HUNT_FINDINGS_API_PATH, {
+          version: '2023-10-31',
+          query: {
+            from,
+            to,
+            size: pageSize,
+            offset: pageIndex * pageSize,
+            sort_by: huntFindingsSortBy,
+            sort_order: huntFindingsSortOrder,
+            ...(huntFindingsFilters.statuses.length
+              ? { statuses: huntFindingsFilters.statuses }
+              : {}),
+            ...(huntFindingsFilters.severities.length
+              ? { severities: huntFindingsFilters.severities }
+              : {}),
+            ...(typeof huntFindingsFilters.minConfidence === 'number'
+              ? { min_confidence: huntFindingsFilters.minConfidence }
+              : {}),
+            ...(huntFindingsFilters.q.trim() ? { q: huntFindingsFilters.q.trim() } : {}),
+          },
+        });
+        setHuntFindings(response.findings ?? []);
+        setHuntFindingsTotal(response.total ?? 0);
+        setHuntFindingsFeedbackLoop(response.feedback_loop ?? []);
+      } catch (err) {
+        setHuntFindings([]);
+        setHuntFindingsTotal(0);
+        notifications.toasts.addError(err as Error, {
+          title: i18n.translate(
+            'xpack.securitySolution.threatIntelligence.app.huntFindingsLoadError',
+            { defaultMessage: 'Failed to load hunt findings' }
+          ),
+        });
+      } finally {
+        setIsLoadingHuntFindings(false);
+      }
+    },
+    [
+      http,
+      huntFindingsFilters.minConfidence,
+      huntFindingsFilters.q,
+      huntFindingsFilters.severities,
+      huntFindingsFilters.statuses,
+      huntFindingsSortBy,
+      huntFindingsSortOrder,
+      notifications.toasts,
+      timeRangePreset,
+    ]
+  );
+
+  const fetchHuntFindingsNewCount = useCallback(async () => {
+    const { from, to } = resolveTimeRangeFromPreset(timeRangePreset);
+    try {
+      const response = await http.get<{ total: number }>(HUNT_FINDINGS_API_PATH, {
+        version: '2023-10-31',
+        query: {
+          from,
+          to,
+          size: 1,
+          offset: 0,
+          statuses: 'new',
+        },
+      });
+      setHuntFindingsNewTotal(response.total ?? 0);
+    } catch {
+      setHuntFindingsNewTotal(0);
+    }
+  }, [http, timeRangePreset]);
 
   const fetchThreatReportFeed = useCallback(
     async (pageIndex: number) => {
@@ -399,6 +480,15 @@ export const IntelligenceHubPage: FC = () => {
   }, [fetchThreatReportFeed]);
 
   useEffect(() => {
+    setHuntFindingsPageIndex(0);
+    void fetchHuntFindings(0, huntFindingsPageSize);
+  }, [fetchHuntFindings, huntFindingsPageSize]);
+
+  useEffect(() => {
+    void fetchHuntFindingsNewCount();
+  }, [fetchHuntFindingsNewCount]);
+
+  useEffect(() => {
     fetchSavedViews();
   }, [fetchSavedViews]);
 
@@ -486,6 +576,36 @@ export const IntelligenceHubPage: FC = () => {
     setSortBy(next);
   }, []);
 
+  const onHuntFindingsPageChange = useCallback(
+    (pageIndex: number, pageSize: number) => {
+      if (pageSize !== huntFindingsPageSize) {
+        setHuntFindingsPageIndex(0);
+        setHuntFindingsPageSize(pageSize);
+        return;
+      }
+      setHuntFindingsPageIndex(pageIndex);
+      void fetchHuntFindings(pageIndex, pageSize);
+    },
+    [fetchHuntFindings, huntFindingsPageSize]
+  );
+
+  const onHuntFindingsSortChange = useCallback(
+    (nextSortBy: HuntFindingsSortBy, nextSortOrder: HuntFindingsSortOrder) => {
+      setHuntFindingsSortBy(nextSortBy);
+      setHuntFindingsSortOrder(nextSortOrder);
+    },
+    []
+  );
+
+  const onHuntFindingsFiltersChange = useCallback((next: HuntFindingsTableFilters) => {
+    setHuntFindingsFilters(next);
+  }, []);
+
+  const refreshHuntFindings = useCallback(() => {
+    void fetchHuntFindings(huntFindingsPageIndex, huntFindingsPageSize);
+    void fetchHuntFindingsNewCount();
+  }, [fetchHuntFindings, fetchHuntFindingsNewCount, huntFindingsPageIndex, huntFindingsPageSize]);
+
   const toggleSeverity = useCallback((severity: SeverityLevel) => {
     setFilters((prev) => ({
       ...prev,
@@ -567,13 +687,6 @@ export const IntelligenceHubPage: FC = () => {
           void generateAdvisory();
         }}
         onFocusSourceReports={focusSourceReports}
-        huntFindings={huntFindings}
-        huntFindingsFeedbackLoop={huntFindingsFeedbackLoop}
-        isLoadingHuntFindings={isLoadingHuntFindings}
-        http={http}
-        notifications={notifications}
-        application={application}
-        showHuntFindings={false}
         onCorrelateReport={onCorrelateReport}
       />
     );
@@ -595,7 +708,7 @@ export const IntelligenceHubPage: FC = () => {
               {i18n.translate('xpack.securitySolution.threatIntelligence.app.tabHuntFindings', {
                 defaultMessage: 'Hunt findings',
               })}
-              {huntFindings.length > 0 ? (
+              {huntFindingsNewTotal > 0 ? (
                 <>
                   {' '}
                   <EuiBadge color="accent">
@@ -603,7 +716,7 @@ export const IntelligenceHubPage: FC = () => {
                       'xpack.securitySolution.threatIntelligence.app.tabHuntFindingsNewBadge',
                       {
                         defaultMessage: '{count} new',
-                        values: { count: huntFindings.length },
+                        values: { count: huntFindingsNewTotal },
                       }
                     )}
                   </EuiBadge>
@@ -625,7 +738,7 @@ export const IntelligenceHubPage: FC = () => {
           }),
         },
       ] satisfies Array<{ id: IntelligenceHubTabId; name: React.ReactNode }>,
-    [huntFindings.length]
+    [huntFindingsNewTotal]
   );
 
   const renderTabPanel = () => {
@@ -636,10 +749,20 @@ export const IntelligenceHubPage: FC = () => {
         return (
           <HuntFindingsPanel
             findings={huntFindings}
+            total={huntFindingsTotal}
+            pageIndex={huntFindingsPageIndex}
+            pageSize={huntFindingsPageSize}
+            sortBy={huntFindingsSortBy}
+            sortOrder={huntFindingsSortOrder}
+            filters={huntFindingsFilters}
             feedbackLoop={huntFindingsFeedbackLoop}
             isLoading={isLoadingHuntFindings}
+            onPageChange={onHuntFindingsPageChange}
+            onSortChange={onHuntFindingsSortChange}
+            onFiltersChange={onHuntFindingsFiltersChange}
             onHighlightReport={onHighlightReport}
             onCorrelateReport={onCorrelateReport}
+            onDeployed={refreshHuntFindings}
             http={http}
             notifications={notifications}
             application={application}
@@ -745,6 +868,7 @@ export const IntelligenceHubPage: FC = () => {
           isRefreshing={isRefreshing}
           onRefresh={() => {
             void fetchOverview();
+            refreshHuntFindings();
           }}
         />
         {data ? (

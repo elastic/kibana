@@ -67,12 +67,19 @@ export type {
   PersistableHuntSnapshot,
 } from './persist_hunt_findings';
 
-export { listHuntFindings } from './list_hunt_findings';
+export {
+  listHuntFindings,
+  HUNT_FINDINGS_SORT_OPTIONS,
+  HUNT_FINDINGS_STATUS_OPTIONS,
+} from './list_hunt_findings';
 export type {
   ListHuntFindingsParams,
   ListHuntFindingsResult,
   HuntFindingRow,
   FeedbackLoopSummary,
+  HuntFindingsSortBy,
+  HuntFindingsSortOrder,
+  HuntFindingsStatus,
 } from './list_hunt_findings';
 
 export { markHuntFindingDeployed, HuntFindingNotFoundError } from './mark_hunt_finding_deployed';

@@ -7,10 +7,25 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import {
+  SEVERITY_LEVELS,
   THREAT_INTEL_HUNT_FINDINGS_INDEX,
   THREAT_REPORTS_INDEX_PATTERN,
+  type SeverityLevel,
 } from '../../../common/threat_intelligence/hub';
 import { buildSpaceFilterTerms } from '../lib/space_filter';
+
+export const HUNT_FINDINGS_SORT_OPTIONS = [
+  'recency',
+  'confidence',
+  'risk_score',
+  'severity',
+] as const;
+export type HuntFindingsSortBy = (typeof HUNT_FINDINGS_SORT_OPTIONS)[number];
+
+export const HUNT_FINDINGS_STATUS_OPTIONS = ['new', 'deployed'] as const;
+export type HuntFindingsStatus = (typeof HUNT_FINDINGS_STATUS_OPTIONS)[number];
+
+export type HuntFindingsSortOrder = 'asc' | 'desc';
 
 export interface ListHuntFindingsParams {
   spaceId: string;
@@ -18,6 +33,12 @@ export interface ListHuntFindingsParams {
   to?: string;
   min_confidence?: number;
   size?: number;
+  offset?: number;
+  sort_by?: HuntFindingsSortBy;
+  sort_order?: HuntFindingsSortOrder;
+  statuses?: HuntFindingsStatus[];
+  severities?: SeverityLevel[];
+  q?: string;
 }
 
 export interface HuntFindingRow {
@@ -90,6 +111,124 @@ interface ReportEnrichment {
   envHits?: number;
   title?: string;
 }
+
+const escapeWildcard = (value: string): string => value.replace(/[\\*?]/g, '\\$&');
+
+/** Exported for unit tests — builds the ES bool filter + must clauses. */
+export const buildHuntFindingsQueryClauses = (
+  params: Omit<ListHuntFindingsParams, 'spaceId' | 'size' | 'offset' | 'sort_by' | 'sort_order'> & {
+    spaceId: string;
+  }
+): { filter: Record<string, unknown>[]; must: Record<string, unknown>[] } => {
+  const filter: Record<string, unknown>[] = [buildSpaceFilterTerms(params.spaceId)];
+  const must: Record<string, unknown>[] = [];
+
+  if (params.from || params.to) {
+    filter.push({
+      range: {
+        '@timestamp': {
+          ...(params.from ? { gte: params.from } : {}),
+          ...(params.to ? { lte: params.to } : {}),
+        },
+      },
+    });
+  }
+
+  if (typeof params.min_confidence === 'number') {
+    filter.push({
+      range: {
+        confidence: { gte: params.min_confidence },
+      },
+    });
+  }
+
+  const statuses = params.statuses?.filter((status) =>
+    (HUNT_FINDINGS_STATUS_OPTIONS as readonly string[]).includes(status)
+  );
+  if (statuses && statuses.length > 0 && statuses.length < HUNT_FINDINGS_STATUS_OPTIONS.length) {
+    const statusShould: Record<string, unknown>[] = [];
+    if (statuses.includes('deployed')) {
+      statusShould.push({ term: { status: 'deployed' } });
+    }
+    if (statuses.includes('new')) {
+      // Persist path may omit `status` for brand-new findings; treat missing as new.
+      statusShould.push({ term: { status: 'new' } });
+      statusShould.push({ bool: { must_not: { exists: { field: 'status' } } } });
+    }
+    filter.push({
+      bool: {
+        should: statusShould,
+        minimum_should_match: 1,
+      },
+    });
+  }
+
+  const severities = params.severities?.filter((level) =>
+    (SEVERITY_LEVELS as readonly string[]).includes(level)
+  );
+  if (severities && severities.length > 0) {
+    filter.push({ terms: { severity: severities } });
+  }
+
+  const q = params.q?.trim();
+  if (q) {
+    const wildcard = `*${escapeWildcard(q)}*`;
+    must.push({
+      bool: {
+        should: [
+          { match: { hypothesis: q } },
+          { match: { report_title: q } },
+          { wildcard: { technique_name: { value: wildcard, case_insensitive: true } } },
+          { wildcard: { rule_name: { value: wildcard, case_insensitive: true } } },
+          { wildcard: { technique_id: { value: wildcard, case_insensitive: true } } },
+        ],
+        minimum_should_match: 1,
+      },
+    });
+  }
+
+  return { filter, must };
+};
+
+/** Exported for unit tests — maps sort_by/order to an ES sort clause. */
+export const buildHuntFindingsSortClause = (
+  sortBy: HuntFindingsSortBy = 'recency',
+  sortOrder: HuntFindingsSortOrder = 'desc'
+): Array<Record<string, unknown>> => {
+  switch (sortBy) {
+    case 'confidence':
+      return [{ confidence: { order: sortOrder, missing: 0 } }];
+    case 'risk_score':
+      return [{ risk_score: { order: sortOrder, missing: 0 } }];
+    case 'severity':
+      return [
+        {
+          _script: {
+            type: 'number',
+            order: sortOrder,
+            script: {
+              lang: 'painless',
+              source: `
+                if (!doc.containsKey('severity') || doc['severity'].size() == 0) {
+                  return 0;
+                }
+                def s = doc['severity'].value;
+                if (s == 'critical') return 4;
+                if (s == 'high') return 3;
+                if (s == 'medium') return 2;
+                if (s == 'low') return 1;
+                return 0;
+              `,
+            },
+          },
+        },
+        { '@timestamp': { order: 'desc' } },
+      ];
+    case 'recency':
+    default:
+      return [{ '@timestamp': { order: sortOrder } }];
+  }
+};
 
 const deriveTierLabel = (tier1Status: string, huntRunStatus: string): string | undefined => {
   const hasTier1 = Boolean(tier1Status);
@@ -170,36 +309,24 @@ export const listHuntFindings = async (
   params: ListHuntFindingsParams
 ): Promise<ListHuntFindingsResult> => {
   const size = Math.min(Math.max(params.size ?? 25, 1), 100);
-  const filters: Record<string, unknown>[] = [buildSpaceFilterTerms(params.spaceId)];
-
-  if (params.from || params.to) {
-    filters.push({
-      range: {
-        '@timestamp': {
-          ...(params.from ? { gte: params.from } : {}),
-          ...(params.to ? { lte: params.to } : {}),
-        },
-      },
-    });
-  }
-
-  if (typeof params.min_confidence === 'number') {
-    filters.push({
-      range: {
-        confidence: { gte: params.min_confidence },
-      },
-    });
-  }
+  const offset = Math.min(Math.max(params.offset ?? 0, 0), 10_000);
+  const sortBy = params.sort_by ?? 'recency';
+  const sortOrder = params.sort_order ?? 'desc';
+  const { filter, must } = buildHuntFindingsQueryClauses(params);
 
   const [response, feedbackResponse] = await Promise.all([
     esClient.search({
       index: THREAT_INTEL_HUNT_FINDINGS_INDEX,
       ignore_unavailable: true,
+      from: offset,
       size,
       track_total_hits: true,
-      sort: [{ '@timestamp': { order: 'desc' } }],
+      sort: buildHuntFindingsSortClause(sortBy, sortOrder),
       query: {
-        bool: { filter: filters },
+        bool: {
+          filter,
+          ...(must.length ? { must } : {}),
+        },
       },
     }),
     esClient.search({

@@ -5,27 +5,37 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedRelative } from '@kbn/i18n-react';
 import {
   EuiBadge,
+  EuiBasicTable,
   EuiButtonEmpty,
+  EuiButtonGroup,
   EuiButtonIcon,
+  EuiComboBox,
+  type EuiComboBoxOptionOption,
+  EuiEmptyPrompt,
+  EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiInMemoryTable,
+  EuiLoadingSpinner,
   EuiPanel,
   EuiPopover,
+  EuiSelect,
   EuiSpacer,
   EuiText,
   EuiTitle,
   EuiToolTip,
   useEuiTheme,
+  type Criteria,
   type EuiBasicTableColumn,
+  type Pagination,
 } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
+import { SEVERITY_LEVELS, type SeverityLevel } from '../../../../../common/threat_intelligence/hub';
 import { useKibana } from '../../../../common/lib/kibana';
 import { navigateToCorrelateReport } from '../../../lib/navigate_to_correlation_reports';
 import { deployEsqlRule } from '../lib/deploy_esql_rule';
@@ -70,7 +80,59 @@ export interface FeedbackLoopSummary {
   corroborated_rank_score: number;
 }
 
+export type HuntFindingsSortBy = 'recency' | 'confidence' | 'risk_score' | 'severity';
+export type HuntFindingsSortOrder = 'asc' | 'desc';
+export type HuntFindingsStatusFilter = 'new' | 'deployed';
+
+export interface HuntFindingsTableFilters {
+  statuses: HuntFindingsStatusFilter[];
+  severities: SeverityLevel[];
+  minConfidence?: number;
+  q: string;
+}
+
+export const HUNT_FINDINGS_PAGE_SIZE_OPTIONS = [10, 25, 50] as const;
+export const DEFAULT_HUNT_FINDINGS_PAGE_SIZE = 25;
+
+export const emptyHuntFindingsFilters = (): HuntFindingsTableFilters => ({
+  statuses: [],
+  severities: [],
+  minConfidence: undefined,
+  q: '',
+});
+
 type ConfidenceLevel = 'high' | 'medium' | 'low';
+
+const SORTABLE_FIELDS = new Set<string>(['@timestamp', 'confidence', 'risk_score', 'severity']);
+
+const fieldToSortBy = (field: string): HuntFindingsSortBy | undefined => {
+  switch (field) {
+    case '@timestamp':
+      return 'recency';
+    case 'confidence':
+      return 'confidence';
+    case 'risk_score':
+      return 'risk_score';
+    case 'severity':
+      return 'severity';
+    default:
+      return undefined;
+  }
+};
+
+const sortByToField = (sortBy: HuntFindingsSortBy): keyof HuntFindingListItem => {
+  switch (sortBy) {
+    case 'confidence':
+      return 'confidence';
+    case 'risk_score':
+      return 'risk_score';
+    case 'severity':
+      return 'severity';
+    case 'recency':
+    default:
+      return '@timestamp';
+  }
+};
 
 const normalizeConfidence = (confidence: number): number => {
   if (confidence > 1) {
@@ -175,34 +237,22 @@ const formatAffectedSummary = (
   };
 };
 
-const dedupeKey = (finding: HuntFindingListItem): string =>
-  `${finding.report_id}:${finding.technique_id}`;
-
-const partitionFindings = (findings: HuntFindingListItem[]) => {
-  const groups = new Map<string, HuntFindingListItem[]>();
-  for (const finding of findings) {
-    const key = dedupeKey(finding);
-    const group = groups.get(key) ?? [];
-    group.push(finding);
-    groups.set(key, group);
-  }
-
-  const visible: HuntFindingListItem[] = [];
-  const suppressed: HuntFindingListItem[] = [];
-  for (const group of groups.values()) {
-    visible.push(group[0]);
-    suppressed.push(...group.slice(1));
-  }
-
-  return { visible, suppressed, suppressedCount: suppressed.length };
-};
-
 interface Props {
   findings: HuntFindingListItem[];
+  total: number;
+  pageIndex: number;
+  pageSize: number;
+  sortBy: HuntFindingsSortBy;
+  sortOrder: HuntFindingsSortOrder;
+  filters: HuntFindingsTableFilters;
   feedbackLoop?: FeedbackLoopSummary[];
   isLoading: boolean;
+  onPageChange: (pageIndex: number, pageSize: number) => void;
+  onSortChange: (sortBy: HuntFindingsSortBy, sortOrder: HuntFindingsSortOrder) => void;
+  onFiltersChange: (filters: HuntFindingsTableFilters) => void;
   onHighlightReport: (reportId: string) => void;
   onCorrelateReport?: (reportId: string) => void;
+  onDeployed?: () => void;
   http: CoreStart['http'];
   notifications: CoreStart['notifications'];
   application: CoreStart['application'];
@@ -214,8 +264,18 @@ const stopRowClickPropagation = (event: React.MouseEvent | React.KeyboardEvent):
 
 const HuntFindingsPanelComponent: React.FC<Props> = ({
   findings,
+  total,
+  pageIndex,
+  pageSize,
+  sortBy,
+  sortOrder,
+  filters,
   isLoading,
+  onPageChange,
+  onSortChange,
+  onFiltersChange,
   onCorrelateReport,
+  onDeployed,
   http,
   notifications,
   application,
@@ -227,19 +287,13 @@ const HuntFindingsPanelComponent: React.FC<Props> = ({
   const [deployedRuleIdsByFinding, setDeployedRuleIdsByFinding] = useState<Map<string, string>>(
     () => new Map()
   );
-  const [showSuppressed, setShowSuppressed] = useState(false);
   const [openAffectedPopoverId, setOpenAffectedPopoverId] = useState<string | undefined>();
   const [selectedFinding, setSelectedFinding] = useState<HuntFindingListItem | undefined>();
+  const [searchDraft, setSearchDraft] = useState(filters.q);
 
-  const { visible, suppressed, suppressedCount } = useMemo(
-    () => partitionFindings(findings),
-    [findings]
-  );
-
-  const tableItems = useMemo(
-    () => (showSuppressed ? [...visible, ...suppressed] : visible),
-    [showSuppressed, suppressed, visible]
-  );
+  useEffect(() => {
+    setSearchDraft(filters.q);
+  }, [filters.q]);
 
   const getDeployedRuleId = useCallback(
     (finding: HuntFindingListItem): string | undefined =>
@@ -342,6 +396,7 @@ const HuntFindingsPanelComponent: React.FC<Props> = ({
                 }
               : current
           );
+          onDeployed?.();
         } catch (persistErr) {
           // Rule exists; status may lag until retry/refetch. Still keep local link.
           setDeployedRuleIdsByFinding((prev) => {
@@ -391,7 +446,7 @@ const HuntFindingsPanelComponent: React.FC<Props> = ({
         setCreatingRuleId(undefined);
       }
     },
-    [http, notifications, openDeployedRule]
+    [http, notifications, onDeployed, openDeployedRule]
   );
 
   const handleCorrelateReport = useCallback(
@@ -435,6 +490,99 @@ const HuntFindingsPanelComponent: React.FC<Props> = ({
     setSelectedFinding(finding);
   }, []);
 
+  const statusFilterId =
+    filters.statuses.length === 1
+      ? filters.statuses[0]
+      : filters.statuses.length === 0
+      ? 'all'
+      : 'all';
+
+  const severityOptions: Array<EuiComboBoxOptionOption<SeverityLevel>> = useMemo(
+    () =>
+      SEVERITY_LEVELS.map((level) => ({
+        label: level,
+        value: level,
+      })),
+    []
+  );
+
+  const selectedSeverityOptions = useMemo(
+    () =>
+      severityOptions.filter(
+        (option): option is EuiComboBoxOptionOption<SeverityLevel> =>
+          option.value !== undefined && filters.severities.includes(option.value)
+      ),
+    [filters.severities, severityOptions]
+  );
+
+  const confidenceOptions = useMemo(
+    () => [
+      {
+        value: '',
+        text: i18n.translate(
+          'xpack.securitySolution.threatIntelligence.app.huntFindingsConfidenceAny',
+          { defaultMessage: 'Any confidence' }
+        ),
+      },
+      {
+        value: '0.75',
+        text: i18n.translate(
+          'xpack.securitySolution.threatIntelligence.app.huntFindingsConfidenceHighMin',
+          { defaultMessage: 'High (≥ 0.75)' }
+        ),
+      },
+      {
+        value: '0.4',
+        text: i18n.translate(
+          'xpack.securitySolution.threatIntelligence.app.huntFindingsConfidenceMediumMin',
+          { defaultMessage: 'Medium+ (≥ 0.4)' }
+        ),
+      },
+    ],
+    []
+  );
+
+  const sortSelectOptions = useMemo(
+    () => [
+      {
+        value: 'recency',
+        text: i18n.translate(
+          'xpack.securitySolution.threatIntelligence.app.huntFindingsSortRecency',
+          { defaultMessage: 'Most recent' }
+        ),
+      },
+      {
+        value: 'confidence',
+        text: i18n.translate(
+          'xpack.securitySolution.threatIntelligence.app.huntFindingsSortConfidence',
+          { defaultMessage: 'Confidence' }
+        ),
+      },
+      {
+        value: 'risk_score',
+        text: i18n.translate(
+          'xpack.securitySolution.threatIntelligence.app.huntFindingsSortRiskScore',
+          { defaultMessage: 'Risk score' }
+        ),
+      },
+      {
+        value: 'severity',
+        text: i18n.translate(
+          'xpack.securitySolution.threatIntelligence.app.huntFindingsSortSeverity',
+          { defaultMessage: 'Severity' }
+        ),
+      },
+    ],
+    []
+  );
+
+  const applySearch = useCallback(() => {
+    if (searchDraft === filters.q) {
+      return;
+    }
+    onFiltersChange({ ...filters, q: searchDraft });
+  }, [filters, onFiltersChange, searchDraft]);
+
   const columns = useMemo((): Array<EuiBasicTableColumn<HuntFindingListItem>> => {
     return [
       {
@@ -443,7 +591,7 @@ const HuntFindingsPanelComponent: React.FC<Props> = ({
           'xpack.securitySolution.threatIntelligence.app.huntFindingsColumnFinding',
           { defaultMessage: 'Finding' }
         ),
-        width: '22%',
+        width: '20%',
         render: (_techniqueId: string, finding: HuntFindingListItem) => (
           <EuiFlexGroup direction="column" gutterSize="xs">
             <EuiFlexItem grow={false}>
@@ -490,13 +638,14 @@ const HuntFindingsPanelComponent: React.FC<Props> = ({
         ),
       },
       {
-        field: 'report_id',
+        field: '@timestamp',
         name: i18n.translate(
           'xpack.securitySolution.threatIntelligence.app.huntFindingsColumnSourceReport',
           { defaultMessage: 'Source report' }
         ),
-        width: '20%',
-        render: (_reportId: string, finding: HuntFindingListItem) => {
+        width: '18%',
+        sortable: true,
+        render: (_timestamp: string, finding: HuntFindingListItem) => {
           const metaParts: React.ReactNode[] = [];
           if (finding.report_source) {
             metaParts.push(finding.report_source);
@@ -535,7 +684,7 @@ const HuntFindingsPanelComponent: React.FC<Props> = ({
           'xpack.securitySolution.threatIntelligence.app.huntFindingsColumnHypothesis',
           { defaultMessage: 'Hypothesis' }
         ),
-        width: '20%',
+        width: '18%',
         render: (hypothesis: string) => (
           <EuiText
             size="s"
@@ -552,12 +701,23 @@ const HuntFindingsPanelComponent: React.FC<Props> = ({
         ),
       },
       {
+        field: 'severity',
+        name: i18n.translate(
+          'xpack.securitySolution.threatIntelligence.app.huntFindingsColumnSeverity',
+          { defaultMessage: 'Severity' }
+        ),
+        width: '8%',
+        sortable: true,
+        render: (severity: string) => <EuiBadge color="hollow">{severity}</EuiBadge>,
+      },
+      {
         field: 'confidence',
         name: i18n.translate(
           'xpack.securitySolution.threatIntelligence.app.huntFindingsColumnConfidence',
           { defaultMessage: 'Confidence' }
         ),
-        width: '9%',
+        width: '8%',
+        sortable: true,
         render: (confidence: number) => {
           const level = getConfidenceLevel(confidence);
           if (level === 'high') {
@@ -572,7 +732,7 @@ const HuntFindingsPanelComponent: React.FC<Props> = ({
           'xpack.securitySolution.threatIntelligence.app.huntFindingsColumnAffected',
           { defaultMessage: 'Affected' }
         ),
-        width: '12%',
+        width: '10%',
         render: (assets: HuntFindingListItem['affected_assets'], finding: HuntFindingListItem) => {
           const { summary, details } = formatAffectedSummary(assets);
           if (!summary) {
@@ -650,7 +810,7 @@ const HuntFindingsPanelComponent: React.FC<Props> = ({
           'xpack.securitySolution.threatIntelligence.app.huntFindingsColumnActions',
           { defaultMessage: 'Actions' }
         ),
-        width: '9%',
+        width: '10%',
         render: (finding: HuntFindingListItem) => {
           const deployed = isFindingDeployed(finding);
           const deployedRuleId = getDeployedRuleId(finding);
@@ -764,6 +924,44 @@ const HuntFindingsPanelComponent: React.FC<Props> = ({
     [handleRowClick]
   );
 
+  const pagination: Pagination = {
+    pageIndex,
+    pageSize,
+    totalItemCount: total,
+    pageSizeOptions: [...HUNT_FINDINGS_PAGE_SIZE_OPTIONS],
+  };
+
+  const sorting = {
+    sort: {
+      field: sortByToField(sortBy),
+      direction: sortOrder,
+    },
+  };
+
+  const onTableChange = useCallback(
+    (criteria: Criteria<HuntFindingListItem>) => {
+      const { page, sort } = criteria;
+      if (page) {
+        if (page.index !== pageIndex || page.size !== pageSize) {
+          onPageChange(page.index, page.size);
+        }
+      }
+      if (sort?.field && SORTABLE_FIELDS.has(String(sort.field))) {
+        const nextSortBy = fieldToSortBy(String(sort.field));
+        if (nextSortBy && (nextSortBy !== sortBy || sort.direction !== sortOrder)) {
+          onSortChange(nextSortBy, sort.direction);
+        }
+      }
+    },
+    [onPageChange, onSortChange, pageIndex, pageSize, sortBy, sortOrder]
+  );
+
+  const hasActiveFilters =
+    filters.statuses.length > 0 ||
+    filters.severities.length > 0 ||
+    typeof filters.minConfidence === 'number' ||
+    filters.q.trim().length > 0;
+
   return (
     <EuiPanel
       hasBorder={false}
@@ -788,72 +986,195 @@ const HuntFindingsPanelComponent: React.FC<Props> = ({
 
       <EuiSpacer size="m" />
 
-      {isLoading ? (
-        <EuiText size="s" color="subdued">
-          {i18n.translate('xpack.securitySolution.threatIntelligence.app.huntFindingsLoading', {
-            defaultMessage: 'Loading hunt findings…',
-          })}
-        </EuiText>
-      ) : findings.length === 0 ? (
+      <EuiFlexGroup gutterSize="m" alignItems="center" wrap responsive={false}>
+        <EuiFlexItem grow={2} style={{ minWidth: 200 }}>
+          <EuiFieldSearch
+            incremental={false}
+            value={searchDraft}
+            onChange={(event) => setSearchDraft(event.target.value)}
+            onSearch={applySearch}
+            placeholder={i18n.translate(
+              'xpack.securitySolution.threatIntelligence.app.huntFindingsSearchPlaceholder',
+              { defaultMessage: 'Search hypothesis, technique, rule…' }
+            )}
+            data-test-subj="threatIntelHuntFindingsSearch"
+            fullWidth
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonGroup
+            legend={i18n.translate(
+              'xpack.securitySolution.threatIntelligence.app.huntFindingsStatusFilterLegend',
+              { defaultMessage: 'Status filter' }
+            )}
+            options={[
+              {
+                id: 'all',
+                label: i18n.translate(
+                  'xpack.securitySolution.threatIntelligence.app.huntFindingsStatusAll',
+                  { defaultMessage: 'All' }
+                ),
+              },
+              {
+                id: 'new',
+                label: i18n.translate(
+                  'xpack.securitySolution.threatIntelligence.app.huntFindingsStatusNew',
+                  { defaultMessage: 'New' }
+                ),
+              },
+              {
+                id: 'deployed',
+                label: i18n.translate(
+                  'xpack.securitySolution.threatIntelligence.app.huntFindingsStatusDeployed',
+                  { defaultMessage: 'Deployed' }
+                ),
+              },
+            ]}
+            idSelected={statusFilterId}
+            onChange={(id) => {
+              const statuses: HuntFindingsStatusFilter[] =
+                id === 'new' || id === 'deployed' ? [id] : [];
+              onFiltersChange({ ...filters, statuses });
+            }}
+            buttonSize="compressed"
+            data-test-subj="threatIntelHuntFindingsStatusFilter"
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={1} style={{ minWidth: 160 }}>
+          <EuiComboBox
+            aria-label={i18n.translate(
+              'xpack.securitySolution.threatIntelligence.app.huntFindingsSeverityFilterAria',
+              { defaultMessage: 'Severity filter' }
+            )}
+            placeholder={i18n.translate(
+              'xpack.securitySolution.threatIntelligence.app.huntFindingsSeverityFilterPlaceholder',
+              { defaultMessage: 'Severity' }
+            )}
+            options={severityOptions}
+            selectedOptions={selectedSeverityOptions}
+            onChange={(selected) => {
+              onFiltersChange({
+                ...filters,
+                severities: selected
+                  .map((option) => option.value)
+                  .filter((value): value is SeverityLevel => Boolean(value)),
+              });
+            }}
+            isClearable
+            data-test-subj="threatIntelHuntFindingsSeverityFilter"
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false} style={{ minWidth: 150 }}>
+          <EuiSelect
+            compressed
+            options={confidenceOptions}
+            value={typeof filters.minConfidence === 'number' ? String(filters.minConfidence) : ''}
+            onChange={(event) => {
+              const value = event.target.value;
+              onFiltersChange({
+                ...filters,
+                minConfidence: value ? Number(value) : undefined,
+              });
+            }}
+            aria-label={i18n.translate(
+              'xpack.securitySolution.threatIntelligence.app.huntFindingsConfidenceFilterAria',
+              { defaultMessage: 'Minimum confidence' }
+            )}
+            data-test-subj="threatIntelHuntFindingsConfidenceFilter"
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false} style={{ minWidth: 140 }}>
+          <EuiSelect
+            compressed
+            options={sortSelectOptions}
+            value={sortBy}
+            onChange={(event) => {
+              onSortChange(event.target.value as HuntFindingsSortBy, sortOrder);
+            }}
+            aria-label={i18n.translate(
+              'xpack.securitySolution.threatIntelligence.app.huntFindingsSortAria',
+              { defaultMessage: 'Sort findings' }
+            )}
+            data-test-subj="threatIntelHuntFindingsSort"
+          />
+        </EuiFlexItem>
+        {hasActiveFilters ? (
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              size="xs"
+              onClick={() => {
+                setSearchDraft('');
+                onFiltersChange(emptyHuntFindingsFilters());
+              }}
+              data-test-subj="threatIntelHuntFindingsClearFilters"
+            >
+              {i18n.translate(
+                'xpack.securitySolution.threatIntelligence.app.huntFindingsClearFilters',
+                { defaultMessage: 'Clear filters' }
+              )}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        ) : null}
+      </EuiFlexGroup>
+
+      <EuiSpacer size="s" />
+      <EuiText size="xs" color="subdued" data-test-subj="threatIntelHuntFindingsRange">
+        {i18n.translate('xpack.securitySolution.threatIntelligence.app.huntFindingsShowingRange', {
+          defaultMessage: 'Showing {from}–{to} of {total}',
+          values: {
+            from: total === 0 ? 0 : pageIndex * pageSize + 1,
+            to: Math.min((pageIndex + 1) * pageSize, total),
+            total,
+          },
+        })}
+      </EuiText>
+
+      <EuiSpacer size="m" />
+
+      {isLoading && findings.length === 0 ? (
+        <EuiEmptyPrompt
+          icon={<EuiLoadingSpinner size="xl" />}
+          title={
+            <h2>
+              {i18n.translate('xpack.securitySolution.threatIntelligence.app.huntFindingsLoading', {
+                defaultMessage: 'Loading hunt findings…',
+              })}
+            </h2>
+          }
+        />
+      ) : !isLoading && findings.length === 0 ? (
         <EuiText size="s" color="subdued" data-test-subj="threatIntelHuntFindingsEmpty">
-          {i18n.translate('xpack.securitySolution.threatIntelligence.app.huntFindingsEmpty', {
-            defaultMessage:
-              'No hunt findings yet. Continuous hunt runs every hour, or hunt from Agent Builder.',
-          })}
+          {hasActiveFilters
+            ? i18n.translate(
+                'xpack.securitySolution.threatIntelligence.app.huntFindingsEmptyFiltered',
+                {
+                  defaultMessage: 'No hunt findings match the current filters.',
+                }
+              )
+            : i18n.translate('xpack.securitySolution.threatIntelligence.app.huntFindingsEmpty', {
+                defaultMessage:
+                  'No hunt findings yet. Continuous hunt runs every hour, or hunt from Agent Builder.',
+              })}
         </EuiText>
       ) : (
-        <>
-          <div css={tableCss}>
-            <EuiInMemoryTable
-              data-test-subj="threatIntelHuntFindingsTable"
-              items={tableItems}
-              columns={columns}
-              itemId="id"
-              rowProps={rowProps}
-              tableLayout="auto"
-            />
-          </div>
-          {suppressedCount > 0 ? (
-            <>
-              <EuiSpacer size="m" />
-              <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-                <EuiFlexItem grow={false}>
-                  <EuiText
-                    size="xs"
-                    color="subdued"
-                    data-test-subj="threatIntelHuntFindingsSuppressedFooter"
-                  >
-                    {i18n.translate(
-                      'xpack.securitySolution.threatIntelligence.app.huntFindingsSuppressedFooter',
-                      {
-                        defaultMessage:
-                          '{count, plural, one {# duplicate finding suppressed this cycle} other {# duplicate findings suppressed this cycle}}',
-                        values: { count: suppressedCount },
-                      }
-                    )}
-                  </EuiText>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty
-                    size="xs"
-                    onClick={() => setShowSuppressed((current) => !current)}
-                    data-test-subj="threatIntelHuntFindingsToggleSuppressed"
-                  >
-                    {showSuppressed
-                      ? i18n.translate(
-                          'xpack.securitySolution.threatIntelligence.app.huntFindingsHideSuppressed',
-                          { defaultMessage: 'Hide suppressed' }
-                        )
-                      : i18n.translate(
-                          'xpack.securitySolution.threatIntelligence.app.huntFindingsShowSuppressed',
-                          { defaultMessage: 'Show suppressed' }
-                        )}
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </>
-          ) : null}
-        </>
+        <div css={tableCss}>
+          <EuiBasicTable
+            data-test-subj="threatIntelHuntFindingsTable"
+            tableCaption={i18n.translate(
+              'xpack.securitySolution.threatIntelligence.app.huntFindingsTableCaption',
+              { defaultMessage: 'Hunt findings' }
+            )}
+            items={findings}
+            columns={columns}
+            itemId="id"
+            rowProps={rowProps}
+            tableLayout="auto"
+            pagination={pagination}
+            sorting={sorting}
+            onChange={onTableChange}
+            loading={isLoading}
+          />
+        </div>
       )}
       {selectedFinding ? (
         <HuntFindingFlyout

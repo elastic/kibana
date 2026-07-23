@@ -23,7 +23,6 @@ import {
   EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
-import type { CoreStart } from '@kbn/core/public';
 import {
   SEVERITY_LEVELS,
   percentChangeVsPrior,
@@ -42,11 +41,6 @@ import {
 } from '../../../components/report_feed';
 import { getMitreTechniqueMetadata } from '../mitre_technique_metadata';
 import { ExecutiveAdvisoryPanel } from './executive_advisory_panel';
-import {
-  HuntFindingsPanel,
-  type FeedbackLoopSummary,
-  type HuntFindingListItem,
-} from './hunt_findings_panel';
 
 export interface IntelligenceHubChipFilters {
   regions: ThreatRegion[];
@@ -74,13 +68,6 @@ export const IntelligenceHubDashboardView: React.FC<{
   isGeneratingAdvisory?: boolean;
   onGenerateAdvisory?: () => void;
   onFocusSourceReports?: () => void;
-  huntFindings?: HuntFindingListItem[];
-  huntFindingsFeedbackLoop?: FeedbackLoopSummary[];
-  isLoadingHuntFindings?: boolean;
-  http?: CoreStart['http'];
-  notifications?: CoreStart['notifications'];
-  application?: CoreStart['application'];
-  showHuntFindings?: boolean;
   onCorrelateReport?: (reportId: string) => void;
 }> = ({
   data,
@@ -98,13 +85,6 @@ export const IntelligenceHubDashboardView: React.FC<{
   isGeneratingAdvisory = false,
   onGenerateAdvisory = () => undefined,
   onFocusSourceReports = () => undefined,
-  huntFindings = [],
-  huntFindingsFeedbackLoop,
-  isLoadingHuntFindings = false,
-  http,
-  notifications,
-  application,
-  showHuntFindings = false,
   onCorrelateReport,
 }) => {
   const { euiTheme } = useEuiTheme();
@@ -201,21 +181,6 @@ export const IntelligenceHubDashboardView: React.FC<{
           onCorrelate={onCorrelateReport}
         />
       </div>
-      {showHuntFindings && http && notifications && application ? (
-        <>
-          <EuiSpacer size="l" />
-          <HuntFindingsPanel
-            findings={huntFindings}
-            feedbackLoop={huntFindingsFeedbackLoop}
-            isLoading={isLoadingHuntFindings}
-            onHighlightReport={onHighlightReport}
-            onCorrelateReport={onCorrelateReport}
-            http={http}
-            notifications={notifications}
-            application={application}
-          />
-        </>
-      ) : null}
     </>
   );
 };
@@ -284,9 +249,7 @@ const NumericStatCard: React.FC<{
 }> = ({ heading, value, current, prior, emphasizeWhenPositive }) => {
   const { euiTheme } = useEuiTheme();
   const valueColor =
-    emphasizeWhenPositive && current > 0
-      ? emphasizeWhenPositive
-      : euiTheme.colors.textParagraph;
+    emphasizeWhenPositive && current > 0 ? emphasizeWhenPositive : euiTheme.colors.textParagraph;
 
   return (
     <EuiPanel hasBorder paddingSize="m" css={{ height: '100%' }}>
