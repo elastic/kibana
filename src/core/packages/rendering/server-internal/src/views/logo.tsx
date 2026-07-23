@@ -19,7 +19,7 @@ import React from 'react';
  * hood):
  *
  *   - source asset:   @elastic/eui/src/components/icon/assets/logo_elastic.tsx
- *   - compiled copy:  @elastic/eui/lib/components/icon/assets/logo_elastic.js
+ *   - compiled copy:  @elastic/eui/es/components/icon/assets/logo_elastic.js
  *   - loader styles:  @elastic/eui/src/components/loading/loading_elastic.styles.ts
  *
  * Combined with the staggered keyframes in `legacy_styles.css`

@@ -19,7 +19,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 // @ts-expect-error style types not defined, but they exist
-import { euiTreeViewStyles } from '@elastic/eui/lib/components/tree_view/tree_view.styles';
+import { euiTreeViewStyles } from '@elastic/eui/es/components/tree_view/tree_view.styles';
 
 import {
   TREE_NAVIGATION_LOADING,

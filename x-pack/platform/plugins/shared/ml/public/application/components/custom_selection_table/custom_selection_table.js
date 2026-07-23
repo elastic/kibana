@@ -28,7 +28,7 @@ import {
 } from '@elastic/eui';
 import { PropTypes } from 'prop-types';
 
-import { Pager } from '@elastic/eui/lib/services';
+import { Pager } from '@elastic/eui/es/services';
 import { i18n } from '@kbn/i18n';
 
 const ITEMS_PER_PAGE = 20;

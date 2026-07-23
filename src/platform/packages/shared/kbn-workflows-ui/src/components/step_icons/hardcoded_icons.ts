@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import controls from '@elastic/eui/lib/components/icon/svgs/controls.svg';
 import beta from './icons/beta.svg';
 import bolt from './icons/bolt.svg';
 import branch from './icons/branch.svg';
 import clock from './icons/clock.svg';
 import consoleSvg from './icons/console.svg';
+import controls from './icons/controls.svg';
 import database from './icons/database.svg';
 import email from './icons/email.svg';
 import fail from './icons/fail.svg';

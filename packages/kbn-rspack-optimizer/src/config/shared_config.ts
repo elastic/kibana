@@ -32,9 +32,9 @@ export function getSharedResolveConfig(repoRoot: string): Configuration['resolve
       // Match the DLL's resolve aliases so externalized EUI paths resolve to
       // the same optimize/es/ entry points used when building the DLL.
       '@elastic/eui$': '@elastic/eui/optimize/es',
-      '@elastic/eui/lib/components/provider/nested$':
+      '@elastic/eui/es/components/provider/nested$':
         '@elastic/eui/optimize/es/components/provider/nested',
-      '@elastic/eui/lib/services/theme/warning$': '@elastic/eui/optimize/es/services/theme/warning',
+      '@elastic/eui/es/services/theme/warning$': '@elastic/eui/optimize/es/services/theme/warning',
       'react-dom$': 'react-dom/profiling',
       'scheduler/tracing': 'scheduler/tracing-profiling',
       buffer: [

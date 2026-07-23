@@ -186,7 +186,6 @@ export const CleanExtraFilesFromModules: Task = {
           '**/benchmark.js',
           '**/benchmarks.js',
 
-          '**/@elastic/eui/es',
           '**/@elastic/eui/test-env',
           '**/@elastic/eui/optimize',
           '**/@elastic/eui/i18ntokens.json',

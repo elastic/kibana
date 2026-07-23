@@ -9,7 +9,7 @@ import { css } from '@emotion/react';
 
 import { mathWithUnits, transparentize, useEuiFontSize, useEuiTheme } from '@elastic/eui';
 // @ts-expect-error style types not defined
-import { euiToolTipStyles } from '@elastic/eui/lib/components/tool_tip/tool_tip.styles';
+import { euiToolTipStyles } from '@elastic/eui/es/components/tool_tip/tool_tip.styles';
 
 export const useChartTooltipStyles = () => {
   const theme = useEuiTheme();

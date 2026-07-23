@@ -14,9 +14,9 @@ import type { EuiThemeProviderProps } from '@elastic/eui';
 import { EuiThemeProvider } from '@elastic/eui';
 
 // @ts-expect-error EUI exports this component internally, but Kibana isn't picking it up its types
-import { useIsNestedEuiProvider } from '@elastic/eui/lib/components/provider/nested';
+import { useIsNestedEuiProvider } from '@elastic/eui/es/components/provider/nested';
 // @ts-expect-error EUI exports this component internally, but Kibana isn't picking it up its types
-import { emitEuiProviderWarning } from '@elastic/eui/lib/services/theme/warning';
+import { emitEuiProviderWarning } from '@elastic/eui/es/services/theme/warning';
 
 import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import { KibanaEuiProvider } from '@kbn/react-kibana-context-root';
