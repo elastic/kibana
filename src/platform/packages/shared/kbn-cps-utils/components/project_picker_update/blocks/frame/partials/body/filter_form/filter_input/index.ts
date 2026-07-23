@@ -7,11 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { css } from '@emotion/react';
-import type { UseEuiTheme } from '@elastic/eui';
-
-export const filterFormStyles = ({ euiTheme }: Pick<UseEuiTheme, 'euiTheme'>) => ({
-  filterFormWrapper: css({
-    padding: euiTheme.size.base,
-  }),
-});
+export { FilterSelectionInput, type FilterInput } from './filter_input';
+export { filterExpressionCodec } from '../../../../../../utils/filter_input_codec';

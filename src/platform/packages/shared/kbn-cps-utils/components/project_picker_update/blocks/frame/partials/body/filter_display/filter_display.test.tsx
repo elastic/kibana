@@ -14,6 +14,10 @@ import { EuiThemeProvider } from '@elastic/eui';
 
 import type { ProjectPickerState } from '../../../../../state/reducers';
 import { ProjectPickerFilterDisplay } from './filter_display';
+import {
+  FilterOperator,
+  type FilterExpressionValue,
+} from '../../../../../utils/filter_input_codec';
 
 const mockUseProjectPickerState = jest.fn();
 const mockUseProjectPickerActions = jest.fn();
@@ -24,7 +28,7 @@ jest.mock('../../../../../state', () => ({
 }));
 
 const createFilterExpressions = (
-  entries: Array<[string, string, boolean?]>
+  entries: Array<[string, FilterExpressionValue, boolean?]>
 ): ProjectPickerState['filterExpressions'] =>
   new Map(entries.map(([id, expression, enabled = true]) => [id, { expression, enabled }]));
 
@@ -91,19 +95,21 @@ describe('ProjectPickerFilterDisplay', () => {
   it('should render a badge for each applied filter expression', () => {
     renderComponent({
       filterExpressions: createFilterExpressions([
-        ['f1', 'is:_type:security'],
-        ['f2', 'is:env:prod'],
+        ['f1', { operator: FilterOperator.EQUALS, tagName: '_type', tagValue: 'security' }],
+        ['f2', { operator: FilterOperator.EQUALS, tagName: 'env', tagValue: 'prod' }],
       ]),
       selectedProjects: ['p1'],
     });
 
-    expect(screen.getByText('is:_type:security')).toBeInTheDocument();
-    expect(screen.getByText('is:env:prod')).toBeInTheDocument();
+    expect(screen.getByText('_type:security')).toBeInTheDocument();
+    expect(screen.getByText('env:prod')).toBeInTheDocument();
   });
 
   it('should display the no-match callout when filters are applied and no projects are visible', () => {
     renderComponent({
-      filterExpressions: createFilterExpressions([['f1', 'is:_type:security']]),
+      filterExpressions: createFilterExpressions([
+        ['f1', { operator: FilterOperator.EQUALS, tagName: '_type', tagValue: 'security' }],
+      ]),
       visibleProjectIds: [],
       filteredProjectIds: [],
     });
@@ -118,7 +124,9 @@ describe('ProjectPickerFilterDisplay', () => {
 
   it('should not display the no-match callout when filters are applied and projects are visible', () => {
     renderComponent({
-      filterExpressions: createFilterExpressions([['f1', 'is:_type:security']]),
+      filterExpressions: createFilterExpressions([
+        ['f1', { operator: FilterOperator.EQUALS, tagName: '_type', tagValue: 'security' }],
+      ]),
       visibleProjectIds: ['p1'],
       filteredProjectIds: ['p1'],
       selectedProjects: ['p1'],
@@ -144,13 +152,15 @@ describe('ProjectPickerFilterDisplay', () => {
     const user = userEvent.setup();
 
     renderComponent({
-      filterExpressions: createFilterExpressions([['f1', 'is:_type:security']]),
+      filterExpressions: createFilterExpressions([
+        ['f1', { operator: FilterOperator.EQUALS, tagName: '_type', tagValue: 'security' }],
+      ]),
       selectedProjects: ['p1'],
     });
 
-    await user.click(screen.getByText('is:_type:security'));
+    await user.click(screen.getByText('_type:security'));
 
-    expect(screen.getByLabelText('Filter actions for is:_type:security')).toBeInTheDocument();
+    expect(screen.getByLabelText('Filter actions')).toBeInTheDocument();
     expect(screen.getByText('Edit')).toBeInTheDocument();
     expect(screen.getByText('Convert to exclusion')).toBeInTheDocument();
     expect(screen.getByText('Disable')).toBeInTheDocument();
@@ -160,16 +170,18 @@ describe('ProjectPickerFilterDisplay', () => {
   it('should call onEditFilter with the selected filter when Edit is chosen from the context menu', async () => {
     const user = userEvent.setup();
     const { onEditFilter } = renderComponent({
-      filterExpressions: createFilterExpressions([['f1', 'is:_type:security']]),
+      filterExpressions: createFilterExpressions([
+        ['f1', { operator: FilterOperator.EQUALS, tagName: '_type', tagValue: 'security' }],
+      ]),
       selectedProjects: ['p1'],
     });
 
-    await user.click(screen.getByText('is:_type:security'));
+    await user.click(screen.getByText('_type:security'));
     await user.click(screen.getByText('Edit'));
 
     expect(onEditFilter).toHaveBeenCalledWith({
       id: 'f1',
-      expression: 'is:_type:security',
+      expression: { operator: FilterOperator.EQUALS, tagName: '_type', tagValue: 'security' },
     });
   });
 });

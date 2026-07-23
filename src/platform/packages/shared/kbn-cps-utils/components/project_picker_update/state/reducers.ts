@@ -9,11 +9,15 @@
 
 import { uniq } from 'lodash';
 import type { CPSProject } from '../../../types';
-import { FilterOperator, filterExpressionCodec } from '../utils/codec';
+import {
+  FilterOperator,
+  invertOperator,
+  type FilterExpressionValue,
+} from '../utils/filter_input_codec';
 import { computeVisibleProjectIds, getIncludedVisibleProjectIds } from './derivatives';
 
 export interface FilterEntry {
-  expression: string;
+  expression: FilterExpressionValue;
   enabled: boolean;
 }
 
@@ -53,7 +57,10 @@ export function createStoreReducers() {
     /**
      * Adds a new filter expression.
      */
-    addFilterExpression: (state: ProjectPickerState, payload: { expression: string }) => {
+    addFilterExpression: (
+      state: ProjectPickerState,
+      payload: { expression: FilterExpressionValue }
+    ) => {
       const id = window.crypto.randomUUID();
       const filterExpressions = new Map(state.filterExpressions);
       filterExpressions.set(id, { expression: payload.expression, enabled: true });
@@ -68,7 +75,7 @@ export function createStoreReducers() {
      */
     updateFilterExpression: (
       state: ProjectPickerState,
-      payload: { id: string; expression: string }
+      payload: { id: string; expression: FilterExpressionValue }
     ) => {
       const existing = state.filterExpressions.get(payload.id);
       if (!existing) {
@@ -124,15 +131,38 @@ export function createStoreReducers() {
         return state;
       }
 
-      const { operator, ...rest } = filterExpressionCodec.decode(existing.expression);
+      let inverted: FilterExpressionValue;
+
+      // this switch is necessary as a type narrowing mechanism
+      switch (existing.expression.operator) {
+        case FilterOperator.EQUALS:
+        case FilterOperator.NOT_EQUALS:
+          inverted = {
+            ...existing.expression,
+            operator: invertOperator(existing.expression.operator),
+          };
+          break;
+        case FilterOperator.ONE_OF:
+        case FilterOperator.NOT_ONE_OF:
+          inverted = {
+            ...existing.expression,
+            operator: invertOperator(existing.expression.operator),
+          };
+          break;
+        case FilterOperator.EXISTS:
+        case FilterOperator.NOT_EXISTS:
+          inverted = {
+            ...existing.expression,
+            operator: invertOperator(existing.expression.operator),
+          };
+          break;
+        default:
+          return state;
+      }
 
       filterExpressions.set(payload.filterId, {
         ...existing,
-        expression: filterExpressionCodec.encode({
-          ...rest,
-          operator:
-            operator === FilterOperator.EQUALS ? FilterOperator.NOT_EQUALS : FilterOperator.EQUALS,
-        })!,
+        expression: inverted,
       });
 
       return {

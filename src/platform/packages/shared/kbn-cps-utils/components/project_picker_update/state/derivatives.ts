@@ -8,25 +8,37 @@
  */
 
 import type { CPSProject } from '../../../types';
-import { filterExpressionCodec, FilterOperator, type FilterOperatorLiteral } from '../utils/codec';
 import type { StoreDerivative } from './store';
 import type { FilterEntry, ProjectPickerState } from './reducers';
+import {
+  type FilterExpressionDraft,
+  type FilterOperatorLiteral,
+  getOperatorKind,
+  isNegatedOperator,
+  isValidFilterExpression,
+  OperatorKind,
+} from '../utils/filter_input_codec';
 
 export const PREVIEW_FILTER_EXPRESSION_ID = '__preview__';
-
-export interface FilterExpressionDraft {
-  operator?: FilterOperatorLiteral;
-  tagName?: string;
-  tagValue?: string;
-}
 
 const getProjectFieldValue = (project: CPSProject, tagName: string): string | undefined => {
   const normalizedKey = tagName.startsWith('_') ? tagName : `_${tagName}`;
   return project[normalizedKey] ?? project[tagName];
 };
 
-const isNegatedFilterOperator = (operator: string | undefined): boolean => {
-  return operator === FilterOperator.NOT_EQUALS || operator === '-' || operator === 'is not';
+const matchesFilterValue = (
+  fieldValue: string | undefined,
+  operator: FilterOperatorLiteral,
+  tagValue: string | string[] | undefined
+): boolean => {
+  if (getOperatorKind(operator) === OperatorKind.EXISTS) {
+    return fieldValue !== undefined;
+  }
+
+  if (fieldValue === undefined || tagValue === undefined) {
+    return false;
+  }
+  return Array.isArray(tagValue) ? tagValue.includes(fieldValue) : fieldValue === tagValue;
 };
 
 export const applyFilterExpressions = (
@@ -44,13 +56,13 @@ export const applyFilterExpressions = (
       continue;
     }
 
-    const { operator, tagName, tagValue } = filterExpressionCodec.decode(entry.expression);
+    const { operator, tagName, tagValue } = entry.expression;
 
-    if (!tagName || !tagValue) {
+    if (!tagName || (getOperatorKind(operator) !== OperatorKind.EXISTS && !tagValue)) {
       continue;
     }
 
-    const isNegated = isNegatedFilterOperator(operator);
+    const isNegated = isNegatedOperator(operator);
     matchingIds = matchingIds.filter((id) => {
       const project = availableProjects.get(id);
       if (!project) {
@@ -58,7 +70,7 @@ export const applyFilterExpressions = (
       }
 
       const fieldValue = getProjectFieldValue(project, tagName);
-      const matches = fieldValue === tagValue;
+      const matches = matchesFilterValue(fieldValue, operator, tagValue);
       return isNegated ? !matches : matches;
     });
   }
@@ -76,13 +88,7 @@ export const previewFilterMatchingIds = (
   draft: FilterExpressionDraft,
   filterId?: string
 ): string[] | null => {
-  const { operator, tagName, tagValue } = draft;
-  if (!operator || !tagName || !tagValue) {
-    return null;
-  }
-
-  const expression = filterExpressionCodec.encode({ operator, tagName, tagValue });
-  if (!expression) {
+  if (!isValidFilterExpression(draft)) {
     return null;
   }
 
@@ -90,11 +96,11 @@ export const previewFilterMatchingIds = (
   if (filterId) {
     const existing = previewFilters.get(filterId);
     previewFilters.set(filterId, {
-      expression,
+      expression: draft,
       enabled: existing?.enabled ?? true,
     });
   } else {
-    previewFilters.set(PREVIEW_FILTER_EXPRESSION_ID, { expression, enabled: true });
+    previewFilters.set(PREVIEW_FILTER_EXPRESSION_ID, { expression: draft, enabled: true });
   }
 
   return applyFilterExpressions(availableProjects, previewFilters);

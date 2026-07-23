@@ -10,7 +10,6 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import type { EuiContextMenuItemProps } from '@elastic/eui';
 import {
-  EuiBadge,
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiFlexGroup,
@@ -25,6 +24,9 @@ import { useProjectPickerActions, useProjectPickerState } from '../../state';
 import { getIncludedVisibleProjectIds } from '../../state/derivatives';
 import { projectPickerListStyles } from './list.styles';
 import { getProjectTags } from '../../../utils';
+import { FilterBadge } from '../filter_badge/filter_badge';
+import type { FilterExpressionValue } from '../../utils/filter_input_codec';
+import { FilterOperator } from '../../utils/filter_input_codec';
 
 interface ProjectPickerListClickActionContext {
   activeProject: CPSProject;
@@ -206,27 +208,35 @@ export function ProjectPickerList() {
           closePopover={closePopover}
         >
           <EuiFlexGroup direction="column" responsive={false} gutterSize="xs">
-            {getProjectTags(activeProject).map((tag) => (
-              <EuiFlexItem key={tag} grow={false}>
-                <EuiBadge
-                  css={styles.projectTagsBadge}
-                  color="hollow"
-                  iconType="plusCircle"
-                  iconSide="right"
-                  onClick={() => {
-                    actions.addFilterExpression({ expression: `is:${tag}` });
-                  }}
-                  onClickAriaLabel={i18n.translate(
-                    'cpsUtils.projectPicker.list.projectTags.addFilterAriaLabel',
-                    {
-                      defaultMessage: 'Add filter to project',
-                    }
-                  )}
-                >
-                  {tag}
-                </EuiBadge>
-              </EuiFlexItem>
-            ))}
+            {getProjectTags(activeProject).map((tag) => {
+              const filter: FilterExpressionValue = {
+                operator: FilterOperator.EQUALS,
+                tagName: tag.tagName,
+                tagValue: tag.tagValue,
+              };
+
+              return (
+                <EuiFlexItem key={`${tag.tagName}.${tag.tagValue}`} grow={false}>
+                  <FilterBadge
+                    css={styles.projectTagsBadge}
+                    iconType="plusCircle"
+                    iconSide="right"
+                    onClick={() => {
+                      actions.addFilterExpression({
+                        expression: filter,
+                      });
+                    }}
+                    onClickAriaLabel={i18n.translate(
+                      'cpsUtils.projectPicker.list.projectTags.addFilterAriaLabel',
+                      {
+                        defaultMessage: 'Add filter to project',
+                      }
+                    )}
+                    filter={filter}
+                  />
+                </EuiFlexItem>
+              );
+            })}
           </EuiFlexGroup>
         </EuiWrappingPopover>
       ) : null}

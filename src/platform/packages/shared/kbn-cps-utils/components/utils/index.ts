@@ -31,7 +31,18 @@ export const getSolutionIcon = (solution: string): string => {
   return PROJECT_TYPE_ICONS[solution] || 'empty';
 };
 
-export const getProjectTags = (project: CPSProject): string[] =>
+export const getProjectTags = (project: CPSProject) =>
   Object.entries(project)
-    .filter(([key]) => !key.startsWith('_'))
-    .map(([key, value]) => `${key}:${value}`);
+    .map(([key, value]) => {
+      if (key.startsWith('_') || !value) {
+        return null;
+      }
+
+      return {
+        tagName: key,
+        tagValue: value,
+      };
+    })
+    .filter(
+      (expression): expression is { tagName: string; tagValue: string } => expression !== null
+    );

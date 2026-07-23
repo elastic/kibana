@@ -10,8 +10,15 @@
 import { css } from '@emotion/react';
 import type { UseEuiTheme } from '@elastic/eui';
 
-export const filterFormStyles = ({ euiTheme }: Pick<UseEuiTheme, 'euiTheme'>) => ({
-  filterFormWrapper: css({
-    padding: euiTheme.size.base,
+export const filterBadgeStyles = (euiTheme: UseEuiTheme['euiTheme']) => ({
+  container: css({
+    width: 'fit-content',
+    '& [data-is-negated="true"]:before': {
+      content: 'attr(data-negation-string)',
+      display: 'inline-block',
+      color: euiTheme.colors.danger,
+      fontWeight: euiTheme.font.weight.bold,
+      paddingRight: euiTheme.size.xs,
+    },
   }),
 });

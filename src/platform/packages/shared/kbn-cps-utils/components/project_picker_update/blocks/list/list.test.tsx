@@ -110,6 +110,19 @@ describe('ProjectPickerList', () => {
 
     const renderTaggedList = () => renderComponent({ availableProjects: taggedProjects });
 
+    it('shows project tags in a popover when the tags badge is clicked', async () => {
+      const user = userEvent.setup();
+      renderTaggedList();
+
+      const projectA = screen.getAllByTestId('projectPickerListItem')[0];
+      await user.click(within(projectA).getByTestId('projectPickerListItemTags'));
+
+      const popover = await screen.findByLabelText('Project tags');
+      expect(popover).toBeInTheDocument();
+      expect(within(popover).getByText('env:prod-a')).toBeInTheDocument();
+      expect(screen.queryByText('env:prod-b')).not.toBeInTheDocument();
+    });
+
     it('replaces an open context menu with tags from a different project', async () => {
       const user = userEvent.setup();
       renderTaggedList();

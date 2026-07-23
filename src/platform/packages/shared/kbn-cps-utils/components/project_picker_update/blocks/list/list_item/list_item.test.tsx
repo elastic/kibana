@@ -27,6 +27,7 @@ const createDefaultProps = (): ProjectPickerListItemProps => ({
   toggleDisabledMessage: 'You must be searching a minimum of one project.',
   onContextMenu: jest.fn() as ProjectPickerListItemProps['onContextMenu'],
   onToggle: jest.fn() as ProjectPickerListItemProps['onToggle'],
+  onLabelClick: jest.fn() as ProjectPickerListItemProps['onLabelClick'],
 });
 
 const renderComponent = (props: Partial<ProjectPickerListItemProps> = {}) => {
@@ -98,10 +99,10 @@ describe('ProjectPickerListItem', () => {
     expect(screen.getByTestId('projectPickerListItemTags')).toHaveTextContent('2');
   });
 
-  it('should show project tags in a tooltip when hovering the tags badge', async () => {
+  it('should invoke onLabelClick when the tags badge is clicked', async () => {
     const user = userEvent.setup();
 
-    renderComponent({
+    const { props } = renderComponent({
       project: {
         ...defaultProject,
         env: 'prod',
@@ -109,10 +110,8 @@ describe('ProjectPickerListItem', () => {
       },
     });
 
-    await user.hover(screen.getByTestId('projectPickerListItemTags'));
+    await user.click(screen.getByTestId('projectPickerListItemTags'));
 
-    const tooltip = await screen.findByRole('tooltip');
-    expect(tooltip).toHaveTextContent('env:prod');
-    expect(tooltip).toHaveTextContent('team:search');
+    expect(props.onLabelClick).toHaveBeenCalledWith(props.project, expect.any(Object));
   });
 });

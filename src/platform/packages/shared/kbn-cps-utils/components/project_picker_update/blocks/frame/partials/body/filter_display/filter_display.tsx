@@ -13,7 +13,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiText,
-  EuiBadge,
   EuiWrappingPopover,
   EuiContextMenuPanel,
   EuiContextMenuItem,
@@ -22,19 +21,20 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FilterOperator } from '../../../../../utils/codec';
 import type { ProjectPickerState } from '../../../../../state/reducers';
 import { getIncludedVisibleProjectIds } from '../../../../../state/derivatives';
 import { useProjectPickerState, useProjectPickerActions } from '../../../../../state';
 import { filterDisplayStyles } from './filter_display.styles';
-import { filterExpressionCodec } from '../../../../../utils/codec';
+import type { FilterExpressionValue } from '../../../../../utils/filter_input_codec';
+import { isNegatedOperator } from '../../../../../utils/filter_input_codec';
+import { FilterBadge } from '../../../../filter_badge';
 
 /**
  * Describes a filter that is being edited in the filter form.
  */
 export interface EditingFilter {
   id: string;
-  expression: string;
+  expression: FilterExpressionValue;
   enabled: boolean;
 }
 
@@ -96,9 +96,9 @@ const getFilterBadgeContextMenuItems = ({
           return false;
         }
 
-        const { operator } = filterExpressionCodec.decode(filterExpression.expression);
+        const { operator } = filterExpression.expression;
 
-        return operator === FilterOperator.EQUALS;
+        return !isNegatedOperator(operator);
       },
     },
     {
@@ -120,9 +120,9 @@ const getFilterBadgeContextMenuItems = ({
           return false;
         }
 
-        const { operator } = filterExpressionCodec.decode(filterExpression.expression);
+        const { operator } = filterExpression.expression;
 
-        return operator === FilterOperator.NOT_EQUALS;
+        return isNegatedOperator(operator);
       },
     },
     {
@@ -216,8 +216,7 @@ export function ProjectPickerFilterDisplay({ onEditFilter }: ProjectPickerFilter
         aria-label={i18n.translate(
           'cpsUtils.projectPicker.filterDisplay.filterBadgeContextMenuAriaLabel',
           {
-            defaultMessage: 'Filter actions for {filter}',
-            values: { filter: selectedFilter.expression },
+            defaultMessage: 'Filter actions',
           }
         )}
       >
@@ -300,8 +299,8 @@ export function ProjectPickerFilterDisplay({ onEditFilter }: ProjectPickerFilter
               <EuiFlexGroup gutterSize="s" responsive={false}>
                 {filterEntries.map(([id, entry]) => (
                   <EuiFlexItem key={id} grow={false}>
-                    <EuiBadge
-                      color="hollow"
+                    <FilterBadge
+                      filter={entry.expression}
                       onClick={handleFilterBadgeClick.bind(null, id)}
                       style={{
                         width: 'fit-content',
@@ -322,9 +321,7 @@ export function ProjectPickerFilterDisplay({ onEditFilter }: ProjectPickerFilter
                       )}
                       iconSide="right"
                       iconType="cross"
-                    >
-                      {entry.expression}
-                    </EuiBadge>
+                    />
                   </EuiFlexItem>
                 ))}
               </EuiFlexGroup>

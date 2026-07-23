@@ -9,6 +9,7 @@
 
 import type { CPSProject } from '../../../types';
 import { createStoreReducers, type FilterEntry, type ProjectPickerState } from './reducers';
+import { FilterOperator, type FilterExpressionValue } from '../utils/filter_input_codec';
 
 const createProject = (overrides: Partial<CPSProject> & Pick<CPSProject, '_id'>): CPSProject => ({
   _alias: 'alias',
@@ -18,7 +19,7 @@ const createProject = (overrides: Partial<CPSProject> & Pick<CPSProject, '_id'>)
 });
 
 const createFilterExpressions = (
-  entries: Array<[string, string, boolean?]>
+  entries: Array<[string, FilterExpressionValue, boolean?]>
 ): Map<string, FilterEntry> =>
   new Map(entries.map(([id, expression, enabled = true]) => [id, { expression, enabled }]));
 
@@ -62,7 +63,9 @@ describe('createStoreReducers', () => {
 
   it('clears stored filters and overrides when clearing project filters', () => {
     const state = createState({
-      filterExpressions: createFilterExpressions([['f1', 'is:_type:security']]),
+      filterExpressions: createFilterExpressions([
+        ['f1', { operator: FilterOperator.EQUALS, tagName: '_type', tagValue: 'security' }],
+      ]),
       excludedOverrides: ['p2'],
     });
 
@@ -74,7 +77,9 @@ describe('createStoreReducers', () => {
 
   it('resets filters and overrides when reverting to space defaults', () => {
     const state = createState({
-      filterExpressions: createFilterExpressions([['f1', 'is:_type:security']]),
+      filterExpressions: createFilterExpressions([
+        ['f1', { operator: FilterOperator.EQUALS, tagName: '_type', tagValue: 'security' }],
+      ]),
       excludedOverrides: ['p2'],
     });
 
@@ -86,49 +91,61 @@ describe('createStoreReducers', () => {
 
   it('adds filter expressions without touching overrides', () => {
     const state = createState({
-      filterExpressions: createFilterExpressions([['f1', 'is:_type:security']]),
+      filterExpressions: createFilterExpressions([
+        ['f1', { operator: FilterOperator.EQUALS, tagName: '_type', tagValue: 'security' }],
+      ]),
       excludedOverrides: ['p1'],
     });
 
     const nextState = reducers.addFilterExpression(state, {
-      expression: 'is:_region:us-east-1',
+      expression: { operator: FilterOperator.EQUALS, tagName: '_region', tagValue: 'us-east-1' },
     });
 
     expect(nextState.filterExpressions.size).toBe(2);
     expect(nextState.filterExpressions.get('f1')).toEqual({
-      expression: 'is:_type:security',
+      expression: { operator: FilterOperator.EQUALS, tagName: '_type', tagValue: 'security' },
       enabled: true,
     });
-    expect([...nextState.filterExpressions.values()].map((entry) => entry.expression)).toContain(
-      'is:_region:us-east-1'
-    );
+    expect(
+      [...nextState.filterExpressions.values()].map((entry) => entry.expression)
+    ).toContainEqual({
+      operator: FilterOperator.EQUALS,
+      tagName: '_region',
+      tagValue: 'us-east-1',
+    });
     expect(nextState.excludedOverrides).toEqual(['p1']);
   });
 
   it('updates an existing filter expression in place', () => {
     const state = createState({
-      filterExpressions: createFilterExpressions([['f1', 'is:_type:security']]),
+      filterExpressions: createFilterExpressions([
+        ['f1', { operator: FilterOperator.EQUALS, tagName: '_type', tagValue: 'security' }],
+      ]),
     });
 
     const nextState = reducers.updateFilterExpression(state, {
       id: 'f1',
-      expression: 'is:_type:observability',
+      expression: { operator: FilterOperator.EQUALS, tagName: '_type', tagValue: 'observability' },
     });
 
     expect(nextState.filterExpressions).toEqual(
-      createFilterExpressions([['f1', 'is:_type:observability']])
+      createFilterExpressions([
+        ['f1', { operator: FilterOperator.EQUALS, tagName: '_type', tagValue: 'observability' }],
+      ])
     );
     expect(nextState.filterExpressions.size).toBe(1);
   });
 
   it('does not change state when updating a missing filter id', () => {
     const state = createState({
-      filterExpressions: createFilterExpressions([['f1', 'is:_type:security']]),
+      filterExpressions: createFilterExpressions([
+        ['f1', { operator: FilterOperator.EQUALS, tagName: '_type', tagValue: 'security' }],
+      ]),
     });
 
     const nextState = reducers.updateFilterExpression(state, {
       id: 'missing',
-      expression: 'is:_type:observability',
+      expression: { operator: FilterOperator.EQUALS, tagName: '_type', tagValue: 'observability' },
     });
 
     expect(nextState).toBe(state);
@@ -137,15 +154,17 @@ describe('createStoreReducers', () => {
   it('removes a filter expression by id', () => {
     const state = createState({
       filterExpressions: createFilterExpressions([
-        ['f1', 'is:_type:security'],
-        ['f2', 'is:_region:us-east-1'],
+        ['f1', { operator: FilterOperator.EQUALS, tagName: '_type', tagValue: 'security' }],
+        ['f2', { operator: FilterOperator.EQUALS, tagName: '_region', tagValue: 'us-east-1' }],
       ]),
     });
 
     const nextState = reducers.removeFilterExpression(state, { filterId: 'f1' });
 
     expect(nextState.filterExpressions).toEqual(
-      createFilterExpressions([['f2', 'is:_region:us-east-1']])
+      createFilterExpressions([
+        ['f2', { operator: FilterOperator.EQUALS, tagName: '_region', tagValue: 'us-east-1' }],
+      ])
     );
   });
 
@@ -155,7 +174,9 @@ describe('createStoreReducers', () => {
         ['p1', createProject({ _id: 'p1', _type: 'security' })],
         ['p2', createProject({ _id: 'p2', _type: 'observability' })],
       ]),
-      filterExpressions: createFilterExpressions([['f1', 'is:_type:security']]),
+      filterExpressions: createFilterExpressions([
+        ['f1', { operator: FilterOperator.EQUALS, tagName: '_type', tagValue: 'security' }],
+      ]),
       filteredProjectIds: ['p1'],
       visibleProjectIds: ['p1'],
       excludedOverrides: ['p1'],
@@ -173,7 +194,9 @@ describe('createStoreReducers', () => {
         ['p2', createProject({ _id: 'p2', _type: 'observability' })],
         ['p3', createProject({ _id: 'p3', _type: 'security' })],
       ]),
-      filterExpressions: createFilterExpressions([['f1', 'is:_type:security']]),
+      filterExpressions: createFilterExpressions([
+        ['f1', { operator: FilterOperator.EQUALS, tagName: '_type', tagValue: 'security' }],
+      ]),
       filteredProjectIds: ['p1', 'p3'],
       visibleProjectIds: ['p1', 'p3'],
       excludedOverrides: ['p3'],
@@ -191,7 +214,9 @@ describe('createStoreReducers', () => {
         ['p2', createProject({ _id: 'p2', _type: 'observability' })],
         ['p3', createProject({ _id: 'p3', _type: 'security' })],
       ]),
-      filterExpressions: createFilterExpressions([['f1', 'is:_type:security']]),
+      filterExpressions: createFilterExpressions([
+        ['f1', { operator: FilterOperator.EQUALS, tagName: '_type', tagValue: 'security' }],
+      ]),
       filteredProjectIds: ['p1', 'p3'],
       visibleProjectIds: ['p1', 'p3'],
       excludedOverrides: ['p1', 'p3'],
@@ -208,7 +233,9 @@ describe('createStoreReducers', () => {
         ['p1', createProject({ _id: 'p1', _type: 'security' })],
         ['p3', createProject({ _id: 'p3', _type: 'security' })],
       ]),
-      filterExpressions: createFilterExpressions([['f1', 'is:_type:security']]),
+      filterExpressions: createFilterExpressions([
+        ['f1', { operator: FilterOperator.EQUALS, tagName: '_type', tagValue: 'security' }],
+      ]),
       filteredProjectIds: ['p1', 'p3'],
       visibleProjectIds: ['p1', 'p3'],
       excludedOverrides: ['p1'],
@@ -266,7 +293,9 @@ describe('createStoreReducers', () => {
         ['p1', createProject({ _id: 'p1', _type: 'security' })],
         ['p3', createProject({ _id: 'p3', _type: 'security' })],
       ]),
-      filterExpressions: createFilterExpressions([['f1', 'is:_type:security']]),
+      filterExpressions: createFilterExpressions([
+        ['f1', { operator: FilterOperator.EQUALS, tagName: '_type', tagValue: 'security' }],
+      ]),
       filteredProjectIds: ['p1', 'p3'],
       visibleProjectIds: ['p1', 'p3'],
       selectedProjects: ['p1', 'p3'],
@@ -284,7 +313,9 @@ describe('createStoreReducers', () => {
         ['p1', createProject({ _id: 'p1', _type: 'security' })],
         ['p3', createProject({ _id: 'p3', _type: 'security' })],
       ]),
-      filterExpressions: createFilterExpressions([['f1', 'is:_type:security']]),
+      filterExpressions: createFilterExpressions([
+        ['f1', { operator: FilterOperator.EQUALS, tagName: '_type', tagValue: 'security' }],
+      ]),
       filteredProjectIds: ['p1', 'p3'],
       visibleProjectIds: ['p1', 'p3'],
       selectedProjects: ['p3'],
@@ -302,7 +333,9 @@ describe('createStoreReducers', () => {
         ['p1', createProject({ _id: 'p1', _type: 'security' })],
         ['p3', createProject({ _id: 'p3', _type: 'security' })],
       ]),
-      filterExpressions: createFilterExpressions([['f1', 'is:_type:security']]),
+      filterExpressions: createFilterExpressions([
+        ['f1', { operator: FilterOperator.EQUALS, tagName: '_type', tagValue: 'security' }],
+      ]),
       filteredProjectIds: ['p1', 'p3'],
       visibleProjectIds: ['p1', 'p3'],
       selectedProjects: ['p1'],
