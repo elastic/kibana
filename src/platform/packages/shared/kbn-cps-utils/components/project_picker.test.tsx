@@ -10,48 +10,51 @@
 import '@testing-library/jest-dom';
 import React from 'react';
 import { render, screen, act } from '@testing-library/react';
-import type { ProjectRouting } from '@kbn/es-query';
 import userEvent from '@testing-library/user-event';
 import { EuiThemeProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
-import { PROJECT_ROUTING } from '@kbn/cps-common';
-import { ProjectPicker } from './project_picker';
+import { of, Subject } from 'rxjs';
+import { ProjectPicker, type ProjectPickerProps } from './project_picker';
 import { ProjectPickerContent } from './project_picker_content';
+import type { CPSProject, ProjectsData } from '../types';
+
+const TOUR_STORAGE_KEY = 'cps:projectPicker:tourShown';
+
+const originProject: CPSProject = {
+  _id: 'origin',
+  _alias: 'Origin CPSProject',
+  _type: 'observability',
+  _organisation: 'test-org',
+};
+
+const linkedProjects: CPSProject[] = [
+  {
+    _id: 'linked1',
+    _alias: 'Linked CPSProject 1',
+    _type: 'security',
+    _organisation: 'test-org',
+  },
+  {
+    _id: 'linked2',
+    _alias: 'Linked CPSProject 2',
+    _type: 'elasticsearch',
+    _organisation: 'test-org',
+  },
+];
+
+const mockProjectsData: ProjectsData = {
+  origin: originProject,
+  linkedProjects,
+};
 
 describe('ProjectPicker', () => {
-  const mockProjects = {
-    originProject: {
-      _id: 'origin',
-      _alias: 'Origin CPSProject',
-      _type: 'observability',
-      _organisation: 'test-org',
-    },
-    linkedProjects: [
-      {
-        _id: 'linked1',
-        _alias: 'Linked CPSProject 1',
-        _type: 'security',
-        _organisation: 'test-org',
-      },
-      {
-        _id: 'linked2',
-        _alias: 'Linked CPSProject 2',
-        _type: 'elasticsearch',
-        _organisation: 'test-org',
-      },
-    ],
-    isLoading: false,
-    error: null,
-  };
-
-  const defaultProps = {
-    projectRouting: undefined as ProjectRouting | undefined,
+  const defaultProps: ProjectPickerProps = {
+    getActiveRouteProjects$: () => of(mockProjectsData),
+    defaultProjectRoutingGetter: () => undefined,
     onProjectRoutingChange: jest.fn(),
-    projects: mockProjects,
-    totalProjectCount: 2,
   };
 
-  const renderProjectPicker = async (props: Partial<typeof defaultProps> = {}) => {
+  const renderProjectPicker = async (props: Partial<ProjectPickerProps> = {}) => {
     let result;
     await act(async () => {
       result = render(
@@ -65,159 +68,125 @@ describe('ProjectPicker', () => {
     return result!;
   };
 
-  const getButton = () => screen.getByLabelText('Cross-project search project picker');
-
   beforeEach(() => {
     jest.clearAllMocks();
+    localStorage.setItem(TOUR_STORAGE_KEY, 'true');
   });
 
-  it('should render the project picker button', async () => {
+  it('should show a skeleton while projects are loading', async () => {
+    const projects$ = new Subject<ProjectsData | null>();
+    await renderProjectPicker({
+      getActiveRouteProjects$: () => projects$.asObservable(),
+    });
+
+    expect(screen.queryByTestId('cps-project-picker-button')).not.toBeInTheDocument();
+    expect(document.querySelector('.euiSkeletonRectangle')).toBeInTheDocument();
+  });
+
+  it('should render nothing when there is no origin project', async () => {
+    await renderProjectPicker({
+      getActiveRouteProjects$: () =>
+        of({
+          origin: null,
+          linkedProjects,
+        }),
+    });
+
+    expect(screen.queryByTestId('cps-project-picker-button')).not.toBeInTheDocument();
+  });
+
+  it('should render nothing when there are no linked projects', async () => {
+    await renderProjectPicker({
+      getActiveRouteProjects$: () =>
+        of({
+          origin: originProject,
+          linkedProjects: [],
+        }),
+    });
+
+    expect(screen.queryByTestId('cps-project-picker-button')).not.toBeInTheDocument();
+  });
+
+  it('should render the project picker button when projects are available', async () => {
     await renderProjectPicker();
 
-    expect(getButton()).toBeInTheDocument();
+    expect(screen.getByTestId('cps-project-picker-button')).toBeInTheDocument();
+    expect(screen.getByTestId('cps-project-picker-button-label')).toHaveTextContent('All');
   });
-  it('should display button group options in popover', async () => {
+
+  it('should open the popover with the project list', async () => {
     await renderProjectPicker();
 
-    expect(getButton()).toBeInTheDocument();
+    await userEvent.click(screen.getByTestId('cps-project-picker-button'));
 
-    await userEvent.click(getButton());
-    expect(screen.getByText('All projects')).toBeInTheDocument();
-    expect(screen.getByText('This project')).toBeInTheDocument();
+    expect(screen.getByLabelText('Cross-project search (CPS) scope')).toBeInTheDocument();
+    expect(screen.getByText('Cross-project search')).toBeInTheDocument();
+    expect(screen.getByTestId('projectPickerList')).toBeInTheDocument();
+    expect(screen.getAllByTestId('projectPickerListItem')).toHaveLength(3);
+    expect(screen.getByText('Origin CPSProject')).toBeInTheDocument();
+    expect(screen.getByText('Linked CPSProject 1')).toBeInTheDocument();
+    expect(screen.getByText('Linked CPSProject 2')).toBeInTheDocument();
   });
 
-  describe('projectRouting selection', () => {
-    it('should show "All projects" selected when projectRouting is undefined', async () => {
-      await renderProjectPicker({ projectRouting: undefined });
+  it('should call onProjectRoutingChange with the default routing on mount', async () => {
+    const onProjectRoutingChange = jest.fn();
+    await renderProjectPicker({ onProjectRoutingChange });
 
-      await userEvent.click(getButton());
-
-      const allProjectsButton = screen.getByRole('button', { name: /All projects/i });
-      expect(allProjectsButton).toHaveAttribute('aria-pressed', 'true');
-    });
-
-    it('should show "This project" selected when projectRouting is ORIGIN', async () => {
-      await renderProjectPicker({ projectRouting: PROJECT_ROUTING.ORIGIN });
-
-      await userEvent.click(getButton());
-
-      const thisProjectButton = screen.getByRole('button', { name: /This project/i });
-      expect(thisProjectButton).toHaveAttribute('aria-pressed', 'true');
-    });
+    expect(onProjectRoutingChange).toHaveBeenCalledWith('_id:*');
   });
 
-  describe('projectRouting change events', () => {
-    it('should call onProjectRoutingChange with PROJECT_ROUTING.ALL when "All projects" is clicked', async () => {
-      const onProjectRoutingChange = jest.fn();
-      await renderProjectPicker({
-        projectRouting: PROJECT_ROUTING.ORIGIN,
-        onProjectRoutingChange,
-      });
+  it('should update project routing when a project is excluded', async () => {
+    const onProjectRoutingChange = jest.fn();
+    await renderProjectPicker({ onProjectRoutingChange });
 
-      await userEvent.click(getButton());
-      expect(screen.getByText('All projects')).toBeInTheDocument();
-      const allProjectsButton = screen.getByRole('button', { name: /All projects/i });
-      await userEvent.click(allProjectsButton);
+    await userEvent.click(screen.getByTestId('cps-project-picker-button'));
 
-      expect(onProjectRoutingChange).toHaveBeenCalledWith(PROJECT_ROUTING.ALL);
-      expect(onProjectRoutingChange).toHaveBeenCalledTimes(1);
-    });
+    const linkedProjectSwitch = screen.getByTestId('projectPickerListItemSwitch-linked1');
+    await userEvent.click(linkedProjectSwitch);
 
-    it('should call onProjectRoutingChange with ORIGIN when "This project" is clicked', async () => {
-      const onProjectRoutingChange = jest.fn();
-      await renderProjectPicker({
-        projectRouting: undefined,
-        onProjectRoutingChange,
-      });
-
-      await userEvent.click(getButton());
-      expect(screen.getByText('This project')).toBeInTheDocument();
-
-      const thisProjectButton = screen.getByRole('button', { name: /This project/i });
-      await userEvent.click(thisProjectButton);
-
-      expect(onProjectRoutingChange).toHaveBeenCalledWith(PROJECT_ROUTING.ORIGIN);
-      expect(onProjectRoutingChange).toHaveBeenCalledTimes(1);
-    });
+    expect(onProjectRoutingChange).toHaveBeenLastCalledWith('_id:* AND NOT _id:linked1');
+    expect(screen.getByTestId('cps-project-picker-button-label')).toHaveTextContent('2/3');
   });
 
-  describe('state transitions', () => {
-    it('should reflect prop changes correctly', async () => {
-      const onProjectRoutingChange = jest.fn();
-      const { rerender } = await renderProjectPicker({
-        projectRouting: undefined,
-        onProjectRoutingChange,
-      });
+  it('should render a disabled button when isReadonly is true', async () => {
+    await renderProjectPicker({ isReadonly: true });
 
-      // Open popover and verify "All projects" is selected
-      await userEvent.click(getButton());
-
-      const allProjectsButton = screen.getByRole('button', { name: /All projects/i });
-      expect(allProjectsButton).toHaveAttribute('aria-pressed', 'true');
-
-      // Click "This project"
-      const thisProjectButton = screen.getByRole('button', { name: /This project/i });
-      await userEvent.click(thisProjectButton);
-
-      expect(onProjectRoutingChange).toHaveBeenCalledWith(PROJECT_ROUTING.ORIGIN);
-      expect(onProjectRoutingChange).toHaveBeenCalledTimes(1);
-
-      // Simulate parent component updating the prop (after callback is processed)
-      rerender(
-        <I18nProvider>
-          <EuiThemeProvider>
-            <ProjectPicker
-              {...defaultProps}
-              projectRouting={PROJECT_ROUTING.ORIGIN}
-              onProjectRoutingChange={onProjectRoutingChange}
-            />
-          </EuiThemeProvider>
-        </I18nProvider>
-      );
-
-      // Close and reopen popover to see updated state
-      await userEvent.keyboard('{Escape}');
-
-      await userEvent.click(getButton());
-
-      const thisProjectButtonUpdated = screen.getByRole('button', { name: /This project/i });
-      expect(thisProjectButtonUpdated).toHaveAttribute('aria-pressed', 'true');
-    });
+    const button = screen.getByTestId('cps-project-picker-button-disabled');
+    expect(button).toBeDisabled();
+    expect(screen.queryByTestId('cps-project-picker-button-label')).not.toBeInTheDocument();
   });
 
-  describe('accessibility', () => {
-    it('should have proper ARIA labels', async () => {
-      await renderProjectPicker();
+  it('should support keyboard navigation to open the popover', async () => {
+    await renderProjectPicker();
 
-      expect(getButton()).toBeInTheDocument();
-      const button = screen.getByLabelText('Cross-project search project picker');
-      expect(button).toHaveAttribute('aria-label', 'Cross-project search project picker');
+    await userEvent.tab();
+    expect(screen.getByTestId('cps-project-picker-button')).toHaveFocus();
 
-      await userEvent.click(button);
+    await userEvent.keyboard('{Enter}');
+    expect(screen.getByLabelText('Cross-project search (CPS) scope')).toBeInTheDocument();
+    expect(screen.getByTestId('projectPickerList')).toBeInTheDocument();
+  });
 
-      const buttonGroup = screen.getByRole('group', {
-        name: 'Cross-project search project picker',
-      });
-      expect(buttonGroup).toBeInTheDocument();
-    });
+  it('should prevent excluding the last included project', async () => {
+    const user = userEvent.setup();
+    await renderProjectPicker();
 
-    it('should support keyboard navigation', async () => {
-      const onProjectRoutingChange = jest.fn();
-      await renderProjectPicker({
-        projectRouting: undefined,
-        onProjectRoutingChange,
-      });
-      // Tab to the button
-      await userEvent.tab();
+    await user.click(screen.getByTestId('cps-project-picker-button'));
 
-      const button = screen.getByLabelText('Cross-project search project picker');
-      expect(button).toHaveFocus();
+    await user.click(screen.getByTestId('projectPickerListItemSwitch-linked1'));
+    await user.click(screen.getByTestId('projectPickerListItemSwitch-linked2'));
 
-      // Press Enter to open popover
-      await userEvent.keyboard('{Enter}');
+    const originSwitch = screen.getByTestId('projectPickerListItemSwitch-origin');
+    expect(originSwitch).toHaveAttribute('aria-checked', 'true');
 
-      expect(screen.getByText('Cross-project search (CPS) scope')).toBeInTheDocument();
-    });
+    try {
+      await user.click(originSwitch);
+    } catch (error) {
+      expect(error).toBeInstanceOf(Error);
+      expect((error as Error).message).toContain('Unable to perform pointer interaction');
+    } finally {
+      expect(originSwitch).toHaveAttribute('aria-checked', 'true');
+    }
   });
 });
 
