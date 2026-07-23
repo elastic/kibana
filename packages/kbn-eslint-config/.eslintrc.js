@@ -477,6 +477,7 @@ module.exports = {
     '@elastic/eui/consistent-is-invalid-props': 'error',
     '@elastic/eui/tooltip-no-interactive-content': 'error',
     '@elastic/eui/require-table-caption': 'error',
+    '@elastic/eui/accessible-interactive-element': 'error',
   },
 
   overrides: [
