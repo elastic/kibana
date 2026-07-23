@@ -11,7 +11,7 @@ import { EuiText } from '@elastic/eui';
 import { buildDataTableRecord, type EsHitRecord } from '@kbn/discover-utils';
 import { dataViewMockWithTimeField } from '@kbn/discover-utils/src/__mocks__';
 import type { ArgTypes, Args, Decorator } from '@storybook/react';
-import { produce } from 'immer';
+import { produce } from 'immer-v9';
 import React from 'react';
 import { mockUnifiedDocViewerServices } from '../public/__mocks__';
 import { setUnifiedDocViewerServices } from '../public/plugin';

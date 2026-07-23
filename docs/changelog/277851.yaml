@@ -1,0 +1,10 @@
+prs:
+- https://github.com/elastic/kibana/pull/277851
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-07-21
+- product: kibana
+  target: 9.5.0
+title: "Fix Timeline crash on reserved index field names"
+description: "Index field formatting no longer crashes when a field or index name collides with an `Object.prototype` property such as `constructor`."

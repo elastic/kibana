@@ -6,9 +6,10 @@
  */
 
 import React from 'react';
-import { render, waitFor } from '@testing-library/react';
+import { waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+
+import { renderWithMlI18nContext } from '../../../test_utils/render_with_ml_context';
 
 jest.mock('../../../contexts/kibana/use_create_url', () => ({
   useCreateAndNavigateToManagementMlLink: jest.fn(),
@@ -120,21 +121,13 @@ import { NewCalendar } from './new_calendar';
 
 describe('NewCalendar', () => {
   test('Renders new calendar form', () => {
-    const { getByTestId } = render(
-      <IntlProvider locale="en">
-        <NewCalendar isDst={false} />
-      </IntlProvider>
-    );
+    const { getByTestId } = renderWithMlI18nContext(<NewCalendar isDst={false} />);
 
     expect(getByTestId('mlPageCalendarEdit')).toBeInTheDocument();
   });
 
   test('Import modal button is disabled', () => {
-    const { getByTestId } = render(
-      <IntlProvider locale="en">
-        <NewCalendar isDst={false} />
-      </IntlProvider>
-    );
+    const { getByTestId } = renderWithMlI18nContext(<NewCalendar isDst={false} />);
 
     const importEventsButton = getByTestId('mlCalendarImportEventsButton');
     expect(importEventsButton).toBeInTheDocument();
@@ -142,11 +135,7 @@ describe('NewCalendar', () => {
   });
 
   test('New event modal button is disabled', async () => {
-    const { getByTestId } = render(
-      <IntlProvider locale="en">
-        <NewCalendar isDst={false} />
-      </IntlProvider>
-    );
+    const { getByTestId } = renderWithMlI18nContext(<NewCalendar isDst={false} />);
 
     const newEventButton = getByTestId('mlCalendarNewEventButton');
     expect(newEventButton).toBeInTheDocument();
@@ -154,10 +143,8 @@ describe('NewCalendar', () => {
   });
 
   test('isDuplicateId returns true if form calendar id already exists in calendars', async () => {
-    const { getByTestId, queryByTestId, getByText } = render(
-      <IntlProvider locale="en">
-        <NewCalendar isDst={false} />
-      </IntlProvider>
+    const { getByTestId, queryByTestId, getByText } = renderWithMlI18nContext(
+      <NewCalendar isDst={false} />
     );
 
     const mlCalendarIdFormRow = getByText('Calendar ID');

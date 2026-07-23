@@ -1,5 +1,9 @@
 {
-  "sha1": "bccf609d5bee7832beaa8a441f58cea749512236",
+  "sha1": "3ea6222bcbb5955215fc653150c12b339c24da69",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
   "tests": [
     {
       "id": "395fb291fcac059-cdfe72291d65b9f",
@@ -11,7 +15,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout_cps_local/api/tests/cps_logs_extraction.spec.ts",
-        "line": 67,
+        "line": 68,
         "column": 12
       }
     },
@@ -25,7 +29,21 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout_cps_local/api/tests/cps_logs_extraction.spec.ts",
-        "line": 98,
+        "line": 99,
+        "column": 12
+      }
+    },
+    {
+      "id": "395fb291fcac059-758e64ba98d6192",
+      "title": "Entity Store CPS logs extraction (linked serverless project) produces a correct entity document after the CPS extract → promote round-trip",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout_cps_local/api/tests/cps_logs_extraction.spec.ts",
+        "line": 146,
         "column": 12
       }
     }

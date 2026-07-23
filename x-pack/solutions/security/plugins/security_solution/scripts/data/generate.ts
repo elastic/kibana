@@ -11,7 +11,6 @@ import fs from 'fs';
 import { run } from '@kbn/dev-cli-runner';
 import type { ToolingLog } from '@kbn/tooling-log';
 import datemath from '@kbn/datemath';
-import { asyncForEach } from '@kbn/std';
 import type { Client } from '@elastic/elasticsearch';
 import type { IndicesGetMappingResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { KbnClient } from '@kbn/test';
@@ -29,14 +28,30 @@ import {
 } from './lib/indexing';
 import { assertNoBulkErrors } from './lib/bulk';
 import { ensurePrebuiltRulesInstalled } from './lib/prebuilt_rules';
-import { loadInsightsRuleCreateProps } from './lib/insights_rule';
-import { copyPreviewAlertsToRealAlertsIndex, previewRule } from './lib/rule_preview';
 import {
-  enableRules,
-  fetchAllInstalledRules,
-  fetchRuleById,
-  toRuleCreateProps,
-} from './lib/ruleset';
+  resolveEndpointSecurityRule,
+  runAlertJobs,
+  type AlertMode,
+  type PreviewTuning,
+  type RuleAlertJob,
+} from './lib/alert_runner';
+import {
+  assertPackProvenanceAuthored,
+  cleanPackData,
+  huntRuleId,
+  indexAndInstallPack,
+  legacyHuntRuleId,
+  legacyPackIndexName,
+  packIndexName,
+  packTag,
+  parsePacksFlag,
+} from './lib/packs';
+import {
+  cleanThreatIntelFixtures,
+  resolveThreatIntelPackIds,
+  seedThreatIntelForPacks,
+} from './lib/threat_intel_fixtures';
+import { listPacks } from './packs';
 import {
   generateAndIndexAttackDiscoveries,
   type GeneratedAttackDiscoveryGroup,
@@ -45,8 +60,6 @@ import {
 const ATTACKS_DIR = scriptsDataDir('episodes', 'attacks');
 const NOISE_DIR = scriptsDataDir('episodes', 'noise');
 const MAPPING_PATH = path.join(ATTACKS_DIR, 'mapping.json');
-const DATA_GENERATOR_CASE_TAG = 'data-generator';
-const TARGET_PREBUILT_RULES_COUNT = 15;
 
 const normalizeApiKey = (input: string): string => input.trim().replace(/^ApiKey\s+/i, '');
 
@@ -273,7 +286,7 @@ const createCasesFromAttackDiscoveries = async ({
       },
       body: {
         title,
-        tags: [DATA_GENERATOR_CASE_TAG],
+        tags: [],
         category: null,
         severity: 'low',
         description,
@@ -389,22 +402,20 @@ const deleteGeneratedCases = async ({
   };
 
   try {
-    // Primary: safe deletion by generator tag.
-    const tagged = await findCaseIds({
-      owner: 'securitySolution',
-      tags: DATA_GENERATOR_CASE_TAG,
-    });
-
-    // Backwards-compatibility: older generator cases created before tagging existed.
-    // Keep this narrow by filtering to the reporter and owner, and searching only the description field.
-    const legacy = await findCaseIds({
+    // Find generator cases by description fingerprint (no ownership tags on cases).
+    // Also match legacy tagged cases from older generator runs.
+    const byDescription = await findCaseIds({
       owner: 'securitySolution',
       reporters: authenticatedUsername,
       search: '"This case was opened for attack discovery"',
       searchFields: 'description',
     });
+    const legacyTagged = await findCaseIds({
+      owner: 'securitySolution',
+      tags: 'data-generator',
+    });
 
-    const caseIds = Array.from(new Set([...tagged, ...legacy]));
+    const caseIds = Array.from(new Set([...byDescription, ...legacyTagged]));
     if (caseIds.length === 0) {
       log.info(`--clean: no generator-created cases found to delete.`);
       return;
@@ -463,9 +474,8 @@ const ensureGeneratorIndices = async ({
 }) => {
   for (const ep of episodeIds) {
     const idx = episodeIndexNames({ episodeId: ep, endMs, indexPrefix });
-    await asyncForEach(Object.values(idx), async (index) => {
-      await ensureIndex({ esClient, index, mappingPath: MAPPING_PATH, log });
-    });
+    await ensureIndex({ esClient, index: idx.endpointEvents, mappingPath: MAPPING_PATH, log });
+    await ensureIndex({ esClient, index: idx.endpointAlerts, mappingPath: MAPPING_PATH, log });
   }
 };
 
@@ -474,6 +484,7 @@ const cleanGeneratedData = async ({
   kbnClient,
   log,
   episodeIds,
+  packIds,
   endMs,
   spaceId,
   startMs,
@@ -486,6 +497,7 @@ const cleanGeneratedData = async ({
   kbnClient: KbnClient;
   log: ToolingLog;
   episodeIds: string[];
+  packIds: string[];
   endMs: number;
   spaceId: string;
   startMs: number;
@@ -495,7 +507,8 @@ const cleanGeneratedData = async ({
   indexPrefix: string;
 }) => {
   log.warning(
-    `--clean enabled: deleting generated episode indices and generated alerts/discoveries in space "${spaceId}" within the requested time range`
+    `--clean enabled: deleting generated episode indices, pack artifacts, and generator alerts/discoveries in space "${spaceId}" ` +
+      `(discovery cleanup is time-filtered; detection-alert cleanup is by generator tags/rule_ids/ancestors)`
   );
 
   // 1) Remove episode indices created by this script for the selected episodeIds across the requested date range.
@@ -509,7 +522,13 @@ const cleanGeneratedData = async ({
         indexPrefix,
         dateSuffixOverride: suffix,
       });
-      return [idx.endpointEvents, idx.endpointAlerts, idx.insightsAlerts];
+      return [
+        idx.endpointEvents,
+        idx.endpointAlerts,
+        idx.legacyEndpointEvents,
+        idx.legacyEndpointAlerts,
+        idx.insightsAlerts,
+      ];
     })
   );
 
@@ -527,51 +546,105 @@ const cleanGeneratedData = async ({
     log.warning(`--clean: failed to delete episode indices: ${formatError(e)}`);
   }
 
-  // 2) Remove previously generated Security alerts (copied from preview).
-  // Prefer deleting by our generator marker tag; fallback to ruleset-based filters if needed.
+  // 2) Remove previously generated Security alerts.
+  // Pack hunts: uuidv5 rule_ids (+ legacy data-generator-pack-* prefix) and ancestor indices.
+  // Endpoint: delete by ancestor index (episode concrete indices), not by the real
+  // Endpoint Security rule_id (that would wipe non-generator Defend alerts).
   const alertsIndex = `.alerts-security.alerts-${spaceId}`;
-  const hasRuleFilters = ruleUuids.length > 0 || ruleIds.length > 0;
-  if (hasRuleFilters) {
-    try {
-      const exists = await esClient.indices.exists({ index: alertsIndex });
-      if (exists) {
-        await esClient.deleteByQuery({
-          index: alertsIndex,
-          conflicts: 'proceed',
-          refresh: true,
-          query: {
-            bool: {
-              filter: [
-                {
-                  bool: {
-                    should: [
-                      // Prefer deleting alerts explicitly marked by the generator.
-                      { term: { 'kibana.alert.rule.tags': 'data-generator' } },
-                      // Backwards compatibility: delete by ruleset filters too (older generated docs won't have the tag).
-                      ...(ruleUuids.length > 0
-                        ? [{ terms: { 'kibana.alert.rule.uuid': ruleUuids } }]
-                        : []),
-                      ...(ruleIds.length > 0
-                        ? [{ terms: { 'kibana.alert.rule.rule_id': ruleIds } }]
-                        : []),
-                    ],
-                    minimum_should_match: 1,
-                  },
-                },
-              ],
-            },
-          },
-        });
-      }
-    } catch (e) {
-      log.warning(
-        `--clean: failed to delete Security alerts from ${alertsIndex}: ${formatError(e)}`
+  try {
+    const exists = await esClient.indices.exists({ index: alertsIndex });
+    if (exists) {
+      const ancestorIndices = episodeIds.flatMap((ep) =>
+        suffixes.flatMap((suffix) => {
+          const idx = episodeIndexNames({
+            episodeId: ep,
+            endMs,
+            indexPrefix,
+            dateSuffixOverride: suffix,
+          });
+          return [
+            idx.endpointEvents,
+            idx.endpointAlerts,
+            idx.legacyEndpointEvents,
+            idx.legacyEndpointAlerts,
+          ];
+        })
       );
+
+      const packsForClean = packIds.length > 0 ? packIds : listPacks().map((p) => p.id);
+      const packHuntRuleIds: string[] = [];
+      for (const packId of packsForClean) {
+        const pack = listPacks().find((p) => p.id === packId);
+        if (pack) {
+          for (const hunt of pack.hunts) {
+            packHuntRuleIds.push(huntRuleId(packId, hunt.name));
+            packHuntRuleIds.push(legacyHuntRuleId(packId, hunt.name));
+          }
+          const dataStream = pack.eventSources[0]?.dataStream ?? 'unknown';
+          for (const suffix of suffixes) {
+            ancestorIndices.push(
+              packIndexName({
+                packId,
+                dataStream,
+                endMs,
+                dateSuffixOverride: suffix,
+              })
+            );
+            ancestorIndices.push(
+              legacyPackIndexName({
+                packId,
+                dataStream,
+                endMs,
+                dateSuffixOverride: suffix,
+              })
+            );
+          }
+        }
+      }
+
+      const allRuleIds = [...new Set([...ruleIds, ...packHuntRuleIds])];
+      const cleaningAllPacks = packIds.length === 0 || packsForClean.length === listPacks().length;
+      // When --packs is a subset, do not delete other packs' alerts via blanket ownership tags.
+      const tagShouldClauses = cleaningAllPacks
+        ? [
+            { term: { 'kibana.alert.rule.tags': 'data-generator' } },
+            { term: { 'kibana.alert.rule.tags': 'data-generator-fp' } },
+          ]
+        : packsForClean.map((id) => ({ term: { 'kibana.alert.rule.tags': packTag(id) } }));
+
+      await esClient.deleteByQuery({
+        index: alertsIndex,
+        conflicts: 'proceed',
+        refresh: true,
+        query: {
+          bool: {
+            filter: [
+              {
+                bool: {
+                  should: [
+                    { prefix: { 'kibana.alert.rule.rule_id': 'data-generator-pack-' } },
+                    { term: { 'kibana.alert.rule.rule_id': 'data-generator-endpoint-security' } },
+                    ...tagShouldClauses,
+                    ...(ruleUuids.length > 0
+                      ? [{ terms: { 'kibana.alert.rule.uuid': ruleUuids } }]
+                      : []),
+                    ...(allRuleIds.length > 0
+                      ? [{ terms: { 'kibana.alert.rule.rule_id': allRuleIds } }]
+                      : []),
+                    ...(ancestorIndices.length > 0
+                      ? [{ terms: { 'kibana.alert.ancestors.index': ancestorIndices } }]
+                      : []),
+                  ],
+                  minimum_should_match: 1,
+                },
+              },
+            ],
+          },
+        },
+      });
     }
-  } else {
-    log.warning(
-      `--clean: skipping Security alert deletion because no prebuilt rules were resolved.`
-    );
+  } catch (e) {
+    log.warning(`--clean: failed to delete Security alerts from ${alertsIndex}: ${formatError(e)}`);
   }
 
   // 3) Remove previously generated Attack Discoveries (synthetic/no-LLM) within the requested time range.
@@ -741,12 +814,7 @@ const bulkIndexStreamed = async ({
   for await (const item of docs) {
     if (episodeIds.includes(item.episodeId)) {
       const idx = episodeIndexNames({ episodeId: item.episodeId, endMs, indexPrefix });
-      const index =
-        item.kind === 'data'
-          ? idx.endpointEvents
-          : item.kind === 'endpoint_alert'
-          ? idx.endpointAlerts
-          : idx.insightsAlerts;
+      const index = item.kind === 'data' ? idx.endpointEvents : idx.endpointAlerts;
 
       const buf = ensureBuf(index);
       buf.push(item.doc);
@@ -808,13 +876,37 @@ export const cli = () => {
       const hosts = Number(cliContext.flags.h ?? cliContext.flags.hosts ?? 5);
       const users = Number(cliContext.flags.u ?? cliContext.flags.users ?? 5);
       const clean = Boolean(cliContext.flags.clean);
-      const skipAlerts = Boolean(cliContext.flags['skip-alerts']);
-      const skipRulesetPreview = Boolean(cliContext.flags['skip-ruleset-preview']);
       const validateFixtures = Boolean(cliContext.flags['validate-fixtures']);
       const attacks = Boolean(cliContext.flags.attacks);
       const createCases = Boolean(cliContext.flags.cases);
       const shouldGenerateAttackDiscoveries = attacks || createCases;
       const shouldCreateCases = createCases;
+      const leaveRulesDisabled = Boolean(cliContext.flags['leave-rules-disabled']);
+      const alertModeRaw = getOptionalStringFlag(cliContext.flags, 'alert-mode') ?? 'preview';
+      if (alertModeRaw !== 'preview' && alertModeRaw !== 'live' && alertModeRaw !== 'none') {
+        throw new Error(`Invalid --alert-mode "${alertModeRaw}" (expected preview|live|none)`);
+      }
+      const alertMode: AlertMode = alertModeRaw;
+      if (leaveRulesDisabled && alertMode !== 'live') {
+        throw new Error(`--leave-rules-disabled is only valid with --alert-mode live`);
+      }
+      const ruleFrom = getOptionalStringFlag(cliContext.flags, 'rule-from') ?? 'now-30d';
+      const fpCount = Math.min(3, Math.max(0, Number(cliContext.flags['fp-count'] ?? 0)));
+      if (!Number.isInteger(fpCount) || fpCount < 0 || fpCount > 3) {
+        throw new Error(
+          `Invalid --fp-count "${cliContext.flags['fp-count']}" (expected integer 0-3)`
+        );
+      }
+      const threatIntel = Boolean(cliContext.flags['threat-intel']);
+      let packIds = parsePacksFlag(getOptionalStringFlag(cliContext.flags, 'packs'));
+      if (threatIntel && packIds.length === 0) {
+        packIds = resolveThreatIntelPackIds([]);
+        log.info(
+          `--threat-intel with no --packs: defaulting packs to ${packIds.join(
+            ', '
+          )} for RSS pairing.`
+        );
+      }
       const maxPreviewInvocations = Math.max(
         1,
         Number(cliContext.flags['max-preview-invocations'] ?? 12)
@@ -938,49 +1030,41 @@ export const cli = () => {
 
         const effectiveSpaceId = spaceId && spaceId.length > 0 ? spaceId : 'default';
 
-        const installedRules = await fetchAllInstalledRules({ kbnClient });
-        const resolvedRules = (() => {
-          const prebuilt = installedRules
-            .filter((r) => r.immutable === true)
-            .sort((a, b) => a.name.localeCompare(b.name) || a.rule_id.localeCompare(b.rule_id));
-
-          const out: Array<{ id: string; rule_id: string; name: string }> = [];
-          const seenNames = new Set<string>();
-          for (const r of prebuilt) {
-            if (out.length >= TARGET_PREBUILT_RULES_COUNT) break;
-            if (!seenNames.has(r.name)) {
-              seenNames.add(r.name);
-              out.push({ id: r.id, rule_id: r.rule_id, name: r.name });
-            }
-          }
-          return out;
-        })();
-
-        if (resolvedRules.length === 0) {
-          log.warning(
-            `No installed immutable (prebuilt) rules were found. Rule enable/attribution steps will be skipped.`
-          );
-        } else if (resolvedRules.length < TARGET_PREBUILT_RULES_COUNT) {
-          log.warning(
-            `Only resolved ${resolvedRules.length} unique prebuilt rule title(s) for enabling/attribution (target=${TARGET_PREBUILT_RULES_COUNT}).`
-          );
-        }
+        const tuning: PreviewTuning = {
+          interval: previewInterval,
+          invocationCount,
+          previewWindowSeconds,
+          timeframeEndIso: new Date(endMs).toISOString(),
+          timestampRange: { startMs, endMs },
+        };
 
         if (clean) {
-          const ruleIdsForClean = Array.from(new Set([...resolvedRules.map((r) => r.rule_id)]));
-
           await cleanGeneratedData({
             esClient,
             kbnClient,
             log,
             episodeIds,
+            packIds,
             endMs,
             spaceId: effectiveSpaceId,
             startMs,
             username,
-            ruleUuids: resolvedRules.map((r) => r.id),
-            ruleIds: ruleIdsForClean,
+            ruleUuids: [],
+            ruleIds: [],
             indexPrefix,
+          });
+          await cleanPackData({
+            esClient,
+            kbnClient,
+            log,
+            packIds,
+            startMs,
+            endMs,
+          });
+          await cleanThreatIntelFixtures({
+            esClient,
+            log,
+            packIds: packIds.length > 0 ? packIds : undefined,
           });
         }
 
@@ -1000,8 +1084,6 @@ export const cli = () => {
           hostCount: hosts,
           userCount: users,
           seed: getOptionalStringFlag(cliContext.flags, 'seed'),
-          // Default behavior: concentrate most activity on a small subset of risky hosts/users.
-          // This can be tuned later if needed, but is intentionally opinionated to look realistic.
           riskyHostCount: Math.min(2, hosts),
           riskyUserCount: Math.min(2, users),
           riskyProbability: 0.7,
@@ -1016,28 +1098,56 @@ export const cli = () => {
           indexPrefix,
         });
 
-        log.info(`Done indexing episode events/endpoint alerts (and insights-alerts copies).`);
+        log.info(`Done indexing episode events/endpoint alerts.`);
 
-        // In serverless, the Security alerts destination is typically a data stream and may not exist
-        // until detections are initialized. Best-effort initialize here, then verify before preview/copy.
-        await ensureDetectionsInitialized({ kbnClient, log });
+        const packResults = [];
+        for (const packId of packIds) {
+          const result = await indexAndInstallPack({
+            packId,
+            esClient,
+            kbnClient,
+            log,
+            startMs,
+            endMs,
+            fpCount,
+            installRules: alertMode !== 'none',
+            enableRules: alertMode === 'live' && !leaveRulesDisabled,
+            ruleFrom,
+          });
+          assertPackProvenanceAuthored(result.pack);
+          packResults.push(result);
+        }
 
-        // Ensure rules are enabled so generated alerts always reference installed+enabled rules.
-        await enableRules({ kbnClient, ids: resolvedRules.map((r) => r.id) });
+        if (threatIntel) {
+          if (packIds.length === 0) {
+            throw new Error('--threat-intel requires at least one Technology Watch pack');
+          }
+          await seedThreatIntelForPacks({
+            esClient,
+            log,
+            packIds,
+            startMs,
+            endMs,
+            spaceId: effectiveSpaceId,
+          });
+        }
 
-        // Ensure preview index exists (some dev clusters don't allow it to be recreated automatically if deleted).
-        await ensurePreviewAlertsIndex({ esClient, log, spaceId: effectiveSpaceId });
-        await clearPreviewAlertsDocuments({ esClient, log, spaceId: effectiveSpaceId });
-
-        if (skipAlerts) {
-          log.warning(
-            `--skip-alerts enabled: skipping rule preview, copying alerts, and optional Attack Discoveries/Cases. Raw data was still indexed.`
+        if (alertMode === 'none') {
+          log.info(
+            `alert-mode=none: indexed events only (no hunt enable, preview minting, or Attack Discoveries/Cases).`
           );
           return;
         }
 
+        await ensureDetectionsInitialized({ kbnClient, log });
+
+        await ensurePreviewAlertsIndex({ esClient, log, spaceId: effectiveSpaceId });
+        if (alertMode === 'preview') {
+          await clearPreviewAlertsDocuments({ esClient, log, spaceId: effectiveSpaceId });
+        }
+
         const alertsReady = await alertsDataStreamExists({ esClient, spaceId: effectiveSpaceId });
-        if (!alertsReady) {
+        if (!alertsReady && alertMode === 'preview') {
           log.warning(
             `Security alerts destination (.alerts-security.alerts-${effectiveSpaceId}) does not exist yet. ` +
               `Initialize detections (Security app) and re-run to generate/copy alerts. Raw data was still indexed.`
@@ -1045,111 +1155,96 @@ export const cli = () => {
           return;
         }
 
-        // Baseline: generate a small set of detection alerts using the Insights-style query,
-        // then attribute them across ALL rules in the ruleset. This ensures the UI shows alerts
-        // tied to each installed+enabled rule, even if some of those rules don't match the dataset.
-        if (resolvedRules.length > 0) {
-          const insightsRuleExportPath = path.join(ATTACKS_DIR, 'endpoint_alert.ndjson');
-          const insightsRuleCreate = loadInsightsRuleCreateProps(insightsRuleExportPath);
-          insightsRuleCreate.interval = previewInterval;
-          insightsRuleCreate.from = `now-${previewWindowSeconds}s`;
-          insightsRuleCreate.to = 'now';
-          // Do not allow endpoint alert message to override rule name in generated detection alerts.
-          delete insightsRuleCreate.rule_name_override;
+        const alertJobs: RuleAlertJob[] = [];
 
-          // PERFORMANCE:
-          // Rule Preview is the slowest step. Instead of previewing the same Insights-style query
-          // once per rule, run it ONCE and then copy/attribute the resulting preview alerts to each
-          // ruleset rule (ids are namespaced during reindex to avoid collisions).
-          const { previewId } = await previewRule({
-            kbnClient,
-            log,
-            req: {
-              rule: insightsRuleCreate,
-              invocationCount,
-              timeframeEndIso: new Date(endMs).toISOString(),
-            },
+        const alertIndices = episodeIds.map(
+          (ep) => episodeIndexNames({ episodeId: ep, endMs, indexPrefix }).endpointAlerts
+        );
+        const endpointRule = await resolveEndpointSecurityRule({
+          kbnClient,
+          log,
+          index: alertIndices,
+          ruleFrom,
+        });
+        if (endpointRule) {
+          alertJobs.push({
+            ruleRef: endpointRule,
+            index: alertIndices,
+            expectAlerts: true,
+            label: 'Endpoint Security (episode alerts)',
           });
+        }
 
-          for (const ruleRef of resolvedRules) {
-            const fullRule = await fetchRuleById({ kbnClient, id: ruleRef.id });
-            const riskScore =
-              typeof fullRule.risk_score === 'number' ? fullRule.risk_score : undefined;
-            await copyPreviewAlertsToRealAlertsIndex({
-              esClient,
-              log,
-              spaceId: effectiveSpaceId,
-              previewId,
-              targetRule: { ...ruleRef, risk_score: riskScore },
-              timestampRange: { startMs, endMs },
+        for (const packResult of packResults) {
+          for (const ruleRef of packResult.installedRules) {
+            alertJobs.push({
+              ruleRef,
+              index: [packResult.index],
+              expectAlerts: true,
+              label: `pack:${packResult.pack.id} / ${ruleRef.name}`,
             });
           }
         }
 
-        if (!skipRulesetPreview) {
-          for (const ruleRef of resolvedRules) {
-            log.info(`Previewing prebuilt rule: ${ruleRef.name} (${ruleRef.rule_id})`);
-            const fullRule = await fetchRuleById({ kbnClient, id: ruleRef.id });
-            const createProps = toRuleCreateProps(fullRule);
-            createProps.interval = previewInterval;
-            createProps.from = `now-${previewWindowSeconds}s`;
-            createProps.to = 'now';
+        const alertCounts = await runAlertJobs({
+          esClient,
+          kbnClient,
+          log,
+          spaceId: effectiveSpaceId,
+          alertMode,
+          leaveRulesDisabled,
+          jobs: alertJobs,
+          tuning,
+        });
 
-            const { previewId: rulesetPreviewId } = await previewRule({
-              kbnClient,
-              log,
-              req: {
-                rule: createProps,
-                invocationCount,
-                timeframeEndIso: new Date(endMs).toISOString(),
-              },
-            });
-
-            await copyPreviewAlertsToRealAlertsIndex({
-              esClient,
-              log,
-              spaceId: effectiveSpaceId,
-              previewId: rulesetPreviewId,
-              targetRule: ruleRef,
-              timestampRange: { startMs, endMs },
-            });
+        if (alertMode === 'preview') {
+          for (const row of alertCounts) {
+            log.info(`Alert count: ${row.rule} → ${row.count}`);
           }
-        } else {
-          log.warning(
-            `--skip-ruleset-preview enabled: skipping ruleset rule previews (baseline attribution only).`
-          );
         }
 
-        log.info(`Done generating/copying canonical Security alerts for prebuilt rules.`);
+        log.info(
+          alertMode === 'live'
+            ? `Done alert pipeline (mode=live). Rules are ${
+                leaveRulesDisabled ? 'installed disabled' : 'enabled for the detection engine'
+              }; this script does not mint live alerts.`
+            : `Done alert pipeline (mode=${alertMode}). Honest matching: each alert keeps its producing rule's name/severity/MITRE/reason.`
+        );
 
         if (shouldGenerateAttackDiscoveries) {
-          const discoveries = await generateAndIndexAttackDiscoveries({
-            esClient,
-            kbnClient,
-            log,
-            spaceId: effectiveSpaceId,
-            alertsIndex: `.alerts-security.alerts-${effectiveSpaceId}`,
-            authenticatedUsername: username,
-            opts: { startMs, endMs },
-          });
-
-          log.info(`Done generating synthetic Attack Discoveries.`);
-
-          if (shouldCreateCases) {
-            await createCasesFromAttackDiscoveries({
+          if (alertMode === 'live' && leaveRulesDisabled) {
+            log.warning(
+              `Skipping Attack Discoveries: live mode with --leave-rules-disabled has no minted alerts yet.`
+            );
+          } else {
+            const discoveries = await generateAndIndexAttackDiscoveries({
+              esClient,
               kbnClient,
               log,
-              discoveries,
+              spaceId: effectiveSpaceId,
               alertsIndex: `.alerts-security.alerts-${effectiveSpaceId}`,
+              authenticatedUsername: username,
+              opts: { startMs, endMs },
             });
-            log.info(`Done creating cases for a subset of Attack Discoveries.`);
+
+            log.info(`Done generating synthetic Attack Discoveries.`);
+
+            if (shouldCreateCases) {
+              await createCasesFromAttackDiscoveries({
+                kbnClient,
+                log,
+                discoveries,
+                alertsIndex: `.alerts-security.alerts-${effectiveSpaceId}`,
+              });
+              log.info(`Done creating cases for a subset of Attack Discoveries.`);
+            }
           }
         } else {
           log.info(`Skipping Attack Discoveries (enable with --attacks, or use --cases).`);
         }
       } catch (e) {
         log.warning(
-          `Alert generation via Kibana APIs failed; raw data was still indexed. Error: ${formatError(
+          `Post-index pipeline failed (threat-intel seed and/or alert generation); raw episode/pack data was still indexed. Error: ${formatError(
             e
           )}`
         );
@@ -1157,7 +1252,7 @@ export const cli = () => {
     },
     {
       description:
-        'Generate realistic Security data from vendored attack episodes, then produce Security alerts + Attack Discoveries',
+        'Generate realistic Security data from vendored attack episodes + Technology Watch packs, with honest alert attribution',
       flags: {
         string: [
           'events',
@@ -1175,14 +1270,18 @@ export const cli = () => {
           'end-date',
           'indexPrefix',
           'max-preview-invocations',
+          'alert-mode',
+          'rule-from',
+          'fp-count',
+          'packs',
         ],
         boolean: [
           'clean',
-          'skip-alerts',
-          'skip-ruleset-preview',
           'attacks',
           'cases',
           'validate-fixtures',
+          'leave-rules-disabled',
+          'threat-intel',
         ],
         alias: {
           n: 'events',
@@ -1202,9 +1301,13 @@ export const cli = () => {
           'end-date': 'now',
           indexPrefix: 'logs-endpoint',
           'max-preview-invocations': '12',
+          'alert-mode': 'preview',
+          'rule-from': 'now-30d',
+          'fp-count': '0',
+          packs: '',
           clean: false,
-          'skip-alerts': false,
-          'skip-ruleset-preview': false,
+          'leave-rules-disabled': false,
+          'threat-intel': false,
           attacks: false,
           cases: false,
           'validate-fixtures': true,
@@ -1217,12 +1320,16 @@ export const cli = () => {
         --start-date                     Date math start (e.g. 1d, now-1d) (Default: 1d)
         --end-date                       Date math end (e.g. now) (Default: now)
         --episodes                       Comma-separated episode IDs or numbers (e.g. ep1,ep2 or 1,2). Default: ep1-ep8,noise1,noise2
+        --packs                          Comma-separated Technology Watch packs (okta,aws-iam,kubernetes,github-actions)
         --seed                           Optional seed for deterministic scaling
         --clean                          Delete previously generated data for the selected time range before generating new data
         --indexPrefix                    Prefix for endpoint event/alert indices (Default: logs-endpoint)
+        --alert-mode                     preview (default: mint via Rule Preview) | live (install+enable rules for the detection engine) | none (index events only)
+        --leave-rules-disabled           With --alert-mode live only: install hunts but leave them disabled
+        --rule-from                      Rule lookback window for installed custom/pack rules (Default: now-30d)
+        --fp-count                       Max false-positive event templates per hunt that defines them (0-3, Default: 0). FP events/alerts are tagged data-generator-fp (plus data-generator / pack:<id>).
         --max-preview-invocations         Max rule preview invocations per rule (Default: 12). Lower = faster for large time ranges.
-        --skip-alerts                     Skip rule preview + copying alerts entirely (raw event/endpoint alert indexing only)
-        --skip-ruleset-preview            Skip previews of the selected prebuilt rules (baseline attribution only; faster)
+        --threat-intel                   Seed per-pack RSS sources (+ digest subscription) for mustard TI workflows. Defaults --packs to all four when omitted. Environment data is the packs (not logs-aws.local).
         --attacks                         Generate synthetic Attack Discoveries (opt-in)
         --cases                          Create cases from ~50% of generated Attack Discoveries (implies --attacks)
         --no-validate-fixtures            Disable fixture validation (default: validation enabled)
