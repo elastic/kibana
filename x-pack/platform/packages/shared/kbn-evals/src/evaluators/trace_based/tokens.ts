@@ -22,10 +22,11 @@ export function createOutputTokensEvaluator({
     log,
     config: {
       name: 'Output Tokens',
+      // TO_LONG resolves union types (integer vs long across trace index generations).
       buildQuery: (traceId) => `FROM traces-*
         | WHERE trace.id == "${traceId}"
         | STATS 
-        output_tokens = SUM(attributes.gen_ai.usage.output_tokens)`,
+        output_tokens = SUM(TO_LONG(attributes.gen_ai.usage.output_tokens))`,
       extractResult: (response) => {
         const { columns, values } = response;
         const row = values[0];
@@ -49,10 +50,11 @@ export function createInputTokensEvaluator({
     log,
     config: {
       name: 'Input Tokens',
+      // TO_LONG resolves union types (integer vs long across trace index generations).
       buildQuery: (traceId) => `FROM traces-*
         | WHERE trace.id == "${traceId}"
         | STATS 
-        input_tokens = SUM(attributes.gen_ai.usage.input_tokens)`,
+        input_tokens = SUM(TO_LONG(attributes.gen_ai.usage.input_tokens))`,
       extractResult: (response) => {
         const { columns, values } = response;
         const row = values[0];
@@ -76,10 +78,11 @@ export function createCachedTokensEvaluator({
     log,
     config: {
       name: 'Cached Tokens',
+      // TO_LONG resolves union types (integer vs long across trace index generations).
       buildQuery: (traceId) => `FROM traces-*
         | WHERE trace.id == "${traceId}"
         | STATS 
-        cached_tokens = SUM(attributes.gen_ai.usage.cache_read.input_tokens)`,
+        cached_tokens = SUM(TO_LONG(attributes.gen_ai.usage.cache_read.input_tokens))`,
       extractResult: (response) => {
         const { columns, values } = response;
         const row = values[0];
