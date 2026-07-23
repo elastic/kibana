@@ -31,6 +31,7 @@ import { registerSavedViewsRoutes } from './saved_views';
 import { registerFindThreatReportsRoute } from './find_threat_reports';
 import { registerSubscriptionRoutes } from './subscriptions';
 import { registerListSourcesRoute } from './list_sources';
+import { registerListDigestsRoute } from './list_digests';
 import { registerSearchByAnchorsRoute } from './search_by_anchors';
 import { registerSearchByDiamondRoute } from './search_by_diamond';
 import { registerCorrelateThreatRoute } from './correlate_threat';
@@ -100,4 +101,5 @@ export const registerRoutes = (deps: RouteRegistrationDeps): void => {
   registerSavedViewsRoutes(deps);
   registerFlyoutInsightsRoute(deps);
   registerListSourcesRoute(deps);
+  registerListDigestsRoute(deps);
 };

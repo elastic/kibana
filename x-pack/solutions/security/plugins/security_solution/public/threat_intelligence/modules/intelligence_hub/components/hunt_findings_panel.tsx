@@ -245,6 +245,8 @@ interface Props {
   sortBy: HuntFindingsSortBy;
   sortOrder: HuntFindingsSortOrder;
   filters: HuntFindingsTableFilters;
+  /** Hub time-range label shown under the title (e.g. "Last 7 days"). */
+  timeRangeLabel?: string;
   feedbackLoop?: FeedbackLoopSummary[];
   isLoading: boolean;
   onPageChange: (pageIndex: number, pageSize: number) => void;
@@ -270,6 +272,7 @@ const HuntFindingsPanelComponent: React.FC<Props> = ({
   sortBy,
   sortOrder,
   filters,
+  timeRangeLabel,
   isLoading,
   onPageChange,
   onSortChange,
@@ -982,6 +985,15 @@ const HuntFindingsPanelComponent: React.FC<Props> = ({
           defaultMessage:
             'Durable results from continuous and on-demand hunts. Continuous hunt runs every hour.',
         })}
+        {timeRangeLabel
+          ? i18n.translate(
+              'xpack.securitySolution.threatIntelligence.app.huntFindingsTimeRangeSuffix',
+              {
+                defaultMessage: ' Showing findings from {timeRange}.',
+                values: { timeRange: timeRangeLabel },
+              }
+            )
+          : null}
       </EuiText>
 
       <EuiSpacer size="m" />

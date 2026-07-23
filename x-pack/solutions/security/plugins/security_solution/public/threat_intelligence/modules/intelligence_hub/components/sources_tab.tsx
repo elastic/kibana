@@ -25,7 +25,11 @@ import {
   type EuiBasicTableColumn,
   type Pagination,
 } from '@elastic/eui';
-import { LIST_SOURCES_API_PATH } from '../../../../../common/threat_intelligence/hub';
+import {
+  LIST_SOURCES_API_PATH,
+  resolveTimeRangeFromPreset,
+  type TimeRangePresetId,
+} from '../../../../../common/threat_intelligence/hub';
 
 const tagsCellCss = css({
   maxWidth: '100%',
@@ -53,12 +57,13 @@ interface ListSourcesResponse {
 
 interface SourcesTabProps {
   http: CoreStart['http'];
+  timeRangePreset: TimeRangePresetId;
 }
 
 const DEFAULT_PAGE_SIZE = 25;
 const PAGE_SIZE_OPTIONS = [10, 25, 50, 100];
 
-const SourcesTabComponent: React.FC<SourcesTabProps> = ({ http }) => {
+const SourcesTabComponent: React.FC<SourcesTabProps> = ({ http, timeRangePreset }) => {
   const [sources, setSources] = useState<ThreatIntelSourceRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -72,10 +77,14 @@ const SourcesTabComponent: React.FC<SourcesTabProps> = ({ http }) => {
     const load = async () => {
       setLoading(true);
       setError(null);
+      const { from, to } = resolveTimeRangeFromPreset(timeRangePreset);
       try {
         const response = await http.post<ListSourcesResponse>(LIST_SOURCES_API_PATH, {
           version: '2023-10-31',
-          body: JSON.stringify({ size: 500 }),
+          body: JSON.stringify({
+            size: 500,
+            time_range: { from, to },
+          }),
         });
         if (!cancelled) {
           setSources(
@@ -88,6 +97,7 @@ const SourcesTabComponent: React.FC<SourcesTabProps> = ({ http }) => {
               env_hits_total: source.env_hits_total ?? 0,
             }))
           );
+          setPageIndex(0);
         }
       } catch (err) {
         if (!cancelled) {
@@ -111,7 +121,7 @@ const SourcesTabComponent: React.FC<SourcesTabProps> = ({ http }) => {
     return () => {
       cancelled = true;
     };
-  }, [http]);
+  }, [http, timeRangePreset]);
 
   const visibleSources = useMemo(() => {
     const filtered = showDisabled
@@ -356,8 +366,7 @@ const SourcesTabComponent: React.FC<SourcesTabProps> = ({ http }) => {
               {i18n.translate(
                 'xpack.securitySolution.threatIntelligence.app.sourcesTabFilteredEmptyBody',
                 {
-                  defaultMessage:
-                    'Enabled sources and sources with ingested reports appear here.',
+                  defaultMessage: 'Enabled sources and sources with ingested reports appear here.',
                 }
               )}
             </p>
@@ -366,6 +375,10 @@ const SourcesTabComponent: React.FC<SourcesTabProps> = ({ http }) => {
       ) : (
         <EuiInMemoryTable
           data-test-subj="threatIntelSourcesTabTable"
+          tableCaption={i18n.translate(
+            'xpack.securitySolution.threatIntelligence.app.sourcesTabTableCaption',
+            { defaultMessage: 'Threat intelligence sources' }
+          )}
           items={visibleSources}
           columns={columns}
           pagination={pagination}

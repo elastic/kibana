@@ -51,6 +51,39 @@ describe('loadSourceReportStatsByName', () => {
     });
   });
 
+  it('applies Hub time_range to the report enrichment query', async () => {
+    const esClient = {
+      search: jest.fn().mockResolvedValue({
+        aggregations: { by_source_name: { buckets: [] } },
+      }),
+    };
+
+    await loadSourceReportStatsByName({
+      ...defaultArgs,
+      esClient: esClient as never,
+      timeRange: { from: '2026-07-16T00:00:00.000Z', to: '2026-07-23T00:00:00.000Z' },
+    });
+
+    expect(esClient.search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: {
+          bool: {
+            filter: expect.arrayContaining([
+              {
+                range: {
+                  '@timestamp': {
+                    gte: '2026-07-16T00:00:00.000Z',
+                    lte: '2026-07-23T00:00:00.000Z',
+                  },
+                },
+              },
+            ]),
+          },
+        },
+      })
+    );
+  });
+
   it('returns an empty map when enrichment search fails', async () => {
     const esClient = {
       search: jest.fn().mockRejectedValue(new Error('index missing')),

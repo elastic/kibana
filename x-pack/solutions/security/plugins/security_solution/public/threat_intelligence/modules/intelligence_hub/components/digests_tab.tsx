@@ -6,7 +6,6 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedRelative } from '@kbn/i18n-react';
 import type { CoreStart } from '@kbn/core/public';
@@ -14,8 +13,6 @@ import {
   EuiBadge,
   EuiCallOut,
   EuiEmptyPrompt,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiInMemoryTable,
   EuiLoadingSpinner,
   EuiText,
@@ -23,38 +20,38 @@ import {
   type EuiBasicTableColumn,
   type Pagination,
 } from '@elastic/eui';
-import { LIST_SUBSCRIPTIONS_API_PATH } from '../../../../../common/threat_intelligence/hub';
+import {
+  LIST_DIGESTS_API_PATH,
+  resolveTimeRangeFromPreset,
+  type TimeRangePresetId,
+} from '../../../../../common/threat_intelligence/hub';
 
-const tagsCellCss = css({
-  maxWidth: '100%',
-  overflowWrap: 'anywhere',
-});
-
-export interface DigestSubscriptionRow {
+export interface DigestDeliveryRow {
+  digest_id: string;
+  '@timestamp': string;
   subscription_id: string;
-  schedule_rrule?: string;
-  delivery?: { type: string; target: string };
-  severity_threshold?: string;
-  tags?: string[];
-  human_summary?: string;
-  created_at?: string;
-  updated_at?: string;
+  time_range?: { from?: string; to?: string };
+  report_count: number;
+  delivered?: boolean;
+  delivery_error?: string;
+  advisory_id?: string;
 }
 
-interface ListSubscriptionsResponse {
+interface ListDigestsResponse {
   total: number;
-  subscriptions: DigestSubscriptionRow[];
+  digests: DigestDeliveryRow[];
 }
 
 interface DigestsTabProps {
   http: CoreStart['http'];
+  timeRangePreset: TimeRangePresetId;
 }
 
 const DEFAULT_PAGE_SIZE = 25;
 const PAGE_SIZE_OPTIONS = [10, 25, 50];
 
-const DigestsTabComponent: React.FC<DigestsTabProps> = ({ http }) => {
-  const [subscriptions, setSubscriptions] = useState<DigestSubscriptionRow[]>([]);
+const DigestsTabComponent: React.FC<DigestsTabProps> = ({ http, timeRangePreset }) => {
+  const [digests, setDigests] = useState<DigestDeliveryRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [pageIndex, setPageIndex] = useState(0);
@@ -66,13 +63,18 @@ const DigestsTabComponent: React.FC<DigestsTabProps> = ({ http }) => {
     const load = async () => {
       setLoading(true);
       setError(null);
+      const { from, to } = resolveTimeRangeFromPreset(timeRangePreset);
       try {
-        const response = await http.post<ListSubscriptionsResponse>(LIST_SUBSCRIPTIONS_API_PATH, {
+        const response = await http.post<ListDigestsResponse>(LIST_DIGESTS_API_PATH, {
           version: '2023-10-31',
-          body: JSON.stringify({ size: 50 }),
+          body: JSON.stringify({
+            size: 100,
+            time_range: { from, to },
+          }),
         });
         if (!cancelled) {
-          setSubscriptions(response.subscriptions ?? []);
+          setDigests(response.digests ?? []);
+          setPageIndex(0);
         }
       } catch (err) {
         if (!cancelled) {
@@ -96,95 +98,95 @@ const DigestsTabComponent: React.FC<DigestsTabProps> = ({ http }) => {
     return () => {
       cancelled = true;
     };
-  }, [http]);
+  }, [http, timeRangePreset]);
 
-  const columns = useMemo((): Array<EuiBasicTableColumn<DigestSubscriptionRow>> => {
+  const columns = useMemo((): Array<EuiBasicTableColumn<DigestDeliveryRow>> => {
     return [
       {
-        field: 'schedule_rrule',
+        field: '@timestamp',
         name: i18n.translate(
-          'xpack.securitySolution.threatIntelligence.app.digestsTabColumnSchedule',
-          { defaultMessage: 'Schedule' }
+          'xpack.securitySolution.threatIntelligence.app.digestsTabColumnGenerated',
+          { defaultMessage: 'Generated' }
         ),
-        render: (schedule: DigestSubscriptionRow['schedule_rrule']) =>
-          schedule ??
-          i18n.translate('xpack.securitySolution.threatIntelligence.app.digestsTabScheduleUnset', {
-            defaultMessage: '—',
-          }),
+        render: (timestamp: string) =>
+          timestamp ? <FormattedRelative value={new Date(timestamp)} /> : '—',
       },
       {
-        field: 'delivery',
+        field: 'subscription_id',
         name: i18n.translate(
-          'xpack.securitySolution.threatIntelligence.app.digestsTabColumnDelivery',
-          { defaultMessage: 'Delivery' }
+          'xpack.securitySolution.threatIntelligence.app.digestsTabColumnSubscription',
+          { defaultMessage: 'Subscription' }
         ),
-        render: (delivery: DigestSubscriptionRow['delivery']) => {
-          if (!delivery) {
-            return i18n.translate(
-              'xpack.securitySolution.threatIntelligence.app.digestsTabDeliveryUnset',
-              { defaultMessage: '—' }
-            );
-          }
-          return `${delivery.type}: ${delivery.target}`;
-        },
       },
       {
-        field: 'severity_threshold',
+        field: 'time_range',
         name: i18n.translate(
-          'xpack.securitySolution.threatIntelligence.app.digestsTabColumnSeverity',
-          { defaultMessage: 'Severity' }
+          'xpack.securitySolution.threatIntelligence.app.digestsTabColumnPeriod',
+          { defaultMessage: 'Period covered' }
         ),
-        render: (severity: DigestSubscriptionRow['severity_threshold']) =>
-          severity ??
-          i18n.translate('xpack.securitySolution.threatIntelligence.app.digestsTabSeverityUnset', {
-            defaultMessage: '—',
-          }),
-      },
-      {
-        field: 'tags',
-        name: i18n.translate('xpack.securitySolution.threatIntelligence.app.digestsTabColumnTags', {
-          defaultMessage: 'Tags',
-        }),
-        width: '28%',
-        truncateText: false,
-        render: (tags: DigestSubscriptionRow['tags']) => {
-          if (!tags?.length) {
-            return i18n.translate(
-              'xpack.securitySolution.threatIntelligence.app.digestsTabTagsEmpty',
-              { defaultMessage: '—' }
-            );
+        render: (range: DigestDeliveryRow['time_range']) => {
+          if (!range?.from || !range?.to) {
+            return '—';
           }
           return (
-            <div css={tagsCellCss}>
-              <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
-                {tags.map((tag) => (
-                  <EuiFlexItem grow={false} key={tag}>
-                    <EuiBadge>{tag}</EuiBadge>
-                  </EuiFlexItem>
-                ))}
-              </EuiFlexGroup>
-            </div>
+            <EuiText size="xs">
+              {i18n.translate(
+                'xpack.securitySolution.threatIntelligence.app.digestsTabPeriodRange',
+                {
+                  defaultMessage: '{fromDate} – {toDate}',
+                  values: {
+                    fromDate: new Date(range.from).toLocaleDateString(),
+                    toDate: new Date(range.to).toLocaleDateString(),
+                  },
+                }
+              )}
+            </EuiText>
           );
         },
       },
       {
-        field: 'human_summary',
+        field: 'report_count',
         name: i18n.translate(
-          'xpack.securitySolution.threatIntelligence.app.digestsTabColumnSummary',
-          { defaultMessage: 'Summary' }
-        ),
-        render: (summary: DigestSubscriptionRow['human_summary']) => (
-          <EuiText size="s">{summary ?? '—'}</EuiText>
+          'xpack.securitySolution.threatIntelligence.app.digestsTabColumnReports',
+          { defaultMessage: 'Reports' }
         ),
       },
       {
-        field: 'updated_at',
+        field: 'delivered',
         name: i18n.translate(
-          'xpack.securitySolution.threatIntelligence.app.digestsTabColumnUpdated',
-          { defaultMessage: 'Updated' }
+          'xpack.securitySolution.threatIntelligence.app.digestsTabColumnStatus',
+          { defaultMessage: 'Status' }
         ),
-        render: (updatedAt: DigestSubscriptionRow['updated_at']) =>
-          updatedAt ? <FormattedRelative value={new Date(updatedAt)} /> : '—',
+        render: (_delivered: boolean | undefined, row: DigestDeliveryRow) => {
+          if (row.delivery_error) {
+            return (
+              <EuiBadge color="danger">
+                {i18n.translate(
+                  'xpack.securitySolution.threatIntelligence.app.digestsTabStatusFailed',
+                  { defaultMessage: 'Failed' }
+                )}
+              </EuiBadge>
+            );
+          }
+          if (row.delivered) {
+            return (
+              <EuiBadge color="success">
+                {i18n.translate(
+                  'xpack.securitySolution.threatIntelligence.app.digestsTabStatusDelivered',
+                  { defaultMessage: 'Delivered' }
+                )}
+              </EuiBadge>
+            );
+          }
+          return (
+            <EuiBadge color="hollow">
+              {i18n.translate(
+                'xpack.securitySolution.threatIntelligence.app.digestsTabStatusPending',
+                { defaultMessage: 'Pending' }
+              )}
+            </EuiBadge>
+          );
+        },
       },
     ];
   }, []);
@@ -193,13 +195,13 @@ const DigestsTabComponent: React.FC<DigestsTabProps> = ({ http }) => {
     (): Pagination => ({
       pageIndex,
       pageSize,
-      totalItemCount: subscriptions.length,
+      totalItemCount: digests.length,
       pageSizeOptions: PAGE_SIZE_OPTIONS,
     }),
-    [pageIndex, pageSize, subscriptions.length]
+    [digests.length, pageIndex, pageSize]
   );
 
-  const onTableChange = useCallback((criteria: Criteria<DigestSubscriptionRow>) => {
+  const onTableChange = useCallback((criteria: Criteria<DigestDeliveryRow>) => {
     if (criteria.page) {
       setPageIndex(criteria.page.index);
       setPageSize(criteria.page.size);
@@ -244,14 +246,14 @@ const DigestsTabComponent: React.FC<DigestsTabProps> = ({ http }) => {
     );
   }
 
-  if (subscriptions.length === 0) {
+  if (digests.length === 0) {
     return (
       <EuiEmptyPrompt
         data-test-subj="threatIntelDigestsTabEmpty"
         title={
           <h2>
             {i18n.translate('xpack.securitySolution.threatIntelligence.app.digestsTabEmptyTitle', {
-              defaultMessage: 'No digests scheduled',
+              defaultMessage: 'No digests in this time range',
             })}
           </h2>
         }
@@ -259,7 +261,7 @@ const DigestsTabComponent: React.FC<DigestsTabProps> = ({ http }) => {
           <p>
             {i18n.translate('xpack.securitySolution.threatIntelligence.app.digestsTabEmptyBody', {
               defaultMessage:
-                'Use Schedule & deliver on the dashboard to create email or Slack digests for threat intelligence updates.',
+                'No digests were generated in the selected Hub time range. Use Schedule & deliver to create digest subscriptions, or widen the time range.',
             })}
           </p>
         }
@@ -270,11 +272,15 @@ const DigestsTabComponent: React.FC<DigestsTabProps> = ({ http }) => {
   return (
     <EuiInMemoryTable
       data-test-subj="threatIntelDigestsTabTable"
-      items={subscriptions}
+      tableCaption={i18n.translate(
+        'xpack.securitySolution.threatIntelligence.app.digestsTabTableCaption',
+        { defaultMessage: 'Delivered digests' }
+      )}
+      items={digests}
       columns={columns}
       pagination={pagination}
       onTableChange={onTableChange}
-      itemId="subscription_id"
+      itemId="digest_id"
     />
   );
 };

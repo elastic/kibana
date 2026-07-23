@@ -755,6 +755,7 @@ export const IntelligenceHubPage: FC = () => {
             sortBy={huntFindingsSortBy}
             sortOrder={huntFindingsSortOrder}
             filters={huntFindingsFilters}
+            timeRangeLabel={timeRangePresetLabel(timeRangePreset)}
             feedbackLoop={huntFindingsFeedbackLoop}
             isLoading={isLoadingHuntFindings}
             onPageChange={onHuntFindingsPageChange}
@@ -769,9 +770,9 @@ export const IntelligenceHubPage: FC = () => {
           />
         );
       case 'sources':
-        return <SourcesTab http={http} />;
+        return <SourcesTab http={http} timeRangePreset={timeRangePreset} />;
       case 'digests':
-        return <DigestsTab http={http} />;
+        return <DigestsTab http={http} timeRangePreset={timeRangePreset} />;
     }
   };
 
@@ -868,6 +869,7 @@ export const IntelligenceHubPage: FC = () => {
           isRefreshing={isRefreshing}
           onRefresh={() => {
             void fetchOverview();
+            void fetchThreatReportFeed(feedPageIndex);
             refreshHuntFindings();
           }}
         />

@@ -18,6 +18,12 @@ import type { RouteRegistrationDeps } from '.';
 
 const listBodySchema = schema.object({
   size: schema.maybe(schema.number({ min: 1, max: 500 })),
+  time_range: schema.maybe(
+    schema.object({
+      from: schema.string(),
+      to: schema.string(),
+    })
+  ),
 });
 
 interface ThreatIntelSourceDoc {
@@ -87,14 +93,28 @@ export const loadSourceReportStatsByName = async ({
   esClient,
   spaceId,
   logger,
+  timeRange,
 }: {
   esClient: ElasticsearchClient;
   spaceId: string;
   logger: Logger;
+  timeRange?: { from: string; to: string };
 }): Promise<Map<string, SourceReportStats>> => {
   const statsByName = new Map<string, SourceReportStats>();
 
   try {
+    const filters: Record<string, unknown>[] = [buildSpaceFilterTerms(spaceId)];
+    if (timeRange?.from || timeRange?.to) {
+      filters.push({
+        range: {
+          '@timestamp': {
+            ...(timeRange.from ? { gte: timeRange.from } : {}),
+            ...(timeRange.to ? { lte: timeRange.to } : {}),
+          },
+        },
+      });
+    }
+
     const response = await esClient.search({
       index: THREAT_REPORTS_INDEX_PATTERN,
       ignore_unavailable: true,
@@ -102,7 +122,7 @@ export const loadSourceReportStatsByName = async ({
       track_total_hits: false,
       query: {
         bool: {
-          filter: [buildSpaceFilterTerms(spaceId)],
+          filter: filters,
         },
       },
       aggs: {
@@ -203,7 +223,12 @@ export const registerListSourcesRoute = ({
                 },
               },
             }),
-            loadSourceReportStatsByName({ esClient, spaceId, logger }),
+            loadSourceReportStatsByName({
+              esClient,
+              spaceId,
+              logger,
+              timeRange: request.body.time_range,
+            }),
           ]);
 
           const sources = (searchResponse.hits.hits ?? []).map((hit) => {

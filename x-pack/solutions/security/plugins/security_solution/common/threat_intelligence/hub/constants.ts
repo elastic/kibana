@@ -442,6 +442,12 @@ export const DELETE_SUBSCRIPTION_API_PATH =
 export const LIST_SOURCES_API_PATH = `${THREAT_INTELLIGENCE_API_BASE}/sources/list` as const;
 
 /**
+ * List delivered digests — POST /api/threat_intelligence/digests/list.
+ * Backed by `.kibana-threat-intel-digests`; Hub Digests tab filters by Hub time range.
+ */
+export const LIST_DIGESTS_API_PATH = `${THREAT_INTELLIGENCE_API_BASE}/digests/list` as const;
+
+/**
  * API path that powers the visual dashboard. Returns the
  * aggregations the UI panels need in a single response — stats ribbon,
  * by-category breakdown, by-region "Affects You" panel, severity timeline,
