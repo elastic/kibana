@@ -24,6 +24,10 @@ const suggestionsBodySchema = z
   })
   .strict();
 
+const matcherValueSuggestionsResponseSchema = z
+  .array(z.string())
+  .describe('The list of suggested matcher values.');
+
 type SuggestionsBody = z.infer<typeof suggestionsBodySchema>;
 
 @injectable()
@@ -48,6 +52,10 @@ export class MatcherValueSuggestionsRoute extends BaseAlertingRoute {
       body: suggestionsBodySchema,
     },
     response: {
+      200: {
+        body: () => matcherValueSuggestionsResponseSchema,
+        description: 'Returns the suggested matcher values.',
+      },
       400: {
         body: () => errorResponseSchema,
         description: 'Indicates an invalid schema or parameters.',

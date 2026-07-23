@@ -1033,6 +1033,19 @@
       }
     },
     {
+      "id": "68529d4b0bcd626-b29d71d53ae58ac",
+      "title": "Matcher value suggestions API returns a 200 with an array of suggested values for a static field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/matcher_value_suggestions.spec.ts",
+        "line": 22,
+        "column": 10
+      }
+    },
+    {
       "id": "68529d4b0bcd626-fe2b1c0e2bc71ac",
       "title": "Matcher value suggestions API validation: rejects body with unknown top-level keys (strict schema)",
       "expectedStatus": "passed",
@@ -1041,7 +1054,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/matcher_value_suggestions.spec.ts",
-        "line": 22,
+        "line": 43,
         "column": 10
       }
     },
