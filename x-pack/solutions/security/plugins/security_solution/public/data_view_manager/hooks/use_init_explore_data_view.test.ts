@@ -97,9 +97,9 @@ describe('useInitExploreDataView', () => {
     jest.mocked(useDispatch).mockReturnValue(mockDispatch);
     jest.mocked(createExploreDataView).mockResolvedValue(mockExploreDataView as any);
     // Default to being on an explore page; individual tests override as needed.
-    jest.mocked(useLocation).mockReturnValue({ pathname: '/hosts' } as ReturnType<
-      typeof useLocation
-    >);
+    jest
+      .mocked(useLocation)
+      .mockReturnValue({ pathname: '/hosts' } as ReturnType<typeof useLocation>);
     jest.mocked(getScopeFromPath).mockReturnValue(PageScope.explore);
   });
 
