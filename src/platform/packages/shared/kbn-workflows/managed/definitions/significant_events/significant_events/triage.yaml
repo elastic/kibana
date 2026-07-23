@@ -116,6 +116,7 @@ steps:
     plugin-id: 'significant_events_triage'
     aggregate-by: 'significant_events'
     create-conversation: true
+    public-conversation: true
     with:
       message: |
         ## Unreviewed Discoveries

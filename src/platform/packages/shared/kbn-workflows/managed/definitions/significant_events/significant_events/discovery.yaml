@@ -107,6 +107,7 @@ steps:
     plugin-id: 'significant_events_discovery'
     aggregate-by: 'significant_events'
     create-conversation: true
+    public-conversation: true
     with:
       message: |
         ## Detection batch

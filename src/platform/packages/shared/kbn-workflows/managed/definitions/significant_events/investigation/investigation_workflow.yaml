@@ -68,6 +68,7 @@ steps:
     plugin-id: 'significant_events_investigation'
     aggregate-by: 'significant_events'
     create-conversation: true
+    public-conversation: true
     with:
       timeout: 1800s
       # Tag the agent execution with the workflow execution id so callers that already know
