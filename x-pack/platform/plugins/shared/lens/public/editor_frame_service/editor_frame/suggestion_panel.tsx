@@ -213,7 +213,7 @@ const SuggestionPreview = ({
           : undefined
       }
     >
-      <div data-test-subj={`lnsSuggestion-${camelCase(preview.title)}`}>
+      <div data-test-subj={`lnsSuggestion-${camelCase(preview.title)}`} tabIndex={0}>
         <EuiPanel
           hasBorder={true}
           hasShadow={false}

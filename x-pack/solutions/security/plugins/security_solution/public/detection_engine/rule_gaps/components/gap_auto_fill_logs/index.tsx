@@ -178,7 +178,7 @@ export const GapAutoFillLogsFlyout = ({ isOpen, onClose }: GapAutoFillLogsFlyout
 
           return (
             <EuiToolTip content={statusTooltip} position="top">
-              <EuiBadge color={badgeColor}>{statusLabel}</EuiBadge>
+              <EuiBadge color={badgeColor} tabIndex={0}>{statusLabel}</EuiBadge>
             </EuiToolTip>
           );
         },

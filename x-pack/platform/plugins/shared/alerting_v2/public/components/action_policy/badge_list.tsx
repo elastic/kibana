@@ -17,7 +17,7 @@ export const BadgeList = ({ items }: Props) => (
     {items.map((item) => (
       <EuiFlexItem grow={false} key={item} css={{ maxWidth: '100%' }}>
         <EuiToolTip content={item} position="top">
-          <EuiBadge color="hollow" title="">
+          <EuiBadge color="hollow" title="" tabIndex={0}>
             {item}
           </EuiBadge>
         </EuiToolTip>

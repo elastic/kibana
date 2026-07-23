@@ -150,7 +150,7 @@ export const ErrorGroupsList = ({
       render: (value: string) =>
         value ? (
           <EuiToolTip content={formatter(value)}>
-            <EuiText size="xs">{moment(value).fromNow()}</EuiText>
+            <EuiText tabIndex={0} size="xs">{moment(value).fromNow()}</EuiText>
           </EuiToolTip>
         ) : (
           <>{'--'}</>
@@ -164,7 +164,7 @@ export const ErrorGroupsList = ({
       render: (value: string) =>
         value ? (
           <EuiToolTip content={formatter(value)}>
-            <EuiText size="xs">{moment(value).fromNow()}</EuiText>
+            <EuiText tabIndex={0} size="xs">{moment(value).fromNow()}</EuiText>
           </EuiToolTip>
         ) : (
           <>{'--'}</>

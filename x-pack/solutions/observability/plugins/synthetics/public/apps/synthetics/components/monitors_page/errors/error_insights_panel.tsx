@@ -208,6 +208,7 @@ const MonitorTypeCard = ({
             content={isSelected ? CLICK_TO_REMOVE_FILTER : FILTER_BY_TYPE_HINT}
           >
             <EuiFlexGroup
+              tabIndex={0}
               alignItems="center"
               gutterSize="s"
               responsive={false}
@@ -489,6 +490,7 @@ const StatusCodesCard = ({
             content={isSelected ? CLICK_TO_REMOVE_FILTER : FILTER_BY_CODE_HINT}
           >
             <EuiFlexGroup
+              tabIndex={0}
               alignItems="center"
               gutterSize="s"
               responsive={false}
@@ -577,6 +579,7 @@ const EmergingTermsCard = ({
             <EuiFlexItem key={t.term} grow={false}>
               <EuiToolTip content={`${t.foregroundCount} occurrences — ${CLICK_TO_FILTER}`}>
                 <EuiFlexGroup
+                  tabIndex={0}
                   alignItems="center"
                   gutterSize="s"
                   responsive={false}

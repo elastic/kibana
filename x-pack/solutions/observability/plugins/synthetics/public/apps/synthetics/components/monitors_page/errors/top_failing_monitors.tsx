@@ -179,6 +179,7 @@ export const TopFailingMonitors = ({
                 )} downtime`}
               >
                 <div
+                  tabIndex={0}
                   css={css`
                     position: relative;
                     height: 20px;

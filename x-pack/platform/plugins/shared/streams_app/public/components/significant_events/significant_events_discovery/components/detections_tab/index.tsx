@@ -158,7 +158,7 @@ export const DetectionsTab = () => {
       {
         name: (
           <EuiToolTip content={DISCOVERY_STATUS_TOOLTIP}>
-            <span>
+            <span tabIndex={0}>
               {i18n.translate('xpack.streams.detectionsTab.discoveryColumn', {
                 defaultMessage: 'Discovery',
               })}
