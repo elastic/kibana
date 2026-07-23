@@ -262,9 +262,11 @@ export class AssetManagerClient {
             logger: this.logger.get(type),
             namespace: this.namespace,
           }),
-          // Managed assets — delete as the internal user (mirrors install; no granular privilege).
+          // Deletion must run as the requesting user: kibana_system holds the raw
+          // `cluster:admin/script/put` action (so managed installs work) but NOT
+          // `cluster:admin/script/delete`, which is only granted by cluster `manage`/`all`.
           deleteEuidStoredScripts({
-            esClient: this.internalEsClient,
+            esClient: this.esClient,
             logger: this.logger,
           }),
           this.globalStateClient.delete(),
