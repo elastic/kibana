@@ -42,7 +42,14 @@ function makeContext(overrides: { sloRead?: boolean; transactionType?: string } 
       core: { application: { capabilities: { slo: { read: sloRead } } } },
       share: { url: { locators: { get: mockLocatorsGet } } },
     },
-    ingestionType: 'classicApm' as const,
+    capabilities: {
+      loading: false,
+      error: undefined,
+      ingestionType: 'apm' as const,
+      header: { serviceNameLink: true, badges: true },
+      overview: { transactions: true, transactionTypeFilter: true, infraMetrics: true },
+      footer: { alerts: true, slos: true },
+    },
     service: { name: 'opbeans-java' },
     filters: {
       environment: 'production',

@@ -14,7 +14,18 @@ import type { PluginSetupContract as AlertingPluginPublicSetup } from '@kbn/aler
 import type { Environment } from '../../../../common/environment_rt';
 import type { ServiceFlyoutService } from './types';
 
-export type ServiceFlyoutIngestionType = 'classicApm' | 'unprocessedOtel';
+export type ServiceFlyoutIngestionType = 'apm' | 'unprocessedOtel';
+
+export interface ServiceFlyoutCapabilities {
+  loading: boolean;
+  error: Error | undefined;
+  ingestionType: ServiceFlyoutIngestionType | undefined;
+  header: { serviceNameLink: boolean; badges: boolean } | undefined;
+  overview:
+    | { transactions: boolean; transactionTypeFilter: boolean; infraMetrics: boolean }
+    | undefined;
+  footer: { alerts: boolean; slos: boolean } | undefined;
+}
 
 export interface ServiceFlyoutContextValue {
   // Plugin deps provided once by the flyout host — stable across the flyout's lifetime
@@ -28,7 +39,7 @@ export interface ServiceFlyoutContextValue {
   // The service this flyout is showing
   service: ServiceFlyoutService;
   // Resolved once on open — drives conditional rendering throughout the flyout
-  ingestionType: ServiceFlyoutIngestionType | undefined;
+  capabilities: ServiceFlyoutCapabilities;
   // Mutable query scope — changes stay local to the flyout and do not propagate to the host
   filters: {
     environment: Environment;

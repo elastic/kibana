@@ -19,7 +19,7 @@ import {
   ServiceFlyoutContextProvider,
   type ServiceFlyoutContextValue,
 } from './service_flyout_context';
-import { useServiceIngestionType } from './hooks/use_service_ingestion_type';
+import { useServiceFlyoutCapabilities } from './hooks/use_service_flyout_capabilities';
 export type { ServiceFlyoutService } from './types';
 
 export const SERVICE_FLYOUT_TAB_IDS = {
@@ -82,7 +82,7 @@ export function ServiceFlyout({
   const [flyoutTransactionType, setTransactionType] = useState(transactionType ?? '');
   const [refreshToken, setRefreshToken] = useState(Date.now());
 
-  const { ingestionType } = useServiceIngestionType({
+  const capabilities = useServiceFlyoutCapabilities({
     http: core.http,
     serviceName: service.name,
     environment,
@@ -113,7 +113,7 @@ export function ServiceFlyout({
       value={{
         deps: { core, share, lens, dataViews, alerting },
         service,
-        ingestionType,
+        capabilities,
         filters: {
           environment: flyoutEnvironment,
           setEnvironment: setFlyoutEnvironment,
