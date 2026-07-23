@@ -20,14 +20,7 @@ export const LOGS_LOCATOR_ID = 'LOGS_LOCATOR';
 /**
  * Accepts the same parameters as `DiscoverAppLocatorParams`, but automatically sets the data view to all log sources.
  */
-export type LogsLocatorParams = DiscoverAppLocatorParams & {
-  /**
-   * Build and pass an ad-hoc "All logs" data view spec instead of relying on the
-   * profile-registered data view id. Needed by callers reachable outside the Observability
-   * solution (e.g. Fleet in a Security project), where the id is not registered.
-   */
-  useAdHocDataView?: boolean;
-};
+export type LogsLocatorParams = DiscoverAppLocatorParams;
 
 export class LogsLocatorDefinition implements LocatorDefinition<LogsLocatorParams> {
   public readonly id = LOGS_LOCATOR_ID;
@@ -37,6 +30,7 @@ export class LogsLocatorDefinition implements LocatorDefinition<LogsLocatorParam
       locators: LocatorClient;
       getLogSourcesService(): Promise<LogsDataAccessPluginStart['services']['logSourcesService']>;
       getIsEsqlDefault(): Promise<boolean>;
+      getActiveSolutionNavId(): Promise<string | null>;
     }
   ) {}
 
@@ -48,42 +42,42 @@ export class LogsLocatorDefinition implements LocatorDefinition<LogsLocatorParam
   });
 
   public readonly getLocation = async (params: LogsLocatorParams) => {
-    const { useAdHocDataView, ...discoverParams } = params;
-
     const discoverAppLocator =
       this.deps.locators.get<DiscoverAppLocatorParams>('DISCOVER_APP_LOCATOR')!;
 
     const isEsqlDefault = await this.deps.getIsEsqlDefault();
 
-    if (isEsqlDefault && !discoverParams.query) {
+    if (isEsqlDefault && !params.query) {
       const flattenedLogSources = await this.getFlattenedLogSources();
 
       return discoverAppLocator.getLocation({
-        ...discoverParams,
+        ...params,
         query: { esql: `FROM ${flattenedLogSources}` },
       });
     }
 
-    // Respect a caller-provided data view (e.g. Security).
-    if (discoverParams.dataViewId || discoverParams.dataViewSpec) {
-      return discoverAppLocator.getLocation(discoverParams);
+    // Respect a caller-provided data view (e.g. onboarding wired streams).
+    if (params.dataViewId || params.dataViewSpec) {
+      return discoverAppLocator.getLocation(params);
     }
 
-    // Build an ad-hoc data view for callers outside the Observability solution,
-    // where the all-logs data view id is not registered by a profile.
-    if (useAdHocDataView) {
-      const flattenedLogSources = await this.getFlattenedLogSources();
+    // The all-logs data view id is only registered by the Observability and Classic root profiles.
+    const solutionNavId = await this.deps.getActiveSolutionNavId();
+    const allLogsIdIsRegistered = solutionNavId == null || solutionNavId === 'oblt';
 
+    if (allLogsIdIsRegistered) {
       return discoverAppLocator.getLocation({
-        dataViewSpec: getAllLogsDataViewSpec({ allLogsIndexPattern: flattenedLogSources }),
-        ...discoverParams,
+        dataViewId: ALL_LOGS_DATA_VIEW_ID,
+        ...params,
       });
     }
 
-    // Default to the all log sources data view by ID.
+    // Other solutions (e.g. Security) have no profile registering the id, so build an ad-hoc spec.
+    const flattenedLogSources = await this.getFlattenedLogSources();
+
     return discoverAppLocator.getLocation({
-      dataViewId: ALL_LOGS_DATA_VIEW_ID,
-      ...discoverParams,
+      dataViewSpec: getAllLogsDataViewSpec({ allLogsIndexPattern: flattenedLogSources }),
+      ...params,
     });
   };
 
