@@ -8,6 +8,7 @@
 import { type DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { ALL_LOGS_DATA_VIEW_ID, getAllLogsDataViewSpec } from '@kbn/discover-utils/src';
 import type { TimeRange } from '@kbn/es-query';
+import { KIBANA_OBSERVABILITY_PROJECT } from '@kbn/projects-solutions-groups';
 import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
 import type { LocatorDefinition } from '@kbn/share-plugin/common';
 import type { LocatorClient } from '@kbn/share-plugin/common/url_service';
@@ -16,6 +17,18 @@ import type { LocatorClient } from '@kbn/share-plugin/common/url_service';
  * Locator used to link to all log sources in Discover.
  */
 export const LOGS_LOCATOR_ID = 'LOGS_LOCATOR';
+
+/**
+ * Solution nav ids whose Discover root profiles register `ALL_LOGS_DATA_VIEW_ID`.
+ * `null` corresponds to the Classic navigation (stateful).
+ */
+const SOLUTION_NAV_IDS_WITH_ALL_LOGS_DATA_VIEW: ReadonlyArray<string | null> = [
+  null,
+  KIBANA_OBSERVABILITY_PROJECT,
+];
+
+const isAllLogsDataViewRegistered = (solutionNavId: string | null): boolean =>
+  SOLUTION_NAV_IDS_WITH_ALL_LOGS_DATA_VIEW.includes(solutionNavId);
 
 /**
  * Accepts the same parameters as `DiscoverAppLocatorParams`, but automatically sets the data view to all log sources.
@@ -63,9 +76,8 @@ export class LogsLocatorDefinition implements LocatorDefinition<LogsLocatorParam
 
     // The all-logs data view id is only registered by the Observability and Classic root profiles.
     const solutionNavId = await this.deps.getActiveSolutionNavId();
-    const allLogsIdIsRegistered = solutionNavId == null || solutionNavId === 'oblt';
 
-    if (allLogsIdIsRegistered) {
+    if (isAllLogsDataViewRegistered(solutionNavId)) {
       return discoverAppLocator.getLocation({
         dataViewId: ALL_LOGS_DATA_VIEW_ID,
         ...params,
