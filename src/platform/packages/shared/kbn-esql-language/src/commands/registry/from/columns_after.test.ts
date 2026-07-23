@@ -47,8 +47,13 @@ describe('FROM columnsAfter', () => {
 
     const result = await columnsAfter(command, [], '', {
       fromFrom: (cmd) => {
-        const sources = cmd.args.filter((arg) => !Array.isArray(arg) && isSource(arg));
-        return Promise.resolve(sources.flatMap((s) => fieldsByIndex[s.name] ?? []));
+        const fields: ESQLFieldWithMetadata[] = [];
+        for (const arg of cmd.args) {
+          if (!Array.isArray(arg) && isSource(arg)) {
+            fields.push(...(fieldsByIndex[arg.name] ?? []));
+          }
+        }
+        return Promise.resolve(fields);
       },
       fromJoin: () => Promise.resolve([]),
       fromEnrich: () => Promise.resolve([]),
@@ -109,8 +114,13 @@ describe('FROM columnsAfter', () => {
 
     const result = await columnsAfter(command, [], '', {
       fromFrom: (cmd) => {
-        const sources = cmd.args.filter((arg) => !Array.isArray(arg) && isSource(arg));
-        return Promise.resolve(sources.flatMap((s) => fieldsByIndex[s.name] ?? []));
+        const fields: ESQLFieldWithMetadata[] = [];
+        for (const arg of cmd.args) {
+          if (!Array.isArray(arg) && isSource(arg)) {
+            fields.push(...(fieldsByIndex[arg.name] ?? []));
+          }
+        }
+        return Promise.resolve(fields);
       },
       fromJoin: () => Promise.resolve([]),
       fromEnrich: () => Promise.resolve([]),
@@ -185,14 +195,12 @@ describe('FROM columnsAfter', () => {
 
     expect(fromFromMock).toHaveBeenCalledTimes(1);
 
-    const calledSources = fromFromMock.mock.calls[0][0].args.filter(
-      (arg: unknown) => !Array.isArray(arg) && isSource(arg)
-    );
-    expect(calledSources).toHaveLength(3);
-    expect(calledSources.map((s: { name: string }) => s.name)).toEqual([
-      'index1',
-      'index2',
-      'index3',
-    ]);
+    const sourceNames: string[] = [];
+    for (const arg of fromFromMock.mock.calls[0][0].args) {
+      if (!Array.isArray(arg) && isSource(arg)) {
+        sourceNames.push(arg.name);
+      }
+    }
+    expect(sourceNames).toEqual(['index1', 'index2', 'index3']);
   });
 });
