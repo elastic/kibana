@@ -12,11 +12,12 @@ import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { getCustomQueryRuleParams, importRules } from '../../../utils';
 
 /**
- * Scale regression guard well above import chunk size. Dedicated long-timeout
- * config. Legacy path may be slow/flaky — intentional. Stays under the
- * exclusive 10000 cap (`createRulesLimitStream` rejects at `>= 10000`).
+ * Scale regression guards. Dedicated long-timeout config. Legacy path may be
+ * slow/flaky — intentional. Disabled count stays under the exclusive 10000 cap
+ * (`createRulesLimitStream` rejects at `>= 10000`).
  */
-const RULE_COUNT = 8000;
+const DISABLED_RULE_COUNT = 8000;
+const ENABLED_RULE_COUNT = 2000;
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
@@ -24,15 +25,14 @@ export default ({ getService }: FtrProviderContext): void => {
   const log = getService('log');
 
   describe('@ess import rules large payload', function () {
-    // Importing 10k rules on the legacy path can take a long time.
     this.timeout(60 * 60 * 1000);
 
     beforeEach(async () => {
       await deleteAllRules(supertest, log);
     });
 
-    it(`imports ${RULE_COUNT} disabled custom rules`, async () => {
-      const rules = range(RULE_COUNT).map((i) =>
+    it(`imports ${DISABLED_RULE_COUNT} disabled custom rules`, async () => {
+      const rules = range(DISABLED_RULE_COUNT).map((i) =>
         getCustomQueryRuleParams({
           rule_id: `large-payload-rule-${i}`,
           name: `Large payload rule ${i}`,
@@ -48,8 +48,8 @@ export default ({ getService }: FtrProviderContext): void => {
 
       expect(importResponse).toMatchObject({
         success: true,
-        success_count: RULE_COUNT,
-        rules_count: RULE_COUNT,
+        success_count: DISABLED_RULE_COUNT,
+        rules_count: DISABLED_RULE_COUNT,
         errors: [],
       });
 
@@ -62,7 +62,43 @@ export default ({ getService }: FtrProviderContext): void => {
         })
         .expect(200);
 
-      expect(body.total).toBe(RULE_COUNT);
+      expect(body.total).toBe(DISABLED_RULE_COUNT);
+    });
+
+    it(`imports ${ENABLED_RULE_COUNT} enabled custom rules`, async () => {
+      const rules = range(ENABLED_RULE_COUNT).map((i) =>
+        getCustomQueryRuleParams({
+          rule_id: `large-payload-enabled-rule-${i}`,
+          name: `Large payload enabled rule ${i}`,
+          enabled: true,
+        })
+      );
+
+      const importResponse = await importRules({
+        getService,
+        rules,
+        overwrite: false,
+      });
+
+      expect(importResponse).toMatchObject({
+        success: true,
+        success_count: ENABLED_RULE_COUNT,
+        rules_count: ENABLED_RULE_COUNT,
+        errors: [],
+      });
+
+      const { body } = await detectionsApi
+        .findRules({
+          query: {
+            page: 1,
+            per_page: 10,
+            filter: 'alert.attributes.enabled: true',
+          },
+        })
+        .expect(200);
+
+      expect(body.total).toBe(ENABLED_RULE_COUNT);
+      expect(body.data.every((rule: { enabled: boolean }) => rule.enabled)).toBe(true);
     });
   });
 };
