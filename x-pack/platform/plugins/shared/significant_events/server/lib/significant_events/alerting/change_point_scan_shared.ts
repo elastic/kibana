@@ -10,6 +10,7 @@ import type {
   AggregationsExtendedBounds,
   AggregationsFieldDateMath,
 } from '@elastic/elasticsearch/lib/api/types';
+import { METRIC_SERIES_EVERY } from '../rules/metric_series_contract';
 import {
   METRIC_SERIES_BUCKET_RUNTIME_FIELD,
   METRIC_SERIES_VALUE_RUNTIME_FIELD,
@@ -26,11 +27,17 @@ export {
   METRIC_SERIES_RUNTIME_MAPPINGS,
 } from './rule_events_metric_series';
 
+/**
+ * Histogram window for change_point. `max` stops at `now - EVERY` so the series
+ * only includes closed minutes that the rule should already have written —
+ * ending at `now-1m` zero-fills up to ~EVERY of not-yet-emitted minutes and
+ * can misread as a trailing dip/step.
+ */
 export function buildChangePointHistogramBounds(
   lookback: string,
-  bucketInterval: string = METRIC_SERIES_ANALYSIS_BUCKET_INTERVAL
+  _bucketInterval: string = METRIC_SERIES_ANALYSIS_BUCKET_INTERVAL
 ): AggregationsExtendedBounds<AggregationsFieldDateMath> {
-  return { min: lookback, max: `now-${bucketInterval}` };
+  return { min: lookback, max: `now-${METRIC_SERIES_EVERY}` };
 }
 
 /**

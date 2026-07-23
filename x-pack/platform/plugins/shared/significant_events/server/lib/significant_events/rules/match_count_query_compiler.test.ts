@@ -5,8 +5,11 @@
  * 2.0.
  */
 
+import {
+  canCompileMatchMetric,
+  stripTrailingPipeCommands,
+} from './can_compile_match_metric';
 import { compileMatchCountBreachQuery } from './match_count_query_compiler';
-import { canCompileMatchMetric } from './can_compile_match_metric';
 import {
   METRIC_SERIES_CLOSED_BUCKETS,
   METRIC_SERIES_EVERY,
@@ -23,9 +26,40 @@ describe('metric series contract', () => {
   });
 });
 
+describe('stripTrailingPipeCommands', () => {
+  it('peels trailing SORT / LIMIT / KEEP from the end only', () => {
+    expect(
+      stripTrailingPipeCommands(
+        'FROM logs-* | WHERE level == "error" | SORT @timestamp DESC | LIMIT 10'
+      )
+    ).toBe('FROM logs-* | WHERE level == "error"');
+  });
+
+  it('does not strip KEEP / SORT that sit before a WHERE', () => {
+    expect(stripTrailingPipeCommands('FROM logs-* | KEEP message | WHERE level == "error"')).toBe(
+      'FROM logs-* | KEEP message | WHERE level == "error"'
+    );
+    expect(
+      stripTrailingPipeCommands('FROM logs-* | SORT @timestamp DESC | WHERE level == "error"')
+    ).toBe('FROM logs-* | SORT @timestamp DESC | WHERE level == "error"');
+  });
+});
+
 describe('canCompileMatchMetric', () => {
   it('accepts filter-only MATCH queries', () => {
     expect(canCompileMatchMetric('FROM logs-* | WHERE level == "error"')).toBe(true);
+  });
+
+  it('accepts FROM-only, METADATA, and trailing SORT/LIMIT', () => {
+    expect(canCompileMatchMetric('FROM logs-*')).toBe(true);
+    expect(canCompileMatchMetric('FROM logs-* METADATA _id, _source | WHERE level == "error"')).toBe(
+      true
+    );
+    expect(
+      canCompileMatchMetric(
+        'FROM logs-* | WHERE level == "error" | SORT @timestamp DESC | LIMIT 10'
+      )
+    ).toBe(true);
   });
 
   it('rejects STATS queries', () => {
@@ -36,8 +70,20 @@ describe('canCompileMatchMetric', () => {
     ).toBe(false);
   });
 
-  it('rejects empty queries', () => {
+  it('rejects KEEP / SORT / LIMIT / EVAL between FROM and WHERE', () => {
+    expect(canCompileMatchMetric('FROM logs-* | KEEP message | WHERE level == "error"')).toBe(
+      false
+    );
+    expect(canCompileMatchMetric('FROM logs-* | SORT @timestamp DESC | WHERE level == "error"')).toBe(
+      false
+    );
+    expect(canCompileMatchMetric('FROM logs-* | LIMIT 100 | WHERE level == "error"')).toBe(false);
+    expect(canCompileMatchMetric('FROM logs-* | EVAL x = 1 | WHERE level == "error"')).toBe(false);
+  });
+
+  it('rejects empty and unparseable queries', () => {
     expect(canCompileMatchMetric('   ')).toBe(false);
+    expect(canCompileMatchMetric('NOT VALID ESQL !!!')).toBe(false);
   });
 });
 
@@ -61,10 +107,28 @@ describe('compileMatchCountBreachQuery', () => {
     expect(compiled).not.toContain('SORT bucket ASC');
   });
 
-  it('fails closed for STATS queries', () => {
+  it('strips trailing SORT/LIMIT while keeping the author WHERE', () => {
+    const compiled = compileMatchCountBreachQuery(
+      'FROM logs-* | WHERE level == "error" | SORT @timestamp DESC | LIMIT 10',
+      '@timestamp'
+    );
+    const base = compiled.split('\n| ')[0];
+    expect(base).toContain('WHERE level == "error"');
+    expect(base).not.toMatch(/\bSORT\b/);
+    expect(base).not.toMatch(/\bLIMIT\b/);
+  });
+
+  it('fails closed for STATS and non-filter MATCH shapes', () => {
     expect(() =>
       compileMatchCountBreachQuery(
         'FROM logs | STATS c = COUNT(*) BY bucket = BUCKET(@timestamp, 1 minute)',
+        '@timestamp'
+      )
+    ).toThrow(/filter-only/);
+
+    expect(() =>
+      compileMatchCountBreachQuery(
+        'FROM logs-* | KEEP message | WHERE level == "error"',
         '@timestamp'
       )
     ).toThrow(/filter-only/);

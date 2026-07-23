@@ -14,10 +14,15 @@ import {
 } from './change_point_scan_shared';
 
 describe('buildChangePointHistogramBounds', () => {
-  it('pins the date_histogram to the lookback window and excludes the open bucket', () => {
+  it('pins max to now-EVERY so not-yet-written closed minutes are not zero-filled', () => {
+    // Rule emission lag is METRIC_SERIES_EVERY (5m); ending at now-1m fabricates a trailing dip.
     expect(buildChangePointHistogramBounds('now-40m', '1m')).toEqual({
       min: 'now-40m',
-      max: 'now-1m',
+      max: 'now-5m',
+    });
+    expect(buildChangePointHistogramBounds('now-125m', '5m')).toEqual({
+      min: 'now-125m',
+      max: 'now-5m',
     });
   });
 });

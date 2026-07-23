@@ -6,7 +6,10 @@
  */
 
 import { stripMetadata } from '@kbn/streams-schema';
-import { assertCanCompileMatchMetric } from './can_compile_match_metric';
+import {
+  assertCanCompileMatchMetric,
+  stripTrailingPipeCommands,
+} from './can_compile_match_metric';
 import {
   METRIC_SERIES_BUCKET_FIELD,
   METRIC_SERIES_LIMIT,
@@ -15,17 +18,6 @@ import {
 
 /** Strip all METADATA columns; count series does not need `_id` / `_source`. */
 const METADATA_TO_STRIP = ['_id', '_source', '_index', '_version'] as const;
-
-/** Drop trailing author SORT/LIMIT/KEEP so they cannot cap rows before COUNT. */
-const TRAILING_PIPE_COMMAND = /\s*\|\s*(?:SORT|LIMIT|KEEP)\b[\s\S]*$/i;
-
-function stripTrailingPipeCommands(query: string): string {
-  let result = query.trimEnd();
-  while (TRAILING_PIPE_COMMAND.test(result)) {
-    result = result.replace(TRAILING_PIPE_COMMAND, '').trimEnd();
-  }
-  return result;
-}
 
 function toFilterOnlyBase(esqlQuery: string): string {
   return stripTrailingPipeCommands(stripMetadata(esqlQuery, [...METADATA_TO_STRIP]));
@@ -38,10 +30,7 @@ function toFilterOnlyBase(esqlQuery: string): string {
  * Time scoping for source docs comes from the rule engine lookback filter on
  * `time_field`. The in-query `DATE_TRUNC(NOW())` drops the open current minute.
  */
-export function compileMatchCountBreachQuery(
-  esqlQuery: string,
-  timestampField: string
-): string {
+export function compileMatchCountBreachQuery(esqlQuery: string, timestampField: string): string {
   assertCanCompileMatchMetric(esqlQuery);
 
   const base = toFilterOnlyBase(esqlQuery);
