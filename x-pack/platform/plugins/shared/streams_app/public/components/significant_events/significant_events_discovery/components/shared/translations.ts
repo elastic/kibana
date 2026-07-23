@@ -15,6 +15,53 @@ export const FIND_SIGNIFICANT_EVENTS_LABEL = i18n.translate(
   }
 );
 
+/** Tooltip for controls disabled while Significant Events activity is paused. */
+export const ACTIVITY_PAUSED_TOOLTIP = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.activityPausedTooltip',
+  {
+    defaultMessage: 'Significant Events activity is paused. Resume it in Settings.',
+  }
+);
+
+/** Tooltip while maintenance status is still loading. */
+export const ACTIVITY_STATUS_LOADING_TOOLTIP = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.activityStatusLoadingTooltip',
+  {
+    defaultMessage: 'Checking Significant Events activity status…',
+  }
+);
+
+/** Tooltip when maintenance status could not be loaded. */
+export const ACTIVITY_STATUS_ERROR_TOOLTIP = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.activityStatusErrorTooltip',
+  {
+    defaultMessage:
+      'Could not load Significant Events activity status. New activity stays blocked until status is available.',
+  }
+);
+
+/** Tooltip explaining why activity controls are disabled (loading, error, or paused). */
+export const getActivityBlockTooltip = ({
+  isLoading,
+  isError,
+  isBlocked,
+}: {
+  isLoading: boolean;
+  isError: boolean;
+  isBlocked: boolean;
+}): string | undefined => {
+  if (isLoading) {
+    return ACTIVITY_STATUS_LOADING_TOOLTIP;
+  }
+  if (isError) {
+    return ACTIVITY_STATUS_ERROR_TOOLTIP;
+  }
+  if (isBlocked) {
+    return ACTIVITY_PAUSED_TOOLTIP;
+  }
+  return undefined;
+};
+
 export const CANCEL_DISCOVERY_LABEL = i18n.translate(
   'xpack.streams.significantEventsDiscovery.cancelDiscoveryLabel',
   {
