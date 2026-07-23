@@ -169,6 +169,23 @@ describe('useBindChannel', () => {
       expect.objectContaining({ title: expect.stringContaining('bind') })
     );
   });
+
+  it('surfaces the relay reason from the response body as the toast message', async () => {
+    httpPost.mockRejectedValue(
+      Object.assign(new Error('Conflict'), { body: { message: 'channel already claimed' } })
+    );
+    const { wrapper } = createSetup();
+    const { result } = renderHook(() => useBindChannel(), { wrapper });
+
+    await act(async () => {
+      await result.current.bind('C123').catch(() => {});
+    });
+
+    expect(addError).toHaveBeenCalledWith(
+      expect.objectContaining({ message: 'channel already claimed' }),
+      expect.any(Object)
+    );
+  });
 });
 
 describe('useUnbindChannel', () => {
@@ -214,6 +231,23 @@ describe('useUnbindChannel', () => {
     expect(addError).toHaveBeenCalledWith(
       expect.any(Error),
       expect.objectContaining({ title: expect.stringContaining('unbind') })
+    );
+  });
+
+  it('surfaces the relay reason from the response body as the toast message', async () => {
+    httpPost.mockRejectedValue(
+      Object.assign(new Error('Forbidden'), { body: { message: 'owned by another deployment' } })
+    );
+    const { wrapper } = createSetup();
+    const { result } = renderHook(() => useUnbindChannel(), { wrapper });
+
+    await act(async () => {
+      await result.current.unbind('C123').catch(() => {});
+    });
+
+    expect(addError).toHaveBeenCalledWith(
+      expect.objectContaining({ message: 'owned by another deployment' }),
+      expect.any(Object)
     );
   });
 });

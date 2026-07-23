@@ -282,6 +282,27 @@ describe('useRelayAppConnection', () => {
     consoleErrorSpy.mockRestore();
   });
 
+  it('surfaces the relay reason from the response body as the connect toast message', async () => {
+    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    httpGet.mockResolvedValue(statusResponse(RELAY_APP_CONNECTION_STATUS.notConnected));
+    httpPost.mockRejectedValue(
+      Object.assign(new Error('Bad Gateway'), { body: { message: 'workspace already bound' } })
+    );
+    const { wrapper } = createSetup();
+    const { result } = renderHook(() => useRelayAppConnection(), { wrapper });
+    await flush();
+
+    await act(async () => {
+      await result.current.connect().catch(() => undefined);
+    });
+
+    expect(addError).toHaveBeenCalledWith(
+      expect.objectContaining({ message: 'workspace already bound' }),
+      expect.any(Object)
+    );
+    consoleErrorSpy.mockRestore();
+  });
+
   it('surfaces a toast error when disconnect fails', async () => {
     const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
     httpGet.mockResolvedValue(statusResponse(RELAY_APP_CONNECTION_STATUS.connected));

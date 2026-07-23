@@ -14,6 +14,7 @@ import type {
   SlackChannelBinding,
 } from '@kbn/significant-events-plugin/common';
 import { useKibana } from '../../../../../../hooks/use_kibana';
+import { getFormattedError } from '../../../../../../util/errors';
 
 const BINDINGS_ROUTE = '/internal/significant_events/apps/slack/bindings';
 const BIND_CHANNEL_ROUTE = (channelId: string) =>
@@ -87,7 +88,7 @@ export function useBindChannel(): UseBindChannel {
     mutationFn: (channelId: string) =>
       http.post<SlackAppBindChannelResponse>(BIND_CHANNEL_ROUTE(channelId)),
     onError: (error) => {
-      notifications.toasts.addError(error, {
+      notifications.toasts.addError(getFormattedError(error), {
         title: i18n.translate(
           'xpack.streams.significantEventsDiscovery.settings.apps.bindChannelError',
           { defaultMessage: 'Failed to bind the Slack channel' }
@@ -119,7 +120,7 @@ export function useUnbindChannel(): UseUnbindChannel {
     mutationFn: (channelId: string) =>
       http.post<SlackAppUnbindChannelResponse>(UNBIND_CHANNEL_ROUTE(channelId)),
     onError: (error) => {
-      notifications.toasts.addError(error, {
+      notifications.toasts.addError(getFormattedError(error), {
         title: i18n.translate(
           'xpack.streams.significantEventsDiscovery.settings.apps.unbindChannelError',
           { defaultMessage: 'Failed to unbind the Slack channel' }

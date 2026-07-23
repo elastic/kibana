@@ -16,6 +16,7 @@ import {
   type SlackAppStatusResponse,
 } from '@kbn/significant-events-plugin/common';
 import { useKibana } from '../../../../../../hooks/use_kibana';
+import { getFormattedError } from '../../../../../../util/errors';
 
 const STATUS_ROUTE = '/internal/significant_events/apps/slack/status';
 const CONNECT_ROUTE = '/internal/significant_events/apps/slack/connect';
@@ -68,7 +69,7 @@ export function useRelayAppConnection(): UseRelayAppConnection {
       pollDeadlineRef.current = Date.now() + POLL_TIMEOUT_MS;
     },
     onError: (error) => {
-      notifications.toasts.addError(error, {
+      notifications.toasts.addError(getFormattedError(error), {
         title: i18n.translate(
           'xpack.streams.significantEventsDiscovery.settings.apps.connectError',
           {
@@ -88,7 +89,7 @@ export function useRelayAppConnection(): UseRelayAppConnection {
       return http.post<SlackAppDisconnectResponse>(DISCONNECT_ROUTE);
     },
     onError: (error) => {
-      notifications.toasts.addError(error, {
+      notifications.toasts.addError(getFormattedError(error), {
         title: i18n.translate(
           'xpack.streams.significantEventsDiscovery.settings.apps.disconnectError',
           { defaultMessage: 'Failed to disconnect the Slack app' }

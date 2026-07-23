@@ -147,6 +147,7 @@ export function SlackConnectionBindings({ canEdit }: SlackConnectionBindingsProp
       <EuiFlexGroup gutterSize="s" alignItems="flexStart">
         <EuiFlexItem grow={false}>
           <EuiFieldText
+            css={{ minWidth: '300px' }}
             value={channelId}
             onChange={(e) => setChannelId(e.target.value)}
             onKeyDown={(e) => {
@@ -183,7 +184,7 @@ export function SlackConnectionBindings({ canEdit }: SlackConnectionBindingsProp
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer size="s" />
+      <EuiSpacer size="l" />
       <EuiBasicTable
         css={{ width: '100%' }}
         items={bindings}
@@ -271,7 +272,7 @@ function BindingActionCell({ binding, canEdit, onDisconnected }: BindingActionCe
 
   return (
     <>
-      <EuiButton
+      <EuiButtonEmpty
         size="s"
         color="danger"
         isDisabled={!canEdit || isUnbinding}
@@ -283,7 +284,7 @@ function BindingActionCell({ binding, canEdit, onDisconnected }: BindingActionCe
           'xpack.streams.significantEventsDiscovery.settings.apps.slackUnbindChannel',
           { defaultMessage: 'Disconnect' }
         )}
-      </EuiButton>
+      </EuiButtonEmpty>
       {confirmOpen && (
         <EuiConfirmModal
           title={i18n.translate(
