@@ -49,9 +49,10 @@ describe('RENDER_ATTACHMENT_TAG_RE', () => {
 });
 
 describe('createExpectedRenderAttachmentEvaluator', () => {
-  it('scores 1 when there is no render-attachment expectation', async () => {
+  it('skips when there is no render-attachment expectation', async () => {
     const result = await run(conversation('no tag here'), {});
-    expect(result.score).toBe(1);
+    expect(result.score).toBeNull();
+    expect(result.label).toBe('skipped');
   });
 
   it('scores 1 when a valid render_attachment tag is present', async () => {

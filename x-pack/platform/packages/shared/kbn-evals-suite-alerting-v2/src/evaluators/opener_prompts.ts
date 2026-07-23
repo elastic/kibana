@@ -9,10 +9,6 @@ import type { TaskOutput } from '@kbn/evals';
 import type { PromptRequest } from '@kbn/agent-builder-common/agents';
 import { isAskUserQuestionPrompt } from '@kbn/agent-builder-common/agents';
 
-/**
- * Extracts the structured prompts (e.g. `ask_user_question`) the agent fired in response to
- * the conversation opener (turn 0), as captured by the task in `evaluate_dataset.ts`.
- */
 export const getOpenerPrompts = (output: TaskOutput): PromptRequest[] => {
   const prompts = (output as { openerPrompts?: unknown[] })?.openerPrompts ?? [];
   return prompts.filter(
@@ -20,11 +16,6 @@ export const getOpenerPrompts = (output: TaskOutput): PromptRequest[] => {
   );
 };
 
-/**
- * Compact, human-readable summary of a fired prompt. For an `ask_user_question` prompt this
- * surfaces the questions and their option labels so a low-score log is self-explanatory
- * ("what did the agent ask?") without digging into traces.
- */
 export const summarizePrompt = (prompt: PromptRequest) => {
   if (isAskUserQuestionPrompt(prompt)) {
     return {

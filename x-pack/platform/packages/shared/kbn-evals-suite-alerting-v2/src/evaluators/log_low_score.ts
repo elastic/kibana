@@ -9,7 +9,6 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import type { Evaluator, Example, TaskOutput } from '@kbn/evals';
 import { getOpenerPrompts, summarizePrompt } from './opener_prompts';
 
-/** Shape of the TaskOutput produced by `createTask` in `evaluate_dataset.ts`. */
 interface ConversationOutput {
   messages?: Array<{ message?: string }>;
   errors?: unknown[];
@@ -19,11 +18,6 @@ interface ConversationOutput {
 const isConversationOutput = (output: unknown): output is ConversationOutput =>
   typeof output === 'object' && output !== null;
 
-/**
- * Reconstructs the transcript from the task output. `createTask` pushes exactly two messages
- * per turn (the scripted user message, then the agent's reply), so even indices are the user
- * and odd indices are the assistant.
- */
 const formatTranscript = (output: ConversationOutput): string => {
   const messages = output.messages ?? [];
   if (messages.length === 0) return '  (no messages captured)';
@@ -42,16 +36,6 @@ const formatValue = (value: unknown): string => {
   return JSON.stringify(value, null, 2);
 };
 
-/**
- * Wraps an evaluator so that whenever it returns a numeric score below 1 (i.e. a partial or
- * outright failure), the test logs a self-contained report of exactly what happened: the
- * evaluator, its score/label, the judge's explanation, the intent under test, the full
- * conversation transcript, any opener prompts the agent fired, task errors, and the trace id.
- *
- * This means a below-1 result is diagnosable straight from the test output — no need to
- * reproduce the run by hand or dig through the HTML report / traces. A `null` score (skipped
- * or unavailable) is intentionally not logged; only genuine sub-1 scores are surfaced.
- */
 export const withLowScoreLogging = <
   TExample extends Example = Example,
   TTaskOutput extends TaskOutput = TaskOutput

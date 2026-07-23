@@ -8,25 +8,6 @@
 import type { RuleAttachmentData } from '@kbn/alerting-v2-schemas';
 import type { Evaluator, TaskOutput } from '@kbn/evals';
 
-/**
- * Jest-style callback that asserts against the composed rule attachment data
- * fetched from the conversation after the agent run. Throw (or let `expect`
- * throw) to fail the evaluator.
- *
- * Example (import `expect` from `@playwright/test` — it is not a global in the
- * evaluator callback):
- * ```ts
- * import { expect } from '@playwright/test';
- * // ...
- * assertAttachment: (attachment) => {
- *   expect(attachment.kind).toEqual('alert');
- *   expect(attachment.schedule?.lookback).toEqual('5m');
- * }
- * ```
- *
- * Note: this is an in-memory-only expectation (functions are not serializable to
- * Phoenix datasets). Keep it on inline examples in the spec file.
- */
 export type AssertAttachmentFn = (attachment: RuleAttachmentData) => void | Promise<void>;
 
 const getAssertAttachmentFn = (metadata: unknown): AssertAttachmentFn | undefined => {
@@ -39,13 +20,6 @@ const getRuleAttachment = (output: TaskOutput): RuleAttachmentData | undefined =
   return value && typeof value === 'object' ? value : undefined;
 };
 
-/**
- * CODE evaluator that runs an optional `metadata.assertAttachment` callback
- * against the rule attachment data loaded onto the task output.
- *
- * When `assertAttachment` is unset the example has no attachment-payload
- * expectation and scores 1 (n/a).
- */
 export const createAssertAttachmentEvaluator = (): Evaluator => ({
   name: 'AssertAttachment',
   kind: 'CODE',
@@ -53,8 +27,9 @@ export const createAssertAttachmentEvaluator = (): Evaluator => ({
     const assertAttachment = getAssertAttachmentFn(metadata);
     if (!assertAttachment) {
       return {
-        score: 1,
-        metadata: { reason: 'No assertAttachment expectation for this example' },
+        score: null,
+        label: 'skipped',
+        explanation: 'No assertAttachment expectation for this example',
       };
     }
 

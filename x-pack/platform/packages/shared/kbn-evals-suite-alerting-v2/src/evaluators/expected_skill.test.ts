@@ -27,28 +27,29 @@ const run = (output: TaskOutput, metadata: Record<string, unknown> | null) =>
   });
 
 describe('createExpectedSkillEvaluator', () => {
-  it('scores 1 when there is no skill-load expectation', async () => {
+  it('skips when there is no skill-load expectation', async () => {
     const result = await run(outputWithLoadedSkills([RULE_MANAGEMENT_SKILL_ID]), {});
-    expect(result.score).toBe(1);
+    expect(result.score).toBeNull();
+    expect(result.label).toBe('skipped');
   });
 
-  it('scores 1 when the expected skill was loaded', async () => {
+  it('scores 1 when every expected skill was loaded', async () => {
     const result = await run(outputWithLoadedSkills([RULE_MANAGEMENT_SKILL_ID]), {
-      expectedSkill: RULE_MANAGEMENT_SKILL_ID,
+      expectedSkills: [RULE_MANAGEMENT_SKILL_ID],
     });
     expect(result.score).toBe(1);
   });
 
-  it('scores 0 when the expected skill was not loaded', async () => {
+  it('scores 0 when an expected skill was not loaded', async () => {
     const result = await run(outputWithLoadedSkills(['detection-rule-edit']), {
-      expectedSkill: RULE_MANAGEMENT_SKILL_ID,
+      expectedSkills: [RULE_MANAGEMENT_SKILL_ID],
     });
     expect(result.score).toBe(0);
   });
 
   it('scores 0 when no skills were loaded but one was expected', async () => {
     const result = await run(outputWithLoadedSkills([]), {
-      expectedSkill: RULE_MANAGEMENT_SKILL_ID,
+      expectedSkills: [RULE_MANAGEMENT_SKILL_ID],
     });
     expect(result.score).toBe(0);
   });
@@ -85,17 +86,6 @@ describe('createExpectedSkillEvaluator', () => {
     );
   });
 
-  it('combines expectedSkill and expectedSkills (all must load)', async () => {
-    const result = await run(outputWithLoadedSkills([WORKFLOW_AUTHORING_SKILL_ID]), {
-      expectedSkill: RULE_MANAGEMENT_SKILL_ID,
-      expectedSkills: [WORKFLOW_AUTHORING_SKILL_ID],
-    });
-    expect(result.score).toBe(0);
-    expect(result.metadata).toEqual(
-      expect.objectContaining({ missingSkills: [RULE_MANAGEMENT_SKILL_ID] })
-    );
-  });
-
   it('matches expectedSkills against filestore skill paths', async () => {
     const output = {
       steps: [
@@ -123,18 +113,18 @@ describe('createExpectedSkillEvaluator', () => {
       ],
     } as unknown as TaskOutput;
 
-    const result = await run(output, { expectedSkill: RULE_MANAGEMENT_SKILL_ID });
+    const result = await run(output, { expectedSkills: [RULE_MANAGEMENT_SKILL_ID] });
     expect(result.score).toBe(1);
   });
 
   it('reports the loaded skill names in metadata', async () => {
     const result = await run(outputWithLoadedSkills([RULE_MANAGEMENT_SKILL_ID]), {
-      expectedSkill: RULE_MANAGEMENT_SKILL_ID,
+      expectedSkills: [RULE_MANAGEMENT_SKILL_ID],
     });
     expect(result.metadata).toEqual(
       expect.objectContaining({
         loadedNames: [RULE_MANAGEMENT_SKILL_ID],
-        expectedSkill: RULE_MANAGEMENT_SKILL_ID,
+        expectedSkills: [RULE_MANAGEMENT_SKILL_ID],
       })
     );
   });

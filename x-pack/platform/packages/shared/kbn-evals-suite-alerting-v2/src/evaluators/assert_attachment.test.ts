@@ -25,9 +25,10 @@ const run = async (output: TaskOutput, metadata: Record<string, unknown> | null 
   });
 
 describe('createAssertAttachmentEvaluator', () => {
-  it('scores 1 when there is no assertAttachment expectation', async () => {
+  it('skips when there is no assertAttachment expectation', async () => {
     const result = await run({ ruleAttachment: ruleAttachment() }, null);
-    expect(result.score).toBe(1);
+    expect(result.score).toBeNull();
+    expect(result.label).toBe('skipped');
   });
 
   it('scores 0 when assertAttachment is set but no rule attachment was loaded', async () => {

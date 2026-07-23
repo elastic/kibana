@@ -30,8 +30,10 @@ import {
   type AssertAttachmentFn,
 } from './evaluators/assert_attachment';
 import { createExpectedSkillEvaluator } from './evaluators/expected_skill';
-import { createExpectedToolCalledEvaluator } from './evaluators/expected_tool_called';
-import { createExpectedToolGroupsEvaluator } from './evaluators/expected_tool_groups';
+import {
+  createExpectedAnyOfToolIdsEvaluator,
+  createExpectedToolCalledEvaluator,
+} from './evaluators/expected_tool_called';
 import {
   createExpectedRenderAttachmentEvaluator,
   getAssistantMessages,
@@ -64,15 +66,14 @@ export interface RuleManagementExample extends Example {
     criteria?: string[];
   };
   metadata?: {
-    /** The conversation must call this tool at least once. */
-    expectedToolId?: string;
+    /** The conversation must call every tool in this list at least once. */
+    expectedToolIds?: readonly string[];
     /**
-     * "AND-of-ORs" tool expectation: the conversation must call at least one
-     * tool from every group. A single-element group is a hard requirement; a
-     * multi-element group is satisfied by any one member. Example:
-     * `[[get_index_mapping], [index_explorer, list_indices]]`.
+     * Alternative tool expectation: the conversation must call at least one of
+     * these tools (e.g. `index_explorer` OR `list_indices`). Put hard
+     * single-tool requirements in {@link expectedToolIds} instead.
      */
-    expectedToolGroups?: string[][];
+    expectedAnyOfToolIds?: readonly string[];
     /**
      * When true, at least one assistant message must contain a valid
      * `<render_attachment id="…" version="…" />` tag so the UI can display
@@ -90,19 +91,17 @@ export interface RuleManagementExample extends Example {
      * In-memory only — not serializable to Phoenix datasets.
      */
     assertAttachment?: AssertAttachmentFn;
-    /** The conversation must load this skill at least once. */
-    expectedSkill?: string;
     /**
      * The conversation must load **every** skill in this list at least once.
-     * Use for multi-skill flows (e.g. rule compose → notification setup, which
-     * loads both rule-management and workflow-authoring).
+     * Use a one-element array for a single skill. Prefer this over a singular
+     * field — there is no `expectedSkill` on this type (excess-property checks
+     * reject it in specs).
      */
-    expectedSkills?: string[];
+    expectedSkills?: readonly string[];
     /** The conversation must NOT load this skill. */
     shouldNotActivateSkill?: string;
     /** Human-readable label describing the intent under test. */
     query_intent?: string;
-    [key: string]: unknown;
   } | null;
 }
 
@@ -279,7 +278,7 @@ export const createEvaluateDataset = ({
       [
         createExpectedSkillEvaluator(),
         createExpectedToolCalledEvaluator(),
-        createExpectedToolGroupsEvaluator(),
+        createExpectedAnyOfToolIdsEvaluator(),
         createExpectedRenderAttachmentEvaluator(),
         createAssertAttachmentEvaluator(),
         createCriteriaEvaluator(evaluators),

@@ -7,15 +7,6 @@
 
 import type { Evaluator, TaskOutput } from '@kbn/evals';
 
-/**
- * Matches the inline UI tag the agent must emit after composing a rule / action
- * policy so the conversation UI can render the attachment card:
- *
- *   <render_attachment id="<attachmentId>" version="<version>" />
- *
- * Attribute order is not fixed; both `id` and `version` are required. Accepts
- * optional whitespace and a trailing `/` before `>`.
- */
 export const RENDER_ATTACHMENT_TAG_RE =
   /<render_attachment\b(?=[^>]*\bid\s*=\s*["'][^"']+["'])(?=[^>]*\bversion\s*=\s*["'][^"']+["'])[^>]*\/?>/i;
 
@@ -25,10 +16,6 @@ export interface RenderAttachmentRef {
   tag: string;
 }
 
-/**
- * Parses the first `<render_attachment id="…" version="…" />` tag in `message`.
- * Returns null when the tag is missing or attributes are not parseable.
- */
 export const parseRenderAttachmentRef = (message: string): RenderAttachmentRef | null => {
   const tagMatch = message.match(RENDER_ATTACHMENT_TAG_RE)?.[0];
   if (!tagMatch) {
@@ -51,34 +38,23 @@ const getBooleanMeta = (metadata: unknown, key: string): boolean => {
   return value === true;
 };
 
-/** Assistant messages from a createTask conversation output (odd indices). */
 export const getAssistantMessages = (output: TaskOutput): string[] => {
   const messages = (output as { messages?: Array<{ message?: string }> })?.messages ?? [];
-  // createTask pushes user then assistant for each turn (even = user, odd = assistant).
   return messages
     .filter((_, i) => i % 2 === 1)
     .map((m) => m?.message ?? '')
     .filter(Boolean);
 };
 
-/**
- * CODE evaluator that checks the assistant inlined a `<render_attachment>` tag
- * so the UI can display the composed rule/policy card.
- *
- * Reads expectations from the example metadata:
- * - `expectRenderAttachment: true` — at least one assistant message must contain
- *   a valid `<render_attachment id="…" version="…" />` tag.
- *
- * When unset the example has no render-attachment expectation and scores 1 (n/a).
- */
 export const createExpectedRenderAttachmentEvaluator = (): Evaluator => ({
   name: 'ExpectedRenderAttachment',
   kind: 'CODE',
   evaluate: async ({ output, metadata }) => {
     if (!getBooleanMeta(metadata, 'expectRenderAttachment')) {
       return {
-        score: 1,
-        metadata: { reason: 'No render-attachment expectation for this example' },
+        score: null,
+        label: 'skipped',
+        explanation: 'No render-attachment expectation for this example',
       };
     }
 

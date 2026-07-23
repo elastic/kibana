@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { getStringMeta, type Evaluator, type TaskOutput } from '@kbn/evals';
+import type { Evaluator, TaskOutput } from '@kbn/evals';
+import type { RuleManagementExample } from '../evaluate_dataset';
 
-// Raw step shape returned by the agent-builder converse API.
 interface ConversationStep {
   type?: string;
   tool_id?: string;
@@ -20,16 +20,6 @@ const getToolCallStepsWithParams = (output: TaskOutput): ConversationStep[] => {
   return steps.filter((s) => s?.type === 'tool_call');
 };
 
-/**
- * Extracts every skill identifier seen in a conversation's tool-call steps.
- *
- * Collects values from three sources:
- * - `load_skill` params: the skill name string passed to the tool
- * - `load_skill` results: the `skill.name`, `skill.id`, and `skill.path` returned by the server
- * - `read_file` / `filestore.read` params: the path used to read the SKILL.md file
- *
- * Adapted from the agent-builder suite's `getSkillsLoadedFromSteps`.
- */
 export const getSkillsLoadedFromSteps = (output: TaskOutput): string[] => {
   const seen: string[] = [];
 
@@ -57,15 +47,6 @@ export const getSkillsLoadedFromSteps = (output: TaskOutput): string[] => {
   return [...new Set(seen.filter(Boolean))];
 };
 
-/**
- * Returns true if `skillName` (the path-segment name, e.g. 'rule-management')
- * is present in the list of collected skill identifiers.
- *
- * Matches against three forms that may appear in `loadedNames`:
- * - Exact name: 'rule-management'
- * - Dot-prefixed ID: 'platform.rule-management' → name = 'rule-management'
- * - Filestore path: 'skills/platform/alerting/.../SKILL.md' (or similar)
- */
 const skillIsPresent = (skillName: string, loadedNames: string[]): boolean => {
   const lower = skillName.toLowerCase();
   const pathSegment = lower.replace(/\./g, '/');
@@ -75,42 +56,32 @@ const skillIsPresent = (skillName: string, loadedNames: string[]): boolean => {
   });
 };
 
-const getStringArrayMeta = (metadata: unknown, key: string): string[] => {
-  const value = (metadata as Record<string, unknown> | null)?.[key];
-  if (!Array.isArray(value)) return [];
-  return value.filter((item): item is string => typeof item === 'string' && item.length > 0);
-};
-
-/**
- * CODE evaluator that checks skill-load routing for a single example.
- *
- * Reads expectations from the example metadata:
- * - `expectedSkill`: the conversation must load this skill at least once.
- * - `expectedSkills`: the conversation must load **every** skill in this list
- *   at least once (for multi-skill flows like rule compose → notification setup).
- * - `shouldNotActivateSkill`: the conversation must NOT load this skill.
- *
- * When none are set the example has no skill-routing expectation and scores 1 (n/a).
- *
- * Adapted from the agent-builder suite's skill-selection evaluators.
- */
-export const createExpectedSkillEvaluator = (): Evaluator => ({
+export const createExpectedSkillEvaluator = (): Evaluator<
+  RuleManagementExample,
+  TaskOutput
+> => ({
   name: 'ExpectedSkill',
   kind: 'CODE',
   evaluate: async ({ output, metadata }) => {
-    const expectedSkill = getStringMeta(metadata, 'expectedSkill');
-    const expectedSkillList = getStringArrayMeta(metadata, 'expectedSkills');
-    const shouldNotActivateSkill = getStringMeta(metadata, 'shouldNotActivateSkill');
+    const expectedSkills = metadata?.expectedSkills;
+    const shouldNotActivateSkill = metadata?.shouldNotActivateSkill;
 
-    const expectedSkills = [...(expectedSkill ? [expectedSkill] : []), ...expectedSkillList];
-
-    if (expectedSkills.length === 0 && !shouldNotActivateSkill) {
-      return { score: 1, metadata: { reason: 'No skill-load expectation for this example' } };
+    if (expectedSkills == null && !shouldNotActivateSkill) {
+      return {
+        score: null,
+        label: 'skipped',
+        explanation: 'No skill-load expectation for this example',
+      };
     }
 
+    if (expectedSkills != null && expectedSkills.length === 0) {
+      throw new Error('expectedSkills must contain at least one skill');
+    }
+
+    const requiredSkills = expectedSkills ?? [];
     const loadedNames = getSkillsLoadedFromSteps(output as TaskOutput);
 
-    const missingSkills = expectedSkills.filter((skill) => !skillIsPresent(skill, loadedNames));
+    const missingSkills = requiredSkills.filter((skill) => !skillIsPresent(skill, loadedNames));
 
     const checks: boolean[] = [missingSkills.length === 0];
     if (shouldNotActivateSkill) {
@@ -122,8 +93,7 @@ export const createExpectedSkillEvaluator = (): Evaluator => ({
     return {
       score: passed ? 1 : 0,
       metadata: {
-        expectedSkill,
-        expectedSkills,
+        expectedSkills: requiredSkills,
         missingSkills,
         shouldNotActivateSkill,
         loadedNames,

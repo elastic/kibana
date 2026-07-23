@@ -59,7 +59,7 @@ evaluate.describe(
               },
               metadata: {
                 query_intent: 'Soft opener — set up alerting',
-                expectedSkill: RULE_MANAGEMENT_SKILL_ID,
+                expectedSkills: [RULE_MANAGEMENT_SKILL_ID],
                 shouldNotActivateSkill: DETECTION_RULE_EDIT_SKILL_ID,
               },
             },
@@ -102,7 +102,7 @@ evaluate.describe(
                 },
                 metadata: {
                   query_intent: 'Multi-turn clarification — opener then V2 CPU rule',
-                  expectedSkill: RULE_MANAGEMENT_SKILL_ID,
+                  expectedSkills: [RULE_MANAGEMENT_SKILL_ID],
                   shouldNotActivateSkill: DETECTION_RULE_EDIT_SKILL_ID,
                 },
               },
@@ -149,7 +149,7 @@ evaluate.describe(
                   // The rule-management skill legitimately loads on turn 1, so we do not
                   // forbid it here. The signal under test is that the Security
                   // detection-rule-edit skill is activated once the user confirms Security.
-                  expectedSkill: DETECTION_RULE_EDIT_SKILL_ID,
+                  expectedSkills: [DETECTION_RULE_EDIT_SKILL_ID],
                 },
               },
             ],
@@ -201,9 +201,9 @@ evaluate.describe(
                 },
                 metadata: {
                   query_intent: 'UI entry point — Create with AI Agent guided setup then compose',
-                  expectedSkill: RULE_MANAGEMENT_SKILL_ID,
+                  expectedSkills: [RULE_MANAGEMENT_SKILL_ID],
                   shouldNotActivateSkill: DETECTION_RULE_EDIT_SKILL_ID,
-                  expectedToolId: ALERTING_TOOL_IDS.manageRule,
+                  expectedToolIds: [ALERTING_TOOL_IDS.manageRule],
                   expectRenderAttachment: true,
                   assertAttachment: (attachment) => {
                     expect(attachment.kind).toEqual('alert');
@@ -267,9 +267,9 @@ evaluate.describe(
                 metadata: {
                   query_intent:
                     'Fully-specified compose — CPU alert rule with index, threshold, grouping, duration',
-                  expectedSkill: RULE_MANAGEMENT_SKILL_ID,
+                  expectedSkills: [RULE_MANAGEMENT_SKILL_ID],
                   shouldNotActivateSkill: DETECTION_RULE_EDIT_SKILL_ID,
-                  expectedToolId: ALERTING_TOOL_IDS.manageRule,
+                  expectedToolIds: [ALERTING_TOOL_IDS.manageRule],
                   expectRenderAttachment: true,
                   assertAttachment: (attachment) => {
                     expect(attachment.kind).toEqual('alert');
@@ -333,12 +333,12 @@ evaluate.describe(
                 metadata: {
                   query_intent:
                     'Vague compose — admin console errors > 3 in 5m (clarify V2 ok, then discover + compose)',
-                  expectedSkill: RULE_MANAGEMENT_SKILL_ID,
+                  expectedSkills: [RULE_MANAGEMENT_SKILL_ID],
                   shouldNotActivateSkill: DETECTION_RULE_EDIT_SKILL_ID,
-                  expectedToolId: ALERTING_TOOL_IDS.manageRule,
                   // Index is only named colloquially, so after clarification the agent must
                   // discover it and inspect mappings before composing.
-                  expectedToolGroups: [[INDEX_MAPPING_TOOL_ID], [...INDEX_DISCOVERY_TOOL_IDS]],
+                  expectedToolIds: [ALERTING_TOOL_IDS.manageRule, INDEX_MAPPING_TOOL_ID],
+                  expectedAnyOfToolIds: INDEX_DISCOVERY_TOOL_IDS,
                   expectRenderAttachment: true,
                   assertAttachment: (attachment) => {
                     expect(attachment.kind).toEqual('alert');
