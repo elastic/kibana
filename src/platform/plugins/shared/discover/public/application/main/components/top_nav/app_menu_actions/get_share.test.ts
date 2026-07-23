@@ -65,6 +65,9 @@ describe('getShare', () => {
         isEsqlMode: true,
         adHocDataViews: [],
         authorizedRuleTypeIds: [],
+        actions: {
+          updateAdHocDataViews: jest.fn(),
+        },
       },
       currentTab: toolkit.getCurrentTab(),
       persistedDiscoverSession: undefined,
