@@ -181,21 +181,21 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await findings.index.add(dataOldKspm);
 
         await findings.navigateToLatestFindingsPage();
-        await pageObjects.header.waitUntilLoadingHasFinished();
+        await findings.notInstalledCSP.getElement();
         expect(await findings.isLatestFindingsTableThere()).to.be(false);
       });
       it('returns no Findings CSPM', async () => {
         await findings.index.add(dataOldCspm);
 
         await findings.navigateToLatestFindingsPage();
-        await pageObjects.header.waitUntilLoadingHasFinished();
+        await findings.notInstalledCSP.getElement();
         expect(await findings.isLatestFindingsTableThere()).to.be(false);
       });
       it('returns no Findings CNVM', async () => {
         await findings.vulnerabilitiesIndex.add(dataOldCnvm);
 
         await findings.navigateToLatestVulnerabilitiesPage();
-        await pageObjects.header.waitUntilLoadingHasFinished();
+        await findings.notInstalledVulnerabilities.getElement();
         expect(await findings.isLatestFindingsTableThere()).to.be(false);
       });
       it('returns data grid with only data within retention KSPM', async () => {
