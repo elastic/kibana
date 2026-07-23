@@ -23,16 +23,24 @@ const unsupportedInNextChrome = (method: string): never => {
 export class GlobalNavService extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly find = this.ctx.getService('find');
+  private readonly retry = this.ctx.getService('retry');
+  private readonly config = this.ctx.getService('config');
+  private readonly findTimeout = this.config.get('timeouts.find');
 
   /**
    * Visible page title from chrome-next `appHeaderTitle` or legacy `EuiPageHeader` h1.
    */
   public async getPageTitle(): Promise<string> {
-    if (await this.testSubjects.exists('appHeaderTitle', { timeout: 500 })) {
-      return await this.testSubjects.getVisibleText('appHeaderTitle');
-    }
-    const titleElement = await this.find.byCssSelector('.euiPageHeader h1.euiTitle');
-    return await titleElement.getVisibleText();
+    const legacyTitleSelector = '.euiPageHeader h1.euiTitle';
+    return await this.retry.try(async () => {
+      if (await this.testSubjects.exists('appHeaderTitle', { timeout: 0 })) {
+        return await this.testSubjects.getVisibleText('appHeaderTitle');
+      }
+      if (await this.find.existsByCssSelector(legacyTitleSelector, 0)) {
+        return await (await this.find.byCssSelector(legacyTitleSelector)).getVisibleText();
+      }
+      throw new Error('No page title has rendered');
+    });
   }
 
   /**
@@ -50,10 +58,7 @@ export class GlobalNavService extends FtrService {
       .map((subj) => `[data-test-subj="${subj}"]`)
       .join(',');
 
-    try {
-      await this.find.byCssSelector(anyHeaderSelector, 2000);
-    } catch {
-      // No recognized header rendered (e.g. a chrome-less page); retain classic behavior.
+    if (!(await this.find.existsByCssSelector(anyHeaderSelector, this.findTimeout))) {
       return false;
     }
 
