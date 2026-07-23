@@ -12,6 +12,7 @@ import {
   arrayToJsonFormatter,
   objectToJsonFormatter,
   stringToJsonFormatter,
+  omitDefaultFormatter,
 } from './formatting_utils';
 
 import { tlsFormatters } from './tls_formatters';
@@ -36,7 +37,9 @@ export const throttlingFormatter: Formatter = (fields) => {
 
 export const browserFormatters: BrowserFormatMap = {
   [ConfigKey.SOURCE_PROJECT_CONTENT]: null,
-  [ConfigKey.SCREENSHOTS]: null,
+  // 'on' matches Heartbeat's default (elastic/kibana#241818).
+  [ConfigKey.SCREENSHOTS]: omitDefaultFormatter('on'),
+  // ignore_https_errors (default false) is dropped by the template's {{#if}} guard.
   [ConfigKey.IGNORE_HTTPS_ERRORS]: null,
   [ConfigKey.PLAYWRIGHT_OPTIONS]: null,
   [ConfigKey.TEXT_ASSERTION]: stringToJsonFormatter,

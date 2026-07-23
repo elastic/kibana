@@ -425,7 +425,7 @@ describe('formatSyntheticsPolicy', () => {
                 },
                 screenshots: {
                   type: 'text',
-                  value: 'on',
+                  value: null,
                 },
                 'service.name': {
                   type: 'text',
@@ -542,7 +542,7 @@ describe('formatSyntheticsPolicy', () => {
                 },
                 'check.request.method': {
                   type: 'text',
-                  value: 'GET',
+                  value: null,
                 },
                 'check.response.body.negative': {
                   type: 'yaml',
@@ -578,7 +578,7 @@ describe('formatSyntheticsPolicy', () => {
                 },
                 max_redirects: {
                   type: 'integer',
-                  value: '0',
+                  value: null,
                 },
                 'monitor.project.id': {
                   type: 'text',
@@ -604,7 +604,7 @@ describe('formatSyntheticsPolicy', () => {
                 },
                 'response.include_body': {
                   type: 'text',
-                  value: 'on_error',
+                  value: null,
                 },
                 'response.include_headers': {
                   type: 'bool',
@@ -652,7 +652,7 @@ describe('formatSyntheticsPolicy', () => {
                 },
                 timeout: {
                   type: 'text',
-                  value: '16s',
+                  value: null,
                 },
                 type: {
                   type: 'text',
@@ -973,6 +973,53 @@ describe('formatSyntheticsPolicy', () => {
       },
       policy_ids: ['404812e0-90e1-11ed-8111-f7f9cad30b61'],
     });
+  });
+  it('keeps http fields that differ from the Heartbeat default', () => {
+    const { formattedPolicy } = formatSyntheticsPolicy(
+      testNewPolicy,
+      MonitorTypeEnum.HTTP,
+      {
+        ...httpPolicy,
+        [ConfigKey.REQUEST_METHOD_CHECK]: 'POST',
+        [ConfigKey.MAX_REDIRECTS]: '5',
+        [ConfigKey.RESPONSE_BODY_INDEX]: 'always',
+        [ConfigKey.TIMEOUT]: '30',
+      },
+      gParams,
+      []
+    );
+
+    const vars = formattedPolicy.inputs
+      .find((input) => input.type === 'synthetics/http')
+      ?.streams.find((stream) => stream.data_stream.dataset === 'http')?.vars;
+
+    expect(vars?.['check.request.method'].value).toBe('POST');
+    expect(vars?.max_redirects.value).toBe('5');
+    expect(vars?.['response.include_body'].value).toBe('always');
+    expect(vars?.timeout.value).toBe('30s');
+  });
+
+  it('omits http fields that equal the Heartbeat default', () => {
+    const { formattedPolicy } = formatSyntheticsPolicy(
+      testNewPolicy,
+      MonitorTypeEnum.HTTP,
+      httpPolicy,
+      gParams,
+      []
+    );
+
+    const vars = formattedPolicy.inputs
+      .find((input) => input.type === 'synthetics/http')
+      ?.streams.find((stream) => stream.data_stream.dataset === 'http')?.vars;
+
+    // Defaults are dropped so the agent falls back to its own defaults.
+    expect(vars?.['check.request.method'].value).toBeNull();
+    expect(vars?.max_redirects.value).toBeNull();
+    expect(vars?.['response.include_body'].value).toBeNull();
+    expect(vars?.timeout.value).toBeNull();
+
+    // response.include_headers (bool default true) is intentionally still sent.
+    expect(vars?.['response.include_headers'].value).toBe(true);
   });
 });
 

@@ -6,8 +6,8 @@
  */
 
 import type { TCPFields } from '../../../../common/runtime_types';
-import { ConfigKey } from '../../../../common/runtime_types';
-import { objectToJsonFormatter } from './formatting_utils';
+import { ConfigKey, Mode } from '../../../../common/runtime_types';
+import { objectToJsonFormatter, omitDefaultFormatter } from './formatting_utils';
 import { tlsFormatters } from './tls_formatters';
 import { stringToJsonFormatter } from './formatting_utils';
 import type { Formatter } from './common_formatters';
@@ -20,13 +20,16 @@ export const tcpFormatters: TCPFormatMap = {
   ...tlsFormatters,
   [ConfigKey.METADATA]: objectToJsonFormatter,
   [ConfigKey.HOSTS]: stringToJsonFormatter,
+  // proxy_use_local_resolver (default false) is dropped by the template's
+  // {{#if}} guard, so no formatter is needed here.
   [ConfigKey.PROXY_USE_LOCAL_RESOLVER]: null,
   [ConfigKey.RESPONSE_RECEIVE_CHECK]: stringToJsonFormatter,
   [ConfigKey.REQUEST_SEND_CHECK]: stringToJsonFormatter,
   [ConfigKey.PROXY_URL]: stringToJsonFormatter,
   [ConfigKey.PORT]: stringToJsonFormatter,
   [ConfigKey.URLS]: stringToJsonFormatter,
-  [ConfigKey.MODE]: null,
+  // 'any' matches Heartbeat's default (elastic/kibana#241818).
+  [ConfigKey.MODE]: omitDefaultFormatter(Mode.ANY),
   [ConfigKey.IPV4]: null,
   [ConfigKey.IPV6]: null,
 };
