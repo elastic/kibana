@@ -50,6 +50,7 @@ jest.mock('../agent_policy', () => ({
 import * as AgentService from '../agents';
 
 import {
+  deleteVersionSpecificFleetServerPolicies,
   getAgentVersionsForVersionSpecificPolicies,
   getVersionSpecificPolicies,
   reassignAgentsFromVersionSpecificPolicies,
@@ -276,7 +277,7 @@ describe('reassignAgentsFromVersionSpecificPolicies', () => {
     esClient.deleteByQuery.mockResolvedValue({});
   });
 
-  it('reassigns agents on variant policies back to the base policy and deletes stale variant docs', async () => {
+  it('reassigns agents on variant policies back to the base policy', async () => {
     getAgentsByKueryMock.mockResolvedValue({ total: 3 });
 
     await reassignAgentsFromVersionSpecificPolicies(soClient, esClient, 'policy1');
@@ -292,24 +293,41 @@ describe('reassignAgentsFromVersionSpecificPolicies', () => {
       { kuery: 'policy_id:policy1#*', showInactive: false },
       'policy1'
     );
-    expect(esClient.deleteByQuery).toHaveBeenCalledWith(
-      expect.objectContaining({
-        index: '.fleet-policies',
-        query: { prefix: { policy_id: 'policy1#' } },
-      })
-    );
   });
 
-  it('does not reassign when there are no agents on variant policies but still cleans up docs', async () => {
+  it('does not reassign when there are no agents on variant policies', async () => {
     getAgentsByKueryMock.mockResolvedValue({ total: 0 });
 
     await reassignAgentsFromVersionSpecificPolicies(soClient, esClient, 'policy1');
 
     expect(reassignAgentsMock).not.toHaveBeenCalled();
+  });
+
+  it('does not delete variant documents (deletion is owned by the periodic sweep)', async () => {
+    getAgentsByKueryMock.mockResolvedValue({ total: 3 });
+
+    await reassignAgentsFromVersionSpecificPolicies(soClient, esClient, 'policy1');
+
+    expect(esClient.deleteByQuery).not.toHaveBeenCalled();
+  });
+});
+
+describe('deleteVersionSpecificFleetServerPolicies', () => {
+  const esClient = { deleteByQuery: jest.fn() } as any;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    esClient.deleteByQuery.mockResolvedValue({});
+  });
+
+  it('deletes the variant documents for the parent policy without forcing a refresh', async () => {
+    await deleteVersionSpecificFleetServerPolicies(esClient, 'policy1');
+
     expect(esClient.deleteByQuery).toHaveBeenCalledWith(
       expect.objectContaining({
         index: '.fleet-policies',
         query: { prefix: { policy_id: 'policy1#' } },
+        refresh: false,
       })
     );
   });

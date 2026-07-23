@@ -2151,6 +2151,38 @@ describe('Agent policy', () => {
       );
     });
 
+    it('does not fail the update when reassigning agents from version-specific policies throws', async () => {
+      jest.spyOn(agentPolicyService, 'requireUniqueName').mockResolvedValue(undefined);
+      mockedAppContextService.getExperimentalFeatures.mockReturnValue({
+        enableVersionSpecificPolicies: true,
+      } as any);
+      (reassignAgentsFromVersionSpecificPolicies as jest.Mock).mockRejectedValueOnce(
+        new Error('transient ES failure')
+      );
+      const soClient = getAgentPolicyCreateMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      soClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            attributes: { has_agent_version_conditions: true },
+            id: 'agent-policy',
+            type: 'mocked',
+            references: [],
+          },
+        ],
+      });
+
+      await expect(
+        agentPolicyService.update(soClient, esClient, 'agent-policy', {
+          name: 'updated',
+          namespace: 'default',
+        })
+      ).resolves.not.toThrow();
+
+      expect(reassignAgentsFromVersionSpecificPolicies).toHaveBeenCalled();
+    });
+
     it('does not reassign agents when version conditions were never present', async () => {
       jest.spyOn(agentPolicyService, 'requireUniqueName').mockResolvedValue(undefined);
       mockedAppContextService.getExperimentalFeatures.mockReturnValue({

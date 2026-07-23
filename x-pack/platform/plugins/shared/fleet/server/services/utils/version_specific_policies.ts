@@ -95,14 +95,18 @@ export async function getVersionSpecificPolicies(
 }
 
 /**
- * Tear down the version-specific policy variants for a parent agent policy that no longer
- * requires them: reassign any agents still on a variant policy (`<parentId>#<version>`) back to
- * the base policy so they keep syncing, then delete the now-stale variant `.fleet-policies`
- * documents.
+ * Reassign any agents still on a version-specific variant policy (`<parentId>#<version>`) of a
+ * parent that no longer requires them back to the base policy, so they keep syncing.
  *
  * Without this, removing the integration/input that required version-specific policies leaves
  * agents assigned to a variant policy that is never updated again, so they get stuck reporting an
  * outdated policy. See https://github.com/elastic/kibana/issues/276294
+ *
+ * This is the inline fast path invoked from the agent policy update, and is scoped to the caller's
+ * space via `soClient`. It intentionally does NOT delete the variant `.fleet-policies` documents:
+ * deletion is global (across spaces) and owned by the periodic sweep, which first reassigns agents
+ * across every space. Deleting here would strand agents in other spaces that still reference the
+ * variant document until the next sweep run.
  */
 export async function reassignAgentsFromVersionSpecificPolicies(
   soClient: SavedObjectsClientContract,
@@ -117,19 +121,18 @@ export async function reassignAgentsFromVersionSpecificPolicies(
     showInactive: false,
     perPage: 0,
   });
-  if (total > 0) {
-    logger.info(
-      `Reassigning ${total} agents from version-specific policies of ${parentPolicyId} back to the base policy`
-    );
-    await AgentService.reassignAgents(
-      soClient,
-      esClient,
-      { kuery: variantKuery, showInactive: false },
-      parentPolicyId
-    );
+  if (total === 0) {
+    return;
   }
-
-  await deleteVersionSpecificFleetServerPolicies(esClient, parentPolicyId);
+  logger.info(
+    `Reassigning ${total} agents from version-specific policies of ${parentPolicyId} back to the base policy`
+  );
+  await AgentService.reassignAgents(
+    soClient,
+    esClient,
+    { kuery: variantKuery, showInactive: false },
+    parentPolicyId
+  );
 }
 
 /**
@@ -144,8 +147,14 @@ export async function deleteVersionSpecificFleetServerPolicies(
   await esClient.deleteByQuery({
     index: AGENT_POLICY_INDEX,
     ignore_unavailable: true,
+    // TODO(https://github.com/elastic/kibana/pull/279716): a `prefix` query is rejected when
+    // `search.allow_expensive_queries` is disabled. Once `policy_base_id` is indexed on
+    // `.fleet-policies`, match variants with `policy_base_id: parentPolicyId` AND
+    // `must_not policy_id: parentPolicyId` (a bare `policy_base_id` term also matches the base
+    // policy document, which must be kept), reusing buildPolicyBaseId* helpers for the rollout fallback.
     query: { prefix: { policy_id: `${parentPolicyId}${AGENT_POLICY_VERSION_SEPARATOR}` } },
-    refresh: true,
+    // Cleanup only; no reader needs the deletion visible synchronously, so avoid forcing a refresh.
+    refresh: false,
   });
 }
 

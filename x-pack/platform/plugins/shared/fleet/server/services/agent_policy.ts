@@ -350,7 +350,17 @@ class AgentPolicyService {
       logger.debug(
         `Agent policy [${id}] no longer has agent version conditions, reassigning agents from version-specific policies back to the base policy`
       );
-      await reassignAgentsFromVersionSpecificPolicies(soClient, esClient, id);
+      // Swallow and log: the SO update, revision bump, and deploy have already committed above, so
+      // a transient failure here must not fail the whole update (a retry would also skip this
+      // branch, since has_agent_version_conditions is now false). The periodic sweep is the
+      // fallback that recovers any agents this inline pass misses.
+      try {
+        await reassignAgentsFromVersionSpecificPolicies(soClient, esClient, id);
+      } catch (error) {
+        logger.error(
+          `Failed to reassign agents from version-specific policies for agent policy [${id}]: ${error}`
+        );
+      }
     }
 
     logger.debug(
