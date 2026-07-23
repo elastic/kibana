@@ -16,8 +16,6 @@ export const servers: ScoutServerConfig = {
     ...evalsAgentBuilderConfig.kbnTestServer,
     serverArgs: [
       ...evalsAgentBuilderConfig.kbnTestServer.serverArgs,
-      /* The rule-management skill is gated on this advanced setting (defaults to
-       * false), so the xpack.alerting_v2.enabled plugin flag alone is not enough. */
       '--uiSettings.overrides.alerting:v2:enabled=true',
       /* Disable tracing redaction so exported spans carry real prompt/response
        * content when inspecting eval runs in Phoenix or Kibana's Tracing UI. */
