@@ -122,7 +122,7 @@ test.describe(
         // header (`appHeaderTitle`); only one renders depending on the casesRedesign flag.
         await expect(
           page.testSubj.locator('cases-all-title').or(page.testSubj.locator('appHeaderTitle'))
-        ).toBeVisible({
+        ).toHaveText('Cases', {
           timeout: OBSERVABILITY_SPA_SHELL_TIMEOUT_MS,
         });
       });

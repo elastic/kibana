@@ -180,7 +180,9 @@ test.describe(
       await test.step('Open Cases list', async () => {
         await nav.openMoreMenu();
         await nav.navItemInMoreByDeepLinkId('observability-overview:cases').click();
-        await expect(page.testSubj.locator('cases-all-title')).toBeVisible();
+        await expect(
+          page.testSubj.locator('cases-all-title').or(page.testSubj.locator('appHeaderTitle'))
+        ).toHaveText('Cases');
       });
 
       await test.step('Create case', async () => {
@@ -192,7 +194,11 @@ test.describe(
         await nav.openMoreMenu();
         await nav.navItemInMoreByDeepLinkId('observability-overview:cases').click();
         await page.testSubj.click('configure-case-button');
-        await expect(page.testSubj.locator('case-configure-title')).toBeVisible();
+        await expect(
+          page.testSubj
+            .locator('case-configure-title')
+            .or(page.testSubj.locator('cases-redesign-settings-panel'))
+        ).toBeVisible();
       });
     });
 
