@@ -474,9 +474,8 @@ const getDiscoveryQueriesRoute = createServerRoute({
       searchMode,
     } = params.query;
 
-    const resolvedStreamNames = await resolveStreamNames(
-      streamNames,
-      () => scopedClients.streamsClient.listStreams()
+    const resolvedStreamNames = await resolveStreamNames(streamNames, () =>
+      scopedClients.streamsClient.listStreams()
     );
 
     const [kiClient, { alertsReader }] = await Promise.all([
@@ -552,9 +551,8 @@ const getDiscoveryQueriesOccurrencesRoute = createServerRoute({
 
     const { from, to, bucketSize, query, streamNames } = params.query;
 
-    const resolvedStreamNames = await resolveStreamNames(
-      streamNames,
-      () => scopedClients.streamsClient.listStreams()
+    const resolvedStreamNames = await resolveStreamNames(streamNames, () =>
+      scopedClients.streamsClient.listStreams()
     );
 
     const [kiClient, { alertsReader }] = await Promise.all([
