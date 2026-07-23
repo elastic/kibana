@@ -172,6 +172,7 @@ export const RuleDetails = () => {
                       <EuiButtonIcon
                         iconType="copyClipboard"
                         size="xs"
+                        color="text"
                         onClick={copy}
                         isDisabled={tags.length === 0}
                         data-test-subj="ruleDetailsTagsCopyButton"
