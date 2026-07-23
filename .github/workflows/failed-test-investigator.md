@@ -118,6 +118,15 @@ safe-outputs:
       - ai:fix-flaky
     max: 5
     target: *issue_number
+  # Lets the agent close the issue when the verdict is that there is nothing to
+  # fix in the repository (see "Close the issue when there is nothing to fix").
+  # Closing is safe: the failed test reporter reopens the issue automatically if
+  # the test fails again.
+  close-issue:
+    max: 1
+    target: *issue_number
+    required-labels: [failed-test]
+    state-reason: not_planned
 
 strict: false
 timeout-minutes: 35
@@ -208,6 +217,23 @@ When you set it, the comment's `#### Additional context` → "Open questions" bu
 
 This issue may have been investigated before (for example, it was reopened after a prior verdict). Treat any pre-existing `failure:*` classification, `failure:ai-fixable`, `failure:fix-did-not-hold`, `failure:insufficient-data`, or `ai:fix-flaky` label as stale: remove the ones that no longer match your fresh verdict, keep (or add) the single correct classification, `failure:ai-fixable` only if a fix is still available, `failure:fix-did-not-hold` only if a merged fix for this same failure still demonstrably did not hold, and `failure:insufficient-data` only if data is still the blocker. Clear a lingering `ai:fix-flaky` only when your fresh verdict is **not** fixable; when it is, keep (or add) it per "Automatic fix request". If the existing labels already match your verdict, leave them as they are.
 
+## Close the issue when there is clearly nothing to fix
+
+When the verdict is that no change to this repository is needed, close the issue with the `close-issue` tool. Close only when **all** of the following hold:
+
+- the classification is `ci-environment` and `confidence` is `medium` or `high`: the failure came from a transient, external, or one-off cause with nothing test- or product-related to fix;
+- the failure is not recurring: a CI-environment failure that keeps hitting the same test or suite needs escalation, not closing — leave it open;
+- you did not add `failure:ai-fixable` or `ai:fix-flaky`, and no fix PR referencing this issue is open.
+
+Call the tool at most once, only after posting the verdict comment, and do not attach a closing comment to it. Instead, make the close visible in the verdict comment with a tip block right after (and outside) the `<details>` block:
+
+```markdown
+> [!TIP]
+> Closing this issue: {one-sentence reason}. It will reopen automatically if the test fails again.
+```
+
+When in doubt, leave the issue open.
+
 ## Attribution
 
 - Mention a commit (or small set of commits, last 3 months) only when evidence strongly implicates it.
@@ -226,7 +252,7 @@ Post exactly one comment on the issue. Optimize for a reviewer who spends ~30 se
 
 Follow the format below exactly. Do not create standalone sections for "what the test does" "evidence," "where the test ran," or "failure screenshot". Integrate these details seamlessly into the sections below if they add value.
 
-The comment has different parts: a compact header that stays visible on the issue page (one `###` headline + one summary sentence), and a `<details>` block that hides everything else, as well as a tip block about the automatically requested fix (it is only posted under certain conditions, more info below).
+The comment has different parts: a compact header that stays visible on the issue page (one `###` headline + one summary sentence), and a `<details>` block that hides everything else, as well as a tip block about the automatically requested fix or an auto-close (it is only posted under certain conditions, more info below).
 
 **Inside the `<details>` block, every section starts with `#### Section name` on its own line** (e.g., `#### Proposed fix`, `#### Root cause & evidence`).
 

@@ -8,43 +8,26 @@
 import { EuiFlyoutHeader, EuiLink, EuiSpacer, EuiTab, EuiTabs, EuiTitle } from '@elastic/eui';
 import { EBT_CLICK_ACTIONS, getEbtProps } from '@kbn/ebt-click';
 import React from 'react';
-import type { Environment } from '../../../../../common/environment_rt';
-import type { ServiceNodeData } from '../../../../../common/service_map';
 import { SERVICE_FLYOUT_EBT_ACTIONS, SERVICE_FLYOUT_EBT_ELEMENTS } from '../ebt_constants';
 import { ServiceBadges } from './service_badges';
-import { useServiceLinks } from '../hooks/use_service_links';
 import { SERVICE_FLYOUT_TABS, type ServiceFlyoutTabId } from '..';
+import { useServiceFlyoutLinks } from '../hooks/use_service_flyout_links';
 
 interface ServiceFlyoutHeaderProps {
-  service: ServiceNodeData;
   title: string;
   titleId: string;
-  environment: Environment;
-  kuery: string;
-  rangeFrom: string;
-  rangeTo: string;
   selectedTabId: ServiceFlyoutTabId;
   onSelectedTabIdChange: (tabId: ServiceFlyoutTabId) => void;
 }
 
 export function ServiceFlyoutHeader({
-  service,
   title,
   titleId,
-  environment,
-  kuery,
-  rangeFrom,
-  rangeTo,
   selectedTabId,
   onSelectedTabIdChange,
 }: ServiceFlyoutHeaderProps) {
-  const { overviewHref: serviceOverviewHref } = useServiceLinks({
-    serviceName: service.id,
-    rangeFrom,
-    rangeTo,
-    environment,
-    kuery,
-  });
+  const { apm } = useServiceFlyoutLinks();
+  const serviceOverviewHref = apm.overviewTab;
 
   return (
     <EuiFlyoutHeader>
@@ -63,13 +46,7 @@ export function ServiceFlyoutHeader({
         </h2>
       </EuiTitle>
       <EuiSpacer size="m" />
-      <ServiceBadges
-        service={service}
-        environment={environment}
-        kuery={kuery}
-        rangeFrom={rangeFrom}
-        rangeTo={rangeTo}
-      />
+      <ServiceBadges />
       <EuiSpacer size="s" />
       <EuiTabs data-test-subj="serviceFlyoutTabs">
         {SERVICE_FLYOUT_TABS.map(({ id, label }) => (
