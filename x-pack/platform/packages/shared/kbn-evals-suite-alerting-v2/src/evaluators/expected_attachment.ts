@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
+import { getLatestVersion, type VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import type { Evaluator, TaskOutput } from '@kbn/evals';
 
 export const RENDER_ATTACHMENT_TAG_RE =
@@ -23,6 +23,22 @@ export type ExpectRenderAttachment = readonly string[];
 export type ExpectAttachmentDataFn = (
   attachments: VersionedAttachment[]
 ) => void | Promise<void>;
+
+/**
+ * Latest current-version data among attachments of the given type
+ * (filters by type, then takes the last match).
+ */
+export const getLatestAttachmentData = <T>(
+  attachments: VersionedAttachment[],
+  type: string
+): T | undefined => {
+  const ofType = attachments.filter((attachment) => attachment.type === type);
+  const latest = ofType[ofType.length - 1];
+  if (!latest) {
+    return undefined;
+  }
+  return getLatestVersion<T>(latest as VersionedAttachment<string, T>)?.data;
+};
 
 export const parseRenderAttachmentRef = (message: string): RenderAttachmentRef | null => {
   return parseAllRenderAttachmentRefs(message)[0] ?? null;

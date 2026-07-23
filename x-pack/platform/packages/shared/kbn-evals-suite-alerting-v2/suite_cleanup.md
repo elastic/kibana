@@ -14,20 +14,21 @@ Not a feature backlog — see `eval_backlog.md` for new behaviours to evaluate.
   Trimmed specs to keep judge-only behaviour (disambiguation quality, context,
   proactive offers, persistence messaging, query nuances not covered by CODE).
 
-- [ ] **Action-policy has no `expectAttachmentData`**
-  It only checks rendered types. Policy/workflow/rule *shape* (UUID destination,
-  `rule.id` matcher, etc.) is entirely on the LLM judge. Weakest structural
-  coverage in the suite.
+- [x] **Action-policy has no `expectAttachmentData`**
+  CODE asserts: matcher `rule.id: "<id>"`, destination =
+  `{ type: 'workflow', id: <workflowAttachment.workflowId> }`, and workflow
+  `triggers: [{ type: 'manual' }]`. Grouping / throttle remain on the LLM judge.
 
 - [ ] **Even/odd message role assumption**
   `getAssistantMessages` and low-score transcript formatting assume
   `messages[i]` is user/assistant alternating. If the chat client ever returns a
-  different shape, render scoring and logs go wrong silently.
+  different shape, render scoring and logs go wrong silently. (Converse has no
+  roles; real history is GET conversation `rounds` — revisit later.)
 
-- [ ] **`expectAttachmentData` picks “latest rule” ad hoc in the spec**
-  Specs have a local `getLatestRuleAttachmentData` helper. Fine for now, but
-  easy to get wrong once multiple rule drafts exist (edits, retries). No shared
-  helper; no “rendered version” preference anymore.
+- [x] **`expectAttachmentData` picks “latest rule” ad hoc in the spec**
+  Shared `getLatestAttachmentData(attachments, type)` lives in
+  `expected_attachment.ts`. Still “last of type” rather than rendered-version
+  preference — fine until multi-draft cases show up.
 
 - [ ] **Skip vs throw inconsistency**
   Empty `criteria` throws; empty `expectRenderAttachment: []` throws; missing

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { getLatestVersion, type VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import {
   getBreachEsqlQuery,
   RULE_ATTACHMENT_TYPE,
@@ -24,21 +23,7 @@ import {
 } from '../../src/constants';
 import type { EvaluateDataset } from '../../src/evaluate_dataset';
 import { createEvaluateDataset } from '../../src/evaluate_dataset';
-
-const getLatestRuleAttachmentData = (
-  attachments: VersionedAttachment[]
-): RuleAttachmentData | undefined => {
-  const ruleAttachments = attachments.filter(
-    (attachment) => attachment.type === RULE_ATTACHMENT_TYPE
-  );
-  const latest = ruleAttachments[ruleAttachments.length - 1];
-  if (!latest) {
-    return undefined;
-  }
-  return getLatestVersion<RuleAttachmentData>(
-    latest as VersionedAttachment<string, RuleAttachmentData>
-  )?.data;
-};
+import { getLatestAttachmentData } from '../../src/evaluators/expected_attachment';
 
 const evaluate = base.extend<{ evaluateDataset: EvaluateDataset }, {}>({
   evaluateDataset: [
@@ -204,7 +189,10 @@ evaluate.describe(
                   expectedToolIds: [ALERTING_TOOL_IDS.manageRule],
                   expectRenderAttachment: [RULE_ATTACHMENT_TYPE],
                   expectAttachmentData: (attachments) => {
-                    const attachment = getLatestRuleAttachmentData(attachments);
+                    const attachment = getLatestAttachmentData<RuleAttachmentData>(
+                      attachments,
+                      RULE_ATTACHMENT_TYPE
+                    );
                     expect(attachment).toBeDefined();
                     expect(attachment!.kind).toEqual('alert');
                     expect(attachment!.grouping?.fields).toEqual(
@@ -269,7 +257,10 @@ evaluate.describe(
                   expectedToolIds: [ALERTING_TOOL_IDS.manageRule],
                   expectRenderAttachment: [RULE_ATTACHMENT_TYPE],
                   expectAttachmentData: (attachments) => {
-                    const attachment = getLatestRuleAttachmentData(attachments);
+                    const attachment = getLatestAttachmentData<RuleAttachmentData>(
+                      attachments,
+                      RULE_ATTACHMENT_TYPE
+                    );
                     expect(attachment).toBeDefined();
                     expect(attachment!.kind).toEqual('alert');
                     expect(attachment!.grouping?.fields).toEqual(
@@ -335,7 +326,10 @@ evaluate.describe(
                   expectedAnyOfToolIds: INDEX_DISCOVERY_TOOL_IDS,
                   expectRenderAttachment: [RULE_ATTACHMENT_TYPE],
                   expectAttachmentData: (attachments) => {
-                    const attachment = getLatestRuleAttachmentData(attachments);
+                    const attachment = getLatestAttachmentData<RuleAttachmentData>(
+                      attachments,
+                      RULE_ATTACHMENT_TYPE
+                    );
                     expect(attachment).toBeDefined();
                     expect(attachment!.kind).toEqual('alert');
                     expect(attachment!.schedule?.lookback).toEqual('5m');

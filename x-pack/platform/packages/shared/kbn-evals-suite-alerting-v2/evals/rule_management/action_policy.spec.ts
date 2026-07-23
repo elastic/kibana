@@ -5,12 +5,16 @@
  * 2.0.
  */
 
-import { tags } from '@kbn/scout';
-import { evaluate as base } from '../../src/evaluate';
 import {
   ACTION_POLICY_ATTACHMENT_TYPE,
   RULE_ATTACHMENT_TYPE,
+  type ActionPolicyAttachmentData,
+  type RuleAttachmentData,
 } from '@kbn/alerting-v2-schemas';
+import { expect } from '@playwright/test';
+import { tags } from '@kbn/scout';
+import { parse as parseYaml } from 'yaml';
+import { evaluate as base } from '../../src/evaluate';
 import {
   ALERTING_TOOL_IDS,
   DETECTION_RULE_EDIT_SKILL_ID,
@@ -21,6 +25,7 @@ import {
 } from '../../src/constants';
 import type { EvaluateDataset } from '../../src/evaluate_dataset';
 import { createEvaluateDataset } from '../../src/evaluate_dataset';
+import { getLatestAttachmentData } from '../../src/evaluators/expected_attachment';
 
 const evaluate = base.extend<{ evaluateDataset: EvaluateDataset }, {}>({
   evaluateDataset: [
@@ -63,8 +68,7 @@ evaluate.describe(
                   criteria: [
                     'The first-turn response composes the rule AND proactively asks whether the user wants to set up (email) notifications for it — proactive means the assistant raises notifications itself; merely complying after the user brings it up on turn 2 does not satisfy this.',
                     'The assistant does not claim that no email connector is configured — one exists in the environment and should be discovered (e.g. via platform.workflows.get_connectors).',
-                    'The action policy destination references the workflow ID passed to generate_workflow (a UUID), not the workflow attachment id and not a connector id.',
-                    'The action policy is scoped to the composed rule via a rule.id matcher (or the assistant explicitly explains a deliberately broader scope), with per_episode grouping and on_status_change throttle.',
+                    'The action policy uses per_episode grouping and on_status_change throttle.',
                     'The final manage_action_policy call ends with a validate operation, and validation succeeds (after corrective retries if needed).',
                     'The assistant never claims the rule, workflow, or action policy has been created, saved, or activated — it directs the user to save in order Rule → Workflow → Action Policy via the attachment action buttons.',
                   ],
@@ -86,6 +90,39 @@ evaluate.describe(
                     WORKFLOW_YAML_ATTACHMENT_TYPE,
                     ACTION_POLICY_ATTACHMENT_TYPE,
                   ],
+                  expectAttachmentData: (attachments) => {
+                    const rule = getLatestAttachmentData<RuleAttachmentData>(
+                      attachments,
+                      RULE_ATTACHMENT_TYPE
+                    );
+                    const workflow = getLatestAttachmentData<{
+                      workflowId?: string;
+                      yaml?: string;
+                    }>(attachments, WORKFLOW_YAML_ATTACHMENT_TYPE);
+                    const actionPolicy = getLatestAttachmentData<ActionPolicyAttachmentData>(
+                      attachments,
+                      ACTION_POLICY_ATTACHMENT_TYPE
+                    );
+
+                    const ruleId = rule?.id;
+                    const workflowId = workflow?.workflowId;
+
+                    expect(ruleId).toEqual(expect.any(String));
+                    expect(workflowId).toEqual(expect.any(String));
+                    expect(workflow?.yaml).toEqual(expect.any(String));
+                    expect(actionPolicy).toBeDefined();
+                    expect(actionPolicy.matcher).toBe(`rule.id: "${ruleId}"`);
+                    expect(actionPolicy.destinations).toEqual([
+                      { type: 'workflow', id: workflowId },
+                    ]);
+
+                    const parsedWorkflow = parseYaml(workflow!.yaml!) as {
+                      triggers?: Array<{ type?: string }>;
+                    };
+                    expect(parsedWorkflow.triggers?.map((trigger) => trigger.type)).toEqual([
+                      'manual',
+                    ]);
+                  },
                 },
               },
             ],
