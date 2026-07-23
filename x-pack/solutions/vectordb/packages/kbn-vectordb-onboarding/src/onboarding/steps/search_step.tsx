@@ -40,8 +40,7 @@ export const SearchStep = () => {
       onComplete={() => navigate('/')}
     >
       <ApiStep
-        snippets={api.snippets}
-        consoleRequest={api.request}
+        tabs={api.tabs}
         consoleComment={api.consoleComment}
         docsPanel={docsPanel}
         pills={pills}

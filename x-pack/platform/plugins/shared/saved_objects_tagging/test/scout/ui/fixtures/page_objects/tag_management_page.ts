@@ -31,6 +31,11 @@ export class TagManagementPage {
     this.assignFlyout = new TagAssignFlyout(page);
   }
 
+  async goto() {
+    await this.page.gotoApp('management/kibana/tags');
+    await this.tagsTable.waitForLoaded();
+  }
+
   async editTag(tagName: string) {
     const row = this.tagsTable.rowByName(tagName);
     await row.locator('[data-test-subj="tagsTableAction-edit"]').click();
