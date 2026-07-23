@@ -5,11 +5,5 @@
  * 2.0.
  */
 
-/**
- * Cross-domain route response `description` values.
- * Domain-specific descriptions live next to that domain's routes
- * (for example `routes/rules/rule_response_descriptions.ts`).
- */
-
 export const INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION =
   'Indicates an invalid schema or parameters.';
