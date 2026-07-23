@@ -22,6 +22,7 @@ module.exports = {
   ],
   reporters: [
     'default',
+    '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/agent_metrics_reporter.js',
     [
       '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/junit_reporter',
       {
