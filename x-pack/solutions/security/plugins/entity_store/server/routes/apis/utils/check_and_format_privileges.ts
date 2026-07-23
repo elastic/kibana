@@ -24,13 +24,7 @@ export const Privileges = z.object({
   has_all_required: z.boolean(),
   has_read_permissions: z.boolean().optional(),
   has_write_permissions: z.boolean().optional(),
-  /**
-   * Whether the user has the privileges the install / entity_maintainers-init routes
-   * actually enforce (via `enforceEntityStorePrivileges` → `AssetManagerClient.getPrivileges`):
-   * read + manage on the target alias, `manage_index_templates` cluster, saved-object
-   * `create`, and read / view_index_metadata on source indices. This is distinct from
-   * `has_write_permissions` (write on the entity indices).
-   */
+  // Whether the user passes the install / entity_maintainers-init routes' own aggregate check.
   has_install_permissions: z.boolean().optional(),
   has_kibana_feature_access: z.boolean().optional(),
   privileges: z.object({
