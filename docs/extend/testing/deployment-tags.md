@@ -98,9 +98,9 @@ specific solution view (Search, Observability, Security) on stateful, tag it wit
 `scoutSpace.setSolutionView()`, instead of reaching for a per-solution stateful tag.
 
 Per-solution stateful domains (search, observability, security) aren't exposed by the
-`tags.stateful` helper, and are also blocked as raw tag strings (e.g. `@local-stateful-search`) by
+`tags.stateful` helper, and are also blocked as raw tag strings (for example `@local-stateful-search`) by
 the `@kbn/eslint/scout_no_deprecated_tags` lint rule. This isn't a permanent limitation — Kibana CI
-just doesn't schedule those combinations yet — so the helper may expose them again once CI support
+doesn't schedule those combinations yet — so the helper can expose them again once CI support
 lands.
 ::::
 
