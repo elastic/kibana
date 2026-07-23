@@ -178,11 +178,7 @@ export class RelayClient implements RelayClientContract {
     method: 'get' | 'post' | 'put' | 'delete',
     data?: unknown
   ): Promise<AxiosResponse> {
-    const response = await this.sendRequest(
-      new URL(path, this.baseUrl).toString(),
-      data,
-      method
-    );
+    const response = await this.sendRequest(new URL(path, this.baseUrl).toString(), data, method);
     if (response.status >= 200 && response.status < 300) {
       return response;
     }
