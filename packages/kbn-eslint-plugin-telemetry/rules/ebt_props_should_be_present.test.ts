@@ -77,7 +77,7 @@ for (const [name, tester] of [tsTester, babelTester]) {
           errors: [
             {
               line: 1,
-              message: `<${element}> is missing EBT tracking attributes. Add \`data-ebt-action\`, \`data-ebt-element\`, and \`data-ebt-detail\` (use \`getEbtProps()\` from \`@kbn/ebt-click\`).`,
+              message: `<${element}> is missing EBT tracking attributes. Add \`data-ebt-action\` and \`data-ebt-element\` (use \`getEbtProps()\` from \`@kbn/ebt-click\`).`,
             },
           ],
         })),
@@ -87,7 +87,7 @@ for (const [name, tester] of [tsTester, babelTester]) {
           code: `<EuiButton {...{}} data-test-subj="test">Click</EuiButton>`,
           errors: [
             {
-              message: `<EuiButton> is missing EBT tracking attributes. Add \`data-ebt-action\`, \`data-ebt-element\`, and \`data-ebt-detail\` (use \`getEbtProps()\` from \`@kbn/ebt-click\`).`,
+              message: `<EuiButton> is missing EBT tracking attributes. Add \`data-ebt-action\` and \`data-ebt-element\` (use \`getEbtProps()\` from \`@kbn/ebt-click\`).`,
             },
           ],
         },
@@ -97,7 +97,7 @@ for (const [name, tester] of [tsTester, babelTester]) {
           code: `<EuiButton {...someOtherFn()}>Click</EuiButton>`,
           errors: [
             {
-              message: `<EuiButton> is missing EBT tracking attributes. Add \`data-ebt-action\`, \`data-ebt-element\`, and \`data-ebt-detail\` (use \`getEbtProps()\` from \`@kbn/ebt-click\`).`,
+              message: `<EuiButton> is missing EBT tracking attributes. Add \`data-ebt-action\` and \`data-ebt-element\` (use \`getEbtProps()\` from \`@kbn/ebt-click\`).`,
             },
           ],
         },
