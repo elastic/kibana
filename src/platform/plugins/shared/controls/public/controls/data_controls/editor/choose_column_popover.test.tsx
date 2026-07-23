@@ -12,27 +12,14 @@ import { act, fireEvent, render } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { ESQLColumn } from '@kbn/es-types';
-import { KbnWarningCallout } from '@kbn/ui-callout';
-import { useChooseColumnPopover } from './choose_column_popover';
+import { ChooseColumnPopover } from './choose_column_popover';
 
 const columns: ESQLColumn[] = [
   { name: 'col1', type: 'keyword' },
   { name: 'col2', type: 'keyword' },
 ];
 
-function ChooseColumnPopover({
-  columns: columnsProp,
-  updateQuery,
-}: {
-  columns: ESQLColumn[];
-  updateQuery: (column: string) => void;
-}) {
-  const { buttonProps } = useChooseColumnPopover({ columns: columnsProp, updateQuery });
-
-  return <KbnWarningCallout title="Choose a column" actionProps={{ primary: buttonProps }} />;
-}
-
-describe('useChooseColumnPopover', () => {
+describe('ChooseColumnPopover', () => {
   it('should render a search input and a list', async () => {
     const user = userEvent.setup();
     const { findByTestId } = render(

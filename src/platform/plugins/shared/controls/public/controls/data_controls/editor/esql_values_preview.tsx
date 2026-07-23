@@ -12,6 +12,7 @@ import { css } from '@emotion/react';
 import {
   EuiBadge,
   EuiBadgeGroup,
+  EuiCallOut,
   EuiCode,
   EuiFlexGrid,
   EuiFormRow,
@@ -27,8 +28,7 @@ import { max, min } from 'lodash';
 import type { ESQLColumn } from '@kbn/es-types';
 import { isNumericType } from '@kbn/esql-language';
 import { EMPTY_LABEL } from '@kbn/field-formats-common';
-import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
-import { useChooseColumnPopover } from './choose_column_popover';
+import { ChooseColumnPopover } from './choose_column_popover';
 import { DataControlEditorStrings } from '../data_control_constants';
 
 export const ESQLValuesPreview: React.FC<{
@@ -64,44 +64,69 @@ export const ESQLValuesPreview: React.FC<{
     return null;
   }, [previewOptions, singleColumn]);
 
-  const { buttonProps: chooseColumnButtonProps } = useChooseColumnPopover({
-    columns: previewColumns,
-    updateQuery,
-  });
-
   const body = previewError ? (
-    <EuiPanel hasBorder paddingSize="xs" color="danger">
-      <KbnDangerCallout
+    <EuiPanel
+      hasBorder
+      paddingSize="xs"
+      color="danger"
+      css={css`
+        text-align: center;
+      `}
+    >
+      <EuiCallOut
         announceOnMount
         title={DataControlEditorStrings.manageControl.dataSource.valuesPreview.getErrorTitle()}
-        text={previewError.message}
+        color="danger"
+        iconType="error"
         size="s"
-      />
+      >
+        <p>{previewError.message}</p>
+      </EuiCallOut>
     </EuiPanel>
   ) : multiColumnResult ? (
-    <EuiPanel hasBorder paddingSize="xs" color="warning">
-      <KbnWarningCallout
+    <EuiPanel
+      hasBorder
+      paddingSize="xs"
+      color="warning"
+      css={css`
+        text-align: center;
+      `}
+    >
+      <EuiCallOut
         announceOnMount
         title={DataControlEditorStrings.manageControl.dataSource.valuesPreview.getMultiColumnErrorTitle()}
-        text={DataControlEditorStrings.manageControl.dataSource.valuesPreview.getMultiColumnErrorBody(
-          previewColumns.length
-        )}
+        color="warning"
+        iconType="warning"
         size="s"
-        actionProps={{
-          primary: chooseColumnButtonProps,
-        }}
         data-test-subj="esqlMoreThanOneColumnCallout"
-      />
+      >
+        <p>
+          {DataControlEditorStrings.manageControl.dataSource.valuesPreview.getMultiColumnErrorBody(
+            previewColumns.length
+          )}
+        </p>
+        <ChooseColumnPopover columns={previewColumns} updateQuery={updateQuery} />
+      </EuiCallOut>
     </EuiPanel>
   ) : isEmpty ? (
-    <EuiPanel hasBorder paddingSize="xs" color="warning">
-      <KbnWarningCallout
+    <EuiPanel
+      hasBorder
+      paddingSize="xs"
+      color="warning"
+      css={css`
+        text-align: center;
+      `}
+    >
+      <EuiCallOut
         announceOnMount
         title={DataControlEditorStrings.manageControl.dataSource.valuesPreview.getEmptyTitle()}
-        text={DataControlEditorStrings.manageControl.dataSource.valuesPreview.getEmptyText()}
+        color="warning"
+        iconType="warning"
         size="s"
         data-test-subj="esqlMoreThanOneColumnCallout"
-      />
+      >
+        <p>{DataControlEditorStrings.manageControl.dataSource.valuesPreview.getEmptyText()}</p>
+      </EuiCallOut>
     </EuiPanel>
   ) : range ? (
     <EuiFlexGrid columns={2} data-test-subj="esqlValuesPreviewRange">
