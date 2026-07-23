@@ -5,10 +5,6 @@
         "index": { "__one_of": ["SOURCE_INDEX_NAME", []] },
         "query": { "__scope_link": "GLOBAL.query" }
       },
-      "dest": {
-        "index": "",
-        "results_field": ""
-      },
       "analysis": {
         "__one_of": [{
           "outlier_detection": {
@@ -48,9 +44,7 @@
             }
           }
         ]
-      },
-      "description": "",
-      "model_memory_limit": ""
+      }
     }
   }
 }

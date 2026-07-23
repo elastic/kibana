@@ -109,6 +109,10 @@ describe('override conflict audit', () => {
     ).toEqual(['endpoint::settings']);
   });
 
+  // The audit tracks drift in the generated values that overrides replace, so it
+  // can flag stale overrides when a specification sync changes generated body rules.
+  // Changes made only to the curated override (with the generated value unchanged)
+  // are intentionally out of scope: the fingerprint keys on the generated value.
   it('WHEN only curated content changes SHOULD report no audit changes', () => {
     writeDefinition({
       folder: generatedFolder,
@@ -265,7 +269,11 @@ describe('override conflict audit', () => {
     ).toEqual(['endpoint::enabled']);
   });
 
-  it('WHEN a top-level scope link replaces generated rules SHOULD fingerprint the whole body', () => {
+  it.each([
+    ['__scope_link', { __scope_link: 'other.endpoint' }],
+    ['__one_of', { __one_of: [{ first: '' }, { second: '' }] }],
+    ['__any_of', { __any_of: ['first', 'second'] }],
+  ])('WHEN top-level %s replaces generated rules SHOULD fingerprint the whole body', (_, rules) => {
     writeDefinition({
       folder: generatedFolder,
       endpoint: 'endpoint',
@@ -274,7 +282,7 @@ describe('override conflict audit', () => {
     writeDefinition({
       folder: overridesFolder,
       endpoint: 'endpoint',
-      description: { data_autocomplete_rules: { __scope_link: 'other.endpoint' } },
+      description: { data_autocomplete_rules: rules },
     });
 
     expect(

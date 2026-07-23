@@ -33,7 +33,16 @@
       },
       "time_zone": "",
       "locale": "",
-      "params": [],
+      "params": {
+        "__one_of": [
+          [],
+          [
+            {
+              "*": ""
+            }
+          ]
+        ]
+      },
       "profile": {
         "__one_of": [
           true,

@@ -27,6 +27,8 @@ interface CachedResponse {
   etag: string;
 }
 
+const ETAG_ENCODING_SUFFIXES = ['identity', 'gzip', 'deflate', 'br'] as const;
+
 const matchesEtag = (header: string | string[] | undefined, etag: string): boolean => {
   const values = Array.isArray(header) ? header : [header];
   return values.some((value) =>
@@ -36,17 +38,31 @@ const matchesEtag = (header: string | string[] | undefined, etag: string): boole
         return true;
       }
       const unquoted = normalized.replace(/^W\//, '').replace(/^"(.+)"$/, '$1');
-      return unquoted.split('-')[0] === etag;
+      return (
+        unquoted === etag ||
+        ETAG_ENCODING_SUFFIXES.some((encoding) => unquoted === `${etag}-${encoding}`)
+      );
     })
   );
 };
 
-export const registerSpecDefinitionsRoute = ({ router, services }: RouteDependencies) => {
+export const registerSpecDefinitionsRoute = ({ router, log, services }: RouteDependencies) => {
   let cachedResponse: CachedResponse | undefined;
   const getCachedResponse = (): CachedResponse => {
     if (!cachedResponse) {
+      const definitions = services.specDefinitionService.asJson();
+      let es: SpecDefinitionsJson;
+      try {
+        es = compactSpecDefinitions(definitions);
+      } catch (error) {
+        // Compaction only shrinks the payload; if it fails, fall back to the
+        // uncompacted definitions so a single throw can't disable Console
+        // autocomplete. The client resolves the inline rules without globals.
+        log.warn(`Failed to compact Console spec definitions, serving uncompacted: ${error}`);
+        es = definitions;
+      }
       const specResponse: SpecDefinitionsRouteResponse = {
-        es: compactSpecDefinitions(services.specDefinitionService.asJson()),
+        es,
         kibana: { docLinks: kibanaApiDocLinks },
       };
       const body = JSON.stringify(specResponse);

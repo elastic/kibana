@@ -41,6 +41,34 @@ const expandGeneratedRules = (value: unknown, globals: Record<string, unknown>):
   );
 };
 
+const expectValidMetaShapes = (value: unknown): void => {
+  if (Array.isArray(value)) {
+    value.forEach(expectValidMetaShapes);
+    return;
+  }
+  if (!isRecord(value)) {
+    return;
+  }
+  if (Object.hasOwn(value, '__one_of')) {
+    expect(Array.isArray(value.__one_of)).toBe(true);
+  }
+  if (Object.hasOwn(value, '__any_of')) {
+    expect(Array.isArray(value.__any_of)).toBe(true);
+  }
+  if (isRecord(value.__template) && typeof value.__template.__scope_link === 'string') {
+    expect(value.__template.__scope_link.startsWith(`GLOBAL.${GENERATED_GLOBAL_PREFIX}`)).toBe(
+      false
+    );
+  }
+  if (Object.hasOwn(value, '__condition')) {
+    expect(isRecord(value.__condition)).toBe(true);
+    if (isRecord(value.__condition)) {
+      expect(typeof value.__condition.lines_regex).toBe('string');
+    }
+  }
+  Object.values(value).forEach(expectValidMetaShapes);
+};
+
 const expectLosslessEndpointRules = (
   rawDefinitions: SpecDefinitionsJson,
   compactDefinitions: SpecDefinitionsJson
@@ -75,6 +103,7 @@ describe('WHEN serializing the complete Console definitions response', () => {
       const budget = PAYLOAD_BUDGETS[endpointsAvailability];
 
       expectLosslessEndpointRules(rawDefinitions, compactDefinitions);
+      expectValidMetaShapes(compactDefinitions);
       expect(Buffer.byteLength(body)).toBeLessThanOrEqual(budget.decoded);
       expect(gzipSync(body).byteLength).toBeLessThanOrEqual(budget.gzip);
     }

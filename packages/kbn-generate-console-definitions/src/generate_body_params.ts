@@ -310,11 +310,7 @@ const convertUnion = (
   if (objectValues.length === 1) {
     // keep representable primitive, enum, and array alternatives alongside
     // the single object branch
-    const alternatives = uniqueValues([
-      objectValues[0],
-      ...choices,
-      ...(arrayValues.length === 1 ? arrayValues : []),
-    ]);
+    const alternatives = uniqueValues([objectValues[0], ...choices, ...arrayValues]);
     return alternatives.length > 1 ? oneOf(alternatives) : objectValues[0];
   }
   if (objectValues.length > 1) {
@@ -327,7 +323,7 @@ const convertUnion = (
   if (arrayValues.length === 1) {
     return arrayValues[0];
   }
-  return arrayValues.length > 1 ? [] : '';
+  return arrayValues.length > 1 ? oneOf(arrayValues) : '';
 };
 
 const convertBodyValueOf = (

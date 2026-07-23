@@ -8,7 +8,7 @@
  */
 
 import { createHash } from 'crypto';
-import { GENERATED_GLOBAL_PREFIX } from '../../common/constants';
+import { AUTOCOMPLETE_ATOMIC_RULE_KEYS, GENERATED_GLOBAL_PREFIX } from '../../common/constants';
 import type { SpecDefinitionsJson } from '../types';
 
 const MIN_SHARED_RULE_BYTES = 512;
@@ -25,6 +25,9 @@ const isRecord = (value: unknown): value is Record<string, unknown> =>
 
 const isContainer = (value: unknown): value is Record<string, unknown> | unknown[] =>
   Array.isArray(value) || isRecord(value);
+// These values are metadata payloads rather than rule subtrees. Descending into
+// them can change inserted templates or condition matching.
+const OPAQUE_META_KEYS = new Set(['__template', '__condition']);
 
 const cloneForTransport = (definitions: SpecDefinitionsJson): SpecDefinitionsJson =>
   JSON.parse(JSON.stringify(definitions)) as SpecDefinitionsJson;
@@ -42,15 +45,44 @@ const containsRelativeScopeLink = (value: unknown): boolean => {
   return Object.values(value).some(containsRelativeScopeLink);
 };
 
-const collectCandidates = (value: unknown, candidates: Map<string, SharedRuleCandidate>): void => {
-  if (!isContainer(value)) {
+const containsCondition = (value: unknown): boolean => {
+  if (Array.isArray(value)) {
+    return value.some(containsCondition);
+  }
+  if (!isRecord(value)) {
+    return false;
+  }
+  if (Object.hasOwn(value, '__condition')) {
+    return true;
+  }
+  return Object.values(value).some(containsCondition);
+};
+
+const isShareableRule = (value: unknown): value is Record<string, unknown> =>
+  // A generated scope link has object insertion-template semantics, so only
+  // ordinary object rules can be replaced without changing the client contract.
+  isRecord(value) &&
+  !AUTOCOMPLETE_ATOMIC_RULE_KEYS.some((key) => Object.hasOwn(value, key)) &&
+  !Object.hasOwn(value, '__template') &&
+  !Object.hasOwn(value, '__condition') &&
+  !containsRelativeScopeLink(value);
+
+const collectCandidates = (
+  value: unknown,
+  candidates: Map<string, SharedRuleCandidate>,
+  parentKey?: string
+): void => {
+  if (!isContainer(value) || (parentKey && OPAQUE_META_KEYS.has(parentKey))) {
+    return;
+  }
+  if (containsCondition(value)) {
     return;
   }
   const serialized = JSON.stringify(value);
   const existing = candidates.get(serialized);
   if (existing) {
     existing.count += 1;
-  } else if (!containsRelativeScopeLink(value)) {
+  } else if (isShareableRule(value)) {
     candidates.set(serialized, {
       count: 1,
       hash: createHash('sha256').update(serialized).digest('hex'),
@@ -58,7 +90,13 @@ const collectCandidates = (value: unknown, candidates: Map<string, SharedRuleCan
       value,
     });
   }
-  Object.values(value).forEach((nestedValue) => collectCandidates(nestedValue, candidates));
+  if (Array.isArray(value)) {
+    value.forEach((nestedValue) => collectCandidates(nestedValue, candidates));
+  } else {
+    Object.entries(value).forEach(([key, nestedValue]) =>
+      collectCandidates(nestedValue, candidates, key)
+    );
+  }
 };
 
 const selectSharedRules = (
@@ -102,13 +140,17 @@ const assignGlobalNames = (
 const replaceSharedRules = (
   value: unknown,
   globalNames: ReadonlyMap<string, string>,
-  definingRule?: string
+  definingRule?: string,
+  parentKey?: string
 ): unknown => {
-  if (!isContainer(value)) {
+  if (!isContainer(value) || (parentKey && OPAQUE_META_KEYS.has(parentKey))) {
+    return value;
+  }
+  if (containsCondition(value)) {
     return value;
   }
   const serialized = JSON.stringify(value);
-  const globalName = globalNames.get(serialized);
+  const globalName = isShareableRule(value) ? globalNames.get(serialized) : undefined;
   if (globalName && serialized !== definingRule) {
     return { __scope_link: `GLOBAL.${globalName}` };
   }
@@ -118,7 +160,7 @@ const replaceSharedRules = (
   return Object.fromEntries(
     Object.entries(value).map(([key, nestedValue]) => [
       key,
-      replaceSharedRules(nestedValue, globalNames, definingRule),
+      replaceSharedRules(nestedValue, globalNames, definingRule, key),
     ])
   );
 };

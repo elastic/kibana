@@ -48,6 +48,26 @@ const readRules = (
   return endpoint.data_autocomplete_rules;
 };
 
+const resolveGeneratedRule = (
+  value: unknown,
+  globals: Record<string, unknown>
+): Record<string, unknown> => {
+  if (
+    isRecord(value) &&
+    typeof value.__scope_link === 'string' &&
+    value.__scope_link.startsWith(GENERATED_SCOPE_PREFIX)
+  ) {
+    const resolved = globals[value.__scope_link.slice('GLOBAL.'.length)];
+    if (isRecord(resolved)) {
+      return resolved;
+    }
+  }
+  if (!isRecord(value)) {
+    throw new Error('Expected an object rule');
+  }
+  return value;
+};
+
 const expandGeneratedRules = (value: unknown, globals: Record<string, unknown>): unknown => {
   if (Array.isArray(value)) {
     return value.map((entry) => expandGeneratedRules(entry, globals));
@@ -114,6 +134,58 @@ describe('WHEN compacting Console spec definitions', () => {
 
     expect(readRules(compactDefinitions, 'first')).toEqual(relativeRules);
     expect(readRules(compactDefinitions, 'second')).toEqual(relativeRules);
+  });
+
+  it('SHOULD preserve array and metadata shapes that scope links cannot replace', () => {
+    const repeatedRules = {
+      list: [createLargeRule()],
+      one_of: { __one_of: [createLargeRule(), createLargeRule(true)] },
+      any_of: { __any_of: [createLargeRule()] },
+      templated: {
+        __template: { first: 'value' },
+        nested: createLargeRule(),
+      },
+    };
+    const definitions = createDefinitions(repeatedRules, structuredClone(repeatedRules));
+
+    const compactDefinitions = compactSpecDefinitions(definitions);
+    const compactRules = resolveGeneratedRule(
+      readRules(compactDefinitions, 'first'),
+      compactDefinitions.globals
+    );
+
+    expect(Array.isArray(compactRules.list)).toBe(true);
+    expect(isRecord(compactRules.one_of) && Array.isArray(compactRules.one_of.__one_of)).toBe(true);
+    expect(isRecord(compactRules.any_of) && Array.isArray(compactRules.any_of.__any_of)).toBe(true);
+    expect(isRecord(compactRules.templated) && compactRules.templated.__template).toEqual({
+      first: 'value',
+    });
+    expect(
+      isRecord(compactRules.templated) &&
+        isRecord(compactRules.templated.nested) &&
+        compactRules.templated.nested.__scope_link
+    ).toEqual(expect.stringMatching(/^GLOBAL\.__generated_[a-f0-9]+$/));
+  });
+
+  it('SHOULD keep conditional template rules inline for their raw-description consumer', () => {
+    const conditionalRules = {
+      ...createLargeRule(),
+      settings: {
+        __one_of: [
+          {
+            __condition: { lines_regex: 'type: fs' },
+            __template: { location: 'path' },
+            ...createLargeRule(),
+          },
+        ],
+      },
+    };
+    const definitions = createDefinitions(conditionalRules, structuredClone(conditionalRules));
+
+    const compactDefinitions = compactSpecDefinitions(definitions);
+
+    expect(readRules(compactDefinitions, 'first')).toEqual(conditionalRules);
+    expect(readRules(compactDefinitions, 'second')).toEqual(conditionalRules);
   });
 
   it('SHOULD keep small repeated rules inline', () => {

@@ -1,13 +1,10 @@
 {
   "ml.put_job": {
     "data_autocomplete_rules": {
-      "background_persist_interval": "",
       "custom_settings": {},
-      "description": "",
       "groups": [""],
       "model_snapshot_retention_days": 1,
       "renormalization_window_days": 1,
-      "results_index_name": "",
       "results_retention_days": 1
     }
   }  

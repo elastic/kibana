@@ -650,6 +650,75 @@ describe('generateBodyParams', () => {
     });
   });
 
+  it('WHEN a union has an object and multiple distinct array forms SHOULD keep every array form', () => {
+    const objType: SpecificationTypes.Interface = {
+      kind: 'interface',
+      name: { name: 'ObjType', namespace: '_types' },
+      properties: [getMockProperty({ propertyName: 'field' })],
+      specLocation: '',
+    };
+    const itemType: SpecificationTypes.Interface = {
+      kind: 'interface',
+      name: { name: 'ItemType', namespace: '_types' },
+      properties: [getMockProperty({ propertyName: 'name' })],
+      specLocation: '',
+    };
+    const schema: SpecificationTypes.Model = { ...mockSchema, types: [objType, itemType] };
+    const requestType = makeRequestWithBody([
+      getMockProperty({
+        propertyName: 'target',
+        type: {
+          kind: 'union_of',
+          items: [
+            { kind: 'instance_of', type: objType.name },
+            {
+              kind: 'array_of',
+              value: { kind: 'instance_of', type: { name: 'string', namespace: '_builtins' } },
+            },
+            { kind: 'array_of', value: { kind: 'instance_of', type: itemType.name } },
+          ],
+        },
+      }),
+    ]);
+
+    expect(generateBodyParams(requestType, schema)).toEqual({
+      target: {
+        __one_of: [{ field: '' }, [], [{ name: '' }]],
+      },
+    });
+  });
+
+  it('WHEN a union has only multiple distinct array forms SHOULD keep every array form', () => {
+    const itemType: SpecificationTypes.Interface = {
+      kind: 'interface',
+      name: { name: 'ItemType', namespace: '_types' },
+      properties: [getMockProperty({ propertyName: 'name' })],
+      specLocation: '',
+    };
+    const schema: SpecificationTypes.Model = { ...mockSchema, types: [itemType] };
+    const requestType = makeRequestWithBody([
+      getMockProperty({
+        propertyName: 'target',
+        type: {
+          kind: 'union_of',
+          items: [
+            {
+              kind: 'array_of',
+              value: { kind: 'instance_of', type: { name: 'string', namespace: '_builtins' } },
+            },
+            { kind: 'array_of', value: { kind: 'instance_of', type: itemType.name } },
+          ],
+        },
+      }),
+    ]);
+
+    expect(generateBodyParams(requestType, schema)).toEqual({
+      target: {
+        __one_of: [[], [{ name: '' }]],
+      },
+    });
+  });
+
   it('generates __one_of for union of enums', () => {
     const enumA: SpecificationTypes.Enum = {
       kind: 'enum',

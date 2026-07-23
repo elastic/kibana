@@ -10,9 +10,18 @@
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { coreMock, httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 import { EsLegacyConfigService, SpecDefinitionsService } from '../../../../services';
+import { compactSpecDefinitions } from '../../../../services/compact_spec_definitions';
 import { handleEsError } from '../../../../shared_imports';
 import type { RouteDependencies } from '../../..';
 import { registerSpecDefinitionsRoute } from '.';
+
+jest.mock('../../../../services/compact_spec_definitions', () => {
+  const actual = jest.requireActual('../../../../services/compact_spec_definitions');
+  return {
+    ...actual,
+    compactSpecDefinitions: jest.fn(actual.compactSpecDefinitions),
+  };
+});
 
 const createLargeRule = (): Record<string, unknown> =>
   Object.fromEntries(
@@ -21,10 +30,21 @@ const createLargeRule = (): Record<string, unknown> =>
 
 describe('WHEN serving Console spec definitions', () => {
   const mockRouter = httpServiceMock.createRouter();
+  const compactSpecDefinitionsMock = compactSpecDefinitions as jest.MockedFunction<
+    typeof compactSpecDefinitions
+  >;
   let specDefinitionService: SpecDefinitionsService;
+  let log: RouteDependencies['log'];
 
   beforeEach(() => {
     jest.clearAllMocks();
+    // clearAllMocks does not drain a pending mockImplementationOnce queue, so
+    // reset the compaction mock and reinstate the real implementation to keep a
+    // one-off throw from leaking into a later test.
+    compactSpecDefinitionsMock.mockReset();
+    compactSpecDefinitionsMock.mockImplementation(
+      jest.requireActual('../../../../services/compact_spec_definitions').compactSpecDefinitions
+    );
     specDefinitionService = new SpecDefinitionsService();
     const repeatedRules = createLargeRule();
     jest.spyOn(specDefinitionService, 'asJson').mockReturnValue({
@@ -35,9 +55,10 @@ describe('WHEN serving Console spec definitions', () => {
         second: { data_autocomplete_rules: structuredClone(repeatedRules) },
       },
     });
+    log = coreMock.createPluginInitializerContext().logger.get();
     const routeDependencies: RouteDependencies = {
       router: mockRouter,
-      log: coreMock.createPluginInitializerContext().logger.get(),
+      log,
       getStartServices: coreMock.createSetup().getStartServices,
       proxy: {
         readLegacyESConfig: jest.fn(),
@@ -104,6 +125,32 @@ describe('WHEN serving Console spec definitions', () => {
       kibanaResponseFactory
     );
     expect(wildcardResponse.status).toBe(304);
+    const invalidSuffixResponse = await handler(
+      {},
+      httpServerMock.createKibanaRequest({
+        headers: { 'if-none-match': `"${etag}-bogus"` },
+      }),
+      kibanaResponseFactory
+    );
+    expect(invalidSuffixResponse.status).toBe(200);
     expect(specDefinitionService.asJson).toHaveBeenCalledTimes(1);
+  });
+
+  it('SHOULD serve uncompacted definitions when compaction throws', async () => {
+    compactSpecDefinitionsMock.mockImplementationOnce(() => {
+      throw new Error('compaction boom');
+    });
+    const [[, handler]] = mockRouter.get.mock.calls;
+
+    const response = await handler({}, httpServerMock.createKibanaRequest(), kibanaResponseFactory);
+    const payload = JSON.parse(String(response.payload));
+
+    expect(response.status).toBe(200);
+    expect(payload.es.globals).toEqual({});
+    expect(payload.es.endpoints.first.data_autocomplete_rules).toEqual(
+      payload.es.endpoints.second.data_autocomplete_rules
+    );
+    expect(payload.es.endpoints.first.data_autocomplete_rules.__scope_link).toBeUndefined();
+    expect(log.warn).toHaveBeenCalledWith(expect.stringContaining('compaction boom'));
   });
 });

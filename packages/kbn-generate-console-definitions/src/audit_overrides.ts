@@ -11,6 +11,7 @@ import { createHash } from 'crypto';
 import fs from 'fs';
 import Path from 'path';
 import { isEqual } from 'lodash';
+import { AUTOCOMPLETE_ATOMIC_RULE_KEYS } from '@kbn/console-plugin/common/constants';
 import type { EndpointDefinition, EndpointDescription } from '@kbn/console-plugin/common/types';
 
 const AUDIT_VERSION = 1 as const;
@@ -101,7 +102,7 @@ const collectDefinitionConflicts = ({
   if (!generatedRules || !overrideRules) {
     return;
   }
-  if (Object.hasOwn(overrideRules, '__scope_link')) {
+  if (AUTOCOMPLETE_ATOMIC_RULE_KEYS.some((key) => Object.hasOwn(overrideRules, key))) {
     if (!isEqual(generatedRules, overrideRules)) {
       addConflict({
         conflicts,

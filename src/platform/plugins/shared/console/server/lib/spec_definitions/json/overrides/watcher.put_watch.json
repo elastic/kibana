@@ -1,7 +1,6 @@
 {
   "watcher.put_watch": {
     "data_autocomplete_rules": {
-      "metadata": {},
       "throttle_period": 5
     }
   }

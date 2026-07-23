@@ -43,9 +43,7 @@
           "privileges": [],
           "query": ""
         }
-      ],
-      "run_as": [],
-      "metadata": {}
+      ]
     }
   }
 }

@@ -100,6 +100,9 @@
     "indices.rollover::aliases": {
       "generatedHash": "97e401fe871b1de10ee7a6cb26dfb2a41446a3c23e989ca473d6c18ffd8390ce"
     },
+    "indices.rollover::conditions": {
+      "generatedHash": "a39804faebdd21aaadec8daa9f1934436cf10c0ad7dc336fa0668f1c06427e36"
+    },
     "indices.rollover::mappings": {
       "generatedHash": "cad3d9cc29a6bdd136d8e4480d645ed2e4121c80473928a13c4bbdab4a14a40c"
     },

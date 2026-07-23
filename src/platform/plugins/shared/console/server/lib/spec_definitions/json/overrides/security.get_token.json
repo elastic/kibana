@@ -1,9 +1,0 @@
-{
-  "security.get_token": {
-    "data_autocomplete_rules": {
-      "password": "",
-      "scope": "",
-      "username": ""
-    }
-  }
-}
