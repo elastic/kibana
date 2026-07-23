@@ -16,7 +16,7 @@ import { ESQL_SEARCH_STRATEGY, cellHasFormulas, getEsQueryConfig } from '@kbn/da
 import type { IScopedSearchClient } from '@kbn/data-plugin/server';
 import { type Filter, buildEsQuery, extractTimeRange } from '@kbn/es-query';
 import {
-  getTimeFieldFromESQLQuery,
+  parseTimeFieldFromESQLQuery,
   appendLimitToQuery,
   getNamedParams,
   fixESQLQueryWithVariables,
@@ -114,7 +114,7 @@ export class CsvESQLGenerator {
 
     // Builds _tstart/_tend params (from the potentially forceNow-updated time range) and
     // user-defined variable params
-    const timeFieldName = getTimeFieldFromESQLQuery(esqlQuery);
+    const timeFieldName = parseTimeFieldFromESQLQuery(esqlQuery);
     let timeRange;
     if (timeFieldName && currentFilters) {
       ({ timeRange } = extractTimeRange(currentFilters, timeFieldName));
