@@ -10,7 +10,10 @@ import { API_VERSIONS, ENTITY_STORE_ROUTES } from '../../../common';
 import { DEFAULT_ENTITY_STORE_PERMISSIONS } from '../constants';
 import type { EntityStorePluginRouter } from '../../types';
 import { wrapMiddlewares } from '../middleware';
-import { checkEntityStoreIndexPrivileges } from './utils/check_and_format_privileges';
+import {
+  checkEntityStoreIndexPrivileges,
+  formatPrivileges,
+} from './utils/check_and_format_privileges';
 
 export function registerCheckPrivileges(router: EntityStorePluginRouter) {
   router.versioned
@@ -57,7 +60,11 @@ export function registerCheckPrivileges(router: EntityStorePluginRouter) {
         ]);
 
         return res.ok({
-          body: { ...response, has_install_permissions: installPrivileges.hasAllRequested },
+          body: {
+            ...response,
+            has_install_permissions: installPrivileges.hasAllRequested,
+            install_privileges: formatPrivileges(installPrivileges.privileges),
+          },
         });
       })
     );

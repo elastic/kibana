@@ -50,6 +50,7 @@ const defaultProps = {
 
 const allEntityEnginePrivileges: EntityAnalyticsPrivileges = {
   has_all_required: true,
+  has_install_permissions: true,
   privileges: {
     elasticsearch: {
       cluster: { manage_enrich: true },
@@ -61,6 +62,7 @@ const allEntityEnginePrivileges: EntityAnalyticsPrivileges = {
 
 const missingEntityEnginePrivileges: EntityAnalyticsPrivileges = {
   has_all_required: false,
+  has_install_permissions: false,
   privileges: {
     elasticsearch: {
       cluster: { manage_enrich: false },

@@ -19,6 +19,14 @@ import {
   ENTITY_LATEST,
 } from '../../../../common';
 
+const PrivilegesDetail = z.object({
+  elasticsearch: z.object({
+    cluster: z.object({}).catchall(z.boolean()).optional(),
+    index: z.object({}).catchall(z.object({}).catchall(z.boolean())).optional(),
+  }),
+  kibana: z.object({}).catchall(z.boolean()).optional(),
+});
+
 export type Privileges = z.infer<typeof Privileges>;
 export const Privileges = z.object({
   has_all_required: z.boolean(),
@@ -27,13 +35,9 @@ export const Privileges = z.object({
   // Whether the user passes the install / entity_maintainers-init routes' own aggregate check.
   has_install_permissions: z.boolean().optional(),
   has_kibana_feature_access: z.boolean().optional(),
-  privileges: z.object({
-    elasticsearch: z.object({
-      cluster: z.object({}).catchall(z.boolean()).optional(),
-      index: z.object({}).catchall(z.object({}).catchall(z.boolean())).optional(),
-    }),
-    kibana: z.object({}).catchall(z.boolean()).optional(),
-  }),
+  privileges: PrivilegesDetail,
+  // Detailed breakdown behind has_install_permissions, for the "enable Entity Store" callout.
+  install_privileges: PrivilegesDetail.optional(),
 });
 
 const groupPrivilegesByName = <PrivilegeName extends string>(

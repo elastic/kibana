@@ -44,6 +44,8 @@ apiTest.describe('Entity Store check privileges API', { tag: ENTITY_STORE_TAGS }
       has_write_permissions: true,
       has_install_permissions: true,
     });
+    // Install breakdown backing has_install_permissions is returned for the enable-store callout.
+    expect(response.body.install_privileges).toBeDefined();
   });
 
   apiTest(

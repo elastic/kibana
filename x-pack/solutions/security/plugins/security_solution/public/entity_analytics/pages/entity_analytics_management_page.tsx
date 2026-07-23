@@ -100,7 +100,9 @@ export const EntityAnalyticsManagementPage = () => {
     'hasAllRequiredPrivileges' in riskEnginePrivileges &&
     riskEnginePrivileges.hasAllRequiredPrivileges;
 
-  const userHasEntityStorePrivileges = entityEnginePrivileges?.has_all_required ?? false;
+  // Enabling the Entity Store runs the install / maintainers-init routes, which enforce the
+  // install privilege set (has_install_permissions), not entity-index read+write (has_all_required).
+  const userHasEntityStorePrivileges = entityEnginePrivileges?.has_install_permissions ?? false;
   const hasAllRequiredPrivileges = userHasRiskEnginePrivileges || userHasEntityStorePrivileges;
 
   const canRunEngine =
@@ -181,7 +183,7 @@ export const EntityAnalyticsManagementPage = () => {
         }
       />
 
-      {!entityEnginePrivileges || entityEnginePrivileges.has_all_required ? null : (
+      {!entityEnginePrivileges || entityEnginePrivileges.has_install_permissions ? null : (
         <>
           <EuiSpacer size="l" />
           <EntityStoreMissingPrivilegesCallout privileges={entityEnginePrivileges} />

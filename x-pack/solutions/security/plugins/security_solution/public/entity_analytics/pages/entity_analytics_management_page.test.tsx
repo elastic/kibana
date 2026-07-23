@@ -110,7 +110,7 @@ jest.mock('../components/entity_store/hooks/use_entity_store', () => ({
 }));
 
 const mockUseEntityEnginePrivileges = jest.fn().mockReturnValue({
-  data: { has_all_required: true },
+  data: { has_all_required: true, has_install_permissions: true },
 });
 jest.mock('../components/entity_store/hooks/use_entity_engine_privileges', () => ({
   useEntityEnginePrivileges: (...args: unknown[]) => mockUseEntityEnginePrivileges(...args),
@@ -237,7 +237,7 @@ describe('EntityAnalyticsManagementPage', () => {
       data: { status: 'not_installed', engines: [] },
     });
     mockUseEntityEnginePrivileges.mockReturnValue({
-      data: { has_all_required: true },
+      data: { has_all_required: true, has_install_permissions: true },
     });
     mockUseDeleteEntityStoreMutation.mockReturnValue({
       isLoading: false,
@@ -355,7 +355,7 @@ describe('EntityAnalyticsManagementPage', () => {
       data: { status: 'running', engines: [{ type: 'host' }] },
     });
     mockUseEntityEnginePrivileges.mockReturnValue({
-      data: { has_all_required: true },
+      data: { has_all_required: true, has_install_permissions: true },
     });
 
     render(pageComponent());
@@ -369,7 +369,7 @@ describe('EntityAnalyticsManagementPage', () => {
 
   it('shows entity store missing privileges callout when privileges are insufficient', () => {
     mockUseEntityEnginePrivileges.mockReturnValue({
-      data: { has_all_required: false },
+      data: { has_all_required: false, has_install_permissions: false },
     });
 
     render(pageComponent());
@@ -381,7 +381,7 @@ describe('EntityAnalyticsManagementPage', () => {
       data: { status: 'running', engines: [{ type: 'host' }] },
     });
     mockUseEntityEnginePrivileges.mockReturnValue({
-      data: { has_all_required: true },
+      data: { has_all_required: true, has_install_permissions: true },
     });
 
     render(pageComponent());
