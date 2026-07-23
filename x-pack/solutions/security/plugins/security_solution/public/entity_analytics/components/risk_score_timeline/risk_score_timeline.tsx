@@ -368,7 +368,7 @@ const TimelineChart: React.FC<TimelineChartProps> = ({
         name={i18n.translate(
           'xpack.securitySolution.entityAnalytics.riskScoreTimeline.seriesName',
           {
-            defaultMessage: 'Risk score',
+            defaultMessage: 'Max risk score',
           }
         )}
         xScaleType={ScaleType.Time}
