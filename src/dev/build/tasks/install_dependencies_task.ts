@@ -14,12 +14,15 @@ export const InstallDependencies: Task = {
   description: 'Installing node_modules, including production builds of packages',
 
   async run(_config, log, build) {
-    // The in-build package.json is regenerated with `file:` deps pointing at the
-    // copied-in package dirs, so it no longer matches the repo lockfile; install
-    // resolves fresh (deps are exact-pinned + pnpm.overrides, so it's deterministic).
+    // The repo pnpm-lock.yaml is copied into the build (see CopyLegacySource) to
+    // seed resolution. The regenerated package.json changes the `.` importer
+    // (file: deps + pruned list), so this can't be a frozen install — hence
+    // `--no-frozen-lockfile` (CI defaults to frozen, which would abort on the
+    // importer mismatch). pnpm reconciles the changed importer while reusing the
+    // lockfile's existing resolutions for unchanged third-party ranges, so
+    // transitive caret deps stay pinned to the repo's versions instead of drifting.
     // `--ignore-workspace` is required because the build dir lives under the repo,
-    // and pnpm would otherwise walk up to the repo's pnpm-workspace.yaml and try a
-    // frozen install against the (now-mismatched) repo lockfile.
+    // and pnpm would otherwise walk up to the repo's pnpm-workspace.yaml.
     await exec(
       log,
       'pnpm',
@@ -30,6 +33,7 @@ export const InstallDependencies: Task = {
         // @pkgjs/parseargs) from the lockfile under that flag, then the install's
         // own integrity check rejects the lockfile as missing those entries.
         '--ignore-workspace',
+        '--no-frozen-lockfile',
         '--config.confirmModulesPurge=false',
         '--prefer-offline',
       ],
