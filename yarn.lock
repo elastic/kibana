@@ -2049,27 +2049,24 @@
   resolved "https://registry.yarnpkg.com/@elastic/eui-test-helpers/-/eui-test-helpers-1.2.0.tgz#60fb34fa36ba169a1ae639284f36b3be43d3c82a"
   integrity sha512-1k27oE2Wkogh6yeXmUa0kp3D6bjm+8Cv4v8MniBMyLBHwKGK41YQebKAkfmGq4V2xHV5Jv+lAkuTYZf9Iyr0ww==
 
-"@elastic/eui-theme-borealis@8.0.0":
+"@elastic/eui-theme-borealis@file:./elastic_eui_theme_borealis_8.0.0_cjs.tgz":
   version "8.0.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-borealis/-/eui-theme-borealis-8.0.0.tgz#51b11163728fc634bea4848586642eecc0b6b39c"
-  integrity sha512-mNcZxVYPr5c1VDru42Z/VnFZn9GtgNSiEF3SfCiI1c29LNWVzz9qle35tffDxJSu/A2iIWA8tBmuxAFYYLydnw==
+  resolved "file:./elastic_eui_theme_borealis_8.0.0_cjs.tgz#d602d805de02909a25516bfce5f5757d7c7870c8"
   dependencies:
-    "@elastic/eui-theme-common" "10.0.0"
+    "@elastic/eui-theme-common" "workspace:*"
     chroma-js "^2.4.2"
 
-"@elastic/eui-theme-common@10.0.0":
+"@elastic/eui-theme-common@10.0.0", "@elastic/eui-theme-common@file:./elastic_eui_theme_common_10.0.0_cjs.tgz", "@elastic/eui-theme-common@workspace:*":
   version "10.0.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-common/-/eui-theme-common-10.0.0.tgz#d2f71b0863e026ca55b06c1cecc5f6f130aefa37"
-  integrity sha512-cnUZx3S6XlDcm3ArkEGB3Q5Ehq+E5g4gB+a74ob0+Csjglvus0QO4Fyr5UwYHLJqueSMuV9YefVtKDC41lh16g==
+  resolved "file:./elastic_eui_theme_common_10.0.0_cjs.tgz#fd359cf79b77c504826f625241bdf930919c76dc"
   dependencies:
     "@types/lodash" "^4.14.202"
     chroma-js "^2.4.2"
     lodash "^4.17.21"
 
-"@elastic/eui@118.0.0":
-  version "118.0.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-118.0.0.tgz#119d4455097baf58d4972a28d55463792bd7510b"
-  integrity sha512-JfibbY9gfIhIh5NPAaoGHkcs8oG2Y+ir7vR6CrKgItrT/Ujk4dMkqBpnGyBxvJd+c6RmCgdCDy2CTjEI+0b40g==
+"@elastic/eui@file:./elastic_eui_upstream_main.tgz":
+  version "117.1.0"
+  resolved "file:./elastic_eui_upstream_main.tgz#92a4060dbc1554a00b682612c3dad44529d4461d"
   dependencies:
     "@elastic/eui-theme-common" "10.0.0"
     "@elastic/prismjs-esql" "^4.13.0"
