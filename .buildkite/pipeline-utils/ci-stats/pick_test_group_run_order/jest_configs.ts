@@ -12,6 +12,7 @@ import * as globby from 'globby';
 import DISABLED_JEST_CONFIGS from '../../../disabled_jest_configs.json';
 import SHARDED_JEST_CONFIGS from '../../../sharded_jest_configs.json';
 import { filterEmptyJestConfigs } from '../get_tests_from_config';
+import { getKibanaDir } from '#pipeline-utils';
 
 export const SHARD_ANNOTATION_SEP = '||shard=';
 
@@ -63,7 +64,7 @@ export function expandShardedJestConfigs(configs: string[]): string[] {
 
 function globJestConfigs(patterns: string[], limitSolutions: string[] | undefined): string[] {
   return globby.sync(globsForSolutions(patterns, limitSolutions), {
-    cwd: process.cwd(),
+    cwd: getKibanaDir(),
     absolute: false,
     ignore: [...DISABLED_JEST_CONFIGS, '**/node_modules/**'],
   });
