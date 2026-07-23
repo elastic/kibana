@@ -1084,7 +1084,9 @@ describe('validators', () => {
       // The template resolves the $ref'd global field (required: true), but the value is
       // stored under the GLOBAL key — the template pass must not re-check it as absent.
       const requiredGlobalDef = {
+        fieldDefinitionId: 'fd-my_new_field',
         name: 'my_new_field',
+        owner: 'cases',
         definition: yamlStringify({
           name: 'my_new_field',
           label: 'My new Field',
@@ -1098,6 +1100,7 @@ describe('validators', () => {
       );
       fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
         fieldDefinitions: [requiredGlobalDef],
+        total: 1,
       });
 
       await expect(
