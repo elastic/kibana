@@ -7,6 +7,7 @@
 
 import type { InferenceConnector } from '@kbn/inference-common';
 import React, { useCallback, useMemo } from 'react';
+import type { ReactNode } from 'react';
 import {
   CONNECTOR_LOAD_ERROR,
   GENERATE_BUTTON_LABEL,
@@ -33,6 +34,8 @@ interface GenerateSplitButtonProps {
   onRunQueriesOnly: () => void;
   isRunDisabled: boolean;
   isConfigDisabled: boolean;
+  /** Tooltip shown on run actions when they are disabled (e.g. pause). */
+  runDisabledTooltip?: ReactNode;
   isLoading?: boolean;
   size?: ContextMenuSplitButtonProps['size'];
 }
@@ -49,6 +52,7 @@ export const GenerateSplitButton = ({
   onRunQueriesOnly,
   isRunDisabled,
   isConfigDisabled,
+  runDisabledTooltip,
   isLoading,
   size,
 }: GenerateSplitButtonProps) => {
@@ -92,7 +96,8 @@ export const GenerateSplitButton = ({
               onRunFeaturesOnly();
             },
             disabled: isRunDisabled,
-            toolTipContent: GENERATE_FEATURES_TOOLTIP,
+            toolTipContent:
+              isRunDisabled && runDisabledTooltip ? runDisabledTooltip : GENERATE_FEATURES_TOOLTIP,
             toolTipProps: { position: 'right' as const },
           },
           buildConnectorMenuItem({ connector: featuresConnector, panelId: 1 }),
@@ -104,7 +109,8 @@ export const GenerateSplitButton = ({
               onRunQueriesOnly();
             },
             disabled: isRunDisabled,
-            toolTipContent: GENERATE_QUERIES_TOOLTIP,
+            toolTipContent:
+              isRunDisabled && runDisabledTooltip ? runDisabledTooltip : GENERATE_QUERIES_TOOLTIP,
             toolTipProps: { position: 'right' as const },
           },
           buildConnectorMenuItem({ connector: queriesConnector, panelId: 2 }),
@@ -131,6 +137,7 @@ export const GenerateSplitButton = ({
     ],
     [
       isRunDisabled,
+      runDisabledTooltip,
       featuresConnector,
       queriesConnector,
       allConnectors,
@@ -152,6 +159,7 @@ export const GenerateSplitButton = ({
       primaryIconType="radar"
       onPrimaryClick={onRun}
       isPrimaryDisabled={isRunDisabled}
+      primaryDisabledTooltip={isRunDisabled ? runDisabledTooltip : undefined}
       primaryDataTestSubj="significant_events_onboard_streams_button"
       secondaryAriaLabel={GENERATE_CONFIG_ARIA_LABEL}
       isSecondaryDisabled={isConfigDisabled}

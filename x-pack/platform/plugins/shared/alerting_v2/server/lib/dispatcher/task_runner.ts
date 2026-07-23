@@ -15,7 +15,7 @@ import type {
   DispatcherTaskState,
 } from './types';
 
-type TaskRunParams = Pick<RunContext, 'taskInstance' | 'abortController'>;
+type TaskRunParams = Pick<RunContext, 'taskInstance' | 'signal'>;
 
 @injectable()
 export class DispatcherTaskRunner {
@@ -24,8 +24,8 @@ export class DispatcherTaskRunner {
     private readonly dispatcherService: DispatcherServiceContract
   ) {}
 
-  public async run({ taskInstance, abortController }: TaskRunParams): Promise<RunResult> {
-    const params = this.createDispatcherParams(taskInstance, abortController);
+  public async run({ taskInstance, signal }: TaskRunParams): Promise<RunResult> {
+    const params = this.createDispatcherParams(taskInstance, signal);
 
     const result = await this.dispatcherService.run(params);
 
@@ -34,13 +34,13 @@ export class DispatcherTaskRunner {
 
   private createDispatcherParams(
     taskInstance: TaskRunParams['taskInstance'],
-    abortController: AbortController
+    signal: AbortSignal
   ): DispatcherExecutionParams {
     const state: DispatcherTaskState = taskInstance.state;
 
     return {
       previousStartedAt: state.previousStartedAt ? new Date(state.previousStartedAt) : undefined,
-      abortController,
+      signal,
     };
   }
 
