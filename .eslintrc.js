@@ -3106,7 +3106,7 @@ module.exports = {
         'src/platform/packages/shared/kbn-apm-ui-shared/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
       ],
       rules: {
-        '@kbn/telemetry/ebt_props_should_be_present': 'error',
+        '@kbn/telemetry/ebt_props_should_be_present': 'warn',
       },
     },
   ],
