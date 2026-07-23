@@ -128,6 +128,12 @@ describe('createExpectedRenderAttachmentEvaluator', () => {
     ).rejects.toThrow(/at least one attachment type/i);
   });
 
+  it('throws when expectRenderAttachment is present but not an array', async () => {
+    await expect(
+      runRender(conversation('x'), { expectRenderAttachment: 'rule' })
+    ).rejects.toThrow(/must be a non-empty array/i);
+  });
+
   it('scores 1 when every expected attachment type was rendered', async () => {
     const result = await runRender(
       conversation(
@@ -186,6 +192,14 @@ describe('createExpectedAttachmentDataEvaluator', () => {
     );
     expect(result.score).toBeNull();
     expect(result.label).toBe('skipped');
+  });
+
+  it('throws when expectAttachmentData is present but not a function', async () => {
+    await expect(
+      runAttachmentData({ attachments: [] } as TaskOutput, {
+        expectAttachmentData: true,
+      })
+    ).rejects.toThrow(/must be a function/i);
   });
 
   it('scores 1 when the callback passes', async () => {

@@ -109,18 +109,26 @@ describe('collectScoredCriteria', () => {
     ]);
   });
 
-  it('throws when criteria is omitted', () => {
-    expect(() => collectScoredCriteria({})).toThrow(/criteria must contain at least one/i);
-    expect(() => collectScoredCriteria(undefined)).toThrow(/criteria must contain at least one/i);
+  it('returns null when criteria is omitted so the evaluator can skip', () => {
+    expect(collectScoredCriteria({})).toBeNull();
+    expect(collectScoredCriteria(undefined)).toBeNull();
+    expect(collectScoredCriteria({ criteria: undefined })).toBeNull();
+    expect(collectScoredCriteria({ criteria: null as unknown as string[] })).toBeNull();
   });
 
-  it('throws when criteria is empty or only blanks', () => {
+  it('throws when criteria is present but empty or only blanks', () => {
     expect(() => collectScoredCriteria({ criteria: [] })).toThrow(
       /criteria must contain at least one/i
     );
     expect(() => collectScoredCriteria({ criteria: ['', '  '] })).toThrow(
       /criteria must contain at least one/i
     );
+  });
+
+  it('throws when criteria is present but not an array', () => {
+    expect(() =>
+      collectScoredCriteria({ criteria: 'loads skill' as unknown as string[] })
+    ).toThrow(/criteria must be an array/i);
   });
 });
 

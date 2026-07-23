@@ -8,6 +8,7 @@
 import type { ConversationRound } from '@kbn/agent-builder-common';
 import { getLatestVersion, type VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import type { Evaluator, TaskOutput } from '@kbn/evals';
+import { skippedResult } from '../evaluator_utils';
 
 export const RENDER_ATTACHMENT_TAG_RE =
   /<render_attachment\b(?=[^>]*\bid\s*=\s*["'][^"']+["'])(?=[^>]*\bversion\s*=\s*["'][^"']+["'])[^>]*\/?>/i;
@@ -84,17 +85,32 @@ const getAttachments = (output: TaskOutput): VersionedAttachment[] => {
   return Array.isArray(attachments) ? attachments : [];
 };
 
-const getExpectRenderAttachment = (metadata: unknown): ExpectRenderAttachment | undefined => {
+/** `null` means the field was omitted (skip); never returns `undefined`. */
+const getExpectRenderAttachment = (metadata: unknown): ExpectRenderAttachment | null => {
   const value = (metadata as { expectRenderAttachment?: unknown } | null)?.expectRenderAttachment;
-  if (!Array.isArray(value)) {
-    return undefined;
+  if (value === undefined || value === null) {
+    return null;
   }
-  return value.filter((item): item is string => typeof item === 'string' && item.length > 0);
+  if (!Array.isArray(value)) {
+    throw new Error('expectRenderAttachment must be a non-empty array of attachment types');
+  }
+  const types = value.filter((item): item is string => typeof item === 'string' && item.length > 0);
+  if (types.length === 0) {
+    throw new Error('expectRenderAttachment must contain at least one attachment type');
+  }
+  return types;
 };
 
-const getExpectAttachmentDataFn = (metadata: unknown): ExpectAttachmentDataFn | undefined => {
+/** `null` means the field was omitted (skip); never returns `undefined`. */
+const getExpectAttachmentDataFn = (metadata: unknown): ExpectAttachmentDataFn | null => {
   const value = (metadata as { expectAttachmentData?: unknown } | null)?.expectAttachmentData;
-  return typeof value === 'function' ? (value as ExpectAttachmentDataFn) : undefined;
+  if (value === undefined || value === null) {
+    return null;
+  }
+  if (typeof value !== 'function') {
+    throw new Error('expectAttachmentData must be a function');
+  }
+  return value as ExpectAttachmentDataFn;
 };
 
 export const createExpectedRenderAttachmentEvaluator = (): Evaluator => ({
@@ -103,16 +119,8 @@ export const createExpectedRenderAttachmentEvaluator = (): Evaluator => ({
   evaluate: async ({ output, metadata }) => {
     const expectation = getExpectRenderAttachment(metadata);
 
-    if (expectation == null) {
-      return {
-        score: null,
-        label: 'skipped',
-        explanation: 'No render-attachment expectation for this example',
-      };
-    }
-
-    if (expectation.length === 0) {
-      throw new Error('expectRenderAttachment must contain at least one attachment type');
+    if (expectation === null) {
+      return skippedResult('No render-attachment expectation for this example');
     }
 
     const assistantMessages = getAssistantMessages(output as TaskOutput);
@@ -146,12 +154,8 @@ export const createExpectedAttachmentDataEvaluator = (): Evaluator => ({
   evaluate: async ({ output, metadata }) => {
     const assertAttachmentData = getExpectAttachmentDataFn(metadata);
 
-    if (!assertAttachmentData) {
-      return {
-        score: null,
-        label: 'skipped',
-        explanation: 'No attachment-data expectation for this example',
-      };
+    if (assertAttachmentData === null) {
+      return skippedResult('No attachment-data expectation for this example');
     }
 
     const attachments = getAttachments(output as TaskOutput);

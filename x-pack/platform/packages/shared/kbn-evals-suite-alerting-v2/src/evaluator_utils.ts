@@ -6,10 +6,17 @@
  */
 
 import type { ToolingLog } from '@kbn/tooling-log';
-import type { Evaluator, Example, TaskOutput } from '@kbn/evals';
+import type { EvaluationResult, Evaluator, Example, TaskOutput } from '@kbn/evals';
 import type { ConversationRound } from '@kbn/agent-builder-common';
 import type { PromptRequest } from '@kbn/agent-builder-common/agents';
 import { isAskUserQuestionPrompt } from '@kbn/agent-builder-common/agents';
+
+/** Shared skip result when an expectation field is omitted. */
+export const skippedResult = (explanation: string): EvaluationResult => ({
+  score: null,
+  label: 'skipped',
+  explanation,
+});
 
 export const getPrompts = (output: TaskOutput): PromptRequest[] => {
   const prompts = (output as { prompts?: unknown[] })?.prompts ?? [];

@@ -33,6 +33,18 @@ describe('createExpectedSkillEvaluator', () => {
     expect(result.label).toBe('skipped');
   });
 
+  it('throws when expectedSkills is an empty array', async () => {
+    await expect(
+      run(outputWithLoadedSkills([RULE_MANAGEMENT_SKILL_ID]), { expectedSkills: [] })
+    ).rejects.toThrow(/at least one skill/i);
+  });
+
+  it('throws when shouldNotActivateSkill is an empty string', async () => {
+    await expect(
+      run(outputWithLoadedSkills([]), { shouldNotActivateSkill: '' })
+    ).rejects.toThrow(/non-empty string/i);
+  });
+
   it('scores 1 when every expected skill was loaded', async () => {
     const result = await run(outputWithLoadedSkills([RULE_MANAGEMENT_SKILL_ID]), {
       expectedSkills: [RULE_MANAGEMENT_SKILL_ID],

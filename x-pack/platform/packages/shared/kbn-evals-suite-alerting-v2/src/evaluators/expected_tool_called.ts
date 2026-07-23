@@ -7,11 +7,23 @@
 
 import { getToolCallSteps, type Evaluator, type TaskOutput } from '@kbn/evals';
 import type { RuleManagementExample } from '../evaluate_dataset';
+import { skippedResult } from '../evaluator_utils';
 
 export const getUsedToolIds = (output: TaskOutput): string[] =>
   getToolCallSteps(output)
     .map((toolCall) => toolCall.tool_id)
     .filter((toolId): toolId is string => Boolean(toolId));
+
+const requireNonEmptyStringList = (value: unknown, fieldName: string): readonly string[] => {
+  if (!Array.isArray(value)) {
+    throw new Error(`${fieldName} must be a non-empty array of tool-ids`);
+  }
+  const ids = value.filter((item): item is string => typeof item === 'string' && item.length > 0);
+  if (ids.length === 0) {
+    throw new Error(`${fieldName} must contain at least one tool-id`);
+  }
+  return ids;
+};
 
 export const createExpectedToolCalledEvaluator = (): Evaluator<
   RuleManagementExample,
@@ -23,23 +35,16 @@ export const createExpectedToolCalledEvaluator = (): Evaluator<
     const expectedToolIds = metadata?.expectedToolIds;
 
     if (expectedToolIds == null) {
-      return {
-        score: null,
-        label: 'skipped',
-        explanation: 'No tool-call expectation for this example',
-      };
+      return skippedResult('No tool-call expectation for this example');
     }
 
-    if (expectedToolIds.length === 0) {
-      throw new Error('expectedToolIds must contain at least one tool-id');
-    }
-
+    const requiredToolIds = requireNonEmptyStringList(expectedToolIds, 'expectedToolIds');
     const usedToolIds = getUsedToolIds(output as TaskOutput);
-    const missingToolIds = expectedToolIds.filter((id) => !usedToolIds.includes(id));
+    const missingToolIds = requiredToolIds.filter((id) => !usedToolIds.includes(id));
 
     return {
       score: missingToolIds.length === 0 ? 1 : 0,
-      metadata: { expectedToolIds, usedToolIds, missingToolIds },
+      metadata: { expectedToolIds: requiredToolIds, usedToolIds, missingToolIds },
     };
   },
 });
@@ -54,23 +59,16 @@ export const createExpectedAnyOfToolIdsEvaluator = (): Evaluator<
     const expectedAnyOfToolIds = metadata?.expectedAnyOfToolIds;
 
     if (expectedAnyOfToolIds == null) {
-      return {
-        score: null,
-        label: 'skipped',
-        explanation: 'No any-of tool-id expectation for this example',
-      };
+      return skippedResult('No any-of tool-id expectation for this example');
     }
 
-    if (expectedAnyOfToolIds.length === 0) {
-      throw new Error('expectedAnyOfToolIds must contain at least one tool-id');
-    }
-
+    const alternatives = requireNonEmptyStringList(expectedAnyOfToolIds, 'expectedAnyOfToolIds');
     const usedToolIds = getUsedToolIds(output as TaskOutput);
-    const matchedToolIds = expectedAnyOfToolIds.filter((id) => usedToolIds.includes(id));
+    const matchedToolIds = alternatives.filter((id) => usedToolIds.includes(id));
 
     return {
       score: matchedToolIds.length > 0 ? 1 : 0,
-      metadata: { expectedAnyOfToolIds, matchedToolIds, usedToolIds },
+      metadata: { expectedAnyOfToolIds: alternatives, matchedToolIds, usedToolIds },
     };
   },
 });

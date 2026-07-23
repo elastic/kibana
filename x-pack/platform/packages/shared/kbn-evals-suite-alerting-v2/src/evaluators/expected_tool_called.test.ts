@@ -38,6 +38,12 @@ describe('createExpectedToolCalledEvaluator', () => {
     expect(result.label).toBe('skipped');
   });
 
+  it('throws when expectedToolIds is an empty array', async () => {
+    await expect(run(outputWithToolCalls([MANAGE_RULE]), { expectedToolIds: [] })).rejects.toThrow(
+      /at least one tool-id/i
+    );
+  });
+
   it('scores 1 when every expected tool was called', async () => {
     const result = await run(outputWithToolCalls([MANAGE_RULE, MANAGE_ACTION_POLICY]), {
       expectedToolIds: [MANAGE_RULE, MANAGE_ACTION_POLICY],
@@ -86,6 +92,12 @@ describe('createExpectedAnyOfToolIdsEvaluator', () => {
     const result = await run(outputWithToolCalls([MANAGE_RULE]), {});
     expect(result.score).toBeNull();
     expect(result.label).toBe('skipped');
+  });
+
+  it('throws when expectedAnyOfToolIds is an empty array', async () => {
+    await expect(
+      run(outputWithToolCalls([MANAGE_RULE]), { expectedAnyOfToolIds: [] })
+    ).rejects.toThrow(/at least one tool-id/i);
   });
 
   it('scores 1 when one alternative was called', async () => {

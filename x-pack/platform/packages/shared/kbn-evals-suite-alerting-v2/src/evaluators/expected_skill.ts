@@ -7,6 +7,7 @@
 
 import type { Evaluator, TaskOutput } from '@kbn/evals';
 import type { RuleManagementExample } from '../evaluate_dataset';
+import { skippedResult } from '../evaluator_utils';
 
 interface ConversationStep {
   type?: string;
@@ -66,25 +67,34 @@ export const createExpectedSkillEvaluator = (): Evaluator<
     const expectedSkills = metadata?.expectedSkills;
     const shouldNotActivateSkill = metadata?.shouldNotActivateSkill;
 
-    if (expectedSkills == null && !shouldNotActivateSkill) {
-      return {
-        score: null,
-        label: 'skipped',
-        explanation: 'No skill-load expectation for this example',
-      };
+    if (expectedSkills == null && shouldNotActivateSkill == null) {
+      return skippedResult('No skill-load expectation for this example');
     }
 
-    if (expectedSkills != null && expectedSkills.length === 0) {
-      throw new Error('expectedSkills must contain at least one skill');
+    let requiredSkills: readonly string[] = [];
+    if (expectedSkills != null) {
+      if (!Array.isArray(expectedSkills)) {
+        throw new Error('expectedSkills must be a non-empty array of skills');
+      }
+      requiredSkills = expectedSkills.filter(
+        (skill): skill is string => typeof skill === 'string' && skill.length > 0
+      );
+      if (requiredSkills.length === 0) {
+        throw new Error('expectedSkills must contain at least one skill');
+      }
     }
 
-    const requiredSkills = expectedSkills ?? [];
+    if (shouldNotActivateSkill != null) {
+      if (typeof shouldNotActivateSkill !== 'string' || shouldNotActivateSkill.length === 0) {
+        throw new Error('shouldNotActivateSkill must be a non-empty string');
+      }
+    }
+
     const loadedNames = getSkillsLoadedFromSteps(output as TaskOutput);
-
     const missingSkills = requiredSkills.filter((skill) => !skillIsPresent(skill, loadedNames));
 
     const checks: boolean[] = [missingSkills.length === 0];
-    if (shouldNotActivateSkill) {
+    if (shouldNotActivateSkill != null) {
       checks.push(!skillIsPresent(shouldNotActivateSkill, loadedNames));
     }
 

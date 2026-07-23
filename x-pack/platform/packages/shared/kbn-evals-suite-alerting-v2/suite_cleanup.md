@@ -29,16 +29,16 @@ Not a feature backlog — see `eval_backlog.md` for new behaviours to evaluate.
   `expected_attachment.ts`. Still “last of type” rather than rendered-version
   preference — fine until multi-draft cases show up.
 
-- [ ] **Skip vs throw inconsistency**
-  Empty `criteria` throws; empty `expectRenderAttachment: []` throws; missing
-  optional CODE metadata still skips (`score: null`). Intentional, but easy to
-  misread when scanning Phoenix averages.
+- [x] **Skip vs throw inconsistency**
+  Convention: field omitted / `null` → skip (`score: null`); field present but
+  empty or wrong shape (`[]`, `''`, non-array, non-function) → throw. Applied to
+  Criteria and CODE evaluators.
 
 ## Repo hygiene
 
 - [ ] **Untracked planning docs**
-  `eval_backlog.md`, `skill_eval_map.md`, `prompt_candidates.md` aren’t in git.
-  Fine if private, but backlog items won’t travel with the PR unless added.
+  `skill_eval_map.md`, `prompt_candidates.md` aren’t in git (`eval_backlog.md`
+  is). Fine if private, but they won’t travel with the PR unless added.
 
 - [ ] **Leftover WIP**
   Local `detection_rule_edit` skill tweak still sitting uncommitted — unrelated
@@ -52,4 +52,3 @@ Tracked in more detail in `eval_backlog.md`:
 - [ ] Concrete-index avoidance
 - [ ] ES|QL execute validation (`LIMIT 0`)
 - [ ] Workflow reuse vs create
-- [ ] Manual trigger on workflows

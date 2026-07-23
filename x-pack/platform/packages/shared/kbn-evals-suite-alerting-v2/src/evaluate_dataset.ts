@@ -36,7 +36,7 @@ import {
   type ExpectAttachmentDataFn,
   type ExpectRenderAttachment,
 } from './evaluators/expected_attachment';
-import { withLowScoreLogging } from './evaluator_utils';
+import { skippedResult, withLowScoreLogging } from './evaluator_utils';
 
 export interface RuleManagementExample extends Example {
   input: {
@@ -52,9 +52,10 @@ export interface RuleManagementExample extends Example {
   output: {
     /**
      * Free-form quality criteria scored by the LLM Criteria judge.
-     * Required — examples must define at least one non-empty criterion.
+     * Omit to skip the Criteria evaluator; if present, must contain at least
+     * one non-empty string.
      */
-    criteria: string[];
+    criteria?: string[];
   };
   metadata?: {
     /** The conversation must call every tool in this list at least once. */
@@ -99,10 +100,21 @@ export type EvaluateDataset = (params: {
   };
 }) => Promise<void>;
 
+/**
+ * Resolves Criteria strings from example output.
+ * - `null` when `criteria` is omitted (evaluator should skip)
+ * - throws when `criteria` is present but empty / only blanks / not an array
+ */
 export const collectScoredCriteria = (
   output: RuleManagementExample['output'] | null | undefined
-): string[] => {
-  const scoredCriteria = (output?.criteria ?? []).filter(
+): string[] | null => {
+  if (output == null || output.criteria === undefined || output.criteria === null) {
+    return null;
+  }
+  if (!Array.isArray(output.criteria)) {
+    throw new Error('criteria must be an array of non-empty strings');
+  }
+  const scoredCriteria = output.criteria.filter(
     (item): item is string => typeof item === 'string' && item.trim().length > 0
   );
   if (scoredCriteria.length === 0) {
@@ -118,6 +130,9 @@ const createCriteriaEvaluator = (evaluators: DefaultEvaluators): Evaluator => ({
     const scoredCriteria = collectScoredCriteria(
       expected as RuleManagementExample['output'] | null | undefined
     );
+    if (scoredCriteria == null) {
+      return skippedResult('No criteria expectation for this example');
+    }
     return evaluators.criteria(scoredCriteria).evaluate({ expected, ...rest });
   },
 });
