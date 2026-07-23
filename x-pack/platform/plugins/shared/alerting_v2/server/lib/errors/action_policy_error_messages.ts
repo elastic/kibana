@@ -5,14 +5,6 @@
  * 2.0.
  */
 
-/**
- * Canonical human-readable messages for action-policy domain errors.
- * Used by the action policy client (runtime Boom errors) and OAS examples so
- * documentation stays aligned with the HTTP responses clients actually see.
- *
- * `message` is not part of the API contract — clients should branch on `code`.
- */
-
 export type ActionPolicyValidationContext = 'create' | 'update' | 'upsert';
 
 export const getActionPolicyNotFoundMessage = (id: string): string =>
