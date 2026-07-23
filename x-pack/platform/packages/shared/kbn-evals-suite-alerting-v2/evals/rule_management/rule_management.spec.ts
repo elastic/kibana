@@ -204,19 +204,20 @@ evaluate.describe(
                   expectedSkills: [RULE_MANAGEMENT_SKILL_ID],
                   shouldNotActivateSkill: DETECTION_RULE_EDIT_SKILL_ID,
                   expectedToolIds: [ALERTING_TOOL_IDS.manageRule],
-                  expectRenderAttachment: true,
-                  assertAttachment: (attachment) => {
-                    expect(attachment.kind).toEqual('alert');
-                    expect(attachment.grouping?.fields).toEqual(
-                      expect.arrayContaining(['host.name'])
-                    );
-                    expect(
-                      attachment.state_transition?.pending_timeframe ??
-                        attachment.schedule?.lookback
-                    ).toEqual('5m');
-                    const esql = attachment.query ? getBreachEsqlQuery(attachment.query) : '';
-                    expect(esql).toContain(hostMetricsIndex);
-                    expect(esql).toContain('system.cpu.total.norm.pct');
+                  expectRenderAttachment: {
+                    assert: (attachment) => {
+                      expect(attachment.kind).toEqual('alert');
+                      expect(attachment.grouping?.fields).toEqual(
+                        expect.arrayContaining(['host.name'])
+                      );
+                      expect(
+                        attachment.state_transition?.pending_timeframe ??
+                          attachment.schedule?.lookback
+                      ).toEqual('5m');
+                      const esql = attachment.query ? getBreachEsqlQuery(attachment.query) : '';
+                      expect(esql).toContain(hostMetricsIndex);
+                      expect(esql).toContain('system.cpu.total.norm.pct');
+                    },
                   },
                 },
               },
@@ -270,21 +271,22 @@ evaluate.describe(
                   expectedSkills: [RULE_MANAGEMENT_SKILL_ID],
                   shouldNotActivateSkill: DETECTION_RULE_EDIT_SKILL_ID,
                   expectedToolIds: [ALERTING_TOOL_IDS.manageRule],
-                  expectRenderAttachment: true,
-                  assertAttachment: (attachment) => {
-                    expect(attachment.kind).toEqual('alert');
-                    expect(attachment.grouping?.fields).toEqual(
-                      expect.arrayContaining(['host.name'])
-                    );
-                    // "stays above for 5 minutes" → pending timeframe / lookback, not a
-                    // WHERE on @timestamp. Accept either representation.
-                    expect(
-                      attachment.state_transition?.pending_timeframe ??
-                        attachment.schedule?.lookback
-                    ).toEqual('5m');
-                    const esql = attachment.query ? getBreachEsqlQuery(attachment.query) : '';
-                    expect(esql).toContain(hostMetricsIndex);
-                    expect(esql).toContain('system.cpu.total.norm.pct');
+                  expectRenderAttachment: {
+                    assert: (attachment) => {
+                      expect(attachment.kind).toEqual('alert');
+                      expect(attachment.grouping?.fields).toEqual(
+                        expect.arrayContaining(['host.name'])
+                      );
+                      // "stays above for 5 minutes" → pending timeframe / lookback, not a
+                      // WHERE on @timestamp. Accept either representation.
+                      expect(
+                        attachment.state_transition?.pending_timeframe ??
+                          attachment.schedule?.lookback
+                      ).toEqual('5m');
+                      const esql = attachment.query ? getBreachEsqlQuery(attachment.query) : '';
+                      expect(esql).toContain(hostMetricsIndex);
+                      expect(esql).toContain('system.cpu.total.norm.pct');
+                    },
                   },
                 },
               },
@@ -339,12 +341,13 @@ evaluate.describe(
                   // discover it and inspect mappings before composing.
                   expectedToolIds: [ALERTING_TOOL_IDS.manageRule, INDEX_MAPPING_TOOL_ID],
                   expectedAnyOfToolIds: INDEX_DISCOVERY_TOOL_IDS,
-                  expectRenderAttachment: true,
-                  assertAttachment: (attachment) => {
-                    expect(attachment.kind).toEqual('alert');
-                    expect(attachment.schedule?.lookback).toEqual('5m');
-                    const esql = attachment.query ? getBreachEsqlQuery(attachment.query) : '';
-                    expect(esql.toLowerCase()).toContain('admin-console');
+                  expectRenderAttachment: {
+                    assert: (attachment) => {
+                      expect(attachment.kind).toEqual('alert');
+                      expect(attachment.schedule?.lookback).toEqual('5m');
+                      const esql = attachment.query ? getBreachEsqlQuery(attachment.query) : '';
+                      expect(esql.toLowerCase()).toContain('admin-console');
+                    },
                   },
                 },
               },

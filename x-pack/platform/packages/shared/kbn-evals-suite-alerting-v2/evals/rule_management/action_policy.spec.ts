@@ -8,11 +8,16 @@
 import { tags } from '@kbn/scout';
 import { evaluate as base } from '../../src/evaluate';
 import {
+  ACTION_POLICY_ATTACHMENT_TYPE,
+  RULE_ATTACHMENT_TYPE,
+} from '@kbn/alerting-v2-schemas';
+import {
   ALERTING_TOOL_IDS,
   DETECTION_RULE_EDIT_SKILL_ID,
   RULE_MANAGEMENT_SKILL_ID,
   WORKFLOW_AUTHORING_SKILL_ID,
   WORKFLOW_GENERATION_TOOL_ID,
+  WORKFLOW_YAML_ATTACHMENT_TYPE,
 } from '../../src/constants';
 import type { EvaluateDataset } from '../../src/evaluate_dataset';
 import { createEvaluateDataset } from '../../src/evaluate_dataset';
@@ -83,12 +88,11 @@ evaluate.describe(
                     ALERTING_TOOL_IDS.manageRule,
                     WORKFLOW_GENERATION_TOOL_ID,
                   ],
-                  expectRenderAttachment: true,
-                  // No assertAttachment: the rule-attachment resolver follows the latest
-                  // <render_attachment> tag, which in this flow points at the action
-                  // policy (or workflow) attachment rather than the rule, so a
-                  // rule-shaped structural assertion would be unreliable here. Policy
-                  // shape is covered by the Criteria judge instead.
+                  expectRenderAttachment: [
+                    RULE_ATTACHMENT_TYPE,
+                    WORKFLOW_YAML_ATTACHMENT_TYPE,
+                    ACTION_POLICY_ATTACHMENT_TYPE,
+                  ],
                 },
               },
             ],

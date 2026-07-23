@@ -5,15 +5,45 @@
  * 2.0.
  */
 
+import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
+import type { RuleAttachmentData } from '@kbn/alerting-v2-schemas';
 import type { TaskOutput } from '@kbn/evals';
 import {
   RENDER_ATTACHMENT_TAG_RE,
   createExpectedRenderAttachmentEvaluator,
 } from './expected_render_attachment';
 
-const conversation = (assistantMessage: string): TaskOutput =>
+const attachment = (id: string, type: string): VersionedAttachment =>
+  ({
+    id,
+    type,
+    current_version: 1,
+    versions: [
+      {
+        version: 1,
+        data: {},
+        created_at: '2026-01-01T00:00:00.000Z',
+        content_hash: 'hash-1',
+      },
+    ],
+  } as VersionedAttachment);
+
+const ruleAttachment = (overrides: Partial<RuleAttachmentData> = {}): RuleAttachmentData =>
+  ({
+    kind: 'alert',
+    schedule: { every: '1m', lookback: '5m' },
+    ...overrides,
+  } as RuleAttachmentData);
+
+const conversation = (
+  assistantMessage: string,
+  attachments: VersionedAttachment[] = [],
+  extras: Partial<TaskOutput> = {}
+): TaskOutput =>
   ({
     messages: [{ message: 'user prompt' }, { message: assistantMessage }],
+    attachments,
+    ...extras,
   } as unknown as TaskOutput);
 
 const run = (output: TaskOutput, metadata: Record<string, unknown> | null) =>
@@ -65,9 +95,7 @@ describe('createExpectedRenderAttachmentEvaluator', () => {
     expect(result.score).toBe(1);
     expect(result.metadata).toEqual(
       expect.objectContaining({
-        matchedTag: '<render_attachment id="abc" version="1"/>',
-        attachmentId: 'abc',
-        attachmentVersion: 1,
+        matchedTags: ['<render_attachment id="abc" version="1"/>'],
       })
     );
   });
@@ -84,5 +112,99 @@ describe('createExpectedRenderAttachmentEvaluator', () => {
       expectRenderAttachment: true,
     });
     expect(result.score).toBe(0);
+  });
+
+  it('scores 1 when every expected attachment type was rendered', async () => {
+    const result = await run(
+      conversation(
+        [
+          '<render_attachment id="rule-1" version="1"/>',
+          '<render_attachment id="wf-1" version="1"/>',
+          '<render_attachment id="policy-1" version="1"/>',
+        ].join('\n'),
+        [
+          attachment('rule-1', 'rule'),
+          attachment('wf-1', 'workflow.yaml'),
+          attachment('policy-1', 'action_policy'),
+        ]
+      ),
+      { expectRenderAttachment: ['rule', 'workflow.yaml', 'action_policy'] }
+    );
+    expect(result.score).toBe(1);
+    expect(result.metadata).toEqual(
+      expect.objectContaining({
+        renderedTypes: expect.arrayContaining(['rule', 'workflow.yaml', 'action_policy']),
+        missingTypes: [],
+      })
+    );
+  });
+
+  it('scores 0 when an expected attachment type was not rendered', async () => {
+    const result = await run(
+      conversation('<render_attachment id="rule-1" version="1"/>', [
+        attachment('rule-1', 'rule'),
+        attachment('policy-1', 'action_policy'),
+      ]),
+      { expectRenderAttachment: ['rule', 'action_policy'] }
+    );
+    expect(result.score).toBe(0);
+    expect(result.metadata).toEqual(
+      expect.objectContaining({
+        renderedTypes: ['rule'],
+        missingTypes: ['action_policy'],
+      })
+    );
+  });
+
+  it('scores 0 when assert is set but no rule attachment was loaded', async () => {
+    const result = await run(
+      conversation('<render_attachment id="rule-1" version="1"/>', [attachment('rule-1', 'rule')]),
+      {
+        expectRenderAttachment: {
+          assert: () => {
+            expect(true).toBe(true);
+          },
+        },
+      }
+    );
+    expect(result.score).toBe(0);
+    expect(result.explanation).toMatch(/no rule attachment/i);
+  });
+
+  it('scores 1 when assert passes after a successful render', async () => {
+    const result = await run(
+      conversation(
+        '<render_attachment id="rule-1" version="1"/>',
+        [attachment('rule-1', 'rule')],
+        { ruleAttachment: ruleAttachment() }
+      ),
+      {
+        expectRenderAttachment: {
+          assert: (data: RuleAttachmentData) => {
+            expect(data.schedule?.lookback).toEqual('5m');
+          },
+        },
+      }
+    );
+    expect(result.score).toBe(1);
+  });
+
+  it('scores 0 when assert throws after a successful render', async () => {
+    const result = await run(
+      conversation(
+        '<render_attachment id="rule-1" version="1"/>',
+        [attachment('rule-1', 'rule')],
+        { ruleAttachment: ruleAttachment({ schedule: { every: '1m', lookback: '10m' } }) }
+      ),
+      {
+        expectRenderAttachment: {
+          assert: (data: RuleAttachmentData) => {
+            expect(data.schedule?.lookback).toEqual('5m');
+          },
+        },
+      }
+    );
+    expect(result.score).toBe(0);
+    expect(result.explanation).toMatch(/5m|lookback|Expected/i);
   });
 });

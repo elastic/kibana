@@ -13,6 +13,9 @@ export {
   RULE_MANAGEMENT_SKILL_ID,
 } from '@kbn/alerting-v2-constants';
 
+/** Attachment type for workflow YAML drafts produced by `generate_workflow`. */
+export const WORKFLOW_YAML_ATTACHMENT_TYPE = 'workflow.yaml';
+
 /**
  * Security detection-rule skill that commonly competes with Alerting V2
  * "create an alerting rule" prompts. Kept as a distractor id for routing evals.

@@ -25,10 +25,6 @@ import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments'
 import type { ToolingLog } from '@kbn/tooling-log';
 import { resolveRuleAttachmentData } from './attachments';
 import type { RuleManagementChatClient } from './chat_client';
-import {
-  createAssertAttachmentEvaluator,
-  type AssertAttachmentFn,
-} from './evaluators/assert_attachment';
 import { createExpectedSkillEvaluator } from './evaluators/expected_skill';
 import {
   createExpectedAnyOfToolIdsEvaluator,
@@ -37,6 +33,7 @@ import {
 import {
   createExpectedRenderAttachmentEvaluator,
   getAssistantMessages,
+  type ExpectRenderAttachment,
 } from './evaluators/expected_render_attachment';
 import { withLowScoreLogging } from './evaluators/log_low_score';
 
@@ -75,22 +72,15 @@ export interface RuleManagementExample extends Example {
      */
     expectedAnyOfToolIds?: readonly string[];
     /**
-     * When true, at least one assistant message must contain a valid
-     * `<render_attachment id="…" version="…" />` tag so the UI can display
-     * the composed attachment card.
+     * Render-attachment expectation:
+     * - `true`: at least one valid `<render_attachment>` tag must appear
+     * - `string[]`: each listed attachment type (e.g. `rule`, `workflow.yaml`,
+     *   `action_policy`) must be rendered via a tag whose id resolves to that
+     *   type in the conversation attachments
+     * - `{ types?, assert? }`: combine type checks with an optional Jest-style
+     *   structural assert on the resolved rule attachment
      */
-    expectRenderAttachment?: boolean;
-    /**
-     * Jest-style callback that asserts against the composed rule attachment
-     * data fetched from the conversation. Prefer this over Criteria for
-     * structural checks (kind, schedule.lookback, query shape, grouping, …).
-     *
-     * Example (import `expect` from `@playwright/test` in the spec):
-     * `assertAttachment: (attachment) => { expect(attachment.schedule?.lookback).toEqual('5m'); }`
-     *
-     * In-memory only — not serializable to Phoenix datasets.
-     */
-    assertAttachment?: AssertAttachmentFn;
+    expectRenderAttachment?: ExpectRenderAttachment;
     /**
      * The conversation must load **every** skill in this list at least once.
      * Use a one-element array for a single skill. Prefer this over a singular
@@ -280,7 +270,6 @@ export const createEvaluateDataset = ({
         createExpectedToolCalledEvaluator(),
         createExpectedAnyOfToolIdsEvaluator(),
         createExpectedRenderAttachmentEvaluator(),
-        createAssertAttachmentEvaluator(),
         createCriteriaEvaluator(evaluators),
       ].map((evaluator) => withLowScoreLogging(evaluator, log))
     );
