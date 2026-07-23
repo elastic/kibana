@@ -75,6 +75,7 @@ spaceTest.describe(
     spaceTest('navigates to maintenance windows', async ({ browserAuth, pageObjects }) => {
       const { serverlessProjectChromePage, collapsibleNav } = pageObjects;
 
+      // Admin is the only role that has "maintenanceWindow" feature privilege.
       await browserAuth.loginAsAdmin();
       await serverlessProjectChromePage.navigateToSecuritySolutionHomeForChromeNav();
 
