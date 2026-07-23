@@ -15,8 +15,8 @@ import {
 import { ChartType } from '../../charts/helper/get_timeseries_color';
 import { getChartDefinitions, getLatencyChartType } from './chart_configs';
 
-const INDEXES = 'traces-apm*,metrics-apm*';
-const INDEX_PATTERNS = ['traces-apm*', 'metrics-apm*'];
+const TRANSACTION_INDEXES = 'traces-apm*';
+const METRIC_INDEXES = 'metrics-apm*';
 
 type XYLensConfig = Extract<LensConfig, { chartType: 'xy' }>;
 
@@ -31,7 +31,8 @@ function buildDefinitions(
   overrides: Partial<Parameters<typeof getChartDefinitions>[0]> = {}
 ): ReturnType<typeof getChartDefinitions> {
   return getChartDefinitions({
-    indexes: INDEXES,
+    transactionIndexes: TRANSACTION_INDEXES,
+    metricIndexes: METRIC_INDEXES,
     serviceName: 'opbeans-java',
     environment: 'production',
     transactionType: 'request',
@@ -71,19 +72,25 @@ describe('service flyout chart_configs', () => {
     it('buckets every chart by a `timestamp` TBUCKET aliased to the date histogram x-axis', () => {
       const { keyMetrics, infrastructureMetrics } = buildDefinitions();
 
-      [...keyMetrics, ...infrastructureMetrics].forEach(({ config }) => {
+      keyMetrics.forEach(({ config }) => {
         const esql = esqlOf(config);
-
-        INDEX_PATTERNS.forEach((index) => expect(esql).toContain(index));
+        expect(esql).toContain(TRANSACTION_INDEXES);
         expect(esql).toContain('BY timestamp = TBUCKET(100)');
-        // the x-axis field must match the bucket column so Lens can resolve it
+        expect(seriesLayerOf(config).xAxis).toEqual({ field: 'timestamp', type: 'dateHistogram' });
+      });
+
+      infrastructureMetrics.forEach(({ config }) => {
+        const esql = esqlOf(config);
+        expect(esql).toContain(METRIC_INDEXES);
+        expect(esql).toContain('BY timestamp = TBUCKET(100)');
         expect(seriesLayerOf(config).xAxis).toEqual({ field: 'timestamp', type: 'dateHistogram' });
       });
     });
 
-    it('returns the chart layout without a config until the index pattern resolves', () => {
+    it('returns the chart layout without a config until the index patterns resolve', () => {
       const { keyMetrics, infrastructureMetrics } = buildDefinitions({
-        indexes: undefined,
+        transactionIndexes: undefined,
+        metricIndexes: undefined,
         latencyTitleAction: 'latency-action',
       });
 
@@ -114,7 +121,7 @@ describe('service flyout chart_configs', () => {
       const { keyMetrics } = buildDefinitions({ environment: ENVIRONMENT_NOT_DEFINED.value });
 
       expect(esqlOf(keyMetrics[0].config)).toEqual(
-        'SET unmapped_fields="nullify";\nFROM traces-apm*, metrics-apm* | WHERE `processor.event` == "transaction" | WHERE `service.name` == "opbeans-java" | WHERE `transaction.type` == "request" | WHERE `service.environment` == "ENVIRONMENT_NOT_DEFINED" OR `service.environment` IS NULL | EVAL duration_ms = TO_DOUBLE(transaction.duration.us) / 1000 | STATS AVG(duration_ms) BY timestamp = TBUCKET(100)'
+        'SET unmapped_fields="nullify";\nFROM traces-apm* | WHERE `processor.event` == "transaction" | WHERE `service.name` == "opbeans-java" | WHERE `transaction.type` == "request" | WHERE `service.environment` == "ENVIRONMENT_NOT_DEFINED" OR `service.environment` IS NULL | EVAL duration_ms = TO_DOUBLE(transaction.duration.us) / 1000 | STATS AVG(duration_ms) BY timestamp = TBUCKET(100)'
       );
     });
 
@@ -122,7 +129,7 @@ describe('service flyout chart_configs', () => {
       const { keyMetrics } = buildDefinitions({ environment: ENVIRONMENT_ALL.value });
 
       expect(esqlOf(keyMetrics[0].config)).toEqual(
-        'SET unmapped_fields="nullify";\nFROM traces-apm*, metrics-apm* | WHERE `processor.event` == "transaction" | WHERE `service.name` == "opbeans-java" | WHERE `transaction.type` == "request" | EVAL duration_ms = TO_DOUBLE(transaction.duration.us) / 1000 | STATS AVG(duration_ms) BY timestamp = TBUCKET(100)'
+        'SET unmapped_fields="nullify";\nFROM traces-apm* | WHERE `processor.event` == "transaction" | WHERE `service.name` == "opbeans-java" | WHERE `transaction.type` == "request" | EVAL duration_ms = TO_DOUBLE(transaction.duration.us) / 1000 | STATS AVG(duration_ms) BY timestamp = TBUCKET(100)'
       );
     });
 
@@ -131,7 +138,7 @@ describe('service flyout chart_configs', () => {
       const latency = keyMetrics[0].config as XYLensConfig;
 
       expect(esqlOf(keyMetrics[0].config)).toEqual(
-        'SET unmapped_fields="nullify";\nFROM traces-apm*, metrics-apm* | WHERE `processor.event` == "transaction" | WHERE `service.name` == "opbeans-java" | WHERE `transaction.type` == "request" | WHERE `service.environment` == "production" | EVAL duration_ms = TO_DOUBLE(transaction.duration.us) / 1000 | STATS AVG(duration_ms) BY timestamp = TBUCKET(100)'
+        'SET unmapped_fields="nullify";\nFROM traces-apm* | WHERE `processor.event` == "transaction" | WHERE `service.name` == "opbeans-java" | WHERE `transaction.type` == "request" | WHERE `service.environment` == "production" | EVAL duration_ms = TO_DOUBLE(transaction.duration.us) / 1000 | STATS AVG(duration_ms) BY timestamp = TBUCKET(100)'
       );
       // the y-axis value must match the STATS output column so Lens can resolve it
       expect(latency.layers[0].yAxis[0].value).toBe('AVG(duration_ms)');
@@ -142,13 +149,13 @@ describe('service flyout chart_configs', () => {
       const p99 = buildDefinitions({ latencyAggregationType: LatencyAggregationType.p99 });
 
       expect(esqlOf(p95.keyMetrics[0].config)).toEqual(
-        'SET unmapped_fields="nullify";\nFROM traces-apm*, metrics-apm* | WHERE `processor.event` == "transaction" | WHERE `service.name` == "opbeans-java" | WHERE `transaction.type` == "request" | WHERE `service.environment` == "production" | EVAL duration_ms = TO_DOUBLE(transaction.duration.us) / 1000 | STATS PERCENTILE(duration_ms, 95) BY timestamp = TBUCKET(100)'
+        'SET unmapped_fields="nullify";\nFROM traces-apm* | WHERE `processor.event` == "transaction" | WHERE `service.name` == "opbeans-java" | WHERE `transaction.type` == "request" | WHERE `service.environment` == "production" | EVAL duration_ms = TO_DOUBLE(transaction.duration.us) / 1000 | STATS PERCENTILE(duration_ms, 95) BY timestamp = TBUCKET(100)'
       );
       expect((p95.keyMetrics[0].config as XYLensConfig).layers[0].yAxis[0].value).toBe(
         'PERCENTILE(duration_ms, 95)'
       );
       expect(esqlOf(p99.keyMetrics[0].config)).toEqual(
-        'SET unmapped_fields="nullify";\nFROM traces-apm*, metrics-apm* | WHERE `processor.event` == "transaction" | WHERE `service.name` == "opbeans-java" | WHERE `transaction.type` == "request" | WHERE `service.environment` == "production" | EVAL duration_ms = TO_DOUBLE(transaction.duration.us) / 1000 | STATS PERCENTILE(duration_ms, 99) BY timestamp = TBUCKET(100)'
+        'SET unmapped_fields="nullify";\nFROM traces-apm* | WHERE `processor.event` == "transaction" | WHERE `service.name` == "opbeans-java" | WHERE `transaction.type` == "request" | WHERE `service.environment` == "production" | EVAL duration_ms = TO_DOUBLE(transaction.duration.us) / 1000 | STATS PERCENTILE(duration_ms, 99) BY timestamp = TBUCKET(100)'
       );
       expect((p99.keyMetrics[0].config as XYLensConfig).layers[0].yAxis[0].value).toBe(
         'PERCENTILE(duration_ms, 99)'
@@ -160,7 +167,7 @@ describe('service flyout chart_configs', () => {
       const throughput = keyMetrics[1].config as XYLensConfig;
 
       expect(esqlOf(keyMetrics[1].config)).toEqual(
-        'SET unmapped_fields="nullify";\nFROM traces-apm*, metrics-apm* | WHERE `processor.event` == "transaction" | WHERE `service.name` == "opbeans-java" | WHERE `transaction.type` == "request" | WHERE `service.environment` == "production" | STATS COUNT(*) BY timestamp = TBUCKET(100)'
+        'SET unmapped_fields="nullify";\nFROM traces-apm* | WHERE `processor.event` == "transaction" | WHERE `service.name` == "opbeans-java" | WHERE `transaction.type` == "request" | WHERE `service.environment` == "production" | STATS COUNT(*) BY timestamp = TBUCKET(100)'
       );
       expect(throughput.layers[0].yAxis[0].value).toBe('COUNT(*)');
     });
@@ -170,7 +177,7 @@ describe('service flyout chart_configs', () => {
       const failedRate = keyMetrics[2].config as XYLensConfig;
 
       expect(esqlOf(keyMetrics[2].config)).toEqual(
-        'SET unmapped_fields="nullify";\nFROM traces-apm*, metrics-apm* | WHERE `processor.event` == "transaction" | WHERE `service.name` == "opbeans-java" | WHERE `transaction.type` == "request" | WHERE `service.environment` == "production" | STATS failure = COUNT(*) WHERE TO_STRING(event.outcome) == "failure", all = COUNT(*) WHERE (TO_STRING(event.outcome) IN ("failure", "success")) BY timestamp = TBUCKET(100) | EVAL failed_transaction_rate = CASE(all > 0, TO_DOUBLE(failure) / all, NULL) | KEEP timestamp, failed_transaction_rate | SORT timestamp'
+        'SET unmapped_fields="nullify";\nFROM traces-apm* | WHERE `processor.event` == "transaction" | WHERE `service.name` == "opbeans-java" | WHERE `transaction.type` == "request" | WHERE `service.environment` == "production" | STATS failure = COUNT(*) WHERE TO_STRING(event.outcome) == "failure", all = COUNT(*) WHERE (TO_STRING(event.outcome) IN ("failure", "success")) BY timestamp = TBUCKET(100) | EVAL failed_transaction_rate = CASE(all > 0, TO_DOUBLE(failure) / all, NULL) | KEEP timestamp, failed_transaction_rate | SORT timestamp'
       );
       expect(failedRate.layers[0].yAxis[0].value).toBe('failed_transaction_rate');
       expect(failedRate.yBounds).toEqual({ mode: 'custom', lowerBound: 0, upperBound: 1 });
@@ -192,7 +199,7 @@ describe('service flyout chart_configs', () => {
       const cpu = infrastructureMetrics[0].config as XYLensConfig;
 
       expect(esqlOf(infrastructureMetrics[0].config)).toEqual(
-        'SET unmapped_fields="nullify";\nFROM traces-apm*, metrics-apm* | WHERE `processor.event` == "metric" | WHERE `service.name` == "opbeans-java" | WHERE `service.environment` == "production" | WHERE TO_DOUBLE(system.cpu.total.norm.pct) IS NOT NULL | STATS AVG(TO_DOUBLE(system.cpu.total.norm.pct)) BY timestamp = TBUCKET(100)'
+        'SET unmapped_fields="nullify";\nFROM metrics-apm* | WHERE `processor.event` == "metric" | WHERE `service.name` == "opbeans-java" | WHERE `service.environment` == "production" | WHERE TO_DOUBLE(system.cpu.total.norm.pct) IS NOT NULL | STATS AVG(TO_DOUBLE(system.cpu.total.norm.pct)) BY timestamp = TBUCKET(100)'
       );
       expect(cpu.layers[0].yAxis[0].value).toBe('AVG(TO_DOUBLE(system.cpu.total.norm.pct))');
     });
@@ -202,7 +209,7 @@ describe('service flyout chart_configs', () => {
       const memory = infrastructureMetrics[1].config as XYLensConfig;
 
       expect(esqlOf(infrastructureMetrics[1].config)).toEqual(
-        'SET unmapped_fields="nullify";\nFROM traces-apm*, metrics-apm* | WHERE `processor.event` == "metric" | WHERE `service.name` == "opbeans-java" | WHERE `service.environment` == "production" | EVAL cgroup_usage = TO_DOUBLE(system.process.cgroup.memory.mem.usage.bytes) | EVAL cgroup_limit = TO_DOUBLE(system.process.cgroup.memory.mem.`limit`.bytes) | EVAL sys_free = TO_DOUBLE(system.memory.actual.free) | EVAL sys_total = TO_DOUBLE(system.memory.total) | WHERE cgroup_usage IS NOT NULL OR sys_free IS NOT NULL AND sys_total IS NOT NULL | EVAL effective_total = CASE(cgroup_limit > 0 AND cgroup_limit != 9223372036854772000, cgroup_limit, sys_total) | EVAL memory_usage = CASE(cgroup_usage IS NOT NULL AND effective_total > 0, cgroup_usage / effective_total, sys_total > 0 AND sys_free IS NOT NULL, 1 - sys_free / sys_total, NULL) | STATS memory_usage = AVG(memory_usage) BY timestamp = TBUCKET(100) | KEEP timestamp, memory_usage | SORT timestamp'
+        'SET unmapped_fields="nullify";\nFROM metrics-apm* | WHERE `processor.event` == "metric" | WHERE `service.name` == "opbeans-java" | WHERE `service.environment` == "production" | EVAL cgroup_usage = TO_DOUBLE(system.process.cgroup.memory.mem.usage.bytes) | EVAL cgroup_limit = TO_DOUBLE(system.process.cgroup.memory.mem.`limit`.bytes) | EVAL sys_free = TO_DOUBLE(system.memory.actual.free) | EVAL sys_total = TO_DOUBLE(system.memory.total) | WHERE cgroup_usage IS NOT NULL OR sys_free IS NOT NULL AND sys_total IS NOT NULL | EVAL effective_total = CASE(cgroup_limit > 0 AND cgroup_limit != 9223372036854772000, cgroup_limit, sys_total) | EVAL memory_usage = CASE(cgroup_usage IS NOT NULL AND effective_total > 0, cgroup_usage / effective_total, sys_total > 0 AND sys_free IS NOT NULL, 1 - sys_free / sys_total, NULL) | STATS memory_usage = AVG(memory_usage) BY timestamp = TBUCKET(100) | KEEP timestamp, memory_usage | SORT timestamp'
       );
       expect(memory.layers[0].yAxis[0].value).toBe('memory_usage');
     });

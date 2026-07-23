@@ -22,10 +22,10 @@ import React, { useMemo, useState } from 'react';
 import type { LensESQLConfig } from './types';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 import { useServiceFlyoutContext } from '../service_flyout_context';
-import { useAdHocApmDataView } from '../../../../hooks/use_adhoc_apm_data_view';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { LatencyAggregationTypeSelect } from '../../charts/latency_chart/latency_aggregation_type_select';
 import { useServiceHasSystemMetrics } from '../hooks/use_service_has_system_metrics';
+import { useApmIndices } from '../hooks/use_apm_indices';
 import { getChartDefinitions } from './chart_configs';
 import { ServiceFlyoutLensChart } from './lens_chart';
 import { ServiceFlyoutQueryControls } from './query_controls';
@@ -125,8 +125,7 @@ export function ServiceFlyoutOverview() {
     filters: { environment, rangeFrom, rangeTo, transactionType, refreshToken },
   } = useServiceFlyoutContext();
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
-  const { dataView } = useAdHocApmDataView();
-  const indexes = dataView?.getIndexPattern();
+  const { indices } = useApmIndices({ http: core.http });
   const { hasSystemMetrics, isLoading: isSystemMetricsLoading } = useServiceHasSystemMetrics({
     http: core.http,
     serviceName: service.name,
@@ -138,7 +137,8 @@ export function ServiceFlyoutOverview() {
   const { keyMetrics, infrastructureMetrics } = useMemo(
     () =>
       getChartDefinitions({
-        indexes,
+        transactionIndexes: indices?.transaction,
+        metricIndexes: indices?.metric,
         serviceName: service.name,
         environment,
         transactionType: transactionType ?? '',
@@ -150,7 +150,7 @@ export function ServiceFlyoutOverview() {
           />
         ),
       }),
-    [environment, indexes, latencyAggregationType, service.name, transactionType]
+    [environment, indices, latencyAggregationType, service.name, transactionType]
   );
 
   return (

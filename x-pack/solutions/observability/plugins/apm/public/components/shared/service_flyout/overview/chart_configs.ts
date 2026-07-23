@@ -370,14 +370,16 @@ function getMemoryUsageChart(
 }
 
 export function getChartDefinitions({
-  indexes,
+  transactionIndexes,
+  metricIndexes,
   serviceName,
   environment,
   transactionType,
   latencyAggregationType,
   latencyTitleAction,
 }: {
-  indexes: string | undefined;
+  transactionIndexes: string | undefined;
+  metricIndexes: string | undefined;
   serviceName: string;
   environment: string;
   transactionType: string;
@@ -392,13 +394,13 @@ export function getChartDefinitions({
 
   return {
     keyMetrics: [
-      getLatencyChart(indexes, scope, latencyAggregationType, latencyTitleAction),
-      getThroughputChart(indexes, scope),
-      getFailedTransactionRateChart(indexes, scope),
+      getLatencyChart(transactionIndexes, scope, latencyAggregationType, latencyTitleAction),
+      getThroughputChart(transactionIndexes, scope),
+      getFailedTransactionRateChart(transactionIndexes, scope),
     ],
     infrastructureMetrics: [
-      getCpuUsageChart(indexes, metricScope),
-      getMemoryUsageChart(indexes, metricScope),
+      getCpuUsageChart(metricIndexes, metricScope),
+      getMemoryUsageChart(metricIndexes, metricScope),
     ],
   };
 }
