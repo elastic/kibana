@@ -30,6 +30,9 @@ export interface SeverityCounts {
 export type Baseline = Record<string, SeverityCounts>;
 
 const WARNING_DOC_PROPERTIES = new Set(['description']);
+// Custom Kibana override: oasdiff focuses on semantic / backward-compat contract
+// changes (https://www.oasdiff.com/docs/breaking-changes), not doc completeness.
+// We still elevate missing summary/example/examples to errors for our baseline gate.
 const ERROR_DOC_PROPERTIES = new Set(['summary', 'example', 'examples']);
 
 // Drop known AJV noise: optional `$ref`, aggregate anyOf/oneOf `passingSchemas: null`.
