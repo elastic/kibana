@@ -107,7 +107,7 @@ These EUI/Kibana component behaviours are non-obvious and cannot be inferred fro
 - **EUI disabled button tooltip**: hover the `span:has([data-test-subj="..."])` wrapper, not the button itself.
 - **EUI CSS class selectors** (`.euiTableRow`, `.euiToolTipAnchor`, etc.): internal to EUI, change between versions — use `data-test-subj` or ARIA roles.
 - **DOM instability from app bugs**: use `dispatchEvent('click')` over `{ force: true }`; document the bug location in a comment.
-- **EUI Component Objects (`page.components.*`)**: for tests driving EUI components via the published `@elastic/eui-test-helpers`, read `.agents/skills/scout-eui-test-helpers-migration/SKILL.md` — it covers judging the test vs. 1:1-mapping an old wrapper, and requesting helper additions from DevEx rather than self-extending.
+- **EUI Component Objects (`page.components.*`)**: prefer the published `@elastic/eui-test-helpers` (via `page.components.*`) over raw selectors or the old `EuiXxxWrapper`s; flag self-extension (local subclasses / one-off helper methods) — missing capabilities belong in the published helper via DevEx. See the `scout-ui-testing` skill for details.
 
 ## Output
 
