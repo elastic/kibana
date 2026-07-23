@@ -160,6 +160,12 @@ describe('createInitListener', () => {
         scope: PageScope.analyzer,
       })
     );
+
+    // explore scope is intentionally deferred — useInitExploreDataView handles it lazily
+    expect(jest.mocked(mockListenerApi.dispatch)).not.toBeCalledWith(
+      selectDataViewAsync(expect.objectContaining({ scope: PageScope.explore }))
+    );
+
     expect(mockToastsDanger).not.toHaveBeenCalled();
   });
 
