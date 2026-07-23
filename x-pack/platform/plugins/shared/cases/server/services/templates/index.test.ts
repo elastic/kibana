@@ -891,6 +891,43 @@ describe('TemplatesService', () => {
     );
   });
 
+  it('defaults type to keyword for a MARKDOWN field that omits it, on create', async () => {
+    // A display-only MARKDOWN field is authored without `type` (see MarkdownFieldSchema) — the
+    // definition must be parsed through the zod schema (not a raw YAML parse) so this default is
+    // applied before `fieldDefinitions` is built, otherwise the SO write fails validation with
+    // `type` as `undefined`.
+    const definition = yamlStringify({
+      name: 'Template With Markdown',
+      fields: [
+        { control: 'INPUT_TEXT', name: 'field_one', type: 'keyword' },
+        { control: 'MARKDOWN', name: 'instructions', metadata: { content: '# Read me' } },
+      ],
+    });
+    const service = createService();
+
+    unsecuredSavedObjectsClient.create.mockResolvedValue({
+      id: 'template-id',
+      attributes: {} as Template,
+    } as SavedObject<Template>);
+
+    await service.createTemplate(
+      { name: 'Template With Markdown', owner: 'securitySolution', definition },
+      'alice',
+      'generated-id'
+    );
+
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+      CASE_TEMPLATE_SAVED_OBJECT,
+      expect.objectContaining({
+        fieldDefinitions: [
+          { name: 'field_one', label: 'field_one', type: 'keyword', control: 'INPUT_TEXT' },
+          { name: 'instructions', label: 'instructions', type: 'keyword', control: 'MARKDOWN' },
+        ],
+      }),
+      expect.any(Object)
+    );
+  });
+
   it('resolves $ref fields into fieldDefinitions on create', async () => {
     const definition = yamlStringify({
       name: 'Case with ref',
@@ -1181,6 +1218,57 @@ describe('TemplatesService', () => {
           { name: 'field_one', label: 'field_one', type: 'keyword', control: 'INPUT_TEXT' },
         ],
         isLatest: true,
+      }),
+      expect.any(Object)
+    );
+  });
+
+  it('defaults type to keyword for a MARKDOWN field that omits it, on update', async () => {
+    const definition = yamlStringify({
+      name: 'Updated With Markdown',
+      fields: [
+        { control: 'INPUT_TEXT', name: 'field_one', type: 'keyword' },
+        { control: 'MARKDOWN', name: 'instructions', metadata: { content: '# Read me' } },
+      ],
+    });
+    const service = createService();
+
+    jest
+      .spyOn(
+        service as unknown as Record<'_getTemplate', typeof service.getTemplate>,
+        '_getTemplate'
+      )
+      .mockResolvedValue({
+        id: 'template-so-id',
+        attributes: {
+          templateId: 'template-id',
+          name: 'Previous Template',
+          owner: 'securitySolution',
+          definition: buildDefinition('Previous Template'),
+          templateVersion: 1,
+          deletedAt: null,
+          author: 'bob',
+        },
+      } as SavedObject<Template>);
+
+    unsecuredSavedObjectsClient.create.mockResolvedValue({
+      id: 'template-new-so-id',
+      attributes: {} as Template,
+    } as SavedObject<Template>);
+
+    await service.updateTemplate('template-id', {
+      name: 'Updated With Markdown',
+      owner: 'securitySolution',
+      definition,
+    });
+
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+      CASE_TEMPLATE_SAVED_OBJECT,
+      expect.objectContaining({
+        fieldDefinitions: [
+          { name: 'field_one', label: 'field_one', type: 'keyword', control: 'INPUT_TEXT' },
+          { name: 'instructions', label: 'instructions', type: 'keyword', control: 'MARKDOWN' },
+        ],
       }),
       expect.any(Object)
     );
