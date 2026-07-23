@@ -189,7 +189,7 @@ safe-outputs:
   # Custom safe-job: take the draft fix PR out of draft once verification is done.
   jobs:
     mark-pr-ready:
-      description: 'Take the draft fix PR out of draft (mark it ready for review). Call exactly once, and only after you have applied a terminal `flaky-fix-check:*` label (passed, failed, inconclusive, or skipped). Never call it while still iterating. It is a no-op when the PR is already out of draft.'
+      description: 'Take the draft fix PR out of draft (mark it ready for review) and enable auto-merge (squash) so it merges once required CI is green and it has an approval. Call exactly once, and only after you have applied a terminal `flaky-fix-check:*` label (passed, failed, inconclusive, or skipped). Never call it while still iterating.'
       runs-on: ubuntu-latest
       needs: safe_outputs
       permissions:
@@ -214,20 +214,35 @@ safe-outputs:
               }
               const { owner, repo } = context.repo;
               const { data: pr } = await github.rest.pulls.get({ owner, repo, pull_number: prNumber });
-              if (!pr.draft) {
-                core.info(`PR #${prNumber} is already out of draft; nothing to do.`);
+              if (pr.draft) {
+                try {
+                  // markPullRequestReadyForReview only exists on the GraphQL API and needs the PR node id.
+                  await github.graphql(
+                    'mutation($id: ID!) { markPullRequestReadyForReview(input: { pullRequestId: $id }) { pullRequest { isDraft } } }',
+                    { id: pr.node_id }
+                  );
+                  core.info(`Marked PR #${prNumber} ready for review.`);
+                } catch (err) {
+                  // Non-fatal: a failure to mark ready must not fail the verification run.
+                  core.warning(`Could not mark PR #${prNumber} ready for review: ${err.status || ''} ${err.message}`);
+                }
+              } else {
+                core.info(`PR #${prNumber} is already out of draft.`);
+              }
+              if (pr.state !== 'open' || pr.merged) {
+                core.info(`PR #${prNumber} is not open; skipping auto-merge.`);
                 return;
               }
               try {
-                // markPullRequestReadyForReview only exists on the GraphQL API and needs the PR node id.
+                // Always enable auto-merge: Kibana is squash-only, and branch protection (required CI + one approval) still gates the actual merge, so this only removes the final manual click.
                 await github.graphql(
-                  'mutation($id: ID!) { markPullRequestReadyForReview(input: { pullRequestId: $id }) { pullRequest { isDraft } } }',
+                  'mutation($id: ID!) { enablePullRequestAutoMerge(input: { pullRequestId: $id, mergeMethod: SQUASH }) { pullRequest { autoMergeRequest { enabledAt } } } }',
                   { id: pr.node_id }
                 );
-                core.info(`Marked PR #${prNumber} ready for review.`);
+                core.info(`Enabled auto-merge (squash) for PR #${prNumber}.`);
               } catch (err) {
-                // Non-fatal: a failure to mark ready must not fail the verification run.
-                core.warning(`Could not mark PR #${prNumber} ready for review: ${err.status || ''} ${err.message}`);
+                // Non-fatal: auto-merge may be rejected (e.g. all requirements already met, or a transient draft-state race); a human can still merge.
+                core.warning(`Could not enable auto-merge for PR #${prNumber}: ${err.status || ''} ${err.message}`);
               }
 
 strict: false
@@ -292,6 +307,7 @@ Exactly one of these should apply at a time. When you reach a terminal verdict (
 The fixer opens its PR as a **draft**. Verification is what decides it's ready to face a human, so as soon as you reach **any** terminal verdict — `passed`, `failed`, `inconclusive`, or `skipped` — take the PR out of draft by calling the `mark_pr_ready` tool with `confirm: true`, in the same run where you set the terminal label. Do this for every terminal verdict so a finished fix never lingers as a draft.
 
 - **Terminal only.** Never call `mark_pr_ready` while you are still iterating — i.e. whenever you leave `flaky-fix-check:started` in place to trigger another `/flaky` run. Marking a PR ready fires the downstream review and CI automation, which would be wasted on a commit you are about to replace.
+- **Un-drafting always queues auto-merge.** `mark_pr_ready` both takes the PR out of draft and enables GitHub auto-merge (squash) — this is automatic, you don't pass anything to control it. It never merges anything on its own: the PR still won't merge until required CI passes and a human approves, so auto-merge only removes the final manual click once those are satisfied.
 
 ## Environment constraints
 
