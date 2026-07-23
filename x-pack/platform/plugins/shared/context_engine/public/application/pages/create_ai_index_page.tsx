@@ -32,7 +32,7 @@ import type { SelectedSource } from '../components/source_picker';
 import { useCreateAiIndex } from '../hooks/use_create_ai_index';
 import { useNavigation } from '../hooks/use_navigation';
 import { getAiIndexDetailPath } from '../paths';
-import { validateAiIndexName } from '../utils/ai_index_dest';
+import { validateAiIndexId } from '../utils/ai_index_dest';
 
 const STORAGE_TYPES: Array<{
   type: AiIndexType;
@@ -71,17 +71,17 @@ export const CreateAiIndexPage = () => {
   const { navigateToContextEngine } = useNavigation();
   const { createAiIndex, isCreating } = useCreateAiIndex();
   const [selectedSources, setSelectedSources] = useState<SelectedSource[]>([]);
-  const [name, setName] = useState('');
+  const [id, setId] = useState('');
   const [description, setDescription] = useState('');
   const [storageType, setStorageType] = useState<AiIndexType>('index');
   const storageGroupName = useGeneratedHtmlId({ prefix: 'aiIndexStorageType' });
 
-  const { dest, error: nameError } = validateAiIndexName(storageType, name);
+  const { dest, error: nameError } = validateAiIndexId(storageType, id);
   const destValue = dest?.value;
 
   const createAndContinue = async () => {
     const created = await createAiIndex({
-      name,
+      id,
       description,
       storageType,
       sources: selectedSources,
@@ -139,19 +139,20 @@ export const CreateAiIndexPage = () => {
                 />
               ) : (
                 i18n.translate('xpack.contextEngine.createAiIndex.name.helpTextEmpty', {
-                  defaultMessage: 'A backing index name is generated from this name.',
+                  defaultMessage:
+                    'Use lowercase letters, numbers, hyphens, and underscores. A backing index is generated from this name.',
                 })
               )
             }
           >
             <EuiFieldText
               fullWidth
-              value={name}
+              value={id}
               isInvalid={nameError !== undefined}
-              onChange={(event) => setName(event.target.value)}
+              onChange={(event) => setId(event.target.value)}
               data-test-subj="contextAiIndexNameInput"
               placeholder={i18n.translate('xpack.contextEngine.createAiIndex.name.placeholder', {
-                defaultMessage: 'e.g. Support ticket triage',
+                defaultMessage: 'e.g. support-ticket-triage',
               })}
               aria-label={i18n.translate('xpack.contextEngine.createAiIndex.name.ariaLabel', {
                 defaultMessage: 'AI index name',

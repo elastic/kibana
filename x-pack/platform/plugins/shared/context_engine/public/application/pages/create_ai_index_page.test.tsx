@@ -51,8 +51,8 @@ const addEsqlSource = (query: string) => {
   fireEvent.click(screen.getByTestId('contextAddEsqlSourceButton'));
 };
 
-const typeName = (name: string) => {
-  fireEvent.change(screen.getByTestId('contextAiIndexNameInput'), { target: { value: name } });
+const typeId = (id: string) => {
+  fireEvent.change(screen.getByTestId('contextAiIndexNameInput'), { target: { value: id } });
 };
 
 const typeDescription = (description: string) => {
@@ -61,17 +61,19 @@ const typeDescription = (description: string) => {
   });
 };
 
+const VALID_ID = 'support-ticket-triage';
+
 describe('CreateAiIndexPage', () => {
   afterEach(() => {
     jest.clearAllMocks();
   });
 
-  it('keeps the create button disabled until a name is provided, without requiring a source', () => {
+  it('keeps the create button disabled until a valid id is provided, without requiring a source', () => {
     renderWithProviders(coreMock.createStart());
 
     expect(screen.getByTestId('contextCreateAiIndexButton')).toBeDisabled();
 
-    typeName('Support triage');
+    typeId(VALID_ID);
     expect(screen.getByTestId('contextCreateAiIndexButton')).toBeEnabled();
   });
 
@@ -81,16 +83,15 @@ describe('CreateAiIndexPage', () => {
 
     renderWithProviders(services);
 
-    typeName('Support triage');
+    typeId(VALID_ID);
     fireEvent.click(screen.getByTestId('contextCreateAiIndexButton'));
 
     await waitFor(() => {
       expect(services.http.put).toHaveBeenCalledWith(
-        '/api/context_engine/ai_index/support-triage',
+        '/api/context_engine/ai_index/support-ticket-triage',
         expect.objectContaining({
           body: JSON.stringify({
-            name: 'Support triage',
-            dest: { type: 'index', value: 'ai-index-idx-support-triage' },
+            dest: { type: 'index', value: 'ai-index-idx-support-ticket-triage' },
             automations: [],
             sources: [],
           }),
@@ -105,18 +106,17 @@ describe('CreateAiIndexPage', () => {
 
     renderWithProviders(services);
 
-    typeName('Support triage');
+    typeId(VALID_ID);
     typeDescription('Context for triaging support tickets');
     fireEvent.click(screen.getByTestId('contextCreateAiIndexButton'));
 
     await waitFor(() => {
       expect(services.http.put).toHaveBeenCalledWith(
-        '/api/context_engine/ai_index/support-triage',
+        '/api/context_engine/ai_index/support-ticket-triage',
         expect.objectContaining({
           body: JSON.stringify({
-            name: 'Support triage',
             description: 'Context for triaging support tickets',
-            dest: { type: 'index', value: 'ai-index-idx-support-triage' },
+            dest: { type: 'index', value: 'ai-index-idx-support-ticket-triage' },
             automations: [],
             sources: [],
           }),
@@ -131,17 +131,16 @@ describe('CreateAiIndexPage', () => {
 
     renderWithProviders(services);
 
-    typeName('Support triage');
+    typeId(VALID_ID);
     addEsqlSource('FROM logs-* | LIMIT 10');
     fireEvent.click(screen.getByTestId('contextCreateAiIndexButton'));
 
     await waitFor(() => {
       expect(services.http.put).toHaveBeenCalledWith(
-        '/api/context_engine/ai_index/support-triage',
+        '/api/context_engine/ai_index/support-ticket-triage',
         expect.objectContaining({
           body: JSON.stringify({
-            name: 'Support triage',
-            dest: { type: 'index', value: 'ai-index-idx-support-triage' },
+            dest: { type: 'index', value: 'ai-index-idx-support-ticket-triage' },
             automations: [],
             sources: [{ type: 'esql', value: 'FROM logs-* | LIMIT 10' }],
           }),
@@ -150,7 +149,7 @@ describe('CreateAiIndexPage', () => {
     });
 
     expect(services.application.navigateToApp).toHaveBeenCalledWith(CONTEXT_ENGINE_APP_ID, {
-      path: '/ai_index/support-triage',
+      path: '/ai_index/support-ticket-triage',
     });
   });
 
@@ -160,18 +159,17 @@ describe('CreateAiIndexPage', () => {
 
     renderWithProviders(services);
 
-    typeName('Support triage');
+    typeId(VALID_ID);
     addEsqlSource('FROM logs-* | LIMIT 10');
     fireEvent.click(screen.getByTestId('contextAiIndexStorageType-data_stream'));
     fireEvent.click(screen.getByTestId('contextCreateAiIndexButton'));
 
     await waitFor(() => {
       expect(services.http.put).toHaveBeenCalledWith(
-        '/api/context_engine/ai_index/support-triage',
+        '/api/context_engine/ai_index/support-ticket-triage',
         expect.objectContaining({
           body: JSON.stringify({
-            name: 'Support triage',
-            dest: { type: 'data_stream', value: 'ai-index-ds-support-triage' },
+            dest: { type: 'data_stream', value: 'ai-index-ds-support-ticket-triage' },
             automations: [],
             sources: [{ type: 'esql', value: 'FROM logs-* | LIMIT 10' }],
           }),
@@ -186,7 +184,7 @@ describe('CreateAiIndexPage', () => {
 
     renderWithProviders(services);
 
-    typeName('Support triage');
+    typeId(VALID_ID);
     addEsqlSource('FROM logs-* | LIMIT 10');
     fireEvent.click(screen.getByTestId('contextCreateAiIndexButton'));
 
@@ -196,77 +194,29 @@ describe('CreateAiIndexPage', () => {
     expect(services.application.navigateToApp).not.toHaveBeenCalled();
   });
 
-  it('replaces illegal characters while preserving other characters', async () => {
-    const services = coreMock.createStart();
-    services.http.put.mockResolvedValue({ status: 'created' });
-
-    renderWithProviders(services);
-
-    typeName('Support: Triage #1');
-    fireEvent.click(screen.getByTestId('contextCreateAiIndexButton'));
-
-    await waitFor(() => {
-      expect(services.http.put).toHaveBeenCalledWith(
-        '/api/context_engine/ai_index/support-triage-1',
-        expect.objectContaining({
-          body: JSON.stringify({
-            name: 'Support: Triage #1',
-            dest: { type: 'index', value: 'ai-index-idx-support-triage-1' },
-            automations: [],
-            sources: [],
-          }),
-        })
-      );
-    });
-  });
-
-  it('accepts non-ASCII names such as Japanese characters', async () => {
-    const services = coreMock.createStart();
-    services.http.put.mockResolvedValue({ status: 'created' });
-
-    renderWithProviders(services);
-
-    typeName('日本語');
-    fireEvent.click(screen.getByTestId('contextCreateAiIndexButton'));
-
-    await waitFor(() => {
-      expect(services.http.put).toHaveBeenCalledWith(
-        expect.any(String),
-        expect.objectContaining({
-          body: JSON.stringify({
-            name: '日本語',
-            dest: { type: 'index', value: 'ai-index-idx-日本語' },
-            automations: [],
-            sources: [],
-          }),
-        })
-      );
-    });
-  });
-
-  it('shows an error and stays disabled when the name has no valid characters', () => {
+  it('shows an error and stays disabled when the id contains invalid characters', () => {
     renderWithProviders(coreMock.createStart());
 
-    typeName('###');
+    typeId('Support triage');
 
     expect(
-      screen.getByText('Name must include at least one letter or number.')
+      screen.getByText('Use only lowercase letters, numbers, hyphens, and underscores (no spaces).')
     ).toBeInTheDocument();
     expect(screen.getByTestId('contextCreateAiIndexButton')).toBeDisabled();
   });
 
-  it('sends create_only so a name mapping to an existing id is rejected by the server', async () => {
+  it('sends create_only so a duplicate id is rejected by the server', async () => {
     const services = coreMock.createStart();
     services.http.put.mockResolvedValue({ status: 'created' });
 
     renderWithProviders(services);
 
-    typeName('Support triage');
+    typeId(VALID_ID);
     fireEvent.click(screen.getByTestId('contextCreateAiIndexButton'));
 
     await waitFor(() => {
       expect(services.http.put).toHaveBeenCalledWith(
-        '/api/context_engine/ai_index/support-triage',
+        '/api/context_engine/ai_index/support-ticket-triage',
         expect.objectContaining({ query: { create_only: true } })
       );
     });
@@ -275,12 +225,12 @@ describe('CreateAiIndexPage', () => {
   it('surfaces a server conflict as an error toast', async () => {
     const services = coreMock.createStart();
     services.http.put.mockRejectedValue({
-      body: { statusCode: 409, message: "AI index 'support-triage' already exists" },
+      body: { statusCode: 409, message: "AI index 'support-ticket-triage' already exists" },
     });
 
     renderWithProviders(services);
 
-    typeName('Support triage');
+    typeId(VALID_ID);
     fireEvent.click(screen.getByTestId('contextCreateAiIndexButton'));
 
     await waitFor(() => {

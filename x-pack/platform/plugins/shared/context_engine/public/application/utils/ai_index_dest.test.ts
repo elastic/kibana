@@ -5,74 +5,47 @@
  * 2.0.
  */
 
-import { getAiIndexDest, sanitizeAiIndexName, validateAiIndexName } from './ai_index_dest';
-
-describe('sanitizeAiIndexName', () => {
-  it('lowercases the name', () => {
-    expect(sanitizeAiIndexName('Support Triage')).toBe('support-triage');
-  });
-
-  it('replaces runs of illegal characters with a single hyphen', () => {
-    expect(sanitizeAiIndexName('Support: Triage #1')).toBe('support-triage-1');
-    expect(sanitizeAiIndexName('a / b \\ c')).toBe('a-b-c');
-  });
-
-  it('trims leading and trailing hyphens', () => {
-    expect(sanitizeAiIndexName('  #hello#  ')).toBe('hello');
-  });
-
-  it('preserves non-ASCII characters', () => {
-    expect(sanitizeAiIndexName('日本語')).toBe('日本語');
-  });
-
-  it('returns an empty string when nothing valid remains', () => {
-    expect(sanitizeAiIndexName('###')).toBe('');
-    expect(sanitizeAiIndexName('   ')).toBe('');
-  });
-});
+import { getAiIndexDest, validateAiIndexId } from './ai_index_dest';
 
 describe('getAiIndexDest', () => {
-  it('prefixes the sanitized name per storage type', () => {
-    expect(getAiIndexDest('index', 'Support triage')).toEqual({
+  it('prefixes the id per storage type', () => {
+    expect(getAiIndexDest('index', 'support-ticket-triage')).toEqual({
       type: 'index',
-      value: 'ai-index-idx-support-triage',
+      value: 'ai-index-idx-support-ticket-triage',
     });
-    expect(getAiIndexDest('data_stream', 'Support triage')).toEqual({
+    expect(getAiIndexDest('data_stream', 'support-ticket-triage')).toEqual({
       type: 'data_stream',
-      value: 'ai-index-ds-support-triage',
+      value: 'ai-index-ds-support-ticket-triage',
     });
   });
 });
 
-describe('validateAiIndexName', () => {
-  it('returns the dest for a valid name', () => {
-    expect(validateAiIndexName('index', 'Support triage')).toEqual({
-      dest: { type: 'index', value: 'ai-index-idx-support-triage' },
+describe('validateAiIndexId', () => {
+  it('returns the dest for a valid id', () => {
+    expect(validateAiIndexId('index', 'support-ticket-triage')).toEqual({
+      dest: { type: 'index', value: 'ai-index-idx-support-ticket-triage' },
     });
   });
 
-  it('treats an empty name as incomplete: no dest and no error', () => {
-    expect(validateAiIndexName('index', '')).toEqual({});
-    expect(validateAiIndexName('index', '   ')).toEqual({});
+  it('treats an empty id as incomplete: no dest and no error', () => {
+    expect(validateAiIndexId('index', '')).toEqual({});
   });
 
-  it('returns an error message when the name sanitizes to nothing', () => {
-    const { dest, error } = validateAiIndexName('index', '###');
-    expect(dest).toBeUndefined();
-    expect(error).toBe('Name must include at least one letter or number.');
+  it('returns an error message when the id contains invalid characters', () => {
+    expect(validateAiIndexId('index', 'Support triage')).toEqual({
+      error: 'Use only lowercase letters, numbers, hyphens, and underscores (no spaces).',
+    });
+    expect(validateAiIndexId('index', 'bad id')).toEqual({
+      error: 'Use only lowercase letters, numbers, hyphens, and underscores (no spaces).',
+    });
+    expect(validateAiIndexId('index', 'bad#id')).toEqual({
+      error: 'Use only lowercase letters, numbers, hyphens, and underscores (no spaces).',
+    });
   });
 
   it('returns an error message when the dest exceeds the byte limit', () => {
-    const { dest, error } = validateAiIndexName('index', 'a'.repeat(250));
+    const { dest, error } = validateAiIndexId('index', 'a'.repeat(243));
     expect(dest).toBeUndefined();
     expect(error).toBe('Name is too long. Try a shorter name.');
-  });
-
-  it('counts bytes, not characters, for the length limit', () => {
-    // Each of these characters is 3 bytes in UTF-8, so ~85 of them plus the
-    // prefix already exceeds the 255-byte limit.
-    expect(validateAiIndexName('index', '本'.repeat(85)).error).toBe(
-      'Name is too long. Try a shorter name.'
-    );
   });
 });

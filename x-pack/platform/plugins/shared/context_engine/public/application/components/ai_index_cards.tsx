@@ -48,7 +48,7 @@ const AiIndexCard = ({ aiIndex, href }: { aiIndex: AiIndexHttpItem; href: string
       titleSize="xs"
       titleElement="h4"
       paddingSize="l"
-      title={<EuiTextBlockTruncate lines={1}>{aiIndex.name}</EuiTextBlockTruncate>}
+      title={<EuiTextBlockTruncate lines={1}>{aiIndex.id}</EuiTextBlockTruncate>}
       href={href}
       css={css`
         block-size: 100%;
