@@ -192,7 +192,7 @@ function SlackCardFooter({
     <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexStart">
       {error && (
         <EuiFlexItem grow={false}>
-          <EuiCallOut size="s" color="danger" title={error} />
+          <EuiCallOut announceOnMount size="s" color="danger" title={error} />
         </EuiFlexItem>
       )}
       <EuiFlexItem grow={false}>
