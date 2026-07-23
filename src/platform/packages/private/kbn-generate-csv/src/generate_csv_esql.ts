@@ -81,7 +81,7 @@ export class CsvESQLGenerator {
     let reportingError: undefined | ReportingError;
     const warnings: string[] = [];
 
-    const { maxSizeBytes, maxRows, bom, escapeFormulaValues } = settings;
+    const { maxSizeBytes, maxRows, bom, escapeFormulaValues, timezone } = settings;
     const builder = new MaxSizeStringBuilder(this.stream, byteSizeValueToNumber(maxSizeBytes), bom);
 
     // Rewrite identifier-type (FIELDS/FUNCTIONS) variables (e.g. ?var → ??var) for ES compatibility

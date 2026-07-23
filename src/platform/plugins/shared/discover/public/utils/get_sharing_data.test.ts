@@ -409,6 +409,7 @@ describe('getSharingData', () => {
       searchSourceMock,
       { columns: [] },
       servicesMock,
+      undefined,
       lastFetchAbsoluteRange
     );
 
