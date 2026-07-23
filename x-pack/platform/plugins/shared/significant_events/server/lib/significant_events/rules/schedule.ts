@@ -8,26 +8,40 @@
 import { parseDuration } from '@kbn/alerting-plugin/common/parse_duration';
 import { CRITICAL_SEVERITY_THRESHOLD, type StreamQuery } from '@kbn/significant-events-schema';
 import {
-  METRIC_SERIES_ANALYSIS_BUCKET_INTERVAL,
   METRIC_SERIES_EVERY,
   METRIC_SERIES_LOOKBACK,
+  METRIC_SERIES_MAX_WRITE_DELAY,
 } from './metric_series_contract';
 
 const MS_PER_MINUTE = 60 * 1000;
 
 /**
- * Analysis-profile markers (not rule execution intervals).
- * Critical vs default detection scan windows are selected by severity.
+ * Detection analysis profile IDs (not Alerting execution cadences).
  * All MATCH rules execute on {@link METRIC_SERIES_EVERY} / {@link METRIC_SERIES_LOOKBACK}.
+ * Severity only selects which change_point lookback / bucket interval to use.
  */
-export const CRITICAL_RULE_INTERVAL = '1m';
-export const DEFAULT_RULE_INTERVAL = '5m';
+export type AnalysisProfileId = 'critical' | 'default';
 
-const CRITICAL_ANALYSIS_LOOKBACK_MINUTES = 40;
-const DEFAULT_ANALYSIS_LOOKBACK_MINUTES = 125;
+export const CRITICAL_ANALYSIS_PROFILE: AnalysisProfileId = 'critical';
+export const DEFAULT_ANALYSIS_PROFILE: AnalysisProfileId = 'default';
+
+/**
+ * Critical analysis defaults when the Detection workflow does not override
+ * lookback / bucketInterval. ≥22 buckets at 1m keeps change_point above its floor.
+ */
+export const CRITICAL_ANALYSIS_LOOKBACK_MINUTES = 40;
+export const CRITICAL_ANALYSIS_BUCKET_INTERVAL = '1m';
+
+/**
+ * Default (non-critical) analysis profile: coarser 5m outer buckets over 125m
+ * → 25 change_point values (≥22 floor). Configured workflow inputs do not
+ * override this profile (see preserve-profiles contract).
+ */
+export const DEFAULT_ANALYSIS_LOOKBACK_MINUTES = 125;
+export const DEFAULT_ANALYSIS_BUCKET_INTERVAL = '5m';
 
 export interface RuleDetectionSchedule {
-  interval_minutes: number;
+  profile: AnalysisProfileId;
   bucket_interval: string;
   lookback: string;
   lookback_minutes: number;
@@ -37,15 +51,11 @@ export function isCriticalSeverity(query: Pick<StreamQuery, 'severity_score'>): 
   return (query.severity_score ?? 0) >= CRITICAL_SEVERITY_THRESHOLD;
 }
 
-/**
- * Maps severity to an analysis-profile key (`1m` critical / `5m` default).
- * This is NOT the Alerting v2 rule `schedule.every` — execution always uses
- * {@link getMetricSeriesRuleSchedule}.
- */
-export function scheduleIntervalForQuery(
+/** Severity → analysis profile. Not the Alerting v2 `schedule.every`. */
+export function analysisProfileForQuery(
   query: Pick<StreamQuery, 'severity_score'>
-): typeof CRITICAL_RULE_INTERVAL | typeof DEFAULT_RULE_INTERVAL {
-  return isCriticalSeverity(query) ? CRITICAL_RULE_INTERVAL : DEFAULT_RULE_INTERVAL;
+): AnalysisProfileId {
+  return isCriticalSeverity(query) ? CRITICAL_ANALYSIS_PROFILE : DEFAULT_ANALYSIS_PROFILE;
 }
 
 /** Execution schedule for all MATCH metric-series rules. */
@@ -56,40 +66,74 @@ export function getMetricSeriesRuleSchedule(): { every: string; lookback: string
   };
 }
 
-export function getRuleIntervalMs(interval: string): number {
-  return parseDuration(interval);
+export function getDurationMinutes(duration: string): number {
+  const minutes = parseDuration(duration) / MS_PER_MINUTE;
+  if (!Number.isInteger(minutes) || minutes <= 0) {
+    throw new Error(`Duration "${duration}" must resolve to whole positive minutes`);
+  }
+  return minutes;
 }
 
-export function getRuleIntervalMinutes(interval: string): number {
-  const minutes = getRuleIntervalMs(interval) / MS_PER_MINUTE;
+/**
+ * Parse Detection workflow lookback date-math (`now-40m`) into minutes.
+ */
+export function parseLookbackMinutes(lookback: string): number {
+  const match = /^now-(\d+)m$/i.exec(lookback.trim());
+  if (!match) {
+    throw new Error(`Detection lookback "${lookback}" must be ES date math of the form now-<N>m`);
+  }
+  const minutes = Number(match[1]);
   if (!Number.isInteger(minutes) || minutes <= 0) {
-    throw new Error(`Rule interval "${interval}" must resolve to whole positive minutes`);
+    throw new Error(`Detection lookback "${lookback}" must use a positive minute count`);
   }
   return minutes;
 }
 
 /**
  * Detection change_point analysis profile by severity.
- * Bucket interval is always 1m (source metric-series resolution). A coarser
- * interval (e.g. 5m) collapses ~40 one-minute points into ~8 buckets and
- * starves change_point (< 22 values → `indeterminable`).
+ *
+ * Critical defaults (40m / 1m) are overridden at scan time by workflow inputs.
+ * Default stays fixed at 125m / 5m so non-critical rules keep a stable density
+ * contract independent of scheduled tuning.
  */
 export function getRuleDetectionSchedule(
   query: Pick<StreamQuery, 'severity_score'>
 ): RuleDetectionSchedule {
   if (isCriticalSeverity(query)) {
     return {
-      interval_minutes: getRuleIntervalMinutes(CRITICAL_RULE_INTERVAL),
-      bucket_interval: METRIC_SERIES_ANALYSIS_BUCKET_INTERVAL,
+      profile: CRITICAL_ANALYSIS_PROFILE,
+      bucket_interval: CRITICAL_ANALYSIS_BUCKET_INTERVAL,
       lookback: `now-${CRITICAL_ANALYSIS_LOOKBACK_MINUTES}m`,
       lookback_minutes: CRITICAL_ANALYSIS_LOOKBACK_MINUTES,
     };
   }
 
   return {
-    interval_minutes: getRuleIntervalMinutes(DEFAULT_RULE_INTERVAL),
-    bucket_interval: METRIC_SERIES_ANALYSIS_BUCKET_INTERVAL,
+    profile: DEFAULT_ANALYSIS_PROFILE,
+    bucket_interval: DEFAULT_ANALYSIS_BUCKET_INTERVAL,
     lookback: `now-${DEFAULT_ANALYSIS_LOOKBACK_MINUTES}m`,
     lookback_minutes: DEFAULT_ANALYSIS_LOOKBACK_MINUTES,
   };
+}
+
+/**
+ * Write-time `@timestamp` lower bound that covers every source minute in an
+ * analysis window of `lookbackMinutes` ending at `now - MAX_WRITE_DELAY`.
+ * Source min is `now - (lookbackMinutes + writeDelay)`; write-time docs for
+ * that edge can land around the same horizon.
+ */
+export function getAnalysisWriteTimeLookback(lookbackMinutes: number): string {
+  const writeDelayMinutes = getDurationMinutes(METRIC_SERIES_MAX_WRITE_DELAY);
+  return `now-${lookbackMinutes + writeDelayMinutes}m`;
+}
+
+/**
+ * Idle-gate lookback: earliest write-time bound across the configured critical
+ * profile and the fixed default profile, so a space with only default-profile
+ * activity in the wider window is not cancelled early.
+ */
+export function getIdleGateLookback(criticalLookback: string): string {
+  const criticalMinutes = parseLookbackMinutes(criticalLookback);
+  const widestMinutes = Math.max(criticalMinutes, DEFAULT_ANALYSIS_LOOKBACK_MINUTES);
+  return getAnalysisWriteTimeLookback(widestMinutes);
 }

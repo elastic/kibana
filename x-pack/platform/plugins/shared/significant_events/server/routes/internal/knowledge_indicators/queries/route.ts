@@ -35,6 +35,8 @@ import {
   type QueryOccurrences,
 } from '../../../../lib/significant_events/fetch_query_occurrences_from_alerts';
 import { searchModeSchema } from '../../../utils/search_mode';
+import { assertValidDateRange, makeIsoDateFromString } from '../../../utils/iso_date_param';
+import { resolveStreamNamesForSearch } from '../../../utils/resolve_stream_names_for_search';
 import type { PersistQueriesResult } from '../../../../lib/significant_events/persist_queries';
 import { persistQueries } from '../../../../lib/significant_events/persist_queries';
 import { queryFromLink } from '../../../../lib/knowledge_indicators/knowledge_indicator_client/serializers';
@@ -43,10 +45,7 @@ const RECONCILE_STREAM_CONCURRENCY = 3;
 // Manual repair endpoint: keep each request small so operators batch large migrations explicitly.
 const RECONCILE_MAX_STREAMS = 10;
 
-const dateFromString = z
-  .string()
-  .max(MAX_ID_LENGTH)
-  .transform((input) => new Date(input));
+const dateFromString = makeIsoDateFromString('ISO 8601 datetime');
 
 const baseRequestParamsSchema = z.object({
   from: dateFromString.describe('Start of the time range'),
@@ -76,8 +75,8 @@ const requestParamsSchema = baseRequestParamsSchema.extend({
 
 /**
  * Promotes unbacked queries to rule-backed status. Returns
- * `{ promoted, skipped_stats }`. STATS queries are never promoted until
- * rule-on-rule provisioning (#265778); `skipped_stats` counts those.
+ * `{ promoted, skipped_stats }`. Ineligible queries (STATS until #265778, or
+ * MATCH that is not filter-only) are skipped; `skipped_stats` counts those.
  */
 export const promoteUnbackedQueriesRoute = createServerRoute({
   endpoint: 'POST /internal/streams/queries/_promote',
@@ -458,6 +457,11 @@ const getDiscoveryQueriesRoute = createServerRoute({
       status,
       searchMode,
     } = params.query;
+    assertValidDateRange(from, to);
+
+    const resolvedStreamNames = await resolveStreamNamesForSearch(streamNames, query, () =>
+      scopedClients.streamsClient.listStreams()
+    );
 
     const [kiClient, { alertsReader }] = await Promise.all([
       scopedClients.getKnowledgeIndicatorClient(),
@@ -465,7 +469,7 @@ const getDiscoveryQueriesRoute = createServerRoute({
     ]);
     const queryLinks = await fetchQueryLinks(
       {
-        streamNames,
+        streamNames: resolvedStreamNames,
         query,
         filters: { ruleUnbacked: toRuleUnbackedFilter(status) },
         searchMode,
@@ -531,6 +535,11 @@ const getDiscoveryQueriesOccurrencesRoute = createServerRoute({
     await assertSignificantEventsAccess({ server, licensing });
 
     const { from, to, bucketSize, query, streamNames } = params.query;
+    assertValidDateRange(from, to);
+
+    const resolvedStreamNames = await resolveStreamNamesForSearch(streamNames, query, () =>
+      scopedClients.streamsClient.listStreams()
+    );
 
     const [kiClient, { alertsReader }] = await Promise.all([
       scopedClients.getKnowledgeIndicatorClient(),
@@ -546,7 +555,7 @@ const getDiscoveryQueriesOccurrencesRoute = createServerRoute({
         to,
         bucketSize,
         query,
-        streamNames,
+        streamNames: resolvedStreamNames,
         alertsReader,
         spaceId: await getSpaceId(request),
       },

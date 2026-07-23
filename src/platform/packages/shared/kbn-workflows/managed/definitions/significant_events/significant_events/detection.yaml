@@ -20,12 +20,12 @@ triggers:
         type: string
         default: "now-40m"
         required: false
-        description: "Time window start for the change_point aggregation (ES date math, e.g. now-40m). Must give the change_point agg >= 22 buckets at the configured bucketInterval and be wide enough for a drop-to-silence to stand out (~40m at 1m buckets => ~41 buckets)."
+        description: "Critical analysis lookback duration (ES date math, e.g. now-40m). Applied to critical-severity rules only; default-severity rules use a fixed now-125m profile. Must yield >= 22 outer buckets at bucketInterval. The idle-gate count widens past this window to cover the default profile too."
       - name: bucketInterval
         type: string
         default: "1m"
         required: false
-        description: "Fixed interval for the date_histogram bucketing inside change_point. Must be >= 1m (MATCH rules emit closed-minute metric_value points) — a finer interval leaves alternate buckets empty, producing a 0/N sawtooth whose variance masks real drops (a recovery then misreads as `stationary`)."
+        description: "Critical analysis outer date_histogram interval for change_point. Must be >= 1m (MATCH rules emit closed-minute metric_value points). Per-minute MAX collapses overlapping rule re-emits before SUM into this interval. Default-severity rules ignore this input and use a fixed 5m profile."
       - name: detectionIntervalMinutes
         type: number
         default: 10

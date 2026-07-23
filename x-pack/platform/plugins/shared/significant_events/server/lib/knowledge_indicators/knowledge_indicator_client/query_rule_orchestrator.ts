@@ -8,7 +8,7 @@
 import type { Logger } from '@kbn/core/server';
 import type { QueryLink, StreamQuery } from '@kbn/significant-events-schema';
 import { deriveQueryType, hasSameEsql } from '@kbn/streams-schema';
-import { isExpirable, isExpired, QUERY_TYPE_STATS } from '@kbn/significant-events-schema';
+import { isExpirable, isExpired } from '@kbn/significant-events-schema';
 import type { Streams } from '@kbn/streams-schema';
 import { computeRuleId } from '../helpers/compute_rule_id';
 import { installQueries, uninstallQueries } from './rule_orchestration';
@@ -50,47 +50,49 @@ export class QueryRuleOrchestrator {
 
     const toCreate: QueryLink[] = [];
     const toUpdate: QueryLink[] = [];
-    const demotedToStats: QueryLink[] = [];
+    const demotedIneligible: QueryLink[] = [];
     const allNext: Array<{ query: StreamQuery; rule_backed: boolean; rule_id: string }> = [];
 
     for (const query of queries) {
       const current = currentByQueryId.get(query.id);
       const queryType = deriveQueryType(query.esql.query);
-      const isStats = queryType === QUERY_TYPE_STATS;
+      const typedQuery = { ...query, type: queryType };
       const ruleId = computeRuleId(stream, query.id, query.esql.query);
-      const ruleBacked = canQueryBeRuleBacked(queryType);
+      const ruleBacked = canQueryBeRuleBacked({ type: queryType, esql: query.esql });
       if (!current) {
         const link: QueryLink = {
           stream_name: stream,
           rule_backed: ruleBacked,
           rule_id: ruleId,
-          query: { ...query, type: queryType },
+          query: typedQuery,
         };
         if (ruleBacked) toCreate.push(link);
-        allNext.push({ query: link.query, rule_backed: ruleBacked, rule_id: ruleId });
+        allNext.push({ query: typedQuery, rule_backed: ruleBacked, rule_id: ruleId });
       } else if (!current.rule_backed) {
         // Preserve intentionally unbacked queries; promotion is explicit via promoteQueries.
         allNext.push({
-          query: { ...query, type: queryType },
+          query: typedQuery,
           rule_backed: false,
           rule_id: current.rule_id,
         });
-      } else if (isStats && !canQueryBeRuleBacked(queryType)) {
-        demotedToStats.push(current);
-        allNext.push({ query, rule_backed: false, rule_id: current.rule_id });
+      } else if (!ruleBacked) {
+        // Was rule-backed but is no longer installable (STATS, or MATCH that is
+        // not filter-only). Keep the KI stored; uninstall the rule.
+        demotedIneligible.push(current);
+        allNext.push({ query: typedQuery, rule_backed: false, rule_id: current.rule_id });
       } else if (!hasSameEsql(current.query.esql.query, query.esql.query)) {
         const link: QueryLink = {
           stream_name: stream,
           rule_backed: true,
           rule_id: ruleId,
-          query: { ...query, type: queryType },
+          query: typedQuery,
         };
         toCreate.push(link); // breaking change → recreate
-        allNext.push({ query: link.query, rule_backed: true, rule_id: ruleId });
+        allNext.push({ query: typedQuery, rule_backed: true, rule_id: ruleId });
       } else {
-        const link: QueryLink = { ...current, query };
+        const link: QueryLink = { ...current, query: typedQuery };
         toUpdate.push(link);
-        allNext.push({ query, rule_backed: true, rule_id: current.rule_id });
+        allNext.push({ query: typedQuery, rule_backed: true, rule_id: current.rule_id });
       }
     }
 
@@ -98,7 +100,7 @@ export class QueryRuleOrchestrator {
       (link) =>
         (link.rule_backed && !nextIds.has(link.query.id)) ||
         toCreate.some((c) => c.query.id === link.query.id && link.rule_backed) ||
-        demotedToStats.some((d) => d.query.id === link.query.id)
+        demotedIneligible.some((d) => d.query.id === link.query.id)
     );
 
     try {
@@ -253,15 +255,17 @@ export class QueryRuleOrchestrator {
     const idSet = new Set(queryIds);
     const candidates = links.filter((link) => idSet.has(link.query.id) && !link.rule_backed);
 
-    const skippedStats = candidates.filter((link) => !canQueryBeRuleBacked(link.query.type));
-    if (skippedStats.length > 0) {
+    const skippedIneligible = candidates.filter(
+      (link) => !canQueryBeRuleBacked({ type: link.query.type, esql: link.query.esql })
+    );
+    if (skippedIneligible.length > 0) {
       this.logger.info(
-        `Skipping ${skippedStats.length} STATS queries from promotion for stream "${streamName}" (STATS rule backing is not supported yet).`
+        `Skipping ${skippedIneligible.length} ineligible queries from promotion for stream "${streamName}" (STATS, or MATCH that is not filter-only).`
       );
     }
 
     const toPromote = candidates
-      .filter((link) => canQueryBeRuleBacked(link.query.type))
+      .filter((link) => canQueryBeRuleBacked({ type: link.query.type, esql: link.query.esql }))
       .map((link) => ({
         ...link,
         rule_backed: true,
@@ -269,7 +273,7 @@ export class QueryRuleOrchestrator {
       }));
 
     if (toPromote.length === 0) {
-      return { promoted: 0, skipped_stats: skippedStats.length };
+      return { promoted: 0, skipped_stats: skippedIneligible.length };
     }
 
     await installQueries(this.rulesManagementClient, toPromote, []);
@@ -301,7 +305,7 @@ export class QueryRuleOrchestrator {
       throw storageError;
     }
 
-    return { promoted: toPromote.length, skipped_stats: skippedStats.length };
+    return { promoted: toPromote.length, skipped_stats: skippedIneligible.length };
   }
 
   async promoteUnbackedQueries({
@@ -336,7 +340,7 @@ export class QueryRuleOrchestrator {
     }
 
     let promoted = 0;
-    let skippedStats = 0;
+    let skippedIneligible = 0;
     for (const [streamName, ids] of byStream) {
       const definition = streamDefinitions.get(streamName);
       if (!definition) {
@@ -345,10 +349,10 @@ export class QueryRuleOrchestrator {
       }
       const result = await this.promoteQueries(definition, ids);
       promoted += result.promoted;
-      skippedStats += result.skipped_stats;
+      skippedIneligible += result.skipped_stats;
     }
 
-    return { promoted, skipped_stats: skippedStats };
+    return { promoted, skipped_stats: skippedIneligible };
   }
 
   async deleteQueries(

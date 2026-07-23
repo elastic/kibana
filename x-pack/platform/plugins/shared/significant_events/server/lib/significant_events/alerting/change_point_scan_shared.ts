@@ -12,14 +12,23 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import {
   METRIC_SERIES_ANALYSIS_BUCKET_INTERVAL,
-  METRIC_SERIES_EVERY,
+  METRIC_SERIES_MAX_WRITE_DELAY,
 } from '../rules/metric_series_contract';
+import {
+  getAnalysisWriteTimeLookback,
+  getDurationMinutes,
+  parseLookbackMinutes,
+} from '../rules/schedule';
 import {
   METRIC_SERIES_BUCKET_RUNTIME_FIELD,
   METRIC_SERIES_VALUE_RUNTIME_FIELD,
 } from './rule_events_metric_series';
 
 export const RULES_BUCKET_SIZE = 1000;
+
+/** Elasticsearch `change_point` returns `indeterminable` below this many values. */
+export const CHANGE_POINT_MIN_BUCKETS = 22;
+export const CHANGE_POINT_MAX_BUCKETS = 1000;
 
 export { METRIC_SERIES_ANALYSIS_BUCKET_INTERVAL } from '../rules/metric_series_contract';
 export {
@@ -28,16 +37,32 @@ export {
   METRIC_SERIES_RUNTIME_MAPPINGS,
 } from './rule_events_metric_series';
 
+export interface ChangePointHistogramWindow {
+  /** Source-bucket bounds (extended + hard). Ends at the reliable write horizon. */
+  bounds: AggregationsExtendedBounds<AggregationsFieldDateMath>;
+  /** Write-time `@timestamp` prune that covers every source minute in `bounds`. */
+  writeTimeLookback: string;
+}
+
 /**
- * Histogram window for change_point. `max` stops at `now - EVERY` so the series
- * only includes closed minutes that the rule should already have written —
- * ending at `now-1m` zero-fills up to ~EVERY of not-yet-emitted minutes and
- * can misread as a trailing dip/step.
+ * Analysis window for change_point.
+ *
+ * `lookback` (`now-40m`) is the analysis *duration*. The series ends at
+ * `now - MAX_WRITE_DELAY` so not-yet-written closed minutes are excluded, and
+ * starts `duration` earlier. Identical `extended_bounds` + `hard_bounds` keep
+ * empty minutes zero-filled without letting out-of-window docs stretch the
+ * histogram. The write-time filter is widened to the same source span.
  */
-export function buildChangePointHistogramBounds(
-  lookback: string
-): AggregationsExtendedBounds<AggregationsFieldDateMath> {
-  return { min: lookback, max: `now-${METRIC_SERIES_EVERY}` };
+export function buildChangePointHistogramWindow(lookback: string): ChangePointHistogramWindow {
+  const lookbackMinutes = parseLookbackMinutes(lookback);
+  const writeDelayMinutes = getDurationMinutes(METRIC_SERIES_MAX_WRITE_DELAY);
+  const sourceMin = `now-${lookbackMinutes + writeDelayMinutes}m`;
+  const sourceMax = `now-${METRIC_SERIES_MAX_WRITE_DELAY}`;
+
+  return {
+    bounds: { min: sourceMin, max: sourceMax },
+    writeTimeLookback: getAnalysisWriteTimeLookback(lookbackMinutes),
+  };
 }
 
 /**
@@ -46,36 +71,55 @@ export function buildChangePointHistogramBounds(
  * ```esql
  * | EVAL metric_value = TO_INTEGER(FIELD_EXTRACT(data, "metric_value"))
  * | EVAL bucket = TO_DATETIME(TO_LONG(FIELD_EXTRACT(data, "bucket")))
- * | STATS metric_value = MAX(metric_value) BY bucket
+ * | STATS minute_value = MAX(metric_value) BY source_minute = DATE_TRUNC(1 minute, bucket)
+ * | STATS metric_value = SUM(minute_value) BY bucket = BUCKET(source_minute, <interval>)
  * | CHANGE_POINT metric_value ON bucket
  * ```
  *
- * Analysis interval is fixed at 1m (source resolution). Missing minutes are
- * zero-filled via `extended_bounds` + a `bucket_script` over `_count` — the
- * same density contract as the pre-metric-series `over_time>_count` path.
- * (`change_point.gap_policy` alone is not reliable for null max metrics.)
+ * Outer interval is the configured analysis bucket size. Overlapping rule
+ * re-emits are collapsed with per-minute MAX before SUM into the outer bucket.
+ * Empty outer buckets are zero-filled (`extended_bounds` + `_count` script) so
+ * change_point always sees a dense numeric series (needs ≥22 non-null points).
  */
 export function buildChangePointTimeSeriesAggs({
-  extendedBounds,
+  bucketInterval,
+  bounds,
 }: {
-  extendedBounds: AggregationsExtendedBounds<AggregationsFieldDateMath>;
+  bucketInterval: string;
+  bounds: AggregationsExtendedBounds<AggregationsFieldDateMath>;
 }): Record<string, AggregationsAggregationContainer> {
   return {
     over_time: {
       date_histogram: {
         field: METRIC_SERIES_BUCKET_RUNTIME_FIELD,
-        fixed_interval: METRIC_SERIES_ANALYSIS_BUCKET_INTERVAL,
+        fixed_interval: bucketInterval,
         min_doc_count: 0,
-        extended_bounds: extendedBounds,
+        extended_bounds: bounds,
+        hard_bounds: bounds,
       },
       aggs: {
-        // Collapse overlapping MATCH recounts for the same source minute.
+        // Deduplicate overlapping MATCH recounts at source-minute resolution.
+        per_minute: {
+          date_histogram: {
+            field: METRIC_SERIES_BUCKET_RUNTIME_FIELD,
+            fixed_interval: METRIC_SERIES_ANALYSIS_BUCKET_INTERVAL,
+            min_doc_count: 1,
+          },
+          aggs: {
+            minute_value: {
+              max: { field: METRIC_SERIES_VALUE_RUNTIME_FIELD },
+            },
+          },
+        },
         metric_value_raw: {
-          max: { field: METRIC_SERIES_VALUE_RUNTIME_FIELD },
+          sum_bucket: {
+            buckets_path: 'per_minute>minute_value',
+          },
         },
         // `_count` is always present (0 on empty extended_bounds buckets). Use it
-        // to force a numeric series — null `max` alone is skipped by change_point
-        // and yields `indeterminable` when fewer than 22 non-null points remain.
+        // to force a numeric series — null sum_bucket alone is skipped by
+        // change_point and yields `indeterminable` when fewer than
+        // CHANGE_POINT_MIN_BUCKETS non-null points remain.
         metric_value: {
           bucket_script: {
             buckets_path: {

@@ -11,7 +11,10 @@ import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import { SignificantEventsAlertsReaderV2 } from './v2_alerts_reader';
 
 export interface ChangePointScanParams {
+  /** Analysis duration as ES date math (`now-40m`). */
   lookback: string;
+  /** Outer date_histogram interval (`1m`, `5m`, …). Must be ≥ 1m. */
+  bucketInterval: string;
   spaceId: string;
   ruleIds?: string[];
 }

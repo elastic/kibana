@@ -10,7 +10,7 @@ import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import {
   RULES_BUCKET_SIZE,
   METRIC_SERIES_RUNTIME_MAPPINGS,
-  buildChangePointHistogramBounds,
+  buildChangePointHistogramWindow,
   buildChangePointTimeSeriesAggs,
 } from './change_point_scan_shared';
 import { ALERTS_READER_V2 } from './alerts_reader';
@@ -18,6 +18,7 @@ import { ALERTS_READER_V2 } from './alerts_reader';
 const SPACE_ID = 'default';
 const RULE_UUID = 'rule-abc';
 const LOOKBACK = 'now-40m';
+const BUCKET_INTERVAL = '1m';
 
 const makeQueryLink = (
   overrides: {
@@ -158,22 +159,33 @@ describe('SignificantEventsAlertsReaderV2', () => {
 
     const result = await reader.runChangePointScan(
       client,
-      { lookback: LOOKBACK, spaceId: SPACE_ID },
+      { lookback: LOOKBACK, bucketInterval: BUCKET_INTERVAL, spaceId: SPACE_ID },
       [makeQueryLink({ title: 'Linked rule title' })]
     );
 
+    const { bounds, writeTimeLookback } = buildChangePointHistogramWindow(LOOKBACK);
     expect(search).toHaveBeenCalledWith(
       'significant_events_alerts_v2_change_point_scan',
       expect.objectContaining({
         index: '.rule-events',
         track_total_hits: false,
         runtime_mappings: METRIC_SERIES_RUNTIME_MAPPINGS,
+        query: {
+          bool: {
+            filter: [
+              { term: { type: 'signal' } },
+              { term: { space_id: SPACE_ID } },
+              { range: { '@timestamp': { gte: writeTimeLookback } } },
+            ],
+          },
+        },
         aggs: {
           by_rule: {
             terms: { field: 'rule.id', size: RULES_BUCKET_SIZE },
             aggs: {
               ...buildChangePointTimeSeriesAggs({
-                extendedBounds: buildChangePointHistogramBounds(LOOKBACK),
+                bucketInterval: BUCKET_INTERVAL,
+                bounds,
               }),
             },
           },

@@ -6,10 +6,7 @@
  */
 
 import { stripMetadata } from '@kbn/streams-schema';
-import {
-  assertCanCompileMatchMetric,
-  stripTrailingPipeCommands,
-} from './can_compile_match_metric';
+import { assertCanCompileMatchMetric, stripTrailingPipeCommands } from './can_compile_match_metric';
 import {
   METRIC_SERIES_BUCKET_FIELD,
   METRIC_SERIES_LIMIT,
@@ -37,8 +34,9 @@ export function compileMatchCountBreachQuery(esqlQuery: string, timestampField: 
 
   // Keep `bucket` as a datetime (no TO_LONG here). Alerting persists the ES|QL
   // date value; readers project with TO_DATETIME(TO_LONG(FIELD_EXTRACT(...))).
-  // SORT DESC + LIMIT N takes the newest N closed minutes, dropping the partial
-  // oldest minute inside the lookback window (EVERY=5m, LOOKBACK=6m → 5 rows).
+  // SORT DESC + LIMIT N takes the newest N closed minutes. With EVERY=5m,
+  // LOOKBACK=7m and LIMIT=6 the newest closed minutes include a 1m intentional
+  // overlap with the previous run (see metric_series_contract.ts).
   return [
     base,
     `STATS ${METRIC_SERIES_VALUE_FIELD} = COUNT(*) BY ${METRIC_SERIES_BUCKET_FIELD} = BUCKET(${timestampField}, 1 minute)`,

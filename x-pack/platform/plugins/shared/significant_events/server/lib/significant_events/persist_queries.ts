@@ -22,7 +22,10 @@ export interface PersistQueriesResult {
 }
 
 function isRuleEligible(query: GeneratedSignificantEventQuery): boolean {
-  return canQueryBeRuleBacked(query.type) && query.severity_score >= HIGH_SEVERITY_THRESHOLD;
+  return (
+    canQueryBeRuleBacked({ type: query.type, esql: query.esql }) &&
+    query.severity_score >= HIGH_SEVERITY_THRESHOLD
+  );
 }
 
 export async function persistQueries(

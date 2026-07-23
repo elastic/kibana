@@ -12,7 +12,7 @@ import { toEsqlRequest } from '../../streams/esql';
 import {
   RULES_BUCKET_SIZE,
   METRIC_SERIES_RUNTIME_MAPPINGS,
-  buildChangePointHistogramBounds,
+  buildChangePointHistogramWindow,
   buildChangePointTimeSeriesAggs,
 } from './change_point_scan_shared';
 import {
@@ -86,8 +86,7 @@ export class SignificantEventsAlertsReaderV2 implements ISignificantEventsAlerts
     )} AND ${spaceIdCol} == ${esql.str(spaceId)} AND ${ruleIdCol} IN (${ruleIdLiterals})`;
 
     return toEsqlRequest(
-      projectMetricSeriesColumns(scoped)
-        .pipe`WHERE bucket IS NOT NULL AND metric_value IS NOT NULL`
+      projectMetricSeriesColumns(scoped).pipe`WHERE bucket IS NOT NULL AND metric_value IS NOT NULL`
         .pipe`WHERE bucket >= TO_DATETIME(${rangeStart}) AND bucket <= TO_DATETIME(${rangeEnd})`
         .pipe`STATS minute_value = MAX(metric_value) BY rule_id = ${ruleIdCol}, source_minute = DATE_TRUNC(1 minute, bucket)`
         .pipe`STATS count = SUM(minute_value) BY rule_id, bucket = BUCKET(source_minute, ${esql.num(
@@ -144,12 +143,23 @@ export class SignificantEventsAlertsReaderV2 implements ISignificantEventsAlerts
     };
   }
 
-  private buildChangePointScanBody({ lookback, spaceId, ruleIds }: ChangePointScanParams) {
+  private buildChangePointScanBody({
+    lookback,
+    bucketInterval,
+    spaceId,
+    ruleIds,
+  }: ChangePointScanParams) {
+    const { bounds, writeTimeLookback } = buildChangePointHistogramWindow(lookback);
+
     return {
       runtime_mappings: METRIC_SERIES_RUNTIME_MAPPINGS,
       query: {
         bool: {
-          filter: buildRuleEventsSignalFilter({ lookback, spaceId, ruleIds }),
+          filter: buildRuleEventsSignalFilter({
+            lookback: writeTimeLookback,
+            spaceId,
+            ruleIds,
+          }),
         },
       },
       aggs: {
@@ -157,7 +167,8 @@ export class SignificantEventsAlertsReaderV2 implements ISignificantEventsAlerts
           terms: { field: 'rule.id', size: RULES_BUCKET_SIZE },
           aggs: {
             ...buildChangePointTimeSeriesAggs({
-              extendedBounds: buildChangePointHistogramBounds(lookback),
+              bucketInterval,
+              bounds,
             }),
           },
         },

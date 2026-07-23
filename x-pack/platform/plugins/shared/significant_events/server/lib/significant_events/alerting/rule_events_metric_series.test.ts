@@ -52,12 +52,18 @@ describe('METRIC_SERIES_RUNTIME_MAPPINGS', () => {
   it('reads flattened leaves from _source first (Alerting flattened access pattern)', () => {
     expect(METRIC_SERIES_RUNTIME_MAPPINGS['metric_series.bucket']?.type).toBe('date');
     expect(METRIC_SERIES_RUNTIME_MAPPINGS['metric_series.value']?.type).toBe('long');
-    const bucketScript = METRIC_SERIES_RUNTIME_MAPPINGS['metric_series.bucket']?.script?.source;
-    expect(bucketScript).toContain("params._source.data['bucket']");
-    expect(bucketScript?.indexOf('params._source')).toBeLessThan(
-      bucketScript?.indexOf("doc.containsKey('data.bucket')") ?? -1
+    const bucketScript = METRIC_SERIES_RUNTIME_MAPPINGS['metric_series.bucket']?.script;
+    const rawSource =
+      typeof bucketScript === 'object' && bucketScript != null && 'source' in bucketScript
+        ? bucketScript.source
+        : undefined;
+    expect(typeof rawSource).toBe('string');
+    const bucketSource = rawSource as string;
+    expect(bucketSource).toContain("params._source.data['bucket']");
+    expect(bucketSource.indexOf('params._source')).toBeLessThan(
+      bucketSource.indexOf("doc.containsKey('data.bucket')")
     );
-    expect(bucketScript).toContain('Long.parseLong');
-    expect(bucketScript).toContain('ZonedDateTime.parse');
+    expect(bucketSource).toContain('Long.parseLong');
+    expect(bucketSource).toContain('ZonedDateTime.parse');
   });
 });

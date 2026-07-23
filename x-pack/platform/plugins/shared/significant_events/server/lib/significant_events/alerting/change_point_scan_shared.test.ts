@@ -9,40 +9,58 @@ import {
   METRIC_SERIES_ANALYSIS_BUCKET_INTERVAL,
   METRIC_SERIES_BUCKET_RUNTIME_FIELD,
   METRIC_SERIES_VALUE_RUNTIME_FIELD,
-  buildChangePointHistogramBounds,
+  buildChangePointHistogramWindow,
   buildChangePointTimeSeriesAggs,
 } from './change_point_scan_shared';
 
-describe('buildChangePointHistogramBounds', () => {
-  it('pins max to now-EVERY so not-yet-written closed minutes are not zero-filled', () => {
-    // Rule emission lag is METRIC_SERIES_EVERY (5m); ending at now-1m fabricates a trailing dip.
-    expect(buildChangePointHistogramBounds('now-40m')).toEqual({
-      min: 'now-40m',
-      max: 'now-5m',
+describe('buildChangePointHistogramWindow', () => {
+  it('ends at now-MAX_WRITE_DELAY and extends min by the same write delay', () => {
+    // 40m analysis duration ending at now-7m → source min now-47m; write-time prune now-47m.
+    expect(buildChangePointHistogramWindow('now-40m')).toEqual({
+      bounds: { min: 'now-47m', max: 'now-7m' },
+      writeTimeLookback: 'now-47m',
     });
-    expect(buildChangePointHistogramBounds('now-125m')).toEqual({
-      min: 'now-125m',
-      max: 'now-5m',
+    expect(buildChangePointHistogramWindow('now-125m')).toEqual({
+      bounds: { min: 'now-132m', max: 'now-7m' },
+      writeTimeLookback: 'now-132m',
     });
   });
 });
 
 describe('buildChangePointTimeSeriesAggs', () => {
-  it('always analyzes at 1m with _count-based zero-fill for CHANGE_POINT metric_value ON bucket', () => {
-    const extendedBounds = buildChangePointHistogramBounds('now-40m');
-    const aggs = buildChangePointTimeSeriesAggs({ extendedBounds });
+  it('deduplicates at 1m with MAX then SUM into the configured outer interval', () => {
+    const { bounds } = buildChangePointHistogramWindow('now-40m');
+    const aggs = buildChangePointTimeSeriesAggs({
+      bucketInterval: '5m',
+      bounds,
+    });
 
     expect(METRIC_SERIES_ANALYSIS_BUCKET_INTERVAL).toBe('1m');
     expect(aggs.over_time).toEqual({
       date_histogram: {
         field: METRIC_SERIES_BUCKET_RUNTIME_FIELD,
-        fixed_interval: '1m',
+        fixed_interval: '5m',
         min_doc_count: 0,
-        extended_bounds: extendedBounds,
+        extended_bounds: bounds,
+        hard_bounds: bounds,
       },
       aggs: {
+        per_minute: {
+          date_histogram: {
+            field: METRIC_SERIES_BUCKET_RUNTIME_FIELD,
+            fixed_interval: '1m',
+            min_doc_count: 1,
+          },
+          aggs: {
+            minute_value: {
+              max: { field: METRIC_SERIES_VALUE_RUNTIME_FIELD },
+            },
+          },
+        },
         metric_value_raw: {
-          max: { field: METRIC_SERIES_VALUE_RUNTIME_FIELD },
+          sum_bucket: {
+            buckets_path: 'per_minute>minute_value',
+          },
         },
         metric_value: {
           bucket_script: {

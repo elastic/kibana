@@ -679,21 +679,21 @@ When `log_patterns` contain error keywords (error, fail, timeout, exception, cra
 
 ### Pattern Reference
 
-| Pattern | Required Fields | Default Threshold | Sample Floor |
-|---------|----------------|-------------------|-------------|
-| error-rate | `log.level`, `severity_text`, `event.severity` | 2× baseline error % (default 5%) | `total > 20` |
-| structured-error-rate | `error.type`, `error.message`, `event.outcome`, or `MATCH_PHRASE` on `log_patterns` evidence | 2× baseline % | `total > 20` |
-| http-error-rate | `http.response.status_code`, `status_code` | 2× baseline 5xx % (default 5%) | `total > 20` |
-| latency-degradation | `event.duration`, `transaction.duration.us`, `duration` | 2–3× observed P95 (native units) | `sample_count > 20` |
-| auth-failure-rate | `event.outcome`, `authentication.result` | 2× baseline failure % (default 10%) | `attempts >= 50` |
-| cardinality-spike | Any field with 10–500 distinct values | 2–3× per-bucket distinct count | — |
-| component-degradation | Entity field (≤50 distinct) + severity | 2× error % (floor 10%) | `total > 10` |
-| traffic-drop† | — (COUNT) | ~10% of normal volume | typical ≥50/bucket |
-| traffic-spike† | — (COUNT) | 3–5× normal volume | typical ≥50/bucket |
+| Pattern | Required Fields | Typical baseline to mention in description |
+|---------|----------------|--------------------------------------------|
+| error-rate | `log.level`, `severity_text`, `event.severity` | ~error % from `dataset_analysis` |
+| structured-error-rate | `error.type`, `error.message`, `event.outcome`, or `MATCH_PHRASE` on `log_patterns` evidence | ~error annotation % |
+| http-error-rate | `http.response.status_code`, `status_code` | ~5xx % |
+| latency-degradation | `event.duration`, `transaction.duration.us`, `duration` | observed P95 (native units) |
+| auth-failure-rate | `event.outcome`, `authentication.result` | ~failure % |
+| cardinality-spike | Any field with 10–500 distinct values | typical per-minute distinct count |
+| component-degradation | Entity field + severity (scope with `WHERE`, not entity `BY`) | ~error % for that component |
+| traffic-drop† | — (COUNT) | typical volume / minute |
+| traffic-spike† | — (COUNT) | typical volume / minute |
 
 †Traffic patterns don't satisfy the field-evidence gate on their own.
 
-**Metric calibration:** Find the baseline in `dataset_analysis` value distributions to describe expected ranges. Use floating-point arithmetic: `errors * 100.0 / total` inside `CASE` so empty denominators still emit `metric_value = 0`. Denominators SHOULD use `IS NOT NULL` to exclude rows without the field in mixed streams. Do not filter buckets away after STATS.
+**Metric calibration:** Find the baseline in `dataset_analysis` value distributions to describe expected ranges. Use floating-point arithmetic: `errors * 100.0 / total` inside `CASE` so empty denominators still emit `metric_value = 0`. Denominators SHOULD use `IS NOT NULL` to exclude rows without the field in mixed streams. Do not filter buckets away after STATS. Do not add sample-size floors; change-point reads the full series.
 
 ### Templates
 
@@ -714,9 +714,8 @@ FROM <stream>
 **Alternate numerator predicates** — the error-rate template supports swapping the `<error_filter>` clause:
 - **Structured error field**: `<error_field> IS NOT NULL` — use when `log.level` is uniform/absent but `error.type` or `error.message` exist. This measures error annotation prevalence; exclude expected/benign types if `dataset_analysis` shows them.
 - **Message pattern**: `MATCH_PHRASE(<text_field>, "<phrase>")` — use when neither severity nor structured error fields exist but `log_patterns` identifies a recurring error/warning pattern. Requires: the target field is analyzed `text`, the phrase is specific, and `log_patterns` evidence backs it.
-- **Error type breakdown**: Replace `BY bucket` with `BY <error_field>, bucket` (≤20 distinct values for `<error_field>`) to detect spikes in specific error categories.
 
-All variants support optional entity grouping: add `BY <entity_field>` (≤50 distinct) to isolate per-component. Adjust floor to `total > 10` per entity.
+Do not add entity or error-type `BY` dimensions in v0. Scope a component with `WHERE <entity_field> == "<entity>"` before STATS (see component-degradation).
 
 **[latency-degradation]:**
 ```

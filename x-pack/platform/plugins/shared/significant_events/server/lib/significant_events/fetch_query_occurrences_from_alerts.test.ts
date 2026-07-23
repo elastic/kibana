@@ -485,12 +485,12 @@ describe('fetchQueryOccurrencesFromAlerts', () => {
       expect(calledWith.query).toContain('SUM(minute_value)');
       expect(calledWith.query).not.toContain('COUNT_DISTINCT');
 
-      // Write-time prune stays as an index skip hint; lte is widened by EVERY (5m).
+      // Write-time prune stays as an index skip hint; lte is widened by MAX_WRITE_DELAY (7m).
       const timestampRange = calledWith.filter?.bool?.filter?.find(
         (clause) => clause.range?.['@timestamp']
       )?.range?.['@timestamp'];
       expect(timestampRange?.gte).toBe(FROM.toISOString());
-      expect(timestampRange?.lte).toBe(new Date(TO.getTime() + 5 * 60_000).toISOString());
+      expect(timestampRange?.lte).toBe(new Date(TO.getTime() + 7 * 60_000).toISOString());
     });
   });
 });

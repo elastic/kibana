@@ -49,14 +49,14 @@ export function canCompileMatchMetric(esqlQuery: string): boolean {
     return false;
   }
 
-  const commands = root.commands.filter(
-    (cmd): cmd is { name: string } => 'name' in cmd && typeof cmd.name === 'string'
+  const commandNames = root.commands.map((cmd) =>
+    'name' in cmd && typeof cmd.name === 'string' ? cmd.name : undefined
   );
-  if (commands.length === 0 || commands[0].name !== 'from') {
+  if (commandNames.length === 0 || commandNames[0] !== 'from') {
     return false;
   }
 
-  return commands.every((cmd) => ALLOWED_COMMANDS.has(cmd.name));
+  return commandNames.every((name) => name != null && ALLOWED_COMMANDS.has(name));
 }
 
 export function assertCanCompileMatchMetric(esqlQuery: string): void {

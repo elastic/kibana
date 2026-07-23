@@ -6,26 +6,23 @@
  */
 
 import {
-  CRITICAL_RULE_INTERVAL,
-  DEFAULT_RULE_INTERVAL,
+  CRITICAL_ANALYSIS_PROFILE,
+  DEFAULT_ANALYSIS_PROFILE,
+  analysisProfileForQuery,
+  getIdleGateLookback,
   getMetricSeriesRuleSchedule,
   getRuleDetectionSchedule,
-  scheduleIntervalForQuery,
 } from './schedule';
-import {
-  METRIC_SERIES_ANALYSIS_BUCKET_INTERVAL,
-  METRIC_SERIES_EVERY,
-  METRIC_SERIES_LOOKBACK,
-} from './metric_series_contract';
+import { METRIC_SERIES_EVERY, METRIC_SERIES_LOOKBACK } from './metric_series_contract';
 
 describe('Significant Events rule scheduling', () => {
   it.each([
-    [85, CRITICAL_RULE_INTERVAL],
-    [80, CRITICAL_RULE_INTERVAL],
-    [60, DEFAULT_RULE_INTERVAL],
-    [undefined, DEFAULT_RULE_INTERVAL],
-  ])('maps severity %s to analysis profile key %s', (severityScore, expectedInterval) => {
-    expect(scheduleIntervalForQuery({ severity_score: severityScore })).toBe(expectedInterval);
+    [85, CRITICAL_ANALYSIS_PROFILE],
+    [80, CRITICAL_ANALYSIS_PROFILE],
+    [60, DEFAULT_ANALYSIS_PROFILE],
+    [undefined, DEFAULT_ANALYSIS_PROFILE],
+  ])('maps severity %s to analysis profile %s', (severityScore, expectedProfile) => {
+    expect(analysisProfileForQuery({ severity_score: severityScore })).toBe(expectedProfile);
   });
 
   it('uses one metric-series execution schedule for all MATCH rules', () => {
@@ -34,24 +31,31 @@ describe('Significant Events rule scheduling', () => {
       lookback: METRIC_SERIES_LOOKBACK,
     });
     expect(METRIC_SERIES_EVERY).toBe('5m');
-    expect(METRIC_SERIES_LOOKBACK).toBe('6m');
+    expect(METRIC_SERIES_LOOKBACK).toBe('7m');
   });
 
-  it('uses critical analysis profile with 1m buckets', () => {
+  it('uses critical analysis profile defaults (overridable by workflow inputs)', () => {
     expect(getRuleDetectionSchedule({ severity_score: 80 })).toEqual({
-      interval_minutes: 1,
-      bucket_interval: METRIC_SERIES_ANALYSIS_BUCKET_INTERVAL,
+      profile: CRITICAL_ANALYSIS_PROFILE,
+      bucket_interval: '1m',
       lookback: 'now-40m',
       lookback_minutes: 40,
     });
   });
 
-  it('uses default analysis profile on 1m buckets with a longer lookback', () => {
+  it('uses fixed default analysis profile (5m buckets / 125m lookback)', () => {
     expect(getRuleDetectionSchedule({ severity_score: 60 })).toEqual({
-      interval_minutes: 5,
-      bucket_interval: METRIC_SERIES_ANALYSIS_BUCKET_INTERVAL,
+      profile: DEFAULT_ANALYSIS_PROFILE,
+      bucket_interval: '5m',
       lookback: 'now-125m',
       lookback_minutes: 125,
     });
+  });
+
+  it('widens the idle gate to the earliest write-time bound across profiles', () => {
+    // Default profile is wider (125m + 7m write delay) than critical (40m + 7m).
+    expect(getIdleGateLookback('now-40m')).toBe('now-132m');
+    // A critical lookback wider than default still wins.
+    expect(getIdleGateLookback('now-200m')).toBe('now-207m');
   });
 });

@@ -22,7 +22,7 @@ import { parseError } from '../streams/parse_error';
 import { SecurityError } from '../errors/security_error';
 import { getColumnIndex } from '../streams/esql';
 import { type ISignificantEventsAlertsReader, ALERTS_READER_V2 } from './alerting/alerts_reader';
-import { METRIC_SERIES_EVERY } from './rules/metric_series_contract';
+import { METRIC_SERIES_MAX_WRITE_DELAY } from './rules/metric_series_contract';
 import { ESQL_UNITS, MAX_FILL_BUCKETS, parseBucketSize } from './helpers/fill_bucket_gaps';
 
 export interface SparseBucket {
@@ -180,8 +180,9 @@ export async function computeOccurrences(
   const rangeFromIso = from.toISOString();
   const rangeToIso = to.toISOString();
 
-  // Widen the write-time `@timestamp` prune by EVERY so late rule runs for
-  // in-window minutes are still candidates (ES|QL then drops out-of-window buckets).
+  // Widen the write-time `@timestamp` prune by MAX_WRITE_DELAY so late rule
+  // runs (cadence + jitter) for in-window minutes are still candidates; ES|QL
+  // then drops out-of-window source buckets.
   const writeTimePrune = {
     bool: {
       filter: [
@@ -189,7 +190,9 @@ export async function computeOccurrences(
           range: {
             '@timestamp': {
               gte: rangeFromIso,
-              lte: new Date(to.getTime() + parseDuration(METRIC_SERIES_EVERY)).toISOString(),
+              lte: new Date(
+                to.getTime() + parseDuration(METRIC_SERIES_MAX_WRITE_DELAY)
+              ).toISOString(),
             },
           },
         },

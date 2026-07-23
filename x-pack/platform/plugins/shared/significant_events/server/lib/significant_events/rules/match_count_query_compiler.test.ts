@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  canCompileMatchMetric,
-  stripTrailingPipeCommands,
-} from './can_compile_match_metric';
+import { canCompileMatchMetric, stripTrailingPipeCommands } from './can_compile_match_metric';
 import { compileMatchCountBreachQuery } from './match_count_query_compiler';
 import {
   METRIC_SERIES_CLOSED_BUCKETS,
@@ -18,11 +15,12 @@ import {
 } from './metric_series_contract';
 
 describe('metric series contract', () => {
-  it('derives EVERY / LOOKBACK / LIMIT from CLOSED_BUCKETS', () => {
-    expect(METRIC_SERIES_CLOSED_BUCKETS).toBe(5);
+  it('derives EVERY / LOOKBACK / LIMIT from cadence + jitter tolerance', () => {
+    // 5m cadence + 1m jitter → 6 closed minutes; +1m for open-minute drop → 7m lookback.
+    expect(METRIC_SERIES_CLOSED_BUCKETS).toBe(6);
     expect(METRIC_SERIES_EVERY).toBe('5m');
-    expect(METRIC_SERIES_LOOKBACK).toBe('6m');
-    expect(METRIC_SERIES_LIMIT).toBe(5);
+    expect(METRIC_SERIES_LOOKBACK).toBe('7m');
+    expect(METRIC_SERIES_LIMIT).toBe(6);
   });
 });
 
@@ -52,9 +50,9 @@ describe('canCompileMatchMetric', () => {
 
   it('accepts FROM-only, METADATA, and trailing SORT/LIMIT', () => {
     expect(canCompileMatchMetric('FROM logs-*')).toBe(true);
-    expect(canCompileMatchMetric('FROM logs-* METADATA _id, _source | WHERE level == "error"')).toBe(
-      true
-    );
+    expect(
+      canCompileMatchMetric('FROM logs-* METADATA _id, _source | WHERE level == "error"')
+    ).toBe(true);
     expect(
       canCompileMatchMetric(
         'FROM logs-* | WHERE level == "error" | SORT @timestamp DESC | LIMIT 10'
@@ -74,9 +72,9 @@ describe('canCompileMatchMetric', () => {
     expect(canCompileMatchMetric('FROM logs-* | KEEP message | WHERE level == "error"')).toBe(
       false
     );
-    expect(canCompileMatchMetric('FROM logs-* | SORT @timestamp DESC | WHERE level == "error"')).toBe(
-      false
-    );
+    expect(
+      canCompileMatchMetric('FROM logs-* | SORT @timestamp DESC | WHERE level == "error"')
+    ).toBe(false);
     expect(canCompileMatchMetric('FROM logs-* | LIMIT 100 | WHERE level == "error"')).toBe(false);
     expect(canCompileMatchMetric('FROM logs-* | EVAL x = 1 | WHERE level == "error"')).toBe(false);
   });
@@ -97,7 +95,9 @@ describe('compileMatchCountBreachQuery', () => {
     expect(compiled).toContain('FROM logs-*');
     expect(compiled).not.toContain('METADATA');
     expect(compiled).not.toContain('?_tend');
-    expect(compiled).toContain('STATS metric_value = COUNT(*) BY bucket = BUCKET(@timestamp, 1 minute)');
+    expect(compiled).toContain(
+      'STATS metric_value = COUNT(*) BY bucket = BUCKET(@timestamp, 1 minute)'
+    );
     expect(compiled).toContain('WHERE bucket < DATE_TRUNC(1 minute, NOW())');
     expect(compiled).toContain('KEEP bucket, metric_value');
     expect(compiled).toContain('SORT bucket DESC');

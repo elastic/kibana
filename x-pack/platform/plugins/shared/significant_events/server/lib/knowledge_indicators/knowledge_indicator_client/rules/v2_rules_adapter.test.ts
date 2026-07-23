@@ -11,6 +11,7 @@ import { RulesAdapterV2 } from './v2_rules_adapter';
 import type { SignificantEventsRuleDefinition } from './rules_management_client';
 import {
   METRIC_SERIES_EVERY,
+  METRIC_SERIES_LIMIT,
   METRIC_SERIES_LOOKBACK,
   METRIC_SERIES_RULE_TAG,
 } from '../../../significant_events/rules/metric_series_contract';
@@ -58,7 +59,7 @@ function expectMetricSeriesBreach(query: string) {
   expect(query).toContain('STATS metric_value = COUNT(*)');
   expect(query).toContain('KEEP bucket, metric_value');
   expect(query).toContain('SORT bucket DESC');
-  expect(query).toContain('LIMIT 5');
+  expect(query).toContain(`LIMIT ${METRIC_SERIES_LIMIT}`);
   expect(query).not.toContain('METADATA');
   expect(query).not.toContain('LIMIT 1000');
   expect(query).not.toContain('TO_LONG');
@@ -92,7 +93,10 @@ describe('RulesAdapterV2', () => {
         tags: ['sigevents:stream:my-stream', METRIC_SERIES_RULE_TAG],
       });
       expect(data.time_field).toBe('@timestamp');
-      expect(data.schedule).toEqual({ every: METRIC_SERIES_EVERY, lookback: METRIC_SERIES_LOOKBACK });
+      expect(data.schedule).toEqual({
+        every: METRIC_SERIES_EVERY,
+        lookback: METRIC_SERIES_LOOKBACK,
+      });
       expect(data.grouping).toEqual({ fields: ['bucket'] });
       expect(data.query.format).toBe('standalone');
       expectMetricSeriesBreach(data.query.breach.query);
@@ -106,7 +110,10 @@ describe('RulesAdapterV2', () => {
       await adapter.createRule('rule-1', createDefinition);
 
       const data = lastCreateCall(mock).data as Record<string, unknown>;
-      expect(data.schedule).toEqual({ every: '5m', lookback: '6m' });
+      expect(data.schedule).toEqual({
+        every: METRIC_SERIES_EVERY,
+        lookback: METRIC_SERIES_LOOKBACK,
+      });
     });
 
     it('groups by bucket for stable overlapping recount identity', async () => {
@@ -150,7 +157,10 @@ describe('RulesAdapterV2', () => {
 
       expect(data.metadata.name).toBe('Updated title (match count)');
       expect(data.metadata.tags).toEqual(['sigevents:stream:my-stream', METRIC_SERIES_RULE_TAG]);
-      expect(data.schedule).toEqual({ every: METRIC_SERIES_EVERY, lookback: METRIC_SERIES_LOOKBACK });
+      expect(data.schedule).toEqual({
+        every: METRIC_SERIES_EVERY,
+        lookback: METRIC_SERIES_LOOKBACK,
+      });
       expect(data.grouping).toEqual({ fields: ['bucket'] });
       expectMetricSeriesBreach(data.query.breach.query);
     });
@@ -250,6 +260,47 @@ describe('RulesAdapterV2', () => {
 
       await expect(adapter.updateRule('rule-1', updateDefinition)).resolves.toBeUndefined();
       expect(mock.createRule).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('findOwnedRuleIds', () => {
+    it('returns an empty list when no rules match the stream tag', async () => {
+      const mock = makeRulesClientMock();
+      mock.findRules.mockResolvedValue({ items: [], total: 0, page: 1, perPage: 500 });
+      const adapter = makeAdapter(mock);
+
+      await expect(adapter.findOwnedRuleIds('my-stream')).resolves.toEqual([]);
+      expect(mock.findRules).toHaveBeenCalledWith({
+        filter: 'metadata.tags: "sigevents:stream:my-stream"',
+        perPage: 500,
+        page: 1,
+      });
+    });
+
+    it('pages until all owned rule ids are collected', async () => {
+      const mock = makeRulesClientMock();
+      mock.findRules
+        .mockResolvedValueOnce({
+          items: [{ id: 'r1' }, { id: 'r2' }],
+          total: 3,
+          page: 1,
+          perPage: 500,
+        })
+        .mockResolvedValueOnce({
+          items: [{ id: 'r3' }],
+          total: 3,
+          page: 2,
+          perPage: 500,
+        });
+      const adapter = makeAdapter(mock);
+
+      await expect(adapter.findOwnedRuleIds('my-stream')).resolves.toEqual(['r1', 'r2', 'r3']);
+      expect(mock.findRules).toHaveBeenCalledTimes(2);
+      expect(mock.findRules).toHaveBeenNthCalledWith(2, {
+        filter: 'metadata.tags: "sigevents:stream:my-stream"',
+        perPage: 500,
+        page: 2,
+      });
     });
   });
 
