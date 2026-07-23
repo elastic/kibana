@@ -160,6 +160,7 @@ export function createAlertEventsBatchBuilder({
 
       const doc = buildRuleEventDocument({
         '@timestamp': wroteAt,
+        execution: { uuid: executionUuid },
         scheduled_timestamp: scheduledTimestamp,
         rule: { id: ruleId, version: ruleVersion },
         group_hash: groupHash,
