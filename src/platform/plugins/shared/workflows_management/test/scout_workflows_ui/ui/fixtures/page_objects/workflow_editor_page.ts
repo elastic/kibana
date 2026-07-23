@@ -284,29 +284,47 @@ export class WorkflowEditorPage {
     );
   }
 
-  async getStepTypeIconStyles(stepType: string): Promise<{
-    backgroundImage: string;
-    maskImage: string;
-  }> {
+  /**
+   * Wait until the step type's inline decoration renders its icon in the ::after box.
+   *
+   * Scrolls the step's `type:` line into the Monaco viewport first — Monaco virtualizes
+   * off-screen lines, so the decoration span may not exist in the DOM until revealed.
+   * Then polls the computed ::after style via page.waitForFunction until the icon URL
+   * is applied via mask-image (the correct routing for monochrome step-type glyphs).
+   *
+   * This approach is deterministic: waitForFunction retries internally until the condition
+   * holds or the timeout fires, so it does not compete with a separate waitFor budget and
+   * does not depend on a fixed sleep.
+   */
+  async waitForStepTypeIconStyled(
+    stepType: string,
+    timeout = 15_000
+  ): Promise<{ backgroundImage: string; maskImage: string }> {
+    // Reveal the step's type: line so Monaco renders the decoration span into the DOM.
+    await this.setCursorToText(`type: ${stepType}`);
     const typeClass = stepType.replaceAll('.', '-');
-    const typeDecoration = this.yamlEditor.locator(`.type-inline-highlight.type-${typeClass}`);
-    // Short timeout so each expect.poll attempt doesn't consume the entire poll budget.
-    // The poll itself handles retrying until the element appears.
-    await typeDecoration.waitFor({ state: 'visible', timeout: 1000 });
-
-    return typeDecoration.evaluate((element) => {
-      const s = getComputedStyle(element, '::after');
-      // Chromium may populate only the vendor-prefixed property — coalesce both.
-      const unprefixed = s.getPropertyValue('mask-image');
-      const maskImage =
-        unprefixed && unprefixed !== 'none'
-          ? unprefixed
-          : s.getPropertyValue('-webkit-mask-image') || 'none';
-      return {
-        backgroundImage: s.backgroundImage,
-        maskImage,
-      };
-    });
+    const selector = `.monaco-editor .view-line span.type-inline-highlight.type-${typeClass}`;
+    const handle = await this.page.waitForFunction(
+      (sel: string) => {
+        const element = document.querySelector(sel);
+        if (!element) return null;
+        const s = getComputedStyle(element, '::after');
+        // Chromium may populate only the vendor-prefixed property — coalesce both.
+        const unprefixed = s.getPropertyValue('mask-image');
+        const maskImage =
+          unprefixed && unprefixed !== 'none'
+            ? unprefixed
+            : s.getPropertyValue('-webkit-mask-image') || 'none';
+        const backgroundImage = s.backgroundImage;
+        const hasImage = (v: string) => v.includes('data:image') || v.includes('.svg');
+        // Return non-null only once the icon is actually applied to the ::after box.
+        if (!hasImage(maskImage) && !hasImage(backgroundImage)) return null;
+        return { backgroundImage, maskImage };
+      },
+      selector,
+      { timeout }
+    );
+    return handle.jsonValue() as Promise<{ backgroundImage: string; maskImage: string }>;
   }
 
   /**

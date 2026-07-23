@@ -187,8 +187,7 @@ steps:
  * the `type-inline-highlight type-<type>` CSS class is emitted by Monaco and can be inspected
  * in scout tests.
  *
- * Types included: console, if, foreach, http
- * Excluded: merge (graph-internal, not YAML-authored), wait (no public step schema).
+ * Types included: console, if, foreach, http, loop.continue, workflow.fail
  */
 export const getMultiStepTypeWorkflowYaml = (name: string) => `
 name: ${name}
@@ -222,11 +221,17 @@ steps:
         type: console
         with:
           message: "item"
+      - name: skip_item
+        type: loop.continue
   - name: call_api
     type: http
     with:
       url: "https://example.com"
       method: GET
+  - name: stop_here
+    type: workflow.fail
+    with:
+      message: "boom"
 `;
 
 /**
