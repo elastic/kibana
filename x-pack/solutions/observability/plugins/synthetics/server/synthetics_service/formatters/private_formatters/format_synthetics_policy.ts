@@ -132,9 +132,10 @@ export const formatSyntheticsPolicy = (
 
   // Disabled inputs never contribute to the compiled agent policy; they only bloat the
   // package-policy saved object (each carries a full `vars` schema). Drop them so we persist
-  // only the single active input. Fleet's package-upgrade merge is kept in sync via a
-  // synthetics-specific guard in `updatePackageInputs` so the dropped inputs are never
-  // re-added as enabled (see #229595/#236104 for the regression this previously caused).
+  // only the single active input. The synthetics package now disables every input by default
+  // (integrations #15696), so Fleet's package-upgrade merge only ever re-adds a dropped input as
+  // disabled — it can no longer resurrect an enabled `synthetics/browser` and produce a policy
+  // with two enabled inputs (the #229595 regression that forced the #236104 revert).
   // Only strip once we've resolved the active input, so a monitor with an unknown type still
   // yields the (all-disabled) template instead of an empty-inputs policy.
   if (currentInput && dataStream) {

@@ -67,7 +67,6 @@ import {
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   DATA_STREAM_TYPE_VAR_NAME,
   OTEL_COLLECTOR_INPUT_TYPE,
-  FLEET_SYNTHETICS_PACKAGE,
 } from '../../common/constants';
 import type {
   PostDeletePackagePoliciesResponse,
@@ -4154,16 +4153,6 @@ export function updatePackageInputs(
     // take the override value from the new package as-is. This case typically
     // occurs when inputs or package policy templates are added/removed between versions.
     if (originalInput === undefined) {
-      // Synthetics package policies are fully managed by the Synthetics app, which persists
-      // only the single active (enabled) input and intentionally drops the disabled ones.
-      // Re-adding a package-default input here would resurrect the enabled `synthetics/browser`
-      // default and produce a policy with two enabled inputs, which corrupts the policy and
-      // marks agents unhealthy (regression from #229595, reverted in #236104). Skip re-adding
-      // any input the app omitted so upgrades keep the app's input list authoritative.
-      if (packageInfo.name === FLEET_SYNTHETICS_PACKAGE) {
-        continue;
-      }
-
       const originalInputToMigrate = applyInputLevelMigration(
         update,
         basePackagePolicy.inputs,
