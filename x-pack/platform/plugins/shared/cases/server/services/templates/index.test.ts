@@ -1523,6 +1523,209 @@ describe('TemplatesService', () => {
     });
   });
 
+  describe('resource limits', () => {
+    const buildDefinitionWithFields = (name: string, fieldCount: number) =>
+      yamlStringify({
+        name,
+        fields: Array.from({ length: fieldCount }, (_, i) => ({
+          control: 'INPUT_TEXT',
+          name: `field_${i}`,
+          type: 'keyword',
+        })),
+      });
+
+    beforeEach(() => {
+      unsecuredSavedObjectsClient.create.mockResolvedValue({
+        id: 'template-id',
+        attributes: {} as Template,
+      } as SavedObject<Template>);
+    });
+
+    describe('MAX_TEMPLATES_PER_OWNER', () => {
+      it('rejects create when the owner is already at the template limit', async () => {
+        const service = createService();
+        // name-uniqueness + count both read `find`; return a full-but-distinctly-named set so the
+        // name check passes and only the count cap fires.
+        unsecuredSavedObjectsClient.find.mockResolvedValue({
+          page: 1,
+          per_page: 0,
+          total: 200,
+          saved_objects: [],
+        } as unknown as SavedObjectsFindResponse<Template>);
+
+        await expect(
+          service.createTemplate(
+            { name: 'One Too Many', owner: 'securitySolution', definition: buildDefinition('One Too Many') },
+            'alice',
+            'generated-id'
+          )
+        ).rejects.toThrow('Cannot create more than 200 templates per owner.');
+
+        expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+      });
+
+      it('allows create when the owner is one below the limit', async () => {
+        const service = createService();
+        unsecuredSavedObjectsClient.find.mockResolvedValue({
+          page: 1,
+          per_page: 0,
+          total: 199,
+          saved_objects: [],
+        } as unknown as SavedObjectsFindResponse<Template>);
+
+        await service.createTemplate(
+          { name: 'Just Fits', owner: 'securitySolution', definition: buildDefinition('Just Fits') },
+          'alice',
+          'generated-id'
+        );
+
+        expect(unsecuredSavedObjectsClient.create).toHaveBeenCalled();
+      });
+    });
+
+    describe('MAX_FIELDS_PER_TEMPLATE', () => {
+      it('rejects create when a definition declares more than 200 fields', async () => {
+        const service = createService();
+
+        await expect(
+          service.createTemplate(
+            {
+              name: 'Too Many Fields',
+              owner: 'securitySolution',
+              definition: buildDefinitionWithFields('Too Many Fields', 201),
+            },
+            'alice',
+            'generated-id'
+          )
+        ).rejects.toThrow('A template cannot define more than 200 fields.');
+
+        expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+      });
+
+      it('allows create with exactly 200 fields', async () => {
+        const service = createService();
+
+        await service.createTemplate(
+          {
+            name: 'Exactly At Limit',
+            owner: 'securitySolution',
+            definition: buildDefinitionWithFields('Exactly At Limit', 200),
+          },
+          'alice',
+          'generated-id'
+        );
+
+        expect(unsecuredSavedObjectsClient.create).toHaveBeenCalled();
+      });
+
+      it('rejects update when a definition declares more than 200 fields', async () => {
+        const service = createService();
+        jest
+          .spyOn(
+            service as unknown as Record<'_getTemplate', typeof service.getTemplate>,
+            '_getTemplate'
+          )
+          .mockResolvedValue({
+            id: 'template-so-id',
+            attributes: {
+              templateId: 'template-id',
+              name: 'Existing',
+              owner: 'securitySolution',
+              definition: buildDefinition('Existing'),
+              templateVersion: 1,
+              deletedAt: null,
+            },
+          } as SavedObject<Template>);
+
+        await expect(
+          service.updateTemplate('template-id', {
+            name: 'Existing',
+            owner: 'securitySolution',
+            definition: buildDefinitionWithFields('Existing', 201),
+          })
+        ).rejects.toThrow('A template cannot define more than 200 fields.');
+
+        expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+      });
+
+      it('rejects the dry_run preflight when a definition declares more than 200 fields', async () => {
+        const service = createService();
+
+        await expect(
+          service.validateWriteInput({
+            name: 'Too Many Fields',
+            owner: 'securitySolution',
+            definition: buildDefinitionWithFields('Too Many Fields', 201),
+          })
+        ).rejects.toThrow('A template cannot define more than 200 fields.');
+      });
+    });
+
+    describe('MAX_VERSIONS_PER_TEMPLATE', () => {
+      it('rejects update once the template has reached the version cap', async () => {
+        const service = createService();
+        jest
+          .spyOn(
+            service as unknown as Record<'_getTemplate', typeof service.getTemplate>,
+            '_getTemplate'
+          )
+          .mockResolvedValue({
+            id: 'template-so-id',
+            attributes: {
+              templateId: 'template-id',
+              name: 'Busy Template',
+              owner: 'securitySolution',
+              definition: buildDefinition('Busy Template'),
+              templateVersion: 100,
+              deletedAt: null,
+            },
+          } as SavedObject<Template>);
+
+        await expect(
+          service.updateTemplate('template-id', {
+            name: 'Busy Template',
+            owner: 'securitySolution',
+            definition: buildDefinition('Busy Template'),
+          })
+        ).rejects.toThrow('Cannot create more than 100 versions of a template.');
+
+        expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+      });
+
+      it('allows update at one below the version cap', async () => {
+        const service = createService();
+        jest
+          .spyOn(
+            service as unknown as Record<'_getTemplate', typeof service.getTemplate>,
+            '_getTemplate'
+          )
+          .mockResolvedValue({
+            id: 'template-so-id',
+            attributes: {
+              templateId: 'template-id',
+              name: 'Busy Template',
+              owner: 'securitySolution',
+              definition: buildDefinition('Busy Template'),
+              templateVersion: 99,
+              deletedAt: null,
+            },
+          } as SavedObject<Template>);
+
+        await service.updateTemplate('template-id', {
+          name: 'Busy Template',
+          owner: 'securitySolution',
+          definition: buildDefinition('Busy Template'),
+        });
+
+        expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+          CASE_TEMPLATE_SAVED_OBJECT,
+          expect.objectContaining({ templateVersion: 100 }),
+          expect.any(Object)
+        );
+      });
+    });
+  });
+
   describe('incrementUsageStats', () => {
     it('increments usageCount and sets lastUsedAt for an existing template', async () => {
       const service = createService();

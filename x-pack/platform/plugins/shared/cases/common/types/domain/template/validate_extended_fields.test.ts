@@ -100,6 +100,36 @@ describe('validateExtendedFields', () => {
     });
   });
 
+  describe('value length backstop (MAX_EXTENDED_FIELD_VALUE_LENGTH)', () => {
+    it('reports error when a known field value exceeds the max length', () => {
+      const fields: FieldSchemaType[] = [makeTextareaField()];
+      const extendedFields = { notes_as_keyword: 'a'.repeat(30001) };
+      const errors = validateExtendedFields(extendedFields, fields);
+      expect(errors).toContain(
+        'Extended field "notes_as_keyword" exceeds the maximum length of 30000 characters'
+      );
+    });
+
+    it('accepts a value exactly at the max length', () => {
+      const fields: FieldSchemaType[] = [makeTextareaField()];
+      const extendedFields = { notes_as_keyword: 'a'.repeat(30000) };
+      const errors = validateExtendedFields(extendedFields, fields);
+      expect(errors).not.toContain(
+        'Extended field "notes_as_keyword" exceeds the maximum length of 30000 characters'
+      );
+    });
+
+    it('enforces the length backstop even for an unknown key', () => {
+      const fields: FieldSchemaType[] = [makeInputTextField()];
+      const extendedFields = { rogue_as_keyword: 'a'.repeat(30001) };
+      const errors = validateExtendedFields(extendedFields, fields);
+      expect(errors).toContain('Unknown extended field key: "rogue_as_keyword"');
+      expect(errors).toContain(
+        'Extended field "rogue_as_keyword" exceeds the maximum length of 30000 characters'
+      );
+    });
+  });
+
   describe('unknown keys', () => {
     it('reports error for unknown key', () => {
       const fields: FieldSchemaType[] = [makeInputTextField()];

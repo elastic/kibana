@@ -70,7 +70,9 @@ post:
               - $ref: '../components/schemas/template_v2_response.yaml'
               - $ref: '../components/schemas/template_dry_run_response.yaml'
     '400':
-      description: The request body, YAML definition, or template name is invalid.
+      description: >
+        The request body, YAML definition, or template name is invalid, or a resource limit was
+        exceeded (max 200 templates per owner, max 200 fields per template).
       content:
         application/json:
           schema:

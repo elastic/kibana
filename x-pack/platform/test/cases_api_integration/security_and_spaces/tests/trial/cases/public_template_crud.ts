@@ -46,6 +46,17 @@ const buildWriteBody = (name: string, overrides: Record<string, unknown> = {}) =
   ...overrides,
 });
 
+const buildDefinitionWithFields = (fieldCount: number, title = 'Case default title') =>
+  yamlStringify({
+    name: title,
+    fields: Array.from({ length: fieldCount }, (_, i) => ({
+      name: `field_${i}`,
+      type: 'keyword',
+      control: 'INPUT_TEXT',
+      label: `Field ${i}`,
+    })),
+  });
+
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
@@ -193,6 +204,34 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('returns 404 for an unknown template', async () => {
         await requestAs('delete', `${TEMPLATES_URL}/does-not-exist-000000000000`).expect(404);
+      });
+    });
+
+    describe('resource limits', () => {
+      // The per-owner template count (200) and per-template version (100) caps are exhaustively
+      // covered at the service unit-test boundary; seeding them over HTTP would slow this suite for
+      // little added signal. Here we verify only that the field-count cap is wired through the
+      // public create + dry_run routes end-to-end.
+      it('rejects create when a definition declares more than 200 fields', async () => {
+        const { body } = await requestAs('post', TEMPLATES_URL)
+          .send(buildWriteBody('Too Many Fields', { definition: buildDefinitionWithFields(201) }))
+          .expect(400);
+
+        expect(body.message).to.contain('A template cannot define more than 200 fields.');
+      });
+
+      it('allows create with exactly 200 fields', async () => {
+        await requestAs('post', TEMPLATES_URL)
+          .send(buildWriteBody('Exactly At Limit', { definition: buildDefinitionWithFields(200) }))
+          .expect(200);
+      });
+
+      it('surfaces the field-count cap on the dry_run preflight', async () => {
+        const { body } = await requestAs('post', `${TEMPLATES_URL}?dry_run=true`)
+          .send(buildWriteBody('Dry Too Many', { definition: buildDefinitionWithFields(201) }))
+          .expect(400);
+
+        expect(body.message).to.contain('A template cannot define more than 200 fields.');
       });
     });
 

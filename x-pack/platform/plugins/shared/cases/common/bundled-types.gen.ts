@@ -1241,6 +1241,8 @@ export type GetCaseTemplatesResponse = z.infer<typeof GetCaseTemplatesResponse>;
 /**
   * The body for creating or fully replacing a case template. Server-managed attributes (author, usage statistics, field summaries, version flags) are computed and cannot be set.
 
+Resource limits (enforced on write; a violation returns `400`): an owner may have at most 200 templates per space, a definition may declare at most 200 fields, and a template may be updated at most 100 times (version history is capped). A single stored extended-field value may not exceed 30000 characters.
+
   */
 export const TemplateWriteRequest = lazySchema(() =>
   z.object({
