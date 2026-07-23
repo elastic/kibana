@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import pRetry, { AbortError } from 'p-retry';
 import type {
   ElasticsearchServiceStart,
   KibanaRequest,
@@ -33,6 +34,7 @@ import type {
 } from '../../../../../common/agents';
 import type { ToolsServiceStart } from '../../../tools';
 import { createSpaceDslFilter } from '../../../../utils/spaces';
+import { isVersionConflictError } from '../../../../utils/is_version_conflict_error';
 import type {
   AgentsUsingSkillsResult,
   AgentsUsingToolsResult,
@@ -164,6 +166,9 @@ const getAgentDocument = async ({
   return response.hits.hits.length > 0 ? (response.hits.hits[0] as Document) : undefined;
 };
 
+const CONCURRENT_CREATE_CHECK_RETRIES = 9;
+const CONCURRENT_CREATE_CHECK_DELAY_MS = 300;
+
 const ensureSystemAgent = async ({
   storage,
   space,
@@ -207,17 +212,12 @@ const ensureSystemAgent = async ({
       document,
     });
   } catch (error) {
-    // Multiple Kibana nodes may attempt the create concurrently. If another node won,
-    // the desired end state already exists and this installation is complete.
-    const concurrentlyCreatedAgent = await getAgentDocument({
-      storage,
-      space,
-      agentId: profile.id,
-    });
-    if (concurrentlyCreatedAgent && fromEs(concurrentlyCreatedAgent).type === expectedType) {
-      return;
+    // Concurrent callers (parallel requests or multiple Kibana nodes) may race on the
+    // create. A version conflict on our deterministic id proves the document already
+    // exists, so the desired end state is reached and this installation is complete.
+    if (!isVersionConflictError(error)) {
+      throw error;
     }
-    throw error;
   }
 };
 
@@ -484,7 +484,26 @@ class AgentClientImpl implements AgentClient {
     profile: AgentCreateRequest
   ): Promise<PersistedAgentDefinitionWithPermissions> {
     await ensureSystemAgent({ storage: this.storage, space: this.space, profile });
-    return this.get(profile.id);
+
+    // If a concurrent caller won the creation race, the document may not be searchable
+    // yet (searches are refresh-dependent), so retry the read until it becomes visible.
+    return pRetry(
+      async () => {
+        try {
+          return await this.get(profile.id);
+        } catch (error) {
+          if (isAgentNotFoundError(error)) {
+            throw error;
+          }
+          throw new AbortError(error);
+        }
+      },
+      {
+        retries: CONCURRENT_CREATE_CHECK_RETRIES,
+        factor: 1,
+        minTimeout: CONCURRENT_CREATE_CHECK_DELAY_MS,
+      }
+    );
   }
 
   async update(
