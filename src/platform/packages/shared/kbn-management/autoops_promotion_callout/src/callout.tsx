@@ -25,6 +25,7 @@ const CLOUD_CONNECT_PORTAL_URL = 'https://cloud.elastic.co/connect-cluster-servi
 
 export interface AutoOpsPromotionCalloutProps {
   cloudConnectUrl?: string;
+  docsUrl?: string;
   onConnectClick?: (e: React.MouseEvent) => void;
   hasCloudConnectPermission?: boolean;
   /** When true (default), illustration and content+CTA stack in 2 columns. When false, the CTA moves to a third column. */
@@ -36,6 +37,7 @@ export const AUTOOPS_CALLOUT_DISMISSED_KEY = 'kibana.autoOpsPromotionCallout.dis
 
 export const AutoOpsPromotionCallout = ({
   cloudConnectUrl = '/app/cloud_connect',
+  docsUrl = CLOUD_CONNECT_DOCS_URL,
   onConnectClick,
   hasCloudConnectPermission,
   compressed = true,
@@ -136,7 +138,7 @@ export const AutoOpsPromotionCallout = ({
               values={{
                 cloudConnectLink: (
                   <EuiLink
-                    href={CLOUD_CONNECT_DOCS_URL}
+                    href={docsUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     data-test-subj="autoOpsPromotionCalloutDocsLink"
