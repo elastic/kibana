@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import { evaluate as base } from '../../../src/evaluate';
-import type { EvaluateDataset } from '../../../src/evaluate_dataset';
-import { createEvaluateDataset } from '../../../src/evaluate_dataset';
+import {
+  evaluate as base,
+  createEvaluateDataset,
+  type EvaluateDataset,
+} from '@kbn/evals-suite-agent-builder';
 
 export const evaluate = base.extend<{ evaluateDataset: EvaluateDataset }, {}>({
   evaluateDataset: [

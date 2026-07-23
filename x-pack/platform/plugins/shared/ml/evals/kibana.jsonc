@@ -1,0 +1,8 @@
+{
+  "type": "functional-tests",
+  "id": "@kbn/evals-suite-ml",
+  "owner": "@elastic/ml-ui",
+  "group": "platform",
+  "visibility": "private",
+  "devOnly": true
+}
