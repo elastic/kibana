@@ -15,6 +15,9 @@ Explore a Kibana Security Solution feature area through a real browser, collect 
 
 **Execute phases 0 → 1 → 2 → 3 in strict order. Read each phase file before executing it.**
 
+**Your goal:** Surface genuine issues that would affect real users.
+**Your anti-goal:** Do not produce findings to fill a report — if you explored thoroughly and found nothing, that is a valid and useful result. Precision over volume: one confirmed Level 1 bug is worth more than ten uncertain Level 2 flags.
+
 ## Quick Reference
 
 | Phase | Exit condition |
@@ -31,7 +34,7 @@ Explore a Kibana Security Solution feature area through a real browser, collect 
 **The entire invocation block below is optional.** If `Area` or `Flows` is missing, the agent runs a short guided intake.
 
 ```
-Read and follow exploratory-tester/SKILL.md [in parallel mode] [for issue/PR #N]
+Read and follow x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/SKILL.md [in parallel mode] [for issue/PR #N]
 Area: <feature area>
 Flows:
   - <flow name>
@@ -46,6 +49,8 @@ Session-dir: .exploratory-session/entity-analytics-20260714-093022  # optional �
 Environment: profile <name>  # optional — or just: Environment: <name> if the profile file exists
 Session-config: <path>       # optional — read all inputs from a YAML file instead of this block
 ```
+
+Claude Code users who set up the symlink from Prerequisites (`ln -s "$(pwd)/x-pack/…/exploratory-tester" ~/.claude/skills/exploratory-tester`) can use the short form `exploratory-tester/SKILL.md` instead. Cursor and other IDEs use the full path above.
 
 Guided intake: if `Area`/`Flows` missing, the agent asks interactively with defaults (`phases/0-setup.md`). Environment profiles: `Environment: profile <name>` loads a saved profile; the agent offers to save a new profile after validating a user-provided environment (`phases/0-setup.md`). Session-config: `Session-config: <path>` reads all inputs from YAML; copy `templates/session.example.yaml` as a template.
 
@@ -71,6 +76,7 @@ Pre-session errors that make findings low-value before exploration even starts:
 | "I don't know how this feature works" | Check specs → official docs → UI → test files for user flows. |
 | "This error is expected" | Document it. User decides — then add to `knowledge/<area-slug>.md`. |
 | "I called the API and it works" | UI and API hit different code paths. Browser reproduction required. |
+| "I didn't find anything — I should flag this observation just in case" | If you completed the checklist and nothing confirmed, report it as clean. That is signal, not failure. |
 ## Phases
 
 Execute in order — read each file before starting it:
