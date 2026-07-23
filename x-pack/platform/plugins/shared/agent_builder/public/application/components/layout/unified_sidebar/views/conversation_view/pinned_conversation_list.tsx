@@ -25,7 +25,7 @@ interface PinnedConversationListProps {
   pinnedConversations: ConversationWithoutRounds[];
   isDropDisabled?: boolean;
   backgroundColor?: string;
-  onItemClick?: () => void;
+  onItemClick?: (id: string) => void;
 }
 
 export const PinnedConversationList: React.FC<PinnedConversationListProps> = ({
@@ -94,7 +94,7 @@ export const PinnedConversationList: React.FC<PinnedConversationListProps> = ({
           index={index}
           isActive={currentConversationId === conversation.id}
           routeConversationId={currentConversationId}
-          onItemClick={onItemClick}
+          onItemClick={onItemClick ? () => onItemClick(conversation.id) : undefined}
         />
       ))}
     </EuiDroppable>

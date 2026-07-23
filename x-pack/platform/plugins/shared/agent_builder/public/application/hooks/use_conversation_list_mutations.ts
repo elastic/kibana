@@ -108,12 +108,15 @@ export const useConversationListMutations = ({
 
   const updatePinnedStatus = useCallback(
     (conversationId: string, pinned: boolean) => {
+      const now = new Date().toISOString();
+
       queryClient.setQueryData<Conversation>(
         queryKeys.conversations.byId(conversationId),
         (current) => {
           if (!current) return current;
           return produce(current, (draft) => {
             draft.pinned = pinned;
+            draft.updated_at = now;
           });
         }
       );
@@ -124,6 +127,7 @@ export const useConversationListMutations = ({
           const conv = draft.find((c) => c.id === conversationId);
           if (conv) {
             conv.pinned = pinned;
+            conv.updated_at = now;
           }
         });
       });
