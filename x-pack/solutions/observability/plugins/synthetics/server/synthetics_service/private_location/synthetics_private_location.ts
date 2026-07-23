@@ -42,14 +42,25 @@ import {
 import { stringifyString } from '../formatters/private_formatters/formatting_utils';
 import type { PrivateLocationAttributes } from '../../runtime_types/private_locations';
 import { PackagePolicyService } from './package_policy_service';
-import { getMonitorCostMib } from './assign_shards';
+import { getMonitorCostMib, rebalanceByCost } from './assign_shards';
 import {
   assignAgentByHost,
-  balanceAgentsByCost,
   hostFromCondition,
   hostNameCondition,
   isConditionShardedLocation,
+  isEqlSafeLiteral,
+  UNASSIGNED_CONDITION,
 } from './assign_by_condition';
+
+/**
+ * Enrolled agent hosts of a single (condition-sharded) agent policy: the shard
+ * set of lowercased, EQL-safe host names plus each host's `host.id`, used to
+ * pin a monitor to exactly one machine.
+ */
+interface EnrolledAgentHosts {
+  names: string[];
+  idByHost: Map<string, string>;
+}
 import { runRebalanceShardsTaskSoon } from '../../tasks/rebalance_private_location_shards_task';
 
 export interface PrivateConfig {
@@ -211,10 +222,10 @@ export class SyntheticsPrivateLocation {
     maintenanceWindows: MaintenanceWindow[],
     testRunId?: string,
     runOnce?: boolean,
-    /** Enrolled agent host names for the location's single agent policy, when
-     * it is condition-sharded (scalable). Threaded in once per batch by the
-     * caller so we don't query Fleet per monitor. */
-    conditionHosts?: string[],
+    /** Enrolled agent hosts for the location's single agent policy, when it is
+     * condition-sharded (scalable). Threaded in once per batch by the caller so
+     * we don't query Fleet per monitor. */
+    conditionHosts?: EnrolledAgentHosts,
     /** Current `condition` on the package policy being updated (edit path), so
      * we can preserve an existing host pin when we can't compute a fresh
      * assignment. Undefined on the create path (no existing policy). */
@@ -231,16 +242,28 @@ export class SyntheticsPrivateLocation {
       newPolicy.policy_ids = [privateLocation.agentPolicyId];
       if (isConditionShardedLocation(privateLocation)) {
         // Scalable location: gate the monitor to its assigned agent with a
-        // `${host.name}` Elastic Agent condition so exactly one agent runs it
-        // (at-most-once, no duplicate runs). When no enrolled agents are known
-        // yet, keep any existing pin rather than wiping it (a wipe would fan the
-        // monitor out to every agent until the next rebalance); a brand-new
-        // monitor has no existing condition and so stays unpinned until an agent
-        // is assigned by a later create/edit pass or the rebalance task.
-        const assigned = conditionHosts?.length
-          ? assignAgentByHost(config.id, conditionHosts)?.condition ?? null
-          : null;
-        newPolicy.condition = assigned ?? existingCondition ?? null;
+        // `${host.name}`/`${host.id}` Elastic Agent condition so exactly one
+        // agent runs it (at-most-once, no duplicate runs).
+        const names = conditionHosts?.names ?? [];
+        const existingHost = hostFromCondition(existingCondition);
+        if (existingHost && names.includes(existingHost)) {
+          // Idempotent edit/re-sync: the monitor is already pinned to a still-
+          // enrolled agent, so keep it. An edit must not re-pin the monitor
+          // (rendezvous over the current host set could land it on an enrolled-
+          // but-unhealthy agent) — health-driven moves are the rebalance task's job.
+          newPolicy.condition = existingCondition ?? UNASSIGNED_CONDITION;
+        } else if (names.length) {
+          // New monitor, or its pinned agent is no longer enrolled: place it on
+          // an enrolled host now; the rebalance task refines for health/balance.
+          newPolicy.condition =
+            assignAgentByHost(config.id, names, conditionHosts?.idByHost)?.condition ??
+            UNASSIGNED_CONDITION;
+        } else {
+          // No enrolled agents resolved: keep an existing pin if any, else stamp a
+          // never-match sentinel so an unassigned monitor runs on NO agent (not
+          // every agent) until a create/edit pass or the rebalance task assigns it.
+          newPolicy.condition = existingCondition ?? UNASSIGNED_CONDITION;
+        }
       } else {
         // Classic location: never pinned. Clear explicitly so turning condition
         // sharding off removes any previously-stamped host condition instead of
@@ -292,27 +315,51 @@ export class SyntheticsPrivateLocation {
   }
 
   /**
-   * Enrolled agent host names for a single agent policy, read from Fleet agent
-   * `local_metadata`. Lowercased to match what the agent's own `host` provider
-   * reports for `${host.name}` at runtime.
+   * Enrolled agent hosts for a single agent policy, read from Fleet agent
+   * `local_metadata`. Names are lowercased to match what the agent's own `host`
+   * provider reports for `${host.name}` at runtime, and paired with `host.id`
+   * (machine UniqueID) so a monitor can be pinned uniquely even when two agents
+   * share a hostname. Host names that can't be represented as an EQL literal are
+   * skipped (they can't be a shard target without corrupting the condition).
    */
-  private async getEnrolledAgentHosts(agentPolicyId: string): Promise<string[]> {
-    const { agents } = await this.server.fleet.agentService.asInternalUser.listAgents({
-      showInactive: false,
-      perPage: 1000,
-      kuery: `policy_id:"${agentPolicyId}"`,
-    });
-    const hosts = new Set<string>();
-    for (const agent of agents) {
-      const host = (
-        agent.local_metadata as { host?: { name?: string; hostname?: string } } | undefined
-      )?.host;
-      const name = host?.name ?? host?.hostname;
-      if (name) {
-        hosts.add(name.toLowerCase());
+  private async getEnrolledAgentHosts(agentPolicyId: string): Promise<EnrolledAgentHosts> {
+    const names = new Set<string>();
+    const idByHost = new Map<string, string>();
+
+    const perPage = 1000;
+    let page = 1;
+    let hasMore = true;
+    // Paginate: don't silently drop agents past the first page of a large policy.
+    while (hasMore) {
+      const { agents } = await this.server.fleet.agentService.asInternalUser.listAgents({
+        showInactive: false,
+        perPage,
+        page,
+        kuery: `policy_id:"${agentPolicyId}"`,
+      });
+      for (const agent of agents) {
+        const host = (
+          agent.local_metadata as
+            | { host?: { name?: string; hostname?: string; id?: string } }
+            | undefined
+        )?.host;
+        const name = (host?.name ?? host?.hostname)?.toLowerCase();
+        if (name && isEqlSafeLiteral(name)) {
+          names.add(name);
+          if (host?.id && !idByHost.has(name)) {
+            idByHost.set(name, host.id);
+          }
+        } else if (name) {
+          this.server.logger.warn(
+            `[PrivateLocation] Skipping agent host "${name}" on policy ${agentPolicyId}: not representable in an Elastic Agent condition.`
+          );
+        }
       }
+      hasMore = agents.length === perPage;
+      page += 1;
     }
-    return [...hosts];
+
+    return { names: [...names], idByHost };
   }
 
   /**
@@ -322,7 +369,7 @@ export class SyntheticsPrivateLocation {
    */
   private async getConditionHostsByLocation(
     locations: Array<{ id: string; agentPolicyId: string; agentConditionSharding?: boolean }>
-  ): Promise<Map<string, string[]>> {
+  ): Promise<Map<string, EnrolledAgentHosts>> {
     const conditionLocations = [
       ...new Map(
         locations.filter((loc) => loc.agentConditionSharding).map((loc) => [loc.id, loc])
@@ -631,34 +678,30 @@ export class SyntheticsPrivateLocation {
   }
 
   /**
-   * Idempotent rebalance for a scalable (condition-sharded) private location.
+   * Idempotent, minimal-churn rebalance for a scalable (condition-sharded)
+   * private location.
    *
    * Every monitor is pinned to the location's single agent policy; distribution
-   * is expressed as a per-monitor `${host.name}` Elastic Agent condition. This
-   * rewrites only the conditions of monitors whose assigned host changed (e.g.
-   * their agent went offline, or a recovered agent should take a share). It
-   * reuses the existing package policy content and flips only `condition` — it
-   * never decrypts or regenerates monitor configs like {@link editMonitors}.
+   * is expressed as a per-monitor host condition. This reads each monitor's
+   * current pin, runs the {@link rebalanceByCost} placement pass (failover of
+   * stale-host monitors + cost load-balancing onto stability-gated recovery
+   * hosts, moving nothing else), and rewrites only the conditions of monitors
+   * whose host actually changed. It reuses the existing package-policy content
+   * and flips only `condition` — it never decrypts or regenerates monitor
+   * configs like {@link editMonitors}. Steady state performs zero writes.
    *
-   *  - steady state (every monitor on a healthy host, every recovery host has
-   *    work) → no write;
-   *  - failover (a monitor's host is stale/unassigned) → reassign those via
-   *    count-based rendezvous ({@link assignAgentByHost}) onto healthy hosts,
-   *    leaving monitors already on a healthy host untouched (locality);
-   *  - recovery (a healthy, stability-gated host is empty) → full cost-balanced
-   *    redistribution ({@link balanceAgentsByCost}, browser ≈ 50× a lightweight
-   *    check) across the recovery hosts.
-   *
-   * Recovery only ever targets `recoveryHosts` (a stability-gated subset of
-   * `healthyHosts`); failover always uses the full live `healthyHosts`, so a
-   * flapping agent can't repeatedly pull a full redistribution onto itself while
-   * a dead agent's monitors still evacuate immediately.
+   * `recoveryHosts` (a stability-gated subset of `healthyHosts`) are the only
+   * hosts eligible to *receive* load-balancing moves; failover of a dead agent's
+   * monitors ignores this and uses the full live `healthyHosts`, so a flapping
+   * agent can't repeatedly pull load onto itself while a dead agent's monitors
+   * still evacuate immediately.
    */
   async rebalanceShards({
     location,
     healthyHosts,
     recoveryHosts,
     capacities,
+    hostIds,
   }: {
     location: { id: string; label?: string };
     /** Host names of agents that have checked in recently. */
@@ -671,13 +714,13 @@ export class SyntheticsPrivateLocation {
      * bigger agents take proportionally more load. Hosts missing an entry fall
      * back to uniform capacity. */
     capacities?: ReadonlyMap<string, number>;
+    /** Host name → `host.id`, so a rewritten condition pins uniquely on both
+     * (guards against two agents sharing a hostname). */
+    hostIds?: ReadonlyMap<string, string>;
   }): Promise<{ total: number; moved: number }> {
     if (healthyHosts.length === 0) {
       return { total: 0, moved: 0 };
     }
-    const healthySet = new Set(healthyHosts);
-    const recoveryTargets = recoveryHosts ?? healthyHosts;
-
     const pkgPolicies = await this.packagePolicyService.listByLocation({
       locationId: location.id,
     });
@@ -686,71 +729,59 @@ export class SyntheticsPrivateLocation {
       return { total: 0, moved: 0 };
     }
 
-    const suffixLength = location.id.length + 1; // strip trailing `-${locationId}`
+    // The config id is the part before `-${locationId}`; using indexOf (not a
+    // fixed trailing strip) also handles legacy space-suffixed ids
+    // (`${configId}-${locationId}-${spaceId}`) where the location id is an infix.
+    const marker = `-${location.id}`;
+    const configIdOf = (policyId: string): string => {
+      const idx = policyId.indexOf(marker);
+      return idx > 0 ? policyId.slice(0, idx) : '';
+    };
 
-    // Count monitors currently pinned to each healthy host (unassigned or
-    // stale-host monitors don't count toward a healthy host's load).
-    const countByHost = new Map<string, number>(healthyHosts.map((host) => [host, 0]));
-    for (const pp of pkgPolicies) {
-      const host = hostFromCondition(pp.condition);
-      if (host && healthySet.has(host)) {
-        countByHost.set(host, (countByHost.get(host) ?? 0) + 1);
-      }
-    }
-
-    const hasStaleWork = pkgPolicies.some((pp) => {
-      const host = hostFromCondition(pp.condition);
-      return !host || !healthySet.has(host);
+    // Current placement: monitor id, memory cost and its current host pin (from
+    // the package-policy condition). A single minimal-churn pass then computes
+    // the target host per monitor — failing over stale-host monitors and load-
+    // balancing onto recovery hosts, moving nothing else.
+    const monitors = pkgPolicies.flatMap((pp) => {
+      const id = configIdOf(pp.id);
+      return id
+        ? [
+            {
+              id,
+              cost: getMonitorCostMib(monitorTypeOfPolicy(pp)),
+              currentHost: hostFromCondition(pp.condition),
+            },
+          ]
+        : [];
     });
-    const hasRecoveryWork = recoveryTargets.some((host) => (countByHost.get(host) ?? 0) === 0);
-
-    if (!hasStaleWork && !hasRecoveryWork) {
-      return { total: totalMonitors, moved: 0 };
-    }
-
-    // Recovery sees every monitor's cost, so redistribute memory-fairly. Failover
-    // keeps the cheaper, locality-preserving count-based rendezvous.
-    let costBalanced: Map<string, { host: string; condition: string }> | undefined;
-    if (hasRecoveryWork) {
-      costBalanced = balanceAgentsByCost(
-        pkgPolicies.flatMap((pp) => {
-          const id = pp.id.slice(0, pp.id.length - suffixLength);
-          return id ? [{ id, cost: getMonitorCostMib(monitorTypeOfPolicy(pp)) }] : [];
-        }),
-        recoveryTargets,
-        capacities
-      );
-    }
+    const assignment = rebalanceByCost(monitors, healthyHosts, { capacities, recoveryHosts });
 
     const updatesBySpace = new Map<string, UpdatePackagePolicyWithId[]>();
 
     for (const pp of pkgPolicies) {
-      const monitorId = pp.id.slice(0, pp.id.length - suffixLength);
+      const monitorId = configIdOf(pp.id);
       if (!monitorId) {
         continue;
       }
 
-      const desiredHost = costBalanced
-        ? costBalanced.get(monitorId)?.host
-        : assignAgentByHost(monitorId, healthyHosts)?.host;
-      if (!desiredHost) {
-        continue;
-      }
-
-      if (hostFromCondition(pp.condition) === desiredHost) {
-        continue; // already on the right host → no write
+      const desiredHost = assignment.get(monitorId);
+      if (!desiredHost || hostFromCondition(pp.condition) === desiredHost) {
+        continue; // unplaceable, or already on the right host → no write
       }
 
       const spaceId = pp.spaceIds?.[0] ?? DEFAULT_SPACE_ID;
       const updates = updatesBySpace.get(spaceId) ?? [];
-      updates.push(toConditionUpdate(pp, hostNameCondition(desiredHost)));
+      updates.push(
+        toConditionUpdate(pp, hostNameCondition(desiredHost, hostIds?.get(desiredHost)))
+      );
       updatesBySpace.set(spaceId, updates);
     }
 
     let moved = 0;
     for (const [spaceId, policiesToUpdate] of updatesBySpace) {
-      moved += policiesToUpdate.length;
       const failed = await this.packagePolicyService.bulkUpdate({ policiesToUpdate, spaceId });
+      // Count only successful moves (a failed bulkUpdate leaves the old pin).
+      moved += policiesToUpdate.length - failed.length;
       if (failed.length > 0) {
         this.server.logger.error(
           `[rebalanceShards] Failed to move ${failed.length} monitors for location ${

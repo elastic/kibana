@@ -33,9 +33,6 @@ export interface MonitorAgentAssignment {
   host: string | null;
   /** Assigned host is currently checking in within the stale window. */
   healthy: boolean;
-  /** Assigned host is still an enrolled agent on the location's policy. */
-  enrolled: boolean;
-  lastCheckin: number | null;
 }
 
 /**
@@ -87,15 +84,11 @@ export const getMonitorAgentAssignmentRoute: SyntheticsRestApiRouteFactory<
 
         const host = hostFromCondition(packagePolicies[0].condition) ?? null;
         let healthy = false;
-        let enrolled = false;
-        let lastCheckin: number | null = null;
         if (host) {
           const hostInfo = await getAgentHostInfo(server, location.agentPolicyId).catch(
             () => new Map()
           );
-          const info = hostInfo.get(host);
-          enrolled = hostInfo.has(host);
-          lastCheckin = info?.lastCheckin ?? null;
+          const lastCheckin = hostInfo.get(host)?.lastCheckin ?? null;
           healthy = lastCheckin !== null && now - lastCheckin <= STALE_CHECKIN_MS;
         }
 
@@ -106,8 +99,6 @@ export const getMonitorAgentAssignmentRoute: SyntheticsRestApiRouteFactory<
           agentPolicyName: policyNameById.get(location.agentPolicyId) ?? location.agentPolicyId,
           host,
           healthy,
-          enrolled,
-          lastCheckin,
         };
       })
     );

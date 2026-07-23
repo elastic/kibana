@@ -85,6 +85,11 @@ export class AddEditMonitorAPI {
     // for the SO references below and to force-clean orphans on a failed create.
     const packagePolicyIds = monitorPrivateLocations.map((loc) => `${newMonitorId}-${loc.id}`);
 
+    // Whether *this* call actually created the monitor SO. Rollback must only
+    // delete the SO when we own it — a `version_conflict` on create means an SO
+    // with this id already existed and must not be torn down by us.
+    let soCreated = false;
+
     try {
       const packagePolicySoType = await getPackagePolicySavedObjectType();
       const references = monitorPrivateLocations.map((loc) => ({
@@ -107,17 +112,29 @@ export class AddEditMonitorAPI {
         spaceId
       );
 
-      const [monitorSavedObjectN, [packagePolicyResult, syncErrors]] = await Promise.all([
+      // allSettled (not Promise.all) so a rejection on one side doesn't leave the
+      // other's outcome unobserved — we need to know whether the SO was created to
+      // roll back correctly.
+      const [soResult, syncResult] = await Promise.allSettled([
         newMonitorPromise,
         syncErrorsPromise,
       ]);
+      soCreated = soResult.status === 'fulfilled';
 
-      if (packagePolicyResult && (packagePolicyResult?.failed?.length ?? []) > 0) {
+      if (soResult.status === 'rejected') {
+        throw soResult.reason;
+      }
+      if (syncResult.status === 'rejected') {
+        throw syncResult.reason;
+      }
+
+      const [packagePolicyResult, syncErrors] = syncResult.value;
+      if ((packagePolicyResult?.failed?.length ?? 0) > 0) {
         const failed = packagePolicyResult.failed.map((f) => f.error);
         throw new Error(failed.join(', '));
       }
 
-      monitorSavedObject = monitorSavedObjectN;
+      monitorSavedObject = soResult.value;
 
       sendTelemetryEvents(
         server.logger,
@@ -142,6 +159,7 @@ export class AddEditMonitorAPI {
       await this.revertMonitorIfCreated({
         newMonitorId,
         packagePolicyIds,
+        soCreated,
       });
 
       throw e;
@@ -357,7 +375,9 @@ export class AddEditMonitorAPI {
    * saved object and its Fleet package policies concurrently, so a mid-flight failure
    * (e.g. an agent-policy `version_conflict` under load) can leave *either* side
    * stranded. We therefore clean both independently:
-   *  1. delete the monitor SO (and its service/package deployment) if it was created;
+   *  1. delete the monitor SO (and its service/package deployment) — but only when
+   *     *this* call created it (`soCreated`), so a create that failed with a
+   *     conflict against a pre-existing SO of the same id never tears that SO down;
    *  2. unconditionally force-delete the deterministic private-location package
    *     policy ids, so a package policy created while the SO write lost the race
    *     can't survive as an orphan (which would inflate the location's assignment
@@ -367,14 +387,18 @@ export class AddEditMonitorAPI {
   async revertMonitorIfCreated({
     newMonitorId,
     packagePolicyIds = [],
+    soCreated = true,
   }: {
     newMonitorId: string;
     packagePolicyIds?: string[];
+    /** Only true when this call's SO create succeeded; guards against deleting a
+     * foreign SO that already existed under the same id. */
+    soCreated?: boolean;
   }) {
     const { server, spaceId, monitorConfigRepository } = this.routeContext;
 
     try {
-      const encryptedMonitor = await monitorConfigRepository.get(newMonitorId);
+      const encryptedMonitor = soCreated ? await monitorConfigRepository.get(newMonitorId) : null;
       if (encryptedMonitor) {
         // Delete via the API while the SO still exists so its package policies and
         // any service-managed deployment are torn down too, then hard-delete the SO.

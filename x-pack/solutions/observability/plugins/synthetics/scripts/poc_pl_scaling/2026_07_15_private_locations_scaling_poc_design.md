@@ -175,7 +175,18 @@ docs; `missed_deadline` is the health overlay, not the correctness oracle.
   bumps its revision → **all** enrolled agents re-check-in (each just starts/
   stops local units, which is cheap, but it's pool-wide). Hysteresis keeps this
   from happening on every flap.
-- **Constraint:** identity is tied to `host.name` (one agent per host).
+- **Constraint:** identity is tied to `host.name` (one agent per host). The
+  condition also pins `host.id` (machine UniqueID) so two agents that happen to
+  share a hostname can't both match the same monitor.
+- **At-most-once is best-effort across a failover, not fenced.** When a monitor
+  moves from a stale agent A onto a healthy agent B, there is a brief window
+  where both may run it: A might be a false-positive stale (slow check-in, not
+  actually dead) or may not have polled the revised policy yet, while B has
+  already started. Condition sharding has no cross-agent handoff/lease to fence
+  this. **This short overlap is acceptable** — the steady state is exactly-once,
+  the window is bounded by the stale threshold (`STALE_CHECKIN_MS`, ~3 missed
+  check-ins) plus one agent poll, and Heartbeat runs are idempotent w.r.t.
+  indexing. True fencing would need a lease protocol (out of scope).
 
 ## Explicitly out of scope (downstream of proving distribution)
 

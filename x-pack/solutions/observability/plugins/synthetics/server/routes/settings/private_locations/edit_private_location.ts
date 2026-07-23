@@ -161,12 +161,17 @@ export const editPrivateLocationRoute: SyntheticsRestApiRouteFactory<
         // location (label denormalization / (un)stamping host conditions), so
         // require monitor bulk-update rights in every affected space.
         if ((labelChanged || isConditionShardingChanged) && monitorsInLocation.length) {
-          const forbidden = await checkPrivileges({
-            routeContext,
-            monitorsSpaces: monitorsInLocation.map(({ namespaces }) => namespaces![0]),
-          });
-          if (forbidden) {
-            return forbidden;
+          // A monitor can live in several spaces, so require bulk-update rights in
+          // *every* space any affected monitor belongs to — not just its first
+          // namespace — before rewriting them.
+          const monitorsSpaces = [
+            ...new Set(monitorsInLocation.flatMap(({ namespaces }) => namespaces ?? [])),
+          ];
+          if (monitorsSpaces.length) {
+            const forbidden = await checkPrivileges({ routeContext, monitorsSpaces });
+            if (forbidden) {
+              return forbidden;
+            }
           }
         }
 

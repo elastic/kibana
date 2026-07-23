@@ -142,6 +142,7 @@ export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   getMonitorSummaryStatsRoute,
   getSyntheticsDiagnosticsRoute,
   getMonitorAgentAssignmentRoute,
+  getPrivateLocationAgentStats,
 ];
 
 export const syntheticsAppPublicRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
@@ -153,7 +154,6 @@ export const syntheticsAppPublicRestApiRoutes: SyntheticsRestApiRouteFactory[] =
   deletePrivateLocationRoute,
   editPrivateLocationRoute,
   getPrivateLocationsRoute,
-  getPrivateLocationAgentStats,
   getAllSyntheticsMonitorRoute,
   getSyntheticsMonitorRoute,
   addSyntheticsMonitorRoute,

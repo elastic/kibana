@@ -85,8 +85,10 @@ export class PackagePolicyService {
 
   /**
    * Lists all synthetics package policies (across spaces) whose id belongs to the
-   * given private location. Package policy ids use the space-agnostic format
-   * `${configId}-${locationId}`, so we match on the `-${locationId}` suffix.
+   * given private location. Matches both the current space-agnostic id
+   * (`${configId}-${locationId}`) and the legacy space-suffixed id
+   * (`${configId}-${locationId}-${spaceId}`) — otherwise legacy monitors would be
+   * invisible to the rebalancer and stay permanently fanned out.
    * Used by the rebalance task to diff current host-condition assignments without
    * decrypting or regenerating monitor configs.
    */
@@ -109,8 +111,11 @@ export class PackagePolicyService {
       page += 1;
     }
 
-    const suffix = `-${locationId}`;
-    return items.filter((pp) => pp.id.endsWith(suffix));
+    // New format ends with `-${locationId}`; legacy format has it as an infix
+    // (`...-${locationId}-${spaceId}`).
+    const newSuffix = `-${locationId}`;
+    const legacyInfix = `-${locationId}-`;
+    return items.filter((pp) => pp.id.endsWith(newSuffix) || pp.id.includes(legacyInfix));
   }
 
   async bulkCreate({

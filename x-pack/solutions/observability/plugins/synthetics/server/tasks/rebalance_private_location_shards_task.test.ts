@@ -54,15 +54,15 @@ describe('Rebalance private location shards tasks', () => {
     });
   };
 
-  // host name → { checkin ms, host RAM in bytes } for capacity-aware tests.
+  // host name → { checkin ms, host RAM in bytes, host.id } for capacity-aware tests.
   const setHostAgents = (
-    agentsByHost: Record<string, { checkin: number | null; memoryBytes?: number }>
+    agentsByHost: Record<string, { checkin: number | null; memoryBytes?: number; hostId?: string }>
   ) => {
     listAgents.mockResolvedValue({
-      agents: Object.entries(agentsByHost).map(([host, { checkin, memoryBytes }], i) => ({
+      agents: Object.entries(agentsByHost).map(([host, { checkin, memoryBytes, hostId }], i) => ({
         id: `agent-${i}`,
         policy_id: AGENT_POLICY,
-        local_metadata: { host: { name: host, memory: memoryBytes } },
+        local_metadata: { host: { name: host, memory: memoryBytes, id: hostId } },
         last_checkin: checkin == null ? undefined : iso(checkin),
       })),
     });
@@ -105,6 +105,7 @@ describe('Rebalance private location shards tasks', () => {
     const healthyHostsArg = () => [...rebalanceShards.mock.calls[0][0].healthyHosts].sort();
     const recoveryHostsArg = () => [...rebalanceShards.mock.calls[0][0].recoveryHosts].sort();
     const capacitiesArg = (): Map<string, number> => rebalanceShards.mock.calls[0][0].capacities;
+    const hostIdsArg = (): Map<string, string> => rebalanceShards.mock.calls[0][0].hostIds;
     const key = (host: string) => `${AGENT_POLICY}:${host}`;
 
     // Prior state where the given hosts have been healthy long enough to be stable.
@@ -127,6 +128,33 @@ describe('Rebalance private location shards tasks', () => {
       expect(listAgents).toHaveBeenCalledTimes(1);
       expect(rebalanceShards).toHaveBeenCalledTimes(1);
       expect(healthyHostsArg()).toEqual(['h1', 'h2', 'h3']);
+    });
+
+    it('paginates the agent listing so agents past the first page are not dropped', async () => {
+      const PER_PAGE = 1000;
+      const fullPage = Array.from({ length: PER_PAGE }, (_, i) => ({
+        id: `a-${i}`,
+        policy_id: AGENT_POLICY,
+        local_metadata: { host: { name: `p1h${i}` } },
+        last_checkin: iso(FRESH),
+      }));
+      const overflowPage = [
+        {
+          id: 'a-overflow',
+          policy_id: AGENT_POLICY,
+          local_metadata: { host: { name: 'overflow' } },
+          last_checkin: iso(FRESH),
+        },
+      ];
+      listAgents.mockImplementation(({ page }: { page: number }) =>
+        Promise.resolve({ agents: page === 1 ? fullPage : page === 2 ? overflowPage : [] })
+      );
+
+      await runTask();
+
+      // A full first page forces a second fetch; a short second page stops it.
+      expect(listAgents).toHaveBeenCalledTimes(2);
+      expect(healthyHostsArg()).toContain('overflow');
     });
 
     it('evicts an agent whose last check-in is older than the stale window', async () => {
@@ -178,6 +206,17 @@ describe('Rebalance private location shards tasks', () => {
       await runTask();
 
       expect(capacitiesArg()).toEqual(new Map([['h1', 8 * 1024]]));
+    });
+
+    it('passes host.id per host as hostIds (for uniquely pinning same-named agents)', async () => {
+      setHostAgents({
+        h1: { checkin: FRESH, hostId: 'uid-1' },
+        h2: { checkin: FRESH }, // no id reported → omitted
+      });
+
+      await runTask();
+
+      expect(hostIdsArg()).toEqual(new Map([['h1', 'uid-1']]));
     });
 
     it('skips rebalance when no agents are healthy', async () => {

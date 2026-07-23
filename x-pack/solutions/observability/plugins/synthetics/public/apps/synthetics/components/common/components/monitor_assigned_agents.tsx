@@ -97,7 +97,7 @@ const ASSIGNED_AGENT_HELP = i18n.translate('xpack.synthetics.monitorDetails.assi
 const PENDING_ASSIGNMENT_LABEL = i18n.translate(
   'xpack.synthetics.monitorDetails.pendingAssignment',
   {
-    defaultMessage: 'Pending — runs on all agents until the next rebalance',
+    defaultMessage: 'Pending — not running until the next rebalance assigns an agent',
   }
 );
 

@@ -57,6 +57,12 @@ export interface AgentHostInfo {
    * load; unknown hosts fall back to uniform capacity in the balancer.
    */
   memoryMib: number | null;
+  /**
+   * `host.id` (machine UniqueID) of the freshest agent with this host name, so
+   * a rewritten condition can pin on both name and id (two agents sharing a
+   * hostname would otherwise both match). Null when the agent doesn't report it.
+   */
+  hostId: string | null;
 }
 
 /**
@@ -74,31 +80,46 @@ export const getAgentHostInfo = async (
 ): Promise<Map<string, AgentHostInfo>> => {
   const byHost = new Map<string, AgentHostInfo>();
 
-  const { agents } = await server.fleet.agentService.asInternalUser.listAgents({
-    showInactive: false,
-    perPage: 1000,
-    kuery: `policy_id:"${agentPolicyId}"`,
-  });
+  const perPage = 1000;
+  let page = 1;
+  let hasMore = true;
+  // Paginate: a location's single agent policy can hold more than one page of
+  // agents, and dropping the overflow would silently exclude them as shard
+  // targets and from health/capacity.
+  while (hasMore) {
+    const { agents } = await server.fleet.agentService.asInternalUser.listAgents({
+      showInactive: false,
+      perPage,
+      page,
+      kuery: `policy_id:"${agentPolicyId}"`,
+    });
 
-  for (const agent of agents) {
-    const host = (
-      agent.local_metadata as
-        | { host?: { name?: string; hostname?: string; memory?: number } }
-        | undefined
-    )?.host;
-    const name = (host?.name ?? host?.hostname)?.toLowerCase();
-    const last = agent.last_checkin ? Date.parse(agent.last_checkin) : NaN;
-    if (name && !Number.isNaN(last)) {
-      const memoryMib =
-        typeof host?.memory === 'number' && host.memory > 0
-          ? Math.round(host.memory / BYTES_PER_MIB)
-          : null;
-      const prev = byHost.get(name);
-      byHost.set(name, {
-        lastCheckin: Math.max(prev?.lastCheckin ?? 0, last),
-        memoryMib: memoryMib ?? prev?.memoryMib ?? null,
-      });
+    for (const agent of agents) {
+      const host = (
+        agent.local_metadata as
+          | { host?: { name?: string; hostname?: string; memory?: number; id?: string } }
+          | undefined
+      )?.host;
+      const name = (host?.name ?? host?.hostname)?.toLowerCase();
+      const last = agent.last_checkin ? Date.parse(agent.last_checkin) : NaN;
+      if (name && !Number.isNaN(last)) {
+        const memoryMib =
+          typeof host?.memory === 'number' && host.memory > 0
+            ? Math.round(host.memory / BYTES_PER_MIB)
+            : null;
+        const prev = byHost.get(name);
+        // Keep the id from the freshest check-in for this host name.
+        const isFresher = last >= (prev?.lastCheckin ?? -1);
+        byHost.set(name, {
+          lastCheckin: Math.max(prev?.lastCheckin ?? 0, last),
+          memoryMib: memoryMib ?? prev?.memoryMib ?? null,
+          hostId: (isFresher ? host?.id : undefined) ?? prev?.hostId ?? null,
+        });
+      }
     }
+
+    hasMore = agents.length === perPage;
+    page += 1;
   }
 
   return byHost;
@@ -182,9 +203,13 @@ export class RebalancePrivateLocationShardsTask {
         // agents take proportionally more load. Hosts without reported memory
         // are omitted and fall back to uniform capacity in the balancer.
         const capacities = new Map<string, number>();
+        const hostIds = new Map<string, string>();
         for (const [host, info] of hostInfo) {
           if (info.memoryMib != null) {
             capacities.set(host, info.memoryMib);
+          }
+          if (info.hostId != null) {
+            hostIds.set(host, info.hostId);
           }
         }
 
@@ -217,6 +242,7 @@ export class RebalancePrivateLocationShardsTask {
           healthyHosts,
           recoveryHosts,
           capacities,
+          hostIds,
         });
 
         this.debugLog(
