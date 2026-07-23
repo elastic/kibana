@@ -102,7 +102,7 @@ const bindingsSlackAppRoute = createServerRoute({
   },
   params: z.object({
     query: z.object({
-      cursor: z.string().optional(),
+      cursor: z.string().max(1024).optional(),
       perPage: z.coerce.number().int().min(1).max(200).optional(),
     }),
   }),
