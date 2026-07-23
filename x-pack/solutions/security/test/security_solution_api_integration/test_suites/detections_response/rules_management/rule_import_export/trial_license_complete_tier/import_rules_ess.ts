@@ -75,6 +75,10 @@ export default ({ getService }: FtrProviderContext): void => {
       const sidecarActionsPostResults = await getLegacyActionSO(es);
 
       expect(sidecarActionsPostResults.hits.hits.length).toBe(0);
+
+      const overwritten = await fetchRule(supertest, { ruleId: 'rule-1' });
+      expect(overwritten.id).toBe(createdRule.id);
+      expect(overwritten.name).toBe('some other name');
     });
 
     describe('importing rules with different roles', () => {
@@ -109,7 +113,12 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('should successfully import rules without actions when user has no actions privileges', async () => {
-        const ndjson = combineToNdJson(getCustomQueryRuleParams());
+        const rule = getCustomQueryRuleParams({
+          rule_id: 'hunter-no-actions-rule',
+          name: 'Hunter no actions rule',
+          enabled: false,
+        });
+        const ndjson = combineToNdJson(rule);
 
         const { body } = await supertestWithoutAuth
           .post(DETECTION_ENGINE_RULES_IMPORT_URL)
@@ -129,6 +138,11 @@ export default ({ getService }: FtrProviderContext): void => {
           action_connectors_errors: [],
           action_connectors_warnings: [],
         });
+
+        const { body: imported } = await detectionsApi
+          .readRule({ query: { rule_id: 'hunter-no-actions-rule' } })
+          .expect(200);
+        expect(imported.name).toBe('Hunter no actions rule');
       });
 
       it('should NOT import rules with actions when user has "read" actions privileges', async () => {

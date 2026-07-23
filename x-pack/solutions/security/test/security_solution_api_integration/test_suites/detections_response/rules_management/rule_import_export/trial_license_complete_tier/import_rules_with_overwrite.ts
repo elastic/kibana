@@ -83,7 +83,7 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('overwrites an existing rule', async () => {
-      await createRule(
+      const existing = await createRule(
         supertest,
         log,
         getCustomQueryRuleParams({
@@ -115,6 +115,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       const importedRule = await fetchRule(supertest, { ruleId: 'existing-rule' });
 
+      expect(importedRule.id).toBe(existing.id);
       expect(importedRule.name).toBe('Imported rule');
     });
 
@@ -195,7 +196,7 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('enables a disabled rule when overwriting with enabled true', async () => {
-      await createRule(
+      const existing = await createRule(
         supertest,
         log,
         getCustomQueryRuleParams({
@@ -221,12 +222,13 @@ export default ({ getService }: FtrProviderContext): void => {
         .readRule({ query: { rule_id: 'overwrite-enable-rule' } })
         .expect(200);
 
+      expect(body.id).toBe(existing.id);
       expect(body.enabled).toBe(true);
       expect(body.name).toBe('Enabled after overwrite');
     });
 
     it('disables an enabled rule when overwriting with enabled false', async () => {
-      await createRule(
+      const existing = await createRule(
         supertest,
         log,
         getCustomQueryRuleParams({
@@ -252,6 +254,7 @@ export default ({ getService }: FtrProviderContext): void => {
         .readRule({ query: { rule_id: 'overwrite-disable-rule' } })
         .expect(200);
 
+      expect(body.id).toBe(existing.id);
       expect(body.enabled).toBe(false);
       expect(body.name).toBe('Disabled after overwrite');
     });

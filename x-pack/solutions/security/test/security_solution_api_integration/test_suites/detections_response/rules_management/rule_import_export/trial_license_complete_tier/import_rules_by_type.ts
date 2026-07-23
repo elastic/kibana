@@ -36,6 +36,7 @@ export default ({ getService }: FtrProviderContext): void => {
           rule_id: 'import-type-query',
           enabled: false,
         }),
+        expected: { query: '*:*' },
       },
       {
         type: 'threshold',
@@ -43,6 +44,12 @@ export default ({ getService }: FtrProviderContext): void => {
           rule_id: 'import-type-threshold',
           enabled: false,
         }),
+        expected: {
+          threshold: {
+            field: [],
+            value: 1,
+          },
+        },
       },
       {
         type: 'eql',
@@ -50,6 +57,10 @@ export default ({ getService }: FtrProviderContext): void => {
           rule_id: 'import-type-eql',
           enabled: false,
         }),
+        expected: {
+          language: 'eql',
+          query: 'any where true',
+        },
       },
       {
         type: 'threat_match',
@@ -57,6 +68,10 @@ export default ({ getService }: FtrProviderContext): void => {
           rule_id: 'import-type-threat-match',
           enabled: false,
         }),
+        expected: {
+          threat_query: '*:*',
+          threat_index: ['logs_ti*'],
+        },
       },
       {
         type: 'new_terms',
@@ -64,6 +79,10 @@ export default ({ getService }: FtrProviderContext): void => {
           rule_id: 'import-type-new-terms',
           enabled: false,
         }),
+        expected: {
+          new_terms_fields: ['user.name'],
+          history_window_start: 'now-7d',
+        },
       },
       {
         type: 'esql',
@@ -71,6 +90,10 @@ export default ({ getService }: FtrProviderContext): void => {
           rule_id: 'import-type-esql',
           enabled: false,
         }),
+        expected: {
+          language: 'esql',
+          query: 'from logs-* | limit 0',
+        },
       },
       {
         type: 'machine_learning',
@@ -78,10 +101,14 @@ export default ({ getService }: FtrProviderContext): void => {
           rule_id: 'import-type-ml',
           enabled: false,
         }),
+        expected: {
+          machine_learning_job_id: ['some_job_id'],
+          anomaly_threshold: 44,
+        },
       },
     ] as const;
 
-    for (const { type, rule } of cases) {
+    for (const { type, rule, expected } of cases) {
       it(`imports a ${type} rule and reads it back`, async () => {
         await importRulesWithSuccess({
           getService,
@@ -95,9 +122,12 @@ export default ({ getService }: FtrProviderContext): void => {
           })
           .expect(200);
 
-        expect(body.type).toBe(type);
-        expect(body.rule_id).toBe(rule.rule_id);
-        expect(body.enabled).toBe(false);
+        expect(body).toMatchObject({
+          type,
+          rule_id: rule.rule_id,
+          enabled: false,
+          ...expected,
+        });
       });
     }
   });

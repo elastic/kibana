@@ -68,6 +68,16 @@ export default ({ getService }: FtrProviderContext): void => {
         .expect(200);
 
       expect(body.total).toBe(2);
+
+      const { body: firstRule } = await detectionsApi
+        .readRule({ query: { rule_id: 'concurrent-distinct-1' } })
+        .expect(200);
+      const { body: secondRule } = await detectionsApi
+        .readRule({ query: { rule_id: 'concurrent-distinct-2' } })
+        .expect(200);
+
+      expect(firstRule.name).toBe('Concurrent distinct 1');
+      expect(secondRule.name).toBe('Concurrent distinct 2');
     });
 
     it('handles overlapping imports that share a rule_id without overwrite', async () => {
@@ -96,7 +106,9 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(response.rules_count).toBe(1);
         if (response.success_count === 0) {
           expect(response.errors.length).toBeGreaterThan(0);
+          expect(response.errors[0].rule_id).toBe(sharedId);
           expect(response.errors[0].error.status_code).toBe(409);
+          expect(response.errors[0].error.message).toBe('Rule with this rule_id already exists');
         }
       }
 
@@ -119,7 +131,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const sharedId = 'concurrent-overwrite-rule';
       const names = ['Overwrite A', 'Overwrite B'] as const;
 
-      await createRule(
+      const original = await createRule(
         supertest,
         log,
         getCustomQueryRuleParams({
@@ -174,6 +186,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       expect(body.total).toBe(1);
       expect(body.data[0].rule_id).toBe(sharedId);
+      expect(body.data[0].id).toBe(original.id);
       expect(names).toContain(body.data[0].name);
     });
   });

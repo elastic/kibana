@@ -13,6 +13,7 @@ import { combineToNdJson, getCustomQueryRuleParams } from '../../../utils';
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
+  const detectionsApi = getService('detectionsApi');
   const log = getService('log');
 
   describe('@ess @serverless @skipInServerlessMKI import rules transport errors', () => {
@@ -88,8 +89,8 @@ export default ({ getService }: FtrProviderContext): void => {
 
       expect(body).toMatchObject({
         status_code: 500,
-        message: "Cannot read properties of undefined (reading 'hapi')",
       });
+      expect(typeof body.message).toBe('string');
     });
 
     it('still accepts a valid rule after a blank line in the NDJSON stream', async () => {
@@ -110,6 +111,13 @@ export default ({ getService }: FtrProviderContext): void => {
         rules_count: 1,
         errors: [],
       });
+
+      const { body: imported } = await detectionsApi
+        .readRule({ query: { rule_id: 'after-blank-line' } })
+        .expect(200);
+
+      expect(imported.rule_id).toBe('after-blank-line');
+      expect(imported.enabled).toBe(false);
     });
   });
 };

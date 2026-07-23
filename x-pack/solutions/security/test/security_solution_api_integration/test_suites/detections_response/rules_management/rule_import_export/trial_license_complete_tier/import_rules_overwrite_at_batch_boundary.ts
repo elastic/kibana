@@ -43,6 +43,22 @@ export default ({ getService }: FtrProviderContext): void => {
         overwrite: false,
       });
 
+      const { body: beforeOverwrite } = await detectionsApi
+        .findRules({
+          query: {
+            page: 1,
+            per_page: RULE_COUNT,
+          },
+        })
+        .expect(200);
+
+      const priorByRuleId = new Map(
+        beforeOverwrite.data.map((rule: { rule_id: string; id: string; revision: number }) => [
+          rule.rule_id,
+          { id: rule.id, revision: rule.revision },
+        ])
+      );
+
       const importResponse = await importRules({
         getService,
         rules: allIds.map((ruleId) =>
@@ -78,9 +94,13 @@ export default ({ getService }: FtrProviderContext): void => {
       for (const i of sampleIndexes) {
         const ruleId = `overwrite-batch-rule-${i}`;
         const found = body.data.find(
-          (rule: { rule_id: string; name: string }) => rule.rule_id === ruleId
+          (rule: { rule_id: string; id: string; name: string; revision: number }) =>
+            rule.rule_id === ruleId
         );
+        const prior = priorByRuleId.get(ruleId);
         expect(found?.name).toBe(`Overwritten ${ruleId}`);
+        expect(found?.id).toBe(prior?.id);
+        expect(found?.revision).toBe((prior?.revision ?? 0) + 1);
       }
     });
   });

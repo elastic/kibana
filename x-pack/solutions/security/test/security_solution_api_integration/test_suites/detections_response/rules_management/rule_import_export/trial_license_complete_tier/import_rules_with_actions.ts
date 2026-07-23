@@ -162,6 +162,16 @@ export default ({ getService }: FtrProviderContext): void => {
             action_connectors_errors: [],
             action_connectors_warnings: [],
           });
+
+          const { body: webhookRule } = await detectionsApi
+            .readRule({ query: { rule_id: RULE_TO_IMPORT_RULE_ID } }, kibanaSpaceId)
+            .expect(200);
+          const { body: indexRule } = await detectionsApi
+            .readRule({ query: { rule_id: RULE_TO_IMPORT_RULE_ID_2 } }, kibanaSpaceId)
+            .expect(200);
+
+          expect(webhookRule.actions[0].id).toBe(WEBHOOK_CONNECTOR_ID);
+          expect(indexRule.actions[0].id).toBe(INDEX_CONNECTOR_ID);
         });
       });
     };
@@ -238,6 +248,15 @@ export default ({ getService }: FtrProviderContext): void => {
             action_connectors_warnings: [],
             action_connectors_errors: [],
           });
+
+          const { body: overwritten } = await detectionsApi
+            .readRule({ query: { rule_id: RULE_TO_IMPORT_RULE_ID } }, spaceId)
+            .expect(200);
+
+          // Cross-space import remaps connector SO ids; lock action presence/type.
+          expect(overwritten.actions).toHaveLength(1);
+          expect(overwritten.actions[0].action_type_id).toBe('.slack');
+          expect(typeof overwritten.actions[0].id).toBe('string');
         });
 
         it('imports a rule with connector when connector includes an originId', async () => {
@@ -298,6 +317,16 @@ export default ({ getService }: FtrProviderContext): void => {
             action_connectors_warnings: [],
             action_connectors_errors: [],
           });
+
+          const { body: imported } = await detectionsApi
+            .readRule({ query: { rule_id: RULE_TO_IMPORT_RULE_ID } }, spaceId)
+            .expect(200);
+
+          // originId remaps the connector id in the destination space.
+          expect(imported.actions).toHaveLength(1);
+          expect(imported.actions[0].action_type_id).toBe('.slack');
+          expect(typeof imported.actions[0].id).toBe('string');
+          expect(imported.actions[0].id).not.toBe(CONNECTOR_ID);
         });
       });
     });
@@ -342,6 +371,8 @@ export default ({ getService }: FtrProviderContext): void => {
           action_connectors_warnings: [],
           action_connectors_errors: [],
         });
+
+        await detectionsApi.readRule({ query: { rule_id: RULE_TO_IMPORT_RULE_ID } }).expect(404);
       });
 
       it('warns about a missing connector secret', async () => {
@@ -475,6 +506,13 @@ export default ({ getService }: FtrProviderContext): void => {
           action_connectors_errors: [],
           action_connectors_warnings: [],
         });
+
+        const { body: successRule } = await detectionsApi
+          .readRule({ query: { rule_id: RULE_TO_IMPORT_RULE_ID } })
+          .expect(200);
+        expect(successRule.actions[0].id).toBe(WEBHOOK_CONNECTOR_ID);
+
+        await detectionsApi.readRule({ query: { rule_id: RULE_TO_IMPORT_RULE_ID_2 } }).expect(404);
       });
     });
   });

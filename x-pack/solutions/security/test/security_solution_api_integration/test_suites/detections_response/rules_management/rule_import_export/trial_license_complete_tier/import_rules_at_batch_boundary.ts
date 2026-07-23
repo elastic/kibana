@@ -44,6 +44,19 @@ export default ({ getService }: FtrProviderContext): void => {
         overwrite: false,
       });
 
+      const { body: beforeOverwrite } = await detectionsApi
+        .findRules({
+          query: {
+            page: 1,
+            per_page: RULE_COUNT,
+          },
+        })
+        .expect(200);
+
+      const priorIds = new Map(
+        beforeOverwrite.data.map((rule: { rule_id: string; id: string }) => [rule.rule_id, rule.id])
+      );
+
       const rules = allIds.map((ruleId) =>
         getCustomQueryRuleParams({
           rule_id: ruleId,
@@ -80,10 +93,17 @@ export default ({ getService }: FtrProviderContext): void => {
       const foundIds = body.data.map((rule: { rule_id: string }) => rule.rule_id).sort();
       expect(foundIds).toEqual([...allIds].sort());
 
-      const overwritten = body.data.find(
-        (rule: { rule_id: string; name: string }) => rule.rule_id === 'batch-rule-0'
-      );
-      expect(overwritten?.name).toBe('Imported batch-rule-0');
+      // Spot-check overwrite targets keep SO id; a pure create gets the imported name.
+      const sampleRuleIds = ['batch-rule-0', 'batch-rule-250', 'batch-rule-500'];
+      for (const ruleId of sampleRuleIds) {
+        const found = body.data.find(
+          (rule: { rule_id: string; id: string; name: string }) => rule.rule_id === ruleId
+        );
+        expect(found?.name).toBe(`Imported ${ruleId}`);
+        if (priorIds.has(ruleId)) {
+          expect(found?.id).toBe(priorIds.get(ruleId));
+        }
+      }
     });
   });
 };

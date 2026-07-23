@@ -409,6 +409,12 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(body.id).toBe(installed.id);
       expect(body.id).not.toBe(payloadId);
       expect(body.name).toBe('Prebuilt identity overwritten');
+      // Overwrite by rule_id must keep the prebuilt classification family.
+      expect(body.immutable).toBe(true);
+      expect(body.rule_source).toMatchObject({
+        type: 'external',
+        is_customized: true,
+      });
     });
 
     it('ignores a default-space saved object id when creating in another space', async () => {

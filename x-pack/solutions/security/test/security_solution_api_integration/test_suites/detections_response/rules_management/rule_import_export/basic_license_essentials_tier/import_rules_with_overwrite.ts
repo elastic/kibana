@@ -256,6 +256,8 @@ export default ({ getService }: FtrProviderContext): void => {
           },
         ],
       });
+      // Schema validation failures currently omit rule_id on the error object.
+      expect(importResponse.errors[0].rule_id).toBeUndefined();
 
       const { body: updatedFirst } = await detectionsApi
         .readRule({ query: { rule_id: 'overwrite-partial-ok-1' } })

@@ -63,6 +63,22 @@ export default ({ getService }: FtrProviderContext): void => {
         .expect(200);
 
       expect(body.total).toBe(DISABLED_RULE_COUNT);
+
+      const { body: first } = await detectionsApi
+        .readRule({ query: { rule_id: 'large-payload-rule-0' } })
+        .expect(200);
+      const { body: last } = await detectionsApi
+        .readRule({ query: { rule_id: `large-payload-rule-${DISABLED_RULE_COUNT - 1}` } })
+        .expect(200);
+
+      expect(first).toMatchObject({
+        name: 'Large payload rule 0',
+        enabled: false,
+      });
+      expect(last).toMatchObject({
+        name: `Large payload rule ${DISABLED_RULE_COUNT - 1}`,
+        enabled: false,
+      });
     });
 
     it(`imports ${ENABLED_RULE_COUNT} enabled custom rules`, async () => {
@@ -99,6 +115,24 @@ export default ({ getService }: FtrProviderContext): void => {
 
       expect(body.total).toBe(ENABLED_RULE_COUNT);
       expect(body.data.every((rule: { enabled: boolean }) => rule.enabled)).toBe(true);
+
+      const { body: first } = await detectionsApi
+        .readRule({ query: { rule_id: 'large-payload-enabled-rule-0' } })
+        .expect(200);
+      const { body: last } = await detectionsApi
+        .readRule({
+          query: { rule_id: `large-payload-enabled-rule-${ENABLED_RULE_COUNT - 1}` },
+        })
+        .expect(200);
+
+      expect(first).toMatchObject({
+        name: 'Large payload enabled rule 0',
+        enabled: true,
+      });
+      expect(last).toMatchObject({
+        name: `Large payload enabled rule ${ENABLED_RULE_COUNT - 1}`,
+        enabled: true,
+      });
     });
   });
 };

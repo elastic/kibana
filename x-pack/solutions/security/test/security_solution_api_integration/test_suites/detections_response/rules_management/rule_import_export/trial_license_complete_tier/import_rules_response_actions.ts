@@ -16,6 +16,7 @@ import { ROLE } from '../../../../../config/services/security_solution_edr_workf
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
+  const detectionsApi = getService('detectionsApi');
   const log = getService('log');
   const utils = getService('securitySolutionUtils');
   const rolesUsersProvider = getService('rolesUsersProvider');
@@ -23,6 +24,7 @@ export default ({ getService }: FtrProviderContext): void => {
   describe('@ess @serverless @skipInServerlessMKI import rules with endpoint response actions', () => {
     let superTestResponseActionsNoAuthz: TestAgent;
     let rulesToImport: unknown[];
+    let ruleId: string;
 
     before(async () => {
       superTestResponseActionsNoAuthz = await utils.createSuperTestWithCustomRole({
@@ -35,9 +37,10 @@ export default ({ getService }: FtrProviderContext): void => {
 
     beforeEach(async () => {
       await deleteAllRules(supertest, log);
+      ruleId = uuid();
       rulesToImport = [
         getCustomQueryRuleParams({
-          rule_id: uuid(),
+          rule_id: ruleId,
           response_actions: [
             {
               action_type_id: '.endpoint',
@@ -64,11 +67,12 @@ export default ({ getService }: FtrProviderContext): void => {
         rules_count: 1,
         errors: [],
       });
+
+      const { body } = await detectionsApi.readRule({ query: { rule_id: ruleId } }).expect(200);
+      expect(body.response_actions[0].params.command).toBe('suspend-process');
     });
 
     it('should NOT import rules with response actions when user does NOT have authz', async () => {
-      // @ts-expect-error due to array of `unknown` items
-      const ruleId = rulesToImport[0].rule_id;
       const fileBuffer = Buffer.from(combineArrayToNdJson(rulesToImport));
 
       const { body } = await superTestResponseActionsNoAuthz
@@ -93,6 +97,8 @@ export default ({ getService }: FtrProviderContext): void => {
           },
         ],
       });
+
+      await detectionsApi.readRule({ query: { rule_id: ruleId } }).expect(404);
     });
   });
 };
