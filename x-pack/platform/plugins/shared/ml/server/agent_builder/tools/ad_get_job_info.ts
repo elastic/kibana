@@ -94,7 +94,7 @@ export const createAdGetJobInfoTool = (
     );
     // ML viewer might have viewer permission to see results but not to the internal indices
     // so we need to use internal user here
-    const ml = esClient.asCurrentUser.ml;
+    const ml = esClient.asInternalUser.ml;
 
     // and abort tool use if no capabilities
     try {
