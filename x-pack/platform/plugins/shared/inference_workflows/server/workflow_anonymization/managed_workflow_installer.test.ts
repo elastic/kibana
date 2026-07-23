@@ -15,8 +15,6 @@ const createClient = (): jest.Mocked<PluginScopedManagedWorkflowsApi> => ({
   ready: jest.fn().mockResolvedValue(undefined),
   getWorkflowStatus: jest.fn(),
   execute: jest.fn(),
-  getInstalledWorkflowState: jest.fn(),
-  listInstalledWorkflowStates: jest.fn(),
 });
 
 describe('inference anonymization managed workflow installer', () => {

@@ -1,5 +1,5 @@
 name: "Protect sensitive inference data"
-enabled: false
+enabled: true
 description: "Protects common identifiers around inference completion calls. Author: Elastic"
 version: "1"
 tags:
@@ -32,7 +32,7 @@ steps:
         - type: RegExp
           enabled: true
           entityClass: HOST_NAME
-          pattern: '\b(?=.{1,253}\b)(?:[a-zA-Z](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,6}\b'
+          pattern: '\b(?=.{1,253}\b)(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,63}\b'
         - type: RegExp
           enabled: true
           entityClass: USER_NAME

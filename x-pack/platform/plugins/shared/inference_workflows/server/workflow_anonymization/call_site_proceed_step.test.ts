@@ -18,11 +18,11 @@ describe('callSiteProceedStepDefinition handler', () => {
   it('forwards combined input and abortSignal to the proceed capability and returns rawContent', async () => {
     const invoke = jest.fn().mockResolvedValue({ rawContent: 'RESULT' });
     const abortSignal = new AbortController().signal;
-    const input = {
+    const input: Omit<InferenceProceedInput, 'abortSignal'> = {
       system: 'protected system',
       messages: [{ role: MessageRole.User, content: 'text TOKEN' }],
       tokenMap: { TOKEN: { original: 'secret', entityClass: 'ENTITY_NAME' } },
-    } satisfies Omit<InferenceProceedInput, 'abortSignal'>;
+    };
     const capabilities = [
       {
         id: INFERENCE_PROCEED_CAPABILITY_ID,
@@ -34,7 +34,7 @@ describe('callSiteProceedStepDefinition handler', () => {
       input,
       capabilities,
       abortSignal,
-    } as unknown as Parameters<typeof callSiteProceedStepDefinition.handler>[0]);
+    });
 
     expect(invoke).toHaveBeenCalledWith({ ...input, abortSignal });
     expect(result).toEqual({ output: { rawContent: 'RESULT' } });
