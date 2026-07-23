@@ -607,7 +607,10 @@ export class TemplatesService {
    */
   async validateWriteInput(
     input: Pick<CreateTemplateInput, 'name' | 'owner' | 'definition'>,
-    { excludeTemplateId, currentVersion }: { excludeTemplateId?: string; currentVersion?: number } = {}
+    {
+      excludeTemplateId,
+      currentVersion,
+    }: { excludeTemplateId?: string; currentVersion?: number } = {}
   ): Promise<void> {
     const normalizedDefinition = trimFieldDefaults(input.definition);
     const parsedDefinition = parseYaml(normalizedDefinition) as ParsedTemplate['definition'];

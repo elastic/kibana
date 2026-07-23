@@ -1555,7 +1555,11 @@ describe('TemplatesService', () => {
 
         await expect(
           service.createTemplate(
-            { name: 'One Too Many', owner: 'securitySolution', definition: buildDefinition('One Too Many') },
+            {
+              name: 'One Too Many',
+              owner: 'securitySolution',
+              definition: buildDefinition('One Too Many'),
+            },
             'alice',
             'generated-id'
           )
@@ -1574,7 +1578,11 @@ describe('TemplatesService', () => {
         } as unknown as SavedObjectsFindResponse<Template>);
 
         await service.createTemplate(
-          { name: 'Just Fits', owner: 'securitySolution', definition: buildDefinition('Just Fits') },
+          {
+            name: 'Just Fits',
+            owner: 'securitySolution',
+            definition: buildDefinition('Just Fits'),
+          },
           'alice',
           'generated-id'
         );
