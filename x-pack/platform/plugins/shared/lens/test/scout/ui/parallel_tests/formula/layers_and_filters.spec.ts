@@ -41,9 +41,10 @@ spaceTest.describe('Lens formula layers and filters', { tag: tags.stateful.class
         await lens.waitForVisualization();
 
         // Text decoration is configured when the color-mapping indicator is shown.
-        // FTR also asserted inline `style.color` on the cell; the editor stores a named
-        // palette (`positive`) and only `custom` implements getColorForValue, so cells may
-        // not receive inline color until the palette is customized (product limitation).
+        // FTR also asserted inline `style.color` on the cell; named palettes may not
+        // implement getColorForValue, and flipping to legacy custom via setPalette is
+        // unstable (palette flyout remounts). Exact color coverage is stubbed in
+        // scout/api/tests/numeric_correctness.fixme.spec.ts (#276949).
         await expect(page.testSubj.locator('lns_dynamicColoring_edit')).toBeVisible();
         const styleObj = await lens.getDatatableCellStyle(1, 1);
         expect(styleObj['background-color']).toBeUndefined();
@@ -57,6 +58,7 @@ spaceTest.describe('Lens formula layers and filters', { tag: tags.stateful.class
         });
         await lens.waitForVisualization();
         // FTR parity: exact moving-average value for Logstash in-range window after DnD.
+        // Monaco/table query settle can exceed default poll timeout on cold workers.
         await expect
           .poll(async () => lens.getDatatableCellText(1, 1), { timeout: 20_000 })
           .toBe('222,420');
@@ -102,7 +104,7 @@ spaceTest.describe('Lens formula layers and filters', { tag: tags.stateful.class
       });
       await lens.createLayer('referenceLine');
       expect(await lens.getLayerCount()).toBe(2);
-      await lens.activateLayerTab(1);
+      await lens.ensureLayerTabIsActive(1);
 
       await lens.configureDimension({
         dimension: 'lns-layerPanel-1 > lnsXY_yReferenceLineLeftPanel > lns-dimensionTrigger',

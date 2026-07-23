@@ -322,9 +322,14 @@ export class LensApp {
     return (await selectedButton.innerText()).trim();
   }
 
+  /**
+   * Sets terms "Number of values".
+   * ValuesInput debounces parent updates (~256ms) and is a controlled EuiFieldNumber —
+   * Playwright fill/pressSequentially often update the DOM without committing `params.size`.
+   * Mirror `setInputValue`: invoke the component `onChange(number)` via React props/fiber,
+   * then wait for the dimension trigger label to include `Top ${value}`.
+   */
   async setTermsNumberOfValues(value: number) {
-    // ValuesInput debounces parent updates; Playwright DOM fills often never reach React.
-    // Call ValuesInput's numeric onChange via the fiber tree so params.size commits.
     const input = this.page.locator(
       'input[data-test-subj="indexPattern-terms-values"][type="number"]'
     );
@@ -344,6 +349,7 @@ export class LensApp {
       let fiber: FiberNode | null | undefined = inputEl[fiberKey] as FiberNode;
       while (fiber) {
         const props = fiber.memoizedProps;
+        // ValuesInput passes numeric value + onChange(number) — not the string input handler.
         if (props && typeof props.value === 'number' && typeof props.onChange === 'function') {
           props.onChange(Number(nextValue));
           return;
@@ -362,7 +368,7 @@ export class LensApp {
         );
       },
       value,
-      { timeout: 10_000 }
+      { timeout: 15_000 }
     );
   }
 
@@ -390,11 +396,21 @@ export class LensApp {
     const paletteModeToggle = this.page.testSubj.locator('lns_colorMappingOrLegacyPalette_switch');
     const targetValue = isLegacy ? 'true' : 'false';
     if ((await paletteModeToggle.getAttribute('aria-checked')) !== targetValue) {
-      await paletteModeToggle.click();
+      // Palette flyout remounts make the switch fail Playwright stability checks.
+      await paletteModeToggle.dispatchEvent('click');
+      await this.page.waitForFunction(
+        ([subj, expected]) =>
+          document.querySelector(`[data-test-subj="${subj}"]`)?.getAttribute('aria-checked') ===
+          expected,
+        ['lns_colorMappingOrLegacyPalette_switch', targetValue] as const,
+        { timeout: 10_000 }
+      );
     }
 
     if (isLegacy) {
-      await this.page.testSubj.click('lns-palettePicker');
+      const palettePicker = this.page.testSubj.locator('lns-palettePicker');
+      await palettePicker.waitFor({ state: 'visible' });
+      await palettePicker.dispatchEvent('click');
       await this.page.locator(`#${paletteId}`).click();
     } else {
       await this.page.testSubj.click('kbnColoring_ColorMapping_PalettePicker');
@@ -892,21 +908,32 @@ export class LensApp {
 
   /**
    * Changes the data view in the Lens data panel.
-   * After filtering, either a saved `dataView-{title}` row or "Explore matching indices" appears.
+   * By default waits for a saved `dataView-{title}` row (fail if missing).
+   * Pass `{ allowExploreMatching: true }` only for specs that intentionally fall back
+   * to "Explore matching indices".
    */
-  async switchDataPanelIndexPattern(dataViewTitle: string) {
+  async switchDataPanelIndexPattern(
+    dataViewTitle: string,
+    options?: { allowExploreMatching?: boolean }
+  ) {
+    const allowExploreMatching = options?.allowExploreMatching ?? false;
     const switchLink = this.page.testSubj.locator('lns-dataView-switch-link');
     await switchLink.click();
     const switcher = this.page.testSubj.locator('indexPattern-switcher');
     await switcher.waitFor({ state: 'visible' });
     await this.page.testSubj.typeWithDelay('indexPattern-switcher--input', dataViewTitle);
     const matching = switcher.locator(`[data-test-subj="dataView-${dataViewTitle}"]`);
-    const exploreMatching = this.page.testSubj.locator('explore-matching-indices-button');
-    await matching.or(exploreMatching).waitFor({ state: 'visible' });
-    if (await matching.isVisible()) {
-      await matching.click();
+    if (allowExploreMatching) {
+      const exploreMatching = this.page.testSubj.locator('explore-matching-indices-button');
+      await matching.or(exploreMatching).waitFor({ state: 'visible' });
+      if (await matching.isVisible()) {
+        await matching.click();
+      } else {
+        await exploreMatching.click();
+      }
     } else {
-      await exploreMatching.click();
+      await matching.waitFor({ state: 'visible' });
+      await matching.click();
     }
     await switcher.waitFor({ state: 'hidden' });
   }

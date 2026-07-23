@@ -7,9 +7,7 @@
 
 import { spaceTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { createLogstashLensEditorSuiteSetup } from '../../fixtures';
-
-const XY_CHART = 'xyVisChart';
+import { createLogstashLensEditorSuiteSetup, testData } from '../../fixtures';
 
 /**
  * Migrated from FTR `group5/drag_and_drop.ts` (field→workspace + workspace nesting).
@@ -28,7 +26,7 @@ spaceTest.describe('Lens drag and drop field to workspace', { tag: tags.stateful
   spaceTest('builds a bar chart when dropping a categorical field', async ({ pageObjects }) => {
     const { lens } = pageObjects;
 
-    await lens.dragFieldToWorkspace('machine.os.raw', XY_CHART);
+    await lens.dragFieldToWorkspace('machine.os.raw', testData.XY_CHART);
     await expect
       .poll(async () => lens.getDimensionTriggerText('lnsXY_xDimensionPanel'))
       .toBe('Top 9 values of machine.os.raw');
@@ -38,7 +36,7 @@ spaceTest.describe('Lens drag and drop field to workspace', { tag: tags.stateful
   spaceTest('builds a line chart when dropping a time field', async ({ pageObjects }) => {
     const { lens } = pageObjects;
 
-    await lens.dragFieldToWorkspace('@timestamp', XY_CHART);
+    await lens.dragFieldToWorkspace('@timestamp', testData.XY_CHART);
     await expect
       .poll(async () => lens.getDimensionTriggerText('lnsXY_xDimensionPanel'))
       .toBe('@timestamp');
@@ -51,8 +49,8 @@ spaceTest.describe('Lens drag and drop field to workspace', { tag: tags.stateful
       const { lens } = pageObjects;
 
       await spaceTest.step('drop time field then clientip; nest time under category', async () => {
-        await lens.dragFieldToWorkspace('@timestamp', XY_CHART);
-        await lens.dragFieldToWorkspace('clientip', XY_CHART);
+        await lens.dragFieldToWorkspace('@timestamp', testData.XY_CHART);
+        await lens.dragFieldToWorkspace('clientip', testData.XY_CHART);
         await expect
           .poll(async () => lens.getDimensionTriggersTexts('lnsXY_splitDimensionPanel'))
           .toStrictEqual(['Top 9 values of clientip']);
@@ -63,9 +61,9 @@ spaceTest.describe('Lens drag and drop field to workspace', { tag: tags.stateful
 
       await spaceTest.step('overwrite time dimension with utc_time via field search', async () => {
         await lens.searchField('utc');
-        await lens.dragFieldToWorkspace('utc_time', XY_CHART);
+        await lens.dragFieldToWorkspace('utc_time', testData.XY_CHART);
         await lens.searchField('client');
-        await lens.dragFieldToWorkspace('clientip', XY_CHART);
+        await lens.dragFieldToWorkspace('clientip', testData.XY_CHART);
         await expect
           .poll(async () => lens.getDimensionTriggersTexts('lnsXY_xDimensionPanel'))
           .toStrictEqual(['utc_time']);

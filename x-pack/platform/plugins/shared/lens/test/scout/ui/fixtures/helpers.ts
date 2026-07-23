@@ -56,8 +56,12 @@ export interface ElasticChartDebugContext {
 interface LogstashLensEditorBeforeEachContext {
   browserAuth: { loginAsPrivilegedUser: () => Promise<void> };
   context: ElasticChartDebugContext;
+  page: { setViewportSize: (size: { width: number; height: number }) => Promise<void> };
   pageObjects: Pick<PageObjects, 'visualize' | 'lens'>;
 }
+
+/** Matches FTR lens group5 `browser.setWindowSize(1280, 1200)`. */
+export const LENS_EDITOR_VIEWPORT = { width: 1280, height: 1200 } as const;
 
 /** Enables elastic-charts debug state for subsequent page loads in this browser context. */
 export async function enableElasticChartDebug(context: ElasticChartDebugContext): Promise<void> {
@@ -84,11 +88,17 @@ export function createLogstashLensEditorSuiteSetup(options?: {
   loadLensArchives?: boolean;
   /** When true, adds the escaped-name runtime field used by formula KQL field escaping. */
   withEscapedRuntimeField?: boolean;
+  /**
+   * When true, skips opening an empty Lens editor in `beforeEach`
+   * (for specs that open a saved visualization immediately).
+   */
+  skipEmptyLensOpen?: boolean;
 }) {
   const timeRange = options?.timeRange ?? LOGSTASH_IN_RANGE_DATES;
   const enableChartDebug = options?.enableChartDebug ?? false;
   const loadLensArchives = options?.loadLensArchives ?? false;
   const withEscapedRuntimeField = options?.withEscapedRuntimeField ?? false;
+  const skipEmptyLensOpen = options?.skipEmptyLensOpen ?? false;
   let storedDataViewId: string | undefined;
 
   const beforeAll = async ({ scoutSpace, apiServices }: LogstashSpaceSetupContext) => {
@@ -128,12 +138,17 @@ export function createLogstashLensEditorSuiteSetup(options?: {
   const beforeEach = async ({
     browserAuth,
     context,
+    page,
     pageObjects,
   }: LogstashLensEditorBeforeEachContext) => {
+    await page.setViewportSize(LENS_EDITOR_VIEWPORT);
     if (enableChartDebug) {
       await enableElasticChartDebug(context);
     }
     await browserAuth.loginAsPrivilegedUser();
+    if (skipEmptyLensOpen) {
+      return;
+    }
     // URL navigation resets stale Visualize/Lens editor state (e.g. after Maps).
     await pageObjects.visualize.goto();
     await pageObjects.visualize.openNewVisualizationWizard();

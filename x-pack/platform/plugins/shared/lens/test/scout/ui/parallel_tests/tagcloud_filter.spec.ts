@@ -7,7 +7,7 @@
 
 import { spaceTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { createLogstashLensEditorSuiteSetup } from '../fixtures';
+import { createLogstashLensEditorSuiteSetup, testData } from '../fixtures';
 
 spaceTest.describe('Lens tag cloud filter', { tag: tags.stateful.classic }, () => {
   const suiteSetup = createLogstashLensEditorSuiteSetup();
@@ -51,13 +51,7 @@ spaceTest.describe('Lens tag cloud filter', { tag: tags.stateful.classic }, () =
       let renderedTagToFilter = '';
 
       await spaceTest.step('render tag cloud', async () => {
-        const expectedTags = [
-          '97.220.3.248',
-          '78.83.247.30',
-          '226.82.228.233',
-          '93.28.27.24',
-          'Other',
-        ];
+        const expectedTags = [...testData.TAGCLOUD_EXPECTED_TAGS];
         const tagLabels = await lens.getTagCloudTexts();
         expect(tagLabels.length).toBeGreaterThan(3);
         expect(

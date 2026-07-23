@@ -41,6 +41,7 @@ spaceTest.describe('Lens formula KQL escaping', { tag: tags.stateful.classic }, 
 
     await lens.typeInFormula('count(kql=', { replace: true });
     await lens.typeInFormula(`Men's Clothing`, { focus: false });
+    // Second pass: no trailing space; same Monaco/KQL debounce window.
     await expect
       .poll(async () => lens.getFormulaText(), { timeout: 15_000 })
       .toBe(`count(kql='Men\\'s Clothing')`);

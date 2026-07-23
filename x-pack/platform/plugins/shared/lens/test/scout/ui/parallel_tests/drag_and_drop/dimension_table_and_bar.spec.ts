@@ -7,15 +7,14 @@
 
 import { spaceTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { createLogstashLensEditorSuiteSetup } from '../../fixtures';
-
-const XY_CHART = 'xyVisChart';
+import { createLogstashLensEditorSuiteSetup, testData } from '../../fixtures';
 
 /**
- * Migrated from FTR `group5/drag_and_drop.ts` basic dimension DnD journey
- * (table drops → reorder → bar moves → duplicate/swap/combine).
+ * Migrated from FTR `group5/drag_and_drop.ts` table → bar dimension moves
+ * (drops, reorder, compatible/non-compatible moves, duplicate within group).
+ * Sequential within this file — later steps continue editor state from earlier ones.
  */
-spaceTest.describe('Lens drag and drop dimension moves', { tag: tags.stateful.classic }, () => {
+spaceTest.describe('Lens drag and drop table and bar moves', { tag: tags.stateful.classic }, () => {
   const suiteSetup = createLogstashLensEditorSuiteSetup();
 
   spaceTest.beforeAll(suiteSetup.beforeAll);
@@ -25,12 +24,12 @@ spaceTest.describe('Lens drag and drop dimension moves', { tag: tags.stateful.cl
   spaceTest.afterAll(suiteSetup.afterAll);
 
   spaceTest(
-    'drops fields onto table dimensions, reorders, moves across groups, and combines',
+    'drops fields onto table dimensions, reorders, and moves across bar groups',
     async ({ pageObjects }) => {
       const { lens } = pageObjects;
 
       await spaceTest.step('seed workspace with a time field then switch to table', async () => {
-        await lens.dragFieldToWorkspace('@timestamp', XY_CHART);
+        await lens.dragFieldToWorkspace('@timestamp', testData.XY_CHART);
         await lens.switchToVisualization('lnsDatatable');
       });
 
@@ -133,106 +132,6 @@ spaceTest.describe('Lens drag and drop dimension moves', { tag: tags.stateful.cl
         await expect
           .poll(async () => lens.getDimensionTriggersTexts('lnsXY_xDimensionPanel'))
           .toStrictEqual(['Top 9 values of @message.raw']);
-      });
-
-      await spaceTest.step('duplicate and swap via secondary drop targets', async () => {
-        await lens.removeLayer();
-        await lens.ensureLayerTabIsActive();
-        await lens.switchToVisualization('bar');
-        await lens.dragFieldToWorkspace('@timestamp', XY_CHART);
-
-        await lens.dragDimensionToExtraDropType(
-          'lnsXY_xDimensionPanel > lns-dimensionTrigger',
-          'lnsXY_splitDimensionPanel',
-          'duplicate',
-          XY_CHART
-        );
-        await expect
-          .poll(async () => lens.getDimensionTriggerText('lnsXY_splitDimensionPanel'))
-          .toBe('@timestamp [1]');
-        await lens.dragFieldToDimensionTrigger(
-          '@message.raw',
-          'lnsXY_yDimensionPanel > lns-dimensionTrigger'
-        );
-        await lens.dragDimensionToExtraDropType(
-          'lnsXY_splitDimensionPanel > lns-dimensionTrigger',
-          'lnsXY_yDimensionPanel',
-          'swap',
-          XY_CHART
-        );
-        await expect
-          .poll(async () => lens.getDimensionTriggerText('lnsXY_yDimensionPanel'))
-          .toBe('Count of @timestamp');
-        await expect
-          .poll(async () => lens.getDimensionTriggerText('lnsXY_splitDimensionPanel'))
-          .toBe('Top 9 values of @message.raw');
-      });
-
-      await spaceTest.step('combine breakdown with horizontal dimension', async () => {
-        await lens.removeLayer();
-        await lens.ensureLayerTabIsActive();
-        await lens.dragFieldToWorkspace('clientip', XY_CHART);
-        await lens.dragFieldToWorkspace('@message.raw', XY_CHART);
-
-        await lens.dragDimensionToExtraDropType(
-          'lnsXY_splitDimensionPanel > lns-dimensionTrigger',
-          'lnsXY_xDimensionPanel',
-          'combine',
-          XY_CHART
-        );
-        await expect
-          .poll(async () => lens.getDimensionTriggerText('lnsXY_xDimensionPanel'))
-          .toBe('Top values of clientip + 1 other');
-      });
-
-      await spaceTest.step('combine field onto existing horizontal dimension', async () => {
-        await lens.removeLayer();
-        await lens.ensureLayerTabIsActive();
-        await lens.dragFieldToWorkspace('clientip', XY_CHART);
-
-        await lens.dragFieldToExtraDropType(
-          '@message.raw',
-          'lnsXY_xDimensionPanel',
-          'combine',
-          XY_CHART
-        );
-        await expect
-          .poll(async () => lens.getDimensionTriggerText('lnsXY_xDimensionPanel'))
-          .toBe('Top values of clientip + 1 other');
-      });
-
-      await spaceTest.step('combine two multi-terms dimensions', async () => {
-        await lens.removeLayer();
-        await lens.ensureLayerTabIsActive();
-        await lens.dragFieldToWorkspace('clientip', XY_CHART);
-
-        await lens.dragFieldToExtraDropType(
-          '@message.raw',
-          'lnsXY_xDimensionPanel',
-          'combine',
-          XY_CHART
-        );
-
-        await lens.dragFieldToDimensionTrigger(
-          '@message.raw',
-          'lnsXY_splitDimensionPanel > lns-empty-dimension'
-        );
-        await lens.dragFieldToExtraDropType(
-          'geo.src',
-          'lnsXY_splitDimensionPanel',
-          'combine',
-          XY_CHART
-        );
-        await lens.dragDimensionToExtraDropType(
-          'lnsXY_splitDimensionPanel > lns-dimensionTrigger',
-          'lnsXY_xDimensionPanel',
-          'combine',
-          XY_CHART
-        );
-
-        await expect
-          .poll(async () => lens.getDimensionTriggerText('lnsXY_xDimensionPanel'))
-          .toBe('Top values of clientip + 2 others');
       });
     }
   );

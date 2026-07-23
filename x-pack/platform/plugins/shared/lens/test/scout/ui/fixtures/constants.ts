@@ -16,10 +16,22 @@ export const DATA_VIEW_ID = {
   LOGSTASH: 'logstash-*',
 } as const;
 
+/** Elastic Charts / Lens XY workspace chart test subject. */
+export const XY_CHART = 'xyVisChart' as const;
+
 export const LOGSTASH_IN_RANGE_DATES = {
   from: 'Sep 19, 2015 @ 06:31:44.000',
   to: 'Sep 23, 2015 @ 18:31:44.000',
 } as const;
+
+/** Expected tag-cloud labels for Top 5 of `ip` + Average of bytes (Logstash in-range). */
+export const TAGCLOUD_EXPECTED_TAGS = [
+  '97.220.3.248',
+  '78.83.247.30',
+  '226.82.228.233',
+  '93.28.27.24',
+  'Other',
+] as const;
 
 const FTR_LENS_KBN_ARCHIVES_DIR = 'x-pack/platform/test/functional/fixtures/kbn_archives/lens';
 
