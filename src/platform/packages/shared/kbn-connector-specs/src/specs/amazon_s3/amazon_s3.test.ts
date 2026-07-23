@@ -43,7 +43,7 @@ describe('AmazonS3', () => {
       accessKeyId: 'example_access_key',
       secretAccessKey: 'example_secret_key',
     },
-    log: {},
+    log: { debug: jest.fn() },
   } as unknown as ActionContext;
 
   beforeEach(() => {
@@ -326,6 +326,29 @@ describe('AmazonS3', () => {
       contentUrl: 'https://presigned-url',
       hasContent: false,
       message: `File size (987654 bytes) exceeds maximum downloadable size (131072 bytes). Access the file using the provided link.`,
+    });
+  });
+
+  // ===========================================================================
+  // test handler
+  // ===========================================================================
+
+  describe('test handler', () => {
+    it('should return {} when buckets are listed successfully', async () => {
+      mockListAmazonS3Buckets.mockResolvedValue({ buckets: [{ name: 'my-bucket' }] });
+
+      if (!AmazonS3.test) throw new Error('Test handler not defined');
+      const result = await AmazonS3.test.handler(mockContext);
+
+      expect(mockListAmazonS3Buckets).toHaveBeenCalledTimes(1);
+      expect(result).toEqual({});
+    });
+
+    it('should throw when the API call fails', async () => {
+      mockListAmazonS3Buckets.mockRejectedValue(new Error('AccessDenied'));
+
+      if (!AmazonS3.test) throw new Error('Test handler not defined');
+      await expect(AmazonS3.test.handler(mockContext)).rejects.toThrow('AccessDenied');
     });
   });
 });

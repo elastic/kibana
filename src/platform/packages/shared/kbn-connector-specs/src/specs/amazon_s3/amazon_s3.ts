@@ -234,10 +234,7 @@ export const AmazonS3: ConnectorSpec = {
     }),
     handler: async (ctx) => {
       ctx.log.debug('Amazon S3 test handler');
-      const response = await listAmazonS3Buckets(ctx);
-      if (!response.buckets) {
-        throw new Error('Failed to connect to Amazon S3');
-      }
+      await listAmazonS3Buckets(ctx);
       return {};
     },
     enabled: true,

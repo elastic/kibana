@@ -136,4 +136,29 @@ describe('ZendeskConnector', () => {
       );
     });
   });
+
+  // ===========================================================================
+  // test handler
+  // ===========================================================================
+
+  describe('test handler', () => {
+    it('should call /users/me.json and return {}', async () => {
+      mockClient.get.mockResolvedValue({ data: { user: { id: 1, name: 'Alice' } } });
+
+      if (!ZendeskConnector.test) throw new Error('Test handler not defined');
+      const result = await ZendeskConnector.test.handler(mockContext);
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://test-company.zendesk.com/api/v2/users/me.json'
+      );
+      expect(result).toEqual({});
+    });
+
+    it('should throw when the API call fails', async () => {
+      mockClient.get.mockRejectedValue(new Error('Unauthorized'));
+
+      if (!ZendeskConnector.test) throw new Error('Test handler not defined');
+      await expect(ZendeskConnector.test.handler(mockContext)).rejects.toThrow('Unauthorized');
+    });
+  });
 });

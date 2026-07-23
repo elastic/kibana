@@ -24,7 +24,7 @@ const createFailingContext = (): ActionContext => {
       request: jest.fn(reject),
     },
     config: {},
-    log: {},
+    log: { debug: jest.fn(), info: jest.fn(), warn: jest.fn(), error: jest.fn() },
   } as unknown as ActionContext;
 };
 

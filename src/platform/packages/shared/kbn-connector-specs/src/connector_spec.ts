@@ -263,8 +263,9 @@ export const TEST_CONNECTOR_SUB_ACTION = '_test';
 
 /**
  * Success = return data (use `{}` when there's nothing to report); failure = throw.
+ * The `ok?: never` intersection prevents accidentally returning the legacy `{ ok: false }` shape.
  */
-export type ConnectorTestHandlerResult = Record<string, unknown>;
+export type ConnectorTestHandlerResult = Record<string, unknown> & { ok?: never };
 
 export interface ConnectorTest {
   /**
