@@ -151,7 +151,7 @@ export const CreateTransformButton: FC<CreateTransformButtonProps> = ({
             defaultMessage: 'Select transform type',
           })}
         </EuiPopoverTitle>
-        <EuiContextMenu initialPanelId={0} panels={panels} css={{ minWidth: 350 }}/>
+        <EuiContextMenu initialPanelId={0} panels={panels} css={{ minWidth: 350 }} />
       </>
     </EuiPopover>
   );
