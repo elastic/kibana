@@ -501,6 +501,7 @@ src/platform/packages/shared/controls/controls-schemas @elastic/kibana-presentat
 src/platform/packages/shared/dashboards/dashboards-selector @elastic/actionable-obs-team
 src/platform/packages/shared/deeplinks/agent_builder @elastic/search-kibana
 src/platform/packages/shared/deeplinks/analytics @elastic/kibana-data-discovery @elastic/kibana-presentation @elastic/kibana-visualizations
+src/platform/packages/shared/deeplinks/context-engine @elastic/context-eng
 src/platform/packages/shared/deeplinks/devtools @elastic/kibana-management
 src/platform/packages/shared/deeplinks/fleet @elastic/fleet
 src/platform/packages/shared/deeplinks/management @elastic/kibana-management
@@ -2679,6 +2680,7 @@ src/platform/packages/shared/kbn-connector-specs/src/specs/sharepoint_server/** 
 src/platform/packages/shared/kbn-connector-specs/src/specs/shodan/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/slack/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/snowflake/** @elastic/workchat-eng
+src/platform/packages/shared/kbn-connector-specs/src/specs/sublime_security/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/tavily/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/urlvoid/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/virustotal/** @elastic/workflows-eng
