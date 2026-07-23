@@ -422,6 +422,7 @@ export class SecurityPlugin
     this.userProfileStart = this.userProfileService.start({
       clusterClient,
       session,
+      getCurrentUser: core.security.authc.getCurrentUser,
     });
 
     // In serverless, we want to redirect users to the list of projects instead of standard "Logged Out" page.

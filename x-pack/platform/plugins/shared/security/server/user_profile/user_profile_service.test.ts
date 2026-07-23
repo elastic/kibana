@@ -17,6 +17,8 @@ import {
   httpServerMock,
   loggingSystemMock,
 } from '@kbn/core/server/mocks';
+import type { FakeRawRequest } from '@kbn/core-http-server';
+import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import { nextTick } from '@kbn/test-jest-helpers';
 
 import { prefixCommaSeparatedValues, UserProfileService } from './user_profile_service';
@@ -40,6 +42,7 @@ describe('UserProfileService', () => {
   let mockStartParams: {
     clusterClient: ReturnType<typeof elasticsearchServiceMock.createClusterClient>;
     session: ReturnType<typeof sessionMock.create>;
+    getCurrentUser: jest.Mock;
   };
   let mockAuthz: ReturnType<typeof authorizationMock.create>;
   let userProfileService: UserProfileService;
@@ -47,6 +50,7 @@ describe('UserProfileService', () => {
     mockStartParams = {
       clusterClient: elasticsearchServiceMock.createClusterClient(),
       session: sessionMock.create(),
+      getCurrentUser: jest.fn().mockReturnValue(null),
     };
     mockAuthz = authorizationMock.create();
 
