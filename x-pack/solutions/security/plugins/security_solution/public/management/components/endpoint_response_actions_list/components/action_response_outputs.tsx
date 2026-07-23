@@ -9,7 +9,7 @@
 
 import React, { memo, useMemo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
-import { KillProcessActionResult } from '../../kill_process_action_result';
+import { KillSuspendProcessActionResult } from '../../kill_process_action_result';
 import { CancelActionResults } from '../../cancel_action_results';
 import {
   isCancelAction,
@@ -19,6 +19,7 @@ import {
   isMemoryDumpAction,
   isProcessesAction,
   isRunScriptAction,
+  isSuspendProcess,
   isUploadAction,
 } from '../../../../../common/endpoint/service/response_actions/type_guards';
 import { ResponseActionFileDownloadLink } from '../../response_action_file_download_link';
@@ -160,9 +161,9 @@ export const ActionResponseOutputs = memo<ActionResponseOutputsProps>(
                 );
               }
 
-              if (isKillProcess(action)) {
+              if (isKillProcess(action) || isSuspendProcess(action)) {
                 hostOutput = (
-                  <KillProcessActionResult
+                  <KillSuspendProcessActionResult
                     action={action}
                     agentId={agentId}
                     textSize="xs"

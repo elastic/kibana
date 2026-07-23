@@ -5,152 +5,130 @@
  * 2.0.
  */
 
-import React, { memo, useMemo } from 'react';
+import React, { memo } from 'react';
 import type { EuiTextProps } from '@elastic/eui';
 import { EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { RESPONSE_ACTION_STATUS } from '../../common/translations';
 import { EndpointActionFailureMessage } from '../endpoint_action_failure_message';
-import { OUTPUT_MESSAGES, UX_MESSAGES } from '../endpoint_response_actions_list/translations';
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 import type {
   ActionDetails,
   KillProcessActionOutputContent,
   MaybeImmutable,
   ResponseActionParametersWithProcessData,
+  SuspendProcessActionOutputContent,
 } from '../../../../common/endpoint/types';
 
-export interface KillProcessActionResultProps {
+export interface KillSuspendProcessActionResultProps {
   action: MaybeImmutable<
-    ActionDetails<KillProcessActionOutputContent, ResponseActionParametersWithProcessData>
+    ActionDetails<
+      KillProcessActionOutputContent | SuspendProcessActionOutputContent,
+      ResponseActionParametersWithProcessData
+    >
   >;
-  /** The agent id to display the result for. If undefined, the output for ALL agents will be displayed */
+  /** The agent id to display the result for. defaults to the first one in `action.agents[]` */
   agentId?: string;
   textSize?: EuiTextProps['size'];
   'data-test-subj'?: string;
 }
 
-export const KillProcessActionResult = memo<KillProcessActionResultProps>(
-  ({ action: _action, agentId, textSize = 's', 'data-test-subj': dataTestSubj }) => {
+export const KillSuspendProcessActionResult = memo<KillSuspendProcessActionResultProps>(
+  ({ action: _action, agentId: _agentId, textSize = 's', 'data-test-subj': dataTestSubj }) => {
     const action = _action as ActionDetails<
-      KillProcessActionOutputContent,
+      // the use of `&` in the cast below is intentional to ensure that both types are handled in the output content
+      KillProcessActionOutputContent & SuspendProcessActionOutputContent,
       ResponseActionParametersWithProcessData
     >;
     const getTestId = useTestIdGenerator(dataTestSubj);
+    const agentId = _agentId || action.agents[0];
+    const command = action.command;
+    const { wasSuccessful, isCompleted } = action.agentState[agentId] ?? {
+      wasSuccessful: action.wasSuccessful,
+      isCompleted: action.isCompleted,
+      completedAt: action.completedAt,
+      wasCanceled: action.wasCanceled,
+    };
+    const hostOutput = action.outputs?.[agentId]?.content;
 
-    const agents: string[] = useMemo(() => {
-      return agentId ? [agentId] : action.agents;
-    }, [agentId, action.agents]);
-
-    const isSingleAgent = agents.length === 1;
-
-    if (action.command !== 'kill-process') {
-      window.console.warn(`EndpointUploadActionResult: called with a non-upload action`);
+    if (command !== 'kill-process' && command !== 'suspend-process') {
+      window.console.warn(
+        `KillProcessActionResult: Action provided not a kill-process or suspend-process command`
+      );
       return <></>;
     }
 
     return (
       <EuiText size={textSize} data-test-subj={getTestId()}>
-        {agents.map((agent) => {
-          const { wasSuccessful, wasCanceled, isCompleted, completedAt } = action.agentState[
-            agent
-          ] ?? {
-            wasSuccessful: action.wasSuccessful,
-            isCompleted: action.isCompleted,
-            completedAt: action.completedAt,
-            wasCanceled: action.wasCanceled,
-          };
-          // TODO:PT remove usage of i18n values from the History Log page
-          const hostStatusMessage = !isCompleted
-            ? OUTPUT_MESSAGES.isPending(action.command)
-            : wasCanceled
-            ? UX_MESSAGES.badge.canceled
-            : wasSuccessful
-            ? OUTPUT_MESSAGES.wasSuccessful(action.command)
-            : action.isExpired
-            ? OUTPUT_MESSAGES.hasExpired(action.command)
-            : OUTPUT_MESSAGES.hasFailed(action.command);
-          const hostName = action.hosts[agent]?.name ?? agent;
-          const hostOutput = action.outputs?.[agent]?.content;
+        {!isCompleted && (
+          <span data-test-subj={getTestId('pending')}>{RESPONSE_ACTION_STATUS.pendingMessage}</span>
+        )}
 
-          return (
-            <div key={agent}>
-              {!isSingleAgent ? (
-                <div>
-                  <strong>
-                    {hostName}
-                    {': '}
-                  </strong>
-                  <span>{hostStatusMessage}</span>
-                  {isCompleted && (
-                    <div>
-                      {OUTPUT_MESSAGES.expandSection.completedAt} {completedAt}
-                    </div>
-                  )}
-                </div>
-              ) : (
-                hostStatusMessage
-              )}
+        {/* If complete, then show the output returned for this agent */}
+        {isCompleted && (
+          <div>
+            {wasSuccessful ? (
+              <div>
+                {command === 'kill-process' ? (
+                  <FormattedMessage
+                    id="xpack.securitySolution.management.killProcessActionResult.processInfo"
+                    defaultMessage="The following process was terminated:"
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="xpack.securitySolution.management.suspendProcessActionResult.processInfo"
+                    defaultMessage="The following process was suspended:"
+                  />
+                )}
 
-              {/* If complete, then show the output returned for this agent */}
-              {isCompleted && (
-                <div>
-                  {wasSuccessful ? (
-                    <div>
-                      <FormattedMessage
-                        id="xpack.securitySolution.management.killProcessActionResult.processInfo"
-                        defaultMessage="The following process was terminated:"
-                      />
-                      {hostOutput?.pid && (
-                        <div>
-                          <FormattedMessage
-                            id="xpack.securitySolution.management.killProcessActionResult.pid"
-                            defaultMessage="Process ID: {pid}"
-                            values={{ pid: hostOutput?.pid }}
-                          />
-                        </div>
-                      )}
-                      {hostOutput?.entity_id && (
-                        <div>
-                          <FormattedMessage
-                            id="xpack.securitySolution.management.killProcessActionResult.entityId"
-                            defaultMessage="Entity ID: {entityId}"
-                            values={{ entityId: hostOutput?.entity_id }}
-                          />
-                        </div>
-                      )}
-                      {hostOutput?.process_name && (
-                        <div>
-                          <FormattedMessage
-                            id="xpack.securitySolution.management.killProcessActionResult.processName"
-                            defaultMessage="Process name: {processName}"
-                            values={{ processName: hostOutput?.process_name }}
-                          />
-                        </div>
-                      )}
-                      {hostOutput?.command && (
-                        <div>
-                          <FormattedMessage
-                            id="xpack.securitySolution.management.killProcessActionResult.command"
-                            defaultMessage="Process command: {command}"
-                            values={{ command: hostOutput?.command }}
-                          />
-                        </div>
-                      )}
-                    </div>
-                  ) : (
-                    <EndpointActionFailureMessage
-                      action={action}
-                      agentId={agent}
-                      data-test-subj={getTestId(`${agentId}-outputFailureMessage`)}
+                {hostOutput?.pid && (
+                  <div>
+                    <FormattedMessage
+                      id="xpack.securitySolution.management.killProcessActionResult.pid"
+                      defaultMessage="Process ID: {pid}"
+                      values={{ pid: hostOutput?.pid }}
                     />
-                  )}
-                </div>
-              )}
-            </div>
-          );
-        })}
+                  </div>
+                )}
+                {hostOutput?.entity_id && (
+                  <div>
+                    <FormattedMessage
+                      id="xpack.securitySolution.management.killProcessActionResult.entityId"
+                      defaultMessage="Entity ID: {entityId}"
+                      values={{ entityId: hostOutput?.entity_id }}
+                    />
+                  </div>
+                )}
+                {hostOutput?.process_name && (
+                  <div>
+                    <FormattedMessage
+                      id="xpack.securitySolution.management.killProcessActionResult.processName"
+                      defaultMessage="Process name: {processName}"
+                      values={{ processName: hostOutput?.process_name }}
+                    />
+                  </div>
+                )}
+                {hostOutput?.command && (
+                  <div>
+                    <FormattedMessage
+                      id="xpack.securitySolution.management.killProcessActionResult.command"
+                      defaultMessage="Process command: {command}"
+                      values={{ command: hostOutput?.command }}
+                    />
+                  </div>
+                )}
+              </div>
+            ) : (
+              <EndpointActionFailureMessage
+                action={action}
+                agentId={agentId}
+                data-test-subj={getTestId(`${agentId}-outputFailureMessage`)}
+              />
+            )}
+          </div>
+        )}
       </EuiText>
     );
   }
 );
-KillProcessActionResult.displayName = 'KillProcessActionResult';
+KillSuspendProcessActionResult.displayName = 'KillSuspendProcessActionResult';

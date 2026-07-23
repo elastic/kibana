@@ -23,6 +23,7 @@ import type {
   ResponseActionCancelParameters,
   KillProcessActionOutputContent,
   ResponseActionParametersWithProcessData,
+  SuspendProcessActionOutputContent,
 } from '../../types';
 import { RESPONSE_ACTION_AGENT_TYPE, RESPONSE_ACTION_TYPE } from './constants';
 
@@ -86,6 +87,15 @@ export const isKillProcess = (
   ResponseActionParametersWithProcessData
 > => {
   return action.command === 'kill-process';
+};
+
+export const isSuspendProcess = (
+  action: MaybeImmutable<SomeObjectWithCommand>
+): action is ActionDetails<
+  SuspendProcessActionOutputContent,
+  ResponseActionParametersWithProcessData
+> => {
+  return action.command === 'suspend-process';
 };
 
 // type guards to ensure only the matching string values are attached to the types filter type
