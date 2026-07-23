@@ -46,7 +46,7 @@ beforeEach(() => {
   jest.clearAllMocks();
   (getServices as jest.Mock).mockReturnValue({ core: { http: mockHttp }, search: mockSearch });
   (streamGenerate as jest.Mock).mockResolvedValue(undefined);
-  mockFetchEsqlData.mockResolvedValue({ columns: [], values: [] });
+  mockFetchEsqlData.mockResolvedValue({ columns: [], values: [], all_columns: [] });
   mockFillTemplate.mockResolvedValue('<div>rendered</div>');
 });
 

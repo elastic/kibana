@@ -9,15 +9,12 @@ import dateMath from '@kbn/datemath';
 import { getESQLResults, getESQLTimeFieldFromQuery, appendLimitToQuery } from '@kbn/esql-utils';
 import type { HttpStart } from '@kbn/core/public';
 import type { TimeRange } from '@kbn/es-query';
+import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { ISearchGeneric } from '@kbn/search-types';
-import type { TemplateColumn } from './fill_template';
+
+export type EsqlDataResult = ESQLSearchResponse;
 
 const MAX_RENDER_ROWS = 100;
-
-export interface EsqlDataResult {
-  columns: TemplateColumn[];
-  values: unknown[][];
-}
 
 export async function fetchEsqlData(
   search: ISearchGeneric,
@@ -57,8 +54,5 @@ export async function fetchEsqlData(
     timeRange,
   });
 
-  return {
-    columns: response.columns as TemplateColumn[],
-    values: (response.values ?? []) as unknown[][],
-  };
+  return response;
 }

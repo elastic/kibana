@@ -112,7 +112,7 @@ export function useCustomContentHtml({
       setIsLoading(true);
       setError(undefined);
       fetchEsqlData(search, core.http, esqlQuery, timeRange, controller.signal)
-        .then(({ columns, values }) => fillTemplate(template, columns, values))
+        .then((response) => fillTemplate(template, response.columns, response.values ?? []))
         .then((rawHtml) => {
           if (controller.signal.aborted) return;
           setHtml(prepareHtml(rawHtml, colorMode));
@@ -177,7 +177,7 @@ export function useCustomContentHtml({
           return;
         }
         try {
-          const { columns, values } = await fetchEsqlData(
+          const response = await fetchEsqlData(
             search,
             core.http,
             esqlQuery,
@@ -185,7 +185,7 @@ export function useCustomContentHtml({
             controller.signal
           );
           if (controller.signal.aborted) return;
-          const rawHtml = await fillTemplate(cleaned, columns, values);
+          const rawHtml = await fillTemplate(cleaned, response.columns, response.values ?? []);
           if (controller.signal.aborted) return;
           selfWrittenRef.current = { template: cleaned, colorMode };
           onTemplateChangeRef.current(cleaned);

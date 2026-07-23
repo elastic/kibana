@@ -6,11 +6,7 @@
  */
 
 import { Liquid } from 'liquidjs';
-
-export interface TemplateColumn {
-  name: string;
-  type: string;
-}
+import type { ESQLColumn } from '@kbn/es-types';
 
 const liquid = new Liquid({
   strictFilters: false,
@@ -22,22 +18,13 @@ const liquid = new Liquid({
 
 export async function fillTemplate(
   template: string,
-  columns: TemplateColumn[],
+  columns: ESQLColumn[],
   rows: unknown[][]
 ): Promise<string> {
   const maxValues: Record<string, number> = {};
   columns.forEach((col, i) => {
-    let max = -Infinity;
-    let hasFinite = false;
-    for (const r of rows) {
-      if (r[i] === null) continue;
-      const n = Number(r[i]);
-      if (isFinite(n)) {
-        if (n > max) max = n;
-        hasFinite = true;
-      }
-    }
-    if (hasFinite) maxValues[col.name] = max;
+    const nums = rows.map((r) => Number(r[i])).filter((v) => isFinite(v));
+    if (nums.length > 0) maxValues[col.name] = nums.reduce((a, b) => (b > a ? b : a), -Infinity);
   });
 
   const rowObjects = rows.map((row) => {
