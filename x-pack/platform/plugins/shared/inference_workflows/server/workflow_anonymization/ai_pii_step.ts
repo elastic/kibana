@@ -19,6 +19,7 @@ import {
 import { getPiiTokenizationContext } from './capabilities';
 import { createCompletionTextRecords } from './message_records';
 import { replaceKnownOriginals } from './token_map';
+import { piiReplacementsCounter } from './anonymization_metrics';
 
 interface IndexedEntity extends DetectedPiiEntity {
   readonly detectionIndex: number;
@@ -153,6 +154,16 @@ export const executePiiProtection = async ({
     tokenize: pii.tokenize,
     logger,
   });
+
+  const newTokensByClass = new Map<string, number>();
+  for (const [token, entry] of Object.entries(protectedRecords.tokenMap)) {
+    if (!previousTokenMap[token]) {
+      newTokensByClass.set(entry.entityClass, (newTokensByClass.get(entry.entityClass) ?? 0) + 1);
+    }
+  }
+  for (const [entityClass, count] of newTokensByClass) {
+    piiReplacementsCounter.add(count, { entity_class: entityClass });
+  }
 
   return {
     ...detectionRecords.replace(protectedRecords.values),
