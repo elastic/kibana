@@ -46,7 +46,7 @@ export const allowedExperimentalValues = Object.freeze({
    * project picker is registered on osquery pages. Has no effect on stateful Kibana or
    * when CPS is disabled.
    */
-  crossProjectSearch: false,
+  crossProjectSearch: true,
 });
 
 type ExperimentalFeatures = { [K in keyof typeof allowedExperimentalValues]: boolean };
