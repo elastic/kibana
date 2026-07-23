@@ -129,6 +129,7 @@ import {
   hasVersionSuffix,
   removeVersionSuffixFromPolicyId,
   buildPolicyBaseIdWithFallbackEsFilter,
+  buildPolicyIdOrVariantsEsFilter,
 } from '../../common/services/version_specific_policies_utils';
 
 import { VERIFY_PERMISSIONS_TASK } from '../tasks/agentless/verify_permissions_task';
@@ -2119,7 +2120,7 @@ class AgentPolicyService {
         ignore_unavailable: true,
         scroll_size: SO_SEARCH_LIMIT,
         refresh: true,
-        query: buildPolicyBaseIdWithFallbackEsFilter(agentPolicyId),
+        query: buildPolicyIdOrVariantsEsFilter(agentPolicyId),
       });
       hasMore = (res.deleted ?? 0) === SO_SEARCH_LIMIT;
     }
