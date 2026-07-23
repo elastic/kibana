@@ -1,5 +1,5 @@
 {
-  "sha1": "6550752fe7809f935e11d87e4f680e83e3753acd",
+  "sha1": "82a8787982990888cb5f5950b100f256c03c4add",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -17,7 +17,77 @@
       }
     },
     {
-      "id": "6fa936d347ac553-74023816eb352fd",
+      "id": "0bc1c73b9acf972-fde16faf003767d",
+      "title": "serverless security navigation destinations navigate using search",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution_serverless/test/scout/ui/parallel_tests/navigation_destinations.spec.ts",
+        "line": 15,
+        "column": 14
+      }
+    },
+    {
+      "id": "0bc1c73b9acf972-0f2ca503399afd2",
+      "title": "serverless security navigation destinations shows cases in sidebar navigation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution_serverless/test/scout/ui/parallel_tests/navigation_destinations.spec.ts",
+        "line": 34,
+        "column": 14
+      }
+    },
+    {
+      "id": "0bc1c73b9acf972-bd06d3cc4a27625",
+      "title": "serverless security navigation destinations navigates to cases app",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution_serverless/test/scout/ui/parallel_tests/navigation_destinations.spec.ts",
+        "line": 53,
+        "column": 14
+      }
+    },
+    {
+      "id": "0bc1c73b9acf972-374209cc35d4775",
+      "title": "serverless security navigation destinations navigates to maintenance windows",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution_serverless/test/scout/ui/parallel_tests/navigation_destinations.spec.ts",
+        "line": 75,
+        "column": 14
+      }
+    },
+    {
+      "id": "0bc1c73b9acf972-2ac2357e9091602",
+      "title": "serverless security navigation destinations opens panel on legacy management landing page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution_serverless/test/scout/ui/parallel_tests/navigation_destinations.spec.ts",
+        "line": 89,
+        "column": 14
+      }
+    },
+    {
+      "id": "b760102fdea7e93-74023816eb352fd",
       "title": "serverless security navigation has security serverless side nav",
       "expectedStatus": "passed",
       "tags": [
@@ -25,13 +95,13 @@
         "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "x-pack/solutions/security/plugins/security_solution_serverless/test/scout/ui/parallel_tests/serverless_security_navigation.spec.ts",
+        "file": "x-pack/solutions/security/plugins/security_solution_serverless/test/scout/ui/parallel_tests/navigation.spec.ts",
         "line": 22,
         "column": 14
       }
     },
     {
-      "id": "6fa936d347ac553-bde8cbfb95f81a0",
+      "id": "b760102fdea7e93-bde8cbfb95f81a0",
       "title": "serverless security navigation breadcrumbs reflect navigation state",
       "expectedStatus": "passed",
       "tags": [
@@ -39,13 +109,13 @@
         "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "x-pack/solutions/security/plugins/security_solution_serverless/test/scout/ui/parallel_tests/serverless_security_navigation.spec.ts",
+        "file": "x-pack/solutions/security/plugins/security_solution_serverless/test/scout/ui/parallel_tests/navigation.spec.ts",
         "line": 28,
         "column": 14
       }
     },
     {
-      "id": "6fa936d347ac553-c6ca0e098797183",
+      "id": "b760102fdea7e93-c6ca0e098797183",
       "title": "serverless security navigation shows a flat Alerts link when alerts-and-attacks alignment is disabled",
       "expectedStatus": "passed",
       "tags": [
@@ -53,13 +123,13 @@
         "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "x-pack/solutions/security/plugins/security_solution_serverless/test/scout/ui/parallel_tests/serverless_security_navigation.spec.ts",
+        "file": "x-pack/solutions/security/plugins/security_solution_serverless/test/scout/ui/parallel_tests/navigation.spec.ts",
         "line": 52,
         "column": 14
       }
     },
     {
-      "id": "6fa936d347ac553-ead5dde6ed567bf",
+      "id": "b760102fdea7e93-ead5dde6ed567bf",
       "title": "serverless security navigation opens the Launchpad footer panel and navigates to its items",
       "expectedStatus": "passed",
       "tags": [
@@ -67,13 +137,13 @@
         "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "x-pack/solutions/security/plugins/security_solution_serverless/test/scout/ui/parallel_tests/serverless_security_navigation.spec.ts",
+        "file": "x-pack/solutions/security/plugins/security_solution_serverless/test/scout/ui/parallel_tests/navigation.spec.ts",
         "line": 69,
         "column": 14
       }
     },
     {
-      "id": "6fa936d347ac553-141d3e2a9185ca9",
+      "id": "b760102fdea7e93-141d3e2a9185ca9",
       "title": "serverless security navigation highlights the active top-level nav item after navigating",
       "expectedStatus": "passed",
       "tags": [
@@ -81,78 +151,8 @@
         "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "x-pack/solutions/security/plugins/security_solution_serverless/test/scout/ui/parallel_tests/serverless_security_navigation.spec.ts",
-        "line": 90,
-        "column": 14
-      }
-    },
-    {
-      "id": "6fa936d347ac553-3674ffc381a0005",
-      "title": "serverless security navigation navigate using search",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/security/plugins/security_solution_serverless/test/scout/ui/parallel_tests/serverless_security_navigation.spec.ts",
-        "line": 105,
-        "column": 14
-      }
-    },
-    {
-      "id": "6fa936d347ac553-cf8cb4831e435f0",
-      "title": "serverless security navigation shows cases in sidebar navigation",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/security/plugins/security_solution_serverless/test/scout/ui/parallel_tests/serverless_security_navigation.spec.ts",
-        "line": 124,
-        "column": 14
-      }
-    },
-    {
-      "id": "6fa936d347ac553-caa8ea7f936e539",
-      "title": "serverless security navigation navigates to cases app",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/security/plugins/security_solution_serverless/test/scout/ui/parallel_tests/serverless_security_navigation.spec.ts",
-        "line": 143,
-        "column": 14
-      }
-    },
-    {
-      "id": "6fa936d347ac553-bbe78b0d296a14d",
-      "title": "serverless security navigation navigates to maintenance windows",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/security/plugins/security_solution_serverless/test/scout/ui/parallel_tests/serverless_security_navigation.spec.ts",
-        "line": 165,
-        "column": 14
-      }
-    },
-    {
-      "id": "6fa936d347ac553-20246f43808cc39",
-      "title": "serverless security navigation opens panel on legacy management landing page",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/security/plugins/security_solution_serverless/test/scout/ui/parallel_tests/serverless_security_navigation.spec.ts",
-        "line": 178,
+        "file": "x-pack/solutions/security/plugins/security_solution_serverless/test/scout/ui/parallel_tests/navigation.spec.ts",
+        "line": 92,
         "column": 14
       }
     }
