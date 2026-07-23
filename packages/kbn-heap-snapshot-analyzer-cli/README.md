@@ -155,12 +155,9 @@ docker pull "$KIBANA_IMAGE"
 ```
 
 Use `git-<sha>` for a CI or release build, or `pr-<number>-<sha>` for a PR
-build. The combined `kibana-serverless` image is available most consistently.
-Per-solution images, when published for the selected tag, use names such as
-`kibana-serverless-security`, `kibana-serverless-observability`, and
-`kibana-serverless-elasticsearch`.
+build.
 
-To resolve the latest two `deploy@` tags to combined-image names:
+To resolve the latest two `deploy@` tags to image names:
 
 ```sh
 git ls-remote --tags origin 'deploy@*^{}' |
