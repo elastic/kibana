@@ -14,10 +14,7 @@ import {
   EuiSpacer,
   EuiSteps,
   EuiText,
-  useEuiFontSize,
-  useEuiTheme,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { internalTools } from '@kbn/agent-builder-common';
 import type { ToolCallStep as ToolCallStepData } from '@kbn/agent-builder-common/chat/conversation';
@@ -46,8 +43,6 @@ interface ToolResponseFlyoutProps {
 }
 
 export const ToolResponseFlyout: React.FC<ToolResponseFlyoutProps> = ({ step, onClose }) => {
-  const stepTitleSize = useEuiFontSize('s');
-  const { euiTheme } = useEuiTheme();
   const isSubAgentCall = step.tool_id === internalTools.runSubagent;
   const subAgentExecutionId = isSubAgentCall ? getSubAgentExecutionId(step) : undefined;
   const showExecutionSection = Boolean(subAgentExecutionId);
@@ -112,20 +107,7 @@ export const ToolResponseFlyout: React.FC<ToolResponseFlyoutProps> = ({ step, on
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <div
-          css={css`
-            .euiStep__title {
-              ${stepTitleSize}
-            }
-            .euiStep__content {
-              margin-block-start: 0;
-              padding-block-start: 0;
-              padding-block-end: ${euiTheme.size.base};
-            }
-          `}
-        >
-          <EuiSteps headingElement="h3" titleSize="xxs" steps={steps} />
-        </div>
+        <EuiSteps headingElement="h3" titleSize="xxs" steps={steps} />
       </EuiFlyoutBody>
     </EuiFlyout>
   );
