@@ -6,9 +6,10 @@
  */
 
 import React from 'react';
-import { render, waitFor, within } from '@testing-library/react';
+import { waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+
+import { renderWithMlI18nContext } from '../../../test_utils/render_with_ml_context';
 
 import { EditFilterList } from './edit_filter_list';
 
@@ -67,11 +68,7 @@ describe('EditFilterList', () => {
   });
 
   test('renders the edit page for a new filter list and updates ID', async () => {
-    const { getByTestId, getByText } = render(
-      <IntlProvider locale="en">
-        <EditFilterList {...props} />
-      </IntlProvider>
-    );
+    const { getByTestId, getByText } = renderWithMlI18nContext(<EditFilterList {...props} />);
 
     // The filter list should be empty.
     expect(getByText('No items have been added')).toBeInTheDocument();
@@ -110,10 +107,8 @@ describe('EditFilterList', () => {
   });
 
   test('renders the edit page for an existing filter list and updates description', async () => {
-    const { getByTestId } = render(
-      <IntlProvider locale="en">
-        <EditFilterList {...props} filterId="safe_domains" />
-      </IntlProvider>
+    const { getByTestId } = renderWithMlI18nContext(
+      <EditFilterList {...props} filterId="safe_domains" />
     );
 
     expect(mockFilters).toHaveBeenCalledWith({ filterId: 'safe_domains' });
@@ -150,10 +145,8 @@ describe('EditFilterList', () => {
   });
 
   test('updates the items per page', async () => {
-    const { findByText, findByTestId, getByTestId, queryByText } = render(
-      <IntlProvider locale="en">
-        <EditFilterList {...props} filterId="safe_domains" />
-      </IntlProvider>
+    const { findByText, findByTestId, getByTestId, queryByText } = renderWithMlI18nContext(
+      <EditFilterList {...props} filterId="safe_domains" />
     );
 
     expect(mockFilters).toHaveBeenCalledWith({ filterId: 'safe_domains' });
@@ -184,10 +177,8 @@ describe('EditFilterList', () => {
   });
 
   test('renders after selecting an item and deleting it', async () => {
-    const { findByText, getAllByTestId, getByTestId, queryByText } = render(
-      <IntlProvider locale="en">
-        <EditFilterList {...props} filterId="safe_domains" />
-      </IntlProvider>
+    const { findByText, getAllByTestId, getByTestId, queryByText } = renderWithMlI18nContext(
+      <EditFilterList {...props} filterId="safe_domains" />
     );
 
     expect(mockFilters).toHaveBeenCalledWith({ filterId: 'safe_domains' });
@@ -213,11 +204,8 @@ describe('EditFilterList', () => {
   });
 
   test('adds new items to filter list', async () => {
-    const { getByTestId, getByText, findByText, findByTestId, queryByTestId, queryByText } = render(
-      <IntlProvider locale="en">
-        <EditFilterList {...props} filterId="safe_domains" />
-      </IntlProvider>
-    );
+    const { getByTestId, getByText, findByText, findByTestId, queryByTestId, queryByText } =
+      renderWithMlI18nContext(<EditFilterList {...props} filterId="safe_domains" />);
 
     expect(mockFilters).toHaveBeenCalledWith({ filterId: 'safe_domains' });
 
