@@ -145,9 +145,9 @@ describe('connectorSmlType', () => {
       }
       mockFinder.find.mockReturnValue(throwing());
 
-      await expect(
-        collectPages(connectorSmlType.list(createContext() as never))
-      ).rejects.toThrow('ES error');
+      await expect(collectPages(connectorSmlType.list(createContext() as never))).rejects.toThrow(
+        'ES error'
+      );
 
       expect(mockFinder.close).toHaveBeenCalledTimes(1);
     });
