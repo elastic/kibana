@@ -53,5 +53,5 @@ export const columnsAfter = (
   _previousColumns: ESQLColumnData[],
   _query: string
 ): ESQLColumnData[] => {
-  return TS_INFO_FIELDS;
+  return [...TS_INFO_FIELDS];
 };
