@@ -91,6 +91,7 @@ describe('EntityAnalyticsErrorPanel', () => {
 describe('EntityAnalyticsToggle', () => {
   const defaultProps = {
     hasEnablementPrivileges: true,
+    hasStopPrivileges: true,
     isPrivilegesLoading: false,
     selectedSettingsMatchSavedSettings: true,
     onSaveSettings: jest.fn().mockResolvedValue(undefined),
@@ -159,13 +160,28 @@ describe('EntityAnalyticsToggle', () => {
     expect(toggle).toBeDisabled();
   });
 
-  // Turning OFF only stops the store (feature-privilege gated server-side), so a user who can no
-  // longer (re-)enable must still be able to disable a running Entity Analytics.
-  it('keeps the switch usable for turning off when enablement privileges are missing', () => {
+  // OFF only needs SO write on the engine descriptor. Missing that (not full install) disables
+  // the switch when on — otherwise stop fails server-side on the user-scoped SO update.
+  it('disables the switch when stop privileges are missing and the toggle is on', () => {
     mockUseToggleReturn.status = 'enabled';
     const props = {
       ...defaultProps,
       hasEnablementPrivileges: false,
+      hasStopPrivileges: false,
+    };
+
+    render(<EntityAnalyticsToggle {...props} />, { wrapper: Wrapper });
+    const toggle = screen.getByTestId(ENTITY_ANALYTICS_SWITCH_TEST_ID);
+    expect(toggle).toBeChecked();
+    expect(toggle).toBeDisabled();
+  });
+
+  it('keeps an enabled switch usable when stop privileges exist but enablement privileges do not', () => {
+    mockUseToggleReturn.status = 'enabled';
+    const props = {
+      ...defaultProps,
+      hasEnablementPrivileges: false,
+      hasStopPrivileges: true,
     };
 
     render(<EntityAnalyticsToggle {...props} />, { wrapper: Wrapper });
@@ -187,13 +203,13 @@ describe('EntityAnalyticsToggle', () => {
     expect(toggle).toBeDisabled();
   });
 
-  it('keeps an enabled switch usable while privileges are loading', () => {
+  it('disables an enabled switch while privileges are loading', () => {
     mockUseToggleReturn.status = 'enabled';
     const props = { ...defaultProps, isPrivilegesLoading: true };
     render(<EntityAnalyticsToggle {...props} />, { wrapper: Wrapper });
     const toggle = screen.getByTestId(ENTITY_ANALYTICS_SWITCH_TEST_ID);
     expect(toggle).toBeChecked();
-    expect(toggle).not.toBeDisabled();
+    expect(toggle).toBeDisabled();
   });
 
   it('renders unchecked and disabled when status is error', () => {

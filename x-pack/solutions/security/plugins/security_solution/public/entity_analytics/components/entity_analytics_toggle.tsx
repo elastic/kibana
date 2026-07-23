@@ -77,6 +77,7 @@ export const EntityAnalyticsErrorPanel: React.FC<{
 
 interface EntityAnalyticsToggleProps {
   hasEnablementPrivileges: boolean;
+  hasStopPrivileges: boolean;
   isPrivilegesLoading: boolean;
   selectedSettingsMatchSavedSettings: boolean;
   onSaveSettings: () => Promise<void>;
@@ -85,6 +86,7 @@ interface EntityAnalyticsToggleProps {
 
 export const EntityAnalyticsToggle: React.FC<EntityAnalyticsToggleProps> = ({
   hasEnablementPrivileges,
+  hasStopPrivileges,
   isPrivilegesLoading,
   selectedSettingsMatchSavedSettings,
   onSaveSettings,
@@ -99,14 +101,15 @@ export const EntityAnalyticsToggle: React.FC<EntityAnalyticsToggleProps> = ({
   const isChecked = status === 'enabled';
 
   // Turning the toggle ON installs/starts the Entity Store and inits/enables the risk score
-  // maintainer, so it requires the full enablement privilege set. Turning it OFF only stops the
-  // store (the stop route is feature-privilege gated server-side), so an already-enabled toggle
-  // stays usable for users who can't (re-)enable.
+  // maintainer, so it requires the full enablement privilege set. Turning it OFF stops engines
+  // via user-scoped SO updates on entity-engine-descriptor-v2,
+  // so it requires SO write privileges, but not the full ES/cluster install set.
   const isDisabled =
-    (!isChecked && (isPrivilegesLoading || !hasEnablementPrivileges)) ||
+    isPrivilegesLoading ||
     isStatusLoading ||
     status === 'enabling' ||
-    status === 'error';
+    status === 'error' ||
+    (isChecked ? !hasStopPrivileges : !hasEnablementPrivileges);
 
   return (
     <>

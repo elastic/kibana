@@ -13,6 +13,7 @@ import {
   ENTITY_STORE_CLUSTER_PRIVILEGES,
   ENTITY_STORE_SOURCE_INDICES_PRIVILEGES,
   ENTITY_STORE_TARGET_INDICES_PRIVILEGES,
+  ENGINE_DESCRIPTOR_CREATE_PRIVILEGE,
   FF_ENABLE_ENTITY_STORE_V2,
 } from '../../../../common';
 import {
@@ -30,8 +31,6 @@ apiTest.describe('Entity Store - privilege checks', { tag: ENTITY_STORE_TAGS }, 
   const TARGET_INDEX_LATEST_PATTERN = getLatestEntityIndexPattern('default');
   const TARGET_INDEX_UPDATES = getUpdatesEntitiesDataStreamName('default');
   const TARGET_INDEX_METADATA = getMetadataEntitiesDataStreamName('default');
-
-  const SAVED_OBJECT_PRIVILEGE = 'saved_object:entity-engine-descriptor-v2/create';
 
   interface RoleOptions {
     withTargetIndex?: boolean;
@@ -68,7 +67,7 @@ apiTest.describe('Entity Store - privilege checks', { tag: ENTITY_STORE_TAGS }, 
         {
           application: 'kibana-.kibana',
           privileges: withSavedObjectCreate
-            ? ['feature_siem.all', SAVED_OBJECT_PRIVILEGE]
+            ? ['feature_siem.all', ENGINE_DESCRIPTOR_CREATE_PRIVILEGE]
             : ['feature_siem.all'],
           resources: ['*'],
         },

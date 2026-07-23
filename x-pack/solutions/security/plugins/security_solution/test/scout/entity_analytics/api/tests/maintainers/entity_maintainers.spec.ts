@@ -19,6 +19,7 @@ import {
   ENTITY_STORE_SOURCE_INDICES_PRIVILEGES,
   ENTITY_STORE_TARGET_INDICES_PRIVILEGES,
   ENTITY_STORE_CLUSTER_PRIVILEGES,
+  ENGINE_DESCRIPTOR_CREATE_PRIVILEGE,
 } from '@kbn/entity-store/common';
 
 import {
@@ -38,7 +39,6 @@ const TARGET_INDEX_METADATA = getEntityIndexPattern({
   dataset: ENTITY_METADATA,
   namespace: 'default',
 });
-const SAVED_OBJECT_PRIVILEGE = 'saved_object:entity-engine-descriptor-v2/create';
 
 interface RoleOptions {
   withTargetIndex?: boolean;
@@ -75,7 +75,7 @@ const buildRoleDescriptor = ({
       {
         application: 'kibana-.kibana',
         privileges: withSavedObjectCreate
-          ? ['feature_siem.all', SAVED_OBJECT_PRIVILEGE]
+          ? ['feature_siem.all', ENGINE_DESCRIPTOR_CREATE_PRIVILEGE]
           : ['feature_siem.all'],
         resources: ['*'],
       },
@@ -162,7 +162,7 @@ apiTest.describe('Entity Store entity maintainers', { tag: ENTITY_STORE_TAGS }, 
 
       expect(response.statusCode).toBe(403);
       expect(response.body.attributes).toMatchObject({
-        missing_kibana_privileges: [SAVED_OBJECT_PRIVILEGE],
+        missing_kibana_privileges: [ENGINE_DESCRIPTOR_CREATE_PRIVILEGE],
       });
     }
   );

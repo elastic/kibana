@@ -28,6 +28,7 @@ import { AssetCriticalityTab } from '../components/asset_criticality/asset_criti
 import { WatchlistsTab } from '../components/watchlists/watchlists_tab';
 import { EntityResolutionTab } from '../components/entity_resolution';
 import { EntityStoreMissingPrivilegesCallout } from '../components/entity_store/components/entity_store_missing_privileges_callout';
+import { EntityStoreMissingStopPrivilegesCallout } from '../components/entity_store/components/entity_store_missing_stop_privileges_callout';
 import { EngineStatus } from '../components/entity_store/components/engines_status';
 import { ClearEntityDataButton } from '../components/entity_store/components/clear_entity_data_button';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
@@ -38,7 +39,11 @@ import {
 } from '../components/entity_store/hooks/use_entity_store';
 import { useEntityEnginePrivileges } from '../components/entity_store/hooks/use_entity_engine_privileges';
 import { ENTITY_ANALYTICS_MANAGEMENT_PATH } from '../../../common/constants';
-import { userHasRiskEngineReadPermissions, safeErrorMessage } from '../common';
+import {
+  userHasRiskEngineReadPermissions,
+  userHasEntityStoreStopPrivileges,
+  safeErrorMessage,
+} from '../common';
 import {
   ENTITY_ANALYTICS_MANAGEMENT_PAGE_TEST_ID,
   ENTITY_ANALYTICS_MANAGEMENT_PAGE_TITLE_TEST_ID,
@@ -103,11 +108,11 @@ export const EntityAnalyticsManagementPage = () => {
   const userHasEntityStoreInstallPrivileges =
     entityEnginePrivileges?.has_install_permissions ?? false;
 
-  // Turning the toggle ON enables BOTH the risk score maintainer and the Entity Store in a single
-  // action (see useToggleEntityAnalytics), so enablement requires both privilege sets. With an OR
-  // the toggle would look enabled while the half the user isn't privileged for fails server-side
-  // (e.g. an install-only user hitting a risk engine 500). The toggle applies this only to the ON
-  // direction — turning OFF just stops the store and stays available.
+  const hasStopPrivileges = userHasEntityStoreStopPrivileges(entityEnginePrivileges);
+
+  // Turning ON enables BOTH the risk score maintainer and the Entity Store in one action (see
+  // useToggleEntityAnalytics), so enablement requires both privilege sets. With an OR the toggle
+  // would look enabled while the half the user isn't privileged for fails server-side.
   const hasEnablementPrivileges =
     userHasRiskEnginePrivileges && userHasEntityStoreInstallPrivileges;
 
@@ -160,6 +165,14 @@ export const EntityAnalyticsManagementPage = () => {
 
   const deleteError = safeErrorMessage(deleteEntityStoreMutation.error);
 
+  const isEntityAnalyticsOn = entityStoreStatus.data?.status === 'running' || false;
+  const showEntityStoreEnablementCallout =
+    !isEntityAnalyticsOn &&
+    !!entityEnginePrivileges &&
+    !entityEnginePrivileges.has_install_permissions;
+  const showStopPrivilegesCallout =
+    isEntityAnalyticsOn && !isLoadingPrivileges && !hasStopPrivileges;
+
   return (
     <>
       <RiskEnginePrivilegesCallOut privileges={riskEnginePrivileges} />
@@ -181,7 +194,8 @@ export const EntityAnalyticsManagementPage = () => {
                   onSaveSettings={handleSaveToggleSettings}
                   isSavingSettings={saveSelectedSettingsMutation.isLoading}
                   hasEnablementPrivileges={hasEnablementPrivileges}
-                  isPrivilegesLoading={riskEnginePrivileges.isLoading}
+                  hasStopPrivileges={hasStopPrivileges}
+                  isPrivilegesLoading={riskEnginePrivileges.isLoading || isLoadingPrivileges}
                 />
               </EuiFlexGroup>
             </EuiFlexItem>
@@ -189,10 +203,18 @@ export const EntityAnalyticsManagementPage = () => {
         }
       />
 
-      {!entityEnginePrivileges || entityEnginePrivileges.has_install_permissions ? null : (
+      {showEntityStoreEnablementCallout && (
         <>
           <EuiSpacer size="l" />
           <EntityStoreMissingPrivilegesCallout privileges={entityEnginePrivileges} />
+          <EuiSpacer size="l" />
+        </>
+      )}
+
+      {showStopPrivilegesCallout && entityEnginePrivileges && (
+        <>
+          <EuiSpacer size="l" />
+          <EntityStoreMissingStopPrivilegesCallout privileges={entityEnginePrivileges} />
           <EuiSpacer size="l" />
         </>
       )}
