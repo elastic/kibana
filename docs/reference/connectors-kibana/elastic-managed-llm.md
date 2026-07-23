@@ -10,6 +10,10 @@ applies_to:
 Elastic provides built-in LLMs through managed AI connectors.  
 These connectors are accessed and managed through the [Elastic {{infer-cap}} Service (EIS)](docs-content://explore-analyze/elastic-inference/eis.md), which is the single entry point for using Elastic Managed LLMs.
 
+::::{note}
+**`Elastic-Managed-LLM`** is also the connector ID of Elastic's built-in managed connector in earlier versions. In 9.3, the default model behind this connector was replaced. Existing configurations and saved conversations are migrated automatically to the current default model on more recent versions, so no action is required.
+::::
+
 ## Prerequisites
 
 * Requires the `manage_inference` [cluster privilege](https://www.elastic.co/docs/reference/elasticsearch/security-privileges#privileges-list-cluster) (the built-in `inference_admin` role grants this privilege)
@@ -19,10 +23,6 @@ These connectors are accessed and managed through the [Elastic {{infer-cap}} Ser
 
 Elastic Managed LLMs are available exclusively through the Elastic {{infer-cap}} Service.
 You can find the [list of supported models](docs-content://explore-analyze/elastic-inference/eis.md#supported-models) on the EIS documentation page.
-
-::::{note}
-The previous AI connector called **Elastic-Managed-LLM** was deprecated in 9.3.
-::::
 
 ## Region and hosting
 
