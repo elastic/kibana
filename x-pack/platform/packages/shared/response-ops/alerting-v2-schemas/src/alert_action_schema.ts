@@ -197,10 +197,6 @@ export const bulkCreateAlertActionBodySchema = z
     `Request body for bulk create alert actions. Array of 1 to ${MAX_BULK_ITEMS} actions, each with group_hash and action payload.`
   );
 export type BulkCreateAlertActionBody = z.infer<typeof bulkCreateAlertActionBodySchema>;
-
-/**
- * Response schema for `POST /api/alerting/v2/alerts/_bulk_action`.
- */
 export const bulkCreateAlertActionResponseSchema = z
   .object({
     processed: z.number().describe('Number of actions successfully processed.'),
