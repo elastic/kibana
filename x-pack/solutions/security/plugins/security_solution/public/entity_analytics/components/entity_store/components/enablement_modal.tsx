@@ -53,7 +53,9 @@ export const EnablementConfirmationModal: React.FC<EnablementConfirmationModalPr
   const hasEntityStorePrivileges =
     !isLoadingEntityEnginePrivileges && entityEnginePrivileges?.has_install_permissions;
 
-  const isConfirmDisabled = !hasRiskScorePrivileges && !hasEntityStorePrivileges;
+  // Confirm enables BOTH the risk score maintainer and the Entity Store, so require both privilege
+  // sets (disable if either is missing) to avoid a partial-failure 500 on the half the user can't do.
+  const isConfirmDisabled = !hasRiskScorePrivileges || !hasEntityStorePrivileges;
 
   if (!visible) {
     return null;
