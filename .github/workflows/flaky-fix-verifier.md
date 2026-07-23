@@ -234,7 +234,6 @@ safe-outputs:
                 return;
               }
               try {
-                // Always enable auto-merge: Kibana is squash-only, and branch protection (required CI + one approval) still gates the actual merge, so this only removes the final manual click.
                 await github.graphql(
                   'mutation($id: ID!) { enablePullRequestAutoMerge(input: { pullRequestId: $id, mergeMethod: SQUASH }) { pullRequest { autoMergeRequest { enabledAt } } } }',
                   { id: pr.node_id }
