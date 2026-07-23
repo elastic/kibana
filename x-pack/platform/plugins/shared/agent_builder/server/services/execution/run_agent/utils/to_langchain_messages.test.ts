@@ -643,9 +643,8 @@ describe('convertPreviousRounds', () => {
 
   describe('with attachment_context', () => {
     const sampleContext =
-      'The following attachment(s) were added this turn:\n\n' +
       '<attachments count="1">' +
-      '<attachment attachment_id="a-1" type="text" version="1" /></conversation-attachments>';
+      '<attachment attachment_id="a-1" type="text" version="1" /></attachments>';
 
     it('renders attachment_context on the next-input message', async () => {
       const nextInput = makeRoundInput('here is a new attachment', [], {
@@ -659,7 +658,7 @@ describe('convertPreviousRounds', () => {
       expect(result).toHaveLength(1);
       expect(isHumanMessage(result[0])).toBe(true);
       const content = result[0].content as string;
-      expect(content).toContain('added this turn');
+      expect(content).toContain('<attachments');
       expect(content).toContain('attachment_id="a-1"');
     });
 
@@ -682,8 +681,8 @@ describe('convertPreviousRounds', () => {
       });
 
       expect(result).toHaveLength(3);
-      expect(result[0].content as string).toContain('added this turn');
-      expect(result[2].content as string).not.toContain('added this turn');
+      expect(result[0].content as string).toContain('<attachments');
+      expect(result[2].content as string).not.toContain('<attachments');
     });
 
     it('omits attachment_context when the field is absent', async () => {
@@ -693,8 +692,8 @@ describe('convertPreviousRounds', () => {
         conversation: createConversation({ nextInput }),
       });
 
-      expect(result[0].content as string).not.toContain('added this turn');
-      expect(result[0].content as string).not.toContain('updated this turn');
+      expect(result[0].content as string).not.toContain('<attachments');
+      expect(result[0].content as string).not.toContain('<attachments');
     });
   });
 
