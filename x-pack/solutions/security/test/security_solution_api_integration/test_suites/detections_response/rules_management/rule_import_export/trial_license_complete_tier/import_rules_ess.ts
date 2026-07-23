@@ -25,6 +25,7 @@ import { getWebHookConnectorParams } from '../../../utils/connectors/get_web_hoo
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
+  const detectionsApi = getService('detectionsApi');
   const log = getService('log');
   const es = getService('es');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
@@ -80,10 +81,31 @@ export default ({ getService }: FtrProviderContext): void => {
       before(async () => {
         await createUserAndRole(getService, ROLES.hunter_no_actions);
         await createUserAndRole(getService, ROLES.hunter);
+        await createUserAndRole(getService, ROLES.t1_analyst);
       });
       after(async () => {
         await deleteUserAndRole(getService, ROLES.hunter_no_actions);
         await deleteUserAndRole(getService, ROLES.hunter);
+        await deleteUserAndRole(getService, ROLES.t1_analyst);
+      });
+
+      it('returns 403 when the user lacks rules write privilege', async () => {
+        const ndjson = combineToNdJson(
+          getCustomQueryRuleParams({
+            rule_id: 'rbac-import-denied',
+            enabled: false,
+          })
+        );
+
+        await supertestWithoutAuth
+          .post(DETECTION_ENGINE_RULES_IMPORT_URL)
+          .auth(ROLES.t1_analyst, 'changeme')
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
+          .attach('file', Buffer.from(ndjson), 'rules.ndjson')
+          .expect(403);
+
+        await detectionsApi.readRule({ query: { rule_id: 'rbac-import-denied' } }).expect(404);
       });
 
       it('should successfully import rules without actions when user has no actions privileges', async () => {

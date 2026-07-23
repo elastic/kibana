@@ -181,12 +181,18 @@ export default ({ getService }: FtrProviderContext): void => {
     it('reads back a mixed import of different rules even if some cause conflicts', async () => {
       const existingRule1 = getCustomQueryRuleParams({
         rule_id: 'existing-rule-1',
+        name: 'Existing one',
+        enabled: false,
       });
       const existingRule2 = getCustomQueryRuleParams({
         rule_id: 'existing-rule-2',
+        name: 'Existing two',
+        enabled: false,
       });
       const ruleToImportSuccessfully = getCustomQueryRuleParams({
         rule_id: 'non-existing-rule',
+        name: 'Created by import',
+        enabled: false,
       });
 
       await createRule(supertest, log, existingRule1);
@@ -194,10 +200,34 @@ export default ({ getService }: FtrProviderContext): void => {
 
       const IMPORT_PAYLOAD = [existingRule1, existingRule2, ruleToImportSuccessfully];
 
-      await importRules({
+      const importResponse = await importRules({
         getService,
         rules: IMPORT_PAYLOAD,
         overwrite: false,
+      });
+
+      // Assert errors and persisted state together so a rewrite cannot swallow
+      // per-item conflicts while still creating the successful rule.
+      expect(importResponse).toMatchObject({
+        success: false,
+        success_count: 1,
+        rules_count: 3,
+        errors: [
+          {
+            error: {
+              message: 'Rule with this rule_id already exists',
+              status_code: 409,
+            },
+            rule_id: 'existing-rule-1',
+          },
+          {
+            error: {
+              message: 'Rule with this rule_id already exists',
+              status_code: 409,
+            },
+            rule_id: 'existing-rule-2',
+          },
+        ],
       });
 
       const rule1 = await fetchRule(supertest, { ruleId: 'existing-rule-1' });

@@ -6,7 +6,7 @@
  */
 
 import expect from 'expect';
-import { deleteAllRules } from '@kbn/detections-response-ftr-services';
+import { createRule, deleteAllRules } from '@kbn/detections-response-ftr-services';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { getCustomQueryRuleParams, importRules } from '../../../utils';
 
@@ -113,6 +113,68 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(body.total).toBeGreaterThanOrEqual(1);
       expect(body.total).toBeLessThanOrEqual(2);
       expect(body.data.every((item: { rule_id: string }) => item.rule_id === sharedId)).toBe(true);
+    });
+
+    it('handles overlapping overwrite imports that share a rule_id', async () => {
+      const sharedId = 'concurrent-overwrite-rule';
+      const names = ['Overwrite A', 'Overwrite B'] as const;
+
+      await createRule(
+        supertest,
+        log,
+        getCustomQueryRuleParams({
+          rule_id: sharedId,
+          name: 'Original',
+          enabled: false,
+        })
+      );
+
+      const [first, second] = await Promise.all(
+        names.map((name) =>
+          importRules({
+            getService,
+            rules: [
+              getCustomQueryRuleParams({
+                rule_id: sharedId,
+                name,
+                enabled: false,
+              }),
+            ],
+            overwrite: true,
+          })
+        )
+      );
+
+      // Soft contract: each request stays HTTP 200-shaped (importRules asserts
+      // status), reports one rule, and never fails both. Do not assert which
+      // writer wins or that both succeed — last-write-wins is racy by design.
+      const responses = [first, second];
+      for (const response of responses) {
+        expect(response.rules_count).toBe(1);
+        expect(response.success_count).toBeGreaterThanOrEqual(0);
+        expect(response.success_count).toBeLessThanOrEqual(1);
+        if (response.success_count === 0) {
+          expect(response.errors.length).toBeGreaterThan(0);
+        }
+      }
+
+      const totalSuccess = responses.reduce((sum, response) => sum + response.success_count, 0);
+      expect(totalSuccess).toBeGreaterThanOrEqual(1);
+      expect(totalSuccess).toBeLessThanOrEqual(2);
+
+      const { body } = await detectionsApi
+        .findRules({
+          query: {
+            page: 1,
+            per_page: 10,
+            filter: `alert.attributes.params.ruleId: "${sharedId}"`,
+          },
+        })
+        .expect(200);
+
+      expect(body.total).toBe(1);
+      expect(body.data[0].rule_id).toBe(sharedId);
+      expect(names).toContain(body.data[0].name);
     });
   });
 };

@@ -7,7 +7,7 @@
 
 import expect from 'expect';
 import { DETECTION_ENGINE_RULES_IMPORT_URL } from '@kbn/security-solution-plugin/common/constants';
-import { deleteAllRules } from '@kbn/detections-response-ftr-services';
+import { createRule, deleteAllRules } from '@kbn/detections-response-ftr-services';
 import { PRECONFIGURED_EMAIL_ACTION_CONNECTOR_ID } from '../../../../../config/shared';
 import {
   fetchRule,
@@ -41,6 +41,40 @@ export default ({ getService }: FtrProviderContext): void => {
     beforeEach(async () => {
       await deleteAllRules(supertest, log);
       await deleteAllRules(supertest, log, spaceId);
+    });
+
+    it('returns the full import response shape on success', async () => {
+      const ruleId = 'import-response-shape-rule';
+      const importResponse = await importRules({
+        getService,
+        rules: [
+          getCustomQueryRuleParams({
+            rule_id: ruleId,
+            name: 'Response shape',
+            enabled: false,
+          }),
+        ],
+        overwrite: false,
+      });
+
+      expect(importResponse).toEqual({
+        success: true,
+        success_count: 1,
+        rules_count: 1,
+        errors: [],
+        exceptions_success: true,
+        exceptions_success_count: 0,
+        exceptions_errors: [],
+        action_connectors_success: true,
+        action_connectors_success_count: 0,
+        action_connectors_errors: [],
+        action_connectors_warnings: [],
+      });
+
+      const { body: imported } = await detectionsApi
+        .readRule({ query: { rule_id: ruleId } })
+        .expect(200);
+      expect(imported.name).toBe('Response shape');
     });
 
     describe('validation', () => {
@@ -272,6 +306,57 @@ export default ({ getService }: FtrProviderContext): void => {
 
     describe('importing in non-default space', () => {
       testImportingInSpace(spaceId);
+
+      it('creates and overwrites a rule without affecting the default space', async () => {
+        const ruleId = 'space-isolated-rule';
+
+        await createRule(
+          supertest,
+          log,
+          getCustomQueryRuleParams({
+            rule_id: ruleId,
+            name: 'Default space rule',
+            enabled: false,
+          })
+        );
+
+        await importRulesWithSuccess({
+          getService,
+          rules: [
+            getCustomQueryRuleParams({
+              rule_id: ruleId,
+              name: 'Space create',
+              enabled: false,
+            }),
+          ],
+          overwrite: false,
+          spaceId,
+        });
+
+        await importRulesWithSuccess({
+          getService,
+          rules: [
+            getCustomQueryRuleParams({
+              rule_id: ruleId,
+              name: 'Space overwrite',
+              enabled: false,
+            }),
+          ],
+          overwrite: true,
+          spaceId,
+        });
+
+        const { body: defaultRule } = await detectionsApi
+          .readRule({ query: { rule_id: ruleId } })
+          .expect(200);
+        expect(defaultRule.name).toBe('Default space rule');
+
+        const { body: spaceRule } = await detectionsApi
+          .readRule({ query: { rule_id: ruleId } }, spaceId)
+          .expect(200);
+        expect(spaceRule.name).toBe('Space overwrite');
+        expect(spaceRule.id).not.toBe(defaultRule.id);
+      });
     });
 
     describe('forward compatibility', () => {
