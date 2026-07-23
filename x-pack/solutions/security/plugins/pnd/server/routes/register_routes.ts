@@ -20,6 +20,8 @@ import { registerAcceptProposalRoute } from './investigations/accept_proposal';
 import { registerRejectProposalRoute } from './investigations/reject_proposal';
 import { registerModifyProposalRoute } from './investigations/modify_proposal';
 import { registerGenerateProposalRoute } from './investigations/generate_proposal';
+import { registerEmitProposalRoute } from './investigations/emit_proposal';
+import { registerEnrichAlertRoute } from './investigations/enrich_alert';
 
 export interface RouteDependencies {
   router: IRouter;
@@ -41,4 +43,6 @@ export const registerRoutes = (deps: RouteDependencies): void => {
   registerRejectProposalRoute(deps);
   registerModifyProposalRoute(deps);
   registerGenerateProposalRoute(deps);
+  registerEmitProposalRoute(deps);
+  registerEnrichAlertRoute(deps);
 };

@@ -12,12 +12,24 @@ import type {
   ListInvestigationsResponse,
 } from '@kbn/pnd-common';
 import { realInvestigations, realProposals } from '../../routes/investigations/real_data';
+import type {
+  Proposal as CanonicalProposal,
+  EvidencePackage,
+  WorkerEvaluationRecord,
+} from '../../common/schemas';
 
 type Investigation = ListInvestigationsResponse['investigations'][number];
 type Proposal = ListInvestigationProposalsResponse['proposals'][number];
 
 export const PND_INVESTIGATIONS_INDEX = 'pnd-investigations';
 export const PND_PROPOSALS_INDEX = 'pnd-proposals';
+export const PND_EVIDENCE_INDEX = 'pnd-evidence';
+export const PND_WORKER_EVAL_INDEX = 'pnd-worker-evaluations';
+// Canonical Daybreak Proposal contract lives in its own index, separate from the
+// UI proposal docs in PND_PROPOSALS_INDEX whose `evidenceRefs` is an array of
+// rich UI-link objects. The canonical contract's `evidenceRefs` is an array of
+// evidence ids (strings); mixing the two in one index conflicts the mapping.
+export const PND_CANONICAL_PROPOSALS_INDEX = 'pnd-canonical-proposals';
 
 /**
  * Terminal + intermediate proposal states an analyst decision can move a
@@ -71,6 +83,9 @@ export class InvestigationStore {
   private async bootstrap(esClient: ElasticsearchClient): Promise<void> {
     await this.ensureIndex(esClient, PND_INVESTIGATIONS_INDEX);
     await this.ensureIndex(esClient, PND_PROPOSALS_INDEX);
+    await this.ensureIndex(esClient, PND_EVIDENCE_INDEX);
+    await this.ensureIndex(esClient, PND_WORKER_EVAL_INDEX);
+    await this.ensureIndex(esClient, PND_CANONICAL_PROPOSALS_INDEX);
     await this.seedIfEmpty(esClient);
   }
 
@@ -204,6 +219,88 @@ export class InvestigationStore {
         return null;
       }
       throw error;
+    }
+  }
+
+  /**
+   * Persist a canonical Daybreak Proposal produced by a Watch Worker run.
+   * Overwrites by id so a re-run is idempotent.
+   */
+  public async saveProposal(
+    esClient: ElasticsearchClient,
+    proposal: CanonicalProposal
+  ): Promise<void> {
+    await this.ensureReady(esClient);
+    await esClient.index({
+      index: PND_CANONICAL_PROPOSALS_INDEX,
+      id: proposal.id,
+      document: proposal,
+      refresh: true,
+    });
+  }
+
+  /** Persist a canonical EvidencePackage produced by a Watch Worker run. */
+  public async saveEvidencePackage(
+    esClient: ElasticsearchClient,
+    evidence: EvidencePackage
+  ): Promise<void> {
+    await this.ensureReady(esClient);
+    await esClient.index({
+      index: PND_EVIDENCE_INDEX,
+      id: evidence.id,
+      document: evidence,
+      refresh: true,
+    });
+  }
+
+  /**
+   * Persist exactly one WorkerEvaluationRecord per Worker run. This is the
+   * canonical record the Evaluation & Trust scorers read (no parallel store).
+   */
+  public async saveWorkerEvaluationRecord(
+    esClient: ElasticsearchClient,
+    record: WorkerEvaluationRecord
+  ): Promise<void> {
+    await this.ensureReady(esClient);
+    await esClient.index({
+      index: PND_WORKER_EVAL_INDEX,
+      id: record.id,
+      document: record,
+      refresh: true,
+    });
+  }
+
+  /**
+   * Append an escalation-lineage entry to an investigation so the UI can render
+   * the Floor -> Dark -> Deep provenance chain. Fail-soft: a missing
+   * investigation is logged, not thrown (the orchestrator step is continue-on-
+   * failure).
+   */
+  public async recordEscalation(
+    esClient: ElasticsearchClient,
+    args: { investigationId: string; sourceWatch: string; escalatedToWatch: string }
+  ): Promise<void> {
+    await this.ensureReady(esClient);
+    const entry = {
+      sourceWatch: args.sourceWatch,
+      escalatedToWatch: args.escalatedToWatch,
+      at: new Date().toISOString(),
+    };
+    try {
+      await esClient.update({
+        index: PND_INVESTIGATIONS_INDEX,
+        id: args.investigationId,
+        script: {
+          source:
+            'if (ctx._source.escalationLineage == null) { ctx._source.escalationLineage = [] } ctx._source.escalationLineage.add(params.entry)',
+          params: { entry },
+        },
+        refresh: true,
+      });
+    } catch (error) {
+      this.logger.warn(
+        `PND: could not record escalation lineage for ${args.investigationId}: ${error?.message}`
+      );
     }
   }
 }
