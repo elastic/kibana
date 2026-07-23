@@ -101,7 +101,7 @@ describe('cleanup_task', () => {
       registerNotificationCleanupTask(core, taskManager, logger);
 
       const taskDef = registerTaskDefinitions.mock.calls[0][0][CLEANUP_TASK_TYPE];
-      const runner = taskDef.createTaskRunner({ abortController });
+      const runner = taskDef.createTaskRunner({ signal: abortController.signal });
       await runner.run();
 
       expect(deleteByQuery).toHaveBeenCalledWith(
@@ -122,7 +122,7 @@ describe('cleanup_task', () => {
       registerNotificationCleanupTask(core, taskManager, logger);
 
       const taskDef = registerTaskDefinitions.mock.calls[0][0][CLEANUP_TASK_TYPE];
-      const runner = taskDef.createTaskRunner({ abortController });
+      const runner = taskDef.createTaskRunner({ signal: abortController.signal });
 
       await expect(runner.run()).resolves.toBeUndefined();
       expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('ES unavailable'));

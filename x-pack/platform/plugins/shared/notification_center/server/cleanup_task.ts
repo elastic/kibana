@@ -7,6 +7,7 @@
 
 import type { CoreSetup, Logger } from '@kbn/core/server';
 import type {
+  RunContext,
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
@@ -56,7 +57,7 @@ export const registerNotificationCleanupTask = (
       // First run may scan up to 180d of data; 10m gives headroom without tying up TM slots.
       timeout: '10m',
       cost: TaskCost.Tiny,
-      createTaskRunner: ({ abortController }: { abortController: AbortController }) => ({
+      createTaskRunner: ({ signal }: RunContext) => ({
         run: async () => {
           const [coreStart] = await core.getStartServices();
           const esClient = coreStart.elasticsearch.client.asInternalUser;
@@ -69,7 +70,7 @@ export const registerNotificationCleanupTask = (
                 refresh: false,
                 query: buildCleanupQuery(),
               },
-              { signal: abortController.signal }
+              { signal }
             );
           } catch (err) {
             logger.error(`Notification Center cleanup task failed: ${err.message}`);
