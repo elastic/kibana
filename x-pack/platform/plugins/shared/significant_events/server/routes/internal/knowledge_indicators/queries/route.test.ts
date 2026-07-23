@@ -6,6 +6,7 @@
  */
 
 import type { QueryLink } from '@kbn/significant-events-schema';
+import type { SignificantEventsMaintenanceState } from '../../../../../common/maintenance/state_machine';
 import { internalKIQueriesRoutes } from './route';
 
 jest.mock('../../../utils/assert_significant_events_access', () => ({
@@ -16,6 +17,10 @@ const route = internalKIQueriesRoutes['POST /internal/streams/queries/_reconcile
 const RECONCILE_MAX_STREAMS = 10;
 
 type HandlerParams = Parameters<typeof route.handler>[0];
+
+const makeMaintenanceService = (state: SignificantEventsMaintenanceState = 'enabled') => ({
+  getState: jest.fn().mockResolvedValue(state),
+});
 
 const makeQueryLink = (id: string, severityScore: number): QueryLink => ({
   query: {
@@ -75,6 +80,7 @@ describe('reconcileQueriesRoute', () => {
         getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({ replaceStreamQueries }),
       }),
       server: makeServer(),
+      maintenanceService: makeMaintenanceService(),
       logger: { warn: jest.fn() },
     } as unknown as HandlerParams;
 
@@ -108,6 +114,7 @@ describe('reconcileQueriesRoute', () => {
         getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({ replaceStreamQueries }),
       }),
       server: makeServer(),
+      maintenanceService: makeMaintenanceService(),
       logger: { warn: jest.fn() },
     } as unknown as HandlerParams;
 
@@ -125,6 +132,56 @@ describe('reconcileQueriesRoute', () => {
           error: 'rules unavailable',
         },
       ],
+    });
+  });
+});
+
+describe('pause guard on rule-touching query routes', () => {
+  const reconcileRoute = internalKIQueriesRoutes['POST /internal/streams/queries/_reconcile'];
+  const demoteRoute = internalKIQueriesRoutes['POST /internal/streams/queries/_demote'];
+  const generateRoute =
+    internalKIQueriesRoutes['POST /internal/streams/{streamName}/queries/_generate'];
+
+  // getKnowledgeIndicatorClient is the first rule-touching call in each handler and
+  // runs only after the guard, so "not called" proves the guard short-circuits first.
+  const expectPausedBeforeRuleWork = async <P>(
+    handler: (params: P) => Promise<unknown>,
+    params: Record<string, unknown>
+  ) => {
+    const getKnowledgeIndicatorClient = jest.fn();
+    const handlerParams = {
+      params,
+      request: {},
+      getScopedClients: jest.fn().mockResolvedValue({
+        streamsClient: { getStream: jest.fn(), listStreams: jest.fn() },
+        licensing: {},
+        uiSettingsClient: {},
+        getKnowledgeIndicatorClient,
+      }),
+      server: makeServer(),
+      maintenanceService: makeMaintenanceService('paused'),
+      logger: { warn: jest.fn(), get: jest.fn().mockReturnValue({ warn: jest.fn() }) },
+      telemetry: {},
+    } as unknown as P;
+
+    await expect(handler(handlerParams)).rejects.toMatchObject({ output: { statusCode: 409 } });
+    expect(getKnowledgeIndicatorClient).not.toHaveBeenCalled();
+  };
+
+  it('rejects _reconcile with 409 while paused', async () => {
+    await expectPausedBeforeRuleWork(reconcileRoute.handler, {
+      body: { streamNames: ['logs.test'] },
+    });
+  });
+
+  it('rejects _demote with 409 while paused', async () => {
+    await expectPausedBeforeRuleWork(demoteRoute.handler, { body: { queryIds: ['q1'] } });
+  });
+
+  it('rejects _generate with 409 while paused', async () => {
+    await expectPausedBeforeRuleWork(generateRoute.handler, {
+      path: { streamName: 'logs.test' },
+      body: null,
     });
   });
 });

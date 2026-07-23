@@ -22,7 +22,7 @@ import type {
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
 
-import { getIndexPatternFromESQLQuery, getTimeFieldFromESQLQuery } from '@kbn/esql-utils';
+import { getIndexPatternFromESQLQuery, parseTimeFieldFromESQLQuery } from '@kbn/esql-utils';
 
 import {
   LENS_IGNORE_GLOBAL_FILTERS_DEFAULT_VALUE,
@@ -118,7 +118,7 @@ function normalizeESQLAdHocDataViews(
       const adHocDataView: DataViewSpec = attributes.state.adHocDataViews[oldIndex];
       // Use the same logic as the transform: derive timeField from the ES|QL query
       const timeFieldName = esqlQuery
-        ? getTimeFieldFromESQLQuery(esqlQuery)
+        ? parseTimeFieldFromESQLQuery(esqlQuery)
         : adHocDataView.timeFieldName ?? layer.timeField ?? undefined;
       // The transform re-derives the index pattern (and the data view title/name) from the ES|QL
       // query, so a stale persisted name (e.g. a broader multi-index pattern) is normalized away.
@@ -154,7 +154,7 @@ function normalizeESQLAdHocDataViews(
         index: indexPattern,
         dataSourceType: 'esql',
         esqlQuery,
-        timeFieldName: getTimeFieldFromESQLQuery(esqlQuery),
+        timeFieldName: parseTimeFieldFromESQLQuery(esqlQuery),
       });
 
       layer.index = spec.id;
