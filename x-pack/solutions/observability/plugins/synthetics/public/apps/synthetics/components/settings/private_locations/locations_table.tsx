@@ -14,6 +14,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiInMemoryTable,
+  EuiScreenReaderOnly,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
@@ -109,6 +110,31 @@ export const PrivateLocationsTable = ({
 
   const columns: Array<EuiBasicTableColumn<ListItem>> = [
     {
+      align: 'left',
+      width: '40px',
+      isExpander: true,
+      name: (
+        <EuiScreenReaderOnly>
+          <span>{EXPAND_ROW_LABEL}</span>
+        </EuiScreenReaderOnly>
+      ),
+      render: (item: ListItem) => {
+        if (!item.agentConditionSharding) {
+          return null;
+        }
+        const isExpanded = expandedIds.has(item.id);
+        return (
+          <EuiButtonIcon
+            data-test-subj="syntheticsExpandLocationAgents"
+            size="xs"
+            iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
+            aria-label={isExpanded ? COLLAPSE_ROW_LABEL : EXPAND_ROW_LABEL}
+            onClick={() => toggleRow(item.id)}
+          />
+        );
+      },
+    },
+    {
       field: 'label',
       name: LOCATION_NAME_LABEL,
       render: (label: string) => <CopyName text={label} />,
@@ -132,29 +158,17 @@ export const PrivateLocationsTable = ({
       name: AGENT_POLICY_LABEL,
       render: (agentPolicyId: string, item: ListItem) => {
         if (item.agentConditionSharding) {
-          const isExpanded = expandedIds.has(item.id);
           const agentCount = agentStatsByLocation.get(item.id)?.agents.length ?? 0;
           return (
             <EuiFlexGroup direction="column" gutterSize="xs">
               <EuiFlexItem grow={false}>
-                <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-                  <EuiFlexItem grow={false}>
-                    <EuiButtonIcon
-                      data-test-subj="syntheticsExpandLocationAgents"
-                      size="xs"
-                      iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
-                      aria-label={isExpanded ? COLLAPSE_ROW_LABEL : EXPAND_ROW_LABEL}
-                      onClick={() => toggleRow(item.id)}
-                    />
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiBadge color="primary" iconType="cluster">
-                      {agentCount > 0
-                        ? CONDITION_SHARDED_WITH_COUNT_LABEL(agentCount)
-                        : CONDITION_SHARDED_LABEL}
-                    </EuiBadge>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
+                <div>
+                  <EuiBadge color="primary" iconType="cluster">
+                    {agentCount > 0
+                      ? CONDITION_SHARDED_WITH_COUNT_LABEL(agentCount)
+                      : CONDITION_SHARDED_LABEL}
+                  </EuiBadge>
+                </div>
               </EuiFlexItem>
               <EuiFlexItem grow={false} className="eui-textTruncate">
                 <PolicyName

@@ -685,7 +685,7 @@ describe('SyntheticsPrivateLocation', () => {
       expect(policy?.condition).toBeNull();
     });
 
-    it('ignores condition sharding for classic locations (keeps shard/single-policy binding)', async () => {
+    it('clears any host condition for classic (non-sharded) locations', async () => {
       const spl = new SyntheticsPrivateLocation(serverMock);
 
       const policy = await spl.generateNewPolicy(
@@ -701,7 +701,28 @@ describe('SyntheticsPrivateLocation', () => {
       );
 
       expect(policy?.policy_ids).toEqual(['policyId']);
-      expect(policy?.condition).toBeUndefined();
+      // Explicitly null (not undefined) so disabling sharding clears a prior pin.
+      expect(policy?.condition).toBeNull();
+    });
+
+    it('preserves an existing pin when re-syncing with no enrolled agents', async () => {
+      const spl = new SyntheticsPrivateLocation(serverMock);
+      const existingCondition = hostNameCondition('host-a');
+
+      const policy = await spl.generateNewPolicy(
+        testConfig,
+        conditionLocation,
+        testMonitorPolicy as any,
+        'default',
+        {},
+        [],
+        undefined,
+        undefined,
+        [],
+        existingCondition
+      );
+
+      expect(policy?.condition).toBe(existingCondition);
     });
   });
 

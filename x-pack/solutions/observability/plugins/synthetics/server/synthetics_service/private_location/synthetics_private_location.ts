@@ -214,7 +214,11 @@ export class SyntheticsPrivateLocation {
     /** Enrolled agent host names for the location's single agent policy, when
      * it is condition-sharded (scalable). Threaded in once per batch by the
      * caller so we don't query Fleet per monitor. */
-    conditionHosts?: string[]
+    conditionHosts?: string[],
+    /** Current `condition` on the package policy being updated (edit path), so
+     * we can preserve an existing host pin when we can't compute a fresh
+     * assignment. Undefined on the create path (no existing policy). */
+    existingCondition?: string | null
   ): Promise<NewPackagePolicy | null> {
     const { label: locName } = privateLocation;
 
@@ -222,18 +226,26 @@ export class SyntheticsPrivateLocation {
 
     try {
       newPolicy.is_managed = true;
-      // Every monitor is pinned to the location's single agent policy. For a
-      // scalable (condition-sharded) location we additionally gate it to its
-      // assigned agent with a `${host.name}` Elastic Agent condition, so exactly
-      // one agent runs it (at-most-once, no duplicate runs). With no enrolled
-      // agents yet we leave it unconditioned — it then runs on all agents until
-      // one is assigned by a later create/edit pass or the rebalance task.
+      // Every monitor is pinned to the location's single agent policy.
       newPolicy.policy_id = privateLocation.agentPolicyId;
       newPolicy.policy_ids = [privateLocation.agentPolicyId];
       if (isConditionShardedLocation(privateLocation)) {
-        newPolicy.condition = conditionHosts?.length
+        // Scalable location: gate the monitor to its assigned agent with a
+        // `${host.name}` Elastic Agent condition so exactly one agent runs it
+        // (at-most-once, no duplicate runs). When no enrolled agents are known
+        // yet, keep any existing pin rather than wiping it (a wipe would fan the
+        // monitor out to every agent until the next rebalance); a brand-new
+        // monitor has no existing condition and so stays unpinned until an agent
+        // is assigned by a later create/edit pass or the rebalance task.
+        const assigned = conditionHosts?.length
           ? assignAgentByHost(config.id, conditionHosts)?.condition ?? null
           : null;
+        newPolicy.condition = assigned ?? existingCondition ?? null;
+      } else {
+        // Classic location: never pinned. Clear explicitly so turning condition
+        // sharding off removes any previously-stamped host condition instead of
+        // leaving the monitor stuck on one agent.
+        newPolicy.condition = null;
       }
       if (testRunId) {
         newPolicy.name =
@@ -494,6 +506,9 @@ export class SyntheticsPrivateLocation {
     const policiesToDelete: string[] = [];
     // One Fleet query per condition-sharded (scalable) location.
     const conditionHostsByLocation = await this.getConditionHostsByLocation(allPrivateLocations);
+    // Existing package policies by id, so we can preserve a host condition we
+    // can't currently recompute (e.g. no enrolled agents at re-sync time).
+    const existingPolicyById = new Map(existingPolicies.map((policy) => [policy.id, policy]));
 
     for (const { config, globalParams } of configs) {
       const { locations } = config;
@@ -509,6 +524,11 @@ export class SyntheticsPrivateLocation {
 
         try {
           if (hasLocation) {
+            const existingCondition =
+              existingPolicyById.get(newId)?.condition ??
+              legacyPolicyIds
+                .map((id) => existingPolicyById.get(id)?.condition)
+                .find((condition) => condition != null);
             const newPolicy = await this.generateNewPolicy(
               config,
               privateLocation,
@@ -518,7 +538,8 @@ export class SyntheticsPrivateLocation {
               maintenanceWindows,
               undefined,
               undefined,
-              conditionHostsByLocation.get(privateLocation.id)
+              conditionHostsByLocation.get(privateLocation.id),
+              existingCondition
             );
 
             if (!newPolicy) {

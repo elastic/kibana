@@ -161,10 +161,13 @@ export const editPrivateLocationRoute: SyntheticsRestApiRouteFactory<
         // location (label denormalization / (un)stamping host conditions), so
         // require monitor bulk-update rights in every affected space.
         if ((labelChanged || isConditionShardingChanged) && monitorsInLocation.length) {
-          await checkPrivileges({
+          const forbidden = await checkPrivileges({
             routeContext,
             monitorsSpaces: monitorsInLocation.map(({ namespaces }) => namespaces![0]),
           });
+          if (forbidden) {
+            return forbidden;
+          }
         }
 
         newLocation = await repo.editPrivateLocation(locationId, {
