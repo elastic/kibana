@@ -37,15 +37,17 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Enable Agent Builder to pause and ask up to five clarifying multiple-choice questions before acting, then resume after you answer [#274672]({{kib-pull}}274672).
 * Share private agents with selected people using per-agent access control alongside **Public**, **Shared**, and **Private** visibility [#267530]({{kib-pull}}267530).
 * Add an embeddable Agent Builder conversation input that opens **Agent Builder** and sends the message with attachments preserved [#272166]({{kib-pull}}272166).
-* Make Agent Builder tracing generally available so you can view trace waterfalls for each response, use the built-in traces skill, and monitor activity in the overview dashboard while excluding sensitive prompts and tool parameters by default [#276174]({{kib-pull}}276174).
+* Enable Agent Builder tracing by default so you can view trace waterfalls for each response, use the built-in traces skill, and monitor activity in the overview dashboard while excluding sensitive prompts and tool parameters by default [#276174]({{kib-pull}}276174).
 * Add install, open, and delete controls to the **Agent Builder Traces** option on the **GenAI Settings** page, and prevent deleted dashboards from being reinstalled when {{kib}} restarts [#276643]({{kib-pull}}276643).
 * Set a resizable custom width for Agent Builder attachment canvas flyouts in full-screen view and overlay mode in the sidebar [#265200]({{kib-pull}}265200).
-* Limit which connectors an agent can use with optional `connector_ids`, so `@` autocomplete and connector search respect the agent's allowed set [#267333]({{kib-pull}}267333).
+* Add optional `connector_ids` to the Agent Builder conversation API to limit which connectors a request can use [#267333]({{kib-pull}}267333).
 * Show permitted system indices and aliases in Agent Builder index selection, including alerts, ML anomaly results, SLOs, the entity store, exception lists, SIEM signals, and {{stack-monitor-app}} [#265819]({{kib-pull}}265819).
 * Run several Agent Builder conversations at the same time, and track each conversation's status in the chats panel with **In progress**, **Awaiting your input**, **Unread**, and **Error** indicators [#267980]({{kib-pull}}267980) [#271689]({{kib-pull}}271689).
 * Route low-effort Agent Builder operations such as {{esql}} generation and conversation title generation to a configurable fast model, set per feature in **Feature settings**, with automatic fallback to the default model [#265520]({{kib-pull}}265520) [#274849]({{kib-pull}}274849) [#275607]({{kib-pull}}275607).
 
 **Alerting and cases**:
+* Enable Cases as Data by default so you can analyze cases, activity, and attachments through dedicated indices and a prebuilt **Case Analytics** data view that stays current as custom fields change without replacing the space's default data view [#279831]({{kib-pull}}279831) [#280001]({{kib-pull}}280001).
+* Enable the redesigned Cases list, details, and settings pages by default [#279367]({{kib-pull}}279367).
 * Snooze and unsnooze individual alerts with optional expiry or auto-unsnooze conditions [#264090]({{kib-pull}}264090).
 * Add a **Stack Alerts** feature privilege so roles can read and act on alerts without rule management access [#273804]({{kib-pull}}273804).
 * Add an **Inspect** action to view and run the {{es}} query used by custom threshold rules from the rule details page [#262354]({{kib-pull}}262354).
@@ -54,16 +56,15 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Add **Add to chat** and **Summarize case** actions to the case details page [#276635]({{kib-pull}}276635) [#279105]({{kib-pull}}279105).
 * Attach **Lens** visualizations to cases from **Attach saved object** [#274959]({{kib-pull}}274959) [#277040]({{kib-pull}}277040).
 * Attach Discover sessions, dashboards, and maps to cases [#272423]({{kib-pull}}272423).
-* Add an **Attach** button to the case **Activity** and **Attachments** tabs, including **Upload file** [#269560]({{kib-pull}}269560).
+* Redesign case attachments with a unified **Attachments** tab, collapsible sections and item counts by type, **Type** and **Author** filters, **Refresh**, and an **Attach** action on the **Activity** and **Attachments** tabs [#270518]({{kib-pull}}270518) [#272759]({{kib-pull}}272759) [#269560]({{kib-pull}}269560).
 * Add a warning when a selected file already exists in a case [#279327]({{kib-pull}}279327).
-* Add **Type** and **Author** filters on the case **Attachments** tab [#272759]({{kib-pull}}272759).
-* Redesign the case **Attachments** tab so each attachment type appears only when data exists, and add a **Refresh** control [#270518]({{kib-pull}}270518).
 * Extract case observables automatically when alerts are added through the API, workflows, or Agent Builder [#273455]({{kib-pull}}273455).
-* Improve case templates with toggle fields, unique template names, and a simplified default starter template when case templates v2 is enabled [#277626]({{kib-pull}}277626).
-* Split the case template editor into **Fields** and **Configuration** tabs when case templates v2 is enabled [#277269]({{kib-pull}}277269).
-* Add autocomplete and inline validation to the case template YAML editor when case templates v2 is enabled [#279346]({{kib-pull}}279346).
-* Set default connectors and case settings in case templates when `xpack.cases.templates.enabled` is true [#275690]({{kib-pull}}275690).
-* Add a display-only Markdown field type when case templates v2 is enabled [#278329]({{kib-pull}}278329).
+* Improve case templates with toggle fields, unique template names, and a simplified default starter template [#277626]({{kib-pull}}277626).
+* Split the case template editor into **Fields** and **Configuration** tabs [#277269]({{kib-pull}}277269).
+* Add autocomplete and inline validation to the case template YAML editor [#279346]({{kib-pull}}279346).
+* Set default connectors and case settings in case templates [#275690]({{kib-pull}}275690).
+* Add a display-only Markdown field type to case templates [#278329]({{kib-pull}}278329).
+* Add public Cases APIs to discover applicable `extended_fields` and apply template defaults when creating a case [#279684]({{kib-pull}}279684) [#280143]({{kib-pull}}280143).
 * Add `xpack.alerting.alertsService.totalFieldsLimit` (default `2800`, range `2500`–`5000`) to control {{es}} `index.mapping.total_fields.limit` on `.alerts-*` indices and templates [#274024]({{kib-pull}}274024).
 
 **Connectivity**:
@@ -76,10 +77,9 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Add a **Filter by feature** control to the create-connector flyout, and show the HTTP connector in standard connector lists [#271686]({{kib-pull}}271686).
 * Improve authentication options for Agent Builder connectors by listing recommended methods first with a **Recommended** badge and hiding legacy options when you create new connectors [#273410]({{kib-pull}}273410).
 * Add `secretQueryParams` support to the HTTP connector so encrypted query parameters are stored in connector secrets and injected into request URLs [#258291]({{kib-pull}}258291).
-* Add workflow steps to the **Slack (v2)** connector to look up conversation history, channel details, workspace users, and users by email [#273548]({{kib-pull}}273548).
+* Add **Slack (v2)** connector actions for looking up conversation history, channel details, workspace users, and users by email in Agent Builder and Workflows [#273548]({{kib-pull}}273548).
 * Enable OAuth authorization for the **GitHub** and **Slack (v2)** connectors so you can connect using your own OAuth apps [#259549]({{kib-pull}}259549).
 * Add **OAuth Client Credentials (Private Key JWT)** authentication to the **SharePoint Online** connector so you can authenticate with a certificate instead of a client secret [#268847]({{kib-pull}}268847).
-* Add **Quick Connect OAuth 2.0** authentication to the **Microsoft Teams** and **SharePoint Online** connectors, and narrow the default **SharePoint Online** OAuth scope to `Sites.Selected` for tighter site access [#265727]({{kib-pull}}265727).
 
 **Dashboards and Visualizations**:
 * Make the Dashboards and Visualizations APIs generally available, with breaking request and response schema changes detailed in [{{kib}} 9.5.0 breaking changes](breaking-changes.md#kibana-9.5.0-breaking-changes).
@@ -93,6 +93,7 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Add feedback when filters or drilldowns cannot apply to computed values on {{esql}} XY, heatmap, and partition charts [#269722]({{kib-pull}}269722).
 * Show unavailable filter and drilldown actions with an explanation when a {{esql}} data table column is not filterable [#269635]({{kib-pull}}269635).
 * Make the **Fast mode** approximation option applicable to **Vega** visualizations that use an {{esql}} query [#276999]({{kib-pull}}276999).
+* Apply the dashboard time range, query bar, filters, and controls to **Vega** panels that use {{esql}} [#277120]({{kib-pull}}277120) [#280070]({{kib-pull}}280070).
 * Add a **Use global filters** layer setting to {{esql}} visualizations in **Lens** [#264613]({{kib-pull}}264613).
 * Add background trendlines to {{esql}} metric visualizations [#272499]({{kib-pull}}272499).
 * Add a **Density** option to **Lens** Metric charts, with **Default** used for new charts and **Compact** preserved for existing ones [#265526]({{kib-pull}}265526).
@@ -116,6 +117,7 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Add a **Cancel unenrollment** action in the agent activity flyout so you can cancel a scheduled automatic unenrollment of inactive agents during the grace period [#271270]({{kib-pull}}271270).
 * Add **Remove collector** actions for OpAMP collectors in {{fleet}}, including bulk removal, as a technical preview [#268711]({{kib-pull}}268711).
 * Show dedicated **Health**, **Info**, and **Config** tabs and the collector configuration view on the details page for OpAMP-managed collectors in {{fleet}} as a technical preview [#278816]({{kib-pull}}278816).
+* Add an **Elastic Agent** and **OTel Contrib Collector** runtime selector to the **Add Collector** flyout as a technical preview [#280137]({{kib-pull}}280137).
 * Enable automatic installation of dependencies for composable integration packages during package installation [#263762]({{kib-pull}}263762).
 * Rename user-facing **Cloud Connector** copy to **Federated Identity** across {{fleet}} federated-identity onboarding flows [#261353]({{kib-pull}}261353).
 * Enable OpenTelemetry-based permission verification for **Federated Identity** setups in {{fleet}} by default [#265619]({{kib-pull}}265619).
@@ -128,6 +130,8 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Add a `data_stream.type` variable to the simplified package policy API so input-only packages can route data to a different index prefix (for example, `logs-*` instead of `metrics-*`) [#269895]({{kib-pull}}269895).
 
 **Data management**:
+* Add **ES|QL Data Federation** in {{stack-manage-app}} as a technical preview, so you can create and manage external data sources and datasets for {{esql}} queries [#265681]({{kib-pull}}265681).
+* Add hot, frozen, and delete phases to **Data lifecycle** in the index and component template wizards, and add a unified editor for successful and failed data lifecycles in data stream details [#273960]({{kib-pull}}273960) [#273965]({{kib-pull}}273965) [#275740]({{kib-pull}}275740).
 * Add `min_age`, `min_docs`, `min_size`, `min_primary_shard_docs`, and `min_primary_shard_size` rollover conditions to **Index Lifecycle Management** hot-phase actions [#270398]({{kib-pull}}270398).
 * Add **Force merge index** and **Force merge on clone** settings for searchable snapshots in the **Index Lifecycle Management** policy editor for hot, cold, and frozen phases [#264698]({{kib-pull}}264698).
 
@@ -233,6 +237,7 @@ For the {{elastic-sec}} 9.5.0 release information, refer to [{{elastic-sec}} Sol
 * Fix {{esql}} query escaping when Agent Builder generates dashboard visualizations, so patterns such as `GROK` work correctly [#272493]({{kib-pull}}272493).
 
 **Alerting and cases**:
+* Fix custom fields and templates missing from the redesigned **Case settings** page when case templates are turned off [#280215]({{kib-pull}}280215).
 * Fix case viewing and saving after the applied template is deleted, and stop the **Apply template** modal from loading indefinitely [#278716]({{kib-pull}}278716).
 * Fix applying a case template failing when its required fields need values by validating them in the confirmation modal before saving [#278499]({{kib-pull}}278499).
 * Fix template resolution from the wrong case owner in `cases.createCaseFromTemplate` [#268719]({{kib-pull}}268719).
@@ -242,6 +247,7 @@ For the {{elastic-sec}} 9.5.0 release information, refer to [{{elastic-sec}} Sol
 * Fix observable auto-extraction when alerts are added through the case comments API [#274969]({{kib-pull}}274969).
 * Fix pushing a case to an external connector not marking all attachments as pushed [#274451]({{kib-pull}}274451).
 * Fix phrase search in the **All Cases** search bar so quoted phrases match exactly [#266827]({{kib-pull}}266827).
+* Fix {{esql}} query rules grouping alerts incorrectly when `STATS ... BY` uses inline column renames or unnamed expressions [#277293]({{kib-pull}}277293).
 * Fix {{esql}} query rules silently rewriting saved queries during execution [#275231]({{kib-pull}}275231).
 * Fix {{esql}} query rule recovery actions missing source field values from the active alert [#274686]({{kib-pull}}274686).
 * Fix the **Stack alerts** page running two searches on load when filter controls are present [#271441]({{kib-pull}}271441).
@@ -282,7 +288,7 @@ For the {{elastic-sec}} 9.5.0 release information, refer to [{{elastic-sec}} Sol
 * Fix the Visualizations API rejecting `rank_by` with `operation: "count"` on terms buckets when no `field` is specified [#268620]({{kib-pull}}268620).
 * Fix default colored badges missing color when data table columns are created through the Visualizations API [#268425]({{kib-pull}}268425).
 * Fix the Visualizations API rejecting unsupported pipeline operations for **Lens** gauge `min`, `max`, and `goal` metrics [#268168]({{kib-pull}}268168).
-* Fix **Lens** gauge color stops extending beyond configured ranges or losing palette continuity when using the Visualizations API [#272123]({{kib-pull}}272123).
+* Fix **Lens** gauge color stops extending beyond configured ranges or losing palette continuity in the Visualizations API, and keep out-of-range values colored for named palettes with user-defined bounds [#272123]({{kib-pull}}272123) [#279918]({{kib-pull}}279918).
 * Fix dashboard PDF exports using a stale time range after you change the time picker when the dashboard does not save the time range [#278262]({{kib-pull}}278262).
 * Fix **Canvas** tables exceeding the 10,000-row limit from large `createTable` expressions [#276502]({{kib-pull}}276502).
 * Fix **Canvas** autoplay not advancing past the first page [#272619]({{kib-pull}}272619).
@@ -372,6 +378,7 @@ For the {{elastic-sec}} 9.5.0 release information, refer to [{{elastic-sec}} Sol
 * Fix **Dev Tools Console** accepting malformed HTTP methods such as `GETT` and `POSTS` as valid request lines [#270479]({{kib-pull}}270479).
 
 **Discover**:
+* Fix exponential histogram fields with unit metadata rendering incorrectly in the Discover table [#279776]({{kib-pull}}279776).
 * Fix Discover blocking when canceling a long-running {{esql}} asynchronous query times out [#277242]({{kib-pull}}277242).
 * Fix Discover {{esql}} document summary hiding fields when null values incorrectly count toward `discover:maxDocFieldsDisplayed` [#273610]({{kib-pull}}273610).
 * Fix computed-field formatting, the time column, and document viewer types for cascaded {{esql}} documents in Discover [#268892]({{kib-pull}}268892).
@@ -458,6 +465,7 @@ For the {{elastic-sec}} 9.5.0 release information, refer to [{{elastic-sec}} Sol
 * Fix Elastic Workflows version history failing to record changes on newly provisioned clusters when {{es}} is temporarily unavailable [#278387]({{kib-pull}}278387).
 * Fix workflow graph nodes and their detail flyouts displaying machine-readable step names [#277550]({{kib-pull}}277550).
 * Fix workflow exports dropping comments, commented-out steps, or the workflow's enabled state [#277041]({{kib-pull}}277041).
+* Fix workflow imports failing when IDs conflict with soft-deleted workflows or workflows in other spaces [#277042]({{kib-pull}}277042).
 * Fix `foreach` steps failing when a large guarded step output leaves memory between the `if:` guard and loop entry [#278188]({{kib-pull}}278188).
 * Fix `foreach` steps failing to restore earlier step output used by their source expressions [#270089]({{kib-pull}}270089).
 * Fix blank items in `foreach` loops when source step output is no longer in memory [#273515]({{kib-pull}}273515).
