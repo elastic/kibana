@@ -57,7 +57,7 @@ backwards compatible. Renaming or removing a code is a breaking change.
 | `RULE_VERSION_CONFLICT`       | 409    | An update / delete races another writer (`if_seq_no` mismatch)       | `{ rule_id }`                              |
 | `INVALID_RULE_DATA`           | 400    | The submitted body fails the domain-level schema check               | `{ context, errors }` (tree-shaped errors) |
 | `INVALID_STATE_TRANSITION`    | 400    | `state_transition` is incompatible with the rule's `kind`            | `{ rule_id, kind, transition }`            |
-| `INVALID_BULK_PARAMS`         | 400    | Bulk operation combines `ids` with `filter` / `search` / `match_all` | `{ params }`                               |
+| `BULK_QUERY_MATCH_LIMIT_EXCEEDED` | 400 | By-query bulk operation with `force: true` matched more resources than the per-request cap; rejected before any resource is mutated | `{ match_count, limit }`                   |
 | `IMMUTABLE_FIELDS_CHANGED`    | 400    | PUT (upsert) request changes a field flagged as immutable            | `{ fields }`                               |
 | `INVALID_FILTER_FIELD`        | 400    | The `filter` references a field that is not in the allow-list        | `{ field, allowed_fields }`                |
 | `UNSUPPORTED_FILTER_FUNCTION` | 400    | The `filter` uses a KQL function we do not translate yet             | `{ function }`                             |
@@ -76,9 +76,10 @@ backwards compatible. Renaming or removing a code is a breaking change.
 
 ### Alert actions (`server/lib/alert_actions_client/`)
 
-| Code                    | Status | When                                                                     | `details`                     |
-| ----------------------- | ------ | ------------------------------------------------------------------------ | ----------------------------- |
-| `ALERT_EVENT_NOT_FOUND` | 404    | No alert event matches the supplied `group_hash` (+ optional `episode_id`) | `{ group_hash, episode_id? }` |
+| Code                         | Status | When                                                                                                | `details`                                                                  |
+| ---------------------------- | ------ | --------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| `ALERT_EVENT_NOT_FOUND`      | 404    | No alert event matches the supplied `group_hash` (+ optional `episode_id`).                                                                                                                                                    | `{ group_hash, episode_id? }`                                              |
+| `INVALID_EPISODE_STATE_TRANSITION` | 400    | The requested action is a no-op against the current lifecycle state: `activate` of an already-`active` episode, or `deactivate` of an already-`inactive` episode. Every other transition is allowed. | `{ group_hash, episode_id, episode_status, action_type }`                  |
 
 ### Rule doctor insights (`server/lib/rule_doctor_insights_client/`)
 

@@ -7,7 +7,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonIcon, EuiPopover, EuiText } from '@elastic/eui';
+import { EuiButtonIcon, EuiPopover, EuiText, EuiToolTip } from '@elastic/eui';
 
 export function ChatItemActions({
   canCopy,
@@ -30,6 +30,19 @@ export function ChatItemActions({
 }) {
   const [isPopoverOpen, setIsPopoverOpen] = useState<string | undefined>();
 
+  const editPromptLabel = i18n.translate('xpack.aiAssistant.chatTimeline.actions.editPrompt', {
+    defaultMessage: 'Edit prompt',
+  });
+
+  const inspectPromptLabel = i18n.translate(
+    'xpack.aiAssistant.chatTimeline.actions.inspectPrompt',
+    { defaultMessage: 'Inspect prompt' }
+  );
+
+  const copyMessageLabel = i18n.translate('xpack.aiAssistant.chatTimeline.actions.copyMessage', {
+    defaultMessage: 'Copy message',
+  });
+
   useEffect(() => {
     const timeout = setTimeout(() => {
       if (isPopoverOpen) {
@@ -45,47 +58,51 @@ export function ChatItemActions({
   return (
     <>
       {canEdit ? (
-        <EuiButtonIcon
-          aria-label={i18n.translate('xpack.aiAssistant.chatTimeline.actions.editPrompt', {
-            defaultMessage: 'Edit prompt',
-          })}
-          color="text"
-          data-test-subj="observabilityAiAssistantChatItemActionsEditPromptButton"
-          display={editing ? 'fill' : 'empty'}
-          iconType="pencil"
-          onClick={onToggleEdit}
-        />
+        <EuiToolTip content={editPromptLabel} disableScreenReaderOutput>
+          <EuiButtonIcon
+            aria-label={editPromptLabel}
+            color="text"
+            data-test-subj="observabilityAiAssistantChatItemActionsEditPromptButton"
+            display={editing ? 'fill' : 'empty'}
+            iconType="pencil"
+            onClick={onToggleEdit}
+          />
+        </EuiToolTip>
       ) : null}
 
       {collapsed ? (
-        <EuiButtonIcon
-          aria-label={i18n.translate('xpack.aiAssistant.chatTimeline.actions.inspectPrompt', {
-            defaultMessage: 'Inspect prompt',
-          })}
-          color="text"
-          data-test-subj="observabilityAiAssistantChatItemActionsInspectPromptButton"
-          display={expanded ? 'fill' : 'empty'}
-          iconType="inspect"
-          onClick={onToggleExpand}
-        />
+        <EuiToolTip content={inspectPromptLabel} disableScreenReaderOutput>
+          <EuiButtonIcon
+            aria-label={inspectPromptLabel}
+            color="text"
+            data-test-subj="observabilityAiAssistantChatItemActionsInspectPromptButton"
+            display={expanded ? 'fill' : 'empty'}
+            iconType="inspect"
+            onClick={onToggleExpand}
+          />
+        </EuiToolTip>
       ) : null}
 
       {canCopy ? (
         <EuiPopover
+          aria-label={i18n.translate(
+            'xpack.aiAssistant.chatTimeline.actions.copyMessagePopoverAriaLabel',
+            { defaultMessage: 'Copy message confirmation' }
+          )}
           button={
-            <EuiButtonIcon
-              aria-label={i18n.translate('xpack.aiAssistant.chatTimeline.actions.copyMessage', {
-                defaultMessage: 'Copy message',
-              })}
-              color="text"
-              data-test-subj="observabilityAiAssistantChatItemActionsCopyMessageButton"
-              iconType="copy"
-              display={isPopoverOpen === 'copy' ? 'fill' : 'empty'}
-              onClick={() => {
-                setIsPopoverOpen('copy');
-                onCopyToClipboard();
-              }}
-            />
+            <EuiToolTip content={copyMessageLabel} disableScreenReaderOutput>
+              <EuiButtonIcon
+                aria-label={copyMessageLabel}
+                color="text"
+                data-test-subj="observabilityAiAssistantChatItemActionsCopyMessageButton"
+                iconType="copy"
+                display={isPopoverOpen === 'copy' ? 'fill' : 'empty'}
+                onClick={() => {
+                  setIsPopoverOpen('copy');
+                  onCopyToClipboard();
+                }}
+              />
+            </EuiToolTip>
           }
           isOpen={isPopoverOpen === 'copy'}
           panelPaddingSize="s"

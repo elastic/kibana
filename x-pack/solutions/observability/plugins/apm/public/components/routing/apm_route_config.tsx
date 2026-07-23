@@ -7,9 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 import { createRouter, Outlet } from '@kbn/typed-react-router-config';
-import * as t from 'io-ts';
+import { z } from '@kbn/zod/v4';
 import React from 'react';
-import { toBooleanRt } from '@kbn/io-ts-utils';
+import { toBooleanFromString } from '../../../common/utils/to_boolean_from_string';
 import { Breadcrumb } from '../app/breadcrumb';
 import { TraceLink } from '../app/trace_link';
 import { TransactionLink } from '../app/transaction_link';
@@ -21,9 +21,9 @@ import { onboarding } from './onboarding';
 import { tutorialRedirectRoute } from './onboarding/redirect';
 import { ServiceGroupTemplate } from './templates/service_group_template';
 import { ServiceGroupsList } from '../app/service_groups';
-import { offsetRt } from '../../../common/comparison_rt';
+import { offsetSchema } from '../../../common/comparison_rt';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
-import { environmentRt } from '../../../common/environment_rt';
+import { environmentSchema } from '../../../common/environment_rt';
 import { diagnosticsRoute } from '../app/diagnostics';
 import { TransactionDetailsByNameLink } from '../app/transaction_details_link';
 
@@ -41,50 +41,55 @@ const ServiceInventoryTitle = i18n.translate('xpack.apm.views.serviceInventory.t
 const apmRoutes = {
   '/link-to/transaction': {
     element: <TransactionDetailsByNameLink />,
-    params: t.type({
-      query: t.intersection([
-        t.type({ transactionName: t.string, serviceName: t.string }),
-        t.partial({
-          rangeFrom: t.string,
-          rangeTo: t.string,
-          environment: t.string,
-        }),
-      ]),
+    params: z.object({
+      query: z.object({ transactionName: z.string(), serviceName: z.string() }).merge(
+        z.object({
+          rangeFrom: z.string().optional(),
+          rangeTo: z.string().optional(),
+          environment: z.string().optional(),
+        })
+      ),
     }),
   },
   '/link-to/transaction/{transactionId}': {
     element: <TransactionLink />,
-    params: t.intersection([
-      t.type({
-        path: t.type({
-          transactionId: t.string,
+    params: z
+      .object({
+        path: z.object({
+          transactionId: z.string(),
         }),
-      }),
-      t.partial({
-        query: t.partial({
-          rangeFrom: t.string,
-          rangeTo: t.string,
-          waterfallItemId: t.string,
-        }),
-      }),
-    ]),
+      })
+      .merge(
+        z.object({
+          query: z
+            .object({
+              rangeFrom: z.string().optional(),
+              rangeTo: z.string().optional(),
+              waterfallItemId: z.string().optional(),
+            })
+            .optional(),
+        })
+      ),
   },
   '/link-to/trace/{traceId}': {
     element: <TraceLink />,
-    params: t.intersection([
-      t.type({
-        path: t.type({
-          traceId: t.string,
+    params: z
+      .object({
+        path: z.object({
+          traceId: z.string(),
         }),
-      }),
-      t.partial({
-        query: t.partial({
-          rangeFrom: t.string,
-          rangeTo: t.string,
-          waterfallItemId: t.string,
-        }),
-      }),
-    ]),
+      })
+      .merge(
+        z.object({
+          query: z
+            .object({
+              rangeFrom: z.string().optional(),
+              rangeTo: z.string().optional(),
+              waterfallItemId: z.string().optional(),
+            })
+            .optional(),
+        })
+      ),
   },
   '/': {
     element: (
@@ -118,24 +123,28 @@ const apmRoutes = {
             </ServiceGroupTemplate>
           </Breadcrumb>
         ),
-        params: t.type({
-          query: t.intersection([
-            environmentRt,
-            t.type({
-              rangeFrom: t.string,
-              rangeTo: t.string,
-              kuery: t.string,
-              comparisonEnabled: toBooleanRt,
-            }),
-            t.type({
-              serviceGroup: t.string,
-            }),
-            t.partial({
-              refreshPaused: t.union([t.literal('true'), t.literal('false')]),
-              refreshInterval: t.string,
-            }),
-            offsetRt,
-          ]),
+        params: z.object({
+          query: environmentSchema
+            .merge(
+              z.object({
+                rangeFrom: z.string(),
+                rangeTo: z.string(),
+                kuery: z.string(),
+                comparisonEnabled: toBooleanFromString,
+              })
+            )
+            .merge(
+              z.object({
+                serviceGroup: z.string(),
+              })
+            )
+            .merge(
+              z.object({
+                refreshPaused: z.union([z.literal('true'), z.literal('false')]).optional(),
+                refreshInterval: z.string().optional(),
+              })
+            )
+            .merge(offsetSchema),
         }),
         defaults: {
           query: {

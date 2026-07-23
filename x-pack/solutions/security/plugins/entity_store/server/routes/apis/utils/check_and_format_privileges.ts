@@ -11,12 +11,20 @@ import type {
   CheckPrivilegesResponse,
   SecurityPluginStart,
 } from '@kbn/security-plugin/server';
+import {
+  getEntitiesAlias,
+  getLatestEntityIndexPattern,
+  getEntityMetadataAlias,
+  getMetadataEntityIndexPattern,
+  ENTITY_LATEST,
+} from '../../../../common';
 
 export type Privileges = z.infer<typeof Privileges>;
 export const Privileges = z.object({
   has_all_required: z.boolean(),
   has_read_permissions: z.boolean().optional(),
   has_write_permissions: z.boolean().optional(),
+  has_kibana_feature_access: z.boolean().optional(),
   privileges: z.object({
     elasticsearch: z.object({
       cluster: z.object({}).catchall(z.boolean()).optional(),
@@ -90,7 +98,72 @@ export async function checkAndFormatPrivileges({
     privileges: formatPrivileges(privileges),
     has_all_required: hasAllRequested,
     ...hasReadWritePermissions(privileges.elasticsearch, indexPatterns),
+    ...(privilegesToCheck.kibana?.length
+      ? { has_kibana_feature_access: privileges.kibana.every(({ authorized }) => authorized) }
+      : {}),
   };
+}
+
+export interface CheckEntityStoreIndexPrivilegesOpts {
+  request: KibanaRequest;
+  security: SecurityPluginStart;
+  spaceId: string;
+  /**
+   * Also checks read access to the metadata alias/index pattern, e.g. for the
+   * `check_privileges` route, which needs to know whether the metadata indices are readable.
+   */
+  includeMetadataPrivileges?: boolean;
+  /**
+   * Also checks these Kibana feature privileges if specified (e.g. `['securitySolution',
+   * 'securitySolution-entity-analytics']`. Needed by callers that run with a synthetic request
+   * and so never pass through Kibana's route-level authorization
+   */
+  kibanaFeaturePrivileges?: string[];
+}
+
+/**
+ * Shared write/read privilege check for the entities + latest entity indices, reused by the
+ * `check_privileges` route, the `entityStore.updateAssetCriticality` workflow step, and the
+ * Security Solution `set_asset_criticality` agent builder tool.
+ */
+export async function checkEntityStoreIndexPrivileges({
+  request,
+  security,
+  spaceId,
+  includeMetadataPrivileges = false,
+  kibanaFeaturePrivileges,
+}: CheckEntityStoreIndexPrivilegesOpts): Promise<Privileges> {
+  const entitiesAliasPattern = getEntitiesAlias(ENTITY_LATEST, spaceId);
+  const latestEntityIndexPattern = getLatestEntityIndexPattern(spaceId);
+
+  const index: Record<string, string[]> = {
+    [entitiesAliasPattern]: ['read', 'write'],
+    [latestEntityIndexPattern]: ['read', 'write'],
+  };
+
+  if (includeMetadataPrivileges) {
+    index[getEntityMetadataAlias(spaceId)] = ['read'];
+    index[getMetadataEntityIndexPattern(spaceId)] = ['read'];
+  }
+
+  return checkAndFormatPrivileges({
+    request,
+    security,
+    indexPatterns: [entitiesAliasPattern, latestEntityIndexPattern],
+    privilegesToCheck: {
+      elasticsearch: {
+        cluster: [],
+        index,
+      },
+      ...(kibanaFeaturePrivileges?.length
+        ? {
+            kibana: kibanaFeaturePrivileges.map((privilege) =>
+              security.authz.actions.api.get(privilege)
+            ),
+          }
+        : {}),
+    },
+  });
 }
 
 export const hasReadWritePermissions = (

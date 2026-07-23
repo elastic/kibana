@@ -39,7 +39,6 @@ import { AssigneesColumn } from '../../../all_cases/assignees_column';
 import { builderMap as customFieldsBuilderMap } from '../../../custom_fields/builder';
 import { useGetCaseConfiguration } from '../../../../containers/configure/use_get_case_configuration';
 import { IncrementalIdText } from '../../../incremental_id';
-import { ExtendedFieldsColumnCell } from '../../../all_cases/extended_fields_column_cell';
 import { severities } from '../../../severity/config';
 
 type CasesColumns = EuiBasicTableColumn<CaseUI>;
@@ -289,17 +288,6 @@ export const useCasesColumns = ({
 
           return getEmptyCellValue();
         },
-      },
-      extendedFields: {
-        minWidth: '10em',
-        width: '14em',
-        name: casesColumnsConfig.extendedFields.name,
-        render: (theCase: CaseUI) => (
-          <ExtendedFieldsColumnCell
-            extendedFields={theCase.extendedFields}
-            extendedFieldsLabels={theCase.extendedFieldsLabels}
-          />
-        ),
       },
       severity: {
         width: '6em',

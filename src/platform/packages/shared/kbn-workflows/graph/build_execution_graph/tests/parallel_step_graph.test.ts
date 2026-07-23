@@ -146,6 +146,21 @@ describe('convertToWorkflowGraph - parallel step', () => {
     ).toThrow(/not supported inside a parallel branch/);
   });
 
+  it('rejects a waitForApproval step inside a branch body', () => {
+    expect(() =>
+      buildGraph({
+        ...baseParallel,
+        steps: [
+          {
+            name: 'approve',
+            type: 'waitForApproval',
+            with: { message: 'approve?' },
+          } as unknown as ConnectorStep,
+        ],
+      })
+    ).toThrow(/not supported inside a parallel branch/);
+  });
+
   it('compiles a workflow.fail step inside a dynamic branch body', () => {
     // `workflow.output` / `workflow.fail` are allowed inside a branch body; the
     // terminator node is compiled into the branch chain like any other step.
@@ -295,6 +310,27 @@ describe('convertToWorkflowGraph - parallel step', () => {
         ],
       } as unknown as ParallelStep)
     ).toThrow(/unsupported flow-control|timeout/);
+  });
+
+  it('rejects a waitForApproval step inside a static branch body', () => {
+    expect(() =>
+      buildGraph({
+        name: 'fanOut',
+        type: 'parallel',
+        branches: [
+          {
+            name: 'approval',
+            steps: [
+              {
+                name: 'approve',
+                type: 'waitForApproval',
+                with: { message: 'approve?' },
+              },
+            ],
+          },
+        ],
+      } as unknown as ParallelStep)
+    ).toThrow(/not supported inside a parallel branch/);
   });
 
   it('compiles a workflow.fail step inside a static branch body', () => {

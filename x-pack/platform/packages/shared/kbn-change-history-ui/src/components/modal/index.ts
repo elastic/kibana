@@ -7,7 +7,9 @@
 
 export { ChangeHistoryModal } from './change_history_modal';
 export { ChangeHistoryTrigger } from './change_history_trigger';
+export type { ChangeHistoryTriggerProps } from './change_history_trigger';
 export { ChangeHistoryListGroupItem } from './change_history_list_group_item';
+export type { ChangeHistoryListGroupItemProps } from './change_history_list_group_item';
 export { ChangeHistoryRestoreButton } from './change_history_restore_button';
 export type { ChangeHistoryRestoreButtonProps } from './change_history_restore_button';
 export { ChangeHistoryDefaultPreviewHeaderActions } from './change_history_default_preview_header_actions';

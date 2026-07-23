@@ -8,7 +8,11 @@
 import { PathReporter } from 'io-ts/lib/PathReporter';
 import { AttachmentType } from '../../domain/attachment/v1';
 import { UserActionTypes } from '../../domain/user_action/action/v1';
-import { MAX_USER_ACTION_AUTHOR_LENGTH, MAX_USER_ACTION_SEARCH_LENGTH } from '../../../constants';
+import {
+  MAX_USER_ACTION_AUTHOR_LENGTH,
+  MAX_USER_ACTION_AUTHORS_FILTER_LENGTH,
+  MAX_USER_ACTION_SEARCH_LENGTH,
+} from '../../../constants';
 import {
   type CaseUserActionStatsResponse,
   CaseUserActionStatsResponseRt,
@@ -112,7 +116,7 @@ describe('User actions APIs', () => {
         const query = UserActionInternalFindRequestRt.decode({
           ...defaultRequest,
           search: 'test',
-          author: 'elastic',
+          authors: ['elastic'],
         });
 
         expect(query).toStrictEqual({
@@ -122,7 +126,24 @@ describe('User actions APIs', () => {
             page: 1,
             perPage: 10,
             search: 'test',
-            author: 'elastic',
+            authors: ['elastic'],
+          },
+        });
+      });
+
+      it('accepts multiple authors', () => {
+        const query = UserActionInternalFindRequestRt.decode({
+          ...defaultRequest,
+          authors: ['elastic', 'other'],
+        });
+
+        expect(query).toStrictEqual({
+          _tag: 'Right',
+          right: {
+            ...defaultRequest,
+            page: 1,
+            perPage: 10,
+            authors: ['elastic', 'other'],
           },
         });
       });
@@ -150,13 +171,23 @@ describe('User actions APIs', () => {
         );
       });
 
-      it(`throws an error when the author is more than ${MAX_USER_ACTION_AUTHOR_LENGTH} characters`, () => {
+      it('throws an error when the search is an empty string', () => {
+        expect(
+          PathReporter.report(
+            UserActionInternalFindRequestRt.decode({ ...defaultRequest, search: '' })
+          )
+        ).toContain('The search field cannot be an empty string.');
+      });
+
+      it(`throws an error when an author is more than ${MAX_USER_ACTION_AUTHOR_LENGTH} characters`, () => {
         const author = 'a'.repeat(MAX_USER_ACTION_AUTHOR_LENGTH + 1);
 
         expect(
-          PathReporter.report(UserActionInternalFindRequestRt.decode({ ...defaultRequest, author }))
+          PathReporter.report(
+            UserActionInternalFindRequestRt.decode({ ...defaultRequest, authors: [author] })
+          )
         ).toContain(
-          `The length of the author is too long. The maximum length is ${MAX_USER_ACTION_AUTHOR_LENGTH}.`
+          `The length of the authors is too long. The maximum length is ${MAX_USER_ACTION_AUTHOR_LENGTH}.`
         );
       });
 
@@ -164,7 +195,7 @@ describe('User actions APIs', () => {
         const result = UserActionInternalFindRequestSchema.safeParse({
           ...defaultRequest,
           search: 'test',
-          author: 'elastic',
+          authors: ['elastic'],
         });
         expect(result.success).toBe(true);
         expect(result.data).toStrictEqual({
@@ -172,7 +203,21 @@ describe('User actions APIs', () => {
           page: 1,
           perPage: 10,
           search: 'test',
-          author: 'elastic',
+          authors: ['elastic'],
+        });
+      });
+
+      it('zod: accepts multiple authors', () => {
+        const result = UserActionInternalFindRequestSchema.safeParse({
+          ...defaultRequest,
+          authors: ['elastic', 'other'],
+        });
+        expect(result.success).toBe(true);
+        expect(result.data).toStrictEqual({
+          ...defaultRequest,
+          page: 1,
+          perPage: 10,
+          authors: ['elastic', 'other'],
         });
       });
 
@@ -184,12 +229,50 @@ describe('User actions APIs', () => {
         expect(result.success).toBe(false);
       });
 
-      it('zod: throws an error when the author is too long', () => {
+      it('zod: throws an error when the search is an empty string', () => {
         const result = UserActionInternalFindRequestSchema.safeParse({
           ...defaultRequest,
-          author: 'a'.repeat(MAX_USER_ACTION_AUTHOR_LENGTH + 1),
+          search: '',
         });
         expect(result.success).toBe(false);
+      });
+
+      it('zod: throws an error when an author is too long', () => {
+        const result = UserActionInternalFindRequestSchema.safeParse({
+          ...defaultRequest,
+          authors: ['a'.repeat(MAX_USER_ACTION_AUTHOR_LENGTH + 1)],
+        });
+        expect(result.success).toBe(false);
+      });
+
+      it(`throws an error when the authors array has more than ${MAX_USER_ACTION_AUTHORS_FILTER_LENGTH} items`, () => {
+        const authors = Array(MAX_USER_ACTION_AUTHORS_FILTER_LENGTH + 1).fill('elastic');
+
+        expect(
+          PathReporter.report(
+            UserActionInternalFindRequestRt.decode({ ...defaultRequest, authors })
+          )
+        ).toContain(
+          `The length of the field authors is too long. Array must be of length <= ${MAX_USER_ACTION_AUTHORS_FILTER_LENGTH}.`
+        );
+      });
+
+      it(`zod: throws an error when the authors array has more than ${MAX_USER_ACTION_AUTHORS_FILTER_LENGTH} items`, () => {
+        const authors = Array(MAX_USER_ACTION_AUTHORS_FILTER_LENGTH + 1).fill('elastic');
+
+        const result = UserActionInternalFindRequestSchema.safeParse({
+          ...defaultRequest,
+          authors,
+        });
+        expect(result.success).toBe(false);
+      });
+
+      it(`accepts exactly ${MAX_USER_ACTION_AUTHORS_FILTER_LENGTH} authors`, () => {
+        const authors = Array(MAX_USER_ACTION_AUTHORS_FILTER_LENGTH).fill('elastic');
+
+        const query = UserActionInternalFindRequestRt.decode({ ...defaultRequest, authors });
+
+        expect(query._tag).toBe('Right');
       });
     });
 

@@ -203,7 +203,7 @@ test.describe('Workflow execution - Test runs', { tag: [...tags.stateful.classic
     await pageObjects.workflowEditor.saveWorkflow();
 
     // Navigate to the step and click the inline "run step" button.
-    await pageObjects.workflowEditor.runButton.click();
+    await pageObjects.workflowEditor.clickRunButton();
     await page.testSubj.waitForSelector('workflowExecuteModal', { state: 'visible' });
     await pageObjects.workflowEditor.setExecuteModalInputs({
       event: testEvent,

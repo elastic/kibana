@@ -76,4 +76,25 @@ describe('useUpdatePack error toast (6.9)', () => {
     expect(optsArg.toastMessage).not.toBe('Bad Request');
     expect(mockToasts.addSuccess).not.toHaveBeenCalled();
   });
+
+  it('invalidates both the pack list and the individual pack on success', async () => {
+    // Regression guard: without invalidating ['pack', { packId }], the edit
+    // page re-renders pre-update queries (a deleted query reappears) until a
+    // hard reload, because usePack caches it with keepPreviousData.
+    mockHttp.put.mockResolvedValue({ data: { name: 'my-pack' } });
+    const invalidateSpy = jest.spyOn(queryClient, 'invalidateQueries');
+
+    const { result } = renderHook(() => useUpdatePack({ withRedirect: false }), {
+      wrapper: createWrapper(queryClient),
+    });
+
+    await act(async () => {
+      result.current.mutate({ id: 'pack-1', name: 'my-pack' });
+    });
+
+    await waitFor(() => expect(mockToasts.addSuccess).toHaveBeenCalled());
+
+    expect(invalidateSpy).toHaveBeenCalledWith(['packList']);
+    expect(invalidateSpy).toHaveBeenCalledWith(['pack', { packId: 'pack-1' }]);
+  });
 });

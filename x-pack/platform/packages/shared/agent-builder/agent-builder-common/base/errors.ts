@@ -16,6 +16,7 @@ import type { HookExecutionMode, HookLifecycle } from '../hooks/lifecycle';
 export enum AgentBuilderErrorCode {
   internalError = 'internalError',
   badRequest = 'badRequest',
+  forbidden = 'forbidden',
   toolNotFound = 'toolNotFound',
   skillNotFound = 'skillNotFound',
   agentNotFound = 'agentNotFound',
@@ -95,6 +96,28 @@ export const createBadRequestError = (
   return new AgentBuilderError(AgentBuilderErrorCode.badRequest, message, {
     ...meta,
     statusCode: 400,
+  });
+};
+
+/**
+ * Represents a forbidden error (the caller lacks the required privileges).
+ */
+export type AgentBuilderForbiddenError = AgentBuilderError<AgentBuilderErrorCode.forbidden>;
+
+/**
+ * Checks if the given error is a {@link AgentBuilderForbiddenError}
+ */
+export const isForbiddenError = (err: unknown): err is AgentBuilderForbiddenError => {
+  return isAgentBuilderError(err) && err.code === AgentBuilderErrorCode.forbidden;
+};
+
+export const createForbiddenError = (
+  message: string,
+  meta: Record<string, any> = {}
+): AgentBuilderForbiddenError => {
+  return new AgentBuilderError(AgentBuilderErrorCode.forbidden, message, {
+    ...meta,
+    statusCode: 403,
   });
 };
 
@@ -412,6 +435,7 @@ export const isHooksExecutionError = (err: unknown): err is AgentBuilderHooksExe
 export const AgentBuilderErrorUtils = {
   isAgentBuilderError,
   isInternalError,
+  isForbiddenError,
   isToolNotFoundError,
   isSkillNotFoundError,
   isAgentNotFoundError,
@@ -423,6 +447,7 @@ export const AgentBuilderErrorUtils = {
   isAgentExecutionError,
   isContextLengthExceededAgentError,
   createInternalError,
+  createForbiddenError,
   createToolNotFoundError,
   createSkillNotFoundError,
   createAgentNotFoundError,

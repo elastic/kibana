@@ -5,16 +5,9 @@
  * 2.0.
  */
 
-import type { AnomalyDetectorType } from '@kbn/apm-types';
-import type { Environment } from '../../../../common/environment_rt';
+import type { ServiceAnomalyScoreResponse } from '@kbn/apm-api-shared';
 import type { MlClient } from '../../../lib/helpers/get_ml_client';
 import { getServiceAnomalies } from '../../service_map/get_service_anomalies';
-
-export interface ServiceAnomalyScoreResponse {
-  anomalyScore?: number;
-  detectorType?: AnomalyDetectorType;
-  anomalyEnvironment?: Environment;
-}
 
 /**
  * Max ML record score for a single service in the time range (same aggregation as service inventory).

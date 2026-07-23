@@ -34,6 +34,7 @@ describe('fetchEsql', () => {
     data: discoverServiceMock.data,
     expressions: discoverServiceMock.expressions,
     scopedProfilesManager,
+    isApproximate: false,
   };
 
   it('resolves with returned records', async () => {

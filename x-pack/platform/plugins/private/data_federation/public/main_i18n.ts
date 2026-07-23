@@ -63,6 +63,13 @@ export const mainTranslations = {
           defaultMessage: 'Delete data source',
         }
       ),
+      deleteActionHasDataSetsDescription: i18n.translate(
+        'xpack.dataFederation.table.deleteActionHasDataSetsDescription',
+        {
+          defaultMessage:
+            'To delete a data source, you must first delete all datasets that read from it.',
+        }
+      ),
       caption: i18n.translate('xpack.dataFederation.table.caption', {
         defaultMessage: 'Data sources',
       }),

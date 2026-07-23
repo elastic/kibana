@@ -9,8 +9,8 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { BehaviorSubject, EMPTY } from 'rxjs';
-import type { SignificantEventAttachment } from '@kbn/streams-plugin/common';
-import { SIGNIFICANT_EVENT_ATTACHMENT_TYPE } from '@kbn/streams-plugin/common';
+import type { SignificantEventAttachment } from '@kbn/significant-events-plugin/common';
+import { SIGNIFICANT_EVENT_ATTACHMENT_TYPE } from '@kbn/significant-events-plugin/common';
 import { FocusedSignificantEventService } from '../../../services/significant_events/focused_significant_event_service';
 import {
   registerSignificantEventAttachment,
@@ -23,17 +23,15 @@ const attachment: SignificantEventAttachment = {
   type: SIGNIFICANT_EVENT_ATTACHMENT_TYPE,
   data: {
     '@timestamp': '2026-01-01T00:00:00.000Z',
-    created_at: '2026-01-01T00:00:00.000Z',
-    event_id: 'event-1',
-    discovery_slug: 'payment-outage',
-    status: 'promoted',
+    event_uuid: 'event-1',
+    event_id: 'payment-outage',
+    discovery_id: 'discovery-1',
+    status: 'open',
     stream_names: ['logs.payment'],
     title: 'Payment outage',
     summary: 'Payments are failing.',
-    root_cause: 'Payment gateway timeout.',
-    criticality: 90,
+    severity: '60-high',
     confidence: 0.8,
-    recommendations: ['Restart gateway client'],
   },
 };
 
@@ -142,9 +140,7 @@ describe('significantEventAttachmentDefinition', () => {
     );
 
     expect(screen.getByText('Payments are failing.')).toBeInTheDocument();
-    expect(screen.getByText('Payment gateway timeout.')).toBeInTheDocument();
     expect(screen.getByText('logs.payment')).toBeInTheDocument();
-    expect(screen.getByText('1. Restart gateway client')).toBeInTheDocument();
   });
 
   it('does not render inline content', () => {

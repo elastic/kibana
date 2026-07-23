@@ -36,7 +36,7 @@ import { CONNECTOR_ID_REFERENCE_NAME } from '../../common/constants';
  *   - `space_id` and `owner` are emitted at the document root to match the
  *     implicit-privileges DLS convention (see `mappings/case.ts`).
  *     `space_id` is singular — cases are space-isolated. `owner` is also
- *     mirrored at `cases.owner` for data-view grouping.
+ *     mirrored at `case.owner` for data-view grouping.
  *
  * Coupling the two via `extends` would force every additive change to
  * the cases SO into the analytics doc surface. The analytics-doc shape
@@ -57,9 +57,9 @@ export interface CaseAnalyticsDoc {
   // dimension. See `mappings/case.ts`.
   space_id: string;
   owner: string;
-  cases: {
+  case: {
     id: string;
-    // Mirror of the top-level `owner` (the DLS field), kept under `cases.*`
+    // Mirror of the top-level `owner` (the DLS field), kept under `case.*`
     // for data-view grouping. See `mappings/case.ts`.
     owner: string;
     title: string;
@@ -163,7 +163,7 @@ export function buildCaseDoc(so: SavedObject<CasePersistedAttributes>): CaseAnal
     // singular scalar the DLS convention expects.
     space_id: so.namespaces?.[0] ?? 'default',
     owner: a.owner,
-    cases: {
+    case: {
       id: so.id,
       // Mirror of the top-level `owner` for data-view grouping.
       owner: a.owner,

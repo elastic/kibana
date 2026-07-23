@@ -14,6 +14,8 @@ export {
   SECURITY_LIST_WATCHLISTS_TOOL_ID,
   searchEntitiesTool,
   SECURITY_SEARCH_ENTITIES_TOOL_ID,
+  setAssetCriticalityTool,
+  SECURITY_SET_ASSET_CRITICALITY_TOOL_ID,
   createWatchlistTool,
   SECURITY_CREATE_WATCHLIST_TOOL_ID,
   deleteWatchlistTool,

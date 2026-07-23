@@ -26,6 +26,7 @@ import {
   hasValidCreateMetadataOperations,
   dashboardOperationSchema,
 } from './core';
+import { applyDefaultDashboardTimeRange } from './time_range';
 
 const newDashboardMetadataErrorMessage =
   'New dashboards require a set_metadata operation with a non-empty title.';
@@ -135,16 +136,23 @@ Use operations[] to:
           }),
         });
 
-        const description = `Dashboard: ${dashboardData.title}`;
+        // Data-aware default time range computation
+        const finalDashboardData = await applyDefaultDashboardTimeRange({
+          dashboardData,
+          esClient,
+          logger,
+        });
+
+        const description = `Dashboard: ${finalDashboardData.title}`;
         const attachment = isNewDashboard
           ? await attachments.add({
               id: dashboardAttachmentId,
               type: DASHBOARD_ATTACHMENT_TYPE,
               description,
-              data: dashboardData,
+              data: finalDashboardData,
             })
           : await attachments.update(dashboardAttachmentId, {
-              data: dashboardData,
+              data: finalDashboardData,
               description,
             });
 
@@ -162,7 +170,7 @@ Use operations[] to:
               data: {
                 attachment_id: attachment.id,
                 version: attachment.current_version ?? 1,
-                dashboard: summarizeDashboard(dashboardData),
+                dashboard: summarizeDashboard(finalDashboardData),
                 failures: failures.length > 0 ? failures : undefined,
               },
             },

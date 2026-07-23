@@ -5,28 +5,55 @@
  * 2.0.
  */
 
+import { useCallback } from 'react';
+import type { Alert } from '@kbn/alerting-types';
 import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared/src/common/hooks';
 import { useKibana } from '../utils/kibana_react';
 
-export type AuthorizedToReadRuleType = (ruleTypeId: string, consumer?: string) => boolean;
+/**
+ * Accepts `undefined` for `ruleTypeId` so callers can pass `alert.fields[FIELD]`
+ * directly without an extra truthiness guard. Returns `false` when undefined.
+ */
+export type AuthorizedToReadRuleType = (
+  ruleTypeId: string | undefined,
+  consumer?: string | undefined
+) => boolean;
+export type AuthorizedToReadRuleForAlert = (alert: Alert) => boolean;
+
+export interface UseAuthorizedToReadRuleTypeResult {
+  /** Check rule-read auth by rule type ID and optional consumer. */
+  authorizedToReadRuleType: AuthorizedToReadRuleType;
+  /** Check rule-read auth for the rule behind an alert (extracts type ID and consumer internally). */
+  authorizedToReadRuleForAlert: AuthorizedToReadRuleForAlert;
+}
 
 /**
- * Returns a function that checks whether the current user is authorized to read a
- * specific rule type (and optionally a consumer).
+ * Returns functions that check whether the current user is authorized to read
+ * a specific rule type. Wraps `useGetRuleTypesPermissions` and sources
+ * `http`/`toasts` from Kibana so callers don't have to wire them up.
  *
- * Rule read is authorized per rule type, so UI affordances that link to or depend
- * on a single rule (rule links, "View rule details" actions, custom alert details
- * sections, etc.) should gate on this rather than the coarse
- * `authorizedToReadAnyRules` flag. This wraps `useGetRuleTypesPermissions` and
- * sources `http`/`toasts` from Kibana so callers don't have to wire them up.
+ * Use `authorizedToReadRuleForAlert` when operating on an alert document.
+ * Use `authorizedToReadRuleType` when you already have the rule type ID and consumer.
  */
-export const useAuthorizedToReadRuleType = (): AuthorizedToReadRuleType => {
+export const useAuthorizedToReadRuleType = (): UseAuthorizedToReadRuleTypeResult => {
   const {
     http,
     notifications: { toasts },
   } = useKibana().services;
 
-  const { authorizedToReadRuleType } = useGetRuleTypesPermissions({ http, toasts });
+  const {
+    authorizedToReadRuleType: authorizedToReadRuleTypeFromHook,
+    authorizedToReadRuleForAlert,
+  } = useGetRuleTypesPermissions({ http, toasts });
 
-  return authorizedToReadRuleType;
+  // The shared hook requires a non-undefined ruleTypeId. Callers that read from
+  // alert.fields[FIELD] get string | undefined from TypeScript, so this wrapper
+  // absorbs the undefined check so they don't have to guard it at every call site.
+  const authorizedToReadRuleType = useCallback<AuthorizedToReadRuleType>(
+    (ruleTypeId, consumer) =>
+      Boolean(ruleTypeId && authorizedToReadRuleTypeFromHook(ruleTypeId, consumer)),
+    [authorizedToReadRuleTypeFromHook]
+  );
+
+  return { authorizedToReadRuleType, authorizedToReadRuleForAlert };
 };

@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
-import { jsonRt, toNumberRt } from '@kbn/io-ts-utils';
+import { z } from '@kbn/zod/v4';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
-import { environmentRt } from '@kbn/apm-types';
+import { environmentSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
 
 export interface StatusCounts {
@@ -26,20 +25,38 @@ export interface ServiceSlosResponse {
   statusCounts: StatusCounts;
 }
 
+// Equivalent of io-ts's jsonRt.pipe(t.array(t.string)): parse a JSON string,
+// then validate the parsed value is an array of strings.
+const statusFiltersJsonSchema = z
+  .string()
+  .transform((value, ctx) => {
+    try {
+      return JSON.parse(value);
+    } catch (err) {
+      ctx.addIssue({ code: 'custom', message: err.message });
+      return z.NEVER;
+    }
+  })
+  .pipe(z.array(z.string()));
+
 export const serviceSlosRoute = defineRoute<ServiceSlosResponse>()({
   endpoint: 'GET /internal/apm/services/{serviceName}/slos',
-  params: t.type({
-    path: t.type({ serviceName: t.string }),
-    query: t.intersection([
-      environmentRt,
-      t.type({
-        page: toNumberRt,
-        perPage: toNumberRt,
-      }),
-      t.partial({
-        statusFilters: jsonRt.pipe(t.array(t.string)),
-        kqlQuery: t.string,
-      }),
-    ]),
+  params: z.object({
+    path: z.object({ serviceName: z.string() }),
+    query: environmentSchema
+      .merge(
+        z.object({
+          page: z.coerce.number(),
+          perPage: z.coerce.number(),
+        })
+      )
+      .merge(
+        z
+          .object({
+            statusFilters: statusFiltersJsonSchema,
+            kqlQuery: z.string(),
+          })
+          .partial()
+      ),
   }),
 });

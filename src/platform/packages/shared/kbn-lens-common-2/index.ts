@@ -15,6 +15,7 @@ import type {
   PublishesDataLoading,
   PublishesDataViews,
   PublishesDisabledActionIds,
+  PublishesEsqlUsage,
   PublishesProjectRoutingOverrides,
   PublishesRendered,
   PublishesSavedObjectId,
@@ -25,6 +26,7 @@ import type {
   PublishesUnsavedChanges,
   SerializedTitles,
   SerializedTimeRange,
+  SupportsJsonExport,
 } from '@kbn/presentation-publishing';
 import type { LensApiConfig } from '@kbn/lens-embeddable-utils';
 import type { Simplify } from '@kbn/chart-expressions-common';
@@ -120,13 +122,15 @@ export type LensApi = Simplify<
     // Let the container know about unsaved changes
     PublishesUnsavedChanges &
     PublishesProjectRoutingOverrides &
+    PublishesEsqlUsage &
     // Lens specific API methods:
     // Let the container know when the data has been loaded/updated
     LensInspectorAdapters &
     LensRequestHandlersProps &
     LensApiCallbacks &
     LensHasEditPanel &
-    LegacyLensStateApi
+    LegacyLensStateApi &
+    SupportsJsonExport
 >;
 
 /**

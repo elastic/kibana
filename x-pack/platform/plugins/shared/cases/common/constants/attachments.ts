@@ -41,6 +41,7 @@ export const MAP_ATTACHMENT_TYPE = 'map';
  * management `_find` API.
  */
 export const DASHBOARD_SO_TYPE = 'dashboard';
+export const LENS_SO_TYPE = 'lens';
 export const MAP_SO_TYPE = 'map';
 export const DISCOVER_SESSION_SO_TYPE = 'search';
 
@@ -188,4 +189,15 @@ export const PREFIX_TO_OWNER_MAP: Partial<Record<string, string>> = {
   security: SECURITY_SOLUTION_OWNER,
   observability: OBSERVABILITY_OWNER,
   stack: GENERAL_CASES_OWNER,
+};
+
+/**
+ * Registers an owner→prefix mapping so the owner's legacy `alert`/`event`
+ * attachments resolve to a valid unified type (e.g. `security.alert`). For
+ * dynamically registered owners (e.g. FTR fixtures); built-in solutions are
+ * seeded in {@link OWNER_TO_PREFIX_MAP}. Only the forward map is updated —
+ * `PREFIX_TO_OWNER_MAP` must stay unambiguous when owners share a prefix.
+ */
+export const registerOwnerPrefix = (owner: string, prefix: string): void => {
+  OWNER_TO_PREFIX_MAP[owner] = prefix;
 };

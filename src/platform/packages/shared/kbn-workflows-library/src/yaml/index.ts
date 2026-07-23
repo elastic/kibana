@@ -9,3 +9,5 @@
 
 export { parseTemplateYaml, TemplateParseError } from './parse_template';
 export type { ParsedTemplate, TemplateParseErrorReason } from './parse_template';
+export { renderTemplate } from './render_template';
+export type { RenderTemplateInput } from './render_template';

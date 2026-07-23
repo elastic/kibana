@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
-import { toBooleanRt } from '@kbn/io-ts-utils';
-import { environmentRt } from '@kbn/apm-types';
+import { z } from '@kbn/zod/v4';
+import { BooleanFromString } from '@kbn/zod-helpers/v4';
+import { environmentSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
-import { rangeRt, kueryRt, offsetRt } from '../../default_api_types';
+import { rangeSchema, kuerySchema, offsetSchema } from '../../default_api_types';
 
 export interface DependencyOperation {
   spanName: string;
@@ -28,16 +28,16 @@ export interface DependencyOperationsResponse {
 
 export const dependencyOperationsRoute = defineRoute<DependencyOperationsResponse>()({
   endpoint: 'GET /internal/apm/dependencies/operations',
-  params: t.type({
-    query: t.intersection([
-      rangeRt,
-      environmentRt,
-      kueryRt,
-      offsetRt,
-      t.type({
-        dependencyName: t.string,
-        searchServiceDestinationMetrics: toBooleanRt,
-      }),
-    ]),
+  params: z.object({
+    query: rangeSchema
+      .merge(environmentSchema)
+      .merge(kuerySchema)
+      .merge(offsetSchema)
+      .merge(
+        z.object({
+          dependencyName: z.string(),
+          searchServiceDestinationMetrics: BooleanFromString.default(false),
+        })
+      ),
   }),
 });

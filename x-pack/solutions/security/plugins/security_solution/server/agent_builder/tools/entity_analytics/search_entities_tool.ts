@@ -25,7 +25,6 @@ import type { ExperimentalFeatures } from '../../../../common';
 import { AssetCriticalityLevel } from '../../../../common/api/entity_analytics/asset_criticality/common.gen';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../plugin_contract';
 import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
-import { ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT } from '../../../lib/telemetry/event_based/events';
 import { securityTool } from '../constants';
 import {
   buildListEntityAttachmentId,
@@ -35,6 +34,8 @@ import {
   ensureEntityAttachment,
   type EntityAttachmentDescriptor,
 } from './entity_attachment_utils';
+import { createToolTelemetryTracker } from './tool_telemetry_tracker';
+import { fetchRiskScoreGrounding } from './risk_score_grounding';
 
 const ENTITY_STORE_KEEP_FIELDS = [
   '@timestamp',
@@ -734,19 +735,33 @@ export const searchEntitiesTool = (
         `${SECURITY_SEARCH_ENTITIES_TOOL_ID} tool called with parameters ${JSON.stringify(params)}`
       );
 
-      let success = false;
-      let entitiesReturned = 0;
-      let errorMessage: string | undefined;
+      const telemetryTracker = createToolTelemetryTracker({
+        core,
+        toolId: SECURITY_SEARCH_ENTITIES_TOOL_ID,
+        spaceId,
+        actionType: 'read',
+        entityTypes: params.entityTypes ?? [],
+      });
+      telemetryTracker.recordResultCount(0);
 
       try {
         const normalized = normalizeParams(params, logger);
 
+        const [, { entityStore }] = await core.getStartServices();
         const client = esClient.asCurrentUser;
         const entityIndex = getEntitiesAlias(ENTITY_LATEST, spaceId);
         const entitySnapshotIndex = getHistorySnapshotIndexPattern(spaceId);
-        const snapshotIndexExists = await client.indices.exists({
-          index: entitySnapshotIndex,
-        });
+
+        const [snapshotIndexExists, grounding] = await Promise.all([
+          client.indices.exists({ index: entitySnapshotIndex }),
+          fetchRiskScoreGrounding({
+            entityStore,
+            namespace: spaceId,
+            logger,
+          }),
+        ]);
+        const groundingResult = grounding ? [grounding] : [];
+
         const query = buildQuery(
           normalized,
           entityIndex,
@@ -756,7 +771,6 @@ export const searchEntitiesTool = (
         const { columns, values } = await executeEsql({ query, esClient: client });
 
         if (values.length === 0) {
-          success = true;
           return {
             results: [
               {
@@ -766,6 +780,7 @@ export const searchEntitiesTool = (
                   message: 'No entities found matching the specified criteria.',
                 },
               },
+              ...groundingResult,
             ],
           };
         }
@@ -784,13 +799,13 @@ export const searchEntitiesTool = (
           logger,
         });
 
-        success = true;
-        entitiesReturned = values.length;
+        telemetryTracker.recordResultCount(values.length);
         return {
-          results: [...esqlResultEntries, ...attachmentSideEffectResults],
+          results: [...esqlResultEntries, ...attachmentSideEffectResults, ...groundingResult],
         };
       } catch (error) {
-        errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        telemetryTracker.recordFailure(errorMessage);
         return {
           results: [
             {
@@ -801,15 +816,7 @@ export const searchEntitiesTool = (
           ],
         };
       } finally {
-        const [coreStart] = await core.getStartServices();
-        coreStart.analytics.reportEvent(ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT.eventType, {
-          toolId: SECURITY_SEARCH_ENTITIES_TOOL_ID,
-          entityTypes: params.entityTypes ?? [],
-          spaceId,
-          success,
-          entitiesReturned,
-          errorMessage,
-        });
+        await telemetryTracker.report();
       }
     },
   };

@@ -7,6 +7,7 @@
     "alertingTypes": "src/platform/packages/shared/kbn-alerting-types",
     "apmOss": "src/plugins/apm_oss",
     "apmCommon": "x-pack/platform/packages/shared/kbn-apm-common",
+    "apmUiShared": "src/platform/packages/shared/kbn-apm-ui-shared",
     "apmTypes": "x-pack/platform/packages/shared/kbn-apm-types",
     "autocomplete": "x-pack/solutions/security/packages/kbn-securitysolution-autocomplete/src",
     "avcBanner": "src/platform/packages/shared/kbn-avc-banner/src",

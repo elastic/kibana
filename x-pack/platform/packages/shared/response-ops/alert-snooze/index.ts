@@ -29,6 +29,9 @@ export {
 export { buildSnoozeSummary } from './utils/build_snooze_summary';
 export type { BuildSnoozeSummaryParams } from './utils/build_snooze_summary';
 
+export { AlertSnoozeBadge } from './components/alert_snooze_badge';
+export type { AlertSnoozeBadgeProps } from './components/alert_snooze_badge';
+
 export { ConditionalSnoozePanel } from './components/conditional_snooze_panel';
 export type {
   ConditionalSnoozePanelProps,
@@ -42,12 +45,12 @@ export type {
   AlertSnoozePayload,
 } from './components/alert_snooze_popover';
 
-export {
-  DEFAULT_DATA_CONDITION_TYPES,
-  fieldChangeDescriptor,
-  severityChangeDescriptor,
-  severityEqualsDescriptor,
-} from './components/built_in_data_conditions';
+export { AlertSnoozePanelInline } from './components/alert_snooze_panel_inline';
+export type { AlertSnoozePanelInlineProps } from './components/alert_snooze_panel_inline';
+
+export { useAlertSnooze } from './hooks/use_alert_snooze';
+export type { UseAlertSnoozeParams, UseAlertSnoozeResult } from './hooks/use_alert_snooze';
+
 export { DataConditionType } from './components/types';
 export type {
   AlertSeverityLevel,

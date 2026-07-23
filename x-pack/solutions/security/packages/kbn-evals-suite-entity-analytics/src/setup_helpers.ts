@@ -175,20 +175,21 @@ export async function assignEntitiesToWatchlist({
 }
 
 /**
- * Calls `deleteEntityEngines` for teardown
- * Failures are logged as warnings rather than thrown
+ * Uninstalls the entity store v2 for teardown.
+ * Failures are logged as warnings rather than thrown.
  */
 export async function deleteEntityEngines({
-  quickApiClient,
+  supertest,
   log,
 }: {
-  quickApiClient: {
-    deleteEntityEngines: (opts: { query: { delete_data: boolean } }) => Promise<unknown>;
-  };
+  supertest: SuperTest.Agent;
   log: ScoutLogger;
 }): Promise<void> {
   try {
-    await quickApiClient.deleteEntityEngines({ query: { delete_data: true } });
+    await supertest
+      .post('/api/security/entity_store/uninstall')
+      .set(MUTATING_HEADERS)
+      .send({ delete_data: true });
   } catch (err) {
     log.warning(`deleteEntityEngines failed during teardown: ${(err as Error).message}`);
   }

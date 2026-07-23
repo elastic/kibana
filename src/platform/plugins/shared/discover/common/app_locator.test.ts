@@ -335,6 +335,26 @@ describe('Discover url generator', () => {
     });
   });
 
+  describe('when isApproximate is used', () => {
+    test('should include isApproximate in appState', async () => {
+      const { locator } = await setup();
+      const { path } = await locator.getLocation({ isApproximate: true });
+      const { _a } = getStatesFromKbnUrl(path, ['_a']);
+
+      expect((_a as Record<string, unknown>).isApproximate).toBe(true);
+    });
+  });
+
+  describe('when isApproximate is not used', () => {
+    test('isApproximate should not be set in appState', async () => {
+      const { locator } = await setup();
+      const { path } = await locator.getLocation({ dataViewId });
+      const { _a } = getStatesFromKbnUrl(path, ['_a']);
+
+      expect((_a as Record<string, unknown>).isApproximate).toBeUndefined();
+    });
+  });
+
   describe('useHash property', () => {
     describe('when default useHash is set to false', () => {
       test('when using default, sets data view ID in the generated URL', async () => {

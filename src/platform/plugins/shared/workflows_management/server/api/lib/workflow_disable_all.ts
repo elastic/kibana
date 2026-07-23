@@ -84,7 +84,7 @@ export const disableAllWorkflows = async (params: {
         } = await bulkIndexWithOccRetry({
           client,
           hits: occHits,
-          mutate: mutateWorkflowToDisabled,
+          mutate: (hit) => mutateWorkflowToDisabled(hit._source),
           logger,
           bumpVersion,
         });

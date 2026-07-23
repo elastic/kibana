@@ -33,7 +33,7 @@ export function useServiceHasSystemMetrics({
         },
       }),
     [serviceName, environment, start, end],
-    { showToastOnError: false }
+    { showToastOnError: false, useLegacyCallApmApi: true }
   );
 
   return { hasSystemMetrics: data?.hasSystemMetrics, isLoading: isPending(status) };

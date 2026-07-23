@@ -63,6 +63,7 @@ jest.mock('../../app_context', () => {
       getExperimentalFeatures: jest.fn(),
       getCloud: jest.fn(),
       getTaskManagerStart: jest.fn(() => ({ runSoon: jest.fn().mockResolvedValue({}) })),
+      getKibanaVersion: jest.fn(() => '8.0.0'),
     },
   };
 });

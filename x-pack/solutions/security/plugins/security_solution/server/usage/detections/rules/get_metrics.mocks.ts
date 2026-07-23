@@ -46,6 +46,36 @@ export const getMockRuleAlertsResponse = (docCount: number): SearchResponse<neve
   },
 });
 
+interface ChangesHistoryUsageAggsMock {
+  revision_saved: { doc_count: number };
+  rule_restored: { doc_count: number };
+}
+
+export const getMockChangesHistoryUsageResponse = ({
+  revisionSavedCount,
+  ruleRestoredCount,
+}: {
+  revisionSavedCount: number;
+  ruleRestoredCount: number;
+}): SearchResponse<never, ChangesHistoryUsageAggsMock> => ({
+  took: 5,
+  timed_out: false,
+  _shards: {
+    total: 1,
+    successful: 1,
+    skipped: 0,
+    failed: 0,
+  },
+  hits: {
+    max_score: null,
+    hits: [],
+  },
+  aggregations: {
+    revision_saved: { doc_count: revisionSavedCount },
+    rule_restored: { doc_count: ruleRestoredCount },
+  },
+});
+
 export const getMockAlertCaseCommentsResponse = (): SavedObjectsFindResponse<
   Partial<AttachmentAttributes>,
   never

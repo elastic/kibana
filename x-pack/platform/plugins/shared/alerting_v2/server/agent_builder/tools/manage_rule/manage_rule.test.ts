@@ -14,6 +14,15 @@ import { AGENT_BUILDER_TAG } from '../../common/constants';
 const getEsqlQueryMock = (ctx: ToolHandlerContextMock) =>
   ctx.esClient.asCurrentUser.esql.query as unknown as jest.Mock;
 
+const getFieldCapsMock = (ctx: ToolHandlerContextMock) =>
+  ctx.esClient.asCurrentUser.fieldCaps as unknown as jest.Mock;
+
+// set_query resolves the rule's time field from the source index via fieldCaps.
+// Default to an index that exposes @timestamp so query-based operations don't
+// fail time-field resolution.
+const mockResolvableTimeField = (ctx: ToolHandlerContextMock) =>
+  getFieldCapsMock(ctx).mockResolvedValueOnce({ fields: { '@timestamp': { date: {} } } });
+
 const createContext = (): ToolHandlerContextMock => {
   const ctx = agentBuilderMocks.tools.createHandlerContext();
   ctx.attachments.add.mockResolvedValue({
@@ -40,6 +49,7 @@ describe('manageRuleTool', () => {
         ],
         values: [],
       });
+      mockResolvableTimeField(ctx);
 
       const result = await tool.handler(
         {
@@ -151,6 +161,7 @@ describe('manageRuleTool', () => {
         columns: [{ name: 'host.name', type: 'keyword' }],
         values: [],
       });
+      mockResolvableTimeField(ctx);
 
       await tool.handler(
         {
@@ -183,6 +194,7 @@ describe('manageRuleTool', () => {
         columns: [{ name: 'host.name', type: 'keyword' }],
         values: [],
       });
+      mockResolvableTimeField(ctx);
 
       await tool.handler(
         {
@@ -196,7 +208,7 @@ describe('manageRuleTool', () => {
                 breach: { query: 'FROM metrics-* | WHERE cpu > 0.9' },
                 no_data: { query: 'FROM heartbeat-* | STATS count = COUNT(*) BY host.name' },
               },
-              no_data_strategy: 'emit',
+              no_data_strategy: 'last_known_status',
             },
           ],
         },
@@ -206,7 +218,7 @@ describe('manageRuleTool', () => {
       const addCall = ctx.attachments.add.mock.calls[0][0] as {
         data: { no_data_strategy?: string };
       };
-      expect(addCall.data.no_data_strategy).toBe('emit');
+      expect(addCall.data.no_data_strategy).toBe('last_known_status');
     });
 
     it('updates an persisted attachment when ruleAttachmentId is provided', async () => {

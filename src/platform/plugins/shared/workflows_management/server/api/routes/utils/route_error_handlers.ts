@@ -21,6 +21,7 @@ import {
 } from '@kbn/workflows-yaml';
 import { WorkflowChangeHistoryDisabledError } from '../../../lib/workflow_change_history_disabled_error';
 import { WorkflowHistoryEventNotFoundError } from '../../../lib/workflow_history_event_not_found_error';
+import { WorkflowHistoryPaginationError } from '../../../lib/workflow_history_pagination_error';
 import { WorkflowForbiddenError } from '../../workflow_forbidden_error';
 
 /**
@@ -109,6 +110,14 @@ export function handleRouteError(
         attributes: {
           code: 'HISTORY_DISABLED',
         },
+      },
+    });
+  }
+
+  if (error instanceof WorkflowHistoryPaginationError) {
+    return response.badRequest({
+      body: {
+        message: error.message,
       },
     });
   }

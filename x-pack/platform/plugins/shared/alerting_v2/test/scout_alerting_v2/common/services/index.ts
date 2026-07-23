@@ -14,7 +14,13 @@ export { getRuleEventsApiService } from './rule_events_api_service';
 export type { RuleExecutionsApiService } from './rule_executions_api_service';
 export { getRuleExecutionsApiService } from './rule_executions_api_service';
 
-export type { AlertActionsApiService, AlertActionsFilter } from './alert_actions_api_service';
+export type { AlertActionsEventsService, AlertActionsFilter } from './alert_actions_events_service';
+export { getAlertActionsEventsService } from './alert_actions_events_service';
+
+export type {
+  AlertActionsApiService,
+  ActivateAlertActionParams,
+} from './alert_actions_api_service';
 export { getAlertActionsApiService } from './alert_actions_api_service';
 
 export type { ActionPoliciesApiService } from './action_policies_api_service';

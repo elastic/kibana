@@ -5,11 +5,6 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
+import { z } from '@kbn/zod/v4';
 
-export const logEcsReformattingRt = t.union([
-  t.literal('off'),
-  t.literal('shade'),
-  t.literal('replace'),
-  t.literal('override'),
-]);
+export const logEcsReformattingSchema = z.enum(['off', 'shade', 'replace', 'override']);

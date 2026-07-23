@@ -50,6 +50,7 @@ export const convertTool = ({
       getSchema: () => tool.schema,
       getHandler: () => tool.handler,
       summarizeToolReturn: tool.summarizeToolReturn,
+      maxResultTokens: tool.maxResultTokens,
     };
   }
   if (!isBuiltinDefinition(definition)) {
@@ -88,6 +89,7 @@ export const convertTool = ({
         return props.getLlmDescription ? props.getLlmDescription(args) : tool.description;
       },
       summarizeToolReturn: tool.summarizeToolReturn,
+      maxResultTokens: tool.maxResultTokens,
     };
   }
 

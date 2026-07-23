@@ -7,8 +7,11 @@
 
 import { useCallback, useRef, useState } from 'react';
 import type { RuleHistoryItem } from '../../../../../common/api/detection_engine/rule_management';
+import { isCustomizedPrebuiltRule } from '../../../../../common/api/detection_engine/model/rule_schema/utils';
 import { useRestoreRuleFromHistoryMutation } from '../../../rule_management/api/hooks/use_restore_rule_revision_mutation';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
+import { useKibana } from '../../../../common/lib/kibana';
+import { RuleChangesHistoryEventTypes } from '../../../../common/lib/telemetry/events/rule_changes_history/types';
 import * as i18n from './translations';
 
 interface UseRuleRestoreProps {
@@ -30,6 +33,7 @@ export function useRuleRestoreFromHistory({
   onConflict,
 }: UseRuleRestoreProps): UseRuleRestoreResult {
   const { addSuccess, addError, addInfo, addWarning } = useAppToasts();
+  const { telemetry } = useKibana().services;
   const [restoringItemId, setRestoringItemId] = useState<string | undefined>(undefined);
   const restoringItemRef = useRef<RuleHistoryItem | undefined>(undefined);
   const isRestoringAnywayRef = useRef(false);
@@ -38,12 +42,23 @@ export function useRuleRestoreFromHistory({
     onSettled: (response, error) => {
       const restoringItem = restoringItemRef.current;
       const wasRestoringAnyway = isRestoringAnywayRef.current;
+      const { ruleType, isPrebuilt, isCustomized } = getRuleRestoreTelemetryFields(
+        restoringItem?.rule
+      );
       restoringItemRef.current = undefined;
       isRestoringAnywayRef.current = false;
       setRestoringItemId(undefined);
 
       if (response?.no_change) {
         addInfo(i18n.RESTORE_NO_CHANGE_TOAST);
+
+        telemetry.reportEvent(RuleChangesHistoryEventTypes.ChangesHistoryRestoreTriggered, {
+          status: 'no_change',
+          ruleType,
+          isPrebuilt,
+          isCustomized,
+          isConflictRetry: wasRestoringAnyway,
+        });
         return;
       }
 
@@ -58,6 +73,14 @@ export function useRuleRestoreFromHistory({
             : i18n.CUSTOM_RULE_RESTORE_SUCCESS_TOAST(restoredRevision);
         addSuccess(message);
         onRestoreSuccess?.();
+
+        telemetry.reportEvent(RuleChangesHistoryEventTypes.ChangesHistoryRestoreTriggered, {
+          status: 'success',
+          ruleType,
+          isPrebuilt,
+          isCustomized,
+          isConflictRetry: wasRestoringAnyway,
+        });
       }
 
       if (error) {
@@ -78,10 +101,31 @@ export function useRuleRestoreFromHistory({
             },
             ruleRevision === undefined
           );
+          telemetry.reportEvent(RuleChangesHistoryEventTypes.ChangesHistoryRestoreTriggered, {
+            status: 'conflict',
+            ruleType,
+            isPrebuilt,
+            isCustomized,
+            isConflictRetry: wasRestoringAnyway,
+          });
         } else if (isConflict) {
           addWarning(i18n.RESTORE_CONFLICT_TOAST);
+          telemetry.reportEvent(RuleChangesHistoryEventTypes.ChangesHistoryRestoreTriggered, {
+            status: 'conflict',
+            ruleType,
+            isPrebuilt,
+            isCustomized,
+            isConflictRetry: wasRestoringAnyway,
+          });
         } else {
           addError(error, { title: i18n.RESTORE_ERROR_TOAST });
+          telemetry.reportEvent(RuleChangesHistoryEventTypes.ChangesHistoryRestoreTriggered, {
+            status: 'error',
+            ruleType,
+            isPrebuilt,
+            isCustomized,
+            isConflictRetry: wasRestoringAnyway,
+          });
         }
       }
     },
@@ -99,5 +143,21 @@ export function useRuleRestoreFromHistory({
   return {
     restoreFromHistory: handleRestore,
     restoringItemId,
+  };
+}
+
+function getRuleRestoreTelemetryFields(rule?: RuleHistoryItem['rule']): {
+  ruleType: RuleHistoryItem['rule']['type'] | 'unknown';
+  isPrebuilt: boolean;
+  isCustomized: boolean;
+} {
+  if (!rule) {
+    return { ruleType: 'unknown', isPrebuilt: false, isCustomized: false };
+  }
+
+  return {
+    ruleType: rule.type,
+    isPrebuilt: rule.rule_source.type === 'external',
+    isCustomized: isCustomizedPrebuiltRule(rule),
   };
 }

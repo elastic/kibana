@@ -376,6 +376,23 @@ describe('CasePostRequestRt', () => {
     });
   });
 
+  it('accepts a template with no version (resolved on create when templates are enabled)', () => {
+    const request = { ...defaultRequest, template: { id: 'template-id' } };
+
+    expect(PathReporter.report(CasePostRequestRt.decode(request))).toContain('No errors!');
+  });
+
+  it.each([0, -1, 1.5])(
+    'throws when the template version is not a positive integer (%p)',
+    (version) => {
+      expect(
+        PathReporter.report(
+          CasePostRequestRt.decode({ ...defaultRequest, template: { id: 'template-id', version } })
+        )
+      ).toContain('The template version must be a positive integer.');
+    }
+  );
+
   it(`throws an error when a text customFields is longer than ${MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH}`, () => {
     expect(
       PathReporter.report(

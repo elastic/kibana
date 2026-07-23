@@ -9,7 +9,7 @@ metadata:
       title: Pipeline link
 spec:
   type: buildkite-pipeline
-  owner: 'group:obs-onboarding-team'
+  owner: 'group:streams-ui'
   system: buildkite
   implementation:
     apiVersion: buildkite.elastic.dev/v1
@@ -21,7 +21,7 @@ spec:
       env:
         KIBANA_SLACK_NOTIFICATIONS_ENABLED: 'true'
         SLACK_NOTIFICATIONS_ON_SUCCESS: 'true'
-        SLACK_NOTIFICATIONS_CHANNEL: '#obs-onboarding'
+        SLACK_NOTIFICATIONS_CHANNEL: '#streams-ui'
       allow_rebuilds: false
       branch_configuration: main
       default_branch: main
@@ -41,7 +41,7 @@ spec:
         prefix_pull_request_fork_branch_names: false
         skip_pull_request_builds_for_existing_commits: true
       teams:
-        obs-onboarding-team:
+        streams-ui:
           access_level: MANAGE_BUILD_AND_READ
         kibana-operations:
           access_level: MANAGE_BUILD_AND_READ
@@ -60,4 +60,4 @@ spec:
         - kibana
         - observability
         - opentelemetry
-        - obs-onboarding
+        - streams-ui

@@ -34,7 +34,7 @@ const defaultFetchContext: FetchContext = {
   timeslice: undefined,
   esqlVariables: undefined,
   projectRouting: undefined,
-  isApproximate: undefined,
+  isApproximate: false,
 };
 
 describe('updateSearchSource', () => {

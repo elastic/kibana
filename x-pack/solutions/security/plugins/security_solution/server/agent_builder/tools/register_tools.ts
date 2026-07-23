@@ -23,6 +23,7 @@ import {
   generateLeadsTool,
   listLeadsTool,
   dismissLeadTool,
+  setAssetCriticalityTool,
 } from './entity_analytics';
 import { alertsTool } from './alerts_tool';
 import { createDetectionRuleTool } from './create_detection_rule_tool';
@@ -36,6 +37,7 @@ import type {
   SecuritySolutionPluginCoreSetupDependencies,
   SetupPlugins,
 } from '../../plugin_contract';
+import { SIEM_READINESS_AGENT_BUILDER_ENABLED } from '../siem_readiness_feature_flag';
 
 /**
  * Registers all security agent builder tools with the agentBuilder plugin.
@@ -44,7 +46,7 @@ import type {
  * `run_rule_preview` tool behind `experimentalFeatures.rulePreviewAttachmentEnabled` so the
  * features can ship dark and be enabled per environment.
  */
-export const registerTools = async (
+export const registerTools = (
   agentBuilder: AgentBuilderPluginSetup,
   core: SecuritySolutionPluginCoreSetupDependencies,
   logger: Logger,
@@ -52,6 +54,7 @@ export const registerTools = async (
   ml: SetupPlugins['ml'],
   rulePreviewDeps: RunRulePreviewDeps,
   isServerless: boolean = false,
+  kibanaVersion: string,
   hasEncryptionKey: boolean = false
 ) => {
   agentBuilder.tools.register(entityRiskScoreTool(core, logger));
@@ -68,6 +71,9 @@ export const registerTools = async (
   agentBuilder.tools.register(listWatchlistsTool(core, logger, experimentalFeatures));
   agentBuilder.tools.register(removeEntitiesFromWatchlistTool(core, logger, experimentalFeatures));
   agentBuilder.tools.register(searchEntitiesTool(core, logger, experimentalFeatures));
+  agentBuilder.tools.register(
+    setAssetCriticalityTool(core, logger, experimentalFeatures, kibanaVersion)
+  );
   agentBuilder.tools.register(updateWatchlistTool(core, logger, experimentalFeatures));
 
   if (experimentalFeatures.rulePreviewAttachmentEnabled) {
@@ -77,7 +83,7 @@ export const registerTools = async (
   if (experimentalFeatures.leadGenerationEnabled) {
     agentBuilder.tools.register(listLeadsTool(core, logger, experimentalFeatures));
     agentBuilder.tools.register(
-      generateLeadsTool(core, logger, experimentalFeatures, rulePreviewDeps.getStartServices)
+      generateLeadsTool(core, logger, experimentalFeatures, rulePreviewDeps.getStartServices, ml)
     );
     agentBuilder.tools.register(dismissLeadTool(core, logger, experimentalFeatures));
   }
@@ -88,5 +94,7 @@ export const registerTools = async (
     agentBuilder.tools.register(pciFieldMapperTool(core, logger));
   }
 
-  registerSiemReadinessTools(agentBuilder, core, logger, isServerless);
+  if (SIEM_READINESS_AGENT_BUILDER_ENABLED) {
+    registerSiemReadinessTools(agentBuilder, core, logger, isServerless);
+  }
 };

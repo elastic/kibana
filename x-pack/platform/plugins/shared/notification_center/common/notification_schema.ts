@@ -7,26 +7,31 @@
 
 import { z } from '@kbn/zod';
 import { isInternalURL } from '@kbn/std';
+import {
+  NOTIFICATION_NAMESPACES,
+  isRegisteredNotificationRef,
+} from './notification_registry_utils';
 
-/**
- * Severity of a notification, lowest to highest. Drives the per-document
- * retention TTL applied by the Notification Center cleanup task.
- */
-export const SEVERITIES = ['info', 'warning', 'error', 'critical'] as const;
+/** Severity members, exported so producers reference `SEVERITY.warning` rather than a raw string. */
+export const SEVERITY = {
+  info: 'info',
+  warning: 'warning',
+  error: 'error',
+  critical: 'critical',
+} as const;
 
-/**
- * Call-to-action for a notification: a link the user can follow, with the text
- * to render for that link.
- */
+/** Severity tiers, low→high; array order is load-bearing for retention. */
+export const SEVERITIES = [
+  SEVERITY.info,
+  SEVERITY.warning,
+  SEVERITY.error,
+  SEVERITY.critical,
+] as const;
+
+/** Call-to-action: an internal link and its display text. */
 export const ctaSchema = z
   .object({
-    /**
-     * Internal Kibana destination the call-to-action navigates to. Must be a
-     * root-relative path beginning with a single `/`. External, protocol-relative
-     * (`//host`), and backslash-prefixed (`/\host`) URLs are rejected via
-     * `isInternalURL` — they resolve off-origin in the browser and would be an
-     * open-redirect surface.
-     */
+    /** Internal Kibana path; off-origin URLs are rejected (open-redirect guard). */
     link: z
       .string()
       .min(1)
@@ -34,40 +39,56 @@ export const ctaSchema = z
       .refine((value) => value.startsWith('/') && isInternalURL(value), {
         message: 'link must be an internal path starting with a single "/"',
       }),
-    /** Human-readable label rendered for the link. */
     linkText: z.string().min(1).max(200),
   })
   .strict();
 
 /**
- * The canonical notification document, as stored in the `.kibana-notification-center`
- * data stream. Documents are append-only and immutable; per-user state (read,
- * subscriptions, horizons) lives separately in `core.userStorage`.
+ * Field shape shared by the write and read schemas. `namespace` and `type` are
+ * both drawn from the notification registry
  */
-export const notificationSchema = z
+const notificationObject = z
   .object({
-    /** Ingest time, into the datastream, ISO 8601. Determines ordering and retention. */
-    '@timestamp': z.iso.datetime(),
-    /**
-     * Deterministic idempotency key. See the ID conventions in `notification_id.ts`.
-     */
+    /** Idempotency key; see notification_id.ts for the ID conventions. */
     notification_id: z.string().min(1).max(512),
-    /** Timestamp of the notification event, ISO 8601. */
-    event_timestamp: z.iso.datetime(),
-    /** Registered notification type, e.g. `inferenceModelStatus`. */
+    /** Occurrence time, set by NC for `timeseries` notification kind */
+    event_timestamp: z.iso.datetime().optional(),
+    /** Registry namespace that owns this notification, e.g. `inference`. */
+    namespace: z.enum(NOTIFICATION_NAMESPACES),
+    /** Registry type within `namespace`, e.g. `modelStatus` */
     type: z.string().min(1).max(64),
-    /** Short, human-readable headline. */
     title: z.string().min(1).max(256),
-    /** Longer human-readable description. */
     description: z.string().min(1).max(2000),
-    /** App id of the producing application, e.g. `inference`. */
-    source_app_id: z.string().min(1).max(64),
-    /**
-     * Severity of the notification. Optional on submit; defaults to `info`.
-     * Drives severity-based retention.
-     */
     severity: z.enum(SEVERITIES).default('info'),
-    /** Optional call-to-action link rendered with the notification. */
     cta: ctaSchema.optional(),
   })
   .strict();
+
+/**
+ * The assembled write payload, validated before append.
+ * The `(namespace, type)` pair must be registered in the NOTIFICATION_REGISTRY.
+ */
+export const notificationWriteSchema = notificationObject.superRefine((value, ctx) => {
+  if (!isRegisteredNotificationRef(value.namespace, value.type)) {
+    ctx.addIssue({
+      code: 'custom',
+      path: ['type'],
+      message: `type "${value.type}" is not registered under namespace "${value.namespace}"`,
+    });
+  }
+});
+
+/**
+ * Shape of a notification stored in the NC index.
+ * `loose()` ensures reads don't fail for outdated documents.
+ */
+export const notificationReadSchema = notificationObject
+  .extend({
+    /** Ingest time, stamped on write by NC — never producer-supplied. */
+    '@timestamp': z.iso.datetime(),
+    namespace: z.string().min(1).max(64),
+    type: z.string().min(1).max(64),
+    // Catch unknown severity tiers that may be added in the future
+    severity: z.enum(SEVERITIES).default('info').catch('info'),
+  })
+  .loose();

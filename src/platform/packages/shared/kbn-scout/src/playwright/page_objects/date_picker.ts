@@ -73,6 +73,13 @@ export class DatePicker {
       : this.page.testSubj.locator(selector);
   }
 
+  private getDateRangePresetTestSubject(label: string) {
+    return `dateRangePickerPresetItem-${label
+      .replace(/→/g, '-')
+      .replace(/["'&]/g, '')
+      .replace(/\s+/g, '_')}`;
+  }
+
   // ---------------------------------------------------------------------------
   // Legacy EuiSuperDatePicker helpers
   // ---------------------------------------------------------------------------
@@ -181,6 +188,36 @@ export class DatePicker {
     }
   }
 
+  async openDateRangePickerPresetsPanel() {
+    if (!(await this.isNewDateRangePicker())) {
+      throw new Error(
+        'openDateRangePickerPresetsPanel is only supported by the new DateRangePicker'
+      );
+    }
+
+    await this.ensurePickerVisible();
+    // Clicking the control button toggles the popover, so bail out when the
+    // panel is already open — otherwise this click would close it (e.g. right
+    // after saving a preset, which leaves the panel open). This guard assumes
+    // the panel is in a settled state: callers that close it must wait for it
+    // to be hidden first (see `closeDateRangePickerPresetsPanel`), otherwise a
+    // still-closing panel reads as visible here and we skip re-opening it.
+    const mainPanel = this.page.testSubj.locator('dateRangePickerMainPanel');
+    if (await mainPanel.isVisible()) return;
+    await this.page.testSubj.locator('dateRangePickerControlButton').click();
+    await mainPanel.waitFor();
+  }
+
+  async closeDateRangePickerPresetsPanel() {
+    const mainPanel = this.page.testSubj.locator('dateRangePickerMainPanel');
+    if (!(await mainPanel.isVisible())) return;
+    // Escape closes the popover, but the keypress resolves before React
+    // unmounts it — wait for the panel to actually be gone so a following
+    // `openDateRangePickerPresetsPanel` doesn't race the close.
+    await this.page.keyboard.press('Escape');
+    await mainPanel.waitFor({ state: 'hidden' });
+  }
+
   private async openCustomRangePanel(containerLocator?: Locator) {
     await this.ensurePickerVisible(containerLocator);
     // Click the control button scoped to the container
@@ -213,6 +250,9 @@ export class DatePicker {
     // Dialog elements render as a portal at the page root
     await this.setDatePart('Start', from);
     await this.setDatePart('End', to);
+    // The apply button submits the custom-range form, which calls `applyRange`
+    // and forwards to the query bar's `onSubmit` — so this also submits the
+    // query and no separate querySubmitButton click is needed.
     await this.page.testSubj.locator('dateRangePickerCustomRangeApplyButton').click();
 
     if (validateDates) {
@@ -228,8 +268,6 @@ export class DatePicker {
         `Date picker should reflect the updated time range`
       ).toBeVisible();
     }
-
-    await this.getTestSubjLocator('querySubmitButton', containerLocator).click();
   }
 
   private async openDateRangePickerSettingsPanel() {
@@ -276,6 +314,56 @@ export class DatePicker {
       await expect(commonlyUsedOption).toBeVisible();
       await commonlyUsedOption.click();
     }
+  }
+
+  async setTextRange(value: string) {
+    if (!(await this.isNewDateRangePicker())) {
+      throw new Error('setTextRange is only supported by the new DateRangePicker');
+    }
+
+    await this.ensurePickerVisible();
+    await this.page.testSubj.locator('dateRangePickerControlButton').click();
+    const input = this.page.testSubj.locator('dateRangePickerInput');
+    await input.clear();
+    await input.fill(value);
+    // Enter applies the range and submits the query on its own — the picker's
+    // `onInputKeyDown` calls `applyRange`, which the query bar's `onChange`
+    // forwards to `onSubmit`. No separate querySubmitButton click is needed.
+    await input.press('Enter');
+    // `applyRange` sets `isEditing=false`, which unmounts the input and closes
+    // the popover. Wait for edit mode to end so a following open/read isn't
+    // racing that close.
+    await input.waitFor({ state: 'hidden' });
+  }
+
+  async saveCurrentRangeAsPreset() {
+    if (!(await this.isNewDateRangePicker())) {
+      throw new Error('saveCurrentRangeAsPreset is only supported by the new DateRangePicker');
+    }
+
+    await this.openDateRangePickerPresetsPanel();
+    await this.page.testSubj.locator('dateRangePickerSavePresetButton').click();
+    // Saving applies the range (`applyRange`), which closes the popover. Wait
+    // for the panel to be gone so a following open isn't racing the close — the
+    // idempotent opener would otherwise read the still-closing panel as "open"
+    // and skip re-opening it.
+    await this.page.testSubj.locator('dateRangePickerMainPanel').waitFor({ state: 'hidden' });
+  }
+
+  getDateRangePreset(label: string) {
+    return this.page.testSubj.locator(this.getDateRangePresetTestSubject(label));
+  }
+
+  async deleteDateRangePreset(label: string) {
+    if (!(await this.isNewDateRangePicker())) {
+      throw new Error('deleteDateRangePreset is only supported by the new DateRangePicker');
+    }
+
+    await this.openDateRangePickerPresetsPanel();
+    const preset = this.getDateRangePreset(label);
+    await preset.waitFor();
+    await preset.hover();
+    await preset.getByTestId('dateRangePickerDeletePresetButton').click();
   }
 
   async setAbsoluteRange({ from, to }: { from: string; to: string }) {

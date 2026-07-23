@@ -13,7 +13,34 @@ jest.mock('@kbn/repo-info', () => ({
   REPO_ROOT: '/repo',
 }));
 
-import { parseMoonJestOutput, computeJestParallelism } from './run_jest_via_moon';
+import {
+  parseMoonJestOutput,
+  computeJestParallelism,
+  buildMoonJestWarnings,
+  buildJestNodeOptions,
+  JEST_WORKER_MAX_OLD_SPACE_MB,
+} from './run_jest_via_moon';
+
+describe('buildJestNodeOptions', () => {
+  it('sets the default heap cap when NODE_OPTIONS is unset', () => {
+    expect(buildJestNodeOptions(undefined)).toBe(
+      `--max-old-space-size=${JEST_WORKER_MAX_OLD_SPACE_MB}`
+    );
+  });
+
+  it('lets a user-supplied --max-old-space-size win over the default (last flag wins)', () => {
+    // This is the exact remediation run_check.ts prints on OOM: it must actually take effect.
+    const result = buildJestNodeOptions('--max-old-space-size=8192');
+    const values = [...result.matchAll(/--max-old-space-size=(\d+)/g)].map((m) => m[1]);
+    expect(values[values.length - 1]).toBe('8192');
+  });
+
+  it('preserves other user-supplied NODE_OPTIONS flags', () => {
+    expect(buildJestNodeOptions('--trace-warnings')).toBe(
+      `--max-old-space-size=${JEST_WORKER_MAX_OLD_SPACE_MB} --trace-warnings`
+    );
+  });
+});
 
 describe('parseMoonJestOutput', () => {
   it('parses successful Jest JSON output with project prefix', () => {
@@ -31,6 +58,22 @@ describe('parseMoonJestOutput', () => {
       testCount: 5,
       failures: [],
     });
+  });
+
+  it('parses non-@-scoped project ids (e.g. kibana-buildkite)', () => {
+    const output = [
+      'fail RunTask(kibana-buildkite:jest) (2s, abc123)',
+      'kibana-buildkite:jest | {"success":false,"numTotalTests":2,"numPassedTests":1,"numFailedTests":1,"testResults":[{"name":"/repo/.buildkite/foo.test.ts","assertionResults":[{"status":"failed","fullName":"foo fails","failureMessages":["Error: boom\\n    at /repo/.buildkite/foo.test.ts:3:1"]}]}]}',
+    ].join('\n');
+
+    const result = parseMoonJestOutput(output);
+    expect(result.parseFailures).toEqual([]);
+    expect(result.tasks).toHaveLength(1);
+    expect(result.tasks[0]).toMatchObject({
+      project: 'kibana-buildkite',
+      passed: false,
+    });
+    expect(result.tasks[0].failures[0]).toMatchObject({ name: 'foo fails' });
   });
 
   it('marks cached tasks', () => {
@@ -83,17 +126,100 @@ describe('parseMoonJestOutput', () => {
     expect(result.parseFailures).toHaveLength(1);
     expect(result.parseFailures[0]).toContain('Failed to parse Jest JSON from project @kbn/bad');
   });
+
+  it('flags a Jest worker OOM signature as failure with oom set', () => {
+    const output = [
+      'fail RunTask(@kbn/foo:jest) (2s, abc123)',
+      '@kbn/foo:jest | {"success":false,"numTotalTests":2,"numPassedTests":1,"numFailedTests":1,"testResults":[{"name":"/repo/packages/foo/src/bar.test.ts","assertionResults":[{"status":"failed","fullName":"bar should work","failureMessages":["Jest worker encountered 4 child process exceptions, exceeding retry limit"]}]}]}',
+    ].join('\n');
+
+    const result = parseMoonJestOutput(output);
+    expect(result.tasks[0].failures[0].oom).toBe(true);
+  });
+
+  it('flags a whole-suite crash with no assertion results as failure with oom set', () => {
+    // This is the literal message jest-worker's ChildProcessWorker/NodeThreadsWorker raise
+    // for a crashed/OOM-killed worker; Jest's formatTestResults flattens it into `message`.
+    // The raw V8 "heap out of memory" crash text never reaches this field.
+    const output = [
+      'fail RunTask(@kbn/foo:jest) (2s, abc123)',
+      '@kbn/foo:jest | {"success":false,"numTotalTests":0,"numPassedTests":0,"numFailedTests":0,"testResults":[{"name":"/repo/packages/foo/src/bar.test.ts","status":"failed","message":"Jest worker ran out of memory and crashed","assertionResults":[]}]}',
+    ].join('\n');
+
+    const result = parseMoonJestOutput(output);
+    expect(result.tasks[0].failures).toHaveLength(1);
+    expect(result.tasks[0].failures[0]).toMatchObject({
+      name: 'Test suite failed to run',
+      oom: true,
+    });
+  });
+
+  it('does not flag a normal assertion failure as oom', () => {
+    const output = [
+      'fail RunTask(@kbn/foo:jest) (2s, abc123)',
+      '@kbn/foo:jest | {"success":false,"numTotalTests":2,"numPassedTests":1,"numFailedTests":1,"testResults":[{"name":"/repo/packages/foo/src/bar.test.ts","assertionResults":[{"status":"failed","fullName":"bar should work","failureMessages":["Error: expected true"]}]}]}',
+    ].join('\n');
+
+    const result = parseMoonJestOutput(output);
+    expect(result.tasks[0].failures[0].oom).toBe(false);
+  });
+});
+
+describe('buildMoonJestWarnings', () => {
+  it('flags a raw V8 heap crash when no tasks parsed and exit code is non-zero', () => {
+    const output = [
+      '<--- Last few GCs --->',
+      'FATAL ERROR: Reached heap limit Allocation failed - JavaScript heap out of memory',
+    ].join('\n');
+
+    const warnings = buildMoonJestWarnings({
+      output,
+      exitCode: 134,
+      taskCount: 0,
+      parseFailures: [],
+    });
+
+    expect(warnings?.[0]).toContain('out-of-memory crash signature');
+  });
+
+  it('falls back to a generic message when no tasks parsed and no OOM signature present', () => {
+    const warnings = buildMoonJestWarnings({
+      output: 'some unrelated crash output',
+      exitCode: 1,
+      taskCount: 0,
+      parseFailures: [],
+    });
+
+    expect(warnings?.[0]).toContain('no Jest task output was parsed');
+  });
+
+  it('returns undefined when tasks parsed and there are no parse failures', () => {
+    const warnings = buildMoonJestWarnings({
+      output: '',
+      exitCode: 0,
+      taskCount: 1,
+      parseFailures: [],
+    });
+
+    expect(warnings).toBeUndefined();
+  });
 });
 
 describe('computeJestParallelism', () => {
   let cpusSpy: jest.SpyInstance;
+  let memSpy: jest.SpyInstance;
+
+  const GB = 1024 * 1024 * 1024;
 
   beforeEach(() => {
     cpusSpy = jest.spyOn(Os, 'cpus').mockReturnValue(new Array(8).fill({}) as any);
+    // Plenty of RAM by default so these tests exercise the CPU-bound path only.
+    memSpy = jest.spyOn(Os, 'totalmem').mockReturnValue(64 * GB);
   });
 
   afterEach(() => {
     cpusSpy.mockRestore();
+    memSpy.mockRestore();
   });
 
   it('caps Moon concurrency at 2', () => {
@@ -117,5 +243,14 @@ describe('computeJestParallelism', () => {
     cpusSpy.mockReturnValue(new Array(2).fill({}) as any);
     const { maxWorkers } = computeJestParallelism(10);
     expect(maxWorkers).toBe(2);
+  });
+
+  it('caps maxWorkers by available memory on high-core, low-RAM machines', () => {
+    cpusSpy.mockReturnValue(new Array(16).fill({}) as any);
+    memSpy.mockReturnValue(16 * GB);
+    const { concurrency, maxWorkers } = computeJestParallelism(1);
+    expect(concurrency).toBe(1);
+    // Without the memory bound this would be 16 (one worker per CPU).
+    expect(maxWorkers).toBe(3);
   });
 });
