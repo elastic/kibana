@@ -17,14 +17,18 @@ import { LRUCache } from 'lru-cache';
 const timeFieldCache = new LRUCache<string, Promise<string | undefined>>({ max: 100 });
 
 /**
- * Resolves the default time field for an ES|QL query by calling the timefield API.
+ * Resolves the time field for an ES|QL query by calling the server-side timefield API.
+ * The API performs a local parse for `?_tstart`/`?_tend` params first, then falls back
+ * to `fieldCaps` to detect `@timestamp` on the backing index.
  *
- * When `http` is omitted, returns `undefined` (unless a prior successful request
- * for the same query left a value in the in-memory cache).
+ * Use this on the client when you have HTTP access and need full resolution.
+ * For synchronous/server-side contexts where only local parsing is needed,
+ * use `parseTimeFieldFromESQLQuery` instead.
  *
- * Concurrent requests for the same query share one HTTP request via an LRU-backed promise cache.
+ * Concurrent requests for the same query share one HTTP request via an LRU-backed
+ * promise cache.
  */
-export async function getESQLTimeFieldFromQuery({
+export async function getESQLTimeField({
   query,
   http,
 }: {
