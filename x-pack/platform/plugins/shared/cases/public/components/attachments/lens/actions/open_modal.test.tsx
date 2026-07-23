@@ -366,6 +366,28 @@ describe('openModal', () => {
       expect(attributes).toEqual(mockLensAttributes);
     });
 
+    it('does not throw when a legacy Lens document has no state.filters', async () => {
+      const services = getMockServices();
+      const legacyAttributesWithoutFilters = {
+        ...mockLensAttributes,
+        state: { ...mockLensAttributes.state, filters: undefined },
+      } as unknown as ReturnType<ReturnType<typeof getMockLensApi>['getFullAttributes']>;
+
+      openModal(
+        getMockLensApi(undefined, {
+          getFullAttributes: () => legacyAttributesWithoutFilters,
+          parentApi: getMockParentApiWithSearchContext({ filters: [parentFilter] }),
+        }),
+        'myAppId',
+        {} as unknown as CasesActionContextProps,
+        services
+      );
+
+      const attributes = await getAttachedAttributes();
+
+      expect(attributes.state.filters).toEqual([parentFilter]);
+    });
+
     it('ignores an ES|QL parent query instead of writing it into state.query', async () => {
       const services = getMockServices();
 

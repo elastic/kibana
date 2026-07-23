@@ -80,7 +80,10 @@ const getAttributesWithParentSearchContext = (
     state: {
       ...attributes.state,
       ...(parentQuery ? { query: parentQuery } : {}),
-      filters: [...extractedFilters, ...attributes.state.filters],
+      // `state.filters` is typed as required, but older saved Lens panels can
+      // lack it at runtime -- Lens's own `getMergedSearchContext` guards the
+      // same access with `|| []` (see merged_search_context.ts).
+      filters: [...extractedFilters, ...(attributes.state.filters ?? [])],
     },
   };
 };
