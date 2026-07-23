@@ -127,6 +127,7 @@ describe('AssetManagerClient', () => {
     client = new AssetManagerClient({
       logger: loggerMock.create(),
       esClient: {} as jest.Mocked<ElasticsearchClient>,
+      internalEsClient: {} as jest.Mocked<ElasticsearchClient>,
       taskManager: {} as jest.Mocked<TaskManagerStartContract>,
       engineDescriptorClient:
         mockEngineDescriptorClient as unknown as import('../saved_objects').EngineDescriptorClient,
@@ -178,6 +179,7 @@ describe('AssetManagerClient', () => {
       getPrivilegesClient = new AssetManagerClient({
         logger: loggerMock.create(),
         esClient: {} as jest.Mocked<ElasticsearchClient>,
+        internalEsClient: {} as jest.Mocked<ElasticsearchClient>,
         taskManager: {} as jest.Mocked<TaskManagerStartContract>,
         engineDescriptorClient:
           mockEngineDescriptorClient as unknown as import('../saved_objects').EngineDescriptorClient,
