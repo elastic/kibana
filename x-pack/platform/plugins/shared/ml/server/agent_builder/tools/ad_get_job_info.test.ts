@@ -24,10 +24,12 @@ const createMlMock = () => ({
 });
 
 const createEsClientMock = (mlMock = createMlMock()) => ({
-  asCurrentUser: {
+  asInternalUser: {
     ml: mlMock,
     search: jest.fn().mockResolvedValue({ hits: { hits: [] } }),
-    indices: { exists: jest.fn().mockResolvedValue(true) },
+    esql: {
+      query: jest.fn().mockResolvedValue({ columns: [], values: [] }),
+    },
   },
 });
 
@@ -116,7 +118,7 @@ describe('adGetJobInfoTool', () => {
         context
       );
 
-      expect(esClient.asCurrentUser.search).toHaveBeenCalledWith(
+      expect(esClient.asInternalUser.search).toHaveBeenCalledWith(
         expect.objectContaining({
           index: '.ml-notifications-*',
           query: { term: { job_id: 'my-job' } },
@@ -224,18 +226,21 @@ describe('adGetJobInfoTool', () => {
       expect(ml.getModelSnapshots).toHaveBeenCalledWith({ job_id: 'my-job' });
     });
 
-    it('operation=validate_permissions calls ml.info and indices.exists', async () => {
+    it('operation=validate_permissions calls ml.info and returns capability status', async () => {
       const ml = createMlMock();
-      const esClient = createEsClientMock(ml);
-      const context = createContext(esClient);
+      const context = createContext(createEsClientMock(ml));
 
       const result = await adGetJobInfoTool.handler({ operation: 'validate_permissions' }, context);
 
       expect(ml.info).toHaveBeenCalled();
-      expect(esClient.asCurrentUser.indices.exists).toHaveBeenCalled();
-      expect((result as { results: Array<{ type: string }> }).results[0].type).toBe(
-        ToolResultType.other
-      );
+      expect(result).toEqual({
+        results: [
+          {
+            type: ToolResultType.other,
+            data: { ml_info: { version: '8.0.0' }, canGetJobs: true },
+          },
+        ],
+      });
     });
 
     it('returns error result when ML client throws', async () => {
