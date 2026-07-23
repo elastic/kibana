@@ -5,22 +5,24 @@
  * 2.0.
  */
 
-import type { ReactNode } from 'react';
-import React, { lazy, Suspense, useCallback, useMemo } from 'react';
-import { useStore } from 'react-redux';
+import React, { lazy, useCallback, useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
 import { noop } from 'lodash/fp';
-import type { OverlaySystemFlyoutOpenOptions } from '@kbn/core-overlays-browser';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import { useKibana } from '../../common/lib/kibana';
 import type { CellActionRenderer } from '../shared/components/cell_actions';
 import { cellActionRenderer } from '../shared/components/cell_actions';
-import { flyoutProviders } from '../shared/components/flyout_provider';
-import { FlyoutLoading } from '../shared/components/flyout_loading';
 import {
   defaultToolsFlyoutProperties,
   useDefaultDocumentFlyoutProperties,
 } from '../shared/hooks/use_default_flyout_properties';
+import { useOpenFlyout } from '../shared/hooks/use_open_flyout';
+import type { FlyoutOrigin } from '../../common/lib/telemetry';
+import {
+  FLYOUT_SESSION_KIND,
+  FLYOUT_SURFACE,
+  FLYOUT_TOOL,
+  FLYOUT_TYPE,
+} from '../../common/lib/telemetry';
 import {
   ATTACK_CORRELATIONS_TITLE,
   ATTACK_ENTITIES_TITLE,
@@ -29,7 +31,22 @@ import {
 } from '../shared/constants/flyout_titles';
 import { buildFlyoutNavTitle } from '../shared/utils/build_flyout_nav_title';
 import { getAttackTitleValue } from './utils/get_attack_title';
-import { FlyoutSessionContextProvider, useFlyoutSessionContext } from '../session_context';
+import { useFlyoutSessionContext } from '../session_context';
+import { useFlyoutV2UrlWriter } from '../shared/url_state/flyout_v2_url_writer';
+import {
+  FLYOUT_DESCRIPTOR_KIND,
+  decodeFlyoutV2UrlParam,
+  urlParamKeyForHistoryKey,
+} from '../shared/url_state/flyout_v2_url_param';
+import type { FlyoutDescriptor } from '../shared/url_state/flyout_v2_url_param';
+
+/**
+ * Extracts the minimal identifying fields from an attack DataTableRecord for use in URL descriptors.
+ */
+const attackIdsFromHit = (hit: DataTableRecord): { attackId: string; indexName: string } => ({
+  attackId: (hit.raw._id as string) ?? '',
+  indexName: (hit.raw._index as string) ?? '',
+});
 
 // Lazy-loaded so consumers of this hook don't statically pull the attack flyout graph into their
 // bundle; the chunk only loads when the flyout (or one of its tools) is actually opened.
@@ -58,6 +75,8 @@ export interface OpenAttackFlyoutParams {
   attackTitle?: string;
   /** Renderer for cell actions in nested alert flyouts. Defaults to the standard `cellActionRenderer`. */
   renderCellActions?: CellActionRenderer;
+  /** Which UI trigger opened this flyout, when known. */
+  origin?: FlyoutOrigin;
 }
 
 export interface OpenAttackCorrelationsParams {
@@ -67,6 +86,8 @@ export interface OpenAttackCorrelationsParams {
   alertIds: string[];
   /** Optional callback to open one of the correlated alerts. */
   onShowAlert?: (id: string, indexName: string, title?: string) => void;
+  /** Which UI trigger opened the correlations tool, when known. */
+  origin?: FlyoutOrigin;
 }
 
 export interface OpenAttackEntitiesParams {
@@ -74,6 +95,8 @@ export interface OpenAttackEntitiesParams {
   hit: DataTableRecord;
   /** Ids of the alerts correlated to the attack. */
   alertIds: string[];
+  /** Which UI trigger opened the entities tool, when known. */
+  origin?: FlyoutOrigin;
 }
 
 export interface AttackFlyoutApi {
@@ -96,8 +119,8 @@ export interface AttackFlyoutApi {
 /**
  * Developer-facing API to open the new (EUI-based) attack flyout and its tool flyouts, in the same
  * mindset as `useExpandableFlyoutApi`, `useDocumentFlyoutApi`, etc. It encapsulates the provider
- * wiring (`flyoutProviders` + `overlays.openSystemFlyout`) and the per-flyout properties so call
- * sites don't repeat them.
+ * wiring (`flyoutProviders` + `overlays.openSystemFlyout`, via `useOpenFlyout`) and the per-flyout
+ * properties so call sites don't repeat them. `useOpenFlyout` also reports open/close telemetry.
  *
  * This API only ever opens the NEW flyout. It does not know about the legacy expandable flyout:
  * callers remain responsible for gating on `useIsNewFlyoutEnabled()` and falling back to the
@@ -106,38 +129,22 @@ export interface AttackFlyoutApi {
  * Must be used within the Security Solution app shell (Redux store + router + Kibana services).
  */
 export const useAttackFlyoutApi = (): AttackFlyoutApi => {
-  const { services } = useKibana();
-  const { overlays } = services;
-  const store = useStore();
   const history = useHistory();
   const { session: sessionMode, historyKey } = useFlyoutSessionContext();
   const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
+  const open = useOpenFlyout();
+  const urlParamKey = urlParamKeyForHistoryKey(historyKey);
+  const { writeOnOpen, buildOnClose } = useFlyoutV2UrlWriter(urlParamKey, historyKey);
 
-  // The main/child flyout and the tools differ only in their properties (base size + session). Both
-  // are kept private here so callers never reason about them: they pick the method they want and
-  // this helper opens the system flyout with the given properties.
-  const open = useCallback(
-    (
-      children: ReactNode,
-      properties: OverlaySystemFlyoutOpenOptions,
-      propagatedSessionMode = sessionMode
-    ) => {
-      overlays.openSystemFlyout(
-        flyoutProviders({
-          services,
-          store,
-          history,
-          children: (
-            <FlyoutSessionContextProvider value={{ session: propagatedSessionMode, historyKey }}>
-              <Suspense fallback={<FlyoutLoading />}>{children}</Suspense>
-            </FlyoutSessionContextProvider>
-          ),
-        }),
-        properties
-      );
-    },
-    [overlays, services, store, history, historyKey, sessionMode]
-  );
+  // Reads the first descriptor from the current URL stack without bumping the generation.
+  // Used by openAttackFlyoutAsChild to determine the parent descriptor (close fallback)
+  // before appending the child descriptor with writeOnOpen('inherit').
+  const readFirstDescriptor = useCallback((): FlyoutDescriptor | null => {
+    if (!history?.location) return null;
+    const raw = new URLSearchParams(history.location.search).get(urlParamKey);
+    const stack = decodeFlyoutV2UrlParam(raw);
+    return stack?.[0] ?? null;
+  }, [history, urlParamKey]);
 
   const openAttackFlyout = useCallback(
     ({
@@ -146,7 +153,10 @@ export const useAttackFlyoutApi = (): AttackFlyoutApi => {
       onAttackUpdated = noop,
       attackTitle,
       renderCellActions = cellActionRenderer,
+      origin,
     }: OpenAttackFlyoutParams) => {
+      writeOnOpen({ kind: FLYOUT_DESCRIPTOR_KIND.attack, attackId, indexName });
+      const onClose = buildOnClose(null);
       open(
         <AttackFlyoutWrapper
           attackId={attackId}
@@ -159,10 +169,17 @@ export const useAttackFlyoutApi = (): AttackFlyoutApi => {
           historyKey,
           session: sessionMode,
           title: formatFlyoutTitle(ATTACK_TITLE, attackTitle),
+          onClose,
+        },
+        {
+          surface: FLYOUT_SURFACE.FLYOUT,
+          flyoutType: FLYOUT_TYPE.ATTACK,
+          session: sessionMode,
+          origin,
         }
       );
     },
-    [open, defaultDocumentFlyoutProperties, historyKey, sessionMode]
+    [open, defaultDocumentFlyoutProperties, historyKey, sessionMode, writeOnOpen, buildOnClose]
   );
 
   const openAttackFlyoutAsChild = useCallback(
@@ -172,7 +189,11 @@ export const useAttackFlyoutApi = (): AttackFlyoutApi => {
       onAttackUpdated = noop,
       attackTitle,
       renderCellActions = cellActionRenderer,
+      origin,
     }: OpenAttackFlyoutParams) => {
+      const parentDescriptor = readFirstDescriptor();
+      writeOnOpen({ kind: FLYOUT_DESCRIPTOR_KIND.attack, attackId, indexName }, 'inherit');
+      const onClose = buildOnClose(parentDescriptor);
       open(
         <AttackFlyoutWrapper
           attackId={attackId}
@@ -183,45 +204,95 @@ export const useAttackFlyoutApi = (): AttackFlyoutApi => {
         {
           ...defaultDocumentFlyoutProperties,
           historyKey,
-          session: 'inherit',
+          session: FLYOUT_SESSION_KIND.INHERIT,
           title: buildFlyoutNavTitle(formatFlyoutTitle(ATTACK_TITLE, attackTitle)),
+          onClose,
         },
-        'inherit'
+        {
+          surface: FLYOUT_SURFACE.FLYOUT,
+          flyoutType: FLYOUT_TYPE.ATTACK,
+          session: FLYOUT_SESSION_KIND.INHERIT,
+          origin,
+        },
+        FLYOUT_SESSION_KIND.INHERIT
       );
     },
-    [open, defaultDocumentFlyoutProperties, historyKey]
+    [
+      open,
+      defaultDocumentFlyoutProperties,
+      historyKey,
+      readFirstDescriptor,
+      writeOnOpen,
+      buildOnClose,
+    ]
   );
 
   const openAttackCorrelations = useCallback(
-    ({ hit, alertIds, onShowAlert }: OpenAttackCorrelationsParams) => {
+    ({ hit, alertIds, onShowAlert, origin }: OpenAttackCorrelationsParams) => {
+      const { attackId, indexName } = attackIdsFromHit(hit);
+      writeOnOpen({
+        kind: FLYOUT_DESCRIPTOR_KIND.attackCorrelations,
+        attackId,
+        indexName,
+        alertIds,
+      });
+      // A tool flyout opens with session:'start' (a root, not a child of the attack): the attack is
+      // not persisted alongside it, so closing the tool clears the param.
+      const onClose = buildOnClose(null);
       open(
         <CorrelationsDetails hit={hit} alertIds={alertIds} onShowAlert={onShowAlert} />,
         {
           ...defaultToolsFlyoutProperties,
           historyKey,
-          session: 'start',
+          session: FLYOUT_SESSION_KIND.START,
           title: formatFlyoutTitle(ATTACK_CORRELATIONS_TITLE, getAttackTitleValue(hit)),
+          onClose,
         },
-        'inherit'
+        {
+          surface: FLYOUT_SURFACE.TOOL,
+          tool: FLYOUT_TOOL.CORRELATIONS,
+          flyoutType: FLYOUT_TYPE.ATTACK,
+          session: FLYOUT_SESSION_KIND.START,
+          origin,
+        },
+        FLYOUT_SESSION_KIND.INHERIT
       );
     },
-    [open, historyKey]
+    [open, historyKey, writeOnOpen, buildOnClose]
   );
 
   const openAttackEntities = useCallback(
-    ({ hit, alertIds }: OpenAttackEntitiesParams) => {
+    ({ hit, alertIds, origin }: OpenAttackEntitiesParams) => {
+      const { attackId, indexName } = attackIdsFromHit(hit);
+      writeOnOpen({
+        kind: FLYOUT_DESCRIPTOR_KIND.attackEntities,
+        attackId,
+        indexName,
+        alertIds,
+      });
+      // A tool flyout opens with session:'start' (a root, not a child of the attack): the attack is
+      // not persisted alongside it, so closing the tool clears the param.
+      const onClose = buildOnClose(null);
       open(
         <EntitiesDetails hit={hit} alertIds={alertIds} />,
         {
           ...defaultToolsFlyoutProperties,
           historyKey,
-          session: 'start',
+          session: FLYOUT_SESSION_KIND.START,
           title: formatFlyoutTitle(ATTACK_ENTITIES_TITLE, getAttackTitleValue(hit)),
+          onClose,
         },
-        'inherit'
+        {
+          surface: FLYOUT_SURFACE.TOOL,
+          tool: FLYOUT_TOOL.ENTITIES,
+          flyoutType: FLYOUT_TYPE.ATTACK,
+          session: FLYOUT_SESSION_KIND.START,
+          origin,
+        },
+        FLYOUT_SESSION_KIND.INHERIT
       );
     },
-    [open, historyKey]
+    [open, historyKey, writeOnOpen, buildOnClose]
   );
 
   return useMemo(
