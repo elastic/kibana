@@ -21,6 +21,7 @@ export class VisualizeApp {
   private readonly legacyTab;
   private readonly visualizeSaveButton;
   private readonly visualizationLoader;
+  private readonly editInLensButton;
   /** Save modal locators/actions, shared with other apps (e.g. Maps) via `SavedObjectSaveModal`. */
   readonly saveModal: SavedObjectSaveModal;
 
@@ -32,6 +33,7 @@ export class VisualizeApp {
     this.legacyTab = this.page.testSubj.locator('groupModalLegacyTab');
     this.visualizeSaveButton = this.page.testSubj.locator('visualizeSaveButton');
     this.visualizationLoader = this.page.testSubj.locator('visualizationLoader');
+    this.editInLensButton = this.page.testSubj.locator('visualizeEditInLensButton');
     this.saveModal = new SavedObjectSaveModal(this.page);
   }
 
@@ -121,5 +123,13 @@ export class VisualizeApp {
     await this.clickLegacyTab();
     await this.clickVisType('metrics');
     await this.waitForVisualizationLoaded();
+  }
+
+  async clickEditInLensButton() {
+    await this.editInLensButton.click();
+  }
+
+  getEditInLensButton() {
+    return this.editInLensButton;
   }
 }

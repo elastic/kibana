@@ -225,6 +225,10 @@ export interface AppHeaderConfig {
   tabs?: AppHeaderTab[];
   badges?: AppHeaderBadge[];
   menu?: AppMenuConfig;
+  /**
+   * @deprecated Temporary slot for `FavoriteButton` or a thin wrapper around it. Replace this with
+   * the typed favorite action API tracked in https://github.com/elastic/kibana/issues/271402.
+   */
   favorite?: ReactNode;
   metadata?: AppHeaderMetadataItems;
   spacing?: AppHeaderSpacing;
