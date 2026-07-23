@@ -29,6 +29,8 @@ export interface DocProps extends EsDocSearchProps {
   referrer?: string;
 }
 
+const DOC_VIEWER_BOTTOM_RESERVE_PX = 56;
+
 export function Doc(props: DocProps) {
   const { dataView } = props;
   const { scopedProfilesManager } = useScopedServices();
@@ -155,7 +157,11 @@ export function Doc(props: DocProps) {
 
           {reqState === ElasticRequestState.Found && record !== null && dataView && (
             <div data-test-subj="doc-hit">
-              <SingleDocViewer record={record} dataView={dataView} />
+              <SingleDocViewer
+                record={record}
+                dataView={dataView}
+                decreaseAvailableHeightBy={DOC_VIEWER_BOTTOM_RESERVE_PX}
+              />
             </div>
           )}
         </EuiPageBody>

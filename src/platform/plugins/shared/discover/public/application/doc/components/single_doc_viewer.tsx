@@ -17,9 +17,14 @@ import { useProfileAccessor } from '../../../context_awareness';
 interface SingleDocViewerProps {
   record: DataTableRecord;
   dataView: DataView;
+  decreaseAvailableHeightBy?: number;
 }
 
-export const SingleDocViewer: React.FC<SingleDocViewerProps> = ({ record, dataView }) => {
+export const SingleDocViewer: React.FC<SingleDocViewerProps> = ({
+  record,
+  dataView,
+  decreaseAvailableHeightBy,
+}) => {
   const getDocViewerAccessor = useProfileAccessor('getDocViewer', {
     record,
   });
@@ -37,6 +42,7 @@ export const SingleDocViewer: React.FC<SingleDocViewerProps> = ({ record, dataVi
       hit={record}
       dataView={dataView}
       hideActionsColumn
+      decreaseAvailableHeightBy={decreaseAvailableHeightBy}
       docViewsRegistry={docViewer.docViewsRegistry}
     />
   );
