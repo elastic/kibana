@@ -21,6 +21,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import dateMath from '@kbn/datemath';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import type { ReactNode } from 'react';
 import React, { useCallback, useMemo, useState } from 'react';
@@ -72,6 +73,9 @@ export interface RiskInputsTabProps<T extends EntityType> {
   entityId?: string;
   /** Navigates to the alert preview for a risk-input row. */
   onShowAlert: (id: string, indexName: string) => void;
+  /** Initial sub-tab to select. Takes precedence over the expandable-flyout URL state. Used by
+   *  the v2 tool flyout which has no expandable-flyout state. */
+  subTab?: RiskScoreLeftPanelSubTab;
 }
 
 const FIRST_RECORD_PAGINATION = {
@@ -116,11 +120,30 @@ export const RiskInputsTab = <T extends EntityType>({
   entityName,
   entityId,
   onShowAlert,
+  subTab: subTabProp,
 }: RiskInputsTabProps<T>) => {
   const panels = useStableExpandableFlyoutState();
-  const subTab = isRiskScoreFlyoutPanelProps(panels.left)
+  const { openLeftPanel } = useExpandableFlyoutApi();
+  const subTabFromState = isRiskScoreFlyoutPanelProps(panels.left)
     ? panels.left.params.path.subTab
     : undefined;
+  const subTab = subTabFromState ?? subTabProp;
+
+  // Keeps the expandable-flyout URL state in sync with the user's manual tab
+  // toggle so that clicking the same flyout link twice still forces a remount.
+  const onSubTabChange = useCallback(
+    (newSubTab: RiskScoreLeftPanelSubTab) => {
+      if (!isRiskScoreFlyoutPanelProps(panels.left)) return;
+      openLeftPanel({
+        ...panels.left,
+        params: {
+          ...panels.left.params,
+          path: { tab: EntityDetailsLeftPanelTab.RISK_INPUTS, subTab: newSubTab },
+        },
+      });
+    },
+    [openLeftPanel, panels.left]
+  );
 
   const { data: watchlists } = useGetWatchlists();
 
@@ -248,6 +271,7 @@ export const RiskInputsTab = <T extends EntityType>({
       resolutionGroup={resolutionGroup}
       watchlistNamesById={watchlistNamesById}
       onShowAlert={onShowAlert}
+      onSubTabChange={onSubTabChange}
     />
   );
 };
@@ -271,6 +295,7 @@ interface RiskInputsTabContentProps<T extends EntityType> {
   resolutionGroup: ReturnType<typeof useResolutionGroup>['data'];
   watchlistNamesById: Map<string, string>;
   onShowAlert: (id: string, indexName: string) => void;
+  onSubTabChange: (subTab: RiskScoreLeftPanelSubTab) => void;
 }
 
 const RiskInputsTabContent = <T extends EntityType>({
@@ -290,6 +315,7 @@ const RiskInputsTabContent = <T extends EntityType>({
   resolutionGroup,
   watchlistNamesById,
   onShowAlert,
+  onSubTabChange,
 }: RiskInputsTabContentProps<T>) => {
   const { setQuery, deleteQuery } = useGlobalTime();
   const euidApi = useEntityStoreEuidApi();
@@ -356,10 +382,18 @@ const RiskInputsTabContent = <T extends EntityType>({
     );
   }, []);
 
-  const onViewChange = useCallback((id: string) => {
-    setUserSelectedView(id as RiskScoreLeftPanelSubTab);
-    setSelectedTimestamp(undefined);
-  }, []);
+  const onViewChange = useCallback(
+    (id: string) => {
+      const newSubTab = id as RiskScoreLeftPanelSubTab;
+      setUserSelectedView(newSubTab);
+      setSelectedTimestamp(undefined);
+      // Keep the expandable-flyout URL state in sync so that clicking the same
+      // right-panel link again produces a URL change, which forces a remount and
+      // resets userSelectedView to the correct value (v1 mode only; no-op in v2).
+      onSubTabChange(newSubTab);
+    },
+    [onSubTabChange]
+  );
 
   const latestRiskScore = isResolutionView ? resolutionRiskScore : entityRiskScore;
   const activeRiskScore = pitRiskScore ?? latestRiskScore;

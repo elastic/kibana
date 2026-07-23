@@ -27,11 +27,30 @@ const TIME_UNITS: Record<TimeUnit, string> = {
   }),
 };
 
-export const getTimeOptions = (val: number = 1) =>
-  (Object.keys(TIME_UNITS) as TimeUnit[]).map((value) => ({
-    value,
-    text: val > 1 ? TIME_UNITS[value] : TIME_UNITS[value].slice(0, -1),
-  }));
+const TIME_UNIT_MS: Record<TimeUnit, number> = {
+  s: 1000,
+  m: 60 * 1000,
+  h: 60 * 60 * 1000,
+  d: 24 * 60 * 60 * 1000,
+};
+
+/**
+ * Build the time-unit options for a duration input. When `minDurationMs` is
+ * provided, units smaller than the largest unit that still fits within the
+ * minimum are hidden (e.g. "seconds" disappears once the minimum is `1m`), while
+ * a sub-minute minimum (e.g. `5s`) keeps every unit available.
+ */
+export const getTimeOptions = (val: number = 1, minDurationMs: number = 0) => {
+  const cutoff = (Object.values(TIME_UNIT_MS) as number[])
+    .filter((ms) => ms <= minDurationMs)
+    .reduce((max, ms) => Math.max(max, ms), 0);
+  return (Object.keys(TIME_UNITS) as TimeUnit[])
+    .filter((unit) => TIME_UNIT_MS[unit] >= cutoff)
+    .map((value) => ({
+      value,
+      text: val > 1 ? TIME_UNITS[value] : TIME_UNITS[value].slice(0, -1),
+    }));
+};
 
 export const getDurationUnitValue = (duration: string): TimeUnit => {
   const durationRegex = /^(\d+)(s|m|h|d)$/;

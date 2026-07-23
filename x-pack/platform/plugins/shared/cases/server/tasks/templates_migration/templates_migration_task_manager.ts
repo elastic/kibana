@@ -33,7 +33,7 @@ import {
 } from './types';
 import type { MigrationTaskState } from './types';
 import { findAllConfigurations, migrateOneConfigure } from './migrate_configuration';
-import { runCaseBackfillPhase } from './run_case_backfill';
+import { hasPendingCaseBackfill, runCaseBackfillPhase } from './run_case_backfill';
 
 /**
  * Registers and schedules the one-shot task that migrates legacy (v1) templates and custom fields
@@ -48,13 +48,25 @@ export class TemplatesMigrationTaskManager {
   private readonly logger: Logger;
   private internalRepo?: ISavedObjectsRepository;
   private migrationUsageCounter?: IUsageCounter;
+  /**
+   * Best-effort hook fired once, when the existing-case `extended_fields` backfill reaches a terminal
+   * state (fully complete OR gives up) AND there was outstanding backfill work at the start of that
+   * final run. Wired by the plugin to `CasesAnalyticsV2Service.triggerBackfillReconciliation`: the
+   * backfill's raw SO `bulkUpdate` bumps only the SO-framework `updated_at`, not the case-domain
+   * `attributes.updated_at` that analytics-v2's incremental reconciliation filters on, so without a
+   * nudge the backfilled `extended_fields` would never be mirrored to `.cases`. Optional and
+   * fire-and-forget — failures are logged, never propagated (see `notifyCaseBackfillComplete`).
+   */
+  private readonly onCaseBackfillComplete?: () => Promise<void> | void;
 
   constructor(
     taskManager: TaskManagerSetupContract,
     logger: Logger,
-    usageCollection?: UsageCollectionSetup
+    usageCollection?: UsageCollectionSetup,
+    onCaseBackfillComplete?: () => Promise<void> | void
   ) {
     this.logger = logger.get('cases_templates_v2_migration');
+    this.onCaseBackfillComplete = onCaseBackfillComplete;
     this.logger.info('Registering Cases Templates V2 Migration Task');
 
     if (usageCollection) {
@@ -67,7 +79,7 @@ export class TemplatesMigrationTaskManager {
         description: 'One-shot migration of legacy templates and custom fields to the v2 system',
         timeout: '10m',
         maxAttempts: 3,
-        createTaskRunner: ({ taskInstance, abortController }: RunContext) => {
+        createTaskRunner: ({ taskInstance, signal }: RunContext) => {
           // Same guard as IncrementalIdTaskManager: if Task Manager fires between setup() and
           // start(), we throw and let TM mark the run as failed — it will retry on next startup.
           if (!this.internalRepo) {
@@ -78,13 +90,10 @@ export class TemplatesMigrationTaskManager {
           const previousState = (taskInstance?.state ?? {}) as MigrationTaskState;
           // Task Manager aborts this signal on timeout/cancel; the backfill checks it between pages
           // and persists its cursor so the next run resumes rather than running past the timeout.
-          const signal = abortController?.signal ?? new AbortController().signal;
-
           return {
             run: () => this.run(repo, previousState, signal),
             cancel: async () => {
               log.debug('Cases templates v2 migration task cancelled — aborting scan');
-              abortController?.abort();
             },
           };
         },
@@ -148,6 +157,15 @@ export class TemplatesMigrationTaskManager {
 
     const configures = await findAllConfigurations(repo, log, executionId);
     log.debug(`[${executionId}] Found ${configures.length} cases-configure SOs to inspect`);
+
+    // Captured from the START-of-run configure snapshot (before this run flags any space), so it
+    // reflects whether real case-backfill work was outstanding when the run began. Derived from the
+    // restart-durable `legacyCasesMigrated` flags rather than a per-run write count, so it stays
+    // correct even when the final run of a multi-run backfill re-scans already-written cases and
+    // writes nothing (e.g. after a restart wiped the in-progress cursor). Drives the one-shot
+    // analytics re-index nudge on completion — see `onCaseBackfillComplete`. A no-op restart of a
+    // fully-migrated cluster has every space flagged, so this is `false` and no re-index is triggered.
+    const hadPendingCaseBackfill = hasPendingCaseBackfill(configures);
 
     // Aggregate counts so the whole run emits a single summary INFO line, not one per space.
     const totals = {
@@ -228,6 +246,7 @@ export class TemplatesMigrationTaskManager {
 
     // Backfill fully done — delete this one-shot task.
     if (backfill.complete) {
+      await this.notifyCaseBackfillComplete(hadPendingCaseBackfill, executionId);
       return { state: {}, shouldDeleteTask: true };
     }
 
@@ -241,6 +260,10 @@ export class TemplatesMigrationTaskManager {
           `with update failures — some cases were not backfilled. Resolve the underlying error (see earlier ` +
           `"updates failed" logs) and restart Kibana to re-run the migration.`
       );
+      // Some cases may still have been backfilled successfully across prior runs; nudge analytics to
+      // re-index so those aren't stranded. A later restart re-runs the migration and completes it,
+      // firing this again (idempotent) once the remaining cases succeed.
+      await this.notifyCaseBackfillComplete(hadPendingCaseBackfill, executionId);
       return { state: {}, shouldDeleteTask: true };
     }
 
@@ -253,5 +276,35 @@ export class TemplatesMigrationTaskManager {
       ? CASE_BACKFILL_FAILURE_RESCHEDULE_DELAY_MS
       : CASE_BACKFILL_RESCHEDULE_DELAY_MS;
     return { state: nextState, runAt: new Date(Date.now() + delayMs) };
+  }
+
+  /**
+   * Fires the `onCaseBackfillComplete` hook exactly at the migration's terminal points, and only
+   * when there was outstanding case-backfill work when the final run began. Called from the two
+   * `shouldDeleteTask` branches, so it runs once per migration lifetime (the task deletes itself
+   * after; a subsequent restart of a fully-migrated cluster sees no pending work and does not fire).
+   *
+   * Best-effort by contract: the hook is awaited so its own logging orders sensibly, but any error
+   * is caught and swallowed. Letting it throw would prevent the caller from returning
+   * `shouldDeleteTask: true`, so Task Manager would retry the already-finished migration and re-fire
+   * the hook — a pointless retry loop. The migration's own success does not depend on the hook.
+   */
+  private async notifyCaseBackfillComplete(
+    hadPendingCaseBackfill: boolean,
+    executionId: string
+  ): Promise<void> {
+    if (!hadPendingCaseBackfill || this.onCaseBackfillComplete == null) {
+      return;
+    }
+    try {
+      await this.onCaseBackfillComplete();
+    } catch (err) {
+      this.logger.warn(
+        `[${executionId}] onCaseBackfillComplete hook failed (migration is still complete): ${
+          err instanceof Error ? err.message : String(err)
+        }`,
+        { error: err instanceof Error ? err : undefined }
+      );
+    }
   }
 }

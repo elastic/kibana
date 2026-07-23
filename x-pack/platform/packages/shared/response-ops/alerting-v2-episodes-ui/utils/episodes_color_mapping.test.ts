@@ -48,7 +48,7 @@ describe('buildModifiedVisAttributes', () => {
       const result = buildModifiedVisAttributes(
         mockLensAttributes,
         undefined,
-        { status },
+        { status: [status] },
         mockColors
       );
       const layer = (result.state?.visualization as any).layers[0];
@@ -61,11 +61,22 @@ describe('buildModifiedVisAttributes', () => {
     }
   );
 
+  it('applies the danger (red) yConfig color when multiple statuses are selected', () => {
+    const result = buildModifiedVisAttributes(
+      mockLensAttributes,
+      undefined,
+      { status: ['active', 'pending'] },
+      mockColors
+    );
+    const layer = (result.state?.visualization as any).layers[0];
+    expect(layer.yConfig[0]).toMatchObject({ forAccessor: 'col_count', color: mockColors.danger });
+  });
+
   it('does not set yConfig color when a breakdown field other than episode.status is set', () => {
     const result = buildModifiedVisAttributes(
       mockLensAttributes,
       'rule.id',
-      { status: 'active' },
+      { status: ['active'] },
       mockColors
     );
     const layer = (result.state?.visualization as any).layers[0];

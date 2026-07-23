@@ -25,6 +25,7 @@ import {
   type GenerateConfigAction,
   type ValidateConfigAction,
   type GenerateTimeRangeAction,
+  isGenerateEsqlAction,
   isGenerateConfigAction,
   isValidateConfigAction,
 } from './actions_lens';
@@ -400,16 +401,23 @@ What is the most appropriate time range for this visualization?`,
   // Node: Finalize - extract outputs from actions
   const finalizeNode = async (state: VisualizationState) => {
     const lastValidateAction = [...state.actions].reverse().find(isValidateConfigAction);
-    const lastGenerateEsqlAction = [...state.actions]
-      .reverse()
-      .find((action): action is GenerateEsqlAction => action.type === 'generate_esql');
+    const lastGenerateEsqlAction = [...state.actions].reverse().find(isGenerateEsqlAction);
     const lastTimeRangeAction = [...state.actions]
       .reverse()
       .find((action): action is GenerateTimeRangeAction => action.type === 'generate_time_range');
 
+    // Surface an ES|QL resolution failure (a query that was never generated, so
+    // no config was attempted) so the caller gets the real root cause.
+    const esqlError =
+      lastGenerateEsqlAction && !lastGenerateEsqlAction.success
+        ? `Could not resolve a valid ES|QL query for the visualization: ${
+            lastGenerateEsqlAction.error ?? 'Unknown error'
+          }`
+        : null;
+
     return {
       validatedConfig: lastValidateAction?.success ? lastValidateAction.config : null,
-      error: lastValidateAction?.success ? null : lastValidateAction?.error || null,
+      error: lastValidateAction?.success ? null : lastValidateAction?.error || esqlError,
       esqlQuery: lastGenerateEsqlAction?.query || state.esqlQuery,
       timeRange: lastTimeRangeAction?.timeRange ?? null,
     };
@@ -443,6 +451,19 @@ What is the most appropriate time range for this visualization?`,
     return GENERATE_CONFIG_NODE;
   };
 
+  // Router: A config authored without a query can never validate (data_source
+  // is pinned from the generated query), so when ES|QL generation failed route
+  // straight to finalize with the ES|QL error instead of burning config
+  // generation retries.
+  const afterGenerateEsqlRouter = (state: VisualizationState): string => {
+    const lastGenerateEsqlAction = [...state.actions].reverse().find(isGenerateEsqlAction);
+    if (!lastGenerateEsqlAction?.success) {
+      logger.warn('ES|QL generation failed; finalizing without generating a config');
+      return 'finalize';
+    }
+    return GENERATE_CONFIG_NODE;
+  };
+
   // Router: Use an explicit ES|QL query when provided, otherwise generate one.
   // Existing config is still valuable because generateESQLNode includes the
   // prior query as context when regenerating edits.
@@ -469,7 +490,10 @@ What is the most appropriate time range for this visualization?`,
       [GENERATE_CONFIG_NODE]: GENERATE_CONFIG_NODE,
       [GENERATE_ESQL_NODE]: GENERATE_ESQL_NODE,
     })
-    .addEdge(GENERATE_ESQL_NODE, GENERATE_CONFIG_NODE)
+    .addConditionalEdges(GENERATE_ESQL_NODE, afterGenerateEsqlRouter, {
+      [GENERATE_CONFIG_NODE]: GENERATE_CONFIG_NODE,
+      finalize: 'finalize',
+    })
     .addEdge(GENERATE_CONFIG_NODE, VALIDATE_CONFIG_NODE)
     .addConditionalEdges(VALIDATE_CONFIG_NODE, shouldRetryRouter, {
       [GENERATE_CONFIG_NODE]: GENERATE_CONFIG_NODE,

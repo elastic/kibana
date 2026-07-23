@@ -11,6 +11,7 @@ import type { HttpStart } from '@kbn/core/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { getESQLTimeFieldFromQuery } from '@kbn/esql-utils';
 import type { ISearchGeneric } from '@kbn/search-types';
+import { resolveTimeField } from '@kbn/alerting-v2-utils';
 import { useDataFields } from '../../form/hooks/use_data_fields';
 import { isDateLikeFieldType } from '../../form/utils';
 import { ruleFormKeys } from '../../form/hooks/query_key_factory';
@@ -79,6 +80,20 @@ export const useResolveTimeField = ({
     retry: false,
   });
 
+  // Candidate date fields: field caps when available, otherwise the single
+  // field the ES|QL API inferred from the query.
+  const candidateDateFields = useMemo(
+    () => (dateFields.length > 0 ? dateFields : apiTimeField ? [apiTimeField] : []),
+    [dateFields, apiTimeField]
+  );
+
+  const resolvedTimeField = useMemo(
+    () => resolveTimeField({ dateFields: candidateDateFields, currentTimeField: timeField }),
+    [candidateDateFields, timeField]
+  );
+
+  const isLoadingResolution = isLoadingFields || (needsApiTimeField && isLoadingApiTimeField);
+
   const timeFieldOptions = useMemo(() => {
     if (dateFields.length > 0) {
       return dateFields.map((name) => ({ value: name, text: name }));
@@ -86,63 +101,40 @@ export const useResolveTimeField = ({
     if (apiTimeField) {
       return [{ value: apiTimeField, text: apiTimeField }];
     }
-    return [{ value: '@timestamp', text: '@timestamp' }];
+    // No date field on the index: don't fabricate `@timestamp`. Callers show a
+    // placeholder/invalid state so the user must select (or fix the query).
+    return [];
   }, [dateFields, apiTimeField]);
 
   const isTimeFieldResolved = useMemo(() => {
     if (!enabled || !fromSourceQuery) {
       return true;
     }
-    if (isLoadingFields || (needsApiTimeField && isLoadingApiTimeField)) {
+    if (isLoadingResolution) {
       return false;
     }
-    // Any field that exists on the index is valid — auto-correction only fires when
-    // the current field is absent, so membership is the right check here (not equality
-    // with dateFields[0], which is alphabetically first, not necessarily canonical).
-    if (dateFields.length > 0) {
-      return dateFields.includes(timeField);
-    }
-    if (apiTimeField) {
-      return timeField === apiTimeField;
-    }
-    // Neither field-caps nor the API fallback found a date field; the correction
-    // effect will reset to '@timestamp'. Report resolved only once that matches.
-    return timeField === '@timestamp';
-  }, [
-    enabled,
-    fromSourceQuery,
-    isLoadingFields,
-    needsApiTimeField,
-    isLoadingApiTimeField,
-    dateFields,
-    apiTimeField,
-    timeField,
-  ]);
+    return timeField === resolvedTimeField;
+  }, [enabled, fromSourceQuery, isLoadingResolution, resolvedTimeField, timeField]);
 
   useEffect(() => {
-    if (!enabled || !onTimeFieldChange || !fromSourceQuery) {
+    if (!enabled || !onTimeFieldChange || !fromSourceQuery || isLoadingResolution) {
       return;
     }
-    if (isLoadingFields || (needsApiTimeField && isLoadingApiTimeField)) {
-      return;
-    }
-    if (dateFields.length > 0 && !dateFields.includes(timeField)) {
-      onTimeFieldChange(dateFields[0]);
-    } else if (apiTimeField && timeField !== apiTimeField) {
-      onTimeFieldChange(apiTimeField);
-    } else if (dateFields.length === 0 && !apiTimeField && timeField !== '@timestamp') {
-      onTimeFieldChange('@timestamp');
+    // Sync the form value to the resolved field. `null` (no resolvable date field
+    // on the index, or the current selection isn't valid) clears the value —
+    // never fabricate `@timestamp` — so the user is forced to pick and the empty
+    // value can be flagged downstream.
+    const nextTimeField = resolvedTimeField ?? '';
+    if (nextTimeField !== timeField) {
+      onTimeFieldChange(nextTimeField);
     }
   }, [
     enabled,
     fromSourceQuery,
-    dateFields,
-    apiTimeField,
+    isLoadingResolution,
+    resolvedTimeField,
     timeField,
     onTimeFieldChange,
-    isLoadingFields,
-    needsApiTimeField,
-    isLoadingApiTimeField,
   ]);
 
   return {
