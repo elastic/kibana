@@ -17,6 +17,7 @@ import {
 } from '@kbn/significant-events-plugin/common';
 import { useKibana } from '../../../../../../hooks/use_kibana';
 import { getFormattedError } from '../../../../../../util/errors';
+import { RELAY_APP_BINDINGS_QUERY_KEY } from './use_relay_app_bindings';
 
 const STATUS_ROUTE = '/internal/significant_events/apps/slack/status';
 const CONNECT_ROUTE = '/internal/significant_events/apps/slack/connect';
@@ -97,7 +98,12 @@ export function useRelayAppConnection(): UseRelayAppConnection {
       });
     },
     onSettled: () => {
-      return queryClient.invalidateQueries({ queryKey: RELAY_APP_CONNECTION_STATUS_QUERY_KEY });
+      return Promise.all([
+        queryClient.invalidateQueries({ queryKey: RELAY_APP_CONNECTION_STATUS_QUERY_KEY }),
+        // Disconnecting drops all channel bindings; invalidate them too so the
+        // `keepPreviousData` bindings query does not keep serving stale rows.
+        queryClient.invalidateQueries({ queryKey: RELAY_APP_BINDINGS_QUERY_KEY }),
+      ]);
     },
   });
 

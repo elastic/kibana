@@ -83,7 +83,12 @@ const disconnectSlackAppRoute = createServerRoute({
   },
   params: z.object({}),
   handler: async ({ request, server }): Promise<SlackAppDisconnectResponse> => {
-    return new SlackAppService(server).disconnect(request);
+    try {
+      return await new SlackAppService(server).disconnect(request);
+    } catch (error) {
+      if (error instanceof RelayRequestError) throwRelayError(error);
+      throw error;
+    }
   },
 });
 

@@ -441,7 +441,7 @@ describe('SlackAppService', () => {
         RELAY_APP_CONNECTION_SO_TYPE,
         RELAY_APP_CONNECTION_SO_ID
       );
-      expect(result).toEqual({ success: true });
+      expect(result).toEqual({ status: 'disconnected' });
     });
 
     it('skips the Relay unbind when the binding is still in-progress (no tenantKey)', async () => {
@@ -464,10 +464,10 @@ describe('SlackAppService', () => {
         RELAY_APP_CONNECTION_SO_TYPE,
         RELAY_APP_CONNECTION_SO_ID
       );
-      expect(result).toEqual({ success: true });
+      expect(result).toEqual({ status: 'disconnected' });
     });
 
-    it('keeps the binding in an error state and reports failure when the Relay unbind fails', async () => {
+    it('keeps the binding in an error state and throws when the Relay unbind fails', async () => {
       const { server, soClient, invalidateAsInternalUser } = createHarness();
       soClient.get.mockResolvedValue({
         attributes: {
@@ -484,7 +484,9 @@ describe('SlackAppService', () => {
         )
       );
 
-      const result = await new SlackAppService(server).disconnect(request);
+      await expect(new SlackAppService(server).disconnect(request)).rejects.toThrow(
+        'teardown incomplete: 1 workspace(s) failed and remain bound; retry to finish'
+      );
 
       expect(invalidateAsInternalUser).toHaveBeenCalledWith({ ids: ['key-1'] });
       expect(soClient.delete).not.toHaveBeenCalled();
@@ -497,7 +499,6 @@ describe('SlackAppService', () => {
         }),
         { id: RELAY_APP_CONNECTION_SO_ID, overwrite: true }
       );
-      expect(result).toEqual({ success: false });
     });
 
     it('is a no-op when the connection does not exist', async () => {
@@ -507,7 +508,7 @@ describe('SlackAppService', () => {
       );
 
       await expect(new SlackAppService(server).disconnect(request)).resolves.toEqual({
-        success: true,
+        status: 'disconnected',
       });
       expect(invalidateAsInternalUser).not.toHaveBeenCalled();
       expect(soClient.delete).not.toHaveBeenCalled();

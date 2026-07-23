@@ -379,7 +379,7 @@ export class SlackAppService {
     ]);
 
     if (!connection) {
-      return { success: true };
+      return { status: 'disconnected' };
     }
 
     if (connection.apiKeyId) {
@@ -404,7 +404,10 @@ export class SlackAppService {
           apiKeyId: null,
           error: message,
         });
-        return { success: false };
+        // Surface the failure to the caller instead of a misleading success: the
+        // route maps this to a retryable 5xx and the connection stays in `error`
+        // state so the settings UI shows it and the user can retry.
+        throw error;
       }
     }
 
@@ -416,6 +419,6 @@ export class SlackAppService {
         }
       });
 
-    return { success: true };
+    return { status: 'disconnected' };
   }
 }

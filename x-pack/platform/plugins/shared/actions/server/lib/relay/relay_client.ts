@@ -97,14 +97,22 @@ export class RelayClient implements RelayClientContract {
     );
     const body = response.data as RelayBindingsListResponse | undefined;
 
-    const bindings: RelayBinding[] = Array.isArray(body?.bindings)
-      ? body.bindings.map(({ scope_type, scope_id, display_name, visibility }) => ({
-          scope_type,
-          scope_id,
-          display_name,
-          visibility,
-        }))
-      : [];
+    if (!Array.isArray(body?.bindings)) {
+      throw new RelayRequestError(
+        `/v1/slack/tenants/${encodeURIComponent(tenantKey)}/bindings`,
+        response.status,
+        'Relay invalid response format missing expected `bindings` array'
+      );
+    }
+
+    const bindings: RelayBinding[] = body.bindings.map(
+      ({ scope_type, scope_id, display_name, visibility }) => ({
+        scope_type,
+        scope_id,
+        display_name,
+        visibility,
+      })
+    );
 
     return { bindings, nextCursor: body?.next_cursor };
   }
@@ -145,7 +153,7 @@ export class RelayClient implements RelayClientContract {
       throw new Error('Callback URL does not match the configured Relay origin');
     }
 
-    const response = await this.sendRequest(url, body, signal);
+    const response = await this.sendRequest(url, body, 'post', signal);
     return { status: response.status };
   }
 
@@ -173,7 +181,6 @@ export class RelayClient implements RelayClientContract {
     const response = await this.sendRequest(
       new URL(path, this.baseUrl).toString(),
       data,
-      undefined,
       method
     );
     if (response.status >= 200 && response.status < 300) {
@@ -187,8 +194,8 @@ export class RelayClient implements RelayClientContract {
   private sendRequest(
     url: string,
     data: unknown,
-    signal?: AbortSignal,
-    method: 'get' | 'post' | 'put' | 'delete' = 'post'
+    method: 'get' | 'post' | 'put' | 'delete' = 'post',
+    signal?: AbortSignal
   ): Promise<AxiosResponse> {
     return request({
       axios: this.axios,

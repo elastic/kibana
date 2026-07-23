@@ -35,7 +35,7 @@ export interface SlackAppStatusResponse {
 }
 
 export interface SlackAppDisconnectResponse {
-  success: boolean;
+  status: 'disconnected';
 }
 
 /**

@@ -222,7 +222,7 @@ describe('useRelayAppConnection', () => {
 
   it('disconnect() posts to the disconnect route with no connection id', async () => {
     httpGet.mockResolvedValue(statusResponse(RELAY_APP_CONNECTION_STATUS.connected));
-    httpPost.mockResolvedValue({ success: true });
+    httpPost.mockResolvedValue({ status: 'disconnected' });
     const { wrapper } = createSetup();
     const { result } = renderHook(() => useRelayAppConnection(), { wrapper });
     await flush();
@@ -239,7 +239,7 @@ describe('useRelayAppConnection', () => {
   // time remaining from the previous install's deadline.
   it('resets the poll deadline when the install resolves, so a subsequent connect gets a fresh window', async () => {
     httpGet.mockResolvedValue(statusResponse(RELAY_APP_CONNECTION_STATUS.oauthInProgress));
-    httpPost.mockResolvedValue({ success: true });
+    httpPost.mockResolvedValue({ status: 'disconnected' });
     const { wrapper, queryClient } = createSetup();
     const { result } = renderHook(() => useRelayAppConnection(), { wrapper });
 
