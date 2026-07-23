@@ -6,6 +6,7 @@
  */
 
 import { getESQLResults } from '@kbn/esql-utils';
+import { fillTemplate } from '../utils/fill_template';
 import { registerRenderRoute } from './render_route';
 
 jest.mock('@kbn/esql-utils', () => ({
@@ -23,10 +24,11 @@ jest.mock('@kbn/datemath', () => ({
 }));
 
 jest.mock('../utils/fill_template', () => ({
-  fillTemplate: jest.fn((_template: string, _cols: unknown, _rows: unknown) => '<p>filled</p>'),
+  fillTemplate: jest.fn((_template: string, _cols: unknown, _rows: unknown) => '<p>filled</p>') as jest.MockedFunction<typeof fillTemplate>,
 }));
 
 const mockGetESQLResults = getESQLResults as jest.MockedFunction<typeof getESQLResults>;
+const mockFillTemplate = fillTemplate as jest.MockedFunction<typeof fillTemplate>;
 
 interface RequestBody {
   template: string;
@@ -182,6 +184,21 @@ describe('registerRenderRoute', () => {
 
     expect(response.customError).toHaveBeenCalledWith(expect.objectContaining({ statusCode: 500 }));
     expect(loggerError).toHaveBeenCalledWith(expect.stringContaining('index_not_found_exception'));
+    expect(response.ok).not.toHaveBeenCalled();
+  });
+
+  it('returns a 500 when fillTemplate throws', async () => {
+    const { router, handler, getStartServices, logger, context, request, response, loggerError } =
+      buildMocks();
+    registerRenderRoute(router, getStartServices, logger);
+    mockFillTemplate.mockImplementation(() => {
+      throw new Error('invalid_liquid_template');
+    });
+
+    await handler(context, request, response);
+
+    expect(response.customError).toHaveBeenCalledWith(expect.objectContaining({ statusCode: 500 }));
+    expect(loggerError).toHaveBeenCalledWith(expect.stringContaining('invalid_liquid_template'));
     expect(response.ok).not.toHaveBeenCalled();
   });
 });

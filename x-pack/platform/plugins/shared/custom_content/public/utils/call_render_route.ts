@@ -19,7 +19,11 @@ export async function callRenderRoute(
 
   let timeField: string | undefined;
   if (timeRange) {
-    timeField = (await getESQLTimeFieldFromQuery({ query: esqlQuery, http })) ?? undefined;
+    try {
+      timeField = (await getESQLTimeFieldFromQuery({ query: esqlQuery, http })) ?? undefined;
+    } catch {
+      // field caps unavailable — render without time filter
+    }
   }
 
   const { html } = await http.post<{ html: string }>(CUSTOM_CONTENT_RENDER_ROUTE, {

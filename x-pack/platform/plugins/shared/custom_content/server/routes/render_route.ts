@@ -54,17 +54,11 @@ export function registerRenderRoute(
 
       const { template, esqlQuery, timeRange, timeField } = request.body;
 
+      const gte = timeRange && dateMath.parse(timeRange.from)?.toISOString();
+      const lt = timeRange && dateMath.parse(timeRange.to, { roundUp: true })?.toISOString();
       const filter =
-        timeRange && timeField
-          ? {
-              range: {
-                [timeField]: {
-                  gte: dateMath.parse(timeRange.from)?.toISOString(),
-                  lt: dateMath.parse(timeRange.to, { roundUp: true })?.toISOString(),
-                  format: 'strict_date_optional_time',
-                },
-              },
-            }
+        timeRange && timeField && gte && lt
+          ? { range: { [timeField]: { gte, lt, format: 'strict_date_optional_time' } } }
           : undefined;
 
       try {

@@ -18,7 +18,7 @@ const liquid = new Liquid({
 export function fillTemplate(template: string, columns: ESQLColumn[], rows: unknown[][]): string {
   const maxValues: Record<string, number> = {};
   columns.forEach((col, i) => {
-    const nums = rows.map((r) => Number(r[i])).filter((v) => isFinite(v));
+    const nums = rows.filter((r) => r[i] !== null).map((r) => Number(r[i])).filter(isFinite);
     if (nums.length > 0) maxValues[col.name] = nums.reduce((a, b) => (b > a ? b : a), -Infinity);
   });
 

@@ -62,11 +62,6 @@ export function useCustomContentHtml({
   const [error, setError] = useState<string | undefined>();
   const [isAiUnavailable, setIsAiUnavailable] = useState(false);
 
-  // Tracks whether the panel already has rendered HTML so the streaming interval
-  // is skipped when re-generating — avoids a flash of partial content over existing output.
-  const renderedHtmlRef = useRef('');
-  renderedHtmlRef.current = html;
-
   // onTemplateChange() writes back into savedTemplate, a dep of this effect. Track what we last
   // wrote so we can skip the echo re-run without also skipping intentional version bumps.
   const selfWrittenTemplateRef = useRef<string | undefined>(undefined);
