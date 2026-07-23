@@ -24,5 +24,5 @@ export const columnsAfter = (
   _previousColumns: ESQLColumnData[],
   _query: string
 ): ESQLColumnData[] => {
-  return [...METRICS_INFO_COLUMNS];
+  return METRICS_INFO_COLUMNS;
 };
