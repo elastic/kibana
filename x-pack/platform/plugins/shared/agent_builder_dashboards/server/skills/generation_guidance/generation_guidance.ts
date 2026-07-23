@@ -5,9 +5,12 @@
  * 2.0.
  */
 
+import { getChartTypeSelectionPromptContent } from '@kbn/agent-builder-visualizations-server';
 import { dashboardTools } from '../../../common';
 import type { DashboardGuidanceModule } from '../guidance_module';
 import { dashboardDesignGuidancePrompt } from './design';
+
+const chartTypeSelectionGuidance = getChartTypeSelectionPromptContent();
 
 const guidance = `## Building a Dashboard
 
@@ -33,8 +36,14 @@ For an existing dashboard:
 
 ## Panel Inputs
 
-- Use \`source: "request"\` to create or edit a Lens panel from a natural-language / ES|QL query — this is the only correct way to make a **new** visualization. Never hand-build a Lens \`config\` for a new visualization.
+- Use \`source: "request"\` to create or edit a Lens or Vega panel from a natural-language / ES|QL query — this is the only correct way to make a **new** visualization. Never hand-build a visualization \`config\` for a new visualization.
 - Use \`source: "config"\` only for content you have already resolved (an existing visualization's config, or markdown). The generation tool never reads an attachment or saved-object store, so the config must be supplied directly.
+
+## Chart Type Guidance
+
+For every new Lens panel, choose and pass \`chartType\`; it is required. For a new Vega panel, \`chartType\` is an optional authoring hint — omit it when no Lens chart type represents the requested visualization. On edits, \`chartType\` is optional because the existing panel configuration provides the current visual form. When editing a Lens panel, omit \`chartType\` to preserve its current chart family; provide a new \`chartType\` when the request changes the chart family, such as from \`xy\` to \`pie\`.
+
+${chartTypeSelectionGuidance}
 
 ${dashboardDesignGuidancePrompt}
 

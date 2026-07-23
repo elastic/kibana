@@ -25,6 +25,7 @@ import type { SignificantEventsClients } from '../lib/significant_events/signifi
 import type { ContinuousKiOnboardingWorkflowService } from '../lib/workflows/continuous_onboarding_workflow';
 import type { SignificantEventsScheduledWorkflowsService } from '../lib/workflows/significant_events_scheduled_workflows';
 import type { WorkflowClients } from '../lib/workflows/create_workflow_clients';
+import type { SignificantEventsMaintenanceService } from '../lib/maintenance/maintenance_service';
 
 export type GetScopedClients = (params: {
   request: KibanaRequest;
@@ -55,6 +56,7 @@ export interface RouteDependencies {
   continuousKiOnboardingWorkflowService?: ContinuousKiOnboardingWorkflowService;
   significantEventsScheduledWorkflowsService?: SignificantEventsScheduledWorkflowsService;
   workflowClients: WorkflowClients;
+  maintenanceService: SignificantEventsMaintenanceService;
   getSpaceId: (request: KibanaRequest) => Promise<string>;
 }
 
