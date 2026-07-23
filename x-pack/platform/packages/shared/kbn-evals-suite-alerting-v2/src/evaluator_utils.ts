@@ -10,8 +10,8 @@ import type { Evaluator, Example, TaskOutput } from '@kbn/evals';
 import type { PromptRequest } from '@kbn/agent-builder-common/agents';
 import { isAskUserQuestionPrompt } from '@kbn/agent-builder-common/agents';
 
-export const getOpenerPrompts = (output: TaskOutput): PromptRequest[] => {
-  const prompts = (output as { openerPrompts?: unknown[] })?.openerPrompts ?? [];
+export const getPrompts = (output: TaskOutput): PromptRequest[] => {
+  const prompts = (output as { prompts?: unknown[] })?.prompts ?? [];
   return prompts.filter(
     (p): p is PromptRequest => typeof p === 'object' && p !== null && 'type' in p
   );
@@ -74,7 +74,7 @@ export const withLowScoreLogging = <
       const conversationOutput: ConversationOutput = isConversationOutput(output) ? output : {};
       const intent =
         (metadata as { query_intent?: string } | null)?.query_intent ?? '(no query_intent)';
-      const openerPrompts = getOpenerPrompts(output as TaskOutput);
+      const prompts = getPrompts(output as TaskOutput);
       const errors = conversationOutput.errors ?? [];
 
       const sections = [
@@ -85,8 +85,8 @@ export const withLowScoreLogging = <
         result.reasoning ? `Reasoning:   ${result.reasoning}` : undefined,
         `Expected:    ${formatValue(expected)}`,
         `--- Conversation ---\n${formatTranscript(conversationOutput)}`,
-        openerPrompts.length > 0
-          ? `--- Opener prompts ---\n${formatValue(openerPrompts.map(summarizePrompt))}`
+        prompts.length > 0
+          ? `--- Prompts ---\n${formatValue(prompts.map(summarizePrompt))}`
           : undefined,
         result.metadata ? `--- Evaluator metadata ---\n${formatValue(result.metadata)}` : undefined,
         errors.length > 0 ? `--- Task errors ---\n${formatValue(errors)}` : undefined,

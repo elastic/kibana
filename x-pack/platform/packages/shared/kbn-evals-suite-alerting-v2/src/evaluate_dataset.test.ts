@@ -144,9 +144,9 @@ describe('createTask', () => {
   });
 
   it('answers a pending opener prompt with the next turn text instead of a new message', async () => {
-    const openerPrompt = askUserQuestion('ask-1');
+    const pendingPrompt = askUserQuestion('ask-1');
     const { client, calls } = makeChatClient([
-      converseResult({ prompts: [openerPrompt] }), // turn 0 -> agent asks
+      converseResult({ prompts: [pendingPrompt] }), // turn 0 -> agent asks
       converseResult({ prompts: [] }), // turn 1 answer -> resolved
     ]);
 
@@ -164,19 +164,19 @@ describe('createTask', () => {
     });
   });
 
-  it('captures the opener prompts (turn 0 only) so the judge and low-score logs can see them', async () => {
-    const openerPrompt = askUserQuestion('ask-1');
+  it('captures prompts from every turn so the judge and low-score logs can see them', async () => {
+    const firstPrompt = askUserQuestion('ask-1');
     const laterPrompt = askUserQuestion('ask-2');
     const { client } = makeChatClient([
-      converseResult({ prompts: [openerPrompt] }),
+      converseResult({ prompts: [firstPrompt] }),
       converseResult({ prompts: [laterPrompt] }),
     ]);
 
     const output = (await runTask(client, {
       turns: ['opener', 'second'],
-    })) as TaskOutput & { openerPrompts: unknown[] };
+    })) as TaskOutput & { prompts: unknown[] };
 
-    expect(output.openerPrompts).toEqual([openerPrompt]);
+    expect(output.prompts).toEqual([firstPrompt, laterPrompt]);
   });
 
   it('threads the conversationId returned from the first turn into subsequent turns', async () => {

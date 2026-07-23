@@ -156,11 +156,10 @@ export const createTask = (
     const steps: unknown[] = [];
     const errors: unknown[] = [];
     let traceId: string | undefined;
-    // Structured prompts (e.g. `ask_user_question`) the agent asked in response to the
-    // opener (turn 0). Surfaced in the task output so the LLM `Criteria` judge can see how the
-    // agent tried to disambiguate Alerting V2 vs Security up front (and so low-score logs can
-    // show exactly what was asked), even when the opener's prose message is empty.
-    const openerPrompts: unknown[] = [];
+    // Structured prompts (e.g. `ask_user_question`) the agent asked across the conversation.
+    // Surfaced in the task output so the LLM Criteria judge and low-score logs can see what
+    // was asked even when assistant prose is empty.
+    const prompts: PromptRequest[] = [];
     // Prompts the agent is awaiting a response to, carried over between turns so the next
     // scripted turn is delivered as the answer rather than a rejected free-text message.
     let pendingPrompts: PromptRequest[] = [];
@@ -178,11 +177,7 @@ export const createTask = (
       if (response.steps) steps.push(...response.steps);
       errors.push(...response.errors);
       traceId = response.traceId ?? traceId;
-
-      if (turnIndex === 0) {
-        openerPrompts.push(...response.prompts);
-      }
-
+      prompts.push(...response.prompts);
       pendingPrompts = response.prompts;
     }
 
@@ -208,7 +203,7 @@ export const createTask = (
       messages,
       steps,
       traceId,
-      openerPrompts,
+      prompts,
       conversationId,
       attachments,
     };

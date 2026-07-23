@@ -27,7 +27,7 @@ const params = {
       { message: 'I mean Alerting V2, CPU above 90%.' },
       { message: "Here's how we'll build it..." },
     ],
-    openerPrompts: [
+    prompts: [
       {
         type: AgentPromptType.ask_user_question,
         id: 'ask-1',
@@ -59,7 +59,7 @@ describe('withLowScoreLogging', () => {
     expect(message).toContain('trace-123');
     expect(message).toContain('[user] I want to set up alerting.');
     expect(message).toContain('[assistant] Do you want Alerting V2 or Security?');
-    expect(message).toContain('Opener prompts');
+    expect(message).toContain('Prompts');
   });
 
   it('logs for a partial (fractional) score', async () => {
