@@ -110,7 +110,9 @@ describe('createResponseActionsParamsAuthorizer', () => {
   it('preserves the status code of a validator error thrown from a different class', async () => {
     // Simulates osquery's own CustomHttpRequestError: a non-Boom error carrying a
     // numeric `statusCode` that is NOT an instanceof the security_solution class.
-    const osqueryError = Object.assign(new Error('not authorized for osquery'), { statusCode: 403 });
+    const osqueryError = Object.assign(new Error('not authorized for osquery'), {
+      statusCode: 403,
+    });
     const authorizer = createResponseActionsParamsAuthorizer({
       endpointAppContextService,
       getOsqueryResponseActionsAuthzChecker: () => jest.fn().mockRejectedValue(osqueryError),
