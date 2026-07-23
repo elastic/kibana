@@ -25,8 +25,7 @@
  *
  * The managed SQL MCP server exposes three tools:
  *   execute_sql_read_only  — read-only (SELECT/SHOW/DESCRIBE/EXPLAIN/WITH).
- *                            Server enforces read-only; assertReadOnly also checks
- *                            client-side for a fast, clear error before the round-trip.
+ *                            Server enforces read-only;
  *   execute_sql            — unrestricted (DML, DDL, etc.). No read-only guard.
  *   poll_sql_result        — poll async results by statement_id.
  *
@@ -244,7 +243,7 @@ export const Databricks: ConnectorSpec = {
     '## Databricks Connector — usage guidance',
     '',
     '### Choosing between `runQuery` and `executeStatement`',
-    '- Use `runQuery` for read-only SQL: SELECT, SHOW, DESCRIBE, EXPLAIN, and WITH queries. Write operations are blocked both client-side and by the server (`execute_sql_read_only`).',
+    '- Use `runQuery` for read-only SQL: SELECT, SHOW, DESCRIBE, EXPLAIN, and WITH queries.',
     '- Use `executeStatement` for DML (INSERT, UPDATE, DELETE) or DDL (CREATE, ALTER, DROP) — this action is available to workflows but is not exposed to AI agents.',
     '- Prefer `runQuery` for all data exploration and analytics — it prevents accidental mutations.',
     '',
@@ -264,17 +263,6 @@ export const Databricks: ConnectorSpec = {
     '### Writing efficient queries',
     'Always qualify table names with catalog.schema.table (e.g., `main.default.customers`) to avoid ambiguity.',
     'Use LIMIT to control result size — Databricks returns large result sets as paginated chunks.',
-    '',
-    '### Read-only guard',
-    '`runQuery` rejects any statement that does not start with SELECT, SHOW, DESCRIBE, DESC, EXPLAIN, or WITH. ' +
-      'Semicolon-delimited multi-statement input is also rejected. ' +
-      'Write operations smuggled into a WITH CTE are caught and rejected.',
-    '',
-    '### Genie and other MCP servers',
-    'This connector targets the Databricks SQL MCP server by default (`/api/2.0/mcp/sql`).',
-    'For natural-language data questions, change the serverUrl to point to a Genie MCP server',
-    '(`/api/2.0/mcp/genie/<genie_space_id>`) and use `callTool` with `query_space`.',
-    'Use `listTools` to discover what the connected server supports.',
     '',
     '### Common gotchas',
     '- The MCP server URL is workspace-specific — each Databricks workspace has a different hostname.',
