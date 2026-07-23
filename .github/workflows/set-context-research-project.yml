@@ -1,0 +1,61 @@
+name: Set Nightshift - Context and Research Workstream fields from label
+
+# Adds a labeled issue to the "Nightshift: Context and Research" project and sets its
+# "Workstream" single-select field based on the label
+#
+
+on:
+  issues:
+    types: [labeled]
+
+permissions: {}
+
+env:
+  CONTEXT_RESEARCH_PROJECT_ID: 'PVT_kwDOAGc3Zs4BbAmj'
+  WORKSTREAM_FIELD_ID: 'PVTSSF_lADOAGc3Zs4BbAmjzhWPSno'
+  LABEL_TO_OPTION: |
+    {
+      "kbn-evals": "6bf0df26",
+      "workstream:investigate-act": "45a6cbd6"
+    }
+
+jobs:
+  set_workstream:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: octokit/graphql-action@ddde8ebb2493e79f390e6449c725c21663a67505 # v3.0.2
+        id: add_to_project
+        # Only act when the label that fired the event maps to an option.
+        if: ${{ fromJSON(env.LABEL_TO_OPTION)[github.event.label.name] != null }}
+        with:
+          # Variables have to be snake cased because of https://github.com/octokit/graphql-action/issues/164
+          query: |
+            mutation AddToProject($project_id: ID!, $content_id: ID!) {
+              addProjectV2ItemById(input: { projectId: $project_id, contentId: $content_id }) {
+                item {
+                  id
+                }
+              }
+            }
+          project_id: ${{ env.CONTEXT_RESEARCH_PROJECT_ID }}
+          content_id: ${{ github.event.issue.node_id }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.CONTEXT_RESEARCH_PROJECT_TOKEN }}
+
+      - uses: octokit/graphql-action@ddde8ebb2493e79f390e6449c725c21663a67505 # v3.0.2
+        if: ${{ fromJSON(env.LABEL_TO_OPTION)[github.event.label.name] != null }}
+        with:
+          query: |
+            mutation SetWorkstream($item_id: ID!, $project_id: ID!, $field_id: ID!, $option_id: String) {
+              updateProjectV2ItemFieldValue(
+                input: { itemId: $item_id, projectId: $project_id, fieldId: $field_id, value: { singleSelectOptionId: $option_id } }
+              ) {
+                clientMutationId
+              }
+            }
+          item_id: ${{ fromJSON(steps.add_to_project.outputs.data).addProjectV2ItemById.item.id }}
+          project_id: ${{ env.CONTEXT_RESEARCH_PROJECT_ID }}
+          field_id: ${{ env.WORKSTREAM_FIELD_ID }}
+          option_id: ${{ fromJSON(env.LABEL_TO_OPTION)[github.event.label.name] }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.CONTEXT_RESEARCH_PROJECT_TOKEN }}
