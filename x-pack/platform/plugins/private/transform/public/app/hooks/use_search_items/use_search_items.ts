@@ -65,6 +65,8 @@ export const useSearchItems = (defaultSavedObjectId: string | undefined) => {
 
   useEffect(() => {
     if (savedObjectId !== undefined) {
+      setSearchItems(undefined);
+      setError(undefined);
       fetchSavedObject(savedObjectId);
     }
     // Run this only when savedObjectId changes.

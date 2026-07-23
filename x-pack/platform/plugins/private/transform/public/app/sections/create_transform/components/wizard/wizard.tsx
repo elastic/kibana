@@ -192,6 +192,11 @@ export const Wizard: FC<WizardProps> = React.memo(
 
     const confirmDataViewChange = useCallback(() => {
       if (pendingDataViewId) {
+        const transformFunction = transformFunctionRef.current;
+        setStepDefineState(undefined);
+        setStepDetailsState(getDefaultStepDetailsState(transformFunction));
+        setStepCreateState(getDefaultStepCreateState());
+        setCurrentStep(WIZARD_STEPS.DEFINE);
         setSavedObjectId?.(pendingDataViewId);
       }
       setPendingDataViewId(undefined);

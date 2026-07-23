@@ -173,5 +173,7 @@ describe('Transform: <Wizard />', () => {
     fireEvent.click(screen.getByText('Change data view'));
 
     expect(setSavedObjectId).toHaveBeenCalledWith('next-data-view-id');
+    expect(screen.queryByTestId('mockStepDefineForm')).not.toBeInTheDocument();
+    expect(screen.getByTestId('mockEmptyStepDefineForm')).toBeInTheDocument();
   });
 });

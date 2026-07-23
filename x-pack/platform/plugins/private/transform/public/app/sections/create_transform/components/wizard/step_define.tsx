@@ -48,6 +48,7 @@ export const StepDefine: FC<StepDefineProps> = ({
               {dataViewPicker}
               <EuiSpacer size="m" />
               <StepDefineForm
+                key={searchItems.dataView.id ?? searchItems.dataView.getIndexPattern()}
                 onChange={setStepDefineState}
                 overrides={{ ...stepDefineState }}
                 searchItems={searchItems}
