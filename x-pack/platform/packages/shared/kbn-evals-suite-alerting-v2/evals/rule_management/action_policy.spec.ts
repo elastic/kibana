@@ -60,14 +60,12 @@ evaluate.describe(
                   ],
                 },
                 output: {
-                  expected: [
+                  criteria: [
                     'Loads the Alerting V2 rule-management skill (not Security detection-rule-edit) and composes the kind: alert rule via platform.alerting.manage_rule on the first turn.',
                     'After composing the complete alert rule, proactively offers to set up email notifications for it — the offer originates from the assistant on the first turn, before the user asks for notifications.',
                     'On the second turn, loads the workflow-authoring skill and generates a notification workflow via platform.core.generate_workflow (passing a UUID workflowId), using the configured email connector.',
                     'Calls platform.alerting.manage_action_policy to compose the action policy: workflow destination, rule.id matcher scoping it to the composed rule, per_episode grouping, on_status_change throttle, ending with a validate operation.',
                     'Renders the composed attachments inline and directs the user to save in order Rule → Workflow → Action Policy via the attachment buttons.',
-                  ],
-                  criteria: [
                     'The first-turn response composes the rule AND proactively asks whether the user wants to set up (email) notifications for it — proactive means the assistant raises notifications itself; merely complying after the user brings it up on turn 2 does not satisfy this.',
                     'The assistant does not claim that no email connector is configured — one exists in the environment and should be discovered (e.g. via platform.workflows.get_connectors).',
                     'The action policy destination references the workflow ID passed to generate_workflow (a UUID), not the workflow attachment id and not a connector id.',

@@ -67,32 +67,32 @@ const runTask = async (
 };
 
 describe('collectScoredCriteria', () => {
-  it('scores both expected and criteria (expected first)', () => {
+  it('returns non-empty criteria', () => {
     expect(
       collectScoredCriteria({
-        expected: ['loads skill', 'calls manage_rule'],
-        criteria: ['no @timestamp filter'],
+        criteria: ['loads skill', 'calls manage_rule', 'no @timestamp filter'],
       })
     ).toEqual(['loads skill', 'calls manage_rule', 'no @timestamp filter']);
   });
 
-  it('accepts a single expected string', () => {
-    expect(collectScoredCriteria({ expected: 'loads skill', criteria: [] })).toEqual([
+  it('filters blank criteria strings', () => {
+    expect(collectScoredCriteria({ criteria: ['loads skill', '  ', ''] })).toEqual([
       'loads skill',
     ]);
   });
 
-  it('scores expected alone when criteria is omitted', () => {
-    expect(collectScoredCriteria({ expected: ['loads skill'] })).toEqual(['loads skill']);
+  it('throws when criteria is omitted', () => {
+    expect(() => collectScoredCriteria({})).toThrow(/criteria must contain at least one/i);
+    expect(() => collectScoredCriteria(undefined)).toThrow(/criteria must contain at least one/i);
   });
 
-  it('scores criteria alone when expected is omitted', () => {
-    expect(collectScoredCriteria({ criteria: ['validates query'] })).toEqual(['validates query']);
-  });
-
-  it('returns an empty list when neither is provided', () => {
-    expect(collectScoredCriteria({})).toEqual([]);
-    expect(collectScoredCriteria(undefined)).toEqual([]);
+  it('throws when criteria is empty or only blanks', () => {
+    expect(() => collectScoredCriteria({ criteria: [] })).toThrow(
+      /criteria must contain at least one/i
+    );
+    expect(() => collectScoredCriteria({ criteria: ['', '  '] })).toThrow(
+      /criteria must contain at least one/i
+    );
   });
 });
 

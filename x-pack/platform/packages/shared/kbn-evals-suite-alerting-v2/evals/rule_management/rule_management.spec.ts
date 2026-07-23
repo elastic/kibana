@@ -47,12 +47,10 @@ evaluate.describe(
                 turns: ["I want to set up alerting but I'm not sure where to start."],
               },
               output: {
-                expected: [
+                criteria: [
                   'Loads the Alerting V2 rule-management skill (not Security detection-rule-edit).',
                   'Clarifies first whether the user wants Alerting V2 or Security detection rules (e.g. via a two-option ask_user_question) before assuming Alerting V2.',
                   'Does not compose a Security detection rule or a finished V2 rule in this turn.',
-                ],
-                criteria: [
                   'On this vague opener, the assistant tries to establish whether the user wants operational/observability alerting (Alerting V2) or Security detection rules before proceeding — via a structured question (e.g. an ask_user_question prompt) or in prose — rather than assuming one or composing a rule. Equivalent labels such as "Observability" or "Operations" for the Alerting V2 side count as valid disambiguation.',
                   'The response does not create a Security detection rule or a finished Alerting V2 rule in this turn.',
                 ],
@@ -88,12 +86,10 @@ evaluate.describe(
                   ],
                 },
                 output: {
-                  expected: [
+                  criteria: [
                     'Keeps the Alerting V2 rule-management skill engaged across turns (never routes to Security detection-rule-edit).',
                     'Uses the clarification to move toward an Alerting V2 alert rule for sustained high CPU.',
                     'Retains context from the first turn (does not re-ask what the user already answered).',
-                  ],
-                  criteria: [
                     'On the first (vague) turn, the assistant tries to establish whether the user wants operational/observability alerting (Alerting V2) or Security detection rules — via a structured question (e.g. an ask_user_question prompt) or in prose — rather than assuming. Equivalent labels such as "Observability" or "Operations" for the Alerting V2 side count as valid disambiguation.',
                     'The final response stays focused on Alerting V2 (alert/signal rules) and does not switch to Security detection rules.',
                     "The assistant uses the user's clarification (CPU above 90%) to progress toward composing an Alerting V2 alert rule rather than repeating the same generic orientation.",
@@ -132,12 +128,10 @@ evaluate.describe(
                   ],
                 },
                 output: {
-                  expected: [
+                  criteria: [
                     'Activates the Security detection-rule-edit skill once the user confirms they want Security detection rules.',
                     'Uses the clarification to move toward a Security detection rule for brute-force login attempts.',
                     'Retains context from the first turn and does not force the request into Alerting V2 or claim it cannot help.',
-                  ],
-                  criteria: [
                     'On the first (vague) turn, the assistant tries to establish whether the user wants operational/observability alerting (Alerting V2) or Security detection rules — via a structured question (e.g. an ask_user_question prompt) or in prose — rather than assuming. Equivalent labels such as "Observability" or "Operations" for the Alerting V2 side count as valid disambiguation.',
                     'Once the user confirms they want Security detection rules, the assistant routes to Security detection-rule functionality rather than continuing to steer them toward Alerting V2.',
                     'The assistant does not claim it is unable to help with Security detection rules.',
@@ -186,13 +180,11 @@ evaluate.describe(
                   ],
                 },
                 output: {
-                  expected: [
+                  criteria: [
                     'Loads the Alerting V2 rule-management skill on the first turn (it is named explicitly; Security detection-rule-edit must not activate).',
                     'On the first turn, asks what the user wants to monitor instead of composing a rule or asking Alerting V2 vs Security (the prompt already says alerting v2).',
                     `After the user answers, calls platform.alerting.manage_rule to compose a kind: alert rule on ${hostMetricsIndex} for average system.cpu.total.norm.pct > 0.9 grouped by host.name.`,
                     'Ends the manage_rule operations with a validate operation and renders the rule attachment / directs the user to the Create rule button instead of persisting via API.',
-                  ],
-                  criteria: [
                     'The first-turn response is a guided setup question about what to monitor (data source, condition, or both) — not a composed rule, not a V2-vs-Security disambiguation, and not a refusal.',
                     "The second-turn response uses the user's answer to compose the rule rather than re-asking for details the user already provided.",
                     'The breach ES|QL query filters for average system.cpu.total.norm.pct above 0.9 (or an equivalent 90% threshold expression), and the 5-minute duration is expressed via lookback/schedule or a state transition — not a WHERE on @timestamp.',
@@ -254,13 +246,11 @@ evaluate.describe(
                   ],
                 },
                 output: {
-                  expected: [
+                  criteria: [
                     'Loads the Alerting V2 rule-management skill (not Security detection-rule-edit).',
                     'Calls platform.alerting.manage_rule to compose the rule in this turn rather than asking for details the user already gave.',
                     `Composes a kind: alert rule whose ES|QL query reads from ${hostMetricsIndex}, aggregates system.cpu.total.norm.pct, groups by host.name, and filters for the > 0.9 threshold.`,
                     'Ends the manage_rule operations with a validate operation and renders the rule attachment / directs the user to the Create rule button instead of persisting via API.',
-                  ],
-                  criteria: [
                     'The breach ES|QL query filters for average system.cpu.total.norm.pct above 0.9 (or an equivalent 90% threshold expression).',
                     'The query does not embed an absolute time-range or @timestamp window filter for the 5-minute duration — the lookback/schedule (or a state transition) expresses the duration, not a WHERE on @timestamp.',
                     'The set_query operation validates successfully against Elasticsearch (the index and fields exist), and the final manage_rule call ends with a validate operation.',
@@ -320,13 +310,11 @@ evaluate.describe(
                   ],
                 },
                 output: {
-                  expected: [
+                  criteria: [
                     'May clarify Alerting V2 vs Security on the opener; once the user confirms Alerting V2, stays on the rule-management skill (not Security detection-rule-edit).',
                     'Discovers the admin-console index (via index_explorer or list_indices) and inspects its field mappings via get_index_mapping before composing.',
                     `Calls platform.alerting.manage_rule to compose a kind: alert rule against ${adminConsoleIndex} that counts error events (> 3) over a 5-minute window.`,
                     'Ends the manage_rule operations with a validate operation and renders the rule attachment / directs the user to the Create rule button instead of persisting via API.',
-                  ],
-                  criteria: [
                     'If the assistant asks which alerting system to use on the first turn, that is acceptable — it must not assume Security detection rules. After the user confirms Alerting V2, it proceeds to compose rather than repeating the same disambiguation.',
                     'The rule\'s ES|QL query counts error events (e.g. filtering on log.level == "ERROR" or an equivalent error indicator present in the mappings) and fires when the count is greater than 3.',
                     'The query does not embed an absolute @timestamp time-range filter for the 5-minute window — lookback expresses the duration.',

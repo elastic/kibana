@@ -50,16 +50,10 @@ export interface RuleManagementExample extends Example {
   };
   output: {
     /**
-     * Graded expectations scored by the LLM Criteria judge (together with
-     * {@link criteria}). Prefer these for the high-level checklist of what
-     * “good” looks like for the example.
+     * Free-form quality criteria scored by the LLM Criteria judge.
+     * Required — examples must define at least one non-empty criterion.
      */
-    expected?: string | string[];
-    /**
-     * Additional free-form quality criteria scored by the same LLM Criteria
-     * judge. Combined with {@link expected} into one Criteria score.
-     */
-    criteria?: string[];
+    criteria: string[];
   };
   metadata?: {
     /** The conversation must call every tool in this list at least once. */
@@ -102,23 +96,16 @@ export type EvaluateDataset = (params: {
   };
 }) => Promise<void>;
 
-/**
- * Builds the full LLM-judged checklist for an example: `output.expected`
- * (string or string[]) followed by `output.criteria`. Both contribute to the
- * single Criteria evaluator score.
- */
 export const collectScoredCriteria = (
   output: RuleManagementExample['output'] | null | undefined
 ): string[] => {
-  const expectedItems = Array.isArray(output?.expected)
-    ? output.expected
-    : output?.expected
-    ? [output.expected]
-    : [];
-  const criteriaItems = output?.criteria ?? [];
-  return [...expectedItems, ...criteriaItems].filter(
+  const scoredCriteria = (output?.criteria ?? []).filter(
     (item): item is string => typeof item === 'string' && item.trim().length > 0
   );
+  if (scoredCriteria.length === 0) {
+    throw new Error('criteria must contain at least one non-empty string');
+  }
+  return scoredCriteria;
 };
 
 const createCriteriaEvaluator = (evaluators: DefaultEvaluators): Evaluator => ({
@@ -128,13 +115,6 @@ const createCriteriaEvaluator = (evaluators: DefaultEvaluators): Evaluator => ({
     const scoredCriteria = collectScoredCriteria(
       expected as RuleManagementExample['output'] | null | undefined
     );
-    if (scoredCriteria.length === 0) {
-      return {
-        score: null,
-        label: 'skipped',
-        explanation: 'No expected/criteria provided for this example',
-      };
-    }
     return evaluators.criteria(scoredCriteria).evaluate({ expected, ...rest });
   },
 });
