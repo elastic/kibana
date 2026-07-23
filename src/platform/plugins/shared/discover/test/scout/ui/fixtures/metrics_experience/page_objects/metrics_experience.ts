@@ -175,4 +175,11 @@ export class MetricsExperiencePage {
   public async openInspectorFlyout(cardIndex: number): Promise<void> {
     await this.clickVisibleQuickAction(cardIndex, this.chartActionsFor(cardIndex).inspect);
   }
+
+  /**
+   * Returns the title element of the card at `index`
+   */
+  public getCardTitle(index: number): Locator {
+    return this.getCardByIndex(index).locator('[data-test-subj="embeddablePanelTitle"]');
+  }
 }

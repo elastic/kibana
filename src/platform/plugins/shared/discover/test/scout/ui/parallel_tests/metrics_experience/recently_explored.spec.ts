@@ -45,19 +45,15 @@ spaceTest.describe(
 
       await expect(metricsExperience.grid).toBeVisible();
 
-      const recentlyExploredMetric = await metricsExperience
-        .getCardByIndex(1)
-        .locator('[data-test-subj="embeddablePanelTitle"]')
-        .textContent();
-      expect(recentlyExploredMetric).not.toBeNull();
+      const targetTitle = metricsExperience.getCardTitle(1);
+      await expect(targetTitle).not.toHaveText('');
+      const targetMetricName = await targetTitle.textContent();
 
       await metricsExperience.recordInteraction(1);
       await metricsExperience.selectSortBy('recency');
 
       // The interacted metric moves to the front.
-      await expect(
-        metricsExperience.getCardByIndex(0).locator('[data-test-subj="embeddablePanelTitle"]')
-      ).toHaveText(String(recentlyExploredMetric));
+      await expect(metricsExperience.getCardTitle(0)).toHaveText(String(targetMetricName));
     });
   }
 );
