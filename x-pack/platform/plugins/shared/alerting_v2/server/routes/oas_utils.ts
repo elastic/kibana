@@ -7,11 +7,6 @@
 
 import type { ErrorResponse } from '@kbn/alerting-v2-schemas';
 
-/**
- * Concrete OAS fragment shape used by Alerting v2 examples/tests.
- * Narrower than the OpenAPI `ReferenceObject | MediaTypeObject` union so
- * callers can read `content` without casts.
- */
 export interface AlertingOasOperationObject {
   requestBody?: {
     content?: {
