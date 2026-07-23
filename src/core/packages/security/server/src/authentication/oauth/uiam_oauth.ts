@@ -17,6 +17,7 @@ export interface UiamOAuthClientLogo {
 export interface UiamOAuthConnectionsSummary {
   active?: string[];
   revoked?: string[];
+  expired?: string[];
 }
 
 export type UiamOAuthClientType = 'public' | 'confidential';
