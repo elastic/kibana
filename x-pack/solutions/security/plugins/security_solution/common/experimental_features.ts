@@ -69,6 +69,12 @@ export const allowedExperimentalValues = Object.freeze({
   responseActionsEndpointCancel: false,
 
   /**
+   * `kill_descendants` parameter option for the `kill-process` response action for Elastic Defend Endpoint
+   * Release: 9.6
+   */
+  responseActionsEndpointKillProcessDescendants: false,
+
+  /**
    * Enables CCS prefixing of endpoint indices so a Defend agent shipping to a remote ES output
    * (Fleet remote output) is visible from the managing cluster's Kibana. Off by default while
    * we test impact on other features.
