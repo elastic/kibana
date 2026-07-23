@@ -570,6 +570,14 @@ export const RULE_EDIT_ERROR_TEXT = i18n.translate('responseOpsRuleForm.ruleForm
   defaultMessage: 'Cannot update rule.',
 });
 
+export const RULE_EDIT_SUCCESS_TEXT = (ruleName: string) =>
+  i18n.translate('responseOpsRuleForm.ruleForm.editSuccessText', {
+    defaultMessage: 'Updated "{ruleName}"',
+    values: {
+      ruleName,
+    },
+  });
+
 export const CIRCUIT_BREAKER_SEE_FULL_ERROR_TEXT = i18n.translate(
   'responseOpsRuleForm.ruleForm.circuitBreakerSeeFullErrorText',
   {
