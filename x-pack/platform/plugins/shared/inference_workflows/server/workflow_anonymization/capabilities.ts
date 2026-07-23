@@ -8,6 +8,8 @@
 import {
   INFERENCE_PROCEED_CAPABILITY_ID,
   PII_TOKENIZATION_CAPABILITY_ID,
+  resolveInferenceProceedCapabilityValue,
+  resolvePiiTokenizationCapabilityValue,
   type InferenceProceedCapability,
   type PiiTokenizationContext,
 } from '@kbn/inference-plugin/server';
@@ -24,31 +26,32 @@ const getCapabilityValue = (
   return capability.value;
 };
 
-const isPiiTokenizationContext = (value: object): value is PiiTokenizationContext =>
-  'detectEntities' in value &&
-  typeof value.detectEntities === 'function' &&
-  'tokenize' in value &&
-  typeof value.tokenize === 'function';
-
-const isInferenceProceedCapability = (value: object): value is InferenceProceedCapability =>
-  'invoke' in value && typeof value.invoke === 'function';
-
 export const getPiiTokenizationContext = (
   capabilities: WorkflowExecutionCapabilities | undefined
 ): PiiTokenizationContext => {
-  const value = getCapabilityValue(capabilities, PII_TOKENIZATION_CAPABILITY_ID);
-  if (!isPiiTokenizationContext(value)) {
-    throw new Error(`Workflow capability "${PII_TOKENIZATION_CAPABILITY_ID}" is invalid`);
+  const capability = resolvePiiTokenizationCapabilityValue(
+    getCapabilityValue(capabilities, PII_TOKENIZATION_CAPABILITY_ID)
+  );
+  if (!capability) {
+    throw new Error(
+      `Workflow capability "${PII_TOKENIZATION_CAPABILITY_ID}" is invalid. ` +
+        `Capabilities are in-memory handles that cannot survive JSON serialization.`
+    );
   }
-  return value;
+  return capability;
 };
 
 export const getInferenceProceedCapability = (
   capabilities: WorkflowExecutionCapabilities | undefined
 ): InferenceProceedCapability => {
-  const value = getCapabilityValue(capabilities, INFERENCE_PROCEED_CAPABILITY_ID);
-  if (!isInferenceProceedCapability(value)) {
-    throw new Error(`Workflow capability "${INFERENCE_PROCEED_CAPABILITY_ID}" is invalid`);
+  const capability = resolveInferenceProceedCapabilityValue(
+    getCapabilityValue(capabilities, INFERENCE_PROCEED_CAPABILITY_ID)
+  );
+  if (!capability) {
+    throw new Error(
+      `Workflow capability "${INFERENCE_PROCEED_CAPABILITY_ID}" is invalid. ` +
+        `Capabilities are in-memory handles that cannot survive JSON serialization.`
+    );
   }
-  return value;
+  return capability;
 };

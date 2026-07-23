@@ -14,13 +14,18 @@ const deriveExecutionScope = ({
   serverSalt,
   sessionId,
 }: {
-  serverSalt: string;
+  serverSalt?: string;
   sessionId?: string;
 }): string => {
   if (!sessionId) {
     return randomBytes(32).toString('hex');
   }
-
+  // Without a server key, use the session ID directly as salt — tokens are within-session stable
+  // but not server-hardened. Configure xpack.inference.anonymization.encryptionKey for HMAC-backed
+  // tokens that are opaque even if the session ID is known.
+  if (!serverSalt) {
+    return sessionId;
+  }
   return createHmac('sha256', serverSalt).update(`session:${sessionId}`).digest('hex');
 };
 
@@ -30,7 +35,7 @@ export const createPiiTokenizationContext = ({
   sessionId,
 }: {
   detectionContext: PiiDetectionContext;
-  serverSalt: string;
+  serverSalt?: string;
   sessionId?: string;
 }): PiiTokenizationContext => {
   const executionScope = deriveExecutionScope({ serverSalt, sessionId });

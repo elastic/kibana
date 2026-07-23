@@ -15,11 +15,12 @@ import {
   getConnectorPlatform,
   getConnectorDefaultModel,
   type ChatCompleteCompositeResponse,
+  type ChatCompletionEvent,
   MessageRole,
 } from '@kbn/inference-common';
 import type { Logger } from '@kbn/logging';
 import type { Observable } from 'rxjs';
-import { defer, forkJoin, from, identity, share, switchMap, catchError, throwError } from 'rxjs';
+import { catchError, defer, from, identity, share, switchMap, tap, throwError } from 'rxjs';
 import { withChatCompleteSpan } from '@kbn/inference-tracing';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { omit } from 'lodash';
@@ -50,6 +51,11 @@ import type { InferenceEndpointIdCache } from '../util/inference_endpoint_id_cac
 import { prepareAnonymization } from './prepare_anonymization';
 import type { TokenUsageLogger } from '../token_usage';
 import { handleTokenUsageLogging, buildTokenUsageContext } from '../token_usage';
+import type { WorkflowAnonymizationOptions } from '../inference_client/workflow_anonymization_options';
+import {
+  createWorkflowAnonymizationPipeline,
+  type WorkflowInvocationState,
+} from './workflow_anonymization_pipeline';
 
 interface CreateChatCompleteApiOptions {
   request: KibanaRequest;
@@ -60,6 +66,7 @@ interface CreateChatCompleteApiOptions {
   regexWorker: RegexWorkerService;
   esClient: ElasticsearchClient;
   anonymization?: InferenceAnonymizationOptions;
+  workflowAnonymization?: WorkflowAnonymizationOptions;
   endpointIdCache: InferenceEndpointIdCache;
   callbackManager?: InferenceCallbackManager;
   tokenUsageLogger?: TokenUsageLogger;
@@ -115,6 +122,7 @@ export function createChatCompleteCallbackApi({
   regexWorker,
   esClient,
   anonymization,
+  workflowAnonymization,
   endpointIdCache,
   callbackManager,
   tokenUsageLogger,
@@ -130,6 +138,8 @@ export function createChatCompleteCallbackApi({
     }: ChatCompleteApiWithCallbackInitOptions,
     callback: ChatCompleteApiWithCallbackCallback
   ) => {
+    const workflowInvocationState: WorkflowInvocationState = { connectorInvoked: false };
+    const retryFilter = getRetryFilter(retryConfiguration.retryOn);
     const inference$ = defer(() =>
       resolveAndCreatePipeline({
         connectorId,
@@ -145,6 +155,14 @@ export function createChatCompleteCallbackApi({
         stream,
         namespace,
         anonymization,
+        workflowAnonymization,
+        workflowInvocationState,
+        connectorRetry: {
+          maxRetries,
+          backoffMultiplier: retryConfiguration.backoffMultiplier,
+          initialDelay: retryConfiguration.initialDelay,
+          retryFilter,
+        },
         tokenUsageLogger,
         isTokenUsageTrackingEnabled,
       })
@@ -153,7 +171,7 @@ export function createChatCompleteCallbackApi({
         maxRetry: maxRetries,
         backoffMultiplier: retryConfiguration.backoffMultiplier,
         initialDelay: retryConfiguration.initialDelay,
-        errorFilter: getRetryFilter(retryConfiguration.retryOn),
+        errorFilter: (error) => !workflowInvocationState.connectorInvoked && retryFilter(error),
       }),
       callbackManager ? handleLifecycleCallbacks({ callbackManager }) : identity,
       abortSignal ? handleCancellation(abortSignal) : identity
@@ -169,6 +187,7 @@ export function createChatCompleteCallbackApi({
 
 function createChatCompletePipeline({
   resolve,
+  request,
   esClient,
   logger,
   anonymizationRulesPromise,
@@ -178,11 +197,15 @@ function createChatCompletePipeline({
   stream,
   namespace,
   anonymization,
+  workflowAnonymization,
+  workflowInvocationState,
+  connectorRetry,
   connectorId,
   tokenUsageLogger,
   isTokenUsageTrackingEnabled,
 }: {
   resolve: () => Promise<ResolvedPipelineContext>;
+  request: KibanaRequest;
   esClient: ElasticsearchClient;
   logger: Logger;
   anonymizationRulesPromise: Promise<AnonymizationRule[]>;
@@ -192,15 +215,20 @@ function createChatCompletePipeline({
   stream?: boolean;
   namespace: string;
   anonymization?: InferenceAnonymizationOptions;
+  workflowAnonymization?: WorkflowAnonymizationOptions;
+  workflowInvocationState: WorkflowInvocationState;
+  connectorRetry: {
+    maxRetries: number;
+    backoffMultiplier?: number;
+    initialDelay?: number;
+    retryFilter: (error: Error) => boolean;
+  };
   connectorId: string;
   tokenUsageLogger?: TokenUsageLogger;
   isTokenUsageTrackingEnabled?: () => Promise<boolean>;
 }) {
-  return forkJoin({
-    context: from(resolve()),
-    anonymizationRules: from(anonymizationRulesPromise),
-  }).pipe(
-    switchMap(({ context, anonymizationRules }) => {
+  return from(resolve()).pipe(
+    switchMap((context) => {
       const { callbackContext, getSpanModel, chatComplete } = context;
 
       const {
@@ -218,78 +246,131 @@ function createChatCompletePipeline({
 
       const messages = sanitizeMessages(givenMessages);
 
-      return from(
-        prepareAnonymization({
+      const invokeConnector = ({
+        system: connectorSystem,
+        messages: connectorMessages,
+        abortSignal: connectorAbortSignal,
+      }: {
+        system?: string;
+        messages: readonly (typeof messages)[number][];
+        abortSignal?: AbortSignal;
+      }): Observable<ChatCompletionEvent> => {
+        const spanModel = getSpanModel(modelName);
+        let emittedEvent = false;
+        return withChatCompleteSpan(
+          {
+            system: connectorSystem,
+            messages: [...connectorMessages],
+            tools,
+            toolChoice,
+            ...(spanModel ? { model: spanModel } : {}),
+            ...metadata?.attributes,
+          },
+          () =>
+            chatComplete({
+              system: connectorSystem,
+              messages: [...connectorMessages],
+              toolChoice,
+              tools,
+              temperature,
+              logger,
+              functionCalling,
+              modelName,
+              abortSignal: connectorAbortSignal,
+              metadata,
+              timeout,
+              maxContentLength,
+              stream: workflowAnonymization ? true : stream,
+            }).pipe(chunksIntoMessage({ toolOptions: { toolChoice, tools }, logger }))
+        ).pipe(
+          tap(() => {
+            emittedEvent = true;
+          }),
+          workflowAnonymization
+            ? retryWithExponentialBackoff({
+                maxRetry: connectorRetry.maxRetries,
+                backoffMultiplier: connectorRetry.backoffMultiplier,
+                initialDelay: connectorRetry.initialDelay,
+                errorFilter: (error) => !emittedEvent && connectorRetry.retryFilter(error),
+              })
+            : identity
+        );
+      };
+
+      const tokenUsageOperator = tokenUsageLogger
+        ? handleTokenUsageLogging({
+            tokenUsageLogger,
+            getContext: () =>
+              buildTokenUsageContext({
+                connectorId,
+                model: callbackContext.model,
+                modelName,
+                featureId: metadata?.connectorTelemetry?.pluginId,
+                parentFeatureId: metadata?.connectorTelemetry?.aggregateBy,
+              }),
+            logger,
+            isEnabled: isTokenUsageTrackingEnabled,
+          })
+        : identity;
+
+      if (workflowAnonymization) {
+        return createWorkflowAnonymizationPipeline({
+          request,
           namespace,
-          logger,
-          anonymizationRules,
-          regexWorker,
-          esClient,
-          replacementsEsClient: anonymization?.replacements?.esClient,
-          replacementsEncryptionKeyPromise: anonymization?.replacements?.encryptionKeyPromise,
-          usePersistentReplacements: anonymization?.replacements?.usePersistentReplacements,
-          requireReplacementsEncryptionKey: anonymization?.replacements?.requireEncryptionKey,
-          saltPromise: anonymization?.saltPromise,
-          resolveEffectivePolicy: anonymization?.resolveEffectivePolicy,
-          metadata,
           system,
           messages,
-        })
-      ).pipe(
-        switchMap(({ anonymization: preparedAnonymization, replacementsId, effectivePolicy }) => {
-          const systemWithAnonymizationInstructions = preparedAnonymization.system
-            ? addAnonymizationInstruction(
-                preparedAnonymization.system,
-                anonymizationRules,
-                effectivePolicy
-              )
-            : system;
+          sessionId: metadata?.anonymization?.sessionId,
+          agentId: metadata?.anonymization?.agentId,
+          abortSignal,
+          saltPromise: anonymization?.saltPromise,
+          regexWorker,
+          logger,
+          workflowAnonymization,
+          invocationState: workflowInvocationState,
+          invokeConnector,
+        }).pipe(tokenUsageOperator);
+      }
 
-          const spanModel = getSpanModel(modelName);
-
-          return withChatCompleteSpan(
-            {
-              system: systemWithAnonymizationInstructions,
-              messages: preparedAnonymization.messages,
-              tools,
-              toolChoice,
-              ...(spanModel ? { model: spanModel } : {}),
-              ...metadata?.attributes,
-            },
-            () => {
-              return chatComplete({
-                system: systemWithAnonymizationInstructions,
-                messages: preparedAnonymization.messages,
-                toolChoice,
-                tools,
-                temperature,
-                logger,
-                functionCalling,
-                modelName,
-                abortSignal,
-                metadata,
-                timeout,
-                maxContentLength,
-                stream,
-              }).pipe(chunksIntoMessage({ toolOptions: { toolChoice, tools }, logger }));
-            }
-          ).pipe(deanonymizeMessage({ ...preparedAnonymization, replacementsId }));
-        }),
-        tokenUsageLogger
-          ? handleTokenUsageLogging({
-              tokenUsageLogger,
-              getContext: () =>
-                buildTokenUsageContext({
-                  connectorId,
-                  model: callbackContext.model,
-                  modelName,
-                  featureId: metadata?.connectorTelemetry?.pluginId,
-                  parentFeatureId: metadata?.connectorTelemetry?.aggregateBy,
-                }),
+      return from(anonymizationRulesPromise).pipe(
+        switchMap((anonymizationRules) =>
+          from(
+            prepareAnonymization({
+              namespace,
               logger,
-              isEnabled: isTokenUsageTrackingEnabled,
+              anonymizationRules,
+              regexWorker,
+              esClient,
+              replacementsEsClient: anonymization?.replacements?.esClient,
+              replacementsEncryptionKeyPromise: anonymization?.replacements?.encryptionKeyPromise,
+              usePersistentReplacements: anonymization?.replacements?.usePersistentReplacements,
+              requireReplacementsEncryptionKey: anonymization?.replacements?.requireEncryptionKey,
+              saltPromise: anonymization?.saltPromise,
+              resolveEffectivePolicy: anonymization?.resolveEffectivePolicy,
+              metadata,
+              system,
+              messages,
             })
-          : identity
+          ).pipe(
+            switchMap(
+              ({ anonymization: preparedAnonymization, replacementsId, effectivePolicy }) => {
+                const systemWithAnonymizationInstructions = preparedAnonymization.system
+                  ? addAnonymizationInstruction(
+                      preparedAnonymization.system,
+                      anonymizationRules,
+                      effectivePolicy
+                    )
+                  : system;
+
+                return invokeConnector({
+                  system: systemWithAnonymizationInstructions,
+                  messages: preparedAnonymization.messages,
+                  abortSignal,
+                }).pipe(deanonymizeMessage({ ...preparedAnonymization, replacementsId }));
+              }
+            )
+          )
+        ),
+        tokenUsageOperator
       );
     })
   );
@@ -309,6 +390,9 @@ function resolveAndCreatePipeline({
   stream,
   namespace,
   anonymization,
+  workflowAnonymization,
+  workflowInvocationState,
+  connectorRetry,
   tokenUsageLogger,
   isTokenUsageTrackingEnabled,
 }: {
@@ -325,6 +409,14 @@ function resolveAndCreatePipeline({
   stream?: boolean;
   namespace: string;
   anonymization?: InferenceAnonymizationOptions;
+  workflowAnonymization?: WorkflowAnonymizationOptions;
+  workflowInvocationState: WorkflowInvocationState;
+  connectorRetry: {
+    maxRetries: number;
+    backoffMultiplier?: number;
+    initialDelay?: number;
+    retryFilter: (error: Error) => boolean;
+  };
   tokenUsageLogger?: TokenUsageLogger;
   isTokenUsageTrackingEnabled?: () => Promise<boolean>;
 }) {
@@ -426,6 +518,7 @@ function resolveAndCreatePipeline({
 
       return createChatCompletePipeline({
         resolve,
+        request,
         esClient,
         logger,
         anonymizationRulesPromise,
@@ -435,6 +528,9 @@ function resolveAndCreatePipeline({
         stream,
         namespace,
         anonymization,
+        workflowAnonymization,
+        workflowInvocationState,
+        connectorRetry,
         connectorId,
         tokenUsageLogger,
         isTokenUsageTrackingEnabled,

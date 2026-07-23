@@ -61,6 +61,21 @@ describe('workflow anonymization schemas', () => {
     expect(workflowChatMessageSchema.parse(message)).toEqual(message);
   });
 
+  it('preserves opaque image extensions for forward compatibility', () => {
+    const message = {
+      role: MessageRole.User,
+      content: [
+        {
+          type: 'image',
+          source: { data: 'base64', mimeType: 'image/png', sourceMetadata: 'preserved' },
+          altText: 'preserved',
+        },
+      ],
+    };
+
+    expect(workflowChatMessageSchema.parse(message)).toEqual(message);
+  });
+
   it('rejects unknown message, rule, and token-map fields', () => {
     expect(() =>
       workflowChatMessageSchema.parse({

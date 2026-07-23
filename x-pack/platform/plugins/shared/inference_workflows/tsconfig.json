@@ -6,6 +6,7 @@
   "include": ["../../../../../typings/**/*", "common/**/*", "public/**/*", "server/**/*"],
   "exclude": ["target/**/*"],
   "kbn_references": [
+    "@kbn/anonymization-common",
     "@kbn/core",
     "@kbn/i18n",
     "@kbn/zod",
@@ -14,6 +15,12 @@
     "@kbn/workflows-management-plugin",
     "@kbn/inference-plugin",
     "@kbn/inference-common",
-    "@kbn/search-inference-endpoints"
+    "@kbn/search-inference-endpoints",
+    "@kbn/core-http-server-mocks",
+    "@kbn/core-logging-server-mocks",
+    "@kbn/core-spaces-common",
+    "@kbn/spaces-plugin",
+    "@kbn/config-schema",
+    "@kbn/anonymization-plugin"
   ]
 }
