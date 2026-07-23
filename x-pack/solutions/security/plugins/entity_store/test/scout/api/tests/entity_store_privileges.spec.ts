@@ -176,7 +176,7 @@ apiTest.describe('Entity Store - privilege checks', { tag: ENTITY_STORE_TAGS }, 
 
       expect(response.statusCode).toBe(403);
       expect(response.body.attributes).toMatchObject({
-        missing_kibana_privileges: [SAVED_OBJECT_PRIVILEGE],
+        missing_kibana_privileges: [ENGINE_DESCRIPTOR_CREATE_PRIVILEGE],
       });
     }
   );
@@ -254,7 +254,7 @@ apiTest.describe('Entity Store - privilege checks', { tag: ENTITY_STORE_TAGS }, 
 
       expect(response.statusCode).toBe(403);
       expect(response.body.attributes).toMatchObject({
-        missing_kibana_privileges: [SAVED_OBJECT_PRIVILEGE],
+        missing_kibana_privileges: [ENGINE_DESCRIPTOR_CREATE_PRIVILEGE],
       });
     }
   );
