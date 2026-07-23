@@ -11,7 +11,6 @@ import type { SignificantEventsWorkflowStatusResult } from '@kbn/significant-eve
 import React from 'react';
 import { useFetchDiscoveryQueries } from '../../../../../hooks/significant_events/use_fetch_discovery_queries';
 
-const QUERIES_PER_PAGE = 1000;
 const ACTIVE_DRAFT_STATUS = ['active', 'draft'] as const;
 
 interface QueriesColumnProps {
@@ -25,13 +24,14 @@ export function QueriesColumn({ streamName, streamOnboardingResult }: QueriesCol
       name: streamName,
       query: '',
       page: 1,
-      perPage: QUERIES_PER_PAGE,
+      perPage: 1,
       status: [...ACTIVE_DRAFT_STATUS],
     },
     [streamOnboardingResult]
   );
 
-  const totalCount = queriesFetchState.data?.queries.length ?? 0;
+  const isCountLoading = queriesFetchState.isLoading || queriesFetchState.isFetching;
+  const totalCount = queriesFetchState.data?.total ?? 0;
 
   return (
     <EuiText
@@ -41,7 +41,13 @@ export function QueriesColumn({ streamName, streamOnboardingResult }: QueriesCol
         font-family: 'Roboto Mono', monospace;
       `}
     >
-      {totalCount ? <EuiI18nNumber value={totalCount} /> : '—'}
+      {isCountLoading || queriesFetchState.isError ? (
+        '—'
+      ) : totalCount ? (
+        <EuiI18nNumber value={totalCount} />
+      ) : (
+        '—'
+      )}
     </EuiText>
   );
 }

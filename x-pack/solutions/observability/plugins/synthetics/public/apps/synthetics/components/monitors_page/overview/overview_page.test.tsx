@@ -7,10 +7,10 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { Provider } from 'react-redux';
+import { Provider } from 'react-redux-v7';
 import { Router } from '@kbn/shared-ux-router';
 import { createMemoryHistory } from 'history';
-import { applyMiddleware, createStore } from 'redux';
+import { applyMiddleware, createStore } from 'redux-v4';
 import createSagaMiddleware from 'redux-saga';
 
 import { rootReducer } from '../../../state/root_reducer';

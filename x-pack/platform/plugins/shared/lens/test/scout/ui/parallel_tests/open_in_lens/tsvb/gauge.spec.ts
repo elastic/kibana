@@ -41,35 +41,27 @@ spaceTest.describe('TSVB Gauge - Open in Lens', { tag: tags.deploymentAgnostic }
       );
       expect(hasAction).toBe(false);
     });
-
-    await spaceTest.step('basic gauge has Convert to Lens action', async () => {
-      const hasAction = await dashboard.panelHasAction(
-        testData.DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION,
-        'Gauge - Basic'
-      );
-      expect(hasAction).toBe(true);
-    });
   });
 
   spaceTest('should convert basic gauge to Lens', async ({ page, pageObjects }) => {
-    const { dashboard } = pageObjects;
+    const { dashboard, lens } = pageObjects;
     await dashboard.clickPanelAction(
       testData.DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION,
       'Gauge - Basic'
     );
-    await expect(page.testSubj.locator('mtrVis')).toBeVisible();
+    await lens.waitForVisualization('mtrVis');
 
     const metricValue = page.testSubj.locator('mtrVis').getByText('Count of records');
     await expect(metricValue).toBeVisible();
   });
 
   spaceTest('should convert gauge with metric params', async ({ page, pageObjects }) => {
-    const { dashboard } = pageObjects;
+    const { dashboard, lens } = pageObjects;
     await dashboard.clickPanelAction(
       testData.DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION,
       'Gauge - Value count'
     );
-    await expect(page.testSubj.locator('mtrVis')).toBeVisible();
+    await lens.waitForVisualization('mtrVis');
 
     const dimensions = page.testSubj.locator('lns-dimensionTrigger');
     await expect(dimensions).toHaveCount(2);
@@ -83,7 +75,7 @@ spaceTest.describe('TSVB Gauge - Open in Lens', { tag: tags.deploymentAgnostic }
       testData.DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION,
       'Gauge - Color ranges'
     );
-    await expect(page.testSubj.locator('mtrVis')).toBeVisible();
+    await lens.waitForVisualization('mtrVis');
 
     const dimensions = page.testSubj.locator('lns-dimensionTrigger');
     await expect(dimensions).toHaveCount(3);
@@ -106,12 +98,12 @@ spaceTest.describe('TSVB Gauge - Open in Lens', { tag: tags.deploymentAgnostic }
   spaceTest(
     'should bring ignore global filters at series level over',
     async ({ page, pageObjects }) => {
-      const { dashboard } = pageObjects;
+      const { dashboard, lens } = pageObjects;
       await dashboard.clickPanelAction(
         testData.DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION,
         'Gauge - Ignore global filters series'
       );
-      await expect(page.testSubj.locator('mtrVis')).toBeVisible();
+      await lens.waitForVisualization('mtrVis');
       await expect(page.testSubj.locator('lnsChangeIndexPatternIgnoringFilters')).toBeVisible();
     }
   );
@@ -119,12 +111,12 @@ spaceTest.describe('TSVB Gauge - Open in Lens', { tag: tags.deploymentAgnostic }
   spaceTest(
     'should bring ignore global filters at panel level over',
     async ({ page, pageObjects }) => {
-      const { dashboard } = pageObjects;
+      const { dashboard, lens } = pageObjects;
       await dashboard.clickPanelAction(
         testData.DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION,
         'Gauge - Ignore global filters panel'
       );
-      await expect(page.testSubj.locator('mtrVis')).toBeVisible();
+      await lens.waitForVisualization('mtrVis');
       await expect(page.testSubj.locator('lnsChangeIndexPatternIgnoringFilters')).toBeVisible();
     }
   );

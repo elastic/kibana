@@ -61,7 +61,7 @@ export class AgentBuilderPlatformPlugin
       },
       logger: this.logger.get('sml-connector'),
     });
-    setupDeps.agentContextLayer.registerType(connectorSmlType);
+    setupDeps.agentBuilderSml.registerType(connectorSmlType);
 
     const connectorLifecycleHandler = createConnectorLifecycleHandler({
       logger: this.logger.get('connector-lifecycle'),

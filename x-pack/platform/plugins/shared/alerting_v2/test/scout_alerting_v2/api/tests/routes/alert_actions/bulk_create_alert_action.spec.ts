@@ -496,6 +496,25 @@ apiTest.describe('Bulk create alert actions API', { tag: '@local-stateful-classi
   });
 
   apiTest(
+    'schema: rejects an item with unknown body fields (strict mode) with 400',
+    async ({ apiClient }) => {
+      const response = await apiClient.post(BULK_ALERT_ACTION_URL, {
+        headers: writerHeaders,
+        body: [
+          {
+            group_hash: 'any-group',
+            action_type: 'ack',
+            episode_id: 'some-episode',
+            unknownField: 'x',
+          },
+        ],
+      });
+
+      expect(response).toHaveStatusCode(400);
+    }
+  );
+
+  apiTest(
     'authorization: returns 403 for a user with read-only alerting_v2 privileges',
     async ({ apiClient, requestAuth }) => {
       const readerCredentials = await requestAuth.getApiKeyForCustomRole(

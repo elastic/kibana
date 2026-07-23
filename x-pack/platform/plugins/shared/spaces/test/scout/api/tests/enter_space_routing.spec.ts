@@ -133,6 +133,7 @@ apiTest.describe('Enter space redirect routing', { tag: tags.deploymentAgnostic 
         kbnClient,
         '/app/management/kibana/objects?initialQuery=type:(visualization)#/view'
       );
+      await kbnClient.uiSettings.waitForEventualCacheRefresh();
       const location = await enterSpace(apiClient);
       expect(location).toContain(`/s/${SPACE_ID}/app/management/kibana/objects`);
       expect(location).toContain('initialQuery=type:(visualization)');

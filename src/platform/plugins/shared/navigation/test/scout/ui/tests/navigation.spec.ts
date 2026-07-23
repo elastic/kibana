@@ -11,7 +11,7 @@ import { expect } from '@kbn/scout/ui';
 import { tags } from '@kbn/scout';
 import { test } from '../fixtures';
 
-// Failing: See https://github.com/elastic/kibana/issues/266913
+// Failing: See https://github.com/elastic/kibana/issues/266915
 test.describe.skip('navigation', { tag: tags.serverless.security.complete }, () => {
   test('has security serverless side nav', async ({ pageObjects, browserAuth }) => {
     await browserAuth.loginAsPrivilegedUser();
@@ -26,6 +26,8 @@ test.describe.skip('navigation', { tag: tags.serverless.security.complete }, () 
     await expect(page.testSubj.locator('breadcrumbs')).toBeVisible();
     await expect(pageObjects.navigation.getBreadcrumbByText('Get started')).toBeVisible();
 
+    // Alerts is now nested inside the "Detections" panel opener; open it before clicking Alerts.
+    await pageObjects.collapsibleNav.getNavItemById('securityGroup:alertDetections').click();
     await pageObjects.collapsibleNav.clickNavItemByDeepLinkId('securitySolutionUI:alerts');
     await expect(pageObjects.navigation.getBreadcrumbByText('Alerts')).toBeVisible();
 

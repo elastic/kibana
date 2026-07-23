@@ -9,6 +9,7 @@
 
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
+import { waitFor } from '@testing-library/react';
 
 import type { ViewMode } from '@kbn/presentation-publishing';
 import { setMockedPresentationUtilServices } from '@kbn/presentation-util-plugin/public/mocks';
@@ -244,5 +245,53 @@ describe('Internal dashboard top nav', () => {
       }),
       {}
     );
+  });
+
+  describe('esqlApproximation toggle', () => {
+    it('should be disabled when there is no ES|QL panel', async () => {
+      const { api, internalApi } = buildMockDashboardApi();
+
+      renderWithChrome(
+        <DashboardContext.Provider value={api}>
+          <DashboardInternalContext.Provider value={internalApi}>
+            <InternalDashboardTopNav redirectTo={jest.fn()} />
+          </DashboardInternalContext.Provider>
+        </DashboardContext.Provider>
+      );
+
+      await waitFor(() => {
+        expect(unifiedSearchService.ui.SearchBar).toHaveBeenCalledWith(
+          expect.objectContaining({
+            esqlApproximation: expect.objectContaining({ disabled: true }),
+          }),
+          {}
+        );
+      });
+    });
+
+    it('should be enabled when a panel publishes usesEsql$ as true (e.g. a Vega panel using ES|QL)', async () => {
+      const { api, internalApi } = buildMockDashboardApi();
+      api.registerChildApi({
+        uuid: 'vega-panel',
+        usesEsql$: new BehaviorSubject(true),
+      } as unknown as Parameters<typeof api.registerChildApi>[0]);
+
+      renderWithChrome(
+        <DashboardContext.Provider value={api}>
+          <DashboardInternalContext.Provider value={internalApi}>
+            <InternalDashboardTopNav redirectTo={jest.fn()} />
+          </DashboardInternalContext.Provider>
+        </DashboardContext.Provider>
+      );
+
+      await waitFor(() => {
+        expect(unifiedSearchService.ui.SearchBar).toHaveBeenCalledWith(
+          expect.objectContaining({
+            esqlApproximation: expect.objectContaining({ disabled: false }),
+          }),
+          {}
+        );
+      });
+    });
   });
 });

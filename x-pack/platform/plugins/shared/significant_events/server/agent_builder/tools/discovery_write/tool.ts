@@ -18,45 +18,47 @@ import type { GetScopedClients } from '../../../routes/types';
 import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
 import { createSignificantEventsAvailability } from '../significant_events_availability';
-import { discoveryWriteHandler } from './handler';
+import {
+  getBulkWriteToolErrorCode,
+  MAX_BULK_WRITE_ITEMS,
+  trackTelemetryBestEffort,
+} from '../bulk_write';
+import { discoveryWriteBulkHandler } from './handler';
 
 export const SIGNIFICANT_EVENTS_DISCOVERY_WRITE_TOOL_ID =
   platformSignificantEventsTools.discoveryWrite;
 
-const discoveryWriteSchema = discoverySchema
+export const discoveryWriteItemSchema = discoverySchema
   .pick({
     kind: true,
     discovery_id: true,
-    discovery_slug: true,
+    event_id: true,
     title: true,
+    symptom_hypothesis: true,
     summary: true,
-    root_cause: true,
-    impact: true,
-    rule_names: true,
     stream_names: true,
-    criticality: true,
+    severity: true,
     confidence: true,
-    detections: true,
-    dependency_edges: true,
-    infra_components: true,
-    cause_kis: true,
-    evidences: true,
-    parent_discovery_id: true,
-    grouped_discovery_ids: true,
-    grouping_rationale: true,
+    signals: true,
+    causal_features: true,
+    blast_radius: true,
     previous_discovery_id: true,
     workflow_execution_id: true,
     conversation_id: true,
   })
-  .partial({ discovery_slug: true, discovery_id: true })
+  .partial({ event_id: true, discovery_id: true })
   .extend({
     dedup_window: z
       .string()
       .default('now-1h')
       .describe(
-        'Deduplication window as an ES date math expression (e.g. "now-1h"). Applies only to new episodes with auto-generated slugs: if a document with the same kind and slug already exists within this window, the write is skipped and the existing discovery_id is returned. Continuation and clearance writes (explicit discovery_slug) are never deduped. Defaults to "now-1h".'
+        'Deduplication window as an ES date math expression (e.g. "now-1h"). Applies only to new events without an explicit event_id: if a kind:discovery document with the same primary stream and detection rule UUIDs already exists within this window, the write is skipped and the existing discovery_id is returned. Continuation writes (explicit event_id) are never deduped. Defaults to "now-1h".'
       ),
   });
+
+export const discoveryWriteSchema = z.object({
+  items: z.array(discoveryWriteItemSchema).min(1).max(MAX_BULK_WRITE_ITEMS),
+});
 
 export function createDiscoveryWriteTool({
   getScopedClients,
@@ -73,10 +75,10 @@ export function createDiscoveryWriteTool({
     id: SIGNIFICANT_EVENTS_DISCOVERY_WRITE_TOOL_ID,
     type: ToolType.builtin,
     description: dedent`
-      Append a discovery document to the discoveries data stream. The data stream is immutable — each write creates a new version; the latest-source pattern resolves to the most recent document per slug.
+      Append a batch of discovery documents to the discoveries data stream. The data stream is immutable — each successful item creates a new version; the latest-source pattern resolves to the most recent document per event_id. Submit at most one item per explicit event_id and one new discovery per stream-and-rule fingerprint.
 
-      Use kind "discovery" or "clearance" to record an open investigation episode. 
-      Use kind "handled" to stamp the episode as fully processed after the corresponding significant event has been written.
+      Use kind "discovery" or "clearance" to record an open investigation event. 
+      Use kind "handled" to stamp the event as fully processed after the corresponding significant event has been written.
     `,
     schema: discoveryWriteSchema,
     tags: ['streams', 'significant_events'],
@@ -84,45 +86,66 @@ export function createDiscoveryWriteTool({
     handler: async (toolParams, context) => {
       const { request } = context;
       try {
-        const { getDiscoveryClient, licensing, uiSettingsClient } = await getScopedClients({
+        const { getDiscoveryClient, licensing } = await getScopedClients({
           request,
         });
-        await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+        await assertSignificantEventsAccess({ server, licensing });
 
-        const data = await discoveryWriteHandler({
+        const data = await discoveryWriteBulkHandler({
           discoveryClient: getDiscoveryClient(),
-          input: toolParams,
+          inputs: toolParams.items,
         });
 
-        telemetry.trackAgentToolDiscoveryWrite({
-          success: true,
-          kind: toolParams.kind,
-          discovery_slug: data.discovery_slug,
-          stream_names: toolParams.stream_names,
-          written: data.written,
+        data.forEach((result) => {
+          const input = toolParams.items[result.index];
+          if (input === undefined) return;
+          const isBulkError = 'reason' in result && result.reason === 'bulk_error';
+          trackTelemetryBestEffort({
+            logger,
+            description: 'discovery_write telemetry',
+            track: () =>
+              telemetry.trackAgentToolDiscoveryWrite({
+                success: !isBulkError,
+                kind: input.kind,
+                event_id: result.event_id,
+                stream_names: input.stream_names,
+                written: result.written,
+                error_message: isBulkError ? result.error.reason : undefined,
+              }),
+          });
         });
 
         return {
-          results: [{ type: ToolResultType.other, data }],
+          results: [{ type: ToolResultType.other, data: { results: data } }],
         };
       } catch (error) {
         const message = error instanceof Error ? error.message : 'Unknown error';
         logger.error(`Error running discovery_write: ${message}`);
 
-        telemetry.trackAgentToolDiscoveryWrite({
-          success: false,
-          kind: toolParams.kind,
-          discovery_slug: toolParams.discovery_slug ?? 'unknown',
-          stream_names: toolParams.stream_names,
-          written: false,
-          error_message: message,
+        toolParams.items.forEach((input) => {
+          trackTelemetryBestEffort({
+            logger,
+            description: 'failed discovery_write telemetry',
+            track: () =>
+              telemetry.trackAgentToolDiscoveryWrite({
+                success: false,
+                kind: input.kind,
+                event_id: input.event_id ?? 'unknown',
+                stream_names: input.stream_names,
+                written: false,
+                error_message: message,
+              }),
+          });
         });
+        const code = getBulkWriteToolErrorCode(error instanceof Error ? error : new Error(message));
 
         return {
           results: [
             {
               type: ToolResultType.error,
               data: {
+                code,
+                retryable: false,
                 message: i18n.translate(
                   'xpack.significantEvents.agentBuilder.tools.discoveryWrite.errorMessage',
                   {

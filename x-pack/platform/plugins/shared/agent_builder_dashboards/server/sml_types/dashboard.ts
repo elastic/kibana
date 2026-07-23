@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { SmlTypeDefinition } from '@kbn/agent-context-layer-plugin/server';
-import { kibanaSavedObjectPermissions } from '@kbn/agent-context-layer-plugin/server';
+import type { SmlTypeDefinition } from '@kbn/agent-builder-sml-plugin/server';
+import { kibanaSavedObjectPermissions } from '@kbn/agent-builder-sml-plugin/server';
 import {
   DASHBOARD_ATTACHMENT_TYPE,
   dashboardStateToAttachmentData,
@@ -91,19 +91,15 @@ export const createDashboardSmlType = ({
     }
   },
 
-  getSmlData: async (originId, context) => {
+  getSmlEntry: async (originId, context) => {
     try {
       const dashboardClient = await getDashboardClient();
       const dashboard = await dashboardClient.read(context.savedObjectsClient, originId);
 
       return {
-        chunks: [
-          {
-            type: DASHBOARD_SML_TYPE,
-            title: dashboard.data.title ?? originId,
-            content: toDashboardSearchContent(dashboard.data),
-          },
-        ],
+        type: DASHBOARD_SML_TYPE,
+        title: dashboard.data.title ?? originId,
+        content: toDashboardSearchContent(dashboard.data),
       };
     } catch (error) {
       context.logger.warn(

@@ -9,6 +9,7 @@
 
 import type { BehaviorSubject } from 'rxjs';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
+import type { SerializableRecord } from '@kbn/utility-types';
 
 type PublishingSubject<T extends unknown = unknown> = Omit<BehaviorSubject<T>, 'next'>;
 
@@ -57,11 +58,11 @@ export const isQueryESQLControl = (control?: object): control is QueryESQLContro
   );
 };
 
-export interface ESQLControlVariable {
+export interface ESQLControlVariable extends SerializableRecord {
   key: string;
   value: string | number | (string | number)[];
   type: ESQLVariableType;
-  meta?: {
+  meta?: SerializableRecord & {
     // `controlledBy` is the ID of the control that publishes the variable
     controlledBy?: string;
     // `group` allows grouping of variables

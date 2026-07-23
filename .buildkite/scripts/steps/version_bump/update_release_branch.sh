@@ -17,11 +17,50 @@ jq --arg branch "$BRANCH" '.branch = $branch' package.json > package.json.tmp &&
 
 # See https://github.com/elastic/kibana/pull/199404
 # Prevent backport assignments
-printf '\n# See https://github.com/elastic/kibana/pull/199404\n# Prevent backport assignments\n* @kibanamachine \n' >> .github/CODEOWNERS
+printf '\n# See https://github.com/elastic/kibana/pull/199404\n# Prevent backport assignments\n* @kibanamachine' >> .github/CODEOWNERS
+
+echo "Disabling serverless jest integration config on release branch"
+jq '. + ["src/core/server/integration_tests/saved_objects/serverless/migrations/jest.integration.config.js"] | unique' \
+  .buildkite/disabled_jest_configs.json > .buildkite/disabled_jest_configs.json.tmp \
+  && mv .buildkite/disabled_jest_configs.json.tmp .buildkite/disabled_jest_configs.json
+
+echo "Moving serverless FTR manifest enabled configs to disabled on release branch"
+for manifest in .buildkite/ftr-manifests/*serverless*_configs.yml; do
+  awk '
+    /^defaultQueue:/ { dq = $0; next }
+    /^enabled:$/ { found_enabled = 1; next }
+    { print }
+    END {
+      if (found_enabled) { printf "\n"; if (dq) print dq; print "enabled:" }
+      else if (dq) print dq
+    }
+  ' "$manifest" > "${manifest}.tmp" && mv "${manifest}.tmp" "$manifest"
+done
+
+echo "Skipping serverless core integration tests on release branch"
+SERVERLESS_TESTS=(
+  "src/core/server/integration_tests/elasticsearch/capabilities_serverless.test.ts"
+  "src/core/server/integration_tests/elasticsearch/project_routing_serverless_cps.test.ts"
+  "src/core/server/integration_tests/elasticsearch/project_routing_serverless_non_cps.test.ts"
+)
+for test_file in "${SERVERLESS_TESTS[@]}"; do
+  if grep -q "^describe\.skip(" "$test_file"; then
+    echo "INFO: $test_file already patched, skipping"
+    continue
+  fi
+  if ! grep -q "^describe(" "$test_file"; then
+    echo "ERROR: Expected top-level describe() not found in $test_file" >&2
+    exit 1
+  fi
+  sed -i "0,/^describe(/s/^describe(/\/\/ Serverless tests are only supported on main\ndescribe.skip(/" "$test_file"
+done
 
 head_branch="bump-versions-$(date +%F_%H-%M-%S)-release-branch"
 git checkout -b "$head_branch"
-git add package.json .github/CODEOWNERS
+git add package.json .github/CODEOWNERS \
+  .buildkite/disabled_jest_configs.json \
+  .buildkite/ftr-manifests/*serverless*_configs.yml \
+  "${SERVERLESS_TESTS[@]}"
 git commit -m "[release branch setup] Set branch to ${BRANCH}"
 
 git push origin "$head_branch"

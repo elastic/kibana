@@ -12,12 +12,17 @@ import type { DiscoveryEvaluator } from '../types';
 import { createExecuteEsqlGroundingEvaluator } from '../common/esql_grounding';
 import { createDiscoveryToolUsageEvaluator } from './tool_usage/tool_usage';
 import {
-  createCriticalityCalibrationEvaluator,
+  createSeverityCalibrationEvaluator,
   createConfidenceCalibrationEvaluator,
 } from '../common/scores_calibration';
 import { createEvidenceDescriptionEvaluator } from '../common/evidence_quality';
 import { groupingCorrectnessEvaluator } from './grouping/grouping_correctness';
 import { evidenceCollectionEvaluator } from './evidences/evidence_collection';
+import { continuationTrajectoryEvaluator } from './tool_usage/tool_usage';
+import {
+  continuationStabilityEvaluator,
+  type ContinuationEvaluator,
+} from './continuation/continuation_stability';
 
 /**
  * Factory that creates the full set of evaluators for the discovery agent eval suite.
@@ -44,7 +49,15 @@ export const createDiscoveryEvaluators = (
     ...base,
     createScenarioCriteriaLlmEvaluator({ criteriaFn, criteria }),
     createEvidenceDescriptionEvaluator({ criteriaFn }),
-    createCriticalityCalibrationEvaluator({ criteriaFn }),
+    createSeverityCalibrationEvaluator({ criteriaFn }),
     createConfidenceCalibrationEvaluator({ criteriaFn }),
   ];
 };
+
+/**
+ * Factory that creates the evaluators for the "continuation over time" discovery agent eval —
+ * mirrors `createDiscoveryEvaluators`'s shape, just a smaller, fixed evaluator set (no
+ * scenario-criteria variant; the continuation output has no `expected` criteria to score against).
+ */
+export const createContinuationEvaluators = (): ContinuationEvaluator[] =>
+  selectEvaluators([continuationStabilityEvaluator, continuationTrajectoryEvaluator]);

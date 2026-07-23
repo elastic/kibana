@@ -8,7 +8,7 @@
 import type { GetResponse } from '@elastic/elasticsearch/lib/api/types';
 import {
   agentBuilderDefaultAgentId,
-  AgentType,
+  chatAgentTypeId,
   getDefaultAgentAccessControl,
 } from '@kbn/agent-builder-common';
 import type { AgentAccessControl, UserIdAndName } from '@kbn/agent-builder-common';
@@ -19,7 +19,7 @@ import { normalizeAccessControl } from '../../access_control';
 
 export type Document = Pick<GetResponse<AgentProperties>, '_id' | '_source'>;
 
-const defaultAgentType = AgentType.chat;
+const defaultAgentType = chatAgentTypeId;
 
 export const fromEs = (document: Document): PersistedAgentDefinition => {
   if (!document._source) {
@@ -34,7 +34,7 @@ export const fromEs = (document: Document): PersistedAgentDefinition => {
 
   return {
     id: resolvedId,
-    type: document._source.type,
+    type: document._source.type ?? defaultAgentType,
     name: document._source.name,
     description: document._source.description,
     labels: document._source.labels,
@@ -76,7 +76,7 @@ export const createRequestToEs = ({
   return {
     id: profile.id,
     name: profile.name,
-    type: defaultAgentType,
+    type: profile.type ?? defaultAgentType,
     space,
     description: profile.description,
     labels: profile.labels,

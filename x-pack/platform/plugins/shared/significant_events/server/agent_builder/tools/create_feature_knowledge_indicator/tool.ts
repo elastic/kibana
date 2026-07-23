@@ -80,12 +80,11 @@ export function createFeatureKnowledgeIndicatorTool({
     },
     availability: {
       cacheMode: 'space',
-      handler: async ({ uiSettings }): Promise<ToolAvailabilityResult> => {
+      handler: async (): Promise<ToolAvailabilityResult> => {
         try {
           await assertSignificantEventsAccess({
             server,
             licensing: server.licensing,
-            uiSettingsClient: uiSettings,
           });
           return { status: 'available' };
         } catch (error) {
@@ -116,7 +115,6 @@ export function createFeatureKnowledgeIndicatorTool({
         await assertSignificantEventsAccess({
           server,
           licensing: scopedClients.licensing,
-          uiSettingsClient: scopedClients.uiSettingsClient,
         });
         const definition = await scopedClients.streamsClient.getStream(streamName);
         streamType = getStreamTypeFromDefinition(definition);
