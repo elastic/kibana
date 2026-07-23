@@ -14,6 +14,7 @@ import type { GraphRequest } from '@kbn/cloud-security-posture-common/types/grap
 import {
   GRAPH_ROUTE_PATH,
   GRAPH_RUNTIME_EVALUATIONS_ENABLED_SETTING,
+  GRAPH_SHOW_UNKNOWN_TARGET_ENABLED_SETTING,
 } from '../../../common/constants';
 import type { CspRequestHandlerContext, CspRouter } from '../../types';
 import { getGraph as getGraphV1 } from './v1';
@@ -47,7 +48,6 @@ export const defineGraphRoute = (router: CspRouter) =>
       },
       async (context: CspRequestHandlerContext, request, response) => {
         const cspContext = await context.csp;
-        const { nodesLimit, showUnknownTarget = true } = request.body;
         const {
           originEventIds,
           start,
@@ -71,6 +71,10 @@ export const defineGraphRoute = (router: CspRouter) =>
         const integrationRuntimeEvalsEnabled = await coreContext.uiSettings.client.get<boolean>(
           GRAPH_RUNTIME_EVALUATIONS_ENABLED_SETTING
         );
+        const showUnknownTargetDefault = await coreContext.uiSettings.client.get<boolean>(
+          GRAPH_SHOW_UNKNOWN_TARGET_ENABLED_SETTING
+        );
+        const { nodesLimit, showUnknownTarget = showUnknownTargetDefault } = request.body;
 
         try {
           const resp = await getGraphV1({
