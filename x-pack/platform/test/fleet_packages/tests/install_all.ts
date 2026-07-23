@@ -26,24 +26,44 @@ export default function (providerContext: FtrProviderContext) {
   const API_VERSION = '2023-10-31';
   const API_VERSION_HEADER_NAME = 'elastic-api-version';
 
-  function installPackage(
+  function isTransientError(error: any): boolean {
+    const status = error?.response?.status ?? error?.status;
+    if (status != null) {
+      return status >= 500;
+    }
+    // Network-level errors (ECONNRESET, ETIMEDOUT, etc.)
+    return error?.code != null;
+  }
+
+  async function installPackage(
     name: string,
-    version: string
+    version: string,
+    maxRetries = 3
   ): Promise<{ name: string; version: string; success: boolean; error?: any; took?: number }> {
     const start = Date.now();
-    return supertest
-      .post(`/api/fleet/epm/packages/${name}/${version}`)
-      .set('kbn-xsrf', 'xxx')
-      .set(API_VERSION_HEADER_NAME, API_VERSION)
-      .send({ force: true })
-      .expect(200)
-      .then(() => {
-        const end = Date.now();
-        return { name, version, success: true, took: (end - start) / 1000 };
-      })
-      .catch((error) => {
-        return { name, version, success: false, error };
-      });
+    let lastError: any;
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        await supertest
+          .post(`/api/fleet/epm/packages/${name}/${version}`)
+          .set('kbn-xsrf', 'xxx')
+          .set(API_VERSION_HEADER_NAME, API_VERSION)
+          .send({ force: true })
+          .expect(200);
+        return { name, version, success: true, took: (Date.now() - start) / 1000 };
+      } catch (error) {
+        lastError = error;
+        if (!isTransientError(error) || attempt === maxRetries) {
+          break;
+        }
+        const delayMs = 2000 * attempt;
+        logger.warning(
+          `Install ${name}@${version} failed with transient error (attempt ${attempt}/${maxRetries}), retrying in ${delayMs}ms: ${error?.message}`
+        );
+        await new Promise((resolve) => setTimeout(resolve, delayMs));
+      }
+    }
+    return { name, version, success: false, error: lastError };
   }
 
   async function deletePackage(
