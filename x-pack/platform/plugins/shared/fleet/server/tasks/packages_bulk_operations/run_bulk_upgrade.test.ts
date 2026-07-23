@@ -53,7 +53,7 @@ describe('Bulk upgrade task', () => {
   describe('_runBulkUpgradeTask', () => {
     it('should work for successfull upgrade', async () => {
       const res = await _runBulkUpgradeTask({
-        abortController: new AbortController(),
+        signal: new AbortController().signal,
         logger: loggingSystemMock.createLogger(),
         taskParams: {
           type: 'bulk_upgrade',
@@ -69,7 +69,7 @@ describe('Bulk upgrade task', () => {
 
     it('should return error for non successful upgrade', async () => {
       const res = await _runBulkUpgradeTask({
-        abortController: new AbortController(),
+        signal: new AbortController().signal,
         logger: loggingSystemMock.createLogger(),
         taskParams: {
           type: 'bulk_upgrade',
@@ -102,7 +102,7 @@ describe('Bulk upgrade task', () => {
 
     it('should work for successful upgrade with package policies upgrade', async () => {
       const res = await _runBulkUpgradeTask({
-        abortController: new AbortController(),
+        signal: new AbortController().signal,
         logger: loggingSystemMock.createLogger(),
         taskParams: {
           type: 'bulk_upgrade',
@@ -123,7 +123,7 @@ describe('Bulk upgrade task', () => {
       abortController.abort();
       await expect(() =>
         _runBulkUpgradeTask({
-          abortController,
+          signal: abortController.signal,
           logger: loggingSystemMock.createLogger(),
           taskParams: {
             type: 'bulk_upgrade',

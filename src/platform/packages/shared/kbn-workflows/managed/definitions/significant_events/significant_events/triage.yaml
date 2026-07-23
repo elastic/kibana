@@ -107,7 +107,7 @@ steps:
   # -----------------------------------------------------------------------
   - name: run_judge_agent
     type: ai.agent
-    agent-id: "platform.streams.sig-events.discovery-judge"
+    agent-id: "significant_events.discovery-judge"
     # Keep connector-id-by-feature/plugin-id/aggregate-by in sync with @kbn/significant-events-schema
     # inference_feature_ids.ts (SIGNIFICANT_EVENTS_TRIAGE_INFERENCE_FEATURE_ID /
     # SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID). Own feature — judge is a lighter,
@@ -116,6 +116,7 @@ steps:
     plugin-id: 'significant_events_triage'
     aggregate-by: 'significant_events'
     create-conversation: true
+    public-conversation: true
     with:
       message: |
         ## Unreviewed Discoveries
@@ -127,7 +128,7 @@ steps:
         properties:
           significant_events:
             type: array
-            description: 'Compact summary of each processed discovery. The judge writes event data via events_write; the workflow uses this summary to stamp handled discoveries and gate trigger_investigation.'
+            description: 'Final events_write outcomes copied by the judge. Successful writes include event_uuid; failed writes have written: false and remain queued. The workflow uses only successful items to stamp handled discoveries and gate trigger_investigation.'
             items:
               type: object
               properties:
@@ -136,7 +137,7 @@ steps:
                   description: 'Echo the event_id verbatim from the input discovery. Also returned by events_write. Required for trigger_investigation context.'
                 event_uuid:
                   type: string
-                  description: 'UUID assigned by events_write. Required for trigger_investigation context.'
+                  description: 'UUID assigned by events_write. Present only when written is true and required for trigger_investigation context.'
                 severity:
                   type: string
                   enum: ['80-critical', '60-high', '40-medium', '20-low']
@@ -148,7 +149,11 @@ steps:
                 written:
                   type: boolean
                   description: 'true when events_write appended the event version.'
-              required: [event_id, event_uuid, severity, status, written]
+                reason:
+                  type: string
+                  enum: [bulk_error]
+                  description: 'Failure reason when written is false.'
+              required: [event_id, severity, status, written]
         required: [significant_events]
     on-failure:
       continue: false
@@ -266,7 +271,7 @@ steps:
             steps:
               - name: gate_investigatable_severity
                 type: if
-                condition: '${{ consts.INVESTIGATABLE_SEVERITIES contains foreach.item.severity }}'
+                condition: '${{ foreach.item.event_uuid != null and consts.INVESTIGATABLE_SEVERITIES contains foreach.item.severity }}'
                 steps:
                   # ES|QL rows are [event_id, _source, score]; pull the matching _source for the message.
                   - name: resolve_open_event

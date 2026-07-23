@@ -9,17 +9,24 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
+import type { EuiBreakpointSize } from '@elastic/eui';
 import { AppMenuComponent } from './app_menu';
-import type { AppMenuConfig } from '../types';
+import type { AppMenuConfig, AppMenuItemType } from '../types';
 import { APP_MENU_TEST_SUBJECTS } from '../test_subjects';
 
-// Mock useIsWithinBreakpoints to control responsive behavior
-const mockUseIsWithinBreakpoints = jest.fn();
+let mockCurrentBreakpoint: EuiBreakpointSize | undefined = 'xl';
+let mockViewportBreakpoint: EuiBreakpointSize = 'xl';
+
+jest.mock('@kbn/core-chrome-layout-utils', () => ({
+  useCurrentChromeApplicationBreakpoint: () => mockCurrentBreakpoint,
+}));
+
 jest.mock('@elastic/eui', () => {
-  const original = jest.requireActual('@elastic/eui');
+  const actual = jest.requireActual('@elastic/eui');
+
   return {
-    ...original,
-    useIsWithinBreakpoints: (breakpoints: string[]) => mockUseIsWithinBreakpoints(breakpoints),
+    ...actual,
+    useCurrentEuiBreakpoint: () => mockViewportBreakpoint,
   };
 });
 
@@ -35,11 +42,8 @@ describe('AppMenu', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    // Default to xl breakpoint (shows all items)
-    mockUseIsWithinBreakpoints.mockImplementation((breakpoints: string[]) => {
-      if (breakpoints.includes('xl')) return true;
-      return false;
-    });
+    mockCurrentBreakpoint = 'xl';
+    mockViewportBreakpoint = 'xl';
   });
 
   describe('rendering', () => {
@@ -67,7 +71,7 @@ describe('AppMenu', () => {
       expect(screen.getByTestId(APP_MENU_TEST_SUBJECTS.root)).toBeInTheDocument();
     });
 
-    it('should render menu items at xl breakpoint', () => {
+    it('should render menu items at the wide application breakpoint', () => {
       render(<AppMenuComponent config={defaultConfig} />);
 
       expect(screen.getByText('Item 1')).toBeInTheDocument();
@@ -93,30 +97,48 @@ describe('AppMenu', () => {
   });
 
   describe('responsive behavior', () => {
-    it('should render overflow button at m-l breakpoint', () => {
-      mockUseIsWithinBreakpoints.mockImplementation((breakpoints: string[]) => {
-        if (breakpoints.includes('m') && breakpoints.includes('l')) return true;
-        return false;
-      });
+    it('should render overflow button at a medium application breakpoint', () => {
+      mockCurrentBreakpoint = 's';
 
       render(<AppMenuComponent config={defaultConfig} />);
 
       expect(screen.getByTestId(APP_MENU_TEST_SUBJECTS.overflowButton)).toBeInTheDocument();
     });
 
-    it('should render overflow button with all items at small breakpoint', () => {
-      mockUseIsWithinBreakpoints.mockReturnValue(false);
+    it('should render overflow button with all items at a narrow application breakpoint', () => {
+      mockCurrentBreakpoint = 'xs';
 
       render(<AppMenuComponent config={defaultConfig} />);
 
       expect(screen.getByTestId(APP_MENU_TEST_SUBJECTS.overflowButton)).toBeInTheDocument();
     });
 
-    it('should render individual menu items at xl breakpoint', () => {
-      mockUseIsWithinBreakpoints.mockImplementation((breakpoints: string[]) => {
-        if (breakpoints.includes('xl')) return true;
-        return false;
-      });
+    it('should render individual menu items at m/l/xl application breakpoints', () => {
+      for (const breakpoint of ['m', 'l', 'xl'] as const) {
+        mockCurrentBreakpoint = breakpoint;
+
+        const { unmount } = render(<AppMenuComponent config={defaultConfig} />);
+
+        expect(screen.getByText('Item 1')).toBeInTheDocument();
+        expect(screen.getByText('Item 2')).toBeInTheDocument();
+
+        unmount();
+      }
+    });
+
+    it('should fall back to viewport breakpoints when application measurement is unavailable', () => {
+      mockCurrentBreakpoint = undefined;
+      mockViewportBreakpoint = 'm';
+
+      render(<AppMenuComponent config={defaultConfig} />);
+
+      expect(screen.getByTestId(APP_MENU_TEST_SUBJECTS.overflowButton)).toBeInTheDocument();
+      expect(screen.queryByText('Item 1')).not.toBeInTheDocument();
+    });
+
+    it('should use viewport xl as wide when application measurement is unavailable', () => {
+      mockCurrentBreakpoint = undefined;
+      mockViewportBreakpoint = 'xl';
 
       render(<AppMenuComponent config={defaultConfig} />);
 
@@ -124,29 +146,58 @@ describe('AppMenu', () => {
       expect(screen.getByText('Item 2')).toBeInTheDocument();
     });
 
-    it('should render overflow button at xl breakpoint when item is marked as overflow', () => {
-      mockUseIsWithinBreakpoints.mockImplementation((breakpoints: string[]) => {
-        if (breakpoints.includes('xl')) return true;
-        return false;
-      });
-
+    it('should render overflow button at the wide breakpoint when item is marked as overflow', () => {
+      const forcedOverflowItem: AppMenuItemType = {
+        id: 'singleOverflowItem',
+        label: 'Single overflow item',
+        run: jest.fn(),
+        iconType: 'gear',
+        order: 1,
+        overflow: true,
+      };
       const forcedOverflowConfig: AppMenuConfig = {
-        items: [
-          {
-            id: 'singleOverflowItem',
-            label: 'Single overflow item',
-            run: jest.fn(),
-            iconType: 'gear',
-            order: 1,
-            overflow: true,
-          },
-        ],
+        items: [forcedOverflowItem],
       };
 
       render(<AppMenuComponent config={forcedOverflowConfig} />);
 
       expect(screen.getByTestId(APP_MENU_TEST_SUBJECTS.overflowButton)).toBeInTheDocument();
       expect(screen.queryByText('Single overflow item')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('viewport breakpoint mapping', () => {
+    it('should render collapsed content at viewport s', () => {
+      mockViewportBreakpoint = 's';
+
+      render(<AppMenuComponent config={defaultConfig} breakpointSource="viewport" />);
+
+      expect(screen.getByTestId(APP_MENU_TEST_SUBJECTS.overflowButton)).toBeInTheDocument();
+      expect(screen.queryByText('Item 1')).not.toBeInTheDocument();
+    });
+
+    it('should render medium content at viewport m and l', () => {
+      for (const breakpoint of ['m', 'l'] as const) {
+        mockViewportBreakpoint = breakpoint;
+
+        const { unmount } = render(
+          <AppMenuComponent config={defaultConfig} breakpointSource="viewport" />
+        );
+
+        expect(screen.getByTestId(APP_MENU_TEST_SUBJECTS.overflowButton)).toBeInTheDocument();
+        expect(screen.queryByText('Item 1')).not.toBeInTheDocument();
+
+        unmount();
+      }
+    });
+
+    it('should render wide content at viewport xl', () => {
+      mockViewportBreakpoint = 'xl';
+
+      render(<AppMenuComponent config={defaultConfig} breakpointSource="viewport" />);
+
+      expect(screen.getByText('Item 1')).toBeInTheDocument();
+      expect(screen.getByText('Item 2')).toBeInTheDocument();
     });
   });
 
@@ -167,7 +218,7 @@ describe('AppMenu', () => {
       expect(screen.getByTestId('test-switch')).toBeInTheDocument();
     });
 
-    it('should render the switch alongside menu items at xl breakpoint', () => {
+    it('should render the switch alongside menu items at the wide application breakpoint', () => {
       render(<AppMenuComponent config={{ ...defaultConfig, switch: switchConfig }} />);
 
       expect(screen.getByTestId('test-switch')).toBeInTheDocument();
@@ -175,19 +226,16 @@ describe('AppMenu', () => {
       expect(screen.getByText('Item 2')).toBeInTheDocument();
     });
 
-    it('should render the switch at m-l breakpoint', () => {
-      mockUseIsWithinBreakpoints.mockImplementation((breakpoints: string[]) => {
-        if (breakpoints.includes('m') && breakpoints.includes('l')) return true;
-        return false;
-      });
+    it('should render the switch at a medium application breakpoint', () => {
+      mockCurrentBreakpoint = 's';
 
       render(<AppMenuComponent config={{ ...defaultConfig, switch: switchConfig }} />);
 
       expect(screen.getByTestId('test-switch')).toBeInTheDocument();
     });
 
-    it('should not render standalone switch at collapsed breakpoint (only overflow)', () => {
-      mockUseIsWithinBreakpoints.mockReturnValue(false);
+    it('should not render standalone switch at a narrow application breakpoint', () => {
+      mockCurrentBreakpoint = 'xs';
 
       render(<AppMenuComponent config={{ switch: switchConfig }} />);
 
