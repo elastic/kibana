@@ -23,7 +23,7 @@ import {
   RuleFormResolveRuleError,
   RuleFormRuleTypeError,
 } from './rule_form_errors';
-import { RULE_EDIT_ERROR_TEXT, RULE_EDIT_SUCCESS_TEXT } from './translations';
+import { RULE_EDIT_ERROR_TEXT } from './translations';
 import { getAvailableRuleTypes, parseRuleCircuitBreakerErrorMessage } from './utils';
 import type { RuleFormStepId } from './constants';
 import { DEFAULT_VALID_CONSUMERS, getDefaultFormData } from './constants';
@@ -61,8 +61,7 @@ export const EditRuleForm = (props: EditRuleFormProps) => {
 
   const { mutate, isLoading: isSaving } = useUpdateRule({
     http,
-    onSuccess: ({ name }) => {
-      toasts.addSuccess(RULE_EDIT_SUCCESS_TEXT(name));
+    onSuccess: () => {
       onSubmit?.(id);
     },
     onError: (error) => {
