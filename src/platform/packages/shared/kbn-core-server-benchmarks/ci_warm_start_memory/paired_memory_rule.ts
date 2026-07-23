@@ -2,6 +2,15 @@
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the "Elastic License
  * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
  * Public License, v 1"; you may not use this file except in compliance with, at
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
@@ -15,9 +24,9 @@ export const WARM_START_MEMORY_CONFIDENCE = 0.99;
 // eight pairs by default (df 7); values above the table use the conservative
 // df=30 value rather than silently using a normal approximation.
 const ONE_SIDED_99_T_CRITICAL = [
-  31.8205, 6.9646, 4.5407, 3.7469, 3.3649, 3.1427, 2.9979, 2.8965, 2.8214, 2.7638,
-  2.7181, 2.6810, 2.6503, 2.6245, 2.6025, 2.5835, 2.5669, 2.5524, 2.5395, 2.5274,
-  2.5176, 2.5083, 2.5000, 2.4922, 2.4851, 2.4786, 2.4727, 2.4671, 2.4620, 2.4573,
+  31.8205, 6.9646, 4.5407, 3.7469, 3.3649, 3.1427, 2.9979, 2.8965, 2.8214, 2.7638, 2.7181, 2.681,
+  2.6503, 2.6245, 2.6025, 2.5835, 2.5669, 2.5524, 2.5395, 2.5274, 2.5176, 2.5083, 2.5, 2.4922,
+  2.4851, 2.4786, 2.4727, 2.4671, 2.462, 2.4573,
 ];
 
 export interface PairedMemoryRuleResult {

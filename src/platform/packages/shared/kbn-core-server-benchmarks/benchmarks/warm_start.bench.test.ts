@@ -33,7 +33,9 @@ describe('warm_start', () => {
   beforeEach(() => {
     jest.useFakeTimers();
     mockedGetPort.mockResolvedValue(5701);
-    mockedStartKibana.mockResolvedValue({ proc: {} as Awaited<ReturnType<typeof startKibana>>['proc'] });
+    mockedStartKibana.mockResolvedValue({
+      proc: {} as Awaited<ReturnType<typeof startKibana>>['proc'],
+    });
   });
 
   afterEach(() => {

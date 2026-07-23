@@ -2,6 +2,15 @@
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the "Elastic License
  * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
  * Public License, v 1"; you may not use this file except in compliance with, at
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
@@ -50,11 +59,19 @@ export async function collectAndRunPaired({
     cwd: configFromCwd ? process.cwd() : leftContext.workspace.getDir(),
   });
   const parsedConfigs = await parseConfigs(configPaths);
-  const configs = loadConfigs(parsedConfigs, leftContext.globalConfig, leftContext.runtimeOverrides)
-    .map((config) => ({ ...config, benchmarks: config.benchmarks.filter((benchmark) => !benchmark.skip) }));
+  const configs = loadConfigs(
+    parsedConfigs,
+    leftContext.globalConfig,
+    leftContext.runtimeOverrides
+  ).map((config) => ({
+    ...config,
+    benchmarks: config.benchmarks.filter((benchmark) => !benchmark.skip),
+  }));
 
   if (!configs.length || configs.some((config) => !config.comparisonRun)) {
-    throw new Error('Randomized paired execution requires every selected config to set comparisonRun');
+    throw new Error(
+      'Randomized paired execution requires every selected config to set comparisonRun'
+    );
   }
 
   const leftResults: ConfigResult[] = [];

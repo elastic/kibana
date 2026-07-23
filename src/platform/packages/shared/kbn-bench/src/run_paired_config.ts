@@ -2,6 +2,15 @@
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the "Elastic License
  * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
  * Public License, v 1"; you may not use this file except in compliance with, at
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
@@ -43,7 +52,13 @@ const createPrng = (seed: string): (() => number) => {
   };
 };
 
-export const createPairedOrder = ({ pairs, seed }: { pairs: number; seed: string }): PairOrder[] => {
+export const createPairedOrder = ({
+  pairs,
+  seed,
+}: {
+  pairs: number;
+  seed: string;
+}): PairOrder[] => {
   const order: PairOrder[] = Array.from({ length: pairs }, (_, index) =>
     index % 2 === 0 ? 'baseline-target' : 'target-baseline'
   );
@@ -87,9 +102,7 @@ const toStart = async ({
 });
 
 const createRunnable = async (benchmark: Benchmark) =>
-  benchmark.kind === 'module'
-    ? fromModuleBenchmark(benchmark)
-    : fromScriptBenchmark(benchmark);
+  benchmark.kind === 'module' ? fromModuleBenchmark(benchmark) : fromScriptBenchmark(benchmark);
 
 export async function runPairedConfig({
   config,

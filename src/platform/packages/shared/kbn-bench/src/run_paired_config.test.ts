@@ -18,7 +18,9 @@ import type { GlobalRunContext } from './types';
 jest.mock('./runner/from_module_benchmark');
 jest.mock('./runner/run_benchmark');
 
-const mockedFromModuleBenchmark = fromModuleBenchmark as jest.MockedFunction<typeof fromModuleBenchmark>;
+const mockedFromModuleBenchmark = fromModuleBenchmark as jest.MockedFunction<
+  typeof fromModuleBenchmark
+>;
 const mockedCreateBenchmarkExecutor = createBenchmarkExecutor as jest.MockedFunction<
   typeof createBenchmarkExecutor
 >;
@@ -61,8 +63,7 @@ const failedRun = (): BenchmarkRunResult => ({
   samples: [],
 });
 
-const createContext = (buildDir: string): GlobalRunContext =>
-  ({ buildDir } as GlobalRunContext);
+const createContext = (buildDir: string): GlobalRunContext => ({ buildDir } as GlobalRunContext);
 
 const config: LoadedBenchConfig = {
   name: 'paired-test',
@@ -135,11 +136,7 @@ describe('runPairedConfig', () => {
     });
 
     const [benchmark] = pairedComparison.benchmarks;
-    expect(benchmark.order).toEqual([
-      'baseline-target',
-      'target-baseline',
-      'baseline-target',
-    ]);
+    expect(benchmark.order).toEqual(['baseline-target', 'target-baseline', 'baseline-target']);
     expect(benchmark.attemptedPairs).toBe(3);
     expect(benchmark.validPairs).toHaveLength(2);
     expect(benchmark.validPairs.map(({ pair }) => pair)).toEqual([0, 1]);
