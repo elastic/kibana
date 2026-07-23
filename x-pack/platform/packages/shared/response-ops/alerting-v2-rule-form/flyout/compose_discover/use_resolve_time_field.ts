@@ -9,7 +9,7 @@ import { useEffect, useMemo } from 'react';
 import { useQuery } from '@kbn/react-query';
 import type { HttpStart } from '@kbn/core/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { getESQLTimeFieldFromQuery } from '@kbn/esql-utils';
+import { getESQLTimeField } from '@kbn/esql-utils';
 import { resolveTimeField } from '@kbn/alerting-v2-utils';
 import { useDataFields } from '../../form/hooks/use_data_fields';
 import { ruleFormKeys } from '../../form/hooks/query_key_factory';
@@ -63,7 +63,7 @@ export const useResolveTimeField = ({
 
   const { data: apiTimeField, isLoading: isLoadingApiTimeField } = useQuery({
     queryKey: ruleFormKeys.composeDiscoverApiTimeField(fromSourceQuery),
-    queryFn: () => getESQLTimeFieldFromQuery({ query: fromSourceQuery, http }),
+    queryFn: () => getESQLTimeField({ query: fromSourceQuery, http }),
     enabled: needsApiTimeField,
     refetchOnWindowFocus: false,
     retry: false,
