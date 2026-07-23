@@ -36,7 +36,6 @@ dependsOn:
   - '@kbn/core-http-router-server-mocks'
   - '@kbn/features-plugin'
   - '@kbn/lazy-object'
-  - '@kbn/datemath'
   - '@kbn/task-manager-plugin'
   - '@kbn/core-http-request-handler-context-server'
   - '@kbn/kibana-react-plugin'
