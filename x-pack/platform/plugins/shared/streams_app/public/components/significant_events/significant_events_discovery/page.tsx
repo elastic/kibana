@@ -238,6 +238,10 @@ export function SignificantEventsDiscoveryPage() {
     );
   }
 
+  if (tab === 'discoveries') {
+    return <RedirectTo path="/_discovery/{tab}" params={{ path: { tab: 'significant_events' } }} />;
+  }
+
   if (!isValidDiscoveryTab(tab)) {
     return <RedirectTo path="/_discovery/{tab}" params={{ path: { tab: 'streams' } }} />;
   }

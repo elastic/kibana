@@ -61,7 +61,11 @@ export const findDetectionSignal = (
   detection: LifecycleDetection,
   events: ReadonlyArray<Pick<SignificantEvent, 'signals'>> | undefined
 ): SignalEntry | undefined => {
-  for (const event of [...(events ?? [])].reverse()) {
+  for (let index = (events?.length ?? 0) - 1; index >= 0; index--) {
+    const event = events?.[index];
+    if (!event) {
+      continue;
+    }
     for (const signal of event.signals ?? []) {
       if (signal.type !== 'detection') {
         continue;
