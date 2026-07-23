@@ -7,13 +7,15 @@
 
 import { PHASE_ORDER, type IlmPhase } from '@kbn/data-lifecycle-phases';
 import type { LifecyclePhase } from './lifecycle_types';
-import { buildPhaseTimelineSegments, type TimelineSegment } from './data_lifecycle_segments';
+import {
+  buildPhaseTimelineSegments,
+  DELETE_COLUMN_WIDTH,
+  type TimelineSegment,
+} from './data_lifecycle_segments';
 
 // `grid-template-columns` only animates between values with the same track count. Rendering every
 // canonical `PHASE_ORDER` slot (absent phases as zero-width tracks) keeps that count fixed, so widths
 // animate instead of snapping on add/remove.
-
-const DELETE_COLUMN_WIDTH = '50px';
 
 // The DSL base phase uses a localized label rather than an ILM name, so it falls through to `hot`.
 const slotOfPhase = (phase: LifecyclePhase): IlmPhase => {
