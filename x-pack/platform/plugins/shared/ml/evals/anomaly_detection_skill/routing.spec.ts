@@ -57,7 +57,7 @@ evaluate.describe('ML Anomaly Detection - routing', { tag: [...tags.stateful.cla
   );
 
   evaluate(
-    'anomaly investigation queries activate the anomaly-detection skill and ES|QL tool',
+    'anomaly investigation queries activate the anomaly-detection skill and query_anomalies tool',
     async ({ evaluateDataset }) => {
       await evaluateDataset({
         dataset: {

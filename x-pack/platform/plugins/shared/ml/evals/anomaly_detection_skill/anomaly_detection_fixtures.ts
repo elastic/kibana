@@ -201,12 +201,15 @@ export async function seedAnomalyDetectionModule({
     });
 
     const topRecord = records[0];
+    // Keep two-decimal precision (do not Math.round): RequiredTermsInResponse does a
+    // substring match, and agents typically echo the tool's raw score (e.g. 45.88).
+    // Rounding to 46 would fail that check even when the answer is correct.
     const topAnomaly: TopAnomalyRecord | undefined = topRecord
       ? {
           jobId: jobIds.responseCodeRates,
           timestamp: new Date(topRecord.timestamp).toISOString(),
           responseCode: String(topRecord.partition_field_value ?? ''),
-          recordScore: Math.round(topRecord.record_score),
+          recordScore: Number(Number(topRecord.record_score).toFixed(2)),
         }
       : undefined;
 

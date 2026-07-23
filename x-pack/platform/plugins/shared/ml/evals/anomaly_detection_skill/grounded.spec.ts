@@ -81,9 +81,12 @@ evaluate.describe(
                   // Anomaly records live in .ml-anomalies-* and are read via ES|QL templates
                   // (ad_query_anomaly_records) through ml.query_anomalies, not the ML job-info API tool.
                   expectedToolId: 'ml.query_anomalies',
+                  // Use the integer portion of the score so answers that echo the tool's
+                  // raw value (e.g. "45.88") still match. Avoid Math.round here — a rounded
+                  // required term like "46" fails substring match against "45.88".
                   requiredTerms:
                     topAnomaly && jobId
-                      ? [jobId, topAnomaly.responseCode, String(topAnomaly.recordScore)]
+                      ? [jobId, topAnomaly.responseCode, String(Math.trunc(topAnomaly.recordScore))]
                       : [],
                 },
               },
