@@ -109,21 +109,44 @@ describe('SlackAppService', () => {
         request,
         expect.objectContaining({
           metadata: expect.objectContaining({ managed: true, managed_by: 'nightshift-relay' }),
-          kibana_role_descriptors: {
-            nightshift_relay_agent_builder: expect.objectContaining({
-              elasticsearch: { cluster: ['monitor_inference'], indices: [], run_as: [] },
-              kibana: [{ spaces: ['*'], feature: { agentBuilder: ['read'], actions: ['read'] } }],
-            }),
+        })
+      );
+
+      // Read-only, least-privilege: direct ES read on observability signals only (queried as
+      // this key), everything else (Streams, Significant Events, connectors) via Kibana features.
+      const { kibana_role_descriptors: descriptors } = grantAsInternalUser.mock.calls[0][1];
+      expect(descriptors.nightshift_relay_agent_builder).toEqual({
+        elasticsearch: {
+          cluster: ['monitor_inference'],
+          indices: [
+            {
+              names: ['traces-*', 'logs-*', 'metrics-*', 'apm-*'],
+              privileges: ['read', 'view_index_metadata'],
+            },
+          ],
+          run_as: [],
+        },
+        kibana: [
+          {
+            spaces: ['*'],
+            feature: {
+              streams: ['read'],
+              agentBuilder: ['read'],
+              actions: ['read'],
+              workflowsManagement: ['read'],
+            },
           },
-        })
-      );
-      expect(startInstall).toHaveBeenCalledWith(
-        expect.objectContaining({
-          kibana_api_key: Buffer.from('key-1:secret').toString('base64'),
-          kibana_url: 'https://kibana.test',
-          kibana_version: '9.2.0',
-        })
-      );
+        ],
+      });
+      // The minted key is the caller-supplied credential; no relay-minted
+      // secret exists anywhere in the exchange.
+      expect(startInstall).toHaveBeenCalledWith({
+        kibana_api_key: Buffer.from('key-1:secret').toString('base64'),
+        kibana_url: 'https://kibana.test',
+        kibana_version: '9.2.0',
+        license_info: 'platinum',
+        created_by_user_key: 'admin',
+      });
       // Written to the fixed SO id with overwrite.
       expect(soClient.create).toHaveBeenCalledWith(
         RELAY_APP_CONNECTION_SO_TYPE,
