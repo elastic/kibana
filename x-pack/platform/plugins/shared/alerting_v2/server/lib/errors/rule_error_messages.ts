@@ -5,14 +5,6 @@
  * 2.0.
  */
 
-/**
- * Canonical human-readable messages for rule domain errors.
- * Used by the rules client (runtime Boom errors) and OAS examples so
- * documentation stays aligned with the HTTP responses clients actually see.
- *
- * `message` is not part of the API contract — clients should branch on `code`.
- */
-
 export type RuleValidationContext = 'create' | 'update' | 'upsert';
 
 export const getRuleNotFoundMessage = (id: string): string => `Rule with id "${id}" not found`;
