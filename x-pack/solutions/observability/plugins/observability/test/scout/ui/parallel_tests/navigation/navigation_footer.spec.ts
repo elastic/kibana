@@ -10,7 +10,7 @@ import { expect } from '@kbn/scout-oblt/ui';
 
 test.describe(
   'Stateful Observability Navigation - Footer',
-  { tag: [...tags.stateful.observability] },
+  { tag: [...tags.stateful.classic] },
   () => {
     test.beforeAll(async ({ scoutSpace }) => {
       await scoutSpace.setSolutionView('oblt');

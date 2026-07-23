@@ -17,6 +17,7 @@ spaceTest.describe(
   },
   () => {
     spaceTest.beforeAll(async ({ scoutSpace }) => {
+      await scoutSpace.setSolutionView('oblt');
       await scoutSpace.savedObjects.load(testData.KBN_ARCHIVE);
       await scoutSpace.uiSettings.setDefaultIndex(testData.DATA_VIEW_NAME);
       await scoutSpace.uiSettings.setDefaultTime(DEFAULT_TIME_RANGE);

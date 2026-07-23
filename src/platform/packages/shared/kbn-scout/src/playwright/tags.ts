@@ -32,15 +32,21 @@ export const getPlaywrightTagsFor = (
 export const tags = {
   stateful: {
     classic: getPlaywrightTagsFor('stateful', 'classic'),
-    search: getPlaywrightTagsFor('stateful', 'search'),
-    observability: getPlaywrightTagsFor('stateful', 'observability_complete'),
-    security: getPlaywrightTagsFor('stateful', 'security_complete'),
+
+    // `search` / `observability` / `security` domains are intentionally NOT exposed here for
+    // the `stateful` architecture: Kibana CI doesn't schedule stateful test runs for anything
+    // other than `classic` yet (see `getServerRunFlagsFromTags`'s `supportedArchDomainCombos`
+    // in `../tests_discovery/tag_utils.ts`), so tests tagged with them would be discovered but
+    // silently never run. The underlying support isn't removed -- `getPlaywrightTagsFor` and
+    // the `@kbn/scout-info` test target definitions still recognize these combos -- it's just
+    // not surfaced through this helper until CI can actually schedule them. Use
+    // `tags.stateful.classic` for stateful coverage of a solution feature instead.
 
     /**
-     * Tags to target all stateful deployment types
+     * Tags to target all supported stateful deployment types
      */
     get all(): string[] {
-      return [...this.classic, ...this.search, ...this.observability, ...this.security];
+      return [...this.classic];
     },
   },
   serverless: {
