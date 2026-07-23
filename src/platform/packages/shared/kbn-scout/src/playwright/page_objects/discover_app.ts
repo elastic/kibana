@@ -614,6 +614,24 @@ export class DiscoverApp {
     return this.page.testSubj.innerText('unifiedHistogramBreakdownSelectorButton');
   }
 
+  /**
+   * Clears the histogram breakdown field by selecting the "No breakdown" option.
+   */
+  async clearBreakdownField() {
+    await this.page.testSubj.click('unifiedHistogramBreakdownSelectorButton');
+    await this.page.testSubj.waitForSelector('unifiedHistogramBreakdownSelectorSelectable', {
+      state: 'visible',
+    });
+    await this.page
+      .locator(
+        `[data-test-subj="unifiedHistogramBreakdownSelectorSelectable"] .euiSelectableListItem[value="__EMPTY_SELECTOR_OPTION__"]`
+      )
+      .click();
+    await this.page.testSubj.waitForSelector('unifiedHistogramBreakdownSelectorSelectable', {
+      state: 'hidden',
+    });
+  }
+
   async expandTimeRangeAsSuggestedInNoResultsMessage() {
     const button = this.page.testSubj.locator('discoverNoResultsViewAllMatches');
     await button.click();
