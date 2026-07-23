@@ -12,6 +12,7 @@ import {
   filterExpressionCodec,
   getFilterExpressionLookupKey,
   isValidFilterExpression,
+  projectRoutingCodec,
 } from './filter_input_codec';
 
 describe('filterExpressionCodec', () => {
@@ -157,6 +158,76 @@ describe('filterExpressionCodec', () => {
       expect(filterExpressionCodec.decode(filterExpressionCodec.encode(expression))).toEqual(
         expression
       );
+    });
+  });
+});
+
+describe('projectRoutingCodec', () => {
+  describe('encode', () => {
+    it('encodes an equals filter as a tag:value clause', () => {
+      expect(
+        projectRoutingCodec.encode({
+          operator: FilterOperator.EQUALS,
+          tagName: 'env',
+          tagValue: 'prod',
+        })
+      ).toBe('env:prod');
+    });
+
+    it('encodes a not-equals filter as an exists clause minus the value', () => {
+      expect(
+        projectRoutingCodec.encode({
+          operator: FilterOperator.NOT_EQUALS,
+          tagName: 'env',
+          tagValue: 'prod',
+        })
+      ).toBe('env:* AND NOT env:prod');
+    });
+
+    it('encodes a one-of filter as OR-joined tag:value clauses', () => {
+      expect(
+        projectRoutingCodec.encode({
+          operator: FilterOperator.ONE_OF,
+          tagName: 'env',
+          tagValue: ['prod', 'staging'],
+        })
+      ).toBe('env:prod OR env:staging');
+    });
+
+    it('encodes a not-one-of filter as an exists clause minus the OR group', () => {
+      expect(
+        projectRoutingCodec.encode({
+          operator: FilterOperator.NOT_ONE_OF,
+          tagName: 'env',
+          tagValue: ['prod', 'staging'],
+        })
+      ).toBe('env:* AND NOT (env:prod OR env:staging)');
+    });
+
+    it('encodes an exists filter as a wildcard clause', () => {
+      expect(
+        projectRoutingCodec.encode({
+          operator: FilterOperator.EXISTS,
+          tagName: 'env',
+          tagValue: undefined,
+        })
+      ).toBe('env:*');
+    });
+
+    it('encodes a not-exists filter as a negated wildcard clause', () => {
+      expect(
+        projectRoutingCodec.encode({
+          operator: FilterOperator.NOT_EXISTS,
+          tagName: 'env',
+          tagValue: undefined,
+        })
+      ).toBe('NOT env:*');
+    });
+  });
+
+  describe('decode', () => {
+    it('throws because decoding is not implemented yet', () => {
+      expect(() => projectRoutingCodec.decode('env:prod')).toThrow('Not implemented');
     });
   });
 });

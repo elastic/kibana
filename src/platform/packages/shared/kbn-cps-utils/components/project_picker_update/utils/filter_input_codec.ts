@@ -207,6 +207,16 @@ export const projectRoutingCodec = z.codec(z.string().nullable(), FilterExpressi
         return `${tagName}:${tagValue}`;
       case FilterOperator.NOT_EQUALS:
         return `${tagName}:* AND NOT ${tagName}:${tagValue}`;
+      case FilterOperator.ONE_OF:
+        return `${tagValue.map((value) => `${tagName}:${value}`).join(' OR ')}`;
+      case FilterOperator.NOT_ONE_OF:
+        return `${tagName}:* AND NOT (${tagValue
+          .map((value) => `${tagName}:${value}`)
+          .join(' OR ')})`;
+      case FilterOperator.EXISTS:
+        return `${tagName}:*`;
+      case FilterOperator.NOT_EXISTS:
+        return `NOT ${tagName}:*`;
       default:
         return null;
     }

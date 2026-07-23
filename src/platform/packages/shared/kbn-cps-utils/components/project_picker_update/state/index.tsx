@@ -169,7 +169,9 @@ export const ProjectPickerStateProvider = ({
   useEffect(() => {
     onProjectRoutingChange(
       Array.from(store.state.filterExpressions.values())
-        .map((filterEntry) => projectRoutingCodec.encode(filterEntry.expression))
+        .map((filterEntry) =>
+          filterEntry.enabled ? projectRoutingCodec.encode(filterEntry.expression) : null
+        )
         .concat(
           '_id:*',
           store.state.excludedOverrides.map((override) => `NOT _id:${override}`)
