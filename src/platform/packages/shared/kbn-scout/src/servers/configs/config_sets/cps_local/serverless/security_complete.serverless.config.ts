@@ -35,6 +35,7 @@ export const servers: ScoutServerConfig = {
     serverArgs: [
       ...uiamConfig.kbnTestServer.serverArgs,
       '--cps.cpsEnabled=true',
+      '--feature_flags.overrides.core.chrome.next=true',
       '--xpack.alerting.rules.apiKeyType=uiam',
       // UIAM API keys for task-manager: required for background tasks to be eligible
       // for CPS fan-out (stock ES API keys don't carry x-client-authentication).
