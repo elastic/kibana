@@ -18,40 +18,36 @@ import type { GetScopedClients } from '../../../routes/types';
 import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
 import { createSignificantEventsAvailability } from '../significant_events_availability';
-import { eventsWriteHandler } from './handler';
+import {
+  getBulkWriteToolErrorCode,
+  MAX_BULK_WRITE_ITEMS,
+  trackTelemetryBestEffort,
+} from '../bulk_write';
+import { eventsWriteBulkHandler } from './handler';
 
 export const SIGNIFICANT_EVENTS_EVENTS_WRITE_TOOL_ID = platformSignificantEventsTools.eventsWrite;
 
-const eventsWriteSchema = significantEventSchema
-  .pick({
-    discovery_slug: true,
-    discovery_id: true,
-    status: true,
-    stream_names: true,
-    rule_names: true,
-    title: true,
-    summary: true,
-    root_cause: true,
-    criticality: true,
-    confidence: true,
-    recommendations: true,
-    assessment_note: true,
-    evidences: true,
-    cause_kis: true,
-    dependency_edges: true,
-    infra_components: true,
-    workflow_execution_id: true,
-  })
-  .extend({
-    // Override the base schema's description — it's written for discovery_write, where
-    // discovery_slug is optional and auto-generated for new episodes. Here it always refers
-    // to an existing discovery, so it's required and must never be omitted.
-    discovery_slug: significantEventSchema.shape.discovery_slug.describe(
-      'Required. Stable episode identifier of the discovery being reviewed — ' +
-        'copy it verbatim from the input discovery.'
-    ),
-    conversation_id: z.string().optional(),
-  });
+export const eventsWriteItemSchema = significantEventSchema.pick({
+  event_id: true,
+  discovery_id: true,
+  status: true,
+  stream_names: true,
+  title: true,
+  symptom_hypothesis: true,
+  summary: true,
+  severity: true,
+  confidence: true,
+  assessment_note: true,
+  signals: true,
+  causal_features: true,
+  blast_radius: true,
+  workflow_execution_id: true,
+  conversation_id: true,
+});
+
+export const eventsWriteSchema = z.object({
+  items: z.array(eventsWriteItemSchema).min(1).max(MAX_BULK_WRITE_ITEMS),
+});
 
 export function createEventsWriteTool({
   getScopedClients,
@@ -68,8 +64,7 @@ export function createEventsWriteTool({
     id: SIGNIFICANT_EVENTS_EVENTS_WRITE_TOOL_ID,
     type: ToolType.builtin,
     description: dedent`
-      Create or version a significant event for a discovery episode. Handles deduplication: looks up the current event version by discovery_slug; if status has not changed, skips the write and returns the existing event_id.
-      For events linked to a discovery episode via discovery_slug. Standalone events not tied to a discovery episode use event_create instead.
+      Create or version a batch of significant events linked to discoveries. Each item appends a new event version and is enriched with event_uuid and previous_event_uuid. Submit at most one item per event_id. Standalone events not tied to a discovery use event_create instead.
     `,
     schema: eventsWriteSchema,
     tags: ['streams', 'significant_events'],
@@ -77,41 +72,61 @@ export function createEventsWriteTool({
     handler: async (toolParams, context) => {
       const { request } = context;
       try {
-        const { getEventClient, licensing, uiSettingsClient } = await getScopedClients({ request });
-        await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+        const { getEventClient, licensing } = await getScopedClients({ request });
+        await assertSignificantEventsAccess({ server, licensing });
 
-        const data = await eventsWriteHandler({
+        const data = await eventsWriteBulkHandler({
           eventClient: getEventClient(),
-          input: toolParams,
+          inputs: toolParams.items,
         });
 
-        telemetry.trackAgentToolEventsWrite({
-          success: true,
-          discovery_slug: data.discovery_slug,
-          status: data.status,
-          written: data.written,
-          stream_names: toolParams.stream_names,
+        data.forEach((result) => {
+          const input = toolParams.items[result.index];
+          if (input === undefined) return;
+          trackTelemetryBestEffort({
+            logger,
+            description: 'events_write telemetry',
+            track: () =>
+              telemetry.trackAgentToolEventsWrite({
+                success: result.written,
+                event_id: result.event_id,
+                status: result.status,
+                written: result.written,
+                stream_names: input.stream_names,
+                error_message: result.written ? undefined : result.error.reason,
+              }),
+          });
         });
 
         return {
-          results: [{ type: ToolResultType.other, data }],
+          results: [{ type: ToolResultType.other, data: { results: data } }],
         };
       } catch (error) {
         const message = error instanceof Error ? error.message : 'Unknown error';
         logger.error(`Error running events_write: ${message}`);
-        telemetry.trackAgentToolEventsWrite({
-          success: false,
-          discovery_slug: toolParams.discovery_slug,
-          status: toolParams.status,
-          written: false,
-          stream_names: toolParams.stream_names,
-          error_message: message,
+        toolParams.items.forEach((input) => {
+          trackTelemetryBestEffort({
+            logger,
+            description: 'failed events_write telemetry',
+            track: () =>
+              telemetry.trackAgentToolEventsWrite({
+                success: false,
+                event_id: input.event_id,
+                status: input.status,
+                written: false,
+                stream_names: input.stream_names,
+                error_message: message,
+              }),
+          });
         });
+        const code = getBulkWriteToolErrorCode(error instanceof Error ? error : new Error(message));
         return {
           results: [
             {
               type: ToolResultType.error,
               data: {
+                code,
+                retryable: false,
                 message: i18n.translate(
                   'xpack.significantEvents.agentBuilder.tools.eventsWrite.errorMessage',
                   {

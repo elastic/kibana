@@ -23,6 +23,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { PhaseName } from '@kbn/streams-schema';
+import { usePushFlyoutFocus } from '@kbn/data-lifecycle-phases';
 import { isEqual } from 'lodash';
 import { FormProvider, useForm, useFormState, useWatch } from 'react-hook-form';
 import type { EditDeletePhaseFlyoutProps, EditDeletePhaseFlyoutValue } from './types';
@@ -65,6 +66,7 @@ export const EditDeletePhaseFlyout = ({
   const formId = useGeneratedHtmlId({ prefix: 'streamsEditDeletePhaseFlyoutForm' });
   const dataTestSubj = dataTestSubjProp ?? 'streamsEditDeletePhaseFlyout';
   const { footerStyles, headerStyles, sectionStyles } = useEditDeletePhaseFlyoutStyles();
+  const { focusProps } = usePushFlyoutFocus();
 
   const schema = useMemo(
     () => getEditDeletePhaseFlyoutFormSchema({ maximumRetentionPeriod }),
@@ -234,6 +236,7 @@ export const EditDeletePhaseFlyout = ({
   const applyButton = (
     <EuiButton
       fill
+      size="s"
       type="submit"
       form={formId}
       isLoading={Boolean(isSaving) || isSubmitting}
@@ -247,12 +250,14 @@ export const EditDeletePhaseFlyout = ({
   return (
     <EuiFlyout
       type="push"
-      size="s"
+      size={400}
       paddingSize="none"
       ownFocus={false}
       onClose={onClose}
       aria-labelledby={flyoutTitleId}
+      role="region"
       data-test-subj={dataTestSubj}
+      {...focusProps}
     >
       <EuiFlyoutHeader hasBorder>
         <EuiFlexGroup direction="column" gutterSize="s" responsive={false} css={headerStyles}>
@@ -330,6 +335,7 @@ export const EditDeletePhaseFlyout = ({
               data-test-subj={`${dataTestSubj}CancelButton`}
               onClick={onClose}
               flush="left"
+              size="s"
             >
               {editDeletePhaseFlyoutI18n.cancelButtonLabel}
             </EuiButtonEmpty>

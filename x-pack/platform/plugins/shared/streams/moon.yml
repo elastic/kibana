@@ -90,7 +90,7 @@ dependsOn:
   - '@kbn/elastic-agent-utils'
   - '@kbn/sample-log-parser'
   - '@kbn/workflows-extensions'
-  - '@kbn/agent-context-layer-plugin'
+  - '@kbn/agent-builder-sml-plugin'
 tags:
   - plugin
   - prod

@@ -11,7 +11,7 @@ import { EuiBasicTable, EuiBadge, EuiCallOut, EuiFlexGroup, EuiFlexItem } from '
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import type { Discovery } from '@kbn/significant-events-schema';
+import { getSeverityLabel, type Discovery } from '@kbn/significant-events-schema';
 import { RUNNING_POLL_INTERVAL_MS } from '../../../constants';
 import {
   useFetchDiscoveriesEntities,
@@ -19,6 +19,7 @@ import {
 } from '../../../../../hooks/significant_events/use_fetch_discoveries_entities';
 import { useTimefilter } from '../../../../../hooks/use_timefilter';
 import { useSignificantEventsDiscoveryContext } from '../../context/significant_events_discovery_context';
+import { useBlocksNewActivity } from '../../../../../hooks/significant_events/use_significant_events_maintenance';
 import { DiscoveryFlyout } from './discovery_flyout';
 import { FindSignificantEventsButton } from '../streams_view/find_significant_events_button';
 import { StreamsAppSearchBar } from '../../../../streams_app_search_bar';
@@ -69,11 +70,7 @@ const columns: Array<EuiBasicTableColumn<Discovery>> = [
     }),
     width: '160px',
     render: (discovery: Discovery) => {
-      const streamNames = [
-        ...new Set(
-          (discovery.detections ?? []).map((d) => d.stream_name).filter((s): s is string => !!s)
-        ),
-      ];
+      const streamNames = discovery.stream_names ?? [];
       return (
         <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
           {streamNames.slice(0, MAX_VISIBLE_STREAMS).map((name) => (
@@ -91,12 +88,12 @@ const columns: Array<EuiBasicTableColumn<Discovery>> = [
     },
   },
   {
-    field: 'criticality',
-    name: i18n.translate('xpack.streams.discoveriesTab.criticalityColumn', {
-      defaultMessage: 'Criticality',
+    field: 'severity',
+    name: i18n.translate('xpack.streams.discoveriesTab.severityColumn', {
+      defaultMessage: 'Severity',
     }),
     width: '100px',
-    render: (value: number | undefined) => (value != null ? String(value) : '-'),
+    render: (value: Discovery['severity']) => getSeverityLabel(value),
   },
   {
     field: 'confidence',
@@ -122,6 +119,7 @@ const columns: Array<EuiBasicTableColumn<Discovery>> = [
 
 export const DiscoveriesTab = () => {
   const { timeState } = useTimefilter();
+  const { blocksActivity, activityBlockTooltip } = useBlocksNewActivity();
 
   const { isRunning, isCanceling, handleRun, handleCancel } =
     useSignificantEventsDiscoveryContext();
@@ -136,7 +134,7 @@ export const DiscoveriesTab = () => {
   const [selectedDiscovery, setSelectedDiscovery] = useState<Discovery | undefined>();
 
   const { data: historyData, isLoading: isHistoryLoading } = useFetchDiscoveryHistory(
-    selectedDiscovery?.discovery_slug
+    selectedDiscovery?.event_id
   );
 
   const onTableChange = ({ page }: { page?: { index: number; size: number } }) => {
@@ -165,7 +163,8 @@ export const DiscoveriesTab = () => {
               onCancel={handleCancel}
               isRunning={isRunning}
               isCanceling={isCanceling}
-              isDisabled={isRunning}
+              isDisabled={isRunning || blocksActivity}
+              disabledTooltip={activityBlockTooltip}
             />
           </EuiFlexItem>
         </EuiFlexGroup>

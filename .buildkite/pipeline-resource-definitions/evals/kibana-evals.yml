@@ -54,7 +54,7 @@ spec:
           access_level: READ_ONLY
       schedules:
         Weekly build:
-          cronline: 0 0 * * 1 GMT
+          cronline: 0 20 * * 0 GMT
           message: Weekly LLM Evals (all suites, all models)
           branch: main
       tags:

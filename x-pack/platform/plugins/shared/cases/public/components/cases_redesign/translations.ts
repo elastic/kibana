@@ -15,6 +15,14 @@ export const CASE_DETAILS_TITLE = i18n.translate('xpack.cases.casesRedesign.deta
   defaultMessage: 'Case Details (Redesign)',
 });
 
+export const CASE_SETTINGS_TITLE = i18n.translate('xpack.cases.casesRedesign.settings.title', {
+  defaultMessage: 'Cases settings',
+});
+
+export const BACK_TO_CASES = i18n.translate('xpack.cases.casesRedesign.settings.backToCases', {
+  defaultMessage: 'Cases',
+});
+
 export const VIEWING_CASE = (caseId: string) =>
   i18n.translate('xpack.cases.casesRedesign.details.viewingCase', {
     defaultMessage: 'Viewing case: {caseId}. This page is under construction.',
@@ -24,6 +32,19 @@ export const VIEWING_CASE = (caseId: string) =>
 export const SHOW_METRICS = i18n.translate('xpack.cases.casesRedesign.details.showMetrics', {
   defaultMessage: 'Show metrics',
 });
+
+export const TEMPLATE_NOT_FOUND = (name: string) =>
+  i18n.translate('xpack.cases.casesRedesign.details.templateNotFound', {
+    defaultMessage: '{name} (not found)',
+    values: { name },
+  });
+
+export const TEMPLATE_NOT_FOUND_GENERIC = i18n.translate(
+  'xpack.cases.casesRedesign.details.templateNotFoundGeneric',
+  {
+    defaultMessage: 'Template not found',
+  }
+);
 
 export const REPORTED_BY = (name: string) =>
   i18n.translate('xpack.cases.casesRedesign.details.reportedBy', {
@@ -148,3 +169,10 @@ export const CLICK_TO_SEND_EMAIL = (email: string) =>
 export const ADD_CONNECTOR = i18n.translate('xpack.cases.casesRedesign.details.addConnector', {
   defaultMessage: 'Add connector',
 });
+
+export const LEGACY_CUSTOM_FIELDS_TITLE = i18n.translate(
+  'xpack.cases.casesRedesign.details.legacyCustomFieldsTitle',
+  {
+    defaultMessage: 'Legacy custom fields',
+  }
+);

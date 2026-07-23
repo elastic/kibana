@@ -14,8 +14,8 @@ import { DiscoveryService, discoveriesDataStream } from './discoveries';
 import type { DiscoveryClient } from './discoveries';
 import { EventService, eventsDataStream } from './events';
 import type { EventClient } from './events';
-import { memoriesDataStream } from '../memory';
-import { memoryHistoryDataStream } from '../memory/history_data_stream';
+import { memoriesDataStream } from '../../memory_and_investigation/lib/memory';
+import { memoryHistoryDataStream } from '../../memory_and_investigation/lib/memory/history_data_stream';
 
 export interface SignificantEventsServices {
   detection: DetectionService;
@@ -68,21 +68,29 @@ export async function initializeSignificantEventsTemplates({
   esClient: ElasticsearchClient;
   logger: Logger;
 }): Promise<void> {
-  await Promise.all(
-    SIGNIFICANT_EVENTS_DATA_STREAMS.map(async (definition) => {
-      try {
-        await DataStreamClient.initializeTemplate({
-          dataStream: definition,
-          elasticsearchClient: esClient,
-          logger,
-        });
-      } catch (error) {
-        logger.error(
-          `Failed to initialize template for ${definition.name}: ${
-            error instanceof Error ? error.message : String(error)
-          }`
-        );
-      }
-    })
+  // Attempt every template, then reject with an aggregate naming each failed one. Swallowing the
+  // errors here would make the caller's install aggregate report success even when a template failed.
+  const results = await Promise.allSettled(
+    SIGNIFICANT_EVENTS_DATA_STREAMS.map((definition) =>
+      DataStreamClient.initializeTemplate({
+        dataStream: definition,
+        elasticsearchClient: esClient,
+        logger,
+      })
+    )
   );
+
+  const failures = results.flatMap((result, index) =>
+    result.status === 'rejected'
+      ? [
+          `${SIGNIFICANT_EVENTS_DATA_STREAMS[index].name} (${
+            result.reason instanceof Error ? result.reason.message : String(result.reason)
+          })`,
+        ]
+      : []
+  );
+
+  if (failures.length > 0) {
+    throw new Error(`Failed to initialize significant events templates: [${failures.join('; ')}]`);
+  }
 }

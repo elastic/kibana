@@ -63,7 +63,7 @@ export const createMockedInternalAgent = (
       update_agent: true,
       update_access_control: true,
     },
-    isAvailable: jest.fn() as any,
+    isAvailable: jest.fn(async () => ({ status: 'available' as const })) as any,
     ...parts,
   };
 };
@@ -71,6 +71,8 @@ export const createMockedInternalAgent = (
 export const createAgentsServiceStartMock = (): AgentsServiceStartMock => {
   return {
     getRegistry: jest.fn().mockImplementation(() => createMockedAgentRegistry()),
+    ensure: jest.fn(),
+    resolveAgentConfiguration: jest.fn(),
     removeToolRefsFromAgents: jest.fn(),
     getAgentsUsingTools: jest.fn(),
     removePluginRefsFromAgents: jest.fn(),

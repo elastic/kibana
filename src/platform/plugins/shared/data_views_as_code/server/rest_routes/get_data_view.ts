@@ -23,8 +23,14 @@ export const registerGetDataViewAsCodeRoute = (
   router.versioned
     .get({
       path: GET_DATA_VIEW_AS_CODE_PATH,
-      access: 'public',
+      access: 'internal',
       description: 'Get a data view by id',
+      options: {
+        availability: {
+          stability: 'tech_preview',
+          since: '9.5.0',
+        },
+      },
       security: {
         authz: {
           enabled: false,
@@ -50,6 +56,9 @@ export const registerGetDataViewAsCodeRoute = (
           response: {
             200: {
               body: () => asCodeResponseSchema,
+            },
+            404: {
+              description: 'not found',
             },
           },
         },

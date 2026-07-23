@@ -14,6 +14,8 @@ import {
   prependAgentlessApiBasePathToEndpoint,
   logLegacyAgentlessWriteDeprecation,
   LEGACY_AGENTLESS_WRITE_DEPRECATION_MARKER,
+  isManagedBulkEnabled,
+  getManagedBulkEndpoint,
 } from './agentless';
 
 jest.mock('../app_context');
@@ -81,6 +83,81 @@ describe('logLegacyAgentlessWriteDeprecation', () => {
     const message = warn.mock.calls[0][0] as string;
     expect(message).toContain(LEGACY_AGENTLESS_WRITE_DEPRECATION_MARKER);
     expect(message).toContain('create package policy');
+  });
+});
+
+describe('isManagedBulkEnabled', () => {
+  afterEach(() => {
+    jest.clearAllMocks();
+    mockedAppContextService.getConfig.mockReset();
+  });
+
+  it('should return false if managedOtlp url is absent and flag is false', () => {
+    jest.spyOn(appContextService, 'getConfig').mockReturnValue({
+      agentless: { managedBulk: { enabled: false } },
+    } as any);
+    jest.spyOn(appContextService, 'getCloud').mockReturnValue({} as any);
+
+    expect(isManagedBulkEnabled()).toBe(false);
+  });
+
+  it('should return false if managedOtlp url is absent and flag is true', () => {
+    jest.spyOn(appContextService, 'getConfig').mockReturnValue({
+      agentless: { managedBulk: { enabled: true } },
+    } as any);
+    jest.spyOn(appContextService, 'getCloud').mockReturnValue({} as any);
+
+    expect(isManagedBulkEnabled()).toBe(false);
+  });
+
+  it('should return false if managedOtlp url is present but flag is false', () => {
+    jest.spyOn(appContextService, 'getConfig').mockReturnValue({
+      agentless: { managedBulk: { enabled: false } },
+    } as any);
+    jest
+      .spyOn(appContextService, 'getCloud')
+      .mockReturnValue({ managedOtlp: { url: 'https://managed-otlp.example.com' } } as any);
+
+    expect(isManagedBulkEnabled()).toBe(false);
+  });
+
+  it('should return true if managedOtlp url is present and flag is true', () => {
+    jest.spyOn(appContextService, 'getConfig').mockReturnValue({
+      agentless: { managedBulk: { enabled: true } },
+    } as any);
+    jest
+      .spyOn(appContextService, 'getCloud')
+      .mockReturnValue({ managedOtlp: { url: 'https://managed-otlp.example.com' } } as any);
+
+    expect(isManagedBulkEnabled()).toBe(true);
+  });
+});
+
+describe('getManagedBulkEndpoint', () => {
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('should return undefined if managedOtlp url is absent', () => {
+    jest.spyOn(appContextService, 'getCloud').mockReturnValue({} as any);
+
+    expect(getManagedBulkEndpoint()).toBeUndefined();
+  });
+
+  it('should append /_es to the managedOtlp url when present', () => {
+    jest
+      .spyOn(appContextService, 'getCloud')
+      .mockReturnValue({ managedOtlp: { url: 'https://managed-otlp.example.com' } } as any);
+
+    expect(getManagedBulkEndpoint()).toBe('https://managed-otlp.example.com/_es');
+  });
+
+  it('should strip a trailing slash before appending /_es', () => {
+    jest
+      .spyOn(appContextService, 'getCloud')
+      .mockReturnValue({ managedOtlp: { url: 'https://managed-otlp.example.com/' } } as any);
+
+    expect(getManagedBulkEndpoint()).toBe('https://managed-otlp.example.com/_es');
   });
 });
 

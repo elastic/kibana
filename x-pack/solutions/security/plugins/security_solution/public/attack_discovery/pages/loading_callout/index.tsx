@@ -29,6 +29,7 @@ import * as i18n from './translations';
 import { getIsTerminalState } from './get_is_terminal_state';
 import { useDismissAttackDiscoveryGeneration } from '../use_dismiss_attack_discovery_generations';
 import { useHasWorkflowsPrivileges } from '../hooks/use_has_workflows_privileges';
+import { ENABLE_ATTACK_DISCOVERY_WORKFLOWS_SETTING } from '../../../../common/constants';
 import { useKibana } from '../../../common/lib/kibana';
 import { AttackDiscoveryEventTypes } from '../../../common/lib/telemetry';
 
@@ -58,6 +59,12 @@ interface Props {
   hideActions?: boolean;
   localStorageAttackDiscoveryMaxAlerts: string | undefined;
   loadingMessage?: string;
+  /**
+   * When provided, clicking "View details" delegates to this callback instead of
+   * opening the local `WorkflowExecutionDetailsFlyout`. Used by the master-detail
+   * control center to swap its flyout body in place (avoiding a stacked flyout).
+   */
+  onViewDetails?: (executionUuid: string) => void;
   onRefresh?: () => void;
   persistedCount?: number;
   reason?: string;
@@ -91,6 +98,7 @@ const LoadingCalloutComponent: React.FC<Props> = ({
   hideActions = false,
   localStorageAttackDiscoveryMaxAlerts,
   loadingMessage,
+  onViewDetails,
   onRefresh,
   persistedCount,
   reason,
@@ -105,23 +113,25 @@ const LoadingCalloutComponent: React.FC<Props> = ({
 }) => {
   const { euiTheme } = useEuiTheme();
   const isDarkMode = useKibanaIsDarkMode();
-  const { featureFlags, http, telemetry } = useKibana().services;
+  const { featureFlags, http, telemetry, uiSettings } = useKibana().services;
 
   const [isWorkflowsEnabled, setIsWorkflowsEnabled] = useState<boolean>(false);
 
   const { hasWorkflowsRead } = useHasWorkflowsPrivileges();
 
-  // Load feature flag value
+  // Load feature flag value and combine with per-space uiSetting opt-in
   useEffect(() => {
     const loadFeatureFlag = async () => {
-      const enabled = await featureFlags.getBooleanValue(
+      const ffEnabled = await featureFlags.getBooleanValue(
         'securitySolution.attackDiscoveryWorkflowsEnabled',
-        false
+        true
       );
-      setIsWorkflowsEnabled(enabled);
+      setIsWorkflowsEnabled(
+        ffEnabled && uiSettings.get(ENABLE_ATTACK_DISCOVERY_WORKFLOWS_SETTING, false)
+      );
     };
     loadFeatureFlag();
-  }, [featureFlags]);
+  }, [featureFlags, uiSettings]);
 
   const isTerminalState = useMemo(() => getIsTerminalState(status), [status]);
 
@@ -244,8 +254,16 @@ const LoadingCalloutComponent: React.FC<Props> = ({
 
   const openFlyout = useCallback(() => {
     telemetry.reportEvent(AttackDiscoveryEventTypes.ExecutionDetailsOpened, {});
+
+    // When a delegate is provided, hand off "View details" to the parent (e.g.
+    // the master-detail control center) instead of opening a nested flyout.
+    if (onViewDetails != null && executionUuid != null) {
+      onViewDetails(executionUuid);
+      return;
+    }
+
     setIsFlyoutOpen(true);
-  }, [telemetry]);
+  }, [executionUuid, onViewDetails, telemetry]);
 
   const closeFlyout = useCallback(() => {
     setIsFlyoutOpen(false);
@@ -331,7 +349,7 @@ const LoadingCalloutComponent: React.FC<Props> = ({
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      {isFlyoutOpen && (
+      {onViewDetails == null && isFlyoutOpen && (
         <WorkflowExecutionDetailsFlyout
           alertsContextCount={alertsContextCount}
           approximateFutureTime={approximateFutureTime}

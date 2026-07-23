@@ -6,15 +6,24 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import type { SignificantEvent } from '@kbn/significant-events-schema';
+import { type SignificantEvent } from '@kbn/significant-events-schema';
 import type { EventClient } from '../../../lib/significant_events/events';
+import {
+  assertUniqueBulkWriteKeys,
+  assertValidBulkWriteSize,
+  createBulkWriteItemError,
+  createBulkWriteOutcomeUnknownError,
+  extractCreateResults,
+  type CompactBulkError,
+  toCompactBulkError,
+} from '../bulk_write';
 
 /**
  * Input for writing a significant event document. Derived from the canonical SignificantEvent
  * schema.
  *
- * `discovery_slug` is optional. When absent (chat-initiated path), a synthetic slug is generated
- * (`agent-event-<uuid8>`) and the dedup lookup is skipped.
+ * `event_id` is optional. When absent (chat-initiated path), a synthetic ID is generated
+ * (`agent-event-<uuid8>`) and the latest-version lookup is skipped.
  *
  * `conversation_id` is the only addition not in the base schema — passed through for traceability.
  */
@@ -23,34 +32,133 @@ export type EventsWriteInput = Pick<
   | 'discovery_id'
   | 'status'
   | 'stream_names'
-  | 'rule_names'
   | 'title'
+  | 'symptom_hypothesis'
   | 'summary'
-  | 'root_cause'
-  | 'criticality'
+  | 'severity'
   | 'confidence'
-  | 'recommendations'
   | 'assessment_note'
-  | 'evidences'
-  | 'cause_kis'
-  | 'dependency_edges'
-  | 'infra_components'
+  | 'signals'
+  | 'causal_features'
+  | 'blast_radius'
   | 'workflow_execution_id'
 > & {
   /** Optional — generated as `agent-event-<uuid8>` when absent (chat-initiated path). */
-  discovery_slug?: string;
+  event_id?: string;
   /** Not in the base SignificantEvent schema — passed through for traceability. */
   conversation_id?: string;
 };
 
 export interface EventsWriteResult {
+  index: number;
+  event_uuid: string;
   event_id: string;
-  discovery_slug: string;
   status: SignificantEvent['status'];
-  written: boolean;
-  reason?: string;
+  written: true;
 }
 
+export interface EventsWriteFailureResult {
+  index: number;
+  event_id: string;
+  status: SignificantEvent['status'];
+  written: false;
+  reason: 'bulk_error';
+  error: CompactBulkError;
+}
+
+export type EventsWriteBulkResult = EventsWriteResult | EventsWriteFailureResult;
+
+/**
+ * Versions a batch of significant events in one request while preserving input order in the
+ * returned results. Transport or malformed-response failures leave the whole outcome unknown;
+ * Elasticsearch item failures remain isolated to their corresponding results.
+ */
+export async function eventsWriteBulkHandler({
+  eventClient,
+  inputs,
+}: {
+  eventClient: EventClient;
+  inputs: EventsWriteInput[];
+}): Promise<EventsWriteBulkResult[]> {
+  assertValidBulkWriteSize(inputs);
+  assertUniqueBulkWriteKeys(
+    inputs.flatMap((input, index) =>
+      input.event_id === undefined ? [] : [{ index, key: input.event_id }]
+    ),
+    'event_id'
+  );
+
+  const explicitEventIds = inputs.flatMap((input) =>
+    input.event_id === undefined ? [] : [input.event_id]
+  );
+  // Synthetic event IDs are always new. Only explicit IDs need a latest-version lookup for
+  // previous_event_uuid and investigation lineage.
+  const latestEvents =
+    explicitEventIds.length === 0
+      ? new Map<string, SignificantEvent>()
+      : await eventClient.findLatestByEventIds(explicitEventIds);
+  const timestamp = new Date().toISOString();
+  const prepared = inputs.map((input, index) => {
+    const eventId = input.event_id ?? `agent-event-${uuidv4().slice(0, 8)}`;
+    const eventUuid = uuidv4();
+    return {
+      index,
+      eventId,
+      eventUuid,
+      status: input.status,
+      document: {
+        ...input,
+        '@timestamp': timestamp,
+        event_uuid: eventUuid,
+        event_id: eventId,
+        previous_event_uuid: latestEvents.get(eventId)?.event_uuid,
+        // Carry investigation lineage forward so a re-open keeps investigations already attached
+        // to the episode. Triage uses this to avoid re-investigating it. Status updates already
+        // spread the latest document, and the UI attachment path writes this field directly.
+        investigations: latestEvents.get(eventId)?.investigations,
+        severity: input.severity,
+      },
+    };
+  });
+
+  let response;
+  try {
+    response = await eventClient.bulkCreate(
+      prepared.map(({ document }) => document),
+      // `wait_for` lets the immediate triage `_count` see the newly written event version.
+      { throwOnFail: false, refresh: 'wait_for' }
+    );
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : 'Unknown Elasticsearch transport error';
+    throw createBulkWriteOutcomeUnknownError(`Event bulk write outcome is unknown: ${message}`);
+  }
+
+  const createResults = extractCreateResults(response, prepared.length, 'Event');
+
+  return prepared.map(({ index, eventId, eventUuid, status }, responseIndex) => {
+    const detail = createResults[responseIndex];
+    if (detail.error) {
+      return {
+        index,
+        event_id: eventId,
+        status,
+        written: false,
+        reason: 'bulk_error',
+        error: toCompactBulkError(detail),
+      };
+    }
+    return {
+      index,
+      event_uuid: eventUuid,
+      event_id: eventId,
+      status,
+      written: true,
+    };
+  });
+}
+
+/** Single-item adapter retained for callers such as `event_create` that require thrown item errors. */
 export async function eventsWriteHandler({
   eventClient,
   input,
@@ -58,61 +166,12 @@ export async function eventsWriteHandler({
   eventClient: EventClient;
   input: EventsWriteInput;
 }): Promise<EventsWriteResult> {
-  // Generate a synthetic slug when no discovery episode is linked.
-  // Synthetic slugs are always new — skip the dedup lookup.
-  const slug = input.discovery_slug || `agent-event-${uuidv4().slice(0, 8)}`;
-  const isSynthetic = !input.discovery_slug;
-
-  const latestEvent = isSynthetic ? null : (await eventClient.findLatestBySlugs([slug])).get(slug);
-
-  // Skip write if status unchanged
-  if (latestEvent && latestEvent.status === input.status) {
-    return {
-      event_id: latestEvent.event_id,
-      discovery_slug: slug,
-      status: input.status,
-      written: false,
-      reason: 'status_unchanged',
-    };
+  const [result] = await eventsWriteBulkHandler({ eventClient, inputs: [input] });
+  if (result === undefined) {
+    throw createBulkWriteOutcomeUnknownError('Event bulk write did not return a result');
   }
-
-  const now = new Date().toISOString();
-  const eventId = uuidv4();
-
-  await eventClient.bulkCreate(
-    [
-      {
-        '@timestamp': now,
-        created_at: now,
-        event_id: eventId,
-        previous_event_id: latestEvent?.event_id,
-        discovery_slug: slug,
-        discovery_id: input.discovery_id,
-        status: input.status,
-        stream_names: input.stream_names,
-        rule_names: input.rule_names,
-        title: input.title,
-        summary: input.summary,
-        root_cause: input.root_cause,
-        criticality: input.criticality,
-        confidence: input.confidence,
-        recommendations: input.recommendations,
-        assessment_note: input.assessment_note,
-        evidences: input.evidences,
-        cause_kis: input.cause_kis,
-        dependency_edges: input.dependency_edges,
-        infra_components: input.infra_components,
-        workflow_execution_id: input.workflow_execution_id,
-        conversation_id: input.conversation_id,
-      },
-    ],
-    { throwOnFail: true }
-  );
-
-  return {
-    event_id: eventId,
-    discovery_slug: slug,
-    status: input.status,
-    written: true,
-  };
+  if (!result.written) {
+    throw createBulkWriteItemError(result.error);
+  }
+  return result;
 }

@@ -9,22 +9,20 @@ import type { DataStreamDefinition } from '@kbn/data-streams';
 import type { Detection } from '@kbn/significant-events-schema';
 import type { GetFieldsOf, MappingsDefinition } from '@kbn/es-mappings';
 import { mappings } from '@kbn/es-mappings';
+
 export const DETECTIONS_DATA_STREAM = '.significant_events-detections';
+
 export const detectionsMappings = {
   dynamic: false,
   properties: {
     '@timestamp': mappings.date({ format: 'strict_date_optional_time' }),
-    kind: mappings.keyword(),
     detection_id: mappings.keyword(),
     rule_uuid: mappings.keyword(),
     rule_name: mappings.keyword(),
-    peak_alert_count: mappings.long(),
-    detection_evidence: mappings.object({
-      properties: {
-        change_point_type: mappings.keyword(),
-        p_value: { type: 'double' as const },
-      },
-    }),
+    change_point_type: mappings.keyword(),
+    p_value: { type: 'double' as const },
+    severity_score: mappings.integer(),
+    processed_by: mappings.keyword(),
   },
 } satisfies MappingsDefinition;
 
@@ -36,7 +34,7 @@ export const detectionsDataStream: DataStreamDefinition<
   StoredDetection
 > = {
   name: DETECTIONS_DATA_STREAM,
-  version: 5,
+  version: 8,
   hidden: true,
   template: {
     priority: 500,

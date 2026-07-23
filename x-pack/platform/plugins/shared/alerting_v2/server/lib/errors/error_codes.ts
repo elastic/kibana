@@ -33,8 +33,14 @@ export const ALERTING_V2_ERROR_CODES = {
   INVALID_RULE_DATA: 'INVALID_RULE_DATA',
   /** `state_transition` cannot be applied to the rule's `kind`. */
   INVALID_STATE_TRANSITION: 'INVALID_STATE_TRANSITION',
-  /** Bulk rule operation params combine `ids` with `filter` / `search`. */
-  INVALID_BULK_PARAMS: 'INVALID_BULK_PARAMS',
+  /**
+   * A by-query bulk operation was submitted with `force: true` and the filter
+   * matched more resources than a single request may process. Rejected before
+   * any resource is mutated so the caller sees an all-or-nothing outcome (no
+   * partial execution) — the caller must narrow the filter or split the
+   * operation into multiple requests.
+   */
+  BULK_QUERY_MATCH_LIMIT_EXCEEDED: 'BULK_QUERY_MATCH_LIMIT_EXCEEDED',
   /** PUT body changed a field flagged as immutable. */
   IMMUTABLE_FIELDS_CHANGED: 'IMMUTABLE_FIELDS_CHANGED',
   /** Filter expression referenced an unknown field. */
@@ -137,6 +143,38 @@ export const ALERTING_V2_LOG_CODES = {
    * degrade to `null`.
    */
   EXECUTION_HISTORY_WORKFLOW_LOOKUP_FAILED: 'EXECUTION_HISTORY_WORKFLOW_LOOKUP_FAILED',
+
+  // ────────── Domain event bus, subscribers & publishers (fan-out) ─────────
+  /**
+   * The underlying event-bus emitter surfaced an `'error'` event (e.g. an
+   * unhandled rejection captured by `captureRejections`). Caught by the bus's
+   * permanent defensive listener so it can never crash the process.
+   */
+  EVENT_BUS_EMITTER_ERROR: 'EVENT_BUS_EMITTER_ERROR',
+  /**
+   * A subscribed handler threw (sync throw or rejected promise) while
+   * processing a published domain event. The failure is isolated: sibling
+   * handlers for the same event still run and the publisher is unaffected.
+   */
+  EVENT_BUS_HANDLER_FAILURE: 'EVENT_BUS_HANDLER_FAILURE',
+  /**
+   * The rule-lifecycle → workflow subscriber failed to emit a workflow event
+   * for a rule domain event. The originating rule operation already
+   * succeeded; only the workflow fan-out for this event was lost.
+   */
+  RULE_WORKFLOW_SUBSCRIBER_FAILURE: 'RULE_WORKFLOW_SUBSCRIBER_FAILURE',
+  /**
+   * The alert-action → workflow subscriber failed to emit a workflow event
+   * for an alert-action domain event. The originating action already
+   * succeeded; only the workflow fan-out for this event was lost.
+   */
+  ALERT_ACTION_WORKFLOW_SUBSCRIBER_FAILURE: 'ALERT_ACTION_WORKFLOW_SUBSCRIBER_FAILURE',
+  /**
+   * The rule-executor → workflow subscriber failed to emit a workflow event
+   * for a rule-execution domain event. The rule run already completed; only
+   * the workflow fan-out for this event was lost.
+   */
+  RULE_EXECUTOR_WORKFLOW_SUBSCRIBER_FAILURE: 'RULE_EXECUTOR_WORKFLOW_SUBSCRIBER_FAILURE',
 } as const;
 
 export type AlertingV2LogCode = (typeof ALERTING_V2_LOG_CODES)[keyof typeof ALERTING_V2_LOG_CODES];
