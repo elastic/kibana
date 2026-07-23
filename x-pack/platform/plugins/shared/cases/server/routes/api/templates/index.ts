@@ -17,6 +17,8 @@ import { bulkDeleteTemplatesRoute } from './bulk_delete_templates_route';
 import { bulkExportTemplatesRoute } from './bulk_export_templates_route';
 import { getTemplateTagsRoute } from './get_template_tags_route';
 import { getTemplateCreatorsRoute } from './get_template_creators_route';
+import { getApplicableFieldsRoute } from './get_applicable_fields_route';
+import { getCaseApplicableFieldsRoute } from './get_case_applicable_fields_route';
 
 /**
  * Register public readonly template routes conditionally, based on feature flag
@@ -26,7 +28,12 @@ export const getPublicTemplateRoutes = (config: ConfigType) => {
     return [];
   }
 
-  return [getPublicTemplatesRoute, getPublicTemplateRoute];
+  return [
+    getPublicTemplatesRoute,
+    getPublicTemplateRoute,
+    getApplicableFieldsRoute,
+    getCaseApplicableFieldsRoute,
+  ];
 };
 
 /**
