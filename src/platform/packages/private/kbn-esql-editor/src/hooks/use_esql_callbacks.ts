@@ -109,6 +109,7 @@ export const useEsqlCallbacks = ({
 }: UseEsqlCallbacksParams): ESQLCallbacks => {
   const columnsAbortControllerRef = useRef<AbortController | undefined>(undefined);
   const previousColumnsQueryRef = useRef<string | undefined>(undefined);
+  const lifecycleAbortControllerRef = useRef(new AbortController());
 
   const getSources = useCallback(async () => {
     clearCacheWhenOld(dataSourcesCache, DATA_SOURCES_CACHE_KEY);
@@ -181,18 +182,22 @@ export const useEsqlCallbacks = ({
     ]
   );
 
-  // Abort any in-flight getColumnsFor request when the editor unmounts. Without this, navigating away
-  // from a long-running query leaves it polling in the browser and running on ES.
+  // Abort any in-flight requests when the editor unmounts.
   useEffect(() => {
+    const lifecycleController = lifecycleAbortControllerRef.current;
     return () => {
       columnsAbortControllerRef.current?.abort();
       if (previousColumnsQueryRef.current) {
         esqlFieldsCache.delete(previousColumnsQueryRef.current);
       }
+      lifecycleController.abort();
     };
   }, [esqlFieldsCache]);
 
-  const getPolicies = useCallback(async () => getEsqlPolicies(core.http), [core.http]);
+  const getPolicies = useCallback(
+    async () => getEsqlPolicies(core.http, lifecycleAbortControllerRef.current.signal),
+    [core.http]
+  );
 
   const getPreferences = useCallback(
     async () => ({
@@ -214,11 +219,11 @@ export const useEsqlCallbacks = ({
   );
 
   const getTimeseriesIndicesCallback = useCallback(async () => {
-    return (await getTimeseriesIndices(core.http)) || [];
+    return (await getTimeseriesIndices(core.http, lifecycleAbortControllerRef.current.signal)) || [];
   }, [core.http]);
 
   const getViewsCallback = useCallback(async () => {
-    const views = await getViews(core.http);
+    const views = await getViews(core.http, lifecycleAbortControllerRef.current.signal);
     const enrichViews = esqlService?.enrichViews;
     if (!enrichViews) {
       return views;
@@ -227,7 +232,7 @@ export const useEsqlCallbacks = ({
   }, [core.http, esqlService]);
 
   const getDatasetsCallback = useCallback(async () => {
-    return await getDatasets(core.http);
+    return await getDatasets(core.http, lifecycleAbortControllerRef.current.signal);
   }, [core.http]);
 
   const getEditorExtensionsCallback = useCallback(
@@ -235,7 +240,12 @@ export const useEsqlCallbacks = ({
       // Only fetch recommendations if there's an active solutionId and a non-empty query
       // Otherwise the route will return an error
       if (activeSolutionId && queryString.trim() !== '') {
-        return await getEditorExtensions(core.http, queryString, activeSolutionId);
+        return await getEditorExtensions(
+          core.http,
+          queryString,
+          activeSolutionId,
+          lifecycleAbortControllerRef.current.signal
+        );
       }
       return {
         recommendedQueries: [],
@@ -247,7 +257,13 @@ export const useEsqlCallbacks = ({
 
   const getInferenceEndpointsCallback = useCallback(
     async (taskType: string) => {
-      return (await getInferenceEndpoints(core.http, taskType)) || [];
+      return (
+        (await getInferenceEndpoints(
+          core.http,
+          taskType,
+          lifecycleAbortControllerRef.current.signal
+        )) || []
+      );
     },
     [core.http]
   );

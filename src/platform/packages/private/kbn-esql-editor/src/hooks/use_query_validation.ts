@@ -114,7 +114,16 @@ export const useQueryValidation = ({
     [esqlCallbacks, code, editorModel]
   );
 
+  const isFirstCacheEffectRunRef = useRef(true);
   useEffect(() => {
+    // Skip the initial mount — the debounced validation below (skipFirstRender: false)
+    // already runs a full parse on first render, so running a second one here would
+    // duplicate every callback (getSources, getColumnsFor, etc.) at startup.
+    if (isFirstCacheEffectRunRef.current) {
+      isFirstCacheEffectRunRef.current = false;
+      return;
+    }
+
     const setQueryToTheCache = async () => {
       if (editorRef?.current) {
         try {
