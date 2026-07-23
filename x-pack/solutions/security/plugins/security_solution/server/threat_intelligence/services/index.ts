@@ -75,16 +75,6 @@ export type {
   FeedbackLoopSummary,
 } from './list_hunt_findings';
 
-export {
-  getContinuousHuntStatus,
-  extractReportIdFromStepPayload,
-  extractCandidateTotal,
-  extractTitleFromCandidateHits,
-  loadReportTitle,
-  countSuppressedFindings,
-} from './continuous_hunt_status';
-export type { ContinuousHuntStatusParams } from './continuous_hunt_status';
-
 export { markHuntFindingDeployed, HuntFindingNotFoundError } from './mark_hunt_finding_deployed';
 export type {
   MarkHuntFindingDeployedParams,

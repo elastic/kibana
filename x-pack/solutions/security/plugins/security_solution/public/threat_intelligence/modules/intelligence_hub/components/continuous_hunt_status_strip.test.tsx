@@ -5,133 +5,123 @@
  * 2.0.
  */
 
-import { cleanup, render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
-import type { ContinuousHuntStatusResponse } from '../../../../../common/threat_intelligence/hub';
-import { useKibana } from '../../../../common/lib/kibana';
+import type { HuntStatusResponse } from '../../../../../common/threat_intelligence/hub';
 import { ContinuousHuntStatusStrip } from './continuous_hunt_status_strip';
 
-jest.mock('../../../../common/lib/kibana');
+const mockHttpGet = jest.fn();
 
-const idleNewFindings: ContinuousHuntStatusResponse = {
-  phase: 'idle',
-  workflow_enabled: true,
-  last_completed_at: '2026-07-23T11:00:00.000Z',
-  next_run_at: '2026-07-23T15:00:00.000Z',
-  reports_hunted_last_cycle: 4,
-  findings: { new_count: 3, suppressed_count: 1 },
-  sparkline_24h: Array.from({ length: 24 }, (_, i) => (i % 3) + 1),
-};
+jest.mock('../../../../common/lib/kibana', () => ({
+  useKibana: () => ({
+    services: {
+      http: { get: (...args: unknown[]) => mockHttpGet(...args) },
+    },
+  }),
+}));
 
-const idleQuiet: ContinuousHuntStatusResponse = {
-  ...idleNewFindings,
-  findings: { new_count: 0, suppressed_count: 0 },
-};
-
-const hunting: ContinuousHuntStatusResponse = {
-  phase: 'hunting',
-  workflow_enabled: true,
-  workflow_execution_id: 'exec-1',
-  started_at: '2026-07-23T11:55:00.000Z',
-  last_completed_at: '2026-07-23T08:00:00.000Z',
-  next_run_at: '2026-07-23T16:00:00.000Z',
-  reports_hunted_last_cycle: 2,
-  report: {
-    id: 'r-b',
-    title: 'Live Okta campaign',
-    index: 2,
-    total: 4,
+const baseStatus: HuntStatusResponse = {
+  workflow_id: 'threat-intel-continuous-threat-hunt',
+  workflow_found: true,
+  current_run: null,
+  last_run: {
+    id: 'run-1',
+    status: 'completed',
+    started_at: new Date(Date.now() - 14 * 60 * 1000).toISOString(),
+    finished_at: new Date(Date.now() - 13 * 60 * 1000).toISOString(),
+    duration_ms: 18_000,
+    triggered_by: 'manual',
   },
-  tier: {
-    current: 1,
-    total: 2,
-    label: 'Running Tier 1 and Tier 2…',
-  },
-  findings: { new_count: 0, suppressed_count: 0 },
-  sparkline_24h: Array.from({ length: 24 }, () => 0),
+  cycle: { reports_hunted: 4, new_findings: 3, environment_hits: 2 },
+  totals: { findings: 22, reports_with_findings: 4 },
+  activity_24h: new Array(24).fill(0).map((_, i) => (i % 5 === 0 ? 2 : 0)),
+  schedule: { every: '4h', armed: false, next_run_at: null },
 };
 
-const renderStrip = () =>
-  render(
+const renderStrip = (status: HuntStatusResponse) => {
+  mockHttpGet.mockResolvedValue(status);
+  return render(
     <I18nProvider>
       <ContinuousHuntStatusStrip />
     </I18nProvider>
   );
+};
 
 describe('ContinuousHuntStatusStrip', () => {
-  const httpGet = jest.fn();
-
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.mocked(useKibana).mockReturnValue({
-      services: { http: { get: httpGet } },
-    } as unknown as ReturnType<typeof useKibana>);
+    mockHttpGet.mockReset();
   });
 
-  afterEach(() => {
-    cleanup();
+  it('renders nothing until the status is fetched and the workflow exists', async () => {
+    renderStrip({ ...baseStatus, workflow_found: false });
+
+    await waitFor(() => expect(mockHttpGet).toHaveBeenCalled());
+    expect(screen.queryByTestId('threatIntelContinuousHuntStatusStrip')).not.toBeInTheDocument();
   });
 
-  it('returns the loading skeleton before the first status response', () => {
-    httpGet.mockReturnValue(new Promise(() => undefined));
-    renderStrip();
-    expect(screen.getByTestId('threatIntelContinuousHuntStatusStrip-loading')).toBeInTheDocument();
+  it('renders the new-findings badge with real cycle counts when the last run produced findings', async () => {
+    renderStrip(baseStatus);
+
+    expect(
+      await screen.findByTestId('threatIntelContinuousHuntNewFindingsBadge')
+    ).toHaveTextContent('3 new findings');
+    expect(screen.getByTestId('threatIntelContinuousHuntCycleStats')).toHaveTextContent(
+      '4 reports hunted'
+    );
+    expect(screen.getByTestId('threatIntelContinuousHuntEnvHits')).toHaveTextContent(
+      '2 with environment hits'
+    );
+    expect(screen.getByTestId('threatIntelContinuousHuntRunMeta')).toHaveTextContent(
+      'Last run 14 min ago'
+    );
+    // Schedules not armed: on-demand instead of a fake countdown.
+    expect(screen.getByTestId('threatIntelContinuousHuntRunMeta')).toHaveTextContent('On-demand');
   });
 
-  it('returns the new findings badge from the live status response', async () => {
-    httpGet.mockResolvedValue(idleNewFindings);
-    renderStrip();
-    await waitFor(() => {
-      expect(screen.getByTestId('threatIntelContinuousHuntNewFindingsBadge')).toHaveTextContent(
-        '3 new findings'
-      );
+  it('renders the quiet state when the last completed run wrote no new findings', async () => {
+    renderStrip({
+      ...baseStatus,
+      cycle: { reports_hunted: 4, new_findings: 0, environment_hits: 0 },
     });
+
+    expect(await screen.findByTestId('threatIntelContinuousHuntQuietMessage')).toBeInTheDocument();
+    expect(screen.getByTestId('threatIntelContinuousHuntQuietPill')).toBeInTheDocument();
+    expect(screen.getByTestId('threatIntelContinuousHuntQuietMessage')).toHaveTextContent(
+      '22 known findings across 4 reports'
+    );
   });
 
-  it('returns the suppressed duplicate count from the live status response', async () => {
-    httpGet.mockResolvedValue(idleNewFindings);
-    renderStrip();
-    await waitFor(() => {
-      expect(screen.getByTestId('threatIntelContinuousHuntSuppressed')).toHaveTextContent(
-        '1 duplicate suppressed'
-      );
+  it('renders in-flight step progress while a run is executing', async () => {
+    renderStrip({
+      ...baseStatus,
+      current_run: {
+        id: 'run-2',
+        started_at: new Date(Date.now() - 38 * 1000).toISOString(),
+        current_step_id: 'hunt_each_report',
+        completed_steps: 2,
+        expected_total_steps: 6,
+      },
     });
+
+    expect(await screen.findByTestId('threatIntelContinuousHuntHuntingTitle')).toHaveTextContent(
+      'Hunt in progress'
+    );
+    expect(screen.getByTestId('threatIntelContinuousHuntHuntingSub')).toHaveTextContent(
+      'hunt_each_report'
+    );
+    expect(screen.getByTestId('threatIntelContinuousHuntTierProgress')).toBeInTheDocument();
   });
 
-  it('returns the quiet cycle message when there are no new findings', async () => {
-    httpGet.mockResolvedValue(idleQuiet);
-    renderStrip();
-    await waitFor(() => {
-      expect(screen.getByTestId('threatIntelContinuousHuntQuietMessage')).toBeInTheDocument();
+  it('renders the failed state when the last run failed', async () => {
+    renderStrip({
+      ...baseStatus,
+      last_run: { ...baseStatus.last_run!, status: 'failed' },
+      cycle: { reports_hunted: 0, new_findings: 0, environment_hits: 0 },
     });
-  });
 
-  it('returns the hunting title from the live report', async () => {
-    httpGet.mockResolvedValue(hunting);
-    renderStrip();
-    await waitFor(() => {
-      expect(screen.getByTestId('threatIntelContinuousHuntHuntingTitle')).toHaveTextContent(
-        'Hunting now: Live Okta campaign'
-      );
-    });
-  });
-
-  it('returns report progress from the live status response', async () => {
-    httpGet.mockResolvedValue(hunting);
-    renderStrip();
-    await waitFor(() => {
-      expect(screen.getByTestId('threatIntelContinuousHuntReportProgress')).toHaveTextContent(
-        'Report 2 of 4'
-      );
-    });
-  });
-
-  it('returns status unavailable when the first fetch fails', async () => {
-    httpGet.mockRejectedValue(new Error('boom'));
-    renderStrip();
-    await waitFor(() => {
-      expect(screen.getByTestId('threatIntelContinuousHuntStatusStrip-error')).toBeInTheDocument();
-    });
+    expect(await screen.findByTestId('threatIntelContinuousHuntLeftColumn')).toHaveTextContent(
+      'Last hunt failed'
+    );
   });
 });

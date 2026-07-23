@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ScopedModel } from '@kbn/agent-builder-server';
 import { z } from '@kbn/zod/v4';
 import { subtechniqueById, tacticsToIds, techniqueById } from '@kbn/securitysolution-mitre-catalog';
 import {
+  HUNT_FOR_THREAT_INDEX_PATTERNS,
   proposedEsqlRule,
   sanitizeRuleName,
   severityToRiskScore,
@@ -74,6 +75,13 @@ type CandidateBehavior = z.infer<typeof candidateBehaviorSchema>;
  * already depends on.
  */
 export interface HuntBehaviorArticleContext {
+  /**
+   * Concrete backing indices that produced Tier 1 hits (from the
+   * `per_index` aggregation). Used to steer the grounded ES|QL
+   * generation towards the data sources the activity was actually
+   * observed in.
+   */
+  matched_indices?: string[];
   /** Top N affected hostnames from the Tier 1 hit aggregation. */
   affected_hosts?: string[];
   /** Top N affected usernames from the Tier 1 hit aggregation. */
@@ -103,10 +111,23 @@ export interface HuntBehaviorArticleContext {
   }>;
 }
 
+export interface HuntBehaviorIoc {
+  type: string;
+  value: string;
+}
+
 export interface HuntBehaviorParams {
   text: string;
   report_id?: string;
   llm_confidence_threshold?: number;
+  /**
+   * Extracted IOCs from the originating report (same shape as
+   * `hunt_for_threat`'s resolved set). When provided, the grounded
+   * ES|QL generation step anchors each proposed rule on these verbatim
+   * artifact values instead of relying on the LLM re-extracting them
+   * from the report text.
+   */
+  iocs?: HuntBehaviorIoc[];
   /**
    * When provided, the LLM extraction prompt is prepended with a
    * structured "Environment context" block describing the Tier 1 hit
@@ -197,6 +218,271 @@ const buildFindingId = (techniqueId: string, reportId?: string): string =>
   `${reportId ?? 'anon'}:${techniqueId}`;
 
 /**
+ * Step 3 — grounded ES|QL generation. One structured-output call turns
+ * the validated behavior set into real hunt queries anchored on the
+ * report's concrete artifacts (IPs, domains, hashes, file paths,
+ * package/process names, command lines, accounts) instead of the
+ * placeholder `TO_LOWER(message) LIKE "*<technique name>*"` skeleton
+ * that `proposedEsqlRule` emits. The skeleton remains the fallback for
+ * any behavior the LLM misses, for unparseable output, and for the
+ * whole set when the generation call itself fails — so the
+ * `proposed_esql_rule` contract (always present, always non-empty)
+ * is preserved for every caller.
+ */
+const esqlRuleSchema = z.object({
+  technique_id: z
+    .string()
+    .describe('ATT&CK ID of the candidate behavior this query hunts for — copy it verbatim.'),
+  esql: z
+    .string()
+    .describe(
+      'Complete executable ES|QL query starting with FROM. No markdown fences, no comment lines.'
+    ),
+});
+
+export const huntBehaviorEsqlGenerationSchema = z.object({
+  rules: z.array(esqlRuleSchema).default([]),
+});
+
+const ESQL_GENERATION_PROMPT = `You are an expert detection engineer writing ES|QL threat-hunt
+queries for the Elastic Security Detection Engine.
+
+For EACH candidate behavior listed below, write ONE complete ES|QL query that hunts for the
+SPECIFIC activity the threat report describes, grounded in the report's concrete artifacts:
+IP addresses, CIDR ranges, domains, URLs, file hashes, file paths, package/library names,
+process names, command lines, and email/user accounts. Use the verbatim artifact values from
+the "Extracted IOCs" list and the report text.
+
+Hard requirements:
+- Each query MUST filter on at least one concrete artifact value (or a tight pattern derived
+  from one, e.g. a package name with a version wildcard). Generic queries are worthless.
+- NEVER filter on the ATT&CK technique name as a message substring
+  (e.g. \`TO_LOWER(message) LIKE "*credentials in files*"\` is forbidden).
+- Start with \`FROM <patterns>\` using the most relevant of the available index patterns —
+  prefer the specific integration(s) where the activity would appear over a catch-all.
+  Always use wildcard index patterns (e.g. \`logs-okta.system*\`); NEVER a dated concrete
+  index name — confirmed-hit indices only tell you WHICH integration to target.
+- Use only valid ES|QL: commands FROM / WHERE / EVAL / STATS ... BY / SORT / KEEP / LIMIT
+  separated by \`|\`; functions such as TO_LOWER(), STARTS_WITH(), ENDS_WITH(),
+  CIDR_MATCH(<ip_field>, "<cidr>"), COALESCE(); operators ==, !=, IN (...), LIKE with *
+  wildcards, AND / OR / NOT, IS NOT NULL. String literals use double quotes.
+- Use ECS fields appropriate to the artifact and data source:
+  ip → source.ip / destination.ip / host.ip / client.ip / server.ip / related.ip;
+  domain → dns.question.name / destination.domain / url.domain;
+  url → url.full / url.original;
+  hash → file.hash.sha256|sha1|md5 / process.hash.* / dll.hash.*;
+  email or account → user.name / user.email / user.target.name / related.user;
+  file path → file.path / process.executable;
+  process / command → process.name / process.command_line / process.args;
+  cloud API activity → event.action / event.provider / user.name / source.ip;
+  packages & network flows → url.* / destination.domain / network.* / event.action.
+- Correlate more than one signal when the report supports it (e.g. process activity AND a
+  known C2 destination) — but never at the cost of requirement 1.
+- End with \`| LIMIT 100\`. Include a KEEP listing @timestamp plus the fields the query
+  filters on so the preview surface shows the evidence. In KEEP, only use fields you
+  filtered on, core ECS fields (@timestamp, host.name, user.name, source.ip,
+  destination.ip, event.action, event.outcome), or fields observed in the sample
+  events — an invented column makes the whole query fail validation.
+- Return the bare query text only — no markdown, no comments, no prose.`;
+
+/**
+ * Strip markdown fences / stray comment lines from LLM output and
+ * reject anything that doesn't start with a FROM source command. A
+ * `undefined` return means "fall back to the skeleton template".
+ */
+const sanitizeGeneratedEsql = (raw: string): string | undefined => {
+  let text = raw.trim();
+  const fenced = text.match(/```(?:esql|sql)?\s*([\s\S]*?)```/i);
+  if (fenced) text = fenced[1].trim();
+  text = text
+    .split('\n')
+    .filter((line) => !line.trim().startsWith('//'))
+    .join('\n')
+    .trim();
+  if (!/^FROM\s/i.test(text)) return undefined;
+  return text;
+};
+
+/**
+ * Deterministic metadata header prepended to the LLM-generated body —
+ * mirrors the skeleton template's comment block so downstream surfaces
+ * (finding flyout, rule-create handoff) keep the same shape.
+ */
+const buildGroundedEsqlHeader = (b: {
+  rule_name: string;
+  severity: SeverityLevel;
+  risk_score: number;
+  technique_id: string;
+  parent_technique_id?: string;
+  tactic_ids: string[];
+}): string =>
+  [
+    `// Generated from threat_intel.hunt_behavior — grounded in the report's extracted`,
+    `// IOCs/behaviors. Review the FROM clause and artifact values before enabling.`,
+    `// rule_name: ${b.rule_name}`,
+    `// severity: ${b.severity}  risk_score: ${b.risk_score}`,
+    `// mitre_attack: ${b.technique_id}${
+      b.parent_technique_id ? ` (parent ${b.parent_technique_id})` : ''
+    }`,
+    `// tactics: ${b.tactic_ids.join(', ') || '<unmapped>'}`,
+  ].join('\n');
+
+const MAX_ESQL_PROMPT_IOCS = 30;
+const MAX_ESQL_PROMPT_TEXT_CHARS = 6000;
+const MAX_ESQL_REPAIR_ATTEMPTS = 3;
+
+/**
+ * Drop one unknown column from the query's KEEP list. Returns
+ * `undefined` when the column isn't in KEEP (e.g. referenced in WHERE —
+ * not safely repairable) so the caller falls back to the template.
+ */
+const pruneKeepColumn = (esql: string, column: string): string | undefined => {
+  const keepRegex = /(\bKEEP\b\s+)([^|]+)/i;
+  const match = esql.match(keepRegex);
+  if (!match) return undefined;
+  const columns = match[2]
+    .split(',')
+    .map((c) => c.trim())
+    .filter(Boolean);
+  const remaining = columns.filter((c) => c !== column);
+  if (remaining.length === columns.length || remaining.length === 0) return undefined;
+  return esql.replace(keepRegex, `$1${remaining.join(', ')} `);
+};
+
+/**
+ * Dry-run a generated query against the environment (`| LIMIT 0` keeps
+ * it cheap — ES|QL applies the minimum LIMIT). Unknown KEEP columns —
+ * the most common LLM hallucination — are pruned and retried; any other
+ * verification failure rejects the query so the behavior falls back to
+ * the skeleton template rather than persisting a broken rule.
+ */
+const validateEsqlAgainstEnvironment = async (
+  esClient: ElasticsearchClient,
+  logger: Logger,
+  techniqueId: string,
+  esql: string
+): Promise<string | undefined> => {
+  let candidate = esql;
+  for (let attempt = 0; attempt < MAX_ESQL_REPAIR_ATTEMPTS; attempt++) {
+    try {
+      await esClient.esql.query({ query: `${candidate}\n| LIMIT 0` });
+      return candidate;
+    } catch (err) {
+      const message = (err as Error).message ?? '';
+      const unknownColumn = message.match(/Unknown column \[([^\]]+)\]/);
+      const repaired = unknownColumn ? pruneKeepColumn(candidate, unknownColumn[1]) : undefined;
+      if (!repaired) {
+        logger.warn(
+          `[ti:esql] generated ES|QL for ${techniqueId} failed environment validation — ` +
+            `falling back to the skeleton template. ${message.slice(0, 300)}`
+        );
+        return undefined;
+      }
+      candidate = repaired;
+    }
+  }
+  logger.warn(
+    `[ti:esql] generated ES|QL for ${techniqueId} still failing after ` +
+      `${MAX_ESQL_REPAIR_ATTEMPTS} repair attempts — falling back to the skeleton template.`
+  );
+  return undefined;
+};
+
+/**
+ * One LLM call for the whole validated set. Returns a map of
+ * technique_id → sanitized ES|QL body; missing entries (and the empty
+ * map on failure) fall back to the skeleton template per behavior.
+ */
+const generateGroundedEsql = async (
+  model: ScopedModel,
+  logger: Logger,
+  {
+    text,
+    iocs,
+    articleContext,
+    behaviors,
+  }: {
+    text: string;
+    iocs?: HuntBehaviorIoc[];
+    articleContext?: HuntBehaviorArticleContext;
+    behaviors: ValidatedBehavior[];
+  }
+): Promise<Map<string, string>> => {
+  const generated = new Map<string, string>();
+  const sections: string[] = [ESQL_GENERATION_PROMPT];
+
+  const indexPatterns = new Set<string>(HUNT_FOR_THREAT_INDEX_PATTERNS);
+  // Generalize concrete backing indices (dated data-stream / rollover names)
+  // to wildcard patterns so the model can't anchor a durable rule on a
+  // single day's index.
+  const matchedPatterns = [
+    ...new Set(
+      (articleContext?.matched_indices ?? []).map(
+        (index) => `${index.replace(/^\.ds-/, '').replace(/[-.]\d{4}[.-]\d{2}[.-]\d{2}.*$/, '')}*`
+      )
+    ),
+  ];
+  for (const pattern of matchedPatterns) {
+    indexPatterns.add(pattern);
+  }
+  sections.push(`--- AVAILABLE INDEX PATTERNS ---\n${[...indexPatterns].join('\n')}`);
+  if (matchedPatterns.length > 0) {
+    sections.push(
+      `--- INDEX PATTERNS WITH CONFIRMED ENVIRONMENT HITS (prefer these in FROM) ---\n${matchedPatterns.join(
+        '\n'
+      )}`
+    );
+  }
+  if (articleContext?.sample_events?.length) {
+    sections.push(
+      `--- SAMPLE MATCHED ENVIRONMENT EVENTS ---\n${articleContext.sample_events
+        .map((evt) => `- ${evt}`)
+        .join('\n')}`
+    );
+  }
+  if (iocs?.length) {
+    sections.push(
+      `--- EXTRACTED IOCS (verbatim values to hunt) ---\n${iocs
+        .slice(0, MAX_ESQL_PROMPT_IOCS)
+        .map((ioc) => `- ${ioc.type}: ${ioc.value}`)
+        .join('\n')}`
+    );
+  }
+  sections.push(
+    `--- CANDIDATE BEHAVIORS (one query each) ---\n${behaviors
+      .map((b) => `- ${b.technique_id} (${b.technique_name}): "${b.evidence_quote}"`)
+      .join('\n')}`
+  );
+  sections.push(`--- REPORT TEXT ---\n${text.slice(0, MAX_ESQL_PROMPT_TEXT_CHARS)}`);
+
+  try {
+    const structured = model.chatModel.withStructuredOutput(huntBehaviorEsqlGenerationSchema);
+    const result = (await structured.invoke(sections.join('\n\n'))) as z.infer<
+      typeof huntBehaviorEsqlGenerationSchema
+    >;
+    for (const rule of result.rules ?? []) {
+      const techniqueId = rule.technique_id?.toUpperCase().trim();
+      const esql = sanitizeGeneratedEsql(rule.esql ?? '');
+      if (techniqueId && esql && !generated.has(techniqueId)) {
+        generated.set(techniqueId, esql);
+      }
+    }
+    if (generated.size < behaviors.length) {
+      logger.warn(
+        `[ti:esql] grounded ES|QL generation covered ${generated.size}/${behaviors.length} ` +
+          `behaviors — uncovered behaviors fall back to the skeleton template.`
+      );
+    }
+  } catch (err) {
+    logger.warn(
+      `[ti:esql] grounded ES|QL generation failed — all behaviors fall back to the ` +
+        `skeleton template. ${(err as Error).message}`
+    );
+  }
+  return generated;
+};
+
+/**
  * Render the optional Tier 1 environment-hit context as a structured
  * preamble for the LLM prompt. Empty / missing context returns `''` so
  * the standalone `hunt_behavior` shape (no article_context) is
@@ -248,12 +534,19 @@ const renderArticleContext = (context: HuntBehaviorArticleContext | undefined): 
 export const huntBehavior = async (
   model: ScopedModel,
   logger: Logger,
-  params: HuntBehaviorParams
+  params: HuntBehaviorParams,
+  /**
+   * Optional — when provided, each LLM-generated ES|QL body is dry-run
+   * against the environment (`LIMIT 0`) before replacing the skeleton
+   * template, so hallucinated columns never reach a persisted finding.
+   */
+  esClient?: ElasticsearchClient
 ): Promise<HuntBehaviorResult> => {
   const {
     text,
     report_id: reportId,
     llm_confidence_threshold: llmThreshold = 0.5,
+    iocs,
     article_context: articleContext,
   } = params;
 
@@ -348,6 +641,28 @@ export const huntBehavior = async (
       });
     } else {
       droppedIds.push(candidate.technique_id);
+    }
+  }
+
+  // Step 3 — replace the skeleton template with grounded ES|QL wherever the
+  // LLM produced a usable query. The template (already set in the loop
+  // above) remains the per-behavior fallback so `proposed_esql_rule` is
+  // never empty.
+  if (validated.length > 0) {
+    const groundedEsql = await generateGroundedEsql(model, logger, {
+      text,
+      iocs,
+      articleContext,
+      behaviors: validated,
+    });
+    for (const behavior of validated) {
+      let esql = groundedEsql.get(behavior.technique_id);
+      if (esql && esClient) {
+        esql = await validateEsqlAgainstEnvironment(esClient, logger, behavior.technique_id, esql);
+      }
+      if (esql) {
+        behavior.proposed_esql_rule = `${buildGroundedEsqlHeader(behavior)}\n${esql}`;
+      }
     }
   }
 

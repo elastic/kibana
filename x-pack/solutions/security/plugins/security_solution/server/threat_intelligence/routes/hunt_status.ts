@@ -6,29 +6,29 @@
  */
 
 import {
-  CONTINUOUS_HUNT_STATUS_API_PATH,
+  HUNT_STATUS_API_PATH,
   THREAT_INTELLIGENCE_API_PRIVILEGES,
 } from '../../../common/threat_intelligence/hub';
 import { resolveCurrentSpaceId } from '../lib/space_filter';
-import { getContinuousHuntStatus } from '../services/continuous_hunt_status';
+import { getHuntStatus } from '../services/hunt_status';
 import type { RouteRegistrationDeps } from '.';
 
 /**
- * GET /api/threat_intelligence/continuous_hunt/status
- *
- * Aggregates continuous hunt workflow execution (default space) with
- * space-scoped hunt findings for the Intelligence Hub status strip.
+ * GET /api/threat_intelligence/hunt_status — continuous-hunt run status
+ * for the Intelligence Hub status strip. Read-only; joins workflows
+ * execution history with hunt-findings / report-feedback stats. The
+ * workflows internal indices are read with the internal user (they are
+ * system indices), gated behind the same read privilege as
+ * `hunt_findings`, and only run metadata is returned.
  */
-export const registerContinuousHuntStatusRoute = ({
+export const registerHuntStatusRoute = ({
   router,
   logger,
   getSpacesService,
-  getTaskManager,
-  getWorkflowsManagement,
 }: RouteRegistrationDeps): void => {
   router.versioned
     .get({
-      path: CONTINUOUS_HUNT_STATUS_API_PATH,
+      path: HUNT_STATUS_API_PATH,
       access: 'public',
       security: {
         authz: {
@@ -39,28 +39,23 @@ export const registerContinuousHuntStatusRoute = ({
     .addVersion(
       {
         version: '2023-10-31',
-        validate: {},
+        validate: false,
       },
       async (context, request, response) => {
         const core = await context.core;
         const esClient = core.elasticsearch.client.asCurrentUser;
+        const internalClient = core.elasticsearch.client.asInternalUser;
         const spaceId = resolveCurrentSpaceId(getSpacesService(), request);
 
         try {
-          const body = await getContinuousHuntStatus({
-            spaceId,
-            esClient,
-            logger,
-            workflowsManagement: getWorkflowsManagement?.(),
-            taskManager: getTaskManager?.(),
-          });
-          return response.ok({ body });
+          const result = await getHuntStatus(esClient, internalClient, logger, { spaceId });
+          return response.ok({ body: result });
         } catch (err) {
-          logger.warn(`continuous_hunt/status failed: ${(err as Error).message}`);
+          logger.warn(`hunt_status failed: ${(err as Error).message}`);
           return response.customError({
             statusCode: 500,
             body: {
-              message: `Failed to load continuous hunt status: ${(err as Error).message}`,
+              message: `Failed to load hunt status: ${(err as Error).message}`,
             },
           });
         }

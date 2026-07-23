@@ -65,9 +65,13 @@ export const registerExtractIocsRoute = ({ router, logger }: RouteRegistrationDe
       async (_context, request, response) => {
         try {
           // html primary / body_text fallback: the route owns the conversion so
-          // extractIocs stays a pure string-in function.
+          // extractIocs stays a pure string-in function. Workflow callers render
+          // `{{ ...content.body_html }}` via Liquid, which coerces a missing
+          // body_html (manual / STIX reports) to an EMPTY STRING rather than
+          // omitting the field — treat blank html as absent or those reports
+          // would be extracted against an empty document and yield zero IOCs.
           const inputText =
-            request.body.html != null
+            request.body.html != null && request.body.html.trim() !== ''
               ? htmlToStructured(extractArticleHtml(request.body.html))
               : request.body.text;
           const result = extractIocs({

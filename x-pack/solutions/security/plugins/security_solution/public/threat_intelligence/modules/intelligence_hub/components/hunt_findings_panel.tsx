@@ -110,10 +110,24 @@ const getConfidenceLabel = (level: ConfidenceLevel): string => {
   }
 };
 
+/**
+ * `rule_name` carries a trailing `(reportId.slice(0, 12))` disambiguator from
+ * `sanitizeRuleName` so Detection Engine rule names stay unique per report.
+ * That raw doc-id fragment is noise in the Hub UI — strip it for display when
+ * it matches the finding's own report id. Deployed rule names are unaffected.
+ */
+export const stripReportIdSuffix = (name: string, reportId?: string): string => {
+  if (!reportId) {
+    return name;
+  }
+  const suffix = ` (${reportId.slice(0, 12)})`;
+  return name.endsWith(suffix) ? name.slice(0, -suffix.length) : name;
+};
+
 const getFindingTitle = (finding: HuntFindingListItem): string => {
   const ruleName = finding.rule_name?.trim();
   if (ruleName && !ruleName.toLowerCase().startsWith('ti hunt:')) {
-    return ruleName;
+    return stripReportIdSuffix(ruleName, finding.report_id);
   }
   return finding.technique_name || finding.technique_id;
 };

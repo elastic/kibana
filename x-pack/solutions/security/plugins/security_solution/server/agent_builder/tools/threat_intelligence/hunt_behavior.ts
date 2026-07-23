@@ -58,10 +58,10 @@ export const huntBehaviorTool: BuiltinSkillBoundedTool<typeof huntBehaviorSchema
     '`threat-intel-finding-card` attachment hint. Agent Builder should call this tool directly; ' +
     'native Workflows and UI surfaces use the matching HTTP route.',
   schema: huntBehaviorSchema,
-  handler: async (params, { logger, modelProvider }) => {
+  handler: async (params, { logger, modelProvider, esClient }) => {
     try {
       const model = await modelProvider.getDefaultModel();
-      const data = await huntBehavior(model, logger, params);
+      const data = await huntBehavior(model, logger, params, esClient.asCurrentUser);
       return { results: [{ type: ToolResultType.other, data }] };
     } catch (err) {
       logger.warn(`hunt_behavior failed: ${(err as Error).message}`);

@@ -17,19 +17,6 @@ import CONTINUOUS_THREAT_HUNT_YAML from './continuous_threat_hunt.yaml';
 
 const DEFAULT_SPACE_ID = 'default';
 
-/** Stable id for the built-in continuous hunt workflow (default space). */
-export const CONTINUOUS_THREAT_HUNT_WORKFLOW_ID = 'threat-intel-continuous-threat-hunt' as const;
-
-/** Space where built-in TI workflows are installed. */
-export const CONTINUOUS_THREAT_HUNT_WORKFLOW_SPACE_ID = DEFAULT_SPACE_ID;
-
-/** Task Manager id for the continuous hunt scheduled trigger. */
-export const CONTINUOUS_THREAT_HUNT_SCHEDULED_TASK_ID =
-  `workflow:${CONTINUOUS_THREAT_HUNT_WORKFLOW_ID}:scheduled` as const;
-
-/** Schedule interval encoded in continuous_threat_hunt.yaml. */
-export const CONTINUOUS_THREAT_HUNT_INTERVAL_MS = 4 * 60 * 60 * 1000;
-
 // A minimal fake KibanaRequest used for background operations that have no
 // real HTTP request (e.g. plugin start). getAuthenticatedUser falls back to
 // 'system' when security is absent, so headers can be empty.

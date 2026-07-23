@@ -9,7 +9,6 @@ import type { IRouter, Logger } from '@kbn/core/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { registerAnalyseEnvironmentRoute } from './analyse_environment';
 import { registerBackfillDiamondRoute } from './backfill_diamond';
 import { registerCoverageGapRoute } from './coverage_gap';
@@ -26,7 +25,7 @@ import { registerHuntForThreatRoute } from './hunt_for_threat';
 import { registerHuntOrchestratorRoute } from './hunt_orchestrator';
 import { registerHuntFindingsRoute } from './hunt_findings';
 import { registerHuntFindingDeployRoute } from './hunt_finding_deploy';
-import { registerContinuousHuntStatusRoute } from './continuous_hunt_status';
+import { registerHuntStatusRoute } from './hunt_status';
 import { registerCreateThreatReportRoute } from './create_threat_report';
 import { registerSavedViewsRoutes } from './saved_views';
 import { registerFindThreatReportsRoute } from './find_threat_reports';
@@ -60,12 +59,6 @@ export interface RouteRegistrationDeps {
    * backfill task; route returns 503 when missing.
    */
   getTaskManager?: () => TaskManagerStartContract | undefined;
-  /**
-   * Optional workflows-management setup contract. Used by continuous hunt
-   * status to read in-process execution progress without requiring the
-   * caller to hold workflow `readExecution` privileges.
-   */
-  getWorkflowsManagement?: () => WorkflowsServerPluginSetup | undefined;
 }
 
 /**
@@ -86,7 +79,6 @@ export const registerRoutes = (deps: RouteRegistrationDeps): void => {
   registerHuntOrchestratorRoute(deps);
   registerHuntFindingsRoute(deps);
   registerHuntFindingDeployRoute(deps);
-  registerContinuousHuntStatusRoute(deps);
   registerCoverageGapRoute(deps);
   registerGeneralizeFromTelemetryRoute(deps);
   registerExtractIocsRoute(deps);
@@ -104,6 +96,7 @@ export const registerRoutes = (deps: RouteRegistrationDeps): void => {
 
   // UI-facing routes (dashboard + saved views + flyout).
   registerDashboardOverviewRoute(deps);
+  registerHuntStatusRoute(deps);
   registerSavedViewsRoutes(deps);
   registerFlyoutInsightsRoute(deps);
   registerListSourcesRoute(deps);
