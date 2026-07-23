@@ -7,14 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Sha256 } from '@kbn/crypto-browser';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 
 const RECENT_METRICS_STORAGE_KEY = 'discover:metricsExperience:recentlyExplored';
 const RECENT_METRICS_MAX_LENGTH = 100;
 
 const buildStorageKey = (basePath: string): string =>
-  `${RECENT_METRICS_STORAGE_KEY}-${new Sha256().update(basePath, 'utf8').digest('base64')}`;
+  `${RECENT_METRICS_STORAGE_KEY}-${btoa(basePath)}`;
 
 const loadKeys = (storage: IStorageWrapper, storageKey: string): string[] => {
   const stored: unknown = storage.get(storageKey);
