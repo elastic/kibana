@@ -6,6 +6,7 @@
  */
 
 import type { IRouter, Logger } from '@kbn/core/server';
+import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { PndConfig } from '../config';
 import type { PndSpaceIdResolver } from '../types';
 import type { WatchWorkflowProjectionService } from '../services/watches/watch_workflow_projection_service';
@@ -14,6 +15,10 @@ import { registerGetWatchRoute } from './watches/get_watch';
 import { registerListInvestigationsRoute } from './investigations/list_investigations';
 import { registerGetInvestigationRoute } from './investigations/get_investigation';
 import { registerListInvestigationProposalsRoute } from './investigations/list_proposals';
+import { registerAcceptProposalRoute } from './investigations/accept_proposal';
+import { registerRejectProposalRoute } from './investigations/reject_proposal';
+import { registerModifyProposalRoute } from './investigations/modify_proposal';
+import { registerGenerateProposalRoute } from './investigations/generate_proposal';
 
 export interface RouteDependencies {
   router: IRouter;
@@ -21,6 +26,7 @@ export interface RouteDependencies {
   config: PndConfig;
   getSpaceId: PndSpaceIdResolver;
   getWatchProjection: () => WatchWorkflowProjectionService | undefined;
+  getWorkflowsManagement: () => WorkflowsServerPluginSetup['management'] | undefined;
 }
 
 export const registerRoutes = (deps: RouteDependencies): void => {
@@ -29,4 +35,8 @@ export const registerRoutes = (deps: RouteDependencies): void => {
   registerListInvestigationsRoute(deps);
   registerGetInvestigationRoute(deps);
   registerListInvestigationProposalsRoute(deps);
+  registerAcceptProposalRoute(deps);
+  registerRejectProposalRoute(deps);
+  registerModifyProposalRoute(deps);
+  registerGenerateProposalRoute(deps);
 };

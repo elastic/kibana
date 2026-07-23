@@ -21,14 +21,21 @@ export const installStatic = async ({
   workflowsExtensions: WorkflowsExtensionsServerPluginStart;
   logger: Logger;
 }): Promise<{ failedIds: string[] }> => {
-  if (!enabled) return { failedIds: [] };
+  if (!enabled) {
+    logger.warn('PND installStatic: enabled=false, skipping watch install');
+    return { failedIds: [] };
+  }
 
+  logger.info(`PND installStatic: installing ${PND_WATCH_WORKFLOW_IDS.length} watch workflows`);
   const client = await workflowsExtensions.initManagedWorkflowsClient('pnd');
+  logger.info('PND installStatic: got managed workflows client');
   const failedIds: string[] = [];
 
   for (const id of PND_WATCH_WORKFLOW_IDS) {
     try {
+      logger.info(`PND installStatic: installing ${id}`);
       await client.install(id, { spaceId: GLOBAL_WORKFLOW_SPACE_ID });
+      logger.info(`PND installStatic: installed ${id} successfully`);
     } catch (error) {
       failedIds.push(id);
       logger.error(
@@ -39,6 +46,16 @@ export const installStatic = async ({
     }
   }
 
-  await client.ready();
+  logger.info('PND installStatic: calling client.ready()');
+  try {
+    await client.ready();
+    logger.info('PND installStatic: client.ready() completed');
+  } catch (error) {
+    logger.error(
+      `PND installStatic: client.ready() failed: ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
+  }
   return { failedIds };
 };

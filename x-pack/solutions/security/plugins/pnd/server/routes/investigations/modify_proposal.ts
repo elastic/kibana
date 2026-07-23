@@ -1,0 +1,71 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { z } from '@kbn/zod/v4';
+import { API_VERSIONS, INTERNAL_API_ACCESS, PND_INVESTIGATION_URL_TEMPLATE } from '@kbn/pnd-common';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
+import { PND_API_PRIVILEGE_READ } from '../../../common/constants';
+import type { RouteDependencies } from '../register_routes';
+
+const ModifyProposalRequestParams = z.object({
+  id: z.string().min(1).max(256),
+  proposalId: z.string().min(1).max(256),
+});
+
+const ModifyProposalRequestBody = z.object({
+  reasoning: z.string().min(1),
+});
+
+const MODIFY_PROPOSAL_PATH =
+  `${PND_INVESTIGATION_URL_TEMPLATE}/proposals/{proposalId}/modify` as const;
+
+export const registerModifyProposalRoute = ({ router, logger }: RouteDependencies) => {
+  router.versioned
+    .post({
+      path: MODIFY_PROPOSAL_PATH,
+      access: INTERNAL_API_ACCESS,
+      security: {
+        authz: { requiredPrivileges: [PND_API_PRIVILEGE_READ] },
+      },
+      summary: 'Modify a proposal for an investigation',
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.internal.v1,
+        validate: {
+          request: {
+            params: buildRouteValidationWithZod(ModifyProposalRequestParams),
+            body: buildRouteValidationWithZod(ModifyProposalRequestBody),
+          },
+        },
+      },
+      async (_context, request, response) => {
+        try {
+          const { id: _investigationId, proposalId } = request.params;
+          const { reasoning } = request.body;
+
+          // TODO: Update proposal status in ES to 'modified'
+          // Store reasoning in proposal.analyst_reasoning
+
+          return response.ok({
+            body: {
+              proposalId,
+              reasoning,
+              status: 'modified',
+              message: 'Proposal modified',
+            },
+          });
+        } catch (error) {
+          logger.error(`Failed to modify proposal: ${error}`);
+          return response.customError({
+            statusCode: 500,
+            body: { message: 'Failed to modify proposal' },
+          });
+        }
+      }
+    );
+};

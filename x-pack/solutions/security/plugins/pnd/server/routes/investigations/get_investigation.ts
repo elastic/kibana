@@ -1,8 +1,7 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0".
  */
 
 import { z } from '@kbn/zod/v4';
@@ -12,6 +11,7 @@ import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { getMockInvestigationById } from '@kbn/pnd-common';
 import { PND_API_PRIVILEGE_READ } from '../../../common/constants';
 import type { RouteDependencies } from '../register_routes';
+import { getRealInvestigationById } from './real_data';
 
 const GetInvestigationRequestParams = z.object({
   id: z.string().min(1).max(256),
@@ -51,9 +51,14 @@ export const registerGetInvestigationRoute = ({ router, logger, config }: RouteD
             return response.ok({ body });
           }
 
-          return response.notFound({
-            body: { message: `Investigation "${id}" not found` },
-          });
+          const investigation = getRealInvestigationById(id);
+          if (!investigation) {
+            return response.notFound({
+              body: { message: `Investigation "${id}" not found` },
+            });
+          }
+          const body: GetInvestigationResponse = { investigation };
+          return response.ok({ body });
         } catch (error) {
           logger.error(`Failed to get investigation: ${error}`);
           return response.customError({

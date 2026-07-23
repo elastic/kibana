@@ -89,6 +89,7 @@ export class PndPlugin
       config: this.config,
       getSpaceId: (request) => this.getSpaceId(request),
       getWatchProjection: () => this.watchProjection,
+      getWorkflowsManagement: () => this.workflowsManagementApi,
     });
 
     return {};

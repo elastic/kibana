@@ -8,10 +8,10 @@
 import { z } from '@kbn/zod/v4';
 import { API_VERSIONS, INTERNAL_API_ACCESS, PND_INVESTIGATION_URL_TEMPLATE } from '@kbn/pnd-common';
 import type { ListInvestigationProposalsResponse } from '@kbn/pnd-common';
-import { getMockProposalsByInvestigationId } from '@kbn/pnd-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { PND_API_PRIVILEGE_READ } from '../../../common/constants';
 import type { RouteDependencies } from '../register_routes';
+import { realProposals } from './real_data';
 
 const ListProposalsRequestParams = z.object({
   id: z.string().min(1).max(256),
@@ -46,16 +46,13 @@ export const registerListInvestigationProposalsRoute = ({
         try {
           const { id } = request.params;
 
-          if (config.ui.useMockData) {
-            const proposals = getMockProposalsByInvestigationId(id);
-            const body: ListInvestigationProposalsResponse = {
-              proposals,
-              total: proposals.length,
-            };
-            return response.ok({ body });
-          }
+          // Use hardcoded proposals - in future, this will query ES
+          const proposals = realProposals[id] ?? [];
 
-          const body: ListInvestigationProposalsResponse = { proposals: [], total: 0 };
+          const body: ListInvestigationProposalsResponse = {
+            proposals,
+            total: proposals.length,
+          };
           return response.ok({ body });
         } catch (error) {
           logger.error(`Failed to list investigation proposals: ${error}`);
@@ -66,4 +63,33 @@ export const registerListInvestigationProposalsRoute = ({
         }
       }
     );
+};
+
+// Export handler functions for proposal actions (stubbed for future ES integration)
+export const handleAcceptProposal = async (
+  investigationId: string,
+  proposalId: string
+): Promise<boolean> => {
+  // TODO: Implement ES update with proposal status change to 'approved'
+  return true;
+};
+
+export const handleRejectProposal = async (
+  investigationId: string,
+  proposalId: string,
+  reason?: string
+): Promise<boolean> => {
+  // TODO: Implement ES update with proposal status change to 'dismissed'
+  // Store reason in proposal.rejection_reason field
+  return true;
+};
+
+export const handleModifyProposal = async (
+  investigationId: string,
+  proposalId: string,
+  reasoning: string
+): Promise<boolean> => {
+  // TODO: Implement ES update with proposal status change to 'modified'
+  // Store reasoning in proposal.analyst_reasoning field
+  return true;
 };

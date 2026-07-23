@@ -6,17 +6,18 @@
  */
 
 import React, { useEffect, useMemo, useState } from 'react';
-import type { EuiTabbedContentTab } from '@elastic/eui';
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
   EuiPanel,
   EuiSpacer,
-  EuiTabbedContent,
+  EuiTabs,
+  EuiTab,
   EuiText,
 } from '@elastic/eui';
 import { useParams } from 'react-router-dom';
@@ -25,40 +26,153 @@ import type { Proposal, ProposalStatus } from '@kbn/pnd-common';
 import { PndPageSection } from '../../components/layout/pnd_page_section';
 import { PndPageHeader } from '../../components/pnd_page_header';
 import { usePndDocTitle } from '../../hooks/use_pnd_doc_title';
-import { useInvestigation, useInvestigationProposals } from '../../hooks/use_investigations_api';
+import {
+  useInvestigation,
+  useInvestigationProposals,
+  useGenerateProposal,
+} from '../../hooks/use_investigations_api';
+import type { GenerateProposalProvenance } from '../../hooks/use_investigations_api';
 import * as i18n from './translations';
 
 const ProposalRow: React.FC<{
   proposal: Proposal;
+  investigationId: string;
   onStatusChange: (proposalId: string, status: ProposalStatus) => void;
-}> = ({ proposal, onStatusChange }) => (
-  <EuiPanel paddingSize="m" data-test-subj={`pndProposalRow-${proposal.id}`}>
-    <EuiText size="s">
-      <p>
-        <strong>{proposal.summary}</strong>
-      </p>
-      <p>{proposal.recommendation}</p>
-    </EuiText>
-    <EuiSpacer size="s" />
-    <EuiFlexGroup gutterSize="s">
-      <EuiFlexItem grow={false}>
-        <EuiButton size="s" onClick={() => onStatusChange(proposal.id, 'approved')}>
-          {i18n.ACTION_APPROVE}
-        </EuiButton>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiButton size="s" color="text" onClick={() => onStatusChange(proposal.id, 'modified')}>
-          {i18n.ACTION_MODIFY}
-        </EuiButton>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiButtonEmpty size="s" onClick={() => onStatusChange(proposal.id, 'dismissed')}>
-          {i18n.ACTION_DISMISS}
-        </EuiButtonEmpty>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  </EuiPanel>
-);
+}> = ({ proposal, investigationId, onStatusChange }) => {
+  const { http, notifications } = useKibana().services;
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleAction = async (action: 'accept' | 'reject' | 'modify') => {
+    setIsLoading(true);
+    try {
+      let endpoint = `/internal/pnd/investigations/${investigationId}/proposals/${proposal.id}`;
+      let newStatus: ProposalStatus;
+      const body: Record<string, unknown> = {};
+
+      if (action === 'accept') {
+        endpoint = `${endpoint}/accept`;
+        newStatus = 'approved';
+      } else if (action === 'reject') {
+        endpoint = `${endpoint}/reject`;
+        newStatus = 'dismissed';
+        body.reason = 'Dismissed by analyst';
+      } else {
+        endpoint = `${endpoint}/modify`;
+        newStatus = 'modified';
+        body.reasoning = 'Modified by analyst review';
+      }
+
+      const result = (await http!.post(endpoint, {
+        body: JSON.stringify(body),
+      })) as {
+        escalation?: { triggered?: boolean; completed?: boolean; workflowExecutionId?: string };
+      };
+
+      onStatusChange(proposal.id, newStatus);
+      if (action === 'accept' && result?.escalation?.triggered) {
+        notifications?.toasts.addSuccess(
+          result.escalation.completed
+            ? `Escalation Watch workflow completed (${result.escalation.workflowExecutionId})`
+            : `Escalation Watch workflow triggered (${result.escalation.workflowExecutionId})`
+        );
+      } else {
+        notifications?.toasts.addSuccess(`Proposal ${newStatus}`);
+      }
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      notifications?.toasts.addError(new Error(message), {
+        title: `Failed to ${action} proposal`,
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const statusColors: Record<ProposalStatus, string> = {
+    pending: '#FFFFFF',
+    approved: '#E8F5E9',
+    dismissed: '#F5F5F5',
+    modified: '#E3F2FD',
+    executed: '#C8E6C9',
+  };
+
+  return (
+    <EuiPanel
+      paddingSize="m"
+      style={{ backgroundColor: statusColors[proposal.status] }}
+      data-test-subj={`pndProposalRow-${proposal.id}`}
+    >
+      <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexStart">
+        <EuiFlexItem>
+          <EuiText size="s">
+            <p>
+              <strong>
+                {(proposal as any).type
+                  ? `${(proposal as any).type} Proposal`
+                  : (proposal as any).summary || 'Proposal'}
+              </strong>
+            </p>
+            {(proposal as any).confidence && (
+              <p style={{ color: '#666', fontSize: '0.9em' }}>
+                Confidence: {((proposal as any).confidence * 100).toFixed(0)}%
+              </p>
+            )}
+            <p>
+              {(proposal as any).reasoning ||
+                (proposal as any).recommendation ||
+                'No details available'}
+            </p>
+            {proposal.status !== 'pending' && (
+              <p style={{ color: '#666', fontSize: '0.85em', marginTop: '0.5rem' }}>
+                Status: <strong>{proposal.status}</strong>
+              </p>
+            )}
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      {proposal.status === 'pending' && (
+        <>
+          <EuiSpacer size="s" />
+          <EuiFlexGroup gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                size="s"
+                color="success"
+                onClick={() => handleAction('accept')}
+                isLoading={isLoading}
+                disabled={isLoading}
+              >
+                {i18n.ACTION_APPROVE}
+              </EuiButton>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                size="s"
+                color="text"
+                onClick={() => handleAction('modify')}
+                isLoading={isLoading}
+                disabled={isLoading}
+              >
+                {i18n.ACTION_MODIFY}
+              </EuiButton>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                size="s"
+                color="danger"
+                onClick={() => handleAction('reject')}
+                isLoading={isLoading}
+                disabled={isLoading}
+              >
+                {i18n.ACTION_DISMISS}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </>
+      )}
+    </EuiPanel>
+  );
+};
 
 export const InvestigationDetailPage: React.FC = () => {
   const { services } = useKibana();
@@ -67,6 +181,9 @@ export const InvestigationDetailPage: React.FC = () => {
   const proposalsQuery = useInvestigationProposals(id);
   const [localStatuses, setLocalStatuses] = useState<Record<string, ProposalStatus>>({});
   const [selectedTabId, setSelectedTabId] = useState('overview');
+  const [generatedProposal, setGeneratedProposal] = useState<Proposal | null>(null);
+  const [provenance, setProvenance] = useState<GenerateProposalProvenance | null>(null);
+  const generateProposal = useGenerateProposal(id);
   usePndDocTitle(data?.investigation?.title ?? i18n.PAGE_TITLE);
 
   useEffect(() => {
@@ -96,6 +213,23 @@ export const InvestigationDetailPage: React.FC = () => {
     services.notifications?.toasts.addSuccess(i18n.STATUS_UPDATED);
   };
 
+  const onGenerateProposal = async () => {
+    try {
+      const result = await generateProposal.mutateAsync();
+      setGeneratedProposal(result.proposal);
+      setProvenance(result.provenance);
+      setSelectedTabId('proposals');
+      services.notifications?.toasts.addSuccess(
+        `Watch workflow proposal generated (${result.provenance.stepType})`
+      );
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      services.notifications?.toasts.addError(new Error(message), {
+        title: 'Failed to generate LLM proposal',
+      });
+    }
+  };
+
   if (isLoading) {
     return (
       <PndPageSection>
@@ -115,48 +249,94 @@ export const InvestigationDetailPage: React.FC = () => {
 
   const { investigation } = data;
 
-  const tabs: EuiTabbedContentTab[] = [
-    {
-      id: 'overview',
-      name: i18n.TAB_OVERVIEW,
-      content: (
-        <EuiText>
-          <p>{investigation.summary}</p>
-          <p>
-            <strong>{investigation.affectedSurface}</strong>
-          </p>
-        </EuiText>
-      ),
-    },
-    {
-      id: 'proposals',
-      name: i18n.TAB_PROPOSALS,
-      content: (
+  const overviewContent = (
+    <EuiText>
+      <p>{investigation.summary}</p>
+      <p>
+        <strong>{investigation.affectedSurface}</strong>
+      </p>
+    </EuiText>
+  );
+
+  const proposalsContent = (
+    <>
+      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="s">
+        <EuiFlexItem grow={false}>
+          <EuiText size="s">
+            <strong>Analyst proposals</strong>
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            size="s"
+            iconType="sparkles"
+            fill
+            isLoading={generateProposal.isLoading}
+            onClick={onGenerateProposal}
+            data-test-subj="pndGenerateProposalButton"
+          >
+            Generate with LLM
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="m" />
+
+      {generatedProposal && provenance ? (
         <>
-          {proposals.map((proposal) => (
-            <React.Fragment key={proposal.id}>
-              <ProposalRow proposal={proposal} onStatusChange={onStatusChange} />
-              <EuiSpacer size="m" />
-            </React.Fragment>
-          ))}
+          <EuiCallOut
+            announceOnMount
+            title={`Watch workflow · ${provenance.stepType} step · ${provenance.latencyMs}ms${
+              provenance.tokenUsage ? ` · ${provenance.tokenUsage.totalTokens} tokens` : ''
+            }`}
+            color="primary"
+            iconType="sparkles"
+            size="s"
+            data-test-subj="pndLlmProvenance"
+          >
+            <EuiText size="xs">
+              This proposal was produced by a live Watch workflow (ai.agent reasoning step), not
+              seed data. Execution: {provenance.workflowExecutionId}
+            </EuiText>
+          </EuiCallOut>
+          <EuiSpacer size="s" />
+          <ProposalRow
+            proposal={generatedProposal}
+            investigationId={id}
+            onStatusChange={onStatusChange}
+          />
+          <EuiSpacer size="m" />
         </>
-      ),
-    },
-    {
-      id: 'timeline',
-      name: i18n.TAB_TIMELINE,
-      content: (
-        <EuiText size="s">
-          <ul>
-            {investigation.events.map((event) => (
-              <li key={event.id}>
-                {event.timestamp}: {event.summary}
-              </li>
-            ))}
-          </ul>
-        </EuiText>
-      ),
-    },
+      ) : null}
+
+      {proposals.length === 0 ? (
+        <EuiText>No proposals available</EuiText>
+      ) : (
+        proposals.map((proposal) => (
+          <React.Fragment key={proposal.id}>
+            <ProposalRow proposal={proposal} investigationId={id} onStatusChange={onStatusChange} />
+            <EuiSpacer size="m" />
+          </React.Fragment>
+        ))
+      )}
+    </>
+  );
+
+  const timelineContent = (
+    <EuiText size="s">
+      <ul>
+        {investigation.events.map((event) => (
+          <li key={event.id}>
+            {event.timestamp}: {event.summary}
+          </li>
+        ))}
+      </ul>
+    </EuiText>
+  );
+
+  const tabs = [
+    { id: 'overview', name: i18n.TAB_OVERVIEW, content: overviewContent },
+    { id: 'proposals', name: i18n.TAB_PROPOSALS, content: proposalsContent },
+    { id: 'timeline', name: i18n.TAB_TIMELINE, content: timelineContent },
   ];
 
   const selectedTab = tabs.find((tab) => tab.id === selectedTabId) ?? tabs[0];
@@ -168,12 +348,19 @@ export const InvestigationDetailPage: React.FC = () => {
         subtitle={investigation.affectedSurface}
         backTo={{ path: '/', label: i18n.BACK_TO_BRIEF }}
       />
-      <EuiTabbedContent
-        tabs={tabs}
-        selectedTab={selectedTab}
-        onTabClick={(tab) => setSelectedTabId(tab.id)}
-        autoFocus="selected"
-      />
+      <EuiTabs>
+        {tabs.map((tab) => (
+          <EuiTab
+            key={tab.id}
+            isSelected={tab.id === selectedTab.id}
+            onClick={() => setSelectedTabId(tab.id)}
+          >
+            {tab.name}
+          </EuiTab>
+        ))}
+      </EuiTabs>
+      <EuiSpacer size="m" />
+      {selectedTab.content}
     </PndPageSection>
   );
 };
