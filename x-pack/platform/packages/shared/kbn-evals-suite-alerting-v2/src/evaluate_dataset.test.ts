@@ -206,7 +206,7 @@ describe('createTask', () => {
     expect(output.messages).toEqual([{ message: 'm0' }, { message: 'm1' }]);
   });
 
-  it('loads conversation attachments and resolves ruleAttachment after converse', async () => {
+  it('loads conversation attachments after converse', async () => {
     const listAttachments = jest.fn(async () => [
       {
         id: 'att-1',
@@ -237,16 +237,17 @@ describe('createTask', () => {
 
     const output = (await runTask(client, { turns: ['create a rule'] })) as TaskOutput & {
       conversationId?: string;
-      ruleAttachment?: { kind?: string; schedule?: { lookback?: string } };
       attachments?: unknown[];
     };
 
     expect(listAttachments).toHaveBeenCalledWith('conv-xyz');
     expect(output.conversationId).toBe('conv-xyz');
-    expect(output.attachments).toHaveLength(1);
-    expect(output.ruleAttachment).toEqual({
-      kind: 'alert',
-      schedule: { every: '1m', lookback: '5m' },
-    });
+    expect(output.attachments).toEqual([
+      expect.objectContaining({
+        id: 'att-1',
+        type: 'rule',
+      }),
+    ]);
   });
 });
+

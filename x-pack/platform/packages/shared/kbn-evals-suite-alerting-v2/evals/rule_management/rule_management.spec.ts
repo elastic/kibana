@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { getBreachEsqlQuery } from '@kbn/alerting-v2-schemas';
+import { getLatestVersion, type VersionedAttachment } from '@kbn/agent-builder-common/attachments';
+import {
+  getBreachEsqlQuery,
+  RULE_ATTACHMENT_TYPE,
+  type RuleAttachmentData,
+} from '@kbn/alerting-v2-schemas';
 import { expect } from '@playwright/test';
 import { tags } from '@kbn/scout';
 import { evaluate as base } from '../../src/evaluate';
@@ -19,6 +24,21 @@ import {
 } from '../../src/constants';
 import type { EvaluateDataset } from '../../src/evaluate_dataset';
 import { createEvaluateDataset } from '../../src/evaluate_dataset';
+
+const getLatestRuleAttachmentData = (
+  attachments: VersionedAttachment[]
+): RuleAttachmentData | undefined => {
+  const ruleAttachments = attachments.filter(
+    (attachment) => attachment.type === RULE_ATTACHMENT_TYPE
+  );
+  const latest = ruleAttachments[ruleAttachments.length - 1];
+  if (!latest) {
+    return undefined;
+  }
+  return getLatestVersion<RuleAttachmentData>(
+    latest as VersionedAttachment<string, RuleAttachmentData>
+  )?.data;
+};
 
 const evaluate = base.extend<{ evaluateDataset: EvaluateDataset }, {}>({
   evaluateDataset: [
@@ -196,20 +216,21 @@ evaluate.describe(
                   expectedSkills: [RULE_MANAGEMENT_SKILL_ID],
                   shouldNotActivateSkill: DETECTION_RULE_EDIT_SKILL_ID,
                   expectedToolIds: [ALERTING_TOOL_IDS.manageRule],
-                  expectRenderAttachment: {
-                    assert: (attachment) => {
-                      expect(attachment.kind).toEqual('alert');
-                      expect(attachment.grouping?.fields).toEqual(
-                        expect.arrayContaining(['host.name'])
-                      );
-                      expect(
-                        attachment.state_transition?.pending_timeframe ??
-                          attachment.schedule?.lookback
-                      ).toEqual('5m');
-                      const esql = attachment.query ? getBreachEsqlQuery(attachment.query) : '';
-                      expect(esql).toContain(hostMetricsIndex);
-                      expect(esql).toContain('system.cpu.total.norm.pct');
-                    },
+                  expectRenderAttachment: [RULE_ATTACHMENT_TYPE],
+                  expectAttachmentData: (attachments) => {
+                    const attachment = getLatestRuleAttachmentData(attachments);
+                    expect(attachment).toBeDefined();
+                    expect(attachment!.kind).toEqual('alert');
+                    expect(attachment!.grouping?.fields).toEqual(
+                      expect.arrayContaining(['host.name'])
+                    );
+                    expect(
+                      attachment!.state_transition?.pending_timeframe ??
+                        attachment!.schedule?.lookback
+                    ).toEqual('5m');
+                    const esql = attachment!.query ? getBreachEsqlQuery(attachment!.query) : '';
+                    expect(esql).toContain(hostMetricsIndex);
+                    expect(esql).toContain('system.cpu.total.norm.pct');
                   },
                 },
               },
@@ -262,22 +283,23 @@ evaluate.describe(
                   expectedSkills: [RULE_MANAGEMENT_SKILL_ID],
                   shouldNotActivateSkill: DETECTION_RULE_EDIT_SKILL_ID,
                   expectedToolIds: [ALERTING_TOOL_IDS.manageRule],
-                  expectRenderAttachment: {
-                    assert: (attachment) => {
-                      expect(attachment.kind).toEqual('alert');
-                      expect(attachment.grouping?.fields).toEqual(
-                        expect.arrayContaining(['host.name'])
-                      );
-                      // "stays above for 5 minutes" → pending timeframe / lookback, not a
-                      // WHERE on @timestamp. Accept either representation.
-                      expect(
-                        attachment.state_transition?.pending_timeframe ??
-                          attachment.schedule?.lookback
-                      ).toEqual('5m');
-                      const esql = attachment.query ? getBreachEsqlQuery(attachment.query) : '';
-                      expect(esql).toContain(hostMetricsIndex);
-                      expect(esql).toContain('system.cpu.total.norm.pct');
-                    },
+                  expectRenderAttachment: [RULE_ATTACHMENT_TYPE],
+                  expectAttachmentData: (attachments) => {
+                    const attachment = getLatestRuleAttachmentData(attachments);
+                    expect(attachment).toBeDefined();
+                    expect(attachment!.kind).toEqual('alert');
+                    expect(attachment!.grouping?.fields).toEqual(
+                      expect.arrayContaining(['host.name'])
+                    );
+                    // "stays above for 5 minutes" → pending timeframe / lookback, not a
+                    // WHERE on @timestamp. Accept either representation.
+                    expect(
+                      attachment!.state_transition?.pending_timeframe ??
+                        attachment!.schedule?.lookback
+                    ).toEqual('5m');
+                    const esql = attachment!.query ? getBreachEsqlQuery(attachment!.query) : '';
+                    expect(esql).toContain(hostMetricsIndex);
+                    expect(esql).toContain('system.cpu.total.norm.pct');
                   },
                 },
               },
@@ -330,13 +352,14 @@ evaluate.describe(
                   // discover it and inspect mappings before composing.
                   expectedToolIds: [ALERTING_TOOL_IDS.manageRule, INDEX_MAPPING_TOOL_ID],
                   expectedAnyOfToolIds: INDEX_DISCOVERY_TOOL_IDS,
-                  expectRenderAttachment: {
-                    assert: (attachment) => {
-                      expect(attachment.kind).toEqual('alert');
-                      expect(attachment.schedule?.lookback).toEqual('5m');
-                      const esql = attachment.query ? getBreachEsqlQuery(attachment.query) : '';
-                      expect(esql.toLowerCase()).toContain('admin-console');
-                    },
+                  expectRenderAttachment: [RULE_ATTACHMENT_TYPE],
+                  expectAttachmentData: (attachments) => {
+                    const attachment = getLatestRuleAttachmentData(attachments);
+                    expect(attachment).toBeDefined();
+                    expect(attachment!.kind).toEqual('alert');
+                    expect(attachment!.schedule?.lookback).toEqual('5m');
+                    const esql = attachment!.query ? getBreachEsqlQuery(attachment!.query) : '';
+                    expect(esql.toLowerCase()).toContain('admin-console');
                   },
                 },
               },

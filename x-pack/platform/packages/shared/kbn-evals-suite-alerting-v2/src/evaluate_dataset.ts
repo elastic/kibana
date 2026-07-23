@@ -23,7 +23,6 @@ import {
 } from '@kbn/agent-builder-common/agents';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { resolveRuleAttachmentData } from './attachments';
 import type { RuleManagementChatClient } from './chat_client';
 import { createExpectedSkillEvaluator } from './evaluators/expected_skill';
 import {
@@ -31,10 +30,11 @@ import {
   createExpectedToolCalledEvaluator,
 } from './evaluators/expected_tool_called';
 import {
+  createExpectedAttachmentDataEvaluator,
   createExpectedRenderAttachmentEvaluator,
-  getAssistantMessages,
+  type ExpectAttachmentDataFn,
   type ExpectRenderAttachment,
-} from './evaluators/expected_render_attachment';
+} from './evaluators/expected_attachment';
 import { withLowScoreLogging } from './evaluator_utils';
 
 export interface RuleManagementExample extends Example {
@@ -65,15 +65,17 @@ export interface RuleManagementExample extends Example {
      */
     expectedAnyOfToolIds?: readonly string[];
     /**
-     * Render-attachment expectation:
-     * - `true`: at least one valid `<render_attachment>` tag must appear
-     * - `string[]`: each listed attachment type (e.g. `rule`, `workflow.yaml`,
-     *   `action_policy`) must be rendered via a tag whose id resolves to that
-     *   type in the conversation attachments
-     * - `{ types?, assert? }`: combine type checks with an optional Jest-style
-     *   structural assert on the resolved rule attachment
+     * Attachment types (e.g. `rule`, `workflow.yaml`, `action_policy`) that must
+     * each be rendered via a `<render_attachment>` tag whose id resolves to that
+     * type in the conversation attachments.
      */
     expectRenderAttachment?: ExpectRenderAttachment;
+    /**
+     * Jest-style callback that receives every conversation attachment so the
+     * example can pick and assert against whichever payload(s) it cares about.
+     * In-memory only — not serializable to Phoenix datasets.
+     */
+    expectAttachmentData?: ExpectAttachmentDataFn;
     /**
      * The conversation must load **every** skill in this list at least once.
      * Use a one-element array for a single skill. Prefer this over a singular
@@ -185,7 +187,7 @@ export const createTask = (
     }
 
     // Load conversation attachments so CODE evaluators (and the Criteria judge) can
-    // inspect the composed rule payload, not only tool-call params / render tags.
+    // inspect composed payloads, not only tool-call params / render tags.
     let attachments: VersionedAttachment[] = [];
     if (conversationId) {
       try {
@@ -201,11 +203,6 @@ export const createTask = (
       }
     }
 
-    const ruleAttachment = resolveRuleAttachmentData(
-      attachments,
-      getAssistantMessages({ messages })
-    );
-
     return {
       errors,
       messages,
@@ -214,7 +211,6 @@ export const createTask = (
       openerPrompts,
       conversationId,
       attachments,
-      ruleAttachment,
     };
   };
 };
@@ -233,19 +229,13 @@ export const createEvaluateDataset = ({
   return async ({ dataset: { name, description, examples } }) => {
     const dataset = { name, description, examples } satisfies EvaluationDataset;
 
-    // Wrap every evaluator so any sub-1 score logs a self-contained report (transcript,
-    // opener prompts, explanation, trace id) straight to the test output.
-    //
-    // Whether the agent tried to disambiguate Alerting V2 vs Security on the opener — via a
-    // structured `ask_user_question` or in prose — is judged by the LLM `Criteria` evaluator
-    // rather than a brittle regex. The task output includes `openerPrompts`, so the judge sees
-    // the structured prompt content (options/labels), not just the assistant's prose.
     const selectedEvaluators = selectEvaluators<RuleManagementExample, TaskOutput>(
       [
         createExpectedSkillEvaluator(),
         createExpectedToolCalledEvaluator(),
         createExpectedAnyOfToolIdsEvaluator(),
         createExpectedRenderAttachmentEvaluator(),
+        createExpectedAttachmentDataEvaluator(),
         createCriteriaEvaluator(evaluators),
       ].map((evaluator) => withLowScoreLogging(evaluator, log))
     );
