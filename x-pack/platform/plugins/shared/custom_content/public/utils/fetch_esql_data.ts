@@ -14,8 +14,6 @@ import type { ISearchGeneric } from '@kbn/search-types';
 
 export type EsqlDataResult = ESQLSearchResponse;
 
-const MAX_RENDER_ROWS = 100;
-
 export async function fetchEsqlData(
   search: ISearchGeneric,
   http: HttpStart,
@@ -45,9 +43,8 @@ export async function fetchEsqlData(
     }
   }
 
-  const boundedQuery = appendLimitToQuery(esqlQuery, MAX_RENDER_ROWS);
   const { response } = await getESQLResults({
-    esqlQuery: boundedQuery,
+    esqlQuery,
     search,
     signal,
     filter,
