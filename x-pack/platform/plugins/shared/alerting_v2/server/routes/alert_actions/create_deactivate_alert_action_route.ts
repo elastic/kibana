@@ -15,7 +15,7 @@ import { createAlertActionRouteForType } from './create_alert_action_route_for_t
 export const CreateDeactivateAlertActionRoute = createAlertActionRouteForType({
   actionType: ALERT_EPISODE_ACTION_TYPE.DEACTIVATE,
   pathSuffix: '_deactivate',
-  summary: 'Create an alert _deactivate action',
+  summary: 'Deactivate an alert',
   bodySchema: createDeactivateAlertActionBodySchema,
   oasOperationObject: createDeactivateAlertActionOasExamples,
 });

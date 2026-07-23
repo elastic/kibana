@@ -15,7 +15,7 @@ import { createAlertActionRouteForType } from './create_alert_action_route_for_t
 export const CreateUnackAlertActionRoute = createAlertActionRouteForType({
   actionType: ALERT_EPISODE_ACTION_TYPE.UNACK,
   pathSuffix: '_unack',
-  summary: 'Create an alert _unack action',
+  summary: 'Unacknowledge an alert',
   bodySchema: createUnackAlertActionBodySchema,
   oasOperationObject: createUnackAlertActionOasExamples,
 });

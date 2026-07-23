@@ -18,7 +18,7 @@ import { createRouteDependencies } from '../test_utils';
 describe('createAlertActionRouteForType', () => {
   it('creates a route class with expected static metadata', () => {
     const suffix = '_tag';
-    const summary = `Create an alert ${suffix} action`;
+    const summary = 'Add tags to an alert';
     const RouteClass = createAlertActionRouteForType({
       actionType: ALERT_EPISODE_ACTION_TYPE.TAG,
       pathSuffix: suffix,
@@ -36,7 +36,7 @@ describe('createAlertActionRouteForType', () => {
     const RouteClass = createAlertActionRouteForType({
       actionType: ALERT_EPISODE_ACTION_TYPE.TAG,
       pathSuffix: '_tag',
-      summary: 'Create an alert _tag action',
+      summary: 'Add tags to an alert',
       bodySchema: createTagAlertActionBodySchema,
     });
     const { ctx } = createRouteDependencies();
@@ -63,7 +63,7 @@ describe('createAlertActionRouteForType', () => {
     const RouteClass = createAlertActionRouteForType({
       actionType: ALERT_EPISODE_ACTION_TYPE.TAG,
       pathSuffix: '_tag',
-      summary: 'Create an alert _tag action',
+      summary: 'Add tags to an alert',
       bodySchema: createTagAlertActionBodySchema,
     });
     const { ctx } = createRouteDependencies();

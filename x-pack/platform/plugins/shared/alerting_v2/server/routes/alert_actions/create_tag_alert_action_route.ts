@@ -15,7 +15,7 @@ import { createAlertActionRouteForType } from './create_alert_action_route_for_t
 export const CreateTagAlertActionRoute = createAlertActionRouteForType({
   actionType: ALERT_EPISODE_ACTION_TYPE.TAG,
   pathSuffix: '_tag',
-  summary: 'Create an alert _tag action',
+  summary: 'Add tags to an alert',
   bodySchema: createTagAlertActionBodySchema,
   oasOperationObject: createTagAlertActionOasExamples,
 });

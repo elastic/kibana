@@ -15,7 +15,7 @@ import { createAlertActionRouteForType } from './create_alert_action_route_for_t
 export const CreateActivateAlertActionRoute = createAlertActionRouteForType({
   actionType: ALERT_EPISODE_ACTION_TYPE.ACTIVATE,
   pathSuffix: '_activate',
-  summary: 'Create an alert _activate action',
+  summary: 'Activate an alert',
   bodySchema: createActivateAlertActionBodySchema,
   oasOperationObject: createActivateAlertActionOasExamples,
 });

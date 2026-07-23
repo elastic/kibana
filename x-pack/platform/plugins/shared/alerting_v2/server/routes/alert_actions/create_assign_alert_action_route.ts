@@ -15,7 +15,7 @@ import { createAlertActionRouteForType } from './create_alert_action_route_for_t
 export const CreateAssignAlertActionRoute = createAlertActionRouteForType({
   actionType: ALERT_EPISODE_ACTION_TYPE.ASSIGN,
   pathSuffix: '_assign',
-  summary: 'Create an alert _assign action',
+  summary: 'Assign an alert to a user',
   bodySchema: createAssignAlertActionBodySchema,
   oasOperationObject: createAssignAlertActionOasExamples,
 });

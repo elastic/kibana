@@ -15,7 +15,7 @@ import { createAlertActionRouteForType } from './create_alert_action_route_for_t
 export const CreateUnsnoozeAlertActionRoute = createAlertActionRouteForType({
   actionType: ALERT_EPISODE_ACTION_TYPE.UNSNOOZE,
   pathSuffix: '_unsnooze',
-  summary: 'Create an alert _unsnooze action',
+  summary: 'Unsnooze an alert',
   bodySchema: createUnsnoozeAlertActionBodySchema,
   oasOperationObject: createUnsnoozeAlertActionOasExamples,
 });

@@ -15,7 +15,7 @@ import { createAlertActionRouteForType } from './create_alert_action_route_for_t
 export const CreateAckAlertActionRoute = createAlertActionRouteForType({
   actionType: ALERT_EPISODE_ACTION_TYPE.ACK,
   pathSuffix: '_ack',
-  summary: 'Create an alert _ack action',
+  summary: 'Acknowledge an alert',
   bodySchema: createAckAlertActionBodySchema,
   oasOperationObject: createAckAlertActionOasExamples,
 });
