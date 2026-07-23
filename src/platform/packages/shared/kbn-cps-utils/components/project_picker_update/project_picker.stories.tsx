@@ -37,7 +37,7 @@ export const ProjectPickerStory: StoryObj<ComponentProps<typeof ProjectPicker>> 
         _alias: faker.company.name(),
         _organisation: faker.company.name(),
         _region: faker.helpers.arrayElement(['us-east-1', 'us-west-1', 'eu-west-1']),
-        _provider: faker.helpers.arrayElement(['AWS', 'Azure', 'GCP']),
+        _csp: faker.helpers.arrayElement(['AWS', 'Azure', 'GCP']),
         ...Array.from(new Array(faker.number.int({ min: 1, max: 10 }))).reduce((acc, _) => {
           const tagKey = faker.helpers.arrayElement(tagKeys);
           acc[tagKey] = faker.helpers.arrayElement(tagsValueMap[tagKey]);

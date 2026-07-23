@@ -101,7 +101,7 @@ export function ProjectPickerListItem({
               {i18n.translate('cpsUtils.projectPicker.listItem.region', {
                 defaultMessage: '{provider}, {region}',
                 values: {
-                  provider: project._provider,
+                  provider: project._csp,
                   region: project._region,
                 },
               })}

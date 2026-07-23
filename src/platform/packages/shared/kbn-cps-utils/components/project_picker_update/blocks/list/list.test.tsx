@@ -23,7 +23,7 @@ const createProject = (id: string, tags: Record<string, string> = {}): CPSProjec
   _type: 'security',
   _organisation: 'org',
   _region: 'us-east-1',
-  _provider: 'AWS',
+  _csp: 'AWS',
   ...tags,
 });
 
