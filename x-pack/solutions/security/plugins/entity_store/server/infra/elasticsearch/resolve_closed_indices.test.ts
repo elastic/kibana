@@ -7,7 +7,11 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
-import { resolveClosedIndexAdjustments } from './resolve_closed_indices';
+import {
+  formatErrorForLog,
+  formatNameListForLog,
+  resolveClosedIndexAdjustments,
+} from './resolve_closed_indices';
 
 const makeEsClient = (resolveIndexImpl: jest.Mock) =>
   ({
@@ -346,5 +350,61 @@ describe('resolveClosedIndexAdjustments', () => {
     await resolveClosedIndexAdjustments(makeEsClient(resolveIndex), ['logs-*'], logger);
 
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('-logs-closed-ds'));
+  });
+
+  it('summarizes long closed-index lists in the warning instead of joining all names', async () => {
+    const closedNames = Array.from({ length: 12 }, (_, i) => `.ds-logs-closed-${i}-000001`);
+    const resolveIndex = jest
+      .fn()
+      .mockResolvedValueOnce({
+        indices: [],
+        aliases: [],
+        data_streams: closedNames.map((name, i) => ({
+          name: `logs-closed-${i}`,
+          backing_indices: [name],
+          timestamp_field: '@timestamp',
+        })),
+      })
+      .mockResolvedValueOnce({
+        indices: closedNames.map((name) => ({ name, attributes: ['closed'] })),
+        aliases: [],
+        data_streams: [],
+      });
+
+    await resolveClosedIndexAdjustments(makeEsClient(resolveIndex), ['logs-*'], logger);
+
+    const warnMessage = (logger.warn as jest.Mock).mock.calls
+      .map((call) => String(call[0]))
+      .find((msg) => msg.includes('Detected closed backing indices'));
+
+    expect(warnMessage).toBeDefined();
+    expect(warnMessage).toContain('… and 7 more (total 12)');
+    // Must not dump every negation into the log line.
+    expect(warnMessage).not.toContain('-logs-closed-11');
+  });
+});
+
+describe('formatNameListForLog', () => {
+  it('joins short lists in full', () => {
+    expect(formatNameListForLog(['a', 'b'])).toBe('a, b');
+  });
+
+  it('truncates long lists with a total count', () => {
+    expect(formatNameListForLog(['a', 'b', 'c', 'd', 'e', 'f', 'g'])).toBe(
+      'a, b, c, d, e … and 2 more (total 7)'
+    );
+  });
+});
+
+describe('formatErrorForLog', () => {
+  it('returns short messages unchanged', () => {
+    expect(formatErrorForLog(new Error('boom'))).toBe('boom');
+  });
+
+  it('truncates very long error messages', () => {
+    const long = 'x'.repeat(600);
+    const formatted = formatErrorForLog(new Error(long));
+    expect(formatted.length).toBeLessThan(long.length);
+    expect(formatted).toContain('truncated, original length 600');
   });
 });

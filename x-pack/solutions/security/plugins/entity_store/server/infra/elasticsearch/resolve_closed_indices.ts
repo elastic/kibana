@@ -72,6 +72,36 @@ const resolveArgs = (name: string[]) => ({
   allow_no_indices: true,
 });
 
+/** Max names included verbatim in a warn log; remainder summarized by count. */
+const MAX_LOGGED_NAMES = 5;
+/** Cap error.message size in logs (414 HTML bodies are small; keep a hard ceiling anyway). */
+const MAX_LOGGED_ERROR_CHARS = 500;
+
+export const formatNameListForLog = (
+  names: string[],
+  maxNames: number = MAX_LOGGED_NAMES
+): string => {
+  if (names.length === 0) {
+    return '(none)';
+  }
+  if (names.length <= maxNames) {
+    return names.join(', ');
+  }
+  const shown = names.slice(0, maxNames).join(', ');
+  return `${shown} … and ${names.length - maxNames} more (total ${names.length})`;
+};
+
+export const formatErrorForLog = (
+  error: unknown,
+  maxChars: number = MAX_LOGGED_ERROR_CHARS
+): string => {
+  const raw = error instanceof Error ? error.message : String(error);
+  if (raw.length <= maxChars) {
+    return raw;
+  }
+  return `${raw.slice(0, maxChars)}… (truncated, original length ${raw.length})`;
+};
+
 export const resolveClosedIndexAdjustments = async (
   esClient: ElasticsearchClient,
   includePatterns: string[],
@@ -128,10 +158,15 @@ export const resolveClosedIndexAdjustments = async (
     const negations = [...closedStandaloneNegations, ...dataStreamNegations];
 
     if (negations.length > 0 || openBackingIndices.length > 0) {
+      // Never join unbounded index lists into a single log line — on large clusters
+      // that can produce multi-MB messages and contribute to write EPIPE crashes when
+      // the logging pipeline cannot absorb them.
       logger.warn(
-        `Detected closed backing indices. Excluding data streams/indices: ${negations.join(', ')}` +
+        `Detected closed backing indices. Excluding data streams/indices: ${formatNameListForLog(
+          negations
+        )}` +
           (openBackingIndices.length > 0
-            ? `; adding open backing indices back: ${openBackingIndices.join(', ')}`
+            ? `; adding open backing indices back: ${formatNameListForLog(openBackingIndices)}`
             : '')
       );
     }
@@ -139,9 +174,9 @@ export const resolveClosedIndexAdjustments = async (
     return { openBackingIndices, negations };
   } catch (error) {
     logger.warn(
-      `Failed to resolve closed indices (falling back to unfiltered patterns): ${
-        error instanceof Error ? error.message : String(error)
-      }`
+      `Failed to resolve closed indices (falling back to unfiltered patterns): ${formatErrorForLog(
+        error
+      )}`
     );
     return { openBackingIndices: [], negations: [] };
   }
