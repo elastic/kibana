@@ -323,8 +323,8 @@ describe('buildPolicyBaseIdWithFallbackEsFilter', () => {
 describe('buildPolicyBaseIdsWithFallbackEsFilter', () => {
   it('should match on policy_base_id terms for migrated docs', () => {
     const filter = buildPolicyBaseIdsWithFallbackEsFilter(['policy-a', 'policy-b']);
-    expect(filter).toMatchObject({
-      bool: { should: [{ terms: { policy_base_id: ['policy-a', 'policy-b'] } }] },
+    expect((filter as any).bool.should[0]).toEqual({
+      terms: { policy_base_id: ['policy-a', 'policy-b'] },
     });
   });
 
