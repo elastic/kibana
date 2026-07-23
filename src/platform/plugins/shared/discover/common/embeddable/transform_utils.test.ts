@@ -550,9 +550,6 @@ describe('search embeddable transform utils', () => {
         fieldFormats: {
           rt: { id: 'string' },
         },
-        fieldAttrs: {
-          rt: {},
-        },
         runtimeFieldMap: {
           rt: {
             type: 'keyword',

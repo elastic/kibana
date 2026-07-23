@@ -1425,7 +1425,7 @@
       "get": {
         "summary": "Get the fields applicable to a case",
         "operationId": "getApplicableFieldsDefaultSpace",
-        "description": "Returns the fields a caller may write to a case's `extended_fields` when creating a case for the given owner. Includes the owner's global (library-wide) fields and, when `templateId` is supplied, that template's fields. Migrated legacy custom fields appear as `global` fields. Requires the Cases feature to be enabled in the space.\n",
+        "description": "Returns the fields you can write to a case's `extended_fields` when creating a case for the given owner. Includes the owner's global (library-wide) fields and, when `templateId` is supplied, that template's fields. Migrated legacy custom fields appear as `global` fields. Requires the Cases feature to be enabled in the space.\n",
         "tags": [
           "cases"
         ],
@@ -1474,6 +1474,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/response_4xx"
+                },
+                "examples": {
+                  "response400": {
+                    "$ref": "#/components/examples/response_400_invalid_template"
+                  }
                 }
               }
             }
@@ -1499,6 +1504,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/response_4xx"
+                },
+                "examples": {
+                  "response403": {
+                    "$ref": "#/components/examples/response_403"
+                  }
                 }
               }
             }
@@ -1560,7 +1570,7 @@
       "get": {
         "summary": "Get the fields applicable to an existing case",
         "operationId": "getCaseApplicableFieldsDefaultSpace",
-        "description": "Returns the fields a caller may write to the case's `extended_fields`. The owner and any applied template are derived from the case itself, so the response includes the owner's global (library-wide) fields and, when the case has a template applied, that template's fields. Requires the Cases feature to be enabled in the space.\n",
+        "description": "Returns the fields you can write to the case's `extended_fields`. The case determines the owner and any applied template. The response includes the owner's global fields (library-wide) and, if the case has a template, that template's fields. Requires the Cases feature to be enabled in the space.\n",
         "tags": [
           "cases"
         ],
@@ -1606,6 +1616,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/response_4xx"
+                },
+                "examples": {
+                  "response403": {
+                    "$ref": "#/components/examples/response_403"
+                  }
                 }
               }
             }
@@ -3281,6 +3296,26 @@
                     }
                   ]
                 }
+              }
+            }
+          },
+          "template": {
+            "type": "object",
+            "nullable": true,
+            "x-state": "Technical preview",
+            "description": "A case template to create the case from. Requires the `xpack.cases.templates.enabled` setting. The server applies the template's case defaults (severity, category, tags, assignees, settings, connector) and its field defaults into `extended_fields`; any value explicitly provided in the request wins over the template default. When `version` is omitted, the latest version of the template is resolved and pinned on the case. To discover a template's fields before creating a case, use the get case fields API (`GET /api/cases/fields`).\n",
+            "required": [
+              "id"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "The template identifier. Retrieve template ids with `GET /api/cases/templates`."
+              },
+              "version": {
+                "type": "integer",
+                "description": "The template version to apply. Omit to use (and pin) the latest version.\n",
+                "minimum": 1
               }
             }
           }
@@ -6690,6 +6725,22 @@
               "isGlobal": false
             }
           ]
+        }
+      },
+      "response_400_invalid_template": {
+        "summary": "The request is invalid.",
+        "value": {
+          "error": "Bad Request",
+          "message": "Template [invalid-template-id] not found for owner [cases]",
+          "statusCode": 400
+        }
+      },
+      "response_403": {
+        "summary": "The user does not have access to the requested resource.",
+        "value": {
+          "error": "Forbidden",
+          "message": "Unauthorized to access cases",
+          "statusCode": 403
         }
       },
       "get_case_response": {
