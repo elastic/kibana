@@ -101,11 +101,12 @@ Wait for the `Kibana is now available` log line or poll the status endpoint:
 while [ "$(curl -s -o /dev/null -w '%{http_code}' http://localhost:5601/api/status)" != "200" ]; do
   sleep 2
 done
+sleep 30
 ```
 
-After the first 200, give Kibana about 30 seconds of additional idle time so
-background tasks settle. Do not open the UI because that triggers plugin
-startup work and pollutes the baseline.
+The final sleep gives Kibana additional idle time after the first 200 so
+background tasks settle. Do not open the UI because that triggers plugin startup
+work and pollutes the baseline.
 
 ### 6. Trigger the snapshot and require.cache dump
 
@@ -291,11 +292,12 @@ initialization on first boot. Two reliable signals:
   until [ "$(curl -s -o /dev/null -w '%{http_code}' http://localhost:5601/api/status)" = "200" ]; do
     sleep 2
   done
+  sleep 30
   ```
 
-After the first 200, give it ~30s of additional idle time so background
-tasks settle. Don't open the UI — that triggers plugin startup work and
-pollutes the baseline.
+The final sleep gives Kibana additional idle time after the first 200 so
+background tasks settle. Don't open the UI — that triggers plugin startup work
+and pollutes the baseline.
 
 Allocation tracking substantially slows startup. Five minutes to reach
 available is normal for a full serverless image.
