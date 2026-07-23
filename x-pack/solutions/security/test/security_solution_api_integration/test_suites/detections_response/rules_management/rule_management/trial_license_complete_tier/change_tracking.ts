@@ -700,6 +700,54 @@ export default ({ getService }: FtrProviderContext): void => {
         }
       });
 
+      it('records bulkCount as the full import size when overwriting across chunk boundaries', async () => {
+        // Above main import chunking (50) and planned rewrite batches (300–500).
+        const ruleCount = 568;
+
+        await importRulesWithSuccess({
+          getService,
+          rules: range(ruleCount).map((i) =>
+            getCustomQueryRuleParams({
+              rule_id: `bulk-overwrite-chunk-${i}`,
+              name: `Before overwrite ${i}`,
+              enabled: false,
+            })
+          ),
+          overwrite: false,
+        });
+
+        await clearHistory();
+
+        await importRulesWithSuccess({
+          getService,
+          rules: range(ruleCount).map((i) =>
+            getCustomQueryRuleParams({
+              rule_id: `bulk-overwrite-chunk-${i}`,
+              name: `After overwrite ${i}`,
+              enabled: false,
+            })
+          ),
+          overwrite: true,
+        });
+
+        await refreshHistory();
+
+        const sampleIndexes = [0, 50, 300, 500, ruleCount - 1];
+
+        for (const i of sampleIndexes) {
+          const { body: rule } = await detectionsApi
+            .readRule({ query: { rule_id: `bulk-overwrite-chunk-${i}` } })
+            .expect(200);
+
+          const { body } = await detectionsApi
+            .ruleChangesHistory({ params: { ruleId: rule.id }, query: {} })
+            .expect(200);
+
+          expect(body.items[0].action).toBe('rule_import');
+          expect(body.items[0].metadata?.bulk_count).toBe(ruleCount);
+        }
+      });
+
       it('records bulkCount equal to the number of installed prebuilt rules', async () => {
         await createPrebuiltRuleAssetSavedObjects(es, [
           createRuleAssetSavedObject({ rule_id: 'bulk-install-count-1', version: 1 }),
