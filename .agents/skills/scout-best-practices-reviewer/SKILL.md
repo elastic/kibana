@@ -1,6 +1,6 @@
 ---
 name: scout-best-practices-reviewer
-description: Review Scout UI/API tests (including Scout test migrations) for best practices, reuse, and parity.
+description: Review Scout UI/API tests (including Scout test migrations) for best practices, reuse, parity, and server config hygiene.
 ---
 
 # Scout Best Practices Reviewer
@@ -31,6 +31,52 @@ Important: Do not post GitHub comments unless explicitly stated.
    - As needed: `docs/extend/testing/api-auth.md`, `docs/extend/testing/browser-auth.md`, `docs/extend/testing/parallelism.md`, `docs/extend/testing/deployment-tags.md`, `docs/extend/testing/a11y-checks.md`, `docs/extend/testing/debugging.md`, `docs/extend/testing/run-scout-tests.md`
 
    **Rule of thumb:** always read the general best practices, then open **only** the UI-specific file for UI reviews or the API-specific file for API reviews. If a PR mixes UI and API specs, open both.
+
+## Critical checks (do these first, one by one)
+
+This review is a **multi-step workflow**. Before the general scope/checklist below, work through the numbered critical checks in this section **one at a time, in order** — do not batch them and do not skip ahead. Each check is high-signal: a genuine hit almost always means the PR should change before merge, so treat them as the highest priority findings in the review.
+
+For every critical check:
+
+1. Determine whether the PR triggers the check (see each check's **Detect**).
+2. If it does, run the check's evaluation and decide whether it's a real hit.
+3. If it's a hit, produce a finding and **point to the referenced docs**.
+
+**Reporting critical-check findings — use a GitHub important alert.** These checks are extremely important, so whenever you surface one of their findings (a GitHub review comment, PR comment, or your summary output), wrap it in a GitHub `> [!IMPORTANT]` alert so it stands out from ordinary findings:
+
+> [!IMPORTANT]
+> **Scout custom server config additions** — `<config set>` only enables runtime-toggleable flags, so it doesn't need a dedicated server. Enable them at runtime via `apiServices.core.settings(...)` instead. See `docs/extend/testing/feature-flags.md`.
+
+This alert formatting is about *how* a critical-check finding is presented; it does not override the "Do not post GitHub comments unless explicitly stated" rule above — only post comments when the caller explicitly asks for it.
+
+### Check 1 — Scout custom server config additions
+
+**Why it matters:** Every custom server config set spins up its **own dedicated local Kibana instance**, which adds CI cost and is **not supported on Elastic Cloud (QA)** — it only runs locally. So every added or updated config set must earn its keep. Many settings do **not** require a custom config set at all because they can be toggled **at runtime** (no server reboot) via `apiServices.core.settings(...)`, which works everywhere including Cloud.
+
+**Detect** — the PR adds or updates a Scout server config set if it touches any of:
+
+- Files under `src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/<name>/**` (a new config set directory, or new/edited `*.config.ts` / `shared.ts` / `base.config.ts`, especially changes to `serverArgs` or other `ScoutServerConfig` fields).
+- A new path-convention config set: a new `test/scout_<name>/` directory (Scout maps `scout_<name>` → the `<name>` config set) or a new `--serverConfigSet <name>` usage.
+
+**Evaluate** — for each added/updated config set, ask: *is a dedicated server actually required, or could the same effect be achieved at runtime?* Go through each added `serverArg` / setting:
+
+- **Runtime-toggleable (does NOT justify a custom config set)** — settings the config-overrides API can force while the server runs, e.g.:
+  - `--feature_flags.overrides.<id>=...`
+  - `--uiSettings.overrides.<key>=...` / `--uiSettings.globalOverrides.<key>=...`
+  - plugin `experimentalFeatures` objects (e.g. `xpack.<plugin>.experimentalFeatures`) that are read at runtime
+  These belong in `apiServices.core.settings(...)` — in a **global setup hook** (`global.setup.ts`, recommended for parallel suites, with a matching teardown to revert) or in `beforeAll`/`afterAll` for sequential suites.
+- **Boot-required (legitimately justifies a custom config set)** — settings that must be present at server startup, e.g. those read during a plugin `setup` lifecycle (HTTP route registration), enabling/disabling a plugin (`--xpack.<plugin>.enabled`), ES/server options (`esServerlessOptions`, ES args), or auth/IdP wiring (mock IdP, UIAM).
+- **When unsure** whether a setting requires boot, say so and ask the author to confirm — do not assert it's runtime-toggleable.
+
+**Flag (IMPORTANT) when:**
+
+- A new/updated config set's additions are composed **only** of runtime-toggleable flags → recommend removing (or not adding) the custom config set and enabling those flags at runtime instead.
+- A config set mixes boot-required and runtime-toggleable settings → recommend moving the runtime-toggleable subset out to `apiServices.core.settings(...)` and keeping the config set minimal.
+- A new custom config set appears without evidence it's needed → note that the docs require **reaching out to the AppEx QA team before creating one**, and ask whether that happened.
+
+**Recommend:** point the author to the runtime approach and, in the mixed/boot-required case, the minimal-config guidance.
+
+**References:** `docs/extend/testing/feature-flags.md` (the runtime-vs-custom-server comparison table, the runtime approach `#scout-feature-flags-runtime`, and the custom servers section `#scout-feature-flags-custom-servers`), and `docs/extend/testing/global-setup-hook.md` for the global setup/teardown hook pattern.
 
 ## Scope (be comprehensive)
 
