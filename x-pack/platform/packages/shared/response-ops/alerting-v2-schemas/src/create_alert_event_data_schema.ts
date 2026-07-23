@@ -18,16 +18,25 @@ const externalAlertStatusSchema = z.enum(['active', 'inactive', 'pending', 'reco
 
 const RESERVED_SOURCE_PREFIX = 'elastic.';
 
+const sourceSchema = z
+  .string()
+  .min(1)
+  .refine((v) => !v.startsWith(RESERVED_SOURCE_PREFIX), {
+    message:
+      'source cannot start with "elastic." — this prefix is reserved for Elastic-produced events.',
+  });
+
 export const createAlertEventDataSchema = z.object({
-  source: z
-    .string()
-    .min(1)
-    .refine((v) => !v.startsWith(RESERVED_SOURCE_PREFIX), {
-      message:
-        'source cannot start with "elastic." — this prefix is reserved for Elastic-produced events.',
-    }),
-  fingerprint: z.string().min(1),
+  // Required via body or /:source URL path — validated in the route handler.
+  source: sourceSchema.optional(),
+
+  // At least one of fingerprint / fingerprint_fields / rule_id is required.
+  // Priority: fingerprint > fingerprint_fields (hashed from data.*) > rule_id (hashed with source).
+  // Validated in the route handler after source is resolved.
+  fingerprint: z.string().min(1).optional(),
+  fingerprint_fields: z.array(z.string().min(1)).min(1).optional(),
   rule_id: z.string().min(1).optional(),
+
   rule_name: z.string().optional(),
   alert_url: z.string().optional(),
   alert_status: externalAlertStatusSchema.optional(),
@@ -37,7 +46,8 @@ export const createAlertEventDataSchema = z.object({
 });
 
 export const createAlertEventResponseSchema = z.object({
-  id: z.string(),
+  group_hash: z.string(),
+  episode_id: z.string(),
 });
 
 export type CreateAlertEventData = z.infer<typeof createAlertEventDataSchema>;
