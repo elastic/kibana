@@ -298,6 +298,7 @@ describe('AgentBuilder runner', () => {
       }
     );
 
+
     it('passes conversationId as sessionId and agentId to the model provider factory', async () => {
       const runnerDeps = createRunnerDepsMock();
       runnerDeps.agentsService.getRegistry.mockResolvedValue(agentClient);
