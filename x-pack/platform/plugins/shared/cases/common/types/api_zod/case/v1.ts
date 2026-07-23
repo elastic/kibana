@@ -303,6 +303,13 @@ export const CasesFindResponseSchema = CasesStatusResponseSchema.extend({
   page: z.number(),
   per_page: z.number(),
   total: z.number(),
+  /**
+   * The average resolve time in seconds of the cases matching the search, ignoring the
+   * status filter (like the status counts). Only returned by the internal search API so
+   * the cases list metrics bar reflects the same query as the table. Null when no
+   * matching case has been closed.
+   */
+  mttr: z.number().nullable().optional(),
 });
 
 export const CasesSimilarResponseSchema = z.object({

@@ -136,6 +136,7 @@ export const transformCases = ({
   page,
   perPage,
   total,
+  mttr,
 }: {
   casesMap: Map<string, Case>;
   countOpenCases: number;
@@ -144,6 +145,8 @@ export const transformCases = ({
   page: number;
   perPage: number;
   total: number;
+  /** Average resolve time in seconds of the matching cases; only the search API provides it. */
+  mttr?: number | null;
 }): CasesFindResponse => ({
   page,
   per_page: perPage,
@@ -152,6 +155,7 @@ export const transformCases = ({
   count_open_cases: countOpenCases,
   count_in_progress_cases: countInProgressCases,
   count_closed_cases: countClosedCases,
+  ...(mttr !== undefined ? { mttr } : {}),
 });
 
 export const flattenCaseSavedObject = ({

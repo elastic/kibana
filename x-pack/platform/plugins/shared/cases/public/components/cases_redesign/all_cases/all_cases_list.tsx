@@ -282,7 +282,13 @@ export const AllCasesList = React.memo<AllCasesListProps>(
               margin-bottom: ${euiTheme.size.m};
             `}
           >
-            <CasesMetrics />
+            <CasesMetrics
+              countOpenCases={data.countOpenCases}
+              countInProgressCases={data.countInProgressCases}
+              countClosedCases={data.countClosedCases}
+              mttr={data.mttr}
+              isLoading={isLoadingCases}
+            />
           </div>
         ) : null}
         <CasesTableUtilityBar

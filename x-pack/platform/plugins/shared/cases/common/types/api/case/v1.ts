@@ -503,6 +503,17 @@ export const CasesFindResponseRt = rt.intersection([
     total: rt.number,
   }),
   CasesStatusResponseRt,
+  rt.exact(
+    rt.partial({
+      /**
+       * The average resolve time in seconds of the cases matching the search, ignoring the
+       * status filter (like the status counts). Only returned by the internal search API so
+       * the cases list metrics bar reflects the same query as the table. Null when no
+       * matching case has been closed.
+       */
+      mttr: rt.union([rt.number, rt.null]),
+    })
+  ),
 ]);
 
 export const CasesSimilarResponseRt = rt.strict({

@@ -117,6 +117,7 @@ export const search = async (
       status: undefined,
       customFieldsConfiguration,
       authorizationFilter,
+      searchType: 'search',
     });
 
     const caseQueryOptions = constructQueryOptions({
@@ -172,21 +173,27 @@ export const search = async (
       : [];
     const resolvedFieldLabelFilters = fieldLabelResults.length > 0 ? fieldLabelResults : undefined;
 
-    const [cases, statusStats] = await Promise.all([
-      caseService.searchCasesGroupedByID({
-        caseOptions: {
-          ...paramArgs,
-          ...caseQueryOptions,
-          searchFields: asArray(paramArgs.searchFields),
-        },
-        namespaces,
-        extendedFieldFilters: resolvedExtendedFieldFilters,
-        fieldLabelFilters: resolvedFieldLabelFilters,
-      }),
-      caseService.getCaseStatusStats({
-        searchOptions: statusStatsOptions,
-      }),
-    ]);
+    const cases = await caseService.searchCasesGroupedByID({
+      caseOptions: {
+        ...paramArgs,
+        ...caseQueryOptions,
+        searchFields: asArray(paramArgs.searchFields),
+      },
+      namespaces,
+      extendedFieldFilters: resolvedExtendedFieldFilters,
+      fieldLabelFilters: resolvedFieldLabelFilters,
+      // Status counts and MTTR are computed with the full search query (free-text search,
+      // extended field filters, attachment matches) so the metrics shown next to the list
+      // always reflect it; only the status clause is stripped (statusStatsOptions) so all
+      // three status counts stay populated.
+      statsOptions: { filter: statusStatsOptions.filter },
+    });
+
+    const statusStats = cases.searchStats?.statusStats ?? {
+      open: 0,
+      'in-progress': 0,
+      closed: 0,
+    };
 
     ensureSavedObjectsAreAuthorized([...cases.casesMap.values()]);
 
@@ -198,6 +205,7 @@ export const search = async (
       countOpenCases: statusStats.open,
       countInProgressCases: statusStats['in-progress'],
       countClosedCases: statusStats.closed,
+      mttr: cases.searchStats?.mttr ?? null,
     });
 
     res.cases = enrichCasesWithFieldLabels(res.cases, templateSOs, globalFields);

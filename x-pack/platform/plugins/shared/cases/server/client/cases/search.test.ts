@@ -69,11 +69,10 @@ describe('search', () => {
       perPage: 10,
       total: casesMap.size,
       casesMap,
-    });
-    clientArgs.services.caseService.getCaseStatusStats.mockResolvedValue({
-      open: 1,
-      'in-progress': 2,
-      closed: 3,
+      searchStats: {
+        statusStats: { open: 1, 'in-progress': 2, closed: 3 },
+        mttr: 120,
+      },
     });
 
     afterEach(() => {
@@ -90,6 +89,22 @@ describe('search', () => {
 
       expect(call.caseOptions.search).toBe(searchTerm);
       expect(call.namespaces).toEqual(['space1']);
+    });
+
+    it('requests stats alongside the search and returns them in the response', async () => {
+      const searchRequest = createCasesClientMockSearchRequest({ search: 'foobar' });
+      const res = await search(searchRequest, clientArgs, casesClientMock);
+
+      const call = clientArgs.services.caseService.searchCasesGroupedByID.mock.calls[0][0];
+
+      // The stats filter is provided (status clause stripped) so counts and MTTR are computed
+      // with the same query as the case list.
+      expect(call).toHaveProperty('statsOptions');
+
+      expect(res.count_open_cases).toBe(1);
+      expect(res.count_in_progress_cases).toBe(2);
+      expect(res.count_closed_cases).toBe(3);
+      expect(res.mttr).toBe(120);
     });
 
     it('fetches global field definitions for search when templates are enabled', async () => {
@@ -163,11 +178,10 @@ describe('search', () => {
       perPage: 10,
       total: casesMap.size,
       casesMap,
-    });
-    clientArgs.services.caseService.getCaseStatusStats.mockResolvedValue({
-      open: 1,
-      'in-progress': 2,
-      closed: 3,
+      searchStats: {
+        statusStats: { open: 1, 'in-progress': 2, closed: 3 },
+        mttr: 120,
+      },
     });
     casesClientMock.configure.get = jest.fn().mockResolvedValue(configureMock);
 

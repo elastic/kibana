@@ -151,6 +151,7 @@ export const convertAllCasesToCamel = (snakeCases: CasesFindResponse): CasesFind
   page: snakeCases.page,
   perPage: snakeCases.per_page,
   total: snakeCases.total,
+  mttr: snakeCases.mttr,
 });
 
 export const convertSimilarCasesToCamel = (

@@ -23,6 +23,7 @@ export const initialData: CasesFindResponseUI = {
   countClosedCases: 0,
   countInProgressCases: 0,
   countOpenCases: 0,
+  mttr: null,
   page: 0,
   perPage: 0,
   total: 0,
