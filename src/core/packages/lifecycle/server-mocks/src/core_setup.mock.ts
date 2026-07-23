@@ -89,6 +89,7 @@ export function createCoreSetupMock({
     plugins: lazyObject({
       onSetup: jest.fn(),
       onStart: jest.fn(),
+      onStarted: jest.fn().mockResolvedValue(undefined),
     }),
     pricing: pricingServiceMock.createSetupContract(),
     injection: injectionServiceMock.createSetupContract(),

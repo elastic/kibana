@@ -50,6 +50,7 @@ export function createCoreStartMock() {
     injection: injectionServiceMock.createStartContract(),
     plugins: lazyObject({
       onStart: jest.fn(),
+      onStarted: jest.fn().mockResolvedValue(undefined),
     }),
     pricing: pricingServiceMock.createStartContract(),
     dataStreams: dataStreamServiceMock.createStartContract(),

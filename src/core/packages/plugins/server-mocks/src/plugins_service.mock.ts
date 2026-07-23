@@ -42,6 +42,7 @@ const createSetupContractMock = () => {
   const contract: jest.Mocked<PluginsServiceSetup> = lazyObject({
     onSetup: jest.fn(),
     onStart: jest.fn(),
+    onStarted: jest.fn().mockResolvedValue(undefined),
   });
 
   return contract;
@@ -50,6 +51,7 @@ const createSetupContractMock = () => {
 const createStartContractMock = () => {
   const contract: jest.Mocked<PluginsServiceStart> = lazyObject({
     onStart: jest.fn(),
+    onStarted: jest.fn().mockResolvedValue(undefined),
   });
   return contract;
 };

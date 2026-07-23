@@ -6,7 +6,7 @@
  */
 
 import type { Observable } from 'rxjs';
-import { Subject, withLatestFrom, BehaviorSubject } from 'rxjs';
+import { combineLatest, Subject, withLatestFrom, BehaviorSubject } from 'rxjs';
 import { distinctUntilChanged, startWith } from 'rxjs';
 import { pipe } from 'fp-ts/pipeable';
 import { map as mapOptional, none } from 'fp-ts/Option';
@@ -78,6 +78,8 @@ export interface TaskPollingLifecycleOpts {
   config: TaskManagerConfig;
   middleware: Middleware;
   elasticsearchAndSOAvailability$: Observable<boolean>;
+  // Emits `true` once all plugins have completed their `start` lifecycle.
+  pluginsStarted$: Observable<boolean>;
   executionContext: ExecutionContextStart;
   usageCounter?: UsageCounter;
   taskPartitioner: TaskPartitioner;
@@ -142,6 +144,8 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
     config,
     // Elasticsearch and SavedObjects availability status
     elasticsearchAndSOAvailability$,
+    // Emits `true` once all plugins have finished starting
+    pluginsStarted$,
     taskStore,
     definitions,
     executionContext,
@@ -246,16 +250,22 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
 
     this.subscribeToPoller(this.poller.events$);
 
-    elasticsearchAndSOAvailability$.subscribe((areESAndSOAvailable) => {
-      if (areESAndSOAvailable && !this.started) {
-        // set synchronously so repeat availability emissions (e.g. ES
-        // reconnects) can never trigger a second reconciliation or poller start
-        this.started = true;
-        // fire-and-forget: reconcileAndStartPolling never rejects (it handles
-        // its own errors) and starts the poller when it settles
-        void this.reconcileAndStartPolling();
+    // Only start polling once infrastructure is available (ES + SavedObjects) AND every plugin
+    // has completed its `start` lifecycle. Gating on plugin startup prevents claiming/running
+    // tasks before their owning plugins are ready, which otherwise surfaces as startup-ordering
+    // failures (e.g. missing saved object mappings or unresolved DI bindings).
+    combineLatest([elasticsearchAndSOAvailability$, pluginsStarted$]).subscribe(
+      ([areESAndSOAvailable, pluginsStarted]) => {
+        if (areESAndSOAvailable && pluginsStarted && !this.started) {
+          // set synchronously so repeat availability emissions (e.g. ES
+          // reconnects) can never trigger a second reconciliation or poller start
+          this.started = true;
+          // fire-and-forget: reconcileAndStartPolling never rejects (it handles
+          // its own errors) and starts the poller when it settles
+          void this.reconcileAndStartPolling();
+        }
       }
-    });
+    );
   }
 
   /**

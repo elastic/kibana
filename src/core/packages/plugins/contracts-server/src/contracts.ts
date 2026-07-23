@@ -81,6 +81,32 @@ export interface PluginsServiceSetup {
    * ```
    */
   onStart: PluginContractResolver;
+  /**
+   * Returns a promise that resolves once all plugins have completed their `start` lifecycle,
+   * and before Core's `start` lifecycle is resumed.
+   *
+   * If called when plugins are already started, the returned promise resolves instantly.
+   *
+   * Unlike {@link PluginsServiceSetup.onStart}, this does not resolve any plugin contract and
+   * does not require declaring a dependency — it is a plugin-agnostic signal for "all plugins
+   * have started". Use it when you need to defer work until the whole plugin `start` phase has
+   * completed (e.g. before running background work that may depend on any plugin being ready).
+   *
+   * This is a stable lifecycle signal (not a cyclic-dependency workaround): it resolves exactly
+   * once, right after every plugin's `start` lifecycle has completed. If the plugin `start` phase
+   * cannot complete, Core aborts server startup, so this promise never resolves for a running
+   * Kibana without all plugins having started.
+   *
+   * @example
+   * ```ts
+   * setup(core) {
+   *   core.plugins.onStarted().then(() => {
+   *     // safe to assume every plugin has finished its start lifecycle
+   *   });
+   * }
+   * ```
+   */
+  onStarted: PluginStartedResolver;
 }
 
 /**
@@ -122,7 +148,38 @@ export interface PluginsServiceStart {
    * @experimental
    */
   onStart: PluginContractResolver;
+  /**
+   * Returns a promise that resolves once all plugins have completed their `start` lifecycle,
+   * and before Core's `start` lifecycle is resumed.
+   *
+   * If called when plugins are already started, the returned promise resolves instantly.
+   *
+   * Unlike {@link PluginsServiceStart.onStart}, this does not resolve any plugin contract and
+   * does not require declaring a dependency — it is a plugin-agnostic signal for "all plugins
+   * have started".
+   *
+   * This is a stable lifecycle signal (not a cyclic-dependency workaround): it resolves exactly
+   * once, right after every plugin's `start` lifecycle has completed.
+   *
+   * @example
+   * ```ts
+   * start(core) {
+   *   core.plugins.onStarted().then(() => {
+   *     // safe to assume every plugin has finished its start lifecycle
+   *   });
+   * }
+   * ```
+   */
+  onStarted: PluginStartedResolver;
 }
+
+/**
+ * A resolver for the plugin-agnostic "all plugins started" signal.
+ *
+ * @see {@link PluginsServiceSetup} and {@link PluginsServiceStart}
+ * @public
+ */
+export type PluginStartedResolver = () => Promise<void>;
 
 /**
  * Contract resolver response for found plugins.

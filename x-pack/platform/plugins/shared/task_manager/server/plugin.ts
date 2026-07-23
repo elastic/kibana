@@ -67,6 +67,7 @@ import {
   scheduleMarkRemovedTasksAsUnrecognizedDefinition,
 } from './removed_tasks/mark_removed_tasks_as_unrecognized';
 import { getElasticsearchAndSOAvailability } from './lib/get_es_and_so_availability';
+import { getPluginsStarted$ } from './lib/get_plugins_started';
 import { LicenseSubscriber } from './license_subscriber';
 import type {
   ApiKeyInvalidationFn,
@@ -147,6 +148,7 @@ export class TaskManagerPlugin
   private definitions: TaskTypeDictionary;
   private middleware: Middleware = createInitialMiddleware();
   private elasticsearchAndSOAvailability$?: Observable<boolean>;
+  private pluginsStarted$?: Observable<boolean>;
   private monitoringStats$ = new Subject<MonitoringStats>();
   private metrics$ = new Subject<Metrics>();
   private resetMetrics$ = new Subject<boolean>();
@@ -208,6 +210,15 @@ export class TaskManagerPlugin
       isServerless,
       logger: this.logger,
       getClusterClient: () => clusterClientPromise,
+    });
+
+    // Emits `true` once every plugin has completed its `start` lifecycle. Used to gate the task
+    // poller so we don't claim/run tasks before their owning plugins have finished starting
+    // (which otherwise causes startup-ordering failures, e.g. missing SO mappings or DI bindings).
+    // Fails open so the poller can never be permanently blocked (see getPluginsStarted$).
+    this.pluginsStarted$ = getPluginsStarted$({
+      onStarted: () => core.plugins.onStarted(),
+      logger: this.logger,
     });
 
     core.metrics
@@ -461,6 +472,7 @@ export class TaskManagerPlugin
         usageCounter: this.usageCounter,
         middleware: this.middleware,
         elasticsearchAndSOAvailability$: this.elasticsearchAndSOAvailability$!,
+        pluginsStarted$: this.pluginsStarted$!,
         taskPartitioner,
         startingCapacity,
         apiKeyStrategy,

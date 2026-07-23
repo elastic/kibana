@@ -6,7 +6,7 @@
  */
 
 import sinon from 'sinon';
-import { Subject } from 'rxjs';
+import { of, Subject } from 'rxjs';
 
 import type { TaskLifecycleEvent } from './polling_lifecycle';
 import { TaskPollingLifecycle, claimAvailableTasks } from './polling_lifecycle';
@@ -140,6 +140,7 @@ describe('TaskPollingLifecycle', () => {
     middleware: createInitialMiddleware(),
     startingCapacity: 20,
     executionContext,
+    pluginsStarted$: of(true),
     taskPartitioner: new TaskPartitioner({
       logger: taskManagerLogger,
       podName: 'test',
@@ -184,6 +185,52 @@ describe('TaskPollingLifecycle', () => {
 
       elasticsearchAndSOAvailability$.next(true);
 
+      await retryUntil(
+        'polling started',
+        () => mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable.mock.calls.length > 0
+      );
+    });
+
+    test('does not begin polling until all plugins have started', async () => {
+      clock.restore();
+      const elasticsearchAndSOAvailability$ = new Subject<boolean>();
+      const pluginsStarted$ = new Subject<boolean>();
+      new TaskPollingLifecycle({
+        ...taskManagerOpts,
+        elasticsearchAndSOAvailability$,
+        pluginsStarted$,
+      });
+
+      // Infrastructure is available, but plugins haven't finished starting yet.
+      elasticsearchAndSOAvailability$.next(true);
+      pluginsStarted$.next(false);
+      await delay(100);
+      expect(mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable).not.toHaveBeenCalled();
+
+      // Once all plugins have started, polling begins.
+      pluginsStarted$.next(true);
+      await retryUntil(
+        'polling started',
+        () => mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable.mock.calls.length > 0
+      );
+    });
+
+    test('does not begin polling when plugins have started but ES/SO are unavailable', async () => {
+      clock.restore();
+      const elasticsearchAndSOAvailability$ = new Subject<boolean>();
+      const pluginsStarted$ = new Subject<boolean>();
+      new TaskPollingLifecycle({
+        ...taskManagerOpts,
+        elasticsearchAndSOAvailability$,
+        pluginsStarted$,
+      });
+
+      pluginsStarted$.next(true);
+      elasticsearchAndSOAvailability$.next(false);
+      await delay(100);
+      expect(mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable).not.toHaveBeenCalled();
+
+      elasticsearchAndSOAvailability$.next(true);
       await retryUntil(
         'polling started',
         () => mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable.mock.calls.length > 0

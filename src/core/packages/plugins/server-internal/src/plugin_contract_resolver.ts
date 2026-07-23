@@ -25,9 +25,25 @@ export class RuntimePluginContractResolver {
   private readonly setupRequestQueue: PluginContractRequest[] = [];
   private readonly startRequestQueue: PluginContractRequest[] = [];
 
+  private startedPromise?: Promise<void>;
+  private resolveStarted?: () => void;
+
   setDependencyMap(depMap: Map<PluginName, Set<PluginName>>) {
     this.dependencyMap = new Map(depMap.entries());
   }
+
+  onStarted = (): Promise<void> => {
+    // Already started: resolve immediately.
+    if (this.startContracts) {
+      return Promise.resolve();
+    }
+    if (!this.startedPromise) {
+      this.startedPromise = new Promise<void>((resolve) => {
+        this.resolveStarted = resolve;
+      });
+    }
+    return this.startedPromise;
+  };
 
   onSetup = <T extends PluginContractMap>(
     pluginName: PluginName,
@@ -114,6 +130,10 @@ export class RuntimePluginContractResolver {
       throw new Error('resolveStartRequests can only be called once');
     }
     this.startContracts = startContracts;
+
+    // Resolve the plugin-agnostic "all plugins started" signal first, so it can never be blocked
+    // by an unexpected failure while resolving individual contract requests below.
+    this.resolveStarted?.();
 
     for (const startRequest of this.startRequestQueue) {
       const response = createContractRequestResponse(startRequest.pluginNames, startContracts);

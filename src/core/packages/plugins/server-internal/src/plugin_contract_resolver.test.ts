@@ -340,4 +340,51 @@ describe('RuntimePluginContractResolver', () => {
       );
     });
   });
+
+  describe('onStarted', () => {
+    it('does not resolve until resolveStartRequests is called', async () => {
+      const handler = jest.fn();
+      resolver.onStarted().then(() => handler());
+
+      await fewTicks();
+      expect(handler).not.toHaveBeenCalled();
+
+      resolver.resolveStartRequests(toMap({ pluginA: pluginAContract }));
+
+      await fewTicks();
+      expect(handler).toHaveBeenCalledTimes(1);
+    });
+
+    it('resolves all pending onStarted requests once when started', async () => {
+      const handler1 = jest.fn();
+      const handler2 = jest.fn();
+      resolver.onStarted().then(() => handler1());
+      resolver.onStarted().then(() => handler2());
+
+      await fewTicks();
+      expect(handler1).not.toHaveBeenCalled();
+      expect(handler2).not.toHaveBeenCalled();
+
+      resolver.resolveStartRequests(toMap({ pluginA: pluginAContract }));
+
+      await fewTicks();
+      expect(handler1).toHaveBeenCalledTimes(1);
+      expect(handler2).toHaveBeenCalledTimes(1);
+    });
+
+    it('resolves instantly when called after resolveStartRequests', async () => {
+      resolver.resolveStartRequests(toMap({ pluginA: pluginAContract }));
+
+      const handler = jest.fn();
+      resolver.onStarted().then(() => handler());
+
+      await fewTicks();
+      expect(handler).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not require a declared dependency', async () => {
+      // onStarted is plugin-agnostic; unlike onStart it should never throw.
+      expect(() => resolver.onStarted()).not.toThrow();
+    });
+  });
 });

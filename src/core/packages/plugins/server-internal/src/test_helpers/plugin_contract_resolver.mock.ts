@@ -15,6 +15,7 @@ export const createRuntimePluginContractResolverMock =
       setDependencyMap: jest.fn(),
       onSetup: jest.fn(),
       onStart: jest.fn(),
+      onStarted: jest.fn().mockResolvedValue(undefined),
       resolveSetupRequests: jest.fn(),
       resolveStartRequests: jest.fn(),
     };

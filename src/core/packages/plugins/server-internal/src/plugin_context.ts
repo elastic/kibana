@@ -307,6 +307,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
     plugins: {
       onSetup: (...dependencyNames) => runtimeResolver.onSetup(plugin.name, dependencyNames),
       onStart: (...dependencyNames) => runtimeResolver.onStart(plugin.name, dependencyNames),
+      onStarted: () => runtimeResolver.onStarted(),
     },
     pricing: {
       isFeatureAvailable: deps.pricing.isFeatureAvailable,
@@ -420,6 +421,7 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>({
     },
     plugins: {
       onStart: (...dependencyNames) => runtimeResolver.onStart(plugin.name, dependencyNames),
+      onStarted: () => runtimeResolver.onStarted(),
     },
     pricing: deps.pricing,
     security: {

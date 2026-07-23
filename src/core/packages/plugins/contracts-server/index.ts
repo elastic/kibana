@@ -12,6 +12,7 @@ export type {
   PluginsServiceStart,
   PluginContractMap,
   PluginContractResolver,
+  PluginStartedResolver,
   PluginContractResolverResponse,
   PluginContractResolverResponseItem,
   FoundPluginContractResolverResponseItem,
