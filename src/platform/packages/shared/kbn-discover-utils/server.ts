@@ -7,9 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EmbeddableRegistryDefinition } from '@kbn/embeddable-plugin/server';
-import { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils/server';
-
-export const createSearchEmbeddableFactory = (): EmbeddableRegistryDefinition => ({
-  id: SEARCH_EMBEDDABLE_TYPE,
-});
+export * from './src/constants';
+export { ALL_RECOMMENDED_FIELDS_FOR_ESQL } from './src/data_types/logs/recommended_fields';
+export { getSortForSearchSource } from './src/utils/sorting/get_sort_for_search_source';
+export { isLegacySort, type SortOrder } from './src/utils/sorting/get_sort';

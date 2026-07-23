@@ -9,7 +9,7 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
-import { DataGridDensity } from '@kbn/discover-utils';
+import { DataGridDensity } from '@kbn/discover-utils/server';
 import type { SavedObjectsModelVersionMap } from '@kbn/core-saved-objects-server';
 import {
   MIN_SAVED_SEARCH_SAMPLE_SIZE,

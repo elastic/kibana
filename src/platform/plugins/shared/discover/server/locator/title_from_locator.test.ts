@@ -14,7 +14,7 @@ import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import type { SavedSearchAttributes } from '@kbn/saved-search-plugin/common';
 import type { LocatorServicesDeps as Services } from '.';
 import type { DiscoverAppLocatorParams } from '../../common';
-import { DOC_HIDE_TIME_COLUMN_SETTING } from '@kbn/discover-utils';
+import { DOC_HIDE_TIME_COLUMN_SETTING } from '@kbn/discover-utils/server';
 import { titleFromLocatorFactory } from './title_from_locator';
 
 const mockSavedSearchId = 'abc-test-123';

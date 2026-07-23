@@ -18,7 +18,7 @@ import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { PluginInitializerContext } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils';
+import { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils/server';
 import { registerRoutes } from './api/register_routes';
 import { getDiscoverSessionEmbeddableSchema } from './embeddable/schema';
 import type { DiscoverServerPluginStart, DiscoverServerPluginStartDeps } from '.';

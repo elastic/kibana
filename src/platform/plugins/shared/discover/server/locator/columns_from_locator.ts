@@ -10,7 +10,7 @@
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { SavedSearch } from '@kbn/saved-search-plugin/common';
 import { getSavedSearch } from '@kbn/saved-search-plugin/server';
-import { DOC_HIDE_TIME_COLUMN_SETTING } from '@kbn/discover-utils';
+import { DOC_HIDE_TIME_COLUMN_SETTING } from '@kbn/discover-utils/server';
 import type { LocatorServicesDeps } from '.';
 import type { DiscoverAppLocatorParams } from '../../common';
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import { ALL_RECOMMENDED_FIELDS_FOR_ESQL } from '@kbn/discover-utils';
+import { ALL_RECOMMENDED_FIELDS_FOR_ESQL } from '@kbn/discover-utils/server';
 import type { PluginSetup as ESQLSetup } from '@kbn/esql/server';
 
 const TRACES_INDEX_PATTERN = 'traces-*';

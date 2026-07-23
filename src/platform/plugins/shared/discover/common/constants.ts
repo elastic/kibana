@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SAMPLE_ROWS_PER_PAGE_SETTING } from '@kbn/discover-utils';
+import { SAMPLE_ROWS_PER_PAGE_SETTING } from '@kbn/discover-utils/server';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import { isObject } from 'lodash';
 

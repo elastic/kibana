@@ -8,7 +8,7 @@
  */
 
 import { z } from '@kbn/zod';
-import { DataGridDensity } from '@kbn/discover-utils';
+import { DataGridDensity } from '@kbn/discover-utils/server';
 import { asCodeQuerySchema } from '@kbn/as-code-shared-schemas';
 import { esqlDataSourceSchema } from '@kbn/as-code-data-views-schema';
 import {

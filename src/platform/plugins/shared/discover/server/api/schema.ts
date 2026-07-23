@@ -26,7 +26,7 @@ import {
 import { refreshIntervalSchema } from '@kbn/data-service-server';
 import { timeRangeSchema } from '@kbn/es-query-server';
 import { MAX_DISCOVER_SESSION_TABS } from '@kbn/saved-search-plugin/common';
-import { UnifiedHistogramSuggestionType } from '@kbn/discover-utils';
+import { UnifiedHistogramSuggestionType } from '@kbn/discover-utils/server';
 import { classicTabSchema, esqlTabSchema } from '../embeddable/schema';
 
 export const MAX_SESSION_TITLE_LENGTH = 256;

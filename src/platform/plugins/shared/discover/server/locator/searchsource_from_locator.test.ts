@@ -18,7 +18,7 @@ import type { SavedSearchAttributes } from '@kbn/saved-search-plugin/common';
 import type { DiscoverSessionTabAttributes } from '@kbn/saved-search-plugin/server';
 import type { LocatorServicesDeps as Services } from '.';
 import type { DiscoverAppLocatorParams } from '../../common';
-import { DOC_HIDE_TIME_COLUMN_SETTING } from '@kbn/discover-utils';
+import { DOC_HIDE_TIME_COLUMN_SETTING } from '@kbn/discover-utils/server';
 import { searchSourceFromLocatorFactory } from './searchsource_from_locator';
 
 const mockSavedSearchId = 'abc-test-123';
