@@ -170,6 +170,7 @@ export const getESQLControlFactory = <
             console.error('Error getting ESQL control trigger', e);
           }
         },
+        supportsJsonExport: true,
       }) as ESQLControlApi<State>;
 
       const componentApi: ESQLOptionsListComponentApi = {

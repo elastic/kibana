@@ -276,16 +276,21 @@ export class CasesClientFactory {
         savedObjectsClient: unsecuredSavedObjectsClient,
       });
 
+    const fieldDefinitionsService = new FieldDefinitionsService({
+      unsecuredSavedObjectsClient,
+      refreshAnalyticsV2DataView,
+    });
+
     const templatesService = new TemplatesService({
       unsecuredSavedObjectsClient,
       savedObjectsSerializer,
       esClient,
       namespace,
       refreshAnalyticsV2DataView,
-    });
-
-    const fieldDefinitionsService = new FieldDefinitionsService({
-      unsecuredSavedObjectsClient,
+      getFieldDefinitionsForOwner: (owner) =>
+        fieldDefinitionsService
+          .getFieldDefinitions(owner)
+          .then(({ fieldDefinitions }) => fieldDefinitions),
     });
 
     const caseService = new CasesService({

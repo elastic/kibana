@@ -77,7 +77,7 @@
     "@kbn/scout",
     "@kbn/core-http-server-mocks",
     "@kbn/apm-utils",
-    "@kbn/actions-utils",
-    "@kbn/datemath"
+    "@kbn/datemath",
+    "@kbn/core-http-server-utils"
   ]
 }

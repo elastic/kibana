@@ -224,4 +224,13 @@ export const ConnectorIconsMap: Map<
     '.mongodb',
     lazy(() => import(/* webpackChunkName: "connectorIconMongodb" */ './specs/mongodb/icon')),
   ],
+  [
+    '.sublime_security',
+    lazy(
+      () =>
+        import(
+          /* webpackChunkName: "connectorIconSublimeSecurity" */ './specs/sublime_security/icon'
+        )
+    ),
+  ],
 ]);
