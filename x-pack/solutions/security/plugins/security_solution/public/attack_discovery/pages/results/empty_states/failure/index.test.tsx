@@ -9,11 +9,16 @@ import { render, screen } from '@testing-library/react';
 import React from 'react';
 
 import { Failure } from '.';
+import { TestProviders } from '../../../../../common/mock';
 import { LEARN_MORE, FAILURE_TITLE } from './translations';
 const failureReason = "You're a failure";
 describe('Failure', () => {
   beforeEach(() => {
-    render(<Failure failureReason={failureReason} />);
+    render(
+      <TestProviders>
+        <Failure failureReason={failureReason} />
+      </TestProviders>
+    );
   });
 
   it('renders the expected title', () => {
@@ -38,7 +43,7 @@ describe('Failure', () => {
     it('links to the documentation', () => {
       expect(learnMoreLink).toHaveAttribute(
         'href',
-        'https://www.elastic.co/guide/en/security/current/attack-discovery.html'
+        'https://www.elastic.co/docs/solutions/security/ai/attack-discovery'
       );
     });
 

@@ -9,11 +9,16 @@ import { render, screen } from '@testing-library/react';
 import React from 'react';
 
 import { NoAlerts } from '.';
+import { TestProviders } from '../../../../../common/mock';
 import { ATTACK_DISCOVERY_ONLY, LEARN_MORE, NO_ALERTS_TO_ANALYZE } from './translations';
 
 describe('NoAlerts', () => {
   beforeEach(() => {
-    render(<NoAlerts isDisabled={false} isLoading={false} onGenerate={jest.fn()} />);
+    render(
+      <TestProviders>
+        <NoAlerts isDisabled={false} isLoading={false} onGenerate={jest.fn()} />
+      </TestProviders>
+    );
   });
 
   it('renders the avatar', () => {
@@ -44,7 +49,7 @@ describe('NoAlerts', () => {
     it('links to the documentation', () => {
       expect(learnMoreLink).toHaveAttribute(
         'href',
-        'https://www.elastic.co/guide/en/security/current/attack-discovery.html'
+        'https://www.elastic.co/docs/solutions/security/ai/attack-discovery'
       );
     });
 
