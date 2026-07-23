@@ -41,6 +41,8 @@ export {
   type PreviouslyIdentifiedFeature,
   type ExcludedFeatureSummary,
   type IgnoredFeature,
+  type SearchSimilarFeaturesArguments,
+  type SimilarFeatureHit,
 } from './src/features/identify_features';
 export { generateAllComputedFeatures } from './src/features/computed';
 export {

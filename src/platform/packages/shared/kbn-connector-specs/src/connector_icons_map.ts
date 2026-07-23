@@ -224,4 +224,13 @@ export const ConnectorIconsMap: Map<
     '.monday_com',
     lazy(() => import(/* webpackChunkName: "connectorIconMondayCom" */ './specs/monday_com/icon')),
   ],
+  [
+    '.sublime_security',
+    lazy(
+      () =>
+        import(
+          /* webpackChunkName: "connectorIconSublimeSecurity" */ './specs/sublime_security/icon'
+        )
+    ),
+  ],
 ]);
