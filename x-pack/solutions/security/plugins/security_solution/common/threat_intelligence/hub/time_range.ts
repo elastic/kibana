@@ -43,3 +43,31 @@ export const resolveTimeRangeFromPreset = (
   const from = new Date(nowMs - PRESET_DURATION_MS[preset]).toISOString();
   return { from, to };
 };
+
+/**
+ * Prior window of equal length ending at the current `from`.
+ * Used for Hub stats-ribbon "vs prior period" comparisons.
+ */
+export const resolvePriorTimeRange = (fromIso: string, toIso: string): ResolvedTimeRange => {
+  const fromMs = Date.parse(fromIso);
+  const toMs = Date.parse(toIso);
+  if (!Number.isFinite(fromMs) || !Number.isFinite(toMs) || toMs <= fromMs) {
+    throw new Error(`resolvePriorTimeRange: invalid range ${fromIso} → ${toIso}`);
+  }
+  const durationMs = toMs - fromMs;
+  return {
+    from: new Date(fromMs - durationMs).toISOString(),
+    to: fromIso,
+  };
+};
+
+/**
+ * Percent change for Hub stats ribbon vs prior period.
+ * Matches design: 0/0 → 0, new activity from empty prior → 100, else rounded ratio.
+ */
+export const percentChangeVsPrior = (current: number, prior: number): number => {
+  if (prior === 0) {
+    return current === 0 ? 0 : 100;
+  }
+  return Math.round(((current - prior) / prior) * 100);
+};

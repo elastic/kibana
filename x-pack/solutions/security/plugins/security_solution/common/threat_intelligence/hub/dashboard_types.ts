@@ -42,6 +42,10 @@ export interface DashboardOverviewResponse {
     affects_you_total: number;
     /** Distinct `source.name` values in the overview query scope (time + filters). */
     distinct_source_count: number;
+    /** Same metrics for the equal-length window ending at the current `from`. */
+    total_reports_prior: number;
+    critical_reports_prior: number;
+    distinct_source_count_prior: number;
   };
   by_category: Array<{
     category: ThreatCategory | '<unknown>';

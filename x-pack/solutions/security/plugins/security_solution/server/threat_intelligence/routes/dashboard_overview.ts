@@ -11,6 +11,7 @@ import {
   DASHBOARD_OVERVIEW_API_PATH,
   THREAT_INTELLIGENCE_API_PRIVILEGES,
   THREAT_REPORTS_INDEX_PATTERN,
+  resolvePriorTimeRange,
   type DashboardOverviewResponse,
   type SeverityLevel,
   type ThreatCategory,
@@ -111,6 +112,32 @@ interface ReportsAggregations {
     };
   };
 }
+
+interface OverviewHitTotal {
+  hits: { total?: number | { value?: number } };
+  aggregations?: ReportsAggregations;
+}
+
+const hitTotal = (response: OverviewHitTotal): number =>
+  typeof response.hits.total === 'number' ? response.hits.total : response.hits.total?.value ?? 0;
+
+const severityBucketCount = (response: OverviewHitTotal, level: SeverityLevel): number =>
+  (response.aggregations?.by_severity?.buckets ?? []).find((b) => b.key === level)?.doc_count ?? 0;
+
+const distinctSourceCountFrom = (response: OverviewHitTotal): number =>
+  Math.round(response.aggregations?.distinct_source_count?.value ?? 0);
+
+/** Ribbon prior-period fields from a prior-window overview search. */
+export const ribbonPriorsFromOverviewResponse = (
+  response: OverviewHitTotal
+): Pick<
+  DashboardOverviewResponse['stats_ribbon'],
+  'total_reports_prior' | 'critical_reports_prior' | 'distinct_source_count_prior'
+> => ({
+  total_reports_prior: hitTotal(response),
+  critical_reports_prior: severityBucketCount(response, 'critical'),
+  distinct_source_count_prior: distinctSourceCountFrom(response),
+});
 
 const fetchReportsOverview = async (
   esClient: ElasticsearchClient,
@@ -248,16 +275,18 @@ export const registerDashboardOverviewRoute = ({
         const savedObjectsClient = core.savedObjects.client;
 
         try {
-          const reportsResponse = await fetchReportsOverview(esClient, from, to, filters);
+          const { from: priorFrom, to: priorTo } = resolvePriorTimeRange(from, to);
+          const [reportsResponse, priorReportsResponse] = await Promise.all([
+            fetchReportsOverview(esClient, from, to, filters),
+            fetchReportsOverview(esClient, priorFrom, priorTo, filters),
+          ]);
 
-          const totalReports =
-            typeof reportsResponse.hits.total === 'number'
-              ? reportsResponse.hits.total
-              : reportsResponse.hits.total?.value ?? 0;
+          const totalReports = hitTotal(reportsResponse);
           const aggs = reportsResponse.aggregations as ReportsAggregations | undefined;
+          const ribbonPriors = ribbonPriorsFromOverviewResponse(priorReportsResponse);
 
           const severityCount = (level: SeverityLevel): number =>
-            (aggs?.by_severity?.buckets ?? []).find((b) => b.key === level)?.doc_count ?? 0;
+            severityBucketCount(reportsResponse, level);
 
           const byCategory = (aggs?.by_category?.buckets ?? []).map((b) => ({
             category: b.key as ThreatCategory | '<unknown>',
@@ -323,7 +352,7 @@ export const registerDashboardOverviewRoute = ({
           const environmentHitsTotal = aggs?.environment_hits_total?.value ?? 0;
           const layer1Total = aggs?.layer_1_total?.value ?? 0;
           const layer2Total = aggs?.layer_2_total?.value ?? 0;
-          const distinctSourceCount = Math.round(aggs?.distinct_source_count?.value ?? 0);
+          const distinctSourceCount = distinctSourceCountFrom(reportsResponse);
 
           const reportsWithHits = aggs?.reports_with_hits_filter?.doc_count ?? 0;
           const topReports = (aggs?.top_reports_with_hits?.hits.hits ?? [])
@@ -388,6 +417,7 @@ export const registerDashboardOverviewRoute = ({
               low_reports: severityCount('low'),
               affects_you_total: environmentHitsTotal,
               distinct_source_count: distinctSourceCount,
+              ...ribbonPriors,
             },
             by_category: byCategory,
             by_region: byRegion,

@@ -27,6 +27,7 @@ import {
 import type { CoreStart } from '@kbn/core/public';
 import {
   SEVERITY_LEVELS,
+  percentChangeVsPrior,
   type DashboardOverviewResponse,
   type SeverityLevel,
   type ThreatCategory,
@@ -220,6 +221,35 @@ export const IntelligenceHubDashboardView: React.FC<{
   );
 };
 
+const PriorPeriodStat: React.FC<{ current: number; prior: number }> = ({ current, prior }) => {
+  const { euiTheme } = useEuiTheme();
+  const percent = percentChangeVsPrior(current, prior);
+  const direction = percent > 0 ? 'up' : percent < 0 ? 'down' : 'flat';
+  const iconType = direction === 'up' ? 'arrowUp' : direction === 'down' ? 'arrowDown' : 'arrowRight';
+  const color =
+    direction === 'up'
+      ? euiTheme.colors.success
+      : direction === 'down'
+      ? euiTheme.colors.danger
+      : euiTheme.colors.textSubdued;
+
+  return (
+    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+      <EuiFlexItem grow={false}>
+        <EuiIcon type={iconType} color={color} size="s" />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiText size="xs" css={{ color }}>
+          {i18n.translate('xpack.securitySolution.threatIntelligence.app.statVsPriorPeriod', {
+            defaultMessage: '{percent}% vs prior period',
+            values: { percent: Math.abs(percent) },
+          })}
+        </EuiText>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
+
 export const StatsRibbon: React.FC<{
   stats: DashboardOverviewResponse['stats_ribbon'];
   topCategory?: ThreatCategory | '<unknown>';
@@ -234,35 +264,6 @@ export const StatsRibbon: React.FC<{
     [stats.critical_reports, stats.high_reports, stats.low_reports, stats.medium_reports]
   );
 
-  const priorStats = stats as DashboardOverviewResponse['stats_ribbon'] & {
-    total_reports_prior?: number;
-    critical_reports_prior?: number;
-    distinct_source_count_prior?: number;
-  };
-
-  const priorDelta = (
-    current: number,
-    priorKey: 'total_reports_prior' | 'critical_reports_prior' | 'distinct_source_count_prior'
-  ): React.ReactNode => {
-    const prior = priorStats[priorKey];
-    if (prior === undefined) {
-      return null;
-    }
-    const delta = current - prior;
-    if (delta === 0) {
-      return null;
-    }
-    const sign = delta > 0 ? '+' : '';
-    return (
-      <EuiText size="xs" color="subdued">
-        {i18n.translate('xpack.securitySolution.threatIntelligence.app.statVsPriorPeriod', {
-          defaultMessage: '{sign}{delta} vs prior period',
-          values: { sign, delta },
-        })}
-      </EuiText>
-    );
-  };
-
   return (
     <EuiFlexGroup gutterSize="m" wrap={false} responsive={false}>
       <EuiFlexItem grow={true} style={{ minWidth: 0 }}>
@@ -274,7 +275,8 @@ export const StatsRibbon: React.FC<{
             })}
             titleColor="primary"
           />
-          {priorDelta(stats.total_reports, 'total_reports_prior')}
+          <EuiSpacer size="xs" />
+          <PriorPeriodStat current={stats.total_reports} prior={stats.total_reports_prior} />
         </EuiPanel>
       </EuiFlexItem>
       <EuiFlexItem grow={true} style={{ minWidth: 0 }}>
@@ -289,7 +291,11 @@ export const StatsRibbon: React.FC<{
             )}
             titleColor="danger"
           />
-          {priorDelta(stats.critical_reports, 'critical_reports_prior')}
+          <EuiSpacer size="xs" />
+          <PriorPeriodStat
+            current={stats.critical_reports}
+            prior={stats.critical_reports_prior}
+          />
         </EuiPanel>
       </EuiFlexItem>
       <EuiFlexItem grow={true} style={{ minWidth: 0 }}>
@@ -304,7 +310,11 @@ export const StatsRibbon: React.FC<{
             )}
             titleColor="accent"
           />
-          {priorDelta(stats.distinct_source_count, 'distinct_source_count_prior')}
+          <EuiSpacer size="xs" />
+          <PriorPeriodStat
+            current={stats.distinct_source_count}
+            prior={stats.distinct_source_count_prior}
+          />
         </EuiPanel>
       </EuiFlexItem>
       <EuiFlexItem grow={true} style={{ minWidth: 0 }}>

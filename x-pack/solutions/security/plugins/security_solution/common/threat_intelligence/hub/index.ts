@@ -151,6 +151,8 @@ export {
   DEFAULT_TIME_RANGE_PRESET,
   TIME_RANGE_PRESET_IDS,
   isTimeRangePresetId,
+  percentChangeVsPrior,
+  resolvePriorTimeRange,
   resolveTimeRangeFromPreset,
 } from './time_range';
 export type { SavedViewAttributes, SavedViewSummary } from './saved_views';
