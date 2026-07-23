@@ -69,17 +69,10 @@ export const KillSuspendProcessActionResult = memo<KillSuspendProcessActionResul
           <div>
             {wasSuccessful ? (
               <div>
-                {command === 'kill-process' ? (
-                  <FormattedMessage
-                    id="xpack.securitySolution.management.killProcessActionResult.processInfo"
-                    defaultMessage="The following process was terminated:"
-                  />
-                ) : (
-                  <FormattedMessage
-                    id="xpack.securitySolution.management.suspendProcessActionResult.processInfo"
-                    defaultMessage="The following process was suspended:"
-                  />
-                )}
+                <FormattedMessage
+                  id="xpack.securitySolution.management.killProcessActionResult.processInfo"
+                  defaultMessage="Result:"
+                />
 
                 {hostOutput?.pid && (
                   <div>
