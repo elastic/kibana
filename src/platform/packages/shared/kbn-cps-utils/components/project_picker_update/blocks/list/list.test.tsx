@@ -67,13 +67,12 @@ const defaultProps = {
     _csp: faker.helpers.arrayElement(['AWS', 'Azure', 'GCP']),
   })),
   originProjectId: 'p1',
-  defaultProjectRouting: '_alias:origin',
-  onProjectRoutingChange: jest.fn(),
   defaultProjectRoutingGetter: () => '_alias:origin',
+  onProjectRoutingChange: jest.fn(),
 };
 
 const renderComponent = (
-  props: Partial<Pick<ProjectPickerStateProviderProps, 'availableProjects' | 'isReadOnly'>> = {}
+  props: Partial<Omit<ProjectPickerStateProviderProps, 'children'>> = {}
 ) => {
   return render(
     <ProjectPickerStateProvider {...defaultProps} {...props}>

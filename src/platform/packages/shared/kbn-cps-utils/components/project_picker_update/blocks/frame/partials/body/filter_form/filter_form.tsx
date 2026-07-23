@@ -165,9 +165,7 @@ export function ProjectPickerFilterForm({
   ) : null;
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="none">
-      <EuiFlexItem>
-        <FormProvider {...form}>
+    <FormProvider {...form}>
           <EuiForm>
             <EuiFormRow
               label={null}
@@ -232,7 +230,5 @@ export function ProjectPickerFilterForm({
             </EuiFormRow>
           </EuiForm>
         </FormProvider>
-      </EuiFlexItem>
-    </EuiFlexGroup>
   );
 }

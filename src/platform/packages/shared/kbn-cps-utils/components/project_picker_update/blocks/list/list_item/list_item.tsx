@@ -36,7 +36,7 @@ export interface ProjectPickerListItemProps {
   onLabelClick: (project: CPSProject, evt: React.MouseEvent<HTMLButtonElement>) => void;
 }
 
-export function ProjectPickerListItem({
+export const ProjectPickerListItem = React.memo(function ProjectPickerListItem({
   isReadOnly,
   isSelected,
   isToggleDisabled = false,
@@ -162,4 +162,4 @@ export function ProjectPickerListItem({
       </EuiFlexItem>
     </EuiFlexGroup>
   );
-}
+});

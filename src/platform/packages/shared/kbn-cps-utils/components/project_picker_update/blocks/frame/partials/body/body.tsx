@@ -58,7 +58,7 @@ export function ProjectPickerFrameBodyHeader() {
   }, []);
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="none" css={styles.bodyContainer}>
+    <EuiFlexGroup direction="column" gutterSize="s" css={styles.bodyContainer}>
       {state.isReadOnly && (
         <EuiFlexItem>
           <KbnInfoCallout

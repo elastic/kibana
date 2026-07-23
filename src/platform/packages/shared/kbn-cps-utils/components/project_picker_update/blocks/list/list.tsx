@@ -57,22 +57,23 @@ export function ProjectPickerList({ scrollContainerRef }: ProjectPickerListProps
     setActivePopover(null);
   }, []);
 
-  const getWrappingPopoverTrigger = useCallback(
-    (kind: 'contextMenu' | 'tags') => {
-      return (project: CPSProject, evt: React.MouseEvent<unknown>) => {
-        evt.preventDefault();
+  const getWrappingPopoverTrigger = useCallback((kind: 'contextMenu' | 'tags') => {
+    return (project: CPSProject, evt: React.MouseEvent<unknown>) => {
+      evt.preventDefault();
 
-        if (activePopover?.kind === kind && activePopover.project._id === project._id) {
-          closePopover();
-          return;
+      const nextButton = evt.currentTarget as HTMLElement;
+
+      setActivePopover((prev) => {
+        if (prev?.kind === kind && prev.project._id === project._id) {
+          buttonRef.current = null;
+          return null;
         }
 
-        buttonRef.current = evt.currentTarget as HTMLElement;
-        setActivePopover({ kind, project, isVisible: true });
-      };
-    },
-    [activePopover, closePopover]
-  );
+        buttonRef.current = nextButton;
+        return { kind, project, isVisible: true };
+      });
+    };
+  }, []);
 
   const onContextMenu = useMemo<ProjectPickerListItemProps['onContextMenu']>(
     () => getWrappingPopoverTrigger('contextMenu'),
