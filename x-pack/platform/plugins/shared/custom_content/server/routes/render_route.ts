@@ -41,7 +41,12 @@ export function registerRenderRoute(
         body: schema.object({
           template: schema.string({ maxLength: CUSTOM_CONTENT_MAX_TEMPLATE_SCHEMA_LENGTH }),
           esqlQuery: schema.string({ maxLength: CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH }),
-          timeRange: schema.maybe(schema.object({ from: schema.string(), to: schema.string() })),
+          timeRange: schema.maybe(
+            schema.object({
+              from: schema.string({ maxLength: 100 }),
+              to: schema.string({ maxLength: 100 }),
+            })
+          ),
           timeField: schema.maybe(schema.string({ maxLength: 256 })),
         }),
       },

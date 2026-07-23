@@ -65,7 +65,12 @@ export function registerGenerateRoute(
           esqlQuery: schema.maybe(
             schema.string({ maxLength: CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH })
           ),
-          timeRange: schema.maybe(schema.object({ from: schema.string(), to: schema.string() })),
+          timeRange: schema.maybe(
+            schema.object({
+              from: schema.string({ maxLength: 100 }),
+              to: schema.string({ maxLength: 100 }),
+            })
+          ),
         }),
       },
     },
