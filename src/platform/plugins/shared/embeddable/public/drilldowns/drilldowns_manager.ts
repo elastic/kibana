@@ -51,12 +51,15 @@ export function initializeDrilldownsManager(
       skip(1),
       map(() => undefined)
     ),
-    getLatestState: () => ({
-      drilldowns: drilldowns$.value.map((drilldown) => {
-        const { actionId, ...rest } = drilldown;
-        return rest;
-      }),
-    }),
+    getLatestState: () =>
+      drilldowns$.value.length
+        ? {
+            drilldowns: drilldowns$.value.map((drilldown) => {
+              const { actionId, ...rest } = drilldown;
+              return rest;
+            }),
+          }
+        : {},
     reinitializeState: (lastState: SerializedDrilldowns) => {
       api.setDrilldowns(lastState.drilldowns ?? []);
     },
