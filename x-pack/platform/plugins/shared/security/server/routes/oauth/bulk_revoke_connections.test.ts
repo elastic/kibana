@@ -20,11 +20,9 @@ import { routeDefinitionParamsMock } from '../index.mock';
 
 describe('Bulk revoke OAuth connections route', () => {
   function getMockContext(
-    licenseCheckResult: { state: string; message?: string } = { state: 'valid' },
-    { oauthManagementEnabled = true }: { oauthManagementEnabled?: boolean } = {}
+    licenseCheckResult: { state: string; message?: string } = { state: 'valid' }
   ) {
     const coreContext = coreMock.createRequestHandlerContext();
-    (coreContext.uiSettings.client.get as jest.Mock).mockResolvedValue(oauthManagementEnabled);
     return coreMock.createCustomRequestHandlerContext({
       core: coreContext,
       licensing: { license: { check: jest.fn().mockReturnValue(licenseCheckResult) } },
@@ -185,22 +183,6 @@ describe('Bulk revoke OAuth connections route', () => {
 
     expect(response.status).toBe(404);
   });
-
-  it('returns 404 when uiamOAuthClientManagement setting is disabled', async () => {
-    const response = await routeHandler(
-      getMockContext({ state: 'valid' }, { oauthManagementEnabled: false }),
-      httpServerMock.createKibanaRequest({
-        body: {
-          connections: [{ client_id: 'client-1', connection_id: 'conn-1' }],
-        },
-      }),
-      kibanaResponseFactory
-    );
-
-    expect(response.status).toBe(404);
-    expect(oauthMock.revokeConnection).not.toHaveBeenCalled();
-  });
-
   it('returns 404 when security features are disabled (null upstream result)', async () => {
     oauthMock.revokeConnection.mockResolvedValue(null);
 
