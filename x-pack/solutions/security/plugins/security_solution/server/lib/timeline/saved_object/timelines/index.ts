@@ -331,7 +331,8 @@ export const getAllTimelineByIds = async (
     timelineType: TimelineType | null;
   }
 ): Promise<GetTimelinesResponse> => {
-  const userName = getRequestUserDisplayName(request);
+  const userName = request.user?.username ?? UNAUTHENTICATED_USER;
+  const ownerDisplayName = getRequestUserDisplayName(request);
   const savedObjectsClient = (await request.context.core).savedObjects.client;
 
   const uniqueIds = [...new Set(ids)];
@@ -345,7 +346,7 @@ export const getAllTimelineByIds = async (
         if (isSavedObjectErrorResult(savedObject)) return false;
         if (
           savedObject.attributes.status === TimelineStatusEnum.draft &&
-          savedObject.attributes.createdBy !== userName
+          savedObject.attributes.createdBy !== ownerDisplayName
         ) {
           return false;
         }
@@ -744,13 +745,14 @@ export const deleteTimeline = async (
   const allowedIds: string[] = [];
 
   for (const savedObject of bulkGetResponse.saved_objects) {
-    if (!isSavedObjectErrorResult(savedObject)) {
-      const { status, createdBy } = savedObject.attributes;
-      if (status === TimelineStatusEnum.draft && createdBy !== currentUserDisplayName) {
-        hasNonOwnerDraft = true;
-      } else {
-        allowedIds.push(savedObject.id);
-      }
+    if (isSavedObjectErrorResult(savedObject)) {
+      throw Boom.notFound();
+    }
+    const { status, createdBy } = savedObject.attributes;
+    if (status === TimelineStatusEnum.draft && createdBy !== currentUserDisplayName) {
+      hasNonOwnerDraft = true;
+    } else {
+      allowedIds.push(savedObject.id);
     }
   }
 

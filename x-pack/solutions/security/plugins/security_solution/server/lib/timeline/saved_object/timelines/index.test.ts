@@ -796,6 +796,25 @@ describe('saved_object', () => {
       expect(mockDeleteSavedObject).not.toHaveBeenCalled();
     });
 
+    it('throws a Boom 404 when a timeline id does not resolve via bulkGet', async () => {
+      mockBulkGetSavedObject.mockResolvedValue({
+        saved_objects: [
+          buildActiveTimelineSO('timeline-1'),
+          {
+            id: 'timeline-2',
+            type: 'siem-ui-timeline',
+            error: { statusCode: 404, error: 'Not Found', message: 'Not found' },
+          },
+        ],
+      });
+
+      await expect(deleteTimeline(mockRequest, ['timeline-1', 'timeline-2'])).rejects.toMatchObject(
+        { output: { statusCode: 404 } }
+      );
+
+      expect(mockDeleteSavedObject).not.toHaveBeenCalled();
+    });
+
     it('successfully deletes a draft timeline owned by the requester', async () => {
       mockBulkGetSavedObject.mockResolvedValue({
         saved_objects: [buildDraftTimelineSO('timeline-draft', 'username')],
