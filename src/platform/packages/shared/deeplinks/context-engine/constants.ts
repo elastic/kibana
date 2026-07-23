@@ -7,19 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FtrConfigProviderContext } from '@kbn/test';
-
-export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const functionalConfig = (
-    await readConfigFile(require.resolve('../../../config.base.js'))
-  ).getAll();
-
-  return {
-    ...functionalConfig,
-    testFiles: [require.resolve('.')],
-    esTestCluster: {
-      ...functionalConfig.esTestCluster,
-      serverArgs: ['xpack.security.enabled=true'],
-    },
-  };
-}
+export const CONTEXT_ENGINE_APP_ID = 'context_engine';

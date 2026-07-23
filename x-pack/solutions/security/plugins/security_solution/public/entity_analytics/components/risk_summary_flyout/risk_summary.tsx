@@ -313,7 +313,7 @@ const FlyoutRiskSummaryComponent = <T extends EntityType>({
               defaultMessage="Entity risk contributions"
             />
           ),
-          link: riskScoreData.loading ? undefined : entityTabLink,
+          link: entityTabLink,
           iconType: !isPreviewMode && !hideHeaderIcon ? 'chevronLimitLeft' : undefined,
         }}
         expand={{
@@ -420,7 +420,7 @@ const FlyoutRiskSummaryComponent = <T extends EntityType>({
                   defaultMessage="Resolution group risk contributions"
                 />
               ),
-              link: entityResolutionRiskScore?.loading ? undefined : resolutionTabLink,
+              link: resolutionTabLink,
               iconType: !isPreviewMode && !hideHeaderIcon ? 'chevronLimitLeft' : undefined,
             }}
             expand={{
