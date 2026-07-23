@@ -37,38 +37,41 @@ export const McpClientsNotConnectedBanner = ({ clients }: McpClientsNotConnected
     []
   );
 
-  const disconnectedClients = useMemo(
+  const neverConnectedClients = useMemo(
     () =>
       clients.filter(
         (client) =>
-          !client.revoked && (!client.connections?.active || client.connections.active.length === 0)
+          !client.revoked &&
+          (client.connections?.active?.length ?? 0) === 0 &&
+          (client.connections?.expired?.length ?? 0) === 0 &&
+          (client.connections?.revoked?.length ?? 0) === 0
       ),
     [clients]
   );
 
-  const hasUnseenDisconnectedClient = useMemo(() => {
+  const hasUnseenNeverConnectedClient = useMemo(() => {
     const dismissedSet = new Set(dismissedClientIds);
-    return disconnectedClients.some((client) => !dismissedSet.has(client.id));
-  }, [disconnectedClients, dismissedClientIds]);
+    return neverConnectedClients.some((client) => !dismissedSet.has(client.id));
+  }, [neverConnectedClients, dismissedClientIds]);
 
   const handleDismiss = useCallback(() => {
-    setDismissedClientIds(disconnectedClients.map((client) => client.id));
-  }, [setDismissedClientIds, disconnectedClients]);
+    setDismissedClientIds(neverConnectedClients.map((client) => client.id));
+  }, [setDismissedClientIds, neverConnectedClients]);
 
   const displayNames = useMemo(
     () =>
-      disconnectedClients
+      neverConnectedClients
         .filter((client) => client.client_name)
         .slice(0, MAX_DISPLAY_NAMES)
         .map((client) => client.client_name),
-    [disconnectedClients]
+    [neverConnectedClients]
   );
 
-  if (disconnectedClients.length === 0 || !hasUnseenDisconnectedClient) {
+  if (neverConnectedClients.length === 0 || !hasUnseenNeverConnectedClient) {
     return null;
   }
 
-  const remainingCount = disconnectedClients.length - MAX_DISPLAY_NAMES;
+  const remainingCount = neverConnectedClients.length - MAX_DISPLAY_NAMES;
 
   return (
     <EuiCallOut
@@ -82,7 +85,7 @@ export const McpClientsNotConnectedBanner = ({ clients }: McpClientsNotConnected
         id="xpack.agentBuilder.mcpClients.notConnectedBanner.message"
         defaultMessage="{count, plural, one {The MCP client {names} is} other {The MCP clients {names}{remaining} are}} not yet connected."
         values={{
-          count: disconnectedClients.length,
+          count: neverConnectedClients.length,
           names: (
             <>
               {displayNames.map((name, index) => (
