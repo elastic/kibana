@@ -18,34 +18,7 @@ interface Props {
   clusterDetails: estypes.ClusterDetails;
 }
 
-const MOCK_CLUSTER_DETAILS: estypes.ClusterDetails = {
-  status: 'skipped',
-  indices: 'kibana_sample_data*',
-  timed_out: false,
-  failures: [
-    {
-      shard: -1,
-      index: null as unknown as string,
-      reason: {
-        type: 'search_phase_execution_exception',
-        reason: 'all shards failed',
-        failed_shards: [
-          {
-            shard: 0,
-            index: 'remote1:.ds-kibana_sample_data_logs-2023.09.21-000001',
-            node: '_JVoOnN5QKidGGXFJAlgpA',
-            reason: {
-              type: 'query_shard_exception',
-              reason: 'failed to create query: [runtime_exception] runtime_exception: ...',
-            },
-          },
-        ],
-      },
-    },
-  ],
-};
-
-export function ClusterView({ clusterDetails = MOCK_CLUSTER_DETAILS }: Props) {
+export function ClusterView({ clusterDetails }: Props) {
   const clusterFailure = (clusterDetails.failures ?? []).find((failure) => {
     return typeof failure.shard !== 'undefined' && failure.shard < 0;
   });
