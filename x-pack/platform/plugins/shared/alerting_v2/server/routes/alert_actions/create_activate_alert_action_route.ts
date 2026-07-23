@@ -9,16 +9,13 @@ import {
   ALERT_EPISODE_ACTION_TYPE,
   createActivateAlertActionBodySchema,
 } from '@kbn/alerting-v2-schemas';
-import {
-  CREATE_ACTIVATE_ALERT_ACTION_SUMMARY,
-  createActivateAlertActionOasExamples,
-} from './alert_oas_examples';
+import { createActivateAlertActionOasExamples } from './create_activate_alert_action_oas_example';
 import { createAlertActionRouteForType } from './create_alert_action_route_for_type';
 
 export const CreateActivateAlertActionRoute = createAlertActionRouteForType({
   actionType: ALERT_EPISODE_ACTION_TYPE.ACTIVATE,
   pathSuffix: '_activate',
-  summary: CREATE_ACTIVATE_ALERT_ACTION_SUMMARY,
+  summary: 'Create an alert _activate action',
   bodySchema: createActivateAlertActionBodySchema,
   oasOperationObject: createActivateAlertActionOasExamples,
 });

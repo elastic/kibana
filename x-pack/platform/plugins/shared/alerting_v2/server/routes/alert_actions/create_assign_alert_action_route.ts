@@ -9,16 +9,13 @@ import {
   ALERT_EPISODE_ACTION_TYPE,
   createAssignAlertActionBodySchema,
 } from '@kbn/alerting-v2-schemas';
-import {
-  CREATE_ASSIGN_ALERT_ACTION_SUMMARY,
-  createAssignAlertActionOasExamples,
-} from './alert_oas_examples';
+import { createAssignAlertActionOasExamples } from './create_assign_alert_action_oas_example';
 import { createAlertActionRouteForType } from './create_alert_action_route_for_type';
 
 export const CreateAssignAlertActionRoute = createAlertActionRouteForType({
   actionType: ALERT_EPISODE_ACTION_TYPE.ASSIGN,
   pathSuffix: '_assign',
-  summary: CREATE_ASSIGN_ALERT_ACTION_SUMMARY,
+  summary: 'Create an alert _assign action',
   bodySchema: createAssignAlertActionBodySchema,
   oasOperationObject: createAssignAlertActionOasExamples,
 });

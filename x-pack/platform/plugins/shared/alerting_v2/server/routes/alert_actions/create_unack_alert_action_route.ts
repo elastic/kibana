@@ -9,16 +9,13 @@ import {
   ALERT_EPISODE_ACTION_TYPE,
   createUnackAlertActionBodySchema,
 } from '@kbn/alerting-v2-schemas';
-import {
-  CREATE_UNACK_ALERT_ACTION_SUMMARY,
-  createUnackAlertActionOasExamples,
-} from './alert_oas_examples';
+import { createUnackAlertActionOasExamples } from './create_unack_alert_action_oas_example';
 import { createAlertActionRouteForType } from './create_alert_action_route_for_type';
 
 export const CreateUnackAlertActionRoute = createAlertActionRouteForType({
   actionType: ALERT_EPISODE_ACTION_TYPE.UNACK,
   pathSuffix: '_unack',
-  summary: CREATE_UNACK_ALERT_ACTION_SUMMARY,
+  summary: 'Create an alert _unack action',
   bodySchema: createUnackAlertActionBodySchema,
   oasOperationObject: createUnackAlertActionOasExamples,
 });

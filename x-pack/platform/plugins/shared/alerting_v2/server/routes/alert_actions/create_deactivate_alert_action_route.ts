@@ -9,16 +9,13 @@ import {
   ALERT_EPISODE_ACTION_TYPE,
   createDeactivateAlertActionBodySchema,
 } from '@kbn/alerting-v2-schemas';
-import {
-  CREATE_DEACTIVATE_ALERT_ACTION_SUMMARY,
-  createDeactivateAlertActionOasExamples,
-} from './alert_oas_examples';
+import { createDeactivateAlertActionOasExamples } from './create_deactivate_alert_action_oas_example';
 import { createAlertActionRouteForType } from './create_alert_action_route_for_type';
 
 export const CreateDeactivateAlertActionRoute = createAlertActionRouteForType({
   actionType: ALERT_EPISODE_ACTION_TYPE.DEACTIVATE,
   pathSuffix: '_deactivate',
-  summary: CREATE_DEACTIVATE_ALERT_ACTION_SUMMARY,
+  summary: 'Create an alert _deactivate action',
   bodySchema: createDeactivateAlertActionBodySchema,
   oasOperationObject: createDeactivateAlertActionOasExamples,
 });

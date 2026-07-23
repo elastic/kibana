@@ -9,16 +9,13 @@ import {
   ALERT_EPISODE_ACTION_TYPE,
   createAckAlertActionBodySchema,
 } from '@kbn/alerting-v2-schemas';
-import {
-  CREATE_ACK_ALERT_ACTION_SUMMARY,
-  createAckAlertActionOasExamples,
-} from './alert_oas_examples';
+import { createAckAlertActionOasExamples } from './create_ack_alert_action_oas_example';
 import { createAlertActionRouteForType } from './create_alert_action_route_for_type';
 
 export const CreateAckAlertActionRoute = createAlertActionRouteForType({
   actionType: ALERT_EPISODE_ACTION_TYPE.ACK,
   pathSuffix: '_ack',
-  summary: CREATE_ACK_ALERT_ACTION_SUMMARY,
+  summary: 'Create an alert _ack action',
   bodySchema: createAckAlertActionBodySchema,
   oasOperationObject: createAckAlertActionOasExamples,
 });

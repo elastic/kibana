@@ -9,16 +9,13 @@ import {
   ALERT_EPISODE_ACTION_TYPE,
   createTagAlertActionBodySchema,
 } from '@kbn/alerting-v2-schemas';
-import {
-  CREATE_TAG_ALERT_ACTION_SUMMARY,
-  createTagAlertActionOasExamples,
-} from './alert_oas_examples';
+import { createTagAlertActionOasExamples } from './create_tag_alert_action_oas_example';
 import { createAlertActionRouteForType } from './create_alert_action_route_for_type';
 
 export const CreateTagAlertActionRoute = createAlertActionRouteForType({
   actionType: ALERT_EPISODE_ACTION_TYPE.TAG,
   pathSuffix: '_tag',
-  summary: CREATE_TAG_ALERT_ACTION_SUMMARY,
+  summary: 'Create an alert _tag action',
   bodySchema: createTagAlertActionBodySchema,
   oasOperationObject: createTagAlertActionOasExamples,
 });
