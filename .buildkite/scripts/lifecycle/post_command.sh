@@ -16,6 +16,7 @@ if [[ "$IS_TEST_EXECUTION_STEP" == "true" ]]; then
     '.scout/reports/scout-playwright-test-failures-*/**/*'
     '.scout/reports/scout-playwright-test-failures-*/scout-failures-*.ndjson'
     'target/junit/**/*'
+    '{examples,packages,src,x-pack}/**/integration_tests/**/logs*.log'
     'target/kibana-coverage/jest/**/*'
     'target/kibana-coverage/functional/**/*'
     'target/kibana-*'
@@ -77,6 +78,22 @@ if [[ "$IS_TEST_EXECUTION_STEP" == "true" ]]; then
       echo "--- Run Failed Test Reporter (Scout, failure_count=$SCOUT_FAILURE_COUNT, github_update=$SCOUT_GH_UPDATE_STATUS)"
       node scripts/report_failed_tests --build-url="${BUILDKITE_BUILD_URL}#${BUILDKITE_JOB_ID}" $SCOUT_GH_FLAG \
         '.scout/reports/scout-playwright-test-failures-*/scout-failures-*.ndjson'
+    fi
+  fi
+
+  # Best-effort: capture Elasticsearch serverless container logs on failure.
+  # Jest integration serverless runs ES as Docker containers (es01, es02, ...)
+  # whose logs are otherwise lost — only client-side ECONNRESET is visible. See
+  # https://github.com/elastic/kibana/issues/188958. Fully guarded so it can
+  # never affect the step's exit status.
+  if [[ $BUILDKITE_COMMAND_EXIT_STATUS -ne 0 ]] && command -v docker >/dev/null 2>&1; then
+    es_containers="$(docker ps -a --filter 'name=es0' --format '{{.Names}}' 2>/dev/null || true)"
+    if [[ -n "$es_containers" ]]; then
+      mkdir -p target/test_failures
+      while IFS= read -r es_container; do
+        [[ -z "$es_container" ]] && continue
+        docker logs "$es_container" > "target/test_failures/es-container-${es_container}.log" 2>&1 || true
+      done <<< "$es_containers"
     fi
   fi
 
