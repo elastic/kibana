@@ -153,4 +153,20 @@ describe('resetReconciliationTask', () => {
     ).resolves.toBeUndefined();
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('locked'));
   });
+
+  it('resolves even when ensureScheduled rejects during scheduling', async () => {
+    // End-to-end resilience: an ensureScheduled failure must not break reset. Note that
+    // scheduleReconciliationTask swallows this internally, so the rejection never actually reaches
+    // resetReconciliationTask's own try — this pins the composed "reset never throws on a scheduling
+    // hiccup" behavior, not the try boundary itself (no current input makes scheduling throw).
+    // bulkUpdateState still runs and resolves.
+    const tm = taskManagerMock.createStart();
+    (tm.ensureScheduled as jest.Mock).mockRejectedValueOnce(new Error('tm unavailable'));
+
+    await expect(
+      resetReconciliationTask({ taskManager: tm, logger, intervalMinutes: 30 })
+    ).resolves.toBeUndefined();
+    // bulkUpdateState is reached despite the scheduling hiccup.
+    expect(tm.bulkUpdateState).toHaveBeenCalledTimes(1);
+  });
 });

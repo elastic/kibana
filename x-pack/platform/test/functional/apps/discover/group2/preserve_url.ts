@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+/**
+ * Migration recommendation: MIGRATE TO SCOUT. Good integration test.
+ */
+
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 

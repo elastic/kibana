@@ -101,12 +101,14 @@ interface ActionPolicySnoozeFormProps {
   isSnoozed: boolean;
   onApplySnooze: (snoozedUntil: string) => void;
   onCancelSnooze: () => void;
+  showTitle?: boolean;
 }
 
 export const ActionPolicySnoozeForm = ({
   isSnoozed,
   onApplySnooze,
   onCancelSnooze,
+  showTitle = true,
 }: ActionPolicySnoozeFormProps) => {
   const [durationValue, setDurationValue] = useState(1);
   const [durationUnit, setDurationUnit] = useState<DurationUnit>('h');
@@ -117,14 +119,18 @@ export const ActionPolicySnoozeForm = ({
 
   return (
     <>
-      <EuiTitle size="xxxs">
-        <h4>
-          {i18n.translate('xpack.alertingV2.actionPolicy.snooze.title', {
-            defaultMessage: 'Snooze notifications',
-          })}
-        </h4>
-      </EuiTitle>
-      <EuiSpacer size="s" />
+      {showTitle && (
+        <>
+          <EuiTitle size="xxxs">
+            <h4>
+              {i18n.translate('xpack.alertingV2.actionPolicy.snooze.title', {
+                defaultMessage: 'Snooze notifications',
+              })}
+            </h4>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+        </>
+      )}
       <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center">
         <EuiFlexItem grow={false} style={{ width: 80 }}>
           <EuiFieldNumber
