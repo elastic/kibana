@@ -32,7 +32,7 @@ export function createAddServiceMapPanelAction(
     isCompatible: async ({ embeddable }) => {
       return deps.config.serviceMapEnabled && apiIsPresentationContainer(embeddable);
     },
-    execute: async ({ embeddable }) => {
+    execute: async ({ embeddable, returnFocus }) => {
       if (!deps.config.serviceMapEnabled || !apiIsPresentationContainer(embeddable)) {
         throw new IncompatibleActionError();
       }
@@ -44,6 +44,7 @@ export function createAddServiceMapPanelAction(
       openLazyFlyout({
         core: deps.coreStart,
         parentApi: embeddable,
+        returnFocus,
         flyoutProps: {
           size: 'm',
         },
