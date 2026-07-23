@@ -328,8 +328,18 @@ const ChartItem = React.memo(
       [euiTheme.colors.vis]
     );
 
-    const recordExploredMetric = useCallback(
-      () => onMetricExplored?.(getMetricUniqueKey(metricItem)),
+    const recordExploredMetric = useCallback<React.MouseEventHandler<HTMLDivElement>>(
+      (event) => {
+        // Only count clicks on panel action controls (Inspect, View details, Explore in
+        // Discover, Copy to dashboard, and the overflow menu that hosts Cases), not clicks
+        // on the chart body, legend, or time series selection.
+        const isActionClick = (event.target as HTMLElement).closest(
+          '[data-test-subj^="embeddablePanelAction-"], [data-test-subj="embeddablePanelToggleMenuIcon"]'
+        );
+        if (isActionClick) {
+          onMetricExplored?.(getMetricUniqueKey(metricItem));
+        }
+      },
       [onMetricExplored, metricItem]
     );
 
@@ -469,7 +479,7 @@ const A11yGridCell = React.forwardRef(
       isFocused: boolean;
       isSelected: boolean;
       onFocus: (rowIndex: number, colIndex: number) => void;
-      onClickCapture?: () => void;
+      onClickCapture?: React.MouseEventHandler<HTMLDivElement>;
     }>,
     ref: React.Ref<HTMLDivElement>
   ) => {
