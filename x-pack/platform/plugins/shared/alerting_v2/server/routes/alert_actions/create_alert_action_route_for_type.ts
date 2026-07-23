@@ -25,10 +25,8 @@ import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { ALERTING_V2_ALERT_API_PATH } from '../constants';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
-import {
-  ALERT_EVENT_NOT_FOUND_DESCRIPTION,
-  INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
-} from '../route_response_descriptions';
+import { INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION } from '../route_descriptions';
+import { ALERT_EVENT_NOT_FOUND_DESCRIPTION } from './alert_action_route_descriptions';
 
 interface CreateAlertActionRouteForTypeOptions<
   TAction extends CreateAlertActionBody['action_type']

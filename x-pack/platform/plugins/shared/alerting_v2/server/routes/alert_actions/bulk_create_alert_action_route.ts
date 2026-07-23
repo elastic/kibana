@@ -20,7 +20,7 @@ import { ALERTING_V2_ALERT_API_PATH } from '../constants';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { bulkCreateAlertActionOasExamples } from './bulk_create_alert_action_oas_example';
-import { INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION } from '../route_response_descriptions';
+import { INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION } from '../route_descriptions';
 
 @injectable()
 export class BulkCreateAlertActionRoute extends BaseAlertingRoute {
