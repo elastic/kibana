@@ -487,6 +487,7 @@ export class SecurityPlugin
       },
       userProfiles: {
         getCurrent: this.userProfileStart.getCurrent,
+        getCurrentProfileId: this.userProfileStart.getCurrentProfileId,
         bulkGet: this.userProfileStart.bulkGet,
         suggest: this.userProfileStart.suggest,
       },
