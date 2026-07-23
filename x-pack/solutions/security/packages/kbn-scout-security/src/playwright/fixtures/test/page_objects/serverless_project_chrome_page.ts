@@ -61,7 +61,6 @@ export class ServerlessProjectChromePage {
   }
 
   async clickLogo() {
-    await this.logo.waitFor({ state: 'visible' });
     await this.logo.click();
   }
 
