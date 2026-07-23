@@ -5,102 +5,76 @@
  * 2.0.
  */
 
-import {
-  EuiPanel,
-  EuiSkeletonRectangle,
-  EuiSkeletonText,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiEmptyPrompt, EuiSkeletonTitle, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import React from 'react';
-
-const Panel = ({
-  title,
-  description,
-}: {
-  title: React.ReactNode;
-  description: React.ReactNode;
-}) => (
-  <EuiPanel hasBorder paddingSize="l">
-    <EuiTitle size="s">
-      <h2>{title}</h2>
-    </EuiTitle>
-    <EuiSpacer size="s" />
-    <EuiText size="s" color="subdued">
-      <p>{description}</p>
-    </EuiText>
-    <EuiSpacer size="m" />
-    <EuiSkeletonText lines={2} />
-  </EuiPanel>
-);
+import React, { useState } from 'react';
+import { useParams } from 'react-router-dom';
+import { AutomationsPanel, DescriptionPanel, SourcesPanel } from '../components/ai_index_detail';
+import { EditSourcesFlyout } from '../components/edit_sources_flyout';
+import { useAiIndex } from '../hooks/use_ai_index';
 
 export const AiIndexDetailPage = () => {
+  const { id } = useParams<{ id: string }>();
+  const { aiIndex, isLoading, error, refetch } = useAiIndex(id);
+  const [isEditingSources, setIsEditingSources] = useState(false);
+
+  if (error) {
+    return (
+      <KibanaPageTemplate data-test-subj="contextAiIndexDetailPage">
+        <KibanaPageTemplate.Section>
+          <EuiEmptyPrompt
+            iconType="error"
+            color="danger"
+            data-test-subj="contextAiIndexDetailError"
+            title={
+              <h2>
+                <FormattedMessage
+                  id="xpack.contextEngine.aiIndexDetail.error.title"
+                  defaultMessage="Unable to load AI index"
+                />
+              </h2>
+            }
+            body={<p>{error.message}</p>}
+          />
+        </KibanaPageTemplate.Section>
+      </KibanaPageTemplate>
+    );
+  }
+
   return (
     <KibanaPageTemplate data-test-subj="contextAiIndexDetailPage">
       <KibanaPageTemplate.Header
         pageTitle={
-          <FormattedMessage
-            id="xpack.contextEngine.aiIndexDetail.title"
-            defaultMessage="My AI index"
-          />
+          isLoading ? (
+            <EuiSkeletonTitle size="l" data-test-subj="contextAiIndexTitleLoading" />
+          ) : (
+            aiIndex?.name
+          )
         }
       />
       <KibanaPageTemplate.Section>
-        <Panel
-          title={
-            <FormattedMessage
-              id="xpack.contextEngine.aiIndexDetail.description.title"
-              defaultMessage="Description"
-            />
-          }
-          description={
-            <FormattedMessage
-              id="xpack.contextEngine.aiIndexDetail.description.description"
-              defaultMessage="No sources yet — add a source and a summary will be generated automatically."
-            />
-          }
+        <DescriptionPanel isLoading={isLoading} description={aiIndex?.description} />
+        <EuiSpacer size="l" />
+        <SourcesPanel
+          isLoading={isLoading}
+          sources={aiIndex?.sources ?? []}
+          canEdit={aiIndex !== undefined}
+          onEditSources={() => setIsEditingSources(true)}
         />
         <EuiSpacer size="l" />
-        <Panel
-          title={
-            <FormattedMessage
-              id="xpack.contextEngine.aiIndexDetail.sources.title"
-              defaultMessage="Sources"
-            />
-          }
-          description={
-            <FormattedMessage
-              id="xpack.contextEngine.aiIndexDetail.sources.description"
-              defaultMessage="ES|QL views, indices, Connectors and stream signals feeding this AI index."
-            />
-          }
-        />
-        <EuiSpacer size="l" />
-        <EuiPanel hasBorder paddingSize="l">
-          <EuiTitle size="s">
-            <h2>
-              <FormattedMessage
-                id="xpack.contextEngine.aiIndexDetail.automations.title"
-                defaultMessage="Automations"
-              />
-            </h2>
-          </EuiTitle>
-          <EuiSpacer size="s" />
-          <EuiText size="s" color="subdued">
-            <p>
-              <FormattedMessage
-                id="xpack.contextEngine.aiIndexDetail.automations.description"
-                defaultMessage="Automations extract and refresh this AI index's Knowledge Indicators from its sources."
-              />
-            </p>
-          </EuiText>
-          <EuiSpacer size="m" />
-          <EuiSkeletonRectangle width="100%" height={88} borderRadius="m" />
-        </EuiPanel>
+        <AutomationsPanel />
       </KibanaPageTemplate.Section>
+      {isEditingSources && aiIndex && (
+        <EditSourcesFlyout
+          aiIndex={aiIndex}
+          onClose={() => setIsEditingSources(false)}
+          onSaved={() => {
+            setIsEditingSources(false);
+            refetch();
+          }}
+        />
+      )}
     </KibanaPageTemplate>
   );
 };
