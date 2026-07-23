@@ -489,11 +489,22 @@ export class LensApp {
     await this.chartSwitchList.waitFor({ state: 'visible' });
   }
 
-  async dragFieldToWorkspace(field: string) {
-    const fieldLocator = this.page.testSubj.locator(`lnsFieldListPanelField-___${field}___`);
-    const dropTarget = this.page.testSubj.locator('workspace-drag-drop-prompt');
-    await fieldLocator.dragTo(dropTarget);
-    await this.page.locator('.echCanvasRenderer').waitFor({ state: 'visible' });
+  /**
+   * Drags a field onto the Lens workspace (FTR `dragFieldToWorkspace`).
+   * Uses HTML5 DnD — Playwright `dragTo` does not reliably drive Lens drop zones.
+   */
+  async dragFieldToWorkspace(field: string, visualizationTestSubj?: string) {
+    const fieldLocator = this.getFieldListPanelFieldLocator(field);
+    await fieldLocator.waitFor({ state: 'visible' });
+    const fieldTestSubj =
+      (await fieldLocator.getAttribute('data-test-subj')) ?? `lnsFieldListPanelField-${field}`;
+    await this.html5DragAndDrop(fieldTestSubj, 'lnsWorkspace');
+    await this.waitForLensDragDropToFinish();
+    if (visualizationTestSubj) {
+      await this.waitForVisualization(visualizationTestSubj);
+    } else {
+      await this.page.locator('.echCanvasRenderer').waitFor({ state: 'visible' });
+    }
   }
 
   getConvertToEsqlButton() {
@@ -587,19 +598,13 @@ export class LensApp {
     return this.getDimensionTriggerLocator().all();
   }
 
-  /** Returns visible labels for all dimension triggers inside a dimension panel. */
-  private async getDimensionTriggersTexts(dimension: string): Promise<string[]> {
+  /**
+   * Returns visible labels for all dimension triggers inside a panel/group.
+   * Empty panels return `[]` (do not wait for a trigger to appear).
+   * Panel test-subj may match multiple wrappers (filled + empty slot); read triggers only.
+   */
+  async getDimensionTriggersTexts(dimension: string): Promise<string[]> {
     const triggersLocator = this.page.testSubj.locator(`${dimension} > lns-dimensionTrigger`);
-    await this.page.waitForFunction(
-      (panel) => {
-        const root = document.querySelector(`[data-test-subj="${panel}"]`);
-        return (root?.querySelectorAll('[data-test-subj="lns-dimensionTrigger"]').length ?? 0) > 0;
-      },
-      dimension,
-      // waitForFunction has no Scout default (unlike expect/actionTimeout).
-      { timeout: 10_000 }
-    );
-
     const triggers = await triggersLocator.all();
     const texts: string[] = [];
     for (const trigger of triggers) {
@@ -907,9 +912,10 @@ export class LensApp {
   }
 
   private getFieldListPanelFieldLocator(field: string) {
-    // Prefer the encoded unified-field-list id used by existing Scout DnD, then fall back.
-    const encoded = this.page.testSubj.locator(`lnsFieldListPanelField-___${field}___`);
-    return encoded.or(this.page.testSubj.locator(`lnsFieldListPanelField-${field}`));
+    // Prefer Available Fields — the same field can also appear under Selected Fields after use.
+    return this.page.locator(
+      `[data-test-subj="lnsIndexPatternAvailableFields"] [data-attr-field="${field}"]`
+    );
   }
 
   /**
@@ -1119,17 +1125,10 @@ export class LensApp {
   }
 
   /**
-   * HTML5 DnD between dimension triggers/drop targets (FTR `dragDimensionToDimension`).
-   * Both `from` and `to` are test-subj chains (e.g. `panel > lns-dimensionTrigger`).
+   * HTML5 DnD between test-subj chains (FTR `browser.html5DragAndDrop`).
+   * Chains use `>` separators (e.g. `panel > lns-dimensionTrigger`).
    */
-  async dragDimensionToDimension({ from, to }: { from: string; to: string }) {
-    await this.page.testSubj.locator(from).waitFor({ state: 'visible' });
-    await this.page.testSubj.locator(to).waitFor({ state: 'visible' });
-
-    // Mirror FTR `browser.html5DragAndDrop`: dragstart, short pause, drop + dragend.
-    // Dimension→dimension drops do not reliably mount `.domDragDrop-isActiveGroup`
-    // (that signal is for field→workspace geo DnD), so keep the FTR-equivalent pause
-    // inside the page evaluate rather than waiting on a missing class.
+  private async html5DragAndDrop(from: string, to: string) {
     await this.page.evaluate(
       async ([fromChain, toChain]) => {
         interface Transfer {
@@ -1170,7 +1169,7 @@ export class LensApp {
 
         const origin = queryChain(fromChain);
         if (!origin) {
-          throw new Error(`dragDimensionToDimension: origin not found for ${fromChain}`);
+          throw new Error(`html5DragAndDrop: origin not found for ${fromChain}`);
         }
 
         const dragStartEvent = createEvent('dragstart');
@@ -1181,7 +1180,7 @@ export class LensApp {
 
         const target = queryChain(toChain);
         if (!target) {
-          throw new Error(`dragDimensionToDimension: target not found for ${toChain}`);
+          throw new Error(`html5DragAndDrop: target not found for ${toChain}`);
         }
 
         const dropEvent = createEvent('drop');
@@ -1194,8 +1193,457 @@ export class LensApp {
       },
       [from, to] as [string, string]
     );
+  }
 
+  /**
+   * HTML5 DnD between dimension triggers/drop targets (FTR `dragDimensionToDimension`).
+   * Both `from` and `to` are test-subj chains (e.g. `panel > lns-dimensionTrigger`).
+   */
+  async dragDimensionToDimension({ from, to }: { from: string; to: string }) {
+    // Chains may match multiple nodes (e.g. Y panel with duplicates); wait for presence, not strict unique.
+    await this.page.waitForFunction(
+      (chain) => {
+        const parts = chain.split('>').map((p: string) => p.trim());
+        let nodes: Element[] = [document.body];
+        for (const part of parts) {
+          const next: Element[] = [];
+          for (const node of nodes) {
+            next.push(...Array.from(node.querySelectorAll(`[data-test-subj="${part}"]`)));
+          }
+          nodes = next;
+        }
+        return nodes.length > 0;
+      },
+      from,
+      { timeout: 10_000 }
+    );
+    await this.page.waitForFunction(
+      (chain) => {
+        const parts = chain.split('>').map((p: string) => p.trim());
+        let nodes: Element[] = [document.body];
+        for (const part of parts) {
+          const next: Element[] = [];
+          for (const node of nodes) {
+            next.push(...Array.from(node.querySelectorAll(`[data-test-subj="${part}"]`)));
+          }
+          nodes = next;
+        }
+        return nodes.length > 0;
+      },
+      to,
+      { timeout: 10_000 }
+    );
+    await this.html5DragAndDrop(from, to);
     await this.waitForLensDragDropToFinish();
+  }
+
+  /** Drags a field onto a dimension trigger / empty slot (test-subj chain). */
+  async dragFieldToDimensionTrigger(field: string, dimension: string) {
+    const fieldLocator = this.getFieldListPanelFieldLocator(field);
+    await fieldLocator.waitFor({ state: 'visible' });
+    const fieldTestSubj =
+      (await fieldLocator.getAttribute('data-test-subj')) ?? `lnsFieldListPanelField-${field}`;
+    await this.page.testSubj.locator(dimension).waitFor({ state: 'visible' });
+    await this.html5DragAndDrop(fieldTestSubj, dimension);
+    await this.waitForLensDragDropToFinish();
+  }
+
+  /**
+   * Reorders dimensions within a group (1-based indices, FTR `reorderDimensions`).
+   * The reorderable drop layer only mounts after dragstart, so the full DnD runs in-page.
+   */
+  async reorderDimensions(dimension: string, startIndex: number, endIndex: number) {
+    await this.page.waitForFunction(
+      ({ panelSubj, minCount }) =>
+        document.querySelectorAll(`[data-test-subj="${panelSubj}"]`).length >= minCount,
+      { panelSubj: dimension, minCount: Math.max(startIndex, endIndex) },
+      { timeout: 10_000 }
+    );
+    await this.page.evaluate(
+      async ([panelSubj, startIdx, endIdx]) => {
+        interface Transfer {
+          data: Record<string, string>;
+          setData: (key: string, value: string) => void;
+          getData: (key: string) => string;
+        }
+
+        function createEvent(typeOfEvent: string) {
+          const event = document.createEvent('CustomEvent') as CustomEvent & {
+            dataTransfer: Transfer;
+          };
+          event.initCustomEvent(typeOfEvent, true, true, null);
+          event.dataTransfer = {
+            data: {},
+            setData(key: string, value: string) {
+              this.data[key] = value;
+            },
+            getData(key: string) {
+              return this.data[key];
+            },
+          };
+          return event;
+        }
+
+        const panels = Array.from(document.querySelectorAll(`[data-test-subj="${panelSubj}"]`));
+        const startPanel = panels[startIdx - 1];
+        const endPanel = panels[endIdx - 1];
+        const origin = startPanel?.querySelector('.domDraggable');
+        if (!origin) {
+          throw new Error(
+            `reorderDimensions: missing origin for ${panelSubj} index ${startIdx} (found ${panels.length} panels)`
+          );
+        }
+        const dragStartEvent = createEvent('dragstart');
+        origin.dispatchEvent(dragStartEvent);
+        await new Promise((resolve) => setTimeout(resolve, 100));
+
+        const target =
+          endPanel?.querySelector(`[data-test-subj="lnsDragDrop-reorderableDropLayer"]`) ?? null;
+        if (!target) {
+          throw new Error(
+            `reorderDimensions: drop layer not found for ${panelSubj} index ${endIdx}`
+          );
+        }
+        const dropEvent = createEvent('drop');
+        dropEvent.dataTransfer = dragStartEvent.dataTransfer;
+        target.dispatchEvent(dropEvent);
+        const dragEndEvent = createEvent('dragend');
+        dragEndEvent.dataTransfer = dropEvent.dataTransfer;
+        origin.dispatchEvent(dragEndEvent);
+      },
+      [dimension, startIndex, endIndex] as [string, number, number]
+    );
+    await this.waitForLensDragDropToFinish();
+  }
+
+  /**
+   * Drags over a dimension group and drops on an extra target (duplicate/swap/combine).
+   * Mirrors FTR `dragEnterDrop` with timed dragenter → drop.
+   */
+  private async dragEnterDrop(dragging: string, draggedOver: string, dropTarget: string) {
+    await this.page.evaluate(
+      async ([fromSel, overSel, dropSel]) => {
+        interface Transfer {
+          data: Record<string, string>;
+          setData: (key: string, value: string) => void;
+          getData: (key: string) => string;
+        }
+
+        function createEvent(typeOfEvent: string) {
+          const event = document.createEvent('CustomEvent') as CustomEvent & {
+            dataTransfer: Transfer;
+          };
+          event.initCustomEvent(typeOfEvent, true, true, null);
+          event.dataTransfer = {
+            data: {},
+            setData(key: string, value: string) {
+              this.data[key] = value;
+            },
+            getData(key: string) {
+              return this.data[key];
+            },
+          };
+          return event;
+        }
+
+        function queryChain(chain: string): Element | null {
+          // CSS selector (starts with `[`) or test-subj chain with `>`
+          if (chain.trim().startsWith('[')) {
+            return document.querySelector(chain);
+          }
+          const parts = chain.split('>').map((p) => p.trim());
+          let nodes: Element[] = [document.body];
+          for (const part of parts) {
+            const next: Element[] = [];
+            for (const node of nodes) {
+              next.push(...Array.from(node.querySelectorAll(`[data-test-subj="${part}"]`)));
+            }
+            nodes = next;
+          }
+          return nodes[0] ?? null;
+        }
+
+        const origin = queryChain(fromSel);
+        if (!origin) {
+          throw new Error(`dragEnterDrop: origin not found for ${fromSel}`);
+        }
+        const dragStartEvent = createEvent('dragstart');
+        origin.dispatchEvent(dragStartEvent);
+
+        await new Promise((resolve) => setTimeout(resolve, 200));
+
+        const over = queryChain(overSel);
+        if (!over) {
+          throw new Error(`dragEnterDrop: draggedOver not found for ${overSel}`);
+        }
+        const dragenter = createEvent('dragenter');
+        dragenter.dataTransfer = dragStartEvent.dataTransfer;
+        over.dispatchEvent(dragenter);
+        const dragover = createEvent('dragover');
+        dragover.dataTransfer = dragStartEvent.dataTransfer;
+        over.dispatchEvent(dragover);
+
+        await new Promise((resolve) => setTimeout(resolve, 200));
+
+        const target = queryChain(dropSel);
+        if (!target) {
+          throw new Error(`dragEnterDrop: dropTarget not found for ${dropSel}`);
+        }
+        const dropEvent = createEvent('drop');
+        dropEvent.dataTransfer = dragStartEvent.dataTransfer;
+        target.dispatchEvent(dropEvent);
+        const dragEndEvent = createEvent('dragend');
+        dragEndEvent.dataTransfer = dropEvent.dataTransfer;
+        origin.dispatchEvent(dragEndEvent);
+      },
+      [dragging, draggedOver, dropTarget] as [string, string, string]
+    );
+  }
+
+  async dragFieldToExtraDropType(
+    field: string,
+    to: string,
+    type: 'duplicate' | 'swap' | 'combine',
+    visDataTestSubj?: string
+  ) {
+    const fieldLocator = this.getFieldListPanelFieldLocator(field);
+    await fieldLocator.waitFor({ state: 'visible' });
+    const fieldTestSubj =
+      (await fieldLocator.getAttribute('data-test-subj')) ?? `lnsFieldListPanelField-${field}`;
+    await this.dragEnterDrop(
+      fieldTestSubj,
+      `${to} > lnsDragDrop-domDroppable`,
+      `${to} > domDragDrop-dropTarget-${type}`
+    );
+    if (visDataTestSubj) {
+      await this.waitForVisualization(visDataTestSubj);
+    }
+  }
+
+  async dragDimensionToExtraDropType(
+    from: string,
+    to: string,
+    type: 'duplicate' | 'swap' | 'combine',
+    visDataTestSubj?: string
+  ) {
+    await this.page.testSubj.locator(from).waitFor({ state: 'visible' });
+    await this.dragEnterDrop(
+      from,
+      `${to} > lnsDragDrop-domDroppable`,
+      `${to} > domDragDrop-dropTarget-${type}`
+    );
+    if (visDataTestSubj) {
+      await this.waitForVisualization(visDataTestSubj);
+    }
+  }
+
+  /**
+   * Settle between Lens keyboard DnD arrow presses (FTR used `common.sleep(200)`).
+   * Polls until ~200ms elapsed instead of `waitForTimeout` / eslint-disable.
+   */
+  private async paceKeyboardDragDrop(previousActiveKey?: string): Promise<string> {
+    const started = Date.now();
+    await this.page.waitForFunction((start) => Date.now() - start >= 200, started, {
+      timeout: 2_000,
+    });
+    const activeKey = await this.page.evaluate(() => {
+      const active = document.querySelector('.domDroppable--active, .domDroppable--hover');
+      if (!active) {
+        return '';
+      }
+      return (
+        active.getAttribute('data-test-subj') ??
+        `${active.className}:${(active.textContent ?? '').slice(0, 40)}`
+      );
+    });
+    return activeKey || previousActiveKey || '';
+  }
+
+  /**
+   * Keyboard-drags a field onto a drop target by arrow steps (FTR `dragFieldWithKeyboard`).
+   */
+  async dragFieldWithKeyboard(fieldName: string, steps = 1, reverse = false) {
+    const handler = this.page.locator(
+      `[data-attr-field="${fieldName}"] [data-test-subj="lnsDragDrop-keyboardHandler"]`
+    );
+    // Prefer available-fields handler when the field is listed twice (selected + available).
+    const availableHandler = this.page.locator(
+      `[data-test-subj="lnsIndexPatternAvailableFields"] [data-attr-field="${fieldName}"] [data-test-subj="lnsDragDrop-keyboardHandler"]`
+    );
+    const target = (await availableHandler.count()) > 0 ? availableHandler : handler;
+    await target.waitFor({ state: 'visible' });
+    await target.focus();
+    await this.page.keyboard.press('Enter');
+    await this.page.waitForFunction(
+      () => document.querySelectorAll('.domDroppable--active').length > 0,
+      undefined,
+      { timeout: 10_000 }
+    );
+    let activeKey = await this.paceKeyboardDragDrop();
+    for (let i = 0; i < steps; i++) {
+      await this.page.keyboard.press(reverse ? 'ArrowLeft' : 'ArrowRight');
+      activeKey = await this.paceKeyboardDragDrop(activeKey);
+    }
+    await this.page.keyboard.press('Enter');
+    await this.waitForLensDragDropToFinish();
+  }
+
+  /**
+   * Keyboard-moves a dimension by arrow steps (FTR `dimensionKeyboardDragDrop`).
+   * FTR sleeps 200ms between arrow presses; we use soft active-target polling instead.
+   */
+  async dimensionKeyboardDragDrop(group: string, index = 0, steps = 1, reverse = false) {
+    const handlersLocator = this.page.locator(
+      `[data-test-subj="${group}"] [data-test-subj="lnsDragDrop-keyboardHandler"]`
+    );
+    await this.page.waitForFunction(
+      ({ groupSubj, min }) =>
+        document.querySelectorAll(
+          `[data-test-subj="${groupSubj}"] [data-test-subj="lnsDragDrop-keyboardHandler"]`
+        ).length > min,
+      { groupSubj: group, min: index },
+      { timeout: 10_000 }
+    );
+    const handlers = await handlersLocator.all();
+    const handler = handlers[index];
+    if (!handler) {
+      throw new Error(`dimensionKeyboardDragDrop: handler not found at index ${index}`);
+    }
+    await handler.focus();
+    await this.page.keyboard.press('Enter');
+    let activeKey = await this.paceKeyboardDragDrop();
+    for (let i = 0; i < steps; i++) {
+      await this.page.keyboard.press(reverse ? 'ArrowLeft' : 'ArrowRight');
+      activeKey = await this.paceKeyboardDragDrop(activeKey);
+    }
+    await this.paceKeyboardDragDrop(activeKey);
+    await this.page.keyboard.press('Enter');
+    await this.waitForLensDragDropToFinish();
+  }
+
+  /**
+   * Keyboard-reorders a dimension within its group (FTR `dimensionKeyboardReorder`).
+   */
+  async dimensionKeyboardReorder(group: string, index = 0, steps = 1, reverse = false) {
+    const handlersLocator = this.page.locator(
+      `[data-test-subj="${group}"] [data-test-subj="lnsDragDrop-keyboardHandler"]`
+    );
+    await this.page.waitForFunction(
+      ({ groupSubj, min }) =>
+        document.querySelectorAll(
+          `[data-test-subj="${groupSubj}"] [data-test-subj="lnsDragDrop-keyboardHandler"]`
+        ).length > min,
+      { groupSubj: group, min: index },
+      { timeout: 10_000 }
+    );
+    const handlers = await handlersLocator.all();
+    const handler = handlers[index];
+    if (!handler) {
+      throw new Error(`dimensionKeyboardReorder: handler not found at index ${index}`);
+    }
+    await handler.focus();
+    await this.page.keyboard.press('Enter');
+    let activeKey = await this.paceKeyboardDragDrop();
+    for (let i = 0; i < steps; i++) {
+      await this.page.keyboard.press(reverse ? 'ArrowUp' : 'ArrowDown');
+      activeKey = await this.paceKeyboardDragDrop(activeKey);
+    }
+    await this.paceKeyboardDragDrop(activeKey);
+    await this.page.keyboard.press('Enter');
+    await this.waitForLensDragDropToFinish();
+  }
+
+  /** Filters the field list (FTR `searchField`). */
+  async searchField(name: string) {
+    const input = this.page.testSubj.locator('lnsIndexPatternFieldSearch');
+    await input.waitFor({ state: 'visible' });
+    await input.fill('');
+    await this.page.testSubj.typeWithDelay('lnsIndexPatternFieldSearch', name, { delay: 30 });
+  }
+
+  /**
+   * Removes/resets a layer (FTR `removeLayer`). With a single layer this resets the viz.
+   */
+  async removeLayer(index = 0) {
+    const tabsLocator = this.page.locator('[data-test-subj^="unifiedTabs_tab_"]');
+    const tabs = await tabsLocator.all();
+    if (tabs[index]) {
+      await tabs[index].hover();
+    }
+    const splitButton = this.page.testSubj.locator(`lnsLayerSplitButton--${index}`);
+    if (await splitButton.isVisible()) {
+      await splitButton.click();
+    }
+    await this.page.testSubj.click(`lnsLayerRemove--${index}`);
+    const modal = this.page.testSubj.locator('lnsLayerRemoveModal');
+    if (await modal.isVisible()) {
+      await this.page.testSubj.click('lnsLayerRemoveConfirmButton');
+    }
+  }
+
+  /**
+   * Ensures the layer tab is active when multiple layers exist (FTR `ensureLayerTabIsActive`).
+   * No-op when the tab bar is hidden (single layer).
+   */
+  async ensureLayerTabIsActive(index = 0) {
+    const tabsLocator = this.page.locator('[data-test-subj^="unifiedTabs_tab_"]');
+    if ((await tabsLocator.count()) === 0) {
+      return;
+    }
+    const tabs = await tabsLocator.all();
+    const tab = tabs[index];
+    if (!tab) {
+      throw new Error(`ensureLayerTabIsActive: tab not found at index ${index}`);
+    }
+    if ((await tab.getAttribute('aria-selected')) === 'true') {
+      await this.page.testSubj.locator(`lns-layerPanel-${index}`).waitFor({ state: 'visible' });
+      return;
+    }
+    await this.activateLayerTab(index);
+  }
+
+  /** Returns whether the open dimension editor has top-level aggregation enabled. */
+  async isTopLevelAggregation(): Promise<boolean> {
+    const nestingSwitch = this.page.testSubj.locator('indexPattern-nesting-switch');
+    await nestingSwitch.waitFor({ state: 'visible' });
+    return nestingSwitch.isChecked();
+  }
+
+  /** Focused field list item — name + test-subj for keyboard-DnD assertions (FTR `assertFocusedField`). */
+  async getFocusedField(): Promise<{ name: string; testSubj: string | null }> {
+    return this.page.evaluate(() => {
+      const input = document.activeElement as HTMLElement | null;
+      if (!input) {
+        return { name: '', testSubj: null };
+      }
+      // FTR: activeElement parent holds `data-test-subj="lnsFieldListPanelField"`.
+      const parent = input.parentElement;
+      let fieldEl: HTMLElement | null = input;
+      while (fieldEl && !fieldEl.getAttribute('data-attr-field')) {
+        fieldEl = fieldEl.parentElement;
+      }
+      return {
+        name: fieldEl?.getAttribute('data-attr-field') ?? '',
+        testSubj: parent?.getAttribute('data-test-subj') ?? null,
+      };
+    });
+  }
+
+  /** Visible text of the focused field list item (for keyboard-DnD assertions). */
+  async getFocusedFieldName(): Promise<string> {
+    return (await this.getFocusedField()).name;
+  }
+
+  /** Visible text of the focused dimension trigger (for keyboard-DnD assertions). */
+  async getFocusedDimensionLabel(): Promise<string> {
+    return this.page.evaluate(() => {
+      const input = document.activeElement;
+      if (!input) {
+        return '';
+      }
+      const dimension = input.parentElement?.parentElement;
+      return (dimension?.textContent ?? '').replace(/\u200b/g, '').trim();
+    });
   }
 
   async getWorkspaceErrorCount(): Promise<number> {
