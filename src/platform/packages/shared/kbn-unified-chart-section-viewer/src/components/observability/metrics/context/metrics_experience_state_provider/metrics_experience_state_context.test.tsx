@@ -9,7 +9,6 @@
 
 import React, { useContext } from 'react';
 import { renderHook, act } from '@testing-library/react';
-import { getFetch$Mock, getFetchParamsMock } from '@kbn/unified-histogram/__mocks__/fetch_params';
 import {
   MetricsExperienceStateContext,
   MetricsExperienceStateProvider,
@@ -285,92 +284,6 @@ describe('MetricsExperienceStateProvider', () => {
         ]);
       });
       expect(result.current.currentPage).toBe(3);
-    });
-  });
-
-  describe('recentlyExploredMetrics', () => {
-    const renderWithRecency = (getRecentlyExploredMetrics: () => readonly string[]) => {
-      const fetch$ = getFetch$Mock();
-      const recencyWrapper = ({ children }: { children: React.ReactNode }) => (
-        <MetricsExperienceStateProvider
-          profileId="test-profile"
-          getRecentlyExploredMetrics={getRecentlyExploredMetrics}
-          discoverFetch$={fetch$}
-        >
-          {children}
-        </MetricsExperienceStateProvider>
-      );
-      const { result } = renderHook(() => useMetricsExperienceState(), { wrapper: recencyWrapper });
-      return { result, fetch$ };
-    };
-
-    it('reads the recency snapshot on mount', () => {
-      const { result } = renderWithRecency(() => ['metrics-*::cpu']);
-
-      expect(result.current.recentlyExploredMetrics).toEqual(['metrics-*::cpu']);
-    });
-
-    it('re-reads when the sort changes', () => {
-      let stored: string[] = ['metrics-*::cpu'];
-      const { result } = renderWithRecency(() => stored);
-
-      stored = ['metrics-*::memory', 'metrics-*::cpu'];
-      act(() => {
-        result.current.onMetricsSortChange([METRICS_SORT_BY.recency, METRICS_SORT_DIRECTION.desc]);
-      });
-
-      expect(result.current.recentlyExploredMetrics).toEqual([
-        'metrics-*::memory',
-        'metrics-*::cpu',
-      ]);
-    });
-
-    it('re-reads when the search term changes', () => {
-      let stored: string[] = [];
-      const { result } = renderWithRecency(() => stored);
-
-      stored = ['metrics-*::cpu'];
-      act(() => {
-        result.current.onSearchTermChange('cpu');
-      });
-
-      expect(result.current.recentlyExploredMetrics).toEqual(['metrics-*::cpu']);
-    });
-
-    it('re-reads when the dimensions change', () => {
-      let stored: string[] = [];
-      const { result } = renderWithRecency(() => stored);
-
-      stored = ['metrics-*::cpu'];
-      act(() => {
-        result.current.onDimensionsChange([{ name: 'host.name' }]);
-      });
-
-      expect(result.current.recentlyExploredMetrics).toEqual(['metrics-*::cpu']);
-    });
-
-    it('re-reads when the Discover fetch emits', () => {
-      let stored: string[] = [];
-      const { result, fetch$ } = renderWithRecency(() => stored);
-
-      stored = ['metrics-*::cpu'];
-      act(() => {
-        fetch$.next({ fetchParams: getFetchParamsMock(), lensVisServiceState: undefined });
-      });
-
-      expect(result.current.recentlyExploredMetrics).toEqual(['metrics-*::cpu']);
-    });
-
-    it('does not re-read when only the page changes', () => {
-      let stored: string[] = ['metrics-*::cpu'];
-      const { result } = renderWithRecency(() => stored);
-
-      stored = ['metrics-*::memory', 'metrics-*::cpu'];
-      act(() => {
-        result.current.onPageChange(2);
-      });
-
-      expect(result.current.recentlyExploredMetrics).toEqual(['metrics-*::cpu']);
     });
   });
 });
