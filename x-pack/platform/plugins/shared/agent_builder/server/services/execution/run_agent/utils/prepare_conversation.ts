@@ -13,7 +13,7 @@ import type {
   RoundInput,
 } from '@kbn/agent-builder-common';
 import { createBadRequestError } from '@kbn/agent-builder-common';
-import type { AttachmentInput, AttachmentVersionRef } from '@kbn/agent-builder-common/attachments';
+import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import {
   ATTACHMENT_REF_ACTOR,
   getLatestVersion,
@@ -24,14 +24,9 @@ import type {
   AttachmentResolveContext,
   AttachmentStateManager,
 } from '@kbn/agent-builder-server/attachments';
-import type { AttachmentsService } from '@kbn/agent-builder-server/runner';
 import type { AgentHandlerContext } from '@kbn/agent-builder-server/agents';
 
 import { mergeAttachmentRefs } from './add_round_complete_event';
-import {
-  type AttachmentContextProvider,
-  makeAttachmentContextProvider,
-} from './attachment_context';
 import { formatAttachmentsMetadata } from './attachment_presentation';
 
 export type ProcessedConversationRound = Omit<ConversationRound, 'input'> & {
@@ -52,13 +47,11 @@ export interface ProcessedConversation {
  **/
 const mergeInputAttachmentsIntoAttachmentState = async (
   attachmentStateManager: AttachmentStateManager,
-  attachmentContextProvider: AttachmentContextProvider,
-  attachmentsService: AttachmentsService,
+  attachmentContentByKey: Map<string, string>,
   inputs: AttachmentInput[],
   options: { updateOriginSnapshot?: boolean; resolveContext: AttachmentResolveContext }
-): Promise<ProcessedAttachmentType[]> => {
-  const attachmentTypes: ProcessedAttachmentType[] = [];
-  if (inputs.length === 0) return attachmentTypes;
+): Promise<void> => {
+  if (inputs.length === 0) return;
 
   for (const input of inputs) {
     // Prefer stable IDs (if provided)
@@ -80,21 +73,12 @@ const mergeInputAttachmentsIntoAttachmentState = async (
             ATTACHMENT_REF_ACTOR.user
           );
         }
-        if (attachmentContextProvider.areTypeInstructionsNeeded(input.type)) {
-          attachmentContextProvider.markTypeInstructionsProvided(input.type);
-          const definition = attachmentsService.getTypeDefinition(input.type);
-          const description = definition?.getAgentDescription?.() ?? undefined;
-          attachmentTypes.push({
-            type: input.type,
-            description,
-          });
-        }
         continue;
       }
     }
 
     const contentKey = getContentKey(input, 'unknown');
-    if (attachmentContextProvider.hasAttachmentContent(contentKey)) {
+    if (attachmentContentByKey.has(contentKey)) {
       // already present (same content), nothing to do
       continue;
     }
@@ -115,50 +99,9 @@ const mergeInputAttachmentsIntoAttachmentState = async (
 
     const latest = getLatestVersion(created);
     if (latest) {
-      attachmentContextProvider.setAttachmentContentKey(
-        `${created.type}:${latest.content_hash}`,
-        created.id
-      );
-    }
-
-    if (attachmentContextProvider.areTypeInstructionsNeeded(input.type)) {
-      attachmentContextProvider.markTypeInstructionsProvided(input.type);
-      const definition = attachmentsService.getTypeDefinition(input.type);
-      const description = definition?.getAgentDescription?.() ?? undefined;
-      attachmentTypes.push({
-        type: input.type,
-        description,
-      });
+      attachmentContentByKey.set(`${created.type}:${latest.content_hash}`, created.id);
     }
   }
-
-  return attachmentTypes;
-};
-
-const getNewAttachmentTypesFromRefs = (
-  attachmentStateManager: AttachmentStateManager,
-  attachmentContextProvider: AttachmentContextProvider,
-  attachmentsService: AttachmentsService,
-  attachmentRefs: AttachmentVersionRef[]
-): ProcessedAttachmentType[] => {
-  const attachmentTypes: ProcessedAttachmentType[] = [];
-  const typeInstructionsNeeded: string[] = [];
-  for (const ref of attachmentRefs) {
-    const type = attachmentStateManager.get(ref.attachment_id)?.type;
-    if (type && attachmentContextProvider.areTypeInstructionsNeeded(type)) {
-      typeInstructionsNeeded.push(type);
-      attachmentContextProvider.markTypeInstructionsProvided(type);
-    }
-  }
-  typeInstructionsNeeded.forEach((type) => {
-    const definition = attachmentsService.getTypeDefinition(type);
-    const description = definition?.getAgentDescription?.() ?? undefined;
-    attachmentTypes.push({
-      type,
-      description,
-    });
-  });
-  return attachmentTypes;
 };
 
 /**
@@ -206,13 +149,20 @@ export const prepareConversation = async ({
   action?: ConversationAction;
 }): Promise<ProcessedConversation> => {
   const { attachments: attachmentsService, attachmentStateManager } = context;
-  const attachmentContextProvider = makeAttachmentContextProvider(attachmentStateManager);
   const resolveContext: AttachmentResolveContext = {
     request: context.request,
     spaceId: context.spaceId,
     savedObjectsClient: context.savedObjectsClient,
   };
-  const conversationAttachmentTypes: ProcessedAttachmentType[] = [];
+
+  // Pre-populate content keys from already-known attachments to detect duplicates.
+  const attachmentContentByKey = new Map<string, string>();
+  for (const existing of attachmentStateManager.getAll()) {
+    const latest = getLatestVersion(existing);
+    if (latest) {
+      attachmentContentByKey.set(`${existing.type}:${latest.content_hash}`, existing.id);
+    }
+  }
 
   // Handle regenerate action: use last round's input and strip it from previous rounds
   const { effectiveRounds, effectiveNextInput } = prepareForAction({
@@ -223,28 +173,15 @@ export const prepareConversation = async ({
 
   const processedRounds: ProcessedConversationRound[] = [];
   for (const round of effectiveRounds) {
-    let attachmentTypes: ProcessedAttachmentType[] = [];
     attachmentStateManager.clearAccessTracking();
     // migrate legacy attachments to state manger and updates refs for this round
     if (round.input.attachments && round.input.attachments.length > 0) {
-      attachmentTypes = await mergeInputAttachmentsIntoAttachmentState(
+      await mergeInputAttachmentsIntoAttachmentState(
         attachmentStateManager,
-        attachmentContextProvider,
-        attachmentsService,
+        attachmentContentByKey,
         round.input.attachments,
-        {
-          resolveContext,
-        }
+        { resolveContext }
       );
-    }
-    if (round.input.attachment_refs) {
-      const newTypes = getNewAttachmentTypesFromRefs(
-        attachmentStateManager,
-        attachmentContextProvider,
-        attachmentsService,
-        round.input.attachment_refs
-      );
-      attachmentTypes.push(...newTypes);
     }
     const attachmentRefs = mergeAttachmentRefs(
       round.input.attachment_refs,
@@ -258,38 +195,17 @@ export const prepareConversation = async ({
         attachment_refs: attachmentRefs,
       },
     };
-    const processedRound = await prepareRound({
-      round: strippedRound,
-      attachmentStateManager,
-    });
-    if (attachmentTypes.length) {
-      processedRound.input.attachment_types = attachmentTypes;
-      conversationAttachmentTypes.push(...attachmentTypes);
-    }
-    processedRounds.push(processedRound);
+    processedRounds.push(prepareRound({ round: strippedRound, attachmentStateManager }));
   }
 
   attachmentStateManager.clearAccessTracking();
   const nextInputAttachments = (effectiveNextInput.attachments ?? []) as AttachmentInput[];
-  const nextInputAttachmentTypes = await mergeInputAttachmentsIntoAttachmentState(
+  await mergeInputAttachmentsIntoAttachmentState(
     attachmentStateManager,
-    attachmentContextProvider,
-    attachmentsService,
+    attachmentContentByKey,
     nextInputAttachments,
-    {
-      updateOriginSnapshot: true,
-      resolveContext,
-    }
+    { updateOriginSnapshot: true, resolveContext }
   );
-  if (effectiveNextInput.attachment_refs) {
-    const newRefTypes = getNewAttachmentTypesFromRefs(
-      attachmentStateManager,
-      attachmentContextProvider,
-      attachmentsService,
-      effectiveNextInput.attachment_refs
-    );
-    nextInputAttachmentTypes.push(...newRefTypes);
-  }
   const nextInputAccessedRefs = attachmentStateManager.getAccessedRefs();
   const mergedNextInputRefs = mergeAttachmentRefs(
     effectiveNextInput.attachment_refs,
@@ -301,49 +217,68 @@ export const prepareConversation = async ({
     attachments: [],
     ...(mergedNextInputRefs ? { attachment_refs: mergedNextInputRefs } : {}),
   };
-  const processedNextInput = await prepareRoundInput({
+  const processedNextInput = prepareRoundInput({
     input: strippedNextInput,
     attachmentStateManager,
   });
-  processedNextInput.attachment_types = nextInputAttachmentTypes.length
-    ? nextInputAttachmentTypes
-    : undefined;
-  conversationAttachmentTypes.push(...nextInputAttachmentTypes);
+
+  const roundAttachmentTypes = [
+    ...(processedNextInput.attachment_refs ?? []),
+    ...processedRounds.flatMap((round) => round.input.attachment_refs ?? []),
+  ]
+    .map((ar) => ar.type)
+    .filter((type): type is string => !!type);
+
+  const conversationAttachmentTypes = attachmentStateManager.getActive().map((a) => a.type);
+  const attachmentTypeIds = [
+    ...new Set<string>([...conversationAttachmentTypes, ...roundAttachmentTypes]),
+  ];
+
+  const attachmentTypes = await Promise.all(
+    attachmentTypeIds.map<Promise<ProcessedAttachmentType>>(async (type) => {
+      const definition = attachmentsService.getTypeDefinition(type);
+      const description = definition?.getAgentDescription?.() ?? undefined;
+      return {
+        type,
+        description,
+      };
+    })
+  );
 
   return {
     nextInput: processedNextInput,
     previousRounds: processedRounds,
-    attachmentTypes: conversationAttachmentTypes,
+    attachmentTypes,
     attachmentStateManager,
   };
 };
 
-const prepareRound = async ({
+const prepareRound = ({
   round,
   attachmentStateManager,
 }: {
   round: ConversationRound;
   attachmentStateManager: AttachmentStateManager;
-}): Promise<ProcessedConversationRound> => {
+}): ProcessedConversationRound => {
   return {
     ...round,
-    input: await prepareRoundInput({
-      input: round.input,
-      attachmentStateManager,
-    }),
+    input: prepareRoundInput({ input: round.input, attachmentStateManager }),
   };
 };
 
-const prepareRoundInput = async ({
+const prepareRoundInput = ({
   input,
   attachmentStateManager,
 }: {
   input: RoundInput | ConverseInput;
   attachmentStateManager: AttachmentStateManager;
-}): Promise<ProcessedRoundInput> => {
+}): ProcessedRoundInput => {
   const inputAttachments: Partial<ProcessedRoundInput> = {};
   if (input.attachment_refs) {
-    inputAttachments.attachment_refs = input.attachment_refs;
+    inputAttachments.attachment_refs = input.attachment_refs.map((ref) => ({
+      ...ref,
+      type: attachmentStateManager.getAttachmentRecord(ref.attachment_id)?.type,
+    }));
     if ('attachment_context' in input && input.attachment_context) {
       inputAttachments.attachment_context = input.attachment_context;
     } else {

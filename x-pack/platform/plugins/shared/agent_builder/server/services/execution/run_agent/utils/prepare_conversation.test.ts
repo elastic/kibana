@@ -195,7 +195,7 @@ describe('prepareConversation', () => {
       expect(result.attachmentTypes.map((t) => t.type)).toEqual(['text']);
     });
 
-    it('sets attachment_context and attachment_types on nextInput when promoted from legacy attachments array', async () => {
+    it('sets attachment_context on nextInput and includes attachment type in conversation attachmentTypes when promoted from legacy attachments array', async () => {
       mockContext.attachmentStateManager = createAttachmentStateManager([], {
         getTypeDefinition: (type: string) => ({
           id: type,
@@ -224,8 +224,8 @@ describe('prepareConversation', () => {
       expect(result.nextInput.attachment_context).toContain('<attachments count="1">');
       expect(result.nextInput.attachment_context).toContain('attachment_id="note-1"');
 
-      // attachment_types should carry the type description for new types
-      expect(result.nextInput.attachment_types).toEqual([
+      // attachment type description is surfaced at conversation level, not per-round
+      expect(result.attachmentTypes).toEqual([
         { type: 'text', description: 'A text attachment type' },
       ]);
     });
@@ -562,8 +562,9 @@ describe('prepareConversation', () => {
         context: mockContext,
       });
 
+      // type is undefined because a-1 was never added to the state manager for this conversation
       expect(result.previousRounds[0].input.attachment_refs).toEqual([
-        { attachment_id: 'a-1', version: 1, operation: 'created', actor: 'user' },
+        { attachment_id: 'a-1', version: 1, operation: 'created', actor: 'user', type: undefined },
       ]);
       expect(result.previousRounds[0].input.attachment_context).toBe(
         '<attachments count="1"><attachment attachment_id="a-1"/></conversation-attachments>'
@@ -674,7 +675,7 @@ describe('prepareConversation', () => {
     });
   });
 
-  describe('attachment_types on ProcessedRoundInput', () => {
+  describe('ProcessedAttachmentVersionRef type field and conversation attachmentTypes', () => {
     const makeStateManager = (attachments: VersionedAttachment[]) =>
       createAttachmentStateManager(attachments, {
         getTypeDefinition: (type: string) => ({
@@ -684,18 +685,19 @@ describe('prepareConversation', () => {
         }),
       });
 
-    it('is undefined on all rounds when there are no attachment_refs', async () => {
+    it('leaves attachment_refs undefined and attachmentTypes empty when there are no attachment_refs', async () => {
       const result = await prepareConversation({
         previousRounds: [createRound({ input: { message: 'Previous' } })],
         nextInput: { message: 'Hello' },
         context: mockContext,
       });
 
-      expect(result.previousRounds[0].input.attachment_types).toBeUndefined();
-      expect(result.nextInput.attachment_types).toBeUndefined();
+      expect(result.previousRounds[0].input.attachment_refs).toBeUndefined();
+      expect(result.nextInput.attachment_refs).toBeUndefined();
+      expect(result.attachmentTypes).toEqual([]);
     });
 
-    it('sets attachment_types on a previous round that introduces a new type via attachment_refs', async () => {
+    it('sets type on attachment_refs from the state manager and includes that type in conversation attachmentTypes', async () => {
       mockContext.attachmentStateManager = makeStateManager([
         {
           id: 'a-1',
@@ -735,13 +737,17 @@ describe('prepareConversation', () => {
         context: mockContext,
       });
 
-      expect(result.previousRounds[0].input.attachment_types).toEqual([
+      expect(result.previousRounds[0].input.attachment_refs![0]).toMatchObject({
+        attachment_id: 'a-1',
+        type: 'text',
+      });
+      expect(result.nextInput.attachment_refs).toBeUndefined();
+      expect(result.attachmentTypes).toEqual([
         { type: 'text', description: 'A text attachment type' },
       ]);
-      expect(result.nextInput.attachment_types).toBeUndefined();
     });
 
-    it('only sets attachment_types on the first round that introduces a type — subsequent rounds with the same type get undefined', async () => {
+    it('deduplicates types across rounds — all refs get type set, but attachmentTypes lists each type once', async () => {
       mockContext.attachmentStateManager = makeStateManager([
         {
           id: 'a-1',
@@ -804,14 +810,16 @@ describe('prepareConversation', () => {
         context: mockContext,
       });
 
-      expect(result.previousRounds[0].input.attachment_types).toEqual([
+      // All refs get type set regardless of which round introduced the type first
+      expect(result.previousRounds[0].input.attachment_refs![0]).toMatchObject({ type: 'text' });
+      expect(result.previousRounds[1].input.attachment_refs![0]).toMatchObject({ type: 'text' });
+      // 'text' appears in both rounds but is deduplicated to one entry
+      expect(result.attachmentTypes).toEqual([
         { type: 'text', description: 'A text attachment type' },
       ]);
-      expect(result.previousRounds[1].input.attachment_types).toBeUndefined();
-      expect(result.nextInput.attachment_types).toBeUndefined();
     });
 
-    it('sets attachment_types on nextInput when it has explicit attachment_refs for a new type', async () => {
+    it('sets type on nextInput attachment_refs and includes the type in conversation attachmentTypes', async () => {
       mockContext.attachmentStateManager = makeStateManager([
         {
           id: 'a-1',
@@ -847,12 +855,16 @@ describe('prepareConversation', () => {
         context: mockContext,
       });
 
-      expect(result.nextInput.attachment_types).toEqual([
+      expect(result.nextInput.attachment_refs![0]).toMatchObject({
+        attachment_id: 'a-1',
+        type: 'text',
+      });
+      expect(result.attachmentTypes).toEqual([
         { type: 'text', description: 'A text attachment type' },
       ]);
     });
 
-    it('does not set attachment_types on nextInput when the type was already introduced in a previous round', async () => {
+    it('deduplicates when the same type appears in both a previous round and nextInput', async () => {
       mockContext.attachmentStateManager = makeStateManager([
         {
           id: 'a-1',
@@ -919,13 +931,15 @@ describe('prepareConversation', () => {
         context: mockContext,
       });
 
-      expect(result.previousRounds[0].input.attachment_types).toEqual([
+      expect(result.previousRounds[0].input.attachment_refs![0]).toMatchObject({ type: 'text' });
+      expect(result.nextInput.attachment_refs![0]).toMatchObject({ type: 'text' });
+      // 'text' appears in both round and nextInput refs, but is deduplicated to one entry
+      expect(result.attachmentTypes).toEqual([
         { type: 'text', description: 'A text attachment type' },
       ]);
-      expect(result.nextInput.attachment_types).toBeUndefined();
     });
 
-    it('sets attachment_types on separate rounds when they introduce distinct types', async () => {
+    it('includes all distinct types in attachmentTypes, each ref carrying its own type', async () => {
       mockContext.attachmentStateManager = makeStateManager([
         {
           id: 'a-1',
@@ -988,13 +1002,15 @@ describe('prepareConversation', () => {
         context: mockContext,
       });
 
-      expect(result.previousRounds[0].input.attachment_types).toEqual([
-        { type: 'text', description: 'A text attachment' },
-      ]);
-      expect(result.previousRounds[1].input.attachment_types).toEqual([
-        { type: 'image', description: 'A image attachment' },
-      ]);
-      expect(result.nextInput.attachment_types).toBeUndefined();
+      expect(result.previousRounds[0].input.attachment_refs![0]).toMatchObject({ type: 'text' });
+      expect(result.previousRounds[1].input.attachment_refs![0]).toMatchObject({ type: 'image' });
+      expect(result.attachmentTypes).toEqual(
+        expect.arrayContaining([
+          { type: 'text', description: 'A text attachment' },
+          { type: 'image', description: 'A image attachment' },
+        ])
+      );
+      expect(result.attachmentTypes).toHaveLength(2);
     });
   });
 
@@ -1050,8 +1066,9 @@ describe('prepareConversation', () => {
       expect(result.nextInput.message).toBe('Original message');
 
       // The original round's attachment_refs must be preserved (merged), not dropped.
+      // type is undefined because a-1 is not in the state manager for this conversation.
       expect(result.nextInput.attachment_refs).toEqual([
-        { attachment_id: 'a-1', version: 1, actor: 'user' },
+        { attachment_id: 'a-1', version: 1, actor: 'user', type: undefined },
       ]);
     });
 
@@ -1107,8 +1124,9 @@ describe('prepareConversation', () => {
         action: 'regenerate',
       });
 
+      // a-1 exists in the state manager with type 'text', so type is set on the ref.
       expect(result.nextInput.attachment_refs).toEqual([
-        { attachment_id: 'a-1', version: 1, operation: 'created', actor: 'user' },
+        { attachment_id: 'a-1', version: 1, operation: 'created', actor: 'user', type: 'text' },
       ]);
     });
   });

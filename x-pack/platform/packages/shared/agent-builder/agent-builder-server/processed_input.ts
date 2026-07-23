@@ -26,15 +26,21 @@ export interface ProcessedAttachmentType {
 }
 
 /**
+ * Server-side processed attachment reference
+ */
+export interface ProcessedAttachmentVersionRef extends AttachmentVersionRef {
+  /** Type added to track instructions */
+  type?: string;
+}
+
+/**
  * Processed input for a single conversation round (message + processed attachments).
  */
 export interface ProcessedRoundInput {
   message: string;
   attachments: ProcessedAttachment[];
   /** References to versioned conversation-level attachments touched during this round. */
-  attachment_refs?: AttachmentVersionRef[];
+  attachment_refs?: ProcessedAttachmentVersionRef[];
   /** Pre-rendered, immutable attachment prompt context for this round (see RoundInput). */
   attachment_context?: string;
-  /** Pre-rendered attachment instructions associated with types introduced in this round. */
-  attachment_types?: ProcessedAttachmentType[];
 }

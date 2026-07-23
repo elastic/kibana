@@ -8,6 +8,7 @@
 import type { AIMessage, ToolMessage } from '@langchain/core/messages';
 import { isAIMessage, isHumanMessage } from '@langchain/core/messages';
 import type {
+  CompactionSummary,
   ConversationRoundStep,
   ReasoningStep,
   ToolCallStep,
@@ -35,7 +36,7 @@ describe('convertPreviousRounds', () => {
   const makeRoundInput = (
     message: string,
     attachments: ProcessedAttachment[] = [],
-    overrides: Partial<Pick<ProcessedRoundInput, 'attachment_types' | 'attachment_context'>> = {}
+    overrides: Partial<Pick<ProcessedRoundInput, 'attachment_refs' | 'attachment_context'>> = {}
   ): ProcessedRoundInput => ({
     message,
     attachments,
@@ -500,14 +501,17 @@ describe('convertPreviousRounds', () => {
     });
   });
 
-  describe('with attachment_types', () => {
-    it('renders type instructions on the next-input message', async () => {
+  describe('with attachment type instructions', () => {
+    it('renders type instructions when a ref introduces a new type', async () => {
       const nextInput = makeRoundInput('tell me about this', [], {
-        attachment_types: [{ type: 'esql', description: 'An ES|QL query.' }],
+        attachment_refs: [{ attachment_id: 'a-1', version: 1, type: 'esql' }],
       });
 
       const result = await convertPreviousRounds({
-        conversation: createConversation({ nextInput }),
+        conversation: createConversation({
+          nextInput,
+          attachmentTypes: [{ type: 'esql', description: 'An ES|QL query.' }],
+        }),
       });
 
       expect(result).toHaveLength(1);
@@ -518,12 +522,14 @@ describe('convertPreviousRounds', () => {
       expect(content).toContain('An ES|QL query.');
     });
 
-    it('renders type instructions on a previous round message but not on the next-input message', async () => {
+    it('renders type instructions on the first occurrence only — subsequent rounds with the same type get no instructions', async () => {
+      // Previous round introduces 'esql' → shared Set records it.
+      // Next-input also has an esql ref → already provided, so instructions are suppressed.
       const previousRounds = [
         createRound({
           id: 'round-1',
           input: makeRoundInput('first message', [], {
-            attachment_types: [{ type: 'esql', description: 'An ES|QL query.' }],
+            attachment_refs: [{ attachment_id: 'a-1', version: 1, type: 'esql' }],
           }),
           response: makeAssistantResponse('got it'),
         }),
@@ -532,7 +538,10 @@ describe('convertPreviousRounds', () => {
       const result = await convertPreviousRounds({
         conversation: createConversation({
           previousRounds,
-          nextInput: makeRoundInput('follow-up'),
+          nextInput: makeRoundInput('follow-up', [], {
+            attachment_refs: [{ attachment_id: 'a-1', version: 2, type: 'esql' }],
+          }),
+          attachmentTypes: [{ type: 'esql', description: 'An ES|QL query.' }],
         }),
       });
 
@@ -545,24 +554,90 @@ describe('convertPreviousRounds', () => {
       expect(result[2].content as string).not.toContain('## ATTACHMENT TYPES');
     });
 
-    it('omits type instructions when attachment_types is an empty array', async () => {
-      const nextInput = makeRoundInput('hello', [], { attachment_types: [] });
+    it('omits type instructions when the ref type is not in the conversation attachmentTypes', async () => {
+      const nextInput = makeRoundInput('hello', [], {
+        attachment_refs: [{ attachment_id: 'a-1', version: 1, type: 'unknown-type' }],
+      });
 
       const result = await convertPreviousRounds({
-        conversation: createConversation({ nextInput }),
+        conversation: createConversation({
+          nextInput,
+          attachmentTypes: [], // 'unknown-type' has no entry in the master list
+        }),
       });
 
       expect(result[0].content as string).not.toContain('## ATTACHMENT TYPES');
     });
 
-    it('omits type instructions when attachment_types is absent', async () => {
+    it('omits type instructions when there are no attachment_refs', async () => {
       const nextInput = makeRoundInput('hello');
 
       const result = await convertPreviousRounds({
-        conversation: createConversation({ nextInput }),
+        conversation: createConversation({
+          nextInput,
+          attachmentTypes: [{ type: 'esql', description: 'An ES|QL query.' }],
+        }),
       });
 
       expect(result[0].content as string).not.toContain('## ATTACHMENT TYPES');
+    });
+
+    it('re-renders type instructions after compaction — the first remaining round that references a type gets instructions even if it appeared in a now-compacted round', async () => {
+      // The compaction summary replaces earlier rounds where 'esql' was first introduced.
+      // Because attachmentTypeInstructionsProvided starts empty each call, the first
+      // remaining round that has an esql ref must re-render the type instructions.
+      const compactionSummary: CompactionSummary = {
+        summarized_round_count: 2,
+        created_at: '2024-01-01T00:00:00.000Z',
+        token_count: 100,
+        structured_data: {
+          discussion_summary: 'User shared ES|QL queries.',
+          user_intent: 'Understand ES|QL syntax',
+          key_topics: [],
+          outcomes_and_decisions: [],
+          agent_actions: [],
+          entities: [],
+          unanswered_questions: [],
+          tool_calls_summary: [],
+        },
+      };
+
+      const previousRounds = [
+        createRound({
+          id: 'round-3',
+          input: makeRoundInput('what is this query doing?', [], {
+            attachment_refs: [{ attachment_id: 'q-1', version: 1, type: 'esql' }],
+          }),
+          response: makeAssistantResponse('It filters by status.'),
+        }),
+      ];
+
+      const result = await convertPreviousRounds({
+        conversation: createConversation({
+          previousRounds,
+          nextInput: makeRoundInput('follow-up', [], {
+            attachment_refs: [{ attachment_id: 'q-1', version: 1, type: 'esql' }],
+          }),
+          attachmentTypes: [{ type: 'esql', description: 'An ES|QL query.' }],
+        }),
+        compactionSummary,
+      });
+
+      // compaction user + compaction assistant + round user + round assistant + nextInput user
+      expect(result).toHaveLength(5);
+
+      expect(isHumanMessage(result[0])).toBe(true);
+      expect(result[0].content).toContain('[Previous conversation context was compacted]');
+      expect(isAIMessage(result[1])).toBe(true);
+
+      // First remaining round after compaction gets type instructions (Set starts fresh)
+      expect(isHumanMessage(result[2])).toBe(true);
+      expect(result[2].content as string).toContain('## ATTACHMENT TYPES');
+      expect(result[2].content as string).toContain('An ES|QL query.');
+
+      // nextInput has the same type ref but should not repeat instructions (Set is shared within the call)
+      expect(isHumanMessage(result[4])).toBe(true);
+      expect(result[4].content as string).not.toContain('## ATTACHMENT TYPES');
     });
   });
 
@@ -627,13 +702,16 @@ describe('convertPreviousRounds', () => {
     it('orders message → attachments XML → attachment_context within a single message → type instructions', async () => {
       const attachment = makeProcessedAttachment('att-1', 'text', { content: 'data' }, 'text data');
       const nextInput = makeRoundInput('user message', [attachment], {
-        attachment_types: [{ type: 'text', description: 'Plain text.' }],
+        attachment_refs: [{ attachment_id: 'att-1', version: 1, type: 'text' }],
         attachment_context:
           '<attachment-context count="1"><attachment attachment_id="att-1" /></attachment-context>',
       });
 
       const result = await convertPreviousRounds({
-        conversation: createConversation({ nextInput }),
+        conversation: createConversation({
+          nextInput,
+          attachmentTypes: [{ type: 'text', description: 'Plain text.' }],
+        }),
       });
 
       const content = result[0].content as string;
@@ -650,12 +728,15 @@ describe('convertPreviousRounds', () => {
 
     it('timestamp prefix stays before type instructions and attachment_context', async () => {
       const nextInput = makeRoundInput('timestamped message', [], {
-        attachment_types: [{ type: 'esql', description: 'An ES|QL query.' }],
+        attachment_refs: [{ attachment_id: 'a-1', version: 1, type: 'esql' }],
         attachment_context: 'The following attachment(s) were added this turn:\n\n<x/>',
       });
 
       const result = await convertPreviousRounds({
-        conversation: createConversation({ nextInput }),
+        conversation: createConversation({
+          nextInput,
+          attachmentTypes: [{ type: 'esql', description: 'An ES|QL query.' }],
+        }),
         conversationTimestamp: now,
       });
 

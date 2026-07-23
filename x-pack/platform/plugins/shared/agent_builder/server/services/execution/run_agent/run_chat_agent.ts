@@ -327,6 +327,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   const processedInput: RoundInput = {
     message: processedConversation.nextInput.message,
     attachments: processedConversation.nextInput.attachments.map((a) => a.attachment),
+    attachment_refs: processedConversation.nextInput.attachment_refs,
   };
 
   // Use provided overrides, or fall back to pending round's overrides (for HITL resume)

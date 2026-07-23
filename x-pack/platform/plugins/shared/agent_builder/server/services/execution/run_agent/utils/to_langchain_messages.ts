@@ -28,7 +28,11 @@ import {
   wrapToolResultContent,
 } from '@kbn/agent-builder-genai-utils/langchain';
 import { generateXmlTree, type XmlNode } from '@kbn/agent-builder-genai-utils/tools/utils';
-import type { ProcessedAttachment, ProcessedRoundInput } from '@kbn/agent-builder-server';
+import type {
+  ProcessedAttachment,
+  ProcessedAttachmentType,
+  ProcessedRoundInput,
+} from '@kbn/agent-builder-server';
 import type { CompactionSummary } from '@kbn/agent-builder-common';
 import { formatSystemNotice } from '../prompts/utils/actions';
 import { formatDate } from '../prompts/utils/helpers';
@@ -79,6 +83,7 @@ export const convertPreviousRounds = async ({
   conversationTimestamp,
 }: ConversationToLangchainOptions): Promise<BaseMessage[]> => {
   const messages: BaseMessage[] = [];
+  const attachmentTypeInstructionsProvided = new Set<string>();
 
   let rounds = conversation.previousRounds;
   let input = conversation.nextInput;
@@ -101,10 +106,24 @@ export const convertPreviousRounds = async ({
   }
 
   for (const round of rounds) {
-    messages.push(...(await roundToLangchain(round, { resultTransformer, ignoreSteps })));
+    messages.push(
+      ...(await roundToLangchain(round, {
+        resultTransformer,
+        ignoreSteps,
+        attachmentTypes: conversation.attachmentTypes,
+        attachmentTypeInstructionsProvided,
+      }))
+    );
   }
 
-  messages.push(formatRoundInput({ input, timestamp: inputTimestamp }));
+  messages.push(
+    formatRoundInput({
+      input,
+      timestamp: inputTimestamp,
+      attachmentTypes: conversation.attachmentTypes,
+      attachmentTypeInstructionsProvided,
+    })
+  );
 
   return messages;
 };
@@ -112,16 +131,30 @@ export const convertPreviousRounds = async ({
 export interface RoundToLangchainOptions {
   resultTransformer?: ToolCallResultTransformer;
   ignoreSteps?: boolean;
+  attachmentTypes?: ProcessedAttachmentType[];
+  attachmentTypeInstructionsProvided?: Set<string>;
 }
 
 export const roundToLangchain = async (
   round: ProcessedConversationRound,
-  { resultTransformer, ignoreSteps = false }: RoundToLangchainOptions = {}
+  {
+    resultTransformer,
+    ignoreSteps = false,
+    attachmentTypes,
+    attachmentTypeInstructionsProvided,
+  }: RoundToLangchainOptions = {}
 ): Promise<BaseMessage[]> => {
   const messages: BaseMessage[] = [];
 
   // user message
-  messages.push(formatRoundInput({ input: round.input, timestamp: round.started_at }));
+  messages.push(
+    formatRoundInput({
+      input: round.input,
+      timestamp: round.started_at,
+      attachmentTypes,
+      attachmentTypeInstructionsProvided,
+    })
+  );
 
   // steps
   if (!ignoreSteps) {
@@ -169,11 +202,15 @@ export const roundToLangchain = async (
 const formatRoundInput = ({
   input,
   timestamp,
+  attachmentTypes,
+  attachmentTypeInstructionsProvided,
 }: {
   input: ProcessedRoundInput;
   timestamp?: string;
+  attachmentTypes?: ProcessedAttachmentType[];
+  attachmentTypeInstructionsProvided?: Set<string>;
 }): HumanMessage => {
-  const { message, attachments, attachment_context, attachment_types } = input;
+  const { message, attachments, attachment_context, attachment_refs } = input;
 
   let content = message;
 
@@ -191,10 +228,27 @@ const formatRoundInput = ({
   if (attachment_context) {
     content += `\n\n${attachment_context}\n`;
   }
-  if (attachment_types && attachment_types.length > 0) {
-    const attachmentsInstructions = attachmentTypeInstructions(attachment_types);
+  if (
+    attachment_refs &&
+    attachment_refs.length > 0 &&
+    attachmentTypes &&
+    attachmentTypeInstructionsProvided
+  ) {
+    const roundAttachmentTypes: ProcessedAttachmentType[] = [];
+    for (const ref of attachment_refs) {
+      if (ref.type && !attachmentTypeInstructionsProvided.has(ref.type)) {
+        attachmentTypeInstructionsProvided.add(ref.type);
+        const processedType = attachmentTypes.find((type) => type.type === ref.type);
+        if (processedType) {
+          roundAttachmentTypes.push(processedType);
+        }
+      }
+    }
+    if (roundAttachmentTypes.length > 0) {
+      const attachmentsInstructions = attachmentTypeInstructions(roundAttachmentTypes);
 
-    content += `\n\n${attachmentsInstructions}\n`;
+      content += `\n\n${attachmentsInstructions}\n`;
+    }
   }
 
   if (timestamp && timestamp !== new Date(0).toISOString()) {
