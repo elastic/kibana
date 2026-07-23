@@ -18,7 +18,6 @@ export interface ReferenceMaps {
   policies: Map<string, ESQLPolicy>;
   query: string;
   joinIndices: IndexAutocompleteItem[];
-  coordinatorJoinIndices: IndexAutocompleteItem[];
   timeSeriesSources?: IndexAutocompleteItem[];
   views?: EsqlView[];
   datasets?: EsqlDataset[];

@@ -394,7 +394,11 @@ export const specialIndicesToSuggestions = (
   return [...mainSuggestions, ...aliasSuggestions];
 };
 
-/** Returns the source used to fetch the fields of a LOOKUP JOIN target. */
+/**
+ * Returns the source node from the target index of a JOIN command.
+ * For example, in the following JOIN command, it returns the source node representing "lookup_index":
+ * | LOOKUP JOIN lookup_index AS l ON source_index.id = l.id
+ */
 export const getLookupJoinSource = (command: ESQLAstJoinCommand): string | undefined => {
   const firstArg = command.args[0];
   const argumentToWalk = isAsExpression(firstArg) ? firstArg.args[0] : firstArg;

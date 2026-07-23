@@ -14,7 +14,6 @@ import type {
   EsqlDatasetsResult,
   EsqlViewsResult,
   IndexAutocompleteItem,
-  LookupIndicesAutocompleteResult,
 } from './sources_autocomplete_types';
 import type { ESQLControlVariable } from './variables_types';
 import type { InferenceEndpointsAutocompleteResult } from './inference_endpoint_autocomplete_types';
@@ -151,7 +150,7 @@ export interface ESQLCallbacks {
   canSuggestVariables?: () => boolean;
   getJoinIndices?: (cacheOptions?: {
     forceRefresh?: boolean;
-  }) => Promise<LookupIndicesAutocompleteResult>;
+  }) => Promise<{ indices: IndexAutocompleteItem[] }>;
   getTimeseriesIndices?: () => Promise<{ indices: IndexAutocompleteItem[] }>;
   getViews?: () => Promise<EsqlViewsResult>;
   getDatasets?: () => Promise<EsqlDatasetsResult>;

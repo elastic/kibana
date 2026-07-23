@@ -10,11 +10,6 @@ export interface IndicesAutocompleteResult {
   indices: IndexAutocompleteItem[];
 }
 
-export interface LookupIndicesAutocompleteResult extends IndicesAutocompleteResult {
-  /** Indices available on the coordinating cluster. */
-  coordinatorIndices: IndexAutocompleteItem[];
-}
-
 export interface IndexAutocompleteItem {
   name: string;
   mode: 'lookup' | 'time_series' | string;

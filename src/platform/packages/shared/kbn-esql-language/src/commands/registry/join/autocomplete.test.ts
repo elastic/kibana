@@ -205,6 +205,14 @@ describe('JOIN Autocomplete', () => {
       });
     });
 
+    test('does not suggest the create index command for coordinator targets', async () => {
+      await joinExpectSuggestions(
+        'FROM index | LOOKUP JOIN _coordinator:new_join_index',
+        { notContains: ['Create lookup index "_coordinator:new_join_index"'] },
+        mockCallbacks
+      );
+    });
+
     test('discriminates between indices and aliases', async () => {
       const suggestions = await suggest(
         'FROM index | LEFT JOIN ',

@@ -24,6 +24,7 @@ import {
 import { specialIndicesToSuggestions } from '../../definitions/utils/sources';
 import { esqlCommandRegistry } from '..';
 import { suggestForExpression } from '../../definitions/utils';
+import { COORDINATOR_LOOKUP_JOIN_PREFIX } from '../../definitions/constants';
 
 export async function autocomplete(
   query: string,
@@ -75,13 +76,15 @@ export async function autocomplete(
       const indexNameInput = words[words.length - 1] ?? '';
       const joinSources = context?.joinSources;
       const suggestions: ISuggestionItem[] = [];
+      // _coordinator: is a lookup target qualifier, not part of the index name to create.
+      const isCoordinatorTarget = indexNameInput.startsWith(`${COORDINATOR_LOOKUP_JOIN_PREFIX}:`);
 
       const canCreate = (await callbacks?.canCreateLookupIndex?.(indexNameInput)) ?? false;
 
       const indexAlreadyExists = joinSources?.some(
         (source) => source.name === indexNameInput || source.aliases.includes(indexNameInput)
       );
-      if (canCreate && !indexAlreadyExists) {
+      if (canCreate && !indexAlreadyExists && !isCoordinatorTarget) {
         const createIndexCommandSuggestion = getLookupIndexCreateSuggestion(indexNameInput);
         suggestions.push(createIndexCommandSuggestion);
       }

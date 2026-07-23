@@ -203,10 +203,7 @@ export function getCallbackMocks(): ESQLCallbacks {
       }))
     ),
     getPolicies: jest.fn(async () => policies),
-    getJoinIndices: jest.fn(async () => ({
-      indices: joinIndices,
-      coordinatorIndices: joinIndices,
-    })),
+    getJoinIndices: jest.fn(async () => ({ indices: joinIndices })),
     getTimeseriesIndices: jest.fn(async () => ({ indices: timeseriesIndices })),
     getViews: jest.fn(async () => ({ views })),
     getDatasets: jest.fn(async () => ({ datasets })),

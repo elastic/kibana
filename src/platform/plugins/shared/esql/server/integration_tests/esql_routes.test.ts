@@ -44,8 +44,6 @@ describe('ESQL routes', () => {
       mode: 'Lookup',
       aliases: ['lookup_index2_alias1', 'lookup_index2_alias2'],
     });
-
-    expect(result.body.coordinatorIndices).toEqual(result.body.indices);
   });
 
   it('returns closed lookup indices with status: closed in JOIN indices response', async () => {

@@ -9,11 +9,6 @@
 
 import type { IndexAutocompleteItem } from '@kbn/esql-types';
 
-/** Returns indices without a remote-cluster qualifier. */
-export const getCoordinatorIndices = (
-  lookupIndices: IndexAutocompleteItem[]
-): IndexAutocompleteItem[] => lookupIndices.filter(({ name }) => !name.includes(':'));
-
 /**
  * Finds lookup indices that exist across all specified remote clusters.
  *

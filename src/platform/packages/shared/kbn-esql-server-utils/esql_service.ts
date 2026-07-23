@@ -11,7 +11,6 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import {
   type IndicesAutocompleteResult,
   type IndexAutocompleteItem,
-  type LookupIndicesAutocompleteResult,
   type ResolveIndexResponse,
   type ESQLFieldWithMetadata,
   SOURCES_TYPES,
@@ -24,7 +23,7 @@ import type {
   InferenceEndpointAutocompleteItem,
   InferenceEndpointsAutocompleteResult,
 } from '@kbn/esql-types';
-import { getCoordinatorIndices, getListOfCCSIndices } from './lookup_utils';
+import { getListOfCCSIndices } from './lookup_utils';
 
 export interface EsqlServiceOptions {
   client: ElasticsearchClient;
@@ -39,61 +38,54 @@ export class EsqlService {
    * @param remoteClusters Optional comma-separated list of remote clusters to include.
    * @returns A promise that resolves to the indices autocomplete result.
    */
-  public getIndicesByIndexMode(
-    mode: 'lookup',
-    remoteClusters?: string
-  ): Promise<LookupIndicesAutocompleteResult>;
-  public getIndicesByIndexMode(
-    mode: 'time_series',
-    remoteClusters?: string
-  ): Promise<IndicesAutocompleteResult>;
   public async getIndicesByIndexMode(
     mode: 'lookup' | 'time_series',
     remoteClusters?: string
-  ): Promise<IndicesAutocompleteResult | LookupIndicesAutocompleteResult> {
+  ): Promise<IndicesAutocompleteResult> {
     const { client } = this.options;
-    const remoteClusterNames = remoteClusters
-      ? remoteClusters
-          .split(',')
-          .map((cluster) => cluster.trim())
-          .filter(Boolean)
-      : [];
-    const sourcePatterns = ['*', ...remoteClusterNames.map((cluster) => `${cluster}:*`)];
 
-    // Hidden indices are intentionally excluded.
+    const indices: IndexAutocompleteItem[] = [];
+
+    const sourcesToQuery = ['*'];
+    const remoteClustersArray: string[] = [];
+    if (remoteClusters) {
+      remoteClustersArray.push(...remoteClusters.split(','));
+      // attach a wildcard * for each remoteCluster
+      const clustersArray = remoteClustersArray.map((cluster) => `${cluster.trim()}:*`);
+      sourcesToQuery.push(...clustersArray);
+    }
+
+    // It doesn't return hidden indices
     const sources = (await client.indices.resolveIndex({
-      name: sourcePatterns,
+      name: sourcesToQuery,
       expand_wildcards: mode === 'lookup' ? ['open', 'closed'] : 'open',
       mode,
     })) as ResolveIndexResponse;
 
-    const sourceType = this.getIndexSourceType(mode);
-    const resolvedIndices: IndexAutocompleteItem[] = [
-      ...(sources.indices ?? []).map((index) => ({
+    const mappedMode = this.getIndexSourceType(mode);
+
+    sources.indices?.forEach((index) => {
+      indices.push({
         name: index.name,
-        mode: sourceType,
+        mode: mappedMode,
         aliases: index.aliases ?? [],
         ...(index.attributes?.includes('closed') ? { isClosed: true } : {}),
-      })),
-      ...(sources.data_streams ?? []).map((dataStream) => ({
-        name: dataStream.name,
-        mode: sourceType,
-        aliases: dataStream.aliases ?? [],
-      })),
-    ];
+      });
+    });
 
-    const indices = remoteClusterNames.length
-      ? getListOfCCSIndices(remoteClusterNames, resolvedIndices)
-      : resolvedIndices;
+    sources.data_streams?.forEach((dataStream) => {
+      indices.push({ name: dataStream.name, mode: mappedMode, aliases: dataStream.aliases ?? [] });
+    });
 
-    if (mode === 'lookup') {
-      return {
-        indices,
-        coordinatorIndices: getCoordinatorIndices(resolvedIndices),
-      };
-    }
+    const crossClusterCommonIndices = remoteClusters
+      ? getListOfCCSIndices(remoteClustersArray, indices)
+      : indices;
 
-    return { indices };
+    const result: IndicesAutocompleteResult = {
+      indices: crossClusterCommonIndices,
+    };
+
+    return result;
   }
 
   /**

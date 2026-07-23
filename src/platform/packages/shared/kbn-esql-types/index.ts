@@ -25,7 +25,6 @@ export {
 
 export {
   type IndicesAutocompleteResult,
-  type LookupIndicesAutocompleteResult,
   type IndexAutocompleteItem,
   type ResolveIndexResponse,
   type ESQLSourceResult,
