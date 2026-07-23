@@ -18,12 +18,9 @@ import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { MatcherSuggestionsService } from '../../lib/services/matcher_suggestions_service/matcher_suggestions_service';
 import { ALERTING_V2_ACTION_POLICY_API_PATH } from '../constants';
 import { BaseAlertingRoute } from '../base_alerting_route';
-import {
-  MATCHER_DATA_FIELDS_SUMMARY,
-  matcherDataFieldsOasExamples,
-} from '../action_policies/action_policy_oas_examples';
+import { matcherDataFieldsOasExamples } from './matcher_data_fields_oas_example';
 import { AlertingRouteContext } from '../alerting_route_context';
-import { INVALID_QUERY_PARAMETERS_DESCRIPTION } from '../route_response_descriptions';
+import { INVALID_QUERY_PARAMETERS_DESCRIPTION } from '../route_descriptions';
 
 @injectable()
 export class MatcherDataFieldsRoute extends BaseAlertingRoute {
@@ -35,7 +32,7 @@ export class MatcherDataFieldsRoute extends BaseAlertingRoute {
     },
   };
   static routeOptions = {
-    summary: MATCHER_DATA_FIELDS_SUMMARY,
+    summary: 'Get matcher data fields suggestions',
     description: 'Get suggestions for matcher data fields.',
     oasOperationObject: matcherDataFieldsOasExamples,
   } as const;

@@ -16,10 +16,7 @@ import {
   type CreateActionPolicyData,
 } from '@kbn/alerting-v2-schemas';
 import { BaseAlertingRoute } from '../base_alerting_route';
-import {
-  UPSERT_ACTION_POLICY_SUMMARY,
-  upsertActionPolicyOasExamples,
-} from './action_policy_oas_examples';
+import { upsertActionPolicyOasExamples } from './upsert_action_policy_oas_example';
 import { ALERTING_V2_ACTION_POLICY_API_PATH } from '../constants';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { AlertingRouteContext } from '../alerting_route_context';
@@ -27,8 +24,8 @@ import { ActionPolicyClient } from '../../lib/action_policy_client';
 import {
   ACTION_POLICY_NOT_FOUND_DESCRIPTION,
   ACTION_POLICY_UPSERT_CONFLICT_DESCRIPTION,
-  INVALID_REQUEST_PARAMETERS_OR_BODY_DESCRIPTION,
-} from '../route_response_descriptions';
+} from './action_policy_route_descriptions';
+import { INVALID_REQUEST_PARAMETERS_OR_BODY_DESCRIPTION } from '../route_descriptions';
 
 const actionPolicyIdParamsSchema = z.object({
   id: z.string().describe('The identifier for the action policy.'),
@@ -47,7 +44,7 @@ export class UpsertActionPolicyRoute extends BaseAlertingRoute {
     },
   };
   static routeOptions = {
-    summary: UPSERT_ACTION_POLICY_SUMMARY,
+    summary: 'Create or replace an action policy',
     description:
       'Creates an action policy with the given identifier, or fully replaces it if one already exists.',
     oasOperationObject: upsertActionPolicyOasExamples,

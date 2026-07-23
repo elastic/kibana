@@ -17,13 +17,10 @@ import {
 import { ActionPolicyExecutionHistoryClient } from '../../lib/action_policy_execution_history_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { BaseAlertingRoute } from '../base_alerting_route';
-import {
-  LIST_ACTION_POLICY_EXECUTION_HISTORY_SUMMARY,
-  listActionPolicyExecutionHistoryOasExamples,
-} from './action_policy_oas_examples';
+import { listActionPolicyExecutionHistoryOasExamples } from './list_execution_history_oas_example';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_API_PATH } from '../constants';
-import { INVALID_QUERY_PARAMETERS_DESCRIPTION } from '../route_response_descriptions';
+import { INVALID_QUERY_PARAMETERS_DESCRIPTION } from '../route_descriptions';
 
 @injectable()
 export class ListExecutionHistoryRoute extends BaseAlertingRoute {
@@ -35,7 +32,7 @@ export class ListExecutionHistoryRoute extends BaseAlertingRoute {
     },
   };
   static routeOptions = {
-    summary: LIST_ACTION_POLICY_EXECUTION_HISTORY_SUMMARY,
+    summary: 'List action policy execution history',
     description:
       'Get a paginated list of dispatcher summary events for action policies in the current space.',
     oasOperationObject: listActionPolicyExecutionHistoryOasExamples,

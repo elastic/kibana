@@ -17,13 +17,10 @@ import { inject, injectable } from 'inversify';
 import { ActionPolicyClient } from '../../lib/action_policy_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { BaseAlertingRoute } from '../base_alerting_route';
-import {
-  MATCH_ACTION_POLICIES_FOR_RULE_SUMMARY,
-  matchActionPoliciesForRuleOasExamples,
-} from './action_policy_oas_examples';
+import { matchActionPoliciesForRuleOasExamples } from './match_action_policies_for_rule_oas_example';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { ALERTING_V2_ACTION_POLICY_API_PATH } from '../constants';
-import { INVALID_REQUEST_BODY_DESCRIPTION } from '../route_response_descriptions';
+import { INVALID_REQUEST_BODY_DESCRIPTION } from '../route_descriptions';
 
 @injectable()
 export class MatchActionPoliciesForRuleRoute extends BaseAlertingRoute {
@@ -35,7 +32,7 @@ export class MatchActionPoliciesForRuleRoute extends BaseAlertingRoute {
     },
   };
   static routeOptions = {
-    summary: MATCH_ACTION_POLICIES_FOR_RULE_SUMMARY,
+    summary: 'Match action policies for a rule',
     description:
       'Returns action policies that match a given rule, categorised as direct, global, or global-filtered.',
     oasOperationObject: matchActionPoliciesForRuleOasExamples,

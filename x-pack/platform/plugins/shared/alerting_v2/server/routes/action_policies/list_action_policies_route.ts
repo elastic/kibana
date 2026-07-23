@@ -12,13 +12,10 @@ import { inject, injectable } from 'inversify';
 import { ActionPolicyClient } from '../../lib/action_policy_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { BaseAlertingRoute } from '../base_alerting_route';
-import {
-  LIST_ACTION_POLICIES_SUMMARY,
-  listActionPoliciesOasExamples,
-} from './action_policy_oas_examples';
+import { listActionPoliciesOasExamples } from './list_action_policies_oas_example';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { ALERTING_V2_ACTION_POLICY_API_PATH } from '../constants';
-import { INVALID_QUERY_PARAMETERS_DESCRIPTION } from '../route_response_descriptions';
+import { INVALID_QUERY_PARAMETERS_DESCRIPTION } from '../route_descriptions';
 import {
   listActionPoliciesQuerySchema,
   type ListActionPoliciesQuery,
@@ -34,7 +31,7 @@ export class ListActionPoliciesRoute extends BaseAlertingRoute {
     },
   };
   static routeOptions = {
-    summary: LIST_ACTION_POLICIES_SUMMARY,
+    summary: 'List action policies',
     description: 'Get a paginated list of action policies with optional filtering and sorting.',
     oasOperationObject: listActionPoliciesOasExamples,
   } as const;

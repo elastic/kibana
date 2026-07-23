@@ -5,125 +5,110 @@
  * 2.0.
  */
 
-import { ALERTING_V2_ERROR_CODES } from '../../lib/errors/error_codes';
 import {
-  getActionPolicyNotFoundMessage,
-  getActionPolicyVersionConflictMessage,
-} from '../../lib/errors/action_policy_error_messages';
-import type { AlertingV2OasOperationObject } from '../json_oas_example';
+  actionPolicyResponseSchema,
+  actionPolicyTagsResponseSchema,
+  bulkActionActionPoliciesBodySchema,
+  bulkActionActionPoliciesResponseSchema,
+  countPolicyExecutionEventsResponseSchema,
+  createActionPolicyDataSchema,
+  findActionPoliciesResponseSchema,
+  listPolicyExecutionHistoryResponseSchema,
+  matchActionPoliciesForRuleBodySchema,
+  matchActionPoliciesForRuleResponseSchema,
+  matcherDataFieldsResponseSchema,
+  snoozeActionPolicyBodySchema,
+  updateActionPolicyBodySchema,
+} from '@kbn/alerting-v2-schemas';
 import {
-  ACTION_POLICY_NOT_FOUND_DESCRIPTION,
-  ACTION_POLICY_UPSERT_CONFLICT_DESCRIPTION,
-  INVALID_REQUEST_PARAMETERS_OR_BODY_DESCRIPTION,
-} from '../route_response_descriptions';
-import { CreateActionPolicyRoute } from './create_action_policy_route';
+  ACTION_POLICY_RESPONSE,
+  CREATE_ACTION_POLICY_REQUEST,
+} from './action_policy_oas_shared_examples';
+import { UPDATE_ACTION_POLICY_REQUEST } from './update_action_policy_oas_example';
+import { LIST_ACTION_POLICIES_RESPONSE } from './list_action_policies_oas_example';
+import { SNOOZE_ACTION_POLICY_REQUEST } from './snooze_action_policy_oas_example';
 import {
-  CREATE_ACTION_POLICY_SUMMARY,
-  actionPolicyTagsOasExamples,
-  createActionPolicyOasExamples,
-  getActionPolicyOasExamples,
-  upsertActionPolicyOasExamples,
-} from './action_policy_oas_examples';
+  BULK_ACTION_ACTION_POLICIES_REQUEST,
+  BULK_ACTION_ACTION_POLICIES_RESPONSE,
+} from './bulk_action_action_policies_oas_example';
+import {
+  MATCH_ACTION_POLICIES_FOR_RULE_REQUEST,
+  MATCH_ACTION_POLICIES_FOR_RULE_RESPONSE,
+} from './match_action_policies_for_rule_oas_example';
+import { LIST_EXECUTION_HISTORY_RESPONSE } from './list_execution_history_oas_example';
+import { COUNT_EXECUTION_HISTORY_RESPONSE } from './count_new_execution_history_events_oas_example';
+import { MATCHER_DATA_FIELDS_RESPONSE } from '../suggestions/matcher_data_fields_oas_example';
+import { ACTION_POLICY_TAGS_RESPONSE } from '../suggestions/action_policy_tags_oas_example';
 
-const getValidateResponseDescription = (status: number): string | undefined => {
-  const { validate } = CreateActionPolicyRoute;
-  if (typeof validate !== 'object' || validate === null || !('response' in validate)) {
-    return undefined;
-  }
-  const response = (validate as { response?: Record<number, { description?: string }> }).response;
-  return response?.[status]?.description;
-};
+describe('action policy OAS example payloads', () => {
+  it('keeps create request example valid against createActionPolicyDataSchema', () => {
+    expect(createActionPolicyDataSchema.safeParse(CREATE_ACTION_POLICY_REQUEST).success).toBe(true);
+  });
 
-describe('action policy OAS examples', () => {
-  it('includes request, success, and route-error examples for create', () => {
-    const oas = createActionPolicyOasExamples();
+  it('keeps action policy response example valid against actionPolicyResponseSchema', () => {
+    expect(actionPolicyResponseSchema.safeParse(ACTION_POLICY_RESPONSE).success).toBe(true);
+  });
 
-    expect(CreateActionPolicyRoute.options.summary).toBe(CREATE_ACTION_POLICY_SUMMARY);
-    expect(
-      oas.requestBody?.content?.['application/json']?.examples?.createActionPolicyRequest
-    ).toEqual(expect.objectContaining({ summary: CREATE_ACTION_POLICY_SUMMARY }));
-    expect(
-      oas.responses?.[201]?.content?.['application/json']?.examples?.createActionPolicyResponse
-    ).toEqual(expect.objectContaining({ summary: CREATE_ACTION_POLICY_SUMMARY }));
-    expect(
-      oas.responses?.[400]?.content?.['application/json']?.examples?.invalidActionPolicyData
-    ).toEqual(
-      expect.objectContaining({
-        summary: INVALID_REQUEST_PARAMETERS_OR_BODY_DESCRIPTION,
-        value: expect.objectContaining({
-          code: ALERTING_V2_ERROR_CODES.INVALID_ACTION_POLICY_DATA,
-        }),
-      })
-    );
-    expect(getValidateResponseDescription(400)).toBe(
-      INVALID_REQUEST_PARAMETERS_OR_BODY_DESCRIPTION
+  it('keeps update request example valid against updateActionPolicyBodySchema', () => {
+    expect(updateActionPolicyBodySchema.safeParse(UPDATE_ACTION_POLICY_REQUEST).success).toBe(true);
+  });
+
+  it('keeps snooze request example valid against snoozeActionPolicyBodySchema', () => {
+    expect(snoozeActionPolicyBodySchema.safeParse(SNOOZE_ACTION_POLICY_REQUEST).success).toBe(true);
+  });
+
+  it('keeps list response example valid against findActionPoliciesResponseSchema', () => {
+    expect(findActionPoliciesResponseSchema.safeParse(LIST_ACTION_POLICIES_RESPONSE).success).toBe(
+      true
     );
   });
 
-  it('includes 404 examples for get', () => {
-    const oas = getActionPolicyOasExamples();
-
+  it('keeps bulk request example valid against bulkActionActionPoliciesBodySchema', () => {
     expect(
-      oas.responses?.[404]?.content?.['application/json']?.examples?.actionPolicyNotFound
-    ).toEqual(
-      expect.objectContaining({
-        summary: ACTION_POLICY_NOT_FOUND_DESCRIPTION,
-        value: expect.objectContaining({
-          code: ALERTING_V2_ERROR_CODES.ACTION_POLICY_NOT_FOUND,
-          message: getActionPolicyNotFoundMessage('action-policy-1'),
-        }),
-      })
+      bulkActionActionPoliciesBodySchema.safeParse(BULK_ACTION_ACTION_POLICIES_REQUEST).success
+    ).toBe(true);
+  });
+
+  it('keeps bulk response example valid against bulkActionActionPoliciesResponseSchema', () => {
+    expect(
+      bulkActionActionPoliciesResponseSchema.safeParse(BULK_ACTION_ACTION_POLICIES_RESPONSE).success
+    ).toBe(true);
+  });
+
+  it('keeps match request example valid against matchActionPoliciesForRuleBodySchema', () => {
+    expect(
+      matchActionPoliciesForRuleBodySchema.safeParse(MATCH_ACTION_POLICIES_FOR_RULE_REQUEST).success
+    ).toBe(true);
+  });
+
+  it('keeps match response example valid against matchActionPoliciesForRuleResponseSchema', () => {
+    expect(
+      matchActionPoliciesForRuleResponseSchema.safeParse(MATCH_ACTION_POLICIES_FOR_RULE_RESPONSE)
+        .success
+    ).toBe(true);
+  });
+
+  it('keeps execution history response example valid against listPolicyExecutionHistoryResponseSchema', () => {
+    expect(
+      listPolicyExecutionHistoryResponseSchema.safeParse(LIST_EXECUTION_HISTORY_RESPONSE).success
+    ).toBe(true);
+  });
+
+  it('keeps execution history count example valid against countPolicyExecutionEventsResponseSchema', () => {
+    expect(
+      countPolicyExecutionEventsResponseSchema.safeParse(COUNT_EXECUTION_HISTORY_RESPONSE).success
+    ).toBe(true);
+  });
+
+  it('keeps matcher data fields example valid against matcherDataFieldsResponseSchema', () => {
+    expect(matcherDataFieldsResponseSchema.safeParse(MATCHER_DATA_FIELDS_RESPONSE).success).toBe(
+      true
     );
   });
 
-  it('includes 409 examples for upsert', () => {
-    const oas = upsertActionPolicyOasExamples();
-
-    expect(
-      oas.responses?.[409]?.content?.['application/json']?.examples?.actionPolicyVersionConflict
-    ).toEqual(
-      expect.objectContaining({
-        summary: ACTION_POLICY_UPSERT_CONFLICT_DESCRIPTION,
-        value: expect.objectContaining({
-          code: ALERTING_V2_ERROR_CODES.ACTION_POLICY_VERSION_CONFLICT,
-          message: getActionPolicyVersionConflictMessage('action-policy-1'),
-        }),
-      })
-    );
-  });
-
-  it('is exposed on CreateActionPolicyRoute.options', async () => {
-    expect(CreateActionPolicyRoute.options.oasOperationObject).toBe(createActionPolicyOasExamples);
-
-    const oasOperationObject = CreateActionPolicyRoute.options.oasOperationObject;
-    expect(oasOperationObject).toBeDefined();
-    if (!oasOperationObject) {
-      throw new Error('expected oasOperationObject');
-    }
-
-    const oas = (await oasOperationObject()) as AlertingV2OasOperationObject;
-    expect(typeof oas).not.toBe('string');
-
-    expect(
-      oas.requestBody?.content?.['application/json']?.examples?.createActionPolicyRequest
-    ).toBeDefined();
-    expect(
-      oas.responses?.[201]?.content?.['application/json']?.examples?.createActionPolicyResponse
-    ).toBeDefined();
-    expect(
-      oas.responses?.[400]?.content?.['application/json']?.examples?.invalidActionPolicyData
-    ).toBeDefined();
-  });
-
-  it('includes success examples for action policy tags', () => {
-    const oas = actionPolicyTagsOasExamples();
-
-    expect(
-      oas.responses?.[200]?.content?.['application/json']?.examples?.actionPolicyTagsResponse
-    ).toEqual(
-      expect.objectContaining({
-        value: expect.arrayContaining(['production']),
-      })
+  it('keeps action policy tags example valid against actionPolicyTagsResponseSchema', () => {
+    expect(actionPolicyTagsResponseSchema.safeParse(ACTION_POLICY_TAGS_RESPONSE).success).toBe(
+      true
     );
   });
 });

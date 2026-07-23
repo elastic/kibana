@@ -19,17 +19,14 @@ import { inject, injectable } from 'inversify';
 import { ActionPolicyClient } from '../../lib/action_policy_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { BaseAlertingRoute } from '../base_alerting_route';
-import {
-  SNOOZE_ACTION_POLICY_SUMMARY,
-  snoozeActionPolicyOasExamples,
-} from './action_policy_oas_examples';
+import { snoozeActionPolicyOasExamples } from './snooze_action_policy_oas_example';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { ALERTING_V2_ACTION_POLICY_API_PATH } from '../constants';
 import {
   ACTION_POLICY_NOT_FOUND_DESCRIPTION,
   ACTION_POLICY_VERSION_CONFLICT_DESCRIPTION,
-  INVALID_REQUEST_PARAMETERS_OR_BODY_DESCRIPTION,
-} from '../route_response_descriptions';
+} from './action_policy_route_descriptions';
+import { INVALID_REQUEST_PARAMETERS_OR_BODY_DESCRIPTION } from '../route_descriptions';
 
 const snoozeActionPolicyParamsSchema = z.object({
   id: z.string().min(1).max(ID_MAX_LENGTH).describe('The action policy identifier.'),
@@ -45,7 +42,7 @@ export class SnoozeActionPolicyRoute extends BaseAlertingRoute {
     },
   };
   static routeOptions = {
-    summary: SNOOZE_ACTION_POLICY_SUMMARY,
+    summary: 'Snooze an action policy',
     description: 'Snooze an action policy until a specified time.',
     oasOperationObject: snoozeActionPolicyOasExamples,
   } as const;

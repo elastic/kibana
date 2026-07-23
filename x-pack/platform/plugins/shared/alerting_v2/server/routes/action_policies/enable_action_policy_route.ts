@@ -17,16 +17,13 @@ import { inject, injectable } from 'inversify';
 import { ActionPolicyClient } from '../../lib/action_policy_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { BaseAlertingRoute } from '../base_alerting_route';
-import {
-  ENABLE_ACTION_POLICY_SUMMARY,
-  enableActionPolicyOasExamples,
-} from './action_policy_oas_examples';
+import { enableActionPolicyOasExamples } from './enable_action_policy_oas_example';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { ALERTING_V2_ACTION_POLICY_API_PATH } from '../constants';
 import {
   ACTION_POLICY_NOT_FOUND_DESCRIPTION,
   ACTION_POLICY_VERSION_CONFLICT_DESCRIPTION,
-} from '../route_response_descriptions';
+} from './action_policy_route_descriptions';
 
 const enableActionPolicyParamsSchema = z.object({
   id: z.string().min(1).max(ID_MAX_LENGTH).describe('The action policy identifier.'),
@@ -42,7 +39,7 @@ export class EnableActionPolicyRoute extends BaseAlertingRoute {
     },
   };
   static routeOptions = {
-    summary: ENABLE_ACTION_POLICY_SUMMARY,
+    summary: 'Enable an action policy',
     description: 'Enable an action policy by identifier.',
     oasOperationObject: enableActionPolicyOasExamples,
   } as const;

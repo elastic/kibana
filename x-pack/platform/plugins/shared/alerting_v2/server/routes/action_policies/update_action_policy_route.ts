@@ -19,17 +19,14 @@ import { inject, injectable } from 'inversify';
 import { ActionPolicyClient } from '../../lib/action_policy_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { BaseAlertingRoute } from '../base_alerting_route';
-import {
-  UPDATE_ACTION_POLICY_SUMMARY,
-  updateActionPolicyOasExamples,
-} from './action_policy_oas_examples';
+import { updateActionPolicyOasExamples } from './update_action_policy_oas_example';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { ALERTING_V2_ACTION_POLICY_API_PATH } from '../constants';
 import {
   ACTION_POLICY_NOT_FOUND_DESCRIPTION,
   ACTION_POLICY_VERSION_CONFLICT_DESCRIPTION,
-  INVALID_REQUEST_PARAMETERS_OR_BODY_DESCRIPTION,
-} from '../route_response_descriptions';
+} from './action_policy_route_descriptions';
+import { INVALID_REQUEST_PARAMETERS_OR_BODY_DESCRIPTION } from '../route_descriptions';
 
 const updateActionPolicyParamsSchema = z.object({
   id: z.string().min(1).max(ID_MAX_LENGTH).describe('The action policy identifier.'),
@@ -45,7 +42,7 @@ export class UpdateActionPolicyRoute extends BaseAlertingRoute {
     },
   };
   static routeOptions = {
-    summary: UPDATE_ACTION_POLICY_SUMMARY,
+    summary: 'Partially update an action policy.',
     description:
       'Apply a partial update to an existing action policy. Fields not present in the body are left unchanged.',
     oasOperationObject: updateActionPolicyOasExamples,
