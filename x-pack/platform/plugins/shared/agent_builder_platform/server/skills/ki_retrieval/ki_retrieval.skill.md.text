@@ -1,0 +1,107 @@
+## When to Use This Skill
+
+Load this skill when the user wants to **query a Context Engine AI Index** — i.e. to
+retrieve Knowledge Indicators (KIs) that have already been generated.
+
+This is the query-time complement to `ki-automation-generation`, which populates the index.
+This skill is not about generating these KIs, that is a separate skill.
+
+## What a KI index looks like
+
+KIs are stored in indices matching `ai-index-idx-*` (regular index) or `ai-index-ds-*`
+(datastream). Use `platform.core.list_indices` to discover which ones exist, filtering by
+those prefixes.
+
+### Field reference
+
+| Field | ES|QL type | Purpose |
+|---|---|---|
+| `type` | keyword | Categorization — e.g. `"index_metadata"`, `"document"`, `"entity_profile"` |
+| `title` | text | Short display name; primary semantic surface via `title.semantic` |
+| `content` | text | Full text: purpose, questions answered, access patterns; semantic via `content.semantic` |
+| `description` | text | Routing heuristic — what the KI does NOT contain; semantic via `description.semantic` |
+| `tags` | keyword | Filter facets |
+| `attributes` | flattened | Structured keyword-queryable metadata (status, themes, entity names, etc.) |
+
+Semantic sub-fields use **dot notation**: `content.semantic`, `title.semantic`, `description.semantic`.
+
+---
+
+## Aggregation
+
+Before querying, you can orient yourself with an aggregation to see what types of KIs exist in the index:
+
+```esql
+FROM ai-index-idx-*
+| STATS ki_count = COUNT(*) BY type
+| SORT ki_count DESC
+```
+
+---
+
+## ES|QL query
+
+Use FORK+FUSE hybrid search. It runs keyword and semantic branches in parallel and combines
+them with reciprocal rank fusion, so documents matching both branches score higher than
+documents matching only one.
+
+Always include `METADATA _id, _index, _score` — required for `SORT _score DESC` and for FUSE
+to deduplicate across branches.
+
+```esql
+FROM ai-index-idx-* METADATA _id, _index, _score
+| FORK
+    ( WHERE content:"<query>"          | SORT _score DESC | LIMIT 20 )
+    ( WHERE content.semantic:"<query>" | SORT _score DESC | LIMIT 20 )
+| FUSE
+| SORT _score DESC, _id ASC
+| LIMIT 10
+```
+
+Set a generous per-branch `LIMIT` (20) so FUSE has enough candidates to merge results from.
+The post-FUSE `LIMIT 10` controls the final result count.
+
+Only deviate from this template if you have a hard constraint that FORK+FUSE cannot satisfy. In all other cases, use the template above.
+
+To scope results to a specific type or tag, add a `WHERE` before `FORK`:
+
+```esql
+FROM ai-index-idx-* METADATA _id, _index, _score
+| WHERE type == "index_metadata"
+| FORK
+    ( WHERE content:"<query>"          | SORT _score DESC | LIMIT 20 )
+    ( WHERE content.semantic:"<query>" | SORT _score DESC | LIMIT 20 )
+| FUSE
+| SORT _score DESC, _id ASC
+| LIMIT 10
+```
+
+Replace `type == "index_metadata"` with any combination of `type` or `tags` filters.
+
+---
+
+## ES|QL syntax notes
+
+- **`METADATA _id, _index, _score`** — exposes the BM25/FUSE relevance score. Required for `SORT _score DESC`
+  whenever you use `:` match operators or `FUSE`. Omitting it causes a missing-field error.
+- **FORK branches** — each branch is an independent sub-query executed in parallel. A generous
+  per-branch `LIMIT` (e.g. 20) ensures FUSE has enough candidates.
+- **FUSE** — combines branches with reciprocal rank fusion. Score = sum of `1 / (rank + 60)`
+  across all branches the document appeared in. A document matching both branches beats one
+  matching only one branch.
+- **Dot notation for semantic sub-fields** — use `content.semantic`, not `content_semantic`.
+
+---
+
+## Suggested retrieval flow
+
+1. **Discover** — call `platform.core.list_indices` and filter by `ai-index-*` to find which
+   KI indices exist in the environment.
+2. **Orient** — run a `STATS ki_count = COUNT(*) BY type` aggregation to see what categories
+   of KIs are available.
+3. **Query** — use FORK+FUSE hybrid search.
+4. **Return** — surface the `title`, `content`, and `type` fields from matching KIs. 
+
+---
+
+
