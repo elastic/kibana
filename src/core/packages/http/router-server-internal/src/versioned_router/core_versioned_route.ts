@@ -23,6 +23,7 @@ import type {
   RouteMethod,
   VersionedRouterRoute,
   VersionedRouteResponseValidation,
+  VersionedRouteValidation,
 } from '@kbn/core-http-server';
 import type { Request } from '@hapi/hapi';
 import type { Logger } from '@kbn/logging';
@@ -54,10 +55,15 @@ interface InternalVersionedRouteConfig<M extends RouteMethod> extends VersionedR
   defaultHandlerResolutionStrategy: HandlerResolutionStrategy;
 }
 
-function extractValidationSchemaFromHandler(handler: VersionedRouterRoute['handlers'][0]) {
+function extractValidationSchemaFromHandler(
+  handler: VersionedRouterRoute['handlers'][0]
+): Exclude<VersionedRouteValidation<unknown, unknown, unknown>, false> | undefined {
   if (handler.options.validate === false) return undefined;
-  if (typeof handler.options.validate === 'function') return handler.options.validate();
-  return handler.options.validate;
+  const validation =
+    typeof handler.options.validate === 'function'
+      ? handler.options.validate()
+      : handler.options.validate;
+  return validation === false ? undefined : validation;
 }
 
 export class CoreVersionedRoute implements VersionedRoute {

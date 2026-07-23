@@ -311,6 +311,7 @@ export interface VersionedRouteResponseValidation {
  * @public
  */
 export type VersionedRouteValidation<P, Q, B> =
+  | false
   | {
       /**
        * Validation to run against route inputs: params, query and body
@@ -332,27 +333,6 @@ export type VersionedRouteValidation<P, Q, B> =
        * @public
        */
       onRequestValidationError?: RequestValidationErrorHandler;
-    }
-  | {
-      /**
-       * Disables request validation.
-       * @public
-       */
-      request: false;
-      /**
-       * Validation to run against route output.
-       *
-       * @note This validation is only intended to run in development. Do not use this
-       *       for setting default values!
-       *
-       * @public
-       */
-      response?: VersionedRouteResponseValidation;
-      /**
-       * Request validation failures cannot occur when request validation is disabled.
-       * @public
-       */
-      onRequestValidationError?: never;
     };
 
 /**
@@ -372,7 +352,7 @@ export interface AddVersionOpts<P, Q, B> {
    *       that the function will only be called once.
    * @public
    */
-  validate: false | VersionedRouteValidation<P, Q, B> | (() => VersionedRouteValidation<P, Q, B>); // Provide a way to lazily load validation schemas
+  validate: VersionedRouteValidation<P, Q, B> | (() => VersionedRouteValidation<P, Q, B>); // Provide a way to lazily load validation schemas
 
   security?: Pick<RouteSecurity, 'authz'>;
 

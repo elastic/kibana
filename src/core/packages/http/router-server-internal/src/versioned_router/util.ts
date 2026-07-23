@@ -41,6 +41,9 @@ export function unwrapVersionedResponseBodyValidation(
 }
 
 function prepareValidation(validation: VersionedRouteValidation<unknown, unknown, unknown>) {
+  if (validation === false) {
+    return validation;
+  }
   if (validation.response) {
     const { unsafe, ...responseValidations } = validation.response;
     const result: VersionedRouteResponseValidation = {};

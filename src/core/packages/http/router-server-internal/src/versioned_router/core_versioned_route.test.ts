@@ -698,13 +698,15 @@ describe('Versioned route', () => {
         },
       ] = route.handlers;
 
-      const res200 = (validate as () => VersionedRouteValidation<unknown, unknown, unknown>)()
-        .response![200].body!;
+      const res200 = (
+        validate as () => Exclude<VersionedRouteValidation<unknown, unknown, unknown>, false>
+      )().response![200].body!;
 
       expect(isConfigSchema(unwrapVersionedResponseBodyValidation(res200))).toBe(true);
 
-      const res404 = (validate as () => VersionedRouteValidation<unknown, unknown, unknown>)()
-        .response![404].body!;
+      const res404 = (
+        validate as () => Exclude<VersionedRouteValidation<unknown, unknown, unknown>, false>
+      )().response![404].body!;
 
       expect(isConfigSchema(unwrapVersionedResponseBodyValidation(res404))).toBe(true);
 
