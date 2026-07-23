@@ -10,7 +10,6 @@ import type { HttpSetup, IUiSettingsClient } from '@kbn/core/public';
 import {
   OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED,
   OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_INTERVAL_HOURS,
-  OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_EXCLUDED_STREAM_PATTERNS,
 } from '@kbn/management-settings-ids';
 import { DEFAULT_EXTRACTION_INTERVAL_HOURS } from '@kbn/significant-events-plugin/common';
 import { useSyncEnabledFromStatus } from './use_sync_enabled_from_status';
@@ -18,7 +17,6 @@ import { useSyncEnabledFromStatus } from './use_sync_enabled_from_status';
 export interface ContinuousExtractionState {
   enabled: boolean;
   intervalHours: number;
-  excludedStreamPatterns: string;
 }
 
 const readSettingsFromClient = (globalClient: IUiSettingsClient): ContinuousExtractionState => ({
@@ -26,10 +24,6 @@ const readSettingsFromClient = (globalClient: IUiSettingsClient): ContinuousExtr
   intervalHours: globalClient.get<number>(
     OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_INTERVAL_HOURS,
     DEFAULT_EXTRACTION_INTERVAL_HOURS
-  ),
-  excludedStreamPatterns: globalClient.get<string>(
-    OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_EXCLUDED_STREAM_PATTERNS,
-    ''
   ),
 });
 
@@ -57,10 +51,7 @@ export const useContinuousExtractionSettings = ({
   });
 
   const hasChanged = useMemo(
-    () =>
-      draft.enabled !== saved.enabled ||
-      draft.intervalHours !== saved.intervalHours ||
-      draft.excludedStreamPatterns !== saved.excludedStreamPatterns,
+    () => draft.enabled !== saved.enabled || draft.intervalHours !== saved.intervalHours,
     [draft, saved]
   );
 
@@ -78,10 +69,6 @@ export const useContinuousExtractionSettings = ({
       globalClient.set(
         OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_INTERVAL_HOURS,
         draft.intervalHours
-      ),
-      globalClient.set(
-        OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_EXCLUDED_STREAM_PATTERNS,
-        draft.excludedStreamPatterns
       ),
     ]);
 
