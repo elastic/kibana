@@ -8,11 +8,7 @@
 import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import type {
-  AiIndexDest,
-  AiIndexDls,
-  AiIndexIndexConfig,
-} from '../../common/http_api/ai_indices';
+import type { AiIndexDest, AiIndexDls, AiIndexIndexConfig } from '../../common/http_api/ai_indices';
 
 /**
  * The base template every AI index inherits. Consumer `index_config` is deep-merged
