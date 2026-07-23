@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import {
   EuiBadge,
   EuiButton,
   EuiButtonEmpty,
-  EuiButtonIcon,
   EuiCallOut,
   EuiCard,
   EuiFlexGroup,
@@ -20,7 +19,6 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiText,
-  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { RELAY_APP_CONNECTION_STATUS } from '@kbn/significant-events-plugin/common';
@@ -116,8 +114,6 @@ function SlackCardFooter({
   onConnect,
   onDisconnect,
 }: SlackCardFooterProps) {
-  const [channelsOpen, setChannelsOpen] = useState(false);
-
   if (status === RELAY_APP_CONNECTION_STATUS.oauthInProgress) {
     return (
       <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexStart">
@@ -154,43 +150,19 @@ function SlackCardFooter({
   }
 
   if (status === RELAY_APP_CONNECTION_STATUS.connected) {
-    const channelToggleLabel = channelsOpen
-      ? i18n.translate('xpack.streams.significantEventsDiscovery.settings.apps.slackHideChannels', {
-          defaultMessage: 'Hide channels',
-        })
-      : i18n.translate('xpack.streams.significantEventsDiscovery.settings.apps.slackViewChannels', {
-          defaultMessage: 'View channels',
-        });
-
     return (
       <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexStart">
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiBadge color="success" iconType="check">
-                {i18n.translate(
-                  'xpack.streams.significantEventsDiscovery.settings.apps.slackConnected',
-                  { defaultMessage: 'Connected' }
-                )}
-              </EuiBadge>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiToolTip disableScreenReaderOutput content={channelToggleLabel}>
-                <EuiButtonIcon
-                  iconType={channelsOpen ? 'arrowUp' : 'arrowDown'}
-                  onClick={() => setChannelsOpen((open) => !open)}
-                  aria-label={channelToggleLabel}
-                  data-test-subj="streamsSlackAppViewChannelsButton"
-                />
-              </EuiToolTip>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <EuiBadge color="success" iconType="check">
+            {i18n.translate(
+              'xpack.streams.significantEventsDiscovery.settings.apps.slackConnected',
+              { defaultMessage: 'Connected' }
+            )}
+          </EuiBadge>
         </EuiFlexItem>
-        {channelsOpen && (
-          <EuiFlexItem grow={false} css={{ width: '100%' }}>
-            <SlackConnectionBindings canEdit={canEdit} />
-          </EuiFlexItem>
-        )}
+        <EuiFlexItem grow={false} css={{ width: '100%' }}>
+          <SlackConnectionBindings canEdit={canEdit} />
+        </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
             size="s"

@@ -100,7 +100,7 @@ describe('RelayClient', () => {
   });
 
   describe('listBindings', () => {
-    it('GETs the per-tenant bindings endpoint and maps SUB entries', async () => {
+    it('GETs a single page and maps SUB entries with their display snapshot, exposing next_cursor', async () => {
       requestMock.mockResolvedValue({
         status: 200,
         data: {
@@ -108,29 +108,34 @@ describe('RelayClient', () => {
             {
               scope_type: 'SUB',
               scope_id: 'C123',
-              target_ref: 'target-1',
-              status: 'bound_to_self',
+              display_name: 'general',
+              visibility: 'public',
             },
-            { scope_type: 'SUB', scope_id: 'C456', status: 'bound_to_other_target' },
+            { scope_type: 'SUB', scope_id: 'C456' },
           ],
+          next_cursor: 'cursor-2',
         },
       } as never);
 
-      await expect(createClient().listBindings('team-A')).resolves.toEqual([
-        {
-          scope_type: 'SUB',
-          scope_id: 'C123',
-          target_ref: 'target-1',
-          status: 'bound_to_self',
-        },
-        {
-          scope_type: 'SUB',
-          scope_id: 'C456',
-          target_ref: undefined,
-          status: 'bound_to_other_target',
-        },
-      ]);
+      await expect(createClient().listBindings('team-A')).resolves.toEqual({
+        bindings: [
+          {
+            scope_type: 'SUB',
+            scope_id: 'C123',
+            display_name: 'general',
+            visibility: 'public',
+          },
+          {
+            scope_type: 'SUB',
+            scope_id: 'C456',
+            display_name: undefined,
+            visibility: undefined,
+          },
+        ],
+        nextCursor: 'cursor-2',
+      });
 
+      expect(requestMock).toHaveBeenCalledTimes(1);
       expect(requestMock).toHaveBeenCalledWith(
         expect.objectContaining({
           url: 'https://relay.test/v1/slack/tenants/team-A/bindings?limit=200',
@@ -139,66 +144,16 @@ describe('RelayClient', () => {
       );
     });
 
-    it('follows next_cursor to aggregate every page', async () => {
-      requestMock
-        .mockResolvedValueOnce({
-          status: 200,
-          data: {
-            bindings: [{ scope_type: 'SUB', scope_id: 'C123', status: 'bound_to_self' }],
-            next_cursor: 'cursor-1',
-          },
-        } as never)
-        .mockResolvedValueOnce({
-          status: 200,
-          data: {
-            bindings: [{ scope_type: 'SUB', scope_id: 'C456', status: 'bound_to_other_target' }],
-          },
-        } as never);
+    it('passes the caller-supplied cursor and limit through to the Relay', async () => {
+      requestMock.mockResolvedValue({ status: 200, data: { bindings: [] } } as never);
 
-      await expect(createClient().listBindings('team-A')).resolves.toEqual([
-        { scope_type: 'SUB', scope_id: 'C123', target_ref: undefined, status: 'bound_to_self' },
-        {
-          scope_type: 'SUB',
-          scope_id: 'C456',
-          target_ref: undefined,
-          status: 'bound_to_other_target',
-        },
-      ]);
+      await createClient().listBindings('team-A', { cursor: 'cursor-1', limit: 10 });
 
-      expect(requestMock).toHaveBeenNthCalledWith(
-        1,
+      expect(requestMock).toHaveBeenCalledWith(
         expect.objectContaining({
-          url: 'https://relay.test/v1/slack/tenants/team-A/bindings?limit=200',
+          url: 'https://relay.test/v1/slack/tenants/team-A/bindings?limit=10&cursor=cursor-1',
         })
       );
-      expect(requestMock).toHaveBeenNthCalledWith(
-        2,
-        expect.objectContaining({
-          url: 'https://relay.test/v1/slack/tenants/team-A/bindings?limit=200&cursor=cursor-1',
-        })
-      );
-    });
-
-    it('stops paginating and warns when the Relay repeats a cursor', async () => {
-      const warn = jest.fn();
-      const client = new RelayClient({
-        baseUrl: 'https://relay.test',
-        configurationUtilities,
-        logger: { warn } as unknown as Logger,
-      });
-      requestMock.mockResolvedValue({
-        status: 200,
-        data: {
-          bindings: [{ scope_type: 'SUB', scope_id: 'C123', status: 'bound_to_self' }],
-          next_cursor: 'loop',
-        },
-      } as never);
-
-      await client.listBindings('team-A');
-
-      // First page (no cursor) sees `loop`; second page repeats `loop` and halts.
-      expect(requestMock).toHaveBeenCalledTimes(2);
-      expect(warn).toHaveBeenCalledTimes(1);
     });
 
     it('encodes special characters in the tenantKey path segment', async () => {
@@ -213,77 +168,12 @@ describe('RelayClient', () => {
       );
     });
 
-    it('returns an empty array when the response bindings field is missing', async () => {
+    it('returns an empty page with no cursor when the response bindings field is missing', async () => {
       requestMock.mockResolvedValue({ status: 200, data: {} } as never);
-      await expect(createClient().listBindings('team-A')).resolves.toEqual([]);
-    });
-  });
-
-  describe('listChannels', () => {
-    it('GETs the per-tenant channels endpoint and returns id/name entries', async () => {
-      requestMock.mockResolvedValue({
-        status: 200,
-        data: {
-          channels: [
-            { id: 'C111', name: 'general' },
-            { id: 'C222', name: 'alerts' },
-          ],
-        },
-      } as never);
-
-      await expect(createClient().listChannels('team-A')).resolves.toEqual([
-        { id: 'C111', name: 'general' },
-        { id: 'C222', name: 'alerts' },
-      ]);
-
-      expect(requestMock).toHaveBeenCalledWith(
-        expect.objectContaining({
-          url: 'https://relay.test/v1/slack/tenants/team-A/channels?limit=200',
-          method: 'get',
-        })
-      );
-    });
-
-    it('follows next_cursor to aggregate every page', async () => {
-      requestMock
-        .mockResolvedValueOnce({
-          status: 200,
-          data: { channels: [{ id: 'C111', name: 'general' }], next_cursor: 'cursor-1' },
-        } as never)
-        .mockResolvedValueOnce({
-          status: 200,
-          data: { channels: [{ id: 'C222', name: 'alerts' }] },
-        } as never);
-
-      await expect(createClient().listChannels('team-A')).resolves.toEqual([
-        { id: 'C111', name: 'general' },
-        { id: 'C222', name: 'alerts' },
-      ]);
-
-      expect(requestMock).toHaveBeenNthCalledWith(
-        2,
-        expect.objectContaining({
-          url: 'https://relay.test/v1/slack/tenants/team-A/channels?limit=200&cursor=cursor-1',
-        })
-      );
-    });
-
-    it('returns an empty array when the response channels field is missing', async () => {
-      requestMock.mockResolvedValue({ status: 200, data: {} } as never);
-      await expect(createClient().listChannels('team-A')).resolves.toEqual([]);
-    });
-
-    it('skips entries missing id or name', async () => {
-      requestMock.mockResolvedValue({
-        status: 200,
-        data: {
-          channels: [{ id: 'C111', name: 'general' }, { id: 'C222' }, { name: 'no-id' }],
-        },
-      } as never);
-
-      await expect(createClient().listChannels('team-A')).resolves.toEqual([
-        { id: 'C111', name: 'general' },
-      ]);
+      await expect(createClient().listBindings('team-A')).resolves.toEqual({
+        bindings: [],
+        nextCursor: undefined,
+      });
     });
   });
 

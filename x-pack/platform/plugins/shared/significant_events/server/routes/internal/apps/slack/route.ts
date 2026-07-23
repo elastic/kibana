@@ -93,16 +93,21 @@ const bindingsSlackAppRoute = createServerRoute({
     access: 'internal',
     summary: 'List bound Slack channels',
     description:
-      'Returns the Slack channel bindings for the connected workspace, as reported by the Relay.',
+      'Returns a single page of Slack channel bindings for the connected workspace, as reported by the Relay. Use `cursor` (from a previous response `nextCursor`) and `perPage` to paginate.',
   },
   security: {
     authz: {
       requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
-  params: z.object({}),
-  handler: async ({ request, server }): Promise<SlackAppBindingsResponse> => {
-    return new SlackAppService(server).listBindings(request);
+  params: z.object({
+    query: z.object({
+      cursor: z.string().optional(),
+      perPage: z.coerce.number().int().min(1).max(200).optional(),
+    }),
+  }),
+  handler: async ({ params, request, server }): Promise<SlackAppBindingsResponse> => {
+    return new SlackAppService(server).listBindings(request, params.query);
   },
 });
 

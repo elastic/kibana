@@ -486,25 +486,21 @@ describe('SlackAppService', () => {
 
   describe('listBindings', () => {
     const listBindings = jest.fn();
-    const listChannels = jest.fn();
 
     function createHarnessWithListBindings(opts?: HarnessOptions) {
       const harness = createHarness(opts);
-      // Re-inject relayClient with listBindings + listChannels alongside the other mocks.
+      // Re-inject relayClient with listBindings alongside the other mocks.
       (harness.server as unknown as { relayClient: unknown }).relayClient = {
         startInstall,
         fetchClaim,
         unbind,
         listBindings,
-        listChannels,
       };
       return harness;
     }
 
     beforeEach(() => {
       listBindings.mockReset();
-      listChannels.mockReset();
-      listChannels.mockResolvedValue([]); // default: no member channels
     });
 
     it('returns empty bindings when the relay client is not available', async () => {
@@ -547,7 +543,7 @@ describe('SlackAppService', () => {
       });
     });
 
-    it('surfaces bound_to_self and bound_to_other_target SUB entries from the bindings API', async () => {
+    it('maps a page of connected SUB bindings from the relay, using the persisted display name', async () => {
       const { server, soClient } = createHarnessWithListBindings();
       soClient.get.mockResolvedValue({
         attributes: {
@@ -555,22 +551,24 @@ describe('SlackAppService', () => {
           tenantKey: 'tenant-A',
         },
       });
-      listBindings.mockResolvedValue([
-        { scope_type: 'SUB', scope_id: 'C123', status: 'bound_to_self' },
-        { scope_type: 'SUB', scope_id: 'C456', status: 'bound_to_other_target' },
-      ]);
-      // Names are derived by joining against the member-channels list.
-      listChannels.mockResolvedValue([{ id: 'C123', name: 'general' }]);
+      listBindings.mockResolvedValue({
+        bindings: [
+          { scope_type: 'SUB', scope_id: 'C123', display_name: 'general', visibility: 'public' },
+          { scope_type: 'SUB', scope_id: 'C456' }, // no persisted display snapshot
+        ],
+        nextCursor: 'cursor-2',
+      });
 
       await expect(new SlackAppService(server).listBindings(request)).resolves.toEqual({
         bindings: [
           { channel: 'C123', displayName: 'general', status: 'bound_to_self' },
-          { channel: 'C456', status: 'bound_to_other_target' },
+          { channel: 'C456', status: 'bound_to_self' },
         ],
+        nextCursor: 'cursor-2',
       });
     });
 
-    it('synthesizes not_bound entries from member channels absent in the bindings list', async () => {
+    it('forwards the cursor and perPage to the relay client', async () => {
       const { server, soClient } = createHarnessWithListBindings();
       soClient.get.mockResolvedValue({
         attributes: {
@@ -578,37 +576,32 @@ describe('SlackAppService', () => {
           tenantKey: 'tenant-A',
         },
       });
-      listBindings.mockResolvedValue([
-        { scope_type: 'SUB', scope_id: 'C123', status: 'bound_to_self' },
-      ]);
-      listChannels.mockResolvedValue([
-        { id: 'C123', name: 'general' }, // already bound — supplies its name, must NOT be duplicated
-        { id: 'C789', name: 'alerts' }, // unbound — must appear as not_bound
-      ]);
+      listBindings.mockResolvedValue({ bindings: [], nextCursor: undefined });
 
-      await expect(new SlackAppService(server).listBindings(request)).resolves.toEqual({
+      await new SlackAppService(server).listBindings(request, { cursor: 'cursor-1', perPage: 10 });
+
+      expect(listBindings).toHaveBeenCalledWith('tenant-A', { cursor: 'cursor-1', limit: 10 });
+    });
+
+    it('ignores entries without a scope_id', async () => {
+      const { server, soClient } = createHarnessWithListBindings();
+      soClient.get.mockResolvedValue({
+        attributes: {
+          status: RELAY_APP_CONNECTION_STATUS.connected,
+          tenantKey: 'tenant-A',
+        },
+      });
+      listBindings.mockResolvedValue({
         bindings: [
-          { channel: 'C123', displayName: 'general', status: 'bound_to_self' },
-          { channel: 'C789', displayName: 'alerts', status: 'not_bound' },
+          { scope_type: 'TENANT' },
+          { scope_type: 'SUB', scope_id: 'C123', display_name: 'general' },
         ],
+        nextCursor: undefined,
       });
-    });
-
-    it('returns bound entries even when the channels API fails (best-effort degrade, no names)', async () => {
-      const { server, soClient } = createHarnessWithListBindings();
-      soClient.get.mockResolvedValue({
-        attributes: {
-          status: RELAY_APP_CONNECTION_STATUS.connected,
-          tenantKey: 'tenant-A',
-        },
-      });
-      listBindings.mockResolvedValue([
-        { scope_type: 'SUB', scope_id: 'C123', status: 'bound_to_self' },
-      ]);
-      listChannels.mockRejectedValue(new Error('Slack rate limit'));
 
       await expect(new SlackAppService(server).listBindings(request)).resolves.toEqual({
-        bindings: [{ channel: 'C123', status: 'bound_to_self' }],
+        bindings: [{ channel: 'C123', displayName: 'general', status: 'bound_to_self' }],
+        nextCursor: undefined,
       });
     });
 

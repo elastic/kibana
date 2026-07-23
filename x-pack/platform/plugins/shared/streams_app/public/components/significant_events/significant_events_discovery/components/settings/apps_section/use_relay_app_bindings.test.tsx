@@ -60,12 +60,13 @@ describe('useRelayAppBindings', () => {
     expect(httpGet).not.toHaveBeenCalled();
   });
 
-  it('fetches the bindings route when enabled is true', async () => {
+  it('fetches the first page (no cursor) with a perPage query and exposes nextCursor', async () => {
     const response: SlackAppBindingsResponse = {
       bindings: [
         { channel: 'C123', displayName: 'general', status: 'bound_to_self' },
-        { channel: 'C456', status: 'bound_to_other_target' },
+        { channel: 'C456', status: 'bound_to_self' },
       ],
+      nextCursor: 'cursor-2',
     };
     httpGet.mockResolvedValue(response);
     const { wrapper } = createSetup();
@@ -74,13 +75,32 @@ describe('useRelayAppBindings', () => {
     await flush();
     expect(httpGet).toHaveBeenCalledWith(
       '/internal/significant_events/apps/slack/bindings',
-      expect.objectContaining({ signal: expect.any(AbortSignal) })
+      expect.objectContaining({
+        query: { perPage: 10 },
+        signal: expect.any(AbortSignal),
+      })
     );
     expect(result.current.bindings).toEqual([
       { channel: 'C123', displayName: 'general', status: 'bound_to_self' },
-      { channel: 'C456', status: 'bound_to_other_target' },
+      { channel: 'C456', status: 'bound_to_self' },
     ]);
+    expect(result.current.nextCursor).toBe('cursor-2');
     expect(result.current.isLoading).toBe(false);
+  });
+
+  it('includes the cursor in the query when paging past the first page', async () => {
+    httpGet.mockResolvedValue({ bindings: [], nextCursor: undefined });
+    const { wrapper } = createSetup();
+    renderHook(() => useRelayAppBindings(true, 'cursor-1'), { wrapper });
+
+    await flush();
+    expect(httpGet).toHaveBeenCalledWith(
+      '/internal/significant_events/apps/slack/bindings',
+      expect.objectContaining({
+        query: { perPage: 10, cursor: 'cursor-1' },
+        signal: expect.any(AbortSignal),
+      })
+    );
   });
 
   it('returns isLoading true while the request is pending', async () => {

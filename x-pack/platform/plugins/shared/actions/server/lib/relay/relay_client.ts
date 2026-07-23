@@ -13,12 +13,13 @@ import { request } from '../axios_utils';
 import { RelayRequestError } from './relay_error';
 import type {
   RelayBinding,
+  RelayBindingsPage,
   RelayCallbackResponse,
   RelayClaimResponse,
   RelayClientContract,
   RelayInstallRequest,
   RelayInstallResponse,
-  RelaySlackChannel,
+  RelayListBindingsOptions,
 } from './types';
 
 export interface RelayClientOptions {
@@ -32,6 +33,12 @@ const RELAY_MAX_PAGE_LIMIT = 200;
 
 interface RelayErrorResponse {
   message?: string;
+}
+
+/** Raw shape of the cursor-paginated bindings list response body. */
+interface RelayBindingsListResponse {
+  bindings?: RelayBinding[];
+  next_cursor?: string;
 }
 
 export class RelayClient implements RelayClientContract {
@@ -68,49 +75,38 @@ export class RelayClient implements RelayClientContract {
   }
 
   /**
-   * List the SUB (channel-scoped) bindings for a given Slack workspace tenant, across all
-   * deployments, with caller-relative status. The endpoint is cursor-paginated; this walks
-   * every page (following `next_cursor`) and returns the aggregated result. The Relay no
-   * longer enriches entries with `display_name` — join against `listChannels` for names.
+   * Fetch a single page of the calling deployment's own SUB (channel-scoped) bindings for a
+   * given Slack workspace tenant — the "connected channels" inventory. Each entry carries its
+   * persisted display snapshot (`display_name`, `visibility`). Returns the page's items plus
+   * the Relay's opaque `next_cursor` (as `nextCursor`); pass it back via `options.cursor` to
+   * read the next page.
    */
-  async listBindings(tenantKey: string): Promise<RelayBinding[]> {
-    return this.collect(`/v1/slack/tenants/${encodeURIComponent(tenantKey)}/bindings`, (data) => {
-      const body = data as { bindings?: unknown[] } | undefined;
-      if (!body || !Array.isArray(body.bindings)) {
-        return [];
-      }
-      return body.bindings.map((entry) => {
-        const e = entry as {
-          scope_type?: string;
-          scope_id?: string;
-          target_ref?: string;
-          status: RelayBinding['status'];
-        };
-        return {
-          scope_type: e.scope_type,
-          scope_id: e.scope_id,
-          target_ref: e.target_ref,
-          status: e.status,
-        };
-      });
+  async listBindings(
+    tenantKey: string,
+    options: RelayListBindingsOptions = {}
+  ): Promise<RelayBindingsPage> {
+    const query = new URLSearchParams({
+      limit: String(options.limit ?? RELAY_MAX_PAGE_LIMIT),
     });
-  }
+    if (options.cursor) {
+      query.set('cursor', options.cursor);
+    }
 
-  /**
-   * List all Slack channels the bot is currently a member of for the given tenant workspace.
-   * Returns `{ id, name }[]`. The endpoint is cursor-paginated; this walks every page
-   * (following `next_cursor`). Use alongside `listBindings` to derive `not_bound` channels.
-   */
-  async listChannels(tenantKey: string): Promise<RelaySlackChannel[]> {
-    return this.collect(`/v1/slack/tenants/${encodeURIComponent(tenantKey)}/channels`, (data) => {
-      const body = data as { channels?: unknown[] } | undefined;
-      if (!body || !Array.isArray(body.channels)) {
-        return [];
-      }
-      return (body.channels as Array<{ id?: string; name?: string }>)
-        .filter((e): e is RelaySlackChannel => e.id != null && e.name != null)
-        .map(({ id, name }) => ({ id, name }));
-    });
+    const response = await this.get(
+      `/v1/slack/tenants/${encodeURIComponent(tenantKey)}/bindings?${query.toString()}`
+    );
+    const body = response.data as RelayBindingsListResponse | undefined;
+
+    const bindings: RelayBinding[] = Array.isArray(body?.bindings)
+      ? body.bindings.map(({ scope_type, scope_id, display_name, visibility }) => ({
+          scope_type,
+          scope_id,
+          display_name,
+          visibility,
+        }))
+      : [];
+
+    return { bindings, nextCursor: body?.next_cursor };
   }
 
   /** Claim an unclaimed channel (put-if-absent). The caller must hold a registration for the tenant. */
@@ -167,47 +163,6 @@ export class RelayClient implements RelayClientContract {
 
   private async get(path: string): Promise<AxiosResponse> {
     return this.send(path, 'get');
-  }
-
-  /**
-   * Collect every item from a cursor-paginated GET endpoint. `extract` maps a single page's
-   * response body to its items; the pages are walked via {@link paginate} and flattened.
-   */
-  private async collect<T>(basePath: string, extract: (data: unknown) => T[]): Promise<T[]> {
-    const items: T[] = [];
-    for await (const page of this.paginate(basePath)) {
-      items.push(...extract(page.data));
-    }
-    return items;
-  }
-
-  /**
-   * Walk a cursor-paginated GET endpoint, yielding one successful response per page.
-   * Follows the response `next_cursor` until it is absent. `?limit=` is fixed to the
-   * Relay's `MAX_PAGE_LIMIT` to minimize round-trips. Stops if the Relay ever repeats a
-   * cursor, so a misbehaving server can't drive an unbounded request loop.
-   */
-  private async *paginate(basePath: string): AsyncGenerator<AxiosResponse> {
-    const seenCursors = new Set<string>();
-    let cursor: string | undefined;
-    do {
-      const query = new URLSearchParams({ limit: String(RELAY_MAX_PAGE_LIMIT) });
-      if (cursor) {
-        query.set('cursor', cursor);
-      }
-      const response = await this.get(`${basePath}?${query.toString()}`);
-      yield response;
-      cursor = (response.data as { next_cursor?: string } | undefined)?.next_cursor;
-      if (cursor && seenCursors.has(cursor)) {
-        this.logger.warn(
-          `Relay returned a repeated pagination cursor for ${basePath}; stopping pagination`
-        );
-        return;
-      }
-      if (cursor) {
-        seenCursors.add(cursor);
-      }
-    } while (cursor);
   }
 
   private async send(

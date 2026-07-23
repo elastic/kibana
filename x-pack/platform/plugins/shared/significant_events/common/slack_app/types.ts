@@ -39,31 +39,30 @@ export interface SlackAppDisconnectResponse {
 }
 
 /**
- * Binding status as reported by the Relay:
- * - `bound_to_self` — this channel is already claimed by this deployment.
- * - `bound_to_other_target` — claimed by a different deployment; no action possible.
- * - `not_bound` — the bot is a member but the channel is unclaimed; can be bound.
+ * Binding status for a connected channel. The bindings route only ever returns this
+ * deployment's own SUB bindings, so every entry is `bound_to_self`.
  */
-export type SlackChannelBindingStatus = 'bound_to_self' | 'bound_to_other_target' | 'not_bound';
+export type SlackChannelBindingStatus = 'bound_to_self';
 
 /**
  * A single binding entry for a connected workspace, as returned by the bindings route.
- * `channel` = Slack channel id for a SUB-scope binding; `displayName` = channel name when available.
- * `bound_to_self` / `bound_to_other_target` come from the Relay; `not_bound` is derived on the
- * Kibana side by joining member channels against the bound entries.
+ * `channel` = Slack channel id for a SUB-scope binding; `displayName` = the channel's
+ * persisted display-name snapshot from the Relay, when available.
  */
 export interface SlackChannelBinding {
-  /** Slack channel id for a channel-specific binding (`SUB` scope or `not_bound`). */
+  /** Slack channel id for a channel-specific (`SUB`-scope) binding. */
   channel?: string;
-  /** Human-readable channel name; present when derived from the bot's member-channel list. */
+  /** Human-readable channel name from the Relay's persisted display snapshot. */
   displayName?: string;
-  /** Binding status for this entry (Relay-reported for bound entries, derived for `not_bound`). */
+  /** Binding status for this entry; always `bound_to_self` for the connected-channel list. */
   status: SlackChannelBindingStatus;
 }
 
-/** Response from the per-connection bindings route. */
+/** Response from the per-connection bindings route (one page of connected channels). */
 export interface SlackAppBindingsResponse {
   bindings: SlackChannelBinding[];
+  /** Opaque cursor for the next page of connected channels; absent on the last page. */
+  nextCursor?: string;
 }
 
 /** Response from the per-channel bind route. */

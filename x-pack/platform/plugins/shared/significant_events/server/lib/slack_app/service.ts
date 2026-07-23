@@ -25,6 +25,14 @@ import {
 import { SlackAppUnavailableError } from './errors';
 import { getKibanaUrl } from './get_kibana_url';
 
+/** Pagination options for a single page of connected channels. */
+export interface ListBindingsOptions {
+  /** Opaque cursor from a previous page's `nextCursor`; omit for the first page. */
+  cursor?: string;
+  /** Max entries to return in this page. */
+  perPage?: number;
+}
+
 export class SlackAppService {
   private readonly logger: Logger;
 
@@ -269,77 +277,53 @@ export class SlackAppService {
     };
   }
 
-  async listBindings(request: KibanaRequest): Promise<SlackAppBindingsResponse> {
+  async listBindings(
+    request: KibanaRequest,
+    options: ListBindingsOptions = {}
+  ): Promise<SlackAppBindingsResponse> {
     const soClient = this.getSoClient(request);
-    const relayClient = await this.getRelayClient();
+    const [relayClient, connection] = await Promise.all([
+      this.getRelayClient(),
+      this.readConnection(soClient),
+    ]);
 
     if (!relayClient) {
       return { bindings: [] };
     }
 
-    const connection = await this.readConnection(soClient);
-
     if (connection?.status !== RELAY_APP_CONNECTION_STATUS.connected || !connection.tenantKey) {
       return { bindings: [] };
     }
 
-    // Fetch the SUB bound entries and the bot's member channel list concurrently.
-    // The channels call is best-effort: failure degrades to showing only bound entries
-    // (without their human-readable channel names).
-    const [bindingsResult, channelsResult] = await Promise.allSettled([
-      relayClient.listBindings(connection.tenantKey),
-      relayClient.listChannels(connection.tenantKey),
-    ]);
-
-    if (bindingsResult.status === 'rejected') {
-      this.logger.warn(
-        `Failed to list bindings from Relay: ${this.toErrorMessage(bindingsResult.reason)}`
-      );
+    let page;
+    try {
+      page = await relayClient.listBindings(connection.tenantKey, {
+        cursor: options.cursor,
+        limit: options.perPage,
+      });
+    } catch (error) {
+      this.logger.warn(`Failed to list bindings from Relay: ${this.toErrorMessage(error)}`);
       return { bindings: [] };
     }
-    const rawBindings = bindingsResult.value;
 
-    if (channelsResult.status === 'rejected') {
-      this.logger.warn(
-        `Failed to list channels from Relay (best-effort): ${this.toErrorMessage(
-          channelsResult.reason
-        )}`
-      );
-    }
-    const memberChannels = channelsResult.status === 'fulfilled' ? channelsResult.value : [];
-    // The bindings endpoint no longer enriches entries with a channel name, so join bound
-    // channel ids against the member-channels list to recover human-readable names.
-    const channelNamesById = new Map(memberChannels.map((ch) => [ch.id, ch.name]));
-
+    // The Relay returns only this deployment's own SUB bindings (the connected channels),
+    // each carrying its persisted display snapshot, so no additional Slack call is needed.
     const bindings: SlackAppBindingsResponse['bindings'] = [];
-    // Track channel ids that already have an explicit binding so we don't duplicate them.
-    const boundChannelIds = new Set<string>();
-
-    for (const entry of rawBindings) {
+    for (const entry of page.bindings) {
       if (entry.scope_id == null) {
         continue;
       }
       const binding: SlackAppBindingsResponse['bindings'][number] = {
         channel: entry.scope_id,
-        status: entry.status,
+        status: 'bound_to_self',
       };
-      const displayName = channelNamesById.get(entry.scope_id);
-      if (displayName != null) {
-        binding.displayName = displayName;
+      if (entry.display_name != null) {
+        binding.displayName = entry.display_name;
       }
       bindings.push(binding);
-      boundChannelIds.add(entry.scope_id);
     }
 
-    // Synthesize not_bound entries from the channels the bot is a member of that are
-    // not already explicitly bound (to self or another target).
-    for (const ch of memberChannels) {
-      if (!boundChannelIds.has(ch.id)) {
-        bindings.push({ channel: ch.id, displayName: ch.name, status: 'not_bound' });
-      }
-    }
-
-    return { bindings };
+    return { bindings, nextCursor: page.nextCursor };
   }
 
   private async requireConnectedTenant(

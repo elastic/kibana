@@ -26,32 +26,40 @@ export interface RelayCallbackResponse {
   status: number;
 }
 
-/** A single entry from the Relay bindings list (`GET /v1/slack/tenants/:tenantKey/bindings`). */
+/**
+ * A single entry from the caller-owned bindings inventory
+ * (`GET /v1/slack/tenants/:tenantKey/bindings`).
+ *
+ * The endpoint returns only the calling deployment's own SUB bindings — the
+ * "connected channels" for this tenant — so entries carry no ownership status
+ * or target ref. Each row includes a persisted display snapshot
+ * (`display_name`, `visibility`), so the connected-channel list can be served
+ * without any additional Slack call.
+ */
 export interface RelayBinding {
   /** Binding scope type from the Relay: always `"SUB"` for channel-specific bindings. */
   scope_type?: string;
   /** Channel id — present for `SUB`-scope entries. */
   scope_id?: string;
-  /**
-   * Target ref of the owning deployment — only returned by the Relay for the caller's own
-   * bindings (i.e. when `status` is `bound_to_self`).
-   */
-  target_ref?: string;
-  /**
-   * Caller-relative binding status from the Relay wire contract.
-   * `not_bound` is NOT emitted by this endpoint — that status is derived on the
-   * Kibana side by joining the channels list against the bindings list.
-   */
-  status: 'bound_to_self' | 'bound_to_other_target';
+  /** Persisted display-name snapshot; absent for legacy rows without one. */
+  display_name?: string;
+  /** Persisted visibility snapshot; absent for legacy rows without one. */
+  visibility?: 'public' | 'private';
 }
 
-/**
- * A single entry from the Relay channels list (`GET /v1/slack/tenants/:tenantKey/channels`).
- * Returns all Slack channels the bot is currently a member of (no binding data).
- */
-export interface RelaySlackChannel {
-  id: string;
-  name: string;
+/** Options for fetching a single page of the caller-owned bindings inventory. */
+export interface RelayListBindingsOptions {
+  /** Opaque cursor from a previous page's `nextCursor`; omit for the first page. */
+  cursor?: string;
+  /** Max entries to return in this page. Defaults to the Relay's max page size. */
+  limit?: number;
+}
+
+/** A single page of the caller-owned bindings inventory, plus the cursor to the next page. */
+export interface RelayBindingsPage {
+  bindings: RelayBinding[];
+  /** Present when more pages remain; pass back as `cursor` to fetch the next page. */
+  nextCursor?: string;
 }
 
 export interface RelayClientContract {
@@ -60,17 +68,12 @@ export interface RelayClientContract {
   /** Unbind a single workspace binding identified by its tenant key. */
   unbind(tenantKey: string): Promise<void>;
   /**
-   * List the SUB (channel-scoped) bindings for a given Slack workspace (tenant), across all
-   * deployments, with caller-relative status (`bound_to_self` or `bound_to_other_target`).
-   * Walks every page of the cursor-paginated endpoint. `not_bound` entries are NOT in this
-   * list — derive them by joining against `listChannels`.
+   * Fetch a single page of the calling deployment's own SUB (channel-scoped) bindings for a
+   * given Slack workspace (tenant) — the "connected channels" inventory. Each entry carries
+   * its persisted display snapshot (`display_name`, `visibility`). Follow `nextCursor` to
+   * read subsequent pages of the cursor-paginated endpoint.
    */
-  listBindings(tenantKey: string): Promise<RelayBinding[]>;
-  /**
-   * List all Slack channels the bot is currently a member of for a given tenant.
-   * Use alongside `listBindings` to derive channels available to bind (`not_bound`).
-   */
-  listChannels(tenantKey: string): Promise<RelaySlackChannel[]>;
+  listBindings(tenantKey: string, options?: RelayListBindingsOptions): Promise<RelayBindingsPage>;
   /** Claim an unclaimed channel for this deployment (put-if-absent; 409 if already claimed). */
   bind(tenantKey: string, channelId: string): Promise<void>;
   /** Release a channel binding owned by this deployment (404 if none; 403 if owned by another). */

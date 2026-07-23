@@ -44,7 +44,6 @@ export type {
   RelayClientContract,
   RelayInstallRequest,
   RelayInstallResponse,
-  RelaySlackChannel,
 } from './lib/relay';
 
 export {

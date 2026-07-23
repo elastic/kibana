@@ -14,5 +14,4 @@ export type {
   RelayClientContract,
   RelayInstallRequest,
   RelayInstallResponse,
-  RelaySlackChannel,
 } from './types';

@@ -23,31 +23,51 @@ const UNBIND_CHANNEL_ROUTE = (channelId: string) =>
 
 export const RELAY_APP_BINDINGS_QUERY_KEY = ['relayAppConnectionBindings'] as const;
 
+/** Number of connected channels shown per page in the settings table. */
+export const RELAY_APP_BINDINGS_PAGE_SIZE = 10;
+
+/** Stable reference for the loading/empty state so the table `items` prop stays referentially equal. */
+const EMPTY_BINDINGS: SlackChannelBinding[] = [];
+
 export interface UseRelayAppBindings {
   bindings: SlackChannelBinding[];
   isLoading: boolean;
+  isFetching: boolean;
+  /** Opaque cursor for the next page; absent when this is the last page. */
+  nextCursor?: string;
 }
 
 /**
- * Fetches the bound Slack channels for the connected workspace.
- * The query is only active when `enabled` is true, so the fetch is deferred
- * until the expander is opened.
+ * Fetches a single page of the Slack channels connected to this deployment. The query is
+ * only active when `enabled` is true (e.g. once the Slack App is connected). Pass the
+ * opaque `cursor` from a previous page's `nextCursor` to fetch the next page; omit it for
+ * the first page. Each cursor is cached as its own query so paging back and forth is instant.
  */
-export function useRelayAppBindings(enabled: boolean): UseRelayAppBindings {
+export function useRelayAppBindings(enabled: boolean, cursor?: string): UseRelayAppBindings {
   const {
     core: { http },
   } = useKibana();
 
   const query = useQuery<SlackAppBindingsResponse, Error>({
-    queryKey: RELAY_APP_BINDINGS_QUERY_KEY,
-    queryFn: ({ signal }) => http.get<SlackAppBindingsResponse>(BINDINGS_ROUTE, { signal }),
+    queryKey: [...RELAY_APP_BINDINGS_QUERY_KEY, cursor ?? null],
+    queryFn: ({ signal }) =>
+      http.get<SlackAppBindingsResponse>(BINDINGS_ROUTE, {
+        query: { perPage: RELAY_APP_BINDINGS_PAGE_SIZE, ...(cursor ? { cursor } : {}) },
+        signal,
+      }),
     enabled,
     retry: false,
+    keepPreviousData: true,
+    // Connected channels only change via bind/unbind in this UI (which invalidate this
+    // query), so cached pages stay fresh and paging back to one avoids a redundant fetch.
+    staleTime: 30_000,
   });
 
   return {
-    bindings: query.data?.bindings ?? [],
+    bindings: query.data?.bindings ?? EMPTY_BINDINGS,
     isLoading: query.isLoading && enabled,
+    isFetching: query.isFetching && enabled,
+    nextCursor: query.data?.nextCursor,
   };
 }
 
@@ -56,7 +76,7 @@ export interface UseBindChannel {
   isLoading: boolean;
 }
 
-/** Per-row mutation hook for binding a channel to this deployment. */
+/** Mutation hook for binding a channel to this deployment. */
 export function useBindChannel(): UseBindChannel {
   const {
     core: { http, notifications },

@@ -5,20 +5,18 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
-  EuiBadge,
   EuiBasicTable,
   EuiButton,
+  EuiButtonEmpty,
   EuiCallOut,
-  EuiCode,
   EuiConfirmModal,
-  EuiFieldSearch,
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
   EuiText,
-  EuiToolTip,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -34,14 +32,57 @@ interface SlackConnectionBindingsProps {
 }
 
 export function SlackConnectionBindings({ canEdit }: SlackConnectionBindingsProps) {
-  const { bindings, isLoading } = useRelayAppBindings(true);
-  const [searchValue, setSearchValue] = useState('');
+  // Cursor-based pagination: `cursors[i]` is the opaque cursor used to fetch page `i`
+  // (undefined for the first page). The Relay only exposes forward `nextCursor` values, so
+  // we remember the cursors we've visited to allow stepping back and forth.
+  const [cursors, setCursors] = useState<Array<string | undefined>>([undefined]);
+  const [pageIndex, setPageIndex] = useState(0);
 
-  const filteredBindings = useMemo(() => {
-    const term = searchValue.trim().toLowerCase();
-    if (!term) return bindings;
-    return bindings.filter((b) => channelLabel(b).toLowerCase().includes(term));
-  }, [bindings, searchValue]);
+  const { bindings, isLoading, isFetching, nextCursor } = useRelayAppBindings(
+    true,
+    cursors[pageIndex]
+  );
+  const { bind, isLoading: isBinding } = useBindChannel();
+  const [channelId, setChannelId] = useState('');
+
+  const trimmedChannelId = channelId.trim();
+  const canBind = canEdit && !isBinding && trimmedChannelId.length > 0;
+
+  const resetToFirstPage = useCallback(() => {
+    setCursors([undefined]);
+    setPageIndex(0);
+  }, []);
+
+  const onBind = () => {
+    if (!canBind) {
+      return;
+    }
+    // Binding changes the connected set, so return to the first page after it succeeds.
+    // Failure is surfaced via a toast in useBindChannel; ignore the rejection here.
+    bind(trimmedChannelId)
+      .then(() => {
+        setChannelId('');
+        resetToFirstPage();
+      })
+      .catch(() => undefined);
+  };
+
+  const onNextPage = () => {
+    if (nextCursor == null || isFetching) {
+      return;
+    }
+    // Record the next page's cursor the first time we advance to it; revisiting a page we've
+    // already paged through keeps the existing stack.
+    setCursors((prev) => (pageIndex + 1 < prev.length ? prev : [...prev, nextCursor]));
+    setPageIndex((index) => index + 1);
+  };
+
+  const onPreviousPage = () => {
+    if (pageIndex === 0 || isFetching) {
+      return;
+    }
+    setPageIndex((index) => index - 1);
+  };
 
   const columns = useMemo(
     () => [
@@ -56,55 +97,6 @@ export function SlackConnectionBindings({ canEdit }: SlackConnectionBindingsProp
         ),
       },
       {
-        field: 'status' as const,
-        name: i18n.translate(
-          'xpack.streams.significantEventsDiscovery.settings.apps.slackTableStatus',
-          { defaultMessage: 'Status' }
-        ),
-        render: (_: unknown, binding: SlackChannelBinding) => {
-          if (binding.status === 'bound_to_self') {
-            return (
-              <EuiBadge color="success">
-                {i18n.translate(
-                  'xpack.streams.significantEventsDiscovery.settings.apps.slackStatusBound',
-                  { defaultMessage: 'Connected' }
-                )}
-              </EuiBadge>
-            );
-          }
-          if (binding.status === 'not_bound') {
-            return (
-              <EuiBadge color="primary">
-                {i18n.translate(
-                  'xpack.streams.significantEventsDiscovery.settings.apps.slackStatusNotBound',
-                  { defaultMessage: 'Invited - not Connected' }
-                )}
-              </EuiBadge>
-            );
-          }
-          // bound_to_other_target
-          return (
-            <EuiToolTip
-              content={i18n.translate(
-                'xpack.streams.significantEventsDiscovery.settings.apps.slackChannelUnavailableTooltip',
-                { defaultMessage: 'Bound to another deployment' }
-              )}
-            >
-              <EuiBadge
-                tabIndex={0}
-                color="default"
-                data-test-subj="streamsSlackAppChannelUnavailableBadge"
-              >
-                {i18n.translate(
-                  'xpack.streams.significantEventsDiscovery.settings.apps.slackChannelUnavailable',
-                  { defaultMessage: 'Connected to another Kibana' }
-                )}
-              </EuiBadge>
-            </EuiToolTip>
-          );
-        },
-      },
-      {
         field: 'actions' as const,
         name: i18n.translate(
           'xpack.streams.significantEventsDiscovery.settings.apps.slackTableActions',
@@ -112,12 +104,18 @@ export function SlackConnectionBindings({ canEdit }: SlackConnectionBindingsProp
         ),
         width: '100px',
         render: (_: unknown, binding: SlackChannelBinding) => (
-          <BindingActionCell binding={binding} canEdit={canEdit} />
+          <BindingActionCell
+            binding={binding}
+            canEdit={canEdit}
+            onDisconnected={resetToFirstPage}
+          />
         ),
       },
     ],
-    [canEdit]
+    [canEdit, resetToFirstPage]
   );
+
+  const showPagination = pageIndex > 0 || nextCursor != null;
 
   return (
     <>
@@ -130,59 +128,72 @@ export function SlackConnectionBindings({ canEdit }: SlackConnectionBindingsProp
         <EuiText size="s">
           <FormattedMessage
             id="xpack.streams.significantEventsDiscovery.settings.apps.slackChannelsCallout"
-            defaultMessage="Only channels you have invited {botName} to appear here. In Slack, type {command} in a channel to make it connectable, then bind it to a deployment."
+            defaultMessage="Invite {botName} to a Slack channel, then paste the channel ID below and select {bind} to connect it to this deployment."
             values={{
               botName: <strong>{'@Elastic'}</strong>,
-              command: <EuiCode>{'/invite @Elastic'}</EuiCode>,
+              bind: (
+                <strong>
+                  {i18n.translate(
+                    'xpack.streams.significantEventsDiscovery.settings.apps.slackBindChannel',
+                    { defaultMessage: 'Connect' }
+                  )}
+                </strong>
+              ),
             }}
           />
         </EuiText>
       </EuiCallOut>
       <EuiSpacer size="l" />
-      <EuiFlexGroup gutterSize="s" alignItems="center">
-        <EuiFlexItem>
-          <EuiFieldSearch
-            incremental
-            isClearable
-            value={searchValue}
-            onChange={(e) => setSearchValue(e.target.value)}
+      <EuiFlexGroup gutterSize="s" alignItems="flexStart">
+        <EuiFlexItem grow={false}>
+          <EuiFieldText
+            value={channelId}
+            onChange={(e) => setChannelId(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                onBind();
+              }
+            }}
+            disabled={!canEdit || isBinding}
             placeholder={i18n.translate(
-              'xpack.streams.significantEventsDiscovery.settings.apps.slackChannelSearchPlaceholder',
-              { defaultMessage: 'Search channels' }
+              'xpack.streams.significantEventsDiscovery.settings.apps.slackChannelIdPlaceholder',
+              { defaultMessage: 'Enter a Slack channel ID' }
             )}
             aria-label={i18n.translate(
-              'xpack.streams.significantEventsDiscovery.settings.apps.slackChannelSearchAriaLabel',
-              { defaultMessage: 'Search Slack channels' }
+              'xpack.streams.significantEventsDiscovery.settings.apps.slackChannelIdAriaLabel',
+              { defaultMessage: 'Slack channel ID' }
             )}
-            data-test-subj="streamsSlackAppChannelSearch"
+            data-test-subj="streamsSlackAppChannelIdInput"
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiText size="s" color="subdued" data-test-subj="streamsSlackAppChannelCounts">
+          <EuiButton
+            fill
+            isDisabled={!canBind}
+            isLoading={isBinding}
+            onClick={onBind}
+            data-test-subj="streamsSlackAppBindChannelButton"
+          >
             {i18n.translate(
-              'xpack.streams.significantEventsDiscovery.settings.apps.slackChannelCounts',
+              'xpack.streams.significantEventsDiscovery.settings.apps.slackBindChannel',
               {
-                defaultMessage: '{total} channels · {connectable} connectable',
-                values: {
-                  total: bindings.length,
-                  connectable: bindings.filter((b) => b.status === 'not_bound').length,
-                },
+                defaultMessage: 'Connect',
               }
             )}
-          </EuiText>
+          </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="s" />
       <EuiBasicTable
         css={{ width: '100%' }}
-        items={filteredBindings}
+        items={bindings}
         columns={columns}
-        loading={isLoading}
+        loading={isLoading || isFetching}
         noItemsMessage={
           <EuiText size="xs" color="subdued">
             {i18n.translate(
               'xpack.streams.significantEventsDiscovery.settings.apps.slackNoChannels',
-              { defaultMessage: 'No channels' }
+              { defaultMessage: 'No connected channels' }
             )}
           </EuiText>
         }
@@ -192,6 +203,55 @@ export function SlackConnectionBindings({ canEdit }: SlackConnectionBindingsProp
           { defaultMessage: 'Slack channels bound to this deployment' }
         )}
       />
+      {showPagination && (
+        <>
+          <EuiSpacer size="s" />
+          <EuiFlexGroup
+            gutterSize="s"
+            alignItems="center"
+            justifyContent="flexEnd"
+            responsive={false}
+          >
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                size="s"
+                iconType="arrowLeft"
+                isDisabled={pageIndex === 0 || isFetching}
+                onClick={onPreviousPage}
+                data-test-subj="streamsSlackAppChannelsPreviousPage"
+              >
+                {i18n.translate(
+                  'xpack.streams.significantEventsDiscovery.settings.apps.slackChannelsPreviousPage',
+                  { defaultMessage: 'Previous' }
+                )}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs" color="subdued" data-test-subj="streamsSlackAppChannelsPageLabel">
+                {i18n.translate(
+                  'xpack.streams.significantEventsDiscovery.settings.apps.slackChannelsPageLabel',
+                  { defaultMessage: 'Page {page}', values: { page: pageIndex + 1 } }
+                )}
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                size="s"
+                iconType="arrowRight"
+                iconSide="right"
+                isDisabled={nextCursor == null || isFetching}
+                onClick={onNextPage}
+                data-test-subj="streamsSlackAppChannelsNextPage"
+              >
+                {i18n.translate(
+                  'xpack.streams.significantEventsDiscovery.settings.apps.slackChannelsNextPage',
+                  { defaultMessage: 'Next' }
+                )}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </>
+      )}
     </>
   );
 }
@@ -199,35 +259,14 @@ export function SlackConnectionBindings({ canEdit }: SlackConnectionBindingsProp
 interface BindingActionCellProps {
   binding: SlackChannelBinding;
   canEdit: boolean;
+  onDisconnected: () => void;
 }
 
-function BindingActionCell({ binding, canEdit }: BindingActionCellProps) {
-  const { bind, isLoading: isBinding } = useBindChannel();
+function BindingActionCell({ binding, canEdit, onDisconnected }: BindingActionCellProps) {
   const { unbind, isLoading: isUnbinding } = useUnbindChannel();
   const [confirmOpen, setConfirmOpen] = useState(false);
   const modalTitleId = useGeneratedHtmlId();
 
-  if (binding.status === 'bound_to_other_target') {
-    return null;
-  }
-
-  if (binding.status === 'not_bound') {
-    return (
-      <EuiButton
-        size="s"
-        isDisabled={!canEdit || isBinding}
-        isLoading={isBinding}
-        onClick={() => binding.channel != null && bind(binding.channel)}
-        data-test-subj="streamsSlackAppBindChannelButton"
-      >
-        {i18n.translate('xpack.streams.significantEventsDiscovery.settings.apps.slackBindChannel', {
-          defaultMessage: 'Connect',
-        })}
-      </EuiButton>
-    );
-  }
-
-  // bound_to_self
   const channelName = channelLabel(binding);
 
   return (
@@ -254,7 +293,12 @@ function BindingActionCell({ binding, canEdit }: BindingActionCellProps) {
           onCancel={() => setConfirmOpen(false)}
           onConfirm={() => {
             if (binding.channel != null) {
-              unbind(binding.channel).finally(() => setConfirmOpen(false));
+              unbind(binding.channel)
+                .then(() => onDisconnected())
+                // Failure is surfaced via a toast in useUnbindChannel; swallow here so the
+                // modal still closes without an unhandled rejection.
+                .catch(() => undefined)
+                .finally(() => setConfirmOpen(false));
             } else {
               setConfirmOpen(false);
             }
