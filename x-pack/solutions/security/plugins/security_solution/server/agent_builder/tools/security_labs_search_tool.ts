@@ -9,6 +9,7 @@ import { z } from '@kbn/zod/v4';
 import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { createErrorResult } from '@kbn/agent-builder-server';
+import { addSpaceIdToPath } from '@kbn/core-spaces-common';
 import {
   ResourceTypes,
   resolveDefaultInferenceIdFromInferenceGet,
@@ -46,7 +47,7 @@ export const securityLabsSearchTool = (
         return { status: 'available' };
       },
     },
-    handler: async ({ query: nlQuery }, { request, modelProvider, logger }) => {
+    handler: async ({ query: nlQuery }, { request, modelProvider, logger, spaceId }) => {
       logger.debug(`${SECURITY_LABS_SEARCH_TOOL_ID} tool called with query: ${nlQuery}`);
 
       try {
@@ -79,12 +80,17 @@ export const securityLabsSearchTool = (
         });
 
         if (!inferenceId) {
-          const basePath = coreStart.http.basePath.get(request);
-          const settingsUrl = `${basePath}${GENAI_SETTINGS_APP_PATH}`;
+          // Use serverBasePath (not request.basePath): Agent Builder requests can omit
+          // basePath, producing /app/... links the chat UI treats as external/broken.
+          const settingsUrl = addSpaceIdToPath(
+            coreStart.http.basePath.serverBasePath,
+            spaceId,
+            GENAI_SETTINGS_APP_PATH
+          );
           return {
             results: [
               createErrorResult({
-                message: `Security Labs content is not installed. To use this tool, please install Security Labs from the GenAI Settings page: ${settingsUrl}. Do not perform any other tool calls, and provide the user with a link to install the documentation.`,
+                message: `Security Labs content is not installed. To use this tool, please install Security Labs from GenAI Settings. Provide the user with this exact markdown link and do not alter the URL path: [GenAI Settings](${settingsUrl}). Do not perform any other tool calls.`,
                 metadata: { settingsUrl },
               }),
             ],

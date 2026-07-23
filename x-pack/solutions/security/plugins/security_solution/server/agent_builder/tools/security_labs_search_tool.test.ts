@@ -244,6 +244,34 @@ describe('securityLabsSearchTool', () => {
       const errorResult = result.results[0] as ErrorResult;
       expect(errorResult.type).toBe(ToolResultType.error);
       expect(errorResult.data.message).toContain('not installed');
+      // Must include server.basePath so Agent Builder treats the link as internal.
+      expect(errorResult.data.metadata).toEqual({
+        settingsUrl: '/mock-server-basepath/app/management/ai/genAiSettings',
+      });
+      expect(errorResult.data.message).toContain(
+        '[GenAI Settings](/mock-server-basepath/app/management/ai/genAiSettings)'
+      );
+    });
+
+    it('includes the current space in the GenAI Settings install URL', async () => {
+      (mockEsClient.asInternalUser.inference.get as unknown as jest.Mock).mockResolvedValue({
+        endpoints: [{ inference_id: defaultInferenceEndpoints.JINAv5 }],
+      });
+      retrieveDocumentationAvailable.mockResolvedValue(false);
+
+      const result = (await tool.handler(
+        { query: 'test query' },
+        createToolHandlerContext(mockRequest, mockEsClient, mockLogger, {
+          modelProvider: mockModelProvider,
+          events: mockEvents as ToolHandlerContext['events'],
+          spaceId: 'security',
+        })
+      )) as ToolHandlerStandardReturn;
+
+      const errorResult = result.results[0] as ErrorResult;
+      expect(errorResult.data.metadata).toEqual({
+        settingsUrl: '/mock-server-basepath/s/security/app/management/ai/genAiSettings',
+      });
     });
 
     it('handles errors', async () => {
