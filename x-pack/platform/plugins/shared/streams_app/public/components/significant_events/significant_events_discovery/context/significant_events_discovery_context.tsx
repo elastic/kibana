@@ -19,6 +19,7 @@ import React, {
 } from 'react';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useSignificantEventsDiscoveryApi } from '../../../../hooks/significant_events/use_significant_events_discovery_api';
+import { getFormattedError } from '../../../../util/errors';
 import { RUNNING_POLL_INTERVAL_MS } from '../../constants';
 
 const TERMINAL_STATUS_TOAST_DELAY_MS = 5 * 1000;
@@ -89,6 +90,9 @@ export function SignificantEventsDiscoveryProvider({
   // server reflects reality, so it can't get stuck.
   const [isOptimisticallyRunning, setIsOptimisticallyRunning] = useState(false);
   const [isCanceling, setIsCanceling] = useState(false);
+  // Distinguishes explicit user cancel from maintenance-driven cancellation
+  // (pause) so we don't toast "discovery canceled" for the latter.
+  const userCancelRequestedRef = useRef(false);
 
   // Execution id of the run we triggered, used to clear the optimistic bridge and
   // to attribute terminal side-effects to our run rather than a previous one.
@@ -105,7 +109,7 @@ export function SignificantEventsDiscoveryProvider({
     onError: (error: Error) => {
       setIsOptimisticallyRunning(false);
       setTrackedExecutionId(null);
-      toasts.addError(error, {
+      toasts.addError(getFormattedError(error), {
         title: i18n.translate(
           'xpack.streams.SignificantEventsDiscoveryWorkflow.triggerErrorTitle',
           {
@@ -120,7 +124,7 @@ export function SignificantEventsDiscoveryProvider({
     mutationFn: cancelSignificantEventsDiscovery,
     onError: (error: Error) => {
       setIsCanceling(false);
-      toasts.addError(error, {
+      toasts.addError(getFormattedError(error), {
         title: i18n.translate('xpack.streams.SignificantEventsDiscoveryWorkflow.cancelErrorTitle', {
           defaultMessage: 'Failed to cancel discovery pipeline',
         }),
@@ -178,6 +182,8 @@ export function SignificantEventsDiscoveryProvider({
 
     setIsCanceling(false);
     setIsOptimisticallyRunning(false);
+    const wasUserCancel = userCancelRequestedRef.current;
+    userCancelRequestedRef.current = false;
 
     const invalidateAll = () =>
       void Promise.all([
@@ -209,7 +215,7 @@ export function SignificantEventsDiscoveryProvider({
         }),
         text: serverError,
       });
-    } else {
+    } else if (wasUserCancel) {
       toasts.addSuccess({
         title: i18n.translate('xpack.streams.SignificantEventsDiscoveryWorkflow.canceledTitle', {
           defaultMessage: 'Significant events discovery canceled',
@@ -223,11 +229,13 @@ export function SignificantEventsDiscoveryProvider({
     // filled in on trigger success, after which the server status drives state.
     setTrackedExecutionId(null);
     setIsCanceling(false);
+    userCancelRequestedRef.current = false;
     setIsOptimisticallyRunning(true);
     triggerMutate();
   }, [triggerMutate]);
 
   const handleCancel = useCallback(() => {
+    userCancelRequestedRef.current = true;
     setIsCanceling(true);
     cancelMutate();
   }, [cancelMutate]);
