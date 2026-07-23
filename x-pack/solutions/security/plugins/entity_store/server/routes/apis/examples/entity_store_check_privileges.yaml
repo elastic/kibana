@@ -23,8 +23,12 @@ responses:
                 elasticsearch:
                   cluster:
                     manage_index_templates: true
+                    manage_ingest_pipelines: true
                   index:
                     "entities-latest-default":
+                      read: true
+                      manage: true
+                    ".entities.v2.latest.security_default-*":
                       read: true
                       manage: true
                 kibana:
@@ -47,13 +51,17 @@ responses:
               install_privileges:
                 elasticsearch:
                   cluster:
-                    manage_index_templates: false
+                    manage_index_templates: true
+                    manage_ingest_pipelines: false
                   index:
                     "entities-latest-default":
                       read: true
-                      manage: false
+                      manage: true
+                    ".entities.v2.latest.security_default-*":
+                      read: true
+                      manage: true
                 kibana:
-                  "saved_object:entity-engine-descriptor-v2/create": false
+                  "saved_object:entity-engine-descriptor-v2/create": true
 x-codeSamples:
   - lang: curl
     source: |

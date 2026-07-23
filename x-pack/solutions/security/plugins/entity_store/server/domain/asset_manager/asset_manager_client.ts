@@ -50,11 +50,13 @@ import {
   getEntitiesAlias,
   ENTITY_LATEST,
   getLatestEntitiesIndexName,
+  getLatestEntityIndexPattern,
 } from '../../../common/domain/entity_index';
 import { getLatestIndexTemplateId } from './latest_index_template';
 import { getUpdatesIndexTemplateId } from './updates_index_template';
 import { getComponentTemplateName, getUpdatesComponentTemplateName } from './component_templates';
 import { getUpdatesEntitiesDataStreamName } from './updates_data_stream';
+import { getMetadataEntitiesDataStreamName } from './metadata_data_stream';
 import type { LogsExtractionClient } from '../logs_extraction';
 import type { RemoteLogExtractionStateClient } from '../saved_objects/remote_log_extraction_state';
 import type { ManagedEntityDefinition } from '../../../common/domain/definitions/entity_schema';
@@ -134,13 +136,14 @@ export class AssetManagerClient {
       await Promise.all([
         this.globalStateClient.init({ historySnapshot, logsExtraction }),
 
+        // V1 cleanup is legacy migration work — run it as the internal user so enabling the
+        // entity store does not require the user to hold transform/enrich/index admin on v1 assets.
         ...entityTypes.map((type) =>
           stopAndRemoveV1({
             type,
             namespace: this.namespace,
             logger: this.logger,
-            esClient: this.esClient,
-            internalEsClient: this.internalEsClient,
+            esClient: this.internalEsClient,
             taskManager: this.taskManager,
             savedObjectsClient: this.savedObjectsClient,
           })
@@ -177,8 +180,11 @@ export class AssetManagerClient {
           request,
         }),
 
+        // Stored scripts are managed assets with no granular ES privilege (only `manage`/`all`),
+        // so create them as the internal user rather than forcing the enabling user to hold
+        // broad cluster `manage`.
         installEuidStoredScripts({
-          esClient: this.esClient,
+          esClient: this.internalEsClient,
           logger: this.logger,
         }),
       ]);
@@ -256,8 +262,9 @@ export class AssetManagerClient {
             logger: this.logger.get(type),
             namespace: this.namespace,
           }),
+          // Managed assets — delete as the internal user (mirrors install; no granular privilege).
           deleteEuidStoredScripts({
-            esClient: this.esClient,
+            esClient: this.internalEsClient,
             logger: this.logger,
           }),
           this.globalStateClient.delete(),
@@ -355,23 +362,33 @@ export class AssetManagerClient {
       'create'
     );
 
-    // _has_privileges treats a leading `-` as a literal index name, not an exclusion.
-    // Negative patterns are a query-time directive and have no meaning here.
-    const sourceIndexPrivileges = Object.fromEntries(
-      sourceIndexPatterns
-        .filter((idx) => !idx.startsWith('-'))
-        .map((idx) => [idx, ENTITY_STORE_SOURCE_INDICES_PRIVILEGES])
-    );
-
-    const targetIndexPrivileges = {
-      [getEntitiesAlias(ENTITY_LATEST, this.namespace)]: ENTITY_STORE_TARGET_INDICES_PRIVILEGES,
+    // Build the index privilege map, unioning privileges when an index is both a target and a
+    // source. Install creates the concrete `.entities.v2.*` latest index (+ alias) and the
+    // updates/metadata data streams as the requesting user, so `manage` is required on each;
+    // the updates data stream is additionally read as an extraction source, so a plain spread
+    // would drop its `manage` requirement. `_has_privileges` treats a leading `-` as a literal
+    // index name (negative patterns are query-time only), so those are stripped.
+    const index: Record<string, string[]> = {};
+    const requirePrivileges = (name: string, privileges: string[]) => {
+      index[name] = Array.from(new Set([...(index[name] ?? []), ...privileges]));
     };
+
+    [
+      getEntitiesAlias(ENTITY_LATEST, this.namespace),
+      getLatestEntityIndexPattern(this.namespace),
+      getUpdatesEntitiesDataStreamName(this.namespace),
+      getMetadataEntitiesDataStreamName(this.namespace),
+    ].forEach((name) => requirePrivileges(name, ENTITY_STORE_TARGET_INDICES_PRIVILEGES));
+
+    sourceIndexPatterns
+      .filter((idx) => !idx.startsWith('-'))
+      .forEach((idx) => requirePrivileges(idx, ENTITY_STORE_SOURCE_INDICES_PRIVILEGES));
 
     return checkPrivileges({
       kibana: [kibanaPrivileges],
       elasticsearch: {
         cluster: ENTITY_STORE_CLUSTER_PRIVILEGES,
-        index: { ...targetIndexPrivileges, ...sourceIndexPrivileges },
+        index,
       },
     });
   }
