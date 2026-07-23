@@ -25,13 +25,12 @@ const ERROR_LOG_THROTTLE_MS = 60_000;
 
 /**
  * Long-polls a dedicated, low-volume Elasticsearch index via the Fleet
- * `_fleet/global_checkpoints?wait_for_advance` API so that Task Manager can be notified
- * almost immediately when a `runSoon` (or a `schedule(..., { requestImmediateClaim: true })`)
- * call happens on another Kibana node, instead of waiting for the next poll interval.
+ * `_fleet/global_checkpoints?wait_for_advance` API so Task Manager is notified almost
+ * immediately when a `runSoon` (or `schedule(..., { requestImmediateClaim: true })`) happens
+ * on another Kibana node, instead of waiting for the next poll interval.
  *
- * This is progressive enhancement: if the long-poll fails (or is disabled), Task Manager's
- * regular polling continues to pick up tasks unaffected. This service is never the primary
- * mechanism by which tasks are claimed, only a way to nudge an existing poll cycle to run sooner.
+ * Best-effort: if the long-poll fails or is disabled, regular polling still picks up tasks;
+ * this only nudges an existing poll cycle to run sooner.
  */
 export interface TaskManagerClaimNudgeServiceOptions {
   logger: Logger;

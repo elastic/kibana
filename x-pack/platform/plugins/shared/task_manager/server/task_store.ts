@@ -62,9 +62,8 @@ import type {
 import { TaskStatus, TaskLifecycleResult } from './task';
 
 /**
- * `TaskStore.schedule()` options. In addition to the public `ApiKeyOptions`, allows an internal
- * `refresh` flag so `TaskScheduling` can force the write to be visible immediately (used for
- * latency-sensitive `requestImmediateClaim` scheduling).
+ * `TaskStore.schedule()` options: `ApiKeyOptions` plus an internal `refresh` flag that makes
+ * the write immediately visible to searches (used by `requestImmediateClaim`).
  */
 export type ScheduleTaskOptions = ApiKeyOptions & { refresh?: boolean };
 

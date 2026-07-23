@@ -607,11 +607,9 @@ export interface ApiKeyOptions {
 export type ScheduleOptions = Record<string, unknown> &
   ApiKeyOptions & {
     /**
-     * Requests that this task be picked up immediately, rather than waiting for the next
-     * poll_interval, for latency-sensitive callers (e.g. a user waiting on a result). This
-     * refreshes the underlying index write and nudges background task nodes to claim
-     * immediately. Progressive enhancement: if the nudge fails, the task still runs on the
-     * next regular poll.
+     * Asks background task nodes to claim this task immediately instead of waiting for the
+     * next poll_interval, for latency-sensitive callers. Best-effort: if the nudge fails,
+     * the task still runs on the next regular poll.
      */
     requestImmediateClaim?: boolean;
   };

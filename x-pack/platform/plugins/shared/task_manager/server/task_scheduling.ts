@@ -52,8 +52,7 @@ const scheduleOptionsToStoreApiKeyOptions = (
     storeOpts.regenerateApiKey = options.regenerateApiKey;
   }
   if (options.requestImmediateClaim === true) {
-    // Make the write visible immediately so a subsequent claim cycle (regular or nudged)
-    // can find it right away, rather than waiting out the index's refresh interval.
+    // make the write visible to the nudged claim cycle without waiting for an index refresh
     storeOpts.refresh = true;
   }
   return Object.keys(storeOpts).length ? storeOpts : undefined;
@@ -125,9 +124,8 @@ export class TaskScheduling {
   }
 
   /**
-   * Notifies background task nodes to run an immediate claim cycle, instead of waiting for
-   * the next poll_interval. Progressive enhancement: failures are logged and otherwise
-   * ignored, since regular polling remains the fallback.
+   * Asks background task nodes to run an immediate claim cycle. Best-effort: on failure,
+   * regular polling remains the fallback.
    */
   private async notifyClaimNudge(taskId: string) {
     if (!this.claimNudgeService) {
@@ -382,8 +380,7 @@ export class TaskScheduling {
           scheduledAt: new Date(),
           runAt: new Date(),
         },
-        // `refresh: true` makes the updated runAt visible to the next claim cycle's search
-        // immediately, rather than waiting out the index's refresh interval.
+        // refresh so the nudged claim cycle sees the updated runAt without an index refresh wait
         { validate: false, refresh: true }
       );
     } catch (e) {
@@ -399,8 +396,6 @@ export class TaskScheduling {
     }
 
     if (!conflict) {
-      // runSoon is inherently latency-sensitive, so always nudge background task nodes to
-      // claim immediately, rather than waiting for the next poll_interval.
       await this.notifyClaimNudge(taskId);
     }
 

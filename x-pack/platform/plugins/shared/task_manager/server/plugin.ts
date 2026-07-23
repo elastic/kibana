@@ -451,9 +451,7 @@ export class TaskManagerPlugin
 
     // Only poll for tasks if configured to run tasks
     if (this.shouldRunBackgroundTasks) {
-      // Long-poll the claim nudge signal index so a `runSoon` (or a `schedule(..., {
-      // requestImmediateClaim: true })`) on any node triggers an immediate claim cycle here,
-      // instead of waiting for the next poll_interval.
+      // watch for claim nudges (e.g. `runSoon` on any node) to run immediate claim cycles here
       this.claimNudgeService?.start();
 
       this.taskManagerMetricsCollector = new TaskManagerMetricsCollector({

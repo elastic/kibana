@@ -101,10 +101,9 @@ export const configSchema = schema.object(
     grant_uiam_api_keys: schema.boolean({ defaultValue: false }),
     /* The number of normal cost tasks that this Kibana instance will run simultaneously */
     capacity: schema.maybe(schema.number({ min: MIN_CAPACITY, max: MAX_CAPACITY })),
-    /* Long-polls a dedicated ES index via the Fleet global checkpoints API so that a `runSoon`
-     * (or a `schedule(..., { requestImmediateClaim: true })`) on any Kibana node triggers an
-     * immediate claim cycle on background task nodes, instead of waiting for the next poll_interval.
-     * Regular polling remains the fallback if this is disabled or fails. */
+    /* Lets a `runSoon` (or `schedule(..., { requestImmediateClaim: true })`) on any Kibana node
+     * trigger an immediate claim cycle on background task nodes. Regular polling remains the
+     * fallback if this is disabled or fails. */
     claim_nudge: schema.object({
       enabled: schema.boolean({ defaultValue: true }),
     }),

@@ -27,9 +27,8 @@ interface Opts<H> {
   pollInterval$: Observable<number>;
   pollIntervalDelay$?: Observable<number>;
   /**
-   * Emits whenever another Kibana node requests an immediate claim cycle (e.g. via `runSoon`
-   * or `schedule(..., { requestImmediateClaim: true })`), so the poller doesn't have to wait
-   * for its regular `pollInterval` to pick up latency-sensitive tasks.
+   * Emits when a Kibana node requests an immediate claim cycle (e.g. via `runSoon`),
+   * triggering a cycle right away instead of waiting for the next `pollInterval`.
    */
   claimNudge$?: Observable<void>;
   getCapacity: () => number;
@@ -90,8 +89,7 @@ export function createTaskPoller<T, H>({
     }
 
     if (running) {
-      // A claim nudge that arrived while this cycle was in-flight is handled by running
-      // the next cycle immediately, rather than waiting out the usual pollInterval.
+      // A claim nudge that arrived mid-cycle triggers the next cycle immediately
       const nextDelay = nudgeRequestedDuringCycle
         ? 0
         : Math.max(pollInterval - (Date.now() - start) + (pollIntervalDelay % pollInterval), 0);

@@ -7,7 +7,7 @@
 
 import type { Observable } from 'rxjs';
 import { Subject, withLatestFrom, BehaviorSubject } from 'rxjs';
-import { distinctUntilChanged, startWith } from 'rxjs';
+import { distinctUntilChanged, filter, startWith } from 'rxjs';
 import { pipe } from 'fp-ts/pipeable';
 import { map as mapOptional, none } from 'fp-ts/Option';
 import { tap } from 'rxjs';
@@ -87,8 +87,8 @@ export interface TaskPollingLifecycleOpts {
   eventLogger: TaskEventLogger;
   enrichFakeRequest?: FakeRequestEnricher;
   /**
-   * When provided (and started), its `claimNudge$` observable is used to trigger an immediate
-   * claim cycle whenever another node requests one, instead of waiting for `poll_interval`.
+   * Triggers an immediate claim cycle when another node requests one, instead of waiting for
+   * `poll_interval`. Ignored while this node is backing off from Elasticsearch errors.
    */
   claimNudgeService?: TaskManagerClaimNudgeService;
 }
@@ -190,6 +190,25 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
       this.currentPollInterval = newPollInterval;
     });
 
+    // Ignore claim nudges while the last error-count window saw Elasticsearch errors (the
+    // same signal that reduces capacity and widens the poll interval above), so nudges never
+    // add claim queries during a backoff. The regular poll picks up nudged tasks instead.
+    let inErrorBackoff = false;
+    errorCheck$.subscribe(({ count, isBlockException }) => {
+      inErrorBackoff = count > 0 || isBlockException;
+    });
+    const claimNudge$ = claimNudgeService?.claimNudge$.pipe(
+      filter(() => {
+        if (inErrorBackoff) {
+          logger.debug(
+            'Ignoring claim nudge because task manager is backing off after Elasticsearch errors; the next regular poll cycle will claim the task'
+          );
+          return false;
+        }
+        return true;
+      })
+    );
+
     const emitEvent = (event: TaskLifecycleEvent) => this.events$.next(event);
 
     this.bufferedStore = new BufferedTaskStore(this.store, {
@@ -234,7 +253,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
       initialPollInterval: pollInterval,
       pollInterval$: this.pollIntervalConfiguration$,
       pollIntervalDelay$,
-      claimNudge$: claimNudgeService?.claimNudge$,
+      claimNudge$,
       getCapacity: () => {
         const capacity = this.pool.availableCapacity();
         if (!capacity) {

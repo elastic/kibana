@@ -132,6 +132,7 @@ export const taskManagerClaimNudgeMappings: SavedObjectsTypeMappingDefinition = 
     },
     nonce: {
       type: 'keyword',
+      ignore_above: 1024,
     },
   },
 };
