@@ -63,8 +63,5 @@ export function DeepStrict<TSchema extends z.ZodType>(schema: TSchema) {
   }) as z.ZodType<z.input<TSchema>>;
   const outputSchema = schema as z.ZodType<z.output<TSchema>, z.input<TSchema>>;
 
-  return z.pipe<typeof checkedInputSchema, typeof outputSchema>(
-    checkedInputSchema,
-    outputSchema
-  );
+  return z.pipe<typeof checkedInputSchema, typeof outputSchema>(checkedInputSchema, outputSchema);
 }
