@@ -149,6 +149,9 @@ describe('WorkflowExecuteManualForm built-in kibana input refs', () => {
                 episode_status: 'active',
               },
             ],
+            rules: {
+              'rule-1': { name: 'Test Rule' },
+            },
           },
         },
         null,
