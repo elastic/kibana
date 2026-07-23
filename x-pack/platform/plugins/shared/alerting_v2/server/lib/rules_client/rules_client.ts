@@ -761,7 +761,6 @@ export class RulesClient {
 
         affectedCount += 1;
         const rule = transformRuleSoAttributesToRuleApiResponse(item.id, item.attrs);
-        rules.push(rule);
         enabledRules.push({ ruleId: rule.id, spaceId, rule });
 
         tasksToSchedule.push({
@@ -858,7 +857,6 @@ export class RulesClient {
 
         const rule = transformRuleSoAttributesToRuleApiResponse(item.id, item.attrs);
         affectedCount += 1;
-        rules.push(rule);
         disabledRules.push({ ruleId: rule.id, spaceId, rule });
         disabledTaskIds.push(getRuleExecutorTaskId({ ruleId: item.id, spaceId }));
       }

@@ -713,10 +713,12 @@ describe('RulesClient', () => {
 
         expect(rulesSavedObjectService.update).toHaveBeenCalledWith(
           expect.objectContaining({
-            metadata: { name: 'rule-1', version: 1 },
-            grouping: undefined,
-          }),
-          expect.objectContaining({ mergeAttributes: false })
+            id: 'rule-id-1',
+            attrs: expect.objectContaining({
+              metadata: { name: 'rule-1', version: 1 },
+              grouping: undefined,
+            }),
+          })
         );
       });
     });
@@ -1977,8 +1979,7 @@ describe('RulesClient', () => {
             }),
           }),
         ]);
-        const savedAttrs = mockSavedObjectsClient.update.mock
-          .calls[0][2] as RuleSavedObjectAttributes;
+        const { attrs: savedAttrs } = rulesSavedObjectService.update.mock.calls[0][0];
         expect(savedAttrs.metadata.version).toBe(5);
       });
 
@@ -2119,7 +2120,7 @@ describe('RulesClient', () => {
 
         // Enabling an already-enabled rule does not touch the SO, re-ensure the
         // task, or emit a lifecycle event (mirrors bulkEnableRules).
-        expect(mockSavedObjectsClient.update).not.toHaveBeenCalled();
+        expect(rulesSavedObjectService.update).not.toHaveBeenCalled();
         expect(ensureRuleExecutorTaskScheduledMock).not.toHaveBeenCalled();
         expect(ruleEventPublisher.emitRuleEnabled).not.toHaveBeenCalled();
       });
@@ -2145,7 +2146,7 @@ describe('RulesClient', () => {
 
         // Disabling an already-disabled rule does not touch the SO, remove the
         // task, or emit a lifecycle event (mirrors bulkDisableRules).
-        expect(mockSavedObjectsClient.update).not.toHaveBeenCalled();
+        expect(rulesSavedObjectService.update).not.toHaveBeenCalled();
         expect(taskManager.removeIfExists).not.toHaveBeenCalled();
         expect(ruleEventPublisher.emitRuleDisabled).not.toHaveBeenCalled();
       });
@@ -2273,12 +2274,7 @@ describe('RulesClient', () => {
 
     it('emits ruleCreated carrying the created rule with sequence 1', async () => {
       const client = createClient();
-      mockSavedObjectsClient.create.mockResolvedValueOnce({
-        id: 'rule-ch-create',
-        type: RULE_SAVED_OBJECT_TYPE,
-        attributes: baseSoAttrs,
-        references: [],
-      });
+      rulesSavedObjectService.create.mockResolvedValueOnce({ id: 'rule-ch-create' });
 
       await client.createRule({ data: baseCreateData, options: { id: 'rule-ch-create' } });
 
@@ -2296,12 +2292,10 @@ describe('RulesClient', () => {
 
     it('increments the sequence from the existing rule on update', async () => {
       const client = createClient();
-      mockSavedObjectsClient.get.mockResolvedValueOnce({
+      rulesSavedObjectService.get.mockResolvedValueOnce({
         id: 'rule-ch-update',
-        type: RULE_SAVED_OBJECT_TYPE,
         attributes: { ...baseSoAttrs, metadata: { ...baseSoAttrs.metadata, version: 4 } },
         version: 'v1',
-        references: [],
       });
 
       await client.updateRule({ id: 'rule-ch-update', data: { metadata: { name: 'renamed' } } });
@@ -2312,12 +2306,10 @@ describe('RulesClient', () => {
 
     it('carries the deleted rule with a bumped sequence for deletions', async () => {
       const client = createClient();
-      mockSavedObjectsClient.get.mockResolvedValueOnce({
+      rulesSavedObjectService.get.mockResolvedValueOnce({
         id: 'rule-ch-delete',
-        type: RULE_SAVED_OBJECT_TYPE,
         attributes: { ...baseSoAttrs, metadata: { ...baseSoAttrs.metadata, version: 7 } },
         version: 'v1',
-        references: [],
       });
 
       await client.deleteRule({ id: 'rule-ch-delete' });
@@ -2332,28 +2324,20 @@ describe('RulesClient', () => {
 
     it('emits one event per rule for a bulk delete, each with a bumped sequence', async () => {
       const client = createClient();
-      mockSavedObjectsClient.bulkGet.mockResolvedValueOnce({
-        saved_objects: [
-          {
-            id: 'bulk-del-1',
-            type: RULE_SAVED_OBJECT_TYPE,
-            attributes: { ...baseSoAttrs, metadata: { ...baseSoAttrs.metadata, version: 1 } },
-            references: [],
-          },
-          {
-            id: 'bulk-del-2',
-            type: RULE_SAVED_OBJECT_TYPE,
-            attributes: { ...baseSoAttrs, metadata: { ...baseSoAttrs.metadata, version: 2 } },
-            references: [],
-          },
-        ],
-      });
-      mockSavedObjectsClient.bulkDelete.mockResolvedValueOnce({
-        statuses: [
-          { id: 'bulk-del-1', type: RULE_SAVED_OBJECT_TYPE, success: true },
-          { id: 'bulk-del-2', type: RULE_SAVED_OBJECT_TYPE, success: true },
-        ],
-      });
+      rulesSavedObjectService.bulkGetByIds.mockResolvedValueOnce([
+        {
+          id: 'bulk-del-1',
+          attributes: { ...baseSoAttrs, metadata: { ...baseSoAttrs.metadata, version: 1 } },
+        },
+        {
+          id: 'bulk-del-2',
+          attributes: { ...baseSoAttrs, metadata: { ...baseSoAttrs.metadata, version: 2 } },
+        },
+      ]);
+      rulesSavedObjectService.bulkDelete.mockResolvedValueOnce([
+        { id: 'bulk-del-1', success: true },
+        { id: 'bulk-del-2', success: true },
+      ]);
 
       await client.bulkDeleteRules({ ids: ['bulk-del-1', 'bulk-del-2'] });
 
@@ -2369,40 +2353,14 @@ describe('RulesClient', () => {
         metadata: { name: 'disabled-rule' },
         enabled: false,
       });
-      mockSavedObjectsClient.bulkGet.mockResolvedValueOnce({
-        saved_objects: [
-          {
-            id: 'bulk-en-1',
-            type: RULE_SAVED_OBJECT_TYPE,
-            attributes: disabledAttrs,
-            version: 'v1',
-            references: [],
-          },
-          {
-            id: 'bulk-en-2',
-            type: RULE_SAVED_OBJECT_TYPE,
-            attributes: disabledAttrs,
-            version: 'v1',
-            references: [],
-          },
-        ],
-      });
-      mockSavedObjectsClient.bulkUpdate.mockResolvedValueOnce({
-        saved_objects: [
-          {
-            id: 'bulk-en-1',
-            type: RULE_SAVED_OBJECT_TYPE,
-            attributes: { ...disabledAttrs, enabled: true },
-            references: [],
-          },
-          {
-            id: 'bulk-en-2',
-            type: RULE_SAVED_OBJECT_TYPE,
-            attributes: { ...disabledAttrs, enabled: true },
-            references: [],
-          },
-        ],
-      });
+      rulesSavedObjectService.bulkGetByIds.mockResolvedValueOnce([
+        { id: 'bulk-en-1', attributes: disabledAttrs, version: 'v1' },
+        { id: 'bulk-en-2', attributes: disabledAttrs, version: 'v1' },
+      ]);
+      rulesSavedObjectService.bulkUpdate.mockResolvedValueOnce([
+        { id: 'bulk-en-1', success: true },
+        { id: 'bulk-en-2', success: true },
+      ]);
 
       await client.bulkEnableRules({ ids: ['bulk-en-1', 'bulk-en-2'] });
 
@@ -2418,18 +2376,15 @@ describe('RulesClient', () => {
 
     it('persists the incremented version on the saved object', async () => {
       const client = createClient();
-      mockSavedObjectsClient.get.mockResolvedValueOnce({
+      rulesSavedObjectService.get.mockResolvedValueOnce({
         id: 'rule-ch-seq',
-        type: RULE_SAVED_OBJECT_TYPE,
         attributes: { ...baseSoAttrs, metadata: { ...baseSoAttrs.metadata, version: 2 } },
         version: 'v1',
-        references: [],
       });
 
       await client.updateRule({ id: 'rule-ch-seq', data: { metadata: { name: 'renamed' } } });
 
-      const savedAttrs = mockSavedObjectsClient.update.mock
-        .calls[0][2] as RuleSavedObjectAttributes;
+      const { attrs: savedAttrs } = rulesSavedObjectService.update.mock.calls[0][0];
       expect(savedAttrs.metadata.version).toBe(3);
     });
   });

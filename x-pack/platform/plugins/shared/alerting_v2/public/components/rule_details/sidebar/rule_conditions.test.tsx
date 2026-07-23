@@ -302,7 +302,7 @@ describe('RuleConditions', () => {
     it('renders description text before the ES|QL heading when it exists', () => {
       const ruleWithDesc = {
         ...baseRule,
-        metadata: { name: 'Test Signal Rule', description: 'My rule desc' },
+        metadata: { ...baseRule.metadata, name: 'Test Signal Rule', description: 'My rule desc' },
       };
       renderConditions(ruleWithDesc);
       const desc = screen.getByTestId('ruleConditionsDescription');
