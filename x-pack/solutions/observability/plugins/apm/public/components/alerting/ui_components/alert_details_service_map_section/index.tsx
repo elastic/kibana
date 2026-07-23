@@ -128,7 +128,6 @@ export function AlertDetailsServiceMapSection({ alert }: AlertDetailsAppSectionP
     serviceName,
     filterPills,
   });
-  console.log('@@@@');
   return (
     <EuiPanel hasBorder paddingSize="m" data-test-subj="apmAlertDetailsServiceMapSection">
       <EuiFlexGroup direction="column" gutterSize="s">
