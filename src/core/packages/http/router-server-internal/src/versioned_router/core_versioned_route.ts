@@ -23,6 +23,7 @@ import type {
   RouteMethod,
   VersionedRouterRoute,
   VersionedRouteResponseValidation,
+  VersionedRouteValidation,
 } from '@kbn/core-http-server';
 import type { Request } from '@hapi/hapi';
 import type { Logger } from '@kbn/logging';
@@ -198,13 +199,10 @@ export class CoreVersionedRoute implements VersionedRoute {
       });
     }
     const validation = extractValidationSchemaFromHandler(handler);
+    this.validateOnRequestValidationError(version, validation);
     const onRequestValidationError = validation?.onRequestValidationError;
 
-    const {
-      error,
-      failure,
-      ok: kibanaRequest,
-    } = validateHapiRequest(hapiRequest, {
+    const { error, ok: kibanaRequest } = validateHapiRequest(hapiRequest, {
       routeInfo: {
         access: this.options.access,
         httpResource: this.options.options?.httpResource,
@@ -218,8 +216,8 @@ export class CoreVersionedRoute implements VersionedRoute {
     });
     if (error) {
       const customResponse = await handleRequestValidationFailure({
-        failure,
-        defaultResponse: error,
+        failure: error.validationFailure,
+        defaultResponse: error.response,
         hapiRequest,
         onRequestValidationError,
         responseFactory,
@@ -265,24 +263,27 @@ export class CoreVersionedRoute implements VersionedRoute {
     return injectVersionHeader(version, response);
   };
 
-  private validateOnRequestValidationError(options: Options) {
-    if (options.validate === false || typeof options.validate === 'function') {
+  private validateOnRequestValidationError(
+    version: string,
+    validation: VersionedRouteValidation<unknown, unknown, unknown> | undefined
+  ) {
+    if (!validation) {
       return;
     }
 
-    const { onRequestValidationError, response } = options.validate;
+    const { onRequestValidationError, response } = validation;
     if (!onRequestValidationError) {
       return;
     }
 
     if (typeof onRequestValidationError !== 'function') {
       throw new Error(
-        `The [${this.method}] at [${this.path}] version [${options.version}] has an invalid 'validate.onRequestValidationError'. Expected a function.`
+        `The [${this.method}] at [${this.path}] version [${version}] has an invalid 'validate.onRequestValidationError'. Expected a function.`
       );
     }
     if (!response) {
       throw new Error(
-        `The [${this.method}] at [${this.path}] version [${options.version}] has an invalid 'validate.response'. Expected response metadata when 'validate.onRequestValidationError' is configured.`
+        `The [${this.method}] at [${this.path}] version [${version}] has an invalid 'validate.response'. Expected response metadata when 'validate.onRequestValidationError' is configured.`
       );
     }
   }
@@ -314,7 +315,9 @@ export class CoreVersionedRoute implements VersionedRoute {
   public addVersion(options: Options, handler: RequestHandler<any, any, any, any>): VersionedRoute {
     this.validateVersion(options.version);
     options = prepareVersionedRouteValidation(options);
-    this.validateOnRequestValidationError(options);
+    if (options.validate !== false && typeof options.validate !== 'function') {
+      this.validateOnRequestValidationError(options.version, options.validate);
+    }
     this.handlers.set(options.version, {
       fn: this.router.enhanceWithContext(handler),
       options,

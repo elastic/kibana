@@ -696,6 +696,33 @@ describe('Versioned route', () => {
     );
   });
 
+  it('validates lazy onRequestValidationError config on first request', async () => {
+    let handler: InternalRouteHandler;
+    (router.registerRoute as jest.Mock).mockImplementation((opts) => (handler = opts.handler));
+    const lazyValidation = jest.fn(() => ({
+      onRequestValidationError: (error, request, response) =>
+        response.custom({ statusCode: 422, body: { message: error.message } }),
+    }));
+
+    versionedRouter
+      .post({
+        path: '/test/{id}',
+        access: 'internal',
+        security: {
+          authz: {
+            requiredPrivileges: ['foo'],
+          },
+        },
+      })
+      .addVersion({ version: '1', validate: lazyValidation }, handlerFn);
+
+    expect(lazyValidation).not.toHaveBeenCalled();
+    await expect(handler!(createRequest())).rejects.toThrowError(
+      "The [post] at [/test/{id}] version [1] has an invalid 'validate.response'. Expected response metadata when 'validate.onRequestValidationError' is configured."
+    );
+    expect(lazyValidation).toHaveBeenCalledTimes(1);
+  });
+
   it('constructs lazily provided validations once (idempotency)', async () => {
     let handler: InternalRouteHandler;
     const { fooValidation } = testValidation;

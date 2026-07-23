@@ -541,8 +541,8 @@ describe('validateHapiRequest', () => {
       routeSchemas: RouteValidator.from({ body: schema.object({ ok: schema.literal(true) }) }),
     });
     expect(ok).toBeUndefined();
-    expect(error?.status).toEqual(400);
-    expect(error?.payload).toMatch(/expected value to equal/);
+    expect(error?.response.status).toEqual(400);
+    expect(error?.response.payload).toMatch(/expected value to equal/);
     expect(log.error).toHaveBeenCalledTimes(1);
     expect(log.error).toHaveBeenCalledWith('400 Bad Request', {
       error: { message: '[request body.ok]: expected value to equal [true]' },

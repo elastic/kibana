@@ -142,8 +142,8 @@ export function validateHapiRequest(
     shouldLogDefaultValidationError = true,
   }: ValidationContext
 ):
-  | { ok: AnyKibanaRequest; error?: never; failure?: never }
-  | { ok?: never; error: IKibanaResponse; failure: ValidationFailure } {
+  | { ok: AnyKibanaRequest; error?: never }
+  | { ok?: never; error: { response: IKibanaResponse; validationFailure: ValidationFailure } } {
   let kibanaRequest: Mutable<AnyKibanaRequest>;
   try {
     kibanaRequest = CoreKibanaRequest.from(request, routeSchemas) as Mutable<AnyKibanaRequest>;
@@ -163,7 +163,12 @@ export function validateHapiRequest(
     if (shouldLogDefaultValidationError) {
       log.error('400 Bad Request', formatErrorMeta(400, { request, error }));
     }
-    return { error: response, failure: { error: validationError, request: kibanaRequest } };
+    return {
+      error: {
+        response,
+        validationFailure: { error: validationError, request: kibanaRequest },
+      },
+    };
   } finally {
     router.emitPostValidate(
       kibanaRequest!,
@@ -188,11 +193,7 @@ export const handle = async (
     isDevMode = false,
   }: HandlerDependencies
 ) => {
-  const {
-    error,
-    failure,
-    ok: kibanaRequest,
-  } = validateHapiRequest(request, {
+  const { error, ok: kibanaRequest } = validateHapiRequest(request, {
     routeInfo: {
       access: route.options?.access,
       httpResource: route.options?.httpResource,
@@ -205,8 +206,8 @@ export const handle = async (
   });
   if (error) {
     const customResponse = await handleRequestValidationFailure({
-      failure,
-      defaultResponse: error,
+      failure: error.validationFailure,
+      defaultResponse: error.response,
       hapiRequest: request,
       onRequestValidationError,
       responseFactory: kibanaResponseFactory,
