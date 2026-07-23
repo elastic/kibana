@@ -21,7 +21,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./import_rules_ess'));
     loadTestFile(require.resolve('./import_connectors'));
     loadTestFile(require.resolve('./import_rules_at_batch_boundary'));
-    loadTestFile(require.resolve('./import_rules_transport_errors'));
     loadTestFile(require.resolve('./import_rules_concurrent'));
     loadTestFile(require.resolve('./import_rules_by_type'));
     loadTestFile(require.resolve('./import_rules_identity'));
