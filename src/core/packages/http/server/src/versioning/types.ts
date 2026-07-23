@@ -310,30 +310,28 @@ export interface VersionedRouteResponseValidation {
  * Versioned route validation
  * @public
  */
-export type VersionedRouteValidation<P, Q, B> =
-  | false
-  | {
-      /**
-       * Validation to run against route inputs: params, query and body
-       * @public
-       */
-      request?: VersionedRouteRequestValidation<P, Q, B>;
-      /**
-       * Validation to run against route output.
-       *
-       * @note This validation is only intended to run in development. Do not use this
-       *       for setting default values!
-       *
-       * @public
-       */
-      response?: VersionedRouteResponseValidation;
-      /**
-       * Maps request validation failures to custom responses.
-       *
-       * @public
-       */
-      onRequestValidationError?: RequestValidationErrorHandler;
-    };
+export interface VersionedRouteValidation<P, Q, B> {
+  /**
+   * Validation to run against route inputs: params, query and body
+   * @public
+   */
+  request?: VersionedRouteRequestValidation<P, Q, B>;
+  /**
+   * Validation to run against route output.
+   *
+   * @note This validation is only intended to run in development. Do not use this
+   *       for setting default values!
+   *
+   * @public
+   */
+  response?: VersionedRouteResponseValidation;
+  /**
+   * Maps request validation failures to custom responses.
+   *
+   * @public
+   */
+  onRequestValidationError?: RequestValidationErrorHandler;
+}
 
 /**
  * Options for a versioned route. Probably needs a lot more options like sunsetting
@@ -352,7 +350,7 @@ export interface AddVersionOpts<P, Q, B> {
    *       that the function will only be called once.
    * @public
    */
-  validate: VersionedRouteValidation<P, Q, B> | (() => VersionedRouteValidation<P, Q, B>); // Provide a way to lazily load validation schemas
+  validate: false | VersionedRouteValidation<P, Q, B> | (() => VersionedRouteValidation<P, Q, B>); // Provide a way to lazily load validation schemas
 
   security?: Pick<RouteSecurity, 'authz'>;
 

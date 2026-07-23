@@ -57,13 +57,13 @@ interface InternalVersionedRouteConfig<M extends RouteMethod> extends VersionedR
 
 function extractValidationSchemaFromHandler(
   handler: VersionedRouterRoute['handlers'][0]
-): Exclude<VersionedRouteValidation<unknown, unknown, unknown>, false> | undefined {
+): VersionedRouteValidation<unknown, unknown, unknown> | undefined {
   if (handler.options.validate === false) return undefined;
   const validation =
     typeof handler.options.validate === 'function'
       ? handler.options.validate()
       : handler.options.validate;
-  return validation === false ? undefined : validation;
+  return validation;
 }
 
 export class CoreVersionedRoute implements VersionedRoute {
