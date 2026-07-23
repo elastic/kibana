@@ -191,9 +191,10 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(200);
 
         expect(found.total).toBe(2);
-        expect(
-          found.data.map((rule: { rule_id: string }) => rule.rule_id).sort()
-        ).toEqual(['rule-1', 'rule-2']);
+        expect(found.data.map((rule: { rule_id: string }) => rule.rule_id).sort()).toEqual([
+          'rule-1',
+          'rule-2',
+        ]);
       });
 
       // import is very slow in 7.10+ due to the alerts client find api
