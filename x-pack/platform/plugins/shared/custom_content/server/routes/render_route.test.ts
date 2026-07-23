@@ -24,7 +24,9 @@ jest.mock('@kbn/datemath', () => ({
 }));
 
 jest.mock('../utils/fill_template', () => ({
-  fillTemplate: jest.fn((_template: string, _cols: unknown, _rows: unknown) => '<p>filled</p>') as jest.MockedFunction<typeof fillTemplate>,
+  fillTemplate: jest.fn(
+    (_template: string, _cols: unknown, _rows: unknown) => '<p>filled</p>'
+  ) as jest.MockedFunction<typeof fillTemplate>,
 }));
 
 const mockGetESQLResults = getESQLResults as jest.MockedFunction<typeof getESQLResults>;

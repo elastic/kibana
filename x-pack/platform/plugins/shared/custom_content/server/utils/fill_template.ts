@@ -23,7 +23,10 @@ export function fillTemplate(template: string, columns: ESQLColumn[], rows: unkn
     for (const r of rows) {
       if (r[i] === null) continue;
       const n = Number(r[i]);
-      if (isFinite(n)) { if (n > max) max = n; hasFinite = true; }
+      if (isFinite(n)) {
+        if (n > max) max = n;
+        hasFinite = true;
+      }
     }
     if (hasFinite) maxValues[col.name] = max;
   });
