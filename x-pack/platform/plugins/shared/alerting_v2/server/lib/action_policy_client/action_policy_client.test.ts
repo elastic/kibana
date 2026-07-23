@@ -22,7 +22,7 @@ import {
 import type { RulesSavedObjectService } from '../services/rules_saved_object_service/rules_saved_object_service';
 import { createRulesSavedObjectService } from '../services/rules_saved_object_service/rules_saved_object_service.mock';
 import type { UserService } from '../services/user_service/user_service';
-import { createUserProfile, createUserService } from '../services/user_service/user_service.mock';
+import { createUserService } from '../services/user_service/user_service.mock';
 import type { LoggerService } from '../services/logger_service/logger_service';
 import { createLoggerService } from '../services/logger_service/logger_service.mock';
 import { ActionPolicyClient } from './action_policy_client';
@@ -84,7 +84,7 @@ describe('ActionPolicyClient', () => {
       loggerService
     );
 
-    userProfileService.getCurrent.mockResolvedValue(createUserProfile('elastic_profile_uid'));
+    userProfileService.getCurrentProfileId.mockResolvedValue('elastic_profile_uid');
 
     mockSavedObjectsClient.create.mockResolvedValue({
       id: 'policy-id-default',
@@ -2777,9 +2777,10 @@ describe('ActionPolicyClient', () => {
       const result = await client.matchActionPoliciesForRule({ ruleId: 'missing-rule' });
 
       expect(result.items).toHaveLength(0);
+      expect(result.total).toBe(0);
     });
 
-    it('returns global APs for policies with no matcher', async () => {
+    it('returns global APs for policies with no matcher, along with the space-wide total', async () => {
       jest.spyOn(rulesSavedObjectService, 'get').mockResolvedValueOnce({
         id: 'rule-1',
         attributes: ruleAttributes as never,
@@ -2787,7 +2788,10 @@ describe('ActionPolicyClient', () => {
       });
 
       mockSavedObjectsClient.find.mockResolvedValueOnce(
-        makeFindResponse([{ id: 'ap-catchall', attributes: { ...baseAttributes, matcher: null } }])
+        makeFindResponse(
+          [{ id: 'ap-catchall', attributes: { ...baseAttributes, matcher: null } }],
+          150
+        )
       );
 
       const result = await client.matchActionPoliciesForRule({ ruleId: 'rule-1' });
@@ -2795,6 +2799,7 @@ describe('ActionPolicyClient', () => {
       expect(result.items).toHaveLength(1);
       expect(result.items[0].category).toBe('global');
       expect(result.items[0].actionPolicy.id).toBe('ap-catchall');
+      expect(result.total).toBe(150);
     });
 
     it('returns global-filtered APs for policies where evaluateKql returns true', async () => {

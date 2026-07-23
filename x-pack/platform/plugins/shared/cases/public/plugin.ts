@@ -94,6 +94,7 @@ export class CasesUiPlugin
         id: APP_ID,
         title: APP_TITLE,
         order: 1,
+        mainPaddingSize: 'none',
         async mount(params: ManagementAppMountParams) {
           const [coreStart, pluginsStart] = (await core.getStartServices()) as [
             CoreStart,

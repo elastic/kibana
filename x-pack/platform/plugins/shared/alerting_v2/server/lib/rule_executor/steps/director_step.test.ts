@@ -51,6 +51,30 @@ describe('DirectorStep', () => {
     expect(result.state.alertEventsBatch).toBeDefined();
   });
 
+  it('threads freshly-opened episode ids on state for alertable rules (no direct counter)', async () => {
+    const { directorService, mockEsClient } = createDirectorService();
+    const step = new DirectorStep(loggerService, directorService);
+
+    // No previous episode state, so both events open a new episode.
+    mockEsClient.esql.query.mockResolvedValue(createEmptyEsqlResponse());
+
+    const alertEventsBatch = [
+      createAlertEvent({ group_hash: 'hash-1' }),
+      createAlertEvent({ group_hash: 'hash-2' }),
+    ];
+
+    const state = createRulePipelineState({
+      rule: createRuleResponse({ kind: 'alert' }),
+      alertEventsBatch,
+    });
+
+    const [result] = await collectStreamResults(step.executeStream(createPipelineStream([state])));
+
+    expect(result.type).toBe('continue');
+
+    expect(result.state.newEpisodeIds).toHaveLength(2);
+  });
+
   it('skips episode tracking for signal rules', async () => {
     const { directorService, mockEsClient } = createDirectorService();
     const step = new DirectorStep(loggerService, directorService);

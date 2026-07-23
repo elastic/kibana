@@ -182,6 +182,24 @@ const knowledgeIndicatorFeaturesIdentifiedSchema: RootSchema<KnowledgeIndicatorF
         description: 'Existing features updated in this iteration',
       },
     },
+    features_remapped: {
+      type: 'long',
+      _meta: {
+        description: 'Features remapped to a previously known id in this iteration',
+      },
+    },
+    semantic_verify_calls: {
+      type: 'long',
+      _meta: {
+        description: 'Calls to semantic duplicate verification in this iteration',
+      },
+    },
+    semantic_verify_reuses: {
+      type: 'long',
+      _meta: {
+        description: 'Semantic verifications that reused a known feature id',
+      },
+    },
     input_tokens_used: {
       type: 'long',
       _meta: {
@@ -369,7 +387,7 @@ const agentToolEventStatusUpdateSchema: RootSchema<AgentToolEventStatusUpdatePro
       description: 'Whether the event status update succeeded',
     },
   },
-  event_id: {
+  event_uuid: {
     type: 'keyword',
     _meta: {
       description: 'The identifier of the updated significant event',
@@ -477,8 +495,7 @@ const detectionScanSchema: RootSchema<DetectionScanProps> = {
   alerting_engine: {
     type: 'keyword',
     _meta: {
-      description:
-        'Resolved alerting engine backing the read: `v2` reads `.rule-events`, `v1` reads `.alerts-*`',
+      description: 'Alerting engine backing the read; Significant Events always uses v2',
     },
   },
   alerts_source_index: {
@@ -555,7 +572,7 @@ const agentToolEventInvestigationAttachSchema: RootSchema<AgentToolEventInvestig
         description: 'Whether the investigation attachment succeeded',
       },
     },
-    event_id: {
+    event_uuid: {
       type: 'keyword',
       _meta: {
         description: 'The identifier of the significant event the investigation was attached to',
@@ -583,10 +600,10 @@ const agentToolEventWriteSchema: RootSchema<AgentToolEventWriteProps> = {
       description: 'Whether the workflow event write succeeded',
     },
   },
-  discovery_slug: {
+  event_id: {
     type: 'keyword',
     _meta: {
-      description: 'The discovery episode slug associated with the written event',
+      description: 'The stable event id associated with the written event',
     },
   },
   status: {
@@ -647,7 +664,7 @@ const agentToolEventSearchSchema: RootSchema<AgentToolEventSearchProps> = {
       description: 'Whether the search included a stream_names filter',
     },
   },
-  state_filter: {
+  status_filter: {
     type: 'keyword',
     _meta: {
       description: 'The state filter applied to the search (open or closed)',
@@ -674,9 +691,9 @@ const agentToolDiscoveryWriteSchema: RootSchema<AgentToolDiscoveryWriteProps> = 
       description: 'The kind of discovery document written: discovery, clearance, or handled',
     },
   },
-  discovery_slug: {
+  event_id: {
     type: 'keyword',
-    _meta: { description: 'The discovery episode slug' },
+    _meta: { description: 'The stable event id' },
   },
   stream_names: {
     type: 'array',

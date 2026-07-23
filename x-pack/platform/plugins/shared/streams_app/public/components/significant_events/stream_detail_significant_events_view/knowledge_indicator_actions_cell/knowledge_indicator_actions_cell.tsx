@@ -24,6 +24,7 @@ import {
   RESTORE_LABEL,
   PROMOTE_LABEL,
 } from '../hooks/use_knowledge_indicator_actions';
+import { useBlocksNewActivity } from '../../../../hooks/significant_events/use_significant_events_maintenance';
 import { STATS_PROMOTE_DISABLED_TOOLTIP } from '../../significant_events_discovery/components/queries_table/translations';
 
 interface Props {
@@ -38,6 +39,7 @@ export function KnowledgeIndicatorActionsCell({
   onDeleteRequest,
 }: Props) {
   const [isActionsMenuOpen, setIsActionsMenuOpen] = useState(false);
+  const { blocksActivity, activityBlockTooltip } = useBlocksNewActivity();
   const { excludeFeature, restoreFeature, promoteQuery, isMutating } = useKnowledgeIndicatorActions(
     { streamName }
   );
@@ -104,14 +106,17 @@ export function KnowledgeIndicatorActionsCell({
     if (knowledgeIndicator.kind !== 'query') return [];
 
     const isStats = knowledgeIndicator.query.type === QUERY_TYPE_STATS;
-    const isPromoteDisabled = isMutating || knowledgeIndicator.rule.backed || isStats;
+    const isPromoteDisabled =
+      isMutating || blocksActivity || knowledgeIndicator.rule.backed || isStats;
+    const promoteTooltip =
+      activityBlockTooltip ?? (isStats ? STATS_PROMOTE_DISABLED_TOOLTIP : undefined);
 
     return [
       <EuiContextMenuItem
         key="query-promote"
         icon="plusInCircle"
         disabled={isPromoteDisabled}
-        toolTipContent={isStats ? STATS_PROMOTE_DISABLED_TOOLTIP : undefined}
+        toolTipContent={promoteTooltip}
         onClick={() => {
           setIsActionsMenuOpen(false);
           promoteQuery(knowledgeIndicator.query.id);
@@ -131,7 +136,14 @@ export function KnowledgeIndicatorActionsCell({
         {DELETE_LABEL}
       </EuiContextMenuItem>,
     ];
-  }, [isMutating, knowledgeIndicator, onDeleteRequest, promoteQuery]);
+  }, [
+    activityBlockTooltip,
+    blocksActivity,
+    isMutating,
+    knowledgeIndicator,
+    onDeleteRequest,
+    promoteQuery,
+  ]);
 
   return (
     <EuiPopover

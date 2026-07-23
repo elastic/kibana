@@ -5,47 +5,35 @@
  * 2.0.
  */
 
-import type { AxiosRequestConfig } from 'axios';
-import axios from 'axios';
 import { registerKibanaFunction } from './kibana';
 import type { FunctionRegistrationParameters } from '.';
 
-jest.mock('axios');
-const mockedAxios = jest.mocked(axios);
-
-function createEnotfoundError(hostname: string): Error {
-  const cause = new Error(`getaddrinfo ENOTFOUND ${hostname}`) as NodeJS.ErrnoException;
-  cause.code = 'ENOTFOUND';
-  const error = new Error(`getaddrinfo ENOTFOUND ${hostname}`) as NodeJS.ErrnoException;
-  error.code = 'ERR_NETWORK';
-  error.cause = cause;
-  return error;
-}
-
-function registerFunction(overrides: {
-  publicBaseUrl?: string;
-  requestUrl?: URL;
-  rewrittenUrl?: URL;
-  headers?: Record<string, string>;
-  basePath?: string;
-  serverInfo?: { hostname: string; port: number; protocol: 'http' | 'https' | 'socket' };
-}) {
+function registerFunction(
+  overrides: {
+    requestUrl?: URL;
+    rewrittenUrl?: URL;
+    basePath?: string;
+    headers?: Record<string, string | string[]>;
+    fetchError?: Error;
+  } = {}
+) {
   const logger = { info: jest.fn(), debug: jest.fn(), warn: jest.fn(), error: jest.fn() };
+  const fetch = jest.fn().mockImplementation((pathname: string) => {
+    if (overrides.fetchError) {
+      throw overrides.fetchError;
+    }
+
+    return {
+      body: { ok: true },
+      request: { url: `https://target.example/base${pathname}` },
+    };
+  });
+  const scopedClient = { fetch };
   const coreStart = {
     http: {
-      basePath: {
-        publicBaseUrl: overrides.publicBaseUrl ?? 'https://kibana.example.com:5601',
-        serverBasePath: '',
-        get: jest.fn(),
+      selfClient: {
+        asScoped: jest.fn().mockReturnValue(scopedClient),
       },
-      getServerInfo: jest.fn().mockReturnValue(
-        overrides.serverInfo ?? {
-          name: 'kibana',
-          hostname: '0.0.0.0',
-          port: 5601,
-          protocol: 'http',
-        }
-      ),
     },
   };
 
@@ -56,11 +44,10 @@ function registerFunction(overrides: {
         new URL('https://source.example/internal/observability_ai_assistant/chat/complete'),
       basePath: overrides.basePath ?? '',
       rewrittenUrl: overrides.rewrittenUrl,
-      headers: {
+      headers: overrides.headers ?? {
         'content-type': 'application/json',
         host: 'attacker.example',
         origin: 'https://attacker.example',
-        ...(overrides.headers ?? {}),
       },
     },
     logger,
@@ -77,6 +64,7 @@ function registerFunction(overrides: {
   return {
     handler: functions.registerFunction.mock.calls[0][1],
     coreStart,
+    fetch,
     resources,
   };
 }
@@ -84,17 +72,39 @@ function registerFunction(overrides: {
 describe('kibana tool', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockedAxios.mockResolvedValue({ data: { ok: true } });
   });
 
-  it('forwards requests to the configured publicBaseUrl host only', async () => {
-    const { handler } = registerFunction({
-      headers: {
-        host: 'malicious-host:9200',
-        origin: 'https://malicious-host:9200',
-        'x-forwarded-host': 'another-host',
+  it('calls Kibana through the Core scoped self client', async () => {
+    const { handler, coreStart, fetch, resources } = registerFunction();
+    const signal = new AbortController().signal;
+
+    const result = await handler(
+      {
+        arguments: {
+          method: 'POST',
+          pathname: '/api/apm/agent_keys',
+          query: { type: 'dashboard' },
+          body: { foo: 'bar' },
+        },
       },
+      signal
+    );
+
+    expect(coreStart.http.selfClient.asScoped).toHaveBeenCalledWith(resources.request);
+    expect(fetch).toHaveBeenCalledWith('/api/apm/agent_keys', {
+      method: 'POST',
+      query: { type: 'dashboard' },
+      body: { foo: 'bar' },
+      signal,
+      forwardRequestHeaders: true,
+      access: 'public',
+      asResponse: true,
     });
+    expect(result).toEqual({ content: { ok: true } });
+  });
+
+  it('logs the source request and resolved target url', async () => {
+    const { handler, fetch, resources } = registerFunction({ basePath: '/s/my-space' });
 
     await handler({
       arguments: {
@@ -104,39 +114,69 @@ describe('kibana tool', () => {
       },
     });
 
-    const forwardedRequest = mockedAxios.mock.calls[0][0] as AxiosRequestConfig;
-    expect(forwardedRequest.url).toBe(
-      'https://kibana.example.com:5601/api/saved_objects/_find?type=dashboard'
+    expect(resources.logger.info).toHaveBeenCalledWith(
+      expect.stringContaining('GET https://target.example/base/api/saved_objects/_find')
     );
-    expect(forwardedRequest.url).not.toContain('malicious-host');
-  });
-
-  it('builds the forwarded url using the base path from the incoming request', async () => {
-    const { handler } = registerFunction({
-      basePath: '/s/my-space',
-    });
-
-    await handler({
-      arguments: {
-        method: 'POST',
-        pathname: '/api/apm/agent_keys',
-        body: { foo: 'bar' },
-      },
-    });
-
-    expect(mockedAxios).toHaveBeenCalledWith(
+    expect(fetch).toHaveBeenCalledWith(
+      '/api/saved_objects/_find',
       expect.objectContaining({
-        url: 'https://kibana.example.com:5601/s/my-space/api/apm/agent_keys',
-        data: JSON.stringify({ foo: 'bar' }),
+        method: 'GET',
+        query: { type: 'dashboard' },
       })
     );
   });
 
-  it('forwards authorization header', async () => {
-    const { handler } = registerFunction({
+  it('logs the resolved target URL when the self call fails', async () => {
+    const error = Object.assign(new Error('Not found'), {
+      request: { url: 'https://target.example/base/api/missing' },
+    });
+    const { handler, resources } = registerFunction({ fetchError: error });
+
+    await expect(
+      handler({
+        arguments: {
+          method: 'GET',
+          pathname: '/api/missing',
+        },
+      })
+    ).rejects.toThrow('Not found');
+
+    expect(resources.logger.error).toHaveBeenCalledWith(
+      expect.stringContaining('GET https://target.example/base/api/missing')
+    );
+  });
+
+  it('uses the rewritten url in logs when present', async () => {
+    const rewrittenUrl = new URL('https://source.example/s/space/original');
+    const { handler, resources } = registerFunction({ rewrittenUrl });
+
+    await handler({
+      arguments: {
+        method: 'GET',
+        pathname: '/api/status',
+      },
+    });
+
+    expect(resources.logger.info).toHaveBeenCalledWith(
+      expect.stringContaining(String(rewrittenUrl))
+    );
+  });
+
+  it('opts into Core safe request header forwarding for self calls', async () => {
+    const { handler, fetch } = registerFunction({
       headers: {
-        authorization: 'Basic dGVzdA==',
-        'x-forwarded-user': 'should-be-stripped',
+        accept: 'application/json',
+        'accept-language': 'en-US',
+        authorization: 'Bearer attacker',
+        cookie: 'sid=attacker',
+        host: 'attacker.example',
+        'kbn-version': '1.2.3',
+        origin: 'https://origin.example',
+        referer: 'https://origin.example/app/home',
+        'sec-fetch-site': 'same-origin',
+        'x-elastic-internal-origin': 'attacker',
+        'x-elastic-product-origin': 'observability',
+        'x-kbn-context': '%7B%7D',
       },
     });
 
@@ -147,152 +187,29 @@ describe('kibana tool', () => {
       },
     });
 
-    const forwardedRequest = mockedAxios.mock.calls[0][0] as AxiosRequestConfig;
-    expect(forwardedRequest.headers?.authorization).toBe('Basic dGVzdA==');
-    expect(forwardedRequest.headers).not.toHaveProperty('x-forwarded-user');
-  });
-
-  it('throws when server.publicBaseUrl is not configured', async () => {
-    const { handler, coreStart } = registerFunction({});
-    coreStart.http.basePath.publicBaseUrl = undefined as any;
-
-    await expect(
-      handler({
-        arguments: {
-          method: 'GET',
-          pathname: '/api/saved_objects/_find',
-          query: { type: 'dashboard' },
-        },
+    expect(fetch).toHaveBeenCalledWith(
+      '/api/status',
+      expect.objectContaining({
+        forwardRequestHeaders: true,
       })
-    ).rejects.toThrow(
-      'Cannot invoke Kibana tool: "server.publicBaseUrl" must be configured in kibana.yml'
     );
   });
 
-  describe('local server fallback', () => {
-    const vpcPublicBaseUrl = 'https://kibana-vpc.internal:5601';
-    const defaultServerInfo = { hostname: '0.0.0.0', port: 5601, protocol: 'http' as const };
-    const getStatusArgs = { arguments: { method: 'GET' as const, pathname: '/api/status' } };
+  it('requests internal access for internal Kibana APIs', async () => {
+    const { handler, fetch } = registerFunction();
 
-    function registerVpcFunction(
-      serverInfo: {
-        hostname: string;
-        port: number;
-        protocol: 'http' | 'https' | 'socket';
-      } = defaultServerInfo
-    ) {
-      return registerFunction({ publicBaseUrl: vpcPublicBaseUrl, serverInfo });
-    }
-
-    it('retries with local server address when publicBaseUrl hostname is not resolvable', async () => {
-      const { handler, resources } = registerVpcFunction();
-
-      mockedAxios
-        .mockRejectedValueOnce(createEnotfoundError('kibana-vpc.internal'))
-        .mockResolvedValueOnce({ data: { status: 'ok' } });
-
-      const result = await handler(getStatusArgs);
-
-      expect(mockedAxios).toHaveBeenCalledTimes(2);
-
-      const firstCall = mockedAxios.mock.calls[0][0] as AxiosRequestConfig;
-      expect(firstCall.url).toBe('https://kibana-vpc.internal:5601/api/status');
-
-      const retryCall = mockedAxios.mock.calls[1][0] as AxiosRequestConfig;
-      expect(retryCall.url).toBe('http://localhost:5601/api/status');
-
-      expect(result).toEqual({ content: { status: 'ok' } });
-      expect(resources.logger.warn).toHaveBeenCalledWith(expect.stringContaining('(ENOTFOUND)'));
+    await handler({
+      arguments: {
+        method: 'GET',
+        pathname: '/internal/search',
+      },
     });
 
-    it('does not fall back when the request fails with a non-ENOTFOUND error', async () => {
-      const cause = new Error('connect ECONNREFUSED 127.0.0.1:5601') as NodeJS.ErrnoException;
-      cause.code = 'ECONNREFUSED';
-      const error = new Error('connect ECONNREFUSED') as NodeJS.ErrnoException;
-      error.code = 'ERR_NETWORK';
-      error.cause = cause;
-
-      const { handler, resources } = registerFunction({});
-      mockedAxios.mockRejectedValueOnce(error);
-
-      await expect(handler(getStatusArgs)).rejects.toThrow();
-
-      expect(mockedAxios).toHaveBeenCalledTimes(1);
-      expect(resources.logger.error).toHaveBeenCalledWith(
-        expect.stringContaining('Error calling Kibana API')
-      );
-    });
-
-    it('does not fall back when the request fails with a non-network error', async () => {
-      const { handler } = registerFunction({});
-      mockedAxios.mockRejectedValueOnce(new Error('Request failed with status code 500'));
-
-      await expect(handler(getStatusArgs)).rejects.toThrow('Request failed with status code 500');
-
-      expect(mockedAxios).toHaveBeenCalledTimes(1);
-    });
-
-    it('logs and rethrows when the local fallback request also fails', async () => {
-      const { handler, resources } = registerVpcFunction();
-
-      mockedAxios
-        .mockRejectedValueOnce(createEnotfoundError('kibana-vpc.internal'))
-        .mockRejectedValueOnce(new Error('ECONNREFUSED on fallback'));
-
-      await expect(handler(getStatusArgs)).rejects.toThrow('ECONNREFUSED on fallback');
-
-      expect(mockedAxios).toHaveBeenCalledTimes(2);
-      expect(resources.logger.error).toHaveBeenCalledWith(
-        expect.stringContaining('Error calling Kibana API via local fallback')
-      );
-    });
-
-    it('does not fall back when server protocol is "socket"', async () => {
-      const { handler, resources } = registerVpcFunction({
-        hostname: 'localhost',
-        port: 5601,
-        protocol: 'socket',
-      });
-
-      mockedAxios.mockRejectedValueOnce(createEnotfoundError('kibana-vpc.internal'));
-
-      await expect(handler(getStatusArgs)).rejects.toThrow();
-
-      expect(mockedAxios).toHaveBeenCalledTimes(1);
-      expect(resources.logger.error).toHaveBeenCalledWith(
-        expect.stringContaining('Error calling Kibana API')
-      );
-    });
-
-    it('maps hostname "::" to "localhost" when building the fallback URL', async () => {
-      const { handler } = registerVpcFunction({ hostname: '::', port: 5601, protocol: 'http' });
-
-      mockedAxios
-        .mockRejectedValueOnce(createEnotfoundError('kibana-vpc.internal'))
-        .mockResolvedValueOnce({ data: { ok: true } });
-
-      await handler(getStatusArgs);
-
-      const retryCall = mockedAxios.mock.calls[1][0] as AxiosRequestConfig;
-      expect(retryCall.url).toBe('http://localhost:5601/api/status');
-    });
-
-    it('detects ENOTFOUND nested multiple levels deep in the error cause chain', async () => {
-      const root = new Error('getaddrinfo ENOTFOUND host') as NodeJS.ErrnoException;
-      root.code = 'ENOTFOUND';
-      const mid = new Error('inner wrapper');
-      mid.cause = root;
-      const outer = new Error('outer wrapper');
-      outer.cause = mid;
-
-      const { handler } = registerVpcFunction();
-
-      mockedAxios.mockRejectedValueOnce(outer).mockResolvedValueOnce({ data: { ok: true } });
-
-      const result = await handler(getStatusArgs);
-
-      expect(mockedAxios).toHaveBeenCalledTimes(2);
-      expect(result).toEqual({ content: { ok: true } });
-    });
+    expect(fetch).toHaveBeenCalledWith(
+      '/internal/search',
+      expect.objectContaining({
+        access: 'internal',
+      })
+    );
   });
 });

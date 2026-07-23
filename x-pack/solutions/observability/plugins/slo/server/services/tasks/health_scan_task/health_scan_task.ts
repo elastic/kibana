@@ -53,7 +53,7 @@ export class HealthScanTask {
         title: 'SLO health scan task',
         timeout: '5m',
         maxAttempts: 1,
-        createTaskRunner: ({ taskInstance, fakeRequest, abortController }: RunContext) => {
+        createTaskRunner: ({ taskInstance, fakeRequest, signal }: RunContext) => {
           return {
             run: async () => {
               if (!this.config.healthScanTaskEnabled) {
@@ -99,7 +99,7 @@ export class HealthScanTask {
                     scopedClusterClient,
                     soClient,
                     logger: this.logger,
-                    abortController,
+                    signal,
                   }
                 );
 

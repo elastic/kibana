@@ -34,7 +34,6 @@ export type SignificantEventsUnavailableReason =
   | 'feature_flag'
   | 'pricing_tier'
   | 'license'
-  | 'ui_setting'
   | SignificantEventsRequiredPlugin;
 
 export type SignificantEventsAvailabilityResponse =

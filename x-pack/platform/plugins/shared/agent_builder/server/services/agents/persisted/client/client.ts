@@ -14,6 +14,7 @@ import type {
 import { validateAgentId } from '@kbn/agent-builder-common/agents';
 import {
   agentBuilderDefaultAgentId,
+  chatAgentTypeId,
   createAgentNotFoundError,
   createBadRequestError,
   isAgentNotFoundError,
@@ -127,6 +128,99 @@ export interface AgentClient {
   removeSkillRefsFromAgents(params: { skillIds: string[] }): Promise<AgentsUsingSkillsResult>;
 }
 
+export interface SystemAgentClient {
+  ensureAgent(profile: AgentCreateRequest): Promise<void>;
+}
+
+const getAgentDocument = async ({
+  storage,
+  space,
+  agentId,
+}: {
+  storage: AgentProfileStorage;
+  space: string;
+  agentId: string;
+}): Promise<Document | undefined> => {
+  const response = await storage.getClient().search({
+    track_total_hits: false,
+    size: 1,
+    terminate_after: 1,
+    query: {
+      bool: {
+        filter: [
+          createSpaceDslFilter(space),
+          {
+            bool: {
+              // BWC compatibility with M1 - agentId was stored as the _id
+              should: [{ term: { id: agentId } }, { term: { _id: agentId } }],
+              minimum_should_match: 1,
+            },
+          },
+        ],
+      },
+    },
+  });
+
+  return response.hits.hits.length > 0 ? (response.hits.hits[0] as Document) : undefined;
+};
+
+const ensureSystemAgent = async ({
+  storage,
+  space,
+  profile,
+}: {
+  storage: AgentProfileStorage;
+  space: string;
+  profile: AgentCreateRequest;
+}): Promise<void> => {
+  // System-installed agents may use protected platform namespaces even though they are
+  // persisted (and therefore editable) rather than registered as built-in agents.
+  const validationError = validateAgentId({ agentId: profile.id, builtIn: true });
+  if (validationError) {
+    throw createBadRequestError(`Invalid agent id: "${profile.id}": ${validationError}`);
+  }
+
+  const expectedType = profile.type ?? chatAgentTypeId;
+  const existingAgent = await getAgentDocument({ storage, space, agentId: profile.id });
+  if (existingAgent) {
+    const existingType = fromEs(existingAgent).type;
+    if (existingType !== expectedType) {
+      throw createBadRequestError(
+        `Cannot ensure agent "${profile.id}": the id is already used by an agent of type "${existingType}"`
+      );
+    }
+    return;
+  }
+
+  const creationDate = new Date();
+  const document = createRequestToEs({
+    profile,
+    space,
+    creationDate,
+    user: { username: SYSTEM_USER_ID },
+  });
+
+  try {
+    await storage.getClient().index({
+      id: `${space}_${profile.id}`,
+      op_type: 'create',
+      document,
+    });
+  } catch (error) {
+    // Multiple Kibana nodes may attempt the create concurrently. If another node won,
+    // the desired end state already exists and this installation is complete.
+    const concurrentlyCreatedAgent = await getAgentDocument({
+      storage,
+      space,
+      agentId: profile.id,
+    });
+    if (concurrentlyCreatedAgent && fromEs(concurrentlyCreatedAgent).type === expectedType) {
+      return;
+    }
+    throw error;
+  }
+};
+
 export const createClient = async ({
   space,
   request,
@@ -163,6 +257,22 @@ export const createClient = async ({
     toolsService,
     logger,
   });
+};
+
+export const createSystemClient = ({
+  space,
+  elasticsearch,
+  logger,
+}: {
+  space: string;
+  elasticsearch: ElasticsearchServiceStart;
+  logger: Logger;
+}): SystemAgentClient => {
+  const storage = createStorage({ logger, esClient: elasticsearch.client.asInternalUser });
+
+  return {
+    ensureAgent: (profile) => ensureSystemAgent({ storage, space, profile }),
+  };
 };
 
 class AgentClientImpl implements AgentClient {
@@ -373,28 +483,7 @@ class AgentClientImpl implements AgentClient {
   async ensureDefaultAgent(
     profile: AgentCreateRequest
   ): Promise<PersistedAgentDefinitionWithPermissions> {
-    // Intentionally skipping access checks when ensuring an agent exists
-    const defaultAgent = await this._get(profile.id);
-    if (defaultAgent) {
-      return this.get(profile.id);
-    }
-
-    const now = new Date();
-    const documentId = `${this.space}_${profile.id}`;
-    const attributes = createRequestToEs({
-      profile,
-      space: this.space,
-      creationDate: now,
-      user: {
-        username: SYSTEM_USER_ID,
-      },
-    });
-
-    await this.storage.getClient().index({
-      id: documentId,
-      document: attributes,
-    });
-
+    await ensureSystemAgent({ storage: this.storage, space: this.space, profile });
     return this.get(profile.id);
   }
 
@@ -592,29 +681,6 @@ class AgentClientImpl implements AgentClient {
    * It doesn't check for access. Please use {@link getDocumentWithAccess} instead.
    */
   private async _get(agentId: string): Promise<Document | undefined> {
-    const response = await this.storage.getClient().search({
-      track_total_hits: false,
-      size: 1,
-      terminate_after: 1,
-      query: {
-        bool: {
-          filter: [
-            createSpaceDslFilter(this.space),
-            {
-              bool: {
-                // BWC compatibility with M1 - agentId was stored as the _id
-                should: [{ term: { id: agentId } }, { term: { _id: agentId } }],
-                minimum_should_match: 1,
-              },
-            },
-          ],
-        },
-      },
-    });
-    if (response.hits.hits.length === 0) {
-      return undefined;
-    } else {
-      return response.hits.hits[0] as Document;
-    }
+    return getAgentDocument({ storage: this.storage, space: this.space, agentId });
   }
 }

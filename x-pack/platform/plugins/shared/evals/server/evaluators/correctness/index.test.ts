@@ -16,40 +16,18 @@ describe('correctness evaluator', () => {
   const traceId = '0af7651916cd43dd8448eb211c80319c';
 
   const createEsClient = () => {
-    const queryMock = jest.fn();
+    const searchMock = jest.fn();
     const esClient = {
-      esql: {
-        query: queryMock,
-      },
+      search: searchMock,
     } as unknown as ElasticsearchClient;
 
-    return { esClient, queryMock };
+    return { esClient, searchMock };
   };
 
   it('uses one prompt call to produce factuality, relevance, and sequence_accuracy scores', async () => {
     const logger = loggingSystemMock.createLogger();
-    const { esClient, queryMock } = createEsClient();
+    const { esClient, searchMock } = createEsClient();
     const traceAccessor = createTraceAccessor({ traceId, esClient });
-
-    const inputMessages = JSON.stringify([
-      { role: 'user', parts: [{ type: 'text', content: 'What is the payment status?' }] },
-    ]);
-    const outputMessages = JSON.stringify([
-      {
-        role: 'assistant',
-        finish_reason: 'stop',
-        parts: [{ type: 'text', content: 'Payment service is healthy.' }],
-      },
-    ]);
-
-    queryMock.mockResolvedValueOnce({
-      columns: [
-        { name: '@timestamp', type: 'date' },
-        { name: 'attributes.gen_ai.input.messages', type: 'keyword' },
-        { name: 'attributes.gen_ai.output.messages', type: 'keyword' },
-      ],
-      values: [['2026-06-26T10:00:00.000Z', inputMessages, outputMessages]],
-    });
 
     const promptMock = jest.fn().mockResolvedValue({
       toolCalls: [
@@ -80,6 +58,11 @@ describe('correctness evaluator', () => {
 
     const result = await correctnessEvaluator.evaluate({
       trace: traceAccessor,
+      round: {
+        input: { message: 'What is the payment status?' },
+        response: { message: 'Payment service is healthy.' },
+        steps: [],
+      },
       referenceData: { expected: 'Payment service is healthy.' },
       inferenceClient: { prompt: promptMock } as unknown as BoundInferenceClient,
       log: logger,
@@ -91,6 +74,7 @@ describe('correctness evaluator', () => {
       agent_response: 'Payment service is healthy.',
       ground_truth_response: 'Payment service is healthy.',
     });
+    expect(searchMock).not.toHaveBeenCalled();
     expect(result.scores.map((score) => score.name)).toEqual([
       'factuality',
       'relevance',
@@ -106,6 +90,11 @@ describe('correctness evaluator', () => {
     await expect(
       correctnessEvaluator.evaluate({
         trace: traceAccessor,
+        round: {
+          input: { message: '' },
+          response: { message: '' },
+          steps: [],
+        },
         referenceData: { expected: 'Payment service is healthy.' },
         log: logger,
       })
@@ -137,6 +126,26 @@ describe('correctness evaluator', () => {
       });
       expect(result.success).toBe(true);
       expect(result.data).toEqual({ expected: 'answer' });
+    });
+  });
+
+  describe('evidenceSchema', () => {
+    const { evidenceSchema } = correctnessEvaluator;
+
+    it('accepts populated input and response messages', () => {
+      const result = evidenceSchema!.safeParse({
+        input: { message: 'How many failed payments?' },
+        response: { message: 'There were 12 failed payments.' },
+      });
+      expect(result.success).toBe(true);
+    });
+
+    it('rejects empty response message', () => {
+      const result = evidenceSchema!.safeParse({
+        input: { message: 'How many failed payments?' },
+        response: { message: '' },
+      });
+      expect(result.success).toBe(false);
     });
   });
 
