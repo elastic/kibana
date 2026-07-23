@@ -14,7 +14,14 @@ const liquid = new Liquid({
   dynamicPartials: false,
   relativeReference: false,
   outputEscape: 'escape',
+  renderLimit: 1_000,
+  memoryLimit: 100_000_000,
+  parseLimit: 1_000_000,
 });
+
+function isFiniteNumber(value: unknown): value is number {
+  return Number.isFinite(value);
+}
 
 export async function fillTemplate(
   template: string,
@@ -23,25 +30,30 @@ export async function fillTemplate(
 ): Promise<string> {
   const maxValues: Record<string, number> = {};
   columns.forEach((col, i) => {
-    const nums = rows.map((r) => Number(r[i])).filter((v) => isFinite(v));
-    if (nums.length > 0) maxValues[col.name] = nums.reduce((a, b) => (b > a ? b : a), -Infinity);
+    let max = -Infinity;
+    for (const row of rows) {
+      const value = row[i];
+      if (isFiniteNumber(value)) {
+        max = Math.max(max, value);
+      }
+    }
+    if (isFiniteNumber(max)) {
+      maxValues[col.name] = max;
+    }
   });
 
   const rowObjects = rows.map((row) => {
     const obj: Record<string, { value: unknown; pct?: number }> = {};
     columns.forEach((col, i) => {
+      const value = row[i];
       const max = maxValues[col.name];
-      let pct: number | undefined;
-      if (max !== undefined) {
-        const num = Number(row[i]);
-        pct =
-          max === 0
-            ? 0
-            : isFinite(num)
-            ? Math.min(100, Math.max(0, Math.round((num / max) * 100)))
-            : 0;
-      }
-      obj[col.name] = { value: row[i], pct };
+      const pct =
+        max === undefined
+          ? undefined
+          : max !== 0 && isFiniteNumber(value)
+          ? Math.min(100, Math.max(0, Math.round((value / max) * 100)))
+          : 0;
+      obj[col.name] = { value, pct };
     });
     return obj;
   });

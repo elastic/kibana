@@ -39,7 +39,7 @@ export function streamGenerate(
       .subscribe({
         next: (event) => {
           if (event.type === 'token' && event.token) {
-            onToken(event.token as string);
+            onToken(event.token);
           }
         },
         error: (err) => {

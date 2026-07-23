@@ -83,6 +83,11 @@ describe('fillTemplate', () => {
     expect(result).toContain('&lt;script&gt;');
   });
 
+  it('rejects when a template exceeds the render limit (DoS guard)', async () => {
+    const template = '{% for a in (1..5000) %}{% for b in (1..5000) %}x{% endfor %}{% endfor %}';
+    await expect(fillTemplate(template, [], [])).rejects.toThrow();
+  });
+
   it('trims leading/trailing whitespace from the template before rendering', async () => {
     const result = await fillTemplate(
       '  \n<html><body><p>hello</p></body></html>\n  ',
