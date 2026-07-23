@@ -166,9 +166,10 @@ const getAgentDocument = async ({
   return response.hits.hits.length > 0 ? (response.hits.hits[0] as Document) : undefined;
 };
 
-const CONCURRENT_CREATE_CHECK_RETRIES = 9;
-const CONCURRENT_CREATE_CHECK_DELAY_MS = 300;
-
+/**
+ * Creates a system agent if it doesn't exist. Concurrent creations are
+ * expected (parallel requests or multiple Kibana nodes) and treated as success.
+ */
 const ensureSystemAgent = async ({
   storage,
   space,
@@ -212,9 +213,6 @@ const ensureSystemAgent = async ({
       document,
     });
   } catch (error) {
-    // Concurrent callers (parallel requests or multiple Kibana nodes) may race on the
-    // create. A version conflict on our deterministic id proves the document already
-    // exists, so the desired end state is reached and this installation is complete.
     if (!isVersionConflictError(error)) {
       throw error;
     }
@@ -480,13 +478,15 @@ class AgentClientImpl implements AgentClient {
     return this.get(profile.id);
   }
 
+  /**
+   * A concurrently created agent may not be searchable right away
+   * (searches are refresh-dependent), so the read is retried until it becomes visible.
+   */
   async ensureDefaultAgent(
     profile: AgentCreateRequest
   ): Promise<PersistedAgentDefinitionWithPermissions> {
     await ensureSystemAgent({ storage: this.storage, space: this.space, profile });
 
-    // If a concurrent caller won the creation race, the document may not be searchable
-    // yet (searches are refresh-dependent), so retry the read until it becomes visible.
     return pRetry(
       async () => {
         try {
@@ -498,11 +498,7 @@ class AgentClientImpl implements AgentClient {
           throw new AbortError(error);
         }
       },
-      {
-        retries: CONCURRENT_CREATE_CHECK_RETRIES,
-        factor: 1,
-        minTimeout: CONCURRENT_CREATE_CHECK_DELAY_MS,
-      }
+      { retries: 9, factor: 1, minTimeout: 300 }
     );
   }
 

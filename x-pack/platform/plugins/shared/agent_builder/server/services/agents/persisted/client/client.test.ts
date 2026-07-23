@@ -275,7 +275,7 @@ describe('AgentClient', () => {
     };
 
     const conflictError = Object.assign(new Error('version_conflict_engine_exception'), {
-      meta: { statusCode: 409 },
+      statusCode: 409,
     });
 
     const buildDoc = () => ({
@@ -427,7 +427,7 @@ describe('SystemAgentClient', () => {
 
   describe('concurrent creation', () => {
     const conflictError = Object.assign(new Error('version_conflict_engine_exception'), {
-      meta: { statusCode: 409 },
+      statusCode: 409,
     });
 
     it('treats a concurrent create by another caller as success', async () => {

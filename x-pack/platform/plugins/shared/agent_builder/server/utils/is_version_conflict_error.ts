@@ -6,11 +6,9 @@
  */
 
 export const isVersionConflictError = (error: unknown): boolean => {
-  if (!error || typeof error !== 'object') {
+  if (!error || typeof error !== 'object' || !('statusCode' in error)) {
     return false;
   }
 
-  const castError = error as { statusCode?: number; meta?: { statusCode?: number } };
-
-  return castError.statusCode === 409 || castError.meta?.statusCode === 409;
+  return error.statusCode === 409;
 };
