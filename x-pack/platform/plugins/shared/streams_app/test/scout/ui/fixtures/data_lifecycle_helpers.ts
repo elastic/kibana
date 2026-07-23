@@ -243,20 +243,24 @@ async function selectIlmMethod(page: ScoutPage): Promise<void> {
 }
 
 /**
- * Selects an ILM policy by name in the ILM retention selector
- * (the lifecycle method flyout must already have ILM selected).
- * Managed/system policies are hidden by default behind a filter toggle — this helper activates
- * the toggle automatically so managed policies can be selected the same way as any other.
+ * Selects an ILM policy by name in the ILM retention selector.
+ * Pass `{ managed: true }` for managed/system policies — they are
+ * hidden behind a filter toggle by default. The helper then waits for the toggle to appear before
+ * clicking it, so the caller's intent is explicit and the wait is reliable.
  */
-export async function selectIlmPolicy(page: ScoutPage, policyName: string): Promise<void> {
+export async function selectIlmPolicy(
+  page: ScoutPage,
+  policyName: string,
+  { managed = false }: { managed?: boolean } = {}
+): Promise<void> {
   await selectIlmMethod(page);
   const search = page.getByTestId(RETENTION_TEST_IDS.ilmSearchInput);
   await search.waitFor({ state: 'visible' });
 
-  // Managed policies are hidden by default; reveal them before searching if the toggle is present.
-  const managedToggle = page.getByTestId(RETENTION_TEST_IDS.ilmManagedFilterToggle);
-  if (await managedToggle.isVisible()) {
-    await managedToggle.click();
+  if (managed) {
+    const toggle = page.getByTestId(RETENTION_TEST_IDS.ilmManagedFilterToggle);
+    await toggle.waitFor({ state: 'visible' });
+    await toggle.click();
   }
 
   await search.fill(policyName);
