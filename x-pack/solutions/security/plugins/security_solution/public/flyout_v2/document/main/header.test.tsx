@@ -163,7 +163,6 @@ describe('<DocumentHeader />', () => {
     __resetFlyoutPaginationStoreForTests();
   });
 
-
   it('should pass the hit to the severity component', () => {
     const { getByTestId } = renderHeader({ hit: alertHit });
 
