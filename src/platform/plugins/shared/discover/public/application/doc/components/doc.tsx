@@ -73,7 +73,7 @@ export function Doc(props: DocProps) {
 
   return (
     <>
-      <AppHeader title={title} back={back} />
+      <AppHeader title={title} back={back} spacing="compact" />
       <EuiPage>
         <h1
           id="singleDocTitle"
