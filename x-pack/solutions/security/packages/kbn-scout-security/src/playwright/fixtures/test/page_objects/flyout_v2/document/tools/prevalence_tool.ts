@@ -22,12 +22,6 @@ export class PrevalenceTool {
 
   /** The prevalence details table. */
   public readonly table: Locator;
-  /**
-   * Cell-actions hover wrapper for the first data row's value.
-   * CellActions uses data-test-subj="cellActions-renderContent-{fieldName}" on the wrapper div;
-   * we scope to tbody tr:first-child to avoid needing .first() (banned by no-nth-methods).
-   */
-  public readonly valueCellHoverTarget: Locator;
   /** Hover-down popover that appears when the cursor is over a cell-actions-enabled value. */
   public readonly hoverActionsPopover: Locator;
   /** Filter-in action button that appears inside the hover popover. */
@@ -39,18 +33,10 @@ export class PrevalenceTool {
   /** Filter badge(s) added to the page search bar; use toHaveCount() to assert the number. */
   public readonly filterBadges: Locator;
   /**
-   * "Investigate in timeline" button inside the alert count cell of the first data row.
-   * Scoped with CSS to avoid .first().
-   */
-  public readonly firstAlertCountTimelineButton: Locator;
-  /**
    * ChildLink for the source.ip value in the prevalence table.
    * Scoped to the row whose text includes "source.ip" so it resolves to exactly one element.
    */
   public readonly sourceIpChildLink: Locator;
-  /** Title text of the network details flyout opened by clicking the source.ip ChildLink. */
-  public readonly networkDetailsFlyoutHeaderText: Locator;
-
   constructor(page: ScoutPage) {
     this.titleLink = page.testSubj.locator('securitySolutionFlyoutInsightsPrevalenceTitleLink');
     this.toolsFlyoutHeader = page.testSubj.locator('securitySolutionFlyoutToolsFlyoutHeader');
@@ -59,9 +45,6 @@ export class PrevalenceTool {
       'securitySolutionFlyoutToolsFlyoutHeaderTitleIcon'
     );
     this.table = page.testSubj.locator('securitySolutionFlyoutPrevalenceDetailsTable');
-    this.valueCellHoverTarget = page.locator(
-      '[data-test-subj="securitySolutionFlyoutPrevalenceDetailsTable"] tbody tr:first-child [data-test-subj^="cellActions-renderContent-"]'
-    );
     this.hoverActionsPopover = page.testSubj.locator('hoverActionsPopover');
     this.filterInAction = page.testSubj.locator('actionItem-security-default-cellActions-filterIn');
     this.filterOutAction = page.testSubj.locator(
@@ -71,16 +54,18 @@ export class PrevalenceTool {
       'actionItem-security-default-cellActions-addToTimeline'
     );
     this.filterBadges = page.locator('[id^="popoverFor_filter"]');
-    this.firstAlertCountTimelineButton = page.locator(
-      '[data-test-subj="securitySolutionFlyoutPrevalenceDetailsTable"] tbody tr:first-child [data-test-subj="securitySolutionFlyoutPrevalenceDetailsTableAlertCountCell"] [data-test-subj="securitySolutionFlyoutPrevalenceDetailsTableInvestigateInTimelineButton"]'
-    );
     this.sourceIpChildLink = page.testSubj
       .locator('securitySolutionFlyoutPrevalenceDetailsTable')
       .locator('tr')
       .filter({ hasText: 'source.ip' })
       .locator('[data-test-subj="securitySolutionFlyoutOpenFlyoutLink"]');
-    this.networkDetailsFlyoutHeaderText = page.testSubj.locator(
-      'network-details-flyout-headerText'
-    );
+  }
+
+  /** "Investigate in timeline" button for a deterministic prevalence field row. */
+  alertCountTimelineButton(fieldName: string): Locator {
+    return this.table
+      .getByRole('row')
+      .filter({ hasText: fieldName })
+      .getByTestId('securitySolutionFlyoutPrevalenceDetailsTableInvestigateInTimelineButton');
   }
 }

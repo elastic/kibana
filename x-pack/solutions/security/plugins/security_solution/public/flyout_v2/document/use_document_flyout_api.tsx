@@ -21,6 +21,7 @@ import type { CellActionRenderer } from '../shared/components/cell_actions';
 import { cellActionRenderer } from '../shared/components/cell_actions';
 import type { OpenFlyoutLinkProps } from '../shared/components/open_flyout_link';
 import { OpenFlyoutLink } from '../shared/components/open_flyout_link';
+import { CHILD_DOCUMENT_FLYOUT_TEST_ID } from '../shared/components/test_ids';
 import { getColumns } from './tools/prevalence/utils/get_columns';
 import {
   defaultToolsFlyoutProperties,
@@ -357,7 +358,7 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
       );
       const onClose = buildOnClose(parentDescriptor);
       open(
-        buildFromIndexContent(params),
+        <div data-test-subj={CHILD_DOCUMENT_FLYOUT_TEST_ID}>{buildFromIndexContent(params)}</div>,
         {
           ...defaultDocumentFlyoutProperties,
           historyKey,

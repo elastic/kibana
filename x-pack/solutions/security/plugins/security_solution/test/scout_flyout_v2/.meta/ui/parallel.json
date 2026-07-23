@@ -1,5 +1,9 @@
 {
-  "sha1": "e036845587d36e7010c8f27fca3190734bc94183",
+  "sha1": "645647a213121ec591e4e50f1504617ece7d9a26",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
   "tests": [
     {
       "id": "b434c882272c100-1054e603e578b92",
@@ -8,7 +12,7 @@
       "tags": [],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_flyout_v2/ui/parallel_tests/global.setup.ts",
-        "line": 11,
+        "line": 10,
         "column": 16
       }
     },
@@ -24,7 +28,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_flyout_v2/ui/parallel_tests/flyout_v2/document/main/about.spec.ts",
-        "line": 35,
+        "line": 33,
         "column": 14
       }
     },
@@ -40,7 +44,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_flyout_v2/ui/parallel_tests/flyout_v2/document/main/about.spec.ts",
-        "line": 53,
+        "line": 51,
         "column": 14
       }
     },
@@ -120,7 +124,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_flyout_v2/ui/parallel_tests/flyout_v2/document/main/investigation.spec.ts",
-        "line": 42,
+        "line": 39,
         "column": 14
       }
     },
@@ -184,7 +188,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_flyout_v2/ui/parallel_tests/flyout_v2/document/main/take_action.spec.ts",
-        "line": 95,
+        "line": 96,
         "column": 14
       }
     },
@@ -248,7 +252,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_flyout_v2/ui/parallel_tests/flyout_v2/document/tools/correlations.spec.ts",
-        "line": 41,
+        "line": 37,
         "column": 14
       }
     },
@@ -264,7 +268,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_flyout_v2/ui/parallel_tests/flyout_v2/document/tools/correlations.spec.ts",
-        "line": 72,
+        "line": 68,
         "column": 14
       }
     },
@@ -280,7 +284,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_flyout_v2/ui/parallel_tests/flyout_v2/document/tools/notes.spec.ts",
-        "line": 44,
+        "line": 39,
         "column": 14
       }
     },
@@ -296,7 +300,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_flyout_v2/ui/parallel_tests/flyout_v2/document/tools/notes.spec.ts",
-        "line": 67,
+        "line": 62,
         "column": 14
       }
     },
@@ -367,7 +371,7 @@
     {
       "id": "f3d854e17db9da9-33c8ca7e18b78c8",
       "title": "Document flyout v2 — Response tool overlay renders an automated endpoint response action result for the alert",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -376,8 +380,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_flyout_v2/ui/parallel_tests/flyout_v2/document/tools/response.spec.ts",
-        "line": 40,
-        "column": 14
+        "line": 35,
+        "column": 15
       }
     },
     {
@@ -392,7 +396,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_flyout_v2/ui/parallel_tests/flyout_v2/document/tools/threat_intelligence.spec.ts",
-        "line": 38,
+        "line": 32,
         "column": 14
       }
     },
@@ -413,9 +417,9 @@
       }
     },
     {
-      "id": "53a6fae2d8abe52-c8c3d0fc5adef75",
-      "title": "Document flyout v2 — User entity flyout opens the user entity flyout",
-      "expectedStatus": "skipped",
+      "id": "53a6fae2d8abe52-0fc50b59945c97a",
+      "title": "User entity flyout v2 opens from the alerts table user cell and renders the main sections",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -424,8 +428,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_flyout_v2/ui/parallel_tests/flyout_v2/entity/main/user_flyout.spec.ts",
-        "line": 22,
-        "column": 15
+        "line": 55,
+        "column": 14
       }
     },
     {
@@ -473,6 +477,118 @@
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_flyout_v2/ui/parallel_tests/flyout_v2/entity/tools/host_alerts_insights.spec.ts",
         "line": 108,
+        "column": 14
+      }
+    },
+    {
+      "id": "430aca02c10fa14-01d1c2e9c319efd",
+      "title": "Host entity flyout v2 - Risk Inputs tool risk inputs tool opens and shows the host name in the header",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_flyout_v2/ui/parallel_tests/flyout_v2/entity/tools/host_risk_inputs.spec.ts",
+        "line": 65,
+        "column": 14
+      }
+    },
+    {
+      "id": "430aca02c10fa14-1b3c484531e0b17",
+      "title": "Host entity flyout v2 - Risk Inputs tool header title opens the host as a child flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_flyout_v2/ui/parallel_tests/flyout_v2/entity/tools/host_risk_inputs.spec.ts",
+        "line": 88,
+        "column": 14
+      }
+    },
+    {
+      "id": "0c1304444bcad14-57c3b6f25c597f4",
+      "title": "User entity flyout v2 - Alerts insight tool filters the alerts table by severity",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_flyout_v2/ui/parallel_tests/flyout_v2/entity/tools/user_alerts_insights.spec.ts",
+        "line": 48,
+        "column": 14
+      }
+    },
+    {
+      "id": "0c1304444bcad14-c6921e7d0fc3d79",
+      "title": "User entity flyout v2 - Alerts insight tool header opens the user as a child flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_flyout_v2/ui/parallel_tests/flyout_v2/entity/tools/user_alerts_insights.spec.ts",
+        "line": 89,
+        "column": 14
+      }
+    },
+    {
+      "id": "0c1304444bcad14-0c6f295bf84a9a6",
+      "title": "User entity flyout v2 - Alerts insight tool expanding an alert row opens the document flyout for that rule",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_flyout_v2/ui/parallel_tests/flyout_v2/entity/tools/user_alerts_insights.spec.ts",
+        "line": 108,
+        "column": 14
+      }
+    },
+    {
+      "id": "57bd3b2cf6cfd2d-7d5b34006642bde",
+      "title": "User entity flyout v2 - Risk Inputs tool risk inputs tool opens and shows the user name in the header",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_flyout_v2/ui/parallel_tests/flyout_v2/entity/tools/user_risk_inputs.spec.ts",
+        "line": 65,
+        "column": 14
+      }
+    },
+    {
+      "id": "57bd3b2cf6cfd2d-e304a66e12bb4eb",
+      "title": "User entity flyout v2 - Risk Inputs tool header title opens the user as a child flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_flyout_v2/ui/parallel_tests/flyout_v2/entity/tools/user_risk_inputs.spec.ts",
+        "line": 88,
         "column": 14
       }
     },

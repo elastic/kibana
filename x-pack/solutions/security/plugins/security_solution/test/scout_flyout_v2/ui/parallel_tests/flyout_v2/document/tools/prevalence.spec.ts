@@ -68,7 +68,7 @@ spaceTest.describe(
         await expect(pageObjects.prevalenceTool.table).toBeVisible();
 
         // Hover over a value cell — all three cell action buttons must be visible
-        await pageObjects.prevalenceTool.valueCellHoverTarget.hover();
+        await pageObjects.prevalenceTool.sourceIpChildLink.hover();
         await expect(pageObjects.prevalenceTool.hoverActionsPopover).toBeVisible();
         await expect(pageObjects.prevalenceTool.filterInAction).toBeVisible();
         await expect(pageObjects.prevalenceTool.filterOutAction).toBeVisible();
@@ -79,7 +79,7 @@ spaceTest.describe(
         await expect(pageObjects.prevalenceTool.filterBadges).toHaveCount(1);
 
         // Filter-out replaces the existing positive filter with a negated one — badge count stays 1
-        await pageObjects.prevalenceTool.valueCellHoverTarget.hover();
+        await pageObjects.prevalenceTool.sourceIpChildLink.hover();
         await expect(pageObjects.prevalenceTool.filterOutAction).toBeVisible();
         await pageObjects.prevalenceTool.filterOutAction.click();
         await expect(pageObjects.prevalenceTool.filterBadges).toHaveCount(1);
@@ -99,7 +99,7 @@ spaceTest.describe(
         });
         await expect(pageObjects.prevalenceTool.table).toBeVisible();
 
-        await pageObjects.prevalenceTool.firstAlertCountTimelineButton.click();
+        await pageObjects.prevalenceTool.alertCountTimelineButton('source.ip').click();
 
         // Timeline modal opens
         await expect(pageObjects.timelinePage.panel).toBeVisible({ timeout: 15_000 });
@@ -116,11 +116,9 @@ spaceTest.describe(
 
         await expect(pageObjects.documentFlyout.insightsSection).toBeVisible();
         // Guard against the race: rule must be loaded before clicking so the overlay gets investigation_fields=['source.ip'].
-        await expect(
-          pageObjects.documentFlyout.highlightedFieldsTable
-            .locator('tr')
-            .filter({ hasText: 'source.ip' })
-        ).toBeVisible({ timeout: 15_000 });
+        await expect(pageObjects.documentFlyout.highlightedFieldChildLink('source.ip')).toBeVisible(
+          { timeout: 15_000 }
+        );
         await pageObjects.prevalenceTool.titleLink.click();
 
         await expect(pageObjects.prevalenceTool.toolsFlyoutHeader).toBeVisible({
@@ -131,12 +129,8 @@ spaceTest.describe(
         await pageObjects.prevalenceTool.sourceIpChildLink.click();
 
         // Network details flyout opens
-        await expect(pageObjects.prevalenceTool.networkDetailsFlyoutHeaderText).toBeVisible({
-          timeout: 10_000,
-        });
-        await expect(pageObjects.prevalenceTool.networkDetailsFlyoutHeaderText).toContainText(
-          PREVALENCE_SOURCE_IP
-        );
+        await pageObjects.networkFlyout.waitForNetworkFlyout();
+        await expect(pageObjects.networkFlyout.title).toContainText(PREVALENCE_SOURCE_IP);
       }
     );
   }

@@ -40,5 +40,8 @@ export type { NetworkApiService } from './network';
 export { getHostApiService } from './host';
 export type { HostApiService } from './host';
 
+export { getUserApiService } from './user';
+export type { UserApiService } from './user';
+
 export { getResponseActionsApiService } from './response_actions';
 export type { ResponseActionsApiService } from './response_actions';

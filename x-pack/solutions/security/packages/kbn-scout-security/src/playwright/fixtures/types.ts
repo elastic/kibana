@@ -26,6 +26,7 @@ import type {
   AnalyzerApiService,
   NetworkApiService,
   HostApiService,
+  UserApiService,
   ResponseActionsApiService,
 } from './worker';
 
@@ -42,6 +43,7 @@ export interface SecurityApiServicesFixture extends ApiServicesFixture {
   analyzer: AnalyzerApiService;
   network: NetworkApiService;
   host: HostApiService;
+  user: UserApiService;
   responseActions: ResponseActionsApiService;
 }
 

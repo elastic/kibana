@@ -12,14 +12,7 @@ spaceTest.describe(
   'Document flyout v2 — Threat intelligence tool overlay',
   { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
   () => {
-    let ruleName: string;
-
-    spaceTest.beforeEach(async ({ browserAuth, apiServices, scoutSpace }) => {
-      ruleName = `${CUSTOM_QUERY_RULE.name}_${scoutSpace.id}_${Date.now()}`;
-      await apiServices.detectionRule.createCustomQueryRule({
-        ...CUSTOM_QUERY_RULE,
-        name: ruleName,
-      });
+    spaceTest.beforeEach(async ({ browserAuth }) => {
       await browserAuth.loginAsPlatformEngineer();
     });
 

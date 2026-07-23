@@ -6,17 +6,17 @@
  */
 
 /**
- * Scout UI test for the host entity flyout's Alerts insight tool (a stacked system flyout).
+ * Scout UI test for the user entity flyout's Alerts insight tool (a stacked system flyout).
  *
- * Entry path: Alerts page → alerts table host.name cell → host flyout → entity insight section →
- * Alerts insight tool. The seeded alert(s) reference the host, so the tool's alerts table renders them.
+ * Entry path: Alerts page → alerts table user.name cell → user flyout → entity insight section →
+ * Alerts insight tool. The seeded alert(s) reference the user, so the tool's alerts table renders them.
  */
 
-import { spaceTest, tags, CUSTOM_QUERY_RULE, HOST_NAME } from '@kbn/scout-security';
+import { spaceTest, tags, CUSTOM_QUERY_RULE, USER_NAME } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/ui';
 
 spaceTest.describe(
-  'Host entity flyout v2 - Alerts insight tool',
+  'User entity flyout v2 - Alerts insight tool',
   { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
   () => {
     let ruleName: string;
@@ -26,7 +26,7 @@ spaceTest.describe(
       // Rule execution can be slow under parallel load.
       testInfo.setTimeout(testInfo.timeout + 120_000);
 
-      ({ sourceIndex } = await apiServices.host.createHostFixture(scoutSpace.id));
+      ({ sourceIndex } = await apiServices.user.createUserFixture(scoutSpace.id));
 
       ruleName = `${CUSTOM_QUERY_RULE.name}_${scoutSpace.id}_${Date.now()}`;
       await apiServices.detectionRule.createCustomQueryRule({
@@ -42,13 +42,13 @@ spaceTest.describe(
     spaceTest.afterEach(async ({ apiServices, scoutSpace }) => {
       await apiServices.detectionRule.deleteAll();
       await apiServices.detectionAlerts.deleteAll();
-      await apiServices.host.cleanupHostFixture(scoutSpace.id);
+      await apiServices.user.cleanupUserFixture(scoutSpace.id);
     });
 
     spaceTest(
       'filters the alerts table by severity',
       async ({ pageObjects, apiServices, scoutSpace }) => {
-        // Add a second alert of a different severity (same host) so filtering is observable.
+        // Add a second alert of a different severity (same user) so filtering is observable.
         const lowSeverityRuleName = `${CUSTOM_QUERY_RULE.name}_low_${scoutSpace.id}_${Date.now()}`;
         await apiServices.detectionRule.createCustomQueryRule({
           ...CUSTOM_QUERY_RULE,
@@ -59,16 +59,16 @@ spaceTest.describe(
         });
         await apiServices.detectionAlerts.waitForAlerts(lowSeverityRuleName, 1, 60_000);
 
-        const { alertsTablePage, hostFlyout } = pageObjects;
+        const { alertsTablePage, userFlyout } = pageObjects;
         await alertsTablePage.navigate();
         await alertsTablePage.waitForRuleAlert(ruleName);
-        await alertsTablePage.clickHostNameCell(HOST_NAME);
-        await hostFlyout.waitForHostFlyout();
-        await hostFlyout.openAlertsInsightTool();
+        await alertsTablePage.clickUserNameCell(USER_NAME);
+        await userFlyout.waitForUserFlyout();
+        await userFlyout.openAlertsInsightTool();
 
         await spaceTest.step('both severities are listed', async () => {
-          await expect(hostFlyout.alertsInsightsToolTable).toBeVisible();
-          await expect(hostFlyout.alertsInsightsToolAlertSeverities).toHaveCount(2, {
+          await expect(userFlyout.alertsInsightsToolTable).toBeVisible();
+          await expect(userFlyout.alertsInsightsToolAlertSeverities).toHaveCount(2, {
             timeout: 15_000,
           });
         });
@@ -76,47 +76,47 @@ spaceTest.describe(
         await spaceTest.step(
           'clicking the Low severity segment filters to one Low alert',
           async () => {
-            await hostFlyout.alertsInsightsToolSeveritySegment('Low').click();
-            await expect(hostFlyout.alertsInsightsToolAlertSeverities).toHaveCount(1, {
+            await userFlyout.alertsInsightsToolSeveritySegment('Low').click();
+            await expect(userFlyout.alertsInsightsToolAlertSeverities).toHaveCount(1, {
               timeout: 15_000,
             });
-            await expect(hostFlyout.alertsInsightsToolAlertSeverities).toContainText('Low');
+            await expect(userFlyout.alertsInsightsToolAlertSeverities).toContainText('Low');
           }
         );
       }
     );
 
-    spaceTest('header opens the host as a child flyout', async ({ pageObjects }) => {
-      const { alertsTablePage, hostFlyout } = pageObjects;
+    spaceTest('header opens the user as a child flyout', async ({ pageObjects }) => {
+      const { alertsTablePage, userFlyout } = pageObjects;
       await alertsTablePage.navigate();
       await alertsTablePage.waitForRuleAlert(ruleName);
-      await alertsTablePage.clickHostNameCell(HOST_NAME);
-      await hostFlyout.waitForHostFlyout();
-      await hostFlyout.openAlertsInsightTool();
+      await alertsTablePage.clickUserNameCell(USER_NAME);
+      await userFlyout.waitForUserFlyout();
+      await userFlyout.openAlertsInsightTool();
 
-      // The tool header's source context targets the host, and only the originating host flyout
+      // The tool header's source context targets the user, and only the originating user flyout
       // exists (mounted behind the tool) at this point.
-      await expect(hostFlyout.toolsFlyoutTitle).toContainText(HOST_NAME);
-      await expect(hostFlyout.header).toHaveCount(1);
+      await expect(userFlyout.toolsFlyoutTitle).toContainText(USER_NAME);
+      await expect(userFlyout.header).toHaveCount(1);
 
-      // Clicking it opens a second host flyout for the same host as a stacked child.
-      await hostFlyout.toolsFlyoutTitle.click();
-      await expect(hostFlyout.header).toHaveCount(2);
-      await expect(hostFlyout.title.filter({ hasText: HOST_NAME })).toHaveCount(2);
+      // Clicking it opens a second user flyout for the same user as a stacked child.
+      await userFlyout.toolsFlyoutTitle.click();
+      await expect(userFlyout.header).toHaveCount(2);
+      await expect(userFlyout.title.filter({ hasText: USER_NAME })).toHaveCount(2);
     });
 
     spaceTest(
       'expanding an alert row opens the document flyout for that rule',
       async ({ pageObjects }) => {
-        const { alertsTablePage, hostFlyout, documentFlyout } = pageObjects;
+        const { alertsTablePage, userFlyout, documentFlyout } = pageObjects;
         await alertsTablePage.navigate();
         await alertsTablePage.waitForRuleAlert(ruleName);
-        await alertsTablePage.clickHostNameCell(HOST_NAME);
-        await hostFlyout.waitForHostFlyout();
-        await hostFlyout.openAlertsInsightTool();
+        await alertsTablePage.clickUserNameCell(USER_NAME);
+        await userFlyout.waitForUserFlyout();
+        await userFlyout.openAlertsInsightTool();
 
-        await expect(hostFlyout.alertsInsightsToolTable).toBeVisible();
-        await hostFlyout.alertsInsightsToolExpandRow(ruleName).click();
+        await expect(userFlyout.alertsInsightsToolTable).toBeVisible();
+        await userFlyout.alertsInsightsToolExpandRow(ruleName).click();
 
         // The row's expand control opens that alert's document flyout (a full alert flyout, not the
         // child-wrapped variant), titled with the rule name.

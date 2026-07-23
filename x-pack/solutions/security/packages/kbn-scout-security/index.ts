@@ -14,6 +14,7 @@ export { PREVALENCE_SOURCE_IP } from './src/playwright/fixtures/worker/apis/prev
 export { ANALYZER_ORIGIN_PROCESS_NAME } from './src/playwright/fixtures/worker/apis/analyzer';
 export { NETWORK_SOURCE_IP } from './src/playwright/fixtures/worker/apis/network';
 export { HOST_NAME } from './src/playwright/fixtures/worker/apis/host';
+export { USER_HOST_ID, USER_NAME } from './src/playwright/fixtures/worker/apis/user';
 export { THREAT_FEED_NAME } from './src/playwright/fixtures/worker/apis/threat_intelligence';
 export {
   CURRENT_USER_PROFILE_API_PATH,

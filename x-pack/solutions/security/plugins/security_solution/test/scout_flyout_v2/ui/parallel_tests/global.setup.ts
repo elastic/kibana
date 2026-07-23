@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { globalSetupHook } from '@kbn/scout-security';
-import { archives } from '@kbn/scout-security/src/playwright/constants';
+import { globalSetupHook, SECURITY_ARCHIVES } from '@kbn/scout-security';
 
 globalSetupHook('Ingest archives to Elasticsearch', async ({ esArchiver, log }) => {
-  const archivesToIngest = [archives.ES.AUDITBEAT];
+  const archivesToIngest = [SECURITY_ARCHIVES.AUDITBEAT];
 
   log.debug('[setup] loading archives test data (only if indexes do not exist)...');
   for (const archive of archivesToIngest) {

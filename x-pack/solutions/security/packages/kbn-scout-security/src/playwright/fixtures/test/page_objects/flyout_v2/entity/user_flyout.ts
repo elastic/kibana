@@ -8,34 +8,31 @@
 import type { ScoutPage, Locator } from '@kbn/scout';
 
 /**
- * Page object for the flyout_v2 host entity flyout, opened via `services.overlays.openSystemFlyout`
- * from a `host.name` value (e.g. the alerts table host-details cell or the document flyout entities
+ * Page object for the flyout_v2 user entity flyout, opened via `services.overlays.openSystemFlyout`
+ * from a `user.name` value (e.g. the alerts table user-details cell or the document flyout entities
  * section).
  *
- * Covers the sections that render when the host is NOT in the entity store: the header, observed
- * data, footer actions, and the alerts insight tool. Entity-store-backed sections (risk summary,
- * asset criticality, risk-inputs tool, entity store tabs/visualizations) require seeding the entity
- * store and are out of scope here — see the deferred follow-up.
+ * Covers sections that render for any user (header, observed data, footer actions, alerts insight
+ * tool) as well as entity-store-backed sections (risk summary → risk inputs tool). Tests that
+ * require the entity store seed it per-space via `apiServices.entityAnalytics.installEntityStoreV2`.
  */
-export class HostFlyout {
+export class UserFlyout {
   /** Header container. */
   public readonly header: Locator;
-  /** Title text (the host name). Scoped to the header to disambiguate from a parent document flyout. */
+  /** Title text (the user name). Scoped to the header to disambiguate from a parent document flyout. */
   public readonly title: Locator;
-  /** First/last seen timestamp (only rendered when the host is not in the entity store). */
+  /** First/last seen timestamp (only rendered when the user is not in the entity store). */
   public readonly lastSeen: Locator;
-  /** "Host" entity-type badge. */
+  /** "User" entity-type badge. */
   public readonly entityTypeBadge: Locator;
   /** Entity source badge (observed vs entity store). */
   public readonly observedBadge: Locator;
   /** Observed-data accordion. */
   public readonly observedAccordion: Locator;
-  /** Entity insight accordion wrapping the CSP / alerts previews. */
-  public readonly entityInsight: Locator;
-  /** Link that opens the Alerts insight tool. */
-  public readonly alertsInsightLink: Locator;
   /** Take action button in the footer. */
   public readonly takeActionButton: Locator;
+  /** Link that opens the Alerts insight tool. */
+  public readonly alertsInsightLink: Locator;
   /** Root of the stacked Alerts insight tool flyout. */
   public readonly alertsInsightsTool: Locator;
   /** Alerts table rendered inside the Alerts insight tool. */
@@ -47,24 +44,24 @@ export class HostFlyout {
    */
   public readonly alertsInsightsToolAlertSeverities: Locator;
   /**
-   * Source-context title button in the tool header. For the alerts insight tool it shows the host
-   * name + storage icon and opens the host flyout when clicked.
+   * Source-context title button in the tool header. For the alerts insight tool it shows the user
+   * name + storage icon and opens the user flyout when clicked.
    */
   public readonly toolsFlyoutTitle: Locator;
   /** Button that opens the Risk Inputs tool (in the entity risk summary section). */
   public readonly riskInputsLink: Locator;
   /** Root of the stacked Risk Inputs tool flyout body. */
   public readonly riskInputsTool: Locator;
+
   constructor(page: ScoutPage) {
-    this.header = page.testSubj.locator('host-panel-header');
+    this.header = page.testSubj.locator('user-panel-header');
     this.title = this.header.locator('[data-test-subj="flyoutTitleText"]');
-    this.lastSeen = page.testSubj.locator('host-panel-header-lastSeen');
-    this.entityTypeBadge = page.testSubj.locator('host-panel-header-entity-type-badge');
-    this.observedBadge = page.testSubj.locator('host-panel-header-observed-badge');
+    this.lastSeen = page.testSubj.locator('user-panel-header-lastSeen');
+    this.entityTypeBadge = page.testSubj.locator('user-panel-header-entity-type-badge');
+    this.observedBadge = page.testSubj.locator('user-panel-header-observed-badge');
     this.observedAccordion = page.testSubj.locator('observedEntity-accordion');
-    this.entityInsight = page.testSubj.locator('entityInsightTestSubj');
-    this.alertsInsightLink = page.testSubj.locator('securitySolutionFlyoutInsightsAlertsTitleLink');
     this.takeActionButton = page.testSubj.locator('take-action-button');
+    this.alertsInsightLink = page.testSubj.locator('securitySolutionFlyoutInsightsAlertsTitleLink');
     this.alertsInsightsTool = page.testSubj.locator('alertsInsightsTool');
     this.alertsInsightsToolTable = page.testSubj.locator(
       'securitySolutionFlyoutAlertsFindingsTable'
@@ -77,8 +74,8 @@ export class HostFlyout {
     this.riskInputsTool = page.testSubj.locator('securitySolutionFlyoutRiskInputsTool');
   }
 
-  /** Wait for the host flyout to be visible and its header rendered. */
-  async waitForHostFlyout() {
+  /** Wait for the user flyout to be visible and its header rendered. */
+  async waitForUserFlyout() {
     await this.header.waitFor({ state: 'visible', timeout: 15_000 });
   }
 

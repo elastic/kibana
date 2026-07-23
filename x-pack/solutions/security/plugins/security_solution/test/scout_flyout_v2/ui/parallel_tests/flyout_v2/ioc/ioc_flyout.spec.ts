@@ -8,12 +8,10 @@
 /**
  * Scout UI tests for the flyout_v2 IOC (Indicator of Compromise) flyout.
  *
- * Entry path: Security → Threat Intelligence → Indicators table →
- *   click `tiToggleIndicatorFlyoutButton` → IOC flyout opens.
+ * Entry path: restore the IOC flyout from its persisted URL descriptor.
  *
- * The indicators table queries the global `logs-ti_*` pattern (not space-scoped), so each test
- * indexes a uniquely-named indicator and filters the table down to it via the KQL search bar
- * before opening the flyout, keeping assertions deterministic across parallel workers.
+ * Each test indexes a uniquely-named indicator into the worker's index and restores it by exact
+ * document ID and index, keeping assertions deterministic across parallel workers.
  *
  * Tagged `stateful.classic` only, since the Threat Intelligence page is not available in all
  * serverless security configurations.
@@ -22,17 +20,14 @@
 import { spaceTest, tags } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/ui';
 
-// FIXME: Quarantined — the Threat Intelligence indicators page intermittently never mounts (it
-// hangs on the initial loading spinner, so neither the table nor the empty-state ever renders),
-// which is an app-side initial-load issue rather than a test problem. Re-enable once the page
-// reliably mounts.
-spaceTest.describe.skip('IOC flyout v2', { tag: [...tags.stateful.classic] }, () => {
+spaceTest.describe('IOC flyout v2', { tag: [...tags.stateful.classic] }, () => {
+  let indicatorId: string;
+  let indicatorIndex: string;
   let indicatorName: string;
 
   spaceTest.beforeEach(async ({ browserAuth, apiServices, scoutSpace }) => {
-    ({ indicatorName } = await apiServices.threatIntelligence.createFileIndicatorFixture(
-      scoutSpace.id
-    ));
+    ({ indicatorId, indicatorIndex, indicatorName } =
+      await apiServices.threatIntelligence.createFileIndicatorFixture(scoutSpace.id));
     await browserAuth.loginAsPlatformEngineer();
   });
 
@@ -43,9 +38,7 @@ spaceTest.describe.skip('IOC flyout v2', { tag: [...tags.stateful.classic] }, ()
   spaceTest(
     'navigates between the Overview, Table and JSON tabs and the "View all fields in table" shortcut',
     async ({ pageObjects }) => {
-      await pageObjects.threatIntelligenceIndicatorsPage.navigate();
-      await pageObjects.threatIntelligenceIndicatorsPage.openFlyoutForIndicator(indicatorName);
-      await pageObjects.iocFlyout.waitForFlyout();
+      await pageObjects.iocFlyout.openForIndicator({ indicatorId, indicatorIndex });
 
       await spaceTest.step('Overview tab shows the highlighted fields table', async () => {
         await expect(pageObjects.iocFlyout.overviewTable).toBeVisible();
@@ -94,9 +87,7 @@ spaceTest.describe.skip('IOC flyout v2', { tag: [...tags.stateful.classic] }, ()
   spaceTest(
     'the take action menu lists every action and Investigate in Timeline opens the timeline',
     async ({ pageObjects }) => {
-      await pageObjects.threatIntelligenceIndicatorsPage.navigate();
-      await pageObjects.threatIntelligenceIndicatorsPage.openFlyoutForIndicator(indicatorName);
-      await pageObjects.iocFlyout.waitForFlyout();
+      await pageObjects.iocFlyout.openForIndicator({ indicatorId, indicatorIndex });
 
       await spaceTest.step('the take action menu lists the expected items', async () => {
         await pageObjects.iocFlyout.openTakeActionMenu();
@@ -116,9 +107,7 @@ spaceTest.describe.skip('IOC flyout v2', { tag: [...tags.stateful.classic] }, ()
   spaceTest(
     'take action → Add to block list opens the block list creation flyout',
     async ({ pageObjects }) => {
-      await pageObjects.threatIntelligenceIndicatorsPage.navigate();
-      await pageObjects.threatIntelligenceIndicatorsPage.openFlyoutForIndicator(indicatorName);
-      await pageObjects.iocFlyout.waitForFlyout();
+      await pageObjects.iocFlyout.openForIndicator({ indicatorId, indicatorIndex });
 
       await pageObjects.iocFlyout.openTakeActionMenu();
       await pageObjects.iocFlyout.addToBlockListItem.click();
@@ -132,9 +121,7 @@ spaceTest.describe.skip('IOC flyout v2', { tag: [...tags.stateful.classic] }, ()
   spaceTest(
     'take action → Add to case opens the existing-case modal and the new-case flyout',
     async ({ pageObjects, page }) => {
-      await pageObjects.threatIntelligenceIndicatorsPage.navigate();
-      await pageObjects.threatIntelligenceIndicatorsPage.openFlyoutForIndicator(indicatorName);
-      await pageObjects.iocFlyout.waitForFlyout();
+      await pageObjects.iocFlyout.openForIndicator({ indicatorId, indicatorIndex });
 
       await spaceTest.step('Add to existing case opens the select-case modal', async () => {
         await pageObjects.iocFlyout.openTakeActionMenu();

@@ -24,6 +24,7 @@ import {
   getAnalyzerApiService,
   getNetworkApiService,
   getHostApiService,
+  getUserApiService,
   getResponseActionsApiService,
 } from './worker';
 import { extendPageObjects, securityBrowserAuthFixture } from './test';
@@ -108,8 +109,13 @@ export const test = securityFixtures.extend<SecurityTestFixtures, SecurityWorker
         esClient,
         log,
       });
+      extendedApiServices.user = getUserApiService({
+        esClient,
+        log,
+      });
       extendedApiServices.responseActions = getResponseActionsApiService({
         esClient,
+        kbnClient,
         log,
       });
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EsClient, ScoutLogger, ScoutParallelWorkerFixtures } from '@kbn/scout';
+import type { EsClient, KbnClient, ScoutLogger, ScoutParallelWorkerFixtures } from '@kbn/scout';
 import { measurePerformanceAsync } from '@kbn/scout';
 
 // `.logs-endpoint.actions` is a Fleet-managed data stream. Its index template maps `type` and
@@ -34,14 +34,17 @@ export interface ResponseActionsApiService {
 
 export const getResponseActionsApiService = ({
   esClient,
+  kbnClient,
   log,
   scoutSpace,
 }: {
   esClient: EsClient;
+  kbnClient: KbnClient;
   log: ScoutLogger;
   scoutSpace?: ScoutParallelWorkerFixtures['scoutSpace'];
 }): ResponseActionsApiService => {
   const space = scoutSpace?.id ? scoutSpace.id : 'default';
+  const basePath = scoutSpace?.id ? `/s/${scoutSpace.id}` : '';
 
   const service: ResponseActionsApiService = {
     seedAutomatedEndpointAction: async ({ alertId, ruleName }) => {
@@ -49,6 +52,36 @@ export const getResponseActionsApiService = ({
         log,
         'security.responseActions.seedAutomatedEndpointAction',
         async () => {
+          await kbnClient.request({
+            method: 'POST',
+            path: `${basePath}/api/security_solution/initialize`,
+            body: { flows: ['init-endpoint-protection'] },
+          });
+
+          const actionDataStreamExists = await esClient.indices.exists(
+            { index: ENDPOINT_ACTIONS_INDEX },
+            FLEET_HEADERS
+          );
+          if (!actionDataStreamExists) {
+            await esClient.indices.createDataStream(
+              { name: ENDPOINT_ACTIONS_INDEX },
+              FLEET_HEADERS
+            );
+          }
+          // The Endpoint plugin normally adds these mappings during startup when the data stream
+          // already exists. Scout creates it after startup, so configure the fields before the
+          // first document is indexed rather than letting dynamic mapping turn them into text.
+          await esClient.indices.putMapping(
+            {
+              index: ENDPOINT_ACTIONS_INDEX,
+              properties: {
+                originSpaceId: { type: 'keyword', ignore_above: 1024 },
+                tags: { type: 'keyword', ignore_above: 1024 },
+              },
+            },
+            FLEET_HEADERS
+          );
+
           const actionId = `scout-response-action-${space}-${Date.now()}`;
           const agentId = `scout-response-agent-${space}`;
           const hostName = `scout-response-host-${space}`;

@@ -14,7 +14,8 @@ spaceTest.describe(
   () => {
     let ruleName: string;
 
-    spaceTest.beforeEach(async ({ browserAuth, apiServices, scoutSpace }) => {
+    spaceTest.beforeEach(async ({ browserAuth, apiServices, scoutSpace }, testInfo) => {
+      testInfo.setTimeout(testInfo.timeout + 120_000);
       ruleName = `${CUSTOM_QUERY_RULE.name}_${scoutSpace.id}_${Date.now()}`;
       await apiServices.detectionRule.createCustomQueryRule({
         ...CUSTOM_QUERY_RULE,
@@ -32,7 +33,7 @@ spaceTest.describe(
       await apiServices.responseActions.cleanupResponseActions();
     });
 
-    spaceTest.skip(
+    spaceTest(
       'renders an automated endpoint response action result for the alert',
       async ({ pageObjects, apiServices }) => {
         // Link a seeded automated endpoint action to this rule's alert so the response section has

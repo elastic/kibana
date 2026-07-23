@@ -7,6 +7,9 @@
 
 import type { ScoutPage, Locator } from '@kbn/scout';
 import { KibanaCodeEditorWrapper } from '@kbn/scout';
+import { encode } from '@kbn/rison';
+
+const ALERTS_PAGE_URL = 'security/alerts';
 
 /**
  * Page object for the flyout_v2 IOC (Indicator of Compromise) flyout, opened from the
@@ -62,7 +65,7 @@ export class IOCFlyout {
   /** Wraps the Monaco editor that backs the JSON tab; reads its full model value. */
   private readonly codeEditor: KibanaCodeEditorWrapper;
 
-  constructor(page: ScoutPage) {
+  constructor(private readonly page: ScoutPage) {
     this.codeEditor = new KibanaCodeEditorWrapper(page);
     this.title = page.testSubj.locator('securitySolutionFlyoutIOCDetailsTitleText');
     this.subtitle = page.testSubj.locator('securitySolutionFlyoutIOCDetailsSubtitle');
@@ -93,6 +96,22 @@ export class IOCFlyout {
     this.blocklistFormNameInput = page.testSubj.locator('blocklist-form-name-input');
     this.allCasesModal = page.testSubj.locator('all-cases-modal');
     this.createCaseSubmit = page.testSubj.locator('create-case-submit');
+  }
+
+  /** Restore the IOC flyout from URL state without depending on the indicators landing page. */
+  async openForIndicator({
+    indicatorId,
+    indicatorIndex,
+  }: {
+    indicatorId: string;
+    indicatorIndex: string;
+  }) {
+    await this.page.gotoApp(ALERTS_PAGE_URL, {
+      params: {
+        flyoutV2: encode([{ kind: 'ioc', indicatorId, indicatorIndex }]),
+      },
+    });
+    await this.waitForFlyout();
   }
 
   /** Wait for the flyout to be visible and its title rendered. */

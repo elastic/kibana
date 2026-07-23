@@ -18,6 +18,8 @@ export interface FileIndicatorFixture {
   indicatorIndex: string;
   /** Unique indicator name (also the file sha256); use it to filter the indicators table. */
   indicatorName: string;
+  /** Elasticsearch document ID used to restore the IOC flyout directly from URL state. */
+  indicatorId: string;
 }
 
 // Index the source event is written to (a plain index, not part of the threat pattern).
@@ -42,7 +44,10 @@ export interface ThreatIntelligenceApiService {
    *
    * The index should match `logs-ti_*` (the default threat index pattern).
    */
-  indexFileIndicator: (options: { index: string; sha256: string }) => Promise<void>;
+  indexFileIndicator: (options: {
+    index: string;
+    sha256: string;
+  }) => Promise<{ indicatorId: string }>;
   /**
    * Deletes one or more indices, ignoring missing ones. Use in teardown to clean up
    * test-only indices created by the methods above.
@@ -93,7 +98,7 @@ export const getThreatIntelligenceApiService = ({
     },
 
     indexFileIndicator: async ({ index, sha256 }) => {
-      await measurePerformanceAsync(
+      return measurePerformanceAsync(
         log,
         'security.threatIntelligence.indexFileIndicator',
         async () => {
@@ -135,6 +140,8 @@ export const getThreatIntelligenceApiService = ({
               `Failed to index threat indicator "${sha256}" into "${index}": unexpected index result "${indexResponse.result}"`
             );
           }
+
+          return { indicatorId: indexResponse._id };
         }
       );
     },
@@ -159,9 +166,12 @@ export const getThreatIntelligenceApiService = ({
       // Delete before creating so stale documents from a crashed prior run don't accumulate.
       await service.deleteIndices([sourceIndex, indicatorIndex]);
       await service.indexSourceEvent({ index: sourceIndex, sha256: indicatorName });
-      await service.indexFileIndicator({ index: indicatorIndex, sha256: indicatorName });
+      const { indicatorId } = await service.indexFileIndicator({
+        index: indicatorIndex,
+        sha256: indicatorName,
+      });
 
-      return { sourceIndex, indicatorIndex, indicatorName };
+      return { sourceIndex, indicatorIndex, indicatorName, indicatorId };
     },
 
     cleanupFileIndicatorFixture: async (spaceId) => {

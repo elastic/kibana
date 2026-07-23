@@ -131,6 +131,29 @@ export class AlertsTablePage {
     await hostCell.click();
   }
 
+  async clickUserNameCell(userName: string) {
+    await this.alertsTable.waitFor({ state: 'visible' });
+    // `user.name` renders one clickable cell per alert row; scope to the first data row.
+    const userCell = this.alertsTable
+      .locator('[data-gridcell-row-index="0"]')
+      .getByTestId('users-link-anchor')
+      .filter({ hasText: userName });
+    // `user.name` sits mid-grid and EUI horizontally virtualizes columns, so the cell isn't mounted
+    // until scrolled into view. Scroll the virtualized body right in steps until it mounts.
+    const virtualized = this.alertsTable.locator('.euiDataGrid__virtualized');
+    await expect
+      .poll(
+        async () => {
+          if ((await userCell.count()) > 0) return true;
+          await virtualized.evaluate((el) => el.scrollBy({ left: 500 }));
+          return false;
+        },
+        { timeout: 20_000, intervals: [250] }
+      )
+      .toBe(true);
+    await userCell.click();
+  }
+
   async waitForDetectionsAlertsWrapper() {
     // Increased timeout to 20 seconds because this page sometimes takes longer to load
     return this.detectionsAlertsWrapper.waitFor({ state: 'visible', timeout: 20_000 });
