@@ -29,7 +29,7 @@ import {
   snapshotCatalogKey,
   snapshotSourceKey,
 } from '../../src/datasets';
-import { buildAvailableSnapshotsBySource } from '../shared';
+import { buildAvailableSnapshotsBySource } from '../../src/data_generators/available_snapshots';
 import type { DiscoveryJudgeScenario } from '../../src/datasets';
 import { createJudgeEvaluators } from '../../src/evaluators/discovery';
 import { extractSignificantEventsFromToolCall } from '../../src/evaluators/discovery/utils/parse_agent_output';

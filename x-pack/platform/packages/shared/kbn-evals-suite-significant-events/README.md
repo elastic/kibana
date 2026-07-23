@@ -1,6 +1,6 @@
 # Significant Events Evaluations
 
-Evaluations for Significant Events, covering the individual LLM-based pipeline stages (Knowledge Indicator feature extraction, KI query generation, KI feature exclusion/deduplication, discovery, judge) plus an opt-in end-to-end run from replayed logs to raised significant events.
+Evaluations for Significant Events, covering the individual LLM-based pipeline stages: Knowledge Indicator (KI) feature extraction, KI query generation, KI feature exclusion/deduplication, discovery, and judge. For the full end-to-end replay evals (logs all the way to raised significant events), see the sibling suite [`@kbn/evals-suite-significant-events-live`](../kbn-evals-suite-significant-events-live/README.md), which builds on the infrastructure exported by this package.
 These evaluations support both qualitative (LLM-as-a-judge + deterministic CODE evaluators) and quantitative (trace-based) metrics.
 
 For general information about writing evaluation tests, configuration, and usage, see the main [`@kbn/evals` documentation](../kbn-evals/README.md).
@@ -15,103 +15,6 @@ For general information about writing evaluation tests, configuration, and usage
 | **KI feature deduplication** | `ki_feature_deduplication/ki_feature_deduplication.spec.ts` | Are KIs stable and semantically unique across independent runs and iterative dedup loops? |
 | **Discovery agent**          | `discovery/discovery.spec.ts`                               | Does the discovery agent group detections into correct, evidence-backed discoveries (incl. continuation over time)? |
 | **Discovery judge**          | `discovery/judge.spec.ts`                                   | Does the judge promote real incidents to open events and dismiss benign noise?            |
-| **End-to-end pipeline**      | `e2e/e2e.spec.ts`                                           | Opt-in (`SIGEVENTS_E2E=true`): full funnel from replayed logs to raised significant events, scored per stage. |
-| **Live end-to-end pipeline** | `e2e_live/e2e_live.spec.ts`                                 | Opt-in (`SIGEVENTS_E2E_LIVE=true`): the same funnel with NO shortcuts — LLM onboarding, real alerting rules over a streamed incident tail, and the real orchestrator. |
-
-## End-to-end pipeline eval
-
-> **Warning — destructive: run these e2e specs against a dedicated eval cluster only.**
-> Between scenarios they wipe ALL documents from the live pipeline data streams (`.rule-events`,
-> `.significant_events-detections/-discoveries/-events`, and the knowledge-indicators stream),
-> delete the managed `logs` stream, and the live spec additionally deletes **every alerting v2
-> rule in the space** (`_delete_by_query` with `match_all`) and overrides the significant-events
-> inference feature settings for the duration of the run. Anything a shared cluster has in those
-> stores is lost.
-
-`evals/e2e/e2e.spec.ts` chains every pipeline stage against the live product instead of testing stages in isolation:
-
-```
-replay logs (timestamps shifted to now)
-  -> seed KIs (snapshot features + canonical rule-backed queries with synthetic rule ids)
-  -> synthesize `.rule-events` signals (bucketed ES|QL per canonical query)
-  -> execute the `system-significant-events-detection` managed workflow (real change-point scan)
-  -> discovery agent via /converse over the detections the workflow actually produced
-  -> execute the `system-significant-events-triage` managed workflow (judge writes events)
-  -> score `.significant_events-events`
-```
-
-Design notes:
-
-- No Alerting rules are installed and no real-time waiting happens: the change-point scan only reads rule-backed KI query links and `.rule-events` signals, both of which the spec seeds. Canonical queries all sit in the critical severity band so the scan honours the lookback/bucket-interval the spec sizes to the replayed window.
-- Discoveries written by the agent's `discovery_write` tool persist to the live discoveries stream, which is exactly what triage picks up — the discovery-to-judge handoff is the real product path.
-- Pipeline data streams (`.rule-events`, `.significant_events-detections/-discoveries/-events`, KI stream) are wiped per scenario, and scenarios run serially.
-- Datasets: bank-of-anthos only for now (`ledger-db-disconnect` checks recall — the cascade must end as an open event; `healthy-baseline` checks precision — no open events allowed).
-
-Checkpoint scoring (`src/evaluators/e2e/`):
-
-- `detection_match` (CODE): per-rule F1 of produced detections vs `expected_detection_rule_uuids`, with an allowlist for benign volume rules.
-- Discovery-stage evaluators reused from `src/evaluators/discovery/` (grouping correctness, evidence collection, tool usage, ES|QL grounding, calibration).
-- `event_outcome` (CODE): F1 over expected events — recall on expected entries (matched by underlying discovery rule_uuids + acceptable status), precision on unjustified `open` events.
-- `funnel_completion` (CODE): fraction of stages (signals, detections, discoveries, events) that produced their expected output — a single trend metric for dashboards.
-- `scenario_criteria` (LLM): scenario criteria judged over the full funnel output.
-
-Run it with:
-
-```bash
-SIGEVENTS_E2E=true SIGEVENTS_DATASET=bank-of-anthos node scripts/evals run \
-  --suite significant-events \
-  --project <connector-id> \
-  --judge <gemini-3-pro-connector-id> \
-  e2e.spec.ts
-```
-
-## Live end-to-end pipeline eval
-
-`evals/e2e_live/e2e_live.spec.ts` removes every shortcut the seeded spec takes. Nothing is
-seeded and nothing is synthesized — the product does all the work:
-
-```
-replay ONLY the pre-incident baseline (shifted to end at ~now)
-  -> run the real onboarding workflow: LLM feature extraction + query generation, then _promote
-     (real alerting rules installed for every eligible generated query)
-  -> stream the incident tail at 1x wall clock; the installed rules fire naturally and write
-     real signals into `.rule-events`
-  -> trigger the orchestrator (detect -> discover -> triage) and poll it to completion
-  -> collect detections, discoveries, events, and the discovery/judge agent conversations
-     (fetched from the Agent Builder API for trajectory scoring)
-```
-
-How it differs from the seeded spec:
-
-| | `e2e.spec.ts` (seeded) | `e2e_live.spec.ts` (live) |
-| --- | --- | --- |
-| Queries | Canonical, seeded as KI docs | LLM-generated by real onboarding |
-| Signals | Synthesized from bucketed ES\|QL | Real rule executions over a streamed tail |
-| Detection | Real workflow, manually executed | Real workflow via the orchestrator |
-| Discovery | Agent via `/converse` | Real discovery workflow (conversation fetched afterwards) |
-| Judge | Standalone triage workflow | Real triage via the orchestrator |
-| Deterministic scoring | uuid-based F1 per checkpoint | Count/status funnel + open-event outcome (no uuid catalog exists) |
-| Model | Agents on suite connectors | ALL four LLM stages pinned to the evaluated `--model` connector |
-| Wall clock | Minutes per scenario | ~30-45 minutes per scenario (onboarding + 1x tail streaming + orchestrator) |
-| Determinism | High (regression signal) | Low by design — measures the real product experience |
-
-Notes and known properties:
-
-- Real alerting rules only evaluate `(now - lookback, now]` (2m for critical-band rules, 10m otherwise) — there is no backfill. That is why the incident tail must be streamed in real time; generated queries below the critical severity band (60-79) run on a 5m cadence and may not accumulate enough change-point buckets within a short tail. This is a real product property, not an eval bug.
-- Per-scenario `live` config lives in the dataset (`incident_onset_offset_minutes`, `max_tail_minutes`, live criteria) — see [src/datasets/bank_of_anthos/e2e.ts](src/datasets/bank_of_anthos/e2e.ts). Captured snapshots are SHORT (~3 min healthy + ~5 min failure, so 10-20 min total): the onset offset must leave real baseline data before the cut (the replay fails fast when <5% of docs land in the baseline), and `max_tail_minutes` must be >= the offset or the end of the snapshot — where the incident lives — is dropped from the stream (the streamer warns loudly).
-- Onboarding variance is the point: on a bad run the generated queries never cover the incident signatures and the funnel shows the drop at the signals/detections stage.
-- The generic trace-based token/latency evaluators are NOT attached in live mode: the LLM calls happen inside server-side workflow executions whose spans carry Kibana's trace ids, not the eval's, so trace queries always come back empty. Cost/latency is scored deterministically instead by the `live_*` usage evaluators — onboarding tokens from the workflow status payload, discovery/judge tokens and LLM-call counts from conversation `model_usage`, tool calls from the fetched conversation steps, and wall-clock stage durations.
-- Manual/local runs only; not part of any CI schedule.
-
-Run it with:
-
-```bash
-SIGEVENTS_E2E_LIVE=true SIGEVENTS_DATASET=bank-of-anthos node scripts/evals run \
-  --suite significant-events \
-  --project <connector-id> \
-  --judge <gemini-3-pro-connector-id> \
-  e2e_live.spec.ts
-```
 
 ## Prerequisites
 
@@ -246,8 +149,6 @@ node scripts/evals run \
 | `KI_QUERY_GENERATION_KI_FEATURE_SOURCE` | KI feature source for KI query generation (`canonical`, `snapshot`, `both`) | `both`                     |
 | `GCS_CREDENTIALS`                       | GCS service account JSON for snapshot access                                | —                          |
 | `SIGEVENTS_TRUST_UPSTREAM`              | When `true`, use dataset examples from the golden cluster instead of upserting from code | `false`                    |
-| `SIGEVENTS_E2E`                         | When `true`, run the end-to-end pipeline spec (`e2e/e2e.spec.ts`); skipped otherwise | `false`                    |
-| `SIGEVENTS_E2E_LIVE`                    | When `true`, run the LIVE end-to-end pipeline spec (`e2e_live/e2e_live.spec.ts`, ~30-45 min per scenario); skipped otherwise | `false`                    |
 | `TRACING_ES_URL`                        | Elasticsearch URL for trace queries (if traces are in a separate cluster)   | Falls back to test cluster |
 | `TRACING_ES_API_KEY`                    | API key for the trace Elasticsearch cluster                                 | —                          |
 
@@ -266,11 +167,6 @@ node scripts/evals run \
 | **filter_grounding**                   | KI feature extraction    | Entity filter equality pairs are grounded in input sample documents                       |
 | **ki_query_generation_code_evaluator** | KI query generation      | ES\|QL syntax validity, category/severity compliance, and execution hit rate              |
 | **tool_usage_validation**              | KI query generation      | Validates `get_stream_features` and `add_queries` tool calls were invoked correctly       |
-| **detection_match**                    | End-to-end pipeline      | Per-rule F1 of change-point detections vs the expected/allowed rule sets                  |
-| **event_outcome**                      | End-to-end pipeline      | F1 over expected significant events (status + underlying discovery) and unjustified opens |
-| **funnel_completion**                  | End-to-end pipeline      | Fraction of pipeline stages (signals, detections, discoveries, events) that passed        |
-| **live_funnel_completion**             | Live end-to-end pipeline | Count/status funnel: onboarding, signals, detections, discoveries, events (no uuid catalog) |
-| **live_event_outcome**                 | Live end-to-end pipeline | Binary final outcome: incident must end with an open event, baseline must end with none   |
 
 ### LLM-as-a-judge evaluators
 

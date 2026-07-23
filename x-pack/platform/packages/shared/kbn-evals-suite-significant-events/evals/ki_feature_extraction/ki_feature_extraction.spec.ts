@@ -25,7 +25,7 @@ import {
   snapshotCatalogKey,
   type KIFeatureExtractionScenario,
 } from '../../src/datasets';
-import { buildAvailableSnapshotsBySource } from '../shared';
+import { buildAvailableSnapshotsBySource } from '../../src/data_generators/available_snapshots';
 import { collectSampleDocuments } from './collect_sample_documents';
 
 const TRUST_UPSTREAM = process.env.SIGEVENTS_TRUST_UPSTREAM === 'true';

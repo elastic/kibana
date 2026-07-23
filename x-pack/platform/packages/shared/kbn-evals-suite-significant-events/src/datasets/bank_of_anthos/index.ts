@@ -14,7 +14,6 @@ import type { DatasetConfig } from '../types';
 import { kiFeatureExtraction, kiFeatureDeduplication, kiFeatureExclusion } from './ki_features';
 import { kiQueryGeneration } from './ki_queries';
 import { discovery, discoveryJudge } from './discovery';
-import { e2e } from './e2e';
 
 export const bankOfAnthosDataset: DatasetConfig = {
   id: BANK_OF_ANTHOS_NAMESPACE,
@@ -26,5 +25,4 @@ export const bankOfAnthosDataset: DatasetConfig = {
   discovery,
   discoveryJudge,
   kiQueryGeneration,
-  e2e,
 };

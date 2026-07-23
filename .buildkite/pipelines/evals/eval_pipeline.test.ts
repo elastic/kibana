@@ -38,6 +38,13 @@ const SUITES = {
       configPath: 'x-pack/smoke-tests/playwright.config.ts',
       defaultModelGroups: ['eis/anthropic-claude-4.5-haiku'],
     },
+    {
+      id: 'slow-suite',
+      name: 'Slow Suite',
+      ciLabels: ['evals:slow-suite'],
+      configPath: 'x-pack/slow-suite/playwright.config.ts',
+      manualOnly: true,
+    },
   ],
 };
 
@@ -90,6 +97,19 @@ describe('eval_pipeline', () => {
 
     it('does not trigger when the only model label is dropped by forwarding (gate parity)', () => {
       expect(getEvalTriggerStep('evals:agent-builder,models:gpt 5')).toBeNull();
+    });
+
+    it('excludes manual-only suites from `evals:all`', () => {
+      const yaml = getEvalPipeline('evals:all,models:eis/openai-gpt-5.4') as string;
+
+      expect(yaml).toContain('Evals: Agent Builder');
+      expect(yaml).not.toContain('Evals: Slow Suite');
+    });
+
+    it('runs a manual-only suite when its own label is applied explicitly', () => {
+      const yaml = getEvalPipeline('evals:slow-suite,models:eis/openai-gpt-5.4') as string;
+
+      expect(yaml).toContain('Evals: Slow Suite');
     });
   });
 

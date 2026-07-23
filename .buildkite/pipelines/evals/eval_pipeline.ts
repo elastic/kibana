@@ -21,6 +21,12 @@ export interface EvalsSuiteMetadataEntry {
   serverConfigSet?: string;
   weeklyEisModelGroups?: string[];
   defaultModelGroups?: string[] | null;
+  /**
+   * Suites that only run when their own label is applied explicitly (e.g. long-running or
+   * destructive suites). `evals:all` skips them; the weekly pipeline never sees them since its
+   * suite steps are hardcoded in llm_evals.yml.
+   */
+  manualOnly?: boolean;
 }
 
 function pathExistsInGitTree(repoRelativePath: string): boolean {
@@ -240,7 +246,7 @@ function resolveEvalSelection(githubPrLabels: string): EvalSelection | null {
   const evalSuites = readEvalsSuiteMetadata();
   const runAllEvals = parsedLabels.includes('evals:all');
   const selectedEvalSuites = runAllEvals
-    ? evalSuites
+    ? evalSuites.filter((suite) => !suite.manualOnly)
     : evalSuites.filter((suite) => {
         const labels = suite.ciLabels?.length ? suite.ciLabels : [`evals:${suite.id}`];
         return labels.some((label) => parsedLabels.includes(label));

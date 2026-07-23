@@ -7154,6 +7154,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/evals-suite-significant-events-live@link:x-pack/platform/packages/shared/kbn-evals-suite-significant-events-live":
+  version "0.0.0"
+  uid ""
+
 "@kbn/evals-suite-significant-events@link:x-pack/platform/packages/shared/kbn-evals-suite-significant-events":
   version "0.0.0"
   uid ""

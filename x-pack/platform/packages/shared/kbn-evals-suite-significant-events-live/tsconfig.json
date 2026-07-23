@@ -1,0 +1,23 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": ["jest", "node", "@kbn/ambient-common-types"]
+  },
+  "include": ["**/*.ts"],
+  "exclude": ["target/**/*"],
+  "kbn_references": [
+    "@kbn/evals",
+    "@kbn/evals-phoenix-executor",
+    "@kbn/evals-suite-significant-events",
+    "@kbn/tooling-log",
+    "@kbn/scout",
+    "@kbn/significant-events-schema",
+    "@kbn/significant-events-plugin",
+    "@kbn/kibana-api-cli",
+    "@kbn/dev-cli-runner",
+    "@kbn/core",
+    "@kbn/es-snapshot-loader",
+    "@kbn/test",
+  ]
+}

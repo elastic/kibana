@@ -110,10 +110,6 @@ export type {
   KIFeatureDeduplicationScenario,
   DiscoveryScenario,
   DiscoveryJudgeScenario,
-  E2ECanonicalQuery,
-  E2EExpectedEvent,
-  E2ELiveConfig,
-  E2EScenario,
   SamplingCriterion,
   SnapshotSourceOverride,
 } from './types';

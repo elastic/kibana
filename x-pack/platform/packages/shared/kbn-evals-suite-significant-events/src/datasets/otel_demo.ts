@@ -13,7 +13,6 @@ export const otelDemoDataset: DatasetConfig = {
   id: OTEL_DEMO_NAMESPACE,
   description: 'OpenTelemetry Demo microservices application',
   gcs: { bucket: GCS_BUCKET, basePathPrefix: OTEL_DEMO_GCS_BASE_PATH_PREFIX },
-  e2e: [],
   kiFeatureExtraction: [
     {
       input: {
