@@ -7,6 +7,8 @@
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
+import { SML_DASHBOARD_INGESTION_WORKFLOW_ID } from '@kbn/workflows/managed';
+import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type {
   AgentBuilderSmlPluginSetup,
   AgentBuilderSmlPluginStart,
@@ -24,6 +26,8 @@ import {
 import { resolveSmlAttachItems } from './services/sml/execute_sml_attach_items';
 import type { SmlService } from './services/sml/types';
 import { buildIndexAttachment, buildDeleteAttachment } from './start_contract';
+
+const AGENT_BUILDER_SML_PLUGIN_ID = 'agentBuilderSml';
 
 export class AgentBuilderSmlPlugin
   implements
@@ -49,6 +53,9 @@ export class AgentBuilderSmlPlugin
   ): AgentBuilderSmlPluginSetup {
     registerFeatures({ features: setupDeps.features });
     registerUISettings({ uiSettings: coreSetup.uiSettings });
+
+    // Own the managed workflows that ingest KIs (replacing the dashboard/visualization crawlers).
+    setupDeps.workflowsExtensions.registerManagedWorkflowOwner(AGENT_BUILDER_SML_PLUGIN_ID);
 
     const smlSetup = this.smlServiceInstance.setup({ logger: this.logger.get('sml') });
 
@@ -127,7 +134,9 @@ export class AgentBuilderSmlPlugin
         'visualizations, connectors, workflows, alerting rules, action policies, ' +
         'and significant events.',
       dest: { type: 'index', value: 'ai-index-idx-sml-data' },
-      automations: [],
+      // Declare the workflows that populate this ai-index (for association + a future UI).
+      // SML owns/installs these workflows itself (below); context_engine just records the ids.
+      automations: [{ type: 'workflow', value: SML_DASHBOARD_INGESTION_WORKFLOW_ID }],
       sources: [],
       index_config: {
         mappings: {
@@ -150,7 +159,7 @@ export class AgentBuilderSmlPlugin
 
   start(
     coreStart: CoreStart,
-    { taskManager, spaces, security }: AgentBuilderSmlStartDependencies
+    { taskManager, workflowsExtensions, spaces, security }: AgentBuilderSmlStartDependencies
   ): AgentBuilderSmlPluginStart {
     const { elasticsearch, savedObjects } = coreStart;
 
@@ -167,6 +176,16 @@ export class AgentBuilderSmlPlugin
       logger: this.logger.get('sml'),
     }).catch((error) => {
       this.logger.error(`Failed to schedule SML crawler tasks: ${error.message}`);
+    });
+
+    // Install the managed ingestion workflow(s). Fire-and-forget so a workflows outage
+    // never blocks plugin start (mirrors the crawler scheduling above).
+    this.installManagedWorkflows(workflowsExtensions).catch((error) => {
+      this.logger.warn(
+        `Failed to install SML ingestion workflows: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
     });
 
     const startContract: AgentBuilderSmlPluginStart = {
@@ -189,6 +208,21 @@ export class AgentBuilderSmlPlugin
     };
 
     return startContract;
+  }
+
+  private async installManagedWorkflows(
+    workflowsExtensions: AgentBuilderSmlStartDependencies['workflowsExtensions']
+  ): Promise<void> {
+    const client = await workflowsExtensions.initManagedWorkflowsClient(
+      AGENT_BUILDER_SML_PLUGIN_ID
+    );
+    // Installed globally: the workflow enumerates every space itself and runs under a
+    // privileged service-account identity (see the workflow definition's IDENTITY note).
+    await client.install(SML_DASHBOARD_INGESTION_WORKFLOW_ID, {
+      spaceId: GLOBAL_WORKFLOW_SPACE_ID,
+    });
+    await client.ready();
+    this.logger.get('sml').info('SML managed ingestion workflows installed');
   }
 
   stop() {}

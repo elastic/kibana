@@ -9,7 +9,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { AiIndexProperties } from '../../common/http_api/ai_indices';
 import type { AiIndexService } from './service';
-import { AiIndexNotFoundError, InvalidAiIndexDestError } from './errors';
+import { InvalidAiIndexDestError } from './errors';
 import { applyDls, applyIndexConfig } from './index_config';
 
 export class AiIndexRegistry {
@@ -72,24 +72,13 @@ export class AiIndexRegistry {
       await applyDls({ esClient, id, dest: properties.dest, dls, logger });
     }
 
+    // Reconcile the managed doc on every startup (putManaged is an idempotent upsert), so
+    // changes to the declared metadata — notably `automations` (the ids of the workflows that
+    // populate this ai-index) — persist across restarts rather than being frozen at first
+    // registration.
     try {
-      await aiIndexService.get(id);
-      logger.debug(`AI index '${id}' already registered — skipping doc write`);
-      return;
-    } catch (err) {
-      if (!(err instanceof AiIndexNotFoundError)) {
-        logger.warn(
-          `Failed to check AI index '${id}' registration status: ${
-            err instanceof Error ? err.message : String(err)
-          }`
-        );
-        return;
-      }
-    }
-
-    try {
-      await aiIndexService.putManaged(id, storedProperties);
-      logger.info(`AI index '${id}' registered successfully`);
+      const outcome = await aiIndexService.putManaged(id, storedProperties);
+      logger.info(`AI index '${id}' ${outcome === 'created' ? 'registered' : 'reconciled'}`);
     } catch (err) {
       if (err instanceof InvalidAiIndexDestError) {
         logger.warn(`AI index '${id}' dest is not valid: '${err.message}'. Skipped.`);

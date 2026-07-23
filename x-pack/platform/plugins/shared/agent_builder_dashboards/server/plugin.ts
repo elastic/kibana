@@ -20,7 +20,6 @@ import type {
 } from './types';
 import { registerSkills } from './skills';
 import { createDashboardAttachmentType } from './attachment_types';
-import { createDashboardSmlType } from './sml_types';
 
 export class AgentBuilderDashboardsPlugin
   implements
@@ -55,7 +54,10 @@ export class AgentBuilderDashboardsPlugin
         getDashboardClient,
       }) as Parameters<typeof setupDeps.agentBuilder.attachments.registerType>[0]
     );
-    setupDeps.agentBuilderSml.registerType(createDashboardSmlType({ getDashboardClient }));
+    // Dashboard KI ingestion is now handled by the SML managed workflow
+    // (`system-agent-builder-sml-dashboard-ingestion`), not the crawler SML type. The
+    // `dashboard` crawler type is no longer registered. (Existing crawled dashboard docs
+    // should be purged once — see the PR description's cleanup note.)
     registerSkills(setupDeps.agentBuilder);
     return {};
   }

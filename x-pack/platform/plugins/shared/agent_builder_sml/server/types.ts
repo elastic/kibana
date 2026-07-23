@@ -15,6 +15,10 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import type { ContextEnginePluginSetup } from '@kbn/context-engine-plugin/server';
+import type {
+  WorkflowsExtensionsServerPluginSetup,
+  WorkflowsExtensionsServerPluginStart,
+} from '@kbn/workflows-extensions/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import type {
@@ -28,11 +32,13 @@ import type { SmlResolvedItemResult } from './services/sml/execute_sml_attach_it
 export interface AgentBuilderSmlSetupDependencies {
   features: FeaturesPluginSetup;
   taskManager: TaskManagerSetupContract;
+  workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
   contextEngine?: ContextEnginePluginSetup;
 }
 
 export interface AgentBuilderSmlStartDependencies {
   taskManager: TaskManagerStartContract;
+  workflowsExtensions: WorkflowsExtensionsServerPluginStart;
   spaces?: SpacesPluginStart;
   security?: SecurityPluginStart;
 }

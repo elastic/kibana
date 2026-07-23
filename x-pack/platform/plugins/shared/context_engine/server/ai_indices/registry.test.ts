@@ -98,15 +98,9 @@ describe('AiIndexRegistry', () => {
       expect(service.putManaged).not.toHaveBeenCalled();
     });
 
-    it('skips putManaged() when entry already exists', async () => {
+    it('reconciles the managed doc even when the entry already exists', async () => {
       const service = makeServiceMock({
-        get: jest.fn().mockResolvedValue({
-          id: 'test',
-          managed: true,
-          ...makeProperties(),
-          date_created: '',
-          date_modified: '',
-        }),
+        putManaged: jest.fn().mockResolvedValue('updated'),
       });
       registry.register('test', makeProperties());
 
@@ -117,7 +111,9 @@ describe('AiIndexRegistry', () => {
         logger,
       });
 
-      expect(service.putManaged).not.toHaveBeenCalled();
+      // putManaged is an idempotent upsert; it runs on every startup so declared metadata
+      // (e.g. automations) stays current rather than being frozen at first registration.
+      expect(service.putManaged).toHaveBeenCalledWith('test', makeProperties());
     });
 
     it('calls putManaged() when entry does not exist', async () => {
