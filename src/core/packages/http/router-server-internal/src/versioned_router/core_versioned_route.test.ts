@@ -728,6 +728,8 @@ describe('Versioned route', () => {
         handlerFn
       );
 
+    expect(lazyValidation).not.toHaveBeenCalled();
+
     for (let i = 0; i < 10; i++) {
       const { status } = await handler!(
         createRequest({

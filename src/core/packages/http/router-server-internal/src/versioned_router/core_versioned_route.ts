@@ -266,12 +266,11 @@ export class CoreVersionedRoute implements VersionedRoute {
   };
 
   private validateOnRequestValidationError(options: Options) {
-    if (options.validate === false) {
+    if (options.validate === false || typeof options.validate === 'function') {
       return;
     }
 
-    const validate = typeof options.validate === 'function' ? options.validate() : options.validate;
-    const { onRequestValidationError, response } = validate;
+    const { onRequestValidationError, response } = options.validate;
     if (!onRequestValidationError) {
       return;
     }
