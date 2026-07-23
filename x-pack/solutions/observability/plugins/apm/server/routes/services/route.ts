@@ -59,6 +59,7 @@ import { getServiceAgent } from './get_service_agent';
 import { getServiceDependencies } from './get_service_dependencies';
 import { getServiceDependenciesBreakdown } from './get_service_dependencies_breakdown';
 import { getServiceHasSystemMetrics } from './get_service_has_system_metrics';
+import { getServiceIngestionType } from './get_service_ingestion_type';
 import { getServiceInstanceContainerMetadata } from './get_service_instance_container_metadata';
 import { getServiceInstanceMetadataDetails } from './get_service_instance_metadata_details';
 import { getServiceInstancesDetailedStatisticsPeriods } from './get_service_instances/detailed_statistics';
@@ -864,6 +865,27 @@ const serviceHasSystemMetricsRoute = createApmServerRoute({
   },
 });
 
+const serviceIngestionTypeRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/services/{serviceName}/ingestion_type',
+  params: z.object({
+    path: z.object({ serviceName: z.string().max(MAX_SERVICE_NAME_LENGTH) }),
+    query: environmentSchema.merge(rangeSchema),
+  }),
+  security: { authz: { requiredPrivileges: ['apm'] } },
+  handler: async (resources): Promise<{ ingestionType: 'classicApm' | 'unprocessedOtel' }> => {
+    const { params, context, getApmIndices } = resources;
+    const {
+      path: { serviceName },
+      query: { environment, start, end },
+    } = params;
+
+    const [core, indices] = await Promise.all([context.core, getApmIndices()]);
+    const esClient = core.elasticsearch.client.asCurrentUser;
+
+    return getServiceIngestionType({ esClient, indices, serviceName, environment, start, end });
+  },
+});
+
 export const serviceRouteRepository = {
   ...servicesRoute,
   ...servicesDetailedStatisticsRoute,
@@ -886,4 +908,5 @@ export const serviceRouteRepository = {
   ...serviceAnomalyScoreRoute,
   ...serviceSlosRoute,
   ...serviceHasSystemMetricsRoute,
+  ...serviceIngestionTypeRoute,
 };

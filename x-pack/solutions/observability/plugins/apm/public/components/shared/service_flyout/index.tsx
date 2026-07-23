@@ -19,6 +19,7 @@ import {
   ServiceFlyoutContextProvider,
   type ServiceFlyoutContextValue,
 } from './service_flyout_context';
+import { useServiceIngestionType } from './hooks/use_service_ingestion_type';
 export type { ServiceFlyoutService } from './types';
 
 export const SERVICE_FLYOUT_TAB_IDS = {
@@ -81,6 +82,14 @@ export function ServiceFlyout({
   const [flyoutTransactionType, setTransactionType] = useState(transactionType ?? '');
   const [refreshToken, setRefreshToken] = useState(Date.now());
 
+  const { ingestionType } = useServiceIngestionType({
+    http: core.http,
+    serviceName: service.name,
+    environment,
+    start,
+    end,
+  });
+
   const [selectedTabId, setSelectedTabId] = useState<ServiceFlyoutTabId>(
     SERVICE_FLYOUT_DEFAULT_TAB_ID
   );
@@ -104,7 +113,7 @@ export function ServiceFlyout({
       value={{
         deps: { core, share, lens, dataViews, alerting },
         service,
-        ingestionType: 'classicApm', // TODO hardcoded for now, it will require a request to the server to determine
+        ingestionType,
         filters: {
           environment: flyoutEnvironment,
           setEnvironment: setFlyoutEnvironment,
