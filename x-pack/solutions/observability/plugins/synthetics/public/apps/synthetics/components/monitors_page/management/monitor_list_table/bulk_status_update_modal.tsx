@@ -16,42 +16,49 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { EncryptedSyntheticsSavedMonitor } from '../../../../../../../common/runtime_types';
-import { ConfigKey, SourceType } from '../../../../../../../common/runtime_types';
+import { ConfigKey } from '../../../../../../../common/runtime_types';
+import { useCanUsePublicLocationsPermission } from '../../../../../../hooks/use_capabilities';
 import { useGetUrlParams } from '../../../../hooks';
 import { fetchBulkUpdateMonitors } from '../../../../state';
 import { kibanaService } from '../../../../../../utils/kibana_service';
+import { isMonitorBulkEditable } from './bulk_edit_eligibility';
 
 export const BulkStatusUpdateModal = ({
   monitors,
   enabled,
   onClose,
+  onCompleted,
   reloadPage,
 }: {
   monitors: EncryptedSyntheticsSavedMonitor[];
   enabled: boolean;
   onClose: () => void;
+  onCompleted?: () => void;
   reloadPage: () => void;
 }) => {
   const [isUpdating, setIsUpdating] = useState(false);
   const { spaceId } = useGetUrlParams();
+  const canUsePublicLocations = useCanUsePublicLocationsPermission();
   const modalTitleId = useGeneratedHtmlId();
   const skippedAccordionId = useGeneratedHtmlId();
 
-  // Only `ui`-origin monitors can be patched via the bulk API; project/terraform
-  // monitors are rejected per-id server-side, so we exclude them up front.
+  // Only monitors that can actually be patched are sent to the bulk API:
+  // project/terraform monitors are rejected server-side, and public-location
+  // monitors require the elastic-managed-locations capability. Ineligible
+  // monitors are surfaced as skipped so the user understands why.
   const { eligibleIds, skippedMonitors } = useMemo(() => {
     const eligible: string[] = [];
     const skipped: Array<{ id: string; name: string }> = [];
     for (const monitor of monitors) {
       const id = monitor[ConfigKey.CONFIG_ID];
-      if (monitor[ConfigKey.MONITOR_SOURCE_TYPE] === SourceType.UI) {
+      if (isMonitorBulkEditable(monitor, canUsePublicLocations)) {
         eligible.push(id);
       } else {
         skipped.push({ id, name: monitor[ConfigKey.NAME] });
       }
     }
     return { eligibleIds: eligible, skippedMonitors: skipped };
-  }, [monitors]);
+  }, [monitors, canUsePublicLocations]);
 
   const handleConfirm = useCallback(async () => {
     setIsUpdating(true);
@@ -85,9 +92,11 @@ export const BulkStatusUpdateModal = ({
     } finally {
       setIsUpdating(false);
       reloadPage();
+      // The action ran (success or failure), so the selection is now stale.
+      onCompleted?.();
       onClose();
     }
-  }, [eligibleIds, enabled, spaceId, reloadPage, onClose]);
+  }, [eligibleIds, enabled, spaceId, reloadPage, onCompleted, onClose]);
 
   return (
     <EuiConfirmModal
@@ -125,7 +134,7 @@ export const BulkStatusUpdateModal = ({
                   'xpack.synthetics.bulkStatusUpdateModal.skippedWarning.description',
                   {
                     defaultMessage:
-                      'Project and Terraform-managed monitors cannot be edited here. Update them from their source instead.',
+                      'Project and Terraform-managed monitors cannot be edited here (update them from their source instead), and monitors using Elastic managed locations require additional permissions.',
                   }
                 )}
               </p>

@@ -11,11 +11,15 @@ import type { EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
 import { EuiButton, EuiContextMenu, EuiPopover } from '@elastic/eui';
 import type { EncryptedSyntheticsSavedMonitor } from '../../../../../../../common/runtime_types';
 import { ConfigKey } from '../../../../../../../common/runtime_types';
-import { useCanEditSynthetics } from '../../../../../../hooks/use_capabilities';
+import {
+  useCanEditSynthetics,
+  useCanUsePublicLocationsPermission,
+} from '../../../../../../hooks/use_capabilities';
 import { useEnablement } from '../../../../hooks';
 import { CANNOT_PERFORM_ACTION_SYNTHETICS } from '../../../common/components/permissions';
 import { SERVICE_NOT_ALLOWED } from '../disabled_callout';
 import { useMonitorIntegrationHealth } from '../../../common/hooks/use_monitor_integration_health';
+import { isMonitorBulkEditable } from './bulk_edit_eligibility';
 
 export const BulkOperations = ({
   selectedItems,
@@ -34,6 +38,7 @@ export const BulkOperations = ({
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const { isUnhealthy, isFixableByReset } = useMonitorIntegrationHealth();
   const canEditSynthetics = useCanEditSynthetics();
+  const canUsePublicLocations = useCanUsePublicLocationsPermission();
   const { isServiceAllowed } = useEnablement();
 
   const closePopover = () => setIsPopoverOpen(false);
@@ -50,13 +55,22 @@ export const BulkOperations = ({
 
   // Enable/Disable are per-current-state: only the monitors that would actually
   // change are counted and patched, so we avoid re-syncing Fleet policies for
-  // monitors already in the target state.
-  const enableIds = selectedItems
-    .filter((item) => !item[ConfigKey.ENABLED])
-    .map((item) => item[ConfigKey.CONFIG_ID]);
-  const disableIds = selectedItems
-    .filter((item) => item[ConfigKey.ENABLED])
-    .map((item) => item[ConfigKey.CONFIG_ID]);
+  // monitors already in the target state. The full by-state set is still handed
+  // to the modal so it can surface the ineligible (project/terraform, or
+  // permission-restricted) monitors as skipped.
+  const enableCandidates = selectedItems.filter((item) => !item[ConfigKey.ENABLED]);
+  const disableCandidates = selectedItems.filter((item) => item[ConfigKey.ENABLED]);
+  const enableIds = enableCandidates.map((item) => item[ConfigKey.CONFIG_ID]);
+  const disableIds = disableCandidates.map((item) => item[ConfigKey.CONFIG_ID]);
+
+  // Counts/disabled state reflect only monitors that can actually be updated, so
+  // the menu never offers an action that would open a modal with nothing to do.
+  const eligibleEnableCount = enableCandidates.filter((item) =>
+    isMonitorBulkEditable(item, canUsePublicLocations)
+  ).length;
+  const eligibleDisableCount = disableCandidates.filter((item) =>
+    isMonitorBulkEditable(item, canUsePublicLocations)
+  ).length;
 
   if (selectedItems.length === 0) {
     return null;
@@ -72,18 +86,24 @@ export const BulkOperations = ({
   const items: EuiContextMenuPanelItemDescriptor[] = [
     {
       name:
-        enableIds.length > 0
+        eligibleEnableCount > 0
           ? i18n.translate('xpack.synthetics.bulkOperations.enableMonitors', {
               defaultMessage:
                 'Enable {count, number} {count, plural, one {monitor} other {monitors}}',
-              values: { count: enableIds.length },
+              values: { count: eligibleEnableCount },
             })
           : i18n.translate('xpack.synthetics.bulkOperations.enableMonitorsEmpty', {
               defaultMessage: 'Enable monitors',
             }),
       icon: 'play',
-      disabled: isActionDisabled || enableIds.length === 0,
-      toolTipContent: disabledTooltip ?? (enableIds.length === 0 ? ALL_ALREADY_ENABLED : undefined),
+      disabled: isActionDisabled || eligibleEnableCount === 0,
+      toolTipContent:
+        disabledTooltip ??
+        (eligibleEnableCount === 0
+          ? enableCandidates.length === 0
+            ? ALL_ALREADY_ENABLED
+            : NO_ELIGIBLE_TO_ENABLE
+          : undefined),
       'data-test-subj': 'syntheticsBulkEnableMonitorsItem',
       onClick: () => {
         closePopover();
@@ -92,19 +112,24 @@ export const BulkOperations = ({
     },
     {
       name:
-        disableIds.length > 0
+        eligibleDisableCount > 0
           ? i18n.translate('xpack.synthetics.bulkOperations.disableMonitors', {
               defaultMessage:
                 'Disable {count, number} {count, plural, one {monitor} other {monitors}}',
-              values: { count: disableIds.length },
+              values: { count: eligibleDisableCount },
             })
           : i18n.translate('xpack.synthetics.bulkOperations.disableMonitorsEmpty', {
               defaultMessage: 'Disable monitors',
             }),
       icon: 'pause',
-      disabled: isActionDisabled || disableIds.length === 0,
+      disabled: isActionDisabled || eligibleDisableCount === 0,
       toolTipContent:
-        disabledTooltip ?? (disableIds.length === 0 ? ALL_ALREADY_DISABLED : undefined),
+        disabledTooltip ??
+        (eligibleDisableCount === 0
+          ? disableCandidates.length === 0
+            ? ALL_ALREADY_DISABLED
+            : NO_ELIGIBLE_TO_DISABLE
+          : undefined),
       'data-test-subj': 'syntheticsBulkDisableMonitorsItem',
       onClick: () => {
         closePopover();
@@ -176,3 +201,16 @@ const ALL_ALREADY_ENABLED = i18n.translate('xpack.synthetics.bulkOperations.allA
 const ALL_ALREADY_DISABLED = i18n.translate('xpack.synthetics.bulkOperations.allAlreadyDisabled', {
   defaultMessage: 'All selected monitors are already disabled.',
 });
+
+const NO_ELIGIBLE_TO_ENABLE = i18n.translate('xpack.synthetics.bulkOperations.noEligibleToEnable', {
+  defaultMessage:
+    'None of the selected monitors can be enabled here. Project and Terraform-managed monitors, and monitors using locations you cannot access, are excluded.',
+});
+
+const NO_ELIGIBLE_TO_DISABLE = i18n.translate(
+  'xpack.synthetics.bulkOperations.noEligibleToDisable',
+  {
+    defaultMessage:
+      'None of the selected monitors can be disabled here. Project and Terraform-managed monitors, and monitors using locations you cannot access, are excluded.',
+  }
+);
