@@ -10,7 +10,8 @@ import type {
   BulkCreateAlertActionResponse,
 } from '@kbn/alerting-v2-schemas';
 import { ALERT_EPISODE_ACTION_TYPE } from '@kbn/alerting-v2-schemas';
-import { invalidResponseExample, type AlertingOasOperationObject } from '../oas_utils';
+import { invalidResponseExample } from '../oas_utils';
+import type { AlertingOasOperationObject } from '../oas_types';
 import { buildAlertOas } from './oas_utils';
 import { SAMPLE_EPISODE_ID, SAMPLE_GROUP_HASH } from './alert_oas_shared_examples';
 

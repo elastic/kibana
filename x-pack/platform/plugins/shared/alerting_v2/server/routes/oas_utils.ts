@@ -6,26 +6,7 @@
  */
 
 import type { ErrorResponse } from '@kbn/alerting-v2-schemas';
-
-export interface AlertingOasOperationObject {
-  requestBody?: {
-    content?: {
-      'application/json'?: {
-        examples?: Record<string, { summary?: string; value?: unknown }>;
-      };
-    };
-  };
-  responses?: Record<
-    string,
-    {
-      content?: {
-        'application/json'?: {
-          examples?: Record<string, { summary?: string; value?: unknown }>;
-        };
-      };
-    }
-  >;
-}
+import type { OasExampleEntry } from './oas_types';
 
 export const jsonExample = <T>(name: string, summary: string, value: T) => ({
   content: {
@@ -39,12 +20,6 @@ export const jsonExample = <T>(name: string, summary: string, value: T) => ({
     },
   },
 });
-
-export interface OasExampleEntry {
-  name: string;
-  summary: string;
-  value: unknown;
-}
 
 /**
  * Validation errors currently return Kibana core's Boom shape, but Core will

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { jsonExample, type AlertingOasOperationObject, type OasExampleEntry } from '../oas_utils';
+import { jsonExample } from '../oas_utils';
+import type { AlertingOasOperationObject, OasExampleEntry } from '../oas_types';
 
 export const buildAlertOas = ({
   requestBody,

@@ -9,7 +9,8 @@ import type { CreateDeactivateAlertActionBody } from '@kbn/alerting-v2-schemas';
 import { ALERT_EPISODE_ACTION_TYPE } from '@kbn/alerting-v2-schemas';
 import { ALERTING_V2_ERROR_CODES } from '../../lib/errors/error_codes';
 import { getCannotDeactivateEpisodeMessage } from '../../lib/errors/alert_error_messages';
-import { invalidResponseExample, type AlertingOasOperationObject } from '../oas_utils';
+import { invalidResponseExample } from '../oas_utils';
+import type { AlertingOasOperationObject } from '../oas_types';
 import { buildAlertOas } from './oas_utils';
 import {
   ALERT_EVENT_NOT_FOUND_RESPONSE,

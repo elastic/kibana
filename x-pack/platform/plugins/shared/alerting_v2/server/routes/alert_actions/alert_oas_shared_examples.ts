@@ -8,7 +8,8 @@
 import type { ErrorResponse } from '@kbn/alerting-v2-schemas';
 import { ALERTING_V2_ERROR_CODES } from '../../lib/errors/error_codes';
 import { getAlertEventNotFoundMessage } from '../../lib/errors/alert_error_messages';
-import { invalidResponseExample, type OasExampleEntry } from '../oas_utils';
+import { invalidResponseExample } from '../oas_utils';
+import type { OasExampleEntry } from '../oas_types';
 
 export const SAMPLE_GROUP_HASH = 'group-hash-1';
 export const SAMPLE_EPISODE_ID = 'episode-1';

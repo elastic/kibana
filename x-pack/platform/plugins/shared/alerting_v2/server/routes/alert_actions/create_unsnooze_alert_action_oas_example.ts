@@ -6,7 +6,7 @@
  */
 
 import type { CreateUnsnoozeAlertActionBody } from '@kbn/alerting-v2-schemas';
-import type { AlertingOasOperationObject } from '../oas_utils';
+import type { AlertingOasOperationObject } from '../oas_types';
 import { buildAlertOas } from './oas_utils';
 import {
   ALERT_EVENT_NOT_FOUND_RESPONSE,
