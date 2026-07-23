@@ -35,6 +35,7 @@ dependsOn:
   - '@kbn/es-query'
   - '@kbn/es-types'
   - '@kbn/datemath'
+  - '@kbn/search-types'
 tags:
   - plugin
   - prod

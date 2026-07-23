@@ -22,7 +22,8 @@
     "@kbn/esql-utils",
     "@kbn/es-query",
     "@kbn/es-types",
-    "@kbn/datemath"
+    "@kbn/datemath",
+    "@kbn/search-types"
   ],
   "exclude": ["target/**/*"]
 }

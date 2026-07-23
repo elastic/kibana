@@ -6,7 +6,7 @@
  */
 
 import dateMath from '@kbn/datemath';
-import { getESQLResults, getESQLTimeFieldFromQuery, appendLimitToQuery } from '@kbn/esql-utils';
+import { getESQLResults, getESQLTimeFieldFromQuery } from '@kbn/esql-utils';
 import type { HttpStart } from '@kbn/core/public';
 import type { TimeRange } from '@kbn/es-query';
 import type { ESQLSearchResponse } from '@kbn/es-types';
