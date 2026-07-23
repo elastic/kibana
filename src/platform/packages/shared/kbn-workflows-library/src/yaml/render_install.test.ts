@@ -160,6 +160,42 @@ describe('renderInstall', () => {
     );
   });
 
+  it('should substitute inside a block scalar in place, keeping the block style and the next key intact', () => {
+    const raw = TEMPLATE.replace(
+      'note: "prefix __install__.note suffix"',
+      'note: |\n        line for __install__.note here\n        second line\n      other: value'
+    );
+    const { yaml } = renderInstall({ template: parseFixture(raw), values: VALID_VALUES });
+
+    expect(yaml).toContain('note: |');
+    expect(yaml).toContain('line for hello here');
+    expect(yaml).toContain('second line');
+    const workflow = parse(yaml) as {
+      steps: Array<{ with: { note: string; other: string } }>;
+    };
+    expect(workflow.steps[0].with.note).toBe('line for hello here\nsecond line\n');
+    expect(workflow.steps[0].with.other).toBe('value');
+  });
+
+  it('should re-encode a block scalar when a value is multiline, without breaking the next key', () => {
+    const raw = TEMPLATE.replace(
+      'note: "prefix __install__.note suffix"',
+      'note: |\n        prefix __install__.note suffix\n      other: value'
+    );
+    const value = 'line one\nline two';
+    const { yaml } = renderInstall({
+      template: parseFixture(raw),
+      values: { ...VALID_VALUES, note: value },
+    });
+    const workflow = parse(yaml) as {
+      steps: Array<{ with: { note: string; other: string } }>;
+    };
+
+    // `|` block literals keep their final newline; the re-encode preserves it.
+    expect(workflow.steps[0].with.note).toBe(`prefix ${value} suffix\n`);
+    expect(workflow.steps[0].with.other).toBe('value');
+  });
+
   it('should not touch placeholders in YAML comments', () => {
     const raw = TEMPLATE.replace('# nested body comment', '# see __install__.abuseipdb-connector');
     const { yaml } = renderInstall({ template: parseFixture(raw), values: VALID_VALUES });

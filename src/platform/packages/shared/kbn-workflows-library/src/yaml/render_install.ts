@@ -188,15 +188,38 @@ function substituteInstallPlaceholders(
         return;
       }
 
+      const [start, valueEnd] = node.range;
+      // A block scalar's source range includes the `|`/`>` header and the
+      // trailing newline(s) before the next token, so a naive splice with a
+      // re-encoded scalar would glue the next key onto the same line. Block
+      // content is literal (no quoting/escaping), so substitute in place —
+      // preserving the block style — unless a value itself contains a newline
+      // (which could break the block indentation).
+      const isBlock = node.type === 'BLOCK_LITERAL' || node.type === 'BLOCK_FOLDED';
+      const segment = source.slice(start, valueEnd);
+      if (isBlock && referenced.every((name) => !/[\r\n]/.test(String(resolved[name])))) {
+        edits.push({
+          start,
+          end: valueEnd,
+          text: segment.replace(INSTALL_PLACEHOLDER, (_match, name: string) =>
+            String(resolved[name])
+          ),
+        });
+        return;
+      }
+      // Whatever trailing layout the span includes (a block scalar's final
+      // newline + indentation) must survive the re-encode.
+      const trailing = /\s+$/.exec(segment)?.[0] ?? '';
+
       const exact = EXACT_INSTALL_PLACEHOLDER.exec(node.value);
       const replacement = exact
         ? resolved[exact[1]]
         : node.value.replace(INSTALL_PLACEHOLDER, (_match, name: string) => String(resolved[name]));
       const quoted = node.type === 'QUOTE_DOUBLE' || node.type === 'QUOTE_SINGLE';
       edits.push({
-        start: node.range[0],
-        end: node.range[1],
-        text: encodeYamlScalar(replacement, { forceQuote: quoted }),
+        start,
+        end: valueEnd,
+        text: encodeYamlScalar(replacement, { forceQuote: quoted }) + trailing,
       });
     },
   });
