@@ -510,6 +510,10 @@ export function AddCisIntegrationFormPageProvider({
 
   const getValueInEditPage = async (field: string) => {
     /* Newly added/edited integration always shows up on top by default as such we can just always click the most top if we want to check for the latest one  */
+    await PageObjects.header.waitUntilLoadingHasFinished();
+    await retry.waitFor(`field ${field} to render on edit page`, async () =>
+      testSubjects.exists(field)
+    );
     const fieldValue = await (await testSubjects.find(field)).getAttribute('value');
     return fieldValue;
   };
@@ -559,6 +563,10 @@ export function AddCisIntegrationFormPageProvider({
   const getFieldValueInEditPage = async (field: string) => {
     /* Newly added/edited integration always shows up on top by default as such we can just always click the most top if we want to check for the latest one  */
     await navigateToEditIntegrationPage();
+    await PageObjects.header.waitUntilLoadingHasFinished();
+    await retry.waitFor(`field ${field} to render on edit page`, async () =>
+      testSubjects.exists(field)
+    );
     const fieldValue = await getFieldAttributeValue(field, 'value');
     return fieldValue;
   };

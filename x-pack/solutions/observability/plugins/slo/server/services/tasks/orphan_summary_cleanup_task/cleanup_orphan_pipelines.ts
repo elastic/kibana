@@ -51,7 +51,7 @@ export async function cleanupOrphanPipelines(
   params: RunParams,
   dependencies: Dependencies
 ): Promise<PipelineCleanupRunResult> {
-  const { esClient, logger, abortController } = dependencies;
+  const { esClient, logger, signal } = dependencies;
   const pageSize = params.pageSize ?? DEFAULT_PAGE_SIZE;
   const maxPages = params.maxPages ?? DEFAULT_MAX_PAGES;
   const concurrency = params.concurrency ?? DEFAULT_CONCURRENCY;
@@ -60,7 +60,7 @@ export async function cleanupOrphanPipelines(
   let currentPage = 0;
 
   try {
-    abortController.signal.throwIfAborted();
+    signal.throwIfAborted();
 
     // `ingest.getPipeline` does not paginate; the response is a flat object
     // keyed by pipeline id. We list once, sort deterministically, and then
@@ -68,7 +68,7 @@ export async function cleanupOrphanPipelines(
     // `maxPages` and resume from the same cursor on the next run.
     const response = await esClient.ingest.getPipeline(
       { id: SLO_PIPELINE_PATTERN, summary: true },
-      { ignore: [404], signal: abortController.signal }
+      { ignore: [404], signal }
     );
 
     const pipelineIds = Object.keys(response).sort();
@@ -83,7 +83,7 @@ export async function cleanupOrphanPipelines(
     }
 
     while (startIndex < pipelineIds.length) {
-      abortController.signal.throwIfAborted();
+      signal.throwIfAborted();
       currentPage++;
 
       const endIndex = Math.min(startIndex + pageSize, pipelineIds.length);
@@ -98,7 +98,7 @@ export async function cleanupOrphanPipelines(
       }
 
       if (sloPipelines.length > 0) {
-        abortController.signal.throwIfAborted();
+        signal.throwIfAborted();
         const uniqueSloIds = [...new Set(sloPipelines.map(({ slo }) => slo.id))];
         const definitionMap = await findSloDefinitionMap(uniqueSloIds, dependencies);
 
@@ -114,7 +114,7 @@ export async function cleanupOrphanPipelines(
         }
 
         if (orphanRevisions.size > 0) {
-          abortController.signal.throwIfAborted();
+          signal.throwIfAborted();
           logger.debug(
             `Deleting orphan SLO ingest pipelines for ${orphanRevisions.size} (sloId, revision) pairs`
           );
@@ -126,10 +126,10 @@ export async function cleanupOrphanPipelines(
                 try {
                   await esClient.ingest.deletePipeline(
                     { id: wildcardId },
-                    { ignore: [404], signal: abortController.signal }
+                    { ignore: [404], signal }
                   );
                 } catch (err) {
-                  if (isAbortError(err, abortController)) throw err;
+                  if (isAbortError(err, signal)) throw err;
                   logger.warn(
                     `Failed to delete orphan SLO pipeline [${wildcardId}]: ${err.message}`
                   );
@@ -155,7 +155,7 @@ export async function cleanupOrphanPipelines(
       }
     }
   } catch (error) {
-    if (isAbortError(error, abortController)) {
+    if (isAbortError(error, signal)) {
       logger.debug('Orphan pipelines cleanup aborted');
       return { aborted: true, completed: false, nextState: { after: cursor } };
     }

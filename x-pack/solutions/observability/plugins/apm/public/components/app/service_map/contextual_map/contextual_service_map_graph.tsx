@@ -55,6 +55,8 @@ import { ContextualServiceMapControls } from './contextual_service_map_controls'
 import { ServiceFlyout } from '../../../shared/service_flyout';
 import { SERVICE_FLYOUT_SOURCES } from '../../../shared/service_flyout/constants';
 import type { ServiceFlyoutOptions } from '../../../shared/service_flyout/types';
+import { useServiceMapFlyoutProps } from '../use_service_map_flyout_props';
+import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 
 type ServiceMapServiceNode = Node<ServiceNodeData>;
 
@@ -120,6 +122,7 @@ function ContextualGraphInner({
 }: ContextualServiceMapGraphProps) {
   const { services } = useKibana<ApmPluginStartDeps & ApmServices>();
   const { telemetry } = services;
+  const { core, share, lens, dataViews, plugins } = useApmPluginContext();
   const makeAlertsNavigateHandler = useServiceMapAlertsNavigateFactory();
   const { euiTheme } = useEuiTheme();
   const { fitView, zoomIn, zoomOut } = useReactFlow();
@@ -168,6 +171,14 @@ function ContextualGraphInner({
       return { ...n, data: { ...n.data, contextHighlight } };
     });
   }, [visibleNodes, visibleEdges, highlightedServiceName]);
+
+  const flyoutProps = useServiceMapFlyoutProps({
+    selectedServiceNodeForFlyout,
+    environment,
+    flyoutOptions,
+    start,
+    end,
+  });
 
   const [nodes, setNodes, onNodesChange] = useNodesState(layoutedNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(visibleEdges);
@@ -413,15 +424,12 @@ function ContextualGraphInner({
               alwaysNavigateOnFocus={alwaysNavigateOnPopoverFocus}
               clearKueryOnNavigation={clearKueryOnPopoverNavigation}
             />
-            {selectedServiceNodeForFlyout && (
+            {flyoutProps && (
               <ServiceFlyout
-                key={selectedServiceNodeForFlyout.data.id}
-                service={selectedServiceNodeForFlyout.data}
-                environment={environment}
-                kuery={flyoutOptions?.kuery ?? kuery}
-                initialRangeFrom={flyoutOptions?.rangeFrom ?? start}
-                initialRangeTo={flyoutOptions?.rangeTo ?? end}
-                initialTransactionType={flyoutOptions?.initialTransactionType}
+                key={flyoutProps.service.name}
+                service={flyoutProps.service}
+                deps={{ core, share, lens, dataViews, alerting: plugins.alerting }}
+                filters={flyoutProps.filters}
                 onView={handleServiceFlyoutView}
                 onClose={handlePopoverClose}
               />
