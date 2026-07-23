@@ -78,13 +78,6 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
 
     const executionClient = this.createExecutionClient();
 
-    if (providedExecutionId) {
-      const existing = await executionClient.peek(providedExecutionId);
-      if (existing) {
-        throw createBadRequestError(`Execution with id ${providedExecutionId} already exists`);
-      }
-    }
-
     const validatedAttachments = await this.validateAttachmentsIfProvided(
       params.nextInput.attachments,
       request
@@ -93,15 +86,45 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       ? { ...params, nextInput: { ...params.nextInput, attachments: validatedAttachments } }
       : params;
 
-    const execution = await executionClient.create({
-      executionMode: mode,
-      executionId,
-      agentId,
-      spaceId,
-      agentParams: validatedParams,
-      parentExecutionId: params.parentExecutionId,
-      metadata,
-    });
+    let execution: AgentExecution;
+    try {
+      execution = await executionClient.create({
+        executionMode: mode,
+        executionId,
+        agentId,
+        spaceId,
+        agentParams: validatedParams,
+        parentExecutionId: params.parentExecutionId,
+        metadata,
+      });
+    } catch (err) {
+      if (err?.meta?.statusCode === 409) {
+        if (metadata?.execution_idempotency_key) {
+          this.logger.debug(
+            `Duplicate idempotency key detected, returning existing execution ${executionId}`
+          );
+
+          // Repairs executions left in `scheduled` when the original delivery
+          // failed before scheduling the task.
+          const existing = await executionClient.peek(executionId);
+
+          if (existing?.status === ExecutionStatus.scheduled) {
+            await this.deps.taskManager.ensureScheduled(this.buildRunAgentTask(executionId), {
+              request,
+            });
+          }
+
+          return {
+            executionId,
+            events$: this.followExecution(executionId),
+          };
+        }
+
+        throw createBadRequestError(`Execution with id ${executionId} already exists`);
+      }
+
+      throw err;
+    }
 
     // Wire up external abort signal to execution abort
     if (abortSignal) {
@@ -162,6 +185,17 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
   /**
    * Execute on a TM node: schedule the task and return the followExecution polling observable.
    */
+  private buildRunAgentTask(executionId: string) {
+    return {
+      id: `agent-${executionId}`,
+      taskType: taskTypes.runAgent,
+      params: { executionId },
+      scope: ['agent-builder'],
+      enabled: true,
+      state: {},
+    };
+  }
+
   private async executeWithScheduledTask({
     executionId,
     agentId,
@@ -171,17 +205,9 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     agentId: string;
     request: ExecuteAgentParams['request'];
   }): Promise<ExecuteAgentResult> {
-    await this.deps.taskManager.schedule(
-      {
-        id: `agent-${executionId}`,
-        taskType: taskTypes.runAgent,
-        params: { executionId },
-        scope: ['agent-builder'],
-        enabled: true,
-        state: {},
-      },
-      { request }
-    );
+    // ensureScheduled tolerates the task already existing: a concurrent idempotent
+    // replay may have re-issued this schedule while repairing a stuck execution.
+    await this.deps.taskManager.ensureScheduled(this.buildRunAgentTask(executionId), { request });
 
     this.logger.debug(`Scheduled remote agent execution ${executionId} for agent ${agentId}`);
 

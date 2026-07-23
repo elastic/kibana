@@ -32,6 +32,6 @@ export interface WorkflowExecutionLoopParams {
   esClient: ElasticsearchClient;
   fakeRequest: KibanaRequest<unknown, unknown, unknown>;
   coreStart: CoreStart;
-  taskAbortController: AbortController;
+  signal: AbortSignal;
   workflowTaskManager: WorkflowTaskManager;
 }

@@ -43,7 +43,8 @@ type RunNodeTestParams = Omit<
 };
 
 describe('runNode', () => {
-  let mockParams: RunNodeTestParams;
+  let mockParams: jest.Mocked<WorkflowExecutionLoopParams>;
+  let taskAbortController: AbortController;
   let workflowExecution: EsWorkflowExecution;
   let mockNode: GraphNodeUnion;
   let mockNodeImplementation: jest.Mocked<NodeImplementation>;
@@ -68,6 +69,7 @@ describe('runNode', () => {
     mockCatchError.mockResolvedValue(undefined);
     mockHandleExecutionDelay.mockResolvedValue(undefined);
 
+    taskAbortController = new AbortController();
     workflowExecution = {
       id: 'test-workflow-execution-id',
       workflowId: 'test-workflow-id',
@@ -134,8 +136,8 @@ describe('runNode', () => {
       stepIoService: {
         releaseTransientlyRehydratedOutputs: jest.fn(),
       },
-      taskAbortController: new AbortController(),
-    } as unknown as RunNodeTestParams;
+      signal: taskAbortController.signal,
+    } as unknown as jest.Mocked<WorkflowExecutionLoopParams>;
   });
 
   describe('when workflow is running', () => {
@@ -182,14 +184,14 @@ describe('runNode', () => {
 
     it('should pass the task abort signal when Task Manager aborts during step execution', async () => {
       mockNodeImplementation.run.mockImplementation(async () => {
-        mockParams.taskAbortController.abort(new WorkflowTaskManagerAbortError());
+        taskAbortController.abort(new WorkflowTaskManagerAbortError());
       });
 
       await runNode(mockParams);
 
       expect(mockHandleExecutionDelay).toHaveBeenCalled();
       expect(mockStepExecutionRuntime.flushEventLogs).toHaveBeenCalledWith({
-        signal: mockParams.taskAbortController.signal,
+        signal: mockParams.signal,
       });
     });
   });

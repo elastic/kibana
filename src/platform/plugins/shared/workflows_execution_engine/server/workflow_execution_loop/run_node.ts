@@ -168,7 +168,7 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
         } finally {
           if (stepExecutionRuntime) {
             await stepExecutionRuntime.flushEventLogs({
-              signal: params.taskAbortController.signal,
+              signal: params.signal,
             });
           }
         }
