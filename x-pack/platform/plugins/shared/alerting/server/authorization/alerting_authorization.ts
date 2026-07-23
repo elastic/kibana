@@ -351,7 +351,9 @@ export class AlertingAuthorization {
         const baseMessage = `Unauthorized to ${params.operation} ${params.authorizationEntity}s for any rule types.`;
         const errorMessage =
           (namespaces ?? []).length > 0
-            ? `${baseMessage} Validate that you have permissions to access spaces: ${namespaces}`
+            ? `${baseMessage} Validate that you have permissions to access spaces: ${(
+                namespaces ?? []
+              ).map((space) => (space === undefined ? 'default' : space))}`
             : baseMessage;
         throw Boom.forbidden(errorMessage);
       }
@@ -532,16 +534,13 @@ export class AlertingAuthorization {
       }
 
       const checkPrivileges = this.authorization.checkPrivilegesWithRequest(this.request);
-      const spaces = (namespaces ? namespaces : [this.spaceId]).filter(
-        (space): space is string => !!space
+      const spaces = (namespaces ? namespaces : [this.spaceId]).map((space) =>
+        space === undefined ? 'default' : space
       );
 
-      const { username, hasAllRequested, privileges } =
-        spaces.length > 0
-          ? await checkPrivileges.atSpaces(spaces, {
-              kibana: [...requiredPrivileges.keys()],
-            })
-          : await checkPrivileges.globally({ kibana: [...requiredPrivileges.keys()] });
+      const { username, hasAllRequested, privileges } = await checkPrivileges.atSpaces(spaces, {
+        kibana: [...requiredPrivileges.keys()],
+      });
 
       const privilegeAuthResults = new Map<string, boolean[]>();
       for (const { authorized, privilege } of privileges.kibana) {
