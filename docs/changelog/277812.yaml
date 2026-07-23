@@ -10,4 +10,4 @@ products:
   target: 9.5.0
 areas:
 - Search and data
-title: Merge Status and Content filters into a single More filter
+title: Merge Status and Content filters into a single More filter on the Browse integrations page.
