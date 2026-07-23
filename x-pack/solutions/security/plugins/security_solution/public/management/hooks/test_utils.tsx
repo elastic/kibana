@@ -9,7 +9,10 @@ import { waitFor, renderHook } from '@testing-library/react';
 import type { HttpSetup } from '@kbn/core/public';
 import type { CreateExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { coreMock } from '@kbn/core/public/mocks';
-import { ReactQueryClientProvider } from '../../common/containers/query_client/query_client_provider';
+import {
+  ReactQueryClientProvider,
+  SecuritySolutionQueryClient,
+} from '../../common/containers/query_client/query_client_provider';
 
 export const getFakeListId: () => string = () => 'FAKE_LIST_ID';
 export const getFakeListDefinition: () => CreateExceptionListSchema = () => ({
@@ -36,13 +39,14 @@ export const renderQuery = async (
   hook: () => any,
   waitForHook: 'isSuccess' | 'isLoading' | 'isError' = 'isSuccess'
 ) => {
+  const queryClient = new SecuritySolutionQueryClient();
   const wrapper = ({ children }: { children: React.ReactNode }): JSX.Element => (
-    <ReactQueryClientProvider>{children}</ReactQueryClientProvider>
+    <ReactQueryClientProvider queryClient={queryClient}>{children}</ReactQueryClientProvider>
   );
   const { result: resultHook } = renderHook(() => hook(), {
     wrapper,
   });
-  await waitFor(() => expect(resultHook.current[waitForHook]).toBeTruthy(), { timeout: 5000 });
+  await waitFor(() => expect(resultHook.current[waitForHook]).toBeTruthy());
   return resultHook.current;
 };
 
@@ -50,8 +54,9 @@ export const renderMutation = async (
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   hook: () => any
 ) => {
+  const queryClient = new SecuritySolutionQueryClient();
   const wrapper = ({ children }: { children: React.ReactNode }): JSX.Element => (
-    <ReactQueryClientProvider>{children}</ReactQueryClientProvider>
+    <ReactQueryClientProvider queryClient={queryClient}>{children}</ReactQueryClientProvider>
   );
   const { result: resultHook } = renderHook(() => hook(), {
     wrapper,
