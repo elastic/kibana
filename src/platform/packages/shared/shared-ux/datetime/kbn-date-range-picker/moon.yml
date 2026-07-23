@@ -19,7 +19,6 @@ project:
 dependsOn:
   - '@kbn/i18n'
   - '@kbn/test-jest-helpers'
-  - '@kbn/i18n-react'
 tags:
   - shared-browser
   - package

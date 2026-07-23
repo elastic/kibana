@@ -1269,7 +1269,7 @@ describe('client', () => {
         };
 
         it('does not call fieldDefinitionsService when templates flag is disabled', async () => {
-          // config.templates.enabled defaults to false in createCasesClientMockArgs
+          clientArgs.config = { ...clientArgs.config, templates: { enabled: false } };
           clientArgs.services.caseConfigureService.get.mockResolvedValue(baseGetResult as never);
           clientArgs.services.caseConfigureService.patch.mockResolvedValue(
             basePatchResult as never
@@ -1844,7 +1844,7 @@ describe('client', () => {
       });
 
       it('does not call fieldDefinitionsService when templates flag is disabled', async () => {
-        // config.templates.enabled defaults to false in createCasesClientMockArgs
+        clientArgs.config = { ...clientArgs.config, templates: { enabled: false } };
         await create(
           {
             ...baseRequest,

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, within } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { EventFlyout } from './event_flyout';
@@ -16,6 +16,15 @@ jest.mock('@kbn/investigation-output', () => ({
   // Avoid requireActual — it pulls a deep Kibana React graph that is brittle in unit tests.
   InvestigationOutput: () => null,
   useInvestigationState: () => ({ status: 'complete', state: undefined, error: undefined }),
+}));
+
+jest.mock('../hooks/use_fetch_stream_features', () => ({
+  useFetchStreamFeatures: () => ({
+    data: [],
+    isLoading: false,
+    isError: false,
+    refetch: jest.fn(),
+  }),
 }));
 
 jest.mock('../hooks/use_fetch_event_lifecycle', () => ({
@@ -49,6 +58,16 @@ jest.mock('../../../utils/kibana_react', () => ({
           useSparklineOverrides: () => ({}),
         },
       },
+      share: {
+        url: {
+          locators: {
+            get: () => ({ getRedirectUrl: () => '/app/discover#redirect' }),
+          },
+        },
+      },
+      application: {
+        getUrlForApp: (_app: string, { path }: { path: string }) => `/app/apm${path}`,
+      },
     },
   }),
 }));
@@ -80,7 +99,7 @@ describe('EventFlyout', () => {
     renderFlyout();
 
     expect(screen.getByText(mockEvent.title)).toBeInTheDocument();
-    expect(screen.getByText('Significant event')).toBeInTheDocument();
+    expect(screen.getByText('Significant Event')).toBeInTheDocument();
     expect(screen.getByText('Needs action')).toBeInTheDocument();
     expect(screen.getByText('Investigating')).toBeInTheDocument();
   });
@@ -167,5 +186,37 @@ describe('EventFlyout', () => {
 
     fireEvent.click(screen.getByTestId('euiFlyoutCloseButton'));
     expect(onClose).toHaveBeenCalled();
+  });
+
+  it('opens the detection flyout when a detection card is clicked', () => {
+    renderFlyout();
+
+    expect(screen.queryByTestId('nightshiftDetectionFlyout')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('nightshiftDetectionCard'));
+    expect(screen.getByTestId('nightshiftDetectionFlyout')).toBeInTheDocument();
+  });
+
+  it('closes the detection flyout without closing the event flyout', () => {
+    const onClose = jest.fn();
+    renderFlyout({ onClose });
+
+    fireEvent.click(screen.getByTestId('nightshiftDetectionCard'));
+    const detectionFlyout = screen.getByTestId('nightshiftDetectionFlyout');
+    fireEvent.click(within(detectionFlyout).getByTestId('euiFlyoutCloseButton'));
+
+    expect(screen.queryByTestId('nightshiftDetectionFlyout')).not.toBeInTheDocument();
+    expect(screen.getByTestId('nightshiftEventFlyout')).toBeInTheDocument();
+    expect(onClose).not.toHaveBeenCalled();
+  });
+
+  it('toggles the detection flyout closed when the selected card is clicked again', () => {
+    renderFlyout();
+
+    const card = screen.getByTestId('nightshiftDetectionCard');
+    fireEvent.click(card);
+    expect(screen.getByTestId('nightshiftDetectionFlyout')).toBeInTheDocument();
+
+    fireEvent.click(card);
+    expect(screen.queryByTestId('nightshiftDetectionFlyout')).not.toBeInTheDocument();
   });
 });
