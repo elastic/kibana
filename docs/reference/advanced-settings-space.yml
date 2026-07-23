@@ -2260,7 +2260,7 @@ groups:
           ece: ga
           eck: ga
           self: ga
-          security: preview
+          security: ga
 
   - group: Timelion
     id: kibana-timelion-settings
