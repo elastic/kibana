@@ -12,7 +12,7 @@ import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 export const getFormatService = () =>
   ({
     deserialize: (target: any) => ({
-      convert: (text: string, format: string) => text,
-      reactConvert: (text: string) => text,
+      convertToText: (text: string) => text,
+      convertToReact: (text: string) => text,
     }),
   } as FieldFormatsStart);

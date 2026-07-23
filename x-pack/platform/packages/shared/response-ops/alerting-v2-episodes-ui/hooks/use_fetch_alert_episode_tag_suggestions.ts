@@ -7,24 +7,28 @@
 
 import { useQuery } from '@kbn/react-query';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import {
   type AlertActionTagSuggestionRow,
   fetchAlertActionTagSuggestions,
 } from '../apis/fetch_alert_action_tag_suggestions';
 import { queryKeys } from '../query_keys';
+import { useSpaceId } from './use_space_id';
 
 export interface UseFetchAlertEpisodeTagSuggestionsOptions {
-  services: { expressions: ExpressionsStart };
+  services: { expressions: ExpressionsStart; spaces: SpacesPluginStart };
   enabled?: boolean;
 }
 
 export const useFetchAlertEpisodeTagSuggestions = ({
   services,
   enabled = true,
-}: UseFetchAlertEpisodeTagSuggestionsOptions) =>
-  useQuery({
-    queryKey: queryKeys.tagSuggestions(),
-    queryFn: ({ signal }) => fetchAlertActionTagSuggestions({ services, abortSignal: signal }),
+}: UseFetchAlertEpisodeTagSuggestionsOptions) => {
+  const spaceId = useSpaceId(services.spaces);
+  return useQuery({
+    queryKey: queryKeys.tagSuggestions(spaceId),
+    queryFn: ({ signal }) =>
+      fetchAlertActionTagSuggestions({ spaceId, services, abortSignal: signal }),
     enabled,
     refetchOnWindowFocus: false,
     select: (rows: AlertActionTagSuggestionRow[]) => {
@@ -40,3 +44,4 @@ export const useFetchAlertEpisodeTagSuggestions = ({
       return tags;
     },
   });
+};

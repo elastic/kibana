@@ -9,8 +9,7 @@ import { httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 import type { RequestHandler } from '@kbn/core/server';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { getBulkAgentDetailsRoute } from './get_bulk_agent_details';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
-
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 interface MockContext {
   core: Promise<{
     logger: {

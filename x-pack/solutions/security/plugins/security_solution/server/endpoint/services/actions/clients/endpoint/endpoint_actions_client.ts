@@ -10,6 +10,7 @@
 import type { FleetActionRequest } from '@kbn/fleet-plugin/server/services/actions';
 import { v4 as uuidv4 } from 'uuid';
 import type { Mutable } from 'utility-types';
+import { isResponseActionCancelable } from '../../../../../../common/endpoint/service/response_actions/is_response_action_cancelable';
 import { getActionDetailsById } from '../../action_details_by_id';
 import type { CustomScriptsRequestQueryParams } from '../../../../../../common/api/endpoint/custom_scripts/get_custom_scripts_route';
 import type { MemoryDumpActionRequestBody } from '../../../../../../common/api/endpoint/actions/response_actions/memory_dump';
@@ -159,7 +160,52 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
         return {
           isValid: false,
           error: new ResponseActionsClientError(
-            `The following agent IDs do not support memory dump: ${unsupportedAgents.join(', ')}`
+            `The following agent IDs do not support memory dump: ${unsupportedAgents.join(' | ')}`
+          ),
+        };
+      }
+    }
+
+    // Kill Process: `kill_descendants` is gated by a feature flag and requires that the
+    // Endpoint supports it (via the `kill_process_descendents` capability).
+    if (
+      actionRequest.command === 'kill-process' &&
+      actionRequest.parameters?.kill_descendants === true
+    ) {
+      if (
+        !this.options.endpointService.experimentalFeatures
+          .responseActionsEndpointKillProcessDescendants
+      ) {
+        return {
+          isValid: false,
+          error: new ResponseActionsClientError(
+            'kill-process `kill_descendants` parameter is not enabled',
+            400
+          ),
+        };
+      }
+
+      const endpointMetadata = await this.options.endpointService
+        .getEndpointMetadataService(this.options.spaceId)
+        .findHostMetadataForFleetAgents(actionRequest.endpoint_ids);
+
+      const unsupportedAgents = endpointMetadata
+        .filter(
+          (endpointMeta) =>
+            !endpointMeta.Endpoint.capabilities?.includes('kill_process_descendents')
+        )
+        .map(
+          (endpointMeta) =>
+            `${endpointMeta.agent.id} / ${endpointMeta.host.hostname} (Agent v.${endpointMeta.agent.version})`
+        );
+
+      if (unsupportedAgents.length > 0) {
+        return {
+          isValid: false,
+          error: new ResponseActionsClientError(
+            `The following agent IDs do not support killing process descendents: ${unsupportedAgents.join(
+              ', '
+            )}`
           ),
         };
       }
@@ -206,11 +252,19 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
               400
             );
           }
+
+          // Check to ensure that this endpoint's response is still pending
+          if (actionToCancel.agentState[endpointId].isCompleted) {
+            throw new ResponseActionsClientError(
+              `Action [${actionRequest.parameters.id}] is already completed for agent [${endpointId}] and cannot be canceled.`,
+              400
+            );
+          }
         }
 
-        if (actionToCancel.isCompleted) {
+        if (!isResponseActionCancelable(actionToCancel.command, this.agentType)) {
           throw new ResponseActionsClientError(
-            `Action [${actionRequest.parameters.id}] is already completed and cannot be canceled.`,
+            `[${actionToCancel.command}] response action cannot be canceled.`,
             400
           );
         }

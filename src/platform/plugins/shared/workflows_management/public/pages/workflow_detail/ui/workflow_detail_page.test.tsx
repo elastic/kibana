@@ -7,27 +7,37 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { render, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
-import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
+import { useHistory } from 'react-router-dom';
+import { useTemplate, useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { WorkflowDetailPage } from './workflow_detail_page';
+import { PLUGIN_ID } from '../../../../common';
 import { createMockStore } from '../../../entities/workflows/store/__mocks__/store.mock';
+import { selectYamlString } from '../../../entities/workflows/store/workflow_detail/selectors';
 import { setWorkflow } from '../../../entities/workflows/store/workflow_detail/slice';
 import { mockWorkflowsManagementCapabilities } from '../../../hooks/__mocks__/use_workflows_capabilities';
-import { TestWrapper } from '../../../shared/test_utils';
+import { createStartServicesMock } from '../../../mocks';
+import { getTestProvider } from '../../../shared/mocks/test_providers';
+
+const createMockHttpFetchError = (message: string, status: number) =>
+  Object.assign(new Error(message), {
+    name: 'HttpFetchError',
+    request: {} as Request,
+    response: { status } as Response,
+    body: { message },
+  });
 
 interface WorkflowDetailPageProps {
   id?: string;
 }
 
-// Mock the hooks
 const mockUseWorkflowsBreadcrumbs = jest.fn();
 const mockUseWorkflowUrlState = jest.fn();
 
-// Create mock functions that can be changed
 let mockLoadConnectors = jest.fn();
 let mockLoadWorkflow = jest.fn();
-let mockAsyncThunkState: { isLoading: boolean; error: string | null } = {
+let mockAsyncThunkState: { isLoading: boolean; error: unknown | null } = {
   isLoading: false,
   error: null,
 };
@@ -42,13 +52,26 @@ jest.mock('../../../hooks/use_workflow_url_state', () => ({
 jest.mock('@kbn/workflows-ui', () => ({
   ...jest.requireActual('@kbn/workflows-ui'),
   useWorkflowsCapabilities: jest.fn(),
+  useTemplate: jest.fn(),
 }));
 
 const mockUseWorkflowsCapabilities = useWorkflowsCapabilities as jest.MockedFunction<
   typeof useWorkflowsCapabilities
 >;
+const mockUseTemplate = useTemplate as jest.MockedFunction<typeof useTemplate>;
 
-// Mock the thunks
+// The page only reads `data` / `isInitialLoading` / `isError` off the query
+// result, so tests mock just those; the double cast avoids spelling out the
+// ~20 other react-query result fields. `isLoading` is intentionally pinned to
+// the react-query v4 disabled-query behavior (`true` when there's no data) so
+// the page can't accidentally depend on it — see the seeding effect.
+const asTemplateQueryResult = (result: {
+  data?: unknown;
+  isInitialLoading: boolean;
+  isError: boolean;
+}): ReturnType<typeof useTemplate> =>
+  ({ ...result, isLoading: !result.data } as unknown as ReturnType<typeof useTemplate>);
+
 jest.mock('../../../entities/workflows/store/workflow_detail/thunks/load_connectors_thunk', () => ({
   loadConnectorsThunk: (...args: unknown[]) => mockLoadConnectors(...args),
 }));
@@ -56,7 +79,20 @@ jest.mock('../../../entities/workflows/store/workflow_detail/thunks/load_workflo
   loadWorkflowThunk: (...args: unknown[]) => mockLoadWorkflow(...args),
 }));
 
-// Mock child components to avoid rendering deep component trees
+jest.mock('./workflow_not_found_page', () => ({
+  WorkflowNotFoundPage: ({ onBackToWorkflows }: { onBackToWorkflows: () => void }) => (
+    <div data-test-subj="workflow-not-found-page">
+      <button
+        type="button"
+        data-test-subj="workflowDetailBackToWorkflowsButton"
+        onClick={onBackToWorkflows}
+      >
+        {'Back to Workflows'}
+      </button>
+    </div>
+  ),
+}));
+
 jest.mock('./workflow_detail_header', () => ({
   WorkflowDetailHeader: () => <div data-test-subj="workflow-detail-header">{'Header'}</div>,
 }));
@@ -83,17 +119,16 @@ jest.mock('./workflow_detail_test_step_modal', () => ({
   ),
 }));
 jest.mock('../../../features/workflow_execution_detail', () => ({
-  WorkflowExecutionDetail: ({ executionId }: any) => (
+  WorkflowExecutionDetail: ({ executionId }: { executionId: string }) => (
     <div data-test-subj="workflow-execution-detail">{executionId}</div>
   ),
 }));
 jest.mock('../../../features/workflow_execution_list/ui/workflow_execution_list_stateful', () => ({
-  WorkflowExecutionList: ({ workflowId }: any) => (
+  WorkflowExecutionList: ({ workflowId }: { workflowId: string }) => (
     <div data-test-subj="workflow-execution-list">{workflowId}</div>
   ),
 }));
 
-// Mock useAsyncThunk hooks - needs to be dynamic
 jest.mock('../../../hooks/use_async_thunk', () => ({
   useAsyncThunkState: (mockedThunk: Function) => [mockedThunk, mockAsyncThunkState],
 }));
@@ -116,7 +151,8 @@ describe('WorkflowDetailPage', () => {
     props: WorkflowDetailPageProps,
     storeSetup?: (
       store: ReturnType<typeof createMockStore>
-    ) => void | ReturnType<typeof createMockStore>
+    ) => void | ReturnType<typeof createMockStore>,
+    initialEntries?: string[]
   ) => {
     let store = createMockStore();
 
@@ -127,17 +163,33 @@ describe('WorkflowDetailPage', () => {
       }
     }
 
-    const wrapper = ({ children }: { children: React.ReactNode }) => {
-      return <TestWrapper store={store}>{children}</TestWrapper>;
+    const services = createStartServicesMock();
+    const navigateToApp = jest.spyOn(services.application, 'navigateToApp');
+
+    // Captures the MemoryRouter history so tests can mutate the URL query the
+    // way `useWorkflowUrlState` does (e.g. `?view=graph` on view toggle).
+    const historyRef: { current?: ReturnType<typeof useHistory> } = {};
+    const CaptureHistory = () => {
+      historyRef.current = useHistory();
+      return null;
     };
 
-    return render(<WorkflowDetailPage {...props} />, { wrapper });
+    const view = render(
+      <>
+        <CaptureHistory />
+        <WorkflowDetailPage {...props} />
+      </>,
+      {
+        wrapper: getTestProvider({ store, services, initialEntries }),
+      }
+    );
+
+    return { ...view, navigateToApp, historyRef };
   };
 
   beforeEach(() => {
     jest.clearAllMocks();
 
-    // Reset mock state
     mockAsyncThunkState = {
       isLoading: false,
       error: null,
@@ -145,12 +197,15 @@ describe('WorkflowDetailPage', () => {
     mockLoadConnectors = jest.fn().mockReturnValue(Promise.resolve());
     mockLoadWorkflow = jest.fn().mockReturnValue(Promise.resolve());
 
-    // Mock default hook implementations
-    mockUseWorkflowsBreadcrumbs.mockImplementation(() => {
-      // Empty function, hook just sets breadcrumbs
-    });
+    mockUseWorkflowsBreadcrumbs.mockImplementation(() => undefined);
     mockUseWorkflowsCapabilities.mockReturnValue(mockWorkflowsManagementCapabilities);
-
+    mockUseTemplate.mockReturnValue(
+      asTemplateQueryResult({
+        data: undefined,
+        isInitialLoading: false,
+        isError: false,
+      })
+    );
     mockUseWorkflowUrlState.mockReturnValue({
       activeTab: 'workflow' as const,
       selectedExecutionId: undefined,
@@ -160,7 +215,7 @@ describe('WorkflowDetailPage', () => {
   });
 
   describe('when loading existing workflow', () => {
-    it('should load workflow when id is provided', async () => {
+    it('should load workflow when id is provided', () => {
       renderWithProviders({ id: 'test-workflow-123' }, (s) => {
         s.dispatch(setWorkflow(mockWorkflow));
       });
@@ -176,31 +231,156 @@ describe('WorkflowDetailPage', () => {
       renderWithProviders({ id: undefined }, () => store);
 
       expect(mockLoadConnectors).toHaveBeenCalled();
-      // Component should render without loading a workflow since there's no id
       expect(dispatchSpy).toHaveBeenCalled();
     });
   });
 
-  describe('when error occurs', () => {
-    it('should display error message when workflow fails to load', async () => {
-      // Set error state
-      mockAsyncThunkState = { isLoading: false, error: 'Failed to load workflow' };
+  describe('when creating from a template (`?fromTemplate=<slug>`)', () => {
+    const templateYaml = 'name: My template workflow\nsteps:\n  - name: hello\n    type: console\n';
+    const template = {
+      raw: templateYaml,
+      body: {},
+      metadata: { slug: 'my-template', name: 'My template', version: '1.0.0', categories: [] },
+    };
 
-      const { getByText } = renderWithProviders({ id: 'test-workflow-123' });
+    const getSeededYaml = (store: ReturnType<typeof createMockStore>) =>
+      selectYamlString(store.getState());
 
-      await waitFor(() => {
-        expect(getByText('Unable to load workflow')).toBeInTheDocument();
+    it('seeds the editor with the rendered template yaml', () => {
+      mockUseTemplate.mockReturnValue(
+        asTemplateQueryResult({
+          data: template,
+          isInitialLoading: false,
+          isError: false,
+        })
+      );
+      const store = createMockStore();
+
+      renderWithProviders({ id: undefined }, () => store, ['/create?fromTemplate=my-template']);
+
+      expect(mockUseTemplate).toHaveBeenCalledWith('my-template');
+      expect(getSeededYaml(store)).toBe(templateYaml);
+    });
+
+    it('does not reset the yaml when the URL query changes (e.g. switching to the graph view)', () => {
+      mockUseTemplate.mockReturnValue(
+        asTemplateQueryResult({
+          data: template,
+          isInitialLoading: false,
+          isError: false,
+        })
+      );
+      const store = createMockStore();
+
+      const { historyRef } = renderWithProviders({ id: undefined }, () => store, [
+        '/create?fromTemplate=my-template',
+      ]);
+      expect(getSeededYaml(store)).toBe(templateYaml);
+
+      // Simulate `useWorkflowUrlState` mutating the query on view toggle.
+      act(() => {
+        historyRef.current?.replace('/create?fromTemplate=my-template&view=graph');
       });
+
+      expect(getSeededYaml(store)).toBe(templateYaml);
+    });
+
+    it('does not reset the yaml when a background refetch errors after a successful seed', () => {
+      mockUseTemplate.mockReturnValue(
+        asTemplateQueryResult({
+          data: template,
+          isInitialLoading: false,
+          isError: false,
+        })
+      );
+      const store = createMockStore();
+
+      const { historyRef } = renderWithProviders({ id: undefined }, () => store, [
+        '/create?fromTemplate=my-template',
+      ]);
+      expect(getSeededYaml(store)).toBe(templateYaml);
+
+      // react-query v4 background refetch failure: `data` retained,
+      // `isError: true`. Trigger a re-render on the same component instance
+      // (so `seededWithRef` is preserved) via a router `replace` — this
+      // mirrors what happens on the create page when `useWorkflowUrlState`
+      // mutates `location.search` after a refetch-on-focus.
+      mockUseTemplate.mockReturnValue(
+        asTemplateQueryResult({
+          data: template,
+          isInitialLoading: false,
+          isError: true,
+        })
+      );
+      act(() => {
+        historyRef.current?.replace('/create?fromTemplate=my-template&view=graph');
+      });
+
+      expect(getSeededYaml(store)).toBe(templateYaml);
+    });
+
+    it('falls back to the default yaml when the template fails to load', () => {
+      mockUseTemplate.mockReturnValue(
+        asTemplateQueryResult({
+          data: undefined,
+          isInitialLoading: false,
+          isError: true,
+        })
+      );
+      const store = createMockStore();
+
+      renderWithProviders({ id: undefined }, () => store, ['/create?fromTemplate=missing']);
+
+      expect(getSeededYaml(store)).toContain('name: New workflow');
+    });
+  });
+
+  describe('when error occurs', () => {
+    it('should render the not found page for 404 workflow load errors', () => {
+      mockAsyncThunkState = {
+        isLoading: false,
+        error: createMockHttpFetchError('Workflow not found', 404),
+      };
+
+      renderWithProviders({ id: 'test-workflow-123' });
+
+      expect(screen.getByTestId('workflow-not-found-page')).toBeInTheDocument();
+    });
+
+    it('should navigate to workflows list when back button is clicked', () => {
+      mockAsyncThunkState = {
+        isLoading: false,
+        error: createMockHttpFetchError('Workflow not found', 404),
+      };
+
+      const { navigateToApp } = renderWithProviders({ id: 'test-workflow-123' });
+
+      fireEvent.click(screen.getByTestId('workflowDetailBackToWorkflowsButton'));
+
+      expect(navigateToApp).toHaveBeenCalledWith(PLUGIN_ID, undefined);
+    });
+
+    it('should display generic error message for non-not-found failures', () => {
+      mockAsyncThunkState = {
+        isLoading: false,
+        error: createMockHttpFetchError('Internal server error', 500),
+      };
+
+      renderWithProviders({ id: 'test-workflow-123' });
+
+      expect(screen.getByText('Unable to load workflow')).toBeInTheDocument();
+      expect(screen.getByText(/Internal server error/)).toBeInTheDocument();
+      expect(screen.queryByTestId('workflow-not-found-page')).not.toBeInTheDocument();
     });
   });
 
   describe('when loading state', () => {
     it('should pass loading state to header', () => {
-      // Set loading state
       mockAsyncThunkState = { isLoading: true, error: null };
 
-      const { getByTestId } = renderWithProviders({ id: 'test-workflow-123' });
-      expect(getByTestId('workflow-detail-header')).toBeInTheDocument();
+      renderWithProviders({ id: 'test-workflow-123' });
+
+      expect(screen.getByTestId('workflow-detail-header')).toBeInTheDocument();
     });
   });
 
@@ -213,12 +393,11 @@ describe('WorkflowDetailPage', () => {
         setActiveTab: jest.fn(),
       });
 
-      const { getByTestId } = renderWithProviders({ id: 'test-workflow-123' }, (s) => {
+      renderWithProviders({ id: 'test-workflow-123' }, (s) => {
         s.dispatch(setWorkflow(mockWorkflow));
       });
 
-      expect(getByTestId('workflow-execution-list')).toBeInTheDocument();
-      expect(getByTestId('workflow-execution-list')).toHaveTextContent('test-workflow-123');
+      expect(screen.getByTestId('workflow-execution-list')).toHaveTextContent('test-workflow-123');
     });
 
     it('should render editor layout with execution detail when selectedExecutionId is set', () => {
@@ -229,12 +408,11 @@ describe('WorkflowDetailPage', () => {
         setActiveTab: jest.fn(),
       });
 
-      const { getByTestId } = renderWithProviders({ id: 'test-workflow-123' }, (s) => {
+      renderWithProviders({ id: 'test-workflow-123' }, (s) => {
         s.dispatch(setWorkflow(mockWorkflow));
       });
 
-      expect(getByTestId('workflow-execution-detail')).toBeInTheDocument();
-      expect(getByTestId('workflow-execution-detail')).toHaveTextContent('execution-123');
+      expect(screen.getByTestId('workflow-execution-detail')).toHaveTextContent('execution-123');
     });
   });
 
@@ -247,27 +425,22 @@ describe('WorkflowDetailPage', () => {
         setActiveTab: jest.fn(),
       });
 
-      const { getByTestId, queryByTestId } = renderWithProviders(
-        { id: 'test-workflow-123' },
-        (s) => {
-          s.dispatch(setWorkflow(mockWorkflow));
-        }
-      );
+      renderWithProviders({ id: 'test-workflow-123' }, (s) => {
+        s.dispatch(setWorkflow(mockWorkflow));
+      });
 
-      expect(getByTestId('workflow-detail-header')).toBeInTheDocument();
-      expect(getByTestId('workflow-detail-editor')).toBeInTheDocument();
-      expect(getByTestId('workflow-editor-layout')).toBeInTheDocument();
-      expect(queryByTestId('workflow-execution-list')).not.toBeInTheDocument();
-      expect(queryByTestId('workflow-execution-detail')).not.toBeInTheDocument();
+      expect(screen.getByTestId('workflow-detail-header')).toBeInTheDocument();
+      expect(screen.getByTestId('workflow-detail-editor')).toBeInTheDocument();
+      expect(screen.getByTestId('workflow-editor-layout')).toBeInTheDocument();
+      expect(screen.queryByTestId('workflow-execution-list')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('workflow-execution-detail')).not.toBeInTheDocument();
     });
   });
 
   describe('breadcrumbs', () => {
     it('should call useWorkflowsBreadcrumbs hook with workflow name', () => {
-      const workflowName = 'My Workflow';
-
       renderWithProviders({ id: 'test-workflow-123' }, (s) => {
-        s.dispatch(setWorkflow({ ...mockWorkflow, name: workflowName }));
+        s.dispatch(setWorkflow({ ...mockWorkflow, name: 'My Workflow' }));
       });
 
       expect(mockUseWorkflowsBreadcrumbs).toHaveBeenCalled();
@@ -281,7 +454,11 @@ describe('WorkflowDetailPage', () => {
     });
 
     it('should call loadWorkflow when id changes', () => {
-      const { rerender } = renderWithProviders({ id: 'test-workflow-123' });
+      const store = createMockStore();
+      const services = createStartServicesMock();
+      const wrapper = getTestProvider({ store, services });
+
+      const { rerender } = render(<WorkflowDetailPage id="test-workflow-123" />, { wrapper });
 
       expect(mockLoadWorkflow).toHaveBeenCalledTimes(1);
       expect(mockLoadWorkflow).toHaveBeenLastCalledWith({ id: 'test-workflow-123' });
@@ -294,35 +471,32 @@ describe('WorkflowDetailPage', () => {
 
   describe('workflow test modal', () => {
     it('should render workflow detail test modal', () => {
-      const { getByTestId } = renderWithProviders({ id: 'test-workflow-123' });
-      expect(getByTestId('workflow-detail-test-modal')).toBeInTheDocument();
+      renderWithProviders({ id: 'test-workflow-123' });
+      expect(screen.getByTestId('workflow-detail-test-modal')).toBeInTheDocument();
     });
   });
 
   describe('workflow test step modal', () => {
     it('should render workflow detail test step modal', () => {
-      const { getByTestId } = renderWithProviders({ id: 'test-workflow-123' });
-      expect(getByTestId('workflow-detail-test-step-modal')).toBeInTheDocument();
+      renderWithProviders({ id: 'test-workflow-123' });
+      expect(screen.getByTestId('workflow-detail-test-step-modal')).toBeInTheDocument();
     });
   });
 
   describe('workflow execution detail close handler', () => {
     it('should handle closing execution detail', () => {
-      const setSelectedExecutionMock = jest.fn();
       mockUseWorkflowUrlState.mockReturnValue({
         activeTab: 'executions' as const,
         selectedExecutionId: 'execution-123',
-        setSelectedExecution: setSelectedExecutionMock,
+        setSelectedExecution: jest.fn(),
         setActiveTab: jest.fn(),
       });
 
-      const { getByTestId } = renderWithProviders({ id: 'test-workflow-123' }, (s) => {
+      renderWithProviders({ id: 'test-workflow-123' }, (s) => {
         s.dispatch(setWorkflow(mockWorkflow));
       });
 
-      expect(getByTestId('workflow-execution-detail')).toBeInTheDocument();
-      // The onClose handler is passed to WorkflowExecutionDetail but we can't test it here
-      // as it's a callback that depends on the component's internal implementation
+      expect(screen.getByTestId('workflow-execution-detail')).toBeInTheDocument();
     });
   });
 
@@ -379,11 +553,11 @@ describe('WorkflowDetailPage', () => {
         setActiveTab: jest.fn(),
       });
 
-      const { queryByTestId } = renderWithProviders({ id: 'test-workflow-123' }, (s) => {
+      renderWithProviders({ id: 'test-workflow-123' }, (s) => {
         s.dispatch(setWorkflow(mockWorkflow));
       });
 
-      expect(queryByTestId('workflow-execution-list')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('workflow-execution-list')).not.toBeInTheDocument();
     });
   });
 });

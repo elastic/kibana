@@ -29,6 +29,7 @@ test.describe(
       await test.step('navigate to OTel Host flow', async () => {
         await pageObjects.onboarding.selectHostUseCase();
         await pageObjects.onboarding.clickIntegrationCard('integration-card:otel-logs');
+        await pageObjects.onboarding.waitForIngestionModeSelector();
       });
 
       await test.step('ingestion selector is visible', async () => {
@@ -52,6 +53,7 @@ test.describe(
     test('can switch between ingestion modes', async ({ pageObjects }) => {
       await pageObjects.onboarding.selectHostUseCase();
       await pageObjects.onboarding.clickIntegrationCard('integration-card:otel-logs');
+      await pageObjects.onboarding.waitForIngestionModeSelector();
 
       await test.step('select Wired Streams', async () => {
         await pageObjects.onboarding.selectWiredStreams();

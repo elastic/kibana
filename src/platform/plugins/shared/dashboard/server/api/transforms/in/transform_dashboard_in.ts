@@ -7,20 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { uniqBy } from 'lodash';
+
 import type { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
 import type { RequestTiming } from '@kbn/core-http-server';
+import { toStoredTags } from '@kbn/as-code-shared-transforms';
 import type { DashboardState } from '../../types';
 import type { DashboardSavedObjectAttributes } from '../../../dashboard_saved_object';
 import { transformPanelsIn } from './transform_panels_in';
 import { transformPinnedPanelsIn } from './transform_pinned_panels_in';
 import { transformSearchSourceIn } from './transform_search_source_in';
-import { transformTagsIn } from './transform_tags_in';
 import { transformOptionsIn } from './transform_options_in';
 
 export const transformDashboardIn = (
   dashboardState: Partial<DashboardState>,
   isDashboardAppRequest: boolean = false,
-  serverTiming?: RequestTiming
+  serverTiming?: RequestTiming,
+  useGASchemas?: boolean
 ): {
   attributes: DashboardSavedObjectAttributes;
   references: SavedObjectReference[];
@@ -38,17 +41,18 @@ export const transformDashboardIn = (
       time_range,
       refresh_interval,
       project_routing,
+      esql_approximation,
       ...rest
     } = dashboardState;
 
-    const tagReferences = transformTagsIn(tags);
+    const { references: tagReferences } = toStoredTags({ tags });
 
     const {
       panelsJSON,
       sections,
       references: panelReferences,
     } = panels
-      ? transformPanelsIn(panels, isDashboardAppRequest)
+      ? transformPanelsIn(panels, isDashboardAppRequest, useGASchemas)
       : {
           panelsJSON: '',
           sections: undefined,
@@ -61,7 +65,8 @@ export const transformDashboardIn = (
     );
 
     const { pinnedPanels, references: controlGroupReferences } = transformPinnedPanelsIn(
-      pinned_panels ?? []
+      pinned_panels ?? [],
+      useGASchemas
     );
 
     const attributes = {
@@ -80,16 +85,20 @@ export const transformDashboardIn = (
         : { timeRestore: false }),
       kibanaSavedObjectMeta: { searchSourceJSON },
       ...(project_routing !== undefined && { projectRouting: project_routing }),
+      ...(esql_approximation !== undefined && { esqlApproximation: esql_approximation }),
     };
 
     return {
       attributes,
-      references: [
-        ...tagReferences,
-        ...panelReferences,
-        ...controlGroupReferences,
-        ...searchSourceReferences,
-      ],
+      references: uniqBy(
+        [
+          ...tagReferences,
+          ...panelReferences,
+          ...controlGroupReferences,
+          ...searchSourceReferences,
+        ],
+        'name'
+      ),
     };
   } finally {
     timer?.end();

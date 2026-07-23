@@ -57,7 +57,7 @@ This tool fetches Elastic Defend package configurations to assist in troubleshoo
         }
         const defaultTransformSettings: Array<{ path: string; config: unknown }> = [];
         if (packageData) {
-          packageData.assetsMap.forEach((buffer, path) => {
+          packageData.assetsMap?.forEach((buffer, path) => {
             if (path.includes('elasticsearch/transform/') && buffer) {
               const content = buffer.toString('utf-8');
               const config: unknown = JSON.parse(content);

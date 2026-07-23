@@ -15,17 +15,6 @@ import { savedObjectNamespacesToSpaceId } from '../../space_id_to_namespace';
 import { MaintenanceWindowSavedObjectsClientToken } from './tokens';
 import type { ActiveMaintenanceWindow } from './types';
 
-export const DEFAULT_MAINTENANCE_WINDOW_CACHE_INTERVAL_MS = 60 * 1000;
-
-interface MaintenanceWindowServiceOptions {
-  cacheIntervalMs?: number;
-}
-
-interface CacheEntry {
-  expiresAt: number;
-  windows: ActiveMaintenanceWindow[];
-}
-
 export interface MaintenanceWindowServiceContract {
   /**
    * Returns all enabled maintenance windows across all spaces, with each MW's
@@ -40,46 +29,14 @@ export interface MaintenanceWindowServiceContract {
 
 @injectable()
 export class MaintenanceWindowService implements MaintenanceWindowServiceContract {
-  private cache: CacheEntry | null = null;
-  private inFlight: Promise<ActiveMaintenanceWindow[]> | null = null;
-  private readonly cacheIntervalMs: number;
-
   constructor(
     @inject(MaintenanceWindowSavedObjectsClientToken)
     private readonly client: SavedObjectsClientContract,
     @inject(LoggerServiceToken)
-    private readonly logger: LoggerServiceContract,
-    options: MaintenanceWindowServiceOptions = {}
-  ) {
-    this.cacheIntervalMs = options.cacheIntervalMs ?? DEFAULT_MAINTENANCE_WINDOW_CACHE_INTERVAL_MS;
-  }
+    private readonly logger: LoggerServiceContract
+  ) {}
 
   public async getEnabledMaintenanceWindows(): Promise<ActiveMaintenanceWindow[]> {
-    const now = Date.now();
-    if (this.cache && this.cache.expiresAt > now) {
-      return this.cache.windows;
-    }
-
-    if (this.inFlight) {
-      return this.inFlight;
-    }
-
-    this.inFlight = this.fetchEnabledWindows()
-      .then((windows) => {
-        this.cache = {
-          windows,
-          expiresAt: Date.now() + this.cacheIntervalMs,
-        };
-        return windows;
-      })
-      .finally(() => {
-        this.inFlight = null;
-      });
-
-    return this.inFlight;
-  }
-
-  private async fetchEnabledWindows(): Promise<ActiveMaintenanceWindow[]> {
     const windows: ActiveMaintenanceWindow[] = [];
     const finder = this.client.createPointInTimeFinder<MaintenanceWindowAttributes>({
       type: MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,

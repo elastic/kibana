@@ -269,11 +269,60 @@ const version5: SavedObjectsFullModelVersion = {
   },
 };
 
+const logExtractionRuntimeStateSchemaV6 = schema.object({
+  checkpointTimestamp: schema.nullable(schema.string()),
+  paginationId: schema.nullable(schema.string()),
+  lastExecutionTimestamp: schema.nullable(schema.string()),
+});
+
+const engineDescriptorSchemaV6 = schema.object({
+  ...engineDescriptorAttributesSchemaV1,
+  logExtractionState: logExtractionRuntimeStateSchemaV6,
+  error: schema.nullable(
+    schema.object({
+      message: schema.string(),
+      action: schema.string(),
+    })
+  ),
+});
+
+const version6: SavedObjectsFullModelVersion = {
+  changes: [
+    {
+      type: 'data_backfill' as const,
+      backfillFn: (document) => {
+        const { logExtractionState } = document.attributes;
+        return {
+          attributes: {
+            logExtractionState: {
+              checkpointTimestamp: logExtractionState?.paginationTimestamp ?? null,
+            },
+          },
+        };
+      },
+    },
+    {
+      type: 'data_removal' as const,
+      removedAttributePaths: [
+        'logExtractionState.logsPageCursorStartId',
+        'logExtractionState.logsPageCursorEndId',
+        'logExtractionState.paginationTimestamp',
+        'logExtractionState.logsPageCursorStartTimestamp',
+        'logExtractionState.logsPageCursorEndTimestamp',
+      ],
+    },
+  ],
+  schemas: {
+    create: engineDescriptorSchemaV6,
+    forwardCompatibility: engineDescriptorSchemaV6.extends({}, { unknowns: 'ignore' }),
+  },
+};
+
 export const EngineDescriptorType: SavedObjectsType = {
   name: EngineDescriptorTypeName,
   hidden: false,
   namespaceType: 'multiple-isolated',
   mappings: EngineDescriptorTypeMappings,
-  modelVersions: { 1: version1, 2: version2, 3: version3, 4: version4, 5: version5 },
+  modelVersions: { 1: version1, 2: version2, 3: version3, 4: version4, 5: version5, 6: version6 },
   hiddenFromHttpApis: true,
 };

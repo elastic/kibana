@@ -9,7 +9,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useMemo } from 'react';
 
 import type { Filter, Query } from '@kbn/es-query';
-import { type DataView, type DataViewSpec, getEsQueryConfig } from '@kbn/data-plugin/common';
+import { type DataView, getEsQueryConfig } from '@kbn/data-plugin/common';
 import { ID as OverviewHostQueryId } from '../../containers/overview_host';
 import { OverviewHost } from '../overview_host';
 import { OverviewNetwork } from '../overview_network';
@@ -26,7 +26,6 @@ import { SecurityPageName } from '../../../../common/constants';
 interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'setQuery'> {
   filters: Filter[];
   indexNames: string[];
-  dataViewSpec?: DataViewSpec;
   dataView: DataView;
   query: Query;
 }
@@ -35,7 +34,6 @@ const EventCountsComponent: React.FC<Props> = ({
   filters,
   from,
   indexNames,
-  dataViewSpec,
   dataView,
   query,
   setQuery,
@@ -47,24 +45,22 @@ const EventCountsComponent: React.FC<Props> = ({
     () =>
       convertToBuildEsQuery({
         config: getEsQueryConfig(uiSettings),
-        dataViewSpec,
         dataView,
         queries: [query],
         filters: [...filters, ...fieldNameExistsFilter(SecurityPageName.hosts)],
       }),
-    [dataViewSpec, filters, dataView, query, uiSettings]
+    [filters, dataView, query, uiSettings]
   );
 
   const [networkFilterQuery] = useMemo(
     () =>
       convertToBuildEsQuery({
         config: getEsQueryConfig(uiSettings),
-        dataViewSpec,
         dataView,
         queries: [query],
         filters: [...filters, ...sourceOrDestinationIpExistsFilter],
       }),
-    [uiSettings, dataViewSpec, dataView, query, filters]
+    [uiSettings, dataView, query, filters]
   );
 
   useInvalidFilterQuery({

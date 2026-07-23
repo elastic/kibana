@@ -63,6 +63,38 @@ describe('selectHasUnsavedChanges', () => {
     expect(result).toEqual({ hasUnsavedChanges: false, unsavedTabIds: [] });
   });
 
+  it('does not detect unsaved changes for untouched persisted tabs with empty sort', async () => {
+    const services = createDiscoverServicesMock();
+    const { internalState, runtimeStateManager, initializeTabs, initializeSingleTab } =
+      getDiscoverInternalStateMock({
+        services,
+        persistedDataViews: [dataViewWithTimefieldMock],
+      });
+
+    const persistedTab = {
+      ...getPersistedTabMock({
+        tabId: 'persisted-tab',
+        dataView: dataViewWithTimefieldMock,
+        services,
+      }),
+      sort: [],
+    };
+    const persistedDiscoverSession = createDiscoverSessionMock({
+      id: 'test-id',
+      tabs: [persistedTab],
+    });
+
+    await initializeTabs({ persistedDiscoverSession });
+    await initializeSingleTab({ tabId: persistedTab.id });
+
+    const result = selectHasUnsavedChanges(internalState.getState(), {
+      runtimeStateManager,
+      services,
+    });
+
+    expect(result).toEqual({ hasUnsavedChanges: false, unsavedTabIds: [] });
+  });
+
   it('detects unsaved changes when the active saved search diverges from the persisted tab', async () => {
     const { internalState, runtimeStateManager, services, getCurrentTab } = await setup();
     const currentTab = getCurrentTab();

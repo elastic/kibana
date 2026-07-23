@@ -6,7 +6,14 @@
  */
 
 import React, { useMemo, useCallback, useState } from 'react';
-import { EuiPopover, EuiContextMenu, EuiButtonIcon, EuiButton, EuiIcon } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonIcon,
+  EuiContextMenu,
+  EuiIcon,
+  EuiPopover,
+  EuiToolTip,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { EuiContextMenuPanelDescriptor, IconType, EuiIconProps } from '@elastic/eui';
 
@@ -186,18 +193,28 @@ export const HierarchicalActionsMenu: React.FC<HierarchicalActionsMenuProps> = (
       {button.children}
     </EuiButton>
   ) : (
-    <EuiButtonIcon
-      iconType="boxesVertical"
-      onClick={toggleMenu}
-      aria-label={i18n.translate('xpack.fleet.hierarchicalMenu.openMenuAriaLabel', {
+    <EuiToolTip
+      content={i18n.translate('xpack.fleet.hierarchicalMenu.openMenuAriaLabel', {
         defaultMessage: 'Open menu',
       })}
-      data-test-subj={dataTestSubj || 'hierarchicalMenuButton'}
-    />
+      disableScreenReaderOutput
+    >
+      <EuiButtonIcon
+        iconType="boxesVertical"
+        onClick={toggleMenu}
+        aria-label={i18n.translate('xpack.fleet.hierarchicalMenu.openMenuAriaLabel', {
+          defaultMessage: 'Open menu',
+        })}
+        data-test-subj={dataTestSubj || 'hierarchicalMenuButton'}
+      />
+    </EuiToolTip>
   );
 
   return (
     <EuiPopover
+      aria-label={i18n.translate('xpack.fleet.hierarchicalMenu.popoverAriaLabel', {
+        defaultMessage: 'Menu',
+      })}
       anchorPosition={anchorPosition}
       panelPaddingSize="none"
       button={buttonElement}

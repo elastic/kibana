@@ -45,6 +45,7 @@ tags:
   - jest-unit-tests
 fileGroups:
   src:
+    - '*.ts'
     - common/**/*
     - public/**/*
     - server/**/*

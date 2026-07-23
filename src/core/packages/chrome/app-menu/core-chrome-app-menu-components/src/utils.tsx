@@ -8,14 +8,19 @@
  */
 
 import React, { type MouseEvent, type ReactNode } from 'react';
+import { css } from '@emotion/react';
 import { isArray, isFunction, upperFirst } from 'lodash';
 import {
   type EuiButtonColor,
   type EuiThemeComputed,
   type EuiContextMenuPanelDescriptor,
   type EuiContextMenuPanelItemDescriptor,
+  type UseEuiTheme,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLoadingSpinner,
+  EuiSwitch,
+  EuiToolTip,
 } from '@elastic/eui';
 import { getRouterLinkProps } from '@kbn/router-utils';
 import { AppMenuBadge } from './components/app_menu_badge';
@@ -26,11 +31,13 @@ import type {
   AppMenuItemType,
   AppMenuPopoverItem,
   AppMenuPrimaryActionItem,
+  AppMenuSwitch,
 } from './types';
 import { APP_MENU_ITEM_LIMIT, DEFAULT_POPOVER_WIDTH } from './constants';
+import { APP_MENU_TEST_SUBJECTS, getAppMenuItemTestSubj } from './test_subjects';
 
-const sortByOrder = <T extends { order: number }>(items: T[]): T[] =>
-  [...items].sort((a, b) => a.order - b.order);
+const sortByOrder = <T extends { order?: number }>(items: T[]): T[] =>
+  [...items].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
 
 /**
  * Calculate how many items can be displayed.
@@ -83,7 +90,11 @@ export const getAppMenuItems = ({
 }: {
   config?: AppMenuConfig;
   hasStaticItems?: boolean;
-}) => {
+}): {
+  displayedItems: AppMenuItemType[];
+  overflowItems: AppMenuItemType[];
+  shouldOverflow: boolean;
+} => {
   if (!config || !config.items) {
     return {
       displayedItems: [],
@@ -119,11 +130,13 @@ export const getAppMenuItems = ({
 };
 
 export const processStaticItems = (staticItems?: AppMenuItemType[]): AppMenuItemType[] =>
-  sortByOrder(staticItems ?? []).map(({ separator, ...item }, index) => ({
+  sortByOrder(staticItems ?? []).map(({ separator, ...item }) => ({
     ...item,
     overflow: true,
-    ...(index === 0 ? { separator: 'above' as const } : {}),
   }));
+
+export const hasNonGlobalStaticItems = (staticItems?: Array<{ global?: boolean }>): boolean =>
+  !!staticItems?.some((item) => !item.global);
 
 export const isDisabled = (disableButton: AppMenuItemCommon['disableButton']) =>
   Boolean(isFunction(disableButton) ? disableButton() : disableButton);
@@ -156,7 +169,9 @@ export const createReturnFocus =
       parentElement.focus();
       return;
     }
-    document.querySelector<HTMLElement>('[data-test-subj="app-menu-overflow-button"]')?.focus();
+    document
+      .querySelector<HTMLElement>(`[data-test-subj="${APP_MENU_TEST_SUBJECTS.overflowButton}"]`)
+      ?.focus();
   };
 
 export const mapAppMenuItemToPanelItem = (
@@ -171,8 +186,10 @@ export const mapAppMenuItemToPanelItem = (
     tooltipTitle: item?.tooltipTitle,
   });
 
+  const loading = Boolean(item.isLoading);
+
   const handleClick = (event: MouseEvent) => {
-    if (isDisabled(item?.disableButton)) {
+    if (isDisabled(item?.disableButton) || loading) {
       return;
     }
 
@@ -196,14 +213,15 @@ export const mapAppMenuItemToPanelItem = (
       ? getRouterLinkProps({ href: item.href, onClick: handleClick })
       : { onClick: hasClickHandler ? handleClick : undefined };
 
+  const itemTestSubj = item.testId ?? getAppMenuItemTestSubj(item.id);
+
+  const showAsSelected = Boolean(item.isSelected);
+
   const itemName: ReactNode = item.labelBadgeText ? (
     <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
       <EuiFlexItem grow={false}>{upperFirst(item.label)}</EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <AppMenuBadge
-          text={item.labelBadgeText}
-          data-test-subj={item.testId ? `${item.testId}-badge` : undefined}
-        />
+        <AppMenuBadge text={item.labelBadgeText} data-test-subj={`${itemTestSubj}-badge`} />
       </EuiFlexItem>
     </EuiFlexGroup>
   ) : (
@@ -213,17 +231,27 @@ export const mapAppMenuItemToPanelItem = (
   return {
     key: item.id,
     name: itemName,
-    icon: item?.iconType,
+    icon: loading ? (
+      <EuiLoadingSpinner size="m" data-test-subj={`${itemTestSubj}-loading`} />
+    ) : (
+      item?.iconType
+    ),
     ...routerLinkProps,
     href: item?.href,
     target: item?.href ? item?.target : undefined,
-    disabled: isDisabled(item?.disableButton),
-    'data-test-subj': item?.testId,
+    disabled: isDisabled(item?.disableButton) || loading,
+    'data-test-subj': itemTestSubj,
     toolTipContent: content,
     toolTipProps: {
       title,
     },
     ...(childPanelId !== undefined && { panel: childPanelId }),
+    ...(item?.isDestructive && { color: 'danger' }),
+    ...(showAsSelected && {
+      css: ({ euiTheme }: UseEuiTheme) => css`
+        background-color: ${getIsSelectedColor({ color: 'text', euiTheme, isFilled: false })};
+      `,
+    }),
   };
 };
 
@@ -278,12 +306,59 @@ export const getPopoverActionItems = ({
 };
 
 /**
+ * Generate switch items for the popover menu. The switch is rendered as the very last item
+ * with a separator above it.
+ */
+export const getPopoverSwitchItems = ({
+  switchConfig,
+}: {
+  switchConfig: AppMenuSwitch;
+}): EuiContextMenuPanelItemDescriptor[] => {
+  const separator = createSeparatorItem('switch-separator');
+  const { title, content } = getTooltip({
+    tooltipContent: switchConfig.tooltipContent,
+    tooltipTitle: switchConfig.tooltipTitle,
+  });
+  const showTooltip = Boolean(content || title);
+
+  return [
+    separator,
+    {
+      key: `switch-${switchConfig.id}`,
+      renderItem: () => {
+        const switchElement = (
+          <EuiSwitch
+            id={switchConfig.id}
+            label={switchConfig.label}
+            labelProps={switchConfig.labelProps}
+            checked={switchConfig.checked}
+            onChange={(e) => switchConfig.onChange(e.target.checked)}
+            disabled={switchConfig.disabled}
+            compressed
+            data-test-subj={switchConfig['data-test-subj'] ?? APP_MENU_TEST_SUBJECTS.switch}
+          />
+        );
+
+        return showTooltip ? (
+          <EuiToolTip content={content} title={title}>
+            {switchElement}
+          </EuiToolTip>
+        ) : (
+          switchElement
+        );
+      },
+    },
+  ];
+};
+
+/**
  * Recursively generate EUI context menu panels from the provided menu items.
  */
 export const getPopoverPanels = ({
   items,
   staticItems,
   primaryActionItem,
+  switchConfig,
   startPanelId = 0,
   rootPanelWidth = DEFAULT_POPOVER_WIDTH,
   rootPopoverTestId,
@@ -294,6 +369,7 @@ export const getPopoverPanels = ({
   items: AppMenuPopoverItem[];
   staticItems?: AppMenuPopoverItem[];
   primaryActionItem?: AppMenuPrimaryActionItem;
+  switchConfig?: AppMenuSwitch;
   startPanelId?: number;
   rootPanelWidth?: number;
   rootPopoverTestId?: string;
@@ -303,6 +379,7 @@ export const getPopoverPanels = ({
 }): EuiContextMenuPanelDescriptor[] => {
   const panels: EuiContextMenuPanelDescriptor[] = [];
   const hasActionItems = Boolean(primaryActionItem);
+  const hasSwitchItem = Boolean(switchConfig);
   let currentPanelId = startPanelId;
 
   const processItems = ({
@@ -320,7 +397,7 @@ export const getPopoverPanels = ({
   }) => {
     const panelItems: EuiContextMenuPanelItemDescriptor[] = [];
 
-    const sortedItems = [...itemsToProcess].sort((a, b) => a.order - b.order);
+    const sortedItems = sortByOrder(itemsToProcess);
 
     sortedItems.forEach((item) => {
       if (item.separator === 'above') {
@@ -398,10 +475,13 @@ export const getPopoverPanels = ({
     const mainPanel = panels.find((panel) => panel.id === startPanelId);
 
     if (staticPanel && mainPanel) {
-      mainPanel.items = [
-        ...(mainPanel.items as EuiContextMenuPanelItemDescriptor[]),
-        ...(staticPanel.items as EuiContextMenuPanelItemDescriptor[]),
-      ];
+      const mainItems = mainPanel.items as EuiContextMenuPanelItemDescriptor[];
+      const staticPanelItems = staticPanel.items as EuiContextMenuPanelItemDescriptor[];
+
+      // Only add a separator between regular and static items
+      const separator = mainItems.length > 0 ? [createSeparatorItem('static-items-separator')] : [];
+
+      mainPanel.items = [...mainItems, ...separator, ...staticPanelItems];
       panels.splice(panels.indexOf(staticPanel), 1);
     }
   }
@@ -410,19 +490,23 @@ export const getPopoverPanels = ({
    * Action items are only added to the main panel and only in lower breakpoints (below "m").
    * They should not be available to be added via config.
    */
+  const mainPanel = panels.find((panel) => panel.id === startPanelId);
+
+  if (!mainPanel) return panels;
+
   if (hasActionItems) {
-    const mainPanel = panels.find((panel) => panel.id === startPanelId);
-
-    if (!mainPanel) return panels;
-
     const actionItems: EuiContextMenuPanelItemDescriptor[] = getPopoverActionItems({
       primaryActionItem,
       onCloseOverflowButton: onClose,
     });
 
     mainPanel.items = [...(mainPanel.items as EuiContextMenuPanelItemDescriptor[]), ...actionItems];
+  }
 
-    return panels;
+  if (hasSwitchItem && switchConfig) {
+    const switchItems = getPopoverSwitchItems({ switchConfig });
+
+    mainPanel.items = [...(mainPanel.items as EuiContextMenuPanelItemDescriptor[]), ...switchItems];
   }
 
   return panels;

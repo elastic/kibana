@@ -12,6 +12,7 @@ import React, { type FC, Fragment } from 'react';
 
 import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
 import type { FinderAttributes, SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
+import { isEsqlSavedSearch, type DiscoverSessionFinderAttributes } from '@kbn/discover-utils';
 import { useAppDependencies } from '../../../../app_dependencies';
 
 interface SearchSelectionProps {
@@ -20,7 +21,7 @@ interface SearchSelectionProps {
   canEditDataView: boolean;
 }
 
-type SavedObject = SavedObjectCommon<FinderAttributes & { isTextBasedQuery?: boolean }>;
+type SavedObject = SavedObjectCommon<FinderAttributes & DiscoverSessionFinderAttributes>;
 
 const fixedPageSize: number = 8;
 
@@ -70,7 +71,7 @@ export const SearchSelection: FC<SearchSelectionProps> = ({
               ),
               showSavedObject: (savedObject: SavedObject) =>
                 // ES|QL Based saved searches are not supported in transforms, filter them out
-                savedObject.attributes.isTextBasedQuery !== true,
+                !isEsqlSavedSearch(savedObject),
             },
             {
               type: 'index-pattern',

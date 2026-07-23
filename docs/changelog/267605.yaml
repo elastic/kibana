@@ -1,0 +1,11 @@
+prs:
+- https://github.com/elastic/kibana/pull/267605
+issues:
+- https://github.com/elastic/kibana/issues/264523
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-05-12
+areas:
+- Dashboards and visualizations
+title: Fix close behavior of ES|QL control flyout

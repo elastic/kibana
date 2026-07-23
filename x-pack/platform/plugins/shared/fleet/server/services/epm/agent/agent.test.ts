@@ -98,6 +98,16 @@ multi_text_field:
     });
   });
 
+  it('should preserve date-like text values as strings instead of coercing to a Date', () => {
+    // https://github.com/elastic/kibana/issues/273220
+    const streamTemplate = `api_version: {{api_version}}\n`;
+    const vars = {
+      api_version: { type: 'text', value: '2024-03-02' },
+    };
+    const output = compileTemplate(vars, getMockedMetaVariable(), streamTemplate);
+    expect(output).toEqual({ api_version: '2024-03-02' });
+  });
+
   it('should support yaml values', () => {
     const streamTemplate = `
 input: redis/metrics
@@ -263,6 +273,29 @@ text_var: {{escape_string text_var}}
       expect(output).toEqual({
         input: 'log',
         password: "ab'c'",
+      });
+    });
+
+    it('should preserve double quotes inside escape_string values without corrupting surrounding YAML', () => {
+      // Regression: https://github.com/elastic/kibana/issues/279388
+      // escape_string wraps single-line values in YAML single quotes: 'user"name'
+      // The newline-collapse regex was incorrectly treating the `"` inside the
+      // single-quoted scalar as a double-quote delimiter, matching across lines
+      // and collapsing subsequent YAML keys onto one line.
+      const template = `
+username: {{escape_string username}}
+password: {{escape_string password}}
+interval: 24h
+`;
+      const vars = {
+        username: { type: 'text', value: 'user"name' },
+        password: { type: 'password', value: 'p@ss"word' },
+      };
+      const output = compileTemplate(vars, getMockedMetaVariable(), template);
+      expect(output).toEqual({
+        username: 'user"name',
+        password: 'p@ss"word',
+        interval: '24h',
       });
     });
 

@@ -6,7 +6,33 @@
  */
 
 import { SYNTHETICS_INDEX_PATTERN } from './constants';
-import { getSyntheticsIndices } from './get_synthetics_indices';
+import { getSyntheticsCcsIndex, getSyntheticsIndices } from './get_synthetics_indices';
+
+describe('getSyntheticsCcsIndex', () => {
+  it('defaults to the local synthetics index pattern when no remoteName is provided', () => {
+    expect(getSyntheticsCcsIndex()).toBe(SYNTHETICS_INDEX_PATTERN);
+  });
+
+  it('returns the local pattern when remoteName is an empty string', () => {
+    expect(getSyntheticsCcsIndex('')).toBe(SYNTHETICS_INDEX_PATTERN);
+  });
+
+  it('prefixes the default synthetics pattern with the remote cluster alias', () => {
+    expect(getSyntheticsCcsIndex('cluster1')).toBe(`cluster1:${SYNTHETICS_INDEX_PATTERN}`);
+  });
+
+  it('prefixes a custom base index pattern when provided', () => {
+    expect(getSyntheticsCcsIndex('cluster1', '.alerts-observability*')).toBe(
+      'cluster1:.alerts-observability*'
+    );
+  });
+
+  it('returns the custom base unchanged when no remoteName is provided', () => {
+    expect(getSyntheticsCcsIndex(undefined, '.alerts-observability*')).toBe(
+      '.alerts-observability*'
+    );
+  });
+});
 
 describe('getSyntheticsIndices', () => {
   it('returns only the local index when CCS is disabled', () => {

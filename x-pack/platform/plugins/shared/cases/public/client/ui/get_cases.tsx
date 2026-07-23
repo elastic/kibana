@@ -30,7 +30,6 @@ export const getCasesLazy = ({
   owner,
   permissions,
   basePath,
-  actionsNavigation,
   refreshRef,
   timelineIntegration,
   features,
@@ -50,11 +49,7 @@ export const getCasesLazy = ({
     }}
   >
     <Suspense fallback={<EuiLoadingSpinner />}>
-      <CasesRoutesLazy
-        actionsNavigation={actionsNavigation}
-        refreshRef={refreshRef}
-        timelineIntegration={timelineIntegration}
-      />
+      <CasesRoutesLazy refreshRef={refreshRef} timelineIntegration={timelineIntegration} />
     </Suspense>
   </CasesProvider>
 );

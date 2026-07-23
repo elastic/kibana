@@ -44,7 +44,15 @@ const AddExistingCaseModalWrapper: React.FC<Props> = ({ lensApi, onClose, onSucc
     const attributes = lensApi.getFullAttributes();
     return !attributes || !appliedTimeRange
       ? []
-      : [getLensCaseAttachment({ attributes, timeRange: appliedTimeRange })];
+      : [
+          getLensCaseAttachment({
+            attributes,
+            timeRange: appliedTimeRange,
+            // Pass the Lens chart description (e.g. entity identity such as "host: web-server-1")
+            // as metadata so Cases can surface it alongside the attachment.
+            metadata: attributes.description ? { description: attributes.description } : undefined,
+          }),
+        ];
   }, [lensApi, absoluteTimeRange, absoluteParentTimeRange]);
 
   useEffect(() => {

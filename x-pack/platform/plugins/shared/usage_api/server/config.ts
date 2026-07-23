@@ -12,7 +12,7 @@ import type { PluginConfigDescriptor } from '@kbn/core/server';
 const tlsConfig = schema.object({
   certificate: schema.string(),
   key: schema.string(),
-  ca: schema.string(),
+  ca: schema.maybe(schema.string()),
 });
 
 const configSchema = schema.object({

@@ -1994,5 +1994,54 @@ invalid: "
         ).map((e) => e.message)
       ).toEqual(['Operation operation_not_available not found']);
     });
+
+    describe('locale-invariant type comparison (regression: #149803)', () => {
+      it('tinymathFunctions stores locale-invariant type constants, not translated strings', () => {
+        const validArgTypes = new Set<string | undefined>([
+          'number',
+          'boolean',
+          'string',
+          undefined,
+        ]);
+        for (const [name, fn] of Object.entries(tinymathFunctions)) {
+          for (const arg of fn.positionalArguments) {
+            expect({
+              fn: name,
+              typeIsInvariant: validArgTypes.has(arg.type),
+            }).toEqual({ fn: name, typeIsInvariant: true });
+          }
+          if (fn.outputType !== undefined) {
+            expect({
+              fn: name,
+              outputTypeIsInvariant: validArgTypes.has(fn.outputType),
+            }).toEqual({ fn: name, outputTypeIsInvariant: true });
+          }
+        }
+      });
+
+      it('produces no errors for math operator formulas (count() / average(bytes))', () => {
+        expect(
+          formulaOperation.getErrorMessage!(
+            getNewLayerWithFormula('count() / average(bytes)', false),
+            'col1',
+            indexPattern,
+            undefined,
+            operationDefinitionMap
+          )
+        ).toHaveLength(0);
+      });
+
+      it('produces no errors for nested math formulas (ifelse(count() > 1, (count() + average(bytes)) / 2, 5))', () => {
+        expect(
+          formulaOperation.getErrorMessage!(
+            getNewLayerWithFormula('ifelse(count() > 1, (count() + average(bytes)) / 2, 5)', false),
+            'col1',
+            indexPattern,
+            undefined,
+            operationDefinitionMap
+          )
+        ).toHaveLength(0);
+      });
+    });
   });
 });

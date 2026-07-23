@@ -7,11 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { z } from '@kbn/zod/v4';
 import { i18n } from '@kbn/i18n';
 import { isOfAggregateQueryType, type AggregateQuery, type Query } from '@kbn/es-query';
-import type { ActiveConversation } from '@kbn/agent-builder-browser';
 import type { BrowserApiToolDefinition } from '@kbn/agent-builder-browser/tools/browser_api_tool';
 import { AttachmentType, type AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
@@ -27,15 +26,15 @@ import { useDataState } from '../../hooks/use_data_state';
 import { FetchStatus } from '../../../types';
 import { useFetchMoreRecords } from '../layout/use_fetch_more_records';
 import { ESQL_QUERY_RESULTS_ATTACHMENT_TYPE } from '../../../../../common/agent_builder';
+import {
+  useProfileAccessor,
+  type DeepAnalysisPlaybookExtension,
+} from '../../../../context_awareness';
 
 const SESSION_TAG = 'discover';
 const MAX_SAMPLE_ROWS = 10;
 const MAX_COLUMNS = 100;
 const MAX_VALUE_LENGTH = 100;
-
-const ESQL_INITIAL_MESSAGE = i18n.translate('discover.agentBuilder.esqlInitialMessage', {
-  defaultMessage: 'Analyze my data',
-});
 
 const updateQuerySchema = z.object({
   query: z.string().min(1).describe('The query string to apply to the current Discover tab.'),
@@ -99,27 +98,13 @@ export const buildScreenContext = (
   },
 });
 
-export const shouldPrefillEsqlPrompt = (
-  isEsqlMode: boolean,
-  activeConversation: ActiveConversation | null | undefined,
-  hasPrefilled: boolean
-): boolean => {
-  if (!isEsqlMode || hasPrefilled) return false;
-  // Pre-first-emission: don't prefill — the sidebar might already be open with an
-  // existing conversation we shouldn't disrupt.
-  if (activeConversation === undefined) return false;
-  // Keep the prefill in config while sidebar is closed (null) or open without a
-  // conversation id yet. Dropping it during that window would wipe `initialMessage`
-  // before `use_initial_message` auto-sends.
-  return !activeConversation?.id;
-};
-
 export const buildEsqlResultsAttachment = (
   esqlQuery: string,
   esqlQueryColumns: Array<{ name: string; meta?: { type?: string } }>,
   result: Array<{ flattened: Record<string, unknown> }>,
   totalHits: number,
-  timeRange: { from: string; to: string } | undefined
+  timeRange: { from: string; to: string } | undefined,
+  playbookContribution?: DeepAnalysisPlaybookExtension
 ): AttachmentInput => {
   // Build a set of base field names to detect .keyword duplicates
   const columnNames = new Set(esqlQueryColumns.map((col) => col.name));
@@ -162,6 +147,7 @@ export const buildEsqlResultsAttachment = (
       sampleRows,
       totalHits,
       timeRange,
+      ...(playbookContribution ? { playbookContribution } : {}),
     },
   };
 };
@@ -180,6 +166,7 @@ export const DiscoverAgentBuilderConfig = () => {
   const dataStateContainer = useCurrentTabDataStateContainer();
   const documentState = useDataState(dataStateContainer.data$.documents$);
   const { totalHits } = useFetchMoreRecords();
+  const getDeepAnalysisPlaybookAccessor = useProfileAccessor('getDeepAnalysisPlaybook');
 
   const isEsqlMode = isOfAggregateQueryType(query);
   const hasEsqlResults =
@@ -192,21 +179,6 @@ export const DiscoverAgentBuilderConfig = () => {
   // Use a ref for query so the tool handler always reads the latest value
   const queryRef = useRef(query);
   queryRef.current = query;
-
-  // Tracks the agent-builder sidebar state. `undefined` means we haven't received
-  // the BehaviorSubject's first emission yet — we must not prefill because
-  // we don't know whether the sidebar is already open.
-  const [activeConversation, setActiveConversation] = useState<
-    ActiveConversation | null | undefined
-  >(undefined);
-
-  const hasPrefilledEsqlPromptRef = useRef(false);
-
-  useEffect(() => {
-    if (!agentBuilder) return;
-    const sub = agentBuilder.events.ui.activeConversation$.subscribe(setActiveConversation);
-    return () => sub.unsubscribe();
-  }, [agentBuilder]);
 
   const runQueryTool: BrowserApiToolDefinition<z.infer<typeof updateQuerySchema>> = useMemo(
     () => ({
@@ -228,12 +200,6 @@ export const DiscoverAgentBuilderConfig = () => {
     [isEsqlMode, runQueryTool]
   );
 
-  const prefillEsqlPrompt = shouldPrefillEsqlPrompt(
-    isEsqlMode,
-    activeConversation,
-    hasPrefilledEsqlPromptRef.current
-  );
-
   useEffect(() => {
     if (!agentBuilder) {
       return;
@@ -253,13 +219,22 @@ export const DiscoverAgentBuilderConfig = () => {
 
     if (hasEsqlResults && documentState.esqlQueryColumns && documentState.result) {
       const esqlQuery = isOfAggregateQueryType(query) ? query.esql : '';
+      const playbookContribution = getDeepAnalysisPlaybookAccessor(() => undefined)({
+        dataView,
+        query,
+        columns: documentState.esqlQueryColumns.map((col) => ({
+          name: col.name,
+          type: col.meta?.type,
+        })),
+      });
       attachments.push(
         buildEsqlResultsAttachment(
           esqlQuery,
           documentState.esqlQueryColumns,
           documentState.result,
           totalHits ?? documentState.result.length,
-          normalizedTimeRange
+          normalizedTimeRange,
+          playbookContribution
         )
       );
     }
@@ -268,13 +243,6 @@ export const DiscoverAgentBuilderConfig = () => {
       sessionTag: SESSION_TAG,
       attachments,
       browserApiTools,
-      ...(prefillEsqlPrompt
-        ? {
-            newConversation: true,
-            initialMessage: ESQL_INITIAL_MESSAGE,
-            autoSendInitialMessage: true,
-          }
-        : {}),
     });
 
     return () => {
@@ -288,20 +256,13 @@ export const DiscoverAgentBuilderConfig = () => {
     dataView,
     documentState.esqlQueryColumns,
     documentState.result,
+    getDeepAnalysisPlaybookAccessor,
     hasEsqlResults,
     isEsqlMode,
     query,
-    prefillEsqlPrompt,
     timeRange,
     totalHits,
   ]);
-
-  // Mark the prompt as prefilled once a real conversation id exists.
-  useEffect(() => {
-    if (isEsqlMode && activeConversation?.id) {
-      hasPrefilledEsqlPromptRef.current = true;
-    }
-  }, [isEsqlMode, activeConversation]);
 
   return null;
 };

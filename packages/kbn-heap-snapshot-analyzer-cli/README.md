@@ -112,13 +112,21 @@ After the first 200, give it ~30s of additional idle time so background
 tasks settle. Don't open the UI — that triggers plugin startup work and
 pollutes the baseline.
 
-### 6. Trigger the snapshot
+### 6. Trigger the snapshot and require.cache dump
+
+Send both signals at the same time:
 
 ```sh
-kill -SIGUSR2 <kibana-pid>
+kill -SIGUSR2 <kibana-pid>   # heap snapshot
+kill -SIGUSR1 <kibana-pid>   # require.cache dump
 ```
 
-The preload writes to `$HEAP_TRACK_OUTPUT`. Watch for:
+**Always capture both.** The preload patches `Module.prototype.require` from
+the moment it loads, so the require.cache dump is fully built up and costs
+nothing extra. If you skip it now and later find a suspicious package in the
+heap, you'd have to restart Kibana and redo the whole setup to get it.
+
+The heap snapshot writes to `$HEAP_TRACK_OUTPUT`. Watch for:
 
 ```
 [heap-track] taking snapshot -> /tmp/kibana-tracked-idle.heapsnapshot
@@ -127,14 +135,41 @@ The preload writes to `$HEAP_TRACK_OUTPUT`. Watch for:
 
 The snapshot is ~1 GB for a typical full-build idle Kibana.
 
+The require.cache dump writes to `$REQUIRE_CACHE_OUTPUT` (or
+`$HEAP_TRACK_DIR/require-cache-<ts>.jsonl`). It is JSONL, one line per
+module, with all parents that loaded it:
+
+```
+{"id":"<absolute path>","parents":["<absolute path>", ...]}
+```
+
+Watch for:
+
+```
+[heap-track] require graph dumped (4823 modules, 7201 edges, 1842.3 KB) in 0.04s -> /tmp/require-cache-....jsonl
+```
+
 ---
 
-## Analyzing
+## Investigation workflow
+
+These two tools answer different questions. Use them in order:
+
+### Step 1 — heap snapshot: find what's big
 
 ```sh
 node --max-old-space-size=8192 scripts/heap_snapshot_analyzer.js \
   /tmp/kibana-tracked-idle.heapsnapshot
 ```
+
+This tells you **what is retained in memory and how much**, attributed to
+the package or plugin that owns it. Start here. Look for:
+
+- Unexpected entries in **Retained by Package** / **Retained by Plugin**
+- Large entries in **Allocated by Module** that trace back to a library you
+  didn't expect to see, or that are bigger than they should be
+- Packages whose `Saved` counterfactual is high relative to their size
+  (dependency roots that pull in a lot of transitive state)
 
 Output sections:
 
@@ -170,6 +205,70 @@ Flags:
   matching frames when walking the stack so attribution lands on the
   *caller* of the filtered code. Example: `--filter=zod` to attribute
   Zod-allocated state back to the package that defined the schema.
+
+### Step 2 — require.cache dump: trace who loaded it
+
+Once the heap report surfaces a suspicious package, the next question is
+**what pulled it in at runtime**. The heap snapshot cannot answer this —
+it shows retained objects, not import edges. Static analysis of `import`
+statements is unreliable: it misses dynamic `require()` calls and
+over-includes `import type` (which produce zero runtime load).
+
+**Why not just use Node's built-in `require.cache`?** Node only records
+the *first* parent that loaded each module — every subsequent requirer is
+invisible. This is a trap: if you query it and see one package importing
+`heavy-lib`, you might conclude "remove that one import and the problem
+goes away." But there could be a dozen other importers that loaded it after
+the first one, and they're all silently omitted. The fix you'd ship would
+have no effect.
+
+The preload patches `Module.prototype.require` before any user code runs
+and records *every* `(parent, child)` edge as it happens — the same hook
+point as `require-in-the-middle`, just observe-only. The dump therefore
+reflects the full multi-parent graph: all importers, not just the first
+one in.
+
+```sh
+node scripts/require_cache_analyzer.js <dump.jsonl> [flags] [pattern...]
+```
+
+**No pattern — survey the full load graph:**
+
+```sh
+node scripts/require_cache_analyzer.js /tmp/require-cache-....jsonl
+```
+
+Prints total module count and the top 50 `node_modules` packages by number
+of loaded files. Useful for a quick sanity check: is the total module count
+unexpectedly high? Are heavyweight packages (e.g. `typescript`, `webpack`)
+present when they shouldn't be?
+
+**With a pattern — find a specific package and its callers:**
+
+```sh
+# Who loads zod at runtime?
+node scripts/require_cache_analyzer.js /tmp/require-cache-....jsonl zod
+
+# Who loads zod, with full import chains back to the entry script?
+node scripts/require_cache_analyzer.js /tmp/require-cache-....jsonl --chains zod
+
+# Multiple patterns
+node scripts/require_cache_analyzer.js /tmp/require-cache-....jsonl --chains zod '@langchain'
+```
+
+The `--chains` flag does a BFS upward through every parent of every match,
+emitting each unique `(child ← parent)` edge once. Shared upper portions
+of chains collapse naturally because edges deduplicate. This is how you
+find which plugin or package is the root cause: follow the chain until you
+reach a `@kbn/` package that shouldn't depend on the library, or a place
+where a lazy import would break the chain.
+
+Flags:
+
+- `--chains` — print full parent chains back to the entry script (BFS,
+  deduped edges).
+- `--limit=N` — cap matches printed (default 20).
+- `--short` — strip the build prefix to keep paths readable.
 
 ---
 

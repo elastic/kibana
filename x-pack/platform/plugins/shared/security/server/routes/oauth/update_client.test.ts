@@ -7,7 +7,8 @@
 
 import Boom from '@hapi/boom';
 
-import type { RequestHandler } from '@kbn/core/server';
+import type { ObjectType } from '@kbn/config-schema';
+import type { RequestHandler, RouteConfig } from '@kbn/core/server';
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import type { UiamOAuthType } from '@kbn/core-security-server';
@@ -20,13 +21,18 @@ import { routeDefinitionParamsMock } from '../index.mock';
 
 describe('Update OAuth Client route', () => {
   function getMockContext(
-    licenseCheckResult: { state: string; message?: string } = { state: 'valid' }
+    licenseCheckResult: { state: string; message?: string } = { state: 'valid' },
+    { oauthManagementEnabled = true }: { oauthManagementEnabled?: boolean } = {}
   ) {
+    const coreContext = coreMock.createRequestHandlerContext();
+    (coreContext.uiSettings.client.get as jest.Mock).mockResolvedValue(oauthManagementEnabled);
     return coreMock.createCustomRequestHandlerContext({
+      core: coreContext,
       licensing: { license: { check: jest.fn().mockReturnValue(licenseCheckResult) } },
     });
   }
 
+  let routeConfig: RouteConfig<any, any, any, any>;
   let routeHandler: RequestHandler<any, any, any, any>;
   let authc: DeeplyMockedKeys<InternalAuthenticationServiceStart>;
   let oauthMock: jest.Mocked<UiamOAuthType>;
@@ -38,9 +44,10 @@ describe('Update OAuth Client route', () => {
 
     defineUpdateOAuthClientRoute(mockRouteDefinitionParams);
 
-    const [, handler] = mockRouteDefinitionParams.router.patch.mock.calls.find(
+    const [config, handler] = mockRouteDefinitionParams.router.patch.mock.calls.find(
       ([{ path }]) => path === '/internal/security/oauth/clients/{client_id}'
     )!;
+    routeConfig = config;
     routeHandler = handler;
   });
 
@@ -63,6 +70,41 @@ describe('Update OAuth Client route', () => {
 
     expect(response.status).toBe(200);
     expect(response.payload).toEqual(mockClient);
+  });
+
+  describe('client_name length validation aligned with UIAM (128)', () => {
+    const getBodySchema = () => (routeConfig.validate as any).body as ObjectType;
+
+    it('accepts a client_name at the 128-character limit', () => {
+      expect(() => getBodySchema().validate({ client_name: 'a'.repeat(128) })).not.toThrow();
+    });
+
+    it('rejects a client_name over the 128-character limit', () => {
+      expect(() => getBodySchema().validate({ client_name: 'a'.repeat(129) })).toThrow(
+        /client_name/
+      );
+    });
+  });
+
+  describe('redirect_uris size validation aligned with UIAM (1-20)', () => {
+    const getBodySchema = () => (routeConfig.validate as any).body as ObjectType;
+    const uri = 'https://example.com/cb';
+
+    it('rejects an empty redirect_uris array', () => {
+      expect(() => getBodySchema().validate({ redirect_uris: [] })).toThrow(/redirect_uris/);
+    });
+
+    it('accepts 20 redirect URIs', () => {
+      expect(() =>
+        getBodySchema().validate({ redirect_uris: Array.from({ length: 20 }, () => uri) })
+      ).not.toThrow();
+    });
+
+    it('rejects 21 redirect URIs', () => {
+      expect(() =>
+        getBodySchema().validate({ redirect_uris: Array.from({ length: 21 }, () => uri) })
+      ).toThrow(/redirect_uris/);
+    });
   });
 
   it('defaults client_metadata to {} when omitted to satisfy UIAM PATCH contract', async () => {
@@ -120,6 +162,20 @@ describe('Update OAuth Client route', () => {
     );
 
     expect(response.status).toBe(404);
+  });
+
+  it('returns 404 when uiamOAuthClientManagement setting is disabled', async () => {
+    const response = await routeHandler(
+      getMockContext({ state: 'valid' }, { oauthManagementEnabled: false }),
+      httpServerMock.createKibanaRequest({
+        params: { client_id: 'c1' },
+        body: { client_metadata: {} },
+      }),
+      kibanaResponseFactory
+    );
+
+    expect(response.status).toBe(404);
+    expect(oauthMock.updateClient).not.toHaveBeenCalled();
   });
 
   it('returns error from service', async () => {

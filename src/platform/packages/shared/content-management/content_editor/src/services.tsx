@@ -65,7 +65,7 @@ export interface Services {
   openSystemFlyout(node: ReactNode, options?: OverlaySystemFlyoutOpenOptions): OverlayRef;
   notifyError: NotifyFn;
   TagList?: FC<{ tagIds: string[] }>;
-  TagSelector?: React.FC<TagSelectorProps>;
+  TagSelector?: React.ComponentType<any>;
 }
 
 const ContentEditorContext = React.createContext<Services | null>(null);
@@ -133,7 +133,7 @@ export interface ContentEditorKibanaDependencies {
             managed: boolean;
           }) => void;
         }>;
-        SavedObjectSaveModalTagSelector: React.FC<TagSelectorProps>;
+        SavedObjectSaveModalTagSelector: React.ComponentType<any>;
       };
     };
   };

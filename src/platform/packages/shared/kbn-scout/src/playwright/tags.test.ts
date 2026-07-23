@@ -84,7 +84,7 @@ describe('tags', () => {
       );
     });
 
-    it('all includes search, observability, security, and workplaceai', () => {
+    it('all includes search, observability, security, workplaceai, and vectordb', () => {
       expect(tags.serverless.all.length).toBeGreaterThan(0);
       expect(tags.serverless.all).toEqual(
         expect.arrayContaining([
@@ -92,6 +92,7 @@ describe('tags', () => {
           ...tags.serverless.observability.all,
           ...tags.serverless.security.all,
           ...tags.serverless.workplaceai,
+          ...tags.serverless.vectordb,
         ])
       );
     });

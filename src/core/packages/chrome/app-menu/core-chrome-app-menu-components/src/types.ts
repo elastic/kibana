@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EuiHideForProps, IconType } from '@elastic/eui';
+import type { EuiHideForProps, EuiSwitchProps, IconType } from '@elastic/eui';
 import type { SplitButtonWithNotificationProps } from './components/split_button_with_notification';
 
 /**
@@ -120,6 +120,14 @@ interface AppMenuItemBase {
    * Hides the item at the specified responsive breakpoints.
    * */
   hidden?: EuiHideForProps['sizes'];
+  /**
+   * Renders the item in a "pressed" visual state, for toggle-style buttons whose action
+   * opens/closes a paired UI (e.g. a side panel). When the item is displayed inline it uses
+   * `aria-pressed`; when it collapses into the overflow "More" popover the pressed state is
+   * shown with a highlighted background.
+   * Ignored for items with sub-items — those already reflect popover-open state.
+   */
+  isSelected?: boolean;
 }
 
 type AppMenuLinkItem = AppMenuItemBase & {
@@ -210,24 +218,41 @@ type AppMenuItemWithPopover = AppMenuItemBase & {
 
 export type AppMenuItemCommon = AppMenuButtonItem | AppMenuItemWithPopover | AppMenuLinkItem;
 
-/**
- * Full item type for use in `config.items` arrays.
- */
-export type AppMenuItemType = AppMenuItemCommon & {
+type AppMenuItemTypeBase = AppMenuItemCommon & {
   /**
-   * Order of the item in the menu. Lower numbers appear first.
+   * Order of the item in the menu. Lower numbers appear first. Defaults to 0.
+   * Items with the same order preserve their array order.
    */
-  order: number;
-  /**
-   * If `true`, the item will be moved to the "More" menu. Only used in top-level items, not in popover items.
-   */
-  overflow?: boolean;
+  order?: number;
   /**
    * Adds a separator line above or below the item when rendered inside a popover menu.
    * Ignored for top-level, non-popover items.
    */
   separator?: 'above' | 'below';
 };
+
+type AppMenuItemTopLevel = AppMenuItemTypeBase & {
+  overflow?: boolean;
+  isDestructive?: never;
+};
+
+type AppMenuItemOverflow = AppMenuItemTypeBase & {
+  /**
+   * The item will be moved to the "More" menu. Only used in top-level items, not in popover items.
+   */
+  overflow: true;
+  /**
+   * Marks the item as destructive (e.g. delete) by rendering in danger/red color.
+   */
+  isDestructive?: boolean;
+};
+
+/**
+ * Full item type for use in `config.items` arrays.
+ * Can be a top-level item or an overflow item.
+ *
+ */
+export type AppMenuItemType = AppMenuItemTopLevel | AppMenuItemOverflow;
 
 export type AppMenuStaticItem = AppMenuItemType & {
   /**
@@ -255,19 +280,66 @@ export type AppMenuPopoverItem = Omit<
   labelBadgeText?: string;
 };
 
+export interface AppMenuSwitch {
+  id: string;
+  label: string;
+  labelProps: EuiSwitchProps['labelProps'];
+  checked: boolean;
+  onChange: (checked: boolean) => void;
+  disabled?: boolean;
+  tooltipContent?: string | (() => string | undefined);
+  tooltipTitle?: string | (() => string | undefined);
+  'data-test-subj'?: string;
+}
+
+interface AppMenuPrimaryActionBase extends AppMenuItemBase {
+  /**
+   * Width of the popover in pixels. Used when `items` or `splitButtonProps.items` is provided.
+   */
+  popoverWidth?: number;
+  /**
+   * A unique identifier for the popover, used for testing purposes. Maps to `data-test-subj` attribute.
+   */
+  popoverTestId?: string;
+  /**
+   * Subset of SplitButtonWithNotificationProps.
+   */
+  splitButtonProps?: AppMenuSplitButtonProps;
+}
+
+type AppMenuPrimaryActionButton = AppMenuPrimaryActionBase & {
+  href?: string;
+  target?: string;
+  run: AppMenuRunAction;
+  items?: never;
+};
+
+type AppMenuPrimaryActionLink = AppMenuPrimaryActionBase & {
+  href: string;
+  target?: string;
+  run?: AppMenuRunAction;
+  items?: never;
+};
+
+type AppMenuPrimaryActionPopover = AppMenuPrimaryActionBase & {
+  href?: never;
+  target?: never;
+  run?: never;
+  items: AppMenuPopoverItem[];
+};
+
 /**
- * Primary action button type. Can be either a simple button or a split button.
+ * Primary action button type. Can be a simple button, a button with a popover, or a split button.
+ *
+ * - Simple button: provide `run` to execute an action on click.
+ * - Button with popover: provide `items` to open a popover menu on click.
+ * - Split button: provide `run` together with `splitButtonProps` to combine a primary action
+ *   with a secondary dropdown.
  */
 export type AppMenuPrimaryActionItem =
-  /**
-   * The main part of the button should never open a popover.
-   */
-  Omit<AppMenuItemCommon, 'order' | 'overflow' | 'separator'> & {
-    /**
-     * Subset of SplitButtonWithNotificationProps.
-     */
-    splitButtonProps?: AppMenuSplitButtonProps;
-  };
+  | AppMenuPrimaryActionButton
+  | AppMenuPrimaryActionLink
+  | AppMenuPrimaryActionPopover;
 
 /**
  * Configuration object for the AppMenu component.
@@ -283,6 +355,12 @@ export interface AppMenuConfig {
   items?: AppMenuItemType[];
   /**
    * Primary action button to display in the app menu.
+   * Can be a simple button, a button with a popover, or a split button.
    */
   primaryActionItem?: AppMenuPrimaryActionItem;
+  /**
+   * App menu switch. Only one switch is available per app menu
+   * and it is rendered to the left of the menu items.
+   */
+  switch?: AppMenuSwitch;
 }

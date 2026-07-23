@@ -14,9 +14,12 @@ import {
   UPDATES_INDEX,
 } from '../fixtures/constants';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common';
-import { clearEntityStoreIndices } from '../fixtures/helpers';
+import { clearEntityStoreIndices, ingestDoc } from '../fixtures/helpers';
 import { getEuidEsqlFilterBasedOnDocument } from '../../../../common/domain/euid/esql';
-import { USER_SCOUT_INVALID_PER_DOCUMENT_FILTER_EXAMPLES } from '../fixtures/user_ts_extraction_cases';
+import {
+  USER_SCOUT_INVALID_PER_DOCUMENT_FILTER_EXAMPLES,
+  USER_TS_EXTRACTION_CASES,
+} from '../fixtures/user_ts_extraction_cases';
 
 apiTest.describe('ESQL query translation', { tag: ENTITY_STORE_TAGS }, () => {
   let defaultHeaders: Record<string, string>;
@@ -65,7 +68,6 @@ apiTest.describe('ESQL query translation', { tag: ENTITY_STORE_TAGS }, () => {
       const query = `FROM ${UPDATES_INDEX} | WHERE ${filter} | LIMIT 10`;
       const result = await esClient.esql.query({
         query,
-        drop_null_columns: true,
       });
 
       const { values, columns } = result;
@@ -86,7 +88,6 @@ apiTest.describe('ESQL query translation', { tag: ENTITY_STORE_TAGS }, () => {
       const query = `FROM ${UPDATES_INDEX} | WHERE ${filter} | LIMIT 10`;
       const result = await esClient.esql.query({
         query,
-        drop_null_columns: true,
       });
 
       const { values, columns } = result;
@@ -110,7 +111,6 @@ apiTest.describe('ESQL query translation', { tag: ENTITY_STORE_TAGS }, () => {
       const query = `FROM ${UPDATES_INDEX} | WHERE ${filter} | LIMIT 10`;
       const result = await esClient.esql.query({
         query,
-        drop_null_columns: true,
       });
 
       const { values, columns } = result;
@@ -126,7 +126,6 @@ apiTest.describe('ESQL query translation', { tag: ENTITY_STORE_TAGS }, () => {
     async ({ esClient }) => {
       await esClient.esql.query({
         query: `FROM ${UPDATES_INDEX} | LIMIT 1`,
-        drop_null_columns: true,
       });
       for (const example of USER_SCOUT_INVALID_PER_DOCUMENT_FILTER_EXAMPLES) {
         expect(getEuidEsqlFilterBasedOnDocument('user', example.doc)).toBeUndefined();
@@ -147,7 +146,6 @@ apiTest.describe('ESQL query translation', { tag: ENTITY_STORE_TAGS }, () => {
       const query = `FROM ${UPDATES_INDEX} | WHERE ${filter} | LIMIT 10`;
       const result = await esClient.esql.query({
         query,
-        drop_null_columns: true,
       });
 
       const { values, columns } = result;
@@ -174,7 +172,6 @@ apiTest.describe('ESQL query translation', { tag: ENTITY_STORE_TAGS }, () => {
       const query = `FROM ${UPDATES_INDEX} | WHERE ${filter} | LIMIT 10`;
       const result = await esClient.esql.query({
         query,
-        drop_null_columns: true,
       });
 
       const { values, columns } = result;
@@ -199,7 +196,6 @@ apiTest.describe('ESQL query translation', { tag: ENTITY_STORE_TAGS }, () => {
       const query = `FROM ${UPDATES_INDEX} | WHERE ${filter} | LIMIT 10`;
       const result = await esClient.esql.query({
         query,
-        drop_null_columns: true,
       });
 
       const { values, columns } = result;
@@ -220,7 +216,6 @@ apiTest.describe('ESQL query translation', { tag: ENTITY_STORE_TAGS }, () => {
       const query = `FROM ${UPDATES_INDEX} | WHERE ${filter} | LIMIT 10`;
       const result = await esClient.esql.query({
         query,
-        drop_null_columns: true,
       });
 
       const { values, columns } = result;
@@ -230,6 +225,46 @@ apiTest.describe('ESQL query translation', { tag: ENTITY_STORE_TAGS }, () => {
       expect(values[0][userNameIdx]).toBe('no.module.user');
     }
   );
+
+  const userTsAssetCloudIngestedScenarios = USER_TS_EXTRACTION_CASES.filter(
+    (c) =>
+      c.id.startsWith('asset-cloud-provider-') &&
+      c.ingestSource !== undefined &&
+      c.expectedEuid !== undefined &&
+      !c.expectNoPerDocumentDsl
+  );
+
+  for (const scenario of userTsAssetCloudIngestedScenarios) {
+    apiTest(
+      `user: ESQL (ingested asset + cloud.provider) matches scenario "${scenario.id}"`,
+      async ({ esClient }) => {
+        await ingestDoc(esClient, scenario.ingestSource!);
+        const filter = getEuidEsqlFilterBasedOnDocument('user', scenario.dslFilterSource);
+        expect(filter).toBeDefined();
+
+        const query = `FROM ${UPDATES_INDEX} | WHERE ${filter} | LIMIT 10`;
+        const result = await esClient.esql.query({
+          query,
+          drop_null_columns: true,
+        });
+
+        const { values, columns } = result;
+        expect(values).toHaveLength(1);
+        const userNameIdx = columns.findIndex((c) => c.name === 'user.name');
+        expect(userNameIdx).toBeGreaterThan(-1);
+        const expectedUserName = (scenario.dslFilterSource as { user?: { name?: string } }).user
+          ?.name;
+        expect(expectedUserName).toBeDefined();
+        expect(values[0][userNameIdx]).toBe(expectedUserName);
+
+        await esClient.deleteByQuery({
+          index: UPDATES_INDEX,
+          refresh: true,
+          query: scenario.query as object,
+        });
+      }
+    );
+  }
 
   apiTest(
     'service: ESQL from doc with service.name returns exactly that document',
@@ -241,7 +276,6 @@ apiTest.describe('ESQL query translation', { tag: ENTITY_STORE_TAGS }, () => {
       const query = `FROM ${UPDATES_INDEX} | WHERE ${filter} | LIMIT 10`;
       const result = await esClient.esql.query({
         query,
-        drop_null_columns: true,
       });
 
       const { values, columns } = result;
@@ -262,7 +296,6 @@ apiTest.describe('ESQL query translation', { tag: ENTITY_STORE_TAGS }, () => {
       const query = `FROM ${UPDATES_INDEX} | WHERE ${filter} | LIMIT 10`;
       const result = await esClient.esql.query({
         query,
-        drop_null_columns: true,
       });
 
       const { values, columns } = result;

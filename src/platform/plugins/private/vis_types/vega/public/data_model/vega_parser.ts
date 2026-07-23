@@ -748,6 +748,10 @@ The URL is an identifier only. Kibana and your browser will never access this UR
     this._setDefaultValue(axisColor, 'config', 'axis', 'gridColor');
     this._setDefaultValue(500, 'config', 'axis', 'titleFontWeight');
 
+    this._setDefaultValue(0.2, 'config', 'area', 'fillOpacity');
+    this._setDefaultValue(null, 'config', 'view', 'stroke');
+    this._setDefaultValue(true, 'config', 'area', 'line');
+    this._setDefaultValue(1.5, 'config', 'area', 'line', 'strokeWidth');
     this._setDefaultValue('transparent', 'config', 'background');
   }
 

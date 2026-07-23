@@ -6,7 +6,6 @@
       "human": "__flag__",
       "pretty": "__flag__",
       "timeout": [
-        "30s",
         "-1",
         "0"
       ]

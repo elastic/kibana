@@ -8,6 +8,7 @@
 import {
   createActionPolicyDataSchema,
   actionPolicyResponseSchema,
+  errorResponseSchema,
   type CreateActionPolicyData,
 } from '@kbn/alerting-v2-schemas';
 import { Request } from '@kbn/core-di-server';
@@ -18,7 +19,6 @@ import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { ALERTING_V2_ACTION_POLICY_API_PATH } from '../constants';
-import { buildRouteValidationWithZod } from '../route_validation';
 
 @injectable()
 export class CreateActionPolicyRoute extends BaseAlertingRoute {
@@ -26,7 +26,10 @@ export class CreateActionPolicyRoute extends BaseAlertingRoute {
   static path = `${ALERTING_V2_ACTION_POLICY_API_PATH}`;
   static security: RouteSecurity = {
     authz: {
-      requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.actionPolicies.write],
+      requiredPrivileges: [
+        ALERTING_V2_API_PRIVILEGES.actionPolicies.write,
+        ALERTING_V2_API_PRIVILEGES.rules.read,
+      ],
     },
   };
   static routeOptions = {
@@ -34,16 +37,17 @@ export class CreateActionPolicyRoute extends BaseAlertingRoute {
     description:
       'Creates an action policy with a server-generated identifier. To create or replace an action policy with a client-supplied identifier, use PUT /api/alerting/v2/action_policies/.',
   } as const;
-  static validate = {
+  static schemas = {
     request: {
-      body: buildRouteValidationWithZod(createActionPolicyDataSchema),
+      body: createActionPolicyDataSchema,
     },
     response: {
       201: {
         body: () => actionPolicyResponseSchema,
-        description: 'Indicates a successful call.',
+        description: 'Returns the newly created action policy.',
       },
       400: {
+        body: () => errorResponseSchema,
         description: 'Indicates invalid request parameters or body.',
       },
     },

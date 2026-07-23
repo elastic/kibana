@@ -28,6 +28,7 @@ import { i18n } from '@kbn/i18n';
 import { useUiTracker } from '@kbn/observability-shared-plugin/public';
 
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { CORRELATIONS_EBT_ELEMENTS } from './ebt_constants';
 import { FieldStatsPopover } from './context_popover/field_stats_popover';
 import { asPercent, asPreciseDecimal } from '../../../../common/utils/formatters';
 import type { FailedTransactionsCorrelation } from '../../../../common/correlations/failed_transactions_correlations/types';
@@ -468,6 +469,7 @@ export function FailedTransactionsCorrelations({ onFilter }: { onFilter: () => v
               sampleRangeTo,
               sortDirection: 'DESC',
             }}
+            ebt={{ element: CORRELATIONS_EBT_ELEMENTS.FAILED_TRANSACTIONS }}
           />
         </EuiFlexItem>
 

@@ -77,6 +77,9 @@ export interface CasesUiConfigType {
   attachments?: {
     enabled: boolean;
   };
+  chat?: {
+    enabled: boolean;
+  };
   markdownPlugins: {
     lens: boolean;
   };
@@ -92,6 +95,11 @@ export interface CasesUiConfigType {
   };
   templates: {
     enabled: boolean;
+  };
+  casesRedesign: {
+    list: boolean;
+    details: boolean;
+    settings: boolean;
   };
 }
 

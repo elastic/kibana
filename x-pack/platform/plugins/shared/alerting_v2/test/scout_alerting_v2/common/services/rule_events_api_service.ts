@@ -25,10 +25,6 @@ export interface RuleEventFilter {
 
 /**
  * Test-time accessor for the alerting_v2 `.rule-events` data stream.
- *
- * Knows the on-disk schema (`rule.id`, `type`, `status`, `episode.status`,
- * `group_hash`) so specs can read the stream as `apiServices.alertingV2.ruleEvents.find(...)`
- * instead of hand-writing search bodies.
  */
 export interface RuleEventsApiService {
   find: (ruleId: string, filter?: RuleEventFilter) => Promise<AlertEvent[]>;
@@ -36,6 +32,10 @@ export interface RuleEventsApiService {
   getLatestEpisodeStates: (ruleId: string) => Promise<Map<string, AlertEvent>>;
   /** Polls `find(...)` until at least `min` matching events exist. */
   waitForAtLeast: (ruleId: string, min: number, filter?: RuleEventFilter) => Promise<void>;
+  /**
+   * Bulk-seed alert events directly into the `.rule-events` data stream.
+   */
+  seed: (events: AlertEvent[]) => Promise<void>;
   /** Removes every document from the `.rule-events` data stream. */
   cleanUp: () => Promise<void>;
 }
@@ -101,6 +101,18 @@ export const getRuleEventsApiService = ({
       })
       .toBeGreaterThanOrEqual(min);
 
+  const seed: RuleEventsApiService['seed'] = (events) =>
+    measurePerformanceAsync(log, 'ruleEvents.seed', async () => {
+      if (events.length === 0) return;
+      await esClient.bulk({
+        operations: events.flatMap((doc) => [
+          { create: { _index: ALERT_EVENTS_DATA_STREAM } },
+          doc,
+        ]),
+        refresh: true,
+      });
+    });
+
   const cleanUp: RuleEventsApiService['cleanUp'] = () =>
     measurePerformanceAsync(log, `dataStream[${ALERT_EVENTS_DATA_STREAM}].cleanUp`, async () => {
       await esClient.deleteByQuery(
@@ -115,5 +127,5 @@ export const getRuleEventsApiService = ({
       );
     });
 
-  return { find, getLatestEpisodeStates, waitForAtLeast, cleanUp };
+  return { find, getLatestEpisodeStates, waitForAtLeast, seed, cleanUp };
 };

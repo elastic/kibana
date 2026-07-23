@@ -63,11 +63,13 @@ textService.setup(i18n);
 const defaultProps: {
   repository: Repository | EmptyRepository;
   onNext: jest.Mock;
+  onCancel: jest.Mock;
   updateRepository: jest.Mock;
   validation: { isValid: boolean; errors: Record<string, string[]> };
 } = {
   repository: { name: '', type: null, settings: {} },
   onNext: jest.fn(),
+  onCancel: jest.fn(),
   updateRepository: jest.fn(),
   validation: { isValid: true, errors: {} },
 };
@@ -138,6 +140,17 @@ describe('<RepositoryFormStepOne />', () => {
       fireEvent.click(screen.getByTestId('nextButton'));
 
       expect(onNext).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('WHEN the cancel button is clicked', () => {
+    it('SHOULD call onCancel', () => {
+      const onCancel = jest.fn();
+      renderStepOne({ onCancel });
+
+      fireEvent.click(screen.getByTestId('cancelButton'));
+
+      expect(onCancel).toHaveBeenCalledTimes(1);
     });
   });
 

@@ -76,6 +76,11 @@ exports[`ViewApiRequestFlyout is rendered 1`] = `
                 </span>
               </button>
             </span>
+            <div
+              aria-atomic="true"
+              aria-live="assertive"
+              class="emotion-euiScreenReaderOnly"
+            />
           </div>
           <div
             class="euiSpacer euiSpacer--s emotion-euiSpacer-s"

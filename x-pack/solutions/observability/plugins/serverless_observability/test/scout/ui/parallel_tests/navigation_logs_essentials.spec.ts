@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { tags } from '@kbn/scout-oblt';
+import { OBSERVABILITY_SPA_SHELL_TIMEOUT_MS, tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../fixtures';
 
@@ -50,6 +50,40 @@ test.describe(
       });
     });
 
+    test('does not show ML or AI related project settings', async ({ pageObjects }) => {
+      const nav = pageObjects.observabilityNavigation;
+
+      await nav.navItemInFooterById('admin_and_settings').click();
+      const adminAndSettingsPanel = nav.sidePanel('admin_and_settings');
+      await expect(adminAndSettingsPanel).toBeVisible();
+
+      const disabledIds = ['machine_learning', 'model_management'];
+      for (const id of disabledIds) {
+        await expect(
+          adminAndSettingsPanel.locator(`[data-test-subj~="nav-item-id-${id}"]`)
+        ).toBeHidden();
+      }
+
+      const disabledDeepLinks = [
+        'management:overview',
+        'management:anomaly_detection',
+        'management:analytics',
+        'management:trained_models',
+        'management:supplied_configurations',
+        'management:elastic_inference_service',
+        'management:inference_endpoints',
+        'management:model_settings',
+        'management:genAiSettings',
+        'management:evals',
+        'management:observabilityAiAssistantManagement',
+      ];
+      for (const deepLinkId of disabledDeepLinks) {
+        await expect(
+          adminAndSettingsPanel.locator(`[data-test-subj~="nav-item-deepLinkId-${deepLinkId}"]`)
+        ).toBeHidden();
+      }
+    });
+
     test('clicking body nav items sets the active link and navigates', async ({
       pageObjects,
       page,
@@ -84,6 +118,33 @@ test.describe(
       await test.step('/app/observability/cases shows the observability 404 page', async () => {
         await page.gotoApp('observability/cases');
         await expect(page.testSubj.locator('observabilityPageNotFoundBanner')).toBeVisible();
+      });
+    });
+
+    test('Model Management pages are not reachable via direct URL or global search', async ({
+      page,
+      pageObjects,
+    }) => {
+      const nav = pageObjects.observabilityNavigation;
+
+      await test.step('direct URL falls back to the management landing page', async () => {
+        await page.gotoApp('management/modelManagement/model_settings');
+        await expect(page.testSubj.locator('cards-navigation-page')).toBeVisible({
+          timeout: OBSERVABILITY_SPA_SHELL_TIMEOUT_MS,
+        });
+      });
+
+      await test.step('pages do not appear in global search', async () => {
+        await nav.goto();
+        await nav.waitForLoad();
+
+        await page.testSubj.click('nav-search-reveal');
+        await page.testSubj.fill('nav-search-input', 'Elastic Inference');
+        await expect(
+          page.testSubj
+            .locator('euiSelectableMessage')
+            .locator('[data-test-subj~="nav-search-no-results"]')
+        ).toBeVisible();
       });
     });
   }

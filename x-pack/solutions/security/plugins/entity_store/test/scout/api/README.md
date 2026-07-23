@@ -14,7 +14,7 @@ node scripts/scout.js start-server --location local --arch serverless --domain s
 
 And then run
 ```sh
-npx playwright test --config x-pack/solutions/security/plugins/entity_store/test/scout/api/playwright.config.ts --project=local
+node scripts/playwright test --config x-pack/solutions/security/plugins/entity_store/test/scout/api/playwright.config.ts --project=local
 ```
 
 ### Generating archives

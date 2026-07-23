@@ -6,6 +6,7 @@
  */
 
 import { parse } from 'yaml';
+import { validateAgentConditionExpression } from '@kbn/elastic-agent-condition-language';
 
 import { installationStatuses } from '../constants';
 import type {
@@ -23,6 +24,8 @@ import {
   parseDuration,
 } from './validate_package_policy';
 import { AWS_PACKAGE, INVALID_AWS_POLICY, VALID_AWS_POLICY } from './fixtures/aws_package';
+
+const deps = { safeLoadYaml: parse, conditionValidator: validateAgentConditionExpression };
 
 describe('Fleet - validatePackagePolicy()', () => {
   describe('works for packages with single policy template (aka no integrations)', () => {
@@ -350,6 +353,7 @@ describe('Fleet - validatePackagePolicy()', () => {
     const noErrorsValidationResults = {
       name: null,
       additional_datastreams_permissions: null,
+      condition: null,
       description: null,
       namespace: null,
       inputs: {
@@ -388,17 +392,18 @@ describe('Fleet - validatePackagePolicy()', () => {
     };
 
     it('returns no errors for valid package policy', () => {
-      expect(validatePackagePolicy(validPackagePolicy, mockPackage, parse)).toEqual(
+      expect(validatePackagePolicy(validPackagePolicy, mockPackage, deps)).toEqual(
         noErrorsValidationResults
       );
     });
 
     it('returns errors for invalid package policy', () => {
-      expect(validatePackagePolicy(invalidPackagePolicy, mockPackage, parse)).toEqual({
+      expect(validatePackagePolicy(invalidPackagePolicy, mockPackage, deps)).toEqual({
         name: ['Name is required'],
         description: null,
         namespace: null,
         additional_datastreams_permissions: null,
+        condition: null,
         inputs: {
           foo: {
             vars: {
@@ -442,7 +447,7 @@ describe('Fleet - validatePackagePolicy()', () => {
         enabled: false,
       }));
       expect(
-        validatePackagePolicy({ ...validPackagePolicy, inputs: disabledInputs }, mockPackage, parse)
+        validatePackagePolicy({ ...validPackagePolicy, inputs: disabledInputs }, mockPackage, deps)
       ).toEqual(noErrorsValidationResults);
     });
 
@@ -459,13 +464,14 @@ describe('Fleet - validatePackagePolicy()', () => {
         validatePackagePolicy(
           { ...invalidPackagePolicy, inputs: inputsWithDisabledStreams },
           mockPackage,
-          parse
+          deps
         )
       ).toEqual({
         name: ['Name is required'],
         description: null,
         namespace: null,
         additional_datastreams_permissions: null,
+        condition: null,
         inputs: {
           foo: {
             vars: {
@@ -513,13 +519,14 @@ describe('Fleet - validatePackagePolicy()', () => {
             ...mockPackage,
             policy_templates: undefined,
           },
-          parse
+          deps
         )
       ).toEqual({
         name: null,
         description: null,
         namespace: null,
         additional_datastreams_permissions: null,
+        condition: null,
         inputs: {},
         vars: {},
       });
@@ -530,13 +537,14 @@ describe('Fleet - validatePackagePolicy()', () => {
             ...mockPackage,
             policy_templates: [],
           },
-          parse
+          deps
         )
       ).toEqual({
         name: null,
         description: null,
         namespace: null,
         additional_datastreams_permissions: null,
+        condition: null,
         inputs: {},
         vars: {},
       });
@@ -550,13 +558,14 @@ describe('Fleet - validatePackagePolicy()', () => {
             ...mockPackage,
             policy_templates: [{} as RegistryPolicyTemplate],
           },
-          parse
+          deps
         )
       ).toEqual({
         name: null,
         description: null,
         namespace: null,
         additional_datastreams_permissions: null,
+        condition: null,
         inputs: {},
         vars: {},
       });
@@ -567,12 +576,13 @@ describe('Fleet - validatePackagePolicy()', () => {
             ...mockPackage,
             policy_templates: [{ inputs: [] } as unknown as RegistryPolicyTemplate],
           },
-          parse
+          deps
         )
       ).toEqual({
         name: null,
         description: null,
         additional_datastreams_permissions: null,
+        condition: null,
         namespace: null,
         inputs: {},
         vars: {},
@@ -605,13 +615,14 @@ describe('Fleet - validatePackagePolicy()', () => {
             ],
           },
           mockPackage,
-          parse
+          deps
         )
       ).toEqual({
         name: null,
         description: null,
         namespace: null,
         additional_datastreams_permissions: null,
+        condition: null,
         inputs: {
           foo: {
             streams: {
@@ -631,6 +642,111 @@ describe('Fleet - validatePackagePolicy()', () => {
         vars: {},
       });
     });
+
+    describe('condition field', () => {
+      const VALID_EXPR = "${host.platform} == 'linux'";
+      const INVALID_EXPR = "(${host.platform} == 'linux'"; // unclosed paren
+
+      it('condition is null when no condition is set at any level', () => {
+        const result = validatePackagePolicy(validPackagePolicy, mockPackage, deps);
+        expect(result.condition).toBeNull();
+        expect(validationHasErrors(result)).toBe(false);
+      });
+
+      it('condition is null for a valid integration-level expression', () => {
+        const result = validatePackagePolicy(
+          { ...validPackagePolicy, condition: VALID_EXPR },
+          mockPackage,
+          deps
+        );
+        expect(result.condition).toBeNull();
+        expect(validationHasErrors(result)).toBe(false);
+      });
+
+      it('returns errors for an invalid integration-level condition', () => {
+        const result = validatePackagePolicy(
+          { ...validPackagePolicy, condition: INVALID_EXPR },
+          mockPackage,
+          deps
+        );
+        expect(result.condition).not.toBeNull();
+        expect(result.condition!.length).toBeGreaterThan(0);
+        expect(result.condition![0]).toMatch(/column \d+:/);
+        expect(validationHasErrors(result)).toBe(true);
+      });
+
+      it('has no condition errors for a valid input-level expression', () => {
+        const result = validatePackagePolicy(
+          {
+            ...validPackagePolicy,
+            inputs: [
+              { ...validPackagePolicy.inputs[0], condition: VALID_EXPR },
+              ...validPackagePolicy.inputs.slice(1),
+            ],
+          },
+          mockPackage,
+          deps
+        );
+        expect(result.inputs?.foo?.condition).toBeFalsy();
+        expect(validationHasErrors(result)).toBe(false);
+      });
+
+      it('returns errors for an invalid input-level condition', () => {
+        const result = validatePackagePolicy(
+          {
+            ...validPackagePolicy,
+            inputs: [
+              { ...validPackagePolicy.inputs[0], condition: INVALID_EXPR },
+              ...validPackagePolicy.inputs.slice(1),
+            ],
+          },
+          mockPackage,
+          deps
+        );
+        expect(result.inputs?.foo?.condition).toBeTruthy();
+        expect(result.inputs?.foo?.condition!.length).toBeGreaterThan(0);
+        expect(validationHasErrors(result)).toBe(true);
+      });
+
+      it('has no condition errors for a valid stream-level expression', () => {
+        const result = validatePackagePolicy(
+          {
+            ...validPackagePolicy,
+            inputs: [
+              {
+                ...validPackagePolicy.inputs[0],
+                streams: [{ ...validPackagePolicy.inputs[0].streams[0], condition: VALID_EXPR }],
+              },
+              ...validPackagePolicy.inputs.slice(1),
+            ],
+          },
+          mockPackage,
+          deps
+        );
+        expect(result.inputs?.foo?.streams?.foo?.condition).toBeFalsy();
+        expect(validationHasErrors(result)).toBe(false);
+      });
+
+      it('returns errors for an invalid stream-level condition', () => {
+        const result = validatePackagePolicy(
+          {
+            ...validPackagePolicy,
+            inputs: [
+              {
+                ...validPackagePolicy.inputs[0],
+                streams: [{ ...validPackagePolicy.inputs[0].streams[0], condition: INVALID_EXPR }],
+              },
+              ...validPackagePolicy.inputs.slice(1),
+            ],
+          },
+          mockPackage,
+          deps
+        );
+        expect(result.inputs?.foo?.streams?.foo?.condition).toBeTruthy();
+        expect(result.inputs?.foo?.streams?.foo?.condition!.length).toBeGreaterThan(0);
+        expect(validationHasErrors(result)).toBe(true);
+      });
+    });
   });
 
   describe('works for packages with multiple policy templates (aka integrations)', () => {
@@ -639,7 +755,7 @@ describe('Fleet - validatePackagePolicy()', () => {
         validatePackagePolicy(
           INVALID_AWS_POLICY as NewPackagePolicy,
           AWS_PACKAGE as unknown as PackageInfo,
-          parse
+          deps
         )
       ).toMatchSnapshot();
     });
@@ -650,7 +766,7 @@ describe('Fleet - validatePackagePolicy()', () => {
           validatePackagePolicy(
             VALID_AWS_POLICY as NewPackagePolicy,
             AWS_PACKAGE as unknown as PackageInfo,
-            parse
+            deps
           )
         )
       ).toBe(false);
@@ -756,7 +872,7 @@ describe('Fleet - validatePackagePolicy()', () => {
         ],
       };
 
-      const result = validatePackagePolicy(packagePolicy, packageWithDuplicateTypeInputs, parse);
+      const result = validatePackagePolicy(packagePolicy, packageWithDuplicateTypeInputs, deps);
 
       // The first input (filelog_otel) has a valid var, so no error
       // Single policy template packages use just the effectiveName as key (no template prefix)
@@ -939,7 +1055,7 @@ describe('Fleet - validateConditionalRequiredVars()', () => {
     const validationResults = validatePackagePolicy(
       invalidPackagePolicyWithRequiredVars,
       mockPackageInfoRequireVars,
-      parse
+      deps
     );
 
     expect(validationResults).toEqual({
@@ -947,6 +1063,7 @@ describe('Fleet - validateConditionalRequiredVars()', () => {
       description: null,
       namespace: null,
       additional_datastreams_permissions: null,
+      condition: null,
       inputs: {
         'foo-input': {
           streams: {
@@ -1039,7 +1156,7 @@ describe('Fleet - validateConditionalRequiredVars()', () => {
     const validationResults = validatePackagePolicy(
       invalidPackagePolicyWithRequiredVars,
       mockPackageInfoRequireVars,
-      parse
+      deps
     );
 
     expect(validationResults).toEqual({
@@ -1047,6 +1164,7 @@ describe('Fleet - validateConditionalRequiredVars()', () => {
       description: null,
       namespace: null,
       additional_datastreams_permissions: null,
+      condition: null,
       inputs: {
         'foo-input': {
           streams: {
@@ -1143,7 +1261,7 @@ describe('Fleet - validateConditionalRequiredVars()', () => {
     const validationResults = validatePackagePolicy(
       invalidPackagePolicyWithRequiredVars,
       mockPackageInfoRequireVars,
-      parse
+      deps
     );
 
     expect(validationResults).toEqual({
@@ -1151,6 +1269,7 @@ describe('Fleet - validateConditionalRequiredVars()', () => {
       description: null,
       namespace: null,
       additional_datastreams_permissions: null,
+      condition: null,
       inputs: {
         'foo-input': {
           streams: {
@@ -1237,7 +1356,7 @@ describe('Fleet - validateConditionalRequiredVars()', () => {
     const validationResults = validatePackagePolicy(
       invalidPackagePolicyWithRequiredVars,
       mockPackageInfoRequireVars,
-      parse
+      deps
     );
 
     expect(validationResults).toEqual({
@@ -1245,6 +1364,7 @@ describe('Fleet - validateConditionalRequiredVars()', () => {
       description: null,
       namespace: null,
       additional_datastreams_permissions: null,
+      condition: null,
       inputs: {
         'foo-input': {
           streams: {
@@ -1317,6 +1437,7 @@ describe('Fleet - validationHasErrors()', () => {
         name: ['name error'],
         description: null,
         additional_datastreams_permissions: null,
+        condition: null,
         namespace: null,
         inputs: {
           input1: {
@@ -1332,6 +1453,7 @@ describe('Fleet - validationHasErrors()', () => {
         name: null,
         description: null,
         additional_datastreams_permissions: null,
+        condition: null,
         namespace: null,
         inputs: {
           input1: {
@@ -1346,6 +1468,7 @@ describe('Fleet - validationHasErrors()', () => {
         name: null,
         description: null,
         additional_datastreams_permissions: null,
+        condition: null,
         namespace: null,
         inputs: {
           input1: {
@@ -1364,6 +1487,7 @@ describe('Fleet - validationHasErrors()', () => {
         description: null,
         namespace: null,
         additional_datastreams_permissions: null,
+        condition: null,
         inputs: {
           input1: {
             vars: { foo: null, bar: null },
@@ -2088,6 +2212,107 @@ describe('Fleet - validatePackagePolicyConfig', () => {
     });
   });
 
+  describe('Data stream type', () => {
+    const validateDataStreamType = (type: string, packageType: string = 'input') => {
+      return validatePackagePolicyConfig(
+        {
+          type: 'text',
+          value: type,
+        },
+        {
+          name: 'data_stream.type',
+          type: 'text',
+        },
+        'data_stream.type',
+        parse,
+        packageType
+      );
+    };
+
+    it('should return null for valid types', () => {
+      expect(validateDataStreamType('logs')).toBeNull();
+      expect(validateDataStreamType('metrics')).toBeNull();
+      expect(validateDataStreamType('traces')).toBeNull();
+      expect(validateDataStreamType('synthetics')).toBeNull();
+      expect(validateDataStreamType('profiles')).toBeNull();
+    });
+
+    it('should return an error for the legacy profiling type', () => {
+      const res = validateDataStreamType('profiling');
+      expect(res).toEqual([
+        'Data stream type must be one of: logs, metrics, traces, synthetics, profiles',
+      ]);
+    });
+
+    it('should return an error for an unknown type', () => {
+      const res = validateDataStreamType('bogus');
+      expect(res).toEqual([
+        'Data stream type must be one of: logs, metrics, traces, synthetics, profiles',
+      ]);
+    });
+
+    it('should return null when value is undefined', () => {
+      const res = validatePackagePolicyConfig(
+        { type: 'text', value: undefined },
+        { name: 'data_stream.type', type: 'text' },
+        'data_stream.type',
+        parse,
+        'input'
+      );
+      expect(res).toBeNull();
+    });
+
+    it('should return null for non-input package type', () => {
+      expect(validateDataStreamType('bogus', 'integration')).toBeNull();
+    });
+  });
+
+  describe('additional_datastreams_permissions', () => {
+    const basePolicy: NewPackagePolicy = {
+      name: 'test-policy',
+      namespace: 'default',
+      enabled: true,
+      policy_ids: [],
+      inputs: [],
+      vars: {},
+    };
+    const minimalPackage = {
+      name: 'test-pkg',
+      title: 'Test',
+      version: '0.0.0',
+      description: '',
+      type: 'integration',
+      categories: [],
+      requirement: { kibana: { versions: '' }, elasticsearch: { versions: '' } },
+      format_version: '',
+      download: '',
+      path: '',
+      assets: { kibana: {} },
+      status: installationStatuses.NotInstalled,
+      data_streams: [],
+      policy_templates: [],
+    };
+
+    it('accepts profiles-* as an additional datastreams permission', () => {
+      const result = validatePackagePolicy(
+        { ...basePolicy, additional_datastreams_permissions: ['profiles-generic.otel-default'] },
+        minimalPackage as unknown as PackageInfo,
+        deps
+      );
+      expect(result.additional_datastreams_permissions).toBeNull();
+    });
+
+    it('rejects profiling-* as an additional datastreams permission', () => {
+      const result = validatePackagePolicy(
+        { ...basePolicy, additional_datastreams_permissions: ['profiling-events-default'] },
+        minimalPackage as unknown as PackageInfo,
+        deps
+      );
+      expect(result.additional_datastreams_permissions).not.toBeNull();
+      expect(result.additional_datastreams_permissions![0]).toContain('profiling-events-default');
+    });
+  });
+
   describe('URL validation', () => {
     it('should not return an error message for a valid URL', () => {
       const res = validatePackagePolicyConfig(
@@ -2394,11 +2619,7 @@ describe('Fleet - validatePackagePolicy with var_groups', () => {
       var_group_selections: { auth_method: 'api_key' },
     };
 
-    const result = validatePackagePolicy(
-      policyWithUndefinedApiKey,
-      packageInfoWithVarGroups,
-      parse
-    );
+    const result = validatePackagePolicy(policyWithUndefinedApiKey, packageInfoWithVarGroups, deps);
 
     // api_key and api_url should have validation errors because they're required by var_group
     expect(result.vars?.api_key).toEqual([expect.stringContaining('is required')]);
@@ -2416,7 +2637,7 @@ describe('Fleet - validatePackagePolicy with var_groups', () => {
       var_group_selections: { auth_method: 'api_key' },
     };
 
-    const result = validatePackagePolicy(policyWithEmptyApiKey, packageInfoWithVarGroups, parse);
+    const result = validatePackagePolicy(policyWithEmptyApiKey, packageInfoWithVarGroups, deps);
 
     // Empty strings are allowed for var_group required vars (same as regular required vars)
     expect(result.vars?.api_key).toBeNull();
@@ -2436,7 +2657,7 @@ describe('Fleet - validatePackagePolicy with var_groups', () => {
       var_group_selections: { auth_method: 'api_key' },
     };
 
-    const result = validatePackagePolicy(policyWithApiKeySelected, packageInfoWithVarGroups, parse);
+    const result = validatePackagePolicy(policyWithApiKeySelected, packageInfoWithVarGroups, deps);
 
     // api_key and api_url have values, should be valid (null)
     expect(result.vars?.api_key).toBeNull();
@@ -2459,7 +2680,7 @@ describe('Fleet - validatePackagePolicy with var_groups', () => {
       var_group_selections: { auth_method: 'oauth' },
     };
 
-    const result = validatePackagePolicy(policyWithOAuthSelected, packageInfoWithVarGroups, parse);
+    const result = validatePackagePolicy(policyWithOAuthSelected, packageInfoWithVarGroups, deps);
 
     // api_key and api_url are not in selected option, should be skipped
     expect(result.vars?.api_key).toBeNull();
@@ -2493,7 +2714,7 @@ describe('Fleet - validatePackagePolicy with var_groups', () => {
     const result = validatePackagePolicy(
       policyWithMissingRequiredVar,
       packageInfoWithRequiredNonGroupVar,
-      parse
+      deps
     );
 
     // required_var is not controlled by var_group but has required: true and undefined value
@@ -2525,7 +2746,7 @@ describe('Fleet - validatePackagePolicy with var_groups', () => {
     const result = validatePackagePolicy(
       policyWithEmptyRequiredVar,
       packageInfoWithRequiredNonGroupVar,
-      parse
+      deps
     );
 
     // Empty strings are allowed for regular required vars
@@ -2543,7 +2764,7 @@ describe('Fleet - validatePackagePolicy with var_groups', () => {
       var_group_selections: { auth_method: 'api_key' },
     };
 
-    const result = validatePackagePolicy(validPolicy, packageInfoWithVarGroups, parse);
+    const result = validatePackagePolicy(validPolicy, packageInfoWithVarGroups, deps);
 
     expect(result.vars?.api_key).toBeNull();
     expect(result.vars?.api_url).toBeNull();

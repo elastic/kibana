@@ -1,0 +1,13 @@
+prs:
+- https://github.com/elastic/kibana/pull/267245
+issues:
+- https://github.com/elastic/kibana/issues/259494
+- https://github.com/elastic/kibana/issues/265491
+- https://github.com/elastic/kibana/issues/264758
+type: enhancement
+products:
+- product: cloud-serverless
+  target: 2026-05-12
+areas:
+- Dashboards and visualizations
+title: Enable Discover drilldown

@@ -7,7 +7,7 @@
 
 import { Request } from '@kbn/core-di-server';
 import type { KibanaRequest, RouteSecurity } from '@kbn/core-http-server';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
+import { errorResponseSchema } from '@kbn/alerting-v2-schemas';
 import { z } from '@kbn/zod/v4';
 import { inject, injectable } from 'inversify';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
@@ -20,24 +20,38 @@ const matcherDataFieldsQuerySchema = z.object({
   matcher: z.string().min(1).max(2048).optional(),
 });
 
+const matcherDataFieldsResponseSchema = z
+  .array(z.string())
+  .describe('The list of available matcher data field names');
+
 @injectable()
 export class MatcherDataFieldsRoute extends BaseAlertingRoute {
   static method = 'get' as const;
   static path = `${ALERTING_V2_ACTION_POLICY_API_PATH}/suggestions/data_fields`;
   static security: RouteSecurity = {
     authz: {
-      requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.actionPolicies.read],
+      requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.alerts.read],
     },
   };
   static routeOptions = {
     summary: 'Get matcher data fields suggestions',
     description: 'Get suggestions for matcher data fields.',
   } as const;
-  static validate = {
+  static schemas = {
     request: {
-      query: buildRouteValidationWithZod(matcherDataFieldsQuerySchema),
+      query: matcherDataFieldsQuerySchema,
     },
-  } as const;
+    response: {
+      200: {
+        body: () => matcherDataFieldsResponseSchema,
+        description: 'Returns the available matcher data field names.',
+      },
+      400: {
+        body: () => errorResponseSchema,
+        description: 'Indicates invalid query parameters.',
+      },
+    },
+  };
 
   protected readonly routeName = 'matcher data fields suggestions';
 

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { encode as encodeRison } from '@kbn/rison';
 import type { CoreStart } from '@kbn/core/public';
 import type { Environment } from '../../../common/environment_rt';
 
@@ -15,6 +16,12 @@ export interface ServiceMapUrlParams {
   kuery?: string;
   serviceName?: string;
   serviceGroupId?: string;
+  /**
+   * Field-value pairs to pre-populate as filter bar pills.
+   * Each `field` is used unescaped in a match_phrase query — only pass trusted
+   * field names (e.g. TRANSACTION_NAME, TRANSACTION_TYPE constants).
+   */
+  filterPills?: Array<{ field: string; value: string }>;
 }
 
 /**
@@ -22,7 +29,8 @@ export interface ServiceMapUrlParams {
  * Used by the embeddable "View full service map" link.
  */
 export function getServiceMapUrl(core: CoreStart, params: ServiceMapUrlParams): string {
-  const { rangeFrom, rangeTo, environment, kuery, serviceName, serviceGroupId } = params;
+  const { rangeFrom, rangeTo, environment, kuery, serviceName, serviceGroupId, filterPills } =
+    params;
   const searchParams = new URLSearchParams();
   searchParams.set('rangeFrom', rangeFrom);
   searchParams.set('rangeTo', rangeTo);
@@ -35,6 +43,16 @@ export function getServiceMapUrl(core: CoreStart, params: ServiceMapUrlParams): 
   if (serviceGroupId !== undefined && serviceGroupId !== '') {
     searchParams.set('serviceGroup', serviceGroupId);
   }
+
+  if (filterPills && filterPills.length > 0) {
+    const filters = filterPills.map((pill) => ({
+      meta: { key: pill.field, negate: false, disabled: false },
+      query: { match_phrase: { [pill.field]: pill.value } },
+    }));
+    const appState = encodeRison({ filters });
+    searchParams.set('_a', appState);
+  }
+
   const queryString = searchParams.toString();
   const hashPath = serviceName
     ? `#/services/${encodeURIComponent(serviceName)}/service-map`

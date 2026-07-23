@@ -37,6 +37,8 @@ import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { combineQueries } from '../../../../common/lib/kuery';
 import { useKibana } from '../../../../common/lib/kibana';
 import { CellValue } from './render_cell';
+import { useBulkAddToChatConfig } from '../../../../agent_builder/hooks/use_bulk_add_to_chat_config';
+import { useAgentBuilderAvailability } from '../../../../agent_builder/hooks/use_agent_builder_availability';
 import { buildTimeRangeFilter } from '../../alerts_table/helpers';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 
@@ -134,12 +136,14 @@ export const Table = memo(({ dataView, groupingFilters, packages }: TableProps) 
   const {
     services: {
       application,
+      agentBuilder,
       cases,
       data,
       fieldFormats,
       http,
       licensing,
       notifications,
+      rendering,
       uiSettings,
       settings,
     },
@@ -150,13 +154,30 @@ export const Table = memo(({ dataView, groupingFilters, packages }: TableProps) 
       data,
       http,
       notifications,
+      rendering,
       fieldFormats,
       application,
       licensing,
       settings,
+      agentBuilder,
     }),
-    [application, cases, data, fieldFormats, http, licensing, notifications, settings]
+    [
+      agentBuilder,
+      application,
+      cases,
+      data,
+      fieldFormats,
+      http,
+      licensing,
+      notifications,
+      rendering,
+      settings,
+    ]
   );
+
+  const { isAgentBuilderEnabled } = useAgentBuilderAvailability();
+  const bulkAddToChatConfig = useBulkAddToChatConfig('bulk_alerts_alert_summary');
+  const maybeBulkAddToChatConfig = isAgentBuilderEnabled ? bulkAddToChatConfig : undefined;
 
   const getGlobalFiltersSelector = useMemo(() => inputsSelectors.globalFiltersQuerySelector(), []);
   const globalFilters = useDeepEqualSelector(getGlobalFiltersSelector);
@@ -173,9 +194,7 @@ export const Table = memo(({ dataView, groupingFilters, packages }: TableProps) 
     [globalFilters, groupingFilters, timeRangeFilter]
   );
 
-  const dataViewSpec = useMemo(() => dataView.toSpec(), [dataView]);
-
-  const browserFields = useBrowserFields(PageScope.alerts, dataView);
+  const browserFields = useBrowserFields(PageScope.alerts);
 
   const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);
   const globalQuery = useDeepEqualSelector(getGlobalQuerySelector);
@@ -184,7 +203,6 @@ export const Table = memo(({ dataView, groupingFilters, packages }: TableProps) 
     const combinedQuery = combineQueries({
       config: getEsQueryConfig(uiSettings),
       dataProviders: [],
-      dataViewSpec,
       dataView,
       browserFields,
       filters,
@@ -202,7 +220,7 @@ export const Table = memo(({ dataView, groupingFilters, packages }: TableProps) 
     } catch {
       return { bool: {} };
     }
-  }, [browserFields, dataView, dataViewSpec, filters, globalQuery, uiSettings]);
+  }, [browserFields, dataView, filters, globalQuery, uiSettings]);
 
   const renderAdditionalToolbarControls = useCallback(
     () => <AdditionalToolbarControls dataView={dataView} />,
@@ -243,6 +261,7 @@ export const Table = memo(({ dataView, groupingFilters, packages }: TableProps) 
         ruleTypeIds={RULE_TYPE_IDS}
         services={services}
         toolbarVisibility={TOOLBAR_VISIBILITY}
+        bulkAddToChatConfig={maybeBulkAddToChatConfig}
       />
     </EuiDataGridStyleWrapper>
   );

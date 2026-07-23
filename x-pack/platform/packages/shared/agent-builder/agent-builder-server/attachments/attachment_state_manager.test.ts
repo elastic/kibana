@@ -24,7 +24,7 @@ import type { AttachmentTypeDefinition } from './type_definition';
 
 describe('AttachmentStateManager', () => {
   let manager: AttachmentStateManager;
-  const mockContext = { request: {} as any, spaceId: 'default' };
+  const mockContext = { request: {} as any, spaceId: 'default', savedObjectsClient: {} as any };
 
   let resolvedByRefPayload: Record<string, unknown> = { value: 'resolved-1' };
   let isStaleResult: boolean = false;
@@ -225,6 +225,25 @@ describe('AttachmentStateManager', () => {
       await expect(manager.add({ type: 'text', data: {} as any })).rejects.toThrow(
         'Invalid attachment data for type "text"'
       );
+    });
+
+    it('persists group_id on the VersionedAttachment when provided', async () => {
+      const attachment = await manager.add({
+        type: 'text',
+        data: { content: 'grouped' },
+        group_id: 'alert-batch-1',
+      });
+
+      expect(attachment.group_id).toBe('alert-batch-1');
+    });
+
+    it('omits group_id from the VersionedAttachment when not provided', async () => {
+      const attachment = await manager.add({
+        type: 'text',
+        data: { content: 'standalone' },
+      });
+
+      expect(attachment.group_id).toBeUndefined();
     });
   });
 

@@ -8,15 +8,14 @@
  */
 
 import { lazy, useMemo } from 'react';
-import { ACTION_TYPE_SOURCES, type ActionType } from '@kbn/actions-types';
-import type { HttpSetup, IUiSettingsClient } from '@kbn/core/public';
+import type { ActionType } from '@kbn/actions-types';
+import type { DocLinksStart, HttpSetup, IUiSettingsClient } from '@kbn/core/public';
 import type { IconType } from '@elastic/eui';
 import { ConnectorIconsMap } from '@kbn/connector-specs/icons';
 import { fromConnectorSpecSchema } from '@kbn/connector-specs/src/lib/deserialize_connector_spec';
 import type { ConnectorZodSchema } from '@kbn/connector-specs/src/lib/deserialize_connector_spec';
 import { getMeta, setMeta } from '@kbn/connector-specs/src/connector_spec_ui';
 import { narrowSecretsSchemaForAuthMode } from '@kbn/connector-specs/src/lib/narrow_secrets_schema_for_auth_mode';
-import { generateFormFields } from '@kbn/response-ops-form-generator';
 import type {
   ConnectorSpecResponse,
   ConnectorSpecWireResponse,
@@ -57,6 +56,34 @@ export async function fetchConnectorSpec(
 }
 
 /**
+ * Resolves the documentation URL for a spec-based connector.
+ *
+ * The connectors base always comes from the doc-links service, so links stay correct
+ * if the docs structure changes:
+ * - `docsUrl === ''` → the connector has no dedicated page; link to the top-level connectors page.
+ * - `docsUrl` set → used as-is (e.g. a specific page or a third-party site).
+ * - `docsUrl` absent → derive from the connector id (strip leading '.', convert
+ *   underscores/camelCase to kebab-case, append '-action-type').
+ */
+function getDocsUrlFromSpec(spec: ConnectorSpecResponse, docLinks: DocLinksStart): string {
+  const { docsUrl, id } = spec.metadata;
+  const connectorsDocs = docLinks.links.alerting.connectors;
+
+  if (docsUrl === '') {
+    return connectorsDocs;
+  }
+  if (docsUrl) {
+    return docsUrl;
+  }
+  const slug = id
+    .replace(/^\./, '')
+    .replace(/_/g, '-')
+    .replace(/([a-z])([A-Z])/g, '$1-$2')
+    .toLowerCase();
+  return `${connectorsDocs}/${slug}-action-type`;
+}
+
+/**
  * Resolves the icon for a connector based on the spec metadata.
  */
 function getIconFromSpec(spec: ConnectorSpecResponse): IconType {
@@ -80,19 +107,24 @@ function getIconFromSpec(spec: ConnectorSpecResponse): IconType {
  */
 export function transformSpecToActionTypeModel(
   spec: ConnectorSpecResponse,
+  docLinks: DocLinksStart,
   uiSettings?: IUiSettingsClient
 ): ActionTypeModel {
   return {
     id: spec.metadata.id,
     actionTypeTitle: spec.metadata.displayName,
-    source: ACTION_TYPE_SOURCES.spec,
     selectMessage: spec.metadata.description,
     iconClass: getIconFromSpec(spec),
     subtype: undefined,
+    isTestable: spec.isTestable,
     isExperimental: spec.metadata.isTechnicalPreview ?? false,
+    docsUrl: getDocsUrlFromSpec(spec, docLinks),
     getHideInUi: (_actionTypes: ActionType[]) =>
       shouldHideWorkflowsOnlyConnector(spec.metadata.supportedFeatureIds, uiSettings),
     actionConnectorFields: lazy(async () => {
+      const { generateFormFields } = await import(
+        /* webpackPrefetch: true */ '@kbn/response-ops-form-generator'
+      );
       const parsedZodSchema = fromConnectorSpecSchema(spec.schema);
       if (!parsedZodSchema) {
         throw new Error(`Invalid connector spec schema for "${spec.metadata.id}"`);
@@ -113,9 +145,7 @@ export function transformSpecToActionTypeModel(
       }
       return { default: SpecConnectorFormFields };
     }),
-    // Spec-based connectors don't have custom action params UI
     actionParamsFields: lazy(async () => ({ default: () => null })),
-    // Validation is handled server-side via the Zod schema
     validateParams: async () => ({ errors: {} }),
     connectorForm: {
       serializer: createConnectorFormSerializer() as unknown as NonNullable<

@@ -8,7 +8,12 @@
  */
 
 import type { DatatableVisualizationState, RowHeightMode } from '@kbn/lens-common';
-import { LENS_ROW_HEIGHT_MODE, LENS_DATAGRID_DENSITY } from '@kbn/lens-common';
+import {
+  LENS_ROW_HEIGHT_MODE,
+  LENS_DATAGRID_DENSITY,
+  DEFAULT_ROW_HEIGHT_LINES,
+  DEFAULT_HEADER_ROW_HEIGHT_LINES,
+} from '@kbn/lens-common';
 import { parseTransposeId } from '@kbn/transpose-utils';
 import type { DatatableConfig } from '../../../../schema';
 import type { ColumnIdMapping } from './columns';
@@ -42,10 +47,12 @@ function buildHeightAPI(
     return { type: LENS_ROW_HEIGHT_MODE.auto };
   }
 
-  const lines = heightLines ?? 1;
   return type === 'value'
-    ? { type: LENS_ROW_HEIGHT_MODE.custom, lines }
-    : { type: LENS_ROW_HEIGHT_MODE.custom, max_lines: lines };
+    ? { type: LENS_ROW_HEIGHT_MODE.custom, lines: heightLines ?? DEFAULT_ROW_HEIGHT_LINES }
+    : {
+        type: LENS_ROW_HEIGHT_MODE.custom,
+        max_lines: heightLines ?? DEFAULT_HEADER_ROW_HEIGHT_LINES,
+      };
 }
 
 function parseDensityToAPI(

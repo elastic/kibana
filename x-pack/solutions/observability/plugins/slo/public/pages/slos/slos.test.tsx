@@ -53,6 +53,9 @@ jest.mock('react-router-dom', () => ({
 
 jest.mock('@kbn/observability-shared-plugin/public');
 jest.mock('../../hooks/use_kibana');
+jest.mock('../../hooks/use_composite_slo_enabled', () => ({
+  useCompositeSloEnabled: jest.fn().mockReturnValue(false),
+}));
 jest.mock('../../hooks/use_license');
 jest.mock('../../hooks/use_fetch_slo_list');
 jest.mock('../../hooks/use_fetch_slo_definitions');

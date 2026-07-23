@@ -19,6 +19,8 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
 import { formatAgentBuilderErrorMessage } from '@kbn/agent-builder-browser';
 import { useConversationContext } from '../../context/conversation/conversation_context';
 import { useConversationId } from '../../context/conversation/use_conversation_id';
@@ -104,7 +106,15 @@ export const BaseRenameConversationModal: React.FC<BaseRenameConversationModalPr
       </EuiModalBody>
 
       <EuiModalFooter>
-        <EuiButtonEmpty onClick={onClose} data-test-subj="renameConversationModalCancel">
+        <EuiButtonEmpty
+          onClick={onClose}
+          data-test-subj="renameConversationModalCancel"
+          {...getEbtProps({
+            element: AGENT_BUILDER_UI_EBT.element.pageContent,
+            action: AGENT_BUILDER_UI_EBT.action.conversation.RENAME_CANCEL,
+            detail: 'conversation',
+          })}
+        >
           <FormattedMessage
             id="xpack.agentBuilder.renameConversationModal.cancelButton"
             defaultMessage="Cancel"
@@ -116,6 +126,11 @@ export const BaseRenameConversationModal: React.FC<BaseRenameConversationModalPr
           isLoading={isLoading}
           isDisabled={!newTitle.trim() || !isDirty}
           data-test-subj="renameConversationModalSave"
+          {...getEbtProps({
+            element: AGENT_BUILDER_UI_EBT.element.pageContent,
+            action: AGENT_BUILDER_UI_EBT.action.conversation.RENAME_SAVE,
+            detail: 'conversation',
+          })}
         >
           <FormattedMessage
             id="xpack.agentBuilder.renameConversationModal.saveButton"

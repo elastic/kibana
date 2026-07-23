@@ -14,8 +14,8 @@ Stop and tell the user:
 >
 > **C) Cancel** — do nothing."
 
-**If the user selects A:** Run the full update flow — read [`mode-update.md`](mode-update.md) and follow every step in that file. The published comment serves as the baseline; the PR-activity optimisation, URL re-categorization, special handling for implemented Pending sub-issues, and full-document self-review rules defined there all apply.
+**If the user selects A:** Run the full update flow — read [`mode-update.md`](mode-update.md) and follow every step in that file. The published comment serves as the baseline; the PR-activity optimisation, URL re-categorization, special handling for implemented Pending sub-issues, full-document self-review rules, and the Issue Clarity Assessment re-evaluation defined there all apply.
 
 After step 7 of `mode-update.md`, if **no gaps were found** (i.e. step 5 produced an empty change list), do not save a draft — instead tell the user *"The existing test plan appears to be up to date. No changes are needed."*
 
-**If the user selects B:** proceed normally through Steps 1, 2, and 3.
+**If the user selects B:** proceed normally through Steps 1, 1.5, 2, 3, and 3.5 of [`../SKILL.md`](../SKILL.md). The Issue Clarity Assessment (Step 1.5 stop-and-ask gate + Step 3.5 Coverage Ratio assembly) is part of the standard flow and is **not** skipped just because a previous plan existed.

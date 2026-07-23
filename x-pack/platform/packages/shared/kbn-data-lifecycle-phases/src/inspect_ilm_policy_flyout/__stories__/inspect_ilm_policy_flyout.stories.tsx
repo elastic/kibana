@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
+import { EuiButton } from '@elastic/eui';
 import type { SerializedPolicy } from '@kbn/index-lifecycle-management-common-shared';
 import { InspectIlmPolicyFlyout } from '../inspect_ilm_policy_flyout';
 
@@ -94,26 +95,42 @@ const meta: Meta<typeof InspectIlmPolicyFlyout> = {
 export default meta;
 type Story = StoryObj<typeof InspectIlmPolicyFlyout>;
 
+const InspectIlmPolicyFlyoutStoryWrapper = (props: {
+  policyName: string;
+  policy: SerializedPolicy;
+}) => {
+  const [isOpen, setIsOpen] = useState(true);
+
+  if (!isOpen) {
+    return <EuiButton onClick={() => setIsOpen(true)}>Open flyout</EuiButton>;
+  }
+
+  return (
+    <InspectIlmPolicyFlyout
+      policyName={props.policyName}
+      policy={props.policy}
+      onBack={() => setIsOpen(false)}
+      onEditPolicy={action('onEditPolicy')}
+      primaryAction={{
+        label: 'Select policy and apply',
+        onClick: (policyName) => action('onSelectAndApply')({ policyName }),
+        'data-test-subj': 'inspectIlmPolicyFlyoutSelectAndApplyButton',
+      }}
+    />
+  );
+};
+
 export const FullPolicy: Story = {
   render: () => (
-    <InspectIlmPolicyFlyout
-      policyName="alerts-ilm-policy"
-      policy={FULL_POLICY}
-      onBack={action('onBack')}
-      onEditPolicy={action('onEditPolicy')}
-      onSelectAndApply={action('onSelectAndApply')}
-    />
+    <InspectIlmPolicyFlyoutStoryWrapper policyName="alerts-ilm-policy" policy={FULL_POLICY} />
   ),
 };
 
 export const HotPhaseAllRolloverOptions: Story = {
   render: () => (
-    <InspectIlmPolicyFlyout
+    <InspectIlmPolicyFlyoutStoryWrapper
       policyName="all-rollover-thresholds"
       policy={HOT_ALL_ROLLOVER_POLICY}
-      onBack={action('onBack')}
-      onEditPolicy={action('onEditPolicy')}
-      onSelectAndApply={action('onSelectAndApply')}
     />
   ),
 };

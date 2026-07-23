@@ -12,9 +12,11 @@ import type { ScoutPage } from '..';
 
 export class ListingTable {
   private readonly table: Locator;
+  private readonly searchBox: Locator;
 
   constructor(private readonly page: ScoutPage) {
     this.table = this.page.testSubj.locator('listingTable-isLoaded');
+    this.searchBox = this.page.testSubj.locator('tableListSearchBox');
   }
 
   async waitUntilTableIsLoaded(options?: { timeout?: number }) {
@@ -24,5 +26,34 @@ export class ListingTable {
   async getAllItemsNames(): Promise<string[]> {
     const links = this.table.locator('.euiTableRow .euiLink');
     return links.allTextContents();
+  }
+
+  async searchFor(text: string) {
+    await this.searchBox.fill(text);
+    await this.page.keyboard.press('Enter');
+    await this.waitUntilTableIsLoaded();
+  }
+
+  async selectFilterTags(...tagNames: string[]) {
+    await this.page.testSubj.click('tagFilterPopoverButton');
+    for (const tagName of tagNames) {
+      await this.page.testSubj.click(`tag-searchbar-option-${tagName.replace(' ', '_')}`);
+    }
+    await this.searchBox.click();
+    await this.waitUntilTableIsLoaded();
+  }
+
+  /**
+   * Filters the listing by the given title. Wraps `title` in quotes so that
+   * names containing special characters (e.g. `"(1)"`) are matched literally rather
+   * than tokenized by the saved-object search syntax.
+   */
+  async searchForItemTitle(title: string) {
+    await this.searchFor(`"${title}"`);
+  }
+
+  async clearSearchFilter() {
+    await this.page.testSubj.click('clearSearchButton');
+    await this.waitUntilTableIsLoaded();
   }
 }

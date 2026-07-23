@@ -1,0 +1,15 @@
+prs:
+- https://github.com/elastic/kibana/pull/274792
+issues:
+- https://github.com/elastic/kibana/issues/265849
+type: breaking-change
+products:
+- product: cloud-serverless
+  target: 2026-07-09
+areas:
+- Alerting and reporting
+- Dashboards and visualizations
+title: Dashboards and Visualizations APIs use short-hand duration units
+description: "The `duration` format used in visualization configuration now uses short-hand unit values aligned with {{esql}} conventions for its `from` and `to` options. This affects the `api/visualizations` and `api/dashboards` APIs, for both by-value and by-reference panels. For example, `minutes` becomes `min`, `humanize` becomes `auto-approximate`, and `humanizePrecise` becomes `auto`."
+impact: "API requests that configure duration formats with the previous verbose unit names (for example, `minutes`, `humanize`, or `asMilliseconds`) are rejected."
+action: "Update the duration `from` and `to` values in your visualization and dashboard panel API payloads to the new short-hand units. Refer to the [Dashboards API reference](https://dashboardsapispec.kibana.dev/index.html) for the updated schemas."

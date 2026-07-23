@@ -10,6 +10,15 @@
 import { z } from '@kbn/zod/v4';
 import { getLiteralDescription, getZodTypeName } from './get_zod_type_name';
 
+// Memoize results by schema identity so repeated walks of the same recursive
+// schema (e.g. `WorkflowYamlStep`, which references itself via
+// `on-failure.fallback`) don't re-allocate the same nested string per visit.
+let descriptionCache = new WeakMap<z.ZodType, Map<string, string>>();
+
+export function clearDescriptionCache(): void {
+  descriptionCache = new WeakMap();
+}
+
 export interface TypeDescriptionOptions {
   /** Maximum depth for nested objects */
   maxDepth: number;
@@ -135,6 +144,39 @@ function generateDetailedDescription(
   currentDepth: number,
   opts: TypeDescriptionOptions
 ): string {
+  if (currentDepth >= opts.maxDepth) {
+    return getZodTypeName(schema);
+  }
+
+  // currentDepth is part of the key because indentation (in non-singleLine mode)
+  // depends on it.
+  const cacheKey = `${currentDepth}|${
+    opts.maxDepth
+  }|${+opts.showOptional}|${+opts.includeDescriptions}|${+opts.singleLine}|${
+    opts.indentSpacesNumber
+  }`;
+
+  let bucket = descriptionCache.get(schema);
+  if (bucket) {
+    const hit = bucket.get(cacheKey);
+    if (hit !== undefined) {
+      return hit;
+    }
+  } else {
+    bucket = new Map<string, string>();
+    descriptionCache.set(schema, bucket);
+  }
+
+  const result = generateDetailedDescriptionImpl(schema, currentDepth, opts);
+  bucket.set(cacheKey, result);
+  return result;
+}
+
+function generateDetailedDescriptionImpl(
+  schema: z.ZodType,
+  currentDepth: number,
+  opts: TypeDescriptionOptions
+): string {
   const {
     maxDepth,
     showOptional,
@@ -142,9 +184,6 @@ function generateDetailedDescription(
     indentSpacesNumber = 2,
     singleLine = false,
   } = opts;
-  if (currentDepth >= maxDepth) {
-    return getZodTypeName(schema);
-  }
 
   const def = schema.def;
 

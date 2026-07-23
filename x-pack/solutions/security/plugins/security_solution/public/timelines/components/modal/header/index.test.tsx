@@ -9,7 +9,6 @@ import React from 'react';
 import { TestProviders } from '../../../../common/mock';
 import { TimelineModalHeader } from '.';
 import { render } from '@testing-library/react';
-import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { useCreateTimeline } from '../../../hooks/use_create_timeline';
 import { useInspect } from '../../../../common/components/inspect/use_inspect';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -18,14 +17,13 @@ import { timelineActions } from '../../../store';
 jest.mock('../../../../common/hooks/use_experimental_features', () => ({
   useIsExperimentalFeatureEnabled: jest.fn(),
 }));
-jest.mock('../../../../sourcerer/containers');
 jest.mock('../../../hooks/use_create_timeline');
 jest.mock('../../../../common/components/inspect/use_inspect');
 jest.mock('../../../../common/lib/kibana');
 
 const mockGetState = jest.fn();
-jest.mock('react-redux', () => {
-  const actual = jest.requireActual('react-redux');
+jest.mock('react-redux-v7', () => {
+  const actual = jest.requireActual('react-redux-v7');
   return {
     ...actual,
     useDispatch: jest.fn(),
@@ -60,12 +58,6 @@ describe('TimelineModalHeader', () => {
   (useInspect as jest.Mock).mockReturnValue(jest.fn());
 
   it('should render all dom elements', () => {
-    (useSourcererDataView as jest.Mock).mockReturnValue({
-      browserFields: {},
-      indexPattern: { fields: [], title: '' },
-      sourcererDataView: {},
-    });
-
     const { getByTestId, getByText } = renderTimelineModalHeader();
 
     expect(getByTestId('timeline-favorite-empty-star')).toBeInTheDocument();
@@ -80,11 +72,6 @@ describe('TimelineModalHeader', () => {
   });
 
   it('should show attach to case if user has the correct permissions', () => {
-    (useSourcererDataView as jest.Mock).mockReturnValue({
-      browserFields: {},
-      indexPattern: { fields: [], title: '' },
-      sourcererDataView: {},
-    });
     (useKibana as jest.Mock).mockReturnValue({
       services: {
         application: {
@@ -97,6 +84,11 @@ describe('TimelineModalHeader', () => {
               read: true,
             }),
           },
+          hooks: {
+            useCasesAddToNewCaseFlyout: jest.fn().mockReturnValue({ open: jest.fn() }),
+            useCasesAddToExistingCaseModal: jest.fn().mockReturnValue({ open: jest.fn() }),
+          },
+          config: { attachmentsEnabled: false },
         },
         uiSettings: {
           get: jest.fn(),
@@ -110,12 +102,6 @@ describe('TimelineModalHeader', () => {
   });
 
   it('should call showTimeline action when closing timeline', () => {
-    (useSourcererDataView as jest.Mock).mockReturnValue({
-      browserFields: {},
-      indexPattern: { fields: [], title: '' },
-      sourcererDataView: {},
-    });
-
     const spy = jest.spyOn(timelineActions, 'showTimeline');
 
     const { getByTestId } = renderTimelineModalHeader();

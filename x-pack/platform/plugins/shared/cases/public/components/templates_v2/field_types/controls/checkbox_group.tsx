@@ -6,9 +6,10 @@
  */
 
 import type { z } from '@kbn/zod/v4';
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 import { EuiCheckboxGroup, EuiFormRow } from '@elastic/eui';
+import { InlineFieldActions } from './inline_field_actions';
 import { CASE_EXTENDED_FIELDS } from '../../../../../common/constants';
 import { getFieldSnakeKey } from '../../../../../common/utils';
 import type {
@@ -16,7 +17,7 @@ import type {
   ConditionRenderProps,
 } from '../../../../../common/types/domain/template/fields';
 import { FIELD_REQUIRED } from '../../translations';
-import { OptionalFieldLabel } from '../../../optional_field_label';
+import { getFieldRequirementLabel } from '../../../optional_field_label';
 
 type CheckboxGroupProps = z.infer<typeof CheckboxGroupFieldSchema> & ConditionRenderProps;
 
@@ -42,8 +43,12 @@ export const CheckboxGroup: React.FC<CheckboxGroupProps> = ({
   type,
   metadata,
   isRequired,
+  isRequiredOnClose,
+  onConfirm,
+  isSaving,
+  isSaveDisabled,
 }) => {
-  const { control } = useFormContext();
+  const { control, resetField } = useFormContext();
   const path = `${CASE_EXTENDED_FIELDS}.${getFieldSnakeKey(name, type)}`;
 
   const options = useMemo(
@@ -62,6 +67,10 @@ export const CheckboxGroup: React.FC<CheckboxGroupProps> = ({
     };
   }, [isRequired]);
 
+  const handleCancel = useCallback(() => {
+    resetField(path);
+  }, [path, resetField]);
+
   return (
     <Controller
       key={name}
@@ -72,25 +81,39 @@ export const CheckboxGroup: React.FC<CheckboxGroupProps> = ({
       render={({ field, fieldState }) => {
         const selected = toArray(field.value);
         const handleChange = (id: string) => {
-          const next = selected.includes(id) ? selected.filter((s) => s !== id) : [...selected, id];
+          const next = selected.includes(id)
+            ? selected.filter((selectedId) => selectedId !== id)
+            : [...selected, id];
           field.onChange(JSON.stringify(next));
           field.onBlur();
         };
 
         return (
-          <EuiFormRow
-            label={label}
-            labelAppend={!isRequired ? OptionalFieldLabel : undefined}
-            error={fieldState.error?.message}
-            isInvalid={!!fieldState.error}
-            fullWidth
-          >
-            <EuiCheckboxGroup
-              options={options}
-              idToSelectedMap={Object.fromEntries(selected.map((id) => [id, true]))}
-              onChange={handleChange}
-            />
-          </EuiFormRow>
+          <>
+            <EuiFormRow
+              label={label}
+              labelAppend={getFieldRequirementLabel(isRequired, isRequiredOnClose)}
+              error={fieldState.error?.message}
+              isInvalid={Boolean(fieldState.error)}
+              fullWidth
+            >
+              <EuiCheckboxGroup
+                options={options}
+                idToSelectedMap={Object.fromEntries(selected.map((id) => [id, true]))}
+                onChange={handleChange}
+                disabled={isSaving}
+              />
+            </EuiFormRow>
+            {fieldState.isDirty && onConfirm && (
+              <InlineFieldActions
+                name={name}
+                onConfirm={onConfirm}
+                onCancel={handleCancel}
+                isLoading={isSaving}
+                isDisabled={isSaveDisabled}
+              />
+            )}
+          </>
         );
       }}
     />

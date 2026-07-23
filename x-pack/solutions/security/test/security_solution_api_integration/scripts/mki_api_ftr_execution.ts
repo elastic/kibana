@@ -15,6 +15,10 @@ import type {
   ProjectHandler,
 } from '@kbn/security-solution-plugin/scripts/run_cypress/project_handler/project_handler';
 import { CloudHandler } from '@kbn/security-solution-plugin/scripts/run_cypress/project_handler/cloud_project_handler';
+import {
+  PROJECT_INIT_TIMEOUT_EXIT_CODE,
+  isProjectInitTimeoutError,
+} from '@kbn/security-solution-plugin/scripts/run_cypress/project_handler/project_init_timeout_error';
 import { ProxyHandler } from '@kbn/security-solution-plugin/scripts/run_cypress/project_handler/proxy_project_handler';
 import {
   proxyHealthcheck,
@@ -187,9 +191,14 @@ export const cli = () => {
 
         statusCode = await executeCommand(command, envVars, log);
       } catch (err) {
-        log.error('An error occured when running the test script.');
-        log.error(err.message);
-        statusCode = 1;
+        if (isProjectInitTimeoutError(err)) {
+          log.error(`${err.message} (exit ${PROJECT_INIT_TIMEOUT_EXIT_CODE})`);
+          statusCode = PROJECT_INIT_TIMEOUT_EXIT_CODE;
+        } else {
+          log.error('An error occured when running the test script.');
+          log.error(err instanceof Error ? err.message : String(err));
+          statusCode = 1;
+        }
       } finally {
         // Delete serverless project
         log.info(`Deleting project ${PROJECT_NAME} and ID ${project.id} ...`);

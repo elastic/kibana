@@ -6,8 +6,9 @@
  */
 
 import React from 'react';
-import { render, waitFor } from '@testing-library/react';
+import { act, render, waitFor } from '@testing-library/react';
 import { PerformanceContextProvider } from '@kbn/ebt-tools';
+import type { Query } from '@kbn/es-query';
 import type { MemoryHistory } from 'history';
 import { createMemoryHistory } from 'history';
 import { useLocation } from 'react-router-dom';
@@ -162,5 +163,153 @@ describe('UnifiedSearchBar', () => {
       expect(setTimeSpy).toHaveBeenCalledWith(expectedTimeRange);
       expect(setRefreshIntervalSpy).toHaveBeenCalledWith(refreshInterval);
     });
+  });
+
+  it('forwards showFilterBar to the unified search component', async () => {
+    jest.spyOn(useProcessorEventHook, 'useProcessorEvent').mockReturnValue(undefined);
+
+    const searchBarSpy = jest.fn(() => <div />);
+    const search = '?method=json';
+    const pathname = '/service-map';
+    (useLocation as jest.Mock).mockReturnValue({ search, pathname });
+
+    const urlParams = {
+      kuery: '',
+      rangeFrom: 'now-15m',
+      rangeTo: 'now',
+      environment: 'ENVIRONMENT_ALL',
+      comparisonEnabled: true,
+      serviceGroup: '',
+      offset: '1d',
+    };
+
+    jest.spyOn(useApmParamsHook, 'useApmParams').mockReturnValue({ query: urlParams, path: {} });
+
+    render(
+      <MockApmPluginContextWrapper
+        history={history}
+        value={
+          {
+            unifiedSearch: {
+              ui: {
+                SearchBar: searchBarSpy,
+              },
+            },
+          } as unknown as ApmPluginContextValue
+        }
+      >
+        <PerformanceContextProvider>
+          <UnifiedSearchBar showFilterBar />
+        </PerformanceContextProvider>
+      </MockApmPluginContextWrapper>
+    );
+
+    await waitFor(() => {
+      expect(searchBarSpy).toHaveBeenCalled();
+    });
+
+    const firstCallProps = (searchBarSpy.mock.calls as any[])[0][0] as { showFilterBar: boolean };
+    expect(firstCallProps.showFilterBar).toBe(true);
+  });
+
+  it('preserves comparison params when query is updated', async () => {
+    jest.spyOn(useProcessorEventHook, 'useProcessorEvent').mockReturnValue(undefined);
+
+    const searchBarSpy = jest.fn(() => <div />);
+    const urlParams = {
+      kuery: 'service.name:"opbeans-android"',
+      rangeFrom: 'now-15m',
+      rangeTo: 'now',
+      environment: 'ENVIRONMENT_ALL',
+      comparisonEnabled: true,
+      serviceGroup: '',
+      offset: '1d',
+    };
+    const search = fromQuery(urlParams);
+    const pathname = '/service-map';
+
+    (useLocation as jest.Mock).mockReturnValue({ search, pathname });
+    jest.spyOn(useApmParamsHook, 'useApmParams').mockReturnValue({ query: urlParams, path: {} });
+    jest.spyOn(useApmDataViewHook, 'useAdHocApmDataView').mockReturnValue({
+      dataView: {
+        title: 'apm',
+        fields: [
+          {
+            name: 'service.name',
+            type: 'string',
+            searchable: true,
+            aggregatable: true,
+            scripted: false,
+          },
+        ],
+        getFieldByName: (fieldName: string) => {
+          if (fieldName === 'service.name') {
+            return {
+              name: 'service.name',
+              type: 'string',
+              searchable: true,
+              aggregatable: true,
+              scripted: false,
+            };
+          }
+          return undefined;
+        },
+      } as any,
+      apmIndices: undefined,
+    });
+
+    render(
+      <MockApmPluginContextWrapper
+        history={history}
+        value={
+          {
+            unifiedSearch: {
+              ui: {
+                SearchBar: searchBarSpy,
+              },
+            },
+          } as unknown as ApmPluginContextValue
+        }
+      >
+        <PerformanceContextProvider>
+          <UnifiedSearchBar />
+        </PerformanceContextProvider>
+      </MockApmPluginContextWrapper>
+    );
+
+    await waitFor(() => {
+      expect(searchBarSpy).toHaveBeenCalled();
+    });
+
+    const onQuerySubmit = (searchBarSpy.mock.calls as any[])[0][0].onQuerySubmit as (
+      payload: { dateRange: { from: string; to: string }; query?: Query },
+      isUpdate?: boolean
+    ) => void;
+
+    await act(async () => {
+      onQuerySubmit(
+        {
+          dateRange: { from: 'now-30m', to: 'now' },
+          query: { query: 'service.name : "opbeans-node"', language: 'kuery' },
+        },
+        true
+      );
+    });
+
+    await waitFor(() => {
+      expect(history.push).toHaveBeenCalled();
+    });
+
+    const pushArgs = (history.push as jest.Mock).mock.calls.find(
+      (call) => call[0] && typeof call[0] === 'object' && 'search' in call[0]
+    );
+    expect(pushArgs).toBeDefined();
+
+    const pushedSearch = pushArgs![0].search as string;
+    const pushedParams = new URLSearchParams(pushedSearch);
+
+    expect(pushedParams.get('comparisonEnabled')).toBe('true');
+    expect(pushedParams.get('offset')).toBe('1d');
+    expect(pushedParams.get('kuery')).toBe('service.name : "opbeans-node"');
   });
 });

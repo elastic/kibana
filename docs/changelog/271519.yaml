@@ -1,0 +1,11 @@
+prs:
+- https://github.com/elastic/kibana/pull/271519
+issues:
+- https://github.com/elastic/kibana/issues/190293
+type: enhancement
+products:
+- product: cloud-serverless
+  target: 2026-06-01
+areas:
+- Discover and ES|QL
+title: Highlight search results in Discover when using ES|QL

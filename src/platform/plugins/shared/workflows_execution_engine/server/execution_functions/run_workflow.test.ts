@@ -25,6 +25,7 @@ import {
 } from './execution_functions_test_utils';
 import { runWorkflow } from './run_workflow';
 import { setupDependencies } from './setup_dependencies';
+import { handleQueuedWorkflowRunAtTaskStart } from '../concurrency/handle_queued_workflow_run_at_task_start';
 import type { WorkflowsMeteringService } from '../metering';
 import { workflowsExecutionEngineMock } from '../mocks';
 import type { WorkflowsExecutionEnginePluginStart } from '../types';
@@ -32,6 +33,9 @@ import type { WorkflowExecutionState } from '../workflow_context_manager/workflo
 import { workflowExecutionLoop } from '../workflow_execution_loop';
 
 jest.mock('./setup_dependencies');
+jest.mock('../concurrency/handle_queued_workflow_run_at_task_start', () => ({
+  handleQueuedWorkflowRunAtTaskStart: jest.fn().mockResolvedValue(false),
+}));
 jest.mock('../workflow_execution_loop', () => ({
   workflowExecutionLoop: jest.fn().mockResolvedValue(undefined),
 }));
@@ -49,6 +53,11 @@ const mockWorkflowExecutionLoop = workflowExecutionLoop as jest.MockedFunction<
 const mockStartSpan = apm.startSpan as jest.Mock;
 
 const mockWorkflowExecutionEngine = workflowsExecutionEngineMock.createStart();
+
+const mockHandleQueuedWorkflowRunAtTaskStart =
+  handleQueuedWorkflowRunAtTaskStart as jest.MockedFunction<
+    typeof handleQueuedWorkflowRunAtTaskStart
+  >;
 
 describe('runWorkflow', () => {
   describe('wiring / spans / metering', () => {
@@ -83,7 +92,7 @@ describe('runWorkflow', () => {
       runWorkflow({
         workflowRunId,
         spaceId,
-        taskAbortController,
+        signal: taskAbortController.signal,
         logger,
         config: mockConfig,
         fakeRequest,
@@ -159,7 +168,7 @@ describe('runWorkflow', () => {
             workflowExecutionRepository,
             dependencies,
             fakeRequest,
-            taskAbortController,
+            signal: taskAbortController.signal,
           })
         );
       });
@@ -226,10 +235,13 @@ describe('runWorkflow', () => {
         workflowDefinition: { name: 'Test Workflow', steps: [] },
       });
 
-      it('does not call getWorkflowExecutionById when metering is omitted', async () => {
+      it('loads execution after loop even when metering is omitted', async () => {
         await runWorkflowWithDefaults();
 
-        expect(workflowExecutionRepository.getWorkflowExecutionById).not.toHaveBeenCalled();
+        expect(workflowExecutionRepository.getWorkflowExecutionById).toHaveBeenCalledWith(
+          workflowRunId,
+          spaceId
+        );
       });
 
       it('when triggeredBy is undefined, does not treat as event-driven', async () => {
@@ -359,10 +371,13 @@ describe('runWorkflow', () => {
         status: ExecutionStatus.COMPLETED,
       };
 
-      it('does not call getWorkflowExecutionById for metering when meteringService is omitted', async () => {
+      it('does not report metering when meteringService is omitted but still loads execution after loop', async () => {
         await runWorkflowWithDefaults();
 
-        expect(workflowExecutionRepository.getWorkflowExecutionById).not.toHaveBeenCalled();
+        expect(workflowExecutionRepository.getWorkflowExecutionById).toHaveBeenCalledWith(
+          workflowRunId,
+          spaceId
+        );
       });
 
       it('calls reportWorkflowExecution when final execution exists', async () => {
@@ -403,10 +418,42 @@ describe('runWorkflow', () => {
 
         expect(logger.warn).toHaveBeenCalledWith(
           expect.stringContaining(
-            `Failed to fetch execution for metering (execution=${workflowRunId}): fetch failed`
+            `Failed to fetch execution after loop (execution=${workflowRunId}): fetch failed`
           )
         );
         expect(reportWorkflowExecution).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('queued-at-start handling', () => {
+      it('returns shouldDeleteTask when the dormant queue run is handled at task start', async () => {
+        mockHandleQueuedWorkflowRunAtTaskStart.mockResolvedValueOnce(true);
+
+        const result = await runWorkflowWithDefaults();
+
+        expect(result).toEqual({ shouldDeleteTask: true });
+        expect(mockWorkflowExecutionLoop).not.toHaveBeenCalled();
+      });
+
+      it('reports metering once via handlePostExecutionLoop when queued run ends FAILED', async () => {
+        mockHandleQueuedWorkflowRunAtTaskStart.mockResolvedValueOnce(true);
+        const reportWorkflowExecution = jest.fn().mockResolvedValue(undefined);
+        const meteringService = { reportWorkflowExecution } as unknown as WorkflowsMeteringService;
+        const failedExecution = {
+          id: workflowRunId,
+          workflowId: 'wf',
+          spaceId,
+          status: ExecutionStatus.FAILED,
+        };
+        workflowExecutionRepository.getWorkflowExecutionById.mockResolvedValue(failedExecution);
+
+        await runWorkflowWithDefaults({ meteringService });
+
+        expect(reportWorkflowExecution).toHaveBeenCalledTimes(1);
+        expect(reportWorkflowExecution).toHaveBeenCalledWith(
+          failedExecution,
+          dependencies.cloudSetup
+        );
       });
     });
   });
@@ -439,7 +486,7 @@ describe('runWorkflow', () => {
     beforeEach(() => {
       jest.clearAllMocks();
       dependencies = mockContextDependencies();
-      mockGetWorkflowExecutionById = jest.fn();
+      mockGetWorkflowExecutionById = jest.fn().mockResolvedValue(null);
       mockGetLastFailedStepContext = jest.fn().mockReturnValue(undefined);
       mockGetWorkflowExecutionStatus = jest.fn();
       mockGetWorkflowExecution = jest.fn();
@@ -501,7 +548,7 @@ describe('runWorkflow', () => {
         runWorkflow({
           workflowRunId,
           spaceId,
-          taskAbortController: new AbortController(),
+          signal: new AbortController().signal,
           logger: logger as Logger,
           config: { logging: { console: false }, http: { allowedHosts: ['*'] } } as any,
           fakeRequest,
@@ -561,7 +608,7 @@ describe('runWorkflow', () => {
         runWorkflow({
           workflowRunId,
           spaceId,
-          taskAbortController: new AbortController(),
+          signal: new AbortController().signal,
           logger: logger as Logger,
           config: { logging: { console: false }, http: { allowedHosts: ['*'] } } as any,
           fakeRequest,
@@ -578,14 +625,14 @@ describe('runWorkflow', () => {
       expect(emittedPayload.error).not.toHaveProperty('stepName');
     });
 
-    it('should not query execution for metering when triggerEvents path completes without metering', async () => {
+    it('loads execution after loop when metering is omitted (post-loop fetch)', async () => {
       mockWorkflowExecutionLoop.mockResolvedValue(undefined);
       mockGetWorkflowExecutionStatus.mockReturnValue(ExecutionStatus.COMPLETED);
 
       await runWorkflow({
         workflowRunId,
         spaceId,
-        taskAbortController: new AbortController(),
+        signal: new AbortController().signal,
         logger: logger as Logger,
         config: { logging: { console: false }, http: { allowedHosts: ['*'] } } as any,
         fakeRequest,
@@ -593,7 +640,7 @@ describe('runWorkflow', () => {
         workflowsExecutionEngine: mockWorkflowExecutionEngineLocal,
       });
 
-      expect(mockGetWorkflowExecutionById).not.toHaveBeenCalled();
+      expect(mockGetWorkflowExecutionById).toHaveBeenCalledWith(workflowRunId, spaceId);
     });
 
     it('does not emit when execution status is not FAILED', async () => {
@@ -610,7 +657,7 @@ describe('runWorkflow', () => {
         runWorkflow({
           workflowRunId,
           spaceId,
-          taskAbortController: new AbortController(),
+          signal: new AbortController().signal,
           logger: logger as Logger,
           config: { logging: { console: false }, http: { allowedHosts: ['*'] } } as any,
           fakeRequest,
@@ -643,7 +690,7 @@ describe('runWorkflow', () => {
         runWorkflow({
           workflowRunId,
           spaceId,
-          taskAbortController: new AbortController(),
+          signal: new AbortController().signal,
           logger: logger as Logger,
           config: { logging: { console: false }, http: { allowedHosts: ['*'] } } as any,
           fakeRequest,
@@ -671,7 +718,7 @@ describe('runWorkflow', () => {
       await runWorkflow({
         workflowRunId,
         spaceId,
-        taskAbortController: new AbortController(),
+        signal: new AbortController().signal,
         logger: logger as Logger,
         config: { logging: { console: false }, http: { allowedHosts: ['*'] } } as any,
         fakeRequest,

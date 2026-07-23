@@ -28,6 +28,7 @@ import type TestAgent from 'supertest/lib/agent';
 import type {
   RuleResponse,
   RuleUpdateProps,
+  ThreatMatchRuleUpdateProps,
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { v4 as uuidV4 } from 'uuid';
 import { createSupertestErrorLogger } from '../../../../edr_workflows/utils';
@@ -51,6 +52,7 @@ import {
   getActionsWithoutFrequencies,
   getSomeActionsWithFrequencies,
   getCustomQueryRuleParams,
+  getSimpleThreatMatch,
 } from '../../../utils';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 
@@ -552,6 +554,57 @@ export default ({ getService }: FtrProviderContext) => {
 
           expect(outputRule.type).to.be('query');
           expect(outputRule.saved_id).to.be(undefined);
+        });
+      });
+
+      describe('threat_match rule type', () => {
+        // https://github.com/elastic/kibana/issues/276203
+        it('should preserve concurrent_searches and items_per_search when they are included in the update payload', async () => {
+          const ruleId = 'rule-1';
+          await createRule(supertest, log, {
+            ...getSimpleThreatMatch(ruleId),
+            concurrent_searches: 4,
+            items_per_search: 2500,
+          });
+
+          const updatedRule: ThreatMatchRuleUpdateProps = {
+            ...getSimpleThreatMatch(ruleId),
+            rule_id: ruleId,
+            name: 'updated name',
+            concurrent_searches: 4,
+            items_per_search: 2500,
+          };
+
+          const { body: outputRule } = await detectionsApi
+            .updateRule({ body: updatedRule })
+            .expect(200);
+
+          expect(outputRule.name).to.be('updated name');
+          expect(outputRule.concurrent_searches).to.be(4);
+          expect(outputRule.items_per_search).to.be(2500);
+        });
+
+        it('should reset concurrent_searches and items_per_search to their defaults when they are omitted from the update payload', async () => {
+          const ruleId = 'rule-1';
+          await createRule(supertest, log, {
+            ...getSimpleThreatMatch(ruleId),
+            concurrent_searches: 4,
+            items_per_search: 2500,
+          });
+
+          const updatedRule: ThreatMatchRuleUpdateProps = {
+            ...getSimpleThreatMatch(ruleId),
+            rule_id: ruleId,
+            name: 'updated name',
+          };
+
+          const { body: outputRule } = await detectionsApi
+            .updateRule({ body: updatedRule })
+            .expect(200);
+
+          expect(outputRule.name).to.be('updated name');
+          expect(outputRule.concurrent_searches).to.be(undefined);
+          expect(outputRule.items_per_search).to.be(undefined);
         });
       });
 

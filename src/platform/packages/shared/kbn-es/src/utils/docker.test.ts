@@ -51,8 +51,15 @@ import * as waitClusterUtil from './wait_until_cluster_ready';
 import * as waitForSecurityIndexUtil from './wait_for_security_index';
 import * as mockIdpPluginUtil from '@kbn/mock-idp-utils';
 
+/**
+ * This is set to 'true' on CI, and it causes some docker behaviours to differ.
+ * There's a specific test that verifies the cached image is used when set to true.
+ */
+process.env.KBN_ES_SNAPSHOT_USE_CACHED = 'false';
+
 jest.mock('execa');
 const execa = jest.requireMock('execa');
+execa.mockImplementation(() => Promise.resolve({ stdout: '' }));
 
 jest.mock('./read_string_secrets', () => ({
   readStringSecrets: jest.fn().mockResolvedValue({}),
@@ -153,52 +160,56 @@ const volumeCmdTest = async (volumeCmd: string[]) => {
 describe('getServerlessNodes()', () => {
   test('should return default node names and ports with no arguments', () => {
     const nodes = getServerlessNodes();
-    expect(nodes).toHaveLength(3);
+    expect(nodes).toHaveLength(2);
     expect(nodes[0].name).toBe('es01');
     expect(nodes[1].name).toBe('es02');
-    expect(nodes[2].name).toBe('es03');
     expect(nodes[0].params).toEqual(expect.arrayContaining(['127.0.0.1:9300:9300']));
     expect(nodes[1].params).toEqual(expect.arrayContaining(['127.0.0.1:9202:9202']));
-    expect(nodes[2].params).toEqual(expect.arrayContaining(['127.0.0.1:9203:9203']));
+    expect(nodes[1].params).toEqual(expect.arrayContaining(['127.0.0.1:9302:9302']));
+    expect(nodes[0].params).toEqual(
+      expect.arrayContaining([
+        'node.roles=["master","remote_cluster_client","ingest","index","ml","transform"]',
+      ])
+    );
+    expect(nodes[1].params).toEqual(
+      expect.arrayContaining(['node.roles=["master","remote_cluster_client","search"]'])
+    );
+    expect(nodes[0].esArgs).toEqual(
+      expect.arrayContaining([
+        ['xpack.searchable.snapshot.shared_cache.size', '16MB'],
+        ['xpack.searchable.snapshot.shared_cache.region_size', '256K'],
+        ['ES_JAVA_OPTS', '-Xms1536m -Xmx1536m'],
+      ])
+    );
   });
 
   test('should apply name suffix and port offset for linked cluster', () => {
     const nodes = getServerlessNodes('-linked', 10);
-    expect(nodes).toHaveLength(3);
+    expect(nodes).toHaveLength(2);
     expect(nodes[0].name).toBe('es01-linked');
     expect(nodes[1].name).toBe('es02-linked');
-    expect(nodes[2].name).toBe('es03-linked');
     expect(nodes[0].params).toEqual(expect.arrayContaining(['127.0.0.1:9310:9310']));
     expect(nodes[1].params).toEqual(expect.arrayContaining(['127.0.0.1:9212:9212']));
     expect(nodes[1].params).toEqual(expect.arrayContaining(['127.0.0.1:9312:9312']));
-    expect(nodes[2].params).toEqual(expect.arrayContaining(['127.0.0.1:9213:9213']));
-    expect(nodes[2].params).toEqual(expect.arrayContaining(['127.0.0.1:9313:9313']));
   });
 
   test('should configure discovery hosts with suffixed names', () => {
     const nodes = getServerlessNodes('-linked', 10);
-    expect(nodes[0].params).toEqual(
-      expect.arrayContaining([`discovery.seed_hosts=es02-linked,es03-linked`])
-    );
-    expect(nodes[1].params).toEqual(
-      expect.arrayContaining([`discovery.seed_hosts=es01-linked,es03-linked`])
-    );
-    expect(nodes[2].params).toEqual(
-      expect.arrayContaining([`discovery.seed_hosts=es01-linked,es02-linked`])
-    );
+    expect(nodes[0].params).toEqual(expect.arrayContaining([`discovery.seed_hosts=es02-linked`]));
+    expect(nodes[1].params).toEqual(expect.arrayContaining([`discovery.seed_hosts=es01-linked`]));
   });
 });
 
 describe('getSharedServerlessParams()', () => {
   test('should return default master nodes with no arguments', () => {
     const params = getSharedServerlessParams();
-    expect(params).toEqual(expect.arrayContaining(['cluster.initial_master_nodes=es01,es02,es03']));
+    expect(params).toEqual(expect.arrayContaining(['cluster.initial_master_nodes=es01,es02']));
   });
 
   test('should return suffixed master nodes for linked cluster', () => {
     const params = getSharedServerlessParams('-linked');
     expect(params).toEqual(
-      expect.arrayContaining(['cluster.initial_master_nodes=es01-linked,es02-linked,es03-linked'])
+      expect.arrayContaining(['cluster.initial_master_nodes=es01-linked,es02-linked'])
     );
   });
 });
@@ -297,7 +308,7 @@ describe('resolvePort()', () => {
 
 describe('verifyDockerInstalled()', () => {
   test('should call the correct Docker command and log the version', async () => {
-    execa.mockImplementationOnce(() => Promise.resolve({ stdout: 'Docker Version 123' }));
+    execa.mockImplementation(() => Promise.resolve({ stdout: 'Docker Version 123' }));
 
     await verifyDockerInstalled(log);
 
@@ -321,7 +332,7 @@ describe('verifyDockerInstalled()', () => {
   });
 
   test('should reject when Docker is not installed', async () => {
-    execa.mockImplementationOnce(() => Promise.reject({ message: 'Hello World' }));
+    execa.mockImplementation(() => Promise.reject({ message: 'Hello World' }));
 
     await expect(verifyDockerInstalled(log)).rejects.toThrowErrorMatchingInlineSnapshot(`
       "Docker not found locally. Install it from: https://www.docker.com
@@ -333,7 +344,7 @@ describe('verifyDockerInstalled()', () => {
 
 describe('maybeCreateDockerNetwork()', () => {
   test('should call the correct Docker command and create the network if needed', async () => {
-    execa.mockImplementationOnce(() => Promise.resolve({ exitCode: 0 }));
+    execa.mockImplementation(() => Promise.resolve({ exitCode: 0 }));
 
     await maybeCreateDockerNetwork(log);
 
@@ -359,7 +370,7 @@ describe('maybeCreateDockerNetwork()', () => {
   });
 
   test('should use an existing network', async () => {
-    execa.mockImplementationOnce(() =>
+    execa.mockImplementation(() =>
       Promise.reject({ message: 'network with name elastic already exists' })
     );
 
@@ -374,7 +385,7 @@ describe('maybeCreateDockerNetwork()', () => {
   });
 
   test('should reject for any other Docker error', async () => {
-    execa.mockImplementationOnce(() => Promise.reject({ message: 'some error' }));
+    execa.mockImplementation(() => Promise.reject({ message: 'some error' }));
 
     await expect(maybeCreateDockerNetwork(log)).rejects.toThrowErrorMatchingInlineSnapshot(
       `"some error"`
@@ -384,12 +395,42 @@ describe('maybeCreateDockerNetwork()', () => {
 
 describe('maybePullDockerImage()', () => {
   test('should pull the passed image', async () => {
-    execa.mockImplementationOnce(() => Promise.resolve({ exitCode: 0 }));
+    execa.mockImplementation(() => Promise.resolve({ exitCode: 0 }));
 
     await maybePullDockerImage(log, DOCKER_IMG);
 
     expect(execa.mock.calls[0][0]).toEqual('docker');
     expect(execa.mock.calls[0][1]).toEqual(expect.arrayContaining(['pull', DOCKER_IMG]));
+  });
+
+  describe('with KBN_ES_SNAPSHOT_USE_CACHED=true', () => {
+    beforeEach(() => {
+      process.env.KBN_ES_SNAPSHOT_USE_CACHED = 'true';
+    });
+
+    afterEach(() => {
+      process.env.KBN_ES_SNAPSHOT_USE_CACHED = 'false';
+    });
+
+    test('skips pull when the image is available locally', async () => {
+      execa.mockImplementationOnce(() => Promise.resolve({ stdout: 'local-image-id' }));
+
+      await maybePullDockerImage(log, DOCKER_IMG);
+
+      expect(execa.mock.calls).toHaveLength(1);
+      expect(execa.mock.calls[0][1]).toEqual(['images', '-q', DOCKER_IMG]);
+    });
+
+    test('pulls when the image is not available locally', async () => {
+      execa
+        .mockImplementationOnce(() => Promise.resolve({ stdout: '' }))
+        .mockImplementationOnce(() => Promise.resolve({ exitCode: 0 }));
+
+      await maybePullDockerImage(log, DOCKER_IMG);
+
+      expect(execa.mock.calls[0][1]).toEqual(['images', '-q', DOCKER_IMG]);
+      expect(execa.mock.calls[1][1]).toEqual(expect.arrayContaining(['pull', DOCKER_IMG]));
+    });
   });
 });
 
@@ -397,7 +438,7 @@ describe('detectRunningNodes()', () => {
   const nodes = ['es01', 'es02', 'es03'];
 
   test('should not error if no nodes detected', async () => {
-    execa.mockImplementationOnce(() => Promise.resolve({ stdout: '' }));
+    execa.mockImplementation(() => Promise.resolve({ stdout: '' }));
 
     await detectRunningNodes(log, {});
 
@@ -406,7 +447,7 @@ describe('detectRunningNodes()', () => {
   });
 
   test('should kill nodes if detected and kill passed', async () => {
-    execa.mockImplementationOnce(() =>
+    execa.mockImplementation(() =>
       Promise.resolve({
         stdout: nodes.join('\n'),
       })
@@ -419,7 +460,7 @@ describe('detectRunningNodes()', () => {
   });
 
   test('should error if nodes detected and kill not passed', async () => {
-    execa.mockImplementationOnce(() =>
+    execa.mockImplementation(() =>
       Promise.resolve({
         stdout: nodes.join('\n'),
       })
@@ -899,7 +940,7 @@ describe('runServerlessEsNode()', () => {
   };
 
   test('should call the correct Docker command', async () => {
-    execa.mockImplementationOnce(() => Promise.resolve({ stdout: 'containerId1234' }));
+    execa.mockImplementation(() => Promise.resolve({ stdout: 'containerId1234' }));
 
     await runServerlessEsNode(log, node);
 
@@ -933,7 +974,7 @@ describe('runServerlessCluster()', () => {
     >;
   });
 
-  test('should start 3 serverless nodes', async () => {
+  test('should start 2 serverless nodes', async () => {
     waitUntilClusterReadyMock.mockResolvedValue();
     mockFs({
       [baseEsPath]: {},
@@ -944,20 +985,20 @@ describe('runServerlessCluster()', () => {
 
     // docker version (1)
     // docker ps (1)
-    // docker container rm (8 = 3 for ES nodes, 3 for linked ES nodes, 2 for UIAM containers)
+    // docker container rm (7 = 2 ES nodes, 2 linked ES nodes, 3 UIAM containers)
     // docker network create (1)
     // docker pull (1)
     // docker inspect (1)
-    // docker run (3)
+    // docker run (2)
     // docker logs (1)
-    expect(execa.mock.calls).toHaveLength(18);
+    expect(execa.mock.calls).toHaveLength(15);
 
     // UIAM containers should not be started when `--uiam` is not passed
     expect(runUiamContainerMock).not.toHaveBeenCalled();
     expect(initializeUiamContainersMock).not.toHaveBeenCalled();
   });
 
-  test('should start 3 serverless ES nodes and two UIAM containers when in UIAM mode', async () => {
+  test('should start 2 serverless ES nodes and two UIAM containers when in UIAM mode', async () => {
     waitUntilClusterReadyMock.mockResolvedValue();
     mockFs({
       [baseEsPath]: {},
@@ -968,13 +1009,13 @@ describe('runServerlessCluster()', () => {
 
     // docker version (1)
     // docker ps (1)
-    // docker container rm (8 = 3 for ES nodes, 3 for linked ES nodes, 2 for UIAM containers)
+    // docker container rm (7 = 2 ES nodes, 2 linked ES nodes, 3 UIAM containers)
     // docker network create (1)
     // docker pull (3 = 1 for ES nodes, 2 for UIAM containers)
     // docker inspect (2 = image info call for ES nodes is memoized in the previous test, 2 for UIAM containers)
-    // docker run (3)
+    // docker run (2)
     // docker logs (1)
-    expect(execa.mock.calls).toHaveLength(21);
+    expect(execa.mock.calls).toHaveLength(18);
 
     expect(runUiamContainerMock).toHaveBeenCalledTimes(2);
     expect(runUiamContainerMock).toHaveBeenCalledWith(
@@ -1135,12 +1176,12 @@ describe('runDockerContainer()', () => {
     await expect(runDockerContainer(log, {})).resolves.toBeUndefined();
     // docker version (1)
     // docker ps (1)
-    // docker container rm (8 = 3 for ES nodes, 3 for linked ES nodes, 2 for UIAM containers)
+    // docker container rm (7 = 2 ES nodes, 2 linked ES nodes, 3 UIAM containers)
     // docker network create (1)
     // docker pull (1)
     // docker inspect (1)
     // docker run (1)
-    expect(execa.mock.calls).toHaveLength(15);
+    expect(execa.mock.calls).toHaveLength(13);
   });
 });
 

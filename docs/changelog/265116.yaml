@@ -1,0 +1,10 @@
+prs:
+- https://github.com/elastic/kibana/pull/265116
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-05-14
+areas:
+- AI and machine Learning
+title: "Improve integration package installation reliability"
+description: "Enables automatic fallback to compatible package versions when the preferred version is unavailable, reducing installation failures."

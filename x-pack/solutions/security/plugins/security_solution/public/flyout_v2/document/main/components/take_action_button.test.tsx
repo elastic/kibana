@@ -6,19 +6,24 @@
  */
 
 import React from 'react';
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import type { TimelineNonEcsData } from '../../../../../common/search_strategy';
 import { useAddToCaseActions } from '../../../../detections/components/alerts_table/timeline_actions/use_add_to_case_actions';
 import { useAlertsActions } from '../../../../detections/components/alerts_table/timeline_actions/use_alerts_actions';
 import { useAlertAssigneesActions } from '../../../../detections/components/alerts_table/timeline_actions/use_alert_assignees_actions';
 import { useAlertTagsActions } from '../../../../detections/components/alerts_table/timeline_actions/use_alert_tags_actions';
+import { useAlertExceptionActions } from '../../../../detections/components/alerts_table/timeline_actions/use_add_exception_actions';
 import { useInvestigateInTimeline } from '../../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline';
 import { useIsInSecurityApp } from '../../../../common/hooks/is_in_security_app';
 import { useHostIsolationAction } from '../../../../common/components/endpoint/host_isolation/from_alerts/use_host_isolation_action';
+import { useFlyoutTelemetry } from '../../../shared/hooks/use_flyout_telemetry';
+import { FLYOUT_ACTION, FLYOUT_TYPE } from '../../../../common/lib/telemetry';
 import { TakeActionButton } from './take_action_button';
 import { FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID } from './test_ids';
+
+const mockReportActionClicked = jest.fn();
+jest.mock('../../../shared/hooks/use_flyout_telemetry');
 
 jest.mock(
   '../../../../detections/components/alerts_table/timeline_actions/use_add_to_case_actions'
@@ -31,7 +36,28 @@ jest.mock('../../../../detections/components/alerts_table/timeline_actions/use_a
 jest.mock(
   '../../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline'
 );
+jest.mock(
+  '../../../../detections/components/alerts_table/timeline_actions/use_add_exception_actions'
+);
 jest.mock('../../../../common/hooks/is_in_security_app');
+// The button forwards field-browser data (derived from the hit) to the action hooks. Stub the
+// derivation with the flattened-based conversion so these fixtures/expectations stay stable; the
+// real `getTimelineEventsDetailsFromRecord` is covered by its own test.
+jest.mock('../utils/get_timeline_events_details_from_record', () => ({
+  getTimelineEventsDetailsFromRecord: jest.fn((hit: { flattened?: Record<string, unknown> }) =>
+    Object.entries(hit.flattened ?? {}).map(([field, value]) => ({
+      field,
+      values: Array.isArray(value)
+        ? value.map(String)
+        : value != null
+        ? [String(value)]
+        : undefined,
+      originalValue: value,
+      isObjectArray: Array.isArray(value) && value.length > 0 && typeof value[0] === 'object',
+      category: field.split('.')[0],
+    }))
+  ),
+}));
 jest.mock(
   '../../../../common/components/endpoint/host_isolation/from_alerts/use_host_isolation_action',
   () => ({
@@ -55,10 +81,22 @@ jest.mock(
   })
 );
 
+const mockUseResponderActionItem = jest.fn().mockReturnValue([]);
+jest.mock('../../../../common/components/endpoint/responder', () => ({
+  useResponderActionItem: (...args: unknown[]) => mockUseResponderActionItem(...args),
+}));
+
 const mockUseExploreActions = jest.fn().mockReturnValue({ exploreActionItems: [] });
 jest.mock('../hooks/use_explore_actions', () => ({
   useExploreActions: (...args: unknown[]) => mockUseExploreActions(...args),
 }));
+
+jest.mock(
+  '../../../../detections/components/alerts_table/timeline_actions/alert_context_menu',
+  () => ({
+    AddExceptionFlyoutWrapper: () => <div data-test-subj="addExceptionFlyoutWrapper" />,
+  })
+);
 
 const mockUseRunAlertWorkflowPanel = jest.fn().mockReturnValue({
   runWorkflowMenuItem: [],
@@ -86,6 +124,8 @@ const mockUseAddToCaseActions = useAddToCaseActions as jest.Mock;
 const mockUseAlertsActions = useAlertsActions as jest.Mock;
 const mockUseAlertAssigneesActions = useAlertAssigneesActions as jest.Mock;
 const mockUseAlertTagsActions = useAlertTagsActions as jest.Mock;
+const mockUseAlertExceptionActions = useAlertExceptionActions as jest.Mock;
+const mockUseFlyoutTelemetry = useFlyoutTelemetry as jest.Mock;
 
 const createMockHit = (
   flattened: Record<string, unknown> = {},
@@ -110,7 +150,6 @@ const mockUseInvestigateInTimeline = useInvestigateInTimeline as jest.Mock;
 const mockUseIsInSecurityApp = useIsInSecurityApp as jest.Mock;
 const mockUseHostIsolationAction = useHostIsolationAction as jest.Mock;
 const mockEcsData: Ecs = { _id: 'test-id', _index: 'test-index' };
-const mockNonEcsData: TimelineNonEcsData[] = [{ field: 'host.name', value: ['test-host'] }];
 const mockDetailsData = [
   {
     category: 'host',
@@ -124,10 +163,8 @@ const mockRefetchFlyoutData = jest.fn().mockResolvedValue(undefined);
 const mockOnAlertUpdated = jest.fn();
 const mockOnShowNotes = jest.fn();
 const defaultProps = {
-  hit: createMockHit(),
+  hit: createMockHit({ 'host.name': ['test-host'] }),
   ecsData: mockEcsData,
-  nonEcsData: mockNonEcsData,
-  detailsData: mockDetailsData,
   refetchFlyoutData: mockRefetchFlyoutData,
   onAlertUpdated: mockOnAlertUpdated,
   onShowNotes: mockOnShowNotes,
@@ -145,6 +182,7 @@ describe('<TakeActionButton />', () => {
       alertAssigneesPanels: [],
     });
     mockUseAlertTagsActions.mockReturnValue({ alertTagsItems: [], alertTagsPanels: [] });
+    mockUseAlertExceptionActions.mockReturnValue({ exceptionActionItems: [] });
     mockUseInvestigateInTimeline.mockReturnValue({ investigateInTimelineActionItems: [] });
     mockUseIsInSecurityApp.mockReturnValue(true);
     mockUseRunAlertWorkflowPanel.mockReturnValue({
@@ -152,7 +190,12 @@ describe('<TakeActionButton />', () => {
       runAlertWorkflowPanel: [],
     });
     mockUseExploreActions.mockReturnValue({ exploreActionItems: [] });
+    mockUseResponderActionItem.mockReturnValue([]);
     mockUseHostIsolationAction.mockReturnValue([]);
+    mockUseFlyoutTelemetry.mockReturnValue({
+      reportActionClicked: mockReportActionClicked,
+      reportHeaderItemClicked: jest.fn(),
+    });
   });
 
   it('should render the take action button', () => {
@@ -194,7 +237,7 @@ describe('<TakeActionButton />', () => {
     expect(mockUseAddToCaseActions).toHaveBeenCalledWith(
       expect.objectContaining({
         ecsData: mockEcsData,
-        nonEcsData: mockNonEcsData,
+        nonEcsData: [{ field: 'host.name', value: ['test-host'] }],
         onSuccess: mockRefetchFlyoutData,
       })
     );
@@ -302,6 +345,49 @@ describe('<TakeActionButton />', () => {
     );
   });
 
+  describe('isEndpointAlert detection', () => {
+    it('should be true when module=endpoint and kind=alert', () => {
+      const alertHit = createMockHit({
+        'event.kind': 'signal',
+        'kibana.alert.original_event.module': 'endpoint',
+        'kibana.alert.original_event.kind': ['alert'],
+      });
+
+      renderTakeActionButton({ ...defaultProps, hit: alertHit });
+
+      expect(mockUseAlertExceptionActions).toHaveBeenCalledWith(
+        expect.objectContaining({ isEndpointAlert: true })
+      );
+    });
+
+    it('should be false when module=endpoint but kind is not alert', () => {
+      const alertHit = createMockHit({
+        'event.kind': 'signal',
+        'kibana.alert.original_event.module': 'endpoint',
+        'kibana.alert.original_event.kind': ['metric'],
+      });
+
+      renderTakeActionButton({ ...defaultProps, hit: alertHit });
+
+      expect(mockUseAlertExceptionActions).toHaveBeenCalledWith(
+        expect.objectContaining({ isEndpointAlert: false })
+      );
+    });
+
+    it('should be false when module is missing', () => {
+      const alertHit = createMockHit({
+        'event.kind': 'signal',
+        'kibana.alert.original_event.kind': ['alert'],
+      });
+
+      renderTakeActionButton({ ...defaultProps, hit: alertHit });
+
+      expect(mockUseAlertExceptionActions).toHaveBeenCalledWith(
+        expect.objectContaining({ isEndpointAlert: false })
+      );
+    });
+  });
+
   it('should call useRunAlertWorkflowPanel with ecsData and closePopover', () => {
     renderTakeActionButton();
 
@@ -327,6 +413,32 @@ describe('<TakeActionButton />', () => {
         documents: [expect.objectContaining({ _id: 'test-id', _index: 'test-index' })],
       })
     );
+  });
+
+  it('should call useResponderActionItem with field-browser data and closePopover', () => {
+    renderTakeActionButton();
+
+    expect(mockUseResponderActionItem).toHaveBeenCalledWith(mockDetailsData, expect.any(Function));
+  });
+
+  it('should include the Respond action for local documents in Discover', () => {
+    mockUseIsInSecurityApp.mockReturnValue(false);
+    mockUseResponderActionItem.mockReturnValue([
+      {
+        key: 'endpointResponseActions-action-item',
+        name: 'Respond',
+        onClick: jest.fn(),
+      },
+    ]);
+
+    const { getByTestId, getByText } = renderTakeActionButton({
+      ...defaultProps,
+      hit: createMockHit({ 'event.kind': 'signal' }),
+    });
+
+    fireEvent.click(getByTestId(FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID));
+
+    expect(getByText('Respond')).toBeInTheDocument();
   });
 
   it('should not include run workflow menu item when hook returns empty (no permissions)', () => {
@@ -706,6 +818,92 @@ describe('<TakeActionButton />', () => {
       fireEvent.click(screen.getByTestId('hostIsolationMock-isolateHost'));
 
       expect(screen.queryByTestId('hostIsolationMock-isolateHost')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('action telemetry', () => {
+    it('reports origin "footer_take_action" and action "add_note" when "Add note" is clicked', () => {
+      const { getByTestId, getByText } = renderTakeActionButton({
+        ...defaultProps,
+        hit: createMockHit(),
+      });
+
+      fireEvent.click(getByTestId(FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID));
+      fireEvent.click(getByText('Add note'));
+
+      expect(mockReportActionClicked).toHaveBeenCalledWith({
+        flyoutType: FLYOUT_TYPE.DOCUMENT,
+        action: FLYOUT_ACTION.ADD_NOTE,
+      });
+    });
+
+    it('reports action "isolate_host" when the isolate host item is clicked', () => {
+      mockUseHostIsolationAction.mockReturnValue([
+        {
+          key: 'isolate-host-action-item',
+          'data-test-subj': 'isolate-host-action-item',
+          name: 'Isolate host',
+          onClick: jest.fn(),
+        },
+      ]);
+
+      const { getByTestId, getByText } = renderTakeActionButton({
+        ...defaultProps,
+        hit: createMockHit({ 'event.kind': 'signal' }),
+      });
+
+      fireEvent.click(getByTestId(FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID));
+      fireEvent.click(getByText('Isolate host'));
+
+      expect(mockReportActionClicked).toHaveBeenCalledWith({
+        flyoutType: FLYOUT_TYPE.DOCUMENT,
+        action: FLYOUT_ACTION.ISOLATE_HOST,
+      });
+    });
+
+    it('reports action "status_closed" when "Mark as closed" is clicked, without breaking panel navigation', async () => {
+      // `alert-close-context-menu-item` is a pure panel-navigation item in production (it opens
+      // a closing-reason sub-panel) — no `onClick` of its own, just a `panel` id. EUI defers
+      // panel-navigation items' `onClick` to a `requestAnimationFrame` callback, so the report
+      // only shows up after that tick — hence `waitFor`.
+      mockUseAlertsActions.mockReturnValue({
+        actionItems: [
+          {
+            key: 'close-alert-with-reason',
+            'data-test-subj': 'alert-close-context-menu-item',
+            name: 'Mark as closed',
+            panel: 'ALERT_CLOSING_REASON_PANEL_ID',
+          },
+        ],
+        panels: [],
+      });
+
+      const { getByTestId, getByText } = renderTakeActionButton({
+        ...defaultProps,
+        hit: createMockHit({ 'event.kind': 'signal' }),
+      });
+
+      fireEvent.click(getByTestId(FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID));
+      fireEvent.click(getByText('Mark as closed'));
+
+      await waitFor(() => {
+        expect(mockReportActionClicked).toHaveBeenCalledWith({
+          flyoutType: FLYOUT_TYPE.DOCUMENT,
+          action: FLYOUT_ACTION.STATUS_CLOSED,
+        });
+      });
+    });
+
+    it('does not report telemetry for items with no matching action (e.g. an unmocked custom item)', () => {
+      const customItem = { key: 'custom', 'data-test-subj': 'custom-item', name: 'Custom' };
+      mockUseAddToCaseActions.mockReturnValue({ addToCaseActionItems: [customItem] });
+
+      const { getByTestId, getByText } = renderTakeActionButton();
+
+      fireEvent.click(getByTestId(FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID));
+      fireEvent.click(getByText('Custom'));
+
+      expect(mockReportActionClicked).not.toHaveBeenCalled();
     });
   });
 });

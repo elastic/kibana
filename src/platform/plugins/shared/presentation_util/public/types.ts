@@ -10,25 +10,14 @@
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { type PresentationLabsService } from '.';
-import type {
-  getPanelPlacementSettings,
-  registerPanelPlacementSettings,
-} from './registries/panel_placement';
 
-export interface PresentationUtilPluginSetup {
-  registerPanelPlacementSettings: typeof registerPanelPlacementSettings;
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface PresentationUtilPluginSetup {}
 
 export interface PresentationUtilPluginStart {
   labsService: PresentationLabsService;
-  /**
-   * @deprecated
-   *
-   * Use setup.registerPanelPlacementSettings
-   */
-  registerPanelPlacementSettings: typeof registerPanelPlacementSettings;
-  getPanelPlacementSettings: typeof getPanelPlacementSettings;
 }
+
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface PresentationUtilPluginSetupDeps {}
 

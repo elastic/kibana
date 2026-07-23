@@ -1775,6 +1775,7 @@ describe('getOAuthAccessToken()', () => {
       logger,
       configurationUtilities,
       credentials: {
+        type: 'client_secret',
         config: {
           clientId: 'abc',
         },
@@ -1902,6 +1903,21 @@ describe('delete()', () => {
       expect(connectorTokenClient.deleteConnectorTokens).toHaveBeenCalledTimes(1);
     });
 
+    test('revokes tokens before deleting the saved object', async () => {
+      const callOrder: string[] = [];
+      connectorTokenClient.deleteConnectorTokens.mockImplementationOnce(async () => {
+        callOrder.push('deleteConnectorTokens');
+      });
+      unsecuredSavedObjectsClient.delete.mockImplementationOnce(async () => {
+        callOrder.push('soDelete');
+        return {};
+      });
+
+      await actionsClient.delete({ id: '1' });
+
+      expect(callOrder).toEqual(['deleteConnectorTokens', 'soDelete']);
+    });
+
     describe('when connector has authMode per-user', () => {
       beforeEach(() => {
         unsecuredSavedObjectsClient.get.mockReset();
@@ -1958,7 +1974,7 @@ describe('delete()', () => {
       connectorTokenClient.deleteConnectorTokens.mockRejectedValueOnce(new Error('Fail'));
       await expect(actionsClient.delete({ id: '1' })).resolves.toBeUndefined();
       expect(logger.error).toHaveBeenCalledWith(
-        `Failed to delete auth tokens for connector "1" after delete: Fail`
+        `Failed to delete auth tokens for connector "1": Fail`
       );
     });
   });
@@ -2269,6 +2285,7 @@ describe('update()', () => {
         expect(connectorTokenClient.deleteConnectorTokens).toHaveBeenCalledWith({
           connectorId: 'my-action',
           authMode: 'per-user',
+          skipRevocation: true,
         });
       });
     });
@@ -2308,6 +2325,7 @@ describe('update()', () => {
         expect(connectorTokenClient.deleteConnectorTokens).toHaveBeenCalledWith({
           connectorId: 'my-action',
           authMode: 'shared',
+          skipRevocation: true,
         });
       });
     });
@@ -3297,6 +3315,7 @@ describe('isPreconfigured()', () => {
         unsecuredSavedObjectsClient: savedObjectsClientMock.create(),
         encryptedSavedObjectsClient: encryptedSavedObjectsMock.createClient(),
         logger,
+        configurationUtilities: actionsConfigMock.create(),
       }),
       getEventLogClient,
       encryptedSavedObjectsClient,
@@ -3343,6 +3362,7 @@ describe('isPreconfigured()', () => {
         unsecuredSavedObjectsClient: savedObjectsClientMock.create(),
         encryptedSavedObjectsClient: encryptedSavedObjectsMock.createClient(),
         logger,
+        configurationUtilities: actionsConfigMock.create(),
       }),
       getEventLogClient,
       encryptedSavedObjectsClient,
@@ -3391,6 +3411,7 @@ describe('isSystemAction()', () => {
         unsecuredSavedObjectsClient: savedObjectsClientMock.create(),
         encryptedSavedObjectsClient: encryptedSavedObjectsMock.createClient(),
         logger,
+        configurationUtilities: actionsConfigMock.create(),
       }),
       getEventLogClient,
       encryptedSavedObjectsClient,
@@ -3437,6 +3458,7 @@ describe('isSystemAction()', () => {
         unsecuredSavedObjectsClient: savedObjectsClientMock.create(),
         encryptedSavedObjectsClient: encryptedSavedObjectsMock.createClient(),
         logger,
+        configurationUtilities: actionsConfigMock.create(),
       }),
       getEventLogClient,
       encryptedSavedObjectsClient,

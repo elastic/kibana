@@ -21,6 +21,8 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import type { PluginDefinition } from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
 import { useQueryState } from '../../../hooks/use_query_state';
 import { searchParamNames } from '../../../search_param_names';
 import { labels } from '../../../utils/i18n';
@@ -37,7 +39,7 @@ import { PluginAddMenuPanel } from './plugin_add_menu_panel';
 import { PageWrapper } from '../common/page_wrapper';
 import { PluginsCustomizeEmptyState } from './plugins_customize_empty_state';
 import { useListDetailPageStyles } from '../common/styles';
-import { useCanEditAgent } from '../../../hooks/agents/use_can_edit_agent';
+import { useCanUpdateAgent } from '../../../hooks/agents/use_can_update_agent';
 import { usePluginsMutation } from './use_plugins_mutation';
 
 export const AgentPlugins: React.FC = () => {
@@ -47,7 +49,7 @@ export const AgentPlugins: React.FC = () => {
 
   const { agent, isLoading: agentLoading } = useAgentBuilderAgentById(agentId);
   const { plugins: allPlugins, isLoading: pluginsLoading } = usePluginsService();
-  const canEditAgent = useCanEditAgent({ agent });
+  const canEditAgent = useCanUpdateAgent({ agent });
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedPluginId, setSelectedPluginId] = useQueryState<string>(searchParamNames.pluginId);
@@ -140,6 +142,20 @@ export const AgentPlugins: React.FC = () => {
     );
   }, [activePlugins, searchQuery]);
 
+  const handleSelectPlugin = useCallback(
+    (pluginId: string) => {
+      setSelectedPluginId(pluginId);
+    },
+    [setSelectedPluginId]
+  );
+
+  const handleRemovePluginWithReport = useCallback(
+    (plugin: PluginDefinition) => {
+      handleRemovePlugin(plugin);
+    },
+    [handleRemovePlugin]
+  );
+
   const handleTogglePlugin = useCallback(
     (plugin: PluginDefinition, isActive: boolean) => {
       if (enableElasticCapabilities && plugin.readonly) return;
@@ -157,9 +173,9 @@ export const AgentPlugins: React.FC = () => {
     const plugin = activePlugins.find((p) => p.id === selectedPluginId);
     if (plugin) {
       if (enableElasticCapabilities && plugin.readonly) return;
-      handleRemovePlugin(plugin);
+      handleRemovePluginWithReport(plugin);
     }
-  }, [selectedPluginId, activePlugins, handleRemovePlugin, enableElasticCapabilities]);
+  }, [selectedPluginId, activePlugins, handleRemovePluginWithReport, enableElasticCapabilities]);
 
   const libraryActivePluginIdSet = useMemo(() => {
     if (!agentPluginIdSet) return new Set<string>();
@@ -292,8 +308,8 @@ export const AgentPlugins: React.FC = () => {
                       id={plugin.id}
                       name={plugin.name}
                       isSelected={selectedPluginId === plugin.id}
-                      onSelect={() => setSelectedPluginId(plugin.id)}
-                      onRemove={() => handleRemovePlugin(plugin)}
+                      onSelect={() => handleSelectPlugin(plugin.id)}
+                      onRemove={() => handleRemovePluginWithReport(plugin)}
                       removeAriaLabel={labels.agentPlugins.removePluginAriaLabel}
                       readOnlyContent={
                         enableElasticCapabilities && plugin.readonly ? (
@@ -301,6 +317,16 @@ export const AgentPlugins: React.FC = () => {
                         ) : undefined
                       }
                       canEditAgent={canEditAgent}
+                      ebtProps={getEbtProps({
+                        element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                        action: AGENT_BUILDER_UI_EBT.action.agentCustomization.ENTITY_DETAIL_VIEW,
+                        detail: AGENT_BUILDER_UI_EBT.entity.PLUGIN,
+                      })}
+                      removeEbtProps={getEbtProps({
+                        element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                        action: AGENT_BUILDER_UI_EBT.action.agentCustomization.ENTITY_REMOVE,
+                        detail: AGENT_BUILDER_UI_EBT.entity.PLUGIN,
+                      })}
                     />
                   ))
                 )}

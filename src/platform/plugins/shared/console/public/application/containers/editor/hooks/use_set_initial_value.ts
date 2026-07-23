@@ -30,6 +30,8 @@ interface SetInitialValueParams {
   setValue: (value: string) => void;
   /** The toasts service. */
   toasts: IToasts;
+  /** Optional override for the default editor content shown when no saved buffer exists. */
+  defaultEditorContent?: string;
 }
 
 /**
@@ -49,7 +51,7 @@ export const readLoadFromParam = () => {
  * @param params The {@link SetInitialValueParams} to use.
  */
 export const useSetInitialValue = (params: SetInitialValueParams) => {
-  const { localStorageValue, setValue, toasts } = params;
+  const { localStorageValue, setValue, toasts, defaultEditorContent } = params;
   const isInitialValueSet = useRef<boolean>(false);
   const editorDispatch = useEditorActionContext();
 
@@ -123,7 +125,7 @@ export const useSetInitialValue = (params: SetInitialValueParams) => {
     // Only set the value in the editor if an initial value hasn't been set yet
     if (!isInitialValueSet.current) {
       // Only set to default input value if the localstorage value is undefined
-      setValue(localStorageValue ?? DEFAULT_INPUT_VALUE);
+      setValue(localStorageValue ?? defaultEditorContent ?? DEFAULT_INPUT_VALUE);
       loadFromUrl();
       isInitialValueSet.current = true;
     }
@@ -131,5 +133,5 @@ export const useSetInitialValue = (params: SetInitialValueParams) => {
     return () => {
       window.removeEventListener('hashchange', loadFromUrl);
     };
-  }, [localStorageValue, setValue, toasts, editorDispatch]);
+  }, [localStorageValue, setValue, toasts, editorDispatch, defaultEditorContent]);
 };

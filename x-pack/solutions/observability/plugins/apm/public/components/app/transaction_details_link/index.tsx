@@ -17,7 +17,7 @@ import { useTimeRange } from '../../../hooks/use_time_range';
 
 export function TransactionDetailsByNameLink() {
   const {
-    query: { rangeFrom = 'now-15m', rangeTo = 'now', transactionName, serviceName },
+    query: { rangeFrom = 'now-15m', rangeTo = 'now', transactionName, serviceName, environment },
   } = useApmParams('/link-to/transaction');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
@@ -31,11 +31,12 @@ export function TransactionDetailsByNameLink() {
             end,
             transactionName,
             serviceName,
+            environment,
           },
         },
       });
     },
-    [start, end, transactionName, serviceName]
+    [start, end, transactionName, serviceName, environment]
   );
 
   if (status === FETCH_STATUS.SUCCESS) {
@@ -46,6 +47,7 @@ export function TransactionDetailsByNameLink() {
             transaction: data.transaction,
             rangeFrom,
             rangeTo,
+            environment,
           })}
         />
       );

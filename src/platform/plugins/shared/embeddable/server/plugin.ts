@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
+import type { CoreSetup, CoreStart, Plugin, RequestHandlerContext } from '@kbn/core/server';
 import { identity } from 'lodash';
+import { distinctUntilChanged, skip } from 'rxjs';
+
 import type {
   PersistableStateService,
   PersistableStateMigrateFn,
@@ -30,6 +32,7 @@ import type { DrilldownSetup, DrilldownState } from './drilldowns/types';
 import { getDrilldownRegistry } from './drilldowns/registry';
 import type { EmbeddableServerDefinition } from './embeddable_transforms/types';
 import { getEmbeddableServerRegistry } from './embeddable_transforms/registry';
+import { registerSearchRoute } from './search_route';
 
 export interface EmbeddableSetup extends PersistableStateService<EmbeddableStateWithType> {
   registerEmbeddableFactory: (factory: EmbeddableRegistryDefinition) => void;
@@ -76,6 +79,10 @@ export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, Embeddabl
 
   public setup(core: CoreSetup): EmbeddableSetup {
     this.migrateFn = getMigrateFunction(this.getEmbeddableFactory);
+
+    const unversionedRouter = core.http.createRouter<RequestHandlerContext>();
+    registerSearchRoute(unversionedRouter);
+
     return {
       registerEmbeddableFactory: this.registerEmbeddableFactory,
       registerDrilldown: this.drilldownRegistry
@@ -91,6 +98,16 @@ export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, Embeddabl
   }
 
   public start(core: CoreStart): EmbeddableStart {
+    // Changing lens.apiFormat feature flag changes output of lens getSchema, so
+    // we cannot use the cached value.
+    // TODO: remove when lens.apiFormat feature flag is removed.
+    core.featureFlags
+      .getBooleanValue$('lens.apiFormat', false)
+      .pipe(skip(1), distinctUntilChanged())
+      .subscribe((lensApiFormatFlag) => {
+        this.transformsRegistry.resetCache();
+      });
+
     return {
       getAllEmbeddableSchemas: this.transformsRegistry.getAllEmbeddableSchemas,
       getTransforms: this.transformsRegistry.getEmbeddableTransforms,

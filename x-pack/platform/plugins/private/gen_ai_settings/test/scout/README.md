@@ -49,7 +49,7 @@ This follows the convention used in other Scout tests (e.g., `rules_page_header.
 node scripts/scout.js start-server [--stateful|--serverless=[es|oblt|security]]
 
 # Run all tests
-npx playwright test --config x-pack/platform/plugins/private/gen_ai_settings/test/scout/ui/parallel.playwright.config.ts \
+node scripts/playwright test --config x-pack/platform/plugins/private/gen_ai_settings/test/scout/ui/parallel.playwright.config.ts \
   --project local --ui
 
 # Run tests with specific tag

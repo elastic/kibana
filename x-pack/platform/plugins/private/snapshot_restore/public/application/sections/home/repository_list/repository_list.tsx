@@ -8,7 +8,7 @@
 import React, { Fragment, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { RouteComponentProps } from 'react-router-dom';
-import { EuiButton, EuiPageTemplate } from '@elastic/eui';
+import { EuiButton, EuiPageTemplate, EuiCallOut, EuiSpacer } from '@elastic/eui';
 
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 
@@ -18,7 +18,9 @@ import { PageLoading, PageError, useExecutionContext } from '../../../../shared_
 import { useDecodedParams } from '../../../lib';
 import { BASE_PATH, UIM_REPOSITORY_LIST_LOAD } from '../../../constants';
 import { useAppContext, useServices } from '../../../app_context';
+import { useCanSetDefaultRepository } from '../../../services/authorization';
 import { useLoadRepositories } from '../../../services/http';
+import { useDefaultRepository } from '../../../services/use_default_repository';
 import { linkToAddRepository, linkToRepository } from '../../../services/navigation';
 
 import { RepositoryDetails } from './repository_details';
@@ -31,6 +33,7 @@ interface MatchParams {
 export const RepositoryList: React.FunctionComponent<RouteComponentProps<MatchParams>> = ({
   history,
 }) => {
+  const canSetDefaultRepository = useCanSetDefaultRepository();
   const { repositoryName } = useDecodedParams<MatchParams>();
   const {
     error,
@@ -46,6 +49,20 @@ export const RepositoryList: React.FunctionComponent<RouteComponentProps<MatchPa
 
   const { uiMetricService } = useServices();
   const { core } = useAppContext();
+  const {
+    defaultRepository,
+    isLoadingDefaultRepository,
+    defaultRepositoryStatus,
+    reloadDefaultRepository,
+    setDefaultRepository,
+  } = useDefaultRepository();
+  const defaultRepositoryLoadError = defaultRepositoryStatus === 'error';
+  const isDefaultRepositoryFeatureAvailable = !defaultRepositoryLoadError;
+
+  const reloadRepositoriesAndDefault = () => {
+    reload();
+    reloadDefaultRepository();
+  };
 
   const openRepositoryDetailsUrl = (newRepositoryName: Repository['name']): string => {
     return linkToRepository(newRepositoryName);
@@ -76,7 +93,7 @@ export const RepositoryList: React.FunctionComponent<RouteComponentProps<MatchPa
 
   let content;
 
-  if (isLoading) {
+  if (isLoading || isLoadingDefaultRepository) {
     content = (
       <PageLoading>
         <FormattedMessage
@@ -138,10 +155,35 @@ export const RepositoryList: React.FunctionComponent<RouteComponentProps<MatchPa
   } else {
     content = (
       <section data-test-subj="repositoryList">
+        {defaultRepositoryLoadError && (
+          <>
+            <EuiCallOut
+              announceOnMount={false}
+              color="warning"
+              iconType="warning"
+              title={
+                <FormattedMessage
+                  id="xpack.snapshotRestore.repositoryList.defaultRepositoryLoadErrorCalloutTitle"
+                  defaultMessage="The default repository feature is currently unavailable"
+                />
+              }
+            >
+              <FormattedMessage
+                id="xpack.snapshotRestore.repositoryList.defaultRepositoryLoadErrorCalloutDescription"
+                defaultMessage="Please try refreshing the page or returning at a later time."
+              />
+            </EuiCallOut>
+            <EuiSpacer size="m" />
+          </>
+        )}
         <RepositoryTable
           repositories={repositories || []}
           managedRepository={managedRepository?.name}
-          reload={reload}
+          defaultRepository={defaultRepository}
+          canSetDefaultRepository={canSetDefaultRepository}
+          isDefaultRepositoryFeatureAvailable={isDefaultRepositoryFeatureAvailable}
+          onSetDefaultRepository={setDefaultRepository}
+          reload={reloadRepositoriesAndDefault}
           openRepositoryDetailsUrl={openRepositoryDetailsUrl}
           onRepositoryDeleted={onRepositoryDeleted}
         />
@@ -156,6 +198,8 @@ export const RepositoryList: React.FunctionComponent<RouteComponentProps<MatchPa
           repositoryName={repositoryName}
           onClose={closeRepositoryDetails}
           onRepositoryDeleted={onRepositoryDeleted}
+          isDefaultRepository={repositoryName === defaultRepository}
+          isLoadingDefaultRepository={isLoadingDefaultRepository}
         />
       ) : null}
       {content}

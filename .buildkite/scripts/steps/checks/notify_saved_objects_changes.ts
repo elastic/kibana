@@ -12,15 +12,23 @@ import parseArgs from 'minimist';
 import { upsertComment } from '#pipeline-utils';
 
 /**
- * Mirrors the report types in `@kbn/check-saved-objects-cli/src/findings`.
- * Inlined here so this Buildkite script keeps the same dependency surface as the
- * other notifiers (only `#pipeline-utils`).
+ * SOURCE OF TRUTH: packages/kbn-check-saved-objects-cli/src/findings/types.ts
+ *
+ * These interfaces are intentionally inlined rather than imported so that this
+ * Buildkite script keeps the same minimal dependency surface as the other
+ * notifiers (only `#pipeline-utils`, no Kibana package deps).
+ *
+ * When adding, removing, or changing fields in `SavedObjectsCheckFinding`,
+ * `TypeChangeDetails`, or `SavedObjectsCheckReport` in the canonical file
+ * above, mirror the changes here.
  */
 export interface SavedObjectsCheckFinding {
   ruleId: string;
   severity: 'error' | 'warning';
   typeName?: string;
   message: string;
+  /** Plain-text supplement (e.g. fixture diff) rendered separately in PR comments. */
+  details?: string;
   fixHint?: string;
   /**
    * Path fragment appended to the Saved Objects docs base URL.
@@ -28,22 +36,105 @@ export interface SavedObjectsCheckFinding {
    * A value without a leading `#` or `/` will produce a malformed URL.
    */
   docsAnchor?: string;
+  /** GCS URL of the regular (merge-base) baseline snapshot that triggered this finding. */
+  baselineUrl?: string;
+  /** GCS URL of the serverless baseline snapshot that triggered this finding. */
+  serverlessBaselineUrl?: string;
+}
+
+/** Per-type model version change details for updated SO types. */
+export interface TypeChangeDetails {
+  /** Model versions added since the baseline, formatted as `10.x.0`. */
+  newModelVersions: string[];
+  /** Existing model versions modified since the baseline, formatted as `10.x.0`. */
+  modifiedModelVersions: string[];
 }
 
 export interface SavedObjectsCheckReport {
   status: 'pass' | 'fail';
+  /** Requested baseline commit (e.g. merge-base) passed to `--baseline`. */
   baseline?: string;
+  /** GCS snapshot commit actually used when it differs from {@link baseline}. */
+  baselineSnapshotSha?: string;
+  /** True when the baseline snapshot came from an ancestor of {@link baseline}. */
+  baselineSnapshotUsedAncestor?: boolean;
   serverlessBaseline?: string;
+  serverlessBaselineSnapshotSha?: string;
+  serverlessBaselineSnapshotUsedAncestor?: boolean;
   newTypes: string[];
   updatedTypes: string[];
   removedTypes: string[];
   findings: SavedObjectsCheckFinding[];
+  /**
+   * Per-type model version change details for updated SO types.
+   * Only present when both `from` and `to` snapshots were available during the check.
+   */
+  typeChanges?: Record<string, TypeChangeDetails>;
+  /**
+   * True when the check ran against synthetic test data (either via `--test`
+   * or the automatic fallback when no real SO types changed). The change lists
+   * in this case reflect test fixtures, not actual contributor changes.
+   */
+  testMode?: boolean;
 }
 
 const COMMENT_CONTEXT = 'saved-objects-check';
 const DOCS_BASE_URL = 'https://www.elastic.co/docs/extend/kibana/saved-objects';
-const TROUBLESHOOTING_URL = `${DOCS_BASE_URL}/validate#troubleshooting`;
+const TROUBLESHOOTING_URL = `${DOCS_BASE_URL}/troubleshooting`;
 const MODEL_VERSIONS_URL = `${DOCS_BASE_URL}#defining-model-versions`;
+const FIXTURE_MISMATCH_RULE_ID = 'documents/fixture-mismatch';
+
+const stripAnsi = (text: string): string => text.replace(/\u001B\[[0-9;]*m/g, '');
+
+const getFindingSummary = (finding: SavedObjectsCheckFinding): string => {
+  if (finding.details) {
+    const newlineIndex = finding.message.indexOf('\n');
+    return newlineIndex === -1 ? finding.message : finding.message.slice(0, newlineIndex);
+  }
+
+  return stripAnsi(finding.message.split('\n')[0] ?? finding.message);
+};
+
+const getFindingDiff = (finding: SavedObjectsCheckFinding): string | undefined => {
+  if (finding.details) {
+    return finding.details.trim();
+  }
+
+  if (finding.ruleId !== FIXTURE_MISMATCH_RULE_ID) {
+    return undefined;
+  }
+
+  const newlineIndex = finding.message.indexOf('\n');
+  if (newlineIndex === -1) {
+    return undefined;
+  }
+
+  const diff = stripAnsi(finding.message.slice(newlineIndex + 1)).trim();
+  return diff.length > 0 ? diff : undefined;
+};
+
+export const formatFindingForComment = (finding: SavedObjectsCheckFinding): string => {
+  const fix = finding.fixHint ? ` _Fix:_ ${finding.fixHint}` : '';
+  const baselineLinks = [
+    finding.baselineUrl ? `[baseline](${finding.baselineUrl})` : null,
+    finding.serverlessBaselineUrl
+      ? `[serverless baseline](${finding.serverlessBaselineUrl})`
+      : null,
+  ]
+    .filter(Boolean)
+    .join(' ');
+  const links = `([docs](${findingDocsLink(finding)}))${
+    baselineLinks ? ` (${baselineLinks})` : ''
+  }`;
+  const headline = `- **[${finding.ruleId}]** ${getFindingSummary(finding)}${fix} ${links}`;
+  const diff = getFindingDiff(finding);
+
+  if (!diff) {
+    return headline;
+  }
+
+  return `${headline}\n\n\`\`\`diff\n${diff}\n\`\`\``;
+};
 
 function hasSoChanges(report: SavedObjectsCheckReport): boolean {
   return report.newTypes.length + report.updatedTypes.length + report.removedTypes.length > 0;
@@ -51,6 +142,50 @@ function hasSoChanges(report: SavedObjectsCheckReport): boolean {
 
 function needsTwoStepReleaseReminder(report: SavedObjectsCheckReport): boolean {
   return report.updatedTypes.length > 0 || report.removedTypes.length > 0;
+}
+
+/**
+ * Returns the list of type names for which mapping changes are being introduced,
+ * triggering the "only map what needs to be searchable" banner.
+ *
+ * - All new types always qualify.
+ * - Updated types qualify when they have at least one new model version (which
+ *   implies new mappings were potentially introduced). When `typeChanges` is
+ *   absent (older report format) we conservatively include all updated types.
+ */
+function typesWithMappingChanges(report: SavedObjectsCheckReport): string[] {
+  const updatedWithNewVersion = report.typeChanges
+    ? report.updatedTypes.filter((t) => (report.typeChanges![t]?.newModelVersions.length ?? 0) > 0)
+    : report.updatedTypes;
+
+  return [...report.newTypes, ...updatedWithNewVersion];
+}
+
+/**
+ * Builds a per-type change-detail section listing new and modified model
+ * versions for each updated type. Returns an empty string when there is
+ * nothing to report.
+ */
+function buildTypeChangeDetails(report: SavedObjectsCheckReport): string {
+  const { typeChanges } = report;
+  if (!typeChanges || Object.keys(typeChanges).length === 0) return '';
+
+  const lines = Object.entries(typeChanges).flatMap(([typeName, details]) => {
+    const result: string[] = [];
+    if (details.newModelVersions.length > 0) {
+      const versions = details.newModelVersions.map((v) => `\`${v}\``).join(', ');
+      result.push(`- A new model version was introduced for type \`${typeName}\`: ${versions}.`);
+    }
+    if (details.modifiedModelVersions.length > 0) {
+      const versions = details.modifiedModelVersions.map((v) => `\`${v}\``).join(', ');
+      result.push(
+        `- The following model versions have been modified for type \`${typeName}\`: ${versions}.`
+      );
+    }
+    return result;
+  });
+
+  return lines.length > 0 ? `\n\n${lines.join('\n')}` : '';
 }
 
 function buildkiteBuildLink(): string {
@@ -81,13 +216,24 @@ function groupFindingsByType(
   return groups;
 }
 
+export function buildBaselineLagBanner(report: SavedObjectsCheckReport): string {
+  if (!report.baselineSnapshotUsedAncestor) {
+    return '';
+  }
+
+  const resolvedSha = report.baselineSnapshotSha ?? report.baseline;
+  return `\n\n> [!WARNING]\n> The snapshot used as a baseline for comparison is older than the requested merge-base (\`${report.baseline}\` → \`${resolvedSha}\`). That can make unrelated Saved Object types appear changed. If you did not modify any SO type and the check is reporting updated types, rebase onto the latest \`main\` and re-run CI.`;
+}
+
 export function buildFailureBody(report: SavedObjectsCheckReport): string {
   if (report.findings.length === 0) {
     return `## Saved Objects CI check failed
 
 The check failed but no structured findings were collected. See ${buildkiteBuildLink()} for details.
 
-See the [Saved Objects troubleshooting guide](${TROUBLESHOOTING_URL}) and the [model versions documentation](${MODEL_VERSIONS_URL}).`;
+See the [Saved Objects troubleshooting guide](${TROUBLESHOOTING_URL}) and the [model versions documentation](${MODEL_VERSIONS_URL}).${buildBaselineLagBanner(
+      report
+    )}`;
   }
 
   const groups = groupFindingsByType(report.findings);
@@ -97,12 +243,7 @@ See the [Saved Objects troubleshooting guide](${TROUBLESHOOTING_URL}) and the [m
   const sections: string[] = [];
   for (const [typeName, findings] of groups) {
     const heading = typeName === '_general_' ? '### General' : `### \`${typeName}\``;
-    const bullets = findings
-      .map((f) => {
-        const fix = f.fixHint ? ` _Fix:_ ${f.fixHint}` : '';
-        return `- **[${f.ruleId}]** ${f.message}${fix} ([docs](${findingDocsLink(f)}))`;
-      })
-      .join('\n');
+    const bullets = findings.map((f) => formatFindingForComment(f)).join('\n');
     sections.push(`${heading}\n${bullets}`);
   }
 
@@ -122,7 +263,9 @@ ${sections.join('\n\n')}
 ${reproCommand}
 \`\`\`
 
-See the [Saved Objects troubleshooting guide](${TROUBLESHOOTING_URL}) and the [model versions documentation](${MODEL_VERSIONS_URL}) for details.`;
+See the [Saved Objects troubleshooting guide](${TROUBLESHOOTING_URL}) and the [model versions documentation](${MODEL_VERSIONS_URL}) for details.${buildBaselineLagBanner(
+    report
+  )}`;
 }
 
 export function buildSuccessBody(report: SavedObjectsCheckReport): string {
@@ -134,16 +277,29 @@ export function buildSuccessBody(report: SavedObjectsCheckReport): string {
     .filter(Boolean)
     .join('\n');
 
+  const changeDetails = buildTypeChangeDetails(report);
+
+  const mappingsBanner =
+    typesWithMappingChanges(report).length > 0
+      ? `\n\n> [!IMPORTANT]\n> Only map properties that need to be searchable and/or sortable. There is no need to include all type properties in the mappings.`
+      : '';
+
   const reminder = needsTwoStepReleaseReminder(report)
-    ? `\n\n> Some Saved Objects changes (e.g. mapping additions, type removals) require a **2-step release**: ship the change first, then update consumers in a follow-up. Review the [Saved Objects model versions documentation](${MODEL_VERSIONS_URL}) before merging.`
+    ? `\n\n> [!CAUTION]\n> Some Saved Objects changes (e.g. mapping additions, type removals) require a **2-step release**: ship the change first, then update consumers in a follow-up. Review the [Saved Objects model versions documentation](${MODEL_VERSIONS_URL}) before merging.`
     : '';
 
   return `## Saved Objects CI check passed
 
-${summary}${reminder}`;
+${summary}${changeDetails}${mappingsBanner}${buildBaselineLagBanner(report)}${reminder}`;
 }
 
 export function buildCommentBody(report: SavedObjectsCheckReport): string | null {
+  // When the check ran against synthetic test data (no real SO types changed),
+  // the change lists reflect test fixtures rather than contributor work.
+  // Posting a comment in this case would be confusing and unhelpful.
+  if (report.testMode) {
+    return null;
+  }
   if (report.status === 'fail') {
     return buildFailureBody(report);
   }

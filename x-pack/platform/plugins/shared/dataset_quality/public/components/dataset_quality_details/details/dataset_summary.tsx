@@ -34,10 +34,10 @@ export function DatasetSummary() {
     integrationDashboardsLoading,
   } = loadingState;
   const formattedLastActivity = dataStreamDetails?.lastActivity
-    ? dataFormatter.convert(dataStreamDetails?.lastActivity)
+    ? dataFormatter.convertToText(dataStreamDetails?.lastActivity)
     : '-';
   const formattedCreatedOn = dataStreamSettings?.createdOn
-    ? dataFormatter.convert(dataStreamSettings.createdOn)
+    ? dataFormatter.convertToText(dataStreamSettings.createdOn)
     : '-';
 
   return !integrationDetailsLoaded ? (

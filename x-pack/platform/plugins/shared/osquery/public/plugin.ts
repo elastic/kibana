@@ -13,6 +13,7 @@ import type {
   CoreStart,
 } from '@kbn/core/public';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { useAllLiveQueries } from './actions/use_all_live_queries';
 import { getLazyOsqueryResponseActionTypeForm } from './shared_components/lazy_osquery_action_params_form';
@@ -37,7 +38,7 @@ import {
   getLazyOsqueryAction,
   getLazyLiveQueryField,
   useIsOsqueryAvailableSimple,
-  getExternalReferenceAttachmentRegular,
+  getOsqueryCaseAttachment,
 } from './shared_components';
 import type { ServicesWrapperProps } from './shared_components/services_wrapper';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
@@ -91,16 +92,25 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
       },
     });
 
-    core.getStartServices().then(([coreStart, depsStart]) => {
-      plugins.cases?.attachmentFramework.registerExternalReference(
-        getExternalReferenceAttachmentRegular({
-          ...coreStart,
-          ...depsStart,
-          storage,
-          kibanaVersion,
-        } as unknown as ServicesWrapperProps['services'])
-      );
-    });
+    core
+      .getStartServices()
+      .then(([coreStart, depsStart]) => {
+        plugins.cases?.attachmentFramework.registerUnified(
+          getOsqueryCaseAttachment({
+            ...coreStart,
+            ...depsStart,
+            storage,
+            kibanaVersion,
+          } as unknown as ServicesWrapperProps['services'])
+        );
+      })
+      .catch((err) => {
+        core.notifications.toasts.addError(err, {
+          title: i18n.translate('xpack.osquery.cases.attachments.registerErrorTitle', {
+            defaultMessage: 'Failed to register osquery case attachment',
+          }),
+        });
+      });
 
     // Return methods that should be available to other plugins
     return {};

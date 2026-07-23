@@ -74,6 +74,9 @@ dependsOn:
   - '@kbn/saved-search-plugin'
   - '@kbn/lens-common'
   - '@kbn/core-http-browser'
+  - '@kbn/scout'
+  - '@kbn/rison'
+  - '@kbn/as-code-shared-schemas'
 tags:
   - plugin
   - prod
@@ -91,6 +94,7 @@ fileGroups:
     - server/**/*
     - storybook/**/*
     - tasks/mocks/*
+    - test/scout/**/*
     - types/**/*
     - '!target/**/*'
   jest-config:

@@ -12,6 +12,7 @@ import { internalStateSlice } from '../internal_state';
 import { selectTabRuntimeState } from '../runtime_state';
 import { selectTab } from '../selectors';
 import {
+  fromSavedObjectTabToAppState,
   fromSavedObjectTabToSearchSource,
   fromSavedObjectTabToTabState,
 } from '../tab_mapping_utils';
@@ -51,6 +52,7 @@ export const resetDiscoverSession = createInternalStateAsyncThunk(
       discoverSession.tabs.map(async (tab) => {
         dispatch(internalStateSlice.actions.resetOnSavedSearchChange({ tabId: tab.id }));
 
+        const existingTab = selectTab(state, tab.id);
         const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tab.id);
         const tabDataStateContainer = tabRuntimeState?.dataStateContainer$.getValue();
         let initialAppState: DiscoverAppState | undefined;
@@ -64,16 +66,19 @@ export const resetDiscoverSession = createInternalStateAsyncThunk(
           }
 
           initialAppState = getInitialAppState({
-            initialUrlState: undefined,
+            initialUrlState: fromSavedObjectTabToAppState({ tab }),
             persistedTab: tab,
             dataView,
             services,
           });
+
+          // Sidebar visibility is not saved tab state, so keep the current value when resetting.
+          initialAppState.hideSidebar = existingTab?.appState.hideSidebar;
         }
 
         const tabState = fromSavedObjectTabToTabState({
           tab,
-          existingTab: selectTab(state, tab.id),
+          existingTab,
           initialAppState,
         });
 

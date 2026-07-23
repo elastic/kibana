@@ -9,7 +9,7 @@ import React from 'react';
 import type { EuiHealthProps } from '@elastic/eui';
 import { EuiHealth } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { OAuthClient, OAuthClientConnectionsSummary } from '@kbn/agent-builder-common';
+import type { OAuthClient } from '@kbn/agent-builder-common';
 
 export interface McpClientStatusValue {
   label: string;
@@ -17,14 +17,14 @@ export interface McpClientStatusValue {
 }
 
 export enum McpClientStatus {
-  Connected = 'connected',
+  Active = 'active',
   Revoked = 'revoked',
 }
 
 export const mcpClientStatusValues: Record<McpClientStatus, McpClientStatusValue> = {
-  [McpClientStatus.Connected]: {
-    label: i18n.translate('xpack.agentBuilder.mcpClients.status.connected', {
-      defaultMessage: 'Connected',
+  [McpClientStatus.Active]: {
+    label: i18n.translate('xpack.agentBuilder.mcpClients.status.active', {
+      defaultMessage: 'Active',
     }),
     color: 'success',
   },
@@ -36,29 +36,15 @@ export const mcpClientStatusValues: Record<McpClientStatus, McpClientStatusValue
   },
 };
 
-export const getMcpClientStatus = ({
-  revoked,
-  connections,
-}: Pick<OAuthClient, 'revoked' | 'connections'>): McpClientStatus | null => {
-  if (revoked) {
-    return McpClientStatus.Revoked;
-  }
-  if (connections?.active && connections.active.length > 0) {
-    return McpClientStatus.Connected;
-  }
-  return null;
-};
+export const getMcpClientStatus = ({ revoked }: Pick<OAuthClient, 'revoked'>): McpClientStatus =>
+  revoked ? McpClientStatus.Revoked : McpClientStatus.Active;
 
 export interface McpClientStatusIndicatorProps {
   revoked?: boolean;
-  connections?: OAuthClientConnectionsSummary;
 }
 
-export const McpClientStatusIndicator = ({
-  revoked,
-  connections,
-}: McpClientStatusIndicatorProps) => {
-  const status = getMcpClientStatus({ revoked, connections });
+export const McpClientStatusIndicator = ({ revoked }: McpClientStatusIndicatorProps) => {
+  const status = getMcpClientStatus({ revoked });
 
   if (!status) {
     return null;

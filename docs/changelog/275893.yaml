@@ -1,0 +1,10 @@
+prs:
+- https://github.com/elastic/kibana/pull/275893
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-07-07
+areas:
+- Search and data
+title: Fix Integrations browse filtering for Observability and OpenTelemetry
+description: "Fixes the Integrations browse page to show only integrations in both Observability and OpenTelemetry when both categories are selected, instead of matching either category."

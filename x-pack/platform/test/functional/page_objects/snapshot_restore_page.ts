@@ -138,12 +138,15 @@ export function SnapshotRestorePageProvider({ getService }: FtrProviderContext) 
       const rows = await table.findAllByTestSubject('row');
       return await Promise.all(
         rows.map(async (row) => {
+          const nameCell = await row.findByTestSubject('Name_cell');
+          const repoLink = await nameCell.findByCssSelector('a');
+          const repoName = await repoLink.getVisibleText();
           return {
-            repoName: await (await row.findByTestSubject('Name_cell')).getVisibleText(),
-            repoLink: await (await row.findByTestSubject('Name_cell')).findByCssSelector('a'),
+            repoName,
+            repoLink,
             repoType: await (await row.findByTestSubject('Type_cell')).getVisibleText(),
-            repoEdit: await row.findByTestSubject('editRepositoryButton'),
-            repoDelete: await row.findByTestSubject('deleteRepositoryButton'),
+            repoEdit: await row.findByTestSubject(`editRepositoryButton-${repoName}`),
+            repoActions: await row.findByTestSubject(`repositoryActionsMenuButton-${repoName}`),
           };
         })
       );
@@ -163,7 +166,7 @@ export function SnapshotRestorePageProvider({ getService }: FtrProviderContext) 
     async viewRepositoryDetails(name: string) {
       const repos = await this.getRepoList();
       if (repos.length === 1) {
-        const repoToView = repos.filter((r) => (r.repoName = name))[0];
+        const repoToView = repos.filter((r) => r.repoName === name)[0];
         await repoToView.repoLink.click();
       }
       await retry.waitForWithTimeout(`Repo title should be ${name}`, 25000, async () => {

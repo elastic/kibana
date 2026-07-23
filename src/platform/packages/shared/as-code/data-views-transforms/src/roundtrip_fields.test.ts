@@ -10,6 +10,7 @@ import { RUNTIME_FIELD_COMPOSITE_TYPE } from '@kbn/data-views-plugin/common';
 import {
   AS_CODE_DATA_VIEW_SPEC_TYPE,
   type AsCodeDataViewSpec,
+  type AsCodeSavedDataView,
 } from '@kbn/as-code-data-views-schema';
 import { fromStoredFields } from './from_stored_fields';
 import { toStoredDataView } from './to_stored_data_view';
@@ -25,6 +26,28 @@ const toStoredFromAsCodeFields = (
 
   if (typeof stored === 'string') {
     throw new Error('Expected inline data view spec');
+  }
+
+  return {
+    runtimeFieldMap: stored.runtimeFieldMap ?? {},
+    fieldFormats: stored.fieldFormats ?? {},
+    fieldAttrs: stored.fieldAttrs ?? {},
+  };
+};
+
+const toStoredFromSavedAsCodeFields = (
+  fieldSettings: AsCodeSavedDataView['field_settings'] = undefined
+) => {
+  const stored = toStoredDataView({
+    id: 'saved-id',
+    name: 'Saved data view',
+    index_pattern: 'logs-*',
+    allow_hidden_indices: true,
+    ...(fieldSettings !== undefined && { field_settings: fieldSettings }),
+  });
+
+  if (typeof stored === 'string') {
+    throw new Error('Expected inline saved data view spec');
   }
 
   return {
@@ -220,6 +243,39 @@ describe('roundtrip: AsCode → stored → AsCode', () => {
 
       const { runtimeFieldMap, fieldFormats, fieldAttrs } = toStoredFromAsCodeFields(fieldSettings);
       expect(fromStoredFields(runtimeFieldMap, fieldFormats, fieldAttrs)).toEqual(fieldSettings);
+    });
+  });
+
+  describe('saved field settings', () => {
+    it('preserves popularity for indexed, runtime, and composite subfields', () => {
+      const fieldSettings: NonNullable<AsCodeSavedDataView['field_settings']> = {
+        mapped: {
+          popularity: 10,
+          custom_label: 'Mapped label',
+          format: { type: 'bytes', params: { pattern: '0,0.[000]b' } },
+        },
+        rt: {
+          type: 'keyword',
+          popularity: 5,
+          custom_description: 'Runtime field',
+        },
+        parent: {
+          type: RUNTIME_FIELD_COMPOSITE_TYPE,
+          fields: {
+            child: {
+              type: 'keyword',
+              popularity: 3,
+              custom_label: 'Composite child',
+            },
+          },
+        },
+      };
+
+      const { runtimeFieldMap, fieldFormats, fieldAttrs } =
+        toStoredFromSavedAsCodeFields(fieldSettings);
+      expect(fromStoredFields(runtimeFieldMap, fieldFormats, fieldAttrs, true)).toEqual(
+        fieldSettings
+      );
     });
   });
 });
@@ -435,6 +491,52 @@ describe('roundtrip: stored → AsCode → stored', () => {
       expect(rm).toEqual(runtimeFieldMap);
       expect(ff).toEqual(fieldFormats);
       expect(fa).toEqual(fieldAttrs);
+    });
+  });
+
+  describe('saved field settings', () => {
+    it('preserves all stored structures with popularity through saved schema roundtrip', () => {
+      const stored = {
+        runtimeFieldMap: {
+          rt: { type: 'keyword' as const },
+          parent: {
+            type: RUNTIME_FIELD_COMPOSITE_TYPE,
+            fields: {
+              child: { type: 'keyword' as const },
+            },
+          },
+        },
+        fieldFormats: {
+          mapped: { id: 'bytes', params: { pattern: '0,0.[000]b' } },
+        },
+        fieldAttrs: {
+          mapped: { customLabel: 'Mapped', count: 10 },
+          rt: { customDescription: 'Runtime field', count: 5 },
+          'parent.child': { customLabel: 'Composite child', count: 3 },
+        },
+      };
+
+      const asCodeSaved: AsCodeSavedDataView = {
+        id: 'saved-id',
+        name: 'Saved data view',
+        index_pattern: 'logs-*',
+        allow_hidden_indices: true,
+        field_settings: fromStoredFields(
+          stored.runtimeFieldMap,
+          stored.fieldFormats,
+          stored.fieldAttrs,
+          true
+        ),
+      };
+      const result = toStoredDataView(asCodeSaved);
+
+      if (typeof result === 'string') {
+        throw new Error('Expected inline saved data view spec');
+      }
+
+      expect(result.runtimeFieldMap).toEqual(stored.runtimeFieldMap);
+      expect(result.fieldFormats).toEqual(stored.fieldFormats);
+      expect(result.fieldAttrs).toEqual(stored.fieldAttrs);
     });
   });
 });

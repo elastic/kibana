@@ -12,6 +12,5 @@ export default ({ loadTestFile }: FtrProviderContext) => {
     loadTestFile(require.resolve('./rules_list'));
     loadTestFile(require.resolve('./details'));
     loadTestFile(require.resolve('./redirect'));
-    loadTestFile(require.resolve('./rules_page'));
   });
 };

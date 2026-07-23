@@ -9,12 +9,13 @@
 
 import type { ReactNode } from 'react';
 import React from 'react';
-import type { ChromeLayoutConfig } from '@kbn/core-chrome-layout-components';
-import { ChromeLayout, ChromeLayoutConfigProvider } from '@kbn/core-chrome-layout-components';
+import type { ChromeLayoutConfig } from '@kbn/ui-chrome-layout';
+import { ChromeLayout, ChromeLayoutConfigProvider } from '@kbn/ui-chrome-layout';
 import {
   ChromeComponentsProvider,
   ClassicHeader,
   ChromeNextGlobalHeader,
+  ChromeAppHeaderRenderer,
   ProjectHeader,
   GridLayoutProjectSideNav,
   HeaderTopBanner,
@@ -22,6 +23,8 @@ import {
   AppMenuBar,
   Sidebar,
   useHasAppMenu,
+  useHasChromeAppHeaderContent,
+  useHasInlineAppHeader,
 } from '@kbn/core-chrome-browser-components';
 import type { ChromeComponentsDeps } from '@kbn/core-chrome-browser-components';
 import {
@@ -32,7 +35,7 @@ import {
 } from '@kbn/core-chrome-browser-hooks';
 import { isNextChrome } from '@kbn/core-chrome-feature-flags';
 import { useGlobalFooter, useHasHeaderBanner } from '@kbn/core-chrome-browser-hooks/internal';
-import { GridLayoutGlobalStyles } from './grid_global_app_style';
+import { GridLayoutGlobalStyles } from '@kbn/ui-chrome-layout';
 import type { LayoutService, LayoutServiceStartDeps } from '../../layout_service';
 import { AppWrapper } from '../../app_containers';
 import { APP_FIXED_VIEWPORT_ID } from '../../app_fixed_viewport';
@@ -105,6 +108,8 @@ export class GridLayout implements LayoutService {
       const hasHeaderBanner = useHasHeaderBanner();
       const chromeStyle = useChromeStyle();
       const hasAppMenu = useHasAppMenu();
+      const hasInlineAppHeader = useHasInlineAppHeader();
+      const hasChromeAppHeaderContent = useHasChromeAppHeaderContent();
       const footer = useGlobalFooter();
       const sidebarWidth = useSidebarWidth();
       const navigationWidth = useSideNavWidth();
@@ -129,7 +134,11 @@ export class GridLayout implements LayoutService {
           header = <ClassicHeader />;
         } else {
           header = nextChrome ? <ChromeNextGlobalHeader /> : <ProjectHeader />;
-          if (!nextChrome && hasAppMenu) {
+          if (nextChrome) {
+            if (!hasInlineAppHeader && hasChromeAppHeaderContent) {
+              applicationTopBar = <ChromeAppHeaderRenderer />;
+            }
+          } else if (hasAppMenu) {
             applicationTopBar = <AppMenuBar />;
           }
 

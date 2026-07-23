@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButtonIcon } from '@elastic/eui';
+import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback } from 'react';
 
@@ -26,12 +26,17 @@ export const RowExpansionButton = <Item extends any>({
   );
 
   return (
-    <EuiButtonIcon
-      data-test-subj="infraRowExpansionButtonButton"
-      onClick={handleClick}
-      aria-label={isExpanded ? collapseAriaLabel : expandAriaLabel}
-      iconType={isExpanded ? 'chevronSingleUp' : 'chevronSingleDown'}
-    />
+    <EuiToolTip
+      content={isExpanded ? collapseAriaLabel : expandAriaLabel}
+      disableScreenReaderOutput
+    >
+      <EuiButtonIcon
+        data-test-subj="infraRowExpansionButtonButton"
+        onClick={handleClick}
+        aria-label={isExpanded ? collapseAriaLabel : expandAriaLabel}
+        iconType={isExpanded ? 'chevronSingleUp' : 'chevronSingleDown'}
+      />
+    </EuiToolTip>
   );
 };
 

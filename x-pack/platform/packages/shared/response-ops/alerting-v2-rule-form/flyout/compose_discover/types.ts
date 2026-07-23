@@ -6,113 +6,101 @@
  */
 
 import type React from 'react';
-import type { UseFormReturn } from 'react-hook-form';
+import type { FieldPath, UseFormReturn } from 'react-hook-form';
 import type { RuleFormServices } from '../../form/contexts/rule_form_context';
-import type { ComposeFormValues } from './compose_form_types';
+import type { FormValues } from '../../form/types';
+import type { BuilderState } from './rule_builder/types';
 
-export type ComposeDiscoverMode = 'create' | 'edit';
+export type ComposeDiscoverMode = 'create' | 'edit' | 'clone';
 
 export type RecoveryType = 'default' | 'custom' | 'none';
 
 export type QueryTab = 'base' | 'alert' | 'recovery';
 
-export type StepId = 'alertCondition' | 'recoveryCondition' | 'details' | 'notifications';
+export type StepId =
+  | 'alertCondition'
+  | 'builderCondition'
+  | 'recoveryCondition'
+  | 'details'
+  | 'notifications';
+
+export const isAlertConditionStepId = (id: StepId): boolean =>
+  id === 'alertCondition' || id === 'builderCondition';
+
+export const isBuilderConditionStepId = (id: StepId): boolean => id === 'builderCondition';
+
+export interface CustomRecoveryRenderProps {
+  state: ComposeDiscoverState;
+  dispatch: React.Dispatch<ComposeDiscoverAction>;
+}
 
 export interface StepRenderProps {
   state: ComposeDiscoverState;
   dispatch: React.Dispatch<ComposeDiscoverAction>;
   services: RuleFormServices;
+  onRecoveryTypeChange: (type: RecoveryType) => void;
+  isEditing: boolean;
+  ruleId?: string;
+  renderCustomRecovery?: (props: CustomRecoveryRenderProps) => React.ReactNode;
+  /** Opts the user into manual split mode from the form (e.g. split-failed CTA). */
+  onManualSplit?: () => void;
 }
 
 export interface StepDefinition {
   id: StepId;
   title: string;
+  /** RHF field paths validated via `trigger()` when no custom `validate` is set. */
+  fields?: Array<FieldPath<FormValues>>;
+  /** UI-state precondition that must pass before field validation runs. */
+  meetsPrecondition?: (state: ComposeDiscoverState) => boolean;
   render: (props: StepRenderProps) => React.ReactNode;
   validate?: (
-    methods: UseFormReturn<ComposeFormValues>,
-    state: ComposeDiscoverState
+    methods: UseFormReturn<FormValues>,
+    state: ComposeDiscoverState,
+    services?: RuleFormServices,
+    builderState?: BuilderState
   ) => Promise<boolean> | boolean;
-}
-
-/**
- * Describes which tabs the Discover Sandbox should show.
- * Computed from state by getSandboxTabConfig().
- *
- * - 'single'        — no tracking; single editor with fullQuery
- * - 'base-alert'    — tracking on, Alert Condition step: locked base above editable alert block
- * - 'base-recovery' — tracking on, Recovery Condition step: locked base above editable recovery block
- */
-export type SandboxTabConfig =
-  | { type: 'single' }
-  | { type: 'base-alert' }
-  | { type: 'base-recovery' };
-
-/**
- * Data passed from the Sandbox child to the flyout parent on "Apply changes".
- * The flyout writes these values into RHF (the source of truth) and updates
- * the reducer cache.
- */
-export interface SandboxApplyData {
-  isSplit: boolean;
-  fullQuery: string;
-  baseQuery: string;
-  alertBlock: string;
-  recoveryBlock: string;
 }
 
 /**
  * UI-only state for the ComposeDiscover flyout.
  *
- * This reducer manages navigation, Sandbox state, and split-query cache.
- * All form values (name, schedule, delays, etc.) live in useForm<ComposeFormValues>()
- * via RHF and are never stored here. The query/split fields are a write-through
- * cache: written imperatively alongside RHF at Apply time. RHF is the source
- * of truth — these fields exist so the form view can display query summaries
- * without subscribing to RHF watchers.
+ * Query content lives in RHF (committed state) and local useState in the parent flyout (editing buffer).
+ * This reducer owns navigation, Sandbox open/close, tab selection, and mode flags only —
+ * no query strings are stored here.
+ *
+ * Whether the rule is signal vs alert is read directly from RHF `kind` — it is NOT
+ * mirrored here. Pass `isAlert` explicitly to any reducer action or helper that needs it.
  */
 export interface ComposeDiscoverState {
   mode: ComposeDiscoverMode;
   step: number;
-  /**
-   * When false: a single fullQuery editor is shown.
-   * When true: the query is split into baseQuery + alertBlock, with an optional
-   * recoveryBlock for custom recovery. The Sandbox shows a tab bar.
-   */
-  tracking: boolean;
-  /** Full (unsplit) query — used when tracking is disabled. */
-  fullQuery: string;
-  /** Base portion of the split query (FROM … | STATS …) — used when tracking is enabled. */
-  baseQuery: string;
-  /** Alert condition block (| WHERE …) — used when tracking is enabled. */
-  alertBlock: string;
-  /** Recovery condition block — used when tracking + custom recovery are enabled. */
-  recoveryBlock: string;
-  /** How recovery is detected. 'default' = invert the alert block; 'custom' = recoveryBlock. */
+  /** 'default' = no_breach; 'custom' = query; 'none' = no recovery (persists as 'none'). */
   recoveryType: RecoveryType;
   activeTab: QueryTab;
   childOpen: boolean;
   queryCommitted: boolean;
-  /** Date range for the Discover Sandbox preview window — persists across open/close.
-   *  Intentionally NOT connected to ComposeFormValues.schedule.lookback. */
-  sandboxDateStart: string;
-  sandboxDateEnd: string;
   /** When true the stepped form is replaced by a full YAML editor. */
   yamlMode: boolean;
+  /**
+   * When true the sandbox shows separate base/alert tabs and the heuristic
+   * auto-split on Apply is disabled. The user opted in from the unified editor.
+   */
+  manualSplitEnabled: boolean;
 }
 
 export type ComposeDiscoverAction =
-  | { type: 'SET_FULL_QUERY'; query: string }
-  | { type: 'SET_RECOVERY_TYPE'; recoveryType: RecoveryType }
-  | { type: 'ENABLE_TRACKING'; base: string; alertBlock: string }
-  | { type: 'DISABLE_TRACKING' }
+  | { type: 'SET_RECOVERY_TYPE'; recoveryType: RecoveryType; isBuilderMode?: boolean }
+  | { type: 'KIND_CHANGE'; kind: 'signal' | 'alert' }
   | { type: 'SET_TAB'; tab: QueryTab }
   | { type: 'SET_STEP'; step: number }
-  | { type: 'GO_NEXT' }
-  | { type: 'GO_BACK' }
-  | { type: 'SET_SANDBOX_DATE_RANGE'; start: string; end: string }
-  | { type: 'OPEN_CHILD' }
-  | { type: 'OPEN_CHILD_FOR_STEP'; step: number }
+  | { type: 'GO_NEXT'; isAlert: boolean; isBuilderMode?: boolean }
+  | { type: 'GO_BACK'; isBuilderMode?: boolean }
+  | { type: 'OPEN_CHILD'; isAlert: boolean }
+  | { type: 'OPEN_CHILD_FOR_STEP'; step: number; isAlert: boolean }
   | { type: 'CLOSE_CHILD' }
-  | { type: 'COMMIT_CHILD_QUERY'; fullQuery: string }
-  | { type: 'COMMIT_CHILD_SPLIT'; baseQuery: string; alertBlock: string; recoveryBlock: string }
-  | { type: 'SET_YAML_MODE'; enabled: boolean };
+  | { type: 'COMMIT_QUERY' }
+  | { type: 'INVALIDATE_QUERY' }
+  | { type: 'SET_YAML_MODE'; enabled: boolean }
+  | { type: 'ENABLE_MANUAL_SPLIT' }
+  | { type: 'DISABLE_MANUAL_SPLIT' };

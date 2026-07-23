@@ -22,15 +22,18 @@ import type { MenuItemGroup } from './types';
 
 export const useMenuItemGroups = ({
   dashboardApi,
+  returnFocus,
 }: {
   dashboardApi: DashboardApi;
+  returnFocus?: () => void;
 }): { groups: MenuItemGroup[] | undefined; loading: boolean; error: Error | undefined } => {
   const context = useMemo(
     () => ({
       embeddable: dashboardApi,
       trigger: triggers[ADD_PANEL_TRIGGER],
+      returnFocus,
     }),
-    [dashboardApi]
+    [dashboardApi, returnFocus]
   );
 
   const [groups, setGroups] = useState<MenuItemGroup[] | undefined>();
@@ -65,28 +68,70 @@ async function getActionGroups(
   const groups: Record<string, { group: PresentableGroup; actions: Action[] }> = {};
   const disabledStateChangesSubjects: Array<Observable<void> | undefined> = [];
 
-  (
-    await uiActionsService.getTriggerCompatibleActions(ADD_PANEL_TRIGGER, { embeddable: api })
-  ).forEach((action) => {
-    const actionGroups = Array.isArray(action.grouping) ? action.grouping : [ADD_PANEL_OTHER_GROUP];
-    if (action.getDisabledStateChangesSubject) {
-      disabledStateChangesSubjects.push(action.getDisabledStateChangesSubject(context));
-    }
-    actionGroups.forEach((group) => {
-      if (!groups[group.id]) {
-        groups[group.id] = {
-          group,
-          actions: [],
-        };
+  (await uiActionsService.getTriggerCompatibleActions(ADD_PANEL_TRIGGER, context)).forEach(
+    (action) => {
+      const actionGroups = Array.isArray(action.grouping)
+        ? action.grouping
+        : [ADD_PANEL_OTHER_GROUP];
+      if (action.getDisabledStateChangesSubject) {
+        disabledStateChangesSubjects.push(action.getDisabledStateChangesSubject(context));
       }
-      groups[group.id].actions.push(action);
-    });
-  });
+      actionGroups.forEach((group) => {
+        if (!groups[group.id]) {
+          groups[group.id] = {
+            group,
+            actions: [],
+          };
+        }
+        groups[group.id].actions.push(action);
+      });
+    }
+  );
 
   return {
     groups,
     generateMenuItemGroups$: merge(...disabledStateChangesSubjects).pipe(startWith(undefined)),
   };
+}
+
+export function getMenuItems(
+  actions: Action[],
+  dashboardApi: DashboardApi,
+  context: ActionExecutionContext
+) {
+  return actions
+    .map((action) => {
+      const actionName = action.getDisplayName(context);
+      return {
+        id: action.id,
+        name: actionName,
+        icon: action.getIconType?.(context) ?? 'empty',
+        onClick: (event: React.MouseEvent) => {
+          if (event.currentTarget instanceof HTMLAnchorElement) {
+            if (
+              !event.defaultPrevented && // onClick prevented default
+              event.button === 0 &&
+              (!event.currentTarget.target || event.currentTarget.target === '_self') &&
+              !(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey)
+            ) {
+              event.preventDefault();
+            }
+          }
+          dashboardApi.clearOverlays();
+          action.execute(context);
+        },
+        'data-test-subj': `create-action-${actionName}`,
+        description: action?.getDisplayNameTooltip?.(context),
+        isDisabled: action?.isDisabled?.(context),
+        order: action.order ?? 0,
+        MenuItem: action.MenuItem ? action.MenuItem({ context }) : undefined,
+      };
+    })
+    .sort((itemA, itemB) => {
+      return itemA.order === itemB.order
+        ? itemA.name.localeCompare(itemB.name)
+        : itemB.order - itemA.order;
+    });
 }
 
 function generateMenuItemGroups(
@@ -101,39 +146,7 @@ function generateMenuItemGroups(
         title: group.getDisplayName?.(context) ?? '',
         'data-test-subj': `dashboardEditorMenu-${group.id}Group`,
         order: group.order ?? 0,
-        items: actions
-          .map((action) => {
-            const actionName = action.getDisplayName(context);
-            return {
-              id: action.id,
-              name: actionName,
-              icon: action.getIconType?.(context) ?? 'empty',
-              onClick: (event: React.MouseEvent) => {
-                dashboardApi.clearOverlays();
-                if (event.currentTarget instanceof HTMLAnchorElement) {
-                  if (
-                    !event.defaultPrevented && // onClick prevented default
-                    event.button === 0 &&
-                    (!event.currentTarget.target || event.currentTarget.target === '_self') &&
-                    !(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey)
-                  ) {
-                    event.preventDefault();
-                  }
-                }
-                action.execute(context);
-              },
-              'data-test-subj': `create-action-${actionName}`,
-              description: action?.getDisplayNameTooltip?.(context),
-              isDisabled: action?.isDisabled?.(context),
-              order: action.order ?? 0,
-              MenuItem: action.MenuItem ? action.MenuItem({ context }) : undefined,
-            };
-          })
-          .sort((itemA, itemB) => {
-            return itemA.order === itemB.order
-              ? itemA.name.localeCompare(itemB.name)
-              : itemB.order - itemA.order;
-          }),
+        items: getMenuItems(actions, dashboardApi, context),
       };
     })
     .sort((groupA, groupB) => groupB.order - groupA.order);

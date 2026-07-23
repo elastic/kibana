@@ -64,7 +64,7 @@ export const BrowseAllIntegrationsTile = () => {
                 logo={logo}
                 isAvatar
                 size="l"
-                type="space"
+                avatarType="space"
                 hasBorder
                 color={euiTheme.colors.backgroundBaseSubdued}
               />
