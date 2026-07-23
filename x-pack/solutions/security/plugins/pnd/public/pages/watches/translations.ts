@@ -303,6 +303,13 @@ export const RECENT_RUNS_TITLE = i18n.translate('xpack.pnd.watches.detail.recent
   defaultMessage: 'Recent runs',
 });
 
+export const RECENT_RUNS_TABLE_CAPTION = i18n.translate(
+  'xpack.pnd.watches.detail.recentRuns.tableCaption',
+  {
+    defaultMessage: 'Recent watch runs',
+  }
+);
+
 export const VIEW_ALL_RUNS = i18n.translate('xpack.pnd.watches.detail.recentRuns.viewAll', {
   defaultMessage: 'View all runs',
 });

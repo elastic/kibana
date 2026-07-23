@@ -62,5 +62,12 @@ export const RecentRunsTable: React.FC<RecentRunsTableProps> = ({ runs }) => {
     );
   }
 
-  return <EuiBasicTable items={runs} columns={columns} tableLayout="auto" />;
+  return (
+    <EuiBasicTable
+      items={runs}
+      columns={columns}
+      tableLayout="auto"
+      tableCaption={i18n.RECENT_RUNS_TABLE_CAPTION}
+    />
+  );
 };
