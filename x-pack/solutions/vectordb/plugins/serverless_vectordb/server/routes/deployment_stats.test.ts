@@ -42,7 +42,6 @@ describe('registerDeploymentStatsRoute', () => {
 
   const getHandler = () => router.get.mock.calls[0][1];
 
-  // Builds a request handler context whose `core` resolves to the scoped ES + SO clients.
   const createContext = (coreOverride?: Promise<never>) =>
     ({
       core:

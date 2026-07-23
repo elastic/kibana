@@ -24,8 +24,6 @@ export const useAgentsCount = () => {
       return response?.results?.length ?? null;
     },
     refetchOnWindowFocus: false,
-    // This is the slowest of the home-page stat calls, so cache it for 60s to avoid re-incurring it
-    // on every remount/navigation. Matches the staleTime used by useDeploymentStats.
     staleTime: 60_000,
   });
 

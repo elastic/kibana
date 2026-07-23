@@ -8,7 +8,7 @@
 import type { IScopedClusterClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import type { FieldCapsFieldCapability } from '@elastic/elasticsearch/lib/api/types';
 
-// Extend the field capability type to include the `inference` flag until the Elasticsearch package version is updated.
+// The `inference` flag isn't yet in the Elasticsearch package types.
 type FieldCapability = FieldCapsFieldCapability & {
   inference?: boolean;
 };
@@ -43,12 +43,8 @@ const VECTOR_FIELD_TYPES = new Set(['dense_vector', 'sparse_vector', 'semantic_t
 const FIELD_CAPS_TYPES = [...VECTOR_FIELD_TYPES, 'text'];
 
 /**
- * Determines which of the given indices contain a vector field (`dense_vector`, `sparse_vector`, or
- * an inference field such as `semantic_text` / `semantic`).
- *
- * Uses `_field_caps`, which is far lighter than pulling full mappings: it aggregates fields across
- * indices and dedupes shared ones, and flattens nested/multi-fields for free. Inference fields are
- * detected via the `inference` flag, which serverless Elasticsearch always reports.
+ * Returns which of the given indices contain a vector field. Uses `_field_caps` rather than full
+ * mappings as it's far lighter and flattens nested/multi-fields for free.
  */
 const getVectorIndexNames = async (
   client: IScopedClusterClient,
@@ -59,10 +55,8 @@ const getVectorIndexNames = async (
     fields: '*',
     types: FIELD_CAPS_TYPES,
     filters: '-metadata',
-    // Without this, a field mapped in only a subset of the indices is reported with no `indices`
-    // list — indistinguishable from a field mapped in every index — so all requested indices would
-    // be misclassified as vector indices. With it, partially-mapped fields always carry an explicit
-    // `indices` list on the mapped entry.
+    // Forces partially-mapped fields to carry an explicit `indices` list. Without it a field mapped
+    // in a subset of indices looks identical to one mapped everywhere, misclassifying all indices.
     include_unmapped: true,
   });
 
@@ -70,17 +64,14 @@ const getVectorIndexNames = async (
 
   for (const capabilitiesByType of Object.values(fieldCaps.fields)) {
     for (const capability of Object.values(capabilitiesByType) as FieldCapability[]) {
-      // `include_unmapped: true` adds pseudo-entries (type `unmapped`) listing the indices where
-      // the field does not exist; they must never count as matches.
+      // `include_unmapped: true` adds pseudo-entries listing indices where the field is absent.
       if (capability.type === 'unmapped') continue;
 
       const isVectorField =
         VECTOR_FIELD_TYPES.has(capability.type) || capability.inference === true;
       if (!isVectorField) continue;
 
-      // With `include_unmapped: true`, `indices` is absent only when the field (with this
-      // capability) is mapped in every requested index, so all of them qualify and there is
-      // nothing left to discover.
+      // Absent `indices` means the field is mapped in every requested index.
       if (capability.indices === undefined) return indexNames;
 
       const capabilityIndices = Array.isArray(capability.indices)
@@ -88,7 +79,6 @@ const getVectorIndexNames = async (
         : [capability.indices];
       capabilityIndices.forEach((name) => vectorIndexNames.add(name));
 
-      // Every requested index is already known to contain a vector field so exit early and return all indexes.
       if (vectorIndexNames.size === indexNames.length) return indexNames;
     }
   }
@@ -96,14 +86,9 @@ const getVectorIndexNames = async (
   return [...vectorIndexNames];
 };
 
-// Caps the number of indices per ES|QL query so the `FROM` clause cannot grow unbounded on
-// deployments with very many vector indices.
+// Caps indices per ES|QL query so the `FROM` clause can't grow unbounded.
 const ESQL_INDICES_PER_QUERY = 500;
 
-/**
- * Counts top-level documents across the given indices with ES|QL, batching the index list so a
- * single query never targets an unbounded number of indices.
- */
 const countTopLevelDocs = async (
   client: IScopedClusterClient,
   indexNames: string[]
@@ -113,16 +98,10 @@ const countTopLevelDocs = async (
   for (let i = 0; i < indexNames.length; i += ESQL_INDICES_PER_QUERY) {
     const batch = indexNames.slice(i, i + ESQL_INDICES_PER_QUERY);
     const esqlResult = await client.asCurrentUser.esql.query({
-      // Each index name is wrapped in double quotes so characters that are special in ES|QL
-      // (e.g. dashes) can't break the query. Index names can never contain a double quote,
-      // so no escaping is needed.
       query: `FROM ${batch.map((name) => `"${name}"`).join(',')} | STATS doc_count = COUNT(*)`,
-      // return partial results instead of failing when some shards are unavailable
       allow_partial_results: true,
     });
 
-    // The count is aliased to `doc_count` in the query so this lookup doesn't depend on
-    // ES|QL's auto-generated column naming.
     const countColumnIndex = esqlResult.columns.findIndex((col) => col.name === 'doc_count');
     const [row] = esqlResult.values ?? [];
     total += (row?.[countColumnIndex] as number) ?? 0;
@@ -132,20 +111,16 @@ const countTopLevelDocs = async (
 };
 
 /**
- * Fetches index-level stats for the deployment: total user index count, aggregate store size, and
- * the number of documents living in indices that contain a vector field.
- *
- * Never throws: any failure is logged and surfaced as `null` for the affected value so callers can
- * distinguish "unavailable" from a genuine `0`, and so a single failing call doesn't fail the whole
- * stats response.
+ * Fetches index-level stats: user index count, aggregate store size, and doc count across indices
+ * with a vector field. Failures are logged and surfaced as `null` so callers can
+ * distinguish "unavailable" from a genuine `0`.
  */
 export const fetchIndexStats = async (
   client: IScopedClusterClient,
   logger: Logger
 ): Promise<IndexStats> => {
   try {
-    // Serverless-only `_metering/stats` returns docs + size for all user indices.
-    // Requires asSecondaryAuthUser.
+    // Serverless-only `_metering/stats` requires asSecondaryAuthUser.
     const meteringStats = await client.asSecondaryAuthUser.transport.request<MeteringStatsResponse>(
       {
         method: 'GET',
@@ -160,7 +135,6 @@ export const fetchIndexStats = async (
     const indicesCount = userIndices.length;
     const storeSizeBytes = userIndices.reduce((sum, index) => sum + (index.size_in_bytes ?? 0), 0);
 
-    // A deployment with no user indices genuinely has 0 vector docs.
     let vectorDocsCount: number | null = 0;
     if (indicesCount > 0) {
       const indexNames = userIndices.map((i) => i.name);
@@ -170,9 +144,8 @@ export const fetchIndexStats = async (
 
         if (vectorIndexNames.length > 0) {
           // `_metering/stats` num_docs counts Lucene documents, which includes the nested chunk
-          // documents that `semantic_text` fields generate — inflating the count (e.g. 10 docs
-          // reported as 20). Count top-level documents with ES|QL instead, matching the workaround
-          // used by the index management plugin.
+          // documents that `semantic_text` fields generate, inflating the count. Count top-level
+          // documents with ES|QL instead, matching the index management plugin's workaround.
           vectorDocsCount = await countTopLevelDocs(client, vectorIndexNames);
         }
       } catch (error) {
@@ -192,9 +165,8 @@ export const fetchIndexStats = async (
 };
 
 /**
- * Fetches the number of dashboards in the current space. Never throws: returns `null` (and logs) on
- * failure so a dashboard lookup error is distinguishable from "0 dashboards" and doesn't fail the
- * whole stats response.
+ * Fetches the number of dashboards in the current space. Returns `null` on failure so
+ * a lookup error is distinguishable from "0 dashboards".
  */
 export const fetchDashboardsCount = async (
   savedObjectsClient: SavedObjectsClientContract,

@@ -55,8 +55,6 @@ export const useDeploymentStats = () => {
       };
     },
     refetchOnWindowFocus: false,
-    // These are slow-moving, eventually-consistent deployment aggregates, so treat a result as
-    // fresh for 60s to avoid refetching metering + mappings + ES|QL on every remount/navigation.
     staleTime: 60_000,
   });
 

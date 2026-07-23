@@ -119,12 +119,11 @@ describe('fetchIndexStats', () => {
     expect(result.vectorDocsCount).toBe(10);
   });
 
-  it('detects a `semantic` field via the field caps inference flag', async () => {
+  it('detects a `semantic` field by its own reported type', async () => {
     mockMetering([{ name: 'vectordb', num_docs: 10, size_in_bytes: 500 }]);
-    // `semantic` and `semantic_text` are both inference fields, flagged via `inference: true`.
     mockFieldCaps({
       body: {
-        semantic: { type: 'semantic', searchable: true, aggregatable: false, inference: true },
+        semantic: { type: 'semantic', searchable: true, aggregatable: false },
       },
     });
     mockEsqlCount(10);
@@ -169,9 +168,6 @@ describe('fetchIndexStats', () => {
       { name: 'test-vector', num_docs: 10, size_in_bytes: 500 },
       { name: 'test-plain', num_docs: 5000, size_in_bytes: 50 },
     ]);
-    // Real response shape with `include_unmapped: true` when `embedding` only exists in
-    // `test-vector`: the mapped entry carries `indices`, plus an `unmapped` pseudo-entry for the
-    // indices where the field does not exist (verified against a serverless cluster).
     mockFieldCaps({
       embedding: {
         unmapped: {

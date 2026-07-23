@@ -25,8 +25,6 @@ export const registerDeploymentStatsRoute = (router: IRouter, logger: Logger) =>
         const client = core.elasticsearch.client;
         const savedObjectsClient = core.savedObjects.getClient();
 
-        // Index stats (metering + vector classification) and the dashboard count are independent,
-        // so run them in parallel rather than chaining the two round trips.
         const [{ indicesCount, storeSizeBytes, vectorDocsCount }, dashboardsCount] =
           await Promise.all([
             fetchIndexStats(client, logger),
