@@ -43,7 +43,7 @@ type RunNodeTestParams = Omit<
 };
 
 describe('runNode', () => {
-  let mockParams: jest.Mocked<WorkflowExecutionLoopParams>;
+  let mockParams: RunNodeTestParams;
   let taskAbortController: AbortController;
   let workflowExecution: EsWorkflowExecution;
   let mockNode: GraphNodeUnion;
@@ -137,7 +137,7 @@ describe('runNode', () => {
         releaseTransientlyRehydratedOutputs: jest.fn(),
       },
       signal: taskAbortController.signal,
-    } as unknown as jest.Mocked<WorkflowExecutionLoopParams>;
+    } as unknown as RunNodeTestParams;
   });
 
   describe('when workflow is running', () => {
