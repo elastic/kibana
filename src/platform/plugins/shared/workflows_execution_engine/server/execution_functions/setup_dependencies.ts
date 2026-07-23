@@ -62,10 +62,18 @@ export async function setupDependencies(
   // Get ES client from core services (guaranteed to be available at task execution time)
   const internalEsClient = coreStart.elasticsearch.client.asInternalUser;
 
+  const defaultWorkflowExecutionRepository = new WorkflowExecutionRepository(internalEsClient, logger);
+  const defaultStepExecutionRepository = new StepExecutionRepository(internalEsClient, logger);
   const workflowExecutionPersistence =
-    options.workflowExecutionRepository ?? new WorkflowExecutionRepository(internalEsClient, logger);
+    options.workflowExecutionRepository ?? defaultWorkflowExecutionRepository;
   const stepExecutionPersistence =
-    options.stepExecutionRepository ?? new StepExecutionRepository(internalEsClient, logger);
+    options.stepExecutionRepository ?? defaultStepExecutionRepository;
+  const workflowExecutionRepository = options.workflowExecutionRepository
+    ? undefined
+    : defaultWorkflowExecutionRepository;
+  const stepExecutionRepository = options.stepExecutionRepository
+    ? undefined
+    : defaultStepExecutionRepository;
   const workflowRepository = new WorkflowRepository({
     esClient: internalEsClient,
     logger,
@@ -197,15 +205,6 @@ export async function setupDependencies(
     coreStart.elasticsearch.client.asScoped(fakeRequest).asCurrentUser;
 
   const workflowTaskManager = new WorkflowTaskManager(taskManager);
-
-  const workflowExecutionRepository =
-    workflowExecutionPersistence instanceof WorkflowExecutionRepository
-      ? workflowExecutionPersistence
-      : undefined;
-  const stepExecutionRepository =
-    stepExecutionPersistence instanceof StepExecutionRepository
-      ? stepExecutionPersistence
-      : undefined;
 
   const enhancedDependencies: ContextDependencies = {
     ...dependencies,

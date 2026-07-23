@@ -127,7 +127,7 @@ export interface GetWorkflowAggsOptions {
 
 export interface ResolveWorkflowTriggerMatchesResult {
   matched: WorkflowDetailDto[];
-  invalidConditionWorkflowIds: string[];
+  invalidConditionWorkflows: Array<{ id: string; name: string }>;
 }
 
 export interface ExecuteWorkflowSynchronouslyParams {
@@ -340,18 +340,21 @@ export class WorkflowsManagementApi {
   ): Promise<ResolveWorkflowTriggerMatchesResult> {
     const subscribed = await this.getWorkflowsSubscribedToTrigger(triggerId, spaceId);
     const matched: WorkflowDetailDto[] = [];
-    const invalidConditionWorkflowIds: string[] = [];
+    const invalidConditionWorkflows: Array<{ id: string; name: string }> = [];
 
     subscribed.forEach((workflow) => {
       const outcome = classifyWorkflowTriggerMatch(workflow, triggerId, event);
       if (outcome === 'matched') {
         matched.push(workflow);
       } else if (outcome === 'kql_error') {
-        invalidConditionWorkflowIds.push(workflow.id);
+        invalidConditionWorkflows.push({
+          id: workflow.id,
+          name: workflow.name ?? workflow.definition?.name ?? workflow.id,
+        });
       }
     });
 
-    return { matched, invalidConditionWorkflowIds };
+    return { matched, invalidConditionWorkflows };
   }
 
   public async executeWorkflowSynchronously({
@@ -405,9 +408,10 @@ export class WorkflowsManagementApi {
   public async createWorkflow(
     workflow: CreateWorkflowCommand,
     spaceId: string,
-    request: KibanaRequest
+    request: KibanaRequest,
+    options?: { originManagedWorkflowId?: string }
   ): Promise<WorkflowDetailDto> {
-    const result = await this.workflowsService.createWorkflow(workflow, spaceId, request);
+    const result = await this.workflowsService.createWorkflow(workflow, spaceId, request, options);
     this.notifySml(result.id, 'create', request);
     return result;
   }
@@ -453,15 +457,19 @@ export class WorkflowsManagementApi {
       name: `${workflow.name} ${i18n.translate('workflowsManagement.cloneSuffix', {
         defaultMessage: 'Copy',
       })}`,
+      // A managed workflow clone is a user-owned draft. It must never become active before an
+      // administrator reviews it and explicitly coordinates enablement with the managed source.
+      ...(workflow.managed ? { enabled: false } : {}),
     };
 
     // Convert back to YAML string using proper YAML stringification
     const clonedYaml = stringifyWorkflowDefinition(updatedYaml as unknown as WorkflowYaml);
-    const result = await this.workflowsService.createWorkflow(
-      { yaml: clonedYaml },
-      spaceId,
-      request
-    );
+    const result =
+      workflow.managed && workflow.originManagedWorkflowId
+        ? await this.workflowsService.createWorkflow({ yaml: clonedYaml }, spaceId, request, {
+            originManagedWorkflowId: workflow.originManagedWorkflowId,
+          })
+        : await this.workflowsService.createWorkflow({ yaml: clonedYaml }, spaceId, request);
     this.notifySml(result.id, 'create', request);
     return result;
   }

@@ -8,9 +8,14 @@
  */
 
 import apm from 'elastic-apm-node';
+import { performance } from 'perf_hooks';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { EsWorkflowExecution } from '@kbn/workflows';
 import { setupDependencies } from './setup_dependencies';
+import {
+  syncExecutionDurationHistogram,
+  syncExecutionRequestsCounter,
+} from './sync_execution_metrics';
 import { validateSyncWorkflow } from './validate_sync_workflow';
 import type { WorkflowsExecutionEngineConfig } from '../config';
 import type {
@@ -43,27 +48,44 @@ export const runWorkflowSync = async ({
   stepExecutionRepository: StepExecutionPersistence;
 }): Promise<EsWorkflowExecution> => {
   apm.currentTransaction?.setLabel('execution_mode', 'sync');
-  const setup = await setupDependencies(
-    workflowExecution.id,
-    workflowExecution.spaceId,
-    logger,
-    config,
-    dependencies,
-    request,
-    workflowsExecutionEngine,
-    { workflowExecution, workflowExecutionRepository, stepExecutionRepository }
-  );
+  const startTime = performance.now();
+  let outcome: 'success' | 'error' | 'aborted' = 'success';
 
-  validateSyncWorkflow(setup.workflowExecutionGraph);
-  await setup.workflowRuntime.start();
-  await workflowExecutionLoop({
-    ...setup,
-    workflowExecutionRepository: setup.workflowExecutionPersistence,
-    fakeRequest: request,
-    coreStart: dependencies.coreStart,
-    signal: abortController.signal,
-    executionMode: 'sync',
-  });
+  try {
+    const setup = await setupDependencies(
+      workflowExecution.id,
+      workflowExecution.spaceId,
+      logger,
+      config,
+      dependencies,
+      request,
+      workflowsExecutionEngine,
+      { workflowExecution, workflowExecutionRepository, stepExecutionRepository }
+    );
 
-  return setup.workflowExecutionState.getWorkflowExecution();
+    validateSyncWorkflow(
+      setup.workflowExecutionGraph,
+      dependencies.workflowsExtensions.getStepDefinition
+    );
+    await setup.workflowRuntime.start();
+    await workflowExecutionLoop({
+      ...setup,
+      workflowExecutionRepository: setup.workflowExecutionPersistence,
+      fakeRequest: request,
+      coreStart: dependencies.coreStart,
+      signal: abortController.signal,
+      executionMode: 'sync',
+    });
+
+    if (abortController.signal.aborted) {
+      outcome = 'aborted';
+    }
+    return setup.workflowExecutionState.getWorkflowExecution();
+  } catch (error) {
+    outcome = abortController.signal.aborted ? 'aborted' : 'error';
+    throw error;
+  } finally {
+    syncExecutionDurationHistogram.record(performance.now() - startTime, { outcome });
+    syncExecutionRequestsCounter.add(1, { outcome });
+  }
 };

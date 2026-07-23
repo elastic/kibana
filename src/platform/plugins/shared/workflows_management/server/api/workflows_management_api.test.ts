@@ -138,7 +138,7 @@ describe('WorkflowsManagementApi', () => {
           expect.objectContaining({ id: 'unconditional' }),
           expect.objectContaining({ id: 'matching' }),
         ],
-        invalidConditionWorkflowIds: ['invalid'],
+        invalidConditionWorkflows: [{ id: 'invalid', name: 'invalid' }],
       });
       expect(mockWorkflowsService.getWorkflowsSubscribedToTrigger).toHaveBeenCalledWith(
         'inference.aroundCompletion',
@@ -431,6 +431,31 @@ steps:
         expect.any(Object),
         spaceId,
         mockRequest
+      );
+    });
+
+    it('creates managed clones as disabled user-owned workflows with provenance', async () => {
+      const originalWorkflow = createMockWorkflow({
+        managed: true,
+        managedBy: 'inferenceWorkflows',
+        originManagedWorkflowId: 'system-inference_pii_anonymization',
+      });
+      mockWorkflowsService.createWorkflow.mockResolvedValue({
+        ...originalWorkflow,
+        id: 'workflow-clone-456',
+        managed: false,
+        managedBy: null,
+      });
+
+      await api.cloneWorkflow(originalWorkflow, 'default', mockRequest);
+
+      expect(mockWorkflowsService.createWorkflow).toHaveBeenCalledWith(
+        {
+          yaml: expect.stringContaining('enabled: false'),
+        },
+        'default',
+        mockRequest,
+        { originManagedWorkflowId: 'system-inference_pii_anonymization' }
       );
     });
   });

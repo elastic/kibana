@@ -25,6 +25,8 @@ export enum StepCategory {
 
 export const StepCategories = Object.values(StepCategory) as StepCategory[];
 
+export type StepExecutionMode = 'async' | 'sync';
+
 /**
  * Documentation information for a workflow step.
  */
@@ -124,4 +126,10 @@ export interface BaseStepDefinition<
    * suggested for new workflows.
    */
   deprecation?: StepDeprecationInfo;
+
+  /**
+   * Execution modes supported by this step. Omitted means both modes.
+   * Durable or asynchronously resumed steps must explicitly declare async-only support.
+   */
+  supportedExecutionModes?: readonly StepExecutionMode[];
 }
