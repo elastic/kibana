@@ -167,9 +167,9 @@ function getPopulationSearchJsonFromConfig(
         },
       },
       ...(runtimeMappings !== undefined ? { runtime_mappings: runtimeMappings } : {}),
-      ...(projectRouting !== undefined ? { project_routing: projectRouting } : {}),
     },
     ...(indicesOptions ?? {}),
+    ...(projectRouting !== undefined ? { project_routing: projectRouting } : {}),
   };
 
   if (query.bool === undefined) {

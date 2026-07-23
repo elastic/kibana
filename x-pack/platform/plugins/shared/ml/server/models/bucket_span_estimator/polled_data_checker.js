@@ -74,7 +74,6 @@ export class PolledDataChecker {
         },
       },
       ...this.runtimeMappings,
-      ...this.projectRouting,
     };
 
     return search;
@@ -89,6 +88,7 @@ export class PolledDataChecker {
         size: 0,
         body: searchBody,
         ...(this.indicesOptions ?? {}),
+        ...this.projectRouting,
       },
       { maxRetries: 0 }
     );

@@ -287,9 +287,9 @@ export function resultsServiceProvider(mlApi) {
               ...(isPopulatedObject(runtimeMappings) && query
                 ? { runtime_mappings: runtimeMappings }
                 : {}),
-              ...(projectRouting ? { project_routing: projectRouting } : {}),
             },
             ...(indicesOptions ?? {}),
+            ...(projectRouting ? { project_routing: projectRouting } : {}),
           })
           .then((resp) => {
             const dataByTimeBucket = get(resp, ['aggregations', 'eventRate', 'buckets'], []);

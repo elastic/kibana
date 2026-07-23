@@ -186,7 +186,6 @@ export class SingleSeriesChecker {
         },
       },
       ...this.runtimeMappings,
-      ...this.projectRouting,
     };
 
     if (this.field !== null) {
@@ -210,6 +209,7 @@ export class SingleSeriesChecker {
         size: 0,
         body: searchBody,
         ...(this.indicesOptions ?? {}),
+        ...this.projectRouting,
       },
       { maxRetries: 0 }
     );

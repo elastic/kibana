@@ -287,9 +287,9 @@ export function estimateBucketSpanFactory(client) {
                 },
               },
               ...(runtimeMappings !== undefined ? { runtime_mappings: runtimeMappings } : {}),
-              ...(projectRouting !== undefined ? { project_routing: projectRouting } : {}),
             },
             ...(indicesOptions ?? {}),
+            ...(projectRouting !== undefined ? { project_routing: projectRouting } : {}),
           },
           { maxRetries: 0 }
         )
@@ -338,9 +338,9 @@ export function estimateBucketSpanFactory(client) {
                     },
                   },
                   ...(runtimeMappings !== undefined ? { runtime_mappings: runtimeMappings } : {}),
-                  ...(projectRouting !== undefined ? { project_routing: projectRouting } : {}),
                 },
                 ...(indicesOptions ?? {}),
+                ...(projectRouting !== undefined ? { project_routing: projectRouting } : {}),
               },
               { maxRetries: 0 }
             )

@@ -42,9 +42,9 @@ export function getCategoryFields(
             },
           },
           ...(runtimeMappings !== undefined ? { runtime_mappings: runtimeMappings } : {}),
-          ...(projectRouting !== undefined ? { project_routing: projectRouting } : {}),
         },
         ...(indicesOptions ?? {}),
+        ...(projectRouting !== undefined ? { project_routing: projectRouting } : {}),
       })
       .then((resp: any) => {
         const catFields = get(resp, ['aggregations', 'catFields', 'buckets'], []);
