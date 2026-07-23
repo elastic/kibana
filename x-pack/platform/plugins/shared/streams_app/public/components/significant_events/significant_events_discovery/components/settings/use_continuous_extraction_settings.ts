@@ -12,6 +12,7 @@ import {
   OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_INTERVAL_HOURS,
 } from '@kbn/management-settings-ids';
 import { DEFAULT_EXTRACTION_INTERVAL_HOURS } from '@kbn/significant-events-plugin/common';
+import { useSyncEnabledFromStatus } from './use_sync_enabled_from_status';
 
 export interface ContinuousExtractionState {
   enabled: boolean;
@@ -29,14 +30,25 @@ const readSettingsFromClient = (globalClient: IUiSettingsClient): ContinuousExtr
 export const useContinuousExtractionSettings = ({
   globalClient,
   http,
+  /** Live enabled flag from maintenance status (keeps UI in sync after pause/resume). */
+  enabledFromStatus,
 }: {
   globalClient: IUiSettingsClient;
   http: HttpSetup;
+  enabledFromStatus?: boolean;
 }) => {
   const [saved, setSaved] = useState<ContinuousExtractionState>(() =>
     readSettingsFromClient(globalClient)
   );
   const [draft, setDraft] = useState<ContinuousExtractionState>(saved);
+
+  useSyncEnabledFromStatus({
+    client: globalClient,
+    settingId: OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED,
+    enabledFromStatus,
+    setSaved,
+    setDraft,
+  });
 
   const hasChanged = useMemo(
     () => draft.enabled !== saved.enabled || draft.intervalHours !== saved.intervalHours,
