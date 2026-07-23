@@ -12,6 +12,10 @@ import type { Template } from '../../../../common/types/domain/template/v1';
 import {
   MAX_TEMPLATE_DESCRIPTION_LENGTH,
   MAX_TAGS_PER_TEMPLATE,
+  CASE_TEMPLATES_URL,
+  CASE_TEMPLATE_DETAILS_URL,
+  CASE_FIELDS_URL,
+  CASE_APPLICABLE_FIELDS_URL,
 } from '../../../../common/constants';
 import { mockTemplates } from './mock_data';
 import { getTemplatesRoute } from './get_templates_route';
@@ -1446,13 +1450,15 @@ describe('Template Routes', () => {
         typeof getPublicTemplateRoutes
       >[0];
       const routes = getPublicTemplateRoutes(config);
-      expect(routes).toHaveLength(5);
+      expect(routes).toHaveLength(7);
       expect(routes.map((route) => `${route.method.toUpperCase()} ${route.path}`)).toEqual([
-        'GET /api/cases/templates',
-        'GET /api/cases/templates/{template_id}',
-        'POST /api/cases/templates',
-        'PUT /api/cases/templates/{template_id}',
-        'DELETE /api/cases/templates/{template_id}',
+        `GET ${CASE_TEMPLATES_URL}`,
+        `GET ${CASE_TEMPLATE_DETAILS_URL}`,
+        `POST ${CASE_TEMPLATES_URL}`,
+        `PUT ${CASE_TEMPLATE_DETAILS_URL}`,
+        `DELETE ${CASE_TEMPLATE_DETAILS_URL}`,
+        `GET ${CASE_FIELDS_URL}`,
+        `GET ${CASE_APPLICABLE_FIELDS_URL}`,
       ]);
     });
 

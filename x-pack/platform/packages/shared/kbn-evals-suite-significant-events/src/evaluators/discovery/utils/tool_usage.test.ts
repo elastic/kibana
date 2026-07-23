@@ -14,6 +14,7 @@ import {
   extractToolCallIds,
   summarizeEsqlGrounding,
   extractEventSearchCandidateCount,
+  summarizePersistenceCalls,
 } from './tool_usage';
 
 const TOOL_ID_EXECUTE_ESQL = platformCoreTools.executeEsql;
@@ -79,6 +80,75 @@ describe('extractOrderedToolCalls', () => {
 describe('getToolCallCount', () => {
   it('counts only tool_call steps', () => {
     expect(getToolCallCount(steps)).toBe(3);
+  });
+});
+
+describe('summarizePersistenceCalls', () => {
+  const persistenceToolId = platformSignificantEventsTools.discoveryWrite;
+
+  it('accepts one persistence call', () => {
+    expect(
+      summarizePersistenceCalls(
+        [{ type: 'tool_call', tool_id: persistenceToolId, tool_call_id: 'write-1' }],
+        persistenceToolId
+      )
+    ).toEqual({ count: 1, valid: true, retriedPartialFailure: false });
+  });
+
+  it('accepts exactly one retry after an item-level bulk error', () => {
+    expect(
+      summarizePersistenceCalls(
+        [
+          {
+            type: 'tool_call',
+            tool_id: persistenceToolId,
+            tool_call_id: 'write-1',
+            results: [{ data: { results: [{ index: 0, written: false, reason: 'bulk_error' }] } }],
+          },
+          {
+            type: 'tool_call',
+            tool_id: persistenceToolId,
+            tool_call_id: 'write-2',
+            params: { items: [{ event_id: 'failed-event' }] },
+          },
+        ],
+        persistenceToolId
+      )
+    ).toEqual({ count: 2, valid: true, retriedPartialFailure: true });
+  });
+
+  it('rejects repeated calls without a partial bulk failure', () => {
+    expect(
+      summarizePersistenceCalls(
+        [
+          { type: 'tool_call', tool_id: persistenceToolId, tool_call_id: 'write-1' },
+          { type: 'tool_call', tool_id: persistenceToolId, tool_call_id: 'write-2' },
+        ],
+        persistenceToolId
+      )
+    ).toEqual({ count: 2, valid: false, retriedPartialFailure: false });
+  });
+
+  it('rejects a retry that resubmits more than the failed items', () => {
+    expect(
+      summarizePersistenceCalls(
+        [
+          {
+            type: 'tool_call',
+            tool_id: persistenceToolId,
+            tool_call_id: 'write-1',
+            results: [{ data: { results: [{ index: 0, written: false, reason: 'bulk_error' }] } }],
+          },
+          {
+            type: 'tool_call',
+            tool_id: persistenceToolId,
+            tool_call_id: 'write-2',
+            params: { items: [{ event_id: 'failed-event' }, { event_id: 'successful-event' }] },
+          },
+        ],
+        persistenceToolId
+      )
+    ).toEqual({ count: 2, valid: false, retriedPartialFailure: false });
   });
 });
 

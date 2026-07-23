@@ -84,6 +84,10 @@ export class Inspector {
     await this.openInspectorView('Requests');
   }
 
+  async openRequestsStatisticsTab() {
+    await this.requests.statisticsTab.click();
+  }
+
   async getTableData(): Promise<string[][]> {
     await this.panel.locator('tbody').waitFor({ state: 'visible' });
     const tableRows = this.panel.locator('tbody tr');

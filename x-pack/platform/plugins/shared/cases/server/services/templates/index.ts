@@ -22,6 +22,7 @@ import type {
   Template,
   UpdateTemplateInput,
 } from '../../../common/types/domain/template/v1';
+import { ParsedTemplateDefinitionSchema } from '../../../common/types/domain/template/v1';
 import type { FieldDefinition } from '../../../common/types/domain/field_definition/v1';
 import { isRefField } from '../../../common/types/domain/template/fields';
 import { toFieldDefinitions, trimFieldDefaults } from './utils';
@@ -346,7 +347,11 @@ export class TemplatesService {
     id: string = v4()
   ): Promise<SavedObject<Template>> {
     const normalizedDefinition = trimFieldDefaults(input.definition);
-    const parsedDefinition = parseYaml(normalizedDefinition) as ParsedTemplate['definition'];
+    // Parse through the zod schema (not a raw `parseYaml` cast) so field-level defaults — e.g. a
+    // MARKDOWN field's `type` defaulting to `keyword` — are applied before `toFieldDefinitions`
+    // reads them; otherwise an omitted `type` reaches the SO mappings as `undefined` and fails
+    // saved-object validation.
+    const parsedDefinition = ParsedTemplateDefinitionSchema.parse(parseYaml(normalizedDefinition));
     // The case-default title is optional in the definition, so the identity name must come from
     // `input.name` (the editor always sends it) or, for API back-compat, the definition's title.
     const templateName = input.name ?? parsedDefinition.name;
@@ -403,7 +408,8 @@ export class TemplatesService {
     }
 
     const normalizedDefinition = trimFieldDefaults(input.definition);
-    const parsedDefinition = parseYaml(normalizedDefinition) as ParsedTemplate['definition'];
+    // See createTemplate: parse through the zod schema so field-level defaults are applied.
+    const parsedDefinition = ParsedTemplateDefinitionSchema.parse(parseYaml(normalizedDefinition));
     // See createTemplate: identity name comes from `input.name` or the definition's (optional) title.
     const templateName = input.name ?? parsedDefinition.name;
     if (!templateName) {

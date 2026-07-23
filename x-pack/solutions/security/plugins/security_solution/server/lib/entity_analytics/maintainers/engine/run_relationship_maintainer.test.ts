@@ -228,7 +228,7 @@ describe('runRelationshipMaintainer', () => {
         crudClient,
         entityMetadataClient,
         integrations: [baseConfig],
-        abortController: ac,
+        signal: ac.signal,
       });
       expect(result.totalNotFound).toBe(0);
       expect(result.totalWriteErrors).toBe(0);
@@ -462,7 +462,7 @@ describe('runRelationshipMaintainer', () => {
         crudClient,
         entityMetadataClient,
         integrations: [baseConfig],
-        abortController: ac,
+        signal: ac.signal,
       });
       expect(result.totalBuckets).toBe(0);
       expect(esql).not.toHaveBeenCalled();
@@ -513,7 +513,7 @@ describe('runRelationshipMaintainer', () => {
         crudClient,
         entityMetadataClient,
         integrations: [baseConfig],
-        abortController: ac,
+        signal: ac.signal,
       });
       expect(result.totalBuckets).toBe(1);
       expect(result.totalRecords).toBe(0);
@@ -630,7 +630,7 @@ describe('runRelationshipMaintainer', () => {
         crudClient,
         entityMetadataClient,
         integrations: [baseConfig, oktaConfig],
-        abortController: aborted(),
+        signal: aborted().signal,
       });
       expect(search).not.toHaveBeenCalled();
       expect(esql).not.toHaveBeenCalled();
@@ -660,7 +660,7 @@ describe('runRelationshipMaintainer', () => {
         crudClient,
         entityMetadataClient,
         integrations: [baseConfig, oktaConfig],
-        abortController: ac,
+        signal: ac.signal,
       });
       expect(search).toHaveBeenCalledTimes(1); // only integration #1 ran
       expect(esql).toHaveBeenCalledTimes(1);
@@ -688,7 +688,7 @@ describe('runRelationshipMaintainer', () => {
         crudClient,
         entityMetadataClient,
         integrations: [baseConfig],
-        abortController: ac,
+        signal: ac.signal,
       });
       // With streamed per-integration write (C.3): the integration produced
       // zero records so `writeEntityIds` early-returns without ever calling
@@ -802,7 +802,7 @@ describe('runRelationshipMaintainer', () => {
         crudClient,
         entityMetadataClient,
         integrations: [baseConfig, oktaConfig],
-        abortController: ac,
+        signal: ac.signal,
       });
       // baseConfig wrote 1 entity before the abort fired.
       expect(result.totalWritten).toBe(1);
@@ -832,7 +832,7 @@ describe('runRelationshipMaintainer', () => {
   });
 
   describe('transport options', () => {
-    it('does not pass an AbortSignal to the ES client when no abortController is provided', async () => {
+    it('does not pass an AbortSignal to the ES client when no signal is provided', async () => {
       const { esClient, search, esql } = makeEsClient();
       const { crudClient, entityMetadataClient } = makeClients();
       search.mockResolvedValueOnce(
@@ -851,7 +851,7 @@ describe('runRelationshipMaintainer', () => {
       expect(esql.mock.calls[0][1]).toBeUndefined();
     });
 
-    it('passes the AbortSignal to both search and esql.query when abortController is provided', async () => {
+    it('passes the AbortSignal to both search and esql.query when signal is provided', async () => {
       const { esClient, search, esql } = makeEsClient();
       const { crudClient, entityMetadataClient } = makeClients();
       search.mockResolvedValueOnce(
@@ -866,7 +866,7 @@ describe('runRelationshipMaintainer', () => {
         crudClient,
         entityMetadataClient,
         integrations: [baseConfig],
-        abortController: ac,
+        signal: ac.signal,
       });
       expect((search.mock.calls[0][1] as { signal: AbortSignal }).signal).toBe(ac.signal);
       expect((esql.mock.calls[0][1] as { signal: AbortSignal }).signal).toBe(ac.signal);
