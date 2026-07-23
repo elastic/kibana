@@ -15,19 +15,23 @@ jest.mock('dompurify', () => ({
 
 jest.mock('../services');
 jest.mock('../utils/stream_generate');
-jest.mock('../utils/call_render_route');
+jest.mock('../utils/fetch_esql_data');
+jest.mock('../utils/fill_template');
 
 import type { HttpStart } from '@kbn/core/public';
 import type { TimeRange } from '@kbn/es-query';
 import type { CustomContentTokenEvent } from '../../common/types';
 import { getServices } from '../services';
 import { streamGenerate } from '../utils/stream_generate';
-import { callRenderRoute } from '../utils/call_render_route';
+import { fetchEsqlData } from '../utils/fetch_esql_data';
+import { fillTemplate } from '../utils/fill_template';
 import { useCustomContentHtml } from './use_custom_content_html';
 
-const mockCallRenderRoute = callRenderRoute as jest.MockedFunction<typeof callRenderRoute>;
+const mockFetchEsqlData = fetchEsqlData as jest.MockedFunction<typeof fetchEsqlData>;
+const mockFillTemplate = fillTemplate as jest.MockedFunction<typeof fillTemplate>;
 
 const mockHttp = {} as unknown as HttpStart;
+const mockSearch = jest.fn();
 
 function makeHttp(events: CustomContentTokenEvent[]) {
   return (_http: unknown, _params: unknown, onToken: (t: string) => void) => {
@@ -40,9 +44,10 @@ function makeHttp(events: CustomContentTokenEvent[]) {
 
 beforeEach(() => {
   jest.clearAllMocks();
-  (getServices as jest.Mock).mockReturnValue({ core: { http: mockHttp } });
+  (getServices as jest.Mock).mockReturnValue({ core: { http: mockHttp }, search: mockSearch });
   (streamGenerate as jest.Mock).mockResolvedValue(undefined);
-  mockCallRenderRoute.mockResolvedValue('<div>rendered</div>');
+  mockFetchEsqlData.mockResolvedValue({ columns: [], values: [] });
+  mockFillTemplate.mockResolvedValue('<div>rendered</div>');
 });
 
 const baseParams: Parameters<typeof useCustomContentHtml>[0] = {
@@ -68,14 +73,14 @@ describe('useCustomContentHtml', () => {
   });
 
   describe('fast path — static panel with stored template', () => {
-    it('renders the stored HTML immediately with no server calls', async () => {
+    it('renders the stored HTML immediately with no fetch calls', async () => {
       const { result } = renderHook(() =>
         useCustomContentHtml({ ...baseParams, savedTemplate: VALID_HTML })
       );
       await waitFor(() => expect(result.current.isLoading).toBe(false));
       expect(result.current.html).toContain('hello');
       expect(streamGenerate).not.toHaveBeenCalled();
-      expect(mockCallRenderRoute).not.toHaveBeenCalled();
+      expect(mockFetchEsqlData).not.toHaveBeenCalled();
     });
   });
 
@@ -161,27 +166,26 @@ describe('useCustomContentHtml', () => {
       savedTemplate: '{% for row in rows %}{{ row["revenue"].value }}{% endfor %}',
     };
 
-    it('calls the render route without calling the LLM', async () => {
+    it('calls fetchEsqlData and fillTemplate without calling the LLM', async () => {
       const { result } = renderHook(() => useCustomContentHtml(esqlParams));
 
       await waitFor(() => expect(result.current.isLoading).toBe(false));
 
-      expect(mockCallRenderRoute).toHaveBeenCalledTimes(1);
-      expect(mockCallRenderRoute).toHaveBeenCalledWith(
+      expect(mockFetchEsqlData).toHaveBeenCalledTimes(1);
+      expect(mockFetchEsqlData).toHaveBeenCalledWith(
+        mockSearch,
         mockHttp,
-        {
-          template: esqlParams.savedTemplate,
-          esqlQuery: esqlParams.esqlQuery,
-          timeRange: undefined,
-        },
+        esqlParams.esqlQuery,
+        undefined,
         expect.any(AbortSignal)
       );
+      expect(mockFillTemplate).toHaveBeenCalledWith(esqlParams.savedTemplate, [], []);
       expect(result.current.html).toContain('rendered');
       expect(streamGenerate).not.toHaveBeenCalled();
     });
 
-    it('surfaces a render error without calling the LLM', async () => {
-      mockCallRenderRoute.mockRejectedValue(new Error('index not found'));
+    it('surfaces a fetch error without calling the LLM', async () => {
+      mockFetchEsqlData.mockRejectedValue(new Error('index not found'));
 
       const { result } = renderHook(() => useCustomContentHtml(esqlParams));
 
@@ -191,7 +195,7 @@ describe('useCustomContentHtml', () => {
     });
   });
 
-  describe('slow path — ES|QL panel, LLM then render route', () => {
+  describe('slow path — ES|QL panel, LLM then client-side render', () => {
     const LIQUID_TEMPLATE =
       '<html><body>{% for row in rows %}{{ row["revenue"].value }}{% endfor %}</body></html>';
     const esqlParams = {
@@ -199,7 +203,7 @@ describe('useCustomContentHtml', () => {
       esqlQuery: 'FROM logs | STATS revenue = SUM(amount)',
     };
 
-    it('calls streamGenerate then callRenderRoute, saves the Liquid template', async () => {
+    it('calls streamGenerate then fetchEsqlData + fillTemplate, saves the Liquid template', async () => {
       const onTemplateChange = jest.fn();
       (streamGenerate as jest.Mock).mockImplementation(
         makeHttp([{ type: 'token', token: LIQUID_TEMPLATE }])
@@ -212,17 +216,19 @@ describe('useCustomContentHtml', () => {
       await waitFor(() => expect(result.current.isLoading).toBe(false));
 
       expect(streamGenerate).toHaveBeenCalledTimes(1);
-      expect(mockCallRenderRoute).toHaveBeenCalledWith(
+      expect(mockFetchEsqlData).toHaveBeenCalledWith(
+        mockSearch,
         mockHttp,
-        { template: LIQUID_TEMPLATE, esqlQuery: esqlParams.esqlQuery, timeRange: undefined },
+        esqlParams.esqlQuery,
+        undefined,
         expect.any(AbortSignal)
       );
+      expect(mockFillTemplate).toHaveBeenCalledWith(LIQUID_TEMPLATE, [], []);
       expect(result.current.html).toContain('rendered');
-      // Saves the raw Liquid template, not the rendered HTML
       expect(onTemplateChange).toHaveBeenCalledWith(LIQUID_TEMPLATE);
     });
 
-    it('passes esqlQuery and timeRange to streamGenerate and callRenderRoute', async () => {
+    it('passes timeRange to streamGenerate and fetchEsqlData', async () => {
       const timeRange = { from: 'now-7d', to: 'now' };
       (streamGenerate as jest.Mock).mockImplementation(
         makeHttp([{ type: 'token', token: LIQUID_TEMPLATE }])
@@ -237,19 +243,21 @@ describe('useCustomContentHtml', () => {
         expect.any(Function),
         expect.any(AbortSignal)
       );
-      await waitFor(() => expect(mockCallRenderRoute).toHaveBeenCalledTimes(1));
-      expect(mockCallRenderRoute).toHaveBeenCalledWith(
+      await waitFor(() => expect(mockFetchEsqlData).toHaveBeenCalledTimes(1));
+      expect(mockFetchEsqlData).toHaveBeenCalledWith(
+        mockSearch,
         mockHttp,
-        expect.objectContaining({ esqlQuery: esqlParams.esqlQuery, timeRange }),
+        esqlParams.esqlQuery,
+        timeRange,
         expect.any(AbortSignal)
       );
     });
 
-    it('surfaces a render route error and does not save the template', async () => {
+    it('surfaces a render error and does not save the template', async () => {
       (streamGenerate as jest.Mock).mockImplementation(
         makeHttp([{ type: 'token', token: LIQUID_TEMPLATE }])
       );
-      mockCallRenderRoute.mockRejectedValue(new Error('query failed'));
+      mockFetchEsqlData.mockRejectedValue(new Error('query failed'));
       const onTemplateChange = jest.fn();
 
       const { result } = renderHook(() =>
@@ -286,7 +294,6 @@ describe('useCustomContentHtml', () => {
       const LIQUID_TEMPLATE =
         '<html><body>{% for row in rows %}<p>{{ row["revenue"].value }}</p>{% endfor %}</body></html>';
       (streamGenerate as jest.Mock)
-        // First attempt: plain text (no HTML tags) — fails isValidTemplate
         .mockImplementationOnce(makeHttp([{ type: 'token', token: 'just text, no tags' }]))
         .mockImplementation(makeHttp([{ type: 'token', token: LIQUID_TEMPLATE }]));
 
@@ -303,7 +310,6 @@ describe('useCustomContentHtml', () => {
       expect(streamGenerate).toHaveBeenCalledTimes(2);
       expect(result.current.error).toBeUndefined();
       expect(result.current.html).toContain('rendered');
-      // Saves the Liquid template from the successful retry
       expect(onTemplateChange).toHaveBeenCalledWith(LIQUID_TEMPLATE);
     });
   });
@@ -328,7 +334,7 @@ describe('useCustomContentHtml', () => {
   });
 
   describe('timepicker change re-fetches ES|QL panels', () => {
-    it('re-calls callRenderRoute when timeRange changes on a panel with a stored template', async () => {
+    it('re-calls fetchEsqlData when timeRange changes on a panel with a stored template', async () => {
       const esqlParams = {
         ...baseParams,
         esqlQuery: 'FROM logs | STATS revenue = SUM(amount)',
@@ -342,14 +348,16 @@ describe('useCustomContentHtml', () => {
         { initialProps: { timeRange: undefined as TimeRange | undefined } }
       );
 
-      await waitFor(() => expect(mockCallRenderRoute).toHaveBeenCalledTimes(1));
+      await waitFor(() => expect(mockFetchEsqlData).toHaveBeenCalledTimes(1));
 
       rerender({ timeRange: { from: 'now-7d', to: 'now' } });
 
-      await waitFor(() => expect(mockCallRenderRoute).toHaveBeenCalledTimes(2));
-      expect(mockCallRenderRoute).toHaveBeenLastCalledWith(
+      await waitFor(() => expect(mockFetchEsqlData).toHaveBeenCalledTimes(2));
+      expect(mockFetchEsqlData).toHaveBeenLastCalledWith(
+        mockSearch,
         mockHttp,
-        expect.objectContaining({ timeRange: { from: 'now-7d', to: 'now' } }),
+        esqlParams.esqlQuery,
+        { from: 'now-7d', to: 'now' },
         expect.any(AbortSignal)
       );
     });

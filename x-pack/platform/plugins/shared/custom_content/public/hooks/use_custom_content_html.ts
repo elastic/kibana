@@ -11,7 +11,8 @@ import type { EuiThemeColorModeStandard } from '@elastic/eui';
 import type { TimeRange } from '@kbn/es-query';
 import { getServices } from '../services';
 import { streamGenerate } from '../utils/stream_generate';
-import { callRenderRoute } from '../utils/call_render_route';
+import { fetchEsqlData } from '../utils/fetch_esql_data';
+import { fillTemplate } from '../utils/fill_template';
 import {
   stripMarkdownFences,
   isValidTemplate,
@@ -104,13 +105,14 @@ export function useCustomContentHtml({
     const controller = new AbortController();
     let acc = '';
 
-    const { core } = getServices();
+    const { core, search } = getServices();
 
-    // Fast path — ES|QL panel with stored template: render server-side, no LLM.
+    // Fast path — ES|QL panel with stored template: fetch data client-side and render, no LLM.
     if (template && esqlQuery) {
       setIsLoading(true);
       setError(undefined);
-      callRenderRoute(core.http, { template, esqlQuery, timeRange }, controller.signal)
+      fetchEsqlData(search, core.http, esqlQuery, timeRange, controller.signal)
+        .then(({ columns, values }) => fillTemplate(template, columns, values))
         .then((rawHtml) => {
           if (controller.signal.aborted) return;
           setHtml(prepareHtml(rawHtml, colorMode));
@@ -175,11 +177,15 @@ export function useCustomContentHtml({
           return;
         }
         try {
-          const rawHtml = await callRenderRoute(
+          const { columns, values } = await fetchEsqlData(
+            search,
             core.http,
-            { template: cleaned, esqlQuery, timeRange },
+            esqlQuery,
+            timeRange,
             controller.signal
           );
+          if (controller.signal.aborted) return;
+          const rawHtml = await fillTemplate(cleaned, columns, values);
           if (controller.signal.aborted) return;
           selfWrittenRef.current = { template: cleaned, colorMode };
           onTemplateChangeRef.current(cleaned);
