@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { fillPlaceholders, URL_PLACEHOLDER, API_KEY_PLACEHOLDER } from './snippets';
+import { fillPlaceholders, URL_PLACEHOLDER, API_KEY_PLACEHOLDER } from './console_snippets';
 
 describe('fillPlaceholders', () => {
   it('returns the snippet unchanged when url and apiKey are omitted', () => {

@@ -7,16 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FtrConfigProviderContext } from '@kbn/test';
-
-export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const functionalConfig = await readConfigFile(require.resolve('../../../config.base.js'));
-
-  return {
-    ...functionalConfig.getAll(),
-    testFiles: [require.resolve('.')],
-    junit: {
-      reportName: 'Discover - Group 12',
-    },
-  };
-}
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/src/platform/packages/private/kbn-ui-shared-deps-src'],
+};

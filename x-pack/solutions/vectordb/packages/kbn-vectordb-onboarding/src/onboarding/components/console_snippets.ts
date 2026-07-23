@@ -44,6 +44,31 @@ POST my-vectors/_search
   }
 }`;
 
+// TODO: placeholder example — replace with the final hybrid search example
+export const HAVE_VECTORS_SEARCH_HYBRID = `# Run a hybrid search combining kNN and lexical matches
+POST my-vectors/_search
+{
+  "retriever": {
+    "rrf": {
+      "retrievers": [
+        {
+          "knn": {
+            "field": "vector",
+            "query_vector": [0.10, -0.02, 0.91, 0.18, 0.60]
+          }
+        },
+        {
+          "standard": {
+            "query": {
+              "match": { "text": "what is elasticsearch?" }
+            }
+          }
+        }
+      ]
+    }
+  }
+}`;
+
 export const GENERATE_VECTORS_INGEST = `# Create an index that generates vectors automatically
 PUT my-vectors
 {
@@ -67,6 +92,35 @@ POST my-vectors/_search
     "semantic": {
       "field": "text",
       "query": "what is elasticsearch?"
+    }
+  }
+}`;
+
+// TODO: placeholder example — replace with the final hybrid search example
+export const GENERATE_VECTORS_SEARCH_HYBRID = `# Run a hybrid search combining semantic and lexical matches
+POST my-vectors/_search
+{
+  "retriever": {
+    "rrf": {
+      "retrievers": [
+        {
+          "standard": {
+            "query": {
+              "semantic": {
+                "field": "text",
+                "query": "what is elasticsearch?"
+              }
+            }
+          }
+        },
+        {
+          "standard": {
+            "query": {
+              "match": { "text": "what is elasticsearch?" }
+            }
+          }
+        }
+      ]
     }
   }
 }`;
