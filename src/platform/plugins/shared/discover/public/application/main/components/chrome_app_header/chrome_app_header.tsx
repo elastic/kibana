@@ -60,7 +60,7 @@ export const ChromeAppHeader = ({ menu, tabsBar, hasTabs = false }: ChromeAppHea
           return {
             ...item,
             overflow,
-            order: newSessionItem.order + 0.5,
+            order: (newSessionItem.order ?? 0) + 0.5,
           } as AppMenuItemType;
         }
 
