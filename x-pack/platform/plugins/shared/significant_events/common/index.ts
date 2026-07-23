@@ -9,11 +9,10 @@ export { QUERY_STATUSES } from './queries';
 export type { Query, QueryStatus } from './queries';
 
 export {
+  STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG,
   SIGNIFICANT_EVENTS_SEMANTIC_CODE_SEARCH_GROUNDING_ENABLED_FLAG,
   STREAMS_SIGNIFICANT_EVENTS_APPS_ENABLED_FLAG,
 } from './feature_flags';
-
-export { SIGNIFICANT_EVENTS_MEMORY_ENABLED_FLAG } from './memory_and_investigation';
 
 export {
   SIGNIFICANT_EVENT_TIERED_FEATURES,
@@ -24,6 +23,7 @@ export {
   DEFAULT_EXTRACTION_INTERVAL_HOURS,
   MIN_EXTRACTION_INTERVAL_HOURS,
   DEFAULT_SIG_EVENTS_SCHEDULED_DETECTION_INTERVAL_MINUTES,
+  DEFAULT_SIG_EVENTS_TARGET_COVERAGE_MINUTES,
   DEFAULT_SIG_EVENTS_SCHEDULED_DISCOVERY_BATCH_SIZE,
   DEFAULT_SIG_EVENTS_SCHEDULED_MAX_REVIEW_PASSES,
   DEFAULT_SIG_EVENTS_SCHEDULED_REVIEW_INTERVAL_MINUTES,
@@ -41,6 +41,20 @@ export {
   type SignificantEventAttachment,
   type PendingSignificantEventAttachment,
 } from './significant_event_attachment';
+
+export {
+  KI_FEATURE_ATTACHMENT_TYPE,
+  decodeFeatureAttachmentOrigin,
+  encodeFeatureAttachmentOrigin,
+  type KiFeatureAttachment,
+  type PendingKiFeatureAttachment,
+} from './ki_feature_attachment';
+
+export {
+  SIGNIFICANT_EVENT_DETECTION_ATTACHMENT_TYPE,
+  type SignificantEventDetectionAttachment,
+  type PendingSignificantEventDetectionAttachment,
+} from './significant_event_detection_attachment';
 
 export { SIGNIFICANT_EVENTS_REQUIRED_PLUGINS } from './significant_events_availability';
 export type {

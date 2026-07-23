@@ -6,7 +6,7 @@
  */
 
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
-import type { BuiltInAgentDefinition } from '@kbn/agent-builder-server/agents';
+import type { AgentTypeDefinition } from '@kbn/agent-builder-server/agents';
 import { platformCoreTools, platformSignificantEventsTools } from '@kbn/agent-builder-common/tools';
 import instructions from './instructions/investigator.md.text';
 import {
@@ -21,16 +21,17 @@ import {
 } from '../../../agent_builder/agents/discovery/constants';
 
 export const SIGNIFICANT_EVENTS_INVESTIGATION_AGENT_ID = 'platform.sig_events.investigation';
+export const SIGNIFICANT_EVENTS_INVESTIGATION_AGENT_TYPE_ID =
+  'platform.sig_events.investigation-type';
 
-const investigationAgent = {
-  id: SIGNIFICANT_EVENTS_INVESTIGATION_AGENT_ID,
+export const investigationAgentType = {
+  id: SIGNIFICANT_EVENTS_INVESTIGATION_AGENT_TYPE_ID,
   name: 'Streams Investigator',
   description:
     'Investigates an observability issue by querying available signals (logs, traces, metrics), ' +
     'reasoning about causality direction, and producing a contributing-factors conclusion with supporting evidence.',
-  labels: ['observability', 'streams', 'significant-events', 'investigation', 'root-cause'],
   avatar_icon: 'logoElastic',
-  configuration: {
+  baseConfiguration: {
     instructions,
     skill_ids: ['significant-events-memory', 'observability.investigation'],
     tools: [
@@ -53,12 +54,13 @@ const investigationAgent = {
         ],
       },
     ],
-    // Explicit: smlSearch + executeConnectorSubAction let the agent discover and
-    // invoke system connectors (e.g. source repositories) without hard-coding IDs.
+    // Keep Elastic capabilities available while starting with no connectors. Admin-selected
+    // connectors are persisted on the derived agent and merged into this allow-list.
     enable_elastic_capabilities: true,
+    connector_ids: [],
   },
-} as const satisfies BuiltInAgentDefinition;
+} as const satisfies AgentTypeDefinition;
 
-export const registerInvestigationAgents = (agentBuilder: AgentBuilderPluginSetup): void => {
-  agentBuilder.agents.register(investigationAgent);
+export const registerInvestigationAgentType = (agentBuilder: AgentBuilderPluginSetup): void => {
+  agentBuilder.agents.registerType(investigationAgentType);
 };

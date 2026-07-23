@@ -38,18 +38,6 @@ export type ObjectUnionExtendOptions<T> = TypeOptions<T> & {
   extendedBranchMeta?: ObjectUnionExtendedBranchMeta;
 };
 
-const getSchemaId = (type: SomeObjectType): string | undefined => {
-  return (type.getSchema().describe().flags as { id?: string } | undefined)?.id;
-};
-
-const getSchemaMeta = (type: SomeObjectType): Record<string, unknown> => {
-  return Object.assign({}, ...(type.getSchema().describe().metas ?? []));
-};
-
-const getSchemaDescription = (type: SomeObjectType): string | undefined => {
-  return (type.getSchema().describe().flags as { description?: string } | undefined)?.description;
-};
-
 const getExtendedTypeOptions = (
   type: SomeObjectType,
   index: number,
@@ -57,11 +45,15 @@ const getExtendedTypeOptions = (
 ): ObjectTypeOptions<any> | undefined => {
   if (!extendedBranchMeta) return undefined;
 
-  const meta = getSchemaMeta(type);
+  const { id, description, title, ...meta } = type.getMeta() ?? {};
+  const normalizedTitle = title ?? id;
   const extendedMeta = extendedBranchMeta({
-    description: getSchemaDescription(type),
-    id: getSchemaId(type),
-    meta,
+    description,
+    id,
+    meta: {
+      ...meta,
+      ...(normalizedTitle ? { title: normalizedTitle } : {}),
+    },
     index,
     type,
   });

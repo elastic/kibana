@@ -1,5 +1,9 @@
 {
-  "sha1": "a9c1be5f30c3e68122a03e94886ae8507375f2c5",
+  "sha1": "e3ae3bba4fc9205db08eaab5f895fc936232c19b",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
   "tests": [
     {
       "id": "56a87b3c042792d-0f151a046a326da",
@@ -67,7 +71,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/navigation/test/scout/ui/tests/navigation.spec.ts",
-        "line": 36,
+        "line": 38,
         "column": 7
       }
     },
@@ -81,7 +85,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/navigation/test/scout/ui/tests/navigation.spec.ts",
-        "line": 51,
+        "line": 53,
         "column": 7
       }
     },
@@ -95,7 +99,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/navigation/test/scout/ui/tests/navigation.spec.ts",
-        "line": 62,
+        "line": 64,
         "column": 7
       }
     },
@@ -109,7 +113,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/navigation/test/scout/ui/tests/navigation.spec.ts",
-        "line": 75,
+        "line": 77,
         "column": 7
       }
     },
@@ -123,7 +127,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/navigation/test/scout/ui/tests/navigation.spec.ts",
-        "line": 86,
+        "line": 88,
         "column": 7
       }
     }

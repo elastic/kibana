@@ -10,20 +10,20 @@ import type { IRouter, AnalyticsServiceSetup } from '@kbn/core/server';
 import { FEEDBACK_SUBMITTED_EVENT_TYPE } from '../src';
 
 const feedbackQuestionSchema = schema.object({
-  id: schema.string(),
-  question: schema.string(),
-  answer: schema.string(),
+  id: schema.string({ minLength: 1, maxLength: 256 }),
+  question: schema.string({ maxLength: 1024 }),
+  answer: schema.string({ maxLength: 16384 }),
 });
 
 const feedbackBodySchema = schema.object({
-  app_id: schema.string(),
-  user_email: schema.maybe(schema.string()),
-  solution: schema.string(),
+  app_id: schema.string({ minLength: 1, maxLength: 256 }),
+  user_email: schema.maybe(schema.string({ maxLength: 256 })),
+  solution: schema.string({ maxLength: 256 }),
   csat_score: schema.maybe(schema.number()),
   questions: schema.maybe(schema.arrayOf(feedbackQuestionSchema, { maxSize: 2 })),
-  organization_id: schema.maybe(schema.string()),
+  organization_id: schema.maybe(schema.string({ maxLength: 256 })),
   allow_email_contact: schema.boolean(),
-  url: schema.string(),
+  url: schema.string({ maxLength: 2048 }),
 });
 
 export function registerSendFeedbackRoute(router: IRouter, analytics: AnalyticsServiceSetup) {

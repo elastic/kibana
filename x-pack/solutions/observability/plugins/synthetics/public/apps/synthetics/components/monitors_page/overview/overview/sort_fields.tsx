@@ -5,8 +5,8 @@
  * 2.0.
  */
 import React from 'react';
-import type { PayloadAction } from '@reduxjs/toolkit';
-import { useDispatch, useSelector } from 'react-redux';
+import type { PayloadAction } from 'redux-toolkit-v1';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import type { MonitorListSortField } from '../../../../../../../common/runtime_types/monitor_management/sort_field';

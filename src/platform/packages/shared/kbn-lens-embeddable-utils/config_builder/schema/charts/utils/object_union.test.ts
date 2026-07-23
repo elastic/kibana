@@ -103,6 +103,8 @@ describe('objectUnion', () => {
     });
 
     it('applies semantic branch metadata when extending named union members', () => {
+      const typeADescribeSpy = jest.spyOn(namedTypeA.getSchema(), 'describe');
+      const typeBDescribeSpy = jest.spyOn(namedTypeB.getSchema(), 'describe');
       const namedTypeABPlus = objectUnion([namedTypeA, namedTypeB]).extends(
         { bool: schema.boolean() },
         {
@@ -115,6 +117,11 @@ describe('objectUnion', () => {
           }),
         }
       );
+
+      expect(typeADescribeSpy).not.toHaveBeenCalled();
+      expect(typeBDescribeSpy).not.toHaveBeenCalled();
+      typeADescribeSpy.mockRestore();
+      typeBDescribeSpy.mockRestore();
 
       const [extendedTypeA, extendedTypeB] = namedTypeABPlus.getUnionTypes();
       expect(getTypeId(extendedTypeA)).toBe('typeAForPanel');

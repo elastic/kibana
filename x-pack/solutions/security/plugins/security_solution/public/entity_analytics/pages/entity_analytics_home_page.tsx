@@ -262,12 +262,12 @@ const EntityAnalyticsHomePageContent = () => {
     return <PageLoader />;
   }
 
-  if (showEmptyPrompt) {
-    return <EmptyPrompt />;
-  }
-
   if (entityStoreDisabled) {
     return <EntityStoreDisabledEmptyPrompt />;
+  }
+
+  if (showEmptyPrompt) {
+    return <EmptyPrompt />;
   }
 
   return (
@@ -385,14 +385,20 @@ const EntityAnalyticsEntitiesTable = ({
   entityDataView: ReturnType<typeof useEntityStoreDataView>['dataView'];
   entityDataViewLoading: boolean;
 }) => {
+  // Stable provider value so consumers below (e.g. the memoized
+  // `EntitiesTableSection` subtree) are not forced to re-render by a new
+  // context reference when this component re-renders on an unrelated URL change.
+  const dataViewContextValue = useMemo(
+    () => ({
+      dataView: entityDataView,
+      dataViewIsLoading: entityDataViewLoading,
+    }),
+    [entityDataView, entityDataViewLoading]
+  );
+
   if (entityDataViewLoading) {
     return <EuiLoadingSpinner size="l" data-test-subj="entityAnalyticsEntitiesTableLoader" />;
   }
-
-  const dataViewContextValue = {
-    dataView: entityDataView,
-    dataViewIsLoading: entityDataViewLoading,
-  };
 
   return (
     <DataViewContext.Provider value={dataViewContextValue}>

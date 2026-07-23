@@ -30,11 +30,9 @@ export const getLifecycleStatusLabel = (status: LifecycleDisplayStatus): string 
     case 'discovery':
     case 'clearance':
       return DISCOVERY_KIND_LABELS[status];
-    case 'promoted':
-    case 'acknowledged':
-    case 'demoted':
-    case 'resolved':
+    case 'open':
     case 'closed':
+    case 'dismissed':
       return SIGNIFICANT_EVENT_STATUS_LABELS[status];
     default:
       return status;
@@ -46,11 +44,9 @@ export const getLifecycleStatusColor = (status: LifecycleDisplayStatus): string 
     case 'discovery':
     case 'clearance':
       return DISCOVERY_KIND_COLORS[status];
-    case 'promoted':
-    case 'acknowledged':
-    case 'demoted':
-    case 'resolved':
+    case 'open':
     case 'closed':
+    case 'dismissed':
       return SIGNIFICANT_EVENT_STATUS_COLORS[status];
     default:
       return 'hollow';

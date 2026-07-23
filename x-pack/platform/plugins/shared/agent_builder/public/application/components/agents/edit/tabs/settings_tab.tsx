@@ -786,7 +786,7 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
                 <EuiText size="s" color="subdued">
                   {i18n.translate('xpack.agentBuilder.agents.form.settings.workflowDescription', {
                     defaultMessage:
-                      'Runs immediately when the agent is invoked, before the first LLM call.',
+                      'Runs once after each user message, before the agent makes any LLM calls in response.',
                   })}
                 </EuiText>
               </EuiFlexGroup>

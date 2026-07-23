@@ -1,5 +1,9 @@
 {
-  "sha1": "1ef4bdf2321f2b6d2014f655b793cce6587cec7f",
+  "sha1": "3ba55add8f0035d74164662a23dd94b141433d5a",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
   "tests": [
     {
       "id": "7f09fed36a7e0d8-c1ae45431291e6d",
@@ -282,6 +286,134 @@
       }
     },
     {
+      "id": "674eeab210ab703-fdfcbcf90eb14d8",
+      "title": "Embeddable alerts table - alert consumer visibility observability alerts-only user (observabilityAlerts) sees alerts with consumer alerts",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/alerts/embeddable_alerts_consumer_visibility.spec.ts",
+        "line": 75,
+        "column": 13
+      }
+    },
+    {
+      "id": "674eeab210ab703-4a36a224d87a85e",
+      "title": "Embeddable alerts table - alert consumer visibility observability alerts-only user (observabilityAlerts) sees alerts with consumer logs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/alerts/embeddable_alerts_consumer_visibility.spec.ts",
+        "line": 75,
+        "column": 13
+      }
+    },
+    {
+      "id": "674eeab210ab703-e587144b27e6944",
+      "title": "Embeddable alerts table - alert consumer visibility observability alerts-only user (observabilityAlerts) does not see alerts with consumer stackAlerts",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/alerts/embeddable_alerts_consumer_visibility.spec.ts",
+        "line": 107,
+        "column": 13
+      }
+    },
+    {
+      "id": "674eeab210ab703-71001541031dce0",
+      "title": "Embeddable alerts table - alert consumer visibility logs user (logs) sees alerts with consumer alerts",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/alerts/embeddable_alerts_consumer_visibility.spec.ts",
+        "line": 75,
+        "column": 13
+      }
+    },
+    {
+      "id": "674eeab210ab703-a24b9c35a908eb1",
+      "title": "Embeddable alerts table - alert consumer visibility logs user (logs) sees alerts with consumer logs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/alerts/embeddable_alerts_consumer_visibility.spec.ts",
+        "line": 75,
+        "column": 13
+      }
+    },
+    {
+      "id": "674eeab210ab703-8acaad9868c7bd2",
+      "title": "Embeddable alerts table - alert consumer visibility logs user (logs) does not see alerts with consumer stackAlerts",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/alerts/embeddable_alerts_consumer_visibility.spec.ts",
+        "line": 107,
+        "column": 13
+      }
+    },
+    {
+      "id": "8b0b252a84868ea-29eb93102c67972",
+      "title": "Embeddable alerts table - observability alerts panel authorization observability alerts-only user (observabilityAlerts) sees alerts in a pre-configured alerts panel",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/alerts/embeddable_alerts_table.spec.ts",
+        "line": 60,
+        "column": 11
+      }
+    },
+    {
+      "id": "8b0b252a84868ea-ec121466278f989",
+      "title": "Embeddable alerts table - observability alerts panel authorization logs user (logs) sees alerts in a pre-configured alerts panel",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/alerts/embeddable_alerts_table.spec.ts",
+        "line": 60,
+        "column": 11
+      }
+    },
+    {
       "id": "0bc216e8d6c9fd0-9b002a2ca5cc629",
       "title": "Observability alerts - bulk mute / unmute bulk mutes and unmutes the rule alerts",
       "expectedStatus": "passed",
@@ -468,8 +600,8 @@
       }
     },
     {
-      "id": "d3ffd39f648f151-77c285778f177cc",
-      "title": "Observability cases - no privileges returns the feature-privileges-required page",
+      "id": "d3ffd39f648f151-47502b229835fc7",
+      "title": "Observability cases - no privileges returns Application not found when the Observability app is inaccessible",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -563,7 +695,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/nightshift.spec.ts",
-        "line": 38,
+        "line": 54,
         "column": 9
       }
     }
