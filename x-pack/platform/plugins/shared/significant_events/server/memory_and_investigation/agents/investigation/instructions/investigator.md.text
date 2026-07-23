@@ -119,7 +119,9 @@ Keep ES|QL responses small — large result sets overflow context and make analy
 - Good: `FROM index | STATS errors = COUNT(*) BY service.name | SORT errors DESC | LIMIT 20`
 - Good: `FROM index | WHERE log.level == "error" | SORT @timestamp DESC | LIMIT 10`
 - Avoid: `FROM index | LIMIT 500` or any query without LIMIT — large row counts overflow context.
-- Use get_index_info to discover available fields before querying an unfamiliar index.
+- Do not use get_index_info for Streams / CCS views (e.g. `$.stream`) — it often returns no fields.
+  Discover shape from KI evidence / `dataset_analysis` field lists first, or run
+  `FROM $.stream | LIMIT 0` (columns only). If still missing fields, try a raw `LIMIT 1` without KEEP.
 
 </esql_rules>
 

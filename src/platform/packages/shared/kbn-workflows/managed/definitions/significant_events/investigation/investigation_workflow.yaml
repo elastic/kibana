@@ -82,7 +82,7 @@ steps:
         {{ inputs.message }}
 
         {% if inputs.stream_names and inputs.stream_names.size > 0 %}
-        Data streams (use get_index_info to discover available fields in each):
+        Data streams (discover fields via KI evidence / dataset_analysis, or `FROM $.stream | LIMIT 0` for columns; raw `LIMIT 1` without KEEP if needed — do not use get_index_info on Streams/CCS views):
         {% for stream in inputs.stream_names %}- {{ stream }}
         {% endfor %}
         {% endif %}
