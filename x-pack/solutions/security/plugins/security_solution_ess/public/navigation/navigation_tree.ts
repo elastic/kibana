@@ -62,11 +62,7 @@ export const createNavigationTree = (
         link: 'discover',
         icon: 'productDiscover',
       },
-      // Real Security dashboards (not a PND stub) — Throughline position + icon
-      {
-        ...defaultNavigationTree.dashboards(),
-        icon: 'dashboardApp',
-      },
+      defaultNavigationTree.dashboards(),
       {
         link: 'pnd:alerts' as AppDeepLinkId,
         icon: 'bell',
