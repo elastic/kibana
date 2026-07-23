@@ -82,14 +82,9 @@ steps:
         {{ inputs.message }}
 
         {% if inputs.stream_names and inputs.stream_names.size > 0 %}
-        Related streams (logical names — not always valid ES|QL FROM targets):
+        Related streams:
         {% for stream in inputs.stream_names %}- {{ stream }}
         {% endfor %}
-
-        Before querying: load `streams-management` and call `inspect_streams` on these names (aspects: ["overview"]).
-        - Ingest streams (wired/classic): use the stream name as `FROM`.
-        - Query streams: use `query.view` from the inspect result (usually `$.<stream_name>`) as `FROM` — never the bare logical name.
-        Discover fields via KI evidence / dataset_analysis, or `FROM <target> | LIMIT 0` (columns only); raw `LIMIT 1` without KEEP if needed. Do not use get_index_info on Streams/CCS views.
         {% endif %}
         {% if inputs.context %}
         Additional context: {{ inputs.context | json }}
