@@ -346,6 +346,44 @@ describe('openModal', () => {
       expect(attributes).toEqual(mockLensAttributes);
     });
 
+    it("preserves the panel's own query when the parent publishes the default empty query", async () => {
+      const services = getMockServices();
+
+      openModal(
+        getMockLensApi(undefined, {
+          parentApi: getMockParentApiWithSearchContext({
+            query: { query: '', language: 'kuery' },
+          }),
+        }),
+        'myAppId',
+        {} as unknown as CasesActionContextProps,
+        services
+      );
+
+      const attributes = await getAttachedAttributes();
+
+      expect(attributes.state.query).toEqual(mockLensAttributes.state.query);
+      expect(attributes).toEqual(mockLensAttributes);
+    });
+
+    it('ignores an ES|QL parent query instead of writing it into state.query', async () => {
+      const services = getMockServices();
+
+      openModal(
+        getMockLensApi(undefined, {
+          parentApi: getMockParentApiWithSearchContext({ query: { esql: 'FROM logs-*' } }),
+        }),
+        'myAppId',
+        {} as unknown as CasesActionContextProps,
+        services
+      );
+
+      const attributes = await getAttachedAttributes();
+
+      expect(attributes.state.query).toEqual(mockLensAttributes.state.query);
+      expect(attributes).toEqual(mockLensAttributes);
+    });
+
     it('leaves the attributes untouched when the parent does not publish a unified search context', async () => {
       const services = getMockServices();
 

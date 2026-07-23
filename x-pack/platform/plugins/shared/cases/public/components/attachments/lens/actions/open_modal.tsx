@@ -9,6 +9,8 @@ import React, { useEffect, useMemo } from 'react';
 import { unmountComponentAtNode } from 'react-dom';
 import type { LensApi, LensSavedObjectAttributes } from '@kbn/lens-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
+import { isOfAggregateQueryType, isOfQueryType } from '@kbn/es-query';
+import type { Query, AggregateQuery } from '@kbn/es-query';
 import {
   apiPublishesTimeRange,
   apiPublishesUnifiedSearch,
@@ -29,12 +31,28 @@ interface Props {
   services: Services;
 }
 
+// A parent unified-search context conventionally publishes the query-service
+// default (`{ query: '', language: 'kuery' }`) even when the page search bar
+// is empty, which is truthy but carries no information. Lens's own merge
+// logic (`getMergedSearchContext`) also excludes ES|QL/aggregate queries,
+// since those can't be combined with a form-based Lens's own query. Only a
+// non-empty, non-aggregate parent query is worth applying here.
+const getEffectiveParentQuery = (query: Query | AggregateQuery | undefined): Query | undefined => {
+  if (!query || isOfAggregateQueryType(query) || !isOfQueryType(query) || !query.query) {
+    return undefined;
+  }
+  return query;
+};
+
 // The Lens attributes only carry the filters/query set inside the Lens
 // editor's own filter bar. A filter added by clicking a chart element (or a
 // query typed into the surrounding page's search bar) lives on the parent's
-// unified search context instead, so we merge it in here -- mirroring how
-// Lens itself merges the dashboard's search context with its own at render
-// time -- otherwise it would be silently dropped from the case attachment.
+// unified search context instead, so we merge it in here, similar to how
+// Lens merges the dashboard's search context with its own at render time.
+// Unlike Lens -- which keeps the panel's own query and prepends the parent's
+// into an array -- the case attachment only has a single `state.query`, so
+// we only apply the parent's query when it would add something; otherwise
+// the panel's own saved query is preserved.
 const getAttributesWithParentSearchContext = (
   lensApi: LensApi,
   services: Services
@@ -46,7 +64,7 @@ const getAttributesWithParentSearchContext = (
 
   const parentFilters =
     lensApi.parentApi.filters$.getValue()?.filter(({ meta }) => !meta?.disabled) ?? [];
-  const parentQuery = lensApi.parentApi.query$.getValue();
+  const parentQuery = getEffectiveParentQuery(lensApi.parentApi.query$.getValue());
 
   if (!parentFilters.length && !parentQuery) {
     return attributes;
