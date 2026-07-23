@@ -18,7 +18,6 @@ import {
   EuiPanel,
   EuiProgress,
   EuiSpacer,
-  EuiStat,
   EuiText,
   EuiTitle,
   EuiToolTip,
@@ -221,11 +220,30 @@ export const IntelligenceHubDashboardView: React.FC<{
   );
 };
 
+/** Shared card heading so all five ribbon panels match size/color. */
+const StatCardHeading: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { euiTheme } = useEuiTheme();
+  return (
+    <EuiText size="s">
+      <p css={{ marginBottom: 0, color: euiTheme.colors.textParagraph }}>{children}</p>
+    </EuiText>
+  );
+};
+
+const STAT_CARD_MIN_WIDTH_PX = 168;
+
+const statsRibbonCardItemCss = css({
+  flex: `1 1 ${STAT_CARD_MIN_WIDTH_PX}px`,
+  minWidth: STAT_CARD_MIN_WIDTH_PX,
+  maxWidth: '100%',
+});
+
 const PriorPeriodStat: React.FC<{ current: number; prior: number }> = ({ current, prior }) => {
   const { euiTheme } = useEuiTheme();
   const percent = percentChangeVsPrior(current, prior);
   const direction = percent > 0 ? 'up' : percent < 0 ? 'down' : 'flat';
-  const iconType = direction === 'up' ? 'arrowUp' : direction === 'down' ? 'arrowDown' : 'arrowRight';
+  const iconType =
+    direction === 'up' ? 'arrowUp' : direction === 'down' ? 'arrowDown' : 'arrowRight';
   const color =
     direction === 'up'
       ? euiTheme.colors.success
@@ -234,12 +252,18 @@ const PriorPeriodStat: React.FC<{ current: number; prior: number }> = ({ current
       : euiTheme.colors.textSubdued;
 
   return (
-    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+    <EuiFlexGroup
+      gutterSize="xs"
+      alignItems="center"
+      responsive={false}
+      wrap={false}
+      css={{ flexWrap: 'nowrap' }}
+    >
       <EuiFlexItem grow={false}>
         <EuiIcon type={iconType} color={color} size="s" />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiText size="xs" css={{ color }}>
+        <EuiText size="xs" css={{ color, whiteSpace: 'nowrap' }}>
           {i18n.translate('xpack.securitySolution.threatIntelligence.app.statVsPriorPeriod', {
             defaultMessage: '{percent}% vs prior period',
             values: { percent: Math.abs(percent) },
@@ -247,6 +271,33 @@ const PriorPeriodStat: React.FC<{ current: number; prior: number }> = ({ current
         </EuiText>
       </EuiFlexItem>
     </EuiFlexGroup>
+  );
+};
+
+const NumericStatCard: React.FC<{
+  heading: string;
+  value: string;
+  current: number;
+  prior: number;
+  /** When set, value is this color only if `current > 0`; otherwise black. */
+  emphasizeWhenPositive?: string;
+}> = ({ heading, value, current, prior, emphasizeWhenPositive }) => {
+  const { euiTheme } = useEuiTheme();
+  const valueColor =
+    emphasizeWhenPositive && current > 0
+      ? emphasizeWhenPositive
+      : euiTheme.colors.textParagraph;
+
+  return (
+    <EuiPanel hasBorder paddingSize="m" css={{ height: '100%' }}>
+      <StatCardHeading>{heading}</StatCardHeading>
+      <EuiSpacer size="xs" />
+      <EuiTitle size="m" css={{ color: valueColor, '& > *': { color: 'inherit' } }}>
+        <p css={{ marginBottom: 0 }}>{value}</p>
+      </EuiTitle>
+      <EuiSpacer size="xs" />
+      <PriorPeriodStat current={current} prior={prior} />
+    </EuiPanel>
   );
 };
 
@@ -265,62 +316,42 @@ export const StatsRibbon: React.FC<{
   );
 
   return (
-    <EuiFlexGroup gutterSize="m" wrap={false} responsive={false}>
-      <EuiFlexItem grow={true} style={{ minWidth: 0 }}>
-        <EuiPanel hasBorder paddingSize="m">
-          <EuiStat
-            title={stats.total_reports.toLocaleString()}
-            description={i18n.translate('xpack.securitySolution.threatIntelligence.app.statTotal', {
-              defaultMessage: 'Articles',
-            })}
-            titleColor="primary"
-          />
-          <EuiSpacer size="xs" />
-          <PriorPeriodStat current={stats.total_reports} prior={stats.total_reports_prior} />
-        </EuiPanel>
+    <EuiFlexGroup gutterSize="m" wrap responsive>
+      <EuiFlexItem grow css={statsRibbonCardItemCss}>
+        <NumericStatCard
+          heading={i18n.translate('xpack.securitySolution.threatIntelligence.app.statTotal', {
+            defaultMessage: 'Articles',
+          })}
+          value={stats.total_reports.toLocaleString()}
+          current={stats.total_reports}
+          prior={stats.total_reports_prior}
+        />
       </EuiFlexItem>
-      <EuiFlexItem grow={true} style={{ minWidth: 0 }}>
-        <EuiPanel hasBorder paddingSize="m">
-          <EuiStat
-            title={stats.critical_reports.toLocaleString()}
-            description={i18n.translate(
-              'xpack.securitySolution.threatIntelligence.app.statCritical',
-              {
-                defaultMessage: 'Critical',
-              }
-            )}
-            titleColor="danger"
-          />
-          <EuiSpacer size="xs" />
-          <PriorPeriodStat
-            current={stats.critical_reports}
-            prior={stats.critical_reports_prior}
-          />
-        </EuiPanel>
+      <EuiFlexItem grow css={statsRibbonCardItemCss}>
+        <NumericStatCard
+          heading={i18n.translate('xpack.securitySolution.threatIntelligence.app.statCritical', {
+            defaultMessage: 'Critical',
+          })}
+          value={stats.critical_reports.toLocaleString()}
+          current={stats.critical_reports}
+          prior={stats.critical_reports_prior}
+          emphasizeWhenPositive={SEVERITY_HEX.critical}
+        />
       </EuiFlexItem>
-      <EuiFlexItem grow={true} style={{ minWidth: 0 }}>
-        <EuiPanel hasBorder paddingSize="m">
-          <EuiStat
-            title={stats.distinct_source_count.toLocaleString()}
-            description={i18n.translate(
-              'xpack.securitySolution.threatIntelligence.app.statSources',
-              {
-                defaultMessage: 'Sources',
-              }
-            )}
-            titleColor="accent"
-          />
-          <EuiSpacer size="xs" />
-          <PriorPeriodStat
-            current={stats.distinct_source_count}
-            prior={stats.distinct_source_count_prior}
-          />
-        </EuiPanel>
+      <EuiFlexItem grow css={statsRibbonCardItemCss}>
+        <NumericStatCard
+          heading={i18n.translate('xpack.securitySolution.threatIntelligence.app.statSources', {
+            defaultMessage: 'Sources',
+          })}
+          value={stats.distinct_source_count.toLocaleString()}
+          current={stats.distinct_source_count}
+          prior={stats.distinct_source_count_prior}
+        />
       </EuiFlexItem>
-      <EuiFlexItem grow={true} style={{ minWidth: 0 }}>
+      <EuiFlexItem grow css={statsRibbonCardItemCss}>
         <SeverityDistributionPanel totals={severityTotals} />
       </EuiFlexItem>
-      <EuiFlexItem grow={true} style={{ minWidth: 0 }}>
+      <EuiFlexItem grow css={statsRibbonCardItemCss}>
         <TopThreatPanel topCategory={topCategory} />
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -341,12 +372,12 @@ const SeverityDistributionPanel: React.FC<{ totals: Record<SeverityLevel, number
     }));
 
   return (
-    <EuiPanel hasBorder paddingSize="m">
-      <EuiText size="xs" color="subdued">
+    <EuiPanel hasBorder paddingSize="m" css={{ height: '100%' }}>
+      <StatCardHeading>
         {i18n.translate('xpack.securitySolution.threatIntelligence.app.severityDistributionLabel', {
           defaultMessage: 'Severity distribution',
         })}
-      </EuiText>
+      </StatCardHeading>
       <EuiSpacer size="xs" />
       <div
         style={{
@@ -418,19 +449,26 @@ const SeverityDistributionPanel: React.FC<{ totals: Record<SeverityLevel, number
 const TopThreatPanel: React.FC<{ topCategory?: ThreatCategory | '<unknown>' }> = ({
   topCategory,
 }) => (
-  <EuiPanel hasBorder paddingSize="m">
-    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+  <EuiPanel hasBorder paddingSize="m" css={{ height: '100%' }}>
+    <StatCardHeading>
+      {i18n.translate('xpack.securitySolution.threatIntelligence.app.topThreatLabel', {
+        defaultMessage: 'Top threat',
+      })}
+    </StatCardHeading>
+    <EuiSpacer size="xs" />
+    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap={false}>
       <EuiFlexItem grow={false}>
         <EuiIcon type="securityApp" size="l" color="danger" aria-hidden={true} />
       </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiText size="xs" color="subdued">
-          {i18n.translate('xpack.securitySolution.threatIntelligence.app.topThreatLabel', {
-            defaultMessage: 'Top threat',
-          })}
-        </EuiText>
+      <EuiFlexItem css={{ minWidth: 0 }}>
         <EuiTitle size="xs">
-          <h3>
+          <h3
+            css={{
+              marginBottom: 0,
+              overflowWrap: 'anywhere',
+              wordBreak: 'break-word',
+            }}
+          >
             {topCategory && topCategory !== '<unknown>'
               ? topCategory
               : i18n.translate('xpack.securitySolution.threatIntelligence.app.topThreatUnknown', {
