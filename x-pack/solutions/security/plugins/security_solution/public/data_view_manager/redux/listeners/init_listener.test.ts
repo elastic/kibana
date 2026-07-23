@@ -20,10 +20,21 @@ import { selectDataViewAsync } from '../actions';
 import type { CoreStart } from '@kbn/core/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { createDefaultDataView } from '../../utils/create_default_data_view';
+import { createExploreDataView } from '../../utils/create_explore_data_view';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 
 jest.mock('../../utils/create_default_data_view', () => ({
   createDefaultDataView: jest.fn(),
+}));
+
+const mockExploreDataView = {
+  id: 'explore-dv-id',
+  isPersisted: () => false,
+  toSpec: () => ({ id: 'explore-dv-id', title: 'apm-*,auditbeat-*', managed: true }),
+};
+
+jest.mock('../../utils/create_explore_data_view', () => ({
+  createExploreDataView: jest.fn(),
 }));
 
 const mockDataViewsService = {
@@ -66,6 +77,8 @@ describe('createInitListener', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+
+    jest.mocked(createExploreDataView).mockResolvedValue(mockExploreDataView as any);
 
     jest.mocked(createDefaultDataView).mockResolvedValue({
       defaultDataView: { id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID, title: '' },
@@ -161,11 +174,28 @@ describe('createInitListener', () => {
       })
     );
 
-    // explore scope is intentionally deferred — useInitExploreDataView handles it lazily
-    expect(jest.mocked(mockListenerApi.dispatch)).not.toBeCalledWith(
+    // explore scope is created eagerly so it appears in data view pickers across the app
+    expect(jest.mocked(mockListenerApi.dispatch)).toBeCalledWith(
       selectDataViewAsync(expect.objectContaining({ scope: PageScope.explore }))
     );
 
+    expect(mockToastsDanger).not.toHaveBeenCalled();
+  });
+
+  it('silently swallows explore data view creation failure without showing an error modal', async () => {
+    jest.mocked(createExploreDataView).mockRejectedValue(new Error('_field_caps response too large'));
+
+    await listener.effect(sharedDataViewManagerSlice.actions.init([]), mockListenerApi);
+
+    // Other scopes must still be initialized correctly
+    expect(jest.mocked(mockListenerApi.dispatch)).toBeCalledWith(
+      selectDataViewAsync({ id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID, scope: PageScope.default })
+    );
+
+    // Explore scope failure must not surface a modal — useInitExploreDataView retries on explore pages
+    expect(jest.mocked(mockListenerApi.dispatch)).not.toBeCalledWith(
+      selectDataViewAsync(expect.objectContaining({ scope: PageScope.explore }))
+    );
     expect(mockToastsDanger).not.toHaveBeenCalled();
   });
 

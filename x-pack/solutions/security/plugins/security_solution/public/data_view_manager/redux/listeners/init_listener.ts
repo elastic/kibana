@@ -15,6 +15,7 @@ import { sharedDataViewManagerSlice } from '../slices';
 import { PageScope } from '../../constants';
 import { selectDataViewAsync } from '../actions';
 import { createDefaultDataView } from '../../utils/create_default_data_view';
+import { createExploreDataView } from '../../utils/create_explore_data_view';
 import { getSelectedDataViewStorageKey } from './storage_keys';
 import type { DataViewSpec } from '../types';
 
@@ -33,9 +34,12 @@ import type { DataViewSpec } from '../types';
  * - Handling any additional data view selections provided in the action payload (e.g., from URL storage).
  * - Dispatching an error action (and showing a danger toast) if initialization fails.
  *
- * The `explore` scope is intentionally NOT preloaded here — its data view is created lazily by
- * `useInitExploreDataView` when the user navigates to an explore page (Hosts, Users, Network), to avoid
- * fetching large `_field_caps` responses for broad index patterns on unrelated pages (e.g. Alerts).
+ * The `explore` scope is handled separately from the main scopes loop. The explore data view is
+ * created eagerly so that it appears in data view pickers across the app (e.g. in Timeline), but
+ * its creation is wrapped in its own try/catch so that a failure (e.g. `_field_caps` response too
+ * large to parse on clusters with many indices) does not surface a modal on unrelated pages such as
+ * Alerts. If eager creation fails, `useInitExploreDataView` retries lazily the first time the user
+ * navigates to an explore page (Hosts, Users, Network).
  *
  * The listener ensures that race conditions are avoided by only initializing scopes that are not already set,
  * and that state is not reset for slices that already have selections.
@@ -102,9 +106,7 @@ export const createInitListener = (dependencies: {
           PageScope.analyzer,
           PageScope.timeline,
           PageScope.default,
-          // NOTE: explore scope is intentionally omitted here — the explore data view
-          // is created lazily when the user navigates to an explore page (Hosts, Users, Network)
-          // to avoid fetching large _field_caps responses on unrelated pages (e.g. Alerts).
+          // NOTE: explore scope is omitted from this loop — it is handled separately below.
         ]
           // NOTE: only init default data view for slices that are not initialized yet
           .filter((scope) => !listenerApi.getState().dataViewManager[scope].dataViewId)
@@ -146,6 +148,30 @@ export const createInitListener = (dependencies: {
         action.payload.forEach((defaultSelection) => {
           listenerApi.dispatch(selectDataViewAsync(defaultSelection));
         });
+
+        // Eagerly create the explore data view so it appears in data view pickers across the app
+        // (e.g. Timeline's picker). This is intentionally wrapped in its own try/catch so that a
+        // failure here — e.g. the _field_caps response is too large to parse on clusters with many
+        // indices matching the configured patterns — does not surface an error modal on pages that
+        // have no dependency on the explore data view (Alerts, Dashboard, Rules, Cases).
+        // If creation fails here, useInitExploreDataView retries lazily the first time the user
+        // navigates to an explore page (Hosts, Users, Network), where a failure IS surfaced via
+        // a danger toast because the user actually needs the explore data view there.
+        if (!listenerApi.getState().dataViewManager.explore.dataViewId) {
+          try {
+            const exploreDataView = await createExploreDataView(
+              { dataViews: dependencies.dataViews, spaces: dependencies.spaces },
+              defaultDataView.title.split(','),
+              alertDataView.title
+            );
+            listenerApi.dispatch(sharedDataViewManagerSlice.actions.addDataView(exploreDataView));
+            listenerApi.dispatch(
+              selectDataViewAsync({ id: exploreDataView.id, scope: PageScope.explore })
+            );
+          } catch {
+            // Intentionally swallowed — see comment above.
+          }
+        }
       } catch (error: unknown) {
         dependencies.notifications.toasts.addDanger({
           title: 'Error initializing data views',

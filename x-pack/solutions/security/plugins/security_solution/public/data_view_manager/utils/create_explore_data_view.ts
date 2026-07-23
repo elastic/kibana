@@ -22,11 +22,17 @@ export const createExploreDataView = async (
     .filter((pattern) => pattern !== alertsDataViewPattern)
     .join();
 
-  return dependencies.dataViews.create({
-    id: `${EXPLORE_DATA_VIEW_PREFIX}-${(await dependencies.spaces.getActiveSpace()).id}`,
-    name: SECURITY_SOLUTION_EXPLORE_DATA_VIEW,
-    timeFieldName: DEFAULT_TIME_FIELD,
-    title: exploreDataViewPattern,
-    managed: true,
-  });
+  return dependencies.dataViews.create(
+    {
+      id: `${EXPLORE_DATA_VIEW_PREFIX}-${(await dependencies.spaces.getActiveSpace()).id}`,
+      name: SECURITY_SOLUTION_EXPLORE_DATA_VIEW,
+      timeFieldName: DEFAULT_TIME_FIELD,
+      title: exploreDataViewPattern,
+      managed: true,
+    },
+    false, // skipFetchFields — always fetch fields so the data view is ready to use
+    false  // displayErrors — suppress the platform's built-in toast; callers handle errors
+    // appropriately: init_listener swallows silently (explore is not needed on Alerts/Dashboard),
+    // while useInitExploreDataView surfaces a danger toast (the user IS on an explore page).
+  );
 };
