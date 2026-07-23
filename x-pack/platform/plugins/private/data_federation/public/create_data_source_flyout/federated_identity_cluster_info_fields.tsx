@@ -7,10 +7,13 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonIcon, EuiCopy, EuiFieldText, EuiFormRow } from '@elastic/eui';
+import { EuiButtonIcon, EuiCopy, EuiFieldText, EuiFormRow, EuiToolTip } from '@elastic/eui';
 import type { FederatedIdentityClusterInfo } from './federated_identity_cluster_info';
 
 function ReadOnlyFormRow({ label, value }: { label: string; value: string }) {
+  const copyLabel = i18n.translate('xpack.dataFederation.createFlyout.federated.copyAriaLabel', {
+    defaultMessage: 'Copy to clipboard',
+  });
   return (
     <EuiFormRow label={label} fullWidth>
       <div style={{ position: 'relative' }}>
@@ -18,15 +21,14 @@ function ReadOnlyFormRow({ label, value }: { label: string; value: string }) {
         <div style={{ position: 'absolute', right: 4, top: '50%', transform: 'translateY(-50%)' }}>
           <EuiCopy textToCopy={value}>
             {(copy) => (
-              <EuiButtonIcon
-                iconType="copyClipboard"
-                display="empty"
-                onClick={copy}
-                aria-label={i18n.translate(
-                  'xpack.dataFederation.createFlyout.federated.copyAriaLabel',
-                  { defaultMessage: 'Copy to clipboard' }
-                )}
-              />
+              <EuiToolTip content={copyLabel} disableScreenReaderOutput>
+                <EuiButtonIcon
+                  iconType="copyClipboard"
+                  display="empty"
+                  onClick={copy}
+                  aria-label={copyLabel}
+                />
+              </EuiToolTip>
             )}
           </EuiCopy>
         </div>

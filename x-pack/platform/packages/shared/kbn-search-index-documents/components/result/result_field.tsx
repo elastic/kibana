@@ -15,6 +15,7 @@ import {
   EuiTableRow,
   EuiTableRowCell,
   EuiText,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 
@@ -77,6 +78,10 @@ export const ResultField: React.FC<ResultFieldProps> = ({
     defaultMessage: 'This field is of the type {fieldType}',
     values: { fieldType },
   });
+  const fieldTypeButtonLabel = i18n.translate(
+    'xpack.searchIndexDocuments.result.fieldTypeButtonAriaLabel',
+    { defaultMessage: "Show this field's type" }
+  );
 
   return (
     <EuiTableRow css={Styles.resultField(euiTheme)}>
@@ -87,16 +92,13 @@ export const ResultField: React.FC<ResultFieldProps> = ({
               aria-label={fieldTypeLabel}
               closePopover={() => setIsPopoverOpen(false)}
               button={
-                <EuiButtonIcon
-                  aria-label={i18n.translate(
-                    'xpack.searchIndexDocuments.result.fieldTypeButtonAriaLabel',
-                    {
-                      defaultMessage: "Show this field's type",
-                    }
-                  )}
-                  onClick={() => setIsPopoverOpen(!isPopoverOpen)}
-                  iconType={iconType || (fieldType ? iconMap[fieldType] : defaultToken)}
-                />
+                <EuiToolTip content={fieldTypeButtonLabel} disableScreenReaderOutput>
+                  <EuiButtonIcon
+                    aria-label={fieldTypeButtonLabel}
+                    onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+                    iconType={iconType || (fieldType ? iconMap[fieldType] : defaultToken)}
+                  />
+                </EuiToolTip>
               }
               isOpen={isPopoverOpen}
             >
