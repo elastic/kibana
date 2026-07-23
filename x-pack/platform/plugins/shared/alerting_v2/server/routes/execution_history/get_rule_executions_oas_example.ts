@@ -7,8 +7,8 @@
 
 import type { GetRuleExecutionsResponse } from '@kbn/alerting-v2-schemas';
 import { getRuleExecutionsPagePerPageExceedsMaxMessage } from '@kbn/alerting-v2-schemas';
-import { invalidResponseExample, type AlertingOasOperationObject } from '../oas_utils';
-import { buildExecutionHistoryOas } from './oas_utils';
+import { buildOasOperation, invalidResponseExample } from '../oas_utils';
+import type { AlertingOasOperationObject } from '../oas_types';
 
 export const GET_RULE_EXECUTIONS_RESPONSE: GetRuleExecutionsResponse = {
   items: [
@@ -36,7 +36,7 @@ const INVALID_RULE_EXECUTIONS_QUERY_RESPONSE = invalidResponseExample({
 });
 
 export const getRuleExecutionsOasExamples = (): AlertingOasOperationObject =>
-  buildExecutionHistoryOas({
+  buildOasOperation({
     responses: {
       200: {
         name: 'getRuleExecutionsResponse',
