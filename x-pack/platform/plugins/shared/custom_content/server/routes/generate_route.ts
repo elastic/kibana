@@ -69,7 +69,13 @@ export function registerGenerateRoute(
             schema.object({
               from: schema.string({ maxLength: 100 }),
               to: schema.string({ maxLength: 100 }),
+          timeRange: schema.maybe(
+            schema.object({
+              from: schema.string({ maxLength: 100 }),
+              to: schema.string({ maxLength: 100 }),
+              mode: schema.maybe(schema.oneOf([schema.literal('absolute'), schema.literal('relative')])),
             })
+          ),
           ),
         }),
       },
