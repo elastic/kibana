@@ -17,7 +17,8 @@ export const RULE_CHANGES_HISTORY_DATASET = 'rules';
 export const RULE_CHANGES_HISTORY_OBJECT_TYPE = RULE_SAVED_OBJECT_TYPE;
 
 /**
- * Fallback `rule.version` stamped on `.rule-events` when a rule has no
- * `revision` yet (e.g. rules created before versioning).
+ * Fallback `rule.version` stamped on `.rule-events` (and surfaced as
+ * `metadata.version`) when a rule has no persisted `version` yet (e.g. rules
+ * created before versioning).
  */
-export const RULE_REVISION_FALLBACK = 1;
+export const RULE_VERSION_FALLBACK = 1;

@@ -121,12 +121,12 @@ export class RulesClient {
   }
 
   /**
-   * The revision counter incremented on every successful mutation. Persisted on
-   * the rule SO (`revision`) and used as `object.sequence` in the change history
+   * The version counter incremented on every successful mutation. Persisted on
+   * the rule SO (`version`) and used as `object.sequence` in the change history
    * index / `rule.version` on rule events. Always advances, independently of
    * whether change-history logging is enabled.
    */
-  private nextRevision(current?: number): number {
+  private nextVersion(current?: number): number {
     return (current ?? 0) + 1;
   }
 
@@ -300,7 +300,7 @@ export class RulesClient {
     const userProfileUid = await this.userService.getCurrentUserProfileUid();
 
     const nowIso = new Date().toISOString();
-    const revision = this.nextRevision();
+    const ruleVersion = this.nextVersion();
 
     const ruleAttributes = transformCreateRuleBodyToRuleSoAttributes(parsed, {
       enabled: true,
@@ -308,7 +308,7 @@ export class RulesClient {
       createdAt: nowIso,
       updatedBy: userProfileUid,
       updatedAt: nowIso,
-      revision,
+      version: ruleVersion,
     });
 
     // A freshly created rule is always enabled, so it always counts towards the limit.
@@ -373,11 +373,11 @@ export class RulesClient {
       });
     }
 
-    const revision = this.nextRevision(existingAttrs.revision);
+    const ruleVersion = this.nextVersion(existingAttrs.metadata.version);
     const nextAttrs = buildUpdateRuleAttributes(existingAttrs, parsed, {
       updatedBy: userProfileUid,
       updatedAt: nowIso,
-      revision,
+      version: ruleVersion,
     });
 
     await this.validateSchedule({
@@ -401,7 +401,7 @@ export class RulesClient {
     const rule = transformRuleSoAttributesToRuleApiResponse(id, nextAttrs, newVersion);
 
     // Always emit `ruleUpdated` after a successful write — including empty
-    // PATCHes — so `revision` / change-history `object.sequence` stay in
+    // PATCHes — so `version` / change-history `object.sequence` stay in
     // lockstep. Lifecycle enable/disable events are owned by the dedicated
     // enableRule/disableRule endpoints, not this path.
     this.ruleEventPublisher.emitRuleUpdated(this.request, [
@@ -464,7 +464,10 @@ export class RulesClient {
     // emitted rule so the deletion orders after the last change.
     const rule = transformRuleSoAttributesToRuleApiResponse(id, {
       ...existingAttrs,
-      revision: this.nextRevision(existingAttrs.revision),
+      metadata: {
+        ...existingAttrs.metadata,
+        version: this.nextVersion(existingAttrs.metadata.version),
+      },
     });
     this.ruleEventPublisher.emitRuleDeleted(this.request, [
       { ruleId: id, spaceId: this.spaceId, rule },
@@ -487,13 +490,13 @@ export class RulesClient {
     const userProfileUid = await this.userService.getCurrentUserProfileUid();
     const nowIso = new Date().toISOString();
 
-    const revision = this.nextRevision(existingAttrs.revision);
+    const ruleVersion = this.nextVersion(existingAttrs.metadata.version);
     const nextAttrs: RuleSavedObjectAttributes = {
       ...existingAttrs,
       enabled: true,
       updatedBy: userProfileUid,
       updatedAt: nowIso,
-      revision,
+      metadata: { ...existingAttrs.metadata, version: ruleVersion },
     };
 
     // A disabled rule becoming enabled adds new scheduled load, so enforce the limit.
@@ -534,13 +537,13 @@ export class RulesClient {
     const userProfileUid = await this.userService.getCurrentUserProfileUid();
     const nowIso = new Date().toISOString();
 
-    const revision = this.nextRevision(existingAttrs.revision);
+    const ruleVersion = this.nextVersion(existingAttrs.metadata.version);
     const nextAttrs: RuleSavedObjectAttributes = {
       ...existingAttrs,
       enabled: false,
       updatedBy: userProfileUid,
       updatedAt: nowIso,
-      revision,
+      metadata: { ...existingAttrs.metadata, version: ruleVersion },
     };
 
     const taskId = getRuleExecutorTaskId({ ruleId: id, spaceId });
@@ -715,7 +718,10 @@ export class RulesClient {
               spaceId,
               rule: transformRuleSoAttributesToRuleApiResponse(result.id, {
                 ...attrs,
-                revision: this.nextRevision(attrs.revision),
+                metadata: {
+                  ...attrs.metadata,
+                  version: this.nextVersion(attrs.metadata.version),
+                },
               }),
             }
           : { ruleId: result.id, spaceId }
@@ -768,13 +774,13 @@ export class RulesClient {
         continue;
       }
 
-      const revision = this.nextRevision(doc.attributes.revision);
+      const ruleVersion = this.nextVersion(doc.attributes.metadata.version);
       const nextAttrs: RuleSavedObjectAttributes = {
         ...doc.attributes,
         enabled: true,
         updatedBy: userProfileUid,
         updatedAt: nowIso,
-        revision,
+        metadata: { ...doc.attributes.metadata, version: ruleVersion },
       };
 
       itemsToUpdate.push({ id: doc.id, attrs: nextAttrs, version: doc.version });
@@ -893,13 +899,13 @@ export class RulesClient {
         continue;
       }
 
-      const revision = this.nextRevision(doc.attributes.revision);
+      const ruleVersion = this.nextVersion(doc.attributes.metadata.version);
       const nextAttrs: RuleSavedObjectAttributes = {
         ...doc.attributes,
         enabled: false,
         updatedBy: userProfileUid,
         updatedAt: nowIso,
-        revision,
+        metadata: { ...doc.attributes.metadata, version: ruleVersion },
       };
 
       itemsToUpdate.push({ id: doc.id, attrs: nextAttrs, version: doc.version });
@@ -969,14 +975,14 @@ export class RulesClient {
 
     assertImmutableUnchanged(parsed, existingAttrs);
 
-    const revision = this.nextRevision(existingAttrs.revision);
+    const ruleVersion = this.nextVersion(existingAttrs.metadata.version);
     const nextAttrs = transformCreateRuleBodyToRuleSoAttributes(parsed, {
       enabled: existingAttrs.enabled,
       createdBy: existingAttrs.createdBy,
       createdAt: existingAttrs.createdAt,
       updatedBy: userProfileUid,
       updatedAt: nowIso,
-      revision,
+      version: ruleVersion,
     });
 
     await this.validateSchedule({

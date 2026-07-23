@@ -440,7 +440,7 @@ describe('ComposeDiscoverFlyout', () => {
           id: 'rule-1',
           kind: 'signal',
           enabled: true,
-          metadata: { name: 'Signal rule', owner: 'test', tags: [] },
+          metadata: { name: 'Signal rule', version: 1, owner: 'test', tags: [] },
           time_field: '@timestamp',
           schedule: { every: '1m', lookback: '5m' },
           query: { format: 'standalone', breach: { query: '' } },
@@ -848,7 +848,7 @@ describe('ComposeDiscoverFlyout', () => {
           id: 'rule-1',
           kind: 'alert',
           enabled: true,
-          metadata: { name: 'Edit rule', owner: 'test', tags: [] },
+          metadata: { name: 'Edit rule', version: 1, owner: 'test', tags: [] },
           time_field: '@timestamp',
           schedule: { every: '1m', lookback: '5m' },
           query: {
@@ -917,7 +917,7 @@ describe('ComposeDiscoverFlyout', () => {
           id: 'rule-1',
           kind: 'alert',
           enabled: true,
-          metadata: { name: 'Edit rule', owner: 'test', tags: [] },
+          metadata: { name: 'Edit rule', version: 1, owner: 'test', tags: [] },
           time_field: '@timestamp',
           schedule: { every: '1m', lookback: '5m' },
           query: {
@@ -1001,7 +1001,7 @@ describe('ComposeDiscoverFlyout', () => {
           id: 'rule-1',
           kind: 'alert',
           enabled: true,
-          metadata: { name: 'Edit rule', owner: 'test', tags: [] },
+          metadata: { name: 'Edit rule', version: 1, owner: 'test', tags: [] },
           time_field: '@timestamp',
           schedule: { every: '1m', lookback: '5m' },
           query: {
@@ -1131,7 +1131,7 @@ describe('ComposeDiscoverFlyout', () => {
           id: 'rule-1',
           kind: 'alert',
           enabled: true,
-          metadata: { name: 'Edit rule', owner: 'test', tags: [] },
+          metadata: { name: 'Edit rule', version: 1, owner: 'test', tags: [] },
           time_field: '@timestamp',
           schedule: { every: '1m', lookback: '5m' },
           query: {
@@ -1161,7 +1161,7 @@ describe('ComposeDiscoverFlyout', () => {
           id: 'rule-1',
           kind: 'alert',
           enabled: true,
-          metadata: { name: 'Edit rule', owner: 'test', tags: [] },
+          metadata: { name: 'Edit rule', version: 1, owner: 'test', tags: [] },
           time_field: '@timestamp',
           schedule: { every: '1m', lookback: '5m' },
           query: {

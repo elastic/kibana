@@ -82,7 +82,10 @@ describe('RuleEventPublisher', () => {
     });
 
     it('carries the full domain rule when provided', () => {
-      const rule = { id: 'rule-1', revision: 3 } as EventRule['rule'];
+      const rule = {
+        id: 'rule-1',
+        metadata: { name: 'rule-1', version: 3 },
+      } as EventRule['rule'];
       emit(publisher, request, [{ ruleId: 'rule-1', spaceId: 'space-1', rule }]);
 
       expect(eventBus.publish.mock.calls[0][0].payload).toEqual(

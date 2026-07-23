@@ -828,7 +828,7 @@ describe('RulesClient', () => {
           RULE_SAVED_OBJECT_TYPE,
           'rule-id-1',
           expect.objectContaining({
-            metadata: { name: 'rule-1' },
+            metadata: { name: 'rule-1', version: 1 },
             grouping: undefined,
           }),
           expect.objectContaining({ mergeAttributes: false })
@@ -2546,9 +2546,12 @@ describe('RulesClient', () => {
         expect(ruleEventPublisher.emitRuleDisabled).not.toHaveBeenCalled();
       });
 
-      it('emits ruleUpdated for an empty PATCH so revision and change history stay aligned', async () => {
+      it('emits ruleUpdated for an empty PATCH so version and change history stay aligned', async () => {
         const client = createClient();
-        mockGetExistingRule('rule-id-wf-empty', { ...workflowSoAttrs, revision: 4 });
+        mockGetExistingRule('rule-id-wf-empty', {
+          ...workflowSoAttrs,
+          metadata: { ...workflowSoAttrs.metadata, version: 4 },
+        });
 
         await client.updateRule({ id: 'rule-id-wf-empty', data: {} });
 
@@ -2556,12 +2559,14 @@ describe('RulesClient', () => {
           expect.objectContaining({
             ruleId: 'rule-id-wf-empty',
             spaceId: 'space-1',
-            rule: expect.objectContaining({ revision: 5 }),
+            rule: expect.objectContaining({
+              metadata: expect.objectContaining({ version: 5 }),
+            }),
           }),
         ]);
         const savedAttrs = mockSavedObjectsClient.update.mock
           .calls[0][2] as RuleSavedObjectAttributes;
-        expect(savedAttrs.revision).toBe(5);
+        expect(savedAttrs.metadata.version).toBe(5);
       });
 
       it('emits only ruleUpdated for an enable-only PATCH (no lifecycle event via the update path)', async () => {
@@ -2935,8 +2940,7 @@ describe('RulesClient', () => {
           spaceId: 'space-1',
           rule: expect.objectContaining({
             id: 'rule-ch-create',
-            revision: 1,
-            metadata: expect.objectContaining({ name: 'rule-1' }),
+            metadata: expect.objectContaining({ name: 'rule-1', version: 1 }),
           }),
         }),
       ]);
@@ -2947,7 +2951,7 @@ describe('RulesClient', () => {
       mockSavedObjectsClient.get.mockResolvedValueOnce({
         id: 'rule-ch-update',
         type: RULE_SAVED_OBJECT_TYPE,
-        attributes: { ...baseSoAttrs, revision: 4 },
+        attributes: { ...baseSoAttrs, metadata: { ...baseSoAttrs.metadata, version: 4 } },
         version: 'v1',
         references: [],
       });
@@ -2955,7 +2959,7 @@ describe('RulesClient', () => {
       await client.updateRule({ id: 'rule-ch-update', data: { metadata: { name: 'renamed' } } });
 
       const [event] = firstEmit(ruleEventPublisher.emitRuleUpdated as jest.Mock);
-      expect(event.rule?.revision).toBe(5);
+      expect(event.rule?.metadata.version).toBe(5);
     });
 
     it('carries the deleted rule with a bumped sequence for deletions', async () => {
@@ -2963,7 +2967,7 @@ describe('RulesClient', () => {
       mockSavedObjectsClient.get.mockResolvedValueOnce({
         id: 'rule-ch-delete',
         type: RULE_SAVED_OBJECT_TYPE,
-        attributes: { ...baseSoAttrs, revision: 7 },
+        attributes: { ...baseSoAttrs, metadata: { ...baseSoAttrs.metadata, version: 7 } },
         version: 'v1',
         references: [],
       });
@@ -2974,7 +2978,7 @@ describe('RulesClient', () => {
       expect(event.ruleId).toBe('rule-ch-delete');
       // Nothing is persisted on delete, so the emitted rule carries the bumped
       // counter so the deletion orders after the last change.
-      expect(event.rule?.revision).toBe(8);
+      expect(event.rule?.metadata.version).toBe(8);
       expect(event.rule?.id).toBe('rule-ch-delete');
     });
 
@@ -2985,13 +2989,13 @@ describe('RulesClient', () => {
           {
             id: 'bulk-del-1',
             type: RULE_SAVED_OBJECT_TYPE,
-            attributes: { ...baseSoAttrs, revision: 1 },
+            attributes: { ...baseSoAttrs, metadata: { ...baseSoAttrs.metadata, version: 1 } },
             references: [],
           },
           {
             id: 'bulk-del-2',
             type: RULE_SAVED_OBJECT_TYPE,
-            attributes: { ...baseSoAttrs, revision: 2 },
+            attributes: { ...baseSoAttrs, metadata: { ...baseSoAttrs.metadata, version: 2 } },
             references: [],
           },
         ],
@@ -3007,8 +3011,8 @@ describe('RulesClient', () => {
 
       const events = firstEmit(ruleEventPublisher.emitRuleDeleted as jest.Mock);
       expect(events).toHaveLength(2);
-      expect(events[0].rule?.revision).toBe(2);
-      expect(events[1].rule?.revision).toBe(3);
+      expect(events[0].rule?.metadata.version).toBe(2);
+      expect(events[1].rule?.metadata.version).toBe(3);
     });
 
     it('emits enabled rules carrying the full domain rule for a bulk enable', async () => {
@@ -3056,15 +3060,20 @@ describe('RulesClient', () => {
 
       const events = firstEmit(ruleEventPublisher.emitRuleEnabled as jest.Mock);
       expect(events).toHaveLength(2);
-      expect(events[0].rule).toEqual(expect.objectContaining({ enabled: true, revision: 1 }));
+      expect(events[0].rule).toEqual(
+        expect.objectContaining({
+          enabled: true,
+          metadata: expect.objectContaining({ version: 1 }),
+        })
+      );
     });
 
-    it('persists the incremented revision on the saved object', async () => {
+    it('persists the incremented version on the saved object', async () => {
       const client = createClient();
       mockSavedObjectsClient.get.mockResolvedValueOnce({
         id: 'rule-ch-seq',
         type: RULE_SAVED_OBJECT_TYPE,
-        attributes: { ...baseSoAttrs, revision: 2 },
+        attributes: { ...baseSoAttrs, metadata: { ...baseSoAttrs.metadata, version: 2 } },
         version: 'v1',
         references: [],
       });
@@ -3073,7 +3082,7 @@ describe('RulesClient', () => {
 
       const savedAttrs = mockSavedObjectsClient.update.mock
         .calls[0][2] as RuleSavedObjectAttributes;
-      expect(savedAttrs.revision).toBe(3);
+      expect(savedAttrs.metadata.version).toBe(3);
     });
   });
 

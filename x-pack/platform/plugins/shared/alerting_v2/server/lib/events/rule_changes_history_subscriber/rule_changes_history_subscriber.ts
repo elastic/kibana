@@ -81,8 +81,9 @@ export class RuleChangesHistorySubscriber {
   async #dispatch(event: RuleEvent, context: AlertingPublisherContext): Promise<void> {
     const { ruleId, spaceId, rule, correlationId } = event.payload;
 
-    // Nothing orderable to log without the domain rule and its revision.
-    if (!rule || rule.revision === undefined) {
+    // Nothing orderable to log without the domain rule and its version sequence.
+    const sequence = rule?.metadata?.version;
+    if (!rule || sequence === undefined) {
       return;
     }
 
@@ -98,7 +99,7 @@ export class RuleChangesHistorySubscriber {
       await this.changeHistory.logRuleChanges({
         spaceId,
         author,
-        entries: [{ id: ruleId, snapshot: rule, sequence: rule.revision }],
+        entries: [{ id: ruleId, snapshot: rule, sequence }],
         action,
         eventType,
         correlationId,

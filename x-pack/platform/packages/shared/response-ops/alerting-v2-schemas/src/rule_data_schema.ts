@@ -572,6 +572,15 @@ export type UpdateRuleBody = z.infer<typeof updateRuleBodySchema>;
  */
 export const ruleResponseSchema = createRuleDataBaseSchema.extend({
   id: z.string().describe('Unique rule identifier.'),
+  metadata: metadataSchema.extend({
+    version: z
+      .number()
+      .int()
+      .min(1)
+      .describe(
+        'Strictly increasing version of the rule configuration, incremented on every change. Used on generated rule events as `rule.version`.'
+      ),
+  }),
   enabled: z.boolean().describe('Whether the rule is enabled.'),
   createdBy: z.string().nullable().describe('User who created the rule.'),
   createdAt: z.string().describe('ISO timestamp when the rule was created.'),
@@ -580,12 +589,8 @@ export const ruleResponseSchema = createRuleDataBaseSchema.extend({
   version: z
     .string()
     .optional()
-    .describe('The version of the rule, used for optimistic concurrency control'),
-  revision: z
-    .number()
-    .optional()
     .describe(
-      'Strictly increasing revision of the rule configuration, incremented on every change. Used on generated rule events as `rule.version`.'
+      'The saved object version token of the rule, used for optimistic concurrency control.'
     ),
 });
 

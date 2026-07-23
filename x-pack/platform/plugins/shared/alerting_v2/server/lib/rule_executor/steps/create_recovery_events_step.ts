@@ -26,7 +26,6 @@ import {
   QueryServiceInternalToken,
   QueryServiceScopedSpaceRoutingToken,
 } from '../../services/query_service/tokens';
-import { RULE_REVISION_FALLBACK } from '../../rule_changes_history';
 import type { QueryServiceContract } from '../../services/query_service/query_service';
 import type { ActiveAlertGroupHash } from '../queries';
 import { guardedExpandStep } from '../stream_utils';
@@ -94,7 +93,7 @@ export class CreateRecoveryEventsStep implements RuleExecutionStep {
           })
         : buildRecoveryAlertEvents({
             ruleId: rule.id,
-            ruleVersion: rule.revision ?? RULE_REVISION_FALLBACK,
+            ruleVersion: rule.metadata.version,
             spaceId: input.spaceId,
             activeGroupHashes,
             breachedGroupHashes,
@@ -157,7 +156,7 @@ export class CreateRecoveryEventsStep implements RuleExecutionStep {
 
       return buildQueryRecoveryAlertEvents({
         ruleId: rule.id,
-        ruleVersion: rule.revision ?? RULE_REVISION_FALLBACK,
+        ruleVersion: rule.metadata.version,
         spaceId: input.spaceId,
         ruleAttributes: rule,
         activeGroupHashes,

@@ -40,7 +40,7 @@ const profile = {
   user: { username: author.username },
 } as UserProfileWithSecurity;
 
-const rule = createRuleResponse({ id: 'rule-1', revision: 3 });
+const rule = createRuleResponse({ id: 'rule-1', metadata: { version: 3 } });
 
 const payload: RuleEvent['payload'] = {
   ruleId: 'rule-1',
@@ -153,12 +153,15 @@ describe('RuleChangesHistorySubscriber', () => {
       expect(changeHistory.logRuleChanges).not.toHaveBeenCalled();
     });
 
-    it('skips events whose rule has no revision', async () => {
+    it('skips events whose rule has no version sequence', async () => {
       subscriber.start();
-      const ruleWithoutSequence = createRuleResponse({
-        id: 'rule-1',
-        revision: undefined,
-      });
+      // The API always populates `metadata.version`; drop it to exercise the
+      // subscriber's defensive guard against a malformed runtime event.
+      const { version: _version, ...metadataWithoutVersion } = rule.metadata;
+      const ruleWithoutSequence = {
+        ...rule,
+        metadata: metadataWithoutVersion,
+      } as typeof rule;
 
       await handlerFor(RULE_UPDATED_EVENT_TYPE)(
         eventOf(RULE_UPDATED_EVENT_TYPE, { ...payload, rule: ruleWithoutSequence }),
