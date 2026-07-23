@@ -33,6 +33,7 @@ dependsOn:
   - '@kbn/shared-ux-page-kibana-template'
   - '@kbn/i18n-react'
   - '@kbn/kibana-react-plugin'
+  - '@kbn/core-elasticsearch-server-mocks'
 tags:
   - plugin
   - prod
