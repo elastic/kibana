@@ -531,6 +531,11 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
         knowledgeBaseHome: `${ELASTIC_DOCS}solutions/security/ai/ai-assistant-knowledge-base`,
         knowledgeBaseIndexEntries: `${ELASTIC_DOCS}solutions/security/ai/ai-assistant-knowledge-base#knowledge-base-add-knowledge-index`,
       },
+      attackDiscovery: {
+        home: `${ELASTIC_DOCS}solutions/security/ai/attack-discovery`,
+        runFromAttackDiscoveryPage: `${ELASTIC_DOCS}solutions/security/ai/attack-discovery/run-from-attack-discovery-page`,
+        runFromAttacksPage: `${ELASTIC_DOCS}solutions/security/ai/attack-discovery/run-from-attacks-page`,
+      },
       signalsMigrationApi: isServerless
         ? `${KIBANA_APIS}group/endpoint-security-detections-api`
         : `${KIBANA_SERVERLESS_APIS}group/endpoint-security-detections-api`,

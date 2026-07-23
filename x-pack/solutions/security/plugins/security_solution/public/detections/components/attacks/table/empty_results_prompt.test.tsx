@@ -33,10 +33,22 @@ describe('EmptyResultsPrompt', () => {
   const openSchedulesFlyout = jest.fn();
   const reportEvent = jest.fn();
 
+  const attackDiscoveryDocLink =
+    'https://www.elastic.co/docs/solutions/security/ai/attack-discovery/run-from-attacks-page';
+
   beforeEach(() => {
     jest.clearAllMocks();
     (useKibana as jest.Mock).mockReturnValue({
       services: {
+        docLinks: {
+          links: {
+            securitySolution: {
+              attackDiscovery: {
+                runFromAttacksPage: attackDiscoveryDocLink,
+              },
+            },
+          },
+        },
         telemetry: {
           reportEvent,
         },
@@ -80,7 +92,7 @@ describe('EmptyResultsPrompt', () => {
     expect(getByText(i18n.LEARN_MORE)).toBeInTheDocument();
     expect(getByTestId(LEARN_MORE_LINK_DATA_TEST_ID)).toHaveAttribute(
       'href',
-      'https://www.elastic.co/guide/en/security/current/attack-discovery.html'
+      attackDiscoveryDocLink
     );
   });
 

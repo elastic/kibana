@@ -43,7 +43,7 @@ interface EmptyResultsPromptProps {
 export const EmptyResultsPrompt: React.FC<EmptyResultsPromptProps> = React.memo(
   ({ openSchedulesFlyout }) => {
     const {
-      services: { telemetry },
+      services: { docLinks, telemetry },
     } = useKibana();
 
     const onScheduleLinkClick = useCallback(() => {
@@ -134,7 +134,7 @@ export const EmptyResultsPrompt: React.FC<EmptyResultsPromptProps> = React.memo(
                   <EuiLink
                     external={true}
                     data-test-subj={LEARN_MORE_LINK_DATA_TEST_ID}
-                    href="https://www.elastic.co/guide/en/security/current/attack-discovery.html"
+                    href={docLinks.links.securitySolution.attackDiscovery.runFromAttacksPage}
                     target="_blank"
                   >
                     {i18n.LEARN_MORE}

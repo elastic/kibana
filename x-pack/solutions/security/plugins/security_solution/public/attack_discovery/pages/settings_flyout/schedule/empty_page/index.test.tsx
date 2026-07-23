@@ -36,6 +36,16 @@ describe('EmptyPage', () => {
             },
           },
         },
+        docLinks: {
+          links: {
+            securitySolution: {
+              attackDiscovery: {
+                runFromAttacksPage:
+                  'https://www.elastic.co/docs/solutions/security/ai/attack-discovery/run-from-attacks-page',
+              },
+            },
+          },
+        },
         featureFlags: {
           getBooleanValue: jest.fn().mockResolvedValue(false),
         },

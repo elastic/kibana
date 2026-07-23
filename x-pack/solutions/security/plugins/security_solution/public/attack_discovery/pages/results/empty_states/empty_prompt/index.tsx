@@ -19,6 +19,7 @@ import React, { useMemo } from 'react';
 
 import { Generate } from '../generate';
 import { useHasWorkflowsPrivileges } from '../../../hooks/use_has_workflows_privileges';
+import { useKibana } from '../../../../../common/lib/kibana';
 import type { SettingsOverrideOptions } from '../../history/types';
 import * as i18n from './translations';
 
@@ -38,6 +39,9 @@ const EmptyPromptComponent: React.FC<Props> = ({
   onGenerate,
 }) => {
   const { hasWorkflowsExecute } = useHasWorkflowsPrivileges();
+  const {
+    services: { docLinks },
+  } = useKibana();
 
   const historyTitle = useMemo(
     () => (
@@ -126,7 +130,7 @@ const EmptyPromptComponent: React.FC<Props> = ({
       <EuiFlexItem grow={false}>
         <EuiLink
           data-test-subj="learnMore"
-          href="https://www.elastic.co/guide/en/security/current/attack-discovery.html"
+          href={docLinks.links.securitySolution.attackDiscovery.runFromAttackDiscoveryPage}
           target="_blank"
         >
           {i18n.LEARN_MORE}

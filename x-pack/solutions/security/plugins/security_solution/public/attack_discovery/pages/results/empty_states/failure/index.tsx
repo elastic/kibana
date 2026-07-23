@@ -17,6 +17,7 @@ import {
 import { css } from '@emotion/react';
 import React, { useMemo } from 'react';
 
+import { useKibana } from '../../../../../common/lib/kibana';
 import * as i18n from './translations';
 
 interface Props {
@@ -24,6 +25,10 @@ interface Props {
 }
 
 const FailureComponent: React.FC<Props> = ({ failureReason }) => {
+  const {
+    services: { docLinks },
+  } = useKibana();
+
   const Failures = useMemo(() => {
     const failures = failureReason != null ? failureReason.split('\n') : '';
     const [firstFailure, ...restFailures] = failures;
@@ -77,7 +82,7 @@ const FailureComponent: React.FC<Props> = ({ failureReason }) => {
         <EuiLink
           external={true}
           data-test-subj="learnMoreLink"
-          href="https://www.elastic.co/guide/en/security/current/attack-discovery.html"
+          href={docLinks.links.securitySolution.attackDiscovery.home}
           target="_blank"
         >
           {i18n.LEARN_MORE}

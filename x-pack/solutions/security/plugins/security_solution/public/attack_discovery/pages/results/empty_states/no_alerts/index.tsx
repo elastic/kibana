@@ -17,6 +17,7 @@ import { AssistantIcon } from '@kbn/ai-assistant-icon';
 import React, { useMemo } from 'react';
 
 import { Generate } from '../generate';
+import { useKibana } from '../../../../../common/lib/kibana';
 import type { SettingsOverrideOptions } from '../../history/types';
 import * as i18n from './translations';
 
@@ -27,6 +28,10 @@ interface Props {
 }
 
 const NoAlertsComponent: React.FC<Props> = ({ isDisabled, isLoading, onGenerate }) => {
+  const {
+    services: { docLinks },
+  } = useKibana();
+
   const title = useMemo(
     () => (
       <EuiFlexGroup
@@ -85,7 +90,7 @@ const NoAlertsComponent: React.FC<Props> = ({ isDisabled, isLoading, onGenerate 
         <EuiLink
           external={true}
           data-test-subj="learnMoreLink"
-          href="https://www.elastic.co/guide/en/security/current/attack-discovery.html"
+          href={docLinks.links.securitySolution.attackDiscovery.home}
           target="_blank"
         >
           {i18n.LEARN_MORE}

@@ -14,12 +14,17 @@ import * as i18n from './translations';
 
 import ScheduleIconSVG from '../icons/schedule.svg';
 import { CreateButton } from '../create_button';
+import { useKibana } from '../../../../../common/lib/kibana';
 
 interface EmptyPageProps {
   onCreateClick: () => void;
 }
 
 export const EmptyPage: React.FC<EmptyPageProps> = React.memo(({ onCreateClick }) => {
+  const {
+    services: { docLinks },
+  } = useKibana();
+
   return (
     <EuiFlexGroup alignItems="center" justifyContent="center" data-test-subj="emptySchedule">
       <EuiFlexItem grow={false}>
@@ -46,7 +51,7 @@ export const EmptyPage: React.FC<EmptyPageProps> = React.memo(({ onCreateClick }
               <EuiLink
                 external={true}
                 data-test-subj="learnMoreLink"
-                href="https://www.elastic.co/guide/en/security/current/attack-discovery.html"
+                href={docLinks.links.securitySolution.attackDiscovery.runFromAttacksPage}
                 target="_blank"
               >
                 {i18n.LEARN_MORE}

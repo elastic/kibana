@@ -340,6 +340,11 @@ export interface DocLinks {
       knowledgeBaseHome: string;
       knowledgeBaseIndexEntries: string;
     };
+    readonly attackDiscovery: {
+      readonly home: string;
+      readonly runFromAttackDiscoveryPage: string;
+      readonly runFromAttacksPage: string;
+    };
     readonly cloudSecurityPosture: string;
     readonly installElasticDefend: string;
     readonly artifactControl: string;
