@@ -70,6 +70,29 @@ describe('List OAuth Connections route', () => {
     expect(response.payload).toEqual(mockResponse);
   });
 
+  it('passes through the client_name from the connection response', async () => {
+    const mockResponse = {
+      connections: [
+        {
+          id: 'conn1',
+          client_id: 'non-owned-client',
+          client_name: 'Other user app',
+          resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
+        },
+      ],
+    };
+    oauthMock.listConnections.mockResolvedValue(mockResponse);
+
+    const response = await routeHandler(
+      getMockContext(),
+      httpServerMock.createKibanaRequest({ query: {} }),
+      kibanaResponseFactory
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.payload).toEqual(mockResponse);
+  });
+
   it('adds user information to connections when available', async () => {
     oauthMock.listConnections.mockResolvedValue({
       connections: [
