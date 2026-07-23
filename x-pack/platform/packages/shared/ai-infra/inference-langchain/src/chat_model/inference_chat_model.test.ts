@@ -392,6 +392,43 @@ describe('InferenceChatModel', () => {
       });
     });
 
+    it('includes anonymizationMetadata in the chatComplete call metadata', async () => {
+      const anonymizationMetadata = { sessionId: 'sess-1', agentId: 'agent-a' };
+      const chatModel = new InferenceChatModel({
+        chatComplete,
+        connector,
+        telemetryMetadata,
+        anonymizationMetadata,
+      });
+
+      const response = createResponse({ content: 'dummy' });
+      chatComplete.mockResolvedValue(response);
+
+      await chatModel.invoke('question');
+
+      expect(chatComplete).toHaveBeenCalledWith(
+        expect.objectContaining({
+          metadata: {
+            connectorTelemetry: telemetryMetadata,
+            anonymization: anonymizationMetadata,
+          },
+        })
+      );
+    });
+
+    it('omits anonymization from chatComplete metadata when anonymizationMetadata is not set', async () => {
+      const chatModel = new InferenceChatModel({ chatComplete, connector, telemetryMetadata });
+
+      const response = createResponse({ content: 'dummy' });
+      chatComplete.mockResolvedValue(response);
+
+      await chatModel.invoke('question');
+
+      expect(chatComplete).toHaveBeenCalledWith(
+        expect.objectContaining({ metadata: { connectorTelemetry: telemetryMetadata } })
+      );
+    });
+
     it('uses invocation parameters', async () => {
       const chatModel = new InferenceChatModel({
         chatComplete,
