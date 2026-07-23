@@ -15,10 +15,14 @@ export const installIntegration = () => {
   cy.get(ADD_INTEGRATION_BTN).click();
   cy.url({ timeout: 60000 }).should('include', '/add-integration');
 
+  cy.intercept('POST', '**/api/fleet/package_policies').as('createPackagePolicy');
   cy.get(SAVE_AND_CONTINUE_BTN, { timeout: 30000 })
     .should('be.visible')
     .should('be.enabled')
     .click();
 
+  // Wait for the package-policy save to settle so the confirmation modal
+  // assertion is anchored to the action's real completion, not EUI's fade-in.
+  cy.wait('@createPackagePolicy', { timeout: 60000 });
   cy.get(MODAL_CONFIRMATION_TITLE, { timeout: 60000 }).should('be.visible');
 };
