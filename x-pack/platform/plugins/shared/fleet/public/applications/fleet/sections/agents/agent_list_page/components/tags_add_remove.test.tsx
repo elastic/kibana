@@ -277,6 +277,42 @@ describe('TagsAddRemove', () => {
     expect(result.getByTitle('tag1').getAttribute('aria-checked')).toEqual('false');
   });
 
+  it('should rollback tag state on error when adding for single agent', async () => {
+    mockUpdateTags.mockImplementation((_agentId, _newTags, _onSuccess, onError) => {
+      onError?.();
+    });
+    const result = renderComponent('agent1');
+    const getTag = (name: string) => result.getByText(name);
+
+    fireEvent.click(getTag('tag2'));
+
+    expect(result.getByTitle('tag2').getAttribute('aria-checked')).toEqual('false');
+  });
+
+  it('should rollback tag state on error when removing for single agent', async () => {
+    mockUpdateTags.mockImplementation((_agentId, _newTags, _onSuccess, onError) => {
+      onError?.();
+    });
+    const result = renderComponent('agent1');
+    const getTag = (name: string) => result.getByText(name);
+
+    fireEvent.click(getTag('tag1'));
+
+    expect(result.getByTitle('tag1').getAttribute('aria-checked')).toEqual('true');
+  });
+
+  it('should rollback tag state on error for bulk selection', async () => {
+    mockBulkUpdateTags.mockImplementation((_agents, _toAdd, _toRemove, _onSuccess, onError) => {
+      onError?.();
+    });
+    const result = renderComponent(undefined, '');
+    const getTag = (name: string) => result.getByText(name);
+
+    fireEvent.click(getTag('tag2'));
+
+    expect(result.getByTitle('tag2').getAttribute('aria-checked')).toEqual('false');
+  });
+
   it('should add new tag when not found in search and button clicked - bulk selection', () => {
     const result = renderComponent(undefined, 'query');
     const searchInput = result.getByRole('combobox');
