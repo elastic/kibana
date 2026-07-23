@@ -39,6 +39,7 @@ dependsOn:
   - '@kbn/workflows-extensions'
   - '@kbn/triggers-actions-ui-plugin'
   - '@kbn/alerts-ui-shared'
+  - '@kbn/deeplinks-workflows'
 tags:
   - shared-browser
   - package
