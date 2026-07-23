@@ -11,7 +11,7 @@ import type { APMIndices } from '@kbn/apm-sources-access-plugin/server';
 import { PROCESSOR_EVENT, SERVICE_NAME } from '../../../common/es_fields/apm';
 import { environmentQuery } from '../../../common/utils/environment_query';
 
-export type ServiceIngestionType = 'classicApm' | 'unprocessedOtel';
+export type ServiceIngestionType = 'apm' | 'unprocessedOtel';
 
 export async function getServiceIngestionType({
   esClient,
@@ -47,5 +47,5 @@ export async function getServiceIngestionType({
   const total = response.hits.total;
   const count = typeof total === 'number' ? total : total?.value ?? 0;
 
-  return { ingestionType: count > 0 ? 'classicApm' : 'unprocessedOtel' };
+  return { ingestionType: count > 0 ? 'apm' : 'unprocessedOtel' };
 }

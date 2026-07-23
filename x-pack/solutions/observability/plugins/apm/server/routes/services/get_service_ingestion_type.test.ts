@@ -42,10 +42,10 @@ function getFilterClauses(esClient: ElasticsearchClient) {
 
 describe('getServiceIngestionType', () => {
   describe('ingestion type resolution', () => {
-    it('returns classicApm when hits.total is an object with value > 0', async () => {
+    it('returns apm when hits.total is an object with value > 0', async () => {
       const esClient = makeEsClient({ value: 1 });
       const result = await getServiceIngestionType({ esClient, ...baseParams });
-      expect(result).toEqual({ ingestionType: 'classicApm' });
+      expect(result).toEqual({ ingestionType: 'apm' });
     });
 
     it('returns unprocessedOtel when hits.total is an object with value 0', async () => {
@@ -54,10 +54,10 @@ describe('getServiceIngestionType', () => {
       expect(result).toEqual({ ingestionType: 'unprocessedOtel' });
     });
 
-    it('returns classicApm when hits.total is a number > 0', async () => {
+    it('returns apm when hits.total is a number > 0', async () => {
       const esClient = makeEsClient(1);
       const result = await getServiceIngestionType({ esClient, ...baseParams });
-      expect(result).toEqual({ ingestionType: 'classicApm' });
+      expect(result).toEqual({ ingestionType: 'apm' });
     });
 
     it('returns unprocessedOtel when hits.total is a number 0', async () => {

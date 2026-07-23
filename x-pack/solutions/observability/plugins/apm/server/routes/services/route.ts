@@ -872,7 +872,7 @@ const serviceIngestionTypeRoute = createApmServerRoute({
     query: environmentSchema.merge(rangeSchema),
   }),
   security: { authz: { requiredPrivileges: ['apm'] } },
-  handler: async (resources): Promise<{ ingestionType: 'classicApm' | 'unprocessedOtel' }> => {
+  handler: async (resources): Promise<{ ingestionType: 'apm' | 'unprocessedOtel' }> => {
     const { params, context, getApmIndices } = resources;
     const {
       path: { serviceName },
