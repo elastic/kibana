@@ -52,15 +52,22 @@ export function EventFlyout({ event, onClose, onChatClick }: EventFlyoutProps): 
     [lifecycleQuery.data?.detections, selectedDetectionId]
   );
 
+  const eventSignals = useMemo(
+    () => [
+      ...[...(lifecycleQuery.data?.events ?? [])]
+        .reverse()
+        .flatMap((lifecycleEvent) => lifecycleEvent.signals ?? []),
+      ...(event.signals ?? []),
+    ],
+    [event.signals, lifecycleQuery.data?.events]
+  );
+
   const selectedDetectionSignal = useMemo(() => {
     if (!selectedDetection) {
       return undefined;
     }
-    return findDetectionSignal(selectedDetection, {
-      discoveries: lifecycleQuery.data?.discoveries,
-      eventSignals: event.signals,
-    });
-  }, [event.signals, lifecycleQuery.data?.discoveries, selectedDetection]);
+    return findDetectionSignal(selectedDetection, eventSignals);
+  }, [eventSignals, selectedDetection]);
 
   const closeDetectionFlyout = useCallback(() => {
     setSelectedDetectionId(undefined);

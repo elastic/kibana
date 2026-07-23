@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MAX_ID_LENGTH, discoverySchema, type Discovery } from '@kbn/significant-events-schema';
+import { discoverySchema, type Discovery } from '@kbn/significant-events-schema';
 import { z } from '@kbn/zod/v4';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import type { PaginatedResponse } from '../../../lib/significant_events/query_utils';
@@ -46,38 +46,6 @@ const discoveriesSearchRoute = createServerRoute({
   },
 });
 
-const discoveriesHistoryRoute = createServerRoute({
-  endpoint: 'GET /internal/significant_events/discoveries/{id}/history',
-  options: {
-    access: 'internal',
-    summary: 'Get discovery history',
-    description: 'Get all historical versions of a discovery entity.',
-  },
-  security: {
-    authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
-    },
-  },
-  params: z.object({
-    path: z.object({
-      id: z.string().max(MAX_ID_LENGTH),
-    }),
-  }),
-  handler: async ({
-    params,
-    request,
-    getScopedClients,
-    server,
-  }): Promise<{ hits: Discovery[] }> => {
-    const { getDiscoveryClient, licensing } = await getScopedClients({ request });
-
-    await assertSignificantEventsAccess({ server, licensing });
-
-    const result = await getDiscoveryClient().findByEventId(params.path.id);
-    return { hits: result.hits };
-  },
-});
-
 const discoveriesBulkCreateRoute = createServerRoute({
   endpoint: 'POST /internal/significant_events/discoveries',
   options: {
@@ -104,6 +72,5 @@ const discoveriesBulkCreateRoute = createServerRoute({
 
 export const internalDiscoveriesRoutes = {
   ...discoveriesSearchRoute,
-  ...discoveriesHistoryRoute,
   ...discoveriesBulkCreateRoute,
 };
