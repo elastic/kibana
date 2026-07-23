@@ -141,7 +141,7 @@ describe('Upgrade Agentless Deployments', () => {
           UPGRADE_AGENTLESS_DEPLOYMENTS_TASK_TYPE
         ].createTaskRunner;
       const taskRunner = createTaskRunner(
-        taskManagerMock.createRunContext({ taskInstance, abortController })
+        taskManagerMock.createRunContext({ taskInstance, signal: abortController.signal })
       );
       return taskRunner.run();
     };
