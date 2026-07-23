@@ -24,8 +24,6 @@ import {
   type AsCodeRuntimeBaseField,
   type AsCodeFieldSettings,
   type AsCodeDataViewSpec,
-  type AsCodeSavedDataView,
-  type AsCodeSavedFieldSettings,
 } from '@kbn/as-code-data-views-schema';
 
 /**
