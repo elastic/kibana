@@ -157,7 +157,7 @@ export const OverviewPage: FC = () => {
             <>
               <EuiFlexGroup direction="column">
                 <EuiFlexItem>
-                  <EuiTitle size="s">
+                  <EuiTitle size="m">
                     <h2>
                       {i18n.translate('xpack.ml.overview.analyzeYourDataTitle', {
                         defaultMessage: 'Analyze your data',
@@ -187,7 +187,7 @@ export const OverviewPage: FC = () => {
           {canUseAiops ? (
             <>
               <EuiFlexGroup direction="column">
-                <EuiTitle size="s">
+                <EuiTitle size="m">
                   <h2>
                     {i18n.translate('xpack.ml.overview.aiopsLabsTitle', {
                       defaultMessage: 'Surface insights',
@@ -324,7 +324,7 @@ export const OverviewPage: FC = () => {
             </>
           ) : null}
           <EuiFlexGroup direction="column">
-            <EuiTitle size="s">
+            <EuiTitle size="m">
               <h2>
                 {i18n.translate('xpack.ml.overview.visualizeYourDataTitle', {
                   defaultMessage: 'Visualize your data',

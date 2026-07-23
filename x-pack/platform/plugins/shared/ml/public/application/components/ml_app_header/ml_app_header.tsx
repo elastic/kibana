@@ -13,7 +13,6 @@ import type {
   AppHeaderBack,
   AppHeaderBadge,
   AppHeaderMetadataItems,
-  AppHeaderSpacing,
   AppHeaderTab,
   AppHeaderTitle,
   AppHeaderMenu,
@@ -26,7 +25,6 @@ export interface MlAppHeaderProps {
   tabs?: AppHeaderTab[];
   badges?: AppHeaderBadge[];
   metadata?: AppHeaderMetadataItems;
-  spacing?: AppHeaderSpacing;
   docLink?: string;
 }
 
@@ -37,7 +35,6 @@ export const MlAppHeader: FC<MlAppHeaderProps> = ({
   tabs,
   badges,
   metadata,
-  spacing,
   docLink,
 }) => {
   return (
@@ -49,7 +46,7 @@ export const MlAppHeader: FC<MlAppHeaderProps> = ({
         tabs={tabs}
         badges={badges}
         metadata={metadata}
-        spacing={spacing ?? 'bleed'}
+        spacing="bleed"
         docLink={docLink}
         sticky={false}
       />
