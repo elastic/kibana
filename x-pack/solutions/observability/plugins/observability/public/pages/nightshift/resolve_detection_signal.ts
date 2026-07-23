@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { LifecycleDetection, SignalEntry } from '@kbn/significant-events-schema';
+import type {
+  LifecycleDetection,
+  SignificantEvent,
+  SignalEntry,
+} from '@kbn/significant-events-schema';
 
 const streamsAlign = (
   detectionStream: string | undefined,
@@ -55,14 +59,16 @@ const signalMatchesDetection = (signal: SignalEntry, detection: LifecycleDetecti
 
 export const findDetectionSignal = (
   detection: LifecycleDetection,
-  signals: SignalEntry[]
+  events: ReadonlyArray<Pick<SignificantEvent, 'signals'>> | undefined
 ): SignalEntry | undefined => {
-  for (const signal of signals) {
-    if (signal.type !== 'detection') {
-      continue;
-    }
-    if (signalMatchesDetection(signal, detection)) {
-      return signal;
+  for (const event of [...(events ?? [])].reverse()) {
+    for (const signal of event.signals ?? []) {
+      if (signal.type !== 'detection') {
+        continue;
+      }
+      if (signalMatchesDetection(signal, detection)) {
+        return signal;
+      }
     }
   }
 

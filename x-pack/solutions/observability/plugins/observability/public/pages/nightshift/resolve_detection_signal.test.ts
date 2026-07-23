@@ -35,10 +35,12 @@ const mockSignal = (overrides: Partial<SignalEntry> = {}): SignalEntry => ({
   ...overrides,
 });
 
+const mockEvent = (signals: SignalEntry[]) => ({ signals });
+
 describe('findDetectionSignal', () => {
   it('matches by detection_id and stream_name', () => {
     const signal = mockSignal();
-    expect(findDetectionSignal(mockDetection(), [signal])).toEqual(signal);
+    expect(findDetectionSignal(mockDetection(), [mockEvent([signal])])).toEqual(signal);
   });
 
   it('does not match a different detection_id on the same stream', () => {
@@ -48,18 +50,20 @@ describe('findDetectionSignal', () => {
         detection_id: 'det-other',
       },
     });
-    expect(findDetectionSignal(mockDetection(), [signal])).toBeUndefined();
+    expect(findDetectionSignal(mockDetection(), [mockEvent([signal])])).toBeUndefined();
   });
 
   it('does not match when stream_name differs', () => {
     const signal = mockSignal({ stream_name: 'logs.api-gateway' });
-    expect(findDetectionSignal(mockDetection(), [signal])).toBeUndefined();
+    expect(findDetectionSignal(mockDetection(), [mockEvent([signal])])).toBeUndefined();
   });
 
-  it('uses the first matching event signal', () => {
+  it('uses the matching signal from the newest event version', () => {
     const latestSignal = mockSignal({ description: 'latest event version' });
     const olderSignal = mockSignal({ description: 'older event version' });
 
-    expect(findDetectionSignal(mockDetection(), [latestSignal, olderSignal])).toEqual(latestSignal);
+    expect(
+      findDetectionSignal(mockDetection(), [mockEvent([olderSignal]), mockEvent([latestSignal])])
+    ).toEqual(latestSignal);
   });
 });
