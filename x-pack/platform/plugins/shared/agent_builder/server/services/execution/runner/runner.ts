@@ -13,7 +13,10 @@ import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
-import type { ConnectorTelemetryMetadata } from '@kbn/inference-common';
+import type {
+  ConnectorTelemetryMetadata,
+  ChatCompleteAnonymizationMetadata,
+} from '@kbn/inference-common';
 import type { AgentConfiguration, Conversation, ConverseInput } from '@kbn/agent-builder-common';
 import {
   AgentExecutionMode,
@@ -208,6 +211,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
     request,
     defaultConnectorId,
     telemetryMetadata,
+    anonymizationMetadata,
     maxContentLength,
     conversation,
     nextInput,
@@ -218,6 +222,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
     request: KibanaRequest;
     defaultConnectorId?: string;
     telemetryMetadata?: ConnectorTelemetryMetadata;
+    anonymizationMetadata?: ChatCompleteAnonymizationMetadata;
     maxContentLength?: number;
     conversation?: Conversation;
     nextInput?: ConverseInput;
@@ -242,6 +247,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
       request,
       defaultConnectorId,
       telemetryMetadata,
+      anonymizationMetadata,
       maxContentLength,
     });
 
@@ -324,10 +330,23 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
         ...otherParams
       } = params;
       const { nextInput, conversation } = params.agentParams;
+      // sessionId is undefined for stateless agents (no conversation). The anonymization
+      // pipeline builds a fresh token map per call and discards it when the call completes,
+      // so cross-request token reuse is impossible regardless of sessionId value. Stateless
+      // agents are safe; they just cannot correlate entity tokens across separate calls.
+      //
+      // anonymizationMetadata is always constructed and passed so the pipeline — not the
+      // caller — decides whether to skip workflow resolution based on space configuration.
+      // Zero-match resolution is a fast indexed lookup with no connector traffic.
+      const anonymizationMetadata: ChatCompleteAnonymizationMetadata = {
+        sessionId: conversation?.id,
+        agentId: otherParams.agentId,
+      };
       const runner = await createScopedRunnerWithDeps({
         request,
         defaultConnectorId,
         telemetryMetadata,
+        anonymizationMetadata,
         maxContentLength,
         conversation,
         nextInput,
