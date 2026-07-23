@@ -120,8 +120,9 @@ Keep ES|QL responses small — large result sets overflow context and make analy
 - Good: `FROM index | WHERE log.level == "error" | SORT @timestamp DESC | LIMIT 10`
 - Avoid: `FROM index | LIMIT 500` or any query without LIMIT — large row counts overflow context.
 - Do not use get_index_info for Streams / CCS views (e.g. `$.stream`) — it often returns no fields.
-  Discover shape from KI evidence / `dataset_analysis` field lists first, or run
-  `FROM $.stream | LIMIT 0` (columns only). If still missing fields, try a raw `LIMIT 1` without KEEP.
+  Prefer the ES|QL FROM targets listed in the kickoff message (query streams are already prefixed
+  with `$.`). Discover shape from KI evidence / `dataset_analysis` field lists first, or run
+  `FROM <target> | LIMIT 0` (columns only). If still missing fields, try a raw `LIMIT 1` without KEEP.
 
 </esql_rules>
 

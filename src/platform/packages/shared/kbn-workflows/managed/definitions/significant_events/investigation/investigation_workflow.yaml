@@ -28,7 +28,9 @@ triggers:
           type: array
           items:
             type: string
-          description: Optional data stream names to scope observability queries.
+          description: >
+            Optional logical stream names to scope observability queries. Query streams are
+            resolved to their ES|QL view (`$.name`) before being passed to the investigation agent.
         context:
           type: object
           additionalProperties: true
@@ -58,6 +60,21 @@ steps:
     on-failure:
       continue: true
 
+  # Logical stream names (e.g. logging-eis) are not always valid ES|QL FROM targets — query
+  # streams must be queried via their prefixed view ($.logging-eis). Resolve before kickoff so
+  # the agent receives usable FROM targets for both ingest and query streams.
+  - name: resolve_esql_targets
+    type: kibana.request
+    with:
+      method: POST
+      path: '/internal/significant_events/investigation/resolve_esql_targets'
+      headers:
+        x-elastic-internal-origin: 'kibana'
+      body:
+        stream_names: '${{ inputs.stream_names | default: [] }}'
+    on-failure:
+      continue: true
+
   - name: investigate
     type: ai.agent
     agent-id: platform.sig_events.investigation
@@ -81,9 +98,10 @@ steps:
 
         {{ inputs.message }}
 
-        {% if inputs.stream_names and inputs.stream_names.size > 0 %}
-        Data streams (discover fields via KI evidence / dataset_analysis, or `FROM $.stream | LIMIT 0` for columns; raw `LIMIT 1` without KEEP if needed — do not use get_index_info on Streams/CCS views):
-        {% for stream in inputs.stream_names %}- {{ stream }}
+        {% assign esql_targets = steps.resolve_esql_targets.output.esql_from_targets | default: inputs.stream_names %}
+        {% if esql_targets and esql_targets.size > 0 %}
+        Data streams (ES|QL FROM targets — discover fields via KI evidence / dataset_analysis, or `FROM <target> | LIMIT 0` for columns; raw `LIMIT 1` without KEEP if needed — do not use get_index_info on Streams/CCS views):
+        {% for stream in esql_targets %}- {{ stream }}
         {% endfor %}
         {% endif %}
         {% if inputs.context %}
