@@ -123,6 +123,7 @@ export const ModelEndpointRow: React.FC<ModelEndpointRowProps> = ({
                         iconType="lock"
                         size="xs"
                         isDisabled
+                        aria-hidden
                       />
                     </span>
                   </EuiToolTip>

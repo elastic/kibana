@@ -25,12 +25,9 @@ import type { FieldDefinitionsService } from '../../services/field_definitions';
 import { parseTemplate } from '../../routes/api/templates/parse_template';
 import { validateExtendedFields } from '../../../common/types/domain/template/validate_extended_fields';
 import { parseFieldDefinitionsToInlineFields, getFieldSnakeKey } from '../../../common/utils';
+import { resolveTemplateFields } from '../../../common/utils/template_fields';
 import type { InlineField } from '../../../common/types/domain/template/fields';
-import {
-  isInlineField,
-  isDisplayOnlyField,
-  FieldType,
-} from '../../../common/types/domain/template/fields';
+import { isDisplayOnlyField, FieldType } from '../../../common/types/domain/template/fields';
 import { evaluateCondition } from '../../../common/types/domain/template/evaluate_conditions';
 
 interface CustomFieldValidationParams {
@@ -212,14 +209,25 @@ export const validateCaseExtendedFields = async ({
   templateId,
   globalFields,
   templatesService,
+  fieldDefinitionsService,
+  owner,
   partial = false,
+  preResolvedTemplateFields,
 }: {
   extendedFields: Record<string, string>;
   templateId: string | null | undefined;
   globalFields: InlineField[];
   templatesService: TemplatesService;
+  fieldDefinitionsService: FieldDefinitionsService;
+  owner: string;
   /** Pass `true` for update paths where only a subset of fields may be present. */
   partial?: boolean;
+  /**
+   * The template's already-resolved inline fields, when the caller fetched and parsed the
+   * template earlier in the same request (e.g. server-side template expansion on create) —
+   * skips a duplicate SO fetch + parse.
+   */
+  preResolvedTemplateFields?: InlineField[];
 }): Promise<void> => {
   const globalKeySet = new Set(globalFields.map((f) => getFieldSnakeKey(f.name, f.type)));
 
@@ -241,28 +249,38 @@ export const validateCaseExtendedFields = async ({
     return;
   }
 
-  const templateSO = await templatesService.getTemplate(templateId, undefined, {
-    includeDeleted: true,
-  });
-  if (!templateSO) {
-    throw Boom.badRequest(`Template ${templateId} not found`);
-  }
-  let parsedTemplate;
-  try {
-    parsedTemplate = parseTemplate(templateSO.attributes);
-  } catch (err) {
-    throw Boom.badRequest(`Template ${templateId} has an invalid definition`);
+  let resolvedTemplateFields = preResolvedTemplateFields;
+
+  if (resolvedTemplateFields === undefined) {
+    const templateSO = await templatesService.getTemplate(templateId, undefined, {
+      includeDeleted: true,
+    });
+    if (!templateSO) {
+      throw Boom.badRequest(`Template ${templateId} not found`);
+    }
+    let parsedTemplate;
+    try {
+      parsedTemplate = parseTemplate(templateSO.attributes);
+    } catch (err) {
+      throw Boom.badRequest(`Template ${templateId} has an invalid definition`);
+    }
+
+    // Resolve $ref entries in the template definition against the field library so
+    // that keys from library-referenced fields are recognised during validation.
+    const { fieldDefinitions } = await fieldDefinitionsService.getFieldDefinitions(owner);
+    resolvedTemplateFields = resolveTemplateFields(
+      parsedTemplate.definition.fields,
+      fieldDefinitions
+    );
   }
 
-  // Validate template-specific keys against the template definition.
+  // Validate template-specific keys against the resolved template fields.
   const templateOnlyFields = Object.fromEntries(
     Object.entries(extendedFields).filter(([k]) => !globalKeySet.has(k))
   );
-  const templateErrors = validateExtendedFields(
-    templateOnlyFields,
-    parsedTemplate.definition.fields,
-    { partial }
-  );
+  const templateErrors = validateExtendedFields(templateOnlyFields, resolvedTemplateFields, {
+    partial,
+  });
   if (templateErrors.length) {
     throw Boom.badRequest(`Invalid extended_fields: ${templateErrors.join('; ')}`);
   }
@@ -283,11 +301,13 @@ export const validateExtendedFieldsInRequest = async ({
   updateReq,
   originalCase,
   templatesService,
+  fieldDefinitionsService,
   globalFields,
 }: {
   updateReq: CasePatchRequest;
   originalCase: CaseSavedObjectTransformed;
   templatesService: TemplatesService;
+  fieldDefinitionsService: FieldDefinitionsService;
   globalFields: InlineField[];
 }): Promise<void> => {
   if (!updateReq.extended_fields) return;
@@ -303,6 +323,8 @@ export const validateExtendedFieldsInRequest = async ({
     templateId,
     globalFields,
     templatesService,
+    fieldDefinitionsService,
+    owner: originalCase.attributes.owner,
     partial: true,
   });
 };
@@ -320,11 +342,13 @@ export const resolveTemplateFieldsForClose = async ({
   templateId,
   templateVersion,
   templatesService,
+  fieldDefinitionsService,
   logger,
 }: {
   templateId: string;
   templateVersion?: number;
   templatesService: TemplatesService;
+  fieldDefinitionsService: FieldDefinitionsService;
   logger: Logger;
 }): Promise<InlineField[]> => {
   const templateSO = await templatesService.getTemplate(
@@ -337,7 +361,10 @@ export const resolveTemplateFieldsForClose = async ({
   }
   try {
     const parsedTemplate = parseTemplate(templateSO.attributes);
-    return parsedTemplate.definition.fields.filter(isInlineField);
+    const { fieldDefinitions } = await fieldDefinitionsService.getFieldDefinitions(
+      templateSO.attributes.owner
+    );
+    return resolveTemplateFields(parsedTemplate.definition.fields, fieldDefinitions);
   } catch (err) {
     logger.warn(
       `Failed to parse template "${templateId}" definition during close validation — skipping template field enforcement: ${err}`

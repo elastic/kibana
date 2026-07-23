@@ -7,12 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiProvider } from '@elastic/eui';
-import React, { useCallback } from 'react';
+import type { IconType } from '@elastic/eui';
+import { EuiIcon, EuiLoadingSpinner, EuiProvider } from '@elastic/eui';
+import React, { Suspense, useCallback } from 'react';
 import { createRoot } from 'react-dom/client';
 import type { WorkflowYaml } from '@kbn/workflows';
 import { transformWorkflowToGraph } from '@kbn/workflows';
-import { ReactFlowProvider, WorkflowGraphCanvasWithoutProvider } from '@kbn/workflows-ui';
+import {
+  getBaseConnectorType,
+  getConnectorSpecIcon,
+  getStepIconType,
+  HardcodedIcons,
+  ReactFlowProvider,
+  WorkflowGraphCanvasWithoutProvider,
+} from '@kbn/workflows-ui';
+import type { RenderStepIcon } from '@kbn/workflows-ui';
 import { parseYamlToJSONWithoutValidation } from '@kbn/workflows-yaml';
 import type { GraphConfig } from './page_template';
 
@@ -41,6 +50,31 @@ const transformed = transformWorkflowToGraph(workflow);
 
 const NO_OP = () => {};
 
+// Bare trigger `type` values (`manual`, `alert`, `scheduled`) mapped to workflow
+// icons — mirrors `TypeIcon`'s trigger resolution in `@kbn/workflows-ui`.
+const TRIGGER_ICONS: Record<string, IconType> = {
+  manual: HardcodedIcons.manual,
+  alert: HardcodedIcons.alert,
+  scheduled: HardcodedIcons.scheduled,
+};
+
+// Resolves step/trigger icons without a running Kibana. The live app's
+// `<StepIcon>` also consults the workflows-extensions and action-type
+// registries, but those only exist inside a real Kibana plugin — this CLI
+// only has the static connector-spec map (e.g. the AbuseIPDB logo) and the
+// hardcoded fallback tables available.
+const renderStepIcon: RenderStepIcon = ({ stepType, isTrigger }) => {
+  const iconType = isTrigger
+    ? TRIGGER_ICONS[stepType] ?? HardcodedIcons.trigger
+    : getConnectorSpecIcon(stepType) ?? getStepIconType(getBaseConnectorType(stepType));
+
+  return (
+    <Suspense fallback={<EuiLoadingSpinner size="s" />}>
+      <EuiIcon type={iconType} size="m" aria-hidden={true} />
+    </Suspense>
+  );
+};
+
 const GraphApp = () => {
   const handleReady = useCallback(() => {
     // Signal Playwright that the graph is fully laid out and ready to capture.
@@ -63,6 +97,7 @@ const GraphApp = () => {
           showBackground={!graphConfig.transparent}
           edgeZIndex={0}
           onReady={handleReady}
+          renderStepIcon={renderStepIcon}
         />
       </ReactFlowProvider>
     </EuiProvider>

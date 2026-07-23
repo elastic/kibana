@@ -66,6 +66,10 @@ jest.mock('@kbn/alerting-v2-episodes-ui/hooks/use_fetch_rule', () => ({
   useFetchRule: jest.fn(),
 }));
 
+jest.mock('@kbn/alerting-v2-episodes-ui/hooks/use_episode_flapping', () => ({
+  useEpisodeFlapping: jest.fn(() => ({ isFlapping: false, isLoading: false })),
+}));
+
 jest.mock('@kbn/alerting-v2-episodes-ui/actions', () => ({
   createEpisodeActions: jest.fn(),
   READ_SAFE_EPISODE_ACTION_IDS: new Set(['ALERTING_V2_OPEN_EPISODE_IN_DISCOVER']),
@@ -264,39 +268,10 @@ describe('EpisodeDetailsPage', () => {
     );
   });
 
-  it('renders the rule description in the header area', () => {
-    renderPage();
-
-    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.metadata)).toBeInTheDocument();
-    expect(screen.getByTestId('alertingV2EpisodeDetailsHeaderDescription')).toHaveTextContent(
-      'Rule description'
-    );
-  });
-
-  it('omits the header metadata row when the rule has no description', () => {
-    const loadedRuleState = fetchRuleResult.ruleState as unknown as {
-      status: RuleStateStatus;
-      ruleId: string;
-      rule: { metadata: Record<string, unknown> };
-    };
-
-    mockUseFetchRule.mockReturnValue({
-      ...fetchRuleResult,
-      ruleState: {
-        ...loadedRuleState,
-        rule: {
-          ...loadedRuleState.rule,
-          metadata: { ...loadedRuleState.rule.metadata, description: undefined },
-        },
-      },
-    } as unknown as FetchRuleResult);
-
+  it('does not render rule audit metadata in the header area', () => {
     renderPage();
 
     expect(screen.queryByTestId(APP_HEADER_TEST_SUBJECTS.metadata)).not.toBeInTheDocument();
-    expect(
-      screen.queryByTestId('alertingV2EpisodeDetailsHeaderDescription')
-    ).not.toBeInTheDocument();
   });
 
   it('hides the metadata tab when the rule is not loaded', () => {

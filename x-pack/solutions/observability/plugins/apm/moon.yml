@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/apm-plugin'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/obs-signals-traces'
+  defaultOwner: '@elastic/obs-signals-traces-team'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/apm-plugin'
   description: Moon project for @kbn/apm-plugin
   channel: ''
-  owner: '@elastic/obs-signals-traces'
+  owner: '@elastic/obs-signals-traces-team'
   sourceRoot: x-pack/solutions/observability/plugins/apm
 dependsOn:
   - '@kbn/synthtrace'

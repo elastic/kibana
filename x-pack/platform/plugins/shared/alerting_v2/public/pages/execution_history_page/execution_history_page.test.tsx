@@ -6,8 +6,10 @@
  */
 
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, renderHook, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { euiFontSize, useEuiTheme } from '@elastic/eui';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { ListPageTestProviders } from '../../test_utils/test_providers';
 import type { PolicyExecutionHistoryItem } from '../../services/execution_history_api';
 import type { useFetchRuleExecutions } from '../../hooks/use_fetch_rule_executions';
@@ -22,6 +24,8 @@ jest.mock('../../application/breadcrumb_context', () => ({
   useSetBreadcrumbs: () => jest.fn(),
 }));
 
+const mockCanReadRules = true;
+
 jest.mock('@kbn/core-di-browser', () => ({
   useService: (token: unknown) => {
     if (token === 'chrome') return { docTitle: { change: jest.fn() } };
@@ -33,6 +37,13 @@ jest.mock('@kbn/core-di-browser', () => ({
     }
     if (token === 'http') {
       return {};
+    }
+    if (typeof token === 'function') {
+      return {
+        canRead: () => mockCanReadRules,
+        canWrite: () => mockCanReadRules,
+        can: () => mockCanReadRules,
+      };
     }
     return {};
   },
@@ -202,6 +213,19 @@ describe('ExecutionHistoryPage', () => {
       screen.getByRole('heading', { level: 1, name: /execution history/i })
     ).toBeInTheDocument();
     expect(screen.getByRole('tab', { name: /rules/i })).toHaveAttribute('aria-selected', 'true');
+  });
+
+  it('renders the page title with xs size to match other management pages', () => {
+    mockFetchResult();
+    renderPage();
+
+    const { result } = renderHook(() => useEuiTheme());
+    const { fontSize, lineHeight } = euiFontSize(result.current, 'm');
+    const titleSelector = `[data-test-subj='${APP_HEADER_TEST_SUBJECTS.root}'] h1`;
+    const page = screen.getByTestId('executionHistoryPage');
+
+    expect(page).toHaveStyleRule('font-size', fontSize, { target: titleSelector });
+    expect(page).toHaveStyleRule('line-height', lineHeight, { target: titleSelector });
   });
 
   it('renders the experimental badge in the page header', () => {

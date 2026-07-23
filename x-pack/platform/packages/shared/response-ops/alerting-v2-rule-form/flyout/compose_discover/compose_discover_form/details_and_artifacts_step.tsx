@@ -14,6 +14,16 @@ import { RelatedDashboardSelector, RunbookArtifactField } from '../../../form/fi
 export function DetailsAndArtifactsStep() {
   return (
     <>
+      <EuiTitle size="xs">
+        <h3>
+          <FormattedMessage
+            id="xpack.alertingV2.composeDiscover.detailsAndArtifacts.ruleDetailsTitle"
+            defaultMessage="Rule details"
+          />
+        </h3>
+      </EuiTitle>
+      <EuiSpacer size="s" />
+
       {/* Name, description, tags -- connected to RHF via useFormContext() internally */}
       <RuleDetailsFieldGroup />
 

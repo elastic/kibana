@@ -23,8 +23,17 @@ import { css } from '@emotion/react';
 import { capitalize } from 'lodash';
 import useInterval from 'react-use/lib/useInterval';
 import { i18n } from '@kbn/i18n';
-import { getSeverityLabel, SIGNIFICANT_EVENT_STATUS_OPTIONS } from '@kbn/significant-events-schema';
-import type { SignificantEvent, SignificantEventStatus } from '@kbn/significant-events-schema';
+import {
+  getSeverityLabel,
+  severitySchema,
+  SIGNIFICANT_EVENT_STATUS_OPTIONS,
+  SEVERITY_OPTIONS,
+} from '@kbn/significant-events-schema';
+import type {
+  SignificantEvent,
+  SignificantEventStatus,
+  Severity,
+} from '@kbn/significant-events-schema';
 import { useSignificantEventsUrlState } from './use_significant_events_url_state';
 import { useFetchSignificantEventLifecycle } from '../../../../../hooks/significant_events/use_fetch_significant_event_lifecycle';
 import { RUNNING_POLL_INTERVAL_MS } from '../../../constants';
@@ -42,6 +51,9 @@ import { getSignificantEventStatusColor } from '../shared/status_display';
 import { SIGNIFICANT_EVENT_STATUS_LABELS } from '../shared/translations';
 import { useTriggerInvestigation } from '../../../../../hooks/significant_events/use_trigger_investigation';
 import { useUpdateSignificantEvent } from '../../../../../hooks/significant_events/use_update_significant_event';
+import { useBlocksNewActivity } from '../../../../../hooks/significant_events/use_significant_events_maintenance';
+
+export const DEFAULT_SIGNIFICANT_EVENT_SEVERITY_FILTER: Severity[] = ['80-critical', '60-high'];
 
 const RUN_ARIA_LABEL = i18n.translate(
   'xpack.streams.sigEventsTab.runInvestigationButton.ariaLabel',
@@ -59,8 +71,9 @@ const CLOSE_EVENT_ARIA_LABEL = i18n.translate(
 
 const RunInvestigationCell = ({ event }: { event: SignificantEvent }) => {
   const { triggerInvestigation, isTriggering } = useTriggerInvestigation();
+  const { blocksActivity, activityBlockTooltip } = useBlocksNewActivity();
   return (
-    <EuiToolTip content={RUN_ARIA_LABEL} disableScreenReaderOutput>
+    <EuiToolTip content={activityBlockTooltip ?? RUN_ARIA_LABEL} disableScreenReaderOutput>
       <EuiButtonIcon
         iconType="inspect"
         aria-label={RUN_ARIA_LABEL}
@@ -68,7 +81,7 @@ const RunInvestigationCell = ({ event }: { event: SignificantEvent }) => {
           e.stopPropagation();
           if (!isTriggering) triggerInvestigation(event.event_uuid);
         }}
-        isDisabled={isTriggering}
+        isDisabled={isTriggering || blocksActivity}
         isLoading={isTriggering}
         size="s"
         color="primary"
@@ -104,8 +117,6 @@ const CloseEventCell = ({ event }: { event: SignificantEvent }) => {
   );
 };
 
-const MAX_VISIBLE_STREAMS = 3;
-
 const clickableRowCss = css`
   cursor: pointer;
 `;
@@ -125,10 +136,6 @@ const LOADING_MESSAGE = i18n.translate('xpack.streams.sigEventsTab.loadingMessag
 const EMPTY_MESSAGE = i18n.translate('xpack.streams.sigEventsTab.emptyBody', {
   defaultMessage: 'No significant events found.',
 });
-const MORE_LABEL = i18n.translate('xpack.streams.sigEventsTab.moreLabel', {
-  defaultMessage: 'more',
-});
-
 const columns: Array<EuiBasicTableColumn<SignificantEvent>> = [
   {
     field: '@timestamp',
@@ -163,22 +170,43 @@ const columns: Array<EuiBasicTableColumn<SignificantEvent>> = [
       defaultMessage: 'Streams',
     }),
     width: '160px',
+    // Required for the column's `width` to actually constrain the cell — EUI's
+    // `truncateText` only kicks in when the cell is bounded (see tableLayout="fixed" below).
+    truncateText: true,
     render: (streamNames: string[]) => {
       const names = streamNames ?? [];
-      const visible = names.slice(0, MAX_VISIBLE_STREAMS);
-      const remaining = names.length - visible.length;
+      const [first, ...rest] = names;
+      if (!first) return null;
+      const overflowCount = rest.length;
       return (
-        <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
-          {visible.map((name, idx) => (
-            <EuiFlexItem grow={false} key={`${name}-${idx}`}>
-              <EuiBadge color="hollow">{name}</EuiBadge>
-            </EuiFlexItem>
-          ))}
-          {remaining > 0 && (
+        <EuiFlexGroup
+          gutterSize="xs"
+          alignItems="center"
+          responsive={false}
+          css={css`
+            flex-wrap: nowrap;
+            min-width: 0;
+          `}
+        >
+          <EuiFlexItem
+            grow={1}
+            css={css`
+              min-width: 0;
+            `}
+          >
+            <EuiToolTip content={first}>
+              <EuiBadge tabIndex={0} color="hollow">
+                {first}
+              </EuiBadge>
+            </EuiToolTip>
+          </EuiFlexItem>
+          {overflowCount > 0 && (
             <EuiFlexItem grow={false}>
-              <EuiText size="xs" color="subdued">
-                +{remaining} {MORE_LABEL}
-              </EuiText>
+              <EuiToolTip content={rest.join(', ')}>
+                <EuiText tabIndex={0} size="xs" color="subdued">
+                  +{overflowCount}
+                </EuiText>
+              </EuiToolTip>
             </EuiFlexItem>
           )}
         </EuiFlexGroup>
@@ -218,6 +246,8 @@ const extractCheckedKeys = (options: EuiSelectableOption[]): string[] =>
 const isSignificantEventStatus = (value: string): value is SignificantEventStatus =>
   SIGNIFICANT_EVENT_STATUS_OPTIONS.some((status) => status === value);
 
+const isSeverity = (value: string): value is Severity => severitySchema.safeParse(value).success;
+
 const buildSelectableOptions = <T extends string>({
   values,
   selected,
@@ -241,6 +271,9 @@ export const SigEventsTab = () => {
   const [statusFilter, setStatusFilter] = useState<SignificantEventStatus[]>(() =>
     SIGNIFICANT_EVENT_STATUS_OPTIONS.filter((status) => status === 'open')
   );
+  const [severityFilter, setSeverityFilter] = useState<Severity[]>(() => [
+    ...DEFAULT_SIGNIFICANT_EVENT_SEVERITY_FILTER,
+  ]);
   const [streamFilter, setStreamFilter] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const debouncedSearch = useDebouncedValue(searchQuery, 300);
@@ -252,12 +285,14 @@ export const SigEventsTab = () => {
 
   const { isRunning, isCanceling, handleRun, handleCancel } =
     useSignificantEventsDiscoveryContext();
+  const { blocksActivity, activityBlockTooltip } = useBlocksNewActivity();
 
   const { data, isLoading, isError, refetch, pagination, setPagination } =
     useFetchSignificantEvents({
       from: timeState.start,
       to: timeState.end,
       status: statusFilter.length > 0 ? statusFilter : undefined,
+      severity: severityFilter.length > 0 ? severityFilter : undefined,
       stream: streamFilter.length > 0 ? streamFilter : undefined,
       search: debouncedSearch || undefined,
     });
@@ -291,6 +326,11 @@ export const SigEventsTab = () => {
     []
   );
 
+  const onSeverityChange = useCallback(
+    (opts: EuiSelectableOption[]) => setSeverityFilter(extractCheckedKeys(opts).filter(isSeverity)),
+    []
+  );
+
   const filters = useMemo(
     () => [
       {
@@ -309,6 +349,22 @@ export const SigEventsTab = () => {
         onChange: onStatusChange,
       },
       {
+        label: i18n.translate('xpack.streams.sigEventsTab.filter.severity', {
+          defaultMessage: 'Severity',
+        }),
+        ariaLabel: i18n.translate('xpack.streams.sigEventsTab.filter.severityAriaLabel', {
+          defaultMessage: 'Filter by severity',
+        }),
+        options: buildSelectableOptions({
+          values: SEVERITY_OPTIONS,
+          selected: severityFilter,
+          getLabel: getSeverityLabel,
+        }),
+        numFilters: SEVERITY_OPTIONS.length,
+        numActiveFilters: severityFilter.length,
+        onChange: onSeverityChange,
+      },
+      {
         label: i18n.translate('xpack.streams.sigEventsTab.filter.stream', {
           defaultMessage: 'Stream',
         }),
@@ -325,7 +381,15 @@ export const SigEventsTab = () => {
         onChange: onStreamChange,
       },
     ],
-    [statusFilter, streamFilter, streamOptions, onStatusChange, onStreamChange]
+    [
+      statusFilter,
+      severityFilter,
+      streamFilter,
+      streamOptions,
+      onStatusChange,
+      onSeverityChange,
+      onStreamChange,
+    ]
   );
 
   const onTableChange = ({ page }: { page?: { index: number; size: number } }) => {
@@ -379,7 +443,8 @@ export const SigEventsTab = () => {
               onCancel={handleCancel}
               isRunning={isRunning}
               isCanceling={isCanceling}
-              isDisabled={isRunning}
+              isDisabled={isRunning || blocksActivity}
+              disabledTooltip={activityBlockTooltip}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -397,6 +462,7 @@ export const SigEventsTab = () => {
       )}
       <EuiFlexItem grow={false}>
         <EuiBasicTable<SignificantEvent>
+          tableLayout="fixed"
           tableCaption={TABLE_CAPTION}
           items={data?.hits ?? []}
           columns={columns}
