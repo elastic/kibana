@@ -10,8 +10,11 @@ import {
   getInvalidRuleDataMessage,
   getRuleVersionConflictMessage,
 } from '../../lib/errors/rule_error_messages';
-import type { AlertingOasOperationObject } from '../json_oas_example';
-import { buildRuleOas, invalidResponseExample } from './rule_oas_helpers';
+import {
+  buildRuleOas,
+  invalidResponseExample,
+  type AlertingOasOperationObject,
+} from '../oas_utils';
 import {
   CREATE_RULE_REQUEST,
   RULE_NOT_FOUND_RESPONSE,

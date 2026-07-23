@@ -7,8 +7,11 @@
 
 import type { BulkGetRulesParams, BulkGetRulesResponse } from '@kbn/alerting-v2-schemas';
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
-import type { AlertingOasOperationObject } from '../json_oas_example';
-import { buildRuleOas, invalidResponseExample } from './rule_oas_helpers';
+import {
+  buildRuleOas,
+  invalidResponseExample,
+  type AlertingOasOperationObject,
+} from '../oas_utils';
 import { RULE_RESPONSE } from './rule_oas_shared_examples';
 
 export const BULK_GET_RULES_REQUEST: BulkGetRulesParams = {

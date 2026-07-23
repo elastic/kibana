@@ -6,7 +6,48 @@
  */
 
 import type { ErrorResponse } from '@kbn/alerting-v2-schemas';
-import { jsonExample, type AlertingOasOperationObject } from '../json_oas_example';
+
+/**
+ * Concrete OAS fragment shape used by Alerting v2 examples/tests.
+ * Narrower than the OpenAPI `ReferenceObject | MediaTypeObject` union so
+ * callers can read `content` without casts.
+ */
+export interface AlertingOasOperationObject {
+  requestBody?: {
+    content?: {
+      'application/json'?: {
+        examples?: Record<string, { summary?: string; value?: unknown }>;
+      };
+    };
+  };
+  responses?: Record<
+    string,
+    {
+      content?: {
+        'application/json'?: {
+          examples?: Record<string, { summary?: string; value?: unknown }>;
+        };
+      };
+    }
+  >;
+}
+
+/**
+ * Builds an OpenAPI media-type object with a single named JSON example.
+ * Shared by Alerting v2 route `oasOperationObject` helpers.
+ */
+export const jsonExample = <T>(name: string, summary: string, value: T) => ({
+  content: {
+    'application/json': {
+      examples: {
+        [name]: {
+          summary,
+          value,
+        },
+      },
+    },
+  },
+});
 
 export interface OasExampleEntry {
   name: string;

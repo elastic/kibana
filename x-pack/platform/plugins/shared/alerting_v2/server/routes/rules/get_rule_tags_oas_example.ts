@@ -6,8 +6,11 @@
  */
 
 import type { RuleTagsResponse } from '@kbn/alerting-v2-schemas';
-import type { AlertingOasOperationObject } from '../json_oas_example';
-import { buildRuleOas, invalidResponseExample } from './rule_oas_helpers';
+import {
+  buildRuleOas,
+  invalidResponseExample,
+  type AlertingOasOperationObject,
+} from '../oas_utils';
 
 export const RULE_TAGS_RESPONSE: RuleTagsResponse = {
   tags: ['production', 'infra', 'critical'],
