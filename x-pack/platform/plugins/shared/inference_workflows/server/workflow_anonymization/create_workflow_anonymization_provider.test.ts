@@ -17,6 +17,8 @@ import type { WorkflowsManagementApi } from '@kbn/workflows-management-plugin/se
 import {
   INFERENCE_PROCEED_CAPABILITY_ID,
   PII_TOKENIZATION_CAPABILITY_ID,
+  resolveInferenceProceedCapabilityValue,
+  resolvePiiTokenizationCapabilityValue,
 } from '@kbn/inference-plugin/server';
 import { aroundCompletionEventSchema } from '../../common/workflow_anonymization';
 import { createWorkflowAnonymizationProvider } from './create_workflow_anonymization_provider';
@@ -30,6 +32,12 @@ const createManagement = (): jest.Mocked<Management> => ({
   resolveWorkflowTriggerMatches: jest.fn(),
   executeWorkflowSynchronously: jest.fn(),
 });
+
+const createProvider = (
+  management: jest.Mocked<Management>,
+  ensureManagedWorkflow: jest.Mock = jest.fn().mockResolvedValue(undefined),
+  triggerCacheTtlMs = 30_000
+) => createWorkflowAnonymizationProvider({ management, ensureManagedWorkflow, triggerCacheTtlMs });
 
 const createAroundCompletionTrigger = (): WorkflowYaml['triggers'][number] => {
   // The static WorkflowYaml type models built-ins only; registered triggers are added dynamically.
@@ -62,6 +70,17 @@ const proceedStep: WorkflowYaml['steps'][number] = {
   type: 'call_site.proceed',
   with: {},
 };
+const configuredStep: WorkflowYaml['steps'][number] = {
+  name: 'configured',
+  type: 'test.step',
+  with: { type: 'call_site.proceed' },
+};
+const conditionalProceedStep: WorkflowYaml['steps'][number] = {
+  name: 'conditional',
+  type: 'if',
+  condition: 'true',
+  steps: [proceedStep],
+};
 
 const event: AroundCompletionEvent = {
   messages: [{ role: MessageRole.User, content: 'hello' }],
@@ -75,37 +94,166 @@ const proceed: InferenceProceedCapability = {
 };
 
 describe('createWorkflowAnonymizationProvider', () => {
-  it('returns without execution when no workflow matches', async () => {
+  it('rejects an empty space ID before workflow resolution', async () => {
     const management = createManagement();
-    management.resolveWorkflowTriggerMatches.mockResolvedValue({
-      matched: [],
-      invalidConditionWorkflowIds: [],
-    });
-    const provider = createWorkflowAnonymizationProvider({ management });
+    const provider = createProvider(management);
 
     await expect(
       provider.execute({
         event,
-        namespace: 'space-a',
+        namespace: '',
+        request: httpServerMock.createKibanaRequest(),
+        pii,
+        proceed,
+      })
+    ).rejects.toThrow('non-empty space ID');
+    expect(management.resolveWorkflowTriggerMatches).not.toHaveBeenCalled();
+  });
+
+  it('returns without execution when no workflow matches', async () => {
+    const management = createManagement();
+    management.resolveWorkflowTriggerMatches.mockResolvedValue({
+      matched: [],
+      invalidConditionWorkflows: [],
+    });
+    const ensureManagedWorkflow = jest.fn().mockResolvedValue(undefined);
+    const provider = createProvider(management, ensureManagedWorkflow);
+
+    await expect(
+      provider.execute({
+        event,
+        namespace: 'default',
         request: httpServerMock.createKibanaRequest(),
         pii,
         proceed,
       })
     ).resolves.toEqual({ matched: false });
+    expect(ensureManagedWorkflow).toHaveBeenCalledWith('default', expect.anything());
+    expect(management.resolveWorkflowTriggerMatches).toHaveBeenCalledWith(
+      'inference.aroundCompletion',
+      aroundCompletionEventSchema.parse(event),
+      'default'
+    );
     expect(management.executeWorkflowSynchronously).not.toHaveBeenCalled();
+  });
+
+  describe('trigger resolution cache', () => {
+    it('skips the ES lookup on the second call with the same (namespace, agentId)', async () => {
+      const management = createManagement();
+      management.resolveWorkflowTriggerMatches.mockResolvedValue({
+        matched: [],
+        invalidConditionWorkflows: [],
+      });
+      const provider = createProvider(management);
+      const request = httpServerMock.createKibanaRequest();
+      const eventWithAgent = { ...event, agentId: 'agent-a' };
+
+      await provider.execute({
+        event: eventWithAgent,
+        namespace: 'default',
+        request,
+        pii,
+        proceed,
+      });
+      await provider.execute({
+        event: eventWithAgent,
+        namespace: 'default',
+        request,
+        pii,
+        proceed,
+      });
+
+      expect(management.resolveWorkflowTriggerMatches).toHaveBeenCalledTimes(1);
+    });
+
+    it('makes a new ES call when the agentId differs', async () => {
+      const management = createManagement();
+      management.resolveWorkflowTriggerMatches.mockResolvedValue({
+        matched: [],
+        invalidConditionWorkflows: [],
+      });
+      const provider = createProvider(management);
+      const request = httpServerMock.createKibanaRequest();
+
+      await provider.execute({
+        event: { ...event, agentId: 'agent-a' },
+        namespace: 'default',
+        request,
+        pii,
+        proceed,
+      });
+      await provider.execute({
+        event: { ...event, agentId: 'agent-b' },
+        namespace: 'default',
+        request,
+        pii,
+        proceed,
+      });
+
+      expect(management.resolveWorkflowTriggerMatches).toHaveBeenCalledTimes(2);
+    });
+
+    it('makes a new ES call when the namespace differs', async () => {
+      const management = createManagement();
+      management.resolveWorkflowTriggerMatches.mockResolvedValue({
+        matched: [],
+        invalidConditionWorkflows: [],
+      });
+      const provider = createProvider(management);
+      const request = httpServerMock.createKibanaRequest();
+
+      await provider.execute({ event, namespace: 'space-a', request, pii, proceed });
+      await provider.execute({ event, namespace: 'space-b', request, pii, proceed });
+
+      expect(management.resolveWorkflowTriggerMatches).toHaveBeenCalledTimes(2);
+    });
+
+    it('makes a new ES call on every request when triggerCacheTtlMs is 0', async () => {
+      const management = createManagement();
+      management.resolveWorkflowTriggerMatches.mockResolvedValue({
+        matched: [],
+        invalidConditionWorkflows: [],
+      });
+      const provider = createProvider(management, jest.fn().mockResolvedValue(undefined), 0);
+      const request = httpServerMock.createKibanaRequest();
+
+      await provider.execute({ event, namespace: 'default', request, pii, proceed });
+      await provider.execute({ event, namespace: 'default', request, pii, proceed });
+
+      expect(management.resolveWorkflowTriggerMatches).toHaveBeenCalledTimes(2);
+    });
+
+    it('does not cache a resolution with invalid conditions', async () => {
+      const management = createManagement();
+      management.resolveWorkflowTriggerMatches.mockResolvedValue({
+        matched: [],
+        invalidConditionWorkflows: [{ id: 'broken', name: 'Broken' }],
+      });
+      const provider = createProvider(management);
+      const request = httpServerMock.createKibanaRequest();
+
+      await expect(
+        provider.execute({ event, namespace: 'default', request, pii, proceed })
+      ).rejects.toThrow('Broken');
+      await expect(
+        provider.execute({ event, namespace: 'default', request, pii, proceed })
+      ).rejects.toThrow('Broken');
+
+      expect(management.resolveWorkflowTriggerMatches).toHaveBeenCalledTimes(2);
+    });
   });
 
   it('executes one matching workflow synchronously with request-local capabilities', async () => {
     const management = createManagement();
     management.resolveWorkflowTriggerMatches.mockResolvedValue({
-      matched: [createWorkflow([proceedStep])],
-      invalidConditionWorkflowIds: [],
+      matched: [createWorkflow([configuredStep, conditionalProceedStep])],
+      invalidConditionWorkflows: [],
     });
     management.executeWorkflowSynchronously.mockResolvedValue({
       workflowExecutionId: 'execution-1',
       result: { status: ExecutionStatus.COMPLETED, output: { content: 'restored content' } },
     });
-    const provider = createWorkflowAnonymizationProvider({ management });
+    const provider = createProvider(management);
     const request = httpServerMock.createKibanaRequest();
     const abortSignal = new AbortController().signal;
     const parsedEvent = aroundCompletionEventSchema.parse(event);
@@ -123,23 +271,26 @@ describe('createWorkflowAnonymizationProvider', () => {
       },
       spaceId: 'space-a',
       request,
-      capabilities: [
-        { id: PII_TOKENIZATION_CAPABILITY_ID, value: pii },
-        { id: INFERENCE_PROCEED_CAPABILITY_ID, value: proceed },
-      ],
+      capabilities: expect.any(Array),
       abortSignal,
     });
-    const [{ context }] = management.executeWorkflowSynchronously.mock.calls[0];
+    const [{ capabilities, context }] = management.executeWorkflowSynchronously.mock.calls[0];
     expect(context.event).not.toBe(event);
+    expect(capabilities?.map(({ id }) => id)).toEqual([
+      PII_TOKENIZATION_CAPABILITY_ID,
+      INFERENCE_PROCEED_CAPABILITY_ID,
+    ]);
+    expect(resolvePiiTokenizationCapabilityValue(capabilities?.[0].value ?? {})).toBe(pii);
+    expect(resolveInferenceProceedCapabilityValue(capabilities?.[1].value ?? {})).toBe(proceed);
   });
 
   it('rejects invalid trigger conditions and overlapping workflow matches before execution', async () => {
     const management = createManagement();
-    const provider = createWorkflowAnonymizationProvider({ management });
+    const provider = createProvider(management);
 
     management.resolveWorkflowTriggerMatches.mockResolvedValue({
       matched: [createWorkflow([proceedStep])],
-      invalidConditionWorkflowIds: ['invalid-workflow'],
+      invalidConditionWorkflows: [{ id: 'invalid-workflow', name: 'Broken policy' }],
     });
     await expect(
       provider.execute({
@@ -149,12 +300,12 @@ describe('createWorkflowAnonymizationProvider', () => {
         pii,
         proceed,
       })
-    ).rejects.toThrow('invalid-workflow');
+    ).rejects.toThrow('Broken policy (invalid-workflow)');
     expect(management.executeWorkflowSynchronously).not.toHaveBeenCalled();
 
     management.resolveWorkflowTriggerMatches.mockResolvedValue({
       matched: [createWorkflow([proceedStep]), createWorkflow([proceedStep])],
-      invalidConditionWorkflowIds: [],
+      invalidConditionWorkflows: [],
     });
     await expect(
       provider.execute({
@@ -168,16 +319,15 @@ describe('createWorkflowAnonymizationProvider', () => {
     expect(management.executeWorkflowSynchronously).not.toHaveBeenCalled();
   });
 
-  it('requires exactly one proceed step and a string workflow output', async () => {
+  it('rejects when the matched workflow has no proceed step', async () => {
     const management = createManagement();
-    const provider = createWorkflowAnonymizationProvider({ management });
-
     management.resolveWorkflowTriggerMatches.mockResolvedValue({
       matched: [createWorkflow([])],
-      invalidConditionWorkflowIds: [],
+      invalidConditionWorkflows: [],
     });
+
     await expect(
-      provider.execute({
+      createProvider(management).execute({
         event,
         namespace: 'space-a',
         request: httpServerMock.createKibanaRequest(),
@@ -185,17 +335,21 @@ describe('createWorkflowAnonymizationProvider', () => {
         proceed,
       })
     ).rejects.toThrow('must contain exactly one');
+  });
 
+  it('rejects when the workflow completes without string content', async () => {
+    const management = createManagement();
     management.resolveWorkflowTriggerMatches.mockResolvedValue({
       matched: [createWorkflow([proceedStep])],
-      invalidConditionWorkflowIds: [],
+      invalidConditionWorkflows: [],
     });
     management.executeWorkflowSynchronously.mockResolvedValue({
       workflowExecutionId: 'execution-1',
       result: { status: ExecutionStatus.COMPLETED, output: {} },
     });
+
     await expect(
-      provider.execute({
+      createProvider(management).execute({
         event,
         namespace: 'space-a',
         request: httpServerMock.createKibanaRequest(),

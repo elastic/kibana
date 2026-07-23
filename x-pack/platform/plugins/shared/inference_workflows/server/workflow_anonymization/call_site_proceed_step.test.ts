@@ -7,6 +7,7 @@
 
 import { MessageRole } from '@kbn/inference-common';
 import {
+  createInferenceProceedCapabilityValue,
   INFERENCE_PROCEED_CAPABILITY_ID,
   type InferenceProceedInput,
 } from '@kbn/inference-plugin/server';
@@ -39,7 +40,10 @@ describe('inference proceed capability', () => {
   it('receives workflow-transformed input and its call-local token map', async () => {
     const invoke = jest.fn().mockResolvedValue({ rawContent: 'TOKEN' });
     const proceed = getInferenceProceedCapability([
-      { id: INFERENCE_PROCEED_CAPABILITY_ID, value: { invoke } },
+      {
+        id: INFERENCE_PROCEED_CAPABILITY_ID,
+        value: createInferenceProceedCapabilityValue({ invoke }),
+      },
     ]);
     const abortSignal = new AbortController().signal;
     const input: InferenceProceedInput = {
@@ -53,10 +57,10 @@ describe('inference proceed capability', () => {
     expect(invoke).toHaveBeenCalledWith(input);
   });
 
-  it('rejects a malformed capability', () => {
+  it('rejects an unregistered look-alike capability', () => {
     expect(() =>
       getInferenceProceedCapability([
-        { id: INFERENCE_PROCEED_CAPABILITY_ID, value: { invoke: 'not-a-function' } },
+        { id: INFERENCE_PROCEED_CAPABILITY_ID, value: { invoke: jest.fn() } },
       ])
     ).toThrow(`Workflow capability "${INFERENCE_PROCEED_CAPABILITY_ID}" is invalid`);
   });

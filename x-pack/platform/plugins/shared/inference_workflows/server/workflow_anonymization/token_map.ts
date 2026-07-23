@@ -7,10 +7,19 @@
 
 import type { TokenMap } from '../../common/workflow_anonymization';
 
+const replaceStringValues = (text: string, replacements: Record<string, string>): string => {
+  const keys = Object.keys(replacements).filter((k) => k.length > 0);
+  if (keys.length === 0) return text;
+  const sorted = [...keys].sort((a, b) => b.length - a.length);
+  let result = text;
+  for (const key of sorted) {
+    result = result.split(key).join(replacements[key]);
+  }
+  return result;
+};
+
 export const restoreTokens = (value: string, tokenMap: TokenMap): string =>
-  Object.entries(tokenMap)
-    .sort(([left], [right]) => right.length - left.length)
-    .reduce(
-      (current, [token, entry]) => (token ? current.split(token).join(entry.original) : current),
-      value
-    );
+  replaceStringValues(
+    value,
+    Object.fromEntries(Object.entries(tokenMap).map(([token, entry]) => [token, entry.original]))
+  );

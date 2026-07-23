@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { resolveReplacementsEncryptionKey } from './plugin';
+import type { WorkflowAnonymizationProvider } from './workflow_anonymization_provider';
+import { resolveReplacementsEncryptionKey, resolveWorkflowAnonymizationOptions } from './plugin';
 
 describe('resolveReplacementsEncryptionKey', () => {
   it('returns undefined when anonymization is disabled', async () => {
@@ -36,5 +37,55 @@ describe('resolveReplacementsEncryptionKey', () => {
         anonymizationEnabled: true,
       })
     ).resolves.toBeUndefined();
+  });
+});
+
+describe('resolveWorkflowAnonymizationOptions', () => {
+  const provider: WorkflowAnonymizationProvider = {
+    supportsSynchronousExecution: true,
+    execute: jest.fn(),
+  };
+
+  it('does not enable or log when workflow mode is disabled', () => {
+    const logger = { error: jest.fn() };
+
+    expect(
+      resolveWorkflowAnonymizationOptions({
+        enabled: false,
+        failureMode: 'block',
+        provider,
+        logger,
+      })
+    ).toBeUndefined();
+    expect(logger.error).not.toHaveBeenCalled();
+  });
+
+  it('enables the registered synchronous provider', () => {
+    const logger = { error: jest.fn() };
+
+    expect(
+      resolveWorkflowAnonymizationOptions({
+        enabled: true,
+        failureMode: 'allow_unsafe',
+        provider,
+        logger,
+      })
+    ).toEqual({ provider, failureMode: 'allow_unsafe' });
+    expect(logger.error).not.toHaveBeenCalled();
+  });
+
+  it('logs once and retains legacy behavior when the provider is unavailable', () => {
+    const logger = { error: jest.fn() };
+
+    expect(
+      resolveWorkflowAnonymizationOptions({
+        enabled: true,
+        failureMode: 'block',
+        logger,
+      })
+    ).toBeUndefined();
+    expect(logger.error).toHaveBeenCalledWith(
+      expect.stringContaining('retaining legacy anonymization')
+    );
   });
 });

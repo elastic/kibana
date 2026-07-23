@@ -53,6 +53,16 @@ export interface InferenceStartDependencies {
  */
 export interface InferenceServerSetup {
   registerWorkflowAnonymizationProvider(provider: WorkflowAnonymizationProvider): void;
+  /** Operational config values derived from the inference plugin's config, exposed so that
+   *  consumer plugins (e.g. inference_workflows) can share the same settings without
+   *  duplicating config keys. */
+  anonymizationConfig: {
+    /** Trigger-resolution cache TTL in milliseconds. 0 means caching is disabled. */
+    triggerCacheTtlMs: number;
+    /** Whether workflow-driven anonymization is enabled. Consumer plugins should use this
+     *  to gate any unconditional startup work (e.g. managed workflow installation). */
+    workflowDrivenEnabled: boolean;
+  };
 }
 
 /**
