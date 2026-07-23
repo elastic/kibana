@@ -247,7 +247,6 @@ export const useDocumentSummary = ({
         }
         await refetchSummary();
       } else {
-        setHasSummary(false);
         if (responseSummary.includes('Failed to load action')) {
           setIsConnectorMissing(true);
         } else {
