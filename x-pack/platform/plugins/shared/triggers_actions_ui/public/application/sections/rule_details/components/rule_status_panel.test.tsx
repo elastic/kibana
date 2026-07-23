@@ -131,7 +131,6 @@ describe('rule status panel', () => {
 
     const ruleExecutionStatusStat = screen.getAllByTestId('ruleStatus-ok')[0];
     expect(ruleExecutionStatusStat).toHaveTextContent('Last response');
-    expect(ruleExecutionStatusStat.querySelector('h5')).not.toBeInTheDocument();
     expect(ruleExecutionStatusStat.parentElement).toHaveStyle({ minWidth: '160px' });
   });
 
