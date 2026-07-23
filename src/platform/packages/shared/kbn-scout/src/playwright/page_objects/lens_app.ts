@@ -1464,16 +1464,9 @@ export class LensApp {
     }
   }
 
-  /**
-   * Settle between Lens keyboard DnD arrow presses (FTR used `common.sleep(200)`).
-   * Polls until ~200ms elapsed instead of `waitForTimeout` / eslint-disable.
-   */
-  private async paceKeyboardDragDrop(previousActiveKey?: string): Promise<string> {
-    const started = Date.now();
-    await this.page.waitForFunction((start) => Date.now() - start >= 200, started, {
-      timeout: 2_000,
-    });
-    const activeKey = await this.page.evaluate(() => {
+  /** Active keyboard-DnD drop target key (test-subj or class+text fallback). */
+  private async getKeyboardDragActiveKey(): Promise<string> {
+    return this.page.evaluate(() => {
       const active = document.querySelector('.domDroppable--active, .domDroppable--hover');
       if (!active) {
         return '';
@@ -1483,7 +1476,17 @@ export class LensApp {
         `${active.className}:${(active.textContent ?? '').slice(0, 40)}`
       );
     });
-    return activeKey || previousActiveKey || '';
+  }
+
+  /**
+   * Pace between Lens keyboard DnD arrow presses (FTR `common.sleep(200)`).
+   * Lens does not expose a reliable settle signal here: waiting for
+   * `.domDroppable--active` key changes times out on common workspace drops
+   * (highlight often updates without a distinct key). Intentional short sleep.
+   */
+  private async paceKeyboardDragDrop(previousActiveKey?: string): Promise<string> {
+    await this.page.waitForTimeout(200);
+    return (await this.getKeyboardDragActiveKey()) || previousActiveKey || '';
   }
 
   /**
@@ -1517,7 +1520,6 @@ export class LensApp {
 
   /**
    * Keyboard-moves a dimension by arrow steps (FTR `dimensionKeyboardDragDrop`).
-   * FTR sleeps 200ms between arrow presses; we use soft active-target polling instead.
    */
   async dimensionKeyboardDragDrop(group: string, index = 0, steps = 1, reverse = false) {
     const handlersLocator = this.page.locator(
