@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
+import { z } from '@kbn/zod/v4';
 import { defineRoute } from '../types';
-import { alertParamsRt, type PreviewChartResponse } from './types';
+import { alertParamsSchema, type PreviewChartResponse } from './types';
 
 export interface TransactionDurationChartPreviewResponse {
   latencyChartPreview: PreviewChartResponse;
@@ -15,5 +15,5 @@ export interface TransactionDurationChartPreviewResponse {
 export const transactionDurationChartPreviewRoute =
   defineRoute<TransactionDurationChartPreviewResponse>()({
     endpoint: 'GET /internal/apm/rule_types/transaction_duration/chart_preview',
-    params: t.type({ query: alertParamsRt }),
+    params: z.object({ query: alertParamsSchema }),
   });

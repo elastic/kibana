@@ -8,18 +8,19 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiAccordion,
+  EuiBadge,
   EuiButtonIcon,
   EuiEmptyPrompt,
+  EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
   EuiLoadingSpinner,
+  EuiSpacer,
   EuiText,
   EuiTextColor,
   EuiTitle,
-  EuiBadge,
-  EuiSpacer,
-  EuiFieldSearch,
-  EuiHorizontalRule,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -180,15 +181,16 @@ export const FieldLibraryPanel: React.FC<FieldLibraryPanelProps> = ({
                   renderFieldRow(
                     fd,
                     <EuiFlexItem grow={false}>
-                      <EuiButtonIcon
-                        iconType="unlink"
-                        aria-label={i18n.UNLINK_FIELD}
-                        title={i18n.UNLINK_FIELD}
-                        size="xs"
-                        color="danger"
-                        onClick={() => handleUnlink(fd)}
-                        data-test-subj="fieldLibraryUnlinkButton"
-                      />
+                      <EuiToolTip content={i18n.UNLINK_FIELD} disableScreenReaderOutput>
+                        <EuiButtonIcon
+                          iconType="unlink"
+                          aria-label={i18n.UNLINK_FIELD}
+                          size="xs"
+                          color="danger"
+                          onClick={() => handleUnlink(fd)}
+                          data-test-subj="fieldLibraryUnlinkButton"
+                        />
+                      </EuiToolTip>
                     </EuiFlexItem>,
                     'fieldLibraryLinkedRow'
                   )
@@ -211,25 +213,30 @@ export const FieldLibraryPanel: React.FC<FieldLibraryPanelProps> = ({
                 <>
                   {hasReferenceMode && (
                     <EuiFlexItem grow={false}>
-                      <EuiButtonIcon
-                        iconType="link"
-                        aria-label={i18n.REFERENCE_FIELD}
-                        title={i18n.REFERENCE_FIELD}
-                        size="xs"
-                        onClick={() => handleReference(fd)}
-                        data-test-subj="fieldLibraryReferenceButton"
-                      />
+                      <EuiToolTip content={i18n.REFERENCE_FIELD} disableScreenReaderOutput>
+                        <EuiButtonIcon
+                          iconType="link"
+                          aria-label={i18n.REFERENCE_FIELD}
+                          size="xs"
+                          onClick={() => handleReference(fd)}
+                          data-test-subj="fieldLibraryReferenceButton"
+                        />
+                      </EuiToolTip>
                     </EuiFlexItem>
                   )}
                   <EuiFlexItem grow={false}>
-                    <EuiButtonIcon
-                      iconType={hasReferenceMode ? 'copy' : 'plusInCircle'}
-                      aria-label={hasReferenceMode ? i18n.COPY_FIELD : i18n.INSERT_FIELD}
-                      title={hasReferenceMode ? i18n.COPY_FIELD : i18n.INSERT_FIELD}
-                      size="xs"
-                      onClick={() => handleInsert(fd)}
-                      data-test-subj="fieldLibraryInsertButton"
-                    />
+                    <EuiToolTip
+                      content={hasReferenceMode ? i18n.COPY_FIELD : i18n.INSERT_FIELD}
+                      disableScreenReaderOutput
+                    >
+                      <EuiButtonIcon
+                        iconType={hasReferenceMode ? 'copy' : 'plusInCircle'}
+                        aria-label={hasReferenceMode ? i18n.COPY_FIELD : i18n.INSERT_FIELD}
+                        size="xs"
+                        onClick={() => handleInsert(fd)}
+                        data-test-subj="fieldLibraryInsertButton"
+                      />
+                    </EuiToolTip>
                   </EuiFlexItem>
                 </>
               )

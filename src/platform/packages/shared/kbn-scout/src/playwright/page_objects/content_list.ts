@@ -191,6 +191,18 @@ export class ContentListWrapper {
       .click();
   }
 
+  /**
+   * Open the tags filter popover and select the option for the given tag name.
+   *
+   * The subject is derived inline to mirror `getContentListTagOptionSubj` from
+   * `@kbn/content-list-common`; it isn't imported because `@kbn/scout` is on the
+   * Scout selective-testing critical path and must not depend on that package.
+   */
+  async selectTag(name: string) {
+    await this.tagsFilterButton.click();
+    await this.page.testSubj.locator(`tag-searchbar-option-${name.replace(' ', '_')}`).click();
+  }
+
   /** Select all items via the table header checkbox and confirm the bulk-delete dialog. */
   async selectAllAndDelete() {
     await this.tableSelectAllCheckbox.check();

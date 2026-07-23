@@ -41,6 +41,7 @@ export const ClosablePopoverTitle = ({
             disableScreenReaderOutput
           >
             <EuiButtonIcon
+              data-test-subj="closablePopoverTitleButton"
               iconType="cross"
               color="danger"
               aria-label={i18n.translate(

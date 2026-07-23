@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getEntityIcon } from './utils';
+import { getEntityIcon, MAX_RECENT_LEADS } from './utils';
 
 describe('getEntityIcon', () => {
   it('returns "user" for user entity type', () => {
@@ -26,5 +26,13 @@ describe('getEntityIcon', () => {
 
   it('returns "globe" as fallback icon for unknown entity type', () => {
     expect(getEntityIcon('unknown')).toBe('globe');
+  });
+});
+
+describe('MAX_RECENT_LEADS', () => {
+  it('is derived from the per-run engine cap and stays at 20', () => {
+    // Guards against silent drift between the per-run lead cap
+    // (MAX_LEADS_PER_RUN) and the recent-leads ceiling surfaced in the UI.
+    expect(MAX_RECENT_LEADS).toBe(20);
   });
 });

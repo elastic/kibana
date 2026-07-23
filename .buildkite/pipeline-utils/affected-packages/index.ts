@@ -14,6 +14,7 @@ import { getAffectedProjectsMoon } from './strategy_moon';
 export * from './const';
 export * from './utils';
 export { listChangedFiles } from './strategy_git';
+export { getAffectedProjectsMoon } from './strategy_moon';
 
 export interface AffectedPackagesConfig {
   strategy?: 'git' | 'moon';

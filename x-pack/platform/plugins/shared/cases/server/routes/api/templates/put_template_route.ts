@@ -6,7 +6,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import yaml from 'js-yaml';
+import { parse as yamlParse } from 'yaml';
+import { isBoom } from '@hapi/boom';
 import {
   UpdateTemplateInputSchema,
   ParsedTemplateDefinitionSchema,
@@ -53,7 +54,7 @@ export const putTemplateRoute = createCasesRoute({
       // Validate YAML definition
       let parsedYaml: unknown;
       try {
-        parsedYaml = yaml.load(input.definition);
+        parsedYaml = yamlParse(input.definition);
       } catch (yamlError) {
         return response.badRequest({
           body: { message: `Invalid YAML definition: ${yamlError}` },
@@ -79,6 +80,12 @@ export const putTemplateRoute = createCasesRoute({
         body: parsedTemplate,
       });
     } catch (error) {
+      if (isBoom(error) && error.output.statusCode === 409) {
+        return response.conflict({
+          body: { message: error.message },
+        });
+      }
+
       throw createCaseError({
         message: `Failed to update template: ${error}`,
         error,

@@ -13,8 +13,8 @@ import type { AvailableConnectorWithId } from '@kbn/gen-ai-functional-testing';
 import { getAvailableConnectors } from '@kbn/gen-ai-functional-testing';
 
 export interface EvaluationTestOptions extends ScoutTestOptions {
-  connector: AvailableConnectorWithId;
-  evaluationConnector: AvailableConnectorWithId;
+  connectorParam: AvailableConnectorWithId;
+  evaluationConnectorParam: AvailableConnectorWithId;
   repetitions: number;
   timeout?: number;
 }
@@ -91,8 +91,8 @@ export function createPlaywrightEvalsConfig({
             name: connector.id,
             use: {
               ...project.use,
-              connector,
-              evaluationConnector,
+              connectorParam: connector,
+              evaluationConnectorParam: evaluationConnector,
               repetitions: experimentRepetitions,
             },
           };
@@ -115,6 +115,18 @@ export function createPlaywrightEvalsConfig({
     globalSetup: require.resolve('./setup.js'),
     globalTeardown: require.resolve('./teardown.js'),
     timeout: timeout ?? 5 * 60_000,
+    // Playwright 1.61 on Node >=23.5 registers a synchronous `module.registerHooks` load hook
+    // that transforms all first-party TypeScript (anything not in node_modules) with its own
+    // bundled Babel. Workspace `@kbn/*` symlinks resolve to real paths outside node_modules, so
+    // they are captured by Playwright's hook BEFORE `@kbn/babel-register` (pirates) can run.
+    // Playwright's bundled Babel does not handle TypeScript namespace `export import` syntax
+    // correctly and produces invalid CJS output, causing a SyntaxError at load time.
+    //
+    // Defer all first-party Kibana TypeScript to `@kbn/babel-register`; Playwright already
+    // skips node_modules itself. `x-pack/` covers plugins and packages; `src/` covers core.
+    build: {
+      external: ['**/x-pack/**', '**/src/**'],
+    },
     ...(testIgnore !== undefined ? { testIgnore } : {}),
   });
 }

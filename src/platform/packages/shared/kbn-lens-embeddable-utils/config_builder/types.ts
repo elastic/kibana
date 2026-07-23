@@ -151,6 +151,8 @@ export interface LensBreakdownTopValuesConfig {
   type: 'topValues';
   field: string;
   size?: number;
+  secondaryFields?: string[];
+  accuracyMode?: boolean;
   orderBy?: Pick<TermsIndexPatternColumn['params'], 'orderDirection' | 'orderBy' | 'orderAgg'>;
 }
 

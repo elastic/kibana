@@ -5,10 +5,20 @@
  * 2.0.
  */
 
+import type { Type } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
+import { ALERT_SEVERITY_VALUES, type AlertSeverity } from '@kbn/rule-data-utils';
 import { ruleParamsSchemaV1 } from '@kbn/response-ops-rule-params';
 import { rRuleResponseSchemaV1 } from '../../../r_rule';
 import { alertsFilterQuerySchemaV1 } from '../../../alerts_filter_query';
+import {
+  MAX_SNOOZED_INSTANCE_CONDITIONS,
+  MAX_SNOOZED_ALERT_INSTANCES,
+  MAX_SNOOZED_INSTANCE_ID_LENGTH,
+  MAX_SNOOZED_CONDITION_FIELD_LENGTH,
+  MAX_SNOOZE_EXPIRES_AT_LENGTH,
+  MAX_SNOOZED_BY_LENGTH,
+} from '../../../../max_alert_limit';
 import {
   ruleNotifyWhen as ruleNotifyWhenV1,
   ruleExecutionStatusValues as ruleExecutionStatusValuesV1,
@@ -490,6 +500,54 @@ export const artifactsSchema = schema.object({
   investigation_guide: schema.maybe(investigationGuideSchema),
 });
 
+const snoozedAlertConditionSchema = schema.oneOf([
+  schema.object({
+    type: schema.literal('field_change'),
+    field: schema.string({ maxLength: MAX_SNOOZED_CONDITION_FIELD_LENGTH }),
+  }),
+  schema.object({ type: schema.literal('severity_change') }),
+  schema.object({
+    type: schema.literal('severity_equals'),
+    value: schema.oneOf(
+      ALERT_SEVERITY_VALUES.map((severity) => schema.literal(severity)) as [Type<AlertSeverity>]
+    ),
+  }),
+]);
+
+export const snoozedAlertInstanceSchema = schema.object({
+  instance_id: schema.string({
+    maxLength: MAX_SNOOZED_INSTANCE_ID_LENGTH,
+    meta: { description: 'The identifier of the snoozed alert instance.' },
+  }),
+  expires_at: schema.maybe(
+    schema.string({
+      maxLength: MAX_SNOOZE_EXPIRES_AT_LENGTH,
+      meta: {
+        description: 'The datetime at which the per-alert snooze expires, in ISO 8601 format.',
+      },
+    })
+  ),
+  conditions: schema.maybe(
+    schema.arrayOf(snoozedAlertConditionSchema, {
+      maxSize: MAX_SNOOZED_INSTANCE_CONDITIONS,
+      meta: { description: 'Conditions that automatically expire the snooze when met.' },
+    })
+  ),
+  condition_operator: schema.maybe(
+    schema.oneOf([schema.literal('any'), schema.literal('all')], {
+      meta: { description: 'Logical operator applied to the conditions array.' },
+    })
+  ),
+  snoozed_at: schema.string({
+    maxLength: MAX_SNOOZE_EXPIRES_AT_LENGTH,
+    meta: { description: 'The datetime at which the alert was snoozed, in ISO 8601 format.' },
+  }),
+  snoozed_by: schema.string({
+    maxLength: MAX_SNOOZED_BY_LENGTH,
+    meta: { description: 'The identifier of the user who snoozed the alert.' },
+  }),
+});
+
 /**
  * This is a public schema that is used to generate the OpenAPI schema for all of our public APIs that return a rule response.
  */
@@ -757,6 +815,12 @@ export const ruleResponseInternalSchema = schema.object(
           },
         })
       )
+    ),
+    snoozed_alert_instances: schema.maybe(
+      schema.arrayOf(snoozedAlertInstanceSchema, {
+        maxSize: MAX_SNOOZED_ALERT_INSTANCES,
+        meta: { description: 'List of per-alert snooze entries for this rule.' },
+      })
     ),
     is_snoozed_until: schema.maybe(
       schema.nullable(

@@ -370,12 +370,6 @@ export class StorageIndexAdapter<
     }
   }
 
-  /**
-   * If a write index already exists and its mappings are stale,
-   * updates the index template and pushes the new mappings.
-   * No-op when no index exists yet (preserving lazy-write semantics)
-   * or when mappings are already up-to-date.
-   */
   private async updateMappingsIfNeeded(): Promise<void> {
     const expectedSchemaVersion = getSchemaVersion(this.storage);
 
@@ -525,10 +519,22 @@ export class StorageIndexAdapter<
 
     const bulkOperations = operations.flatMap((operation): BulkOperationContainer[] => {
       if ('index' in operation) {
+        const { if_seq_no: ifSeqNo, if_primary_term: ifPrimaryTerm } = operation.index;
+        const hasSeqNo = ifSeqNo != null;
+        const hasPrimaryTerm = ifPrimaryTerm != null;
+        if (hasSeqNo !== hasPrimaryTerm) {
+          throw new Error(
+            'Bulk index OCC requires both if_seq_no and if_primary_term to be set together'
+          );
+        }
+
         return [
           {
             index: {
               _id: operation.index._id,
+              ...(hasSeqNo && hasPrimaryTerm
+                ? { if_seq_no: ifSeqNo, if_primary_term: ifPrimaryTerm }
+                : {}),
             },
           },
           operation.index.document as {},
@@ -817,6 +823,7 @@ export class StorageIndexAdapter<
       get: this.get,
       existsIndex: this.existsIndex,
       esql: this.esql,
+      reconcileMappings: () => this.updateMappingsIfNeeded(),
     };
   }
 }

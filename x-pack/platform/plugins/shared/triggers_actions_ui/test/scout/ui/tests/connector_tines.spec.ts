@@ -6,7 +6,7 @@
  */
 
 import type { ScoutPage } from '@kbn/scout';
-import { tags, EuiComboBoxWrapper } from '@kbn/scout';
+import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test, CONNECTORS_APP_PATH, CONNECTORS_LIST_SELECTORS } from '../fixtures';
 
@@ -140,7 +140,13 @@ test.describe('Tines connector', { tag: tags.stateful.classic }, () => {
     const connectorName = `scout-tines-${Date.now()}`;
 
     await page.testSubj.click('createConnectorButton');
+    await page.testSubj.locator('.tines-card').waitFor({ state: 'visible' });
+    await page.testSubj.click('.index-card');
+    const backBtn = page.testSubj.locator('create-connector-flyout-back-btn');
+    await backBtn.waitFor({ state: 'visible' });
+    await backBtn.click();
     await page.testSubj.click('.tines-card');
+    await page.testSubj.locator('nameInput').waitFor({ state: 'visible' });
     await fillTinesConnectorFields(page, { name: connectorName, url: TINES_CONFIG.url });
 
     const saveButton = page.testSubj.locator('create-connector-flyout-save-btn');
@@ -323,7 +329,7 @@ test.describe('Tines connector', { tag: tags.stateful.classic }, () => {
     await page.testSubj.click('testConnectorTab');
 
     await expect(page.testSubj.locator('tines-storySelector')).toBeEnabled();
-    await new EuiComboBoxWrapper(page, 'tines-storySelector').selectSingleOption(MOCK_STORY.name);
+    await page.components.comboBox('tines-storySelector').setSelectedOptions([MOCK_STORY.name]);
 
     await expect(page.testSubj.locator('tines-webhookSelector')).toBeEnabled();
   });
@@ -338,21 +344,21 @@ test.describe('Tines connector', { tag: tags.stateful.classic }, () => {
     await page.testSubj.click(`edit${testPageConnectorId}`);
     await page.testSubj.click('testConnectorTab');
 
-    const storyCombo = new EuiComboBoxWrapper(page, 'tines-storySelector');
-    const webhookCombo = new EuiComboBoxWrapper(page, 'tines-webhookSelector');
+    const storyCombo = page.components.comboBox('tines-storySelector');
+    const webhookCombo = page.components.comboBox('tines-webhookSelector');
 
     await expect(page.testSubj.locator('tines-storySelector')).toBeEnabled();
-    await storyCombo.selectSingleOption(MOCK_STORY.name);
+    await storyCombo.setSelectedOptions([MOCK_STORY.name]);
     await expect(page.testSubj.locator('tines-webhookSelector')).toBeEnabled();
-    await webhookCombo.selectSingleOption(MOCK_WEBHOOK.name);
-    expect(await webhookCombo.getSelectedValue()).toContain(MOCK_WEBHOOK.name);
+    await webhookCombo.setSelectedOptions([MOCK_WEBHOOK.name]);
+    expect(await webhookCombo.getSelectedOptions()).toContain(MOCK_WEBHOOK.name);
 
     // Clear the story — the webhook selector should be disabled and emptied.
     await storyCombo.clear();
     await expect(page.testSubj.locator('tines-webhookSelector')).toHaveClass(
       /euiComboBox-isDisabled/
     );
-    expect(await webhookCombo.getSelectedValue()).toBe('');
+    expect(await webhookCombo.getSelectedOptions()).toStrictEqual([]);
   });
 
   test('keeps the Run button disabled when story+webhook are set but JSON is missing', async ({
@@ -366,11 +372,9 @@ test.describe('Tines connector', { tag: tags.stateful.classic }, () => {
     await page.testSubj.click('testConnectorTab');
 
     await expect(page.testSubj.locator('tines-storySelector')).toBeEnabled();
-    await new EuiComboBoxWrapper(page, 'tines-storySelector').selectSingleOption(MOCK_STORY.name);
+    await page.components.comboBox('tines-storySelector').setSelectedOptions([MOCK_STORY.name]);
     await expect(page.testSubj.locator('tines-webhookSelector')).toBeEnabled();
-    await new EuiComboBoxWrapper(page, 'tines-webhookSelector').selectSingleOption(
-      MOCK_WEBHOOK.name
-    );
+    await page.components.comboBox('tines-webhookSelector').setSelectedOptions([MOCK_WEBHOOK.name]);
 
     // Story + webhook are filled but JSON body is still empty.
     await expect(page.testSubj.locator('executeActionButton')).toBeDisabled();
@@ -387,11 +391,9 @@ test.describe('Tines connector', { tag: tags.stateful.classic }, () => {
     await page.testSubj.click('testConnectorTab');
 
     await expect(page.testSubj.locator('tines-storySelector')).toBeEnabled();
-    await new EuiComboBoxWrapper(page, 'tines-storySelector').selectSingleOption(MOCK_STORY.name);
+    await page.components.comboBox('tines-storySelector').setSelectedOptions([MOCK_STORY.name]);
     await expect(page.testSubj.locator('tines-webhookSelector')).toBeEnabled();
-    await new EuiComboBoxWrapper(page, 'tines-webhookSelector').selectSingleOption(
-      MOCK_WEBHOOK.name
-    );
+    await page.components.comboBox('tines-webhookSelector').setSelectedOptions([MOCK_WEBHOOK.name]);
     await setTinesJsonBody(page, { hello: 'tines' });
 
     await expect(page.testSubj.locator('executeActionButton')).toBeEnabled();

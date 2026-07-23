@@ -6,7 +6,7 @@ steps:
     soft_fail: true
     agents:
       machineType: n2-highcpu-8
-      diskSizeGb: 95
+      diskSizeGb: 130
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
       provider: gcp

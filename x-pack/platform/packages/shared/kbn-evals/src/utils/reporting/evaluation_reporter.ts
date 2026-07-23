@@ -16,7 +16,7 @@ export type EvaluationReporter = (
   evalsClient: EvalsClient,
   experimentId: string,
   log: SomeDevLog,
-  options?: { taskModelId?: string; suiteId?: string }
+  options?: { taskModelId?: string; suiteId?: string; executionId?: string }
 ) => Promise<void>;
 
 function buildReportHeader(taskModel: Model, evaluatorModel: Model): string[] {

@@ -466,4 +466,72 @@ describe('Url autocomplete', () => {
       method: 'PUT',
     });
   })();
+
+  (function () {
+    // https://github.com/elastic/kibana/issues/182360
+    // When a concrete path segment (e.g. `_sync_job`) also matches a sibling
+    // parameter pattern (e.g. `{connector_id}`), the endpoint whose pattern
+    // matches literally must win, regardless of endpoint registration order.
+    const paramFirst: EndpointsById = {
+      'connector.get': {
+        patterns: ['_connector/{connector_id}'],
+        methods: ['GET'],
+      },
+      'connector.sync_job_list': {
+        patterns: ['_connector/_sync_job'],
+        methods: ['GET'],
+      },
+    };
+    patternsTest(
+      'Competing endpoints - literal wins over param (param registered first)',
+      paramFirst,
+      '_connector/_sync_job$',
+      { method: 'GET', endpoint: 'connector.sync_job_list' }
+    );
+
+    const literalFirst: EndpointsById = {
+      'connector.sync_job_list': {
+        patterns: ['_connector/_sync_job'],
+        methods: ['GET'],
+      },
+      'connector.get': {
+        patterns: ['_connector/{connector_id}'],
+        methods: ['GET'],
+      },
+    };
+    patternsTest(
+      'Competing endpoints - literal wins over param (literal registered first)',
+      literalFirst,
+      '_connector/_sync_job$',
+      { method: 'GET', endpoint: 'connector.sync_job_list' }
+    );
+
+    // A genuine parameter value must still resolve to the param endpoint.
+    patternsTest(
+      'Competing endpoints - param still matches non-literal value',
+      paramFirst,
+      '_connector/some_id$',
+      { method: 'GET', endpoint: 'connector.get', connector_id: 'some_id' }
+    );
+
+    // Explicit priority remains the primary key: it wins even when the
+    // literal-segment specificity would favor the other endpoint.
+    const paramWithPriority: EndpointsById = {
+      'connector.get': {
+        patterns: ['_connector/{connector_id}'],
+        methods: ['GET'],
+        priority: 0,
+      },
+      'connector.sync_job_list': {
+        patterns: ['_connector/_sync_job'],
+        methods: ['GET'],
+      },
+    };
+    patternsTest(
+      'Competing endpoints - explicit priority beats specificity',
+      paramWithPriority,
+      '_connector/_sync_job$',
+      { method: 'GET', endpoint: 'connector.get', connector_id: '_sync_job' }
+    );
+  })();
 });

@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import Boom from '@hapi/boom';
 import { getMeta } from '@kbn/as-code-shared-schemas';
 import type { RequestTiming } from '@kbn/core-http-server';
 import type { SavedObject, SavedObjectsUpdateResponse } from '@kbn/core-saved-objects-api-server';
@@ -25,7 +24,8 @@ export function getDashboardCRUResponseBody(
   operation: Operation,
   strictValidationSchema: ReturnType<typeof getDashboardStateSchema>,
   isDashboardAppRequest: boolean = false,
-  serverTiming?: RequestTiming
+  serverTiming?: RequestTiming,
+  useGASchemas?: boolean
 ) {
   const timer = serverTiming?.start('transform-dashboard-out');
 
@@ -37,7 +37,8 @@ export function getDashboardCRUResponseBody(
       savedObject.attributes,
       savedObject.references,
       isDashboardAppRequest,
-      strictValidationSchema
+      strictValidationSchema,
+      useGASchemas
     ));
     warnings.push(...dashboardStateWarnings);
     if (!isDashboardAppRequest && operation === 'read') {
@@ -47,8 +48,6 @@ export function getDashboardCRUResponseBody(
       dashboardState = scopedDashboardState;
       warnings.push(...scopeWarnings);
     }
-  } catch (transformOutError) {
-    throw Boom.badRequest(`Invalid response. ${transformOutError.message}`);
   } finally {
     timer?.end();
   }

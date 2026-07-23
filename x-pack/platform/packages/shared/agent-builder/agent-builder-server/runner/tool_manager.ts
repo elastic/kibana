@@ -54,6 +54,13 @@ export interface ToolManager {
   setEventEmitter(eventEmitter: AgentEventEmitterFn): void;
 
   /**
+   * Sets the token budget used by the tool-result length guardrail for tools that
+   * don't define their own `maxResultTokens` override.
+   * Should be called once per run before adding tools (else will use default value);
+   */
+  setMaxToolResultTokens(maxTokens: number): void;
+
+  /**
    * Adds tools to the tool manager.
    * Supports both executable tools and browser API tools.
    * @param input - The tool input configuration (executable or browser)
@@ -82,6 +89,14 @@ export interface ToolManager {
   getToolIdMapping(): Map<string, string>;
 
   getToolMeta(toolId: string): { origin: ToolOrigin | undefined; type: ToolType | undefined };
+
+  /**
+   * Returns the resolved executable tool for the given internal id, or `undefined`
+   * if no such tool was registered for this run. Use with `Runner.runInternalTool`
+   * to dispatch a tool from outside the LangChain graph (e.g. `exec_tool` in bash)
+   * while still going through the standard hooks/telemetry pipeline.
+   */
+  getExecutable(toolId: string): ExecutableTool | undefined;
 
   /**
    * Gets the internal tool IDs of all dynamic tools currently in the tool manager.

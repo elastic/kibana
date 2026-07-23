@@ -22,7 +22,8 @@ import {
 } from '../../../screens/unified_timeline';
 
 const mockTimeline = getTimeline();
-describe(
+// Failing: See https://github.com/elastic/kibana/issues/276805
+describe.skip(
   `timeline cell actions`,
   {
     tags: ['@ess'],
