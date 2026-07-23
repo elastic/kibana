@@ -12,12 +12,12 @@
 // workflow.execute. The Orchestrators keep the canonical Watch ids so they are
 // projected 1:1 as the Watches; the Workers carry -worker ids and are not shown
 // as top-level Watches.
-import WATCH_FLOOR_ORCHESTRATOR_YAML from './watch_floor_orchestrator.yaml';
-import WATCH_FLOOR_WORKER_YAML from './watch_floor_worker.yaml';
 import WATCH_DARK_ORCHESTRATOR_YAML from './watch_dark_orchestrator.yaml';
 import WATCH_DARK_WORKER_YAML from './watch_dark_worker.yaml';
 import WATCH_DEEP_ORCHESTRATOR_YAML from './watch_deep_orchestrator.yaml';
 import WATCH_DEEP_WORKER_YAML from './watch_deep_worker.yaml';
+import WATCH_FLOOR_ORCHESTRATOR_YAML from './watch_floor_orchestrator.yaml';
+import WATCH_FLOOR_WORKER_YAML from './watch_floor_worker.yaml';
 import WATCH_OFFICER_YAML from './watch_officer.yaml';
 import type { ManagedWorkflowDefinition } from '../../types';
 
