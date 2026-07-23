@@ -30,7 +30,8 @@ import { buildSpaceFilterTerms } from '../lib/space_filter';
  *      history and in-flight step progress. These are workflows-plugin
  *      internal indices, so they're read with the internal user; the
  *      route itself is gated on the plugin's read privilege and only
- *      run *metadata* (never step outputs) is surfaced.
+ *      run *metadata* is surfaced (step ids, resolved request input
+ *      `report_id` for the strip headline — never hunt step outputs).
  *   2. `.kibana-threat-intel-hunt-findings` — new-findings counts per
  *      cycle plus the 24h activity histogram (space filtered, current
  *      user).
@@ -84,7 +85,79 @@ interface StepExecutionSource {
   stepId?: string;
   status?: string;
   startedAt?: string;
+  stepExecutionIndex?: number;
+  /**
+   * Resolved step config. For `run_hunt_orchestrator` this is the
+   * kibana.request payload: `{ body: { report_id, tier2_when }, ... }`.
+   */
+  input?: unknown;
+  /** Present on completed elasticsearch.search steps (candidate load). */
+  output?: unknown;
 }
+
+const ORCHESTRATOR_STEP_ID = 'run_hunt_orchestrator';
+const LOAD_CANDIDATES_STEP_ID = 'load_hunt_candidates';
+
+/** Exported for unit tests — pull report_id from a kibana.request step input. */
+export const extractReportIdFromStepInput = (input: unknown): string | undefined => {
+  if (!input || typeof input !== 'object') {
+    return undefined;
+  }
+  const body = (input as { body?: unknown }).body;
+  if (!body || typeof body !== 'object') {
+    return undefined;
+  }
+  const reportId = (body as { report_id?: unknown }).report_id;
+  return typeof reportId === 'string' && reportId.trim() ? reportId.trim() : undefined;
+};
+
+/** Exported for unit tests — candidate batch size from load step output. */
+export const extractReportsTotalFromLoadOutput = (output: unknown): number | undefined => {
+  if (!output || typeof output !== 'object') {
+    return undefined;
+  }
+  const hits = (output as { hits?: { hits?: unknown } }).hits?.hits;
+  if (!Array.isArray(hits) || hits.length === 0) {
+    return undefined;
+  }
+  return hits.length;
+};
+
+const pickCurrentOrchestratorStep = (
+  steps: StepExecutionSource[]
+): StepExecutionSource | undefined => {
+  const orchestratorSteps = steps.filter((step) => step.stepId === ORCHESTRATOR_STEP_ID);
+  if (orchestratorSteps.length === 0) {
+    return undefined;
+  }
+  const running = [...orchestratorSteps].reverse().find((step) => step.status === 'running');
+  return running ?? orchestratorSteps[orchestratorSteps.length - 1];
+};
+
+const loadReportTitle = async (
+  esClient: ElasticsearchClient,
+  spaceId: string,
+  reportId: string
+): Promise<string | undefined> => {
+  try {
+    const response = await esClient.search({
+      index: THREAT_REPORTS_INDEX_PATTERN,
+      ignore_unavailable: true,
+      size: 1,
+      query: {
+        bool: {
+          filter: [buildSpaceFilterTerms(spaceId), { ids: { values: [reportId] } }],
+        },
+      },
+      _source: ['content.title'],
+    });
+    const source = response.hits.hits[0]?._source as { content?: { title?: string } } | undefined;
+    const title = source?.content?.title?.trim();
+    return title || undefined;
+  } catch {
+    return undefined;
+  }
+};
 
 /** Parse workflow trigger intervals like `"4h"`, `"30m"`, `"1d"`, `"90s"`. */
 const parseIntervalMs = (every: string | undefined): number | undefined => {
@@ -123,8 +196,10 @@ const loadExecutions = async (
 };
 
 const buildCurrentRun = async (
+  esClient: ElasticsearchClient,
   internalClient: ElasticsearchClient,
   logger: Logger,
+  spaceId: string,
   inFlight: ExecutionSource,
   lastCompletedRunId: string | undefined
 ): Promise<HuntStatusCurrentRun> => {
@@ -132,6 +207,7 @@ const buildCurrentRun = async (
     id: inFlight.id ?? '',
     started_at: inFlight.startedAt ?? new Date(0).toISOString(),
     completed_steps: 0,
+    reports_completed: 0,
   };
   try {
     const [stepsResponse, expectedResponse] = await Promise.all([
@@ -141,7 +217,9 @@ const buildCurrentRun = async (
         size: 100,
         sort: [{ startedAt: { order: 'asc' } }],
         query: { term: { workflowRunId: currentRun.id } },
-        _source: ['stepId', 'status', 'startedAt'],
+        // `input` / load-step `output` hits length are run metadata for the
+        // strip (report id + batch size) — not hunt findings payloads.
+        _source: ['stepId', 'status', 'startedAt', 'stepExecutionIndex', 'input', 'output'],
       }),
       lastCompletedRunId
         ? internalClient.count({
@@ -162,6 +240,43 @@ const buildCurrentRun = async (
     if (currentStepId) currentRun.current_step_id = currentStepId;
     if (expectedResponse && expectedResponse.count > 0) {
       currentRun.expected_total_steps = expectedResponse.count;
+    }
+
+    const orchestratorSteps = steps.filter((step) => step.stepId === ORCHESTRATOR_STEP_ID);
+    currentRun.reports_completed = orchestratorSteps.filter((step) =>
+      TERMINAL_STATUSES.has(step.status as HuntRunTerminalStatus)
+    ).length;
+
+    const loadStep = [...steps]
+      .reverse()
+      .find((step) => step.stepId === LOAD_CANDIDATES_STEP_ID && step.output !== undefined);
+    const reportsTotal = extractReportsTotalFromLoadOutput(loadStep?.output);
+    if (typeof reportsTotal === 'number') {
+      currentRun.reports_total = reportsTotal;
+    } else if (orchestratorSteps.length > 0) {
+      // Fallback before load output is available / indexed: at least as many
+      // as we've already started.
+      currentRun.reports_total = Math.max(
+        orchestratorSteps.length,
+        currentRun.reports_completed + (active?.stepId === ORCHESTRATOR_STEP_ID ? 1 : 0)
+      );
+    }
+
+    const orchestratorStep = pickCurrentOrchestratorStep(steps);
+    const reportId = extractReportIdFromStepInput(orchestratorStep?.input);
+    if (reportId) {
+      currentRun.current_report_id = reportId;
+      const title = await loadReportTitle(esClient, spaceId, reportId);
+      if (title) {
+        currentRun.current_report_title = title;
+      }
+    }
+    if (typeof orchestratorStep?.stepExecutionIndex === 'number') {
+      currentRun.current_report_index = orchestratorStep.stepExecutionIndex + 1;
+    } else if (orchestratorStep?.status === 'running') {
+      currentRun.current_report_index = currentRun.reports_completed + 1;
+    } else if (currentRun.reports_completed > 0) {
+      currentRun.current_report_index = currentRun.reports_completed;
     }
   } catch (err) {
     // Step progress is a nice-to-have; the run header still renders.
@@ -268,8 +383,10 @@ export const getHuntStatus = async (
 
   if (inFlight) {
     response.current_run = await buildCurrentRun(
+      esClient,
       internalClient,
       logger,
+      params.spaceId,
       inFlight,
       lastTerminal?.status === 'completed' ? lastTerminal.id : undefined
     );

@@ -25,11 +25,37 @@ export interface HuntStatusCurrentRun {
   started_at: string;
   /** Step id of the most recently started (non-terminal) step, when known. */
   current_step_id?: string;
-  /** Steps that reached a terminal state so far in this run. */
+  /**
+   * Report currently being hunted — taken from the active (or latest)
+   * `run_hunt_orchestrator` step's resolved `input.body.report_id`.
+   */
+  current_report_id?: string;
+  /**
+   * `content.title` for `current_report_id` when the report is still
+   * visible in the space. Prefer this in the strip headline.
+   */
+  current_report_title?: string;
+  /**
+   * 1-based index of the report currently in the orchestrator (from
+   * foreach `stepExecutionIndex`). Prefer for "Report X of Y" copy.
+   */
+  current_report_index?: number;
+  /** Orchestrator steps that reached a terminal state so far. */
+  reports_completed: number;
+  /**
+   * How many reports this run plans to hunt — length of
+   * `load_hunt_candidates` hits (not the ES match total).
+   */
+  reports_total?: number;
+  /**
+   * @deprecated Prefer `reports_completed` / `reports_total`. Kept so
+   * older clients still render something; counts all terminal workflow
+   * steps (including foreach wrappers), which overshoots across cycles.
+   */
   completed_steps: number;
   /**
-   * Total step-executions the previous completed run produced — a real
-   * denominator for a progress bar. Absent on the very first run.
+   * @deprecated Prefer `reports_total`. Previous completed run's raw
+   * step-execution count — often wrong when candidate batch size differs.
    */
   expected_total_steps?: number;
 }

@@ -100,7 +100,8 @@ describe('ContinuousHuntStatusStrip', () => {
         started_at: new Date(Date.now() - 38 * 1000).toISOString(),
         current_step_id: 'hunt_each_report',
         completed_steps: 2,
-        expected_total_steps: 6,
+        reports_completed: 0,
+        reports_total: 10,
       },
     });
 
@@ -108,9 +109,37 @@ describe('ContinuousHuntStatusStrip', () => {
       'Hunt in progress'
     );
     expect(screen.getByTestId('threatIntelContinuousHuntHuntingSub')).toHaveTextContent(
-      'hunt_each_report'
+      'Working through candidate reports…'
+    );
+    expect(screen.getByTestId('threatIntelContinuousHuntReportCount')).toHaveTextContent(
+      '0 of 10 reports'
     );
     expect(screen.getByTestId('threatIntelContinuousHuntTierProgress')).toBeInTheDocument();
+  });
+
+  it('renders Hunting now with the current report title when available', async () => {
+    renderStrip({
+      ...baseStatus,
+      current_run: {
+        id: 'run-3',
+        started_at: new Date(Date.now() - 15 * 1000).toISOString(),
+        current_step_id: 'run_hunt_orchestrator',
+        current_report_id: 'report-1',
+        current_report_title: 'Recurring contractor IOCs in GitHub supply-chain reporting',
+        current_report_index: 3,
+        completed_steps: 4,
+        reports_completed: 2,
+        reports_total: 10,
+      },
+    });
+
+    expect(await screen.findByTestId('threatIntelContinuousHuntHuntingTitle')).toHaveTextContent(
+      'Hunting now: Recurring contractor IOCs in GitHub supply-chain reporting'
+    );
+    expect(screen.getByTestId('threatIntelContinuousHuntHuntingSub')).toHaveTextContent(
+      'Report 3 of 10 · Tier 1 + Tier 2 analysis'
+    );
+    expect(screen.getByTestId('threatIntelContinuousHuntReportCount')).toHaveTextContent('3 of 10');
   });
 
   it('renders the failed state when the last run failed', async () => {

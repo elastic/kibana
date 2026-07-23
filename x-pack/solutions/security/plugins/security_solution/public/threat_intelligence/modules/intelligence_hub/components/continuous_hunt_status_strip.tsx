@@ -313,30 +313,108 @@ const ContinuousHuntStatusStripComponent: React.FC = () => {
       marginRight: euiTheme.size.s,
       flexShrink: 0,
     });
-    const stepLabel = currentRun.current_step_id
-      ? i18n.translate('xpack.securitySolution.threatIntelligence.app.continuousHuntCurrentStep', {
+    const huntingTitle = currentRun.current_report_title
+      ? i18n.translate(
+          'xpack.securitySolution.threatIntelligence.app.continuousHuntHuntingNowTitle',
+          {
+            defaultMessage: 'Hunting now: {reportTitle}',
+            values: { reportTitle: currentRun.current_report_title },
+          }
+        )
+      : currentRun.current_report_id
+      ? i18n.translate(
+          'xpack.securitySolution.threatIntelligence.app.continuousHuntHuntingNowReportId',
+          {
+            defaultMessage: 'Hunting now: {reportId}',
+            values: { reportId: currentRun.current_report_id },
+          }
+        )
+      : i18n.translate('xpack.securitySolution.threatIntelligence.app.continuousHuntHuntingNow', {
+          defaultMessage: 'Hunt in progress',
+        });
+    const reportIndex = currentRun.current_report_index;
+    const reportsTotal = currentRun.reports_total;
+    const hasReportProgress =
+      typeof reportIndex === 'number' &&
+      reportIndex > 0 &&
+      typeof reportsTotal === 'number' &&
+      reportsTotal > 0;
+
+    const stepLabel = (() => {
+      if (currentRun.current_step_id === 'load_hunt_candidates') {
+        return i18n.translate(
+          'xpack.securitySolution.threatIntelligence.app.continuousHuntStepLoadCandidates',
+          { defaultMessage: 'Selecting top reports to hunt…' }
+        );
+      }
+      if (hasReportProgress) {
+        return i18n.translate(
+          'xpack.securitySolution.threatIntelligence.app.continuousHuntReportOfTotalSub',
+          {
+            defaultMessage: 'Report {current} of {total} · Tier 1 + Tier 2 analysis',
+            values: { current: reportIndex, total: reportsTotal },
+          }
+        );
+      }
+      if (currentRun.current_step_id === 'hunt_each_report') {
+        return i18n.translate(
+          'xpack.securitySolution.threatIntelligence.app.continuousHuntStepHuntEach',
+          { defaultMessage: 'Working through candidate reports…' }
+        );
+      }
+      if (currentRun.current_step_id === 'run_hunt_orchestrator') {
+        return i18n.translate(
+          'xpack.securitySolution.threatIntelligence.app.continuousHuntStepOrchestrator',
+          { defaultMessage: 'Running Tier 1 + Tier 2 hunt…' }
+        );
+      }
+      if (!currentRun.current_step_id) {
+        return i18n.translate(
+          'xpack.securitySolution.threatIntelligence.app.continuousHuntStarting',
+          { defaultMessage: 'Starting up…' }
+        );
+      }
+      return i18n.translate(
+        'xpack.securitySolution.threatIntelligence.app.continuousHuntCurrentStep',
+        {
           defaultMessage: 'Running step: {stepId}',
           values: { stepId: currentRun.current_step_id },
-        })
-      : i18n.translate('xpack.securitySolution.threatIntelligence.app.continuousHuntStarting', {
-          defaultMessage: 'Starting up…',
-        });
-    const stepsProgressLabel =
-      currentRun.expected_total_steps && currentRun.expected_total_steps > 0
-        ? i18n.translate(
-            'xpack.securitySolution.threatIntelligence.app.continuousHuntStepOfTotal',
-            {
-              defaultMessage: '{current} of ~{total} steps',
-              values: {
-                current: currentRun.completed_steps,
-                total: currentRun.expected_total_steps,
-              },
-            }
-          )
-        : i18n.translate('xpack.securitySolution.threatIntelligence.app.continuousHuntStepsDone', {
-            defaultMessage: '{current, plural, one {# step completed} other {# steps completed}}',
-            values: { current: currentRun.completed_steps },
-          });
+        }
+      );
+    })();
+
+    const reportsCompleted = currentRun.reports_completed ?? 0;
+    const progressCurrent = hasReportProgress
+      ? Math.min(reportIndex, reportsTotal)
+      : reportsCompleted;
+    const progressMax = hasReportProgress
+      ? reportsTotal
+      : reportsTotal && reportsTotal > 0
+      ? reportsTotal
+      : undefined;
+    const stepsProgressLabel = hasReportProgress
+      ? i18n.translate(
+          'xpack.securitySolution.threatIntelligence.app.continuousHuntReportOfTotal',
+          {
+            defaultMessage: '{current} of {total}',
+            values: { current: reportIndex, total: reportsTotal },
+          }
+        )
+      : typeof reportsTotal === 'number' && reportsTotal > 0
+      ? i18n.translate(
+          'xpack.securitySolution.threatIntelligence.app.continuousHuntReportsCompletedOfTotal',
+          {
+            defaultMessage: '{completed} of {total} reports',
+            values: { completed: reportsCompleted, total: reportsTotal },
+          }
+        )
+      : i18n.translate(
+          'xpack.securitySolution.threatIntelligence.app.continuousHuntReportsCompleted',
+          {
+            defaultMessage: '{completed, plural, one {# report done} other {# reports done}}',
+            values: { completed: reportsCompleted },
+          }
+        );
 
     return (
       <EuiPanel
@@ -355,10 +433,7 @@ const ContinuousHuntStatusStripComponent: React.FC = () => {
                 <EuiFlexItem grow={false}>
                   <EuiText size="s" css={css({ color: euiTheme.colors.primary, lineHeight: 1.2 })}>
                     <strong data-test-subj="threatIntelContinuousHuntHuntingTitle">
-                      {i18n.translate(
-                        'xpack.securitySolution.threatIntelligence.app.continuousHuntHuntingNow',
-                        { defaultMessage: 'Hunt in progress' }
-                      )}
+                      {huntingTitle}
                     </strong>
                   </EuiText>
                 </EuiFlexItem>
@@ -377,27 +452,27 @@ const ContinuousHuntStatusStripComponent: React.FC = () => {
               <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
                 <EuiFlexItem>
                   <EuiProgress
-                    value={
-                      currentRun.expected_total_steps
-                        ? Math.min(currentRun.completed_steps, currentRun.expected_total_steps)
-                        : undefined
-                    }
-                    max={currentRun.expected_total_steps ?? undefined}
+                    value={progressMax ? progressCurrent : undefined}
+                    max={progressMax}
                     size="s"
                     color="primary"
                     data-test-subj="threatIntelContinuousHuntTierProgress"
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiText size="xs" color="subdued">
+                  <EuiText
+                    size="xs"
+                    color="subdued"
+                    data-test-subj="threatIntelContinuousHuntReportCount"
+                  >
                     {stepsProgressLabel}
                   </EuiText>
                 </EuiFlexItem>
               </EuiFlexGroup>
               <EuiText size="xs" color="subdued">
                 {i18n.translate(
-                  'xpack.securitySolution.threatIntelligence.app.continuousHuntThisRun',
-                  { defaultMessage: 'This run' }
+                  'xpack.securitySolution.threatIntelligence.app.continuousHuntReportsThisRun',
+                  { defaultMessage: 'Reports this run' }
                 )}
               </EuiText>
             </div>
