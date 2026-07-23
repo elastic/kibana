@@ -12,7 +12,6 @@ import type { RuleChangesHistoryServiceContract } from './rule_changes_history_s
  */
 export function createRuleChangesHistoryServiceMock(): jest.Mocked<RuleChangesHistoryServiceContract> {
   return {
-    initialize: jest.fn(),
     logRuleChanges: jest.fn().mockResolvedValue(undefined),
   };
 }

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger as KibanaLogger } from '@kbn/logging';
 import { inject, injectable } from 'inversify';
 import { Logger } from '@kbn/core-di';
@@ -33,7 +32,6 @@ function buildLogChangeHistoryData({
 }
 
 export interface RuleChangesHistoryServiceContract {
-  initialize(elasticsearchClient: ElasticsearchClient): void;
   logRuleChanges(params: LogRuleChangesParams): Promise<void>;
 }
 
@@ -41,7 +39,6 @@ export interface RuleChangesHistoryServiceContract {
 export class RuleChangesHistoryService implements RuleChangesHistoryServiceContract {
   private readonly logger: KibanaLogger;
   private readonly scope: RuleChangesHistoryScope;
-  private initAttempted = false;
 
   constructor(
     @inject(Logger) logger: KibanaLogger,
@@ -90,27 +87,5 @@ export class RuleChangesHistoryService implements RuleChangesHistoryServiceContr
     } catch (error) {
       this.logger.warn(`Unable to log rule changes history for action "${action}": ${error}`);
     }
-  }
-
-  public initialize(elasticsearchClient: ElasticsearchClient): void {
-    if (this.initAttempted) {
-      return;
-    }
-    this.initAttempted = true;
-
-    void this.client
-      .initialize(elasticsearchClient)
-      .then(() => {
-        this.logger.info(
-          `Rule changes history initialized for [${this.scope.module}, ${this.scope.dataset}]`
-        );
-      })
-      .catch((cause) => {
-        const error = new Error(
-          `Unable to initialize rule changes history for [${this.scope.module}, ${this.scope.dataset}]`,
-          { cause }
-        );
-        this.logger.error(error);
-      });
   }
 }

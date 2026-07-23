@@ -11,9 +11,11 @@ export {
   RULE_CHANGES_HISTORY_DATASET,
   RULE_CHANGES_HISTORY_MODULE,
   RULE_CHANGES_HISTORY_OBJECT_TYPE,
+  RULE_CHANGES_HISTORY_RESOURCE_KEY,
   RULE_VERSION_FALLBACK,
 } from './constants';
 export { createChangeHistoryClient } from './create_change_history_client';
+export { RuleChangesHistoryInitializer } from './rule_changes_history_initializer';
 export type {
   LogRuleChangesParams,
   RuleChangesHistoryAuthor,

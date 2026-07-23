@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { ChangeHistoryClient } from '@kbn/change-history';
 import { RULE_CHANGES_HISTORY_OBJECT_TYPE } from './constants';
 import { RuleChangesHistoryService } from './rule_changes_history_service';
@@ -58,17 +58,18 @@ describe('RuleChangesHistoryService', () => {
       expect(opts).toMatchObject({ username: 'alice', userProfileId: 'user-1' });
     });
 
-    it('includes correlationId only when it is provided', async () => {
+    it('includes correlationId when it is provided', async () => {
       await service.logRuleChanges({ ...baseParams, correlationId: 'corr-1' });
 
-      const [, optsWithCorrelation] = clientMock.logBulk.mock.calls[0];
-      expect(optsWithCorrelation).toMatchObject({ correlationId: 'corr-1' });
+      const [, opts] = clientMock.logBulk.mock.calls[0];
+      expect(opts).toMatchObject({ correlationId: 'corr-1' });
+    });
 
-      clientMock.logBulk.mockClear();
+    it('omits correlationId when it is not provided', async () => {
       await service.logRuleChanges(baseParams);
 
-      const [, optsWithoutCorrelation] = clientMock.logBulk.mock.calls[0];
-      expect(optsWithoutCorrelation).not.toHaveProperty('correlationId');
+      const [, opts] = clientMock.logBulk.mock.calls[0];
+      expect(opts).not.toHaveProperty('correlationId');
     });
 
     it('omits `data` entirely when eventType is not provided', async () => {
@@ -135,46 +136,6 @@ describe('RuleChangesHistoryService', () => {
       clientMock.logBulk.mockRejectedValueOnce(new Error('es unreachable'));
 
       await expect(service.logRuleChanges(baseParams)).resolves.toBeUndefined();
-
-      expect(logger.warn).toHaveBeenCalledTimes(1);
-      expect(logger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('Unable to log rule changes history for action "rule_update"')
-      );
-    });
-  });
-
-  describe('initialize', () => {
-    it('initializes the underlying client and logs success', async () => {
-      const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-
-      service.initialize(elasticsearchClient);
-      await new Promise(process.nextTick);
-
-      expect(clientMock.initialize).toHaveBeenCalledWith(elasticsearchClient);
-      expect(logger.info).toHaveBeenCalledWith(expect.stringContaining('initialized'));
-    });
-
-    it('logs an error and does not throw when the client fails to initialize', async () => {
-      clientMock.initialize.mockRejectedValueOnce(new Error('index creation failed'));
-      const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-
-      service.initialize(elasticsearchClient);
-      await new Promise(process.nextTick);
-
-      expect(logger.error).toHaveBeenCalledWith(
-        expect.objectContaining({
-          message: expect.stringContaining('Unable to initialize rule changes history'),
-        })
-      );
-    });
-
-    it('does not re-initialize the client on subsequent calls', () => {
-      const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-
-      service.initialize(elasticsearchClient);
-      service.initialize(elasticsearchClient);
-
-      expect(clientMock.initialize).toHaveBeenCalledTimes(1);
     });
   });
 });

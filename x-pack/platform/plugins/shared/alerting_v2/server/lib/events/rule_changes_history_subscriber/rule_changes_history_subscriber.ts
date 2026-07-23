@@ -102,6 +102,7 @@ export class RuleChangesHistorySubscriber {
         entries: [{ id: ruleId, snapshot: rule, sequence }],
         action,
         eventType,
+        timestamp: rule.updatedAt ?? rule.createdAt,
         correlationId,
       });
     } catch (err) {

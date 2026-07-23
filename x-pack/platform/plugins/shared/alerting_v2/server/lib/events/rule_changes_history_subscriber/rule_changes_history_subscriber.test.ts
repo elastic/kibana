@@ -122,6 +122,7 @@ describe('RuleChangesHistorySubscriber', () => {
           entries: [{ id: 'rule-1', snapshot: rule, sequence: 3 }],
           action,
           eventType: ecsEventType,
+          timestamp: rule.updatedAt,
           correlationId: 'corr-1',
         });
       }
@@ -169,6 +170,40 @@ describe('RuleChangesHistorySubscriber', () => {
       );
 
       expect(changeHistory.logRuleChanges).not.toHaveBeenCalled();
+    });
+
+    it('falls back to createdAt when updatedAt is absent', async () => {
+      subscriber.start();
+      const { updatedAt: _updatedAt, ...ruleWithoutUpdatedAt } = rule;
+
+      await handlerFor(RULE_CREATED_EVENT_TYPE)(
+        eventOf(RULE_CREATED_EVENT_TYPE, {
+          ...payload,
+          rule: ruleWithoutUpdatedAt as typeof rule,
+        }),
+        { request }
+      );
+
+      expect(changeHistory.logRuleChanges).toHaveBeenCalledWith(
+        expect.objectContaining({ timestamp: rule.createdAt })
+      );
+    });
+
+    it('passes an undefined timestamp when neither updatedAt nor createdAt is present, letting the service default to now', async () => {
+      subscriber.start();
+      const { updatedAt: _updatedAt, createdAt: _createdAt, ...ruleWithoutTimestamps } = rule;
+
+      await handlerFor(RULE_CREATED_EVENT_TYPE)(
+        eventOf(RULE_CREATED_EVENT_TYPE, {
+          ...payload,
+          rule: ruleWithoutTimestamps as typeof rule,
+        }),
+        { request }
+      );
+
+      expect(changeHistory.logRuleChanges).toHaveBeenCalledWith(
+        expect.objectContaining({ timestamp: undefined })
+      );
     });
 
     it('catches logRuleChanges failures, logs them, and does not let the rejection escape', async () => {
