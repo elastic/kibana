@@ -90,6 +90,28 @@ jest.mock('./template_yaml_preview', () => ({
   ),
 }));
 
+// The install section has its own test (it needs kibana services and a query
+// client); the stub exposes the preview-values callback and the secondary
+// action so their wiring through TemplateDetail can be asserted.
+jest.mock('./install_form', () => ({
+  TemplateInstallSection: ({
+    onPreviewValuesChange,
+    secondaryAction,
+  }: {
+    onPreviewValuesChange?: (values: Record<string, unknown>) => void;
+    secondaryAction?: React.ReactNode;
+  }) => (
+    <div data-test-subj="mockInstallSection">
+      <button
+        type="button"
+        data-test-subj="mockInstallSectionCommit"
+        onClick={() => onPreviewValuesChange?.({ 'max-age': 42 })}
+      />
+      {secondaryAction}
+    </div>
+  ),
+}));
+
 const RAW = `template-metadata:
   slug: my-template
   version: "1.2.0"
@@ -185,6 +207,30 @@ describe('TemplateDetail', () => {
     expect(preview).not.toHaveTextContent('template-metadata');
     expect(preview.textContent).toContain('maxAge: 7');
     expect(preview.textContent).not.toContain('__install__');
+  });
+
+  it('should re-render the preview with values committed from the install section', () => {
+    renderDetail();
+
+    fireEvent.click(screen.getByTestId('mockInstallSectionCommit'));
+
+    const preview = screen.getByTestId('workflowLibraryTemplateDetail-preview');
+    expect(preview.textContent).toContain('maxAge: 42');
+    expect(preview.textContent).not.toContain('maxAge: 7');
+  });
+
+  it('should pass the secondary action into the install section', () => {
+    render(
+      <WorkflowsUiServicesProvider services={createMockWorkflowsUiServices()}>
+        <TemplateDetail
+          slug="my-template"
+          secondaryAction={<button type="button" data-test-subj="hostSecondaryAction" />}
+        />
+      </WorkflowsUiServicesProvider>
+    );
+
+    const installSection = screen.getByTestId('mockInstallSection');
+    expect(within(installSection).getByTestId('hostSecondaryAction')).toBeInTheDocument();
   });
 
   it('should show the selected step YAML in a read-only graph flyover', () => {

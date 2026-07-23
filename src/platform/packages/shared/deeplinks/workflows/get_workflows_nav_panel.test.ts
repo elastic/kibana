@@ -37,7 +37,7 @@ describe('getWorkflowsNavPanel', () => {
           {
             breadcrumbStatus: 'hidden',
             children: [
-              { link: `${WORKFLOWS_APP_ID}:${WorkflowsPageName.workflows}` },
+              { link: `${WORKFLOWS_APP_ID}:${WorkflowsPageName.list}` },
               { link: `${WORKFLOWS_APP_ID}:${WorkflowsPageName.library}` },
             ],
           },

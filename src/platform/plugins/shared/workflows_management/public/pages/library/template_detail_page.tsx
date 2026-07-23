@@ -17,7 +17,7 @@ import { kbnFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css
 import { i18n } from '@kbn/i18n';
 import { WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/workflows';
 import type { TemplateBody } from '@kbn/workflows-library';
-import { TemplateDetail, useLibraryEnabled, useWorkflowsCapabilities } from '@kbn/workflows-ui';
+import { TemplateDetail, useLibraryEnabled } from '@kbn/workflows-ui';
 import { PLUGIN_ID } from '../../../common';
 import { WorkflowsPageName } from '../../deep_links';
 import { useKibana } from '../../hooks/use_kibana';
@@ -34,8 +34,8 @@ const backToLibraryLabel = i18n.translate('workflowsManagement.libraryTemplatePa
   defaultMessage: 'Back to library',
 });
 
-const addWorkflowLabel = i18n.translate('workflowsManagement.libraryTemplatePage.addWorkflow', {
-  defaultMessage: 'Add workflow',
+const openInEditorLabel = i18n.translate('workflowsManagement.libraryTemplatePage.openInEditor', {
+  defaultMessage: 'Open in editor',
 });
 
 type LibraryTemplateDetailPageProps = RouteComponentProps<{ slug: string }>;
@@ -59,10 +59,6 @@ export const LibraryTemplateDetailPage = React.memo<LibraryTemplateDetailPagePro
   const showGraphPreview = useWorkflowsExperimentalUiSetting(
     WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID
   );
-  // Same capability gate the workflow list uses for its Create/Clone actions —
-  // users without workflow-create privileges shouldn't see the "Add workflow"
-  // CTA because they can't save the resulting draft.
-  const { canCreateWorkflow } = useWorkflowsCapabilities();
 
   const goToLibrary = useCallback(() => {
     application.navigateToApp(PLUGIN_ID, { deepLinkId: WorkflowsPageName.library });
@@ -89,7 +85,7 @@ export const LibraryTemplateDetailPage = React.memo<LibraryTemplateDetailPagePro
     setLoadedTemplate(template);
   }, []);
 
-  const handleAddWorkflow = useCallback(() => {
+  const handleOpenInEditor = useCallback(() => {
     if (!loadedTemplate) return;
     // The create page loads the template by its stable slug, so the link
     // survives refreshes and can be shared.
@@ -153,15 +149,14 @@ export const LibraryTemplateDetailPage = React.memo<LibraryTemplateDetailPagePro
           onLoaded={handleTemplateLoaded}
           showGraphPreview={showGraphPreview}
           backButton={backButton}
-          primaryAction={
-            loadedTemplate && canCreateWorkflow ? (
+          secondaryAction={
+            loadedTemplate ? (
               <EuiButton
-                fill
                 fullWidth
-                onClick={handleAddWorkflow}
-                data-test-subj="workflowLibraryTemplateDetailAddWorkflowButton"
+                onClick={handleOpenInEditor}
+                data-test-subj="workflowLibraryTemplateDetailOpenInEditorButton"
               >
-                {addWorkflowLabel}
+                {openInEditorLabel}
               </EuiButton>
             ) : null
           }

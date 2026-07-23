@@ -7,14 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { act, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import type { RouteComponentProps } from 'react-router-dom';
 import { of } from 'rxjs';
 import type { TemplateBody } from '@kbn/workflows-library';
-import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { LibraryTemplateDetailPage } from './template_detail_page';
-import { mockWorkflowsManagementCapabilities } from '../../hooks/__mocks__/use_workflows_capabilities';
 import { createStartServicesMock, type StartServicesMock } from '../../mocks';
 import { getTestProvider } from '../../shared/mocks/test_providers';
 
@@ -25,32 +23,27 @@ let mockShowGraphPreview: boolean | undefined;
 
 jest.mock('@kbn/workflows-ui', () => ({
   ...jest.requireActual('@kbn/workflows-ui'),
-  useWorkflowsCapabilities: jest.fn(),
   TemplateDetail: ({
     slug,
     onLoaded,
     showGraphPreview,
-    primaryAction,
+    secondaryAction,
   }: {
     slug: string;
     onLoaded: (template: TemplateBody) => void;
     showGraphPreview: boolean;
-    primaryAction?: React.ReactNode;
+    secondaryAction?: React.ReactNode;
   }) => {
     mockOnLoaded = onLoaded;
     mockShowGraphPreview = showGraphPreview;
     return (
       <div data-test-subj="mockTemplateDetail">
         {slug}
-        {primaryAction}
+        {secondaryAction}
       </div>
     );
   },
 }));
-
-const mockUseWorkflowsCapabilities = useWorkflowsCapabilities as jest.MockedFunction<
-  typeof useWorkflowsCapabilities
->;
 
 jest.mock('../../hooks/use_workflows_experimental_ui_setting', () => ({
   useWorkflowsExperimentalUiSetting: () => mockUseWorkflowsExperimentalUiSetting(),
@@ -76,7 +69,6 @@ describe('LibraryTemplateDetailPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseWorkflowsExperimentalUiSetting.mockReturnValue(false);
-    mockUseWorkflowsCapabilities.mockReturnValue(mockWorkflowsManagementCapabilities);
     mockOnLoaded = undefined;
     mockShowGraphPreview = undefined;
   });
@@ -108,44 +100,30 @@ describe('LibraryTemplateDetailPage', () => {
     });
   });
 
-  it('renders the "Add workflow" button when the user can create workflows', () => {
+  it('supplies an "Open in editor" secondary action that opens the prefilled create page', () => {
     const services = buildEnabledServices();
 
     render(<LibraryTemplateDetailPage {...routeProps('first-template')} />, {
       wrapper: getTestProvider({ services }),
     });
 
-    act(() => {
-      mockOnLoaded?.({
-        metadata: { slug: 'first-template', name: 'First template' },
-      } as TemplateBody);
-    });
-
+    // The action only renders once the template has loaded (it links by slug).
     expect(
-      screen.queryByTestId('workflowLibraryTemplateDetailAddWorkflowButton')
-    ).toBeInTheDocument();
-  });
-
-  it('hides the "Add workflow" button for users without create capability', () => {
-    mockUseWorkflowsCapabilities.mockReturnValue({
-      ...mockWorkflowsManagementCapabilities,
-      canCreateWorkflow: false,
-    });
-    const services = buildEnabledServices();
-
-    render(<LibraryTemplateDetailPage {...routeProps('first-template')} />, {
-      wrapper: getTestProvider({ services }),
-    });
-
-    act(() => {
-      mockOnLoaded?.({
-        metadata: { slug: 'first-template', name: 'First template' },
-      } as TemplateBody);
-    });
-
-    expect(
-      screen.queryByTestId('workflowLibraryTemplateDetailAddWorkflowButton')
+      screen.queryByTestId('workflowLibraryTemplateDetailOpenInEditorButton')
     ).not.toBeInTheDocument();
+
+    act(() => {
+      mockOnLoaded?.({
+        metadata: { slug: 'first-template', name: 'First template' },
+      } as TemplateBody);
+    });
+
+    const button = screen.getByTestId('workflowLibraryTemplateDetailOpenInEditorButton');
+    fireEvent.click(button);
+
+    expect(services.application.navigateToApp).toHaveBeenCalledWith('workflows', {
+      path: '/create?fromTemplate=first-template',
+    });
   });
 
   it('passes the visual editor flag through to the template detail preview', () => {

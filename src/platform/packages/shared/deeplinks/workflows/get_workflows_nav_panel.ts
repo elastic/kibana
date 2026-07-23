@@ -9,13 +9,10 @@
 
 import { WORKFLOWS_APP_ID } from './constants';
 import { WorkflowsPageName, type WorkflowsPageName as WorkflowsPageNameType } from './deep_links';
+import type { DeepLinkId } from '.';
 
 /** Keep in sync with `WORKFLOWS_LIBRARY_ENABLED_SETTING_ID` in `@kbn/workflows`. */
 const WORKFLOWS_LIBRARY_ENABLED_SETTING_ID = 'workflowsManagement:library:enabled';
-
-const PANEL_ID = WORKFLOWS_APP_ID;
-
-type DeepLinkId = typeof WORKFLOWS_APP_ID | `${typeof WORKFLOWS_APP_ID}:${WorkflowsPageNameType}`;
 
 const workflowsDeepLink = (page: WorkflowsPageNameType): DeepLinkId =>
   `${WORKFLOWS_APP_ID}:${page}`;
@@ -34,19 +31,12 @@ export interface WorkflowsNavPanelCore {
   };
 }
 
-type WorkflowsNavNode =
-  | { link: typeof WORKFLOWS_APP_ID }
-  | {
-      id: typeof PANEL_ID;
-      link: typeof WORKFLOWS_APP_ID;
-      renderAs: 'panelOpener';
-      children: [
-        {
-          breadcrumbStatus: 'hidden';
-          children: [{ link: DeepLinkId }, { link: DeepLinkId }];
-        }
-      ];
-    };
+interface WorkflowsNavNode {
+  link: typeof WORKFLOWS_APP_ID;
+  id?: typeof WORKFLOWS_APP_ID;
+  renderAs?: 'panelOpener';
+  children?: Array<{ link: DeepLinkId; breadcrumbStatus?: 'hidden' }>;
+}
 
 /**
  * Returns Workflows side-nav entries for solution navigation trees.
@@ -70,17 +60,12 @@ export const getWorkflowsNavPanel = (core: WorkflowsNavPanelCore): WorkflowsNavN
 
   return [
     {
-      id: PANEL_ID,
+      id: WORKFLOWS_APP_ID,
       link: WORKFLOWS_APP_ID,
       renderAs: 'panelOpener',
       children: [
-        {
-          breadcrumbStatus: 'hidden',
-          children: [
-            { link: workflowsDeepLink(WorkflowsPageName.workflows) },
-            { link: workflowsDeepLink(WorkflowsPageName.library) },
-          ],
-        },
+        { link: workflowsDeepLink(WorkflowsPageName.list), breadcrumbStatus: 'hidden' },
+        { link: workflowsDeepLink(WorkflowsPageName.library), breadcrumbStatus: 'hidden' },
       ],
     },
   ];
