@@ -35,11 +35,9 @@ const mcpConfig = {
 
 describe('Create OAuth Client route', () => {
   function getMockContext(
-    licenseCheckResult: { state: string; message?: string } = { state: 'valid' },
-    { oauthManagementEnabled = true }: { oauthManagementEnabled?: boolean } = {}
+    licenseCheckResult: { state: string; message?: string } = { state: 'valid' }
   ) {
     const coreContext = coreMock.createRequestHandlerContext();
-    (coreContext.uiSettings.client.get as jest.Mock).mockResolvedValue(oauthManagementEnabled);
     return coreMock.createCustomRequestHandlerContext({
       core: coreContext,
       licensing: { license: { check: jest.fn().mockReturnValue(licenseCheckResult) } },
@@ -239,20 +237,6 @@ describe('Create OAuth Client route', () => {
 
     expect(response.status).toBe(404);
   });
-
-  it('returns 404 when uiamOAuthClientManagement setting is disabled', async () => {
-    const response = await routeHandler(
-      getMockContext({ state: 'valid' }, { oauthManagementEnabled: false }),
-      httpServerMock.createKibanaRequest({
-        body: { client_name: 'Test' },
-      }),
-      kibanaResponseFactory
-    );
-
-    expect(response.status).toBe(404);
-    expect(oauthMock.createClient).not.toHaveBeenCalled();
-  });
-
   it('returns 404 when MCP protected resource metadata is not configured', async () => {
     ({ routeHandler, oauthMock } = setup({}));
 

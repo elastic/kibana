@@ -733,7 +733,7 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
         ]) || [];
     }
 
-    const { getAnnotations } = annotationServiceProvider(client!);
+    const { getAnnotations } = annotationServiceProvider(client!, mlClient);
 
     const [bucketResp, annotationResp] = await Promise.all([
       mlClient.getBuckets({

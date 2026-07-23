@@ -158,6 +158,7 @@ export const LogEntryRateResultsContent: React.FunctionComponent<{
     defaultSortOptions: SORT_DEFAULTS,
     defaultPaginationOptions: PAGINATION_DEFAULTS,
     filteredDatasets: selectedDatasets,
+    jobIds,
   });
 
   const handleAutoRefreshChange = useCallback(
