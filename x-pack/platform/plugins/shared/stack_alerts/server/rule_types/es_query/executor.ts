@@ -257,7 +257,6 @@ export async function executor(
       },
     });
   }
-
   return { state: { latestTimestamp } };
 }
 
