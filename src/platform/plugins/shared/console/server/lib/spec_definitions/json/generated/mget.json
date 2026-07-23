@@ -10,6 +10,7 @@
       "realtime": "__flag__",
       "refresh": "__flag__",
       "routing": [],
+      "_slice": "",
       "_source": "__flag__",
       "_source_excludes": [],
       "_source_includes": [],
