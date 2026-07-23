@@ -60,7 +60,7 @@ const makeChatClient = (
 
 const runTask = async (
   client: RuleManagementChatClient,
-  input: { question?: string; turns?: string[] }
+  input: { turns: string[] }
 ): Promise<TaskOutput> => {
   const task = createTask(client);
   return task({ input, metadata: null } as Parameters<typeof task>[0]);
@@ -133,10 +133,10 @@ describe('buildPromptResponses', () => {
 });
 
 describe('createTask', () => {
-  it('sends a single-turn question as an input message with no prompt responses', async () => {
+  it('sends a single-turn example as an input message with no prompt responses', async () => {
     const { client, calls } = makeChatClient([converseResult()]);
 
-    await runTask(client, { question: 'hello' });
+    await runTask(client, { turns: ['hello'] });
 
     expect(calls).toHaveLength(1);
     expect(calls[0].messages).toEqual([{ message: 'hello' }]);
@@ -235,7 +235,7 @@ describe('createTask', () => {
       listAttachments
     );
 
-    const output = (await runTask(client, { question: 'create a rule' })) as TaskOutput & {
+    const output = (await runTask(client, { turns: ['create a rule'] })) as TaskOutput & {
       conversationId?: string;
       ruleAttachment?: { kind?: string; schedule?: { lookback?: string } };
       attachments?: unknown[];

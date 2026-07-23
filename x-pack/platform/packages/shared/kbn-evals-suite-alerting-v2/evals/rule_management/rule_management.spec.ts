@@ -44,7 +44,7 @@ evaluate.describe(
           examples: [
             {
               input: {
-                question: "I want to set up alerting but I'm not sure where to start.",
+                turns: ["I want to set up alerting but I'm not sure where to start."],
               },
               output: {
                 expected: [
@@ -248,9 +248,10 @@ evaluate.describe(
             examples: [
               {
                 input: {
-                  question:
+                  turns: [
                     `Create an alert rule on ${hostMetricsIndex} that fires when average ` +
-                    'system.cpu.total.norm.pct stays above 0.9 for 5 minutes, grouped by host.name.',
+                      'system.cpu.total.norm.pct stays above 0.9 for 5 minutes, grouped by host.name.',
+                  ],
                 },
                 output: {
                   expected: [

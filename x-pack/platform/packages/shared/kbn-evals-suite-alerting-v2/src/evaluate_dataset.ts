@@ -39,15 +39,14 @@ import { withLowScoreLogging } from './evaluator_utils';
 
 export interface RuleManagementExample extends Example {
   input: {
-    /** Single user message (single-turn). Use `turns` for a multi-turn conversation. */
-    question?: string;
     /**
-     * Ordered user messages for a multi-turn conversation. Each turn is sent
-     * sequentially over the same `conversation_id`, so the agent retains context
-     * between messages. Skill/tool/criteria assertions are evaluated across the
-     * whole conversation (the union of all turns' steps and messages).
+     * Ordered user messages. Each turn is sent sequentially over the same
+     * `conversation_id`, so the agent retains context between messages.
+     * Skill/tool/criteria assertions are evaluated across the whole
+     * conversation (the union of all turns' steps and messages). Use a
+     * one-element array for a single-turn example.
      */
-    turns?: string[];
+    turns: string[];
   };
   output: {
     /**
@@ -168,10 +167,7 @@ export const createTask = (
   chatClient: RuleManagementChatClient
 ): ExperimentTask<RuleManagementExample, TaskOutput> => {
   return async ({ input }) => {
-    // Both single-turn (`question`) and multi-turn (`turns`) are supported. The
-    // turns are sent sequentially over one `conversation_id` so the agent retains
-    // context between user messages.
-    const userTurns = input.turns ?? (input.question ? [input.question] : []);
+    const userTurns = input.turns;
 
     let conversationId: string | undefined;
     const messages: Array<{ message: string }> = [];
