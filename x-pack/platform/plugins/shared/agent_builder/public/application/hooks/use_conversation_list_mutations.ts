@@ -28,6 +28,8 @@ export const useConversationListMutations = ({
   const { conversationsService } = useAgentBuilderServices();
   const { navigateToAgentBuilderUrl } = useNavigation();
 
+  const listQueryKey = useMemo(() => queryKeys.conversations.byAgent(agentId), [agentId]);
+
   const deleteConversation = useCallback(
     async (conversationId: string) => {
       await conversationsService.delete({ conversationId });
@@ -63,8 +65,6 @@ export const useConversationListMutations = ({
     },
     [conversationsService, queryClient]
   );
-
-  const listQueryKey = useMemo(() => queryKeys.conversations.byAgent(agentId), [agentId]);
 
   const updateReadStatus = useCallback(
     (conversationId: string, read: boolean) => {
