@@ -6,7 +6,7 @@
  */
 
 import type { ErrorResponse } from '@kbn/alerting-v2-schemas';
-import type { OasExampleEntry } from './oas_types';
+import type { AlertingOasOperationObject, OasExampleEntry } from './oas_types';
 
 export const jsonExample = <T>(name: string, summary: string, value: T) => ({
   content: {
@@ -46,3 +46,28 @@ export const invalidResponseExample = ({
     ...(details !== undefined ? { details } : {}),
   } satisfies ErrorResponse,
 });
+
+/** Builds an OAS operation object from request/response examples. */
+export const buildOasOperation = ({
+  requestBody,
+  responses = {},
+}: {
+  requestBody?: OasExampleEntry;
+  responses?: Record<number, OasExampleEntry>;
+}): AlertingOasOperationObject => {
+  const operation: AlertingOasOperationObject = {};
+
+  if (requestBody) {
+    operation.requestBody = jsonExample(requestBody.name, requestBody.summary, requestBody.value);
+  }
+
+  const responseEntries: Record<string, ReturnType<typeof jsonExample>> = {};
+  for (const [status, example] of Object.entries(responses)) {
+    responseEntries[status] = jsonExample(example.name, example.summary, example.value);
+  }
+  if (Object.keys(responseEntries).length > 0) {
+    operation.responses = responseEntries;
+  }
+
+  return operation;
+};

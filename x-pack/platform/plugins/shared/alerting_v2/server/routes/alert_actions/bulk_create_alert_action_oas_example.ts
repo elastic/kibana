@@ -10,9 +10,8 @@ import type {
   BulkCreateAlertActionResponse,
 } from '@kbn/alerting-v2-schemas';
 import { ALERT_EPISODE_ACTION_TYPE } from '@kbn/alerting-v2-schemas';
-import { invalidResponseExample } from '../oas_utils';
+import { buildOasOperation, invalidResponseExample } from '../oas_utils';
 import type { AlertingOasOperationObject } from '../oas_types';
-import { buildAlertOas } from './oas_utils';
 import { SAMPLE_EPISODE_ID, SAMPLE_GROUP_HASH } from './alert_oas_shared_examples';
 
 export const BULK_CREATE_ALERT_ACTION_REQUEST: BulkCreateAlertActionBody = [
@@ -40,7 +39,7 @@ const INVALID_BULK_CREATE_ALERT_ACTION_RESPONSE = invalidResponseExample({
 });
 
 export const bulkCreateAlertActionOasExamples = (): AlertingOasOperationObject =>
-  buildAlertOas({
+  buildOasOperation({
     requestBody: {
       name: 'bulkCreateAlertActionRequest',
       summary: 'Acknowledge one episode and tag another alert group',

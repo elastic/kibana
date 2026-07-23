@@ -7,7 +7,7 @@
 
 import type { CreateTagAlertActionBody } from '@kbn/alerting-v2-schemas';
 import type { AlertingOasOperationObject } from '../oas_types';
-import { buildAlertOas } from './oas_utils';
+import { buildOasOperation } from '../oas_utils';
 import {
   ALERT_EVENT_NOT_FOUND_RESPONSE,
   INVALID_ALERT_ACTION_PARAMS_RESPONSE,
@@ -18,7 +18,7 @@ export const CREATE_TAG_ALERT_ACTION_REQUEST: CreateTagAlertActionBody = {
 };
 
 export const createTagAlertActionOasExamples = (): AlertingOasOperationObject =>
-  buildAlertOas({
+  buildOasOperation({
     requestBody: {
       name: 'createTagAlertActionRequest',
       summary: 'Tag the alert with production and investigating',

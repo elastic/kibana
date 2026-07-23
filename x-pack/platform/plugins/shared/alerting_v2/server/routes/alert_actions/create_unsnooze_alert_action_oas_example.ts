@@ -7,7 +7,7 @@
 
 import type { CreateUnsnoozeAlertActionBody } from '@kbn/alerting-v2-schemas';
 import type { AlertingOasOperationObject } from '../oas_types';
-import { buildAlertOas } from './oas_utils';
+import { buildOasOperation } from '../oas_utils';
 import {
   ALERT_EVENT_NOT_FOUND_RESPONSE,
   INVALID_ALERT_ACTION_PARAMS_RESPONSE,
@@ -16,7 +16,7 @@ import {
 export const CREATE_UNSNOOZE_ALERT_ACTION_REQUEST: CreateUnsnoozeAlertActionBody = {};
 
 export const createUnsnoozeAlertActionOasExamples = (): AlertingOasOperationObject =>
-  buildAlertOas({
+  buildOasOperation({
     requestBody: {
       name: 'createUnsnoozeAlertActionRequest',
       summary: 'Clear the current snooze',

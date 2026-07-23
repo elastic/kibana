@@ -9,9 +9,8 @@ import type { CreateDeactivateAlertActionBody } from '@kbn/alerting-v2-schemas';
 import { ALERT_EPISODE_ACTION_TYPE } from '@kbn/alerting-v2-schemas';
 import { ALERTING_V2_ERROR_CODES } from '../../lib/errors/error_codes';
 import { getCannotDeactivateEpisodeMessage } from '../../lib/errors/alert_error_messages';
-import { invalidResponseExample } from '../oas_utils';
+import { buildOasOperation, invalidResponseExample } from '../oas_utils';
 import type { AlertingOasOperationObject } from '../oas_types';
-import { buildAlertOas } from './oas_utils';
 import {
   ALERT_EVENT_NOT_FOUND_RESPONSE,
   SAMPLE_EPISODE_ID,
@@ -35,7 +34,7 @@ const INVALID_DEACTIVATE_STATE_TRANSITION_RESPONSE = invalidResponseExample({
 });
 
 export const createDeactivateAlertActionOasExamples = (): AlertingOasOperationObject =>
-  buildAlertOas({
+  buildOasOperation({
     requestBody: {
       name: 'createDeactivateAlertActionRequest',
       summary: 'Deactivate as a false positive',

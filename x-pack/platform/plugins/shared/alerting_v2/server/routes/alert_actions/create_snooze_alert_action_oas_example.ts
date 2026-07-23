@@ -7,7 +7,7 @@
 
 import type { CreateSnoozeAlertActionBody } from '@kbn/alerting-v2-schemas';
 import type { AlertingOasOperationObject } from '../oas_types';
-import { buildAlertOas } from './oas_utils';
+import { buildOasOperation } from '../oas_utils';
 import {
   ALERT_EVENT_NOT_FOUND_RESPONSE,
   INVALID_ALERT_ACTION_PARAMS_RESPONSE,
@@ -18,7 +18,7 @@ export const CREATE_SNOOZE_ALERT_ACTION_REQUEST: CreateSnoozeAlertActionBody = {
 };
 
 export const createSnoozeAlertActionOasExamples = (): AlertingOasOperationObject =>
-  buildAlertOas({
+  buildOasOperation({
     requestBody: {
       name: 'createSnoozeAlertActionRequest',
       summary: 'Snooze until 2026-01-16T12:00:00.000Z',
