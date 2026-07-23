@@ -16,11 +16,11 @@ import {
 describe('buildChangePointHistogramBounds', () => {
   it('pins max to now-EVERY so not-yet-written closed minutes are not zero-filled', () => {
     // Rule emission lag is METRIC_SERIES_EVERY (5m); ending at now-1m fabricates a trailing dip.
-    expect(buildChangePointHistogramBounds('now-40m', '1m')).toEqual({
+    expect(buildChangePointHistogramBounds('now-40m')).toEqual({
       min: 'now-40m',
       max: 'now-5m',
     });
-    expect(buildChangePointHistogramBounds('now-125m', '5m')).toEqual({
+    expect(buildChangePointHistogramBounds('now-125m')).toEqual({
       min: 'now-125m',
       max: 'now-5m',
     });
@@ -29,9 +29,8 @@ describe('buildChangePointHistogramBounds', () => {
 
 describe('buildChangePointTimeSeriesAggs', () => {
   it('always analyzes at 1m with _count-based zero-fill for CHANGE_POINT metric_value ON bucket', () => {
-    const extendedBounds = buildChangePointHistogramBounds('now-40m', '1m');
-    // Coarser request intervals must not change analysis resolution.
-    const aggs = buildChangePointTimeSeriesAggs('5m', { extendedBounds });
+    const extendedBounds = buildChangePointHistogramBounds('now-40m');
+    const aggs = buildChangePointTimeSeriesAggs({ extendedBounds });
 
     expect(METRIC_SERIES_ANALYSIS_BUCKET_INTERVAL).toBe('1m');
     expect(aggs.over_time).toEqual({

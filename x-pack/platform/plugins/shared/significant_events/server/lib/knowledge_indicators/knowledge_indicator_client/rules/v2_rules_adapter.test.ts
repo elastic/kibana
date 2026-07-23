@@ -130,7 +130,7 @@ describe('RulesAdapterV2', () => {
           ...createDefinition,
           esqlQuery: statsQuery,
         })
-      ).rejects.toThrow(/STATS queries cannot be installed|filter-only/);
+      ).rejects.toThrow(/filter-only/);
 
       expect(mock.createRule).not.toHaveBeenCalled();
     });

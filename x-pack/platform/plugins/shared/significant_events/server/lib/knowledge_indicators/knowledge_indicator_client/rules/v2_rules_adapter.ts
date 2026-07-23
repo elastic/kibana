@@ -7,14 +7,12 @@
 
 import { isBoom } from '@hapi/boom';
 import { ALERTING_V2_ERROR_CODES, type RulesClientApi } from '@kbn/alerting-v2-plugin/server';
-import { deriveQueryType } from '@kbn/streams-schema';
-import { QUERY_TYPE_STATS } from '@kbn/significant-events-schema';
 import { compileMatchCountBreachQuery } from '../../../significant_events/rules/match_count_query_compiler';
 import {
   METRIC_SERIES_GROUPING_FIELDS,
-  METRIC_SERIES_LOOKBACK,
   METRIC_SERIES_RULE_TAG,
 } from '../../../significant_events/rules/metric_series_contract';
+import { getMetricSeriesRuleSchedule } from '../../../significant_events/rules/schedule';
 import {
   toStreamTag,
   type IRulesManagementClient,
@@ -104,20 +102,12 @@ export class RulesAdapterV2 implements IRulesManagementClient {
   }
 }
 
-function assertNotStatsQuery(esqlQuery: string): void {
-  if (deriveQueryType(esqlQuery) === QUERY_TYPE_STATS) {
-    throw new Error(
-      'STATS queries cannot be installed as v2 signal rules until rule-on-rule provisioning (#265778).'
-    );
-  }
-}
-
 function toV2BreachQuery(esqlQuery: string, timestampField: string): string {
-  assertNotStatsQuery(esqlQuery);
   return compileMatchCountBreachQuery(esqlQuery, timestampField);
 }
 
 function toV2CommonBody(definition: SignificantEventsRuleDefinition) {
+  const { every, lookback } = getMetricSeriesRuleSchedule();
   return {
     metadata: {
       name: definition.name,
@@ -125,8 +115,8 @@ function toV2CommonBody(definition: SignificantEventsRuleDefinition) {
     },
     time_field: definition.timestampField,
     schedule: {
-      every: definition.schedule.interval,
-      lookback: METRIC_SERIES_LOOKBACK,
+      every,
+      lookback,
     },
     grouping: { fields: [...METRIC_SERIES_GROUPING_FIELDS] },
     query: {

@@ -10,7 +10,10 @@ import type {
   AggregationsExtendedBounds,
   AggregationsFieldDateMath,
 } from '@elastic/elasticsearch/lib/api/types';
-import { METRIC_SERIES_EVERY } from '../rules/metric_series_contract';
+import {
+  METRIC_SERIES_ANALYSIS_BUCKET_INTERVAL,
+  METRIC_SERIES_EVERY,
+} from '../rules/metric_series_contract';
 import {
   METRIC_SERIES_BUCKET_RUNTIME_FIELD,
   METRIC_SERIES_VALUE_RUNTIME_FIELD,
@@ -18,9 +21,7 @@ import {
 
 export const RULES_BUCKET_SIZE = 1000;
 
-/** Source metric series is always 1 closed-minute point; analysis must match. */
-export const METRIC_SERIES_ANALYSIS_BUCKET_INTERVAL = '1m';
-
+export { METRIC_SERIES_ANALYSIS_BUCKET_INTERVAL } from '../rules/metric_series_contract';
 export {
   METRIC_SERIES_BUCKET_RUNTIME_FIELD,
   METRIC_SERIES_VALUE_RUNTIME_FIELD,
@@ -34,8 +35,7 @@ export {
  * can misread as a trailing dip/step.
  */
 export function buildChangePointHistogramBounds(
-  lookback: string,
-  _bucketInterval: string = METRIC_SERIES_ANALYSIS_BUCKET_INTERVAL
+  lookback: string
 ): AggregationsExtendedBounds<AggregationsFieldDateMath> {
   return { min: lookback, max: `now-${METRIC_SERIES_EVERY}` };
 }
@@ -55,14 +55,11 @@ export function buildChangePointHistogramBounds(
  * same density contract as the pre-metric-series `over_time>_count` path.
  * (`change_point.gap_policy` alone is not reliable for null max metrics.)
  */
-export function buildChangePointTimeSeriesAggs(
-  _bucketInterval: string,
-  {
-    extendedBounds,
-  }: {
-    extendedBounds: AggregationsExtendedBounds<AggregationsFieldDateMath>;
-  }
-): Record<string, AggregationsAggregationContainer> {
+export function buildChangePointTimeSeriesAggs({
+  extendedBounds,
+}: {
+  extendedBounds: AggregationsExtendedBounds<AggregationsFieldDateMath>;
+}): Record<string, AggregationsAggregationContainer> {
   return {
     over_time: {
       date_histogram: {

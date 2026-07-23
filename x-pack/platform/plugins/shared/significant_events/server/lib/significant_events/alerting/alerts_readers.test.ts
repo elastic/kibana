@@ -10,7 +10,6 @@ import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import {
   RULES_BUCKET_SIZE,
   METRIC_SERIES_RUNTIME_MAPPINGS,
-  METRIC_SERIES_VALUE_RUNTIME_FIELD,
   buildChangePointHistogramBounds,
   buildChangePointTimeSeriesAggs,
 } from './change_point_scan_shared';
@@ -19,7 +18,6 @@ import { ALERTS_READER_V2 } from './alerts_reader';
 const SPACE_ID = 'default';
 const RULE_UUID = 'rule-abc';
 const LOOKBACK = 'now-40m';
-const BUCKET_INTERVAL = '1m';
 
 const makeQueryLink = (
   overrides: {
@@ -124,7 +122,7 @@ describe('SignificantEventsAlertsReaderV2', () => {
     );
   });
 
-  it('normalizes change-point buckets to metric sums and query link metadata', async () => {
+  it('normalizes change-point buckets with query link metadata', async () => {
     const { client, search } = createEsClient();
     search.mockResolvedValue({
       took: 17,
@@ -134,7 +132,6 @@ describe('SignificantEventsAlertsReaderV2', () => {
             {
               key: RULE_UUID,
               doc_count: 100,
-              signal_count: { value: 42 },
               change_points: { type: { mean_shift: { p_value: 0.02 } } },
             },
           ],
@@ -144,7 +141,7 @@ describe('SignificantEventsAlertsReaderV2', () => {
 
     const result = await reader.runChangePointScan(
       client,
-      { lookback: LOOKBACK, bucketInterval: BUCKET_INTERVAL, spaceId: SPACE_ID },
+      { lookback: LOOKBACK, spaceId: SPACE_ID },
       [makeQueryLink({ title: 'Linked rule title' })]
     );
 
@@ -158,11 +155,8 @@ describe('SignificantEventsAlertsReaderV2', () => {
           by_rule: {
             terms: { field: 'rule.id', size: RULES_BUCKET_SIZE },
             aggs: {
-              signal_count: {
-                sum: { field: METRIC_SERIES_VALUE_RUNTIME_FIELD },
-              },
-              ...buildChangePointTimeSeriesAggs(BUCKET_INTERVAL, {
-                extendedBounds: buildChangePointHistogramBounds(LOOKBACK, BUCKET_INTERVAL),
+              ...buildChangePointTimeSeriesAggs({
+                extendedBounds: buildChangePointHistogramBounds(LOOKBACK),
               }),
             },
           },
@@ -174,7 +168,7 @@ describe('SignificantEventsAlertsReaderV2', () => {
       {
         key: RULE_UUID,
         severity_score: 60,
-        doc_count: 42,
+        doc_count: 100,
         rule_name: {
           top: [{ metrics: { 'kibana.alert.rule.name': 'Linked rule title' } }],
         },

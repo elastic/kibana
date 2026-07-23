@@ -12,7 +12,6 @@ import { SignificantEventsAlertsReaderV2 } from './v2_alerts_reader';
 
 export interface ChangePointScanParams {
   lookback: string;
-  bucketInterval: string;
   spaceId: string;
   ruleIds?: string[];
 }

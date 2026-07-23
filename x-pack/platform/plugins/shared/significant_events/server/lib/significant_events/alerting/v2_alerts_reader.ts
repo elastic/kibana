@@ -12,7 +12,6 @@ import { toEsqlRequest } from '../../streams/esql';
 import {
   RULES_BUCKET_SIZE,
   METRIC_SERIES_RUNTIME_MAPPINGS,
-  METRIC_SERIES_VALUE_RUNTIME_FIELD,
   buildChangePointHistogramBounds,
   buildChangePointTimeSeriesAggs,
 } from './change_point_scan_shared';
@@ -36,14 +35,9 @@ import {
 
 const EMPTY_CHANGE_POINT_TYPE: ChangePointTypeMap = {};
 
-interface RawSignalCountAggregation {
-  value?: number;
-}
-
 interface RawRuleBucket {
   key: string;
   doc_count: number;
-  signal_count?: RawSignalCountAggregation;
   change_points?: { type?: ChangePointTypeMap };
 }
 
@@ -132,12 +126,7 @@ export class SignificantEventsAlertsReaderV2 implements ISignificantEventsAlerts
     };
   }
 
-  private buildChangePointScanBody({
-    lookback,
-    bucketInterval,
-    spaceId,
-    ruleIds,
-  }: ChangePointScanParams) {
+  private buildChangePointScanBody({ lookback, spaceId, ruleIds }: ChangePointScanParams) {
     return {
       runtime_mappings: METRIC_SERIES_RUNTIME_MAPPINGS,
       query: {
@@ -149,11 +138,8 @@ export class SignificantEventsAlertsReaderV2 implements ISignificantEventsAlerts
         by_rule: {
           terms: { field: 'rule.id', size: RULES_BUCKET_SIZE },
           aggs: {
-            signal_count: {
-              sum: { field: METRIC_SERIES_VALUE_RUNTIME_FIELD },
-            },
-            ...buildChangePointTimeSeriesAggs(bucketInterval, {
-              extendedBounds: buildChangePointHistogramBounds(lookback, bucketInterval),
+            ...buildChangePointTimeSeriesAggs({
+              extendedBounds: buildChangePointHistogramBounds(lookback),
             }),
           },
         },
@@ -175,7 +161,7 @@ export class SignificantEventsAlertsReaderV2 implements ISignificantEventsAlerts
     return {
       key: bucket.key,
       severity_score: meta?.severityScore ?? 0,
-      doc_count: bucket.signal_count?.value ?? bucket.doc_count,
+      doc_count: bucket.doc_count,
       rule_name: { top: [{ metrics: { 'kibana.alert.rule.name': ruleName } }] },
       stream: { buckets: [{ key: streamName }] },
       change_points: changePoints,

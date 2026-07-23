@@ -8,6 +8,7 @@
 import { parseDuration } from '@kbn/alerting-plugin/common/parse_duration';
 import { CRITICAL_SEVERITY_THRESHOLD, type StreamQuery } from '@kbn/significant-events-schema';
 import {
+  METRIC_SERIES_ANALYSIS_BUCKET_INTERVAL,
   METRIC_SERIES_EVERY,
   METRIC_SERIES_LOOKBACK,
 } from './metric_series_contract';
@@ -22,14 +23,7 @@ const MS_PER_MINUTE = 60 * 1000;
 export const CRITICAL_RULE_INTERVAL = '1m';
 export const DEFAULT_RULE_INTERVAL = '5m';
 
-/** @deprecated Prefer {@link METRIC_SERIES_LOOKBACK}; kept for callers that still derive 2× lookback. */
-export const RULE_LOOKBACK_OVERLAP_RATIO = 2;
-
-/** Always 1m — MATCH metric series emits one point per closed minute (`CHANGE_POINT … ON bucket`). */
-const CRITICAL_ANALYSIS_BUCKET_INTERVAL = '1m';
 const CRITICAL_ANALYSIS_LOOKBACK_MINUTES = 40;
-/** Same 1m analysis resolution as critical; longer window for non-critical rules. */
-const DEFAULT_ANALYSIS_BUCKET_INTERVAL = '1m';
 const DEFAULT_ANALYSIS_LOOKBACK_MINUTES = 125;
 
 export interface RuleDetectionSchedule {
@@ -74,20 +68,6 @@ export function getRuleIntervalMinutes(interval: string): number {
   return minutes;
 }
 
-/** @deprecated Metric-series rules use {@link METRIC_SERIES_LOOKBACK} instead of 2× derivation. */
-export function getRuleLookbackMs(interval: string): number {
-  return RULE_LOOKBACK_OVERLAP_RATIO * getRuleIntervalMs(interval);
-}
-
-/** @deprecated Metric-series rules use {@link METRIC_SERIES_LOOKBACK} instead of 2× derivation. */
-export function getRuleLookbackInterval(interval: string): string {
-  const minutes = getRuleLookbackMs(interval) / MS_PER_MINUTE;
-  if (!Number.isInteger(minutes)) {
-    throw new Error(`Rule lookback for interval "${interval}" must resolve to whole minutes`);
-  }
-  return `${minutes}m`;
-}
-
 /**
  * Detection change_point analysis profile by severity.
  * Bucket interval is always 1m (source metric-series resolution). A coarser
@@ -100,7 +80,7 @@ export function getRuleDetectionSchedule(
   if (isCriticalSeverity(query)) {
     return {
       interval_minutes: getRuleIntervalMinutes(CRITICAL_RULE_INTERVAL),
-      bucket_interval: CRITICAL_ANALYSIS_BUCKET_INTERVAL,
+      bucket_interval: METRIC_SERIES_ANALYSIS_BUCKET_INTERVAL,
       lookback: `now-${CRITICAL_ANALYSIS_LOOKBACK_MINUTES}m`,
       lookback_minutes: CRITICAL_ANALYSIS_LOOKBACK_MINUTES,
     };
@@ -108,7 +88,7 @@ export function getRuleDetectionSchedule(
 
   return {
     interval_minutes: getRuleIntervalMinutes(DEFAULT_RULE_INTERVAL),
-    bucket_interval: DEFAULT_ANALYSIS_BUCKET_INTERVAL,
+    bucket_interval: METRIC_SERIES_ANALYSIS_BUCKET_INTERVAL,
     lookback: `now-${DEFAULT_ANALYSIS_LOOKBACK_MINUTES}m`,
     lookback_minutes: DEFAULT_ANALYSIS_LOOKBACK_MINUTES,
   };

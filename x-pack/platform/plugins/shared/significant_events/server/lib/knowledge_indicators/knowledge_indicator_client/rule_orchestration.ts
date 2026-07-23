@@ -12,22 +12,21 @@ import {
   type SignificantEventsRuleDefinition,
 } from './rules/rules_management_client';
 import { TIMESTAMP } from '../fields';
-import {
-  METRIC_SERIES_EVERY,
-  METRIC_SERIES_RULE_NAME_SUFFIX,
-} from '../../significant_events/rules/metric_series_contract';
+import { METRIC_SERIES_RULE_NAME_SUFFIX } from '../../significant_events/rules/metric_series_contract';
+import { getMetricSeriesRuleSchedule } from '../../significant_events/rules/schedule';
 
 const RULE_INSTALL_CONCURRENCY = 10;
 
 export function toRuleDefinition(queryLink: QueryLink): SignificantEventsRuleDefinition {
   const { query } = queryLink;
+  const { every } = getMetricSeriesRuleSchedule();
   return {
     name: `${query.title}${METRIC_SERIES_RULE_NAME_SUFFIX}`,
     streamName: queryLink.stream_name,
     timestampField: TIMESTAMP,
     esqlQuery: query.esql.query,
     schedule: {
-      interval: METRIC_SERIES_EVERY,
+      interval: every,
     },
   };
 }

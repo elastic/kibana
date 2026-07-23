@@ -24,17 +24,18 @@
 export const METRIC_SERIES_BUCKET_FIELD = 'bucket';
 export const METRIC_SERIES_VALUE_FIELD = 'metric_value';
 
-export const METRIC_SERIES_KEEP = [
-  METRIC_SERIES_BUCKET_FIELD,
-  METRIC_SERIES_VALUE_FIELD,
-] as const;
-
 /** Closed minute buckets each MATCH rule run should emit. */
 export const METRIC_SERIES_CLOSED_BUCKETS = 5;
 
-/** Fixed source bucket size for v0 (one point per closed UTC minute). */
-export const METRIC_SERIES_BUCKET_SIZE = '1m';
+/** Source + analysis resolution (one point per closed UTC minute). */
+export const METRIC_SERIES_ANALYSIS_BUCKET_INTERVAL = '1m';
 
+/**
+ * Execution cadence. Lookback is one closed minute wider than EVERY so a run
+ * can fill LIMIT closed buckets after dropping the open current minute
+ * (EVERY=5m → LOOKBACK=6m → 5 closed minutes). Adjacent runs overlap ~1m;
+ * readers collapse duplicates with MAX(metric_value) per source minute.
+ */
 export const METRIC_SERIES_EVERY = `${METRIC_SERIES_CLOSED_BUCKETS}m`;
 export const METRIC_SERIES_LOOKBACK = `${METRIC_SERIES_CLOSED_BUCKETS + 1}m`;
 export const METRIC_SERIES_LIMIT = METRIC_SERIES_CLOSED_BUCKETS;
