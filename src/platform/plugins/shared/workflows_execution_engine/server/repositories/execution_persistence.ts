@@ -30,13 +30,10 @@ export interface StepExecutionPersistence {
   bulkUpsert(stepExecutions: Array<Partial<EsWorkflowStepExecution>>): Promise<void>;
 }
 
-<<<<<<< HEAD
 /**
  * Owns all mutable state for exactly one synchronous workflow execution.
  * Construct a fresh instance per execution; never share an instance across runs.
  */
-=======
->>>>>>> b2c2244a48b2 ([Workflows] Add synchronous execution mode)
 export class InMemoryExecutionPersistence
   implements WorkflowExecutionPersistence, StepExecutionPersistence
 {
