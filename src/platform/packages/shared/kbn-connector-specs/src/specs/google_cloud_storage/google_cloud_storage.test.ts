@@ -451,8 +451,18 @@ describe('GoogleCloudStorageConnector', () => {
   });
 
   describe('test handler', () => {
-    it('should return {} on success', async () => {
+    it('should return {} on 200 success', async () => {
       mockClient.get.mockResolvedValue({ status: 200, data: { items: [] } });
+
+      if (!GoogleCloudStorageConnector.test) throw new Error('Test handler not defined');
+      const result = await GoogleCloudStorageConnector.test.handler(mockContext);
+
+      expect(result).toEqual({});
+    });
+
+    it('should return {} on 400 (missing project param still proves token is valid)', async () => {
+      // validateStatus accepts 400 — Axios resolves rather than rejects
+      mockClient.get.mockResolvedValue({ status: 400, data: {} });
 
       if (!GoogleCloudStorageConnector.test) throw new Error('Test handler not defined');
       const result = await GoogleCloudStorageConnector.test.handler(mockContext);
