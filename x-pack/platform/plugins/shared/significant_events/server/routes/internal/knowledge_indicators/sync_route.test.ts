@@ -23,7 +23,7 @@ const makeHandlerParams = ({ streamNames }: { streamNames: string[] }): HandlerP
     getScopedClients: jest.fn().mockResolvedValue({
       licensing: {},
       getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({
-        getStreamNamesWithKnowledgeIndicators: jest.fn().mockResolvedValue(streamNames),
+        getStreamNamesToReconcile: jest.fn().mockResolvedValue(streamNames),
       }),
     }),
     server: {} as HandlerParams['server'],
@@ -44,7 +44,7 @@ describe('streamsWithIndicatorsRoute', () => {
     });
   });
 
-  it('returns an empty list when no stream has knowledge indicators', async () => {
+  it('returns an empty list when there is nothing to reconcile', async () => {
     const result = await route.handler(makeHandlerParams({ streamNames: [] }));
 
     expect(result).toEqual({ streams: [] });

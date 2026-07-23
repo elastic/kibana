@@ -15,20 +15,19 @@ export interface StreamsWithIndicatorsResponse {
 }
 
 /**
- * Lists every stream that currently has at least one active knowledge indicator.
- *
- * Deliberately independent of the extraction `_eligible` endpoint: the sync
- * sweep must reconcile all KI-bearing streams regardless of extraction
- * interval, exclusions, or the continuous-extraction toggle. The response shape
- * mirrors the foreach idiom used by the managed sync workflow YAML.
+ * Lists every stream the sync sweep must reconcile (see
+ * `getStreamNamesToReconcile`). Deliberately independent of the extraction
+ * `_eligible` endpoint: the sweep runs regardless of extraction interval,
+ * exclusions, or the continuous-extraction toggle. The response shape mirrors
+ * the foreach idiom used by the managed sync workflow YAML.
  */
 export const streamsWithIndicatorsRoute = createServerRoute({
   endpoint: 'GET /internal/streams/_knowledge_indicators/_streams_with_indicators',
   options: {
     access: 'internal',
-    summary: 'List streams with knowledge indicators',
+    summary: 'List streams to reconcile',
     description:
-      'Returns every stream that has at least one active knowledge indicator, used by the managed KI sync workflow to fan out reconciliation.',
+      'Returns every stream with an active knowledge indicator or a Streams-owned rule, used by the managed KI sync workflow to fan out reconciliation.',
   },
   security: {
     authz: {
@@ -46,7 +45,7 @@ export const streamsWithIndicatorsRoute = createServerRoute({
     await assertSignificantEventsAccess({ server, licensing });
 
     const kiClient = await getKnowledgeIndicatorClient();
-    const streamNames = await kiClient.getStreamNamesWithKnowledgeIndicators();
+    const streamNames = await kiClient.getStreamNamesToReconcile();
 
     return { streams: streamNames.map((streamName) => ({ streamName })) };
   },

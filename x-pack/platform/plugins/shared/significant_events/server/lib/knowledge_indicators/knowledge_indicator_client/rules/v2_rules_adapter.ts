@@ -12,6 +12,7 @@ import { QUERY_TYPE_STATS } from '@kbn/significant-events-schema';
 import { MAX_ALERTS_PER_EXECUTION } from '../../../significant_events/rules/constants';
 import { getRuleLookbackInterval } from '../../../significant_events/rules/schedule';
 import {
+  streamNameFromTag,
   toStreamTag,
   type IRulesManagementClient,
   type SignificantEventsRuleDefinition,
@@ -77,6 +78,21 @@ export class RulesAdapterV2 implements IRulesManagementClient {
       page++;
     }
     return ids;
+  }
+
+  async findStreamNamesWithOwnedRules(): Promise<string[]> {
+    // `getTags` is a terms aggregation over `metadata.tags`: distinct tags in
+    // one call rather than paging every rule. Each owned rule carries one
+    // `sigevents:stream:<name>` tag, so prefix-filtering yields owning streams.
+    const tags = await this.rulesClient.getTags();
+    const streamNames = new Set<string>();
+    for (const tag of tags) {
+      const streamName = streamNameFromTag(tag);
+      if (streamName !== undefined) {
+        streamNames.add(streamName);
+      }
+    }
+    return [...streamNames];
   }
 
   /**
