@@ -76,7 +76,6 @@ export const invalidResponseExample = ({
   } satisfies ErrorResponse,
 });
 
-/** Builds an OAS operation object from request/response examples. */
 export const buildExecutionHistoryOas = ({
   requestBody,
   responses = {},
