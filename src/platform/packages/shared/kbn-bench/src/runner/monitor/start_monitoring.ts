@@ -10,6 +10,11 @@ import fs from 'fs';
 import path from 'path';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { ProcStats, ProcStatSample } from './types';
+
+export interface MonitoringResult {
+  readonly stats: ProcStats[];
+  readonly samples: readonly ProcStatSample[][];
+}
 import { aggregateProcStatSamples } from '../../report/aggregate_proc_stats';
 
 export async function startMonitoring({
@@ -20,7 +25,7 @@ export async function startMonitoring({
   dir: string;
   procStatsRefreshInterval?: number;
   log: ToolingLog;
-}): Promise<() => Promise<ProcStats[]>> {
+}): Promise<() => Promise<MonitoringResult>> {
   // Create a temporary directory where all monitored Node processes will write their stats
   const monitorDir = path.resolve(dir, 'monitor', Math.random().toString().substring(-6));
 
@@ -69,7 +74,8 @@ export async function startMonitoring({
         return [];
       });
 
-    const results: ProcStats[] = [];
+    const stats: ProcStats[] = [];
+    const samplesByProcess: ProcStatSample[][] = [];
     for (const file of files) {
       const lines = await fs.promises
         .readFile(path.join(monitorDir, file), 'utf8')
@@ -86,13 +92,14 @@ export async function startMonitoring({
         const stat = aggregateProcStatSamples(samples);
 
         if (stat.pid !== process.pid) {
-          results.push(stat);
+          stats.push(stat);
+          samplesByProcess.push(samples);
         }
       }
     }
 
     await fs.promises.rm(monitorDir, { recursive: true, force: true });
 
-    return results;
+    return { stats, samples: samplesByProcess };
   };
 }

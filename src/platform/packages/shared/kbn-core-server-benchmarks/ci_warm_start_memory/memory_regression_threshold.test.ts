@@ -7,69 +7,51 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License, v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import {
-  getAllowedRegressionDeltaBytes,
-  isMemoryRegression,
-  MAX_RSS_REGRESSION_THRESHOLD_POLICY,
-  TAIL_HEAP_USED_REGRESSION_THRESHOLD_POLICY,
-  MIN_MAX_RSS_REGRESSION_DELTA_BYTES,
-  MIN_TAIL_HEAP_USED_REGRESSION_DELTA_BYTES,
-  MIN_TAIL_RSS_REGRESSION_DELTA_BYTES,
-} from './memory_regression_threshold';
+  evaluatePairedMemoryRule,
+  MIN_VALID_WARM_START_MEMORY_PAIRS,
+  WARM_START_MEMORY_MATERIALITY_BYTES,
+} from './paired_memory_rule';
 
-describe('getAllowedRegressionDeltaBytes', () => {
-  it('uses the fixed 50 MiB floor for small baselines', () => {
-    const baselineMedianRssBytes = 500 * 1024 * 1024;
-
-    expect(getAllowedRegressionDeltaBytes(baselineMedianRssBytes)).toBe(
-      MIN_TAIL_RSS_REGRESSION_DELTA_BYTES
-    );
+describe('evaluatePairedMemoryRule', () => {
+  it('is inconclusive below the minimum pair count', () => {
+    const result = evaluatePairedMemoryRule({ deltas: Array(7).fill(30 * 1024 * 1024) });
+    expect(result).toEqual({
+      pairCount: MIN_VALID_WARM_START_MEMORY_PAIRS - 1,
+      materialityBytes: WARM_START_MEMORY_MATERIALITY_BYTES,
+      wouldTrigger: false,
+    });
   });
 
-  it('uses 5% of the baseline median when that exceeds 50 MiB', () => {
-    const baselineMedianRssBytes = 200 * 1024 * 1024 * 1024;
+  it('triggers only when the lower confidence bound is above materiality', () => {
+    const exactlyMaterial = evaluatePairedMemoryRule({
+      deltas: Array(MIN_VALID_WARM_START_MEMORY_PAIRS).fill(WARM_START_MEMORY_MATERIALITY_BYTES),
+    });
+    const aboveMaterial = evaluatePairedMemoryRule({
+      deltas: Array(MIN_VALID_WARM_START_MEMORY_PAIRS).fill(
+        WARM_START_MEMORY_MATERIALITY_BYTES + 1
+      ),
+    });
 
-    expect(getAllowedRegressionDeltaBytes(baselineMedianRssBytes)).toBe(
-      baselineMedianRssBytes * 0.05
-    );
+    expect(exactlyMaterial.lowerConfidenceBoundBytes).toBe(WARM_START_MEMORY_MATERIALITY_BYTES);
+    expect(exactlyMaterial.wouldTrigger).toBe(false);
+    expect(aboveMaterial.wouldTrigger).toBe(true);
   });
 
-  it('supports the Max RSS threshold policy', () => {
-    const baselineMedianRssBytes = 500 * 1024 * 1024;
-
-    expect(
-      getAllowedRegressionDeltaBytes(baselineMedianRssBytes, MAX_RSS_REGRESSION_THRESHOLD_POLICY)
-    ).toBe(MIN_MAX_RSS_REGRESSION_DELTA_BYTES);
-  });
-
-  it('supports the Tail heap used threshold policy', () => {
-    const baselineMedianHeapUsedBytes = 500 * 1024 * 1024;
-
-    expect(
-      getAllowedRegressionDeltaBytes(
-        baselineMedianHeapUsedBytes,
-        TAIL_HEAP_USED_REGRESSION_THRESHOLD_POLICY
-      )
-    ).toBe(MIN_TAIL_HEAP_USED_REGRESSION_DELTA_BYTES);
-  });
-});
-
-describe('isMemoryRegression', () => {
-  it('returns false when the target delta is within the allowed threshold', () => {
-    const baselineMedianRssBytes = 2 * 1024 * 1024 * 1024;
-    const allowedDeltaBytes = getAllowedRegressionDeltaBytes(baselineMedianRssBytes);
-
-    expect(
-      isMemoryRegression(baselineMedianRssBytes, baselineMedianRssBytes + allowedDeltaBytes - 1)
-    ).toBe(false);
-  });
-
-  it('returns true when the target delta exceeds the allowed threshold', () => {
-    const baselineMedianRssBytes = 2 * 1024 * 1024 * 1024;
-    const allowedDeltaBytes = getAllowedRegressionDeltaBytes(baselineMedianRssBytes);
-
-    expect(
-      isMemoryRegression(baselineMedianRssBytes, baselineMedianRssBytes + allowedDeltaBytes + 1)
-    ).toBe(true);
+  it('does not trigger a noisy sample with the same mean', () => {
+    const result = evaluatePairedMemoryRule({
+      deltas: [70, -30, 70, -30, 70, -30, 70, -30].map((value) => value * 1024 * 1024),
+    });
+    expect(result.meanBytes).toBe(20 * 1024 * 1024);
+    expect(result.wouldTrigger).toBe(false);
   });
 });

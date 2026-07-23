@@ -7,7 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ToolingLog } from '@kbn/tooling-log';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License, v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { Benchmark, LoadedBenchConfig } from '../config/types';
 import { getFileBaseDir } from '../filesystem/get_file_base_dir';
 import type { GlobalRunContext } from '../types';
@@ -58,65 +66,95 @@ function createCallbackWrapper(
   };
 }
 
-async function runAll({
+export interface BenchmarkExecutor {
+  beforeAll: () => Promise<void>;
+  run: () => Promise<BenchmarkRunResult>;
+  afterAll: () => Promise<void>;
+  readonly profilesDir: string;
+}
+
+/**
+ * Creates an executor whose lifecycle can be interleaved with another executor.
+ * `beforeAll` and `afterAll` intentionally remain explicit so comparison callers
+ * can retain one warm-up/service lifetime per artifact while alternating starts.
+ */
+export function createBenchmarkExecutor({
+  context,
   config,
   benchmark,
-  hooks,
-  log,
-  dir,
-  monitorInterval,
+  runnable,
 }: {
+  context: GlobalRunContext;
   config: LoadedBenchConfig;
   benchmark: Benchmark;
-  hooks: {
-    before?: () => Promise<void>;
-    run: () => Promise<BenchmarkRunReturn | void>;
-    after?: () => Promise<void>;
+  runnable: BenchmarkRunnable;
+}): BenchmarkExecutor {
+  const { log: parentLog, workspace } = context;
+  const benchmarkContext: BenchmarkRunContext = {
+    log: context.log,
+    workspace,
+    buildDir: context.buildDir,
   };
-  log: ToolingLog;
-  dir: string;
-  monitorInterval: number;
-}) {
-  const results: BenchmarkRunResult[] = [];
-
-  // don't collect system metrics for high volume of runs, too much overhead
+  const wrapInTimeout = createCallbackWrapper(benchmarkContext, config.timeout);
+  const profilesDir = getFileBaseDir({
+    dataDir: context.dataDir,
+    configName: config.name,
+    benchmarkName: benchmark.name,
+    workspaceName: workspace.getDisplayName(),
+  });
   const shouldMonitor = benchmark.kind !== 'module' || config.runs <= 100;
 
-  const run = async () => {
+  const run = async (): Promise<BenchmarkRunResult> => {
     const stopMonitoring = shouldMonitor
-      ? await startMonitoring({ log, dir, procStatsRefreshInterval: monitorInterval })
-      : async (...args: any[]) => [];
-
-    await hooks.before?.();
+      ? await startMonitoring({
+          log: context.log,
+          dir: profilesDir,
+          procStatsRefreshInterval: config.monitorInterval,
+        })
+      : async () => ({ stats: [], samples: [] });
 
     try {
+      await wrapInTimeout(`${benchmark.name}:before()`, runnable.before);
       const start = performance.now();
-      const result = await hooks?.run();
-
-      const metrics = result && result.metrics ? result.metrics : {};
-
-      results.push({
-        metrics,
+      const result: BenchmarkRunReturn | void = await wrapInTimeout(
+        `${benchmark.name}:run()`,
+        runnable.run
+      );
+      const monitoring = await stopMonitoring();
+      return {
+        metrics: result?.metrics ?? {},
         status: 'completed',
         time: performance.now() - start,
-        stats: await stopMonitoring(),
-      });
-    } catch (error: any) {
-      results.push({
-        error,
+        stats: monitoring.stats,
+        samples: monitoring.samples,
+      };
+    } catch (error) {
+      const monitoring = await stopMonitoring();
+      return {
+        error: error instanceof Error ? error : new Error(String(error)),
         status: 'failed',
-        stats: await stopMonitoring(),
-      });
+        stats: monitoring.stats,
+        samples: monitoring.samples,
+      };
     } finally {
-      await hooks.after?.();
+      await wrapInTimeout(`${benchmark.name}:after()`, runnable.after);
     }
   };
 
-  for (let i = 0; i < config.runs; i++) {
-    await run();
-  }
-
-  return results;
+  return {
+    beforeAll: async () => {
+      parentLog.info(
+        `Start benchmark name=${benchmark.name} kind=${benchmark.kind} runs=${config.runs}`
+      );
+      await clearExistingProfiles(context.log, profilesDir);
+      await wrapInTimeout(`${benchmark.name}:beforeAll()`, runnable.beforeAll);
+    },
+    run,
+    afterAll: async () => {
+      await wrapInTimeout(`${benchmark.name}:afterAll()`, runnable.afterAll);
+    },
+    profilesDir,
+  };
 }
 
 export async function runBenchmark({
@@ -130,72 +168,34 @@ export async function runBenchmark({
   benchmark: Benchmark;
   runnable: BenchmarkRunnable;
 }): Promise<BenchmarkResult> {
-  const { log: parentLog, workspace } = context;
-
-  parentLog.info(
-    `Start benchmark name=${benchmark.name} kind=${benchmark.kind} runs=${config.runs}`
-  );
-
-  const benchmarkContext: BenchmarkRunContext = {
-    log: context.log,
-    workspace,
-    buildDir: context.buildDir,
-  };
-
-  const wrapInTimeout = createCallbackWrapper(benchmarkContext, config.timeout);
-
-  const testResultsBaseDir = getFileBaseDir({
-    dataDir: context.dataDir,
-    configName: config.name,
-    benchmarkName: benchmark.name,
-    workspaceName: workspace.getDisplayName(),
-  });
-
+  const executor = createBenchmarkExecutor({ context, config, benchmark, runnable });
   const results: BenchmarkRunResult[] = [];
 
-  const profilesDir = testResultsBaseDir;
-
-  await clearExistingProfiles(context.log, profilesDir);
-
   try {
-    await wrapInTimeout(`${benchmark.name}:beforeAll()`, runnable.beforeAll);
+    await executor.beforeAll();
+    const runAll = async () => {
+      for (let i = 0; i < config.runs; i++) {
+        results.push(await executor.run());
+      }
+    };
 
-    const runCb = () =>
-      runAll({
-        config,
-        benchmark,
-        hooks: {
-          before: () => wrapInTimeout(`${benchmark.name}:before()`, runnable.before),
-          run: () => wrapInTimeout(`${benchmark.name}:run()`, runnable.run),
-          after: () => wrapInTimeout(`${benchmark.name}:after()`, runnable.after),
-        },
-        log: context.log,
-        dir: testResultsBaseDir,
-        monitorInterval: config.monitorInterval,
-      });
-
-    const resultsFromRun = config.profile
-      ? await wrapInProfiler(profilesDir, runCb)
-      : await runCb();
-
-    results.push(...resultsFromRun);
+    if (config.profile) {
+      await wrapInProfiler(executor.profilesDir, runAll);
+    } else {
+      await runAll();
+    }
   } finally {
-    await wrapInTimeout(`${benchmark.name}:afterAll()`, runnable.afterAll);
+    await executor.afterAll();
   }
 
   let profile;
-
   if (config.profile) {
     profile = await collectAndMergeCpuProfiles({
-      profilesDir,
+      profilesDir: executor.profilesDir,
       name: benchmark.name,
       log: context.log,
     });
   }
 
-  return {
-    benchmark,
-    runs: results,
-    profile,
-  };
+  return { benchmark, runs: results, profile };
 }

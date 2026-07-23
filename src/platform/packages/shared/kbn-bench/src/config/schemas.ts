@@ -8,7 +8,13 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InitialBenchConfig, ModuleBenchmark, Script, ScriptBenchmark } from './types';
+import type {
+  InitialBenchConfig,
+  ModuleBenchmark,
+  PairedComparisonRun,
+  Script,
+  ScriptBenchmark,
+} from './types';
 
 const benchmarkSchemaBase = z.object({
   // Restrict benchmark name to filename-safe characters we allow for generated artifacts
@@ -53,6 +59,14 @@ const scriptBenchmarkSchema = benchmarkSchemaBase.extend({
 
 const benchmarkSchema = z.union([moduleBenchmarkSchema, scriptBenchmarkSchema]);
 
+const pairedComparisonRunSchema = z.object({
+  mode: z.literal('randomized_paired'),
+  pairs: z.number().int().positive(),
+  maxAttempts: z.number().int().positive(),
+  seed: z.string().optional(),
+  enforcement: z.enum(['observe', 'fail']).optional(),
+}) satisfies z.Schema<PairedComparisonRun>;
+
 const configSchema = z.object({
   name: z.string(),
   runs: z.number().optional(),
@@ -60,6 +74,7 @@ const configSchema = z.object({
   monitorInterval: z.number().positive().optional(),
   profile: z.boolean().optional(),
   openProfile: z.boolean().optional(),
+  comparisonRun: pairedComparisonRunSchema.optional(),
   benchmarks: z.array(benchmarkSchema),
 }) satisfies z.Schema<InitialBenchConfig>;
 

@@ -12,7 +12,13 @@ import { compareWarmStartMemory } from './ci_warm_start_memory/compare_warm_star
 
 const config: InitialBenchConfig = {
   name: 'kibana_ci_warm_start_memory',
-  runs: 3,
+  runs: 8,
+  comparisonRun: {
+    mode: 'randomized_paired',
+    pairs: 8,
+    maxAttempts: 12,
+    enforcement: 'observe',
+  },
   monitorInterval: 250,
   profile: false,
   timeout: 10 * 60_000,

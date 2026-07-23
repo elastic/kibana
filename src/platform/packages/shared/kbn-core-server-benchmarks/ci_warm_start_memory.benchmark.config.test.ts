@@ -14,7 +14,13 @@ describe('ci_warm_start_memory.benchmark.config', () => {
     expect(config).toEqual(
       expect.objectContaining({
         name: 'kibana_ci_warm_start_memory',
-        runs: 3,
+        runs: 8,
+        comparisonRun: {
+          mode: 'randomized_paired',
+          pairs: 8,
+          maxAttempts: 12,
+          enforcement: 'observe',
+        },
         monitorInterval: 250,
         profile: false,
         benchmarks: [
