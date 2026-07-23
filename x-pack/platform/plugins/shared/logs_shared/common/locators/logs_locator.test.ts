@@ -28,11 +28,18 @@ const mockGetLogSourcesService = jest.fn().mockResolvedValue({
   getFlattenedLogSources: mockGetFlattenedLogSources,
 });
 
-const createLocator = (isEsqlDefault: boolean) =>
+const createLocator = ({
+  isEsqlDefault = false,
+  solutionNavId = 'oblt',
+}: {
+  isEsqlDefault?: boolean;
+  solutionNavId?: string | null;
+} = {}) =>
   new LogsLocatorDefinition({
     locators: mockLocators as any,
     getLogSourcesService: mockGetLogSourcesService,
     getIsEsqlDefault: jest.fn().mockResolvedValue(isEsqlDefault),
+    getActiveSolutionNavId: jest.fn().mockResolvedValue(solutionNavId),
   });
 
 describe('LogsLocatorDefinition', () => {
@@ -42,7 +49,7 @@ describe('LogsLocatorDefinition', () => {
 
   describe('when discover.isEsqlDefault is true', () => {
     it('delegates to DISCOVER_APP_LOCATOR with an ES|QL query when no query param is provided', async () => {
-      const locator = createLocator(true);
+      const locator = createLocator({ isEsqlDefault: true });
 
       await locator.getLocation({});
 
@@ -52,8 +59,8 @@ describe('LogsLocatorDefinition', () => {
       });
     });
 
-    it('delegates with the all-logs data view id when a query is given', async () => {
-      const locator = createLocator(true);
+    it('falls through to the data view resolution when a query is given', async () => {
+      const locator = createLocator({ isEsqlDefault: true, solutionNavId: 'oblt' });
       const callerQuery = { language: 'kuery', query: 'host.name: "my-host"' };
 
       await locator.getLocation({ query: callerQuery });
@@ -66,7 +73,7 @@ describe('LogsLocatorDefinition', () => {
     });
 
     it('spreads consumer-provided params into the delegated call', async () => {
-      const locator = createLocator(true);
+      const locator = createLocator({ isEsqlDefault: true });
       const extraParams = {
         timeRange: { from: 'now-15m', to: 'now' },
         filters: [{ meta: { alias: 'test' } }],
@@ -82,109 +89,94 @@ describe('LogsLocatorDefinition', () => {
   });
 
   describe('when discover.isEsqlDefault is false', () => {
-    it('delegates to DISCOVER_APP_LOCATOR with the all-logs data view id', async () => {
-      const locator = createLocator(false);
+    describe('in a solution that registers the all-logs data view (Observability / Classic)', () => {
+      it('delegates the all-logs data view id in the Observability solution', async () => {
+        const locator = createLocator({ solutionNavId: 'oblt' });
 
-      await locator.getLocation({});
+        await locator.getLocation({});
 
-      expect(mockLocators.get).toHaveBeenCalledWith('DISCOVER_APP_LOCATOR');
-      expect(mockGetLocation).toHaveBeenCalledWith({
-        dataViewId: ALL_LOGS_DATA_VIEW_ID,
+        expect(mockLocators.get).toHaveBeenCalledWith('DISCOVER_APP_LOCATOR');
+        expect(mockGetLocation).toHaveBeenCalledWith({
+          dataViewId: ALL_LOGS_DATA_VIEW_ID,
+        });
+        expect(mockGetFlattenedLogSources).not.toHaveBeenCalled();
       });
-      expect(mockGetFlattenedLogSources).not.toHaveBeenCalled();
-    });
 
-    it('delegates the stable all-logs dataViewId by default (resolved by the root profile)', async () => {
-      const locator = createLocator(false);
+      it('delegates the all-logs data view id in the Classic nav (no solution)', async () => {
+        const locator = createLocator({ solutionNavId: null });
 
-      await locator.getLocation({});
+        await locator.getLocation({});
 
-      const delegatedParams = mockGetLocation.mock.calls[0][0];
-      expect(delegatedParams).not.toHaveProperty('dataViewSpec');
-      expect(delegatedParams.dataViewId).toBe(ALL_LOGS_DATA_VIEW_ID);
-    });
+        const delegatedParams = mockGetLocation.mock.calls[0][0];
+        expect(delegatedParams).not.toHaveProperty('dataViewSpec');
+        expect(delegatedParams.dataViewId).toBe(ALL_LOGS_DATA_VIEW_ID);
+        expect(mockGetFlattenedLogSources).not.toHaveBeenCalled();
+      });
 
-    it('does not shadow a caller-provided dataViewId with the all-logs spec', async () => {
-      const locator = createLocator(false);
-      const callerQuery = { language: 'kuery', query: 'aws.cloudwatch.namespace: AWS/EC2' };
+      it('spreads consumer-provided params into the delegated call', async () => {
+        const locator = createLocator({ solutionNavId: 'oblt' });
+        const extraParams = {
+          timeRange: { from: 'now-1h', to: 'now' },
+          columns: ['message', '@timestamp'],
+        };
 
-      await locator.getLocation({ dataViewId: 'metrics-*', query: callerQuery } as any);
+        await locator.getLocation(extraParams as any);
 
-      const delegatedParams = mockGetLocation.mock.calls[0][0];
-      expect(delegatedParams).toEqual({ dataViewId: 'metrics-*', query: callerQuery });
-      expect(delegatedParams).not.toHaveProperty('dataViewSpec');
-      expect(mockGetFlattenedLogSources).not.toHaveBeenCalled();
-    });
-
-    it('does not shadow a caller-provided dataViewSpec with the all-logs spec', async () => {
-      const locator = createLocator(false);
-      const callerDataViewSpec = { title: 'logs-aws.ec2-*', timeFieldName: '@timestamp' };
-
-      await locator.getLocation({ dataViewSpec: callerDataViewSpec } as any);
-
-      const delegatedParams = mockGetLocation.mock.calls[0][0];
-      expect(delegatedParams).toEqual({ dataViewSpec: callerDataViewSpec });
-      expect(delegatedParams.dataViewSpec).not.toEqual(ALL_LOGS_DATA_VIEW_SPEC);
-      expect(mockGetFlattenedLogSources).not.toHaveBeenCalled();
-    });
-
-    it('spreads consumer-provided params into the delegated call', async () => {
-      const locator = createLocator(false);
-      const extraParams = {
-        timeRange: { from: 'now-1h', to: 'now' },
-        columns: ['message', '@timestamp'],
-      };
-
-      await locator.getLocation(extraParams as any);
-
-      expect(mockGetLocation).toHaveBeenCalledWith({
-        dataViewId: ALL_LOGS_DATA_VIEW_ID,
-        ...extraParams,
+        expect(mockGetLocation).toHaveBeenCalledWith({
+          dataViewId: ALL_LOGS_DATA_VIEW_ID,
+          ...extraParams,
+        });
       });
     });
-  });
 
-  describe('when useAdHocDataView is true', () => {
-    it('builds and delegates the all-logs ad-hoc data view spec instead of the id', async () => {
-      const locator = createLocator(false);
-      const callerQuery = { language: 'kuery', query: 'host.name: "my-host"' };
+    describe('in a solution without the all-logs data view (Security / Search)', () => {
+      it('builds and delegates the all-logs ad-hoc data view spec in the Security solution', async () => {
+        const locator = createLocator({ solutionNavId: 'security' });
+        const callerQuery = { language: 'kuery', query: 'host.name: "my-host"' };
 
-      await locator.getLocation({ query: callerQuery, useAdHocDataView: true });
+        await locator.getLocation({ query: callerQuery });
 
-      const delegatedParams = mockGetLocation.mock.calls[0][0];
-      expect(mockGetFlattenedLogSources).toHaveBeenCalled();
-      expect(delegatedParams.dataViewSpec).toEqual(ALL_LOGS_DATA_VIEW_SPEC);
-      expect(delegatedParams).not.toHaveProperty('dataViewId');
-      expect(delegatedParams.query).toEqual(callerQuery);
+        const delegatedParams = mockGetLocation.mock.calls[0][0];
+        expect(mockGetFlattenedLogSources).toHaveBeenCalled();
+        expect(delegatedParams.dataViewSpec).toEqual(ALL_LOGS_DATA_VIEW_SPEC);
+        expect(delegatedParams).not.toHaveProperty('dataViewId');
+        expect(delegatedParams.query).toEqual(callerQuery);
+      });
+
+      it('builds and delegates the all-logs ad-hoc data view spec in the Search solution', async () => {
+        const locator = createLocator({ solutionNavId: 'es' });
+
+        await locator.getLocation({});
+
+        const delegatedParams = mockGetLocation.mock.calls[0][0];
+        expect(delegatedParams.dataViewSpec).toEqual(ALL_LOGS_DATA_VIEW_SPEC);
+        expect(delegatedParams).not.toHaveProperty('dataViewId');
+      });
     });
 
-    it('does not forward the useAdHocDataView flag to DISCOVER_APP_LOCATOR', async () => {
-      const locator = createLocator(false);
+    describe('when the caller provides a data view', () => {
+      it('respects a caller-provided dataViewId regardless of the solution', async () => {
+        const locator = createLocator({ solutionNavId: 'security' });
+        const callerQuery = { language: 'kuery', query: 'aws.cloudwatch.namespace: AWS/EC2' };
 
-      await locator.getLocation({ useAdHocDataView: true });
+        await locator.getLocation({ dataViewId: 'metrics-*', query: callerQuery } as any);
 
-      const delegatedParams = mockGetLocation.mock.calls[0][0];
-      expect(delegatedParams).not.toHaveProperty('useAdHocDataView');
-    });
+        const delegatedParams = mockGetLocation.mock.calls[0][0];
+        expect(delegatedParams).toEqual({ dataViewId: 'metrics-*', query: callerQuery });
+        expect(delegatedParams).not.toHaveProperty('dataViewSpec');
+        expect(mockGetFlattenedLogSources).not.toHaveBeenCalled();
+      });
 
-    it('respects a caller-provided data view over the ad-hoc spec', async () => {
-      const locator = createLocator(false);
+      it('respects a caller-provided dataViewSpec regardless of the solution', async () => {
+        const locator = createLocator({ solutionNavId: 'oblt' });
+        const callerDataViewSpec = { title: 'logs-aws.ec2-*', timeFieldName: '@timestamp' };
 
-      await locator.getLocation({ dataViewId: 'metrics-*', useAdHocDataView: true } as any);
+        await locator.getLocation({ dataViewSpec: callerDataViewSpec } as any);
 
-      const delegatedParams = mockGetLocation.mock.calls[0][0];
-      expect(delegatedParams).toEqual({ dataViewId: 'metrics-*' });
-      expect(delegatedParams).not.toHaveProperty('dataViewSpec');
-      expect(mockGetFlattenedLogSources).not.toHaveBeenCalled();
-    });
-
-    it('still prefers the ES|QL query when it is the default and no query is provided', async () => {
-      const locator = createLocator(true);
-
-      await locator.getLocation({ useAdHocDataView: true });
-
-      expect(mockGetLocation).toHaveBeenCalledWith({
-        query: { esql: `FROM ${CUSTOM_LOG_PATTERN}` },
+        const delegatedParams = mockGetLocation.mock.calls[0][0];
+        expect(delegatedParams).toEqual({ dataViewSpec: callerDataViewSpec });
+        expect(delegatedParams.dataViewSpec).not.toEqual(ALL_LOGS_DATA_VIEW_SPEC);
+        expect(mockGetFlattenedLogSources).not.toHaveBeenCalled();
       });
     });
   });

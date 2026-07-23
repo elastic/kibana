@@ -55,7 +55,6 @@ export const ViewLogsButton: React.FunctionComponent<ViewLogsProps> = ({
         to: getTimeRangeEndFromTime(endTime ? endTime : defaultEndTime),
       },
       query: { language: 'kuery', query: logStreamQuery },
-      useAdHocDataView: true,
     });
   }, [endTime, logStreamQuery, logsLocator, startTime]);
 
