@@ -10,14 +10,14 @@ import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClientProvider } from '@kbn/react-query';
 import type { HttpStart } from '@kbn/core/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { getESQLTimeFieldFromQuery } from '@kbn/esql-utils';
+import { getESQLTimeField } from '@kbn/esql-utils';
 import { createTestQueryClient } from '../../test_utils';
 import { useDataFields } from '../../form/hooks/use_data_fields';
 import { ruleFormKeys } from '../../form/hooks/query_key_factory';
 import { useResolveTimeField } from './use_resolve_time_field';
 
 jest.mock('@kbn/esql-utils', () => ({
-  getESQLTimeFieldFromQuery: jest.fn(async () => undefined),
+  getESQLTimeField: jest.fn(async () => undefined),
 }));
 
 jest.mock('../../form/hooks/use_data_fields', () => ({
@@ -45,7 +45,7 @@ describe('useResolveTimeField', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (useDataFields as jest.Mock).mockReturnValue({ data: {}, isLoading: false });
-    (getESQLTimeFieldFromQuery as jest.Mock).mockResolvedValue(undefined);
+    (getESQLTimeField as jest.Mock).mockResolvedValue(undefined);
   });
 
   it('clears an invalid current field (does not substitute) but offers the real field for selection', async () => {
@@ -77,7 +77,7 @@ describe('useResolveTimeField', () => {
 
   it('offers the ES|QL timefield API result as an option but clears the invalid current field', async () => {
     const onTimeFieldChange = jest.fn();
-    (getESQLTimeFieldFromQuery as jest.Mock).mockResolvedValue('timestamp');
+    (getESQLTimeField as jest.Mock).mockResolvedValue('timestamp');
 
     const { result } = renderHook(
       () =>
@@ -89,7 +89,7 @@ describe('useResolveTimeField', () => {
     );
 
     await waitFor(() => {
-      expect(getESQLTimeFieldFromQuery).toHaveBeenCalledWith({
+      expect(getESQLTimeField).toHaveBeenCalledWith({
         query: 'FROM kibana_sample_data_flights',
         http: defaultParams.http,
       });
@@ -137,7 +137,7 @@ describe('useResolveTimeField', () => {
     );
 
     await waitFor(() => {
-      expect(getESQLTimeFieldFromQuery).toHaveBeenCalled();
+      expect(getESQLTimeField).toHaveBeenCalled();
     });
     expect(onTimeFieldChange).toHaveBeenCalledWith('');
     expect(result.current.isTimeFieldResolved).toBe(false);
@@ -189,7 +189,7 @@ describe('useResolveTimeField', () => {
         })
       );
       expect(onTimeFieldChange).not.toHaveBeenCalled();
-      expect(getESQLTimeFieldFromQuery).not.toHaveBeenCalled();
+      expect(getESQLTimeField).not.toHaveBeenCalled();
       expect(result.current.isTimeFieldResolved).toBe(true);
     });
   });

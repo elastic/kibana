@@ -6,6 +6,8 @@
  */
 
 import { renderHook } from '@testing-library/react';
+import { useHistory } from 'react-router-dom';
+import { decode } from '@kbn/rison';
 import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import type { Indicator } from '../../../common/threat_intelligence/types/indicator';
 import { useIocFlyoutApi } from './use_ioc_flyout_api';
@@ -29,6 +31,8 @@ jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useHistory: jest.fn(() => ({})),
 }));
+
+const useHistoryMock = useHistory as jest.Mock;
 jest.mock('../../common/lib/kibana');
 jest.mock('../../common/hooks/is_in_security_app');
 jest.mock('../shared/components/flyout_provider', () => ({
@@ -49,6 +53,7 @@ const indicator = {
 describe('useIocFlyoutApi', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    useHistoryMock.mockReturnValue({});
     mockOpenSystemFlyout.mockReturnValue({ onClose: Promise.resolve(), close: jest.fn() });
     (useKibana as jest.Mock).mockReturnValue({
       services: {
@@ -118,5 +123,29 @@ describe('useIocFlyoutApi', () => {
     result.current.openIocFlyout({ indicator });
 
     expect(mockOpenSystemFlyout.mock.calls[0][1].historyKey).toBe(DOC_VIEWER_FLYOUT_HISTORY_KEY);
+  });
+
+  it("persists the indicator's `_index` in the flyoutV2 URL descriptor so it can be restored", () => {
+    const replace = jest.fn();
+    useHistoryMock.mockReturnValue({ location: { search: '' }, replace });
+    const indicatorWithIndex = {
+      _id: 'ioc-1',
+      _index: 'logs-ti_abusech_malware-latest',
+      fields: { 'threat.indicator.type': ['url'] },
+    } as unknown as Indicator;
+
+    const { result } = renderHook(() => useIocFlyoutApi());
+    result.current.openIocFlyout({ indicator: indicatorWithIndex });
+
+    expect(replace).toHaveBeenCalledTimes(1);
+    const { search } = replace.mock.calls[0][0];
+    const encoded = new URLSearchParams(search).get('flyoutV2');
+    expect(decode(encoded as string)).toEqual([
+      {
+        kind: 'ioc',
+        indicatorId: 'ioc-1',
+        indicatorIndex: 'logs-ti_abusech_malware-latest',
+      },
+    ]);
   });
 });
