@@ -841,6 +841,191 @@ paths:
       summary: Update an exception list
       tags:
         - Security Exceptions API
+  /api/exception_lists/_bulk_delete:
+    post:
+      description: >
+        Delete multiple exception lists using either their `id` or `list_id`
+        field. Provide
+
+        exactly one of `ids` or `list_ids`, each containing at least one entry;
+        mixing both in
+
+        the same request is not supported.
+      operationId: BulkDeleteExceptionLists
+      requestBody:
+        content:
+          application/json:
+            schema:
+              examples:
+                byListIds:
+                  value:
+                    list_ids:
+                      - simple_list_1
+                      - simple_list_2
+                    namespace_type: single
+              oneOf:
+                - additionalProperties: false
+                  type: object
+                  properties:
+                    ids:
+                      description: Array of exception list saved object identifiers.
+                      items:
+                        $ref: '#/components/schemas/ExceptionListId'
+                      maxItems: 100
+                      minItems: 1
+                      type: array
+                    namespace_type:
+                      $ref: '#/components/schemas/ExceptionNamespaceType'
+                      default: single
+                      description: >
+                        `single` deletes lists in the current Kibana space;
+                        `agnostic` deletes global
+
+                        lists. Applies to every list in the request.
+                  required:
+                    - ids
+                - additionalProperties: false
+                  type: object
+                  properties:
+                    list_ids:
+                      description: Array of human readable exception list string identifiers.
+                      items:
+                        $ref: '#/components/schemas/ExceptionListHumanId'
+                      maxItems: 100
+                      minItems: 1
+                      type: array
+                    namespace_type:
+                      $ref: '#/components/schemas/ExceptionNamespaceType'
+                      default: single
+                      description: >
+                        `single` deletes lists in the current Kibana space;
+                        `agnostic` deletes global
+
+                        lists. Applies to every list in the request.
+                  required:
+                    - list_ids
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                partialFailure:
+                  value:
+                    deleted:
+                      - _version: WzIsMV0=
+                        created_at: '2025-01-07T19:34:27.942Z'
+                        created_by: elastic
+                        description: This is a sample detection type exception list.
+                        id: 9e5fc75a-a3da-46c5-96e3-a2ec59c6bb85
+                        immutable: false
+                        list_id: simple_list_1
+                        name: Sample Detection Exception List
+                        namespace_type: single
+                        os_types:
+                          - linux
+                        tags:
+                          - malware
+                        tie_breaker_id: 78f1aca1-f8ee-4eb5-9ceb-f5c3ee656cb3
+                        type: detection
+                        updated_at: '2025-01-07T19:34:27.942Z'
+                        updated_by: elastic
+                        version: 1
+                    errors:
+                      - error:
+                          message: 'exception list list_id: "simple_list_2" does not exist'
+                          status_code: 404
+                        list_id: simple_list_2
+              schema:
+                type: object
+                properties:
+                  deleted:
+                    items:
+                      $ref: '#/components/schemas/ExceptionList'
+                    type: array
+                  errors:
+                    items:
+                      type: object
+                      properties:
+                        error:
+                          type: object
+                          properties:
+                            message:
+                              type: string
+                            status_code:
+                              type: integer
+                          required:
+                            - message
+                            - status_code
+                        id:
+                          $ref: '#/components/schemas/ExceptionListId'
+                        list_id:
+                          $ref: '#/components/schemas/ExceptionListHumanId'
+                      required:
+                        - error
+                    type: array
+                required:
+                  - deleted
+                  - errors
+          description: Successful response
+        '400':
+          content:
+            application/json:
+              examples:
+                badRequest:
+                  value:
+                    error: Bad Request
+                    message: Exactly one of "ids" or "list_ids" must be provided, each with at least
+                      one entry
+                    statusCode: 400
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/PlatformErrorResponse'
+                  - $ref: '#/components/schemas/SiemErrorResponse'
+          description: Invalid input data response
+        '401':
+          content:
+            application/json:
+              examples:
+                unauthorized:
+                  value:
+                    error: Unauthorized
+                    message: '[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to
+                      authenticate user [elastic] for REST request
+                      [/_security/_authenticate]]: unable to authenticate user
+                      [elastic] for REST request [/_security/_authenticate]'
+                    statusCode: 401
+              schema:
+                $ref: '#/components/schemas/PlatformErrorResponse'
+          description: Unsuccessful authentication response
+        '403':
+          content:
+            application/json:
+              examples:
+                forbidden:
+                  value:
+                    error: Forbidden
+                    message: API [POST /api/exception_lists/_bulk_delete] is unauthorized for user,
+                      this action is granted by the Kibana privileges
+                      [lists-all]
+                    statusCode: 403
+              schema:
+                $ref: '#/components/schemas/PlatformErrorResponse'
+          description: Not enough privileges response
+        '500':
+          content:
+            application/json:
+              examples:
+                serverError:
+                  value:
+                    message: Internal Server Error
+                    status_code: 500
+              schema:
+                $ref: '#/components/schemas/SiemErrorResponse'
+          description: Internal server error response
+      summary: Bulk delete exception lists
+      tags:
+        - Security Exceptions API
   /api/exception_lists/_duplicate:
     post:
       description: Duplicate an existing exception list.
