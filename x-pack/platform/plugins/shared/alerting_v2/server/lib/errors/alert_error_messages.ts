@@ -5,14 +5,6 @@
  * 2.0.
  */
 
-/**
- * Canonical human-readable messages for alert-action domain errors.
- * Used by the alert actions client (runtime Boom errors) and OAS examples so
- * documentation stays aligned with the HTTP responses clients actually see.
- *
- * `message` is not part of the API contract — clients should branch on `code`.
- */
-
 export const getAlertEventNotFoundMessage = (groupHash: string, episodeId?: string): string =>
   `Alert event with group_hash [${groupHash}] and episode_id [${episodeId}] not found`;
 
