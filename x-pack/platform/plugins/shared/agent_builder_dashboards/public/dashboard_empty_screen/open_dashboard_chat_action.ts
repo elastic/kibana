@@ -21,11 +21,11 @@ export const createOpenDashboardChatAction = (
   order: 0,
   getDisplayName: () =>
     i18n.translate('xpack.agentBuilderDashboards.addPanelFlyout.createWithChatButtonLabel', {
-      defaultMessage: 'Create with chat',
+      defaultMessage: 'Create with Chat',
     }),
   getDisplayNameTooltip: () =>
     i18n.translate('xpack.agentBuilderDashboards.addPanelFlyout.createWithChatDescription', {
-      defaultMessage: 'Let the agent build any panel for you.',
+      defaultMessage: 'Build any panel using an agent.',
     }),
   getIconType: () => 'productAgent',
   isCompatible: async () => true,

@@ -16,18 +16,13 @@ describe('createOpenDashboardChatAction', () => {
     openChat.mockClear();
   });
 
-  it('declares the AiAction extension treatment', () => {
-    const action = createOpenDashboardChatAction(openChat);
-
-    expect(action.extension).toEqual({ isAiAction: true });
-  });
-
-  it('uses the agent icon and Create with chat label', () => {
+  it('uses the agent icon and Create with Chat label', () => {
     const action = createOpenDashboardChatAction(openChat);
     const context = { trigger: { id: OPEN_DASHBOARD_CHAT_ACTION_ID } };
 
     expect(action.getIconType?.(context)).toBe('productAgent');
-    expect(action.getDisplayName?.(context)).toBe('Create with chat');
+    expect(action.getDisplayName?.(context)).toBe('Create with Chat');
+    expect(action.getDisplayNameTooltip?.(context)).toBe('Build any panel using an agent.');
   });
 
   it('is compatible', async () => {

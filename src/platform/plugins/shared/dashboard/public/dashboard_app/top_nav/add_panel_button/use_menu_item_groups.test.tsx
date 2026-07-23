@@ -82,7 +82,6 @@ describe('useMenuItemGroups', () => {
         getIconType: () => 'empty',
         execute: () => {},
         isCompatible: async () => true,
-        extension: { isAiAction: true },
       },
       {
         id: 'myVis',
@@ -121,7 +120,6 @@ describe('useMenuItemGroups', () => {
     expect(groups![0].items.length).toBe(1);
     expect(groups![1].title).toBe('My group');
     expect(groups![1].items.length).toBe(1);
-    expect(groups![1].items[0].isAiAction).toBe(true);
     expect(mockGetAction).not.toBeCalled();
   });
 

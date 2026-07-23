@@ -37,7 +37,6 @@
     "@kbn/scout",
     "@kbn/ui-actions-plugin",
     "@kbn/ftr-llm-proxy",
-    "@kbn/kbn-client",
   ],
   "exclude": ["target/**/*"]
 }

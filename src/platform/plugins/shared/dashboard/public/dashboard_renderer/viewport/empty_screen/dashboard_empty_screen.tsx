@@ -67,7 +67,7 @@ export function DashboardEmptyScreen() {
   const title = (() => {
     const titleString = showEditPrompt
       ? i18n.translate('dashboard.emptyScreen.editModeTitle', {
-          defaultMessage: 'This dashboard is empty',
+          defaultMessage: 'This dashboard is empty. Let\u2019s fill it up!',
         })
       : showWriteControls
       ? i18n.translate('dashboard.emptyScreen.viewModeTitle', {
@@ -80,11 +80,8 @@ export function DashboardEmptyScreen() {
   })();
 
   const body = (() => {
-    const bodyString = showEditPrompt
-      ? i18n.translate('dashboard.emptyScreen.editModeSubtitle', {
-          defaultMessage: 'Choose how you want to create a visualization',
-        })
-      : showWriteControls
+    if (showEditPrompt) return undefined;
+    const bodyString = showWriteControls
       ? i18n.translate('dashboard.emptyScreen.viewModeSubtitle', {
           defaultMessage: 'Enter edit mode, and then start adding your visualizations.',
         })
@@ -167,9 +164,9 @@ const emptyScreenStyles = {
     const { euiTheme } = euiThemeContext;
     return css({
       width: '100%',
-      // Wide enough for "Create visualization (with query)" to stay on one line
+      // Wide enough for "Create visualization (query)" to stay on one line
       // beside its icon when the two featured cards sit side-by-side on laptop.
-      maxWidth: '56rem',
+      maxWidth: '52rem',
       minWidth: 0,
       boxSizing: 'border-box',
       padding: euiTheme.size.xl,
@@ -181,7 +178,7 @@ const emptyScreenStyles = {
         paddingTop: '0 !important',
       },
       [euiMinBreakpoint(euiThemeContext, 'm')]: {
-        width: '49rem',
+        width: '48rem',
       },
       '.euiEmptyPrompt__icon': {
         marginBottom: euiTheme.size.l,

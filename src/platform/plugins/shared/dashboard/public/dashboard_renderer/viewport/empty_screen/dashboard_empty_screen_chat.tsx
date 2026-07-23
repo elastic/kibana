@@ -70,7 +70,7 @@ export const DashboardEmptyScreenChat = () => (
             <EuiText size="s" textAlign="left" css={styles.assistanceText}>
               <strong>
                 {i18n.translate('dashboard.emptyScreen.createWithChatTitle', {
-                  defaultMessage: 'Create with chat',
+                  defaultMessage: 'Create with Chat',
                 })}
               </strong>
             </EuiText>
@@ -85,27 +85,21 @@ export const DashboardEmptyScreenChat = () => (
           responsive={false}
           css={styles.promptsRow}
         >
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-              {promptSuggestions.map(({ prompt, testSubject }) => (
-                <EuiFlexItem grow={false} key={prompt}>
-                  <EuiButton
-                    size="s"
-                    color="text"
-                    minWidth={false}
-                    contentProps={{ css: styles.promptButtonContent }}
-                    css={styles.promptButton}
-                    onClick={() => {
-                      openDashboardChat(prompt);
-                    }}
-                    data-test-subj={testSubject}
-                  >
-                    {prompt}
-                  </EuiButton>
-                </EuiFlexItem>
-              ))}
-            </EuiFlexGroup>
-          </EuiFlexItem>
+          {promptSuggestions.map(({ prompt, testSubject }) => (
+            <EuiFlexItem grow={false} key={prompt}>
+              <EuiButton
+                size="s"
+                color="text"
+                minWidth={false}
+                contentProps={{ css: styles.promptButtonContent }}
+                css={styles.promptButton}
+                onClick={() => openDashboardChat(prompt)}
+                data-test-subj={testSubject}
+              >
+                {prompt}
+              </EuiButton>
+            </EuiFlexItem>
+          ))}
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               css={styles.openChatButton}
@@ -159,6 +153,7 @@ const styles = {
   promptsRow: (euiThemeContext: UseEuiTheme) =>
     css({
       flexWrap: 'nowrap',
+      justifyContent: 'flex-start',
       [euiBreakpoint(euiThemeContext, ['xs', 's'])]: {
         flexWrap: 'wrap',
       },

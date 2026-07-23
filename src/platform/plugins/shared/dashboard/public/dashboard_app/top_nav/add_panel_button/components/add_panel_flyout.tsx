@@ -61,6 +61,7 @@ function NewPanelContent({
     dashboardApi,
     returnFocus,
   });
+  const hasChatAction = uiActionsService.hasAction(OPEN_DASHBOARD_CHAT_ACTION_ID);
 
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [filteredGroups, setFilteredGroups] = useState<MenuItemGroup[]>([]);
@@ -130,9 +131,9 @@ function NewPanelContent({
             </EuiFormRow>
           </EuiForm>
         </EuiFlexItem>
-        {featuredItems.length > 0 && (
+        {(hasChatAction || featuredItems.length > 0) && (
           <EuiFlexItem grow={false} css={styles.featuredPanelsWrapper}>
-            {uiActionsService.hasAction(OPEN_DASHBOARD_CHAT_ACTION_ID) && (
+            {hasChatAction && (
               <AiButton
                 key={OPEN_DASHBOARD_CHAT_ACTION_ID}
                 fullWidth
@@ -142,10 +143,10 @@ function NewPanelContent({
                 onClick={(event: React.MouseEvent) => {
                   onAddPanelClick(event, dashboardApi, openDashboardChat);
                 }}
-                data-test-subj="create-action-Create with chat"
+                data-test-subj="create-action-Create with Chat"
               >
                 {i18n.translate('dashboard.addPanelFlyout.createWithChatButtonLabel', {
-                  defaultMessage: 'Create with chat',
+                  defaultMessage: 'Create with Chat',
                 })}
               </AiButton>
             )}

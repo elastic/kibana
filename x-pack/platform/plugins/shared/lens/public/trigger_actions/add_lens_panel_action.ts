@@ -40,7 +40,7 @@ export function getAddLensPanelAction(deps: LensPluginStartDependencies) {
       }),
     getDisplayNameTooltip: () =>
       i18n.translate('xpack.lens.app.createVisualizationDescription', {
-        defaultMessage: 'Point-and-click editor',
+        defaultMessage: 'Build with the point-and-click editor',
       }),
   };
 }

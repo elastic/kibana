@@ -19,26 +19,13 @@ import { BehaviorSubject } from 'rxjs';
 import { OPEN_DASHBOARD_CHAT_ACTION_ID } from './dashboard_empty_screen_chat_action';
 
 let mockFeaturedItemsLoading = false;
-let mockIncludeChatItem = true;
+let mockHasChatAction = true;
 const mockExecute = jest.fn();
 
 jest.mock('../../../dashboard_app/top_nav/add_panel_button/use_featured_items', () => {
   return {
     useFeaturedItems: () => ({
       featuredItems: [
-        ...(mockIncludeChatItem
-          ? [
-              {
-                id: 'openDashboardChat',
-                name: 'Create with chat',
-                icon: 'productAgent',
-                onClick: jest.fn(),
-                order: 100,
-                isAiAction: true,
-                ['data-test-subj']: 'create-action-Create with chat',
-              },
-            ]
-          : []),
         {
           id: '1',
           name: 'Mock Add Panel',
@@ -70,15 +57,16 @@ describe('DashboardEmptyScreen', () => {
   beforeEach(() => {
     (coreServices.application.capabilities as any).dashboard_v2.showWriteControls = true;
     mockFeaturedItemsLoading = false;
-    mockIncludeChatItem = true;
+    mockHasChatAction = true;
     mockExecute.mockClear();
+    (uiActionsService.hasAction as jest.Mock).mockImplementation(() => mockHasChatAction);
     (uiActionsService.getAction as jest.Mock).mockResolvedValue({
       execute: mockExecute,
     });
   });
 
   test('renders correctly with view mode', () => {
-    mockIncludeChatItem = false;
+    mockHasChatAction = false;
     renderComponent('view');
 
     expect(screen.getByTestId('dashboardEmptyReadWrite')).toBeInTheDocument();
@@ -87,23 +75,24 @@ describe('DashboardEmptyScreen', () => {
   });
 
   test('renders correctly with edit mode', () => {
-    mockIncludeChatItem = false;
+    mockHasChatAction = false;
     renderComponent('edit');
 
     expect(screen.queryByTestId('dashboardEmptyReadWrite')).not.toBeInTheDocument();
     expect(screen.queryByTestId('dashboardEmptyReadOnly')).not.toBeInTheDocument();
     expect(screen.getByTestId('emptyDashboardWidget')).toBeInTheDocument();
+    expect(screen.getByText('This dashboard is empty. Let\u2019s fill it up!')).toBeInTheDocument();
     expect(screen.getByTestId('mockAddPanelAction')).toBeInTheDocument();
   });
 
-  test('renders Chat as a featured item with the empty-screen chat card', () => {
+  test('renders the empty-screen chat card when the Chat action is available', () => {
     renderComponent('edit');
 
-    expect(screen.getByText('Create with chat')).toBeInTheDocument();
+    expect(screen.getByText('Create with Chat')).toBeInTheDocument();
     expect(screen.getByTestId('dashboardCreateWithChatOpenChat')).toBeInTheDocument();
     expect(screen.getByTestId('mockAddPanelAction')).toBeInTheDocument();
     // Chat uses the elaborate empty-screen card, not FeaturedItemCard.
-    expect(screen.queryByTestId('create-action-Create with chat')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('create-action-Create with Chat')).not.toBeInTheDocument();
   });
 
   test('opens Chat with the selected prompt', async () => {
@@ -131,8 +120,8 @@ describe('DashboardEmptyScreen', () => {
     });
   });
 
-  test('does not render Chat when it is not among featured items', () => {
-    mockIncludeChatItem = false;
+  test('does not render Chat when the Chat action is unavailable', () => {
+    mockHasChatAction = false;
     renderComponent('edit');
 
     expect(screen.getByTestId('emptyDashboardWidget')).toBeInTheDocument();
@@ -152,7 +141,7 @@ describe('DashboardEmptyScreen', () => {
   });
 
   test('renders empty-screen featured panels as buttons', () => {
-    mockIncludeChatItem = false;
+    mockHasChatAction = false;
     renderComponent('edit');
 
     expect(screen.getByTestId('mockAddPanelAction').tagName).toBe('BUTTON');
@@ -160,7 +149,7 @@ describe('DashboardEmptyScreen', () => {
 
   test('renders correctly with readonly mode', () => {
     (coreServices.application.capabilities as any).dashboard_v2.showWriteControls = false;
-    mockIncludeChatItem = false;
+    mockHasChatAction = false;
 
     renderComponent('view');
 
@@ -171,7 +160,7 @@ describe('DashboardEmptyScreen', () => {
 
   test('renders correctly with readonly and edit mode', () => {
     (coreServices.application.capabilities as any).dashboard_v2.showWriteControls = false;
-    mockIncludeChatItem = false;
+    mockHasChatAction = false;
 
     renderComponent('edit');
 

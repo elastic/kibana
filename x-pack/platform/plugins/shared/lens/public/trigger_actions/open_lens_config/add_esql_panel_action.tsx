@@ -30,13 +30,13 @@ export class AddESQLPanelAction implements Action<EmbeddableApiContext> {
 
   public getDisplayName(): string {
     return i18n.translate('xpack.lens.app.createEsqlVisualizationTitle', {
-      defaultMessage: 'Create visualization (with query)',
+      defaultMessage: 'Create visualization (query)',
     });
   }
 
   public getDisplayNameTooltip() {
     return i18n.translate('xpack.lens.app.createEsqlVisualizationDescription', {
-      defaultMessage: 'ES|QL editor',
+      defaultMessage: 'Build with the ES|QL editor',
     });
   }
 

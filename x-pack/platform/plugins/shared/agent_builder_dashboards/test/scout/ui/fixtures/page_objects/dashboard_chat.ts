@@ -16,19 +16,17 @@ export class DashboardChatPage {
 
   constructor(page: ScoutPage) {
     this.metricsPrompt = page.testSubj.locator('dashboardCreateWithChatMetricsPrompt');
-    this.addPanelChatAction = page.testSubj.locator('create-action-Create with chat');
+    this.addPanelChatAction = page.testSubj.locator('create-action-Create with Chat');
     this.conversationInputForm = page.testSubj.locator('agentBuilderConversationInputForm');
     this.conversationInputEditor = page.testSubj.locator('agentBuilderConversationInputEditor');
     this.roundResponses = page.testSubj.locator('agentBuilderRoundResponse');
   }
 
   async openFromMetricsPrompt() {
-    await this.metricsPrompt.waitFor({ state: 'visible' });
     await this.metricsPrompt.click();
   }
 
   async openFromAddPanelFlyout() {
-    await this.addPanelChatAction.waitFor({ state: 'visible' });
     await this.addPanelChatAction.click();
   }
 }

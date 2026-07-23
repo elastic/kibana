@@ -8,7 +8,6 @@
 import type { PageObjects, ScoutTestFixtures, ScoutWorkerFixtures } from '@kbn/scout';
 import { test as baseTest, createLazyPageObject } from '@kbn/scout';
 import { createLlmProxy, type LlmProxy } from '@kbn/ftr-llm-proxy';
-import { createGenAiConnectorForProxy, deleteAllConnectors } from './connector_kbn';
 import { DashboardChatPage } from './page_objects';
 
 interface AgentBuilderDashboardsWorkerFixtures extends ScoutWorkerFixtures {
@@ -28,13 +27,22 @@ export const test = baseTest.extend<
   // EmbeddableAccessBoundary requires at least one LLM connector before the
   // conversation editor is rendered. Mirror Agent Builder Scout UI setup.
   llmProxy: [
-    async ({ log, kbnClient }, use) => {
+    async ({ apiServices, log }, use) => {
       const proxy = await createLlmProxy(log);
-      await deleteAllConnectors(kbnClient);
-      await createGenAiConnectorForProxy(kbnClient, proxy);
+      await apiServices.alerting.cleanup.deleteAllConnectors();
+      await apiServices.alerting.connectors.create({
+        name: 'llm-proxy',
+        connectorTypeId: '.gen-ai',
+        config: {
+          apiProvider: 'OpenAI',
+          apiUrl: `http://localhost:${proxy.getPort()}`,
+          defaultModel: 'gpt-4',
+        },
+        secrets: { apiKey: 'myApiKey' },
+      });
       await use(proxy);
       proxy.close();
-      await deleteAllConnectors(kbnClient);
+      await apiServices.alerting.cleanup.deleteAllConnectors();
     },
     { scope: 'worker', auto: true },
   ],
