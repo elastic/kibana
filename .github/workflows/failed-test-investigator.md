@@ -122,55 +122,11 @@ safe-outputs:
   # fix in the repository (see "Close the issue when there is nothing to fix").
   # Closing is safe: the failed test reporter reopens the issue automatically if
   # the test fails again.
-  jobs:
-    close-issue:
-      description: 'Close this failed-test issue because the investigation concluded there is nothing to fix in the repository (transient CI/infra one-off, external cause). Call at most once, only after posting the verdict comment, and never when a fix is needed, requested, or already in review.'
-      runs-on: ubuntu-slim
-      needs: safe_outputs
-      permissions:
-        issues: write
-      inputs:
-        reason:
-          description: 'One short sentence explaining why the issue is safe to close (e.g. "one-off ES startup failure on the CI agent; test passes since").'
-          required: true
-          type: string
-      env:
-        GH_AW_ISSUE_NUMBER: *issue_number
-      steps:
-        - name: Close the issue as not planned
-          uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
-          with:
-            script: |
-              const fs = require('fs');
-              const issueNumber = Number(process.env.GH_AW_ISSUE_NUMBER);
-              const outputPath = process.env.GH_AW_AGENT_OUTPUT;
-              if (!Number.isInteger(issueNumber) || !outputPath || !fs.existsSync(outputPath)) {
-                core.info('Missing issue number or agent output; nothing to do.');
-                return;
-              }
-              // The agent's `reason` tool parameter is delivered here (custom safe-jobs read
-              // inputs from GH_AW_AGENT_OUTPUT, not from the job's inputs context).
-              const { items = [] } = JSON.parse(fs.readFileSync(outputPath, 'utf8'));
-              const request = items.find((entry) => entry.type === 'close_issue');
-              const reason = request?.reason?.trim();
-              if (!reason) {
-                core.info('No close request from the agent; nothing to do.');
-                return;
-              }
-              const { owner, repo } = context.repo;
-              const { data: issue } = await github.rest.issues.get({ owner, repo, issue_number: issueNumber });
-              if (issue.state !== 'open') {
-                core.info(`#${issueNumber} is already ${issue.state}; nothing to do.`);
-                return;
-              }
-              await github.rest.issues.update({
-                owner,
-                repo,
-                issue_number: issueNumber,
-                state: 'closed',
-                state_reason: 'not_planned',
-              });
-              core.info(`Closed #${issueNumber}: ${reason}`);
+  close-issue:
+    max: 1
+    target: *issue_number
+    required-labels: [failed-test]
+    state-reason: not_planned
 
 strict: false
 timeout-minutes: 35
@@ -269,7 +225,7 @@ When the verdict is that no change to this repository is needed, close the issue
 - the failure is not recurring: a CI-environment failure that keeps hitting the same test or suite needs escalation, not closing — leave it open;
 - you did not add `failure:ai-fixable` or `ai:fix-flaky`, and no fix PR referencing this issue is open.
 
-Call the tool at most once, only after posting the verdict comment, with a one-sentence `reason`. When you close, make it visible to readers: append one final italic sentence to the visible header's summary (this is the one allowed addition to the header) — `_Closing this issue: {reason}. It will reopen automatically if the test fails again._`
+Call the tool at most once, only after posting the verdict comment, and do not attach a closing comment to it — instead, make the close visible in the verdict comment itself: append one final italic sentence to the visible header's summary (this is the one allowed addition to the header) — `_Closing this issue: {one-sentence reason}. It will reopen automatically if the test fails again._`
 
 Closing too early is recoverable only because the failed test reporter reopens the issue automatically on the next failure — do not use that as license to close aggressively. When in doubt, leave the issue open.
 
