@@ -5,27 +5,34 @@
  * 2.0.
  */
 
+import type { UpdateRuleBody } from '@kbn/alerting-v2-schemas';
 import { ALERTING_V2_ERROR_CODES } from '../../lib/errors/error_codes';
 import {
   getInvalidRuleDataMessage,
   getRuleVersionConflictMessage,
 } from '../../lib/errors/rule_error_messages';
 import type { AlertingOasOperationObject } from '../json_oas_example';
-import {
-  RULE_NOT_FOUND_RESPONSE,
-  RULE_RESPONSE,
-  UPDATED_RULE_DESCRIPTION,
-  UPDATED_RULE_NAME,
-  UPDATE_RULE_REQUEST,
-  buildRuleOas,
-  invalidResponseExample,
-  ruleResponseExample,
-} from './rule_oas_shared';
+import { buildRuleOas, invalidResponseExample } from './rule_oas_helpers';
+import { RULE_NOT_FOUND_RESPONSE, RULE_RESPONSE, ruleResponseExample } from './rule_oas_shared_examples';
+
+export const UPDATED_RULE_NAME = 'Host CPU high (updated)';
+export const UPDATED_RULE_DESCRIPTION = 'Updated description.';
+
+export const UPDATE_RULE_REQUEST: UpdateRuleBody = {
+  version: 'WzAsMV0=',
+  metadata: {
+    name: UPDATED_RULE_NAME,
+    description: UPDATED_RULE_DESCRIPTION,
+  },
+};
 
 const INVALID_UPDATE_RULE_RESPONSE = invalidResponseExample({
   summary: 'Update body includes an unrecognized field',
   code: ALERTING_V2_ERROR_CODES.INVALID_RULE_DATA,
-  message: getInvalidRuleDataMessage('update', "Unrecognized key(s) in object: 'unknownField'"),
+  message: getInvalidRuleDataMessage(
+    'update',
+    "Unrecognized key(s) in object: 'unknownField'"
+  ),
   details: { context: 'update', errors: { unknownField: ['Unrecognized key'] } },
 });
 

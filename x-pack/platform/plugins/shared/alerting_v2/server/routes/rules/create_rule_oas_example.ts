@@ -8,12 +8,8 @@
 import { ALERTING_V2_ERROR_CODES } from '../../lib/errors/error_codes';
 import { getInvalidRuleDataMessage } from '../../lib/errors/rule_error_messages';
 import type { AlertingOasOperationObject } from '../json_oas_example';
-import {
-  CREATE_RULE_REQUEST,
-  buildRuleOas,
-  invalidResponseExample,
-  ruleResponseExample,
-} from './rule_oas_shared';
+import { buildRuleOas, invalidResponseExample } from './rule_oas_helpers';
+import { CREATE_RULE_REQUEST, ruleResponseExample } from './rule_oas_shared_examples';
 
 const INVALID_CREATE_RULE_RESPONSE = invalidResponseExample({
   summary: 'Missing required rule metadata',

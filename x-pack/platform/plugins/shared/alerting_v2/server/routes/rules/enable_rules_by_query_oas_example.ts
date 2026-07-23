@@ -6,12 +6,8 @@
  */
 
 import type { AlertingOasOperationObject } from '../json_oas_example';
-import {
-  BULK_BY_QUERY_REQUEST,
-  DRY_RUN_RESPONSE,
-  INVALID_BULK_BY_QUERY_RESPONSE,
-  buildRuleOas,
-} from './rule_oas_shared';
+import { buildRuleOas } from './rule_oas_helpers';
+import { BULK_BY_QUERY_REQUEST, DRY_RUN_RESPONSE, INVALID_BULK_BY_QUERY_RESPONSE } from './rule_oas_shared_examples';
 
 export const enableRulesByQueryOasExamples = (): AlertingOasOperationObject =>
   buildRuleOas({

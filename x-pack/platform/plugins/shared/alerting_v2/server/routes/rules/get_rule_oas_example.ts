@@ -6,7 +6,8 @@
  */
 
 import type { AlertingOasOperationObject } from '../json_oas_example';
-import { RULE_NOT_FOUND_RESPONSE, buildRuleOas, ruleResponseExample } from './rule_oas_shared';
+import { buildRuleOas } from './rule_oas_helpers';
+import { RULE_NOT_FOUND_RESPONSE, ruleResponseExample } from './rule_oas_shared_examples';
 
 export const getRuleOasExamples = (): AlertingOasOperationObject =>
   buildRuleOas({

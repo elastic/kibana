@@ -5,8 +5,17 @@
  * 2.0.
  */
 
+import type { FindRulesResponse } from '@kbn/alerting-v2-schemas';
 import type { AlertingOasOperationObject } from '../json_oas_example';
-import { LIST_RULES_RESPONSE, buildRuleOas, invalidResponseExample } from './rule_oas_shared';
+import { buildRuleOas, invalidResponseExample } from './rule_oas_helpers';
+import { RULE_RESPONSE } from './rule_oas_shared_examples';
+
+export const LIST_RULES_RESPONSE: FindRulesResponse = {
+  items: [RULE_RESPONSE],
+  total: 1,
+  page: 1,
+  perPage: 20,
+};
 
 const INVALID_LIST_RULES_RESPONSE = invalidResponseExample({
   summary: 'List query uses an invalid page number',

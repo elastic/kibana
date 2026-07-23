@@ -5,8 +5,13 @@
  * 2.0.
  */
 
+import type { RuleTagsResponse } from '@kbn/alerting-v2-schemas';
 import type { AlertingOasOperationObject } from '../json_oas_example';
-import { RULE_TAGS_RESPONSE, buildRuleOas, invalidResponseExample } from './rule_oas_shared';
+import { buildRuleOas, invalidResponseExample } from './rule_oas_helpers';
+
+export const RULE_TAGS_RESPONSE: RuleTagsResponse = {
+  tags: ['production', 'infra', 'critical'],
+};
 
 const INVALID_RULE_TAGS_RESPONSE = invalidResponseExample({
   summary: 'Tags query filter exceeds the maximum length',

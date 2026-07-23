@@ -18,19 +18,11 @@ import {
   ruleTagsResponseSchema,
   updateRuleBodySchema,
 } from '@kbn/alerting-v2-schemas';
-import {
-  BULK_BY_QUERY_REQUEST,
-  BULK_GET_RULES_REQUEST,
-  BULK_GET_RULES_RESPONSE,
-  BULK_OPERATION_REQUEST,
-  BULK_OPERATION_RESPONSE,
-  CREATE_RULE_REQUEST,
-  DRY_RUN_RESPONSE,
-  LIST_RULES_RESPONSE,
-  RULE_RESPONSE,
-  RULE_TAGS_RESPONSE,
-  UPDATE_RULE_REQUEST,
-} from './rule_oas_shared';
+import { BULK_GET_RULES_REQUEST, BULK_GET_RULES_RESPONSE } from './bulk_get_rules_oas_example';
+import { RULE_TAGS_RESPONSE } from './get_rule_tags_oas_example';
+import { LIST_RULES_RESPONSE } from './list_rules_oas_example';
+import { BULK_BY_QUERY_REQUEST, BULK_OPERATION_REQUEST, BULK_OPERATION_RESPONSE, CREATE_RULE_REQUEST, DRY_RUN_RESPONSE, RULE_RESPONSE } from './rule_oas_shared_examples';
+import { UPDATE_RULE_REQUEST } from './update_rule_oas_example';
 
 describe('rule OAS example payloads', () => {
   it('keeps create/upsert request examples valid against createRuleDataSchema', () => {

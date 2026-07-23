@@ -6,7 +6,8 @@
  */
 
 import type { AlertingOasOperationObject } from '../json_oas_example';
-import { RULE_NOT_FOUND_RESPONSE, buildRuleOas } from './rule_oas_shared';
+import { buildRuleOas } from './rule_oas_helpers';
+import { RULE_NOT_FOUND_RESPONSE } from './rule_oas_shared_examples';
 
 export const deleteRuleOasExamples = (): AlertingOasOperationObject =>
   buildRuleOas({

@@ -6,12 +6,8 @@
  */
 
 import type { AlertingOasOperationObject } from '../json_oas_example';
-import {
-  BULK_OPERATION_REQUEST,
-  BULK_OPERATION_RESPONSE,
-  INVALID_BULK_OPERATION_RESPONSE,
-  buildRuleOas,
-} from './rule_oas_shared';
+import { buildRuleOas } from './rule_oas_helpers';
+import { BULK_OPERATION_REQUEST, BULK_OPERATION_RESPONSE, INVALID_BULK_OPERATION_RESPONSE } from './rule_oas_shared_examples';
 
 export const bulkDisableRulesOasExamples = (): AlertingOasOperationObject =>
   buildRuleOas({

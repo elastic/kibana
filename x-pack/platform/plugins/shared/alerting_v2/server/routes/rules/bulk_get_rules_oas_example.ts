@@ -5,15 +5,19 @@
  * 2.0.
  */
 
+import type { BulkGetRulesParams, BulkGetRulesResponse } from '@kbn/alerting-v2-schemas';
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import type { AlertingOasOperationObject } from '../json_oas_example';
-import {
-  BULK_GET_RULES_REQUEST,
-  BULK_GET_RULES_RESPONSE,
-  RULE_RESPONSE,
-  buildRuleOas,
-  invalidResponseExample,
-} from './rule_oas_shared';
+import { buildRuleOas, invalidResponseExample } from './rule_oas_helpers';
+import { RULE_RESPONSE } from './rule_oas_shared_examples';
+
+export const BULK_GET_RULES_REQUEST: BulkGetRulesParams = {
+  ids: ['rule-1', 'rule-2'],
+};
+
+export const BULK_GET_RULES_RESPONSE: BulkGetRulesResponse = {
+  rules: [RULE_RESPONSE],
+};
 
 const INVALID_BULK_GET_RULES_RESPONSE = invalidResponseExample({
   summary: 'Request body is missing required rule ids',
