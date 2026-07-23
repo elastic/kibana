@@ -17,9 +17,7 @@ import {
   EuiLink,
   EuiText,
   EuiTitle,
-  useEuiTheme,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { BackgroundAgentCompleteStep as BackgroundAgentCompleteStepData } from '@kbn/agent-builder-common';
@@ -47,7 +45,6 @@ export const BackgroundAgentStep: React.FC<BackgroundAgentStepProps> = ({ step }
 };
 
 const BackgroundAgentHeadline: React.FC<{ step: BackgroundAgentCompleteStepData }> = ({ step }) => {
-  const { euiTheme } = useEuiTheme();
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
   const openFlyout = useCallback(() => setIsFlyoutOpen(true), []);
   const closeFlyout = useCallback(() => setIsFlyoutOpen(false), []);
@@ -103,15 +100,7 @@ const BackgroundAgentHeadline: React.FC<{ step: BackgroundAgentCompleteStepData 
         </EuiLink>
       </EuiFlexItem>
       {isFlyoutOpen && (
-        <EuiFlyout
-          onClose={closeFlyout}
-          aria-labelledby="backgroundAgentFlyoutTitle"
-          size="m"
-          ownFocus={false}
-          css={css`
-            z-index: ${Number(euiTheme.levels.flyout) + 4};
-          `}
-        >
+        <EuiFlyout onClose={closeFlyout} aria-labelledby="backgroundAgentFlyoutTitle" size="m">
           <EuiFlyoutHeader hasBorder>
             <EuiTitle size="m">
               <h2 id="backgroundAgentFlyoutTitle">{flyoutTitle}</h2>

@@ -7,7 +7,6 @@
 
 import React, { Fragment } from 'react';
 import {
-  EuiCode,
   EuiFlyout,
   EuiFlyoutHeader,
   EuiFlyoutBody,
@@ -76,7 +75,9 @@ export const ToolResponseFlyout: React.FC<ToolResponseFlyoutProps> = ({ step, on
                 <EuiSpacer size="s" />
                 {/* TODO: replace with sub-agent execution drill-down — elastic/search-team#15172 */}
                 {/* <EuiText size="s" color="subdued"><EuiCode>{subAgentExecutionId}</EuiCode></EuiText> */}
-                <EuiText size="s" color="subdued">TODO</EuiText>
+                <EuiText size="s" color="subdued">
+                  TODO
+                </EuiText>
               </>
             ),
           },
