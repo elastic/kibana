@@ -7,10 +7,16 @@
 
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../ftr_provider_context';
+import type { CasesCommon } from './common';
 
 const replaceNewLinesWithSpace = (str: string) => str.replace(/\n/g, ' ');
 
-export function CasesSingleViewServiceProvider({ getService, getPageObject }: FtrProviderContext) {
+const REPORTED_BY_PREFIX = 'Reported by:';
+
+export function CasesSingleViewServiceProvider(
+  { getService, getPageObject }: FtrProviderContext,
+  casesCommon: CasesCommon
+) {
   const common = getPageObject('common');
   const testSubjects = getService('testSubjects');
   const header = getPageObject('header');
@@ -20,6 +26,19 @@ export function CasesSingleViewServiceProvider({ getService, getPageObject }: Ft
 
   return {
     async deleteCase() {
+      // The redesign moves the delete action to the app-header overflow menu; the legacy UI exposes it
+      // through the action-bar property actions.
+      if (await casesCommon.isRedesignEnabled()) {
+        await retry.try(async () => {
+          await testSubjects.click('app-menu-overflow-button');
+          await testSubjects.existOrFail('case-action-delete', { timeout: 100 });
+          await testSubjects.click('case-action-delete');
+        });
+        await testSubjects.click('confirmModalConfirmButton');
+        await header.waitUntilLoadingHasFinished();
+        return;
+      }
+
       await retry.try(async () => {
         await testSubjects.click('property-actions-case-ellipses');
         await testSubjects.existOrFail('property-actions-case-trash', { timeout: 100 });
@@ -27,6 +46,22 @@ export function CasesSingleViewServiceProvider({ getService, getPageObject }: Ft
       });
       await testSubjects.click('confirmModalConfirmButton');
       await header.waitUntilLoadingHasFinished();
+    },
+
+    /**
+     * Asserts the case-view delete action is not available (used for users lacking the delete
+     * privilege). The redesign always renders the app-header overflow menu (it holds "copy id"), so
+     * we open it and assert the delete item is absent; the legacy UI uses the property-actions menu.
+     */
+    async assertDeleteCaseAbsent() {
+      if (await casesCommon.isRedesignEnabled()) {
+        await testSubjects.click('app-menu-overflow-button');
+        await testSubjects.missingOrFail('case-action-delete');
+        return;
+      }
+
+      await testSubjects.click('property-actions-case-ellipses');
+      await testSubjects.missingOrFail('property-actions-case-trash');
     },
 
     async verifyUserAction(dataTestSubj: string, contentToMatch: string) {
@@ -109,7 +144,12 @@ export function CasesSingleViewServiceProvider({ getService, getPageObject }: Ft
     },
 
     async assertCaseTitle(expectedTitle: string) {
-      const actionTitle = await testSubjects.getVisibleText('editable-title-header-value');
+      // The redesign renders the title in the app header (`appHeaderTitle`); the legacy UI uses the
+      // inline editable title (`editable-title-header-value`).
+      const titleSubject = (await casesCommon.isRedesignEnabled())
+        ? 'appHeaderTitle'
+        : 'editable-title-header-value';
+      const actionTitle = await testSubjects.getVisibleText(titleSubject);
       expect(actionTitle).to.eql(
         expectedTitle,
         `Expected case title to be '${expectedTitle}' (got '${actionTitle}')`
@@ -147,7 +187,16 @@ export function CasesSingleViewServiceProvider({ getService, getPageObject }: Ft
       await testSubjects.click('case-refresh');
     },
 
-    async getReporter() {
+    /**
+     * Returns the reporter's display name in either design. The redesign shows it as app-header
+     * metadata text (`Reported by: <name>`); the legacy UI renders it in the sidebar user list.
+     */
+    async getReporterName(): Promise<string> {
+      if (await casesCommon.isRedesignEnabled()) {
+        const reportedBy = await testSubjects.getVisibleText('case-view-reported-by');
+        return reportedBy.replace(REPORTED_BY_PREFIX, '').trim();
+      }
+
       await testSubjects.existOrFail('case-view-user-list-reporter');
 
       const reporter = await testSubjects.findAllDescendant(
@@ -155,7 +204,7 @@ export function CasesSingleViewServiceProvider({ getService, getPageObject }: Ft
         await testSubjects.find('case-view-user-list-reporter')
       );
 
-      return reporter[0];
+      return reporter[0].getVisibleText();
     },
 
     async getParticipants() {

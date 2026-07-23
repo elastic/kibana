@@ -14,7 +14,7 @@ import { createAlertActionEventPublisher } from '../events/alert_action_event_pu
 import type { AlertActionEventPublisher } from '../events/alert_action_event_publisher/alert_action_event_publisher';
 import { createQueryService } from '../services/query_service/query_service.mock';
 import { createStorageService } from '../services/storage_service/storage_service.mock';
-import { createUserService, createUserProfile } from '../services/user_service/user_service.mock';
+import { createUserService } from '../services/user_service/user_service.mock';
 import { AlertActionsClient } from './alert_actions_client';
 
 export function createAlertActionsClient(): {
@@ -30,7 +30,7 @@ export function createAlertActionsClient(): {
   const { publisher: alertActionEventPublisher } = createAlertActionEventPublisher();
   const request = httpServerMock.createKibanaRequest();
 
-  userProfileService.getCurrent.mockResolvedValue(createUserProfile('test-uid'));
+  userProfileService.getCurrentProfileId.mockResolvedValue('test-uid');
 
   const alertActionsClient = new AlertActionsClient(
     queryService,

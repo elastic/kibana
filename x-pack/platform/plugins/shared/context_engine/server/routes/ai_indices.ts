@@ -10,12 +10,12 @@ import type { IRouter, KibanaResponseFactory, RequestHandler } from '@kbn/core/s
 import type { RouteSecurity } from '@kbn/core-http-server';
 import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import {
+  AI_INDEX_API_VERSION,
   MAX_AI_INDEX_AUTOMATION_LENGTH,
   MAX_AI_INDEX_AUTOMATIONS,
   MAX_AI_INDEX_DESCRIPTION_LENGTH,
   MAX_AI_INDEX_DEST_VALUE_LENGTH,
   MAX_AI_INDEX_ID_LENGTH,
-  MAX_AI_INDEX_NAME_LENGTH,
   MAX_AI_INDEX_SOURCE_VALUE_LENGTH,
   MAX_AI_INDEX_SOURCES,
   MAX_AI_INDICES,
@@ -29,14 +29,13 @@ import type {
   PutAiIndexResponse,
 } from '../../common/http_api/ai_indices';
 import { apiPrivileges } from '../../common/features';
+import { validateAiIndexId } from '../../common/validation';
 import {
   InvalidAiIndexDestError,
   AiIndexConflictError,
   AiIndexNotFoundError,
 } from '../ai_indices/errors';
 import type { AiIndexService } from '../ai_indices/service';
-
-const API_VERSION = '2023-10-31';
 
 const READ_SECURITY: RouteSecurity = {
   authz: { requiredPrivileges: [apiPrivileges.readContextEngine] },
@@ -50,19 +49,12 @@ const aiIndexIdParamsSchema = schema.object({
   aiIndexId: schema.string({
     minLength: 1,
     maxLength: MAX_AI_INDEX_ID_LENGTH,
+    validate: validateAiIndexId,
     meta: { description: 'The unique identifier of the AI index.' },
   }),
 });
 
 const putAiIndexBodySchema = schema.object({
-  name: schema.string({
-    minLength: 1,
-    maxLength: MAX_AI_INDEX_NAME_LENGTH,
-    meta: {
-      description:
-        'Display name for the AI index. Separate from the id so it can be renamed if necessary.',
-    },
-  }),
   description: schema.maybe(
     schema.string({
       maxLength: MAX_AI_INDEX_DESCRIPTION_LENGTH,
@@ -81,7 +73,7 @@ const putAiIndexBodySchema = schema.object({
       maxLength: MAX_AI_INDEX_DEST_VALUE_LENGTH,
       meta: {
         description:
-          'The data stream or index (e.g. `.ai-index-ds-foo`, `.ai-index-idx-foo*`) the AI index is attached to. Must match `type` and start with `.ai-index-ds-` (for `data_stream`) or `.ai-index-idx-` (for `index`). System indices are not allowed.',
+          'The data stream or index (e.g. `ai-index-ds-foo`, `ai-index-idx-foo*`) the AI index is attached to. Must match `type` and start with `ai-index-ds-` (for `data_stream`) or `ai-index-idx-` (for `index`). System indices are not allowed.',
       },
     }),
   }),
@@ -159,7 +151,7 @@ export const registerAiIndexRoutes = ({
     })
     .addVersion(
       {
-        version: API_VERSION,
+        version: AI_INDEX_API_VERSION,
         validate: {
           request: {
             params: aiIndexIdParamsSchema,
@@ -193,7 +185,7 @@ export const registerAiIndexRoutes = ({
     })
     .addVersion(
       {
-        version: API_VERSION,
+        version: AI_INDEX_API_VERSION,
         validate: {
           request: {
             params: aiIndexIdParamsSchema,
@@ -225,7 +217,7 @@ export const registerAiIndexRoutes = ({
     })
     .addVersion(
       {
-        version: API_VERSION,
+        version: AI_INDEX_API_VERSION,
         validate: false,
       },
       withContextEngineFeatureFlag(async (ctx, request, response) => {
@@ -252,7 +244,7 @@ export const registerAiIndexRoutes = ({
     })
     .addVersion(
       {
-        version: API_VERSION,
+        version: AI_INDEX_API_VERSION,
         validate: {
           request: {
             params: aiIndexIdParamsSchema,
