@@ -159,6 +159,15 @@ export class LensApp {
 
     await this.confirmSaveButton.click();
     await this.saveModal.waitFor({ state: 'hidden' });
+
+    if (options?.addToDashboard === 'none') {
+      // A library save fires the "Saved '<title>'" toast and then redirects/reloads the doc.
+      // Wait for that toast so callers don't act mid-save and hit a stale dirty-check.
+      await this.page.testSubj
+        .locator('euiToastHeader__title')
+        .filter({ hasText: `Saved '${title}'` })
+        .waitFor({ state: 'visible' });
+    }
   }
 
   async configureXYDimensions(options?: {
