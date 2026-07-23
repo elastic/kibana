@@ -119,6 +119,8 @@ export function registerGenerateRoute(
       if (esqlQuery) {
         systemPrompt = buildSystemPromptTemplate(colorMode);
 
+        const promptPrefix = prompt ? `${prompt}\n\n` : '';
+
         if (esqlColumns.length > 0) {
           // Column names must NOT be sanitized here — they must match the exact keys used in fillTemplate.
           const schemaLines = esqlColumns.map((c) => `  - ${c.name} (${c.type})`).join('\n');
@@ -126,9 +128,9 @@ export function registerGenerateRoute(
             esqlValues.length > 0
               ? `\n\nSample rows:\n${formatSampleTable(esqlColumns, esqlValues)}`
               : '\n\nNote: no rows available for the current time range.';
-          userContent = `${prompt}\n\nData schema:\n${schemaLines}${sampleSection}\n\nGenerate an HTML template that accesses each column via bracket notation using its exact name, e.g. row["${esqlColumns[0].name}"].value.`;
+          userContent = `${promptPrefix}Data schema:\n${schemaLines}${sampleSection}\n\nGenerate an HTML template that accesses each column via bracket notation using its exact name, e.g. row["${esqlColumns[0].name}"].value.`;
         } else {
-          userContent = `${prompt}\n\nNote: schema unavailable. Generate a suitable template based on the prompt.`;
+          userContent = `${promptPrefix}Note: schema unavailable. Generate a suitable template for this ES|QL query.`;
         }
       } else {
         systemPrompt = buildSystemPromptStatic(colorMode);

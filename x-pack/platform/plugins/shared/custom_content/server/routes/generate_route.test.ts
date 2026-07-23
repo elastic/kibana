@@ -278,6 +278,40 @@ describe('registerGenerateRoute', () => {
     expect(messages[0].content).toContain('schema unavailable');
   });
 
+  it('does not include the literal string "undefined" when prompt is omitted (ES|QL-only request)', async () => {
+    const {
+      router,
+      handler,
+      getStartServices,
+      logger,
+      context,
+      request,
+      response,
+      getDefaultConnector,
+      chatComplete,
+    } = buildMocks();
+    registerGenerateRoute(router, getStartServices, logger);
+    getDefaultConnector.mockResolvedValue({ connectorId: 'connector-1' });
+    chatComplete.mockReturnValue(of(chunkEvent('<div>ok</div>')));
+    mockGetESQLResults.mockResolvedValue({
+      response: {
+        columns: [{ name: 'count', type: 'long' }],
+        values: [[42]],
+      },
+      params: { query: '' },
+    } as Awaited<ReturnType<typeof getESQLResults>>);
+    request.body = {
+      colorMode: 'LIGHT',
+      esqlQuery: 'FROM logs | STATS count = COUNT(*)',
+    } as typeof request.body;
+
+    await handler(context, request, response);
+
+    const [{ messages }] = chatComplete.mock.calls[0];
+    expect(messages[0].content).not.toContain('undefined');
+    expect(messages[0].content).toContain('count (long)');
+  });
+
   it('aborts and emits a size_limit_exceeded SSE error once the streamed HTML exceeds the size limit', async () => {
     const {
       router,
