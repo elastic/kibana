@@ -63,8 +63,9 @@ export function useCustomContentHtml({
   const [isAiUnavailable, setIsAiUnavailable] = useState(false);
 
   // onTemplateChange() writes back into savedTemplate, a dep of this effect. Track what we last
-  // wrote so we can skip the echo re-run without also skipping intentional version bumps.
-  const selfWrittenTemplateRef = useRef<string | undefined>(undefined);
+  // wrote (and the colorMode it was rendered for) so we can skip the echo re-run without also
+  // skipping intentional version bumps or colorMode changes.
+  const selfWrittenRef = useRef<{ template: string; colorMode: string } | undefined>(undefined);
 
   // Track the last-rendered timeRange so a timepicker change still triggers a re-fetch even
   // when savedTemplate hasn't changed (which would otherwise trip the echo-skip guard below).
@@ -83,7 +84,8 @@ export function useCustomContentHtml({
 
     if (
       savedTemplate !== undefined &&
-      savedTemplate === selfWrittenTemplateRef.current &&
+      savedTemplate === selfWrittenRef.current?.template &&
+      colorMode === selfWrittenRef.current?.colorMode &&
       timeRangeSame
     ) {
       return;
@@ -99,22 +101,15 @@ export function useCustomContentHtml({
       return;
     }
 
-    if (!prompt) {
-      setIsLoading(false);
-      return;
-    }
-
     const controller = new AbortController();
     let acc = '';
-
-    setIsLoading(true);
-    setError(undefined);
-    setIsAiUnavailable(false);
 
     const { core } = getServices();
 
     // Fast path — ES|QL panel with stored template: render server-side, no LLM.
     if (template && esqlQuery) {
+      setIsLoading(true);
+      setError(undefined);
       callRenderRoute(core.http, { template, esqlQuery, timeRange }, controller.signal)
         .then((rawHtml) => {
           if (controller.signal.aborted) return;
@@ -129,6 +124,15 @@ export function useCustomContentHtml({
 
       return () => controller.abort();
     }
+
+    if (!prompt) {
+      setIsLoading(false);
+      return;
+    }
+
+    setIsLoading(true);
+    setError(undefined);
+    setIsAiUnavailable(false);
 
     // Slow path — LLM generates the content.
     let hasFailed = false;
@@ -177,7 +181,7 @@ export function useCustomContentHtml({
             controller.signal
           );
           if (controller.signal.aborted) return;
-          selfWrittenTemplateRef.current = cleaned;
+          selfWrittenRef.current = { template: cleaned, colorMode };
           onTemplateChangeRef.current(cleaned);
           setHtml(prepareHtml(rawHtml, colorMode));
         } catch (err) {
@@ -198,7 +202,7 @@ export function useCustomContentHtml({
           return;
         }
         const rendered = prepareHtml(acc, colorMode);
-        selfWrittenTemplateRef.current = rendered;
+        selfWrittenRef.current = { template: rendered, colorMode };
         onTemplateChangeRef.current(rendered);
         setHtml(rendered);
       }

@@ -13,9 +13,9 @@ const LIQUID_TAG_DELIMITER = /\{%/g;
 
 export function sanitizeCellValue(v: unknown): string {
   return String(v ?? '')
+    .slice(0, MAX_SANITIZED_CELL_LENGTH)
     .replace(HTML_ANGLE_BRACKETS, '')
     .replace(LINE_BREAKS, ' ')
     .replace(LIQUID_OUTPUT_DELIMITER, '{ {')
-    .replace(LIQUID_TAG_DELIMITER, '{ %')
-    .slice(0, MAX_SANITIZED_CELL_LENGTH);
+    .replace(LIQUID_TAG_DELIMITER, '{ %');
 }
