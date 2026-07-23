@@ -12,6 +12,7 @@ export {
   AS_CODE_DATA_VIEW_SPEC_TYPE,
   AS_CODE_ESQL_DATA_SOURCE_TYPE,
 } from './src/constants';
+export { RUNTIME_FIELD_COMPOSITE_TYPE } from './src/schema_runtime_field';
 export {
   dataViewReferenceSchema,
   dataViewSchema,
