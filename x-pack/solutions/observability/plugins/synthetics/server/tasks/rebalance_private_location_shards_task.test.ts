@@ -12,6 +12,7 @@ import type { SyntheticsMonitorClient } from '../synthetics_service/synthetics_m
 import { getPrivateLocations } from '../synthetics_service/get_private_locations';
 import {
   RebalancePrivateLocationShardsTask,
+  RECOVERY_STABILITY_MS,
   STALE_CHECKIN_MS,
 } from './rebalance_private_location_shards_task';
 
@@ -102,6 +103,12 @@ describe('Rebalance private location shards tasks', () => {
       });
 
     const healthyShardsArg = () => [...rebalanceShards.mock.calls[0][0].healthyShards].sort();
+    const recoveryShardsArg = () => [...rebalanceShards.mock.calls[0][0].recoveryShards].sort();
+
+    // Prior state where the given shards have been healthy long enough to be stable.
+    const stableSince = (...ids: string[]) => ({
+      healthySince: Object.fromEntries(ids.map((id) => [id, NOW - RECOVERY_STABILITY_MS - 1_000])),
+    });
 
     beforeEach(() => {
       task = new RebalancePrivateLocationShardsTask(server, monitorClient);
@@ -165,10 +172,12 @@ describe('Rebalance private location shards tasks', () => {
       await runTask();
 
       expect(healthyShardsArg()).toEqual(['s1', 's2']);
-      expect(rebalanceShards).toHaveBeenCalledWith({
-        location: scalableLocation,
-        healthyShards: expect.not.arrayContaining(['s3']),
-      });
+      expect(rebalanceShards).toHaveBeenCalledWith(
+        expect.objectContaining({
+          location: scalableLocation,
+          healthyShards: expect.not.arrayContaining(['s3']),
+        })
+      );
     });
 
     it('treats a shard with no agents as stale', async () => {
@@ -211,6 +220,59 @@ describe('Rebalance private location shards tasks', () => {
 
       expect(getAgentStatusForAgentPolicy).toHaveBeenCalledTimes(SHARDS.length);
       expect(healthyShardsArg()).toEqual(['s1', 's2']);
+    });
+
+    describe('recovery hysteresis', () => {
+      it('excludes freshly-seen shards from recovery until they clear the stability window', async () => {
+        setCheckins({ s1: FRESH, s2: FRESH, s3: FRESH });
+
+        // No prior state → every shard's healthy streak starts now, so none are
+        // recovery-eligible yet even though all are healthy/live.
+        const { state } = await runTask();
+
+        expect(healthyShardsArg()).toEqual(['s1', 's2', 's3']);
+        expect(recoveryShardsArg()).toEqual([]);
+        expect((state as { healthySince: Record<string, number> }).healthySince).toEqual({
+          s1: NOW,
+          s2: NOW,
+          s3: NOW,
+        });
+      });
+
+      it('marks shards healthy beyond the stability window as recovery-eligible', async () => {
+        setCheckins({ s1: FRESH, s2: FRESH, s3: FRESH });
+
+        await runTask(stableSince('s1', 's2', 's3'));
+
+        expect(recoveryShardsArg()).toEqual(['s1', 's2', 's3']);
+      });
+
+      it('holds a freshly recovered shard out of recovery while stable shards stay eligible', async () => {
+        // s1/s2 have been healthy a while; s3 was down last run (absent) and is
+        // now back — it must earn stability before receiving recovery work.
+        setCheckins({ s1: FRESH, s2: FRESH, s3: FRESH });
+
+        const { state } = await runTask(stableSince('s1', 's2'));
+
+        expect(healthyShardsArg()).toEqual(['s1', 's2', 's3']);
+        expect(recoveryShardsArg()).toEqual(['s1', 's2']);
+        const { healthySince } = state as { healthySince: Record<string, number> };
+        expect(healthySince.s1).toBe(NOW - RECOVERY_STABILITY_MS - 1_000); // streak preserved
+        expect(healthySince.s3).toBe(NOW); // recovery streak restarted
+      });
+
+      it('resets the streak for a shard that went unhealthy', async () => {
+        setCheckins({ s1: FRESH, s2: FRESH, s3: STALE });
+
+        // s3 was stable before but is stale now → dropped from the streak map so
+        // its grace window restarts if it comes back.
+        const { state } = await runTask(stableSince('s1', 's2', 's3'));
+
+        expect(recoveryShardsArg()).toEqual(['s1', 's2']);
+        expect((state as { healthySince: Record<string, number> }).healthySince).not.toHaveProperty(
+          's3'
+        );
+      });
     });
   });
 });

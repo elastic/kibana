@@ -84,6 +84,13 @@ rebalancing demo.
    - `runRebalanceShardsTaskSoon(server)` helper so enroll/unenroll or CRUD can
      trigger a rebalance immediately; the interval is the safety net.
    - Registered alongside the other synthetics tasks in plugin setup.
+   - **Recovery hysteresis (anti-flap):** the task tracks each shard's healthy
+     streak in its state (`healthySince`). A shard that just came back only
+     becomes eligible to *receive* the full-scan cost redistribution after it has
+     stayed healthy for `RECOVERY_STABILITY_MS`. Failover (evicting a *dead*
+     shard's monitors) still reacts immediately, so a flapping agent can't
+     repeatedly pull a redistribution — and Fleet churn (browser re-deploys) —
+     onto itself on every bounce.
 
 6. **Demo harness** — use `x-pack/packages/kbn-synthetics-private-location` to
    stand up N shard agent policies + N dockerized agents, create ~10 monitors, and

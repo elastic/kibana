@@ -27,6 +27,25 @@ export const DEFAULT_REBALANCE_SCHEDULE = '1m';
 // eviction of a still-live agent risks brief double execution of a monitor.
 export const STALE_CHECKIN_MS = 90_000;
 
+// Anti-flap hysteresis: a shard that has just transitioned unhealthy→healthy
+// must stay healthy for this long before it becomes eligible to *receive*
+// recovery redistribution. Without it, an agent that flaps down↔up faster than
+// this window would repeatedly trigger a full-scan cost rebalance onto itself,
+// churning Fleet package policies (and re-deploying browser runtimes) on every
+// bounce. Kept a few check-in intervals wide so it outlasts transient blips;
+// failover (evicting a *dead* shard's monitors) ignores this and stays immediate.
+export const RECOVERY_STABILITY_MS = 3 * 60_000;
+
+interface RebalanceTaskState {
+  /**
+   * policyId → epoch ms when the shard's current healthy streak began. A shard
+   * absent from the map was not healthy on the previous run, so the next time it
+   * is seen healthy its streak (and stability grace window) restarts. Persisted
+   * across runs to drive the recovery hysteresis above.
+   */
+  healthySince?: Record<string, number>;
+}
+
 /**
  * Fetches the freshest agent `last_checkin` per shard policy in a single
  * aggregation query, rather than N per-shard status calls. Empty result for a
@@ -232,6 +251,27 @@ export class RebalancePrivateLocationShardsTask {
         this.debugLog(`Host memory query failed; sharding uniformly by cost: ${e.message}`);
       }
 
+      // Recovery hysteresis (anti-flap): carry each shard's healthy streak across
+      // runs so a shard only becomes eligible to *receive* recovery work once it
+      // has stayed healthy for RECOVERY_STABILITY_MS. Only maintained on the
+      // aggregated check-in path; the status fallback keeps prior streaks intact.
+      const priorHealthySince =
+        (taskInstance.state as RebalanceTaskState | undefined)?.healthySince ?? {};
+      const nextHealthySince: Record<string, number> = checkins ? {} : { ...priorHealthySince };
+      if (checkins) {
+        for (const id of allShardIds) {
+          const last = checkins.get(id);
+          if (last !== undefined && now - last <= STALE_CHECKIN_MS) {
+            // Continue an existing streak, or start one now for a fresh recovery.
+            nextHealthySince[id] = priorHealthySince[id] ?? now;
+          }
+        }
+      }
+      const isStableShard = (id: string): boolean => {
+        const since = nextHealthySince[id];
+        return since !== undefined && now - since >= RECOVERY_STABILITY_MS;
+      };
+
       for (const location of scalableLocations) {
         const shardIds = location.agentPolicyIds ?? [];
         const healthyShards = checkins
@@ -241,8 +281,12 @@ export class RebalancePrivateLocationShardsTask {
             })
           : await this.getHealthyShardsFromStatus(shardIds);
 
+        // Stable subset eligible to receive recovery redistribution. On the
+        // status fallback (no per-shard timestamps) every healthy shard qualifies.
+        const recoveryShards = checkins ? healthyShards.filter(isStableShard) : healthyShards;
+
         this.debugLog(
-          `location ${location.id}: healthy=${healthyShards.length}/${shardIds.length}`
+          `location ${location.id}: healthy=${healthyShards.length}/${shardIds.length}, recovery-eligible=${recoveryShards.length}`
         );
 
         if (healthyShards.length === 0) {
@@ -259,6 +303,7 @@ export class RebalancePrivateLocationShardsTask {
         const { total, moved } = await privateLocationAPI.rebalanceShards({
           location,
           healthyShards,
+          recoveryShards,
           agentRamMibByShard: memoryByPolicy.size > 0 ? memoryByPolicy : undefined,
         });
 
@@ -266,6 +311,11 @@ export class RebalancePrivateLocationShardsTask {
           `Location ${location.id}: moved ${moved}/${total} monitors over ${healthyShards.length}/${shardIds.length} healthy shards`
         );
       }
+
+      return {
+        state: { ...taskInstance.state, healthySince: nextHealthySince },
+        schedule,
+      };
     } catch (error) {
       logger.error(
         `[RebalanceShards] Rebalance of private location shards failed: ${error.message}`

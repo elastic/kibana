@@ -599,6 +599,41 @@ describe('SyntheticsPrivateLocation', () => {
       const listCalls = (server.fleet.packagePolicyService.list as jest.Mock).mock.calls;
       expect(listCalls.every(([, { kuery }]) => kuery.includes('policy_ids'))).toBe(true);
     });
+
+    it('does not redistribute onto a healthy shard that is not yet recovery-eligible', async () => {
+      const shards = ['s1', 's2', 's3'];
+      // All work currently on s1/s2; s3 is healthy but freshly recovered (empty)
+      // and excluded from recovery by the hysteresis window.
+      const items = monitorIds.map((m) => makePkgPolicy(m, assignShard(m, ['s1', 's2'])!));
+      const bulkUpdate = jest.fn().mockResolvedValue({ failedPolicies: [] });
+
+      const spl = new SyntheticsPrivateLocation(makeServer(items, bulkUpdate));
+      const result = await spl.rebalanceShards({
+        location: { id: LOCATION_ID, agentPolicyIds: shards },
+        healthyShards: shards,
+        recoveryShards: ['s1', 's2'],
+      });
+
+      expect(result.moved).toBe(0);
+      expect(bulkUpdate).not.toHaveBeenCalled();
+    });
+
+    it('redistributes onto a recovered shard once it becomes recovery-eligible', async () => {
+      const shards = ['s1', 's2', 's3'];
+      const items = monitorIds.map((m) => makePkgPolicy(m, assignShard(m, ['s1', 's2'])!));
+      const bulkUpdate = jest.fn().mockResolvedValue({ failedPolicies: [] });
+
+      const spl = new SyntheticsPrivateLocation(makeServer(items, bulkUpdate));
+      const result = await spl.rebalanceShards({
+        location: { id: LOCATION_ID, agentPolicyIds: shards },
+        healthyShards: shards,
+        recoveryShards: shards,
+      });
+
+      expect(result.moved).toBeGreaterThan(0);
+      const updated = bulkUpdate.mock.calls.flatMap((call) => call[2] as PackagePolicy[]);
+      expect(updated.some((p) => p.policy_ids?.[0] === 's3')).toBe(true);
+    });
   });
 
   it('formats monitors stream properly', () => {

@@ -564,14 +564,24 @@ export class SyntheticsPrivateLocation {
    *    monitor's cost and can redistribute memory-fairly with
    *    {@link balanceShardsByCost} (browser ≈ 50× a lightweight check), instead
    *    of count-based hashing that could pile browsers onto one agent.
+   *
+   * Recovery only ever targets `recoveryShards` (a stability-gated subset of
+   * `healthyShards`); failover always uses the full live `healthyShards`, so a
+   * flapping agent can't repeatedly pull a full redistribution onto itself while
+   * a dead agent's monitors still evacuate immediately.
    */
   async rebalanceShards({
     location,
     healthyShards,
+    recoveryShards,
     agentRamMibByShard,
   }: {
     location: { id: string; label?: string; agentPolicyIds?: string[] };
     healthyShards: string[];
+    /** Subset of `healthyShards` eligible to *receive* recovery redistribution
+     * (anti-flap hysteresis — a freshly recovered shard is excluded until it has
+     * proven stable). Defaults to `healthyShards`. Failover ignores this. */
+    recoveryShards?: string[];
     /** Optional per-shard host RAM (MiB). Converted to a usable-capacity weight
      * for cost balancing, reserving browser runtime headroom when the location
      * runs browser monitors. */
@@ -580,6 +590,7 @@ export class SyntheticsPrivateLocation {
     const configuredShards = location.agentPolicyIds ?? healthyShards;
     const healthySet = new Set(healthyShards);
     const staleShards = configuredShards.filter((shard) => !healthySet.has(shard));
+    const recoveryTargets = recoveryShards ?? healthyShards;
 
     const countsByShard = await this.packagePolicyService.countByShard({
       shardIds: [...new Set([...configuredShards, ...healthyShards])],
@@ -588,7 +599,7 @@ export class SyntheticsPrivateLocation {
 
     const hasStaleWork = staleShards.some((shard) => (countsByShard.get(shard) ?? 0) > 0);
     const hasRecoveryWork =
-      totalMonitors > 0 && healthyShards.some((shard) => (countsByShard.get(shard) ?? 0) === 0);
+      totalMonitors > 0 && recoveryTargets.some((shard) => (countsByShard.get(shard) ?? 0) === 0);
 
     if (!hasStaleWork && !hasRecoveryWork) {
       return { total: totalMonitors, moved: 0 };
@@ -612,7 +623,7 @@ export class SyntheticsPrivateLocation {
       const capacities =
         agentRamMibByShard && agentRamMibByShard.size > 0
           ? new Map<string, number>(
-              healthyShards.flatMap((id) => {
+              recoveryTargets.flatMap((id) => {
                 const ram = agentRamMibByShard.get(id);
                 return ram !== undefined
                   ? [[id, shardCapacityMib(ram, locationHasBrowser)] as const]
@@ -625,7 +636,7 @@ export class SyntheticsPrivateLocation {
           const id = pp.id.slice(0, pp.id.length - suffixLength);
           return id ? [{ id, cost: getMonitorCostMib(monitorTypeOfPolicy(pp)) }] : [];
         }),
-        healthyShards,
+        recoveryTargets,
         capacities
       );
     }
