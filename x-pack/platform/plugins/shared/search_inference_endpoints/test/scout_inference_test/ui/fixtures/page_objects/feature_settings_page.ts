@@ -201,8 +201,10 @@ export class FeatureSettingsPage {
    */
   public async selectGlobalModelExpectingInvalid(name: string): Promise<void> {
     await this.globalModelComboBox.locator('[data-test-subj="comboBoxInput"]').click();
+    // EUI stamps the options list with `${testSubj}-optionsList` as one of several
+    // space-separated test-subj tokens, so match it with `~=` (token match).
     await this.page
-      .getByRole('listbox', { name: /choose from the following options/i })
+      .locator('[data-test-subj~="globalModelComboBox-optionsList"]')
       .getByRole('option', { name })
       .click();
   }
