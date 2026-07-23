@@ -73,19 +73,6 @@ describe('getShare', () => {
     });
 
     expect(shareOptions.sharingData.absoluteTimeRange).toEqual(lastFetchAbsoluteRange);
-
-    // Reset dataRequestParams for subsequent tests
-    toolkit.internalState.dispatch(
-      internalStateActions.setDataRequestParams({
-        tabId: toolkit.getCurrentTab().id,
-        dataRequestParams: {
-          timeRangeAbsolute: undefined,
-          timeRangeRelative: undefined,
-          searchSessionId: undefined,
-          isSearchSessionRestored: false,
-        },
-      })
-    );
   });
 
   it('should return the correct share options, without absolute time range set when in classic mode', async () => {
