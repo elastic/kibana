@@ -130,5 +130,16 @@ export const formatSyntheticsPolicy = (
     throttling.value = throttlingFormatter?.(config, ConfigKey.THROTTLING_CONFIG);
   }
 
+  // Disabled inputs never contribute to the compiled agent policy; they only bloat the
+  // package-policy saved object (each carries a full `vars` schema). Drop them so we persist
+  // only the single active input. Fleet's package-upgrade merge is kept in sync via a
+  // synthetics-specific guard in `updatePackageInputs` so the dropped inputs are never
+  // re-added as enabled (see #229595/#236104 for the regression this previously caused).
+  // Only strip once we've resolved the active input, so a monitor with an unknown type still
+  // yields the (all-disabled) template instead of an empty-inputs policy.
+  if (currentInput && dataStream) {
+    formattedPolicy.inputs = formattedPolicy.inputs.filter((input) => input.enabled);
+  }
+
   return { formattedPolicy, hasDataStream: Boolean(dataStream), hasInput: Boolean(currentInput) };
 };
