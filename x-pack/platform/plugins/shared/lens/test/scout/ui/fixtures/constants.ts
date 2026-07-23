@@ -16,6 +16,9 @@ export const DATA_VIEW_ID = {
   LOGSTASH: 'logstash-*',
 } as const;
 
+/** Elastic Charts / Lens XY workspace chart test subject. */
+export const XY_CHART = 'xyVisChart' as const;
+
 export const LOGSTASH_IN_RANGE_DATES = {
   from: 'Sep 19, 2015 @ 06:31:44.000',
   to: 'Sep 23, 2015 @ 18:31:44.000',
