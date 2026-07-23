@@ -125,10 +125,10 @@ export const FieldGroup = (props: FieldGroupProps) => {
           {isCollapsible ? (
             <EuiFlexItem grow={false}>
               <EuiToolTip
-                content={i18n.translate(
-                  'xpack.alertingV2.ruleForm.fieldGroup.toggleButtonLabel',
-                  { defaultMessage: 'Toggle {title}', values: { title } }
-                )}
+                content={i18n.translate('xpack.alertingV2.ruleForm.fieldGroup.toggleButtonLabel', {
+                  defaultMessage: 'Toggle {title}',
+                  values: { title },
+                })}
                 disableScreenReaderOutput
               >
                 <EuiButtonIcon
