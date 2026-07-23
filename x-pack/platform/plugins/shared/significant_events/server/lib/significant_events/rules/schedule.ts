@@ -40,11 +40,11 @@ export const CRITICAL_ANALYSIS_BUCKET_INTERVAL = '1m';
 export const DEFAULT_ANALYSIS_LOOKBACK_MINUTES = 125;
 export const DEFAULT_ANALYSIS_BUCKET_INTERVAL = '5m';
 
-export interface RuleDetectionSchedule {
+export interface AnalysisProfileConfig {
   profile: AnalysisProfileId;
-  bucket_interval: string;
+  bucketInterval: string;
   lookback: string;
-  lookback_minutes: number;
+  lookbackMinutes: number;
 }
 
 export function isCriticalSeverity(query: Pick<StreamQuery, 'severity_score'>): boolean {
@@ -96,23 +96,23 @@ export function parseLookbackMinutes(lookback: string): number {
  * Default stays fixed at 125m / 5m so non-critical rules keep a stable density
  * contract independent of scheduled tuning.
  */
-export function getRuleDetectionSchedule(
+export function getAnalysisProfileConfig(
   query: Pick<StreamQuery, 'severity_score'>
-): RuleDetectionSchedule {
+): AnalysisProfileConfig {
   if (isCriticalSeverity(query)) {
     return {
       profile: CRITICAL_ANALYSIS_PROFILE,
-      bucket_interval: CRITICAL_ANALYSIS_BUCKET_INTERVAL,
+      bucketInterval: CRITICAL_ANALYSIS_BUCKET_INTERVAL,
       lookback: `now-${CRITICAL_ANALYSIS_LOOKBACK_MINUTES}m`,
-      lookback_minutes: CRITICAL_ANALYSIS_LOOKBACK_MINUTES,
+      lookbackMinutes: CRITICAL_ANALYSIS_LOOKBACK_MINUTES,
     };
   }
 
   return {
     profile: DEFAULT_ANALYSIS_PROFILE,
-    bucket_interval: DEFAULT_ANALYSIS_BUCKET_INTERVAL,
+    bucketInterval: DEFAULT_ANALYSIS_BUCKET_INTERVAL,
     lookback: `now-${DEFAULT_ANALYSIS_LOOKBACK_MINUTES}m`,
-    lookback_minutes: DEFAULT_ANALYSIS_LOOKBACK_MINUTES,
+    lookbackMinutes: DEFAULT_ANALYSIS_LOOKBACK_MINUTES,
   };
 }
 

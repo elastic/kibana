@@ -15,25 +15,21 @@ import {
 import { StatusError } from '../../../lib/errors/status_error';
 import { createSignificantEventsTracedEsClient } from '../../../lib/significant_events/create_significant_events_traced_es_client';
 import {
-  CHANGE_POINT_MAX_BUCKETS,
-  CHANGE_POINT_MIN_BUCKETS,
-} from '../../../lib/significant_events/alerting/change_point_scan_shared';
-import {
   CRITICAL_ANALYSIS_PROFILE,
   DEFAULT_ANALYSIS_PROFILE,
   analysisProfileForQuery,
+  getAnalysisProfileConfig,
   getDurationMinutes,
   getIdleGateLookback,
-  getRuleDetectionSchedule,
   parseLookbackMinutes,
+  type AnalysisProfileConfig,
   type AnalysisProfileId,
-  type RuleDetectionSchedule,
 } from '../../../lib/significant_events/rules/schedule';
 import { createServerRoute } from '../../create_server_route';
 import { assertSignificantEventsAccess } from '../../utils/assert_significant_events_access';
 
 interface AnalysisProfileGroup {
-  schedule: RuleDetectionSchedule;
+  config: AnalysisProfileConfig;
   queryLinks: QueryLink[];
 }
 
@@ -41,10 +37,10 @@ const groupQueryLinksByAnalysisProfile = (queryLinks: QueryLink[]): AnalysisProf
   const groups = new Map<AnalysisProfileId, AnalysisProfileGroup>();
 
   for (const queryLink of queryLinks) {
-    const schedule = getRuleDetectionSchedule(queryLink.query);
-    const group = groups.get(schedule.profile) ?? { schedule, queryLinks: [] };
+    const config = getAnalysisProfileConfig(queryLink.query);
+    const group = groups.get(config.profile) ?? { config, queryLinks: [] };
     group.queryLinks.push(queryLink);
-    groups.set(schedule.profile, group);
+    groups.set(config.profile, group);
   }
 
   return Array.from(groups.values());
@@ -53,15 +49,23 @@ const groupQueryLinksByAnalysisProfile = (queryLinks: QueryLink[]): AnalysisProf
 const countRulesForProfile = (queryLinks: QueryLink[], profile: AnalysisProfileId): number =>
   queryLinks.filter((queryLink) => analysisProfileForQuery(queryLink.query) === profile).length;
 
+/** Parse the Detection workflow lookback (`now-<N>m`), surfacing malformed input as 400. */
+function assertDetectionLookback(lookback: string): number {
+  try {
+    return parseLookbackMinutes(lookback);
+  } catch (err) {
+    throw new StatusError(err instanceof Error ? err.message : String(err), 400);
+  }
+}
+
 /**
  * Validate Detection workflow lookback / bucketInterval: whole positive minutes,
  * lookback form `now-<N>m`, and enough outer buckets for change_point (≥22).
  */
 function assertDetectionAnalysisWindow(lookback: string, bucketInterval: string): void {
-  let lookbackMinutes: number;
+  const lookbackMinutes = assertDetectionLookback(lookback);
   let bucketMinutes: number;
   try {
-    lookbackMinutes = parseLookbackMinutes(lookback);
     bucketMinutes = getDurationMinutes(bucketInterval);
   } catch (err) {
     throw new StatusError(err instanceof Error ? err.message : String(err), 400);
@@ -73,11 +77,12 @@ function assertDetectionAnalysisWindow(lookback: string, bucketInterval: string)
     );
   }
   const bucketCount = lookbackMinutes / bucketMinutes;
-  const minBuckets = Math.max(CHANGE_POINT_MIN_BUCKETS, MIN_SIG_EVENTS_CHANGE_POINT_BUCKETS);
-  const maxBuckets = Math.min(CHANGE_POINT_MAX_BUCKETS, MAX_SIG_EVENTS_CHANGE_POINT_BUCKETS);
-  if (bucketCount < minBuckets || bucketCount > maxBuckets) {
+  if (
+    bucketCount < MIN_SIG_EVENTS_CHANGE_POINT_BUCKETS ||
+    bucketCount > MAX_SIG_EVENTS_CHANGE_POINT_BUCKETS
+  ) {
     throw new StatusError(
-      `Detection lookback (${lookback}) / bucketInterval (${bucketInterval}) must yield between ${minBuckets} and ${maxBuckets} buckets, got ${bucketCount}`,
+      `Detection lookback (${lookback}) / bucketInterval (${bucketInterval}) must yield between ${MIN_SIG_EVENTS_CHANGE_POINT_BUCKETS} and ${MAX_SIG_EVENTS_CHANGE_POINT_BUCKETS} buckets, got ${bucketCount}`,
       400
     );
   }
@@ -107,6 +112,9 @@ const countAlertsRoute = createServerRoute({
     const { scopedClusterClient, licensing } = scopedClients;
 
     await assertSignificantEventsAccess({ server, licensing });
+
+    // Same 400-on-malformed contract as the change_point scan route.
+    assertDetectionLookback(params.body.lookback);
 
     const esClient = createSignificantEventsTracedEsClient({
       client: scopedClusterClient.asCurrentUser,
@@ -164,20 +172,20 @@ const changePointScanRoute = createServerRoute({
     ]);
     const queryLinks = await kiClient.getRuleBackedQueryLinks();
 
-    const defaultSchedule = getRuleDetectionSchedule({ severity_score: 0 });
+    const defaultConfig = getAnalysisProfileConfig({ severity_score: 0 });
     const criticalLookback = params.body.lookback;
     const criticalBucketInterval = params.body.bucketInterval;
 
     const startedAt = Date.now();
     const scanResults = await Promise.all(
-      groupQueryLinksByAnalysisProfile(queryLinks).map(({ schedule, queryLinks: groupedLinks }) => {
-        const isCritical = schedule.profile === CRITICAL_ANALYSIS_PROFILE;
+      groupQueryLinksByAnalysisProfile(queryLinks).map(({ config, queryLinks: groupedLinks }) => {
+        const isCritical = config.profile === CRITICAL_ANALYSIS_PROFILE;
         return sigEventsContext.alertsReader.runChangePointScan(
           esClient,
           {
             // Critical uses workflow inputs; default keeps its fixed profile.
-            lookback: isCritical ? criticalLookback : schedule.lookback,
-            bucketInterval: isCritical ? criticalBucketInterval : schedule.bucket_interval,
+            lookback: isCritical ? criticalLookback : config.lookback,
+            bucketInterval: isCritical ? criticalBucketInterval : config.bucketInterval,
             ruleIds: groupedLinks.map((queryLink) => queryLink.rule_id),
             spaceId,
           },
@@ -203,8 +211,8 @@ const changePointScanRoute = createServerRoute({
       alerts_source_index: sigEventsContext.alertsReader.index,
       lookback: criticalLookback,
       bucket_interval: criticalBucketInterval,
-      default_lookback: defaultSchedule.lookback,
-      default_bucket_interval: defaultSchedule.bucket_interval,
+      default_lookback: defaultConfig.lookback,
+      default_bucket_interval: defaultConfig.bucketInterval,
       space_id: spaceId,
     });
 

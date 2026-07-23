@@ -26,10 +26,6 @@ import {
 
 export const RULES_BUCKET_SIZE = 1000;
 
-/** Elasticsearch `change_point` returns `indeterminable` below this many values. */
-export const CHANGE_POINT_MIN_BUCKETS = 22;
-export const CHANGE_POINT_MAX_BUCKETS = 1000;
-
 export { METRIC_SERIES_ANALYSIS_BUCKET_INTERVAL } from '../rules/metric_series_contract';
 export {
   METRIC_SERIES_BUCKET_RUNTIME_FIELD,
@@ -119,7 +115,7 @@ export function buildChangePointTimeSeriesAggs({
         // `_count` is always present (0 on empty extended_bounds buckets). Use it
         // to force a numeric series — null sum_bucket alone is skipped by
         // change_point and yields `indeterminable` when fewer than
-        // CHANGE_POINT_MIN_BUCKETS non-null points remain.
+        // MIN_SIG_EVENTS_CHANGE_POINT_BUCKETS non-null points remain.
         metric_value: {
           bucket_script: {
             buckets_path: {
