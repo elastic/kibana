@@ -298,6 +298,9 @@ const buildArticleContext = (
   const users = tier1.affected_assets.users.map((u) => u.name).filter((n) => n.length > 0);
   if (hosts.length > 0) context.affected_hosts = hosts;
   if (users.length > 0) context.affected_users = users;
+  if (tier1.per_index.length > 0) {
+    context.matched_indices = tier1.per_index.map((entry) => entry.index);
+  }
   if (tier1.hits.length > 0) {
     context.sample_events = tier1.hits.slice(0, maxSamples).map(summarizeHit);
   }
@@ -526,9 +529,15 @@ export const huntOrchestrator = async (
     text: reportText,
     report_id: reportId,
     llm_confidence_threshold: llmThreshold,
+    // Resolved IOC set (explicit params or the report's `extracted.iocs`)
+    // grounds the Tier 2 ES|QL generation on verbatim artifact values.
+    iocs: tier1Raw.resolved_iocs,
     article_context: articleContext,
   };
-  const [tier2Raw] = await Promise.all([huntBehavior(model, logger, tier2Params), feedbackPromise]);
+  const [tier2Raw] = await Promise.all([
+    huntBehavior(model, logger, tier2Params, esClient),
+    feedbackPromise,
+  ]);
   const tier2: HuntOrchestratorTier2 = { ...tier2Raw, tier: 2 };
 
   const result: HuntOrchestratorResult = {

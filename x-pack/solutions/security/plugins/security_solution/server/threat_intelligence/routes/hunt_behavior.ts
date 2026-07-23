@@ -76,11 +76,16 @@ export const registerHuntBehaviorRoute = ({
         }
 
         try {
-          const result = await huntBehavior(modelOutcome.model, logger, {
-            text: request.body.text,
-            report_id: request.body.report_id,
-            llm_confidence_threshold: request.body.llm_confidence_threshold,
-          });
+          const result = await huntBehavior(
+            modelOutcome.model,
+            logger,
+            {
+              text: request.body.text,
+              report_id: request.body.report_id,
+              llm_confidence_threshold: request.body.llm_confidence_threshold,
+            },
+            core.elasticsearch.client.asCurrentUser
+          );
           const uiHints = buildFindingCardUiHints(result.attachment_hints);
           return response.ok({
             body: withUiHints({ body: result, uiHints }),
