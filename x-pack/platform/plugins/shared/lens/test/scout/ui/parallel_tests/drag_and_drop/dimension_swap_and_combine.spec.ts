@@ -37,9 +37,9 @@ spaceTest.describe(
         'duplicate',
         testData.XY_CHART
       );
-      await expect
-        .poll(async () => lens.getDimensionTriggerText('lnsXY_splitDimensionPanel'))
-        .toBe('@timestamp [1]');
+      await expect(lens.getDimensionTriggersLocator('lnsXY_splitDimensionPanel')).toHaveText(
+        '@timestamp [1]'
+      );
       await lens.dragFieldToDimensionTrigger(
         '@message.raw',
         'lnsXY_yDimensionPanel > lns-dimensionTrigger'
@@ -50,12 +50,12 @@ spaceTest.describe(
         'swap',
         testData.XY_CHART
       );
-      await expect
-        .poll(async () => lens.getDimensionTriggerText('lnsXY_yDimensionPanel'))
-        .toBe('Count of @timestamp');
-      await expect
-        .poll(async () => lens.getDimensionTriggerText('lnsXY_splitDimensionPanel'))
-        .toBe('Top 9 values of @message.raw');
+      await expect(lens.getDimensionTriggersLocator('lnsXY_yDimensionPanel')).toHaveText(
+        'Count of @timestamp'
+      );
+      await expect(lens.getDimensionTriggersLocator('lnsXY_splitDimensionPanel')).toHaveText(
+        'Top 9 values of @message.raw'
+      );
     });
 
     spaceTest('combines breakdown with horizontal dimension', async ({ pageObjects }) => {
@@ -70,9 +70,9 @@ spaceTest.describe(
         'combine',
         testData.XY_CHART
       );
-      await expect
-        .poll(async () => lens.getDimensionTriggerText('lnsXY_xDimensionPanel'))
-        .toBe('Top values of clientip + 1 other');
+      await expect(lens.getDimensionTriggersLocator('lnsXY_xDimensionPanel')).toHaveText(
+        'Top values of clientip + 1 other'
+      );
     });
 
     spaceTest('combines field onto existing horizontal dimension', async ({ pageObjects }) => {
@@ -86,9 +86,9 @@ spaceTest.describe(
         'combine',
         testData.XY_CHART
       );
-      await expect
-        .poll(async () => lens.getDimensionTriggerText('lnsXY_xDimensionPanel'))
-        .toBe('Top values of clientip + 1 other');
+      await expect(lens.getDimensionTriggersLocator('lnsXY_xDimensionPanel')).toHaveText(
+        'Top values of clientip + 1 other'
+      );
     });
 
     spaceTest('combines two multi-terms dimensions', async ({ pageObjects }) => {
@@ -120,9 +120,9 @@ spaceTest.describe(
         testData.XY_CHART
       );
 
-      await expect
-        .poll(async () => lens.getDimensionTriggerText('lnsXY_xDimensionPanel'))
-        .toBe('Top values of clientip + 2 others');
+      await expect(lens.getDimensionTriggersLocator('lnsXY_xDimensionPanel')).toHaveText(
+        'Top values of clientip + 2 others'
+      );
     });
   }
 );

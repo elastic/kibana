@@ -149,11 +149,7 @@ export function createLogstashLensEditorSuiteSetup(options?: {
     if (skipEmptyLensOpen) {
       return;
     }
-    // URL navigation resets stale Visualize/Lens editor state (e.g. after Maps).
-    await pageObjects.visualize.goto();
-    await pageObjects.visualize.openNewVisualizationWizard();
-    await pageObjects.visualize.clickVisType('lens');
-    await pageObjects.lens.waitForLensApp();
+    await openEmptyLensEditor(pageObjects);
   };
 
   const afterAll = async ({ scoutSpace, apiServices }: LogstashSpaceSetupContext) => {
@@ -164,7 +160,17 @@ export function createLogstashLensEditorSuiteSetup(options?: {
     await scoutSpace.savedObjects.cleanStandardList();
   };
 
-  return { beforeAll, beforeEach, afterAll };
+  return { beforeAll, beforeEach, afterAll, openEmptyLensEditor };
+}
+
+/** Opens a fresh empty Lens editor (URL navigation resets stale Visualize/Lens state). */
+export async function openEmptyLensEditor(
+  pageObjects: Pick<PageObjects, 'visualize' | 'lens'>
+): Promise<void> {
+  await pageObjects.visualize.goto();
+  await pageObjects.visualize.openNewVisualizationWizard();
+  await pageObjects.visualize.clickVisType('lens');
+  await pageObjects.lens.waitForLensApp();
 }
 
 export async function openDimensionEditorAndWaitForFlyout(

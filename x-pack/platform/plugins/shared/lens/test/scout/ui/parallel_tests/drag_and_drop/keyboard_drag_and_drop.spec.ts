@@ -26,9 +26,10 @@ spaceTest.describe('Lens keyboard drag and drop', { tag: tags.stateful.classic }
 
     await spaceTest.step('drop a field onto the workspace', async () => {
       await lens.dragFieldWithKeyboard('@timestamp');
-      await expect
-        .poll(async () => lens.getDimensionTriggerText('lnsXY_xDimensionPanel'))
-        .toBe('@timestamp');
+      await expect(lens.getDimensionTriggersLocator('lnsXY_xDimensionPanel')).toHaveText(
+        '@timestamp'
+      );
+      // Focus lives on document.activeElement — no locator auto-wait.
       await expect
         .poll(async () => lens.getFocusedField())
         .toStrictEqual({
@@ -39,13 +40,14 @@ spaceTest.describe('Lens keyboard drag and drop', { tag: tags.stateful.classic }
 
     await spaceTest.step('drop fields onto empty and reverse targets', async () => {
       await lens.dragFieldWithKeyboard('bytes', 4);
-      await expect
-        .poll(async () => lens.getDimensionTriggersTexts('lnsXY_yDimensionPanel'))
-        .toStrictEqual(['Count of records', 'Median of bytes']);
+      await expect(lens.getDimensionTriggersLocator('lnsXY_yDimensionPanel')).toHaveText([
+        'Count of records',
+        'Median of bytes',
+      ]);
       await lens.dragFieldWithKeyboard('@message.raw', 1, true);
-      await expect
-        .poll(async () => lens.getDimensionTriggersTexts('lnsXY_splitDimensionPanel'))
-        .toStrictEqual(['Top 9 values of @message.raw']);
+      await expect(lens.getDimensionTriggersLocator('lnsXY_splitDimensionPanel')).toHaveText([
+        'Top 9 values of @message.raw',
+      ]);
       await expect
         .poll(async () => lens.getFocusedField())
         .toStrictEqual({
@@ -56,9 +58,9 @@ spaceTest.describe('Lens keyboard drag and drop', { tag: tags.stateful.classic }
 
     await spaceTest.step('replace an existing dimension via keyboard', async () => {
       await lens.dragFieldWithKeyboard('clientip', 1, true);
-      await expect
-        .poll(async () => lens.getDimensionTriggersTexts('lnsXY_splitDimensionPanel'))
-        .toStrictEqual(['Top 9 values of clientip']);
+      await expect(lens.getDimensionTriggersLocator('lnsXY_splitDimensionPanel')).toHaveText([
+        'Top 9 values of clientip',
+      ]);
       await expect
         .poll(async () => lens.getFocusedField())
         .toStrictEqual({
@@ -69,49 +71,49 @@ spaceTest.describe('Lens keyboard drag and drop', { tag: tags.stateful.classic }
 
     await spaceTest.step('duplicate an element in a group', async () => {
       await lens.dimensionKeyboardDragDrop('lnsXY_yDimensionPanel', 0, 1);
-      await expect
-        .poll(async () => lens.getDimensionTriggersTexts('lnsXY_yDimensionPanel'))
-        .toStrictEqual(['Count of records', 'Median of bytes', 'Count of records [1]']);
+      await expect(lens.getDimensionTriggersLocator('lnsXY_yDimensionPanel')).toHaveText([
+        'Count of records',
+        'Median of bytes',
+        'Count of records [1]',
+      ]);
       await expect.poll(async () => lens.getFocusedDimensionLabel()).toBe('Count of records [1]');
     });
 
     await spaceTest.step('move dimension to compatible dimension', async () => {
       await lens.dimensionKeyboardDragDrop('lnsXY_xDimensionPanel', 0, 5);
-      await expect
-        .poll(async () => lens.getDimensionTriggersTexts('lnsXY_xDimensionPanel'))
-        .toStrictEqual([]);
-      await expect
-        .poll(async () => lens.getDimensionTriggersTexts('lnsXY_splitDimensionPanel'))
-        .toStrictEqual(['@timestamp']);
+      await expect(lens.getDimensionTriggersLocator('lnsXY_xDimensionPanel')).toHaveCount(0);
+      await expect(lens.getDimensionTriggersLocator('lnsXY_splitDimensionPanel')).toHaveText([
+        '@timestamp',
+      ]);
 
       await lens.dimensionKeyboardDragDrop('lnsXY_splitDimensionPanel', 0, 5, true);
-      await expect
-        .poll(async () => lens.getDimensionTriggersTexts('lnsXY_xDimensionPanel'))
-        .toStrictEqual(['@timestamp']);
-      await expect
-        .poll(async () => lens.getDimensionTriggersTexts('lnsXY_splitDimensionPanel'))
-        .toStrictEqual([]);
+      await expect(lens.getDimensionTriggersLocator('lnsXY_xDimensionPanel')).toHaveText([
+        '@timestamp',
+      ]);
+      await expect(lens.getDimensionTriggersLocator('lnsXY_splitDimensionPanel')).toHaveCount(0);
       await expect.poll(async () => lens.getFocusedDimensionLabel()).toBe('@timestamp');
     });
 
     await spaceTest.step('move dimension to incompatible dimension', async () => {
       await lens.dimensionKeyboardDragDrop('lnsXY_yDimensionPanel', 1, 2);
-      await expect
-        .poll(async () => lens.getDimensionTriggersTexts('lnsXY_splitDimensionPanel'))
-        .toStrictEqual(['bytes']);
+      await expect(lens.getDimensionTriggersLocator('lnsXY_splitDimensionPanel')).toHaveText([
+        'bytes',
+      ]);
 
       await lens.dimensionKeyboardDragDrop('lnsXY_xDimensionPanel', 0, 2);
-      await expect
-        .poll(async () => lens.getDimensionTriggersTexts('lnsXY_yDimensionPanel'))
-        .toStrictEqual(['Count of records', 'Count of @timestamp']);
+      await expect(lens.getDimensionTriggersLocator('lnsXY_yDimensionPanel')).toHaveText([
+        'Count of records',
+        'Count of @timestamp',
+      ]);
       await expect.poll(async () => lens.getFocusedDimensionLabel()).toBe('Count of @timestamp');
     });
 
     await spaceTest.step('reorder elements with keyboard', async () => {
       await lens.dimensionKeyboardReorder('lnsXY_yDimensionPanel', 0, 1);
-      await expect
-        .poll(async () => lens.getDimensionTriggersTexts('lnsXY_yDimensionPanel'))
-        .toStrictEqual(['Count of @timestamp', 'Count of records']);
+      await expect(lens.getDimensionTriggersLocator('lnsXY_yDimensionPanel')).toHaveText([
+        'Count of @timestamp',
+        'Count of records',
+      ]);
       await expect.poll(async () => lens.getFocusedDimensionLabel()).toBe('Count of records');
     });
   });

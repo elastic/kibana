@@ -27,9 +27,9 @@ spaceTest.describe('Lens drag and drop field to workspace', { tag: tags.stateful
     const { lens } = pageObjects;
 
     await lens.dragFieldToWorkspace('machine.os.raw', testData.XY_CHART);
-    await expect
-      .poll(async () => lens.getDimensionTriggerText('lnsXY_xDimensionPanel'))
-      .toBe('Top 9 values of machine.os.raw');
+    await expect(lens.getDimensionTriggersLocator('lnsXY_xDimensionPanel')).toHaveText(
+      'Top 9 values of machine.os.raw'
+    );
     expect(await lens.getChartSwitchType()).toBe('Bar');
   });
 
@@ -37,9 +37,9 @@ spaceTest.describe('Lens drag and drop field to workspace', { tag: tags.stateful
     const { lens } = pageObjects;
 
     await lens.dragFieldToWorkspace('@timestamp', testData.XY_CHART);
-    await expect
-      .poll(async () => lens.getDimensionTriggerText('lnsXY_xDimensionPanel'))
-      .toBe('@timestamp');
+    await expect(lens.getDimensionTriggersLocator('lnsXY_xDimensionPanel')).toHaveText(
+      '@timestamp'
+    );
     expect(await lens.getChartSwitchType()).toBe('Line');
   });
 
@@ -51,9 +51,9 @@ spaceTest.describe('Lens drag and drop field to workspace', { tag: tags.stateful
       await spaceTest.step('drop time field then clientip; nest time under category', async () => {
         await lens.dragFieldToWorkspace('@timestamp', testData.XY_CHART);
         await lens.dragFieldToWorkspace('clientip', testData.XY_CHART);
-        await expect
-          .poll(async () => lens.getDimensionTriggersTexts('lnsXY_splitDimensionPanel'))
-          .toStrictEqual(['Top 9 values of clientip']);
+        await expect(lens.getDimensionTriggersLocator('lnsXY_splitDimensionPanel')).toHaveText([
+          'Top 9 values of clientip',
+        ]);
         await lens.openDimensionEditor('lnsXY_splitDimensionPanel > lns-dimensionTrigger');
         expect(await lens.isTopLevelAggregation()).toBe(true);
         await lens.closeDimensionEditor();
@@ -64,9 +64,9 @@ spaceTest.describe('Lens drag and drop field to workspace', { tag: tags.stateful
         await lens.dragFieldToWorkspace('utc_time', testData.XY_CHART);
         await lens.searchField('client');
         await lens.dragFieldToWorkspace('clientip', testData.XY_CHART);
-        await expect
-          .poll(async () => lens.getDimensionTriggersTexts('lnsXY_xDimensionPanel'))
-          .toStrictEqual(['utc_time']);
+        await expect(lens.getDimensionTriggersLocator('lnsXY_xDimensionPanel')).toHaveText([
+          'utc_time',
+        ]);
       });
     }
   );

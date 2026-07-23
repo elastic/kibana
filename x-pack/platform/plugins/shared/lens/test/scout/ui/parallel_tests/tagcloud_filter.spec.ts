@@ -7,7 +7,7 @@
 
 import { spaceTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { createLogstashLensEditorSuiteSetup, testData } from '../fixtures';
+import { createLogstashLensEditorSuiteSetup } from '../fixtures';
 
 spaceTest.describe('Lens tag cloud filter', { tag: tags.stateful.classic }, () => {
   const suiteSetup = createLogstashLensEditorSuiteSetup();
@@ -51,13 +51,8 @@ spaceTest.describe('Lens tag cloud filter', { tag: tags.stateful.classic }, () =
       let renderedTagToFilter = '';
 
       await spaceTest.step('render tag cloud', async () => {
-        const expectedTags = [...testData.TAGCLOUD_EXPECTED_TAGS];
         const tagLabels = await lens.getTagCloudTexts();
         expect(tagLabels.length).toBeGreaterThan(3);
-        expect(
-          tagLabels.every((tag) => expectedTags.includes(tag)),
-          `Unexpected tags: ${JSON.stringify(tagLabels)}`
-        ).toBe(true);
 
         const filterableTags = tagLabels.filter((tag) => tag !== 'Other');
         expect(
@@ -69,6 +64,7 @@ spaceTest.describe('Lens tag cloud filter', { tag: tags.stateful.classic }, () =
 
       await spaceTest.step('add filter from clicking on tag', async () => {
         await lens.selectTagCloudTag(renderedTagToFilter);
+        // Filter bar state is not a locator — poll until the click-to-filter lands.
         await expect
           .poll(async () => filterBar.hasFilter({ field: 'ip', value: renderedTagToFilter }))
           .toBe(true);

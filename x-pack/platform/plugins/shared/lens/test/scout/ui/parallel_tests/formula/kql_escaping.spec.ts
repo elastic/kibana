@@ -34,14 +34,13 @@ spaceTest.describe('Lens formula KQL escaping', { tag: tags.stateful.classic }, 
     await lens.typeInFormula(' ', { focus: false });
     await page.keyboard.press('ArrowLeft');
     await lens.typeInFormula(`Men's Clothing`, { focus: false });
-    // Autocomplete quotes KQL values after a short debounce (FTR slept 100ms).
+    // Monaco model + KQL autocomplete debounce — no locator auto-wait for editor contents.
     await expect
       .poll(async () => lens.getFormulaText(), { timeout: 15_000 })
       .toBe(`count(kql='Men\\'s Clothing ')`);
 
     await lens.typeInFormula('count(kql=', { replace: true });
     await lens.typeInFormula(`Men's Clothing`, { focus: false });
-    // Second pass: no trailing space; same Monaco/KQL debounce window.
     await expect
       .poll(async () => lens.getFormulaText(), { timeout: 15_000 })
       .toBe(`count(kql='Men\\'s Clothing')`);
@@ -58,6 +57,7 @@ spaceTest.describe('Lens formula KQL escaping', { tag: tags.stateful.classic }, 
       keepOpen: true,
     });
     await lens.switchToFormula();
+    // Monaco model value — no locator auto-wait for editor contents.
     await expect.poll(async () => lens.getFormulaText()).toBe(`unique_count('ab\\' "\\'')`);
 
     // Re-type and accept field autocomplete (FTR presses Enter on suggestion).

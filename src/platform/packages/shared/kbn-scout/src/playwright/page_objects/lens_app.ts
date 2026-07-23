@@ -395,17 +395,18 @@ export class LensApp {
 
     const paletteModeToggle = this.page.testSubj.locator('lns_colorMappingOrLegacyPalette_switch');
     const targetValue = isLegacy ? 'true' : 'false';
+    // Palette flyout remounts make the switch fail Playwright stability checks.
+    // Always drive to the requested mode, then wait for aria-checked (no early return).
     if ((await paletteModeToggle.getAttribute('aria-checked')) !== targetValue) {
-      // Palette flyout remounts make the switch fail Playwright stability checks.
       await paletteModeToggle.dispatchEvent('click');
-      await this.page.waitForFunction(
-        ([subj, expected]) =>
-          document.querySelector(`[data-test-subj="${subj}"]`)?.getAttribute('aria-checked') ===
-          expected,
-        ['lns_colorMappingOrLegacyPalette_switch', targetValue] as const,
-        { timeout: 10_000 }
-      );
     }
+    await this.page.waitForFunction(
+      ([subj, expected]) =>
+        document.querySelector(`[data-test-subj="${subj}"]`)?.getAttribute('aria-checked') ===
+        expected,
+      ['lns_colorMappingOrLegacyPalette_switch', targetValue] as const,
+      { timeout: 10_000 }
+    );
 
     if (isLegacy) {
       const palettePicker = this.page.testSubj.locator('lns-palettePicker');
@@ -609,6 +610,15 @@ export class LensApp {
     return this.page.testSubj.locator('lns-dimensionTrigger');
   }
 
+  /**
+   * Locator for dimension-trigger buttons inside a panel/group.
+   * Prefer `expect(locator).toHaveText(...)` / `toHaveCount(0)` over `expect.poll`
+   * + `getDimensionTriggerText` — Playwright auto-waits on the locator.
+   */
+  getDimensionTriggersLocator(dimension: string) {
+    return this.page.testSubj.locator(`${dimension} > lns-dimensionTrigger`);
+  }
+
   /** Returns all dimension-trigger button locators currently rendered in the editor. */
   getDimensionTriggers() {
     return this.getDimensionTriggerLocator().all();
@@ -618,10 +628,10 @@ export class LensApp {
    * Returns visible labels for all dimension triggers inside a panel/group.
    * Empty panels return `[]` (do not wait for a trigger to appear).
    * Panel test-subj may match multiple wrappers (filled + empty slot); read triggers only.
+   * Prefer locator assertions via `getDimensionTriggersLocator` when waiting for UI updates.
    */
   async getDimensionTriggersTexts(dimension: string): Promise<string[]> {
-    const triggersLocator = this.page.testSubj.locator(`${dimension} > lns-dimensionTrigger`);
-    const triggers = await triggersLocator.all();
+    const triggers = await this.getDimensionTriggersLocator(dimension).all();
     const texts: string[] = [];
     for (const trigger of triggers) {
       texts.push(await trigger.innerText());
@@ -908,33 +918,18 @@ export class LensApp {
 
   /**
    * Changes the data view in the Lens data panel.
-   * By default waits for a saved `dataView-{title}` row (fail if missing).
-   * Pass `{ allowExploreMatching: true }` only for specs that intentionally fall back
-   * to "Explore matching indices".
+   * Waits for a saved `dataView-{title}` row and fails if it is missing
+   * (does not fall back to "Explore matching indices").
    */
-  async switchDataPanelIndexPattern(
-    dataViewTitle: string,
-    options?: { allowExploreMatching?: boolean }
-  ) {
-    const allowExploreMatching = options?.allowExploreMatching ?? false;
+  async switchDataPanelIndexPattern(dataViewTitle: string) {
     const switchLink = this.page.testSubj.locator('lns-dataView-switch-link');
     await switchLink.click();
     const switcher = this.page.testSubj.locator('indexPattern-switcher');
     await switcher.waitFor({ state: 'visible' });
     await this.page.testSubj.typeWithDelay('indexPattern-switcher--input', dataViewTitle);
     const matching = switcher.locator(`[data-test-subj="dataView-${dataViewTitle}"]`);
-    if (allowExploreMatching) {
-      const exploreMatching = this.page.testSubj.locator('explore-matching-indices-button');
-      await matching.or(exploreMatching).waitFor({ state: 'visible' });
-      if (await matching.isVisible()) {
-        await matching.click();
-      } else {
-        await exploreMatching.click();
-      }
-    } else {
-      await matching.waitFor({ state: 'visible' });
-      await matching.click();
-    }
+    await matching.waitFor({ state: 'visible' });
+    await matching.click();
     await switcher.waitFor({ state: 'hidden' });
   }
 
@@ -1686,11 +1681,19 @@ export class LensApp {
     return pagination.locator('[data-test-subj^="pagination-button-"]').count();
   }
 
-  private datatableCell(rowIndex: number, colIndex: number, addRowNumberColumn: boolean) {
+  /**
+   * Locator for a Lens datatable cell. Prefer `expect(locator).toContainText(...)`
+   * over `expect.poll` + `getDatatableCellText` when asserting visible values.
+   */
+  getDatatableCellLocator(rowIndex = 0, colIndex = 0, addRowNumberColumn = true) {
     const col = colIndex + (addRowNumberColumn ? 1 : 0);
     return this.dataTable.locator(
       `[data-test-subj="dataGridRowCell"][data-gridcell-column-index="${col}"][data-gridcell-visible-row-index="${rowIndex}"]`
     );
+  }
+
+  private datatableCell(rowIndex: number, colIndex: number, addRowNumberColumn: boolean) {
+    return this.getDatatableCellLocator(rowIndex, colIndex, addRowNumberColumn);
   }
 
   private parseInlineStyle(styleString: string): Record<string, string> {

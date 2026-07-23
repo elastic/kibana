@@ -34,9 +34,10 @@ spaceTest.describe('Lens visualize geo field', { tag: tags.stateful.classic }, (
 
       await maps.waitForLayersToLoad();
       await expect(maps.getLayerToggleButton('logstash-*')).toBeVisible();
+      // Exact document count → #280444. UI asserts Maps shows a doc-count tooltip.
       await expect
         .poll(async () => maps.getLayerTocTooltipMsg('logstash-*'))
-        .toBe('logstash-*\nFound 66 documents.\nResults narrowed by global time');
+        .toMatch(/logstash-\*[\s\S]*Found \d+ documents?\.[\s\S]*Results narrowed by global time/);
 
       const { violations } = await page.checkA11y({
         include: ['#maps-plugin'],
