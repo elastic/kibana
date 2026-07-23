@@ -18,6 +18,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
+  useEuiTheme,
 } from '@elastic/eui';
 import { MAX_ARTIFACTS_INVESTIGATION_GUIDE_LENGTH } from '@kbn/alerting-types/rule/latest';
 import {
@@ -37,6 +38,7 @@ import { LabelWithTooltip } from './label_with_tooltip';
 export const RULE_DETAIL_MIN_ROW_WIDTH = 600;
 
 export const RuleDetails = () => {
+  const { euiTheme } = useEuiTheme();
   const { formData, baseErrors, plugins } = useRuleFormState();
   const { uiActions } = plugins;
 
@@ -133,6 +135,13 @@ export const RuleDetails = () => {
     min-width: 0;
   `;
 
+  // The xs copy button is taller than the label text, which would grow the Tags
+  // label row and push its input below the Rule name input. Collapse the extra
+  // height so both inputs stay aligned.
+  const copyButtonCss = css`
+    margin-block: -${euiTheme.size.xs};
+  `;
+
   return (
     <>
       <EuiFlexGroup>
@@ -170,6 +179,7 @@ export const RuleDetails = () => {
                   <EuiCopy textToCopy={tags.join('\n')}>
                     {(copy) => (
                       <EuiButtonIcon
+                        css={copyButtonCss}
                         iconType="copyClipboard"
                         size="xs"
                         color="text"
