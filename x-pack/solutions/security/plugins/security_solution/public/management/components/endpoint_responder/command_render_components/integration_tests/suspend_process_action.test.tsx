@@ -22,6 +22,8 @@ import type { EndpointCapabilities } from '../../../../../../common/endpoint/ser
 import { ENDPOINT_CAPABILITIES } from '../../../../../../common/endpoint/service/response_actions/constants';
 import type {
   ActionDetailsApiResponse,
+  ActionResponseOutput,
+  EndpointActionResponseDataOutput,
   SuspendProcessActionOutputContent,
 } from '../../../../../../common/endpoint/types';
 import { endpointActionResponseCodes } from '../../lib/endpoint_action_response_codes';
@@ -54,6 +56,24 @@ describe('When using the suspend-process action from response actions console', 
     const mockedContext = createAppRootMockRenderer();
 
     apiMocks = responseActionsHttpMocks(mockedContext.coreStart.http);
+
+    const actionDetailsMockResponder =
+      apiMocks.responseProvider.actionDetails.getMockImplementation()!;
+    apiMocks.responseProvider.actionDetails.mockImplementation((...props) => {
+      const response = actionDetailsMockResponder(...props);
+      response.data.command = 'suspend-process';
+      response.data.outputs = {
+        [response.data.agents[0]]: {
+          type: 'json',
+          content: {
+            pid: 5,
+            process_name: 'foo',
+            entity_id: 'entity-foo',
+          },
+        } as ActionResponseOutput<EndpointActionResponseDataOutput>,
+      };
+      return response;
+    });
 
     render = async (capabilities: EndpointCapabilities[] = [...ENDPOINT_CAPABILITIES]) => {
       renderResult = mockedContext.render(
@@ -226,7 +246,9 @@ describe('When using the suspend-process action from response actions console', 
     await enterConsoleCommand(renderResult, user, 'suspend-process --pid 123');
 
     await waitFor(() => {
-      expect(renderResult.getByTestId('suspendProcess-success')).toBeTruthy();
+      expect(renderResult.getByTestId('test-commandExecutionResult')).toHaveTextContent(
+        'Action completed.'
+      );
     });
   });
 
@@ -235,7 +257,9 @@ describe('When using the suspend-process action from response actions console', 
     await enterConsoleCommand(renderResult, user, 'suspend-process --entityId 123wer');
 
     await waitFor(() => {
-      expect(renderResult.getByTestId('suspendProcess-success')).toBeTruthy();
+      expect(renderResult.getByTestId('test-commandExecutionResult')).toHaveTextContent(
+        'Action completed.'
+      );
     });
   });
 
