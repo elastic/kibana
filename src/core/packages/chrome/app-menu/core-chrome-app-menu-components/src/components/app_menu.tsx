@@ -8,7 +8,8 @@
  */
 
 import React, { useState } from 'react';
-import { EuiHeaderLinks, useIsWithinBreakpoints } from '@elastic/eui';
+import { EuiHeaderLinks, type EuiBreakpointSize, useCurrentEuiBreakpoint } from '@elastic/eui';
+import { useCurrentChromeApplicationBreakpoint } from '@kbn/core-chrome-layout-utils';
 import { css } from '@emotion/react';
 import { getAppMenuItems, hasNonGlobalStaticItems, processStaticItems } from '../utils';
 import { AppMenuActionButton } from './app_menu_action_button';
@@ -26,30 +27,93 @@ const secondaryActionsCss = css`
 export interface AppMenuItemsProps {
   config?: AppMenuConfig;
   visible?: boolean;
-  /**
-   * Whether to render the app menu in a collapsed state (showing only the overflow button).
-   * Only available for the standalone app menu component.
-   * TODO: Remove this in favour of container queries once EUI supports them https://github.com/elastic/eui/issues/8822
-   */
-  isCollapsed?: boolean;
+  breakpointSource?: AppMenuBreakpointSource;
   /**
    * Static items that always appear at the end of the overflow menu.
    */
   staticItems?: AppMenuStaticItem[];
 }
 
+export type AppMenuBreakpointSource = 'application' | 'viewport';
+
+type AppMenuLayout = 'collapsed' | 'minimal' | 'expanded';
+
+const APPLICATION_LAYOUTS: Record<EuiBreakpointSize, AppMenuLayout> = {
+  xs: 'collapsed',
+  s: 'minimal',
+  m: 'expanded',
+  l: 'expanded',
+  xl: 'expanded',
+};
+
+const VIEWPORT_LAYOUTS: Record<EuiBreakpointSize, AppMenuLayout> = {
+  xs: 'collapsed',
+  s: 'collapsed',
+  m: 'minimal',
+  l: 'minimal',
+  xl: 'expanded',
+};
+
 const hasNoItems = (config: AppMenuConfig) =>
   !config.items?.length && !config?.primaryActionItem && !config?.switch;
+
+const AppMenuHeaderLinks = ({ children }: { children: React.ReactNode }) => (
+  <EuiHeaderLinks
+    data-test-subj={APP_MENU_TEST_SUBJECTS.root}
+    gutterSize="xs"
+    popoverBreakpoints="none"
+    className="kbnTopNavMenu__wrapper"
+  >
+    {children}
+  </EuiHeaderLinks>
+);
+
+interface AppMenuResponsiveContentProps {
+  content: Record<AppMenuLayout, React.ReactNode>;
+}
+
+type AppMenuResolvedResponsiveContentProps = AppMenuResponsiveContentProps & {
+  breakpoint: EuiBreakpointSize | undefined;
+  source: AppMenuBreakpointSource;
+};
+
+const AppMenuResponsiveContent = ({
+  content,
+  breakpoint,
+  source,
+}: AppMenuResolvedResponsiveContentProps) => {
+  const layouts = source === 'application' ? APPLICATION_LAYOUTS : VIEWPORT_LAYOUTS;
+  const layout = breakpoint ? layouts[breakpoint] : 'collapsed';
+
+  return <AppMenuHeaderLinks>{content[layout]}</AppMenuHeaderLinks>;
+};
+
+const AppMenuApplicationResponsiveContent = (props: AppMenuResponsiveContentProps) => {
+  const applicationBreakpoint = useCurrentChromeApplicationBreakpoint();
+  const viewportBreakpoint = useCurrentEuiBreakpoint();
+
+  return (
+    <AppMenuResponsiveContent
+      {...props}
+      breakpoint={applicationBreakpoint ?? viewportBreakpoint}
+      source={applicationBreakpoint === undefined ? 'viewport' : 'application'}
+    />
+  );
+};
+
+const AppMenuViewportResponsiveContent = (props: AppMenuResponsiveContentProps) => {
+  const breakpoint = useCurrentEuiBreakpoint();
+
+  return <AppMenuResponsiveContent {...props} breakpoint={breakpoint} source="viewport" />;
+};
 
 export const AppMenuComponent = ({
   config,
   visible = true,
-  isCollapsed = false,
+  breakpointSource = 'application',
   staticItems,
 }: AppMenuItemsProps) => {
   const [openPopoverId, setOpenPopoverId] = useState<string | null>(null);
-  const isBetweenMandXlBreakpoint = useIsWithinBreakpoints(['m', 'l']);
-  const isAboveXlBreakpoint = useIsWithinBreakpoints(['xl']);
 
   /**
    * Global static items are registered once, usually before
@@ -71,32 +135,13 @@ export const AppMenuComponent = ({
   const primaryActionItem = config?.primaryActionItem;
   const switchConfig = config?.switch;
   const showMoreButtonId = 'show-more';
-
-  const headerLinksProps = {
-    'data-test-subj': APP_MENU_TEST_SUBJECTS.root,
-    gutterSize: 'xs' as const,
-    popoverBreakpoints: 'none' as const,
-    className: 'kbnTopNavMenu__wrapper',
-  };
-
-  const {
-    displayedItems,
-    overflowItems,
-    shouldOverflow: shouldOverflowBase,
-  } = getAppMenuItems({
-    config,
-    hasStaticItems: hasVisibleStaticItems,
-  });
-
   const processedStaticItems = processStaticItems(staticItems);
+  const hasStaticItems = processedStaticItems.length > 0;
 
-  const allOverflowItems = [...overflowItems];
-  const shouldOverflow = shouldOverflowBase || processedStaticItems.length > 0;
-  const hasSecondaryActions =
-    Boolean(switchConfig) ||
-    displayedItems.length > 0 ||
-    allOverflowItems.length > 0 ||
-    processedStaticItems.length > 0;
+  const { displayedItems, overflowItems } = getAppMenuItems({
+    config,
+    hasStaticItems,
+  });
 
   const handlePopoverToggle = (id: string) => {
     setOpenPopoverId((prev) => (prev === id ? null : id));
@@ -119,7 +164,7 @@ export const AppMenuComponent = ({
 
   const collapsedComponent = (
     <AppMenuOverflowButton
-      items={[...displayedItems, ...allOverflowItems]}
+      items={[...displayedItems, ...overflowItems]}
       staticItems={processedStaticItems}
       isPopoverOpen={openPopoverId === showMoreButtonId}
       primaryActionItem={primaryActionItem}
@@ -129,37 +174,19 @@ export const AppMenuComponent = ({
     />
   );
 
-  if (isCollapsed) {
-    return <EuiHeaderLinks {...headerLinksProps}>{collapsedComponent}</EuiHeaderLinks>;
-  }
+  const renderInlineContent = (inlineItemLimit: number) => {
+    const inlineItems = displayedItems.slice(0, inlineItemLimit);
+    const responsiveOverflowItems = [...displayedItems.slice(inlineItemLimit), ...overflowItems];
+    const shouldShowOverflow = responsiveOverflowItems.length > 0 || hasStaticItems;
+    const hasSecondaryActions =
+      Boolean(switchConfig) || inlineItems.length > 0 || shouldShowOverflow;
 
-  if (isBetweenMandXlBreakpoint) {
     return (
-      <EuiHeaderLinks {...headerLinksProps}>
+      <>
         {hasSecondaryActions && (
           <div css={secondaryActionsCss}>
             {switchConfig && <AppMenuSwitchComponent switchConfig={switchConfig} />}
-            <AppMenuOverflowButton
-              items={[...displayedItems, ...allOverflowItems]}
-              staticItems={processedStaticItems}
-              isPopoverOpen={openPopoverId === showMoreButtonId}
-              onPopoverToggle={() => handlePopoverToggle(showMoreButtonId)}
-              onPopoverClose={handleOnPopoverClose}
-            />
-          </div>
-        )}
-        {primaryActionComponent}
-      </EuiHeaderLinks>
-    );
-  }
-
-  if (isAboveXlBreakpoint) {
-    return (
-      <EuiHeaderLinks {...headerLinksProps}>
-        {hasSecondaryActions && (
-          <div css={secondaryActionsCss}>
-            {switchConfig && <AppMenuSwitchComponent switchConfig={switchConfig} />}
-            {displayedItems.map((menuItem) => (
+            {inlineItems.map((menuItem) => (
               <AppMenuItem
                 key={menuItem.id}
                 {...menuItem}
@@ -168,9 +195,9 @@ export const AppMenuComponent = ({
                 onPopoverClose={handleOnPopoverClose}
               />
             ))}
-            {shouldOverflow && (
+            {shouldShowOverflow && (
               <AppMenuOverflowButton
-                items={allOverflowItems}
+                items={responsiveOverflowItems}
                 staticItems={processedStaticItems}
                 isPopoverOpen={openPopoverId === showMoreButtonId}
                 onPopoverToggle={() => handlePopoverToggle(showMoreButtonId)}
@@ -180,9 +207,20 @@ export const AppMenuComponent = ({
           </div>
         )}
         {primaryActionComponent}
-      </EuiHeaderLinks>
+      </>
     );
-  }
+  };
 
-  return <EuiHeaderLinks {...headerLinksProps}>{collapsedComponent}</EuiHeaderLinks>;
+  const content: Record<AppMenuLayout, React.ReactNode> = {
+    collapsed: collapsedComponent,
+    minimal: renderInlineContent(0),
+    expanded: renderInlineContent(displayedItems.length),
+  };
+
+  const ResponsiveContent =
+    breakpointSource === 'application'
+      ? AppMenuApplicationResponsiveContent
+      : AppMenuViewportResponsiveContent;
+
+  return <ResponsiveContent content={content} />;
 };

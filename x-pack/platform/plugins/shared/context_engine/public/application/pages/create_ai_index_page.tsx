@@ -6,23 +6,52 @@
  */
 
 import {
-  EuiLink,
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiPanel,
-  EuiSkeletonRectangle,
   EuiSpacer,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import React from 'react';
+import { TryInConsoleButton } from '@kbn/try-in-console';
+import React, { useState } from 'react';
+import { DEFAULT_AI_INDEX_DATA_STREAM } from '../../../common/constants';
+import { SourcePicker } from '../components/source_picker';
+import type { SelectedSource } from '../components/source_picker';
+import { useCreateAiIndex } from '../hooks/use_create_ai_index';
+import { useKibana } from '../hooks/use_kibana';
 import { useNavigation } from '../hooks/use_navigation';
 import { getAiIndexDetailPath } from '../paths';
 
-const SOURCE_PLACEHOLDER_COUNT = 2;
+const CREATE_AI_INDEX_DEST_REQUEST = `# Create an index template so the data stream gets created with the right settings
+PUT _index_template/ai-index-ds-template
+{
+  "index_patterns": [".ai-index-ds-*"],
+  "data_stream": {},
+  "priority": 500
+}
+
+# Create the backing data stream used by the "Continue" button below
+PUT _data_stream/${DEFAULT_AI_INDEX_DATA_STREAM}`;
 
 export const CreateAiIndexPage = () => {
-  const { createContextEngineUrl } = useNavigation();
+  const {
+    services: { application, share, console: consolePlugin },
+  } = useKibana();
+  const { navigateToContextEngine } = useNavigation();
+  const { createAiIndex, isCreating } = useCreateAiIndex();
+  const [selectedSources, setSelectedSources] = useState<SelectedSource[]>([]);
+
+  const createAndContinue = async () => {
+    const created = await createAiIndex(selectedSources);
+    if (created) {
+      navigateToContextEngine(getAiIndexDetailPath(created.id));
+    }
+  };
 
   return (
     <KibanaPageTemplate data-test-subj="contextCreateAiIndexPage">
@@ -37,43 +66,63 @@ export const CreateAiIndexPage = () => {
       />
       <KibanaPageTemplate.Section>
         <EuiPanel hasBorder paddingSize="l">
-          <EuiTitle size="s">
-            <h2>
-              {i18n.translate('xpack.contextEngine.createAiIndex.addSource.title', {
-                defaultMessage: 'Add a source',
-              })}
-            </h2>
-          </EuiTitle>
-          <EuiSpacer size="s" />
-          <EuiText size="s" color="subdued">
-            <p>
-              {i18n.translate('xpack.contextEngine.createAiIndex.addSource.description', {
-                defaultMessage:
-                  'Pick what this AI index should build context from. You can add more than one.',
-              })}
-            </p>
-          </EuiText>
-          <EuiSpacer size="l" />
-          {Array.from({ length: SOURCE_PLACEHOLDER_COUNT }).map((_, index) => (
-            <React.Fragment key={index}>
-              <EuiSkeletonRectangle
-                width="100%"
-                height={56}
-                borderRadius="m"
-                data-test-subj="contextCreateAiIndexSourcePlaceholder"
-              />
+          <EuiFlexGroup alignItems="flexStart" gutterSize="m">
+            <EuiFlexItem>
+              <EuiTitle size="s">
+                <h2>
+                  <FormattedMessage
+                    id="xpack.contextEngine.createAiIndex.addSource.title"
+                    defaultMessage="Add a source"
+                  />
+                </h2>
+              </EuiTitle>
               <EuiSpacer size="s" />
-            </React.Fragment>
-          ))}
-          <EuiSpacer size="s" />
-          <EuiLink
-            data-test-subj="contextCreateAiIndexContinueLink"
-            href={createContextEngineUrl(getAiIndexDetailPath('new'))}
-          >
-            {i18n.translate('xpack.contextEngine.createAiIndex.continueLink', {
-              defaultMessage: 'Continue to AI index',
-            })}
-          </EuiLink>
+              <EuiText size="s" color="subdued">
+                <p>
+                  <FormattedMessage
+                    id="xpack.contextEngine.createAiIndex.addSource.description"
+                    defaultMessage="Pick what this AI index should build context from. You can add more than one."
+                  />
+                </p>
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <TryInConsoleButton
+                    type="emptyButton"
+                    iconType="plusInCircle"
+                    request={CREATE_AI_INDEX_DEST_REQUEST}
+                    application={application}
+                    sharePlugin={share}
+                    consolePlugin={consolePlugin}
+                    data-test-subj="contextCreateAiIndexDestButton"
+                    content={i18n.translate('xpack.contextEngine.createAiIndex.createDestButton', {
+                      defaultMessage: 'Create AI index dest',
+                    })}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    fill
+                    iconType="arrowRight"
+                    iconSide="right"
+                    data-test-subj="contextContinueButton"
+                    onClick={createAndContinue}
+                    isLoading={isCreating}
+                    isDisabled={selectedSources.length === 0}
+                  >
+                    <FormattedMessage
+                      id="xpack.contextEngine.createAiIndex.continueButton"
+                      defaultMessage="Continue"
+                    />
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="l" />
+          <SourcePicker selectedSources={selectedSources} onChange={setSelectedSources} />
         </EuiPanel>
       </KibanaPageTemplate.Section>
     </KibanaPageTemplate>
