@@ -165,6 +165,7 @@ export function SloEditFormDescriptionSection() {
                         iconType="copyClipboard"
                         display="base"
                         size="m"
+                        color="text"
                         onClick={copy}
                         isDisabled={tags.length === 0}
                         data-test-subj="sloEditTagsCopyButton"
