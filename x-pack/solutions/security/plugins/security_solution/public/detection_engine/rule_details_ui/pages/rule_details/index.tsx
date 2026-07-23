@@ -448,23 +448,29 @@ export const RuleDetailsPage = connector(
     );
 
     const isBuildingBlockRule = rule?.building_block_type != null;
+    const [areAlertFiltersInitialized, setAreAlertFiltersInitialized] = useState(false);
     // Set showBuildingBlockAlerts if rule is a Building Block Rule otherwise we won't show alerts
     useEffect(() => {
-      setShowBuildingBlockAlerts(isBuildingBlockRule);
-    }, [isBuildingBlockRule, setShowBuildingBlockAlerts]);
+      if (rule != null) {
+        setShowBuildingBlockAlerts(isBuildingBlockRule);
+      }
+    }, [rule, isBuildingBlockRule, setShowBuildingBlockAlerts]);
+
+    useEffect(() => {
+      if (rule != null) {
+        setAreAlertFiltersInitialized(true);
+      }
+    }, [rule]);
 
     const ruleRuleId = rule?.rule_id ?? '';
-    // Use isBuildingBlockRule directly to ensure correct filter on first render
-    // (useEffect runs after render, so showBuildingBlockAlerts may not be updated yet)
-    const shouldShowBuildingBlockAlerts = isBuildingBlockRule || showBuildingBlockAlerts;
     const alertDefaultFilters = useMemo(
       () => [
         ...buildAlertsFilter(ruleRuleId ?? ''),
-        ...buildShowBuildingBlockFilter(shouldShowBuildingBlockAlerts),
+        ...buildShowBuildingBlockFilter(showBuildingBlockAlerts),
         ...buildAlertStatusFilter(filterGroup),
         ...buildThreatMatchFilter(showOnlyThreatIndicatorAlerts),
       ],
-      [ruleRuleId, shouldShowBuildingBlockAlerts, showOnlyThreatIndicatorAlerts, filterGroup]
+      [ruleRuleId, showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts, filterGroup]
     );
 
     const alertMergedFilters = useMemo(
@@ -911,7 +917,7 @@ export const RuleDetailsPage = connector(
                           />
                           <EuiSpacer />
                         </Display>
-                        {ruleId != null && rule != null && (
+                        {ruleId != null && rule != null && areAlertFiltersInitialized && (
                           <GroupedAlertsTable
                             accordionButtonContent={defaultGroupTitleRenderers}
                             accordionExtraActionGroupStats={accordionExtraActionGroupStats}
