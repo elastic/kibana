@@ -13,7 +13,7 @@ PUT  _ml/anomaly_detectors/<job_id>          # 1. Define job + detectors        
 PUT  _ml/datafeeds/datafeed-<job_id>         # 2. Define datafeed               (ad_create_job operation=create_datafeed)
 POST _ml/anomaly_detectors/<job_id>/_open    # 3a. Open job                     (ad_manage_job_state operation=open_job)
 POST _ml/datafeeds/datafeed-<job_id>/_start  # 3b. Start datafeed               (ad_manage_job_state operation=start_datafeed)
-GET  _ml/anomaly_detectors/<job_id>/results/records   # 4. Read results via platform.core.execute_esql
+GET  _ml/anomaly_detectors/<job_id>/results/records   # 4. Read results via ml.query_anomalies
 ```
 
 To stop: `ad_manage_job_state` (`stop_datafeed`) → `ad_manage_job_state` (`close_job`).
@@ -160,7 +160,7 @@ For **batch analysis on historical data**, pass `start` and `end` to `ad_manage_
 
 ## Retrieving results
 
-Use `platform.core.execute_esql` with the templates in `esql-read-queries` and `esql-metadata-queries` referenced content.
+Use `ml.query_anomalies` with the templates in `esql-read-queries` and `esql-metadata-queries` referenced content.
 
 | Result type | ES|QL template to use                    |
 | ----------- | --------------------------------------- |

@@ -11,6 +11,7 @@ import {
   AD_CREATE_JOB_TOOL_ID,
   AD_MANAGE_JOB_STATE_TOOL_ID,
   AD_UPDATE_JOB_CONFIG_TOOL_ID,
+  QUERY_ANOMALIES_TOOL_ID,
 } from './tools/tool_ids';
 
 const createAgentBuilderMock = () => ({
@@ -26,7 +27,7 @@ const createAgentBuilderMock = () => ({
 const resolveMlCapabilities = jest.fn().mockResolvedValue(null);
 
 describe('registerAnomalyDetectionAgentBuilder', () => {
-  it('registers all 4 ML API tools', () => {
+  it('registers all ML API tools plus query_anomalies', () => {
     const agentBuilder = createAgentBuilderMock();
 
     registerAnomalyDetectionAgentBuilder({
@@ -39,7 +40,8 @@ describe('registerAnomalyDetectionAgentBuilder', () => {
     expect(registeredIds).toContain(AD_CREATE_JOB_TOOL_ID);
     expect(registeredIds).toContain(AD_MANAGE_JOB_STATE_TOOL_ID);
     expect(registeredIds).toContain(AD_UPDATE_JOB_CONFIG_TOOL_ID);
-    expect(agentBuilder.tools.register).toHaveBeenCalledTimes(4);
+    expect(registeredIds).toContain(QUERY_ANOMALIES_TOOL_ID);
+    expect(agentBuilder.tools.register).toHaveBeenCalledTimes(5);
   });
 
   it('registers the anomaly detection skill', () => {

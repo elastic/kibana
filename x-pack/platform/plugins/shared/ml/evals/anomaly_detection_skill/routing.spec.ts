@@ -64,7 +64,7 @@ evaluate.describe('ML Anomaly Detection - routing', { tag: [...tags.stateful.cla
           name: 'agent builder: ml-anomaly-detection-skill-investigate',
           description:
             'Validates that RCA / "what broke?" questions activate the anomaly-detection skill and ' +
-            'query anomaly results via platform.core.execute_esql.',
+            'query anomaly results via ml.query_anomalies.',
           examples: [
             {
               input: {
@@ -79,7 +79,7 @@ evaluate.describe('ML Anomaly Detection - routing', { tag: [...tags.stateful.cla
               metadata: {
                 query_intent: 'Anomaly Detection Investigation',
                 expectedSkill: 'anomaly-detection',
-                expectedToolId: 'platform.core.execute_esql',
+                expectedToolId: 'ml.query_anomalies',
               },
             },
             {
@@ -95,7 +95,7 @@ evaluate.describe('ML Anomaly Detection - routing', { tag: [...tags.stateful.cla
               metadata: {
                 query_intent: 'Anomaly Detection Score Explanation',
                 expectedSkill: 'anomaly-detection',
-                expectedToolId: 'platform.core.execute_esql',
+                expectedToolId: 'ml.query_anomalies',
               },
             },
           ],

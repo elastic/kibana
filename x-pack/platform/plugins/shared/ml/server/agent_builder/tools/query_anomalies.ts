@@ -1,0 +1,218 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { FieldValue } from '@elastic/elasticsearch/lib/api/types';
+import { z } from '@kbn/zod/v4';
+import { ToolType } from '@kbn/agent-builder-common';
+import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
+import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import { createErrorResult, getToolResultId } from '@kbn/agent-builder-server';
+import type { ResolveMlCapabilities } from '@kbn/ml-common-types/capabilities';
+import type { MlLicense } from '../../../common/license';
+import type { MlFeatures } from '../../../common/constants/app';
+import type { MlAuthorizationService } from '../../lib/capabilities/check_capabilities';
+import { hasMlCapabilitiesProvider } from '../../lib/capabilities/check_capabilities';
+import { QUERY_ANOMALIES_TOOL_ID } from './tool_ids';
+
+/**
+ * Index patterns that may be queried with the Kibana internal user.
+ * Source-data queries (e.g. RCA evidence against datafeed indices) must use
+ * platform.core.execute_esql as the current user instead.
+ */
+const ALLOWED_ML_INDEX_PREFIXES = [
+  '.ml-anomalies',
+  '.ml-config',
+  '.ml-notifications',
+  '.ml-annotations',
+] as const;
+
+const DEFAULT_LIMIT = 100;
+
+const schema = z.object({
+  query: z
+    .string()
+    .min(1)
+    .describe(
+      'The ES|QL query to execute against ML system indices (.ml-anomalies-*, .ml-config, .ml-notifications-*, .ml-annotations-*). Copy query text from the anomaly-detection skill referenced content.'
+    ),
+  params: z
+    .record(z.string(), z.union([z.string(), z.number(), z.boolean()]))
+    .optional()
+    .describe(
+      '(Optional) Bound values for ?param placeholders (keys without ?), e.g. { "job_id_pattern": "*", "min_score": 25 }.'
+    ),
+  limit: z
+    .number()
+    .optional()
+    .default(DEFAULT_LIMIT)
+    .describe(`(Optional) Max rows to return. Defaults to ${DEFAULT_LIMIT}.`),
+});
+
+/**
+ * Extracts index / pattern names from the leading FROM clause of an ES|QL query.
+ * Returns null if no FROM clause is found.
+ */
+export const extractFromIndices = (query: string): string[] | null => {
+  const withoutBlockComments = query.replace(/\/\*[\s\S]*?\*\//g, ' ');
+  const withoutLineComments = withoutBlockComments.replace(/\/\/[^\n]*/g, ' ');
+  const match = withoutLineComments.match(/\bFROM\b\s+([^|]+)/i);
+  if (!match) {
+    return null;
+  }
+
+  return match[1]
+    .split(',')
+    .map((part) => part.trim())
+    .filter(Boolean)
+    .map((part) => part.replace(/^["']|["']$/g, ''));
+};
+
+export const isAllowedMlIndex = (index: string): boolean => {
+  // Reject cross-cluster / remote sources — internal-user CCS is out of scope.
+  if (index.includes(':')) {
+    return false;
+  }
+
+  return ALLOWED_ML_INDEX_PREFIXES.some(
+    (prefix) => index === prefix || index.startsWith(`${prefix}-`) || index.startsWith(`${prefix}*`)
+  );
+};
+
+/**
+ * Validates that every FROM source is an allowed ML system index.
+ * Returns an error message, or undefined when the query is allowed.
+ */
+export const validateMlSystemIndexQuery = (query: string): string | undefined => {
+  const indices = extractFromIndices(query);
+  if (!indices || indices.length === 0) {
+    return 'Query must start with a FROM clause targeting an allowed ML system index.';
+  }
+
+  const disallowed = indices.filter((index) => !isAllowedMlIndex(index));
+  if (disallowed.length > 0) {
+    return (
+      `Query targets disallowed index/pattern(s): ${disallowed.join(', ')}. ` +
+      `Only ${ALLOWED_ML_INDEX_PREFIXES.map((p) => `${p}*`).join(', ')} are permitted. ` +
+      `For source-data indices use platform.core.execute_esql.`
+    );
+  }
+
+  return undefined;
+};
+
+const applyLimit = (query: string, limit: number): string => {
+  const trimmed = query.trimEnd();
+  const limitMatch = trimmed.match(/\|\s*LIMIT\s+(\d+)\s*$/i);
+  if (limitMatch) {
+    const existing = Number(limitMatch[1]);
+    if (existing <= limit) {
+      return trimmed;
+    }
+    return `${trimmed.slice(0, limitMatch.index)}| LIMIT ${limit}`;
+  }
+  return `${trimmed}\n| LIMIT ${limit}`;
+};
+
+export const createQueryAnomaliesTool = (
+  resolveMlCapabilities: ResolveMlCapabilities,
+  authorization?: MlAuthorizationService,
+  mlLicense?: MlLicense,
+  enabledFeatures?: MlFeatures
+): BuiltinToolDefinition<typeof schema> => ({
+  id: QUERY_ANOMALIES_TOOL_ID,
+  type: ToolType.builtin,
+  tags: ['ml', 'anomaly-detection'],
+  description: `Execute an ES|QL query against ML anomaly-detection system indices and return tabular results.
+
+## Usage
+
+Pass the full ES|QL string in \`query\`. Optionally pass bound \`params\` for ?placeholders.
+
+Example:
+{
+  "query": "FROM .ml-config | WHERE job_type == \\"anomaly_detector\\" | STATS job_count = COUNT(*), job_ids = VALUES(job_id)",
+  "params": {}
+}
+
+Allowed indices (internal user): \`.ml-anomalies-*\`, \`.ml-config\`, \`.ml-notifications-*\`, \`.ml-annotations-*\`.
+Copy query examples from the anomaly-detection skill referenced content (\`esql-read-queries\`, \`esql-metadata-queries\`, \`esql-score-queries\`).
+
+For source-data indices use \`platform.core.execute_esql\` instead.`,
+  experimental: true,
+  schema,
+  handler: async (
+    { query: esqlQuery, params: esqlParams = {}, limit = DEFAULT_LIMIT },
+    { esClient, request }
+  ) => {
+    const hasMlCapabilities = hasMlCapabilitiesProvider(
+      resolveMlCapabilities,
+      request,
+      authorization,
+      mlLicense,
+      enabledFeatures
+    );
+
+    try {
+      await hasMlCapabilities(['canGetJobs']);
+    } catch (error) {
+      return {
+        results: [
+          createErrorResult(
+            `Error querying anomalies due to missing capabilities: ${error.message}`
+          ),
+        ],
+      };
+    }
+
+    const validationError = validateMlSystemIndexQuery(esqlQuery);
+    if (validationError) {
+      return { results: [createErrorResult(validationError)] };
+    }
+
+    const paramArray: Array<Record<string, FieldValue>> = Object.entries(esqlParams).map(
+      ([key, value]) => ({ [key]: value })
+    );
+    const effectiveQuery = applyLimit(esqlQuery, limit);
+
+    try {
+      // ML viewers can get job results via ML privileges but often lack direct
+      // index privileges on .ml-* system indices — run as the internal user.
+      const result = await esClient.asInternalUser.esql.query({
+        query: effectiveQuery,
+        drop_null_columns: true,
+        allow_partial_results: true,
+        ...(paramArray.length > 0 ? { params: paramArray as unknown as FieldValue[] } : {}),
+      });
+
+      return {
+        results: [
+          {
+            type: ToolResultType.query,
+            data: {
+              esql: effectiveQuery,
+            },
+          },
+          {
+            tool_result_id: getToolResultId(),
+            type: ToolResultType.esqlResults,
+            data: {
+              source: 'esql',
+              query: effectiveQuery,
+              columns: result.columns,
+              values: result.values,
+            },
+          },
+        ],
+      };
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      return {
+        results: [createErrorResult(`Error executing ES|QL query: ${message}`)],
+      };
+    }
+  },
+});

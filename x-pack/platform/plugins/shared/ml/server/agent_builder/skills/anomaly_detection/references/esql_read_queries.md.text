@@ -1,6 +1,10 @@
 # ES|QL Read Query Templates — Records, Timeline, Influencers, RCA
 
-Use `platform.core.execute_esql` with the query text below. Keep `?param` placeholders in the query unchanged and pass bound values separately in the tool's `params` map (keys without `?`, e.g. `{ "job_id_pattern": "*", "min_score": 25 }`).
+Use `ml.query_anomalies` and pass the ES|QL below in the `query` parameter for `.ml-*` system indices. Keep `?param` placeholders in the query and bind values in `params` (keys without `?`, e.g. `{ "job_id_pattern": "*", "min_score": 25 }`).
+
+Section titles (e.g. `ad_query_anomaly_records`) are labels for the query examples only — they are not tool arguments.
+
+For **source-data** examples (`ad_rca_source_evidence`, `ad_search_log_category_examples`) use `platform.core.execute_esql` instead.
 
 ---
 

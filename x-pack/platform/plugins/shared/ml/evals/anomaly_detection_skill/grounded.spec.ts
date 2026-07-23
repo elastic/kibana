@@ -79,8 +79,8 @@ evaluate.describe(
                   query_intent: 'Anomaly Detection Grounded Output',
                   expectedSkill: 'anomaly-detection',
                   // Anomaly records live in .ml-anomalies-* and are read via ES|QL templates
-                  // (ad_query_anomaly_records), not the ML job-info API tool.
-                  expectedToolId: 'platform.core.execute_esql',
+                  // (ad_query_anomaly_records) through ml.query_anomalies, not the ML job-info API tool.
+                  expectedToolId: 'ml.query_anomalies',
                   requiredTerms:
                     topAnomaly && jobId
                       ? [jobId, topAnomaly.responseCode, String(topAnomaly.recordScore)]

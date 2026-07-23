@@ -4,10 +4,31 @@ Single skill covering all anomaly detection work. Use the **Mode Selector** belo
 
 ## Platform
 
-- Read path: `platform.core.execute_esql` against `.ml-anomalies-*`, `.ml-config`, `.ml-notifications-*`, `.ml-annotations-*`
+- Read path: `ml.query_anomalies` (internal user) against `.ml-anomalies-*`, `.ml-config`, `.ml-notifications-*`, `.ml-annotations-*`
+- Source-data ES|QL only: `platform.core.execute_esql` (current user) for RCA evidence / ingest latency against datafeed indices
 - ES|QL query templates are in the referenced content files (`esql-read-queries`, `esql-metadata-queries`, `esql-score-queries`)
 - ML API write/state operations: `ml.ad_get_job_info`, `ml.ad_create_job`, `ml.ad_manage_job_state`, `ml.ad_update_job_config`
 - **Run `ml.ad_get_job_info` with `operation=validate_permissions` first** when tools return empty/misleading results — missing privileges are the most common cause of false negatives.
+
+### Calling `ml.query_anomalies`
+
+Pass the ES|QL text in `query` (copy from referenced content). Optional `params` for `?placeholders`.
+
+```text
+ml.query_anomalies
+  query: |
+    FROM .ml-config
+    | WHERE job_type == "anomaly_detector"
+    | STATS job_count = COUNT(*),
+            job_ids = VALUES(job_id),
+            functions = VALUES(`analysis_config.detectors.function`),
+            fields = VALUES(`analysis_config.detectors.field_name`),
+            by_fields = VALUES(`analysis_config.detectors.by_field_name`),
+            over_fields = VALUES(`analysis_config.detectors.over_field_name`),
+            partition_fields = VALUES(`analysis_config.detectors.partition_field_name`),
+            influencers = VALUES(`analysis_config.influencers`),
+            bucket_spans = VALUES(`analysis_config.bucket_span`)
+```
 
 ## Mode Selector
 
@@ -56,20 +77,21 @@ Read scores this way:
 
 ### Tool chain
 
-| Phase                 | Tool                              | ES|QL template (from `esql-read-queries` or `esql-metadata-queries`)      |
-| --------------------- | --------------------------------- | ------------------------------------------------------------------------- |
-| Discovery             | `ml.ad_get_job_info`              | `operation=get_available_metadata`                                        |
-| Job detail            | `platform.core.execute_esql`      | `ad_get_jobs`, `ad_discover_related_jobs`                                 |
-| Timeline / scope      | `platform.core.execute_esql`      | `ad_query_anomaly_timeline`                                               |
-| Cross-job / entities  | `platform.core.execute_esql`      | `ad_rca_cross_job_entity_match`, `ad_rca_multi_job_entities`, `ad_rca_entity_profile` |
-| Records / influencers | `platform.core.execute_esql`      | `ad_query_anomaly_records`, `ad_query_influencers`                        |
-| RCA depth             | `platform.core.execute_esql`      | `ad_rca_detector_fingerprint`, `ad_rca_correlation`, `ad_rca_blast_radius`, `ad_rca_score_reassessment` |
-| Evidence / categories | `platform.core.execute_esql`      | `ad_rca_source_evidence`, `ad_get_categories`, `ad_search_log_category_examples` |
-| Job config            | `ml.ad_get_job_info`                 | `operation=get_datafeed_config`                                           |
+| Phase                 | Tool                         | ES|QL to pass in `query` (from referenced content)                        |
+| --------------------- | ---------------------------- | ------------------------------------------------------------------------- |
+| Discovery             | `ml.ad_get_job_info`         | `operation=get_available_metadata`                                        |
+| Job detail            | `ml.query_anomalies`         | copy `ad_get_jobs` / `ad_discover_related_jobs`                           |
+| Timeline / scope      | `ml.query_anomalies`         | copy `ad_query_anomaly_timeline`                                          |
+| Cross-job / entities  | `ml.query_anomalies`         | copy `ad_rca_cross_job_entity_match` / `ad_rca_multi_job_entities` / `ad_rca_entity_profile` |
+| Records / influencers | `ml.query_anomalies`         | copy `ad_query_anomaly_records` / `ad_query_influencers`                  |
+| RCA depth             | `ml.query_anomalies`         | copy `ad_rca_detector_fingerprint` / `ad_rca_correlation` / `ad_rca_blast_radius` / `ad_rca_score_reassessment` |
+| Categories            | `ml.query_anomalies`         | copy `ad_get_categories`                                                  |
+| Source evidence       | `platform.core.execute_esql` | copy `ad_rca_source_evidence` / `ad_search_log_category_examples`         |
+| Job config            | `ml.ad_get_job_info`         | `operation=get_datafeed_config`                                           |
 
 ### Protocol
 
-High level: `ml.ad_get_job_info` (`operation=get_available_metadata`) → `ad_query_anomaly_timeline` (via `platform.core.execute_esql`) → rank with `ad_rca_multi_job_entities` (`min_job_count=2`) → `ad_rca_detector_fingerprint` → drill with `ad_query_anomaly_records` + `ad_query_influencers` (low `min_score=25`) → profile with `ad_rca_entity_profile` → order with `ad_rca_correlation` → confirm with `ad_rca_source_evidence`.
+High level: `ml.ad_get_job_info` (`operation=get_available_metadata`) → `ad_query_anomaly_timeline` (via `ml.query_anomalies`) → rank with `ad_rca_multi_job_entities` (`min_job_count=2`) → `ad_rca_detector_fingerprint` → drill with `ad_query_anomaly_records` + `ad_query_influencers` (low `min_score=25`) → profile with `ad_rca_entity_profile` → order with `ad_rca_correlation` → confirm with `ad_rca_source_evidence` via `platform.core.execute_esql`.
 
 When `by_field_name == "mlcategory"`, compare with `ad_get_categories` + `ad_search_log_category_examples` (baseline vs. anomaly window).
 
@@ -122,24 +144,24 @@ These live under `anomaly_score_explanation.*` in ES|QL. **Do not** `KEEP anomal
 
 | Purpose                | Tool                         | ES|QL template / operation                             |
 | ---------------------- | ---------------------------- | ------------------------------------------------------ |
-| Records + explanation  | `platform.core.execute_esql` | `ad_query_anomaly_records` (exact `job_id_pattern`)    |
-| Renormalization drift  | `platform.core.execute_esql` | `ad_rca_score_reassessment`                            |
-| Model bounds (visual)  | `platform.core.execute_esql` | `ad_get_model_plot`                                    |
-| Forecast overlap       | `platform.core.execute_esql` | `ad_get_forecast_results`                              |
-| Influencer attribution | `platform.core.execute_esql` | `ad_query_influencers`                                 |
+| Records + explanation  | `ml.query_anomalies` | `ad_query_anomaly_records` (exact `job_id_pattern`)    |
+| Renormalization drift  | `ml.query_anomalies` | `ad_rca_score_reassessment`                            |
+| Model bounds (visual)  | `ml.query_anomalies` | `ad_get_model_plot`                                    |
+| Forecast overlap       | `ml.query_anomalies` | `ad_get_forecast_results`                              |
+| Influencer attribution | `ml.query_anomalies` | `ad_query_influencers`                                 |
 | Config & detector      | `ml.ad_get_job_info`            | `operation=get_jobs` — `bucket_span`, function, `use_null` |
 | Model snapshots        | `ml.ad_get_job_info`            | `operation=get_model_snapshots`                        |
-| Categorization         | `platform.core.execute_esql` | `ad_get_categories`                                    |
+| Categorization         | `ml.query_anomalies` | `ad_get_categories`                                    |
 
 ### Decision tree — score troubleshooting
 
 1. `ml.ad_get_job_info` (`operation=get_jobs`) — ≥3 weeks data for weekly seasonality?
-2. `platform.core.execute_esql` (`ad_ts_model_memory_health`) — `memory_status` healthy?
-3. `platform.core.execute_esql` (`ad_ts_delayed_data_annotations`) — no incomplete buckets?
-4. `platform.core.execute_esql` (`ad_query_anomaly_records`) — compare `record_score` vs `initial_record_score`.
+2. `ml.query_anomalies` (`ad_ts_model_memory_health`) — `memory_status` healthy?
+3. `ml.query_anomalies` (`ad_ts_delayed_data_annotations`) — no incomplete buckets?
+4. `ml.query_anomalies` (`ad_query_anomaly_records`) — compare `record_score` vs `initial_record_score`.
 5. `ml.ad_get_job_info` (`operation=get_jobs`) — `bucket_span`, detector function, `custom_rules`, `use_null`.
-6. `platform.core.execute_esql` (`ad_get_model_plot`) — wide bounds → `high_variance_penalty`.
-7. `platform.core.execute_esql` (`ad_rca_score_reassessment`) — renormalization drift across history.
+6. `ml.query_anomalies` (`ad_get_model_plot`) — wide bounds → `high_variance_penalty`.
+7. `ml.query_anomalies` (`ad_rca_score_reassessment`) — renormalization drift across history.
 8. Explain `anomaly_score_explanation.*` factors from the record query (flattened ES|QL columns only).
 
 See `esql-score-queries` referenced content for model_plot, forecast, and score reassessment templates.
@@ -204,8 +226,8 @@ Recover a corrupted period without resetting the whole model: `ml.ad_manage_job_
 | ---------------------- | ------------------------------------------------------------------------------------------------------------- |
 | Permissions / metadata | `ml.ad_get_job_info` (`validate_permissions`, `get_available_metadata`, `get_jobs`)                              |
 | Job + datafeed state   | `ml.ad_get_job_info` (`get_jobs`, `get_datafeed_config`, `get_job_messages`)                                     |
-| Timing / missing docs  | `platform.core.execute_esql` (`ad_ts_delayed_data_annotations`, `ad_ts_bucket_event_gaps`, `ad_ts_ingest_latency_estimate`) + `ml.ad_update_job_config` (`update_query_delay`, `update_delayed_data_check`) |
-| Memory                 | `platform.core.execute_esql` (`ad_ts_model_memory_health`) + `ml.ad_create_job` (`estimate_memory`) + `ml.ad_update_job_config` (`update_memory_limit`) |
+| Timing / missing docs  | `ml.query_anomalies` (`ad_ts_delayed_data_annotations`, `ad_ts_bucket_event_gaps`) + `platform.core.execute_esql` (`ad_ts_ingest_latency_estimate` on source indices) + `ml.ad_update_job_config` (`update_query_delay`, `update_delayed_data_check`) |
+| Memory                 | `ml.query_anomalies` (`ad_ts_model_memory_health`) + `ml.ad_create_job` (`estimate_memory`) + `ml.ad_update_job_config` (`update_memory_limit`) |
 | Model / lifecycle      | `ml.ad_get_job_info` (`get_model_snapshots`) + `ml.ad_manage_job_state` (`open_job`, `close_job`, `start_datafeed`, `stop_datafeed`, `revert_model_snapshot`) |
 | Calendars              | `ml.ad_get_job_info` (`get_calendar_events`) + `ml.ad_update_job_config` (`create_calendar_event`)                  |
 
@@ -285,7 +307,7 @@ PUT  _ml/anomaly_detectors/<job_id>          # 1. Define job        (ml.ad_creat
 PUT  _ml/datafeeds/datafeed-<job_id>         # 2. Define datafeed   (ml.ad_create_job operation=create_datafeed)
 POST _ml/anomaly_detectors/<job_id>/_open    # 3a. Open job         (ml.ad_manage_job_state operation=open_job)
 POST _ml/datafeeds/datafeed-<job_id>/_start  # 3b. Start datafeed   (ml.ad_manage_job_state operation=start_datafeed)
-GET  _ml/anomaly_detectors/<job_id>/results  # 4. Read results      (platform.core.execute_esql ad_query_anomaly_records)
+GET  _ml/anomaly_detectors/<job_id>/results  # 4. Read results      (ml.query_anomalies ad_query_anomaly_records)
 ```
 
 ### Process
@@ -348,11 +370,11 @@ For **batch analysis on historical data**, pass `start` and `end` to `ml.ad_mana
 
 ## Examples
 
-**RCA:** "Something caused a spike in our error rate at 2pm — what broke?" → Investigate → `ml.ad_get_job_info` (`operation=get_available_metadata`) → `ad_query_anomaly_timeline` (via `platform.core.execute_esql`) → `ad_rca_multi_job_entities` → RCA report.
+**RCA:** "Something caused a spike in our error rate at 2pm — what broke?" → Investigate → `ml.ad_get_job_info` (`operation=get_available_metadata`) → `ad_query_anomaly_timeline` (via `ml.query_anomalies`) → `ad_rca_multi_job_entities` → RCA report.
 
-**Score drop:** "My anomaly score went from 90 to 55 — did the model change?" → Explain → `ad_rca_score_reassessment` via `platform.core.execute_esql` for drift → explain renormalization.
+**Score drop:** "My anomaly score went from 90 to 55 — did the model change?" → Explain → `ad_rca_score_reassessment` via `ml.query_anomalies` for drift → explain renormalization.
 
-**Memory limit:** "Job status shows `hard_limit` and results look wrong." → Troubleshoot → `ad_ts_model_memory_health` via `platform.core.execute_esql` → `ml.ad_create_job` (`estimate_memory`) → `ml.ad_update_job_config` (`update_memory_limit`) — lifecycle: stop datafeed → close → update → open → start.
+**Memory limit:** "Job status shows `hard_limit` and results look wrong." → Troubleshoot → `ad_ts_model_memory_health` via `ml.query_anomalies` → `ml.ad_create_job` (`estimate_memory`) → `ml.ad_update_job_config` (`update_memory_limit`) — lifecycle: stop datafeed → close → update → open → start.
 
 **New job:** "Detect unusual error rates per host on nginx access logs." → Manage → `high_count` detector with `by_field_name: "host.keyword"` → validate → present → deploy.
 

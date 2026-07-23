@@ -11,6 +11,7 @@ import {
   AD_CREATE_JOB_TOOL_ID,
   AD_MANAGE_JOB_STATE_TOOL_ID,
   AD_UPDATE_JOB_CONFIG_TOOL_ID,
+  QUERY_ANOMALIES_TOOL_ID,
 } from '../../tools/tool_ids';
 
 describe('createAnomalyDetectionSkill', () => {
@@ -41,10 +42,12 @@ describe('createAnomalyDetectionSkill', () => {
     expect(skill.content).toBeTruthy();
   });
 
-  it('registers exactly 5 registry tools including platform.core.execute_esql', async () => {
+  it('registers registry tools including ml.query_anomalies for .ml* ES|QL', async () => {
     const skill = createAnomalyDetectionSkill();
     const toolIds = await skill.getRegistryTools?.();
-    expect(toolIds).toHaveLength(5);
+    expect(toolIds).toHaveLength(6);
+    expect(toolIds).toContain(QUERY_ANOMALIES_TOOL_ID);
+    // Retained for source-data ES|QL (RCA evidence / ingest latency) as the current user.
     expect(toolIds).toContain('platform.core.execute_esql');
     expect(toolIds).toContain(AD_GET_JOB_INFO_TOOL_ID);
     expect(toolIds).toContain(AD_CREATE_JOB_TOOL_ID);

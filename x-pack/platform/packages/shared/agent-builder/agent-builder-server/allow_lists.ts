@@ -51,6 +51,7 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.ml}.ad_create_job`,
   `${internalNamespaces.ml}.ad_manage_job_state`,
   `${internalNamespaces.ml}.ad_update_job_config`,
+  `${internalNamespaces.ml}.query_anomalies`,
 
   // Security Solution
   `${internalNamespaces.security}.entity_risk_score`,

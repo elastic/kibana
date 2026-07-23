@@ -11,6 +11,7 @@ import {
   AD_CREATE_JOB_TOOL_ID,
   AD_MANAGE_JOB_STATE_TOOL_ID,
   AD_UPDATE_JOB_CONFIG_TOOL_ID,
+  QUERY_ANOMALIES_TOOL_ID,
 } from '../../tools/tool_ids';
 import skillContent from './skill.md.text';
 import description from './description.text';
@@ -36,6 +37,8 @@ export const createAnomalyDetectionSkill = () =>
       { name: 'score-reference', relativePath: './references', content: scoreReference },
     ],
     getRegistryTools: () => [
+      QUERY_ANOMALIES_TOOL_ID,
+      // Source-data ES|QL (RCA evidence, ingest latency) still needs the current-user tool.
       'platform.core.execute_esql',
       AD_GET_JOB_INFO_TOOL_ID,
       AD_CREATE_JOB_TOOL_ID,
