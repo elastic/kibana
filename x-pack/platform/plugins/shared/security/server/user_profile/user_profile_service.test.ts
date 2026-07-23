@@ -448,6 +448,48 @@ describe('UserProfileService', () => {
         });
       });
 
+      it('returns the activated profile directly without re-fetching when no dataPath is requested', async () => {
+        const mockedProfile =
+          userProfileMock.createWithSecurity() as unknown as SecurityActivateUserProfileResponse;
+
+        mockStartParams.clusterClient.asInternalUser.security.activateUserProfile.mockResolvedValue(
+          mockedProfile
+        );
+
+        const startContract = userProfileService.start(mockStartParams);
+        // No dataPath requested, so the activated profile is returned directly without a getUserProfile re-fetch.
+        await expect(startContract.getCurrent({ request: mockBasicRequest })).resolves
+          .toMatchInlineSnapshot(`
+          Object {
+            "data": Object {},
+            "enabled": true,
+            "labels": Object {},
+            "uid": "some-profile-uid",
+            "user": Object {
+              "email": "some@email",
+              "full_name": undefined,
+              "realm_domain": "some-realm-domain",
+              "realm_name": "some-realm",
+              "roles": Array [],
+              "username": "some-username",
+            },
+          }
+        `);
+
+        expect(
+          mockStartParams.clusterClient.asInternalUser.security.activateUserProfile
+        ).toHaveBeenCalledTimes(1);
+        expect(mockStartParams.session.get).not.toHaveBeenCalled();
+        expect(
+          mockStartParams.clusterClient.asInternalUser.security.getUserProfile
+        ).not.toHaveBeenCalled();
+
+        expect(securityTelemetry.recordGetCurrentProfileInvocation).toHaveBeenLastCalledWith({
+          outcome: 'success',
+          profileActivationRequired: true,
+        });
+      });
+
       it('returns `null` when es-security-runas-user header is present', async () => {
         (securityTelemetry.recordGetCurrentProfileInvocation as jest.Mock).mockClear();
 
@@ -1097,17 +1139,19 @@ describe('UserProfileService', () => {
       });
 
       it('returns the profile id via activation without fetching the full profile', async () => {
-        const mockedProfile =
-          userProfileMock.createWithSecurity() as unknown as SecurityActivateUserProfileResponse;
+        const mockedProfile = userProfileMock.createWithSecurity({
+          uid: 'basic-activated-uid',
+        }) as unknown as SecurityActivateUserProfileResponse;
 
         mockStartParams.clusterClient.asInternalUser.security.activateUserProfile.mockResolvedValue(
           mockedProfile
         );
 
         const startContract = userProfileService.start(mockStartParams);
+        // Basic auth resolves the id from the activated profile's uid; it must not trigger a getUserProfile re-fetch.
         await expect(
           startContract.getCurrentProfileId({ request: mockBasicRequest })
-        ).resolves.toBe(mockedProfile.uid);
+        ).resolves.toBe('basic-activated-uid');
 
         expect(
           mockStartParams.clusterClient.asInternalUser.security.activateUserProfile

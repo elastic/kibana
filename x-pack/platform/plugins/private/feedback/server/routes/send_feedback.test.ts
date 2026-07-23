@@ -88,6 +88,46 @@ describe('registerSendFeedbackRoute', () => {
     });
   });
 
+  it('reports user_id as undefined when no current profile is resolved', async () => {
+    registerSendFeedbackRoute(router, mockAnalytics);
+
+    const [, handler] = router.post.mock.calls[0];
+
+    const coreContext = coreMock.createRequestHandlerContext();
+    coreContext.userProfile.getCurrentProfileId.mockResolvedValue(null);
+
+    const mockContext = {
+      core: Promise.resolve(coreContext),
+    };
+
+    const mockRequest = httpServerMock.createKibanaRequest({
+      body: {
+        app_id: 'enterpriseSearchContent:connectors',
+        solution: 'search',
+        allow_email_contact: false,
+        url: '/app/elasticsearch/content/connectors',
+      },
+    });
+
+    const mockResponse = httpServerMock.createResponseFactory();
+
+    await handler(mockContext, mockRequest, mockResponse);
+
+    expect(mockAnalytics.reportEvent).toHaveBeenCalledTimes(1);
+    expect(mockAnalytics.reportEvent).toHaveBeenCalledWith(FEEDBACK_SUBMITTED_EVENT_TYPE, {
+      app_id: 'enterpriseSearchContent:connectors',
+      solution: 'search',
+      allow_email_contact: false,
+      url: '/app/elasticsearch/content/connectors',
+      user_id: undefined,
+      source: 'kibana',
+    });
+
+    expect(mockResponse.ok).toHaveBeenCalledWith({
+      body: { success: true },
+    });
+  });
+
   it('should return error response on analytics error', async () => {
     registerSendFeedbackRoute(router, mockAnalytics);
 
