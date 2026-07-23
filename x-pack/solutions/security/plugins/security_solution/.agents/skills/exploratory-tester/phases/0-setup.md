@@ -4,6 +4,18 @@
 
 ---
 
+## Common Mistakes
+
+Pre-session errors that make findings low-value before exploration even starts:
+
+- **No `expected:` on flows** — findings become vague and unactionable; the agent has no oracle to cite
+- **Running as `admin`** — permission bugs are invisible to admins; use `t2_analyst` or `platform_engineer`
+- **No `Specs:` when testing a PR** — without specs the agent falls back to UX heuristics and misses acceptance criteria
+- **Forgetting `Session-timeout:`** — long or many-flow sessions hit the 90 min default cap unexpectedly; set ≈ flows × 12 min
+- **Using this for API-only, load, or accessibility testing** — scope is functional UI testing only; browser reproduction is required for every finding
+
+---
+
 ## Prerequisites
 
 Before starting, verify these are in place:

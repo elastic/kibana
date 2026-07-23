@@ -29,6 +29,20 @@ For each flow in `config.json` in order, run the session cap check then the Expl
 
 ---
 
+## Red Flags
+
+| Thought | Reality |
+|---|---|
+| "This area looks fine — I didn't find anything" | Did you attempt every checklist step? Did step 3 use the noise index? |
+| "All my test data is well-formed ECS" | Real customer data has non-ECS types. Use the noise index for data-view flows. |
+| "Let me check the source code / test file selectors" | **Hard stop.** The implementation may be wrong. Navigate from what's visible in the browser. |
+| "I don't know how this feature works" | Check specs → official docs → UI → test files for user flows. |
+| "This error is expected" | Document it. User decides — then add to `knowledge/<area-slug>.md`. |
+| "I called the API and it works" | UI and API hit different code paths. Browser reproduction required. |
+| "I didn't find anything — I should flag this observation just in case" | If you completed the checklist and nothing confirmed, report it as clean. That is signal, not failure. |
+
+---
+
 ## Parallel mode
 
 **When to use parallel mode:**
