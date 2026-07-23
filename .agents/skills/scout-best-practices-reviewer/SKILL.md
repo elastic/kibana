@@ -43,7 +43,7 @@ Work through these numbered checks **in order, one at a time** — before the ge
 | **Why** | Each custom config set boots its **own dedicated local Kibana** (extra CI cost, **local-only — unsupported on Cloud/QA**), so it must earn its keep. Runtime-toggleable settings need no custom server — set them via `apiServices.core.settings(...)`, which works everywhere. |
 | **Detect** | PR touches a config set: files under `src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/<name>/**` (esp. `serverArgs` / `ScoutServerConfig`), a new `test/scout_<name>/` dir, or new `--serverConfigSet <name>` usage. |
 | **Verify** | Per added setting, is a dedicated server truly required?<br>• **Runtime-toggleable** (no config set): `--feature_flags.overrides.*`, `--uiSettings.overrides.*` / `globalOverrides.*`, runtime `experimentalFeatures` → move to `apiServices.core.settings(...)` in `global.setup.ts` (parallel) or `beforeAll`/`afterAll` (sequential).<br>• **Boot-required** (justifies it): read in plugin `setup` (route registration), `--xpack.<plugin>.enabled`, ES/server args (`esServerlessOptions`), auth/IdP wiring. When unsure, ask — don't assert. |
-| **Flag when** | Additions are only runtime-toggleable (drop the set); a set mixes both (move the runtime subset out); a new set lacks justification (docs require asking AppEx QA first — check that happened). |
+| **Flag when** | Additions are only runtime-toggleable (drop the set); a set mixes both (move the runtime subset out); a new set lacks justification. |
 | **Refs** | `docs/extend/testing/feature-flags.md` (runtime-vs-custom-server table), `docs/extend/testing/global-setup-hook.md` |
 
 ### Check 2 — Scout spec lives where selective testing will run it
