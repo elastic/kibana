@@ -9,11 +9,8 @@ import type { CreateActivateAlertActionBody } from '@kbn/alerting-v2-schemas';
 import { ALERT_EPISODE_ACTION_TYPE } from '@kbn/alerting-v2-schemas';
 import { ALERTING_V2_ERROR_CODES } from '../../lib/errors/error_codes';
 import { getCannotActivateEpisodeMessage } from '../../lib/errors/alert_error_messages';
-import {
-  buildAlertOas,
-  invalidResponseExample,
-  type AlertingOasOperationObject,
-} from '../oas_utils';
+import { invalidResponseExample, type AlertingOasOperationObject } from '../oas_utils';
+import { buildAlertOas } from './oas_utils';
 import {
   ALERT_EVENT_NOT_FOUND_RESPONSE,
   SAMPLE_EPISODE_ID,

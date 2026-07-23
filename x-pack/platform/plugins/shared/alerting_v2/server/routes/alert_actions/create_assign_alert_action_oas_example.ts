@@ -6,7 +6,8 @@
  */
 
 import type { CreateAssignAlertActionBody } from '@kbn/alerting-v2-schemas';
-import { buildAlertOas, type AlertingOasOperationObject } from '../oas_utils';
+import type { AlertingOasOperationObject } from '../oas_utils';
+import { buildAlertOas } from './oas_utils';
 import {
   ALERT_EVENT_NOT_FOUND_RESPONSE,
   INVALID_ALERT_ACTION_PARAMS_RESPONSE,
