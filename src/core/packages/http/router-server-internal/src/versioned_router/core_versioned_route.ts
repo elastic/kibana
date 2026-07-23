@@ -44,7 +44,7 @@ import { prepareVersionedRouteValidation, unwrapVersionedResponseBodyValidation 
 import type { RequestLike } from './route_version_utils';
 import type { RequestHandlerEnhanced, Router } from '../router';
 import { kibanaResponseFactory as responseFactory } from '../response';
-import { logRequestValidationError, validateHapiRequest } from '../route';
+import { handleRequestValidationFailure, validateHapiRequest } from '../route';
 import { RouteValidator } from '../validator';
 import { getWarningHeaderMessageFromRouteDeprecation } from '../get_warning_header_message';
 
@@ -220,32 +220,16 @@ export class CoreVersionedRoute implements VersionedRoute {
       if (!onRequestValidationError) {
         return injectVersionHeader(version, error);
       }
-      const customResponse = await onRequestValidationError(
-        failure.error,
-        failure.request,
-        responseFactory
-      );
-      if (this.env.mode.dev) {
-        const validationErrorMessage = validateOnRequestValidationErrorResponse(
-          validation?.response,
-          customResponse
-        );
-        if (validationErrorMessage) {
-          return injectVersionHeader(
-            version,
-            responseFactory.custom({
-              statusCode: 500,
-              body: `Failed output validation: ${validationErrorMessage}`,
-            })
-          );
-        }
-      }
-      logRequestValidationError(
-        this.log,
+      const customResponse = await handleRequestValidationFailure({
+        failure,
         hapiRequest,
-        customResponse.status,
-        failure.error.rawError
-      );
+        onRequestValidationError,
+        responseFactory,
+        log: this.log,
+        validateResponse: this.env.mode.dev
+          ? (response) => validateOnRequestValidationErrorResponse(validation?.response, response)
+          : undefined,
+      });
       return injectVersionHeader(version, customResponse);
     }
 

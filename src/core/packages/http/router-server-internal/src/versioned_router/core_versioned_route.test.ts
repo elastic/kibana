@@ -438,6 +438,109 @@ describe('Versioned route', () => {
     expect(onRequestValidationErrorV2).toHaveBeenCalledTimes(1);
   });
 
+  it('validates malformed mapped request validation responses in dev mode', async () => {
+    let handler: InternalRouteHandler;
+    versionedRouter = CoreVersionedRouter.from({
+      router,
+      log: loggingSystemMock.createLogger(),
+      env: devEnv,
+    });
+    (router.registerRoute as jest.Mock).mockImplementation((opts) => (handler = opts.handler));
+    versionedRouter
+      .post({
+        path: '/test',
+        access: 'internal',
+        security: { authz: { requiredPrivileges: ['foo'] } },
+      })
+      .addVersion(
+        {
+          version: '1',
+          validate: {
+            request: { body: schema.object({ foo: schema.number() }) },
+            response: {
+              422: { body: () => schema.object({ message: schema.string() }) },
+            },
+            onRequestValidationError: (_error, _request, response) =>
+              response.custom({ statusCode: 422, body: { message: 1 } }),
+          },
+        },
+        handlerFn
+      );
+
+    const response = await handler!(createRequest({ version: '1', body: {} }));
+
+    expect(response.status).toBe(500);
+    expect(response.payload).toMatch(
+      'Failed output validation: [response body.message]: expected value of type [string] but got [number]'
+    );
+    expect(response.options.headers).toMatchObject({ [ELASTIC_HTTP_VERSION_HEADER]: '1' });
+  });
+
+  it('rejects undocumented mapped request validation response statuses in dev mode', async () => {
+    let handler: InternalRouteHandler;
+    versionedRouter = CoreVersionedRouter.from({
+      router,
+      log: loggingSystemMock.createLogger(),
+      env: devEnv,
+    });
+    (router.registerRoute as jest.Mock).mockImplementation((opts) => (handler = opts.handler));
+    versionedRouter
+      .post({
+        path: '/test',
+        access: 'internal',
+        security: { authz: { requiredPrivileges: ['foo'] } },
+      })
+      .addVersion(
+        {
+          version: '1',
+          validate: {
+            request: { body: schema.object({ foo: schema.number() }) },
+            response: { 422: { description: 'Validation failed' } },
+            onRequestValidationError: (_error, _request, response) =>
+              response.custom({ statusCode: 409, body: { message: 'Invalid request' } }),
+          },
+        },
+        handlerFn
+      );
+
+    const response = await handler!(createRequest({ version: '1', body: {} }));
+
+    expect(response.status).toBe(500);
+    expect(response.payload).toMatch(
+      "Failed output validation: No response validation defined for status code [409] in 'validate.response'."
+    );
+    expect(response.options.headers).toMatchObject({ [ELASTIC_HTTP_VERSION_HEADER]: '1' });
+  });
+
+  it('does not instantiate mapped request validation response schemas outside dev mode', async () => {
+    let handler: InternalRouteHandler;
+    const body = jest.fn(() => schema.object({ message: schema.string() }));
+    (router.registerRoute as jest.Mock).mockImplementation((opts) => (handler = opts.handler));
+    versionedRouter
+      .post({
+        path: '/test',
+        access: 'internal',
+        security: { authz: { requiredPrivileges: ['foo'] } },
+      })
+      .addVersion(
+        {
+          version: '1',
+          validate: {
+            request: { body: schema.object({ foo: schema.number() }) },
+            response: { 422: { body } },
+            onRequestValidationError: (_error, _request, response) =>
+              response.custom({ statusCode: 422, body: { message: 1 } }),
+          },
+        },
+        handlerFn
+      );
+
+    const response = await handler!(createRequest({ version: '1', body: {} }));
+
+    expect(response).toMatchObject({ status: 422, payload: { message: 1 } });
+    expect(body).not.toHaveBeenCalled();
+  });
+
   it('preserves default request validation behavior for versions without onRequestValidationError', async () => {
     let handler: InternalRouteHandler;
     (router.registerRoute as jest.Mock).mockImplementation((opts) => (handler = opts.handler));

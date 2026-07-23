@@ -200,6 +200,8 @@ export interface RouteValidatorFullConfigResponse {
 
 /**
  * Normalized request validation error passed to {@link OnRequestValidationError}.
+ *
+ * `rawError` is validator-specific diagnostic data. Do not reflect it to clients.
  * @public
  */
 export interface RequestValidationError {
@@ -210,6 +212,9 @@ export interface RequestValidationError {
 
 /**
  * Maps a request validation failure to a Kibana response.
+ *
+ * The callback receives usable request metadata, but `request.params`, `request.query`, and
+ * `request.body` are fallback, unvalidated values after a validation failure.
  * @public
  */
 export type RequestValidationErrorHandler = (

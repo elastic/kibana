@@ -164,6 +164,56 @@ describe('handle', () => {
     });
   });
 
+  it('awaits async request validation error mappers', async () => {
+    const onRequestValidationError = jest.fn(async (_error, _request, res) => {
+      await Promise.resolve();
+      return res.custom({ statusCode: 422, body: { error: 'validation_failed' } });
+    });
+
+    const response = await handle(createRequest({ query: { foo: 'bar' } }), {
+      router,
+      handler,
+      log,
+      method: 'get',
+      route: {
+        path: '/test',
+        validate: {
+          request: { query: schema.object({ foo: schema.number() }) },
+          response: { 422: { description: 'Validation failed' } },
+          onRequestValidationError,
+        },
+      },
+      routeSchemas: RouteValidator.from({ query: schema.object({ foo: schema.number() }) }),
+    });
+
+    expect(response).toMatchObject({ status: 422, payload: { error: 'validation_failed' } });
+    expect(onRequestValidationError).toHaveBeenCalledTimes(1);
+  });
+
+  it('propagates errors thrown by request validation error mappers', async () => {
+    await expect(
+      handle(createRequest({ query: { foo: 'bar' } }), {
+        router,
+        handler,
+        log,
+        method: 'get',
+        route: {
+          path: '/test',
+          validate: {
+            request: { query: schema.object({ foo: schema.number() }) },
+            response: { 422: { description: 'Validation failed' } },
+            onRequestValidationError: () => {
+              throw new Error('Request validation mapper failed');
+            },
+          },
+        },
+        routeSchemas: RouteValidator.from({ query: schema.object({ foo: schema.number() }) }),
+      })
+    ).rejects.toThrow('Request validation mapper failed');
+
+    expect(log.error).not.toHaveBeenCalled();
+  });
+
   it('preserves zod request validation failures as rawError', async () => {
     let rawError: unknown;
     const response = await handle(createRequest({ body: { foo: 1 } }), {

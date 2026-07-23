@@ -23,6 +23,7 @@ import type {
   OnRequestValidationError,
   RequestValidationError,
   RouteValidatorFullConfigResponse,
+  KibanaResponseFactory,
   RouteAccess,
   RouteConfigOptions,
   PostValidationMetadata,
@@ -206,27 +207,19 @@ export const handle = async (
     if (!onRequestValidationError) {
       return error;
     }
-    const customResponse = await onRequestValidationError(
-      failure.error,
-      failure.request,
-      kibanaResponseFactory
-    );
-    if (isDevMode) {
-      const validationErrorMessage = validateOnRequestValidationErrorResponse(
-        responseValidation,
-        customResponse
-      );
-      if (validationErrorMessage) {
-        return kibanaResponseFactory.custom({
-          statusCode: 500,
-          body: `Failed output validation: ${validationErrorMessage}`,
-        });
-      }
-    }
+    const customResponse = await handleRequestValidationFailure({
+      failure,
+      hapiRequest: request,
+      onRequestValidationError,
+      responseFactory: kibanaResponseFactory,
+      log,
+      validateResponse: isDevMode
+        ? (response) => validateOnRequestValidationErrorResponse(responseValidation, response)
+        : undefined,
+    });
     if (isPublicAccessApiRoute(route.options)) {
       injectVersionHeader(BASE_PUBLIC_VERSION, customResponse);
     }
-    logRequestValidationError(log, request, customResponse.status, failure.error.rawError);
     return customResponse;
   }
   const kibanaResponse = await handler(kibanaRequest, kibanaResponseFactory);
@@ -261,6 +254,37 @@ function normalizeRequestValidationError(rawError: unknown): RequestValidationEr
     source: 'unknown',
     rawError,
   };
+}
+
+export async function handleRequestValidationFailure({
+  failure,
+  hapiRequest,
+  onRequestValidationError,
+  responseFactory,
+  log,
+  validateResponse,
+}: {
+  failure: ValidationFailure;
+  hapiRequest: Request;
+  onRequestValidationError: OnRequestValidationError;
+  responseFactory: KibanaResponseFactory;
+  log: Logger;
+  validateResponse?: (response: IKibanaResponse) => string | undefined;
+}): Promise<IKibanaResponse> {
+  const customResponse = await onRequestValidationError(
+    failure.error,
+    failure.request,
+    responseFactory
+  );
+  const validationErrorMessage = validateResponse?.(customResponse);
+  if (validationErrorMessage) {
+    return responseFactory.custom({
+      statusCode: 500,
+      body: `Failed output validation: ${validationErrorMessage}`,
+    });
+  }
+  logRequestValidationError(log, hapiRequest, customResponse.status, failure.error.rawError);
+  return customResponse;
 }
 
 export function logRequestValidationError(
