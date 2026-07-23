@@ -112,6 +112,28 @@ export const SET_CUSTOM_FIELD_STEP_DOCUMENTATION_DETAILS = i18n.translate(
   }
 );
 
+export const SET_EXTENDED_FIELDS_STEP_LABEL = i18n.translate(
+  'xpack.cases.workflowSteps.setExtendedFields.label',
+  {
+    defaultMessage: 'Cases - Set extended fields',
+  }
+);
+
+export const SET_EXTENDED_FIELDS_STEP_DESCRIPTION = i18n.translate(
+  'xpack.cases.workflowSteps.setExtendedFields.description',
+  {
+    defaultMessage: 'Sets one or more extended field values on an existing case',
+  }
+);
+
+export const SET_EXTENDED_FIELDS_STEP_DOCUMENTATION_DETAILS = i18n.translate(
+  'xpack.cases.workflowSteps.setExtendedFields.documentation.details',
+  {
+    defaultMessage:
+      'This step writes one or more extended fields on a case in a single request. Provide `fields` as a map of storage key to value (for example `priority_as_keyword: "high"`). Storage keys follow the `<name>_as_<type>` convention; discover the keys a case accepts with `GET /api/cases/{case_id}/fields`. Values are strings in canonical storage format — for multi-value controls such as `checkbox_group` or `user_picker`, pass a JSON-encoded array string. Provided fields are merged into the case\'s existing extended fields; unlisted fields are left unchanged. Server-side validation rejects unknown keys and values that do not match the field definition.',
+  }
+);
+
 export const ADD_COMMENT_STEP_LABEL = i18n.translate('xpack.cases.workflowSteps.addComment.label', {
   defaultMessage: 'Cases - Add comment',
 });

@@ -84,13 +84,17 @@ const manageCasesSchema = z.object({
 });
 
 export const manageCasesTool = (
-  getCasesClientFn: GetCasesClientFn
+  getCasesClientFn: GetCasesClientFn,
+  isTemplatesEnabled: boolean
 ): BuiltinToolDefinition<typeof manageCasesSchema> => {
   const createStepDef = createCaseStepDefinition(getCasesClientFn);
   const updateCaseStepDef = updateCaseStepDefinition(getCasesClientFn);
   const updateCasesStepDef = updateCasesStepDefinition(getCasesClientFn);
   const deleteCasesStepDef = deleteCasesStepDefinition(getCasesClientFn);
-  const createFromTemplateStepDef = createCaseFromTemplateStepDefinition(getCasesClientFn);
+  const createFromTemplateStepDef = createCaseFromTemplateStepDefinition(
+    getCasesClientFn,
+    isTemplatesEnabled
+  );
   const assignStepDef = assignCaseStepDefinition(getCasesClientFn);
   const unassignStepDef = unassignCaseStepDefinition(getCasesClientFn);
   const addTagsStepDef = addTagsStepDefinition(getCasesClientFn);
