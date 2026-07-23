@@ -160,7 +160,7 @@ export const AutoOpsPromotionCallout = ({
         style={{
           position: 'absolute',
           top: euiTheme.size.s,
-          right: euiTheme.size.s,
+          insetInlineEnd: euiTheme.size.s,
         }}
         color="text"
         aria-label={i18n.translate('management.autoOpsPromotionCallout.dismissAriaLabel', {
