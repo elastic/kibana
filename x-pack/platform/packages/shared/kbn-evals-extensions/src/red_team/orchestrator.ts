@@ -42,7 +42,7 @@ import { classifySeverity, type NamedEvaluationResult } from './severity';
 import { extractResponseText } from './output_text';
 import { isAttackPass } from './pass_check';
 import { createAttackSuccessJudge } from './judge/attack_success';
-import { createRefusalQualityJudge } from './judge/refusal_quality';
+import { createRefusalQualityJudge, REFUSAL_QUALITY_EVALUATOR_NAME } from './judge/refusal_quality';
 
 export interface RedTeamOrchestratorOptions {
   config: RedTeamConfig;
@@ -57,21 +57,35 @@ interface RedTeamOrchestrator {
   run: (task: ExperimentTask<Example, TaskOutput>) => Promise<RedTeamReport>;
 }
 
-const buildDefaultEvaluators = (
+/**
+ * Builds the set of evaluators that can be constructed for this run, keyed by
+ * the id that modules reference in their `defaultEvaluators`. An evaluator is
+ * only present when its prerequisites are satisfied — an inference client for
+ * the LLM judges, and the relevant `targetContext` config for the tool/scope
+ * CODE evaluators. A module that asks for an unavailable evaluator is surfaced
+ * as a warning in {@link selectModuleEvaluators} rather than silently dropped.
+ */
+const buildEvaluatorRegistry = (
   config: RedTeamConfig,
   inferenceClient?: BoundInferenceClient,
   log?: ToolingLog
-): Evaluator[] => {
-  const evaluators: Evaluator[] = [createPromptLeakDetectionEvaluator({ refusalAware: true })];
+): Map<string, Evaluator> => {
+  const registry = new Map<string, Evaluator>();
+
+  registry.set('prompt-leak-detection', createPromptLeakDetectionEvaluator({ refusalAware: true }));
 
   if (inferenceClient && log) {
-    evaluators.push(createAttackSuccessJudge({ inferenceClient, log }));
-    evaluators.push(createRefusalQualityJudge({ inferenceClient, log }));
+    registry.set('attack-success-judge', createAttackSuccessJudge({ inferenceClient, log }));
+    registry.set(
+      REFUSAL_QUALITY_EVALUATOR_NAME,
+      createRefusalQualityJudge({ inferenceClient, log })
+    );
   }
 
   const { targetContext } = config;
   if (targetContext?.availableTools && targetContext.availableTools.length > 0) {
-    evaluators.push(
+    registry.set(
+      'tool-poisoning',
       createToolPoisoningEvaluator({
         allowedTools: targetContext.availableTools,
         // Agent-builder task output exposes invocations under `steps` (type
@@ -86,7 +100,8 @@ const buildDefaultEvaluators = (
   }
 
   if (targetContext?.authorizedScopes && targetContext.authorizedScopes.length > 0) {
-    evaluators.push(
+    registry.set(
+      'scope-violation',
       createScopeViolationEvaluator({
         allowedPatterns: targetContext.authorizedScopes.map((scope) => new RegExp(scope, 'i')),
         refusalAware: true,
@@ -94,7 +109,53 @@ const buildDefaultEvaluators = (
     );
   }
 
-  return evaluators;
+  return registry;
+};
+
+/**
+ * Resolves the evaluators for a single module by honoring the module's declared
+ * `defaultEvaluators` contract. Each declared id is looked up in the registry;
+ * a declared-but-unavailable evaluator (e.g. `privilege_escalation` wants
+ * `tool-poisoning` but the suite provides no `targetContext.availableTools`) is
+ * surfaced as a warning instead of being silently dropped, so a missing defense
+ * signal is visible rather than masked behind whatever generic evaluators happen
+ * to be enabled.
+ *
+ * The informational `refusal-quality` judge is declared by no module and is
+ * excluded from pass gating (see {@link isAttackPass}); it is always appended
+ * when available so refusal style is graded whenever a judge is configured.
+ * Caller-supplied `additionalEvaluators` are appended last.
+ */
+const selectModuleEvaluators = (
+  module: AttackModule,
+  registry: Map<string, Evaluator>,
+  additionalEvaluators: Evaluator[],
+  log: ToolingLog
+): Evaluator[] => {
+  const selected: Evaluator[] = [];
+  const seen = new Set<string>();
+
+  for (const id of module.defaultEvaluators) {
+    const evaluator = registry.get(id);
+    if (!evaluator) {
+      log.warning(
+        `Module "${module.name}" declares evaluator "${id}" but it is not available for this run ` +
+          `(missing inference client or targetContext config); its defense signal will be absent.`
+      );
+      continue;
+    }
+    if (!seen.has(id)) {
+      selected.push(evaluator);
+      seen.add(id);
+    }
+  }
+
+  const refusalQuality = registry.get(REFUSAL_QUALITY_EVALUATOR_NAME);
+  if (refusalQuality && !seen.has(REFUSAL_QUALITY_EVALUATOR_NAME)) {
+    selected.push(refusalQuality);
+  }
+
+  return [...selected, ...additionalEvaluators];
 };
 
 const resolveModules = (config: RedTeamConfig): AttackModule[] => {
@@ -259,8 +320,7 @@ export const createRedTeamOrchestrator = (
     log,
   } = options;
 
-  const defaultEvaluators = buildDefaultEvaluators(config, inferenceClient, log);
-  const allEvaluators = [...defaultEvaluators, ...additionalEvaluators];
+  const evaluatorRegistry = buildEvaluatorRegistry(config, inferenceClient, log);
   const guardrailRules = mergeGuardrailRules(DEFAULT_GUARDRAIL_RULES, config.guardrails?.rules);
 
   const moduleConfig: AttackModuleConfig = {
@@ -282,6 +342,16 @@ export const createRedTeamOrchestrator = (
 
         const examples = await module.generate(moduleConfig);
         log.info(`  Generated ${examples.length} adversarial examples`);
+
+        // Honor the module's declared evaluator contract instead of applying one
+        // global set to every module (a declared-but-unavailable evaluator is
+        // warned about in selectModuleEvaluators, not silently dropped).
+        const moduleEvaluators = selectModuleEvaluators(
+          module,
+          evaluatorRegistry,
+          additionalEvaluators,
+          log
+        );
 
         const results: AttackResult[] = [];
         const bySeverity: Record<Severity, number> = { critical: 0, high: 0, medium: 0, low: 0 };
@@ -316,7 +386,7 @@ export const createRedTeamOrchestrator = (
 
           const [experiment] = await executorClient.runExperiment(
             { datasets: [dataset], task, metadata: baseMetadata },
-            allEvaluators
+            moduleEvaluators
           );
 
           const counts = processExperimentResults({
@@ -415,7 +485,7 @@ export const createRedTeamOrchestrator = (
 
                 const [finalExperiment] = await executorClient.runExperiment(
                   { datasets: [finalDataset], task: cachedTask, metadata: baseMetadata },
-                  allEvaluators
+                  moduleEvaluators
                 );
 
                 const counts = processExperimentResults({
@@ -451,7 +521,7 @@ export const createRedTeamOrchestrator = (
 
               const [finalExperiment] = await executorClient.runExperiment(
                 { datasets: [finalDataset], task: cachedTask, metadata: baseMetadata },
-                allEvaluators
+                moduleEvaluators
               );
 
               const counts = processExperimentResults({
@@ -542,7 +612,12 @@ export const createRedTeamOrchestrator = (
       difficulty: moduleConfig.difficulty,
       templateOnly: moduleConfig.templateOnly ?? false,
       modules: moduleReports,
-      overallPassRate: totalAll > 0 ? (passAll / totalAll) * 100 : 100,
+      // Fail-closed: a run that produced zero attacks (e.g. a `--module`/`--difficulty`
+      // combination with no templates, or every module short-circuiting) has NOT
+      // demonstrated any adversarial coverage, so it must not report a clean 100% and
+      // pass the CI gate silently. This is the aggregate analog of the empty-gating-set
+      // fail-closed rule in `isAttackPass`.
+      overallPassRate: totalAll > 0 ? (passAll / totalAll) * 100 : 0,
     };
   };
 

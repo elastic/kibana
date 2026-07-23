@@ -168,13 +168,16 @@ describe('RedTeamOrchestrator', () => {
     const log = createMockLog();
 
     const orchestrator = createRedTeamOrchestrator({
-      config: { ...defaultConfig, count: 2 },
+      config: { ...defaultConfig, count: 2, modules: ['prompt_injection'] },
       executorClient,
       log: log as any,
     });
 
     const report = await orchestrator.run(jest.fn().mockResolvedValue('Clean response'));
-    // With clean responses, all should pass
+    // With clean responses, all should pass. prompt_injection declares the
+    // always-available `prompt-leak-detection` CODE evaluator, so it scores even
+    // without an inference client (unlike judge-only modules, which fail closed
+    // when no judge is configured).
     expect(report.overallPassRate).toBe(100);
   });
 
@@ -475,7 +478,9 @@ describe('RedTeamOrchestrator', () => {
         count: 1,
         difficulty: 'basic',
         templateOnly: true,
-        modules: ['prompt_injection'],
+        // privilege_escalation is the module that declares `tool-poisoning`;
+        // with availableTools set it becomes constructible and is applied.
+        modules: ['privilege_escalation'],
         targetContext: { availableTools: ['allowed_tool'] },
       },
       executorClient,
@@ -664,6 +669,100 @@ describe('RedTeamOrchestrator', () => {
       expect(receivedIds.length).toBeGreaterThan(1);
       expect(receivedIds[0]).toBeUndefined();
       expect(receivedIds[1]).toBe('conv-1');
+    });
+  });
+
+  describe('fail-closed pass rate', () => {
+    it('reports 0% (not 100%) when a run produces zero attacks', async () => {
+      const executorClient = createMockExecutorClient();
+      const log = createMockLog();
+
+      // An empty module list runs no experiments, so totalAll === 0. A clean
+      // 100% here would let a suite with no adversarial coverage pass CI silently.
+      const orchestrator = createRedTeamOrchestrator({
+        config: { count: 1, difficulty: 'basic', templateOnly: true, modules: [] },
+        executorClient,
+        log: log as any,
+      });
+
+      const report = await orchestrator.run(jest.fn().mockResolvedValue('Clean response'));
+
+      expect(report.modules).toHaveLength(0);
+      expect(report.overallPassRate).toBe(0);
+      expect(executorClient.runExperiment).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('per-module evaluator selection', () => {
+    it('warns and omits an evaluator a module declares but the run cannot construct', async () => {
+      const executorClient = createMockExecutorClient();
+      const log = createMockLog();
+
+      // privilege_escalation declares ['tool-poisoning', 'scope-violation',
+      // 'attack-success-judge']. With no targetContext and no inferenceClient,
+      // none of those are constructible — the module must warn for each rather
+      // than silently fall back to a generic set.
+      const orchestrator = createRedTeamOrchestrator({
+        config: {
+          count: 1,
+          difficulty: 'basic',
+          templateOnly: true,
+          modules: ['privilege_escalation'],
+        },
+        executorClient,
+        log: log as any,
+      });
+
+      await orchestrator.run(jest.fn().mockResolvedValue('Clean response'));
+
+      const warnings = (log.warning as jest.Mock).mock.calls.map((c) => c[0] as string);
+      expect(warnings.some((w) => w.includes('tool-poisoning'))).toBe(true);
+      expect(warnings.some((w) => w.includes('scope-violation'))).toBe(true);
+      expect(warnings.some((w) => w.includes('attack-success-judge'))).toBe(true);
+      expect(warnings.every((w) => w.includes('privilege_escalation'))).toBe(true);
+
+      // The declared-but-unavailable evaluators must not be passed to the run.
+      const passedEvaluators = (
+        executorClient.runExperiment.mock.calls[0][1] as Array<{
+          name: string;
+        }>
+      ).map((e) => e.name);
+      expect(passedEvaluators).not.toContain('tool-poisoning');
+      expect(passedEvaluators).not.toContain('scope-violation');
+    });
+
+    it('constructs a module-declared evaluator when its prerequisites are met', async () => {
+      const executorClient = createMockExecutorClient();
+      const log = createMockLog();
+
+      // With targetContext.availableTools set, tool-poisoning becomes
+      // constructible, so privilege_escalation gets its declared detector and
+      // no warning is emitted for it.
+      const orchestrator = createRedTeamOrchestrator({
+        config: {
+          count: 1,
+          difficulty: 'basic',
+          templateOnly: true,
+          modules: ['privilege_escalation'],
+          targetContext: { availableTools: ['SomeTool'], authorizedScopes: ['^allowed'] },
+        },
+        executorClient,
+        log: log as any,
+      });
+
+      await orchestrator.run(jest.fn().mockResolvedValue('Clean response'));
+
+      const passedEvaluators = (
+        executorClient.runExperiment.mock.calls[0][1] as Array<{
+          name: string;
+        }>
+      ).map((e) => e.name);
+      expect(passedEvaluators).toContain('tool-poisoning');
+      expect(passedEvaluators).toContain('scope-violation');
+
+      const warnings = (log.warning as jest.Mock).mock.calls.map((c) => c[0] as string);
+      expect(warnings.some((w) => w.includes('tool-poisoning'))).toBe(false);
+      expect(warnings.some((w) => w.includes('scope-violation'))).toBe(false);
     });
   });
 });
