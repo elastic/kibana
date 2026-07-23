@@ -34,8 +34,7 @@ export function projectMetricSeriesColumns(query: ComposerQuery): ComposerQuery 
   const bucketKey = esql.str(METRIC_SERIES_BUCKET_FIELD);
   const valueKey = esql.str(METRIC_SERIES_VALUE_FIELD);
 
-  return query
-    .pipe`EVAL metric_value = TO_INTEGER(FIELD_EXTRACT(${dataCol}, ${valueKey}))`
+  return query.pipe`EVAL metric_value = TO_INTEGER(FIELD_EXTRACT(${dataCol}, ${valueKey}))`
     .pipe`EVAL bucket = TO_DATETIME(TO_LONG(FIELD_EXTRACT(${dataCol}, ${bucketKey})))`;
 }
 
