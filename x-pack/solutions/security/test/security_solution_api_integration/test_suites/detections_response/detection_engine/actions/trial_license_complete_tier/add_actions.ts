@@ -16,6 +16,7 @@ import {
   deleteAllAlerts,
   getRuleForAlertTesting,
   createRule,
+  createAlertsIndex,
 } from '@kbn/detections-response-ftr-services';
 import { waitForCases } from '../../../utils/cases';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
@@ -47,6 +48,10 @@ export default ({ getService }: FtrProviderContext) => {
   describe('@serverless @serverlessQA @ess add_actions', () => {
     describe('adding actions', () => {
       before(async () => {
+        // Install the alerts-as-data alias before loading the alerts archive, otherwise the
+        // archive can create `.alerts-security.alerts-default` as a concrete index and the rule
+        // then fails to write alerts with `invalid_alias_name_exception`.
+        await createAlertsIndex(supertest, log);
         await esArchiver.load(auditbeatPath);
         await esArchiver.load(
           'x-pack/solutions/security/test/fixtures/es_archives/security_solution/alerts/8.8.0',
