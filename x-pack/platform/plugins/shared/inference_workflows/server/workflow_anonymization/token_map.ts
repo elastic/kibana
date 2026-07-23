@@ -17,7 +17,6 @@ const replaceStringValues = (text: string, replacements: Record<string, string>)
   }
   return result;
 };
-
 export const restoreTokens = (value: string, tokenMap: TokenMap): string =>
   replaceStringValues(
     value,
