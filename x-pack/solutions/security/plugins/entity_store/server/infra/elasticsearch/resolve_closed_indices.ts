@@ -132,11 +132,10 @@ export const resolveClosedIndexAdjustments = async (
     const negations = [...closedStandaloneNegations, ...dataStreamNegations];
 
     if (negations.length > 0 || openBackingIndices.length > 0) {
+      const preview = negations.slice(0, 20).join(', ');
+      const overflow = negations.length > 20 ? ` … and ${negations.length - 20} more` : '';
       logger.warn(
-        `Detected closed backing indices. Excluding data streams/indices: ${negations.join(', ')}` +
-          (openBackingIndices.length > 0
-            ? `; adding open backing indices back: ${openBackingIndices.join(', ')}`
-            : '')
+        `Detected closed backing indices. Excluding data streams/indices: ${preview}${overflow}`
       );
     }
 
