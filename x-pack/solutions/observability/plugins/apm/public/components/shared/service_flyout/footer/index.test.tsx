@@ -225,4 +225,39 @@ describe('ServiceFlyoutFooter', () => {
 
     expect(screen.getByTestId('serviceFlyoutActionsButton')).toBeDisabled();
   });
+
+  it('hides alerts and SLOs actions when capabilities disable them', () => {
+    setupAllHrefs();
+    mockUseServiceFlyoutContext.mockReturnValue({
+      deps: { core: mockCore, share: mockShare, lens: undefined, dataViews: undefined },
+      service: { name: 'opbeans-java' },
+      capabilities: {
+        loading: false,
+        error: undefined,
+        ingestionType: 'unprocessedOtel' as const,
+        header: { serviceNameLink: false, badges: false },
+        overview: { transactions: false, transactionTypeFilter: false, infraMetrics: false },
+        footer: { alerts: false, slos: false },
+      },
+      filters: {
+        environment: 'production',
+        setEnvironment: jest.fn(),
+        rangeFrom: 'now-15m',
+        rangeTo: 'now',
+        setRange: jest.fn(),
+        refreshToken: 0,
+        onRefresh: jest.fn(),
+        transactionType: 'request',
+        setTransactionType: jest.fn(),
+      },
+    });
+    renderFooter();
+    openActionsMenu();
+
+    expect(screen.queryByTestId('serviceFlyoutActionsMenuItem-openAlerts')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('serviceFlyoutActionsMenuItem-openSlos')).not.toBeInTheDocument();
+    expect(
+      screen.getByTestId('serviceFlyoutActionsMenuItem-openTracesInDiscover')
+    ).toBeInTheDocument();
+  });
 });

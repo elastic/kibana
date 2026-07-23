@@ -124,6 +124,35 @@ describe('ServiceFlyoutHeader', () => {
     expect(screen.getByTestId('serviceBadgesMock')).toBeInTheDocument();
   });
 
+  it('renders the title as plain text when serviceNameLink capability is disabled', () => {
+    mockUseServiceFlyoutContext.mockReturnValue({
+      deps: { core: mockCore, share: mockShare, lens: undefined, dataViews: undefined },
+      service: baseNodeData,
+      capabilities: {
+        loading: false,
+        error: undefined,
+        ingestionType: 'unprocessedOtel' as const,
+        header: { serviceNameLink: false, badges: false },
+        overview: { transactions: false, transactionTypeFilter: false, infraMetrics: false },
+        footer: { alerts: false, slos: false },
+      },
+      filters: {
+        environment: 'production',
+        setEnvironment: jest.fn(),
+        rangeFrom: 'now-15m',
+        rangeTo: 'now',
+        setRange: jest.fn(),
+        refreshToken: 0,
+        onRefresh: jest.fn(),
+      },
+    });
+    renderHeader();
+
+    expect(screen.queryByTestId('serviceFlyoutTitleLink')).not.toBeInTheDocument();
+    expect(screen.getByTestId('serviceFlyoutTitle')).toHaveTextContent(baseNodeData.name);
+    expect(screen.getByTestId('serviceBadgesMock')).toBeInTheDocument();
+  });
+
   it('renders a tab per definition and selects the active one', () => {
     renderHeader();
 

@@ -12,13 +12,18 @@ import React, { useMemo } from 'react';
 import { ActionsContextMenu, type ActionGroups } from '../../actions_context_menu';
 import { SERVICE_FLYOUT_EBT_ELEMENTS } from '../ebt_constants';
 import { useServiceFlyoutLinks } from '../hooks/use_service_flyout_links';
+import { useServiceFlyoutContext } from '../service_flyout_context';
 
 export function ServiceFlyoutFooter() {
+  const { capabilities } = useServiceFlyoutContext();
   const {
     alerts: alertsHref,
     slos: slosHref,
     discover: { traces: tracesDiscoverHref, logs: logsDiscoverHref },
   } = useServiceFlyoutLinks();
+
+  const showAlerts = Boolean(alertsHref && capabilities.footer?.alerts);
+  const showSlos = Boolean(slosHref && capabilities.footer?.slos);
 
   const actionGroups = useMemo(() => {
     const groups: ActionGroups = [];
@@ -59,7 +64,7 @@ export function ServiceFlyoutFooter() {
       });
     }
 
-    if (alertsHref) {
+    if (showAlerts) {
       groups.push({
         id: 'alerts',
         groupLabel: i18n.translate('xpack.apm.serviceFlyout.alertsActionsGroupLabel', {
@@ -81,7 +86,7 @@ export function ServiceFlyoutFooter() {
       });
     }
 
-    if (slosHref) {
+    if (showSlos) {
       groups.push({
         id: 'slos',
         groupLabel: i18n.translate('xpack.apm.serviceFlyout.sloActionsGroupLabel', {
@@ -104,7 +109,7 @@ export function ServiceFlyoutFooter() {
     }
 
     return groups;
-  }, [alertsHref, logsDiscoverHref, slosHref, tracesDiscoverHref]);
+  }, [logsDiscoverHref, showAlerts, alertsHref, showSlos, slosHref, tracesDiscoverHref]);
 
   return (
     <EuiFlyoutFooter>

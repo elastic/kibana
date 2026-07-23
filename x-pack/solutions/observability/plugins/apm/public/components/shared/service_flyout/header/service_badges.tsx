@@ -29,10 +29,12 @@ export function ServiceBadges() {
   const {
     deps: { core, share },
     service,
+    capabilities: flyoutCapabilities,
     filters: { environment, rangeFrom, rangeTo, transactionType },
   } = useServiceFlyoutContext();
   const { capabilities, navigateToUrl } = core.application;
   const canReadSlos = !!capabilities.slo?.read;
+  const showDynamicBadges = flyoutCapabilities.header?.badges ?? false;
 
   const { slos: slosHref } = useServiceFlyoutLinks();
 
@@ -55,7 +57,7 @@ export function ServiceBadges() {
           })}
         </EuiBadge>
       </EuiFlexItem>
-      {showAlertsBadge && (
+      {showDynamicBadges && showAlertsBadge && (
         <EuiFlexItem grow={false}>
           <AlertsBadge
             count={alertsCount}
@@ -80,7 +82,7 @@ export function ServiceBadges() {
           />
         </EuiFlexItem>
       )}
-      {canReadSlos && (
+      {showDynamicBadges && canReadSlos && (
         <EuiFlexItem grow={false}>
           <SloStatusBadge
             sloStatus={service.sloStatus ?? 'noSLOs'}
@@ -101,7 +103,7 @@ export function ServiceBadges() {
           />
         </EuiFlexItem>
       )}
-      {showAnomalyBadge && (
+      {showDynamicBadges && showAnomalyBadge && (
         <EuiFlexItem grow={false} data-test-subj="serviceFlyoutAnomaliesBadge">
           <AnomaliesBadge
             score={anomalyData.anomalyScore}

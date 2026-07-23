@@ -33,6 +33,7 @@ export function ServiceFlyoutQueryControls() {
   const {
     deps: { core },
     service,
+    capabilities,
     filters: {
       environment,
       rangeFrom,
@@ -44,6 +45,8 @@ export function ServiceFlyoutQueryControls() {
       setTransactionType,
     },
   } = useServiceFlyoutContext();
+
+  const showTransactionTypeFilter = capabilities.overview?.transactionTypeFilter ?? false;
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
@@ -119,39 +122,41 @@ export function ServiceFlyoutQueryControls() {
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiSpacer size="xs" />
-          <EuiFlexGrid columns={2} gutterSize="s">
-            <EuiFlexItem>
-              <EuiSelect
-                compressed
-                fullWidth
-                prepend={i18n.translate('xpack.apm.serviceFlyout.transactionTypeSelectLabel', {
-                  defaultMessage: 'Transaction type',
-                })}
-                aria-label={i18n.translate(
-                  'xpack.apm.serviceFlyout.transactionTypeSelectAriaLabel',
-                  {
-                    defaultMessage: 'Select transaction type',
+          <EuiFlexGrid columns={showTransactionTypeFilter ? 2 : 1} gutterSize="s">
+            {showTransactionTypeFilter && (
+              <EuiFlexItem>
+                <EuiSelect
+                  compressed
+                  fullWidth
+                  prepend={i18n.translate('xpack.apm.serviceFlyout.transactionTypeSelectLabel', {
+                    defaultMessage: 'Transaction type',
+                  })}
+                  aria-label={i18n.translate(
+                    'xpack.apm.serviceFlyout.transactionTypeSelectAriaLabel',
+                    {
+                      defaultMessage: 'Select transaction type',
+                    }
+                  )}
+                  data-test-subj="serviceFlyoutTransactionTypeSelect"
+                  disabled={isTransactionTypeDisabled}
+                  options={
+                    isTransactionTypeDisabled
+                      ? [
+                          {
+                            value: '',
+                            text: i18n.translate(
+                              'xpack.apm.serviceFlyout.noTransactionTypeOptionLabel',
+                              { defaultMessage: 'No transaction type available' }
+                            ),
+                          },
+                        ]
+                      : transactionTypeOptions
                   }
-                )}
-                data-test-subj="serviceFlyoutTransactionTypeSelect"
-                disabled={isTransactionTypeDisabled}
-                options={
-                  isTransactionTypeDisabled
-                    ? [
-                        {
-                          value: '',
-                          text: i18n.translate(
-                            'xpack.apm.serviceFlyout.noTransactionTypeOptionLabel',
-                            { defaultMessage: 'No transaction type available' }
-                          ),
-                        },
-                      ]
-                    : transactionTypeOptions
-                }
-                value={isTransactionTypeDisabled ? '' : selectedTransactionType ?? ''}
-                onChange={(event) => setTransactionType?.(event.currentTarget.value)}
-              />
-            </EuiFlexItem>
+                  value={isTransactionTypeDisabled ? '' : selectedTransactionType ?? ''}
+                  onChange={(event) => setTransactionType?.(event.currentTarget.value)}
+                />
+              </EuiFlexItem>
+            )}
             <EuiFlexItem>
               <EnvironmentSelect
                 compressed

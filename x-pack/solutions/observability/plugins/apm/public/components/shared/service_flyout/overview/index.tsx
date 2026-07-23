@@ -122,8 +122,10 @@ export function ServiceFlyoutOverview() {
   const {
     deps: { core, share },
     service,
+    capabilities,
     filters: { environment, rangeFrom, rangeTo, transactionType, refreshToken },
   } = useServiceFlyoutContext();
+
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
   const { indices } = useApmIndices({ http: core.http });
   const { hasSystemMetrics, isLoading: isSystemMetricsLoading } = useServiceHasSystemMetrics({
@@ -153,6 +155,20 @@ export function ServiceFlyoutOverview() {
     [environment, indices, latencyAggregationType, service.name, transactionType]
   );
 
+  if (capabilities.loading) {
+    return (
+      <div data-test-subj="serviceFlyoutOverviewSkeleton">
+        <EuiSkeletonTitle size="xs" />
+        <EuiSpacer size="s" />
+        <EuiSkeletonText lines={3} />
+        <EuiSpacer size="m" />
+        <EuiSkeletonTitle size="xs" />
+        <EuiSpacer size="s" />
+        <EuiSkeletonText lines={3} />
+      </div>
+    );
+  }
+
   return (
     <div data-test-subj="serviceFlyoutOverview">
       <ServiceFlyoutQueryControls />
@@ -168,39 +184,42 @@ export function ServiceFlyoutOverview() {
             refreshToken={refreshToken}
           />
         </EuiFlexItem>
-        {isSystemMetricsLoading ? (
-          <EuiFlexItem data-test-subj="serviceFlyoutSection-infrastructureMetricsSkeleton">
-            <EuiSkeletonTitle size="xs" />
-            <EuiSpacer size="s" />
-            <EuiSkeletonText lines={2} />
-          </EuiFlexItem>
-        ) : hasSystemMetrics ? (
+        {capabilities.overview?.infraMetrics &&
+          (isSystemMetricsLoading ? (
+            <EuiFlexItem data-test-subj="serviceFlyoutSection-infrastructureMetricsSkeleton">
+              <EuiSkeletonTitle size="xs" />
+              <EuiSpacer size="s" />
+              <EuiSkeletonText lines={2} />
+            </EuiFlexItem>
+          ) : hasSystemMetrics ? (
+            <EuiFlexItem>
+              <ServiceFlyoutChartsSection
+                id="infrastructureMetrics"
+                title={INFRASTRUCTURE_METRICS_SECTION_TITLE}
+                description={INFRASTRUCTURE_METRICS_SECTION_DESCRIPTION}
+                charts={infrastructureMetrics}
+                rangeFrom={rangeFrom}
+                rangeTo={rangeTo}
+                refreshToken={refreshToken}
+              />
+            </EuiFlexItem>
+          ) : null)}
+        {capabilities.overview?.transactions && (
           <EuiFlexItem>
-            <ServiceFlyoutChartsSection
-              id="infrastructureMetrics"
-              title={INFRASTRUCTURE_METRICS_SECTION_TITLE}
-              description={INFRASTRUCTURE_METRICS_SECTION_DESCRIPTION}
-              charts={infrastructureMetrics}
-              rangeFrom={rangeFrom}
-              rangeTo={rangeTo}
+            <ServiceFlyoutTransactionsSection
+              http={core.http}
+              notifications={core.notifications}
+              locators={share.url.locators}
+              serviceName={service.name}
+              environment={environment}
+              start={start}
+              end={end}
+              transactionType={transactionType ?? ''}
+              latencyAggregationType={latencyAggregationType}
               refreshToken={refreshToken}
             />
           </EuiFlexItem>
-        ) : null}
-        <EuiFlexItem>
-          <ServiceFlyoutTransactionsSection
-            http={core.http}
-            notifications={core.notifications}
-            locators={share.url.locators}
-            serviceName={service.name}
-            environment={environment}
-            start={start}
-            end={end}
-            transactionType={transactionType ?? ''}
-            latencyAggregationType={latencyAggregationType}
-            refreshToken={refreshToken}
-          />
-        </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     </div>
   );
