@@ -12,6 +12,7 @@ xpack.genAiSettings.showAiBreadcrumb: false
 xpack.genAiSettings.showSpacesIntegration: false
 xpack.genAiSettings.showAiAssistantsVisibilitySetting: false
 xpack.genAiSettings.showChatExperienceSetting: false
+xpack.searchInferenceEndpoints.ui.enabled: false
 xpack.aiops.ui.enabled: false
 xpack.apm.enabled: false
 xpack.cases.enabled: false
@@ -34,7 +35,6 @@ xpack.features.overrides:
   agentBuilderSml.hidden: true
   ### Context Engine is hidden when Agent Builder is disabled for this tier
   contextEngine.hidden: true
-
 
 xpack.fleet.internal.registry.excludePackages: [
     # Oblt integrations

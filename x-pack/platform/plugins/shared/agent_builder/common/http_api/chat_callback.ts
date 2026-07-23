@@ -7,7 +7,7 @@
 
 import type {
   ConversationOrigin,
-  ConversationOriginAuthor,
+  ConversationRoundAuthor,
   ConversationOriginType,
   ExecutionStatus,
   SerializedExecutionError,
@@ -15,9 +15,10 @@ import type {
 import type { ChatRequestBodyPayload, ChatResponse } from './chat';
 
 export interface ChatCallbackRequestBodyPayload extends ChatRequestBodyPayload {
+  execution_idempotency_key: string;
   origin?: ConversationOrigin & {
     type: ConversationOriginType;
-    author?: ConversationOriginAuthor;
+    author?: ConversationRoundAuthor;
   };
   callback: {
     url: string;
