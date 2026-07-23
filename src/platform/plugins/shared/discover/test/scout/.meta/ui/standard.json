@@ -1,5 +1,5 @@
 {
-  "sha1": "1ada770aa9236a776e17ddc47702667ca250850d",
+  "sha1": "9c37bf0d149ce6a9ac3e86a65af0ca41b21ceaae",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -14,6 +14,19 @@
         "file": "src/platform/plugins/shared/discover/test/scout/ui/tests/global.setup.ts",
         "line": 12,
         "column": 16
+      }
+    },
+    {
+      "id": "b872d4dcb31c133-5eb77bbe1f0516b",
+      "title": "Discover feature controls — index alias access blocks direct index access but allows access via a permitted alias",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/tests/feature_controls/discover_index_alias_access.spec.ts",
+        "line": 50,
+        "column": 9
       }
     },
     {
