@@ -351,6 +351,50 @@ describe('AgentlessConnectorsInfraService', () => {
       expect(policies.length).toBe(2);
     });
   });
+  describe('getAgentPolicyForConnectorId', () => {
+    const getMockPolicyFetchAllItems = (pages: PackagePolicy[][]) => {
+      return {
+        async *[Symbol.asyncIterator]() {
+          for (const page of pages) {
+            yield page;
+          }
+        },
+      } as AsyncIterable<PackagePolicy[]>;
+    };
+
+    test('queries agents with a kuery that also matches version-specific policy variants', async () => {
+      const packagePolicy = createPackagePolicyMock();
+      packagePolicy.policy_ids = ['this-is-agent-policy-id'];
+      packagePolicy.supports_agentless = true;
+      packagePolicy.inputs = [
+        {
+          type: 'connectors-py',
+          compiled_input: {
+            connector_id: 'connector-1',
+            connector_name: 'Connector One',
+            service_type: 'sharepoint_online',
+          },
+        } as PackagePolicyInput,
+      ];
+
+      packagePolicyService.fetchAllItems.mockResolvedValue(
+        getMockPolicyFetchAllItems([[packagePolicy]])
+      );
+      (agentService.asInternalUser.listAgents as jest.Mock).mockResolvedValue({
+        agents: [],
+        total: 0,
+      });
+
+      await service.getAgentPolicyForConnectorId({ connectorId: 'connector-1' });
+
+      expect(agentService.asInternalUser.listAgents as jest.Mock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          kuery:
+            '(fleet-agents.policy_id:"this-is-agent-policy-id" or fleet-agents.policy_id:this-is-agent-policy-id#*)',
+        })
+      );
+    });
+  });
   describe('deployConnector', () => {
     let agentlessPolicy: AgentlessPolicy;
     let sharepointOnlinePackagePolicy: PackagePolicy;

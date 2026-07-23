@@ -12,7 +12,7 @@ import type { ISessionService } from '@kbn/data-plugin/public';
 import { APP_UI_ID } from '../../../common';
 import type {
   SecurityAgentBuilderChrome,
-  EntityFlyoutRightPanel,
+  EntityAnalyticsFlyoutNavigationState,
 } from './entity_explore_navigation';
 import {
   navigateToEntityAnalyticsWithFlyoutInApp,
@@ -25,6 +25,12 @@ interface EntityAnalyticsAgentNavigationContextValue {
   chrome?: SecurityAgentBuilderChrome;
   openSidebarConversation?: () => void;
   searchSession?: ISessionService;
+  /**
+   * Dismisses the Agent Builder canvas overlay. Navigation helpers call this
+   * before updating the Entity Analytics URL so that the canvas doesn't sit
+   * on top of the page and hide the expandable flyout if it's open
+   */
+  closeCanvas?: () => void;
 }
 
 const EntityAnalyticsAgentNavigationContext =
@@ -32,10 +38,25 @@ const EntityAnalyticsAgentNavigationContext =
 
 export const EntityAnalyticsAgentNavigationProvider: React.FC<
   React.PropsWithChildren<EntityAnalyticsAgentNavigationContextValue>
-> = ({ application, agentBuilder, chrome, openSidebarConversation, searchSession, children }) => {
+> = ({
+  application,
+  agentBuilder,
+  chrome,
+  openSidebarConversation,
+  searchSession,
+  closeCanvas,
+  children,
+}) => {
   const value = useMemo<EntityAnalyticsAgentNavigationContextValue>(
-    () => ({ application, agentBuilder, chrome, openSidebarConversation, searchSession }),
-    [application, agentBuilder, chrome, openSidebarConversation, searchSession]
+    () => ({
+      application,
+      agentBuilder,
+      chrome,
+      openSidebarConversation,
+      searchSession,
+      closeCanvas,
+    }),
+    [application, agentBuilder, chrome, openSidebarConversation, searchSession, closeCanvas]
   );
   return (
     <EntityAnalyticsAgentNavigationContext.Provider value={value}>
@@ -46,20 +67,21 @@ export const EntityAnalyticsAgentNavigationProvider: React.FC<
 
 interface EntityAnalyticsAgentNavigation {
   canNavigate: boolean;
-  navigateWithFlyout: (flyout: { preview: unknown[]; right: EntityFlyoutRightPanel }) => void;
+  navigateWithFlyout: (flyout: EntityAnalyticsFlyoutNavigationState) => void;
   navigateToHome: (opts?: { watchlistId?: string; watchlistName?: string }) => void;
+  closeCanvas?: () => void;
 }
 
 export const useEntityAnalyticsAgentNavigation = (): EntityAnalyticsAgentNavigation => {
-  const { application, agentBuilder, chrome, openSidebarConversation, searchSession } = useContext(
-    EntityAnalyticsAgentNavigationContext
-  );
+  const { application, agentBuilder, chrome, openSidebarConversation, searchSession, closeCanvas } =
+    useContext(EntityAnalyticsAgentNavigationContext);
 
   const canNavigate = application != null;
 
   const navigateWithFlyout = useCallback(
-    (flyout: { preview: unknown[]; right: EntityFlyoutRightPanel }) => {
+    (flyout: EntityAnalyticsFlyoutNavigationState) => {
       if (!application) return;
+      closeCanvas?.();
       navigateToEntityAnalyticsWithFlyoutInApp({
         application,
         appId: APP_UI_ID,
@@ -70,12 +92,13 @@ export const useEntityAnalyticsAgentNavigation = (): EntityAnalyticsAgentNavigat
         searchSession,
       });
     },
-    [application, agentBuilder, chrome, openSidebarConversation, searchSession]
+    [application, agentBuilder, chrome, openSidebarConversation, searchSession, closeCanvas]
   );
 
   const navigateToHome = useCallback(
     (opts?: { watchlistId?: string; watchlistName?: string }) => {
       if (!application) return;
+      closeCanvas?.();
       navigateToEntityAnalyticsHomePageInApp({
         application,
         appId: APP_UI_ID,
@@ -86,8 +109,8 @@ export const useEntityAnalyticsAgentNavigation = (): EntityAnalyticsAgentNavigat
         ...opts,
       });
     },
-    [application, agentBuilder, chrome, openSidebarConversation, searchSession]
+    [application, agentBuilder, chrome, openSidebarConversation, searchSession, closeCanvas]
   );
 
-  return { canNavigate, navigateWithFlyout, navigateToHome };
+  return { canNavigate, navigateWithFlyout, navigateToHome, closeCanvas };
 };

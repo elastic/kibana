@@ -34,6 +34,7 @@ dependsOn:
   - '@kbn/es-query'
   - '@kbn/deeplinks-analytics'
   - '@kbn/licensing-types'
+  - '@kbn/esql-types'
 tags:
   - shared-browser
   - package

@@ -8,8 +8,23 @@
  */
 
 import type { Locator } from '@playwright/test';
-import { DataGrid, type ScoutPage } from '@kbn/scout';
+import type { ScoutPage } from '@kbn/scout';
+import { DataGrid } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
+
+interface MonacoJsonModel {
+  getValue(): string;
+}
+
+interface MonacoJsonEnvironment {
+  MonacoEnvironment?: {
+    monaco?: {
+      editor?: {
+        getModels: () => MonacoJsonModel[];
+      };
+    };
+  };
+}
 
 /**
  * Page object for the unified document viewer flyout that is opened from the
@@ -71,6 +86,30 @@ export class DocViewer {
     return flyout.locator('[data-test-subj*="docTableRowAction"]').count();
   }
 
+  async getJsonCodeEditorValue(): Promise<string> {
+    await this.page
+      .getByLabel('Read only JSON view of an elasticsearch document')
+      .waitFor({ state: 'visible' });
+
+    const raw = await this.page.evaluate(() => {
+      const monacoEnv = (window as unknown as MonacoJsonEnvironment).MonacoEnvironment;
+
+      const models = monacoEnv?.monaco?.editor?.getModels() ?? [];
+      return models.find((model) => model.getValue().trim().startsWith('{'))?.getValue();
+    });
+
+    if (!raw) {
+      throw new Error('DocViewer JSON editor model was not found');
+    }
+
+    return raw;
+  }
+
+  async readJsonFromCodeEditor<T extends Record<string, unknown>>(): Promise<T> {
+    const raw = await this.getJsonCodeEditorValue();
+    return JSON.parse(raw) as T;
+  }
+
   /**
    * Inside an open document-viewer flyout, type a field name into the search
    * input to filter the fields table
@@ -80,6 +119,88 @@ export class DocViewer {
     const searchInput = flyout.locator('[data-test-subj="unifiedDocViewerFieldsSearchInput"]');
     await searchInput.fill(name);
     await expect(searchInput).toHaveValue(name, { timeout: 5_000 });
+  }
+
+  async getFieldSearchValue(): Promise<string> {
+    return this.page.testSubj
+      .locator('docViewerFlyout')
+      .locator('[data-test-subj="unifiedDocViewerFieldsSearchInput"]')
+      .inputValue();
+  }
+
+  async getFieldNameCount(): Promise<number> {
+    const flyout = this.page.testSubj.locator('docViewerFlyout');
+    await flyout.waitFor({ state: 'visible' });
+    return flyout.locator('.kbnDocViewer__fieldName').count();
+  }
+
+  getFieldNames(): Locator {
+    return this.page.testSubj.locator('docViewerFlyout').locator('.kbnDocViewer__fieldName');
+  }
+
+  async openFieldTypeFilter() {
+    await this.page.testSubj.locator('unifiedDocViewerFieldsTableFieldTypeFilterToggle').click();
+    await this.page.testSubj
+      .locator('unifiedDocViewerFieldsTableFieldTypeFilterOptions')
+      .waitFor({ state: 'visible' });
+  }
+
+  async closeFieldTypeFilter() {
+    await this.page.testSubj.locator('unifiedDocViewerFieldsTableFieldTypeFilterToggle').click();
+    await this.page.testSubj
+      .locator('unifiedDocViewerFieldsTableFieldTypeFilterOptions')
+      .waitFor({ state: 'hidden' });
+  }
+
+  getFieldTypeFilterCountLocator(): Locator {
+    return this.page.testSubj.locator('unifiedDocViewerFieldsTableFieldTypeFilterToggle');
+  }
+
+  async expectFieldTypeFilterCount(count: string): Promise<void> {
+    await expect(this.getFieldTypeFilterCountLocator()).toHaveText(count);
+  }
+
+  async clickShowOnlySelectedFieldsSwitch(): Promise<void> {
+    await this.page.testSubj.locator('unifiedDocViewerShowOnlySelectedFieldsSwitch').click();
+  }
+
+  async expectShowOnlySelectedFields(checked: boolean): Promise<void> {
+    await expect(
+      this.page.testSubj.locator('unifiedDocViewerShowOnlySelectedFieldsSwitch')
+    ).toHaveAttribute('aria-checked', checked ? 'true' : 'false');
+  }
+
+  async isSwitchChecked(testSubj: string): Promise<boolean> {
+    return (await this.page.testSubj.locator(testSubj).getAttribute('aria-checked')) === 'true';
+  }
+
+  async isFieldPinned(fieldName: string): Promise<boolean> {
+    return this.page
+      .locator(
+        `[data-test-subj="unifiedDocViewer_pinControl_${fieldName}"]:not(.kbnDocViewer__fieldsGrid__pinAction)`
+      )
+      .waitFor({ state: 'attached', timeout: 1_000 })
+      .then(() => true)
+      .catch(() => false);
+  }
+
+  async togglePinAction(fieldName: string) {
+    const pinControl = this.page.testSubj.locator(`unifiedDocViewer_pinControl_${fieldName}`);
+    const wasPinned = await this.isFieldPinned(fieldName);
+    await pinControl.hover();
+    await this.page.testSubj
+      .locator(`unifiedDocViewer_pinControlButton_${fieldName}`)
+      .waitFor({ state: 'visible' });
+    await this.page.testSubj.locator(`unifiedDocViewer_pinControlButton_${fieldName}`).click();
+    await this.page
+      .locator(
+        `[data-test-subj="unifiedDocViewer_pinControl_${fieldName}"]${
+          wasPinned
+            ? '.kbnDocViewer__fieldsGrid__pinAction'
+            : ':not(.kbnDocViewer__fieldsGrid__pinAction)'
+        }`
+      )
+      .waitFor({ state: 'attached' });
   }
 
   /**
@@ -142,5 +263,11 @@ export class DocViewer {
       .locator('docViewerFlyout')
       .getByLabel('View surrounding documents')
       .click();
+  }
+
+  async openSingleDocument(rowIndex: number) {
+    await this.openAndWaitForFlyout({ rowIndex });
+    await this.page.testSubj.locator('docViewerFlyout').getByLabel('View single document').click();
+    await this.page.testSubj.locator('doc-hit').waitFor({ state: 'visible' });
   }
 }

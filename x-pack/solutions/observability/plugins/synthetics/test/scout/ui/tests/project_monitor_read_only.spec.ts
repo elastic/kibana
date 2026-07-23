@@ -44,7 +44,9 @@ test.describe('ProjectMonitorReadOnly', { tag: tags.stateful.classic }, () => {
 
     await test.step('verify read-only state', async () => {
       await pageObjects.syntheticsApp.navigateToEditMonitor(monitorName);
-      await expect(page.getByText('read-only')).toBeVisible();
+      await expect(
+        page.locator('.euiCallOutHeader__title').filter({ hasText: 'read-only' })
+      ).toBeVisible();
       monitorId = new URL(page.url()).pathname.split('/').at(-1) || '';
       originalConfig = (await syntheticsServices.getMonitor(monitorId)) as Record<string, unknown>;
       expect(originalConfig).not.toBeNull();

@@ -56,18 +56,13 @@ spaceTest.describe(
           await expect(inspector.viewChooser).toBeVisible();
         });
 
-        await spaceTest.step('switch to Requests view and verify statistics', async () => {
-          await inspector.switchToView('Requests');
-          await inspector.requests.statisticsTab.click();
-          await expect(inspector.requests.timestamp).toBeVisible();
-        });
-
-        await spaceTest.step('view request details', async () => {
+        await spaceTest.step('switch to Requests view and verify request details', async () => {
+          await inspector.openInspectorView('Requests');
           await inspector.requests.requestTab.click();
           await expect(inspector.requests.codeViewer).toBeVisible();
         });
 
-        await spaceTest.step('view response details', async () => {
+        await spaceTest.step('verify response details', async () => {
           await inspector.requests.responseTab.click();
           await expect(inspector.requests.codeViewer).toBeVisible();
         });

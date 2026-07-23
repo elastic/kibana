@@ -9,7 +9,7 @@ import type { Conversation } from '@kbn/agent-builder-common';
 import {
   ConversationAccessControlMode,
   ConversationRoundStatus,
-  ConversationSourceType,
+  ConversationOriginType,
   ToolOrigin,
 } from '@kbn/agent-builder-common';
 import {
@@ -491,18 +491,39 @@ describe('conversation model converters', () => {
       });
     });
 
-    it('deserializes first-class source', () => {
+    it('deserializes first-class origin', () => {
       const serialized = documentBase();
-      serialized._source!.source = {
-        type: ConversationSourceType.Slack,
+      serialized._source!.origin = {
         external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
       };
 
       const deserialized = fromEs(serialized);
 
-      expect(deserialized.source).toEqual({
-        type: 'slack',
+      expect(deserialized.origin).toEqual({
         external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
+      });
+    });
+
+    it('deserializes round origin and author', () => {
+      const serialized = documentBase();
+      serialized._source!.conversation_rounds[0].author = {
+        id: 'U123',
+        full_name: 'Jane Doe',
+        username: 'jane',
+      };
+      serialized._source!.conversation_rounds[0].origin = {
+        type: ConversationOriginType.Slack,
+      };
+
+      const deserialized = fromEs(serialized);
+
+      expect(deserialized.rounds[0].origin).toEqual({
+        type: 'slack',
+      });
+      expect(deserialized.rounds[0].author).toEqual({
+        id: 'U123',
+        full_name: 'Jane Doe',
+        username: 'jane',
       });
     });
   });
@@ -692,18 +713,39 @@ describe('conversation model converters', () => {
       });
     });
 
-    it('serializes first-class source', () => {
+    it('serializes first-class origin', () => {
       const conversation = conversationBase();
-      conversation.source = {
-        type: ConversationSourceType.Slack,
+      conversation.origin = {
         external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
       };
 
       const serialized = toEs(conversation, 'space');
 
-      expect(serialized.source).toEqual({
-        type: 'slack',
+      expect(serialized.origin).toEqual({
         external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
+      });
+    });
+
+    it('serializes round origin and author', () => {
+      const conversation = conversationBase();
+      conversation.rounds[0].author = {
+        id: 'U123',
+        full_name: 'Jane Doe',
+        username: 'jane',
+      };
+      conversation.rounds[0].origin = {
+        type: ConversationOriginType.Slack,
+      };
+
+      const serialized = toEs(conversation, 'space');
+
+      expect(serialized.conversation_rounds[0].origin).toEqual({
+        type: 'slack',
+      });
+      expect(serialized.conversation_rounds[0].author).toEqual({
+        id: 'U123',
+        full_name: 'Jane Doe',
+        username: 'jane',
       });
     });
   });
@@ -785,13 +827,12 @@ describe('conversation model converters', () => {
       });
     });
 
-    it('serializes first-class source when creating a conversation', () => {
+    it('serializes first-class origin when creating a conversation', () => {
       const conversation = {
         agent_id: 'agent_id',
         title: 'conv_title',
         rounds: [],
-        source: {
-          type: ConversationSourceType.Slack,
+        origin: {
           external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
         },
       };
@@ -803,8 +844,7 @@ describe('conversation model converters', () => {
         creationDate: new Date(creationDate),
       });
 
-      expect(serialized.source).toEqual({
-        type: 'slack',
+      expect(serialized.origin).toEqual({
         external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
       });
     });

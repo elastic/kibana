@@ -6,25 +6,33 @@
  */
 
 import type {
-  BulkOperationResponse,
+  BulkByIdsParams,
+  BulkByQueryParams,
+  BulkByQueryResult,
+  BulkResponse,
   CreateRuleData,
+  DryRunResponse,
   FindRulesResponse,
-  UpdateRuleData,
-  RuleResponse,
   FindRulesSortField,
+  RuleResponse,
+  UpdateRuleData,
 } from '@kbn/alerting-v2-schemas';
 
 /** Re-exported from the shared schemas package. */
 export type {
-  BulkOperationResponse,
+  BulkByIdsParams,
+  BulkByQueryParams,
+  BulkByQueryResult,
+  BulkResponse,
   CreateRuleData,
+  DryRunResponse,
   FindRulesResponse,
-  UpdateRuleData,
-  RuleResponse,
   FindRulesSortField,
+  RuleResponse,
+  UpdateRuleData,
 };
 
-export type BulkOperationError = BulkOperationResponse['errors'][number];
+export type BulkOperationError = BulkResponse['errors'][number];
 
 export interface CreateRuleParams {
   data: CreateRuleData;
@@ -39,10 +47,6 @@ export interface FindRulesParams {
   sortField?: FindRulesSortField;
   sortOrder?: 'asc' | 'desc';
 }
-
-export type BulkRulesParams =
-  | { ids: string[]; filter?: undefined; search?: undefined; match_all?: undefined }
-  | { filter?: string; search?: string; match_all?: true; ids?: undefined };
 
 export interface UpdateRuleParams {
   id: string;

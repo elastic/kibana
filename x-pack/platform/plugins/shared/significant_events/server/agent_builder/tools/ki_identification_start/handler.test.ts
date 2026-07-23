@@ -46,7 +46,7 @@ describe('startKiIdentificationToolHandler', () => {
     });
 
     expect(result).toEqual({
-      kibanaPath: '/app/streams/logs.nginx/management/significantEvents',
+      kibanaPath: '/app/streams/_discovery/knowledge_indicators?stream=logs.nginx',
     });
 
     expect(managementApi.getWorkflow).toHaveBeenCalledWith('system-streams-ki-onboarding', '*');

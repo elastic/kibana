@@ -12,6 +12,7 @@ import { getFlattenedObject } from '@kbn/std';
 import type {
   AgentPolicy,
   PackagePolicy,
+  PackagePolicyInput,
   OutputType,
   ValueOf,
   Output,
@@ -19,6 +20,7 @@ import type {
 } from '../types';
 import {
   FLEET_APM_PACKAGE,
+  FLEET_CONNECTORS_PACKAGE,
   FLEET_SERVER_PACKAGE,
   FLEET_SYNTHETICS_PACKAGE,
   outputType,
@@ -31,8 +33,29 @@ import {
 
 import { packagePolicyHasOtelInputs } from './otelcol_helpers';
 
-const agentPolicyHasOtelInputs = (agentPolicy: Partial<AgentPolicy>): boolean =>
+/**
+ * Minimal agent policy shape needed to evaluate output eligibility — just the package name
+ * and input types of each package policy, rather than a full (or partial) AgentPolicy.
+ */
+export interface AgentPolicyForOutputEligibility {
+  package_policies?: Array<{
+    package?: { name?: string };
+    inputs?: Array<Pick<PackagePolicyInput, 'type' | 'enabled'>>;
+  }>;
+}
+
+const agentPolicyHasOtelInputs = (agentPolicy: AgentPolicyForOutputEligibility): boolean =>
   (agentPolicy.package_policies ?? []).some((pp) => packagePolicyHasOtelInputs(pp.inputs));
+
+const agentPolicyUsesConnectors = (agentPolicy: AgentPolicyForOutputEligibility): boolean =>
+  (agentPolicy.package_policies ?? []).some((pp) => pp.package?.name === FLEET_CONNECTORS_PACKAGE);
+
+/**
+ * Whether an agent policy is eligible to route its data through the managed bulk output
+ * rather than direct ES: connector and OTel policies must stay on direct ES or managed OTLP.
+ */
+export const canUseManagedBulk = (agentPolicy: AgentPolicyForOutputEligibility): boolean =>
+  !agentPolicyUsesConnectors(agentPolicy) && !agentPolicyHasOtelInputs(agentPolicy);
 
 const sameClusterRestrictedPackages = [
   FLEET_SERVER_PACKAGE,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { parseSourceFields } from './parse_source_fields';
+import { MAX_SOURCE_FIELDS_PER_INDEX, parseSourceFields } from './parse_source_fields';
 
 describe('parseSourceFields', () => {
   it('should parse source fields with multiple index fields', () => {
@@ -28,6 +28,45 @@ describe('parseSourceFields', () => {
     expect(result).toEqual({
       'index-002': 'content',
     });
+  });
+
+  it('should deduplicate source fields for an index', () => {
+    const sourceFields = JSON.stringify({
+      'index-001': ['body', 'name', 'body', 'name', 'body'],
+    });
+    const result = parseSourceFields(sourceFields);
+    expect(result).toEqual({
+      'index-001': ['body', 'name'],
+    });
+  });
+
+  it('should collapse a duplicated single field to a string', () => {
+    const sourceFields = JSON.stringify({
+      'index-001': Array(1000).fill('description'),
+    });
+    const result = parseSourceFields(sourceFields);
+    expect(result).toEqual({
+      'index-001': 'description',
+    });
+  });
+
+  it('should throw an error if unique source fields exceed the maximum per index', () => {
+    const fields = Array.from({ length: MAX_SOURCE_FIELDS_PER_INDEX + 1 }, (_, i) => `field-${i}`);
+    const sourceFields = JSON.stringify({
+      'index-001': fields,
+    });
+    expect(() => parseSourceFields(sourceFields)).toThrowError(
+      `source_fields for index "index-001" exceeds the maximum of ${MAX_SOURCE_FIELDS_PER_INDEX} fields`
+    );
+  });
+
+  it('should throw an error if source fields contain non-string values', () => {
+    const sourceFields = JSON.stringify({
+      'index-001': ['body', 123],
+    });
+    expect(() => parseSourceFields(sourceFields)).toThrowError(
+      'source_fields for index "index-001" must contain non-empty strings'
+    );
   });
 
   it('should throw an error if source fields index value is empty', () => {

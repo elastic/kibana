@@ -13,23 +13,21 @@ import { DiscoveryClient } from './discovery_client';
 
 type StoredRow = Partial<Discovery> & { '@timestamp': string };
 
-const createDiscovery = (overrides: StoredRow): Discovery =>
+const createDiscovery = (overrides: StoredRow): Omit<Discovery, 'processed'> =>
   ({
     kind: 'discovery',
     discovery_id: overrides.discovery_id ?? 'discovery-1',
-    discovery_slug: overrides.discovery_slug ?? 'svc__rule',
-    rule_names: [],
+    event_id: overrides.event_id ?? 'svc__rule',
     stream_names: [],
     title: 'Test discovery',
     summary: 'Test summary',
-    root_cause: 'Test root cause',
-    criticality: 50,
+    severity: '40-medium',
     confidence: 0.8,
-    detections: [],
+    signals: [],
     ...overrides,
   } as Discovery);
 
-const sourceResponse = (docs: Discovery[]): ESQLSearchResponse =>
+const sourceResponse = (docs: Omit<Discovery, 'processed'>[]): ESQLSearchResponse =>
   ({
     columns: [{ name: '_source', type: 'object' }],
     values: docs.map((d) => [d]),
@@ -41,17 +39,17 @@ const countResponse = (total: number): ESQLSearchResponse =>
     values: [[total]],
   } as unknown as ESQLSearchResponse);
 
-// Mirrors the slug-keyed processed derivation: one row per processed discovery_slug.
-const processedResponse = (slugs: string[]): ESQLSearchResponse =>
+// Mirrors the event_id-keyed processed derivation: one row per processed event_id.
+const processedResponse = (eventIds: string[]): ESQLSearchResponse =>
   ({
-    columns: [{ name: 'discovery_slug', type: 'keyword' }],
-    values: slugs.map((s) => [s]),
+    columns: [{ name: 'event_id', type: 'keyword' }],
+    values: eventIds.map((s) => [s]),
   } as unknown as ESQLSearchResponse);
 
 interface MockResponses {
   // Latest discovery per group, as returned by the data query (already collapsed by groupBy).
-  discoveries: Discovery[];
-  // Slugs the processed derivation reports as processed.
+  discoveries: Omit<Discovery, 'processed'>[];
+  // Event IDs the processed derivation reports as processed.
   processedSlugs: string[];
 }
 
@@ -107,7 +105,14 @@ describe('DiscoveryClient', () => {
       await expect(client.bulkCreate([discovery])).resolves.toBe(response);
       expect(dataStreamClient.create).toHaveBeenCalledWith({
         space: 'default',
-        documents: [discovery],
+        documents: [
+          expect.objectContaining({
+            discovery_id: discovery.discovery_id,
+            event_id: discovery.event_id,
+            // Canonical discoveries retain sortable severity through the write boundary.
+            severity: '40-medium',
+          }),
+        ],
       });
     });
 
@@ -147,47 +152,23 @@ describe('DiscoveryClient', () => {
     });
   });
 
-  describe('findStateBySlug', () => {
-    it('returns the complete non-handled state history', async () => {
-      const state = createDiscovery({
-        '@timestamp': '2026-01-02T00:00:00.000Z',
-        discovery_slug: 'svc__rule',
-      });
-      const { client, query } = createClient({
-        discoveries: [state],
-        processedSlugs: [],
-      });
-
-      const result = await client.findStateBySlug('svc__rule');
-
-      expect(result.hits).toEqual([state]);
-      expect(query).toHaveBeenCalledTimes(1);
-      const request = query.mock.calls[0][0] as { query: string };
-      expect(request.query).toContain('kind != "handled"');
-      expect(request.query).toContain('SORT @timestamp ASC');
-      expect(request.query).not.toContain('LIMIT');
-    });
-  });
-
   describe('findLatestPaginated', () => {
-    it('collapses two discoveries sharing one slug (different ids) into a single hit', async () => {
-      // The data query already collapses by groupBy; with slug grouping only the
-      // latest discovery per slug is returned.
+    it('collapses two discoveries sharing one event_id (different ids) into a single hit', async () => {
       const latest = createDiscovery({
         '@timestamp': '2026-01-02T00:00:00.000Z',
         discovery_id: 'exec-2-svc__rule',
-        discovery_slug: 'svc__rule',
+        event_id: 'svc__rule',
       });
       const { client } = createClient({ discoveries: [latest], processedSlugs: [] });
 
       const result = await client.findLatestPaginated();
 
       expect(result.hits).toHaveLength(1);
-      expect(result.hits[0].discovery_slug).toBe('svc__rule');
+      expect(result.hits[0].event_id).toBe('svc__rule');
       expect(result.hits[0].kind).toBe('discovery');
     });
 
-    it('groups by discovery_slug, not discovery_id', async () => {
+    it('groups by event_id, not discovery_id', async () => {
       const { client, query } = createClient({
         discoveries: [createDiscovery({ '@timestamp': '2026-01-02T00:00:00.000Z' })],
         processedSlugs: [],
@@ -198,28 +179,28 @@ describe('DiscoveryClient', () => {
       const dataQuery = query.mock.calls
         .map((c) => (c[0] as { query: string }).query)
         .find((q) => !q.includes('STATS total') && !q.includes('unified_id'));
-      expect(dataQuery).toContain('discovery_slug');
+      expect(dataQuery).toContain('event_id');
       expect(dataQuery).not.toContain('BY discovery_id');
     });
 
-    it('keeps distinct slugs as separate hits', async () => {
+    it('keeps distinct event_ids as separate hits', async () => {
       const { client } = createClient({
         discoveries: [
-          createDiscovery({ '@timestamp': '2026-01-02T00:00:00.000Z', discovery_slug: 'svc__a' }),
-          createDiscovery({ '@timestamp': '2026-01-02T00:00:00.000Z', discovery_slug: 'svc__b' }),
+          createDiscovery({ '@timestamp': '2026-01-02T00:00:00.000Z', event_id: 'svc__a' }),
+          createDiscovery({ '@timestamp': '2026-01-02T00:00:00.000Z', event_id: 'svc__b' }),
         ],
         processedSlugs: [],
       });
 
       const result = await client.findLatestPaginated();
 
-      expect(result.hits.map((h) => h.discovery_slug).sort()).toEqual(['svc__a', 'svc__b']);
+      expect(result.hits.map((h) => h.event_id).sort()).toEqual(['svc__a', 'svc__b']);
     });
 
-    it('marks a slug as processed when a handled doc is at least as recent as the latest discovery', async () => {
+    it('marks an event_id as processed when a handled doc is at least as recent as the latest discovery', async () => {
       const discovery = createDiscovery({
         '@timestamp': '2026-01-01T00:00:00.000Z',
-        discovery_slug: 'svc__rule',
+        event_id: 'svc__rule',
       });
       const { client } = createClient({ discoveries: [discovery], processedSlugs: ['svc__rule'] });
 
@@ -229,14 +210,11 @@ describe('DiscoveryClient', () => {
       expect(result.hits[0].processed).toBe(true);
     });
 
-    it('does not mark a slug processed when a newer discovery (regrow) follows the handled doc', async () => {
-      // discovery(old) -> handled(old) -> discovery(new) for the same slug.
-      // The timestamp guard means the slug is NOT reported processed, so the newest
-      // discovery stays visible.
+    it('does not mark an event_id processed when a newer discovery (regrow) follows the handled doc', async () => {
       const regrown = createDiscovery({
         '@timestamp': '2026-01-03T00:00:00.000Z',
         discovery_id: 'exec-3-svc__rule',
-        discovery_slug: 'svc__rule',
+        event_id: 'svc__rule',
       });
       const { client } = createClient({ discoveries: [regrown], processedSlugs: [] });
 
@@ -247,12 +225,12 @@ describe('DiscoveryClient', () => {
     });
   });
 
-  describe('getProcessedSlugs (via findLatestPaginated)', () => {
-    it('keys the processed derivation on discovery_slug', async () => {
+  describe('getProcessedEventIds (via findLatestPaginated)', () => {
+    it('keys the processed derivation on event_id', async () => {
       const discovery = createDiscovery({
         '@timestamp': '2026-01-01T00:00:00.000Z',
         discovery_id: 'exec-1-svc__rule',
-        discovery_slug: 'svc__rule',
+        event_id: 'svc__rule',
       });
       const { client, query } = createClient({
         discoveries: [discovery],
@@ -261,10 +239,10 @@ describe('DiscoveryClient', () => {
 
       await client.findLatestPaginated();
 
-      const clearanceQuery = query.mock.calls
+      const processedStateQuery = query.mock.calls
         .map((c) => (c[0] as { query: string }).query)
         .find((q) => q.includes('max_state_ts'));
-      expect(clearanceQuery).toContain('discovery_slug');
+      expect(processedStateQuery).toContain('event_id');
     });
   });
 });

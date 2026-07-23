@@ -9,7 +9,7 @@ import type { FC, PropsWithChildren } from 'react';
 import React, { useCallback } from 'react';
 import { EuiButton, EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { css } from '@emotion/react';
 import { useAssistantContext } from '@kbn/elastic-assistant';
 import { PageScope } from '../../data_view_manager/constants';
