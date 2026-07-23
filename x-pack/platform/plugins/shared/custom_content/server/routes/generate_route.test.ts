@@ -303,7 +303,7 @@ describe('registerGenerateRoute', () => {
     request.body = {
       colorMode: 'LIGHT',
       esqlQuery: 'FROM logs | STATS count = COUNT(*)',
-    } as typeof request.body;
+    } as unknown as typeof request.body;
 
     await handler(context, request, response);
 
