@@ -23,8 +23,6 @@ export const RULE_EXECUTIONS_MAX_RESULT_WINDOW = 10_000;
  * reasonable URL length budget (256 chars per id * 10 ids ≈ 2,5KB).
  */
 export const RULE_EXECUTIONS_MAX_RULE_ID_FILTER = 10;
-
-/** Zod refine / OAS example message when `page * perPage` exceeds the result window. */
 export const getRuleExecutionsPagePerPageExceedsMaxMessage = (): string =>
   `page * perPage cannot exceed ${RULE_EXECUTIONS_MAX_RESULT_WINDOW}.`;
 
