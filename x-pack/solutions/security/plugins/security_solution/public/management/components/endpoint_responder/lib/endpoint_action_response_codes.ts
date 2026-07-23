@@ -88,7 +88,7 @@ const CODES = Object.freeze({
   'ra_suspend-process_success_no-action': i18n.translate(
     'xpack.securitySolution.endpointActionResponseCodes.suspendProcess.successNoAction',
     {
-      defaultMessage: 'Action completed. The provided process was not found was already suspended',
+      defaultMessage: 'Action completed. The provided process was not found or was already suspended',
     }
   ),
 
