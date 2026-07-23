@@ -31,13 +31,10 @@ export interface EsErrorLogDetails {
 }
 
 /**
- * Normalizes an unknown thrown value into a readable summary plus structured
- * ECS `error.*` metadata.
- *
- * For Elasticsearch `ResponseError`s this surfaces the underlying error `type`
- * (e.g. `too_many_buckets_exception`) and `reason` - preferring the deepest
- * `root_cause` entry - which a plain `String(error)` interpolation swallows,
- * making failures like a `search.max_buckets` breach diagnosable from the logs.
+ * Normalizes a thrown value into a readable summary plus structured ECS
+ * `error.*` metadata. For Elasticsearch `ResponseError`s it surfaces the
+ * underlying error `type` and `reason` (preferring the deepest `root_cause`),
+ * which a plain `String(error)` swallows.
  */
 export const getEsErrorLogDetails = (error: unknown): EsErrorLogDetails => {
   if (error instanceof EsErrors.ResponseError) {
