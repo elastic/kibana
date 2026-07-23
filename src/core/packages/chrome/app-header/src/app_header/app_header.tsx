@@ -66,6 +66,34 @@ interface AppHeaderViewInternalProps extends AppHeaderViewProps {
   titleAppend?: ReactNode;
 }
 
+const getPublicAppHeaderViewProps = ({
+  title,
+  back,
+  tabs,
+  badges,
+  menu,
+  favorite,
+  metadata,
+  sticky,
+  spacing,
+  docLink,
+  showAddIntegrations,
+  borderless,
+}: AppHeaderViewProps): AppHeaderViewProps => ({
+  title,
+  back,
+  tabs,
+  badges,
+  menu,
+  favorite,
+  metadata,
+  sticky,
+  spacing,
+  docLink,
+  showAddIntegrations,
+  borderless,
+});
+
 const AppHeaderViewInternal = React.memo<AppHeaderViewInternalProps>(
   ({
     title,
@@ -141,9 +169,9 @@ const AppHeaderViewInternal = React.memo<AppHeaderViewInternalProps>(
 
 AppHeaderViewInternal.displayName = 'AppHeaderViewInternal';
 
-export const AppHeaderView = React.memo<AppHeaderViewProps>((props) => (
-  <AppHeaderViewInternal {...props} />
-));
+export const AppHeaderView = React.memo<AppHeaderViewProps>((props) => {
+  return <AppHeaderViewInternal {...getPublicAppHeaderViewProps(props)} />;
+});
 
 AppHeaderView.displayName = 'AppHeaderView';
 
@@ -167,7 +195,9 @@ const InlineAppHeader = React.memo<InlineAppHeaderProps>((props) => {
 
 InlineAppHeader.displayName = 'InlineAppHeader';
 
-export const AppHeader = React.memo<AppHeaderProps>((props) => <InlineAppHeader {...props} />);
+export const AppHeader = React.memo<AppHeaderProps>((props) => (
+  <InlineAppHeader {...getPublicAppHeaderViewProps(props)} title={props.title} />
+));
 
 AppHeader.displayName = 'AppHeader';
 
@@ -176,7 +206,11 @@ export interface DiscoverAppHeaderProps extends AppHeaderProps {
 }
 
 export const DiscoverAppHeader = React.memo<DiscoverAppHeaderProps>(({ tabsBar, ...props }) => (
-  <InlineAppHeader {...props} titleAppend={tabsBar} />
+  <InlineAppHeader
+    {...getPublicAppHeaderViewProps(props)}
+    title={props.title}
+    titleAppend={tabsBar}
+  />
 ));
 
 DiscoverAppHeader.displayName = 'DiscoverAppHeader';
