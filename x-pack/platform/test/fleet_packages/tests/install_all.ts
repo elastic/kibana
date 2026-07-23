@@ -12,6 +12,8 @@
  * 2.0.
  */
 
+import pRetry from 'p-retry';
+
 import type { FtrProviderContext } from '../../api_integration/ftr_provider_context';
 
 const DEPRECATED_PACKAGES = [
@@ -37,33 +39,38 @@ export default function (providerContext: FtrProviderContext) {
 
   async function installPackage(
     name: string,
-    version: string,
-    maxRetries = 3
+    version: string
   ): Promise<{ name: string; version: string; success: boolean; error?: any; took?: number }> {
     const start = Date.now();
-    let lastError: any;
-    for (let attempt = 1; attempt <= maxRetries; attempt++) {
-      try {
-        await supertest
-          .post(`/api/fleet/epm/packages/${name}/${version}`)
-          .set('kbn-xsrf', 'xxx')
-          .set(API_VERSION_HEADER_NAME, API_VERSION)
-          .send({ force: true })
-          .expect(200);
-        return { name, version, success: true, took: (Date.now() - start) / 1000 };
-      } catch (error) {
-        lastError = error;
-        if (!isTransientError(error) || attempt === maxRetries) {
-          break;
+    try {
+      await pRetry(
+        () =>
+          supertest
+            .post(`/api/fleet/epm/packages/${name}/${version}`)
+            .set('kbn-xsrf', 'xxx')
+            .set(API_VERSION_HEADER_NAME, API_VERSION)
+            .send({ force: true })
+            .expect(200),
+        {
+          retries: 3,
+          factor: 2,
+          minTimeout: 2000,
+          onFailedAttempt: (error) => {
+            if (!isTransientError(error)) {
+              throw error;
+            }
+            logger.warning(
+              `Install ${name}@${version} failed with transient error (attempt ${
+                error.attemptNumber
+              }/${error.attemptNumber + error.retriesLeft}), retrying: ${error.message}`
+            );
+          },
         }
-        const delayMs = 2000 * attempt;
-        logger.warning(
-          `Install ${name}@${version} failed with transient error (attempt ${attempt}/${maxRetries}), retrying in ${delayMs}ms: ${error?.message}`
-        );
-        await new Promise((resolve) => setTimeout(resolve, delayMs));
-      }
+      );
+      return { name, version, success: true, took: (Date.now() - start) / 1000 };
+    } catch (error) {
+      return { name, version, success: false, error };
     }
-    return { name, version, success: false, error: lastError };
   }
 
   async function deletePackage(
