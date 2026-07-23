@@ -92,11 +92,21 @@ export const createAdGetJobInfoTool = (
       mlLicense,
       enabledFeatures
     );
+    // ML viewer might have viewer permission to see results but not to the internal indices
+    // so we need to use internal user here
     const ml = esClient.asCurrentUser.ml;
 
+    // and abort tool use if no capabilities
     try {
       await hasMlCapabilities(['canGetJobs']);
-
+    } catch (error) {
+      return {
+        results: [
+          createErrorResult(`Error getting job info due to missing capabilities: ${error.message}`),
+        ],
+      };
+    }
+    try {
       switch (operation) {
         case 'get_jobs': {
           const response = await ml.getJobs(jobId ? { job_id: jobId } : {});
@@ -119,7 +129,7 @@ export const createAdGetJobInfoTool = (
               results: [createErrorResult('job_id is required for get_job_messages')],
             };
           }
-          const messagesResponse = await esClient.asCurrentUser.search({
+          const messagesResponse = await esClient.asInternalUser.search({
             index: '.ml-notifications-*',
             query: { term: { job_id: jobId } },
             sort: [{ timestamp: { order: 'desc' } }],
@@ -156,7 +166,7 @@ export const createAdGetJobInfoTool = (
         }
 
         case 'get_available_metadata': {
-          const response = await esClient.asCurrentUser.esql.query({
+          const response = await esClient.asInternalUser.esql.query({
             query: `FROM .ml-config
 | WHERE job_type == "anomaly_detector"
 | STATS job_count = COUNT(*),
@@ -174,14 +184,13 @@ export const createAdGetJobInfoTool = (
 
         case 'validate_permissions': {
           const response = await ml.info();
-          const hasPermissions = await esClient.asCurrentUser.indices
-            .exists({ index: '.ml-anomalies-*' })
-            .catch(() => false);
+          const canGetJobs = (await hasMlCapabilities(['canGetJobs'])) === undefined;
           return {
             results: [
               {
                 type: ToolResultType.other,
-                data: { ml_info: response, has_ml_index_access: hasPermissions },
+                // hasMlCapabilities() returns void and throws on failure
+                data: { ml_info: response, canGetJobs },
               },
             ],
           };

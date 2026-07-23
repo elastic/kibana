@@ -59,7 +59,7 @@ export const createAdCreateJobTool = (
     try {
       switch (operation) {
         case 'validate_spec': {
-          await hasMlCapabilities(['canGetJobs']);
+          await hasMlCapabilities(['canCreateJob']);
           if (!jobConfig) {
             return {
               results: [createErrorResult('job_config is required for validate_spec')],
@@ -70,7 +70,7 @@ export const createAdCreateJobTool = (
         }
 
         case 'estimate_memory': {
-          await hasMlCapabilities(['canGetJobs']);
+          await hasMlCapabilities(['canCreateJob']);
           if (!jobConfig) {
             return {
               results: [createErrorResult('job_config is required for estimate_memory')],
