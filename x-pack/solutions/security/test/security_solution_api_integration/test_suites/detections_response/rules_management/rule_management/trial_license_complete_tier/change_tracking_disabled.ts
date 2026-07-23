@@ -7,17 +7,13 @@
 
 import expect from 'expect';
 import { v4 as uuidv4 } from 'uuid';
-import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import { deleteAllRules } from '@kbn/detections-response-ftr-services';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { getCustomQueryRuleParams } from '../../../utils';
 
 const CHANGE_HISTORY_DATA_STREAM = '.kibana_change_history';
 const CHANGE_HISTORY_ES_OPTIONS = {
-  headers: {
-    [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
-    'x-elastic-product-origin': 'kibana',
-  },
+  headers: { 'x-elastic-product-origin': 'kibana' },
 };
 
 export default ({ getService }: FtrProviderContext): void => {

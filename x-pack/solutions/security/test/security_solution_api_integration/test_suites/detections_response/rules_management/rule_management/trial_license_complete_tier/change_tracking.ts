@@ -6,7 +6,6 @@
  */
 
 import expect from 'expect';
-import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import { ModeEnum } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { BulkActionTypeEnum } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management';
 import {
@@ -29,10 +28,7 @@ import { revertPrebuiltRule } from '../../../utils/rules/prebuilt_rules/revert_p
 
 const CHANGE_HISTORY_DATA_STREAM = '.kibana_change_history';
 const CHANGE_HISTORY_ES_OPTIONS = {
-  headers: {
-    [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
-    'x-elastic-product-origin': 'kibana',
-  },
+  headers: { 'x-elastic-product-origin': 'kibana' },
 };
 
 export default ({ getService }: FtrProviderContext): void => {
