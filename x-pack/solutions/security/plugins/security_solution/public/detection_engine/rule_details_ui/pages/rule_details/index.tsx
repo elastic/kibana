@@ -449,28 +449,34 @@ export const RuleDetailsPage = connector(
 
     const isBuildingBlockRule = rule?.building_block_type != null;
     const [areAlertFiltersInitialized, setAreAlertFiltersInitialized] = useState(false);
-    // Set showBuildingBlockAlerts if rule is a Building Block Rule otherwise we won't show alerts
     useEffect(() => {
-      if (rule != null) {
+      if (rule != null && !areAlertFiltersInitialized) {
         setShowBuildingBlockAlerts(isBuildingBlockRule);
       }
-    }, [rule, isBuildingBlockRule, setShowBuildingBlockAlerts]);
+    }, [rule, isBuildingBlockRule, setShowBuildingBlockAlerts, areAlertFiltersInitialized]);
 
     useEffect(() => {
-      if (rule != null) {
+      if (
+        rule != null &&
+        !areAlertFiltersInitialized &&
+        showBuildingBlockAlerts === isBuildingBlockRule
+      ) {
         setAreAlertFiltersInitialized(true);
       }
-    }, [rule]);
+    }, [rule, isBuildingBlockRule, showBuildingBlockAlerts, areAlertFiltersInitialized]);
 
     const ruleRuleId = rule?.rule_id ?? '';
+    const shouldShowBuildingBlockAlerts = areAlertFiltersInitialized
+      ? showBuildingBlockAlerts
+      : isBuildingBlockRule || showBuildingBlockAlerts;
     const alertDefaultFilters = useMemo(
       () => [
         ...buildAlertsFilter(ruleRuleId ?? ''),
-        ...buildShowBuildingBlockFilter(showBuildingBlockAlerts),
+        ...buildShowBuildingBlockFilter(shouldShowBuildingBlockAlerts),
         ...buildAlertStatusFilter(filterGroup),
         ...buildThreatMatchFilter(showOnlyThreatIndicatorAlerts),
       ],
-      [ruleRuleId, showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts, filterGroup]
+      [ruleRuleId, shouldShowBuildingBlockAlerts, showOnlyThreatIndicatorAlerts, filterGroup]
     );
 
     const alertMergedFilters = useMemo(
@@ -917,7 +923,7 @@ export const RuleDetailsPage = connector(
                           />
                           <EuiSpacer />
                         </Display>
-                        {ruleId != null && rule != null && areAlertFiltersInitialized && (
+                        {ruleId != null && rule != null && (
                           <GroupedAlertsTable
                             accordionButtonContent={defaultGroupTitleRenderers}
                             accordionExtraActionGroupStats={accordionExtraActionGroupStats}
