@@ -14,14 +14,14 @@ import { generateXmlTree, type XmlNode } from '@kbn/agent-builder-genai-utils/to
  * Returns `''` for an empty list.
  */
 export const formatAttachmentsMetadata = (
-  attachments: AttachmentVersionRef[],
+  attachmentRefs: AttachmentVersionRef[],
   attachmentStateManager: AttachmentStateManager
 ): string => {
-  if (attachments.length === 0) {
+  if (attachmentRefs.length === 0) {
     return '';
   }
 
-  const attachmentElements: XmlNode[] = attachments.flatMap((attachmentRef) => {
+  const attachmentElements: XmlNode[] = attachmentRefs.flatMap((attachmentRef) => {
     const attachment = attachmentStateManager.getAttachmentRecord(attachmentRef.attachment_id);
     if (!attachment) {
       return [];
@@ -49,10 +49,14 @@ export const formatAttachmentsMetadata = (
     ];
   });
 
+  if (attachmentElements.length === 0) {
+    return '';
+  }
+
   return generateXmlTree(
     {
       tagName: 'attachments',
-      attributes: { count: attachments.length },
+      attributes: { count: attachmentElements.length },
       children: [
         {
           tagName: 'note',

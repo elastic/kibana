@@ -103,17 +103,15 @@ describe('formatAttachmentsMetadata', () => {
     }
   });
 
-  it('skips refs where getAttachmentRecord returns undefined', () => {
+  it('returns undefined if all refs getAttachmentRecord returns undefined', () => {
     const stateManager = makeStateManager([]);
 
     const result = formatAttachmentsMetadata(
       [{ attachment_id: 'missing-id', version: 1 }],
       stateManager
     );
-
-    // count reflects the raw refs list length, but no attachment element is rendered
-    expect(result).toContain('count="1"');
-    expect(result).not.toContain('attachment_id="missing-id"');
+    
+    expect(result).toBe('');
   });
 
   it('falls back to latest version when the requested version does not exist on the record', () => {
