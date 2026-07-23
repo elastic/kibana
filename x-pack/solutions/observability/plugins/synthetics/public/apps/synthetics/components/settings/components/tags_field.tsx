@@ -73,6 +73,7 @@ export function TagsField({
                       iconType="copyClipboard"
                       display="base"
                       size="m"
+                      color="text"
                       onClick={copy}
                       isDisabled={tags.length === 0}
                       data-test-subj="syntheticsPrivateLocationTagsCopyButton"

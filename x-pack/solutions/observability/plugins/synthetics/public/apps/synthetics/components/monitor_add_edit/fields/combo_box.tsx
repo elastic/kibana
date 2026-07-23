@@ -104,6 +104,7 @@ export const FormattedComboBox = ({
               iconType="copyClipboard"
               display="base"
               size="m"
+              color="text"
               onClick={copy}
               isDisabled={formattedSelectedOptions.length === 0}
               data-test-subj="syntheticsFleetComboBoxCopyButton"
