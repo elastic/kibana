@@ -104,6 +104,14 @@ export const ListResourcesInputSchema = lazySchema(() =>
       .optional()
       .default(100)
       .describe('Maximum number of items to return (default: 100).'),
+    continue: z
+      .string()
+      .max(MAX_STRING_LENGTH)
+      .optional()
+      .describe(
+        'Continue token from a previous list response for pagination. Pass the `continue` value ' +
+          'from the prior response to fetch the next page.'
+      ),
   })
 );
 export type ListResourcesInput = z.infer<typeof ListResourcesInputSchema>;
@@ -162,11 +170,31 @@ export const ListEventsInputSchema = lazySchema(() =>
       .max(MAX_STRING_LENGTH)
       .optional()
       .describe('The namespace to read events from. Omit to read events across all namespaces.'),
+    labelSelector: z
+      .string()
+      .max(MAX_STRING_LENGTH)
+      .optional()
+      .describe('Optional label selector to filter events, e.g. "app=nginx".'),
+    fieldSelector: z
+      .string()
+      .max(MAX_STRING_LENGTH)
+      .optional()
+      .describe(
+        'Optional field selector to filter events, e.g. "involvedObject.name=my-pod" or "type=Warning".'
+      ),
     limit: z
       .number()
       .optional()
       .default(100)
       .describe('Maximum number of events to return (default: 100).'),
+    continue: z
+      .string()
+      .max(MAX_STRING_LENGTH)
+      .optional()
+      .describe(
+        'Continue token from a previous list response for pagination. Pass the `continue` value ' +
+          'from the prior response to fetch the next page.'
+      ),
   })
 );
 export type ListEventsInput = z.infer<typeof ListEventsInputSchema>;

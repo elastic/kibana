@@ -213,6 +213,23 @@ describe('KubernetesConnector', () => {
         expect.objectContaining({ url: `${API_URL}/api/v1/nodes` })
       );
     });
+
+    it('percent-encodes path segments that need escaping', async () => {
+      mockRequest.mockResolvedValue(okResponse({ items: [] }));
+
+      await KubernetesConnector.actions.getResource.handler(mockContext, {
+        apiVersion: 'v1',
+        resource: 'pods',
+        namespace: 'team a',
+        name: 'pod/with/slash',
+      });
+
+      expect(mockRequest).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          url: `${API_URL}/api/v1/namespaces/team%20a/pods/pod%2Fwith%2Fslash`,
+        })
+      );
+    });
   });
 
   describe('listResources', () => {
@@ -267,6 +284,81 @@ describe('KubernetesConnector', () => {
         labels: { app: 'nginx' },
         creationTimestamp: '2024-01-01T00:00:00Z',
         status: { phase: 'Running' },
+      });
+    });
+
+    it('forwards the continue token for pagination', async () => {
+      mockRequest.mockResolvedValue(okResponse({ items: [] }));
+
+      await KubernetesConnector.actions.listResources.handler(mockContext, {
+        apiVersion: 'v1',
+        resource: 'pods',
+        limit: 100,
+        continue: 'next-token',
+      });
+
+      expect(mockRequest).toHaveBeenCalledWith(
+        expect.objectContaining({
+          params: {
+            limit: '100',
+            continue: 'next-token',
+          },
+        })
+      );
+    });
+  });
+
+  describe('listEvents', () => {
+    it('forwards selectors, limit, and continue and returns a continue token', async () => {
+      mockRequest.mockResolvedValue(
+        okResponse({
+          kind: 'EventList',
+          metadata: { continue: 'events-next' },
+          items: [
+            {
+              type: 'Warning',
+              reason: 'FailedScheduling',
+              message: '0/1 nodes available',
+              involvedObject: { kind: 'Pod', name: 'pod-a' },
+              count: 3,
+              lastTimestamp: '2024-01-01T00:00:00Z',
+            },
+          ],
+        })
+      );
+
+      const result = (await KubernetesConnector.actions.listEvents.handler(mockContext, {
+        namespace: 'default',
+        labelSelector: 'app=nginx',
+        fieldSelector: 'type=Warning',
+        limit: 25,
+        continue: 'prev-token',
+      })) as {
+        itemCount: number;
+        continue?: string;
+        items: Array<{ type?: string; reason?: string }>;
+      };
+
+      expect(mockRequest).toHaveBeenCalledWith(
+        expect.objectContaining({
+          url: `${API_URL}/api/v1/namespaces/default/events`,
+          params: {
+            limit: '25',
+            labelSelector: 'app=nginx',
+            fieldSelector: 'type=Warning',
+            continue: 'prev-token',
+          },
+        })
+      );
+      expect(result.itemCount).toBe(1);
+      expect(result.continue).toBe('events-next');
+      expect(result.items[0]).toEqual({
+        type: 'Warning',
+        reason: 'FailedScheduling',
+        message: '0/1 nodes available',
+        involvedObject: { kind: 'Pod', name: 'pod-a' },
+        count: 3,
+        lastTimestamp: '2024-01-01T00:00:00Z',
       });
     });
   });
@@ -486,12 +578,40 @@ describe('KubernetesConnector', () => {
         expect(mockRequest).not.toHaveBeenCalled();
       });
 
+      it('rejects paths outside the Kubernetes API prefixes', async () => {
+        await expect(
+          KubernetesConnector.actions.request.handler(mockContext, {
+            method: 'GET',
+            path: '/metrics',
+          })
+        ).rejects.toThrow('must be under /api, /apis, /version');
+        expect(mockRequest).not.toHaveBeenCalled();
+      });
+
       it('allows ordinary paths through', async () => {
         mockRequest.mockResolvedValue(okResponse({ kind: 'PodList', items: [] }));
         await expect(
           KubernetesConnector.actions.request.handler(mockContext, {
             method: 'GET',
             path: '/api/v1/namespaces/default/pods',
+          })
+        ).resolves.toBeDefined();
+      });
+
+      it('allows /version and health endpoints', async () => {
+        mockRequest.mockResolvedValue(okResponse({ major: '1' }));
+        await expect(
+          KubernetesConnector.actions.request.handler(mockContext, {
+            method: 'GET',
+            path: '/version',
+          })
+        ).resolves.toBeDefined();
+
+        mockRequest.mockResolvedValue(okResponse('ok'));
+        await expect(
+          KubernetesConnector.actions.request.handler(mockContext, {
+            method: 'GET',
+            path: '/readyz',
           })
         ).resolves.toBeDefined();
       });

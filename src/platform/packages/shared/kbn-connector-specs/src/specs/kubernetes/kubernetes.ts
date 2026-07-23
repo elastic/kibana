@@ -114,6 +114,15 @@ const assertPathAllowed = (path: string): void => {
   }
 
   const pathOnly = path.split(/[?#]/, 1)[0] ?? path;
+
+  // Restrict to well-known Kubernetes API prefixes so the generic `request`
+  // action cannot be pointed at arbitrary cluster endpoints.
+  if (!/^\/(api|apis|version|openapi|healthz|livez|readyz)(\/|$)/.test(pathOnly)) {
+    throw new Error(
+      'Kubernetes API path must be under /api, /apis, /version, /openapi, /healthz, /livez, or /readyz'
+    );
+  }
+
   for (const segment of pathOnly.split('/')) {
     if (BLOCKED_SUBRESOURCES.has(segment)) {
       throw new Error(
@@ -158,8 +167,17 @@ const scrubSecrets = (response: unknown): unknown => {
 // Helpers
 // =============================================================================
 
-const buildApiBase = (apiVersion: string): string =>
-  apiVersion.includes('/') ? `/apis/${apiVersion}` : `/api/${apiVersion}`;
+const buildApiBase = (apiVersion: string): string => {
+  if (apiVersion.includes('/')) {
+    const [group, version, ...rest] = apiVersion.split('/');
+    // Reject malformed apiVersions with extra segments (e.g. "apps/v1/extra").
+    if (!group || !version || rest.length > 0) {
+      throw new Error(`Invalid apiVersion "${apiVersion}"`);
+    }
+    return `/apis/${encodeURIComponent(group)}/${encodeURIComponent(version)}`;
+  }
+  return `/api/${encodeURIComponent(apiVersion)}`;
+};
 
 const buildResourcePath = ({
   apiVersion,
@@ -175,10 +193,10 @@ const buildResourcePath = ({
   subresource?: string;
 }): string => {
   const base = buildApiBase(apiVersion);
-  const ns = namespace ? `/namespaces/${namespace}` : '';
-  const nm = name ? `/${name}` : '';
-  const sub = subresource ? `/${subresource}` : '';
-  return `${base}${ns}/${resource}${nm}${sub}`;
+  const ns = namespace ? `/namespaces/${encodeURIComponent(namespace)}` : '';
+  const nm = name ? `/${encodeURIComponent(name)}` : '';
+  const sub = subresource ? `/${encodeURIComponent(subresource)}` : '';
+  return `${base}${ns}/${encodeURIComponent(resource)}${nm}${sub}`;
 };
 
 interface K8sRequestOptions {
@@ -381,7 +399,8 @@ export const KubernetesConnector: ConnectorSpec = {
       description:
         'List resources of a given type, optionally filtered by namespace and label/field selectors. ' +
         'Returns a compact summary (name, namespace, labels, creation time, status highlights) per item. ' +
-        'Use getResource for the full object.',
+        'When more pages are available the response includes a `continue` token — pass it back to fetch ' +
+        'the next page. Use getResource for the full object.',
       input: ListResourcesInputSchema,
       handler: async (ctx, input: ListResourcesInput) => {
         const data = await k8sRequest(ctx, {
@@ -395,6 +414,7 @@ export const KubernetesConnector: ConnectorSpec = {
             limit: String(input.limit),
             ...(input.labelSelector ? { labelSelector: input.labelSelector } : {}),
             ...(input.fieldSelector ? { fieldSelector: input.fieldSelector } : {}),
+            ...(input.continue ? { continue: input.continue } : {}),
           },
         });
         return slimList(data);
@@ -480,8 +500,10 @@ export const KubernetesConnector: ConnectorSpec = {
     listEvents: {
       isTool: true,
       description:
-        'List recent cluster events, optionally scoped to a namespace. Useful for diagnosing why ' +
-        'a resource is failing to schedule, start, or become ready.',
+        'List recent cluster events, optionally scoped to a namespace and filtered by label/field ' +
+        'selectors. Useful for diagnosing why a resource is failing to schedule, start, or become ready. ' +
+        'When more pages are available the response includes a `continue` token — pass it back to fetch ' +
+        'the next page.',
       input: ListEventsInputSchema,
       handler: async (ctx, input: ListEventsInput) => {
         const data = await k8sRequest(ctx, {
@@ -491,7 +513,12 @@ export const KubernetesConnector: ConnectorSpec = {
             resource: 'events',
             namespace: input.namespace,
           }),
-          params: { limit: String(input.limit) },
+          params: {
+            limit: String(input.limit),
+            ...(input.labelSelector ? { labelSelector: input.labelSelector } : {}),
+            ...(input.fieldSelector ? { fieldSelector: input.fieldSelector } : {}),
+            ...(input.continue ? { continue: input.continue } : {}),
+          },
         });
         const list = data as K8sList;
         const items = Array.isArray(list.items) ? list.items : [];
@@ -505,6 +532,7 @@ export const KubernetesConnector: ConnectorSpec = {
             count: event.count,
             lastTimestamp: event.lastTimestamp ?? event.eventTime,
           })),
+          ...(list.metadata?.continue ? { continue: list.metadata.continue } : {}),
         };
       },
     },
