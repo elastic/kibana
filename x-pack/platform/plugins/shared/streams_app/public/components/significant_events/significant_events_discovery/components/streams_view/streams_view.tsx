@@ -15,6 +15,7 @@ import { useAIFeatures } from '../../../../../hooks/use_ai_features';
 import { useSignificantEventsDiscoveryContext } from '../../context/significant_events_discovery_context';
 import type { StreamsAppSearchBarProps } from '../../../../streams_app_search_bar';
 import { StreamsAppSearchBar } from '../../../../streams_app_search_bar';
+import { useBlocksNewActivity } from '../../../../../hooks/significant_events/use_significant_events_maintenance';
 import { useKiGeneration } from '../knowledge_indicators_table/ki_generation_context';
 import { GenerateSplitButton } from '../shared/generate_split_button';
 import { FindSignificantEventsButton } from './find_significant_events_button';
@@ -22,6 +23,7 @@ import { STREAMS_TABLE_SEARCH_ARIA_LABEL } from './translations';
 import { StreamsTreeTable } from './tree_table';
 
 export function StreamsView() {
+  const { blocksActivity, activityBlockTooltip } = useBlocksNewActivity();
   const [searchText, setSearchText] = useState('');
 
   const searchQuery = useMemo(() => parseSearchQuery(searchText), [searchText]);
@@ -134,12 +136,14 @@ export function StreamsView() {
               onRunFeaturesOnly={onBulkOnboardFeaturesOnly}
               onRunQueriesOnly={onBulkOnboardQueriesOnly}
               isRunDisabled={
+                blocksActivity ||
                 selectedStreams.length === 0 ||
                 isConnectorCatalogUnavailable ||
                 featuresConnectors.loading ||
                 queriesConnectors.loading ||
                 isScheduling
               }
+              runDisabledTooltip={activityBlockTooltip}
               isConfigDisabled={selectedStreams.length === 0}
               isLoading={isScheduling}
             />
@@ -150,7 +154,8 @@ export function StreamsView() {
               onCancel={handleCancel}
               isRunning={isRunning}
               isCanceling={isCanceling}
-              isDisabled={isRunning}
+              isDisabled={isRunning || blocksActivity}
+              disabledTooltip={activityBlockTooltip}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -174,6 +179,8 @@ export function StreamsView() {
           streamOnboardingResultMap={streamStatusMap}
           loading={isStreamsLoading}
           searchQuery={searchQuery}
+          blocksActivity={blocksActivity}
+          activityBlockTooltip={activityBlockTooltip}
           selection={{
             selected: selectedStreams,
             onSelectionChange: setSelectedStreams,
