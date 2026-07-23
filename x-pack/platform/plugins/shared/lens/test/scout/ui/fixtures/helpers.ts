@@ -7,7 +7,12 @@
 
 import { expect } from '@kbn/scout/ui';
 import type { PageObjects, Locator, ScoutPage } from '@kbn/scout';
-import { DATA_VIEW_ID, LOGSTASH_IN_RANGE_DATES } from './constants';
+import {
+  DATA_VIEW_ID,
+  FORMULA_ESCAPED_RUNTIME_FIELD,
+  KBN_ARCHIVE_PATHS,
+  LOGSTASH_IN_RANGE_DATES,
+} from './constants';
 
 type DashboardAndLens = Pick<PageObjects, 'dashboard' | 'lens'>;
 
@@ -19,6 +24,7 @@ interface LogstashSpaceSetupContext {
       unset: (...keys: string[]) => Promise<unknown>;
     };
     savedObjects: {
+      load: (path: string) => Promise<Array<{ id: string; type: string; title: string }>>;
       cleanStandardList: () => Promise<void>;
     };
   };
@@ -29,7 +35,15 @@ interface LogstashSpaceSetupContext {
         name: string;
         timeFieldName: string;
         spaceId: string;
+        runtimeFieldMap?: Record<string, { type: string; script: { source: string } }>;
       }) => Promise<{ data: { id?: string } }>;
+      update: (
+        id: string,
+        body: {
+          runtimeFieldMap?: Record<string, { type: string; script: { source: string } }>;
+          spaceId: string;
+        }
+      ) => Promise<unknown>;
       delete: (id: string, spaceId: string) => Promise<unknown>;
     };
   };
@@ -62,18 +76,42 @@ export function createLogstashLensEditorSuiteSetup(options?: {
   timeRange?: { from: string; to: string };
   /** When true, enables elastic-charts debug state before navigating to Lens. */
   enableChartDebug?: boolean;
+  /**
+   * When true, loads FTR `lens_basic` archive into the space
+   * (needed to open saved `lnsXYvis` for formula transition coverage).
+   * Does not load `default.json` — that only adds `lnsTableVis` / a duplicate index-pattern.
+   */
+  loadLensArchives?: boolean;
+  /** When true, adds the escaped-name runtime field used by formula KQL field escaping. */
+  withEscapedRuntimeField?: boolean;
 }) {
   const timeRange = options?.timeRange ?? LOGSTASH_IN_RANGE_DATES;
   const enableChartDebug = options?.enableChartDebug ?? false;
+  const loadLensArchives = options?.loadLensArchives ?? false;
+  const withEscapedRuntimeField = options?.withEscapedRuntimeField ?? false;
   let storedDataViewId: string | undefined;
 
   const beforeAll = async ({ scoutSpace, apiServices }: LogstashSpaceSetupContext) => {
+    if (loadLensArchives) {
+      await scoutSpace.savedObjects.load(KBN_ARCHIVE_PATHS.LENS_BASIC);
+    }
+
     // Name matches title so Lens data-view switcher rows resolve as `dataView-logstash-*`.
     const { data: dataView } = await apiServices.dataViews.create({
       title: DATA_VIEW_ID.LOGSTASH,
       name: DATA_VIEW_ID.LOGSTASH,
       timeFieldName: '@timestamp',
       spaceId: scoutSpace.id,
+      ...(withEscapedRuntimeField
+        ? {
+            runtimeFieldMap: {
+              [FORMULA_ESCAPED_RUNTIME_FIELD]: {
+                type: 'keyword',
+                script: { source: "emit('abc')" },
+              },
+            },
+          }
+        : {}),
     });
     storedDataViewId = dataView.id;
 

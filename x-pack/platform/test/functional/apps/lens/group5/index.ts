@@ -63,9 +63,8 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
       await kibanaServer.importExport.load(fixtureDirs.lensDefault);
     });
 
-    // Batch 1 (geo_field, tagcloud, gauge, heatmap) migrated to Scout — see #276949.
-    // Remaining: drag_and_drop (~7m 40s) + formula (~5m 52s).
+    // Batch 1 (geo_field, tagcloud, gauge, heatmap) + Batch 2 (formula) migrated to Scout — see #276949.
+    // Remaining: drag_and_drop (~7m 40s).
     loadTestFile(require.resolve('./drag_and_drop'));
-    loadTestFile(require.resolve('./formula'));
   });
 };

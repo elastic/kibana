@@ -336,7 +336,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    // not supported for layers as tabs
+    // Not supported for layers as tabs (product limitation).
+    // Scout Batch 3 (#276949): do not port as test.skip/fixme — omit until cross-layer DnD returns.
     describe.skip('dropping between layers', () => {
       it('should move the column', async () => {
         await visualize.gotoVisualizationLandingPage();

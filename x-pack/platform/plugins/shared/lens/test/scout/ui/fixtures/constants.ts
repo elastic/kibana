@@ -21,8 +21,12 @@ export const LOGSTASH_IN_RANGE_DATES = {
   to: 'Sep 23, 2015 @ 18:31:44.000',
 } as const;
 
+const FTR_LENS_KBN_ARCHIVES_DIR = 'x-pack/platform/test/functional/fixtures/kbn_archives/lens';
+
 export const KBN_ARCHIVE_PATHS = {
   ESQL_CONVERSION_DASHBOARD: `${LENS_SCOUT_FIXTURES_DIR}/esql_conversion_dashboard.json`,
+  /** Saved Lens objects including `lnsXYvis` (group5 formula transition). */
+  LENS_BASIC: `${FTR_LENS_KBN_ARCHIVES_DIR}/lens_basic.json`,
   OPEN_IN_LENS: {
     TSVB: {
       METRIC: `${OPEN_IN_LENS_KBN_ARCHIVES_DIR}/tsvb/metric.json`,
@@ -52,6 +56,9 @@ export const VISUALIZATION_TITLES = {
     },
   },
 } as const;
+
+/** Runtime field used by formula KQL field-name escaping (FTR `ab' "'`). */
+export const FORMULA_ESCAPED_RUNTIME_FIELD = `ab' "'` as const;
 
 export const DASHBOARD_TITLES = {
   OPEN_IN_LENS: {

@@ -10,6 +10,7 @@
 import type { DebugState } from '@elastic/charts';
 import type { ScoutPage } from '..';
 import { expect } from '..';
+import { KibanaCodeEditorWrapper } from '../ui_components';
 
 const normalizeComputedColor = (color: string | undefined): string | undefined => {
   if (!color) {
@@ -43,6 +44,14 @@ export class LensApp {
   private readonly goBackToAppButton;
   private readonly discardChangesModal;
   private readonly confirmModalConfirmButton;
+  private readonly messageListTrigger;
+  private readonly dataTable;
+  /**
+   * Formula Monaco textarea — Lens has no data-test-subj on the editor input.
+   * Note: `lnsFormulaWidget` is the overflow/suggest portal on `document.body`, not the editor.
+   */
+  private readonly formulaEditorTextarea;
+  private readonly codeEditor: KibanaCodeEditorWrapper;
 
   constructor(private readonly page: ScoutPage) {
     this.lensApp = this.page.testSubj.locator('lnsApp');
@@ -64,6 +73,12 @@ export class LensApp {
     this.goBackToAppButton = this.page.testSubj.locator('lnsApp_goBackToAppButton');
     this.discardChangesModal = this.page.testSubj.locator('lnsApp_discardChangesModalOrigin');
     this.confirmModalConfirmButton = this.page.testSubj.locator('confirmModalConfirmButton');
+    this.messageListTrigger = this.page.testSubj.locator('lens-message-list-trigger');
+    this.dataTable = this.page.testSubj.locator('lnsDataTable');
+    this.formulaEditorTextarea = this.page.locator(
+      '.lnsFormula__editorContent .monaco-editor textarea'
+    );
+    this.codeEditor = new KibanaCodeEditorWrapper(page);
   }
 
   async waitForLensApp() {
@@ -202,16 +217,28 @@ export class LensApp {
     operation: string;
     field?: string;
     palette?: { mode: 'legacy' | 'colorMapping'; id: string };
+    formula?: string;
+    disableEmptyRows?: boolean;
     keepOpen?: boolean;
     isPreviousIncompatible?: boolean;
   }) {
     await this.openDimensionSelector(opts.dimension);
-    await this.selectOperation(opts.operation, opts.isPreviousIncompatible);
+    if (opts.operation === 'formula') {
+      await this.switchToFormula();
+    } else {
+      await this.selectOperation(opts.operation, opts.isPreviousIncompatible);
+    }
     if (opts.field) {
       await this.selectField(opts.field);
     }
+    if (opts.formula) {
+      await this.typeInFormula(opts.formula, { replace: true });
+    }
     if (opts.palette) {
       await this.setPalette(opts.palette.id, opts.palette.mode === 'legacy');
+    }
+    if (opts.disableEmptyRows) {
+      await this.setEuiSwitch('indexPattern-include-empty-rows', false);
     }
     if (!opts.keepOpen) {
       await this.closeDimensionEditor();
@@ -339,9 +366,22 @@ export class LensApp {
     );
   }
 
-  async setTableDynamicColoring(coloringType: 'none' | 'cell' | 'text' | 'badge') {
-    await this.page.testSubj.click('lnsDatatable_dynamicColoring_groups');
-    await this.page.testSubj.click(`lnsDatatable_dynamicColoring_groups_${coloringType}`);
+  async setTableDynamicColoring(coloringType: 'none' | 'cell' | 'text' | 'badge' | 'progress') {
+    // Cell decoration combo labels diverge from stored values (`cell` → "Background").
+    const labelByColoringType: Record<typeof coloringType, string> = {
+      none: 'None',
+      cell: 'Background',
+      text: 'Text',
+      badge: 'Badge',
+      progress: 'Progress bar',
+    };
+    await this.page.components
+      .comboBox('lnsDatatable_dynamicColoring_groups')
+      .setSelectedOptions([labelByColoringType[coloringType]]);
+    // Palette editor appears once a non-none decoration assigns palette/colorMapping.
+    if (coloringType !== 'none') {
+      await this.page.testSubj.locator('lns_dynamicColoring_edit').waitFor({ state: 'visible' });
+    }
   }
 
   async setPalette(paletteId: string, isLegacy: boolean) {
@@ -660,13 +700,11 @@ export class LensApp {
   }
 
   async openMessageList() {
-    const trigger = this.page.testSubj.locator('lens-message-list-trigger');
-    await trigger.click();
+    await this.messageListTrigger.click();
   }
 
   async closeMessageList() {
-    const trigger = this.page.testSubj.locator('lens-message-list-trigger');
-    await trigger.click();
+    await this.messageListTrigger.click();
   }
 
   getMessageListItems(severity: 'warning' | 'error') {
@@ -776,7 +814,20 @@ export class LensApp {
   async setEuiSwitch(testSubj: string, checked: boolean) {
     const switchLocator = this.page.testSubj.locator(testSubj);
     await switchLocator.waitFor({ state: 'visible' });
-    await switchLocator.setChecked(checked);
+    const want = checked ? 'true' : 'false';
+    // EUI switch is React-controlled: Playwright `setChecked` clicks then immediately
+    // re-reads aria-checked and fails before Lens commits the update. Click when needed,
+    // then wait for the attribute (no expect() in the page object).
+    if ((await switchLocator.getAttribute('aria-checked')) !== want) {
+      await switchLocator.click();
+    }
+    await this.page.waitForFunction(
+      ([subj, expected]) =>
+        document.querySelector(`[data-test-subj="${subj}"]`)?.getAttribute('aria-checked') ===
+        expected,
+      [testSubj, want] as const,
+      { timeout: 10_000 }
+    );
   }
 
   /**
@@ -963,21 +1014,255 @@ export class LensApp {
     return JSON.parse(debugJson) as DebugState;
   }
 
+  async switchToQuickFunctions() {
+    await this.page.testSubj.click('lens-dimensionTabs-quickFunctions');
+  }
+
+  async switchToFormula() {
+    await this.page.testSubj.click('lens-dimensionTabs-formula');
+  }
+
+  async switchToStaticValue() {
+    await this.page.testSubj.click('lens-dimensionTabs-static_value');
+  }
+
+  /**
+   * Clicks an incompatible quick-function option without waiting for it to become selected.
+   * Used to assert Lens keeps the prior formula on incomplete transitions.
+   */
+  async clickIncompatibleOperation(operation: string) {
+    await this.page.testSubj.click(`lns-indexPatternDimension-${operation} incompatible`);
+  }
+
+  async toggleFullscreen() {
+    await this.page.testSubj.click('lnsFormula-fullscreen');
+  }
+
+  /**
+   * Focuses the formula Monaco textarea (avoid `{ force: true }` — suggest portals intercept clicks).
+   */
+  private async focusFormulaEditor() {
+    await this.formulaEditorTextarea.waitFor({ state: 'attached' });
+    await this.formulaEditorTextarea.evaluate((el) => {
+      (el as HTMLTextAreaElement).focus();
+    });
+  }
+
+  /** Lens formula uses the last registered Monaco model (not always index 0). */
+  private async getFormulaModelIndex(): Promise<number> {
+    return this.page.evaluate(() => {
+      const monacoEnv = (
+        window as unknown as {
+          MonacoEnvironment?: {
+            monaco?: { editor?: { getModels: () => unknown[] } };
+          };
+        }
+      ).MonacoEnvironment;
+      const models = monacoEnv?.monaco?.editor?.getModels() ?? [];
+      return Math.max(0, models.length - 1);
+    });
+  }
+
+  /**
+   * Types into the formula Monaco editor.
+   * Use `replace: true` to clear first (dimension configure). Omit replace to append
+   * (autocomplete paths). Lens auto-inserts quotes/parens after some tokens (e.g. `kql=`),
+   * so callers should `expect.poll(() => lens.getFormulaText())` for the final value.
+   */
+  async typeInFormula(text: string, options?: { replace?: boolean; focus?: boolean }) {
+    if (options?.focus !== false) {
+      await this.focusFormulaEditor();
+    }
+    if (options?.replace) {
+      const modelIndex = await this.getFormulaModelIndex();
+      await this.codeEditor.setCodeEditorValue('', modelIndex);
+      await this.focusFormulaEditor();
+    }
+    await this.page.keyboard.type(text, { delay: 25 });
+  }
+
+  /** Returns the current formula Monaco model value (last registered model). */
+  async getFormulaText(): Promise<string> {
+    const modelIndex = await this.getFormulaModelIndex();
+    return this.codeEditor.getCodeEditorValue(modelIndex);
+  }
+
+  async enableFilter() {
+    await this.page.testSubj.click('indexPattern-advanced-accordion');
+    await this.page.testSubj.click('indexPattern-filters-existingFilterTrigger');
+  }
+
+  async setFilterBy(queryString: string) {
+    await this.page.testSubj
+      .locator('indexPattern-filters-queryStringInput')
+      .pressSequentially(queryString, { delay: 20 });
+    await this.page.testSubj.click('indexPattern-filters-existingFilterTrigger');
+  }
+
+  /**
+   * Adds a visualization layer of the given type (opens the layer-type menu).
+   * Caller must use a chart that shows `lnsLayerAddButton-{layerType}` after Add.
+   */
+  async createLayer(layerType: 'data' | 'referenceLine' | 'annotations') {
+    const tabsBefore = await this.getLayerCount();
+    await this.page.testSubj.click('lnsLayerAddButton');
+    await this.page.testSubj.click(`lnsLayerAddButton-${layerType}`);
+    await this.page.waitForFunction(
+      (before) => {
+        const tabs = document.querySelectorAll('[data-test-subj^="unifiedTabs_tab_"]').length;
+        const count = tabs === 0 ? 1 : tabs;
+        return count > before;
+      },
+      tabsBefore,
+      { timeout: 10_000 }
+    );
+  }
+
+  /**
+   * HTML5 DnD between dimension triggers/drop targets (FTR `dragDimensionToDimension`).
+   * Both `from` and `to` are test-subj chains (e.g. `panel > lns-dimensionTrigger`).
+   */
+  async dragDimensionToDimension({ from, to }: { from: string; to: string }) {
+    await this.page.testSubj.locator(from).waitFor({ state: 'visible' });
+    await this.page.testSubj.locator(to).waitFor({ state: 'visible' });
+
+    // Mirror FTR `browser.html5DragAndDrop`: dragstart, short pause, drop + dragend.
+    // Dimension→dimension drops do not reliably mount `.domDragDrop-isActiveGroup`
+    // (that signal is for field→workspace geo DnD), so keep the FTR-equivalent pause
+    // inside the page evaluate rather than waiting on a missing class.
+    await this.page.evaluate(
+      async ([fromChain, toChain]) => {
+        interface Transfer {
+          data: Record<string, string>;
+          setData: (key: string, value: string) => void;
+          getData: (key: string) => string;
+        }
+
+        function createEvent(typeOfEvent: string) {
+          const event = document.createEvent('CustomEvent') as CustomEvent & {
+            dataTransfer: Transfer;
+          };
+          event.initCustomEvent(typeOfEvent, true, true, null);
+          event.dataTransfer = {
+            data: {},
+            setData(key: string, value: string) {
+              this.data[key] = value;
+            },
+            getData(key: string) {
+              return this.data[key];
+            },
+          };
+          return event;
+        }
+
+        function queryChain(chain: string): Element | null {
+          const parts = chain.split('>').map((p) => p.trim());
+          let nodes: Element[] = [document.body];
+          for (const part of parts) {
+            const next: Element[] = [];
+            for (const node of nodes) {
+              next.push(...Array.from(node.querySelectorAll(`[data-test-subj="${part}"]`)));
+            }
+            nodes = next;
+          }
+          return nodes[0] ?? null;
+        }
+
+        const origin = queryChain(fromChain);
+        if (!origin) {
+          throw new Error(`dragDimensionToDimension: origin not found for ${fromChain}`);
+        }
+
+        const dragStartEvent = createEvent('dragstart');
+        origin.dispatchEvent(dragStartEvent);
+
+        // FTR browser.html5DragAndDrop pauses ~100ms between dragstart and drop.
+        await new Promise((resolve) => setTimeout(resolve, 100));
+
+        const target = queryChain(toChain);
+        if (!target) {
+          throw new Error(`dragDimensionToDimension: target not found for ${toChain}`);
+        }
+
+        const dropEvent = createEvent('drop');
+        dropEvent.dataTransfer = dragStartEvent.dataTransfer;
+        target.dispatchEvent(dropEvent);
+
+        const dragEndEvent = createEvent('dragend');
+        dragEndEvent.dataTransfer = dropEvent.dataTransfer;
+        origin.dispatchEvent(dragEndEvent);
+      },
+      [from, to] as [string, string]
+    );
+
+    await this.waitForLensDragDropToFinish();
+  }
+
+  async getWorkspaceErrorCount(): Promise<number> {
+    const errors = this.page.testSubj.locator('lnsWorkspaceErrors');
+    if ((await errors.count()) === 0) {
+      return 0;
+    }
+    const pagination = this.page.testSubj.locator('lnsWorkspaceErrorsPaginationControl');
+    if ((await pagination.count()) === 0) {
+      return 1;
+    }
+    // EUI pagination buttons use data-test-subj pagination-button-{n} (exclude prev/next).
+    return pagination.locator('[data-test-subj^="pagination-button-"]').count();
+  }
+
+  private datatableCell(rowIndex: number, colIndex: number, addRowNumberColumn: boolean) {
+    const col = colIndex + (addRowNumberColumn ? 1 : 0);
+    return this.dataTable.locator(
+      `[data-test-subj="dataGridRowCell"][data-gridcell-column-index="${col}"][data-gridcell-visible-row-index="${rowIndex}"]`
+    );
+  }
+
+  private parseInlineStyle(styleString: string): Record<string, string> {
+    return styleString.split(';').reduce<Record<string, string>>((memo, cssLine) => {
+      const [prop, value] = cssLine.split(':');
+      if (prop && value) {
+        memo[prop.trim()] = value.trim();
+      }
+      return memo;
+    }, {});
+  }
+
+  async getDatatableCellText(
+    rowIndex = 0,
+    colIndex = 0,
+    addRowNumberColumn = true
+  ): Promise<string> {
+    const cell = this.datatableCell(rowIndex, colIndex, addRowNumberColumn);
+    await cell.waitFor({ state: 'visible' });
+    // EUI data grid can append expand/filter glyphs (↵, ↦) / extra whitespace in innerText.
+    return ((await cell.innerText()) ?? '')
+      .replace(/[\u21b5\u21a6\u2192]/g, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  async getDatatableCellStyle(
+    rowIndex = 0,
+    colIndex = 0,
+    addRowNumberColumn = true
+  ): Promise<Record<string, string>> {
+    const cell = this.datatableCell(rowIndex, colIndex, addRowNumberColumn);
+    await cell.waitFor({ state: 'visible' });
+    return this.parseInlineStyle((await cell.getAttribute('style')) ?? '');
+  }
+
   async getCountOfDatatableColumns(): Promise<number> {
     // FTR parity: EuiDataGrid has no per-column test subj for content cells; `.euiDataGridHeaderCell__content`
     // excludes the leading control column (same selector as FTR `getCountOfDatatableColumns`).
-    return this.page
-      .locator('[data-test-subj="lnsDataTable"] .euiDataGridHeaderCell__content')
-      .count();
+    return this.dataTable.locator('.euiDataGridHeaderCell__content').count();
   }
 
   async getDatatableHeaderText(index = 0): Promise<string> {
     // Prefer content nodes — columnheader innerText can include action glyphs like ↵.
     // Index matches getCountOfDatatableColumns (control column excluded).
     // FTR parity: EUI class selector until Lens exposes header content test subjects.
-    const headers = this.page.locator(
-      '[data-test-subj="lnsDataTable"] .euiDataGridHeaderCell__content'
-    );
+    const headers = this.dataTable.locator('.euiDataGridHeaderCell__content');
     await this.page.waitForFunction(
       ({ minCount }) =>
         document.querySelectorAll('[data-test-subj="lnsDataTable"] .euiDataGridHeaderCell__content')
