@@ -65,6 +65,7 @@ type AssistantResult = {
   summaryAsText: string;
   generatedAt: number;
   generatedBy: string;
+  authorProfileUid?: string;
 } | null;
 
 /**
@@ -85,6 +86,9 @@ const buildResultFromStoredSummary = (
   summaryAsText: '',
   generatedAt: storedSummary.generated_at ?? 0,
   generatedBy: storedSummary.generated_by ?? '',
+  ...(storedSummary.author_profile_uid != null && {
+    authorProfileUid: storedSummary.author_profile_uid,
+  }),
 });
 
 export const useFetchEntityDetailsHighlights = ({
@@ -201,6 +205,7 @@ export const useFetchEntityDetailsHighlights = ({
       const typedOutput = outputResponse.output as EntityHighlightsResponse;
       const generatedAt = Date.now();
       const generatedBy = currentUser?.username ?? 'unknown';
+      const authorProfileUid = currentUser?.profileUid;
 
       // Capture the raw counts the model produced before capping, so persist-time telemetry
       // can measure overshoot (the persisted/capped doc can't reveal it on its own).
@@ -227,6 +232,7 @@ export const useFetchEntityDetailsHighlights = ({
         replacements,
         generatedAt,
         generatedBy,
+        ...(authorProfileUid != null && { authorProfileUid }),
       });
 
       if (persistSummary) {
