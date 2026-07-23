@@ -9,6 +9,7 @@ import type {
   QueryWithOccurrences,
   QueryOccurrencesResponse,
 } from '@kbn/significant-events-schema';
+import { parseDuration } from '@kbn/alerting-plugin/common/parse_duration';
 import { MS_PER_UNIT } from '@kbn/streams-schema';
 import { isEsqlUnknownIndexError } from '@kbn/storage-adapter';
 import type { TracedElasticsearchClient, UnparsedEsqlResponse } from '@kbn/traced-es-client';
@@ -21,6 +22,7 @@ import { parseError } from '../streams/parse_error';
 import { SecurityError } from '../errors/security_error';
 import { getColumnIndex } from '../streams/esql';
 import { type ISignificantEventsAlertsReader, ALERTS_READER_V2 } from './alerting/alerts_reader';
+import { METRIC_SERIES_EVERY } from './rules/metric_series_contract';
 import { ESQL_UNITS, MAX_FILL_BUCKETS, parseBucketSize } from './helpers/fill_bucket_gaps';
 
 export interface SparseBucket {
@@ -173,9 +175,25 @@ export async function computeOccurrences(
   const batches = chunk(ruleIds, rulesPerBatch);
   const limiter = pLimit(BATCH_CONCURRENCY);
 
-  const timeRangeFilter = {
+  // Precise window is on source `bucket` inside the ES|QL request. Convert once
+  // here so the reader never calls Date#toISOString on a missing range.
+  const rangeFromIso = from.toISOString();
+  const rangeToIso = to.toISOString();
+
+  // Widen the write-time `@timestamp` prune by EVERY so late rule runs for
+  // in-window minutes are still candidates (ES|QL then drops out-of-window buckets).
+  const writeTimePrune = {
     bool: {
-      filter: [{ range: { '@timestamp': { gte: from.toISOString(), lte: to.toISOString() } } }],
+      filter: [
+        {
+          range: {
+            '@timestamp': {
+              gte: rangeFromIso,
+              lte: new Date(to.getTime() + parseDuration(METRIC_SERIES_EVERY)).toISOString(),
+            },
+          },
+        },
+      ],
     },
   };
 
@@ -188,8 +206,10 @@ export async function computeOccurrences(
           esqlUnit,
           limit: batchRuleIds.length * buckets,
           spaceId,
+          rangeFromIso,
+          rangeToIso,
         }),
-        filter: timeRangeFilter,
+        filter: writeTimePrune,
       });
     } catch (err) {
       const { type, message } = parseError(err);

@@ -462,7 +462,14 @@ describe('fetchQueryOccurrencesFromAlerts', () => {
         esClient,
       });
 
-      const calledWith = esql.mock.calls[0][1] as { query: string };
+      const calledWith = esql.mock.calls[0][1] as {
+        query: string;
+        filter?: {
+          bool?: {
+            filter?: Array<{ range?: { '@timestamp'?: { gte?: string; lte?: string } } }>;
+          };
+        };
+      };
       expect(calledWith.query).toContain('.rule-events');
       expect(calledWith.query).toContain(
         'EVAL metric_value = TO_INTEGER(FIELD_EXTRACT(data, "metric_value"))'
@@ -470,9 +477,20 @@ describe('fetchQueryOccurrencesFromAlerts', () => {
       expect(calledWith.query).toContain(
         'EVAL bucket = TO_DATETIME(TO_LONG(FIELD_EXTRACT(data, "bucket")))'
       );
+      // Source-bucket window (not write-time) must be in the ES|QL body.
+      expect(calledWith.query).toContain(
+        `bucket >= TO_DATETIME("${FROM.toISOString()}") AND bucket <= TO_DATETIME("${TO.toISOString()}")`
+      );
       expect(calledWith.query).toContain('MAX(metric_value)');
       expect(calledWith.query).toContain('SUM(minute_value)');
       expect(calledWith.query).not.toContain('COUNT_DISTINCT');
+
+      // Write-time prune stays as an index skip hint; lte is widened by EVERY (5m).
+      const timestampRange = calledWith.filter?.bool?.filter?.find(
+        (clause) => clause.range?.['@timestamp']
+      )?.range?.['@timestamp'];
+      expect(timestampRange?.gte).toBe(FROM.toISOString());
+      expect(timestampRange?.lte).toBe(new Date(TO.getTime() + 5 * 60_000).toISOString());
     });
   });
 });

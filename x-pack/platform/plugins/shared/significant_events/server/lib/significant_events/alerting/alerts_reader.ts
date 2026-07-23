@@ -51,6 +51,13 @@ export interface OccurrencesEsqlParams {
   esqlUnit: string;
   limit: number;
   spaceId: string;
+  /**
+   * Inclusive chart window as UTC ISO-8601 strings. Applied to source `bucket`
+   * (match minute), not write-time `@timestamp`. Strings (not `Date`) keep this
+   * boundary free of `toISOString` crashes if a caller omits the range.
+   */
+  rangeFromIso: string;
+  rangeToIso: string;
 }
 
 export interface ISignificantEventsAlertsReader {

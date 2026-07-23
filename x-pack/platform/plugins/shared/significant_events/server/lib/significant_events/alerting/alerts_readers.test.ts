@@ -58,6 +58,8 @@ describe('SignificantEventsAlertsReaderV2', () => {
       esqlUnit: 'minutes',
       limit: 100,
       spaceId: SPACE_ID,
+      rangeFromIso: '2026-01-01T00:00:00.000Z',
+      rangeToIso: '2026-01-01T01:00:00.000Z',
     });
 
     expect(request.query).toContain('type == "signal"');
@@ -69,11 +71,26 @@ describe('SignificantEventsAlertsReaderV2', () => {
     expect(request.query).toContain(
       'EVAL bucket = TO_DATETIME(TO_LONG(FIELD_EXTRACT(data, "bucket")))'
     );
+    expect(request.query).toContain(
+      'bucket >= TO_DATETIME("2026-01-01T00:00:00.000Z") AND bucket <= TO_DATETIME("2026-01-01T01:00:00.000Z")'
+    );
     expect(request.query).toContain('MAX(metric_value)');
     expect(request.query).toContain('SUM(minute_value)');
     expect(request.query).not.toContain('data.bucket');
     expect(request.query).not.toContain('COUNT_DISTINCT');
     expect(request.query).not.toContain('group_hash');
+  });
+
+  it('rejects occurrences requests that omit the source-bucket range', () => {
+    expect(() =>
+      reader.buildOccurrencesEsqlRequest({
+        ruleIds: [RULE_UUID],
+        value: 5,
+        esqlUnit: 'minutes',
+        limit: 100,
+        spaceId: SPACE_ID,
+      } as Parameters<typeof reader.buildOccurrencesEsqlRequest>[0])
+    ).toThrow(/rangeFromIso and rangeToIso/);
   });
 
   it('counts alerts with track_total_hits for the idle gate', async () => {

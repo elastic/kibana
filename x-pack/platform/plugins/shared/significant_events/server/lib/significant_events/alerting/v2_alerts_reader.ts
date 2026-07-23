@@ -53,24 +53,42 @@ export class SignificantEventsAlertsReaderV2 implements ISignificantEventsAlerts
   readonly ruleIdColumn = 'rule_id' as const;
 
   /**
-   * Occurrences over chart buckets: MAX(metric_value) per closed source minute,
-   * then SUM into the requested chart interval (avoids double-counting overlaps).
+   * Match-document occurrences for the UI: each `metric_value` is COUNT(*) of
+   * source docs in a closed minute. MAX collapses overlapping rule re-emits,
+   * then SUM folds minutes into the chart interval. The time window is applied
+   * to source `bucket` (not write-time `@timestamp`).
    */
-  buildOccurrencesEsqlRequest({ ruleIds, value, esqlUnit, limit, spaceId }: OccurrencesEsqlParams) {
+  buildOccurrencesEsqlRequest({
+    ruleIds,
+    value,
+    esqlUnit,
+    limit,
+    spaceId,
+    rangeFromIso,
+    rangeToIso,
+  }: OccurrencesEsqlParams) {
+    if (typeof rangeFromIso !== 'string' || typeof rangeToIso !== 'string') {
+      throw new Error(
+        'buildOccurrencesEsqlRequest requires rangeFromIso and rangeToIso (UTC ISO-8601 strings)'
+      );
+    }
+
     const ruleIdLiterals = ruleIds.map((id) => esql.str(id));
     const ruleIdCol = esql.col(['rule', 'id']);
     const typeCol = esql.col('type');
     const spaceIdCol = esql.col('space_id');
+    // Same TO_DATETIME(str) pattern as latest_source_query / other SigEvents builders.
+    const rangeStart = esql.str(rangeFromIso);
+    const rangeEnd = esql.str(rangeToIso);
 
-    const scoped = esql
-      .from([this.index])
-      .where`${typeCol} == ${esql.str('signal')} AND ${spaceIdCol} == ${esql.str(
-      spaceId
-    )} AND ${ruleIdCol} IN (${ruleIdLiterals})`;
+    const scoped = esql.from([this.index]).where`${typeCol} == ${esql.str(
+      'signal'
+    )} AND ${spaceIdCol} == ${esql.str(spaceId)} AND ${ruleIdCol} IN (${ruleIdLiterals})`;
 
     return toEsqlRequest(
       projectMetricSeriesColumns(scoped)
         .pipe`WHERE bucket IS NOT NULL AND metric_value IS NOT NULL`
+        .pipe`WHERE bucket >= TO_DATETIME(${rangeStart}) AND bucket <= TO_DATETIME(${rangeEnd})`
         .pipe`STATS minute_value = MAX(metric_value) BY rule_id = ${ruleIdCol}, source_minute = DATE_TRUNC(1 minute, bucket)`
         .pipe`STATS count = SUM(minute_value) BY rule_id, bucket = BUCKET(source_minute, ${esql.num(
         value
