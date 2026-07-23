@@ -25,7 +25,12 @@ import {
 } from '@elastic/eui';
 
 import { MAX_FLYOUT_WIDTH } from '../../../constants';
-import { useGetOneAgentPolicyFull, useGetOneAgentPolicy, useStartServices } from '../../../hooks';
+import {
+  useGetOneAgentPolicyFull,
+  useGetOneAgentPolicy,
+  useStartServices,
+  useAuthz,
+} from '../../../hooks';
 import { Loading } from '../../../components';
 import { agentPolicyRouteService, getYamlFormatters } from '../../../services';
 import type { YamlFormatters } from '../../../../../services/yaml_formatters';
@@ -42,6 +47,7 @@ export const AgentPolicyYamlFlyout = memo<{ policyId: string; onClose: () => voi
     const flyoutTitleId = useGeneratedHtmlId();
 
     const core = useStartServices();
+    const canReadSettings = useAuthz().fleet.readSettings;
     const { isLoading: isLoadingYaml, data: yamlData, error } = useGetOneAgentPolicyFull(policyId);
     const { data: agentPolicyData } = useGetOneAgentPolicy(policyId);
     const [formatters, setFormatters] = useState<YamlFormatters | null>(null);
@@ -101,6 +107,31 @@ export const AgentPolicyYamlFlyout = memo<{ policyId: string; onClose: () => voi
               )}
             </h2>
           </EuiTitle>
+          {!canReadSettings && (
+            <>
+              <EuiSpacer size="m" />
+              <EuiCallOut
+                announceOnMount
+                title={
+                  <FormattedMessage
+                    id="xpack.fleet.policyDetails.secretsRedactedTitle"
+                    defaultMessage="Some proxy credentials may not be shown"
+                  />
+                }
+                size="m"
+                color="warning"
+                iconType="warning"
+              >
+                <FormattedMessage
+                  id="xpack.fleet.policyDetails.secretsRedactedDescription"
+                  defaultMessage="Proxy headers and TLS private keys are only visible to users with the {privilege} Kibana privilege for Fleet."
+                  values={{
+                    privilege: <strong>{'Fleet > Settings: Read'}</strong>,
+                  }}
+                />
+              </EuiCallOut>
+            </>
+          )}
           {packagePoliciesContainSecrets && (
             <>
               <EuiSpacer size="m" />
