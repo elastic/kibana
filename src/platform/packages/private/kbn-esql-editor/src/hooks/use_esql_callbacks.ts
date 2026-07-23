@@ -58,7 +58,8 @@ type MemoizedSources = MemoizedFn<
   [
     CoreStart,
     (() => Promise<ILicense | undefined>) | undefined,
-    ((sources: ESQLSourceResult[]) => Promise<ESQLSourceResult[]>) | undefined
+    ((sources: ESQLSourceResult[]) => Promise<ESQLSourceResult[]>) | undefined,
+    AbortSignal | undefined
   ],
   ReturnType<typeof getESQLSources>
 >;
@@ -109,12 +110,18 @@ export const useEsqlCallbacks = ({
 }: UseEsqlCallbacksParams): ESQLCallbacks => {
   const columnsAbortControllerRef = useRef<AbortController | undefined>(undefined);
   const previousColumnsQueryRef = useRef<string | undefined>(undefined);
+  const sourcesAbortControllerRef = useRef(new AbortController());
 
   const getSources = useCallback(async () => {
     clearCacheWhenOld(dataSourcesCache, DATA_SOURCES_CACHE_KEY);
     const getLicense = esqlService?.getLicense;
     const enrichSources = esqlService?.enrichSources;
-    const sources = await memoizedSources(core, getLicense, enrichSources).result;
+    const sources = await memoizedSources(
+      core,
+      getLicense,
+      enrichSources,
+      sourcesAbortControllerRef.current.signal
+    ).result;
     return sources;
   }, [dataSourcesCache, memoizedSources, core, esqlService]);
 
@@ -184,11 +191,13 @@ export const useEsqlCallbacks = ({
   // Abort any in-flight getColumnsFor request when the editor unmounts. Without this, navigating away
   // from a long-running query leaves it polling in the browser and running on ES.
   useEffect(() => {
+    const sourcesController = sourcesAbortControllerRef.current;
     return () => {
       columnsAbortControllerRef.current?.abort();
       if (previousColumnsQueryRef.current) {
         esqlFieldsCache.delete(previousColumnsQueryRef.current);
       }
+      sourcesController.abort();
     };
   }, [esqlFieldsCache]);
 
