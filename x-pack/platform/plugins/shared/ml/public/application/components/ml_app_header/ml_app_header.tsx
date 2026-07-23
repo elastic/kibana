@@ -60,6 +60,7 @@ export const MlAppHeader: FC<MlAppHeaderProps> = ({
         spacing={resolvedSpacing}
         docLink={docLink}
         sticky={false}
+        // @ts-expect-error - titleAppend is restricted to internal props but we do want the time picker here
         titleAppend={showDatePicker ? <MlDatePickerBar /> : undefined}
       />
       <EuiSpacer size="m" />
