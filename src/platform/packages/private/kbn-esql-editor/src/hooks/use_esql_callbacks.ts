@@ -219,7 +219,9 @@ export const useEsqlCallbacks = ({
   );
 
   const getTimeseriesIndicesCallback = useCallback(async () => {
-    return (await getTimeseriesIndices(core.http, lifecycleAbortControllerRef.current.signal)) || [];
+    return (
+      (await getTimeseriesIndices(core.http, lifecycleAbortControllerRef.current.signal)) || []
+    );
   }, [core.http]);
 
   const getViewsCallback = useCallback(async () => {

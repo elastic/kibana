@@ -100,5 +100,10 @@ export const getEditorExtensions = (
   // given index pattern — even when the cache triggers a background refresh
   // with a later, longer query string.
   const { commandName, indexPattern } = analysis;
-  return cachedGetEditorExtensions(http, `${commandName} ${indexPattern}`, activeSolutionId, signal);
+  return cachedGetEditorExtensions(
+    http,
+    `${commandName} ${indexPattern}`,
+    activeSolutionId,
+    signal
+  );
 };

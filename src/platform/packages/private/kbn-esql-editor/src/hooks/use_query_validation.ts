@@ -116,11 +116,14 @@ export const useQueryValidation = ({
 
   const isFirstCacheEffectRunRef = useRef(true);
   useEffect(() => {
-    // Skip the initial mount — the debounced validation below (skipFirstRender: false)
-    // already runs a full parse on first render, so running a second one here would
-    // duplicate every callback (getSources, getColumnsFor, etc.) at startup.
-    if (isFirstCacheEffectRunRef.current) {
-      isFirstCacheEffectRunRef.current = false;
+    const isFirstRun = isFirstCacheEffectRunRef.current;
+    isFirstCacheEffectRunRef.current = false;
+
+    // On the very first render with no query in flight, skip the parseMessages() call —
+    // the debounced validation (skipFirstRender: false) already runs a full parse pass,
+    // so a second one here would duplicate every callback (getSources, getColumnsFor, etc.).
+    // If a query is already loading at mount we fall through so the entry is still recorded.
+    if (isFirstRun && !isQueryLoading && !isLoading) {
       return;
     }
 
