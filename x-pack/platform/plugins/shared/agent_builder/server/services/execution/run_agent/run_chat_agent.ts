@@ -326,7 +326,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
 
   const processedInput: RoundInput = {
     message: processedConversation.nextInput.message,
-    attachments: processedConversation.nextInput.attachments.map((a) => a.attachment),
+    attachments: [], // legacy attachments are always stripped in `prepare_conversation` and replaced with refs
     attachment_refs: processedConversation.nextInput.attachment_refs,
   };
 

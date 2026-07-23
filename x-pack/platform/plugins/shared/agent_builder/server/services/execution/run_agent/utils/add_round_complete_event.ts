@@ -457,7 +457,9 @@ const createRound = ({
     state: undefined,
     input: {
       ...input,
-      ...(attachmentRefs.length > 0 ? { attachment_refs: attachmentRefs } : {}),
+      ...(attachmentRefs.length > 0
+        ? { attachment_refs: mergeAttachmentRefs(input.attachment_refs, attachmentRefs) }
+        : {}),
     },
     steps,
     ...(origin ? { origin: { type: origin.type } } : {}),
