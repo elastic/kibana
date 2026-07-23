@@ -38,6 +38,7 @@ dependsOn:
   - '@kbn/try-in-console'
   - '@kbn/share-plugin'
   - '@kbn/console-plugin'
+  - '@kbn/zod'
 tags:
   - plugin
   - prod

@@ -38,10 +38,10 @@ Tell the user Elasticsearch is starting up.
 
 ### Step 3: Register GCS Snapshot Repository
 
-Wait for Elasticsearch to become available by polling until the cluster health endpoint responds. Fail after 30 attempts (approximately 2.5 minutes):
+Wait for Elasticsearch to become available by polling until the cluster health endpoint responds. Fail after 30 attempts (approximately 2.5 minutes). Use `elastic:changeme` since `yarn es snapshot` starts a stateful cluster:
 
 ```bash
-MAX_RETRIES=30; COUNT=0; until curl -s -u elastic:changeme http://localhost:9200/_cluster/health | grep -q '"status"'; do COUNT=$((COUNT+1)); if [ "$COUNT" -ge "$MAX_RETRIES" ]; then echo "ERROR: Elasticsearch did not become available after $MAX_RETRIES attempts"; exit 1; fi; sleep 5; done
+MAX_RETRIES=30; COUNT=0; until curl -sk -u elastic:changeme http://localhost:9200/_cluster/health | grep -q '"status"'; do COUNT=$((COUNT+1)); if [ "$COUNT" -ge "$MAX_RETRIES" ]; then echo "ERROR: Elasticsearch did not become available after $MAX_RETRIES attempts"; exit 1; fi; sleep 5; done
 ```
 
 If the poll times out, show the error to the user and suggest checking the Elasticsearch background task output for startup errors.
@@ -53,7 +53,7 @@ Once ES is ready, register the GCS snapshot repository with these defaults:
 - **Base path**: `knowledge_base/snapshot_dt=2026-01-10`
 
 ```bash
-curl -s -u elastic:changeme -X PUT "http://localhost:9200/_snapshot/agent-builder-datasets" \
+curl -sk -u elastic:changeme -X PUT "http://localhost:9200/_snapshot/agent-builder-datasets" \
   -H "Content-Type: application/json" \
   -d '{
     "type": "gcs",
@@ -73,7 +73,7 @@ Tell the user the GCS snapshot repository has been registered.
 List available snapshots in the repository:
 
 ```bash
-curl -s -u elastic:changeme "http://localhost:9200/_snapshot/agent-builder-datasets/_all"
+curl -sk -u elastic:changeme "http://localhost:9200/_snapshot/agent-builder-datasets/_all"
 ```
 
 Parse the response and present each snapshot as an option using `AskUserQuestion`. For each snapshot, show:
@@ -87,7 +87,7 @@ Example options:
 Once the user selects a snapshot, restore it:
 
 ```bash
-curl -s -u elastic:changeme -X POST "http://localhost:9200/_snapshot/agent-builder-datasets/<snapshot_name>/_restore" \
+curl -sk -u elastic:changeme -X POST "http://localhost:9200/_snapshot/agent-builder-datasets/<snapshot_name>/_restore" \
   -H "Content-Type: application/json" \
   -d '{
     "indices": "*",
@@ -100,7 +100,7 @@ Verify the restore was accepted by checking the response contains `"accepted":tr
 To retry with conflicting indices closed:
 
 ```bash
-curl -s -u elastic:changeme -X POST "http://localhost:9200/<comma_separated_index_names>/_close"
+curl -sk -u elastic:changeme -X POST "http://localhost:9200/<comma_separated_index_names>/_close"
 ```
 
 Then re-run the restore command.
@@ -109,30 +109,43 @@ Tell the user the snapshot has been restored.
 
 ### Step 5: Launch Kibana
 
-Launch Kibana in the background using `run_in_background`:
+Launch Kibana in the background using `run_in_background`. This flow uses a stateful (non-serverless) ES snapshot, so launch stateful Kibana:
 
 ```bash
 yarn start --no-base-path
 ```
 
-Tell the user Kibana is starting up.
+Tell the user Kibana is starting up. Once Kibana is running, use `scripts/kibana_api_common.sh` to detect the working URL and credentials for subsequent steps:
 
-### Step 6: Confirm Phoenix Running
+```bash
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+source "$REPO_ROOT/scripts/kibana_api_common.sh"
+# KIBANA_URL and KIBANA_AUTH are now set
+```
 
-Use `AskUserQuestion` to confirm Phoenix is running:
+### Step 6: Confirm Phoenix Running (optional)
 
-> Is Phoenix running and ready to receive traces?
+Use `AskUserQuestion` to ask whether the user wants Phoenix tracing:
+
+> Do you want to use Phoenix for trace collection?
 
 Options:
-- **Yes** — Continue
-- **Not yet** — Wait for the user to start Phoenix, then ask again
+- **Yes, Phoenix is running** — Set `KBN_EVALS_EXECUTOR=phoenix` in the final command
+- **No, use inline executor** — Set `KBN_EVALS_EXECUTOR=inline` (no Phoenix needed; traces won't be exported)
+
+If Phoenix: ask the user to confirm it's ready before continuing.
 
 ### Step 7: Launch EDOT
 
-Launch the EDOT collector in the background using `run_in_background`:
+Launch the EDOT collector in the background using `run_in_background`. Use the ES credentials detected by `kibana_api_common.sh`:
 
 ```bash
-ELASTICSEARCH_HOST=http://localhost:9200 ELASTICSEARCH_USERNAME=elastic ELASTICSEARCH_PASSWORD=changeme node scripts/edot_collector.js
+ES_USER="${KIBANA_AUTH%%:*}"
+ES_PASS="${KIBANA_AUTH#*:}"
+ELASTICSEARCH_HOST=http://localhost:9200 \
+ELASTICSEARCH_USERNAME="$ES_USER" \
+ELASTICSEARCH_PASSWORD="$ES_PASS" \
+node scripts/edot_collector.js
 ```
 
 Tell the user EDOT is starting up.
@@ -180,13 +193,16 @@ Using the collected values and the following defaults, output the exact command 
 - **RAG_EVAL_K**: `10,20,30,40`
 - **EVALUATION_REPETITIONS**: `1`
 
+Use `KIBANA_AUTH` detected in Step 5 for `TRACING_ES_URL` (format: `http://<user>:<pass>@localhost:9200`).
+Use the executor chosen in Step 6 (`phoenix` or `inline`).
+
 Display a summary and the command:
 
 > **Stack is ready!**
 >
 > - Elasticsearch: running (snapshot with GCS credentials)
-> - Kibana: running (no base path)
-> - Phoenix: confirmed running
+> - Kibana: `<KIBANA_URL>` (`<KIBANA_AUTH username>`)
+> - Executor: `<phoenix|inline>`
 > - EDOT: running
 >
 > **Important:** Make sure Cloud Connected Mode (CCM) is enabled in Kibana before running the evaluation. Go to **Stack Management > Cloud Connected Mode** in the Kibana UI and enable it if it is not already active.
@@ -194,10 +210,10 @@ Display a summary and the command:
 > **Run the following command in a separate terminal to start the evaluation:**
 >
 > ```bash
-> TRACING_ES_URL=http://elastic:changeme@localhost:9200 \
+> TRACING_ES_URL=http://<ES_USER>:<ES_PASS>@localhost:9200 \
 > SELECTED_EVALUATORS="<value>" \
 > RAG_EVAL_K=<value> \
-> KBN_EVALS_EXECUTOR=phoenix \
+> KBN_EVALS_EXECUTOR=<phoenix|inline> \
 > EVALUATION_CONNECTOR_ID=<value> \
 > DATASET_NAME="<value>" \
 > EVALUATION_REPETITIONS=<value> \
@@ -242,7 +258,8 @@ Tell the user:
 ## Important Notes
 
 - **Background processes**: ES, Kibana, and EDOT are launched with `run_in_background`. Their task IDs are tracked by the session so `stop` can kill them.
-- **Hard-coded values**: `TRACING_ES_URL`, `KBN_EVALS_EXECUTOR`, and `KBN_EVALS_SKIP_CONNECTOR_SETUP` are not configurable — they are set for the local dev stack.
+- **`KBN_EVALS_EXECUTOR`**: Set to `phoenix` if the user confirmed Phoenix is running, otherwise `inline`. With `inline`, traces are not exported and `ExpectedSkillInvocation` evaluators return `null`.
+- **ES credentials**: Always derived from `KIBANA_AUTH` (detected via `kibana_api_common.sh`). The `yarn es snapshot` flow starts a stateful cluster with `elastic:changeme`; do not hard-code this.
 - **Always use `node scripts/playwright test`** — never use `npx playwright test`.
 - **Playwright config**: Always uses `x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/playwright.config.ts`.
 - **Test spec**: Always runs `evals/external/external_dataset.spec.ts`.

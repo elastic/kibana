@@ -8,6 +8,7 @@
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 import { platformCoreTools } from '@kbn/agent-builder-common/tools';
 import { internalNamespaces } from '@kbn/agent-builder-common/base/namespaces';
+import { getAiIndexJsonSchema } from '@kbn/context-engine-plugin/common/http_api/ai_index_schema';
 import content from './ki_automation_generation.skill.md.text';
 import indexSelectionReferenceYaml from './index_selection_reference.yaml.text';
 
@@ -25,13 +26,18 @@ export const kiAutomationGenerationSkill = defineSkillType({
       relativePath: '.',
       content: indexSelectionReferenceYaml,
     },
+    {
+      name: 'ai-index-schema',
+      relativePath: '.',
+      content: JSON.stringify(getAiIndexJsonSchema(), null, 2),
+    },
   ],
   getRegistryTools: () => [
     platformCoreTools.generateWorkflow,
     platformCoreTools.executeWorkflow,
     platformCoreTools.generateEsql,
     platformCoreTools.executeEsql,
-    platformCoreTools.listIndices,
+    platformCoreTools.listIndices, // available for edge-case handling; Phase 1 uses get_index_mapping instead
     platformCoreTools.getIndexMapping,
     platformCoreTools.getWorkflowExecutionStatus,
     `${internalNamespaces.workflows}.validate_workflow`,
