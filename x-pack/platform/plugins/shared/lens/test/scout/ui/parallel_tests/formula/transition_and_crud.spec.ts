@@ -37,8 +37,9 @@ spaceTest.describe('Lens formula transition and CRUD', { tag: tags.stateful.clas
     });
     await lens.switchToFormula();
     // getCurrentChartDebugState waits for chart render-complete internally, so a single read is stable.
+    // Formula transition must preserve the terms grouping on the saved viz: 3 legend items (FTR parity).
     const { legend } = await lens.getCurrentChartDebugState('xyVisChart');
-    expect(legend?.items.length ?? 0).toBeGreaterThan(0);
+    expect(legend?.items).toHaveLength(3);
 
     const { violations } = await page.checkA11y({
       // Dimension flyout has no root data-test-subj; title id is the stable a11y landmark.
