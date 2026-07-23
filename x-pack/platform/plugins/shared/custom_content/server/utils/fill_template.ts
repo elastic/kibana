@@ -8,14 +8,33 @@
 import { Liquid } from 'liquidjs';
 import type { ESQLColumn } from '@kbn/es-types';
 
+const partialsDisabled = () => {
+  throw new Error('partials are disabled');
+};
+
+// `include` and `render` tags resolve filenames through the `fs` option.
+// Every method in the custom loader throws so no filesystem path can be read
+// from an untrusted template regardless of `dynamicPartials`.
 const liquid = new Liquid({
   strictFilters: false,
   strictVariables: false,
   dynamicPartials: false,
+  relativeReference: false,
   outputEscape: 'escape',
+  fs: {
+    readFileSync: partialsDisabled,
+    readFile: async () => partialsDisabled(),
+    existsSync: () => false,
+    exists: async () => false,
+    resolve: partialsDisabled,
+  },
 });
 
-export function fillTemplate(template: string, columns: ESQLColumn[], rows: unknown[][]): string {
+export async function fillTemplate(
+  template: string,
+  columns: ESQLColumn[],
+  rows: unknown[][]
+): Promise<string> {
   const maxValues: Record<string, number> = {};
   columns.forEach((col, i) => {
     let max = -Infinity;
@@ -50,5 +69,5 @@ export function fillTemplate(template: string, columns: ESQLColumn[], rows: unkn
     return obj;
   });
 
-  return liquid.parseAndRenderSync(template.trim(), { rows: rowObjects, max: maxValues });
+  return liquid.parseAndRender(template.trim(), { rows: rowObjects, max: maxValues });
 }

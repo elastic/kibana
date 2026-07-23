@@ -14,6 +14,7 @@ export const CUSTOM_CONTENT_MAX_PROMPT_LENGTH = 10_000;
 export const CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH = 1_000_000;
 export const CUSTOM_CONTENT_MAX_TEMPLATE_BYTES = 500_000;
 export const CUSTOM_CONTENT_SAMPLE_ROW_COUNT = 3;
+export const CUSTOM_CONTENT_MAX_RENDER_ROWS = 500;
 // Schema limit is larger than the generation byte cap to accommodate prepareHtml overhead
 // (DOMPurify WHOLE_DOCUMENT wrappers + CSP <meta> injection) applied before persisting.
 export const CUSTOM_CONTENT_MAX_TEMPLATE_SCHEMA_LENGTH = 510_000;

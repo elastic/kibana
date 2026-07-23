@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 import type { IRouter, CoreSetup } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { ESQLColumn } from '@kbn/es-types';
-import { getESQLResults } from '@kbn/esql-utils';
+import { getESQLResults, appendLimitToQuery } from '@kbn/esql-utils';
 import dateMath from '@kbn/datemath';
 import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import {
@@ -17,6 +17,7 @@ import {
   CUSTOM_CONTENT_MAX_TEMPLATE_SCHEMA_LENGTH,
   CUSTOM_CONTENT_ENABLED_FLAG_KEY,
   CUSTOM_CONTENT_RENDER_ROUTE,
+  CUSTOM_CONTENT_MAX_RENDER_ROWS,
 } from '../../common/constants';
 import { fillTemplate } from '../utils/fill_template';
 
@@ -63,8 +64,13 @@ export function registerRenderRoute(
 
       try {
         const search = data.search.asScoped(request).search;
-        const { response: esqlResponse } = await getESQLResults({ search, esqlQuery, filter });
-        const html = fillTemplate(
+        const boundedQuery = appendLimitToQuery(esqlQuery, CUSTOM_CONTENT_MAX_RENDER_ROWS);
+        const { response: esqlResponse } = await getESQLResults({
+          search,
+          esqlQuery: boundedQuery,
+          filter,
+        });
+        const html = await fillTemplate(
           template,
           esqlResponse.columns as ESQLColumn[],
           esqlResponse.values as unknown[][]

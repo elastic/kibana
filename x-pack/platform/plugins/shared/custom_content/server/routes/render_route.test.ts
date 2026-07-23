@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import { getESQLResults } from '@kbn/esql-utils';
+import { getESQLResults, appendLimitToQuery } from '@kbn/esql-utils';
 import { fillTemplate } from '../utils/fill_template';
 import { registerRenderRoute } from './render_route';
+import { CUSTOM_CONTENT_MAX_RENDER_ROWS } from '../../common/constants';
 
 jest.mock('@kbn/esql-utils', () => ({
   ...jest.requireActual('@kbn/esql-utils'),
   getESQLResults: jest.fn(),
+  appendLimitToQuery: jest.fn((q: string) => `${q} | LIMIT_MOCK`),
 }));
 
 jest.mock('@kbn/datemath', () => ({
@@ -24,13 +26,14 @@ jest.mock('@kbn/datemath', () => ({
 }));
 
 jest.mock('../utils/fill_template', () => ({
-  fillTemplate: jest.fn(
-    (_template: string, _cols: unknown, _rows: unknown) => '<p>filled</p>'
+  fillTemplate: jest.fn((_template: string, _cols: unknown, _rows: unknown) =>
+    Promise.resolve('<p>filled</p>')
   ) as jest.MockedFunction<typeof fillTemplate>,
 }));
 
 const mockGetESQLResults = getESQLResults as jest.MockedFunction<typeof getESQLResults>;
 const mockFillTemplate = fillTemplate as jest.MockedFunction<typeof fillTemplate>;
+const mockAppendLimitToQuery = appendLimitToQuery as jest.MockedFunction<typeof appendLimitToQuery>;
 
 interface RequestBody {
   template: string;
@@ -95,6 +98,7 @@ describe('registerRenderRoute', () => {
       },
       params: { query: '' },
     } as Awaited<ReturnType<typeof getESQLResults>>);
+    mockAppendLimitToQuery.mockImplementation((q: string) => `${q} | LIMIT_MOCK`);
   });
 
   it('registers a POST handler at the internal render path', () => {
@@ -126,9 +130,21 @@ describe('registerRenderRoute', () => {
     await handler(context, request, response);
 
     expect(mockGetESQLResults).toHaveBeenCalledWith(
-      expect.objectContaining({ esqlQuery: request.body.esqlQuery })
+      expect.objectContaining({ esqlQuery: `${request.body.esqlQuery} | LIMIT_MOCK` })
     );
     expect(response.ok).toHaveBeenCalledWith({ body: { html: '<p>filled</p>' } });
+  });
+
+  it('caps the row count by applying appendLimitToQuery with CUSTOM_CONTENT_MAX_RENDER_ROWS', async () => {
+    const { router, handler, getStartServices, logger, context, request, response } = buildMocks();
+    registerRenderRoute(router, getStartServices, logger);
+
+    await handler(context, request, response);
+
+    expect(mockAppendLimitToQuery).toHaveBeenCalledWith(
+      request.body.esqlQuery,
+      CUSTOM_CONTENT_MAX_RENDER_ROWS
+    );
   });
 
   it('builds and forwards a range filter when timeField and timeRange are both provided', async () => {
@@ -189,13 +205,11 @@ describe('registerRenderRoute', () => {
     expect(response.ok).not.toHaveBeenCalled();
   });
 
-  it('returns a 500 when fillTemplate throws', async () => {
+  it('returns a 500 when fillTemplate rejects', async () => {
     const { router, handler, getStartServices, logger, context, request, response, loggerError } =
       buildMocks();
     registerRenderRoute(router, getStartServices, logger);
-    mockFillTemplate.mockImplementation(() => {
-      throw new Error('invalid_liquid_template');
-    });
+    mockFillTemplate.mockRejectedValue(new Error('invalid_liquid_template'));
 
     await handler(context, request, response);
 
