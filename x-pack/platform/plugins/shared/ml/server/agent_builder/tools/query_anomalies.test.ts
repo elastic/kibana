@@ -114,7 +114,7 @@ describe('queryAnomaliesTool', () => {
 | STATS job_count = COUNT(*),
         job_ids = VALUES(job_id)`;
 
-      const result = await queryAnomaliesTool.handler({ query }, context);
+      const result = await queryAnomaliesTool.handler({ query, limit: 100 }, context);
 
       expect(esClient.asInternalUser.esql.query).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -124,7 +124,8 @@ describe('queryAnomaliesTool', () => {
         })
       );
       expect(esClient.asCurrentUser.esql.query).not.toHaveBeenCalled();
-      expect(result.results).toEqual(
+      const standardResult = result as { results: Array<{ type: string; data?: unknown }> };
+      expect(standardResult.results).toEqual(
         expect.arrayContaining([
           expect.objectContaining({ type: ToolResultType.query }),
           expect.objectContaining({
@@ -145,7 +146,7 @@ describe('queryAnomaliesTool', () => {
         'FROM .ml-anomalies-* | WHERE job_id LIKE ?job_id_pattern AND record_score >= ?min_score';
 
       await queryAnomaliesTool.handler(
-        { query, params: { job_id_pattern: 'web-*', min_score: 75 } },
+        { query, params: { job_id_pattern: 'web-*', min_score: 75 }, limit: 100 },
         context
       );
 
@@ -160,7 +161,10 @@ describe('queryAnomaliesTool', () => {
       const esClient = createEsClientMock();
       const context = createContext(esClient);
 
-      const result = await queryAnomaliesTool.handler({ query: 'FROM logs-* | LIMIT 10' }, context);
+      const result = await queryAnomaliesTool.handler(
+        { query: 'FROM logs-* | LIMIT 10', limit: 100 },
+        context
+      );
 
       expect(esClient.asInternalUser.esql.query).not.toHaveBeenCalled();
       const standardResult = result as {
@@ -176,7 +180,7 @@ describe('queryAnomaliesTool', () => {
       const context = createContext(esClient);
 
       const result = await queryAnomaliesTool.handler(
-        { query: 'FROM .ml-config | LIMIT 1' },
+        { query: 'FROM .ml-config | LIMIT 1', limit: 100 },
         context
       );
 
