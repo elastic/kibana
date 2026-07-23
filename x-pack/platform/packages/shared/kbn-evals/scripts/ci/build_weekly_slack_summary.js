@@ -62,7 +62,7 @@ function renderSuiteLine(suite) {
   const rootCause = extractSuiteRootCauseLine(suite.triageBody);
   if (rootCause) {
     lines.push(`  ${rootCause}`);
-  } else if (!suite.triageBody) {
+  } else {
     lines.push(`  _(no triage)_`);
   }
 
