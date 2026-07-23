@@ -47,8 +47,7 @@ esac
 echo "--- Download Kibana Distribution"
 
 mkdir -p ./target
-download_tmp_artifact "kibana-default.tar.zst" ./target "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
-mv ./target/kibana-default.tar.zst ./target/kibana-$VERSION-linux-x86_64.tar.zst
+download_artifact "kibana-$VERSION-linux-x86_64.tar.zst" ./target --build "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
 
 echo "--- Build Cloud Distribution"
 ELASTICSEARCH_MANIFEST_URL="https://storage.googleapis.com/kibana-ci-es-snapshots-daily/$(jq -r '.version' package.json)/manifest-latest-verified.json"
@@ -152,35 +151,15 @@ if [ -z "${CLOUD_DEPLOYMENT_ID}" ] || [ "${CLOUD_DEPLOYMENT_ID}" = 'null' ]; the
 
   echo "Enabling verbose logging..."
   ecctl deployment show "$CLOUD_DEPLOYMENT_ID" --generate-update-payload | jq '
-    def ensure_setting($pattern; $key; $value):
-      if test("(?m)^" + $pattern + ":") then
-        sub("(?m)^" + $pattern + ":.*$"; $key + ": " + $value)
-      else
-        . + (if length == 0 or endswith("\n") then "" else "\n" end) + $key + ": " + $value + "\n"
-      end;
-    .resources.kibana[0].plan.kibana.user_settings_yaml = (
-      (.resources.kibana[0].plan.kibana.user_settings_yaml // "")
-      | ensure_setting("logging\\.root\\.level"; "logging.root.level"; "all")
-      | ensure_setting("xpack\\.pnd\\.enabled"; "xpack.pnd.enabled"; "true")
-    )
+    .resources.kibana[0].plan.kibana.user_settings_yaml = "logging.root.level: all"
     ' > /tmp/verbose_logging.json
   ecctl deployment update "$CLOUD_DEPLOYMENT_ID" --track --output json --file /tmp/verbose_logging.json > "$ECCTL_LOGS"
 else
   ecctl deployment show "$CLOUD_DEPLOYMENT_ID" --generate-update-payload | jq '
-    def ensure_setting($pattern; $key; $value):
-      if test("(?m)^" + $pattern + ":") then
-        sub("(?m)^" + $pattern + ":.*$"; $key + ": " + $value)
-      else
-        . + (if length == 0 or endswith("\n") then "" else "\n" end) + $key + ": " + $value + "\n"
-      end;
     .resources.kibana[0].plan.kibana.docker_image = "'$KIBANA_CLOUD_IMAGE'" |
     (.. | select(.version? != null).version) = "'$VERSION'" |
     (.resources.elasticsearch[0].plan.cluster_topology[]? | select(.zone_count != null) | .zone_count) = '$ES_ZONE_COUNT' |
-    (.resources.elasticsearch[0].plan.cluster_topology[]? | select(.id == "hot_content") | .size.value) = '$ES_HOT_TIER_MEMORY_SIZE' |
-    .resources.kibana[0].plan.kibana.user_settings_yaml = (
-      (.resources.kibana[0].plan.kibana.user_settings_yaml // "")
-      | ensure_setting("xpack\\.pnd\\.enabled"; "xpack.pnd.enabled"; "true")
-    )
+    (.resources.elasticsearch[0].plan.cluster_topology[]? | select(.id == "hot_content") | .size.value) = '$ES_HOT_TIER_MEMORY_SIZE'
     ' > /tmp/deploy.json
 
   # Verify that zone_count was set (at least one topology element should have zone_count)

@@ -13,8 +13,6 @@ xpack.pnd.enabled: true
 - **`xpack.pnd.enabled`** — sole enablement switch (default `false`). When false, the plugin registers no app, routes, or features; Security nav nodes for PND are omitted automatically.
 - **`xpack.pnd.ui.useMockData`** — optional data-source toggle (default `true`). Not required for enablement; leave unset for mock fixtures. Set `false` later when wiring live Workflows / Agent Builder projection.
 
-PR cloud deploys set `xpack.pnd.enabled: true` via `.buildkite/scripts/steps/cloud/deploy.json` (label `ci:cloud-deploy`). **Revert that enablement before merge** so production/default builds stay off.
-
 Restart Kibana after changing config, then open `/app/pnd` (or use the Security left rail).
 
 ### When disabled (`xpack.pnd.enabled: false`) — no production pollution
