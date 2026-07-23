@@ -28,6 +28,7 @@ const OPEN_IN_DISCOVER_EPISODE_ACTION_ID = 'ALERTING_V2_OPEN_EPISODE_IN_DISCOVER
 const WRITE_CAPABILITIES = { alerting_v2_alerts: { read: true, all: true } };
 const READ_ONLY_CAPABILITIES = { alerting_v2_alerts: { read: true, all: false } };
 let mockCapabilities: Record<string, Record<string, boolean>> = WRITE_CAPABILITIES;
+let mockCanReadExecutionHistory = true;
 
 jest.mock('@kbn/core-di-browser', () => {
   const { UserCapabilities: ActualUserCapabilities } = jest.requireActual(
@@ -36,7 +37,15 @@ jest.mock('@kbn/core-di-browser', () => {
   return {
     useService: (token: unknown) => {
       if (token === ActualUserCapabilities) {
-        return new ActualUserCapabilities({ capabilities: mockCapabilities });
+        const capabilities = new ActualUserCapabilities({ capabilities: mockCapabilities });
+        return {
+          can: (feature: string, capability: string) => capabilities.can(feature, capability),
+          canWrite: (feature: string) => capabilities.canWrite(feature),
+          canRead: (feature: string) =>
+            feature === 'executionHistory'
+              ? mockCanReadExecutionHistory
+              : capabilities.canRead(feature),
+        };
       }
       return {};
     },
@@ -48,22 +57,6 @@ jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useHistory: () => ({ push: jest.fn() }),
   useParams: jest.fn(),
-}));
-
-let mockCanReadExecutionHistory = true;
-
-jest.mock('@kbn/core-di-browser', () => ({
-  useService: (token: unknown) => {
-    if (typeof token === 'function') {
-      return {
-        canRead: () => mockCanReadExecutionHistory,
-        canWrite: () => mockCanReadExecutionHistory,
-        can: () => mockCanReadExecutionHistory,
-      };
-    }
-    return {};
-  },
-  CoreStart: (key: string) => key,
 }));
 
 jest.mock('@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_query', () => ({
