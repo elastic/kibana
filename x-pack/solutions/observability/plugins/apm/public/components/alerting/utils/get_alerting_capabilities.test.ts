@@ -6,15 +6,13 @@
  */
 
 import type { Capabilities } from '@kbn/core/public';
-import type { ApmPluginSetupDeps } from '../../../plugin';
 import { getAlertingCapabilities } from './get_alerting_capabilities';
 
 describe('getAlertingCapabilities', () => {
   describe('when the alerting plugin is not enabled', () => {
     it('returns isAlertingAvailable = false', () => {
       expect(
-        getAlertingCapabilities({} as ApmPluginSetupDeps, { apm: {} } as unknown as Capabilities)
-          .isAlertingAvailable
+        getAlertingCapabilities({}, { apm: {} } as unknown as Capabilities).isAlertingAvailable
       ).toEqual(false);
     });
   });

@@ -9,53 +9,16 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiFlyoutFooter } from '@elastic/
 import { EBT_CLICK_ACTIONS } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
-import type { Environment } from '../../../../../common/environment_rt';
-import { useManageSlosUrl } from '../../../../hooks/use_manage_slos_url';
-import { useDiscoverHref } from '../../links/discover_links/use_discover_href';
 import { ActionsContextMenu, type ActionGroups } from '../../actions_context_menu';
 import { SERVICE_FLYOUT_EBT_ELEMENTS } from '../ebt_constants';
-import { useServiceLinks } from '../hooks/use_service_links';
+import { useServiceFlyoutLinks } from '../hooks/use_service_flyout_links';
 
-interface ServiceFlyoutFooterProps {
-  serviceName: string;
-  environment: Environment;
-  rangeFrom: string;
-  rangeTo: string;
-  transactionType: string;
-}
-
-export function ServiceFlyoutFooter({
-  serviceName,
-  environment,
-  rangeFrom,
-  rangeTo,
-  transactionType,
-}: ServiceFlyoutFooterProps) {
-  const { alertsHref } = useServiceLinks({
-    serviceName,
-    rangeFrom,
-    rangeTo,
-    environment,
-    kuery: '',
-  });
-
-  const slosHref = useManageSlosUrl({ serviceName, environment });
-
-  const tracesDiscoverHref = useDiscoverHref({
-    indexType: 'traces',
-    rangeFrom,
-    rangeTo,
-    queryParams: { serviceName, transactionType, environment, sortDirection: 'DESC' },
-  });
-
-  const logsDiscoverHref = useDiscoverHref({
-    indexType: 'error',
-    rangeFrom,
-    rangeTo,
-    queryParams: { serviceName, environment, sortDirection: 'DESC' },
-  });
-
-  const hasAnyActions = tracesDiscoverHref || logsDiscoverHref || alertsHref || slosHref;
+export function ServiceFlyoutFooter() {
+  const {
+    alerts: alertsHref,
+    slos: slosHref,
+    discover: { traces: tracesDiscoverHref, logs: logsDiscoverHref },
+  } = useServiceFlyoutLinks();
 
   const actionGroups = useMemo(() => {
     const groups: ActionGroups = [];
@@ -157,7 +120,7 @@ export function ServiceFlyoutFooter({
                 size="s"
                 iconType="chevronSingleDown"
                 iconSide="right"
-                disabled={!hasAnyActions}
+                disabled={actionGroups.length === 0}
                 data-test-subj="serviceFlyoutActionsButton"
               >
                 {i18n.translate('xpack.apm.serviceFlyout.actionsButtonLabel', {

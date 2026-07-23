@@ -120,6 +120,15 @@ export const CaseRequestFieldsSchema = CaseBaseOptionalFieldsRequestSchema.exten
 });
 
 /**
+ * Template reference accepted on case CREATION — zod mirror of `CaseRequestTemplateRt`.
+ * `version` may be omitted: the server resolves and pins the template's latest version.
+ */
+export const CaseRequestTemplateSchema = z.object({
+  id: z.string(),
+  version: z.number().int().min(1).optional(),
+});
+
+/**
  * Create case
  */
 export const CasePostRequestSchema = z.object({
@@ -152,7 +161,7 @@ export const CasePostRequestSchema = z.object({
     ])
     .optional(),
   customFields: CaseRequestCustomFieldsSchema.optional(),
-  template: CaseTemplateSchema.nullable().optional(),
+  template: CaseRequestTemplateSchema.nullable().optional(),
   [CASE_EXTENDED_FIELDS]: z.record(z.string(), z.string()).optional(),
 });
 
