@@ -1,0 +1,10 @@
+prs:
+  - https://github.com/elastic/kibana/pull/280364
+type: enhancement
+products:
+  - product: cloud-serverless
+    target: 2026-07-23
+areas:
+  - Agent Builder
+title: Allow workflows to create public Agent Builder conversations
+description: "The `ai.agent` workflow step supports `public-conversation: true` so newly created conversations can be shared with users who can use the agent. Significant Events managed workflows that persist conversations enable this by default."

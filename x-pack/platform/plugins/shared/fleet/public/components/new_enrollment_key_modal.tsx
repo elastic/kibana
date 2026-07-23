@@ -88,7 +88,7 @@ export const NewEnrollmentTokenModal: React.FunctionComponent<Props> = ({
 
   const selectPolicyOptions = useMemo(() => {
     return agentPolicies
-      .filter((agentPolicy) => !agentPolicy.is_managed)
+      .filter((agentPolicy) => !agentPolicy.is_managed && !agentPolicy.supports_agentless)
       .map((agentPolicy) => ({
         key: agentPolicy.id,
         label: agentPolicy.name,
