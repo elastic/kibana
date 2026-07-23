@@ -9,6 +9,9 @@ module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../..',
   roots: ['<rootDir>/x-pack/platform/plugins/shared/osquery'],
+  moduleNameMapper: {
+    'immer-v9': '<rootDir>/node_modules/immer',
+  },
   coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/platform/plugins/shared/osquery',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
