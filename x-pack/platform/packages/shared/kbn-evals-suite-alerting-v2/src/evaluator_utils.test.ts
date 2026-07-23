@@ -8,7 +8,7 @@
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { Evaluator, EvaluationResult, TaskOutput } from '@kbn/evals';
 import { AgentPromptType } from '@kbn/agent-builder-common/agents';
-import { withLowScoreLogging } from './log_low_score';
+import { withLowScoreLogging } from './evaluator_utils';
 
 const createLog = () => ({ warning: jest.fn() } as unknown as ToolingLog);
 

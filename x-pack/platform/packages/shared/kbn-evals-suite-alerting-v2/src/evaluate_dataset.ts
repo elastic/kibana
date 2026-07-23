@@ -35,7 +35,7 @@ import {
   getAssistantMessages,
   type ExpectRenderAttachment,
 } from './evaluators/expected_render_attachment';
-import { withLowScoreLogging } from './evaluators/log_low_score';
+import { withLowScoreLogging } from './evaluator_utils';
 
 export interface RuleManagementExample extends Example {
   input: {
