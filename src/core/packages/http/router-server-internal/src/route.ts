@@ -213,8 +213,9 @@ export const handle = async (
       responseFactory: kibanaResponseFactory,
       log,
       isDevMode,
-      validateResponse: (response) =>
-        validateOnRequestValidationErrorResponse(responseValidation, response),
+      validateResponse: responseValidation
+        ? (response) => validateOnRequestValidationErrorResponse(responseValidation, response)
+        : undefined,
     });
     if (isPublicAccessApiRoute(route.options)) {
       injectVersionHeader(BASE_PUBLIC_VERSION, customResponse);
@@ -272,7 +273,7 @@ export async function handleRequestValidationFailure({
   responseFactory: KibanaResponseFactory;
   log: Logger;
   isDevMode: boolean;
-  validateResponse: (response: IKibanaResponse) => string | undefined;
+  validateResponse?: (response: IKibanaResponse) => string | undefined;
 }): Promise<IKibanaResponse> {
   if (!onRequestValidationError) {
     return defaultResponse;
@@ -283,7 +284,7 @@ export async function handleRequestValidationFailure({
     failure.request,
     responseFactory
   );
-  const validationErrorMessage = isDevMode ? validateResponse(customResponse) : undefined;
+  const validationErrorMessage = isDevMode ? validateResponse?.(customResponse) : undefined;
   if (validationErrorMessage) {
     return responseFactory.custom({
       statusCode: 500,
@@ -349,8 +350,6 @@ function routeSchemasFromRouteConfig<P, Q, B>(
     );
   }
 
-  validateOnRequestValidationError(route, routeMethod);
-
   if (route.validate !== false) {
     const validation = getRequestValidation(route.validate);
     Object.entries(validation).forEach(([key, schema]) => {
@@ -361,27 +360,6 @@ function routeSchemasFromRouteConfig<P, Q, B>(
       }
     });
     return RouteValidator.from(validation);
-  }
-}
-
-function validateOnRequestValidationError<P, Q, B>(
-  route: InternalRouteConfig<P, Q, B, typeof routeMethod>,
-  routeMethod: RouteMethod
-) {
-  const onRequestValidationError = getRouteOnRequestValidationError(route);
-  if (onRequestValidationError === undefined) {
-    return;
-  }
-
-  if (typeof onRequestValidationError !== 'function') {
-    throw new Error(
-      `The [${routeMethod}] at [${route.path}] has an invalid 'validate.onRequestValidationError'. Expected a function.`
-    );
-  }
-  if (!getRouteResponseValidation(route)) {
-    throw new Error(
-      `The [${routeMethod}] at [${route.path}] has an invalid 'validate.response'. Expected response metadata when 'validate.onRequestValidationError' is configured.`
-    );
   }
 }
 

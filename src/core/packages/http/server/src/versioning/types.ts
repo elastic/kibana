@@ -310,28 +310,50 @@ export interface VersionedRouteResponseValidation {
  * Versioned route validation
  * @public
  */
-export interface VersionedRouteValidation<P, Q, B> {
-  /**
-   * Validation to run against route inputs: params, query and body
-   * @public
-   */
-  request?: VersionedRouteRequestValidation<P, Q, B>;
-  /**
-   * Validation to run against route output.
-   *
-   * @note This validation is only intended to run in development. Do not use this
-   *       for setting default values!
-   *
-   * @public
-   */
-  response?: VersionedRouteResponseValidation;
-  /**
-   * Maps request validation failures to responses declared in {@link VersionedRouteValidation.response}.
-   *
-   * @public
-   */
-  onRequestValidationError?: RequestValidationErrorHandler;
-}
+export type VersionedRouteValidation<P, Q, B> =
+  | {
+      /**
+       * Validation to run against route inputs: params, query and body
+       * @public
+       */
+      request?: VersionedRouteRequestValidation<P, Q, B>;
+      /**
+       * Validation to run against route output.
+       *
+       * @note This validation is only intended to run in development. Do not use this
+       *       for setting default values!
+       *
+       * @public
+       */
+      response?: VersionedRouteResponseValidation;
+      /**
+       * Maps request validation failures to custom responses.
+       *
+       * @public
+       */
+      onRequestValidationError?: RequestValidationErrorHandler;
+    }
+  | {
+      /**
+       * Disables request validation.
+       * @public
+       */
+      request: false;
+      /**
+       * Validation to run against route output.
+       *
+       * @note This validation is only intended to run in development. Do not use this
+       *       for setting default values!
+       *
+       * @public
+       */
+      response?: VersionedRouteResponseValidation;
+      /**
+       * Request validation failures cannot occur when request validation is disabled.
+       * @public
+       */
+      onRequestValidationError?: never;
+    };
 
 /**
  * Options for a versioned route. Probably needs a lot more options like sunsetting

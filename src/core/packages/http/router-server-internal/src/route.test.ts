@@ -8,7 +8,7 @@
  */
 
 import { hapiMocks } from '@kbn/hapi-mocks';
-import { buildRoute, validateHapiRequest, handle } from './route';
+import { validateHapiRequest, handle } from './route';
 import { createRouter } from './versioned_router/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { Logger } from '@kbn/logging';
@@ -125,12 +125,6 @@ describe('handle', () => {
         path: '/test',
         validate: {
           request: { query: schema.object({ foo: schema.number() }) },
-          response: {
-            422: {
-              description: 'Validation failed',
-              body: () => schema.object({ message: schema.string(), source: schema.string() }),
-            },
-          },
           onRequestValidationError: (error, request, res) => {
             expect(error).toMatchObject({
               message: '[request query.foo]: expected value of type [number] but got [string]',
@@ -146,6 +140,7 @@ describe('handle', () => {
         },
       },
       routeSchemas: RouteValidator.from({ query: schema.object({ foo: schema.number() }) }),
+      isDevMode: true,
     });
 
     expect(handler).not.toHaveBeenCalled();
@@ -472,68 +467,7 @@ describe('handle', () => {
     );
     expect(log.error).not.toHaveBeenCalled();
   });
-
-  it('rejects invalid onRequestValidationError config', () => {
-    expect(() =>
-      buildRoute({
-        router,
-        handler,
-        log,
-        method: 'get',
-        route: {
-          path: '/test',
-          validate: {
-            request: { query: schema.object({ foo: schema.number() }) },
-            response: { 400: { description: 'Validation failed' } },
-            onRequestValidationError: 'not a function' as never,
-          },
-        },
-      })
-    ).toThrow(
-      "The [get] at [/test] has an invalid 'validate.onRequestValidationError'. Expected a function."
-    );
-
-    expect(() =>
-      buildRoute({
-        router,
-        handler,
-        log,
-        method: 'get',
-        route: {
-          path: '/test',
-          validate: {
-            request: { query: schema.object({ foo: schema.number() }) },
-            response: { 400: { description: 'Validation failed' } },
-            onRequestValidationError: null as never,
-          },
-        },
-      })
-    ).toThrow(
-      "The [get] at [/test] has an invalid 'validate.onRequestValidationError'. Expected a function."
-    );
-  });
-
-  it('rejects onRequestValidationError config without response metadata', () => {
-    expect(() =>
-      buildRoute({
-        router,
-        handler,
-        log,
-        method: 'get',
-        route: {
-          path: '/test',
-          validate: {
-            request: { query: schema.object({ foo: schema.number() }) },
-            onRequestValidationError: (_error, _request, res) => res.badRequest(),
-          },
-        },
-      })
-    ).toThrow(
-      "The [get] at [/test] has an invalid 'validate.response'. Expected response metadata when 'validate.onRequestValidationError' is configured."
-    );
-  });
 });
-
 describe('validateHapiRequest', () => {
   let router: Router;
   let log: Logger;

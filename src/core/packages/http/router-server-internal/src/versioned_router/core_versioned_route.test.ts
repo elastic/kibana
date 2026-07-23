@@ -12,9 +12,6 @@ import type {
   RequestHandler,
   VersionedRouteValidation,
   RouteSecurity,
-  RequestValidationError,
-  KibanaRequest,
-  KibanaResponseFactory,
 } from '@kbn/core-http-server';
 import type { InternalRouteHandler, Router } from '../router';
 import { createFooValidation } from '../router.test.util';
@@ -574,10 +571,10 @@ describe('Versioned route', () => {
     expect(response.options.headers).toMatchObject({ [ELASTIC_HTTP_VERSION_HEADER]: '1' });
   });
 
-  it('sets fallback request apiVersion and logs custom request validation responses', async () => {
+  it('maps and logs custom request validation responses without response validation in dev mode', async () => {
     let handler: InternalRouteHandler;
     const log = loggingSystemMock.createLogger();
-    versionedRouter = CoreVersionedRouter.from({ router, log, env: notDevEnv });
+    versionedRouter = CoreVersionedRouter.from({ router, log, env: devEnv });
     const onRequestValidationError = jest.fn((error, request, response) =>
       response.custom({ statusCode: 422, body: { version: request.apiVersion } })
     );
@@ -597,11 +594,7 @@ describe('Versioned route', () => {
         {
           version: '1',
           validate: {
-            ...testValidation.fooValidation,
-            response: {
-              ...testValidation.fooValidation.response,
-              422: { body: () => schema.object({ version: schema.literal('1') }) },
-            },
+            request: testValidation.fooValidation.request,
             onRequestValidationError,
           },
         },
@@ -609,7 +602,7 @@ describe('Versioned route', () => {
       );
 
     const response = await handler!(
-      createRequest({ version: undefined, body: {}, params: { foo: 1 }, query: { foo: 1 } })
+      createRequest({ version: '1', body: {}, params: { foo: 1 }, query: { foo: 1 } })
     );
 
     expect(response.status).toBe(422);
@@ -653,96 +646,6 @@ describe('Versioned route', () => {
       response: { 200: expect.any(Object), 422: expect.any(Object) },
       onRequestValidationError: expect.any(Function),
     });
-  });
-
-  it('rejects invalid versioned onRequestValidationError config', () => {
-    const route = versionedRouter.post({
-      path: '/test/{id}',
-      access: 'internal',
-      security: {
-        authz: {
-          requiredPrivileges: ['foo'],
-        },
-      },
-    });
-
-    expect(() =>
-      route.addVersion(
-        {
-          version: '1',
-          validate: {
-            request: testValidation.fooValidation.request,
-            response: { 422: {} },
-            onRequestValidationError: 'not a function' as never,
-          },
-        },
-        handlerFn
-      )
-    ).toThrowError(
-      "The [post] at [/test/{id}] version [1] has an invalid 'validate.onRequestValidationError'. Expected a function."
-    );
-
-    expect(() =>
-      route.addVersion(
-        {
-          version: '2',
-          validate: {
-            request: testValidation.fooValidation.request,
-            response: { 422: {} },
-            onRequestValidationError: null as never,
-          },
-        },
-        handlerFn
-      )
-    ).toThrowError(
-      "The [post] at [/test/{id}] version [2] has an invalid 'validate.onRequestValidationError'. Expected a function."
-    );
-
-    expect(() =>
-      route.addVersion(
-        {
-          version: '3',
-          validate: {
-            request: testValidation.fooValidation.request,
-            onRequestValidationError: (error, request, response) =>
-              response.custom({ statusCode: 422 }),
-          },
-        },
-        handlerFn
-      )
-    ).toThrowError(
-      "The [post] at [/test/{id}] version [3] has an invalid 'validate.response'. Expected response metadata when 'validate.onRequestValidationError' is configured."
-    );
-  });
-
-  it('validates lazy onRequestValidationError config on first request', async () => {
-    let handler: InternalRouteHandler;
-    (router.registerRoute as jest.Mock).mockImplementation((opts) => (handler = opts.handler));
-    const lazyValidation = jest.fn(() => ({
-      onRequestValidationError: (
-        error: RequestValidationError,
-        request: KibanaRequest,
-        response: KibanaResponseFactory
-      ) => response.custom({ statusCode: 422, body: { message: error.message } }),
-    }));
-
-    versionedRouter
-      .post({
-        path: '/test/{id}',
-        access: 'internal',
-        security: {
-          authz: {
-            requiredPrivileges: ['foo'],
-          },
-        },
-      })
-      .addVersion({ version: '1', validate: lazyValidation }, handlerFn);
-
-    expect(lazyValidation).not.toHaveBeenCalled();
-    await expect(handler!(createRequest())).rejects.toThrowError(
-      "The [post] at [/test/{id}] version [1] has an invalid 'validate.response'. Expected response metadata when 'validate.onRequestValidationError' is configured."
-    );
-    expect(lazyValidation).toHaveBeenCalledTimes(1);
   });
 
   it('constructs lazily provided validations once (idempotency)', async () => {

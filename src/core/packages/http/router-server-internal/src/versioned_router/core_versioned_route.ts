@@ -23,7 +23,6 @@ import type {
   RouteMethod,
   VersionedRouterRoute,
   VersionedRouteResponseValidation,
-  VersionedRouteValidation,
 } from '@kbn/core-http-server';
 import type { Request } from '@hapi/hapi';
 import type { Logger } from '@kbn/logging';
@@ -199,9 +198,6 @@ export class CoreVersionedRoute implements VersionedRoute {
       });
     }
     const validation = extractValidationSchemaFromHandler(handler);
-    if (typeof handler.options.validate === 'function') {
-      this.validateOnRequestValidationError(version, validation);
-    }
     const onRequestValidationError = validation?.onRequestValidationError;
 
     const { error, ok: kibanaRequest } = validateHapiRequest(hapiRequest, {
@@ -225,8 +221,9 @@ export class CoreVersionedRoute implements VersionedRoute {
         responseFactory,
         log: this.log,
         isDevMode: this.env.mode.dev,
-        validateResponse: (response) =>
-          validateOnRequestValidationErrorResponse(validation?.response, response),
+        validateResponse: validation?.response
+          ? (response) => validateOnRequestValidationErrorResponse(validation.response, response)
+          : undefined,
       });
       return injectVersionHeader(version, customResponse);
     }
@@ -265,31 +262,6 @@ export class CoreVersionedRoute implements VersionedRoute {
     return injectVersionHeader(version, response);
   };
 
-  private validateOnRequestValidationError(
-    version: string,
-    validation: VersionedRouteValidation<unknown, unknown, unknown> | undefined
-  ) {
-    if (!validation) {
-      return;
-    }
-
-    const { onRequestValidationError, response } = validation;
-    if (onRequestValidationError === undefined) {
-      return;
-    }
-
-    if (typeof onRequestValidationError !== 'function') {
-      throw new Error(
-        `The [${this.method}] at [${this.path}] version [${version}] has an invalid 'validate.onRequestValidationError'. Expected a function.`
-      );
-    }
-    if (!response) {
-      throw new Error(
-        `The [${this.method}] at [${this.path}] version [${version}] has an invalid 'validate.response'. Expected response metadata when 'validate.onRequestValidationError' is configured.`
-      );
-    }
-  }
-
   private validateVersion(version: string) {
     // We do an additional check here while we only have a single allowed public version
     // for all public Kibana HTTP APIs
@@ -317,9 +289,6 @@ export class CoreVersionedRoute implements VersionedRoute {
   public addVersion(options: Options, handler: RequestHandler<any, any, any, any>): VersionedRoute {
     this.validateVersion(options.version);
     options = prepareVersionedRouteValidation(options);
-    if (options.validate !== false && typeof options.validate !== 'function') {
-      this.validateOnRequestValidationError(options.version, options.validate);
-    }
     this.handlers.set(options.version, {
       fn: this.router.enhanceWithContext(handler),
       options,

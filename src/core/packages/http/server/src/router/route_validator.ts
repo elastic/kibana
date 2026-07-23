@@ -224,9 +224,10 @@ export type RequestValidationErrorHandler = (
 ) => IKibanaResponse | Promise<IKibanaResponse>;
 
 /**
- * Maps request validation failures to documented Kibana responses.
+ * Maps request validation failures to Kibana responses.
  *
- * Response metadata is declared in {@link RouteValidatorRequestAndResponses.response}.
+ * When configured, response metadata in {@link RouteValidatorRequestAndResponses.response} validates
+ * the custom response in development.
  * @public
  */
 export type OnRequestValidationError = RequestValidationErrorHandler;
@@ -242,7 +243,7 @@ export interface RouteValidatorRequestAndResponses<P, Q, B> {
    */
   response?: RouteValidatorFullConfigResponse;
   /**
-   * Maps request validation failures to responses declared in {@link RouteValidatorRequestAndResponses.response}.
+   * Maps request validation failures to custom responses.
    */
   onRequestValidationError?: OnRequestValidationError;
 }
