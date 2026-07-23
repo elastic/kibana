@@ -11,7 +11,7 @@ import { platformSignificantEventsTools, platformCoreTools } from '@kbn/agent-bu
 import { SIGNIFICANT_EVENTS_KI_GROUNDING_SKILL_ID } from '../../skills/significant_events_ki_grounding';
 import instructions from './instructions/discovery.md.text';
 
-export const SIGNIFICANT_EVENTS_DISCOVERY_AGENT_ID = 'platform.streams.sig-events.discovery';
+export const SIGNIFICANT_EVENTS_DISCOVERY_AGENT_ID = 'significant_events.discovery';
 export const SIGNIFICANT_EVENTS_DISCOVERY_AGENT_TYPE_ID = 'platform.sig_events.discovery-type';
 
 export const discoveryAgentType = {
