@@ -6,9 +6,9 @@
  */
 
 import type { MatcherDataFieldsResponse } from '@kbn/alerting-v2-schemas';
-import { invalidResponseExample, type AlertingOasOperationObject } from '../oas_utils';
+import { buildOasOperation, invalidResponseExample } from '../oas_utils';
+import type { AlertingOasOperationObject } from '../oas_types';
 import { INVALID_QUERY_PARAMETERS_DESCRIPTION } from '../route_descriptions';
-import { buildActionPolicyOas } from '../action_policies/oas_utils';
 
 export const MATCHER_DATA_FIELDS_RESPONSE: MatcherDataFieldsResponse = [
   'host.name',
@@ -30,7 +30,7 @@ const INVALID_MATCHER_DATA_FIELDS_QUERY_RESPONSE = invalidResponseExample({
 });
 
 export const matcherDataFieldsOasExamples = (): AlertingOasOperationObject =>
-  buildActionPolicyOas({
+  buildOasOperation({
     responses: {
       200: {
         name: 'matcherDataFieldsResponse',

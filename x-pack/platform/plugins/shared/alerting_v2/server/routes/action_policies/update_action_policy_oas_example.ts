@@ -6,14 +6,14 @@
  */
 
 import type { UpdateActionPolicyBody } from '@kbn/alerting-v2-schemas';
-import type { AlertingOasOperationObject } from '../oas_utils';
+import type { AlertingOasOperationObject } from '../oas_types';
 import {
   ACTION_POLICY_NOT_FOUND_RESPONSE,
   ACTION_POLICY_VERSION_CONFLICT_RESPONSE,
   actionPolicyResponseExample,
   invalidActionPolicyDataResponse,
 } from './action_policy_oas_shared_examples';
-import { buildActionPolicyOas } from './oas_utils';
+import { buildOasOperation } from '../oas_utils';
 
 export const UPDATE_ACTION_POLICY_REQUEST: UpdateActionPolicyBody = {
   version: 'WzAsMV0=',
@@ -22,7 +22,7 @@ export const UPDATE_ACTION_POLICY_REQUEST: UpdateActionPolicyBody = {
 };
 
 export const updateActionPolicyOasExamples = (): AlertingOasOperationObject =>
-  buildActionPolicyOas({
+  buildOasOperation({
     requestBody: {
       name: 'updateActionPolicyRequest',
       summary: 'Rename and update the description',

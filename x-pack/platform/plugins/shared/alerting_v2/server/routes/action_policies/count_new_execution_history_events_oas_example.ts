@@ -6,9 +6,9 @@
  */
 
 import type { CountPolicyExecutionEventsResponse } from '@kbn/alerting-v2-schemas';
-import { invalidResponseExample, type AlertingOasOperationObject } from '../oas_utils';
+import { buildOasOperation, invalidResponseExample } from '../oas_utils';
+import type { AlertingOasOperationObject } from '../oas_types';
 import { INVALID_QUERY_PARAMETERS_DESCRIPTION } from '../route_descriptions';
-import { buildActionPolicyOas } from './oas_utils';
 
 export const COUNT_EXECUTION_HISTORY_RESPONSE: CountPolicyExecutionEventsResponse = {
   count: 3,
@@ -28,7 +28,7 @@ const INVALID_COUNT_EXECUTION_EVENTS_QUERY_RESPONSE = invalidResponseExample({
 });
 
 export const countActionPolicyExecutionHistoryOasExamples = (): AlertingOasOperationObject =>
-  buildActionPolicyOas({
+  buildOasOperation({
     responses: {
       200: {
         name: 'countActionPolicyExecutionHistoryResponse',

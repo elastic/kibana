@@ -6,9 +6,9 @@
  */
 
 import type { ActionPolicyTagsResponse } from '@kbn/alerting-v2-schemas';
-import { invalidResponseExample, type AlertingOasOperationObject } from '../oas_utils';
+import { buildOasOperation, invalidResponseExample } from '../oas_utils';
+import type { AlertingOasOperationObject } from '../oas_types';
 import { INVALID_QUERY_PARAMETERS_DESCRIPTION } from '../route_descriptions';
-import { buildActionPolicyOas } from '../action_policies/oas_utils';
 
 export const ACTION_POLICY_TAGS_RESPONSE: ActionPolicyTagsResponse = [
   'production',
@@ -30,7 +30,7 @@ const INVALID_ACTION_POLICY_TAGS_QUERY_RESPONSE = invalidResponseExample({
 });
 
 export const actionPolicyTagsOasExamples = (): AlertingOasOperationObject =>
-  buildActionPolicyOas({
+  buildOasOperation({
     responses: {
       200: {
         name: 'actionPolicyTagsResponse',

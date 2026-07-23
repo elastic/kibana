@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import type { AlertingOasOperationObject } from '../oas_utils';
+import type { AlertingOasOperationObject } from '../oas_types';
 import {
   ACTION_POLICY_NOT_FOUND_RESPONSE,
   actionPolicyResponseExample,
 } from './action_policy_oas_shared_examples';
-import { buildActionPolicyOas } from './oas_utils';
+import { buildOasOperation } from '../oas_utils';
 
 export const getActionPolicyOasExamples = (): AlertingOasOperationObject =>
-  buildActionPolicyOas({
+  buildOasOperation({
     responses: {
       200: actionPolicyResponseExample('getActionPolicyResponse', 'An action policy'),
       404: ACTION_POLICY_NOT_FOUND_RESPONSE,

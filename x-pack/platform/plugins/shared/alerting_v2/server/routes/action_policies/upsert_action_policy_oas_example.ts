@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AlertingOasOperationObject } from '../oas_utils';
+import type { AlertingOasOperationObject } from '../oas_types';
 import {
   ACTION_POLICY_NOT_FOUND_RESPONSE,
   ACTION_POLICY_UPSERT_CONFLICT_RESPONSE,
@@ -13,10 +13,10 @@ import {
   actionPolicyResponseExample,
   invalidActionPolicyDataResponse,
 } from './action_policy_oas_shared_examples';
-import { buildActionPolicyOas } from './oas_utils';
+import { buildOasOperation } from '../oas_utils';
 
 export const upsertActionPolicyOasExamples = (): AlertingOasOperationObject =>
-  buildActionPolicyOas({
+  buildOasOperation({
     requestBody: {
       name: 'upsertActionPolicyRequest',
       summary: 'Action policy to create or replace at the given id',

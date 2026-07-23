@@ -6,9 +6,9 @@
  */
 
 import type { ListPolicyExecutionHistoryResponse } from '@kbn/alerting-v2-schemas';
-import type { AlertingOasOperationObject } from '../oas_utils';
+import type { AlertingOasOperationObject } from '../oas_types';
 import { INVALID_QUERY_PARAMETERS_RESPONSE } from './action_policy_oas_shared_examples';
-import { buildActionPolicyOas } from './oas_utils';
+import { buildOasOperation } from '../oas_utils';
 
 export const LIST_EXECUTION_HISTORY_RESPONSE: ListPolicyExecutionHistoryResponse = {
   items: [
@@ -30,7 +30,7 @@ export const LIST_EXECUTION_HISTORY_RESPONSE: ListPolicyExecutionHistoryResponse
 };
 
 export const listActionPolicyExecutionHistoryOasExamples = (): AlertingOasOperationObject =>
-  buildActionPolicyOas({
+  buildOasOperation({
     responses: {
       200: {
         name: 'listActionPolicyExecutionHistoryResponse',

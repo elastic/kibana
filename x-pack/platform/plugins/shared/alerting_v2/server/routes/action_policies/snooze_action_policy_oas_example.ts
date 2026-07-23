@@ -6,21 +6,21 @@
  */
 
 import type { SnoozeActionPolicyBody } from '@kbn/alerting-v2-schemas';
-import { invalidResponseExample, type AlertingOasOperationObject } from '../oas_utils';
+import { buildOasOperation, invalidResponseExample } from '../oas_utils';
+import type { AlertingOasOperationObject } from '../oas_types';
 import { INVALID_REQUEST_PARAMETERS_OR_BODY_DESCRIPTION } from '../route_descriptions';
 import {
   ACTION_POLICY_NOT_FOUND_RESPONSE,
   ACTION_POLICY_VERSION_CONFLICT_RESPONSE,
   actionPolicyResponseExample,
 } from './action_policy_oas_shared_examples';
-import { buildActionPolicyOas } from './oas_utils';
 
 export const SNOOZE_ACTION_POLICY_REQUEST: SnoozeActionPolicyBody = {
   snoozedUntil: '2026-01-16T12:00:00.000Z',
 };
 
 export const snoozeActionPolicyOasExamples = (): AlertingOasOperationObject =>
-  buildActionPolicyOas({
+  buildOasOperation({
     requestBody: {
       name: 'snoozeActionPolicyRequest',
       summary: 'Snooze until a specific timestamp',

@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import type { AlertingOasOperationObject } from '../oas_utils';
+import type { AlertingOasOperationObject } from '../oas_types';
 import {
   CREATE_ACTION_POLICY_REQUEST,
   actionPolicyResponseExample,
   invalidActionPolicyDataResponse,
 } from './action_policy_oas_shared_examples';
-import { buildActionPolicyOas } from './oas_utils';
+import { buildOasOperation } from '../oas_utils';
 
 export const createActionPolicyOasExamples = (): AlertingOasOperationObject =>
-  buildActionPolicyOas({
+  buildOasOperation({
     requestBody: {
       name: 'createActionPolicyRequest',
       summary: 'Workflow notification for matching host alerts',

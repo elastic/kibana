@@ -26,7 +26,8 @@ import {
   INVALID_QUERY_PARAMETERS_DESCRIPTION,
   INVALID_REQUEST_PARAMETERS_OR_BODY_DESCRIPTION,
 } from '../route_descriptions';
-import { invalidResponseExample, type OasExampleEntry } from '../oas_utils';
+import { invalidResponseExample } from '../oas_utils';
+import type { OasExampleEntry } from '../oas_types';
 
 /** Identifier reused across action-policy request/response/error examples. */
 export const SAMPLE_ACTION_POLICY_ID = 'action-policy-1';

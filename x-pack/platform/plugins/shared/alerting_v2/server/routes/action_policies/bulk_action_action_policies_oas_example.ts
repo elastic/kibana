@@ -9,9 +9,9 @@ import type {
   BulkActionActionPoliciesBody,
   BulkActionActionPoliciesResponse,
 } from '@kbn/alerting-v2-schemas';
-import { invalidResponseExample, type AlertingOasOperationObject } from '../oas_utils';
+import { buildOasOperation, invalidResponseExample } from '../oas_utils';
+import type { AlertingOasOperationObject } from '../oas_types';
 import { INVALID_REQUEST_BODY_DESCRIPTION } from '../route_descriptions';
-import { buildActionPolicyOas } from './oas_utils';
 
 export const BULK_ACTION_ACTION_POLICIES_REQUEST: BulkActionActionPoliciesBody = {
   actions: [
@@ -27,7 +27,7 @@ export const BULK_ACTION_ACTION_POLICIES_RESPONSE: BulkActionActionPoliciesRespo
 };
 
 export const bulkActionActionPoliciesOasExamples = (): AlertingOasOperationObject =>
-  buildActionPolicyOas({
+  buildOasOperation({
     requestBody: {
       name: 'bulkActionActionPoliciesRequest',
       summary: 'Enable one policy and snooze another',

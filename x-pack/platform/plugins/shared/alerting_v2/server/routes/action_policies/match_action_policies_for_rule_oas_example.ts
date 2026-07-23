@@ -9,10 +9,10 @@ import type {
   MatchActionPoliciesForRuleBody,
   MatchActionPoliciesForRuleResponse,
 } from '@kbn/alerting-v2-schemas';
-import { invalidResponseExample, type AlertingOasOperationObject } from '../oas_utils';
+import { buildOasOperation, invalidResponseExample } from '../oas_utils';
+import type { AlertingOasOperationObject } from '../oas_types';
 import { INVALID_REQUEST_BODY_DESCRIPTION } from '../route_descriptions';
 import { ACTION_POLICY_RESPONSE } from './action_policy_oas_shared_examples';
-import { buildActionPolicyOas } from './oas_utils';
 
 export const MATCH_ACTION_POLICIES_FOR_RULE_REQUEST: MatchActionPoliciesForRuleBody = {
   rule: {
@@ -28,7 +28,7 @@ export const MATCH_ACTION_POLICIES_FOR_RULE_RESPONSE: MatchActionPoliciesForRule
 };
 
 export const matchActionPoliciesForRuleOasExamples = (): AlertingOasOperationObject =>
-  buildActionPolicyOas({
+  buildOasOperation({
     requestBody: {
       name: 'matchActionPoliciesForRuleRequest',
       summary: 'Rule to match action policies against',
