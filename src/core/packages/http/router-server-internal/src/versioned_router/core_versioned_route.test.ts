@@ -12,6 +12,9 @@ import type {
   RequestHandler,
   VersionedRouteValidation,
   RouteSecurity,
+  RequestValidationError,
+  KibanaRequest,
+  KibanaResponseFactory,
 } from '@kbn/core-http-server';
 import type { InternalRouteHandler, Router } from '../router';
 import { createFooValidation } from '../router.test.util';
@@ -716,8 +719,11 @@ describe('Versioned route', () => {
     let handler: InternalRouteHandler;
     (router.registerRoute as jest.Mock).mockImplementation((opts) => (handler = opts.handler));
     const lazyValidation = jest.fn(() => ({
-      onRequestValidationError: (error, request, response) =>
-        response.custom({ statusCode: 422, body: { message: error.message } }),
+      onRequestValidationError: (
+        error: RequestValidationError,
+        request: KibanaRequest,
+        response: KibanaResponseFactory
+      ) => response.custom({ statusCode: 422, body: { message: error.message } }),
     }));
 
     versionedRouter
