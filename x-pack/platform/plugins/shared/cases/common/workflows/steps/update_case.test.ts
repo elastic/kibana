@@ -40,6 +40,33 @@ describe('update_case common step definition', () => {
     ).toBe(false);
   });
 
+  it('accepts extended_fields in update case input', () => {
+    expect(
+      InputSchema.safeParse({
+        case_id: caseIdFixture,
+        updates: { extended_fields: { priority_as_keyword: 'high' } },
+      }).success
+    ).toBe(true);
+  });
+
+  it('accepts a template switch in update case input', () => {
+    expect(
+      InputSchema.safeParse({
+        case_id: caseIdFixture,
+        updates: { template: { id: 'triage_template', version: 3 } },
+      }).success
+    ).toBe(true);
+  });
+
+  it('accepts clearing the template with null in update case input', () => {
+    expect(
+      InputSchema.safeParse({
+        case_id: caseIdFixture,
+        updates: { template: null },
+      }).success
+    ).toBe(true);
+  });
+
   it('accepts valid output payload', () => {
     expect(OutputSchema.safeParse({ case: createCaseResponseFixture }).success).toBe(true);
   });

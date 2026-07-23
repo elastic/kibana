@@ -1,7 +1,10 @@
 type: object
+x-state: Technical preview
 additionalProperties:
   type: string
 description: >
+  Technical preview. Enabled by default; can be disabled via `xpack.cases.templates.enabled: false`,
+  in which case field-library fields and templates are unavailable.
   A map of case field values from the field library. This replaces `customFields`.
   Each entry is keyed by the field's storage key, which follows the
   `<field_name>_as_<storage_type>` convention, where `storage_type` is `keyword` (text),
@@ -12,6 +15,9 @@ description: >
   (`GET /api/cases/fields`, or `GET /api/cases/{caseId}/fields` for an existing case).
   Legacy custom fields are migrated into this map, so a migrated field's value is found under
   its `<key>_as_<storage_type>` key.
+  The number of fields per owner and per template, template versions retained, and the length of
+  each stored value are bounded; see the templates API (`/api/cases/templates`) for the exact
+  limits.
 example:
   priority_as_keyword: high
   ticket_number_as_integer: '4287'
