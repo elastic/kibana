@@ -20,9 +20,9 @@
 @elastic/esql-promql-grammar@4.14.0
 @elastic/esql-types@4.14.0
 @elastic/esql@4.14.0
-@elastic/eui-theme-borealis@8.0.0
-@elastic/eui-theme-common@10.0.0
-@elastic/eui@117.1.0
+@elastic/eui-theme-borealis@8.0.0-snapshot.1784799821981
+@elastic/eui-theme-common@10.0.0-snapshot.1784799821981
+@elastic/eui@117.1.0-snapshot.1784799821981
 @elastic/numeral@2.5.1
 @elastic/pretty-printer@4.14.0
 @elastic/prismjs-esql@4.14.0
