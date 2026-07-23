@@ -240,7 +240,7 @@ Follow the template in [`references/document-structure.md`](references/document-
 | Target feature type | Example |
 |---|---|
 | UI feature (flyouts, panels, forms, navigation) | [`references/example-test-plan.md`](references/example-test-plan.md) |
-| Backend / parser feature (no UI, no PR yet, unknown `TARGET_VERSION`) | [`references/example-test-plan-backend.md`](references/example-test-plan-backend.md) |
+| Backend / parser feature (no UI, no PR yet, no upgrade surface) | [`references/example-test-plan-backend.md`](references/example-test-plan-backend.md) |
 
 Pick the closer match by shape, not by domain. The two examples differ in which optional sections apply, how `N/A` is handled in the Issue Clarity Assessment, and how the Coverage Ratio is computed when no PR exists.
 
