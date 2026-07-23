@@ -281,6 +281,21 @@ describe('Create OAuth Client route', () => {
     expect(oauthMock.createClient).not.toHaveBeenCalled();
   });
 
+  it('returns 404 when the serverless project type has no UIAM mapping', async () => {
+    ({ routeHandler, oauthMock } = setup(mcpConfig, { serverlessProjectType: 'workplaceai' }));
+
+    const response = await routeHandler(
+      getMockContext(),
+      httpServerMock.createKibanaRequest({
+        body: { client_name: 'Test' },
+      }),
+      kibanaResponseFactory
+    );
+
+    expect(response.status).toBe(404);
+    expect(oauthMock.createClient).not.toHaveBeenCalled();
+  });
+
   it('returns 404 when OAuth is not available', async () => {
     authc.oauth = null;
 
