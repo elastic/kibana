@@ -112,6 +112,7 @@ export const TagOptions: React.FC<Props> = ({ tagName, isTagHovered, onTagsUpdat
             })}
             color="text"
             onClick={(event: MouseEvent<HTMLButtonElement>) => {
+              event.stopPropagation();
               setTagOptionsButton(event.currentTarget);
               setTagOptionsVisible(!tagOptionsVisible);
             }}
