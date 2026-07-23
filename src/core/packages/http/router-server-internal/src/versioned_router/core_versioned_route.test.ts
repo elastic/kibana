@@ -685,6 +685,22 @@ describe('Versioned route', () => {
           version: '2',
           validate: {
             request: testValidation.fooValidation.request,
+            response: { 422: {} },
+            onRequestValidationError: null as never,
+          },
+        },
+        handlerFn
+      )
+    ).toThrowError(
+      "The [post] at [/test/{id}] version [2] has an invalid 'validate.onRequestValidationError'. Expected a function."
+    );
+
+    expect(() =>
+      route.addVersion(
+        {
+          version: '3',
+          validate: {
+            request: testValidation.fooValidation.request,
             onRequestValidationError: (error, request, response) =>
               response.custom({ statusCode: 422 }),
           },
@@ -692,7 +708,7 @@ describe('Versioned route', () => {
         handlerFn
       )
     ).toThrowError(
-      "The [post] at [/test/{id}] version [2] has an invalid 'validate.response'. Expected response metadata when 'validate.onRequestValidationError' is configured."
+      "The [post] at [/test/{id}] version [3] has an invalid 'validate.response'. Expected response metadata when 'validate.onRequestValidationError' is configured."
     );
   });
 

@@ -272,7 +272,7 @@ export class CoreVersionedRoute implements VersionedRoute {
     }
 
     const { onRequestValidationError, response } = validation;
-    if (!onRequestValidationError) {
+    if (onRequestValidationError === undefined) {
       return;
     }
 

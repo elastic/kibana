@@ -369,7 +369,7 @@ function validateOnRequestValidationError<P, Q, B>(
   routeMethod: RouteMethod
 ) {
   const onRequestValidationError = getRouteOnRequestValidationError(route);
-  if (!onRequestValidationError) {
+  if (onRequestValidationError === undefined) {
     return;
   }
 

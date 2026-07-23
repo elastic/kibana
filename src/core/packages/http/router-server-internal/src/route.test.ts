@@ -492,6 +492,25 @@ describe('handle', () => {
     ).toThrow(
       "The [get] at [/test] has an invalid 'validate.onRequestValidationError'. Expected a function."
     );
+
+    expect(() =>
+      buildRoute({
+        router,
+        handler,
+        log,
+        method: 'get',
+        route: {
+          path: '/test',
+          validate: {
+            request: { query: schema.object({ foo: schema.number() }) },
+            response: { 400: { description: 'Validation failed' } },
+            onRequestValidationError: null as never,
+          },
+        },
+      })
+    ).toThrow(
+      "The [get] at [/test] has an invalid 'validate.onRequestValidationError'. Expected a function."
+    );
   });
 
   it('rejects onRequestValidationError config without response metadata', () => {
