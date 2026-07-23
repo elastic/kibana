@@ -127,6 +127,27 @@ export function isSafeMethod(method: RouteMethod): method is SafeRouteMethod {
 }
 
 /**
+ * Like lodash `once`, but only caches successful results. If the factory throws,
+ * the next call retries rather than returning the cached failure (undefined).
+ * This prevents silent validation bypass when deferred schema construction fails
+ * on the first request — subsequent requests will consistently fail with an error
+ * instead of silently skipping validation.
+ *
+ * @internal
+ */
+export function onceCacheOnSuccess<T>(factory: () => T): () => T {
+  let cached: T | undefined;
+  let built = false;
+  return () => {
+    if (!built) {
+      cached = factory(); // throws → built stays false, next call retries
+      built = true;
+    }
+    return cached as T;
+  };
+}
+
+/**
  * Create a valid options object with "sensible" defaults + adding some validation to the options fields
  *
  * @param method HTTP verb for these options

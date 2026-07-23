@@ -567,6 +567,32 @@ describe('Versioned route', () => {
       expect(validateOutputFn).toHaveBeenCalledTimes(0);
       expect(custom).toHaveBeenCalledTimes(1);
     });
+
+    it('throws immediately at addVersion time if validate factory throws (dev mode)', () => {
+      const brokenValidateFactory = () => {
+        throw new Error('Invalid schema: non-zod params detected');
+      };
+
+      expect(() => {
+        versionedRouter
+          .post({
+            path: '/broken',
+            access: 'internal',
+            security: {
+              authz: {
+                requiredPrivileges: ['foo'],
+              },
+            },
+          })
+          .addVersion(
+            {
+              version: '1',
+              validate: brokenValidateFactory,
+            },
+            handlerFn
+          );
+      }).toThrow('Invalid schema: non-zod params detected');
+    });
   });
 
   it('allows using default resolution for specific internal routes', async () => {

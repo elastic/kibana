@@ -17,6 +17,7 @@ import type {
   VersionedRouteValidation,
 } from '@kbn/core-http-server';
 import { validRouteSecurity } from '../security_route_config_validator';
+import { onceCacheOnSuccess } from '../util';
 
 export function isCustomValidation(
   v: VersionedRouteCustomResponseBodyValidation | VersionedResponseBodyValidation
@@ -69,13 +70,21 @@ function prepareValidation(validation: VersionedRouteValidation<unknown, unknown
 
 // Integration tested in ./core_versioned_route.test.ts
 export function prepareVersionedRouteValidation(
-  options: AddVersionOpts<unknown, unknown, unknown>
+  options: AddVersionOpts<unknown, unknown, unknown>,
+  isDev: boolean = false
 ): AddVersionOpts<unknown, unknown, unknown> {
   const { validate: originalValidate, security, ...rest } = options;
   let validate = originalValidate;
 
   if (typeof originalValidate === 'function') {
-    validate = once(() => prepareValidation(originalValidate()));
+    if (isDev) {
+      // Eager path — call immediately so errors surface at addVersion() time
+      validate = prepareValidation(originalValidate());
+    } else {
+      // Deferred path — use onceCacheOnSuccess to retry on failure instead of
+      // silently bypassing validation after the first construction error.
+      validate = onceCacheOnSuccess(() => prepareValidation(originalValidate())) as any;
+    }
   } else if (typeof validate === 'object' && validate !== null) {
     validate = prepareValidation(validate);
   }

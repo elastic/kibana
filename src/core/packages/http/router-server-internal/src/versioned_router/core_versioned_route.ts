@@ -273,7 +273,7 @@ export class CoreVersionedRoute implements VersionedRoute {
 
   public addVersion(options: Options, handler: RequestHandler<any, any, any, any>): VersionedRoute {
     this.validateVersion(options.version);
-    options = prepareVersionedRouteValidation(options);
+    options = prepareVersionedRouteValidation(options, this.env.mode.dev);
     this.handlers.set(options.version, {
       fn: this.router.enhanceWithContext(handler),
       options,

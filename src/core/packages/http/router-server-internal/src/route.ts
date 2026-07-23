@@ -40,6 +40,7 @@ import {
   getRouteFullPath,
   validOptions,
   prepareRouteConfigValidation,
+  onceCacheOnSuccess,
 } from './util';
 import { validRouteSecurity } from './security_route_config_validator';
 
@@ -84,18 +85,9 @@ export function buildRoute({
     getRouteSchemas = () => routeSchemas;
   } else {
     // Deferred path (production) — schema construction on first request.
-    // Use a custom memoizer that only caches on success: if construction throws,
-    // `built` stays false so every subsequent request retries. This ensures a route
-    // with a broken schema consistently returns 500 (not silent validation bypass).
-    let cached: RouteValidator<unknown, unknown, unknown> | undefined;
-    let built = false;
-    getRouteSchemas = () => {
-      if (!built) {
-        cached = routeSchemasFromRouteConfig(route, method);
-        built = true;
-      }
-      return cached;
-    };
+    // Use onceCacheOnSuccess to ensure a broken schema retries on every request
+    // rather than silently bypassing validation after the first failure.
+    getRouteSchemas = onceCacheOnSuccess(() => routeSchemasFromRouteConfig(route, method));
   }
 
   return {
