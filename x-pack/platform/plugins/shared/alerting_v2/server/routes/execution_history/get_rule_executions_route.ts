@@ -21,10 +21,7 @@ import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { ALERTING_V2_EXECUTION_HISTORY_RULES_API_PATH } from '../constants';
 import { INVALID_QUERY_PARAMETERS_DESCRIPTION } from '../route_response_descriptions';
-import {
-  GET_RULE_EXECUTIONS_SUMMARY,
-  getRuleExecutionsOasExamples,
-} from './execution_history_oas_examples';
+import { getRuleExecutionsOasExamples } from './get_rule_executions_oas_example';
 
 @injectable()
 export class GetRuleExecutionsRoute extends BaseAlertingRoute {
@@ -36,7 +33,7 @@ export class GetRuleExecutionsRoute extends BaseAlertingRoute {
     },
   };
   static routeOptions = {
-    summary: GET_RULE_EXECUTIONS_SUMMARY,
+    summary: 'List rule executions',
     description: 'Get a paginated list of rule execution events.',
     oasOperationObject: getRuleExecutionsOasExamples,
   } as const;
