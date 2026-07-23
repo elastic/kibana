@@ -157,15 +157,7 @@ export class NavigationPublicPlugin
         // Idempotent: same id is a no-op; a different id is a caller bug,
         // logged and ignored rather than re-running enableUi mid-session.
         if (this.activeSolutionId === id) return;
-        if (this.activeSolutionId !== null) {
-          this.initializerContext.logger
-            .get()
-            .error(
-              `navigation.initNavigation() called with solution "${id}" but was already initialized with "${this.activeSolutionId}". Ignoring.`
-            );
-          return;
-        }
-        this.activeSolutionId = id;
+        if (!this.claimActiveSolution(id)) return;
         chrome.project.initNavigation(id, navigationTree$);
         if (!isUnauthenticated) {
           this.customizationService.enableUi({ core, chrome, security, solution: id });
@@ -214,9 +206,27 @@ export class NavigationPublicPlugin
     }
 
     if (isProjectNav && solutionView !== 'classic') {
-      this.activeSolutionId = solutionView as SolutionId;
+      if (!this.claimActiveSolution(solutionView as SolutionId)) return;
       this.tryInitNavigation();
     }
+  }
+
+  /**
+   * First writer wins. Same id is a successful re-claim; a different id is a
+   * caller bug and is logged rather than switching mid-session.
+   */
+  private claimActiveSolution(id: SolutionId): boolean {
+    if (this.activeSolutionId === id) return true;
+    if (this.activeSolutionId !== null) {
+      this.initializerContext.logger
+        .get()
+        .error(
+          `Navigation already initialized with solution "${this.activeSolutionId}"; ignoring attempt to switch to "${id}".`
+        );
+      return false;
+    }
+    this.activeSolutionId = id;
+    return true;
   }
 
   private getIsUnauthenticated(http: HttpStart) {
