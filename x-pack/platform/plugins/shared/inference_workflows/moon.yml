@@ -17,6 +17,7 @@ project:
   owner: '@elastic/search-kibana'
   sourceRoot: x-pack/platform/plugins/shared/inference_workflows
 dependsOn:
+  - '@kbn/anonymization-common'
   - '@kbn/core'
   - '@kbn/i18n'
   - '@kbn/zod'
@@ -26,6 +27,12 @@ dependsOn:
   - '@kbn/inference-plugin'
   - '@kbn/inference-common'
   - '@kbn/search-inference-endpoints'
+  - '@kbn/core-http-server-mocks'
+  - '@kbn/core-logging-server-mocks'
+  - '@kbn/core-spaces-common'
+  - '@kbn/spaces-plugin'
+  - '@kbn/config-schema'
+  - '@kbn/anonymization-plugin'
 tags:
   - plugin
   - prod

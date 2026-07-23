@@ -65,6 +65,36 @@ describe('createPiiTokenizationContext', () => {
     );
   });
 
+  it('produces stable tokens for the same session when no server key is configured', () => {
+    const first = createPiiTokenizationContext({
+      detectionContext,
+      sessionId: 'conversation-1',
+    });
+    const second = createPiiTokenizationContext({
+      detectionContext,
+      sessionId: 'conversation-1',
+    });
+
+    expect(first.tokenize('EMAIL', 'person@example.com')).toBe(
+      second.tokenize('EMAIL', 'person@example.com')
+    );
+  });
+
+  it('isolates tokens by session when no server key is configured', () => {
+    const first = createPiiTokenizationContext({
+      detectionContext,
+      sessionId: 'conversation-1',
+    });
+    const second = createPiiTokenizationContext({
+      detectionContext,
+      sessionId: 'conversation-2',
+    });
+
+    expect(first.tokenize('EMAIL', 'person@example.com')).not.toBe(
+      second.tokenize('EMAIL', 'person@example.com')
+    );
+  });
+
   it('delegates detection without exposing the detector implementation', async () => {
     const detectEntities = jest.fn().mockResolvedValue([]);
     const context = createPiiTokenizationContext({

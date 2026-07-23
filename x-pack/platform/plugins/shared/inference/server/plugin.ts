@@ -45,6 +45,7 @@ import { InferenceEndpointIdCache } from './util/inference_endpoint_id_cache';
 import { TokenUsageLogger } from './token_usage';
 import { installTokenUsageDashboard } from './dashboard';
 import type { WorkflowAnonymizationProvider } from './workflow_anonymization_provider';
+import type { WorkflowAnonymizationOptions } from './inference_client/workflow_anonymization_options';
 
 const parseLegacyAnonymizationRules = (value: unknown): AnonymizationRule[] => {
   let parsed: unknown = value;
@@ -86,6 +87,29 @@ export const resolveReplacementsEncryptionKey = async ({
   }
 
   return policyService.getReplacementsEncryptionKey(namespace);
+};
+
+export const resolveWorkflowAnonymizationOptions = ({
+  enabled,
+  failureMode,
+  provider,
+  logger,
+}: {
+  enabled: boolean;
+  failureMode: WorkflowAnonymizationOptions['failureMode'];
+  provider?: WorkflowAnonymizationProvider;
+  logger: Pick<Logger, 'error'>;
+}): WorkflowAnonymizationOptions | undefined => {
+  if (!enabled) {
+    return undefined;
+  }
+  if (!provider?.supportsSynchronousExecution) {
+    logger.error(
+      'Workflow-driven inference anonymization is configured but synchronous workflow support is unavailable; retaining legacy anonymization'
+    );
+    return undefined;
+  }
+  return { provider, failureMode };
 };
 
 export class InferencePlugin
@@ -130,11 +154,21 @@ export class InferencePlugin
         }
         this.workflowAnonymizationProvider = provider;
       },
+      anonymizationConfig: {
+        triggerCacheTtlMs: this.config.anonymization.triggerCacheTtlSeconds * 1000,
+        workflowDrivenEnabled: this.config.anonymization.workflow_driven,
+      },
     };
   }
 
   start(core: CoreStart, pluginsStart: InferenceStartDependencies): InferenceServerStart {
     const anonymizationEnabled = pluginsStart.anonymization?.isEnabled() ?? false;
+    const workflowAnonymization = resolveWorkflowAnonymizationOptions({
+      enabled: this.config.anonymization.workflow_driven,
+      failureMode: this.config.anonymization.failureMode,
+      provider: this.workflowAnonymizationProvider,
+      logger: this.logger,
+    });
     this.endpointIdCache.setEsClient(core.elasticsearch.client.asInternalUser);
     this.tokenUsageLogger.setEsClient(core.elasticsearch.client.asInternalUser);
 
@@ -157,6 +191,12 @@ export class InferencePlugin
     if (anonymizationEnabled) {
       this.logger.info(
         'Persistent anonymization replacements key material is auto-managed per space via the anonymization plugin'
+      );
+    }
+
+    if (this.config.anonymization.workflow_driven && !this.config.anonymization.encryptionKey) {
+      this.logger.warn(
+        'xpack.inference.anonymization.encryptionKey is not configured; tokens will be derived from the session ID alone and are not server-hardened. Configure this key for HMAC-backed tokens.'
       );
     }
 
@@ -226,7 +266,9 @@ export class InferencePlugin
         })(),
         esClient: core.elasticsearch.client.asScoped(request).asCurrentUser,
         anonymization: {
-          saltPromise: anonymizationEnabled ? policyService?.getSalt(namespace) : undefined,
+          saltPromise: this.config.anonymization.encryptionKey
+            ? Promise.resolve(this.config.anonymization.encryptionKey)
+            : undefined,
           resolveEffectivePolicy: async (target?: ChatCompleteAnonymizationTarget) => {
             if (!anonymizationEnabled || !policyService || !target) {
               return undefined;
@@ -268,6 +310,7 @@ export class InferencePlugin
           esClient: core.elasticsearch.client.asScoped(options.request).asCurrentUser,
           endpointIdCache: this.endpointIdCache,
           tokenUsageLogger: this.tokenUsageLogger,
+          workflowAnonymization,
           isTokenUsageTrackingEnabled: createTokenUsageTrackingEnabledCheck(options.request),
         }) as T extends InferenceBoundClientCreateOptions ? BoundInferenceClient : InferenceClient;
       },
@@ -286,6 +329,7 @@ export class InferencePlugin
           endpointIdCache: this.endpointIdCache,
           logger: this.logger,
           tokenUsageLogger: this.tokenUsageLogger,
+          workflowAnonymization,
           isTokenUsageTrackingEnabled: createTokenUsageTrackingEnabledCheck(options.request),
         });
       },

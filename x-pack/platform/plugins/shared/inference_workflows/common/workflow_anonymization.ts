@@ -23,9 +23,11 @@ const textContentSchema = z.object({ type: z.literal('text'), text: z.string() }
 const imageContentSchema = z
   .object({
     type: z.literal('image'),
-    source: z.object({ data: z.string(), mimeType: z.string() }).strict(),
+    // Images are opaque to PII traversal. Preserve additional source metadata so valid message
+    // extensions do not become runtime failures before anonymization sees the textual content.
+    source: z.object({ data: z.string(), mimeType: z.string() }).passthrough(),
   })
-  .strict();
+  .passthrough();
 
 const userMessageSchema = z
   .object({
@@ -65,11 +67,15 @@ const toolMessageSchema = z
   })
   .strict();
 
-export const workflowChatMessageSchema = z.discriminatedUnion('role', [
+const inferredWorkflowChatMessageSchema = z.discriminatedUnion('role', [
   userMessageSchema,
   assistantMessageSchema,
   toolMessageSchema,
 ]) satisfies z.ZodType<Message>;
+
+// Consumers need the stable Message output contract rather than the narrower inferred shape of
+// passthrough image branches. The definition above remains compile-time checked without a cast.
+export const workflowChatMessageSchema: z.ZodType<Message> = inferredWorkflowChatMessageSchema;
 
 export const tokenMapEntrySchema = z
   .object({
