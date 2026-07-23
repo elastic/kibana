@@ -306,6 +306,7 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
             defaultMessage="Project scope: {projectRouting}"
             values={{ projectRouting }}
           />
+          <EuiSpacer size="m" />
         </EuiText>
       ) : null}
 
