@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
+import { z } from '@kbn/zod/v4';
 import type { SpanLinkDetails } from '@kbn/apm-types';
 import { defineRoute } from '../types';
-import { kueryRt, rangeRt } from '../../default_api_types';
+import { kuerySchema, rangeSchema } from '../../default_api_types';
 
 export interface LinkedChildrenResponse {
   spanLinksDetails: SpanLinkDetails[];
@@ -15,11 +15,11 @@ export interface LinkedChildrenResponse {
 
 export const linkedChildrenRoute = defineRoute<LinkedChildrenResponse>()({
   endpoint: 'GET /internal/apm/traces/{traceId}/span_links/{spanId}/children',
-  params: t.type({
-    path: t.type({
-      traceId: t.string,
-      spanId: t.string,
+  params: z.object({
+    path: z.object({
+      traceId: z.string(),
+      spanId: z.string(),
     }),
-    query: t.intersection([kueryRt, rangeRt]),
+    query: kuerySchema.merge(rangeSchema),
   }),
 });

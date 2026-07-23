@@ -9,14 +9,11 @@ import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
-import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import { AttackFlyout, JSON_TAB_TEST_ID, OVERVIEW_TAB_TEST_ID, TABLE_TAB_TEST_ID } from '.';
 import { TestProviders } from '../../../common/mock';
-import { createStartServicesMock } from '../../../common/lib/kibana/kibana_react.mock';
-import { documentFlyoutHistoryKey } from '../../shared/constants/flyout_history';
-import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
+import { useSharedToolsFlyoutApi } from '../../shared/tools/use_shared_tools_flyout_api';
 
-jest.mock('../../../common/hooks/is_in_security_app');
+jest.mock('../../shared/tools/use_shared_tools_flyout_api');
 
 jest.mock('./footer', () => ({
   Footer: ({ onAttackUpdated }: { onAttackUpdated: () => void }) => (
@@ -61,10 +58,6 @@ jest.mock('../../shared/components/json_tab', () => ({
   JsonTab: () => <div data-test-subj="mock-json-tab" />,
 }));
 
-jest.mock('../../shared/tools/notes', () => ({
-  NotesDetails: () => <div data-test-subj="mock-notes-details" />,
-}));
-
 const createAttackHit = (extra: DataTableRecord['flattened'] = {}): DataTableRecord =>
   ({
     id: 'attack-1',
@@ -82,11 +75,11 @@ const createAttackHit = (extra: DataTableRecord['flattened'] = {}): DataTableRec
 const mockAttack = {} as AttackDiscoveryAlert;
 
 describe('<AttackFlyout />', () => {
-  const startServices = createStartServicesMock();
+  const mockOpenNotes = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.mocked(useIsInSecurityApp).mockReturnValue(true);
+    jest.mocked(useSharedToolsFlyoutApi).mockReturnValue({ openNotes: mockOpenNotes });
   });
 
   it('renders the header, body, and footer', () => {
@@ -150,57 +143,18 @@ describe('<AttackFlyout />', () => {
     expect(getByTestId('attack-flyout-footer')).toBeInTheDocument();
   });
 
-  it('opens notes in a system flyout when the notes action is clicked', () => {
-    const openSystemFlyout = jest.fn();
-    startServices.overlays = {
-      ...startServices.overlays,
-      openSystemFlyout,
-    };
-
+  it('opens notes via the shared tools API when the notes action is clicked', () => {
+    const hit = createAttackHit();
     const { getByTestId } = render(
-      <TestProviders startServices={startServices}>
-        <AttackFlyout hit={createAttackHit()} attack={mockAttack} onAttackUpdated={jest.fn()} />
+      <TestProviders>
+        <AttackFlyout hit={hit} attack={mockAttack} onAttackUpdated={jest.fn()} />
       </TestProviders>
     );
 
     fireEvent.click(getByTestId('mock-header'));
 
-    expect(openSystemFlyout).toHaveBeenCalledTimes(1);
-    expect(openSystemFlyout).toHaveBeenCalledWith(
-      expect.anything(),
-      expect.objectContaining({
-        ownFocus: false,
-        resizable: true,
-        size: 'm',
-        session: 'start',
-        historyKey: documentFlyoutHistoryKey,
-      })
-    );
-  });
-
-  it('uses the discover history key when outside the security app', () => {
-    jest.mocked(useIsInSecurityApp).mockReturnValue(false);
-    const openSystemFlyout = jest.fn();
-    startServices.overlays = {
-      ...startServices.overlays,
-      openSystemFlyout,
-    };
-
-    const { getByTestId } = render(
-      <TestProviders startServices={startServices}>
-        <AttackFlyout hit={createAttackHit()} attack={mockAttack} onAttackUpdated={jest.fn()} />
-      </TestProviders>
-    );
-
-    fireEvent.click(getByTestId('mock-header'));
-
-    expect(openSystemFlyout).toHaveBeenCalledWith(
-      expect.anything(),
-      expect.objectContaining({
-        session: 'start',
-        historyKey: DOC_VIEWER_FLYOUT_HISTORY_KEY,
-      })
-    );
+    expect(mockOpenNotes).toHaveBeenCalledTimes(1);
+    expect(mockOpenNotes).toHaveBeenCalledWith({ hit });
   });
 
   it('passes onAttackUpdated callback to the header and footer', () => {

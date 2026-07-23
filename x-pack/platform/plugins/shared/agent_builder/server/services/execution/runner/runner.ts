@@ -208,6 +208,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
     request,
     defaultConnectorId,
     telemetryMetadata,
+    maxContentLength,
     conversation,
     nextInput,
     promptState,
@@ -217,6 +218,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
     request: KibanaRequest;
     defaultConnectorId?: string;
     telemetryMetadata?: ConnectorTelemetryMetadata;
+    maxContentLength?: number;
     conversation?: Conversation;
     nextInput?: ConverseInput;
     promptState?: PromptStorageState;
@@ -236,7 +238,12 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
     const promptManager = createPromptManager({ state: promptState });
     const toolManager = createToolManager();
 
-    const modelProvider = modelProviderFactory({ request, defaultConnectorId, telemetryMetadata });
+    const modelProvider = modelProviderFactory({
+      request,
+      defaultConnectorId,
+      telemetryMetadata,
+      maxContentLength,
+    });
 
     const subAgentExecutor = createSubAgentExecutor({ request, getExecutionService });
 
@@ -311,6 +318,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
         request,
         defaultConnectorId,
         telemetryMetadata,
+        maxContentLength,
         abortSignal,
         executionMode = AgentExecutionMode.conversation,
         ...otherParams
@@ -320,6 +328,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
         request,
         defaultConnectorId,
         telemetryMetadata,
+        maxContentLength,
         conversation,
         nextInput,
         abortSignal,

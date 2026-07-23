@@ -7,17 +7,26 @@
 
 import React from 'react';
 import moment from 'moment';
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
+import {
+  EuiAccordion,
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+  EuiToolTip,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type {
   SignificantEvent,
   SignificantEventInvestigation,
 } from '@kbn/significant-events-schema';
+import { InvestigationOutput, useInvestigationState } from '@kbn/investigation-output';
 import { formatTimestamp } from '../../../../../util/formatters';
-import {
-  INVESTIGATION_STATUS_COLORS,
-  INVESTIGATION_STATUS_LABELS,
-} from '../shared/investigation_status';
+import { useKibana } from '../../../../../hooks/use_kibana';
+import { isInvestigationRunning } from '../shared/investigation_status';
 
 const SECTION_TITLE = i18n.translate(
   'xpack.streams.sigEventsTab.flyout.investigationsSectionTitle',
@@ -30,6 +39,13 @@ const NO_INVESTIGATIONS_TEXT = i18n.translate(
   'xpack.streams.sigEventsTab.flyout.noInvestigations',
   {
     defaultMessage: 'No investigations yet.',
+  }
+);
+
+const OPEN_CONVERSATION_LABEL = i18n.translate(
+  'xpack.streams.sigEventsTab.flyout.openConversationAriaLabel',
+  {
+    defaultMessage: 'Open investigation conversation',
   }
 );
 
@@ -46,29 +62,70 @@ const formatDuration = (startedAt: string, completedAt?: string): string => {
   return moment.duration(diffMs).humanize();
 };
 
-const InvestigationRow = ({ investigation }: { investigation: SignificantEventInvestigation }) => {
-  const { status, started_at, completed_at } = investigation;
-  const duration = formatDuration(started_at, completed_at);
-  const isRunning = status === 'pending';
+const InvestigationRow = ({
+  investigation,
+  initialIsOpen,
+}: {
+  investigation: SignificantEventInvestigation;
+  initialIsOpen: boolean;
+}) => {
+  const {
+    core: { http },
+  } = useKibana();
+  const { started_at: startedAt, completed_at: completedAt, workflow_execution_id } = investigation;
+  const duration = formatDuration(startedAt, completedAt);
+  const accordionId = useGeneratedHtmlId({ prefix: 'sigEventInvestigation' });
+
+  /**
+   * The hook's `status` is authoritative over the doc-derived flag — it settles as soon as the
+   * live stream ends and the final result is fetched, which can happen before the next 5s
+   * lifecycle poll updates `completed_at` on the sig-event doc (and, conversely, it keeps
+   * showing "running" when the doc lags a run that is actually still going).
+   */
+  const { state, error, status, conversationId } = useInvestigationState({
+    http,
+    workflowExecutionId: workflow_execution_id,
+    isRunning: isInvestigationRunning(investigation),
+  });
+
+  const conversationHref = conversationId
+    ? http.basePath.prepend(`/app/agent_builder/conversations/${conversationId}`)
+    : undefined;
 
   return (
-    <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-      <EuiFlexItem grow={false}>
-        <EuiBadge color={INVESTIGATION_STATUS_COLORS[status]}>
-          {INVESTIGATION_STATUS_LABELS[status]}
-        </EuiBadge>
-      </EuiFlexItem>
-      <EuiFlexItem grow>
+    <EuiAccordion
+      id={accordionId}
+      initialIsOpen={initialIsOpen}
+      data-test-subj="sigEventInvestigationRow"
+      buttonContent={
         <EuiText size="xs" color="subdued">
-          {formatTimestamp(started_at)}
-          {isRunning
+          {formatTimestamp(startedAt)}
+          {status === 'running'
             ? ` · ${getRunningDurationText(duration)}`
-            : completed_at
+            : completedAt
             ? ` · ${duration}`
             : null}
         </EuiText>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+      }
+      extraAction={
+        conversationHref ? (
+          <EuiToolTip content={OPEN_CONVERSATION_LABEL} disableScreenReaderOutput>
+            <EuiButtonIcon
+              data-test-subj="sigEventInvestigationOpenConversationButton"
+              iconType="discuss"
+              size="s"
+              aria-label={OPEN_CONVERSATION_LABEL}
+              href={conversationHref}
+              target="_blank"
+              onClick={(e: React.MouseEvent) => e.stopPropagation()}
+            />
+          </EuiToolTip>
+        ) : undefined
+      }
+    >
+      <EuiSpacer size="s" />
+      <InvestigationOutput status={status} state={state} error={error} />
+    </EuiAccordion>
   );
 };
 
@@ -80,7 +137,7 @@ export const EventInvestigations = ({ event }: EventInvestigationsProps) => {
   const investigations = event.investigations ?? [];
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="s">
+    <EuiFlexGroup direction="column" gutterSize="l">
       <EuiFlexItem grow={false}>
         <EuiTitle size="xs">
           <h3>{SECTION_TITLE}</h3>
@@ -93,9 +150,12 @@ export const EventInvestigations = ({ event }: EventInvestigationsProps) => {
           </EuiText>
         </EuiFlexItem>
       ) : (
-        investigations.map((investigation) => (
+        investigations.map((investigation, index) => (
           <EuiFlexItem key={investigation.workflow_execution_id} grow={false}>
-            <InvestigationRow investigation={investigation} />
+            <InvestigationRow
+              investigation={investigation}
+              initialIsOpen={index === investigations.length - 1}
+            />
           </EuiFlexItem>
         ))
       )}

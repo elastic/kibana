@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { EntitySummaryStalenessEntitySnapshot } from '@kbn/entity-store/common';
 import type { EntityType } from '../../../../common/entity_analytics/types';
 import type { RiskScoreState } from '../../../entity_analytics/api/hooks/use_risk_score';
 import type { EntityRiskScore, RiskStats } from '../../../../common/search_strategy';
@@ -16,6 +17,17 @@ export function getRiskFromEntityRecord(record: EntityStoreRecord): {
   calculated_score_norm?: number;
 } | null {
   return getRiskFromRecord(record);
+}
+
+/** Current entity signals used for AI summary staleness checks. */
+export function buildEntitySummaryStalenessEntitySnapshot(
+  record?: EntityStoreRecord | null
+): EntitySummaryStalenessEntitySnapshot {
+  const risk = record ? getRiskFromEntityRecord(record) : null;
+  return {
+    // Matches flyout risk summary (`entity.risk.calculated_score_norm`), not raw calculated_score.
+    riskScoreNorm: risk?.calculated_score_norm ?? null,
+  };
 }
 
 function getRiskFromRecord(record: EntityStoreRecord): {

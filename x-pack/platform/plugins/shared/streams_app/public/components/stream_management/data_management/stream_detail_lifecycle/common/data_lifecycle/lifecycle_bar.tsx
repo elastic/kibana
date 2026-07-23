@@ -134,7 +134,6 @@ export const LifecycleBar: React.FC<LifecycleBarProps> = ({
           responsive={false}
           css={{
             gridTemplateColumns,
-            paddingInline: euiTheme.size.xxs,
             boxSizing: 'border-box',
             height: '100%',
           }}

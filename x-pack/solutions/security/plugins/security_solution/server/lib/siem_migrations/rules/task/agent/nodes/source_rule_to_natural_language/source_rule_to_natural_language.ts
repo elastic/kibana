@@ -11,6 +11,7 @@ import {
   UNSUPPORTED_FUNCTIONS,
 } from '../../../../../common/task/util/has_unsupported_function';
 import { cleanMarkdown, generateAssistantComment } from '../../../../../common/task/util/comments';
+import { formatLookupResourcesContext } from '../../../../../common/task/util/format_lookup_resource';
 import type { GraphNode, ModelWithTools } from '../../types';
 import { GENERAL_INTERPRET_INSTRUCTIONS, USER_MESSAGE, VENDOR_INSTRUCTIONS } from './prompts';
 
@@ -35,7 +36,7 @@ export const getSourceRuleToNaturalLanguageNode = ({
       title: state.original_rule.title,
       description: state.original_rule.description,
       query,
-      resources: JSON.stringify(state.resources?.lookup ?? []),
+      resources: formatLookupResourcesContext(state.resources?.lookup ?? []),
     });
 
     const currentMessages = state.messages ?? [];

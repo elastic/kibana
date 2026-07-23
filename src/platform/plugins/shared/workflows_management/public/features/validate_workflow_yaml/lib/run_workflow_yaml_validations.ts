@@ -36,12 +36,11 @@ export interface RunWorkflowYamlValidationsParams {
 }
 
 /**
- * Shared YAML validators for workflow editors and change-history preview.
+ * Structural YAML validators shared by the live editor and change-history preview.
  *
- * Intentionally excludes editor-only checks that need live Kibana context:
- * connector IDs, step-property handlers, workflow-input cross-references, and
- * ES|QL cluster validation. Those run in `useYamlValidation` only; change-history
- * preview uses this structural subset.
+ * Connector IDs, step-property handlers, workflow-input cross-references, graph-build
+ * failures, and ES|QL cluster validation are layered on top by
+ * `collectFullWorkflowYamlValidationResults`.
  */
 export function runWorkflowYamlValidations({
   yamlString,

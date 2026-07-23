@@ -18,6 +18,7 @@ import {
   EuiFlyoutHeader,
   EuiHorizontalRule,
   EuiPanel,
+  EuiSpacer,
   EuiTab,
   EuiTabs,
   EuiToolTip,
@@ -137,8 +138,9 @@ export const AlertEpisodeDetailsFlyout = ({
           <AlertEpisodeDetailsHeaderSection
             episodeId={episodeId}
             services={services}
-            titleSize="m"
+            titleSize="s"
           />
+          <EuiSpacer size="s" />
           <EuiTabs bottomBorder={false}>
             <EuiTab
               isSelected={effectiveTab === 'overview'}

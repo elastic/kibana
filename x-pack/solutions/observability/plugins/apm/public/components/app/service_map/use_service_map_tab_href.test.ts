@@ -5,39 +5,13 @@
  * 2.0.
  */
 
+import type { ReactNode } from 'react';
+import React from 'react';
 import { renderHook } from '@testing-library/react';
+import { createMemoryHistory } from 'history';
+import { MockApmPluginContextWrapper } from '../../../context/apm_plugin/mock_apm_plugin_context';
+import { fromQuery } from '../../shared/links/url_helpers';
 import { useServiceMapTabHrefBuilder } from './use_service_map_tab_href';
-import { useApmRouter } from '../../../hooks/use_apm_router';
-import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
-import { useApmRoutePath } from '../../../hooks/use_apm_route_path';
-
-jest.mock('../../../hooks/use_apm_router', () => ({
-  useApmRouter: jest.fn(),
-}));
-
-jest.mock('../../../hooks/use_apm_params', () => ({
-  useAnyOfApmParams: jest.fn(),
-}));
-
-jest.mock('../../../hooks/use_apm_route_path', () => ({
-  useApmRoutePath: jest.fn(),
-}));
-
-const mockedUseApmRouter = jest.mocked(useApmRouter);
-const mockedUseAnyOfApmParams = jest.mocked(useAnyOfApmParams);
-const mockedUseApmRoutePath = jest.mocked(useApmRoutePath);
-
-const mockedLink = jest.fn(
-  (path: string, args: { path?: Record<string, string>; query?: Record<string, unknown> }) => {
-    const concretePath = path.replace(/\{serviceName\}/, args.path?.serviceName ?? '');
-    const search = new URLSearchParams();
-    for (const [k, v] of Object.entries(args.query ?? {})) {
-      if (v !== undefined) search.set(k, String(v));
-    }
-    const qs = search.toString();
-    return `/app/apm${concretePath}${qs ? `?${qs}` : ''}`;
-  }
-);
 
 const serviceMapQuery = {
   rangeFrom: 'now-15m',
@@ -49,23 +23,20 @@ const serviceMapQuery = {
   serviceGroup: '',
 };
 
-describe('useServiceMapTabHrefBuilder', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-    mockedUseApmRouter.mockReturnValue({ link: mockedLink } as unknown as ReturnType<
-      typeof useApmRouter
-    >);
-    mockedUseAnyOfApmParams.mockReturnValue({ query: serviceMapQuery } as unknown as ReturnType<
-      typeof useAnyOfApmParams
-    >);
+function createWrapper(pathname: string) {
+  const history = createMemoryHistory({
+    initialEntries: [{ pathname, search: fromQuery(serviceMapQuery) }],
   });
 
-  it('builds an overview-tab link and resets the map kuery', () => {
-    mockedUseApmRoutePath.mockReturnValue(
-      '/service-map' as unknown as ReturnType<typeof useApmRoutePath>
-    );
+  return ({ children }: { children?: ReactNode }) =>
+    React.createElement(MockApmPluginContextWrapper, { history }, children);
+}
 
-    const { result } = renderHook(() => useServiceMapTabHrefBuilder('overview'));
+describe('useServiceMapTabHrefBuilder', () => {
+  it('builds an overview-tab link and resets the map kuery', () => {
+    const { result } = renderHook(() => useServiceMapTabHrefBuilder('overview'), {
+      wrapper: createWrapper('/service-map'),
+    });
     const href = result.current('opbeans-node');
 
     expect(href).toContain('/app/apm/services/opbeans-node/overview');
@@ -74,12 +45,21 @@ describe('useServiceMapTabHrefBuilder', () => {
     expect(search.get('environment')).toBe('production');
   });
 
-  it('builds a mobile-services overview-tab link on the mobile map context', () => {
-    mockedUseApmRoutePath.mockReturnValue(
-      '/mobile-services/{serviceName}/service-map' as unknown as ReturnType<typeof useApmRoutePath>
-    );
+  it('builds a mobile-services overview-tab link on the mobile overview context', () => {
+    const { result } = renderHook(() => useServiceMapTabHrefBuilder('overview'), {
+      wrapper: createWrapper('/mobile-services/opbeans-rum/overview'),
+    });
+    const href = result.current('opbeans-rum');
 
-    const { result } = renderHook(() => useServiceMapTabHrefBuilder('overview'));
+    expect(href).toContain('/app/apm/mobile-services/opbeans-rum/overview');
+    const search = new URL(`http://x${href}`).searchParams;
+    expect(search.get('kuery')).toBe('');
+  });
+
+  it('builds a mobile-services overview-tab link on the mobile map context', () => {
+    const { result } = renderHook(() => useServiceMapTabHrefBuilder('overview'), {
+      wrapper: createWrapper('/mobile-services/opbeans-rum/service-map'),
+    });
     const href = result.current('opbeans-rum');
 
     expect(href).toContain('/app/apm/mobile-services/opbeans-rum/overview');

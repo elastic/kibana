@@ -6,6 +6,7 @@
  */
 
 import type { Entity } from '@kbn/entity-store/common';
+import { MAX_LEADS_PER_RUN } from '../../../../common/entity_analytics/lead_generation/constants';
 
 /**
  * Entity representation flowing through the lead generation pipeline.
@@ -132,7 +133,7 @@ export interface LeadGenerationEngineConfig {
 
 export const DEFAULT_ENGINE_CONFIG: LeadGenerationEngineConfig = {
   minObservations: 1,
-  maxLeads: 10,
+  maxLeads: MAX_LEADS_PER_RUN,
   corroborationBonus: 0.15,
   diversityBonus: 0.1,
   normalizationCeiling: 100,

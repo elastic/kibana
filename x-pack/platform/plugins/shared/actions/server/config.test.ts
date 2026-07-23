@@ -604,6 +604,45 @@ describe('config validation', () => {
       );
     });
   });
+
+  describe('relay.ssl', () => {
+    test('accepts the Relay URL and complete SSL configuration', () => {
+      const result = configSchema.validate({
+        relay: {
+          url: 'https://relay.test',
+          ssl: {
+            verificationMode: 'full',
+            certificateAuthorities: ['/path/to/ca.pem'],
+            certificate: '/path/to/cert.pem',
+            key: '/path/to/key.pem',
+          },
+        },
+      });
+
+      expect(result.relay).toEqual({
+        url: 'https://relay.test',
+        ssl: {
+          verificationMode: 'full',
+          certificateAuthorities: ['/path/to/ca.pem'],
+          certificate: '/path/to/cert.pem',
+          key: '/path/to/key.pem',
+        },
+      });
+    });
+
+    test('throws when certificate is specified without key', () => {
+      expect(() =>
+        configSchema.validate({
+          relay: {
+            url: 'https://relay.test',
+            ssl: {
+              certificate: '/path/to/cert.pem',
+            },
+          },
+        })
+      ).toThrow('[relay.ssl]: must specify [relay.ssl.key]');
+    });
+  });
 });
 
 // object creator that ensures we can create a property named __proto__ on an

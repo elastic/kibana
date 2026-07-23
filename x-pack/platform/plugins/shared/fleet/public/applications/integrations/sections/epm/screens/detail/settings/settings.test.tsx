@@ -15,6 +15,9 @@ jest.mock('../../../../../hooks', () => {
   return {
     ...jest.requireActual('../../../../../hooks'),
     useGetPackagePoliciesQuery: jest.fn().mockReturnValue({ data: { items: [] } }),
+    useBulkGetAgentPoliciesQuery: jest
+      .fn()
+      .mockReturnValue({ data: { items: [] }, isLoading: false }),
     useGetPackageInstallStatus: jest.fn(),
     useGetSettingsQuery: jest.fn().mockReturnValue({
       data: { item: { integration_knowledge_enabled: true } },
@@ -76,6 +79,7 @@ import {
   useGetPackageInstallStatus,
   useAuthz,
   useGetPackagePoliciesQuery,
+  useBulkGetAgentPoliciesQuery,
   useUpgradePackagePolicyDryRunQuery,
   useUpgradeAgentlessPoliciesDryRunQuery,
 } from '../../../../../hooks';
@@ -238,6 +242,9 @@ describe('SettingsPage', () => {
 
     afterEach(() => {
       jest.mocked(useGetPackagePoliciesQuery).mockReturnValue({ data: { items: [] } } as any);
+      jest
+        .mocked(useBulkGetAgentPoliciesQuery)
+        .mockReturnValue({ data: { items: [] }, isLoading: false } as any);
       jest.mocked(isAgentlessPoliciesUIEnabled).mockReturnValue(true);
     });
 
@@ -267,6 +274,57 @@ describe('SettingsPage', () => {
         'agentless-policy',
       ]);
       expect(jest.mocked(useUpgradeAgentlessPoliciesDryRunQuery).mock.calls[0][0]).toEqual([]);
+    });
+
+    it('routes a parent-only agentless policy (no own supports_agentless flag) to the agentless dry-run', () => {
+      // Older agentless policies carry the flag only on their parent agent policy; the server's
+      // block matches them via the parent, so the client must too or they poison the legacy batch.
+      jest.mocked(useGetPackagePoliciesQuery).mockReturnValue({
+        data: {
+          items: [
+            { id: 'agent-based-policy', supports_agentless: false, policy_ids: ['regular-agent'] },
+            { id: 'legacy-agentless', supports_agentless: false, policy_ids: ['agentless-agent'] },
+          ],
+        },
+      } as any);
+      jest.mocked(useBulkGetAgentPoliciesQuery).mockReturnValue({
+        data: {
+          items: [
+            { id: 'regular-agent', supports_agentless: false },
+            { id: 'agentless-agent', supports_agentless: true },
+          ],
+        },
+        isLoading: false,
+      } as any);
+
+      renderComponent(installedPackageInfo);
+
+      expect(jest.mocked(useUpgradePackagePolicyDryRunQuery).mock.calls[0][0]).toEqual([
+        'agent-based-policy',
+      ]);
+      expect(jest.mocked(useUpgradeAgentlessPoliciesDryRunQuery).mock.calls[0][0]).toEqual([
+        'legacy-agentless',
+      ]);
+    });
+
+    it('holds the legacy dry-run (enabled: false) until the parent agent-policy lookup resolves', () => {
+      jest.mocked(useGetPackagePoliciesQuery).mockReturnValue({
+        data: {
+          items: [
+            { id: 'agent-based-policy', supports_agentless: false, policy_ids: ['regular-agent'] },
+          ],
+        },
+      } as any);
+      jest.mocked(useBulkGetAgentPoliciesQuery).mockReturnValue({
+        data: undefined,
+        isLoading: true,
+      } as any);
+
+      renderComponent(installedPackageInfo);
+
+      // While the parent lookup is loading, the legacy dry-run must not fire (a still-hidden
+      // parent-only agentless policy could otherwise 400 the whole batch).
+      expect(jest.mocked(useUpgradePackagePolicyDryRunQuery).mock.calls[0][2]?.enabled).toBe(false);
     });
   });
 

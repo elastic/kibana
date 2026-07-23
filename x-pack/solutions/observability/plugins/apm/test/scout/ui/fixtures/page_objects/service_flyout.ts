@@ -14,6 +14,7 @@ export class ServiceFlyoutPage {
   public readonly title: Locator;
   public readonly actions: Locator;
   public readonly transactionsSection: Locator;
+  public readonly transactionSparklines: Locator;
 
   constructor(private readonly page: ScoutPage) {
     this.flyout = page.testSubj.locator('serviceFlyout');
@@ -21,6 +22,9 @@ export class ServiceFlyoutPage {
     this.title = page.testSubj.locator('serviceFlyoutTitleLink');
     this.actions = page.testSubj.locator('serviceFlyoutActionsButton');
     this.transactionsSection = page.testSubj.locator('serviceFlyoutSection-transactions-loaded');
+    this.transactionSparklines = this.transactionsSection.locator(
+      '[data-test-subj="transactionSparklineChart"]'
+    );
   }
 
   getChartLocator(id: string): Locator {
@@ -43,7 +47,7 @@ export class ServiceFlyoutPage {
     await this.waitForHidden();
   }
 
-  async clickAction(action: string) {
+  async clickFooterAction(action: string) {
     await this.actions.click();
     await this.page.testSubj.click(`serviceFlyoutActionsMenuItem-${action}`);
   }

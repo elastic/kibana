@@ -8,8 +8,3 @@
  */
 
 export { SavedObjectsManagementPage } from './saved_objects_management_page';
-export { CopySavedObjectsToSpaceFlyout } from './copy_saved_objects_to_space_flyout';
-export type {
-  CopyToSpaceSetupOptions,
-  CopyToSpaceSummary,
-} from './copy_saved_objects_to_space_flyout';

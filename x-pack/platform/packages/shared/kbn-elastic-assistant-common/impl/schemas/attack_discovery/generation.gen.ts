@@ -16,6 +16,43 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
+export const WorkflowExecutionReference = lazySchema(() =>
+  z.object({
+    /**
+     * The workflow definition ID
+     */
+    workflowId: z.string(),
+    /**
+     * The human-readable workflow name (optional; used by the UI to display a label)
+     */
+    workflowName: z.string().optional(),
+    /**
+     * The workflow execution ID
+     */
+    workflowRunId: z.string(),
+  })
+);
+export type WorkflowExecutionReference = z.infer<typeof WorkflowExecutionReference>;
+
+/**
+ * Workflow execution tracking for manual orchestration
+ */
+export const WorkflowExecutionsTracking = lazySchema(() =>
+  z.object({
+    /**
+     * Alert retrieval workflow executions (one per workflow invoked)
+     */
+    alertRetrieval: z.array(WorkflowExecutionReference).nullable().optional(),
+    /**
+     * Generation-phase gate (skill) executions, including any net-new alert re-fetch the skill triggers
+     */
+    gate: z.array(WorkflowExecutionReference).nullable().optional(),
+    generation: WorkflowExecutionReference.nullable().optional(),
+    validation: WorkflowExecutionReference.nullable().optional(),
+  })
+);
+export type WorkflowExecutionsTracking = z.infer<typeof WorkflowExecutionsTracking>;
+
 export const AttackDiscoveryGeneration = lazySchema(() =>
   z.object({
     /**
@@ -42,9 +79,29 @@ export const AttackDiscoveryGeneration = lazySchema(() =>
       })
       .optional(),
     /**
+     * Identifier of the persisted Agent Builder conversation for skill-based alert retrieval (optional; present only when the skill retrieval mode ran)
+     */
+    conversation_id: z.string().optional(),
+    /**
      * The number of new Attack discovery alerts (max kibana.alert.rule.execution.metrics.alert_counts.new) for this generation
      */
     discoveries: z.number(),
+    /**
+     * The number of attack discoveries dropped as duplicates during the persist step
+     */
+    duplicates_dropped_count: z.number().int().optional(),
+    /**
+     * The number of attack discoveries generated before deduplication and hallucination filtering
+     */
+    generated_count: z.number().int().optional(),
+    /**
+     * The number of attack discoveries filtered as hallucinations during the validation step
+     */
+    hallucinations_filtered_count: z.number().int().optional(),
+    /**
+     * The number of attack discoveries successfully persisted after deduplication and hallucination filtering
+     */
+    persisted_count: z.number().int().optional(),
     /**
      * When generation ended (max event.end)
      */
@@ -56,7 +113,15 @@ export const AttackDiscoveryGeneration = lazySchema(() =>
     /**
      * Generation loading message (kibana.alert.rule.execution.status)
      */
-    loading_message: z.string(),
+    loading_message: z.string().optional(),
+    /**
+     * Structured error category from server classification (optional; absent for successful generations)
+     */
+    error_category: z.string().optional(),
+    /**
+     * Workflow ID that caused the failure (optional; absent for successful generations)
+     */
+    failed_workflow_id: z.string().optional(),
     /**
      * Reason for failed generations (event.reason)
      */
@@ -69,6 +134,42 @@ export const AttackDiscoveryGeneration = lazySchema(() =>
      * The status of the attack discovery generation
      */
     status: z.enum(['canceled', 'dismissed', 'failed', 'started', 'succeeded']),
+    /**
+     * Synthesized per-step lifecycle markers (e.g. step-start, step-complete, step-fail) derived from raw event.action values. The array is ordered by step sequence (alert retrieval, generation, validation), with each step contributing 0-2 tokens that indicate its execution status.
+     */
+    step_event_actions: z.array(z.string()).optional(),
+    /**
+     * Workflow execution tracking for alert retrieval, generation, and validation workflows
+     */
+    workflow_executions: WorkflowExecutionsTracking.optional(),
+    /**
+     * The workflow definition ID for deep linking
+     */
+    workflow_id: z.string().optional(),
+    /**
+     * Source metadata for scheduled generations (rule_id, rule_name, action_execution_uuid)
+     */
+    source_metadata: z
+      .object({
+        /**
+         * The action execution UUID from the alerting framework
+         */
+        action_execution_uuid: z.string().optional(),
+        /**
+         * The ID of the alerting rule that triggered this generation
+         */
+        rule_id: z.string().optional(),
+        /**
+         * The name of the alerting rule that triggered this generation
+         */
+        rule_name: z.string().optional(),
+      })
+      .nullable()
+      .optional(),
+    /**
+     * The workflow execution ID for monitoring
+     */
+    workflow_run_id: z.string().optional(),
   })
 );
 export type AttackDiscoveryGeneration = z.infer<typeof AttackDiscoveryGeneration>;

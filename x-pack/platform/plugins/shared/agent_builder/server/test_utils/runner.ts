@@ -166,6 +166,7 @@ export const createSkillsServiceMock = (): SkillsServiceMock => {
 export const createToolManagerMock = (): ToolManagerMock => {
   return {
     setEventEmitter: jest.fn(),
+    setMaxToolResultTokens: jest.fn(),
     addTools: jest.fn(),
     list: jest.fn(),
     recordToolUse: jest.fn(),

@@ -31,6 +31,14 @@ export interface AlertingV2Usage {
   count_with_grouping?: number;
   avg_grouping_fields_count?: number | null;
   min_created_at?: string | null;
+  count_by_query_format?: { composed?: number; standalone?: number };
+  count_by_recovery_strategy?: { no_breach?: number; query?: number; none?: number };
+  count_by_no_data_strategy?: {
+    last_known_status?: number;
+    emit?: number;
+    recover?: number;
+    none?: number;
+  };
 
   // execution stats
   executions_count_24hr?: number;

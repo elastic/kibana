@@ -49,8 +49,8 @@ jest.mock('../../../entities/workflows/model/use_workflow_actions', () => ({
 jest.mock('../../../entities/connectors/model/use_available_connectors', () => ({
   useFetchConnector: () => jest.fn(() => ({ data: undefined, isLoading: false })),
 }));
-jest.mock('react-redux', () => ({
-  ...jest.requireActual('react-redux'),
+jest.mock('react-redux-v7', () => ({
+  ...jest.requireActual('react-redux-v7'),
   useSelector: (selector: any) => mockUseSelector(selector),
 }));
 
@@ -289,7 +289,7 @@ describe('WorkflowDetailEditor', () => {
       const store = mockStore();
 
       (useWorkflowsExperimentalUiSetting as jest.Mock).mockImplementation(
-        (settingId: string) => settingId === 'workflows:ui:visualEditor:enabled'
+        (settingId: string) => settingId === 'workflows:experimentalFeatures'
       );
 
       mockUseSelector.mockImplementation((selector: any) => {

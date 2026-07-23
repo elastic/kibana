@@ -47,5 +47,8 @@
     "@kbn/es-errors",
     "@kbn/workflows-extensions",
     "@kbn/i18n",
+    "@kbn/workflows",
+    "@kbn/es",
+    "@kbn/test-es-server",
   ]
 }

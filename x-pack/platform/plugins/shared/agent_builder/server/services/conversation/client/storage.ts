@@ -14,6 +14,7 @@ import type {
   ConversationAccessControl,
   ConversationInternalState,
   ConversationRoundStatus,
+  ConversationOrigin,
 } from '@kbn/agent-builder-common/chat';
 import type { PersistentConversationRound } from './types';
 
@@ -42,6 +43,12 @@ const storageSettings = {
         },
         dynamic: false,
       }),
+      origin: types.object({
+        properties: {
+          external_conversation_id: types.keyword({}),
+        },
+        dynamic: false,
+      }),
     },
   },
 } satisfies IndexStorageSettings;
@@ -61,6 +68,7 @@ export interface ConversationProperties {
   read?: boolean;
   workspace_id?: string;
   access_control?: ConversationAccessControl;
+  origin?: ConversationOrigin;
   // legacy field
   rounds?: PersistentConversationRound[];
 }

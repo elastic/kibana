@@ -44,8 +44,22 @@ export const PREVIOUS_VERSION_LABEL = i18n.translate(
   }
 );
 
-export const CURRENT_VERSION_LABEL = i18n.translate('workflows.changeHistory.currentVersionLabel', {
-  defaultMessage: 'Current version:',
+export const SELECTED_VERSION_LABEL = i18n.translate(
+  'workflows.changeHistory.selectedVersionLabel',
+  {
+    defaultMessage: 'Selected version:',
+  }
+);
+
+export const UNSAVED_CHANGES_ACTION = i18n.translate(
+  'workflows.changeHistory.unsavedChangesAction',
+  {
+    defaultMessage: 'Unsaved changes',
+  }
+);
+
+export const UNSAVED_CHANGES_ACTOR = i18n.translate('workflows.changeHistory.unsavedChangesActor', {
+  defaultMessage: 'You',
 });
 
 export const CHANGES_SUMMARY_STEPS = i18n.translate(

@@ -9,7 +9,7 @@ import { ExperimentalFeaturesService } from './experimental_features';
 
 /**
  * Kill switch for the agentless policies UI migration: when true (default), the UI reads/writes
- * agentless integration policies through the agentless policies API; when false, every migrated
+ * agentless integration policies through the managed integrations API; when false, every migrated
  * surface falls back to the legacy package-policy/agent-policy APIs. Single source of truth —
  * all agentless-vs-legacy UI forks must consult this instead of reading the flag directly.
  *
@@ -17,7 +17,13 @@ import { ExperimentalFeaturesService } from './experimental_features';
  * upgrade) are gated. Agentless policy create and delete are NOT gated — they have been calling
  * the agentless API in production for a while and predate this switch, so they stay on it even
  * when the flag is off.
+ *
+ * The kill switch falls back to the legacy APIs, but `disableAgentlessLegacyAPI` blocks those for
+ * agentless — so when that flag is on, ignore the kill switch and keep the UI on the agentless API
+ * (otherwise agentless would be unmanageable).
  */
 export const isAgentlessPoliciesUIEnabled = (): boolean => {
-  return ExperimentalFeaturesService.get().enableAgentlessPoliciesUI;
+  const { enableAgentlessPoliciesUI, disableAgentlessLegacyAPI } =
+    ExperimentalFeaturesService.get();
+  return enableAgentlessPoliciesUI || disableAgentlessLegacyAPI;
 };

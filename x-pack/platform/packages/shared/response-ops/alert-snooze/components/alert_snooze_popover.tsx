@@ -19,17 +19,22 @@ import {
 import { SnoozeFormBody } from './snooze_form_body';
 import { useSnoozeForm } from './use_snooze_form';
 import type { AlertSnoozePayload } from './use_snooze_form';
-import type { DataConditionTypeDescriptor } from './types';
 import * as i18n from './translations';
 
 export type { AlertSnoozePayload } from './use_snooze_form';
 
 export interface AlertSnoozePopoverProps {
   onApply: (payload: AlertSnoozePayload) => void;
-  dataConditionTypes?: readonly DataConditionTypeDescriptor[];
+  /** alert field names for the `field_change` condition dropdown. */
+  fieldOptions?: string[];
+  isLoadingFields?: boolean;
 }
 
-export const AlertSnoozePopover = ({ onApply, dataConditionTypes }: AlertSnoozePopoverProps) => {
+export const AlertSnoozePopover = ({
+  onApply,
+  fieldOptions,
+  isLoadingFields,
+}: AlertSnoozePopoverProps) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const togglePopover = useCallback(() => setIsOpen((open) => !open), []);
@@ -82,7 +87,8 @@ export const AlertSnoozePopover = ({ onApply, dataConditionTypes }: AlertSnoozeP
         onTabChange={setActiveTab}
         onQuickScheduleChange={setQuickEndDate}
         onConditionalScheduleChange={setConditionalSchedule}
-        dataConditionTypes={dataConditionTypes}
+        fieldOptions={fieldOptions}
+        isLoadingFields={isLoadingFields}
       />
 
       <EuiHorizontalRule margin="none" />

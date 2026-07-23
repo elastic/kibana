@@ -14,9 +14,16 @@ export type {
   OAuthClientConnectionsSummary,
 } from '@kbn/agent-builder-common';
 
+export interface OAuthConnectionUser {
+  email?: string;
+  first_name?: string;
+  last_name?: string;
+}
+
 export interface OAuthConnection {
   id: string;
   client_id: string;
+  client_name?: string;
   name?: string;
   resource: string;
   creation?: string;
@@ -25,6 +32,7 @@ export interface OAuthConnection {
   revocation_reason?: string;
   scopes?: string[];
   user_id?: string;
+  user?: OAuthConnectionUser;
 }
 
 export interface ListOAuthClientsResponse {

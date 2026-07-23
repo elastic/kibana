@@ -16,6 +16,8 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { formatAgentBuilderErrorMessage } from '@kbn/agent-builder-browser';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import { defer } from 'lodash';
@@ -109,7 +111,16 @@ export const McpClientCreate = () => {
           <EuiSpacer size="xl" />
           <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty size="m" color="text" onClick={handleCancel}>
+              <EuiButtonEmpty
+                size="m"
+                color="text"
+                onClick={handleCancel}
+                {...getEbtProps({
+                  element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                  action: AGENT_BUILDER_UI_EBT.action.globalManagement.MCP_CLIENT_CREATE_CANCEL,
+                  detail: AGENT_BUILDER_UI_EBT.entity.MCP_CLIENT,
+                })}
+              >
                 {labels.tools.mcpClients.form.cancelButton}
               </EuiButtonEmpty>
             </EuiFlexItem>
@@ -121,6 +132,11 @@ export const McpClientCreate = () => {
                 isLoading={isCreating}
                 disabled={hasErrors || isCreating}
                 data-test-subj="mcpClientCreateButton"
+                {...getEbtProps({
+                  element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                  action: AGENT_BUILDER_UI_EBT.action.globalManagement.MCP_CLIENT_CREATE_SUBMIT,
+                  detail: AGENT_BUILDER_UI_EBT.entity.MCP_CLIENT,
+                })}
               >
                 {labels.tools.mcpClients.form.createButton}
               </EuiButton>
