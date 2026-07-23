@@ -8,7 +8,7 @@
 import { expect } from '@kbn/scout/api';
 import type { RoleApiCredentials } from '@kbn/scout';
 import { ALERTING_V2_INTERNAL_SUGGESTIONS_MATCHER_VALUES_API_PATH } from '@kbn/alerting-v2-constants';
-import { apiTest } from '../fixtures';
+import { apiTest, testData } from '../fixtures';
 
 apiTest.describe('Matcher value suggestions API', { tag: '@local-stateful-classic' }, () => {
   let adminCredentials: RoleApiCredentials;
@@ -16,7 +16,10 @@ apiTest.describe('Matcher value suggestions API', { tag: '@local-stateful-classi
 
   apiTest.beforeAll(async ({ requestAuth }) => {
     adminCredentials = await requestAuth.getApiKeyForAdmin();
-    adminHeaders = { ...adminCredentials.apiKeyHeader };
+    // This is an internal API reached over POST, so the request needs the
+    // shared XSRF / internal-origin headers alongside the API key; without
+    // them Kibana rejects the request with a 400 before it hits validation.
+    adminHeaders = { ...testData.COMMON_HEADERS, ...adminCredentials.apiKeyHeader };
   });
 
   apiTest(
