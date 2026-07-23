@@ -329,13 +329,15 @@ describe('validateWorkflowInputs', () => {
     setInputsSchema({
       properties: {
         field_syntax_markdown: { type: 'string' },
+        parser_error_syntax: { type: 'string' },
         valid_liquid_syntax: { type: 'string' },
       },
-      required: ['field_syntax_markdown', 'valid_liquid_syntax'],
+      required: ['field_syntax_markdown', 'parser_error_syntax', 'valid_liquid_syntax'],
     });
 
     const inputs = {
       field_syntax_markdown: 'Malware on {{ host.name SRVWIN07 }}',
+      parser_error_syntax: 'Malware on {{ host.name: web-01 }}',
       valid_liquid_syntax: '{{ some.thing }}',
     };
     const workflowExecution = createWorkflowExecution({ inputs });
