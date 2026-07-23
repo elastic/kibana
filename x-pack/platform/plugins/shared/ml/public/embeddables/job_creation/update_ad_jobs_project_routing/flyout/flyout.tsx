@@ -235,7 +235,8 @@ export const UpdateADJobsProjectRoutingFlyout: FC<Props> = ({
       } else {
         toasts.addWarning(
           i18n.translate('xpack.ml.embeddables.updateADJobsProjectRoutingFlyout.updatePartial', {
-            defaultMessage: 'Project routing was updated for {success} of {total} jobs.',
+            defaultMessage:
+              'Project routing was updated for {success} of {total} jobs. Any jobs that were previously running will need to be restarted if their update failed.',
             values: { success: successCount, total: jobIds.length },
           })
         );
