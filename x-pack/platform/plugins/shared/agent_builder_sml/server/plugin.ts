@@ -91,6 +91,39 @@ export class AgentBuilderSmlPlugin
       getSmlService,
     });
 
+    // Runtime fields that reconcile the raw values stored on SML docs with the format
+    // Kibana grants use, so a DLS template can filter without any change to ingestion:
+    //  - space_resources: raw space id `marketing` -> `space:marketing` (global `*` passed through)
+    //  - space_perms:     (space x required-privilege) -> `space:marketing|saved_object:dashboard/get`
+    const spaceResourcesScript =
+      "for (def s : doc['spaces']) { emit(s == '*' ? '*' : 'space:' + s); }";
+    const spacePermsScript =
+      "for (def s : doc['spaces']) { for (def p : doc['permissions.kibana.privileges.name']) { " +
+      "emit((s == '*' ? '*' : 'space:' + s) + '|' + p); } }";
+
+    // Composite DLS: a KI is visible if the user holds its required privilege in one of the
+    // KI's spaces (space_perms), OR it is public (no required privilege) and lives in a space
+    // the user can access (space_resources). `_user.application_privileges` /
+    // `_user.application_resources` come from the Elasticsearch DLS-template extension.
+    const dlsSource = JSON.stringify({
+      bool: {
+        minimum_should_match: 1,
+        should: [
+          { terms: { space_perms: '__APP_PRIVS__' } },
+          {
+            bool: {
+              must: [
+                { terms: { space_resources: '__APP_RES__' } },
+                { bool: { must_not: { exists: { field: 'permissions.kibana.privileges.name' } } } },
+              ],
+            },
+          },
+        ],
+      },
+    })
+      .replace('"__APP_PRIVS__"', '{{#toJson}}_user.application_privileges{{/toJson}}')
+      .replace('"__APP_RES__"', '{{#toJson}}_user.application_resources{{/toJson}}');
+
     setupDeps.contextEngine?.registerAiIndex('elastic', {
       name: 'Elastic',
       description:
@@ -100,6 +133,18 @@ export class AgentBuilderSmlPlugin
       dest: { type: 'index', value: 'ai-index-idx-sml-data' },
       automations: [],
       sources: [],
+      index_config: {
+        mappings: {
+          runtime: {
+            space_resources: { type: 'keyword', script: { source: spaceResourcesScript } },
+            space_perms: { type: 'keyword', script: { source: spacePermsScript } },
+          },
+        },
+      },
+      dls: {
+        role: 'ai-index-elastic-reader',
+        query: JSON.stringify({ template: { source: dlsSource } }),
+      },
     });
 
     return {

@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { AiIndexProperties } from '../../common/http_api/ai_indices';
 import type { AiIndexService } from './service';
 import { AiIndexNotFoundError, InvalidAiIndexDestError } from './errors';
+import { applyDls, applyIndexConfig } from './index_config';
 
 export class AiIndexRegistry {
   private readonly entries = new Map<string, AiIndexProperties>();
@@ -26,10 +28,12 @@ export class AiIndexRegistry {
 
   async startupRegister({
     aiIndexService,
+    esClient,
     isEnabled,
     logger,
   }: {
     aiIndexService: AiIndexService;
+    esClient: ElasticsearchClient;
     isEnabled: boolean;
     logger: Logger;
   }): Promise<void> {
@@ -41,7 +45,7 @@ export class AiIndexRegistry {
     }
 
     for (const [id, properties] of this.entries) {
-      await this.registerOne({ id, properties, aiIndexService, logger });
+      await this.registerOne({ id, properties, aiIndexService, esClient, logger });
     }
   }
 
@@ -49,16 +53,28 @@ export class AiIndexRegistry {
     id,
     properties,
     aiIndexService,
+    esClient,
     logger,
   }: {
     id: string;
     properties: AiIndexProperties;
     aiIndexService: AiIndexService;
+    esClient: ElasticsearchClient;
     logger: Logger;
   }): Promise<void> {
+    // index_config and dls are applied to the dest, not stored on the ai-index doc.
+    const { index_config: indexConfig, dls, ...storedProperties } = properties;
+
+    // Apply the index template/mappings and DLS role on every startup — both are
+    // idempotent upserts, so they stay current even when the ai-index doc already exists.
+    await applyIndexConfig({ esClient, id, dest: properties.dest, indexConfig, logger });
+    if (dls) {
+      await applyDls({ esClient, id, dest: properties.dest, dls, logger });
+    }
+
     try {
       await aiIndexService.get(id);
-      logger.debug(`AI index '${id}' already registered — skipping`);
+      logger.debug(`AI index '${id}' already registered — skipping doc write`);
       return;
     } catch (err) {
       if (!(err instanceof AiIndexNotFoundError)) {
@@ -72,7 +88,7 @@ export class AiIndexRegistry {
     }
 
     try {
-      await aiIndexService.putManaged(id, properties);
+      await aiIndexService.putManaged(id, storedProperties);
       logger.info(`AI index '${id}' registered successfully`);
     } catch (err) {
       if (err instanceof InvalidAiIndexDestError) {

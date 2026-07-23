@@ -6,6 +6,7 @@
  */
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { AiIndexRegistry } from './registry';
 import { AiIndexNotFoundError, InvalidAiIndexDestError } from './errors';
 import type { AiIndexService } from './service';
@@ -33,10 +34,12 @@ const makeServiceMock = (overrides: Partial<AiIndexService> = {}): jest.Mocked<A
 describe('AiIndexRegistry', () => {
   let registry: AiIndexRegistry;
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
+  let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
 
   beforeEach(() => {
     registry = new AiIndexRegistry();
     logger = loggingSystemMock.createLogger();
+    esClient = elasticsearchServiceMock.createElasticsearchClient();
   });
 
   describe('register()', () => {
@@ -47,14 +50,14 @@ describe('AiIndexRegistry', () => {
       });
 
       registry.register('test', makeProperties());
-      await registry.startupRegister({ aiIndexService: service, isEnabled: true, logger });
+      await registry.startupRegister({ aiIndexService: service, esClient, isEnabled: true, logger });
 
       expect(service.putManaged).toHaveBeenCalledWith('test', makeProperties());
     });
 
     it('throws if called after startupRegister has run', async () => {
       const service = makeServiceMock();
-      await registry.startupRegister({ aiIndexService: service, isEnabled: false, logger });
+      await registry.startupRegister({ aiIndexService: service, esClient, isEnabled: false, logger });
 
       expect(() => registry.register('test', makeProperties())).toThrow(
         'registerAiIndex called after plugin start'
@@ -74,7 +77,7 @@ describe('AiIndexRegistry', () => {
       const service = makeServiceMock();
       registry.register('test', makeProperties());
 
-      await registry.startupRegister({ aiIndexService: service, isEnabled: false, logger });
+      await registry.startupRegister({ aiIndexService: service, esClient, isEnabled: false, logger });
 
       expect(service.get).not.toHaveBeenCalled();
       expect(service.putManaged).not.toHaveBeenCalled();
@@ -92,7 +95,7 @@ describe('AiIndexRegistry', () => {
       });
       registry.register('test', makeProperties());
 
-      await registry.startupRegister({ aiIndexService: service, isEnabled: true, logger });
+      await registry.startupRegister({ aiIndexService: service, esClient, isEnabled: true, logger });
 
       expect(service.putManaged).not.toHaveBeenCalled();
     });
@@ -104,7 +107,7 @@ describe('AiIndexRegistry', () => {
       });
       registry.register('test', makeProperties());
 
-      await registry.startupRegister({ aiIndexService: service, isEnabled: true, logger });
+      await registry.startupRegister({ aiIndexService: service, esClient, isEnabled: true, logger });
 
       expect(service.putManaged).toHaveBeenCalledWith('test', makeProperties());
     });
@@ -117,7 +120,7 @@ describe('AiIndexRegistry', () => {
       registry.register('test', makeProperties());
 
       await expect(
-        registry.startupRegister({ aiIndexService: service, isEnabled: true, logger })
+        registry.startupRegister({ aiIndexService: service, esClient, isEnabled: true, logger })
       ).resolves.not.toThrow();
 
       expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('dest not ready'));
@@ -131,7 +134,7 @@ describe('AiIndexRegistry', () => {
       registry.register('test', makeProperties());
 
       await expect(
-        registry.startupRegister({ aiIndexService: service, isEnabled: true, logger })
+        registry.startupRegister({ aiIndexService: service, esClient, isEnabled: true, logger })
       ).resolves.not.toThrow();
 
       expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('ES cluster unavailable'));
@@ -145,7 +148,7 @@ describe('AiIndexRegistry', () => {
       registry.register('a', makeProperties({ name: 'A' }));
       registry.register('b', makeProperties({ name: 'B' }));
 
-      await registry.startupRegister({ aiIndexService: service, isEnabled: true, logger });
+      await registry.startupRegister({ aiIndexService: service, esClient, isEnabled: true, logger });
 
       expect(service.putManaged).toHaveBeenCalledTimes(2);
       expect(service.putManaged).toHaveBeenCalledWith('a', makeProperties({ name: 'A' }));

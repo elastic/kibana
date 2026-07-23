@@ -61,8 +61,10 @@ export class ContextEnginePlugin
   start(coreStart: CoreStart): ContextEnginePluginStart {
     const aiIndexLogger = this.logger.get('ai_indices');
 
+    const esClient = coreStart.elasticsearch.client.asInternalUser;
+
     this.aiIndexService = new AiIndexService({
-      esClient: coreStart.elasticsearch.client.asInternalUser,
+      esClient,
       logger: aiIndexLogger,
     });
 
@@ -77,6 +79,7 @@ export class ContextEnginePlugin
       .then((isEnabled) =>
         registry.startupRegister({
           aiIndexService,
+          esClient,
           isEnabled: isEnabled ?? false,
           logger: aiIndexLogger,
         })
