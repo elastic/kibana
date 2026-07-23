@@ -7,10 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-<<<<<<< HEAD
 import { getBuiltInStepDefinition } from '@kbn/workflows';
-=======
->>>>>>> b2c2244a48b2 ([Workflows] Add synchronous execution mode)
 import { validateSyncWorkflow } from './validate_sync_workflow';
 
 const createGraph = (stepType: string) => ({
@@ -26,18 +23,13 @@ describe('validateSyncWorkflow', () => {
   it.each(['wait', 'waitForInput', 'waitForApproval', 'workflow.execute', 'workflow.executeAsync'])(
     'rejects async-only step %s',
     (stepType) => {
-<<<<<<< HEAD
       expect(() => validateSyncWorkflow(createGraph(stepType), () => undefined)).toThrow(
-=======
-      expect(() => validateSyncWorkflow(createGraph(stepType))).toThrow(
->>>>>>> b2c2244a48b2 ([Workflows] Add synchronous execution mode)
         'is not supported in synchronous workflows'
       );
     }
   );
 
   it('accepts ordinary and capability-backed atomic steps', () => {
-<<<<<<< HEAD
     expect(() => validateSyncWorkflow(createGraph('ai.pii'), () => undefined)).not.toThrow();
   });
 
@@ -47,8 +39,5 @@ describe('validateSyncWorkflow', () => {
         stepType === 'custom.async' ? getBuiltInStepDefinition('wait') : undefined
       )
     ).toThrow('is not supported in synchronous workflows');
-=======
-    expect(() => validateSyncWorkflow(createGraph('ai.pii'))).not.toThrow();
->>>>>>> b2c2244a48b2 ([Workflows] Add synchronous execution mode)
   });
 });

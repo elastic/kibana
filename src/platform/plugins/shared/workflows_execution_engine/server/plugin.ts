@@ -760,6 +760,7 @@ export class WorkflowsExecutionEnginePlugin
 
     const buildExecutionDocument = async (args: {
       workflow: WorkflowExecutionEngineModel;
+      executionId?: string;
       context: Record<string, unknown>;
       defaultTriggeredBy: string;
       authenticatedUser: string;
@@ -880,14 +881,12 @@ export class WorkflowsExecutionEnginePlugin
         };
         const workflowExecution = await buildExecutionDocument({
           workflow,
+          executionId: options.executionId,
           context: syncContext,
           defaultTriggeredBy: 'manual',
           authenticatedUser,
           now: new Date(),
         });
-        if (options.executionId) {
-          workflowExecution.id = options.executionId;
-        }
         if (!workflowExecution.workflowDefinition) {
           throw new Error('Synchronous workflow execution requires a workflow definition');
         }
@@ -952,11 +951,14 @@ export class WorkflowsExecutionEnginePlugin
           });
 
           const output = getSynchronousWorkflowOutput(result.context?.output);
+          const failureError =
+            result.status === ExecutionStatus.FAILED && result.error ? result.error : undefined;
           return {
             workflowExecutionId: result.id,
             result: {
               status: result.status,
               ...(output ? { output } : {}),
+              ...(failureError ? { error: failureError } : {}),
             },
           };
         } finally {
