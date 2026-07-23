@@ -1684,7 +1684,7 @@ class AgentPolicyService {
       ignore_unavailable: true,
       query: {
         bool: {
-          filter: [{ term: { active: 'true' } }, buildPolicyBaseIdWithFallbackEsFilter(id)],
+          filter: [{ term: { active: 'true' } }, buildPolicyIdOrVariantsEsFilter(id)],
         },
       },
     });
