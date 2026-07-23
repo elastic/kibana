@@ -221,6 +221,15 @@ export const ConnectorIconsMap: Map<
     lazy(() => import(/* webpackChunkName: "connectorIconOneDrive" */ './specs/one_drive/icon')),
   ],
   [
+    '.sublime_security',
+    lazy(
+      () =>
+        import(
+          /* webpackChunkName: "connectorIconSublimeSecurity" */ './specs/sublime_security/icon'
+        )
+    ),
+  ],
+  [
     '.kubernetes',
     lazy(() => import(/* webpackChunkName: "connectorIconKubernetes" */ './specs/kubernetes/icon')),
   ],
