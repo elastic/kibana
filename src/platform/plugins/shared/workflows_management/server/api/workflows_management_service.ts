@@ -348,10 +348,11 @@ export class WorkflowsService {
   public async createWorkflow(
     workflow: CreateWorkflowCommand,
     spaceId: string,
-    request: KibanaRequest
+    request: KibanaRequest,
+    options?: { originManagedWorkflowId?: string }
   ): Promise<WorkflowDetailDto> {
     await this.ensureInitialized();
-    return this.crudService.createWorkflow(workflow, spaceId, request);
+    return this.crudService.createWorkflow(workflow, spaceId, request, options);
   }
 
   public async bulkCreateWorkflows(
