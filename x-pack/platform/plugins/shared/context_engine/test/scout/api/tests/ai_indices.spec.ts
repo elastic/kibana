@@ -14,11 +14,13 @@ const AI_INDEX_ID = 'scout_test_ai_index';
 const AI_INDEX_PATH = `api/context_engine/ai_index/${AI_INDEX_ID}`;
 const INDEX_AI_INDEX_ID = 'scout_test_index_ai_index';
 const INDEX_AI_INDEX_PATH = `api/context_engine/ai_index/${INDEX_AI_INDEX_ID}`;
-const DEST_DATA_STREAM = '.ai-index-ds-scout-test';
-const DEST_INDEX = '.ai-index-idx-scout-test';
+const LAZY_AI_INDEX_ID = `${AI_INDEX_ID}_lazy`;
+const LAZY_AI_INDEX_PATH = `api/context_engine/ai_index/${LAZY_AI_INDEX_ID}`;
+const DEST_DATA_STREAM = 'ai-index-ds-scout-test';
+const DEST_INDEX = 'ai-index-idx-scout-test';
 // Must not match the data stream template pattern (`${DEST_DATA_STREAM}*`),
 // or ES refuses to create it as a plain index.
-const PLAIN_INDEX = '.ai-index-ds-plain-scout-test';
+const PLAIN_INDEX = 'ai-index-ds-plain-scout-test';
 const DEST_INDEX_TEMPLATE = 'scout-test-context-engine-template';
 const CONTEXT_ENGINE_ENABLED_SETTING = 'contextEngine:enabled';
 
@@ -28,7 +30,6 @@ const API_HEADERS = {
 };
 
 const aiIndexBody = {
-  name: 'scout_test_ai_index',
   description: 'AI index created by the Scout API test suite',
   dest: { type: 'data_stream', value: DEST_DATA_STREAM },
   automations: [{ type: 'workflow', value: 'scout-automation' }],
@@ -61,6 +62,10 @@ apiTest.describe('context engine AI indices API', { tag: tags.stateful.classic }
       responseType: 'json',
     });
     await apiClient.delete(INDEX_AI_INDEX_PATH, {
+      headers: { ...adminApiCredentials.apiKeyHeader, ...API_HEADERS },
+      responseType: 'json',
+    });
+    await apiClient.delete(LAZY_AI_INDEX_PATH, {
       headers: { ...adminApiCredentials.apiKeyHeader, ...API_HEADERS },
       responseType: 'json',
     });
@@ -153,22 +158,28 @@ apiTest.describe('context engine AI indices API', { tag: tags.stateful.classic }
     });
   });
 
-  apiTest('rejects an AI index whose dest does not exist', async ({ apiClient }) => {
-    const response = await apiClient.put(AI_INDEX_PATH, {
-      headers: { ...adminApiCredentials.apiKeyHeader, ...API_HEADERS },
-      responseType: 'json',
-      body: { ...aiIndexBody, dest: { type: 'data_stream', value: 'does-not-exist-*' } },
-    });
+  apiTest(
+    'creates an AI index whose dest does not exist yet (lazy creation)',
+    async ({ apiClient }) => {
+      const response = await apiClient.put(LAZY_AI_INDEX_PATH, {
+        headers: { ...adminApiCredentials.apiKeyHeader, ...API_HEADERS },
+        responseType: 'json',
+        body: {
+          ...aiIndexBody,
+          dest: { type: 'data_stream', value: 'ai-index-ds-does-not-exist*' },
+        },
+      });
 
-    expect(response).toHaveStatusCode(400);
-  });
+      expect(response).toHaveStatusCode(201);
+      expect(response.body).toStrictEqual({ status: 'created' });
+    }
+  );
 
   apiTest('creates and reads an index AI index', async ({ apiClient }) => {
     const createResponse = await apiClient.put(INDEX_AI_INDEX_PATH, {
       headers: { ...adminApiCredentials.apiKeyHeader, ...API_HEADERS },
       responseType: 'json',
       body: {
-        name: INDEX_AI_INDEX_ID,
         dest: { type: 'index', value: `${DEST_INDEX}*` },
         automations: [],
         sources: [],
@@ -215,6 +226,16 @@ apiTest.describe('context engine AI indices API', { tag: tags.stateful.classic }
       headers: { ...adminApiCredentials.apiKeyHeader, ...API_HEADERS },
       responseType: 'json',
       body: bodyWithoutDest,
+    });
+
+    expect(response).toHaveStatusCode(400);
+  });
+
+  apiTest('rejects an id with disallowed characters', async ({ apiClient }) => {
+    const response = await apiClient.put('api/context_engine/ai_index/Invalid_ID', {
+      headers: { ...adminApiCredentials.apiKeyHeader, ...API_HEADERS },
+      responseType: 'json',
+      body: aiIndexBody,
     });
 
     expect(response).toHaveStatusCode(400);
