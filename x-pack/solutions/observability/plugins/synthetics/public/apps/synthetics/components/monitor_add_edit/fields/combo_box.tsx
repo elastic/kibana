@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiButtonIcon, EuiComboBox, EuiCopy, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { createTagsPasteHandler, getNewTags, splitTags } from '../../common/tags_input';
 
 export interface FormattedComboBoxProps {
   onChange: (value: string[]) => void;
@@ -43,12 +44,7 @@ export const FormattedComboBox = ({
 
   const addTags = useCallback(
     (rawValues: string[]) => {
-      const newTags = rawValues
-        .map((value) => value.trim())
-        .filter(
-          (value, index, arr) =>
-            value.length > 0 && !selectedOptions.includes(value) && arr.indexOf(value) === index
-        );
+      const newTags = getNewTags(selectedOptions, rawValues);
 
       if (newTags.length === 0) {
         return;
@@ -60,22 +56,9 @@ export const FormattedComboBox = ({
     [onChange, formattedSelectedOptions, selectedOptions, setSelectedOptions]
   );
 
-  const onCreateOption = useCallback((tag: string) => addTags(tag.split(',')), [addTags]);
+  const onCreateOption = useCallback((tag: string) => addTags(splitTags(tag)), [addTags]);
 
-  const onPaste = useCallback(
-    (e: React.ClipboardEvent<HTMLDivElement>) => {
-      // Tags copied from badges arrive newline-separated on the clipboard, but the
-      // single-line input would collapse them into one tag. Read the raw clipboard and
-      // split on newlines/commas before the input sanitizes the value.
-      const text = e.clipboardData.getData('text');
-      if (!/[\n\r,]/.test(text)) {
-        return;
-      }
-      e.preventDefault();
-      addTags(text.split(/[\n\r,]+/));
-    },
-    [addTags]
-  );
+  const onPaste = useMemo(() => createTagsPasteHandler(addTags), [addTags]);
 
   const onSearchChange = useCallback(
     (searchValue: string) => {

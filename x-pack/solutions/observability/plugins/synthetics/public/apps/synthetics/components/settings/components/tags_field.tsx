@@ -17,6 +17,7 @@ import {
 import type { Control, FieldErrors } from 'react-hook-form';
 import { Controller } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
+import { createTagsPasteHandler, getNewTags, splitTags } from '../../common/tags_input';
 import type { PrivateLocation } from '../../../../../../common/runtime_types';
 
 export function TagsField({
@@ -36,21 +37,15 @@ export function TagsField({
         name="tags"
         control={control}
         render={({ field }) => {
+          const tags = field.value ?? [];
+
           const addTags = (rawValues: string[]) => {
-            const existingTags = field.value ?? [];
-            const newTags = rawValues
-              .map((value) => value.trim())
-              .filter(
-                (value, index, arr) =>
-                  value.length > 0 && !existingTags.includes(value) && arr.indexOf(value) === index
-              );
+            const newTags = getNewTags(tags, rawValues);
 
             if (newTags.length > 0) {
-              field.onChange([...existingTags, ...newTags]);
+              field.onChange([...tags, ...newTags]);
             }
           };
-
-          const tags = field.value ?? [];
 
           return (
             <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="flexStart">
@@ -63,18 +58,8 @@ export function TagsField({
                   isInvalid={!!errors?.tags}
                   selectedOptions={tags.map((tag) => ({ label: tag, value: tag }))}
                   options={tagsList.map((tag) => ({ label: tag, value: tag }))}
-                  onCreateOption={(newTag) => addTags(newTag.split(','))}
-                  onPaste={(e: React.ClipboardEvent<HTMLDivElement>) => {
-                    // Tags copied from badges arrive newline-separated on the clipboard, but the
-                    // single-line input would collapse them into one tag. Read the raw clipboard
-                    // and split on newlines/commas before the input sanitizes the value.
-                    const text = e.clipboardData.getData('text');
-                    if (!/[\n\r,]/.test(text)) {
-                      return;
-                    }
-                    e.preventDefault();
-                    addTags(text.split(/[\n\r,]+/));
-                  }}
+                  onCreateOption={(newTag) => addTags(splitTags(newTag))}
+                  onPaste={createTagsPasteHandler(addTags)}
                   {...field}
                   onChange={(selectedTags) => {
                     field.onChange(selectedTags.map((tag) => tag.value));
