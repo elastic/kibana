@@ -264,79 +264,75 @@ describe('ES|QL async search strategy', () => {
       });
     });
 
-  describe('submitEsqlSearch', () => {
-    const mockGetLicense = jest.fn();
-    const depsWithLicensing = {
-      ...mockDeps,
-      licensing: { getLicense: mockGetLicense },
-    } as unknown as SearchStrategyDependencies;
+    describe('submitEsqlSearch', () => {
+      const mockGetLicense = jest.fn();
+      const depsWithLicensing = {
+        ...mockDeps,
+        licensing: { getLicense: mockGetLicense },
+      } as unknown as SearchStrategyDependencies;
 
-    beforeEach(() => {
-      mockGetLicense.mockClear();
+      beforeEach(() => {
+        mockGetLicense.mockClear();
+      });
+
+      it('includes approximation param when license is enterprise and options.approximation is true', async () => {
+        mockAsyncQuery.mockResolvedValueOnce(mockAsyncResponse);
+        mockGetLicense.mockResolvedValueOnce({ isActive: true, hasAtLeast: () => true });
+        const esSearch = esqlAsyncSearchStrategyProvider(mockSearchConfig, mockLogger);
+        await firstValueFrom(
+          esSearch.search(
+            { params: { query: 'from logs' } },
+            { approximation: true },
+            depsWithLicensing
+          )
+        );
+        const [request] = mockAsyncQuery.mock.calls[0];
+        expect(request.approximation).toBe(true);
+      });
+
+      it('includes approximation: false when license is enterprise and options.approximation is false', async () => {
+        mockAsyncQuery.mockResolvedValueOnce(mockAsyncResponse);
+        mockGetLicense.mockResolvedValueOnce({ isActive: true, hasAtLeast: () => true });
+        const esSearch = esqlAsyncSearchStrategyProvider(mockSearchConfig, mockLogger);
+        await firstValueFrom(
+          esSearch.search(
+            { params: { query: 'from logs' } },
+            { approximation: false },
+            depsWithLicensing
+          )
+        );
+        const [request] = mockAsyncQuery.mock.calls[0];
+        expect(request.approximation).toBe(false);
+      });
+
+      it('drops approximation and logs a warning when license is below enterprise', async () => {
+        mockAsyncQuery.mockResolvedValueOnce(mockAsyncResponse);
+        mockGetLicense.mockResolvedValueOnce({ isActive: true, hasAtLeast: () => false });
+        const esSearch = esqlAsyncSearchStrategyProvider(mockSearchConfig, mockLogger);
+        await firstValueFrom(
+          esSearch.search(
+            { params: { query: 'from logs' } },
+            { approximation: true },
+            depsWithLicensing
+          )
+        );
+        const [request] = mockAsyncQuery.mock.calls[0];
+        expect(request).not.toHaveProperty('approximation');
+        expect(mockWarn).toHaveBeenCalledWith(expect.stringContaining('approximation'));
+      });
+
+      it('does not include approximation when licensing is absent from deps', async () => {
+        mockAsyncQuery.mockResolvedValueOnce(mockAsyncResponse);
+        const esSearch = esqlAsyncSearchStrategyProvider(mockSearchConfig, mockLogger);
+        await firstValueFrom(
+          esSearch.search({ params: { query: 'from logs' } }, { approximation: true }, mockDeps)
+        );
+        const [request] = mockAsyncQuery.mock.calls[0];
+        expect(request).not.toHaveProperty('approximation');
+      });
     });
 
-    it('includes approximation param when license is enterprise and options.approximation is true', async () => {
-      mockAsyncQuery.mockResolvedValueOnce(mockAsyncResponse);
-      mockGetLicense.mockResolvedValueOnce({ isActive: true, hasAtLeast: () => true });
-      const esSearch = esqlAsyncSearchStrategyProvider(mockSearchConfig, mockLogger);
-      await firstValueFrom(
-        esSearch.search(
-          { params: { query: 'from logs' } },
-          { approximation: true },
-          depsWithLicensing
-        )
-      );
-      const [request] = mockAsyncQuery.mock.calls[0];
-      expect(request.approximation).toBe(true);
-    });
-
-    it('includes approximation: false when license is enterprise and options.approximation is false', async () => {
-      mockAsyncQuery.mockResolvedValueOnce(mockAsyncResponse);
-      mockGetLicense.mockResolvedValueOnce({ isActive: true, hasAtLeast: () => true });
-      const esSearch = esqlAsyncSearchStrategyProvider(mockSearchConfig, mockLogger);
-      await firstValueFrom(
-        esSearch.search(
-          { params: { query: 'from logs' } },
-          { approximation: false },
-          depsWithLicensing
-        )
-      );
-      const [request] = mockAsyncQuery.mock.calls[0];
-      expect(request.approximation).toBe(false);
-    });
-
-    it('drops approximation and logs a warning when license is below enterprise', async () => {
-      mockAsyncQuery.mockResolvedValueOnce(mockAsyncResponse);
-      mockGetLicense.mockResolvedValueOnce({ isActive: true, hasAtLeast: () => false });
-      const esSearch = esqlAsyncSearchStrategyProvider(mockSearchConfig, mockLogger);
-      await firstValueFrom(
-        esSearch.search(
-          { params: { query: 'from logs' } },
-          { approximation: true },
-          depsWithLicensing
-        )
-      );
-      const [request] = mockAsyncQuery.mock.calls[0];
-      expect(request).not.toHaveProperty('approximation');
-      expect(mockWarn).toHaveBeenCalledWith(expect.stringContaining('approximation'));
-    });
-
-    it('does not include approximation when licensing is absent from deps', async () => {
-      mockAsyncQuery.mockResolvedValueOnce(mockAsyncResponse);
-      const esSearch = esqlAsyncSearchStrategyProvider(mockSearchConfig, mockLogger);
-      await firstValueFrom(
-        esSearch.search(
-          { params: { query: 'from logs' } },
-          { approximation: true },
-          mockDeps
-        )
-      );
-      const [request] = mockAsyncQuery.mock.calls[0];
-      expect(request).not.toHaveProperty('approximation');
-    });
-  });
-
-  it('throws normalized error if ResponseError is thrown', async () => {
+    it('throws normalized error if ResponseError is thrown', async () => {
       const errResponse = new errors.ResponseError({
         body: indexNotFoundException,
         statusCode: 404,
