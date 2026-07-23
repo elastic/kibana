@@ -250,6 +250,13 @@ export const HUNT_ORCHESTRATOR_API_PATH =
  */
 export const HUNT_FINDINGS_API_PATH = `${THREAT_INTELLIGENCE_API_BASE}/hunt_findings` as const;
 /**
+ * Continuous hunt status for the Hub strip —
+ * GET /api/threat_intelligence/continuous_hunt/status.
+ * Aggregates workflow execution progress + hunt findings (no browser workflows API).
+ */
+export const CONTINUOUS_HUNT_STATUS_API_PATH =
+  `${THREAT_INTELLIGENCE_API_BASE}/continuous_hunt/status` as const;
+/**
  * Mark a hunt finding deployed — POST /api/threat_intelligence/hunt_findings/{findingId}/deploy.
  * Persists Detection Engine rule linkage on the finding document.
  */

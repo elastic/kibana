@@ -59,6 +59,7 @@ export {
   HUNT_FOR_THREAT_API_PATH,
   HUNT_ORCHESTRATOR_API_PATH,
   HUNT_FINDINGS_API_PATH,
+  CONTINUOUS_HUNT_STATUS_API_PATH,
   HUNT_FINDING_DEPLOY_API_PATH,
   SYNTHESIZE_ADVISORY_API_PATH,
   COVERAGE_GAP_API_PATH,
@@ -136,6 +137,13 @@ export {
   severityFromConfidence,
 } from './rule_export';
 export type { DashboardLatestAdvisory, DashboardOverviewResponse } from './dashboard_types';
+export type {
+  ContinuousHuntPhase,
+  ContinuousHuntStatusResponse,
+  ContinuousHuntStatusReport,
+  ContinuousHuntStatusTier,
+  ContinuousHuntStatusFindings,
+} from './continuous_hunt_status';
 export type { ResolvedTimeRange, TimeRangePresetId } from './time_range';
 export {
   DEFAULT_TIME_RANGE_PRESET,

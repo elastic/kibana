@@ -382,6 +382,7 @@ export class Plugin implements ISecuritySolutionPlugin {
         getSpacesService: () => this.threatIntelligenceSpacesService,
         getInference: () => this.threatIntelligenceInference,
         getTaskManager: () => this.threatIntelligenceTaskManager,
+        getWorkflowsManagement: () => this.threatIntelligenceWorkflowsManagement,
       });
       this.logger.info(
         'Threat Intelligence routes registered (threatIntelligenceSkillEnabled is on)'
