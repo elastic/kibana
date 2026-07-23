@@ -34,6 +34,7 @@ import {
   buildEntitySummaryStaleness,
   computeEntitySummaryStalenessReasons,
 } from '@kbn/entity-store/common/entity_summary';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
 import { useAgentBuilderAvailability } from '../../../../agent_builder/hooks/use_agent_builder_availability';
@@ -174,6 +175,39 @@ export const EntityHighlightsAccordion: React.FC<{
 
     return computeEntitySummaryStalenessReasons(storedSummary, entitySnapshot);
   }, [storedSummary, entitySnapshot, generationBaseline]);
+
+  // Dismiss state — stored per-entity per-space so dismiss is local to this browser session
+  // and does not affect other users. The stored value is the risk score at dismissal time;
+  // if the score changes again the callout re-appears automatically.
+  const staleDismissKey = `securitySolution.entitySummary.staleness.dismissed.${
+    spaceId ?? 'default'
+  }.${entityType}.${entityIdentifier}`;
+  const [dismissedAtScore, setDismissedAtScore, removeDismissedAtScore] =
+    useLocalStorage<number>(staleDismissKey);
+
+  const riskScoreReason = useMemo(
+    () => stalenessReasons.find((r) => r.signal === 'risk_score'),
+    [stalenessReasons]
+  );
+  const isStalenessCalloutDismissed =
+    dismissedAtScore !== undefined && riskScoreReason?.currentScore === dismissedAtScore;
+
+  const onDismissStalenessCallout = useCallback(() => {
+    if (riskScoreReason !== undefined) {
+      setDismissedAtScore(riskScoreReason.currentScore);
+    }
+  }, [riskScoreReason, setDismissedAtScore]);
+
+  // Generating a new summary invalidates any prior staleness dismissal, which was tied to the
+  // previous summary's risk score. Clearing it prevents the callout from staying hidden if the
+  // score later returns to the previously dismissed-at value (dismiss at Y → regenerate at Z →
+  // score returns to Y would otherwise be wrongly treated as still-dismissed).
+  const onGenerateSummary = useCallback(() => {
+    removeDismissedAtScore();
+    fetchEntityHighlights();
+  }, [removeDismissedAtScore, fetchEntityHighlights]);
+
+  const activeStalenessReasons = isStalenessCalloutDismissed ? [] : stalenessReasons;
 
   const onAddConnectorClick = useCallback(() => {
     setIsConnectorModalVisible(true);
@@ -342,7 +376,7 @@ export const EntityHighlightsAccordion: React.FC<{
               <EuiButtonEmpty
                 size="s"
                 iconType="refresh"
-                onClick={fetchEntityHighlights}
+                onClick={onGenerateSummary}
                 isDisabled={!connectorId || isLoading}
                 data-test-subj="entity-highlights-error-regenerate"
               >
@@ -363,8 +397,9 @@ export const EntityHighlightsAccordion: React.FC<{
             generatedAt={assistantResult?.generatedAt ?? null}
             generatedBy={assistantResult?.generatedBy ?? ''}
             authorProfileUid={assistantResult?.authorProfileUid}
-            stalenessReasons={stalenessReasons}
-            onRefresh={fetchEntityHighlights}
+            stalenessReasons={activeStalenessReasons}
+            onRefresh={onGenerateSummary}
+            onDismiss={onDismissStalenessCallout}
             canRegenerate={canGenerate}
             isRefreshing={isSummaryRefreshing}
           />
@@ -417,7 +452,7 @@ export const EntityHighlightsAccordion: React.FC<{
               {(aiConnectors?.length ?? 0) > 0 ? (
                 <EuiFlexItem grow={1}>
                   <AiButton
-                    onClick={fetchEntityHighlights}
+                    onClick={onGenerateSummary}
                     isDisabled={!connectorId}
                     size="s"
                     iconType="sparkles"
