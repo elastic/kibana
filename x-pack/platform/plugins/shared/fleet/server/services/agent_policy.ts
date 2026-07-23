@@ -128,7 +128,6 @@ import {
 import {
   hasVersionSuffix,
   removeVersionSuffixFromPolicyId,
-  buildPolicyBaseIdWithFallbackEsFilter,
   buildPolicyIdOrVariantsEsFilter,
 } from '../../common/services/version_specific_policies_utils';
 
