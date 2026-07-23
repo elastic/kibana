@@ -5,17 +5,36 @@
  * 2.0.
  */
 
+import type { UiamOAuthProjectType } from '@kbn/core-security-server';
+import {
+  KIBANA_OBSERVABILITY_SOLUTION,
+  KIBANA_SEARCH_SOLUTION,
+  KIBANA_SECURITY_SOLUTION,
+  KIBANA_VECTORDB_SOLUTION,
+  KIBANA_WORKPLACE_AI_SOLUTION,
+  type KibanaSolution,
+} from '@kbn/projects-solutions-groups';
+
 import { createClientBodySchema } from './schemas';
 import { withOAuthManagementGate } from './with_oauth_management_gate';
 import type { RouteDefinitionParams } from '..';
 import { wrapIntoCustomErrorResponse } from '../../errors';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
 
+const KIBANA_SOLUTION_TO_UIAM_PROJECT_TYPE: Record<KibanaSolution, UiamOAuthProjectType> = {
+  [KIBANA_SEARCH_SOLUTION]: 'elasticsearch',
+  [KIBANA_OBSERVABILITY_SOLUTION]: 'observability',
+  [KIBANA_SECURITY_SOLUTION]: 'security',
+  [KIBANA_WORKPLACE_AI_SOLUTION]: 'workplaceai',
+  [KIBANA_VECTORDB_SOLUTION]: 'vectordb',
+};
+
 export function defineCreateOAuthClientRoute({
   router,
   config,
   getAuthenticationService,
   serverlessProjectId,
+  serverlessProjectType,
 }: RouteDefinitionParams) {
   router.post(
     {
@@ -66,10 +85,20 @@ export function defineCreateOAuthClientRoute({
             });
           }
 
+          if (!serverlessProjectType) {
+            return response.notFound({
+              body: {
+                message:
+                  'OAuth management is not available: serverless project type is not configured',
+              },
+            });
+          }
+
           const result = await oauth.createClient(request, {
             ...request.body,
             resource,
             project_id: serverlessProjectId,
+            project_type: KIBANA_SOLUTION_TO_UIAM_PROJECT_TYPE[serverlessProjectType],
           });
           if (!result) {
             return response.notFound({
