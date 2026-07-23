@@ -24,12 +24,13 @@ export const createImageAction: ActionDefinition<EmbeddableApiContext> = {
   getIconType: () => 'image',
   order: 20,
   isCompatible: async ({ embeddable: parentApi }) => apiCanAddNewPanel(parentApi),
-  execute: async ({ embeddable: parentApi }) => {
+  execute: async ({ embeddable: parentApi, returnFocus }) => {
     if (!apiCanAddNewPanel(parentApi)) throw new IncompatibleActionError();
 
     openLazyFlyout({
       core: coreServices,
       parentApi,
+      returnFocus,
       loadContent: async ({ closeFlyout, ariaLabelledBy }) => {
         const { getImageEditor } = await import('../components/image_editor/get_image_editor');
         return await getImageEditor({

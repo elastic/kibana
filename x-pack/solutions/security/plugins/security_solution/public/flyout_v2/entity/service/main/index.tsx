@@ -314,6 +314,7 @@ export const Service: FC<ServiceProps> = memo(function Service({
             isPreviewMode={false}
             entityStoreEntityId={entityStoreEntityId}
             onShowEntity={onShowRelatedEntityFromResolution}
+            riskScoreQueryId={SERVICE_PANEL_RISK_SCORE_QUERY_ID}
           />
         )}
       </FlyoutBody>
