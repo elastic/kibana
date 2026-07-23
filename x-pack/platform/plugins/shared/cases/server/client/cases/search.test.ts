@@ -92,6 +92,28 @@ describe('search', () => {
       expect(call.namespaces).toEqual(['space1']);
     });
 
+    it('fetches global field definitions for search when templates are enabled', async () => {
+      const argsWithTemplates = {
+        ...clientArgs,
+        config: {
+          ...clientArgs.config,
+          templates: { enabled: true },
+        },
+      };
+      const searchRequest = createCasesClientMockSearchRequest({
+        search: 'team',
+        owner: 'cases',
+      });
+      await search(searchRequest, argsWithTemplates, casesClientMock);
+
+      expect(
+        argsWithTemplates.services.fieldDefinitionsService.getGlobalFieldDefinitionsForSearch
+      ).toHaveBeenCalledWith({ owner: ['cases'] });
+      expect(
+        argsWithTemplates.services.templatesService.getTemplateVersionsForExtendedFieldSearch
+      ).toHaveBeenCalledWith({ owner: ['cases'] });
+    });
+
     it('search with single custom field', async () => {
       const searchRequest = createCasesClientMockSearchRequest({
         customFields: { second_key: [true] },
