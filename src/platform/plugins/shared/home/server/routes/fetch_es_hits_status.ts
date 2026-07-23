@@ -22,8 +22,8 @@ export const registerHitsStatusRoute = (router: IRouter) => {
       },
       validate: {
         body: schema.object({
-          index: schema.string(),
-          query: schema.recordOf(schema.string(), schema.any()),
+          index: schema.string({ minLength: 1, maxLength: 1024 }),
+          query: schema.recordOf(schema.string({ maxLength: 1024 }), schema.any()),
         }),
       },
     },

@@ -323,7 +323,7 @@ export class DiscoverApp {
   }
 
   async openSaveSearchModal(name?: string) {
-    await this.page.testSubj.click('discoverSaveButton');
+    await this.clickAppMenuItem('discoverSaveButton');
     await this.page.testSubj.locator('savedObjectSaveModal').waitFor({ state: 'visible' });
     if (name !== undefined) {
       await this.page.testSubj.fill('savedObjectTitle', name);
@@ -348,7 +348,7 @@ export class DiscoverApp {
   }
 
   async saveSearchAsNew(name: string) {
-    await this.page.testSubj.click('discoverSaveButton');
+    await this.clickAppMenuItem('discoverSaveButton');
     await this.page.testSubj.fill('savedObjectTitle', name);
     const checkbox = this.page.testSubj.locator('saveAsNewCheckbox');
     if (!(await checkbox.isChecked())) {
@@ -358,7 +358,7 @@ export class DiscoverApp {
   }
 
   async saveUnsavedChanges() {
-    await this.page.testSubj.click('discoverSaveButton');
+    await this.clickAppMenuItem('discoverSaveButton');
     await this.page.testSubj.waitForSelector('confirmSaveSavedObjectButton', { state: 'visible' });
     await this.confirmSaveModal();
     await this.waitUntilSearchingHasFinished();
@@ -549,6 +549,10 @@ export class DiscoverApp {
     const rowIndex = index - 1; // Convert to 0-based index
     const row = this.page.locator(`[data-grid-row-index="${rowIndex}"]`);
     return await row.innerText();
+  }
+
+  getSearchTermHighlights(): Locator {
+    return this.page.testSubj.locator('docTable').locator('mark');
   }
 
   async getDocTableField(index: number): Promise<string> {

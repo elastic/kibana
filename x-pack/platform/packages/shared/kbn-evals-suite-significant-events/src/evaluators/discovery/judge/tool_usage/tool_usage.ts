@@ -8,7 +8,7 @@
 import { platformCoreTools, platformSignificantEventsTools } from '@kbn/agent-builder-common';
 import type { ConverseStep } from '@kbn/evals';
 import type { Discovery } from '@kbn/significant-events-schema';
-import { extractToolCallIds } from '../../utils/tool_usage';
+import { extractToolCallIds, summarizePersistenceCalls } from '../../utils/tool_usage';
 import type { DiscoveryJudgeEvaluator } from '../../types';
 
 const { executeEsql: TOOL_ID_EXECUTE_ESQL } = platformCoreTools;
@@ -20,7 +20,8 @@ const {
 
 /** Require the judge-owned event write and reject workflow-owned discovery stamping. */
 const scoreOutputTool = (
-  calledTools: Set<string>
+  calledTools: Set<string>,
+  steps: ConverseStep[]
 ): { score: number; label: string; explanation: string } | null => {
   if (!calledTools.has(TOOL_ID_EVENTS_WRITE)) {
     return {
@@ -34,6 +35,14 @@ const scoreOutputTool = (
       score: 0.5,
       label: `unnecessary-${TOOL_ID_DISCOVERY_WRITE}`,
       explanation: `${TOOL_ID_DISCOVERY_WRITE} was called, but handled stamping belongs to the triage workflow`,
+    };
+  }
+  const persistenceCalls = summarizePersistenceCalls(steps, TOOL_ID_EVENTS_WRITE);
+  if (!persistenceCalls.valid) {
+    return {
+      score: 0.75,
+      label: 'multiple-events-write-calls',
+      explanation: `${TOOL_ID_EVENTS_WRITE} was called ${persistenceCalls.count} times without one justified partial-failure retry`,
     };
   }
   return null;
@@ -91,7 +100,7 @@ export const scoreJudgeToolUsage = ({
         explanation: `${TOOL_ID_EXECUTE_ESQL} called correctly but ${TOOL_ID_KI_SEARCH} was also called — all input evidences carried esql_query, so KI search was unnecessary`,
       };
     }
-    const outputCheck = scoreOutputTool(calledTools);
+    const outputCheck = scoreOutputTool(calledTools, steps);
     if (outputCheck) {
       return outputCheck;
     }
@@ -102,7 +111,7 @@ export const scoreJudgeToolUsage = ({
     };
   }
 
-  const outputCheck = scoreOutputTool(calledTools);
+  const outputCheck = scoreOutputTool(calledTools, steps);
   if (outputCheck) {
     return outputCheck;
   }

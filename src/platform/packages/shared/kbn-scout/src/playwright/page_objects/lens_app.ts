@@ -138,14 +138,19 @@ export class LensApp {
     await this.goBackToAppButton.click();
   }
 
+  getDiscardChangesModal() {
+    return this.discardChangesModal;
+  }
+
   async confirmDiscardChangesModal() {
     await this.discardChangesModal.waitFor({ state: 'visible' });
     await this.confirmModalConfirmButton.click();
+    await this.discardChangesModal.waitFor({ state: 'hidden' });
   }
 
   /**
    * Opens the Lens save modal, fills in the title, optionally selects
-   * a dashboard target, and confirms.
+   * a dashboard target, and confirms. Waits for the modal to close.
    */
   async save(
     title: string,
@@ -178,7 +183,7 @@ export class LensApp {
     }
 
     await this.confirmSaveButton.click();
-    await expect(this.saveModal).toBeHidden();
+    await this.saveModal.waitFor({ state: 'hidden' });
   }
 
   async configureXYDimensions(options?: {
