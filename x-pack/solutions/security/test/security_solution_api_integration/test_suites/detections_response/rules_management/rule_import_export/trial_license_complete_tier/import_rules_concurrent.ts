@@ -1,0 +1,118 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import expect from 'expect';
+import { deleteAllRules } from '@kbn/detections-response-ftr-services';
+import type { FtrProviderContext } from '../../../../../ftr_provider_context';
+import { getCustomQueryRuleParams, importRules } from '../../../utils';
+
+export default ({ getService }: FtrProviderContext): void => {
+  const supertest = getService('supertest');
+  const detectionsApi = getService('detectionsApi');
+  const log = getService('log');
+
+  describe('@ess @serverless @skipInServerlessMKI concurrent rule imports', () => {
+    beforeEach(async () => {
+      await deleteAllRules(supertest, log);
+    });
+
+    it('imports two overlapping requests with distinct rule_ids', async () => {
+      const [first, second] = await Promise.all([
+        importRules({
+          getService,
+          rules: [
+            getCustomQueryRuleParams({
+              rule_id: 'concurrent-distinct-1',
+              name: 'Concurrent distinct 1',
+              enabled: false,
+            }),
+          ],
+          overwrite: false,
+        }),
+        importRules({
+          getService,
+          rules: [
+            getCustomQueryRuleParams({
+              rule_id: 'concurrent-distinct-2',
+              name: 'Concurrent distinct 2',
+              enabled: false,
+            }),
+          ],
+          overwrite: false,
+        }),
+      ]);
+
+      expect(first).toMatchObject({
+        success: true,
+        success_count: 1,
+        errors: [],
+      });
+      expect(second).toMatchObject({
+        success: true,
+        success_count: 1,
+        errors: [],
+      });
+
+      const { body } = await detectionsApi
+        .findRules({
+          query: {
+            page: 1,
+            per_page: 10,
+            filter: 'alert.attributes.params.ruleId: concurrent-distinct-*',
+          },
+        })
+        .expect(200);
+
+      expect(body.total).toBe(2);
+    });
+
+    it('handles overlapping imports that share a rule_id without overwrite', async () => {
+      const sharedId = 'concurrent-shared-rule';
+      const rule = getCustomQueryRuleParams({
+        rule_id: sharedId,
+        name: 'Concurrent shared',
+        enabled: false,
+      });
+
+      const [first, second] = await Promise.all([
+        importRules({ getService, rules: [rule], overwrite: false }),
+        importRules({ getService, rules: [rule], overwrite: false }),
+      ]);
+
+      const responses = [first, second];
+      const totalSuccess = responses.reduce((sum, response) => sum + response.success_count, 0);
+
+      // Legacy import has a TOCTOU race on rule_id uniqueness: both requests
+      // may succeed and leave two rules with the same rule_id. Also valid is
+      // one create + one 409 conflict. Never expect a hard 500.
+      expect(totalSuccess).toBeGreaterThanOrEqual(1);
+      expect(totalSuccess).toBeLessThanOrEqual(2);
+
+      for (const response of responses) {
+        expect(response.rules_count).toBe(1);
+        if (response.success_count === 0) {
+          expect(response.errors.length).toBeGreaterThan(0);
+          expect(response.errors[0].error.status_code).toBe(409);
+        }
+      }
+
+      const { body } = await detectionsApi
+        .findRules({
+          query: {
+            page: 1,
+            per_page: 10,
+            filter: `alert.attributes.params.ruleId: "${sharedId}"`,
+          },
+        })
+        .expect(200);
+
+      expect(body.total).toBeGreaterThanOrEqual(1);
+      expect(body.total).toBeLessThanOrEqual(2);
+      expect(body.data.every((item: { rule_id: string }) => item.rule_id === sharedId)).toBe(true);
+    });
+  });
+};
