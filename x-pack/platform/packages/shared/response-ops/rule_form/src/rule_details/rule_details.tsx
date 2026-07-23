@@ -159,7 +159,12 @@ export const RuleDetails = () => {
             fullWidth
             label={RULE_TAG_INPUT_TITLE}
             labelAppend={
-              <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
+              <EuiFlexGroup
+                gutterSize="s"
+                responsive={false}
+                alignItems="center"
+                justifyContent="flexEnd"
+              >
                 <EuiFlexItem grow={false}>{OptionalFieldLabel}</EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiCopy textToCopy={tags.join('\n')}>
