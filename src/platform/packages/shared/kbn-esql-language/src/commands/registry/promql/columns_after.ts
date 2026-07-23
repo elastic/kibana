@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { ESQLCommand, ESQLAstPromqlCommand } from '@elastic/esql/types';
-import { isBinaryExpression, isIdentifier, Walker } from '@elastic/esql';
+import { isBinaryExpression, isIdentifier, type PromQLAstExpression, Walker } from '@elastic/esql';
 import type { ESQLColumnData, ESQLUserDefinedColumn } from '../types';
 import type { IAdditionalFields } from '../registry';
 import { findPipeOutsideQuotes } from '../../definitions/utils/shared';
@@ -22,22 +22,26 @@ export const columnsAfter = async (
   const promqlCommand = command as ESQLAstPromqlCommand;
   const pipeIndex = findPipeOutsideQuotes(query, promqlCommand.location.min);
   const sourceColumns = fromPromql ? await fromPromql(promqlCommand) : [];
-  const userDefinedColumn = getUserDefinedColumn(promqlCommand);
-  const stepColumn = getStepColumn(promqlCommand);
 
   if (pipeIndex === -1) {
     return sourceColumns;
   }
 
-  const { metrics, breakdownLabels } = getPromqlOutputColumns(promqlCommand, {
-    excludeMetrics: !!userDefinedColumn,
-  });
+  const userDefinedColumn = getUserDefinedColumn(promqlCommand);
+  const stepColumn = getStepColumn(promqlCommand);
+
+  const { expressionColumn, metrics, breakdownLabels } = getPromqlOutputColumns(
+    promqlCommand,
+    query,
+    !!userDefinedColumn
+  );
 
   const sourceByName = new Map(sourceColumns.map((column) => [column.name, column]));
 
   return buildColumns({
     stepColumn,
     userDefinedColumn,
+    expressionColumn,
     sourceByName,
     metrics,
     breakdownLabels,
@@ -66,14 +70,11 @@ function getUserDefinedColumn(command: ESQLAstPromqlCommand): ESQLUserDefinedCol
 }
 
 function getStepColumn(command: ESQLAstPromqlCommand): ESQLColumnData | undefined {
-  const hasStepOrBuckets = command.params?.entries?.some(
-    ({ key }) =>
-      isIdentifier(key) &&
-      (key.name.toLowerCase() === PromqlParamName.Step ||
-        key.name.toLowerCase() === PromqlParamName.Buckets)
+  const hasTime = command.params?.entries?.some(
+    ({ key }) => isIdentifier(key) && key.name.toLowerCase() === PromqlParamName.Time
   );
 
-  if (!hasStepOrBuckets) {
+  if (!command.query || hasTime) {
     return undefined;
   }
 
@@ -86,19 +87,21 @@ function getStepColumn(command: ESQLAstPromqlCommand): ESQLColumnData | undefine
 
 function getPromqlOutputColumns(
   command: ESQLAstPromqlCommand,
-  { excludeMetrics }: { excludeMetrics: boolean }
+  query: string,
+  hasUserDefinedColumn: boolean
 ): {
+  expressionColumn: ESQLUserDefinedColumn | undefined;
   metrics: Set<string>;
   breakdownLabels: Set<string>;
 } {
   const metrics = new Set<string>();
   const breakdownLabels = new Set<string>();
-  let expressionType: string | undefined;
+  let expression: PromQLAstExpression | undefined;
 
   Walker.walk(command, {
     promql: {
       visitPromqlQuery: (node) => {
-        expressionType ??= node.expression?.type;
+        expression ??= node.expression;
       },
       visitPromqlSelector: (node) => {
         if (node.metric?.name) {
@@ -117,24 +120,35 @@ function getPromqlOutputColumns(
     },
   });
 
-  const includeMetrics = expressionType === 'selector' && !excludeMetrics;
+  const expressionColumn =
+    expression && expression.type !== 'selector' && !hasUserDefinedColumn
+      ? {
+          name: query.substring(expression.location.min, expression.location.max + 1),
+          type: 'unknown' as const,
+          location: expression.location,
+          userDefined: true as const,
+        }
+      : undefined;
+  const includeMetrics = expression?.type === 'selector' && !hasUserDefinedColumn;
 
   if (!includeMetrics) {
-    return { metrics: new Set(), breakdownLabels };
+    return { expressionColumn, metrics: new Set(), breakdownLabels };
   }
 
-  return { metrics, breakdownLabels };
+  return { expressionColumn, metrics, breakdownLabels };
 }
 
 function buildColumns({
   stepColumn,
   userDefinedColumn,
+  expressionColumn,
   sourceByName,
   metrics,
   breakdownLabels,
 }: {
   stepColumn: ESQLColumnData | undefined;
   userDefinedColumn: ESQLUserDefinedColumn | undefined;
+  expressionColumn: ESQLColumnData | undefined;
   sourceByName: Map<string, ESQLColumnData>;
   metrics: Set<string>;
   breakdownLabels: Set<string>;
@@ -144,6 +158,7 @@ function buildColumns({
 
   columns = appendColumn(columns, columnNames, stepColumn);
   columns = appendColumn(columns, columnNames, userDefinedColumn);
+  columns = appendColumn(columns, columnNames, expressionColumn);
   columns = appendPromqlFields(columns, columnNames, sourceByName, metrics);
   columns = appendPromqlFields(columns, columnNames, sourceByName, breakdownLabels);
 

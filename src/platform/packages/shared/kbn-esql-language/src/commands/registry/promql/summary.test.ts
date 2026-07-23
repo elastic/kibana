@@ -21,9 +21,9 @@ const assertSummary = (query: string, { expectedNewColumns }: { expectedNewColum
 };
 
 describe('PROMQL summary', () => {
-  it('returns labeled column', () => {
+  it('returns the step and labeled columns for a range query without explicit step params', () => {
     assertSummary('PROMQL index=metrics col0=(sum(bytes))', {
-      expectedNewColumns: ['col0'],
+      expectedNewColumns: ['step', 'col0'],
     });
   });
   it('returns the step column when step param is present', () => {

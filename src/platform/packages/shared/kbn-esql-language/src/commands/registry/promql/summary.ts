@@ -26,11 +26,9 @@ export const summary = (command: ESQLCommand, query: string): ESQLCommandSummary
   const promqlCommand = command as ESQLAstPromqlCommand;
   const newColumns: string[] = [];
 
-  // "step" or "buckets" param creates a step column in the output
-  if (
-    hasParam(promqlCommand, PromqlParamName.Step) ||
-    hasParam(promqlCommand, PromqlParamName.Buckets)
-  ) {
+  // Range queries produce a "step" column. The only mode that does not is an
+  // instant query, selected via the "time" param.
+  if (promqlCommand.query && !hasParam(promqlCommand, PromqlParamName.Time)) {
     newColumns.push(PromqlParamName.Step);
   }
 
