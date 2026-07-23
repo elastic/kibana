@@ -8,6 +8,7 @@
 import Boom from '@hapi/boom';
 import {
   ArtifactsElasticsearchError,
+  BundledPackageLocationNotFoundError,
   FleetError,
   FleetErrorWithStatusCode,
   FleetNotFoundError,
@@ -15,8 +16,12 @@ import {
   FleetUnauthorizedError,
   isESClientError,
   PackageAlreadyInstalledError,
+  PackageESError,
   PackagePolicyNameExistsError,
   PackageSavedObjectConflictError,
+  RegistryConnectionError,
+  RegistryError,
+  RegistryResponseError,
 } from '@kbn/fleet-plugin/server/errors';
 
 /**
@@ -62,9 +67,9 @@ function boomifyWithStatus(
 }
 
 /**
- * Mirrors Fleet's getHTTPResponseCode defaults for errors APM source-map routes
- * commonly surface. Intentionally avoids fleetErrorToResponseOptions so we do not
- * double-log via Fleet's appContext logger.
+ * Mirrors Fleet's getHTTPResponseCode for statuses that matter to source-map
+ * routes (4xx client errors and 5xx/502 server failures). Intentionally avoids
+ * fleetErrorToResponseOptions so we do not double-log via Fleet's appContext logger.
  */
 function getFleetErrorStatusCode(error: FleetError): number {
   if (error instanceof FleetUnauthorizedError) {
@@ -82,6 +87,17 @@ function getFleetErrorStatusCode(error: FleetError): number {
   }
   if (error instanceof FleetTooManyRequestsError) {
     return 429;
+  }
+  // Keep genuine Fleet/registry/ES package failures as 5xx so they still ERROR-log.
+  if (
+    error instanceof BundledPackageLocationNotFoundError ||
+    error instanceof PackageESError ||
+    error instanceof RegistryResponseError
+  ) {
+    return 500;
+  }
+  if (error instanceof RegistryConnectionError || error instanceof RegistryError) {
+    return 502;
   }
   if (error instanceof FleetErrorWithStatusCode && typeof error.statusCode === 'number') {
     return error.statusCode;

@@ -10,8 +10,10 @@ import { errors as EsErrors } from '@elastic/elasticsearch';
 import {
   ArtifactsElasticsearchError,
   FleetError,
+  PackageESError,
   PackagePolicyNotFoundError,
   PackagePolicyValidationError,
+  RegistryConnectionError,
 } from '@kbn/fleet-plugin/server/errors';
 import { throwMappedSourceMapRouteError } from './map_source_map_route_error';
 
@@ -82,6 +84,33 @@ describe('throwMappedSourceMapRouteError', () => {
         isBoom: true,
         output: expect.objectContaining({ statusCode: 400 }),
         message: 'fleet failed',
+      })
+    );
+  });
+
+  it('maps Fleet package ES failures to 500', () => {
+    expect(() =>
+      throwMappedSourceMapRouteError(new PackageESError('package es failed'), fallbackMessage)
+    ).toThrow(
+      expect.objectContaining({
+        isBoom: true,
+        output: expect.objectContaining({ statusCode: 500 }),
+        message: 'package es failed',
+      })
+    );
+  });
+
+  it('maps Fleet registry connection failures to 502', () => {
+    expect(() =>
+      throwMappedSourceMapRouteError(
+        new RegistryConnectionError('registry unreachable'),
+        fallbackMessage
+      )
+    ).toThrow(
+      expect.objectContaining({
+        isBoom: true,
+        output: expect.objectContaining({ statusCode: 502 }),
+        message: 'registry unreachable',
       })
     );
   });
