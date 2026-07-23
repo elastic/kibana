@@ -67,6 +67,7 @@ jest.mock('@kbn/test', () => ({
 jest.mock('fs', () => ({
   ...jest.requireActual('fs'),
   existsSync: jest.fn(),
+  readdirSync: jest.fn(),
 }));
 
 const mockExecaFn = jest.fn();
