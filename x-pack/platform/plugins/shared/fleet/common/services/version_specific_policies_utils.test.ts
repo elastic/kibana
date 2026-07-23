@@ -17,6 +17,7 @@ import {
   buildPolicyIdsOrVariantsEsFilter,
   buildPolicyBaseIdWithFallbackEsFilter,
   buildPolicyBaseIdsWithFallbackEsFilter,
+  buildPolicyBaseIdWithFallbackKuery,
 } from './version_specific_policies_utils';
 
 describe('removeVersionSuffixFromPolicyId', () => {
@@ -249,6 +250,36 @@ describe('buildPolicyIdsOrVariantsEsFilter', () => {
 
   it('should return match_none for an empty array instead of an empty terms clause', () => {
     expect(buildPolicyIdsOrVariantsEsFilter([])).toEqual({ match_none: {} });
+  });
+});
+
+describe('buildPolicyBaseIdWithFallbackKuery', () => {
+  it('should match migrated docs via policy_base_id term', () => {
+    expect(buildPolicyBaseIdWithFallbackKuery('my-policy')).toContain('policy_base_id:"my-policy"');
+  });
+
+  it('should include fallback branch for docs missing policy_base_id', () => {
+    expect(buildPolicyBaseIdWithFallbackKuery('my-policy')).toContain(
+      'policy_id:"my-policy" and not policy_base_id:*'
+    );
+  });
+
+  it('should use custom field names when provided', () => {
+    expect(
+      buildPolicyBaseIdWithFallbackKuery(
+        'my-policy',
+        'fleet-agents.policy_base_id',
+        'fleet-agents.policy_id'
+      )
+    ).toBe(
+      '(fleet-agents.policy_base_id:"my-policy" or (fleet-agents.policy_id:"my-policy" and not fleet-agents.policy_base_id:*))'
+    );
+  });
+
+  it('should escape quotes in the base id', () => {
+    expect(buildPolicyBaseIdWithFallbackKuery('my"policy')).toContain(
+      'policy_base_id:"my\\"policy"'
+    );
   });
 });
 

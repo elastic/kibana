@@ -144,6 +144,20 @@ export function buildPolicyIdsOrVariantsEsFilter(
 // and the startup backfill covers all pre-existing documents.
 
 /**
+ * KQL equivalent of {@link buildPolicyBaseIdWithFallbackEsFilter}: matches migrated documents via
+ * `policy_base_id:"id"` and un-migrated documents via `policy_id:"id" and not policy_base_id:*`.
+ * Use this when building a KQL string (e.g. for URL kuery params) instead of an ES DSL filter.
+ */
+export function buildPolicyBaseIdWithFallbackKuery(
+  baseId: string,
+  policyBaseIdField: string = 'policy_base_id',
+  policyIdField: string = DEFAULT_POLICY_ID_FIELD
+): string {
+  const escapedId = escapeQuotes(baseId);
+  return `(${policyBaseIdField}:"${escapedId}" or (${policyIdField}:"${escapedId}" and not ${policyBaseIdField}:*))`;
+}
+
+/**
  * ES query DSL filter preferring `policy_base_id` for migrated documents, with a legacy
  * `policy_id` exact-term fallback for documents that pre-date the `policy_base_id` field.
  */
