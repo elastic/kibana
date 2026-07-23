@@ -108,16 +108,18 @@ Existing namespaces and their source scope:
 | `timelines` | `public/timelines/` | no |
 | `workflows` | `public/workflows/` | no |
 
+> The source scope column shows the UI (`public/`) anchor. API tests for a feature belong in the **same namespace** as its UI tests — the namespace tracks the feature area, not the code layer (e.g., entity analytics API tests live in `entity_analytics/api/` alongside the UI tests).
+
 ### Create a new namespace when:
 
-- The feature source lives in a top-level directory under `public/` **not covered** by any row above (e.g., `public/asset_inventory/` → new namespace `asset_inventory`). Sub-directories of an existing scope (e.g. `public/flyout_v2/`) belong in the parent namespace, not a new one.
+- The feature source lives in a top-level directory under `public/` **not covered** by any row above (e.g., `public/asset_inventory/` → new namespace `asset_inventory`). Sub-directories of an existing scope (e.g. `public/flyout_v2/`) belong in the parent namespace, not a new one. For server-only features with no `public/` counterpart, use the directory name under `server/lib/` as the namespace anchor (e.g., `server/lib/machine_learning/` → namespace `machine_learning`). ⚠️ Exception: `server/lib/timeline` (singular) maps to the existing `timelines` namespace — do not create a new `timeline` namespace.
 - There are **3 or more test specs** — single tests do not justify a new Playwright config with its own fixtures tree.
 
 A different owning team reinforces the decision but is not required on its own.
 
 ### How to create a new namespace (3 required steps):
 
-1. **Create the directory structure.** Copy from `test/scout/timelines/ui/` (UI-only reference) or `test/scout/entity_analytics/` (UI + API reference; also has a `common/` dir for shared fixtures). Each namespace needs its own `parallel.playwright.config.ts` (or `playwright.config.ts`), `fixtures/index.ts`, and specs.
+1. **Create the directory structure.** Run `node scripts/scout generate --path x-pack/solutions/security/plugins/security_solution --type ui --namespace <name>` (use `--type api` or `--type both` if API tests are also needed). This scaffolds `test/scout/<name>/{ui,api}/` with the correct config files.
 2. **Generate and commit the config manifest.** Run `node scripts/scout.js update-test-config-manifests` from the repo root. This writes `.meta/(ui|api)/*.json` under the namespace dir. Without it, CI discovery and selective testing will not see the new config. Commit the generated file.
 3. **Add a CODEOWNERS entry.** Add `/x-pack/solutions/security/plugins/security_solution/test/scout/<namespace>/ @elastic/<team>` to `.github/CODEOWNERS`. If omitted, ownership falls through to the umbrella entry `@elastic/security-engineering-productivity` — easy to forget (the `exceptions` namespace currently has no dedicated entry for this reason).
 
@@ -140,7 +142,6 @@ bash .agents/skills/cypress-to-scout-migration/scripts/scaffold_scout_spec.sh \
   --type parallel --scout-package @kbn/scout-security
 ```
 
-If the namespace directory does not yet exist, create it first with `node scripts/scout.js generate --path x-pack/solutions/security/plugins/security_solution --type ui` and move / rename the generated scaffold into the correct namespace sub-directory, or create the structure manually following an existing namespace (e.g. `test/scout/timelines/ui/`).
 
 ## Security Solution tags
 
