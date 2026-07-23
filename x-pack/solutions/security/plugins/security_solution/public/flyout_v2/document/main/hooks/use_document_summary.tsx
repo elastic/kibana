@@ -251,6 +251,7 @@ export const useDocumentSummary = ({
           setIsConnectorMissing(true);
         } else {
           setFetchError(rawResponse.response);
+          setHasSummary(false);
         }
       }
       setIsGenerating(false);
