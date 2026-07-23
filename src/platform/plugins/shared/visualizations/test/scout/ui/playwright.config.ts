@@ -7,13 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FtrConfigProviderContext } from '@kbn/test';
+import { createPlaywrightConfig } from '@kbn/scout';
 
-export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const functionalConfig = await readConfigFile(require.resolve('../../../config.base.js'));
-
-  return {
-    ...functionalConfig.getAll(),
-    testFiles: [require.resolve('.')],
-  };
-}
+// Sequential (single-worker) config for tests that mutate global cluster state
+// (empty-cluster / no-data-view prompts) and therefore cannot run in the
+// space-isolated parallel pool.
+export default createPlaywrightConfig({
+  testDir: './tests',
+});

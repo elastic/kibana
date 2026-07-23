@@ -170,4 +170,86 @@ export class VisualizeApp {
   getEditInLensButton() {
     return this.editInLensButton;
   }
+
+  /** Switches to the legacy tab and opens the aggregation-based visualization type list. */
+  async clickAggBasedVisualizations() {
+    await this.clickLegacyTab();
+    await this.clickVisType('aggbased');
+    await expect(this.visNewDialogTypes).toBeVisible();
+  }
+
+  /**
+   * Returns the visualization group titles currently shown in the new-visualization
+   * wizard (recommended or legacy tab), sorted alphabetically.
+   */
+  async getVisibleVisTypes(): Promise<string[]> {
+    await expect(this.visNewDialogGroups).toBeVisible();
+    const titles = await this.visNewDialogGroups.getByTestId('visTypeTitle').allInnerTexts();
+    return titles
+      .map((title) => title.trim())
+      .filter(Boolean)
+      .sort();
+  }
+
+  /** Returns the aggregation-based visualization type titles (unsorted). */
+  async getChartTypes(): Promise<string[]> {
+    await expect(this.visNewDialogTypes).toBeVisible();
+    const titles = await this.visNewDialogTypes.getByTestId('visTypeTitle').allInnerTexts();
+    return titles.map((title) => title.trim()).filter(Boolean);
+  }
+
+  /** Clicks the data-table aggregation-based visualization type. */
+  async clickDataTable() {
+    await this.page.testSubj.click('visType-table');
+  }
+
+  /** Selects the source data view / saved search for a new aggregation-based visualization. */
+  async clickNewSearch(dataView = 'logstash-*') {
+    await this.selectDataSource(dataView);
+  }
+
+  /**
+   * Saves the current visualization to the library and waits for the breadcrumb to
+   * reflect the new title.
+   */
+  async saveVisualization(visName: string) {
+    await this.openSaveModal();
+    await this.saveToLibrary(visName);
+    await expect(this.page.testSubj.locator('breadcrumb last')).toHaveText(visName);
+  }
+
+  /** Navigates to the Visualize library listing from the breadcrumb, searches and opens a saved visualization. */
+  async loadSavedVisualization(visName: string) {
+    await this.page.testSubj.click('breadcrumb first');
+    await expect(this.landingPage).toBeVisible();
+    await this.page.testSubj.fill('tableListSearchBox', `"${visName}"`);
+    await this.page.keyboard.press('Enter');
+    await this.page.testSubj.locator('listingTable-isLoaded').waitFor({ state: 'visible' });
+    await this.openSavedVisualization(visName);
+  }
+
+  /**
+   * Creates a data view from the Visualize "no data view" prompt. The data view
+   * editor auto-appends `*`, so `name` is the base title (e.g. `logstash`).
+   */
+  async createDataViewFromPrompt(name: string) {
+    await this.page.testSubj.click('createDataViewButton');
+
+    const flyout = this.page.testSubj.locator('indexPatternEditorFlyout');
+    const form = this.page.testSubj.locator('indexPatternEditorForm');
+    const titleInput = this.page.testSubj.locator('createIndexPatternTitleInput');
+    const timestampField = this.page.testSubj.locator('timestampField');
+
+    await flyout.waitFor({ state: 'visible' });
+    await titleInput.fill(name.endsWith('*') ? name : `${name}*`);
+    // Wait for async title validation to settle before continuing.
+    await form.and(this.page.locator('[data-validation-error="0"]')).waitFor({ state: 'visible' });
+    // Wait for the timestamp field options to load; the default `@timestamp` applies.
+    await timestampField
+      .and(this.page.locator('[data-is-loading="0"]'))
+      .waitFor({ state: 'visible', timeout: 30_000 });
+
+    await this.page.testSubj.click('saveIndexPatternButton');
+    await flyout.waitFor({ state: 'hidden' });
+  }
 }

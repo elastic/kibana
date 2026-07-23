@@ -86,6 +86,7 @@ plugins:
     - upgrade_assistant
     - uptime
     - ux
+    - visualizations
     - watcher
     - workflows_extensions
     - workflows_management
