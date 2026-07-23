@@ -79,7 +79,7 @@ export class TemplatesMigrationTaskManager {
         description: 'One-shot migration of legacy templates and custom fields to the v2 system',
         timeout: '10m',
         maxAttempts: 3,
-        createTaskRunner: ({ taskInstance, abortController }: RunContext) => {
+        createTaskRunner: ({ taskInstance, signal }: RunContext) => {
           // Same guard as IncrementalIdTaskManager: if Task Manager fires between setup() and
           // start(), we throw and let TM mark the run as failed — it will retry on next startup.
           if (!this.internalRepo) {
@@ -90,13 +90,10 @@ export class TemplatesMigrationTaskManager {
           const previousState = (taskInstance?.state ?? {}) as MigrationTaskState;
           // Task Manager aborts this signal on timeout/cancel; the backfill checks it between pages
           // and persists its cursor so the next run resumes rather than running past the timeout.
-          const signal = abortController?.signal ?? new AbortController().signal;
-
           return {
             run: () => this.run(repo, previousState, signal),
             cancel: async () => {
               log.debug('Cases templates v2 migration task cancelled — aborting scan');
-              abortController?.abort();
             },
           };
         },
