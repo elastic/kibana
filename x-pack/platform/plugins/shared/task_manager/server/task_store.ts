@@ -61,6 +61,13 @@ import type {
 } from './task';
 import { TaskStatus, TaskLifecycleResult } from './task';
 
+/**
+ * `TaskStore.schedule()` options. In addition to the public `ApiKeyOptions`, allows an internal
+ * `refresh` flag so `TaskScheduling` can force the write to be visible immediately (used for
+ * latency-sensitive `requestImmediateClaim` scheduling).
+ */
+export type ScheduleTaskOptions = ApiKeyOptions & { refresh?: boolean };
+
 import type { TaskTypeDictionary } from './task_type_dictionary';
 import type { AdHocTaskCounter } from './lib/adhoc_task_counter';
 import { TaskValidator } from './task_validator';
@@ -440,7 +447,7 @@ export class TaskStore {
    */
   public async schedule(
     taskInstance: TaskInstance,
-    options?: ApiKeyOptions
+    options?: ScheduleTaskOptions
   ): Promise<ConcreteTaskInstance> {
     return this.executionContextRunner.run(() => this._schedule(taskInstance, options), {
       id: 'schedule',
@@ -448,7 +455,7 @@ export class TaskStore {
   }
   private async _schedule(
     taskInstance: TaskInstance,
-    options?: ApiKeyOptions
+    options?: ScheduleTaskOptions
   ): Promise<ConcreteTaskInstance> {
     try {
       this.validateCanEncryptSavedObjects(options?.request);
@@ -477,7 +484,7 @@ export class TaskStore {
           ...apiKeySOFields,
           runAt: getFirstRunAt({ taskInstance: validatedTaskInstance, logger: this.logger }),
         },
-        { id, refresh: false }
+        { id, refresh: options?.refresh ?? false }
       );
       if (
         get(taskInstance, 'schedule.interval', null) == null &&
@@ -617,7 +624,7 @@ export class TaskStore {
    */
   public async update(
     doc: ConcreteTaskInstance,
-    options: { validate: boolean }
+    options: { validate: boolean; refresh?: boolean }
   ): Promise<ConcreteTaskInstance> {
     return this.executionContextRunner.run(() => this._update(doc, options), {
       id: 'update',
@@ -626,7 +633,7 @@ export class TaskStore {
 
   private async _update(
     doc: ConcreteTaskInstance,
-    options: { validate: boolean }
+    options: { validate: boolean; refresh?: boolean }
   ): Promise<ConcreteTaskInstance> {
     let updatedSavedObject;
     let attributes;
@@ -640,7 +647,7 @@ export class TaskStore {
         doc.id,
         attributes,
         {
-          refresh: false,
+          refresh: options.refresh ?? false,
           version: doc.version,
         }
       );

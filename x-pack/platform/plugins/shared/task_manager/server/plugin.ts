@@ -42,6 +42,7 @@ import {
   BACKGROUND_TASK_NODE_SO_NAME,
   TASK_SO_NAME,
   INVALIDATE_API_KEY_SO_NAME,
+  TASK_MANAGER_CLAIM_NUDGE_SO_NAME,
 } from './saved_objects';
 import type { TaskDefinitionRegistry } from './task_type_dictionary';
 import { TaskTypeDictionary } from './task_type_dictionary';
@@ -53,7 +54,8 @@ import type { MonitoringStats } from './monitoring';
 import { createMonitoringStats } from './monitoring';
 import type { ConcreteTaskInstance, TaskEventLogger } from './task';
 import { registerTaskManagerUsageCollector } from './usage';
-import { TASK_MANAGER_INDEX } from './constants';
+import { TASK_MANAGER_CLAIM_NUDGE_INDEX, TASK_MANAGER_INDEX } from './constants';
+import { TaskManagerClaimNudgeService } from './claim_nudge/claim_nudge_service';
 import { AdHocTaskCounter } from './lib/adhoc_task_counter';
 import { setupIntervalLogging } from './lib/log_health_metrics';
 import type { Metrics } from './metrics';
@@ -167,6 +169,7 @@ export class TaskManagerPlugin
   private startContract?: TaskManagerStartContract;
   private uiamApiKeyProvisioningTask?: UiamApiKeyProvisioningTask;
   private enrichFakeRequest?: FakeRequestEnricher;
+  private claimNudgeService?: TaskManagerClaimNudgeService;
 
   constructor(private readonly initContext: PluginInitializerContext) {
     this.initContext = initContext;
@@ -370,7 +373,17 @@ export class TaskManagerPlugin
       TASK_SO_NAME,
       BACKGROUND_TASK_NODE_SO_NAME,
       INVALIDATE_API_KEY_SO_NAME,
+      TASK_MANAGER_CLAIM_NUDGE_SO_NAME,
     ]);
+
+    if (this.config.claim_nudge.enabled) {
+      this.claimNudgeService = new TaskManagerClaimNudgeService({
+        logger: this.logger,
+        esClient: elasticsearch.client.asInternalUser,
+        savedObjectsRepository,
+        index: TASK_MANAGER_CLAIM_NUDGE_INDEX,
+      });
+    }
 
     this.kibanaDiscoveryService = new KibanaDiscoveryService({
       savedObjectsRepository,
@@ -438,6 +451,11 @@ export class TaskManagerPlugin
 
     // Only poll for tasks if configured to run tasks
     if (this.shouldRunBackgroundTasks) {
+      // Long-poll the claim nudge signal index so a `runSoon` (or a `schedule(..., {
+      // requestImmediateClaim: true })`) on any node triggers an immediate claim cycle here,
+      // instead of waiting for the next poll_interval.
+      this.claimNudgeService?.start();
+
       this.taskManagerMetricsCollector = new TaskManagerMetricsCollector({
         logger: this.logger,
         store: taskStore,
@@ -466,6 +484,7 @@ export class TaskManagerPlugin
         apiKeyStrategy,
         eventLogger: this.taskEventLogger!,
         enrichFakeRequest,
+        claimNudgeService: this.claimNudgeService,
       });
     }
 
@@ -494,6 +513,7 @@ export class TaskManagerPlugin
       middleware: this.middleware,
       taskManagerId: taskStore.taskManagerId,
       taskPollingLifecycle: this.taskPollingLifecycle,
+      claimNudgeService: this.claimNudgeService,
     });
 
     scheduleDeleteInactiveNodesTaskDefinition(this.logger, taskScheduling).catch(() => {});
@@ -547,6 +567,7 @@ export class TaskManagerPlugin
   public async stop() {
     this.licenseSubscriber?.cleanup();
     this.uiamApiKeyProvisioningTask?.stop();
+    this.claimNudgeService?.stop();
 
     // Stop polling for tasks
     if (this.taskPollingLifecycle) {

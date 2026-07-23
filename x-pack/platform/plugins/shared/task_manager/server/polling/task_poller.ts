@@ -26,6 +26,12 @@ interface Opts<H> {
   initialPollInterval: number;
   pollInterval$: Observable<number>;
   pollIntervalDelay$?: Observable<number>;
+  /**
+   * Emits whenever another Kibana node requests an immediate claim cycle (e.g. via `runSoon`
+   * or `schedule(..., { requestImmediateClaim: true })`), so the poller doesn't have to wait
+   * for its regular `pollInterval` to pick up latency-sensitive tasks.
+   */
+  claimNudge$?: Observable<void>;
   getCapacity: () => number;
   work: WorkFn<H>;
 }
@@ -52,11 +58,14 @@ export function createTaskPoller<T, H>({
   initialPollInterval,
   pollInterval$,
   pollIntervalDelay$,
+  claimNudge$,
   getCapacity,
   work,
 }: Opts<H>): TaskPoller<T, H> {
   const hasCapacity = () => getCapacity() > 0;
   let running: boolean = false;
+  let isCycleRunning: boolean = false;
+  let nudgeRequestedDuringCycle: boolean = false;
   let timeoutId: NodeJS.Timeout | null = null;
   let hasSubscribed: boolean = false;
   let pollInterval = initialPollInterval;
@@ -65,6 +74,7 @@ export function createTaskPoller<T, H>({
 
   async function runCycle() {
     timeoutId = null;
+    isCycleRunning = true;
     const start = Date.now();
     try {
       if (hasCapacity()) {
@@ -75,22 +85,51 @@ export function createTaskPoller<T, H>({
       }
     } catch (e) {
       subject.next(asPollingError<T>(e, PollingErrorType.WorkError));
+    } finally {
+      isCycleRunning = false;
     }
 
     if (running) {
+      // A claim nudge that arrived while this cycle was in-flight is handled by running
+      // the next cycle immediately, rather than waiting out the usual pollInterval.
+      const nextDelay = nudgeRequestedDuringCycle
+        ? 0
+        : Math.max(pollInterval - (Date.now() - start) + (pollIntervalDelay % pollInterval), 0);
+      nudgeRequestedDuringCycle = false;
       // Set the next runCycle call
       timeoutId = setTimeout(
         () =>
           runCycle().catch((e) => {
             subject.next(asPollingError(e, PollingErrorType.PollerError));
           }),
-        Math.max(pollInterval - (Date.now() - start) + (pollIntervalDelay % pollInterval), 0)
+        nextDelay
       );
       // Reset delay, it's designed to shuffle only once
       pollIntervalDelay = 0;
     } else {
       logger.info('Task poller finished running its last cycle');
     }
+  }
+
+  function runCycleNow() {
+    if (!running) {
+      return;
+    }
+
+    if (isCycleRunning) {
+      // Coalesce bursts of nudges into a single immediate follow-up cycle.
+      nudgeRequestedDuringCycle = true;
+      return;
+    }
+
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+      timeoutId = null;
+    }
+
+    runCycle().catch((e) => {
+      subject.next(asPollingError(e, PollingErrorType.PollerError));
+    });
   }
 
   function subscribe() {
@@ -116,6 +155,12 @@ export function createTaskPoller<T, H>({
       pollIntervalDelay$.subscribe((delay) => {
         pollIntervalDelay = delay;
         logger.debug(`Task poller now delaying emission by ${delay}ms`);
+      });
+    }
+    if (claimNudge$) {
+      claimNudge$.subscribe(() => {
+        logger.debug('Task poller received a claim nudge, running a claim cycle immediately');
+        runCycleNow();
       });
     }
     hasSubscribed = true;

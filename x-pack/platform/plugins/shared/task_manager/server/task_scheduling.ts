@@ -22,7 +22,7 @@ import {
   type TaskInstanceWithDeprecatedFields,
   type TaskInstanceWithId,
 } from './task';
-import type { TaskStore } from './task_store';
+import type { ScheduleTaskOptions, TaskStore } from './task_store';
 import { ensureDeprecatedFieldsAreCorrected } from './lib/correct_deprecated_fields';
 import { retryableBulkUpdate } from './lib/retryable_bulk_update';
 import type { ErrorOutput } from './lib/bulk_operation_buffer';
@@ -30,14 +30,15 @@ import { calculateNextRunAtFromSchedule } from './lib/get_next_run_at';
 import { TaskAlreadyRunningError } from './lib/errors';
 import type { TaskPollingLifecycle } from './polling_lifecycle';
 import { getExecutionId } from './lib/get_execution_id';
+import type { TaskManagerClaimNudgeService } from './claim_nudge/claim_nudge_service';
 
 const scheduleOptionsToStoreApiKeyOptions = (
   options?: ScheduleOptions
-): ApiKeyOptions | undefined => {
+): ScheduleTaskOptions | undefined => {
   if (!options) {
     return undefined;
   }
-  const storeOpts: ApiKeyOptions = {};
+  const storeOpts: ScheduleTaskOptions = {};
   if (options.request) {
     storeOpts.request = options.request;
   }
@@ -49,6 +50,11 @@ const scheduleOptionsToStoreApiKeyOptions = (
   }
   if (options.regenerateApiKey !== undefined) {
     storeOpts.regenerateApiKey = options.regenerateApiKey;
+  }
+  if (options.requestImmediateClaim === true) {
+    // Make the write visible immediately so a subsequent claim cycle (regular or nudged)
+    // can find it right away, rather than waiting out the index's refresh interval.
+    storeOpts.refresh = true;
   }
   return Object.keys(storeOpts).length ? storeOpts : undefined;
 };
@@ -62,6 +68,7 @@ export interface TaskSchedulingOpts {
   middleware: Middleware;
   taskManagerId: string;
   taskPollingLifecycle?: TaskPollingLifecycle; // subscribe to task lifecycle events
+  claimNudgeService?: TaskManagerClaimNudgeService;
 }
 
 /**
@@ -102,6 +109,7 @@ export class TaskScheduling {
   private logger: Logger;
   private middleware: Middleware;
   private readonly taskPolling: TaskPollingLifecycle | undefined;
+  private readonly claimNudgeService: TaskManagerClaimNudgeService | undefined;
 
   /**
    * Initializes the task manager, preventing any further addition of middleware,
@@ -113,6 +121,24 @@ export class TaskScheduling {
     this.middleware = opts.middleware;
     this.store = opts.taskStore;
     this.taskPolling = opts.taskPollingLifecycle;
+    this.claimNudgeService = opts.claimNudgeService;
+  }
+
+  /**
+   * Notifies background task nodes to run an immediate claim cycle, instead of waiting for
+   * the next poll_interval. Progressive enhancement: failures are logged and otherwise
+   * ignored, since regular polling remains the fallback.
+   */
+  private async notifyClaimNudge(taskId: string) {
+    if (!this.claimNudgeService) {
+      return;
+    }
+    try {
+      await this.claimNudgeService.notify();
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      this.logger.warn(`Failed to notify Task Manager claim nudge for task ${taskId}: ${message}`);
+    }
   }
 
   /**
@@ -135,7 +161,7 @@ export class TaskScheduling {
         ? agent.currentTraceparent
         : '';
 
-    return await this.store.schedule(
+    const scheduledTask = await this.store.schedule(
       {
         ...modifiedTask,
         traceparent: traceparent || '',
@@ -143,6 +169,12 @@ export class TaskScheduling {
       },
       scheduleOptionsToStoreApiKeyOptions(options)
     );
+
+    if (options?.requestImmediateClaim === true) {
+      await this.notifyClaimNudge(scheduledTask.id);
+    }
+
+    return scheduledTask;
   }
 
   /**
@@ -350,7 +382,9 @@ export class TaskScheduling {
           scheduledAt: new Date(),
           runAt: new Date(),
         },
-        { validate: false }
+        // `refresh: true` makes the updated runAt visible to the next claim cycle's search
+        // immediately, rather than waiting out the index's refresh interval.
+        { validate: false, refresh: true }
       );
     } catch (e) {
       if (e.statusCode === 409) {
@@ -363,6 +397,13 @@ export class TaskScheduling {
         throw e;
       }
     }
+
+    if (!conflict) {
+      // runSoon is inherently latency-sensitive, so always nudge background task nodes to
+      // claim immediately, rather than waiting for the next poll_interval.
+      await this.notifyClaimNudge(taskId);
+    }
+
     return conflict ? { id: task.id, forced, conflict: true } : { id: task.id, forced };
   }
 

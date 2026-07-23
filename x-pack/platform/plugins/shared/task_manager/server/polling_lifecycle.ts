@@ -64,6 +64,7 @@ import {
 } from './lib/create_managed_configuration';
 import { createRunningAveragedStat } from './monitoring/task_run_calculators';
 import { resetInFlightTasksOwnedByThisNode } from './lib/task_reconciliation';
+import type { TaskManagerClaimNudgeService } from './claim_nudge/claim_nudge_service';
 
 const MAX_BUFFER_OPERATIONS = 100;
 
@@ -85,6 +86,11 @@ export interface TaskPollingLifecycleOpts {
   apiKeyStrategy: ApiKeyStrategy;
   eventLogger: TaskEventLogger;
   enrichFakeRequest?: FakeRequestEnricher;
+  /**
+   * When provided (and started), its `claimNudge$` observable is used to trigger an immediate
+   * claim cycle whenever another node requests one, instead of waiting for `poll_interval`.
+   */
+  claimNudgeService?: TaskManagerClaimNudgeService;
 }
 
 export type TaskLifecycleEvent =
@@ -151,6 +157,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
     apiKeyStrategy,
     eventLogger,
     enrichFakeRequest,
+    claimNudgeService,
   }: TaskPollingLifecycleOpts) {
     this.logger = logger;
     this.middleware = middleware;
@@ -227,6 +234,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
       initialPollInterval: pollInterval,
       pollInterval$: this.pollIntervalConfiguration$,
       pollIntervalDelay$,
+      claimNudge$: claimNudgeService?.claimNudge$,
       getCapacity: () => {
         const capacity = this.pool.availableCapacity();
         if (!capacity) {

@@ -6,7 +6,7 @@
  */
 
 import sinon from 'sinon';
-import { of, BehaviorSubject } from 'rxjs';
+import { of, BehaviorSubject, Subject } from 'rxjs';
 import { none } from 'fp-ts/Option';
 import { createTaskPoller, PollingError, PollingErrorType } from './task_poller';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
@@ -461,6 +461,112 @@ describe('TaskPoller', () => {
     clock.tick(pollInterval);
     await new Promise((resolve) => setImmediate(resolve));
     expect(work).toHaveBeenCalledTimes(3);
+  });
+  describe('claimNudge$', () => {
+    test('triggers an immediate cycle when a claim nudge arrives between polls', async () => {
+      const pollInterval = 1000;
+
+      const work = jest.fn(async () => true);
+      const claimNudge$ = new Subject<void>();
+      createTaskPoller<void, boolean>({
+        initialPollInterval: pollInterval,
+        logger: loggingSystemMock.create().get(),
+        pollInterval$: of(pollInterval),
+        pollIntervalDelay$: of(0),
+        claimNudge$,
+        getCapacity: () => 1,
+        work,
+      }).start();
+
+      // initial cycle runs synchronously on start()
+      expect(work).toHaveBeenCalledTimes(1);
+      await new Promise((resolve) => setImmediate(resolve));
+
+      // well before the next scheduled poll
+      clock.tick(pollInterval / 4);
+      expect(work).toHaveBeenCalledTimes(1);
+
+      claimNudge$.next();
+      await new Promise((resolve) => setImmediate(resolve));
+
+      expect(work).toHaveBeenCalledTimes(2);
+
+      // the regular schedule resumes pollInterval ms after the nudged cycle, not the original one
+      clock.tick(pollInterval - 10);
+      expect(work).toHaveBeenCalledTimes(2);
+      clock.tick(20);
+      await new Promise((resolve) => setImmediate(resolve));
+      expect(work).toHaveBeenCalledTimes(3);
+    });
+
+    test('coalesces a claim nudge that arrives while a cycle is already running', async () => {
+      const pollInterval = 1000;
+      const { promise: worker, resolve: resolveWorker } = createResolvablePromise();
+
+      const work = jest.fn(async () => {
+        await worker;
+        return true;
+      });
+      const claimNudge$ = new Subject<void>();
+      createTaskPoller<void, boolean>({
+        initialPollInterval: pollInterval,
+        logger: loggingSystemMock.create().get(),
+        pollInterval$: of(pollInterval),
+        pollIntervalDelay$: of(0),
+        claimNudge$,
+        getCapacity: () => 1,
+        work,
+      }).start();
+
+      expect(work).toHaveBeenCalledTimes(1);
+      await new Promise((resolve) => setImmediate(resolve));
+      // fire the zero-delay timer that activates the claimNudge$ subscription
+      clock.tick(0);
+      await new Promise((resolve) => setImmediate(resolve));
+
+      // a cycle is in-flight; the nudge should be coalesced, not trigger a second call
+      claimNudge$.next();
+      await new Promise((resolve) => setImmediate(resolve));
+      expect(work).toHaveBeenCalledTimes(1);
+
+      resolveWorker(true);
+      await new Promise((resolve) => setImmediate(resolve));
+
+      // the coalesced nudge causes the next cycle to be scheduled with 0 delay, rather than
+      // pollInterval; fire that zero-delay timer.
+      clock.tick(0);
+      await new Promise((resolve) => setImmediate(resolve));
+
+      expect(work).toHaveBeenCalledTimes(2);
+    });
+
+    test('is a no-op once the poller has been stopped', async () => {
+      const pollInterval = 1000;
+
+      const work = jest.fn(async () => true);
+      const claimNudge$ = new Subject<void>();
+      const poller = createTaskPoller<void, boolean>({
+        initialPollInterval: pollInterval,
+        logger: loggingSystemMock.create().get(),
+        pollInterval$: of(pollInterval),
+        pollIntervalDelay$: of(0),
+        claimNudge$,
+        getCapacity: () => 1,
+        work,
+      });
+      poller.start();
+      await new Promise((resolve) => setImmediate(resolve));
+      expect(work).toHaveBeenCalledTimes(1);
+
+      poller.stop();
+
+      claimNudge$.next();
+      await new Promise((resolve) => setImmediate(resolve));
+      clock.tick(pollInterval);
+      await new Promise((resolve) => setImmediate(resolve));
+
+      expect(work).toHaveBeenCalledTimes(1);
+    });
   });
 });
 
