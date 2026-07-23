@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, within } from '@testing-library/react';
 import { EntityHighlightsResult, joinSignalLabels } from './entity_highlights_result';
 import { TestProviders } from '../../../../common/mock';
 import { useBulkGetUserProfiles } from '../../../../common/components/user_profiles/use_bulk_get_user_profiles';
@@ -495,7 +495,7 @@ describe('EntityHighlightsResult', () => {
       expect(screen.queryByTestId('entity-highlights-staleness-callout')).not.toBeInTheDocument();
     });
 
-    it('renders a single EUI warning callout with a risk-specific header and one regenerate action', () => {
+    it('renders a single EUI warning callout with the out-of-date header and one regenerate action', () => {
       render(
         <EntityHighlightsResult
           assistantResult={defaultAssistantResult}
@@ -509,9 +509,8 @@ describe('EntityHighlightsResult', () => {
 
       const callout = screen.getByTestId('entity-highlights-staleness-callout');
       expect(callout).toBeInTheDocument();
-      expect(
-        screen.getByText('Entity risk has changed since this summary was generated')
-      ).toBeInTheDocument();
+      // The header now reads "Summary out of date" with the change detail appended after it.
+      expect(screen.getByText('Summary out of date')).toBeInTheDocument();
 
       // Single regenerate action inside the callout — the old dual-button UI is gone.
       expect(screen.getByTestId('entity-highlights-staleness-regenerate')).toBeInTheDocument();
@@ -540,7 +539,7 @@ describe('EntityHighlightsResult', () => {
       ).not.toBeInTheDocument();
     });
 
-    it('renders a single reason as plain text rather than a bulleted list', () => {
+    it('renders a single reason inline in the callout header rather than a bulleted list', () => {
       render(
         <EntityHighlightsResult
           assistantResult={defaultAssistantResult}
@@ -554,13 +553,18 @@ describe('EntityHighlightsResult', () => {
         { wrapper: TestProviders }
       );
 
-      // Scores are rounded to 2 decimals via formatRiskScore, not shown raw.
-      const reason = screen.getByText('Risk score changed from 87.13 to 62.85');
-      expect(reason.tagName).toBe('P');
+      // Scores are rounded to 2 decimals via formatRiskScore, not shown raw. The detail is now
+      // composed into the callout header (a <span>), followed by the "Regenerate to update." hint.
+      const reason = screen.getByText(
+        /This entity's risk score changed from 87\.13 to 62\.85 after the summary was generated\./
+      );
+      expect(reason).toBeInTheDocument();
+      // The detail is not rendered as a list item.
       expect(reason.closest('li')).toBeNull();
+      expect(reason.closest('ul')).toBeNull();
     });
 
-    it('lists multiple reasons as a bulleted list', () => {
+    it('joins multiple changed signals into the header instead of a bulleted list', () => {
       render(
         <EntityHighlightsResult
           assistantResult={defaultAssistantResult}
@@ -575,12 +579,14 @@ describe('EntityHighlightsResult', () => {
         { wrapper: TestProviders }
       );
 
-      expect(
-        screen.getByText('Risk score changed from 70.00 to 90.00').closest('li')
-      ).not.toBeNull();
-      expect(
-        screen.getByText('Risk score changed from 50.00 to 80.00').closest('li')
-      ).not.toBeNull();
+      // Multiple reasons no longer render as <ul><li> items; the changed signal labels are
+      // joined (via joinSignalLabels) into the header text instead.
+      const summary = screen.getByText(/Entity risk changed after the summary was generated\./);
+      expect(summary).toBeInTheDocument();
+      // The staleness detail itself is not rendered as a list (the recommended-actions
+      // markdown below renders its own list, so we only assert on this element's ancestry).
+      expect(summary.closest('li')).toBeNull();
+      expect(summary.closest('ul')).toBeNull();
     });
 
     it('calls onRefresh when the callout regenerate button is clicked', () => {
@@ -598,6 +604,47 @@ describe('EntityHighlightsResult', () => {
       fireEvent.click(screen.getByTestId('entity-highlights-staleness-regenerate'));
 
       expect(mockOnRefresh).toHaveBeenCalledTimes(1);
+    });
+
+    it('renders a dismiss affordance and calls onDismiss when it is clicked', () => {
+      const mockOnDismiss = jest.fn();
+
+      render(
+        <EntityHighlightsResult
+          assistantResult={defaultAssistantResult}
+          showAnonymizedValues={false}
+          generatedAt={null}
+          stalenessReasons={[{ signal: 'risk_score', previousScore: 70, currentScore: 90 }]}
+          onRefresh={mockOnRefresh}
+          onDismiss={mockOnDismiss}
+        />,
+        { wrapper: TestProviders }
+      );
+
+      const callout = screen.getByTestId('entity-highlights-staleness-callout');
+      const dismissButton = within(callout).getByLabelText('Dismiss this callout');
+      expect(dismissButton).toBeInTheDocument();
+
+      fireEvent.click(dismissButton);
+
+      expect(mockOnDismiss).toHaveBeenCalledTimes(1);
+      expect(mockOnRefresh).not.toHaveBeenCalled();
+    });
+
+    it('does not render a dismiss affordance when onDismiss is not provided', () => {
+      render(
+        <EntityHighlightsResult
+          assistantResult={defaultAssistantResult}
+          showAnonymizedValues={false}
+          generatedAt={null}
+          stalenessReasons={[{ signal: 'risk_score', previousScore: 70, currentScore: 90 }]}
+          onRefresh={mockOnRefresh}
+        />,
+        { wrapper: TestProviders }
+      );
+
+      const callout = screen.getByTestId('entity-highlights-staleness-callout');
+      expect(within(callout).queryByLabelText('Dismiss this callout')).not.toBeInTheDocument();
     });
   });
 });

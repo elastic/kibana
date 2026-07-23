@@ -1,5 +1,5 @@
 {
-  "sha1": "1ada770aa9236a776e17ddc47702667ca250850d",
+  "sha1": "9c37bf0d149ce6a9ac3e86a65af0ca41b21ceaae",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -878,6 +878,149 @@
       }
     },
     {
+      "id": "7abc737cf80f02c-2cfd5e822a3757a",
+      "title": "Discover field data shows expected hit counts for KQL field data queries",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/field_data.spec.ts",
+        "line": 42,
+        "column": 12
+      }
+    },
+    {
+      "id": "7abc737cf80f02c-a8f44ec1d28f93c",
+      "title": "Discover field data highlights search terms in field data",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/field_data.spec.ts",
+        "line": 50,
+        "column": 12
+      }
+    },
+    {
+      "id": "7abc737cf80f02c-e0f78621f567cf2",
+      "title": "Discover field data shows a KQL syntax error callout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/field_data.spec.ts",
+        "line": 59,
+        "column": 12
+      }
+    },
+    {
+      "id": "7abc737cf80f02c-c5c5a049bc79180",
+      "title": "Discover field data shows top-level object keys and normalizes legacy source-column URLs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/field_data.spec.ts",
+        "line": 68,
+        "column": 12
+      }
+    },
+    {
+      "id": "7abc737cf80f02c-39a7bf9f4993ce7",
+      "title": "Discover field data keeps default columns while adding and removing a selected field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/field_data.spec.ts",
+        "line": 104,
+        "column": 12
+      }
+    },
+    {
+      "id": "81034d4f889f7cd-62fcf40a53e2aa3",
+      "title": "Discover filter editor should add a phrases filter",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/filter_editor.spec.ts",
+        "line": 74,
+        "column": 12
+      }
+    },
+    {
+      "id": "81034d4f889f7cd-916ef4064612fbb",
+      "title": "Discover filter editor should show the phrases if you re-open a phrases filter",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/filter_editor.spec.ts",
+        "line": 88,
+        "column": 12
+      }
+    },
+    {
+      "id": "81034d4f889f7cd-cdd572780fe3f78",
+      "title": "Discover filter editor should support filtering on nested fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/filter_editor.spec.ts",
+        "line": 103,
+        "column": 12
+      }
+    },
+    {
+      "id": "81034d4f889f7cd-3fab466edceb071",
+      "title": "Discover filter editor should support app filters in histogram/total hits and data grid",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/filter_editor.spec.ts",
+        "line": 118,
+        "column": 12
+      }
+    },
+    {
+      "id": "81034d4f889f7cd-3d7d735f4628d32",
+      "title": "Discover filter editor should support pinned filters in histogram/total hits and data grid",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/filter_editor.spec.ts",
+        "line": 126,
+        "column": 12
+      }
+    },
+    {
+      "id": "81034d4f889f7cd-355219a2ab7aef3",
+      "title": "Discover filter editor should support range filter on version fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/filter_editor.spec.ts",
+        "line": 134,
+        "column": 12
+      }
+    },
+    {
       "id": "b415c9303d327cd-7ac4102f64101ea",
       "title": "Discover flyouts closes the doc viewer when opening ES|QL docs",
       "expectedStatus": "passed",
@@ -943,6 +1086,110 @@
       }
     },
     {
+      "id": "16d7eb9389ed15b-11a9ee664bb6bd9",
+      "title": "Discover inspector request stats shows zero hits for a request with no results",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/inspector_stats.spec.ts",
+        "line": 29,
+        "column": 12
+      }
+    },
+    {
+      "id": "16d7eb9389ed15b-ecb27d4b9fa6544",
+      "title": "Discover inspector request stats shows total hits for a request with results",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/inspector_stats.spec.ts",
+        "line": 41,
+        "column": 12
+      }
+    },
+    {
+      "id": "7fbf1c196f09ff2-2f83ef189a298ae",
+      "title": "Discover large strings renders large string field data",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/large_string.spec.ts",
+        "line": 45,
+        "column": 12
+      }
+    },
+    {
+      "id": "7fbf1c196f09ff2-4e060fddf03f6e9",
+      "title": "Discover large strings searches and highlights a term inside large string field data",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/large_string.spec.ts",
+        "line": 53,
+        "column": 12
+      }
+    },
+    {
+      "id": "e2f00e1851401c6-502dd4a8af59315",
+      "title": "Discover shared links should allow for copying the snapshot URL with state in query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/shared_links.spec.ts",
+        "line": 44,
+        "column": 12
+      }
+    },
+    {
+      "id": "e2f00e1851401c6-20a3d8e627abeca",
+      "title": "Discover shared links should load snapshot URL with empty sort param correctly",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/shared_links.spec.ts",
+        "line": 57,
+        "column": 12
+      }
+    },
+    {
+      "id": "e2f00e1851401c6-c2d80d059981da0",
+      "title": "Discover shared links should allow for copying the snapshot URL with state in session storage",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/shared_links.spec.ts",
+        "line": 73,
+        "column": 12
+      }
+    },
+    {
+      "id": "e2f00e1851401c6-087a8daa0898646",
+      "title": "Discover shared links sharing hashed url shouldn't crash the app",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/shared_links.spec.ts",
+        "line": 92,
+        "column": 12
+      }
+    },
+    {
       "id": "6eb90f184b14d3d-42bdbd699342333",
       "title": "Discover side nav link saves the last URL when in data view mode",
       "expectedStatus": "passed",
@@ -991,6 +1238,19 @@
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/sidenav_link.spec.ts",
         "line": 72,
+        "column": 12
+      }
+    },
+    {
+      "id": "6f5c03996c11e89-fbdaa99c7544650",
+      "title": "Discover source filters hides source-filtered fields from the field list",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/source_filters.spec.ts",
+        "line": 39,
         "column": 12
       }
     },
@@ -1510,7 +1770,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/tabs/controls.spec.ts",
-        "line": 157,
+        "line": 155,
         "column": 12
       }
     },
@@ -1523,7 +1783,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/tabs/controls.spec.ts",
-        "line": 185,
+        "line": 182,
         "column": 12
       }
     },
@@ -2344,6 +2604,175 @@
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/unmapped_fields.spec.ts",
         "line": 70,
         "column": 12
+      }
+    },
+    {
+      "id": "ef0516f500ea2ee-aaf15abc562feec",
+      "title": "Discover URL state should show a warning and fall back to the default data view when navigating to a URL with an invalid data view ID",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/url_state.spec.ts",
+        "line": 48,
+        "column": 12
+      }
+    },
+    {
+      "id": "ef0516f500ea2ee-f877a06040894ca",
+      "title": "Discover URL state should show a warning and fall back to the current data view if the URL is updated to an invalid data view ID",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/url_state.spec.ts",
+        "line": 69,
+        "column": 12
+      }
+    },
+    {
+      "id": "ef0516f500ea2ee-2bd7d9e6f1b1889",
+      "title": "Discover URL state should sync Lens global state to Discover sidebar link and carry over the state when navigating to Discover",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/url_state.spec.ts",
+        "line": 100,
+        "column": 12
+      }
+    },
+    {
+      "id": "ef0516f500ea2ee-c6e8a99ff0c01b9",
+      "title": "Discover URL state should merge custom global filters with saved search filters",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/url_state.spec.ts",
+        "line": 136,
+        "column": 12
+      }
+    },
+    {
+      "id": "35067bbcb21d5b1-28cdc8d1189eea3",
+      "title": "Discover feature controls — share and reporting discover:all gets a short share URL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/feature_controls/discover_share_and_reporting.spec.ts",
+        "line": 37,
+        "column": 14
+      }
+    },
+    {
+      "id": "35067bbcb21d5b1-00052ff5a8cd2fa",
+      "title": "Discover feature controls — share and reporting discover:all can generate a CSV report",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/feature_controls/discover_share_and_reporting.spec.ts",
+        "line": 47,
+        "column": 14
+      }
+    },
+    {
+      "id": "35067bbcb21d5b1-3f1dc73612eea1e",
+      "title": "Discover feature controls — share and reporting discover:read + url_create also gets a short share URL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/feature_controls/discover_share_and_reporting.spec.ts",
+        "line": 55,
+        "column": 14
+      }
+    },
+    {
+      "id": "35067bbcb21d5b1-658b64ad2978e8b",
+      "title": "Discover feature controls — share and reporting discover:read without url_create only gets a long share URL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/feature_controls/discover_share_and_reporting.spec.ts",
+        "line": 68,
+        "column": 14
+      }
+    },
+    {
+      "id": "35067bbcb21d5b1-c763afe8d7022e3",
+      "title": "Discover feature controls — share and reporting discover:read snapshot URL encodes the current query, sort and time range",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/feature_controls/discover_share_and_reporting.spec.ts",
+        "line": 82,
+        "column": 14
       }
     },
     {

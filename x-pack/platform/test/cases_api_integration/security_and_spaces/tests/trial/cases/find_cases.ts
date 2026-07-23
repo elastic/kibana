@@ -19,8 +19,6 @@ import {
   loginUsers,
 } from '../../../../common/lib/api';
 import { secOnlySpacesAll, superUser } from '../../../../common/lib/authentication/users';
-import { createUsersAndRoles, deleteUsersAndRoles } from '../../../../common/lib/authentication';
-import { securitySolutionOnlyAllSpacesRole } from '../../../../common/lib/authentication/roles';
 
 export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
@@ -32,14 +30,6 @@ export default ({ getService }: FtrProviderContext): void => {
     let suggestedSecUsers: UserProfile[];
     let superUserHeaders: { Cookie: string };
     let secOnlyHeaders: { Cookie: string };
-
-    before(async () => {
-      await createUsersAndRoles(
-        getService,
-        [secOnlySpacesAll],
-        [securitySolutionOnlyAllSpacesRole]
-      );
-    });
 
     beforeEach(async () => {
       cookies = await loginUsers({
@@ -68,14 +58,6 @@ export default ({ getService }: FtrProviderContext): void => {
 
     afterEach(async () => {
       await deleteAllCaseItems(es);
-    });
-
-    after(async () => {
-      await deleteUsersAndRoles(
-        getService,
-        [secOnlySpacesAll],
-        [securitySolutionOnlyAllSpacesRole]
-      );
     });
 
     it('filters by reporters using the profile uid and username', async () => {
