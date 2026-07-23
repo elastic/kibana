@@ -19,12 +19,7 @@ interface ModeDefinition {
 }
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { common, discover, unifiedFieldList, unifiedTabs } = getPageObjects([
-    'common',
-    'discover',
-    'unifiedFieldList',
-    'unifiedTabs',
-  ]);
+  const { common, discover, unifiedTabs } = getPageObjects(['common', 'discover', 'unifiedTabs']);
   const browser = getService('browser');
   const dataGrid = getService('dataGrid');
   const dataViews = getService('dataViews');
@@ -33,6 +28,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const timestampColorSelectTestSubj = 'exampleProfileStateTimestampColorSelect';
   const rowControlColorSelectTestSubj = 'exampleProfileStateRowControlColorSelect';
+  const boxColorSelectTestSubj = 'exampleProfileStateBoxColorSelect';
 
   const expectRowHeight = async (expectedValue: string, expectedCustomHeight?: number) => {
     await discover.waitUntilTabIsLoaded();
@@ -111,6 +107,64 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const changeRowControlColor = async (nextValue: string) => {
     await testSubjects.selectValue(rowControlColorSelectTestSubj, nextValue);
     await expectRowControlColor(nextValue);
+  };
+
+  const getBoxColor = async () => {
+    return await testSubjects.getAttribute(boxColorSelectTestSubj, 'value');
+  };
+
+  const expectBoxColor = async (expectedValue: string) => {
+    await retry.try(async () => {
+      expect(await getBoxColor()).to.be(expectedValue);
+    });
+  };
+
+  const changeBoxColor = async (nextValue: string) => {
+    await testSubjects.selectValue(boxColorSelectTestSubj, nextValue);
+    await expectBoxColor(nextValue);
+  };
+
+  const expectProfileStateControls = async ({
+    timestampColor,
+    rowControlColor,
+    boxColor,
+  }: {
+    timestampColor: string;
+    rowControlColor: string;
+    boxColor: string;
+  }) => {
+    await expectTimestampColor(timestampColor);
+    await expectRowControlColor(rowControlColor);
+    await expectBoxColor(boxColor);
+  };
+
+  const getProfileUrlState = async () => {
+    const hash = await browser.execute<[], string>('return window.location.hash');
+    const queryIndex = hash.indexOf('?');
+
+    if (queryIndex === -1) {
+      return undefined;
+    }
+
+    const profileUrlState = new URLSearchParams(hash.slice(queryIndex + 1)).get('_p');
+
+    return profileUrlState ? kbnRison.decode(profileUrlState) : undefined;
+  };
+
+  const expectProfileUrlBoxColor = async (expectedValue: string) => {
+    await retry.try(async () => {
+      expect(await getProfileUrlState()).to.eql({
+        exampleProfileState: {
+          boxColor: expectedValue,
+        },
+      });
+    });
+  };
+
+  const expectNoProfileUrlState = async () => {
+    await retry.try(async () => {
+      expect(await getProfileUrlState()).to.be(undefined);
+    });
   };
 
   const openProfileStateDocView = async () => {
@@ -222,53 +276,81 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await expectRowHeight('Custom', 2);
         });
 
-        it('updates profile state from the example doc viewer', async () => {
+        it('applies UI, persistent, and URL profile state through refresh, restore, duplicate, and tab switch', async () => {
           await mode.loadDefaultProfile();
-          await unifiedFieldList.clickFieldListItemAdd('@timestamp');
-          await discover.waitUntilTabIsLoaded();
           await openProfileStateDocView();
-          await expectTimestampColor('hollow');
-
-          await changeTimestampColor('danger');
-
-          await dataGrid.closeFlyout();
-          await openProfileStateDocView();
-          await expectTimestampColor('danger');
-        });
-
-        it('persists persistent profile state across refresh and recently closed tabs', async () => {
-          await mode.loadDefaultProfile();
-          await unifiedFieldList.clickFieldListItemAdd('@timestamp');
-          await discover.waitUntilTabIsLoaded();
-          await openProfileStateDocView();
-          await expectTimestampColor('hollow');
-          await expectRowControlColor('text');
+          await expectProfileStateControls({
+            timestampColor: 'hollow',
+            rowControlColor: 'text',
+            boxColor: 'transparent',
+          });
 
           await changeTimestampColor('danger');
           await changeRowControlColor('warning');
+          await changeBoxColor('danger');
           await waitForPersistentProfileStateInStorage('warning');
+          await expectProfileUrlBoxColor('danger');
 
-          await dataGrid.closeFlyout();
+          await browser.goBack();
+          await expectNoProfileUrlState();
+          await expectBoxColor('transparent');
+
+          await browser.goForward();
+          await expectProfileUrlBoxColor('danger');
+          await expectBoxColor('danger');
+
           await browser.refresh();
           await discover.waitUntilTabIsLoaded();
           await openProfileStateDocView();
-          await expectTimestampColor('hollow');
-          await expectRowControlColor('warning');
+          await expectProfileStateControls({
+            timestampColor: 'hollow',
+            rowControlColor: 'warning',
+            boxColor: 'danger',
+          });
+          await changeTimestampColor('accent');
 
-          await dataGrid.closeFlyout();
           await unifiedTabs.createNewTab();
           await discover.waitUntilTabIsLoaded();
           await unifiedTabs.closeTab(0);
-          await discover.waitUntilTabIsLoaded();
           await waitForRecentlyClosedProfileStateInStorage('warning');
 
           await browser.refresh();
           await discover.waitUntilTabIsLoaded();
+          await waitForRecentlyClosedProfileStateInStorage('warning');
+
           await unifiedTabs.restoreRecentlyClosedTab(0);
           await discover.waitUntilTabIsLoaded();
           await openProfileStateDocView();
-          await expectTimestampColor('hollow');
-          await expectRowControlColor('warning');
+          await expectProfileStateControls({
+            timestampColor: 'hollow',
+            rowControlColor: 'warning',
+            boxColor: 'danger',
+          });
+          await changeTimestampColor('accent');
+
+          await unifiedTabs.duplicateTab(1);
+          await discover.waitUntilTabIsLoaded();
+          await openProfileStateDocView();
+          await expectProfileStateControls({
+            timestampColor: 'accent',
+            rowControlColor: 'warning',
+            boxColor: 'danger',
+          });
+
+          await changeTimestampColor('success');
+          await changeRowControlColor('primary');
+          await changeBoxColor('success');
+          await waitForPersistentProfileStateInStorage('primary');
+          await expectProfileUrlBoxColor('success');
+
+          await unifiedTabs.selectTab(1);
+          await discover.waitUntilTabIsLoaded();
+          await expectProfileStateControls({
+            timestampColor: 'accent',
+            rowControlColor: 'warning',
+            boxColor: 'danger',
+          });
+          await expectProfileUrlBoxColor('danger');
         });
       });
     }

@@ -20,6 +20,14 @@ const SYNTHETICS_API_URLS = {
 
 const PUBLIC_API_HEADERS = { 'elastic-api-version': '2023-10-31' };
 
+// Ping streams written by `addSummaryDocument`. Excludes `synthetics-browser*`, which
+// holds es_archiver data other specs depend on and won't be reloaded within a run.
+const SYNTHETICS_TEST_PING_INDICES = [
+  'synthetics-http-default',
+  'synthetics-tcp-default',
+  'synthetics-icmp-default',
+];
+
 interface PrivateLocation {
   id: string;
   label: string;
@@ -52,6 +60,7 @@ export interface SyntheticsServicesFixture {
   }) => Promise<void>;
   cleanUp: () => Promise<void>;
   cleanUpAlerts: () => Promise<void>;
+  deletePings: () => Promise<void>;
   deleteCustomRules: () => Promise<void>;
   deleteConnectors: () => Promise<void>;
   deleteMonitorByQuery: (query: string) => Promise<void>;
@@ -311,6 +320,18 @@ function createSyntheticsServices(
       types: ['synthetics-monitor', 'synthetics-monitor-multi-space', 'alert'],
     });
     await cleanUpAlerts();
+    await deletePings();
+  };
+
+  // Orphaned summary docs (no saved object) otherwise surface as read-only Heartbeat monitors.
+  const deletePings = async () => {
+    await esClient.deleteByQuery({
+      index: SYNTHETICS_TEST_PING_INDICES.map((index) => `${index}*`).join(','),
+      query: { match_all: {} },
+      conflicts: 'proceed',
+      refresh: true,
+      ignore_unavailable: true,
+    });
   };
 
   const cleanUpAlerts = async () => {
@@ -381,6 +402,7 @@ function createSyntheticsServices(
     await kbnClient.savedObjects.clean({
       types: ['synthetics-monitor', 'synthetics-monitor-multi-space'],
     });
+    await deletePings();
   };
 
   const deleteParams = async () => {
@@ -590,6 +612,7 @@ function createSyntheticsServices(
     addSummaryDocument,
     cleanUp,
     cleanUpAlerts,
+    deletePings,
     deleteCustomRules,
     deleteConnectors,
     deleteMonitorByQuery,

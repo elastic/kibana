@@ -23,9 +23,9 @@ describe('CreateAlertEventsStep', () => {
     step = new CreateAlertEventsStep(loggerService);
   });
 
-  it('builds alert events correctly', async () => {
+  it('builds alert-typed events for kind: alert rule', async () => {
     const input = createRuleExecutionInput();
-    const rule = createRuleResponse();
+    const rule = createRuleResponse({ kind: 'alert' });
     const esqlRowBatch = [{ 'host.name': 'host-a' }, { 'host.name': 'host-b' }];
 
     const state = createRulePipelineState({ input, rule, esqlRowBatch });
@@ -42,7 +42,7 @@ describe('CreateAlertEventsStep', () => {
       data: { 'host.name': 'host-a' },
       status: 'breached',
       source: 'internal',
-      type: 'signal',
+      type: 'alert',
       space_id: 'default',
     });
 
@@ -54,8 +54,24 @@ describe('CreateAlertEventsStep', () => {
       data: { 'host.name': 'host-b' },
       status: 'breached',
       source: 'internal',
-      type: 'signal',
+      type: 'alert',
       space_id: 'default',
+    });
+  });
+
+  it('builds signal-typed events for a stateless kind: signal rule', async () => {
+    const input = createRuleExecutionInput();
+    const rule = createRuleResponse({ kind: 'signal' });
+    const esqlRowBatch = [{ 'host.name': 'host-a' }];
+
+    const state = createRulePipelineState({ input, rule, esqlRowBatch });
+    const [result] = await collectStreamResults(step.executeStream(createPipelineStream([state])));
+
+    expect(result.type).toBe('continue');
+    expect(result.state.alertEventsBatch).toHaveLength(1);
+    expect(result.state.alertEventsBatch?.[0]).toMatchObject({
+      type: 'signal',
+      status: 'breached',
     });
   });
 

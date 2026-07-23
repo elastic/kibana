@@ -150,14 +150,20 @@ export const useParseYaml = () => {
               templateId: result.data.templateId,
               name: result.data.template_name ?? result.data.templateName ?? result.data.name ?? '',
               owner: result.data.owner,
+              // Template identity description/tags come from the `template_*` keys. When those keys
+              // are present the top-level `description`/`tags` are CASE defaults (see caseDefaults
+              // above) and must NOT bleed into the template identity — otherwise a template whose
+              // only tags are case-default tags (e.g. a migrated/exported template with no template
+              // tags) would incorrectly copy them onto the template. The top-level fallback applies
+              // only to the legacy flat shape, where those keys are the template identity itself.
               description:
                 result.data.template_description ??
                 result.data.templateDescription ??
-                result.data.description,
+                (hasTemplateMetadataKeys ? undefined : result.data.description),
               tags:
                 result.data.template_tags ??
                 result.data.templateTags ??
-                result.data.tags ??
+                (hasTemplateMetadataKeys ? undefined : result.data.tags) ??
                 undefined,
               caseDefaults,
               severity: caseDefaults.severity,

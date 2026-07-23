@@ -390,9 +390,9 @@ export const getAgentDataHandler: RequestHandler<
       pkgName,
       pkgVersion,
     });
-    dataStreamPattern = (packageInfo.data_streams || [])
-      .map((ds) => generateTemplateIndexPattern(ds))
-      .join(',');
+    dataStreamPattern =
+      (packageInfo.data_streams || []).map((ds) => generateTemplateIndexPattern(ds)).join(',') ||
+      undefined;
   }
 
   const { items, dataPreview } = await AgentService.getIncomingDataByAgentsId({
