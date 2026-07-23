@@ -499,7 +499,8 @@ export class WorkflowCrudService {
   async createWorkflow(
     workflow: CreateWorkflowCommand,
     spaceId: string,
-    request: KibanaRequest
+    request: KibanaRequest,
+    options?: { originManagedWorkflowId?: string }
   ): Promise<WorkflowDetailDto> {
     if (workflow.id) {
       validateWorkflowId(workflow.id);
@@ -526,6 +527,7 @@ export class WorkflowCrudService {
       now,
       spaceId,
       triggerDefinitions,
+      originManagedWorkflowId: options?.originManagedWorkflowId,
     });
 
     let id = baseId;
