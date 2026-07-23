@@ -10,6 +10,13 @@
 import { z } from '@kbn/zod/v4';
 import { difference, isArray, isPlainObject } from 'lodash';
 
+type DeepStrictSchema<TSchema extends z.ZodType> = z.ZodType<z.output<TSchema>, unknown>;
+type DeepStrictInputSchema<TSchema extends z.ZodType> = z.ZodType<z.input<TSchema>, unknown>;
+type DeepStrictOutputSchema<TSchema extends z.ZodType> = z.ZodType<
+  z.output<TSchema>,
+  z.input<TSchema>
+>;
+
 function getFlattenedKeys(obj: unknown, parentKey = '', keys: Set<string> = new Set()) {
   if (isPlainObject(obj)) {
     Object.entries(obj as Record<string, any>).forEach(([key, value]) => {
@@ -36,7 +43,7 @@ function getFlattenedKeys(obj: unknown, parentKey = '', keys: Set<string> = new 
  * The actual parsing is done by piping through the original schema, so all
  * schema-level errors are preserved.
  */
-export function DeepStrict<TSchema extends z.ZodType>(schema: TSchema) {
+export function DeepStrict<TSchema extends z.ZodType>(schema: TSchema): DeepStrictSchema<TSchema> {
   const checkedInputSchema = z.unknown().check((ctx) => {
     // Trial-parse to compare input vs output keys
     const result = schema.safeParse(ctx.value);
@@ -60,10 +67,10 @@ export function DeepStrict<TSchema extends z.ZodType>(schema: TSchema) {
         message: `Excess keys are not allowed`,
       });
     }
-  }) as z.ZodType<z.input<TSchema>>;
-  const outputSchema = schema as z.ZodType<z.output<TSchema>, z.input<TSchema>>;
+  }) as DeepStrictInputSchema<TSchema>;
+  const outputSchema = schema as DeepStrictOutputSchema<TSchema>;
 
-  return z.pipe<typeof checkedInputSchema, typeof outputSchema>(
+  return z.pipe<DeepStrictInputSchema<TSchema>, DeepStrictOutputSchema<TSchema>>(
     checkedInputSchema,
     outputSchema
   );

@@ -12,6 +12,7 @@ import type {
   SortCombinations,
 } from '@elastic/elasticsearch/lib/api/types';
 import { withSpan } from '@kbn/apm-utils';
+import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { type DataStreamDefinition, DataStreamClient } from '@kbn/data-streams';
 import type { ClientCreateRequest } from '@kbn/data-streams/src/types/es_api';
@@ -34,6 +35,13 @@ import type {
 import { sha256, sanitizeFields } from './utils';
 
 export { DATA_STREAM_NAME } from './constants';
+
+const CHANGE_HISTORY_ES_OPTIONS = {
+  headers: {
+    [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
+    'x-elastic-product-origin': 'kibana',
+  },
+};
 
 type ChangeHistoryDataStreamClient = DataStreamClient<
   typeof changeHistoryMappings.v1,
@@ -122,11 +130,15 @@ export class ChangeHistoryClient implements IChangeHistoryClient {
     // Enroll the data stream in DSL lifecycle with infinite retention by default.
     // Cluster admins can add retention later via Index Management (stateful and serverless).
     try {
-      this.client = await DataStreamClient.initialize({
+      const systemElasticsearchClient = elasticsearchClient.child(CHANGE_HISTORY_ES_OPTIONS);
+      await DataStreamClient.initializeTemplate({
         dataStream: definition,
-        elasticsearchClient,
+        elasticsearchClient: systemElasticsearchClient,
         logger: this.logger,
-        lazyCreation: false,
+      });
+      this.client = DataStreamClient.fromDefinition({
+        dataStream: definition,
+        elasticsearchClient: systemElasticsearchClient,
       });
     } catch (error) {
       const err = new Error(
@@ -305,6 +317,7 @@ export class ChangeHistoryClient implements IChangeHistoryClient {
       () =>
         client.search({
           space: spaceId,
+          ignore_unavailable: true,
           query: { bool: { filter } },
           sort: opts?.sort ?? defaultSort,
           size: opts?.size ?? DEFAULT_RESULT_SIZE,

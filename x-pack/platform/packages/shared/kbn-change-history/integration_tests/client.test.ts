@@ -7,6 +7,7 @@
 
 import type { Client } from '@elastic/elasticsearch';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import { ToolingLog } from '@kbn/tooling-log';
 import type { EsTestCluster } from '@kbn/test';
 import { createTestEsCluster } from '@kbn/test';
@@ -19,7 +20,12 @@ import { sha256, REDACTED } from '../src/utils';
 const KIBANA_SPACE = 'default';
 const TEST_MODULE = 'test-module';
 const TEST_DATASET = 'test-dataset';
-const ES_CLIENT_OPTIONS = { headers: { 'x-elastic-product-origin': 'kibana' } };
+const ES_CLIENT_OPTIONS = {
+  headers: {
+    [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
+    'x-elastic-product-origin': 'kibana',
+  },
+};
 
 const defaultLogOpts = {
   action: 'rule_create',
@@ -81,7 +87,7 @@ describe('ChangeHistoryClient', () => {
       }
     };
 
-    it('should initialize the data stream', async () => {
+    it('should initialize change history storage', async () => {
       const client = new ChangeHistoryClient(defaultCostructorOpts);
       expect(client.isInitialized()).toBe(false);
 
@@ -90,7 +96,9 @@ describe('ChangeHistoryClient', () => {
       await client.initialize(esClient);
       expect(client.isInitialized()).toBe(true);
 
-      expect(await getEsDataStreams(DATA_STREAM_NAME)).toEqual([DATA_STREAM_NAME]);
+      const template = await esClient.indices.getIndexTemplate({ name: DATA_STREAM_NAME });
+      expect(template.index_templates).toHaveLength(1);
+      expect(await getEsDataStreams(DATA_STREAM_NAME)).toHaveLength(0);
 
       const result = await client.getHistory(KIBANA_SPACE, 'rule', 'any-id');
       expect(result.total).toBe(0);

@@ -7,6 +7,7 @@
 
 import expect from 'expect';
 import { v4 as uuidv4 } from 'uuid';
+import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import { ModeEnum } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
 import { deleteAllRules } from '@kbn/detections-response-ftr-services';
@@ -24,7 +25,10 @@ import { createUserAndRole, deleteUserAndRole } from '../../../../../config/serv
 
 const CHANGE_HISTORY_DATA_STREAM = '.kibana_change_history';
 const CHANGE_HISTORY_ES_OPTIONS = {
-  headers: { 'x-elastic-product-origin': 'kibana' },
+  headers: {
+    [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
+    'x-elastic-product-origin': 'kibana',
+  },
 };
 
 export default ({ getService }: FtrProviderContext): void => {
