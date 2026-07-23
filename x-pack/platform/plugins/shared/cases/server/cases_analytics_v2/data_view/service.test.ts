@@ -854,9 +854,9 @@ describe('CasesAnalyticsV2DataViewService', () => {
      * Stack Management (not via `/reset`, which clears the cache),
      * the in-memory cache still claims "bootstrapped" and
      * `ensureForSpace` short-circuits forever. The TTL re-check
-     * self-heals at the next request after `BOOTSTRAP_CACHE_TTL_MS`
-     * elapses; faster recovery requires hitting `/reset`, which
-     * calls `clearBootstrapCache` directly.
+     * self-heals at the next request once `BOOTSTRAP_CACHE_TTL_MS`
+     * (one minute) elapses; faster recovery requires hitting `/reset`,
+     * which calls `clearBootstrapCache` directly.
      */
     it('re-runs the ensure path after the TTL elapses, recreating a missing data view', async () => {
       // Bespoke wiring: the test owns the wall clock via a `now()`
@@ -900,7 +900,7 @@ describe('CasesAnalyticsV2DataViewService', () => {
       // Within TTL: cache short-circuits, no extra get/create.
       dvService.get.mockClear();
       dvService.createSavedObject.mockClear();
-      nowMs += 60_000; // +1 minute
+      nowMs += 30_000; // +30s (inside the 1-minute TTL)
       await service.ensureForSpace(deps);
       expect(dvService.get).not.toHaveBeenCalled();
       expect(dvService.createSavedObject).not.toHaveBeenCalled();
@@ -909,7 +909,7 @@ describe('CasesAnalyticsV2DataViewService', () => {
       // re-runs and recreates. The post-TTL re-check logs at DEBUG
       // so support cases ("user reports no data view") can confirm
       // the next request re-checked instead of trusting a stale cache.
-      nowMs += 6 * 60_000; // +6 more minutes (well past 5-minute TTL)
+      nowMs += 2 * 60_000; // +2 more minutes (well past the 1-minute TTL)
       stubMissingDataView(dvService);
       childLogger?.debug.mockClear?.();
       await service.ensureForSpace(deps);

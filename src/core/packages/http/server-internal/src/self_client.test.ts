@@ -12,6 +12,7 @@ import type { IAuthHeadersStorage, KibanaRequest } from '@kbn/core-http-server';
 import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { mockRouter } from '@kbn/core-http-router-server-mocks';
+import { AuthHeadersStorage } from './auth_headers_storage';
 import type { HttpConfig } from './http_config';
 import {
   createInternalHttpSelfClient,
@@ -44,6 +45,7 @@ const createFakeRequest = (headers: Record<string, string> = {}): KibanaRequest 
 const createClient = ({
   publicBaseUrl = 'https://kibana.example.com/base',
   authHeaders = { authorization: 'test-auth-token' },
+  authRequestHeaders: suppliedAuthRequestHeaders,
   target = 'auto',
   getHttpConfig = jest.fn().mockReturnValue({
     ssl: { enabled: false, requestCert: false },
@@ -53,14 +55,17 @@ const createClient = ({
 }: {
   publicBaseUrl?: string | null;
   authHeaders?: Record<string, string>;
+  authRequestHeaders?: IAuthHeadersStorage;
   target?: 'auto' | 'local';
   getHttpConfig?: jest.MockedFunction<() => HttpConfig>;
   serverProtocol?: 'http' | 'https';
 } = {}) => {
-  const authRequestHeaders = {
-    get: jest.fn().mockReturnValue(authHeaders),
-    set: jest.fn(),
-  } as jest.Mocked<IAuthHeadersStorage>;
+  const authRequestHeaders =
+    suppliedAuthRequestHeaders ??
+    ({
+      get: jest.fn().mockReturnValue(authHeaders),
+      set: jest.fn(),
+    } as jest.Mocked<IAuthHeadersStorage>);
   const log = loggingSystemMock.createLogger();
 
   const self = createInternalHttpSelfClient({
@@ -312,6 +317,48 @@ describe('InternalHttpSelfScopedClient', () => {
     expect(result.request).toBeInstanceOf(Request);
   });
 
+  it('uses the authorization header from a fake request instead of auth header storage', async () => {
+    const authRequestHeaders = new AuthHeadersStorage();
+    const request = createFakeRequest({
+      authorization: 'ApiKey fake-request-api-key',
+      cookie: 'sid=must-not-forward',
+      'x-elastic-internal-origin': 'must-not-forward',
+    });
+    authRequestHeaders.set(request, { authorization: 'Bearer auth-storage-token' });
+    const { self } = createClient({ authRequestHeaders });
+
+    await self.asScoped(request).fetch('/api/status');
+
+    const outboundRequest = (global.fetch as jest.Mock).mock.calls[0][0] as Request;
+    expect(outboundRequest.headers.get('authorization')).toBe('ApiKey fake-request-api-key');
+    expect(outboundRequest.headers.get('cookie')).toBeNull();
+    expect(outboundRequest.headers.get('x-elastic-internal-origin')).toBeNull();
+  });
+
+  it('does not add authorization for a fake request without it', async () => {
+    const authRequestHeaders = new AuthHeadersStorage();
+    const request = createFakeRequest({});
+    authRequestHeaders.set(request, { authorization: 'Bearer auth-storage-token' });
+    const { self } = createClient({ authRequestHeaders });
+
+    await self.asScoped(request).fetch('/api/status', { forwardRequestHeaders: true });
+
+    const outboundRequest = (global.fetch as jest.Mock).mock.calls[0][0] as Request;
+    expect(outboundRequest.headers.has('authorization')).toBe(false);
+  });
+
+  it('preserves UIAM authorization from a fake request unchanged', async () => {
+    const authRequestHeaders = new AuthHeadersStorage();
+    const request = createFakeRequest({ authorization: 'ApiKey essu_credential_123' });
+    authRequestHeaders.set(request, { authorization: 'Bearer auth-storage-token' });
+    const { self } = createClient({ authRequestHeaders });
+
+    await self.asScoped(request).fetch('/api/status');
+
+    const outboundRequest = (global.fetch as jest.Mock).mock.calls[0][0] as Request;
+    expect(outboundRequest.headers.get('authorization')).toBe('ApiKey essu_credential_123');
+  });
+
   it('forwards safe request headers without forwarding cookies', async () => {
     const { self } = createClient({
       authHeaders: { authorization: 'test-auth-token', cookie: 'sid=normalized' },
@@ -338,7 +385,7 @@ describe('InternalHttpSelfScopedClient', () => {
     expect(outboundRequest.headers.get('sec-fetch-site')).toBeNull();
     expect(outboundRequest.headers.get('x-elastic-product-origin')).toBe('observability');
     expect(outboundRequest.headers.get('x-kbn-context')).toBe('%7B%7D');
-    expect(outboundRequest.headers.get('authorization')).toBe('test-auth-token');
+    expect(outboundRequest.headers.get('authorization')).toBe('test-token-placeholder');
     expect(outboundRequest.headers.get('cookie')).toBeNull();
     expect(outboundRequest.headers.get('host')).toBeNull();
     expect(outboundRequest.headers.get('x-elastic-internal-origin')).toBeNull();
