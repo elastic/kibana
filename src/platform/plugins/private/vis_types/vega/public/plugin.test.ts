@@ -7,14 +7,27 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { BehaviorSubject } from 'rxjs';
+import {
+  ADD_CANVAS_ELEMENT_TRIGGER,
+  ADD_PANEL_TRIGGER,
+} from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
 import { inspectorPluginMock } from '@kbn/inspector-plugin/public/mocks';
 import { visualizationsPluginMock } from '@kbn/visualizations-plugin/public/mocks';
-import { VEGA_EMBEDDABLE_TYPE } from '../common/constants';
-import { VegaPlugin } from './plugin';
+import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import type { MapsEmsPluginPublicStart } from '@kbn/maps-ems-plugin/public';
+import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import {
+  ADD_VEGA_EMBEDDABLE_ACTION_ID,
+  ADD_VEGA_PANEL_ACTION_ID,
+  VEGA_EMBEDDABLE_TYPE,
+} from '../common/constants';
+import { VegaPlugin, type VegaPluginStartDependencies } from './plugin';
 
 const mockCreateVegaFn = jest.fn();
 const mockGetVegaVisRenderer = jest.fn();
@@ -77,4 +90,127 @@ describe('VegaPlugin', () => {
       expect(expressions.registerRenderer).toHaveBeenCalledTimes(1);
     }
   );
+
+  describe('Dashboard add action feature flag', () => {
+    const startPlugin = (flag$: BehaviorSubject<boolean>) => {
+      const core = coreMock.createStart();
+      core.featureFlags.getBooleanValue$ = jest.fn().mockReturnValue(flag$);
+
+      const uiActions = uiActionsPluginMock.createStartContract();
+      const deps: VegaPluginStartDependencies = {
+        data: dataPluginMock.createStartContract(),
+        dataViews: dataViewPluginMocks.createStartContract(),
+        embeddable: embeddablePluginMock.createStartContract(),
+        expressions: expressionsPluginMock.createStartContract(),
+        inspector: inspectorPluginMock.createStartContract(),
+        uiActions,
+        // No public start mocks exist for these; the plugin only stores them at start.
+        mapsEms: {} as MapsEmsPluginPublicStart,
+        usageCollection: {} as UsageCollectionStart,
+      };
+
+      const plugin = new VegaPlugin(
+        coreMock.createPluginInitializerContext({ enableExternalUrls: false })
+      );
+      plugin.start(core, deps);
+      return { plugin, uiActions };
+    };
+
+    const countCalls = (calls: Array<[string, string]>, trigger: string, actionId: string) =>
+      calls.filter(([t, a]) => t === trigger && a === actionId).length;
+
+    it('attaches the legacy Visualize-navigation action to the Add-panel menu when the flag is disabled', () => {
+      const { uiActions } = startPlugin(new BehaviorSubject(false));
+      // Legacy action swapped onto the Dashboard Add-panel menu; the new by-value action is not.
+      expect(uiActions.attachAction).toHaveBeenCalledWith(
+        ADD_PANEL_TRIGGER,
+        ADD_VEGA_PANEL_ACTION_ID
+      );
+      expect(
+        countCalls(
+          uiActions.attachAction.mock.calls,
+          ADD_PANEL_TRIGGER,
+          ADD_VEGA_EMBEDDABLE_ACTION_ID
+        )
+      ).toBe(0);
+      // Canvas always keeps the legacy action.
+      expect(uiActions.attachAction).toHaveBeenCalledWith(
+        ADD_CANVAS_ELEMENT_TRIGGER,
+        ADD_VEGA_PANEL_ACTION_ID
+      );
+    });
+
+    it('swaps in the new by-value action and detaches the legacy action when the flag is enabled', () => {
+      const { uiActions } = startPlugin(new BehaviorSubject(true));
+      expect(uiActions.attachAction).toHaveBeenCalledWith(
+        ADD_PANEL_TRIGGER,
+        ADD_VEGA_EMBEDDABLE_ACTION_ID
+      );
+      expect(uiActions.detachAction).toHaveBeenCalledWith(
+        ADD_PANEL_TRIGGER,
+        ADD_VEGA_PANEL_ACTION_ID
+      );
+    });
+
+    it('swaps the Add-panel action as the flag changes at runtime, then stops on plugin stop', () => {
+      const flag$ = new BehaviorSubject(false);
+      const { plugin, uiActions } = startPlugin(flag$);
+
+      // disabled → legacy attached, new detached
+      expect(
+        countCalls(uiActions.attachAction.mock.calls, ADD_PANEL_TRIGGER, ADD_VEGA_PANEL_ACTION_ID)
+      ).toBe(1);
+      expect(
+        countCalls(
+          uiActions.attachAction.mock.calls,
+          ADD_PANEL_TRIGGER,
+          ADD_VEGA_EMBEDDABLE_ACTION_ID
+        )
+      ).toBe(0);
+
+      flag$.next(true); // enabled → new attached, legacy detached
+      expect(
+        countCalls(
+          uiActions.attachAction.mock.calls,
+          ADD_PANEL_TRIGGER,
+          ADD_VEGA_EMBEDDABLE_ACTION_ID
+        )
+      ).toBe(1);
+      expect(
+        countCalls(uiActions.detachAction.mock.calls, ADD_PANEL_TRIGGER, ADD_VEGA_PANEL_ACTION_ID)
+      ).toBe(1);
+
+      flag$.next(true); // distinctUntilChanged collapses the repeat
+      expect(
+        countCalls(
+          uiActions.attachAction.mock.calls,
+          ADD_PANEL_TRIGGER,
+          ADD_VEGA_EMBEDDABLE_ACTION_ID
+        )
+      ).toBe(1);
+
+      flag$.next(false); // back to legacy
+      expect(
+        countCalls(uiActions.attachAction.mock.calls, ADD_PANEL_TRIGGER, ADD_VEGA_PANEL_ACTION_ID)
+      ).toBe(2);
+      // new action detached on each disabled emission (initial + this one)
+      expect(
+        countCalls(
+          uiActions.detachAction.mock.calls,
+          ADD_PANEL_TRIGGER,
+          ADD_VEGA_EMBEDDABLE_ACTION_ID
+        )
+      ).toBe(2);
+
+      plugin.stop();
+      flag$.next(true); // after stop, subscription is closed — no further swaps
+      expect(
+        countCalls(
+          uiActions.attachAction.mock.calls,
+          ADD_PANEL_TRIGGER,
+          ADD_VEGA_EMBEDDABLE_ACTION_ID
+        )
+      ).toBe(1);
+    });
+  });
 });

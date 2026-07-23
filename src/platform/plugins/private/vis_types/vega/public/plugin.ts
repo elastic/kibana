@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { distinctUntilChanged, type Subscription } from 'rxjs';
 import type { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { Plugin as ExpressionsPublicPlugin } from '@kbn/expressions-plugin/public';
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -43,7 +44,12 @@ import type { ConfigSchema } from '../server/config';
 
 import { getVegaInspectorView } from './vega_inspector';
 import { getServiceSettingsLazy } from './vega_view/vega_map_view/service_settings/get_service_settings_lazy';
-import { VEGA_EMBEDDABLE_TYPE } from '../common/constants';
+import {
+  ADD_VEGA_EMBEDDABLE_ACTION_ID,
+  ADD_VEGA_PANEL_ACTION_ID,
+  VEGA_DASHBOARD_EMBEDDABLE_FLAG,
+  VEGA_EMBEDDABLE_TYPE,
+} from '../common/constants';
 
 /** @internal */
 export interface VegaVisualizationDependencies {
@@ -78,6 +84,7 @@ export interface VegaPluginStartDependencies {
 /** @internal */
 export class VegaPlugin implements Plugin<void, void> {
   initializerContext: PluginInitializerContext<ConfigSchema>;
+  private dashboardEmbeddableFlagSubscription?: Subscription;
 
   constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
     this.initializerContext = initializerContext;
@@ -144,18 +151,43 @@ export class VegaPlugin implements Plugin<void, void> {
     setThemeService(core.theme);
     setUsageCollectionStart(deps.usageCollection);
 
-    deps.uiActions.registerActionAsync('addVegaPanelAction', async () => {
+    deps.uiActions.registerActionAsync(ADD_VEGA_PANEL_ACTION_ID, async () => {
       const { getAddVegaPanelAction } = await import('./add_vega_panel_action');
       return getAddVegaPanelAction(deps);
     });
-    deps.uiActions.attachAction(ADD_CANVAS_ELEMENT_TRIGGER, 'addVegaPanelAction');
+    // Canvas keeps the legacy Visualize-navigation action regardless of the flag.
+    deps.uiActions.attachAction(ADD_CANVAS_ELEMENT_TRIGGER, ADD_VEGA_PANEL_ACTION_ID);
 
-    deps.uiActions.registerActionAsync('addVegaEmbeddableAction', async () => {
+    // The embeddable definition is always registered (see setup) so existing Vega panels keep
+    // rendering even after a flag rollback.
+    deps.uiActions.registerActionAsync(ADD_VEGA_EMBEDDABLE_ACTION_ID, async () => {
       const { getAddVegaEmbeddableAction } = await import(
         './embeddable/add_vega_embeddable_action'
       );
       return getAddVegaEmbeddableAction();
     });
-    deps.uiActions.attachAction(ADD_PANEL_TRIGGER, 'addVegaEmbeddableAction');
+
+    // The flag swaps which Vega action is on the Dashboard Add-panel menu: the new by-value flyout
+    // action when enabled, the legacy Visualize-navigation action when disabled (pre-embeddable
+    // behavior). Attach the wanted action before detaching the other so ADD_PANEL_TRIGGER always
+    // has an action list, otherwise detachAction dereferences an undefined list. attachAction is
+    // idempotent and detaching a not-attached action is a no-op, so no attach-state tracking is needed.
+    this.dashboardEmbeddableFlagSubscription = core.featureFlags
+      .getBooleanValue$(VEGA_DASHBOARD_EMBEDDABLE_FLAG, false)
+      .pipe(distinctUntilChanged())
+      .subscribe((enabled) => {
+        if (enabled) {
+          deps.uiActions.attachAction(ADD_PANEL_TRIGGER, ADD_VEGA_EMBEDDABLE_ACTION_ID);
+          deps.uiActions.detachAction(ADD_PANEL_TRIGGER, ADD_VEGA_PANEL_ACTION_ID);
+        } else {
+          deps.uiActions.attachAction(ADD_PANEL_TRIGGER, ADD_VEGA_PANEL_ACTION_ID);
+          deps.uiActions.detachAction(ADD_PANEL_TRIGGER, ADD_VEGA_EMBEDDABLE_ACTION_ID);
+        }
+      });
+  }
+
+  public stop() {
+    this.dashboardEmbeddableFlagSubscription?.unsubscribe();
+    this.dashboardEmbeddableFlagSubscription = undefined;
   }
 }

@@ -13,3 +13,11 @@ import { ON_APPLY_FILTER, ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/comm
 export const VEGA_EMBEDDABLE_TYPE = 'vega';
 
 export const VEGA_EMBEDDABLE_SUPPORTED_TRIGGERS = [ON_APPLY_FILTER, ON_OPEN_PANEL_MENU];
+
+/** Browser feature flag gating the Dashboard "Add Vega panel" creation action. Off by default. */
+export const VEGA_DASHBOARD_EMBEDDABLE_FLAG = 'vega.dashboardEmbeddable';
+
+export const ADD_VEGA_EMBEDDABLE_ACTION_ID = 'addVegaEmbeddableAction';
+
+/** Legacy "Add Vega" action that navigates to the Visualize editor (Canvas + flag-off Dashboard). */
+export const ADD_VEGA_PANEL_ACTION_ID = 'addVegaPanelAction';

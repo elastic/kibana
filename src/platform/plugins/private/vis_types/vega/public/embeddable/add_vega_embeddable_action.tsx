@@ -11,13 +11,13 @@ import { ADD_PANEL_VISUALIZATION_GROUP } from '@kbn/embeddable-plugin/public';
 import { apiCanAddNewPanel, type EmbeddableApiContext } from '@kbn/presentation-publishing';
 import type { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-import { VEGA_EMBEDDABLE_TYPE } from '../../common/constants';
-import type { VegaByValueState } from '../../server';
+import { ADD_VEGA_EMBEDDABLE_ACTION_ID, VEGA_EMBEDDABLE_TYPE } from '../../common/constants';
 import { getDefaultSpec } from '../default_spec';
+import type { VegaByValueState } from './types';
 import type { VegaEmbeddableApi } from './vega_embeddable';
 
 export const getAddVegaEmbeddableAction = (): ActionDefinition<EmbeddableApiContext> => ({
-  id: 'addVegaEmbeddableAction',
+  id: ADD_VEGA_EMBEDDABLE_ACTION_ID,
   grouping: [ADD_PANEL_VISUALIZATION_GROUP],
   getIconType: () => 'visVega',
   getDisplayName: () => 'Vega',

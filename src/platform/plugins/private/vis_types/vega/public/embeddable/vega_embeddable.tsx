@@ -37,8 +37,8 @@ import {
   useStateFromPublishingSubject,
 } from '@kbn/presentation-publishing';
 import { openLazyFlyout } from '@kbn/presentation-util';
-import type { VegaByValueState } from '../../server';
 import { VEGA_EMBEDDABLE_SUPPORTED_TRIGGERS, VEGA_EMBEDDABLE_TYPE } from '../../common/constants';
+import type { VegaByValueState } from './types';
 import type { VegaPluginStartDependencies } from '../plugin';
 import { toVegaEmbeddableExpressionAst } from '../to_ast';
 import { extractIndexPatternsFromSpec } from '../lib/extract_index_pattern';
