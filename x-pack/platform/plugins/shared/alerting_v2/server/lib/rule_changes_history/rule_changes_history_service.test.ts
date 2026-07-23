@@ -71,36 +71,18 @@ describe('RuleChangesHistoryService', () => {
       expect(optsWithoutCorrelation).not.toHaveProperty('correlationId');
     });
 
-    it('omits `data` entirely when neither metadata nor eventType is provided', async () => {
+    it('omits `data` entirely when eventType is not provided', async () => {
       await service.logRuleChanges(baseParams);
 
       const [, opts] = clientMock.logBulk.mock.calls[0];
       expect(opts).not.toHaveProperty('data');
     });
 
-    it('builds `data` with only `metadata` when eventType is absent', async () => {
-      await service.logRuleChanges({ ...baseParams, metadata: { source: 'ui' } });
-
-      const [, opts] = clientMock.logBulk.mock.calls[0];
-      expect(opts.data).toEqual({ metadata: { source: 'ui' } });
-    });
-
-    it('builds `data` with only `event.type` when metadata is absent', async () => {
+    it('builds `data` with `event.type` when eventType is provided', async () => {
       await service.logRuleChanges({ ...baseParams, eventType: 'creation' });
 
       const [, opts] = clientMock.logBulk.mock.calls[0];
       expect(opts.data).toEqual({ event: { type: 'creation' } });
-    });
-
-    it('combines metadata and eventType into a single `data` object when both are provided', async () => {
-      await service.logRuleChanges({
-        ...baseParams,
-        metadata: { source: 'ui' },
-        eventType: 'deletion',
-      });
-
-      const [, opts] = clientMock.logBulk.mock.calls[0];
-      expect(opts.data).toEqual({ event: { type: 'deletion' }, metadata: { source: 'ui' } });
     });
 
     it('maps each entry to an ObjectChange using the service objectType and a normalized ISO timestamp', async () => {

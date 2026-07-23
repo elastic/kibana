@@ -23,19 +23,13 @@ import { RuleChangesHistoryClientToken } from './tokens';
 import type { LogRuleChangesParams, RuleChangesHistoryScope } from './types';
 
 function buildLogChangeHistoryData({
-  metadata,
   eventType,
-}: Pick<LogRuleChangesParams, 'metadata' | 'eventType'>):
-  | LogChangeHistoryOptions['data']
-  | undefined {
-  if (!metadata && !eventType) {
+}: Pick<LogRuleChangesParams, 'eventType'>): LogChangeHistoryOptions['data'] | undefined {
+  if (!eventType) {
     return undefined;
   }
 
-  return {
-    ...(eventType ? { event: { type: eventType } } : {}),
-    ...(metadata ? { metadata } : {}),
-  } as LogChangeHistoryOptions['data'];
+  return { event: { type: eventType } } as LogChangeHistoryOptions['data'];
 }
 
 export interface RuleChangesHistoryServiceContract {
@@ -67,7 +61,6 @@ export class RuleChangesHistoryService implements RuleChangesHistoryServiceContr
     entries,
     action,
     timestamp = new Date(),
-    metadata,
     eventType,
     correlationId,
   }: LogRuleChangesParams): Promise<void> {
@@ -84,7 +77,7 @@ export class RuleChangesHistoryService implements RuleChangesHistoryServiceContr
     }));
 
     try {
-      const data = buildLogChangeHistoryData({ metadata, eventType });
+      const data = buildLogChangeHistoryData({ eventType });
 
       await this.client.logBulk(changes, {
         action,

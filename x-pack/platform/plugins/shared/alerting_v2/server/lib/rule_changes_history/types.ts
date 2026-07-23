@@ -40,7 +40,6 @@ export interface LogRuleChangesParams {
   entries: RuleChangesHistoryEntry[];
   action: string;
   timestamp?: string | number | Date;
-  metadata?: Record<string, string | number | boolean>;
   /** ECS `event.type`. Defaults to `change` when omitted. */
   eventType?: RuleChangesHistoryEventType;
   /** Shared id linking entries written by the same (bulk) operation. */
