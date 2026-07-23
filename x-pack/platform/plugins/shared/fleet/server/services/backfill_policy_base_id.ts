@@ -16,8 +16,9 @@ import {
 import { appContextService } from '.';
 
 // Painless: strip version suffix from policy_id and store as policy_base_id.
-// Skips documents that already have policy_base_id set (idempotent).
-// The separator character is passed via params.separator to avoid hard-coding it.
+// Mirrors removeVersionSuffixFromPolicyId: only strips when the segment after the last
+// separator looks like a version (digits.digits). Painless regex is off by default so
+// we use a plain digit walk instead. Skips docs that already have policy_base_id (idempotent).
 const BACKFILL_SCRIPT = `
   if (ctx._source.policy_id == null ||
       (ctx._source.containsKey('policy_base_id') && ctx._source.policy_base_id != null)) {
@@ -25,8 +26,20 @@ const BACKFILL_SCRIPT = `
     return;
   }
   String pid = ctx._source.policy_id;
-  int idx = pid.lastIndexOf(params.separator);
-  ctx._source.policy_base_id = idx >= 0 ? pid.substring(0, idx) : pid;
+  int sepIdx = pid.lastIndexOf(params.separator);
+  if (sepIdx >= 0) {
+    String suffix = pid.substring(sepIdx + 1);
+    int dotIdx = suffix.indexOf('.');
+    boolean isVersion = dotIdx > 0 && suffix.length() > dotIdx + 1;
+    if (isVersion) {
+      for (int i = 0; i < suffix.length(); i++) {
+        if (i != dotIdx && !Character.isDigit(suffix.charAt(i))) { isVersion = false; break; }
+      }
+    }
+    ctx._source.policy_base_id = isVersion ? pid.substring(0, sepIdx) : pid;
+  } else {
+    ctx._source.policy_base_id = pid;
+  }
 `.trim();
 
 async function runBackfill(esClient: ElasticsearchClient, index: string, label: string) {
