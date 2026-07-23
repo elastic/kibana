@@ -67,6 +67,7 @@ import {
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   DATA_STREAM_TYPE_VAR_NAME,
   OTEL_COLLECTOR_INPUT_TYPE,
+  FLEET_SYNTHETICS_PACKAGE,
 } from '../../common/constants';
 import type {
   PostDeletePackagePoliciesResponse,
@@ -4153,6 +4154,21 @@ export function updatePackageInputs(
     // take the override value from the new package as-is. This case typically
     // occurs when inputs or package policy templates are added/removed between versions.
     if (originalInput === undefined) {
+      // Synthetics package policies are fully managed by the Synthetics app, which persists only
+      // the single active input and intentionally drops the disabled ones to keep the saved object
+      // small. Synthetics is a `keep_policies_up_to_date` package, so a package bump auto-upgrades
+      // every private-location policy through here; without this guard each dropped input would be
+      // re-added (as disabled, since the package now defaults every input to disabled) and the
+      // policy would re-bloat. Nothing re-strips it afterwards — the periodic sync task skips
+      // monitors whose data hasn't changed — so the bloat would persist until each monitor is
+      // edited. Skip re-adding inputs the app omitted so upgrades keep the app's input list
+      // authoritative and the policies durably lean. (Historically re-adding here also resurrected
+      // an enabled `synthetics/browser`, the #229595 regression reverted in #236104; the package
+      // default fix means it now returns disabled, but the re-bloat alone is reason enough to skip.)
+      if (packageInfo.name === FLEET_SYNTHETICS_PACKAGE) {
+        continue;
+      }
+
       const originalInputToMigrate = applyInputLevelMigration(
         update,
         basePackagePolicy.inputs,
