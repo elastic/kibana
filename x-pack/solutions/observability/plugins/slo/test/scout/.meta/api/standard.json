@@ -1,5 +1,9 @@
 {
-  "sha1": "2833805fdb8f8d01384686a0705ec7379821fd55",
+  "sha1": "2570f0f02dccd85fd05f3652657e8fe558dbb024",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
   "tests": [
     {
       "id": "f68be9083a5aaaa-c0035bbeaed0391",
@@ -2569,7 +2573,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_grouped_stats.spec.ts",
-        "line": 33,
+        "line": 34,
         "column": 12
       }
     },
@@ -2585,7 +2589,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_grouped_stats.spec.ts",
-        "line": 43,
+        "line": 44,
         "column": 12
       }
     },
@@ -2601,7 +2605,23 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_grouped_stats.spec.ts",
-        "line": 85,
+        "line": 86,
+        "column": 12
+      }
+    },
+    {
+      "id": "e36a4d37497fb1d-6779c15cbf79f5c",
+      "title": "Get SLO Grouped Stats buckets grouped-by-service.name instances using slo.groupings.service.name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_grouped_stats.spec.ts",
+        "line": 111,
         "column": 12
       }
     },
@@ -2617,7 +2637,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_grouped_stats.spec.ts",
-        "line": 110,
+        "line": 157,
         "column": 12
       }
     },
@@ -2633,7 +2653,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_grouped_stats.spec.ts",
-        "line": 122,
+        "line": 169,
         "column": 12
       }
     },
