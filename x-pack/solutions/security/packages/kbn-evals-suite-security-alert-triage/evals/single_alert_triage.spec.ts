@@ -193,7 +193,8 @@ evaluate.describe(
             examples: [
               {
                 input: {
-                  question: 'Help me triage this alert and decide what to do with it.',
+                  question:
+                    'Help me triage the attached alert and decide what to do with it. Use the alert-analysis skill to investigate: assess the alert, find related alerts, enrich with Security Labs and entity risk context, and recommend a disposition with concrete next steps. Respond in markdown suitable for attaching to a case.',
                 },
                 output: {
                   expected:

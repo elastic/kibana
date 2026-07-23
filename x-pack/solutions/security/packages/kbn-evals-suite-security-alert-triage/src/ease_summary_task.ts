@@ -26,11 +26,13 @@ interface EaseConnectorResponse {
 export const callEaseSummary = async ({
   fetch,
   connectorId,
+  actionTypeId,
   alertContext,
   log,
 }: {
   fetch: HttpHandler;
   connectorId: string;
+  actionTypeId: string;
   alertContext: string;
   log: ToolingLog;
 }): Promise<{ rawResponse: string }> => {
@@ -45,7 +47,7 @@ export const callEaseSummary = async ({
       headers: { 'elastic-api-version': '1' },
       query: { content_references_disabled: true },
       body: JSON.stringify({
-        actionTypeId: '.gen-ai',
+        actionTypeId,
         message: alertContext,
         promptIds: { promptGroupId: 'ease', promptId: 'alertSummarySystemPrompt' },
         replacements: {},

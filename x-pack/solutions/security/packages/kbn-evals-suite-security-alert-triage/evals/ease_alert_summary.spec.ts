@@ -89,7 +89,7 @@ function createEvaluateEaseSummary({
   log,
 }: {
   fetch: HttpHandler;
-  connector: { id: string };
+  connector: { id: string; actionTypeId: string };
   executorClient: EvalsExecutorClient;
   log: ToolingLog;
 }) {
@@ -113,6 +113,7 @@ function createEvaluateEaseSummary({
           return callEaseSummary({
             fetch,
             connectorId: connector.id,
+            actionTypeId: connector.actionTypeId,
             alertContext: (input as EaseSummaryExample['input']).alertContext,
             log,
           });
