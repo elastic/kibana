@@ -75,6 +75,8 @@ const setupRouter = (registerFn: (deps: any) => void, configOverrides: Partial<P
     config,
     getSpaceId: NOOP_SPACE_RESOLVER,
     getWatchProjection: NOOP_PROJECTION,
+    getWorkflowsManagement: () => undefined,
+    getInvestigationStore: () => undefined,
   });
 
   return { router, logger, config };
@@ -146,6 +148,8 @@ describe('GET /internal/pnd/watches — list watches', () => {
             throw new Error('ES down');
           },
         } as any),
+      getWorkflowsManagement: () => undefined,
+      getInvestigationStore: () => undefined,
     });
 
     const response = makeResponse();

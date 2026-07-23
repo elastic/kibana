@@ -10,6 +10,7 @@ import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugi
 import type { PndConfig } from '../config';
 import type { PndSpaceIdResolver } from '../types';
 import type { WatchWorkflowProjectionService } from '../services/watches/watch_workflow_projection_service';
+import type { InvestigationStore } from '../services/investigations/investigation_store';
 import { registerListWatchesRoute } from './watches/list_watches';
 import { registerGetWatchRoute } from './watches/get_watch';
 import { registerListInvestigationsRoute } from './investigations/list_investigations';
@@ -27,6 +28,7 @@ export interface RouteDependencies {
   getSpaceId: PndSpaceIdResolver;
   getWatchProjection: () => WatchWorkflowProjectionService | undefined;
   getWorkflowsManagement: () => WorkflowsServerPluginSetup['management'] | undefined;
+  getInvestigationStore: () => InvestigationStore | undefined;
 }
 
 export const registerRoutes = (deps: RouteDependencies): void => {

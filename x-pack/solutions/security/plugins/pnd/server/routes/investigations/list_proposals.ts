@@ -23,6 +23,7 @@ export const registerListInvestigationProposalsRoute = ({
   router,
   logger,
   config,
+  getInvestigationStore,
 }: RouteDependencies) => {
   router.versioned
     .get({
@@ -42,13 +43,28 @@ export const registerListInvestigationProposalsRoute = ({
           },
         },
       },
-      async (_context, request, response) => {
+      async (context, request, response) => {
         try {
           const { id } = request.params;
 
-          // Use hardcoded proposals - in future, this will query ES
-          const proposals = realProposals[id] ?? [];
+          if (config.ui.useMockData) {
+            const proposals = realProposals[id] ?? [];
+            const body: ListInvestigationProposalsResponse = {
+              proposals,
+              total: proposals.length,
+            };
+            return response.ok({ body });
+          }
 
+          const store = getInvestigationStore();
+          if (store != null) {
+            const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+            const body = await store.listProposals(esClient, id);
+            return response.ok({ body });
+          }
+
+          // Store not yet initialized — fall back to seed data.
+          const proposals = realProposals[id] ?? [];
           const body: ListInvestigationProposalsResponse = {
             proposals,
             total: proposals.length,
@@ -63,33 +79,4 @@ export const registerListInvestigationProposalsRoute = ({
         }
       }
     );
-};
-
-// Export handler functions for proposal actions (stubbed for future ES integration)
-export const handleAcceptProposal = async (
-  investigationId: string,
-  proposalId: string
-): Promise<boolean> => {
-  // TODO: Implement ES update with proposal status change to 'approved'
-  return true;
-};
-
-export const handleRejectProposal = async (
-  investigationId: string,
-  proposalId: string,
-  reason?: string
-): Promise<boolean> => {
-  // TODO: Implement ES update with proposal status change to 'dismissed'
-  // Store reason in proposal.rejection_reason field
-  return true;
-};
-
-export const handleModifyProposal = async (
-  investigationId: string,
-  proposalId: string,
-  reasoning: string
-): Promise<boolean> => {
-  // TODO: Implement ES update with proposal status change to 'modified'
-  // Store reasoning in proposal.analyst_reasoning field
-  return true;
 };

@@ -23,7 +23,12 @@ const ModifyProposalRequestBody = z.object({
 const MODIFY_PROPOSAL_PATH =
   `${PND_INVESTIGATION_URL_TEMPLATE}/proposals/{proposalId}/modify` as const;
 
-export const registerModifyProposalRoute = ({ router, logger }: RouteDependencies) => {
+export const registerModifyProposalRoute = ({
+  router,
+  logger,
+  config,
+  getInvestigationStore,
+}: RouteDependencies) => {
   router.versioned
     .post({
       path: MODIFY_PROPOSAL_PATH,
@@ -43,13 +48,27 @@ export const registerModifyProposalRoute = ({ router, logger }: RouteDependencie
           },
         },
       },
-      async (_context, request, response) => {
+      async (context, request, response) => {
         try {
-          const { id: _investigationId, proposalId } = request.params;
+          const { proposalId } = request.params;
           const { reasoning } = request.body;
 
-          // TODO: Update proposal status in ES to 'modified'
-          // Store reasoning in proposal.analyst_reasoning
+          // In mock mode there is no ES document to mutate; echo the decision.
+          if (!config.ui.useMockData) {
+            const store = getInvestigationStore();
+            if (store != null) {
+              const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+              const updated = await store.updateProposalStatus(esClient, proposalId, {
+                status: 'modified',
+                analystReasoning: reasoning,
+              });
+              if (updated == null) {
+                return response.notFound({
+                  body: { message: `Proposal "${proposalId}" not found` },
+                });
+              }
+            }
+          }
 
           return response.ok({
             body: {

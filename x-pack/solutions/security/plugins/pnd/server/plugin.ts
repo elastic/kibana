@@ -29,6 +29,7 @@ import { installStatic } from './managed_workflows/install_static';
 import type { WatchWorkflowProjectionService } from './services/watches/watch_workflow_projection_service';
 import { WatchWorkflowProjectionService as WatchWorkflowProjectionServiceImpl } from './services/watches/watch_workflow_projection_service';
 import { WatchWorkflowsManagementClientImpl } from './services/watches/watch_workflows_management_client';
+import { InvestigationStore } from './services/investigations/investigation_store';
 
 export class PndPlugin
   implements Plugin<PndPluginSetup, PndPluginStart, PndSetupDependencies, PndStartDependencies>
@@ -38,6 +39,7 @@ export class PndPlugin
   private spaces?: PndStartDependencies['spaces'];
   private watchProjection?: WatchWorkflowProjectionService;
   private workflowsManagementApi?: WorkflowsServerPluginSetup['management'];
+  private investigationStore?: InvestigationStore;
 
   constructor(context: PluginInitializerContext<PndConfig>) {
     this.logger = context.logger.get();
@@ -90,6 +92,7 @@ export class PndPlugin
       getSpaceId: (request) => this.getSpaceId(request),
       getWatchProjection: () => this.watchProjection,
       getWorkflowsManagement: () => this.workflowsManagementApi,
+      getInvestigationStore: () => this.investigationStore,
     });
 
     return {};
@@ -119,6 +122,14 @@ export class PndPlugin
     if (!this.config.ui.useMockData && this.workflowsManagementApi != null) {
       const managementClient = new WatchWorkflowsManagementClientImpl(this.workflowsManagementApi);
       this.watchProjection = new WatchWorkflowProjectionServiceImpl(managementClient, this.logger);
+    }
+
+    // Stand up the Elasticsearch-backed investigation/proposal store. Index
+    // creation + seeding happens lazily on the first authenticated request
+    // (see InvestigationStore.ensureReady), because the internal user cannot
+    // create arbitrary data indices — the request-scoped user can.
+    if (!this.config.ui.useMockData) {
+      this.investigationStore = new InvestigationStore(this.logger);
     }
 
     return {};
