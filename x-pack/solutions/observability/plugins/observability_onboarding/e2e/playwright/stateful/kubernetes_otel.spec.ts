@@ -44,9 +44,9 @@ test('Otel Kubernetes', async ({ page, onboardingHomePage, otelKubernetesFlowPag
   /**
    * Cold GKE nodes require pulling the EDOT daemon-collector image (~6 min),
    * on top of helm install, operator + daemon-collector readiness waits, and
-   * java-app restart. 20 min covers: ~30s (helm + operator) + ~6 min (image
-   * pull + daemonset rollout) + ~1 min (connect + ingest) + 2 min buffer
-   * + APM/dashboard assertions.
+   * java-app rollout. 20 min covers: ~30s (helm + operator) + ~6 min (image
+   * pull + daemonset rollout) + ~1 min (connect + ingest) + APM/dashboard
+   * assertions.
    */
   test.setTimeout(20 * 60_000);
 
@@ -94,11 +94,12 @@ test('Otel Kubernetes', async ({ page, onboardingHomePage, otelKubernetesFlowPag
      * pull takes ~6 min, and the OTel Java agent will not automatically
      * reconnect if the endpoint was unavailable at its own startup.
      */
-    const sleepSnippet = `kubectl rollout status --watch --timeout=300s deployment/opentelemetry-kube-stack-opentelemetry-operator --namespace opentelemetry-operator-system
+    const collectorReadinessSnippet = `kubectl rollout status --watch --timeout=300s deployment/opentelemetry-kube-stack-opentelemetry-operator --namespace opentelemetry-operator-system
 kubectl rollout status --watch --timeout=300s deployment/opentelemetry-kube-stack-gateway-collector --namespace opentelemetry-operator-system
 kubectl rollout status --watch --timeout=660s daemonset/opentelemetry-kube-stack-daemon-collector --namespace opentelemetry-operator-system`;
+    const instrumentedAppReadinessSnippet = `kubectl rollout status --watch --timeout=300s deployment/${INSTRUMENTED_APP_NAME} --namespace ${INSTRUMENTED_APP_CONTAINER_NAMESPACE}`;
 
-    codeSnippet = `${helmRepoSnippet}\n${installStackSnippet}\n${sleepSnippet}\n${annotateAllResourceSnippet}\n${restartDeploymentSnippet}`;
+    codeSnippet = `${helmRepoSnippet}\n${installStackSnippet}\n${collectorReadinessSnippet}\n${annotateAllResourceSnippet}\n${restartDeploymentSnippet}\n${instrumentedAppReadinessSnippet}`;
   } else {
     codeSnippet = `${helmRepoSnippet}\n${installStackSnippet}`;
   }
@@ -204,6 +205,9 @@ kubectl rollout status --watch --timeout=660s daemonset/opentelemetry-kube-stack
         });
       });
       await apmPage.goto(serviceInventoryHref);
+      // Resolve the locator redirect before the service-row retry loop starts.
+      // Otherwise its reloads restart /app/r while Kibana is still redirecting.
+      await apmPage.waitForURL(/\/app\/apm\/services(?:[/?#]|$)/, { timeout: 120_000 });
       const apmServiceInventoryPage = new ApmServiceInventoryPage(apmPage);
 
       const serviceTestId = `serviceLink_${apmServiceName}`;
