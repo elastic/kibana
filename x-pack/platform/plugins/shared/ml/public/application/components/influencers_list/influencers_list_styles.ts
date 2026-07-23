@@ -9,11 +9,8 @@ import { css } from '@emotion/react';
 
 import { useEuiFontSize, useEuiTheme } from '@elastic/eui';
 
-import {
-  getThemeResolvedSeverityColor,
-  ML_ANOMALY_THRESHOLD,
-  type MlSeverityType,
-} from '@kbn/ml-anomaly-utils';
+import { ML_ANOMALY_THRESHOLD, type MlSeverityType } from '@kbn/ml-anomaly-utils';
+import { getThemeResolvedSeverityColor } from '@kbn/ml-anomaly-utils/use_severity_color';
 
 export const useInfluencersListStyles = () => {
   const { euiTheme } = useEuiTheme();

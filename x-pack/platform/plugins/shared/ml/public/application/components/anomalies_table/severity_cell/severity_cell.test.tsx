@@ -9,7 +9,7 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { SeverityCell } from './severity_cell';
 
-jest.mock('@kbn/ml-anomaly-utils', () => ({
+jest.mock('@kbn/ml-anomaly-utils/use_severity_color', () => ({
   getFormattedSeverityScore: (score: number) => {
     if (score < 1) return '< 1';
     return Math.round(score).toString();

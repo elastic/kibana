@@ -167,7 +167,6 @@ export {
   SYNTHETICS_WAIT_TIMINGS,
 } from './field_names/synthetics';
 
-export { type Color, colorTransformer } from './color_palette';
 export { getInspectResponse, type InspectResponse } from './utils/get_inspect_response';
 export {
   type DataTier,

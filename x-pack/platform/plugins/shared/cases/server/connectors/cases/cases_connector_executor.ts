@@ -8,13 +8,13 @@
 import pMap from 'p-map';
 import { get, partition, pick } from 'lodash';
 import dateMath from '@kbn/datemath';
-import { CaseStatuses } from '@kbn/cases-components';
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 import type { Logger } from '@kbn/core/server';
 import { getFlattenedObject, stableStringify } from '@kbn/std';
-import type {
-  CustomFieldsConfiguration,
-  TemplatesConfiguration,
+import {
+  CaseStatuses,
+  type CustomFieldsConfiguration,
+  type TemplatesConfiguration,
 } from '../../../common/types/domain';
 import {
   CASE_EXTENDED_FIELDS,

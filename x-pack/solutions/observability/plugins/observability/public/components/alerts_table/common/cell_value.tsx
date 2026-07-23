@@ -45,7 +45,7 @@ import { CellTooltip } from './cell_tooltip';
 import { TimestampTooltip } from './timestamp_tooltip';
 import type { GetObservabilityAlertsTableProp } from '../types';
 import AlertActions from '../../alert_actions/alert_actions';
-import { ElapsedTimestampTooltip } from '../../../../common';
+import { ElapsedTimestampTooltip } from '../../../../common/components/elapsed_timestamp_tooltip';
 
 export const getAlertFieldValue = (alert: Alert, fieldName: string) => {
   // can be updated when working on https://github.com/elastic/kibana/issues/140819

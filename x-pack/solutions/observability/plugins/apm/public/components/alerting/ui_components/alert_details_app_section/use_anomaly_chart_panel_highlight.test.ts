@@ -8,7 +8,7 @@
 import { renderHook } from '@testing-library/react';
 import { useAnomalyChartPanelHighlight } from './use_anomaly_chart_panel_highlight';
 
-jest.mock('@kbn/ml-anomaly-utils', () => ({
+jest.mock('@kbn/ml-anomaly-utils/use_severity_color', () => ({
   useSeverityColor: (score: number) => {
     if (score >= 75) return '#ff0000';
     if (score >= 50) return '#ff9900';
