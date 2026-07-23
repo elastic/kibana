@@ -103,7 +103,7 @@ Existing namespaces and their source scope:
 | `agent_builder` | `public/agent_builder/` | no |
 | `entity_analytics` | `public/entity_analytics/` | yes |
 | `exceptions` | `public/exceptions/` | no |
-| `flyout` | `public/flyout/` (including `flyout_v2`) | no |
+| `flyout` | `public/flyout/` (and `public/flyout_v2/`, a v2 rewrite of the same feature area in a separate top-level dir; tests should land in this namespace) | no |
 | `reports` | `public/reports/` | no |
 | `timelines` | `public/timelines/` | no |
 | `workflows` | `public/workflows/` | no |
@@ -112,7 +112,7 @@ Existing namespaces and their source scope:
 
 ### Create a new namespace when:
 
-- The feature source lives in a top-level directory under `public/` **not covered** by any row above (e.g., `public/asset_inventory/` → new namespace `asset_inventory`). Sub-directories of an existing scope (e.g. `public/flyout_v2/`) belong in the parent namespace, not a new one. For server-only features with no `public/` counterpart, use the directory name under `server/lib/` as the namespace anchor (e.g., `server/lib/machine_learning/` → namespace `machine_learning`). ⚠️ Exception: `server/lib/timeline` (singular) maps to the existing `timelines` namespace — do not create a new `timeline` namespace.
+- The feature source lives in a top-level directory under `public/` **not covered** by any row above (e.g., `public/asset_inventory/` → new namespace `asset_inventory`). Separate v2/v3 rewrites of an existing feature area (e.g. `public/flyout_v2/`) belong in the parent namespace, not a new one. For server-only features with no `public/` counterpart, use the directory name under `server/lib/` as the namespace anchor (e.g., `server/lib/machine_learning/` → namespace `machine_learning`). ⚠️ Exception: `server/lib/timeline` (singular) maps to the existing `timelines` namespace — do not create a new `timeline` namespace.
 - There are **3 or more test specs** — single tests do not justify a new Playwright config with its own fixtures tree.
 
 A different owning team reinforces the decision but is not required on its own.
@@ -120,7 +120,7 @@ A different owning team reinforces the decision but is not required on its own.
 ### How to create a new namespace (3 required steps):
 
 1. **Create the directory structure.** Run `node scripts/scout generate --path x-pack/solutions/security/plugins/security_solution --type ui --namespace <name>` (use `--type api` or `--type both` if API tests are also needed). This scaffolds `test/scout/<name>/{ui,api}/` with the correct config files.
-2. **Generate and commit the config manifest.** Run `node scripts/scout.js update-test-config-manifests` from the repo root. This writes `.meta/(ui|api)/*.json` under the namespace dir. Without it, CI discovery and selective testing will not see the new config. Commit the generated file.
+2. **Generate and commit the config manifest.** Run `node scripts/scout update-test-config-manifests` from the repo root. This writes `.meta/(ui|api)/*.json` under the namespace dir. Without it, CI discovery and selective testing will not see the new config. Commit the generated file.
 3. **Add a CODEOWNERS entry.** Add `/x-pack/solutions/security/plugins/security_solution/test/scout/<namespace>/ @elastic/<team>` to `.github/CODEOWNERS`. If omitted, ownership falls through to the umbrella entry `@elastic/security-engineering-productivity` — easy to forget (the `exceptions` namespace currently has no dedicated entry for this reason).
 
 > **No `.buildkite/scout_ci_config.yml` edit is needed.** The `security_solution` plugin is already registered in the `enabled` plugins list in that file. CI auto-discovers all `playwright.config.ts` files within registered plugins — only entries under `excluded_configs` are skipped. New namespace configs are picked up automatically.
@@ -162,7 +162,6 @@ Available Security serverless tiers:
 | Role | Method | Use |
 |------|--------|-----|
 | Platform engineer | `browserAuth.loginAsPlatformEngineer()` | Default for most tests — standard CRUD privileges |
-| Privileged user | `browserAuth.loginAsPrivilegedUser()` | Editor role in serverless security projects |
 | T1 analyst | `browserAuth.loginAsT1Analyst()` | Read-only analyst (RBAC testing) |
 | Any security role | `browserAuth.loginAsSecurityRole('role_name')` | Generic — works for any role in `roles.yml` |
 | Custom role | `browserAuth.loginWithCustomRole(roleDescriptor)` | Ad-hoc RBAC testing with inline descriptors |
