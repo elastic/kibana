@@ -64,13 +64,17 @@ export function useCustomContentHtml({
   const [isAiUnavailable, setIsAiUnavailable] = useState(false);
 
   // onTemplateChange() writes back into savedTemplate, a dep of this effect. Track what we last
-  // wrote (and the colorMode it was rendered for) so we can skip the echo re-run without also
-  // skipping intentional version bumps or colorMode changes.
-  const selfWrittenRef = useRef<{ template: string; colorMode: string } | undefined>(undefined);
+  // wrote so we can skip the echo re-run without also skipping intentional version bumps.
+  const selfWrittenRef = useRef<string | undefined>(undefined);
 
   // Track the last-rendered timeRange so a timepicker change still triggers a re-fetch even
   // when savedTemplate hasn't changed (which would otherwise trip the echo-skip guard below).
   const lastRenderedTimeRangeRef = useRef<TimeRange | undefined>(undefined);
+
+  const colorModeRef = useRef(colorMode);
+  useEffect(() => {
+    colorModeRef.current = colorMode;
+  }, [colorMode]);
 
   const onTemplateChangeRef = useRef(onTemplateChange);
   useEffect(() => {
@@ -83,12 +87,7 @@ export function useCustomContentHtml({
       timeRange?.to === lastRenderedTimeRangeRef.current?.to;
     lastRenderedTimeRangeRef.current = timeRange;
 
-    if (
-      savedTemplate !== undefined &&
-      savedTemplate === selfWrittenRef.current?.template &&
-      colorMode === selfWrittenRef.current?.colorMode &&
-      timeRangeSame
-    ) {
+    if (savedTemplate !== undefined && savedTemplate === selfWrittenRef.current && timeRangeSame) {
       return;
     }
 
@@ -96,7 +95,7 @@ export function useCustomContentHtml({
 
     // Fast path — static panel with stored HTML.
     if (template && !esqlQuery) {
-      setHtml(prepareHtml(template, colorMode));
+      setHtml(prepareHtml(template, colorModeRef.current));
       setIsLoading(false);
       setError(undefined);
       return;
@@ -115,7 +114,7 @@ export function useCustomContentHtml({
         .then((response) => fillTemplate(template, response.columns, response.values ?? []))
         .then((rawHtml) => {
           if (controller.signal.aborted) return;
-          setHtml(prepareHtml(rawHtml, colorMode));
+          setHtml(prepareHtml(rawHtml, colorModeRef.current));
           setIsLoading(false);
         })
         .catch((err: Error) => {
@@ -187,9 +186,9 @@ export function useCustomContentHtml({
           if (controller.signal.aborted) return;
           const rawHtml = await fillTemplate(cleaned, response.columns, response.values ?? []);
           if (controller.signal.aborted) return;
-          selfWrittenRef.current = { template: cleaned, colorMode };
+          selfWrittenRef.current = cleaned;
           onTemplateChangeRef.current(cleaned);
-          setHtml(prepareHtml(rawHtml, colorMode));
+          setHtml(prepareHtml(rawHtml, colorModeRef.current));
         } catch (err) {
           if (controller.signal.aborted || (err instanceof Error && err.name === 'AbortError'))
             return;
@@ -207,8 +206,8 @@ export function useCustomContentHtml({
           );
           return;
         }
-        const rendered = prepareHtml(acc, colorMode);
-        selfWrittenRef.current = { template: rendered, colorMode };
+        const rendered = prepareHtml(acc, colorModeRef.current);
+        selfWrittenRef.current = rendered;
         onTemplateChangeRef.current(rendered);
         setHtml(rendered);
       }
@@ -223,7 +222,7 @@ export function useCustomContentHtml({
 
       streamGenerate(
         core.http,
-        { prompt: promptForLlm, esqlQuery, timeRange, colorMode },
+        { prompt: promptForLlm, esqlQuery, timeRange, colorMode: colorModeRef.current },
         (token) => {
           acc += token;
         },
@@ -252,7 +251,7 @@ export function useCustomContentHtml({
     return () => {
       controller.abort();
     };
-  }, [embeddableId, prompt, esqlQuery, timeRange, generationVersion, savedTemplate, colorMode]);
+  }, [embeddableId, prompt, esqlQuery, timeRange, generationVersion, savedTemplate]);
 
   return { html, isLoading, error, isAiUnavailable };
 }
