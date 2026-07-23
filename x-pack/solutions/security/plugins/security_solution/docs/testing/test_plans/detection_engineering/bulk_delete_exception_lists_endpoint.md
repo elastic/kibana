@@ -1,12 +1,14 @@
-# Test plan: bulk delete exception lists API endpoint <!-- omit from toc -->
+# Test plan: exception lists bulk action — delete <!-- omit from toc -->
 
 **Status**: `in progress`.
 
 ## Summary <!-- omit from toc -->
 
-This is a test plan for `POST /api/exception_lists/_bulk_delete`, a new API endpoint that deletes up to 100 exception lists (and their items) in a single request. The endpoint accepts either saved object `ids` or human-readable `list_ids` (not both), cascades item deletion per list, reports per-list success/failure, and respects existing exception-list RBAC.
+This is a test plan for the `delete` action on `POST /api/exception_lists/_bulk_action`, a new API endpoint that deletes up to 100 exception lists (and their items) in a single request. The endpoint accepts an `action` discriminant and either saved object `ids` or human-readable `list_ids` (not both), cascades item deletion per list, reports per-list success/failure with a summary, and respects existing exception-list RBAC.
 
 The existing single-delete endpoint (`DELETE /api/exception_lists`) is **not** changed by this work and is out of scope for this plan.
+
+**RFC:** [API Design — Exception Lists Bulk Action Endpoint](https://docs.google.com/document/d/1-lMRDfNEqCGaODQmHDlIT6KYECViz3YNbj5qso2KWNM/edit)
 
 ## Table of contents <!-- omit from toc -->
 
@@ -22,6 +24,7 @@ The existing single-delete endpoint (`DELETE /api/exception_lists`) is **not** c
   - [Core functionality — delete by id](#core-functionality--delete-by-id)
   - [Item cascade](#item-cascade)
   - [Partial failure and error reporting](#partial-failure-and-error-reporting)
+  - [Response shape](#response-shape)
   - [Input validation](#input-validation)
   - [Deduplication and retry safety](#deduplication-and-retry-safety)
   - [Namespace support](#namespace-support)
@@ -41,8 +44,7 @@ The existing single-delete endpoint (`DELETE /api/exception_lists`) is **not** c
 - **Exception list item**: a saved object (`list_type: 'item'`) that belongs to exactly one exception list, identified by `list_id`.
 - **Item cascade**: when a list is deleted, all its items are deleted first, then the list container itself. This prevents orphaned items.
 - **Namespace type**: `single` (space-scoped) or `agnostic` (global across all spaces).
-- **Partial failure**: the endpoint always returns HTTP 200 with `{ deleted, errors }` for per-list outcomes. HTTP 4xx/5xx is reserved for validation or system-level failures.
-- **PIT streaming**: items are deleted one page (1,000) at a time via a Point-In-Time finder rather than loading all item IDs into memory.
+- **Partial failure**: the endpoint always returns HTTP 200 with `{ success, summary, deleted, errors }` for per-list outcomes. HTTP 4xx/5xx is reserved for validation or system-level failures.
 
 ## Requirements
 
@@ -52,27 +54,29 @@ The existing single-delete endpoint (`DELETE /api/exception_lists`) is **not** c
 - The user has the `exceptions-all` Kibana privilege unless the scenario explicitly tests a different role.
 - Exception lists and items are created fresh per scenario and cleaned up after each run.
 - The endpoint is available on both ESS and serverless deployments.
+- All requests include `"action": "delete"` in the request body unless testing action validation.
 
 ### Non-functional requirements
 
 - The endpoint must handle up to 100 lists per request.
-- Item cascade uses bounded concurrency (`pMap`, concurrency = 10) across lists.
+- Item cascade uses bounded concurrency across lists.
 - Item deletion uses PIT streaming (1,000 items per page) to bound memory usage regardless of item count.
-- The PIT finder is always closed in a `finally` block, even on mid-stream errors.
 
 ### Product requirements
 
-Functional requirements derived from [#276458](https://github.com/elastic/kibana/issues/276458):
+Functional requirements derived from [#276458](https://github.com/elastic/kibana/issues/276458) and the [API design RFC](https://docs.google.com/document/d/1-lMRDfNEqCGaODQmHDlIT6KYECViz3YNbj5qso2KWNM/edit):
 
 - User can delete multiple exception lists in one request by `id` or `list_id`.
+- The request must include `action: "delete"`.
 - Exactly one of `ids` or `list_ids` must be provided (not both, not neither).
 - Each array must contain at least 1 and at most 100 entries.
 - Deleting a list cascades to all its exception list items.
-- Per-list success/failure is reported in the response body.
+- The response includes `success`, `summary` (total/succeeded/failed), `deleted`, and `errors`.
 - One list's failure does not abort other lists in the batch.
-- Duplicate identifiers in the request are deduplicated before processing.
+- Duplicate identifiers in the request are deduplicated.
 - The endpoint respects space scoping and exception-list RBAC (`exceptions-all` privilege required).
-- Passing an exception list **item** saved object ID is rejected (returns 404 for that entry) without deleting the item or its parent list.
+- Passing an exception list **item** saved object ID is rejected (returns 404 for that entry) without side effects.
+- Mixed namespace types (`single` + `agnostic`) in a single request are not supported.
 
 ## Scenarios
 
@@ -84,10 +88,12 @@ Functional requirements derived from [#276458](https://github.com/elastic/kibana
 
 ```Gherkin
 Given 3 exception lists exist with list_ids "list-1", "list-2", and "list-3"
-When the user calls POST /api/exception_lists/_bulk_delete with list_ids ["list-1", "list-2"]
+When the user calls POST /api/exception_lists/_bulk_action with action "delete" and list_ids ["list-1", "list-2"]
 Then the response status is 200
-And the response body "deleted" array contains 2 entries for "list-1" and "list-2"
-And the response body "errors" array is empty
+And "success" is true
+And "summary.total" is 2 and "summary.succeeded" is 2 and "summary.failed" is 0
+And the "deleted" array contains 2 entries for "list-1" and "list-2"
+And the "errors" array is empty
 And exception list "list-3" still exists
 ```
 
@@ -97,10 +103,12 @@ And exception list "list-3" still exists
 
 ```Gherkin
 Given an exception list exists with list_id "list-1"
-When the user calls POST /api/exception_lists/_bulk_delete with list_ids ["list-1"]
+When the user calls POST /api/exception_lists/_bulk_action with action "delete" and list_ids ["list-1"]
 Then the response status is 200
-And the response body "deleted" array contains 1 entry for "list-1"
-And the response body "errors" array is empty
+And "success" is true
+And "summary.succeeded" is 1
+And the "deleted" array contains 1 entry for "list-1"
+And the "errors" array is empty
 ```
 
 ### Core functionality — delete by id
@@ -111,10 +119,12 @@ And the response body "errors" array is empty
 
 ```Gherkin
 Given 2 exception lists exist with saved object ids "so-1" and "so-2"
-When the user calls POST /api/exception_lists/_bulk_delete with ids ["so-1", "so-2"]
+When the user calls POST /api/exception_lists/_bulk_action with action "delete" and ids ["so-1", "so-2"]
 Then the response status is 200
-And the response body "deleted" array contains 2 entries matching "so-1" and "so-2"
-And the response body "errors" array is empty
+And "success" is true
+And "summary.succeeded" is 2
+And the "deleted" array contains 2 entries matching "so-1" and "so-2"
+And the "errors" array is empty
 ```
 
 ### Item cascade
@@ -125,7 +135,7 @@ And the response body "errors" array is empty
 
 ```Gherkin
 Given an exception list "list-1" exists with 1 exception list item
-When the user calls POST /api/exception_lists/_bulk_delete with list_ids ["list-1"]
+When the user calls POST /api/exception_lists/_bulk_action with action "delete" and list_ids ["list-1"]
 Then the response status is 200
 And the list is in the "deleted" array
 And the exception list item no longer exists (GET returns 404)
@@ -138,10 +148,10 @@ And the exception list item no longer exists (GET returns 404)
 ```Gherkin
 Given an exception list "list-1" exists with items
 When the bulk delete service processes "list-1"
-Then deleteExceptionListItemsByListStreamed is called before savedObjectsClient.delete
+Then items are deleted before the list container
 ```
 
-**Notes**: This ordering prevents orphaned items. If the container were deleted first, the items would have no resolvable parent and could never be cleaned up. Verified via mock call-order assertions in the unit test suite.
+**Notes**: This ordering prevents orphaned items. If the container were deleted first, the items would have no resolvable parent and could never be cleaned up.
 
 ### Partial failure and error reporting
 
@@ -152,10 +162,12 @@ Then deleteExceptionListItemsByListStreamed is called before savedObjectsClient.
 ```Gherkin
 Given an exception list exists with list_id "list-1"
 And no exception list exists with list_id "does-not-exist"
-When the user calls POST /api/exception_lists/_bulk_delete with list_ids ["list-1", "does-not-exist"]
+When the user calls POST /api/exception_lists/_bulk_action with action "delete" and list_ids ["list-1", "does-not-exist"]
 Then the response status is 200
+And "success" is false
+And "summary.total" is 2 and "summary.succeeded" is 1 and "summary.failed" is 1
 And the "deleted" array contains 1 entry for "list-1"
-And the "errors" array contains 1 entry for "does-not-exist" with status_code 404
+And the "errors" array contains 1 entry with status_code 404 and lists [{ list_id: "does-not-exist" }]
 ```
 
 #### **Scenario: All lists not found returns only errors**
@@ -164,8 +176,10 @@ And the "errors" array contains 1 entry for "does-not-exist" with status_code 40
 
 ```Gherkin
 Given no exception lists exist with list_ids "a" or "b"
-When the user calls POST /api/exception_lists/_bulk_delete with list_ids ["a", "b"]
+When the user calls POST /api/exception_lists/_bulk_action with action "delete" and list_ids ["a", "b"]
 Then the response status is 200
+And "success" is false
+And "summary.total" is 2 and "summary.succeeded" is 0 and "summary.failed" is 2
 And the "deleted" array is empty
 And the "errors" array contains 2 entries, each with status_code 404
 ```
@@ -176,15 +190,14 @@ And the "errors" array contains 2 entries, each with status_code 404
 
 ```Gherkin
 Given an exception list "list-1" exists with 1 exception list item (item saved object id "item-so-1")
-When the user calls POST /api/exception_lists/_bulk_delete with ids ["item-so-1"]
+When the user calls POST /api/exception_lists/_bulk_action with action "delete" and ids ["item-so-1"]
 Then the response status is 200
+And "success" is false
 And the "deleted" array is empty
-And the "errors" array contains 1 entry for "item-so-1" with status_code 404
+And the "errors" array contains 1 entry with status_code 404 and lists [{ id: "item-so-1" }]
 And the exception list "list-1" still exists
 And the exception list item "item-so-1" still exists
 ```
-
-**Notes**: The service validates that resolved saved objects have `list_type: 'list'`; item saved objects (`list_type: 'item'`) are rejected as not found without any mutation.
 
 #### **Scenario: Per-list error isolation**
 
@@ -198,17 +211,79 @@ Then "list-1" appears in the "errors" array
 And "list-2" is still successfully deleted and appears in the "deleted" array
 ```
 
-**Notes**: Each list is processed as an independent unit within the `pMap` loop. A failure in one list's item cascade or container delete does not abort or affect other lists.
+### Response shape
+
+#### **Scenario: Successful response includes summary counts**
+
+**Automation**: 1 integration test.
+
+```Gherkin
+Given 3 exception lists exist with list_ids "list-1", "list-2", and "list-3"
+When the user calls POST /api/exception_lists/_bulk_action with action "delete" and list_ids ["list-1", "list-2", "list-3"]
+Then the response status is 200
+And "success" is true
+And "summary" is { "total": 3, "succeeded": 3, "failed": 0 }
+And the "deleted" array has length 3
+And the "errors" array is empty
+```
+
+#### **Scenario: Partial failure sets success to false**
+
+**Automation**: 1 integration test.
+
+```Gherkin
+Given an exception list exists with list_id "list-1"
+And no exception list exists with list_id "missing"
+When the user calls POST /api/exception_lists/_bulk_action with action "delete" and list_ids ["list-1", "missing"]
+Then the response status is 200
+And "success" is false
+And "summary.failed" is 1
+```
+
+#### **Scenario: Error entries carry the identifier type used by the caller**
+
+**Automation**: 1 integration test.
+
+```Gherkin
+Given no exception list exists with list_id "does-not-exist"
+When the user calls POST /api/exception_lists/_bulk_action with action "delete" and list_ids ["does-not-exist"]
+Then the "errors[0].lists[0].list_id" is "does-not-exist"
+And "errors[0].lists[0].id" is null
+```
+
+```Gherkin
+Given no exception list exists with id "missing-so-id"
+When the user calls POST /api/exception_lists/_bulk_action with action "delete" and ids ["missing-so-id"]
+Then the "errors[0].lists[0].id" is "missing-so-id"
+And "errors[0].lists[0].list_id" is null
+```
 
 ### Input validation
+
+#### **Scenario: Request with unrecognized action returns 400**
+
+**Automation**: 1 integration test.
+
+```Gherkin
+When the user calls POST /api/exception_lists/_bulk_action with body { "action": "unknown", "list_ids": ["list-1"] }
+Then the response status is 400
+```
+
+#### **Scenario: Request without action field returns 400**
+
+**Automation**: 1 integration test.
+
+```Gherkin
+When the user calls POST /api/exception_lists/_bulk_action with body { "list_ids": ["list-1"] }
+Then the response status is 400
+```
 
 #### **Scenario: Request with neither ids nor list_ids returns 400**
 
 **Automation**: 1 integration test.
 
 ```Gherkin
-Given an empty request body
-When the user calls POST /api/exception_lists/_bulk_delete with body {}
+When the user calls POST /api/exception_lists/_bulk_action with body { "action": "delete" }
 Then the response status is 400
 ```
 
@@ -217,7 +292,7 @@ Then the response status is 400
 **Automation**: 1 integration test.
 
 ```Gherkin
-When the user calls POST /api/exception_lists/_bulk_delete with body { ids: [] }
+When the user calls POST /api/exception_lists/_bulk_action with body { "action": "delete", "ids": [] }
 Then the response status is 400
 ```
 
@@ -226,7 +301,7 @@ Then the response status is 400
 **Automation**: 1 integration test.
 
 ```Gherkin
-When the user calls POST /api/exception_lists/_bulk_delete with body { list_ids: [] }
+When the user calls POST /api/exception_lists/_bulk_action with body { "action": "delete", "list_ids": [] }
 Then the response status is 400
 ```
 
@@ -236,18 +311,16 @@ Then the response status is 400
 
 ```Gherkin
 Given an exception list exists
-When the user calls POST /api/exception_lists/_bulk_delete with body { ids: ["so-1"], list_ids: ["list-1"] }
+When the user calls POST /api/exception_lists/_bulk_action with body { "action": "delete", "ids": ["so-1"], "list_ids": ["list-1"] }
 Then the response status is 400
 ```
-
-**Notes**: The schema uses `oneOf` — exactly one of the two shapes is accepted. Providing both fields causes schema validation to fail.
 
 #### **Scenario: Request exceeding 100 list_ids returns 400**
 
 **Automation**: 1 integration test.
 
 ```Gherkin
-When the user calls POST /api/exception_lists/_bulk_delete with 101 list_ids
+When the user calls POST /api/exception_lists/_bulk_action with action "delete" and 101 list_ids
 Then the response status is 400
 ```
 
@@ -256,7 +329,7 @@ Then the response status is 400
 **Automation**: 1 integration test.
 
 ```Gherkin
-When the user calls POST /api/exception_lists/_bulk_delete with 101 ids
+When the user calls POST /api/exception_lists/_bulk_action with action "delete" and 101 ids
 Then the response status is 400
 ```
 
@@ -268,8 +341,9 @@ Then the response status is 400
 
 ```Gherkin
 Given an exception list exists with saved object id "so-1"
-When the user calls POST /api/exception_lists/_bulk_delete with ids ["so-1", "so-1"]
+When the user calls POST /api/exception_lists/_bulk_action with action "delete" and ids ["so-1", "so-1"]
 Then the response status is 200
+And "summary.total" is 1
 And the "deleted" array contains exactly 1 entry
 And the "errors" array is empty
 ```
@@ -280,13 +354,29 @@ And the "errors" array is empty
 
 ```Gherkin
 Given an exception list exists with list_id "list-1"
-When the user calls POST /api/exception_lists/_bulk_delete with list_ids ["list-1", "list-1"]
+When the user calls POST /api/exception_lists/_bulk_action with action "delete" and list_ids ["list-1", "list-1"]
 Then the response status is 200
+And "summary.total" is 1
 And the "deleted" array contains exactly 1 entry
 And the "errors" array is empty
 ```
 
-**Notes**: Deduplication uses `new Set()` before processing, making the request safe to retry — a second call with the same IDs will report those as 404 (already deleted) without side effects.
+#### **Scenario: Retrying a successful delete request returns 404 for already-deleted lists**
+
+**Automation**: 1 integration test.
+
+```Gherkin
+Given an exception list exists with list_id "list-1"
+When the user calls POST /api/exception_lists/_bulk_action with action "delete" and list_ids ["list-1"]
+Then the response status is 200 and "success" is true
+When the user re-issues the same request
+Then the response status is 200
+And "success" is false
+And the "deleted" array is empty
+And the "errors" array contains 1 entry for "list-1" with status_code 404
+```
+
+**Notes**: A 404 error for a target the caller intended to delete should be treated as success — the list is gone.
 
 ### Namespace support
 
@@ -296,7 +386,7 @@ And the "errors" array is empty
 
 ```Gherkin
 Given an exception list exists with list_id "list-1" and namespace_type "agnostic"
-When the user calls POST /api/exception_lists/_bulk_delete with list_ids ["list-1"] and namespace_type "agnostic"
+When the user calls POST /api/exception_lists/_bulk_action with action "delete", list_ids ["list-1"], and namespace_type "agnostic"
 Then the response status is 200
 And the "deleted" array contains 1 entry
 And the "errors" array is empty
@@ -308,7 +398,7 @@ And the "errors" array is empty
 
 ```Gherkin
 Given an exception list exists with list_id "list-1" in the single (space-scoped) namespace
-When the user calls POST /api/exception_lists/_bulk_delete with list_ids ["list-1"] and no namespace_type
+When the user calls POST /api/exception_lists/_bulk_action with action "delete", list_ids ["list-1"], and no namespace_type
 Then the response status is 200
 And the list is deleted from the current space
 ```
@@ -319,11 +409,14 @@ And the list is deleted from the current space
 
 ```Gherkin
 Given an exception list "list-1" exists in the agnostic namespace
-When the user calls POST /api/exception_lists/_bulk_delete with list_ids ["list-1"] and namespace_type "single"
+When the user calls POST /api/exception_lists/_bulk_action with action "delete", list_ids ["list-1"], and namespace_type "single"
 Then the response status is 200
+And "success" is false
 And the "errors" array contains 1 entry for "list-1" with status_code 404
 And the agnostic list "list-1" still exists
 ```
+
+**Notes**: `namespace_type` applies uniformly to the entire request. Callers cannot mix `single` and `agnostic` deletions in one call.
 
 ### Authorization / RBAC
 
@@ -334,7 +427,7 @@ And the agnostic list "list-1" still exists
 ```Gherkin
 Given a user with the "rules_read_exceptions_all" role
 And an exception list exists with list_id "list-1"
-When the user calls POST /api/exception_lists/_bulk_delete with list_ids ["list-1"]
+When the user calls POST /api/exception_lists/_bulk_action with action "delete" and list_ids ["list-1"]
 Then the response status is 200
 And the "deleted" array contains 1 entry
 ```
@@ -346,7 +439,7 @@ And the "deleted" array contains 1 entry
 ```Gherkin
 Given a user with the "rules_read_exceptions_read" role
 And an exception list exists with list_id "list-1"
-When the user calls POST /api/exception_lists/_bulk_delete with list_ids ["list-1"]
+When the user calls POST /api/exception_lists/_bulk_action with action "delete" and list_ids ["list-1"]
 Then the response status is 403
 ```
 
@@ -356,6 +449,6 @@ Then the response status is 403
 
 ```Gherkin
 Given no authentication credentials are provided
-When the user calls POST /api/exception_lists/_bulk_delete
+When the user calls POST /api/exception_lists/_bulk_action
 Then the response status is 401
 ```
