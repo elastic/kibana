@@ -40,11 +40,26 @@ export const createConnectorSmlType = (deps: ConnectorSmlTypeDeps): SmlTypeDefin
   return {
     id: CONNECTOR_SML_TYPE,
 
-    // Connectors are indexed exclusively via event-driven lifecycle hooks.
-    // The list method yields nothing — no crawling is performed.
-    list: (_context) => ({
-      [Symbol.asyncIterator]: () => ({ next: async () => ({ done: true as const, value: [] }) }),
-    }),
+    // Allow for crawling
+    async *list(context) {
+      const finder = context.savedObjectsClient.createPointInTimeFinder({
+        type: 'action',
+        perPage: 1000,
+        namespaces: ['*'],
+        fields: ['updated_at'],
+      });
+      try {
+        for await (const response of finder.find()) {
+          yield response.saved_objects.map((so) => ({
+            id: so.id,
+            updatedAt: so.updated_at ?? new Date().toISOString(),
+            spaces: so.namespaces ?? [],
+          }));
+        }
+      } finally {
+        await finder.close();
+      }
+    },
 
     getSmlEntry: async (originId, context) => {
       try {
