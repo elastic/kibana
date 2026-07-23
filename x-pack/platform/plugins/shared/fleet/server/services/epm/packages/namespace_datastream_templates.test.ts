@@ -190,20 +190,33 @@ function mockInstalledPackage(
 
 function makeEsClientWithTemplate(composedOf: string[] = BASE_COMPOSED_OF) {
   const esClient = elasticsearchServiceMock.createElasticsearchClient();
-  esClient.indices.getIndexTemplate.mockResolvedValue({
-    index_templates: [
-      {
-        name: 'logs-nginx.access',
-        index_template: {
-          composed_of: composedOf,
-          index_patterns: ['logs-nginx.access-*'],
-          priority: 200,
-          template: { settings: {}, mappings: {} },
-          data_stream: {},
-          _meta: { package: { name: 'nginx' } },
+  // Base template calls return the mock template; NS template calls (identified by the
+  // `@namespace.` marker) return 404 — NS templates don't pre-exist by default, so the
+  // pre-flight check correctly treats the base being in overlapping as a user conflict.
+  esClient.indices.getIndexTemplate.mockImplementation(({ name }: { name: string }) => {
+    if (name.includes('@namespace.')) {
+      return Promise.reject({ meta: { statusCode: 404 } });
+    }
+    return Promise.resolve({
+      index_templates: [
+        {
+          name,
+          index_template: {
+            composed_of: composedOf,
+            index_patterns: [`${name}-*`],
+            priority: 200,
+            template: { settings: {}, mappings: {} },
+            data_stream: {},
+            _meta: { package: { name: 'nginx' } },
+          },
         },
-      },
-    ],
+      ],
+    });
+  });
+  // Default: base template wins (not in overlapping) — no warning expected.
+  esClient.indices.simulateIndexTemplate.mockResolvedValue({
+    overlapping: [],
+    template: { mappings: {}, settings: {}, aliases: {} },
   } as any);
   return esClient;
 }
@@ -530,5 +543,38 @@ describe('syncNamespaceTemplates', () => {
         expect.objectContaining({ type: ElasticsearchAssetType.componentTemplate }),
       ])
     );
+  });
+
+  it('logs a warning when a pre-existing template overrides the Fleet base template but still creates the namespace template', async () => {
+    mockInstalledPackage();
+    const esClient = makeEsClientWithTemplate();
+    esClient.indices.simulateIndexTemplate.mockResolvedValue({
+      overlapping: [{ name: 'logs-nginx.access', index_patterns: ['logs-nginx.access-*'] }],
+      template: { mappings: {}, settings: {}, aliases: {} },
+    } as any);
+    const logger = {
+      debug: jest.fn(),
+      info: jest.fn(),
+      warn: jest.fn(),
+      error: jest.fn(),
+    } as any;
+    mockedAppContextService.getLogger.mockReturnValue(logger);
+
+    const summary = await syncNamespaceTemplates({
+      soClient,
+      esClient,
+      packageName: 'nginx',
+      addedNamespaces: ['production'],
+      removedNamespaces: [],
+    });
+
+    expect(logger.warn).toHaveBeenCalledTimes(1);
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('"logs-nginx.access"'));
+
+    expect(esClient.indices.putIndexTemplate).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'logs-nginx.access@namespace.production' }),
+      expect.any(Object)
+    );
+    expect(summary.created).toEqual(['production']);
   });
 });

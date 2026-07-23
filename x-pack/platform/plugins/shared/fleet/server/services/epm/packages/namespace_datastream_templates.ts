@@ -28,7 +28,11 @@ import type { PackageInfo } from '../../../../common/types';
 import { updateEsAssetReferences } from './es_assets_reference';
 import { getInstalledPackageWithAssets, getInstallation } from './get';
 import { handleIlmSettingsRestoreAfterPackageInstall } from './namespace_ilm_settings';
-import { isOtelDataStream, fetchIndexTemplate } from './namespace_template_utils';
+import {
+  isOtelDataStream,
+  fetchIndexTemplate,
+  warnIfPreexistingCustomization,
+} from './namespace_template_utils';
 
 /**
  * Returns true if namespace-level customization is opted in for `namespace` on
@@ -189,6 +193,18 @@ async function createNamespaceTemplatesForPackage({
           namespace,
           templateName,
           isOtelInputType,
+        });
+
+        await warnIfPreexistingCustomization({
+          esClient,
+          dataStream,
+          indexName: nsTemplate.index_patterns[0],
+          baseTemplateName: templateName,
+          nsTemplateName: nsName,
+          namespace,
+          logger,
+          logContext,
+          signal,
         });
 
         await esClient.indices.putIndexTemplate({ name: nsName, ...nsTemplate }, { signal });
