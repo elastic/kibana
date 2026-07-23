@@ -32,7 +32,7 @@ import type { SelectedSource } from '../components/source_picker';
 import { useCreateAiIndex } from '../hooks/use_create_ai_index';
 import { useNavigation } from '../hooks/use_navigation';
 import { getAiIndexDetailPath } from '../paths';
-import { getAiIndexDest } from '../utils/ai_index_dest';
+import { validateAiIndexName } from '../utils/ai_index_dest';
 
 const STORAGE_TYPES: Array<{
   type: AiIndexType;
@@ -76,9 +76,8 @@ export const CreateAiIndexPage = () => {
   const [storageType, setStorageType] = useState<AiIndexType>('index');
   const storageGroupName = useGeneratedHtmlId({ prefix: 'aiIndexStorageType' });
 
-  const trimmedName = name.trim();
-  const destValue = getAiIndexDest(storageType, trimmedName || 'namespace').value;
-  const isDisabled = !trimmedName;
+  const { dest, error: nameError } = validateAiIndexName(storageType, name);
+  const destValue = dest?.value;
 
   const createAndContinue = async () => {
     const created = await createAiIndex({
@@ -129,17 +128,26 @@ export const CreateAiIndexPage = () => {
           <EuiSpacer size="m" />
           <EuiFormRow
             fullWidth
+            isInvalid={nameError !== undefined}
+            error={nameError}
             helpText={
-              <FormattedMessage
-                id="xpack.contextEngine.createAiIndex.name.helpText"
-                defaultMessage="uses {dest} to store pre-computed context"
-                values={{ dest: <EuiCode>{destValue}</EuiCode> }}
-              />
+              destValue ? (
+                <FormattedMessage
+                  id="xpack.contextEngine.createAiIndex.name.helpText"
+                  defaultMessage="uses {dest} to store pre-computed context"
+                  values={{ dest: <EuiCode>{destValue}</EuiCode> }}
+                />
+              ) : (
+                i18n.translate('xpack.contextEngine.createAiIndex.name.helpTextEmpty', {
+                  defaultMessage: 'A backing index name is generated from this name.',
+                })
+              )
             }
           >
             <EuiFieldText
               fullWidth
               value={name}
+              isInvalid={nameError !== undefined}
               onChange={(event) => setName(event.target.value)}
               data-test-subj="contextAiIndexNameInput"
               placeholder={i18n.translate('xpack.contextEngine.createAiIndex.name.placeholder', {
@@ -254,7 +262,7 @@ export const CreateAiIndexPage = () => {
               data-test-subj="contextCreateAiIndexButton"
               onClick={createAndContinue}
               isLoading={isCreating}
-              isDisabled={isDisabled}
+              isDisabled={dest === undefined}
             >
               {i18n.translate('xpack.contextEngine.createAiIndex.continueButton', {
                 defaultMessage: 'Create AI index',

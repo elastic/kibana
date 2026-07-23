@@ -195,4 +195,97 @@ describe('CreateAiIndexPage', () => {
     });
     expect(services.application.navigateToApp).not.toHaveBeenCalled();
   });
+
+  it('replaces illegal characters while preserving other characters', async () => {
+    const services = coreMock.createStart();
+    services.http.put.mockResolvedValue({ status: 'created' });
+
+    renderWithProviders(services);
+
+    typeName('Support: Triage #1');
+    fireEvent.click(screen.getByTestId('contextCreateAiIndexButton'));
+
+    await waitFor(() => {
+      expect(services.http.put).toHaveBeenCalledWith(
+        '/api/context_engine/ai_index/support-triage-1',
+        expect.objectContaining({
+          body: JSON.stringify({
+            name: 'Support: Triage #1',
+            dest: { type: 'index', value: 'ai-index-idx-support-triage-1' },
+            automations: [],
+            sources: [],
+          }),
+        })
+      );
+    });
+  });
+
+  it('accepts non-ASCII names such as Japanese characters', async () => {
+    const services = coreMock.createStart();
+    services.http.put.mockResolvedValue({ status: 'created' });
+
+    renderWithProviders(services);
+
+    typeName('日本語');
+    fireEvent.click(screen.getByTestId('contextCreateAiIndexButton'));
+
+    await waitFor(() => {
+      expect(services.http.put).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({
+          body: JSON.stringify({
+            name: '日本語',
+            dest: { type: 'index', value: 'ai-index-idx-日本語' },
+            automations: [],
+            sources: [],
+          }),
+        })
+      );
+    });
+  });
+
+  it('shows an error and stays disabled when the name has no valid characters', () => {
+    renderWithProviders(coreMock.createStart());
+
+    typeName('###');
+
+    expect(
+      screen.getByText('Name must include at least one letter or number.')
+    ).toBeInTheDocument();
+    expect(screen.getByTestId('contextCreateAiIndexButton')).toBeDisabled();
+  });
+
+  it('sends create_only so a name mapping to an existing id is rejected by the server', async () => {
+    const services = coreMock.createStart();
+    services.http.put.mockResolvedValue({ status: 'created' });
+
+    renderWithProviders(services);
+
+    typeName('Support triage');
+    fireEvent.click(screen.getByTestId('contextCreateAiIndexButton'));
+
+    await waitFor(() => {
+      expect(services.http.put).toHaveBeenCalledWith(
+        '/api/context_engine/ai_index/support-triage',
+        expect.objectContaining({ query: { create_only: true } })
+      );
+    });
+  });
+
+  it('surfaces a server conflict as an error toast', async () => {
+    const services = coreMock.createStart();
+    services.http.put.mockRejectedValue({
+      body: { statusCode: 409, message: "AI index 'support-triage' already exists" },
+    });
+
+    renderWithProviders(services);
+
+    typeName('Support triage');
+    fireEvent.click(screen.getByTestId('contextCreateAiIndexButton'));
+
+    await waitFor(() => {
+      expect(services.notifications.toasts.addError).toHaveBeenCalled();
+    });
+    expect(services.application.navigateToApp).not.toHaveBeenCalled();
+  });
 });

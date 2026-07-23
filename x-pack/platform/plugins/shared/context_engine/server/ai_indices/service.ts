@@ -18,7 +18,12 @@ import type {
   AiIndexHttpItem,
   AiIndexProperties,
 } from '../../common/http_api/ai_indices';
-import { InvalidAiIndexDestError, AiIndexConflictError, AiIndexNotFoundError } from './errors';
+import {
+  InvalidAiIndexDestError,
+  AiIndexConflictError,
+  AiIndexNotFoundError,
+  AiIndexAlreadyExistsError,
+} from './errors';
 import type { AiIndexDocument, AiIndexStorageClient } from './storage';
 import { createAiIndexStorageClient } from './storage';
 
@@ -50,11 +55,19 @@ export class AiIndexService {
    * Creates or fully replaces an AI index, preserving `date_created` on update.
    * Concurrent writes are guarded with optimistic concurrency control; a losing
    * writer gets a {@link AiIndexConflictError}.
+   *
+   * With `createOnly`, an existing id is rejected with an
+   * {@link AiIndexAlreadyExistsError} instead of being overwritten. Enforced
+   * atomically by Elasticsearch's `op_type: 'create'`, so it is race-free.
    */
-  async put(aiIndexId: string, properties: AiIndexProperties): Promise<'created' | 'updated'> {
+  async put(
+    aiIndexId: string,
+    properties: AiIndexProperties,
+    { createOnly = false }: { createOnly?: boolean } = {}
+  ): Promise<'created' | 'updated'> {
     await this.assertValidDest(properties.dest);
 
-    const existing = await this.findDocument(aiIndexId);
+    const existing = createOnly ? undefined : await this.findDocument(aiIndexId);
     const now = new Date().toISOString();
     const document: AiIndexDocument = {
       ...properties,
@@ -77,7 +90,9 @@ export class AiIndexService {
       return 'created';
     } catch (error) {
       if (isResponseError(error) && error.statusCode === 409) {
-        throw new AiIndexConflictError(aiIndexId);
+        throw createOnly
+          ? new AiIndexAlreadyExistsError(aiIndexId)
+          : new AiIndexConflictError(aiIndexId);
       }
       throw error;
     }

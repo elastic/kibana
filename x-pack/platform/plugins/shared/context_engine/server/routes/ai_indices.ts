@@ -34,6 +34,7 @@ import {
   InvalidAiIndexDestError,
   AiIndexConflictError,
   AiIndexNotFoundError,
+  AiIndexAlreadyExistsError,
 } from '../ai_indices/errors';
 import type { AiIndexService } from '../ai_indices/service';
 
@@ -51,6 +52,16 @@ const aiIndexIdParamsSchema = schema.object({
     maxLength: MAX_AI_INDEX_ID_LENGTH,
     validate: validateAiIndexId,
     meta: { description: 'The unique identifier of the AI index.' },
+  }),
+});
+
+const putAiIndexQuerySchema = schema.object({
+  create_only: schema.boolean({
+    defaultValue: false,
+    meta: {
+      description:
+        'When true, the request fails with a 409 if an AI index with this id already exists instead of overwriting it.',
+    },
   }),
 });
 
@@ -122,7 +133,7 @@ const handleAiIndexError = (error: unknown, response: KibanaResponseFactory) => 
   if (error instanceof AiIndexNotFoundError) {
     return response.notFound({ body: { message: error.message } });
   }
-  if (error instanceof AiIndexConflictError) {
+  if (error instanceof AiIndexConflictError || error instanceof AiIndexAlreadyExistsError) {
     return response.conflict({ body: { message: error.message } });
   }
   throw error;
@@ -155,13 +166,16 @@ export const registerAiIndexRoutes = ({
         validate: {
           request: {
             params: aiIndexIdParamsSchema,
+            query: putAiIndexQuerySchema,
             body: putAiIndexBodySchema,
           },
         },
       },
       withContextEngineFeatureFlag(async (ctx, request, response) => {
         try {
-          const status = await getAiIndexService().put(request.params.aiIndexId, request.body);
+          const status = await getAiIndexService().put(request.params.aiIndexId, request.body, {
+            createOnly: request.query.create_only,
+          });
           const body: PutAiIndexResponse = { status };
           return status === 'created' ? response.created({ body }) : response.ok({ body });
         } catch (error) {

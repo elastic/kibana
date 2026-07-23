@@ -15,6 +15,7 @@ import {
   InvalidAiIndexDestError,
   AiIndexConflictError,
   AiIndexNotFoundError,
+  AiIndexAlreadyExistsError,
 } from '../ai_indices/errors';
 import type { AiIndexService } from '../ai_indices/service';
 
@@ -25,7 +26,9 @@ interface RegisteredRoute {
     security: { authz: { requiredPrivileges: string[] } };
   };
   handler: RequestHandler;
-  validate: false | { request?: { params?: Type<unknown>; body?: Type<unknown> } };
+  validate:
+    | false
+    | { request?: { params?: Type<unknown>; query?: Type<unknown>; body?: Type<unknown> } };
 }
 
 describe('ai indices routes', () => {
@@ -141,8 +144,30 @@ describe('ai indices routes', () => {
 
       await callRoute('PUT', aiIndexByIdPath, putRequest);
 
-      expect(aiIndexService.put).toHaveBeenCalledWith('customer_support', putRequest.body);
+      expect(aiIndexService.put).toHaveBeenCalledWith('customer_support', putRequest.body, {
+        createOnly: undefined,
+      });
       expect(response.created).toHaveBeenCalledWith({ body: { status: 'created' } });
+    });
+
+    it('forwards create_only to the service', async () => {
+      aiIndexService.put.mockResolvedValue('created');
+
+      await callRoute('PUT', aiIndexByIdPath, { ...putRequest, query: { create_only: true } });
+
+      expect(aiIndexService.put).toHaveBeenCalledWith('customer_support', putRequest.body, {
+        createOnly: true,
+      });
+    });
+
+    it('returns 409 when create_only hits an existing id', async () => {
+      aiIndexService.put.mockRejectedValue(new AiIndexAlreadyExistsError('customer_support'));
+
+      await callRoute('PUT', aiIndexByIdPath, { ...putRequest, query: { create_only: true } });
+
+      expect(response.conflict).toHaveBeenCalledWith({
+        body: { message: "AI index 'customer_support' already exists" },
+      });
     });
 
     it('returns 200 when the AI index is updated', async () => {
@@ -367,6 +392,24 @@ describe('ai indices routes', () => {
 
     it('rejects an empty id', () => {
       expect(() => validateParams({ aiIndexId: '' })).toThrow();
+    });
+  });
+
+  describe('PUT query validation', () => {
+    const validateQuery = (query: Record<string, unknown>) => {
+      const { validate } = getRoute('PUT', aiIndexByIdPath);
+      if (!validate || !validate.request?.query) {
+        throw new Error('expected a PUT query schema');
+      }
+      return validate.request.query.validate(query);
+    };
+
+    it('defaults create_only to false', () => {
+      expect(validateQuery({})).toEqual({ create_only: false });
+    });
+
+    it('coerces the create_only query string to a boolean', () => {
+      expect(validateQuery({ create_only: 'true' })).toEqual({ create_only: true });
     });
   });
 });

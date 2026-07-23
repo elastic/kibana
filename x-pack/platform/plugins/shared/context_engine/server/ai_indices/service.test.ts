@@ -9,7 +9,12 @@ import { errors } from '@elastic/elasticsearch';
 import type { DiagnosticResult } from '@elastic/elasticsearch';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { AiIndexService } from './service';
-import { InvalidAiIndexDestError, AiIndexConflictError, AiIndexNotFoundError } from './errors';
+import {
+  InvalidAiIndexDestError,
+  AiIndexConflictError,
+  AiIndexNotFoundError,
+  AiIndexAlreadyExistsError,
+} from './errors';
 import type { AiIndexDocument, AiIndexStorageClient } from './storage';
 import { createAiIndexStorageClient } from './storage';
 
@@ -165,6 +170,27 @@ describe('AiIndexService', () => {
       await expect(service.put('customer_support', properties)).rejects.toBeInstanceOf(
         AiIndexConflictError
       );
+    });
+
+    describe('createOnly', () => {
+      it('creates without looking up the existing document', async () => {
+        await expect(
+          service.put('customer_support', properties, { createOnly: true })
+        ).resolves.toBe('created');
+
+        expect(storageClient.get).not.toHaveBeenCalled();
+        expect(storageClient.index).toHaveBeenCalledWith(
+          expect.objectContaining({ id: 'customer_support', op_type: 'create' })
+        );
+      });
+
+      it('throws AiIndexAlreadyExistsError when the id already exists (409)', async () => {
+        storageClient.index.mockRejectedValue(createConflictError());
+
+        await expect(
+          service.put('customer_support', properties, { createOnly: true })
+        ).rejects.toBeInstanceOf(AiIndexAlreadyExistsError);
+      });
     });
 
     it('allows a data_stream dest with no matches yet (lazy creation)', async () => {

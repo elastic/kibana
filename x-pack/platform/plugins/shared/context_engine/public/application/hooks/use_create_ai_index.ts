@@ -11,7 +11,7 @@ import { useCallback } from 'react';
 import type { AiIndexProperties, AiIndexType } from '../../../common/http_api/ai_indices';
 import { putAiIndex } from '../api/ai_indices';
 import type { SelectedSource } from '../components/source_picker';
-import { getAiIndexDest, slugifyAiIndexName } from '../utils/ai_index_dest';
+import { getAiIndexDest, sanitizeAiIndexName } from '../utils/ai_index_dest';
 import { getErrorMessage } from '../utils/get_error_message';
 import { toAiIndexSources } from '../utils/sources';
 import { contextEngineQueryKeys } from './query_keys';
@@ -36,7 +36,7 @@ export const useCreateAiIndex = () => {
 
   const { mutateAsync, isLoading } = useMutation<CreatedAiIndex, Error, CreateAiIndexArgs>({
     mutationFn: async ({ name, description, storageType, sources }) => {
-      const id = slugifyAiIndexName(name);
+      const id = sanitizeAiIndexName(name);
       const properties: AiIndexProperties = {
         name: name.trim(),
         description: description.trim() || undefined,
@@ -44,7 +44,8 @@ export const useCreateAiIndex = () => {
         automations: [],
         sources: toAiIndexSources(sources),
       };
-      await putAiIndex(http, { aiIndexId: id, properties });
+
+      await putAiIndex(http, { aiIndexId: id, properties, createOnly: true });
       return { id };
     },
     onSuccess: () => {

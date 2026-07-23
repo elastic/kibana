@@ -48,6 +48,8 @@ export const getAiIndex = (
 interface PutAiIndexArgs {
   aiIndexId: string;
   properties: AiIndexProperties;
+  /** When true, the request fails with a 409 instead of overwriting an existing id. */
+  createOnly?: boolean;
 }
 
 /**
@@ -55,9 +57,10 @@ interface PutAiIndexArgs {
  */
 export const putAiIndex = (
   http: HttpStart,
-  { aiIndexId, properties }: PutAiIndexArgs
+  { aiIndexId, properties, createOnly }: PutAiIndexArgs
 ): Promise<PutAiIndexResponse> =>
   http.put<PutAiIndexResponse>(buildPath(aiIndexByIdPath, { aiIndexId }), {
     version: AI_INDEX_API_VERSION,
     body: JSON.stringify(properties),
+    ...(createOnly ? { query: { create_only: true } } : {}),
   });
