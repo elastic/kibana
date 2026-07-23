@@ -27,6 +27,7 @@ import { useFetchSLOSuggestions } from '../hooks/use_fetch_suggestions';
 import type { CreateSLOForm } from '../types';
 import { OptionalText } from './common/optional_text';
 import { MAX_WIDTH } from '../constants';
+import { createTagsPasteHandler, getNewTags, splitTags } from '../helpers/tags_input';
 
 export function SloEditFormDescriptionSection() {
   const { control, getFieldState } = useFormContext<CreateSLOForm>();
@@ -119,27 +120,14 @@ export function SloEditFormDescriptionSection() {
           defaultValue={[]}
           rules={{ required: false }}
           render={({ field: { ref, ...field }, fieldState }) => {
+            const tags = field.value ?? [];
+
             const addTags = (rawValues: string[]) => {
-              const values = field.value ?? [];
-              const existing = new Set(values.map((tag) => tag.trim().toLowerCase()));
-
-              const newTags = rawValues
-                .map((tag) => tag.trim())
-                .filter((tag) => {
-                  const normalized = tag.toLowerCase();
-                  if (!normalized || existing.has(normalized)) {
-                    return false;
-                  }
-                  existing.add(normalized);
-                  return true;
-                });
-
+              const newTags = getNewTags(tags, rawValues);
               if (newTags.length > 0) {
-                field.onChange([...values, ...newTags]);
+                field.onChange([...tags, ...newTags]);
               }
             };
-
-            const tags = field.value ?? [];
 
             return (
               <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="flexStart">
@@ -164,18 +152,8 @@ export function SloEditFormDescriptionSection() {
 
                       field.onChange([]);
                     }}
-                    onCreateOption={(searchValue: string) => addTags(searchValue.split(','))}
-                    onPaste={(e: React.ClipboardEvent<HTMLDivElement>) => {
-                      // Tags copied from badges arrive newline-separated on the clipboard, but
-                      // the single-line input would collapse them into one tag. Read the raw
-                      // clipboard and split on newlines/commas before the input sanitizes it.
-                      const text = e.clipboardData.getData('text');
-                      if (!/[\n\r,]/.test(text)) {
-                        return;
-                      }
-                      e.preventDefault();
-                      addTags(text.split(/[\n\r,]+/));
-                    }}
+                    onCreateOption={(searchValue: string) => addTags(splitTags(searchValue))}
+                    onPaste={createTagsPasteHandler(addTags)}
                     isClearable
                     data-test-subj="sloEditTagsSelector"
                   />
