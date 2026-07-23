@@ -27,8 +27,12 @@ export type {
   WorkflowAroundCompletionResult,
 } from './workflow_anonymization_provider';
 export {
+  createInferenceProceedCapabilityValue,
+  createPiiTokenizationCapabilityValue,
   INFERENCE_PROCEED_CAPABILITY_ID,
   PII_TOKENIZATION_CAPABILITY_ID,
+  resolveInferenceProceedCapabilityValue,
+  resolvePiiTokenizationCapabilityValue,
   type DetectedPiiEntity,
   type InferenceProceedCapability,
   type InferenceProceedInput,

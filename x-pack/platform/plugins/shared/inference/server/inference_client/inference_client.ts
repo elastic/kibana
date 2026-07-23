@@ -27,6 +27,7 @@ import { createCallbackManager } from './callback_manager';
 import type { InferenceAnonymizationOptions } from './anonymization_options';
 import type { InferenceEndpointIdCache } from '../util/inference_endpoint_id_cache';
 import type { TokenUsageLogger } from '../token_usage';
+import type { WorkflowAnonymizationOptions } from './workflow_anonymization_options';
 
 export function createInferenceClient({
   request,
@@ -40,6 +41,7 @@ export function createInferenceClient({
   endpointIdCache,
   callbacks,
   anonymization,
+  workflowAnonymization,
   tokenUsageLogger,
   isTokenUsageTrackingEnabled,
 }: {
@@ -54,6 +56,7 @@ export function createInferenceClient({
   endpointIdCache: InferenceEndpointIdCache;
   callbacks?: InferenceCallbacks;
   anonymization?: InferenceAnonymizationOptions;
+  workflowAnonymization?: WorkflowAnonymizationOptions;
   tokenUsageLogger?: TokenUsageLogger;
   isTokenUsageTrackingEnabled?: () => Promise<boolean>;
 }): InferenceClient {
@@ -76,6 +79,7 @@ export function createInferenceClient({
         ...(replacementsEsClient ? { esClient: replacementsEsClient } : {}),
       },
     },
+    workflowAnonymization,
     tokenUsageLogger,
     isTokenUsageTrackingEnabled,
   });

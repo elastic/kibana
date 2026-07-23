@@ -11,6 +11,32 @@ describe('inference config schema', () => {
   it('validates with defaults', () => {
     expect(configSchema.validate({})).toMatchObject({
       enabled: true,
+      anonymization: {
+        workflow_driven: false,
+        failureMode: 'block',
+        triggerCacheTtlSeconds: 30,
+      },
     });
+  });
+
+  it('accepts the explicit unsafe failure mode', () => {
+    expect(
+      configSchema.validate({
+        anonymization: {
+          workflow_driven: true,
+          failureMode: 'allow_unsafe',
+        },
+      }).anonymization
+    ).toMatchObject({
+      workflow_driven: true,
+      failureMode: 'allow_unsafe',
+    });
+  });
+
+  it('accepts triggerCacheTtlSeconds of 0 to disable caching', () => {
+    expect(
+      configSchema.validate({ anonymization: { triggerCacheTtlSeconds: 0 } }).anonymization
+        .triggerCacheTtlSeconds
+    ).toBe(0);
   });
 });

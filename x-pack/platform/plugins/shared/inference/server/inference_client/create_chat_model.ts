@@ -17,9 +17,11 @@ import type { RegexWorkerService } from '../chat_complete/anonymization/regex_wo
 import type { InferenceAnonymizationOptions } from './anonymization_options';
 import type { InferenceEndpointIdCache } from '../util/inference_endpoint_id_cache';
 import type { TokenUsageLogger } from '../token_usage';
+import type { WorkflowAnonymizationOptions } from './workflow_anonymization_options';
 
 export interface CreateChatModelOptions {
   request: KibanaRequest;
+  namespace: string;
   connectorId: string;
   actions: ActionsClientProvider;
   logger: Logger;
@@ -31,12 +33,14 @@ export interface CreateChatModelOptions {
   endpointIdCache: InferenceEndpointIdCache;
   callbacks?: InferenceCallbacks;
   anonymization?: InferenceAnonymizationOptions;
+  workflowAnonymization?: WorkflowAnonymizationOptions;
   tokenUsageLogger?: TokenUsageLogger;
   isTokenUsageTrackingEnabled?: () => Promise<boolean>;
 }
 
 export const createChatModel = async ({
   request,
+  namespace,
   connectorId,
   actions,
   logger,
@@ -48,12 +52,14 @@ export const createChatModel = async ({
   endpointIdCache,
   callbacks,
   anonymization,
+  workflowAnonymization,
   tokenUsageLogger,
   isTokenUsageTrackingEnabled,
 }: CreateChatModelOptions): Promise<InferenceChatModel> => {
   const client = createClient({
     actions,
     request,
+    namespace,
     anonymizationRulesPromise,
     regexWorker,
     esClient,
@@ -62,6 +68,7 @@ export const createChatModel = async ({
     logger,
     callbacks,
     anonymization,
+    workflowAnonymization,
     tokenUsageLogger,
     isTokenUsageTrackingEnabled,
   });

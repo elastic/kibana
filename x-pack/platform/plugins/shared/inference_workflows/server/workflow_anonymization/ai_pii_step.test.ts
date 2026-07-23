@@ -7,6 +7,7 @@
 
 import { MessageRole } from '@kbn/inference-common';
 import {
+  createPiiTokenizationCapabilityValue,
   PII_TOKENIZATION_CAPABILITY_ID,
   type DetectedPiiEntity,
   type PiiTextRecord,
@@ -24,7 +25,7 @@ const rule = {
 } as const;
 
 const createCapabilities = (pii: PiiTokenizationContext): WorkflowExecutionCapabilities => [
-  { id: PII_TOKENIZATION_CAPABILITY_ID, value: pii },
+  { id: PII_TOKENIZATION_CAPABILITY_ID, value: createPiiTokenizationCapabilityValue(pii) },
 ];
 
 const createLogger = () => ({ warn: jest.fn() });
