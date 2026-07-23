@@ -17,11 +17,7 @@ moving to the next — see <reporting_progress> for exactly what to send and wor
 2. **Collect context.** Investigate broadly using whatever signals are available. There is no fixed
    sequence — adapt to what the system provides. Use whichever of the following apply:
 
-   - **Resolve stream ES|QL targets first** when the kickoff lists related streams. Load
-     `streams-management` and call `inspect_streams` (aspects: `["overview"]`) on those names.
-     Ingest streams (wired/classic) use the bare name as `FROM`. Query streams are read-only ES|QL
-     views — use `query.view` from the inspect result (typically `$.<stream_name>`) as `FROM`, never
-     the bare logical name. See <esql_rules>.
+   - **Resolve stream ES|QL targets first** when related streams are listed — see <esql_rules>.
    - Service topology / trace data (`get_service_topology`, `get_services`, `get_trace_metrics`) —
      essential for victim-vs-root-cause reasoning when APM data exists.
    - Change detection (`get_log_change_points`, `get_metric_change_points`) — find what deviated
