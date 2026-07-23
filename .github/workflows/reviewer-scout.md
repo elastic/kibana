@@ -150,7 +150,7 @@ Work through the multi-step **Critical checks** defined in the skill's `SKILL.md
 
 ```
 > [!IMPORTANT]
-> The Applications DX team marked this comment as important.
+> The Applications DX team marked this comment as high-priority.
 ```
 
 For dispatched follow-up runs, use this context:
