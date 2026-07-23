@@ -180,25 +180,11 @@ export const vegaEmbeddableFactory = (
       isEditingEnabled: () => true,
       onEdit: ({ isNewPanel = false } = {}) => {
         const initialSpec = spec$.getValue();
-        let cancelled = false;
-        const save = (spec: string) => {
-          cancelled = true;
-          spec$.next(spec);
-        };
-        const cancel = () => {
-          if (cancelled) return;
-          cancelled = true;
-          if (isNewPanel && apiIsPresentationContainer(parentApi)) {
-            parentApi.removePanel(api.uuid);
-          } else {
-            spec$.next(initialSpec);
-          }
-        };
         openLazyFlyout({
           core,
           parentApi,
           flyoutProps: {
-            size: 's',
+            size: 'm',
             type: 'push',
           },
           loadContent: async ({ closeFlyout, ariaLabelledBy }) => {
@@ -208,12 +194,18 @@ export const vegaEmbeddableFactory = (
                 ariaLabelledBy={ariaLabelledBy}
                 closeFlyout={closeFlyout}
                 initialSpec={initialSpec}
-                onApply={(spec) => spec$.next(spec)}
-                onCancel={() => {
-                  cancel();
-                  closeFlyout();
+                isNewPanel={isNewPanel}
+                onPreview={(spec) => spec$.next(spec)}
+                onSave={(spec) => spec$.next(spec)}
+                // Runs on any close that is not a Save: a new panel is removed, an existing panel
+                // is restored to the spec captured when the flyout opened.
+                onRevert={() => {
+                  if (isNewPanel && apiIsPresentationContainer(parentApi)) {
+                    parentApi.removePanel(api.uuid);
+                  } else {
+                    spec$.next(initialSpec);
+                  }
                 }}
-                onSave={save}
               />
             );
           },

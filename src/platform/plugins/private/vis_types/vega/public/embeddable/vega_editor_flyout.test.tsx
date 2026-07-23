@@ -29,70 +29,112 @@ jest.mock('../components/vega_vis_editor', () => ({
 }));
 
 describe('VegaEditorFlyout', () => {
-  const renderFlyout = () => {
+  const renderFlyout = ({ isNewPanel = false }: { isNewPanel?: boolean } = {}) => {
     const closeFlyout = jest.fn();
-    const onCancel = jest.fn();
-    const onApply = jest.fn();
+    const onRevert = jest.fn();
+    const onPreview = jest.fn();
     const onSave = jest.fn();
-    render(
+    const { unmount } = render(
       <VegaEditorFlyout
         ariaLabelledBy="vega-flyout-title"
         closeFlyout={closeFlyout}
         initialSpec="{ mark: point }"
-        onApply={onApply}
-        onCancel={onCancel}
+        isNewPanel={isNewPanel}
+        onPreview={onPreview}
+        onRevert={onRevert}
         onSave={onSave}
       />
     );
-    return { closeFlyout, onCancel, onApply, onSave };
+    return { closeFlyout, onRevert, onPreview, onSave, unmount };
   };
 
-  it('does not apply the preview while typing; Apply pushes the current spec', async () => {
-    const { onApply } = renderFlyout();
+  it('does not preview while typing; Preview pushes the current spec', async () => {
+    const { onPreview } = renderFlyout();
     const user = userEvent.setup();
 
     expect(screen.getByRole('heading', { name: 'Vega' })).toBeInTheDocument();
     const editor = screen.getByRole('textbox', { name: 'Vega spec' });
-    const applyButton = screen.getByRole('button', { name: 'Apply' });
+    const previewButton = screen.getByRole('button', { name: 'Preview' });
 
-    // Apply is disabled until the spec differs from what was last applied.
-    expect(applyButton).toBeDisabled();
+    // Preview is disabled until the spec differs from what is rendered on the panel.
+    expect(previewButton).toBeDisabled();
 
     await user.clear(editor);
     await user.paste('{ mark: bar }');
     // Editing must not trigger the preview (no queries run on keystrokes).
-    expect(onApply).not.toHaveBeenCalled();
-    expect(applyButton).toBeEnabled();
+    expect(onPreview).not.toHaveBeenCalled();
+    expect(previewButton).toBeEnabled();
 
-    await user.click(applyButton);
-    expect(onApply).toHaveBeenCalledTimes(1);
-    expect(onApply).toHaveBeenCalledWith('{ mark: bar }');
-    // After applying, Apply is disabled again until further edits.
-    expect(applyButton).toBeDisabled();
+    await user.click(previewButton);
+    expect(onPreview).toHaveBeenCalledTimes(1);
+    expect(onPreview).toHaveBeenCalledWith('{ mark: bar }');
+    // After previewing, Preview is disabled again until further edits.
+    expect(previewButton).toBeDisabled();
   });
 
-  it('saves the current spec and closes without requiring Apply', async () => {
-    const { closeFlyout, onApply, onSave } = renderFlyout();
+  it('disables Apply and close until an existing panel has real changes', async () => {
+    renderFlyout();
+    const user = userEvent.setup();
+
+    // No edits yet → nothing to save.
+    expect(screen.getByRole('button', { name: 'Apply and close' })).toBeDisabled();
+
+    const editor = screen.getByRole('textbox', { name: 'Vega spec' });
+    await user.clear(editor);
+    await user.paste('{ mark: bar }');
+    expect(screen.getByRole('button', { name: 'Apply and close' })).toBeEnabled();
+
+    // Editing back to the original spec disables Save again.
+    await user.clear(editor);
+    await user.paste('{ mark: point }');
+    expect(screen.getByRole('button', { name: 'Apply and close' })).toBeDisabled();
+  });
+
+  it('enables Apply and close for a new panel so its default spec can be accepted', () => {
+    renderFlyout({ isNewPanel: true });
+    expect(screen.getByRole('button', { name: 'Apply and close' })).toBeEnabled();
+  });
+
+  it('saves the current spec, closes, and does not revert on unmount', async () => {
+    const { closeFlyout, onPreview, onRevert, onSave, unmount } = renderFlyout();
     const user = userEvent.setup();
 
     const editor = screen.getByRole('textbox', { name: 'Vega spec' });
     await user.clear(editor);
     await user.paste('{ mark: bar }');
 
-    await user.click(screen.getByRole('button', { name: 'Save' }));
+    await user.click(screen.getByRole('button', { name: 'Apply and close' }));
     expect(onSave).toHaveBeenCalledWith('{ mark: bar }');
     expect(closeFlyout).toHaveBeenCalledTimes(1);
-    // Save persists directly; it does not depend on a prior Apply.
-    expect(onApply).not.toHaveBeenCalled();
+    // Save persists directly; it does not depend on a prior Preview.
+    expect(onPreview).not.toHaveBeenCalled();
+
+    // Unmounting after a Save must not revert the committed spec.
+    unmount();
+    expect(onRevert).not.toHaveBeenCalled();
   });
 
-  it('delegates cancellation without saving', async () => {
-    const { closeFlyout, onCancel, onSave } = renderFlyout();
+  it('reverts to the pre-edit state on unmount when not applied (e.g. Esc / click-away)', async () => {
+    const { onRevert, unmount } = renderFlyout();
+    const user = userEvent.setup();
+
+    const editor = screen.getByRole('textbox', { name: 'Vega spec' });
+    await user.clear(editor);
+    await user.paste('{ mark: bar }');
+    await user.click(screen.getByRole('button', { name: 'Preview' })); // previewed but not saved
+
+    unmount();
+    expect(onRevert).toHaveBeenCalledTimes(1);
+  });
+
+  it('closes the flyout when Cancel is clicked (revert happens on the ensuing unmount)', async () => {
+    const { closeFlyout, onSave, onRevert } = renderFlyout();
     const user = userEvent.setup();
 
     await user.click(screen.getByRole('button', { name: 'Cancel' }));
-    expect(onCancel).toHaveBeenCalledTimes(1);
+    expect(closeFlyout).toHaveBeenCalledTimes(1);
     expect(onSave).not.toHaveBeenCalled();
-    expect(closeFlyout).not.toHaveBeenCalled();
+    // Cancel only closes; the revert is driven by unmount, not the button.
+    expect(onRevert).not.toHaveBeenCalled();
   });
 });

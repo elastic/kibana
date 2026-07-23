@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -40,23 +40,47 @@ export const VegaEditorFlyout = ({
   ariaLabelledBy,
   closeFlyout,
   initialSpec,
-  onApply,
-  onCancel,
+  isNewPanel = false,
+  onPreview,
+  onRevert,
   onSave,
 }: {
   ariaLabelledBy: string;
   closeFlyout: () => void;
   initialSpec: string;
-  onApply: (spec: string) => void;
-  onCancel?: () => void;
+
+  isNewPanel?: boolean;
+  onPreview: (spec: string) => void;
+  onRevert: () => void;
   onSave: (spec: string) => void;
 }) => {
   const [spec, setSpec] = useState(initialSpec);
-  const [appliedSpec, setAppliedSpec] = useState(initialSpec);
-  const isDirty = spec !== appliedSpec;
-  const applyPreview = () => {
-    onApply(spec);
-    setAppliedSpec(spec);
+  const [previewedSpec, setPreviewedSpec] = useState(initialSpec);
+  const canPreview = spec !== previewedSpec;
+  const canSave = isNewPanel || spec !== initialSpec;
+  const previewChanges = () => {
+    onPreview(spec);
+    setPreviewedSpec(spec);
+  };
+
+  // Revert on unmount unless the user saved. A ref holds the latest callback without re-arming the
+  // unmount effect; `saved` suppresses the revert after a successful Save.
+  const saved = useRef(false);
+  const onRevertRef = useRef(onRevert);
+  onRevertRef.current = onRevert;
+  useEffect(
+    () => () => {
+      if (!saved.current) {
+        onRevertRef.current();
+      }
+    },
+    []
+  );
+
+  const handleSave = () => {
+    saved.current = true;
+    onSave(spec);
+    closeFlyout();
   };
   return (
     <>
@@ -73,7 +97,7 @@ export const VegaEditorFlyout = ({
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty flush="left" onClick={onCancel ?? closeFlyout}>
+            <EuiButtonEmpty flush="left" onClick={closeFlyout}>
               {i18n.translate('visTypeVega.dashboard.cancelButtonLabel', {
                 defaultMessage: 'Cancel',
               })}
@@ -83,12 +107,12 @@ export const VegaEditorFlyout = ({
             <EuiFlexGroup gutterSize="s" responsive={false}>
               <EuiFlexItem grow={false}>
                 <EuiButton
-                  data-test-subj="vegaEditorFlyoutApplyButton"
-                  disabled={!isDirty}
-                  onClick={applyPreview}
+                  data-test-subj="vegaEditorFlyoutPreviewButton"
+                  disabled={!canPreview}
+                  onClick={previewChanges}
                 >
-                  {i18n.translate('visTypeVega.dashboard.applyButtonLabel', {
-                    defaultMessage: 'Apply',
+                  {i18n.translate('visTypeVega.dashboard.previewButtonLabel', {
+                    defaultMessage: 'Preview',
                   })}
                 </EuiButton>
               </EuiFlexItem>
@@ -96,13 +120,11 @@ export const VegaEditorFlyout = ({
                 <EuiButton
                   data-test-subj="vegaEditorFlyoutSaveButton"
                   fill
-                  onClick={() => {
-                    onSave(spec);
-                    closeFlyout();
-                  }}
+                  disabled={!canSave}
+                  onClick={handleSave}
                 >
-                  {i18n.translate('visTypeVega.dashboard.saveButtonLabel', {
-                    defaultMessage: 'Save',
+                  {i18n.translate('visTypeVega.dashboard.applyAndCloseButtonLabel', {
+                    defaultMessage: 'Apply and close',
                   })}
                 </EuiButton>
               </EuiFlexItem>

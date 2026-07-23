@@ -177,15 +177,14 @@ describe('vegaEmbeddableFactory', () => {
       ariaLabelledBy: 'vega-flyout-title',
       closeFlyout,
     })) as React.ReactElement<{
-      onCancel: () => void;
-      onApply: (spec: string) => void;
+      onRevert: () => void;
+      onPreview: (spec: string) => void;
     }>;
 
-    content.props.onApply('{ mark: bar }');
+    content.props.onPreview('{ mark: bar }');
     expect(api.serializeState().spec).toBe('{ mark: bar }');
-    content.props.onCancel();
+    content.props.onRevert();
     expect(api.serializeState().spec).toBe('{ mark: point }');
-    expect(closeFlyout).toHaveBeenCalledTimes(1);
   });
 
   it('keeps the edited spec when saving', async () => {

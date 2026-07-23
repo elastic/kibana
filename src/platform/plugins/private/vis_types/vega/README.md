@@ -4,10 +4,12 @@ Dashboard supports a dedicated by-value `vega` panel. Its stored config holds a 
 (JSON or HJSON); title, time range, and drilldown fields are optional. The string is preserved
 exactly, so comments and formatting round-trip.
 
-Add or edit a Vega panel from Dashboard's **Add panel** menu. A new panel is added immediately so
-the Dashboard previews spec edits as you type; Cancel removes a new panel or restores an existing
-panel's prior spec. There is no library item or by-reference Vega panel. Existing `legacy_vis` Vega
-panels and Canvas creation remain legacy behavior.
+Add or edit a Vega panel from Dashboard's **Add panel** menu. Editing does not run the spec's queries
+as you type: click **Preview** to render the current spec on the panel, and **Apply and close** to
+commit it to the dashboard (still unsaved until you save the dashboard). Any other close — Cancel,
+Esc, or click-away — reverts, removing a new panel or restoring an existing panel's prior spec. There
+is no library item or by-reference Vega panel. Existing `legacy_vis` Vega panels and Canvas creation
+remain legacy behavior.
 
 The Dashboard **Add panel** action is gated by the `vega.dashboardEmbeddable` browser feature flag
 (off by default). The public embeddable definition is always registered so existing Vega panels keep
