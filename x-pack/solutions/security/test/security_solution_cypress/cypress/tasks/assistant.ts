@@ -135,6 +135,7 @@ export const submitMessage = () => {
 };
 
 export const typeAndSendMessage = (message: string) => {
+  cy.get(USER_PROMPT).should('not.be.disabled');
   cy.get(USER_PROMPT).click();
   cy.get(USER_PROMPT).type(message);
   submitMessage();
