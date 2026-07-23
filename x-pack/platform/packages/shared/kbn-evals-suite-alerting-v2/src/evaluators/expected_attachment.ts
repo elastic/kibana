@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ConversationRound } from '@kbn/agent-builder-common';
 import { getLatestVersion, type VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import type { Evaluator, TaskOutput } from '@kbn/evals';
 
@@ -64,9 +65,16 @@ export const parseAllRenderAttachmentRefs = (message: string): RenderAttachmentR
 };
 
 export const getAssistantMessages = (output: TaskOutput): string[] => {
-  const messages = (output as { messages?: Array<{ message?: string }> })?.messages ?? [];
+  const rounds = (output as { rounds?: ConversationRound[] })?.rounds;
+  if (Array.isArray(rounds) && rounds.length > 0) {
+    return rounds.map((round) => round.response?.message ?? '').filter(Boolean);
+  }
+
+  // Fallback for unit fixtures that only provide a messages projection.
+  const messages =
+    (output as { messages?: Array<{ role?: string; message?: string }> })?.messages ?? [];
   return messages
-    .filter((_, i) => i % 2 === 1)
+    .filter((m) => m?.role === 'assistant')
     .map((m) => m?.message ?? '')
     .filter(Boolean);
 };

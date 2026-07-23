@@ -19,11 +19,10 @@ Not a feature backlog — see `eval_backlog.md` for new behaviours to evaluate.
   `{ type: 'workflow', id: <workflowAttachment.workflowId> }`, and workflow
   `triggers: [{ type: 'manual' }]`. Grouping / throttle remain on the LLM judge.
 
-- [ ] **Even/odd message role assumption**
-  `getAssistantMessages` and low-score transcript formatting assume
-  `messages[i]` is user/assistant alternating. If the chat client ever returns a
-  different shape, render scoring and logs go wrong silently. (Converse has no
-  roles; real history is GET conversation `rounds` — revisit later.)
+- [x] **Even/odd message role assumption**
+  Transcript now comes from `GET /conversations/{id}` `rounds` (`input` /
+  `response`). Task output keeps a thin `messages` projection for Criteria;
+  `getAssistantMessages` / low-score logs prefer `rounds`.
 
 - [x] **`expectAttachmentData` picks “latest rule” ad hoc in the spec**
   Shared `getLatestAttachmentData(attachments, type)` lives in

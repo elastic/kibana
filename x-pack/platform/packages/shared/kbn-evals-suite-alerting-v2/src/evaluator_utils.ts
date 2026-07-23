@@ -7,6 +7,7 @@
 
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { Evaluator, Example, TaskOutput } from '@kbn/evals';
+import type { ConversationRound } from '@kbn/agent-builder-common';
 import type { PromptRequest } from '@kbn/agent-builder-common/agents';
 import { isAskUserQuestionPrompt } from '@kbn/agent-builder-common/agents';
 
@@ -32,7 +33,8 @@ export const summarizePrompt = (prompt: PromptRequest) => {
 };
 
 interface ConversationOutput {
-  messages?: Array<{ message?: string }>;
+  rounds?: ConversationRound[];
+  messages?: Array<{ role?: string; message?: string }>;
   errors?: unknown[];
   traceId?: string;
 }
@@ -41,11 +43,22 @@ const isConversationOutput = (output: unknown): output is ConversationOutput =>
   typeof output === 'object' && output !== null;
 
 const formatTranscript = (output: ConversationOutput): string => {
+  const rounds = output.rounds;
+  if (Array.isArray(rounds) && rounds.length > 0) {
+    return rounds
+      .flatMap((round) => {
+        const user = (round.input?.message ?? '').trim() || '(empty)';
+        const assistant = (round.response?.message ?? '').trim() || '(empty)';
+        return [`  [user] ${user}`, `  [assistant] ${assistant}`];
+      })
+      .join('\n');
+  }
+
   const messages = output.messages ?? [];
   if (messages.length === 0) return '  (no messages captured)';
   return messages
-    .map((m, i) => {
-      const role = i % 2 === 0 ? 'user' : 'assistant';
+    .map((m) => {
+      const role = m?.role ?? 'unknown';
       const text = (m?.message ?? '').trim() || '(empty)';
       return `  [${role}] ${text}`;
     })

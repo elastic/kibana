@@ -7,9 +7,15 @@
 
 import { AgentPromptType } from '@kbn/agent-builder-common/agents';
 import type { PromptRequest } from '@kbn/agent-builder-common/agents';
+import type { Conversation, ConversationRound } from '@kbn/agent-builder-common';
 import type { TaskOutput } from '@kbn/evals';
 import type { ConverseResult, RuleManagementChatClient } from './chat_client';
-import { buildPromptResponses, collectScoredCriteria, createTask } from './evaluate_dataset';
+import {
+  buildPromptResponses,
+  collectScoredCriteria,
+  createTask,
+  messagesFromRounds,
+} from './evaluate_dataset';
 
 const askUserQuestion = (id: string, questionCount = 1): PromptRequest =>
   ({
@@ -30,21 +36,42 @@ const authorization = (id: string): PromptRequest =>
 
 const converseResult = (overrides: Partial<ConverseResult> = {}): ConverseResult => ({
   conversationId: 'conv-1',
-  messages: [{ message: 'agent reply' }],
+  response: { message: 'agent reply' },
   steps: [],
   errors: [],
   prompts: [],
   ...overrides,
 });
 
+const round = (userMessage: string, assistantMessage: string): ConversationRound =>
+  ({
+    input: { message: userMessage },
+    response: { message: assistantMessage },
+  } as ConversationRound);
+
+const conversationResult = (overrides: Partial<Conversation> = {}): Conversation =>
+  ({
+    id: 'conv-1',
+    rounds: [round('hello', 'agent reply')],
+    attachments: [],
+    ...overrides,
+  } as Conversation);
+
 /**
  * Chat client stub that returns a scripted response per `converse` call and records the
  * params it was called with, so we can assert how the task loop threads turns and prompts.
  */
-const makeChatClient = (
-  responses: ConverseResult[],
-  listAttachments: jest.Mock = jest.fn(async () => [])
-) => {
+const makeChatClient = ({
+  responses,
+  conversation = conversationResult(),
+  getConversation = jest.fn(async () => conversation),
+  listAttachments = jest.fn(async () => []),
+}: {
+  responses: ConverseResult[];
+  conversation?: Conversation;
+  getConversation?: jest.Mock;
+  listAttachments?: jest.Mock;
+}) => {
   const calls: Array<Record<string, unknown>> = [];
   let index = 0;
   const converse = jest.fn(async (params: Record<string, unknown>) => {
@@ -52,8 +79,9 @@ const makeChatClient = (
     return responses[index++] ?? converseResult();
   });
   return {
-    client: { converse, listAttachments } as unknown as RuleManagementChatClient,
+    client: { converse, getConversation, listAttachments } as unknown as RuleManagementChatClient,
     calls,
+    getConversation,
     listAttachments,
   };
 };
@@ -96,6 +124,22 @@ describe('collectScoredCriteria', () => {
   });
 });
 
+describe('messagesFromRounds', () => {
+  it('projects user input and assistant response from each round', () => {
+    expect(
+      messagesFromRounds([
+        round('first user', 'first assistant'),
+        round('second user', 'second assistant'),
+      ])
+    ).toEqual([
+      { role: 'user', message: 'first user' },
+      { role: 'assistant', message: 'first assistant' },
+      { role: 'user', message: 'second user' },
+      { role: 'assistant', message: 'second assistant' },
+    ]);
+  });
+});
+
 describe('buildPromptResponses', () => {
   it('answers an ask_user_question with the turn text as free-text (custom)', () => {
     const result = buildPromptResponses([askUserQuestion('ask-1')], 'I mean Alerting V2');
@@ -134,7 +178,7 @@ describe('buildPromptResponses', () => {
 
 describe('createTask', () => {
   it('sends a single-turn example as an input message with no prompt responses', async () => {
-    const { client, calls } = makeChatClient([converseResult()]);
+    const { client, calls } = makeChatClient({ responses: [converseResult()] });
 
     await runTask(client, { turns: ['hello'] });
 
@@ -145,10 +189,12 @@ describe('createTask', () => {
 
   it('answers a pending opener prompt with the next turn text instead of a new message', async () => {
     const pendingPrompt = askUserQuestion('ask-1');
-    const { client, calls } = makeChatClient([
-      converseResult({ prompts: [pendingPrompt] }), // turn 0 -> agent asks
-      converseResult({ prompts: [] }), // turn 1 answer -> resolved
-    ]);
+    const { client, calls } = makeChatClient({
+      responses: [
+        converseResult({ prompts: [pendingPrompt] }), // turn 0 -> agent asks
+        converseResult({ prompts: [] }), // turn 1 answer -> resolved
+      ],
+    });
 
     await runTask(client, {
       turns: ['I want to set up alerting', 'I mean Alerting V2'],
@@ -167,10 +213,12 @@ describe('createTask', () => {
   it('captures prompts from every turn so the judge and low-score logs can see them', async () => {
     const firstPrompt = askUserQuestion('ask-1');
     const laterPrompt = askUserQuestion('ask-2');
-    const { client } = makeChatClient([
-      converseResult({ prompts: [firstPrompt] }),
-      converseResult({ prompts: [laterPrompt] }),
-    ]);
+    const { client } = makeChatClient({
+      responses: [
+        converseResult({ prompts: [firstPrompt] }),
+        converseResult({ prompts: [laterPrompt] }),
+      ],
+    });
 
     const output = (await runTask(client, {
       turns: ['opener', 'second'],
@@ -180,10 +228,13 @@ describe('createTask', () => {
   });
 
   it('threads the conversationId returned from the first turn into subsequent turns', async () => {
-    const { client, calls } = makeChatClient([
-      converseResult({ conversationId: 'conv-xyz', prompts: [] }),
-      converseResult({ conversationId: 'conv-xyz', prompts: [] }),
-    ]);
+    const { client, calls } = makeChatClient({
+      responses: [
+        converseResult({ conversationId: 'conv-xyz', prompts: [] }),
+        converseResult({ conversationId: 'conv-xyz', prompts: [] }),
+      ],
+      conversation: conversationResult({ id: 'conv-xyz' }),
+    });
 
     await runTask(client, { turns: ['first', 'second'] });
 
@@ -191,23 +242,35 @@ describe('createTask', () => {
     expect(calls[1].conversationId).toBe('conv-xyz');
   });
 
-  it('aggregates steps, errors, and messages across turns', async () => {
-    const { client } = makeChatClient([
-      converseResult({ steps: [{ a: 1 }], messages: [{ message: 'm0' }], prompts: [] }),
-      converseResult({ steps: [{ b: 2 }], messages: [{ message: 'm1' }], prompts: [] }),
-    ]);
+  it('aggregates steps and loads rounds/messages from GET conversation', async () => {
+    const rounds = [round('t0', 'm0'), round('t1', 'm1')];
+    const { client, getConversation } = makeChatClient({
+      responses: [
+        converseResult({ steps: [{ a: 1 }], prompts: [] }),
+        converseResult({ steps: [{ b: 2 }], prompts: [] }),
+      ],
+      conversation: conversationResult({ rounds }),
+    });
 
     const output = (await runTask(client, { turns: ['t0', 't1'] })) as TaskOutput & {
       steps: unknown[];
       messages: unknown[];
+      rounds: unknown[];
     };
 
+    expect(getConversation).toHaveBeenCalledWith('conv-1');
     expect(output.steps).toEqual([{ a: 1 }, { b: 2 }]);
-    expect(output.messages).toEqual([{ message: 'm0' }, { message: 'm1' }]);
+    expect(output.rounds).toEqual(rounds);
+    expect(output.messages).toEqual([
+      { role: 'user', message: 't0' },
+      { role: 'assistant', message: 'm0' },
+      { role: 'user', message: 't1' },
+      { role: 'assistant', message: 'm1' },
+    ]);
   });
 
-  it('loads conversation attachments after converse', async () => {
-    const listAttachments = jest.fn(async () => [
+  it('loads attachments from GET conversation after converse', async () => {
+    const attachments = [
       {
         id: 'att-1',
         type: 'rule',
@@ -221,26 +284,23 @@ describe('createTask', () => {
           },
         ],
       },
-    ]);
-    const { client } = makeChatClient(
-      [
-        converseResult({
-          conversationId: 'conv-xyz',
-          messages: [
-            { message: 'create a rule' },
-            { message: '<render_attachment id="att-1" version="1" />' },
-          ],
-        }),
-      ],
-      listAttachments
-    );
+    ];
+    const { client, getConversation, listAttachments } = makeChatClient({
+      responses: [converseResult({ conversationId: 'conv-xyz' })],
+      conversation: conversationResult({
+        id: 'conv-xyz',
+        rounds: [round('create a rule', '<render_attachment id="att-1" version="1" />')],
+        attachments: attachments as Conversation['attachments'],
+      }),
+    });
 
     const output = (await runTask(client, { turns: ['create a rule'] })) as TaskOutput & {
       conversationId?: string;
       attachments?: unknown[];
     };
 
-    expect(listAttachments).toHaveBeenCalledWith('conv-xyz');
+    expect(getConversation).toHaveBeenCalledWith('conv-xyz');
+    expect(listAttachments).not.toHaveBeenCalled();
     expect(output.conversationId).toBe('conv-xyz');
     expect(output.attachments).toEqual([
       expect.objectContaining({
@@ -249,5 +309,41 @@ describe('createTask', () => {
       }),
     ]);
   });
-});
 
+  it('falls back to listAttachments when GET conversation fails', async () => {
+    const listAttachments = jest.fn(async () => [
+      {
+        id: 'att-fallback',
+        type: 'rule',
+        current_version: 1,
+        versions: [],
+      },
+    ]);
+    const getConversation = jest.fn(async () => {
+      throw new Error('conversation gone');
+    });
+    const { client } = makeChatClient({
+      responses: [converseResult({ conversationId: 'conv-xyz' })],
+      getConversation,
+      listAttachments,
+    });
+
+    const output = (await runTask(client, { turns: ['create a rule'] })) as TaskOutput & {
+      attachments?: unknown[];
+      rounds?: unknown[];
+      errors?: unknown[];
+    };
+
+    expect(getConversation).toHaveBeenCalledWith('conv-xyz');
+    expect(listAttachments).toHaveBeenCalledWith('conv-xyz');
+    expect(output.attachments).toEqual([expect.objectContaining({ id: 'att-fallback' })]);
+    expect(output.rounds).toEqual([]);
+    expect(output.errors).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          error: expect.objectContaining({ message: 'conversation gone' }),
+        }),
+      ])
+    );
+  });
+});

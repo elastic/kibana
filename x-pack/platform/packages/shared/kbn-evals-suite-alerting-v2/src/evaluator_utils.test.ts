@@ -21,11 +21,21 @@ const stubEvaluator = (result: EvaluationResult): Evaluator => ({
 const params = {
   input: { turns: ['I want to set up alerting.', 'I mean Alerting V2, CPU above 90%.'] },
   output: {
+    rounds: [
+      {
+        input: { message: 'I want to set up alerting.' },
+        response: { message: 'Do you want Alerting V2 or Security?' },
+      },
+      {
+        input: { message: 'I mean Alerting V2, CPU above 90%.' },
+        response: { message: "Here's how we'll build it..." },
+      },
+    ],
     messages: [
-      { message: 'I want to set up alerting.' },
-      { message: 'Do you want Alerting V2 or Security?' },
-      { message: 'I mean Alerting V2, CPU above 90%.' },
-      { message: "Here's how we'll build it..." },
+      { role: 'user', message: 'I want to set up alerting.' },
+      { role: 'assistant', message: 'Do you want Alerting V2 or Security?' },
+      { role: 'user', message: 'I mean Alerting V2, CPU above 90%.' },
+      { role: 'assistant', message: "Here's how we'll build it..." },
     ],
     prompts: [
       {

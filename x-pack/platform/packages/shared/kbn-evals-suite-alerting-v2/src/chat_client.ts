@@ -7,15 +7,14 @@
 
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { HttpHandler } from '@kbn/core/public';
-import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
+import { agentBuilderDefaultAgentId, type Conversation } from '@kbn/agent-builder-common';
 import type { PromptRequest, PromptResponse } from '@kbn/agent-builder-common/agents';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import pRetry from 'p-retry';
 
-type Messages = Array<{ message: string }>;
-
 interface ConverseParams {
-  messages: Messages;
+  /** Scripted user turn text to send as converse `input` (or as prompt answers). */
+  messages: Array<{ message: string }>;
   conversationId?: string;
   /**
    * Answers to prompts the agent is currently awaiting (e.g. an `ask_user_question`),
@@ -28,7 +27,7 @@ interface ConverseParams {
 
 export interface ConverseResult {
   conversationId?: string;
-  messages: Messages;
+  response: { message: string };
   errors: unknown[];
   steps?: unknown[];
   traceId?: string;
@@ -41,11 +40,6 @@ export interface ConverseResult {
   prompts: PromptRequest[];
 }
 
-/**
- * Minimal Agent Builder chat client used to drive the rule-management skill through the
- * non-streaming `/api/agent_builder/converse` endpoint. Intentionally self-contained so the
- * suite does not depend on the (private) agent-builder eval suite package.
- */
 export class RuleManagementChatClient {
   constructor(
     private readonly fetch: HttpHandler,
@@ -111,7 +105,7 @@ export class RuleManagementChatClient {
 
       return {
         conversationId: chatResponse.conversation_id,
-        messages: [...messages, chatResponse.response],
+        response: { message: chatResponse.response.message },
         steps: chatResponse.steps,
         traceId: chatResponse.trace_id,
         prompts: chatResponse.response.prompts ?? [],
@@ -127,13 +121,10 @@ export class RuleManagementChatClient {
         conversationId,
         steps: [],
         prompts: [],
-        messages: [
-          ...messages,
-          {
-            message:
-              'This question could not be answered as an internal error occurred. Please try again.',
-          },
-        ],
+        response: {
+          message:
+            'This question could not be answered as an internal error occurred. Please try again.',
+        },
         errors: [
           {
             error: {
@@ -148,10 +139,23 @@ export class RuleManagementChatClient {
   };
 
   /**
-   * Lists attachments persisted on a conversation (including rule drafts created by
-   * `manage_rule`). Used by compose evaluators that assert on the attachment payload
-   * itself, not only the `<render_attachment>` tag in the assistant message.
+   * Loads the persisted conversation (rounds + attachments). Used after converse so
+   * evaluators can read the authoritative transcript from `rounds` rather than a
+   * harness-synthesized message list.
    */
+  getConversation = async (conversationId: string): Promise<Conversation> => {
+    this.log.info(`Fetching conversation ${conversationId}`);
+
+    const response = await this.executeWithRetry('getConversation', async () => {
+      return this.fetch(`/api/agent_builder/conversations/${conversationId}`, {
+        method: 'GET',
+        version: '2023-10-31',
+      });
+    });
+
+    return response as Conversation;
+  };
+
   listAttachments = async (conversationId: string): Promise<VersionedAttachment[]> => {
     this.log.info(`Listing attachments for conversation ${conversationId}`);
 

@@ -15,6 +15,7 @@ import {
   type ExperimentTask,
   type TaskOutput,
 } from '@kbn/evals';
+import type { ConversationRound } from '@kbn/agent-builder-common';
 import type { PromptRequest, PromptResponse } from '@kbn/agent-builder-common/agents';
 import {
   isAskUserQuestionPrompt,
@@ -145,6 +146,18 @@ export const buildPromptResponses = (
   return responses;
 };
 
+/**
+ * Project Criteria-compatible messages from persisted conversation rounds.
+ * `role` reflects which round field the text came from (`input` vs `response`).
+ */
+export const messagesFromRounds = (
+  rounds: ConversationRound[]
+): Array<{ role: 'user' | 'assistant'; message: string }> =>
+  rounds.flatMap((round) => [
+    { role: 'user' as const, message: round.input.message },
+    { role: 'assistant' as const, message: round.response?.message ?? '' },
+  ]);
+
 export const createTask = (
   chatClient: RuleManagementChatClient
 ): ExperimentTask<RuleManagementExample, TaskOutput> => {
@@ -152,7 +165,6 @@ export const createTask = (
     const userTurns = input.turns;
 
     let conversationId: string | undefined;
-    const messages: Array<{ message: string }> = [];
     const steps: unknown[] = [];
     const errors: unknown[] = [];
     let traceId: string | undefined;
@@ -173,7 +185,6 @@ export const createTask = (
           pendingPrompts.length > 0 ? buildPromptResponses(pendingPrompts, turnText) : undefined,
       });
       conversationId = response.conversationId ?? conversationId;
-      messages.push(...response.messages);
       if (response.steps) steps.push(...response.steps);
       errors.push(...response.errors);
       traceId = response.traceId ?? traceId;
@@ -181,26 +192,44 @@ export const createTask = (
       pendingPrompts = response.prompts;
     }
 
-    // Load conversation attachments so CODE evaluators (and the Criteria judge) can
-    // inspect composed payloads, not only tool-call params / render tags.
+    // Authoritative transcript + attachments come from GET conversation (rounds),
+    // not from a harness-synthesized message list.
+    let rounds: ConversationRound[] = [];
     let attachments: VersionedAttachment[] = [];
     if (conversationId) {
       try {
-        attachments = await chatClient.listAttachments(conversationId);
+        const conversation = await chatClient.getConversation(conversationId);
+        rounds = conversation.rounds ?? [];
+        attachments = conversation.attachments ?? [];
       } catch (error) {
         errors.push({
           error: {
-            message: error instanceof Error ? error.message : 'Failed to list attachments',
+            message: error instanceof Error ? error.message : 'Failed to get conversation',
             stack: error instanceof Error ? error.stack : undefined,
           },
           type: 'error',
         });
+        try {
+          attachments = await chatClient.listAttachments(conversationId);
+        } catch (attachmentError) {
+          errors.push({
+            error: {
+              message:
+                attachmentError instanceof Error
+                  ? attachmentError.message
+                  : 'Failed to list attachments',
+              stack: attachmentError instanceof Error ? attachmentError.stack : undefined,
+            },
+            type: 'error',
+          });
+        }
       }
     }
 
     return {
       errors,
-      messages,
+      rounds,
+      messages: messagesFromRounds(rounds),
       steps,
       traceId,
       prompts,

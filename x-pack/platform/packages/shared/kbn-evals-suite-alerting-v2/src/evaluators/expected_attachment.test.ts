@@ -11,6 +11,7 @@ import {
   RENDER_ATTACHMENT_TAG_RE,
   createExpectedAttachmentDataEvaluator,
   createExpectedRenderAttachmentEvaluator,
+  getAssistantMessages,
 } from './expected_attachment';
 
 const attachment = (id: string, type: string, data: Record<string, unknown> = {}): VersionedAttachment =>
@@ -33,7 +34,16 @@ const conversation = (
   attachments: VersionedAttachment[] = []
 ): TaskOutput =>
   ({
-    messages: [{ message: 'user prompt' }, { message: assistantMessage }],
+    rounds: [
+      {
+        input: { message: 'user prompt' },
+        response: { message: assistantMessage },
+      },
+    ],
+    messages: [
+      { role: 'user', message: 'user prompt' },
+      { role: 'assistant', message: assistantMessage },
+    ],
     attachments,
   } as unknown as TaskOutput);
 
@@ -52,6 +62,32 @@ const runAttachmentData = (output: TaskOutput, metadata: Record<string, unknown>
     expected: {},
     metadata,
   });
+
+describe('getAssistantMessages', () => {
+  it('reads assistant text from conversation rounds', () => {
+    expect(
+      getAssistantMessages({
+        rounds: [
+          { input: { message: 'u1' }, response: { message: 'a1' } },
+          { input: { message: 'u2' }, response: { message: 'a2' } },
+        ],
+      } as TaskOutput)
+    ).toEqual(['a1', 'a2']);
+  });
+
+  it('falls back to role-tagged messages when rounds are absent', () => {
+    expect(
+      getAssistantMessages({
+        messages: [
+          { role: 'user', message: 'u1' },
+          { role: 'assistant', message: 'a1' },
+          { role: 'user', message: 'u2' },
+          { role: 'assistant', message: 'a2' },
+        ],
+      } as TaskOutput)
+    ).toEqual(['a1', 'a2']);
+  });
+});
 
 describe('RENDER_ATTACHMENT_TAG_RE', () => {
   it('matches a self-closing tag with id and version', () => {
