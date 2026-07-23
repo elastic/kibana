@@ -1,5 +1,5 @@
 {
-  "sha1": "1f1f0cd56a64e43bfa6055070680c58a2ebbc628",
+  "sha1": "1ada770aa9236a776e17ddc47702667ca250850d",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -848,6 +848,149 @@
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/dataview_without_timefield.spec.ts",
         "line": 163,
+        "column": 12
+      }
+    },
+    {
+      "id": "2864055bb746b0c-958b3be687e6b1b",
+      "title": "Discover default route can use a saved search as default route",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/default_route.spec.ts",
+        "line": 48,
+        "column": 12
+      }
+    },
+    {
+      "id": "2864055bb746b0c-be60dfd199df2dc",
+      "title": "Discover default route can use a URL with filters as default route",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/default_route.spec.ts",
+        "line": 62,
+        "column": 12
+      }
+    },
+    {
+      "id": "b415c9303d327cd-7ac4102f64101ea",
+      "title": "Discover flyouts closes the doc viewer when opening ES|QL docs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/flyouts.spec.ts",
+        "line": 27,
+        "column": 12
+      }
+    },
+    {
+      "id": "b415c9303d327cd-f083079b60ab38c",
+      "title": "Discover flyouts closes the doc viewer when opening the Lens edit flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/flyouts.spec.ts",
+        "line": 39,
+        "column": 12
+      }
+    },
+    {
+      "id": "b415c9303d327cd-78a9080dd474452",
+      "title": "Discover flyouts closes ES|QL docs when opening the doc viewer",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/flyouts.spec.ts",
+        "line": 51,
+        "column": 12
+      }
+    },
+    {
+      "id": "b415c9303d327cd-e1a8acda5be53bc",
+      "title": "Discover flyouts closes ES|QL docs when opening the Lens edit flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/flyouts.spec.ts",
+        "line": 63,
+        "column": 12
+      }
+    },
+    {
+      "id": "b415c9303d327cd-050933582993d7d",
+      "title": "Discover flyouts closes the Lens edit flyout when opening the doc viewer",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/flyouts.spec.ts",
+        "line": 79,
+        "column": 12
+      }
+    },
+    {
+      "id": "6eb90f184b14d3d-42bdbd699342333",
+      "title": "Discover side nav link saves the last URL when in data view mode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/sidenav_link.spec.ts",
+        "line": 36,
+        "column": 12
+      }
+    },
+    {
+      "id": "6eb90f184b14d3d-8af80798d852a85",
+      "title": "Discover side nav link saves the last URL when in ES|QL mode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/sidenav_link.spec.ts",
+        "line": 47,
+        "column": 12
+      }
+    },
+    {
+      "id": "6eb90f184b14d3d-53b39d00b08807e",
+      "title": "Discover side nav link does not save the last URL if it was an ad-hoc data view",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/sidenav_link.spec.ts",
+        "line": 59,
+        "column": 12
+      }
+    },
+    {
+      "id": "6eb90f184b14d3d-c6d431d3f6edb8e",
+      "title": "Discover side nav link saves the last URL if the session was saved",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/sidenav_link.spec.ts",
+        "line": 72,
         "column": 12
       }
     },
