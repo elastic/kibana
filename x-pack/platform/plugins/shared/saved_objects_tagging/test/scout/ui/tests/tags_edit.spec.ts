@@ -13,10 +13,10 @@ import { KBN_ARCHIVES, test } from '../fixtures';
 test.describe('Tags management edit', { tag: tags.stateful.classic }, () => {
   test.beforeAll(async ({ kbnClient }) => {
     await kbnClient.savedObjects.cleanStandardList();
-    await kbnClient.importExport.load(KBN_ARCHIVES.FUNCTIONAL_BASE);
   });
 
-  test.beforeEach(async ({ browserAuth, pageObjects }) => {
+  test.beforeEach(async ({ browserAuth, pageObjects, kbnClient }) => {
+    await kbnClient.importExport.load(KBN_ARCHIVES.FUNCTIONAL_BASE);
     await browserAuth.loginAsPrivilegedUser();
     await pageObjects.tagManagement.goto();
   });

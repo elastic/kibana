@@ -17,13 +17,14 @@ import { expect } from '..';
  * `visualizeSaveButton`, Maps' `saveButton`).
  */
 export class SavedObjectSaveModal {
-  private readonly saveModal;
+  /** The modal container itself, exposed so callers can wait for it to open (e.g. after clicking an app-specific save button). */
+  readonly modal;
   private readonly titleInput;
   private readonly confirmSaveButton;
   private readonly dashboardPicker;
 
   constructor(private readonly page: ScoutPage) {
-    this.saveModal = this.page.testSubj.locator('savedObjectSaveModal');
+    this.modal = this.page.testSubj.locator('savedObjectSaveModal');
     this.titleInput = this.page.testSubj.locator('savedObjectTitle');
     this.confirmSaveButton = this.page.testSubj.locator('confirmSaveSavedObjectButton');
     this.dashboardPicker = this.page.testSubj.locator('open-dashboard-picker');
@@ -51,7 +52,7 @@ export class SavedObjectSaveModal {
 
   async confirm() {
     await this.confirmSaveButton.click();
-    await expect(this.saveModal).toBeHidden();
+    await expect(this.modal).toBeHidden();
   }
 
   async saveToExistingDashboard(name: string, dashboardTitle: string) {

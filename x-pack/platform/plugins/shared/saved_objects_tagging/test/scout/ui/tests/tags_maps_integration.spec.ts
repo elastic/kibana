@@ -60,11 +60,10 @@ test.describe('Maps integration', { tag: tags.stateful.classic }, () => {
     await pageObjects.maps.gotoNewMap();
 
     await pageObjects.maps.saveButton.click();
-    await pageObjects.maps.savedObjectTitleInput.fill('my-new-map');
+    await pageObjects.saveModal.fillTitle('my-new-map');
     await pageObjects.saveModal.selectNoDashboard();
     await pageObjects.tagManagement.selectSavedObjectTags('tag-1', 'tag-3');
-    await pageObjects.maps.confirmSaveButton.click();
-    await pageObjects.maps.confirmSaveButton.waitFor({ state: 'hidden' });
+    await pageObjects.saveModal.confirm();
 
     await page.goto(kbnUrl.app('maps'));
     await pageObjects.savedObjectsListing.waitForLoaded();
@@ -77,7 +76,7 @@ test.describe('Maps integration', { tag: tags.stateful.classic }, () => {
     await pageObjects.maps.gotoNewMap();
 
     await pageObjects.maps.saveButton.click();
-    await pageObjects.maps.savedObjectTitleInput.fill('map-with-new-tag');
+    await pageObjects.saveModal.fillTitle('map-with-new-tag');
     await pageObjects.saveModal.selectNoDashboard();
     await pageObjects.tagManagement.openCreateTagFromSelector();
     await expect(pageObjects.tagManagement.tagModal.form).toBeVisible();
@@ -88,8 +87,7 @@ test.describe('Maps integration', { tag: tags.stateful.classic }, () => {
     });
     await page.testSubj.click('createModalConfirmButton');
     await pageObjects.tagManagement.tagModal.form.waitFor({ state: 'hidden' });
-    await pageObjects.maps.confirmSaveButton.click();
-    await pageObjects.maps.confirmSaveButton.waitFor({ state: 'hidden' });
+    await pageObjects.saveModal.confirm();
 
     await page.goto(kbnUrl.app('maps'));
     await pageObjects.savedObjectsListing.waitForLoaded();
@@ -104,8 +102,7 @@ test.describe('Maps integration', { tag: tags.stateful.classic }, () => {
 
     await pageObjects.maps.saveButton.click();
     await pageObjects.tagManagement.selectSavedObjectTags('tag-3');
-    await pageObjects.maps.confirmSaveButton.click();
-    await pageObjects.maps.confirmSaveButton.waitFor({ state: 'hidden' });
+    await pageObjects.saveModal.confirm();
 
     await page.goto(kbnUrl.app('maps'));
     await pageObjects.savedObjectsListing.waitForLoaded();
