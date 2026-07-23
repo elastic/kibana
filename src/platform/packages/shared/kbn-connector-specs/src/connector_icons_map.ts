@@ -220,6 +220,15 @@ export const ConnectorIconsMap: Map<
     '.one_drive',
     lazy(() => import(/* webpackChunkName: "connectorIconOneDrive" */ './specs/one_drive/icon')),
   ],
+  [
+    '.sublime_security',
+    lazy(
+      () =>
+        import(
+          /* webpackChunkName: "connectorIconSublimeSecurity" */ './specs/sublime_security/icon'
+        )
+    ),
+  ],
 
   [
     '.trello',
