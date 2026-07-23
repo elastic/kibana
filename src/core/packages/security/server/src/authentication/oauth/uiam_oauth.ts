@@ -22,12 +22,7 @@ export interface UiamOAuthConnectionsSummary {
 
 export type UiamOAuthClientType = 'public' | 'confidential';
 
-export type UiamOAuthProjectType =
-  | 'elasticsearch'
-  | 'observability'
-  | 'security'
-  | 'workplaceai'
-  | 'vectordb';
+export type UiamOAuthProjectType = 'elasticsearch' | 'observability' | 'security' | 'vectordb';
 
 export interface UiamOAuthClientResponse {
   id: string;

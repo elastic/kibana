@@ -11,7 +11,6 @@ import {
   KIBANA_SEARCH_SOLUTION,
   KIBANA_SECURITY_SOLUTION,
   KIBANA_VECTORDB_SOLUTION,
-  KIBANA_WORKPLACE_AI_SOLUTION,
   type KibanaSolution,
 } from '@kbn/projects-solutions-groups';
 
@@ -21,13 +20,13 @@ import type { RouteDefinitionParams } from '..';
 import { wrapIntoCustomErrorResponse } from '../../errors';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
 
-const KIBANA_SOLUTION_TO_UIAM_PROJECT_TYPE: Record<KibanaSolution, UiamOAuthProjectType> = {
-  [KIBANA_SEARCH_SOLUTION]: 'elasticsearch',
-  [KIBANA_OBSERVABILITY_SOLUTION]: 'observability',
-  [KIBANA_SECURITY_SOLUTION]: 'security',
-  [KIBANA_WORKPLACE_AI_SOLUTION]: 'workplaceai',
-  [KIBANA_VECTORDB_SOLUTION]: 'vectordb',
-};
+const KIBANA_SOLUTION_TO_UIAM_PROJECT_TYPE: Partial<Record<KibanaSolution, UiamOAuthProjectType>> =
+  {
+    [KIBANA_SEARCH_SOLUTION]: 'elasticsearch',
+    [KIBANA_OBSERVABILITY_SOLUTION]: 'observability',
+    [KIBANA_SECURITY_SOLUTION]: 'security',
+    [KIBANA_VECTORDB_SOLUTION]: 'vectordb',
+  };
 
 export function defineCreateOAuthClientRoute({
   router,
