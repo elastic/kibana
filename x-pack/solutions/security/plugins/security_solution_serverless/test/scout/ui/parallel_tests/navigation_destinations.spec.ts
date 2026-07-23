@@ -12,65 +12,60 @@ spaceTest.describe(
   'serverless security navigation destinations',
   { tag: [...tags.serverless.security.complete] },
   () => {
-    spaceTest('navigate using search', async ({ page, pageObjects, browserAuth, scoutSpace }) => {
-      const { serverlessProjectChromePage } = pageObjects;
+    spaceTest(
+      'navigation via search, sidebar cases link, cases app, and legacy management landing page',
+      async ({ page, pageObjects, browserAuth, scoutSpace }) => {
+        const { serverlessProjectChromePage, collapsibleNav } = pageObjects;
 
-      await browserAuth.loginAsPrivilegedUser();
-      await serverlessProjectChromePage.navigateToSecuritySolutionHomeForChromeNav();
+        await browserAuth.loginAsPrivilegedUser();
+        await serverlessProjectChromePage.navigateToSecuritySolutionHomeForChromeNav();
 
-      // spaceTest runs each test in its own space, so app URLs (including the
-      // one on the search result) are space-prefixed rather than root-relative.
-      await serverlessProjectChromePage.openNavSearch();
-      await serverlessProjectChromePage.searchNav('security dashboards');
-      await serverlessProjectChromePage
-        .getNavSearchOptionByUrl(`/s/${scoutSpace.id}/app/security/dashboards`)
-        .click();
-      await serverlessProjectChromePage.closeNavSearch();
+        await spaceTest.step('navigate using search', async () => {
+          // spaceTest runs each test in its own space, so app URLs (including the
+          // one on the search result) are space-prefixed rather than root-relative.
+          await serverlessProjectChromePage.openNavSearch();
+          await serverlessProjectChromePage.searchNav('security dashboards');
+          await serverlessProjectChromePage
+            .getNavSearchOptionByUrl(`/s/${scoutSpace.id}/app/security/dashboards`)
+            .click();
+          await serverlessProjectChromePage.closeNavSearch();
 
-      await page.waitForURL(/app\/security\/dashboards/);
-      expect(page.url()).toContain('app/security/dashboards');
-    });
+          await page.waitForURL(/app\/security\/dashboards/);
+          expect(page.url()).toContain('app/security/dashboards');
+        });
 
-    spaceTest('shows cases in sidebar navigation', async ({ pageObjects, browserAuth }) => {
-      const { serverlessProjectChromePage } = pageObjects;
+        await spaceTest.step('shows cases in sidebar navigation', async () => {
+          await expect(serverlessProjectChromePage.primaryNav).toBeVisible();
+          await serverlessProjectChromePage.openChromeNavMoreMenuIfPresent();
+          await expect(
+            serverlessProjectChromePage.navItemInBodyByDeepLinkId('securitySolutionUI:cases')
+          ).toBeVisible();
+        });
 
-      await browserAuth.loginAsPrivilegedUser();
-      await serverlessProjectChromePage.navigateToSecuritySolutionHomeForChromeNav();
+        await spaceTest.step('navigates to cases app', async () => {
+          await expect(async () => {
+            await serverlessProjectChromePage.openChromeNavMoreMenuIfPresent();
+            await serverlessProjectChromePage
+              .navItemInBodyByDeepLinkId('securitySolutionUI:cases')
+              .click();
+            await page.waitForURL(/\/app\/security\/cases/, { timeout: 5_000 });
+          }).toPass({ timeout: 30_000 });
 
-      await expect(serverlessProjectChromePage.primaryNav).toBeVisible();
-      await serverlessProjectChromePage.openChromeNavMoreMenuIfPresent();
-      await expect(
-        serverlessProjectChromePage.navItemInBodyByDeepLinkId('securitySolutionUI:cases')
-      ).toBeVisible();
-    });
+          expect(page.url()).toContain('/app/security/cases');
 
-    // Deliberately asserts only the navigation contract (URL + active nav-item highlight),
-    // not that a specific Cases page landmark renders. An earlier version of this test
-    // asserted the `cases-all-title` test-subj, which is owned by `@kbn/cases-plugin` and
-    // broke when the Cases redesign changed that page's internals (kibana#266915). Nav
-    // tests shouldn't reach into another plugin's page internals — that coverage belongs
-    // in a Cases-owned suite.
-    spaceTest('navigates to cases app', async ({ page, pageObjects, browserAuth }) => {
-      const { serverlessProjectChromePage } = pageObjects;
+          await serverlessProjectChromePage.openChromeNavMoreMenuIfPresent();
+          await expect(
+            serverlessProjectChromePage.activeNavItemInBodyByDeepLinkId('securitySolutionUI:cases')
+          ).toBeVisible();
+        });
 
-      await browserAuth.loginAsPrivilegedUser();
-      await serverlessProjectChromePage.navigateToSecuritySolutionHomeForChromeNav();
-
-      await expect(async () => {
-        await serverlessProjectChromePage.openChromeNavMoreMenuIfPresent();
-        await serverlessProjectChromePage
-          .navItemInBodyByDeepLinkId('securitySolutionUI:cases')
-          .click();
-        await page.waitForURL(/\/app\/security\/cases/, { timeout: 5_000 });
-      }).toPass({ timeout: 30_000 });
-
-      expect(page.url()).toContain('/app/security/cases');
-
-      await serverlessProjectChromePage.openChromeNavMoreMenuIfPresent();
-      await expect(
-        serverlessProjectChromePage.activeNavItemInBodyByDeepLinkId('securitySolutionUI:cases')
-      ).toBeVisible();
-    });
+        await spaceTest.step('opens panel on legacy management landing page', async () => {
+          await page.gotoApp('management');
+          await expect(page.testSubj.locator('cards-navigation-page')).toBeVisible();
+          await expect(collapsibleNav.getNavItemById('stack_management')).toBeVisible();
+        });
+      }
+    );
 
     spaceTest('navigates to maintenance windows', async ({ browserAuth, pageObjects }) => {
       const { serverlessProjectChromePage, collapsibleNav } = pageObjects;
@@ -85,19 +80,5 @@ spaceTest.describe(
         serverlessProjectChromePage.getBreadcrumbByText('Maintenance Windows')
       ).toBeVisible();
     });
-
-    spaceTest(
-      'opens panel on legacy management landing page',
-      async ({ page, pageObjects, browserAuth }) => {
-        const { serverlessProjectChromePage, collapsibleNav } = pageObjects;
-
-        await browserAuth.loginAsPrivilegedUser();
-        await serverlessProjectChromePage.navigateToSecuritySolutionHomeForChromeNav();
-
-        await page.gotoApp('management');
-        await expect(page.testSubj.locator('cards-navigation-page')).toBeVisible();
-        await expect(collapsibleNav.getNavItemById('stack_management')).toBeVisible();
-      }
-    );
   }
 );
