@@ -3,11 +3,11 @@
 exports[`EditFilterListHeader renders the header when creating a new filter list with ID, description and items set 1`] = `
 <div>
   <div
-    class="css-1at6qh1-root-root-root-root"
+    class="css-ayyaqq-root-root-root-root"
     data-test-subj="appHeader"
   >
     <div
-      class="css-gc10uy-primaryRow-primaryRow-primaryRow"
+      class="css-t37kb7-primaryRow-primaryRow-primaryRow"
     >
       <div
         class="css-856hcb-titleCluster"
@@ -184,11 +184,11 @@ exports[`EditFilterListHeader renders the header when creating a new filter list
 exports[`EditFilterListHeader renders the header when creating a new filter list with the ID not set 1`] = `
 <div>
   <div
-    class="css-1at6qh1-root-root-root-root"
+    class="css-ayyaqq-root-root-root-root"
     data-test-subj="appHeader"
   >
     <div
-      class="css-gc10uy-primaryRow-primaryRow-primaryRow"
+      class="css-t37kb7-primaryRow-primaryRow-primaryRow"
     >
       <div
         class="css-856hcb-titleCluster"
@@ -377,11 +377,11 @@ exports[`EditFilterListHeader renders the header when creating a new filter list
 exports[`EditFilterListHeader renders the header when editing an existing unused filter list with no description or items 1`] = `
 <div>
   <div
-    class="css-1at6qh1-root-root-root-root"
+    class="css-ayyaqq-root-root-root-root"
     data-test-subj="appHeader"
   >
     <div
-      class="css-gc10uy-primaryRow-primaryRow-primaryRow"
+      class="css-t37kb7-primaryRow-primaryRow-primaryRow"
     >
       <div
         class="css-856hcb-titleCluster"
@@ -525,11 +525,11 @@ exports[`EditFilterListHeader renders the header when editing an existing unused
 exports[`EditFilterListHeader renders the header when editing an existing used filter list with description and items set 1`] = `
 <div>
   <div
-    class="css-1at6qh1-root-root-root-root"
+    class="css-ayyaqq-root-root-root-root"
     data-test-subj="appHeader"
   >
     <div
-      class="css-gc10uy-primaryRow-primaryRow-primaryRow"
+      class="css-t37kb7-primaryRow-primaryRow-primaryRow"
     >
       <div
         class="css-856hcb-titleCluster"
