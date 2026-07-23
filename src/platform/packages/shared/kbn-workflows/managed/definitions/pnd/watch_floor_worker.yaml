@@ -1,0 +1,76 @@
+version: "1"
+name: Watch Floor Worker
+description: >
+  Watch Floor domain worker. Enriches a real detection-engine alert, triages it
+  via the alert-analysis skill, and emits a typed classification the Floor
+  Orchestrator turns into a canonical Proposal + escalation decision.
+enabled: true
+tags:
+  - watch-worker
+  - watch-floor-worker
+triggers:
+  - type: manual
+steps:
+  - name: enrich_alert
+    # Fetch the real alert evidence. Fail-closed: if enrichment fails we stop
+    # before Reason rather than triaging an empty context.
+    type: http
+    on-failure:
+      continue: false
+    with:
+      method: POST
+      url: "kbn://internal/pnd/investigations/_enrich_alert"
+      headers:
+        kbn-xsrf: "true"
+        Elastic-Api-Version: "1"
+      body:
+        alertId: "{{ inputs.alertId }}"
+        investigationId: "{{ inputs.investigationId }}"
+  - name: triage_alerts
+    type: ai.agent
+    timeout: "10m"
+    with:
+      message: >
+        Use the [/alert-analysis](skill://alert-analysis) skill to triage the
+        enriched security alert below. Prefer recall over precision when unsure.
+        You already have all the evidence you need in the context. Do NOT call
+        any tools beyond the skill, do NOT ask questions. Return the structured
+        classification in a single response.
+
+        Enriched alert:
+        {{ steps.enrich_alert.output | json }}
+
+        Original alert / event context:
+        {{ inputs.event | json }}
+      schema:
+        type: object
+        properties:
+          classification:
+            type: string
+            enum:
+              - false_positive
+              - true_positive
+              - inconclusive
+            description: Classification of the alert based on analysis
+          confidence_score:
+            type: number
+            minimum: 0
+            maximum: 1
+            description: Confidence from 0.0-1.0
+          rationale:
+            type: string
+            description: Brief human-readable explanation
+        required:
+          - classification
+          - confidence_score
+          - rationale
+  - name: worker_output
+    type: data.set
+    with:
+      workerRun:
+        watch: watch-floor
+        classification: "{{ steps.triage_alerts.output.structured_output.classification | default: 'inconclusive' }}"
+        confidence: "{{ steps.triage_alerts.output.structured_output.confidence_score | default: 0 }}"
+        rationale: "{{ steps.triage_alerts.output.structured_output.rationale | default: 'Watch Floor triage completed.' }}"
+        alertId: "{{ inputs.alertId }}"
+        investigationId: "{{ inputs.investigationId }}"

@@ -1,0 +1,100 @@
+version: "1"
+name: Dark Watch
+description: >
+  Dark Watch Orchestrator (D10). Continuous threat hunting. Runs on a schedule
+  or on escalation from Watch Floor. Runs the Dark Worker under the demo service
+  identity, emits proposals, and escalates high-confidence findings to Deep Watch
+  for forensic investigation.
+enabled: true
+tags:
+  - watch
+  - watch-dark
+settings:
+  timeout: "20m"
+  concurrency:
+    key: "watch-dark-orchestrator"
+    strategy: drop
+    max: 1
+triggers:
+  - type: scheduled
+    with:
+      every: "60m"
+  - type: manual
+steps:
+  - name: watch_policy
+    type: data.set
+    with:
+      watch:
+        mandate: Continuous threat hunting & IoC correlation
+        autonomyLevel: 5
+        handoff: brief
+        onDemand: false
+        draft: false
+        cadence: sweep
+        every: 60
+        from: 22
+        to: 6
+        mode: window
+        runAs: pnd-watch-service
+        escalateThreshold: 0.8
+        escalateTo: system-security-watch-deep
+        ui:
+          color: "#f59e0b"
+          icon: bolt
+          order: 30
+        scopeSummary: Threat intel - Security indices - EDR - network
+        scopes:
+          - name: Threat intelligence
+            access: full
+            label: Read
+          - name: Security indices
+            access: full
+            label: Read
+          - name: EDR - network
+            access: full
+            label: Read
+        callables:
+          - id: threat-intelligence
+            name: Threat intel hunt
+            kind: skill
+            summary: Scheduled - correlates threat reports with environment telemetry
+            gated: false
+            enabled: true
+          - id: alert-analysis
+            name: Alert analysis
+            kind: skill
+            summary: On alert - classifies FP / TP / inconclusive
+            gated: false
+            enabled: true
+  - name: run_dark_worker
+    type: workflow.execute
+    with:
+      workflow-id: "system-security-watch-dark-worker"
+      inputs:
+        escalation: "{{ inputs.escalation | default: trigger.context }}"
+  - name: emit_proposal
+    type: http
+    on-failure:
+      continue: true
+    with:
+      method: POST
+      url: "kbn://internal/pnd/investigations/_emit_proposal"
+      headers:
+        kbn-xsrf: "true"
+        Elastic-Api-Version: "1"
+      body:
+        sourceWatch: watch-dark
+        workerRun: "{{ steps.run_dark_worker.output.workerRun }}"
+  - name: escalate_to_deep
+    if: "{{ steps.run_dark_worker.output.workerRun.confidence >= steps.watch_policy.output.watch.escalateThreshold }}"
+    type: workflow.execute
+    with:
+      workflow-id: "system-security-watch-deep"
+      inputs:
+        escalation:
+          fromWatch: watch-dark
+          toWatch: watch-deep
+          reason: "{{ steps.run_dark_worker.output.workerRun.finding }}"
+          confidence: "{{ steps.run_dark_worker.output.workerRun.confidence }}"
+          investigationId: "{{ steps.run_dark_worker.output.workerRun.investigationId }}"
+          indicators: "{{ steps.run_dark_worker.output.workerRun.indicators }}"

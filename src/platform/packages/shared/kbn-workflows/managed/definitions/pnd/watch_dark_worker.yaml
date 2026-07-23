@@ -1,0 +1,64 @@
+version: "1"
+name: Dark Watch Worker
+description: >
+  Dark Watch domain worker. Continuous hunt-style sweep with threat-intelligence
+  correlation and IoC validation against environment telemetry. Emits a typed
+  finding the Dark Orchestrator turns into a proposal + escalation decision.
+enabled: true
+tags:
+  - watch-worker
+  - watch-dark-worker
+triggers:
+  - type: manual
+steps:
+  - name: threat_intel_hunt
+    type: ai.agent
+    timeout: "10m"
+    with:
+      message: >
+        Use the [/threat-intelligence](skill://threat-intelligence) skill to
+        perform a threat-intelligence hunt sweep. You already have the escalation
+        context and telemetry access you need; reason from the evidence and return
+        a single structured finding. Do NOT ask questions.
+
+        1. Scan indexed threat reports for newly published IoCs and TTPs
+        2. Correlate IoCs (IPs, hashes, domains) against environment telemetry
+           using ES|QL over endpoint events, network flows, and alerts
+        3. Identify coverage gaps - MITRE techniques without matching detections
+        4. Produce a finding with a confidence score and recommended hunt
+
+        Escalation context:
+        {{ inputs.escalation | json }}
+      schema:
+        type: object
+        properties:
+          finding:
+            type: string
+            description: Synthesized significant-event finding
+          confidence_score:
+            type: number
+            minimum: 0
+            maximum: 1
+          indicators:
+            type: array
+            items:
+              type: object
+              properties:
+                type: { type: string }
+                name: { type: string }
+                confidence: { type: number }
+          recommended_action:
+            type: string
+        required:
+          - finding
+          - confidence_score
+  - name: worker_output
+    type: data.set
+    with:
+      workerRun:
+        watch: watch-dark
+        finding: "{{ steps.threat_intel_hunt.output.structured_output.finding | default: 'Dark Watch sweep complete.' }}"
+        confidence: "{{ steps.threat_intel_hunt.output.structured_output.confidence_score | default: 0 }}"
+        indicators: "{{ steps.threat_intel_hunt.output.structured_output.indicators | default: [] }}"
+        recommendedAction: "{{ steps.threat_intel_hunt.output.structured_output.recommended_action | default: '' }}"
+        investigationId: "{{ inputs.escalation.investigationId }}"

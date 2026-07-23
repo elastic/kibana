@@ -7,16 +7,30 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import WATCH_DARK_YAML from './watch_dark.yaml';
-import WATCH_DEEP_YAML from './watch_deep.yaml';
-import WATCH_FLOOR_YAML from './watch_floor.yaml';
+// D10 topology: each Watch is realized by an Orchestrator (owns trigger, run-as,
+// Investigation Conversation, HIL, escalation) that invokes a domain Worker via
+// workflow.execute. The Orchestrators keep the canonical Watch ids so they are
+// projected 1:1 as the Watches; the Workers carry -worker ids and are not shown
+// as top-level Watches.
+import WATCH_FLOOR_ORCHESTRATOR_YAML from './watch_floor_orchestrator.yaml';
+import WATCH_FLOOR_WORKER_YAML from './watch_floor_worker.yaml';
+import WATCH_DARK_ORCHESTRATOR_YAML from './watch_dark_orchestrator.yaml';
+import WATCH_DARK_WORKER_YAML from './watch_dark_worker.yaml';
+import WATCH_DEEP_ORCHESTRATOR_YAML from './watch_deep_orchestrator.yaml';
+import WATCH_DEEP_WORKER_YAML from './watch_deep_worker.yaml';
 import WATCH_OFFICER_YAML from './watch_officer.yaml';
 import type { ManagedWorkflowDefinition } from '../../types';
 
+// Orchestrators keep the canonical Watch ids (1:1 Watch projection).
 export const PND_WATCH_FLOOR_WORKFLOW_ID = 'system-security-watch-floor';
 export const PND_WATCH_OFFICER_WORKFLOW_ID = 'system-security-watch-officer';
 export const PND_WATCH_DARK_WORKFLOW_ID = 'system-security-watch-dark';
 export const PND_WATCH_DEEP_WORKFLOW_ID = 'system-security-watch-deep';
+
+// Workers (domain workflows invoked by the Orchestrators).
+export const PND_WATCH_FLOOR_WORKER_WORKFLOW_ID = 'system-security-watch-floor-worker';
+export const PND_WATCH_DARK_WORKER_WORKFLOW_ID = 'system-security-watch-dark-worker';
+export const PND_WATCH_DEEP_WORKER_WORKFLOW_ID = 'system-security-watch-deep-worker';
 
 const MANAGEMENT = {
   enablement: 'restorable',
@@ -32,14 +46,30 @@ const VISIBILITY = {
   solutions: ['security'],
 } as const;
 
+/** Workers are invoked by Orchestrators; not surfaced as top-level Watches. */
+const WORKER_VISIBILITY = {
+  selectors: [],
+  solutions: ['security'],
+} as const;
+
 export const PND_WATCH_FLOOR_WORKFLOW = {
   billable: false,
   id: PND_WATCH_FLOOR_WORKFLOW_ID,
   management: MANAGEMENT,
   pluginId: PLUGIN_ID,
-  version: 4,
+  version: 5,
   visibility: VISIBILITY,
-  yaml: WATCH_FLOOR_YAML,
+  yaml: WATCH_FLOOR_ORCHESTRATOR_YAML,
+} as const satisfies ManagedWorkflowDefinition;
+
+export const PND_WATCH_FLOOR_WORKER_WORKFLOW = {
+  billable: false,
+  id: PND_WATCH_FLOOR_WORKER_WORKFLOW_ID,
+  management: MANAGEMENT,
+  pluginId: PLUGIN_ID,
+  version: 1,
+  visibility: WORKER_VISIBILITY,
+  yaml: WATCH_FLOOR_WORKER_YAML,
 } as const satisfies ManagedWorkflowDefinition;
 
 export const PND_WATCH_OFFICER_WORKFLOW = {
@@ -57,9 +87,19 @@ export const PND_WATCH_DARK_WORKFLOW = {
   id: PND_WATCH_DARK_WORKFLOW_ID,
   management: MANAGEMENT,
   pluginId: PLUGIN_ID,
-  version: 4,
+  version: 5,
   visibility: VISIBILITY,
-  yaml: WATCH_DARK_YAML,
+  yaml: WATCH_DARK_ORCHESTRATOR_YAML,
+} as const satisfies ManagedWorkflowDefinition;
+
+export const PND_WATCH_DARK_WORKER_WORKFLOW = {
+  billable: false,
+  id: PND_WATCH_DARK_WORKER_WORKFLOW_ID,
+  management: MANAGEMENT,
+  pluginId: PLUGIN_ID,
+  version: 1,
+  visibility: WORKER_VISIBILITY,
+  yaml: WATCH_DARK_WORKER_YAML,
 } as const satisfies ManagedWorkflowDefinition;
 
 export const PND_WATCH_DEEP_WORKFLOW = {
@@ -67,21 +107,37 @@ export const PND_WATCH_DEEP_WORKFLOW = {
   id: PND_WATCH_DEEP_WORKFLOW_ID,
   management: MANAGEMENT,
   pluginId: PLUGIN_ID,
-  version: 4,
+  version: 5,
   visibility: VISIBILITY,
-  yaml: WATCH_DEEP_YAML,
+  yaml: WATCH_DEEP_ORCHESTRATOR_YAML,
+} as const satisfies ManagedWorkflowDefinition;
+
+export const PND_WATCH_DEEP_WORKER_WORKFLOW = {
+  billable: false,
+  id: PND_WATCH_DEEP_WORKER_WORKFLOW_ID,
+  management: MANAGEMENT,
+  pluginId: PLUGIN_ID,
+  version: 1,
+  visibility: WORKER_VISIBILITY,
+  yaml: WATCH_DEEP_WORKER_YAML,
 } as const satisfies ManagedWorkflowDefinition;
 
 export const PND_WATCH_WORKFLOWS = [
   PND_WATCH_FLOOR_WORKFLOW,
+  PND_WATCH_FLOOR_WORKER_WORKFLOW,
   PND_WATCH_OFFICER_WORKFLOW,
   PND_WATCH_DARK_WORKFLOW,
+  PND_WATCH_DARK_WORKER_WORKFLOW,
   PND_WATCH_DEEP_WORKFLOW,
+  PND_WATCH_DEEP_WORKER_WORKFLOW,
 ] as const;
 
 export const PND_WATCH_WORKFLOW_IDS = [
   PND_WATCH_FLOOR_WORKFLOW_ID,
+  PND_WATCH_FLOOR_WORKER_WORKFLOW_ID,
   PND_WATCH_OFFICER_WORKFLOW_ID,
   PND_WATCH_DARK_WORKFLOW_ID,
+  PND_WATCH_DARK_WORKER_WORKFLOW_ID,
   PND_WATCH_DEEP_WORKFLOW_ID,
+  PND_WATCH_DEEP_WORKER_WORKFLOW_ID,
 ] as const;

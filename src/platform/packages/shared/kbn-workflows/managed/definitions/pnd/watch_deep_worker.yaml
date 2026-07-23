@@ -1,0 +1,66 @@
+version: "1"
+name: Deep Watch Worker
+description: >
+  Deep Watch domain worker. Specialist forensic investigation of escalated
+  threats. Correlates endpoint telemetry with threat-intel IoCs and produces a
+  DRAFT forensic report for specialist review. Never executes response actions.
+enabled: true
+tags:
+  - watch-worker
+  - watch-deep-worker
+triggers:
+  - type: manual
+steps:
+  - name: forensic_investigation
+    type: ai.agent
+    timeout: "15m"
+    with:
+      message: >
+        Use the [/deep-watch-forensics](skill://deep-watch-forensics) skill to
+        perform a forensic investigation of the escalated threat context below.
+        You already have the endpoint telemetry and IoC context you need; reason
+        from the evidence and return a single structured draft report. Do NOT ask
+        questions. Do NOT execute response actions.
+
+        Correlate endpoint telemetry (process events, network connections, file
+        writes, registry modifications) with threat-intel IoCs. Produce:
+        1. Patient-zero identification with first-seen timestamp
+        2. Chronological attack timeline (process tree)
+        3. Lateral movement chain across affected hosts
+        4. Persistence mechanisms enumerated
+        5. IoC validation results (file hashes, C2 IPs, registry keys)
+        6. Draft forensic report with recommended containment actions
+
+        All conclusions are DRAFT - for specialist review only.
+        Recommend containment to the analyst; do NOT execute.
+
+        Escalation context:
+        {{ inputs.escalation | json }}
+      schema:
+        type: object
+        properties:
+          patient_zero:
+            type: string
+          timeline_summary:
+            type: string
+          lateral_movement:
+            type: string
+          persistence:
+            type: string
+          ioc_validation:
+            type: string
+          recommended_containment:
+            type: string
+          draft: { type: boolean }
+        required:
+          - timeline_summary
+          - recommended_containment
+  - name: worker_output
+    type: data.set
+    with:
+      workerRun:
+        watch: watch-deep
+        draft: true
+        report: "{{ steps.forensic_investigation.output.structured_output | json }}"
+        recommendedContainment: "{{ steps.forensic_investigation.output.structured_output.recommended_containment | default: '' }}"
+        investigationId: "{{ inputs.escalation.investigationId }}"
