@@ -65,8 +65,7 @@ export const putContinuousKIExtractionSettingsRoute = createServerRoute({
     // Feature toggles are owned by Pause/Resume while paused — no edits allowed.
     if (
       continuousKiExtraction.enabled !== undefined ||
-      continuousKiExtraction.intervalHours !== undefined ||
-      continuousKiExtraction.excludedStreamPatterns !== undefined
+      continuousKiExtraction.intervalHours !== undefined
     ) {
       await assertNotPaused({ maintenanceService, request });
     }
