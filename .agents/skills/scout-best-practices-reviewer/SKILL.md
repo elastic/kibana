@@ -59,15 +59,15 @@ For every critical check:
 
 ### Check 2 — Scout spec lives where selective testing will run it
 
-**Why:** PR CI schedules a Scout config only when its owning `@kbn/` module (nearest `kibana.jsonc` to the config, resolved via `findPackageForPath`) is in the affected set — the changed modules plus everything that depends on them through `tsconfig.json` `kbn_references`. A spec that exercises module `X` but lives in a package with no `kbn_references` edge to `X` never runs on `X`'s PRs — silent coverage loss until the post-merge suite (slipped #266913/#266915; see #280190).
+**Why:** PR CI schedules a Scout config only when its owning `@kbn/` module (nearest `kibana.jsonc` to the config, resolved via `findPackageForPath`) is in the affected set — the changed modules plus everything that depends on them through `tsconfig.json` `kbn_references`. A spec that exercises module `X` but lives in a package with no `kbn_references` edge to `X` never runs on `X`'s PRs — silent coverage loss until the post-merge suite.
 
-**Detect** — the PR adds/moves a spec (`**/test/scout{,_*}/**/{ui,api}/**/*.spec.ts`) that exercises code outside its host package: `page.gotoApp('security'|...)` / `page.goto('/app/<other>')` or another solution's `data-test-subj` / nav (e.g. `securitySolutionUI:*`, Cases, ML) from a platform/shared plugin; cross-solution tags (e.g. `@local-serverless-security_complete`); or a `<namespace>` that doesn't match the `public/<area>/` it covers (post-#275087).
+**Detect** — the PR adds/moves a spec (`**/test/scout{,_*}/**/{ui,api}/**/*.spec.ts`) that exercises code outside its host package: `page.gotoApp('security'|...)` / `page.goto('/app/<other>')` or another solution's `data-test-subj` / nav (e.g. `securitySolutionUI:*`, Cases, ML) from a platform/shared plugin; cross-solution tags (e.g. `@local-serverless-security_complete`); or a `<namespace>` that doesn't match the `public/<area>/` it covers.
 
 **Verify** — find the spec's host module (nearest `kibana.jsonc`) and the module(s) owning the code it exercises; confirm they're the same or that the host's `tsconfig.json` `kbn_references` transitively reach the covered module. The host plugin must be in `.buildkite/scout_ci_config.yml` `plugins.enabled`.
 
 **Flag when:** the host package doesn't depend on the code under test → relocate the spec + its config set (`*.playwright.config.ts`, `fixtures/`, `tests|parallel_tests/`, `global.setup.ts`) to the owning plugin, fix `kbn_references` + CODEOWNERS, and rerun `node scripts/scout update-test-config-manifests`. Keep only solution-agnostic assertions (chrome/breadcrumb) in the platform plugin.
 
-**Refs:** `src/platform/packages/shared/kbn-scout/src/tests_discovery/{testing_scope,affected_modules}.ts`, `src/platform/packages/private/kbn-scout-info/src/paths.ts`, `.buildkite/scripts/steps/test/scout/resolve_selective_testing.ts`, `.buildkite/scout_ci_config.yml`. Example: #280190 (moved Security nav specs out of platform `navigation`), #275087 (namespace layout).
+**Refs:** `src/platform/packages/shared/kbn-scout/src/tests_discovery/{testing_scope,affected_modules}.ts`, `src/platform/packages/private/kbn-scout-info/src/paths.ts`, `.buildkite/scripts/steps/test/scout/resolve_selective_testing.ts`, `.buildkite/scout_ci_config.yml`.
 
 ### Check 3 — Pick the right test type (and 100% justify it)
 
@@ -83,7 +83,7 @@ For every critical check:
 
 **Flag when:** a UI test's assertions are data-correctness/logic-only, a migration ports an FTR data/logic suite straight into UI, or the type is defended only with "it works / easier / that's how it was" → ask "what does a browser round-trip verify that an API (data/contract) or unit/RTL (logic) test wouldn't?" If nothing, move it down the pyramid; if there's real UI-layer behavior, have the author name it. Move only the offending assertion when the rest is a legit flow.
 
-**Refs:** `docs/extend/testing/scout-best-practices.md#pick-the-right-test-type` (selection table), `docs/extend/testing/migrate-tests.md#dont-migrate-blindly`, `docs/extend/testing/ui-best-practices.md`. Examples: #277094 (r3552675082 — accepted UI-logic justification for a flyout), #279879 (r3623333562 — pure function → unit test, not UI).
+**Refs:** `docs/extend/testing/scout-best-practices.md#pick-the-right-test-type` (selection table), `docs/extend/testing/migrate-tests.md#dont-migrate-blindly`, `docs/extend/testing/ui-best-practices.md`.
 
 ## Scope (be comprehensive)
 
