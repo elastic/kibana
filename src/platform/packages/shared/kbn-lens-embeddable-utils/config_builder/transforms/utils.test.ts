@@ -11,6 +11,7 @@ import {
   buildDatasourceStates,
   buildReferences,
   getDataSourceIndex,
+  getAdHocDataViewSpec,
   addLayerColumn,
   operationFromColumn,
   buildDataSourceState,
@@ -19,6 +20,7 @@ import {
   generateApiLayer,
   filtersAndQueryToLensState,
   filtersAndQueryToApiFormat,
+  buildDataSourceStateNoESQL,
 } from './utils';
 import type {
   GenericIndexPatternColumn,
@@ -106,6 +108,29 @@ describe('getDatasetIndex', () => {
         "timeFieldName": undefined,
       }
     `);
+  });
+
+  test('threads allow_hidden_indices into allowHidden when set', () => {
+    const result = getDataSourceIndex({
+      type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+      index_pattern: 'my-hidden-*',
+      time_field: '@timestamp',
+      allow_hidden_indices: true,
+    });
+    expect(result).toEqual({
+      index: 'my-hidden-*',
+      timeFieldName: '@timestamp',
+      allowHidden: true,
+    });
+  });
+
+  test('omits allowHidden when allow_hidden_indices is not set', () => {
+    const result = getDataSourceIndex({
+      type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+      index_pattern: 'logs-*',
+      time_field: '@timestamp',
+    });
+    expect(result).not.toHaveProperty('allowHidden');
   });
 });
 
@@ -456,6 +481,93 @@ describe('buildDataSourceState', () => {
         "type": "data_view_spec",
       }
     `);
+  });
+});
+
+describe('buildDataSourceStateNoESQL', () => {
+  test('emits allow_hidden_indices for an adhoc dataview with allowHidden', () => {
+    const formBasedLayer = {
+      indexPatternId: 'my-adhoc-dataview-id',
+      columns: {},
+      columnOrder: [],
+    } as FormBasedLayer;
+
+    const result = buildDataSourceStateNoESQL(
+      formBasedLayer,
+      'layer_1',
+      {
+        'my-adhoc-dataview-id': {
+          index: 'test-id',
+          title: 'my-hidden-*',
+          timeFieldName: '@timestamp',
+          allowHidden: true,
+        },
+      },
+      [],
+      [
+        {
+          type: 'index-pattern',
+          id: 'my-adhoc-dataview-id',
+          name: 'indexpattern-datasource-layer-layer_1',
+        },
+      ]
+    );
+    expect(result).toEqual({
+      type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+      index_pattern: 'my-hidden-*',
+      time_field: '@timestamp',
+      allow_hidden_indices: true,
+    });
+  });
+
+  test('omits allow_hidden_indices for an adhoc dataview without allowHidden', () => {
+    const formBasedLayer = {
+      indexPatternId: 'my-adhoc-dataview-id',
+      columns: {},
+      columnOrder: [],
+    } as FormBasedLayer;
+
+    const result = buildDataSourceStateNoESQL(
+      formBasedLayer,
+      'layer_1',
+      {
+        'my-adhoc-dataview-id': {
+          index: 'test-id',
+          title: 'logs-*',
+          timeFieldName: '@timestamp',
+        },
+      },
+      [],
+      [
+        {
+          type: 'index-pattern',
+          id: 'my-adhoc-dataview-id',
+          name: 'indexpattern-datasource-layer-layer_1',
+        },
+      ]
+    );
+    expect(result).not.toHaveProperty('allow_hidden_indices');
+  });
+});
+
+describe('getAdHocDataViewSpec', () => {
+  test('preserves allowHidden when true', () => {
+    const spec = getAdHocDataViewSpec({
+      type: 'adHocDataView',
+      index: 'my-hidden-*',
+      timeFieldName: '@timestamp',
+      allowHidden: true,
+    });
+    expect(spec).toHaveProperty('allowHidden', true);
+  });
+
+  test('omits allowHidden when not provided', () => {
+    const spec = getAdHocDataViewSpec({
+      type: 'adHocDataView',
+      index: 'logs-*',
+      timeFieldName: '@timestamp',
+    });
+    expect(spec).not.toHaveProperty('allowHidden');
   });
 });
 
