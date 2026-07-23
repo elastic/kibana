@@ -22,13 +22,13 @@ Important: Do not post GitHub comments unless explicitly stated.
 3. Removed/previous tests (if this is a migration) to verify behavior parity.
 4. Scout docs (open only what you need — best practices are split by test type so you can skip the irrelevant half):
 
-   - **General best practices** (always relevant): `docs/extend/scout/best-practices.md`
-   - **UI-only best practices** (open when reviewing UI tests): `docs/extend/scout/ui-best-practices.md`
-   - **API-only best practices** (open when reviewing API tests): `docs/extend/scout/api-best-practices.md`
-   - Core concepts & fixtures: `docs/extend/scout/core-concepts.md`, `docs/extend/scout/fixtures.md`
-   - Reuse surfaces: `docs/extend/scout/page-objects.md`, `docs/extend/scout/api-services.md`
-   - Type-specific guides: `docs/extend/scout/write-ui-tests.md`, `docs/extend/scout/write-api-tests.md`
-   - As needed: `docs/extend/scout/api-auth.md`, `docs/extend/scout/browser-auth.md`, `docs/extend/scout/parallelism.md`, `docs/extend/scout/deployment-tags.md`, `docs/extend/scout/a11y-checks.md`, `docs/extend/scout/debugging.md`, `docs/extend/scout/run-tests.md`
+   - **General best practices** (always relevant): `docs/extend/testing/scout-best-practices.md`
+   - **UI-only best practices** (open when reviewing UI tests): `docs/extend/testing/ui-best-practices.md`
+   - **API-only best practices** (open when reviewing API tests): `docs/extend/testing/api-best-practices.md`
+   - Core concepts & fixtures: `docs/extend/testing/scout.md`, `docs/extend/testing/fixtures.md`
+   - Reuse surfaces: `docs/extend/testing/page-objects.md`, `docs/extend/testing/api-services.md`
+   - Type-specific guides: `docs/extend/testing/write-ui-tests.md`, `docs/extend/testing/write-api-tests.md`
+   - As needed: `docs/extend/testing/api-auth.md`, `docs/extend/testing/browser-auth.md`, `docs/extend/testing/parallelism.md`, `docs/extend/testing/deployment-tags.md`, `docs/extend/testing/a11y-checks.md`, `docs/extend/testing/debugging.md`, `docs/extend/testing/run-scout-tests.md`
 
    **Rule of thumb:** always read the general best practices, then open **only** the UI-specific file for UI reviews or the API-specific file for API reviews. If a PR mixes UI and API specs, open both.
 
@@ -36,16 +36,16 @@ Important: Do not post GitHub comments unless explicitly stated.
 
 - Don’t limit the review to the diff. Look for duplication and missed reuse by scanning:
   - existing Scout specs in the same area (and similar suites elsewhere in the repo)
-  - available fixtures (`docs/extend/scout/fixtures.md` + local `test/scout/**/fixtures`)
+  - available fixtures (`docs/extend/testing/fixtures.md` + local `test/scout/**/fixtures`)
   - existing page objects, API services, and fixtures (in `@kbn/scout`, solution Scout packages, and plugin-local `test/scout/**`) before suggesting brand-new helpers
 
 ### Quick checklist
 
 Checklist items are tagged with the document they're detailed in:
 
-- **[general]** → `docs/extend/scout/best-practices.md` (applies to both UI and API tests)
-- **[ui]** → `docs/extend/scout/ui-best-practices.md`
-- **[api]** → `docs/extend/scout/api-best-practices.md`
+- **[general]** → `docs/extend/testing/scout-best-practices.md` (applies to both UI and API tests)
+- **[ui]** → `docs/extend/testing/ui-best-practices.md`
+- **[api]** → `docs/extend/testing/api-best-practices.md`
 
 Open only the docs relevant to the test type(s) under review.
 
@@ -54,7 +54,8 @@ Open only the docs relevant to the test type(s) under review.
 - **[api]** **Fixture boundaries**: `apiClient` for the endpoint under test; `apiServices`/`kbnClient` for setup/teardown only; correct auth + common headers.
 - **[api]** **Correctness**: guardrail assertions before dereferencing response fields; validate contract + side effects; stable error assertions.
 - **[ui]** **UI scope**: UI tests should focus on user interactions and rendering; avoid “data correctness” assertions (for example exact API response shapes or exact table cell values) unless the UI behavior depends on them. Prefer Scout API tests (or unit/integration) for data correctness coverage.
-- **[general]** **Isolation**: parallel-safe data and resilient cleanup in hooks; no reliance on file ordering or shared mutable state.
+- **[ui]** **Page objects**: Encapsulate multi-step interactions and reused sequences in page objects — specs should primarily hold assertions (`expect`), test flow (`test.step`), and page-object method calls. Short inline locator calls for simple one-off assertions (e.g. a single label or nav-link check) are acceptable. Flag raw locators when the interaction is complex enough to benefit from abstraction or is duplicated across specs. Extract all locators as `readonly` properties in the constructor; no inline locator creation inside methods.
+- **[general]** **Isolation**: parallel-safe data; resilient cleanup in `afterAll`/`afterEach`; defensive cleanup in `beforeAll` for failed-run leftovers; `scoutSpace.savedObjects.cleanStandardList()` as catch-all after domain-specific cleanup; no reliance on file ordering or shared mutable state.
 - **[general]** **RBAC / realism**: minimal permissions (avoid `admin` unless required); space-aware behavior covered or explicitly out of scope.
 - **[ui]** **Flake traps**: avoid `waitForTimeout()` and time-based assertions/retries; rely on auto-waiting + explicit readiness signals. Some locators are restricted by `@kbn/eslint/scout_no_locators` (e.g. `globalLoadingIndicator`).
 - **[general]** **Cost**: avoid repeating expensive setup; consider a global setup hook for shared one-time operations.
@@ -96,6 +97,16 @@ When in doubt, prefer a lower severity. Optimization suggestions (efficiency imp
   - Verify suite wiring/discovery (new specs are picked up by Scout/Playwright config; no orphaned `loadTestFile()`).
   - Ensure any intentional de-scopes are explicit, and that tags/permissions remain equivalent and cloud/serverless compatible where applicable.
 - **Output**: include the “Migration parity” section only when action is required; otherwise omit it.
+
+### Kibana / EUI component patterns (UI)
+
+These EUI/Kibana component behaviours are non-obvious and cannot be inferred from documentation alone.
+
+- **`QueryStringInput`**: `fill()` races with React prop sync; use `pressSequentially()` instead.
+- **`EuiBasicTable` empty state**: always renders a phantom "no items found" row — assert `toContainText('No items found')`, never `toHaveCount(0)`.
+- **EUI disabled button tooltip**: hover the `span:has([data-test-subj="..."])` wrapper, not the button itself.
+- **EUI CSS class selectors** (`.euiTableRow`, `.euiToolTipAnchor`, etc.): internal to EUI, change between versions — use `data-test-subj` or ARIA roles.
+- **DOM instability from app bugs**: use `dispatchEvent('click')` over `{ force: true }`; document the bug location in a comment.
 
 ## Output
 

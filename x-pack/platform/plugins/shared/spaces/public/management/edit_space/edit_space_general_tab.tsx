@@ -130,7 +130,7 @@ export const EditSpaceSettingsTab: React.FC<Props> = ({ space, features, history
   );
 
   const onChangeFeatures = useCallback(
-    (updatedSpace: Partial<Space>) => {
+    (updatedSpace: CustomizeSpaceFormValues) => {
       setFormValues({ ...formValues, ...updatedSpace });
       setIsDirty(true);
       setShowUserImpactWarning(true);
@@ -139,7 +139,7 @@ export const EditSpaceSettingsTab: React.FC<Props> = ({ space, features, history
   );
 
   const onSolutionViewChange = useCallback(
-    (updatedSpace: Partial<Space>) => {
+    (updatedSpace: CustomizeSpaceFormValues) => {
       setSolution(updatedSpace.solution);
 
       const storedFeatureVisibility = storedFeatureVisibilityRef.current;
@@ -160,7 +160,7 @@ export const EditSpaceSettingsTab: React.FC<Props> = ({ space, features, history
   );
 
   const onProjectRoutingChange = useCallback(
-    (updatedSpace: Partial<Space>) => {
+    (updatedSpace: CustomizeSpaceFormValues) => {
       onChangeSpaceSettings(updatedSpace);
     },
     [onChangeSpaceSettings]

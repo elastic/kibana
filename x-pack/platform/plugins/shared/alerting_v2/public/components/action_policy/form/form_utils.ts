@@ -34,6 +34,7 @@ export const toFormState = (response: ActionPolicyResponse): ActionPolicyFormSta
     throttleStrategy: response.throttle?.strategy ?? DEFAULT_STRATEGY_FOR_MODE[groupingMode],
     throttleInterval: response.throttle?.interval ?? '',
     destinations: response.destinations.map((d) => ({ type: d.type, id: d.id })),
+    inlineActions: [],
   };
 };
 

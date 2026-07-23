@@ -12,7 +12,7 @@ import {
   coreMock,
   savedObjectsClientMock,
 } from '@kbn/core/server/mocks';
-import { produce } from 'immer';
+import { produce } from 'immer-v9';
 import type {
   KibanaRequest,
   SavedObjectsClientContract,
@@ -4082,6 +4082,7 @@ describe('Package policy service', () => {
     describe('remove protections', () => {
       beforeEach(() => {
         mockAgentPolicyService.bumpRevision.mockReset();
+        jest.mocked(licenseService.hasAtLeast).mockReturnValue(true);
       });
 
       const generateAttributes = (overrides: Record<string, unknown> = {}) => ({
@@ -4283,19 +4284,19 @@ describe('Package policy service', () => {
           testPolicyIds,
           [],
           // Add package override for both old and new policies
-          { package: { name: 'not-endpoint', title: 'Other', version: '1.0.0' } }
+          { package: { name: 'apache', title: 'Apache', version: '1.0.0' } }
         );
 
         await packagePolicyService.update(
           savedObjectsClient,
           elasticsearchClient,
           generateSO({
-            package: { name: 'not-endpoint', title: 'Other', version: '1.0.0' },
+            package: { name: 'apache', title: 'Apache', version: '1.0.0' },
           }).id,
           generateAttributes({
             policy_ids: [],
             name: 'test-package-policy-1',
-            package: { name: 'not-endpoint', title: 'Other', version: '1.0.0' },
+            package: { name: 'apache', title: 'Apache', version: '1.0.0' },
           })
         );
 
@@ -4312,7 +4313,7 @@ describe('Package policy service', () => {
         const savedObjectsClient = createSavedObjectClientMock();
         const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
-        // Mock existing package policy
+        // Mock existing package policy with same package name as the update ('test')
         savedObjectsClient.bulkGet.mockResolvedValue({
           saved_objects: [
             {
@@ -4320,7 +4321,10 @@ describe('Package policy service', () => {
               type: 'abcd',
               references: [],
               version: 'test',
-              attributes: createPackagePolicyMock(),
+              attributes: {
+                ...createPackagePolicyMock(),
+                package: { name: 'test', title: 'Test', version: '0.0.1' },
+              },
             },
           ],
         });
@@ -4355,6 +4359,108 @@ describe('Package policy service', () => {
             }
           )
         ).rejects.toThrowError(/Input tcp in test is not allowed for deployment mode 'agentless'/);
+      });
+    });
+
+    describe('bumpRevision option', () => {
+      beforeEach(() => {
+        mockAgentPolicyService.bumpRevision.mockReset();
+        jest.mocked(licenseService.hasAtLeast).mockReturnValue(true);
+      });
+
+      const generateAttributes = (overrides: Record<string, unknown> = {}) => ({
+        name: 'test-package-policy',
+        description: '',
+        namespace: 'default',
+        enabled: true,
+        revision: 1,
+        policy_ids: ['test-agent-policy-1', 'test-agent-policy-2'],
+        package: {
+          name: 'test',
+          title: 'Test',
+          version: '0.9.0',
+        },
+        inputs: [],
+        ...overrides,
+      });
+
+      const generateSO = (overrides: Record<string, unknown> = {}) => ({
+        id: 'existing-package-policy',
+        type: 'ingest-package-policies',
+        references: [],
+        version: '1.0.0',
+        attributes: generateAttributes(overrides),
+      });
+
+      const policyIds = ['test-agent-policy-1', 'test-agent-policy-2'];
+
+      const setupSOClientMocks = (
+        savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>
+      ) => {
+        savedObjectsClient.bulkGet.mockResolvedValue({
+          saved_objects: [generateSO({ policy_ids: policyIds })],
+        });
+        savedObjectsClient.get.mockResolvedValue(generateSO({ policy_ids: policyIds }));
+        savedObjectsClient.update.mockResolvedValue(generateSO({ policy_ids: policyIds }));
+      };
+
+      const callUpdate = async (
+        savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>,
+        elasticsearchClient: ElasticsearchClientMock,
+        options?: { bumpRevision?: boolean }
+      ) => {
+        await packagePolicyService.update(
+          savedObjectsClient,
+          elasticsearchClient,
+          generateSO().id,
+          generateAttributes({ policy_ids: policyIds }),
+          options
+        );
+      };
+
+      it('bumps associated agent policy revisions by default', async () => {
+        const savedObjectsClient = createSavedObjectClientMock();
+        const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+        setupSOClientMocks(savedObjectsClient);
+
+        await callUpdate(savedObjectsClient, elasticsearchClient);
+
+        expect(mockAgentPolicyService.bumpRevision).toHaveBeenCalledTimes(policyIds.length);
+      });
+
+      it('bumps associated agent policy revisions when bumpRevision is true', async () => {
+        const savedObjectsClient = createSavedObjectClientMock();
+        const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+        setupSOClientMocks(savedObjectsClient);
+
+        await callUpdate(savedObjectsClient, elasticsearchClient, { bumpRevision: true });
+
+        expect(mockAgentPolicyService.bumpRevision).toHaveBeenCalledTimes(policyIds.length);
+      });
+
+      it('does not bump associated agent policy revisions when bumpRevision is false', async () => {
+        const savedObjectsClient = createSavedObjectClientMock();
+        const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+        setupSOClientMocks(savedObjectsClient);
+
+        await callUpdate(savedObjectsClient, elasticsearchClient, { bumpRevision: false });
+
+        expect(mockAgentPolicyService.bumpRevision).not.toHaveBeenCalled();
+      });
+
+      it('still bumps the package policy own revision when bumpRevision is false', async () => {
+        const savedObjectsClient = createSavedObjectClientMock();
+        const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+        setupSOClientMocks(savedObjectsClient);
+
+        await callUpdate(savedObjectsClient, elasticsearchClient, { bumpRevision: false });
+
+        expect(savedObjectsClient.update).toHaveBeenCalledWith(
+          expect.anything(),
+          generateSO().id,
+          expect.objectContaining({ revision: 2 }),
+          expect.anything()
+        );
       });
     });
   });
@@ -4501,6 +4607,48 @@ describe('Package policy service', () => {
       expect(res.failedPolicies[0].packagePolicy).toEqual(toUpdate);
       expect(res.failedPolicies[0].error).toEqual(
         new PackagePolicyValidationError(`cat is a frozen variable and cannot be modified`)
+      );
+    });
+
+    it('should put item in failedPolicies when package name is changed', async () => {
+      const savedObjectsClient = createSavedObjectClientMock();
+      const mockPackagePolicy = createPackagePolicyMock(); // package.name: 'endpoint'
+
+      savedObjectsClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'test',
+            type: 'abcd',
+            references: [],
+            version: 'test',
+            attributes: mockPackagePolicy,
+          },
+        ],
+      });
+
+      savedObjectsClient.bulkUpdate.mockResolvedValue({ saved_objects: [] });
+
+      const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      // Change package name from 'endpoint' to 'aws' — both known to mocks so the
+      // outer package-info fetch succeeds, but the per-item guard fires before the
+      // asset-lookup step and puts the item in failedPolicies.
+      const toUpdate = {
+        ...mockPackagePolicy,
+        package: { name: 'aws', title: 'AWS', version: '0.3.3' },
+      };
+
+      const res = await packagePolicyService.bulkUpdate(savedObjectsClient, elasticsearchClient, [
+        toUpdate,
+      ]);
+
+      expect(res.failedPolicies).toHaveLength(1);
+      expect(res.updatedPolicies).toHaveLength(0);
+      expect(res.failedPolicies[0].packagePolicy).toEqual(toUpdate);
+      expect(res.failedPolicies[0].error).toEqual(
+        new PackagePolicyValidationError(
+          'Cannot change the package of an existing integration policy. Create a new policy with the desired package.'
+        )
       );
     });
 
@@ -5534,16 +5682,16 @@ describe('Package policy service', () => {
         // All non-endpoint policies
         const nonEndpointPoliciesSO = [
           generateSO({
-            name: 'not-endpoint-policy',
+            name: 'apache-policy',
             policy_ids: ['test-agent-policy-1'],
-            id: 'not-endpoint-1',
-            package: { name: 'not-endpoint', title: 'Other', version: '1.0.0' },
+            id: 'apache-1',
+            package: { name: 'apache', title: 'Apache', version: '1.0.0' },
           }),
           generateSO({
-            name: 'not-endpoint-policy-2',
+            name: 'apache-policy-2',
             policy_ids: ['test-agent-policy-2'],
-            id: 'not-endpoint-2',
-            package: { name: 'not-endpoint', title: 'Other', version: '1.0.0' },
+            id: 'apache-2',
+            package: { name: 'apache', title: 'Apache', version: '1.0.0' },
           }),
         ];
 
@@ -5581,10 +5729,10 @@ describe('Package policy service', () => {
             package: { name: 'endpoint', title: 'Elastic Endpoint', version: '0.9.0' },
           }),
           generateSO({
-            name: 'not-endpoint-policy',
+            name: 'apache-policy',
             policy_ids: ['test-agent-policy-2'],
-            id: 'not-endpoint-1',
-            package: { name: 'not-endpoint', title: 'Other', version: '1.0.0' },
+            id: 'apache-1',
+            package: { name: 'apache', title: 'Apache', version: '1.0.0' },
           }),
         ];
         const mixedTestedPolicies = [
@@ -13698,6 +13846,54 @@ describe('_validateRestrictedFieldsNotModifiedOrThrow()', () => {
       _validateRestrictedFieldsNotModifiedOrThrow({
         oldPackagePolicy: makePolicyWithType('logs'),
         packagePolicyUpdate: makePolicyWithType('logs'),
+      })
+    ).not.toThrow();
+  });
+
+  it('should throw if package name is changed', () => {
+    const oldPackagePolicy = createInputPkgPolicy({
+      namespace: 'default',
+      dataset: 'custom_logs.logs',
+    });
+    expect(() =>
+      _validateRestrictedFieldsNotModifiedOrThrow({
+        oldPackagePolicy,
+        packagePolicyUpdate: {
+          ...oldPackagePolicy,
+          package: { name: 'different_package', title: 'Different', version: '1.0.0' },
+        },
+      })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"Cannot change the package of an existing integration policy. Create a new policy with the desired package."`
+    );
+  });
+
+  it('should not throw if package name is unchanged', () => {
+    const oldPackagePolicy = createInputPkgPolicy({
+      namespace: 'default',
+      dataset: 'custom_logs.logs',
+    });
+    expect(() =>
+      _validateRestrictedFieldsNotModifiedOrThrow({
+        oldPackagePolicy,
+        packagePolicyUpdate: {
+          ...oldPackagePolicy,
+          package: { name: 'custom_logs', title: 'Custom Logs', version: '2.0.0' },
+        },
+      })
+    ).not.toThrow();
+  });
+
+  it('should not throw if package is omitted from update', () => {
+    const oldPackagePolicy = createInputPkgPolicy({
+      namespace: 'default',
+      dataset: 'custom_logs.logs',
+    });
+    const { package: _pkg, ...updateWithoutPackage } = oldPackagePolicy;
+    expect(() =>
+      _validateRestrictedFieldsNotModifiedOrThrow({
+        oldPackagePolicy,
+        packagePolicyUpdate: updateWithoutPackage,
       })
     ).not.toThrow();
   });

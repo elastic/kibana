@@ -122,12 +122,30 @@ describe('TextBasedDimensionEditor', () => {
         {},
         { from: defaultProps.dateRange.fromDate, to: defaultProps.dateRange.toDate },
         undefined,
-        undefined, // No index patterns
-        defaultProps.esqlVariables
+        undefined,
+        defaultProps.esqlVariables,
+        undefined
       );
     });
 
     expect(screen.getByTestId('text-based-dimension-field')).toBeInTheDocument();
+  });
+
+  it('passes isApproximate to fetchFieldsFromESQLExpression', async () => {
+    render(<TextBasedDimensionEditor {...defaultProps} isApproximate={true} />);
+    await waitToLoad();
+
+    await waitFor(() => {
+      expect(fetchFieldsFromESQLExpression).toHaveBeenCalledWith(
+        { esql: 'FROM my_data | limit 0' },
+        {},
+        { from: defaultProps.dateRange.fromDate, to: defaultProps.dateRange.toDate },
+        undefined,
+        undefined,
+        defaultProps.esqlVariables,
+        true
+      );
+    });
   });
 
   it('should set inMetricDimension when selecting a field in a metric dimension', async () => {

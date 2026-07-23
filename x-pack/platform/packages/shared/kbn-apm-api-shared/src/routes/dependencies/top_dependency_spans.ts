@@ -4,12 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
-import { toNumberRt } from '@kbn/io-ts-utils';
+import { z } from '@kbn/zod/v4';
 import type { AgentName, EventOutcome } from '@kbn/apm-types';
-import { environmentRt } from '@kbn/apm-types';
+import { environmentSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
-import { rangeRt, kueryRt } from '../../default_api_types';
+import { rangeSchema, kuerySchema } from '../../default_api_types';
 
 export interface DependencySpan {
   '@timestamp': number;
@@ -31,13 +30,16 @@ export interface TopDependencySpansResponse {
 
 export const topDependencySpansRoute = defineRoute<TopDependencySpansResponse>()({
   endpoint: 'GET /internal/apm/dependencies/operations/spans',
-  params: t.type({
-    query: t.intersection([
-      rangeRt,
-      environmentRt,
-      kueryRt,
-      t.type({ dependencyName: t.string, spanName: t.string }),
-      t.partial({ sampleRangeFrom: toNumberRt, sampleRangeTo: toNumberRt }),
-    ]),
+  params: z.object({
+    query: rangeSchema
+      .merge(environmentSchema)
+      .merge(kuerySchema)
+      .merge(z.object({ dependencyName: z.string(), spanName: z.string() }))
+      .merge(
+        z.object({
+          sampleRangeFrom: z.coerce.number().optional(),
+          sampleRangeTo: z.coerce.number().optional(),
+        })
+      ),
   }),
 });

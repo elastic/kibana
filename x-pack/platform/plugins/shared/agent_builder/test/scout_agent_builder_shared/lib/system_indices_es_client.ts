@@ -6,11 +6,16 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
+import { SYSTEM_INDICES_SUPERUSER, SYSTEM_INDICES_SUPERUSER_PASSWORD } from '@kbn/es';
 import type { ScoutTestConfig } from '@kbn/scout';
-import { systemIndicesSuperuser } from '@kbn/test';
 import { createEsClientForTesting } from '@kbn/test-es-server';
 
 const SYSTEM_INDICES_SUPERUSER_ROLE = 'system_indices_superuser';
+
+const systemIndicesSuperuser = {
+  username: SYSTEM_INDICES_SUPERUSER,
+  password: SYSTEM_INDICES_SUPERUSER_PASSWORD,
+};
 
 /**
  * Returns an ES client authenticated as `system_indices_superuser`, which has

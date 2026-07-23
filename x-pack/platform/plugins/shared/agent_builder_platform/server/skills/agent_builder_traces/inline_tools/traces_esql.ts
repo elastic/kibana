@@ -24,13 +24,14 @@ const tracesEsqlSchema = z.object({
     .string()
     .max(1024)
     .describe(
-      'Natural language question about Agent Builder OTel traces (token usage, latency, tool calls, errors, etc.).'
+      'Natural language question about Agent Builder OTel traces (token usage, latency, tool calls, errors, or captured message content).'
     ),
 });
 
-const TRACES_QUERY_RULES = `
-This is a set of rules that you must follow strictly when generating ES|QL for Agent Builder traces:
-* Always query the provided traces index exactly — do not use a traces-agent_builder.otel-* wildcard.
+const buildTracesQueryRules = (tracesIndex: string) =>
+  `
+This is a set of rules that you must follow strictly when generating ES|QL for Agent Builder trace spans:
+* Use ONLY this index: ${tracesIndex} — do not use a traces-agent_builder.otel-* wildcard or query any other index.
 * Always constrain the time range with @timestamp to the window the user asked about (default to the last 24 hours when they do not specify one).
 * LLM / token usage spans: span.name LIKE "chat *"
 * Tool call spans: span.name LIKE "execute_tool *"
@@ -40,23 +41,30 @@ This is a set of rules that you must follow strictly when generating ES|QL for A
 * Model: attributes.gen_ai.request.model
 * Provider: attributes.gen_ai.provider.name (do not use attributes.gen_ai.system)
 * Agent id: attributes.gen_ai.agent.id
+* Conversation id: attributes.gen_ai.conversation.id
 * duration is in nanoseconds — divide by 1000000000.0 for seconds
 * status.code == "Error" marks failed spans
 * For percentage calculations, multiply by 100.0 before dividing (e.g. ROUND((total - errors) * 100.0 / total, 2)) to avoid integer division
-* Prefer compact STATS aggregations over returning raw spans
+* Message content (user prompts, LLM responses, system prompts, tool results) lives on chat spans (span.name LIKE "chat *") as JSON-string attributes, not on a separate logs index:
+  - attributes.gen_ai.input.messages — chat history sent to the model (user prompts and prior assistant/tool turns). Requires agentBuilder:tracing:includeUserPrompts / includeLlmResponses / includeToolDetails for the respective roles.
+  - attributes.gen_ai.output.messages — the model's response(s). Requires agentBuilder:tracing:includeLlmResponses.
+  - attributes.gen_ai.system_instructions — system prompt. Requires agentBuilder:tracing:includeSystemPrompt.
+* These attributes are JSON strings (arrays of { role, parts:[...] }); message text is not indexed as individual fields, so KEEP the whole attribute and let the caller parse it. Do not invent an attributes.content field.
+* Prefer compact STATS aggregations over returning raw spans unless the user asked for individual span details or message text
 `.trim();
 
 export const createTracesEsqlTool = (): BuiltinSkillBoundedTool<typeof tracesEsqlSchema> => ({
   id: AGENT_BUILDER_TRACES_ESQL_INLINE_TOOL_ID,
   type: ToolType.builtin,
   description:
-    'Generate and execute ES|QL against the current space Agent Builder OTel traces index. ' +
-    'Use this for all Agent Builder trace questions — it scopes queries to the active Kibana space automatically.',
+    'Generate and execute ES|QL against the current space Agent Builder OTel traces index ' +
+    '(span telemetry and captured message content). Scopes queries to the active Kibana space automatically.',
   schema: tracesEsqlSchema,
   confirmation: { askUser: 'never' },
   handler: async ({ prompt }, context) => {
     const { esClient, events, modelProvider, logger, spaceId } = context;
     const tracesIndex = buildAgentBuilderTracesIndexPattern(spaceId);
+    const additionalContext = buildTracesQueryRules(tracesIndex);
 
     try {
       const model = await modelProvider.getDefaultModel();
@@ -67,7 +75,7 @@ export const createTracesEsqlTool = (): BuiltinSkillBoundedTool<typeof tracesEsq
         nlQuery: prompt,
         esClient: esClient.asCurrentUser,
         index: tracesIndex,
-        additionalContext: TRACES_QUERY_RULES,
+        additionalContext,
       });
 
       if (esqlResponse.error) {
@@ -85,7 +93,7 @@ export const createTracesEsqlTool = (): BuiltinSkillBoundedTool<typeof tracesEsq
           tool_result_id: getToolResultId(),
           type: ToolResultType.other,
           data: {
-            message: `Agent Builder traces index for this space: ${tracesIndex}`,
+            message: `Agent Builder traces index for this space: ${tracesIndex}.`,
           },
         },
       ];

@@ -44,6 +44,7 @@ describe('EndpointAgentStatusClient', () => {
     (endpointAppContextServiceMock.getEndpointMetadataService as jest.Mock).mockReturnValue(
       metadataMocks.endpointMetadataService
     );
+    getPendingActionsSummaryMock.mockResolvedValue([]);
     constructorOptions = {
       spaceId: 'default',
       endpointService: endpointAppContextServiceMock,

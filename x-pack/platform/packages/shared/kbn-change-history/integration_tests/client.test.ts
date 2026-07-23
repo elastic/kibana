@@ -11,7 +11,7 @@ import { ToolingLog } from '@kbn/tooling-log';
 import type { EsTestCluster } from '@kbn/test';
 import { createTestEsCluster } from '@kbn/test';
 import { FLAGS } from '../src/constants';
-import { ChangeHistoryClient, ILM_POLICY_NAME } from '..';
+import { ChangeHistoryClient } from '..';
 import { DATA_STREAM_NAME } from '../src/client';
 import type { ObjectChange } from '..';
 import { sha256, REDACTED } from '../src/utils';
@@ -19,6 +19,7 @@ import { sha256, REDACTED } from '../src/utils';
 const KIBANA_SPACE = 'default';
 const TEST_MODULE = 'test-module';
 const TEST_DATASET = 'test-dataset';
+const ES_CLIENT_OPTIONS = { headers: { 'x-elastic-product-origin': 'kibana' } };
 
 const defaultLogOpts = {
   action: 'rule_create',
@@ -30,6 +31,7 @@ const defaultLogOpts = {
 
 describe('ChangeHistoryClient', () => {
   let esServer: EsTestCluster;
+  let esClient: Client;
   const logger = loggingSystemMock.createLogger();
 
   const defaultCostructorOpts = {
@@ -40,10 +42,8 @@ describe('ChangeHistoryClient', () => {
   };
 
   const cleanup = async () => {
-    const client = esServer.getClient();
-    await client.indices.deleteDataStream({ name: DATA_STREAM_NAME }).catch(() => {});
-    await client.indices.deleteIndexTemplate({ name: DATA_STREAM_NAME }).catch(() => {});
-    await client.ilm.deleteLifecycle({ name: ILM_POLICY_NAME }).catch(() => {});
+    await esClient.indices.deleteDataStream({ name: DATA_STREAM_NAME }).catch(() => {});
+    await esClient.indices.deleteIndexTemplate({ name: DATA_STREAM_NAME }).catch(() => {});
   };
 
   beforeAll(async () => {
@@ -53,6 +53,7 @@ describe('ChangeHistoryClient', () => {
       log: new ToolingLog({ writeTo: process.stdout, level: 'debug' }),
     });
     await esServer.start();
+    esClient = esServer.getClient().child(ES_CLIENT_OPTIONS);
   });
 
   afterAll(async () => {
@@ -67,7 +68,7 @@ describe('ChangeHistoryClient', () => {
   describe('initialize', () => {
     const getEsDataStreams = async (name: string) => {
       try {
-        const res = await esServer.getClient().indices.getDataStream({ name });
+        const res = await esClient.indices.getDataStream({ name });
         return res?.data_streams?.map((s) => s.name) ?? [];
       } catch (error) {
         if (
@@ -86,7 +87,7 @@ describe('ChangeHistoryClient', () => {
 
       expect(await getEsDataStreams(DATA_STREAM_NAME)).toHaveLength(0);
 
-      await client.initialize(esServer.getClient());
+      await client.initialize(esClient);
       expect(client.isInitialized()).toBe(true);
 
       expect(await getEsDataStreams(DATA_STREAM_NAME)).toEqual([DATA_STREAM_NAME]);
@@ -96,69 +97,14 @@ describe('ChangeHistoryClient', () => {
       expect(result.items).toEqual([]);
     });
 
-    describe('ILM policy', () => {
-      const getInstalledPolicy = async () => {
-        const res = await esServer.getClient().ilm.getLifecycle({ name: ILM_POLICY_NAME });
-        return res[ILM_POLICY_NAME]?.policy;
-      };
-      const getBackingIndexLifecycleName = async () => {
-        const settings = await esServer
-          .getClient()
-          .indices.getSettings({ index: DATA_STREAM_NAME, expand_wildcards: ['hidden', 'open'] });
-        const [first] = Object.values(settings);
-        return first?.settings?.index?.lifecycle?.name;
-      };
+    it('enrolls the data stream in DSL lifecycle without ILM or data_retention', async () => {
+      const client = new ChangeHistoryClient(defaultCostructorOpts);
+      await client.initialize(esClient);
 
-      it('installs the ILM policy and points the index template at it', async () => {
-        const esClient = esServer.getClient();
-        await expect(esClient.ilm.getLifecycle({ name: ILM_POLICY_NAME })).rejects.toMatchObject({
-          meta: { statusCode: 404 },
-        });
-
-        const client = new ChangeHistoryClient(defaultCostructorOpts);
-        await client.initialize(esClient);
-
-        const policy = await getInstalledPolicy();
-        expect(policy).toEqual({
-          _meta: { managed: true },
-          phases: { hot: { min_age: '0ms', actions: {} } },
-        });
-
-        const template = await esClient.indices.getIndexTemplate({ name: DATA_STREAM_NAME });
-        expect(
-          template.index_templates[0]?.index_template?.template?.settings?.index?.lifecycle?.name
-        ).toBe(ILM_POLICY_NAME);
-
-        expect(await getBackingIndexLifecycleName()).toBe(ILM_POLICY_NAME);
-      });
-
-      it('does not overwrite an admin-modified ILM policy on re-initialize', async () => {
-        const esClient = esServer.getClient();
-
-        const customPolicy = {
-          _meta: { managed: false, modified_by: 'admin' },
-          phases: {
-            hot: {
-              actions: {
-                rollover: { max_age: '7d', max_primary_shard_size: '25gb' },
-              },
-            },
-            delete: { min_age: '90d', actions: { delete: {} } },
-          },
-        };
-        await esClient.ilm.putLifecycle({ name: ILM_POLICY_NAME, policy: customPolicy });
-
-        const client = new ChangeHistoryClient(defaultCostructorOpts);
-        await client.initialize(esClient);
-
-        const policy = await getInstalledPolicy();
-        expect(policy?._meta).toEqual({ managed: false, modified_by: 'admin' });
-        expect(policy?.phases?.hot?.actions?.rollover).toEqual({
-          max_age: '7d',
-          max_primary_shard_size: '25gb',
-        });
-        expect(policy?.phases?.delete).toBeDefined();
-      });
+      const template = await esClient.indices.getIndexTemplate({ name: DATA_STREAM_NAME });
+      const indexTemplate = template.index_templates[0]?.index_template;
+      expect(indexTemplate?.template?.settings?.index?.lifecycle?.name).toBeUndefined();
+      expect(indexTemplate?.template?.lifecycle).toEqual({ enabled: true });
     });
   });
 
@@ -194,10 +140,8 @@ describe('ChangeHistoryClient', () => {
 
   describe('log and getHistory', () => {
     let client: ChangeHistoryClient;
-    let esClient: Client;
 
     beforeEach(async () => {
-      esClient = esServer.getClient();
       client = new ChangeHistoryClient(defaultCostructorOpts);
       await client.initialize(esClient);
     });
@@ -250,7 +194,7 @@ describe('ChangeHistoryClient', () => {
 
     beforeEach(async () => {
       client = new ChangeHistoryClient(defaultCostructorOpts);
-      await client.initialize(esServer.getClient());
+      await client.initialize(esClient);
     });
 
     it('should log multiple changes and return them via getHistory with correct count and ordering', async () => {
@@ -375,7 +319,7 @@ describe('ChangeHistoryClient', () => {
 
     beforeEach(async () => {
       client = new ChangeHistoryClient(defaultCostructorOpts);
-      await client.initialize(esServer.getClient());
+      await client.initialize(esClient);
     });
 
     it('should hash and redact sensitive fields and list paths in object.fields', async () => {

@@ -111,32 +111,49 @@ describe('getQuickFixesForMessage', () => {
     });
   });
 
-  describe('columnTypeConflict', () => {
-    it('returns an empty list when diagnostic data is missing', async () => {
+  describe('invalidUnquotedIdentifier', () => {
+    const queryString = 'FROM logs | KEEP agent-id';
+    // 'agent-id' starts at column 18, endColumn 26 (1-based, exclusive end)
+    const position = { startLineNumber: 1, startColumn: 18, endColumn: 26 };
+
+    it('returns an empty list when position info is missing', async () => {
       const result = await getQuickFixesForMessage({
-        queryString: 'FROM logs-* | WHERE message IS NOT NULL',
-        message: { code: 'columnTypeConflict' },
+        queryString,
+        message: { code: 'invalidUnquotedIdentifier' },
       });
 
       expect(result).toEqual([]);
     });
 
-    it('does not suggest conversions that are not backed by inline casts', async () => {
-      const queryString = 'FROM logs-* | WHERE message IS NOT NULL';
-
+    it('wraps a special-character field name in backticks', async () => {
       const result = await getQuickFixesForMessage({
         queryString,
-        message: {
-          code: 'columnTypeConflict',
-          data: {
-            columnName: 'message',
-            types: ['text'],
-          },
-          location: {
-            min: queryString.indexOf('message'),
-            max: queryString.indexOf('message') + 'message'.length,
-          },
-        },
+        message: { code: 'invalidUnquotedIdentifier', ...position },
+      });
+
+      expect(result).toHaveLength(1);
+      expect(result[0]).toEqual({
+        title: 'Wrap identifier in backticks',
+        fixedText: 'FROM logs | KEEP `agent-id`',
+      });
+    });
+
+    it('returns an empty list when fixQuery returns undefined', async () => {
+      // Missing endColumn makes fixQuery return undefined
+      const result = await getQuickFixesForMessage({
+        queryString,
+        message: { code: 'invalidUnquotedIdentifier', startLineNumber: 1, startColumn: 18 },
+      });
+
+      expect(result).toEqual([]);
+    });
+  });
+
+  describe('columnTypeConflict', () => {
+    it('returns an empty list when diagnostic data is missing', async () => {
+      const result = await getQuickFixesForMessage({
+        queryString: 'FROM logs-* | WHERE message IS NOT NULL',
+        message: { code: 'columnTypeConflict' },
       });
 
       expect(result).toEqual([]);
@@ -161,6 +178,12 @@ describe('getQuickFixesForMessage', () => {
       });
 
       expect(result).toEqual([
+        {
+          title: 'Convert message to text',
+          fixedText: `FROM logs-*
+  | EVAL message = TO_TEXT(message)
+  | WHERE message IS NOT NULL`,
+        },
         {
           title: 'Convert message to keyword',
           fixedText: `FROM logs-*

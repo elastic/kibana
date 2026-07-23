@@ -16,6 +16,8 @@ import { validateDeprecatedStepTypes } from './validate_deprecated_step_types';
 import { validateIfConditions } from './validate_if_conditions';
 import { validateJsonSchemaDefaults } from './validate_json_schema_defaults';
 import { validateLiquidYamlScalars } from './validate_liquid_yaml_scalars';
+import { validateParallelFanOut } from './validate_parallel_fan_out';
+import { validateParallelMode } from './validate_parallel_mode';
 import { validateStepNameUniqueness } from './validate_step_name_uniqueness';
 import { validateTriggerConditions } from './validate_trigger_conditions';
 import { validateVariables as validateVariablesInternal } from './validate_variables';
@@ -34,12 +36,11 @@ export interface RunWorkflowYamlValidationsParams {
 }
 
 /**
- * Shared YAML validators for workflow editors and change-history preview.
+ * Structural YAML validators shared by the live editor and change-history preview.
  *
- * Intentionally excludes editor-only checks that need live Kibana context:
- * connector IDs, step-property handlers, workflow-input cross-references, and
- * ES|QL cluster validation. Those run in `useYamlValidation` only; change-history
- * preview uses this structural subset.
+ * Connector IDs, step-property handlers, workflow-input cross-references, graph-build
+ * failures, and ES|QL cluster validation are layered on top by
+ * `collectFullWorkflowYamlValidationResults`.
  */
 export function runWorkflowYamlValidations({
   yamlString,
@@ -70,7 +71,9 @@ export function runWorkflowYamlValidations({
   if (workflowLookup && lineCounter) {
     results.push(
       ...validateDeprecatedStepTypes(workflowLookup, lineCounter),
-      ...validateIfConditions(workflowLookup, lineCounter)
+      ...validateIfConditions(workflowLookup, lineCounter),
+      ...validateParallelMode(workflowLookup, lineCounter),
+      ...validateParallelFanOut(workflowLookup, lineCounter)
     );
   }
 

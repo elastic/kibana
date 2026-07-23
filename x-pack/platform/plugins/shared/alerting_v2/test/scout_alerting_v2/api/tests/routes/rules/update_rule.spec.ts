@@ -177,7 +177,7 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
       const response = await apiClient.patch(getRuleUrl(created.id), {
         headers: writerHeaders,
         body: {
-          no_data_strategy: 'emit',
+          no_data_strategy: 'last_known_status',
           query: {
             format: 'standalone',
             breach: { query: 'FROM logs-* | LIMIT 1' },
@@ -187,7 +187,7 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
       });
 
       expect(response).toHaveStatusCode(200);
-      expect(response.body.no_data_strategy).toBe('emit');
+      expect(response.body.no_data_strategy).toBe('last_known_status');
       expect(response.body.query).toStrictEqual({
         format: 'standalone',
         breach: { query: 'FROM logs-* | LIMIT 1' },
@@ -272,6 +272,7 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
         body: { version: created.version, metadata: { name: 'second-rename' } },
       });
       expect(staleUpdate).toHaveStatusCode(409);
+      expect(staleUpdate.body.code).toBe('RULE_VERSION_CONFLICT');
     }
   );
 
@@ -305,6 +306,7 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
       body: { metadata: { name: 'whatever' } },
     });
     expect(response).toHaveStatusCode(404);
+    expect(response.body.code).toBe('RULE_NOT_FOUND');
   });
 
   apiTest(
@@ -384,6 +386,20 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
       const response = await apiClient.patch(getRuleUrl(created.id), {
         headers: writerHeaders,
         body: { metadata: { unknownField: 'nope' } },
+      });
+      expect(response).toHaveStatusCode(400);
+    }
+  );
+
+  apiTest(
+    'validation: should reject body with unknown top-level keys (strict schema)',
+    async ({ apiClient, apiServices }) => {
+      const created = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({ metadata: { name: 'rule-strict-top-level' } })
+      );
+      const response = await apiClient.patch(getRuleUrl(created.id), {
+        headers: writerHeaders,
+        body: { metadta: { name: 'typo field' } },
       });
       expect(response).toHaveStatusCode(400);
     }

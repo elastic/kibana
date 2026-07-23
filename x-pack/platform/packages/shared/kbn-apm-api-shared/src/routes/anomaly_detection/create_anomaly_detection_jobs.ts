@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
-import { environmentStringRt } from '@kbn/apm-types';
+import { z } from '@kbn/zod/v4';
+import { environmentStringSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
 
 export interface CreateAnomalyDetectionJobsResponse {
@@ -14,9 +14,9 @@ export interface CreateAnomalyDetectionJobsResponse {
 
 export const createAnomalyDetectionJobsRoute = defineRoute<CreateAnomalyDetectionJobsResponse>()({
   endpoint: 'POST /internal/apm/settings/anomaly-detection/jobs',
-  params: t.type({
-    body: t.type({
-      environments: t.array(environmentStringRt),
+  params: z.object({
+    body: z.object({
+      environments: z.array(environmentStringSchema),
     }),
   }),
 });

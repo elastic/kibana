@@ -28,6 +28,8 @@ export type SkillsDirectoryStructure = Directory<{
     platform: FileDirectory<{
       'agent-builder': FileDirectory;
       alerting: FileDirectory;
+      cases: FileDirectory;
+      'context-engine': FileDirectory;
       dashboard: FileDirectory;
       discover: FileDirectory;
       streams: FileDirectory;
@@ -39,12 +41,19 @@ export type SkillsDirectoryStructure = Directory<{
       alerts: FileDirectory<{
         rules: FileDirectory;
       }>;
+      // The `attack-discovery` skill directory is registered by the
+      // discoveries plugin's attack-discovery-generator skill. Type-only
+      // addition is FF-off safe (no runtime impact) and required for the
+      // discoveries plugin to type-check.
+      'attack-discovery': FileDirectory<{}>;
       compliance: FileDirectory<{}>;
       rules: FileDirectory;
       entities: FileDirectory<{}>;
+      watchlists: FileDirectory<{}>;
       endpoint: FileDirectory<{}>;
       ml: FileDirectory<{}>;
       siem_readiness: FileDirectory<{}>;
+      entity_analytics_leads: FileDirectory<{}>;
     }>;
     search: FileDirectory<{}>;
   }>;
@@ -102,6 +111,13 @@ export interface SkillDefinition<
    * To enable a skill when a specific value is set for a UiSetting, pass an object with key and value.
    */
   uiSettingRequired?: string | { key: string; value: unknown };
+  /**
+   * When true, this skill is not automatically included on agents that have
+   * `enable_elastic_capabilities` set. It remains available to any agent that
+   * references it explicitly via `skill_ids`.
+   * Defaults to false.
+   */
+  excludeFromElasticCapabilities?: boolean;
   /**
    * Content of the skill.
    */

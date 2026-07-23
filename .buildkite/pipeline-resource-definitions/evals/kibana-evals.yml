@@ -28,6 +28,11 @@ spec:
       default_branch: main
       repository: elastic/kibana
       pipeline_file: .buildkite/pipelines/evals/llm_evals.yml
+      initial_step_plugins:
+        - sparse-checkout#v1.6.0:
+            paths:
+              - .buildkite/pipelines/evals/llm_evals.yml
+            cleanup_sparse_state: true
       provider_settings:
         build_branches: false
         build_pull_requests: false
@@ -49,7 +54,7 @@ spec:
           access_level: READ_ONLY
       schedules:
         Weekly build:
-          cronline: 0 0 * * 1 GMT
+          cronline: 0 20 * * 0 GMT
           message: Weekly LLM Evals (all suites, all models)
           branch: main
       tags:

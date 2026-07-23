@@ -35,7 +35,7 @@ export async function getDataViewsAsCodeService(
     elasticsearchClient,
     req
   );
-  return new DataViewsAsCodeService(dataViewsService);
+  return new DataViewsAsCodeService(dataViewsService, core.savedObjects.getClient());
 }
 
 interface ErrorResponseBody {

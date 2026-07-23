@@ -699,7 +699,7 @@ groups:
       - setting: logging.loggers[]
         id: logging-loggers
         description: |
-          Allows you to [customize a specific logger instance](docs-content://deploy-manage/monitor/logging-configuration/kibana-log-settings-examples.md#customize-specific-log-records).
+          Allows you to [customize a specific logger instance](docs-content://deploy-manage/monitor/logging-configuration/kibana-log-settings-examples.md#customize-specific-log-records), including its level, appenders, and optional [meta filters](./logging-settings.md).
         datatype: string
         applies_to:
           stack: ga
@@ -1449,7 +1449,7 @@ groups:
       - setting: server.ssl.supportedProtocols
         id: server-ssl-supportedprotocols
         description: |
-          An array of supported protocols with versions. Valid protocols: `TLSv1`, `TLSv1.1`, `TLSv1.2`, `TLSv1.3`. Enabling `TLSv1.1` would require both setting the `--tls-min-1.1` option in the `node.options` configuration and adding `TLSv1.1` to `server.ssl.supportedProtocols`. `HTTP/2` requires the use of minimum `TLSv1.2` for secure connections.
+          An array of supported protocols with versions. Valid protocols: `TLSv1`, `TLSv1.1`, `TLSv1.2`, `TLSv1.3`. Enabling `TLSv1.1` would require both setting the `--tls-min-v1.1` option in the `node.options` configuration and adding `TLSv1.1` to `server.ssl.supportedProtocols`. `HTTP/2` requires the use of minimum `TLSv1.2` for secure connections.
         datatype: string
         default: "TLSv1.2, TLSv1.3"
         applies_to:
@@ -1486,6 +1486,21 @@ groups:
           stack: ga
           ech: unavailable
           self: ga
+
+      - setting: server.xsrf.allowedSchemes
+        id: settings-xsrf-allowedschemes
+        description: |
+          `Authorization` header schemes whose non-GET requests skip the `kbn-xsrf` check. Supported values are `apikey` and `bearer`; `basic` and all other schemes always require the header. Default is empty, which keeps the `kbn-xsrf` check for all requests.
+        note: |
+          :applies_to: serverless: ga
+          In Serverless environments, requests authenticated using `Authorization: ApiKey` or `Authorization: Bearer` headers bypass the `kbn-xsrf` check by default.
+        datatype: array of strings
+        default: "[]"
+        applies_to:
+          stack: ga 9.5
+          ech: ga
+          self: ga
+        warning: "Do not set this if {{kib}} sits behind an authenticating reverse proxy that adds an `Authorization` header to browser requests, since that would let ordinary browser requests bypass the check."
 
   - group: Telemetry settings
     id: telemetry-settings

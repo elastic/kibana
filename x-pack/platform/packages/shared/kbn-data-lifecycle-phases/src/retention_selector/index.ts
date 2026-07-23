@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-export { RetentionSelector } from './retention_selector';
-export type { RetentionSelectorProps } from './retention_selector';
+export { RetentionSelector, RetentionSelectorSearch } from './retention_selector';
+export type { RetentionSelectorProps, RetentionSelectorSearchProps } from './retention_selector';
 export type { RetentionOption } from './types';

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { CustomFieldTypes, CaseStatuses, CaseSeverity } from '../../../common/types/domain';
 import { stringify as yamlStringify } from 'yaml';
-import { CustomFieldTypes, CaseStatuses } from '../../../common/types/domain';
 import {
   MAX_CATEGORY_LENGTH,
   MAX_DESCRIPTION_LENGTH,
@@ -381,22 +381,62 @@ describe('update', () => {
       expect(operations).toEqual([Operations.updateCase]);
     });
 
-    it('returns only assignCase operation when all cases are assignee changes', () => {
+    it('returns only assignCase operation when all cases are assignee-only changes', () => {
+      const assignOnlyCases = [
+        { id: mockCases[0].id, version: mockCases[0].version ?? '', assignees: [{ uid: '1' }] },
+      ];
       const operations = getOperationsToAuthorize({
         reopenedCases: [],
-        changedAssignees: cases.cases,
-        allCases: cases.cases,
+        changedAssignees: assignOnlyCases,
+        allCases: assignOnlyCases,
       });
       expect(operations).toEqual([Operations.assignCase]);
     });
 
-    it('returns only reopenCase operation when all cases are being reopened', () => {
+    it('returns assignCase and updateCase when an assignee-change request includes an injected title field', () => {
+      const assignWithTitle = [
+        {
+          id: mockCases[0].id,
+          version: mockCases[0].version ?? '',
+          assignees: [{ uid: '1' }],
+          title: 'injected',
+        },
+      ];
       const operations = getOperationsToAuthorize({
-        reopenedCases: cases.cases,
+        reopenedCases: [],
+        changedAssignees: assignWithTitle,
+        allCases: assignWithTitle,
+      });
+      expect(operations).toEqual([Operations.assignCase, Operations.updateCase]);
+    });
+
+    it('returns only reopenCase operation when all cases are being reopened with only status', () => {
+      const statusOnlyCases = [
+        { id: mockCases[0].id, version: mockCases[0].version ?? '', status: CaseStatuses.open },
+      ];
+      const operations = getOperationsToAuthorize({
+        reopenedCases: statusOnlyCases,
         changedAssignees: [],
-        allCases: cases.cases,
+        allCases: statusOnlyCases,
       });
       expect(operations).toEqual([Operations.reopenCase]);
+    });
+
+    it('returns reopenCase and updateCase when a reopened case includes assignees', () => {
+      const reopenWithAssignees = [
+        {
+          id: mockCases[0].id,
+          version: mockCases[0].version ?? '',
+          status: CaseStatuses.open,
+          assignees: [{ uid: '1' }],
+        },
+      ];
+      const operations = getOperationsToAuthorize({
+        reopenedCases: reopenWithAssignees,
+        changedAssignees: [],
+        allCases: reopenWithAssignees,
+      });
+      expect(operations).toEqual([Operations.reopenCase, Operations.updateCase]);
     });
 
     it('returns assignCase and updateCase when some cases have non-assignee changes', () => {
@@ -454,6 +494,57 @@ describe('update', () => {
         Operations.assignCase,
         Operations.updateCase,
       ]);
+    });
+
+    it('returns reopenCase and updateCase when a reopened case has an injected title field', () => {
+      const reopenWithTitle = [
+        {
+          id: mockCases[0].id,
+          version: mockCases[0].version ?? '',
+          status: CaseStatuses.open,
+          title: 'injected',
+        },
+      ];
+      const operations = getOperationsToAuthorize({
+        reopenedCases: reopenWithTitle,
+        changedAssignees: [],
+        allCases: reopenWithTitle,
+      });
+      expect(operations).toEqual([Operations.reopenCase, Operations.updateCase]);
+    });
+
+    it('returns reopenCase and updateCase when a reopened case has an injected description field', () => {
+      const reopenWithDescription = [
+        {
+          id: mockCases[0].id,
+          version: mockCases[0].version ?? '',
+          status: CaseStatuses.open,
+          description: 'injected',
+        },
+      ];
+      const operations = getOperationsToAuthorize({
+        reopenedCases: reopenWithDescription,
+        changedAssignees: [],
+        allCases: reopenWithDescription,
+      });
+      expect(operations).toEqual([Operations.reopenCase, Operations.updateCase]);
+    });
+
+    it('returns reopenCase and updateCase when a reopened case has an injected severity field', () => {
+      const reopenWithSeverity = [
+        {
+          id: mockCases[0].id,
+          version: mockCases[0].version ?? '',
+          status: CaseStatuses.open,
+          severity: CaseSeverity.CRITICAL,
+        },
+      ];
+      const operations = getOperationsToAuthorize({
+        reopenedCases: reopenWithSeverity,
+        changedAssignees: [],
+        allCases: reopenWithSeverity,
+      });
+      expect(operations).toEqual([Operations.reopenCase, Operations.updateCase]);
     });
 
     it('should filter out empty user profiles', async () => {
@@ -611,6 +702,78 @@ describe('update', () => {
             },
           ],
           refresh: false,
+        })
+      );
+    });
+  });
+
+  describe('Template', () => {
+    const clientArgs = createCasesClientMockArgs();
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      clientArgs.services.caseService.getCases.mockResolvedValue({ saved_objects: mockCases });
+      clientArgs.services.caseService.getAllCaseComments.mockResolvedValue({
+        saved_objects: [],
+        total: 0,
+        per_page: 10,
+        page: 1,
+      });
+      clientArgs.services.attachmentService.getter.getCaseAttatchmentStats.mockResolvedValue(
+        new Map()
+      );
+      clientArgs.services.caseService.patchCases.mockResolvedValue({
+        saved_objects: [{ ...mockCases[0] }],
+      });
+    });
+
+    it('resolves the applied template name and passes it to buildUserActions', async () => {
+      clientArgs.services.templatesService.getTemplate.mockResolvedValue({
+        attributes: { name: 'My Template' },
+      } as Awaited<ReturnType<typeof clientArgs.services.templatesService.getTemplate>>);
+
+      await bulkUpdate(
+        {
+          cases: [
+            {
+              id: mockCases[0].id,
+              version: mockCases[0].version ?? '',
+              template: { id: 'tmpl-1', version: 3 },
+            },
+          ],
+        },
+        clientArgs,
+        casesClientMock
+      );
+
+      expect(clientArgs.services.templatesService.getTemplate).toHaveBeenCalledWith('tmpl-1', '3');
+      expect(clientArgs.services.userActionService.creator.buildUserActions).toHaveBeenCalledWith(
+        expect.objectContaining({
+          templateNamesByKey: new Map([['tmpl-1@3', 'My Template']]),
+        })
+      );
+    });
+
+    it('omits the applied template from templateNamesByKey when it cannot be resolved', async () => {
+      clientArgs.services.templatesService.getTemplate.mockResolvedValue(undefined);
+
+      await bulkUpdate(
+        {
+          cases: [
+            {
+              id: mockCases[0].id,
+              version: mockCases[0].version ?? '',
+              template: { id: 'tmpl-missing', version: 1 },
+            },
+          ],
+        },
+        clientArgs,
+        casesClientMock
+      );
+
+      expect(clientArgs.services.userActionService.creator.buildUserActions).toHaveBeenCalledWith(
+        expect.objectContaining({
+          templateNamesByKey: new Map(),
         })
       );
     });
@@ -1254,6 +1417,9 @@ describe('update', () => {
 
     beforeEach(() => {
       jest.clearAllMocks();
+      // These tests assert the exact custom-field patch payload; the extended_fields
+      // mirroring (templates flag ON) is covered by dedicated tests below.
+      clientArgs.config = { ...clientArgs.config, templates: { enabled: false } };
       clientArgs.services.caseService.getCases.mockResolvedValue({ saved_objects: mockCases });
       clientArgs.services.caseService.getAllCaseComments.mockResolvedValue({
         saved_objects: [],
@@ -1946,6 +2112,89 @@ describe('update', () => {
         });
       });
 
+      it('checks authorization for reopenCase and updateCase when reopening with extra fields', async () => {
+        const closedCase = {
+          ...mockCases[0],
+          attributes: {
+            ...mockCases[0].attributes,
+            status: CaseStatuses.closed,
+          },
+        };
+
+        clientArgs.services.caseService.getCases.mockResolvedValue({ saved_objects: [closedCase] });
+
+        clientArgs.services.caseService.patchCases.mockResolvedValue({
+          saved_objects: [{ ...closedCase }],
+        });
+
+        await bulkUpdate(
+          {
+            cases: [
+              {
+                id: closedCase.id,
+                version: closedCase.version ?? '',
+                status: CaseStatuses.open,
+                title: 'injected title',
+              },
+            ],
+          },
+          clientArgs,
+          casesClientMock
+        );
+
+        expect(clientArgs.authorization.ensureAuthorized).toHaveBeenCalledWith({
+          entities: [{ id: closedCase.id, owner: closedCase.attributes.owner }],
+          operation: [Operations.reopenCase, Operations.updateCase],
+        });
+      });
+
+      it('throws when a reopen request contains an injected title and the user lacks updateCase permission', async () => {
+        const closedCase = {
+          ...mockCases[0],
+          attributes: { ...mockCases[0].attributes, status: CaseStatuses.closed },
+        };
+        clientArgs.services.caseService.getCases.mockResolvedValue({ saved_objects: [closedCase] });
+        clientArgs.authorization.ensureAuthorized.mockRejectedValue(new Error('Unauthorized'));
+
+        await expect(
+          bulkUpdate(
+            {
+              cases: [
+                {
+                  id: closedCase.id,
+                  version: closedCase.version ?? '',
+                  status: CaseStatuses.open,
+                  title: 'injected title',
+                },
+              ],
+            },
+            clientArgs,
+            casesClientMock
+          )
+        ).rejects.toThrow('Unauthorized');
+      });
+
+      it('throws when an assignee-change request contains an injected title and the user lacks updateCase permission', async () => {
+        clientArgs.authorization.ensureAuthorized.mockRejectedValue(new Error('Unauthorized'));
+
+        await expect(
+          bulkUpdate(
+            {
+              cases: [
+                {
+                  id: mockCases[0].id,
+                  version: mockCases[0].version ?? '',
+                  assignees: [{ uid: '1' }],
+                  title: 'injected title',
+                },
+              ],
+            },
+            clientArgs,
+            casesClientMock
+          )
+        ).rejects.toThrow('Unauthorized');
+      });
+
       it('throws when user is not authorized to update case', async () => {
         const error = new Error('Unauthorized');
         clientArgs.authorization.ensureAuthorized.mockRejectedValue(error);
@@ -2533,6 +2782,264 @@ describe('update', () => {
       expect(updatedAttributes.time_to_acknowledge).toEqual(expect.any(Number));
       expect(updatedAttributes.time_to_investigate).toEqual(expect.any(Number));
       expect(updatedAttributes.time_to_resolve).toEqual(expect.any(Number));
+    });
+  });
+
+  describe('customFields → extended_fields adapter (write-time mirror)', () => {
+    const casesClientMock2 = createCasesClientMock();
+    casesClientMock2.configure.get = jest.fn().mockResolvedValue([]);
+
+    const customFieldsCfg = [
+      {
+        key: 'priority',
+        type: CustomFieldTypes.TEXT as const,
+        label: 'Priority',
+        required: false,
+      },
+      {
+        key: 'count',
+        type: CustomFieldTypes.NUMBER as const,
+        label: 'Count',
+        required: false,
+      },
+    ];
+
+    const patchPayload = [
+      {
+        key: 'priority',
+        type: CustomFieldTypes.TEXT as const,
+        value: 'high',
+      },
+      {
+        key: 'count',
+        type: CustomFieldTypes.NUMBER as const,
+        value: 3,
+      },
+    ];
+
+    const setupMocks = (
+      clientArgs: ReturnType<typeof createCasesClientMockArgs>,
+      originalExtendedFields?: Record<string, string>
+    ) => {
+      const originalCase = {
+        ...mockCases[0],
+        attributes: {
+          ...mockCases[0].attributes,
+          ...(originalExtendedFields != null ? { extended_fields: originalExtendedFields } : {}),
+        },
+      };
+      clientArgs.services.caseService.getCases.mockResolvedValue({
+        saved_objects: [originalCase],
+      });
+      clientArgs.services.caseService.getAllCaseComments.mockResolvedValue({
+        saved_objects: [],
+        total: 0,
+        per_page: 10,
+        page: 1,
+      });
+      clientArgs.services.caseService.patchCases.mockResolvedValue({
+        saved_objects: [originalCase],
+      });
+      clientArgs.services.attachmentService.getter.getCaseAttatchmentStats.mockResolvedValue(
+        new Map()
+      );
+      casesClientMock2.configure.get = jest
+        .fn()
+        .mockResolvedValue([
+          { owner: mockCases[0].attributes.owner, customFields: customFieldsCfg },
+        ]);
+    };
+
+    it('mirrors customFields into extended_fields when templates flag is enabled', async () => {
+      const clientArgs = createCasesClientMockArgs();
+      clientArgs.config = { ...clientArgs.config, templates: { enabled: true } };
+      setupMocks(clientArgs);
+
+      await bulkUpdate(
+        {
+          cases: [
+            {
+              id: mockCases[0].id,
+              version: mockCases[0].version ?? '',
+              customFields: patchPayload,
+            },
+          ],
+        },
+        clientArgs,
+        casesClientMock2
+      );
+
+      const updatedAttributes =
+        clientArgs.services.caseService.patchCases.mock.calls[0][0].cases[0].updatedAttributes;
+      expect(updatedAttributes.extended_fields).toMatchObject({
+        priority_as_keyword: 'high',
+        count_as_integer: '3',
+      });
+    });
+
+    it('does not mirror customFields when templates flag is disabled', async () => {
+      // FAILURE SCENARIO: adapter runs unconditionally — extended_fields is written when flag is off.
+      const clientArgs = createCasesClientMockArgs();
+      clientArgs.config = { ...clientArgs.config, templates: { enabled: false } };
+      setupMocks(clientArgs);
+
+      await bulkUpdate(
+        {
+          cases: [
+            {
+              id: mockCases[0].id,
+              version: mockCases[0].version ?? '',
+              customFields: patchPayload,
+            },
+          ],
+        },
+        clientArgs,
+        casesClientMock2
+      );
+
+      const updatedAttributes =
+        clientArgs.services.caseService.patchCases.mock.calls[0][0].cases[0].updatedAttributes;
+      expect(updatedAttributes.extended_fields).toBeUndefined();
+    });
+
+    it('does not touch extended_fields when update omits customFields', async () => {
+      // FAILURE SCENARIO: adapter mirrors on every update, clobbering extended_fields
+      // written by the v2 UI even when this update was not about customFields.
+      const clientArgs = createCasesClientMockArgs();
+      clientArgs.config = { ...clientArgs.config, templates: { enabled: true } };
+      setupMocks(clientArgs, { existing_key_as_keyword: 'v2value' });
+
+      await bulkUpdate(
+        {
+          cases: [{ id: mockCases[0].id, version: mockCases[0].version ?? '', title: 'New Title' }],
+        },
+        clientArgs,
+        casesClientMock2
+      );
+
+      const updatedAttributes =
+        clientArgs.services.caseService.patchCases.mock.calls[0][0].cases[0].updatedAttributes;
+      expect(updatedAttributes.extended_fields).toBeUndefined();
+    });
+
+    it('overrides an existing mirror key when the customField value changes (customFields-win)', async () => {
+      const clientArgs = createCasesClientMockArgs();
+      clientArgs.config = { ...clientArgs.config, templates: { enabled: true } };
+      // original case has priority_as_keyword: 'critical' — customFields-win must override it
+      setupMocks(clientArgs, { priority_as_keyword: 'critical' });
+
+      await bulkUpdate(
+        {
+          cases: [
+            {
+              id: mockCases[0].id,
+              version: mockCases[0].version ?? '',
+              customFields: [
+                { key: 'priority', type: CustomFieldTypes.TEXT as const, value: 'low' },
+              ],
+            },
+          ],
+        },
+        clientArgs,
+        casesClientMock2
+      );
+
+      const updatedAttributes =
+        clientArgs.services.caseService.patchCases.mock.calls[0][0].cases[0].updatedAttributes;
+      // Value changed — extended_fields must appear in the patch payload with the new value.
+      expect(updatedAttributes.extended_fields).toEqual({ priority_as_keyword: 'low' });
+    });
+
+    it('omits extended_fields from the patch payload when the customField value is unchanged', async () => {
+      // FAILURE SCENARIO: adapter sets extended_fields on every customFields update, even when
+      // the value is identical — causing a spurious SO write and an unnecessary user action.
+      const clientArgs = createCasesClientMockArgs();
+      clientArgs.config = { ...clientArgs.config, templates: { enabled: true } };
+      // original case has priority_as_keyword: 'low' — same as the incoming value
+      setupMocks(clientArgs, { priority_as_keyword: 'low' });
+
+      await bulkUpdate(
+        {
+          cases: [
+            {
+              id: mockCases[0].id,
+              version: mockCases[0].version ?? '',
+              customFields: [
+                { key: 'priority', type: CustomFieldTypes.TEXT as const, value: 'low' },
+              ],
+            },
+          ],
+        },
+        clientArgs,
+        casesClientMock2
+      );
+
+      const updatedAttributes =
+        clientArgs.services.caseService.patchCases.mock.calls[0][0].cases[0].updatedAttributes;
+      // Value is identical — no spurious write.
+      expect(updatedAttributes.extended_fields).toBeUndefined();
+    });
+
+    it('preserves an unrelated mirror key when the update omits that customField (synthetic-null regression)', async () => {
+      // FAILURE SCENARIO (before fix): fillMissingCustomFields pads { key: 'priority', value: null }
+      // for the absent 'priority' field; the merge then deletes priority_as_keyword — silently
+      // wiping a value stored via the v2 UI that this update never intended to clear.
+      // Fix: mirror only request-provided customFields (updateCaseAttributes.customFields).
+      const clientArgs = createCasesClientMockArgs();
+      clientArgs.config = { ...clientArgs.config, templates: { enabled: true } };
+      // Original case has priority_as_keyword set via the v2 UI; priority is optional-no-default.
+      setupMocks(clientArgs, { priority_as_keyword: 'crit' });
+
+      await bulkUpdate(
+        {
+          cases: [
+            {
+              id: mockCases[0].id,
+              version: mockCases[0].version ?? '',
+              // Only count is being updated — priority is intentionally absent.
+              customFields: [{ key: 'count', type: CustomFieldTypes.NUMBER as const, value: 3 }],
+            },
+          ],
+        },
+        clientArgs,
+        casesClientMock2
+      );
+
+      const updatedAttributes =
+        clientArgs.services.caseService.patchCases.mock.calls[0][0].cases[0].updatedAttributes;
+      // priority was not submitted — its mirror key must be preserved.
+      expect(updatedAttributes.extended_fields?.priority_as_keyword).toBe('crit');
+    });
+
+    it('clears the mirror key when the user explicitly submits null for a customField', async () => {
+      // Guard: confirms that an *intentional* null (user cleared the field) still deletes the
+      // mirror key — the synthetic-null fix must not prevent deliberate clears.
+      const clientArgs = createCasesClientMockArgs();
+      clientArgs.config = { ...clientArgs.config, templates: { enabled: true } };
+      // Original case has priority_as_keyword set.
+      setupMocks(clientArgs, { priority_as_keyword: 'crit' });
+
+      await bulkUpdate(
+        {
+          cases: [
+            {
+              id: mockCases[0].id,
+              version: mockCases[0].version ?? '',
+              // User explicitly clears priority by submitting null.
+              customFields: [
+                { key: 'priority', type: CustomFieldTypes.TEXT as const, value: null },
+              ],
+            },
+          ],
+        },
+        clientArgs,
+        casesClientMock2
+      );
+
+      const updatedAttributes =
+        clientArgs.services.caseService.patchCases.mock.calls[0][0].cases[0].updatedAttributes;
+      // Explicit null — the mirror key must be deleted.
+      expect(updatedAttributes.extended_fields).not.toHaveProperty('priority_as_keyword');
     });
   });
 });

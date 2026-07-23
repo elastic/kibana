@@ -40,10 +40,12 @@ describe('runAgent', () => {
     agentClient = createMockedAgentRegistry();
     agentClient.get.mockResolvedValue(agent);
 
-    const {
-      agentsService: { getRegistry },
-    } = runnerDeps;
-    getRegistry.mockResolvedValue(agentClient);
+    const { agentsService } = runnerDeps;
+    agentsService.getRegistry.mockResolvedValue(agentClient);
+    // by default the resolver returns the agent's own config (empty chat base = no-op merge)
+    agentsService.resolveAgentConfiguration.mockImplementation(
+      async ({ agent: a }) => a.configuration
+    );
 
     agentHandler = jest.fn();
     agentHandler.mockResolvedValue({
@@ -120,6 +122,47 @@ describe('runAgent', () => {
     );
   });
 
+  it('layers runtime overrides onto the agent config before resolving, so the type base survives', async () => {
+    agent = createMockedInternalAgent({
+      configuration: { tools: [], instructions: 'agent instructions', skill_ids: ['my-skill'] },
+    });
+    agentClient.get.mockResolvedValue(agent);
+    const resolvedConfiguration = {
+      tools: [],
+      instructions: 'resolved',
+      skill_ids: ['base-skill', 'my-skill'],
+    };
+    runnerDeps.agentsService.resolveAgentConfiguration.mockResolvedValue(resolvedConfiguration);
+
+    const params: ScopedRunnerRunAgentParams = {
+      agentId: 'test-agent',
+      agentParams: {
+        nextInput: { message: 'dolly' },
+        configurationOverrides: { instructions: 'override instructions' },
+      },
+    };
+
+    await runAgent({
+      agentExecutionParams: params,
+      parentManager: runnerManager,
+    });
+
+    expect(runnerDeps.agentsService.resolveAgentConfiguration).toHaveBeenCalledWith({
+      agent: {
+        ...agent,
+        configuration: {
+          ...agent.configuration,
+          instructions: 'override instructions',
+        },
+      },
+      request: runnerDeps.request,
+    });
+    expect(createAgentHandlerMock).toHaveBeenCalledWith({
+      agent,
+      effectiveConfiguration: resolvedConfiguration,
+    });
+  });
+
   it('returns the expected value', async () => {
     const params: ScopedRunnerRunAgentParams = {
       agentId: 'test-agent',
@@ -136,5 +179,21 @@ describe('runAgent', () => {
     });
 
     expect(result).toEqual({ success: true, data: { foo: 'bar' } });
+  });
+
+  it('scopes the ES client with space-level project routing for CPS support', async () => {
+    const params: ScopedRunnerRunAgentParams = {
+      agentId: 'test-agent',
+      agentParams: { nextInput: { message: 'hi' } },
+    };
+
+    await runAgent({
+      agentExecutionParams: params,
+      parentManager: runnerManager,
+    });
+
+    expect(runnerDeps.elasticsearch.client.asScoped).toHaveBeenCalledWith(runnerDeps.request, {
+      projectRouting: 'space',
+    });
   });
 });

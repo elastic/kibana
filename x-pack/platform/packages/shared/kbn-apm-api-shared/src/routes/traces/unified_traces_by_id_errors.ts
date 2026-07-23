@@ -4,17 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
+import { z } from '@kbn/zod/v4';
 import type { ErrorsByTraceId } from '@kbn/apm-types';
 import { defineRoute } from '../types';
-import { rangeRt } from '../../default_api_types';
+import { rangeSchema } from '../../default_api_types';
 
 export const unifiedTracesByIdErrorsRoute = defineRoute<ErrorsByTraceId>()({
   endpoint: 'GET /internal/apm/unified_traces/{traceId}/errors',
-  params: t.type({
-    path: t.type({
-      traceId: t.string,
+  params: z.object({
+    path: z.object({
+      traceId: z.string(),
     }),
-    query: t.intersection([rangeRt, t.partial({ docId: t.string })]),
+    query: rangeSchema.merge(z.object({ docId: z.string().optional() })),
   }),
 });

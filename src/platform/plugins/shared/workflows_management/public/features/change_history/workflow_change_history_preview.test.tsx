@@ -16,12 +16,16 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { renderWorkflowChangeHistoryPreview } from './workflow_change_history_preview';
 
 jest.mock('@kbn/workflows-ui', () => ({
-  useWorkflowsMonacoTheme: jest.fn(),
-  WORKFLOWS_MONACO_EDITOR_THEME: 'workflows-theme',
+  ...jest.requireActual('@kbn/workflows-ui'),
+  useDefineWorkflowsMonacoTheme: jest.fn(),
 }));
 
-jest.mock('./apply_workflow_yaml_validation_to_editor', () => ({
-  applyWorkflowYamlValidationToEditor: jest.fn(() => Promise.resolve({ validationResults: [] })),
+jest.mock('./use_workflow_change_history_preview_validation', () => ({
+  useWorkflowChangeHistoryPreviewValidation: jest.fn(() => ({
+    validationResults: [],
+    isValidationLoading: false,
+    handleValidationErrorClick: jest.fn(),
+  })),
 }));
 
 jest.mock('../../widgets/workflow_yaml_editor/ui/workflow_yaml_validation_accordion', () => ({
@@ -37,12 +41,15 @@ jest.mock('@kbn/code-editor', () => ({
       createModel: jest.fn((value: string) => ({ value, dispose: jest.fn() })),
       create: jest.fn(() => ({
         dispose: jest.fn(),
+        layout: jest.fn(),
         getModel: jest.fn(() => ({ dispose: jest.fn() })),
+        updateOptions: jest.fn(),
         createDecorationsCollection: jest.fn(() => ({ clear: jest.fn() })),
       })),
       createDiffEditor: jest.fn(() => ({
         setModel: jest.fn(),
         dispose: jest.fn(),
+        layout: jest.fn(),
         updateOptions: jest.fn(),
         getLineChanges: jest.fn(() => []),
         onDidUpdateDiff: jest.fn(() => ({ dispose: jest.fn() })),
@@ -54,9 +61,13 @@ jest.mock('@kbn/code-editor', () => ({
         })),
       })),
       setModelMarkers: jest.fn(),
+      onDidChangeMarkers: jest.fn(() => ({ dispose: jest.fn() })),
     },
   },
 }));
+
+const mockCreateEditor = monaco.editor.create as jest.Mock;
+const mockCreateDiffEditor = monaco.editor.createDiffEditor as jest.Mock;
 
 const makeDetail = (yaml: string) => ({
   id: 'evt-3',
@@ -74,6 +85,10 @@ const renderPreview = (props: Parameters<typeof renderWorkflowChangeHistoryPrevi
   );
 
 describe('workflow change history preview', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('renders the selected version yaml in the monaco preview', () => {
     renderPreview({
       objectId: 'workflow-1',
@@ -98,5 +113,43 @@ describe('workflow change history preview', () => {
 
     expect(screen.getByTestId('workflowChangeHistoryMonacoPreview')).toBeInTheDocument();
     expect(monaco.editor.createModel).toHaveBeenCalledWith('', 'yaml');
+  });
+
+  it('renders compare diff with baseline as original and target as modified', () => {
+    renderPreview({
+      objectId: 'workflow-1',
+      change: makeDetail('name: historical\n'),
+      compareSpec: {
+        comparisonType: 'vs_previous',
+        baseline: { ...makeDetail('name: historical\n'), metadata: { version: 1 } },
+        target: { ...makeDetail('name: current\n'), metadata: { version: 6 }, isCurrent: true },
+      },
+    });
+
+    expect(mockCreateDiffEditor).toHaveBeenCalled();
+    expect(monaco.editor.createModel).toHaveBeenNthCalledWith(1, 'name: historical\n', 'yaml');
+    expect(monaco.editor.createModel).toHaveBeenNthCalledWith(2, 'name: current\n', 'yaml');
+    expect(screen.getByTestId('workflowChangeHistoryCompareIndicator')).toBeInTheDocument();
+    expect(screen.getByText('Comparing with:')).toBeInTheDocument();
+    expect(screen.getByTestId('workflowChangeHistoryCompareIndicatorBadge')).toHaveTextContent(
+      'v1'
+    );
+  });
+
+  it('shows target yaml while compare context is loading', () => {
+    renderPreview({
+      objectId: 'workflow-1',
+      change: makeDetail('name: historical\n'),
+      compareSpec: {
+        comparisonType: 'vs_previous',
+        baseline: makeDetail('name: historical\n'),
+        target: makeDetail('name: current\n'),
+      },
+      isLoadingCompareContext: true,
+    });
+
+    expect(mockCreateEditor).toHaveBeenCalled();
+    expect(mockCreateDiffEditor).not.toHaveBeenCalled();
+    expect(monaco.editor.createModel).toHaveBeenCalledWith('name: current\n', 'yaml');
   });
 });

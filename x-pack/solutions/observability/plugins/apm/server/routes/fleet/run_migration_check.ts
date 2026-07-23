@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import type { APMRouteHandlerResources } from '../apm_routes/register_apm_server_routes';
 import { getApmPackagePolicies } from './get_apm_package_policies';

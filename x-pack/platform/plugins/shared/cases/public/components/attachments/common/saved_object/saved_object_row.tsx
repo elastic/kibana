@@ -7,6 +7,7 @@
 
 import React, { useCallback } from 'react';
 import { EuiBadge, EuiButton, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
+import type { EuiButtonProps } from '@elastic/eui';
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import { FormattedRelativePreferenceDate } from '../../../formatted_date';
 import { SavedObjectLink } from './saved_object_link';
@@ -30,6 +31,10 @@ export interface SavedObjectRowProps {
   isAttachingAny: boolean;
   taggingApi: SavedObjectsTaggingApi | undefined;
   onAttach: (savedObject: FoundSavedObject) => void;
+  /** Override the default "Attach" action button label. */
+  actionLabel?: string;
+  /** Override the default "Attach" action icon. */
+  actionIconType?: EuiButtonProps['iconType'];
 }
 
 const SavedObjectRowComponent: React.FC<SavedObjectRowProps> = ({
@@ -42,6 +47,8 @@ const SavedObjectRowComponent: React.FC<SavedObjectRowProps> = ({
   isAttachingAny,
   taggingApi,
   onAttach,
+  actionLabel,
+  actionIconType,
 }) => {
   const handleClick = useCallback(() => onAttach(savedObject), [onAttach, savedObject]);
 
@@ -96,13 +103,13 @@ const SavedObjectRowComponent: React.FC<SavedObjectRowProps> = ({
           <EuiButton
             size="s"
             color={isAttached ? 'success' : 'primary'}
-            iconType={isAttached ? 'check' : 'plusInCircle'}
+            iconType={isAttached ? 'check' : actionIconType ?? 'plusInCircle'}
             isLoading={isAttachInFlight}
             isDisabled={isAttachingAny || isAttached}
             onClick={handleClick}
             data-test-subj={`cases-attach-so-button-${savedObject.id}`}
           >
-            {isAttached ? i18n.ATTACHED_ACTION : i18n.ATTACH_ACTION}
+            {isAttached ? i18n.ATTACHED_ACTION : actionLabel ?? i18n.ATTACH_ACTION}
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>

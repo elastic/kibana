@@ -21,6 +21,7 @@ const ERROR_TITLE = i18n.translate('alertsApis.snoozeAlert.error', {
 export interface UseSnoozeAlertInstanceParams {
   http: HttpStart;
   notifications: NotificationsStart;
+  skipAlertsQueryContext?: boolean;
 }
 
 export interface SnoozeAlertInstanceMutationParams {
@@ -36,6 +37,7 @@ export const getKey = mutationKeys.snoozeAlertInstance;
 export const useSnoozeAlertInstance = ({
   http,
   notifications: { toasts },
+  skipAlertsQueryContext,
 }: UseSnoozeAlertInstanceParams) => {
   return useMutation(
     ({
@@ -55,7 +57,7 @@ export const useSnoozeAlertInstance = ({
       }),
     {
       mutationKey: getKey(),
-      context: AlertsQueryContext,
+      context: skipAlertsQueryContext ? undefined : AlertsQueryContext,
       onSuccess() {
         toasts.addSuccess(
           i18n.translate('xpack.responseOpsAlertsApis.alertsTable.alertSnoozed', {

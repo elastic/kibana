@@ -253,6 +253,39 @@ describe('Segment Utilities', () => {
       // Delete column keeps its fixed (non-grow) sizing.
       expect(segments[2].isDelete).toBe(true);
     });
+
+    it('clamps an out-of-order (negative-duration) phase to the grow floor of 2', () => {
+      // frozen_after (20d) is after retention/delete (10d), so frozen's [20d, 10d) range is negative
+      // and falls back to the grow floor. That floor must be 2 (matching ILM) so the phase never
+      // collapses to a 1fr sliver that crowds its label against the neighbour.
+      const phases: SegmentPhase[] = [
+        { grow: true, min_age: '0d', label: 'hot' },
+        { grow: true, min_age: '20d', label: 'frozen' },
+        { grow: false, min_age: '10d', isDelete: true },
+      ];
+
+      const segments = buildPhaseTimelineSegments(phases);
+
+      expect(segments[1].grow).toBe(2);
+      // The in-order hot phase keeps a larger weight than the floor.
+      expect(Number(segments[0].grow)).toBeGreaterThan(2);
+    });
+
+    it('keeps an invalid (negative) frozen phase with its typed label, collapsing hot to the floor', () => {
+      // frozen_after=-1d clamps to the start (0d), so hot collapses to a floor-2 sliver while frozen
+      // spans the rest; the typed '-1d' label and the `isFrozen` tag are preserved for the timeline.
+      const phases: SegmentPhase[] = [
+        { grow: true, min_age: '0d', label: 'hot' },
+        { grow: true, min_age: '-1d', label: 'frozen', isFrozen: true },
+        { grow: false, min_age: '30d', isDelete: true },
+      ];
+
+      const segments = buildPhaseTimelineSegments(phases);
+
+      expect(segments[0].grow).toBe(2);
+      expect(segments[1].leftValue).toBe('-1d');
+      expect(segments[1].isFrozen).toBe(true);
+    });
   });
 
   describe('buildDslSegments', () => {
@@ -412,7 +445,7 @@ describe('Segment Utilities', () => {
       expect(result.timelineSegments.map((s) => s.leftValue)).toEqual(['0d', '10d', '30d']);
     });
 
-    it('does not add a duplicate boundary when frozen min_age equals the start (0d)', () => {
+    it('adds a separate 0d boundary for a frozen phase at 0d (ILM parity)', () => {
       const phases: SegmentPhase[] = [
         { grow: true, min_age: '0d', label: 'hot' },
         { grow: true, min_age: '0d', label: 'frozen' },
@@ -421,8 +454,103 @@ describe('Segment Utilities', () => {
 
       const result = buildDslSegments(phases, []);
 
-      // Frozen at 0d sits on the start boundary, so no extra 0d column is created.
-      expect(result.timelineSegments.map((s) => s.leftValue)).toEqual(['0d', '30d']);
+      // frozen_after=0d gets its own 0d mark (like ILM / the non-metrics timeline) rather than
+      // collapsing into the hot start, so the frozen phase visibly starts at 0d.
+      expect(result.timelineSegments.map((s) => s.leftValue)).toEqual(['0d', '0d', '30d']);
+    });
+
+    it('gives a frozen phase at 0d its own 0d mark instead of the first downsample step', () => {
+      const phases: SegmentPhase[] = [
+        { grow: true, min_age: '0d', label: 'hot' },
+        { grow: true, min_age: '0d', label: 'frozen' },
+        { grow: false, min_age: '30d', isDelete: true },
+      ];
+      const downsampleSteps = [
+        { after: '1d', fixed_interval: '1h' },
+        { after: '2d', fixed_interval: '1d' },
+      ];
+
+      const result = buildDslSegments(phases, downsampleSteps);
+
+      // Two 0d columns (hot start + frozen), then the downsample steps — frozen does NOT attach to
+      // the nearest step (1d).
+      expect(result.timelineSegments.map((s) => s.leftValue)).toEqual([
+        '0d',
+        '0d',
+        '1d',
+        '2d',
+        '30d',
+      ]);
+    });
+
+    it('keeps an invalid (negative) frozen phase, shown right after hot with its typed label', () => {
+      // frozen_after=-1d is invalid; instead of disappearing it is positioned right after hot (its
+      // position clamps to 0d) while its typed label '-1d' is preserved for display and it is tagged
+      // `isFrozen` so the timeline can flag it red.
+      const phases: SegmentPhase[] = [
+        { grow: true, min_age: '0d', label: 'hot' },
+        { grow: true, min_age: '-1d', label: 'frozen', isFrozen: true },
+        { grow: false, min_age: '30d', isDelete: true },
+      ];
+      const downsampleSteps = [
+        { after: '1d', fixed_interval: '1h' },
+        { after: '2d', fixed_interval: '1d' },
+      ];
+
+      const result = buildDslSegments(phases, downsampleSteps);
+
+      expect(result.timelineSegments.map((s) => s.leftValue)).toEqual([
+        '0d',
+        '-1d',
+        '1d',
+        '2d',
+        '30d',
+      ]);
+      expect(result.timelineSegments[1].isFrozen).toBe(true);
+    });
+
+    it('keeps downsample steps past retention when a later phase boundary extends the timeline', () => {
+      // Out-of-order config: frozen_after=7d while delete/retention=1d. The frozen boundary extends
+      // the visible timeline to 7d, so the 1d and 2d downsample steps fall inside [0, 7d] and must
+      // stay visible instead of being dropped for being "after retention".
+      const phases: SegmentPhase[] = [
+        { grow: true, min_age: '0d', label: 'hot' },
+        { grow: true, min_age: '7d', label: 'frozen' },
+        { grow: false, min_age: '1d', isDelete: true },
+      ];
+      const downsampleSteps = [
+        { after: '1d', fixed_interval: '1h' },
+        { after: '2d', fixed_interval: '1d' },
+      ];
+
+      const result = buildDslSegments(phases, downsampleSteps);
+
+      // Both downsample steps survive and the frozen boundary is present.
+      expect(result.downsamplingSegments.filter((s) => s.step)).toHaveLength(2);
+      expect(result.timelineSegments.map((s) => s.leftValue)).toEqual([
+        '0d',
+        '1d',
+        '2d',
+        '7d',
+        '1d',
+      ]);
+    });
+
+    it('keeps a downsample step past the frozen boundary when the config is out of order', () => {
+      // frozen_after=20d, delete/retention=1d (out of order) with a step at 24d (beyond frozen). The
+      // config is invalid, so all steps stay visible — the 24d step must not vanish just because it
+      // is past the frozen boundary.
+      const phases: SegmentPhase[] = [
+        { grow: true, min_age: '0d', label: 'hot' },
+        { grow: true, min_age: '20d', label: 'frozen' },
+        { grow: false, min_age: '1d', isDelete: true },
+      ];
+      const downsampleSteps = [{ after: '24d', fixed_interval: '1h' }];
+
+      const result = buildDslSegments(phases, downsampleSteps);
+
+      expect(result.downsamplingSegments.filter((s) => s.step)).toHaveLength(1);
+      expect(result.timelineSegments.map((s) => s.leftValue)).toContain('24d');
     });
 
     it('should filter out downsample steps after retention', () => {
@@ -574,6 +702,52 @@ describe('Segment Utilities', () => {
 
       // hot covers 0s only (span 1), frozen covers 10s/1d/2d/4d (span 4), delete spans 1.
       expect(spans).toEqual([1, 4, 1]);
+      expect(spans.reduce((a, b) => a + b, 0)).toBe(segments.length);
+    });
+
+    it('keeps spans within the grid when frozen_after is 0d (zero-duration hot phase)', () => {
+      // frozen_after=0d: two 0d columns (hot start + frozen), then the downsample columns. Hot spans
+      // [0d, 0d) (zero duration) so it counts 0 raw columns; it must still get one column, borrowed
+      // from frozen, so the total never exceeds the grid tracks and the delete bar doesn't wrap.
+      const phases: SegmentPhase[] = [
+        { grow: true, label: 'hot', min_age: '0d' },
+        { grow: true, label: 'frozen', min_age: '0d' },
+        { grow: false, isDelete: true, min_age: '30d' },
+      ];
+      const segments: TimelineSegment[] = [
+        { grow: 2, leftValue: '0d' },
+        { grow: 2, leftValue: '0d' },
+        { grow: 5, leftValue: '1d' },
+        { grow: 6, leftValue: '2d' },
+        { grow: false, leftValue: '30d', isDelete: true },
+      ];
+
+      const spans = getPhaseColumnSpans(phases, segments);
+
+      // hot borrows one column (span 1), frozen keeps the rest (span 3), delete spans 1 — total 5.
+      expect(spans).toEqual([1, 3, 1]);
+      expect(spans.reduce((a, b) => a + b, 0)).toBe(segments.length);
+    });
+
+    it('places an invalid (negative) frozen column right after hot without wrapping', () => {
+      // frozen_after=-1d: its column keeps the '-1d' label but its position clamps to 0d, so it maps
+      // into the frozen phase span (right after hot) and the delete bar does not wrap.
+      const phases: SegmentPhase[] = [
+        { grow: true, label: 'hot', min_age: '0d' },
+        { grow: true, label: 'frozen', min_age: '-1d', isFrozen: true },
+        { grow: false, isDelete: true, min_age: '30d' },
+      ];
+      const segments: TimelineSegment[] = [
+        { grow: 2, leftValue: '0d' },
+        { grow: 2, leftValue: '-1d', isFrozen: true },
+        { grow: 5, leftValue: '1d' },
+        { grow: 6, leftValue: '2d' },
+        { grow: false, leftValue: '30d', isDelete: true },
+      ];
+
+      const spans = getPhaseColumnSpans(phases, segments);
+
+      expect(spans).toEqual([1, 3, 1]);
       expect(spans.reduce((a, b) => a + b, 0)).toBe(segments.length);
     });
   });

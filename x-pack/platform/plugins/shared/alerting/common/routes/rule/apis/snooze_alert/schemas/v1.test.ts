@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ALERT_SEVERITY_VALUES } from '@kbn/rule-data-utils';
 import { snoozeAlertParamsSchema, snoozeAlertBodySchema } from './v1';
 import {
   MAX_ID_LENGTH,
@@ -129,5 +130,78 @@ describe('snoozeAlertBodySchema', () => {
         ],
       })
     ).not.toThrow();
+  });
+
+  test.each([...ALERT_SEVERITY_VALUES])('accepts severity_equals with value "%s"', (severity) => {
+    expect(() =>
+      snoozeAlertBodySchema.validate({
+        conditions: [{ type: 'severity_equals', value: severity }],
+      })
+    ).not.toThrow();
+  });
+
+  test('rejects severity_equals with an unknown severity value', () => {
+    expect(() =>
+      snoozeAlertBodySchema.validate({
+        conditions: [{ type: 'severity_equals', value: 'catastrophic' }],
+      })
+    ).toThrow();
+  });
+
+  test('rejects severity_equals without a value', () => {
+    expect(() =>
+      snoozeAlertBodySchema.validate({
+        conditions: [{ type: 'severity_equals' }],
+      })
+    ).toThrow();
+  });
+
+  test('rejects a condition with an unknown type', () => {
+    expect(() =>
+      snoozeAlertBodySchema.validate({
+        conditions: [{ type: 'unknown_type' }],
+      })
+    ).toThrow();
+  });
+
+  test('accepts condition_operator "all"', () => {
+    expect(() =>
+      snoozeAlertBodySchema.validate({
+        conditions: [{ type: 'severity_change' }],
+        condition_operator: 'all',
+      })
+    ).not.toThrow();
+  });
+
+  test('rejects an unknown condition_operator', () => {
+    expect(() =>
+      snoozeAlertBodySchema.validate({
+        conditions: [{ type: 'severity_change' }],
+        condition_operator: 'none',
+      })
+    ).toThrow();
+  });
+
+  test('rejects a body with neither expires_at nor conditions', () => {
+    expect(() => snoozeAlertBodySchema.validate({})).toThrow(
+      'either [expires_at] or [conditions] must be provided'
+    );
+  });
+
+  test('rejects an empty conditions array', () => {
+    expect(() => snoozeAlertBodySchema.validate({ conditions: [] })).toThrow(
+      '[conditions] must contain at least one condition'
+    );
+  });
+
+  test('rejects an expires_at in the past', () => {
+    const pastDate = new Date(Date.now() - 86400000).toISOString(); // yesterday
+    expect(() => snoozeAlertBodySchema.validate({ expires_at: pastDate })).toThrow(
+      '[expires_at] must be in the future'
+    );
+  });
+
+  test('rejects a non-ISO expires_at', () => {
+    expect(() => snoozeAlertBodySchema.validate({ expires_at: 'not-a-date' })).toThrow();
   });
 });

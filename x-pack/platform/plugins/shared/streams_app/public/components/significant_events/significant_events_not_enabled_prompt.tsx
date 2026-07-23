@@ -7,7 +7,7 @@
 
 import { EuiEmptyPrompt, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { SignificantEventsUnavailableReason } from '@kbn/streams-plugin/common';
+import type { SignificantEventsUnavailableReason } from '@kbn/significant-events-plugin/common';
 import React from 'react';
 
 // The server reasons plus the client-only `unknown` fallback, surfaced when the
@@ -43,6 +43,11 @@ export function SignificantEventsNotEnabledPrompt({ reason }: { reason: NotEnabl
  * so `i18n.translate` runs at render time.
  */
 const NOT_ENABLED_BODY_MESSAGES: Record<NotEnabledReason, () => string> = {
+  feature_flag: () =>
+    i18n.translate('xpack.streams.significantEvents.notEnabledPrompt.featureFlagBody', {
+      defaultMessage:
+        'Significant events is in Technical Preview and is being rolled out gradually. It is not available in this environment yet.',
+    }),
   pricing_tier: () =>
     i18n.translate('xpack.streams.significantEvents.notEnabledPrompt.pricingTierBody', {
       defaultMessage: 'Significant events is not available on the current pricing tier.',
@@ -50,11 +55,6 @@ const NOT_ENABLED_BODY_MESSAGES: Record<NotEnabledReason, () => string> = {
   license: () =>
     i18n.translate('xpack.streams.significantEvents.notEnabledPrompt.licenseBody', {
       defaultMessage: 'An Enterprise license or higher is required to use significant events.',
-    }),
-  ui_setting: () =>
-    i18n.translate('xpack.streams.significantEvents.notEnabledPrompt.uiSettingBody', {
-      defaultMessage:
-        'Significant events is disabled. Enable it in Advanced Settings to start using it.',
     }),
   unknown: () =>
     i18n.translate('xpack.streams.significantEvents.notEnabledPrompt.unknownBody', {

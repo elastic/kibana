@@ -26,17 +26,22 @@ export default ({ loadTestFile, getService }: FtrProviderContext): void => {
     });
 
     // Trial
+    loadTestFile(require.resolve('./cases/import_export_templates'));
     loadTestFile(require.resolve('./cases/user_actions/find_user_actions'));
     loadTestFile(require.resolve('./cases/assignees'));
     loadTestFile(require.resolve('./cases/find_cases'));
     loadTestFile(require.resolve('./cases/post_case'));
+    loadTestFile(require.resolve('./cases/create_case_from_template'));
     loadTestFile(require.resolve('./cases/patch_case'));
+    // Public API — the fields a caller may apply to a case's `extended_fields`.
+    loadTestFile(require.resolve('./cases/applicable_fields'));
     loadTestFile(require.resolve('./configure'));
     loadTestFile(require.resolve('./attachments_framework/registered_unified_trial'));
     // sub privileges are only available with a license above basic
     loadTestFile(require.resolve('./delete_sub_privilege'));
     loadTestFile(require.resolve('./create_comment_sub_privilege.ts'));
     loadTestFile(require.resolve('./manage_templates_sub_privilege.ts'));
+    loadTestFile(require.resolve('./templates_input_validation.ts'));
     loadTestFile(require.resolve('./user_profiles/get_current'));
     // case observables are only available with a license above basic
     loadTestFile(require.resolve('./internal/observables'));

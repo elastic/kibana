@@ -13,6 +13,7 @@ import { combineLatest, map, of } from 'rxjs';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import { getAlertingV2ManagementNavPanel } from '@kbn/alerting-v2-utils';
+import { getWorkflowsNavPanel } from '@kbn/deeplinks-workflows';
 import type { Location } from 'history';
 import type { ObservabilityPublicPluginsStart } from './plugin';
 
@@ -77,9 +78,7 @@ function createNavTree({
           pathNameSerialized.startsWith(prepend('/app/dashboards')) ||
           isEditingFromDashboard(location, pathNameSerialized, prepend),
       },
-      {
-        link: 'workflows',
-      },
+      ...getWorkflowsNavPanel(coreStart),
       {
         link: 'observability-overview:alerts',
         icon: 'warning',
@@ -472,7 +471,6 @@ function createNavTree({
               description:
                 'The heading of a section in a navigation tree dedicated to data collection',
             }),
-            renderAs: 'panelOpener',
             children: [
               {
                 link: 'integrations',
@@ -498,7 +496,6 @@ function createNavTree({
               description:
                 'Heading in a nav tree dedicated to UIs for leveraging various Elasticsearch features for data management',
             }),
-            renderAs: 'panelOpener',
             children: [
               {
                 link: 'management:index_management',
@@ -514,6 +511,9 @@ function createNavTree({
               },
               {
                 link: 'management:rollup_jobs',
+              },
+              {
+                link: 'management:data_federation',
               },
               {
                 link: 'management:data_quality',
@@ -534,7 +534,6 @@ function createNavTree({
           {
             id: 'stack_management_home',
             title: '',
-            renderAs: 'panelOpener',
             children: [
               {
                 // We include this link here to ensure that the settings icon does not land on Stack Monitoring by default
@@ -564,7 +563,6 @@ function createNavTree({
             title: i18n.translate('xpack.observability.obltNav.alertsAndInsights', {
               defaultMessage: 'Alerts and Insights',
             }),
-            renderAs: 'panelOpener',
             children: [
               {
                 link: 'management:triggersActions',
@@ -636,7 +634,6 @@ function createNavTree({
             title: i18n.translate('xpack.observability.obltNav.security', {
               defaultMessage: 'Security',
             }),
-            renderAs: 'panelOpener',
             children: [
               {
                 link: 'management:users',
@@ -657,7 +654,6 @@ function createNavTree({
             title: i18n.translate('xpack.observability.obltNav.data', {
               defaultMessage: 'Data',
             }),
-            renderAs: 'panelOpener',
             children: [
               {
                 link: 'management:cross_cluster_replication',
@@ -672,7 +668,6 @@ function createNavTree({
             title: i18n.translate('xpack.observability.obltNav.kibana', {
               defaultMessage: 'Kibana',
             }),
-            renderAs: 'panelOpener',
             children: [
               {
                 link: 'management:filesManagement',

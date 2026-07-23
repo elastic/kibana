@@ -7,7 +7,7 @@
 
 import { useMemo } from 'react';
 
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 
 import type { State } from '../edit_transform_flyout_state';
 

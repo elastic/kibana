@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export { formatMillisecondsInUnit, parseInterval, toMilliseconds } from '../../shared';
+export { parseInterval, toMilliseconds } from '../../shared';
 
 /**
  * Extract the index from an ArrayItem path like `_meta.downsampleSteps[3]`.

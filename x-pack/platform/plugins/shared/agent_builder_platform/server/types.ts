@@ -7,33 +7,35 @@
 
 import type { AgentBuilderPluginSetup, AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type {
-  AgentContextLayerPluginSetup,
-  AgentContextLayerPluginStart,
-} from '@kbn/agent-context-layer-plugin/server';
-import type { PluginSetupContract as ActionsPluginSetup } from '@kbn/actions-plugin/server';
+  AgentBuilderSmlPluginSetup,
+  AgentBuilderSmlPluginStart,
+} from '@kbn/agent-builder-sml-plugin/server';
+import type {
+  PluginSetupContract as ActionsPluginSetup,
+  PluginStartContract as ActionsPluginStart,
+} from '@kbn/actions-plugin/server';
 import type { LlmTasksPluginStart } from '@kbn/llm-tasks-plugin/server';
-import type { CasesServerStart } from '@kbn/cases-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 
 export interface PluginSetupDependencies {
   agentBuilder: AgentBuilderPluginSetup;
-  agentContextLayer: AgentContextLayerPluginSetup;
+  agentBuilderSml: AgentBuilderSmlPluginSetup;
   actions: ActionsPluginSetup;
 }
 
 export interface PluginStartDependencies {
   agentBuilder: AgentBuilderPluginStart;
-  agentContextLayer: AgentContextLayerPluginStart;
+  agentBuilderSml: AgentBuilderSmlPluginStart;
+  actions: ActionsPluginStart;
   llmTasks?: LlmTasksPluginStart;
-  cases?: CasesServerStart;
   spaces?: SpacesPluginStart;
 }
 
 export interface AgentBuilderPlatformTracingFeaturesStart {
   /**
-   * Syncs the tracing features for a space.
+   * Installs or removes the tracing dashboard for a given space.
    */
-  sync: (options: { enabled: boolean; spaceId?: string }) => Promise<void>;
+  setDashboard: (options: { enabled: boolean; spaceId: string }) => Promise<void>;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

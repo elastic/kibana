@@ -19,12 +19,6 @@ import {
 import { changeHistoryObjectQueryKeyPrefix } from './change_history_list_query_key';
 import { createQueryClientWrapper } from '../test_utils/create_query_client_wrapper';
 
-const testScope = {
-  module: 'stack',
-  dataset: 'workflows',
-  objectType: 'workflow',
-};
-
 const createAdapter = (
   restoreChange: ChangeHistoryAdapter['restoreChange']
 ): ChangeHistoryAdapter => ({
@@ -191,7 +185,7 @@ describe('useChangeHistoryRestore', () => {
       ChangeHistoryTelemetryEventTypes.RestoreCompleted,
       expect.objectContaining({
         eventName: 'Change history restore completed',
-        ...testScope,
+        ...TEST_CHANGE_HISTORY_SCOPE,
         restoredFromSequence: 3,
         currentSequence: 7,
         rollbackDistance: 4,
@@ -337,7 +331,7 @@ describe('useChangeHistoryRestore', () => {
 
     expect(reportEvent).toHaveBeenCalledWith(ChangeHistoryTelemetryEventTypes.RestoreFailed, {
       eventName: 'Change history restore failed',
-      ...testScope,
+      ...TEST_CHANGE_HISTORY_SCOPE,
       rollbackDistance: 4,
       errorCode: 'RESTORE_CONFLICT',
     });

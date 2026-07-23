@@ -10,6 +10,8 @@ import { ReservedPrivilegesSet } from '@kbn/core-http-server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { TaskAlreadyRunningError } from '@kbn/task-manager-plugin/server/lib/errors';
 import {
+  ACTIVITY_INDEX_NAME,
+  ATTACHMENTS_INDEX_NAME,
   CASES_ANALYTICS_V2_RECONCILE_RUN_SOON_URL,
   CASES_ANALYTICS_V2_RESET_URL,
   CASES_ANALYTICS_V2_STATE_URL,
@@ -24,7 +26,11 @@ import {
   type ResetTaskState,
 } from '../reconciliation/reset_task';
 import { ensureCaseIndex } from '../ensure_indices/case';
+import { ensureActivityIndex } from '../ensure_indices/activity';
+import { ensureAttachmentsIndex } from '../ensure_indices/attachments';
 import type { CasesAnalyticsV2WriterContract } from '../writer';
+import type { CasesActivityV2WriterContract } from '../writer/activity';
+import type { CasesAttachmentsV2WriterContract } from '../writer/attachments';
 
 /**
  * Shape surfaced under `/state.active_reset` for the live or
@@ -32,18 +38,20 @@ import type { CasesAnalyticsV2WriterContract } from '../writer';
  * — Task Manager auto-deletes one-shot tasks on success, so `null`
  * means either "no reset has ever been scheduled" or "the last reset
  * succeeded and was cleaned up". A populated value with
- * `status: 'failed'` is the administrator's signal that the last reset
- * threw on the cases walk; the periodic task continues to fill in the
+ * `status: 'failed'` is the administrator's signal that every surface's
+ * walk threw (total failure); the periodic task continues to fill in the
  * gap regardless.
  *
  * `state` evolves over the task's lifetime:
  *   - At schedule time (before any throttled write): `{}`.
- *   - During the walk: `phase`, `cases_processed`, and `started_at`
- *     populate progressively via the reset task's wall-clock-throttled
- *     progress writer.
+ *   - During the walk: `phase: 'running'`, `started_at`, and all three
+ *     `*_processed` counts populate progressively via the reset task's
+ *     wall-clock-throttled progress writer. The surfaces are walked
+ *     concurrently, so the three counts advance together rather than one
+ *     at a time.
  *   - At task completion: full `ResetTaskState` written by Task
  *     Manager from the runner's return value, including `cases_cursor`,
- *     `completed_at`, and any error message.
+ *     `completed_at`, and any per-surface error message.
  */
 interface ActiveResetSnapshot {
   task_id: string;
@@ -106,10 +114,14 @@ interface RegisterArgs {
   /**
    * Late-bound: the analytics writer is constructed during plugin
    * `start()` (it holds the live ES client). The route handler gates
-   * on writer availability so it can return a clear 503 when there's
-   * nothing usable to walk against.
+   * on writer availability so it can return a clear 503 when the reset
+   * task would have nothing usable to walk against.
    */
   getWriter: () => CasesAnalyticsV2WriterContract | null;
+  /** Activity-surface companion to `getWriter`. Same lifetime and semantics. */
+  getActivityWriter: () => CasesActivityV2WriterContract | null;
+  /** Attachments-surface companion to `getWriter`. Same lifetime and semantics. */
+  getAttachmentsWriter: () => CasesAttachmentsV2WriterContract | null;
   /**
    * Wipes the data view service's in-memory bootstrapped-spaces cache.
    * `/reset` deletes per-space data views directly via the SO API, so
@@ -156,6 +168,8 @@ export const registerCasesAnalyticsV2Routes = ({
   getTaskManager,
   getInternalSavedObjectsClient,
   getWriter,
+  getActivityWriter,
+  getAttachmentsWriter,
   clearDataViewBootstrapCache,
   enabled,
   enableAdminRoutes,
@@ -178,6 +192,8 @@ export const registerCasesAnalyticsV2Routes = ({
       const taskManager = getTaskManager();
       let lastRun: {
         cases_last_run_at?: string;
+        activity_last_run_at?: string;
+        attachments_last_run_at?: string;
         runs?: number;
         next_run_at?: string;
         status?: string;
@@ -199,9 +215,15 @@ export const registerCasesAnalyticsV2Routes = ({
           });
           const task = tasks.docs[0];
           if (task != null) {
-            const state = (task.state ?? {}) as { cases_last_run_at?: string };
+            const state = (task.state ?? {}) as {
+              cases_last_run_at?: string;
+              activity_last_run_at?: string;
+              attachments_last_run_at?: string;
+            };
             lastRun = {
               cases_last_run_at: state.cases_last_run_at,
+              activity_last_run_at: state.activity_last_run_at,
+              attachments_last_run_at: state.attachments_last_run_at,
               runs: task.attempts,
               next_run_at:
                 task.runAt instanceof Date
@@ -236,7 +258,8 @@ export const registerCasesAnalyticsV2Routes = ({
             // the type layer; the shape is owned by this task type's
             // runner. While `idle`, state is `{}`; while `running`,
             // the throttled progress writer pushes partial state every
-            // ~30s (`phase`, `cases_processed`, `started_at`); after
+            // ~30s (`phase: 'running'`, the three `*_processed` counts,
+            // `started_at`); after
             // the runner returns, state is a populated `ResetTaskState`
             // (or the partial mid-walk state on a thrown failure).
             state: (resetTask.state ?? {}) as Partial<ResetTaskState> | Record<string, never>,
@@ -244,15 +267,26 @@ export const registerCasesAnalyticsV2Routes = ({
         }
       }
 
-      // `index_exists: false` while `enabled: true` is the operational
-      // signal that the bootstrap (`ensureCaseIndex`) hit an error at
-      // plugin start. Surfacing it here means an administrator can
-      // detect the failure without grep-ing Kibana logs.
-      let indexExists = false;
+      // Check every index's existence so `/state` reports each
+      // bootstrap's result independently. `ensure*Index` logs and
+      // continues on failure, so a partial bootstrap (some indices up,
+      // others missing) is possible — surfacing per-index status here
+      // makes that visible. All lookups run in parallel so `/state`
+      // stays cheap.
+      let casesIndexExists = false;
+      let activityIndexExists = false;
+      let attachmentsIndexExists = false;
       try {
         const coreContext = await context.core;
         const esClient = coreContext.elasticsearch.client.asInternalUser;
-        indexExists = await esClient.indices.exists({ index: CASE_INDEX_NAME });
+        const [casesExists, activityExists, attachmentsExists] = await Promise.all([
+          esClient.indices.exists({ index: CASE_INDEX_NAME }),
+          esClient.indices.exists({ index: ACTIVITY_INDEX_NAME }),
+          esClient.indices.exists({ index: ATTACHMENTS_INDEX_NAME }),
+        ]);
+        casesIndexExists = casesExists;
+        activityIndexExists = activityExists;
+        attachmentsIndexExists = attachmentsExists;
       } catch (err) {
         log.warn(
           `failed to check analytics index existence: ${
@@ -266,14 +300,21 @@ export const registerCasesAnalyticsV2Routes = ({
           enabled,
           // Top-level `index` / `index_exists` are aliases pointing at
           // the cases surface, alongside the per-surface block under
-          // `surfaces`. The aliases stay even after the activity
-          // surface lands so existing consumers keep working.
+          // `surfaces`.
           index: CASE_INDEX_NAME,
-          index_exists: indexExists,
+          index_exists: casesIndexExists,
           surfaces: {
             cases: {
               index: CASE_INDEX_NAME,
-              index_exists: indexExists,
+              index_exists: casesIndexExists,
+            },
+            activity: {
+              index: ACTIVITY_INDEX_NAME,
+              index_exists: activityIndexExists,
+            },
+            attachments: {
+              index: ATTACHMENTS_INDEX_NAME,
+              index_exists: attachmentsIndexExists,
             },
           },
           reconciliation: {
@@ -393,30 +434,60 @@ export const registerCasesAnalyticsV2Routes = ({
       // task that immediately throws when its getRunnerDeps fires.
       const internalSoClient = getInternalSavedObjectsClient();
       const writer = getWriter();
-      if (internalSoClient == null || writer == null || taskManager == null) {
+      const activityWriter = getActivityWriter();
+      const attachmentsWriter = getAttachmentsWriter();
+      if (
+        internalSoClient == null ||
+        writer == null ||
+        activityWriter == null ||
+        attachmentsWriter == null ||
+        taskManager == null
+      ) {
         return response.customError({
           statusCode: 503,
           body: {
             message:
-              'cases-analyticsV2 is not ready (writer, internal SO client, or task manager unavailable); v2 is likely disabled or still starting.',
+              'cases-analyticsV2 is not ready (writers, internal SO client, or task manager unavailable); v2 is likely disabled or still starting.',
           },
         });
       }
 
       try {
-        // 1. Drop the existing index. 404 is fine (reset on an empty
-        //    cluster, or the index was never bootstrapped).
-        await esClient.indices
-          .delete({ index: CASE_INDEX_NAME })
-          .catch((err: { meta?: { statusCode?: number }; statusCode?: number }) => {
-            const status = err?.statusCode ?? err?.meta?.statusCode;
-            if (status === 404) return;
-            throw err;
-          });
+        // 1. Drop existing indices in parallel. 404 is fine on any
+        //    (reset on an empty cluster, or only some indices ever
+        //    bootstrapped).
+        await Promise.all([
+          esClient.indices
+            .delete({ index: CASE_INDEX_NAME })
+            .catch((err: { meta?: { statusCode?: number }; statusCode?: number }) => {
+              const status = err?.statusCode ?? err?.meta?.statusCode;
+              if (status === 404) return;
+              throw err;
+            }),
+          esClient.indices
+            .delete({ index: ACTIVITY_INDEX_NAME })
+            .catch((err: { meta?: { statusCode?: number }; statusCode?: number }) => {
+              const status = err?.statusCode ?? err?.meta?.statusCode;
+              if (status === 404) return;
+              throw err;
+            }),
+          esClient.indices
+            .delete({ index: ATTACHMENTS_INDEX_NAME })
+            .catch((err: { meta?: { statusCode?: number }; statusCode?: number }) => {
+              const status = err?.statusCode ?? err?.meta?.statusCode;
+              if (status === 404) return;
+              throw err;
+            }),
+        ]);
 
-        // 2. Recreate the index via the same bootstrap used at plugin
-        //    start. Idempotent.
-        await ensureCaseIndex({ esClient, logger: log });
+        // 2. Recreate all three indices via the same bootstrap used at
+        //    plugin start. Idempotent and independent; parallel for
+        //    symmetry with step 1.
+        await Promise.all([
+          ensureCaseIndex({ esClient, logger: log }),
+          ensureActivityIndex({ esClient, logger: log }),
+          ensureAttachmentsIndex({ esClient, logger: log }),
+        ]);
 
         // 3. Delete every per-space `Cases` data view. See
         //    `getInternalSavedObjectsClient` JSDoc for why the
@@ -438,13 +509,12 @@ export const registerCasesAnalyticsV2Routes = ({
 
         return response.custom({
           // 202 Accepted: the destructive cleanup succeeded
-          // synchronously (index dropped and recreated, data views
-          // wiped, cache cleared) but the backfill walk is still
-          // running. `/state.active_reset` is the canonical progress
-          // and completion surface.
+          // synchronously (indices dropped and recreated, data
+          // views wiped, cache cleared) but the backfill walk is
+          // still running. `/state.active_reset` is the canonical
+          // progress and completion surface.
           statusCode: 202,
           body: {
-            reset: CASE_INDEX_NAME,
             data_views_deleted: deletedDataViews,
             // The reset task ID and scheduled-at give the administrator
             // everything they need to poll `/state.active_reset` and
@@ -457,6 +527,14 @@ export const registerCasesAnalyticsV2Routes = ({
                   ? scheduledTask.scheduledAt.toISOString()
                   : (scheduledTask.scheduledAt as unknown as string),
               poll: CASES_ANALYTICS_V2_STATE_URL,
+            },
+            // Per-surface confirmation of the synchronous bootstrap
+            // step. The walk hasn't started yet — counts and cursors
+            // populate on the task SO once the walk completes.
+            surfaces: {
+              cases: { reset: CASE_INDEX_NAME },
+              activity: { reset: ACTIVITY_INDEX_NAME },
+              attachments: { reset: ATTACHMENTS_INDEX_NAME },
             },
           },
         });
@@ -518,28 +596,39 @@ export async function deleteAllPerSpaceCasesDataViews(
 ): Promise<number> {
   const PAGE_SIZE = 100;
 
-  // Pass 1: collect matching ids. Pagination is stable because the
-  // index isn't mutated while it's being walked.
+  // Pass 1: collect matching ids via a point-in-time finder. SO `find`
+  // is `from`/`size`-based, so a page/offset walk throws
+  // `result_window_too_large` once `page * perPage` crosses
+  // `index.max_result_window` (default 10k). At the 10K-space scale this
+  // subsystem targets the cluster can hold well over 10k data views, and
+  // the throw would land mid-`/reset` — after step 1/2 already dropped
+  // and recreated the indices — leaving the subsystem half-reset (data
+  // views undeleted, bootstrap cache never cleared). PIT + `searchAfter`
+  // (via `createPointInTimeFinder`, which also manages the PIT open/close)
+  // is unbounded by the result window — the same reason the
+  // reconciliation runners use PIT (see `reconciliation/runner.ts`).
+  // Pagination is stable: the PIT pins a snapshot, and pass 2 deletes
+  // only after the walk fully drains.
   const targets: Array<{ id: string; namespace: string | undefined }> = [];
-  let page = 1;
-  while (true) {
-    const result = await soClient.find({
-      type: DATA_VIEW_SO_TYPE,
-      namespaces: ['*'],
-      perPage: PAGE_SIZE,
-      page,
-    });
-
-    for (const so of result.saved_objects) {
-      // Only act on data views managed by this plugin; everything
-      // else is left untouched.
-      if (so.id.startsWith(CASE_DATA_VIEW_ID_PREFIX)) {
-        targets.push({ id: so.id, namespace: so.namespaces?.[0] });
+  const finder = soClient.createPointInTimeFinder({
+    type: DATA_VIEW_SO_TYPE,
+    namespaces: ['*'],
+    perPage: PAGE_SIZE,
+  });
+  try {
+    for await (const result of finder.find()) {
+      for (const so of result.saved_objects) {
+        // Only act on data views managed by this plugin; everything
+        // else is left untouched.
+        if (so.id.startsWith(CASE_DATA_VIEW_ID_PREFIX)) {
+          targets.push({ id: so.id, namespace: so.namespaces?.[0] });
+        }
       }
     }
-
-    if (result.saved_objects.length < PAGE_SIZE) break;
-    page++;
+  } finally {
+    // Release the PIT even if iteration throws. `close()` is safe to
+    // call after the generator has already auto-closed on normal drain.
+    await finder.close();
   }
 
   // Pass 2: delete the collected ids. Per-item errors log at WARN

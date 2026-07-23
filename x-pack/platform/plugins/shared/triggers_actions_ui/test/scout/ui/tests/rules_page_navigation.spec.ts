@@ -38,7 +38,7 @@ test.describe('Rules page navigation and loading', { tag: tags.stateful.classic 
   });
 
   test('loads with the correct page title', async ({ page }) => {
-    await expect(page.testSubj.locator('appTitle')).toHaveText('Rules');
+    await expect(page.testSubj.locator('appHeaderTitle')).toHaveText('Rules');
   });
 
   test('displays the rules list', async ({ page }) => {

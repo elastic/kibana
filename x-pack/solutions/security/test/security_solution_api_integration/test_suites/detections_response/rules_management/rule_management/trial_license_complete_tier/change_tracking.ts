@@ -8,7 +8,10 @@
 import expect from 'expect';
 import { ModeEnum } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { BulkActionTypeEnum } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management';
-import { DETECTION_ENGINE_RULES_IMPORT_URL } from '@kbn/security-solution-plugin/common/constants';
+import {
+  DETECTION_ENGINE_RULES_IMPORT_URL,
+  DETECTION_ENGINE_RULES_URL,
+} from '@kbn/security-solution-plugin/common/constants';
 import { deleteAllRules } from '@kbn/detections-response-ftr-services';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import {
@@ -24,6 +27,9 @@ import {
 import { revertPrebuiltRule } from '../../../utils/rules/prebuilt_rules/revert_prebuilt_rule';
 
 const CHANGE_HISTORY_DATA_STREAM = '.kibana_change_history';
+const CHANGE_HISTORY_ES_OPTIONS = {
+  headers: { 'x-elastic-product-origin': 'kibana' },
+};
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
@@ -32,17 +38,23 @@ export default ({ getService }: FtrProviderContext): void => {
   const log = getService('log');
 
   const refreshHistory = async () => {
-    await es.indices.refresh({ index: CHANGE_HISTORY_DATA_STREAM, ignore_unavailable: true });
+    await es.indices.refresh(
+      { index: CHANGE_HISTORY_DATA_STREAM, ignore_unavailable: true },
+      CHANGE_HISTORY_ES_OPTIONS
+    );
   };
 
   const clearHistory = async () => {
     try {
-      await es.deleteByQuery({
-        index: CHANGE_HISTORY_DATA_STREAM,
-        query: { match_all: {} },
-        conflicts: 'proceed',
-        refresh: true,
-      });
+      await es.deleteByQuery(
+        {
+          index: CHANGE_HISTORY_DATA_STREAM,
+          query: { match_all: {} },
+          conflicts: 'proceed',
+          refresh: true,
+        },
+        CHANGE_HISTORY_ES_OPTIONS
+      );
     } catch {
       // Change history index may not exist yet
     }
@@ -374,7 +386,66 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(body.items[0].action).toBe('rule_upgrade');
       });
 
-      it('records rule_duplicate when duplicating a rule', async () => {
+      it('records a single rule_duplicate entry when duplicating a rule with exceptions', async () => {
+        const { body: original } = await detectionsApi
+          .createRule({ body: getCustomQueryRuleParams() })
+          .expect(200);
+
+        // A rule_default exception makes duplication actually clone and reattach a
+        // list — the path that previously emitted a phantom second history entry.
+        await supertest
+          .post(`${DETECTION_ENGINE_RULES_URL}/${original.id}/exceptions`)
+          .set('kbn-xsrf', 'true')
+          .send({
+            items: [
+              {
+                description: 'Sample exception item',
+                name: 'Sample exception item',
+                type: 'simple',
+                entries: [
+                  { field: 'some.field', operator: 'included', type: 'match', value: 'some value' },
+                ],
+              },
+            ],
+          })
+          .expect(200);
+
+        const { body: bulkResponse } = await detectionsApi
+          .performRulesBulkAction({
+            query: {},
+            body: {
+              action: BulkActionTypeEnum.duplicate,
+              duplicate: { include_exceptions: true, include_expired_exceptions: true },
+            },
+          })
+          .expect(200);
+
+        const duplicatedRuleId = bulkResponse.attributes.results.created[0].id;
+
+        await refreshHistory();
+
+        const { body } = await detectionsApi
+          .ruleChangesHistory({ params: { ruleId: duplicatedRuleId }, query: {} })
+          .expect(200);
+
+        expect(body.items).toHaveLength(1);
+
+        const [item] = body.items;
+        expect(item.action).toBe('rule_duplicate');
+        expect(item.old_values).toBeNull();
+        expect(item.metadata?.original_rule_so_id).toBe(original.id);
+        expect(item.rule).toMatchObject({
+          id: duplicatedRuleId,
+          revision: 0,
+          name: 'Custom query rule [Duplicate]',
+          enabled: false,
+        });
+        // The cloned rule_default list is a fresh container, so only its type is stable.
+        expect(item.rule.exceptions_list).toHaveLength(1);
+        expect(item.rule.exceptions_list[0]).toMatchObject({ type: 'rule_default' });
+      });
+
+      it('records a single rule_duplicate entry when duplicating a rule without exceptions', async () => {
         const { body: original } = await detectionsApi
           .createRule({ body: getCustomQueryRuleParams() })
           .expect(200);
@@ -398,8 +469,18 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(200);
 
         expect(body.items).toHaveLength(1);
-        expect(body.items[0].action).toBe('rule_duplicate');
-        expect(body.items[0].metadata?.original_rule_so_id).toBe(original.id);
+
+        const [item] = body.items;
+        expect(item.action).toBe('rule_duplicate');
+        expect(item.old_values).toBeNull();
+        expect(item.metadata?.original_rule_so_id).toBe(original.id);
+        expect(item.rule).toMatchObject({
+          id: duplicatedRuleId,
+          revision: 0,
+          name: 'Custom query rule [Duplicate]',
+          enabled: false,
+        });
+        expect(item.rule.exceptions_list).toEqual([]);
       });
 
       it('records rule_revert when reverting a prebuilt rule', async () => {

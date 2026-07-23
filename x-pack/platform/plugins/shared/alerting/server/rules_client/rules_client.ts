@@ -54,6 +54,8 @@ import type {
 import { getGlobalExecutionKpiWithAuth, getRuleExecutionKPI } from './methods/get_execution_kpi';
 import type { FindRulesParams } from '../application/rule/methods/find';
 import { findRules } from '../application/rule/methods/find';
+import type { FindMutedAlertsParams } from '../application/rule/methods/find_muted_alerts';
+import { findMutedAlerts } from '../application/rule/methods/find_muted_alerts';
 import type { AggregateParams } from '../application/rule/methods/aggregate/types';
 import { aggregateRules } from '../application/rule/methods/aggregate';
 import type { DeleteRuleParams } from '../application/rule/methods/delete';
@@ -83,6 +85,7 @@ import { bulkMuteUnmuteInstances } from '../application/rule/methods/bulk_mute_u
 import type { BulkMuteUnmuteAlertsParams } from '../application/rule/types';
 import type { RunSoonParams } from '../application/rule/methods/run_soon';
 import { runSoon } from '../application/rule/methods/run_soon';
+import type { ListRuleTypesOptions } from '../application/rule/methods/rule_types/rule_types';
 import { listRuleTypes } from '../application/rule/methods/rule_types/rule_types';
 import { getScheduleFrequency } from '../application/rule/methods/get_schedule_frequency/get_schedule_frequency';
 import type { BulkUntrackBody } from '../application/rule/methods/bulk_untrack/bulk_untrack_alerts';
@@ -176,6 +179,8 @@ export class RulesClient {
   public delete = (params: DeleteRuleParams) => deleteRule(this.context, params);
   public find = <Params extends RuleTypeParams = never>(params?: FindRulesParams) =>
     findRules<Params>(this.context, params);
+  public findMutedAlerts = (params?: FindMutedAlertsParams) =>
+    findMutedAlerts(this.context, params);
   public get = <Params extends RuleTypeParams = never>(params: GetRuleParams) =>
     getRule<Params>(this.context, params);
   public resolve = <Params extends RuleTypeParams = never>(params: ResolveParams) =>
@@ -247,7 +252,7 @@ export class RulesClient {
 
   public runSoon = (options: RunSoonParams) => runSoon(this.context, options);
 
-  public listRuleTypes = () => listRuleTypes(this.context);
+  public listRuleTypes = (options?: ListRuleTypesOptions) => listRuleTypes(this.context, options);
 
   public scheduleBackfill = (params: ScheduleBackfillParams) =>
     scheduleBackfill(this.context, params);

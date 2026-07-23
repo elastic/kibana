@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
+import { z } from '@kbn/zod/v4';
 import { getApmTimeseriesRt, type ApmTimeseries } from '@kbn/apm-types';
 import { defineRoute } from '../types';
 
@@ -15,7 +15,7 @@ export interface GetApmTimeseriesResponse {
 
 export const getApmTimeseriesRoute = defineRoute<GetApmTimeseriesResponse>()({
   endpoint: 'POST /internal/apm/assistant/get_apm_timeseries',
-  params: t.type({
+  params: z.object({
     body: getApmTimeseriesRt,
   }),
 });
