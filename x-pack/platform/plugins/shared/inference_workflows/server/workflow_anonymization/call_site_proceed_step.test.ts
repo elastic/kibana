@@ -23,7 +23,12 @@ describe('callSiteProceedStepDefinition handler', () => {
       messages: [{ role: MessageRole.User, content: 'text TOKEN' }],
       tokenMap: { TOKEN: { original: 'secret', entityClass: 'ENTITY_NAME' } },
     };
-    const capabilities = [{ id: INFERENCE_PROCEED_CAPABILITY_ID, value: { invoke } }];
+    const capabilities = [
+      {
+        id: INFERENCE_PROCEED_CAPABILITY_ID,
+        value: createInferenceProceedCapabilityValue({ invoke }),
+      },
+    ];
 
     const result = await callSiteProceedStepDefinition.handler({
       input,
