@@ -40,21 +40,15 @@ describe('FROM columnsAfter', () => {
       { name: 'field3', type: 'text', userDefined: false },
     ];
 
+    const fieldsByIndex: Record<string, ESQLFieldWithMetadata[]> = {
+      index1: index1Fields,
+      index2: index2Fields,
+    };
+
     const result = await columnsAfter(command, [], '', {
       fromFrom: (cmd) => {
-        if (cmd.args.length === 1 && isSource(cmd.args[0])) {
-          const sourceName = cmd.args[0].name;
-
-          if (sourceName === 'index1') {
-            return Promise.resolve(index1Fields);
-          }
-
-          if (sourceName === 'index2') {
-            return Promise.resolve(index2Fields);
-          }
-        }
-
-        return Promise.resolve([]);
+        const sources = cmd.args.filter((arg) => !Array.isArray(arg) && isSource(arg));
+        return Promise.resolve(sources.flatMap((s) => fieldsByIndex[s.name] ?? []));
       },
       fromJoin: () => Promise.resolve([]),
       fromEnrich: () => Promise.resolve([]),
@@ -105,33 +99,18 @@ describe('FROM columnsAfter', () => {
       { name: 'other5', type: 'keyword', userDefined: false },
     ];
 
+    const fieldsByIndex: Record<string, ESQLFieldWithMetadata[]> = {
+      index1: index1Fields,
+      index2: index2Fields,
+      index3: index3Fields,
+      index4: index4Fields,
+      index5: index5Fields,
+    };
+
     const result = await columnsAfter(command, [], '', {
       fromFrom: (cmd) => {
-        if (cmd.args.length === 1 && isSource(cmd.args[0])) {
-          const sourceName = cmd.args[0].name;
-
-          if (sourceName === 'index1') {
-            return Promise.resolve(index1Fields);
-          }
-
-          if (sourceName === 'index2') {
-            return Promise.resolve(index2Fields);
-          }
-
-          if (sourceName === 'index3') {
-            return Promise.resolve(index3Fields);
-          }
-
-          if (sourceName === 'index4') {
-            return Promise.resolve(index4Fields);
-          }
-
-          if (sourceName === 'index5') {
-            return Promise.resolve(index5Fields);
-          }
-        }
-
-        return Promise.resolve([]);
+        const sources = cmd.args.filter((arg) => !Array.isArray(arg) && isSource(arg));
+        return Promise.resolve(sources.flatMap((s) => fieldsByIndex[s.name] ?? []));
       },
       fromJoin: () => Promise.resolve([]),
       fromEnrich: () => Promise.resolve([]),
@@ -188,5 +167,32 @@ describe('FROM columnsAfter', () => {
     expect(fieldNames).toContain('field1');
     expect(fieldNames).toContain('_id');
     expect(fieldNames).toContain('_index');
+  });
+
+  it('batches multiple plain sources into a single fromFrom call', async () => {
+    const command = synth.cmd`FROM index1, index2, index3`;
+
+    const fromFromMock = jest.fn().mockResolvedValue([
+      { name: 'field1', type: 'keyword', userDefined: false },
+      { name: 'field2', type: 'long', userDefined: false },
+    ]);
+
+    await columnsAfter(command, [], '', {
+      fromFrom: fromFromMock,
+      fromJoin: () => Promise.resolve([]),
+      fromEnrich: () => Promise.resolve([]),
+    });
+
+    expect(fromFromMock).toHaveBeenCalledTimes(1);
+
+    const calledSources = fromFromMock.mock.calls[0][0].args.filter(
+      (arg: unknown) => !Array.isArray(arg) && isSource(arg)
+    );
+    expect(calledSources).toHaveLength(3);
+    expect(calledSources.map((s: { name: string }) => s.name)).toEqual([
+      'index1',
+      'index2',
+      'index3',
+    ]);
   });
 });
