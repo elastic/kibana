@@ -133,7 +133,15 @@ const LoadingCalloutComponent: React.FC<Props> = ({
     loadFeatureFlag();
   }, [featureFlags, uiSettings]);
 
-  const isTerminalState = useMemo(() => getIsTerminalState(status), [status]);
+  // A generation-succeeded event is emitted before validation finishes. Keep the
+  // callout in progress until validation writes the persisted result. A persisted
+  // count of 0 is a valid final result and must remain a terminal success.
+  const displayStatus =
+    status === 'succeeded' && workflowExecutions?.validation != null && persistedCount == null
+      ? 'started'
+      : status;
+
+  const isTerminalState = useMemo(() => getIsTerminalState(displayStatus), [displayStatus]);
 
   const leftContent = useMemo(
     () => (
@@ -166,7 +174,7 @@ const LoadingCalloutComponent: React.FC<Props> = ({
             persistedCount={persistedCount}
             reason={reason}
             start={start}
-            status={status}
+            status={displayStatus}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -187,7 +195,7 @@ const LoadingCalloutComponent: React.FC<Props> = ({
       persistedCount,
       reason,
       start,
-      status,
+      displayStatus,
     ]
   );
 
@@ -196,11 +204,11 @@ const LoadingCalloutComponent: React.FC<Props> = ({
     const successBackgroundColor = euiTheme.colors.backgroundBaseSuccess;
     const failedBackgroundColor = euiTheme.colors.backgroundBaseDanger;
 
-    if (status === 'succeeded') {
+    if (displayStatus === 'succeeded') {
       return successBackgroundColor;
     }
 
-    if (status === 'failed') {
+    if (displayStatus === 'failed') {
       return failedBackgroundColor;
     }
 
@@ -208,8 +216,8 @@ const LoadingCalloutComponent: React.FC<Props> = ({
   }, [
     euiTheme.colors.backgroundBaseDanger,
     euiTheme.colors.backgroundBaseSuccess,
+    displayStatus,
     isDarkMode,
-    status,
   ]);
 
   const borderColor = useMemo(() => {
@@ -217,11 +225,11 @@ const LoadingCalloutComponent: React.FC<Props> = ({
     const successBorderColor = euiTheme.colors.borderBaseSuccess;
     const failedBorderColor = euiTheme.colors.borderBaseDanger;
 
-    if (status === 'succeeded') {
+    if (displayStatus === 'succeeded') {
       return successBorderColor;
     }
 
-    if (status === 'failed') {
+    if (displayStatus === 'failed') {
       return failedBorderColor;
     }
 
@@ -230,8 +238,8 @@ const LoadingCalloutComponent: React.FC<Props> = ({
     euiTheme.colors.borderBaseDanger,
     euiTheme.colors.borderBaseSuccess,
     euiTheme.colors.lightShade,
+    displayStatus,
     isDarkMode,
-    status,
   ]);
 
   const { mutateAsync: dismissAttackDiscoveryGeneration } = useDismissAttackDiscoveryGeneration();

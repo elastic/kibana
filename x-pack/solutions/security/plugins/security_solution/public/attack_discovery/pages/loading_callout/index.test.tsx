@@ -42,6 +42,12 @@ describe('LoadingCallout', () => {
     approximateFutureTime: new Date(),
     localStorageAttackDiscoveryMaxAlerts: '50',
   };
+  const validationTracking = {
+    alertRetrieval: null,
+    gate: null,
+    generation: null,
+    validation: { workflowId: 'validation-workflow', workflowRunId: 'validation-run' },
+  };
 
   const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 
@@ -117,6 +123,67 @@ describe('LoadingCallout', () => {
       .querySelector('[data-euiicon-type="logoElastic"]');
 
     expect(icon).not.toBeNull();
+  });
+
+  it('remains in progress when generation succeeded but validation results are pending', () => {
+    render(
+      <TestProviders>
+        <LoadingCallout
+          {...defaultProps}
+          discoveries={0}
+          executionUuid="uuid-123"
+          status="succeeded"
+          workflowExecutions={validationTracking}
+        />
+      </TestProviders>
+    );
+
+    expect(screen.getByTestId('loadingElastic')).toBeInTheDocument();
+    expect(screen.queryByText(/Attack discovery ran successfully/)).not.toBeInTheDocument();
+  });
+
+  it('renders terminal success for a completed validation with zero persisted discoveries', () => {
+    render(
+      <TestProviders>
+        <LoadingCallout
+          {...defaultProps}
+          discoveries={0}
+          duplicatesDroppedCount={7}
+          executionUuid="uuid-123"
+          generatedCount={7}
+          persistedCount={0}
+          status="succeeded"
+          workflowExecutions={validationTracking}
+        />
+      </TestProviders>
+    );
+
+    const icon = screen
+      .getByTestId('loadingCallout')
+      .querySelector('[data-euiicon-type="logoElastic"]');
+
+    expect(icon).not.toBeNull();
+    expect(screen.getByText(/0 new attacks were discovered/)).toBeInTheDocument();
+  });
+
+  it('keeps terminal success behavior for generations without validation tracking', () => {
+    render(
+      <TestProviders>
+        <LoadingCallout
+          {...defaultProps}
+          discoveries={0}
+          executionUuid="uuid-123"
+          status="succeeded"
+        />
+      </TestProviders>
+    );
+
+    const icon = screen
+      .getByTestId('loadingCallout')
+      .querySelector('[data-euiicon-type="logoElastic"]');
+
+    expect(icon).not.toBeNull();
+    expect(screen.getByText(/0 new attacks were discovered/)).toBeInTheDocument();
   });
 
   it('renders terminal state icon for failed', () => {
