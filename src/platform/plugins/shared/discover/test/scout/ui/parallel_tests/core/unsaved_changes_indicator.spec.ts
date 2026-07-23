@@ -126,6 +126,7 @@ spaceTest.describe('Discover unsaved changes indicator', { tag: tags.deploymentA
     });
 
     await spaceTest.step('revert column changes', async () => {
+      await expect(pageObjects.dataGrid.getColumnHeader('bytes')).toBeVisible();
       expect(await pageObjects.dataGrid.getColumnTitles()).toStrictEqual(['@timestamp', 'bytes']);
       await pageObjects.dataGrid.addFieldFromSidebar('extension');
 
