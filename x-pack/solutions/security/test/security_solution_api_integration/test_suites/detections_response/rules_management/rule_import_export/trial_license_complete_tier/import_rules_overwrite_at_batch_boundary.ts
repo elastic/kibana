@@ -52,7 +52,7 @@ export default ({ getService }: FtrProviderContext): void => {
         })
         .expect(200);
 
-      const priorByRuleId = new Map(
+      const priorByRuleId = new Map<string, { id: string; revision: number }>(
         beforeOverwrite.data.map((rule: { rule_id: string; id: string; revision: number }) => [
           rule.rule_id,
           { id: rule.id, revision: rule.revision },
