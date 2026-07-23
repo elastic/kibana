@@ -43,7 +43,7 @@ describe('fetchIndexStats', () => {
 
   const mockEsqlCount = (count: number) => {
     client.asCurrentUser.esql.query.mockResolvedValue({
-      columns: [{ name: 'count()', type: 'long' }],
+      columns: [{ name: 'doc_count', type: 'long' }],
       values: [[count]],
     } as any);
   };
@@ -76,6 +76,8 @@ describe('fetchIndexStats', () => {
       // `text` is included because `semantic_text` may be reported as `text` + `inference: true`
       types: ['dense_vector', 'sparse_vector', 'semantic_text', 'semantic', 'text'],
       filters: '-metadata',
+      // Required so partially-mapped fields carry an explicit `indices` list.
+      include_unmapped: true,
     });
   });
 
@@ -93,7 +95,7 @@ describe('fetchIndexStats', () => {
     const result = await fetchIndexStats(client, logger);
 
     expect(client.asCurrentUser.esql.query).toHaveBeenCalledWith(
-      expect.objectContaining({ query: 'FROM "vectordb" | STATS count()' })
+      expect.objectContaining({ query: 'FROM "vectordb" | STATS doc_count = COUNT(*)' })
     );
     expect(result.vectorDocsCount).toBe(10);
   });
@@ -112,7 +114,7 @@ describe('fetchIndexStats', () => {
     const result = await fetchIndexStats(client, logger);
 
     expect(client.asCurrentUser.esql.query).toHaveBeenCalledWith(
-      expect.objectContaining({ query: 'FROM "vectordb" | STATS count()' })
+      expect.objectContaining({ query: 'FROM "vectordb" | STATS doc_count = COUNT(*)' })
     );
     expect(result.vectorDocsCount).toBe(10);
   });
@@ -130,7 +132,7 @@ describe('fetchIndexStats', () => {
     const result = await fetchIndexStats(client, logger);
 
     expect(client.asCurrentUser.esql.query).toHaveBeenCalledWith(
-      expect.objectContaining({ query: 'FROM "vectordb" | STATS count()' })
+      expect.objectContaining({ query: 'FROM "vectordb" | STATS doc_count = COUNT(*)' })
     );
     expect(result.vectorDocsCount).toBe(10);
   });
@@ -158,8 +160,44 @@ describe('fetchIndexStats', () => {
     await fetchIndexStats(client, logger);
 
     expect(client.asCurrentUser.esql.query).toHaveBeenCalledWith(
-      expect.objectContaining({ query: 'FROM "vectordb" | STATS count()' })
+      expect.objectContaining({ query: 'FROM "vectordb" | STATS doc_count = COUNT(*)' })
     );
+  });
+
+  it('does not classify indices where the vector field is unmapped', async () => {
+    mockMetering([
+      { name: 'test-vector', num_docs: 10, size_in_bytes: 500 },
+      { name: 'test-plain', num_docs: 5000, size_in_bytes: 50 },
+    ]);
+    // Real response shape with `include_unmapped: true` when `embedding` only exists in
+    // `test-vector`: the mapped entry carries `indices`, plus an `unmapped` pseudo-entry for the
+    // indices where the field does not exist (verified against a serverless cluster).
+    mockFieldCaps({
+      embedding: {
+        unmapped: {
+          type: 'unmapped',
+          searchable: false,
+          aggregatable: false,
+          inference: false,
+          indices: ['test-plain'],
+        },
+        dense_vector: {
+          type: 'dense_vector',
+          searchable: true,
+          aggregatable: false,
+          inference: false,
+          indices: ['test-vector'],
+        },
+      },
+    });
+    mockEsqlCount(10);
+
+    const result = await fetchIndexStats(client, logger);
+
+    expect(client.asCurrentUser.esql.query).toHaveBeenCalledWith(
+      expect.objectContaining({ query: 'FROM "test-vector" | STATS doc_count = COUNT(*)' })
+    );
+    expect(result.vectorDocsCount).toBe(10);
   });
 
   it('treats a vector field with no `indices` as present in every requested index', async () => {
@@ -183,7 +221,9 @@ describe('fetchIndexStats', () => {
     await fetchIndexStats(client, logger);
 
     expect(client.asCurrentUser.esql.query).toHaveBeenCalledWith(
-      expect.objectContaining({ query: 'FROM "vectordb-a","vectordb-b" | STATS count()' })
+      expect.objectContaining({
+        query: 'FROM "vectordb-a","vectordb-b" | STATS doc_count = COUNT(*)',
+      })
     );
   });
 
@@ -202,11 +242,11 @@ describe('fetchIndexStats', () => {
     });
     client.asCurrentUser.esql.query
       .mockResolvedValueOnce({
-        columns: [{ name: 'count()', type: 'long' }],
+        columns: [{ name: 'doc_count', type: 'long' }],
         values: [[500]],
       } as any)
       .mockResolvedValueOnce({
-        columns: [{ name: 'count()', type: 'long' }],
+        columns: [{ name: 'doc_count', type: 'long' }],
         values: [[1]],
       } as any);
 
@@ -219,7 +259,7 @@ describe('fetchIndexStats', () => {
     expect(queries[0]).toContain('"vectordb-0"');
     expect(queries[0]).toContain('"vectordb-499"');
     expect(queries[0]).not.toContain('"vectordb-500"');
-    expect(queries[1]).toBe('FROM "vectordb-500" | STATS count()');
+    expect(queries[1]).toBe('FROM "vectordb-500" | STATS doc_count = COUNT(*)');
     expect(result.vectorDocsCount).toBe(501);
   });
 

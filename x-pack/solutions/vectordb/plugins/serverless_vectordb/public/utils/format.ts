@@ -9,10 +9,11 @@ import numeral from '@elastic/numeral';
 
 /**
  * Formats a byte count for display, returning an em dash for `null` (used to signal that the value
- * could not be fetched, as opposed to a genuine `0`).
+ * could not be fetched, as opposed to a genuine `0`). Shows up to two decimals, dropping trailing
+ * zeros (`500 B`, `1.5 KB`, `100 GB`).
  */
 export const formatBytes = (bytes: number | null): string =>
-  bytes === null ? '—' : numeral(bytes).format('0.00 b');
+  bytes === null ? '—' : numeral(bytes).format('0,0.[00] b');
 
 /**
  * Formats a number with locale-aware thousands separators, returning an em dash for `null`.

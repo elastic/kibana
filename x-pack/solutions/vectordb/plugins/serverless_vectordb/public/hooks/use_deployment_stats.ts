@@ -12,12 +12,15 @@ import { DEPLOYMENT_STATS_PATH, WORKFLOWS_STATS_PATH } from '../../common/consta
 interface WorkflowsStats {
   workflows?: { enabled?: number; disabled?: number };
 }
-interface DeploymentStats {
+
+interface DeploymentStatsResponse {
   indicesCount: number | null;
   vectorDocsCount: number | null;
   storeSizeBytes: number | null;
-  workflowsCount: number | null;
   dashboardsCount: number | null;
+}
+interface DeploymentStats extends DeploymentStatsResponse {
+  workflowsCount: number | null;
 }
 
 const initialStats: DeploymentStats = {
@@ -37,7 +40,7 @@ export const useDeploymentStats = () => {
     queryKey: ['deploymentStats'],
     queryFn: async () => {
       const [esStats, workflowsResponse] = await Promise.all([
-        http.get<DeploymentStats>(DEPLOYMENT_STATS_PATH).catch(() => null),
+        http.get<DeploymentStatsResponse>(DEPLOYMENT_STATS_PATH).catch(() => null),
         http.get<WorkflowsStats>(WORKFLOWS_STATS_PATH).catch(() => null),
       ]);
 

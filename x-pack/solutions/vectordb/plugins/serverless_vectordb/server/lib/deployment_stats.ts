@@ -59,19 +59,28 @@ const getVectorIndexNames = async (
     fields: '*',
     types: FIELD_CAPS_TYPES,
     filters: '-metadata',
+    // Without this, a field mapped in only a subset of the indices is reported with no `indices`
+    // list — indistinguishable from a field mapped in every index — so all requested indices would
+    // be misclassified as vector indices. With it, partially-mapped fields always carry an explicit
+    // `indices` list on the mapped entry.
+    include_unmapped: true,
   });
 
   const vectorIndexNames = new Set<string>();
 
   for (const capabilitiesByType of Object.values(fieldCaps.fields)) {
     for (const capability of Object.values(capabilitiesByType) as FieldCapability[]) {
+      // `include_unmapped: true` adds pseudo-entries (type `unmapped`) listing the indices where
+      // the field does not exist; they must never count as matches.
+      if (capability.type === 'unmapped') continue;
+
       const isVectorField =
         VECTOR_FIELD_TYPES.has(capability.type) || capability.inference === true;
       if (!isVectorField) continue;
 
-      // `indices` is only populated when the field is not uniform across the requested indices; when
-      // absent, the field (with this capability) exists in every requested index, so all of them
-      // qualify and there is nothing left to discover.
+      // With `include_unmapped: true`, `indices` is absent only when the field (with this
+      // capability) is mapped in every requested index, so all of them qualify and there is
+      // nothing left to discover.
       if (capability.indices === undefined) return indexNames;
 
       const capabilityIndices = Array.isArray(capability.indices)
@@ -104,14 +113,17 @@ const countTopLevelDocs = async (
   for (let i = 0; i < indexNames.length; i += ESQL_INDICES_PER_QUERY) {
     const batch = indexNames.slice(i, i + ESQL_INDICES_PER_QUERY);
     const esqlResult = await client.asCurrentUser.esql.query({
-      // Index names are quoted so names requiring ES|QL quoting cannot break the query. Double
-      // quotes cannot appear in index names, so no escaping is needed.
-      query: `FROM ${batch.map((name) => `"${name}"`).join(',')} | STATS count()`,
+      // Each index name is wrapped in double quotes so characters that are special in ES|QL
+      // (e.g. dashes) can't break the query. Index names can never contain a double quote,
+      // so no escaping is needed.
+      query: `FROM ${batch.map((name) => `"${name}"`).join(',')} | STATS doc_count = COUNT(*)`,
       // return partial results instead of failing when some shards are unavailable
       allow_partial_results: true,
     });
 
-    const countColumnIndex = esqlResult.columns.findIndex((col) => col.name === 'count()');
+    // The count is aliased to `doc_count` in the query so this lookup doesn't depend on
+    // ES|QL's auto-generated column naming.
+    const countColumnIndex = esqlResult.columns.findIndex((col) => col.name === 'doc_count');
     const [row] = esqlResult.values ?? [];
     total += (row?.[countColumnIndex] as number) ?? 0;
   }
