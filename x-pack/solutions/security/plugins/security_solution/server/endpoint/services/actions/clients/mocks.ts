@@ -301,7 +301,7 @@ const createKillOrSuspendProcessOptionsMock = (
   const options: KillOrSuspendProcessRequestBody = {
     ...createNoParamsResponseActionOptionsMock(),
     parameters,
-  };
+  } as KillOrSuspendProcessRequestBody;
   return merge(options, overrides);
 };
 

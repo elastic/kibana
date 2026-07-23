@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiLoadingElastic } from '@elastic/eui';
+import { EuiButton, EuiCallOut, EuiLoadingElastic, EuiSpacer } from '@elastic/eui';
 import type { AppHeaderMenu } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo } from 'react';
@@ -16,6 +16,7 @@ import { useStreamsAppParams } from '../../../hooks/use_streams_app_params';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 import { useStreamsPrivileges } from '../../../hooks/use_streams_privileges';
 import { useSignificantEventsAvailability } from '../../../hooks/significant_events/use_significant_events_availability';
+import { useBlocksNewActivity } from '../../../hooks/significant_events/use_significant_events_maintenance';
 import { RedirectTo } from '../../redirect_to';
 import { SignificantEventsNotEnabledPrompt } from '../significant_events_not_enabled_prompt';
 import { StreamsAppHeader, StreamsAppPageTemplate } from '../../streams_app_page_template';
@@ -66,10 +67,19 @@ export function SignificantEventsDiscoveryPage() {
   } = useKibana();
 
   const {
+    ui: streamsUiPrivileges,
     features: { significantEvents },
   } = useStreamsPrivileges();
+  const canManageStreams = streamsUiPrivileges.manage;
 
   const { availability, isLoading: isAvailabilityLoading } = useSignificantEventsAvailability();
+  const {
+    isBlocked,
+    isLoading: isMaintenanceStatusLoading,
+    isError: isMaintenanceStatusError,
+    status: maintenanceStatus,
+  } = useBlocksNewActivity();
+  const showMaintenanceBanners = tab !== 'settings';
 
   const onOnboardingFailed = useCallback(
     (error: string) => {
@@ -248,6 +258,126 @@ export function SignificantEventsDiscoveryPage() {
       <KiGenerationProvider onFailed={onOnboardingFailed}>
         <SignificantEventsDiscoveryProvider>
           <StreamsAppPageTemplate.Body grow>
+            {showMaintenanceBanners && isMaintenanceStatusLoading && (
+              <>
+                <EuiCallOut
+                  announceOnMount
+                  color="primary"
+                  iconType="clock"
+                  data-test-subj="significantEventsStatusLoadingBanner"
+                  title={i18n.translate(
+                    'xpack.streams.significantEventsDiscovery.statusLoadingBannerTitle',
+                    { defaultMessage: 'Checking Significant Events activity status' }
+                  )}
+                >
+                  <p>
+                    {i18n.translate(
+                      'xpack.streams.significantEventsDiscovery.statusLoadingBannerBody',
+                      {
+                        defaultMessage:
+                          'Manual triggers stay disabled until activity status is known.',
+                      }
+                    )}
+                  </p>
+                </EuiCallOut>
+                <EuiSpacer />
+              </>
+            )}
+            {showMaintenanceBanners && isMaintenanceStatusError && (
+              <>
+                <EuiCallOut
+                  announceOnMount
+                  color="danger"
+                  iconType="error"
+                  data-test-subj="significantEventsStatusErrorBanner"
+                  title={i18n.translate(
+                    'xpack.streams.significantEventsDiscovery.statusErrorBannerTitle',
+                    { defaultMessage: 'Could not load Significant Events activity status' }
+                  )}
+                >
+                  <p>
+                    {i18n.translate(
+                      'xpack.streams.significantEventsDiscovery.statusErrorBannerBody',
+                      {
+                        defaultMessage:
+                          'Manual triggers stay disabled until status can be loaded. Open Settings to retry, or refresh the page.',
+                      }
+                    )}
+                  </p>
+                  {canManageStreams && (
+                    <EuiButton
+                      href={router.link('/_discovery/{tab}', { path: { tab: 'settings' } })}
+                      color="danger"
+                      size="s"
+                      data-test-subj="significantEventsStatusErrorBannerSettingsLink"
+                    >
+                      {i18n.translate(
+                        'xpack.streams.significantEventsDiscovery.statusErrorBannerSettingsButton',
+                        { defaultMessage: 'Go to Settings' }
+                      )}
+                    </EuiButton>
+                  )}
+                </EuiCallOut>
+                <EuiSpacer />
+              </>
+            )}
+            {showMaintenanceBanners && isBlocked && (
+              <>
+                <EuiCallOut
+                  announceOnMount
+                  color="warning"
+                  iconType="pause"
+                  data-test-subj="significantEventsPausedBanner"
+                  title={i18n.translate(
+                    'xpack.streams.significantEventsDiscovery.pausedBannerTitle',
+                    { defaultMessage: 'Significant Events activity is paused' }
+                  )}
+                >
+                  <p>
+                    {canManageStreams
+                      ? i18n.translate(
+                          'xpack.streams.significantEventsDiscovery.pausedBannerBody',
+                          {
+                            defaultMessage:
+                              'Significant Events activity is stopped across the deployment: scheduled discovery, continuous onboarding, detections, memory, investigations, and the alerting rules backing knowledge indicator queries. Manual triggers are blocked until you resume from Settings.',
+                          }
+                        )
+                      : i18n.translate(
+                          'xpack.streams.significantEventsDiscovery.pausedBannerBodyReadOnly',
+                          {
+                            defaultMessage:
+                              'Significant Events activity is stopped across the deployment: scheduled discovery, continuous onboarding, detections, memory, investigations, and the alerting rules backing knowledge indicator queries. Manual triggers are blocked. An administrator with the Streams manage privilege must resume activity from Settings.',
+                          }
+                        )}
+                  </p>
+                  {(maintenanceStatus?.lastSummary?.partialFailures.length ?? 0) > 0 && (
+                    <p>
+                      {i18n.translate(
+                        'xpack.streams.significantEventsDiscovery.pausedBannerPartialFailures',
+                        {
+                          defaultMessage:
+                            'Some maintenance operations could not be completed. Check Settings and the Kibana server logs for details.',
+                        }
+                      )}
+                    </p>
+                  )}
+                  {canManageStreams && (
+                    <EuiButton
+                      href={router.link('/_discovery/{tab}', { path: { tab: 'settings' } })}
+                      color="warning"
+                      size="s"
+                      data-test-subj="significantEventsPausedBannerSettingsLink"
+                    >
+                      {i18n.translate(
+                        'xpack.streams.significantEventsDiscovery.pausedBannerSettingsButton',
+                        { defaultMessage: 'Go to Settings' }
+                      )}
+                    </EuiButton>
+                  )}
+                </EuiCallOut>
+                <EuiSpacer />
+              </>
+            )}
             {tab === 'streams' && <StreamsView />}
             {tab === 'knowledge_indicators' && <KnowledgeIndicatorsTable />}
             {tab === 'queries' && <QueriesTable />}

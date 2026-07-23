@@ -42,7 +42,7 @@ export async function workflowExecutionLoop(params: WorkflowExecutionLoopParams)
   const persistenceAbortController = new AbortController();
 
   const onTaskAbort = () => {
-    if (isWorkflowTaskManagerAbortSignal(params.taskAbortController.signal)) {
+    if (isWorkflowTaskManagerAbortSignal(params.signal)) {
       params.workflowExecutionState.updateWorkflowExecution({
         cancelRequested: true,
         status: ExecutionStatus.CANCELLED,
@@ -64,8 +64,8 @@ export async function workflowExecutionLoop(params: WorkflowExecutionLoopParams)
     persistenceAbortController.abort();
   };
 
-  params.taskAbortController.signal.addEventListener('abort', onTaskAbort, { once: true });
-  if (params.taskAbortController.signal.aborted) {
+  params.signal.addEventListener('abort', onTaskAbort, { once: true });
+  if (params.signal.aborted) {
     onTaskAbort();
   }
 
@@ -86,7 +86,7 @@ export async function workflowExecutionLoop(params: WorkflowExecutionLoopParams)
   } finally {
     const finalFlushSpan = apm.startSpan('final flush state', 'workflow', 'persistence');
     await flushState(params, {
-      workflowLogFlushSignal: params.taskAbortController.signal,
+      workflowLogFlushSignal: params.signal,
     });
     finalFlushSpan?.end();
   }
@@ -109,8 +109,8 @@ export async function workflowExecutionLoop(params: WorkflowExecutionLoopParams)
 
   const finalLogFlushSpan = apm.startSpan('final flush logs', 'workflow', 'logging');
   await params.workflowLogger.flushEvents({
-    signal: params.taskAbortController.signal,
+    signal: params.signal,
   });
   finalLogFlushSpan?.end();
-  params.taskAbortController.signal.removeEventListener('abort', onTaskAbort);
+  params.signal.removeEventListener('abort', onTaskAbort);
 }
