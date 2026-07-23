@@ -136,12 +136,7 @@ describe('useEsqlCallbacks', () => {
 
       let capturedSignal: AbortSignal | undefined;
       (params.memoizedSources as unknown as jest.Mock).mockImplementation(
-        (
-          _core: unknown,
-          _getLicense: unknown,
-          _enrichSources: unknown,
-          signal?: AbortSignal
-        ) => {
+        (_core: unknown, _getLicense: unknown, _enrichSources: unknown, signal?: AbortSignal) => {
           capturedSignal = signal;
           return { timestamp: Date.now(), result: new Promise(() => {}) };
         }
