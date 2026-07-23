@@ -92,6 +92,7 @@ const createQueryClient = () =>
 
 interface RenderProps {
   policy?: ActionPolicyResponse;
+  canWrite?: boolean;
   onClose?: jest.Mock;
   onEdit?: jest.Mock;
   onClone?: jest.Mock;
@@ -120,7 +121,11 @@ const renderFlyout = (props: RenderProps = {}) => {
   render(
     <QueryClientProvider client={createQueryClient()}>
       <I18nProvider>
-        <ActionPolicyDetailsFlyout policy={policy} {...handlers} />
+        <ActionPolicyDetailsFlyout
+          policy={policy}
+          canWrite={props.canWrite ?? true}
+          {...handlers}
+        />
       </I18nProvider>
     </QueryClientProvider>
   );
@@ -335,6 +340,23 @@ describe('ActionPolicyDetailsFlyout', () => {
 
       expect(handlers.onUpdateApiKey).toHaveBeenCalledWith(policy.id);
       expect(handlers.onClose).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('when the user only has read privilege', () => {
+    it('hides the actions menu and the Edit footer button but keeps Close', () => {
+      renderFlyout({ canWrite: false });
+
+      expect(screen.queryByTestId(TEST_SUBJ.actionsMenuButton)).not.toBeInTheDocument();
+      expect(screen.queryByTestId(TEST_SUBJ.editButton)).not.toBeInTheDocument();
+      expect(screen.getByTestId(TEST_SUBJ.closeButton)).toBeInTheDocument();
+    });
+
+    it('still renders the policy details', () => {
+      renderFlyout({ canWrite: false });
+
+      expect(screen.getByTestId(TEST_SUBJ.title)).toHaveTextContent('Critical alerts policy');
+      expect(screen.getByText('data.severity : "critical"')).toBeInTheDocument();
     });
   });
 });

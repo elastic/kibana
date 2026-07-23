@@ -5,30 +5,19 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import type {
   SignificantEvent,
-  SignificantEventInvestigationStatus,
+  SignificantEventInvestigation,
 } from '@kbn/significant-events-schema';
 
-export const INVESTIGATION_STATUS_COLORS: Record<SignificantEventInvestigationStatus, string> = {
-  pending: 'warning',
-  success: 'success',
-  failed: 'danger',
-};
-
-export const INVESTIGATION_STATUS_LABELS: Record<SignificantEventInvestigationStatus, string> = {
-  pending: i18n.translate('xpack.streams.investigation.status.pending', {
-    defaultMessage: 'Running',
-  }),
-  success: i18n.translate('xpack.streams.investigation.status.success', {
-    defaultMessage: 'Completed',
-  }),
-  failed: i18n.translate('xpack.streams.investigation.status.failed', {
-    defaultMessage: 'Failed',
-  }),
-};
+/**
+ * Returns true while an investigation run is in flight according to the significant-event doc.
+ * The doc only records that a run happened and when — an entry is running until the workflow's
+ * terminal step (or the orphan reconciliation) stamps `completed_at`.
+ */
+export const isInvestigationRunning = (investigation: SignificantEventInvestigation): boolean =>
+  investigation.completed_at == null;
 
 /** Returns true when the event has at least one investigation currently in flight. */
-export const hasPendingInvestigation = (event: SignificantEvent): boolean =>
-  event.investigations?.some((i) => i.status === 'pending') ?? false;
+export const hasRunningInvestigation = (event: SignificantEvent): boolean =>
+  event.investigations?.some(isInvestigationRunning) ?? false;

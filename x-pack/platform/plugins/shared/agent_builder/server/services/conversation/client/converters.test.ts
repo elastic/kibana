@@ -9,6 +9,7 @@ import type { Conversation } from '@kbn/agent-builder-common';
 import {
   ConversationAccessControlMode,
   ConversationRoundStatus,
+  ConversationOriginType,
   ToolOrigin,
 } from '@kbn/agent-builder-common';
 import {
@@ -489,6 +490,42 @@ describe('conversation model converters', () => {
         access_mode: ConversationAccessControlMode.Public,
       });
     });
+
+    it('deserializes first-class origin', () => {
+      const serialized = documentBase();
+      serialized._source!.origin = {
+        external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
+      };
+
+      const deserialized = fromEs(serialized);
+
+      expect(deserialized.origin).toEqual({
+        external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
+      });
+    });
+
+    it('deserializes round origin and author', () => {
+      const serialized = documentBase();
+      serialized._source!.conversation_rounds[0].author = {
+        id: 'U123',
+        full_name: 'Jane Doe',
+        username: 'jane',
+      };
+      serialized._source!.conversation_rounds[0].origin = {
+        type: ConversationOriginType.Slack,
+      };
+
+      const deserialized = fromEs(serialized);
+
+      expect(deserialized.rounds[0].origin).toEqual({
+        type: 'slack',
+      });
+      expect(deserialized.rounds[0].author).toEqual({
+        id: 'U123',
+        full_name: 'Jane Doe',
+        username: 'jane',
+      });
+    });
   });
 
   describe('toEs', () => {
@@ -675,6 +712,42 @@ describe('conversation model converters', () => {
         access_mode: ConversationAccessControlMode.Public,
       });
     });
+
+    it('serializes first-class origin', () => {
+      const conversation = conversationBase();
+      conversation.origin = {
+        external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
+      };
+
+      const serialized = toEs(conversation, 'space');
+
+      expect(serialized.origin).toEqual({
+        external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
+      });
+    });
+
+    it('serializes round origin and author', () => {
+      const conversation = conversationBase();
+      conversation.rounds[0].author = {
+        id: 'U123',
+        full_name: 'Jane Doe',
+        username: 'jane',
+      };
+      conversation.rounds[0].origin = {
+        type: ConversationOriginType.Slack,
+      };
+
+      const serialized = toEs(conversation, 'space');
+
+      expect(serialized.conversation_rounds[0].origin).toEqual({
+        type: 'slack',
+      });
+      expect(serialized.conversation_rounds[0].author).toEqual({
+        id: 'U123',
+        full_name: 'Jane Doe',
+        username: 'jane',
+      });
+    });
   });
 
   describe('createRequestToEs', () => {
@@ -751,6 +824,28 @@ describe('conversation model converters', () => {
 
       expect(serialized.access_control).toEqual({
         access_mode: ConversationAccessControlMode.Public,
+      });
+    });
+
+    it('serializes first-class origin when creating a conversation', () => {
+      const conversation = {
+        agent_id: 'agent_id',
+        title: 'conv_title',
+        rounds: [],
+        origin: {
+          external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
+        },
+      };
+
+      const serialized = createRequestToEs({
+        conversation,
+        space: 'space',
+        currentUser: { id: 'user_id', username: 'user_name' },
+        creationDate: new Date(creationDate),
+      });
+
+      expect(serialized.origin).toEqual({
+        external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
       });
     });
   });

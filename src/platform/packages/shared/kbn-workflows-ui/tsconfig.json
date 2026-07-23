@@ -12,6 +12,7 @@
     "@kbn/kibana-react-plugin",
     "@kbn/workflows",
     "@kbn/workflows-library",
+    "@kbn/workflows-yaml",
     "@kbn/react-kibana-context-theme",
     "@kbn/i18n",
     "@kbn/i18n-react",

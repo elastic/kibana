@@ -87,7 +87,7 @@ describe('ChangeHistoryPreviewPanel', () => {
     mockUseChangeHistoryConfig.mockReturnValue({
       adapter: {},
       objectId: TEST_OBJECT_ID,
-      supports: { compare: true, restore: false },
+      supports: { compare: true, restore: false, unsavedChanges: false },
       telemetry: {
         reportDiffViewed: jest.fn(),
         reportDiffChangeNavigated: jest.fn(),

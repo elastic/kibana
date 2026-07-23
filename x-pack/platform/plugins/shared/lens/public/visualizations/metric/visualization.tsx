@@ -8,7 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { PaletteRegistry } from '@kbn/coloring';
-import { getOverridePaletteStops } from '@kbn/coloring';
+import { getOverridePaletteColors } from '@kbn/coloring';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 // eslint-disable-next-line @elastic/eui/no-restricted-eui-imports
 import { euiThemeVars } from '@kbn/ui-theme';
@@ -32,6 +32,7 @@ import {
   LENS_METRIC_ID,
   LENS_METRIC_GROUP_ID,
   LENS_METRIC_DEFAULT_STYLE_TEMPLATE_CONFIG,
+  LENS_METRIC_STATE_DEFAULTS,
 } from '@kbn/lens-common';
 import { convertToRuntimeState } from './runtime_state';
 import { isNumericFieldForDatatable } from '../../../common/expressions/impl/datatable/utils';
@@ -109,11 +110,11 @@ const getMetricLayerConfiguration = (
     const hasDynamicColoring = Boolean(isPrimaryMetricNumeric && props.state.palette);
 
     if (hasDynamicColoring) {
-      const stops = getOverridePaletteStops(paletteService, props.state.palette);
+      const colors = getOverridePaletteColors(paletteService, props.state.palette);
 
       return {
         triggerIconType: 'colorBy',
-        palette: stops?.map(({ color }) => color),
+        palette: colors,
       };
     }
 
@@ -464,6 +465,7 @@ export const getMetricVisualization = ({
       layerId: addNewLayer(),
       layerType: layerTypes.DATA,
       ...LENS_METRIC_DEFAULT_STYLE_TEMPLATE_CONFIG,
+      density: LENS_METRIC_STATE_DEFAULTS.density,
       palette: mainPalette?.type === 'legacyPalette' ? mainPalette.value : undefined,
     };
   },
@@ -798,7 +800,9 @@ export const getMetricVisualization = ({
       });
     }
 
-    const stops = state.palette?.params?.stops || [];
+    // Named palettes may carry only a band count (empty `stops`); resolve their colors from the
+    // palette service so the preview matches the rendered chart.
+    const colors = getOverridePaletteColors(paletteService, state.palette) ?? [];
     const hasStaticColoring = !!state.color;
     const hasDynamicColoring = !!state.palette;
 
@@ -821,7 +825,7 @@ export const getMetricVisualization = ({
           ...this.getDescription(state),
           dimensions,
           palette: (hasDynamicColoring
-            ? stops.map(({ color }) => color)
+            ? colors
             : hasStaticColoring
             ? [state.color]
             : [getDefaultColor(state, isMetricNumeric)]

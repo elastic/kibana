@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { coreMock } from '@kbn/core/server/mocks';
 import { ToolResultType, type ErrorResult, type OtherResult } from '@kbn/agent-builder-common';
 import { ConfirmationStatus } from '@kbn/agent-builder-common/agents/prompts';
 import type {
@@ -18,8 +19,9 @@ import {
   setupMockCoreStartServices,
 } from '../../../__mocks__/test_helpers';
 import type { ExperimentalFeatures } from '../../../../../common';
+import { ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT } from '../../../../lib/telemetry/event_based/events';
 import { getWatchlistToolAvailability } from './watchlist_availability';
-import { deleteWatchlistTool } from './delete_watchlist_tool';
+import { deleteWatchlistTool, SECURITY_DELETE_WATCHLIST_TOOL_ID } from './delete_watchlist_tool';
 
 jest.mock('./watchlist_availability', () => ({
   getWatchlistToolAvailability: jest.fn(),
@@ -114,10 +116,11 @@ describe('deleteWatchlistTool', () => {
     mockExperimentalFeatures,
     true
   );
+  let mockCoreStart: ReturnType<typeof coreMock.createStart>;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    setupMockCoreStartServices(mocks.mockCore, mocks.mockEsClient);
+    mockCoreStart = setupMockCoreStartServices(mocks.mockCore, mocks.mockEsClient);
     mockGetWatchlistToolAvailability.mockResolvedValue({ status: 'available' });
     mockGetUserWatchlistPrivileges.mockResolvedValue({
       privileges: {},
@@ -342,6 +345,130 @@ describe('deleteWatchlistTool', () => {
       expect(other.data.watchlistId).toBe('wl-1');
       expect(other.data.warning).toContain('cleanup-boom');
       expect(other.data.warning).toMatch(/entity source cleanup failed/i);
+    });
+
+    describe('telemetry', () => {
+      it('does not report telemetry while only asking for confirmation', async () => {
+        mockGetFn.mockResolvedValueOnce(buildExistingWatchlist());
+        const ctx = buildHandlerContextWithPrompts(mocks, {
+          checkStatus: ConfirmationStatus.unprompted,
+        });
+
+        await tool.handler({ watchlistId: 'wl-1' }, ctx);
+
+        expect(mockCoreStart.analytics.reportEvent).not.toHaveBeenCalled();
+      });
+
+      it('reports telemetry when refusing to delete a managed watchlist, without ever prompting', async () => {
+        mockGetFn.mockResolvedValueOnce(buildExistingWatchlist({ managed: true, name: 'System' }));
+        const ctx = buildHandlerContextWithPrompts(mocks, {
+          checkStatus: ConfirmationStatus.unprompted,
+        });
+
+        await tool.handler({ watchlistId: 'wl-1' }, ctx);
+
+        expect(ctx.prompts.askForConfirmation).not.toHaveBeenCalled();
+        expect(mockCoreStart.analytics.reportEvent).toHaveBeenCalledWith(
+          ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT.eventType,
+          {
+            toolId: SECURITY_DELETE_WATCHLIST_TOOL_ID,
+            actionType: 'mutation',
+            spaceId: 'default',
+            success: false,
+            errorMessage:
+              'Cannot delete watchlist "System" — it is system-managed and protected from deletion.',
+            userConfirmationOutcome: ConfirmationStatus.unprompted,
+          }
+        );
+      });
+
+      it('reports userConfirmationOutcome=accepted and success=true after a successful delete', async () => {
+        mockDeleteWatchlistEntitiesFn.mockResolvedValueOnce(undefined);
+        mockDeleteFn.mockResolvedValueOnce(undefined);
+        const ctx = buildHandlerContextWithPrompts(mocks, {
+          checkStatus: ConfirmationStatus.accepted,
+        });
+
+        await tool.handler({ watchlistId: 'wl-1' }, ctx);
+
+        expect(mockCoreStart.analytics.reportEvent).toHaveBeenCalledWith(
+          ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT.eventType,
+          {
+            toolId: SECURITY_DELETE_WATCHLIST_TOOL_ID,
+            actionType: 'mutation',
+            spaceId: 'default',
+            success: true,
+            errorMessage: undefined,
+            userConfirmationOutcome: ConfirmationStatus.accepted,
+          }
+        );
+      });
+
+      it('reports userConfirmationOutcome=rejected when the user declines the prompt', async () => {
+        const ctx = buildHandlerContextWithPrompts(mocks, {
+          checkStatus: ConfirmationStatus.rejected,
+        });
+
+        await tool.handler({ watchlistId: 'wl-1' }, ctx);
+
+        expect(mockCoreStart.analytics.reportEvent).toHaveBeenCalledWith(
+          ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT.eventType,
+          {
+            toolId: SECURITY_DELETE_WATCHLIST_TOOL_ID,
+            actionType: 'mutation',
+            spaceId: 'default',
+            success: true,
+            errorMessage: undefined,
+            userConfirmationOutcome: ConfirmationStatus.rejected,
+          }
+        );
+      });
+
+      it('reports success=false when the caller lacks write privilege', async () => {
+        mockGetUserWatchlistPrivileges.mockResolvedValueOnce({
+          privileges: {},
+          has_all_required: false,
+          has_read_permissions: true,
+          has_write_permissions: false,
+        });
+        const ctx = buildHandlerContextWithPrompts(mocks);
+
+        await tool.handler({ watchlistId: 'wl-1' }, ctx);
+
+        expect(mockCoreStart.analytics.reportEvent).toHaveBeenCalledWith(
+          ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT.eventType,
+          {
+            toolId: SECURITY_DELETE_WATCHLIST_TOOL_ID,
+            actionType: 'mutation',
+            spaceId: 'default',
+            success: false,
+            errorMessage: 'You do not have permission to delete watchlists in this space.',
+            userConfirmationOutcome: undefined,
+          }
+        );
+      });
+
+      it('reports success=false and errorMessage when the delete call throws', async () => {
+        mockDeleteWatchlistEntitiesFn.mockResolvedValueOnce(undefined);
+        mockDeleteFn.mockRejectedValueOnce(new Error('boom'));
+        const ctx = buildHandlerContextWithPrompts(mocks, {
+          checkStatus: ConfirmationStatus.accepted,
+        });
+
+        await tool.handler({ watchlistId: 'wl-1' }, ctx);
+
+        expect(mockCoreStart.analytics.reportEvent).toHaveBeenCalledWith(
+          ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT.eventType,
+          {
+            toolId: SECURITY_DELETE_WATCHLIST_TOOL_ID,
+            actionType: 'mutation',
+            spaceId: 'default',
+            success: false,
+            errorMessage: 'boom',
+            userConfirmationOutcome: ConfirmationStatus.accepted,
+          }
+        );
+      });
     });
   });
 });

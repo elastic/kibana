@@ -245,6 +245,22 @@ describe('publicBaseUrl', () => {
   });
 });
 
+describe('selfHttp', () => {
+  test('defaults target to auto', () => {
+    expect(config.schema.validate({}).selfHttp.target).toBe('auto');
+  });
+
+  test('accepts local target', () => {
+    expect(config.schema.validate({ selfHttp: { target: 'local' } }).selfHttp.target).toBe('local');
+  });
+
+  test('rejects unsupported targets', () => {
+    expect(() => config.schema.validate({ selfHttp: { target: 'inject' } })).toThrow(
+      '[selfHttp.target]'
+    );
+  });
+});
+
 test('accepts only valid uuids for server.uuid', () => {
   const httpSchema = config.schema;
   expect(() => httpSchema.validate({ uuid: uuidv4() })).not.toThrow();
@@ -849,5 +865,19 @@ describe('HttpConfig', () => {
       rawPermissionsPolicyConfig
     );
     expect(httpConfig.restrictInternalApis).toBe(true);
+  });
+
+  it('keeps self HTTP target config', () => {
+    const rawConfig = config.schema.validate({ selfHttp: { target: 'local' } }, {});
+    const rawCspConfig = cspConfig.schema.validate({});
+    const rawPermissionsPolicyConfig = permissionsPolicyConfig.schema.validate({});
+    const httpConfig = new HttpConfig(
+      rawConfig,
+      rawCspConfig,
+      ExternalUrlConfig.DEFAULT,
+      rawPermissionsPolicyConfig
+    );
+
+    expect(httpConfig.selfHttp).toEqual({ target: 'local' });
   });
 });

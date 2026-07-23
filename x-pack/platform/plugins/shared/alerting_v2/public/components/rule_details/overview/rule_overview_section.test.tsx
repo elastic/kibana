@@ -21,9 +21,17 @@ jest.mock('./signal_rule_overview', () => ({
 }));
 
 jest.mock('./artifacts', () => ({
-  DashboardArtifactsSection: () => (
-    <div data-test-subj="dashboardArtifactsSectionMock">dashboards</div>
+  ArtifactsSection: () => <div data-test-subj="artifactsSectionMock">artifacts</div>,
+  SignalArtifactsSection: () => (
+    <div data-test-subj="signalArtifactsSectionMock">signal artifacts</div>
   ),
+}));
+
+const mockCanRead = jest.fn();
+
+jest.mock('@kbn/core-di-browser', () => ({
+  CoreStart: (key: string) => key,
+  useService: () => ({ canRead: mockCanRead }),
 }));
 
 const baseRule: RuleApiResponse = {
@@ -50,6 +58,11 @@ const renderSection = (rule: RuleApiResponse) =>
   );
 
 describe('RuleOverviewSection', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockCanRead.mockReturnValue(true);
+  });
+
   describe('activity section routing', () => {
     it('renders the alert timeline for alert rules', () => {
       renderSection({ ...baseRule, kind: 'alert' });
@@ -62,17 +75,25 @@ describe('RuleOverviewSection', () => {
       expect(screen.getByTestId('signalRuleOverviewMock')).toBeInTheDocument();
       expect(screen.queryByTestId('alertTimelineSectionMock')).not.toBeInTheDocument();
     });
+
+    it('hides the alert timeline when the user cannot read alerts', () => {
+      mockCanRead.mockReturnValue(false);
+      renderSection({ ...baseRule, kind: 'alert' });
+      expect(screen.queryByTestId('alertTimelineSectionMock')).not.toBeInTheDocument();
+    });
   });
 
-  describe('dashboard artifacts visibility', () => {
-    it('shows the dashboard artifacts section for alert rules', () => {
+  describe('artifacts visibility', () => {
+    it('shows the artifacts section for alert rules', () => {
       renderSection({ ...baseRule, kind: 'alert' });
-      expect(screen.getByTestId('dashboardArtifactsSectionMock')).toBeInTheDocument();
+      expect(screen.getByTestId('artifactsSectionMock')).toBeInTheDocument();
+      expect(screen.queryByTestId('signalArtifactsSectionMock')).not.toBeInTheDocument();
     });
 
-    it('does not show dashboard artifacts for signal rules', () => {
+    it('shows the signal artifacts section for signal rules', () => {
       renderSection({ ...baseRule, kind: 'signal' });
-      expect(screen.queryByTestId('dashboardArtifactsSectionMock')).not.toBeInTheDocument();
+      expect(screen.getByTestId('signalArtifactsSectionMock')).toBeInTheDocument();
+      expect(screen.queryByTestId('artifactsSectionMock')).not.toBeInTheDocument();
     });
   });
 });

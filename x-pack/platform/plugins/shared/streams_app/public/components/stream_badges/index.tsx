@@ -34,6 +34,8 @@ import { useStreamsPrivileges } from '../../hooks/use_streams_privileges';
 
 import { truncateText } from '../../util/truncate_text';
 
+const INFINITY_SYMBOL = '∞';
+
 const DataRetentionTooltip: React.FC<{ children: React.ReactElement }> = ({ children }) => (
   <EuiToolTip
     position="top"
@@ -175,9 +177,16 @@ export function LifecycleBadge({
 
   let badge: React.ReactElement;
 
+  const indefiniteLabel = i18n.translate(
+    'xpack.streams.entityDetailViewWithoutParams.dslIndefiniteBadgeLabel',
+    {
+      defaultMessage: 'Indefinite',
+    }
+  );
+
   if (isIlmLifecycle(lifecycle)) {
     badge = (
-      <EuiBadge color="hollow" iconType="clockCounter" iconSide="left" tabIndex={0}>
+      <EuiBadge color="hollow" iconType="clock" iconSide="left" tabIndex={0}>
         <EuiLink
           data-test-subj={dataTestSubj}
           color="text"
@@ -205,26 +214,30 @@ export function LifecycleBadge({
       </EuiBadge>
     );
   } else if (isDslLifecycle(lifecycle)) {
+    const hasRetention = Boolean(lifecycle.dsl.data_retention);
     badge = (
       <EuiBadge
         color="hollow"
-        iconType="clockCounter"
+        iconType="clock"
         iconSide="left"
         tabIndex={0}
         data-test-subj={dataTestSubj}
+        aria-label={hasRetention ? undefined : indefiniteLabel}
       >
-        {lifecycle.dsl.data_retention ??
-          i18n.translate('xpack.streams.entityDetailViewWithoutParams.dslIndefiniteBadgeLabel', {
-            defaultMessage: 'Indefinite',
-          })}
+        {hasRetention ? lifecycle.dsl.data_retention : INFINITY_SYMBOL}
       </EuiBadge>
     );
   } else {
     badge = (
-      <EuiBadge color="hollow" tabIndex={0} data-test-subj={dataTestSubj}>
-        {i18n.translate('xpack.streams.entityDetailViewWithoutParams.disabledLifecycleBadgeLabel', {
-          defaultMessage: 'Retention: Disabled',
-        })}
+      <EuiBadge
+        color="hollow"
+        iconType="clock"
+        iconSide="left"
+        tabIndex={0}
+        data-test-subj={dataTestSubj}
+        aria-label={indefiniteLabel}
+      >
+        {INFINITY_SYMBOL}
       </EuiBadge>
     );
   }
@@ -249,28 +262,39 @@ interface DiscoverBadgeButtonQueryProps extends DiscoverBadgeButtonBaseProps {
 
 type DiscoverBadgeButtonProps = DiscoverBadgeButtonIngestProps | DiscoverBadgeButtonQueryProps;
 
-export function DiscoverBadgeButton({
+/**
+ * Resolves the "Open in Discover" URL for a stream, or `undefined` when Discover is unavailable
+ * (no locator, no backing data stream, or no resolvable ES|QL query).
+ */
+export function useDiscoverStreamLink({
   stream,
   hasDataStream = false,
-  spellOut = false,
   indexMode,
-}: DiscoverBadgeButtonProps) {
+}: {
+  stream?:
+    | Streams.WiredStream.Definition
+    | Streams.ClassicStream.Definition
+    | Streams.QueryStream.Definition;
+  hasDataStream?: boolean;
+  indexMode?: IndicesIndexMode;
+}): string | undefined {
   const {
     dependencies: {
       start: { share },
     },
   } = useKibana();
-  const isIngestStream = !Streams.QueryStream.Definition.is(stream);
   const { features } = useStreamsPrivileges();
-  const esqlQuery = getDiscoverEsqlQuery({
-    definition: stream,
-    indexMode: isIngestStream ? indexMode : undefined,
-    includeMetadata: Streams.WiredStream.Definition.is(stream),
-    useViews: features.wiredStreamViews.enabled,
-  });
-  const useUrl = share.url.locators.useUrl;
+  const isIngestStream = stream ? !Streams.QueryStream.Definition.is(stream) : false;
+  const esqlQuery = stream
+    ? getDiscoverEsqlQuery({
+        definition: stream,
+        indexMode: isIngestStream ? indexMode : undefined,
+        includeMetadata: Streams.WiredStream.Definition.is(stream),
+        useViews: features.wiredStreamViews.enabled,
+      })
+    : undefined;
 
-  const discoverLink = useUrl<DiscoverAppLocatorParams>(
+  const discoverLink = share.url.locators.useUrl<DiscoverAppLocatorParams>(
     () => ({
       id: DISCOVER_APP_LOCATOR,
       params: {
@@ -281,6 +305,21 @@ export function DiscoverBadgeButton({
   );
 
   if (!discoverLink || !hasDataStream || !esqlQuery) {
+    return undefined;
+  }
+
+  return discoverLink;
+}
+
+export function DiscoverBadgeButton({
+  stream,
+  hasDataStream = false,
+  spellOut = false,
+  indexMode,
+}: DiscoverBadgeButtonProps) {
+  const discoverLink = useDiscoverStreamLink({ stream, hasDataStream, indexMode });
+
+  if (!discoverLink) {
     return null;
   }
 

@@ -7,5 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { LibraryCatalogBrowserPage } from './catalog_browser';
-export { LibraryTemplateDetailPage } from './template_detail';
+export { LibraryCatalogBrowserPage } from './catalog_browser_page';
+export { LibraryTemplateDetailPage } from './template_detail_page';

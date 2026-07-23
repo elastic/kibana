@@ -8,6 +8,7 @@
  */
 
 import { getStepIconType, getTriggerTypeIconType } from './get_step_icon_type';
+import { HardcodedIcons } from './hardcoded_icons';
 
 describe('getTriggerTypeIconType', () => {
   it.each([
@@ -33,6 +34,7 @@ describe('getStepIconType', () => {
     ['database', 'data.set'],
     ['clock', 'wait'],
     ['user', 'waitForInput'],
+    ['user', 'waitForApproval'],
     ['branch', 'if'],
     ['tokenBoolean', 'if-branch'],
     ['refresh', 'foreach'],
@@ -40,10 +42,6 @@ describe('getStepIconType', () => {
     ['refresh', 'enter-while'],
     ['tokenNumber', 'foreach-iteration'],
     ['tokenNumber', 'while-iteration'],
-    ['branch', 'parallel'],
-    ['branch', 'enter-parallel'],
-    ['branch', 'exit-parallel'],
-    ['branch', 'parallel-branch'],
     ['controls', 'loop.break'],
     ['controls', 'loop.continue'],
     ['controls', 'loop-break'],
@@ -63,6 +61,13 @@ describe('getStepIconType', () => {
     expect(getStepIconType(nodeType)).toBe(expectedIcon);
   });
 
+  it.each(['parallel', 'enter-parallel', 'exit-parallel', 'parallel-branch'])(
+    'should return the hardcoded parallel icon for the "%s" step type',
+    (nodeType) => {
+      expect(getStepIconType(nodeType)).toBe(HardcodedIcons.parallel);
+    }
+  );
+
   it('should return "logoElasticsearch" for elasticsearch-prefixed types', () => {
     expect(getStepIconType('elasticsearch.search')).toBe('logoElasticsearch');
     expect(getStepIconType('elasticsearch.index')).toBe('logoElasticsearch');
@@ -75,5 +80,17 @@ describe('getStepIconType', () => {
   it('should return "plugs" for unknown step types', () => {
     expect(getStepIconType('custom_step')).toBe('plugs');
     expect(getStepIconType('unknown')).toBe('plugs');
+  });
+
+  // Regression guard: getStepIconType accepts raw dotted connector types (e.g. ".slack")
+  // without a separate normalization step. Each case below returned "plugs" before the
+  // leading-dot strip was added; if the strip is removed they must fail.
+  it.each([
+    ['logoSlack', '.slack'],
+    ['logoSlack', '.slack_api'],
+    ['mail', '.email'],
+    ['sparkles', '.inference'],
+  ])('should strip the leading dot and return "%s" for "%s"', (expected, nodeType) => {
+    expect(getStepIconType(nodeType)).toBe(expected);
   });
 });

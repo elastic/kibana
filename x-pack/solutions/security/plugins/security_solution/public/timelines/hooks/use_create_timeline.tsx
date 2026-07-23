@@ -6,7 +6,7 @@
  */
 
 import { useCallback, useMemo } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import { InputsModelId } from '../../common/store/inputs/constants';
 import { timelineActions } from '../store';
 import { useTimelineFullScreen } from '../../common/containers/use_full_screen';

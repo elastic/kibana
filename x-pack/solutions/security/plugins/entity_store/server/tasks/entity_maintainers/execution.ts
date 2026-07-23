@@ -19,6 +19,7 @@ import {
   type EntityMaintainerTaskMethod,
 } from './types';
 import { CRUDClient, type EntityUpdateClient } from '../../domain/crud';
+import { ResolutionRulesClient } from '../../domain/resolution/rules';
 import { EntityMetadataClient } from '../../domain/entity_metadata';
 import type { TelemetryReporter } from '../../telemetry/events';
 import { ENTITY_MAINTAINER_EVENT } from '../../telemetry/events';
@@ -35,7 +36,7 @@ export interface ExecuteMaintainerRunParams {
   status: Partial<EntityMaintainerStatus>;
   request: KibanaRequest;
   taskId: string;
-  taskAbortController?: AbortController;
+  signal?: AbortSignal;
   namespace?: string;
   id: string;
   run: EntityMaintainerTaskMethod;
@@ -105,7 +106,7 @@ export async function executeMaintainerRun({
   status,
   request,
   taskId,
-  taskAbortController,
+  signal,
   namespace,
   id,
   run,
@@ -139,6 +140,7 @@ export async function executeMaintainerRun({
   const cpsEsClient = coreStart.elasticsearch.client.asScoped(request, {
     projectRouting: 'space',
   }).asCurrentUser;
+  const soClient = coreStart.savedObjects.getScopedClient(request);
   const emitWorkflowTriggerEvent = createWorkflowTriggerEmitter({
     getWorkflowsClient: () => workflowsExtensions.getClient(request),
     logger,
@@ -156,7 +158,7 @@ export async function executeMaintainerRun({
     namespace: maintainerStatus.metadata.namespace,
   });
   const taskLogger = logger.get(taskId);
-  const abortController = taskAbortController ?? new AbortController();
+  const abortSignal = signal ?? new AbortController().signal;
   const telemetryClient = createMaintainerTelemetryClient({
     id,
     namespace: maintainerStatus.metadata.namespace,
@@ -178,10 +180,15 @@ export async function executeMaintainerRun({
         logger: taskLogger,
         setup,
         run,
-        abortController,
+        signal: abortSignal,
         esClient,
         cpsEsClient,
         crudClient,
+        resolutionRulesClient: new ResolutionRulesClient(
+          soClient,
+          maintainerStatus.metadata.namespace,
+          taskLogger
+        ),
         entityMetadataClient,
         id,
         analytics,
@@ -210,10 +217,11 @@ export async function runEntityMaintainerTask({
   logger,
   setup,
   run,
-  abortController,
+  signal,
   esClient,
   cpsEsClient,
   crudClient,
+  resolutionRulesClient,
   entityMetadataClient,
   id,
   analytics,
@@ -224,10 +232,11 @@ export async function runEntityMaintainerTask({
   logger: Logger;
   setup?: EntityMaintainerTaskMethod;
   run: EntityMaintainerTaskMethod;
-  abortController: AbortController;
+  signal: AbortSignal;
   esClient: ElasticsearchClient;
   cpsEsClient: ElasticsearchClient;
   crudClient: EntityUpdateClient;
+  resolutionRulesClient: ResolutionRulesClient;
   entityMetadataClient: EntityMetadataClient;
   id: string;
   analytics: TelemetryReporter;
@@ -248,18 +257,19 @@ export async function runEntityMaintainerTask({
     });
   };
   try {
-    abortController.signal.addEventListener('abort', onAbort);
+    signal.addEventListener('abort', onAbort);
     const isFirstRun = status.metadata.runs === 0;
     if (isFirstRun && setup) {
       logger.debug(`First run, executing setup`);
       status.state = await setup({
         status: { ...status },
-        abortController,
+        signal,
         logger,
         fakeRequest,
         esClient,
         cpsEsClient,
         crudClient,
+        resolutionRulesClient,
         entityMetadataClient,
         telemetry: telemetryClient,
       });
@@ -272,12 +282,13 @@ export async function runEntityMaintainerTask({
     logger.debug(`Executing run`);
     status.state = await run({
       status: { ...status },
-      abortController,
+      signal,
       logger,
       fakeRequest,
       esClient,
       cpsEsClient,
       crudClient,
+      resolutionRulesClient,
       entityMetadataClient,
       telemetry: telemetryClient,
     });
@@ -299,7 +310,7 @@ export async function runEntityMaintainerTask({
     });
   } finally {
     status.metadata.runs++;
-    abortController.signal.removeEventListener('abort', onAbort);
+    signal.removeEventListener('abort', onAbort);
     try {
       telemetryClient.flush({
         durationMs: Date.now() - runStartedAt,

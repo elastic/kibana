@@ -141,13 +141,13 @@ describe('transformDashboardIn', () => {
     expect(output.attributes).not.toHaveProperty('projectRouting');
   });
 
-  it('should transform esql_approximation to isApproximate attribute', () => {
+  it('should transform esql_approximation to esqlApproximation attribute', () => {
     const output = transformDashboardIn({ title: 'title', esql_approximation: true });
-    expect(output.attributes.isApproximate).toBe(true);
+    expect(output.attributes.esqlApproximation).toBe(true);
   });
 
-  it('should not include isApproximate in attributes when esql_approximation is undefined', () => {
+  it('should not include esqlApproximation in attributes when esql_approximation is undefined', () => {
     const output = transformDashboardIn({ title: 'title' });
-    expect(output.attributes).not.toHaveProperty('isApproximate');
+    expect(output.attributes).not.toHaveProperty('esqlApproximation');
   });
 });

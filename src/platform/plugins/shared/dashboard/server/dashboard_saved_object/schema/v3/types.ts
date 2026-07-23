@@ -14,7 +14,7 @@ import type { dashboardAttributesSchema, gridDataSchema, sectionSchema } from '.
 /** The attributes of a dashboard saved object. */
 export type DashboardAttributes = TypeOf<typeof dashboardAttributesSchema> & {
   projectRouting?: string;
-  isApproximate?: boolean;
+  esqlApproximation?: boolean;
 } & {
   /**
    * To avoid defining a new SO version, I am adding the new key `pinned_panels` here

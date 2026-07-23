@@ -13,6 +13,7 @@ const soClient = savedObjectsClientMock.create();
 const request = httpServerMock.createKibanaRequest();
 let logger: ReturnType<typeof loggingSystemMock.createLogger>;
 let mockJobsFn: jest.Mock;
+let mockListModulesFn: jest.Mock;
 let mockMl: MlPluginSetup;
 
 const makeJob = (overrides: Record<string, unknown> = {}) => ({
@@ -29,12 +30,19 @@ const makeJob = (overrides: Record<string, unknown> = {}) => ({
   ...overrides,
 });
 
+const makeModuleJob = (id: string, customSettings: Record<string, unknown>) => ({
+  id,
+  config: { custom_settings: customSettings },
+});
+
 beforeEach(() => {
   jest.clearAllMocks();
   logger = loggingSystemMock.createLogger();
   mockJobsFn = jest.fn().mockResolvedValue({ jobs: [makeJob()] });
+  mockListModulesFn = jest.fn().mockResolvedValue([]);
   mockMl = {
     anomalyDetectorsProvider: jest.fn().mockReturnValue({ jobs: mockJobsFn }),
+    modulesProvider: jest.fn().mockReturnValue({ listModules: mockListModulesFn }),
   } as unknown as MlPluginSetup;
 });
 
@@ -165,6 +173,164 @@ describe('getJobConfig', () => {
       threatTactics: ['Credential Access'],
       threatTechniques: ['Brute Force'],
     });
+  });
+
+  it('does not query modules when the live job already has threat_tactics', async () => {
+    mockJobsFn.mockResolvedValueOnce({
+      jobs: [
+        makeJob({
+          custom_settings: {
+            security_app_display_name: 'Custom Job',
+            threat_tactics: ['TA0006'],
+          },
+        }),
+      ],
+    });
+    mockListModulesFn.mockResolvedValueOnce([
+      { jobs: [makeModuleJob('test-job', { security_app_display_name: 'Stale Name' })] },
+    ]);
+
+    const result = await getJobConfig({
+      jobIds: ['test-job'],
+      logger,
+      ml: mockMl,
+      request,
+      soClient,
+    });
+
+    expect(result.get('test-job')?.jobName).toBe('Custom Job');
+    expect(mockListModulesFn).not.toHaveBeenCalled();
+  });
+
+  it('falls back to the module custom_settings when the live job has no threat_tactics', async () => {
+    mockJobsFn.mockResolvedValueOnce({
+      jobs: [makeJob({ custom_settings: { security_app_display_name: 'Stale Name' } })],
+    });
+    mockListModulesFn.mockResolvedValueOnce([
+      {
+        jobs: [
+          makeModuleJob('test-job', {
+            security_app_display_name: 'Spike in Logon Events',
+            threat_tactics: ['TA0006'],
+            threat_techniques: ['T1110'],
+          }),
+        ],
+      },
+    ]);
+
+    const result = await getJobConfig({
+      jobIds: ['test-job'],
+      logger,
+      ml: mockMl,
+      request,
+      soClient,
+    });
+
+    expect(result.get('test-job')).toMatchObject({
+      jobName: 'Spike in Logon Events',
+      threatTactics: ['Credential Access'],
+      threatTechniques: ['Brute Force'],
+    });
+  });
+
+  it('falls back to the live job custom_settings when no module job matches', async () => {
+    mockJobsFn.mockResolvedValueOnce({
+      jobs: [makeJob({ custom_settings: { security_app_display_name: 'Custom Job' } })],
+    });
+    mockListModulesFn.mockResolvedValueOnce([
+      { jobs: [makeModuleJob('other-job', { security_app_display_name: 'Other Job' })] },
+    ]);
+
+    const result = await getJobConfig({
+      jobIds: ['test-job'],
+      logger,
+      ml: mockMl,
+      request,
+      soClient,
+    });
+
+    expect(result.get('test-job')?.jobName).toBe('Custom Job');
+  });
+
+  it('logs a debug message and falls back to live job custom_settings when listModules fails', async () => {
+    mockJobsFn.mockResolvedValueOnce({
+      jobs: [makeJob({ custom_settings: { security_app_display_name: 'Custom Job' } })],
+    });
+    mockListModulesFn.mockRejectedValueOnce(new Error('modules unavailable'));
+
+    const result = await getJobConfig({
+      jobIds: ['test-job'],
+      logger,
+      ml: mockMl,
+      request,
+      soClient,
+    });
+
+    expect(result.get('test-job')?.jobName).toBe('Custom Job');
+    expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('modules unavailable'));
+  });
+
+  it('sets hasThreatTactics to true when custom_settings.threat_tactics is present', async () => {
+    mockJobsFn.mockResolvedValueOnce({
+      jobs: [makeJob({ custom_settings: { threat_tactics: ['TA0006'] } })],
+    });
+
+    const result = await getJobConfig({
+      jobIds: ['test-job'],
+      logger,
+      ml: mockMl,
+      request,
+      soClient,
+    });
+
+    expect(result.get('test-job')?.hasThreatTactics).toBe(true);
+  });
+
+  it('sets hasThreatTactics to true when custom_settings.threat_tactics is an empty array', async () => {
+    mockJobsFn.mockResolvedValueOnce({
+      jobs: [makeJob({ custom_settings: { threat_tactics: [] } })],
+    });
+
+    const result = await getJobConfig({
+      jobIds: ['test-job'],
+      logger,
+      ml: mockMl,
+      request,
+      soClient,
+    });
+
+    expect(result.get('test-job')?.hasThreatTactics).toBe(true);
+  });
+
+  it('sets hasThreatTactics to false when custom_settings.threat_tactics is absent', async () => {
+    const result = await getJobConfig({
+      jobIds: ['test-job'],
+      logger,
+      ml: mockMl,
+      request,
+      soClient,
+    });
+
+    expect(result.get('test-job')?.hasThreatTactics).toBe(false);
+  });
+
+  it('sets hasThreatTactics to false and threatTactics to [] when custom_settings.threat_tactics is not an array', async () => {
+    mockJobsFn.mockResolvedValueOnce({
+      // custom_settings is runtime ES data, so a job could have threat_tactics
+      // set to a non-array value (e.g. null) despite the declared type.
+      jobs: [makeJob({ custom_settings: { threat_tactics: null } })],
+    });
+
+    const result = await getJobConfig({
+      jobIds: ['test-job'],
+      logger,
+      ml: mockMl,
+      request,
+      soClient,
+    });
+
+    expect(result.get('test-job')?.hasThreatTactics).toBe(false);
+    expect(result.get('test-job')?.threatTactics).toEqual([]);
   });
 
   it('sets jobName to null when security_app_display_name is absent', async () => {

@@ -23,3 +23,15 @@ export const SIGNIFICANT_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID =
 /** Root cause investigation. */
 export const SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID =
   'significant_events_investigation' as const;
+
+/** Triage/judging of discovery candidates. */
+export const SIGNIFICANT_EVENTS_TRIAGE_INFERENCE_FEATURE_ID = 'significant_events_triage' as const;
+
+/**
+ * Background memory upkeep for Streams Significant Events: scraping durable knowledge out of
+ * chat conversations, synthesizing knowledge indicators into wiki pages, consolidating the wiki
+ * (merging duplicates, removing stale entries), and reconciling knowledge gaps (from
+ * investigations and the periodic memory audit). All one feature since these are all low-stakes,
+ * background curation tasks over the same memory wiki.
+ */
+export const SIGNIFICANT_EVENTS_MEMORY_INFERENCE_FEATURE_ID = 'significant_events_memory' as const;

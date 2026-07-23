@@ -56,16 +56,17 @@ const getIlmPolicies = async ({
 };
 
 const mapIlmPolicyToFlyout = (policy: PolicyFromES): IlmPolicyForFlyout => {
+  const isManaged = policy.policy._meta?.managed === true;
   return {
     name: policy.name,
     phases: policy.policy.phases,
     serializedPolicy: policy.policy,
+    ...(isManaged ? { isManaged: true } : {}),
   };
 };
 
 export interface UseEditSuccessfulLifecycleFlyoutArgs {
   definition: Streams.ingest.all.GetResponse;
-  stats?: { size?: string; sizeBytes?: number; totalDocs?: number };
   core: CoreStart;
   http: CoreStart['http'];
   application: CoreStart['application'];
@@ -81,7 +82,6 @@ export interface UseEditSuccessfulLifecycleFlyoutArgs {
 
 export const useEditSuccessfulLifecycleFlyout = ({
   definition,
-  stats,
   core,
   http,
   application,
@@ -346,7 +346,6 @@ export const useEditSuccessfulLifecycleFlyout = ({
       isServerless,
       ilmPhases,
       hotColor,
-      stats,
     });
   }, [
     definition.effective_lifecycle,
@@ -361,7 +360,6 @@ export const useEditSuccessfulLifecycleFlyout = ({
     isServerless,
     method,
     selectedIlmPolicyName,
-    stats,
   ]);
 
   const previewModel = useMemo<EditFlyoutPreviewModel>(() => {
@@ -549,6 +547,7 @@ export const useEditSuccessfulLifecycleFlyout = ({
           }}
           isApplyDisabled={isApplyDisabled}
           showWarning={retentionWarning}
+          warningType="ilm_policy"
         />
       </LifecycleFlyout>
 

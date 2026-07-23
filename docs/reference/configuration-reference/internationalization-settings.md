@@ -49,8 +49,8 @@ When a user sets a preferred language, it is stored in their user profile and ta
 4. **`Accept-Language` header** — When the steps above produce no match
    and `i18n.defaultLocale` is left at its `en` default, {{kib}} consults
    the browser's `Accept-Language` preferences. The first weighted
-   preference that's an exact match (region included) for an entry in
-   `i18n.locales` wins.
+   preference matching an entry in `i18n.locales`, exactly or by language
+   (`fr-CH` or bare `fr` can resolve to a configured `fr-FR`), wins.
 5. **`i18n.defaultLocale` config** — The server-wide default (`en` unless
    overridden) set in `kibana.yml`, used when nothing above matches.
 

@@ -20,12 +20,13 @@ import {
   EuiSuperSelect,
   EuiText,
   EuiTitle,
+  useEuiTheme,
 } from '@elastic/eui';
 import type { EuiFilePickerClass } from '@elastic/eui/src/components/form/file_picker/file_picker';
-import { useAppToasts } from '../../../../../../common/hooks/use_app_toasts';
 import type { MigrationStepProps } from '../../../../../common/types';
 import type { RuleMigrationTaskStats } from '../../../../../../../common/siem_migrations/model/rule_migration.gen';
 import type { QRadarMitreMappingsData } from '../../../../../../../common/siem_migrations/model/vendor/rules/qradar.gen';
+import { FILE_UPLOAD_ERROR } from '../../../../../common/translations/file_upload_error';
 import { useParseFileInput } from '../../../../../common/hooks/use_parse_file_input';
 import { getEuiStepStatus } from '../../../../../common/utils/get_eui_step_status';
 import { useEnhanceRules } from '../../../../service/hooks/use_enhance_rules';
@@ -83,21 +84,18 @@ const EnhancementsDataInputContent = React.memo<EnhancementsDataInputContentProp
     const [parsedData, setParsedData] = useState<QRadarMitreMappingsData | null>(null);
     const [addedEnhancements, setAddedEnhancements] = useState<AddedEnhancement[]>([]);
     const filePickerRef = React.useRef<EuiFilePickerClass>(null);
+    const { euiTheme } = useEuiTheme();
 
     const { enhanceRules, isLoading } = useEnhanceRules();
-    const { addError } = useAppToasts();
 
-    const onFileParsed = useCallback(
-      (content: string) => {
-        try {
-          const parsed: QRadarMitreMappingsData = JSON.parse(content);
-          setParsedData(parsed);
-        } catch (err) {
-          addError(err, { title: i18n.INVALID_JSON_ERROR });
-        }
-      },
-      [addError]
-    );
+    const onFileParsed = useCallback((content: string) => {
+      try {
+        const parsed: QRadarMitreMappingsData = JSON.parse(content);
+        setParsedData(parsed);
+      } catch (err) {
+        throw new Error(FILE_UPLOAD_ERROR.INVALID_JSON);
+      }
+    }, []);
 
     const { parseFile, isParsing, error: parseError } = useParseFileInput(onFileParsed);
 
@@ -108,6 +106,7 @@ const EnhancementsDataInputContent = React.memo<EnhancementsDataInputContentProp
     const onFileChange = useCallback(
       (files: FileList | null) => {
         setParsedData(null);
+        parseFile(files);
 
         if (!files || files.length === 0) {
           setSelectedFile(null);
@@ -115,7 +114,6 @@ const EnhancementsDataInputContent = React.memo<EnhancementsDataInputContentProp
         }
 
         setSelectedFile(files[0]);
-        parseFile(files);
       },
       [parseFile]
     );
@@ -172,7 +170,7 @@ const EnhancementsDataInputContent = React.memo<EnhancementsDataInputContentProp
           />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFlexGroup direction="row" gutterSize="m" alignItems="flexEnd">
+          <EuiFlexGroup direction="row" gutterSize="m" alignItems="flexStart">
             <EuiFlexItem grow={2}>
               <EuiFormRow label={i18n.ENHANCEMENT_TYPE_LABEL} fullWidth>
                 <EuiSuperSelect
@@ -186,7 +184,12 @@ const EnhancementsDataInputContent = React.memo<EnhancementsDataInputContentProp
               </EuiFormRow>
             </EuiFlexItem>
             <EuiFlexItem grow={3}>
-              <EuiFormRow label={i18n.FILE_LABEL} isInvalid={!!parseError} fullWidth>
+              <EuiFormRow
+                label={i18n.FILE_LABEL}
+                isInvalid={!!parseError}
+                error={parseError}
+                fullWidth
+              >
                 <EuiFilePicker
                   id="enhancementFilePicker"
                   ref={filePickerRef as React.Ref<Omit<EuiFilePickerProps, 'stylesMemoizer'>>}
@@ -203,6 +206,7 @@ const EnhancementsDataInputContent = React.memo<EnhancementsDataInputContentProp
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButton
+                css={{ marginTop: `calc(${euiTheme.size.base} + ${euiTheme.size.xs})` }}
                 onClick={onAddEnhancement}
                 disabled={isAddDisabled}
                 isLoading={isLoading}

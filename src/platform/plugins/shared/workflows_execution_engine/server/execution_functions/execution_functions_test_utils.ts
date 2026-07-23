@@ -24,6 +24,7 @@ export const createMockWorkflowExecutionEngineConfig = (): WorkflowsExecutionEng
   maxResponseSize: new ByteSizeValue(10 * 1024 * 1024),
   eviction: { minPayloadSize: new ByteSizeValue(10 * 1024) },
   collectQueueMetrics: false,
+  hitlExternalResume: { enabled: true },
 });
 
 export const createMockLogger = (): Logger =>
@@ -98,7 +99,7 @@ export const getExpectedWorkflowExecutionLoopCallArgs = (options: {
   workflowExecutionRepository: MockWorkflowExecutionRepository;
   dependencies: ContextDependencies;
   fakeRequest: KibanaRequest;
-  taskAbortController: AbortController;
+  signal: AbortSignal;
 }) => ({
   workflowRuntime: options.workflowRuntime,
   stepExecutionRuntimeFactory: {},
@@ -110,6 +111,6 @@ export const getExpectedWorkflowExecutionLoopCallArgs = (options: {
   esClient: {},
   fakeRequest: options.fakeRequest,
   coreStart: options.dependencies.coreStart,
-  taskAbortController: options.taskAbortController,
+  signal: options.signal,
   workflowTaskManager: {},
 });

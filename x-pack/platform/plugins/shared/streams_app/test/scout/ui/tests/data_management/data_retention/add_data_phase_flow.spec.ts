@@ -10,8 +10,10 @@ import { expect } from '@kbn/scout/ui';
 
 import { test } from '../../../fixtures';
 import {
+  type ManagedDefaultSnapshotRepository,
   RETENTION_TEST_IDS,
   closeToastsIfPresent,
+  setDefaultSnapshotRepository,
   setStreamDslLifecycle,
 } from '../../../fixtures/data_lifecycle_helpers';
 
@@ -133,20 +135,18 @@ test.describe(
       esClient,
       apiServices,
       pageObjects,
+      config,
     }) => {
       // The frozen phase is gated on a default snapshot repository (the suite's beforeAll cleared
-      // it). Register a real fs repository (the Scout stateful cluster sets `path.repo=/tmp/repo`)
-      // and set it as the cluster default so the gate passes and the flyout — not the gating modal —
+      // it). Register a default repository (an `fs` repository locally, the managed
+      // `found-snapshots` on Cloud) so the gate passes and the flyout — not the gating modal —
       // opens. The finally block restores the suite's "no default repository" invariant so sibling
       // tests are unaffected regardless of execution order.
-      const REPO_NAME = 'streams-frozen-phase-test-repo';
-      await esClient.snapshot.createRepository({
-        name: REPO_NAME,
-        repository: { type: 'fs', settings: { location: '/tmp/repo' } },
-      });
-      await esClient.cluster.putSettings({
-        persistent: { 'repositories.default_repository': REPO_NAME },
-      });
+      const repository = await setDefaultSnapshotRepository(
+        esClient,
+        config.isCloud,
+        'streams-frozen-phase-test-repo'
+      );
 
       try {
         // Reset to a clean DSL lifecycle and reload so the gating hook re-fetches the new default.
@@ -181,10 +181,7 @@ test.describe(
           await expect(page.getByTestId(FROZEN_PHASE_BUTTON)).toBeVisible();
         });
       } finally {
-        await esClient.cluster.putSettings({
-          persistent: { 'repositories.default_repository': null },
-        });
-        await esClient.snapshot.deleteRepository({ name: REPO_NAME }).catch(() => {});
+        await repository.cleanup();
       }
     });
 
@@ -207,22 +204,22 @@ test.describe(
     test('resumes adding the frozen phase when a default repository is created and the modal is refreshed', async ({
       page,
       esClient,
+      config,
     }) => {
       // No default repository yet (cleared in beforeAll), so selecting frozen opens the gating modal.
       await page.getByTestId(ADD_DATA_PHASE_BUTTON).click();
       await page.getByTestId(FROZEN_OPTION).click();
       await expect(page.getByTestId(DEFAULT_REPO_MODAL_TITLE)).toBeVisible();
 
-      const REPO_NAME = 'streams-frozen-resume-test-repo';
+      let repository: ManagedDefaultSnapshotRepository | undefined;
       try {
-        // Configure a default snapshot repository out of band while the modal is open.
-        await esClient.snapshot.createRepository({
-          name: REPO_NAME,
-          repository: { type: 'fs', settings: { location: '/tmp/repo' } },
-        });
-        await esClient.cluster.putSettings({
-          persistent: { 'repositories.default_repository': REPO_NAME },
-        });
+        // Configure a default snapshot repository out of band while the modal is open (an `fs`
+        // repository locally, the managed `found-snapshots` on Cloud).
+        repository = await setDefaultSnapshotRepository(
+          esClient,
+          config.isCloud,
+          'streams-frozen-resume-test-repo'
+        );
 
         // Refresh should detect the repository, close the modal, and resume the flow by opening the
         // data phases flyout on the frozen panel (rather than leaving the user stuck in the modal).
@@ -236,10 +233,7 @@ test.describe(
         await page.getByTestId(DATA_PHASES_FLYOUT_CANCEL).click();
         await page.getByTestId(DATA_PHASES_FLYOUT).waitFor({ state: 'hidden' });
       } finally {
-        await esClient.cluster.putSettings({
-          persistent: { 'repositories.default_repository': null },
-        });
-        await esClient.snapshot.deleteRepository({ name: REPO_NAME }).catch(() => {});
+        await repository?.cleanup();
       }
     });
 
@@ -276,27 +270,41 @@ test.describe(
       page,
       apiServices,
       pageObjects,
+      esClient,
+      config,
     }) => {
-      await setStreamDslLifecycle(apiServices.streams, STREAM, { frozen_after: '10d' });
-      await pageObjects.streams.gotoDataRetentionTab(STREAM);
+      // A working frozen phase requires a default snapshot repository. Register one (an `fs`
+      // repository locally, the managed `found-snapshots` on Cloud).
+      const repository = await setDefaultSnapshotRepository(
+        esClient,
+        config.isCloud,
+        'streams-frozen-edit-test-repo'
+      );
 
-      // The frozen phase's timeline label is the localized, capitalized "Frozen".
-      await test.step('edit opens the data phases flyout (no gating on an existing phase)', async () => {
-        await page.getByTestId(FROZEN_PHASE_BUTTON).click();
-        await page.getByTestId(FROZEN_PHASE_EDIT_BUTTON).click();
-        await expect(page.getByTestId(DATA_PHASES_FLYOUT)).toBeVisible();
-        await expect(page.getByTestId(DATA_PHASES_FLYOUT_FROZEN_PANEL)).toBeVisible();
-      });
+      try {
+        await setStreamDslLifecycle(apiServices.streams, STREAM, { frozen_after: '10d' });
+        await pageObjects.streams.gotoDataRetentionTab(STREAM);
 
-      await test.step('remove deletes the frozen phase from the timeline', async () => {
-        await page.getByTestId(DATA_PHASES_FLYOUT_CANCEL).click();
-        await page.getByTestId(DATA_PHASES_FLYOUT).waitFor({ state: 'hidden' });
+        // The frozen phase's timeline label is the localized, capitalized "Frozen".
+        await test.step('edit opens the data phases flyout (no gating on an existing phase)', async () => {
+          await page.getByTestId(FROZEN_PHASE_BUTTON).click();
+          await page.getByTestId(FROZEN_PHASE_EDIT_BUTTON).click();
+          await expect(page.getByTestId(DATA_PHASES_FLYOUT)).toBeVisible();
+          await expect(page.getByTestId(DATA_PHASES_FLYOUT_FROZEN_PANEL)).toBeVisible();
+        });
 
-        await page.getByTestId(FROZEN_PHASE_BUTTON).click();
-        await page.getByTestId(FROZEN_PHASE_REMOVE_BUTTON).click();
+        await test.step('remove deletes the frozen phase from the timeline', async () => {
+          await page.getByTestId(DATA_PHASES_FLYOUT_CANCEL).click();
+          await page.getByTestId(DATA_PHASES_FLYOUT).waitFor({ state: 'hidden' });
 
-        await expect(page.getByTestId(FROZEN_PHASE_BUTTON)).toBeHidden();
-      });
+          await page.getByTestId(FROZEN_PHASE_BUTTON).click();
+          await page.getByTestId(FROZEN_PHASE_REMOVE_BUTTON).click();
+
+          await expect(page.getByTestId(FROZEN_PHASE_BUTTON)).toBeHidden();
+        });
+      } finally {
+        await repository.cleanup();
+      }
     });
   }
 );

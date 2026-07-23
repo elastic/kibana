@@ -140,6 +140,7 @@ export interface CasesPublicStart {
   config: {
     templatesEnabled: boolean;
     attachmentsEnabled: boolean;
+    chatEnabled: boolean;
     casesRedesign: {
       list: boolean;
       details: boolean;

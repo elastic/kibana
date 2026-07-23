@@ -12,6 +12,8 @@ import { useInfiniteChangeHistory } from '../../../rule_management/api/hooks/use
 import type { RuleHistoryItem } from '../../../../../common/api/detection_engine/rule_management';
 import { TestProviders } from '../../../../common/mock';
 import type { RuleResponse } from '../../../../../common/api/detection_engine/model/rule_schema';
+import { RuleChangesHistoryEventTypes } from '../../../../common/lib/telemetry/events/rule_changes_history/types';
+import { createTelemetryServiceMock } from '../../../../common/lib/telemetry/telemetry_service.mock';
 
 // IntersectionObserver is used by the rule changes history timeline's scroll-to-load-more sentinel but is absent in jsdom.
 class MockIntersectionObserver {
@@ -27,6 +29,21 @@ Object.defineProperty(window, 'IntersectionObserver', {
 });
 
 jest.mock('../../../rule_management/api/hooks/use_infinite_change_history');
+
+const mockedTelemetry = createTelemetryServiceMock();
+jest.mock('../../../../common/lib/kibana', () => {
+  const original = jest.requireActual('../../../../common/lib/kibana');
+
+  return {
+    ...original,
+    useKibana: () => ({
+      services: {
+        application: { navigateToApp: jest.fn() },
+        telemetry: mockedTelemetry,
+      },
+    }),
+  };
+});
 
 const mockUseInfiniteChangeHistory = useInfiniteChangeHistory as jest.Mock;
 
@@ -290,6 +307,59 @@ describe('RuleChangesHistory', () => {
     await waitFor(() => {
       expect(screen.getByTestId('ruleChangesHistoryNothingSelected')).toBeInTheDocument();
     });
+  });
+
+  it('does not fire ChangesHistoryDiffOpened on auto-selection, but fires it on an explicit click', async () => {
+    const firstItem = createHistoryItem({
+      id: 'create-1',
+      action: 'rule_create',
+      rule: { name: 'AlphaRule', rule_source: { type: 'internal' } } as RuleResponse,
+    });
+    const secondItem = createHistoryItem({
+      id: 'update-1',
+      action: 'rule_update',
+      rule: {
+        name: 'BetaRule',
+        revision: 1,
+        rule_source: { type: 'external' },
+      } as RuleResponse,
+      old_values: { name: 'AlphaRule' },
+    });
+    mockUseInfiniteChangeHistory.mockReturnValue(
+      mockUseInfiniteQueryResult([secondItem, firstItem])
+    );
+
+    render(
+      <TestProviders>
+        <RuleChangesHistory ruleId="rule-1" header={<span />} />
+      </TestProviders>
+    );
+
+    // The newest item is auto-selected on mount; this must not fire the event.
+    await waitFor(() => {
+      expect(screen.getByTestId('ruleChangesHistoryDiff')).toHaveTextContent('BetaRule');
+    });
+    expect(mockedTelemetry.reportEvent).not.toHaveBeenCalledWith(
+      RuleChangesHistoryEventTypes.ChangesHistoryDiffOpened,
+      expect.anything()
+    );
+
+    // An explicit click on a timeline item fires the event with the derived isPrebuiltRule.
+    fireEvent.click(screen.getByTestId(`ruleChangeHistoryItem-${firstItem.id}`));
+
+    await waitFor(() => {
+      expect(mockedTelemetry.reportEvent).toHaveBeenCalledWith(
+        RuleChangesHistoryEventTypes.ChangesHistoryDiffOpened,
+        { isPrebuiltRule: false }
+      );
+    });
+
+    // Clicking the already-selected item again must not re-fire the event.
+    mockedTelemetry.reportEvent.mockClear();
+
+    fireEvent.click(screen.getByTestId(`ruleChangeHistoryItem-${firstItem.id}`));
+
+    expect(mockedTelemetry.reportEvent).not.toHaveBeenCalled();
   });
 });
 

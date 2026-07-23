@@ -44,6 +44,11 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
       await kibanaServer.uiSettings.update({
         'securitySolution:enableAssetInventory': true,
         'securitySolution:entityStoreEnableV2': true,
+        // This suite drives the legacy expandable flyout via `flyout` URL params (host-panel /
+        // user-panel) and asserts on legacy test subjects (`rightSection`). Disable the new flyout
+        // so those legacy panels render instead of being consumed by the flyout v2 legacy-URL
+        // interop, which translates the `flyout` param into the new (EUI) flyout.
+        'securitySolution:enableNewFlyout': false,
       });
 
       // Initialize security-solution-default data-view (required by entity store)
@@ -61,6 +66,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
         'securitySolution:enableAssetInventory': false,
         'securitySolution:entityStoreEnableV2': false,
       });
+      await kibanaServer.uiSettings.unset('securitySolution:enableNewFlyout');
     });
 
     describe('entity relationships', () => {
@@ -74,7 +80,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
           logger,
           retry,
           entitiesIndex: '.entities.v2.latest.security_*',
-          expectedCount: 45,
+          expectedCount: 46,
         });
       });
 
@@ -94,15 +100,20 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
         //   They should collapse into a single grouped relationship node.
         // - different-subtype-actor-server has a different subtype (GCP Compute Instance)
         //   and should produce its own separate relationship node.
+        // - administers-target-server-admin (User / AWS IAM User) administers
+        //   relationship-target-server, exercising a second relationship type (administers)
+        //   on the same target — added to cover ENTITY_RELATIONSHIP_FIELDS growing past the
+        //   ES|QL FORK 8-branch limit (see fetch_entity_relationships_graph.ts batching).
         //
         // Expected graph after opening the entity flyout for origin-pinned-server
         // and clicking "show entity relationships" on relationship-target-server:
-        //   Entity nodes (4):
+        //   Entity nodes (5):
         //     - origin-pinned-server (solo, pinned as origin)
         //     - grouped-actor-server-1 + grouped-actor-server-2 (merged group, count=2)
         //     - different-subtype-actor-server (solo, different subtype)
+        //     - administers-target-server-admin (solo, administers relationship)
         //     - relationship-target-server (target)
-        //   Relationship nodes (3): one per distinct actor group
+        //   Relationship nodes (4): one per distinct actor group/relationship type
 
         // Navigate directly to the entity analytics home page with the entity flyout
         // open for origin-pinned-server (host type). The flyout URL parameter opens
@@ -138,10 +149,11 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
         await expandedFlyoutGraph.showEntityRelationships('host:relationship-target-server');
         await expandedFlyoutGraph.clickOnFitGraphIntoViewControl();
 
-        // Assert 4 entity nodes: origin (solo), group of 2, different-subtype (solo), target
+        // Assert 5 entity nodes: origin (solo), group of 2, different-subtype (solo),
+        // administers-target-server-admin (solo), target
         await expandedFlyoutGraph.assertGraphNodesNumber(
-          4 + // entity nodes
-            3 // relationship nodes (one per actor group)
+          5 + // entity nodes
+            4 // relationship nodes (one per actor group/relationship type)
         );
 
         // origin-pinned-server must exist as its own solo node (pinned, never merged)
@@ -153,10 +165,15 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
         // different-subtype-actor-server appears as a solo node (different subtype)
         await expandedFlyoutGraph.assertNodeExists('host:different-subtype-actor-server');
 
-        // 3 relationship nodes with label "Communicates with"
+        // administers-target-server-admin appears as a solo node (administers relationship,
+        // different actor type from the communicates_with hosts)
+        await expandedFlyoutGraph.assertNodeExists('user:administers-target-server-admin');
+
+        // 4 relationship nodes: 3 with label "Communicates with", 1 with label "Administers"
         const relationshipNodeIds = [
           'rel(host:origin-pinned-server-communicates_with)',
           'rel(host:different-subtype-actor-server-communicates_with)',
+          'rel(user:administers-target-server-admin-administers)',
         ];
         for (const nodeId of relationshipNodeIds) {
           await expandedFlyoutGraph.assertNodeExists(nodeId);
@@ -202,15 +219,17 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
         await expandedFlyoutGraph.clickOnFitGraphIntoViewControl();
 
         // --- Phase 3+4 combined assertion ---
-        // After hiding, the entity rejoins the group: back to the original 7 nodes
-        //   Entity nodes (4): origin-pinned-server, merged-group (count=2),
-        //                     different-subtype-actor-server, target
-        //   Relationship nodes (3): back to the original 3
-        await expandedFlyoutGraph.assertGraphNodesNumber(4 + 3);
+        // After hiding, the entity rejoins the group: back to the original 9 nodes
+        //   Entity nodes (5): origin-pinned-server, merged-group (count=2),
+        //                     different-subtype-actor-server, administers-target-server-admin,
+        //                     target
+        //   Relationship nodes (4): back to the original 4
+        await expandedFlyoutGraph.assertGraphNodesNumber(5 + 4);
         await expandedFlyoutGraph.assertNodeExists(mergedGroupNodeId);
         await expandedFlyoutGraph.assertNodeExists('host:relationship-target-server');
         await expandedFlyoutGraph.assertNodeExists('host:origin-pinned-server');
         await expandedFlyoutGraph.assertNodeExists('host:different-subtype-actor-server');
+        await expandedFlyoutGraph.assertNodeExists('user:administers-target-server-admin');
       });
 
       it('should group same-type targets and isolate a pinned target (target grouping & pinning)', async () => {

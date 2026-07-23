@@ -9,6 +9,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { LENS_FORMAT_NUMBER_DECIMALS_DEFAULT, LENS_FORMAT_COMPACT_DEFAULT } from './constants';
+import { durationFormatSchema, legacyDurationFormatSchema } from './duration_units';
 
 const numericFormatSchema = schema.object(
   {
@@ -91,47 +92,6 @@ const byteFormatSchema = schema.object(
   }
 );
 
-const durationFormatSchema = schema.object(
-  {
-    type: schema.literal('duration'),
-    /**
-     * From
-     */
-    from: schema.string({
-      meta: {
-        description:
-          'Source time unit for conversion, for example `milliseconds`, `seconds`, `minutes`, `hours`, or `days`.',
-      },
-    }),
-    /**
-     * To
-     */
-    to: schema.string({
-      meta: {
-        description:
-          'Display time unit after conversion, for example `seconds`, `minutes`, `hours`, or `days`.',
-      },
-    }),
-    /**
-     * Suffix
-     */
-    suffix: schema.maybe(
-      schema.string({
-        meta: {
-          description: 'Suffix appended to the formatted value.',
-        },
-      })
-    ),
-  },
-  {
-    meta: {
-      id: 'durationFormat',
-      title: 'Duration Format',
-      description: 'Duration format between time units.',
-    },
-  }
-);
-
 const customFormatSchema = schema.object(
   {
     type: schema.literal('custom'),
@@ -154,10 +114,19 @@ const customFormatSchema = schema.object(
 );
 
 /**
- * Format configuration
+ * Format configuration for dimension values.
+ * Accepts both GA and legacy unit names for the `duration` type so that neither is rejected at
+ * the HTTP validation layer. The route handlers enforce exactly one set at runtime based on the
+ * `asCode.useGASchemas` feature flag.
  */
 export const formatTypeSchema = schema.oneOf(
-  [numericFormatSchema, byteFormatSchema, durationFormatSchema, customFormatSchema],
+  [
+    numericFormatSchema,
+    byteFormatSchema,
+    durationFormatSchema,
+    legacyDurationFormatSchema,
+    customFormatSchema,
+  ],
   {
     meta: {
       id: 'formatType',

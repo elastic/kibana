@@ -2243,14 +2243,14 @@ describe('enrichCasesWithFieldLabels', () => {
       definition: '',
       templateVersion: 1,
       deletedAt: null,
-      fieldNames: [
+      fieldDefinitions: [
         { name: 'priority', label: 'Priority Level', type: 'keyword', control: 'INPUT_TEXT' },
         { name: 'effort', label: 'Effort Points', type: 'integer', control: 'INPUT_NUMBER' },
       ],
     },
   };
 
-  it('populates extended_fields_labels from the matched template fieldNames', () => {
+  it('populates extended_fields_labels from the matched template fieldDefinitions', () => {
     const result = enrichCasesWithFieldLabels([caseWithTemplate], [templateSO]);
 
     expect(result[0].extended_fields_labels).toEqual({
@@ -2263,6 +2263,42 @@ describe('enrichCasesWithFieldLabels', () => {
     const result = enrichCasesWithFieldLabels([baseCase], [templateSO]);
 
     expect(result[0]).toEqual(baseCase);
+  });
+
+  it('populates labels for a template-less case from global field definitions', () => {
+    const caseWithGlobalOnly = {
+      ...baseCase,
+      extended_fields: { team_as_keyword: 'soc' },
+    };
+    const globalFields = [
+      { name: 'team', label: 'Team', control: 'INPUT_TEXT' as const, type: 'keyword' as const },
+    ];
+
+    const result = enrichCasesWithFieldLabels([caseWithGlobalOnly], [], globalFields);
+
+    expect(result[0].extended_fields_labels).toEqual({
+      team_as_keyword: 'Team',
+    });
+  });
+
+  it('merges global and template labels with template winning on key collision', () => {
+    const globalFields = [
+      {
+        name: 'priority',
+        label: 'Global Priority',
+        control: 'INPUT_TEXT' as const,
+        type: 'keyword' as const,
+      },
+      { name: 'team', label: 'Team', control: 'INPUT_TEXT' as const, type: 'keyword' as const },
+    ];
+
+    const result = enrichCasesWithFieldLabels([caseWithTemplate], [templateSO], globalFields);
+
+    expect(result[0].extended_fields_labels).toEqual({
+      priority_as_keyword: 'Priority Level',
+      effort_as_integer: 'Effort Points',
+      team_as_keyword: 'Team',
+    });
   });
 
   it('returns case unchanged when it has no extended_fields', () => {
@@ -2304,7 +2340,7 @@ describe('enrichCasesWithFieldLabels', () => {
       attributes: {
         ...templateSO.attributes,
         templateVersion: 2,
-        fieldNames: [
+        fieldDefinitions: [
           { name: 'priority', label: 'Priority Level v2', type: 'keyword', control: 'INPUT_TEXT' },
         ],
       },
@@ -2338,7 +2374,7 @@ describe('enrichCasesWithFieldLabels', () => {
         ...templateSO.attributes,
         templateId: 'template-id-2',
         templateVersion: 1,
-        fieldNames: [
+        fieldDefinitions: [
           { name: 'severity', label: 'Severity Label', type: 'keyword', control: 'SELECT_BASIC' },
         ],
       },

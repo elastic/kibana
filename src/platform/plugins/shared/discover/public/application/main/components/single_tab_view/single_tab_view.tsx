@@ -106,6 +106,7 @@ export const SingleTabView = ({
         searchSessionManager,
         internalState,
         runtimeStateManager,
+        urlStateStorage,
         injectCurrentTab,
         getCurrentTab,
       });

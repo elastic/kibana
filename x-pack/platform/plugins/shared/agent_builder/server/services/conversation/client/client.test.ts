@@ -90,13 +90,24 @@ describe('ConversationClient', () => {
   });
 
   describe('list', () => {
-    it('requests access_control and preserves it in listed conversations', async () => {
+    it('requests access_control and origin, and preserves them in listed conversations', async () => {
+      const origin = {
+        external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
+      };
       mockEsClient.search.mockResolvedValue({
         hits: {
           hits: [
-            createConversationDocument({
-              accessMode: ConversationAccessControlMode.Public,
-            }),
+            {
+              ...createConversationDocument({
+                accessMode: ConversationAccessControlMode.Public,
+              }),
+              _source: {
+                ...createConversationDocument({
+                  accessMode: ConversationAccessControlMode.Public,
+                })._source!,
+                origin,
+              },
+            },
           ],
         },
       });
@@ -105,7 +116,7 @@ describe('ConversationClient', () => {
 
       expect(mockEsClient.search).toHaveBeenCalledWith(
         expect.objectContaining({
-          _source: expect.arrayContaining(['access_control']),
+          _source: expect.arrayContaining(['access_control', 'origin']),
         })
       );
       expect(result[0]).toEqual(
@@ -113,6 +124,7 @@ describe('ConversationClient', () => {
           access_control: {
             access_mode: ConversationAccessControlMode.Public,
           },
+          origin,
         })
       );
     });
@@ -331,6 +343,47 @@ describe('ConversationClient', () => {
       });
 
       await expect(client.exists('conversation-1')).rejects.toBe(error);
+    });
+  });
+
+  describe('getByOrigin', () => {
+    it('finds a conversation by first-class origin in the current space', async () => {
+      const document = createConversationDocument();
+      mockEsClient.search
+        .mockResolvedValueOnce({
+          hits: {
+            hits: [document],
+          },
+        })
+        .mockResolvedValueOnce({
+          hits: {
+            hits: [document],
+          },
+        });
+
+      const result = await client.getByOrigin({
+        external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
+      });
+
+      expect(result?.id).toBe('conversation-1');
+      expect(mockEsClient.search).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({
+          query: {
+            bool: {
+              filter: [
+                expect.any(Object),
+                {
+                  term: {
+                    'origin.external_conversation_id':
+                      'team:T123/channel:C123/thread:1712345678.000100',
+                  },
+                },
+              ],
+            },
+          },
+        })
+      );
     });
   });
 
