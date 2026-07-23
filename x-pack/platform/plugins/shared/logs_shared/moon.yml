@@ -61,6 +61,7 @@ dependsOn:
   - '@kbn/ml-plugin'
   - '@kbn/saved-search-component'
   - '@kbn/core-execution-context-common'
+  - '@kbn/projects-solutions-groups'
 tags:
   - plugin
   - prod
