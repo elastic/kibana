@@ -250,7 +250,12 @@ export const ContextApp = ({
           </h1>
           <TopNavMenu {...getNavBarProps()} />
           <EuiPage css={styles.docsPage}>
-            <EuiPageBody paddingSize="none" css={styles.docsContent} panelProps={{ role: 'main' }}>
+            <EuiPageBody
+              panelled
+              paddingSize="none"
+              css={styles.docsContent}
+              panelProps={{ role: 'main', hasShadow: false }}
+            >
               <ContextAppContentMemoized
                 dataView={dataView}
                 columns={columns}
