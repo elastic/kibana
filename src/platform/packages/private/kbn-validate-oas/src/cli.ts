@@ -19,14 +19,10 @@ import {
   classifySchemaError,
   classifyRefError,
   countSeverities,
-  computeBreakdown,
-  isNewBaselineShape,
-  isLegacyBaselineShape,
   hasSeverityIncrease,
   type OasIssue,
   type Baseline,
   type SeverityCounts,
-  type CategoryBreakdown,
 } from './error_categorization';
 
 const kibanaYamlRelativePath = './oas_docs/output/kibana.yaml';
@@ -42,7 +38,6 @@ run(
     const assertNoErrorIncrease = flagsReader.boolean('assert-no-error-increase');
     const skipPrintingIssues = flagsReader.boolean('skip-printing-issues');
     const updateBaseline = flagsReader.boolean('update-baseline');
-    const breakdown = flagsReader.boolean('breakdown');
 
     if (only && only !== 'traditional' && only !== 'serverless') {
       log.error('Invalid value for --only flag, must be "traditional" or "serverless"');
@@ -75,7 +70,6 @@ run(
     let schemaValidationFailed = false;
     let compatibilityValidationFailed = false;
     const severityCounts: Baseline = {};
-    const breakdowns: Record<string, CategoryBreakdown> = {};
     const compatibilityErrorMessages: Record<string, string> = {};
 
     const yamlPaths: string[] = [];
@@ -131,7 +125,6 @@ run(
 
         const counts = countSeverities(filteredIssues);
         severityCounts[yamlPath] = counts;
-        breakdowns[yamlPath] = computeBreakdown(filteredIssues);
 
         if (filteredIssues.length) {
           hasValidationIssues = true;
@@ -151,7 +144,11 @@ run(
             log.warning('Found the following issues\n\n' + issueText + '\n');
           }
 
-          printSummary(log, yamlPath, counts, breakdowns[yamlPath], breakdown);
+          log.warning(
+            `${chalk.underline(yamlPath)}: ${chalk.bold(
+              pluralize(counts.errors, 'error')
+            )}, ${chalk.bold(pluralize(counts.warnings, 'warning'))}`
+          );
         }
 
         if (compatibilityResult && !compatibilityResult.valid) {
@@ -198,23 +195,7 @@ run(
     }
 
     if (assertNoErrorIncrease) {
-      const parsedBaseline: unknown = JSON.parse(Fs.readFileSync(baselineFile, 'utf-8'));
-
-      if (isLegacyBaselineShape(parsedBaseline)) {
-        log.error(
-          'oas_error_baseline.json uses the old flat format. Regenerate it with:\n  node ./scripts/validate_oas_docs.js --update-baseline'
-        );
-        process.exit(1);
-      }
-
-      if (!isNewBaselineShape(parsedBaseline)) {
-        log.error(
-          'oas_error_baseline.json is not in the expected { errors, warnings } format. Regenerate it with:\n  node ./scripts/validate_oas_docs.js --update-baseline'
-        );
-        process.exit(1);
-      }
-
-      const baseline = parsedBaseline;
+      const baseline: Baseline = JSON.parse(Fs.readFileSync(baselineFile, 'utf-8'));
 
       let report = '';
       for (const yamlPath of yamlPaths) {
@@ -289,19 +270,17 @@ run(
     description: 'Validate Kibana OAS YAML files (in oas_docs/output)',
     usage: 'node ./scripts/validate_oas_docs.js',
     flags: {
-      boolean: ['assert-no-error-increase', 'update-baseline', 'skip-printing-issues', 'breakdown'],
+      boolean: ['assert-no-error-increase', 'update-baseline', 'skip-printing-issues'],
       string: ['path', 'only'],
       help: `
       --assert-no-error-increase  Gates CI on both the error AND warning counts per bundle. Despite the flag name, a warning increase also fails — a quality-warning increase can mask a structural regression hiding behind a description cleanup. Fails if either axis rises above baseline for any bundle.
       --update-baseline          Update or create the baseline file with current { errors, warnings } counts.
-      --breakdown                Print structural/quality category subtotals within each severity bucket.
       --path                     Pass in the (start of) a custom API route path (for example /api/fleet/agent_policies), can be specified multiple times.
       --only                     Validate only OAS for the a specific offering, one of "traditional" or "serverless". Omitting this will validate all offerings.
       --skip-printing-issues     Do not print the errors found in the OAS spec, only the count of errors and warnings.
 `,
       examples: `
 node ./scripts/validate_oas_docs.js
-node ./scripts/validate_oas_docs.js --breakdown
 node ./scripts/validate_oas_docs.js --path /api/fleet/agent_policies --path /api/fleet/agent_policies
 node ./scripts/validate_oas_docs.js --only serverless --path /api/fleet/agent_policies
 node ./scripts/validate_oas_docs.js --assert-no-error-increase --update-baseline
@@ -318,31 +297,4 @@ function formatAxis(label: string, curr: number, prev: number): string {
     return chalk.yellow(`${label} ${chalk.bold(curr)} (baseline ${prev})`);
   }
   return chalk.green(`${label} ${chalk.bold(curr)} (was ${prev})`);
-}
-
-function printSummary(
-  log: { warning: (message: string) => void },
-  yamlPath: string,
-  counts: SeverityCounts,
-  categoryBreakdown: CategoryBreakdown,
-  showBreakdown: boolean
-): void {
-  if (!showBreakdown) {
-    log.warning(
-      `${chalk.underline(yamlPath)}: ${chalk.bold(pluralize(counts.errors, 'error'))}, ${chalk.bold(
-        pluralize(counts.warnings, 'warning')
-      )}`
-    );
-    return;
-  }
-
-  log.warning(
-    `${chalk.underline(yamlPath)}\n` +
-      `  errors:   ${chalk.bold(counts.errors)} (structural ${
-        categoryBreakdown.errors.structural
-      }, quality ${categoryBreakdown.errors.quality})\n` +
-      `  warnings: ${chalk.bold(counts.warnings)} (structural ${
-        categoryBreakdown.warnings.structural
-      }, quality ${categoryBreakdown.warnings.quality})`
-  );
 }

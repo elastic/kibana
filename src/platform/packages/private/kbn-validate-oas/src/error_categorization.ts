@@ -27,14 +27,10 @@ export interface SeverityCounts {
   warnings: number;
 }
 
-export interface CategoryBreakdown {
-  errors: { structural: number; quality: number };
-  warnings: { structural: number; quality: number };
-}
-
 export type Baseline = Record<string, SeverityCounts>;
 
-const DOC_COMPLETENESS_PROPERTIES = new Set(['description', 'summary', 'example', 'examples']);
+const WARNING_DOC_PROPERTIES = new Set(['description']);
+const ERROR_DOC_PROPERTIES = new Set(['summary', 'example', 'examples']);
 
 // Drop known AJV noise: optional `$ref`, aggregate anyOf/oneOf `passingSchemas: null`.
 export const classifySchemaError = (error: ErrorObject): OasIssue | null => {
@@ -48,15 +44,17 @@ export const classifySchemaError = (error: ErrorObject): OasIssue | null => {
     return null;
   }
 
-  const isDocCompleteness =
-    keyword === 'required' && DOC_COMPLETENESS_PROPERTIES.has(params.missingProperty);
+  const missingProperty = params.missingProperty;
+  const isWarningDoc = keyword === 'required' && WARNING_DOC_PROPERTIES.has(missingProperty);
+  const isErrorDoc = keyword === 'required' && ERROR_DOC_PROPERTIES.has(missingProperty);
+  const isDocCompleteness = isWarningDoc || isErrorDoc;
 
   return {
     path: instancePath,
     message: message ?? '',
     schemaPath,
     source: 'schema',
-    severity: isDocCompleteness ? 'warning' : 'error',
+    severity: isWarningDoc ? 'warning' : 'error',
     category: isDocCompleteness ? 'quality' : 'structural',
   };
 };
@@ -81,36 +79,6 @@ export const countSeverities = (issues: OasIssue[]): SeverityCounts =>
     },
     { errors: 0, warnings: 0 }
   );
-
-export const computeBreakdown = (issues: OasIssue[]): CategoryBreakdown =>
-  issues.reduce<CategoryBreakdown>(
-    (breakdown, issue) => {
-      breakdown[issue.severity === 'error' ? 'errors' : 'warnings'][issue.category]++;
-      return breakdown;
-    },
-    {
-      errors: { structural: 0, quality: 0 },
-      warnings: { structural: 0, quality: 0 },
-    }
-  );
-
-const isSeverityCounts = (value: unknown): value is SeverityCounts =>
-  typeof value === 'object' &&
-  value !== null &&
-  typeof (value as SeverityCounts).errors === 'number' &&
-  typeof (value as SeverityCounts).warnings === 'number';
-
-export const isNewBaselineShape = (value: unknown): value is Baseline =>
-  typeof value === 'object' &&
-  value !== null &&
-  Object.values(value).length > 0 &&
-  Object.values(value).every((entry) => isSeverityCounts(entry));
-
-export const isLegacyBaselineShape = (value: unknown): boolean =>
-  typeof value === 'object' &&
-  value !== null &&
-  Object.values(value).length > 0 &&
-  Object.values(value).every((entry) => typeof entry === 'number');
 
 // Gates on both axes: a warning increase is also a failure. Without this, a quality-warning
 // increase (missing descriptions) could hide behind a structural cleanup that lowers the error

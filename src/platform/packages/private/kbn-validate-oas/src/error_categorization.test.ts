@@ -12,9 +12,6 @@ import {
   classifySchemaError,
   classifyRefError,
   countSeverities,
-  computeBreakdown,
-  isNewBaselineShape,
-  isLegacyBaselineShape,
   hasSeverityIncrease,
   type OasIssue,
   type Baseline,
@@ -30,8 +27,24 @@ const schemaError = (overrides: Partial<ErrorObject> = {}): ErrorObject => ({
 });
 
 describe('classifySchemaError', () => {
-  it.each(['description', 'summary', 'example', 'examples'])(
-    'classifies required doc property "%s" as quality/warning',
+  it('classifies required description as quality/warning', () => {
+    const issue = classifySchemaError(
+      schemaError({
+        keyword: 'required',
+        params: { missingProperty: 'description' },
+        message: "must have required property 'description'",
+      })
+    );
+
+    expect(issue).toMatchObject({
+      source: 'schema',
+      severity: 'warning',
+      category: 'quality',
+    });
+  });
+
+  it.each(['summary', 'example', 'examples'])(
+    'classifies required doc property "%s" as quality/error',
     (missingProperty) => {
       const issue = classifySchemaError(
         schemaError({
@@ -43,7 +56,7 @@ describe('classifySchemaError', () => {
 
       expect(issue).toMatchObject({
         source: 'schema',
-        severity: 'warning',
+        severity: 'error',
         category: 'quality',
       });
     }
@@ -110,58 +123,10 @@ describe('countSeverities', () => {
         category: 'structural',
       },
       { path: '', message: '', source: 'schema', severity: 'warning', category: 'quality' },
+      { path: '', message: '', source: 'schema', severity: 'error', category: 'quality' },
     ];
 
-    expect(countSeverities(issues)).toEqual({ errors: 2, warnings: 1 });
-  });
-});
-
-describe('computeBreakdown', () => {
-  it('nests category subtotals under each severity bucket', () => {
-    const issues: OasIssue[] = [
-      { path: '', message: '', source: 'schema', severity: 'error', category: 'structural' },
-      { path: '', message: '', source: 'schema', severity: 'warning', category: 'quality' },
-      { path: '', message: '', source: 'schema', severity: 'warning', category: 'quality' },
-    ];
-
-    expect(computeBreakdown(issues)).toEqual({
-      errors: { structural: 1, quality: 0 },
-      warnings: { structural: 0, quality: 2 },
-    });
-  });
-});
-
-describe('baseline shape guards', () => {
-  it('accepts the new {errors, warnings} shape', () => {
-    const baseline = {
-      './oas_docs/output/kibana.yaml': { errors: 1, warnings: 16 },
-    };
-
-    expect(isNewBaselineShape(baseline)).toBe(true);
-    expect(isLegacyBaselineShape(baseline)).toBe(false);
-  });
-
-  it('detects the legacy { path: number } shape', () => {
-    const baseline = {
-      './oas_docs/output/kibana.yaml': 16,
-    };
-
-    expect(isLegacyBaselineShape(baseline)).toBe(true);
-    expect(isNewBaselineShape(baseline)).toBe(false);
-  });
-
-  it('rejects an empty object baseline', () => {
-    expect(isNewBaselineShape({})).toBe(false);
-    expect(isLegacyBaselineShape({})).toBe(false);
-  });
-
-  it('rejects a malformed baseline', () => {
-    const malformed = {
-      './oas_docs/output/kibana.yaml': { errors: '1', warnings: 16 },
-    };
-
-    expect(isNewBaselineShape(malformed)).toBe(false);
-    expect(isLegacyBaselineShape(malformed)).toBe(false);
+    expect(countSeverities(issues)).toEqual({ errors: 3, warnings: 1 });
   });
 });
 
