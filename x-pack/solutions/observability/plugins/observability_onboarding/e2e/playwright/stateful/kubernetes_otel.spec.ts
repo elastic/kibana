@@ -204,10 +204,12 @@ kubectl rollout status --watch --timeout=660s daemonset/opentelemetry-kube-stack
           ...(errorBody !== undefined ? { errorBody } : {}),
         });
       });
-      await apmPage.goto(serviceInventoryHref);
-      // Resolve the locator redirect before the service-row retry loop starts.
-      // Otherwise its reloads restart /app/r while Kibana is still redirecting.
-      await apmPage.waitForURL(/\/app\/apm\/services(?:[/?#]|$)/, { timeout: 120_000 });
+      // The CTA uses an /app/r locator redirect, which can remain stuck on the
+      // "Redirecting..." page in serverless CI. Navigate to its target directly
+      // so the inventory mounts before the service-row retry loop starts.
+      await apmPage.goto(`${process.env.KIBANA_BASE_URL}/app/apm/services`, {
+        waitUntil: 'domcontentloaded',
+      });
       const apmServiceInventoryPage = new ApmServiceInventoryPage(apmPage);
 
       const serviceTestId = `serviceLink_${apmServiceName}`;
