@@ -40,7 +40,7 @@ describe('event_search tool', () => {
   it('returns events on success and tracks telemetry', async () => {
     (assertSignificantEventsAccess as jest.Mock).mockResolvedValue(undefined);
     (searchEventsToolHandler as jest.Mock).mockResolvedValue({
-      events: [{ event_id: 'e1' }],
+      events: [{ event_uuid: 'e1' }],
       total: 1,
     });
 
@@ -60,7 +60,7 @@ describe('event_search tool', () => {
 
     const result = await invokeHandler(
       tool as never,
-      { stream_names: ['logs.checkout'], state: 'open' },
+      { stream_names: ['logs.checkout'], status: 'open' },
       createMockToolContext()
     );
 
@@ -72,14 +72,14 @@ describe('event_search tool', () => {
       result_count: 1,
       has_query: false,
       has_stream_filter: true,
-      state_filter: 'open',
+      status_filter: 'open',
     });
   });
 
   it('accepts cross-stream searches without stream_names', async () => {
     (assertSignificantEventsAccess as jest.Mock).mockResolvedValue(undefined);
     (searchEventsToolHandler as jest.Mock).mockResolvedValue({
-      events: [{ event_id: 'e2' }],
+      events: [{ event_uuid: 'e2' }],
       total: 1,
     });
 
@@ -98,7 +98,7 @@ describe('event_search tool', () => {
 
     const result = await invokeHandler(
       tool as never,
-      { query: 'latency', state: 'closed' },
+      { query: 'latency', status: 'closed' },
       createMockToolContext()
     );
 

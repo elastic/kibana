@@ -15,6 +15,7 @@ import React, { memo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows';
 import { ExecutionStatus, TRIGGER_STEP_TYPES } from '@kbn/workflows';
+import { deslugifyStepName } from './deslugify_step_name';
 import { useWorkflowGraphActions } from './workflow_graph_actions_context';
 import type { RenderStepIcon } from './workflow_graph_actions_context';
 import { getStepIconType, getTriggerTypeIconType } from '../step_icons';
@@ -469,6 +470,10 @@ function WorkflowGraphNodeInner(node: NodeProps<Node<WorkflowGraphNodeData>>) {
   const { stepType, label, isTrigger, stepExecution, preview, step } = node.data;
   const { euiTheme } = useEuiTheme();
   const isTriggerNode = isTrigger || TRIGGER_STEP_TYPES.has(stepType);
+  // Display-only: trigger labels are already human-readable (getTriggerLabel);
+  // step labels are frequently authored as slugs, so deslugify for display.
+  // `label` itself must stay untouched — it's used to key execution status.
+  const displayLabel = isTriggerNode ? label : deslugifyStepName(label);
 
   const iconType = isTriggerNode ? getTriggerTypeIconType(stepType) : getStepIconType(stepType);
   const maxAttempts = getStepMaxAttempts(step);
@@ -494,7 +499,7 @@ function WorkflowGraphNodeInner(node: NodeProps<Node<WorkflowGraphNodeData>>) {
     return (
       <NodePreviewCard
         stepType={stepType}
-        label={label}
+        label={displayLabel}
         isTrigger={isTrigger}
         isTriggerNode={isTriggerNode}
         iconType={iconType}
@@ -513,7 +518,7 @@ function WorkflowGraphNodeInner(node: NodeProps<Node<WorkflowGraphNodeData>>) {
       <div
         role="button"
         tabIndex={0}
-        aria-label={`${stepType} step: ${label}${
+        aria-label={`${stepType} step: ${displayLabel}${
           stepExecution?.status ? `, status: ${stepExecution.status}` : ''
         }`}
         onMouseEnter={() => setIsHovered(true)}
@@ -603,9 +608,9 @@ function WorkflowGraphNodeInner(node: NodeProps<Node<WorkflowGraphNodeData>>) {
             textOverflow: 'ellipsis',
             minWidth: 0,
           }}
-          title={label}
+          title={displayLabel}
         >
-          {label}
+          {displayLabel}
         </span>
 
         {/* Retry-on-failure badge: the configured max-attempts taken from

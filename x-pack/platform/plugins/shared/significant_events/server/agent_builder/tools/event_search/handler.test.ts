@@ -8,7 +8,7 @@
 import { searchEventsToolHandler } from './handler';
 
 describe('searchEventsToolHandler', () => {
-  const makeClient = (hits: object[] = [{ event_id: 'e1' }]) => ({
+  const makeClient = (hits: object[] = [{ event_uuid: 'e1', severity: '60-high' }]) => ({
     findLatestByCurrentStatePaginated: jest
       .fn()
       .mockResolvedValue({ hits, page: 1, perPage: 20, total: hits.length }),
@@ -22,7 +22,7 @@ describe('searchEventsToolHandler', () => {
 
     const result = await searchEventsToolHandler({
       eventClient: eventClient as never,
-      params: { query: 'timeout', stream_names: ['logs.checkout'], state: 'open', page: 2 },
+      params: { query: 'timeout', stream_names: ['logs.checkout'], status: 'open', page: 2 },
     });
 
     expect(eventClient.findLatestByCurrentStatePaginated).toHaveBeenCalledWith({
@@ -30,18 +30,23 @@ describe('searchEventsToolHandler', () => {
       perPage: undefined,
       search: 'timeout',
       stream: ['logs.checkout'],
-      state: 'open',
+      status: ['open'],
     });
     expect(eventClient.findLatestPaginated).not.toHaveBeenCalled();
-    expect(result).toEqual({ events: [{ event_id: 'e1' }], page: 1, per_page: 20, total: 1 });
+    expect(result).toEqual({
+      events: [{ event_uuid: 'e1', severity: '60-high' }],
+      page: 1,
+      per_page: 20,
+      total: 1,
+    });
   });
 
   it('supports cross-stream state search when stream_names is omitted', async () => {
-    const eventClient = makeClient([{ event_id: 'e2' }]);
+    const eventClient = makeClient([{ event_uuid: 'e2', severity: '20-low' }]);
 
     await searchEventsToolHandler({
       eventClient: eventClient as never,
-      params: { state: 'closed' },
+      params: { status: 'closed' },
     });
 
     expect(eventClient.findLatestByCurrentStatePaginated).toHaveBeenCalledWith({
@@ -49,7 +54,7 @@ describe('searchEventsToolHandler', () => {
       perPage: undefined,
       search: undefined,
       stream: undefined,
-      state: 'closed',
+      status: ['closed'],
     });
   });
 

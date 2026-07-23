@@ -66,6 +66,7 @@ export {
   isFeatureWithFilter,
   mergeFeature,
   normalizeFeatureSlug,
+  normalizeFeatureSlugForMatching,
   toBaseFeature,
 } from './src/feature';
 
@@ -95,12 +96,18 @@ export {
   SIGNIFICANT_EVENT_STATUS_OPTIONS,
   INVESTIGATION_PROGRESS_UI_EVENT,
   INVESTIGATE_STEP_ID,
+  type BlastRadiusEntry,
+  type CausalFeature,
+  type SignalEntry,
+  type Severity,
+  severitySchema,
+  SEVERITY_OPTIONS,
+  getSeverityLabel,
   detectionSchema,
   discoverySchema,
-  dependencyEdgeSchema,
-  infraComponentSchema,
-  causeKiSchema,
-  evidenceSchema,
+  blastRadiusEntrySchema,
+  causalFeatureSchema,
+  signalEntrySchema,
   significantEventSchema,
   significantEventStatusSchema,
   significantEventsTuningConfigSchema,
@@ -137,10 +144,3 @@ export {
 } from './src/inference_feature_ids';
 
 export type { KnowledgeIndicatorClientContract } from './src/knowledge_indicator_client';
-
-export type {
-  RelayClaimResponse,
-  RelayClientContract,
-  RelayInstallRequest,
-  RelayInstallResponse,
-} from './src/relay_client';

@@ -28,6 +28,7 @@
     "mappings:generate": "node scripts/mappings/mappings_generator",
     "mappings:load": "node scripts/mappings/mappings_loader",
     "langgraph:draw": "node scripts/langgraph/draw_graphs",
+    "data:generate": "node scripts/data/generate_cli.js",
     "junit:transform": "node scripts/junit_transformer --pathPattern '../../../../../target/kibana-security-solution/cypress/results/*.xml' --rootDirectory ../../../../../ --reportName 'Security Solution Cypress' --writeInPlace",
     "openapi:generate": "node scripts/openapi/generate",
     "openapi:generate:debug": "node --inspect-brk scripts/openapi/generate",

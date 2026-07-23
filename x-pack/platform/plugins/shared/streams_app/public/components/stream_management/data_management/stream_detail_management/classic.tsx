@@ -28,6 +28,10 @@ import { StreamDetailAttachments } from '../../../stream_detail_attachments';
 import { ClassicStreamPartitioning } from '../stream_detail_routing/classic_stream_partitioning';
 import { buildLifecycleTabActions } from './lifecycle_tab_label_with_actions';
 import { StreamDetailCanvas } from '../stream_detail_canvas';
+import {
+  ImportLifecycleFlyoutProvider,
+  useImportLifecycleFlyoutContext,
+} from '../stream_detail_lifecycle/import_from_stream';
 
 const classicStreamManagementSubTabs = [
   'overview',
@@ -61,6 +65,23 @@ export function ClassicStreamDetailManagement({
   definition: Streams.ClassicStream.GetResponse;
   refreshDefinition: () => void;
 }) {
+  return (
+    <ImportLifecycleFlyoutProvider>
+      <ClassicStreamDetailManagementContent
+        definition={definition}
+        refreshDefinition={refreshDefinition}
+      />
+    </ImportLifecycleFlyoutProvider>
+  );
+}
+
+function ClassicStreamDetailManagementContent({
+  definition,
+  refreshDefinition,
+}: {
+  definition: Streams.ClassicStream.GetResponse;
+  refreshDefinition: () => void;
+}) {
   const {
     core: { notifications },
     dependencies: {
@@ -72,9 +93,10 @@ export function ClassicStreamDetailManagement({
   } = useStreamsAppParams('/{key}/management/{tab}');
   const router = useStreamsAppRouter();
   const { rangeFrom, rangeTo } = useTimeRange();
+  const importLifecycleFlyout = useImportLifecycleFlyoutContext();
 
   const {
-    features: { canvas, queryStreams, significantEventsDiscovery },
+    features: { canvas, queryStreams, significantEvents },
     isLoading: isPrivilegesLoading,
   } = useStreamsPrivileges();
 
@@ -105,7 +127,6 @@ export function ClassicStreamDetailManagement({
           title={key}
           back={{ href: router.link('/'), label: backToStreamsLabel }}
           badges={classicErrorBadges}
-          padding="m"
         />
         <StreamsAppPageTemplate.Body>
           <MissingDataStreamCallout
@@ -146,6 +167,8 @@ export function ClassicStreamDetailManagement({
       share,
       router,
       timeRange: { rangeFrom, rangeTo },
+      onImportFromStream: importLifecycleFlyout?.open,
+      isImportFromStreamDisabled: importLifecycleFlyout?.isDisabled,
     }),
   };
 
@@ -226,7 +249,7 @@ export function ClassicStreamDetailManagement({
       return null;
     }
 
-    if (significantEventsDiscovery?.enabled && significantEventsDiscovery?.available) {
+    if (significantEvents?.available) {
       return (
         <RedirectTo
           path="/_discovery/{tab}"

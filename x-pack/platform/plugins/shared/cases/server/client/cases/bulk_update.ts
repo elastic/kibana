@@ -83,6 +83,7 @@ import {
 } from './validators';
 import type { InlineField } from '../../../common/types/domain/template/fields';
 import { emptyCasesAssigneesSanitizer } from './sanitizers';
+import { mergeCustomFieldsIntoExtendedFields } from '../../../common/utils/template_fields';
 /**
  * Throws an error if any of the requests attempt to update the owner of a case.
  */
@@ -401,6 +402,16 @@ function partitionPatchRequest(
   };
 }
 
+/**
+ * Fields that are allowed to be present when users reopen cases
+ */
+const REOPEN_ONLY_CASE_FIELDS = new Set(['id', 'version', 'status']);
+
+/**
+ * Fields that are allowed to be present when case is reassigned
+ */
+const ASSIGN_ONLY_CASE_FIELDS = new Set(['id', 'version', 'assignees']);
+
 export function getOperationsToAuthorize({
   reopenedCases,
   changedAssignees,
@@ -412,9 +423,17 @@ export function getOperationsToAuthorize({
 }): OperationDetails[] {
   const operations: OperationDetails[] = [];
   const onlyAssigneeOperations =
-    reopenedCases.length === 0 && changedAssignees.length === allCases.length;
+    reopenedCases.length === 0 &&
+    changedAssignees.length === allCases.length &&
+    changedAssignees.every((caseReq) =>
+      Object.keys(caseReq).every((key) => ASSIGN_ONLY_CASE_FIELDS.has(key))
+    );
   const onlyReopenOperations =
-    changedAssignees.length === 0 && reopenedCases.length === allCases.length;
+    changedAssignees.length === 0 &&
+    reopenedCases.length === allCases.length &&
+    reopenedCases.every((caseReq) =>
+      Object.keys(caseReq).every((key) => REOPEN_ONLY_CASE_FIELDS.has(key))
+    );
 
   if (reopenedCases.length > 0) {
     operations.push(Operations.reopenCase);
@@ -611,6 +630,7 @@ export const bulkUpdate = async (
           updateReq,
           originalCase,
           templatesService,
+          fieldDefinitionsService,
           globalFields: globalFieldsByOwner.get(originalCase.attributes.owner) ?? [],
         })
       )
@@ -651,6 +671,7 @@ export const bulkUpdate = async (
             templateId: id,
             templateVersion: version,
             templatesService,
+            fieldDefinitionsService,
             logger,
           });
           return [`${id}@${version}`, fields] as [string, InlineField[]];
@@ -674,6 +695,7 @@ export const bulkUpdate = async (
       user,
       casesToUpdate,
       customFieldsConfigurationMap,
+      templatesEnabled: clientArgs.config.templates.enabled,
     });
 
     // Resolve names of newly-applied templates so the "applied template" user action records the
@@ -903,10 +925,12 @@ const createPatchCasesPayload = ({
   casesToUpdate,
   user,
   customFieldsConfigurationMap,
+  templatesEnabled,
 }: {
   casesToUpdate: UpdateRequestWithOriginalCase[];
   user: User;
   customFieldsConfigurationMap: Map<string, CustomFieldsConfiguration>;
+  templatesEnabled: boolean;
 }): PatchCasesArgs => {
   const updatedDt = new Date().toISOString();
 
@@ -946,6 +970,33 @@ const createPatchCasesPayload = ({
           ...(originalCase.attributes.extended_fields ?? {}),
           ...trimmedCaseAttributes.extended_fields,
         };
+      }
+
+      // Mirror customFields into extended_fields so that automations writing to the legacy API
+      // keep the v2 analytics / UI surface populated. Only run when the update includes
+      // customFields — an update that omits customFields must not change extended_fields.
+      //
+      // CustomFields-win semantics: the incoming value always overrides the mirror key; a null
+      // value the caller explicitly submitted clears the mirror key.
+      //
+      // Pass the RAW request customFields (updateCaseAttributes.customFields), not the
+      // post-fill array (trimmedCaseAttributes.customFields). fillMissingCustomFields pads
+      // absent optional-no-default fields with { key, value: null }; those synthetic nulls
+      // would otherwise hit the merge's delete branch and wipe mirror keys the update never
+      // intended to clear — silently destroying values stored via the v2 UI.
+      //
+      // mergeCustomFieldsIntoExtendedFields returns the *same reference* when the result is
+      // value-identical — guard on reference inequality to avoid spurious writes/user-actions.
+      if (templatesEnabled && updateCaseAttributes.customFields) {
+        const currentExtendedFields =
+          trimmedCaseAttributes.extended_fields ?? originalCase.attributes.extended_fields;
+        const merged = mergeCustomFieldsIntoExtendedFields(
+          updateCaseAttributes.customFields,
+          currentExtendedFields
+        );
+        if (merged !== currentExtendedFields && merged != null) {
+          trimmedCaseAttributes.extended_fields = merged;
+        }
       }
 
       return {

@@ -106,7 +106,10 @@ export function registerAgentBuilderTools({
       logger: logger.get('events_write_tool'),
       telemetry,
     }),
-    createInvestigationProgressReportTool(),
+    createInvestigationProgressReportTool({
+      server,
+      logger: logger.get('investigation_progress_report_tool'),
+    }),
   ];
 
   for (const tool of tools) {

@@ -47,15 +47,27 @@ describe('toStoredDataView', () => {
       fieldFormats: {
         rt: { id: 'string', params: undefined },
       },
-      fieldAttrs: {
-        rt: {},
-      },
       runtimeFieldMap: {
         rt: {
           type: 'keyword',
           script: { source: 'emit(doc["id"].value)' },
         },
       },
+    });
+  });
+
+  it('maps inline allow_hidden_indices to allowHidden', () => {
+    const dataView: AsCodeDataViewSpec = {
+      type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+      index_pattern: 'my-hidden-*',
+      time_field: '@timestamp',
+      allow_hidden_indices: true,
+    };
+    const result = toStoredDataView(dataView);
+    expect(result).toEqual({
+      title: 'my-hidden-*',
+      timeFieldName: '@timestamp',
+      allowHidden: true,
     });
   });
 
@@ -118,9 +130,6 @@ describe('toStoredDataView', () => {
       },
       fieldFormats: {
         rt: { id: 'string', params: undefined },
-      },
-      fieldAttrs: {
-        rt: {},
       },
     });
   });
