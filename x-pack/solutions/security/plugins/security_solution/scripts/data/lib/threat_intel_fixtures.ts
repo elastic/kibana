@@ -1137,8 +1137,12 @@ const seedHistoricThreatReports = async ({
 
   log.info(
     `Seeded ${docs.length} historic threat report(s) into ${THREAT_REPORTS_DATA_STREAM} ` +
-      `across [${new Date(historicStartMs).toISOString()}, ${new Date(historicEndMs).toISOString()}] ` +
-      `(live window (${THREAT_INTEL_LIVE_WINDOW_MS / (60 * 60 * 1000)}h) left empty for real workflow ingest).`
+      `across [${new Date(historicStartMs).toISOString()}, ${new Date(
+        historicEndMs
+      ).toISOString()}] ` +
+      `(live window (${
+        THREAT_INTEL_LIVE_WINDOW_MS / (60 * 60 * 1000)
+      }h) left empty for real workflow ingest).`
   );
   return docs.length;
 };
@@ -1241,9 +1245,9 @@ export const seedThreatIntelForPacks = async ({
 
   log.info(
     `Seeded ${scenarios.length} threat-intel RSS source(s) (${reportItemCount} current RSS item(s) ` +
-      `for workflow ingest) and 1 digest subscription` +
-      (historicReportCount > 0 ? `, plus ${historicReportCount} historic Hub report(s)` : '') +
-      `. Environment telemetry is the Technology Watch pack indices (not logs-aws.local). ` +
+      `for workflow ingest) and 1 digest subscription${
+        historicReportCount > 0 ? `, plus ${historicReportCount} historic Hub report(s)` : ''
+      }. Environment telemetry is the Technology Watch pack indices (not logs-aws.local). ` +
       `On mustard Kibana: run threat-intel.source_ingestion to fill the live ${
         THREAT_INTEL_LIVE_WINDOW_MS / (60 * 60 * 1000)
       }h window with real reports; ` +

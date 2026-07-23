@@ -223,7 +223,9 @@ describe('buildHistoricThreatReportDoc', () => {
     });
     const feedUrl = buildPackRssDataUrl({
       scenario,
-      reportItems: buildPackRssCurrentReportItems({ endMs: Date.parse('2026-07-22T18:00:00.000Z') }),
+      reportItems: buildPackRssCurrentReportItems({
+        endMs: Date.parse('2026-07-22T18:00:00.000Z'),
+      }),
     });
     const newest = buildHistoricThreatReportDoc({
       scenario,
@@ -260,7 +262,9 @@ describe('buildHistoricThreatReportDoc', () => {
     });
     const feedUrl = buildPackRssDataUrl({
       scenario,
-      reportItems: buildPackRssCurrentReportItems({ endMs: Date.parse('2026-07-22T18:00:00.000Z') }),
+      reportItems: buildPackRssCurrentReportItems({
+        endMs: Date.parse('2026-07-22T18:00:00.000Z'),
+      }),
     });
     const titles = items.map((item, itemIndex) => {
       const doc = buildHistoricThreatReportDoc({
@@ -287,7 +291,9 @@ describe('buildHistoricThreatReportDoc', () => {
     const scenario = PACK_TI_SCENARIOS.okta;
     const feedUrl = buildPackRssDataUrl({
       scenario,
-      reportItems: buildPackRssCurrentReportItems({ endMs: Date.parse('2026-07-22T18:00:00.000Z') }),
+      reportItems: buildPackRssCurrentReportItems({
+        endMs: Date.parse('2026-07-22T18:00:00.000Z'),
+      }),
     });
     const doc = buildHistoricThreatReportDoc({
       scenario,
@@ -315,7 +321,9 @@ describe('buildHistoricThreatReportDoc', () => {
     });
     const feedUrl = buildPackRssDataUrl({
       scenario,
-      reportItems: buildPackRssCurrentReportItems({ endMs: Date.parse('2026-07-22T18:00:00.000Z') }),
+      reportItems: buildPackRssCurrentReportItems({
+        endMs: Date.parse('2026-07-22T18:00:00.000Z'),
+      }),
     });
     const names = items.map((item, itemIndex) => {
       const doc = buildHistoricThreatReportDoc({
