@@ -60,6 +60,8 @@ export {
   HUNT_ORCHESTRATOR_API_PATH,
   HUNT_FINDINGS_API_PATH,
   HUNT_FINDING_DEPLOY_API_PATH,
+  HUNT_STATUS_API_PATH,
+  CONTINUOUS_HUNT_WORKFLOW_ID,
   SYNTHESIZE_ADVISORY_API_PATH,
   COVERAGE_GAP_API_PATH,
   GENERALIZE_FROM_TELEMETRY_API_PATH,
@@ -110,6 +112,14 @@ export type {
   FlyoutInsightsRelatedReport,
   RelatedReportJoinReason,
 } from './flyout_insights_types';
+export type {
+  HuntRunTerminalStatus,
+  HuntStatusCurrentRun,
+  HuntStatusLastRun,
+  HuntStatusCycle,
+  HuntStatusSchedule,
+  HuntStatusResponse,
+} from './hunt_status_types';
 export type { SubscriptionTemplate, SubscriptionTemplateId } from './subscription_templates';
 export {
   SUBSCRIPTION_TEMPLATES,

@@ -25,6 +25,7 @@ import { registerHuntForThreatRoute } from './hunt_for_threat';
 import { registerHuntOrchestratorRoute } from './hunt_orchestrator';
 import { registerHuntFindingsRoute } from './hunt_findings';
 import { registerHuntFindingDeployRoute } from './hunt_finding_deploy';
+import { registerHuntStatusRoute } from './hunt_status';
 import { registerCreateThreatReportRoute } from './create_threat_report';
 import { registerSavedViewsRoutes } from './saved_views';
 import { registerFindThreatReportsRoute } from './find_threat_reports';
@@ -95,6 +96,7 @@ export const registerRoutes = (deps: RouteRegistrationDeps): void => {
 
   // UI-facing routes (dashboard + saved views + flyout).
   registerDashboardOverviewRoute(deps);
+  registerHuntStatusRoute(deps);
   registerSavedViewsRoutes(deps);
   registerFlyoutInsightsRoute(deps);
   registerListSourcesRoute(deps);

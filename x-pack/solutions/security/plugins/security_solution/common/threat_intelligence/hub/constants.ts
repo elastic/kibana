@@ -256,6 +256,19 @@ export const HUNT_FINDINGS_API_PATH = `${THREAT_INTELLIGENCE_API_BASE}/hunt_find
 export const HUNT_FINDING_DEPLOY_API_PATH =
   `${THREAT_INTELLIGENCE_API_BASE}/hunt_findings/{findingId}/deploy` as const;
 /**
+ * Continuous-hunt status — GET /api/threat_intelligence/hunt_status.
+ * Read-only aggregation of the continuous-hunt workflow's execution
+ * history plus per-cycle findings/report stats; backs the Intelligence
+ * Hub status strip. Same read privilege as `hunt_findings`.
+ */
+export const HUNT_STATUS_API_PATH = `${THREAT_INTELLIGENCE_API_BASE}/hunt_status` as const;
+/**
+ * Workflow id of the built-in continuous hunt (see
+ * `server/threat_intelligence/workflows/index.ts`). Shared so the status
+ * route/strip and the workflow installer never drift apart.
+ */
+export const CONTINUOUS_HUNT_WORKFLOW_ID = 'threat-intel-continuous-threat-hunt' as const;
+/**
  * Cross-report advisory synthesis — see
  * {@link THREAT_INTEL_TOOL_IDS.synthesizeAdvisory}. Same
  * `requiredPrivileges` as `find_threat_reports` (read) when `persist: false`;
