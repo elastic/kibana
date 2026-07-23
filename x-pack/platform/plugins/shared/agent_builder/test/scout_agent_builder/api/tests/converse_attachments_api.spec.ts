@@ -87,7 +87,7 @@ apiTest.describe(
           title: 'Mocked Conversation Title',
           response: 'Mocked LLM response',
         });
-        await postConverse(
+        const res = await postConverse(
           apiClient,
           adminCredentials.apiKeyHeader,
           {
@@ -98,6 +98,10 @@ apiTest.describe(
           mode
         );
         await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
+        const conversationId = (res.body as { conversation_id: string }).conversation_id;
+        expect(conversationId).toBeDefined();
+        conversationIds.push(conversationId);
+
         const firstAgentRequest = llmProxy.interceptedRequests.find(
           (request) => request.matchingInterceptorName === 'final-assistant-response'
         )?.requestBody;
@@ -149,7 +153,7 @@ apiTest.describe(
             title: 'Mocked Conversation Title',
             response: 'Mocked LLM response',
           });
-          const conRes = await postConverse(
+          const res = await postConverse(
             apiClient,
             adminCredentials.apiKeyHeader,
             {
@@ -167,7 +171,7 @@ apiTest.describe(
           );
           await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
 
-          const conversationId = (conRes.body as { conversation_id: string }).conversation_id;
+          const conversationId = (res.body as { conversation_id: string }).conversation_id;
           expect(conversationId).toBeDefined();
           conversationIds.push(conversationId);
           const conversation = await getConversation(
