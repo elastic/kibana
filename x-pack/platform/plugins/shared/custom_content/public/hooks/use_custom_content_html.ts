@@ -67,9 +67,11 @@ export function useCustomContentHtml({
   // wrote so we can skip the echo re-run without also skipping intentional version bumps.
   const selfWrittenRef = useRef<string | undefined>(undefined);
 
-  // Track the last-rendered timeRange so a timepicker change still triggers a re-fetch even
-  // when savedTemplate hasn't changed (which would otherwise trip the echo-skip guard below).
+  // Track the last-rendered timeRange and generationVersion so that timepicker changes and
+  // explicit refresh clicks still trigger a re-fetch even when savedTemplate hasn't changed
+  // (which would otherwise trip the echo-skip guard below).
   const lastRenderedTimeRangeRef = useRef<TimeRange | undefined>(undefined);
+  const lastRenderedGenerationVersionRef = useRef(generationVersion);
 
   const colorModeRef = useRef(colorMode);
   useEffect(() => {
@@ -87,7 +89,15 @@ export function useCustomContentHtml({
       timeRange?.to === lastRenderedTimeRangeRef.current?.to;
     lastRenderedTimeRangeRef.current = timeRange;
 
-    if (savedTemplate !== undefined && savedTemplate === selfWrittenRef.current && timeRangeSame) {
+    const generationVersionSame = generationVersion === lastRenderedGenerationVersionRef.current;
+    lastRenderedGenerationVersionRef.current = generationVersion;
+
+    if (
+      savedTemplate !== undefined &&
+      savedTemplate === selfWrittenRef.current &&
+      timeRangeSame &&
+      generationVersionSame
+    ) {
       return;
     }
 

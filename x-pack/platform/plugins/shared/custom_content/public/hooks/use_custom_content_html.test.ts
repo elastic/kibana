@@ -363,6 +363,32 @@ describe('useCustomContentHtml', () => {
     });
   });
 
+  describe('refresh re-fetches ES|QL panels after first generation', () => {
+    it('re-calls fetchEsqlData when generationVersion increments on a panel with a stored template', async () => {
+      const LIQUID_TEMPLATE =
+        '<html><body>{% for row in rows %}<p>{{ row["revenue"].value }}</p>{% endfor %}</body></html>';
+      const esqlParams = {
+        ...baseParams,
+        esqlQuery: 'FROM logs | STATS revenue = SUM(amount)',
+        savedTemplate: LIQUID_TEMPLATE,
+        // simulate selfWrittenRef by having savedTemplate already match what the LLM would write
+        prompt: undefined,
+      };
+
+      const { rerender } = renderHook(
+        ({ version }: { version: number }) =>
+          useCustomContentHtml({ ...esqlParams, generationVersion: version }),
+        { initialProps: { version: 0 } }
+      );
+
+      await waitFor(() => expect(mockFetchEsqlData).toHaveBeenCalledTimes(1));
+
+      rerender({ version: 1 });
+
+      await waitFor(() => expect(mockFetchEsqlData).toHaveBeenCalledTimes(2));
+    });
+  });
+
   describe('re-render on generationVersion change', () => {
     it('re-runs LLM generation when generationVersion increments', async () => {
       (streamGenerate as jest.Mock).mockResolvedValue(undefined);
