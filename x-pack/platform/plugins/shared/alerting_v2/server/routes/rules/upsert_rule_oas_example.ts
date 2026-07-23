@@ -12,7 +12,12 @@ import {
 } from '../../lib/errors/rule_error_messages';
 import type { AlertingOasOperationObject } from '../json_oas_example';
 import { buildRuleOas, invalidResponseExample } from './rule_oas_helpers';
-import { CREATE_RULE_REQUEST, RULE_NOT_FOUND_RESPONSE, RULE_RESPONSE, ruleResponseExample } from './rule_oas_shared_examples';
+import {
+  CREATE_RULE_REQUEST,
+  RULE_NOT_FOUND_RESPONSE,
+  RULE_RESPONSE,
+  ruleResponseExample,
+} from './rule_oas_shared_examples';
 
 const INVALID_UPSERT_RULE_RESPONSE = invalidResponseExample({
   summary: 'Upsert body is missing required rule metadata',

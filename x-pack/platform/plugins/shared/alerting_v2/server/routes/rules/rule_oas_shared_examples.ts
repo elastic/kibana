@@ -16,10 +16,7 @@ import type {
 } from '@kbn/alerting-v2-schemas';
 import { ALERTING_V2_ERROR_CODES } from '../../lib/errors/error_codes';
 import { getRuleNotFoundMessage } from '../../lib/errors/rule_error_messages';
-import {
-  invalidResponseExample,
-  type OasExampleEntry,
-} from './rule_oas_helpers';
+import { invalidResponseExample, type OasExampleEntry } from './rule_oas_helpers';
 
 const SAMPLE_RULE_DATA = {
   kind: 'alert' as const,

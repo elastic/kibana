@@ -13,7 +13,11 @@ import {
 } from '../../lib/errors/rule_error_messages';
 import type { AlertingOasOperationObject } from '../json_oas_example';
 import { buildRuleOas, invalidResponseExample } from './rule_oas_helpers';
-import { RULE_NOT_FOUND_RESPONSE, RULE_RESPONSE, ruleResponseExample } from './rule_oas_shared_examples';
+import {
+  RULE_NOT_FOUND_RESPONSE,
+  RULE_RESPONSE,
+  ruleResponseExample,
+} from './rule_oas_shared_examples';
 
 export const UPDATED_RULE_NAME = 'Host CPU high (updated)';
 export const UPDATED_RULE_DESCRIPTION = 'Updated description.';
@@ -29,10 +33,7 @@ export const UPDATE_RULE_REQUEST: UpdateRuleBody = {
 const INVALID_UPDATE_RULE_RESPONSE = invalidResponseExample({
   summary: 'Update body includes an unrecognized field',
   code: ALERTING_V2_ERROR_CODES.INVALID_RULE_DATA,
-  message: getInvalidRuleDataMessage(
-    'update',
-    "Unrecognized key(s) in object: 'unknownField'"
-  ),
+  message: getInvalidRuleDataMessage('update', "Unrecognized key(s) in object: 'unknownField'"),
   details: { context: 'update', errors: { unknownField: ['Unrecognized key'] } },
 });
 
