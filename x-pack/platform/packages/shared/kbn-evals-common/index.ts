@@ -20,6 +20,7 @@ export {
   buildExperimentsListingAggregation,
   parseExperimentsListingResponse,
   buildModelDisplayId,
+  escapeWildcard,
 } from './impl/query_builders';
 export type {
   ExperimentsListingResult,

@@ -17,9 +17,21 @@ import {
   buildExperimentsListingAggregation,
   parseExperimentsListingResponse,
   buildModelDisplayId,
+  escapeWildcard,
 } from './query_builders';
 
 describe('query_builders', () => {
+  describe('escapeWildcard', () => {
+    it('escapes wildcard metacharacters so they match literally', () => {
+      // input chars: a * b ? c \ d  ->  a \* b \? c \\ d
+      expect(escapeWildcard('a*b?c\\d')).toBe('a\\*b\\?c\\\\d');
+    });
+
+    it('leaves input without metacharacters unchanged', () => {
+      expect(escapeWildcard('feature/in-tool')).toBe('feature/in-tool');
+    });
+  });
+
   describe('buildSpaceFilter', () => {
     it('matches the space or all-spaces, plus legacy (missing) docs in the default space', () => {
       expect(buildSpaceFilter('default')).toEqual({
@@ -247,6 +259,28 @@ describe('query_builders', () => {
           ],
         },
       });
+    });
+
+    it('escapes wildcard metacharacters in the branch filter', () => {
+      const query = buildExperimentsListingFilterQuery({ branch: 'feature/foo?bar' }) as {
+        bool: { filter: Array<{ wildcard: { 'metadata.git.branch': { value: string } } }> };
+      };
+      expect(query.bool.filter[0].wildcard['metadata.git.branch'].value).toBe(
+        '*feature/foo\\?bar*'
+      );
+    });
+
+    it('escapes wildcard metacharacters in the search filter for both fields', () => {
+      const query = buildExperimentsListingFilterQuery({ search: 'a*b' }) as {
+        bool: {
+          filter: Array<{
+            bool: { should: Array<{ wildcard: Record<string, { value: string }> }> };
+          }>;
+        };
+      };
+      const should = query.bool.filter[0].bool.should;
+      expect(should[0].wildcard.experiment_name.value).toBe('*a\\*b*');
+      expect(should[1].wildcard['metadata.git.branch'].value).toBe('*a\\*b*');
     });
 
     it('filters by datasetId', () => {

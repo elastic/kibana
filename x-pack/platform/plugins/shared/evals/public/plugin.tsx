@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
@@ -27,15 +27,26 @@ const DEFAULT_ADD_TO_DATASET_LABEL = i18n.translate('xpack.evals.addToDatasetAct
   defaultMessage: 'Add to dataset',
 });
 
+/** Browser-exposed subset of the evals config (see `exposeToBrowser` in `server/config.ts`). */
+interface EvalsPublicConfig {
+  enabled: boolean;
+}
+
 export class EvalsPublicPlugin
   implements
     Plugin<EvalsPublicSetup, EvalsPublicStart, EvalsSetupDependencies, EvalsStartDependencies>
 {
+  private readonly config: EvalsPublicConfig;
+
+  constructor(initializerContext: PluginInitializerContext) {
+    this.config = initializerContext.config.get<EvalsPublicConfig>();
+  }
+
   public setup(
     coreSetup: CoreSetup<EvalsStartDependencies>,
     { management, workflowsExtensions }: EvalsSetupDependencies
   ): EvalsPublicSetup {
-    if (workflowsExtensions) {
+    if (this.config.enabled && workflowsExtensions) {
       registerEvalsPublicWorkflowSteps(workflowsExtensions);
     }
 
