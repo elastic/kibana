@@ -27,6 +27,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import type { HuntFindingListItem } from './hunt_findings_panel';
+import { stripReportIdSuffix } from './hunt_findings_panel';
 
 interface Props {
   finding: HuntFindingListItem;
@@ -43,7 +44,7 @@ const titleCase = (value: string): string =>
   value.length === 0 ? value : `${value.charAt(0).toUpperCase()}${value.slice(1)}`;
 
 const getFindingTitle = (finding: HuntFindingListItem): string =>
-  finding.rule_name ||
+  (finding.rule_name && stripReportIdSuffix(finding.rule_name, finding.report_id)) ||
   (finding.technique_name
     ? `${finding.technique_id}: ${finding.technique_name}`
     : finding.technique_id);
