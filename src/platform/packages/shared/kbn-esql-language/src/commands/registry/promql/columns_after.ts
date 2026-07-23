@@ -70,11 +70,7 @@ function getUserDefinedColumn(command: ESQLAstPromqlCommand): ESQLUserDefinedCol
 }
 
 function getStepColumn(command: ESQLAstPromqlCommand): ESQLColumnData | undefined {
-  const hasTime = command.params?.entries?.some(
-    ({ key }) => isIdentifier(key) && key.name.toLowerCase() === PromqlParamName.Time
-  );
-
-  if (!command.query || hasTime) {
+  if (!command.query) {
     return undefined;
   }
 

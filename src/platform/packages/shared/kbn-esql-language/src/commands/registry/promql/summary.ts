@@ -12,23 +12,12 @@ import { isBinaryExpression, isIdentifier } from '@elastic/esql';
 import type { ESQLCommandSummary } from '../..';
 import { PromqlParamName } from './utils';
 
-/** Returns true if PROMQL has the specified parameter */
-const hasParam = (command: ESQLAstPromqlCommand, paramName: PromqlParamName): boolean => {
-  if (!command.params) {
-    return false;
-  }
-  return command.params.entries.some(
-    (param) => isIdentifier(param.key) && param.key.name === paramName
-  );
-};
-
 export const summary = (command: ESQLCommand, query: string): ESQLCommandSummary => {
   const promqlCommand = command as ESQLAstPromqlCommand;
   const newColumns: string[] = [];
 
-  // Range queries produce a "step" column. The only mode that does not is an
-  // instant query, selected via the "time" param.
-  if (promqlCommand.query && !hasParam(promqlCommand, PromqlParamName.Time)) {
+  // A query produces a "step" column in the output.
+  if (promqlCommand.query) {
     newColumns.push(PromqlParamName.Step);
   }
 

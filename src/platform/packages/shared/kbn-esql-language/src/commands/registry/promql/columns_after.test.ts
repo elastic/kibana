@@ -85,7 +85,7 @@ describe('PROMQL columnsAfter', () => {
     expect(result.map(({ name }) => name)).toEqual(['step', 'col0', 'job']);
   });
 
-  it('does not return step column when time param is used', async () => {
+  it('returns step column even when time param is used', async () => {
     const result = await columnsAfter(
       synth.cmd`PROMQL index=metrics time="2026-01-13T11:30:00.000Z" col0=(sum by (job) (http_requests_total{env="prod"}))`,
       [],
@@ -102,7 +102,7 @@ describe('PROMQL columnsAfter', () => {
       }
     );
 
-    expect(result.map(({ name }) => name)).toEqual(['col0', 'job']);
+    expect(result.map(({ name }) => name)).toEqual(['step', 'col0', 'job']);
   });
 
   it('reconstructs the expression column name when a pipe follows and no col0= is provided', async () => {
