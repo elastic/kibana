@@ -176,17 +176,3 @@ export const LEGACY_CUSTOM_FIELDS_TITLE = i18n.translate(
     defaultMessage: 'Legacy custom fields',
   }
 );
-
-export const LEGACY_CUSTOM_FIELDS_VIEW_CUSTOM_FIELDS = i18n.translate(
-  'xpack.cases.casesRedesign.details.legacyCustomFieldsViewCustomFields',
-  {
-    defaultMessage: 'custom fields',
-  }
-);
-
-export const LEGACY_CUSTOM_FIELDS_VIEW_SETTINGS = i18n.translate(
-  'xpack.cases.casesRedesign.details.legacyCustomFieldsViewSettings',
-  {
-    defaultMessage: 'settings',
-  }
-);
