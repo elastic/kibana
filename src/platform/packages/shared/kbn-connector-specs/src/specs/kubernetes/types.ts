@@ -74,7 +74,7 @@ export const RequestInputSchema = lazySchema(() =>
       .describe(
         'Optional Content-Type override. Kubernetes PATCH requires one of: ' +
           '"application/strategic-merge-patch+json" (default for PATCH), "application/merge-patch+json", ' +
-          '"application/json-patch+json", or "application/apply-patch+yaml" for server-side apply.'
+          '"application/json-patch+json", or "application/apply-patch+json" for server-side apply.'
       ),
   })
 );

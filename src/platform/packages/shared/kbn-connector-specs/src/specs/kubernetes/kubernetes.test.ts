@@ -425,7 +425,7 @@ describe('KubernetesConnector', () => {
           method: 'PATCH',
           url: `${API_URL}/apis/apps/v1/namespaces/default/deployments/web`,
           params: { fieldManager: 'kibana', force: 'true' },
-          headers: { 'Content-Type': 'application/apply-patch+yaml' },
+          headers: { 'Content-Type': 'application/apply-patch+json' },
         })
       );
     });

@@ -61,7 +61,7 @@ import type {
 const STRATEGIC_MERGE_PATCH = 'application/strategic-merge-patch+json';
 const MERGE_PATCH = 'application/merge-patch+json';
 const JSON_PATCH = 'application/json-patch+json';
-const APPLY_PATCH = 'application/apply-patch+yaml';
+const APPLY_PATCH = 'application/apply-patch+json';
 
 /** Cap pod log output so it stays within an agent-safe context size. */
 const MAX_LOG_CHARS = 20000;
