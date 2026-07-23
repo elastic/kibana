@@ -146,7 +146,12 @@ Using the imported reviewer instructions:
 
 ## Critical checks
 
-Work through the multi-step **Critical checks** defined in the skill's `SKILL.md` one by one, in order. Report any Critical-check hits **before** ordinary findings, and wrap each Critical-check finding in a GitHub `> [!IMPORTANT]` alert so it stands out.
+Work through the multi-step **Critical checks** defined in the skill's `SKILL.md` one by one, in order. Report any Critical-check hits **before** ordinary findings, and prefix each Critical-check finding with a GitHub `> [!IMPORTANT]` alert containing exactly this line (the finding details follow after the alert):
+
+```
+> [!IMPORTANT]
+> The Applications DX team marked this comment as important.
+```
 
 For dispatched follow-up runs, use this context:
 - PR number: `${{ github.event.inputs.pr_number }}`
