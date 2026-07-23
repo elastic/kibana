@@ -185,15 +185,24 @@ export function useCustomContentHtml({
           );
           return;
         }
+        let response;
         try {
-          const response = await fetchEsqlData(
+          response = await fetchEsqlData(
             search,
             core.http,
             esqlQuery,
             timeRange,
             controller.signal
           );
-          if (controller.signal.aborted) return;
+        } catch (err) {
+          if (controller.signal.aborted || (err instanceof Error && err.name === 'AbortError'))
+            return;
+          setError(err instanceof Error ? err.message : RENDER_ERROR_MESSAGE);
+          setIsLoading(false);
+          return;
+        }
+        if (controller.signal.aborted) return;
+        try {
           const rawHtml = await fillTemplate(cleaned, response.columns, response.values ?? []);
           if (controller.signal.aborted) return;
           selfWrittenRef.current = cleaned;

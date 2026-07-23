@@ -267,6 +267,7 @@ describe('useCustomContentHtml', () => {
       await waitFor(() => expect(result.current.error).toBeDefined());
       expect(result.current.isLoading).toBe(false);
       expect(onTemplateChange).not.toHaveBeenCalled();
+      expect(streamGenerate).toHaveBeenCalledTimes(1);
     });
   });
 
