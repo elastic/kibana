@@ -93,7 +93,7 @@ describe('fetchIndexStats', () => {
     const result = await fetchIndexStats(client, logger);
 
     expect(client.asCurrentUser.esql.query).toHaveBeenCalledWith(
-      expect.objectContaining({ query: 'FROM vectordb | STATS count()' })
+      expect.objectContaining({ query: 'FROM "vectordb" | STATS count()' })
     );
     expect(result.vectorDocsCount).toBe(10);
   });
@@ -112,7 +112,7 @@ describe('fetchIndexStats', () => {
     const result = await fetchIndexStats(client, logger);
 
     expect(client.asCurrentUser.esql.query).toHaveBeenCalledWith(
-      expect.objectContaining({ query: 'FROM vectordb | STATS count()' })
+      expect.objectContaining({ query: 'FROM "vectordb" | STATS count()' })
     );
     expect(result.vectorDocsCount).toBe(10);
   });
@@ -130,7 +130,7 @@ describe('fetchIndexStats', () => {
     const result = await fetchIndexStats(client, logger);
 
     expect(client.asCurrentUser.esql.query).toHaveBeenCalledWith(
-      expect.objectContaining({ query: 'FROM vectordb | STATS count()' })
+      expect.objectContaining({ query: 'FROM "vectordb" | STATS count()' })
     );
     expect(result.vectorDocsCount).toBe(10);
   });
@@ -158,7 +158,7 @@ describe('fetchIndexStats', () => {
     await fetchIndexStats(client, logger);
 
     expect(client.asCurrentUser.esql.query).toHaveBeenCalledWith(
-      expect.objectContaining({ query: 'FROM vectordb | STATS count()' })
+      expect.objectContaining({ query: 'FROM "vectordb" | STATS count()' })
     );
   });
 
@@ -183,8 +183,44 @@ describe('fetchIndexStats', () => {
     await fetchIndexStats(client, logger);
 
     expect(client.asCurrentUser.esql.query).toHaveBeenCalledWith(
-      expect.objectContaining({ query: 'FROM vectordb-a,vectordb-b | STATS count()' })
+      expect.objectContaining({ query: 'FROM "vectordb-a","vectordb-b" | STATS count()' })
     );
+  });
+
+  it('batches the ES|QL count when there are more than 500 vector indices', async () => {
+    const indices = Array.from({ length: 501 }, (_, i) => ({
+      name: `vectordb-${i}`,
+      num_docs: 1,
+      size_in_bytes: 10,
+    }));
+    mockMetering(indices);
+    // A uniform vector field means every index is a vector index.
+    mockFieldCaps({
+      embedding: {
+        dense_vector: { type: 'dense_vector', searchable: true, aggregatable: false },
+      },
+    });
+    client.asCurrentUser.esql.query
+      .mockResolvedValueOnce({
+        columns: [{ name: 'count()', type: 'long' }],
+        values: [[500]],
+      } as any)
+      .mockResolvedValueOnce({
+        columns: [{ name: 'count()', type: 'long' }],
+        values: [[1]],
+      } as any);
+
+    const result = await fetchIndexStats(client, logger);
+
+    expect(client.asCurrentUser.esql.query).toHaveBeenCalledTimes(2);
+    const queries = client.asCurrentUser.esql.query.mock.calls.map(
+      ([request]) => (request as { query: string }).query
+    );
+    expect(queries[0]).toContain('"vectordb-0"');
+    expect(queries[0]).toContain('"vectordb-499"');
+    expect(queries[0]).not.toContain('"vectordb-500"');
+    expect(queries[1]).toBe('FROM "vectordb-500" | STATS count()');
+    expect(result.vectorDocsCount).toBe(501);
   });
 
   it('returns a null vectorDocsCount (not 0) when the vector lookup fails', async () => {

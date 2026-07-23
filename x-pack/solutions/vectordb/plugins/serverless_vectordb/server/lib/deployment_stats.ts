@@ -87,6 +87,38 @@ const getVectorIndexNames = async (
   return [...vectorIndexNames];
 };
 
+// Caps the number of indices per ES|QL query so the `FROM` clause cannot grow unbounded on
+// deployments with very many vector indices.
+const ESQL_INDICES_PER_QUERY = 500;
+
+/**
+ * Counts top-level documents across the given indices with ES|QL, batching the index list so a
+ * single query never targets an unbounded number of indices.
+ */
+const countTopLevelDocs = async (
+  client: IScopedClusterClient,
+  indexNames: string[]
+): Promise<number> => {
+  let total = 0;
+
+  for (let i = 0; i < indexNames.length; i += ESQL_INDICES_PER_QUERY) {
+    const batch = indexNames.slice(i, i + ESQL_INDICES_PER_QUERY);
+    const esqlResult = await client.asCurrentUser.esql.query({
+      // Index names are quoted so names requiring ES|QL quoting cannot break the query. Double
+      // quotes cannot appear in index names, so no escaping is needed.
+      query: `FROM ${batch.map((name) => `"${name}"`).join(',')} | STATS count()`,
+      // return partial results instead of failing when some shards are unavailable
+      allow_partial_results: true,
+    });
+
+    const countColumnIndex = esqlResult.columns.findIndex((col) => col.name === 'count()');
+    const [row] = esqlResult.values ?? [];
+    total += (row?.[countColumnIndex] as number) ?? 0;
+  }
+
+  return total;
+};
+
 /**
  * Fetches index-level stats for the deployment: total user index count, aggregate store size, and
  * the number of documents living in indices that contain a vector field.
@@ -129,16 +161,7 @@ export const fetchIndexStats = async (
           // documents that `semantic_text` fields generate — inflating the count (e.g. 10 docs
           // reported as 20). Count top-level documents with ES|QL instead, matching the workaround
           // used by the index management plugin.
-          const esqlResult = await client.asCurrentUser.esql.query({
-            query: `FROM ${vectorIndexNames.join(',')} | STATS count()`,
-            // return partial results instead of failing when some shards are unavailable
-            allow_partial_results: true,
-          });
-          const countColumnIndex = esqlResult.columns.findIndex((col) => col.name === 'count()');
-          vectorDocsCount = (esqlResult.values ?? []).reduce(
-            (sum, row) => sum + ((row[countColumnIndex] as number) ?? 0),
-            0
-          );
+          vectorDocsCount = await countTopLevelDocs(client, vectorIndexNames);
         }
       } catch (error) {
         // Index/size counts are still valid; only the vector doc count is unavailable.
