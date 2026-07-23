@@ -10,10 +10,15 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
-  EUI_MODAL_CONFIRM_BUTTON,
-  EuiConfirmModal,
+  EuiButton,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiModal,
+  EuiModalBody,
+  EuiModalFooter,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
   EuiPanel,
   EuiSpacer,
   EuiText,
@@ -152,47 +157,37 @@ export const ProjectRoutingChangeConfirmModal: FC<Props> = ({
   }, [countsDependencies]);
 
   return (
-    <EuiConfirmModal
+    <EuiModal
       maxWidth={euiTheme.breakpoint.s}
+      onClose={onCancel}
       aria-labelledby={confirmModalTitleId}
-      title={modalTitle}
-      titleProps={{ id: confirmModalTitleId }}
-      onCancel={onCancel}
-      onConfirm={onConfirm}
-      cancelButtonText={i18n.translate(
-        'xpack.ml.embeddables.updateADJobsProjectRoutingFlyout.confirmModalCancel',
-        {
-          defaultMessage: 'Cancel',
-        }
-      )}
-      confirmButtonText={i18n.translate(
-        'xpack.ml.embeddables.updateADJobsProjectRoutingFlyout.confirmModalConfirm',
-        {
-          defaultMessage: 'Update',
-        }
-      )}
-      defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
       data-test-subj="mlUpdateAdJobsProjectRoutingConfirmModal"
     >
-      <EuiText size="s">
-        <FormattedMessage
-          id="xpack.ml.embeddables.updateADJobsProjectRoutingFlyout.confirmModalBody"
-          defaultMessage="The model for this job was trained on a specific set of data. Changing this data set may cause temporary model instability and an increase in false-positives. Are you sure you want to apply these changes?"
-        />
-      </EuiText>
+      <EuiModalHeader>
+        <EuiModalHeaderTitle id={confirmModalTitleId}>{modalTitle}</EuiModalHeaderTitle>
+      </EuiModalHeader>
 
-      {countsDependencies && countsDependencies.jobIds.length > 1 ? (
-        <>
-          <EuiTitle size="xxs">
-            <h6>
-              <FormattedMessage
-                id="xpack.ml.embeddables.updateADJobsProjectRoutingFlyout.affectedJobsTitle"
-                defaultMessage="Affected jobs"
-              />
-            </h6>
-          </EuiTitle>
+      <EuiModalBody>
+        <EuiText size="s">
+          <FormattedMessage
+            id="xpack.ml.embeddables.updateADJobsProjectRoutingFlyout.confirmModalBody"
+            defaultMessage="The model for this job was trained on a specific set of data. Changing this data set may cause temporary model instability and an increase in false-positives. Are you sure you want to apply these changes?"
+          />
+        </EuiText>
 
-          <EuiText>
+        {countsDependencies && countsDependencies.jobIds.length > 1 ? (
+          <>
+            <EuiSpacer size="m" />
+            <EuiTitle size="xxs">
+              <h6>
+                <FormattedMessage
+                  id="xpack.ml.embeddables.updateADJobsProjectRoutingFlyout.affectedJobsTitle"
+                  defaultMessage="Affected jobs"
+                />
+              </h6>
+            </EuiTitle>
+
+            <EuiSpacer size="xs" />
             <EuiPanel
               paddingSize="s"
               hasBorder={false}
@@ -200,13 +195,12 @@ export const ProjectRoutingChangeConfirmModal: FC<Props> = ({
               color="subdued"
               css={{ maxHeight: '250px', overflowY: 'auto' }}
             >
-              {countsDependencies.jobIds.map((jobId) => {
+              {countsDependencies.jobIds.map((jobId, index) => {
                 const counts = jobScopeChangeCounts.get(jobId) ?? { added: 0, removed: 0 };
 
                 return (
                   <React.Fragment key={jobId}>
                     <EuiFlexGroup
-                      key={jobId}
                       responsive={false}
                       gutterSize="s"
                       alignItems="center"
@@ -222,15 +216,37 @@ export const ProjectRoutingChangeConfirmModal: FC<Props> = ({
                         <ScopeChangeCount count={counts.removed} type="removed" />
                       </EuiFlexItem>
                     </EuiFlexGroup>
-                    <EuiSpacer size="s" />
+                    {index < countsDependencies.jobIds.length - 1 ? <EuiSpacer size="s" /> : null}
                   </React.Fragment>
                 );
               })}
             </EuiPanel>
-          </EuiText>
-        </>
-      ) : null}
-    </EuiConfirmModal>
+          </>
+        ) : null}
+      </EuiModalBody>
+
+      <EuiModalFooter>
+        <EuiButtonEmpty
+          onClick={onCancel}
+          data-test-subj="mlUpdateAdJobsProjectRoutingConfirmModalCancel"
+        >
+          <FormattedMessage
+            id="xpack.ml.embeddables.updateADJobsProjectRoutingFlyout.confirmModalCancel"
+            defaultMessage="Cancel"
+          />
+        </EuiButtonEmpty>
+        <EuiButton
+          fill
+          onClick={onConfirm}
+          data-test-subj="mlUpdateAdJobsProjectRoutingConfirmModalConfirm"
+        >
+          <FormattedMessage
+            id="xpack.ml.embeddables.updateADJobsProjectRoutingFlyout.confirmModalConfirm"
+            defaultMessage="Yes, save"
+          />
+        </EuiButton>
+      </EuiModalFooter>
+    </EuiModal>
   );
 };
 
