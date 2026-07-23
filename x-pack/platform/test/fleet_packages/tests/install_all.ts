@@ -44,13 +44,18 @@ export default function (providerContext: FtrProviderContext) {
     const start = Date.now();
     try {
       await pRetry(
-        () =>
-          supertest
+        async () => {
+          const res = await supertest
             .post(`/api/fleet/epm/packages/${name}/${version}`)
             .set('kbn-xsrf', 'xxx')
             .set(API_VERSION_HEADER_NAME, API_VERSION)
-            .send({ force: true })
-            .expect(200),
+            .send({ force: true });
+          if (res.status !== 200) {
+            const err: any = new Error(`Install failed with status ${res.status}`);
+            err.status = res.status;
+            throw err;
+          }
+        },
         {
           retries: 3,
           factor: 2,
