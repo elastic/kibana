@@ -59,13 +59,18 @@ const scriptBenchmarkSchema = benchmarkSchemaBase.extend({
 
 const benchmarkSchema = z.union([moduleBenchmarkSchema, scriptBenchmarkSchema]);
 
-const pairedComparisonRunSchema = z.object({
-  mode: z.literal('randomized_paired'),
-  pairs: z.number().int().positive(),
-  maxAttempts: z.number().int().positive(),
-  seed: z.string().optional(),
-  enforcement: z.enum(['observe', 'fail']).optional(),
-}) satisfies z.Schema<PairedComparisonRun>;
+const pairedComparisonRunSchema = z
+  .object({
+    mode: z.literal('randomized_paired'),
+    pairs: z.number().int().positive(),
+    maxAttempts: z.number().int().positive(),
+    seed: z.string().optional(),
+    enforcement: z.enum(['observe', 'fail']).optional(),
+  })
+  .refine(({ maxAttempts, pairs }) => maxAttempts >= pairs, {
+    message: 'maxAttempts must be greater than or equal to pairs',
+    path: ['maxAttempts'],
+  }) satisfies z.Schema<PairedComparisonRun>;
 
 const configSchema = z.object({
   name: z.string(),

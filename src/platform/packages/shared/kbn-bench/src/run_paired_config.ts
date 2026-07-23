@@ -28,22 +28,18 @@ type Side = 'baseline' | 'target';
 type PairOrder = 'baseline-target' | 'target-baseline';
 
 const toSeed = (seed: string): number => {
-  let value = 2166136261;
+  let value = 0;
   for (const char of seed) {
-    value ^= char.charCodeAt(0);
-    value = Math.imul(value, 16777619);
+    value = (value * 31 + char.charCodeAt(0)) % 2147483647;
   }
-  return value >>> 0;
+  return value || 1;
 };
 
 const createPrng = (seed: string): (() => number) => {
   let state = toSeed(seed);
   return () => {
-    state += 0x6d2b79f5;
-    let value = state;
-    value = Math.imul(value ^ (value >>> 15), value | 1);
-    value ^= value + Math.imul(value ^ (value >>> 7), value | 61);
-    return ((value ^ (value >>> 14)) >>> 0) / 4294967296;
+    state = (state * 48271) % 2147483647;
+    return state / 2147483647;
   };
 };
 
@@ -121,7 +117,13 @@ export async function runPairedConfig({
   const rightBenchmarks: BenchmarkResult[] = [];
   const pairedBenchmarks: PairedBenchmarkComparison[] = [];
   const { pairs, maxAttempts } = config.comparisonRun;
-  const order = createPairedOrder({ pairs: maxAttempts, seed });
+  const order = [
+    ...createPairedOrder({ pairs, seed }),
+    ...createPairedOrder({
+      pairs: maxAttempts - pairs,
+      seed: `${seed}|replacement-attempts`,
+    }),
+  ];
 
   for (const benchmark of config.benchmarks) {
     const [leftRunnable, rightRunnable] = await Promise.all([
