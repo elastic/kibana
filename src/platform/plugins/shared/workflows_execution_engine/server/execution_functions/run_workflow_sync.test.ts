@@ -65,9 +65,10 @@ describe('runWorkflowSync', () => {
 
     const abortController = new AbortController();
     const request = {} as Parameters<typeof runWorkflowSync>[0]['request'];
-    const dependencies = {
-      coreStart: {},
-    } as Parameters<typeof runWorkflowSync>[0]['dependencies'];
+    const dependencies = Object.assign(
+      {} as Parameters<typeof runWorkflowSync>[0]['dependencies'],
+      { coreStart: {}, workflowsExtensions: { getStepDefinition: jest.fn() } }
+    );
     const workflowExecutionRepository = {} as Parameters<
       typeof runWorkflowSync
     >[0]['workflowExecutionRepository'];
@@ -91,7 +92,10 @@ describe('runWorkflowSync', () => {
       })
     ).resolves.toBe(completedExecution);
 
-    expect(validateSyncWorkflow).toHaveBeenCalledWith(workflowExecutionGraph);
+    expect(validateSyncWorkflow).toHaveBeenCalledWith(
+      workflowExecutionGraph,
+      dependencies.workflowsExtensions.getStepDefinition
+    );
     expect(workflowRuntime.start).toHaveBeenCalledTimes(1);
     expect(workflowExecutionLoop).toHaveBeenCalledWith(
       expect.objectContaining({

@@ -157,11 +157,14 @@ export const executeWorkflowSync = async ({
     });
 
     const output = getSynchronousWorkflowOutput(result.context?.output);
+    const failureError =
+      result.status === ExecutionStatus.FAILED && result.error ? result.error : undefined;
     return {
       workflowExecutionId: result.id,
       result: {
         status: result.status,
         ...(output ? { output } : {}),
+        ...(failureError ? { error: failureError } : {}),
       },
     };
   } finally {

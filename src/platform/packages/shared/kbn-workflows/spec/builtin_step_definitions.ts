@@ -222,6 +222,7 @@ export const builtInStepDefinitions: BaseStepDefinition[] = [
   },
   {
     id: 'wait',
+    supportedExecutionModes: ['async'],
     label: 'Wait',
     description: 'Pause execution for a specified duration',
     category: StepCategory.FlowControl,
@@ -255,6 +256,7 @@ export const builtInStepDefinitions: BaseStepDefinition[] = [
   },
   {
     id: 'workflow.execute',
+    supportedExecutionModes: ['async'],
     label: 'Execute Workflow',
     description: 'Execute another workflow and wait for it to complete',
     category: StepCategory.FlowControl,
@@ -274,6 +276,7 @@ export const builtInStepDefinitions: BaseStepDefinition[] = [
   },
   {
     id: 'waitForInput',
+    supportedExecutionModes: ['async'],
     label: 'Wait For Input',
     description: 'Pause execution until external input is provided (human-in-the-loop)',
     category: StepCategory.FlowControl,
@@ -308,6 +311,7 @@ export const builtInStepDefinitions: BaseStepDefinition[] = [
   },
   {
     id: 'waitForApproval',
+    supportedExecutionModes: ['async'],
     label: 'Wait For Approval',
     description: 'Pause execution until approval or rejection is received (human-in-the-loop)',
     category: StepCategory.FlowControl,
@@ -337,6 +341,7 @@ export const builtInStepDefinitions: BaseStepDefinition[] = [
   },
   {
     id: 'workflow.executeAsync',
+    supportedExecutionModes: ['async'],
     label: 'Execute Workflow (Async)',
     description: 'Start another workflow and continue without waiting for completion',
     category: StepCategory.FlowControl,

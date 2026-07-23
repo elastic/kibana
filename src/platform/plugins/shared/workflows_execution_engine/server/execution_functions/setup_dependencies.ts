@@ -226,15 +226,6 @@ export async function setupDependencies({
 
   const workflowTaskManager = new WorkflowTaskManager(taskManager);
 
-  const workflowExecutionRepository =
-    workflowExecutionPersistence instanceof WorkflowExecutionRepository
-      ? workflowExecutionPersistence
-      : undefined;
-  const stepExecutionRepository =
-    stepExecutionPersistence instanceof StepExecutionRepository
-      ? stepExecutionPersistence
-      : undefined;
-
   const enhancedDependencies: ContextDependencies = {
     ...dependencies,
     workflowRepository,

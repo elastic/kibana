@@ -50,6 +50,18 @@ describe('InMemoryExecutionPersistence', () => {
     ).resolves.toBeNull();
   });
 
+  it('does not share state between execution-scoped instances', async () => {
+    const first = new InMemoryExecutionPersistence(execution);
+    const secondExecution = { ...execution, id: 'execution-2' };
+    const second = new InMemoryExecutionPersistence(secondExecution);
+
+    await first.updateWorkflowExecution({ status: ExecutionStatus.RUNNING });
+
+    await expect(
+      second.getWorkflowExecutionById(secondExecution.id, secondExecution.spaceId)
+    ).resolves.toEqual(expect.objectContaining({ status: ExecutionStatus.PENDING }));
+  });
+
   it('merges step lifecycle and IO updates without an external repository', async () => {
     const persistence = new InMemoryExecutionPersistence(execution);
     await persistence.bulkUpsert([
