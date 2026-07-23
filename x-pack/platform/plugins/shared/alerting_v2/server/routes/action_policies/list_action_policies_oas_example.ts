@@ -6,11 +6,12 @@
  */
 
 import type { FindActionPoliciesResponse } from '@kbn/alerting-v2-schemas';
-import { buildActionPolicyOas, type AlertingOasOperationObject } from '../oas_utils';
+import type { AlertingOasOperationObject } from '../oas_utils';
 import {
   ACTION_POLICY_RESPONSE,
   INVALID_QUERY_PARAMETERS_RESPONSE,
 } from './action_policy_oas_shared_examples';
+import { buildActionPolicyOas } from './oas_utils';
 
 export const LIST_ACTION_POLICIES_RESPONSE: FindActionPoliciesResponse = {
   items: [ACTION_POLICY_RESPONSE],

@@ -9,12 +9,9 @@ import type {
   BulkActionActionPoliciesBody,
   BulkActionActionPoliciesResponse,
 } from '@kbn/alerting-v2-schemas';
-import {
-  buildActionPolicyOas,
-  invalidResponseExample,
-  type AlertingOasOperationObject,
-} from '../oas_utils';
+import { invalidResponseExample, type AlertingOasOperationObject } from '../oas_utils';
 import { INVALID_REQUEST_BODY_DESCRIPTION } from '../route_descriptions';
+import { buildActionPolicyOas } from './oas_utils';
 
 export const BULK_ACTION_ACTION_POLICIES_REQUEST: BulkActionActionPoliciesBody = {
   actions: [

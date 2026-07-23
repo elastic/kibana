@@ -6,8 +6,9 @@
  */
 
 import type { ListPolicyExecutionHistoryResponse } from '@kbn/alerting-v2-schemas';
-import { buildActionPolicyOas, type AlertingOasOperationObject } from '../oas_utils';
+import type { AlertingOasOperationObject } from '../oas_utils';
 import { INVALID_QUERY_PARAMETERS_RESPONSE } from './action_policy_oas_shared_examples';
+import { buildActionPolicyOas } from './oas_utils';
 
 export const LIST_EXECUTION_HISTORY_RESPONSE: ListPolicyExecutionHistoryResponse = {
   items: [

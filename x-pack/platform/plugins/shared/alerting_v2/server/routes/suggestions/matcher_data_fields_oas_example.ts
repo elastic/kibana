@@ -6,14 +6,28 @@
  */
 
 import type { MatcherDataFieldsResponse } from '@kbn/alerting-v2-schemas';
-import { buildActionPolicyOas, type AlertingOasOperationObject } from '../oas_utils';
-import { INVALID_QUERY_PARAMETERS_RESPONSE } from '../action_policies/action_policy_oas_shared_examples';
+import { invalidResponseExample, type AlertingOasOperationObject } from '../oas_utils';
+import { INVALID_QUERY_PARAMETERS_DESCRIPTION } from '../route_descriptions';
+import { buildActionPolicyOas } from '../action_policies/oas_utils';
 
 export const MATCHER_DATA_FIELDS_RESPONSE: MatcherDataFieldsResponse = [
   'host.name',
   'host.ip',
   'kibana.alert.rule.name',
 ];
+
+const INVALID_MATCHER_DATA_FIELDS_QUERY_RESPONSE = invalidResponseExample({
+  summary: INVALID_QUERY_PARAMETERS_DESCRIPTION,
+  message: 'matcher: Too small: expected string to have >=1 characters',
+  details: {
+    errors: {
+      errors: [],
+      properties: {
+        matcher: { errors: ['Too small: expected string to have >=1 characters'] },
+      },
+    },
+  },
+});
 
 export const matcherDataFieldsOasExamples = (): AlertingOasOperationObject =>
   buildActionPolicyOas({
@@ -23,6 +37,6 @@ export const matcherDataFieldsOasExamples = (): AlertingOasOperationObject =>
         summary: 'Available matcher data fields',
         value: MATCHER_DATA_FIELDS_RESPONSE,
       },
-      400: INVALID_QUERY_PARAMETERS_RESPONSE,
+      400: INVALID_MATCHER_DATA_FIELDS_QUERY_RESPONSE,
     },
   });

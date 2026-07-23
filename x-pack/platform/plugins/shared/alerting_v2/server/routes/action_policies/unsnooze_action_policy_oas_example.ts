@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { buildActionPolicyOas, type AlertingOasOperationObject } from '../oas_utils';
+import type { AlertingOasOperationObject } from '../oas_utils';
 import {
   ACTION_POLICY_NOT_FOUND_RESPONSE,
   ACTION_POLICY_VERSION_CONFLICT_RESPONSE,
   actionPolicyResponseExample,
 } from './action_policy_oas_shared_examples';
+import { buildActionPolicyOas } from './oas_utils';
 
 export const unsnoozeActionPolicyOasExamples = (): AlertingOasOperationObject =>
   buildActionPolicyOas({

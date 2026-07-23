@@ -6,13 +6,14 @@
  */
 
 import type { UpdateActionPolicyBody } from '@kbn/alerting-v2-schemas';
-import { buildActionPolicyOas, type AlertingOasOperationObject } from '../oas_utils';
+import type { AlertingOasOperationObject } from '../oas_utils';
 import {
   ACTION_POLICY_NOT_FOUND_RESPONSE,
   ACTION_POLICY_VERSION_CONFLICT_RESPONSE,
   actionPolicyResponseExample,
   invalidActionPolicyDataResponse,
 } from './action_policy_oas_shared_examples';
+import { buildActionPolicyOas } from './oas_utils';
 
 export const UPDATE_ACTION_POLICY_REQUEST: UpdateActionPolicyBody = {
   version: 'WzAsMV0=',

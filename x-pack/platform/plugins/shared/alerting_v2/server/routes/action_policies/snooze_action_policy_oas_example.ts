@@ -6,17 +6,14 @@
  */
 
 import type { SnoozeActionPolicyBody } from '@kbn/alerting-v2-schemas';
-import {
-  buildActionPolicyOas,
-  invalidResponseExample,
-  type AlertingOasOperationObject,
-} from '../oas_utils';
+import { invalidResponseExample, type AlertingOasOperationObject } from '../oas_utils';
 import { INVALID_REQUEST_PARAMETERS_OR_BODY_DESCRIPTION } from '../route_descriptions';
 import {
   ACTION_POLICY_NOT_FOUND_RESPONSE,
   ACTION_POLICY_VERSION_CONFLICT_RESPONSE,
   actionPolicyResponseExample,
 } from './action_policy_oas_shared_examples';
+import { buildActionPolicyOas } from './oas_utils';
 
 export const SNOOZE_ACTION_POLICY_REQUEST: SnoozeActionPolicyBody = {
   snoozedUntil: '2026-01-16T12:00:00.000Z',
