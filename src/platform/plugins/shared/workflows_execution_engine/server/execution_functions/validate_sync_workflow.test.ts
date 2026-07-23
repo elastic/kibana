@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { getBuiltInStepDefinition } from '@kbn/workflows';
 import { validateSyncWorkflow } from './validate_sync_workflow';
 
 const createGraph = (stepType: string) => ({
@@ -22,13 +23,21 @@ describe('validateSyncWorkflow', () => {
   it.each(['wait', 'waitForInput', 'waitForApproval', 'workflow.execute', 'workflow.executeAsync'])(
     'rejects async-only step %s',
     (stepType) => {
-      expect(() => validateSyncWorkflow(createGraph(stepType))).toThrow(
+      expect(() => validateSyncWorkflow(createGraph(stepType), () => undefined)).toThrow(
         'is not supported in synchronous workflows'
       );
     }
   );
 
-  it('accepts steps that are not in the async-only set', () => {
-    expect(() => validateSyncWorkflow(createGraph('data.set'))).not.toThrow();
+  it('accepts ordinary and capability-backed atomic steps', () => {
+    expect(() => validateSyncWorkflow(createGraph('ai.pii'), () => undefined)).not.toThrow();
+  });
+
+  it('derives extension execution constraints from the registered definition', () => {
+    expect(() =>
+      validateSyncWorkflow(createGraph('custom.async'), (stepType) =>
+        stepType === 'custom.async' ? getBuiltInStepDefinition('wait') : undefined
+      )
+    ).toThrow('is not supported in synchronous workflows');
   });
 });
