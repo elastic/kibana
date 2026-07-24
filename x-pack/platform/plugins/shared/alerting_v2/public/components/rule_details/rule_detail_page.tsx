@@ -161,9 +161,9 @@ export const RuleDetailPage: React.FunctionComponent = () => {
 
   const handleToggleEnabled = React.useCallback(
     (enabled: boolean) => {
-      toggleRuleEnabled({ id: rule.id, enabled });
+      toggleRuleEnabled({ id: rule.id, enabled, name: rule.metadata.name });
     },
-    [toggleRuleEnabled, rule.id]
+    [toggleRuleEnabled, rule.id, rule.metadata.name]
   );
 
   const onEdit = React.useCallback(() => {
