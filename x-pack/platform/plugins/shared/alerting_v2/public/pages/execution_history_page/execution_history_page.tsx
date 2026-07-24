@@ -77,7 +77,7 @@ export const ExecutionHistoryPage = () => {
   );
 
   return (
-    <>
+    <div data-test-subj="executionHistoryPage">
       <AppHeader
         sticky={false}
         title={EXECUTION_HISTORY_PAGE_TITLE}
@@ -116,6 +116,6 @@ export const ExecutionHistoryPage = () => {
         />
       )}
       {composeFlyout}
-    </>
+    </div>
   );
 };
