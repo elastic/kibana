@@ -39,6 +39,7 @@ dependsOn:
   - '@kbn/resizable-layout'
   - '@kbn/search-errors'
   - '@kbn/utility-types'
+  - '@kbn/esql-language'
 tags:
   - shared-common
   - package
