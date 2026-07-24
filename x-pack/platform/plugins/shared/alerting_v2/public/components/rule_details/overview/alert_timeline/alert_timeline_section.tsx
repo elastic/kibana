@@ -138,8 +138,7 @@ export const AlertTimelineSection: React.FC = () => {
             from={timeRange.from}
             to={timeRange.to}
             onChange={setTimeRange}
-            data={data}
-            notifications={notifications}
+            services={{ data, notifications, http, application, uiSettings }}
             onRefresh={handleRefresh}
             isLoading={isLoading}
             showTimeWindowButtons

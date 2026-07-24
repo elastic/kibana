@@ -6,4 +6,7 @@
  */
 
 export { AlertingDateRangePicker } from './alerting_date_range_picker';
-export type { AlertingDateRangePickerProps } from './alerting_date_range_picker';
+export type {
+  AlertingDateRangePickerProps,
+  AlertingDateRangePickerServices,
+} from './alerting_date_range_picker';

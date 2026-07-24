@@ -6,8 +6,15 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import type { NotificationsStart } from '@kbn/core/public';
+import { map } from 'rxjs';
+import type {
+  ApplicationStart,
+  HttpStart,
+  IUiSettingsClient,
+  NotificationsStart,
+} from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { useObservable } from '@kbn/use-observable';
 import {
   DateRangePicker,
   type AutoRefreshSettings,
@@ -29,20 +36,35 @@ const DEFAULT_AUTO_REFRESH: AutoRefreshSettings = {
   intervalDisplayUnit: 's',
 };
 
-const MAX_RECENT_RANGES = 10;
+const toRecentRanges = (ranges: Array<{ from: string; to: string }>): PresetItem[] =>
+  ranges.map(({ from, to }) => ({ start: from, end: to }));
+
+export interface AlertingDateRangePickerServices {
+  data: DataPublicPluginStart;
+  notifications: NotificationsStart;
+  http: HttpStart;
+  application: ApplicationStart;
+  uiSettings: IUiSettingsClient;
+}
 
 export interface AlertingDateRangePickerProps {
   from: string;
   to: string;
   onChange: (range: { from: string; to: string }) => void;
-  data: DataPublicPluginStart;
-  notifications: NotificationsStart;
+  services: AlertingDateRangePickerServices;
   /** When provided, wires the picker's built-in auto-refresh control. */
   onRefresh?: () => void;
   isLoading?: boolean;
   showTimeWindowButtons?: boolean | TimeWindowButtonsConfig;
   width?: 'auto' | 'restricted' | 'full';
   compressed?: boolean;
+  /**
+   * Whether saved presets are persisted via `data.dateRangePickerPresets` (shared
+   * user storage, also surfaced in Discover/Dashboard). When `false`, presets are
+   * the read-only quick-ranges defaults.
+   * @default true
+   */
+  persistPresets?: boolean;
   'data-test-subj'?: string;
 }
 
@@ -54,28 +76,36 @@ export const AlertingDateRangePicker = ({
   from,
   to,
   onChange,
-  data,
-  notifications,
+  services: { data, notifications, http, application, uiSettings },
   onRefresh,
   isLoading = false,
   showTimeWindowButtons = false,
   width = 'auto',
   compressed = true,
+  persistPresets = true,
   'data-test-subj': dataTestSubj,
 }: AlertingDateRangePickerProps) => {
   const [dateRangePickerSettings, setDateRangePickerSettings] = useState<DateRangePickerSettings>(
     DEFAULT_DATE_PICKER_SETTINGS
   );
   const [autoRefresh, setAutoRefresh] = useState<AutoRefreshSettings>(DEFAULT_AUTO_REFRESH);
-  const [recentTimeRanges, setRecentTimeRanges] = useState<PresetItem[]>([]);
 
   const dateRangePickerPresets = useDateRangePickerPresets({
     service: data.dateRangePickerPresets,
-    persistenceEnabled: true,
+    persistenceEnabled: persistPresets,
     notifications,
   });
 
+  // Same global history used by unified search's query bar (Discover, Dashboard, etc.).
+  const timeHistory = data.query.timefilter.history;
+  const recentRanges$ = useMemo(() => timeHistory.get$().pipe(map(toRecentRanges)), [timeHistory]);
+  const recentTimeRanges = useObservable(recentRanges$, toRecentRanges(timeHistory.get()));
+
   const value = `${from} to ${to}`;
+  const timeZone = uiSettings.get<string>('dateFormat:tz', 'Browser');
+  const dateFormat = uiSettings.get<string>('dateFormat');
+  const canAccessAdvancedSettings =
+    (application.capabilities.advancedSettings?.save as boolean | undefined) ?? false;
 
   const settings = useMemo(
     () => (onRefresh ? { ...dateRangePickerSettings, autoRefresh } : dateRangePickerSettings),
@@ -88,28 +118,27 @@ export const AlertingDateRangePicker = ({
         return;
       }
       onChange({ from: start, to: end });
-      setRecentTimeRanges((prev) => {
-        const key = `${start}|${end}`;
-        const deduped = prev.filter((range) => `${range.start}|${range.end}` !== key);
-        return [{ start, end }, ...deduped].slice(0, MAX_RECENT_RANGES);
-      });
+      timeHistory.add({ from: start, to: end });
     },
-    [onChange]
+    [onChange, timeHistory]
   );
 
-  const handleSettingsChange = useCallback((next: DateRangePickerSettings) => {
-    const { autoRefresh: nextAutoRefresh, ...rest } = next;
-    setDateRangePickerSettings(rest);
-    if (nextAutoRefresh) {
-      setAutoRefresh((prev) => {
-        // When enabling auto-refresh, clear isPaused so the timer starts immediately.
-        if (!prev.isEnabled && nextAutoRefresh.isEnabled) {
-          return { ...nextAutoRefresh, isPaused: false };
-        }
-        return nextAutoRefresh;
-      });
-    }
-  }, []);
+  const handleSettingsChange = useCallback(
+    (next: DateRangePickerSettings) => {
+      const { autoRefresh: nextAutoRefresh, ...rest } = next;
+      setDateRangePickerSettings(rest);
+      if (onRefresh && nextAutoRefresh) {
+        setAutoRefresh((prev) => {
+          // When enabling auto-refresh, clear isPaused so the timer starts immediately.
+          if (!prev.isEnabled && nextAutoRefresh.isEnabled) {
+            return { ...nextAutoRefresh, isPaused: false };
+          }
+          return nextAutoRefresh;
+        });
+      }
+    },
+    [onRefresh]
+  );
 
   return (
     <DateRangePicker
@@ -126,6 +155,10 @@ export const AlertingDateRangePicker = ({
       onRefresh={onRefresh}
       width={width}
       compressed={compressed}
+      dateFormat={dateFormat}
+      timeZone={timeZone}
+      prependBasePath={http.basePath.prepend}
+      canAccessAdvancedSettings={canAccessAdvancedSettings}
       data-test-subj={dataTestSubj}
     />
   );

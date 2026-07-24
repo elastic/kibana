@@ -104,4 +104,7 @@ export type {
 
 // Shared DateRangePicker wrapper for Alerting v2 surfaces
 export { AlertingDateRangePicker } from './date_range_picker';
-export type { AlertingDateRangePickerProps } from './date_range_picker';
+export type {
+  AlertingDateRangePickerProps,
+  AlertingDateRangePickerServices,
+} from './date_range_picker';

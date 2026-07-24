@@ -314,8 +314,7 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
             from={dateRange.dateStart}
             to={dateRange.dateEnd}
             onChange={handleDateRangeChange}
-            data={services.data}
-            notifications={services.notifications}
+            services={services}
             width="auto"
             data-test-subj="querySandboxDatePicker"
           />

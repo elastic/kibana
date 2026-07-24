@@ -45,6 +45,8 @@
     "@kbn/cps-utils",
     "@kbn/cps",
     "@kbn/date-range-picker",
-    "@kbn/date-range-picker-presets"
+    "@kbn/date-range-picker-presets",
+    "@kbn/use-observable",
+    "@kbn/core-ui-settings-browser-mocks"
   ]
 }

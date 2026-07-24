@@ -48,6 +48,7 @@ export const SignalRuleOverview: React.FC = () => {
   const application = useService(CoreStart('application'));
   const uiSettings = useService(CoreStart('uiSettings'));
   const notifications = useService(CoreStart('notifications'));
+  const http = useService(CoreStart('http'));
   const rule = useRule();
   const timeZone = uiSettings.get<string>('dateFormat:tz', 'Browser');
 
@@ -254,8 +255,7 @@ export const SignalRuleOverview: React.FC = () => {
             from={timeRange.from}
             to={timeRange.to}
             onChange={setTimeRange}
-            data={data}
-            notifications={notifications}
+            services={{ data, notifications, http, application, uiSettings }}
             onRefresh={handleRefresh}
             isLoading={isLoading}
             showTimeWindowButtons
