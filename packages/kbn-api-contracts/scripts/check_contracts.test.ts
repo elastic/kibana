@@ -383,7 +383,7 @@ describe('check_contracts', () => {
       mockRunOasdiff.mockReturnValue([]);
     });
 
-    it('applies the allowlist to every parsed change, not a Terraform-scoped subset', async () => {
+    it('applies the allowlist to every parsed change', async () => {
       mockParseOasdiff.mockReturnValue([stableChange, anotherChange]);
       mockApplyAllowlist.mockReturnValue({
         breakingChanges: [stableChange, anotherChange],
