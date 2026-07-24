@@ -44,12 +44,14 @@ const makeStep = (results: ToolResult[]) =>
   });
 
 describe('ToolCallStep', () => {
-  it('shows "tool: search" and "running…" and is not clickable while no results have arrived', () => {
+  it('shows "tool: search" and "running…" and is clickable (opens parameters flyout)', async () => {
+    const user = userEvent.setup();
     renderWithProviders(<ToolCallStep step={makeStep([])} />);
     const status = screen.getByRole('status');
     expect(status.querySelector('.euiBadge')).toHaveTextContent('tool: search');
     expect(status).toHaveTextContent('running…');
-    expect(screen.queryByRole('button')).not.toBeInTheDocument();
+    await user.click(screen.getByRole('button'));
+    expect(screen.getByText('tool: search')).toBeInTheDocument();
   });
 
   it('shows "tool: search" and "ran." and opens the response flyout directly on click', async () => {
@@ -58,18 +60,18 @@ describe('ToolCallStep', () => {
     const status = screen.getByRole('status');
     expect(status.querySelector('.euiBadge')).toHaveTextContent('tool: search');
     expect(status).toHaveTextContent('ran.');
-    expect(screen.queryByText('Inspect tool response')).not.toBeInTheDocument();
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     await user.click(screen.getByRole('button'));
-    expect(screen.getByText('Inspect tool response')).toBeInTheDocument();
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
   });
 
   it('closes the flyout when its close button is clicked', async () => {
     const user = userEvent.setup();
     renderWithProviders(<ToolCallStep step={makeStep([otherResult('r1')])} />);
     await user.click(screen.getByRole('button'));
-    expect(screen.getByText('Inspect tool response')).toBeInTheDocument();
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
     await user.click(screen.getByTestId('euiFlyoutCloseButton'));
-    expect(screen.queryByText('Inspect tool response')).not.toBeInTheDocument();
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
 
   it('still shows "ran." for an error result, with the danger badge color', () => {
@@ -79,7 +81,7 @@ describe('ToolCallStep', () => {
     expect(badge?.className).toContain('danger');
   });
 
-  it('is clickable for a running sub-agent call once its execution id is known', () => {
+  it('is always clickable for a running sub-agent call', () => {
     const step = createToolCallStep({
       tool_call_id: 'call-1',
       tool_id: internalTools.runSubagent,
