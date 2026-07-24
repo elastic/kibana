@@ -67,7 +67,9 @@ export async function createRuntimeFieldFromEditor(
   fieldName: string,
   script: string
 ): Promise<void> {
-  const fieldEditor = page.getByRole('dialog', { name: /Create field/ });
+  // Use an attribute selector (not `page.testSubj`) so this works for both a ScoutPage
+  // and a plain Playwright Page (e.g. the Discover tab opened via `context.newPage()`).
+  const fieldEditor = page.locator('[data-test-subj="fieldEditor"]');
   await fieldEditor.waitFor({ state: 'visible' });
 
   await fieldEditor.getByRole('textbox', { name: /Name/ }).fill(fieldName);

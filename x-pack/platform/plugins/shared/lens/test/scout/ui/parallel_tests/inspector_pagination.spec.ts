@@ -38,13 +38,10 @@ spaceTest.describe('Lens inspector pagination', { tag: tags.stateful.classic }, 
   spaceTest(
     'should allow switching between inspector table pages',
     async ({ browserAuth, page, pageObjects }) => {
-      const { lens, visualize, inspector } = pageObjects;
+      const { lens, inspector } = pageObjects;
 
       await browserAuth.loginAsPrivilegedUser();
-      await visualize.goto();
-      await visualize.openNewVisualizationWizard();
-      await visualize.clickVisType('lens');
-      await lens.waitForLensApp();
+      await lens.openFullEditor();
 
       await lens.configureDimension({
         dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',

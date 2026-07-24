@@ -57,10 +57,7 @@ spaceTest.describe('Lens with multiple data views', { tag: tags.stateful.classic
       const { visualize, lens, filterBar } = pageObjects;
 
       await spaceTest.step('build multi-layer chart with logstash and flights layers', async () => {
-        await visualize.goto();
-        await visualize.openNewVisualizationWizard();
-        await visualize.clickVisType('lens');
-        await lens.waitForLensApp();
+        await lens.openFullEditor();
 
         // Logstash layer — switch data panel to long-window, click bytes
         await switchDataPanelIndexPattern(page, testData.DATA_VIEW_ID.LONG_WINDOW_LOGSTASH);

@@ -21,7 +21,6 @@ export class Inspector {
   public readonly closeButton: Locator;
   public readonly viewChooser: Locator;
   public readonly tablePaginationPopoverButton: Locator;
-  public readonly appMenuOverflowButton: Locator;
 
   public readonly requests: {
     readonly requestChooser: Locator;
@@ -38,7 +37,6 @@ export class Inspector {
     this.closeButton = page.testSubj.locator('euiFlyoutCloseButton');
     this.viewChooser = page.testSubj.locator('inspectorViewChooser');
     this.tablePaginationPopoverButton = page.testSubj.locator('tablePaginationPopoverButton');
-    this.appMenuOverflowButton = page.testSubj.locator('app-menu-overflow-button');
 
     this.requests = {
       requestChooser: page.testSubj.locator('inspectorRequestChooser'),
@@ -49,16 +47,6 @@ export class Inspector {
       timestamp: page.testSubj.locator('inspector.statistics.requestTimestamp'),
       codeViewer: page.testSubj.locator('inspectorRequestCodeViewerContainer'),
     };
-  }
-
-  /**
-   * Opens the inspector when the trigger lives in the app menu overflow
-   * (Discover and similar apps). Prefer {@link open} when the button is in the top nav.
-   */
-  async openViaAppMenu(openButtonTestSubj: string = 'openInspectorButton') {
-    await this.appMenuOverflowButton.click();
-    await this.page.testSubj.click(openButtonTestSubj);
-    await this.panel.waitFor({ state: 'visible' });
   }
 
   async open(openButtonTestSubj: string = 'openInspectorButton') {
