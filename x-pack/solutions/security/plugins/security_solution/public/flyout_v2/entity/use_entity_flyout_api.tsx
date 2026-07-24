@@ -590,7 +590,12 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
               contextID={contextID}
             />
           );
-          descriptor = { kind: FLYOUT_DESCRIPTOR_KIND.host, hostName: entityName ?? '', entityId };
+          descriptor = {
+            kind: FLYOUT_DESCRIPTOR_KIND.host,
+            hostName: entityName ?? '',
+            entityId,
+            scopeId,
+          };
           break;
         case 'user':
           children = (
@@ -601,7 +606,12 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
               contextID={contextID}
             />
           );
-          descriptor = { kind: FLYOUT_DESCRIPTOR_KIND.user, userName: entityName ?? '', entityId };
+          descriptor = {
+            kind: FLYOUT_DESCRIPTOR_KIND.user,
+            userName: entityName ?? '',
+            entityId,
+            scopeId,
+          };
           break;
         case 'service':
           children = (
@@ -616,6 +626,7 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
             kind: FLYOUT_DESCRIPTOR_KIND.service,
             serviceName: entityName ?? '',
             entityId,
+            scopeId,
           };
           break;
         default:
@@ -625,7 +636,16 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
       const parentDescriptor = readFirstDescriptor();
       writeOnOpen(descriptor, 'inherit');
       const onClose = buildOnClose(parentDescriptor);
-      const childTitle = title ?? entityName ?? entityId;
+      const titleValue = entityName ?? entityId;
+      const childTitle =
+        title ??
+        (engineType === 'host'
+          ? formatFlyoutTitle(HOST_TITLE, titleValue)
+          : engineType === 'user'
+          ? formatFlyoutTitle(USER_TITLE, titleValue)
+          : engineType === 'service'
+          ? formatFlyoutTitle(SERVICE_TITLE, titleValue)
+          : GENERIC_ENTITY_TITLE);
       open(
         children,
         {

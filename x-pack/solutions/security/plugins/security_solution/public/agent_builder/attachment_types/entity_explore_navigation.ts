@@ -483,13 +483,10 @@ export const navigateToEntityAnalyticsWithFlyoutInApp = ({
     replace: true,
   });
 
-  if (alreadyOnEaHomePage && isNewFlyoutEnabled) {
+  if (isNewFlyoutEnabled) {
     const descriptors = buildEntityFlyoutV2NavigationState(flyout);
     if (descriptors) {
-      // Let navigateToApp update the router location before the v2 opener writes its URL state.
-      setTimeout(() => {
-        notifyFlyoutV2Navigation({ urlParamKey: FLYOUT_V2_URL_PARAM, descriptors });
-      }, 0);
+      notifyFlyoutV2Navigation({ urlParamKey: FLYOUT_V2_URL_PARAM, descriptors });
     }
   }
 

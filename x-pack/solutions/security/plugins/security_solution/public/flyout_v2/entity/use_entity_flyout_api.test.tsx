@@ -256,7 +256,7 @@ describe('useEntityFlyoutApi', () => {
     );
   });
 
-  it('openEntityDetailsAsChild composes the nav title from the entity name', () => {
+  it('openEntityDetailsAsChild composes a type-specific nav title from the entity name', () => {
     const { result } = renderHook(() => useEntityFlyoutApi());
     result.current.openEntityDetailsAsChild({
       engineType: 'host',
@@ -265,8 +265,8 @@ describe('useEntityFlyoutApi', () => {
       scopeId: 'scopeId',
     });
 
-    expect(buildFlyoutNavTitle).toHaveBeenCalledWith('host-1');
-    expect(mockOpenSystemFlyout.mock.calls[0][1].title).toBe('NAV:host-1');
+    expect(buildFlyoutNavTitle).toHaveBeenCalledWith('Host: host-1');
+    expect(mockOpenSystemFlyout.mock.calls[0][1].title).toBe('NAV:Host: host-1');
   });
 
   it('openEntityDetailsAsChild falls back to entityId when entityName is absent', () => {
@@ -278,7 +278,23 @@ describe('useEntityFlyoutApi', () => {
       scopeId: 'scopeId',
     });
 
-    expect(buildFlyoutNavTitle).toHaveBeenCalledWith('entity-1');
+    expect(buildFlyoutNavTitle).toHaveBeenCalledWith('Host: entity-1');
+  });
+
+  it.each([
+    ['user', 'User: name-1'],
+    ['service', 'Service: name-1'],
+    ['unknown', 'Entity'],
+  ] as const)('openEntityDetailsAsChild formats the %s nav title', (engineType, expectedTitle) => {
+    const { result } = renderHook(() => useEntityFlyoutApi());
+    result.current.openEntityDetailsAsChild({
+      engineType,
+      entityId: 'entity-1',
+      entityName: 'name-1',
+      scopeId: 'scopeId',
+    });
+
+    expect(buildFlyoutNavTitle).toHaveBeenCalledWith(expectedTitle);
   });
 
   it.each([
@@ -298,7 +314,7 @@ describe('useEntityFlyoutApi', () => {
       });
 
       expect(mockWriteOnOpen).toHaveBeenCalledWith(
-        expect.objectContaining({ kind: expectedKind }),
+        expect.objectContaining({ kind: expectedKind, scopeId: 'scope-1' }),
         'inherit'
       );
       expect(mockBuildOnClose).toHaveBeenCalledWith(null);

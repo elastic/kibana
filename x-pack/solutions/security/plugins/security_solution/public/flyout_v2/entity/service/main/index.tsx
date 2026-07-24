@@ -178,7 +178,6 @@ export const Service: FC<ServiceProps> = memo(function Service({
         entityId: params.entityId,
         entityName: params.entityName,
         scopeId,
-        title: params.entityName ?? params.entityId,
         origin,
       }),
     [openEntityDetailsAsChild, scopeId]

@@ -63,6 +63,8 @@ export type FlyoutTool = (typeof FLYOUT_TOOL)[keyof typeof FLYOUT_TOOL];
  * to distinguish otherwise-identical opens of the same tool from different buttons.
  */
 export const FLYOUT_ORIGIN = {
+  // Flyout reconstructed from URL state during application mount.
+  URL_RESTORE: 'url_restore',
   // Document/attack flyout header badge or footer "Take action" menu.
   // Header badge/button in the document or attack flyout.
   FLYOUT_HEADER: 'flyout_header',
