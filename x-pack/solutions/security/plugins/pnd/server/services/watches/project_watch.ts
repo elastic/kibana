@@ -22,8 +22,8 @@ import type {
 } from '@kbn/pnd-common';
 import { coverageFromSchedule } from '@kbn/pnd-common';
 
-/** Temporary policy bag on the workflow watch_policy data.set step. */
-interface WatchAgentStepAttrs {
+/** Static watch policy bag from `consts.watch_policy`. */
+interface WatchPolicyAttrs {
   mandate?: string;
   autonomyLevel?: AutonomyLevel;
   handoff?: ScheduleHandoff;
@@ -90,20 +90,10 @@ const asMode = (value: unknown): ScheduleMode => {
 
 export const extractWatchPolicy = (
   definition: WorkflowYaml | null | undefined
-): WatchAgentStepAttrs | undefined => {
-  if (!definition?.steps) return undefined;
-  const policyStep = definition.steps.find(
-    (step) => (step as { name?: unknown }).name === 'watch_policy'
-  );
-  const candidateSteps = policyStep ? [policyStep] : definition.steps;
-  for (const step of candidateSteps) {
-    const withBlock = (step as { with?: unknown }).with;
-    if (!isRecord(withBlock)) continue;
-    const watch = withBlock.watch;
-    if (!isRecord(watch)) continue;
-    return watch as unknown as WatchAgentStepAttrs;
-  }
-  return undefined;
+): WatchPolicyAttrs | undefined => {
+  const policy = definition?.consts?.watch_policy;
+  if (!isRecord(policy)) return undefined;
+  return policy as unknown as WatchPolicyAttrs;
 };
 
 export const normalizeWorkflowTriggerType = (raw: string | undefined): WorkflowTriggerType => {
@@ -134,7 +124,7 @@ export const projectTriggers = (
 
 export const projectSchedule = (
   triggers: WatchTriggerProjection[],
-  policy: WatchAgentStepAttrs | undefined
+  policy: WatchPolicyAttrs | undefined
 ): WatchSchedule => {
   const hasSchedule = triggers.some((t) => t.type === 'schedule');
   const hasEvent = triggers.some((t) => t.type === 'event');
@@ -163,7 +153,7 @@ export const projectSchedule = (
   };
 };
 
-const projectScopes = (policy: WatchAgentStepAttrs | undefined): WatchScope[] => {
+const projectScopes = (policy: WatchPolicyAttrs | undefined): WatchScope[] => {
   if (!policy?.scopes || !Array.isArray(policy.scopes)) return [];
   return policy.scopes.map((scope) => ({
     name: asString(scope.name, 'Scope'),
@@ -220,7 +210,7 @@ const collectSkillIdsFromText = (text: string, into: Set<string>): void => {
  */
 export const projectCallablesFromDefinition = (
   definition: WorkflowYaml | null | undefined,
-  policy: WatchAgentStepAttrs | undefined
+  policy: WatchPolicyAttrs | undefined
 ): WatchCallableRef[] => {
   const skillIds = new Set<string>();
   const workflowIds = new Set<string>();
@@ -354,24 +344,22 @@ tags:
   - watch-custom
 triggers:
   - type: manual
+consts:
+  watch_policy:
+    mandate: ${JSON.stringify(name)}
+    autonomyLevel: 1
+    handoff: none
+    onDemand: true
+    draft: false
+    cadence: manual
+    mode: demand
+    ui:
+      color: "#6b7280"
+      icon: sparkles
+    scopeSummary: Custom
+    scopes: []
+    callables: []
 steps:
-  - name: watch_policy
-    type: data.set
-    with:
-      watch:
-        mandate: ${JSON.stringify(name)}
-        autonomyLevel: 1
-        handoff: none
-        onDemand: true
-        draft: false
-        cadence: manual
-        mode: demand
-        ui:
-          color: "#6b7280"
-          icon: sparkles
-        scopeSummary: Custom
-        scopes: []
-        callables: []
   - name: run_watch
     type: console
     with:

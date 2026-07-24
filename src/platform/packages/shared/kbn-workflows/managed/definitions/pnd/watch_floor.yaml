@@ -10,41 +10,39 @@ tags:
 triggers:
   - type: alert
   - type: manual
+consts:
+  watch_policy:
+    mandate: Frontline triage
+    autonomyLevel: 3
+    handoff: officer
+    onDemand: false
+    draft: false
+    cadence: stream
+    mode: always
+    ui:
+      color: "#16b3a6"
+      icon: alert
+      order: 10
+    scopeSummary: Security indices · APM · logs
+    scopes:
+      - name: Security indices
+        access: full
+        label: Read
+      - name: APM · logs · SLOs
+        access: full
+        label: Read
+      - name: Finance PII
+        access: masked
+        label: Masked
+    # Display overrides only — capabilities are projected from steps below.
+    callables:
+      - id: alert-analysis
+        name: Alert analysis
+        kind: skill
+        summary: On alert · classifies FP / TP / inconclusive
+        gated: false
+        enabled: true
 steps:
-  - name: watch_policy
-    type: data.set
-    with:
-      watch:
-        mandate: Frontline triage
-        autonomyLevel: 3
-        handoff: officer
-        onDemand: false
-        draft: false
-        cadence: stream
-        mode: always
-        ui:
-          color: "#16b3a6"
-          icon: alert
-          order: 10
-        scopeSummary: Security indices · APM · logs
-        scopes:
-          - name: Security indices
-            access: full
-            label: Read
-          - name: APM · logs · SLOs
-            access: full
-            label: Read
-          - name: Finance PII
-            access: masked
-            label: Masked
-        # Display overrides only — capabilities are projected from steps below.
-        callables:
-          - id: alert-analysis
-            name: Alert analysis
-            kind: skill
-            summary: On alert · classifies FP / TP / inconclusive
-            gated: false
-            enabled: true
   - name: triage_alerts
     type: ai.agent
     timeout: "10m"

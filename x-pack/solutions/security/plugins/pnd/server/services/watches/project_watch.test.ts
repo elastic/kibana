@@ -7,12 +7,40 @@
 
 import type { WorkflowYaml } from '@kbn/workflows';
 import {
+  extractWatchPolicy,
   normalizeWorkflowTriggerType,
   projectCallablesFromDefinition,
   projectSchedule,
 } from './project_watch';
 
 describe('project watch', () => {
+  describe('extractWatchPolicy', () => {
+    it('reads static policy from consts.watch_policy', () => {
+      const definition = {
+        version: '1',
+        name: 'Deep Watch',
+        enabled: true,
+        triggers: [{ type: 'manual' }],
+        consts: {
+          watch_policy: {
+            mandate: 'Deep investigation & hunts',
+            autonomyLevel: 3,
+            handoff: 'records',
+            ui: { color: '#8b5cf6', icon: 'console', order: 40 },
+          },
+        },
+        steps: [{ name: 'stub', type: 'console', with: { message: 'hi' } }],
+      } as unknown as WorkflowYaml;
+
+      expect(extractWatchPolicy(definition)).toMatchObject({
+        mandate: 'Deep investigation & hunts',
+        autonomyLevel: 3,
+        handoff: 'records',
+        ui: { color: '#8b5cf6', icon: 'console', order: 40 },
+      });
+    });
+  });
+
   describe('normalizeWorkflowTriggerType', () => {
     it.each([
       ['scheduled', 'schedule'],
