@@ -6,6 +6,7 @@
  */
 
 import { buildLensConfig, buildVegaConfig } from '@kbn/agent-builder-visualizations-server';
+import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import { VEGA_VIS_TYPE } from '@kbn/agent-builder-visualizations-common';
 import type { ModelProvider, ToolEventEmitter } from '@kbn/agent-builder-server';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
@@ -64,6 +65,7 @@ describe('createVisPanelResolver', () => {
       identifier: 'show total requests',
       nlQuery: 'show total requests',
       index: 'logs-*',
+      chartType: SupportedChartType.Metric,
     });
 
     expect(result).toEqual({
@@ -94,19 +96,19 @@ describe('createVisPanelResolver', () => {
       type: 'vis',
       operationType: 'edit_panels',
       identifier: 'panel-1',
-      nlQuery: 'turn this into a line chart',
+      nlQuery: 'change the title',
       existingPanel: {
         id: 'panel-1',
         type: LENS_EMBEDDABLE_TYPE,
-        config: { type: 'bar' },
+        config: { type: 'xy' },
         grid: { w: 24, h: 12, x: 0, y: 0 },
       },
     });
 
     expect(mockedBuildLensConfig).toHaveBeenCalledWith(
       expect.objectContaining({
-        existingConfig: JSON.stringify({ type: 'bar' }),
-        parsedExistingConfig: { type: 'bar' },
+        existingConfig: JSON.stringify({ type: 'xy' }),
+        parsedExistingConfig: { type: 'xy' },
       })
     );
   });
@@ -153,6 +155,7 @@ describe('createVisPanelResolver', () => {
       operationType: 'add_panels',
       identifier: 'total requests',
       nlQuery: 'total requests',
+      chartType: SupportedChartType.Metric,
     });
 
     expect(result.type).toBe('success');
