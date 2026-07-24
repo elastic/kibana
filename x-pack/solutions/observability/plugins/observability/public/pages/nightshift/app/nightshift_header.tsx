@@ -15,7 +15,9 @@ import {
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
+import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
+import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../common/ebt_constants';
 import { NightshiftMarkIcon } from './nightshift_mark_icon';
 
 export interface NightshiftHeaderProps {
@@ -138,6 +140,10 @@ export function NightshiftHeader({
               data-test-subj="o11yNightshiftAppShowAllLink"
               href={showAllEventsHref}
               size="s"
+              {...getEbtProps({
+                action: NIGHTSHIFT_EBT_ACTIONS.VIEW_ALL_SIGNIFICANT_EVENTS,
+                element: NIGHTSHIFT_EBT_ELEMENTS.PAGE_HEADER,
+              })}
               css={css`
                 color: ${euiTheme.colors.textSubdued};
               `}

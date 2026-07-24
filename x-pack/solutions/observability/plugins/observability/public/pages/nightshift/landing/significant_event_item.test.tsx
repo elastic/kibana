@@ -38,6 +38,9 @@ describe('SignificantEventItem', () => {
     const row = screen.getByTestId('nightshiftSignificantEventItem');
     expect(row).toHaveAttribute('role', 'button');
     expect(row).toHaveAttribute('tabindex', '0');
+    expect(row).toHaveAttribute('data-ebt-action', 'viewSignificantEvent');
+    expect(row).toHaveAttribute('data-ebt-element', 'nightshiftSignificantEventsList');
+    expect(row).toHaveAttribute('data-ebt-detail', 'open');
 
     fireEvent.click(row);
     expect(onClick).toHaveBeenCalledWith(mockEvent);
@@ -99,7 +102,12 @@ describe('SignificantEventItem', () => {
     const onChatClick = jest.fn();
     renderItem({ onClick, onChatClick });
 
-    fireEvent.click(screen.getByTestId('nightshiftOpenEventInChatButton'));
+    const chatButton = screen.getByTestId('nightshiftOpenEventInChatButton');
+    expect(chatButton).toHaveAttribute('data-ebt-action', 'openInChat');
+    expect(chatButton).toHaveAttribute('data-ebt-element', 'nightshiftSignificantEventsList');
+    expect(chatButton).toHaveAttribute('data-ebt-detail', 'newConversation');
+
+    fireEvent.click(chatButton);
     expect(onChatClick).toHaveBeenCalledWith(mockEvent);
     expect(onClick).not.toHaveBeenCalled();
   });

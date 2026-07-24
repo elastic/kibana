@@ -21,6 +21,7 @@ import {
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
+import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import type { UseQueryResult } from '@kbn/react-query';
 import type {
@@ -36,6 +37,7 @@ import { getChangePointLabel } from '../detection/change_point';
 import { ChangePointSparkline } from '../detection/change_point_visualization';
 import { getDetectionEntities } from './get_detection_entities';
 import { nightshiftBackgroundTransition } from '../common/nightshift_transition';
+import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../common/ebt_constants';
 
 const SPARKLINE_SKELETON_WIDTH = 64;
 const SPARKLINE_SKELETON_HEIGHT = 32;
@@ -101,7 +103,7 @@ function DetectionCard({
       return;
     }
     keyboardEvent.preventDefault();
-    onClick?.(detection);
+    keyboardEvent.currentTarget.click();
   };
 
   return (
@@ -110,6 +112,15 @@ function DetectionCard({
       tabIndex={onClick ? 0 : undefined}
       aria-pressed={onClick ? isSelected : undefined}
       data-test-subj="nightshiftDetectionCard"
+      {...(onClick
+        ? getEbtProps({
+            action: isSelected
+              ? NIGHTSHIFT_EBT_ACTIONS.CLOSE_FLYOUT
+              : NIGHTSHIFT_EBT_ACTIONS.VIEW_DETECTION,
+            element: NIGHTSHIFT_EBT_ELEMENTS.EVENT_FLYOUT_DETECTIONS,
+            detail: detection.change_point_type,
+          })
+        : {})}
       onClick={onClick ? handleClick : undefined}
       onKeyDown={onClick ? handleKeyDown : undefined}
       css={css`

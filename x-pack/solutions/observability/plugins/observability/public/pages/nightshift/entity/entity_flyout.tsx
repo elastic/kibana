@@ -23,6 +23,7 @@ import {
   EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
+import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import type { Feature } from '@kbn/significant-events-schema';
 import {
@@ -32,6 +33,11 @@ import {
 import { AiButton } from '@kbn/shared-ux-ai-components';
 import { useKibana } from '../../../utils/kibana_react';
 import { formatChatAttachmentDescription } from '../chat/chat_attachment_description';
+import {
+  NIGHTSHIFT_EBT_ACTIONS,
+  NIGHTSHIFT_EBT_DETAILS,
+  NIGHTSHIFT_EBT_ELEMENTS,
+} from '../common/ebt_constants';
 import { FlyoutSectionTitle } from '../common/flyout_section_title';
 import { TruncatableSummary } from '../common/truncatable_summary';
 
@@ -179,6 +185,13 @@ export function EntityFlyout({
       data-test-subj="nightshiftEntityFlyout"
       type="push"
       hasAnimation={false}
+      closeButtonProps={{
+        'data-test-subj': 'euiFlyoutCloseButton',
+        ...getEbtProps({
+          action: NIGHTSHIFT_EBT_ACTIONS.CLOSE_FLYOUT,
+          element: NIGHTSHIFT_EBT_ELEMENTS.ENTITY_FLYOUT,
+        }),
+      }}
     >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s">
@@ -286,6 +299,11 @@ export function EntityFlyout({
                   iconSide="left"
                   data-test-subj="nightshiftEntityFlyoutChatButton"
                   onClick={handleOpenInChat}
+                  {...getEbtProps({
+                    action: NIGHTSHIFT_EBT_ACTIONS.OPEN_IN_CHAT,
+                    element: NIGHTSHIFT_EBT_ELEMENTS.ENTITY_FLYOUT,
+                    detail: NIGHTSHIFT_EBT_DETAILS.NEW_CONVERSATION,
+                  })}
                 >
                   {i18n.translate(
                     'xpack.observability.nightshift.entityFlyout.openInChatButtonLabel',

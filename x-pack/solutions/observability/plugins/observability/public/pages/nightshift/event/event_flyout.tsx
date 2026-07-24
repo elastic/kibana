@@ -47,6 +47,8 @@ import {
   rememberInvestigationTerminalFailure,
 } from './significant_event_status';
 import { useKibana } from '../../../utils/kibana_react';
+import { NIGHTSHIFT_EBT_ELEMENTS } from '../common/ebt_constants';
+import { setFlyoutMenuCloseButtonEbtProps } from '../common/flyout_close_ebt';
 
 export interface EventFlyoutProps {
   event: SignificantEvent;
@@ -150,6 +152,9 @@ export function EventFlyout({ event, onClose }: EventFlyoutProps): React.ReactEl
       aria-label={event.title}
       flyoutMenuProps={flyoutMenuProps}
       data-test-subj="nightshiftEventFlyout"
+      onClickCapture={(clickEvent: React.MouseEvent<HTMLElement>) =>
+        setFlyoutMenuCloseButtonEbtProps(clickEvent, NIGHTSHIFT_EBT_ELEMENTS.EVENT_FLYOUT)
+      }
     >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s">

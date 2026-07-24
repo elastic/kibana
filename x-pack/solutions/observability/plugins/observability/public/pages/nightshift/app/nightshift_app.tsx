@@ -19,6 +19,7 @@ import {
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
+import { usePageReady } from '@kbn/ebt-tools';
 import { i18n } from '@kbn/i18n';
 import type { SignificantEvent } from '@kbn/significant-events-schema';
 import { useKibana } from '../../../utils/kibana_react';
@@ -218,6 +219,24 @@ export function NightshiftApp(): React.ReactElement {
 
   const hasEvents = shownEvents.length > 0;
   const hasNeedsAction = needsActionEvents.length > 0;
+
+  usePageReady({
+    isReady: !isLoading && !eventsError,
+    isRefreshing: isLoading,
+    customMetrics: {
+      key1: 'total_event_count',
+      value1: events.length,
+      key2: 'needs_action_event_count',
+      value2: needsActionEvents.length,
+      key3: 'resolved_event_count',
+      value3: resolvedEvents.length,
+      key4: 'blast_radius_filter_active',
+      value4: activeBlastRadiusChip ? 1 : 0,
+    },
+    meta: {
+      description: '[ttfmp_nightshift] The Nightshift landing page has loaded significant events.',
+    },
+  });
 
   // Only treat a load failure as fatal when there is nothing to show; a failed
   // background refetch that still has cached data degrades to a non-blocking warning.

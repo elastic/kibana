@@ -18,8 +18,14 @@ import {
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
+import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import type { SignificantEvent } from '@kbn/significant-events-schema';
+import {
+  NIGHTSHIFT_EBT_ACTIONS,
+  NIGHTSHIFT_EBT_DETAILS,
+  NIGHTSHIFT_EBT_ELEMENTS,
+} from '../common/ebt_constants';
 import { SignificantEventItem } from './significant_event_item';
 
 export interface SignificantEventListProps {
@@ -102,6 +108,14 @@ export function SignificantEventList({
                     flush="left"
                     onClick={onClearFilter}
                     size="s"
+                    {...getEbtProps({
+                      action: NIGHTSHIFT_EBT_ACTIONS.CLEAR_BLAST_RADIUS_FILTER,
+                      element: NIGHTSHIFT_EBT_ELEMENTS.SIGNIFICANT_EVENTS_LIST,
+                      detail:
+                        statusColor === 'danger'
+                          ? NIGHTSHIFT_EBT_DETAILS.NEEDS_ACTION
+                          : NIGHTSHIFT_EBT_DETAILS.RESOLVED,
+                    })}
                   >
                     {i18n.translate('xpack.observability.nightshift.list.clearFilterButton', {
                       defaultMessage: 'Clear filter',
