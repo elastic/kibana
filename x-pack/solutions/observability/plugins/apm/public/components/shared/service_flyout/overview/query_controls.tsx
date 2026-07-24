@@ -22,7 +22,7 @@ import type { Environment } from '../../../../../common/environment_rt';
 import { getTransactionType } from '../../../../context/apm_service/apm_service_context';
 import { useServiceTransactionTypesFetcher } from '../../../../context/apm_service/use_service_transaction_types_fetcher';
 import { useServiceFlyoutContext } from '../service_flyout_context';
-import { useEnvironmentsFetcher } from '../../../../hooks/use_environments_fetcher';
+import { useUnifiedEnvironmentsFetcher } from '../../../../hooks/use_unified_environments_fetcher';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { usePreferredDataSourceAndBucketSize } from '../../../../hooks/use_preferred_data_source_and_bucket_size';
 import { useTimeRange } from '../../../../hooks/use_time_range';
@@ -66,7 +66,7 @@ export function ServiceFlyoutQueryControls() {
     rollupInterval: preferred?.source.rollupInterval,
   });
 
-  const { environments, status: environmentsStatus } = useEnvironmentsFetcher({
+  const { environments, status: environmentsStatus } = useUnifiedEnvironmentsFetcher({
     serviceName: service.name,
     start,
     end,
