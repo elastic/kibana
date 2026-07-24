@@ -139,8 +139,8 @@ export function ServiceFlyoutOverview() {
   const { keyMetrics, infrastructureMetrics } = useMemo(
     () =>
       getChartDefinitions({
-        transactionIndexes: indices?.transaction,
-        metricIndexes: indices?.metric,
+        indices,
+        ingestionType: capabilities.ingestionType,
         serviceName: service.name,
         environment,
         transactionType: transactionType ?? '',
@@ -152,7 +152,14 @@ export function ServiceFlyoutOverview() {
           />
         ),
       }),
-    [environment, indices, latencyAggregationType, service.name, transactionType]
+    [
+      capabilities.ingestionType,
+      environment,
+      indices,
+      latencyAggregationType,
+      service.name,
+      transactionType,
+    ]
   );
 
   if (capabilities.loading) {

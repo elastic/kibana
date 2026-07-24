@@ -9,7 +9,9 @@ import type { ReactNode } from 'react';
 import { esql, type ComposerQuery } from '@elastic/esql';
 import { i18n } from '@kbn/i18n';
 import type { LensConfig, LensSeriesLayer } from '@kbn/lens-embeddable-utils';
+import type { APMIndices } from '@kbn/apm-sources-access-plugin/common/config_schema';
 import type { LensESQLConfig } from './types';
+import type { ServiceFlyoutIngestionType } from '../service_flyout_context';
 import {
   EVENT_OUTCOME,
   METRIC_CGROUP_MEMORY_LIMIT_BYTES,
@@ -370,16 +372,16 @@ function getMemoryUsageChart(
 }
 
 export function getChartDefinitions({
-  transactionIndexes,
-  metricIndexes,
+  indices,
+  ingestionType,
   serviceName,
   environment,
   transactionType,
   latencyAggregationType,
   latencyTitleAction,
 }: {
-  transactionIndexes: string | undefined;
-  metricIndexes: string | undefined;
+  indices: APMIndices | undefined;
+  ingestionType: ServiceFlyoutIngestionType | undefined;
   serviceName: string;
   environment: string;
   transactionType: string;
@@ -389,6 +391,8 @@ export function getChartDefinitions({
   keyMetrics: FlyoutLensChartConfigDefinition[];
   infrastructureMetrics: FlyoutLensChartConfigDefinition[];
 } {
+  const transactionIndexes = indices?.transaction;
+  const metricIndexes = indices?.metric;
   const scope: ServiceScope = { serviceName, environment, transactionType };
   const metricScope: ServiceScope = { serviceName, environment };
 

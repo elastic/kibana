@@ -18,6 +18,15 @@ import { getChartDefinitions, getLatencyChartType } from './chart_configs';
 const TRANSACTION_INDEXES = 'traces-apm*';
 const METRIC_INDEXES = 'metrics-apm*';
 
+const MOCK_INDICES = {
+  transaction: TRANSACTION_INDEXES,
+  metric: METRIC_INDEXES,
+  span: TRANSACTION_INDEXES,
+  error: 'logs-apm*',
+  onboarding: 'apm-*',
+  sourcemap: 'apm-*',
+};
+
 type XYLensConfig = Extract<LensConfig, { chartType: 'xy' }>;
 
 function seriesLayerOf(config: LensConfig | undefined): LensSeriesLayer {
@@ -31,8 +40,8 @@ function buildDefinitions(
   overrides: Partial<Parameters<typeof getChartDefinitions>[0]> = {}
 ): ReturnType<typeof getChartDefinitions> {
   return getChartDefinitions({
-    transactionIndexes: TRANSACTION_INDEXES,
-    metricIndexes: METRIC_INDEXES,
+    indices: MOCK_INDICES,
+    ingestionType: 'apm',
     serviceName: 'opbeans-java',
     environment: 'production',
     transactionType: 'request',
@@ -89,8 +98,7 @@ describe('service flyout chart_configs', () => {
 
     it('returns the chart layout without a config until the index patterns resolve', () => {
       const { keyMetrics, infrastructureMetrics } = buildDefinitions({
-        transactionIndexes: undefined,
-        metricIndexes: undefined,
+        indices: undefined,
         latencyTitleAction: 'latency-action',
       });
 
