@@ -39,9 +39,8 @@ describe('ArgocdConnector', () => {
       expect(ArgocdConnector.metadata.displayName).toBe('Argo CD');
     });
 
-    it('supports workflows and agentBuilder features', () => {
-      expect(ArgocdConnector.metadata.supportedFeatureIds).toContain('workflows');
-      expect(ArgocdConnector.metadata.supportedFeatureIds).toContain('agentBuilder');
+    it('supports agentBuilder features', () => {
+      expect(ArgocdConnector.metadata.supportedFeatureIds).toEqual(['agentBuilder']);
     });
 
     it('is marked as technical preview', () => {
