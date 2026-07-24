@@ -22,7 +22,7 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { ToolCallStep as ToolCallStepData } from '@kbn/agent-builder-common/chat/conversation';
+import type { ToolCallStep } from '@kbn/agent-builder-common/chat/conversation';
 import { useFollowExecution } from '../../../../../hooks/use_follow_execution';
 import { RoundEvents } from '../round_events';
 import { JsonCodeBlock } from '../json_code_block';
@@ -71,7 +71,7 @@ export const SubAgentExecutionFlyout: React.FC<SubAgentExecutionFlyoutProps> = (
   onBack,
   onClose,
 }) => {
-  const [nestedStep, setNestedStep] = useState<ToolCallStepData | null>(null);
+  const [nestedStep, setNestedStep] = useState<ToolCallStep | null>(null);
   const {
     steps: executionSteps,
     response,
@@ -111,11 +111,14 @@ export const SubAgentExecutionFlyout: React.FC<SubAgentExecutionFlyoutProps> = (
         </>
       ),
     },
-    ...(!isRunning
+    ...(!isRunning || displayMessage
       ? [
           {
             title: resultLabel,
-            status: (hasError ? 'danger' : 'complete') as 'danger' | 'complete',
+            status: (hasError ? 'danger' : isRunning ? 'loading' : 'complete') as
+              | 'danger'
+              | 'loading'
+              | 'complete',
             children: (
               <>
                 <EuiSpacer size="s" />
