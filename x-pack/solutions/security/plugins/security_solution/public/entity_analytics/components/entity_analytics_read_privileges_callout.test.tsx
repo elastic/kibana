@@ -55,6 +55,7 @@ const renderCallout = (
         entityEnginePrivileges={entityEnginePrivileges}
         leadGenerationPrivileges={leadGenerationPrivileges}
         anomalyPrivileges={anomalyPrivileges}
+        id="entity-analytics-home"
       />
     </TestProviders>
   );

@@ -9,7 +9,9 @@
 
 import type { ChangeHistoryCompareSpec } from '@kbn/change-history-ui';
 
+import { WORKFLOW_UNSAVED_CHANGE_ID } from './constants';
 import { getWorkflowChangeHistoryCompareIndicator } from './get_workflow_change_history_compare_indicator';
+import { UNSAVED_CHANGES_ACTION } from './translations';
 
 const makeChange = (id: string, version: number, isCurrent?: boolean) => ({
   id,
@@ -45,6 +47,27 @@ describe('getWorkflowChangeHistoryCompareIndicator', () => {
     expect(getWorkflowChangeHistoryCompareIndicator(compareSpec)).toEqual({
       baselineVersion: 5,
       currentVersion: 8,
+    });
+  });
+
+  it('uses the unsaved changes badge when the target has no version metadata', () => {
+    const compareSpec: ChangeHistoryCompareSpec = {
+      comparisonType: 'vs_previous',
+      baseline: makeChange('evt-2', 2),
+      target: {
+        id: WORKFLOW_UNSAVED_CHANGE_ID,
+        timestamp: '2026-07-03T12:00:00.000Z',
+        actor: { name: 'You' },
+        action: 'Unsaved changes',
+        snapshot: { workflow: { yaml: 'name: draft\n' } },
+        isCurrent: true,
+      },
+    };
+
+    expect(getWorkflowChangeHistoryCompareIndicator(compareSpec)).toEqual({
+      baselineVersion: 2,
+      currentBadgeLabel: UNSAVED_CHANGES_ACTION,
+      currentBadgeColor: 'warning',
     });
   });
 });

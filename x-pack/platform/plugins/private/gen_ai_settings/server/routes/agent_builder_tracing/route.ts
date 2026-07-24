@@ -5,49 +5,36 @@
  * 2.0.
  */
 
-import {
-  AGENT_BUILDER_TRACING_ENABLED_SETTING_ID,
-  AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
-} from '@kbn/management-settings-ids';
+import { z } from '@kbn/zod';
 import { createGenAiSettingsServerRoute } from '../create_gen_ai_settings_server_route';
 
-const syncAgentBuilderTracingPlatformFeaturesRoute = createGenAiSettingsServerRoute({
-  endpoint: 'POST /internal/gen_ai_settings/agent_builder/sync_tracing_platform_features',
+const tracingDashboardRoute = createGenAiSettingsServerRoute({
+  endpoint: 'POST /internal/gen_ai_settings/agent_builder/tracing_dashboard',
   security: {
     authz: {
       requiredPrivileges: ['manage_advanced_settings'],
     },
   },
-  handler: async (resources): Promise<{ installed: boolean }> => {
-    const { request, plugins } = resources;
+  params: z.object({
+    body: z.object({ enabled: z.boolean() }),
+  }),
+  handler: async (resources): Promise<{ success: boolean }> => {
+    const { request, params, plugins } = resources;
 
     if (!plugins.agentBuilderPlatform) {
-      return { installed: false };
+      return { success: false };
     }
 
-    const coreStart = await plugins.core.start();
-    const uiSettingsClient = coreStart.uiSettings.asScopedToClient(
-      coreStart.savedObjects.getScopedClient(request)
-    );
-
-    const tracingEnabled = await uiSettingsClient.get<boolean>(
-      AGENT_BUILDER_TRACING_ENABLED_SETTING_ID
-    );
-    const experimentalFeaturesEnabled = await uiSettingsClient.get<boolean>(
-      AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID
-    );
-    const enabled = tracingEnabled && experimentalFeaturesEnabled;
-
     const agentBuilderPlatformStart = await plugins.agentBuilderPlatform.start();
-    await agentBuilderPlatformStart.tracingFeatures.sync({
-      enabled,
+    await agentBuilderPlatformStart.tracingFeatures.setDashboard({
+      enabled: params.body.enabled,
       spaceId: request.spaceId,
     });
 
-    return { installed: true };
+    return { success: true };
   },
 });
 
 export const agentBuilderTracingRoutes = {
-  ...syncAgentBuilderTracingPlatformFeaturesRoute,
+  ...tracingDashboardRoute,
 };

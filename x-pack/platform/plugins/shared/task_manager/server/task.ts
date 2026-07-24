@@ -92,7 +92,7 @@ export interface RunContext {
    * is generated using the API key and passed as part of the run context.
    */
   fakeRequest?: KibanaRequest;
-  abortController: AbortController;
+  signal: AbortSignal;
 
   /**
    * If the task has a known `profile_uid`, binds it to a child fake request
@@ -589,6 +589,13 @@ export type PartialSerializedConcreteTaskInstance = Partial<SerializedConcreteTa
 export interface ApiKeyOptions {
   request?: KibanaRequest;
   regenerateApiKey?: boolean;
+  /**
+   * When true with a request that includes an API key, clone the caller's credentials into a
+   * new managed key for the scheduled task(s) instead of reusing the caller's key directly.
+   * Intended for long-lived tasks (e.g. alerting rule executors) created from ephemeral callers
+   * such as workflows.
+   */
+  cloneApiKey?: boolean;
   /**
    * When true with a request, grant only the Elasticsearch API key (skip UIAM). Intended for
    * tests and narrow internal flows (e.g. exercising UIAM provisioning on tasks that have ES

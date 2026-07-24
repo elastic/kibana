@@ -5,13 +5,36 @@
  * 2.0.
  */
 
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { KibanaRequest, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import type { EntityType } from '@kbn/entity-store/common';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import { euid } from '@kbn/entity-store/common/euid_helpers';
 import { ENTITY_ANOMALY_DEFAULT_LOOKBACK } from '../../../../common/constants';
+import type { AnomalyScoreRange } from '../../../../common/api/entity_analytics';
 import { getSecurityMlJobIds } from './get_security_ml_job_ids';
 import type { AnomalyHit, RawAnomalyRecord } from './types';
+
+// A missing/empty selection means "no severity filter", which defaults to the
+// standard threshold of 1 rather than truly unbounded (record_score 0 anomalies are noise).
+export const buildScoreRangeFilter = (
+  scoreRanges?: AnomalyScoreRange[]
+): QueryDslQueryContainer => {
+  if (!scoreRanges || scoreRanges.length === 0) {
+    return { range: { record_score: { gte: 1 } } };
+  }
+
+  return {
+    bool: {
+      should: scoreRanges.map(({ min_score: min, max_score: max }) => ({
+        range: {
+          record_score: { gte: Math.max(min, 1), ...(max !== undefined ? { lt: max } : {}) },
+        },
+      })),
+      minimum_should_match: 1,
+    },
+  };
+};
 
 interface RequiredHit {
   _id: string;
@@ -65,8 +88,7 @@ export interface SearchEntityAnomaliesOpts {
   entityId: string;
   fromMs?: number;
   toMs?: number;
-  minScore?: number;
-  maxScore?: number;
+  scoreRanges?: AnomalyScoreRange[];
   jobIds?: string[];
   sort?: Array<{ field: AnomalySortField; order: AnomalySortOrder }>;
   from?: number;
@@ -88,8 +110,7 @@ export const searchEntityAnomalies = async ({
   entityId,
   fromMs,
   toMs,
-  minScore,
-  maxScore,
+  scoreRanges,
   jobIds: filterJobIds,
   sort = DEFAULT_SORT_SPEC,
   from = 0,
@@ -129,14 +150,7 @@ export const searchEntityAnomalies = async ({
             filter: [
               { term: { result_type: 'record' } },
               { term: { is_interim: false } },
-              {
-                range: {
-                  record_score: {
-                    gte: minScore || 1,
-                    ...(maxScore !== undefined ? { lt: maxScore } : {}),
-                  },
-                },
-              },
+              buildScoreRangeFilter(scoreRanges),
               {
                 range: {
                   timestamp: {

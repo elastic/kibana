@@ -92,6 +92,18 @@ interface ResolutionErrorEvent extends ResolutionEventBase {
   operation: string;
 }
 
+interface ResolutionStateEvent {
+  entityType: string;
+  namespace: string;
+  totalEntities: number;
+  resolvedEntities: number;
+  targetEntities: number;
+  standaloneEntities: number;
+  resolutionGroups: number;
+  avgGroupSize: number;
+  maxGroupSize: number;
+}
+
 interface EntityMaintainerRunSummaryFunnel {
   /** Entities or records scanned from source */
   scanned: number;
@@ -624,6 +636,71 @@ export const ENTITY_STORE_RESOLUTION_GROUP_VIEW_EVENT = {
   },
 } as const satisfies EventTypeOpts<ResolutionGroupViewEvent>;
 
+export const ENTITY_STORE_RESOLUTION_STATE_EVENT = {
+  eventType: 'entity_store_resolution_state',
+  schema: {
+    entityType: {
+      type: 'keyword',
+      _meta: {
+        description: 'Entity type for this snapshot (e.g. "user", "host", "service", "generic")',
+      },
+    },
+    namespace: {
+      type: 'keyword',
+      _meta: {
+        description: 'Kibana space the entity store belongs to (e.g. "default")',
+      },
+    },
+    totalEntities: {
+      type: 'long',
+      _meta: {
+        description: 'Total number of entity documents of this type in the store',
+      },
+    },
+    resolvedEntities: {
+      type: 'long',
+      _meta: {
+        description:
+          'Number of entities that have a resolved_to field (i.e. are aliases in a resolution group)',
+      },
+    },
+    targetEntities: {
+      type: 'long',
+      _meta: {
+        description:
+          'Number of distinct resolution targets (entities that other entities resolve to)',
+      },
+    },
+    standaloneEntities: {
+      type: 'long',
+      _meta: {
+        description:
+          'Number of entities that are neither aliases nor targets — not involved in any resolution group',
+      },
+    },
+    resolutionGroups: {
+      type: 'long',
+      _meta: {
+        description:
+          'Number of resolution groups (each group has one target and one or more aliases)',
+      },
+    },
+    avgGroupSize: {
+      type: 'float',
+      _meta: {
+        description:
+          'Average number of entities per resolution group (target + aliases); 0 when no groups exist',
+      },
+    },
+    maxGroupSize: {
+      type: 'long',
+      _meta: {
+        description: 'Largest resolution group size (target + aliases); 0 when no groups exist',
+      },
+    },
+  },
+} as const satisfies EventTypeOpts<ResolutionStateEvent>;
+
 export const ENTITY_STORE_RESOLUTION_ERROR_EVENT = {
   eventType: 'entity_store_resolution_error',
   schema: {
@@ -730,6 +807,7 @@ const events = [
   ENTITY_STORE_RESOLUTION_UNLINK_EVENT,
   ENTITY_STORE_RESOLUTION_GROUP_VIEW_EVENT,
   ENTITY_STORE_RESOLUTION_ERROR_EVENT,
+  ENTITY_STORE_RESOLUTION_STATE_EVENT,
 ] as const;
 
 export const registerTelemetry = (analytics: AnalyticsServiceSetup) =>
@@ -752,6 +830,7 @@ interface TelemetryEventMap {
   [ENTITY_STORE_RESOLUTION_UNLINK_EVENT.eventType]: ResolutionUnlinkEvent;
   [ENTITY_STORE_RESOLUTION_GROUP_VIEW_EVENT.eventType]: ResolutionGroupViewEvent;
   [ENTITY_STORE_RESOLUTION_ERROR_EVENT.eventType]: ResolutionErrorEvent;
+  [ENTITY_STORE_RESOLUTION_STATE_EVENT.eventType]: ResolutionStateEvent;
 }
 
 export type TelemetryReporter = ReturnType<typeof createReportEvent>;

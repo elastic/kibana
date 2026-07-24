@@ -234,7 +234,7 @@ async function createPage(kibanaUrl: string, page: MemoryPage, authHeader: strin
 async function listAllPages(
   kibanaUrl: string,
   authHeader: string
-): Promise<Array<{ id: string; name: string }>> {
+): Promise<Array<{ id: string; name: string; tags: string[] }>> {
   const response = await fetch(`${kibanaUrl}/internal/streams/memory/search`, {
     method: 'POST',
     headers: { ...INTERNAL_HEADERS, 'Content-Type': 'application/json', Authorization: authHeader },
@@ -244,7 +244,9 @@ async function listAllPages(
     const text = await response.text();
     throw new Error(`Failed to list memory pages: ${response.status} ${text}`);
   }
-  const body = (await response.json()) as { entries?: Array<{ id: string; name: string }> };
+  const body = (await response.json()) as {
+    entries?: Array<{ id: string; name: string; tags: string[] }>;
+  };
   return body.entries ?? [];
 }
 
@@ -263,8 +265,8 @@ export async function seedMemory({
 
   const existing = await listAllPages(kibanaUrl, authHeader);
   for (const entry of existing) {
-    if (!ownedNames.has(entry.name)) {
-      log.info(`  Deleting unrelated memory page "${entry.name}"`);
+    if (entry.tags.includes('otel-demo') && !ownedNames.has(entry.name)) {
+      log.info(`  Deleting stale demo memory page "${entry.name}"`);
       await deletePage(kibanaUrl, entry.id, authHeader);
     }
   }

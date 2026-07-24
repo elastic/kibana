@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import type { Type } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
+import { ALERT_SEVERITY_VALUES, type AlertSeverity } from '@kbn/rule-data-utils';
 import { ISO_DATE_REGEX } from '../../../../schedule/constants';
 import {
   MAX_ID_LENGTH,
@@ -51,16 +53,11 @@ const snoozeConditionSchema = schema.oneOf([
     {
       type: schema.literal('severity_equals'),
       value: schema.oneOf(
-        [
-          schema.literal('critical'),
-          schema.literal('high'),
-          schema.literal('medium'),
-          schema.literal('low'),
-          schema.literal('info'),
-        ],
+        ALERT_SEVERITY_VALUES.map((severity) => schema.literal(severity)) as [Type<AlertSeverity>],
         {
           meta: {
-            description: 'The target severity level: critical, high, medium, low, or info.',
+            description:
+              'The target severity level: critical, major, high, medium, minor, low, warning, or info.',
           },
         }
       ),

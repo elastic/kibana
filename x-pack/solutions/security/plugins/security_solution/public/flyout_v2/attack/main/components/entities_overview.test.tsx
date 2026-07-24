@@ -63,20 +63,20 @@ describe('EntitiesOverview (v2)', () => {
   });
 
   it('renders the section with the entities test id', () => {
-    renderWithEui(<EntitiesOverview alertIds={['alert-1']} />);
+    renderWithEui(<EntitiesOverview alertIds={['alert-1']} onShowEntities={jest.fn()} />);
 
     expect(screen.getByTestId(INSIGHTS_ENTITIES_TEST_ID)).toBeInTheDocument();
   });
 
   it('passes alertIds to useAttackEntitiesCounts', () => {
     const alertIds = ['id-1', 'id-2'];
-    renderWithEui(<EntitiesOverview alertIds={alertIds} />);
+    renderWithEui(<EntitiesOverview alertIds={alertIds} onShowEntities={jest.fn()} />);
 
     expect(mockUseAttackEntitiesCounts).toHaveBeenCalledWith(alertIds);
   });
 
   it('renders Related users and Related hosts labels', () => {
-    renderWithEui(<EntitiesOverview alertIds={['alert-1']} />);
+    renderWithEui(<EntitiesOverview alertIds={['alert-1']} onShowEntities={jest.fn()} />);
 
     expect(screen.getByText('Related users')).toBeInTheDocument();
     expect(screen.getByText('Related hosts')).toBeInTheDocument();
@@ -90,7 +90,7 @@ describe('EntitiesOverview (v2)', () => {
       error: false,
     });
 
-    renderWithEui(<EntitiesOverview alertIds={['alert-1']} />);
+    renderWithEui(<EntitiesOverview alertIds={['alert-1']} onShowEntities={jest.fn()} />);
 
     expect(screen.getByText('3')).toBeInTheDocument();
     expect(screen.getByText('5')).toBeInTheDocument();
@@ -104,19 +104,12 @@ describe('EntitiesOverview (v2)', () => {
       error: false,
     });
 
-    renderWithEui(<EntitiesOverview alertIds={['alert-1']} />);
+    renderWithEui(<EntitiesOverview alertIds={['alert-1']} onShowEntities={jest.fn()} />);
 
     expect(screen.queryByText('0')).not.toBeInTheDocument();
   });
 
-  it('renders the title as plain text when onShowEntities is not provided', () => {
-    renderWithEui(<EntitiesOverview alertIds={['alert-1']} />);
-
-    expect(screen.getByTestId(`${INSIGHTS_ENTITIES_TEST_ID}TitleText`)).toBeInTheDocument();
-    expect(screen.queryByTestId(`${INSIGHTS_ENTITIES_TEST_ID}TitleLink`)).not.toBeInTheDocument();
-  });
-
-  it('renders the title as a link when onShowEntities is provided', () => {
+  it('renders the title as a link that invokes onShowEntities', () => {
     const onShowEntities = jest.fn();
     renderWithEui(<EntitiesOverview alertIds={['alert-1']} onShowEntities={onShowEntities} />);
 

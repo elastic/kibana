@@ -38,7 +38,7 @@ export class ServerlessVectordbPlugin
         defaultMessage: 'Vector DB',
       }),
       appRoute: '/app/vectordb',
-      euiIconType: 'logoElasticsearch',
+      euiIconType: 'logoVectorDB',
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
       deepLinks: [
         {
@@ -70,7 +70,7 @@ export class ServerlessVectordbPlugin
 
   public start(
     core: CoreStart,
-    { serverless }: ServerlessVectordbStartDependencies
+    { navigation }: ServerlessVectordbStartDependencies
   ): ServerlessVectordbPluginStart {
     const chatExperience$ = core.settings.client.get$<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE);
 
@@ -84,7 +84,7 @@ export class ServerlessVectordbPlugin
         });
       })
     );
-    serverless.initNavigation('vectordb', navigationTree$);
+    navigation.initNavigation('vectordb', navigationTree$);
     return {};
   }
 

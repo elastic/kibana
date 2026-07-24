@@ -50,6 +50,7 @@ describe('createActionPolicySmlType', () => {
   let getActionPolicy: jest.Mock;
   let getRepoSo: jest.Mock;
   let createFinder: jest.Mock;
+  let getIsAlertingV2Enabled: jest.Mock;
   let repository: ISavedObjectsRepository;
   let actionPolicyClient: ActionPolicyClient;
 
@@ -57,6 +58,7 @@ describe('createActionPolicySmlType', () => {
     getActionPolicy = jest.fn();
     getRepoSo = jest.fn();
     createFinder = jest.fn();
+    getIsAlertingV2Enabled = jest.fn().mockResolvedValue(true);
 
     repository = {
       get: getRepoSo,
@@ -70,6 +72,7 @@ describe('createActionPolicySmlType', () => {
     createActionPolicySmlType({
       getScopedActionPolicyClient: () => actionPolicyClient,
       getInternalRepository: () => repository,
+      getIsAlertingV2Enabled: () => getIsAlertingV2Enabled(),
     });
 
   describe('id and fetchFrequency', () => {
@@ -169,10 +172,19 @@ describe('createActionPolicySmlType', () => {
       await expect(drainList()).rejects.toThrow('boom');
       expect(close).toHaveBeenCalledTimes(1);
     });
+
+    it('yields nothing and never touches the repository when alerting v2 is disabled', async () => {
+      getIsAlertingV2Enabled.mockResolvedValue(false);
+
+      const items = await drainList();
+
+      expect(items).toEqual([]);
+      expect(createFinder).not.toHaveBeenCalled();
+    });
   });
 
-  describe('getSmlData', () => {
-    it('returns a single chunk built from action policy metadata', async () => {
+  describe('getSmlEntry', () => {
+    it('returns a single entry built from action policy metadata', async () => {
       // Title is the policy name; content is the searchable corpus an
       // agent reasons over (name + description + matcher + grouping +
       // destinations + tags). The fields are pinned so a refactor
@@ -180,24 +192,20 @@ describe('createActionPolicySmlType', () => {
       // shows up as a diff.
       getRepoSo.mockResolvedValueOnce({ id: 'policy-1', attributes: baseActionPolicyAttrs });
 
-      const result = await buildDefinition().getSmlData('policy-1', buildSmlContext());
+      const result = await buildDefinition().getSmlEntry('policy-1', buildSmlContext());
 
       expect(getRepoSo).toHaveBeenCalledWith(ACTION_POLICY_SAVED_OBJECT_TYPE, 'policy-1');
       expect(result).toEqual({
-        chunks: [
-          {
-            type: ACTION_POLICY_SML_TYPE,
-            title: 'Critical alerts → Slack',
-            content: [
-              'Critical alerts → Slack',
-              'Route every critical-priority alert to #oncall',
-              'alert.severity = "critical"',
-              'per_episode',
-              'workflow:wf-critical-route',
-              'oncall, critical',
-            ].join('\n'),
-          },
-        ],
+        type: ACTION_POLICY_SML_TYPE,
+        title: 'Critical alerts → Slack',
+        content: [
+          'Critical alerts → Slack',
+          'Route every critical-priority alert to #oncall',
+          'alert.severity = "critical"',
+          'per_episode',
+          'workflow:wf-critical-route',
+          'oncall, critical',
+        ].join('\n'),
       });
     });
 
@@ -207,24 +215,33 @@ describe('createActionPolicySmlType', () => {
         attributes: undefined as unknown as ActionPolicySavedObjectAttributes,
       });
 
-      const result = await buildDefinition().getSmlData('policy-bare', buildSmlContext());
+      const result = await buildDefinition().getSmlEntry('policy-bare', buildSmlContext());
 
-      expect(result?.chunks[0].title).toBe('policy-bare');
+      expect(result?.title).toBe('policy-bare');
     });
 
     it('returns undefined and logs a warning when the saved object lookup throws', async () => {
-      // getSmlData is called by the crawler per-origin — a single
+      // getSmlEntry is called by the crawler per-origin — a single
       // missing SO must NOT abort the whole crawl. We swallow the
       // error and log it so other origins can still be indexed.
       getRepoSo.mockRejectedValueOnce(new Error('not found'));
       const logger = loggingSystemMock.createLogger();
 
-      const result = await buildDefinition().getSmlData('policy-missing', buildSmlContext(logger));
+      const result = await buildDefinition().getSmlEntry('policy-missing', buildSmlContext(logger));
 
       expect(result).toBeUndefined();
       expect(logger.warn).toHaveBeenCalledWith(
         expect.stringContaining("SML action policy: failed to get data for 'policy-missing'")
       );
+    });
+
+    it('returns undefined without reading the saved object when alerting v2 is disabled', async () => {
+      getIsAlertingV2Enabled.mockResolvedValue(false);
+
+      const result = await buildDefinition().getSmlEntry('policy-1', buildSmlContext());
+
+      expect(result).toBeUndefined();
+      expect(getRepoSo).not.toHaveBeenCalled();
     });
   });
 
@@ -233,12 +250,12 @@ describe('createActionPolicySmlType', () => {
       // This is the security-critical assertion the original review
       // flagged as missing. The action policies API gates reads on
       // `api:read_action_policies` (via ALERTING_V2_API_PRIVILEGES);
-      // the SML chunk MUST stamp the same privilege so a user without
-      // it cannot see policy chunks in agent context.
+      // the SML entry MUST stamp the same privilege so a user without
+      // it cannot see policy entries in agent context.
       //
       // Regression history: prior iterations of analogous SML types
       // shipped with hand-rolled privilege strings that didn't map to
-      // any registered Kibana privilege — chunks were silently
+      // any registered Kibana privilege — entries were silently
       // invisible to every caller (including superusers) because
       // `checkPrivilegesDynamicallyWithRequest` reported "unknown".
       // Pinning the privilege resolution against
@@ -249,7 +266,6 @@ describe('createActionPolicySmlType', () => {
         kibana: {
           privileges: [{ name: `api:${ALERTING_V2_API_PRIVILEGES.actionPolicies.read}` }],
         },
-        elasticsearch: { indices: [] },
       });
     });
   });
@@ -267,13 +283,13 @@ describe('createActionPolicySmlType', () => {
         created_at: '2026-04-10T00:00:00.000Z',
         updated_at: '2026-04-10T00:00:00.000Z',
         spaces: ['default'],
-        permissions: { kibana: { privileges: [] }, elasticsearch: { indices: [] } },
+        permissions: { kibana: { privileges: [] } },
         ingestion_method: 'crawled' as const,
       };
     };
 
     it('returns an attachment input wrapping the parsed action policy', async () => {
-      // `toAttachment` is the bridge from indexed chunk -> agent
+      // `toAttachment` is the bridge from indexed entry -> agent
       // builder attachment payload. It MUST use the scoped client
       // (carries the caller's request) — not the internal repository
       // — so the read goes through the user's authorization context.
@@ -293,7 +309,7 @@ describe('createActionPolicySmlType', () => {
     });
 
     it('returns undefined when getActionPolicy throws', async () => {
-      // The chunk surfaces in search results but the policy itself
+      // The entry surfaces in search results but the policy itself
       // was deleted between index time and read time — surface this
       // as "no attachment" rather than 500-ing the whole reply.
       // `actionPolicyAttachmentDataSchema` is `.partial()`, so the
@@ -326,6 +342,18 @@ describe('createActionPolicySmlType', () => {
       await buildDefinition().toAttachment(document, buildToAttachmentContext());
 
       expect(getActionPolicy).toHaveBeenCalledWith({ id: '' });
+    });
+
+    it('returns undefined without calling the action policy client when alerting v2 is disabled', async () => {
+      getIsAlertingV2Enabled.mockResolvedValue(false);
+
+      const result = await buildDefinition().toAttachment(
+        buildSmlDocument(),
+        buildToAttachmentContext()
+      );
+
+      expect(result).toBeUndefined();
+      expect(getActionPolicy).not.toHaveBeenCalled();
     });
   });
 });

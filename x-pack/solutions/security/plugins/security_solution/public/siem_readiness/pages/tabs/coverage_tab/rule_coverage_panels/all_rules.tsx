@@ -94,10 +94,11 @@ export const AllRuleCoveragePanel: React.FC = () => {
       .map((name) => ({
         label: getIntegrationDisplayName(name),
         key: name,
-        isDisabled: disabledPackagesSet.has(name),
       }))
       .sort((a, b) => {
-        if (a.isDisabled !== b.isDisabled) return a.isDisabled ? -1 : 1;
+        const aDisabled = disabledPackagesSet.has(a.key as string);
+        const bDisabled = disabledPackagesSet.has(b.key as string);
+        if (aDisabled !== bDisabled) return aDisabled ? -1 : 1;
         return a.label.localeCompare(b.label);
       });
   }, [relatedIntegrationNames, enabledPackagesSet, disabledPackagesSet, getIntegrationDisplayName]);

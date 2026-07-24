@@ -7,7 +7,15 @@
 
 import { schema } from '@kbn/config-schema';
 import type { SavedObjectsFullModelVersion } from '@kbn/core-saved-objects-server';
-import { MAX_ALERTS_PER_CASE, MAX_COMMENT_LENGTH } from '../../../../common/constants';
+import {
+  MAX_ALERTS_PER_CASE,
+  MAX_ATTACHMENT_ID_LENGTH,
+  MAX_COMMENT_LENGTH,
+  MAX_ISO_DATE_LENGTH,
+  MAX_OWNER_LENGTH,
+  MAX_ATTACHMENT_TYPE_LENGTH,
+  MAX_USERNAME_LENGTH,
+} from '../../../../common/constants';
 
 // The SO mapping uses `dynamic: false`, so only a subset of attributes is indexed.
 // The `create` schema must declare every indexed field (see
@@ -20,11 +28,6 @@ import { MAX_ALERTS_PER_CASE, MAX_COMMENT_LENGTH } from '../../../../common/cons
 // (string): 512 = ES `_id` upper bound, covering every current producer
 // (alert/event ES ids, foreign SO UUIDs). `attachmentId` (array): reuses
 // MAX_ALERTS_PER_CASE. `username`: matches Kibana security plugin routes.
-const MAX_OWNER_LENGTH = 30;
-const MAX_ISO_DATE_LENGTH = 30;
-const MAX_ATTACHMENT_TYPE_LENGTH = 50;
-const MAX_ATTACHMENT_ID_LENGTH = 512;
-const MAX_USERNAME_LENGTH = 1024;
 
 const userSchema = schema.object(
   {

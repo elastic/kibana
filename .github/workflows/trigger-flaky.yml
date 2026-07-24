@@ -34,12 +34,13 @@ jobs:
           COMMENT_BODY: ${{github.event.comment.body}}
           ISSUE_NUMBER: ${{github.event.issue.number}}
         run: |
-          # Extract configs (everything after '/flaky ')
-          configs="${COMMENT_BODY#/flaky }"
-
-          # Validate comment body format
+          # Match `/flaky` and capture only the config list. Tokens are
+          # `type:path[:count]` and never span lines, so the match stops before any
+          # footer, markers, trailing CR, or prose the comment carries below the
+          # command — validating and extracting the configs in one step.
           # Pattern: type:path[:count] where path cannot contain .., start with ./ or /, or end with /
-          if [[ ! "$configs" =~ ^[[:space:]]*(ftrConfig|scoutConfig|config):[a-zA-Z0-9_-]+([/.][a-zA-Z0-9_-]+)*(:[0-9]+)?([[:space:]]+(ftrConfig|scoutConfig|config):[a-zA-Z0-9_-]+([/.][a-zA-Z0-9_-]+)*(:[0-9]+)?)*[[:space:]]*$ ]]; then
+          config_token='(ftrConfig|scoutConfig|config):[a-zA-Z0-9_-]+([/.][a-zA-Z0-9_-]+)*(:[0-9]+)?'
+          if [[ ! "$COMMENT_BODY" =~ ^/flaky[[:blank:]]+(${config_token}([[:blank:]]+${config_token})*) ]]; then
             echo "::error::Invalid comment format. Use: /flaky <type>:<config>[:count] [<type>:<config>[:count] ...]"
             echo "::error::Where <type> is one of: ftrConfig, scoutConfig, config"
             echo "::error::And <count> is an optional positive integer"
@@ -47,6 +48,7 @@ jobs:
             echo "::error::Example: /flaky config:x-pack/test:5 ftrConfig:functional/apps"
             exit 1
           fi
+          configs="${BASH_REMATCH[1]}"
 
           npm ci --omit=dev
           node trigger-flaky-test-runner $ISSUE_NUMBER "$configs"

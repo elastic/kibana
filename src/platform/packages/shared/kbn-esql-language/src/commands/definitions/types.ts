@@ -146,7 +146,22 @@ export interface ElasticsearchCommandDefinition {
   name: string;
   license?: LicenseType;
   observability_tier?: string;
+  output?: ElasticsearchCommandOutputDefinition;
 }
+
+export interface ElasticsearchCommandOutputDefinition {
+  vary_by: string;
+  selected_by?: string;
+  variants: Record<string, ElasticsearchCommandOutputVariant>;
+}
+
+export type ElasticsearchCommandOutputVariant = Record<
+  string,
+  {
+    type: SupportedDataType;
+    default?: boolean;
+  }
+>;
 
 export interface ElasticsearchSettingsDefinition {
   name: string;

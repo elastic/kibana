@@ -10,7 +10,6 @@
 export { ExecutionError } from './errors/execution_error';
 export { loadWorkflowExampleContent } from './examples';
 export { validateWorkflowForExecution } from './lib/validate_workflow_for_execution';
-export { readWorkflowVersioningEnabled } from './lib/read_workflow_versioning_enabled';
 export { buildWorkflowFilters } from './lib/workflow_filters';
 export type {
   BuildWorkflowFiltersParams,
@@ -26,6 +25,18 @@ export {
 } from './repositories/step_execution_repository';
 export { WorkflowRepository } from './repositories/workflow_repository';
 export { GLOBAL_WORKFLOW_SPACE_ID } from './constants';
+
+export {
+  EXTERNAL_RESUME_API_PATH,
+  EXTERNAL_RESUME_FORM_API_PATH,
+  DEFAULT_WAIT_FOR_APPROVAL_TIMEOUT,
+  DEFAULT_HITL_INPUT_CHANNEL_MESSAGE,
+  DEFAULT_HITL_INPUT_OPEN_FORM_LABEL,
+  DEFAULT_WAIT_FOR_INPUT_TIMEOUT,
+} from './external_resume/constants';
+export { buildExternalResumeUrl } from './external_resume/build_external_resume_url';
+export { buildExternalResumeFormUrl } from './external_resume/build_external_resume_form_url';
+export { computeTokenHmac } from './external_resume/compute_token_hmac';
 
 export type {
   GetManagedWorkflowStatusOptions,

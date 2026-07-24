@@ -7,6 +7,10 @@
 
 import { isBoom, boomify } from '@hapi/boom';
 
+import {
+  AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG,
+  AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG_DEFAULT,
+} from '@kbn/as-code-shared-schemas';
 import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
 import type { TypeOf } from '@kbn/config-schema';
 import { LENS_CONTENT_TYPE } from '@kbn/lens-common/content_management/constants';
@@ -79,6 +83,12 @@ export const registerLensVisualizationsSearchAPIRoute: RegisterAPIRouteFn = (
     },
     async (ctx, req, res) =>
       telemetryHandler(req, usageCounter, async () => {
+        const { core } = await ctx.resolve(['core']);
+        const useGASchemas = await core.featureFlags.getBooleanValue(
+          AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG,
+          AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG_DEFAULT
+        );
+
         // TODO fix IContentClient to type this client based on the actual
         const client = contentManagement.contentClient
           .getForRequest({ request: req, requestHandlerContext: ctx })
@@ -108,7 +118,7 @@ export const registerLensVisualizationsSearchAPIRoute: RegisterAPIRouteFn = (
           return res.ok<TypeOf<typeof lensSearchResponseBodySchema>>({
             body: {
               data: hits.map((item) => {
-                return getLensResponseItem(builder, item);
+                return getLensResponseItem(builder, item, useGASchemas);
               }),
               meta: {
                 page,

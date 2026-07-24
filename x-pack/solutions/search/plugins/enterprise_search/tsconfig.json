@@ -76,6 +76,7 @@
     "@kbn/cell-actions",
     "@kbn/ui-actions-plugin",
     "@kbn/alerting-v2-utils",
+    "@kbn/deeplinks-workflows",
     "@kbn/fleet-plugin",
     "@kbn/search-shared-ui",
     "@kbn/charts-theme",

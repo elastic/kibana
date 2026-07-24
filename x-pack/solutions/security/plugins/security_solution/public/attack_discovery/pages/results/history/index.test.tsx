@@ -18,6 +18,8 @@ import { getMockAttackDiscoveryAlerts } from '../../mock/mock_attack_discovery_a
 import { useFindAttackDiscoveries } from '../../use_find_attack_discoveries';
 import { useGetAttackDiscoveryGenerations } from '../../use_get_attack_discovery_generations';
 import { useKibana as mockUseKibana } from '../../../../common/lib/kibana';
+import { useFlyoutApi } from '../../../../flyout_v2/use_flyout_api';
+import { createFlyoutApiMock } from '../../../../flyout_v2/use_flyout_api.mock';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -66,6 +68,12 @@ jest.mock('../../../../common/lib/kibana', () => ({
         },
         ui: { getCasesContext: mockCasesContext },
       },
+      featureFlags: {
+        getBooleanValue: jest.fn().mockResolvedValue(false),
+      },
+      uiSettings: {
+        get: jest.fn().mockReturnValue(false),
+      },
       theme: {
         getTheme: jest.fn().mockReturnValue({ darkMode: false }),
       },
@@ -79,6 +87,7 @@ jest.mock('../../../../common/lib/kibana', () => ({
     remove: jest.fn(),
   })),
 }));
+jest.mock('../../../../flyout_v2/use_flyout_api');
 
 jest.mock(
   '../attack_discovery_markdown_formatter/field_markdown_renderer/use_entity_euid_from_alerts',
@@ -122,6 +131,12 @@ jest.mock(
         useCasesAddToNewCaseFlyout: jest.fn(),
       },
       ui: { getCasesContext: mockCasesContext },
+    },
+    featureFlags: {
+      getBooleanValue: jest.fn().mockResolvedValue(false),
+    },
+    uiSettings: {
+      get: jest.fn().mockReturnValue(false),
     },
     theme: {
       getTheme: jest.fn().mockReturnValue({ darkMode: false }),
@@ -203,6 +218,7 @@ const defaultProps = {
 describe('History', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.mocked(useFlyoutApi).mockReturnValue(createFlyoutApiMock());
 
     // Reset mocks to their default state
     (useFindAttackDiscoveries as jest.Mock).mockReturnValue({

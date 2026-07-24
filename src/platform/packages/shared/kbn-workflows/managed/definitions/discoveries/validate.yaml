@@ -1,0 +1,113 @@
+version: '1'
+name: Security - Attack discovery - Default validation
+description: >
+  Validates generated attack discoveries by filtering hallucinated alert IDs,
+  then persists deduplicated discoveries
+enabled: true
+tags:
+  - Attack discovery
+  - Security
+  - attackDiscovery:validate
+
+triggers:
+  - type: manual
+
+inputs:
+  additionalProperties: false
+  properties:
+    alerts_context_count:
+      description: Number of alerts analyzed
+      type: integer
+    alerts_index_pattern:
+      description: >
+        Elasticsearch index pattern for security alerts. When not provided,
+        defaults to .alerts-security.alerts-<spaceId> using the current
+        Kibana space (via workflow.spaceId).
+      type: string
+    anonymized_alerts:
+      description: Anonymized alerts in Document format
+      items:
+        additionalProperties: true
+        type: object
+      type: array
+    api_config:
+      additionalProperties: false
+      description: LLM API configuration
+      properties:
+        action_type_id:
+          type: string
+        connector_id:
+          type: string
+        model:
+          type: string
+      required:
+        - connector_id
+      type: object
+    attack_discoveries:
+      description: Attack discoveries to validate
+      items:
+        additionalProperties: true
+        type: object
+      type: array
+    connector_name:
+      description: LLM connector name
+      type: string
+    enable_field_rendering:
+      default: true
+      description: Enable field rendering in UI
+      type: boolean
+    generation_uuid:
+      description: Generation execution UUID for tracking
+      type: string
+    replacements:
+      additionalProperties: true
+      description: Anonymization replacements
+      type: object
+    source:
+      description: How the generation was triggered (interactive, scheduled, or action)
+      enum:
+        - action
+        - interactive
+        - scheduled
+      type: string
+    with_replacements:
+      default: false
+      description: Include replacements in response
+      type: boolean
+  required:
+    - alerts_context_count
+    - anonymized_alerts
+    - api_config
+    - attack_discoveries
+    - generation_uuid
+
+steps:
+  # Step 1: Filter hallucinated alert IDs and deduplicate discoveries
+  - name: validate_discoveries
+    type: security.attack-discovery.defaultValidation
+    timeout: '5m'
+    with:
+      alerts_context_count: ${{ inputs.alerts_context_count }}
+      alerts_index_pattern: '{%- if inputs.alerts_index_pattern -%}{{ inputs.alerts_index_pattern }}{%- else -%}.alerts-security.alerts-{{ workflow.spaceId }}{%- endif -%}'
+      anonymized_alerts: ${{ inputs.anonymized_alerts }}
+      api_config: ${{ inputs.api_config }}
+      attack_discoveries: ${{ inputs.attack_discoveries }}
+      connector_name: ${{ inputs.connector_name }}
+      generation_uuid: ${{ inputs.generation_uuid }}
+      replacements: ${{ inputs.replacements }}
+
+  # Step 2: Persist validated discoveries to the Elasticsearch index
+  - name: persist_discoveries
+    type: security.attack-discovery.persistDiscoveries
+    timeout: '5m'
+    with:
+      alerts_context_count: ${{ inputs.alerts_context_count }}
+      anonymized_alerts: ${{ inputs.anonymized_alerts }}
+      api_config: ${{ inputs.api_config }}
+      attack_discoveries: ${{ steps.validate_discoveries.output.validated_discoveries }}
+      connector_name: ${{ inputs.connector_name }}
+      enable_field_rendering: ${{ inputs.enable_field_rendering }}
+      generation_uuid: ${{ inputs.generation_uuid }}
+      replacements: ${{ inputs.replacements }}
+      source: ${{ inputs.source }}
+      with_replacements: ${{ inputs.with_replacements }}

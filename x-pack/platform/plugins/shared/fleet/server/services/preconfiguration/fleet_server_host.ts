@@ -76,7 +76,7 @@ export function getPreconfiguredFleetServerHostFromConfig(
       ? [
           {
             id: ECH_AGENTLESS_FLEET_SERVER_HOST_ID,
-            name: 'Internal Fleet Server for agentless',
+            name: 'Internal Fleet Server for managed integrations',
             host_urls: cloudServerHosts,
             is_default: false,
             is_preconfigured: true,
@@ -322,16 +322,16 @@ async function isPreconfiguredFleetServerHostDifferentFromCurrent(
 ): Promise<boolean> {
   const secretFieldsAreDifferent = async (): Promise<boolean> => {
     const sslKeyHashIsDifferent = await isSecretDifferent(
-      preconfiguredFleetServerHost.secrets?.ssl?.key,
-      existingFleetServerHost.secrets?.ssl?.key
+      preconfiguredFleetServerHost.secrets?.ssl?.key ?? undefined,
+      existingFleetServerHost.secrets?.ssl?.key ?? undefined
     );
     const sslESKeyHashIsDifferent = await isSecretDifferent(
-      preconfiguredFleetServerHost.secrets?.ssl?.es_key,
-      existingFleetServerHost.secrets?.ssl?.es_key
+      preconfiguredFleetServerHost.secrets?.ssl?.es_key ?? undefined,
+      existingFleetServerHost.secrets?.ssl?.es_key ?? undefined
     );
     const sslAgentKeyHashIsDifferent = await isSecretDifferent(
-      preconfiguredFleetServerHost.secrets?.ssl?.agent_key,
-      existingFleetServerHost.secrets?.ssl?.agent_key
+      preconfiguredFleetServerHost.secrets?.ssl?.agent_key ?? undefined,
+      existingFleetServerHost.secrets?.ssl?.agent_key ?? undefined
     );
     return sslKeyHashIsDifferent || sslESKeyHashIsDifferent || sslAgentKeyHashIsDifferent;
   };

@@ -23,17 +23,17 @@ import { CASE_DYNAMIC_TEMPLATES } from './dynamic_templates';
  *   - `@timestamp` — required by Discover / Lens; set to the case's
  *     latest activity timestamp at write time.
  *   - `space_id` / `owner` — top-level (document-root) scoping fields,
- *     deliberately NOT under `cases.*`. This mirrors the Kibana
+ *     deliberately NOT under `case.*`. This mirrors the Kibana
  *     implicit-privileges DLS convention (elasticsearch#148331): a future
  *     ES `ImplicitPrivilegesProvider` can DLS-scope `.cases` by top-level
  *     `space_id` (+ `owner` for solution scoping) the same way the alerts
  *     provider scopes `.rule-events` by top-level `space_id`. Cases SOs
  *     are `multiple-isolated`, so a case lives in exactly one space —
  *     `space_id` is therefore singular, not an array. `owner` is also
- *     mirrored at `cases.owner` so analysts see it in the grouped
+ *     mirrored at `case.owner` so analysts see it in the grouped
  *     data-view namespace; the top-level copy is the DLS field.
- *   - `cases.*` — case-specific fields, namespaced so runtime fields at
- *     `cases.<snake>` can lift extended-field keywords without
+ *   - `case.*` — case-specific fields, namespaced so runtime fields at
+ *     `case.<snake>` can lift extended-field keywords without
  *     colliding.
  *
  * Intentional divergences from the SO mapping:
@@ -45,12 +45,12 @@ import { CASE_DYNAMIC_TEMPLATES } from './dynamic_templates';
  *     `index.mapping.total_fields.limit` (default 1000) on tenants with
  *     many templates × spaces; flattened keeps the mapping at one field
  *     regardless of cluster-wide snake-key cardinality. Per-child typed
- *     querying happens via runtime fields at `cases.<snake>` (see
+ *     querying happens via runtime fields at `case.<snake>` (see
  *     `data_view/runtime_fields.ts`), which read the value via
- *     `doc['cases.extended_fields.<snake>']`.
+ *     `doc['case.extended_fields.<snake>']`.
  *   - `observables`: SO uses a nested array of
  *     `{ typeKey, value, description }`; this index denormalizes to one
- *     keyword array per `typeKey` (`cases.observables.url: ["..."]`) so
+ *     keyword array per `typeKey` (`case.observables.url: ["..."]`) so
  *     analysts run simple term queries instead of nested aggregations.
  *     `description` is dropped — free-text per observable, not an
  *     analytics dimension.
@@ -73,15 +73,15 @@ export const CASE_INDEX_MAPPING: MappingTypeMapping = {
     // Top-level scoping fields for implicit-privileges DLS (see the
     // file-level comment). `space_id` is singular — cases are
     // space-isolated. `owner` carries the solution dimension; it is also
-    // mirrored at `cases.owner` below for data-view grouping.
+    // mirrored at `case.owner` below for data-view grouping.
     space_id: { type: 'keyword' },
     owner: { type: 'keyword' },
 
-    cases: {
+    case: {
       properties: {
         id: { type: 'keyword' },
         // Mirror of the top-level `owner` (the DLS field). Kept under
-        // `cases.*` so analysts see it in the grouped data-view namespace
+        // `case.*` so analysts see it in the grouped data-view namespace
         // alongside the other case fields.
         owner: { type: 'keyword' },
         title: {
@@ -138,15 +138,20 @@ export const CASE_INDEX_MAPPING: MappingTypeMapping = {
         total_comments: { type: 'integer' },
         total_events: { type: 'integer' },
         total_observables: { type: 'integer' },
-        // Case lifetime in milliseconds. `unsigned_long` matches the SO
-        // type to avoid an unnecessary divergence.
-        duration: { type: 'unsigned_long' },
-        // SLA timing fields. Not in the SO mapping (the SO is
-        // `dynamic: false`, storing them in `_source` only); declared
-        // here because the strict analytics mapping requires it.
-        time_to_acknowledge: { type: 'long' },
-        time_to_investigate: { type: 'long' },
-        time_to_resolve: { type: 'long' },
+        // Case lifetime in **seconds** — `Math.floor((closedAt - createdAt) /
+        // 1000)`; see `getDurationInSeconds` in `client/cases/utils.ts`.
+        // `unsigned_long` matches the SO type to avoid an unnecessary
+        // divergence. `meta.unit: 's'` surfaces the unit (seconds) to
+        // Kibana/Lens so consumers don't have to guess or read this comment.
+        duration: { type: 'unsigned_long', meta: { unit: 's' } },
+        // SLA timing fields, all in **seconds** (see
+        // `calculateTimeDifferenceInSeconds` in `client/cases/utils.ts`);
+        // `meta.unit: 's'` makes the unit explicit to Kibana/Lens. Not in the
+        // SO mapping (the SO is `dynamic: false`, storing them in `_source`
+        // only); declared here because the strict analytics mapping requires it.
+        time_to_acknowledge: { type: 'long', meta: { unit: 's' } },
+        time_to_investigate: { type: 'long', meta: { unit: 's' } },
+        time_to_resolve: { type: 'long', meta: { unit: 's' } },
         // Monotonic per-tenant id. Matches the SO exactly, including
         // the multi-fields: `keyword` for exact-match aggregations,
         // `text` for partial search.
@@ -230,9 +235,9 @@ export const CASE_INDEX_MAPPING: MappingTypeMapping = {
         // Denormalized from the SO's nested
         // `{ typeKey, value, description }` array into a flat object
         // keyed by observable type
-        // (`cases.observables.<typeKey>: keyword[]`). Lets analysts run
+        // (`case.observables.<typeKey>: keyword[]`). Lets analysts run
         // simple term queries
-        // (`cases.observables.url: "http://..."`) without nested
+        // (`case.observables.url: "http://..."`) without nested
         // aggregation overhead while preserving the type↔value
         // relationship via the field path.
         //
@@ -247,9 +252,9 @@ export const CASE_INDEX_MAPPING: MappingTypeMapping = {
         // `flattened` keeps the mapping at one field regardless of how
         // many distinct `<name>_as_<type>` snake-keys exist across
         // templates cluster-wide. Typed querying happens via runtime
-        // fields at `cases.<snake>` (see `data_view/runtime_fields.ts`),
+        // fields at `case.<snake>` (see `data_view/runtime_fields.ts`),
         // which read the value via
-        // `doc['cases.extended_fields.<snake>']`. Matches the cases SO
+        // `doc['case.extended_fields.<snake>']`. Matches the cases SO
         // mapping.
         extended_fields: { type: 'flattened' },
       },

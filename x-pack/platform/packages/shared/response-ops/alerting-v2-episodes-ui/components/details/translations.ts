@@ -65,6 +65,13 @@ export const FLYOUT_TAB_RELATED = i18n.translate(
   }
 );
 
+export const FLYOUT_TAB_TIMELINE = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.flyout.tab.timeline',
+  {
+    defaultMessage: 'Timeline',
+  }
+);
+
 export const FLYOUT_TAB_METADATA = i18n.translate(
   'xpack.alertingV2EpisodesUi.details.flyout.tab.metadata',
   {
@@ -236,6 +243,13 @@ export const METADATA_LIST_GROUPING_LABEL = i18n.translate(
   }
 );
 
+export const METADATA_LIST_GROUPING_ERROR = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.metadataList.groupingError',
+  {
+    defaultMessage: 'Could not load grouping.',
+  }
+);
+
 export const METADATA_LIST_TRIGGERED_LABEL = i18n.translate(
   'xpack.alertingV2EpisodesUi.details.metadataList.triggeredLabel',
   {
@@ -254,6 +268,13 @@ export const METADATA_LIST_ASSIGNEE_LABEL = i18n.translate(
   'xpack.alertingV2EpisodesUi.details.metadataList.assigneeLabel',
   {
     defaultMessage: 'Assignee',
+  }
+);
+
+export const METADATA_LIST_TAGS_LABEL = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.metadataList.tagsLabel',
+  {
+    defaultMessage: 'Tags',
   }
 );
 

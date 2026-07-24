@@ -5,26 +5,22 @@
  * 2.0.
  */
 
+import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import type { DataTableRecord } from '@kbn/discover-utils';
+import type { EventHit } from '@kbn/timelines-plugin/common/search_strategy';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import { getTimelineFieldsDataFromHit } from '@kbn/timelines-plugin/common';
 
 /**
- * Converts a `DataTableRecord` into the `TimelineEventsDetailsItem[]` format expected by legacy
- * action hooks (e.g. responder, add-to-case). Each flattened field is mapped to its category,
- * stringified values, and original value.
+ * Converts a `DataTableRecord` into the `TimelineEventsDetailsItem[]` format expected by the table
+ * tab and other field-browser consumers.
  *
- * @deprecated This adapter exists only to bridge the gap while legacy hooks still require
- * `TimelineEventsDetailsItem[]`. It should be removed once all actions and downstream logic
- * have been updated to accept `DataTableRecord` directly.
+ * Delegates to the shared `getTimelineFieldsDataFromHit` — the same formatter the server uses to
+ * build `dataFormattedForFieldBrowser`. It runs on `hit.raw` (the raw ES hit, which carries
+ * `fields` / `_source` / `_id` / `_index`), so object-array fields (e.g. `threat.enrichments`) are
+ * serialized correctly and metadata fields are included. This produces the exact same rows/values
+ * the expandable flyout got from its server fetch, on every surface (Security flyout and Discover).
  */
 export const getTimelineEventsDetailsFromRecord = (
   hit: DataTableRecord
-): TimelineEventsDetailsItem[] => {
-  return Object.entries(hit.flattened).map(([field, value]) => ({
-    field,
-    values: Array.isArray(value) ? value.map(String) : value != null ? [String(value)] : undefined,
-    originalValue: value,
-    isObjectArray: Array.isArray(value) && value.length > 0 && typeof value[0] === 'object',
-    category: field.split('.')[0],
-  }));
-};
+): TimelineEventsDetailsItem[] => getTimelineFieldsDataFromHit(hit.raw as SearchHit<EventHit>);

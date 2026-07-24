@@ -34,7 +34,7 @@ export class ToastsService extends FtrService {
     if (titleOnly) return { title };
 
     const toast = await this.getElementByIndex(index);
-    const messageElement = await this.testSubjects.findDescendant('errorToastMessage', toast);
+    const messageElement = await this.testSubjects.findDescendant('euiToastText', toast);
     const message: string = await messageElement.getVisibleText();
 
     return { title, message };
@@ -89,6 +89,15 @@ export class ToastsService extends FtrService {
         await closeBtn.click();
       } catch (err) {
         // ignore errors, toast clear themselves after timeout
+      }
+      try {
+        // A dismissed toast stays in the DOM during its fade-out animation, and a toast that
+        // is already auto-fading cannot be clicked (the click above is swallowed). In both
+        // cases the element is still attached when this returns, so wait for it to actually
+        // detach; otherwise a following `assertCount(0)` re-finds it and the caller loops.
+        await this.find.waitForElementStale(toastElement, 5000);
+      } catch (err) {
+        // ignore, assertCount handles any toast that is genuinely still present
       }
     }
   }

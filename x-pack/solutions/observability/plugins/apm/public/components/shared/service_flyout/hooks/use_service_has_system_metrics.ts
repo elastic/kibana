@@ -6,7 +6,7 @@
  */
 
 import type { Environment } from '../../../../../common/environment_rt';
-import { useFetcher } from '../../../../hooks/use_fetcher';
+import { isPending, useFetcher } from '../../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 
 interface Params {
@@ -21,10 +21,10 @@ export function useServiceHasSystemMetrics({
   environment,
   rangeFrom,
   rangeTo,
-}: Params): boolean | undefined {
+}: Params): { hasSystemMetrics: boolean | undefined; isLoading: boolean } {
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
-  const { data } = useFetcher(
+  const { data, status } = useFetcher(
     (callApmApi) =>
       callApmApi('GET /internal/apm/services/{serviceName}/has_system_metrics', {
         params: {
@@ -33,8 +33,8 @@ export function useServiceHasSystemMetrics({
         },
       }),
     [serviceName, environment, start, end],
-    { showToastOnError: false }
+    { showToastOnError: false, useLegacyCallApmApi: true }
   );
 
-  return data?.hasSystemMetrics;
+  return { hasSystemMetrics: data?.hasSystemMetrics, isLoading: isPending(status) };
 }

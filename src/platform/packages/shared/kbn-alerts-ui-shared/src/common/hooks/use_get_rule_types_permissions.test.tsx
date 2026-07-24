@@ -12,9 +12,19 @@ import React from 'react';
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { notificationServiceMock } from '@kbn/core/public/mocks';
 import { renderHook, waitFor } from '@testing-library/react';
+import type { Alert } from '@kbn/alerting-types';
+import { ALERT_RULE_CONSUMER, ALERT_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { useGetRuleTypesPermissions } from './use_get_rule_types_permissions';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { testQueryClientConfig } from '../test_utils/test_query_client_config';
+
+const buildAlert = (fields: { ruleTypeId?: string; consumer?: string }): Alert =>
+  ({
+    _id: 'alert-1',
+    _index: '.alerts',
+    ...(fields.ruleTypeId ? { [ALERT_RULE_TYPE_ID]: [fields.ruleTypeId] } : {}),
+    ...(fields.consumer ? { [ALERT_RULE_CONSUMER]: [fields.consumer] } : {}),
+  } as Alert);
 
 const http = httpServiceMock.createStartContract();
 const { toasts } = notificationServiceMock.createStartContract();
@@ -222,6 +232,111 @@ describe('useGetRuleTypesPermissions', () => {
       expect(result.current.authorizedToReadRuleType('rule-type-1', 'unknown-consumer')).toBe(
         false
       );
+    });
+  });
+
+  describe('authorizedToReadRuleForAlert', () => {
+    it('should return true when the alert rule type and consumer are readable', async () => {
+      getRuleTypes.mockResolvedValueOnce([
+        {
+          id: 'rule-type-1',
+          authorizedConsumers: { alerts: { read: true, all: false } },
+        },
+      ]);
+      const { result } = renderHook(
+        () =>
+          useGetRuleTypesPermissions({
+            http,
+            toasts,
+            enabled: true,
+          }),
+        {
+          wrapper: Wrapper,
+        }
+      );
+      await waitFor(() => result.current.isSuccess);
+      expect(
+        result.current.authorizedToReadRuleForAlert(
+          buildAlert({ ruleTypeId: 'rule-type-1', consumer: 'alerts' })
+        )
+      ).toBe(true);
+    });
+
+    it('should return false when the alert consumer is not readable for the rule type', async () => {
+      getRuleTypes.mockResolvedValueOnce([
+        {
+          id: 'rule-type-1',
+          authorizedConsumers: {
+            alerts: { read: true, all: false },
+            logs: { read: false, all: false },
+          },
+        },
+      ]);
+      const { result } = renderHook(
+        () =>
+          useGetRuleTypesPermissions({
+            http,
+            toasts,
+            enabled: true,
+          }),
+        {
+          wrapper: Wrapper,
+        }
+      );
+      await waitFor(() => result.current.isSuccess);
+      expect(
+        result.current.authorizedToReadRuleForAlert(
+          buildAlert({ ruleTypeId: 'rule-type-1', consumer: 'logs' })
+        )
+      ).toBe(false);
+    });
+
+    it('should return false when the alert has no rule type id', async () => {
+      getRuleTypes.mockResolvedValueOnce([
+        {
+          id: 'rule-type-1',
+          authorizedConsumers: { alerts: { read: true, all: false } },
+        },
+      ]);
+      const { result } = renderHook(
+        () =>
+          useGetRuleTypesPermissions({
+            http,
+            toasts,
+            enabled: true,
+          }),
+        {
+          wrapper: Wrapper,
+        }
+      );
+      await waitFor(() => result.current.isSuccess);
+      expect(result.current.authorizedToReadRuleForAlert(buildAlert({ consumer: 'alerts' }))).toBe(
+        false
+      );
+    });
+
+    it('should fall back to any authorized consumer when the alert has no consumer', async () => {
+      getRuleTypes.mockResolvedValueOnce([
+        {
+          id: 'rule-type-1',
+          authorizedConsumers: { alerts: { read: true, all: false } },
+        },
+      ]);
+      const { result } = renderHook(
+        () =>
+          useGetRuleTypesPermissions({
+            http,
+            toasts,
+            enabled: true,
+          }),
+        {
+          wrapper: Wrapper,
+        }
+      );
+      await waitFor(() => result.current.isSuccess);
+      expect(
+        result.current.authorizedToReadRuleForAlert(buildAlert({ ruleTypeId: 'rule-type-1' }))
+      ).toBe(true);
     });
   });
 });

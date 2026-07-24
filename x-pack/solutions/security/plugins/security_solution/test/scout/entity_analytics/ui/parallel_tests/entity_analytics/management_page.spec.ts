@@ -70,7 +70,7 @@ spaceTest.describe(
         // store is in `installing` state (status === 'enabling'), so asserting
         // UI text alone races against install completion. Mirrors
         // engine_status_management.spec.ts. See #259664.
-        await apiServices.entityAnalytics.waitForEntityStoreStatusV2('running', 180000);
+        await apiServices.entityAnalytics.waitForEntityStoreStatus('running', 180000);
         await managementPage.waitForStatusLoaded();
         await expect(managementPage.entityAnalyticsHealth).toContainText('On', {
           timeout: 30000,
@@ -83,7 +83,7 @@ spaceTest.describe(
         // them. Full deletion to `not_installed` only happens in afterEach via
         // deleteEntityStoreEngines. Wait for the post-stop backend state, then
         // assert the UI flip.
-        await apiServices.entityAnalytics.waitForEntityStoreStatusV2('stopped', 60000);
+        await apiServices.entityAnalytics.waitForEntityStoreStatus('stopped', 60000);
         await managementPage.waitForStatusLoaded();
         await expect(managementPage.entityAnalyticsHealth).toContainText('Off', {
           timeout: 30000,
@@ -122,7 +122,7 @@ spaceTest.describe(
 
       await expect(managementPage.entityAnalyticsHealth).toContainText('Off');
 
-      await page.route('**/api/security/entity_store/start', (route) =>
+      await page.route('**/api/security/entity_store/install', (route) =>
         route.fulfill({
           status: 500,
           contentType: 'application/json',
@@ -136,7 +136,7 @@ spaceTest.describe(
         timeout: 30000,
       });
 
-      await page.unroute('**/api/security/entity_store/start');
+      await page.unroute('**/api/security/entity_store/install');
     });
   }
 );

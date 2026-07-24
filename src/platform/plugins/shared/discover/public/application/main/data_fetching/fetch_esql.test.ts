@@ -34,6 +34,7 @@ describe('fetchEsql', () => {
     data: discoverServiceMock.data,
     expressions: discoverServiceMock.expressions,
     scopedProfilesManager,
+    isApproximate: false,
   };
 
   it('resolves with returned records', async () => {
@@ -135,20 +136,20 @@ describe('fetchEsql', () => {
     expect(result.time).toEqual(absoluteTimeRange);
   });
 
-  it('passes useApproximation to the expression searchContext', async () => {
+  it('passes isApproximate to the expression searchContext', async () => {
     const expressionsExecuteSpy = jest.spyOn(discoverServiceMock.expressions, 'execute');
     expressionsExecuteSpy.mockReturnValueOnce({
       cancel: jest.fn(),
       getData: jest.fn(() => of({ result: { columns: [], rows: [] } })),
     } as unknown as ExecutionContract);
 
-    await fetchEsql({ ...fetchEsqlMockProps, useApproximation: true });
+    await fetchEsql({ ...fetchEsqlMockProps, isApproximate: true });
 
     expect(expressionsExecuteSpy).toHaveBeenCalledWith(
       expect.anything(),
       null,
       expect.objectContaining({
-        searchContext: expect.objectContaining({ useApproximation: true }),
+        searchContext: expect.objectContaining({ isApproximate: true }),
       })
     );
   });

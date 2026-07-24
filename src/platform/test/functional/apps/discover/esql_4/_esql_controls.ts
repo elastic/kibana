@@ -27,8 +27,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'timePicker',
   ]);
 
-  // Failing: See https://github.com/elastic/kibana/issues/271826
-  describe.skip('discover esql controls', () => {
+  describe('discover esql controls', () => {
     before(async () => {
       await kibanaServer.uiSettings.replace({
         defaultIndex: 'logstash-*',
@@ -77,6 +76,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // Verify that the control exists in discover
         const control = await dashboardControls.getControlElementById('esql-control-1');
         expect(control).to.be.ok();
+
+        await discover.waitUntilTabIsLoaded();
         await discover.expectDocTableToBeLoaded();
       });
     });

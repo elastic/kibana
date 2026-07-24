@@ -12,11 +12,13 @@ import { keyBy } from 'lodash';
 import type { UseQueryOptions } from '@kbn/react-query';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { ToastsStart } from '@kbn/core-notifications-browser';
+import type { Alert } from '@kbn/alerting-types';
 import type { RuleType } from '@kbn/triggers-actions-ui-types';
 import type {
   RuleTypeIndexWithDescriptions,
   RuleTypeWithDescription,
 } from '@kbn/triggers-actions-ui-types';
+import { ALERT_RULE_CONSUMER, ALERT_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { useGetRuleTypesQuery } from '@kbn/response-ops-rules-apis/hooks/use_get_rule_types_query';
 import { i18n } from '@kbn/i18n';
 import { ALERTS_FEATURE_ID } from '../constants';
@@ -135,6 +137,18 @@ export const useGetRuleTypesPermissions = ({
     [filteredIndex]
   );
 
+  // Convenience wrapper: checks rule-read authorization for the rule behind a
+  // specific alert by extracting the rule type ID and consumer from the alert
+  // document. Returns false when either field is absent.
+  const authorizedToReadRuleForAlert = useCallback(
+    (alert: Alert) => {
+      const ruleTypeId = alert[ALERT_RULE_TYPE_ID]?.[0] as string | undefined;
+      const consumer = alert[ALERT_RULE_CONSUMER]?.[0] as string | undefined;
+      return Boolean(ruleTypeId && authorizedToReadRuleType(ruleTypeId, consumer));
+    },
+    [authorizedToReadRuleType]
+  );
+
   return {
     ruleTypesState: {
       isInitialLoad: isInitialLoading,
@@ -146,6 +160,7 @@ export const useGetRuleTypesPermissions = ({
     authorizedRuleTypes,
     authorizedToReadAnyRules,
     authorizedToReadRuleType,
+    authorizedToReadRuleForAlert,
     authorizedToCreateAnyRules,
     isSuccess,
   };

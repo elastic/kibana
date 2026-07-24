@@ -208,10 +208,10 @@ pivot:
       - "Feature:Observability Home"
       - "Feature:SLO"
       - "Team:obs-ux-management"
-      - "Team:Obs AI Assistant"
+      - "Team:nightshift-context-and-research"
       - "Team:obs-ux-infra_services - DEPRECATED"
       - "Team:obs-ux-logs"
-      - "Team:obs-onboarding"
+      - "Team:streams-ui"
       - "Team:obs-knowledge"
       - "Team:obs-entities"
       - "ci:project-deploy-observability"
@@ -227,7 +227,6 @@ pivot:
       - "Team:actionable-obs"
       - "Team:obs-exploration"
       - "Team:obs-presentation"
-      - "Team:obs-ai"
       - "Team:Observability"
       - "author:actionable-obs"
       - "Feature:Streams"
@@ -317,6 +316,7 @@ bundle:
   # Use YAML literal block scalar (|) for multiline descriptions. See docs/contribute/changelog.md for examples.
   # description: |
   #   This release includes new features and bug fixes.
+  use_local_changelogs: true
 
   # Named bundle profiles for different release scenarios
   profiles:

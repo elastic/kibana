@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-/** Parameters for restoring a historical change through the domain adapter. */
+/** Sequence and confirm-time context for restore KPI telemetry. */
 export interface ChangeHistoryRestoreTelemetryParams {
   restoredFromSequence?: number;
   currentSequence?: number;
   rollbackDistance?: number;
+  /** True when the host had unsaved in-editor changes at restore confirm time. */
+  hadUnsavedLocalEdits?: boolean;
 }
 
 export interface RestoreChangeParams {

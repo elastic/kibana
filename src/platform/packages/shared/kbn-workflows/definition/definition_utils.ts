@@ -120,17 +120,34 @@ const nestedStepHandlers: ReadonlyArray<NestedStepHandler> = [
     collect: (step) => {
       const groups: NestedStepGroup[] = [];
 
-      if (isParallelStep(step) && Array.isArray(step.branches)) {
-        step.branches.forEach((branch, branchIndex) => {
-          pushStepGroup(groups, `.branch[${branchIndex}]`, branch.steps);
-        });
+      if (isParallelStep(step)) {
+        // Dynamic fan-out exposes a single shared body (`steps` paired with
+        // `foreach`); static branches expose one body per named branch
+        // (`branches[].steps`). Collect whichever mode this parallel step uses.
+        // Gate the dynamic body on `foreach` so a stray top-level `steps` on a
+        // static step (schema-invalid, but be defensive) isn't double-collected.
+        if (step.foreach !== undefined && Array.isArray(step.steps)) {
+          pushStepGroup(groups, '', step.steps);
+        }
+        if (Array.isArray(step.branches)) {
+          step.branches.forEach((branch, branchIndex) => {
+            pushStepGroup(groups, `.branch[${branchIndex}]`, branch.steps);
+          });
+        }
       }
 
       return groups;
     },
     strip: (stripped, step) => {
-      if (isParallelStep(step) && Array.isArray(step.branches)) {
-        stripped.branches = stripObjectArraySteps(step.branches as Array<Record<string, unknown>>);
+      if (isParallelStep(step)) {
+        if (Array.isArray(step.steps)) {
+          deleteNestedStepKey(stripped, 'steps', step.steps);
+        }
+        if (Array.isArray(step.branches)) {
+          stripped.branches = stripObjectArraySteps(
+            step.branches as Array<Record<string, unknown>>
+          );
+        }
       }
     },
   },

@@ -225,6 +225,7 @@ export function initializeFetch({
               searchSessionId,
               esqlVariables: getRelevantESQLVariables(savedSearch, fetchContext.esqlVariables),
               projectRouting: fetchContext.projectRouting,
+              isApproximate: fetchContext.isApproximate,
             });
             return {
               columnsMeta: result.esqlQueryColumns

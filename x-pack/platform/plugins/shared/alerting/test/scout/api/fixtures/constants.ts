@@ -5,11 +5,25 @@
  * 2.0.
  */
 
+import { tags } from '@kbn/scout';
+
 export const COMMON_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',
   'x-elastic-internal-origin': 'kibana',
   'Content-Type': 'application/json;charset=UTF-8',
 };
+
+/**
+ * Deployment-agnostic tag set with serverless observability targets removed.
+ *
+ * Stack alerts privilege tests rely on the `stackAlertsOnly` feature. It is registered
+ * on every deployment, but the serverless observability project hides it via
+ * `xpack.features.overrides` (see config/serverless.oblt.complete.yml), so those lanes
+ * are excluded. Stateful observability is full Kibana and keeps the feature, so it stays.
+ */
+export const DEPLOYMENT_AGNOSTIC_WITHOUT_SERVERLESS_OBS = tags.deploymentAgnostic.filter(
+  (tag) => !tags.serverless.observability.all.includes(tag)
+);
 
 export const ES_QUERY_RULE_PARAMS = {
   index: ['.kibana-event-log-*'],
@@ -21,7 +35,10 @@ export const ES_QUERY_RULE_PARAMS = {
   thresholdComparator: '>',
   threshold: [0],
   searchType: 'esQuery',
-  excludeHitsFromPreviousRun: true,
+  // Keep every run counting the full time window so the alert stays active across the
+  // create-time auto-run and the setup's _run_soon; excluding prior hits can leave the
+  // second run with zero new docs, recovering the alert before setup can find it.
+  excludeHitsFromPreviousRun: false,
   aggType: 'count',
   groupBy: 'all',
 } as const;

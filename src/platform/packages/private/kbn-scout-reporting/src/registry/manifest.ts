@@ -13,6 +13,7 @@ import type { TestCase } from '@playwright/test/reporter';
 import { globSync } from 'fast-glob';
 import path from 'node:path';
 import { SCOUT_CONFIG_MANIFEST_PATH_GLOB } from '@kbn/scout-info';
+import type { ScoutTestChannel } from '@kbn/scout-info';
 
 let git: SimpleGit;
 
@@ -25,6 +26,7 @@ export interface ScoutConfigManifest {
   path: string;
   exists: boolean;
   sha1: string;
+  testChannels: ScoutTestChannel[];
   tests: {
     id: string;
     title: string;

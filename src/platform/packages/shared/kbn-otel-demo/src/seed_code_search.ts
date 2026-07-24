@@ -12,17 +12,30 @@ import execa from 'execa';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
+import { REPO_ROOT } from '@kbn/repo-info';
 import type { ElasticsearchConfig } from './read_kibana_config';
+import { applyCodeScenario } from './apply_code_scenario';
+import { getCodeScenarioById } from './code_scenarios';
+import { ensureOtelDemoAtVersion, OTEL_DEMO_REPOSITORY, SCS_CACHE_DIR } from './otel_demo_source';
 
-const OTEL_DEMO_REPO_URL = 'https://github.com/open-telemetry/opentelemetry-demo.git';
-const OTEL_DEMO_REPOSITORY = 'open-telemetry/opentelemetry-demo';
-const SCS_REPO_URL = 'https://github.com/elastic/semantic-code-search.git';
+const SCS_DOCKER_IMAGE = 'ghcr.io/elastic/semantic-code-search:main';
+// scs stores its config (Elasticsearch connection, inference endpoint, etc.) here.
+const SCS_CONFIG_DIR = path.join(os.homedir(), '.scs');
+const SCS_DOCKER_ENV_VARS = [
+  'ELASTICSEARCH_ENDPOINT',
+  'ELASTICSEARCH_USERNAME',
+  'ELASTICSEARCH_PASSWORD',
+  'SCS_ELASTICSEARCH_INFERENCE_ID',
+];
 
-// Cached outside the Kibana repo so it persists across branches and is never committed.
-const SCS_CACHE_DIR = path.join(os.homedir(), '.kbn-otel-scs');
-const SCS_BIN = path.join(SCS_CACHE_DIR, 'packages', 'cli', 'dist', 'src', 'bin.js');
 // Tracks which version is currently indexed so --version changes trigger a re-index.
 const INDEXED_VERSION_FILE = path.join(SCS_CACHE_DIR, '.indexed-version');
+const CODE_SCENARIO_STATE_PATH = path.join(
+  REPO_ROOT,
+  'data',
+  'demo_environments',
+  'code_scenario_state.json'
+);
 
 interface SeedCodeSearchOptions {
   elasticsearch: ElasticsearchConfig;
@@ -30,70 +43,75 @@ interface SeedCodeSearchOptions {
   kibanaUrl: string;
   version: string;
   log: ToolingLog;
+  codeScenarioId?: string;
+  codeScenarioRepoDir?: string;
+}
+
+interface CodeScenarioState {
+  activeCodeScenarioId?: string;
+}
+
+interface ScsRunner {
+  run(args: string[], env: NodeJS.ProcessEnv): Promise<void>;
+  /** Rewrites a `localhost`/`127.0.0.1` URL so it's reachable from inside the scs container. */
+  rewriteHostUrl(url: string): string;
+}
+
+function rewriteToDockerHost(url: string): string {
+  const parsed = new URL(url);
+  if (parsed.hostname === 'localhost' || parsed.hostname === '127.0.0.1') {
+    parsed.hostname = 'host.docker.internal';
+  }
+  return parsed.toString().replace(/\/$/, '');
 }
 
 /**
- * Returns [exe, ...prefixArgs] for invoking the scs CLI.
- * Prefers a PATH-installed `scs`; falls back to cloning + building the monorepo.
+ * Resolves how to invoke the scs CLI. Prefers a PATH-installed `scs`; otherwise
+ * falls back to the published Docker image so users don't have to clone and
+ * build the semantic-code-search monorepo locally.
  */
-async function ensureScs(log: ToolingLog): Promise<[string, ...string[]]> {
+async function resolveScsRunner(log: ToolingLog): Promise<ScsRunner> {
   try {
     await execa.command('scs --version');
     log.info('Using scs from PATH.');
-    return ['scs'];
+    return {
+      run: async (args, env) => {
+        await execa('scs', args, { stdio: 'inherit', env });
+      },
+      rewriteHostUrl: (url) => url,
+    };
   } catch {
-    // not on PATH — fall through to local build
+    // not on PATH — fall back to the Docker image
   }
 
-  if (!fs.existsSync(SCS_BIN)) {
-    if (!fs.existsSync(SCS_CACHE_DIR)) {
-      log.info(`Cloning elastic/semantic-code-search to ${SCS_CACHE_DIR} ...`);
-      await execa('git', ['clone', '--depth', '1', SCS_REPO_URL, SCS_CACHE_DIR], {
-        stdio: 'inherit',
-      });
-    } else {
-      log.info(`Pulling latest scs in ${SCS_CACHE_DIR} ...`);
-      await execa('git', ['pull'], { cwd: SCS_CACHE_DIR, stdio: 'inherit' });
-    }
+  log.info(`Using scs via Docker image ${SCS_DOCKER_IMAGE}`);
+  // The image reads/writes its config here (e.g. from its `setup` wizard);
+  // we always pass explicit args and env vars below, so the wizard never runs.
+  fs.mkdirSync(SCS_CONFIG_DIR, { recursive: true });
 
-    log.info('Installing scs dependencies (yarn install) ...');
-    // CXXFLAGS=--std=c++20 is required to compile tree-sitter native bindings against Node 24 headers.
-    await execa('yarn', ['install'], {
-      cwd: SCS_CACHE_DIR,
-      stdio: 'inherit',
-      env: { ...process.env, CXXFLAGS: '--std=c++20' },
-    });
-
-    log.info('Building scs CLI (nx run @elastic/scs:build) ...');
-    await execa('yarn', ['nx', 'run', '@elastic/scs:build'], {
-      cwd: SCS_CACHE_DIR,
-      stdio: 'inherit',
-      env: { ...process.env, NX_LOAD_DOT_ENV_FILES: 'false' },
-    });
-  } else {
-    log.info(`Using cached scs build at ${SCS_BIN}`);
-  }
-
-  return ['node', SCS_BIN];
-}
-
-/**
- * Returns a local path to the OTel demo repo checked out at the given tag.
- * Cached per-version under SCS_CACHE_DIR so repeated runs skip the clone.
- */
-async function ensureOtelDemoAtVersion(version: string, log: ToolingLog): Promise<string> {
-  const repoDir = path.join(SCS_CACHE_DIR, 'repos', `opentelemetry-demo-${version}`);
-  if (fs.existsSync(repoDir)) {
-    log.info(`Using cached OTel demo source at ${repoDir}`);
-    return repoDir;
-  }
-  log.info(`Cloning OTel demo at tag v${version} to ${repoDir} ...`);
-  await execa(
-    'git',
-    ['clone', '--depth', '1', '--branch', `v${version}`, OTEL_DEMO_REPO_URL, repoDir],
-    { stdio: 'inherit' }
-  );
-  return repoDir;
+  return {
+    run: async (args, env) => {
+      await execa(
+        'docker',
+        [
+          'run',
+          '--rm',
+          '--add-host',
+          'host.docker.internal:host-gateway',
+          '-v',
+          `${SCS_CONFIG_DIR}:/config`,
+          // Mounted at the same path so repo paths resolve identically inside the container.
+          '-v',
+          `${SCS_CACHE_DIR}:${SCS_CACHE_DIR}`,
+          ...SCS_DOCKER_ENV_VARS.flatMap((name) => ['-e', name]),
+          SCS_DOCKER_IMAGE,
+          ...args,
+        ],
+        { stdio: 'inherit', env }
+      );
+    },
+    rewriteHostUrl: rewriteToDockerHost,
+  };
 }
 
 function getIndexedVersion(): string | null {
@@ -124,30 +142,62 @@ async function chunksIndexHasDocs(esHosts: string, username: string, password: s
   }
 }
 
+async function readCodeScenarioState(): Promise<CodeScenarioState> {
+  try {
+    const state = await fs.promises.readFile(CODE_SCENARIO_STATE_PATH, 'utf8');
+    return JSON.parse(state) as CodeScenarioState;
+  } catch {
+    return {};
+  }
+}
+
+async function writeCodeScenarioState(state: CodeScenarioState): Promise<void> {
+  await fs.promises.mkdir(path.dirname(CODE_SCENARIO_STATE_PATH), { recursive: true });
+  await fs.promises.writeFile(
+    CODE_SCENARIO_STATE_PATH,
+    `${JSON.stringify(state, null, 2)}\n`,
+    'utf8'
+  );
+}
+
 export async function seedCodeSearch({
   elasticsearch,
   kibanaCredentials,
   kibanaUrl,
   version,
   log,
+  codeScenarioId,
+  codeScenarioRepoDir,
 }: SeedCodeSearchOptions) {
-  const [scsBin, repoDir] = await Promise.all([
-    ensureScs(log),
-    ensureOtelDemoAtVersion(version, log),
-  ]);
-  const [exe, ...prefixArgs] = scsBin;
+  const scs = await resolveScsRunner(log);
+  let repoDir: string;
+  let forceReindex = false;
+
+  if (codeScenarioId) {
+    const scenario = getCodeScenarioById(codeScenarioId);
+    if (!scenario) {
+      throw new Error(`Unknown code scenario: ${codeScenarioId}`);
+    }
+    repoDir = codeScenarioRepoDir || (await applyCodeScenario({ version, scenario, log }));
+    forceReindex = true;
+  } else {
+    repoDir = await ensureOtelDemoAtVersion(version, log);
+    const previousState = await readCodeScenarioState();
+    forceReindex = Boolean(previousState.activeCodeScenarioId);
+  }
 
   // scs reads ES credentials from environment variables
   const env = {
     ...process.env,
-    ELASTICSEARCH_ENDPOINT: elasticsearch.hosts,
+    ELASTICSEARCH_ENDPOINT: scs.rewriteHostUrl(elasticsearch.hosts),
     ELASTICSEARCH_USERNAME: elasticsearch.username,
     ELASTICSEARCH_PASSWORD: elasticsearch.password,
     // Use the ELSER 2 inference endpoint that ships with Elastic Stack
     SCS_ELASTICSEARCH_INFERENCE_ID: '.elser-2-elasticsearch',
   };
 
-  // Skip re-index only when the same version is already indexed.
+  // Skip re-index only when the same version is already indexed and no re-index is forced
+  // (a code scenario is requested, or one was previously active and must be reset).
   // If --version changes, force a clean re-index so indexed source matches the deployed demo.
   const indexedVersion = getIndexedVersion();
   const hasDocs = await chunksIndexHasDocs(
@@ -156,10 +206,18 @@ export async function seedCodeSearch({
     elasticsearch.password
   );
 
-  if (indexedVersion === version && hasDocs) {
+  if (!forceReindex && indexedVersion === version && hasDocs) {
     log.info(`Existing code index found for v${version} — skipping re-index.`);
   } else {
-    if (indexedVersion && indexedVersion !== version) {
+    if (codeScenarioId) {
+      log.info(
+        `Indexing OTel demo v${version} with code scenario ${codeScenarioId} (--clean). May take several minutes.`
+      );
+    } else if (forceReindex) {
+      log.info(
+        `Re-indexing clean OTel demo v${version} after code scenario reset (--clean). May take several minutes.`
+      );
+    } else if (indexedVersion && indexedVersion !== version) {
       log.info(`Version changed (${indexedVersion} → ${version}) — re-indexing with --clean.`);
     } else {
       log.info(
@@ -167,11 +225,7 @@ export async function seedCodeSearch({
       );
     }
 
-    await execa(
-      exe,
-      [...prefixArgs, 'index', repoDir, '--clean', '--repository', OTEL_DEMO_REPOSITORY],
-      { stdio: 'inherit', env }
-    );
+    await scs.run(['index', repoDir, '--clean', '--repository', OTEL_DEMO_REPOSITORY], env);
 
     setIndexedVersion(version);
     log.info('Code indexing complete.');
@@ -179,20 +233,19 @@ export async function seedCodeSearch({
 
   log.info('Installing agentic interfaces into Kibana ...');
 
-  await execa(
-    exe,
+  await scs.run(
     [
-      ...prefixArgs,
       'install-agentic-interfaces',
       '--kibana-url',
-      kibanaUrl,
+      scs.rewriteHostUrl(kibanaUrl),
       '--username',
       kibanaCredentials.username,
       '--password',
       kibanaCredentials.password,
     ],
-    { stdio: 'inherit', env }
+    env
   );
 
   log.info('Agentic interfaces installed.');
+  await writeCodeScenarioState({ activeCodeScenarioId: codeScenarioId });
 }

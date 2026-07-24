@@ -26,7 +26,12 @@ import {
 } from '@kbn/observability-plugin/common';
 import type { ObservabilityUptimeAlert } from '@kbn/alerts-as-data-utils';
 import type { SyntheticsPluginsSetupDependencies, SyntheticsServerSetup } from '../../types';
-import { getCertSummary, getTLSAlertDocument, setTLSRecoveredAlertsContext } from './message_utils';
+import {
+  getCertSummary,
+  getTLSAlertDocument,
+  getTLSCertAlertId,
+  setTLSRecoveredAlertsContext,
+} from './message_utils';
 import type { SyntheticsCommonState } from '../../../common/runtime_types/alert_rules/common';
 import { TLSRuleExecutor } from './tls_rule_executor';
 import { TLS_CERTIFICATE } from '../../../common/constants/synthetics_alerts';
@@ -105,13 +110,14 @@ export const registerSyntheticsTLSCheckRule = (
           return;
         }
 
-        // The TLS rule only evaluates lightweight HTTP/TCP certificates, which
-        // always carry a sha256 fingerprint used as the stable alert id.
-        if (!cert.sha256) {
+        // Lightweight HTTP/TCP certs use their sha256 fingerprint as the alert
+        // id; browser certs (which have no fingerprint) fall back to a stable
+        // subject-common-name + issuer identity. Certs with neither are skipped.
+        const alertId = getTLSCertAlertId(cert);
+        if (!alertId) {
           return;
         }
 
-        const alertId = cert.sha256;
         const { uuid } = alertsClient.report({
           id: alertId,
           actionGroup: TLS_CERTIFICATE.id,

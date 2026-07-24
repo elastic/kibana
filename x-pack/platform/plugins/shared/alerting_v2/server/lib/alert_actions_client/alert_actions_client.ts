@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import { esql } from '@elastic/esql';
 import Boom from '@hapi/boom';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { Request } from '@kbn/core-di-server';
 import { inject, injectable } from 'inversify';
 import { groupBy, omit } from 'lodash';
-import type {
-  BulkCreateAlertActionItemBody,
-  CreateAlertActionBody,
+import {
+  type BulkCreateAlertActionItemBody,
+  type CreateAlertActionBody,
 } from '@kbn/alerting-v2-schemas';
 import {
   ALERT_ACTIONS_DATA_STREAM,
@@ -21,15 +20,20 @@ import {
 } from '../../resources/datastreams/alert_actions';
 import { ALERT_EVENTS_DATA_STREAM } from '../../resources/datastreams/alert_events';
 import { AlertActionEventPublisher } from '../events/alert_action_event_publisher/alert_action_event_publisher';
-import { queryResponseToRecords } from '../services/query_service/query_response_to_records';
 import { type QueryServiceContract } from '../services/query_service/query_service';
 import { QueryServiceInternalToken } from '../services/query_service/tokens';
 import type { StorageServiceContract } from '../services/storage_service/storage_service';
 import { StorageServiceScopedToken } from '../services/storage_service/tokens';
 import type { UserServiceContract } from '../services/user_service/user_service';
 import { UserService } from '../services/user_service/user_service';
-import { ALERTING_V2_ERROR_CODES } from '../errors/error_codes';
 import { RequestSpaceIdToken } from '../services/spaces_service/tokens';
+import {
+  bulkLoadLatestAlertEvents,
+  loadLastAlertEventOrThrow,
+} from './context_loaders/load_latest_alert_events';
+import type { AlertEventRecord } from './types';
+import type { PreparedAction } from './handler';
+import { ACTION_HANDLERS, prepareWithHandler } from './handlers';
 
 @injectable()
 export class AlertActionsClient {
@@ -47,101 +51,186 @@ export class AlertActionsClient {
     groupHash: string;
     action: CreateAlertActionBody;
   }): Promise<void> {
+    const { groupHash, action } = params;
+
     const [userProfileUid, alertEvent] = await Promise.all([
-      this.getUserProfileUid(),
-      this.findLastAlertEventRecordOrThrow({
-        groupHash: params.groupHash,
-        episodeId: 'episode_id' in params.action ? params.action.episode_id : undefined,
+      this.userService.getCurrentUserProfileUid(),
+      loadLastAlertEventOrThrow({
+        queryService: this.queryService,
+        spaceId: this.spaceId,
+        groupHash,
+        episodeId: 'episode_id' in action ? action.episode_id : undefined,
       }),
     ]);
 
-    const doc = this.buildAlertActionDocument({
-      action: params.action,
-      alertEvent,
-      userProfileUid,
-    });
+    const prepared = this.prepareAction({ action, alertEvent, userProfileUid });
 
-    await this.bulkIndexActions([doc]);
-    this.eventPublisher.emitEpisodeActions(this.request, [doc]);
+    await this.persistPreparedActions([prepared]);
+    this.eventPublisher.emitEpisodeActions(this.request, [prepared.alertActionDoc]);
   }
 
-  public async createBulkActions(
-    actions: BulkCreateAlertActionItemBody[]
-  ): Promise<{ processed: number; total: number }> {
-    const [userProfileUid, records] = await Promise.all([
-      this.getUserProfileUid(),
-      this.fetchLastAlertEventRecordsForActions(actions),
-    ]);
+  /**
+   * Builds the writable payload for a single action. Pure / read-only
+   * and **synchronous** — preconditions are evaluated and the docs are
+   * constructed, but nothing is indexed and no domain event is emitted.
+   * Throws on precondition failure with the same Boom error each route
+   * surface relies on.
+   *
+   * Shared between {@link AlertActionsClient.createAction} (which lets
+   * the throw bubble back to the route) and
+   * {@link AlertActionsClient.createBulkActions} (which converts
+   * expected Boom 400 / 404 rejections into silent skips so the rest of
+   * the batch still gets persisted). All I/O the prep would have needed
+   * has already happened by the time this is called.
+   */
+  private prepareAction(params: {
+    action: CreateAlertActionBody;
+    alertEvent: AlertEventRecord;
+    userProfileUid: string | null;
+  }): PreparedAction {
+    const { action, alertEvent, userProfileUid } = params;
+    const alertActionDoc = this.buildAlertActionDocument({ action, alertEvent, userProfileUid });
 
-    const recordsByGroupHash = groupBy(records, 'group_hash');
-    const docs = actions
-      .map((action) => {
-        const groupRecords = recordsByGroupHash[action.group_hash];
-        if (!groupRecords) {
-          return;
-        }
+    return prepareWithHandler({ action, alertEvent, alertActionDoc }, ACTION_HANDLERS);
+  }
 
-        const matchingAlertEventRecord =
-          'episode_id' in action
-            ? groupRecords.find((record) => record.episode_id === action.episode_id)
-            : groupRecords[0];
-
-        if (matchingAlertEventRecord) {
-          return this.buildAlertActionDocument({
-            action,
-            alertEvent: matchingAlertEventRecord,
-            userProfileUid,
-          });
-        }
-      })
-      .filter((doc): doc is AlertAction => doc !== undefined);
-
-    if (docs.length > 0) {
-      await this.bulkIndexActions(docs);
-      this.eventPublisher.emitEpisodeActions(this.request, docs);
+  /**
+   * Persists a batch of prepared actions in a single ES `_bulk` round-trip.
+   * `bulkIndexDocsAcrossIndices` is used uniformly so audit-only batches and
+   * mixed audit + synthetic `.rule-events` batches share one code path. The
+   * `wait_for` refresh ensures the next API/UI read sees the new state.
+   */
+  private async persistPreparedActions(prepared: readonly PreparedAction[]): Promise<void> {
+    if (prepared.length === 0) {
+      return;
     }
 
-    return { processed: docs.length, total: actions.length };
-  }
+    const docs = prepared.flatMap(({ alertActionDoc, ruleEvent }) =>
+      ruleEvent
+        ? [
+            { index: ALERT_EVENTS_DATA_STREAM, doc: ruleEvent },
+            { index: ALERT_ACTIONS_DATA_STREAM, doc: alertActionDoc },
+          ]
+        : [{ index: ALERT_ACTIONS_DATA_STREAM, doc: alertActionDoc }]
+    );
 
-  private async bulkIndexActions(docs: readonly AlertAction[]): Promise<void> {
-    await this.storageService.bulkIndexDocs({
-      index: ALERT_ACTIONS_DATA_STREAM,
+    await this.storageService.bulkIndexDocsAcrossIndices({
       docs,
-      // this ensures that the action is immediately visible to the user in the UI
       refresh: 'wait_for',
     });
   }
 
-  private async fetchLastAlertEventRecordsForActions(
+  /**
+   * Bulk equivalent of {@link AlertActionsClient.createAction}. Each item is
+   * dispatched through the same {@link AlertActionsClient.prepareAction}
+   * helper as the single route, so lifecycle actions (`deactivate` /
+   * `activate`) get their preconditions and synthetic `.rule-events` doc
+   * just like in the single-route flow.
+   *
+   * Per-item failure handling matches the existing bulk UX: if an item's
+   * latest alert event cannot be located (404) or its lifecycle precondition
+   * fails (400), the item is silently skipped — it does not count toward
+   * `processed`, no doc is written, and no event is emitted for it. Any
+   * other error (5xx, ES outage, …) bubbles up and fails the whole batch
+   * so the caller sees the real problem instead of a misleadingly silent
+   * "0 processed" response.
+   *
+   * Successful items are written in a single ES `_bulk` round-trip via
+   * {@link AlertActionsClient.persistPreparedActions} and emitted as a
+   * single batch of domain events. Bulk requests that contain only audit
+   * actions (e.g. `ack` / `tag` / `snooze`) keep the previous one-call
+   * behaviour; bulk requests with mixed lifecycle + audit items still
+   * write everything in one round-trip thanks to `bulkIndexDocsAcrossIndices`.
+   */
+  public async createBulkActions(
     actions: BulkCreateAlertActionItemBody[]
-  ): Promise<AlertEventRecord[]> {
-    let whereClause = esql.exp`FALSE`;
-    for (const action of actions) {
-      whereClause = esql.exp`${whereClause} OR (group_hash == ${action.group_hash} AND ${
-        'episode_id' in action ? esql.exp`episode.id == ${action.episode_id}` : esql.exp`TRUE`
-      })`;
+  ): Promise<{ processed: number; total: number }> {
+    // Stage 1: resolve the user identity + the latest alert event per group
+    // referenced in the batch. Two queries, in parallel, regardless of
+    // batch size.
+    const [userProfileUid, latestEvents] = await Promise.all([
+      this.userService.getCurrentUserProfileUid(),
+      bulkLoadLatestAlertEvents({
+        queryService: this.queryService,
+        spaceId: this.spaceId,
+        actions,
+      }),
+    ]);
+
+    const latestEventsByGroupHash = groupBy(latestEvents, (event) => event.group_hash);
+    const actionsWithLatestAlertEvents = this.pairActionsWithLatestEvents(
+      actions,
+      latestEventsByGroupHash
+    );
+
+    // Stage 2: synchronous per-action prep. The `try/catch` here is
+    // the *only* place per-item precondition errors are tolerated —
+    // Boom 400 / 404 become silent skips (preserving the bulk UX),
+    // anything else propagates and fails the whole batch loudly.
+    const prepared: PreparedAction[] = [];
+    for (const { action, alertEvent } of actionsWithLatestAlertEvents) {
+      try {
+        prepared.push(this.prepareAction({ action, alertEvent, userProfileUid }));
+      } catch (error) {
+        if (
+          Boom.isBoom(error) &&
+          (error.output.statusCode === 400 || error.output.statusCode === 404)
+        ) {
+          continue;
+        }
+        throw error;
+      }
     }
 
-    const query = esql`
-      FROM ${ALERT_EVENTS_DATA_STREAM}
-      | WHERE type == "alert" AND space_id == ${this.spaceId} AND (${whereClause})
-      | STATS
-        last_event_timestamp = MAX(@timestamp),
-        last_episode_id = LAST(episode.id, @timestamp),
-        rule_id = VALUES(rule.id)
-        BY group_hash, space_id
-      | KEEP last_event_timestamp, rule_id, group_hash, last_episode_id, space_id
-      | RENAME last_event_timestamp AS @timestamp, last_episode_id AS episode_id
-    `.toRequest();
+    if (prepared.length === 0) {
+      return { processed: 0, total: actions.length };
+    }
 
-    return queryResponseToRecords<AlertEventRecord>(
-      await this.queryService.executeQuery({ query: query.query })
+    await this.persistPreparedActions(prepared);
+    this.eventPublisher.emitEpisodeActions(
+      this.request,
+      prepared.map((p) => p.alertActionDoc)
     );
+
+    return { processed: prepared.length, total: actions.length };
   }
 
-  private async getUserProfileUid(): Promise<string | null> {
-    return this.userService.getCurrentUserProfileUid();
+  /**
+   * Pairs each bulk item with the {@link AlertEventRecord} it should write
+   * against. Items whose group has no event, or whose targeted `episode_id`
+   * is not the group's latest episode, are silently dropped — same skip
+   * semantics the bulk path has always had for `ack` / `tag` / etc.
+   */
+  private pairActionsWithLatestEvents(
+    actions: readonly BulkCreateAlertActionItemBody[],
+    latestEventsByGroupHash: Record<string, AlertEventRecord[]>
+  ): Array<{ action: BulkCreateAlertActionItemBody; alertEvent: AlertEventRecord }> {
+    const resolved: Array<{
+      action: BulkCreateAlertActionItemBody;
+      alertEvent: AlertEventRecord;
+    }> = [];
+    for (const action of actions) {
+      // The loader groups `STATS … BY group_hash, space_id`, so each
+      // bucket is length-≤1: at most one "latest" row per group.
+      const [alertEvent] = latestEventsByGroupHash[action.group_hash] ?? [];
+
+      if (!alertEvent) {
+        continue;
+      }
+
+      // Supersession guard: an item that narrowed to a specific
+      // `episode_id` must not be paired with a newer episode of the same
+      // group. This mirrors the activate handler's precondition ("cannot
+      // act on an episode that has been superseded"), applied silently
+      // for the bulk path.
+      if ('episode_id' in action && alertEvent.episode_id !== action.episode_id) {
+        continue;
+      }
+
+      resolved.push({ action, alertEvent });
+    }
+
+    return resolved;
   }
 
   private buildAlertActionDocument(params: {
@@ -164,47 +253,4 @@ export class AlertActionsClient {
       ...actionData,
     };
   }
-
-  private async findLastAlertEventRecordOrThrow(params: {
-    groupHash: string;
-    episodeId?: string;
-  }): Promise<AlertEventRecord> {
-    const { groupHash, episodeId } = params;
-    const query = esql`
-      FROM ${ALERT_EVENTS_DATA_STREAM}
-      | WHERE type == "alert" AND space_id == ${this.spaceId} AND group_hash == ${groupHash} AND ${
-      episodeId ? esql.exp`episode.id == ${episodeId}` : esql.exp`true`
-    }
-      | SORT @timestamp DESC
-      | RENAME rule.id AS rule_id, episode.id AS episode_id
-      | KEEP @timestamp, group_hash, episode_id, rule_id, space_id
-      | LIMIT 1`.toRequest();
-
-    const result = queryResponseToRecords<AlertEventRecord>(
-      await this.queryService.executeQuery({ query: query.query })
-    );
-
-    if (result.length === 0) {
-      throw Boom.notFound(
-        `Alert event with group_hash [${groupHash}] and episode_id [${episodeId}] not found`,
-        {
-          code: ALERTING_V2_ERROR_CODES.ALERT_EVENT_NOT_FOUND,
-          details: {
-            group_hash: groupHash,
-            ...(episodeId ? { episode_id: episodeId } : {}),
-          },
-        }
-      );
-    }
-
-    return result[0];
-  }
-}
-
-interface AlertEventRecord {
-  '@timestamp': string;
-  group_hash: string;
-  episode_id: string;
-  rule_id: string;
-  space_id: string;
 }

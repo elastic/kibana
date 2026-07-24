@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { EuiModal, EuiModalBody, useEuiTheme } from '@elastic/eui';
+import { EuiModal, EuiModalBody, useEuiTheme, useGeneratedHtmlId } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { ChangeHistoryEmptyPrompt } from '../timeline/change_history_empty_prompt';
 import { ChangeHistoryListErrorPrompt } from '../timeline/change_history_list_error_prompt';
@@ -19,6 +19,7 @@ import { ChangeHistoryModalSelectionContext } from '../../provider/change_histor
 import type { ChangeHistoryCompareRowOverride } from '../../types/change_history_compare_override';
 import type { ChangeHistoryListItem } from '../../types/change_history_list_item';
 import type { ChangeHistorySelectionSource } from '../../telemetry/types';
+import { findCommittedChangeHistoryListItem } from '../../utils/find_committed_change_history_list_item';
 import { findCurrentChangeHistoryListItem } from '../../utils/build_change_history_restore_telemetry';
 import { getRestoreVersionLabel } from '../../utils/get_restore_version_label';
 import * as i18n from '../timeline/translations';
@@ -41,6 +42,7 @@ export function ChangeHistoryModal(): JSX.Element | null {
   const { euiTheme } = useEuiTheme();
   const { adapter, objectId, labels, supports, telemetry } = useChangeHistoryConfig();
   const { isOpen, closeModal } = useChangeHistoryModal();
+  const modalTitleId = useGeneratedHtmlId();
 
   const [selectedChangeId, setSelectedChangeId] = useState<string | undefined>();
   const [compareOverride, setCompareOverride] = useState<
@@ -50,12 +52,20 @@ export function ChangeHistoryModal(): JSX.Element | null {
   const lastReportedChangeIdBySourceRef = useRef<
     Partial<Record<ChangeHistorySelectionSource, string>>
   >({});
-  const { items, total, isLoading, isFetchingFirstPage, isLoadingMore, error, loadMore } =
-    useChangeHistoryList({
-      adapter,
-      objectId,
-      enabled: isOpen,
-    });
+  const {
+    items,
+    total,
+    pendingChange,
+    isLoading,
+    isFetchingFirstPage,
+    isLoadingMore,
+    error,
+    loadMore,
+  } = useChangeHistoryList({
+    adapter,
+    objectId,
+    enabled: isOpen,
+  });
 
   const reportChangeSelected = useCallback(
     (item: ChangeHistoryListItem, selectionSource: ChangeHistorySelectionSource) => {
@@ -147,7 +157,10 @@ export function ChangeHistoryModal(): JSX.Element | null {
     [requestCompareToVersion, requestRestoreVersion, supports.compare, supports.restore]
   );
 
-  const currentChange = useMemo(() => findCurrentChangeHistoryListItem(items), [items]);
+  const currentChange = useMemo(
+    () => findCommittedChangeHistoryListItem(items) ?? findCurrentChangeHistoryListItem(items),
+    [items]
+  );
   const restoreConfirmChange = useMemo(
     () =>
       restoreConfirmChangeId
@@ -223,7 +236,8 @@ export function ChangeHistoryModal(): JSX.Element | null {
   const hasNoHistory = !isLoading && !error && !hasItems;
   const showLoadingSidebar = isLoading && !hasItems && !error;
   const showListError = Boolean(error) && !hasItems && !isLoading;
-  const allItemsLoaded = hasItems && items.length >= total;
+  const committedItemCount = pendingChange ? items.length - 1 : items.length;
+  const allItemsLoaded = hasItems && committedItemCount >= total;
   const historyStartedAt = allItemsLoaded
     ? getHistoryStartedAt(items.map((item) => item.timestamp))
     : undefined;
@@ -268,11 +282,13 @@ export function ChangeHistoryModal(): JSX.Element | null {
         maxWidth={false}
         css={styles.modal}
         data-test-subj="changeHistoryModal"
+        aria-labelledby={modalTitleId}
       >
         <EuiModalBody css={styles.modalBody}>
           <ChangeHistoryPreviewShell
             backLabel={labels.previewBackLabel}
             title={labels.previewTitle}
+            titleId={modalTitleId}
             onBack={closeModal}
           >
             <div css={styles.fullPageEmptyState} data-test-subj="changeHistoryModalEmpty">
@@ -291,12 +307,14 @@ export function ChangeHistoryModal(): JSX.Element | null {
         maxWidth={false}
         css={styles.modal}
         data-test-subj="changeHistoryModal"
+        aria-labelledby={modalTitleId}
       >
         <EuiModalBody css={styles.modalBody}>
           <div css={styles.splitLayout}>
             <ChangeHistoryPreviewShell
               backLabel={labels.previewBackLabel}
               title={labels.previewTitle}
+              titleId={modalTitleId}
               onBack={closeModal}
               headerActions={previewHeaderActions}
             >

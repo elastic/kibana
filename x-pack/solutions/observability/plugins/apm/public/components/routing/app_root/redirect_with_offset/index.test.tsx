@@ -89,6 +89,28 @@ describe('RedirectWithOffset', () => {
     expect(query.comparisonEnabled).toBe('false');
   });
 
+  it('redirects with a valid comparisonEnabled when the url value is a bare key', async () => {
+    // A bare `?comparisonEnabled` key parses to null, which is not a valid boolean.
+    renderUrl({ pathname: '/services', search: 'comparisonEnabled', hash: '' }, true);
+
+    const query = qs.parse(history.entries[0].search);
+    expect(query.comparisonEnabled).toBe('true');
+  });
+
+  it('redirects with the default comparisonEnabled when the url value is invalid', async () => {
+    renderUrl(
+      {
+        pathname: '/services',
+        search: qs.stringify({ comparisonEnabled: 'maybe' }),
+        hash: '',
+      },
+      false
+    );
+
+    const query = qs.parse(history.entries[0].search);
+    expect(query.comparisonEnabled).toBe('false');
+  });
+
   it('redirects with offset=1d when comparisonType=day is set in the query params', () => {
     renderUrl(
       {

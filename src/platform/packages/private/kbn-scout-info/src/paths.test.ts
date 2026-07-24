@@ -21,6 +21,7 @@ import {
   TESTABLE_COMPONENT_SCOUT_ROOT_PATH_REGEX,
   SCOUT_TESTS_ONLY_IGNORE_PATTERNS,
   SCOUT_TESTS_ONLY_SCOPE_GLOBS,
+  SCOUT_TESTS_ONLY_EXCLUDE_GLOBS,
 } from './paths';
 
 describe('Scout path globs', () => {
@@ -117,6 +118,45 @@ describe('Scout path globs', () => {
 
     it.each(shouldNotMatch)('does not match: %s', (testPath) => {
       expect(picomatch.isMatch(testPath, SCOUT_CONFIG_MANIFEST_PATH_GLOB)).toBe(false);
+    });
+  });
+
+  describe('SCOUT_TESTS_ONLY_EXCLUDE_GLOBS', () => {
+    const shouldMatch = [
+      // fixtures directly under the category
+      'src/platform/plugins/shared/my_plugin/test/scout/ui/fixtures/index.ts',
+      'src/platform/plugins/shared/my_plugin/test/scout/api/fixtures/params.ts',
+      // page objects (live under fixtures/)
+      'src/platform/plugins/shared/inspector/test/scout/ui/fixtures/page_objects/inspector.ts',
+      // namespace nested under fixtures
+      'src/platform/plugins/shared/discover/test/scout/ui/fixtures/traces_experience/page_objects/apm.ts',
+      // namespace before the category (matches the second glob form)
+      'x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/ui/fixtures/data.ts',
+      // custom scout_<server> scope
+      'src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/fixtures/page_objects/workflow_list_page.ts',
+    ];
+
+    const shouldNotMatch = [
+      // non-fixtures files inside a scope stay on the tests-only fast path
+      'src/platform/plugins/shared/my_plugin/test/scout/ui/tests/a.spec.ts',
+      'src/platform/plugins/shared/my_plugin/test/scout/ui/parallel_tests/b.spec.ts',
+      'src/platform/plugins/shared/my_plugin/test/scout/ui/helpers/foo.ts',
+      'src/platform/plugins/shared/my_plugin/test/scout/ui/playwright.config.ts',
+      'src/platform/plugins/shared/my_plugin/test/scout/.meta/ui/standard.json',
+      // fixtures outside any scout scope must not match
+      'src/platform/plugins/shared/my_plugin/public/fixtures/foo.ts',
+    ];
+
+    it.each(shouldMatch)('matches: %s', (testPath) => {
+      expect(picomatch.isMatch(testPath, [...SCOUT_TESTS_ONLY_EXCLUDE_GLOBS], { dot: true })).toBe(
+        true
+      );
+    });
+
+    it.each(shouldNotMatch)('does not match: %s', (testPath) => {
+      expect(picomatch.isMatch(testPath, [...SCOUT_TESTS_ONLY_EXCLUDE_GLOBS], { dot: true })).toBe(
+        false
+      );
     });
   });
 });
@@ -512,6 +552,13 @@ describe('Scout tests-only patterns duplicated in pipeline-utils/selective_scout
 
   it.each(SCOUT_TESTS_ONLY_SCOPE_GLOBS)(
     'selective_scout.ts contains scope glob verbatim: %s',
+    (pattern) => {
+      expect(containsPatternLiteral(duplicateSource, pattern)).toBe(true);
+    }
+  );
+
+  it.each(SCOUT_TESTS_ONLY_EXCLUDE_GLOBS)(
+    'selective_scout.ts contains exclude glob verbatim: %s',
     (pattern) => {
       expect(containsPatternLiteral(duplicateSource, pattern)).toBe(true);
     }

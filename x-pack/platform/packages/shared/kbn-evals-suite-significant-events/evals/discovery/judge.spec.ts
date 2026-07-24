@@ -1,0 +1,285 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { SIGNIFICANT_EVENTS_JUDGE_AGENT_ID } from '@kbn/significant-events-plugin/server';
+import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '@kbn/significant-events-plugin/common';
+import { tags } from '@kbn/scout';
+import { getCurrentTraceId } from '@kbn/evals';
+import type { Discovery } from '@kbn/significant-events-schema';
+import type { GcsConfig } from '../../src/data_generators/replay';
+import {
+  replayIntoManagedStream,
+  SIGEVENTS_SNAPSHOT_RUN,
+  SIGEVENTS_WIRED_ROOTS,
+  cleanSignificantEventsDataStreams,
+  ensureStreamsEnabled,
+  deleteTemporaryReplayIndices,
+  canonicalDiscoveryFromGroundTruth,
+} from '../../src/data_generators/replay';
+import { replayKnowledgeIndicatorsSnapshot } from '../../src/data_generators/replay_knowledge_indicators_snapshot';
+import { evaluate } from '../../src/evaluate';
+import {
+  getActiveDatasets,
+  MANAGED_STREAM_SEARCH_PATTERN,
+  resolveScenarioSnapshotSource,
+  snapshotCatalogKey,
+  snapshotSourceKey,
+} from '../../src/datasets';
+import { buildAvailableSnapshotsBySource } from '../shared';
+import type { DiscoveryJudgeScenario } from '../../src/datasets';
+import { createJudgeEvaluators } from '../../src/evaluators/discovery';
+import { extractSignificantEventsFromToolCall } from '../../src/evaluators/discovery/utils/parse_agent_output';
+import { buildDiscoveryJudgeInput } from '../../src/evaluators/discovery/judge/build_agent_input';
+
+const TRUST_UPSTREAM = process.env.SIGEVENTS_TRUST_UPSTREAM === 'true';
+
+evaluate.describe(
+  'Significant Events Discovery - Judge Agent',
+  { tag: tags.serverless.observability.complete },
+  () => {
+    const activeDatasets = getActiveDatasets();
+    const availableSnapshotsBySource = new Map<string, Set<string>>();
+
+    evaluate.beforeAll(async ({ esClient, kbnClient, log }) => {
+      // Agent availability is gated on the significant events availability feature flag (defaults to
+      // false); force it on before any converse.
+      await kbnClient.request({
+        path: '/internal/core/_settings',
+        method: 'PUT',
+        headers: { 'elastic-api-version': '1' },
+        body: {
+          'feature_flags.overrides': {
+            [STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG]: true,
+          },
+        },
+      });
+      log.info('Enabled significant events availability feature flag');
+
+      const snapshots = await buildAvailableSnapshotsBySource(
+        activeDatasets,
+        (dataset) => dataset.discoveryJudge,
+        esClient,
+        log
+      );
+      snapshots.forEach((v, k) => availableSnapshotsBySource.set(k, v));
+    });
+
+    for (const dataset of activeDatasets) {
+      if (dataset.discoveryJudge.length === 0) {
+        continue;
+      }
+
+      evaluate.describe(dataset.id, () => {
+        interface CollectedExample {
+          scenario: DiscoveryJudgeScenario;
+          discoveries: Discovery[];
+          snapshotKey: string;
+        }
+
+        const collectedExamples: CollectedExample[] = [];
+        const snapshotSources = new Map<string, { snapshotName: string; gcs: GcsConfig }>();
+
+        evaluate.beforeAll(async ({ esClient, apiServices, log }) => {
+          for (const scenario of dataset.discoveryJudge) {
+            const snapshotSource = resolveScenarioSnapshotSource({
+              scenarioId: scenario.input.scenario_id,
+              datasetGcs: dataset.gcs,
+              snapshotSource: scenario.snapshot_source,
+            });
+
+            const availableSnapshots =
+              availableSnapshotsBySource.get(snapshotCatalogKey(snapshotSource.gcs)) ?? new Set();
+
+            if (!availableSnapshots.has(snapshotSource.snapshotName)) {
+              log.info(
+                `Snapshot "${snapshotSource.snapshotName}" not found in run "${SIGEVENTS_SNAPSHOT_RUN}" ` +
+                  `(source: ${snapshotSource.gcs.bucket}/${snapshotSource.gcs.basePathPrefix}) — skipping scenario "${scenario.input.scenario_id}"`
+              );
+              continue;
+            }
+
+            // Discoveries always come from the canonical dataset regardless of source mode.
+            // The snapshot only provides logs and KIs replayed into ES — schema changes
+            // between snapshot capture and current code make snapshot discoveries unreliable.
+            const discoveries = scenario.input.discoveries.map((discovery) =>
+              canonicalDiscoveryFromGroundTruth({
+                streamName: 'logs',
+                scenarioId: scenario.input.scenario_id,
+                discovery,
+              })
+            );
+
+            // Ensure the managed stream is replayed so ES|QL queries in judge can execute
+            await cleanSignificantEventsDataStreams(esClient, log);
+            for (const name of SIGEVENTS_WIRED_ROOTS) {
+              await esClient.indices.deleteDataStream({ name }).catch(() => {});
+              await esClient.indices
+                .delete({ index: name, ignore_unavailable: true })
+                .catch(() => {});
+            }
+            await ensureStreamsEnabled({ esClient, apiServices, log });
+
+            const stats = await replayIntoManagedStream(
+              esClient,
+              log,
+              snapshotSource.snapshotName,
+              snapshotSource.gcs
+            );
+
+            if (stats.created === 0) {
+              log.info(
+                `No documents indexed from snapshot "${snapshotSource.snapshotName}" — skipping`
+              );
+              continue;
+            }
+
+            await esClient.indices.refresh({ index: MANAGED_STREAM_SEARCH_PATTERN });
+
+            const key = snapshotSourceKey(snapshotSource);
+            collectedExamples.push({
+              scenario,
+              discoveries,
+              snapshotKey: key,
+            });
+            snapshotSources.set(scenario.input.scenario_id, snapshotSource);
+          }
+
+          if (collectedExamples.length === 0) {
+            log.info(`No scenarios available for dataset "${dataset.id}" — skipping`);
+            evaluate.skip();
+          }
+        });
+
+        evaluate(
+          'Discovery judge',
+          async ({
+            executorClient,
+            evaluators,
+            esClient,
+            agentBuilderClient,
+            apiServices,
+            log,
+          }) => {
+            let lastReplayedSnapshotKey: string | undefined;
+
+            const discoveriesByScenario = new Map(
+              collectedExamples.map(({ scenario, discoveries, snapshotKey }) => [
+                scenario.input.scenario_id,
+                { discoveries, snapshotKey },
+              ])
+            );
+
+            await executorClient.runExperiment(
+              {
+                datasets: [
+                  {
+                    name: `sigevents: Discovery judge (${dataset.id})`,
+                    description: `[${dataset.id}] Discovery judge across scenarios`,
+                    examples: collectedExamples.map(({ scenario }) => ({
+                      id: scenario.input.scenario_id,
+                      input: { ...scenario.input, snapshot_source: scenario.snapshot_source },
+                      output: scenario.output,
+                      metadata: {
+                        ...scenario.metadata,
+                        test_index: MANAGED_STREAM_SEARCH_PATTERN,
+                      },
+                    })),
+                  },
+                ],
+                concurrency: 1,
+                trustUpstreamDataset: TRUST_UPSTREAM,
+                task: async ({ input }: { input: DiscoveryJudgeScenario['input'] }) => {
+                  const data = discoveriesByScenario.get(input.scenario_id);
+                  if (!data) {
+                    throw new Error(`No pre-collected data for scenario "${input.scenario_id}"`);
+                  }
+
+                  const { discoveries, snapshotKey } = data;
+                  const snapshotSource = snapshotSources.get(input.scenario_id);
+                  if (!snapshotSource) {
+                    throw new Error(`No snapshot source found for scenario "${input.scenario_id}"`);
+                  }
+
+                  const agentInput = buildDiscoveryJudgeInput({ discoveries });
+
+                  if (snapshotKey !== lastReplayedSnapshotKey) {
+                    await cleanSignificantEventsDataStreams(esClient, log);
+                    for (const name of SIGEVENTS_WIRED_ROOTS) {
+                      await esClient.indices.deleteDataStream({ name }).catch(() => {});
+                      await esClient.indices
+                        .delete({ index: name, ignore_unavailable: true })
+                        .catch(() => {});
+                    }
+                    await ensureStreamsEnabled({ esClient, apiServices, log });
+                    const stats = await replayIntoManagedStream(
+                      esClient,
+                      log,
+                      snapshotSource.snapshotName,
+                      snapshotSource.gcs
+                    );
+                    if (stats.created === 0) {
+                      throw new Error(
+                        `No documents indexed after replaying snapshot "${snapshotSource.snapshotName}"`
+                      );
+                    }
+                    await esClient.indices.refresh({ index: MANAGED_STREAM_SEARCH_PATTERN });
+                    lastReplayedSnapshotKey = snapshotKey;
+                  }
+
+                  // Replay the captured knowledge indicators (features + queries) into the LIVE KI
+                  // data stream so the real search_knowledge_indicators tool resolves them when we
+                  // invoke the agent over /converse.
+                  await replayKnowledgeIndicatorsSnapshot(
+                    esClient,
+                    log,
+                    snapshotSource.snapshotName,
+                    snapshotSource.gcs
+                  );
+
+                  const converseResult = await agentBuilderClient.converse({
+                    agentId: SIGNIFICANT_EVENTS_JUDGE_AGENT_ID,
+                    input: agentInput,
+                  });
+
+                  return {
+                    // The agent returns its result as JSON in the final message (no emit tool /
+                    // structured_output on the public converse API); parse it for the evaluators.
+                    significantEvents: extractSignificantEventsFromToolCall(converseResult.steps),
+                    inputDiscoveries: discoveries,
+                    // Raw converse steps — the trajectory and grounding evaluators read tool calls.
+                    steps: converseResult.steps,
+                    // The agent runs inline (local execution), so its gen_ai spans nest under the
+                    // eval's trace — tag with that id, like the inferenceClient-based evals. This
+                    // keeps trace metrics correlatable against the default cluster (no TRACING_ES_URL).
+                    traceId: getCurrentTraceId(),
+                  };
+                },
+              },
+              [
+                ...createJudgeEvaluators({
+                  criteriaFn: evaluators.criteria.bind(evaluators),
+                }),
+                evaluators.traceBasedEvaluators.inputTokens,
+                evaluators.traceBasedEvaluators.outputTokens,
+                evaluators.traceBasedEvaluators.cachedTokens,
+                evaluators.traceBasedEvaluators.toolCalls,
+                evaluators.traceBasedEvaluators.latency,
+              ]
+            );
+          }
+        );
+
+        evaluate.afterAll(async ({ esClient, apiServices, log }) => {
+          log.debug('Cleaning up judge test data');
+          await deleteTemporaryReplayIndices(esClient, log);
+          await apiServices.streams.disable().catch(() => {});
+          await cleanSignificantEventsDataStreams(esClient, log);
+        });
+      });
+    }
+  }
+);

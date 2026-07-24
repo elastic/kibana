@@ -12,8 +12,9 @@ import { serializedTitlesSchema } from '@kbn/presentation-publishing-schemas';
 import { SLO_ALERTS_SUPPORTED_TRIGGERS } from '../../../common/embeddables/alerts/constants';
 
 const sloItemSchema = schema.object({
-  slo_id: schema.string({ meta: { description: 'SLO ID' } }),
+  slo_id: schema.string({ maxLength: 64, meta: { description: 'SLO ID' } }),
   slo_instance_id: schema.string({
+    maxLength: 512,
     defaultValue: '*',
     meta: { description: 'SLO instance ID' },
   }),

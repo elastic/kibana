@@ -281,6 +281,7 @@ describe('data_fetching related hooks', () => {
         esqlQuery,
         esqlVariables: undefined,
         timeRange: undefined,
+        isApproximate: false,
         viewModeToggle: undefined,
         expandedDoc$: new BehaviorSubject<DataTableRecord | undefined>(undefined),
         expandedDocOwner$: new BehaviorSubject<string | undefined>(undefined),
@@ -391,7 +392,30 @@ describe('data_fetching related hooks', () => {
           esqlVariables: contextValue.esqlVariables,
           timeRange: contextValue.timeRange,
           dataView,
+          isApproximate: contextValue.isApproximate,
         });
+      });
+
+      it('forwards isApproximate from the context so drill-downs match the active search mode', async () => {
+        const mockRow = createMockRowData();
+        const { Wrapper, contextValue } = createWrapper({ isApproximate: true });
+        const dataView = dataViewWithTimefieldMock;
+
+        const { result } = renderHook(() => useDataCascadeRowExpansionHandlers({ dataView }), {
+          wrapper: Wrapper,
+        });
+
+        await act(async () => {
+          await result.current.onCascadeLeafNodeExpanded({
+            row: mockRow,
+            nodePath: ['category'],
+            nodePathMap: { category: 'A' },
+          });
+        });
+
+        expect(contextValue.cascadedDocumentsFetcher.fetchCascadedDocuments).toHaveBeenCalledWith(
+          expect.objectContaining({ isApproximate: true })
+        );
       });
     });
 

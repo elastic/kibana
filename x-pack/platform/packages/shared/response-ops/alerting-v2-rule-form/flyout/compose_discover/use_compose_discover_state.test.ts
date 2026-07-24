@@ -72,6 +72,15 @@ describe('createInitialState', () => {
     expect(withSignal.recoveryType).toBe('default');
   });
 
+  it('applies initialRecoveryType none for alert rules', () => {
+    const state = createInitialState({
+      mode: 'edit',
+      initialKind: 'alert',
+      initialRecoveryType: 'none',
+    });
+    expect(state.recoveryType).toBe('none');
+  });
+
   it('opens the query preview in create mode', () => {
     const state = createInitialState({ mode: 'create' });
 
@@ -265,9 +274,19 @@ describe('getSandboxTabs', () => {
     expect(getSandboxTabs(true, state)).toBeUndefined();
   });
 
-  it('returns [base, alert] on alertCondition step in edit mode', () => {
+  it('returns undefined on alertCondition step in edit mode (unified editor by default)', () => {
     const state = createState({ step: 0, mode: 'edit' });
+    expect(getSandboxTabs(true, state)).toBeUndefined();
+  });
+
+  it('returns [base, alert] on alertCondition step in edit mode when manualSplitEnabled', () => {
+    const state = createState({ step: 0, mode: 'edit', manualSplitEnabled: true });
     expect(getSandboxTabs(true, state)).toEqual(['base', 'alert']);
+  });
+
+  it('returns undefined on alertCondition step in clone mode (unified editor by default)', () => {
+    const state = createState({ step: 0, mode: 'clone' });
+    expect(getSandboxTabs(true, state)).toBeUndefined();
   });
 
   it('returns [recovery] on recoveryCondition step with custom recovery', () => {
@@ -278,5 +297,62 @@ describe('getSandboxTabs', () => {
   it('returns undefined on recoveryCondition step with default recovery', () => {
     const state = createState({ step: 1, recoveryType: 'default' });
     expect(getSandboxTabs(true, state)).toBeUndefined();
+  });
+
+  it('returns [base, alert] on alertCondition step in create mode when manualSplitEnabled', () => {
+    const state = createState({ step: 0, mode: 'create', manualSplitEnabled: true });
+    expect(getSandboxTabs(true, state)).toEqual(['base', 'alert']);
+  });
+
+  it('returns undefined on alertCondition step in create mode when manualSplitEnabled is false', () => {
+    const state = createState({ step: 0, mode: 'create', manualSplitEnabled: false });
+    expect(getSandboxTabs(true, state)).toBeUndefined();
+  });
+});
+
+// ── ENABLE_MANUAL_SPLIT / DISABLE_MANUAL_SPLIT ────────────────────────────────
+
+describe('reducer — manual split actions', () => {
+  it('initializes manualSplitEnabled to false', () => {
+    const state = createInitialState({ mode: 'create' });
+    expect(state.manualSplitEnabled).toBe(false);
+  });
+
+  it('ENABLE_MANUAL_SPLIT sets manualSplitEnabled to true and switches to base tab', () => {
+    const state = createState({ manualSplitEnabled: false, activeTab: 'alert' });
+    const next = reducer(state, { type: 'ENABLE_MANUAL_SPLIT' });
+    expect(next.manualSplitEnabled).toBe(true);
+    expect(next.activeTab).toBe('base');
+  });
+
+  it('DISABLE_MANUAL_SPLIT sets manualSplitEnabled to false and returns to unified tab', () => {
+    const state = createState({ manualSplitEnabled: true, activeTab: 'base' });
+    const next = reducer(state, { type: 'DISABLE_MANUAL_SPLIT' });
+    expect(next.manualSplitEnabled).toBe(false);
+    expect(next.activeTab).toBe('alert');
+  });
+
+  it('SET_YAML_MODE clears manualSplitEnabled when entering YAML', () => {
+    const state = createState({ manualSplitEnabled: true });
+    const next = reducer(state, { type: 'SET_YAML_MODE', enabled: true });
+    expect(next.manualSplitEnabled).toBe(false);
+    expect(next.yamlMode).toBe(true);
+  });
+
+  it('SET_YAML_MODE does not change manualSplitEnabled when exiting YAML', () => {
+    const state = createState({ manualSplitEnabled: false, yamlMode: true });
+    const next = reducer(state, { type: 'SET_YAML_MODE', enabled: false });
+    expect(next.manualSplitEnabled).toBe(false);
+    expect(next.yamlMode).toBe(false);
+  });
+
+  it('KIND_CHANGE resets manualSplitEnabled to false', () => {
+    const state = createState({ manualSplitEnabled: true });
+
+    const toAlert = reducer(state, { type: 'KIND_CHANGE', kind: 'alert' });
+    expect(toAlert.manualSplitEnabled).toBe(false);
+
+    const toSignal = reducer(state, { type: 'KIND_CHANGE', kind: 'signal' });
+    expect(toSignal.manualSplitEnabled).toBe(false);
   });
 });

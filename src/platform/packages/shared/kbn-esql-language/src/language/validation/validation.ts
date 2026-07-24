@@ -15,7 +15,6 @@ import { esqlCommandRegistry } from '../../commands/registry';
 import type { ICommandCallbacks } from '../../commands/registry/types';
 import { UnmappedFieldsStrategy } from '../../commands/registry/types';
 import { getMessageFromId } from '../../commands/definitions/utils';
-import { unwrapExpressionParens } from '../../commands/definitions/utils/ast';
 import { QueryColumns } from '../../query_columns_service';
 import { retrievePolicies, retrieveSources } from './resources';
 import type { ReferenceMaps, ValidationOptions, ValidationResult } from './types';
@@ -66,13 +65,11 @@ async function validateAst(
 
   const parsingResult = EsqlQuery.fromSrc(queryString);
 
-  unwrapExpressionParens(parsingResult.ast);
-
   const headerCommands = parsingResult.ast.header ?? [];
 
   const rootCommands = parsingResult.ast.commands;
 
-  const [sources, availablePolicies, joinIndices, timeSeriesSources, views, datasets] =
+  const [sources, availablePolicies, joinIndices, timeSeriesSources, views, datasets, license] =
     await Promise.all([
       shouldValidateCallback(callbacks, 'getSources')
         ? retrieveSources(rootCommands, callbacks)
@@ -88,9 +85,8 @@ async function validateAst(
         : undefined,
       shouldValidateCallback(callbacks, 'getViews') ? callbacks?.getViews?.() : undefined,
       shouldValidateCallback(callbacks, 'getDatasets') ? callbacks?.getDatasets?.() : undefined,
+      callbacks?.getLicense?.(),
     ]);
-
-  const license = await callbacks?.getLicense?.();
   const hasMinimumLicenseRequired = license
     ? (minimumLicenseRequired: LicenseType) => license.hasAtLeast(minimumLicenseRequired)
     : undefined;
