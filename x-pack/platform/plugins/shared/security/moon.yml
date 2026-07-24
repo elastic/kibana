@@ -106,6 +106,7 @@ dependsOn:
   - '@kbn/mock-idp-utils'
   - '@kbn/core-user-activity-server'
   - '@kbn/core-user-activity-server-mocks'
+  - '@kbn/management-settings-ids'
   - '@kbn/deeplinks-agent-builder'
   - '@kbn/react-query'
   - '@kbn/agent-builder-common'

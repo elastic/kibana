@@ -27,7 +27,7 @@ import { TitleArea } from './title_area';
 import { TitleActions } from './title_actions';
 import { AppMenu } from './app_menu';
 import { AppHeaderMetadata } from './app_header_metadata';
-import { useResolvedBadges, useShareAction } from './hooks';
+import { useCanAccessIntegrations, useResolvedBadges, useShareAction } from './hooks';
 
 export interface AppHeaderViewProps {
   title?: AppHeaderTitle;
@@ -113,6 +113,8 @@ const AppHeaderViewInternal = React.memo<AppHeaderViewInternalProps>(
     const hasLegacyActionMenu = useHasLegacyActionMenu();
     const shareAction = useShareAction(menu);
     const resolvedBadges = useResolvedBadges(badges);
+    const canAccessIntegrations = useCanAccessIntegrations();
+    const showIntegrations = !!showAddIntegrations && canAccessIntegrations;
 
     // Sparse legacy states (only a back and/or overflow-menu button, no title or other content) look
     // too tall at the standard height, so default them to the shorter `compact` spacing. An explicit
@@ -141,7 +143,7 @@ const AppHeaderViewInternal = React.memo<AppHeaderViewInternalProps>(
       !!favorite ||
       !!metadata?.length ||
       !!docLink ||
-      !!showAddIntegrations ||
+      showIntegrations ||
       hasLegacyActionMenu;
 
     if (!show) {

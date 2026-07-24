@@ -44,7 +44,7 @@ import { ListExecutionHistoryRoute } from '../routes/action_policies/list_execut
 import { CountNewExecutionHistoryEventsRoute } from '../routes/action_policies/count_new_execution_history_events_route';
 import { GetRuleExecutionsRoute } from '../routes/execution_history/get_rule_executions_route';
 import { MatcherValueSuggestionsRoute } from '../routes/suggestions/matcher_value_suggestions_route';
-import { MatcherDataFieldsRoute } from '../routes/suggestions/matcher_data_fields_route';
+import { MatcherRuleEventFieldsRoute } from '../routes/suggestions/matcher_rule_event_fields_route';
 import { ActionPolicyTagsRoute } from '../routes/suggestions/action_policy_tags_route';
 import { SuggestUserProfilesRoute } from '../routes/suggestions/suggest_user_profiles_route';
 import { UpsertRuleRoute } from '../routes/rules/upsert_rule_route';
@@ -96,7 +96,7 @@ export function bindRoutes({ bind }: ContainerModuleLoadOptions) {
   bind(Route).toConstantValue(CountNewExecutionHistoryEventsRoute);
   bind(Route).toConstantValue(GetRuleExecutionsRoute);
   bind(Route).toConstantValue(MatcherValueSuggestionsRoute);
-  bind(Route).toConstantValue(MatcherDataFieldsRoute);
+  bind(Route).toConstantValue(MatcherRuleEventFieldsRoute);
 
   bind(Route).toConstantValue(ActionPolicyTagsRoute);
   bind(Route).toConstantValue(SuggestUserProfilesRoute);
