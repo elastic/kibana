@@ -108,7 +108,7 @@ export function IconStops({
 
       let deleteButton;
       if (iconStops.length > 2 && index !== 0) {
-        const deleteLabel = i18n.translate('xpack.maps.styles.iconStops.deleteButtonLabel', {
+        const deleteLabel = i18n.translate('xpack.maps.styles.iconStops.deleteButtonAriaLabel', {
           defaultMessage: 'Delete',
         });
         deleteButton = (
