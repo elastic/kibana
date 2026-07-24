@@ -7,4 +7,6 @@ products:
 - product: kibana
 areas:
 - Alerting and reporting
-title: Link case-templates docs via doclinks service
+title: Add case templates documentation links in Cases
+description: Adds Documentation links in the templates list and editor headers and
+  updates the landing page Learn more link to the manage case templates guide.

@@ -7,4 +7,7 @@ products:
 - product: kibana
 areas:
 - Alerting and reporting
-title: Mirror customFields into extended_fields on every runtime write (templates v2 adapter)
+title: Sync Cases custom fields with templates v2 extended fields
+description: When case templates v2 is enabled, custom field values mirror into `extended_fields`
+  on create and update, and newly configured custom fields get matching global field
+  definitions for the templates UI.

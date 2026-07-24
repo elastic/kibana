@@ -7,5 +7,6 @@ products:
 - product: kibana
 areas:
 - Search and data
-title: Disable Model Management UI on Logs Essentials tier
-description: Fixes Model Management pages being reachable by URL or global search on Observability Logs Essentials projects where AI features aren't supported.
+title: Fix Model Management pages appearing on Observability Logs Essentials projects
+description: Fixes Model Management pages being reachable by URL or global search
+  on Observability Logs Essentials projects where AI features aren't supported.

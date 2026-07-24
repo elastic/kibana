@@ -5,4 +5,6 @@ products:
 - product: cloud-serverless
   target: 2026-07-22
 - product: kibana
-title: enable the advanced setting for the new flyout system
+title: Enable the new flyout system in Elastic Security by default
+description: Turns on the `securitySolution:enableNewFlyout` advanced setting so Elastic
+  Security uses the unified flyout system unless you disable it in Advanced Settings.

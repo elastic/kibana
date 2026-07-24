@@ -7,4 +7,6 @@ products:
 - product: kibana
 areas:
 - Alerting and reporting
-title: Add duplicate file callout
+title: Add duplicate file warning in Cases file upload
+description: Shows a callout in the Cases upload modal when the selected filename
+  matches an existing attachment; upload is still allowed.

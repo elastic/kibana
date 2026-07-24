@@ -7,4 +7,8 @@ products:
 - product: kibana
 areas:
 - AI and machine Learning
-title: Fix ML saved objects API privileges
+title: Fix ML saved objects API access when ML features are disabled
+description: Machine Learning saved object APIs incorrectly required privileges for
+  anomaly detection, data frame analytics, and trained models all at once. Users could
+  be blocked when a feature was disabled. APIs now accept any one of the relevant
+  capabilities.

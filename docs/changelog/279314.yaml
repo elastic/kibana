@@ -7,5 +7,6 @@ products:
 - product: kibana
 areas:
 - Search and data
-title: Hide Manage regions for read-only users
-description: Improves the Elastic Inference Service page by hiding Manage regions for users with read-only access.
+title: Hide "Manage regions" for read-only users on Elastic Inference Service
+description: Hides the Manage regions control for users without manage access so the
+  page no longer shows an action they cannot use.

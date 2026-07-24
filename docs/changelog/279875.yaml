@@ -7,4 +7,6 @@ products:
 - product: kibana
 areas:
 - AI and machine Learning
-title: Fixing apply annotation to series checkbox
+title: Fix "Apply annotation to this series" checkbox when editing annotations
+description: Fixes the checkbox staying selected when you edit an existing annotation
+  that applies to a single series.

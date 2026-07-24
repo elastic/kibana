@@ -9,5 +9,7 @@ products:
 - product: kibana
 areas:
 - Search and data
-title: Categorize EPR response errors
-description: "Adds categorization to Fleet's connection errors to Elastic Package Registry: these now carry a categorized type (timeout/dns/connection/http/unknown) and a reason (underlying Node error code or HTTP status), surfaced in both server logs and API error responses."
+title: Improve Fleet Elastic Package Registry connection error details
+description: Fleet connection errors to the Elastic Package Registry now include a
+  categorized type (timeout, DNS, connection, HTTP, or unknown) and a reason (Node
+  error code or HTTP status) in server logs and API responses.

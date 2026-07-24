@@ -9,4 +9,6 @@ products:
 - product: kibana
 areas:
 - Dashboards and visualizations
-title: Honor the Fast mode state when sharing a Dashboard
+title: Fix Dashboard Fast mode not preserved in shared links
+description: Sharing a dashboard link did not include the Fast mode (`esql_approximation`)
+  setting. Shared dashboard links now preserve Fast mode when it is enabled.

@@ -7,4 +7,7 @@ products:
 - product: kibana
 areas:
 - AI and machine Learning
-title: 'Anomaly detection alerting: when available, use event.ingested for deduplication-safe rule queries '
+title: Reduce duplicate anomaly detection alerts by preferring `event.ingested`
+description: When `event.ingested` is present, rule queries use the previous run window
+  on that field instead of overlapping timestamp lookbacks, while results without
+  `event.ingested` keep the existing behavior.

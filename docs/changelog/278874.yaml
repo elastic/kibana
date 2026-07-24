@@ -9,4 +9,7 @@ products:
 - product: kibana
 areas:
 - Dashboards and visualizations
-title: Allow filtering dashboards and links list routes by tag names
+title: Add tag name filtering to dashboard and link list APIs
+description: Dashboard and link list APIs now accept `tag_names` and `excluded_tag_names`
+  query parameters to filter results by tag name, in addition to filtering by tag
+  ID.

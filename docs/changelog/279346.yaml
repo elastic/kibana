@@ -7,4 +7,7 @@ products:
 - product: kibana
 areas:
 - Alerting and reporting
-title: Autocomplete and validation for the template YAML editor
+title: Add autocomplete and validation to the Cases template YAML editor
+description: Adds field-type snippets, `$ref` autocomplete, and inline validation
+  for misspelled metadata keys, invalid `show_when` and `required_when` references,
+  and control-specific validation rules.

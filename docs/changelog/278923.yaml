@@ -9,5 +9,8 @@ products:
 - product: kibana
 areas:
 - Search and data
-title: 'Add rotate uninstall token API and UI '
-description: Added a **Rotate uninstall token** button to the agent policy tamper protection settings and a corresponding `POST /api/fleet/uninstall_tokens/{agentPolicyId}/rotate` API endpoint. This allows operators to invalidate a leaked uninstall token without having to recreate the policy and migrate agents.
+title: Add API and UI to rotate Fleet agent uninstall tokens
+description: Adds a "Rotate uninstall token" button to agent policy tamper protection
+  settings and a `POST /api/fleet/uninstall_tokens/{agentPolicyId}/rotate` endpoint.
+  Operators can invalidate a leaked uninstall token without recreating the policy
+  and migrating agents.

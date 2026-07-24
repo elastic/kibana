@@ -9,4 +9,6 @@ products:
 - product: kibana
 areas:
 - Dashboards and visualizations
-title: Fix user activity logs time range
+title: Fix missing time range in dashboard user activity logs
+description: User activity logs now record the dashboard time range when `timeRestore`
+  is disabled, instead of logging null values.

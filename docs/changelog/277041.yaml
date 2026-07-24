@@ -5,4 +5,7 @@ products:
 - product: cloud-serverless
   target: 2026-07-22
 - product: kibana
-title: Fix export issue adopting original yaml and correct enable flag
+title: Fix One Workflows export of comments and enable status
+description: Exported workflow YAML could drop user comments or commented steps and
+  encode the wrong enable status. Export now preserves the original YAML comments
+  and enable flag.
