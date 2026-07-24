@@ -50,7 +50,7 @@ your-plugin/
 ```
 
 :::::::{tip}
-Large plugins can split tests into per-area [namespaces](#scout-namespaces) instead of placing them directly under the Scout root.
+Large plugins often accumulate tests across different functional areas, sometimes owned by different teams. Rather than placing them all directly under the Scout root, group them into functional-area [namespaces](#scout-namespaces) and assign ownership per area.
 :::::::
 
 ::::::::
@@ -155,12 +155,13 @@ your-plugin/
         └── common/              # shared code (optional, reserved name)
 ```
 
-A namespace holds the same layout you'd otherwise place at the Scout root, just one level deeper — its own Playwright config(s), fixtures, and tests (for example `test/scout/<namespace>/ui/playwright.config.ts`).
+A namespace holds the same layout you'd otherwise place at the Scout root, one level deeper — its own Playwright config(s), fixtures, and tests (for example `test/scout/<namespace>/ui/playwright.config.ts`).
 
 **Why use namespaces?**
 
 - **Scoped ownership**: assign each area to the team that owns it in `.github/CODEOWNERS`, so failures reach the smaller group that maintains that functionality.
-- **Independently runnable**: each namespace is discovered as its own config, so selective testing and CI reporting are scoped per area — while all namespaces still share the same [server configuration](./run-scout-tests.md#scout-run-tests-server-config-set).
+- **Run a focused subset**: point Scout at a single namespace's config to run (or re-run) only that area's tests, instead of the whole plugin's suite.
+- **Independently runnable in CI**: each namespace is discovered as its own config, so selective testing and CI reporting are scoped per area — while all namespaces still share the same [server configuration](./run-scout-tests.md#scout-run-tests-server-config-set).
 
 ### Generate a namespace [scout-namespaces-generate]
 
