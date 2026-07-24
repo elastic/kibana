@@ -18,6 +18,7 @@ import {
   createManagementSectionMock,
   managementPluginMock,
 } from '@kbn/management-plugin/public/mocks';
+import { AGENT_BUILDER_UIAM_OAUTH_CLIENT_MANAGEMENT_SETTING_ID } from '@kbn/management-settings-ids';
 
 import { apiKeysManagementApp } from './api_keys';
 import { applicationConnectionsManagementApp } from './application_connections';
@@ -31,6 +32,23 @@ import type { ConfigType } from '../config';
 import { securityMock } from '../mocks';
 
 const mockSection = createManagementSectionMock();
+
+const createUiSettingsMock = (initialUiamOAuthClientManagement: boolean = false) => {
+  const uiamOAuthClientManagement$ = new BehaviorSubject<boolean>(initialUiamOAuthClientManagement);
+  const { uiSettings } = coreMock.createSetup();
+  uiSettings.get$.mockImplementation((key: string) => {
+    if (key === AGENT_BUILDER_UIAM_OAUTH_CLIENT_MANAGEMENT_SETTING_ID) {
+      return uiamOAuthClientManagement$.asObservable();
+    }
+    return new BehaviorSubject<unknown>(undefined).asObservable();
+  });
+  return {
+    uiSettings,
+    updateUiamOAuthClientManagement(enabled: boolean) {
+      uiamOAuthClientManagement$.next(enabled);
+    },
+  };
+};
 
 const createConfigMock = (overrides: Partial<ConfigType> = {}): ConfigType => ({
   loginAssistanceMessage: '',
@@ -50,6 +68,8 @@ describe('ManagementService', () => {
       const { fatalErrors, getStartServices } = coreMock.createSetup();
       const { authc } = securityMock.createSetup();
       const license = licenseMock.create();
+      const { uiSettings } = createUiSettingsMock();
+
       const managementSetup: ManagementSetup = {
         sections: {
           register: jest.fn(() => mockSection),
@@ -66,6 +86,7 @@ describe('ManagementService', () => {
         getStartServices: getStartServices as any,
         license,
         fatalErrors,
+        uiSettings,
         authc,
         management: managementSetup,
         buildFlavor: 'traditional',
@@ -107,6 +128,8 @@ describe('ManagementService', () => {
       const { authc } = securityMock.createSetup();
       authc.isUIAMEnabled.mockReturnValue(true);
       const license = licenseMock.create();
+      const { uiSettings } = createUiSettingsMock();
+
       const managementSetup = managementPluginMock.createSetupContract();
       managementSetup.sections.section.security = mockUiamSection;
 
@@ -115,6 +138,7 @@ describe('ManagementService', () => {
         getStartServices,
         license,
         fatalErrors,
+        uiSettings,
         authc,
         management: managementSetup,
         buildFlavor: 'serverless',
@@ -135,6 +159,8 @@ describe('ManagementService', () => {
       const { authc } = securityMock.createSetup();
       authc.isUIAMEnabled.mockReturnValue(false);
       const license = licenseMock.create();
+      const { uiSettings } = createUiSettingsMock();
+
       const managementSetup = managementPluginMock.createSetupContract();
       managementSetup.sections.section.security = mockServerlessSection;
 
@@ -143,6 +169,7 @@ describe('ManagementService', () => {
         getStartServices,
         license,
         fatalErrors,
+        uiSettings,
         authc,
         management: managementSetup,
         buildFlavor: 'serverless',
@@ -158,6 +185,8 @@ describe('ManagementService', () => {
       const { fatalErrors, getStartServices } = coreMock.createSetup();
       const { authc } = securityMock.createSetup();
       const license = licenseMock.create();
+      const { uiSettings } = createUiSettingsMock();
+
       const managementSetup: ManagementSetup = {
         sections: {
           register: jest.fn(() => mockSectionWithConfig),
@@ -182,6 +211,7 @@ describe('ManagementService', () => {
         getStartServices: getStartServices as any,
         license,
         fatalErrors,
+        uiSettings,
         authc,
         management: managementSetup,
         buildFlavor: 'traditional',
@@ -220,6 +250,7 @@ describe('ManagementService', () => {
       initialFeatures: Partial<SecurityLicenseFeatures>;
       canManageSecurity?: boolean;
       buildFlavor?: BuildFlavor;
+      initialUiamOAuthClientManagement?: boolean;
       isUIAMEnabled?: boolean;
     }
 
@@ -227,6 +258,7 @@ describe('ManagementService', () => {
       initialFeatures,
       canManageSecurity = true,
       buildFlavor = 'traditional',
+      initialUiamOAuthClientManagement = false,
       isUIAMEnabled = false,
     }: StartServiceOptions) {
       const { fatalErrors, getStartServices } = coreMock.createSetup();
@@ -236,6 +268,10 @@ describe('ManagementService', () => {
       );
       const license = licenseMock.create();
       license.features$ = licenseSubject;
+
+      const { uiSettings, updateUiamOAuthClientManagement } = createUiSettingsMock(
+        initialUiamOAuthClientManagement
+      );
 
       const config = {
         ui: {
@@ -265,6 +301,7 @@ describe('ManagementService', () => {
         getStartServices: getStartServices as any,
         license,
         fatalErrors,
+        uiSettings,
         authc,
         management: managementSetup,
         buildFlavor,
@@ -318,11 +355,13 @@ describe('ManagementService', () => {
         updateFeatures(features: Partial<SecurityLicenseFeatures>) {
           licenseSubject.next(features as unknown as SecurityLicenseFeatures);
         },
+        updateUiamOAuthClientManagement,
       };
     }
 
-    // Apps that are license-gated only. Application Connections is excluded
-    // because it has an additional UIAM gate on top of `showLinks`.
+    // Apps that are license-gated only (i.e. not also FF-gated). Application
+    // Connections is excluded because it has an additional uiSetting gate
+    // (`agentBuilder:uiamOAuthClientManagement`) on top of `showLinks`.
     const LICENSE_GATED_APP_IDS = [
       usersManagementApp.id,
       rolesManagementApp.id,
@@ -424,11 +463,12 @@ describe('ManagementService', () => {
       }
     });
 
-    describe('Application Connections app (UIAM gate)', () => {
-      it('is not enabled when UIAM is disabled', () => {
+    describe('Application Connections app (UIAM + UIAM OAuth client management gate)', () => {
+      it('is not enabled when UIAM is disabled, even when the UIAM OAuth client management setting is on', () => {
         const { mockApps } = startService({
           initialFeatures: { showLinks: true, showRoleMappingsManagement: true },
           isUIAMEnabled: false,
+          initialUiamOAuthClientManagement: true,
         });
         // App is never added to the status array when UIAM is disabled, so it
         // stays at its default mock-enabled state and is never touched by the
@@ -438,42 +478,55 @@ describe('ManagementService', () => {
         expect(app.disable).not.toHaveBeenCalled();
       });
 
-      it('is enabled when UIAM is enabled and `showLinks` is true', () => {
+      it('is disabled when UIAM is enabled but the UIAM OAuth client management setting is off', () => {
         const { mockApps } = startService({
           initialFeatures: { showLinks: true, showRoleMappingsManagement: true },
           isUIAMEnabled: true,
-        });
-        expect(mockApps.get(applicationConnectionsManagementApp.id)!.enabled).toBe(true);
-      });
-
-      it('is disabled when `showLinks` is false', () => {
-        const { mockApps } = startService({
-          initialFeatures: { showLinks: false, showRoleMappingsManagement: true },
-          isUIAMEnabled: true,
+          initialUiamOAuthClientManagement: false,
         });
         expect(mockApps.get(applicationConnectionsManagementApp.id)!.enabled).toBe(false);
       });
 
-      it('toggles reactively when `showLinks` changes after `start`', () => {
-        const { mockApps, updateFeatures } = startService({
+      it('is enabled when UIAM is enabled, `showLinks` is true, and the UIAM OAuth client management setting is on', () => {
+        const { mockApps } = startService({
+          initialFeatures: { showLinks: true, showRoleMappingsManagement: true },
+          isUIAMEnabled: true,
+          initialUiamOAuthClientManagement: true,
+        });
+        expect(mockApps.get(applicationConnectionsManagementApp.id)!.enabled).toBe(true);
+      });
+
+      it('is disabled when `showLinks` is false, regardless of the UIAM OAuth client management setting', () => {
+        const { mockApps } = startService({
           initialFeatures: { showLinks: false, showRoleMappingsManagement: true },
           isUIAMEnabled: true,
+          initialUiamOAuthClientManagement: true,
+        });
+        expect(mockApps.get(applicationConnectionsManagementApp.id)!.enabled).toBe(false);
+      });
+
+      it('toggles reactively when the UIAM OAuth client management setting changes after `start`', () => {
+        const { mockApps, updateUiamOAuthClientManagement } = startService({
+          initialFeatures: { showLinks: true, showRoleMappingsManagement: true },
+          isUIAMEnabled: true,
+          initialUiamOAuthClientManagement: false,
         });
         const app = mockApps.get(applicationConnectionsManagementApp.id)!;
         expect(app.enabled).toBe(false);
 
-        updateFeatures({ showLinks: true, showRoleMappingsManagement: true });
+        updateUiamOAuthClientManagement(true);
         expect(app.enabled).toBe(true);
 
-        updateFeatures({ showLinks: false, showRoleMappingsManagement: true });
+        updateUiamOAuthClientManagement(false);
         expect(app.enabled).toBe(false);
       });
 
-      it('is disabled when the user lacks management capability, even with UIAM enabled', () => {
+      it('is disabled when the user lacks management capability, even with UIAM and the UIAM OAuth client management setting on', () => {
         const { mockApps } = startService({
           initialFeatures: { showLinks: true, showRoleMappingsManagement: true },
           canManageSecurity: false,
           isUIAMEnabled: true,
+          initialUiamOAuthClientManagement: true,
         });
         expect(mockApps.get(applicationConnectionsManagementApp.id)!.enabled).toBe(false);
       });

@@ -8,8 +8,13 @@
 import { useMemo } from 'react';
 import type { FeatureFlags } from '../route_config';
 import { useExperimentalFeatures } from './use_experimental_features';
+import { useUiamOAuthClientManagement } from './use_uiam_oauth_client_management';
 
 export const useFeatureFlags = (): FeatureFlags => {
   const experimental = useExperimentalFeatures();
-  return useMemo(() => ({ experimental }), [experimental]);
+  const uiamOAuthClientManagement = useUiamOAuthClientManagement();
+  return useMemo(
+    () => ({ experimental, uiamOAuthClientManagement }),
+    [experimental, uiamOAuthClientManagement]
+  );
 };
