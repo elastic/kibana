@@ -51,7 +51,7 @@ export const SourcesPanel = ({ isLoading, sources, canEdit, onEditSources }: Sou
         >
           <FormattedMessage
             id="xpack.contextEngine.aiIndexDetail.sources.editButton"
-            defaultMessage="Edit sources"
+            defaultMessage="Edit"
           />
         </EuiButton>
       </EuiFlexItem>
