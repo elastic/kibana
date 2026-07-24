@@ -9,7 +9,7 @@ import type { SignificantEvent, SignificantEventStatus } from '@kbn/significant-
 import {
   NEEDS_ACTION_STATUSES,
   RESOLVED_STATUSES,
-  byCriticalityDesc,
+  bySeverityDesc,
   filterEventsByStream,
   getNeedsActionEvents,
   getResolvedEvents,
@@ -22,48 +22,44 @@ import {
 const mockEvent = (overrides: Partial<SignificantEvent> = {}): SignificantEvent =>
   ({
     '@timestamp': '2026-01-01T00:00:00.000Z',
-    created_at: '2026-01-01T00:00:00.000Z',
     event_id: 'evt-1',
-    discovery_slug: 'disc-1',
-    status: 'promoted',
+    event_uuid: 'evt-uuid-1',
+    status: 'open',
     stream_names: ['service-a'],
     title: 'Event',
     summary: 'Summary',
-    root_cause: 'Root cause',
-    criticality: 50,
+    severity: '40-medium',
     confidence: 0.9,
-    recommendations: [],
     ...overrides,
   } as SignificantEvent);
 
 describe('significant_event_status', () => {
-  it('classifies promoted and acknowledged as needs-action', () => {
-    expect(NEEDS_ACTION_STATUSES).toEqual(['promoted', 'acknowledged']);
-    expect(isNeedsActionStatus('promoted')).toBe(true);
-    expect(isNeedsActionStatus('acknowledged')).toBe(true);
-    expect(isNeedsActionStatus('resolved')).toBe(false);
+  it('classifies open as needs-action', () => {
+    expect(NEEDS_ACTION_STATUSES).toEqual(['open']);
+    expect(isNeedsActionStatus('open')).toBe(true);
+    expect(isNeedsActionStatus('closed')).toBe(false);
   });
 
-  it('classifies resolved, closed, and demoted as resolved', () => {
-    expect(RESOLVED_STATUSES).toEqual(['demoted', 'resolved', 'closed']);
-    expect(isResolvedStatus('resolved')).toBe(true);
+  it('classifies closed and dismissed as resolved', () => {
+    expect(RESOLVED_STATUSES).toEqual(['closed', 'dismissed']);
     expect(isResolvedStatus('closed')).toBe(true);
-    expect(isResolvedStatus('promoted')).toBe(false);
+    expect(isResolvedStatus('dismissed')).toBe(true);
+    expect(isResolvedStatus('open')).toBe(false);
   });
 
-  it('treats demoted (dismissed) as resolved, not needs-action', () => {
-    const demoted: SignificantEventStatus = 'demoted';
-    expect(isNeedsActionStatus(demoted)).toBe(false);
-    expect(isResolvedStatus(demoted)).toBe(true);
+  it('treats dismissed as resolved, not needs-action', () => {
+    const dismissed: SignificantEventStatus = 'dismissed';
+    expect(isNeedsActionStatus(dismissed)).toBe(false);
+    expect(isResolvedStatus(dismissed)).toBe(true);
   });
 
-  it('splits events into needs-action and resolved buckets, grouping demoted with resolved', () => {
+  it('splits events into needs-action and resolved buckets, grouping dismissed with resolved', () => {
     const events = [
-      mockEvent({ event_id: '1', status: 'promoted' }),
-      mockEvent({ event_id: '2', status: 'acknowledged' }),
-      mockEvent({ event_id: '3', status: 'resolved' }),
+      mockEvent({ event_id: '1', status: 'open' }),
+      mockEvent({ event_id: '2', status: 'open' }),
+      mockEvent({ event_id: '3', status: 'closed' }),
       mockEvent({ event_id: '4', status: 'closed' }),
-      mockEvent({ event_id: '5', status: 'demoted' }),
+      mockEvent({ event_id: '5', status: 'dismissed' }),
     ];
 
     expect(getNeedsActionEvents(events).map(({ event_id: id }) => id)).toEqual(['1', '2']);
@@ -82,14 +78,26 @@ describe('significant_event_status', () => {
     expect(filterEventsByStream(events, 'service-b').map(({ event_id: id }) => id)).toEqual(['2']);
   });
 
-  it('sorts by descending criticality, breaking ties on recency', () => {
+  it('sorts by descending severity, breaking ties on recency', () => {
     const events = [
-      mockEvent({ event_id: 'low', criticality: 10, '@timestamp': '2026-01-01T00:00:00.000Z' }),
-      mockEvent({ event_id: 'high', criticality: 90, '@timestamp': '2026-01-01T00:00:00.000Z' }),
-      mockEvent({ event_id: 'newer', criticality: 90, '@timestamp': '2026-01-02T00:00:00.000Z' }),
+      mockEvent({
+        event_id: 'low',
+        severity: '20-low',
+        '@timestamp': '2026-01-01T00:00:00.000Z',
+      }),
+      mockEvent({
+        event_id: 'high',
+        severity: '60-high',
+        '@timestamp': '2026-01-01T00:00:00.000Z',
+      }),
+      mockEvent({
+        event_id: 'newer',
+        severity: '60-high',
+        '@timestamp': '2026-01-02T00:00:00.000Z',
+      }),
     ];
 
-    expect([...events].sort(byCriticalityDesc).map(({ event_id: id }) => id)).toEqual([
+    expect([...events].sort(bySeverityDesc).map(({ event_id: id }) => id)).toEqual([
       'newer',
       'high',
       'low',
@@ -97,9 +105,9 @@ describe('significant_event_status', () => {
   });
 
   it('maps status to color and label', () => {
-    expect(getStatusColor('promoted')).toBe('danger');
-    expect(getStatusColor('resolved')).toBe('success');
-    expect(getStatusLabel('promoted')).toBe('Investigating');
-    expect(getStatusLabel('resolved')).toBe('Investigated');
+    expect(getStatusColor('open')).toBe('danger');
+    expect(getStatusColor('closed')).toBe('success');
+    expect(getStatusLabel('open')).toBe('Investigating');
+    expect(getStatusLabel('closed')).toBe('Investigated');
   });
 });

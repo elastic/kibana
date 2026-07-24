@@ -60,7 +60,7 @@ describe('StreamOverview', () => {
     mockUseStreamsPrivileges.mockReturnValue({
       features: {
         contentPacks: { enabled: false },
-        significantEventsDiscovery: { enabled: false, available: true },
+        significantEvents: { available: false },
       },
       isLoading: false,
     });
@@ -91,11 +91,11 @@ describe('StreamOverview', () => {
     expect(screen.getByText('Dataset quality')).toBeInTheDocument();
   });
 
-  it('renders knowledge indicators panel when discovery is enabled and significant events is available', () => {
+  it('renders knowledge indicators panel when significant events is available', () => {
     mockUseStreamsPrivileges.mockReturnValue({
       features: {
         contentPacks: { enabled: false },
-        significantEventsDiscovery: { enabled: true, available: true },
+        significantEvents: { available: true },
       },
       isLoading: false,
     });
@@ -113,7 +113,7 @@ describe('StreamOverview', () => {
     expect(screen.getByTestId('mockKnowledgeIndicatorsPanel')).toBeInTheDocument();
   });
 
-  it('does not render knowledge indicators panel when discovery is disabled', () => {
+  it('does not render knowledge indicators panel when significant events is unavailable on the client', () => {
     mockUseSignificantEventsAvailability.mockReturnValue({
       availability: { available: true },
       isLoading: false,
@@ -132,7 +132,7 @@ describe('StreamOverview', () => {
     mockUseStreamsPrivileges.mockReturnValue({
       features: {
         contentPacks: { enabled: false },
-        significantEventsDiscovery: { enabled: true, available: true },
+        significantEvents: { available: true },
       },
       isLoading: true,
     });
@@ -154,7 +154,7 @@ describe('StreamOverview', () => {
     mockUseStreamsPrivileges.mockReturnValue({
       features: {
         contentPacks: { enabled: false },
-        significantEventsDiscovery: { enabled: true, available: true },
+        significantEvents: { available: true },
       },
       isLoading: false,
     });
@@ -176,12 +176,12 @@ describe('StreamOverview', () => {
     mockUseStreamsPrivileges.mockReturnValue({
       features: {
         contentPacks: { enabled: false },
-        significantEventsDiscovery: { enabled: true, available: true },
+        significantEvents: { available: true },
       },
       isLoading: false,
     });
     mockUseSignificantEventsAvailability.mockReturnValue({
-      availability: { available: false, reason: 'ui_setting' },
+      availability: { available: false, reason: 'feature_flag' },
       isLoading: false,
     });
     mockUseStreamDetail.mockReturnValue({

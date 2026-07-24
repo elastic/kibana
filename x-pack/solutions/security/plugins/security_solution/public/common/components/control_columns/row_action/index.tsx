@@ -30,9 +30,10 @@ import type {
 } from '../../../../../common/types';
 import type { TimelineItem, TimelineNonEcsData } from '../../../../../common/search_strategy';
 import { type ColumnHeaderOptions, type OnRowSelected } from '../../../../../common/types/timeline';
-import { DocumentEventTypes, NotesEventTypes } from '../../../lib/telemetry';
+import { DocumentEventTypes, FLYOUT_ORIGIN, NotesEventTypes } from '../../../lib/telemetry';
 import { getMappedNonEcsValue } from '../../../utils/get_mapped_non_ecs_value';
 import { useUserPrivileges } from '../../user_privileges';
+import { getDocumentHistoryTitle } from '../../../../flyout_v2/document/main/utils/get_header_title';
 
 export type RowActionProps = EuiDataGridCellValueElementProps & {
   columnHeaders: ColumnHeaderOptions[];
@@ -123,6 +124,8 @@ const RowActionComponent = ({
         renderCellActions:
           tableId === TableId.alertsOnCasePage ? casesCellActionRenderer : cellActionRenderer,
         onAlertUpdated: handleAlertUpdated,
+        origin: FLYOUT_ORIGIN.ALERTS_TABLE,
+        title: getDocumentHistoryTitle(hit),
       });
     } else {
       openFlyout({
@@ -154,7 +157,7 @@ const RowActionComponent = ({
 
   const toggleShowNotes = useCallback(() => {
     if (enableNewFlyout && hit) {
-      openNotes({ hit });
+      openNotes({ hit, origin: FLYOUT_ORIGIN.ALERTS_TABLE });
     } else {
       openFlyout({
         right: {

@@ -16,7 +16,7 @@ describe('alerts', () => {
     const savedObjectsClient = savedObjectsRepositoryMock.create();
     const telemetrySavedObjectsClient = new TelemetrySavedObjectsClient(savedObjectsClient);
 
-    savedObjectsClient.find.mockResolvedValue({
+    const legacyResponse = {
       total: 3,
       saved_objects: [],
       per_page: 1,
@@ -112,10 +112,22 @@ describe('alerts', () => {
           ],
         },
       },
-    });
+    };
+
+    // Unified alerts (cases-attachments) query returns nothing here; the merge
+    // adds 0, so expectations below reflect the legacy (cases-comments) query.
+    const emptyUnifiedResponse = {
+      total: 0,
+      saved_objects: [],
+      per_page: 0,
+      page: 0,
+    };
 
     beforeEach(() => {
       jest.clearAllMocks();
+      savedObjectsClient.find
+        .mockResolvedValueOnce(legacyResponse)
+        .mockResolvedValueOnce(emptyUnifiedResponse);
     });
 
     it('it returns the correct res', async () => {
@@ -260,6 +272,37 @@ describe('alerts', () => {
         perPage: 0,
         type: 'cases-comments',
         namespaces: ['*'],
+      });
+    });
+
+    it('also queries unified alerts in cases-attachments', async () => {
+      await getAlertsTelemetryData({ savedObjectsClient: telemetrySavedObjectsClient, logger });
+
+      const unifiedCall = savedObjectsClient.find.mock.calls.find(
+        ([args]) => args.type === 'cases-attachments'
+      );
+
+      expect(unifiedCall).toBeDefined();
+      const [unifiedArgs] = unifiedCall!;
+      expect(unifiedArgs.aggs).toMatchObject({
+        by_owner: {
+          terms: { field: 'cases-attachments.attributes.owner' },
+          aggs: {
+            uniqueAlertCommentsCount: {
+              cardinality: { field: 'cases-attachments.attributes.attachmentId' },
+            },
+          },
+        },
+      });
+      expect(unifiedArgs.filter).toMatchObject({
+        arguments: expect.arrayContaining([
+          expect.objectContaining({
+            arguments: expect.arrayContaining([
+              expect.objectContaining({ value: 'cases-attachments.attributes.type' }),
+              expect.objectContaining({ value: 'security.alert' }),
+            ]),
+          }),
+        ]),
       });
     });
   });

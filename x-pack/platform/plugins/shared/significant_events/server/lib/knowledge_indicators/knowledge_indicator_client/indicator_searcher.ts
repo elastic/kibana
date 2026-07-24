@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RetrieverContainer } from '@elastic/elasticsearch/lib/api/types';
+import { BasicPrettyPrinter, esql, type ComposerQuery } from '@elastic/esql';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type {
   Feature,
@@ -17,25 +17,80 @@ import {
   isStoredFeatureKnowledgeIndicator,
   isStoredQueryKnowledgeIndicator,
   KNOWLEDGE_INDICATORS_DATA_STREAM,
-  type StoredKnowledgeIndicator,
 } from '../data_stream';
 import { combineWhere, inPredicate, IS_NOT_DELETED, IS_NOT_EXCLUDED } from '../esql_helpers';
 import {
+  DESCRIPTION,
+  FEATURE_SUBTYPE,
   FEATURE_TYPE,
+  ID,
   KI_TYPE_FEATURE,
   KI_TYPE_QUERY,
+  QUERY_ESQL,
+  SEARCH_EMBEDDING,
   STREAM_NAME,
+  TAGS,
+  TIMESTAMP,
+  TITLE,
   TYPE,
   type KnowledgeIndicatorType,
 } from '../fields';
 import { fromStoredFeature, fromStoredQuery } from './serializers';
 import { searchWithKeywordFallback } from '../../streams/search_with_keyword_fallback';
+import {
+  esqlToObjects,
+  queryEsql,
+  type LatestSourceWhereCondition,
+} from '../../significant_events/latest_source_query';
 import type { SearchMode } from '../../../../common/queries';
 
 import type { RevisionReader } from './revision_reader';
 import type { RuleUnbackedFilter } from './types';
 
 const SEARCH_SIZE_LIMIT = 10_000;
+const QUERY_FEATURE_ID = 'query.features.id';
+
+type RankedIndicatorRow = Record<string, unknown> & {
+  id?: string;
+  'stream.name'?: string;
+  type?: KnowledgeIndicatorType;
+  '@timestamp'?: string;
+};
+
+interface KeywordClause {
+  readonly condition: LatestSourceWhereCondition;
+  readonly boost: number;
+}
+
+interface KeywordExpressions {
+  readonly condition: LatestSourceWhereCondition;
+  readonly score: LatestSourceWhereCondition;
+}
+
+const combineKeywordClauses = (clauses: KeywordClause[]): KeywordExpressions => {
+  const condition = clauses
+    .map(({ condition: clause }) => `(${BasicPrettyPrinter.expression(clause)})`)
+    .join(' OR ');
+  const score = clauses
+    .map(
+      ({ condition: clause, boost }) =>
+        `CASE(${BasicPrettyPrinter.expression(clause)}, ${boost.toFixed(1)}, 0.0)`
+    )
+    .join(' + ');
+
+  return {
+    condition: esql.exp(condition),
+    score: esql.exp(score),
+  };
+};
+
+// Columns ranking must return so the caller can key each row and match the phase-1 latest revision.
+const rankGroupKeyColumns = () => [
+  esql.col(ID),
+  esql.col(STREAM_NAME),
+  esql.col(TYPE),
+  esql.col(TIMESTAMP),
+];
 
 export class IndicatorSearcher {
   constructor(
@@ -125,85 +180,27 @@ export class IndicatorSearcher {
     const docs = await this.revisionReader.fetchLatestRevisions(where, postGroupingWhere);
     const docById = new Map(docs.map((d) => [`${d['stream.name']}:${d.type}:${d.id}`, d]));
 
-    // Phase 2: rank via ES standard search on the latest doc subset. We
-    // re-issue a search constrained by the (stream.name, type, id) tuples
-    // we got back from phase 1. The data stream client doesn't expose the
-    // raw ES client `_id` filter directly, so we scope by id terms.
+    // Phase 2: rank via ES|QL on the latest doc subset. We re-issue a query
+    // constrained by the (stream.name, type, id) tuples from phase 1.
     if (docById.size === 0) {
       return { hits: [] };
     }
 
     const ids = Array.from(new Set(docs.map((d) => d.id)));
     const limit = options.limit ?? SEARCH_SIZE_LIMIT;
-
-    const filter: Array<Record<string, unknown>> = [
-      { terms: { id: ids } },
-      { terms: { 'stream.name': streamNames } },
-    ];
-    if (options.types?.length) {
-      filter.push({ terms: { type: options.types } });
+    const phase2Where = combineWhere(
+      inPredicate(ID, ids),
+      inPredicate(STREAM_NAME, streamNames),
+      inPredicate(TYPE, options.types ?? [])
+    );
+    if (!phase2Where) {
+      return { hits: [] };
     }
 
-    let retriever: RetrieverContainer;
-    if (mode === 'keyword') {
-      retriever = {
-        standard: {
-          query: this.buildKeywordQuery(queryText, filter, options.types),
-        },
-      };
-    } else if (mode === 'semantic') {
-      retriever = {
-        linear: {
-          retrievers: [
-            {
-              retriever: {
-                standard: {
-                  query: { match: { search_embedding: queryText } },
-                  filter: { bool: { filter } },
-                },
-              },
-              weight: 1,
-              normalizer: 'minmax',
-            },
-          ],
-          rank_window_size: limit,
-          min_score: this.config.semantic_min_score,
-        },
-      };
-    } else {
-      retriever = {
-        rrf: {
-          retrievers: [
-            { standard: { query: this.buildKeywordQuery(queryText, [], options.types) } },
-            {
-              linear: {
-                retrievers: [
-                  {
-                    retriever: {
-                      standard: { query: { match: { search_embedding: queryText } } },
-                    },
-                    weight: 1,
-                    normalizer: 'minmax',
-                  },
-                ],
-                rank_window_size: limit,
-                min_score: this.config.semantic_min_score,
-              },
-            },
-          ],
-          filter: { bool: { filter } },
-          rank_window_size: limit,
-          rank_constant: this.config.rrf_rank_constant,
-        },
-      };
-    }
-
-    const response = await this.esClient.search({
-      index: KNOWLEDGE_INDICATORS_DATA_STREAM,
-      size: limit,
-      track_total_hits: true,
-      retriever,
-    });
+    const query = this.buildRankQuery(mode, phase2Where, queryText, options.types ?? [], limit);
+    const rankedRows = esqlToObjects<RankedIndicatorRow>(
+      await queryEsql({ esClient: this.esClient, query })
+    );
 
     // Walk the ranked rows and surface each group once, in rank order. A row
     // only counts if its @timestamp matches the group's latest revision — that
@@ -213,16 +210,23 @@ export class IndicatorSearcher {
     // surface a non-latest payload. A Set is enough to dedupe.
     const seen = new Set<string>();
     const hits: KnowledgeIndicator[] = [];
-    for (const hit of response.hits.hits) {
-      const source = hit._source as StoredKnowledgeIndicator | undefined;
-      if (!source) continue;
-      const key = `${source['stream.name']}:${source.type}:${source.id}`;
+    for (const row of rankedRows) {
+      const id = row[ID];
+      const streamName = row[STREAM_NAME];
+      const type = row[TYPE];
+      const timestamp = row[TIMESTAMP];
+      if (
+        typeof id !== 'string' ||
+        typeof streamName !== 'string' ||
+        typeof type !== 'string' ||
+        typeof timestamp !== 'string'
+      ) {
+        continue;
+      }
+      const key = `${streamName}:${type}:${id}`;
       if (seen.has(key)) continue;
       const latest = docById.get(key);
-      if (
-        !latest ||
-        new Date(latest['@timestamp']).getTime() !== new Date(source['@timestamp']).getTime()
-      ) {
+      if (!latest || new Date(latest[TIMESTAMP]).getTime() !== new Date(timestamp).getTime()) {
         continue;
       }
       seen.add(key);
@@ -236,52 +240,96 @@ export class IndicatorSearcher {
     return { hits };
   }
 
-  private buildKeywordQuery(
+  private buildRankQuery(
+    mode: SearchMode,
+    where: LatestSourceWhereCondition,
     queryText: string,
-    filter: Array<Record<string, unknown>>,
-    types: KnowledgeIndicatorType[] = []
-  ): Record<string, unknown> {
-    const escaped = queryText.replace(/[\\*?]/g, '\\$&');
-    const wildcard = (field: string, boost?: number) => ({
-      wildcard: {
-        [field]: {
-          value: `*${escaped}*`,
-          case_insensitive: true,
-          ...(boost !== undefined ? { boost } : {}),
-        },
-      },
-    });
-
-    const featureShould = [
-      wildcard('title', 3),
-      wildcard('description', 2),
-      wildcard(FEATURE_TYPE),
-      wildcard('feature.subtype'),
-      wildcard('tags'),
-    ];
-
-    const queryShould = [
-      wildcard('title', 3),
-      wildcard('description', 2),
-      wildcard('query.esql'),
-      wildcard('query.features.id'),
-    ];
-
-    let should: Array<Record<string, unknown>>;
-    if (types.length === 0 || (types.includes(KI_TYPE_FEATURE) && types.includes(KI_TYPE_QUERY))) {
-      should = [...featureShould, ...queryShould];
-    } else if (types.includes(KI_TYPE_FEATURE)) {
-      should = featureShould;
-    } else {
-      should = queryShould;
+    types: KnowledgeIndicatorType[],
+    limit: number
+  ): ComposerQuery {
+    if (mode === 'semantic') {
+      return esql`FROM ${KNOWLEDGE_INDICATORS_DATA_STREAM} METADATA _score, _id, _index
+        | WHERE ${where}
+        | FORK (
+            WHERE MATCH(${esql.col(SEARCH_EMBEDDING)}, ${{ q: queryText }})
+            | SORT _score DESC
+            | LIMIT ${limit}
+          )
+        | FUSE LINEAR WITH {"normalizer":"minmax"}
+        | WHERE _score >= ${this.config.semantic_min_score}
+        | KEEP _id, _index, _score, ${rankGroupKeyColumns()}
+        | SORT _score DESC
+        | LIMIT ${limit}`;
     }
 
-    return {
-      bool: {
-        filter,
-        should,
-        minimum_should_match: 1,
-      },
-    };
+    const keyword = this.buildKeywordExpressions(queryText, types);
+    if (mode === 'keyword') {
+      return esql`FROM ${KNOWLEDGE_INDICATORS_DATA_STREAM} METADATA _score, _id, _index
+        | WHERE ${where}
+        | WHERE ${keyword.condition}
+        | EVAL _score = ${keyword.score}
+        | WHERE _score > 0
+        | KEEP _id, _index, _score, ${rankGroupKeyColumns()}
+        | SORT _score DESC
+        | LIMIT ${limit}`;
+    }
+
+    // Threshold the semantic branch in-place (FUSE LINEAR + fake group) before RRF-fusing with keyword; final KEEP drops the FUSE keys _id/_index.
+    return esql`FROM ${KNOWLEDGE_INDICATORS_DATA_STREAM} METADATA _score, _id, _index
+      | WHERE ${where}
+      | FORK
+          (
+            WHERE MATCH(${esql.col(SEARCH_EMBEDDING)}, ${{ q: queryText }})
+            | SORT _score DESC
+            | LIMIT ${limit}
+            | EVAL label = "semantic"
+            | FUSE LINEAR GROUP BY label WITH {"normalizer":"minmax"}
+            | WHERE _score >= ${this.config.semantic_min_score}
+            | KEEP _id, _index, _score, ${rankGroupKeyColumns()}
+            | SORT _score DESC
+            | LIMIT ${limit}
+          )
+          (
+            WHERE ${keyword.condition}
+            | EVAL _score = ${keyword.score}
+            | WHERE _score > 0
+            | SORT _score DESC
+            | LIMIT ${limit}
+            | KEEP _id, _index, _score, ${rankGroupKeyColumns()}
+          )
+      | FUSE RRF WITH {"rank_constant":${this.config.rrf_rank_constant}}
+      | SORT _score DESC
+      | KEEP ${rankGroupKeyColumns()}, _score
+      | LIMIT ${limit}`;
+  }
+
+  private buildKeywordExpressions(
+    queryText: string,
+    types: KnowledgeIndicatorType[]
+  ): KeywordExpressions {
+    const lowerQueryText = queryText.toLowerCase();
+    const escaped = lowerQueryText.replace(/[\\*?]/g, '\\$&');
+    const lowerWildcard = esql.str(`*${escaped}*`);
+    const likeClause = (field: string, boost: number): KeywordClause => ({
+      condition: esql.exp`TO_LOWER(${esql.col(field)}) LIKE ${lowerWildcard}`,
+      boost,
+    });
+
+    const clauses: KeywordClause[] = [likeClause(TITLE, 3), likeClause(DESCRIPTION, 2)];
+    const includeFeatures = types.length === 0 || types.includes(KI_TYPE_FEATURE);
+    const includeQueries = types.length === 0 || types.includes(KI_TYPE_QUERY);
+
+    if (includeFeatures) {
+      // Join the multivalue so substring LIKE works; LIKE is null per-element, and MV_CONTAINS matched whole tags only.
+      clauses.push(likeClause(FEATURE_TYPE, 1), likeClause(FEATURE_SUBTYPE, 1), {
+        condition: esql.exp`MV_CONCAT(TO_LOWER(${esql.col(TAGS)}), " ") LIKE ${lowerWildcard}`,
+        boost: 1,
+      });
+    }
+    if (includeQueries) {
+      clauses.push(likeClause(QUERY_ESQL, 1), likeClause(QUERY_FEATURE_ID, 1));
+    }
+
+    return combineKeywordClauses(clauses);
   }
 }

@@ -12,7 +12,7 @@ import Path from 'path';
 
 import { CI_PARALLEL_PROCESS_PREFIX } from '@kbn/test-es-server';
 
-export function getUniqueJunitReportPath(
+export function getJunitReportPath(
   rootDirectory: string,
   reportName: string,
   counter?: number
@@ -21,7 +21,7 @@ export function getUniqueJunitReportPath(
     ? `-bk__${process.env.BUILDKITE_JOB_ID}`
     : '';
 
-  const path = Path.resolve(
+  return Path.resolve(
     rootDirectory,
     'target/junit',
     process.env.JOB || '.',
@@ -29,6 +29,14 @@ export function getUniqueJunitReportPath(
       counter ? `-${counter}` : ''
     }${BUILDKITE_ID_SUFFIX}.xml`
   );
+}
+
+export function getUniqueJunitReportPath(
+  rootDirectory: string,
+  reportName: string,
+  counter?: number
+): string {
+  const path = getJunitReportPath(rootDirectory, reportName, counter);
 
   return Fs.existsSync(path)
     ? getUniqueJunitReportPath(rootDirectory, reportName, (counter ?? 0) + 1)
