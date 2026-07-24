@@ -34,7 +34,7 @@ import {
   deletePrebuiltRulesAssets,
 } from '../../../../../tasks/api_calls/common';
 import {
-  clickRuleManagementBreadcrumb,
+  navigateBackToRulesManagement,
   visitAddRulesPage,
 } from '../../../../../tasks/rules_management';
 
@@ -78,7 +78,7 @@ describe(
       // Assert installation succeeded
       assertRuleInstallationSuccessToastShown([RULE_1]);
       // Go back to rules table and assert that the rules are installed
-      clickRuleManagementBreadcrumb();
+      navigateBackToRulesManagement();
       assertRulesPresentInInstalledRulesTable([RULE_1]);
     });
 
@@ -88,7 +88,7 @@ describe(
       assertInstallationRequestIsComplete([RULE_1, RULE_2]);
       assertRuleInstallationSuccessToastShown([RULE_1, RULE_2]);
       // Go back to rules table and assert that the rules are installed
-      clickRuleManagementBreadcrumb();
+      navigateBackToRulesManagement();
       assertRulesPresentInInstalledRulesTable([RULE_1, RULE_2]);
     });
 
@@ -98,7 +98,7 @@ describe(
       assertInstallationRequestIsComplete([RULE_1, RULE_2]);
       assertRuleInstallationSuccessToastShown([RULE_1, RULE_2]);
       // Go back to rules table and assert that the rules are installed
-      clickRuleManagementBreadcrumb();
+      navigateBackToRulesManagement();
       assertRulesPresentInInstalledRulesTable([RULE_1, RULE_2]);
     });
 
@@ -107,7 +107,7 @@ describe(
       assertInstallationRequestIsComplete([RULE_1, RULE_2]);
       assertRuleInstallationSuccessToastShown([RULE_1, RULE_2]);
       // Go back to rules table and assert that the rules are installed
-      clickRuleManagementBreadcrumb();
+      navigateBackToRulesManagement();
       assertRulesPresentInInstalledRulesTable([RULE_1, RULE_2]);
     });
 

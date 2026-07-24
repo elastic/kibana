@@ -8,7 +8,6 @@
 import type { SecurityRoleName } from '@kbn/security-solution-plugin/common/test';
 import type { Exception } from '../objects/exception';
 import { PAGE_CONTENT_SPINNER } from '../screens/common/page';
-import { clickRuleManagementBreadcrumb } from './rules_management';
 import { RULE_STATUS } from '../screens/create_new_rule';
 import {
   ADD_EXCEPTIONS_BTN_FROM_EMPTY_PROMPT_BTN,
@@ -179,10 +178,6 @@ export const waitForTheRuleToBeExecuted = () => {
       .invoke('text')
       .then((ruleStatus) => ruleStatus === 'succeeded');
   });
-};
-
-export const goBackToRulesTable = () => {
-  clickRuleManagementBreadcrumb();
 };
 
 export const getDetails = (title: string | RegExp) =>

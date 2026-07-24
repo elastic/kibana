@@ -29,8 +29,7 @@ test.describe('Inference Navigation', () => {
       await mockInferenceEndpoints(page, eisEndpointsMockData);
       await pageObjects.eisModels.goto();
 
-      await expect(pageObjects.navigation.breadcrumbsContainer).toBeVisible();
-      await pageObjects.navigation.expectBreadcrumbTexts([
+      await expect(pageObjects.navigation.allBreadcrumbs).toHaveText([
         ...BREADCRUMBS.stateful.classic,
         'Elastic Inference',
       ]);
@@ -44,8 +43,7 @@ test.describe('Inference Navigation', () => {
       await mockInferenceEndpoints(page, externalInferenceEndpointsMockData);
       await pageObjects.externalInference.goto();
 
-      await expect(pageObjects.navigation.breadcrumbsContainer).toBeVisible();
-      await pageObjects.navigation.expectBreadcrumbTexts([
+      await expect(pageObjects.navigation.allBreadcrumbs).toHaveText([
         ...BREADCRUMBS.stateful.classic,
         'External Inference',
       ]);
@@ -59,8 +57,7 @@ test.describe('Inference Navigation', () => {
       await mockInferenceEndpoints(page, eisEndpointsMockData);
       await pageObjects.featureSettings.goto();
 
-      await expect(pageObjects.navigation.breadcrumbsContainer).toBeVisible();
-      await pageObjects.navigation.expectBreadcrumbTexts([
+      await expect(pageObjects.navigation.allBreadcrumbs).toHaveText([
         ...BREADCRUMBS.stateful.classic,
         'Feature Settings',
       ]);

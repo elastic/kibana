@@ -52,8 +52,8 @@ import {
   openPrebuiltRuleInstallFlyoutFor,
 } from '../../../../../tasks/prebuilt_rules_preview';
 import {
+  navigateBackToRulesManagement,
   visitAddRulesPage,
-  clickRuleManagementBreadcrumb,
 } from '../../../../../tasks/rules_management';
 import {
   deleteAlertsAndRules,
@@ -111,7 +111,7 @@ describe(
         assertRuleInstallationSuccessToastShown([PREBUILT_RULE_ASSET]);
 
         // Go back to rules table and assert that the rules are installed
-        clickRuleManagementBreadcrumb();
+        navigateBackToRulesManagement();
         expectRulesInTable(RULES_MANAGEMENT_TABLE, [PREBUILT_RULE_NAME]);
 
         clickAddElasticRulesButton();

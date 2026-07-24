@@ -116,6 +116,18 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       });
     });
 
+    it('navigates to data management and query rules', async () => {
+      await svlCommonNavigation.sidenav.openPanel('data_management');
+      await solutionNavigation.sidenav.expectLinkActive({
+        deepLinkId: 'management:index_management',
+      });
+
+      await solutionNavigation.sidenav.clickLink({
+        deepLinkId: 'searchQueryRules',
+      });
+      await testSubjects.existOrFail('queryRulesBasePage');
+    });
+
     it('navigate using search', async () => {
       await svlCommonNavigation.search.showSearch();
       await svlCommonNavigation.search.searchFor('type:application discover');

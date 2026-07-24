@@ -46,11 +46,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   // breadcrumb trail and surfaces the parent page as a back button in the app header; classic
   // project chrome still renders the Discover breadcrumb.
   const goBackToDiscover = async () => {
-    if (await globalNav.isNextProjectChrome()) {
-      await testSubjects.click('appHeaderBack');
-    } else {
-      await testSubjects.click('~breadcrumb-deepLinkId-discover');
-    }
+    const backControl = (await globalNav.isNextProjectChrome())
+      ? 'appHeaderBack'
+      : '~breadcrumb-deepLinkId-discover';
+    await testSubjects.existOrFail(backControl);
+    await testSubjects.click(backControl);
+    await PageObjects.discover.waitUntilTabIsLoaded();
   };
 
   describe('adhoc data views', function () {
@@ -97,7 +98,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await surrDocs.click();
       await PageObjects.context.waitUntilContextLoadingHasFinished();
       await goBackToDiscover();
-      await PageObjects.header.waitUntilLoadingHasFinished();
 
       expect(await dataViews.getSelectedName()).to.be('logstash*');
 
@@ -108,7 +108,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       await goBackToDiscover();
-      await PageObjects.header.waitUntilLoadingHasFinished();
 
       expect(await dataViews.getSelectedName()).to.be('logstash*');
     });

@@ -5,29 +5,12 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout/ui';
 import type { ScoutPage, Locator } from '@kbn/scout';
 
 export class PageNavigation {
-  readonly breadcrumbsContainer: Locator;
   readonly allBreadcrumbs: Locator;
-  readonly firstBreadcrumb: Locator;
-  readonly lastBreadcrumb: Locator;
 
-  constructor(private readonly page: ScoutPage) {
-    this.breadcrumbsContainer = page.testSubj.locator('breadcrumbs');
+  constructor(page: ScoutPage) {
     this.allBreadcrumbs = page.testSubj.locator('~breadcrumb');
-    this.firstBreadcrumb = page.locator('[data-test-subj*="breadcrumb"][data-test-subj*="first"]');
-    this.lastBreadcrumb = page.locator('[data-test-subj*="breadcrumb"][data-test-subj*="last"]');
-  }
-
-  breadcrumb(text: string): Locator {
-    return this.page.testSubj.locator('~breadcrumb').filter({ hasText: text });
-  }
-
-  async expectBreadcrumbTexts(expectedTexts: string[]): Promise<void> {
-    await expect(this.breadcrumbsContainer).toBeVisible();
-    const allTexts = await this.allBreadcrumbs.allTextContents();
-    expect(allTexts).toStrictEqual(expectedTexts);
   }
 }

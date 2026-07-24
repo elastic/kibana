@@ -8,6 +8,7 @@
 import {
   APP_HEADER_BACK,
   APP_HEADER_BACK_MENU_ITEM,
+  RULE_MANAGEMENT_PAGE_BREADCRUMB,
   RULE_MANAGEMENT_PAGE_TITLE,
 } from '../screens/breadcrumbs';
 import {
@@ -23,29 +24,26 @@ export function visitRulesManagementTable(): void {
   visit(RULES_MANAGEMENT_URL);
 }
 
-/**
- * Navigates back to the rules table. When an app header back button is rendered it is used (opening
- * its menu and selecting the rules destination when several ancestors exist); otherwise the rules
- * list is opened directly.
- */
-export function clickRuleManagementBreadcrumb(): void {
-  cy.get('body').then(($body) => {
-    if ($body.find(APP_HEADER_BACK).length > 0) {
-      cy.get(APP_HEADER_BACK).then(($button) => {
-        cy.wrap($button).click();
-        if ($button.attr('aria-haspopup') === 'menu') {
-          cy.contains(APP_HEADER_BACK_MENU_ITEM, RULE_MANAGEMENT_PAGE_TITLE).click();
-        }
-      });
-    } else {
-      visit(RULES_MANAGEMENT_URL);
-    }
-  });
-}
+export function navigateBackToRulesManagement(): void {
+  cy.get(`${APP_HEADER_BACK},${RULE_MANAGEMENT_PAGE_BREADCRUMB}`)
+    .filter(':visible')
+    .first()
+    .should('be.visible')
+    .then(($control) => {
+      const menuId = $control.attr('aria-controls');
+      const opensMenu = $control.attr('aria-haspopup') === 'menu';
 
-export function openRuleManagementPageViaBreadcrumbs(): void {
-  cy.log('Navigate back to rules table');
-  clickRuleManagementBreadcrumb();
+      cy.wrap($control).click();
+      if (opensMenu) {
+        if (!menuId) {
+          throw new Error('Rules management back button does not identify its menu');
+        }
+        cy.get(`#${menuId}`)
+          .contains(APP_HEADER_BACK_MENU_ITEM, RULE_MANAGEMENT_PAGE_TITLE)
+          .should('be.visible')
+          .click();
+      }
+    });
   cy.url().should('include', RULES_MANAGEMENT_URL);
 }
 

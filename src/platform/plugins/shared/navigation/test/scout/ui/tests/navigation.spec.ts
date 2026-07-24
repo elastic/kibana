@@ -86,7 +86,7 @@ test.describe.skip('navigation', { tag: tags.serverless.security.complete }, () 
     await pageObjects.collapsibleNav.clickItem('management:maintenanceWindows', {
       lowercase: false,
     });
-    await expect(pageObjects.navigation.getBreadcrumbByText('Maintenance Windows')).toBeVisible();
+    await expect(pageObjects.navigation.pageTitle()).toContainText('Maintenance Windows');
   });
 
   test('opens panel on legacy management landing page', async ({

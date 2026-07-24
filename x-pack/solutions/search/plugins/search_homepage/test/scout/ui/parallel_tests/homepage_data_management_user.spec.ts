@@ -48,23 +48,20 @@ spaceTest.describe(
       }
     );
 
-    spaceTest(
-      'should only see Data Management in primary sidenav',
-      async ({ page, pageObjects }) => {
-        const { collapsibleNav } = pageObjects;
+    spaceTest('should only see Home and Data Management in primary sidenav', async ({ page }) => {
+      // The solution "home" node always renders as a primary sidenav item, so a
+      // limited-permission user sees it alongside Data Management.
+      const primaryNav = page.testSubj.locator('kbnChromeNav-primaryNavigation');
+      const navItems = primaryNav.locator('[data-test-subj*="nav-item-id-"]');
+      await expect(navItems).toHaveCount(2);
 
-        // The solution "home" node always renders as a primary sidenav item, so a
-        // limited-permission user sees it alongside Data Management.
-        const primaryNav = page.testSubj.locator('kbnChromeNav-primaryNavigation');
-        const navItems = primaryNav.locator('[data-test-subj*="nav-item-id-"]');
-        await expect(navItems).toHaveCount(2);
+      const homeLink = primaryNav.locator('[data-test-subj~="nav-item-id-searchHomepage"]');
+      await expect(homeLink).toBeVisible();
 
-        const homeLink = collapsibleNav.getNavItemById('searchHomepage');
-        await expect(homeLink).toBeVisible();
-
-        const dataManagementLink = collapsibleNav.getNavItemById('data_management');
-        await expect(dataManagementLink).toBeVisible();
-      }
-    );
+      const dataManagementLink = primaryNav.locator(
+        '[data-test-subj~="nav-item-id-data_management"]'
+      );
+      await expect(dataManagementLink).toBeVisible();
+    });
   }
 );
