@@ -5,16 +5,28 @@
  * 2.0.
  */
 
-import { stripMarkdownFences, containsScript, injectCsp, sanitizeHtml } from './template_fill';
+import {
+  stripMarkdownFences,
+  containsScript,
+  injectCsp,
+  sanitizeHtml,
+  isValidTemplate,
+} from './prepare_html';
 
 describe('injectCsp', () => {
-  it('injects CSP into an existing <head>', () => {
-    const result = injectCsp('<html><head></head><body></body></html>');
+  it('injects CSP and color-scheme meta into an existing <head>', () => {
+    const result = injectCsp('<html><head></head><body></body></html>', 'DARK');
     expect(result).toContain('<head><meta http-equiv="Content-Security-Policy"');
+    expect(result).toContain('color-scheme" content="dark"');
+  });
+
+  it('uses light color-scheme by default', () => {
+    const result = injectCsp('<p>hello</p>');
+    expect(result).toContain('color-scheme" content="light"');
   });
 
   it('prepends CSP when there is no <head>', () => {
-    const result = injectCsp('<p>hello</p>');
+    const result = injectCsp('<p>hello</p>', 'LIGHT');
     expect(result.startsWith('<meta http-equiv="Content-Security-Policy"')).toBe(true);
   });
 
@@ -56,6 +68,20 @@ describe('containsScript', () => {
 
   it('returns false for markup with no script tag', () => {
     expect(containsScript('<div class="script-like">no actual script here</div>')).toBe(false);
+  });
+});
+
+describe('isValidTemplate', () => {
+  it('returns true for strings containing an HTML tag', () => {
+    expect(isValidTemplate('<div>hello</div>')).toBe(true);
+    expect(isValidTemplate('{% for row in rows %}<p>{{ row["x"].value }}</p>{% endfor %}')).toBe(
+      true
+    );
+  });
+
+  it('returns false for plain text with no HTML tag', () => {
+    expect(isValidTemplate('just some text')).toBe(false);
+    expect(isValidTemplate('')).toBe(false);
   });
 });
 

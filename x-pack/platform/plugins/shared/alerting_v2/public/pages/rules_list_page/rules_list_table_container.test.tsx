@@ -225,7 +225,11 @@ describe('RulesListTableContainer', () => {
 
       fireEvent.click(screen.getByTestId('ruleEnabledSwitch-rule-1'));
 
-      expect(mockToggleEnabledMutate).toHaveBeenCalledWith({ id: 'rule-1', enabled: false });
+      expect(mockToggleEnabledMutate).toHaveBeenCalledWith({
+        id: 'rule-1',
+        enabled: false,
+        name: 'Rule One',
+      });
     });
 
     it('shows a spinner in place of the switch for the rule being toggled', () => {
