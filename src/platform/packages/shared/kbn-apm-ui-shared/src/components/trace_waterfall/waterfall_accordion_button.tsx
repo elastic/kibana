@@ -10,7 +10,9 @@
 import { EuiButtonIcon, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { getEbtProps } from '@kbn/ebt-click';
 import React from 'react';
+import { TRACE_WATERFALL_EBT_CLICK_ACTIONS, TRACE_WATERFALL_EBT_ELEMENTS } from './ebt_constants';
 
 export interface WaterfallAccordionButtonProps {
   isOpen: boolean;
@@ -47,6 +49,10 @@ export function WaterfallAccordionButton({ isOpen, onClick }: WaterfallAccordion
           padding: ${euiTheme.size.m};
           width: auto;
         `}
+        {...getEbtProps({
+          action: TRACE_WATERFALL_EBT_CLICK_ACTIONS.TOGGLE_WATERFALL,
+          element: TRACE_WATERFALL_EBT_ELEMENTS.WATERFALL_ACCORDION_BUTTON,
+        })}
         aria-label={i18n.translate('apmUiShared.waterfall.foldButton.ariaLabel', {
           defaultMessage: 'Click to {isAccordionOpen} the waterfall',
           values: {
