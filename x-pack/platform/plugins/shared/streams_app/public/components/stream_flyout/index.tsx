@@ -22,6 +22,7 @@ import {
   EuiTab,
   EuiSpacer,
   useGeneratedHtmlId,
+  type EuiFlyoutMenuCustomAction,
 } from '@elastic/eui';
 import { DatasetQualityIndicator } from '@kbn/dataset-quality-plugin/public';
 import {
@@ -184,6 +185,35 @@ function StreamFlyoutContent({ name, onClose }: StreamFlyoutProps) {
     );
   }
 
+  const customActions: EuiFlyoutMenuCustomAction[] = [];
+
+  if (definition) {
+    customActions.push({
+      iconType: 'share',
+      'aria-label': i18n.translate('xpack.streams.flyout.tab.goToLink', {
+        defaultMessage: 'Go to Stream Details',
+      }),
+      onClick: () => {
+        push('/{key}', {
+          path: { key: name },
+          query: { rangeFrom, rangeTo },
+        });
+      },
+    });
+  }
+
+  if (canDeleteStream) {
+    customActions.push({
+      iconType: 'trash',
+      'aria-label': i18n.translate('xpack.streams.flyout.tab.deleteStreamLink', {
+        defaultMessage: 'Delete Stream',
+      }),
+      onClick: () => {
+        setShowDeleteModal(true);
+      },
+    });
+  }
+
   return (
     <EuiFlyout
       size="l"
@@ -192,33 +222,7 @@ function StreamFlyoutContent({ name, onClose }: StreamFlyoutProps) {
       data-test-subj="streamsCanvasFlyout"
       paddingSize="none"
       flyoutMenuProps={{
-        customActions: [
-          {
-            iconType: 'share',
-            'aria-label': i18n.translate('xpack.streams.flyout.tab.goToLink', {
-              defaultMessage: 'Go to Stream Details',
-            }),
-            onClick: () => {
-              push('/{key}', {
-                path: { key: name },
-                query: { rangeFrom, rangeTo },
-              });
-            },
-          },
-          ...(canDeleteStream
-            ? [
-                {
-                  iconType: 'trash',
-                  'aria-label': i18n.translate('xpack.streams.flyout.tab.deleteStreamLink', {
-                    defaultMessage: 'Delete Stream',
-                  }),
-                  onClick: () => {
-                    setShowDeleteModal(true);
-                  },
-                },
-              ]
-            : []),
-        ],
+        customActions,
       }}
     >
       <EuiFlyoutHeader hasBorder>
