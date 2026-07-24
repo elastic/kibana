@@ -39,7 +39,7 @@ export const RunSimulationButton = () => {
           : undefined
       }
     >
-      <span style={{ display: 'inline-flex' }} tabIndex={0}>
+      <span style={{ display: 'inline-flex' }} tabIndex={canRunSimulation ? undefined : 0}>
         <EuiButtonIcon
           iconType="play"
           aria-label={i18n.translate(
