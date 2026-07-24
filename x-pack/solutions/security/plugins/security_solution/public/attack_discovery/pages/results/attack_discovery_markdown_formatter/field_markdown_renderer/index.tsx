@@ -19,6 +19,15 @@ import type { ParsedField } from '../types';
 
 const contextId = 'FieldMarkdownRenderer';
 
+const inlineFieldWrapperCss = css`
+  display: inline-block;
+  vertical-align: middle;
+
+  .euiBadge {
+    vertical-align: middle;
+  }
+`;
+
 export const FieldMarkdownRenderer = ({ icon, name, value }: ParsedField) => {
   const { disableActions, scopeId, alertIds } = useMarkdownFormatterContext();
   const { openRightPanel } = useExpandableFlyoutApi();
@@ -94,25 +103,31 @@ export const FieldMarkdownRenderer = ({ icon, name, value }: ParsedField) => {
     [euiTheme.font.scale.s, euiTheme.size.xs, flyoutPanelProps, isLoading, onEntityClick, value]
   );
 
+  if (disableActions) {
+    return (
+      <span css={inlineFieldWrapperCss} data-test-subj="fieldMarkdownRendererInlineWrapper">
+        <EuiToolTip content={name} data-test-subj="fieldMarkdownRendererToolTip" position="top">
+          <EuiBadge color="hollow" data-test-subj="disabledActionsBadge" iconType={icon}>
+            {value}
+          </EuiBadge>
+        </EuiToolTip>
+      </span>
+    );
+  }
+
   return (
-    <EuiToolTip content={name} data-test-subj="fieldMarkdownRendererToolTip" position="top">
-      {disableActions ? (
-        <EuiBadge color="hollow" data-test-subj="disabledActionsBadge" iconType={icon}>
-          {value}
-        </EuiBadge>
-      ) : (
-        <DraggableBadge
-          contextId="fieldMarkdownRenderer"
-          scopeId={scopeId}
-          eventId=""
-          iconType={icon}
-          isAggregatable={false}
-          field={name}
-          value={value}
-        >
-          {entityButton}
-        </DraggableBadge>
-      )}
-    </EuiToolTip>
+    <span css={inlineFieldWrapperCss} data-test-subj="fieldMarkdownRendererInlineWrapper">
+      <DraggableBadge
+        contextId="fieldMarkdownRenderer"
+        scopeId={scopeId}
+        eventId=""
+        iconType={icon}
+        isAggregatable={false}
+        field={name}
+        value={value}
+      >
+        {entityButton}
+      </DraggableBadge>
+    </span>
   );
 };
