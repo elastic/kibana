@@ -18,6 +18,7 @@ import {
 } from '../../../tasks/rebalance_private_location_shards_task';
 import type { SyntheticsRestApiRouteFactory } from '../../types';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
+import { ConfigKey } from '../../../../common/runtime_types';
 
 export interface MonitorAgentAssignment {
   locationId: string;
@@ -53,7 +54,14 @@ export const getMonitorAgentAssignmentRoute: SyntheticsRestApiRouteFactory<
       monitorId: schema.string({ minLength: 1, maxLength: 1024 }),
     }),
   },
-  handler: async ({ server, request, savedObjectsClient, syntheticsMonitorClient, spaceId }) => {
+  handler: async ({
+    server,
+    request,
+    savedObjectsClient,
+    syntheticsMonitorClient,
+    monitorConfigRepository,
+    spaceId,
+  }) => {
     const { monitorId } = request.params;
 
     const { locations, agentPolicies } = await getPrivateLocationsAndAgentPolicies(
@@ -65,6 +73,16 @@ export const getMonitorAgentAssignmentRoute: SyntheticsRestApiRouteFactory<
       return [];
     }
 
+    // Package policies are keyed by the monitor's query id (`config.id`), which for
+    // project monitors is the `custom_heartbeat_id`, not the config id the UI passes.
+    // Resolve it so the by-id lookup below hits; fall back to the raw id (they match
+    // for UI-created monitors) if the monitor can't be loaded.
+    const queryId = await monitorConfigRepository
+      .get(monitorId)
+      .then((monitor) => monitor.attributes[ConfigKey.MONITOR_QUERY_ID])
+      .catch(() => undefined);
+    const idBases = [...new Set([queryId, monitorId].filter(Boolean) as string[])];
+
     const policyNameById = new Map(agentPolicies.map((policy) => [policy.id, policy.name]));
     const packagePolicyService = new PackagePolicyService(server);
     const now = Date.now();
@@ -73,7 +91,10 @@ export const getMonitorAgentAssignmentRoute: SyntheticsRestApiRouteFactory<
       scalableLocations.map(async (location): Promise<MonitorAgentAssignment | null> => {
         // Space-agnostic id `${configId}-${locationId}`, with the legacy
         // space-suffixed id as a fallback for older monitors.
-        const policyIds = [`${monitorId}-${location.id}`, `${monitorId}-${location.id}-${spaceId}`];
+        const policyIds = idBases.flatMap((base) => [
+          `${base}-${location.id}`,
+          `${base}-${location.id}-${spaceId}`,
+        ]);
         const packagePolicies = await packagePolicyService
           .getByIds({ spaceId, packagePolicyIds: policyIds })
           .catch(() => []);
