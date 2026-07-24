@@ -61,7 +61,7 @@ jobs:
     - name: Dismiss alerts
       id: dismiss-alerts
       continue-on-error: true
-      uses: advanced-security/dismiss-alerts@046d6b48d2e43cf563f96f67332c47c432eff83e # 2.0.2
+      uses: advanced-security/dismiss-alerts@a18f986bdb40edba0dd7a74382c15d4a3d50a1c8 # 2.0.3
       env:
         GITHUB_TOKEN: ${{secrets.KIBANAMACHINE_TOKEN}}
       with:
