@@ -49,6 +49,9 @@ const initializingResponse = (
  * route-registration methods are intercepted; everything else (routerPath, getRoutes, etc.)
  * passes through to the underlying router via the Proxy.
  *
+ * The route path from the triggering request is forwarded to the engine as the init trigger
+ * source, so metrics and spans record which route first woke the plugin up.
+ *
  * @internal
  */
 export function createGuardedRouter<Context extends RequestHandlerContextBase>(
@@ -60,7 +63,10 @@ export function createGuardedRouter<Context extends RequestHandlerContextBase>(
     handler: RequestHandler<P, Q, B, Context, Method>
   ): RequestHandler<P, Q, B, Context, Method> => {
     return (context, request, response) => {
-      const status = engine.ensureInitialized(pluginId);
+      const status = engine.ensureInitialized(pluginId, {
+        type: 'http_route',
+        path: request.route.path,
+      });
       if (status !== 'available') {
         return initializingResponse(response, status);
       }
@@ -102,7 +108,10 @@ function createGuardedVersionedRouter<Context extends RequestHandlerContextBase>
     addVersion: (options, handler) =>
       wrapVersionedRoute(
         route.addVersion(options, (context, request, response): MaybePromise<IKibanaResponse> => {
-          const status = engine.ensureInitialized(pluginId);
+          const status = engine.ensureInitialized(pluginId, {
+            type: 'http_route',
+            path: request.route.path,
+          });
           if (status !== 'available') {
             return initializingResponse(response, status);
           }

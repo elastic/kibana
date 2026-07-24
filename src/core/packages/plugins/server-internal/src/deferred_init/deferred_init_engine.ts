@@ -8,10 +8,12 @@
  */
 
 import { BehaviorSubject, filter, firstValueFrom, type Observable } from 'rxjs';
+import { metrics, ValueType, type Counter, type Histogram } from '@opentelemetry/api';
 import type { Logger } from '@kbn/logging';
 import { withLock, isLockAcquisitionError } from '@kbn/lock-manager';
 import { DeferredInitializationError } from '@kbn/core-deferred-init-common';
 import type { InitState, LazyInitContext } from '@kbn/core-plugins-server';
+import { withActiveSpan } from '@kbn/tracing-utils';
 import { readDeferredInitState, writeDeferredInitOutcome } from './deferred_init_state';
 import {
   DEFERRED_INIT_BACKOFF_BASE_MS,
@@ -22,6 +24,18 @@ import {
 /** A plugin's deferred initialization work, bound to its {@link LazyInitContext}. */
 export type DeferredInitRunner = (ctx: LazyInitContext) => Promise<void>;
 
+/**
+ * What caused a plugin's deferred init to be kicked for the first time on this process.
+ * Recorded as span attributes and metric dimensions so teams can answer "which route/plugin
+ * first woke up our plugin in production".
+ *
+ * @public
+ */
+export type InitTrigger =
+  | { readonly type: 'http_route'; readonly path: string }
+  | { readonly type: 'contract'; readonly callerPlugin: string }
+  | { readonly type: 'explicit' };
+
 interface DeferredInitRecord {
   readonly state$: BehaviorSubject<InitState>;
   runner?: DeferredInitRunner;
@@ -30,11 +44,70 @@ interface DeferredInitRecord {
   lastError?: unknown;
   /** Consecutive failed runs since the last success; reset to 0 on success. */
   failedAttempts: number;
+  /** Set on the first kick; not updated on subsequent retries. */
+  firstTrigger?: InitTrigger;
+  /** process.hrtime.bigint() captured when the plugin first transitions to 'initializing'. */
+  initStartedAtNs?: bigint;
 }
 
 const LOCK_ID_PREFIX = 'deferred-init:';
+const METER_NAME = 'kibana.plugins';
 
 type GuardedRunOutcome = 'available' | 'retry';
+
+/** Lazily-initialized OTel instruments — created on first use so the global meter is ready. */
+interface DeferredInitInstruments {
+  readonly durationHistogram: Histogram;
+  readonly attemptsCounter: Counter;
+  readonly timeToAvailableHistogram: Histogram;
+}
+
+let instruments: DeferredInitInstruments | undefined;
+
+const getInstruments = (): DeferredInitInstruments => {
+  if (!instruments) {
+    const meter = metrics.getMeter(METER_NAME);
+    instruments = {
+      durationHistogram: meter.createHistogram('kibana.plugin.deferred_init.duration_ms', {
+        description:
+          'Wall-clock duration of a single lazyInitialize() run, from lock acquisition to runner return.',
+        unit: 'ms',
+        valueType: ValueType.DOUBLE,
+      }),
+      attemptsCounter: meter.createCounter('kibana.plugin.deferred_init.attempts_total', {
+        description: 'Cumulative count of lazyInitialize() run attempts, broken down by outcome.',
+        unit: '1',
+        valueType: ValueType.INT,
+      }),
+      timeToAvailableHistogram: meter.createHistogram(
+        'kibana.plugin.deferred_init.time_to_available_ms',
+        {
+          description:
+            'Elapsed time from process start until a plugin first reaches the available state. ' +
+            'A low value means the plugin is used immediately after boot (effectively eager); a ' +
+            'high value confirms the lazy-init benefit is real in production.',
+          unit: 'ms',
+          valueType: ValueType.DOUBLE,
+        }
+      ),
+    };
+  }
+  return instruments;
+};
+
+const triggerAttributes = (trigger: InitTrigger | undefined): Record<string, string> => {
+  if (!trigger) {
+    return { 'trigger.type': 'unknown', 'trigger.detail': '—' };
+  }
+  switch (trigger.type) {
+    case 'http_route':
+      return { 'trigger.type': 'http_route', 'trigger.detail': trigger.path };
+    case 'contract':
+      return { 'trigger.type': 'contract', 'trigger.detail': trigger.callerPlugin };
+    case 'explicit':
+      return { 'trigger.type': 'explicit', 'trigger.detail': '—' };
+  }
+};
 
 /**
  * Per-instance engine that tracks per-plugin deferred-init state and runs the work
@@ -57,6 +130,8 @@ type GuardedRunOutcome = 'available' | 'retry';
 export class DeferredInitEngine {
   private readonly records = new Map<string, DeferredInitRecord>();
   private readonly retryAttempts = new Map<string, number>();
+  /** Captured at construction (early in server boot) for time-to-available measurements. */
+  private readonly engineStartedAtNs = process.hrtime.bigint();
 
   constructor(private readonly log: Logger, private readonly kibanaVersion: string) {}
 
@@ -127,13 +202,13 @@ export class DeferredInitEngine {
    * `failed` plugin becomes auto-kickable again once its cooldown elapses and flips it back to
    * `idle`; an explicit {@link trigger} call can still force a sooner retry.
    */
-  public ensureInitialized(pluginId: string): InitState {
+  public ensureInitialized(pluginId: string, trigger?: InitTrigger): InitState {
     const record = this.records.get(pluginId);
     if (!record) {
       return 'idle';
     }
     if (record.state$.value === 'idle') {
-      this.kick(pluginId, record);
+      this.kick(pluginId, record, trigger);
     }
     return record.state$.value;
   }
@@ -142,16 +217,16 @@ export class DeferredInitEngine {
    * Explicitly kick the deferred work (if `idle`/`failed`) and return a promise that
    * resolves when the in-flight run settles. Used for programmatic triggers.
    */
-  public trigger(pluginId: string): Promise<void> {
+  public trigger(pluginId: string, trigger?: InitTrigger): Promise<void> {
     const record = this.ensureRecord(pluginId);
     const state = record.state$.value;
     if (state === 'idle' || state === 'failed') {
-      this.kick(pluginId, record);
+      this.kick(pluginId, record, trigger);
     }
     return record.inFlight ?? Promise.resolve();
   }
 
-  private kick(pluginId: string, record: DeferredInitRecord): void {
+  private kick(pluginId: string, record: DeferredInitRecord, trigger?: InitTrigger): void {
     if (record.inFlight) {
       return;
     }
@@ -162,14 +237,29 @@ export class DeferredInitEngine {
       return;
     }
 
+    // Only record the trigger that first woke up the plugin; retries inherit the original.
+    if (!record.firstTrigger && trigger) {
+      record.firstTrigger = trigger;
+    }
+
     const { runner, ctx } = record;
     record.state$.next('initializing');
+    record.initStartedAtNs = process.hrtime.bigint();
     this.log.info(`Deferred init for "${pluginId}" started.`);
 
-    record.inFlight = this.runGuarded(pluginId, runner, ctx).then(
+    record.inFlight = this.runGuarded(pluginId, runner, ctx, record.firstTrigger).then(
       (outcome) => {
         record.inFlight = undefined;
         if (outcome === 'available') {
+          const elapsedFromEngineStartMs =
+            Number(process.hrtime.bigint() - this.engineStartedAtNs) / 1e6;
+          const inst = getInstruments();
+          const commonAttrs = {
+            'plugin.id': pluginId,
+            ...triggerAttributes(record.firstTrigger),
+          };
+          inst.timeToAvailableHistogram.record(elapsedFromEngineStartMs, commonAttrs);
+
           this.retryAttempts.delete(pluginId);
           record.failedAttempts = 0;
           record.state$.next('available');
@@ -202,7 +292,7 @@ export class DeferredInitEngine {
    * `RuntimePluginContractResolver.loadPluginContract` to gate cross-plugin, in-process access to
    * a lazy plugin's `start()` contract.
    */
-  public async waitUntilAvailable(pluginId: string): Promise<void> {
+  public async waitUntilAvailable(pluginId: string, trigger?: InitTrigger): Promise<void> {
     const record = this.ensureRecord(pluginId);
 
     while (true) {
@@ -220,7 +310,7 @@ export class DeferredInitEngine {
         });
       }
       if (state === 'idle' || state === 'failed') {
-        this.kick(pluginId, record);
+        this.kick(pluginId, record, trigger);
       }
       await (record.inFlight ?? Promise.resolve());
 
@@ -248,64 +338,101 @@ export class DeferredInitEngine {
    *    than running unlocked.
    * 3. On success, persist `available`. On failure, re-check the state doc first so a slow
    *    failure can never clobber a peer's already-recorded success.
+   *
+   * Emits an OTel span (child of the triggering HTTP request span when available) and records
+   * duration + attempt-count metrics for every run.
    */
   private async runGuarded(
     pluginId: string,
     runner: DeferredInitRunner,
-    ctx: LazyInitContext
+    ctx: LazyInitContext,
+    trigger: InitTrigger | undefined
   ): Promise<GuardedRunOutcome> {
     const { savedObjects, elasticsearch, logger } = ctx;
+    const inst = getInstruments();
+    const commonAttrs = {
+      'plugin.id': pluginId,
+      ...triggerAttributes(trigger),
+    };
 
-    const existing = await readDeferredInitState(savedObjects, logger, pluginId);
-    // Only trust a stored `available` result if it was written by the same Kibana version.
-    // On upgrade the SO is migrated but attributes persist, so a stale `available` from the
-    // previous version must be treated as unknown and the runner re-executed.
-    if (existing?.status === 'available' && existing.kibanaVersion === this.kibanaVersion) {
-      return 'available';
-    }
+    return withActiveSpan(
+      'kibana.plugin.deferred_init.run',
+      { attributes: commonAttrs },
+      async () => {
+        const runStartNs = process.hrtime.bigint();
 
-    try {
-      await withLock(
-        { esClient: elasticsearch.client, logger, lockId: LOCK_ID_PREFIX + pluginId },
-        () => runner(ctx)
-      );
-    } catch (error) {
-      if (isLockAcquisitionError(error)) {
-        this.log.debug(
-          `Deferred init for "${pluginId}": lock held by another instance; will retry.`
+        const existing = await readDeferredInitState(savedObjects, logger, pluginId);
+        // Only trust a stored `available` result if it was written by the same Kibana version.
+        // On upgrade the SO is migrated but attributes persist, so a stale `available` from the
+        // previous version must be treated as unknown and the runner re-executed.
+        if (existing?.status === 'available' && existing.kibanaVersion === this.kibanaVersion) {
+          const durationMs = Number(process.hrtime.bigint() - runStartNs) / 1e6;
+          const attrs = { ...commonAttrs, outcome: 'available' };
+          inst.durationHistogram.record(durationMs, attrs);
+          inst.attemptsCounter.add(1, attrs);
+          return 'available' as GuardedRunOutcome;
+        }
+
+        try {
+          await withLock(
+            { esClient: elasticsearch.client, logger, lockId: LOCK_ID_PREFIX + pluginId },
+            () => runner(ctx)
+          );
+        } catch (error) {
+          if (isLockAcquisitionError(error)) {
+            this.log.debug(
+              `Deferred init for "${pluginId}": lock held by another instance; will retry.`
+            );
+            const durationMs = Number(process.hrtime.bigint() - runStartNs) / 1e6;
+            const attrs = { ...commonAttrs, outcome: 'retry' };
+            inst.durationHistogram.record(durationMs, attrs);
+            inst.attemptsCounter.add(1, attrs);
+            return 'retry' as GuardedRunOutcome;
+          }
+
+          // The runner threw. Before recording a cluster-wide failure, make sure a peer that
+          // raced us to completion didn't already succeed in the meantime.
+          const latest = await readDeferredInitState(savedObjects, logger, pluginId);
+          if (latest?.status === 'available' && latest.kibanaVersion === this.kibanaVersion) {
+            const durationMs = Number(process.hrtime.bigint() - runStartNs) / 1e6;
+            const attrs = { ...commonAttrs, outcome: 'available' };
+            inst.durationHistogram.record(durationMs, attrs);
+            inst.attemptsCounter.add(1, attrs);
+            return 'available' as GuardedRunOutcome;
+          }
+          await writeDeferredInitOutcome(
+            savedObjects,
+            logger,
+            pluginId,
+            'failed',
+            latest?.attempts ?? existing?.attempts ?? 0,
+            this.kibanaVersion,
+            error
+          );
+          const durationMs = Number(process.hrtime.bigint() - runStartNs) / 1e6;
+          const attrs = { ...commonAttrs, outcome: 'failed' };
+          inst.durationHistogram.record(durationMs, attrs);
+          inst.attemptsCounter.add(1, attrs);
+          throw error;
+        }
+
+        // Always safe to write `available` here even under a race: every concurrent writer
+        // converges on the same value.
+        await writeDeferredInitOutcome(
+          savedObjects,
+          logger,
+          pluginId,
+          'available',
+          existing?.attempts ?? 0,
+          this.kibanaVersion
         );
-        return 'retry';
+        const durationMs = Number(process.hrtime.bigint() - runStartNs) / 1e6;
+        const attrs = { ...commonAttrs, outcome: 'available' };
+        inst.durationHistogram.record(durationMs, attrs);
+        inst.attemptsCounter.add(1, attrs);
+        return 'available' as GuardedRunOutcome;
       }
-
-      // The runner threw. Before recording a cluster-wide failure, make sure a peer that
-      // raced us to completion didn't already succeed in the meantime.
-      const latest = await readDeferredInitState(savedObjects, logger, pluginId);
-      if (latest?.status === 'available' && latest.kibanaVersion === this.kibanaVersion) {
-        return 'available';
-      }
-      await writeDeferredInitOutcome(
-        savedObjects,
-        logger,
-        pluginId,
-        'failed',
-        latest?.attempts ?? existing?.attempts ?? 0,
-        this.kibanaVersion,
-        error
-      );
-      throw error;
-    }
-
-    // Always safe to write `available` here even under a race: every concurrent writer
-    // converges on the same value.
-    await writeDeferredInitOutcome(
-      savedObjects,
-      logger,
-      pluginId,
-      'available',
-      existing?.attempts ?? 0,
-      this.kibanaVersion
-    );
-    return 'available';
+    ) as Promise<GuardedRunOutcome>;
   }
 
   /**

@@ -465,7 +465,10 @@ describe('RuntimePluginContractResolver', () => {
       await expect(resolver.loadPluginContract(SOURCE_PLUGIN, 'pluginA')).resolves.toBe(
         pluginAContract
       );
-      expect(engine.waitUntilAvailable).toHaveBeenCalledWith('pluginA');
+      expect(engine.waitUntilAvailable).toHaveBeenCalledWith('pluginA', {
+        type: 'contract',
+        callerPlugin: SOURCE_PLUGIN,
+      });
     });
 
     it('rejects if the engine ultimately fails to become available', async () => {

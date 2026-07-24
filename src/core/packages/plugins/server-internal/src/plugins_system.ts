@@ -9,6 +9,7 @@
 
 import { map } from 'rxjs';
 import pRetry from 'p-retry';
+import { metrics, ValueType, type Histogram } from '@opentelemetry/api';
 import { withTimeout, isPromise } from '@kbn/std';
 import type { DiscoveredPlugin, PluginName } from '@kbn/core-base-common';
 import type { CoreContext } from '@kbn/core-base-server-internal';
@@ -16,6 +17,7 @@ import type { Logger } from '@kbn/logging';
 import { PluginType } from '@kbn/core-base-common';
 import type { LazyInitContext } from '@kbn/core-plugins-server';
 import { isDeferredInitializationError } from '@kbn/core-deferred-init-common';
+import { withActiveSpan } from '@kbn/tracing-utils';
 import type { PluginWrapper } from './plugin';
 import { type PluginDependencies } from './types';
 import {
@@ -38,6 +40,21 @@ import {
 } from './deferred_init';
 
 const Sec = 1000;
+
+let lifecycleHistogram: Histogram | undefined;
+const getLifecycleHistogram = (): Histogram => {
+  if (!lifecycleHistogram) {
+    lifecycleHistogram = metrics
+      .getMeter('kibana.plugins')
+      .createHistogram('kibana.plugin.lifecycle.duration_ms', {
+        description:
+          'Wall-clock duration of each plugin setup() or start() call during server boot.',
+        unit: 'ms',
+        valueType: ValueType.DOUBLE,
+      });
+  }
+  return lifecycleHistogram;
+};
 /**
  * How many times to retry a plugin's `start()` when it fails because a dependency's deferred
  * init hasn't succeeded yet (a {@link DeferredInitializationError} with `retriable: true`). Any
@@ -183,8 +200,14 @@ export class PluginsSystem<T extends PluginType> {
         );
       }
 
+      const pluginAttrs = { 'plugin.id': pluginName, 'plugin.source': plugin.source };
       let contract: unknown;
-      const contractOrPromise = plugin.setup(pluginSetupContext, pluginDepContracts);
+      const setupStartNs = process.hrtime.bigint();
+      const contractOrPromise = withActiveSpan(
+        'kibana.plugin.setup',
+        { attributes: pluginAttrs },
+        () => plugin.setup(pluginSetupContext, pluginDepContracts)
+      );
       if (isPromise(contractOrPromise)) {
         if (this.coreContext.env.mode.dev) {
           this.log.warn(
@@ -206,6 +229,10 @@ export class PluginsSystem<T extends PluginType> {
       } else {
         contract = contractOrPromise;
       }
+      getLifecycleHistogram().record(Number(process.hrtime.bigint() - setupStartNs) / 1e6, {
+        ...pluginAttrs,
+        lifecycle: 'setup',
+      });
 
       contracts.set(pluginName, contract);
       this.satupPlugins.push(pluginName);
@@ -242,12 +269,17 @@ export class PluginsSystem<T extends PluginType> {
         return depContracts;
       }, {} as Record<PluginName, unknown>);
 
-      const contract = await this.startPluginWithRetry(
-        pluginName,
-        plugin,
-        deps,
-        pluginDepContracts
+      const pluginAttrs = { 'plugin.id': pluginName, 'plugin.source': plugin.source };
+      const startStartNs = process.hrtime.bigint();
+      const contract = await withActiveSpan(
+        'kibana.plugin.start',
+        { attributes: pluginAttrs },
+        () => this.startPluginWithRetry(pluginName, plugin, deps, pluginDepContracts)
       );
+      getLifecycleHistogram().record(Number(process.hrtime.bigint() - startStartNs) / 1e6, {
+        ...pluginAttrs,
+        lifecycle: 'start',
+      });
 
       // Attach the deferred-init runner before moving on to the next plugin. Dependencies start
       // before dependents (topological order), so a dependent that calls
