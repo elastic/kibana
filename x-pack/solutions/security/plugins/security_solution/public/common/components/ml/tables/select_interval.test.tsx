@@ -17,12 +17,13 @@ describe('SelectInterval', () => {
   });
 
   it('calls onChange when clicked', async () => {
+    const user = userEvent.setup({ delay: null });
     const onChangeCb = jest.fn();
     const { getByText, getByTestId } = render(
       <SelectInterval interval={'day'} onChange={onChangeCb} />
     );
 
-    await userEvent.selectOptions(getByTestId('selectInterval'), getByText('1 hour'));
+    await user.selectOptions(getByTestId('selectInterval'), getByText('1 hour'));
     expect(onChangeCb).toBeCalledWith('hour');
   });
 });
