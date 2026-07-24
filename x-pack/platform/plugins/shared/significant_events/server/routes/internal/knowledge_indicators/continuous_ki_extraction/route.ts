@@ -6,14 +6,13 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
 import {
   OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED,
   OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_INTERVAL_HOURS,
-  OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_EXCLUDED_STREAM_PATTERNS,
 } from '@kbn/management-settings-ids';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
+import { assertNotPaused } from '../../../utils/assert_not_paused';
 import { FeatureNotEnabledError } from '../../../../lib/errors/feature_not_enabled_error';
 import {
   STREAMS_API_PRIVILEGES,
@@ -24,7 +23,6 @@ const putContinuousKiExtractionSettingsBodySchema = z.object({
   continuousKiExtraction: z.object({
     enabled: z.boolean().optional(),
     intervalHours: z.number().min(MIN_EXTRACTION_INTERVAL_HOURS).optional(),
-    excludedStreamPatterns: z.string().max(MAX_TEXT_LENGTH).optional(),
   }),
 });
 
@@ -34,7 +32,7 @@ export const putContinuousKIExtractionSettingsRoute = createServerRoute({
     access: 'internal',
     summary: 'Update continuous KI extraction settings',
     description:
-      'Updates continuous KI extraction settings (enabled, interval, excluded patterns) and ensures the extraction workflow is created or updated accordingly.',
+      'Updates continuous KI extraction settings (enabled, interval) and ensures the extraction workflow is created or updated accordingly.',
   },
   security: {
     authz: {
@@ -50,6 +48,7 @@ export const putContinuousKIExtractionSettingsRoute = createServerRoute({
     getScopedClients,
     server,
     continuousKiOnboardingWorkflowService,
+    maintenanceService,
     logger,
   }): Promise<{ success: true }> => {
     if (!continuousKiOnboardingWorkflowService) {
@@ -63,6 +62,14 @@ export const putContinuousKIExtractionSettingsRoute = createServerRoute({
 
     const { continuousKiExtraction } = params.body;
 
+    // Feature toggles are owned by Pause/Resume while paused — no edits allowed.
+    if (
+      continuousKiExtraction.enabled !== undefined ||
+      continuousKiExtraction.intervalHours !== undefined
+    ) {
+      await assertNotPaused({ maintenanceService, request });
+    }
+
     const updates: Record<string, boolean | number | string> = {};
 
     if (continuousKiExtraction.enabled !== undefined) {
@@ -72,10 +79,6 @@ export const putContinuousKIExtractionSettingsRoute = createServerRoute({
     if (continuousKiExtraction.intervalHours !== undefined) {
       updates[OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_INTERVAL_HOURS] =
         continuousKiExtraction.intervalHours;
-    }
-    if (continuousKiExtraction.excludedStreamPatterns !== undefined) {
-      updates[OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_EXCLUDED_STREAM_PATTERNS] =
-        continuousKiExtraction.excludedStreamPatterns;
     }
 
     const previousValues: Record<string, boolean | number | string> = {};
@@ -89,8 +92,8 @@ export const putContinuousKIExtractionSettingsRoute = createServerRoute({
     }
 
     // Only reconcile the workflow on an actual enabled-state transition so the
-    // legacy and managed workflows never run at the same time. Interval/excluded
-    // changes are picked up by the running workflow at execution time.
+    // legacy and managed workflows never run at the same time. Interval changes are
+    // picked up by the running workflow at execution time.
     const previousEnabled = allSettings[
       OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED
     ] as boolean;
