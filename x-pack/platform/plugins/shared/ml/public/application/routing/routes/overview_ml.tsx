@@ -32,7 +32,6 @@ export const overviewRouteFactory = (
   title: i18n.translate('xpack.ml.overview.overviewLabel', {
     defaultMessage: 'Overview',
   }),
-  enableDatePicker: true,
   render: (props, deps) => <PageWrapper {...props} deps={deps} />,
   breadcrumbs: [
     getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),

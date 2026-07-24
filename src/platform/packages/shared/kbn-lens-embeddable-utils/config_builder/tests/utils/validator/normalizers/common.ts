@@ -22,7 +22,7 @@ import type {
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
 
-import { getIndexPatternFromESQLQuery, getTimeFieldFromESQLQuery } from '@kbn/esql-utils';
+import { getIndexPatternFromESQLQuery, parseTimeFieldFromESQLQuery } from '@kbn/esql-utils';
 
 import {
   LENS_IGNORE_GLOBAL_FILTERS_DEFAULT_VALUE,
@@ -118,7 +118,7 @@ function normalizeESQLAdHocDataViews(
       const adHocDataView: DataViewSpec = attributes.state.adHocDataViews[oldIndex];
       // Use the same logic as the transform: derive timeField from the ES|QL query
       const timeFieldName = esqlQuery
-        ? getTimeFieldFromESQLQuery(esqlQuery)
+        ? parseTimeFieldFromESQLQuery(esqlQuery)
         : adHocDataView.timeFieldName ?? layer.timeField ?? undefined;
       // The transform re-derives the index pattern (and the data view title/name) from the ES|QL
       // query, so a stale persisted name (e.g. a broader multi-index pattern) is normalized away.
@@ -154,7 +154,7 @@ function normalizeESQLAdHocDataViews(
         index: indexPattern,
         dataSourceType: 'esql',
         esqlQuery,
-        timeFieldName: getTimeFieldFromESQLQuery(esqlQuery),
+        timeFieldName: parseTimeFieldFromESQLQuery(esqlQuery),
       });
 
       layer.index = spec.id;
@@ -705,10 +705,17 @@ export function getPaletteNormalizer<T extends LensAttributes>(
           return;
         }
 
-        // The SO→API transform always uses rangeMax as the last step's upper bound (lte),
-        // replacing the original stop value. The API→SO step then reconstructs the stop from lte,
-        // so the last stop always becomes rangeMax after the round-trip.
-        if (palette.params.stops) {
+        // For multi-stop palettes: the SO→API transform uses rangeMax as the last step's upper
+        // bound (lte), replacing the original stop value. The API→SO step then reconstructs the
+        // stop from lte, so the last stop becomes rangeMax after the round-trip.
+        //
+        // For single stop palettes: the transform's `i === 0` branch emits a closed
+        // `lt: <stop>` and returns before the last-step `lte: rangeMax` branch can run, so
+        // `lte: rangeMax` is never applied to the stop. For an open-above single stop (continuity
+        // 'above'/'all', rangeMax null) the transform instead appends a trailing `gte: <stop>`
+        // continuation step, which `mergeTrailingSameColorStep` collapses back on the reverse pass,
+        // leaving the original `lt` (the stop value) intact.
+        if (palette.params.stops && palette.params.stops.length > 1) {
           const lastStop = palette.params.stops.at(-1);
           if (lastStop) lastStop.stop = rangeMax as unknown as number; // can be null
         }
