@@ -5,16 +5,11 @@
  * 2.0.
  */
 
-export const STANDARD_INDEX_MODE = 'standard';
-export const LOGSDB_INDEX_MODE = 'logsdb';
-export const TIME_SERIES_MODE = 'time_series';
-export const LOOKUP_INDEX_MODE = 'lookup';
-export const VECTOR_DB_INDEX_MODE = 'vectordb_document';
-
-export const IndexMode = {
-  standard: STANDARD_INDEX_MODE,
-  logsdb: LOGSDB_INDEX_MODE,
-  time_series: TIME_SERIES_MODE,
-  lookup: LOOKUP_INDEX_MODE,
-  vectordb_document: VECTOR_DB_INDEX_MODE,
-} as const;
+export {
+  STANDARD_INDEX_MODE,
+  LOGSDB_INDEX_MODE,
+  TIME_SERIES_MODE,
+  LOOKUP_INDEX_MODE,
+  VECTOR_DB_INDEX_MODE,
+  IndexMode,
+} from '@kbn/index-management-shared-types';

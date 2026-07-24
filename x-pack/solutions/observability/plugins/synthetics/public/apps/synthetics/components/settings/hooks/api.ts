@@ -6,7 +6,7 @@
  */
 
 import type { PolicyFromES } from '@kbn/index-lifecycle-management-common-shared';
-import type { DataStream } from '@kbn/index-management-plugin/common';
+import type { DataStream } from '@kbn/index-management-shared-types';
 import type { IndexSizeEntry } from '../../../../../../common/constants';
 import { apiService } from '../../../../../utils/api_service';
 import { SYNTHETICS_API_URLS } from '../../../../../../common/constants';

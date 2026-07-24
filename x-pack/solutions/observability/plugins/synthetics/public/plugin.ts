@@ -50,7 +50,6 @@ import type {
   ObservabilitySharedPluginStart,
 } from '@kbn/observability-shared-plugin/public';
 
-import type { LicenseManagementUIPluginSetup } from '@kbn/license-management-plugin/public/plugin';
 import type {
   ObservabilityAIAssistantPublicSetup,
   ObservabilityAIAssistantPublicStart,
@@ -59,7 +58,6 @@ import type { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverle
 import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
-import type { SLOPublicStart } from '@kbn/slo-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
@@ -69,6 +67,9 @@ import type { ContentManagementPublicStart } from '@kbn/content-management-plugi
 import type { KqlPluginStart } from '@kbn/kql/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
+import type { ReactNode } from 'react';
+import type { CreateSLOInput } from '@kbn/slo-schema';
+import type { RecursivePartial } from '@kbn/utility-types';
 import { registerSyntheticsEmbeddables } from './apps/embeddables/register_embeddables';
 import { kibanaService } from './utils/kibana_service';
 import { PLUGIN } from '../common/constants/plugin';
@@ -76,6 +77,22 @@ import { OVERVIEW_ROUTE } from '../common/constants/ui';
 import { locators } from './apps/locators';
 import { syntheticsAlertTypeInitializers } from './apps/synthetics/lib/alert_types';
 import { registerSyntheticsUiActions } from './apps/embeddables/ui_actions/register_ui_actions';
+
+/**
+ * Minimal structural mirrors of upstream plugin contracts, kept local so synthetics does not have to
+ * reference the full `@kbn/license-management-plugin` / `@kbn/slo-plugin` TS projects for two type-only
+ * usages. If the upstream contracts change, update these to match.
+ */
+interface LicenseManagementSetupContract {
+  enabled: boolean;
+}
+
+interface SloPublicStartContract {
+  getCreateSLOFormFlyout: (props: {
+    initialValues: RecursivePartial<CreateSLOInput>;
+    onClose: () => void;
+  }) => ReactNode;
+}
 
 export interface ClientPluginsSetup {
   home?: HomePublicPluginSetup;
@@ -121,9 +138,9 @@ export interface ClientPluginsStart {
   uiSettings: CoreStart['uiSettings'];
   usageCollection: UsageCollectionStart;
   serverless: ServerlessPluginStart;
-  licenseManagement?: LicenseManagementUIPluginSetup;
+  licenseManagement?: LicenseManagementSetupContract;
   licensing: LicensingPluginStart;
-  slo?: SLOPublicStart;
+  slo?: SloPublicStartContract;
   presentationUtil: PresentationUtilPluginStart;
   dashboard: DashboardStart;
   charts: ChartsPluginStart;

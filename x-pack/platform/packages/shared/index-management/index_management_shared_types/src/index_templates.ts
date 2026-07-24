@@ -5,16 +5,9 @@
  * 2.0.
  */
 
+import type { IndexMode } from './index_modes';
+
 export type TemplateType = 'default' | 'managed' | 'cloudManaged' | 'system';
-
-export const IndexMode = {
-  standard: 'standard',
-  logsdb: 'logsdb',
-  time_series: 'time_series',
-  lookup: 'lookup',
-} as const;
-
-export type IndexMode = (typeof IndexMode)[keyof typeof IndexMode];
 
 export interface DataRetention {
   enabled: boolean;

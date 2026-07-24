@@ -6,7 +6,7 @@
  */
 
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
-import type { DataStream } from '@kbn/index-management-plugin/common';
+import type { DataStream } from '@kbn/index-management-shared-types';
 import { useContext } from 'react';
 import { keyBy } from 'lodash';
 import { getDslPolicies } from './api';
