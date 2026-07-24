@@ -442,10 +442,9 @@ export const ArgocdConnector: ConnectorSpec = {
               ),
             },
             caCert: {
-              label: i18n.translate(
-                'core.kibanaConnectorSpecs.argocd.auth.bearerWithTls.caLabel',
-                { defaultMessage: 'Server CA certificate (PEM)' }
-              ),
+              label: i18n.translate('core.kibanaConnectorSpecs.argocd.auth.bearerWithTls.caLabel', {
+                defaultMessage: 'Server CA certificate (PEM)',
+              }),
               helpText: i18n.translate(
                 'core.kibanaConnectorSpecs.argocd.auth.bearerWithTls.caHelpText',
                 {
