@@ -25,6 +25,7 @@ import {
   getInitialCaseValue,
   type GetInitialCaseValueArgs,
 } from '../../../common/utils/get_initial_case_value';
+import { getNoneConnector } from '../../../common/utils/connectors';
 import { parseTemplate } from '../../routes/api/templates/parse_template';
 
 const findTemplateById = (
@@ -74,10 +75,26 @@ export const createCaseFromTemplateStepDefinition = (
             seededDefaults.description = parsed.definition.description;
           }
 
-          const createPayload = getInitialCaseValue({
+          // Build a MINIMAL create payload: only the wire-required fields (title / description /
+          // tags / connector / settings / owner) plus the pinned template reference. We must NOT
+          // materialize severity / assignees / category / settings.extractObservables here, because
+          // `cases.create`'s expansion only applies a template default when the field is
+          // `=== undefined`. Seeding those (as getInitialCaseValue does) would silently suppress the
+          // template's own severity / assignees / extractObservables / category defaults. Leaving
+          // them absent lets expansion apply them (caller overwrites still win when present).
+          const createPayload = {
             owner,
+            title: '',
+            description: '',
+            // An empty tags array reads as "caller sent none", so expansion applies the template's
+            // tags. A `.none` connector and a syncAlerts-only settings object likewise leave the
+            // template connector / extractObservables defaults free to apply.
+            tags: [],
+            connector: getNoneConnector(),
+            settings: { syncAlerts: true },
             ...seededDefaults,
-            // Caller overwrites win over the template's seeded title / description.
+            // Caller overwrites win over the template's seeded title / description and the
+            // wire-required scaffolding above.
             ...normalizedOverwrites,
             // The step's `case_template_id` is authoritative — pin it last so an overwrites-supplied
             // template reference can never override the requested template.
@@ -85,7 +102,7 @@ export const createCaseFromTemplateStepDefinition = (
               id: templateSO.attributes.templateId,
               version: templateSO.attributes.templateVersion,
             },
-          } as GetInitialCaseValueArgs);
+          } as CasePostRequest;
 
           const createdCase = await casesClient.cases.create(createPayload);
           return safeParseCaseForWorkflowOutput(

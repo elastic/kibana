@@ -6,10 +6,23 @@
  */
 
 import { stringify as yamlStringify } from 'yaml';
+import type { SavedObject } from '@kbn/core/server';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
 import { createCaseResponseFixture } from '../../../common/fixtures/create_case';
 import { createCaseFromTemplateStepDefinition } from './create_case_from_template';
 import { createStepHandlerContext } from './test_utils';
 import type { CasesClient } from '../../client';
+import type { CasePostRequest } from '../../../common/types/api';
+import type { Template } from '../../../common/types/domain/template/v1';
+import {
+  createTemplatesServiceMock,
+  createFieldDefinitionsServiceMock,
+} from '../../services/mocks';
+import {
+  applyTemplateDefaultsToCreateRequest,
+  resolveTemplateForCreate,
+} from '../../client/cases/expand_template_defaults';
 
 const buildTemplateSO = (definition: Record<string, unknown>, overrides = {}) => ({
   id: 'so-1',
@@ -282,7 +295,7 @@ describe('createCaseFromTemplateStepDefinition', () => {
   });
 
   describe('when the templates feature is enabled (v2 path)', () => {
-    it('seeds only title/description from a template SO and delegates expansion to cases.create', async () => {
+    it('forwards a minimal payload that leaves severity/assignees/extractObservables to cases.create expansion', async () => {
       const create = jest.fn().mockResolvedValue(createCaseResponseFixture);
       const getTemplate = jest.fn().mockResolvedValue(
         buildTemplateSO({
@@ -323,8 +336,16 @@ describe('createCaseFromTemplateStepDefinition', () => {
           template: { id: 'triage_template', version: 4 },
         })
       );
-      // The step seeds only the wire-required fields; template severity/tags are expansion's job.
-      expect(createPayload.severity).toBe('low');
+      // CRITICAL: the step must NOT materialize these optional fields. cases.create's expansion only
+      // applies a template default when the field is `=== undefined`, so seeding severity /
+      // assignees / settings.extractObservables here would silently suppress the template's own
+      // defaults. They must be absent from the forwarded payload.
+      expect('severity' in createPayload).toBe(false);
+      expect('assignees' in createPayload).toBe(false);
+      expect('category' in createPayload).toBe(false);
+      expect(createPayload.settings).toEqual({ syncAlerts: true });
+      expect('extractObservables' in createPayload.settings).toBe(false);
+      // Tags are seeded empty (= "caller sent none") so expansion applies the template's tags.
       expect(createPayload.tags).toEqual([]);
 
       expect(result).toEqual({
@@ -399,6 +420,78 @@ describe('createCaseFromTemplateStepDefinition', () => {
       expect(createPayload.title).toBe('Legacy title');
       // The legacy path never pins a template reference on the created case.
       expect(createPayload.template).toBeUndefined();
+    });
+
+    // Regression guard for the dropped-template-defaults bug: it is not enough that the step forwards
+    // a minimal payload — that payload has to actually let cases.create's real expansion apply the
+    // template's severity / category / assignees / extractObservables defaults. Here we capture what
+    // the step forwards and run it through the REAL applyTemplateDefaultsToCreateRequest, asserting
+    // the final persisted values carry the template defaults rather than getInitialCaseValue's
+    // hardcoded low / [] / true that previously suppressed them.
+    it('forwards a payload that expansion resolves to the template defaults (end-to-end)', async () => {
+      const templateDefinition = {
+        name: 'Triage default title',
+        description: 'Triage default description',
+        severity: 'high',
+        category: 'events',
+        tags: ['from-template'],
+        settings: { syncAlerts: false, extractObservables: true },
+        assignees: [{ uid: 'template-assignee' }],
+        fields: [],
+      };
+
+      const create = jest.fn().mockResolvedValue(createCaseResponseFixture);
+      const getTemplate = jest.fn().mockResolvedValue(
+        buildTemplateSO(templateDefinition, { templateVersion: 4 })
+      );
+      const getCasesClient = jest.fn().mockResolvedValue({
+        templates: { getTemplate },
+        configure: { get: jest.fn() },
+        cases: { create },
+      } as unknown as CasesClient);
+
+      const definition = createCaseFromTemplateStepDefinition(getCasesClient, true);
+      await definition.handler(
+        createContext({
+          owner: 'securitySolution',
+          case_template_id: 'triage_template',
+        })
+      );
+
+      // What the step handed to cases.create.
+      const forwardedPayload = create.mock.calls[0][0] as CasePostRequest;
+
+      // Now drive that payload through the exact server-side expansion cases.create would run.
+      const templatesService = createTemplatesServiceMock();
+      const fieldDefinitionsService = createFieldDefinitionsServiceMock();
+      fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
+        fieldDefinitions: [],
+        total: 0,
+      });
+      templatesService.getTemplate.mockResolvedValue(
+        buildTemplateSO(templateDefinition, { templateVersion: 4 }) as unknown as SavedObject<Template>
+      );
+      const resolved = await resolveTemplateForCreate({
+        templateId: 'triage_template',
+        version: forwardedPayload.template?.version,
+        owner: 'securitySolution',
+        templatesService,
+        fieldDefinitionsService,
+      });
+      const expanded = await applyTemplateDefaultsToCreateRequest(forwardedPayload, resolved, {
+        hasPlatinumLicenseOrGreater: true,
+        actionsClient: actionsClientMock.create(),
+        logger: loggingSystemMock.createLogger(),
+      });
+
+      // The template defaults survive expansion — the previous getInitialCaseValue seeding would
+      // have pinned severity: 'low', assignees: [], and extractObservables: true instead.
+      expect(expanded.severity).toBe('high');
+      expect(expanded.category).toBe('events');
+      expect(expanded.assignees).toEqual([{ uid: 'template-assignee' }]);
+      expect(expanded.tags).toEqual(['from-template']);
+      expect(expanded.settings).toEqual({ syncAlerts: true, extractObservables: true });
+      expect(expanded.template).toEqual({ id: 'triage_template', version: 4 });
     });
   });
 });
