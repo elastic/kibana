@@ -34,37 +34,13 @@ Important: Do not post GitHub comments unless explicitly stated.
 
 ## Critical checks (do these first, one by one)
 
-Work through these numbered checks **in order, one at a time** — before the general checklist below; don't batch or skip. They're high-signal: a genuine hit almost always means the PR must change before merge, so they're the highest-priority findings. For each, use **Detect** to see if it applies, **Verify** to confirm a real hit, then flag it and cite the referenced docs.
+Work through these numbered checks **in order, one at a time**, before the general checklist — don't batch or skip. They're the highest-priority findings: a genuine hit almost always means the PR must change before merge. Each row links to the canonical public guidance — **read the linked section before flagging**, and cite it in the comment.
 
-### Check 1 — Scout custom server config additions
-
-| | |
-|---|---|
-| **Why** | Each custom config set boots its **own dedicated local Kibana** (extra CI cost, **local-only — unsupported on Cloud/QA**), so it must earn its keep. Runtime-toggleable settings need no custom server — set them via `apiServices.core.settings(...)`, which works everywhere. |
-| **Detect** | PR touches a config set: files under `src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/<name>/**` (esp. `serverArgs` / `ScoutServerConfig`), a new `test/scout_<name>/` dir, or new `--serverConfigSet <name>` usage. |
-| **Verify** | Per added setting, is a dedicated server truly required?<br>• **Runtime-toggleable** (no config set): `--feature_flags.overrides.*`, `--uiSettings.overrides.*` / `globalOverrides.*`, runtime `experimentalFeatures` → move to `apiServices.core.settings(...)` in `global.setup.ts` (parallel) or `beforeAll`/`afterAll` (sequential).<br>• **Boot-required** (justifies it): read in plugin `setup` (route registration), `--xpack.<plugin>.enabled`, ES/server args (`esServerlessOptions`), auth/IdP wiring. When unsure, ask — don't assert.<br>• **Reuse before adding**: even when a custom server is warranted, scan existing sets under `.../config_sets/` for one with a similar purpose (overlapping `serverArgs`) and prefer sharing it. |
-| **Flag when** | Additions are only runtime-toggleable (drop the set); a set mixes both (move the runtime subset out); a new set lacks justification; a new set duplicates an existing set's purpose/args → suggest reusing that set, or ask whether it can be extended with a small adjustment when no existing consumer is negatively impacted. |
-| **Refs** | `docs/extend/testing/feature-flags.md` (runtime-vs-custom-server table), `docs/extend/testing/global-setup-hook.md` |
-
-### Check 2 — Scout spec lives where selective testing will run it
-
-| | |
-|---|---|
-| **Why** | PR CI runs a Scout config only when its owning `@kbn/` module (nearest `kibana.jsonc`, via `findPackageForPath`) is in the affected set — changed modules plus everything depending on them via `tsconfig.json` `kbn_references`. A spec exercising module `X` from a package with no `kbn_references` edge to `X` never runs on `X`'s PRs — silent coverage loss until post-merge. |
-| **Detect** | PR adds/moves a spec (`**/test/scout{,_*}/**/{ui,api}/**/*.spec.ts`) exercising code outside its host package: `page.gotoApp('security')` / `page.goto('/app/<other>')`, another solution's `data-test-subj` / nav (e.g. `securitySolutionUI:*`, Cases, ML) from a platform/shared plugin, cross-solution tags (e.g. `@local-serverless-security_complete`), or a `<namespace>` not matching the `public/<area>/` it covers. |
-| **Verify** | The spec's host module (nearest `kibana.jsonc`) must equal — or have `tsconfig.json` `kbn_references` transitively reaching — the module(s) owning the code it exercises; the host plugin must be in `.buildkite/scout_ci_config.yml` `plugins.enabled`. |
-| **Flag when** | Host package doesn't depend on the code under test → relocate the spec + its config set (`*.playwright.config.ts`, `fixtures/`, `tests/` or `parallel_tests/`, `global.setup.ts`) to the owning plugin, fix `kbn_references` + CODEOWNERS, rerun `node scripts/scout update-test-config-manifests`. Keep only solution-agnostic assertions (chrome/breadcrumb) in the platform plugin. |
-| **Refs** | `src/platform/packages/shared/kbn-scout/src/tests_discovery/{testing_scope,affected_modules}.ts`, `src/platform/packages/private/kbn-scout-info/src/paths.ts`, `.buildkite/scripts/steps/test/scout/resolve_selective_testing.ts`, `.buildkite/scout_ci_config.yml` |
-
-### Check 3 — Pick the right test type (and 100% justify it)
-
-| | |
-|---|---|
-| **Why** | Test type is the biggest lever on speed/reliability/cost: UI (browser) is slowest/most flake-prone, API cheaper/deterministic, Jest unit/RTL cheapest/most direct. A UI test for what's really data correctness or pure logic buys flakiness and CI time a cheaper layer avoids. Migrations are the moment to re-layer, not port 1:1. "It works / it's easier / that's how the FTR test did it" is NOT sufficient. |
-| **Detect** | PR adds/migrates a UI spec (`test` / `spaceTest` under `**/test/scout/ui/**`), an API spec (`apiTest` under `**/test/scout/api/**`), or an FTR→Scout / Cypress→Scout migration. |
-| **Verify** | Map each test to the cheapest layer that fully covers it:<br>• Data correctness / API shape read via the DOM (exact counts, aggregations, response fields, `403`/capability, e.g. `toHaveText('1,024')`) → `apiTest`.<br>• Pure logic, **local UI state** (expand/collapse, select/clear, show/hide with **no API call**), or single-component rendering (conditional/empty states, a badge that's a pure function of a prop, formatters, validation) → Jest unit/RTL. Grep for an existing `*.test.tsx` covering the same component/interaction — if already covered there, the browser test adds no integration value.<br>• UI is justified only for browser-only behavior: multi-step flows, in-app role behavior, non-trivial front-end logic (e.g. a flyout's conflict resolution). A number in the DOM alone doesn't justify UI. |
-| **Flag when** | The UI test is really data/logic-only; drives a pure local UI toggle (no API) already covered by a unit/RTL test (→ recommend removing it); ports an FTR data/logic suite straight into UI; or is defended only with "it works / easier / that's how it was". Ask "what does a browser round-trip verify that an API or unit/RTL test wouldn't?" — if nothing, move it down the pyramid (or remove when already covered); else have the author name the UI-layer behavior. Move only the offending assertion when the rest is a legit flow. |
-| **Refs** | `docs/extend/testing/scout-best-practices.md#pick-the-right-test-type` (selection table), `docs/extend/testing/migrate-tests.md#dont-migrate-blindly`, `docs/extend/testing/ui-best-practices.md` |
+| # | Critical check | Fires when the PR… | Flag / ask → see |
+|---|---|---|---|
+| 1 | **Custom server config earns its keep** | adds or updates a config set (files under `.../kbn-scout/.../config_sets/<name>/**`, a new `test/scout_<name>/` dir, or new `--serverConfigSet`) | Setting is runtime-toggleable → move it to `apiServices.core.settings(...)`. Duplicates an existing set's purpose/args → reuse that set, or ask its owners to extend it. → `docs/extend/testing/feature-flags.md`, `docs/extend/testing/scout-best-practices.md#prefer-runtime-feature-flags` |
+| 2 | **Spec lives where selective testing runs it** | adds or moves a spec that drives another plugin's app/UI (`page.gotoApp('<other>')`, another solution's `data-test-subj`, tags, or nav) | Host package doesn't own or `kbn_references`-depend on the code under test → relocate the spec to the owning plugin so PR CI actually runs it. → `docs/extend/testing/scout-best-practices.md#keep-tests-close-to-source-code` |
+| 3 | **Right test type, 100% justified** | adds or migrates a UI or API spec, or an FTR/Cypress→Scout migration | UI asserts data/logic only, or drives a pure local UI toggle already covered by a Jest unit/RTL test → move down the pyramid or remove. "It works / it's easier / that's how the FTR did it" isn't justification. → `docs/extend/testing/scout-best-practices.md#pick-the-right-test-type`, `docs/extend/testing/migrate-tests.md#dont-migrate-blindly` |
 
 ## Scope (be comprehensive)
 
@@ -87,7 +63,7 @@ Open only the docs relevant to the test type(s) under review.
 - **[general]** **No unused constants**: flag constants that are unused or used in only one place — prefer inlining them.
 - **[api]** **Fixture boundaries**: `apiClient` for the endpoint under test; `apiServices`/`kbnClient` for setup/teardown only; correct auth + common headers.
 - **[api]** **Correctness**: guardrail assertions before dereferencing response fields; validate contract + side effects; stable error assertions.
-- **[ui]** **UI scope**: keep UI specs focused on user interactions and rendering; for data-correctness assertions and choosing the right layer, see **Check 3 — Pick the right test type**.
+- **[ui]** **UI scope**: keep UI specs focused on user interactions and rendering; for data-correctness assertions and choosing the right layer, see **Critical check 3 (right test type)**.
 - **[ui]** **Page objects**: Encapsulate multi-step interactions and reused sequences in page objects — specs should primarily hold assertions (`expect`), test flow (`test.step`), and page-object method calls. Short inline locator calls for simple one-off assertions (e.g. a single label or nav-link check) are acceptable. Flag raw locators when the interaction is complex enough to benefit from abstraction or is duplicated across specs. Extract all locators as `readonly` properties in the constructor; no inline locator creation inside methods.
 - **[general]** **Isolation**: parallel-safe data; resilient cleanup in `afterAll`/`afterEach`; defensive cleanup in `beforeAll` for failed-run leftovers; `scoutSpace.savedObjects.cleanStandardList()` as catch-all after domain-specific cleanup; no reliance on file ordering or shared mutable state.
 - **[general]** **RBAC / realism**: minimal permissions (avoid `admin` unless required); space-aware behavior covered or explicitly out of scope.

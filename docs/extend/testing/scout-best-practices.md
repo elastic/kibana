@@ -34,6 +34,14 @@ await expect(page.testSubj.locator('row-0-col-count')).toHaveText('1,024');
 await expect(page.testSubj.locator('row-0-col-avg')).toHaveText('42.7');
 ```
 
+❌ **Don't:** keep a UI test for a pure local UI state change (expand/collapse, show/hide, select/clear with **no API call**) when a Jest unit or React Testing Library test already covers it — the browser round-trip adds no integration value, so remove the UI test.
+
+```ts
+// already covered by settings_panel.test.tsx — a UI test here is redundant
+await page.testSubj.click('settingsPanelToggle');
+await expect(page.testSubj.locator('settingsPanelBody')).toBeVisible();
+```
+
 ✔️ **Do:** use a Scout API test to validate an endpoint's contract.
 
 ```ts
@@ -114,7 +122,7 @@ A test should live in the plugin or package that owns the code it exercises. Whe
 - **API tests**: the routes under test should be defined in this plugin's `/server` directory.
 - **UI tests**: the UI being driven should come from this plugin's `/public` directory — a quick look there is usually enough to understand what the plugin renders and whether the test fits.
 
-This also keeps Scout's selective testing effective: it runs only the tests for modules affected by a PR, so a test placed in the wrong plugin won't be triggered by changes to the code it actually covers. The full suite still runs post-merge on `kibana-on-merge`.
+This also keeps Scout's selective testing effective. On a PR, Scout runs a test config only when its **owning module** — the nearest `kibana.jsonc` to the spec on disk — is in the affected set: the modules the PR changed, plus every module that depends on them through `tsconfig.json` `kbn_references`. So a spec that drives plugin `X`'s app but lives in a package with no `kbn_references` edge to `X` silently won't run when `X` changes — a coverage gap you won't notice until the full suite runs post-merge on `kibana-on-merge`.
 
 ## Prefer runtime feature flags [prefer-runtime-feature-flags]
 
@@ -196,7 +204,7 @@ test('returns 403 when missing read privilege', async ({ apiClient }) => {
 
 ## Organize test suites by role and user flow [organize-test-suites-by-role-and-user-flow]
 
-Prefer “one role + one flow per file” and keep spec files small (roughly 4–5 short tests or 2–3 longer ones). The test runner balances work at the spec-file level, so oversized files become bottlenecks during [parallel execution](../testing/parallelism.md). Put shared login/navigation in `beforeEach`.
+Prefer “one role + one flow per file” and keep spec files small — roughly 4–5 short tests, or 2–3 when scenarios are longer (lean toward the lower end once any single scenario runs longer than ~30s). The test runner balances work at the spec-file level, so small files parallelize better (an oversized file becomes a single-worker bottleneck) and limit blast radius: skipping one flaky test drops only its small group rather than a whole large suite. See [parallel execution](../testing/parallelism.md). Put shared login/navigation in `beforeEach`.
 
 :::::{dropdown} Example
 

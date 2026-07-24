@@ -99,6 +99,8 @@ Some settings — such as those used during the plugin `setup` lifecycle (e.g., 
 ⚠️ Each custom config set requires its own dedicated local server instance, which adds CI cost. **Reach out to the AppEx QA team before creating one** to make sure it is the right approach for your use case. If the flag you need can be toggled at runtime, prefer the [runtime approach](#scout-feature-flags-runtime) instead — it works everywhere, including Cloud.
 ::::::
 
+Before creating a set, check the existing sets under `config_sets/` first: if one already boots with a similar purpose (overlapping `serverArgs`), reuse it, or ask its owners whether it can be extended with a small adjustment when no existing consumer is negatively impacted. A set that duplicates another's purpose multiplies CI cost for no benefit.
+
 ### How custom configs work [scout-feature-flags-custom-configs-how]
 
 By default, Scout starts a local server using the `default` configuration set. Custom configs live under:
