@@ -3,7 +3,7 @@ navigation_title: "Workday"
 type: reference
 description: "Access Workday HR data across workers, org structure, time off, recruiting, and holidays with the Workday connector. Reference for OAuth 2.0 setup, connector configuration, and available actions."
 applies_to:
-  stack: preview 9.5
+  stack: preview 9.6
   serverless: preview
 ---
 
