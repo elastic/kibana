@@ -61,7 +61,7 @@ const resultLabel = i18n.translate(
 interface SubAgentExecutionFlyoutProps {
   executionId: string;
   params?: Record<string, unknown>;
-  onBack: () => void;
+  onBack?: () => void;
   onClose: () => void;
 }
 
@@ -154,22 +154,24 @@ export const SubAgentExecutionFlyout: React.FC<SubAgentExecutionFlyoutProps> = (
         onClose={onClose}
         aria-labelledby="subAgentExecutionFlyoutTitle"
         size="m"
-        ownFocus={false}
-        outsideClickCloses
+        ownFocus={!onBack}
+        outsideClickCloses={onBack ? true : undefined}
       >
-        <EuiFlyoutHeader
-          hasBorder
-          css={css`
-            && {
-              padding-block: 4px;
-              padding-left: 8px;
-            }
-          `}
-        >
-          <EuiButtonEmpty iconType="undo" onClick={onBack} flush="left" size="s" color="text">
-            <EuiText size="xs">{backLabel}</EuiText>
-          </EuiButtonEmpty>
-        </EuiFlyoutHeader>
+        {onBack && (
+          <EuiFlyoutHeader
+            hasBorder
+            css={css`
+              && {
+                padding-block: 4px;
+                padding-left: 8px;
+              }
+            `}
+          >
+            <EuiButtonEmpty iconType="undo" onClick={onBack} flush="left" size="s" color="text">
+              <EuiText size="xs">{backLabel}</EuiText>
+            </EuiButtonEmpty>
+          </EuiFlyoutHeader>
+        )}
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="l">
             <h2 id="subAgentExecutionFlyoutTitle">{subAgentExecutionTitle}</h2>
