@@ -1805,6 +1805,13 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.ai_agent.index.ts @elastic/nightshift-context-and-research-team
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.ai_agent.stateful.config.ts @elastic/nightshift-context-and-research-team
 
+# Evals
+/x-pack/platform/test/api_integration_deployment_agnostic/apis/evals @elastic/nightshift-context-and-research-team
+/x-pack/platform/test/api_integration_deployment_agnostic/configs/serverless/oblt.evals.feature_flag.index.ts @elastic/nightshift-context-and-research-team
+/x-pack/platform/test/api_integration_deployment_agnostic/configs/serverless/oblt.evals.feature_flag.serverless.config.ts @elastic/nightshift-context-and-research-team
+/x-pack/platform/test/api_integration_deployment_agnostic/configs/stateful/platform.evals.feature_flag.index.ts @elastic/nightshift-context-and-research-team
+/x-pack/platform/test/api_integration_deployment_agnostic/configs/stateful/platform.evals.feature_flag.stateful.config.ts @elastic/nightshift-context-and-research-team
+
 # Infra Obs
 ## This plugin mostly contains the codebase for the infra services, but also includes some code for the Logs UI app.
 ## To keep @elastic/obs-exploration-team as codeowner of the Logs UI code without requiring a review for all the other code changes
