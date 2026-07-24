@@ -41,24 +41,26 @@ Ground architectural and maintainability findings in the changed files and their
 
 ## Review process
 
-1. Start with workflow-provided PR context artifacts under `/tmp/gh-aw/agent/`: read `pr-metadata.json` and `pr-files.json` first to understand scope before reading any diff content.
-2. Walk every changed file in the order listed in `pr-files.json`, skipping generated or output-only files. Complete this ordered pass before emitting review output; finding a reportable issue does not end the pass.
-3. For each file, evaluate every applicable concern in the review priorities. Retain every distinct concrete candidate while continuing through the remaining files.
-4. For the current file, use `pr-files.json` to build the exact diff header (`diff --git a/${previous_filename ?? filename} b/${filename}`), then search `pr-diff.txt` for that section and inspect it. Do not read `pr-diff.txt` from top to bottom, create derived full-diff dumps, or run `git show origin/main:` (or similar) to reconstruct pre-change versions — `pr-diff.txt` is the source of old-vs-new content.
-5. Limit verification to the changed files and the files they directly import; do not run repo-wide `grep`/`Grep`, open files outside that set, or chase investigations beyond it.
-6. Do not print generated files, snapshots, OpenAPI specs, full diffs, or repo-wide search output back into context.
-7. Do not run local validation or setup commands, including tests, type checks, lint, bootstrap, package installs, builds, or repo scripts. Review from static source, prefetched artifacts, and GitHub data only.
-8. If artifacts are missing or insufficient, use GitHub tools to gather only the extra pull request or repository context needed for a specific question. Using `.github/scripts/prefetch_pr_context.js` as an example on how to retrieve the missing artifacts.
-9. If a time-budget hook message says to stop exploration and prepare output, finish the current verification and then emit every concrete finding retained so far, or `noop`.
-10. After the ordered pass, emit every distinct concrete finding; do not select only the strongest candidate.
-11. If no concrete issue is found after the ordered pass, stop and call `noop` with exactly `No issues found`.
-12. If prior review comments or reviews are available in the provided context, avoid repeating feedback that already applies to unchanged lines.
+1. Before reading any diff content, inspect the workflow-provided PR context artifacts under `/tmp/gh-aw/agent/`: read `pr-metadata.json` and `pr-files.json`, then inspect `pr-review-comments.json` and `pr-reviews.json`. This prior-review inspection is mandatory on every review run, including when the files are empty.
+2. Build an index of this reviewer's existing root findings before reviewing changed files. Prefer `review_workflow_id` from `pr-review-comments.json`; for older artifacts where it is absent, join `pull_request_review_id` to the review `id` in `pr-reviews.json` and parse the `workflow_id` from the review marker. Include only root comments (`in_reply_to_id` is null) whose workflow id equals this reviewer's own workflow id.
+3. Treat every indexed, non-outdated finding that still maps to unchanged code as already covered. Thread resolution state does not change this: a resolved thread is not evidence that the code changed, and the same or semantically equivalent concern must not be posted again on unchanged code.
+4. Walk every changed file in the order listed in `pr-files.json`, skipping generated or output-only files. Complete this ordered pass before emitting review output; finding a reportable issue does not end the pass.
+5. For each file, evaluate every applicable concern in the review priorities. Retain every distinct concrete candidate while continuing through the remaining files.
+6. For the current file, use `pr-files.json` to build the exact diff header (`diff --git a/${previous_filename ?? filename} b/${filename}`), then search `pr-diff.txt` for that section and inspect it. Do not read `pr-diff.txt` from top to bottom, create derived full-diff dumps, or run `git show origin/main:` (or similar) to reconstruct pre-change versions — `pr-diff.txt` is the source of old-vs-new content.
+7. Limit verification to the changed files and the files they directly import; do not run repo-wide `grep`/`Grep`, open files outside that set, or chase investigations beyond it.
+8. Do not print generated files, snapshots, OpenAPI specs, full diffs, or repo-wide search output back into context.
+9. Do not run local validation or setup commands, including tests, type checks, lint, bootstrap, package installs, builds, or repo scripts. Review from static source, prefetched artifacts, and GitHub data only.
+10. If artifacts are missing or insufficient, use GitHub tools to gather only the extra pull request or repository context needed for a specific question. Using `.github/scripts/prefetch_pr_context.js` as an example on how to retrieve the missing artifacts.
+11. If a time-budget hook message says to stop exploration and prepare output, finish the current verification and then emit every concrete finding retained so far, or `noop`.
+12. After the ordered pass, emit every distinct concrete finding not already covered by the prior-feedback index; do not select only the strongest candidate.
+13. If no concrete issue is found after the ordered pass, stop and call `noop` with exactly `No issues found`.
 
 ## Review mode output
 
 Use review mode when the importing workflow is triggered by a pull request event or manual dispatch. Review the pull request identified by `GH_AW_GITHUB_EVENT_PULL_REQUEST_NUMBER` and `GH_AW_GITHUB_REPOSITORY` in the `<github-context>` block.
 
 - Create one inline review comment for every distinct concrete finding retained during the completed ordered pass.
+- Immediately before each `create-pull-request-review-comment` call, compare the candidate against the prior-feedback index. Suppress the call when this reviewer already reported the same or a semantically equivalent concern on non-outdated, unchanged code.
 - Use `create-pull-request-review-comment` only for concrete, line-specific findings.
 - Keep each inline comment focused on a single issue and explain the practical risk or regression.
 - When a finding has a small, directly applicable fix, include a GitHub suggested change in the inline comment using a `suggestion` code block.
@@ -71,7 +73,11 @@ Use review mode when the importing workflow is triggered by a pull request event
 
 ## Review Re-runs
 
-On subsequent review mode runs, skip unchanged lines already covered by earlier feedback that is still applicable. Review only the new changes, stay high-signal, and do not restate findings on unchanged lines. When checking prior AI feedback, inspect only threads from this reviewer that overlap changed lines or a specifically relevant nearby snippet.
+On subsequent review mode runs, skip unchanged code already covered by earlier feedback that is still applicable. Review only the new changes, stay high-signal, and do not restate findings on unchanged lines. When checking prior AI feedback, inspect only threads from this reviewer that overlap changed lines or a specifically relevant nearby snippet.
+
+- A prior finding may be posted again only when its comment is outdated or the relevant code changed, and the current implementation still has a concrete issue after re-evaluation.
+- A resolved but non-outdated finding on unchanged code remains covered and must not be reposted.
+- Compare concerns semantically, not only by exact comment text; rephrasing the same risk is still a duplicate.
 
 ## Requesting resolution of addressed AI feedback
 

@@ -94,6 +94,44 @@ const normalizeLabel = (label) => ({
   description: label.description ?? '',
 });
 
+const getReviewWorkflowMetadata = (reviewBody) => {
+  const emptyMetadata = {
+    review_workflow_id: null,
+    review_workflow_run_id: null,
+    review_workflow_run_url: null,
+  };
+
+  if (typeof reviewBody !== 'string') {
+    return emptyMetadata;
+  }
+
+  const marker = reviewBody.match(/<!--\s*gh-aw-agentic-workflow:[\s\S]*?-->/)?.[0];
+  if (!marker) {
+    return emptyMetadata;
+  }
+
+  const workflowId = marker.match(/\bworkflow_id:\s*([^,\s]+)/)?.[1] ?? null;
+  const runIdMatch = marker.match(/\bid:\s*(\d+)/)?.[1];
+  const runUrl = marker.match(/\brun:\s*(https:\/\/[^\s]+?)(?=\s*-->)/)?.[1] ?? null;
+
+  return {
+    review_workflow_id: workflowId,
+    review_workflow_run_id: runIdMatch ? Number.parseInt(runIdMatch, 10) : null,
+    review_workflow_run_url: runUrl,
+  };
+};
+
+const addReviewWorkflowMetadata = ({ reviewComments, reviews }) => {
+  const metadataByReviewId = new Map(
+    reviews.map((review) => [review.id, getReviewWorkflowMetadata(review.body)])
+  );
+
+  return reviewComments.map((comment) => ({
+    ...comment,
+    ...(metadataByReviewId.get(comment.pull_request_review_id) ?? getReviewWorkflowMetadata(null)),
+  }));
+};
+
 const metadataQuery = `
   query($owner: String!, $repo: String!, $number: Int!) {
     repository(owner: $owner, name: $repo) {
@@ -459,11 +497,19 @@ const prefetchPrContext = async ({
     repoFullName,
     pullNumber,
   });
+  const reviewCommentsWithWorkflowMetadata = addReviewWorkflowMetadata({
+    reviewComments,
+    reviews,
+  });
 
   writeJson({ outputDir, filename: 'pr-metadata.json', value: metadata });
   writeJson({ outputDir, filename: 'pr-files.json', value: filesWithPatch.map(withoutPatch) });
   writeJson({ outputDir, filename: 'pr-issue-comments.json', value: issueComments });
-  writeJson({ outputDir, filename: 'pr-review-comments.json', value: reviewComments });
+  writeJson({
+    outputDir,
+    filename: 'pr-review-comments.json',
+    value: reviewCommentsWithWorkflowMetadata,
+  });
   writeJson({ outputDir, filename: 'pr-reviews.json', value: reviews });
   writeText({ outputDir, filename: 'pr-diff.txt', value: buildPrDiffFromFiles(filesWithPatch) });
 
@@ -471,9 +517,11 @@ const prefetchPrContext = async ({
 };
 
 module.exports = {
+  addReviewWorkflowMetadata,
   buildPrDiffFromFiles,
   getPrMetadata,
   getReviewComments,
+  getReviewWorkflowMetadata,
   graphqlWithRetry,
   prefetchPrContext,
   reviewThreadToComments,
