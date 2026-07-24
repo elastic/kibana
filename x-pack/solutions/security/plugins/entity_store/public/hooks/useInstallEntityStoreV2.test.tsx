@@ -27,14 +27,26 @@ const createMockServices = (): MockServices => ({
 
 const asServices = (mock: MockServices): Services => mock as unknown as Services;
 
-// The hook reads status and (only when it might auto-install) the preferences, both via http.get.
-// Route the two GETs by path so tests can set the status and the autoInstall preference independently.
+// The hook reads status, privileges (before any write), and (only when it might
+// auto-install) preferences — all via http.get. Route GETs by path so tests can
+// set each independently.
 const mockHttpGet = (
   mockServices: MockServices,
-  { status, autoInstall = true }: { status: EntityStoreStatus; autoInstall?: boolean }
+  {
+    status,
+    autoInstall = true,
+    hasInstallPermissions = true,
+  }: {
+    status: EntityStoreStatus;
+    autoInstall?: boolean;
+    hasInstallPermissions?: boolean;
+  }
 ) => {
   mockServices.http.get.mockImplementation((opts: { path: string }) => {
     if (opts.path === ENTITY_STORE_ROUTES.public.STATUS) return Promise.resolve({ status });
+    if (opts.path === ENTITY_STORE_ROUTES.internal.CHECK_PRIVILEGES) {
+      return Promise.resolve({ has_install_permissions: hasInstallPermissions });
+    }
     if (opts.path === ENTITY_STORE_ROUTES.internal.PREFERENCES) {
       return Promise.resolve({ autoInstall });
     }
@@ -63,6 +75,9 @@ describe('useInstallEntityStoreV2', () => {
       method: 'GET',
       query: { type: 'entity-engine-status', per_page: 0 },
     });
+    expect(mockServices.http.get).not.toHaveBeenCalledWith(
+      expect.objectContaining({ path: ENTITY_STORE_ROUTES.internal.CHECK_PRIVILEGES })
+    );
     expect(mockServices.http.post).not.toHaveBeenCalled();
   });
 
@@ -152,6 +167,10 @@ describe('useInstallEntityStoreV2', () => {
       path: ENTITY_STORE_ROUTES.public.STATUS,
       query: { include_components: false },
     });
+    expect(mockServices.http.get).toHaveBeenCalledWith({
+      path: ENTITY_STORE_ROUTES.internal.CHECK_PRIVILEGES,
+      query: { apiVersion: '2' },
+    });
     expect(mockServices.http.post).toHaveBeenCalledWith({
       path: ENTITY_STORE_ROUTES.public.INSTALL,
       body: JSON.stringify({}),
@@ -206,5 +225,52 @@ describe('useInstallEntityStoreV2', () => {
     expect(mockServices.http.get).not.toHaveBeenCalledWith(
       expect.objectContaining({ path: ENTITY_STORE_ROUTES.internal.PREFERENCES })
     );
+  });
+
+  it('should not POST /install when the user lacks install privileges', async () => {
+    const mockServices = createMockServices();
+
+    mockServices.spaces.getActiveSpace.mockResolvedValue({ id: 'default' });
+    mockHttpGet(mockServices, {
+      status: EntityStoreStatusEnum.enum.not_installed,
+      hasInstallPermissions: false,
+    });
+
+    renderHook(() => useInstallEntityStoreV2(asServices(mockServices)));
+
+    await waitFor(() => {
+      expect(mockServices.http.get).toHaveBeenCalledWith({
+        path: ENTITY_STORE_ROUTES.internal.CHECK_PRIVILEGES,
+        query: { apiVersion: '2' },
+      });
+    });
+
+    expect(mockServices.http.get).not.toHaveBeenCalledWith(
+      expect.objectContaining({ path: ENTITY_STORE_ROUTES.internal.PREFERENCES })
+    );
+    expect(mockServices.http.post).not.toHaveBeenCalled();
+    expect(mockServices.logger.error).not.toHaveBeenCalled();
+  });
+
+  it('should not POST entity_maintainers/init when the user lacks install privileges', async () => {
+    const mockServices = createMockServices();
+
+    mockServices.spaces.getActiveSpace.mockResolvedValue({ id: 'default' });
+    mockHttpGet(mockServices, {
+      status: EntityStoreStatusEnum.enum.running,
+      hasInstallPermissions: false,
+    });
+
+    renderHook(() => useInstallEntityStoreV2(asServices(mockServices)));
+
+    await waitFor(() => {
+      expect(mockServices.http.get).toHaveBeenCalledWith({
+        path: ENTITY_STORE_ROUTES.internal.CHECK_PRIVILEGES,
+        query: { apiVersion: '2' },
+      });
+    });
+
+    expect(mockServices.http.post).not.toHaveBeenCalled();
+    expect(mockServices.logger.error).not.toHaveBeenCalled();
   });
 });

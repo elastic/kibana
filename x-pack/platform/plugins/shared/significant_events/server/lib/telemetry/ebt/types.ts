@@ -164,6 +164,8 @@ interface AgentToolEventSearchProps {
   has_query: boolean;
   has_stream_filter: boolean;
   status_filter?: SignificantEventStatus;
+  view: 'compact' | 'full';
+  page: number;
   error_message?: string;
 }
 
