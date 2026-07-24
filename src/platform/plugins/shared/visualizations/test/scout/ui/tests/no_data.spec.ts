@@ -57,14 +57,16 @@ test.describe('Visualize - no data', { tag: ['@local-stateful-classic'] }, () =>
     page,
     esArchiver,
     kbnClient,
-    pageObjects: { visualize },
+    pageObjects: { visualize, dataViewEditor },
   }) => {
     await esArchiver.loadIfNeeded(testData.ES_ARCHIVES.LOGSTASH);
     await kbnClient.savedObjects.clean({ types: ['search', 'index-pattern'] });
 
     await page.gotoApp('visualize');
 
-    await visualize.createDataViewFromPrompt('logstash');
+    await visualize.openCreateDataViewFlyout();
+    await dataViewEditor.setTitle('logstash*');
+    await dataViewEditor.save();
 
     await expect(page.testSubj.locator('newItemButton')).toBeVisible();
   });

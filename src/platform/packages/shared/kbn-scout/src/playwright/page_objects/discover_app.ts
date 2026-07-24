@@ -11,6 +11,7 @@ import type { Download } from 'playwright-core';
 import type { Locator } from '../../..';
 import type { ScoutPage } from '..';
 import { DataGrid } from './data_grid';
+import { DataViewEditor } from './data_view_editor';
 import { expect } from '..';
 import { KibanaCodeEditorWrapper } from '../ui_components';
 import { resolveSelector } from '../utils';
@@ -39,10 +40,12 @@ const DEFAULT_SAVE_MODAL_TIMEOUT = 30_000;
 export class DiscoverApp {
   public readonly codeEditor: KibanaCodeEditorWrapper;
   private readonly dataGrid: DataGrid;
+  private readonly dataViewEditor: DataViewEditor;
 
   constructor(private readonly page: ScoutPage) {
     this.codeEditor = new KibanaCodeEditorWrapper(page);
     this.dataGrid = new DataGrid(page);
+    this.dataViewEditor = new DataViewEditor(page);
   }
 
   async goto(options: DiscoverGotoOptions) {
@@ -130,35 +133,13 @@ export class DiscoverApp {
   }
 
   private async fillAndSubmitDataViewEditor({ name, adHoc = false }: DataViewOptions) {
-    // Minimal inline interaction with the data view editor flyout. The full
-    // `DataViewEditorPage` object lives in the `data_view_editor` plugin, but
-    // `kbn-scout` is a base package and must not depend on a plugin, so the few
-    // steps Discover needs are driven directly here.
-    const flyout = this.page.testSubj.locator('indexPatternEditorFlyout');
-    const form = this.page.testSubj.locator('indexPatternEditorForm');
-    const titleInput = this.page.testSubj.locator('createIndexPatternTitleInput');
-    const timestampField = this.page.testSubj.locator('timestampField');
-
-    await flyout.waitFor({ state: 'visible' });
-
     // FTR passes the base name and relies on the editor auto-appending `*` as the
-    // user types. Scout sets the title verbatim (`fill`), so append the wildcard
-    // here to preserve that contract (`name`, `* will be added automatically`).
-    await titleInput.fill(name.endsWith('*') ? name : `${name}*`);
-    // wait for async title validation to settle before continuing.
-    await form.and(this.page.locator('[data-validation-error="0"]')).waitFor({ state: 'visible' });
+    // user types. The `DataViewEditor` page object sets the title verbatim, so append
+    // the wildcard here to preserve that contract (`* will be added automatically`).
+    const title = name.endsWith('*') ? name : `${name}*`;
 
-    // wait for timestamp options; default @timestamp applies.
-    await timestampField
-      .and(this.page.locator('[data-is-loading="0"]'))
-      .waitFor({ state: 'visible', timeout: 30_000 });
-
-    if (adHoc) {
-      await this.page.testSubj.click('exploreIndexPatternButton');
-    } else {
-      await this.page.testSubj.click('saveIndexPatternButton');
-    }
-    await flyout.waitFor({ state: 'hidden' });
+    await this.dataViewEditor.setTitle(title);
+    await this.dataViewEditor.save({ adHoc });
 
     await this.waitUntilTabIsLoaded();
   }

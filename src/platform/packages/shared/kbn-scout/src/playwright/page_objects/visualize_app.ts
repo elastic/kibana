@@ -218,28 +218,8 @@ export class VisualizeApp {
     await this.openSavedVisualization(visName);
   }
 
-  /**
-   * Creates a data view from the Visualize "no data view" prompt. The data view
-   * editor auto-appends `*`, so `name` is the base title (e.g. `logstash`).
-   */
-  async createDataViewFromPrompt(name: string) {
+  /** Opens the data view editor flyout from the Visualize "no data view" prompt. */
+  async openCreateDataViewFlyout() {
     await this.page.testSubj.click('createDataViewButton');
-
-    const flyout = this.page.testSubj.locator('indexPatternEditorFlyout');
-    const form = this.page.testSubj.locator('indexPatternEditorForm');
-    const titleInput = this.page.testSubj.locator('createIndexPatternTitleInput');
-    const timestampField = this.page.testSubj.locator('timestampField');
-
-    await flyout.waitFor({ state: 'visible' });
-    await titleInput.fill(name.endsWith('*') ? name : `${name}*`);
-    // Wait for async title validation to settle before continuing.
-    await form.and(this.page.locator('[data-validation-error="0"]')).waitFor({ state: 'visible' });
-    // Wait for the timestamp field options to load; the default `@timestamp` applies.
-    await timestampField
-      .and(this.page.locator('[data-is-loading="0"]'))
-      .waitFor({ state: 'visible', timeout: 30_000 });
-
-    await this.page.testSubj.click('saveIndexPatternButton');
-    await flyout.waitFor({ state: 'hidden' });
   }
 }
