@@ -17,8 +17,12 @@ Transcript location:
 
 Usage:
     python3 x-pack/solutions/security/plugins/security_solution/.agents/scripts/session-token-usage.py [TRANSCRIPT_PATH]
+    python3 x-pack/solutions/security/plugins/security_solution/.agents/scripts/session-token-usage.py
+        --json [TRANSCRIPT_PATH] [--manifest MANIFEST] [--session-dir SESSION_DIR]
 
 If TRANSCRIPT_PATH is given it overrides the auto-resolved location.
+Structured mode emits versioned JSON and uses explicit unavailable statuses for
+missing transcripts, manifests, payload counters, and artifacts.
 
 Consumers:
 - `exploratory-tester`: invoked from Phase 3 (Step 3a) while building the Timing & Cost section.

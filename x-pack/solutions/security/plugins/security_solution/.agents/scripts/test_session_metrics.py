@@ -198,7 +198,9 @@ class SessionMetricsParserTests(unittest.TestCase):
                     {
                         "version": 1,
                         "session_root": ".",
-                        "transcripts": [],
+                        "transcripts": [
+                            {"path": "missing.jsonl", "scope": "worker"}
+                        ],
                         "artifacts": [],
                     }
                 ),
@@ -213,6 +215,7 @@ class SessionMetricsParserTests(unittest.TestCase):
             )
             self.assertEqual(metrics["tokens"]["status"], "not_available")
             self.assertEqual(metrics["artifacts"]["status"], "not_available")
+            self.assertEqual(metrics["sources"][1]["status"], "missing")
 
     def test_manifest_cannot_read_paths_outside_session_root(self):
         with tempfile.TemporaryDirectory() as raw_dir:
@@ -341,6 +344,7 @@ class SessionMetricsParserTests(unittest.TestCase):
             metrics = json.loads(result.stdout)
             self.assertEqual(metrics["tokens"]["status"], "not_available")
             self.assertEqual(metrics["payload_bytes"]["status"], "not_available")
+            self.assertEqual(metrics["sources"][0]["status"], "missing")
 
     def test_report_contract_keeps_metrics_separate_from_findings(self):
         report_template = (
@@ -354,6 +358,10 @@ class SessionMetricsParserTests(unittest.TestCase):
         self.assertIn("**Browser/tool payload bytes:**", report_template)
         self.assertIn("**Session artifact bytes:**", report_template)
         self.assertIn("not available", report_template)
+        self.assertIn("## Level 1 — Confirmed Bugs", report_template)
+        self.assertIn("## Level 2 — Suspicious", report_template)
+        self.assertIn("## Level 3 — Observations", report_template)
+        self.assertIn("## Known / Suppressed", report_template)
         self.assertIn("Level 1 findings are never suppressed", phase_three)
 
 

@@ -30,11 +30,14 @@ Add an opt-in structured mode for the exploratory tester. The structured mode ac
 
 The manifest may contain:
 
+- A `session_root` and optional `artifact_root`, both resolved under the manifest directory.
 - Transcript paths with an explicit `orchestrator` or `worker` scope.
 - Artifact paths with an explicit kind: findings, report, screenshot, video, configuration, or detector source.
 - Optional numeric payload counters supplied by a future collector: tool-input bytes, tool-output bytes, and browser-event bytes.
 
 Only paths and numeric counters are consumed. The metrics script never reads or stores payload content.
+When no manifest is supplied, structured mode may measure the known session outputs under
+an explicitly supplied session directory; it never scans arbitrary files.
 
 ### Structured output
 
