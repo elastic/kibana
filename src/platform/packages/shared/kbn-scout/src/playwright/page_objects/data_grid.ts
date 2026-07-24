@@ -484,6 +484,10 @@ export class DataGrid {
     const pollIntervalMs = 100;
     const totalTimeoutMs = 30_000;
 
+    // Gate on the data fetch first so the visibility budget below isn't spent
+    // waiting for an in-flight search rather than for the table to render.
+    await this.waitForLoad();
+
     await table.waitFor({ state: 'visible', timeout: totalTimeoutMs });
 
     let stableSince: number | null = null;
