@@ -48,6 +48,35 @@ describe('[Index management API Routes] Data streams ILM policies', () => {
     expect(body.policies[0].name).toBe('my_policy');
   });
 
+  test('sets isManaged to true for policies with _meta.managed = true', async () => {
+    hasPrivileges.mockResolvedValue({ has_all_requested: true });
+    getLifecycle.mockResolvedValue({
+      managed_policy: {
+        policy: {
+          _meta: { managed: true },
+          phases: {
+            hot: { min_age: '0ms', actions: {} },
+          },
+        },
+      },
+      regular_policy: {
+        policy: {
+          phases: {
+            hot: { min_age: '0ms', actions: {} },
+          },
+        },
+      },
+    });
+
+    const { body } = await router.runRequest(mockRequest);
+
+    expect(body.policies).toHaveLength(2);
+    const managed = body.policies.find((p: { name: string }) => p.name === 'managed_policy');
+    const regular = body.policies.find((p: { name: string }) => p.name === 'regular_policy');
+    expect(managed.isManaged).toBe(true);
+    expect(regular.isManaged).toBeUndefined();
+  });
+
   test('reports no manage_ilm and degrades to an empty list when policies cannot be read', async () => {
     hasPrivileges.mockResolvedValue({ has_all_requested: false });
     getLifecycle.mockRejectedValue(

@@ -45,7 +45,11 @@ import { useTimelineControlColumn } from '../shared/use_timeline_control_columns
 import { LeftPanelNotesTab } from '../../../../../flyout/document_details/left';
 import { useFlyoutApi } from '../../../../../flyout_v2/use_flyout_api';
 import { useIsNewFlyoutEnabled } from '../../../../../common/hooks/use_is_new_flyout_enabled';
-import { DocumentEventTypes, NotesEventTypes } from '../../../../../common/lib/telemetry';
+import {
+  DocumentEventTypes,
+  FLYOUT_ORIGIN,
+  NotesEventTypes,
+} from '../../../../../common/lib/telemetry';
 import { TimelineRefetch } from '../../refetch_timeline';
 import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
 import { useSelectedPatterns } from '../../../../../data_view_manager/hooks/use_selected_patterns';
@@ -169,7 +173,7 @@ export const EqlTabContentComponent: React.FC<Props> = ({
       const indexName = selectedPatterns.join(',');
 
       if (enableNewFlyout && eventData) {
-        openNotes({ hit: eventData });
+        openNotes({ hit: eventData, origin: FLYOUT_ORIGIN.TIMELINE });
       } else if (isAttackRow) {
         openFlyout({
           right: {
