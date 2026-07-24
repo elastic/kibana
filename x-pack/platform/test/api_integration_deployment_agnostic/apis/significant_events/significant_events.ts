@@ -219,7 +219,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         const rules = await alertingApi.searchRulesV2(roleAuthc);
         expect(rules.body.items).to.have.length(1);
-        expect(rules.body.items[0].metadata.name).to.eql('should not be deleted');
+        expect(rules.body.items[0].metadata.name).to.eql('should not be deleted (match count)');
       });
     });
 
