@@ -2262,6 +2262,20 @@ groups:
           stack: unavailable
           security: ga
 
+      - setting: "securitySolution:enableNewFlyout"
+        id: security-solution-enable-new-flyout
+        description: |
+          Enables the new flyout system for document details in Security Solution.
+        datatype: bool
+        default: true
+        applies_to:
+          stack: preview 9.5
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          security: ga
+
   - group: Timelion
     id: kibana-timelion-settings
     settings:

@@ -24,7 +24,7 @@ const detectionSignalsByRuleUuid = (
   return signalsByRuleUuid;
 };
 
-/** CODE evaluator: every input detection must have exactly one signal with executed ES|QL evidence. */
+/** CODE evaluator: every input detection has one signal and evidence when an exact backed query exists. */
 export const evidenceCollectionEvaluator: DiscoveryEvaluator = {
   name: 'evidence_collection',
   kind: 'CODE',
@@ -75,7 +75,7 @@ export const evidenceCollectionEvaluator: DiscoveryEvaluator = {
       explanation:
         issues.length > 0
           ? `${issues.join('; ')} (score=${score.toFixed(2)})`
-          : `All ${expectedRuleUuids.size} input rule(s) have collected ES|QL evidence`,
+          : `All ${expectedRuleUuids.size} input rule(s) have the required signal and evidence coverage`,
     });
   },
 };
