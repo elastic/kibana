@@ -97,11 +97,7 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
           const [coreStart] = await osqueryContext.getStartServices();
           const clusterClient = coreStart.elasticsearch.client;
           const internalEsClient = clusterClient.asInternalUser;
-          const dataReadEsClient = getReadEsClient(
-            clusterClient,
-            request,
-            osqueryContext.cpsEnabled
-          );
+          const readEsClient = getReadEsClient(clusterClient, request, osqueryContext.cpsEnabled);
           const ccsEnabled = await hasConnectedRemoteClusters(internalEsClient);
 
           const spaceId = osqueryContext?.service?.getActiveSpace
@@ -216,7 +212,7 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
 
           const [actionsResult, scheduledResult] = await Promise.all([
             actionsQuery
-              ? internalEsClient.search(
+              ? readEsClient.search(
                   {
                     index: prefixIndexPatternsWithCcs(`${ACTIONS_INDEX}*`, ccsEnabled),
                     ...actionsQuery,
@@ -225,7 +221,7 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
                 )
               : Promise.resolve({ hits: { hits: [] } }),
             scheduledQuery
-              ? dataReadEsClient
+              ? readEsClient
                   .search(
                     {
                       index: prefixIndexPatternsWithCcs(

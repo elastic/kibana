@@ -16,6 +16,7 @@ import { API_VERSIONS, ACTIONS_INDEX } from '../../../common/constants';
 import { PLUGIN_ID } from '../../../common';
 import { buildRouteValidation } from '../../utils/build_validation/route_validation';
 import { buildSpaceIdFilter } from '../../utils/build_space_id_filter';
+import { getReadEsClient } from '../../utils/get_read_es_client';
 
 const USERS_PAGE_SIZE = 10;
 
@@ -63,17 +64,23 @@ export const getHistoryUsersRoute = (
       async (context, request, response) => {
         try {
           const [coreStartServices] = await osqueryContext.getStartServices();
-          const esClient = coreStartServices.elasticsearch.client.asInternalUser;
+          const clusterClient = coreStartServices.elasticsearch.client;
+          const internalEsClient = clusterClient.asInternalUser;
 
           const spaceId = osqueryContext?.service?.getActiveSpace
             ? (await osqueryContext.service.getActiveSpace(request))?.id || DEFAULT_SPACE_ID
             : DEFAULT_SPACE_ID;
 
-          const actionsIndexExists = await esClient.indices.exists({
+          const actionsIndexExists = await internalEsClient.indices.exists({
             index: `${ACTIONS_INDEX}*`,
           });
 
           const index = actionsIndexExists ? `${ACTIONS_INDEX}*` : AGENT_ACTIONS_INDEX;
+          // The Fleet fallback index is never fanned out by CPS, so only the
+          // osquery-owned actions index is read as the request user.
+          const esClient = actionsIndexExists
+            ? getReadEsClient(clusterClient, request, osqueryContext.cpsEnabled)
+            : internalEsClient;
 
           const { searchTerm } = request.query;
 

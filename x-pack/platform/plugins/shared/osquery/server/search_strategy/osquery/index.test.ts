@@ -6,12 +6,14 @@
  */
 
 import { of, lastValueFrom } from 'rxjs';
+import { AGENT_ACTIONS_INDEX } from '@kbn/fleet-plugin/common';
 import { OsqueryQueries } from '../../../common/search_strategy/osquery';
 import type { StrategyRequestType } from '../../../common/search_strategy/osquery';
 import { Direction } from '../../../common/search_strategy';
 import type { ActionResultsStrategyResponse } from '../../../common/search_strategy';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import {
+  ACTIONS_INDEX,
   ACTION_RESPONSES_DATA_STREAM_INDEX,
   OSQUERY_INTEGRATION_NAME,
 } from '../../../common/constants';
@@ -285,24 +287,40 @@ describe('osquerySearchStrategyProvider space scoping', () => {
       ]);
     });
 
-    it('keeps actions metadata reads on the internal-user search client when CPS is enabled', async () => {
-      const actionsRequest = {
-        factoryQueryType: OsqueryQueries.actions,
-        kuery: '',
-        pagination: { activePage: 0, cursorStart: 0, querySize: 20 },
-        sort: { field: 'created_at', direction: Direction.desc },
-        spaceId: 'default',
-      } as StrategyRequestType<OsqueryQueries.actions>;
+    const actionsRequest = {
+      factoryQueryType: OsqueryQueries.actions,
+      kuery: '',
+      pagination: { activePage: 0, cursorStart: 0, querySize: 20 },
+      sort: { field: 'created_at', direction: Direction.desc },
+      spaceId: 'default',
+    } as StrategyRequestType<OsqueryQueries.actions>;
 
+    it('routes actions metadata reads to the enhanced strategy when CPS is enabled', async () => {
+      const enhancedSearchMock = jest.fn().mockReturnValue(of(emptyRawResponse));
       const { provider, searchMock, getSearchStrategy } = setup({
         cpsEnabled: true,
         actionsIndexExists: true,
+      });
+      getSearchStrategy.mockReturnValue({ search: enhancedSearchMock, cancel: jest.fn() });
+
+      await lastValueFrom(provider.search(actionsRequest, {} as never, { request: {} } as never));
+
+      expect(getSearchStrategy).toHaveBeenCalled();
+      expect(searchMock).not.toHaveBeenCalled();
+      expect(enhancedSearchMock.mock.calls[0][0].params.index).toEqual(`${ACTIONS_INDEX}*`);
+    });
+
+    it('keeps the Fleet actions fallback on the internal-user search client when CPS is enabled', async () => {
+      const { provider, searchMock, getSearchStrategy } = setup({
+        cpsEnabled: true,
+        actionsIndexExists: false,
       });
 
       await lastValueFrom(provider.search(actionsRequest, {} as never, { request: {} } as never));
 
       expect(searchMock).toHaveBeenCalled();
       expect(getSearchStrategy).not.toHaveBeenCalled();
+      expect(searchMock.mock.calls[0][0].params.index).toEqual(AGENT_ACTIONS_INDEX);
     });
 
     it('adds CCS-prefixed index targets when remote clusters are connected', async () => {

@@ -5,22 +5,26 @@
  * 2.0.
  */
 
-export const isOsqueryActionsMetadataIndex = (index: string): boolean =>
-  index.includes('osquery_manager.actions') && !index.includes('action.responses');
+/**
+ * Fleet-owned indices (`.fleet-actions*`, `.fleet-actions-results*`, `.fleet-agents*`)
+ * are excluded from CPS routing and the request user holds no privileges on them, so
+ * reads must stay on the internal client (origin-only).
+ */
+export const isFleetIndex = (index: string): boolean => index.includes('fleet');
 
-export const isOsqueryDataIndex = (index: string): boolean =>
-  index.includes('osquery_manager') &&
-  !index.includes('fleet') &&
-  !isOsqueryActionsMetadataIndex(index);
+/**
+ * Osquery-owned indices: action metadata (`.logs-osquery_manager.actions-*`), results
+ * and action responses. All of them are read as the request user under CPS so they fan
+ * out to linked projects. The `osquery_manager` substring also matches CCS-prefixed
+ * patterns (e.g. `*:logs-osquery_manager.result-*`).
+ */
+export const isOsqueryIndex = (index: string): boolean =>
+  index.includes('osquery_manager') && !isFleetIndex(index);
 
 export const shouldUseInternalSearchClient = (indices: string[], cpsEnabled: boolean): boolean => {
   if (!cpsEnabled) {
-    return indices.some((index) => index.includes('fleet') || index.includes('osquery_manager'));
+    return indices.some((index) => isFleetIndex(index) || index.includes('osquery_manager'));
   }
 
-  return (
-    indices.some((index) => index.includes('fleet')) ||
-    indices.some(isOsqueryActionsMetadataIndex) ||
-    !indices.some(isOsqueryDataIndex)
-  );
+  return indices.some(isFleetIndex) || !indices.some(isOsqueryIndex);
 };

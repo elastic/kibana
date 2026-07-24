@@ -8,6 +8,11 @@ viewer:
     - 'read_project_routing'
   indices:
     - names:
+        - .logs-osquery_manager.actions-*
+        - .logs-osquery_manager.action.responses-*
+      privileges:
+        - read
+    - names:
         - '.siem-signals*'
         - '.lists-*'
         - '.items-*'
@@ -31,7 +36,6 @@ viewer:
         - endgame-*
         - filebeat-*
         - logs-*
-        - .logs-osquery_manager.action.responses-*
         - packetbeat-*
         - winlogbeat-*
         - metrics-endpoint.metadata_current_*
@@ -88,6 +92,11 @@ editor:
     - 'read_project_routing'
   indices:
     - names:
+        - .logs-osquery_manager.actions-*
+        - .logs-osquery_manager.action.responses-*
+      privileges:
+        - read
+    - names:
         - '.siem-signals*'
         - '.lists-*'
         - '.items-*'
@@ -104,7 +113,6 @@ editor:
         - endgame-*
         - filebeat-*
         - logs-*
-        - .logs-osquery_manager.action.responses-*
         - packetbeat-*
         - winlogbeat-*
         - logstash-*
@@ -198,6 +206,11 @@ t1_analyst:
     - 'read_project_routing'
   indices:
     - names:
+        - .logs-osquery_manager.actions-*
+        - .logs-osquery_manager.action.responses-*
+      privileges:
+        - read
+    - names:
         - '.alerts-security*'
         - '.siem-signals-*'
       privileges:
@@ -221,7 +234,6 @@ t1_analyst:
         - endgame-*
         - filebeat-*
         - logs-*
-        - .logs-osquery_manager.action.responses-*
         - packetbeat-*
         - winlogbeat-*
         - logstash-*
@@ -276,6 +288,11 @@ t2_analyst:
     - 'read_project_routing'
   indices:
     - names:
+        - .logs-osquery_manager.actions-*
+        - .logs-osquery_manager.action.responses-*
+      privileges:
+        - read
+    - names:
         - .alerts-security*
         - .siem-signals-*
       privileges:
@@ -299,7 +316,6 @@ t2_analyst:
         - endgame-*
         - filebeat-*
         - logs-*
-        - .logs-osquery_manager.action.responses-*
         - packetbeat-*
         - winlogbeat-*
         - logstash-*
@@ -358,13 +374,17 @@ t3_analyst:
     - 'read_project_routing'
   indices:
     - names:
+        - .logs-osquery_manager.actions-*
+        - .logs-osquery_manager.action.responses-*
+      privileges:
+        - read
+    - names:
         - apm-*-transaction*
         - traces-apm*
         - auditbeat-*
         - endgame-*
         - filebeat-*
         - logs-*
-        - .logs-osquery_manager.action.responses-*
         - packetbeat-*
         - winlogbeat-*
         - logstash-*
@@ -459,13 +479,17 @@ threat_intelligence_analyst:
     - 'read_project_routing'
   indices:
     - names:
+        - .logs-osquery_manager.actions-*
+        - .logs-osquery_manager.action.responses-*
+      privileges:
+        - read
+    - names:
         - apm-*-transaction*
         - traces-apm*
         - auditbeat-*
         - endgame-*
         - filebeat-*
         - logs-*
-        - .logs-osquery_manager.action.responses-*
         - packetbeat-*
         - winlogbeat-*
         - logstash-*
@@ -549,13 +573,17 @@ rule_author:
     - 'read_project_routing'
   indices:
     - names:
+        - .logs-osquery_manager.actions-*
+        - .logs-osquery_manager.action.responses-*
+      privileges:
+        - read
+    - names:
         - apm-*-transaction*
         - traces-apm*
         - auditbeat-*
         - endgame-*
         - filebeat-*
         - logs-*
-        - .logs-osquery_manager.action.responses-*
         - packetbeat-*
         - winlogbeat-*
         - logstash-*
@@ -642,13 +670,17 @@ soc_manager:
     - 'read_project_routing'
   indices:
     - names:
+        - .logs-osquery_manager.actions-*
+        - .logs-osquery_manager.action.responses-*
+      privileges:
+        - read
+    - names:
         - apm-*-transaction*
         - traces-apm*
         - auditbeat-*
         - endgame-*
         - filebeat-*
         - logs-*
-        - .logs-osquery_manager.action.responses-*
         - packetbeat-*
         - winlogbeat-*
         - logstash-*
@@ -741,13 +773,17 @@ detections_admin:
   cluster: ['manage_index_templates', 'manage_transform', 'read_project_routing']
   indices:
     - names:
+        - .logs-osquery_manager.actions-*
+        - .logs-osquery_manager.action.responses-*
+      privileges:
+        - read
+    - names:
         - apm-*-transaction*
         - traces-apm*
         - auditbeat-*
         - endgame-*
         - filebeat-*
         - logs-*
-        - .logs-osquery_manager.action.responses-*
         - packetbeat-*
         - winlogbeat-*
         - logstash-*
@@ -821,13 +857,17 @@ platform_engineer:
     - manage
   indices:
     - names:
+        - .logs-osquery_manager.actions-*
+        - .logs-osquery_manager.action.responses-*
+      privileges:
+        - read
+    - names:
         - apm-*-transaction*
         - traces-apm*
         - auditbeat-*
         - endgame-*
         - filebeat-*
         - logs-*
-        - .logs-osquery_manager.action.responses-*
         - packetbeat-*
         - winlogbeat-*
         - logstash-*
@@ -908,6 +948,11 @@ endpoint_operations_analyst:
     - 'read_project_routing'
   indices:
     - names:
+        - .logs-osquery_manager.actions-*
+        - .logs-osquery_manager.action.responses-*
+      privileges:
+        - read
+    - names:
         - metrics-endpoint.metadata_current_*
         - .fleet-agents*
         - .fleet-actions*
@@ -920,7 +965,6 @@ endpoint_operations_analyst:
         - endgame-*
         - filebeat-*
         - logs-*
-        - .logs-osquery_manager.action.responses-*
         - packetbeat-*
         - winlogbeat-*
         - logstash-*
@@ -1013,6 +1057,11 @@ endpoint_policy_manager:
     - 'read_project_routing'
   indices:
     - names:
+        - .logs-osquery_manager.actions-*
+        - .logs-osquery_manager.action.responses-*
+      privileges:
+        - read
+    - names:
         - metrics-endpoint.metadata_current_*
         - .fleet-agents*
         - .fleet-actions*
@@ -1025,7 +1074,6 @@ endpoint_policy_manager:
         - endgame-*
         - filebeat-*
         - logs-*
-        - .logs-osquery_manager.action.responses-*
         - packetbeat-*
         - winlogbeat-*
         - logstash-*

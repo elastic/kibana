@@ -105,9 +105,6 @@ export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
             spaceId
           );
 
-          // Select internal client for all osquery indices that require it.
-          // The 'osquery_manager' substring matches both local and CCS-prefixed patterns
-          // (e.g. '*:logs-osquery_manager.action...').
           const indices = Array.isArray(dsl.index) ? dsl.index : dsl.index ? [dsl.index] : [];
           const useInternalSearchClient = shouldUseInternalSearchClient(
             indices,
