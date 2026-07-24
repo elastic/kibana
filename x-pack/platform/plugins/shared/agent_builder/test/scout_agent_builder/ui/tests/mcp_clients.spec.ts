@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { AGENT_BUILDER_UIAM_OAUTH_CLIENT_MANAGEMENT_SETTING_ID } from '@kbn/management-settings-ids';
 import { expect } from '@kbn/scout/ui';
 import {
   createOAuthClient,
@@ -22,7 +23,10 @@ test.describe.skip(
     let authHeaders: Record<string, string>;
     const createdClientIds: string[] = [];
 
-    test.beforeAll(async ({ samlAuth }) => {
+    test.beforeAll(async ({ kbnClient, samlAuth }) => {
+      await kbnClient.uiSettings.update({
+        [AGENT_BUILDER_UIAM_OAUTH_CLIENT_MANAGEMENT_SETTING_ID]: true,
+      });
       authHeaders = await createUiamAuthHeaders(samlAuth);
     });
 
@@ -30,11 +34,12 @@ test.describe.skip(
       await browserAuth.loginAsAdmin();
     });
 
-    test.afterAll(async ({ apiClient }) => {
+    test.afterAll(async ({ apiClient, kbnClient }) => {
       await Promise.all(
         createdClientIds.map((id) => revokeOAuthClient(apiClient, authHeaders, id))
       );
       createdClientIds.length = 0;
+      await kbnClient.uiSettings.unset(AGENT_BUILDER_UIAM_OAUTH_CLIENT_MANAGEMENT_SETTING_ID);
     });
 
     test('opens the MCP Clients page from the Manage MCP menu', async ({ page, pageObjects }) => {

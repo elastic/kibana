@@ -1,9 +1,5 @@
 {
-  "sha1": "efb0dcbfc56f5d66b979ec78c34e623561df1cbc",
-  "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
-  ],
+  "sha1": "3e5900783a2147584431a8d739077a4a2468dc5e",
   "tests": [
     {
       "id": "f6d065371af5227-8e2fb993048f286",
@@ -15,7 +11,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_oauth_local/api/parallel_tests/uiam_oauth_clients_crud.spec.ts",
-        "line": 44,
+        "line": 53,
         "column": 12
       }
     },
@@ -29,7 +25,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_oauth_local/api/parallel_tests/uiam_oauth_clients_crud.spec.ts",
-        "line": 130,
+        "line": 139,
         "column": 12
       }
     },

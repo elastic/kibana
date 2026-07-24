@@ -37,6 +37,7 @@ export type SidebarView = 'conversation' | 'manage';
 
 export interface FeatureFlags {
   experimental: boolean;
+  uiamOAuthClientManagement: boolean;
 }
 
 export interface Capabilities {
@@ -55,6 +56,7 @@ export interface RouteDefinition {
   sidebarView: SidebarView;
   isExperimental?: boolean;
   requiresUIAM?: boolean;
+  requiresUiamOAuthClientManagement?: boolean;
   navLabel?: string;
   navIcon?: string;
 }
@@ -220,6 +222,7 @@ export const manageRoutes: RouteDefinition[] = [
     viewId: agentBuilderViewIds.manageMcpClientCreate,
     sidebarView: 'manage',
     requiresUIAM: true,
+    requiresUiamOAuthClientManagement: true,
     element: <AgentBuilderMcpClientCreatePage />,
   },
   {
@@ -227,6 +230,7 @@ export const manageRoutes: RouteDefinition[] = [
     viewId: agentBuilderViewIds.manageMcpClients,
     sidebarView: 'manage',
     requiresUIAM: true,
+    requiresUiamOAuthClientManagement: true,
     element: <AgentBuilderMcpClientsPage />,
   },
   {
@@ -293,10 +297,11 @@ export interface SidebarNavItem {
 }
 
 const isRouteEnabled = (route: RouteDefinition, config: RouteAccessConfig): boolean => {
-  const { isExperimental, requiresUIAM } = route;
+  const { isExperimental, requiresUIAM, requiresUiamOAuthClientManagement } = route;
   const { featureFlags, capabilities } = config;
   if (isExperimental && !featureFlags.experimental) return false;
   if (requiresUIAM && !capabilities.isUIAMEnabled) return false;
+  if (requiresUiamOAuthClientManagement && !featureFlags.uiamOAuthClientManagement) return false;
   return true;
 };
 
