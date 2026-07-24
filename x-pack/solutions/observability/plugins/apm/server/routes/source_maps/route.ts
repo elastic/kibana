@@ -25,6 +25,7 @@ import {
 } from '../fleet/source_maps';
 import { createApmSourceMap } from './create_apm_source_map';
 import { deleteApmSourceMap } from './delete_apm_sourcemap';
+import { throwMappedSourceMapRouteError } from './map_source_map_route_error';
 import { runFleetSourcemapArtifactsMigration } from './schedule_source_map_migration';
 
 function throwNotImplementedIfSourceMapNotAvailable(featureFlags: ApmFeatureFlags): void {
@@ -58,7 +59,10 @@ const listSourceMapRoute = createApmServerRoute({
         return { artifacts, total };
       }
     } catch (e) {
-      throw Boom.internal('Something went wrong while fetching artifacts source maps', e);
+      throwMappedSourceMapRouteError(
+        e,
+        'Something went wrong while fetching artifacts source maps'
+      );
     }
   },
 });
@@ -152,7 +156,10 @@ const uploadSourceMapRoute = createApmServerRoute({
         return artifact;
       }
     } catch (e) {
-      throw Boom.internal('Something went wrong while creating a new source map', e);
+      // Fleet policy/artifact failures are often FleetError (not Boom). Map those
+      // to the correct <500 status so register_apm_server_routes does not log them
+      // as unexpected ERROR-level 500s.
+      throwMappedSourceMapRouteError(e, 'Something went wrong while creating a new source map');
     }
   },
 });
@@ -185,7 +192,10 @@ const deleteSourceMapRoute = createApmServerRoute({
         });
       }
     } catch (e) {
-      throw Boom.internal(`Something went wrong while deleting source map. id: ${id}`, e);
+      throwMappedSourceMapRouteError(
+        e,
+        `Something went wrong while deleting source map. id: ${id}`
+      );
     }
   },
 });
