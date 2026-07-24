@@ -58,11 +58,11 @@ export function getChartDefinitions({
         ? getOtelLatencyChart(otelIndexes, scope, latencyAggregationType, latencyTitleAction)
         : getLatencyChart(transactionIndexes, scope, latencyAggregationType, latencyTitleAction),
       isOtel
-        ? getOtelThroughputChart(otelIndexes, scope)
-        : getThroughputChart(transactionIndexes, scope),
-      isOtel
         ? getOtelFailedTransactionRateChart(otelIndexes, scope)
         : getFailedTransactionRateChart(transactionIndexes, scope),
+      isOtel
+        ? getOtelThroughputChart(otelIndexes, scope)
+        : getThroughputChart(transactionIndexes, scope),
     ],
     infrastructureMetrics: [
       getCpuUsageChart(metricIndexes, metricScope),

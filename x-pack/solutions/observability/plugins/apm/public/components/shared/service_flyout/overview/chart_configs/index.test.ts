@@ -51,8 +51,8 @@ describe('service flyout chart_configs', () => {
 
       expect(keyMetrics.map((c) => c.id)).toEqual([
         'latency',
-        'throughput',
         'failedTransactionRate',
+        'throughput',
       ]);
       expect(infrastructureMetrics.map((c) => c.id)).toEqual(['cpuUsage', 'memoryUsage']);
     });
@@ -64,8 +64,8 @@ describe('service flyout chart_configs', () => {
 
       expect(keyMetrics.map((c) => c.id)).toEqual([
         'latency',
-        'throughput',
         'failedTransactionRate',
+        'throughput',
       ]);
       expect(infrastructureMetrics.map((c) => c.id)).toEqual(['cpuUsage', 'memoryUsage']);
     });
@@ -105,8 +105,8 @@ describe('service flyout chart_configs', () => {
 
       expect(keyMetrics.map((c) => c.id)).toEqual([
         'latency',
-        'throughput',
         'failedTransactionRate',
+        'throughput',
       ]);
       expect(infrastructureMetrics.map((c) => c.id)).toEqual(['cpuUsage', 'memoryUsage']);
       [...keyMetrics, ...infrastructureMetrics].forEach((chart) => {

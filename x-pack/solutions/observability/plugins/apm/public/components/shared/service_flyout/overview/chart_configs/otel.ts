@@ -80,8 +80,8 @@ export function getOtelFailedTransactionRateChart(
   indexes: string | undefined,
   scope: ServiceScope
 ): FlyoutLensChartConfigDefinition {
-  const title = i18n.translate('xpack.apm.serviceFlyout.failedTransactionRateChartTitle', {
-    defaultMessage: 'Failed transaction rate',
+  const title = i18n.translate('xpack.apm.serviceFlyout.otelErrorRateChartTitle', {
+    defaultMessage: 'Error rate',
   });
 
   return buildChartDefinition({
