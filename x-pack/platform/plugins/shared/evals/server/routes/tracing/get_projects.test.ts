@@ -40,7 +40,6 @@ const buildProjectBucket = ({
   distinct_traces: { value: distinctTraces },
   last_trace: { value_as_string: lastTrace },
   latency_percentiles: { values: { '50.0': p50, '99.0': p99 } },
-  trace_ids: { buckets: traceIds.map((id) => ({ key: id, doc_count: 1 })) },
   error_count: { doc_count: errorDocCount, distinct_traces: { value: distinctErrorTraces } },
 });
 
