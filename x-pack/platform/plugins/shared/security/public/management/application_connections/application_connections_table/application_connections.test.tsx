@@ -344,6 +344,121 @@ describe('ApplicationConnections', () => {
     expect(queryByText('Laptop session')).not.toBeInTheDocument();
   }, 15_000);
 
+  it('renders an "Expired" status for a connection that is expired but not revoked, and keeps it selectable', async () => {
+    setupHttpResponses(coreStart, {
+      clients: {
+        clients: [{ id: 'client-a', client_name: 'My MCP app', resource: 'cluster:elastic' }],
+      },
+      connections: {
+        connections: [
+          {
+            id: 'conn-expired',
+            client_id: 'client-a',
+            name: 'Stale session',
+            resource: 'cluster:elastic',
+            expired: true,
+          },
+        ],
+      },
+    });
+
+    const { findByText, findByTestId, getByTestId, queryByTestId } = renderPage(coreStart);
+
+    await findByText('My MCP app');
+    fireEvent.click(getByTestId('applicationConnectionsViewModeList'));
+
+    const listView = await findByTestId('applicationConnectionsListView');
+    await within(listView).findByText('Stale session');
+    expect(within(listView).getByText('Expired')).toBeInTheDocument();
+
+    expect(queryByTestId('applicationConnectionsBulkRevokeButton')).not.toBeInTheDocument();
+    const rowCheckbox = within(listView).getByLabelText(/Select connection 'Stale session'/);
+    fireEvent.click(rowCheckbox);
+    expect(await findByTestId('applicationConnectionsBulkRevokeButton')).toHaveTextContent(
+      'Revoke 1 connection'
+    );
+
+    expect(within(listView).getByTestId('revokeConnection-conn-expired')).toBeInTheDocument();
+  });
+
+  it('renders "Revoked" (not "Expired") when a connection is both expired and revoked', async () => {
+    setupHttpResponses(coreStart, {
+      clients: {
+        clients: [{ id: 'client-a', client_name: 'My MCP app', resource: 'cluster:elastic' }],
+      },
+      connections: {
+        connections: [
+          {
+            id: 'conn-both',
+            client_id: 'client-a',
+            name: 'Old session',
+            resource: 'cluster:elastic',
+            expired: true,
+            revoked: true,
+          },
+        ],
+      },
+    });
+
+    const { findByText, findByTestId, getByTestId } = renderPage(coreStart);
+
+    await findByText('My MCP app');
+    fireEvent.click(getByTestId('applicationConnectionsViewModeList'));
+
+    const listView = await findByTestId('applicationConnectionsListView');
+    await within(listView).findByText('Old session');
+    expect(within(listView).getAllByText('Revoked').length).toBeGreaterThan(0);
+    expect(within(listView).queryByText('Expired')).not.toBeInTheDocument();
+  });
+
+  it('filters by "Expired" inside a mixed-status grouped row', async () => {
+    setupHttpResponses(coreStart, {
+      clients: {
+        clients: [{ id: 'client-a', client_name: 'Mixed app', resource: 'cluster:elastic' }],
+      },
+      connections: {
+        connections: [
+          {
+            id: 'conn-active',
+            client_id: 'client-a',
+            name: 'Laptop session',
+            resource: 'cluster:elastic',
+          },
+          {
+            id: 'conn-expired',
+            client_id: 'client-a',
+            name: 'Stale session',
+            resource: 'cluster:elastic',
+            expired: true,
+          },
+          {
+            id: 'conn-revoked',
+            client_id: 'client-a',
+            name: 'Desktop session',
+            resource: 'cluster:elastic',
+            revoked: true,
+          },
+        ],
+      },
+    });
+
+    const { findByRole, findByTestId, findByText, getByRole, getByTestId, queryByText } =
+      renderPage(coreStart);
+
+    expect(await findByTestId('applicationConnectionsCount-client-a')).toHaveTextContent('3');
+
+    fireEvent.click(getByRole('button', { name: /Status Selection/ }));
+    fireEvent.click(await findByRole('option', { name: /Expired/ }));
+
+    await waitFor(() => {
+      expect(getByTestId('applicationConnectionsCount-client-a')).toHaveTextContent('1');
+    });
+    fireEvent.click(getByTestId('expandRow-client-a'));
+    expect(await findByText('Stale session')).toBeInTheDocument();
+    expect(queryByText('Laptop session')).not.toBeInTheDocument();
+    expect(queryByText('Desktop session')).not.toBeInTheDocument();
+  }, 15_000);
+
   it('renders the expanded connection table with the Figma-aligned columns (no Scopes, no Select-all)', async () => {
     setupHttpResponses(coreStart, {
       clients: {
