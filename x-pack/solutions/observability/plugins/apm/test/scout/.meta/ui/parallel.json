@@ -1,5 +1,5 @@
 {
-  "sha1": "e801ccb40115e272ff9cb74f9a7a14151bb82c73",
+  "sha1": "e35f8318bd5a79cffd263c194484feb4fcb1b690",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -1586,8 +1586,8 @@
       }
     },
     {
-      "id": "6a80f754a8758b3-b3c53cac9ad403b",
-      "title": "Service map - nodes, edges and popovers navigates to Discover (traces)",
+      "id": "6a80f754a8758b3-e0bd84c24095102",
+      "title": "Service map - nodes, edges and popovers navigates to Discover (traces) from flyout footer actions",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -1602,8 +1602,8 @@
       }
     },
     {
-      "id": "6a80f754a8758b3-f4d15e4df57ceca",
-      "title": "Service map - nodes, edges and popovers navigates to Discover (logs)",
+      "id": "6a80f754a8758b3-02d98c7a0ea5036",
+      "title": "Service map - nodes, edges and popovers navigates to Discover (logs) from flyout footer actions",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -1618,8 +1618,8 @@
       }
     },
     {
-      "id": "6a80f754a8758b3-de729fac031b3c6",
-      "title": "Service map - nodes, edges and popovers navigates to Service Details (alerts) and page loads",
+      "id": "6a80f754a8758b3-be54d3b49115fd0",
+      "title": "Service map - nodes, edges and popovers navigates to Observability Alerts from flyout footer actions",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -1634,8 +1634,8 @@
       }
     },
     {
-      "id": "6a80f754a8758b3-f61f62040135513",
-      "title": "Service map - nodes, edges and popovers navigates to SLOs and page loads",
+      "id": "6a80f754a8758b3-aced03aeab6c955",
+      "title": "Service map - nodes, edges and popovers navigates to SLOs from flyout footer actions",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
