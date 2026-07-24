@@ -1,6 +1,7 @@
 import json
 import math
 import os
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -8,6 +9,7 @@ from pathlib import Path
 
 
 SCRIPT_DIR = Path(__file__).resolve().parent
+SCRIPT = SCRIPT_DIR / "session-token-usage.py"
 sys.path.insert(0, str(SCRIPT_DIR))
 
 from session_metrics import (  # noqa: E402
@@ -21,6 +23,17 @@ from session_metrics import (  # noqa: E402
 
 
 class SessionMetricsParserTests(unittest.TestCase):
+    def run_script(self, *args: str) -> subprocess.CompletedProcess[str]:
+        environment = os.environ.copy()
+        environment.pop("CLAUDE_CODE_SESSION_ID", None)
+        return subprocess.run(
+            [sys.executable, str(SCRIPT), *args],
+            capture_output=True,
+            text=True,
+            check=False,
+            env=environment,
+        )
+
     def test_parse_transcript_supports_message_and_top_level_usage(self):
         with tempfile.TemporaryDirectory() as raw_dir:
             transcript = Path(raw_dir) / "session.jsonl"
@@ -225,6 +238,48 @@ class SessionMetricsParserTests(unittest.TestCase):
                 build_session_metrics(manifest, None, None)
 
             outside.unlink()
+
+    def test_json_mode_is_opt_in(self):
+        with tempfile.TemporaryDirectory() as raw_dir:
+            tmp_path = Path(raw_dir)
+            transcript = tmp_path / "session.jsonl"
+            transcript.write_text(
+                '{"message":{"usage":{"input_tokens":2,"output_tokens":3,'
+                '"cache_creation_input_tokens":5,"cache_read_input_tokens":7}}}\n',
+                encoding="utf-8",
+            )
+
+            result = self.run_script(str(transcript))
+            self.assertEqual(result.returncode, 0)
+            self.assertEqual(
+                result.stdout,
+                "input=2 output=3 cache_create=5 cache_read=7 total=17\n",
+            )
+
+            structured = self.run_script(
+                str(transcript),
+                "--json",
+                "--manifest",
+                str(tmp_path / "metrics.json"),
+            )
+            self.assertEqual(structured.returncode, 0)
+            self.assertEqual(
+                json.loads(structured.stdout)["schema_version"],
+                1,
+            )
+
+    def test_json_mode_reports_unavailable_inputs_as_json(self):
+        with tempfile.TemporaryDirectory() as raw_dir:
+            result = self.run_script(
+                "--json",
+                "--manifest",
+                str(Path(raw_dir) / "missing-metrics.json"),
+            )
+
+            self.assertEqual(result.returncode, 0)
+            metrics = json.loads(result.stdout)
+            self.assertEqual(metrics["tokens"]["status"], "not_available")
+            self.assertEqual(metrics["payload_bytes"]["status"], "not_available")
 
 
 if __name__ == "__main__":
