@@ -10,7 +10,7 @@
 import { z, lazySchema } from '@kbn/zod/v4';
 import type { AuthTypeDefinition } from '../connector_spec';
 import * as i18n from './translations';
-import { kubernetesTlsSchemaFields } from './kubernetes_tls_schema';
+import { pemCaTlsSchemaFields } from './pem_ca_tls_schema';
 
 export const KUBERNETES_AKS_AUTH_ID = 'kubernetes_aks';
 
@@ -38,7 +38,7 @@ const authSchema = lazySchema(() =>
         .string()
         .min(1, { message: i18n.KUBERNETES_AKS_CLIENT_SECRET_REQUIRED_MESSAGE })
         .meta({ sensitive: true, label: i18n.KUBERNETES_AKS_CLIENT_SECRET_LABEL }),
-      ...kubernetesTlsSchemaFields(),
+      ...pemCaTlsSchemaFields(),
     })
     .meta({ label: i18n.KUBERNETES_AKS_AUTH_LABEL })
 );

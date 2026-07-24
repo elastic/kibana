@@ -10,7 +10,7 @@
 import { z, lazySchema } from '@kbn/zod/v4';
 import type { AuthTypeDefinition } from '../connector_spec';
 import * as i18n from './translations';
-import { kubernetesTlsSchemaFields } from './kubernetes_tls_schema';
+import { pemCaTlsSchemaFields } from './pem_ca_tls_schema';
 
 export const KUBERNETES_GKE_AUTH_ID = 'kubernetes_gke';
 
@@ -32,7 +32,7 @@ const authSchema = lazySchema(() =>
           label: i18n.KUBERNETES_GKE_SERVICE_ACCOUNT_JSON_LABEL,
           helpText: i18n.KUBERNETES_GKE_SERVICE_ACCOUNT_JSON_HELP_TEXT,
         }),
-      ...kubernetesTlsSchemaFields(),
+      ...pemCaTlsSchemaFields(),
     })
     .meta({ label: i18n.KUBERNETES_GKE_AUTH_LABEL })
 );

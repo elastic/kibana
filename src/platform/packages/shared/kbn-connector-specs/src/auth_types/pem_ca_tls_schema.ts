@@ -10,17 +10,21 @@
 import { z } from '@kbn/zod/v4';
 import * as i18n from './translations';
 
-export interface KubernetesTlsFields {
+export interface PemCaTlsFields {
   caCert?: string;
   verificationMode?: 'none' | 'certificate' | 'full';
 }
 
-export const kubernetesTlsSchemaFields = () => ({
+/**
+ * Optional PEM CA + verification mode fields shared by auth types that talk to
+ * self-hosted HTTPS APIs (bearer+TLS, Kubernetes cloud variants, etc.).
+ */
+export const pemCaTlsSchemaFields = () => ({
   caCert: z
     .string()
     .meta({
-      label: i18n.KUBERNETES_AUTH_CA_LABEL,
-      helpText: i18n.KUBERNETES_AUTH_CA_HELP_TEXT,
+      label: i18n.BEARER_WITH_TLS_AUTH_CA_LABEL,
+      helpText: i18n.BEARER_WITH_TLS_AUTH_CA_HELP_TEXT,
       widget: 'textarea',
       sensitive: true,
     })
@@ -28,8 +32,8 @@ export const kubernetesTlsSchemaFields = () => ({
   verificationMode: z
     .enum(['none', 'certificate', 'full'])
     .meta({
-      label: i18n.KUBERNETES_AUTH_VERIFICATION_MODE_LABEL,
-      helpText: i18n.KUBERNETES_AUTH_VERIFICATION_MODE_HELP_TEXT,
+      label: i18n.BEARER_WITH_TLS_AUTH_VERIFICATION_MODE_LABEL,
+      helpText: i18n.BEARER_WITH_TLS_AUTH_VERIFICATION_MODE_HELP_TEXT,
     })
     .optional(),
 });

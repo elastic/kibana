@@ -336,9 +336,52 @@ export const KubernetesConnector: ConnectorSpec = {
   auth: {
     types: [
       {
-        type: 'kubernetes',
+        type: 'bearer_with_tls',
         isRecommended: true,
         defaults: {},
+        overrides: {
+          label: i18n.translate(
+            'core.kibanaConnectorSpecs.kubernetes.auth.bearerWithTls.label',
+            { defaultMessage: 'Service account token' }
+          ),
+          meta: {
+            token: {
+              label: i18n.translate(
+                'core.kibanaConnectorSpecs.kubernetes.auth.bearerWithTls.tokenLabel',
+                { defaultMessage: 'Token' }
+              ),
+              helpText: i18n.translate(
+                'core.kibanaConnectorSpecs.kubernetes.auth.bearerWithTls.tokenHelpText',
+                {
+                  defaultMessage:
+                    'A Kubernetes service account bearer token. Prefer a least-privilege service account scoped to the namespaces and verbs the connector needs.',
+                }
+              ),
+            },
+            caCert: {
+              label: i18n.translate(
+                'core.kibanaConnectorSpecs.kubernetes.auth.bearerWithTls.caLabel',
+                { defaultMessage: 'Cluster CA certificate (PEM)' }
+              ),
+              helpText: i18n.translate(
+                'core.kibanaConnectorSpecs.kubernetes.auth.bearerWithTls.caHelpText',
+                {
+                  defaultMessage:
+                    'Paste the PEM-encoded certificate authority used to verify the API server. Leave empty to rely on the system trust store or to disable verification.',
+                }
+              ),
+            },
+            verificationMode: {
+              helpText: i18n.translate(
+                'core.kibanaConnectorSpecs.kubernetes.auth.bearerWithTls.verificationModeHelpText',
+                {
+                  defaultMessage:
+                    'How to verify the API server TLS certificate. "full" verifies the certificate and hostname, "certificate" verifies the certificate only, and "none" disables verification (not recommended).',
+                }
+              ),
+            },
+          },
+        },
       },
       {
         type: 'kubernetes_gke',

@@ -48,9 +48,9 @@ describe('AnsibleControllerConnector', () => {
   });
 
   describe('auth', () => {
-    it('recommends ansible_controller auth', () => {
+    it('recommends bearer_with_tls auth', () => {
       const auth = AnsibleControllerConnector.auth?.types.find(
-        (t): t is AuthTypeDef => typeof t === 'object' && t.type === 'ansible_controller'
+        (t): t is AuthTypeDef => typeof t === 'object' && t.type === 'bearer_with_tls'
       );
       expect(auth?.isRecommended).toBe(true);
     });
@@ -61,10 +61,10 @@ describe('AnsibleControllerConnector', () => {
         isEarsEnabled: false,
         isEarsExperimentalEnabled: false,
       });
-      expect(schema.safeParse({ authType: 'ansible_controller', token: 'pat-token' }).success).toBe(
+      expect(schema.safeParse({ authType: 'bearer_with_tls', token: 'pat-token' }).success).toBe(
         true
       );
-      expect(schema.safeParse({ authType: 'ansible_controller', token: '' }).success).toBe(false);
+      expect(schema.safeParse({ authType: 'bearer_with_tls', token: '' }).success).toBe(false);
     });
   });
 

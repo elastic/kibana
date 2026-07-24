@@ -14,7 +14,7 @@ import {
   KubernetesEksAuth as KubernetesEksAuthDefinition,
   type KubernetesEksAuthSchema,
 } from './kubernetes_eks';
-import { configureKubernetesTls } from './kubernetes_tls_helpers';
+import { configurePemCaTls } from './pem_ca_tls_helpers';
 
 export const KubernetesEksAuth: AuthTypeSpec<KubernetesEksAuthSchema> = {
   ...KubernetesEksAuthDefinition,
@@ -32,6 +32,6 @@ export const KubernetesEksAuth: AuthTypeSpec<KubernetesEksAuthSchema> = {
 
     axiosInstance.defaults.headers.common.Authorization = `Bearer ${token}`;
 
-    return configureKubernetesTls(ctx, axiosInstance, secret);
+    return configurePemCaTls(ctx, axiosInstance, secret);
   },
 };

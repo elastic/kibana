@@ -50,9 +50,9 @@ describe('KubernetesConnector', () => {
   });
 
   describe('auth', () => {
-    it('recommends the kubernetes auth type', () => {
+    it('recommends the bearer_with_tls auth type', () => {
       const k8sAuth = KubernetesConnector.auth?.types.find(
-        (t): t is AuthTypeDef => typeof t === 'object' && t.type === 'kubernetes'
+        (t): t is AuthTypeDef => typeof t === 'object' && t.type === 'bearer_with_tls'
       );
       expect(k8sAuth).toBeDefined();
       expect(k8sAuth?.isRecommended).toBe(true);
@@ -65,15 +65,22 @@ describe('KubernetesConnector', () => {
         isEarsExperimentalEnabled: false,
       });
 
-      expect(schema.safeParse({ authType: 'kubernetes', token: 'sa-token' }).success).toBe(true);
-      expect(schema.safeParse({ authType: 'kubernetes', token: '' }).success).toBe(false);
+      expect(schema.safeParse({ authType: 'bearer_with_tls', token: 'sa-token' }).success).toBe(
+        true
+      );
+      expect(schema.safeParse({ authType: 'bearer_with_tls', token: '' }).success).toBe(false);
     });
 
     it('offers managed cluster auth types for GKE, EKS, and AKS', () => {
       const types = KubernetesConnector.auth?.types.map((t) =>
         typeof t === 'object' ? t.type : t
       );
-      expect(types).toEqual(['kubernetes', 'kubernetes_gke', 'kubernetes_eks', 'kubernetes_aks']);
+      expect(types).toEqual([
+        'bearer_with_tls',
+        'kubernetes_gke',
+        'kubernetes_eks',
+        'kubernetes_aks',
+      ]);
     });
 
     it('validates managed cluster secrets', () => {

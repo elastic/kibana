@@ -370,9 +370,52 @@ export const AnsibleControllerConnector: ConnectorSpec = {
   auth: {
     types: [
       {
-        type: 'ansible_controller',
+        type: 'bearer_with_tls',
         isRecommended: true,
         defaults: {},
+        overrides: {
+          label: i18n.translate(
+            'core.kibanaConnectorSpecs.ansibleController.auth.bearerWithTls.label',
+            { defaultMessage: 'API token' }
+          ),
+          meta: {
+            token: {
+              label: i18n.translate(
+                'core.kibanaConnectorSpecs.ansibleController.auth.bearerWithTls.tokenLabel',
+                { defaultMessage: 'Token' }
+              ),
+              helpText: i18n.translate(
+                'core.kibanaConnectorSpecs.ansibleController.auth.bearerWithTls.tokenHelpText',
+                {
+                  defaultMessage:
+                    'A long-lived Ansible Automation Controller / AWX personal access token or OAuth2 token. Do not use session cookies.',
+                }
+              ),
+            },
+            caCert: {
+              label: i18n.translate(
+                'core.kibanaConnectorSpecs.ansibleController.auth.bearerWithTls.caLabel',
+                { defaultMessage: 'Server CA certificate (PEM)' }
+              ),
+              helpText: i18n.translate(
+                'core.kibanaConnectorSpecs.ansibleController.auth.bearerWithTls.caHelpText',
+                {
+                  defaultMessage:
+                    'Paste the PEM-encoded certificate authority used to verify the Controller / AWX server. Leave empty to rely on the system trust store or to disable verification.',
+                }
+              ),
+            },
+            verificationMode: {
+              helpText: i18n.translate(
+                'core.kibanaConnectorSpecs.ansibleController.auth.bearerWithTls.verificationModeHelpText',
+                {
+                  defaultMessage:
+                    'How to verify the server TLS certificate. "full" verifies the certificate and hostname, "certificate" verifies the certificate only, and "none" disables verification (not recommended).',
+                }
+              ),
+            },
+          },
+        },
       },
     ],
   },

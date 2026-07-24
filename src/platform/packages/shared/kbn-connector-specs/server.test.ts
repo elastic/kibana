@@ -10,15 +10,15 @@
 import { authTypeSpecs as authTypeDefinitions } from '.';
 import { authTypeSpecs as serverAuthTypeSpecs } from './server';
 
-const KUBERNETES_AUTH_TYPES = [
-  'KubernetesAuth',
+const SERVER_OVERRIDE_AUTH_TYPES = [
+  'BearerWithTlsAuth',
   'KubernetesAksAuth',
   'KubernetesEksAuth',
   'KubernetesGkeAuth',
 ] as const;
 
 describe('server auth type specs', () => {
-  it.each(KUBERNETES_AUTH_TYPES)('adds the server implementation for %s', (authTypeName) => {
+  it.each(SERVER_OVERRIDE_AUTH_TYPES)('adds the server implementation for %s', (authTypeName) => {
     expect(authTypeDefinitions[authTypeName]).not.toHaveProperty('configure');
     expect(serverAuthTypeSpecs[authTypeName].configure).toEqual(expect.any(Function));
   });
