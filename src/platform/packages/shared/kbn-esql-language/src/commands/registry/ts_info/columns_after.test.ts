@@ -14,7 +14,7 @@ import { columnsAfter, TS_INFO_FIELDS } from './columns_after';
 describe('TS_INFO > columnsAfter', () => {
   const mockCommand = { name: 'ts_info' } as ESQLCommand;
 
-  it('appends TS_INFO columns to previous columns', () => {
+  it('replaces previous columns with TS_INFO columns', () => {
     const previousColumns: ESQLColumnData[] = [
       { name: 'field1', type: 'keyword', userDefined: false },
       { name: 'field2', type: 'double', userDefined: false },
@@ -22,11 +22,7 @@ describe('TS_INFO > columnsAfter', () => {
 
     const result = columnsAfter(mockCommand, previousColumns, '');
 
-    expect(result).toEqual<ESQLColumnData[]>([
-      { name: 'field1', type: 'keyword', userDefined: false },
-      { name: 'field2', type: 'double', userDefined: false },
-      ...TS_INFO_FIELDS,
-    ]);
+    expect(result).toEqual<ESQLColumnData[]>([...TS_INFO_FIELDS]);
   });
 
   it('returns only TS_INFO columns when previous columns is empty', () => {

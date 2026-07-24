@@ -552,16 +552,6 @@ export const labels = {
       breadcrumb: i18n.translate('xpack.agentBuilder.mcpClients.breadcrumb', {
         defaultMessage: 'MCP clients',
       }),
-      techPreviewBadgeLabel: i18n.translate('xpack.agentBuilder.mcpClients.techPreviewBadgeLabel', {
-        defaultMessage: 'Technical preview',
-      }),
-      techPreviewBadgeDescription: i18n.translate(
-        'xpack.agentBuilder.mcpClients.techPreviewBadgeDescription',
-        {
-          defaultMessage:
-            'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
-        }
-      ),
       addMcpClientButtonLabel: i18n.translate(
         'xpack.agentBuilder.mcpClients.addMcpClientButtonLabel',
         {
