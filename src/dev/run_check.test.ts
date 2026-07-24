@@ -324,8 +324,7 @@ describe('run_check', () => {
       expect.arrayContaining(['scripts/jest']),
       expect.anything()
     );
-    // Intentional failure to exercise the failed-test annotation issue link (throwaway demo PR, do not merge)
-    expect(mockRunJestViaMoon).not.toHaveBeenCalled();
+    expect(mockRunJestViaMoon).toHaveBeenCalled();
   });
 
   it('skips fast path for Scout test files with parallel playwright config', async () => {

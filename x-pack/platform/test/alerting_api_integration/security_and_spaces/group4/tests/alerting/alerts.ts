@@ -1060,6 +1060,11 @@ instanceStateValue: true
         });
 
         it(`shouldn't schedule actions when alert is muted`, async () => {
+          // Intentional failure for the space_1_all/space1 scenario to exercise the
+          // failed-test annotation issue link (throwaway demo PR #280527, do not merge).
+          if (scenario.id === 'space_1_all at space1') {
+            expect(true).to.eql(false);
+          }
           const testStart = new Date();
           const reference = alertUtils.generateReference();
           const response = await alertUtils.createAlwaysFiringAction({
