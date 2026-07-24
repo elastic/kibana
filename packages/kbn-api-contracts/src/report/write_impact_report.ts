@@ -9,18 +9,12 @@
 
 import { writeFileSync, mkdirSync } from 'fs';
 import { resolve } from 'path';
+import type { StabilityTier } from '../stability';
 
 /**
- * Tiers the checker acts on. Experimental breaking changes are dropped upstream
- * (in check_contracts) and never reach the report, so a reported entry is always
- * stable or tech_preview.
- */
-export type CaughtTier = 'stable' | 'tech_preview';
-
-/**
- * A single caught breaking change, tier-classified. Terraform fields are
- * ownership enrichment, present only when the change maps to a provider API;
- * they never affect whether the change is caught.
+ * A single breaking change, tier-classified. Every reported change carries its
+ * tier: stable and tech_preview gate the build, experimental is reported for
+ * visibility only. The notifier and CI log key their sections off this field.
  */
 export interface ImpactReportEntry {
   path: string;
@@ -28,10 +22,8 @@ export interface ImpactReportEntry {
   reason: string;
   oasdiffId?: string;
   source?: string;
-  tier: CaughtTier;
+  tier: StabilityTier;
   since?: string;
-  terraformResource?: string;
-  owners?: string[];
 }
 
 export interface ImpactReport {

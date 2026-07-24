@@ -10,7 +10,10 @@
 import { readFileSync, existsSync } from 'fs';
 import { upsertComment } from '#pipeline-utils';
 
-type CaughtTier = 'stable' | 'tech_preview';
+// Mirrors StabilityTier in @kbn/api-contracts. Kept as a local type because the
+// notifier only reads the JSON report and this workspace does not depend on the
+// package.
+type Tier = 'stable' | 'tech_preview' | 'experimental';
 
 export interface ImpactEntry {
   path: string;
@@ -18,10 +21,8 @@ export interface ImpactEntry {
   reason: string;
   oasdiffId?: string;
   source?: string;
-  tier: CaughtTier;
+  tier: Tier;
   since?: string;
-  terraformResource?: string;
-  owners?: string[];
 }
 
 interface ImpactReport {
@@ -30,48 +31,58 @@ interface ImpactReport {
 
 // Kept stable so CI reruns on in-flight PRs update the existing comment in place
 // rather than posting a duplicate alongside the old one.
-const COMMENT_CONTEXT = 'api-contracts-tf-breaking';
+const COMMENT_CONTEXT = 'api-contracts-breaking';
 
 const ALLOWLIST_PATH = 'packages/kbn-api-contracts/allowlist.json';
 const README_PATH = 'packages/kbn-api-contracts/README.md';
 
-const TIER_LABEL: Record<CaughtTier, string> = {
+const TIER_LABEL: Record<Tier, string> = {
   stable: 'Stable (GA)',
   tech_preview: 'Technical Preview',
+  experimental: 'Experimental',
 };
 
 const escapeCell = (text: string): string => text.replace(/\|/g, '\\|').replace(/\n/g, ' ');
 
-const renderTierSection = (tier: CaughtTier, entries: ImpactEntry[]): string => {
-  if (entries.length === 0) {
-    return '';
-  }
+const renderTable = (entries: ImpactEntry[]): string => {
   const rows = entries
     .map((e) => {
       const method = e.method ? ` \`${e.method.toUpperCase()}\`` : '';
       const oasdiffId = e.oasdiffId ? `\`${escapeCell(e.oasdiffId)}\`` : '';
       const source = e.source ? `\`${escapeCell(e.source)}\`` : '';
-      const terraform = e.terraformResource ? `\`${escapeCell(e.terraformResource)}\`` : '';
-      const owners = (e.owners || []).join(', ');
-      return `| \`${e.path}\`${method} | ${escapeCell(
-        e.reason
-      )} | ${oasdiffId} | ${source} | ${terraform} | ${owners} |`;
+      return `| \`${e.path}\`${method} | ${escapeCell(e.reason)} | ${oasdiffId} | ${source} |`;
     })
     .join('\n');
 
+  return `| Endpoint | Reason | oasdiffId | Source |
+|----------|--------|-----------|--------|
+${rows}`;
+};
+
+const renderTierSection = (tier: Tier, entries: ImpactEntry[]): string => {
+  if (entries.length === 0) {
+    return '';
+  }
   return `### ${TIER_LABEL[tier]} (${entries.length})
 
-| Endpoint | Reason | oasdiffId | Source | Terraform Resource | Owners |
-|----------|--------|-----------|--------|--------------------|--------|
-${rows}
+${renderTable(entries)}
+`;
+};
+
+const renderExperimentalSection = (entries: ImpactEntry[]): string => {
+  if (entries.length === 0) {
+    return '';
+  }
+  return `### Experimental — informational, not blocking merge (${entries.length})
+
+Experimental APIs are allowed to introduce breaking changes. These are listed for visibility only and do not fail this check.
+
+${renderTable(entries)}
 `;
 };
 
 export const buildCommentBody = (entries: ImpactEntry[]): string => {
-  const allOwners = [...new Set(entries.flatMap((e) => e.owners || []))];
-  const ownerMentions = allOwners.length > 0 ? allOwners.join(' ') : '_unknown_';
-
-  const sections = [
+  const gatingSections = [
     renderTierSection(
       'stable',
       entries.filter((e) => e.tier === 'stable')
@@ -84,11 +95,15 @@ export const buildCommentBody = (entries: ImpactEntry[]): string => {
     .filter(Boolean)
     .join('\n');
 
-  return `## API Contract Breaking Changes — Stable & Technical Preview
+  const experimentalSection = renderExperimentalSection(
+    entries.filter((e) => e.tier === 'experimental')
+  );
 
-cc ${ownerMentions}
+  const sections = [gatingSections, experimentalSection].filter(Boolean).join('\n');
 
-The following breaking change(s) were detected across the stable and Technical Preview OpenAPI surface, grouped by stability tier. Rows with a Terraform Resource also affect the [Elastic Terraform Provider](https://github.com/elastic/terraform-provider-elasticstack).
+  return `## API Contract Breaking Changes
+
+The following breaking change(s) were detected across the public OpenAPI surface, grouped by stability tier. Stable and Technical Preview changes fail the check and should be resolved; Experimental changes are informational.
 
 ${sections}
 ### What to do

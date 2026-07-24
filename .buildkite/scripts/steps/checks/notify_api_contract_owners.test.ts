@@ -18,8 +18,6 @@ const entry = (overrides: Partial<ImpactEntry> = {}): ImpactEntry => ({
   method: 'GET',
   reason: 'Endpoint removed',
   tier: 'stable',
-  terraformResource: 'elasticstack_kibana_space',
-  owners: ['@elastic/kibana-security'],
   ...overrides,
 });
 
@@ -27,12 +25,18 @@ describe('buildCommentBody', () => {
   it('renders a stable section with a tier heading and table header', () => {
     const body = buildCommentBody([entry()]);
 
-    expect(body).toContain('## API Contract Breaking Changes — Stable & Technical Preview');
+    expect(body).toContain('## API Contract Breaking Changes');
     expect(body).toContain('### Stable (GA) (1)');
-    expect(body).toContain(
-      '| Endpoint | Reason | oasdiffId | Source | Terraform Resource | Owners |'
-    );
+    expect(body).toContain('| Endpoint | Reason | oasdiffId | Source |');
     expect(body).toContain('| `/api/spaces/space` `GET` |');
+  });
+
+  it('does not mention Terraform or cc owning teams', () => {
+    const body = buildCommentBody([entry()]);
+
+    expect(body).not.toMatch(/terraform/i);
+    expect(body).not.toContain('cc ');
+    expect(body).not.toContain('Owners');
   });
 
   it('groups changes into separate stable and tech_preview sections', () => {
@@ -54,34 +58,25 @@ describe('buildCommentBody', () => {
     expect(body).not.toContain('### Stable (GA)');
   });
 
-  it('flags a change that also affects the Terraform provider', () => {
+  it('renders experimental changes in a clearly non-blocking section after the gating tiers', () => {
     const body = buildCommentBody([
-      entry({
-        terraformResource: 'elasticstack_kibana_space',
-        owners: ['@elastic/kibana-security'],
-      }),
+      entry({ path: '/api/spaces/space', tier: 'stable' }),
+      entry({ path: '/api/exp', tier: 'experimental' }),
     ]);
 
-    expect(body).toContain('`elasticstack_kibana_space`');
-    expect(body).toContain('@elastic/kibana-security');
+    expect(body).toContain('### Experimental — informational, not blocking merge (1)');
+    expect(body).toContain('do not fail this check');
+    expect(body).toContain('| `/api/exp` `GET` |');
+    // gating tier rendered before the experimental section
+    expect(body.indexOf('### Stable (GA)')).toBeLessThan(body.indexOf('### Experimental'));
   });
 
-  it('leaves the Terraform cell empty when the change maps to no provider API', () => {
-    const body = buildCommentBody([entry({ terraformResource: undefined, owners: undefined })]);
-    const dataRow = body.split('\n').find((l) => l.includes('`/api/spaces/space`'))!;
+  it('posts an experimental-only comment with no gating section', () => {
+    const body = buildCommentBody([entry({ path: '/api/exp', tier: 'experimental' })]);
 
-    // trailing "| <terraform> | <owners> |" both empty
-    expect(dataRow).toMatch(/\|\s*\|\s*\|$/);
-  });
-
-  it('ccs deduplicated owners and falls back to _unknown_ when none', () => {
-    expect(
-      buildCommentBody([
-        entry({ owners: ['@elastic/fleet'] }),
-        entry({ path: '/api/fleet/agent_policies', method: 'POST', owners: ['@elastic/fleet'] }),
-      ])
-    ).toContain('cc @elastic/fleet\n');
-    expect(buildCommentBody([entry({ owners: undefined })])).toContain('cc _unknown_');
+    expect(body).toContain('### Experimental — informational, not blocking merge (1)');
+    expect(body).not.toContain('### Stable (GA)');
+    expect(body).not.toContain('### Technical Preview');
   });
 
   it('escapes pipe characters and newlines in the reason field', () => {

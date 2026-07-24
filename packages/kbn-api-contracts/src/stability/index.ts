@@ -8,5 +8,7 @@
  */
 
 export { parseXState } from './parse_x_state';
-export type { ParseXStateResult } from './parse_x_state';
+export type { ParseXStateResult, StabilityTier } from './parse_x_state';
 export { resolveTier } from './resolve_tier';
+export { isGatingTier } from './tiers';
+export type { GatingTier } from './tiers';

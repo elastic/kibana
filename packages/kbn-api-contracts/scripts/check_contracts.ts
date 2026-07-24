@@ -24,8 +24,7 @@ import { formatFailure } from '../src/report/format_failure';
 import { writeImpactReport } from '../src/report/write_impact_report';
 import type { ImpactReportEntry } from '../src/report/write_impact_report';
 import { loadAllowlist } from '../src/allowlist/load_allowlist';
-import { checkTerraformImpact } from '../src/terraform/check_terraform_impact';
-import { resolveTier } from '../src/stability';
+import { resolveTier, isGatingTier } from '../src/stability';
 
 type Distribution = 'stack' | 'serverless';
 
@@ -37,7 +36,6 @@ interface CheckContractsOptions {
   baseBranch: string;
   mergeBase?: string;
   allowlistPath?: string;
-  terraformApisPath?: string;
   reportPath?: string;
 }
 
@@ -163,7 +161,6 @@ run(
       baseBranch: (flags.baseBranch as string) || 'main',
       mergeBase: (flags.mergeBase as string) || undefined,
       allowlistPath: (flags.allowlistPath as string) || undefined,
-      terraformApisPath: (flags.terraformApisPath as string) || undefined,
       reportPath: (flags.reportPath as string) || undefined,
     };
 
@@ -242,22 +239,11 @@ run(
       // Tier from the base spec (the API as it existed before the break).
       const baseOas = await loadOas(basePath);
 
-      // Terraform impact is ownership enrichment, never a gate: attach the owning
-      // resource and owners to changes that map to a provider API.
-      const terraformImpact = checkTerraformImpact(breakingChanges, opts.terraformApisPath);
-      const ownershipByChange = new Map(
-        terraformImpact.impactedChanges.map((impact) => [impact.change, impact])
-      );
-
-      // Only stable and tech_preview breaking changes are caught. Experimental are
-      // excluded entirely: not reported, not counted.
-      const entries: ImpactReportEntry[] = [];
-      for (const change of breakingChanges) {
+      // Classify every breaking change by tier. All tiers are reported so the PR
+      // notifier can surface experimental breaks as an informational section, but
+      // only stable and tech_preview gate: experimental APIs are allowed to break.
+      const entries: ImpactReportEntry[] = breakingChanges.map((change) => {
         const { tier, since } = resolveTier(baseOas, change);
-        if (tier === 'experimental') {
-          continue;
-        }
-        const ownership = ownershipByChange.get(change);
         const entry: ImpactReportEntry = {
           path: change.path,
           method: change.method,
@@ -269,34 +255,33 @@ run(
         if (since !== undefined) {
           entry.since = since;
         }
-        if (ownership) {
-          entry.terraformResource = ownership.terraformResource;
-          entry.owners = ownership.owners;
-        }
-        entries.push(entry);
-      }
+        return entry;
+      });
 
       if (opts.reportPath) {
         writeImpactReport(opts.reportPath, { entries });
         log.info(`Impact report written to ${opts.reportPath}`);
       }
 
-      const experimentalCount = breakingChanges.length - entries.length;
+      const gatingEntries = entries.filter((entry) => isGatingTier(entry.tier));
+      const experimentalCount = entries.length - gatingEntries.length;
       if (experimentalCount > 0) {
-        log.info(`${experimentalCount} experimental-tier breaking change(s) excluded`);
+        log.info(
+          `${experimentalCount} experimental-tier breaking change(s) reported (informational, not blocking)`
+        );
       }
 
-      if (entries.length === 0) {
+      if (gatingEntries.length === 0) {
         log.success('No breaking changes detected in stable or tech_preview APIs');
         return;
       }
 
-      const stableCount = entries.filter((e) => e.tier === 'stable').length;
-      const techPreviewCount = entries.length - stableCount;
+      const stableCount = gatingEntries.filter((entry) => entry.tier === 'stable').length;
+      const techPreviewCount = gatingEntries.length - stableCount;
 
       log.error(formatFailure(entries));
       throw new Error(
-        `Caught ${entries.length} breaking change(s) in stable/tech_preview APIs: ` +
+        `Caught ${gatingEntries.length} breaking change(s) in stable/tech_preview APIs: ` +
           `${stableCount} stable, ${techPreviewCount} tech_preview`
       );
     } finally {
@@ -313,7 +298,6 @@ run(
         'baseBranch',
         'mergeBase',
         'allowlistPath',
-        'terraformApisPath',
         'reportPath',
       ],
       help: `
@@ -322,7 +306,6 @@ run(
         --baseBranch         Base branch to compare against (default: main)
         --mergeBase          Merge base commit SHA (used in CI, skips remote resolution)
         --allowlistPath      Override allowlist path (default: packages/kbn-api-contracts/allowlist.json)
-        --terraformApisPath  Override Terraform provider APIs config path (ownership enrichment only)
         --reportPath         Write a JSON impact report to this path (used by CI for PR notifications)
 
         Examples:

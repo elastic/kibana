@@ -22,15 +22,15 @@ const techPreviewEntry = (
   reason = 'HTTP method removed'
 ): ImpactReportEntry => ({ path, method, reason, tier: 'tech_preview' });
 
+const experimentalEntry = (path: string, reason = 'Endpoint removed'): ImpactReportEntry => ({
+  path,
+  reason,
+  tier: 'experimental',
+});
+
 const expectOutputContains = (output: string, ...substrings: string[]) => {
   substrings.forEach((substring) => {
     expect(output).toContain(substring);
-  });
-};
-
-const expectOutputNotContains = (output: string, ...substrings: string[]) => {
-  substrings.forEach((substring) => {
-    expect(output).not.toContain(substring);
   });
 };
 
@@ -66,29 +66,23 @@ describe('formatFailure', () => {
     expect(output.indexOf('/api/old')).toBeLessThan(output.indexOf('/api/preview'));
   });
 
-  it('flags a change that also affects a Terraform provider API', () => {
-    const output = formatFailure([
-      {
-        path: '/api/spaces/space',
-        reason: 'Endpoint removed',
-        tier: 'stable',
-        terraformResource: 'elasticstack_kibana_space',
-        owners: ['@elastic/kibana-security'],
-      },
-    ]);
+  it('lists experimental changes in a non-blocking section and excludes them from the count', () => {
+    const output = formatFailure([stableEntry('/api/old'), experimentalEntry('/api/exp')]);
 
     expectOutputContains(
       output,
-      'elasticstack_kibana_space',
-      'also affects the Terraform provider',
-      'Owners: @elastic/kibana-security'
+      // count reflects only the gating (stable/tech_preview) change
+      'Caught 1 breaking change(s) in stable/tech_preview APIs (1 stable, 0 tech_preview)',
+      'Informational — not blocking merge',
+      'Tier: Experimental',
+      '/api/exp'
     );
   });
 
-  it('omits Terraform details when the change maps to no provider API', () => {
-    const output = formatFailure([stableEntry('/api/test')]);
+  it('omits the informational section when there are no experimental changes', () => {
+    const output = formatFailure([stableEntry('/api/old')]);
 
-    expectOutputNotContains(output, 'Terraform Resource', 'also affects the Terraform provider');
+    expect(output).not.toContain('Informational — not blocking merge');
   });
 
   it('produces deterministic output for the same input', () => {

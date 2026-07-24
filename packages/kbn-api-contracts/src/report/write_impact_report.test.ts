@@ -47,7 +47,7 @@ describe('writeImpactReport', () => {
     expect(written.entries).toEqual([]);
   });
 
-  it('preserves optional since and Terraform enrichment fields', () => {
+  it('preserves the optional since field', () => {
     const report: ImpactReport = {
       entries: [
         {
@@ -56,8 +56,6 @@ describe('writeImpactReport', () => {
           reason: 'HTTP method removed',
           tier: 'tech_preview',
           since: '9.1',
-          terraformResource: 'elasticstack_fleet_agent_policy',
-          owners: ['@elastic/fleet'],
         },
       ],
     };

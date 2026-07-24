@@ -7,43 +7,72 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-type XStateTier = 'stable' | 'tech_preview' | 'experimental';
+/**
+ * The stability tiers an API can declare. Mirrors the `stability` enum in the
+ * platform route contract (route.ts) and the input to `getXState`; kept in sync
+ * by the compile-time guard in ./tiers.
+ */
+export type StabilityTier = 'stable' | 'tech_preview' | 'experimental';
 
 export interface ParseXStateResult {
-  tier: XStateTier;
+  tier: StabilityTier;
   since?: string;
 }
 
-const SINCE_SEPARATOR = '; added in ';
-const BARE_SINCE_PREFIX = 'Added in ';
+// `getXState` appends "; added in <version>" for a non-serverless route that has
+// a `since`, and emits a bare "Added in <version>" when the stability label is
+// empty. Both matchers are case-insensitive and whitespace-tolerant so the
+// hand-written variants observed in the bundled specs ("; Added in", "added in")
+// parse identically to the generated form. The version is captured verbatim.
+const SINCE_WITH_LABEL = /;\s*added in\s+(.+)$/i;
+const BARE_SINCE = /^added in\s+(.+)$/i;
 
 /**
  * Parse an OpenAPI `x-state` string into a stability tier (and optional `since`).
- * Inverse of `getXState` in @kbn/router-to-openapispec (src/util.ts), which writes
- * these strings. Unrecognized, empty, or missing input is treated as `stable`
- * (most conservative), so an unknown state is never under-classified.
+ *
+ * The stability label mirrors `getXState` in @kbn/router-to-openapispec
+ * ("Generally available" / "Technical Preview" / "Experimental"), but the check
+ * runs against the bundled OAS, which includes hand-written specs. Those deviate
+ * only in casing and spacing of the same nomenclature (e.g. "Technical preview",
+ * "added in 9.5.0"), never in mechanism, so labels are compared case-insensitively
+ * rather than coupled to `getXState`'s exact output.
+ *
+ * Two tests guard the two sources, and they are complementary, not redundant: a
+ * round-trip test asserts this parser decodes `getXState`'s output for every tier
+ * (so generator drift fails loudly), and a data-driven test asserts it decodes the
+ * real distinct `x-state` strings observed in the bundled specs (so hand-written
+ * variance stays covered). Coupling classification to `getXState` would break the
+ * hand-written half; hence the tolerant parser.
+ *
+ * Unrecognized, empty, or missing input is treated as `stable` (the most
+ * conservative tier and the platform default in route.ts), so an unknown state is
+ * never under-classified into experimental where a breaking change would be
+ * silently allowed.
  */
 export const parseXState = (xState: string | undefined): ParseXStateResult => {
-  if (!xState) {
+  if (!xState || !xState.trim()) {
     return { tier: 'stable' };
   }
 
-  if (xState.startsWith(BARE_SINCE_PREFIX)) {
-    return { tier: 'stable', since: xState.slice(BARE_SINCE_PREFIX.length) };
+  // A bare "Added in <version>" carries no stability label, so it is stable.
+  const bareMatch = BARE_SINCE.exec(xState);
+  if (bareMatch) {
+    return { tier: 'stable', since: bareMatch[1].trim() };
   }
 
   let label = xState;
   let since: string | undefined;
-  const separatorIdx = xState.indexOf(SINCE_SEPARATOR);
-  if (separatorIdx !== -1) {
-    label = xState.slice(0, separatorIdx);
-    since = xState.slice(separatorIdx + SINCE_SEPARATOR.length);
+  const sinceMatch = SINCE_WITH_LABEL.exec(xState);
+  if (sinceMatch) {
+    label = xState.slice(0, sinceMatch.index);
+    since = sinceMatch[1].trim();
   }
 
-  let tier: XStateTier = 'stable';
-  if (label === 'Technical Preview') {
+  const normalized = label.trim().toLowerCase();
+  let tier: StabilityTier = 'stable';
+  if (normalized === 'technical preview') {
     tier = 'tech_preview';
-  } else if (label === 'Experimental') {
+  } else if (normalized === 'experimental') {
     tier = 'experimental';
   }
 

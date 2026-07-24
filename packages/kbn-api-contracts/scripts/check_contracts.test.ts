@@ -42,10 +42,6 @@ jest.mock('../src/input/load_oas', () => ({
   }),
 }));
 
-jest.mock('../src/terraform/check_terraform_impact', () => ({
-  checkTerraformImpact: jest.fn(),
-}));
-
 jest.mock('../src/allowlist/load_allowlist', () => ({
   loadAllowlist: jest.fn(),
 }));
@@ -63,7 +59,6 @@ import { writeFileSync, rmSync } from 'fs';
 import { runOasdiff, runOasdiffStructural, parseOasdiff, applyAllowlist } from '../src/diff';
 import type { BreakingChange } from '../src/diff';
 import { loadOas } from '../src/input/load_oas';
-import { checkTerraformImpact } from '../src/terraform/check_terraform_impact';
 import { loadAllowlist } from '../src/allowlist/load_allowlist';
 import { formatFailure } from '../src/report/format_failure';
 
@@ -76,9 +71,6 @@ const mockRunOasdiffStructural = runOasdiffStructural as jest.MockedFunction<
 >;
 const mockParseOasdiff = parseOasdiff as jest.MockedFunction<typeof parseOasdiff>;
 const mockLoadOas = loadOas as jest.MockedFunction<typeof loadOas>;
-const mockCheckTerraformImpact = checkTerraformImpact as jest.MockedFunction<
-  typeof checkTerraformImpact
->;
 const mockLoadAllowlist = loadAllowlist as jest.MockedFunction<typeof loadAllowlist>;
 const mockApplyAllowlist = applyAllowlist as jest.MockedFunction<typeof applyAllowlist>;
 const mockFormatFailure = formatFailure as jest.MockedFunction<typeof formatFailure>;
@@ -114,14 +106,13 @@ describe('check_contracts', () => {
       paths: {},
       components: { schemas: {} },
     });
-    // Whole-surface defaults: allowlist passes everything through, no Terraform
-    // impact, and formatFailure is a stub. Individual tests override as needed.
+    // Whole-surface defaults: allowlist passes everything through and
+    // formatFailure is a stub. Individual tests override as needed.
     mockLoadAllowlist.mockReturnValue({ entries: [] });
     mockApplyAllowlist.mockImplementation((changes) => ({
       breakingChanges: changes,
       allowlistedChanges: [],
     }));
-    mockCheckTerraformImpact.mockReturnValue({ hasImpact: false, impactedChanges: [] });
     mockFormatFailure.mockReturnValue('FAILURE REPORT');
   });
 
@@ -495,7 +486,7 @@ describe('check_contracts', () => {
       );
     });
 
-    it('excludes an experimental breaking change from the report and the exit code', async () => {
+    it('reports an experimental breaking change but does not gate on it', async () => {
       mockParseOasdiff.mockReturnValue([experimentalChange]);
       primeLoadOas(baseSpec({ '/api/exp': { post: { 'x-state': 'Experimental' } } }));
 
@@ -504,19 +495,32 @@ describe('check_contracts', () => {
         log: mockLog,
       });
 
-      expect(mockLog.info).toHaveBeenCalledWith('1 experimental-tier breaking change(s) excluded');
+      expect(mockLog.info).toHaveBeenCalledWith(
+        '1 experimental-tier breaking change(s) reported (informational, not blocking)'
+      );
       expect(mockLog.success).toHaveBeenCalledWith(
         'No breaking changes detected in stable or tech_preview APIs'
       );
 
+      // The experimental change is still written to the report so the PR notifier
+      // can surface it as informational; it just does not fail the check.
       const reportCall = mockWriteFileSync.mock.calls.find(([path]) =>
         String(path).endsWith('stack-impact.json')
       );
       expect(reportCall).toBeDefined();
-      expect(JSON.parse(reportCall![1] as string)).toEqual({ entries: [] });
+      expect(JSON.parse(reportCall![1] as string)).toEqual({
+        entries: [
+          {
+            path: '/api/exp',
+            method: 'POST',
+            reason: 'experimental break',
+            tier: 'experimental',
+          },
+        ],
+      });
     });
 
-    it('catches stable and tech_preview while excluding experimental in a mixed run', async () => {
+    it('gates on stable and tech_preview while reporting experimental in a mixed run', async () => {
       mockParseOasdiff.mockReturnValue([stableChange, techPreviewChange, experimentalChange]);
       primeLoadOas(
         baseSpec({
@@ -529,22 +533,14 @@ describe('check_contracts', () => {
       await expect(runCallback({ flags: defaultFlags, log: mockLog })).rejects.toThrow(
         'Caught 2 breaking change(s) in stable/tech_preview APIs: 1 stable, 1 tech_preview'
       );
-      expect(mockLog.info).toHaveBeenCalledWith('1 experimental-tier breaking change(s) excluded');
+      expect(mockLog.info).toHaveBeenCalledWith(
+        '1 experimental-tier breaking change(s) reported (informational, not blocking)'
+      );
     });
 
-    it('writes a tier report with Terraform ownership enrichment when reportPath is set', async () => {
+    it('writes a tier-classified report when reportPath is set', async () => {
       mockParseOasdiff.mockReturnValue([stableChange]);
       primeLoadOas(baseSpec({ '/api/x': { post: { 'x-state': 'Generally available' } } }));
-      mockCheckTerraformImpact.mockReturnValue({
-        hasImpact: true,
-        impactedChanges: [
-          {
-            change: stableChange,
-            terraformResource: 'elasticstack_kibana_space',
-            owners: ['@elastic/kibana-security'],
-          },
-        ],
-      });
 
       await expect(
         runCallback({
@@ -564,8 +560,6 @@ describe('check_contracts', () => {
             method: 'POST',
             reason: 'stable break',
             tier: 'stable',
-            terraformResource: 'elasticstack_kibana_space',
-            owners: ['@elastic/kibana-security'],
           },
         ],
       });
@@ -625,15 +619,6 @@ describe('check_contracts', () => {
         allowlistedChanges: [],
       }));
 
-      mockCheckTerraformImpact.mockImplementation((changes) => ({
-        hasImpact: changes.length > 0,
-        impactedChanges: changes.map((change) => ({
-          change,
-          terraformResource: 'elasticstack_kibana_data_view',
-          owners: ['@elastic/kibana-data-discovery'],
-        })),
-      }));
-
       await expect(runCallback({ flags: defaultFlags, log: mockLog })).rejects.toThrow(
         'Caught 1 breaking change(s) in stable/tech_preview APIs: 1 stable, 0 tech_preview'
       );
@@ -649,8 +634,6 @@ describe('check_contracts', () => {
           oasdiffId: 'kbn:request-additional-properties-tightened',
           source: `/components/schemas/${componentName}`,
           tier: 'stable',
-          terraformResource: 'elasticstack_kibana_data_view',
-          owners: ['@elastic/kibana-data-discovery'],
         },
       ]);
     });
