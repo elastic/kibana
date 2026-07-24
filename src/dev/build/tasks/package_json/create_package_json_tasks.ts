@@ -17,23 +17,24 @@ export const CreatePackageJson: Task = {
 
   async run(config, log, build) {
     const plugins = config.getDistPluginsFromRepo() as PluginPackage[];
-    const distPkgIds = new Set(config.getDistPackagesFromRepo().map((p) => p.id));
+    const distPackages = config.getDistPackagesFromRepo();
+    const distPkgIds = new Set(distPackages.map((p) => p.id));
+    const distPkgDirById = new Map(distPackages.map((p) => [p.id, p.normalizedRepoRelativeDir]));
     const pkg = config.getKibanaPkg();
 
     /**
-     * Replaces `link:` dependencies with `file:` dependencies. When installing
-     * dependencies, these `file:` dependencies will be copied into `node_modules`
-     * instead of being symlinked.
-     *
-     * This will allow us to copy packages into the build and run `yarn`, which
-     * will then _copy_ the `file:` dependencies into `node_modules` instead of
+     * Replaces `workspace:*` dependencies with `file:` dependencies pointing at the
+     * package's directory (copied into the build). When installing dependencies,
+     * pnpm copies these `file:` dependencies into `node_modules` instead of
      * symlinking like we do in development.
-     *
      */
     const transformedDeps = Object.fromEntries(
       Object.entries({ ...pkg.dependencies, ...pkg.devDependencies })
         .filter(([id]) => !id.startsWith('@kbn/') || distPkgIds.has(id))
-        .map(([name, version]) => [name, version.replace(/^link:/, 'file:')])
+        .map(([name, version]) => {
+          const dir = distPkgDirById.get(name);
+          return [name, dir ? `file:${dir}` : version];
+        })
     );
 
     const newPkg = {
@@ -54,7 +55,7 @@ export const CreatePackageJson: Task = {
       engines: {
         node: pkg.engines?.node,
       },
-      resolutions: pkg.resolutions,
+      pnpm: pkg.pnpm,
       dependencies: {
         // include dependencies which are explicitly used
         ...(await findUsedDependencies(transformedDeps, build.resolvePath('.'), plugins)),
@@ -78,7 +79,7 @@ export const RemovePackageJsonDeps: Task = {
 
     delete pkg.dependencies;
     delete pkg.private;
-    delete pkg.resolutions;
+    delete pkg.pnpm;
 
     await write(build.resolvePath('package.json'), JSON.stringify(pkg, null, '  '));
   },

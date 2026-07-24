@@ -34,7 +34,7 @@ const buildStorybook = (storybook: string): Promise<{ logs: string }> => {
       logsBuffer.push(chunk.toString());
     };
 
-    const child = spawn('yarn', ['storybook', '--site', storybook], {
+    const child = spawn('pnpm', ['storybook', '--site', storybook], {
       stdio: 'pipe',
       env: {
         ...process.env,

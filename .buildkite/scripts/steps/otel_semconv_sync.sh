@@ -68,7 +68,7 @@ generate_typescript() {
 
   # Run ESLint fix
   echo "--- Running ESLint fix"
-  yarn lint:es --fix "$OTEL_PACKAGE_DIR/src/generated/" || true
+  pnpm lint:es --fix "$OTEL_PACKAGE_DIR/src/generated/" || true
 }
 
 create_pull_request() {

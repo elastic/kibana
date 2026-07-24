@@ -32,7 +32,7 @@ export const CleanPackageManagerRelatedFiles: Task = {
   description: 'Cleaning package manager related files from the build folder',
 
   async run(config, log, build) {
-    await deleteAll([build.resolvePath('yarn.lock'), build.resolvePath('.npmrc')], log);
+    await deleteAll([build.resolvePath('pnpm-lock.yaml'), build.resolvePath('.npmrc')], log);
   },
 };
 
@@ -164,6 +164,7 @@ export const CleanExtraFilesFromModules: Task = {
           '**/component.json',
           '**/bower.json',
           '**/yarn.lock',
+          '**/pnpm-lock.yaml',
 
           // nested package manager artifacts (e.g. pnpm virtual store leaked into published packages)
           '**/.pnpm',

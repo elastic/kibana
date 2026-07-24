@@ -13,12 +13,12 @@ import fs from 'fs/promises';
 
 import { run } from '@kbn/dev-cli-runner';
 import { REPO_ROOT } from '@kbn/repo-info';
-import type { PackageInfo } from './yarn_lock_v1';
-import { parseYarnLock } from './yarn_lock_v1';
+
+import { parsePnpmLock, type PnpmLockGraph } from './pnpm_lock';
 
 const options: RunOptions = {
   description:
-    'Extracts declared dependency versions from a Yarn v1 lockfile into a versions file.\n' +
+    'Extracts declared dependency versions from the pnpm-lock.yaml file into a versions file.\n' +
     'This can be useful to set up Moon task dependencies on package versions used in the repo.',
   flags: {
     string: ['collect'],
@@ -50,18 +50,18 @@ async function collectDependenciesAndWriteFile(
   { transitive }: { transitive: boolean }
 ) {
   const rootPackageJson = path.join(REPO_ROOT, 'package.json');
-  const yarnLockPath = path.join(REPO_ROOT, 'yarn.lock');
+  const pnpmLockPath = path.join(REPO_ROOT, 'pnpm-lock.yaml');
 
-  const [packageJsonContent, yarnLockContent] = await Promise.all([
+  const [packageJsonContent, pnpmLockContent] = await Promise.all([
     fs.readFile(rootPackageJson, 'utf-8'),
-    fs.readFile(yarnLockPath, 'utf-8'),
+    fs.readFile(pnpmLockPath, 'utf-8'),
   ]);
 
   const outputLines = collectDependencyVersionLines({
     dependencies,
     rootPackageJsonContent: packageJsonContent,
     transitive,
-    yarnLockContent,
+    pnpmLockContent,
   });
 
   await fs.writeFile(outputFilePath, outputLines.join('\n') + '\n', 'utf-8');
@@ -71,98 +71,63 @@ export const collectDependencyVersionLines = ({
   dependencies,
   rootPackageJsonContent,
   transitive,
-  yarnLockContent,
+  pnpmLockContent,
 }: {
   dependencies: string[];
   rootPackageJsonContent: string;
   transitive: boolean;
-  yarnLockContent: string;
+  pnpmLockContent: string;
 }) => {
   const pkgJson = JSON.parse(rootPackageJsonContent);
-  const yarnLockEntries = Object.values(parseYarnLock(yarnLockContent));
-  const requestedVersionIndex = createRequestedVersionIndex(yarnLockEntries);
+  const graph = parsePnpmLock(pnpmLockContent);
 
   const allRequestedDependencies = {
     ...pkgJson.devDependencies,
     ...pkgJson.dependencies,
   };
 
-  const rootDependencies = resolveRootDependencies(
-    dependencies,
-    requestedVersionIndex,
-    allRequestedDependencies
-  );
+  const rootKeys = resolveRootDependencies(dependencies, graph, allRequestedDependencies);
 
-  const resolvedDependencyKeys = transitive
-    ? collectTransitiveDependencies(rootDependencies, requestedVersionIndex)
-    : new Set(rootDependencies.map((pkg) => `${pkg.name}@${pkg.resolvedVersion}`));
+  const resolvedKeys = transitive
+    ? collectTransitiveDependencies(rootKeys, graph)
+    : new Set(rootKeys);
 
-  return Array.from(resolvedDependencyKeys).sort((a, b) => a.localeCompare(b));
-};
-
-const createRequestedVersionIndex = (packages: PackageInfo[]) => {
-  const index = new Map<string, PackageInfo>();
-
-  for (const pkg of packages) {
-    for (const requestedVersion of pkg.requestedVersions) {
-      index.set(`${pkg.name}@${requestedVersion}`, pkg);
-    }
-  }
-
-  return index;
-};
-
-const resolveDependency = (
-  dependencyName: string,
-  requestedVersion: string,
-  requestedVersionIndex: Map<string, PackageInfo>
-) => {
-  const pkg = requestedVersionIndex.get(`${dependencyName}@${requestedVersion}`);
-
-  if (!pkg?.resolvedVersion) {
-    throw new Error(
-      `Unable to resolve ${dependencyName}@${requestedVersion} from yarn.lock dependency graph`
-    );
-  }
-
-  return pkg;
+  return Array.from(resolvedKeys).sort((a, b) => a.localeCompare(b));
 };
 
 const resolveRootDependencies = (
   dependencies: string[],
-  requestedVersionIndex: Map<string, PackageInfo>,
+  graph: PnpmLockGraph,
   allRequestedDependencies: Record<string, string>
 ) => {
   return dependencies.map((dependencyName) => {
-    const declaredVersion = allRequestedDependencies[dependencyName];
-
-    if (!declaredVersion) {
+    if (!(dependencyName in allRequestedDependencies)) {
       throw new Error(`Unable to find ${dependencyName} in the root package.json dependency list`);
     }
 
-    return resolveDependency(dependencyName, declaredVersion, requestedVersionIndex);
+    const version = graph.rootVersions.get(dependencyName);
+    if (!version) {
+      throw new Error(
+        `Unable to resolve ${dependencyName} from the pnpm-lock.yaml dependency graph`
+      );
+    }
+    return `${dependencyName}@${version}`;
   });
 };
 
-const collectTransitiveDependencies = (
-  rootDependencies: PackageInfo[],
-  requestedVersionIndex: Map<string, PackageInfo>
-) => {
+const collectTransitiveDependencies = (rootKeys: string[], graph: PnpmLockGraph) => {
   const visited = new Set<string>();
-  const queue = [...rootDependencies];
+  const queue = [...rootKeys];
 
   while (queue.length > 0) {
-    const pkg = queue.shift()!;
-    const packageKey = `${pkg.name}@${pkg.resolvedVersion}`;
-
-    if (visited.has(packageKey)) {
+    const key = queue.shift()!;
+    if (visited.has(key)) {
       continue;
     }
+    visited.add(key);
 
-    visited.add(packageKey);
-
-    for (const [dependencyName, requestedVersion] of Object.entries(pkg.dependencies ?? {})) {
-      queue.push(resolveDependency(dependencyName, requestedVersion, requestedVersionIndex));
+    for (const childKey of graph.edges.get(key) ?? []) {
+      queue.push(childKey);
     }
   }
 

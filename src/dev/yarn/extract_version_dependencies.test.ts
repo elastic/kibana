@@ -15,35 +15,54 @@ describe('collectDependencyVersionLines', () => {
       alpha: '^1.0.0',
       gamma: '^3.0.0',
     },
+    devDependencies: {
+      delta: '^4.0.0',
+    },
   });
 
-  const yarnLockContent = `
-alpha@^1.0.0:
-  version "1.0.1"
-  dependencies:
-    beta "^1.0.0"
-    optional-child "^1.0.0"
+  const pnpmLockContent = `
+lockfileVersion: '9.0'
 
-beta@^1.0.0:
-  version "1.1.0"
-  dependencies:
-    shared "^1.0.0"
+importers:
 
-optional-child@^1.0.0:
-  version "1.0.2"
-  optionalDependencies:
-    shared "^2.0.0"
+  .:
+    dependencies:
+      alpha:
+        specifier: ^1.0.0
+        version: 1.0.1
+      gamma:
+        specifier: ^3.0.0
+        version: 3.0.0
+    devDependencies:
+      delta:
+        specifier: ^4.0.0
+        version: 4.0.0
 
-gamma@^3.0.0:
-  version "3.0.0"
-  dependencies:
-    shared "^2.0.0"
+snapshots:
 
-shared@^1.0.0:
-  version "1.2.0"
+  alpha@1.0.1:
+    dependencies:
+      beta: 1.1.0
+    optionalDependencies:
+      optional-child: 1.0.2
 
-shared@^2.0.0:
-  version "2.3.0"
+  beta@1.1.0:
+    dependencies:
+      shared: 1.2.0
+
+  optional-child@1.0.2:
+    optionalDependencies:
+      shared: 2.3.0
+
+  gamma@3.0.0:
+    dependencies:
+      shared: 2.3.0
+
+  delta@4.0.0: {}
+
+  shared@1.2.0: {}
+
+  shared@2.3.0: {}
 `;
 
   it('returns direct resolved dependency versions when transitive is false', () => {
@@ -52,7 +71,7 @@ shared@^2.0.0:
         dependencies: ['alpha', 'gamma'],
         rootPackageJsonContent,
         transitive: false,
-        yarnLockContent,
+        pnpmLockContent,
       })
     ).toEqual(['alpha@1.0.1', 'gamma@3.0.0']);
   });
@@ -63,7 +82,7 @@ shared@^2.0.0:
         dependencies: ['alpha'],
         rootPackageJsonContent,
         transitive: true,
-        yarnLockContent,
+        pnpmLockContent,
       })
     ).toEqual([
       'alpha@1.0.1',
@@ -80,7 +99,7 @@ shared@^2.0.0:
         dependencies: ['alpha', 'gamma'],
         rootPackageJsonContent,
         transitive: true,
-        yarnLockContent,
+        pnpmLockContent,
       })
     ).toEqual([
       'alpha@1.0.1',
@@ -92,13 +111,24 @@ shared@^2.0.0:
     ]);
   });
 
+  it('resolves devDependencies from the root importer', () => {
+    expect(
+      collectDependencyVersionLines({
+        dependencies: ['delta'],
+        rootPackageJsonContent,
+        transitive: false,
+        pnpmLockContent,
+      })
+    ).toEqual(['delta@4.0.0']);
+  });
+
   it('throws when a requested root dependency is not declared in package.json', () => {
     expect(() =>
       collectDependencyVersionLines({
         dependencies: ['missing'],
         rootPackageJsonContent,
         transitive: true,
-        yarnLockContent,
+        pnpmLockContent,
       })
     ).toThrowErrorMatchingInlineSnapshot(
       `"Unable to find missing in the root package.json dependency list"`

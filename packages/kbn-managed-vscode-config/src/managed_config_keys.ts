@@ -26,7 +26,7 @@ export const MANAGED_CONFIG_KEYS: ManagedConfigKey[] = [
       ['**/.chromium']: true,
       ['**/.es']: true,
       ['**/.eslintcache']: true,
-      ['**/.yarn-local-mirror']: true,
+      ['**/.pnpm-store']: true,
       ['**/*.log']: true,
       ['**/api_docs']: true,
       ['**/bazel-*']: true,

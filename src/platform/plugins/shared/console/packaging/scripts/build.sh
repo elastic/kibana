@@ -50,7 +50,7 @@ cd "$CONSOLE_PACKAGING_DIR"
 # ./generate_console_definitions.sh
 
 echo "Building JavaScript and CSS..."
-cd "$KIBANA_ROOT" && NODE_ENV=production BUILD_OUTPUT_DIR="$OUTPUT_DIR" yarn webpack --config src/platform/plugins/shared/console/packaging/webpack.config.js
+cd "$KIBANA_ROOT" && NODE_ENV=production BUILD_OUTPUT_DIR="$OUTPUT_DIR" pnpm exec webpack --config src/platform/plugins/shared/console/packaging/webpack.config.js
 cd "$CONSOLE_PACKAGING_DIR"
 
 echo "Build react TS definitions..."

@@ -51,6 +51,21 @@ export function getSharedResolveConfig(repoRoot: string): Configuration['resolve
 }
 
 /**
+ * Shared resolve-time module replacements applied to every RSPack build.
+ *
+ * vega-tooltip's `exports` lists "types" first, and `resolve.tsConfig` makes rspack's
+ * resolver honor the "types" condition, so the bare import resolves to its `.d.ts`
+ * (which the JS parser then chokes on). `resolve.alias` doesn't help because the
+ * tsConfig resolver wins inside the resolve pipeline, so rewrite the request to the
+ * JS build entry before resolution.
+ */
+export function getSharedResolvePlugins(): RspackPluginInstance[] {
+  return [
+    new rspack.NormalModuleReplacementPlugin(/^vega-tooltip$/, require.resolve('vega-tooltip')),
+  ];
+}
+
+/**
  * Shared resolve.fallback for Node.js built-ins.
  * These modules don't exist in browser and should be empty/false.
  */

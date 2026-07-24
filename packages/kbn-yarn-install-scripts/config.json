@@ -145,6 +145,12 @@
       "reason": "Builds native for @swc/core, used by proxy at src/dev/build to optimize assets.  Prebuilds are sufficient."
     },
     {
+      "path": "@scarf/scarf",
+      "lifecycle": "postinstall",
+      "required": false,
+      "reason": "Sends anonymous install analytics. Not needed."
+    },
+    {
       "path": "@mongodb-js/zstd",
       "lifecycle": "install",
       "required": false,

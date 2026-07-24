@@ -20,7 +20,13 @@ export const CopyLegacySource: Task = {
 
   async run(config, log) {
     const select = [
-      'yarn.lock',
+      // Copy the repo lockfile so the in-build install (see InstallDependencies)
+      // resolves against the repo's pinned versions instead of re-resolving fresh.
+      // The regenerated package.json changes the `.` importer (file: deps + pruned
+      // list), but pnpm reuses the lockfile's existing resolutions for unchanged
+      // third-party ranges — including transitive caret deps that would otherwise
+      // drift. Removed after install by CleanPackageManagerRelatedFiles.
+      'pnpm-lock.yaml',
       '.npmrc',
       '.puppeteerrc',
       'config/kibana.yml',

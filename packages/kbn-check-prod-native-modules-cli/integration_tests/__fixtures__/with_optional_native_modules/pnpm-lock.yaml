@@ -1,0 +1,14 @@
+lockfileVersion: '9.0'
+
+importers:
+  '.':
+    dependencies:
+      package-x:
+        specifier: ^2.0.0
+        version: 2.0.0
+
+snapshots:
+  package-x@2.0.0:
+    optionalDependencies:
+      optional-native-module-abc: 1.0.0
+  optional-native-module-abc@1.0.0: {}

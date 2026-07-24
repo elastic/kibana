@@ -142,9 +142,9 @@ const getSha256Hash = async (filePath) => {
 
   console.log('---Updating puppeteer package to version %s', process.env.PUPPETEER_VERSION);
 
-  await $('yarn', ['add', `puppeteer@${process.env.PUPPETEER_VERSION}`]);
-  await $('yarn', ['kbn', 'bootstrap']);
-  await $('git', ['add', 'package.json', 'yarn.lock']);
+  await $('pnpm', ['add', `puppeteer@${process.env.PUPPETEER_VERSION}`]);
+  await $('pnpm', ['kbn', 'bootstrap']);
+  await $('git', ['add', 'package.json', 'pnpm-lock.yaml']);
   await $('git', [
     'commit',
     '-m',

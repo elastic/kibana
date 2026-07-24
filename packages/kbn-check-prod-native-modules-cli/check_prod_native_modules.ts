@@ -11,7 +11,7 @@ import * as path from 'path';
 import { promises as fs, existsSync } from 'fs';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { findProductionDependencies, readYarnLock } from '@kbn/yarn-lock-validator';
+import { findProductionDependencies, readPnpmLock } from '@kbn/yarn-lock-validator';
 import { loadPackageJson } from './helpers';
 
 // Checks if a given path contains a native module or not recursively
@@ -107,7 +107,7 @@ async function checkProdNativeModules(log: ToolingLog) {
 
   try {
     // Gets all production dependencies based on package.json and then searches across transient dependencies using lock file
-    const rawProductionDependencies = findProductionDependencies(log, await readYarnLock(), true);
+    const rawProductionDependencies = findProductionDependencies(log, await readPnpmLock(), true);
 
     // Converts rawProductionDependencies into a simple Map of production dependencies
     const productionDependencies: Map<string, boolean> = new Map();

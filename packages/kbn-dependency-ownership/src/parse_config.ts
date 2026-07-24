@@ -39,7 +39,10 @@ export const parseConfig = (() => {
     const packageDevDependencies = Object.keys(packageConfig?.devDependencies || {}).filter(
       packageFilter
     );
-    const packageResolutions = Object.keys(packageConfig?.resolutions || {});
+    const packageResolutions = Object.keys({
+      ...packageConfig?.resolutions,
+      ...packageConfig?.pnpm?.overrides,
+    });
 
     cache = { renovateRules, packageDependencies, packageDevDependencies, packageResolutions };
     return cache;

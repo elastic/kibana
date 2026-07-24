@@ -2,6 +2,8 @@
   "_no_owner": {
     "oas_docs/package-lock.json": "'package-lock.json' should be snake_case",
     "packages/kbn-tsconfig": "'kbn-tsconfig' should be snake_case",
+    "pnpm-lock.yaml": "'pnpm-lock.yaml' should be snake_case",
+    "pnpm-workspace.yaml": "'pnpm-workspace.yaml' should be snake_case",
     "src/platform/packages/private/default-nav": "'default-nav' should be snake_case",
     "src/platform/packages/private/kbn-reporting": "'kbn-reporting' should be snake_case",
     "src/platform/packages/private/shared-ux": "'shared-ux' should be snake_case",

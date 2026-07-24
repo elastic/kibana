@@ -16,7 +16,7 @@ jest.mock('fs', () => {
     readFileSync: jest.fn((filePath) => {
       if (filePath.endsWith('package.json')) {
         return '{ "name": "kibana" }';
-      } else if (filePath.endsWith('yarn.lock')) {
+      } else if (filePath.endsWith('pnpm-lock.yaml')) {
         return '';
       }
       return '';
@@ -26,6 +26,19 @@ jest.mock('fs', () => {
 });
 
 import { checkSemverRanges } from '.';
+
+/** Build a minimal pnpm-lock.yaml root importer from name -> [specifier, version]. */
+const lock = (deps: Record<string, [specifier: string, version: string]>) => {
+  const lines = ['importers:', '  .:', '    dependencies:'];
+  for (const [name, [specifier, version]] of Object.entries(deps)) {
+    lines.push(
+      `      '${name}':`,
+      `        specifier: ${specifier}`,
+      `        version: ${version}`
+    );
+  }
+  return lines.join('\n') + '\n';
+};
 
 describe('checkSemverRanges', () => {
   it('should not report errors when no semver ranges are present', () => {
@@ -38,16 +51,12 @@ describe('checkSemverRanges', () => {
       },
     });
 
-    const yarnLock = `
-lodash@4.17.21:
-  version "4.17.21"
-typescript@4.9.5:
-  version "4.9.5"
-`;
-
     const result = checkSemverRanges({
       pkgJsonContent: pkgJson,
-      yarnLockContent: yarnLock,
+      pnpmLockContent: lock({
+        lodash: ['4.17.21', '4.17.21'],
+        typescript: ['4.9.5', '4.9.5'],
+      }),
     });
     expect(result.totalFixes).toBe(0);
   });
@@ -62,16 +71,12 @@ typescript@4.9.5:
       },
     });
 
-    const yarnLock = `
-lodash@^4.17.21:
-  version "4.17.21"
-typescript@~4.9.5:
-  version "4.9.5"
-`;
-
     const result = checkSemverRanges({
       pkgJsonContent: pkgJson,
-      yarnLockContent: yarnLock,
+      pnpmLockContent: lock({
+        lodash: ['^4.17.21', '4.17.21'],
+        typescript: ['~4.9.5', '4.9.5'],
+      }),
       fix: true,
     });
     expect(result.totalFixes).toBe(2);
@@ -96,21 +101,17 @@ typescript@~4.9.5:
     );
   });
 
-  it(`finds the correct version bump in the yarn.lock`, () => {
+  it(`finds the resolved version recorded for the matching specifier`, () => {
     const pkgJson = JSON.stringify({
       dependencies: {
         lodash: '^4.17.20',
       },
     });
-    const yarnLock = `
-lodash@^5.22.23:
-  version "5.29.0"
-lodash@^4.17.20:
-  version "4.17.20"
-`;
     const result = checkSemverRanges({
       pkgJsonContent: pkgJson,
-      yarnLockContent: yarnLock,
+      pnpmLockContent: lock({
+        lodash: ['^4.17.20', '4.17.20'],
+      }),
       fix: true,
     });
 
@@ -132,60 +133,39 @@ lodash@^4.17.20:
     );
   });
 
-  it('should throw an error if a version cannot be resolved from yarn.lock', () => {
+  it('strips peer-dependency suffixes from the resolved version', () => {
+    const pkgJson = JSON.stringify({
+      dependencies: {
+        ai: '^5.0.190',
+      },
+    });
+    const result = checkSemverRanges({
+      pkgJsonContent: pkgJson,
+      pnpmLockContent: lock({
+        ai: ['^5.0.190', '5.0.190(zod@4.4.3)'],
+      }),
+      fix: true,
+    });
+
+    expect(result.totalFixes).toBe(1);
+    expect(fs.writeFileSync).toHaveBeenCalledWith(
+      expect.any(String),
+      JSON.stringify({ dependencies: { ai: '5.0.190' } }, null, 2)
+    );
+  });
+
+  it('should throw an error if a version cannot be resolved from pnpm-lock.yaml', () => {
     const pkgJson = JSON.stringify({
       dependencies: {
         lodash: '^4.17.21',
       },
     });
 
-    const yarnLock = `
-# Empty yarn.lock
-`;
-
     expect(() =>
       checkSemverRanges({
         pkgJsonContent: pkgJson,
-        yarnLockContent: yarnLock,
+        pnpmLockContent: lock({}),
       })
-    ).toThrow('Could not resolve version for lodash with version ^4.17.21 from yarn.lock');
-  });
-
-  it(`doesn't pick the @types version`, () => {
-    const pkgJson = JSON.stringify({
-      dependencies: {
-        'chroma-js': '^2.1.0',
-      },
-    });
-
-    const yarnLock = `
-@types/chroma-js@^2.1.0:
-  version "2.1.1"
-chroma-js@^2.1.0:
-  version "2.1.0"
-`;
-
-    const result = checkSemverRanges({
-      pkgJsonContent: pkgJson,
-      yarnLockContent: yarnLock,
-      fix: true,
-    });
-
-    expect(result.totalFixes).toBe(1);
-    expect(result.fixesPerField).toEqual({
-      dependencies: 1,
-    });
-    expect(fs.writeFileSync).toHaveBeenCalledWith(
-      expect.any(String),
-      JSON.stringify(
-        {
-          dependencies: {
-            'chroma-js': '2.1.0',
-          },
-        },
-        null,
-        2
-      )
-    );
+    ).toThrow('Could not resolve version for lodash with version ^4.17.21 from pnpm-lock.yaml');
   });
 });

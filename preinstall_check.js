@@ -8,36 +8,11 @@
  */
 
 (() => {
-  const isUsingNpm = process.env.npm_config_git !== undefined;
+  // npm_config_user_agent looks like `pnpm/9.15.9 npm/? node/v20 ...` for pnpm,
+  // `npm/10 ...` for npm, `yarn/1.22 ...` for yarn classic.
+  const userAgent = process.env.npm_config_user_agent || '';
 
-  if (isUsingNpm) {
-    throw new Error(`Use Yarn instead of npm, see Kibana's contributing guidelines`);
-  }
-
-  // The value of the `npm_config_argv` env for each command:
-  //
-  // - `npm install`: '{"remain":[],"cooked":["install"],"original":[]}'
-  // - `yarn`: '{"remain":[],"cooked":["install"],"original":[]}'
-  // - `yarn kbn bootstrap`: '{"remain":[],"cooked":["run","kbn"],"original":["kbn","bootstrap"]}'
-  const rawArgv = process.env.npm_config_argv;
-
-  if (rawArgv === undefined) {
-    return;
-  }
-
-  try {
-    const argv = JSON.parse(rawArgv);
-
-    // allow dependencies to be installed with `yarn kbn bootstrap`
-    if (argv.cooked.includes('kbn')) {
-      // all good, trying to install deps using `kbn`
-      return;
-    }
-
-    if (argv.cooked.includes('install')) {
-      console.log('\nWARNING: When installing dependencies, prefer `yarn kbn bootstrap`\n');
-    }
-  } catch (e) {
-    // if it fails we do nothing, as this is just intended to be a helpful message
+  if (userAgent.startsWith('npm/') || userAgent.startsWith('yarn/')) {
+    throw new Error(`Use pnpm instead, see Kibana's contributing guidelines`);
   }
 })();

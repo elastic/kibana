@@ -18,7 +18,7 @@ setup_fips() {
     export OPENSSL_MODULES="$OPENSSL_PATH/lib/ossl-modules"
     export NODE_OPTIONS="--enable-fips --openssl-config=$KBN_DIR/.devcontainer/config/nodejs.cnf"
     echo "FIPS mode enabled"
-    echo "If manually bootstrapping in FIPS mode use: NODE_OPTIONS='' yarn kbn bootstrap"
+    echo "If manually bootstrapping in FIPS mode use: NODE_OPTIONS='' pnpm kbn bootstrap"
   else
     sed -i '/xpack.security.fipsMode.enabled:/ {s/.*/xpack.security.fipsMode.enabled: false/; t}; $a\xpack.security.fipsMode.enabled: false' "$KBN_CONFIG_FILE"
   fi

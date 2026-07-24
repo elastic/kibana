@@ -39,7 +39,7 @@ export class HealthGatewayService extends FtrService {
     this.port = await getPort({ port: getPort.makeRange(1024, 65536) });
 
     await this.runner.run(`health-gateway-${this.port}`, {
-      cmd: 'yarn',
+      cmd: 'pnpm',
       args: [
         'kbn',
         'run-in-packages',
