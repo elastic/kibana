@@ -75,6 +75,7 @@ export class RenderingService {
   private readonly logger: Logger;
   private airgapped: boolean = false;
   private isCoreRenderingInReactConcurrentMode: boolean = true;
+  private exposeNavDependencies: boolean = false;
   private userStorageStart?: UserStorageServiceStart;
   constructor(private readonly coreContext: CoreContext) {
     this.logger = coreContext.logger.get('rendering');
@@ -120,6 +121,12 @@ export class RenderingService {
     this.isCoreRenderingInReactConcurrentMode = await firstValueFrom(
       this.coreContext.configService.atPath<boolean>('isCoreRenderingInReactConcurrentMode')
     ).catch(() => true);
+
+    this.exposeNavDependencies = await firstValueFrom(
+      this.coreContext.configService.atPath<{ exposeNavDependencies?: boolean }>('plugins')
+    )
+      .then((pluginsConfig) => pluginsConfig?.exposeNavDependencies ?? false)
+      .catch(() => false);
 
     registerBootstrapRoute({
       router: http.createRouter<InternalRenderingRequestHandlerContext>(''),
@@ -190,6 +197,7 @@ export class RenderingService {
       packageInfo: this.coreContext.env.packageInfo,
       airgapped: this.airgapped,
       isCoreRenderingInReactConcurrentMode: this.isCoreRenderingInReactConcurrentMode,
+      exposeNavDependencies: this.exposeNavDependencies,
     };
     const staticAssetsHrefBase = http.staticAssets.getHrefBase();
     const usingCdn = http.staticAssets.isUsingCdn();
