@@ -51,6 +51,7 @@ import { getSignificantEventStatusColor } from '../shared/status_display';
 import { SIGNIFICANT_EVENT_STATUS_LABELS } from '../shared/translations';
 import { useTriggerInvestigation } from '../../../../../hooks/significant_events/use_trigger_investigation';
 import { useUpdateSignificantEvent } from '../../../../../hooks/significant_events/use_update_significant_event';
+import { useBlocksNewActivity } from '../../../../../hooks/significant_events/use_significant_events_maintenance';
 
 export const DEFAULT_SIGNIFICANT_EVENT_SEVERITY_FILTER: Severity[] = ['80-critical', '60-high'];
 
@@ -70,8 +71,9 @@ const CLOSE_EVENT_ARIA_LABEL = i18n.translate(
 
 const RunInvestigationCell = ({ event }: { event: SignificantEvent }) => {
   const { triggerInvestigation, isTriggering } = useTriggerInvestigation();
+  const { blocksActivity, activityBlockTooltip } = useBlocksNewActivity();
   return (
-    <EuiToolTip content={RUN_ARIA_LABEL} disableScreenReaderOutput>
+    <EuiToolTip content={activityBlockTooltip ?? RUN_ARIA_LABEL} disableScreenReaderOutput>
       <EuiButtonIcon
         iconType="inspect"
         aria-label={RUN_ARIA_LABEL}
@@ -79,7 +81,7 @@ const RunInvestigationCell = ({ event }: { event: SignificantEvent }) => {
           e.stopPropagation();
           if (!isTriggering) triggerInvestigation(event.event_uuid);
         }}
-        isDisabled={isTriggering}
+        isDisabled={isTriggering || blocksActivity}
         isLoading={isTriggering}
         size="s"
         color="primary"
@@ -283,6 +285,7 @@ export const SigEventsTab = () => {
 
   const { isRunning, isCanceling, handleRun, handleCancel } =
     useSignificantEventsDiscoveryContext();
+  const { blocksActivity, activityBlockTooltip } = useBlocksNewActivity();
 
   const { data, isLoading, isError, refetch, pagination, setPagination } =
     useFetchSignificantEvents({
@@ -440,7 +443,8 @@ export const SigEventsTab = () => {
               onCancel={handleCancel}
               isRunning={isRunning}
               isCanceling={isCanceling}
-              isDisabled={isRunning}
+              isDisabled={isRunning || blocksActivity}
+              disabledTooltip={activityBlockTooltip}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
