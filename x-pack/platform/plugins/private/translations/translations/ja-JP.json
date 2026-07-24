@@ -11193,7 +11193,6 @@
     "xpack.agentBuilder.round.error.workflowAborted.title": "会話が中止されました",
     "xpack.agentBuilder.round.error.workflowExecution.title": "ワークフローが失敗しました",
     "xpack.agentBuilder.round.userInput": "ユーザー入力",
-    "xpack.agentBuilder.roundAttachmentReferences.attachmentAdded": "添付ファイルが追加されました：{description}",
     "xpack.agentBuilder.roundAttachmentReferences.attachments": "添付ファイル",
     "xpack.agentBuilder.roundResponseActions.copy": "応答をコピー",
     "xpack.agentBuilder.roundResponseActions.copySuccess": "応答がクリップボードにコピーされました",

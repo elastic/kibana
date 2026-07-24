@@ -11191,7 +11191,6 @@
     "xpack.agentBuilder.round.error.workflowAborted.title": "对话中止",
     "xpack.agentBuilder.round.error.workflowExecution.title": "工作流程失败",
     "xpack.agentBuilder.round.userInput": "用户输入",
-    "xpack.agentBuilder.roundAttachmentReferences.attachmentAdded": "附件已添加： {description}",
     "xpack.agentBuilder.roundAttachmentReferences.attachments": "附件",
     "xpack.agentBuilder.roundResponseActions.copy": "复制响应",
     "xpack.agentBuilder.roundResponseActions.copySuccess": "响应已复制到剪贴板",
