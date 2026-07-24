@@ -591,15 +591,18 @@ describe('#createLoggingConfig', () => {
 
     const loggingConfig = await lastValueFrom(
       features$.pipe(
-        createLoggingConfig({
-          enabled: true,
-          include_saved_object_names: false,
-          appender: {
-            type: 'otel',
-            protocol: 'http',
-            url: 'http://collector:4318/v1/logs',
+        createLoggingConfig(
+          {
+            enabled: true,
+            include_saved_object_names: false,
+            appender: {
+              type: 'otel',
+              protocol: 'http',
+              url: 'http://collector:4318/v1/logs',
+            },
           },
-        })
+          true
+        )
       )
     );
 
@@ -634,20 +637,23 @@ describe('#createLoggingConfig', () => {
 
     const loggingConfig = await lastValueFrom(
       features$.pipe(
-        createLoggingConfig({
-          enabled: true,
-          include_saved_object_names: false,
-          appender: {
-            type: 'otel',
-            protocol: 'http',
-            url: 'http://collector:4318/v1/logs',
-            fieldRenames: {
-              'custom.field': 'custom.new_field',
-              // User tries to override an audit rename — audit wins.
-              'kibana.space_id': 'kibana.space.overridden',
+        createLoggingConfig(
+          {
+            enabled: true,
+            include_saved_object_names: false,
+            appender: {
+              type: 'otel',
+              protocol: 'http',
+              url: 'http://collector:4318/v1/logs',
+              fieldRenames: {
+                'custom.field': 'custom.new_field',
+                // User tries to override an audit rename — audit wins.
+                'kibana.space_id': 'kibana.space.overridden',
+              },
             },
           },
-        })
+          true
+        )
       )
     );
 
@@ -663,15 +669,18 @@ describe('#createLoggingConfig', () => {
 
     const loggingConfig = await lastValueFrom(
       features$.pipe(
-        createLoggingConfig({
-          enabled: true,
-          include_saved_object_names: false,
-          appender: {
-            type: 'otel',
-            protocol: 'http',
-            url: 'http://collector:4318/v1/logs',
+        createLoggingConfig(
+          {
+            enabled: true,
+            include_saved_object_names: false,
+            appender: {
+              type: 'otel',
+              protocol: 'http',
+              url: 'http://collector:4318/v1/logs',
+            },
           },
-        })
+          true
+        )
       )
     );
 
@@ -686,16 +695,19 @@ describe('#createLoggingConfig', () => {
 
     const loggingConfig = await lastValueFrom(
       features$.pipe(
-        createLoggingConfig({
-          enabled: true,
-          include_saved_object_names: false,
-          appender: {
-            type: 'otel',
-            protocol: 'http',
-            url: 'http://collector:4318/v1/logs',
-            fieldDrops: ['custom.field'],
+        createLoggingConfig(
+          {
+            enabled: true,
+            include_saved_object_names: false,
+            appender: {
+              type: 'otel',
+              protocol: 'http',
+              url: 'http://collector:4318/v1/logs',
+              fieldDrops: ['custom.field'],
+            },
           },
-        })
+          true
+        )
       )
     );
 
@@ -711,15 +723,18 @@ describe('#createLoggingConfig', () => {
 
     const loggingConfig = await lastValueFrom(
       features$.pipe(
-        createLoggingConfig({
-          enabled: true,
-          include_saved_object_names: false,
-          appender: {
-            type: 'otel',
-            protocol: 'http',
-            url: 'http://collector:4318/v1/logs',
+        createLoggingConfig(
+          {
+            enabled: true,
+            include_saved_object_names: false,
+            appender: {
+              type: 'otel',
+              protocol: 'http',
+              url: 'http://collector:4318/v1/logs',
+            },
           },
-        })
+          true
+        )
       )
     );
 
@@ -734,16 +749,19 @@ describe('#createLoggingConfig', () => {
 
     const loggingConfig = await lastValueFrom(
       features$.pipe(
-        createLoggingConfig({
-          enabled: true,
-          include_saved_object_names: false,
-          appender: {
-            type: 'otel',
-            protocol: 'http',
-            url: 'http://collector:4318/v1/logs',
-            fieldDefaults: { 'event.type': ['change'] },
+        createLoggingConfig(
+          {
+            enabled: true,
+            include_saved_object_names: false,
+            appender: {
+              type: 'otel',
+              protocol: 'http',
+              url: 'http://collector:4318/v1/logs',
+              fieldDefaults: { 'event.type': ['change'] },
+            },
           },
-        })
+          true
+        )
       )
     );
 
@@ -758,15 +776,18 @@ describe('#createLoggingConfig', () => {
 
     const loggingConfig = await lastValueFrom(
       features$.pipe(
-        createLoggingConfig({
-          enabled: true,
-          include_saved_object_names: false,
-          appender: {
-            type: 'otel',
-            protocol: 'http',
-            url: 'http://collector:4318/v1/logs',
+        createLoggingConfig(
+          {
+            enabled: true,
+            include_saved_object_names: false,
+            appender: {
+              type: 'otel',
+              protocol: 'http',
+              url: 'http://collector:4318/v1/logs',
+            },
           },
-        })
+          true
+        )
       )
     );
 
@@ -776,26 +797,30 @@ describe('#createLoggingConfig', () => {
     );
   });
 
-  test('injects minimal resource attributes when using an OTel appender', async () => {
+  test('injects a minimal resource allowlist + attributes when using an OTel appender', async () => {
     const features$ = of({ allowAuditLogging: true });
 
     const loggingConfig = await lastValueFrom(
       features$.pipe(
-        createLoggingConfig({
-          enabled: true,
-          include_saved_object_names: false,
-          appender: {
-            type: 'otel',
-            protocol: 'http',
-            url: 'http://collector:4318/v1/logs',
+        createLoggingConfig(
+          {
+            enabled: true,
+            include_saved_object_names: false,
+            appender: {
+              type: 'otel',
+              protocol: 'http',
+              url: 'http://collector:4318/v1/logs',
+            },
           },
-        })
+          true
+        )
       )
     );
 
     const appenders = loggingConfig.appenders as Record<string, AppenderConfigType>;
     const otelAppender = appenders.auditTrailAppender as OtelAppenderConfig;
-    expect(otelAppender.minimalResource).toBe(true);
+    // includeResources keeps only the audit resource attribute keys; attributes supply the values.
+    expect(otelAppender.includeResources).toEqual(Object.keys(AUDIT_OTEL_RESOURCE_ATTRIBUTES));
     expect(otelAppender.attributes).toEqual(AUDIT_OTEL_RESOURCE_ATTRIBUTES);
   });
 
@@ -804,16 +829,19 @@ describe('#createLoggingConfig', () => {
 
     const loggingConfig = await lastValueFrom(
       features$.pipe(
-        createLoggingConfig({
-          enabled: true,
-          include_saved_object_names: false,
-          appender: {
-            type: 'otel',
-            protocol: 'http',
-            url: 'http://collector:4318/v1/logs',
-            attributes: { 'custom.attr': 'value' },
+        createLoggingConfig(
+          {
+            enabled: true,
+            include_saved_object_names: false,
+            appender: {
+              type: 'otel',
+              protocol: 'http',
+              url: 'http://collector:4318/v1/logs',
+              attributes: { 'custom.attr': 'value' },
+            },
           },
-        })
+          true
+        )
       )
     );
 
@@ -824,7 +852,7 @@ describe('#createLoggingConfig', () => {
     });
   });
 
-  test('does not inject fieldDrops, fieldDefaults, fieldAdditions or minimalResource for non-OTel appenders', async () => {
+  test('does not inject fieldDrops, fieldDefaults, fieldAdditions or includeResources for non-OTel appenders', async () => {
     const features$ = of({ allowAuditLogging: true });
 
     const loggingConfig = await lastValueFrom(
@@ -844,7 +872,39 @@ describe('#createLoggingConfig', () => {
     expect(appenders.auditTrailAppender).not.toHaveProperty('fieldDrops');
     expect(appenders.auditTrailAppender).not.toHaveProperty('fieldDefaults');
     expect(appenders.auditTrailAppender).not.toHaveProperty('fieldAdditions');
-    expect(appenders.auditTrailAppender).not.toHaveProperty('minimalResource');
+    expect(appenders.auditTrailAppender).not.toHaveProperty('includeResources');
+  });
+
+  test('does not inject audit transforms for an OTel appender when not serverless', async () => {
+    const features$ = of({ allowAuditLogging: true });
+
+    const loggingConfig = await lastValueFrom(
+      features$.pipe(
+        createLoggingConfig(
+          {
+            enabled: true,
+            include_saved_object_names: false,
+            appender: {
+              type: 'otel',
+              protocol: 'http',
+              url: 'http://collector:4318/v1/logs',
+            },
+          },
+          false // not serverless — the OTel appender is left untouched
+        )
+      )
+    );
+
+    // The transforms are Serverless-only: on other build flavors the OTel appender passes through
+    // unchanged (full resource, raw ECS field names).
+    const appenders = loggingConfig.appenders as Record<string, AppenderConfigType>;
+    const otelAppender = appenders.auditTrailAppender as OtelAppenderConfig;
+    expect(otelAppender).not.toHaveProperty('fieldRenames');
+    expect(otelAppender).not.toHaveProperty('fieldDrops');
+    expect(otelAppender).not.toHaveProperty('fieldDefaults');
+    expect(otelAppender).not.toHaveProperty('fieldUppercase');
+    expect(otelAppender).not.toHaveProperty('fieldAdditions');
+    expect(otelAppender).not.toHaveProperty('includeResources');
   });
 });
 

@@ -131,7 +131,7 @@ describe('OtelAppender', () => {
       expect(result.fieldRenames).toBeUndefined();
     });
 
-    it('fieldDrops, fieldUppercase, fieldDefaults, fieldAdditions and minimalResource are optional and absent by default', () => {
+    it('fieldDrops, fieldUppercase, fieldDefaults, fieldAdditions and includeResources are optional and absent by default', () => {
       const result = OtelAppender.configSchema.validate({
         type: 'otel',
         url: 'http://collector:4318/v1/logs',
@@ -140,7 +140,7 @@ describe('OtelAppender', () => {
       expect(result.fieldUppercase).toBeUndefined();
       expect(result.fieldDefaults).toBeUndefined();
       expect(result.fieldAdditions).toBeUndefined();
-      expect(result.minimalResource).toBeUndefined();
+      expect(result.includeResources).toBeUndefined();
     });
 
     it('accepts fieldAdditions as a map of template strings', () => {
@@ -153,12 +153,12 @@ describe('OtelAppender', () => {
       });
     });
 
-    it('accepts minimalResource as a boolean', () => {
+    it('accepts includeResources as an array of strings', () => {
       const result = OtelAppender.configSchema.validate({
         ...validConfig,
-        minimalResource: true,
+        includeResources: ['service.name', 'service.type'],
       });
-      expect(result.minimalResource).toBe(true);
+      expect(result.includeResources).toEqual(['service.name', 'service.type']);
     });
 
     it('accepts fieldUppercase as an array of strings', () => {
@@ -430,27 +430,89 @@ describe('OtelAppender', () => {
       });
     });
 
-    describe('minimalResource', () => {
-      it('builds the resource only from attributes, skipping the resource detectors', () => {
+    describe('includeResources', () => {
+      // Wires buildOtelResources().merge(...) to resolve to a resource whose getRawAttributes()
+      // returns the given entries, so we can assert what survives the allowlist/denylist filter.
+      const wireResourceWithRawAttributes = (rawAttributes: Array<[string, unknown]>) => {
+        const resourceWithKnownRaw = makeMockResource('known');
+        (resourceWithKnownRaw.getRawAttributes as jest.Mock).mockReturnValue(rawAttributes);
+        const r1 = makeMockResource('r1', {});
+        r1.merge.mockReturnValueOnce(resourceWithKnownRaw);
+        mockMergeResource.mockReturnValueOnce(r1);
+        return resourceWithKnownRaw;
+      };
+
+      it('filters the resource to the allowlisted keys (detectors still run)', () => {
+        wireResourceWithRawAttributes([
+          ['service.name', 'serverless-kibana'],
+          ['service.type', 'kibana'],
+          ['host.name', 'my-host'],
+          ['process.pid', 123],
+          ['telemetry.sdk.language', 'nodejs'],
+        ]);
+
         new OtelAppender({
           ...validConfig,
-          minimalResource: true,
+          includeResources: ['service.name', 'service.type'],
           attributes: { 'service.name': 'serverless-kibana', 'service.type': 'kibana' },
         });
 
-        // Detectors (and thus buildOtelResources) are not run in minimal mode.
-        expect(mockDetectResources).not.toHaveBeenCalled();
-        // The resource is built solely from the provided attributes.
-        expect(mockResourceFromAttributes).toHaveBeenLastCalledWith({
-          'service.name': 'serverless-kibana',
-          'service.type': 'kibana',
-        });
+        // includeResources filters the detected resource — it does not skip detection.
+        expect(mockDetectResources).toHaveBeenCalled();
+        // Only the allowlisted keys survive.
+        const filteredArg = mockResourceFromAttributes.mock.calls.at(-1)![0];
+        expect(Object.keys(filteredArg).sort()).toEqual(['service.name', 'service.type']);
+        expect(filteredArg['service.name']).toBe('serverless-kibana');
+        expect(filteredArg['service.type']).toBe('kibana');
       });
 
-      it('still runs the resource detectors when minimalResource is not set', () => {
-        new OtelAppender(validConfig);
+      it('keeps the overriding value on duplicate keys (config.attributes wins over detected)', () => {
+        // merge() emits the overriding resource's attributes first, so service.name appears twice:
+        // the configured 'serverless-kibana' (override, first) and the APM-derived 'kibana' (base).
+        wireResourceWithRawAttributes([
+          ['service.name', 'serverless-kibana'],
+          ['service.type', 'kibana'],
+          ['service.name', 'kibana'],
+        ]);
 
-        expect(mockDetectResources).toHaveBeenCalled();
+        new OtelAppender({
+          ...validConfig,
+          includeResources: ['service.name', 'service.type'],
+          attributes: { 'service.name': 'serverless-kibana', 'service.type': 'kibana' },
+        });
+
+        const filteredArg = mockResourceFromAttributes.mock.calls.at(-1)![0];
+        // First occurrence (the override) wins — not the last/base value.
+        expect(filteredArg['service.name']).toBe('serverless-kibana');
+        expect(filteredArg['service.type']).toBe('kibana');
+      });
+
+      it('lets an explicit allowlist govern the resource even when a key is also in fieldDrops', () => {
+        wireResourceWithRawAttributes([
+          ['service.name', 'serverless-kibana'],
+          ['service.type', 'kibana'],
+          ['host.name', 'my-host'],
+        ]);
+
+        new OtelAppender({
+          ...validConfig,
+          includeResources: ['service.name', 'service.type'],
+          // service.type is also dropped from the per-record attributes, but the resource allowlist
+          // keeps it in the resource (fieldDrops does not shape the resource when an allowlist is set).
+          fieldDrops: ['service.type'],
+        });
+
+        const filteredArg = mockResourceFromAttributes.mock.calls.at(-1)![0];
+        expect(Object.keys(filteredArg).sort()).toEqual(['service.name', 'service.type']);
+      });
+
+      it('does not rebuild the resource when includeResources defaults to all and no fieldDrops', () => {
+        const resourceWithKnownRaw = wireResourceWithRawAttributes([['service.name', 'kibana']]);
+
+        new OtelAppender(validConfig); // no includeResources, no fieldDrops
+
+        // Fast path: the merged resource is used directly, with no getRawAttributes()-based rebuild.
+        expect(resourceWithKnownRaw.getRawAttributes).not.toHaveBeenCalled();
       });
     });
   });

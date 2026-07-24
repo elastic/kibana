@@ -101,19 +101,25 @@ export interface OtelAppenderConfig {
    * objects, wrap dotted attribute names in `[brackets]`:
    * `"[service.name]": my-kibana`
    *
-   * When {@link OtelAppenderConfig.minimalResource} is `true`, these attributes are the
-   * *entire* resource — the auto-detected attributes are not included.
+   * These attributes are merged into the resource; when {@link OtelAppenderConfig.includeResources}
+   * narrows the resource, they supply the values for the included keys (e.g. `service.name`).
    */
   attributes?: Record<string, string>;
   /**
-   * When `true`, the OTLP resource is built **only** from {@link OtelAppenderConfig.attributes},
-   * skipping the shared OTel resource detectors (host, OS, process, and the
-   * `OTEL_RESOURCE_ATTRIBUTES` env detector). Use for signals that must ship a deliberately
-   * minimal resource (e.g. Serverless audit logs, which carry only `service.name` and
-   * `service.type`) so cloud/k8s/process/host fields are excluded from the emitted document.
-   * Defaults to `false` (full auto-detected resource).
+   * Allowlist of resource-attribute keys to include in the OTLP resource. Defaults to `['*']`
+   * (include every auto-detected and configured attribute — the standard OTel resource).
+   *
+   * When set to an explicit list (anything not containing `'*'`), the resource is filtered to
+   * only those keys. Filtering is applied to the fully-resolved resource (auto-detected host/OS/
+   * process/env attributes plus {@link OtelAppenderConfig.attributes}), so
+   * `['service.name', 'service.type']` ships a deliberately minimal resource with the
+   * cloud/k8s/process/host fields excluded.
+   *
+   * An explicit allowlist fully governs the resource: a listed key is kept even if
+   * {@link OtelAppenderConfig.fieldDrops} also names it (`fieldDrops` still removes that key from
+   * the per-record attributes). `fieldDrops` only shapes the resource in the default `['*']` case.
    */
-  minimalResource?: boolean;
+  includeResources?: string[];
   /**
    * Optional TLS settings for HTTPS/gRPC to the OTLP endpoint, including mutual TLS (client certificates).
    */
@@ -133,9 +139,12 @@ export interface OtelAppenderConfig {
    */
   fieldRenames?: Record<string, string | string[]>;
   /**
-   * Optional list of attribute keys to remove from the OTLP output. Applied to both log record
-   * attributes and resource attributes. Keys absent from the output are silently skipped.
-   * Injected programmatically (e.g. by the audit service to satisfy Serverless field exclusions).
+   * Optional list of attribute keys to remove from the OTLP output. Always applied to the per-record
+   * log attributes. Also applied to the resource attributes **only** when
+   * {@link OtelAppenderConfig.includeResources} is `['*']` (the default) — an explicit
+   * `includeResources` allowlist takes precedence for the resource. Keys absent from the output are
+   * silently skipped. Injected programmatically (e.g. by the audit service to satisfy Serverless
+   * field exclusions).
    */
   fieldDrops?: string[];
   /**

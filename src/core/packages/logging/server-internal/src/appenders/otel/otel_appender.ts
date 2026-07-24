@@ -253,8 +253,8 @@ export class OtelAppender implements DisposableAppender {
     layout: schema.maybe(Layouts.configSchema),
     // Optional: user-provided attributes override the service attributes derived from APM config.
     attributes: schema.maybe(schema.recordOf(schema.string(), schema.string())),
-    // When true, the resource is built only from `attributes` (no auto-detected resource).
-    minimalResource: schema.maybe(schema.boolean()),
+    // Allowlist of resource-attribute keys to include (default ['*'] = keep all).
+    includeResources: schema.maybe(schema.arrayOf(schema.string())),
     // Template-based derived attributes: target key -> template with {field} placeholders.
     fieldAdditions: schema.maybe(schema.recordOf(schema.string(), schema.string())),
     fieldRenames: schema.maybe(
@@ -330,32 +330,44 @@ export class OtelAppender implements DisposableAppender {
     //   2. Derived: service.name / service.version / deployment.environment from the
     //      APM config singleton (mirrors how initTelemetry builds trace resources)
     //   3. User overrides: explicit attributes from kibana.yml (optional)
-    // When minimalResource is set, the resource is built solely from the configured attributes —
-    // the shared resource detectors (host/OS/process and the OTEL_RESOURCE_ATTRIBUTES env detector)
-    // are skipped entirely, so cloud/k8s/process fields are excluded from the emitted document.
-    // Used by Serverless audit logs, which ship only service.name + service.type at the resource
-    // level. config.attributes are plain (synchronous) values, so there are no async-detected
-    // entries to preserve here — getRawAttributes() only matters for the detector-based path below.
+    //
+    // The fully-resolved resource above is then shaped by two config knobs:
+    //   - includeResources: allowlist of keys to keep (default ['*'] = keep all).
+    //   - fieldDrops: denylist, applied to the resource only when includeResources includes '*'
+    //     (its default).
+    // An explicit allowlist fully governs the resource — a key it names is kept even if fieldDrops
+    // also lists it, because fieldDrops is primarily a per-record denylist (a field can be dropped
+    // from per-record attributes yet kept in the resource, e.g. audit logs' service.type). Filtering
+    // rebuilds via getRawAttributes() so async entries (e.g. host.id) are preserved for the SDK to
+    // await at export time.
+    const includeResources = config.includeResources ?? ['*'];
+    const includeAll = includeResources.includes('*');
+    const baseResource = buildOtelResources().merge(
+      resources.resourceFromAttributes(config.attributes ?? {})
+    );
     let resource;
-    if (config.minimalResource) {
-      resource = resources.resourceFromAttributes(config.attributes ?? {});
+    if (includeAll && !config.fieldDrops?.length) {
+      resource = baseResource;
     } else {
-      const baseResource = buildOtelResources().merge(
-        resources.resourceFromAttributes(config.attributes ?? {})
-      );
-      // When fieldDrops is configured, rebuild the resource excluding the specified keys
-      // so they are absent from resource.attributes in the OTLP export (not just from
-      // per-record log attributes). getRawAttributes() is used — not resource.attributes —
-      // because it preserves async-resolving entries (e.g. host.id from getMachineId).
-      // resourceFromAttributes() correctly accepts MaybePromise values and the SDK awaits
-      // them at export time, so the rebuilt resource retains all async-detected attributes.
-      resource = config.fieldDrops?.length
-        ? resources.resourceFromAttributes(
-            Object.fromEntries(
-              baseResource.getRawAttributes().filter(([key]) => !config.fieldDrops!.includes(key))
-            )
-          )
-        : baseResource;
+      // Explicit allowlist governs alone; otherwise (['*']) fall back to the fieldDrops denylist.
+      const keepAttribute = ([key]: [string, unknown]) =>
+        includeAll ? !config.fieldDrops?.includes(key) : includeResources.includes(key);
+      const rawAttributes = baseResource.getRawAttributes();
+
+      // merge() lists the overriding resource's attributes first and does not dedupe, so a key can
+      // appear twice (e.g. service.name from both APM config and config.attributes). Keep the FIRST
+      // occurrence to match the SDK's first-wins merge semantics — Object.fromEntries alone is
+      // last-wins and would pick the overridden base value.
+      const seen = new Set<string>();
+      const kept = rawAttributes.filter((entry) => {
+        const [key] = entry;
+        if (seen.has(key) || !keepAttribute(entry)) {
+          return false;
+        }
+        seen.add(key);
+        return true;
+      });
+      resource = resources.resourceFromAttributes(Object.fromEntries(kept));
     }
     this.loggerProvider = new LoggerProvider({
       processors: [new BatchLogRecordProcessor(exporter)],

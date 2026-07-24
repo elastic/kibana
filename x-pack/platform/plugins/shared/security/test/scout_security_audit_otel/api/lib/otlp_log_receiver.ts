@@ -33,6 +33,19 @@ interface OtlpResource {
 /** A flattened `{ 'event.action': 'user_login', 'kibana.space.id': 'default' }`-style map. */
 export type FlatAttributes = Record<string, unknown>;
 
+/**
+ * Reserved key under which the raw resource-level attributes are stashed on each flattened record.
+ * The flat view merges resource + log-record attributes (log-record wins), which makes it impossible
+ * to tell where a field originated. Tests that need to assert on the resource contract specifically
+ * (e.g. the minimal resource emitted by the audit appender) read this via {@link getResourceAttributes}.
+ * The `__` prefix cannot collide with dotted OTel attribute keys.
+ */
+const RESOURCE_ATTRS_KEY = '__resourceAttributes';
+
+/** Returns the raw resource-level attributes captured for a flattened record. */
+export const getResourceAttributes = (e: FlatAttributes): FlatAttributes =>
+  (e[RESOURCE_ATTRS_KEY] as FlatAttributes) ?? {};
+
 const unwrapAnyValue = (value: OtlpAnyValue | undefined): unknown => {
   if (!value) return undefined;
   if (value.arrayValue) return value.arrayValue.values.map(unwrapAnyValue);
@@ -59,6 +72,10 @@ const toFlatAttributes = (record: OtlpLogRecord, resourceAttrs: FlatAttributes):
   for (const { key, value } of record.attributes ?? []) {
     attrs[key] = unwrapAnyValue(value);
   }
+
+  // Stash the raw resource attributes separately so tests can assert the resource contract
+  // (which fields Kibana emits at the resource level) independently of the merged flat view.
+  attrs[RESOURCE_ATTRS_KEY] = { ...resourceAttrs };
   return attrs;
 };
 

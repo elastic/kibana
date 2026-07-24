@@ -8,7 +8,11 @@
 import { apiTest, OTEL_RECEIVER_PORT, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 
-import { type FlatAttributes, OtlpLogReceiver } from '../lib/otlp_log_receiver';
+import {
+  type FlatAttributes,
+  getResourceAttributes,
+  OtlpLogReceiver,
+} from '../lib/otlp_log_receiver';
 
 const KBN_XSRF = { 'kbn-xsrf': 'xxx', 'x-elastic-internal-origin': 'kibana' };
 const TEST_DASHBOARD_ID = 'audit-log-otel-test-dashboard';
@@ -17,29 +21,35 @@ const receiver = new OtlpLogReceiver();
 
 /**
  * Asserts the OTel envelope and resource-level fields that are identical across all audit events.
- * The audit appender ships a deliberately minimal resource (minimalResource: true) carrying only
- * service.name + service.type — the auto-detected host/OS/process/env attributes are excluded.
+ * The audit appender ships a deliberately minimal resource (includeResources allowlist) carrying
+ * only service.name + service.type — the auto-detected host/OS/process/env attributes are excluded.
  */
 const expectOtelEnvelope = (e: FlatAttributes) => {
   // OTLP envelope fields — top-level log record fields, not logRecord.attributes.
   expect(e.severityNumber).toBe(9); // SeverityNumber.INFO
   expect(e.severityText).toBe('INFO');
-  // Minimal resource: only service.name + service.type are emitted.
-  expect(e['service.name']).toBe('serverless-kibana');
-  expect(e['service.type']).toBe('kibana');
-  // Auto-detected resource fields are excluded by minimalResource.
-  expect(e['telemetry.sdk.language']).toBeUndefined();
-  expect(e['process.runtime.name']).toBeUndefined();
-  expect(e['process.runtime.description']).toBeUndefined();
-  // log.logger is dropped from per-record attributes and absent from the minimal resource.
-  expect(e['log.logger']).toBeUndefined();
-  // AUDIT_OTEL_FIELD_DEFAULTS: log.type defaults to 'audit' on every audit log.
-  expect(e['log.type']).toBe('audit');
+
+  // Minimal-resource contract: Kibana emits EXACTLY service.name + service.type at the resource
+  // level. The exact-key assertion proves nothing else is present — no project.id, no auto-detected
+  // host/OS/process/env fields — so anything seen in production comes from downstream (gateway /
+  // ingest), not Kibana.
+  const resource = getResourceAttributes(e);
+  expect(Object.keys(resource).sort()).toStrictEqual(['service.name', 'service.type']);
+  expect(resource['service.name']).toBe('serverless-kibana');
+  expect(resource['service.type']).toBe('kibana');
+
+  // Per-record guarantees on every audit record.
+  expect(e['log.type']).toBe('audit'); // AUDIT_OTEL_FIELD_DEFAULTS
+  expect(e['log.logger']).toBeUndefined(); // dropped from per-record attributes
+  expect(e['project.id']).toBeUndefined(); // never emitted by Kibana (resource or per-record)
 };
 
 apiTest.describe(
-  'Audit log — OTel field shape',
-  { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
+  'Audit log — OTel field shape (Serverless)',
+  // Serverless-only: the audit OTel field transforms + minimal resource are gated on the serverless
+  // build flavor. Traditional/stateful behavior (raw ECS through the OTel appender) is covered by
+  // audit_log_traditional.spec.ts.
+  { tag: [...tags.serverless.security.complete] },
   () => {
     apiTest.beforeAll(async ({ kbnClient }) => {
       await receiver.start(OTEL_RECEIVER_PORT);
@@ -84,11 +94,6 @@ apiTest.describe(
 
         expectOtelEnvelope(e);
         expect(e.body).toMatch(/logged in/);
-
-        // AUDIT_OTEL_FIELD_DROPS: service.version and host.name excluded from both
-        // log record attributes and resource attributes. Verified once for the appender.
-        expect(e['service.version']).toBeUndefined();
-        expect(e['host.name']).toBeUndefined();
 
         // Core audit fields.
         expect(e['event.action']).toBe('user_login');

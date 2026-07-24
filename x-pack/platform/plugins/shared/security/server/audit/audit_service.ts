@@ -39,18 +39,16 @@ export const AUDIT_OTEL_FIELD_RENAMES: Record<string, string | string[]> = {
   'http.request.headers.x-forwarded-for': 'network.forwarded_ip',
 };
 
-// Fields stripped from log record and resource attributes on Serverless:
-// - service.version / host.name: excluded from Serverless audit logs.
+// Per-record log attributes stripped from the OTLP output on Serverless. (Resource-level exclusions
+// — service.version, host.name, project_name, the detector/env fields — are handled by the
+// appender's includeResources allowlist, not here, so they are not repeated in this list.)
 // - kibana.lookup_realm / kibana.authentication_provider / kibana.authentication_realm:
 //   fixed values on Serverless (always cloud-saml-kibana), so they carry no signal.
 // - url.* component fields: replaced by url.original (built via fieldAdditions), which the
 //   ingest pipeline parses back into components.
 // - log.logger / service.id / service.node.roles / service.state / service.type:
 //   belong in resource.attributes, not per-record attributes, on Serverless.
-// - project_name: populated by the otel-delivery-gateway.
 export const AUDIT_OTEL_FIELD_DROPS: string[] = [
-  'service.version',
-  'host.name',
   'kibana.lookup_realm',
   'kibana.authentication_provider',
   'kibana.authentication_realm',
@@ -64,7 +62,6 @@ export const AUDIT_OTEL_FIELD_DROPS: string[] = [
   'service.node.roles',
   'service.state',
   'service.type',
-  'project_name',
 ];
 
 // event.type is required on every audit log. Authentication events omit it; default to 'access'.
@@ -88,10 +85,10 @@ export const AUDIT_OTEL_FIELD_ADDITIONS: Record<string, string> = {
   'url.original': '{url.scheme}://{url.domain}{url.path}',
 };
 
-// Audit logs ship a deliberately minimal OTel resource: only these attributes, with the shared
-// resource detectors (host/OS/process and the OTEL_RESOURCE_ATTRIBUTES env detector) skipped.
-// service.name identifies the audit signal; service.type identifies the product. Injected via
-// `minimalResource: true` + `attributes` on the OTel appender.
+// Audit logs ship a deliberately minimal OTel resource: only these keys survive the appender's
+// `includeResources` allowlist, and these values are supplied via the appender's `attributes`.
+// service.name identifies the audit signal; service.type identifies the product. Everything else
+// the resource detectors produce (host/OS/process/env) is filtered out.
 export const AUDIT_OTEL_RESOURCE_ATTRIBUTES: Record<string, string> = {
   'service.name': 'serverless-kibana',
   'service.type': 'kibana',
@@ -104,6 +101,10 @@ interface AuditServiceSetupParams {
   config: ConfigType['audit'];
   logging: Pick<LoggingServiceSetup, 'configure'>;
   http: Pick<HttpServiceSetup, 'registerOnPostAuth'>;
+  // The OTel audit field transforms target Serverless log-delivery requirements only. On other
+  // build flavors the OTel appender is left untouched (full resource, raw ECS field names).
+  // Defaults to `false` (no transforms) when omitted; the plugin always passes it explicitly.
+  isServerless?: boolean;
 
   getCurrentUser(
     request: KibanaRequest
@@ -131,6 +132,7 @@ export class AuditService {
     config,
     logging,
     http,
+    isServerless = false,
     getCurrentUser,
     getSID,
     getSpaceId,
@@ -140,7 +142,7 @@ export class AuditService {
     logging.configure(
       license.features$.pipe(
         distinctUntilKeyChanged('allowAuditLogging'),
-        createLoggingConfig(config)
+        createLoggingConfig(config, isServerless)
       )
     );
 
@@ -236,7 +238,7 @@ export class AuditService {
   }
 }
 
-export const createLoggingConfig = (config: ConfigType['audit']) =>
+export const createLoggingConfig = (config: ConfigType['audit'], isServerless = false) =>
   map<Pick<SecurityLicenseFeatures, 'allowAuditLogging'>, LoggerContextConfigInput>((features) => {
     const baseAppender = config.appender ?? {
       type: 'console' as const,
@@ -245,12 +247,13 @@ export const createLoggingConfig = (config: ConfigType['audit']) =>
         highlight: true,
       },
     };
-    // When the configured appender is OTel, inject audit-specific field transforms
-    // (renames, drops, defaults, additions) to satisfy Serverless audit log field requirements
-    // at the output layer — without touching the upstream AuditEvent type. The resource is also
-    // slimmed to the minimal audit attributes so cloud/k8s/process fields are excluded.
+    // On Serverless, when the configured appender is OTel, inject audit-specific field transforms
+    // (renames, drops, defaults, additions) to satisfy Serverless audit log field requirements at
+    // the output layer — without touching the upstream AuditEvent type — and slim the resource to
+    // the minimal audit attributes. These transforms are Serverless-only: on other build flavors
+    // the OTel appender is left untouched (full resource, raw ECS field names).
     const appender =
-      baseAppender.type === 'otel'
+      isServerless && baseAppender.type === 'otel'
         ? {
             ...baseAppender,
             fieldRenames: { ...baseAppender.fieldRenames, ...AUDIT_OTEL_FIELD_RENAMES },
@@ -258,7 +261,8 @@ export const createLoggingConfig = (config: ConfigType['audit']) =>
             fieldDefaults: { ...AUDIT_OTEL_FIELD_DEFAULTS, ...baseAppender.fieldDefaults },
             fieldUppercase: [...(baseAppender.fieldUppercase ?? []), ...AUDIT_OTEL_FIELD_UPPERCASE],
             fieldAdditions: { ...baseAppender.fieldAdditions, ...AUDIT_OTEL_FIELD_ADDITIONS },
-            minimalResource: true,
+            // Ship a minimal resource: keep only the audit resource attributes we set below.
+            includeResources: Object.keys(AUDIT_OTEL_RESOURCE_ATTRIBUTES),
             attributes: { ...baseAppender.attributes, ...AUDIT_OTEL_RESOURCE_ATTRIBUTES },
           }
         : baseAppender;
