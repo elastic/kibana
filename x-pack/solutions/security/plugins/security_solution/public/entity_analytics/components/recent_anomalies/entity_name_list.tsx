@@ -16,6 +16,7 @@ import {
   EntityPanelParamByType,
 } from '../../../flyout/entity_details/shared/constants';
 import { useIsNewFlyoutEnabled } from '../../../common/hooks/use_is_new_flyout_enabled';
+import { FLYOUT_ORIGIN } from '../../../common/lib/telemetry';
 import { useFlyoutApi } from '../../../flyout_v2/use_flyout_api';
 import type { EntityMetadata } from './hooks/recent_anomalies_query_hooks';
 
@@ -46,7 +47,12 @@ export const EntityNameList: React.FC<EntityNameListProps> = ({
     };
 
     if (enableNewFlyout) {
-      openEntityFlyout({ engineType: entityType, entityName: entity.entityName, ...sharedParams });
+      openEntityFlyout({
+        engineType: entityType,
+        entityName: entity.entityName,
+        origin: FLYOUT_ORIGIN.RECENT_ANOMALIES,
+        ...sharedParams,
+      });
       return;
     }
 

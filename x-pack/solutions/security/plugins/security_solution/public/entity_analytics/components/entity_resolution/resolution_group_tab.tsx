@@ -15,6 +15,7 @@ import {
   EntityPanelParamByType,
 } from '../../../flyout/entity_details/shared/constants';
 import { useIsNewFlyoutEnabled } from '../../../common/hooks/use_is_new_flyout_enabled';
+import { FLYOUT_ORIGIN } from '../../../common/lib/telemetry';
 import { useFlyoutApi } from '../../../flyout_v2/use_flyout_api';
 import type { EntityType as SecurityEntityType } from '../../../../common/entity_analytics/types';
 import { useKibana } from '../../../common/lib/kibana/kibana_react';
@@ -118,6 +119,7 @@ export const ResolutionGroupTab: React.FC<ResolutionGroupTabProps> = ({
         openEntityFlyout({
           engineType: secEntityType,
           entityName: clickedEntityName,
+          origin: FLYOUT_ORIGIN.RESOLUTION_ENTITY_LINK,
           ...sharedParams,
         });
         return;

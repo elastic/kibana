@@ -27,6 +27,7 @@ import { useGlobalTime } from '../../../../../common/containers/use_global_time'
 import { useQueryInspector } from '../../../../../common/components/page/manage_query';
 import { useQueryToggle } from '../../../../../common/containers/query_toggle';
 import { useIsNewFlyoutEnabled } from '../../../../../common/hooks/use_is_new_flyout_enabled';
+import { FLYOUT_ORIGIN } from '../../../../../common/lib/telemetry';
 import { useFlyoutApi } from '../../../../../flyout_v2/use_flyout_api';
 import { UserPanelKey } from '../../../../../flyout/entity_details/shared/constants';
 
@@ -56,6 +57,7 @@ const useOpenUserFlyout = () => {
         userName,
         scopeId: PRIVILEGED_USERS_TABLE_ID,
         contextID: PRIVILEGED_USERS_TABLE_ID,
+        origin: FLYOUT_ORIGIN.PRIVILEGED_USERS_TABLE,
       });
       return;
     }

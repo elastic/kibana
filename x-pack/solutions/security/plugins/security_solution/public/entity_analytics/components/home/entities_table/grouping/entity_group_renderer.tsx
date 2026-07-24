@@ -25,6 +25,7 @@ import {
   EntityPanelParamByType,
 } from '../../../../../flyout/entity_details/shared/constants';
 import { useIsNewFlyoutEnabled } from '../../../../../common/hooks/use_is_new_flyout_enabled';
+import { FLYOUT_ORIGIN } from '../../../../../common/lib/telemetry';
 import { useFlyoutApi } from '../../../../../flyout_v2/use_flyout_api';
 import { ENTITY_ANALYTICS_TABLE_ID } from '../../constants';
 import { RISK_SCORE_NOT_AVAILABLE } from '../../../entity_resolution/translations';
@@ -81,7 +82,12 @@ const ResolutionGroupPanel = ({
       const sharedParams = { entityId, contextID: tableId, scopeId: tableId };
 
       if (enableNewFlyout) {
-        openEntityFlyout({ engineType: entityType, entityName: targetEntityName, ...sharedParams });
+        openEntityFlyout({
+          engineType: entityType,
+          entityName: targetEntityName,
+          origin: FLYOUT_ORIGIN.ENTITIES_TABLE,
+          ...sharedParams,
+        });
         return;
       }
 

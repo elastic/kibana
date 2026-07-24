@@ -17,6 +17,7 @@ import {
   EntityPanelParamByType,
 } from '../../../flyout/entity_details/shared/constants';
 import { useIsNewFlyoutEnabled } from '../../../common/hooks/use_is_new_flyout_enabled';
+import { FLYOUT_ORIGIN } from '../../../common/lib/telemetry';
 import { useFlyoutApi } from '../../../flyout_v2/use_flyout_api';
 import { useResolutionGroup } from './hooks/use_resolution_group';
 import { ResolutionGroupTable } from './resolution_group_table';
@@ -94,6 +95,7 @@ export const ResolutionSection: React.FC<ResolutionSectionProps> = ({
         openEntityFlyout({
           engineType: entityType,
           entityName: clickedEntityName,
+          origin: FLYOUT_ORIGIN.RESOLUTION_ENTITY_LINK,
           ...sharedParams,
         });
         return;

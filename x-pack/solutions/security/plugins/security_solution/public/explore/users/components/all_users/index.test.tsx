@@ -14,6 +14,7 @@ import { usersModel } from '../../store';
 import { Direction, RiskSeverity } from '../../../../../common/search_strategy';
 import { UsersFields } from '../../../../../common/search_strategy/security_solution/users/common';
 import { fireEvent, render } from '@testing-library/react';
+import { FLYOUT_ORIGIN } from '../../../../common/lib/telemetry';
 
 const mockUseMlCapabilities = jest.fn().mockReturnValue({ isPlatinumOrTrialLicense: false });
 
@@ -207,6 +208,7 @@ describe('Users Table Component', () => {
         entityId,
         contextID: 'allUsers',
         scopeId: 'allUsers',
+        origin: FLYOUT_ORIGIN.USERS_TABLE,
       });
     });
 

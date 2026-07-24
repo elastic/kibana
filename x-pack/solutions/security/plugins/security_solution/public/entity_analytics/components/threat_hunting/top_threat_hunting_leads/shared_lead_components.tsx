@@ -15,6 +15,7 @@ import {
   EntityPanelParamByType,
 } from '../../../../flyout/entity_details/shared/constants';
 import { useIsNewFlyoutEnabled } from '../../../../common/hooks/use_is_new_flyout_enabled';
+import { FLYOUT_ORIGIN } from '../../../../common/lib/telemetry';
 import { useFlyoutApi } from '../../../../flyout_v2/use_flyout_api';
 import { getOpenEntityFlyoutLabel, VIEW_ENTITY_DETAILS } from './translations';
 import { getEntityIcon } from './utils';
@@ -109,7 +110,12 @@ export const EntityBadge: React.FC<EntityBadgeProps> = ({ entity, scopeId }) => 
     const sharedParams = { entityId, contextID: scopeId, scopeId };
 
     if (enableNewFlyout) {
-      openEntityFlyout({ engineType: entity.type, entityName: entity.name, ...sharedParams });
+      openEntityFlyout({
+        engineType: entity.type,
+        entityName: entity.name,
+        origin: FLYOUT_ORIGIN.THREAT_HUNTING_LEADS,
+        ...sharedParams,
+      });
       return;
     }
 

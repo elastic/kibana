@@ -11,6 +11,7 @@ import { screen, render, fireEvent, waitFor } from '@testing-library/react';
 import { TestProviders, createMockStore } from '../../../../common/mock';
 import { hostsModel } from '../../store';
 import { HostsTableType } from '../../store/model';
+import { FLYOUT_ORIGIN } from '../../../../common/lib/telemetry';
 import { HostsTable } from '.';
 import { mockData } from './mock';
 
@@ -237,6 +238,7 @@ describe('Hosts Table', () => {
         entityId,
         contextID: 'allHosts',
         scopeId: 'allHosts',
+        origin: FLYOUT_ORIGIN.HOSTS_TABLE,
       });
     });
 

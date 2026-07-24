@@ -45,6 +45,7 @@ import { SecurityPageName } from '../../../../app/types';
 import { UsersTableType } from '../../store/model';
 import { useNavigateTo } from '../../../../common/lib/kibana';
 import { useIsNewFlyoutEnabled } from '../../../../common/hooks/use_is_new_flyout_enabled';
+import { FLYOUT_ORIGIN } from '../../../../common/lib/telemetry';
 import { useFlyoutApi } from '../../../../flyout_v2/use_flyout_api';
 import { UserPanelKey } from '../../../../flyout/entity_details/shared/constants';
 
@@ -218,7 +219,13 @@ const UsersTableComponent: React.FC<UsersTableProps> = ({
   const openUserDetails = useCallback(
     (userName: string, entityId: string) => {
       if (enableNewFlyout) {
-        openUserFlyout({ userName, entityId, contextID: tableType, scopeId: tableType });
+        openUserFlyout({
+          userName,
+          entityId,
+          contextID: tableType,
+          scopeId: tableType,
+          origin: FLYOUT_ORIGIN.USERS_TABLE,
+        });
         return;
       }
 

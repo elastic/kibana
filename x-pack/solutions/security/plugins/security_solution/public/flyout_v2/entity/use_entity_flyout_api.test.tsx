@@ -15,6 +15,13 @@ import { flyoutProviders } from '../shared/components/flyout_provider';
 import { documentFlyoutHistoryKey } from '../shared/constants/flyout_history';
 import { buildFlyoutNavTitle } from '../shared/utils/build_flyout_nav_title';
 import { FLYOUT_DESCRIPTOR_KIND } from '../shared/url_state/flyout_v2_url_param';
+import {
+  FlyoutV2EventTypes,
+  FLYOUT_ORIGIN,
+  FLYOUT_SESSION_KIND,
+  FLYOUT_SURFACE,
+  FLYOUT_TYPE,
+} from '../../common/lib/telemetry';
 
 jest.mock('../shared/utils/build_flyout_nav_title', () => ({
   buildFlyoutNavTitle: jest.fn((title: string) => `NAV:${title}`),
@@ -213,6 +220,25 @@ describe('useEntityFlyoutApi', () => {
       entityDocId: undefined,
     });
     expect(mockBuildOnClose).toHaveBeenCalledWith(null);
+  });
+
+  it('openEntityFlyout reports the caller-provided origin', () => {
+    const { result } = renderHook(() => useEntityFlyoutApi());
+    result.current.openEntityFlyout({
+      engineType: 'host',
+      entityId: 'entity-1',
+      entityName: 'host-1',
+      scopeId: 'scope-1',
+      origin: FLYOUT_ORIGIN.ENTITIES_TABLE,
+    });
+
+    expect(mockReportEvent).toHaveBeenCalledWith(FlyoutV2EventTypes.FlyoutOpened, {
+      surface: FLYOUT_SURFACE.FLYOUT,
+      flyoutType: FLYOUT_TYPE.HOST,
+      tool: undefined,
+      session: FLYOUT_SESSION_KIND.START,
+      origin: FLYOUT_ORIGIN.ENTITIES_TABLE,
+    });
   });
 
   it('openEntityDetailsAsChild opens the matching entity flyout that inherits the current session', () => {

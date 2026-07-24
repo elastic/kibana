@@ -11,6 +11,7 @@ import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useKibana } from '../../common/lib/kibana';
 import { useOnExpandableFlyoutClose } from '../../flyout/shared/hooks/use_on_expandable_flyout_close';
 import { useIsNewFlyoutEnabled } from '../../common/hooks/use_is_new_flyout_enabled';
+import { FLYOUT_ORIGIN } from '../../common/lib/telemetry';
 import { useFlyoutApi } from '../../flyout_v2/use_flyout_api';
 
 jest.mock('@kbn/expandable-flyout', () => ({
@@ -90,6 +91,7 @@ describe('useDynamicEntityFlyout', () => {
       entityId: '123',
       scopeId: 'scope1',
       contextID: 'context1',
+      origin: FLYOUT_ORIGIN.ASSET_INVENTORY,
     });
   });
 
@@ -113,6 +115,7 @@ describe('useDynamicEntityFlyout', () => {
       entityId: '123',
       scopeId: 'scope1',
       contextID: 'context1',
+      origin: FLYOUT_ORIGIN.ASSET_INVENTORY,
     });
   });
 
@@ -136,6 +139,7 @@ describe('useDynamicEntityFlyout', () => {
       entityId: '123',
       scopeId: 'scope1',
       contextID: 'context1',
+      origin: FLYOUT_ORIGIN.ASSET_INVENTORY,
     });
   });
 
@@ -159,6 +163,7 @@ describe('useDynamicEntityFlyout', () => {
       entityId: '123',
       scopeId: 'scope1',
       contextID: 'context1',
+      origin: FLYOUT_ORIGIN.ASSET_INVENTORY,
     });
   });
 

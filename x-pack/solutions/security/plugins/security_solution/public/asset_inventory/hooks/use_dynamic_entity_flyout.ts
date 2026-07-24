@@ -14,6 +14,7 @@ import {
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../common/lib/kibana';
+import { FLYOUT_ORIGIN } from '../../common/lib/telemetry';
 import { useIsNewFlyoutEnabled } from '../../common/hooks/use_is_new_flyout_enabled';
 import { useFlyoutApi } from '../../flyout_v2/use_flyout_api';
 import {
@@ -71,10 +72,22 @@ export const useDynamicEntityFlyout = ({ onFlyoutClose }: { onFlyoutClose: () =>
     if (enableNewFlyout) {
       switch (entityType) {
         case 'user':
-          openUserFlyout({ userName: entityName ?? '', entityId, scopeId, contextID: contextId });
+          openUserFlyout({
+            userName: entityName ?? '',
+            entityId,
+            scopeId,
+            contextID: contextId,
+            origin: FLYOUT_ORIGIN.ASSET_INVENTORY,
+          });
           break;
         case 'host':
-          openHostFlyout({ hostName: entityName ?? '', entityId, scopeId, contextID: contextId });
+          openHostFlyout({
+            hostName: entityName ?? '',
+            entityId,
+            scopeId,
+            contextID: contextId,
+            origin: FLYOUT_ORIGIN.ASSET_INVENTORY,
+          });
           break;
         case 'service':
           openServiceFlyout({
@@ -82,15 +95,32 @@ export const useDynamicEntityFlyout = ({ onFlyoutClose }: { onFlyoutClose: () =>
             entityId,
             scopeId,
             contextID: contextId,
+            origin: FLYOUT_ORIGIN.ASSET_INVENTORY,
           });
           break;
         default:
           if (entityDocId && entityId) {
-            openGenericEntityFlyout({ entityDocId, entityId, scopeId, contextID: contextId });
+            openGenericEntityFlyout({
+              entityDocId,
+              entityId,
+              scopeId,
+              contextID: contextId,
+              origin: FLYOUT_ORIGIN.ASSET_INVENTORY,
+            });
           } else if (entityId) {
-            openGenericEntityFlyout({ entityId, scopeId, contextID: contextId });
+            openGenericEntityFlyout({
+              entityId,
+              scopeId,
+              contextID: contextId,
+              origin: FLYOUT_ORIGIN.ASSET_INVENTORY,
+            });
           } else if (entityDocId) {
-            openGenericEntityFlyout({ entityDocId, scopeId, contextID: contextId });
+            openGenericEntityFlyout({
+              entityDocId,
+              scopeId,
+              contextID: contextId,
+              origin: FLYOUT_ORIGIN.ASSET_INVENTORY,
+            });
           }
           break;
       }

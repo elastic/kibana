@@ -11,6 +11,7 @@ import { getOr } from 'lodash/fp';
 import { useDispatch } from 'react-redux-v7';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useIsNewFlyoutEnabled } from '../../../common/hooks/use_is_new_flyout_enabled';
+import { FLYOUT_ORIGIN } from '../../../common/lib/telemetry';
 import { useFlyoutApi } from '../../../flyout_v2/use_flyout_api';
 import { UserPanelKey, HostPanelKey } from '../../../flyout/entity_details/shared/constants';
 import { AuthStackByField } from '../../../../common/search_strategy/security_solution/users/authentications';
@@ -55,6 +56,7 @@ const AuthenticationsUserTableComponent: React.FC<AuthenticationsUserTableProps>
           userName: name,
           contextID: 'authentications',
           scopeId: 'authentications',
+          origin: FLYOUT_ORIGIN.AUTHENTICATIONS_TABLE,
         });
         return;
       }
@@ -72,7 +74,12 @@ const AuthenticationsUserTableComponent: React.FC<AuthenticationsUserTableProps>
   const openHostDetails = useCallback(
     (hostName: string) => {
       if (enableNewFlyout) {
-        openHostFlyout({ hostName, contextID: 'authentications', scopeId: 'authentications' });
+        openHostFlyout({
+          hostName,
+          contextID: 'authentications',
+          scopeId: 'authentications',
+          origin: FLYOUT_ORIGIN.AUTHENTICATIONS_TABLE,
+        });
         return;
       }
 

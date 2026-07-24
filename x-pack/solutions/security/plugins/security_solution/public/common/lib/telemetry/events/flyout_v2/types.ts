@@ -161,6 +161,32 @@ export const FLYOUT_ORIGIN = {
   NOTE_PREVIEW: 'note_preview',
   // Threat intelligence table row.
   THREAT_INTEL_TABLE: 'threat_intel_table',
+  // Asset Inventory grid row.
+  ASSET_INVENTORY: 'asset_inventory',
+  // Explore > Hosts table host link.
+  HOSTS_TABLE: 'hosts_table',
+  // Explore > Hosts > Uncommon processes table host link.
+  UNCOMMON_PROCESSES_TABLE: 'uncommon_processes_table',
+  // Explore > Hosts/Users > Authentications table entity link.
+  AUTHENTICATIONS_TABLE: 'authentications_table',
+  // Explore > Hosts > Host risk table host link.
+  HOST_RISK_TABLE: 'host_risk_table',
+  // Explore > Users table user link.
+  USERS_TABLE: 'users_table',
+  // Explore > Users > User risk table user link.
+  USER_RISK_TABLE: 'user_risk_table',
+  // Entity Analytics entities table row or grouped-row preview.
+  ENTITIES_TABLE: 'entities_table',
+  // Entity Analytics Entity Store list preview button.
+  ENTITY_STORE_LIST: 'entity_store_list',
+  // Privileged user monitoring users table.
+  PRIVILEGED_USERS_TABLE: 'privileged_users_table',
+  // Privileged access detection chart entity link.
+  PRIVILEGED_ACCESS_DETECTION: 'privileged_access_detection',
+  // Recent anomalies chart entity link.
+  RECENT_ANOMALIES: 'recent_anomalies',
+  // Threat hunting lead entity badge.
+  THREAT_HUNTING_LEADS: 'threat_hunting_leads',
   // "Analyze event" row-action button, shared across alerts table, timeline, and rule preview.
   ROW_ACTION: 'row_action',
 } as const;

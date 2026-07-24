@@ -17,6 +17,7 @@ import * as i18n from './translations';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { getUncommonColumnsCurated } from './columns';
 import { useIsNewFlyoutEnabled } from '../../../../common/hooks/use_is_new_flyout_enabled';
+import { FLYOUT_ORIGIN } from '../../../../common/lib/telemetry';
 import { useFlyoutApi } from '../../../../flyout_v2/use_flyout_api';
 import { HostPanelKey } from '../../../../flyout/entity_details/shared/constants';
 
@@ -74,7 +75,12 @@ const UncommonProcessTableComponent = React.memo<UncommonProcessTableProps>(
     const openHostDetails = useCallback(
       (hostName: string) => {
         if (enableNewFlyout) {
-          openHostFlyout({ hostName, contextID: tableType, scopeId: tableType });
+          openHostFlyout({
+            hostName,
+            contextID: tableType,
+            scopeId: tableType,
+            origin: FLYOUT_ORIGIN.UNCOMMON_PROCESSES_TABLE,
+          });
           return;
         }
 

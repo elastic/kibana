@@ -11,6 +11,7 @@ import { css } from '@emotion/react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { anomalyChartStyling } from '../../../../recent_anomalies/anomaly_chart_styling';
 import { useIsNewFlyoutEnabled } from '../../../../../../common/hooks/use_is_new_flyout_enabled';
+import { FLYOUT_ORIGIN } from '../../../../../../common/lib/telemetry';
 import { useFlyoutApi } from '../../../../../../flyout_v2/use_flyout_api';
 import { UserPanelKey } from '../../../../../../flyout/entity_details/shared/constants';
 
@@ -27,6 +28,7 @@ export const UserNameList: React.FC<{ userNames: string[] }> = ({ userNames }) =
         userName,
         scopeId: PRIVILEGED_ACCESS_DETECTION_TABLE_ID,
         contextID: PRIVILEGED_ACCESS_DETECTION_TABLE_ID,
+        origin: FLYOUT_ORIGIN.PRIVILEGED_ACCESS_DETECTION,
       });
       return;
     }

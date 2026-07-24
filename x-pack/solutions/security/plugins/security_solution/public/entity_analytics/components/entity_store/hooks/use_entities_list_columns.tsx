@@ -22,6 +22,7 @@ import {
   EntityPanelParamByType,
 } from '../../../../flyout/entity_details/shared/constants';
 import { useIsNewFlyoutEnabled } from '../../../../common/hooks/use_is_new_flyout_enabled';
+import { FLYOUT_ORIGIN } from '../../../../common/lib/telemetry';
 import { useFlyoutApi } from '../../../../flyout_v2/use_flyout_api';
 import { FormattedRelativePreferenceDate } from '../../../../common/components/formatted_date';
 import { RiskScoreLevel } from '../../severity/common';
@@ -83,6 +84,7 @@ export const useEntitiesListColumns = (): EntitiesListColumns => {
               entityId: record.entity?.id ?? '',
               contextID: ENTITIES_LIST_TABLE_ID,
               scopeId: ENTITIES_LIST_TABLE_ID,
+              origin: FLYOUT_ORIGIN.ENTITY_STORE_LIST,
             });
             return;
           }

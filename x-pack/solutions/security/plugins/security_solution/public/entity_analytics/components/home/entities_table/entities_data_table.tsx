@@ -55,6 +55,7 @@ import {
   EntityPanelParamByType,
 } from '../../../../flyout/entity_details/shared/constants';
 import { useIsNewFlyoutEnabled } from '../../../../common/hooks/use_is_new_flyout_enabled';
+import { FLYOUT_ORIGIN } from '../../../../common/lib/telemetry';
 import { useFlyoutApi } from '../../../../flyout_v2/use_flyout_api';
 import {
   EntitySourceValue,
@@ -224,7 +225,12 @@ export const EntitiesDataTable = ({
       const sharedParams = { entityId, contextID: tableId, scopeId: tableId };
 
       if (enableNewFlyout) {
-        openEntityFlyout({ engineType: entityType, entityName, ...sharedParams });
+        openEntityFlyout({
+          engineType: entityType,
+          entityName,
+          origin: FLYOUT_ORIGIN.ENTITIES_TABLE,
+          ...sharedParams,
+        });
         return;
       }
 

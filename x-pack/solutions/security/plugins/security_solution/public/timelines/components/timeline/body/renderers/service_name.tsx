@@ -15,6 +15,7 @@ import { useEntityFromStore } from '../../../../../flyout/entity_details/shared/
 import { EntityType } from '../../../../../../common/search_strategy';
 import { EntityDetailsLink } from '../../../../../common/components/links';
 import { useIsNewFlyoutEnabled } from '../../../../../common/hooks/use_is_new_flyout_enabled';
+import { FLYOUT_ORIGIN } from '../../../../../common/lib/telemetry';
 import { useFlyoutApi } from '../../../../../flyout_v2/use_flyout_api';
 import { ServicePanelKey } from '../../../../../flyout/entity_details/shared/constants';
 import { StatefulEventContext } from '../../../../../common/components/events_viewer/stateful_event_context';
@@ -80,6 +81,7 @@ const ServiceNameComponent: React.FC<Props> = ({
           entityId: resolvedEntityId,
           contextID: contextId,
           scopeId: timelineID,
+          origin: FLYOUT_ORIGIN.TABLE_FIELD_LINK,
         });
         return;
       }
