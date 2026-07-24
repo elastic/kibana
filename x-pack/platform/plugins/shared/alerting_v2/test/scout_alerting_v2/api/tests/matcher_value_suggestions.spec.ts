@@ -27,14 +27,17 @@ apiTest.describe('Matcher value suggestions API', { tag: '@local-stateful-classi
     async ({ apiClient }) => {
       // `episode_status` is backed by static suggestions, so the result is
       // deterministic without seeding any alert events or rules.
-      const response = await apiClient.post(ALERTING_V2_MATCHER_VALUE_SUGGESTIONS_API_PATH, {
-        headers: adminHeaders,
-        body: {
-          field: 'episode_status',
-          query: '',
-        },
-        responseType: 'json',
-      });
+      const response = await apiClient.post(
+        ALERTING_V2_INTERNAL_SUGGESTIONS_MATCHER_VALUES_API_PATH,
+        {
+          headers: adminHeaders,
+          body: {
+            field: 'episode_status',
+            query: '',
+          },
+          responseType: 'json',
+        }
+      );
 
       expect(response).toHaveStatusCode(200);
       expect(response.body).toStrictEqual(
