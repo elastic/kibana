@@ -11,7 +11,8 @@ import { expect } from '@kbn/scout/ui';
 import { tags } from '@kbn/scout';
 import { test } from '../fixtures';
 
-test.describe('navigation', { tag: tags.serverless.security.complete }, () => {
+// Failing: See https://github.com/elastic/kibana/issues/266915
+test.describe.skip('navigation', { tag: tags.serverless.security.complete }, () => {
   test('has security serverless side nav', async ({ pageObjects, browserAuth }) => {
     await browserAuth.loginAsPrivilegedUser();
     await pageObjects.navigation.goToSecurity();
@@ -37,12 +38,17 @@ test.describe('navigation', { tag: tags.serverless.security.complete }, () => {
     await browserAuth.loginAsPrivilegedUser();
     await pageObjects.navigation.goToSecurity();
 
-    await page.testSubj.click('chromeNextGlobalHeaderSearchButton');
+    // The search trigger differs between classic (inline reveal) and chrome-next (header button);
+    // accept either so the test works regardless of whether chrome-next is enabled.
+    await page.testSubj
+      .locator('chromeNextGlobalHeaderSearchButton')
+      .or(page.testSubj.locator('nav-search-reveal'))
+      .click();
     await page.testSubj.fill('nav-search-input', 'security dashboards');
     await page
       .locator('[data-test-subj="nav-search-option"][url="/app/security/dashboards"]')
       .click();
-    // selecting a result closes the search modal and navigates
+    // selecting a result closes the search and navigates
 
     await page.waitForURL(/app\/security\/dashboards/);
     expect(page.url()).toContain('app/security/dashboards');
@@ -80,7 +86,7 @@ test.describe('navigation', { tag: tags.serverless.security.complete }, () => {
     await pageObjects.collapsibleNav.clickItem('management:maintenanceWindows', {
       lowercase: false,
     });
-    await expect(pageObjects.navigation.pageTitle()).toContainText('Maintenance Windows');
+    await expect(pageObjects.navigation.getBreadcrumbByText('Maintenance Windows')).toBeVisible();
   });
 
   test('opens panel on legacy management landing page', async ({

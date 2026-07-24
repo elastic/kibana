@@ -53,11 +53,9 @@ export class NavigationPage {
     // Open the global search if it is not already open (the input may be behind a
     // header or reveal button, or rendered inline).
     if (!(await this.globalSearchInput.isVisible())) {
-      if (await this.globalSearchButton.isVisible()) {
-        await this.globalSearchButton.click();
-      } else if (await this.globalSearchRevealButton.isVisible()) {
-        await this.globalSearchRevealButton.click();
-      }
+      // Only one opener renders at a time (chrome-next header button or classic reveal button),
+      // so `.or()` clicks whichever is present.
+      await this.globalSearchButton.or(this.globalSearchRevealButton).click();
       await this.globalSearchInput.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
     }
 

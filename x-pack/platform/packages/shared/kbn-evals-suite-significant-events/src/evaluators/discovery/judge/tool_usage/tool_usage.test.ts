@@ -23,6 +23,16 @@ const toolCall = (toolId: string): ConverseStep => ({
   tool_call_id: toolId,
 });
 
+const retryCall = (toolId: string): ConverseStep => ({
+  ...toolCall(toolId),
+  params: { items: [{ event_id: 'failed-event' }] },
+});
+
+const retryableEventsWriteCall = (): ConverseStep => ({
+  ...toolCall(TOOL_ID_EVENTS_WRITE),
+  results: [{ data: { results: [{ index: 0, written: false, reason: 'bulk_error' }] } }],
+});
+
 const detectionSignal = (withQuery: boolean): SignalEntry => ({
   type: 'detection',
   stream_name: 'logs',
@@ -86,5 +96,31 @@ describe('scoreJudgeToolUsage', () => {
       score: 0.5,
       label: `unnecessary-${TOOL_ID_DISCOVERY_WRITE}`,
     });
+  });
+
+  it('penalizes multiple event writes without a partial-failure retry', () => {
+    expect(
+      scoreJudgeToolUsage({
+        discoveries: [discovery(true)],
+        steps: [
+          toolCall(TOOL_ID_EXECUTE_ESQL),
+          toolCall(TOOL_ID_EVENTS_WRITE),
+          toolCall(TOOL_ID_EVENTS_WRITE),
+        ],
+      })
+    ).toMatchObject({ score: 0.75, label: 'multiple-events-write-calls' });
+  });
+
+  it('allows one retry after an event bulk item fails', () => {
+    expect(
+      scoreJudgeToolUsage({
+        discoveries: [discovery(true)],
+        steps: [
+          toolCall(TOOL_ID_EXECUTE_ESQL),
+          retryableEventsWriteCall(),
+          retryCall(TOOL_ID_EVENTS_WRITE),
+        ],
+      })
+    ).toMatchObject({ score: 1, label: 'correct' });
   });
 });

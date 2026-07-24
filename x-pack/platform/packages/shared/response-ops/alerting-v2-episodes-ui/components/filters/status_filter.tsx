@@ -5,49 +5,61 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
-import { EuiPopover, EuiFilterButton } from '@elastic/eui';
+import React, { useCallback, useMemo, useState } from 'react';
+import { EuiPopover, EuiFilterButton, EuiHealth, useEuiTheme } from '@elastic/eui';
+import type { EuiThemeComputed } from '@elastic/eui';
 import { InlineFilterPopover } from './inline_filter_popover';
 import * as i18n from './translations';
 
-const EPISODE_STATUS_OPTIONS: Array<{ label: string; value: string }> = [
-  {
-    label: i18n.STATUS_FILTER_ACTIVE_LABEL,
-    value: 'active',
-  },
-  {
-    label: i18n.STATUS_FILTER_RECOVERING_LABEL,
-    value: 'recovering',
-  },
-  {
-    label: i18n.STATUS_FILTER_PENDING_LABEL,
-    value: 'pending',
-  },
-  {
-    label: i18n.STATUS_FILTER_INACTIVE_LABEL,
-    value: 'inactive',
-  },
+type StatusDotColorKey = Extract<keyof EuiThemeComputed['colors'], `text${string}`>;
+
+// The dot uses a resolved theme color (rather than a named token like `danger`) so it keeps its
+// color when its row is highlighted/selected: `EuiIcon` applies custom color values inline, which
+// beats `EuiSelectable`'s highlighted-row recolor. Colors mirror the status badge colors.
+const EPISODE_STATUS_OPTIONS: Array<{
+  label: string;
+  value: string;
+  colorKey: StatusDotColorKey;
+}> = [
+  { label: i18n.STATUS_FILTER_ACTIVE_LABEL, value: 'active', colorKey: 'textDanger' },
+  { label: i18n.STATUS_FILTER_RECOVERING_LABEL, value: 'recovering', colorKey: 'textPrimary' },
+  { label: i18n.STATUS_FILTER_PENDING_LABEL, value: 'pending', colorKey: 'textWarning' },
+  { label: i18n.STATUS_FILTER_INACTIVE_LABEL, value: 'inactive', colorKey: 'textSuccess' },
 ];
 
 interface AlertEpisodesStatusFilterProps {
-  selectedStatus?: string | null;
-  onStatusChange: (status: string | undefined) => void;
+  selectedStatuses?: string[] | null;
+  onStatusesChange: (statuses: string[] | undefined) => void;
   'data-test-subj'?: string;
 }
 
 export function AlertEpisodesStatusFilter({
-  selectedStatus,
-  onStatusChange,
+  selectedStatuses,
+  onStatusesChange,
   'data-test-subj': dataTestSubj = 'statusFilter',
 }: AlertEpisodesStatusFilterProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const { euiTheme } = useEuiTheme();
+
+  const options = useMemo(
+    () =>
+      EPISODE_STATUS_OPTIONS.map(({ label, value, colorKey }) => ({
+        label,
+        value,
+        prepend: <EuiHealth color={euiTheme.colors[colorKey]} />,
+      })),
+    [euiTheme]
+  );
 
   const handleSelectionChange = useCallback(
     (values: string[]) => {
-      onStatusChange(values.length > 0 ? values[0] : undefined);
+      onStatusesChange(values.length > 0 ? values : undefined);
     },
-    [onStatusChange]
+    [onStatusesChange]
   );
+
+  const selectedValues = selectedStatuses ?? [];
+  const activeCount = selectedValues.length;
 
   return (
     <EuiPopover
@@ -58,9 +70,9 @@ export function AlertEpisodesStatusFilter({
           iconSide="right"
           onClick={() => setIsOpen(!isOpen)}
           isSelected={isOpen}
-          hasActiveFilters={!!selectedStatus}
-          numFilters={EPISODE_STATUS_OPTIONS.length}
-          numActiveFilters={selectedStatus ? 1 : undefined}
+          hasActiveFilters={activeCount > 0}
+          numFilters={options.length}
+          numActiveFilters={activeCount > 0 ? activeCount : undefined}
           data-test-subj={`${dataTestSubj}-button`}
         >
           {i18n.STATUS_FILTER_LABEL}
@@ -72,9 +84,9 @@ export function AlertEpisodesStatusFilter({
       panelPaddingSize="none"
     >
       <InlineFilterPopover
-        options={EPISODE_STATUS_OPTIONS}
-        selectedValues={selectedStatus ? [selectedStatus] : []}
-        singleSelect
+        options={options}
+        selectedValues={selectedValues}
+        singleSelect={false}
         onSelectionChange={handleSelectionChange}
         emptyMessage={i18n.STATUS_FILTER_NO_MATCH}
         data-test-subj={`${dataTestSubj}-popover`}

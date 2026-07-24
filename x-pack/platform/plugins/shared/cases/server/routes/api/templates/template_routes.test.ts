@@ -12,6 +12,10 @@ import type { Template } from '../../../../common/types/domain/template/v1';
 import {
   MAX_TEMPLATE_DESCRIPTION_LENGTH,
   MAX_TAGS_PER_TEMPLATE,
+  CASE_TEMPLATES_URL,
+  CASE_TEMPLATE_DETAILS_URL,
+  CASE_FIELDS_URL,
+  CASE_APPLICABLE_FIELDS_URL,
 } from '../../../../common/constants';
 import { mockTemplates } from './mock_data';
 import { getTemplatesRoute } from './get_templates_route';
@@ -383,11 +387,11 @@ describe('Template Routes', () => {
       );
     });
 
-    it('coerces string isDeleted "true" to boolean true', async () => {
+    it('passes isDeleted boolean true to getAllTemplates', async () => {
       const context = createMockContext();
       const casesClient = await (await context.cases).getCasesClient();
       const request = {
-        query: { page: 1, perPage: 10, isDeleted: 'true' },
+        query: { page: 1, perPage: 10, isDeleted: true },
       };
       const response = createMockResponse();
 
@@ -401,11 +405,11 @@ describe('Template Routes', () => {
       );
     });
 
-    it('coerces page and perPage from string to number', async () => {
+    it('passes page and perPage numbers to getAllTemplates', async () => {
       const context = createMockContext();
       const casesClient = await (await context.cases).getCasesClient();
       const request = {
-        query: { page: '2', perPage: '25', isDeleted: false },
+        query: { page: 2, perPage: 25, isDeleted: false },
       };
       const response = createMockResponse();
 
@@ -1158,12 +1162,18 @@ describe('Template Routes', () => {
   });
 
   describe('getPublicTemplateRoutes feature flag gating', () => {
-    it('returns both public routes when templates.enabled is true', () => {
+    it('returns all public routes when templates.enabled is true', () => {
       const config = { templates: { enabled: true } } as unknown as Parameters<
         typeof getPublicTemplateRoutes
       >[0];
       const routes = getPublicTemplateRoutes(config);
-      expect(routes).toHaveLength(2);
+      expect(routes).toHaveLength(4);
+      expect(routes.map((route) => route.path)).toEqual([
+        CASE_TEMPLATES_URL,
+        CASE_TEMPLATE_DETAILS_URL,
+        CASE_FIELDS_URL,
+        CASE_APPLICABLE_FIELDS_URL,
+      ]);
     });
 
     it('returns empty array when templates.enabled is false', () => {

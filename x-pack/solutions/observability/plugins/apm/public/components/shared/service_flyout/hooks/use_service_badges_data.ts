@@ -8,9 +8,9 @@
 import type { ServiceAnomalyScoreResponse } from '@kbn/apm-api-shared';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import type { Environment } from '../../../../../common/environment_rt';
-import { getAlertingCapabilities } from '../../../alerting/utils/get_alerting_capabilities';
-import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
+import { useServiceFlyoutContext } from '../service_flyout_context';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
+import { getAlertingCapabilities } from '../../../alerting/utils/get_alerting_capabilities';
 
 interface ServiceBadgesDataParams {
   serviceName: string;
@@ -30,15 +30,17 @@ export function useServiceBadgesData({
   rangeFrom,
   rangeTo,
 }: ServiceBadgesDataParams): ServiceBadgesData {
-  const { core, plugins } = useApmPluginContext();
+  const {
+    deps: { core, alerting },
+  } = useServiceFlyoutContext();
   const { capabilities } = core.application;
-  const { isAlertingAvailable, canReadAlerts } = getAlertingCapabilities(plugins, capabilities);
-  const { start = '', end = '' } = useTimeRange({ rangeFrom, rangeTo });
+  const { canReadAlerts } = getAlertingCapabilities({ alerting }, capabilities);
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
   const canReadMlJobs = !!capabilities.ml?.canGetJobs;
 
   const { data: alertsData, status: alertsStatus } = useFetcher(
     (callApmApi) => {
-      if (!(isAlertingAvailable && canReadAlerts)) return;
+      if (!canReadAlerts || !start || !end) return;
 
       return callApmApi('GET /internal/apm/services/{serviceName}/alerts_count', {
         params: {
@@ -49,13 +51,13 @@ export function useServiceBadgesData({
         .then((res) => ({ alertsCount: res.alertsCount }))
         .catch((): { alertsCount?: number } => ({}));
     },
-    [serviceName, start, end, environment, isAlertingAvailable, canReadAlerts],
+    [serviceName, start, end, environment, canReadAlerts],
     { showToastOnError: false }
   );
 
   const { data: anomalyData, status: anomalyStatus } = useFetcher(
     (callApmApi) => {
-      if (!canReadMlJobs) return;
+      if (!canReadMlJobs || !start || !end) return;
 
       return callApmApi('GET /internal/apm/services/{serviceName}/anomaly_score', {
         params: {
@@ -72,7 +74,7 @@ export function useServiceBadgesData({
 
   const alertsResolved = alertsStatus === FETCH_STATUS.SUCCESS;
   const alertsCount = alertsResolved ? alertsData?.alertsCount ?? 0 : 0;
-  const canShowAlerts = isAlertingAvailable && canReadAlerts && alertsResolved && alertsCount > 0;
+  const canShowAlerts = canReadAlerts && alertsResolved && alertsCount > 0;
 
   const anomalyResolved = anomalyStatus === FETCH_STATUS.SUCCESS;
   const canShowAnomaly =

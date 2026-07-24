@@ -274,11 +274,11 @@ evaluate.describe(
           }
         );
 
-        // Continuation over time — does a re-arriving incident fold into ONE slug? We grade three
+        // Continuation over time — does a re-arriving incident fold into ONE event ID? We grade three
         // matchers per scenario: rule-UUID re-detection (same rule re-fires) plus the declared
         // `semantic` and `cascade` chains (different rules, same event). One experiment example
-        // per (scenario × path); each chain is ground truth, so slug reuse is the correct answer
-        // and minting a new slug is the defect ("slug proliferation is a defect").
+        // per (scenario × path); each chain is ground truth, so event ID reuse is the correct answer
+        // and minting a new event ID is the defect.
         evaluate(
           'Discovery agent — continuation over time',
           async ({
@@ -328,7 +328,7 @@ evaluate.describe(
                 datasets: [
                   {
                     name: `sigevents: Discovery agent continuation (${dataset.id})`,
-                    description: `[${dataset.id}] discovery agent folds a re-arriving incident into one slug across rule-UUID re-detection and the declared semantic/cascade chains`,
+                    description: `[${dataset.id}] discovery agent folds a re-arriving incident into one event ID across rule-UUID re-detection and the declared semantic/cascade chains`,
                     examples: runs.map((run) => ({
                       id: run.id,
                       input: {
@@ -397,7 +397,7 @@ evaluate.describe(
                   const cycles: ContinuationCycle[] = [];
                   // Tracks event_uuids seeded by this run so they can be deleted after all cycles
                   // complete. Without this cleanup the next run's cycle-0 event_search would
-                  // find the previous run's open events and either reuse a foreign slug or
+                  // find the previous run's open events and either reuse a foreign event ID or
                   // produce spurious noise. Deleting by explicit IDs is safer than wiping the
                   // entire stream and works correctly even when concurrency > 1.
                   const seededEventUuids: string[] = [];
@@ -405,7 +405,7 @@ evaluate.describe(
                   try {
                     // Feed one detection per cycle, oldest first. After each cycle, seed a
                     // SignificantEvent into the events data stream for each produced discovery so the
-                    // next cycle's `event_search state: "open"` call finds it — mirroring what the
+                    // next cycle's `event_search status: "open"` call finds it — mirroring what the
                     // judge would write between discovery invocations in production.
                     for (let i = 0; i < run.sequence.length; i++) {
                       const base = run.sequence[i];
@@ -421,13 +421,13 @@ evaluate.describe(
                       });
 
                       const discoveries = extractDiscoveriesFromToolCall(converseResult.steps);
-                      const producedSlugs = discoveries
+                      const producedEventIds = discoveries
                         .map((discovery) => discovery.event_id)
-                        .filter((slug): slug is string => Boolean(slug));
+                        .filter((eventId): eventId is string => Boolean(eventId));
 
                       cycles.push({
                         ruleName: detection.rule_name,
-                        producedSlugs,
+                        producedEventIds,
                         steps: converseResult.steps,
                       });
 
@@ -445,7 +445,7 @@ evaluate.describe(
                         });
                         seededEventUuids.push(eventUuid);
                       }
-                      if (producedSlugs.length > 0) {
+                      if (producedEventIds.length > 0) {
                         await esClient.indices.refresh({
                           index: SIGNIFICANT_EVENTS_EVENTS_DATA_STREAM,
                         });
@@ -465,7 +465,7 @@ evaluate.describe(
                 },
               },
               [
-                // Task returns a slug trajectory (not discoveries/steps), so only the continuation
+                // Task returns an event ID trajectory (not discoveries/steps), so only continuation
                 // check applies; trace-based evaluators aggregate across all cycles.
                 ...createContinuationEvaluators(),
                 evaluators.traceBasedEvaluators.inputTokens,

@@ -20,11 +20,7 @@ export type SpaceSolution = 'es' | 'oblt' | 'security' | 'classic';
 export class SpacesPage {
   constructor(private readonly page: ScoutPage) {}
 
-  // ---- generic header / selector ----
-
   async isProjectHeaderVisible() {
-    // Accept either the chrome-next global header or the classic project header so this works
-    // regardless of whether chrome-next is enabled.
     return await this.page.testSubj
       .locator('chromeNextGlobalHeader')
       .or(this.page.testSubj.locator('kibanaProjectHeader'))
@@ -61,9 +57,12 @@ export class SpacesPage {
       await contextTrigger.click();
       await this.page.testSubj.locator('contextSwitcherPopoverPanel').waitFor({ state: 'visible' });
       const spacesRow = this.page.testSubj.locator('contextSwitcherSpacesRow');
+      const spacesList = this.page.locator('#contextSwitcherSpacesList');
+      await spacesRow.or(spacesList).waitFor({ state: 'visible' });
       if (await spacesRow.isVisible()) {
         await spacesRow.click();
       }
+      await spacesList.waitFor({ state: 'visible' });
     } else {
       await classicTrigger.click();
       await this.page.testSubj.locator('spaceMenuPopoverPanel').waitFor({ state: 'visible' });
@@ -78,7 +77,6 @@ export class SpacesPage {
     await this.page.testSubj.locator('manageSpaces').waitFor({ state: 'visible' });
   }
 
-  /** Reads the `title` attribute of the header space selector (current space name). */
   async getCurrentSpaceTitle() {
     return (await this.spacesSelectorLocator().getAttribute('title'))?.trim() ?? null;
   }
@@ -324,11 +322,9 @@ export class SpacesPage {
   }
 
   async searchSpacesInNav(searchText: string) {
-    const input = this.navSearchInputLocator();
-    await input.fill(searchText);
+    await this.navSearchInputLocator().fill(searchText);
   }
 
-  /** Counts the selectable space options currently shown in the nav popover. */
   async getNavSpaceResultCount() {
     return await this.spacesMenuPanelLocator().locator('li[role="option"]').count();
   }

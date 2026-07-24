@@ -24,16 +24,23 @@ export class GlobalNavService extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly find = this.ctx.getService('find');
   private readonly retry = this.ctx.getService('retry');
+  private readonly config = this.ctx.getService('config');
+  private readonly findTimeout = this.config.get('timeouts.find');
 
   /**
    * Visible page title from chrome-next `appHeaderTitle` or legacy `EuiPageHeader` h1.
    */
   public async getPageTitle(): Promise<string> {
-    if (await this.testSubjects.exists('appHeaderTitle', { timeout: 500 })) {
-      return await this.testSubjects.getVisibleText('appHeaderTitle');
-    }
-    const titleElement = await this.find.byCssSelector('.euiPageHeader h1.euiTitle');
-    return await titleElement.getVisibleText();
+    const legacyTitleSelector = '.euiPageHeader h1.euiTitle';
+    return await this.retry.try(async () => {
+      if (await this.testSubjects.exists('appHeaderTitle', { timeout: 0 })) {
+        return await this.testSubjects.getVisibleText('appHeaderTitle');
+      }
+      if (await this.find.existsByCssSelector(legacyTitleSelector, 0)) {
+        return await (await this.find.byCssSelector(legacyTitleSelector)).getVisibleText();
+      }
+      throw new Error('No page title has rendered');
+    });
   }
 
   /**
@@ -42,34 +49,20 @@ export class GlobalNavService extends FtrService {
    * flip mid-session (e.g. entering a solution view), so this is probed per call.
    *
    * The active header can be briefly absent while navigating, so we wait for one of the known headers
-   * to settle before deciding. This keeps consecutive probes consistent instead of racing an
-   * unpainted header. If no header renders (e.g. a chromeless page) we fall back to an immediate check.
+   * to settle before deciding. Pages without a recognized header retain classic behavior.
    */
   public async isNextProjectChrome(): Promise<boolean> {
-    const detectHeader = async (): Promise<boolean | undefined> => {
-      if (await this.testSubjects.exists('chromeNextGlobalHeader', { timeout: 0 })) {
-        return true;
-      }
-      if (
-        (await this.testSubjects.exists('headerGlobalNav', { timeout: 0 })) ||
-        (await this.testSubjects.exists('kibanaProjectHeader', { timeout: 0 }))
-      ) {
-        return false;
-      }
-      return undefined;
-    };
+    // The chrome shell renders exactly one of these headers once loaded, but none while navigating,
+    // so wait for whichever appears before deciding rather than probing a single header once.
+    const anyHeaderSelector = ['chromeNextGlobalHeader', 'headerGlobalNav', 'kibanaProjectHeader']
+      .map((subj) => `[data-test-subj="${subj}"]`)
+      .join(',');
 
-    try {
-      return await this.retry.tryForTime(2000, async () => {
-        const result = await detectHeader();
-        if (result === undefined) {
-          throw new Error('no chrome header has rendered yet');
-        }
-        return result;
-      });
-    } catch {
-      return (await detectHeader()) ?? false;
+    if (!(await this.find.existsByCssSelector(anyHeaderSelector, this.findTimeout))) {
+      return false;
     }
+
+    return await this.testSubjects.exists('chromeNextGlobalHeader', { timeout: 0 });
   }
 
   public async moveMouseToLogo(): Promise<void> {
