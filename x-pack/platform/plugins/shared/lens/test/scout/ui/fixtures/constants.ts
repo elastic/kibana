@@ -22,6 +22,8 @@ export const LOGSTASH_IN_RANGE_DATES = {
 } as const;
 
 export const KBN_ARCHIVE_PATHS = {
+  // Shared Lens FTR fixture archive (index patterns + saved Lens visualizations), loaded per space.
+  LENS_BASIC: 'x-pack/platform/test/functional/fixtures/kbn_archives/lens/lens_basic.json',
   ESQL_CONVERSION_DASHBOARD: `${LENS_SCOUT_FIXTURES_DIR}/esql_conversion_dashboard.json`,
   OPEN_IN_LENS: {
     TSVB: {
@@ -46,6 +48,8 @@ export const KBN_ARCHIVE_PATHS = {
 } as const;
 
 export const VISUALIZATION_TITLES = {
+  // Saved legacy metric visualization from the lens_basic archive.
+  LEGACY_METRIC: 'Artistpreviouslyknownaslens',
   OPEN_IN_LENS: {
     AGG_BASED: {
       NAVIGATION_LINE: 'Visualize navigation - Line',
