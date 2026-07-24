@@ -28523,7 +28523,6 @@
     "xpack.maps.styles.color.staticDynamicSelect.staticLabel": "Solide",
     "xpack.maps.styles.colorStops.categoricalStop.noDupesWarningLabel": "Stoppwerte müssen eindeutig sein",
     "xpack.maps.styles.colorStops.deleteButtonAriaLabel": "Löschen",
-    "xpack.maps.styles.colorStops.deleteButtonLabel": "Löschen",
     "xpack.maps.styles.colorStops.hexWarningLabel": "Die Farbe muss einen gültigen Hex-Wert angeben",
     "xpack.maps.styles.colorStops.ordinalStop.numberOrderingWarningLabel": "Der Stopp muss größer als der vorherige Stoppwert sein",
     "xpack.maps.styles.colorStops.ordinalStop.numberWarningLabel": "Der Stopp muss eine Zahl sein",
