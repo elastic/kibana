@@ -53,7 +53,6 @@ export const getNeedsActionEvents = (events: SignificantEvent[]): SignificantEve
 export const getResolvedEvents = (events: SignificantEvent[]): SignificantEvent[] =>
   events.filter(({ status }) => isResolvedStatus(status));
 
-/** Keeps only the events that reference the given stream, or all events when no stream is selected. */
 export const filterEventsByStream = (
   events: SignificantEvent[],
   streamName: string | undefined
