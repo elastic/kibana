@@ -6,9 +6,11 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { map } from 'rxjs';
+import { distinctUntilChanged, map } from 'rxjs';
+import { EuiSuperDatePicker } from '@elastic/eui';
 import type {
   ApplicationStart,
+  FeatureFlagsStart,
   HttpStart,
   IUiSettingsClient,
   NotificationsStart,
@@ -23,6 +25,9 @@ import {
   type TimeWindowButtonsConfig,
 } from '@kbn/date-range-picker';
 import { useDateRangePickerPresets, type PresetItem } from '@kbn/date-range-picker-presets';
+
+/** Same platform flag as unified search — when disabled, fall back to EuiSuperDatePicker. */
+const DATE_RANGE_PICKER_FEATURE_FLAG = 'unifiedSearch.newDateRangePickerEnabled';
 
 const DEFAULT_DATE_PICKER_SETTINGS: DateRangePickerSettings = {
   roundRelativeTime: false,
@@ -45,6 +50,7 @@ export interface AlertingDateRangePickerServices {
   http: HttpStart;
   application: ApplicationStart;
   uiSettings: IUiSettingsClient;
+  featureFlags: FeatureFlagsStart;
 }
 
 export interface AlertingDateRangePickerProps {
@@ -71,12 +77,15 @@ export interface AlertingDateRangePickerProps {
 /**
  * Shared Alerting v2 wrapper around `@kbn/date-range-picker` that owns settings,
  * persisted presets, recent ranges, and optional auto-refresh.
+ *
+ * Falls back to `EuiSuperDatePicker` when `unifiedSearch.newDateRangePickerEnabled`
+ * is disabled.
  */
 export const AlertingDateRangePicker = ({
   from,
   to,
   onChange,
-  services: { data, notifications, http, application, uiSettings },
+  services: { data, notifications, http, application, uiSettings, featureFlags },
   onRefresh,
   isLoading = false,
   showTimeWindowButtons = false,
@@ -89,6 +98,19 @@ export const AlertingDateRangePicker = ({
     DEFAULT_DATE_PICKER_SETTINGS
   );
   const [autoRefresh, setAutoRefresh] = useState<AutoRefreshSettings>(DEFAULT_AUTO_REFRESH);
+  const [isDateRangeInvalid, setIsDateRangeInvalid] = useState(false);
+
+  const isDateRangePickerEnabled$ = useMemo(
+    () =>
+      featureFlags
+        .getBooleanValue$(DATE_RANGE_PICKER_FEATURE_FLAG, true)
+        .pipe(distinctUntilChanged()),
+    [featureFlags]
+  );
+  const isDateRangePickerEnabled = useObservable(
+    isDateRangePickerEnabled$,
+    featureFlags.getBooleanValue(DATE_RANGE_PICKER_FEATURE_FLAG, true)
+  );
 
   const dateRangePickerPresets = useDateRangePickerPresets({
     service: data.dateRangePickerPresets,
@@ -114,6 +136,7 @@ export const AlertingDateRangePicker = ({
 
   const handleChange = useCallback(
     ({ start, end, isInvalid }: DateRangePickerOnChangeProps) => {
+      setIsDateRangeInvalid(isInvalid);
       if (isInvalid) {
         return;
       }
@@ -122,6 +145,10 @@ export const AlertingDateRangePicker = ({
     },
     [onChange, timeHistory]
   );
+
+  const handleInputChange = useCallback(() => {
+    setIsDateRangeInvalid(false);
+  }, []);
 
   const handleSettingsChange = useCallback(
     (next: DateRangePickerSettings) => {
@@ -140,10 +167,38 @@ export const AlertingDateRangePicker = ({
     [onRefresh]
   );
 
+  const handleLegacyTimeChange = useCallback(
+    ({ start, end }: { start: string; end: string }) => {
+      onChange({ from: start, to: end });
+      timeHistory.add({ from: start, to: end });
+    },
+    [onChange, timeHistory]
+  );
+
+  if (!isDateRangePickerEnabled) {
+    return (
+      <EuiSuperDatePicker
+        start={from}
+        end={to}
+        onTimeChange={handleLegacyTimeChange}
+        onRefresh={onRefresh}
+        isLoading={isLoading}
+        showUpdateButton={onRefresh ? 'iconOnly' : false}
+        updateButtonProps={onRefresh ? { fill: false } : undefined}
+        width={width === 'restricted' ? 'auto' : width}
+        compressed={compressed}
+        dateFormat={dateFormat}
+        data-test-subj={dataTestSubj}
+      />
+    );
+  }
+
   return (
     <DateRangePicker
       value={value}
       onChange={handleChange}
+      onInputChange={handleInputChange}
+      isInvalid={isDateRangeInvalid}
       isLoading={isLoading}
       showTimeWindowButtons={showTimeWindowButtons}
       presets={dateRangePickerPresets.presets}

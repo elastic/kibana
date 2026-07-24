@@ -289,6 +289,25 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
       )}
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={false}>
         <CpsPicker />
+        <EuiFlexItem grow={false}>
+          <EuiToolTip
+            content={i18n.translate('xpack.alertingV2.composeDiscover.querySandbox.searchTooltip', {
+              defaultMessage: 'Search ({shortcut})',
+              values: { shortcut: RUN_SHORTCUT_LABEL },
+            })}
+          >
+            <EuiButton
+              size="s"
+              onClick={run}
+              isLoading={isLoading}
+              data-test-subj="querySandboxRunQuery"
+            >
+              {i18n.translate('xpack.alertingV2.composeDiscover.querySandbox.searchButtonLabel', {
+                defaultMessage: 'Search',
+              })}
+            </EuiButton>
+          </EuiToolTip>
+        </EuiFlexItem>
         <EuiFlexItem grow={false} style={{ width: 200, minWidth: 0 }}>
           <EuiSelect
             options={timeFieldOptions}
@@ -320,25 +339,6 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
           />
         </EuiFlexItem>
         {headerActions && <EuiFlexItem grow={false}>{headerActions}</EuiFlexItem>}
-        <EuiFlexItem grow={false}>
-          <EuiToolTip
-            content={i18n.translate('xpack.alertingV2.composeDiscover.querySandbox.searchTooltip', {
-              defaultMessage: 'Search ({shortcut})',
-              values: { shortcut: RUN_SHORTCUT_LABEL },
-            })}
-          >
-            <EuiButton
-              size="s"
-              onClick={run}
-              isLoading={isLoading}
-              data-test-subj="querySandboxRunQuery"
-            >
-              {i18n.translate('xpack.alertingV2.composeDiscover.querySandbox.searchButtonLabel', {
-                defaultMessage: 'Search',
-              })}
-            </EuiButton>
-          </EuiToolTip>
-        </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="s" />
 

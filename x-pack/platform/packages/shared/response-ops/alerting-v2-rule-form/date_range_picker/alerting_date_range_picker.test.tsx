@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { BehaviorSubject, of } from 'rxjs';
 import { render, screen, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -14,8 +15,24 @@ import type { DateRangePickerOnChangeProps, DateRangePickerProps } from '@kbn/da
 import { AlertingDateRangePicker } from './alerting_date_range_picker';
 import type { AlertingDateRangePickerServices } from './alerting_date_range_picker';
 
+const DATE_RANGE_PICKER_FEATURE_FLAG = 'unifiedSearch.newDateRangePickerEnabled';
+
 const mockOnChange = jest.fn();
 let lastPickerProps: DateRangePickerProps | undefined;
+let useNewDateRangePickerFlag = true;
+const mockSuperDatePicker = jest.fn(
+  (props: { 'data-test-subj'?: string; start?: string; end?: string }) => (
+    <div data-test-subj={props['data-test-subj'] ?? 'mockSuperDatePicker'} />
+  )
+);
+
+jest.mock('@elastic/eui', () => {
+  const actual = jest.requireActual('@elastic/eui');
+  return {
+    ...actual,
+    EuiSuperDatePicker: (props: { 'data-test-subj'?: string }) => mockSuperDatePicker(props),
+  };
+});
 
 jest.mock('@kbn/date-range-picker', () => ({
   DateRangePicker: (props: DateRangePickerProps) => {
@@ -41,14 +58,14 @@ jest.mock('@kbn/date-range-picker', () => ({
   },
 }));
 
-const mockUseDateRangePickerPresets = jest.fn(() => ({
+const mockUseDateRangePickerPresets = jest.fn((_options?: unknown) => ({
   presets: [{ start: 'now-15m', end: 'now', label: 'Last 15 minutes' }],
   onPresetSave: jest.fn(),
   onPresetDelete: jest.fn(),
 }));
 
 jest.mock('@kbn/date-range-picker-presets', () => ({
-  useDateRangePickerPresets: (...args: unknown[]) => mockUseDateRangePickerPresets(...args),
+  useDateRangePickerPresets: (options: unknown) => mockUseDateRangePickerPresets(options),
 }));
 
 const data = dataPluginMock.createStartContract();
@@ -59,6 +76,7 @@ const services: AlertingDateRangePickerServices = {
   http: core.http,
   application: core.application,
   uiSettings: core.uiSettings,
+  featureFlags: core.featureFlags,
 };
 
 describe('AlertingDateRangePicker', () => {
@@ -66,7 +84,24 @@ describe('AlertingDateRangePicker', () => {
     jest.clearAllMocks();
     lastPickerProps = undefined;
     mockOnChange.mockClear();
+    useNewDateRangePickerFlag = true;
     (data.query.timefilter.history.get as jest.Mock).mockReturnValue([]);
+    (core.featureFlags.getBooleanValue as jest.Mock).mockImplementation(
+      (key: string, fallback: boolean) => {
+        if (key === DATE_RANGE_PICKER_FEATURE_FLAG) {
+          return useNewDateRangePickerFlag;
+        }
+        return fallback;
+      }
+    );
+    (core.featureFlags.getBooleanValue$ as jest.Mock).mockImplementation(
+      (key: string, fallback: boolean) => {
+        if (key === DATE_RANGE_PICKER_FEATURE_FLAG) {
+          return new BehaviorSubject(useNewDateRangePickerFlag);
+        }
+        return of(fallback);
+      }
+    );
   });
 
   it('propagates a valid onChange as { from, to }', async () => {
@@ -87,7 +122,7 @@ describe('AlertingDateRangePicker', () => {
     expect(data.query.timefilter.history.add).toHaveBeenCalledWith({ from: 'now-1h', to: 'now' });
   });
 
-  it('ignores invalid onChange commits', () => {
+  it('marks the picker invalid and ignores invalid onChange commits', () => {
     render(
       <AlertingDateRangePicker
         from="now-15m"
@@ -98,6 +133,7 @@ describe('AlertingDateRangePicker', () => {
     );
 
     expect(lastPickerProps).toBeDefined();
+    expect(lastPickerProps?.isInvalid).toBe(false);
 
     const invalid: DateRangePickerOnChangeProps = {
       start: 'bad',
@@ -113,6 +149,35 @@ describe('AlertingDateRangePicker', () => {
 
     expect(mockOnChange).not.toHaveBeenCalled();
     expect(data.query.timefilter.history.add).not.toHaveBeenCalled();
+    expect(lastPickerProps?.isInvalid).toBe(true);
+  });
+
+  it('clears invalid state when the input changes', () => {
+    render(
+      <AlertingDateRangePicker
+        from="now-15m"
+        to="now"
+        onChange={mockOnChange}
+        services={services}
+      />
+    );
+
+    act(() => {
+      lastPickerProps!.onChange({
+        start: 'bad',
+        end: 'worse',
+        startDate: null,
+        endDate: null,
+        value: 'bad',
+        isInvalid: true,
+      });
+    });
+    expect(lastPickerProps?.isInvalid).toBe(true);
+
+    act(() => {
+      lastPickerProps!.onInputChange?.('still typing');
+    });
+    expect(lastPickerProps?.isInvalid).toBe(false);
   });
 
   it('includes autoRefresh settings when onRefresh is provided', () => {
@@ -203,6 +268,30 @@ describe('AlertingDateRangePicker', () => {
 
     expect(mockUseDateRangePickerPresets).toHaveBeenCalledWith(
       expect.objectContaining({ persistenceEnabled: false })
+    );
+  });
+
+  it('falls back to EuiSuperDatePicker when the feature flag is disabled', () => {
+    useNewDateRangePickerFlag = false;
+
+    render(
+      <AlertingDateRangePicker
+        from="now-15m"
+        to="now"
+        onChange={mockOnChange}
+        services={services}
+        data-test-subj="alertingDateRangePicker"
+      />
+    );
+
+    expect(screen.getByTestId('alertingDateRangePicker')).toBeInTheDocument();
+    expect(screen.queryByText('mock picker')).not.toBeInTheDocument();
+    expect(mockSuperDatePicker).toHaveBeenCalledWith(
+      expect.objectContaining({
+        start: 'now-15m',
+        end: 'now',
+        'data-test-subj': 'alertingDateRangePicker',
+      })
     );
   });
 });

@@ -28,7 +28,12 @@ import { AlertEpisodesTagFilter } from '@kbn/alerting-v2-episodes-ui/components/
 import { AlertEpisodesAssigneeFilter } from '@kbn/alerting-v2-episodes-ui/components/filters/assignee_filter';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { HttpStart } from '@kbn/core-http-browser';
-import type { ApplicationStart, IUiSettingsClient, NotificationsStart } from '@kbn/core/public';
+import type {
+  ApplicationStart,
+  FeatureFlagsStart,
+  IUiSettingsClient,
+  NotificationsStart,
+} from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { AlertingDateRangePicker } from '@kbn/alerting-v2-rule-form';
@@ -53,6 +58,7 @@ export interface EpisodesFilterBarProps {
     notifications: NotificationsStart;
     application: ApplicationStart;
     uiSettings: IUiSettingsClient;
+    featureFlags: FeatureFlagsStart;
   };
 }
 

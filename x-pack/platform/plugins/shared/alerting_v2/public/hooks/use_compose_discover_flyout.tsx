@@ -50,6 +50,7 @@ export const useComposeDiscoverFlyout = ({
   const notifications = useService(CoreStart('notifications'));
   const application = useService(CoreStart('application'));
   const uiSettings = useService(CoreStart('uiSettings'));
+  const featureFlags = useService(CoreStart('featureFlags'));
   const data = useService(PluginStart('data')) as DataPublicPluginStart;
   const dataViews = useService(PluginStart('dataViews')) as DataViewsPublicPluginStart;
   const lens = useService(PluginStart('lens')) as LensPublicStart;
@@ -78,12 +79,25 @@ export const useComposeDiscoverFlyout = ({
       notifications,
       application,
       uiSettings,
+      featureFlags,
       lens,
       uiActions,
       dashboard,
       cps,
     }),
-    [http, data, dataViews, notifications, application, uiSettings, lens, uiActions, dashboard, cps]
+    [
+      http,
+      data,
+      dataViews,
+      notifications,
+      application,
+      uiSettings,
+      featureFlags,
+      lens,
+      uiActions,
+      dashboard,
+      cps,
+    ]
   );
 
   const closeFlyout = useCallback(() => {

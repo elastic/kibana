@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
-import { applicationServiceMock } from '@kbn/core/public/mocks';
+import { applicationServiceMock, coreMock } from '@kbn/core/public/mocks';
 import { createMockServices } from '@kbn/alerting-v2-episodes-ui/hooks/test_utils';
 import { useFetchEpisodeTagOptions } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_tag_options';
 import { useBulkGetProfiles } from '@kbn/alerting-v2-episodes-ui/hooks/use_bulk_get_profiles';
@@ -58,6 +58,7 @@ const defaultProps = {
     notifications: mockNotifications,
     application: applicationServiceMock.createStartContract(),
     uiSettings: mockEpisodeServices.uiSettings,
+    featureFlags: coreMock.createStart().featureFlags,
   },
 };
 

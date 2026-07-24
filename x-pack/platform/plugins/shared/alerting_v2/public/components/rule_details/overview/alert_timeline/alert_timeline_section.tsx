@@ -43,6 +43,7 @@ export const AlertTimelineSection: React.FC = () => {
   const uiSettings = useService(CoreStart('uiSettings'));
   const http = useService(CoreStart('http'));
   const notifications = useService(CoreStart('notifications'));
+  const featureFlags = useService(CoreStart('featureFlags'));
   const rule = useRule();
   const groupingFields = rule.grouping?.fields;
   const hasGroupingFields = (groupingFields?.length ?? 0) > 0;
@@ -138,7 +139,7 @@ export const AlertTimelineSection: React.FC = () => {
             from={timeRange.from}
             to={timeRange.to}
             onChange={setTimeRange}
-            services={{ data, notifications, http, application, uiSettings }}
+            services={{ data, notifications, http, application, uiSettings, featureFlags }}
             onRefresh={handleRefresh}
             isLoading={isLoading}
             showTimeWindowButtons

@@ -7,6 +7,7 @@
 
 import type {
   ApplicationStart,
+  FeatureFlagsStart,
   HttpStart,
   IUiSettingsClient,
   NotificationsStart,
@@ -27,6 +28,7 @@ export interface RuleFormServices {
   notifications: NotificationsStart;
   application: ApplicationStart;
   uiSettings: IUiSettingsClient;
+  featureFlags: FeatureFlagsStart;
   lens: LensPublicStart;
   uiActions?: UiActionsStart;
   dashboard?: DashboardStart;

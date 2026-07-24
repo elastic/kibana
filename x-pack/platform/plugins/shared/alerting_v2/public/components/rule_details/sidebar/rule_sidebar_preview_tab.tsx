@@ -33,13 +33,14 @@ const RuleSidebarPreviewTabInner: React.FC = () => {
   const notifications = useService<NotificationsStart>(CoreStart('notifications'));
   const application = useService<ApplicationStart>(CoreStart('application'));
   const uiSettings = useService<IUiSettingsClient>(CoreStart('uiSettings'));
+  const featureFlags = useService(CoreStart('featureFlags'));
   const data = useService<DataPublicPluginStart>(PluginStart('data'));
   const dataViews = useService<DataViewsPublicPluginStart>(PluginStart('dataViews'));
   const lens = useService<LensPublicStart>(PluginStart('lens'));
 
   const services = useMemo(
-    () => ({ http, notifications, application, uiSettings, data, dataViews, lens }),
-    [http, notifications, application, uiSettings, data, dataViews, lens]
+    () => ({ http, notifications, application, uiSettings, featureFlags, data, dataViews, lens }),
+    [http, notifications, application, uiSettings, featureFlags, data, dataViews, lens]
   );
 
   const [dateStart, setDateStart] = useState('now-15m');
