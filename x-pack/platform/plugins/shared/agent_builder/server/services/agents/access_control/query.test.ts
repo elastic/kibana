@@ -12,7 +12,7 @@ const ownerUser = { id: 'user-1', username: 'owner' };
 const ownerByUsernameOnly = { username: 'owner' };
 
 describe('buildReadAccessFilter', () => {
-  it('includes owner clauses, the not-private access-control mode clause, and a nested user-ACL clause', () => {
+  it('includes owner id clause, the not-private access-control mode clause, and a nested user-ACL clause', () => {
     const filter = buildReadAccessFilter({ user: ownerUser });
     expect(filter).toEqual({
       bool: {
@@ -31,7 +31,6 @@ describe('buildReadAccessFilter', () => {
               ],
             },
           },
-          { term: { created_by_name: 'owner' } },
           { term: { created_by_id: 'user-1' } },
           {
             nested: {
@@ -74,7 +73,7 @@ describe('buildReadAccessFilter', () => {
 
   it('omits created_by_id clause when user.id is undefined but still adds user-ACL nested clause', () => {
     const filter = buildReadAccessFilter({ user: ownerByUsernameOnly });
-    expect(filter.bool.should).toHaveLength(5);
+    expect(filter.bool.should).toHaveLength(4);
     expect(filter.bool.should[0]).toEqual({
       bool: {
         must: { exists: { field: 'access_control.access_mode' } },
@@ -89,8 +88,7 @@ describe('buildReadAccessFilter', () => {
         ],
       },
     });
-    expect(filter.bool.should[2]).toEqual({ term: { created_by_name: 'owner' } });
-    expect(filter.bool.should[3]).toEqual({
+    expect(filter.bool.should[2]).toEqual({
       nested: {
         path: 'access_control.entries',
         ignore_unmapped: true,
@@ -104,6 +102,7 @@ describe('buildReadAccessFilter', () => {
         },
       },
     });
+    expect(filter.bool.should).not.toContainEqual({ term: { created_by_name: 'owner' } });
   });
 
   it('only emits user-type access-control clauses (V1)', () => {

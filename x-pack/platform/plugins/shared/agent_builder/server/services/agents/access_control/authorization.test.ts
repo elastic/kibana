@@ -28,7 +28,7 @@ const bob: CurrentUser = { id: 'bob-id', username: 'bob' };
 
 describe('agent access-control authorization', () => {
   describe('isAgentOwner', () => {
-    it('matches by id before username', () => {
+    it('matches by stable id', () => {
       expect(isAgentOwner({ owner, currentUser: ownerUser })).toBe(true);
       expect(
         isAgentOwner({
@@ -38,13 +38,28 @@ describe('agent access-control authorization', () => {
       ).toBe(false);
     });
 
-    it('falls back to username when ids are unavailable', () => {
+    it('does not treat same username without ids as ownership (cross-realm unsafe)', () => {
       expect(
         isAgentOwner({
           owner: { username: 'alice' },
           currentUser: { username: 'alice' },
         })
-      ).toBe(true);
+      ).toBe(false);
+    });
+
+    it('does not fall back to username when only one side has an id', () => {
+      expect(
+        isAgentOwner({
+          owner: { username: 'alice' },
+          currentUser: { id: 'owner-id', username: 'alice' },
+        })
+      ).toBe(false);
+      expect(
+        isAgentOwner({
+          owner: { id: 'owner-id', username: 'alice' },
+          currentUser: { username: 'alice' },
+        })
+      ).toBe(false);
     });
   });
 

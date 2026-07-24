@@ -11,7 +11,12 @@ import {
   elasticsearchServiceMock,
 } from '@kbn/core/server/mocks';
 import { APPLICATION_PREFIX } from '@kbn/security-plugin/common/constants';
-import { isAdminFromRequest, getAgentApiAccessFromRequest, getUserFromRequest } from './utils';
+import {
+  isAdminFromRequest,
+  getAgentApiAccessFromRequest,
+  getUserFromRequest,
+  toStableUserId,
+} from './utils';
 import { apiPrivileges } from '../../common/features';
 
 const EXPECTED_ADMIN_HAS_PRIVILEGES_REQUEST = {
@@ -23,6 +28,37 @@ const EXPECTED_ADMIN_HAS_PRIVILEGES_REQUEST = {
     },
   ],
 };
+
+describe('toStableUserId', () => {
+  it('prefers profile uid when present', () => {
+    expect(
+      toStableUserId({
+        profileUid: 'profile-123',
+        username: 'shareduser',
+        authenticationRealm: { type: 'file', name: 'file1' },
+      })
+    ).toBe('profile-123');
+  });
+
+  it('falls back to a realm-qualified id when profile uid is missing', () => {
+    expect(
+      toStableUserId({
+        username: 'shareduser',
+        authenticationRealm: { type: 'file', name: 'file1' },
+      })
+    ).toBe('realm:["file","file1","shareduser"]');
+    expect(
+      toStableUserId({
+        username: 'shareduser',
+        authenticationRealm: { type: 'native', name: 'native1' },
+      })
+    ).toBe('realm:["native","native1","shareduser"]');
+  });
+
+  it('returns undefined when neither profile uid nor realm identity is available', () => {
+    expect(toStableUserId({ username: 'shareduser' })).toBeUndefined();
+  });
+});
 
 describe('getUserFromRequest', () => {
   let security: ReturnType<typeof securityServiceMock.createStart>;
@@ -48,17 +84,37 @@ describe('getUserFromRequest', () => {
     expect(esClient.security.authenticate).not.toHaveBeenCalled();
   });
 
+  it('uses a realm-qualified id when profile uid is missing', async () => {
+    const request = httpServerMock.createKibanaRequest();
+
+    security.authc.getCurrentUser.mockReturnValue({
+      username: 'shareduser',
+      authentication_realm: { type: 'file', name: 'file1' },
+    } as any);
+
+    const result = await getUserFromRequest({ request, security, esClient });
+
+    expect(result).toEqual({
+      id: 'realm:["file","file1","shareduser"]',
+      username: 'shareduser',
+    });
+  });
+
   it('falls back to ES authenticate API when getCurrentUser returns null for a real request', async () => {
     const request = httpServerMock.createKibanaRequest();
 
     security.authc.getCurrentUser.mockReturnValue(null);
     esClient.security.authenticate.mockResolvedValue({
       username: 'api-key-user',
+      authentication_realm: { type: 'native', name: 'native1' },
     } as any);
 
     const result = await getUserFromRequest({ request, security, esClient });
 
-    expect(result).toEqual({ username: 'api-key-user' });
+    expect(result).toEqual({
+      id: 'realm:["native","native1","api-key-user"]',
+      username: 'api-key-user',
+    });
     expect(security.authc.getCurrentUser).toHaveBeenCalledWith(request);
     expect(esClient.security.authenticate).toHaveBeenCalledTimes(1);
   });

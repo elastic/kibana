@@ -49,18 +49,20 @@ describe('hasReadAccess', () => {
     const source = {
       ...baseSource,
       access_control: { access_mode: AgentAccessControlMode.Private, entries: [] },
+      created_by_id: ownerUser.id,
       created_by_name: 'owner',
     };
     expect(hasReadAccess({ source, user: ownerUser, isAdmin: false })).toBe(true);
   });
 
-  it('returns true for owner by username only', () => {
+  it('returns false for same username without matching stable ids (cross-realm unsafe)', () => {
     const source = {
       ...baseSource,
       access_control: { access_mode: AgentAccessControlMode.Private, entries: [] },
       created_by_name: 'owner',
     };
-    expect(hasReadAccess({ source, user: ownerByUsernameOnly, isAdmin: false })).toBe(true);
+    expect(hasReadAccess({ source, user: ownerByUsernameOnly, isAdmin: false })).toBe(false);
+    expect(hasReadAccess({ source, user: ownerUser, isAdmin: false })).toBe(false);
   });
 
   it('returns true for non-owner when access-control mode is undefined (legacy agent treated as public)', () => {
@@ -128,6 +130,7 @@ describe('hasWriteAccess', () => {
     const source = {
       ...baseSource,
       access_control: { access_mode: AgentAccessControlMode.Private, entries: [] },
+      created_by_id: ownerUser.id,
       created_by_name: 'owner',
     };
     expect(hasWriteAccess({ source, user: ownerUser, isAdmin: false })).toBe(true);
@@ -306,6 +309,7 @@ describe('validateAccessControlUpdateAccess', () => {
     const source = {
       ...baseSource,
       access_control: { access_mode: AgentAccessControlMode.Public, entries: [] },
+      created_by_id: ownerUser.id,
       created_by_name: 'owner',
     };
     expect(
@@ -437,6 +441,7 @@ describe('redactAccessControlForCaller', () => {
       access_mode: AgentAccessControlMode.Private,
       entries: [aliceEntry, bobEntry],
     },
+    created_by_id: ownerUser.id,
     created_by_name: 'owner',
   };
 
@@ -581,6 +586,7 @@ describe('redactAccessControlForCaller', () => {
       source: {
         ...baseSource,
         id: agentBuilderDefaultAgentId,
+        created_by_id: ownerUser.id,
         created_by_name: 'owner',
         access_control: { access_mode: AgentAccessControlMode.Private, entries: [aliceEntry] },
       },

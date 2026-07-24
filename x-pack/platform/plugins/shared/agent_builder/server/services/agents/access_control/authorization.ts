@@ -44,9 +44,6 @@ export const isAgentOwner = ({
   if (owner.id !== undefined && currentUser.id !== undefined) {
     return owner.id === currentUser.id;
   }
-  if (owner.username !== undefined && currentUser.username !== undefined) {
-    return owner.username === currentUser.username;
-  }
   return false;
 };
 

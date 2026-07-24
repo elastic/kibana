@@ -15,10 +15,42 @@ import { apiPrivileges } from '../../common/features';
 const KIBANA_APPLICATION = `${APPLICATION_PREFIX}.kibana`;
 
 /**
+ * Builds a stable principal id for Agent Builder ownership checks.
+ *
+ * Usernames alone are not unique across Elasticsearch authentication realms
+ * (e.g. file vs native). Prefer the Kibana user profile uid when present;
+ * otherwise encode realm type/name with the username so same-username
+ * principals in different realms remain distinct.
+ *
+ * The `realm:` prefix keeps synthetic ids distinguishable from profile uids.
+ */
+export const toStableUserId = ({
+  profileUid,
+  username,
+  authenticationRealm,
+}: {
+  profileUid?: string;
+  username?: string;
+  authenticationRealm?: { type?: string; name?: string };
+}): string | undefined => {
+  if (profileUid) {
+    return profileUid;
+  }
+
+  const realmType = authenticationRealm?.type;
+  const realmName = authenticationRealm?.name;
+  if (!realmType || !realmName || !username) {
+    return undefined;
+  }
+
+  return `realm:${JSON.stringify([realmType, realmName, username])}`;
+};
+
+/**
  * Resolves the current user from a request.
  *
  * For real HTTP requests, `security.authc.getCurrentUser` returns the authenticated user
- * (including profile_uid and username).
+ * (including profile_uid, username, and authentication_realm).
  *
  * For fake requests (e.g. from Task Manager using an API key), `getCurrentUser` returns the
  * originating user's identity when the request was enriched at schedule time (profile_uid and
@@ -27,7 +59,10 @@ const KIBANA_APPLICATION = `${APPLICATION_PREFIX}.kibana`;
  *
  * For un-enriched fake requests (e.g. tasks scheduled before enrichment was available), we fall
  * back to the ES `_security/_authenticate` API, which works with API keys and returns the
- * username of the API key owner.
+ * username and authentication realm of the API key owner.
+ *
+ * The returned `id` is a stable principal: profile_uid when available, otherwise a
+ * realm-qualified synthetic id. Username alone is never treated as a unique principal.
  */
 export const getUserFromRequest = async ({
   request,
@@ -41,7 +76,11 @@ export const getUserFromRequest = async ({
   const authUser = security.authc.getCurrentUser(request);
   if (authUser?.username) {
     return {
-      id: authUser.profile_uid,
+      id: toStableUserId({
+        profileUid: authUser.profile_uid,
+        username: authUser.username,
+        authenticationRealm: authUser.authentication_realm,
+      }),
       username: authUser.username,
     };
   }
@@ -50,7 +89,11 @@ export const getUserFromRequest = async ({
   // task scheduled before enrichment): call ES _security/_authenticate
   const authResponse = await esClient.security.authenticate();
   return {
-    id: authUser?.profile_uid,
+    id: toStableUserId({
+      profileUid: authUser?.profile_uid,
+      username: authResponse.username,
+      authenticationRealm: authResponse.authentication_realm,
+    }),
     username: authResponse.username,
   };
 };
