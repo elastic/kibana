@@ -16,6 +16,7 @@ import {
   parseTargetMetadataHits,
   useFetchUnfilteredResolutionGroupData,
   useFetchFilteredResolutionGroupData,
+  useFetchGroupedData,
   ESQL_LIMIT_CAP,
   type EntitiesGroupingQuery,
 } from './use_fetch_grouped_data';
@@ -802,5 +803,60 @@ describe('useFetchFilteredResolutionGroupData', () => {
     expect(result.current.data!.groupData.groupByFields.buckets).toHaveLength(1);
     expect(result.current.data!.groupData.groupsCount.value).toBe(137);
     expect(result.current.data!.groupData.unitsCount.value).toBe(500);
+  });
+});
+
+describe('useFetchGroupedData', () => {
+  const mockAddError = jest.fn();
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (useKibana as jest.Mock).mockReturnValue({
+      services: {
+        data: { search: { search: mockSearch } },
+        notifications: { toasts: { addError: mockAddError, addDanger: jest.fn() } },
+      },
+    });
+  });
+
+  const query = { size: 0 } as EntitiesGroupingQuery;
+
+  it('returns the aggregations when the search resolves with them', async () => {
+    const aggregations = { groupsCount: { value: 3 }, unitsCount: { value: 12 } };
+    mockSearch.mockReturnValue(of({ rawResponse: { aggregations } }));
+
+    const { result } = renderHook(() => useFetchGroupedData({ query, enabled: true }), {
+      wrapper: createWrapper(),
+    });
+
+    await waitFor(() => expect(result.current.data).toEqual(aggregations));
+    expect(mockAddError).not.toHaveBeenCalled();
+  });
+
+  it('degrades to an empty result (no error) when the search returns no aggregations', async () => {
+    // A successful search against a cleared/missing entity store index comes back without an
+    // `aggregations` key. The hook must resolve with `{}` (empty groups) rather than throwing,
+    // so the grouped view shows the empty state instead of an error toast + stuck loader.
+    mockSearch.mockReturnValue(of({ rawResponse: {} }));
+
+    const { result } = renderHook(() => useFetchGroupedData({ query, enabled: true }), {
+      wrapper: createWrapper(),
+    });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(result.current.data).toEqual({});
+    expect(result.current.isError).toBe(false);
+    expect(mockAddError).not.toHaveBeenCalled();
+  });
+
+  it('does not fire when there is no index pattern', () => {
+    mockSearch.mockReturnValue(of({ rawResponse: { aggregations: {} } }));
+
+    renderHook(() => useFetchGroupedData({ query, enabled: true }), {
+      // An empty index pattern (e.g. data view not resolved yet) disables the query.
+      wrapper: createWrapper(''),
+    });
+
+    expect(mockSearch).not.toHaveBeenCalled();
   });
 });

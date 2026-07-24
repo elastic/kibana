@@ -30,7 +30,7 @@ import type { UnifiedMetricsGridRestorableState } from '@kbn/unified-chart-secti
 import type { UnifiedSearchDraft } from '@kbn/unified-search-plugin/public';
 import type { TabItem } from '@kbn/unified-tabs';
 import type { DocViewerRestorableState } from '@kbn/unified-doc-viewer';
-import type { SerializedError } from '@reduxjs/toolkit';
+import type { SerializedError } from 'redux-toolkit-v1';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import type { DataCascadeRestorableState } from '@kbn/shared-ux-document-data-cascade';
 import type { DiscoverDataSource } from '../../../../../common/data_sources';

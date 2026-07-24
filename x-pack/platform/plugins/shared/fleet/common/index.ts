@@ -106,6 +106,11 @@ export {
   getAllVarKeys,
   getAllSupportedVarNames,
   findFirstVarEntry,
+  // Version-specific policies helpers
+  hasVersionSuffix,
+  removeVersionSuffixFromPolicyId,
+  buildPolicyIdOrVariantsKuery,
+  buildPolicyIdsOrVariantsKuery,
 } from './services';
 
 export type {

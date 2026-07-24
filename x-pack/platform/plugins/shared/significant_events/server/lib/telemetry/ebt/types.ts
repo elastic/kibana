@@ -34,6 +34,9 @@ interface KnowledgeIndicatorFeaturesIdentifiedProps {
   docs_count: number;
   features_new: number;
   features_updated: number;
+  features_remapped: number;
+  semantic_verify_calls: number;
+  semantic_verify_reuses: number;
   total_filters: number;
   filters_capped: boolean;
   has_filtered_documents: boolean;
@@ -116,8 +119,8 @@ interface DetectionScanProps {
   critical_rule_count: number;
   /** Rule-backed query count using the default 5m cadence. */
   default_rule_count: number;
-  /** Resolved alerting engine backing the read: `v2` reads `.rule-events`, `v1` reads `.alerts-*`. */
-  alerting_engine: 'v1' | 'v2';
+  /** Alerting engine backing the read. */
+  alerting_engine: 'v2';
   /** The alerts-source index that was read (e.g. `.rule-events`). */
   alerts_source_index: string;
   /** The scan lookback window, e.g. `now-30m`. */
