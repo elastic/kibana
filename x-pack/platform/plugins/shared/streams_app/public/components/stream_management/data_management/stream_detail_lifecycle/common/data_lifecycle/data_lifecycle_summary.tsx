@@ -125,6 +125,12 @@ export const DataLifecycleSummary = ({
   const isRetentionInfinite = !phases.some((p) => p.isDelete);
   const showSkeleton = loading && phases.length === 0;
 
+  // Readiness signal for tests: flips on every stats (re)fetch, not just the initial load.
+  const prefix = testSubjPrefix ? `${testSubjPrefix}-` : '';
+  const statsReadinessTestSubj = `${prefix}dataLifecycleSummary-stats-${
+    loading ? 'loading' : 'loaded'
+  }`;
+
   // Only animate grid changes while the preview stays active between renders. Entering or leaving the
   // preview swaps between separately-computed models, so that render snaps instead of animating.
   const prevPreviewActiveRef = useRef(isPreviewActive);
@@ -150,6 +156,7 @@ export const DataLifecycleSummary = ({
       grow={false}
       paddingSize="s"
       css={{ height: '100%', borderTopLeftRadius: '0', borderBottomLeftRadius: '0' }}
+      data-test-subj={statsReadinessTestSubj}
     >
       <EuiFlexGroup direction="column" gutterSize="s" css={{ height: '100%' }}>
         <EuiPanel hasShadow={false} hasBorder={false} paddingSize="s" grow={false}>

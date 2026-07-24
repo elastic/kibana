@@ -73,6 +73,10 @@ export const RETENTION_TEST_IDS = {
   ilmPolicyRow: (policyName: string) =>
     `retentionSelectableRow-${policyName.replace(/[^a-zA-Z0-9]+/g, '_')}`,
 
+  // Readiness signal: `-loading` while a stats (re)fetch is inflight, `-loaded` once it settles.
+  summaryStatsLoading: 'dataLifecycleSummary-stats-loading',
+  summaryStatsLoaded: 'dataLifecycleSummary-stats-loaded',
+
   // Display elements
   retentionMetric: 'retention-metric',
   retentionMetricSubtitle: 'retention-metric-subtitle',
@@ -195,6 +199,15 @@ export async function openLifecycleMethodFlyout(page: ScoutPage): Promise<Locato
 }
 
 /**
+ * Waits for the summary's stats (re)fetch to settle so a following popover click isn't dismissed by
+ * the re-render. Waits for `-loading` first to avoid matching the stale `-loaded` state on screen.
+ */
+export async function waitForLifecycleSummaryStatsSettled(page: ScoutPage): Promise<void> {
+  await expect(page.getByTestId(RETENTION_TEST_IDS.summaryStatsLoading)).toBeVisible();
+  await expect(page.getByTestId(RETENTION_TEST_IDS.summaryStatsLoaded)).toBeVisible();
+}
+
+/**
  * Saves the lifecycle method flyout changes (Apply) and waits for it to close.
  */
 export async function saveRetentionChanges(
@@ -204,23 +217,15 @@ export async function saveRetentionChanges(
     waitForIlmStats = false,
   }: { expectOverrideConfirmation?: boolean; waitForIlmStats?: boolean } = {}
 ): Promise<void> {
-  // Arm the response wait before applying so the post-save ILM stats refetch can't resolve first.
-  const ilmStatsSettled = waitForIlmStats
-    ? page.waitForResponse((response) => response.url().includes('/lifecycle/_stats'), {
-        timeout: 30_000,
-      })
-    : undefined;
-
   await page.getByTestId(RETENTION_TEST_IDS.successfulFlyoutApplyButton).click();
   if (expectOverrideConfirmation) {
     await confirmOverride(page);
   }
   await page.getByTestId(RETENTION_TEST_IDS.successfulLifecycleFlyout).waitFor({ state: 'hidden' });
 
-  // The ILM summary re-renders once its per-phase stats land. Waiting for that refetch lets the
-  // summary settle before callers interact with it, so a following popover click can't race the
-  // re-render (which would otherwise dismiss the popover as it opens).
-  await ilmStatsSettled;
+  if (waitForIlmStats) {
+    await waitForLifecycleSummaryStatsSettled(page);
+  }
 }
 
 /**
