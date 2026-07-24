@@ -18,6 +18,8 @@ import { EsqlService } from '@kbn/esql-server-utils';
 import { esqlRouteRequestCounter, getErrorStatusCode } from '../metrics';
 
 const ES_TIMESTAMP_FIELD_NAME = '@timestamp';
+// Temporary: remove once dataset filtering is enabled by default in ES
+const DATASET_FILTERING_FEATURE_FLAG_KEY = 'esql.datasetFilteringEnabled';
 
 const hasTimestampInFieldCapsResponse = (result: FieldCapsResponse) =>
   Boolean(result.fields && result.fields['@timestamp']);
@@ -187,9 +189,6 @@ const resolveTimeField = async (
     throw error;
   }
 };
-
-// Temporary: remove once dataset filtering is enabled by default in ES
-const DATASET_FILTERING_FEATURE_FLAG_KEY = 'esql.datasetFilteringEnabled';
 
 export const registerGetTimeFieldRoute = (
   router: IRouter,
