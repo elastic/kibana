@@ -1,7 +1,9 @@
 ---
 navigation_title: "GraphQL"
+type: reference
+description: "Use the GraphQL connector to run queries and mutations, and introspect schemas on any GraphQL API endpoint."
 applies_to:
-  stack: preview 9.5
+  stack: preview 9.6
   serverless: preview
 ---
 

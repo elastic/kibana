@@ -4,6 +4,7 @@
 * [BigQuery](/reference/connectors-kibana/bigquery-action-type.md): Run GoogleSQL queries and retrieve results from Google BigQuery.
 * [Box](/reference/connectors-kibana/box-action-type.md): Search files and folders, read content, and query enterprise content using Box AI.
 * [Brave Search](/reference/connectors-kibana/brave-search-action-type.md): Search the web using the Brave Search API.
+* [Confluence Cloud](/reference/connectors-kibana/confluence-cloud-action-type.md): Search and retrieve Confluence Cloud pages and spaces using the REST API v2.
 * [Dropbox](/reference/connectors-kibana/dropbox-action-type.md): Search files and folders, retrieve file content and metadata, and manage shared links in Dropbox.
 * [Firecrawl](/reference/connectors-kibana/firecrawl-action-type.md): Scrape, search, map, and crawl the web using the Firecrawl API.
 * [Figma](/reference/connectors-kibana/figma-action-type.md): Browse design files, inspect structure, render nodes as images, and explore team projects in Figma.
@@ -14,7 +15,6 @@
 * [Google Cloud Storage](/reference/connectors-kibana/google-cloud-storage-action-type.md): Search and access objects in Google Cloud Storage buckets.
 * [Google Drive](/reference/connectors-kibana/google-drive-action-type.md): Search and access files and folders in Google Drive.
 * [GraphQL](/reference/connectors-kibana/graphql-action-type.md): Run queries and mutations, and introspect schemas on any GraphQL endpoint.
-* [Confluence Cloud](/reference/connectors-kibana/confluence-cloud-action-type.md): Search and retrieve Confluence Cloud pages and spaces using the REST API v2.
 * [HubSpot](/reference/connectors-kibana/hubspot-action-type.md): Search and retrieve contacts, companies, deals, and tickets from HubSpot CRM.
 * [Jira Cloud](/reference/connectors-kibana/jira-cloud-action-type.md): Search issues with JQL, retrieve project and issue details, and look up users in Jira Cloud.
 * [Microsoft Teams](/reference/connectors-kibana/microsoft-teams-action-type.md): Search messages and browse teams, channels, and chats in Microsoft Teams.
