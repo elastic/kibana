@@ -22,8 +22,8 @@ import type {
   AppDeepLink,
 } from '@kbn/core/public';
 import { DEFAULT_APP_CATEGORIES, AppStatus } from '@kbn/core/public';
-import type { CPSPluginStart } from '@kbn/cps/public/types';
-import { ProjectRoutingAccess } from '@kbn/cps-utils/types';
+import type { CPSPluginStart } from '@kbn/cps/public';
+import { ProjectRoutingAccess } from '@kbn/cps-utils';
 import type {
   ConfigSchema,
   ManagementSetup,
@@ -58,7 +58,7 @@ interface ManagementStartDependencies {
   share: SharePluginStart;
   serverless?: ServerlessPluginStart;
   cloud?: { isCloudEnabled: boolean; baseUrl?: string };
-  cps: CPSPluginStart;
+  cps?: CPSPluginStart;
 }
 
 export class ManagementPlugin
