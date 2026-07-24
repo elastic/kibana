@@ -73,13 +73,13 @@ spaceTest.describe('Discover context - back navigation', { tag: tags.deploymentA
     expect(hitCount).toBe(initialHitCount);
   });
 
-  spaceTest('should go back via breadcrumbs with preserved state', async ({ pageObjects }) => {
+  spaceTest('should go back to Discover with preserved state', async ({ pageObjects }) => {
     await pageObjects.contextPage.goBackToDiscover();
     await checkMainViewFilters(pageObjects);
   });
 
   spaceTest(
-    'should go back via breadcrumbs with preserved state after page refresh',
+    'should go back to Discover with preserved state after page refresh',
     async ({ page, pageObjects }) => {
       await page.reload();
       await pageObjects.contextPage.waitUntilContextLoadingHasFinished();
@@ -97,15 +97,12 @@ spaceTest.describe('Discover context - back navigation', { tag: tags.deploymentA
         await pageObjects.contextPage.waitUntilContextLoadingHasFinished();
       });
 
-      await spaceTest.step(
-        'navigate to discover via breadcrumbs and verify original filters',
-        async () => {
-          await pageObjects.contextPage.goBackToDiscover();
+      await spaceTest.step('navigate back to Discover and verify original filters', async () => {
+        await pageObjects.contextPage.goBackToDiscover();
 
-          expect(await pageObjects.filterBar.getFilterCount()).toBe(2);
-          await checkMainViewFilters(pageObjects);
-        }
-      );
+        expect(await pageObjects.filterBar.getFilterCount()).toBe(2);
+        await checkMainViewFilters(pageObjects);
+      });
 
       await spaceTest.step('go back to context and verify modified filter state', async () => {
         await page.goBack();
