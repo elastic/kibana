@@ -12316,7 +12316,6 @@
     "xpack.apm.appName": "APM",
     "xpack.apm.betaBadgeDescription": "此功能当前为公测版。如果遇到任何错误或有任何反馈，请报告问题或访问我们的论坛。",
     "xpack.apm.betaBadgeLabel": "公测版",
-    "xpack.apm.chart.annotation.version": "版本",
     "xpack.apm.chart.comparison.defaultPreviousPeriodLabel": "上一时段",
     "xpack.apm.chart.cpuSeries.processAverageLabel": "进程平均值",
     "xpack.apm.chart.cpuSeries.processMaxLabel": "进程最大值",
