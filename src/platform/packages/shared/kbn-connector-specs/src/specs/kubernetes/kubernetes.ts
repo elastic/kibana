@@ -340,10 +340,9 @@ export const KubernetesConnector: ConnectorSpec = {
         isRecommended: true,
         defaults: {},
         overrides: {
-          label: i18n.translate(
-            'core.kibanaConnectorSpecs.kubernetes.auth.bearerWithTls.label',
-            { defaultMessage: 'Service account token' }
-          ),
+          label: i18n.translate('core.kibanaConnectorSpecs.kubernetes.auth.bearerWithTls.label', {
+            defaultMessage: 'Service account token',
+          }),
           meta: {
             token: {
               label: i18n.translate(
