@@ -6,7 +6,6 @@
  */
 
 import { createClientBodySchema } from './schemas';
-import { withOAuthManagementGate } from './with_oauth_management_gate';
 import type { RouteDefinitionParams } from '..';
 import { wrapIntoCustomErrorResponse } from '../../errors';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
@@ -34,56 +33,51 @@ export function defineCreateOAuthClientRoute({
         access: 'internal',
       },
     },
-    withOAuthManagementGate(
-      createLicensedRouteHandler(async (context, request, response) => {
-        try {
-          const { oauth } = getAuthenticationService();
-          if (!oauth) {
-            return response.notFound({
-              body: { message: 'OAuth management is not available: UIAM is not configured' },
-            });
-          }
-
-          const resource = config.mcp?.oauth2?.metadata?.resource;
-          if (!resource) {
-            return response.notFound({
-              body: {
-                message:
-                  'OAuth management is not available: MCP protected resource metadata is not configured',
-              },
-            });
-          }
-
-          // UIAM requires the project the client belongs to. It is always available on serverless
-          // (where OAuth client management is offered), so a missing value indicates a
-          // deployment where this feature is not available.
-          if (!serverlessProjectId) {
-            return response.notFound({
-              body: {
-                message:
-                  'OAuth management is not available: serverless project id is not configured',
-              },
-            });
-          }
-
-          const result = await oauth.createClient(request, {
-            ...request.body,
-            resource,
-            project_id: serverlessProjectId,
+    createLicensedRouteHandler(async (context, request, response) => {
+      try {
+        const { oauth } = getAuthenticationService();
+        if (!oauth) {
+          return response.notFound({
+            body: { message: 'OAuth management is not available: UIAM is not configured' },
           });
-          if (!result) {
-            return response.notFound({
-              body: {
-                message: 'OAuth management is not available: security features are disabled',
-              },
-            });
-          }
-
-          return response.ok({ body: result });
-        } catch (error) {
-          return response.customError(wrapIntoCustomErrorResponse(error));
         }
-      })
-    )
+
+        const resource = config.mcp?.oauth2?.metadata?.resource;
+        if (!resource) {
+          return response.notFound({
+            body: {
+              message:
+                'OAuth management is not available: MCP protected resource metadata is not configured',
+            },
+          });
+        }
+
+        // UIAM requires the project the client belongs to. It is always available on serverless
+        if (!serverlessProjectId) {
+          return response.notFound({
+            body: {
+              message: 'OAuth management is not available: serverless project id is not configured',
+            },
+          });
+        }
+
+        const result = await oauth.createClient(request, {
+          ...request.body,
+          resource,
+          project_id: serverlessProjectId,
+        });
+        if (!result) {
+          return response.notFound({
+            body: {
+              message: 'OAuth management is not available: security features are disabled',
+            },
+          });
+        }
+
+        return response.ok({ body: result });
+      } catch (error) {
+        return response.customError(wrapIntoCustomErrorResponse(error));
+      }
+    })
   );
 }
