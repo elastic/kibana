@@ -235,14 +235,11 @@ export function registerReconciliationTask({
 
           return { state: nextState };
         },
-        cancel: async () => {
-          // Nothing to release here beyond the abort signal Task Manager
-          // already trips: the runners are SO walks plus writer
-          // dispatches with no long-lived resources. The signal (checked
-          // between surfaces and at each runner's page boundary) stops
-          // the next page fetch; in-flight writer dispatches finish on
-          // their own retry budget.
-        },
+        // No `cancel()` needed: there are no long-lived resources to
+        // release beyond the abort signal Task Manager already trips
+        // (checked between surfaces and at each runner's page boundary,
+        // which stops the next page fetch). In-flight writer dispatches
+        // finish on their own retry budget.
       }),
     },
   });

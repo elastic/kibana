@@ -344,15 +344,14 @@ export function registerResetTask({
             throttledFlush.cancel();
           }
         },
-        cancel: async () => {
-          // No long-lived resources to release beyond the abort signal
-          // Task Manager already trips (threaded into every surface walk
-          // via `runFullReset`, checked at each page boundary). The
-          // in-flight page completes, then the walk throws and unwinds;
-          // bulk dispatches are idempotent on `_id`, so a second `/reset`
-          // rescheduling a fresh task while this one is still finishing
-          // only causes extra ES traffic, no correctness impact.
-        },
+        // No `cancel()` needed: there are no long-lived resources to
+        // release beyond the abort signal Task Manager already trips
+        // (threaded into every surface walk via `runFullReset`, checked
+        // at each page boundary). The in-flight page completes, then the
+        // walk throws and unwinds; bulk dispatches are idempotent on
+        // `_id`, so a second `/reset` rescheduling a fresh task while this
+        // one is still finishing only causes extra ES traffic, no
+        // correctness impact.
       }),
     },
   });
