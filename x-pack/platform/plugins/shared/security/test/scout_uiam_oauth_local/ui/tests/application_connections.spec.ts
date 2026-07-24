@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { AGENT_BUILDER_UIAM_OAUTH_CLIENT_MANAGEMENT_SETTING_ID } from '@kbn/management-settings-ids';
 import { deleteTestOAuthConnection, seedTestOAuthConnection } from '@kbn/mock-idp-utils';
 import { expect } from '@kbn/scout/ui';
 
@@ -28,11 +27,7 @@ test.describe(
     const connectionIds: string[] = [];
     let expiredConnectionId: string;
 
-    test.beforeAll(async ({ apiClient, kbnClient, samlAuth, config: { organizationId } }) => {
-      await kbnClient.uiSettings.update({
-        [AGENT_BUILDER_UIAM_OAUTH_CLIENT_MANAGEMENT_SETTING_ID]: true,
-      });
-
+    test.beforeAll(async ({ apiClient, samlAuth, config: { organizationId } }) => {
       authHeaders = await createUiamAuthHeaders(samlAuth);
 
       const meResponse = await apiClient.get('internal/security/me', {
@@ -89,7 +84,7 @@ test.describe(
       await browserAuth.loginAsAdmin();
     });
 
-    test.afterAll(async ({ apiClient, kbnClient }) => {
+    test.afterAll(async ({ apiClient }) => {
       await Promise.all(
         [...connectionIds, expiredConnectionId]
           .filter(Boolean)
@@ -98,7 +93,6 @@ test.describe(
       if (clientId) {
         await revokeOAuthClient(apiClient, authHeaders, clientId);
       }
-      await kbnClient.uiSettings.unset(AGENT_BUILDER_UIAM_OAUTH_CLIENT_MANAGEMENT_SETTING_ID);
     });
 
     test('shows connections in grouped and list views', async ({ page, pageObjects }) => {
