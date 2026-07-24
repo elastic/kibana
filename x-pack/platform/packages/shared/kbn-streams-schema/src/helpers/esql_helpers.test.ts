@@ -440,10 +440,11 @@ describe('normalizeEsqlSafe', () => {
 
   it('handles STATS queries without altering structure', () => {
     const q =
-      'FROM logs | STATS errors = COUNT(*) WHERE log.level == "ERROR", total = COUNT(*) BY bucket = BUCKET(@timestamp, 5 minutes) | EVAL error_rate = errors * 100.0 / total | WHERE total > 20 AND error_rate > 10';
+      'FROM logs | STATS errors = COUNT(*) WHERE log.level == "ERROR", total = COUNT(*) WHERE log.level IS NOT NULL BY bucket = BUCKET(@timestamp, 1 minute) | EVAL metric_value = CASE(total > 0, errors * 100.0 / total, 0) | KEEP bucket, metric_value';
     const normalized = normalizeEsqlSafe(q);
     expect(normalized).toContain('STATS');
     expect(normalized).toContain('BUCKET');
+    expect(normalized).toContain('metric_value');
   });
 });
 
