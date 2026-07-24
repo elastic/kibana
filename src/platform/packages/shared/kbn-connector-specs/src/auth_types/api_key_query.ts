@@ -40,11 +40,7 @@ export const ApiKeyQueryAuth: AuthTypeSpec<AuthSchemaType> = {
   id: 'api_key_query',
   schema: authSchema,
   normalizeSchema: (defaults?: Record<string, unknown>) => {
-    const existingMeta = authSchema.meta() ?? {};
-    const schemaToUse = z.object({
-      ...authSchema.shape,
-    });
-
+    const meta = authSchema.meta() ?? {};
     const paramNames =
       defaults?.paramNames && Array.isArray(defaults.paramNames)
         ? defaults.paramNames.filter((s): s is string => isString(s) && s.length > 0)
@@ -63,10 +59,10 @@ export const ApiKeyQueryAuth: AuthTypeSpec<AuthSchemaType> = {
             ])
           )
         )
-        .meta(existingMeta);
+        .meta(meta);
     }
 
-    return schemaToUse.meta(existingMeta);
+    return z.object({ ...authSchema.shape }).meta(meta);
   },
   configure: async (
     _: AuthContext,

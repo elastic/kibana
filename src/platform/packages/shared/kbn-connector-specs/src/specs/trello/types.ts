@@ -18,7 +18,7 @@ const trelloId = (label: string) =>
       `Trello ${label} ID (24-character hex string, e.g. "5f8a1b2c3d4e5f6a7b8c9d0e"), as returned by listBoards, search, or another action.`
     );
 
-const cardPosition = () => z.union([z.enum(['top', 'bottom']), z.number()]);
+const cardPosition = z.union([z.enum(['top', 'bottom']), z.number()]);
 
 // Shared by getBoard, listBoardLists, and listBoardCards — all three take only a board ID.
 export const BoardIdInputSchema = lazySchema(() =>
@@ -103,7 +103,7 @@ export const CreateCardInputSchema = lazySchema(() =>
       .max(100)
       .optional()
       .describe('Due date as an ISO 8601 datetime string, e.g. "2024-06-15T17:00:00.000Z".'),
-    pos: cardPosition()
+    pos: cardPosition
       .optional()
       .describe(
         'Position of the card in the list: "top", "bottom", or a positive number. Defaults to "bottom".'
@@ -140,7 +140,7 @@ export const UpdateCardInputSchema = lazySchema(() =>
       idList: trelloId('list')
         .optional()
         .describe('Target list ID to move the card into a different list.'),
-      pos: cardPosition()
+      pos: cardPosition
         .optional()
         .describe('New position within its list: "top", "bottom", or a positive number.'),
       closed: z
