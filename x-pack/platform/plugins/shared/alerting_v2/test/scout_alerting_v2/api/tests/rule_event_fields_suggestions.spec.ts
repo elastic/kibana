@@ -8,11 +8,12 @@
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import { expect } from '@kbn/scout/api';
 import type { RoleApiCredentials } from '@kbn/scout';
+import { ALERTING_V2_SUGGESTIONS_RULE_EVENT_FIELDS_API_PATH } from '@kbn/alerting-v2-constants';
 import { ALERTING_V2_ALERTS_READ_ROLE, apiTest, NO_ACCESS_ROLE, testData } from '../fixtures';
 
 const RULE_ID_A = 'matcher-suggestions-rule-a';
 const RULE_ID_B = 'matcher-suggestions-rule-b';
-const DATA_FIELDS_PATH = `${testData.ACTION_POLICY_API_PATH}/suggestions/data_fields`;
+const RULE_EVENT_FIELDS_PATH = ALERTING_V2_SUGGESTIONS_RULE_EVENT_FIELDS_API_PATH;
 
 const buildAlertEvent = (overrides: {
   ruleId: string;
@@ -33,11 +34,11 @@ const buildAlertEvent = (overrides: {
   data: overrides.data,
 });
 
-const dataFieldsUrl = (params: { matcher?: string } = {}): string => {
+const ruleEventFieldsUrl = (params: { matcher?: string } = {}): string => {
   const search = new URLSearchParams();
   if (params.matcher !== undefined) search.set('matcher', params.matcher);
   const qs = search.toString();
-  return qs ? `${DATA_FIELDS_PATH}?${qs}` : DATA_FIELDS_PATH;
+  return qs ? `${RULE_EVENT_FIELDS_PATH}?${qs}` : RULE_EVENT_FIELDS_PATH;
 };
 
 const seedAlertEvents = async (esClient: EsClient): Promise<void> => {
@@ -61,7 +62,7 @@ const seedAlertEvents = async (esClient: EsClient): Promise<void> => {
  * silent false-positives, the entire suite is restricted to local stateful
  * (classic) until ECH support lands. This matches the find-rules suite.
  */
-apiTest.describe('Matcher data fields suggestions API', { tag: '@local-stateful-classic' }, () => {
+apiTest.describe('Rule event fields suggestions API', { tag: '@local-stateful-classic' }, () => {
   let adminCredentials: RoleApiCredentials;
   let adminHeaders: Record<string, string>;
 
@@ -82,7 +83,7 @@ apiTest.describe('Matcher data fields suggestions API', { tag: '@local-stateful-
   apiTest(
     'returns the union of data.* field names across all matching alerts when no matcher is given',
     async ({ apiClient }) => {
-      const response = await apiClient.get(dataFieldsUrl(), {
+      const response = await apiClient.get(ruleEventFieldsUrl(), {
         headers: adminHeaders,
         responseType: 'json',
       });
@@ -103,10 +104,13 @@ apiTest.describe('Matcher data fields suggestions API', { tag: '@local-stateful-
   apiTest(
     'narrows fields when matcher selects a single rule via rule.id',
     async ({ apiClient }) => {
-      const response = await apiClient.get(dataFieldsUrl({ matcher: `rule.id : "${RULE_ID_A}"` }), {
-        headers: adminHeaders,
-        responseType: 'json',
-      });
+      const response = await apiClient.get(
+        ruleEventFieldsUrl({ matcher: `rule.id : "${RULE_ID_A}"` }),
+        {
+          headers: adminHeaders,
+          responseType: 'json',
+        }
+      );
 
       expect(response).toHaveStatusCode(200);
       // The matcher scopes to documents we seeded for RULE_ID_A, so the
@@ -119,7 +123,7 @@ apiTest.describe('Matcher data fields suggestions API', { tag: '@local-stateful-
     'falls back to the unfiltered result when matcher cannot be parsed',
     async ({ apiClient }) => {
       // Trailing colon makes this an unparseable KQL expression.
-      const response = await apiClient.get(dataFieldsUrl({ matcher: 'rule.id :' }), {
+      const response = await apiClient.get(ruleEventFieldsUrl({ matcher: 'rule.id :' }), {
         headers: adminHeaders,
         responseType: 'json',
       });
@@ -134,10 +138,13 @@ apiTest.describe('Matcher data fields suggestions API', { tag: '@local-stateful-
     async ({ apiClient }) => {
       // `rule.name` is intentionally not pushed down to the alert-events
       // query; the AST collapses to no filter and we return everything.
-      const response = await apiClient.get(dataFieldsUrl({ matcher: 'rule.name : "anything"' }), {
-        headers: adminHeaders,
-        responseType: 'json',
-      });
+      const response = await apiClient.get(
+        ruleEventFieldsUrl({ matcher: 'rule.name : "anything"' }),
+        {
+          headers: adminHeaders,
+          responseType: 'json',
+        }
+      );
 
       expect(response).toHaveStatusCode(200);
       expect(response.body).toStrictEqual(expect.arrayContaining(['data.host', 'data.service']));
@@ -145,7 +152,7 @@ apiTest.describe('Matcher data fields suggestions API', { tag: '@local-stateful-
   );
 
   apiTest('validation: rejects empty matcher with a 400', async ({ apiClient }) => {
-    const response = await apiClient.get(`${DATA_FIELDS_PATH}?matcher=`, {
+    const response = await apiClient.get(`${RULE_EVENT_FIELDS_PATH}?matcher=`, {
       headers: adminHeaders,
       responseType: 'json',
     });
@@ -157,7 +164,7 @@ apiTest.describe('Matcher data fields suggestions API', { tag: '@local-stateful-
   apiTest(
     'validation: rejects matcher longer than the schema limit with a 400',
     async ({ apiClient }) => {
-      const response = await apiClient.get(dataFieldsUrl({ matcher: 'a'.repeat(2049) }), {
+      const response = await apiClient.get(ruleEventFieldsUrl({ matcher: 'a'.repeat(2049) }), {
         headers: adminHeaders,
         responseType: 'json',
       });
@@ -174,7 +181,7 @@ apiTest.describe('Matcher data fields suggestions API', { tag: '@local-stateful-
         ALERTING_V2_ALERTS_READ_ROLE
       );
 
-      const response = await apiClient.get(dataFieldsUrl(), {
+      const response = await apiClient.get(ruleEventFieldsUrl(), {
         headers: readerCredentials.apiKeyHeader,
         responseType: 'json',
       });
@@ -188,7 +195,7 @@ apiTest.describe('Matcher data fields suggestions API', { tag: '@local-stateful-
     async ({ apiClient, requestAuth }) => {
       const noAccessCredentials = await requestAuth.getApiKeyForCustomRole(NO_ACCESS_ROLE);
 
-      const response = await apiClient.get(dataFieldsUrl(), {
+      const response = await apiClient.get(ruleEventFieldsUrl(), {
         headers: noAccessCredentials.apiKeyHeader,
         responseType: 'json',
       });
