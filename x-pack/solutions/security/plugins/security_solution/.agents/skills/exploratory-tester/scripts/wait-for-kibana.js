@@ -9,7 +9,7 @@
       if (s?.status?.overall?.level === 'available') {
         process.stdout.write('Kibana ready\n'); process.exit(0);
       }
-    } catch(e) {}
+    } catch(e) { /* retry */ }
     process.stdout.write('Attempt ' + i + ' — waiting 10s...\n');
     await new Promise(r => setTimeout(r, 10000));
   }
