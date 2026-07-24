@@ -131,7 +131,7 @@ export const EpisodesFilterBar = ({
   }, []);
 
   return (
-    <EuiFlexGroup alignItems="center" gutterSize="s" wrap>
+    <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
       <EuiFlexItem grow>
         <EuiFieldSearch
           fullWidth
@@ -147,9 +147,22 @@ export const EpisodesFilterBar = ({
           `}
         />
       </EuiFlexItem>
-
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+        <EuiFlexGroup alignItems="center" gutterSize="s" wrap>
+          <EuiFlexItem grow={false}>
+            <AlertingDateRangePicker
+              from={timeRange.from}
+              to={timeRange.to}
+              onChange={onTimeChange}
+              services={services}
+              onRefresh={onRefresh}
+              isLoading={isLoading}
+              showTimeWindowButtons
+              width="auto"
+              data-test-subj="episodesFilterBar-datePicker"
+            />
+          </EuiFlexItem>
+
           <EuiFlexItem grow={false}>
             <EuiFilterGroup compressed>
               <AlertEpisodesStatusFilter
@@ -189,19 +202,6 @@ export const EpisodesFilterBar = ({
             </EuiFilterGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <AlertingDateRangePicker
-          from={timeRange.from}
-          to={timeRange.to}
-          onChange={onTimeChange}
-          services={services}
-          onRefresh={onRefresh}
-          isLoading={isLoading}
-          showTimeWindowButtons
-          width="auto"
-          data-test-subj="episodesFilterBar-datePicker"
-        />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
