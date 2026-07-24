@@ -11,7 +11,5 @@ import type { ContainerModuleLoadOptions } from 'inversify';
 import { CoreSetup, DocLinks } from '@kbn/core-di-server';
 
 export function loadDocLinks({ bind }: ContainerModuleLoadOptions): void {
-  bind(DocLinks)
-    .toResolvedValue((docLinks) => docLinks, [CoreSetup('docLinks')])
-    .inSingletonScope();
+  bind(DocLinks).toService(CoreSetup('docLinks'));
 }
