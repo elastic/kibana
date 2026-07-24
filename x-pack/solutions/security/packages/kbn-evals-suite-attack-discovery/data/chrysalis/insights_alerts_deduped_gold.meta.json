@@ -1,5 +1,5 @@
 {
-  "seed_label": "dhrumil-insights-gold-v1",
+  "seed_label": "chrysalis-insights-gold-v1",
   "dedup_key": "event.id / kibana.alert.original_event.id",
   "source": "episodes",
   "raw_hits": 95,

@@ -8,7 +8,7 @@
 /**
  * Collapse duplicated Insights security alerts to one doc per original endpoint event.
  *
- * Dhrumil's AD harness uses 95 canonical alerts. The Insights detection rule re-emits
+ * Chrysalis's AD harness uses 95 canonical alerts. The Insights detection rule re-emits
  * signals on every run (95 → 190 → …); this script dedups using `event.id` (endpoint
  * source) / `kibana.alert.original_event.id` (post-detection-rule).
  *
@@ -16,7 +16,7 @@
  *   node .../dedup_insights_alerts.mjs --from-episodes ~/path/to/Insights_Testing \
  *     --out /path/to/insights_alerts_deduped_gold.ndjson
  *
- * Usage (from ES — Dhrumil cluster or golden stack):
+ * Usage (from ES — Chrysalis cluster or golden stack):
  *   ES_URL=... ES_AUTH='user:pass' \
  *     node .../dedup_insights_alerts.mjs --from-es \
  *     --out /path/to/insights_alerts_deduped_gold.ndjson
@@ -47,7 +47,7 @@ const DEFAULT_GOLD_HOSTS = [
 ];
 
 const DEFAULT_INDEX = '.alerts-security.alerts-default';
-const DEFAULT_SEED_LABEL = 'dhrumil-insights-gold-v0';
+const DEFAULT_SEED_LABEL = 'chrysalis-insights-gold-v0';
 
 const parseArgs = () => {
   const args = process.argv.slice(2);
@@ -55,9 +55,9 @@ const parseArgs = () => {
     mode: null,
     exportPath: null,
     episodesDir: null,
-    out: Path.resolve(__dirname, '../data/dhrumil/insights_alerts_deduped_gold.ndjson'),
-    seedLabel: process.env.DHRUMIL_INSIGHTS_SEED_LABEL ?? DEFAULT_SEED_LABEL,
-    index: process.env.DHRUMIL_INSIGHTS_ALERTS_INDEX ?? DEFAULT_INDEX,
+    out: Path.resolve(__dirname, '../data/chrysalis/insights_alerts_deduped_gold.ndjson'),
+    seedLabel: process.env.CHRYSALIS_INSIGHTS_SEED_LABEL ?? DEFAULT_SEED_LABEL,
+    index: process.env.CHRYSALIS_INSIGHTS_ALERTS_INDEX ?? DEFAULT_INDEX,
     goldHosts: DEFAULT_GOLD_HOSTS,
   };
 
@@ -149,7 +149,7 @@ const dedupeHits = (hits, seedLabel) => {
     const host = src.host?.name ?? 'unknown';
     hostCounts[host] = (hostCounts[host] ?? 0) + 1;
 
-    src.labels = { ...(src.labels ?? {}), dhrumil_insights_eval: seedLabel };
+    src.labels = { ...(src.labels ?? {}), chrysalis_insights_eval: seedLabel };
     const tags = Array.isArray(src.tags) ? [...src.tags] : [];
     if (!tags.includes(seedLabel)) tags.push(seedLabel);
     src.tags = tags;

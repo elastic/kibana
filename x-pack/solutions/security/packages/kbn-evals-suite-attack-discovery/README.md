@@ -243,9 +243,9 @@ This suite is **Node-only** (Playwright eval suite). It includes a package-local
 
 ---
 
-## Dhrumil Agentic SOC parity (Insights + Chrysalis)
+## Chrysalis Agentic SOC parity (Insights + Chrysalis)
 
-Exported from Dhrumil's eval cluster (`2f69892…`) for kbn-evals parity with `tools/eis-benchmark/`.
+Exported from Chrysalis's eval cluster (`2f69892…`) for kbn-evals parity with `tools/eis-benchmark/`.
 
 ### Dedup Insights alerts (AD fixture)
 
@@ -255,30 +255,30 @@ The Insights detection rule re-emits signals; dedup to one alert per `kibana.ale
 ES_URL=https://<es-host> ES_AUTH='user:pass' \
   node x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery/scripts/dedup_insights_alerts.mjs \
   --from-es \
-  --out x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery/data/dhrumil/insights_alerts_deduped_gold.ndjson
+  --out x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery/data/chrysalis/insights_alerts_deduped_gold.ndjson
 ```
 
-Cluster export (Jul 2026) yields **87** unique alerts (methodology cites ~95 — request source NDJSON if exact parity is required). See `data/dhrumil/insights_alerts_deduped_gold.meta.json`.
+Cluster export (Jul 2026) yields **87** unique alerts (methodology cites ~95 — request source NDJSON if exact parity is required). See `data/chrysalis/insights_alerts_deduped_gold.meta.json`.
 
 ### Seed Chrysalis agent + workflows (Scout / eval prep)
 
 From a Scout spec or dev script with `esClient` + Kibana `fetch`:
 
 ```typescript
-import { seedDhrumilChrysalisEvalStack } from '../../src/dhrumil/seed_chrysalis_eval';
+import { seedChrysalisChrysalisEvalStack } from '../../src/chrysalis/seed_chrysalis_eval';
 
-await seedDhrumilChrysalisEvalStack(esClient, fetch, {
+await seedChrysalisChrysalisEvalStack(esClient, fetch, {
   virustotalApiKey: process.env.VIRUSTOTAL_API_KEY,
   slackConnectorId: process.env.CHRYSALIS_SLACK_CONNECTOR_ID,
   oncallEmail: process.env.CHRYSALIS_ONCALL_EMAIL,
 });
 ```
 
-Templates live under `data/dhrumil/` (agent JSON + workflow YAML templates). **Not seeded:** `get.time` and `check.on.call.schedule` workflow tools — still on Dhrumil's deployment only; export from harness repo when available.
+Templates live under `data/chrysalis/` (agent JSON + workflow YAML templates). **Not seeded:** `get.time` and `check.on.call.schedule` workflow tools — still on Chrysalis's deployment only; export from harness repo when available.
 
 | Env var | Purpose |
 |---|---|
 | `VIRUSTOTAL_API_KEY` | Required for `vt-hash-lookup` workflow |
 | `CHRYSALIS_SLACK_CONNECTOR_ID` | Slack connector for `create-channel` |
 | `CHRYSALIS_ONCALL_EMAIL` | Default on-call invite email |
-| `DHRUMIL_INSIGHTS_NDJSON_PATH` | Override insights bulk fixture path |
+| `CHRYSALIS_INSIGHTS_NDJSON_PATH` | Override insights bulk fixture path |

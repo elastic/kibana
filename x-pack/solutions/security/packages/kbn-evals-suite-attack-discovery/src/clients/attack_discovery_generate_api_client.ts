@@ -8,7 +8,7 @@
 /**
  * Client for the production Attack Discovery `_generate` API.
  *
- * Mirrors Dhrumil's `run_attack_discovery.py` flow:
+ * Mirrors Chrysalis's `run_attack_discovery.py` flow:
  *   1. POST /api/attack_discovery/_generate → { execution_uuid }
  *   2. poll GET /api/attack_discovery/generations/{uuid} until terminal
  *   3. return discoveries + alerts_context_count + latency

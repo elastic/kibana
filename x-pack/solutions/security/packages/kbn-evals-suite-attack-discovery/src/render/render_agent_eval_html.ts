@@ -6,7 +6,7 @@
  */
 
 /**
- * TypeScript port of Dhrumil's `render_agent_eval_html.py`.
+ * TypeScript port of Chrysalis's `render_agent_eval_html.py`.
  *
  * Produces a self-contained dark-theme HTML report from Agent Builder eval
  * JSONL rows. The row schema ({@link AgentEvalRow}) is the contract — any

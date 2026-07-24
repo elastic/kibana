@@ -10,14 +10,14 @@ import Path from 'path';
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { HttpHandler } from '@kbn/core/public';
 import {
-  DHRUMIL_CHRYSALIS_AGENT_ID,
-  DHRUMIL_ESQL_TOOL_NAMES,
-  DHRUMIL_INSIGHTS_ALERTS_INDEX,
-  DHRUMIL_INSIGHTS_SEED_LABEL,
-  DHRUMIL_WORKFLOW_TEMPLATE_NAMES,
+  CHRYSALIS_CHRYSALIS_AGENT_ID,
+  CHRYSALIS_ESQL_TOOL_NAMES,
+  CHRYSALIS_INSIGHTS_ALERTS_INDEX,
+  CHRYSALIS_INSIGHTS_SEED_LABEL,
+  CHRYSALIS_WORKFLOW_TEMPLATE_NAMES,
 } from './constants';
 
-export interface SeedDhrumilChrysalisEvalOptions {
+export interface SeedChrysalisChrysalisEvalOptions {
   readonly insightsNdjsonPath?: string;
   readonly virustotalApiKey?: string;
   readonly slackConnectorId?: string;
@@ -25,7 +25,7 @@ export interface SeedDhrumilChrysalisEvalOptions {
   readonly skipInsightsAlerts?: boolean;
 }
 
-export interface SeedDhrumilChrysalisEvalSummary {
+export interface SeedChrysalisChrysalisEvalSummary {
   readonly agentId: string;
   readonly workflowsUpserted: string[];
   readonly esqlToolsUpserted: string[];
@@ -33,10 +33,10 @@ export interface SeedDhrumilChrysalisEvalSummary {
   readonly warnings: string[];
 }
 
-const DATA_DIR = Path.resolve(__dirname, '../../data/dhrumil');
+const DATA_DIR = Path.resolve(__dirname, '../../data/chrysalis');
 const DEFAULT_INSIGHTS_NDJSON = Path.resolve(
   __dirname,
-  '../../data/dhrumil/insights_alerts_deduped_gold.ndjson'
+  '../../data/chrysalis/insights_alerts_deduped_gold.ndjson'
 );
 
 const asResponse = (response: unknown): Response => {
@@ -53,7 +53,7 @@ const substituteWorkflowTemplate = (
     slackConnectorId,
     oncallEmail,
   }: Required<
-    Pick<SeedDhrumilChrysalisEvalOptions, 'virustotalApiKey' | 'slackConnectorId' | 'oncallEmail'>
+    Pick<SeedChrysalisChrysalisEvalOptions, 'virustotalApiKey' | 'slackConnectorId' | 'oncallEmail'>
   >
 ): string =>
   yaml
@@ -64,7 +64,7 @@ const substituteWorkflowTemplate = (
 const loadWorkflowYaml = async (
   name: string,
   options: Required<
-    Pick<SeedDhrumilChrysalisEvalOptions, 'virustotalApiKey' | 'slackConnectorId' | 'oncallEmail'>
+    Pick<SeedChrysalisChrysalisEvalOptions, 'virustotalApiKey' | 'slackConnectorId' | 'oncallEmail'>
   >
 ): Promise<string> => {
   const templatePath = Path.join(DATA_DIR, 'workflows', `${name}.yaml.template`);
@@ -75,11 +75,11 @@ const loadWorkflowYaml = async (
 const upsertWorkflows = async (
   fetch: HttpHandler,
   options: Required<
-    Pick<SeedDhrumilChrysalisEvalOptions, 'virustotalApiKey' | 'slackConnectorId' | 'oncallEmail'>
+    Pick<SeedChrysalisChrysalisEvalOptions, 'virustotalApiKey' | 'slackConnectorId' | 'oncallEmail'>
   >
 ): Promise<string[]> => {
   const yamls = await Promise.all(
-    DHRUMIL_WORKFLOW_TEMPLATE_NAMES.map((name) => loadWorkflowYaml(name, options))
+    CHRYSALIS_WORKFLOW_TEMPLATE_NAMES.map((name) => loadWorkflowYaml(name, options))
   );
 
   const response = asResponse(
@@ -98,7 +98,7 @@ const upsertWorkflows = async (
     throw new Error(`Failed to upsert Chrysalis workflows: ${response.status} ${text}`);
   }
 
-  return [...DHRUMIL_WORKFLOW_TEMPLATE_NAMES];
+  return [...CHRYSALIS_WORKFLOW_TEMPLATE_NAMES];
 };
 
 const AB_API_VERSION = '2023-10-31';
@@ -108,7 +108,7 @@ const upsertChrysalisAgent = async (fetch: HttpHandler): Promise<void> => {
   const agentBody = JSON.parse(await Fs.readFile(agentPath, 'utf8'));
 
   const putResponse = asResponse(
-    await fetch(`/api/agent_builder/agents/${encodeURIComponent(DHRUMIL_CHRYSALIS_AGENT_ID)}`, {
+    await fetch(`/api/agent_builder/agents/${encodeURIComponent(CHRYSALIS_CHRYSALIS_AGENT_ID)}`, {
       method: 'PUT',
       version: AB_API_VERSION,
       headers: { 'kbn-xsrf': 'true', 'Content-Type': 'application/json' },
@@ -141,7 +141,7 @@ const upsertChrysalisAgent = async (fetch: HttpHandler): Promise<void> => {
 const upsertEsqlTools = async (fetch: HttpHandler): Promise<string[]> => {
   const upserted: string[] = [];
 
-  for (const toolId of DHRUMIL_ESQL_TOOL_NAMES) {
+  for (const toolId of CHRYSALIS_ESQL_TOOL_NAMES) {
     const toolPath = Path.join(DATA_DIR, 'tools', `${toolId}.json`);
     const rawBody = JSON.parse(await Fs.readFile(toolPath, 'utf8')) as Record<string, unknown>;
 
@@ -204,11 +204,11 @@ const indexInsightsAlerts = async (esClient: EsClient, ndjsonPath: string): Prom
   return operations.length / 2;
 };
 
-export const seedDhrumilChrysalisEvalStack = async (
+export const seedChrysalisChrysalisEvalStack = async (
   esClient: EsClient,
   fetch: HttpHandler,
-  options: SeedDhrumilChrysalisEvalOptions = {}
-): Promise<SeedDhrumilChrysalisEvalSummary> => {
+  options: SeedChrysalisChrysalisEvalOptions = {}
+): Promise<SeedChrysalisChrysalisEvalSummary> => {
   const warnings: string[] = [];
 
   const virustotalApiKey = options.virustotalApiKey ?? process.env.VIRUSTOTAL_API_KEY;
@@ -247,7 +247,7 @@ export const seedDhrumilChrysalisEvalStack = async (
   }
 
   return {
-    agentId: DHRUMIL_CHRYSALIS_AGENT_ID,
+    agentId: CHRYSALIS_CHRYSALIS_AGENT_ID,
     workflowsUpserted,
     esqlToolsUpserted,
     insightsAlertsIndexed,
@@ -255,10 +255,10 @@ export const seedDhrumilChrysalisEvalStack = async (
   };
 };
 
-export const cleanupDhrumilChrysalisEvalStack = async (esClient: EsClient): Promise<void> => {
+export const cleanupChrysalisChrysalisEvalStack = async (esClient: EsClient): Promise<void> => {
   await esClient.deleteByQuery({
-    index: DHRUMIL_INSIGHTS_ALERTS_INDEX,
-    query: { term: { 'labels.dhrumil_insights_eval': DHRUMIL_INSIGHTS_SEED_LABEL } },
+    index: CHRYSALIS_INSIGHTS_ALERTS_INDEX,
+    query: { term: { 'labels.chrysalis_insights_eval': CHRYSALIS_INSIGHTS_SEED_LABEL } },
     conflicts: 'proceed',
     refresh: true,
   });

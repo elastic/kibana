@@ -8,7 +8,7 @@
 /**
  * The JSONL row contract for Agent Builder skill eval results.
  *
- * This is the 25-field schema shared between Dhrumil's Python harness
+ * This is the 25-field schema shared between Chrysalis's Python harness
  * (`run_agent_eval.py` -> `agent_eval_full.jsonl`) and the kbn-evals TS port.
  * Any system that produces rows matching this interface can feed
  * {@link renderAgentEvalHtml} to produce a self-contained HTML report.
