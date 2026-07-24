@@ -7,25 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
-import {
-  EuiButton,
-  EuiCallOut,
-  EuiCodeBlock,
-  EuiEmptyPrompt,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiFlyoutFooter,
-  EuiFlyoutHeader,
-  EuiLoadingSpinner,
-  EuiTitle,
-  useGeneratedHtmlId,
-} from '@elastic/eui';
+import React, { useCallback } from 'react';
+import { EuiFlyout } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { downloadFileAs } from '@kbn/share-plugin/public';
+import { ExportJsonFlyout } from '@kbn/share-plugin/public';
 import {
   DISCOVER_SESSION_API_BASE_PATH,
   DISCOVER_SESSION_API_VERSION,
@@ -43,106 +28,48 @@ interface DiscoverSessionExportResponse {
 
 export interface ExportSessionJsonFlyoutProps {
   discoverSessionId: string;
+  title: string;
   onClose: () => void;
 }
 
 export const ExportSessionJsonFlyout = ({
   discoverSessionId,
+  title,
   onClose,
 }: ExportSessionJsonFlyoutProps) => {
-  const flyoutTitleId = useGeneratedHtmlId();
   const { http } = useDiscoverServices();
-  const [session, setSession] = useState<DiscoverSessionExportResponse>();
-  const [error, setError] = useState<Error>();
-
-  useEffect(() => {
-    let mounted = true;
-
-    http
-      .get<DiscoverSessionExportResponse>(
-        `${DISCOVER_SESSION_API_BASE_PATH}/${discoverSessionId}`,
+  const getExportJson = useCallback(() => ({ id: discoverSessionId }), [discoverSessionId]);
+  const getSession = useCallback(
+    async ({ id }: { id: string }) => {
+      const data = await http.get<DiscoverSessionExportResponse>(
+        `${DISCOVER_SESSION_API_BASE_PATH}/${encodeURIComponent(id)}`,
         { version: DISCOVER_SESSION_API_VERSION }
-      )
-      .then((response) => {
-        if (mounted) setSession(response);
-      })
-      .catch((fetchError: Error) => {
-        if (mounted) setError(fetchError);
-      });
+      );
 
-    return () => {
-      mounted = false;
-    };
-  }, [http, discoverSessionId]);
-
-  const jsonValue = useMemo(() => (session ? JSON.stringify(session, null, 2) : ''), [session]);
+      return { data, warnings: [] };
+    },
+    [http]
+  );
 
   return (
     <EuiFlyout
       ownFocus
       onClose={onClose}
-      aria-labelledby={flyoutTitleId}
+      aria-label={i18n.translate('discover.topNav.exportSessionJson.flyoutAriaLabel', {
+        defaultMessage: 'Export Discover session as JSON',
+      })}
       data-test-subj="discoverExportSessionJsonFlyout"
     >
-      <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="m">
-          <h2 id={flyoutTitleId}>
-            <FormattedMessage
-              id="discover.topNav.exportSessionJson.flyoutTitle"
-              defaultMessage="Export Discover session as JSON"
-            />
-          </h2>
-        </EuiTitle>
-      </EuiFlyoutHeader>
-      <EuiFlyoutBody>
-        {error ? (
-          <EuiCallOut
-            announceOnMount
-            color="danger"
-            title={i18n.translate('discover.topNav.exportSessionJson.errorTitle', {
-              defaultMessage: 'Unable to load the Discover session',
-            })}
-          >
-            {error.message}
-          </EuiCallOut>
-        ) : !session ? (
-          <EuiEmptyPrompt icon={<EuiLoadingSpinner size="xl" />} />
-        ) : (
-          <EuiCodeBlock
-            language="json"
-            isCopyable
-            overflowHeight="100%"
-            data-test-subj="discoverExportSessionJsonCodeBlock"
-          >
-            {jsonValue}
-          </EuiCodeBlock>
-        )}
-      </EuiFlyoutBody>
-      <EuiFlyoutFooter>
-        <EuiFlexGroup justifyContent="flexEnd">
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              fill
-              iconType="download"
-              disabled={!session}
-              data-test-subj="discoverExportSessionJsonDownloadButton"
-              onClick={() => {
-                if (!session) return;
-                downloadFileAs(`${session.data.title || session.id}.json`, {
-                  content: jsonValue,
-                  type: 'application/json',
-                });
-                onClose();
-              }}
-            >
-              <FormattedMessage
-                id="discover.topNav.exportSessionJson.downloadButtonLabel"
-                defaultMessage="Download JSON"
-              />
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlyoutFooter>
+      <ExportJsonFlyout
+        title={title}
+        isTechnicalPreview
+        objectType={i18n.translate('discover.topNav.exportSessionJson.objectType', {
+          defaultMessage: 'Discover session',
+        })}
+        closeFlyout={onClose}
+        getExportJson={getExportJson}
+        sanitizeState={getSession}
+      />
     </EuiFlyout>
   );
 };

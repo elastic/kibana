@@ -38,6 +38,7 @@ export const getExportSessionJsonAppMenuItem = ({
       return (
         <ExportSessionJsonFlyout
           discoverSessionId={persistedDiscoverSession.id}
+          title={persistedDiscoverSession.title}
           onClose={onFinishAction}
         />
       );

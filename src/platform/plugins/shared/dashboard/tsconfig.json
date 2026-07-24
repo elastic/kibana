@@ -112,8 +112,6 @@
     "@kbn/test-jest-helpers",
     "@kbn/scout",
     "@kbn/cps-utils",
-    "@kbn/code-editor-mock",
-    "@kbn/code-editor",
     "@kbn/as-code-shared-schemas",
     "@kbn/as-code-utils",
     "@kbn/as-code-shared-transforms",

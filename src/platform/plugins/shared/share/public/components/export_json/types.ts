@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ReactNode } from 'react';
+
 export type ExportJsonStatus = 'loading' | 'success' | 'error';
 
 export interface ExportJsonSharingData<State extends object> {
@@ -24,3 +26,15 @@ export interface ExportJsonSanitizedState<SanitizedState extends object> {
 export type SanitizeStateFunction<State extends object, SanitizedState extends object> = (
   state: State
 ) => Promise<{ data: SanitizedState | undefined; warnings: Array<{ message: string }> }>;
+
+export type RenderExportJsonActions = (jsonValue: string) => ReactNode;
+
+export interface ExportJsonFlyoutProps<State extends object, SanitizedState extends object>
+  extends ExportJsonSharingData<State> {
+  isByReference?: boolean;
+  isTechnicalPreview?: boolean;
+  objectType: string;
+  closeFlyout: () => void;
+  sanitizeState: SanitizeStateFunction<State, SanitizedState>;
+  renderAdditionalActions?: RenderExportJsonActions;
+}

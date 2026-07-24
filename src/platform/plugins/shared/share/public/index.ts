@@ -50,3 +50,8 @@ export function plugin(ctx: PluginInitializerContext) {
 }
 
 export { useShareTypeContext } from './components/context';
+export { ExportJsonFlyout } from './components/export_json';
+export type {
+  ExportJsonFlyoutProps,
+  ExportJsonSharingData,
+} from './components/export_json';

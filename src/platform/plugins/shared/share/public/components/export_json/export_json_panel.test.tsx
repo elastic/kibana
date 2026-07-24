@@ -29,7 +29,7 @@ describe('ExportJsonPanel', () => {
       error: undefined,
     };
     render(<ExportJsonPanel {...sanitizedState} onRetry={jest.fn()} />);
-    expect(screen.getByTestId('dashboardExportSourceLoading')).toBeInTheDocument();
+    expect(screen.getByTestId('exportJsonLoading')).toBeInTheDocument();
   });
 
   it('renders warnings when the server reports unsupported panels', async () => {
@@ -43,17 +43,17 @@ describe('ExportJsonPanel', () => {
 
     render(<ExportJsonPanel {...sanitizedState} onRetry={jest.fn()} />);
 
-    expect(screen.getByTestId('dashboardExportSourceWarnings')).toBeInTheDocument();
+    expect(screen.getByTestId('exportJsonWarnings')).toBeInTheDocument();
 
-    expect(screen.queryByTestId('dashboardExportSourceWarningsList')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('exportJsonWarningsList')).not.toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: /Show details/i }));
-    expect(screen.getByTestId('dashboardExportSourceWarningsList')).toBeInTheDocument();
+    expect(screen.getByTestId('exportJsonWarningsList')).toBeInTheDocument();
     expect(screen.getByText(/Dropped panel panel1/)).toBeInTheDocument();
 
-    const callout = screen.getByTestId('dashboardExportSourceWarnings');
+    const callout = screen.getByTestId('exportJsonWarnings');
     await user.click(within(callout).getByTestId('euiDismissCalloutButton'));
-    expect(screen.queryByTestId('dashboardExportSourceWarnings')).not.toBeInTheDocument();
-    expect(screen.getByTestId('exportAssetValue')).toBeInTheDocument();
+    expect(screen.queryByTestId('exportJsonWarnings')).not.toBeInTheDocument();
+    expect(screen.getByTestId('exportJsonValue')).toBeInTheDocument();
   });
 
   it('renders an error prompt and hides sanitized JSON', async () => {
@@ -65,10 +65,10 @@ describe('ExportJsonPanel', () => {
     };
     render(<ExportJsonPanel {...sanitizedState} onRetry={jest.fn()} />);
 
-    expect(screen.getByTestId('dashboardExportSourceSanitizeErrorPrompt')).toBeInTheDocument();
+    expect(screen.getByTestId('exportJsonErrorPrompt')).toBeInTheDocument();
 
     expect(screen.getByText(/boom/)).toBeInTheDocument();
-    expect(screen.queryByTestId('exportAssetValue')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('exportJsonValue')).not.toBeInTheDocument();
   });
 
   it('calls onRetry when the user clicks Retry', async () => {
@@ -83,7 +83,7 @@ describe('ExportJsonPanel', () => {
 
     render(<ExportJsonPanel {...sanitizedState} onRetry={onRetry} />);
 
-    await user.click(screen.getByTestId('dashboardExportSourceRetryButton'));
+    await user.click(screen.getByTestId('exportJsonRetryButton'));
     expect(onRetry).toHaveBeenCalledTimes(1);
   });
 });

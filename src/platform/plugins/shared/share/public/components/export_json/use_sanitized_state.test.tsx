@@ -8,52 +8,41 @@
  */
 
 import { act, renderHook, waitFor } from '@testing-library/react';
-import type { DashboardState } from '../../../../../../common';
-import { DEFAULT_DASHBOARD_OPTIONS } from '../../../../../../common/constants';
 import { useSanitizedState } from './use_sanitized_state';
 
-describe('useSanitizedDashboardState', () => {
-  const dashboardState: DashboardState = {
-    title: 'my dashboard',
-    panels: [],
-    pinned_panels: [],
-    options: DEFAULT_DASHBOARD_OPTIONS,
-  };
+describe('useSanitizedState', () => {
+  const state = { title: 'saved object' };
 
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   test('starts loading and then returns a success state', async () => {
-    const sanitizeDashboard = jest.fn().mockResolvedValue({
-      data: { ...dashboardState, title: 'my dashboard (sanitized)' },
+    const sanitizeState = jest.fn().mockResolvedValue({
+      data: { ...state, title: 'saved object (sanitized)' },
       warnings: [],
     });
 
-    const { result } = renderHook(() =>
-      useSanitizedState({ state: dashboardState, sanitizeState: sanitizeDashboard })
-    );
+    const { result } = renderHook(() => useSanitizedState({ state, sanitizeState }));
     expect(result.current.status).toBe('loading');
 
     await waitFor(() => {
       expect(result.current.status).toBe('success');
     });
 
-    expect(sanitizeDashboard).toHaveBeenCalledTimes(1);
+    expect(sanitizeState).toHaveBeenCalledTimes(1);
   });
 
   test('retries when retry is called', async () => {
-    const sanitizeDashboard = jest
+    const sanitizeState = jest
       .fn()
       .mockRejectedValueOnce(new Error('boom'))
       .mockResolvedValueOnce({
-        data: { ...dashboardState, title: 'my dashboard (sanitized)' },
+        data: { ...state, title: 'saved object (sanitized)' },
         warnings: [],
       });
 
-    const { result } = renderHook(() =>
-      useSanitizedState({ state: dashboardState, sanitizeState: sanitizeDashboard })
-    );
+    const { result } = renderHook(() => useSanitizedState({ state, sanitizeState }));
     await waitFor(() => {
       expect(result.current.status).toBe('error');
     });
@@ -63,7 +52,7 @@ describe('useSanitizedDashboardState', () => {
     });
 
     await waitFor(() => {
-      expect(sanitizeDashboard).toHaveBeenCalledTimes(2);
+      expect(sanitizeState).toHaveBeenCalledTimes(2);
       expect(result.current.status).toBe('success');
     });
   });

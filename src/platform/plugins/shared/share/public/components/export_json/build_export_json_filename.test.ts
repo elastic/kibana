@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { buildExportJsonFilename } from './export_json_share_utils';
+import { buildExportJsonFilename } from './build_export_json_filename';
 
 describe('export_source_share_utils', () => {
   describe('buildExportJsonFilename', () => {

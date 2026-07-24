@@ -77,7 +77,7 @@ export function useSanitizedState<State extends object, SanitizedState extends o
         const err = e instanceof Error ? e : new Error(String(e));
         apm.captureError(err, {
           labels: {
-            error_type: 'SanitizeDashboardFailure',
+            error_type: 'SanitizeExportJsonFailure',
           },
         });
         setError(err);

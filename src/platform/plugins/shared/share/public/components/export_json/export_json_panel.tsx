@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { compressToEncodedURIComponent } from 'lz-string';
 import React, { useEffect, useMemo, useState } from 'react';
 
 import {
@@ -29,13 +28,12 @@ import {
 import { css } from '@emotion/react';
 import { CodeEditor, XJsonLang } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
-import { coreServices, shareService } from '../../../../../services/kibana_services';
-import type { ExportJsonSanitizedState } from './types';
+import type { ExportJsonSanitizedState, RenderExportJsonActions } from './types';
 
 export type ExportJsonPanelProps<SanitizedState extends object> =
   ExportJsonSanitizedState<SanitizedState> & {
-    apiPath?: string;
     onRetry: () => void;
+    renderAdditionalActions?: RenderExportJsonActions;
   };
 
 function WarningsCallout({
@@ -72,17 +70,21 @@ function WarningsCallout({
       <EuiCallOut
         color="warning"
         iconType="alert"
-        title={i18n.translate('dashboard.exportJson.warningsTitle', {
+        title={i18n.translate('share.exportJson.warningsTitle', {
           defaultMessage: 'Unsupported properties were removed',
+          description:
+            'Title of a warning shown above the exported JSON, when parts of the object could not be represented in the export format and were dropped.',
         })}
         size="s"
-        data-test-subj="dashboardExportSourceWarnings"
+        data-test-subj="exportJsonWarnings"
         onDismiss={onDismiss}
       >
         <EuiText size="s" color="subdued">
-          {i18n.translate('dashboard.exportJson.warningsSummary', {
+          {i18n.translate('share.exportJson.warningsSummary', {
             defaultMessage:
               '{count} item{count, plural, one {} other {s}} removed from the JSON source.',
+            description:
+              'Summary line under the warning title. {count} is how many properties were dropped from the exported JSON.',
             values: { count: warnings.length },
           })}
         </EuiText>
@@ -94,20 +96,20 @@ function WarningsCallout({
           paddingSize="s"
           buttonContent={
             isExpanded
-              ? i18n.translate('dashboard.exportJson.warningsAccordionHide', {
+              ? i18n.translate('share.exportJson.warningsAccordionHide', {
                   defaultMessage: 'Hide details',
+                  description:
+                    'Collapses the list of properties that were dropped from the exported JSON.',
                 })
-              : i18n.translate('dashboard.exportJson.warningsAccordionShow', {
+              : i18n.translate('share.exportJson.warningsAccordionShow', {
                   defaultMessage: 'Show details',
+                  description:
+                    'Expands the list of properties that were dropped from the exported JSON.',
                 })
           }
         >
           {isExpanded ? (
-            <EuiText
-              size="s"
-              data-test-subj="dashboardExportSourceWarningsList"
-              css={warningsListStyles}
-            >
+            <EuiText size="s" data-test-subj="exportJsonWarningsList" css={warningsListStyles}>
               <ul>
                 {warnings?.map((warning, idx) => (
                   <li key={`${idx}-${warning}`}>{warning}</li>
@@ -133,16 +135,18 @@ function LoadingState() {
       <EuiFlexItem grow={false}>
         <EuiLoadingSpinner
           size="xl"
-          data-test-subj="dashboardExportSourceLoading"
-          aria-label={i18n.translate('dashboard.exportJson.loadingLabel', {
+          data-test-subj="exportJsonLoading"
+          aria-label={i18n.translate('share.exportJson.loadingLabel', {
             defaultMessage: 'Loading JSON source',
+            description: 'Screen reader label for the spinner shown while the export JSON loads.',
           })}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiText size="s" color="subdued">
-          {i18n.translate('dashboard.exportJson.loadingText', {
+          {i18n.translate('share.exportJson.loadingText', {
             defaultMessage: 'Loading JSON source...',
+            description: 'Text shown next to the spinner while the export JSON loads.',
           })}
         </EuiText>
       </EuiFlexItem>
@@ -151,30 +155,13 @@ function LoadingState() {
 }
 
 function SuccessState({
-  openInConsoleRequest,
   jsonValue,
+  renderAdditionalActions,
 }: {
-  openInConsoleRequest?: string;
   jsonValue: string;
+  renderAdditionalActions?: RenderExportJsonActions;
 }) {
-  const useUrl = shareService?.url.locators.useUrl;
-
-  const devToolsDataUri = openInConsoleRequest
-    ? compressToEncodedURIComponent(openInConsoleRequest)
-    : undefined;
-  const consoleHref = useUrl?.(
-    () => ({
-      id: 'CONSOLE_APP_LOCATOR',
-      params: {
-        loadFrom: `data:text/plain,${devToolsDataUri}`,
-      },
-    }),
-    [devToolsDataUri]
-  );
-
-  const canShowDevTools = Boolean(
-    coreServices.application?.capabilities?.dev_tools?.show && devToolsDataUri !== undefined
-  );
+  const additionalActions = renderAdditionalActions?.(jsonValue);
 
   return (
     <EuiFlexGroup
@@ -187,7 +174,7 @@ function SuccessState({
           flexGrow: 1, // Ensure the editor takes the full height of its flex container on Safari.
         },
       })}
-      data-test-subj="exportAssetValue"
+      data-test-subj="exportJsonValue"
     >
       <EuiFlexItem grow={false}>
         <EuiSpacer size="s" />
@@ -201,36 +188,26 @@ function SuccessState({
                     flush="right"
                     iconType="copyClipboard"
                     onClick={copy}
-                    aria-label={i18n.translate('dashboard.exportJson.copyAriaLabel', {
+                    aria-label={i18n.translate('share.exportJson.copyAriaLabel', {
                       defaultMessage: 'Copy JSON source',
+                      description:
+                        'Screen reader label for the button that copies the exported JSON to the clipboard.',
                     })}
-                    data-test-subj="dashboardExportSourceCopyButton"
+                    data-test-subj="exportJsonCopyButton"
                   >
-                    {i18n.translate('dashboard.exportJson.copyButtonLabel', {
+                    {i18n.translate('share.exportJson.copyButtonLabel', {
                       defaultMessage: 'Copy to clipboard',
+                      description:
+                        'Button that copies the exported JSON, shown above the read-only JSON editor.',
                     })}
                   </EuiButtonEmpty>
                 )}
               </EuiCopy>
             </div>
           </EuiFlexItem>
-          {canShowDevTools ? (
+          {additionalActions ? (
             <EuiFlexItem grow={false}>
-              <div>
-                <EuiButtonEmpty
-                  size="xs"
-                  flush="right"
-                  iconType="wrench"
-                  href={consoleHref}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  data-test-subj="dashboardExportSourceOpenInConsoleButton"
-                >
-                  {i18n.translate('dashboard.exportJson.openInConsoleButtonLabel', {
-                    defaultMessage: 'Open in Console',
-                  })}
-                </EuiButtonEmpty>
-              </div>
+              <div>{additionalActions}</div>
             </EuiFlexItem>
           ) : null}
         </EuiFlexGroup>
@@ -239,8 +216,9 @@ function SuccessState({
         <CodeEditor
           languageId={XJsonLang.ID}
           value={jsonValue}
-          aria-label={i18n.translate('dashboard.exportJson.codeBlockAriaLabel', {
+          aria-label={i18n.translate('share.exportJson.codeBlockAriaLabel', {
             defaultMessage: 'Export JSON source',
+            description: 'Screen reader label for the read-only editor showing the exported JSON.',
           })}
           options={{
             readOnly: true,
@@ -276,25 +254,29 @@ function ErrorState({ error, onRetry }: { error: Error | undefined; onRetry?: ()
           iconType="error"
           color="danger"
           titleSize="s"
-          data-test-subj="dashboardExportSourceSanitizeErrorPrompt"
+          data-test-subj="exportJsonErrorPrompt"
           title={
             <h3>
-              {i18n.translate('dashboard.exportJson.sanitizeErrorTitle', {
+              {i18n.translate('share.exportJson.sanitizeErrorTitle', {
                 defaultMessage: 'Unable to export',
+                description: 'Title shown in place of the JSON when the export could not be loaded.',
               })}
             </h3>
           }
           body={
             <EuiText size="s">
               <p>
-                {i18n.translate('dashboard.exportJson.sanitizeErrorBody', {
+                {i18n.translate('share.exportJson.sanitizeErrorBody', {
                   defaultMessage: 'Sorry, there was an error loading the JSON source.',
+                  description: 'Body text shown when the export JSON could not be loaded.',
                 })}
               </p>
               {error && (
                 <p>
-                  {i18n.translate('dashboard.exportJson.sanitizeErrorDetails', {
+                  {i18n.translate('share.exportJson.sanitizeErrorDetails', {
                     defaultMessage: 'Error: {errorMessage}',
+                    description:
+                      'Shows the underlying failure. {errorMessage} is an untranslated technical message from the server.',
                     values: { errorMessage: error.message },
                   })}
                 </p>
@@ -307,10 +289,11 @@ function ErrorState({ error, onRetry }: { error: Error | undefined; onRetry?: ()
                 color="danger"
                 iconType="refresh"
                 onClick={onRetry}
-                data-test-subj="dashboardExportSourceRetryButton"
+                data-test-subj="exportJsonRetryButton"
               >
-                {i18n.translate('dashboard.exportJson.retryButtonLabel', {
+                {i18n.translate('share.exportJson.retryButtonLabel', {
                   defaultMessage: 'Retry',
+                  description: 'Button that loads the export JSON again after a failure.',
                 })}
               </EuiButton>
             )
@@ -321,15 +304,15 @@ function ErrorState({ error, onRetry }: { error: Error | undefined; onRetry?: ()
   );
 }
 
-export const ExportJsonPanel = <State extends object, SanitizedState extends object>({
-  apiPath,
+export const ExportJsonPanel = <SanitizedState extends object>({
   status,
   data,
   warnings,
   error,
   onRetry,
+  renderAdditionalActions,
 }: ExportJsonPanelProps<SanitizedState>) => {
-  const warningsAccordionId = useGeneratedHtmlId({ prefix: 'dashboardExportSourceWarnings' });
+  const warningsAccordionId = useGeneratedHtmlId({ prefix: 'exportJsonWarnings' });
   const [isWarningsExpanded, setIsWarningsExpanded] = useState(false);
   const [showWarningsCallout, setShowWarningsCallout] = useState(true);
 
@@ -342,11 +325,6 @@ export const ExportJsonPanel = <State extends object, SanitizedState extends obj
   const jsonValue = useMemo(
     () => (status === 'success' && data !== undefined ? JSON.stringify(data, null, 2) : undefined),
     [data, status]
-  );
-
-  const openInConsoleRequest = useMemo(
-    () => (apiPath ? `POST kbn:${apiPath}\n${jsonValue}` : undefined),
-    [apiPath, jsonValue]
   );
 
   return (
@@ -370,13 +348,15 @@ export const ExportJsonPanel = <State extends object, SanitizedState extends obj
           ) : status === 'error' ? (
             <ErrorState error={error} onRetry={onRetry} />
           ) : jsonValue ? (
-            <SuccessState openInConsoleRequest={openInConsoleRequest} jsonValue={jsonValue} />
+            <SuccessState jsonValue={jsonValue} renderAdditionalActions={renderAdditionalActions} />
           ) : (
             <ErrorState
               error={
                 new Error(
-                  i18n.translate('dashboard.exportJson.noDataError', {
+                  i18n.translate('share.exportJson.noDataError', {
                     defaultMessage: 'No data was returned. See warnings above for more details.',
+                    description:
+                      'Shown when the export succeeded but produced nothing, usually because every property was unsupported and dropped.',
                   })
                 )
               }
