@@ -217,6 +217,72 @@ class SessionMetricsParserTests(unittest.TestCase):
             self.assertEqual(metrics["artifacts"]["status"], "not_available")
             self.assertEqual(metrics["sources"][1]["status"], "missing")
 
+    def test_explicit_transcript_is_not_counted_twice_when_manifest_lists_it(self):
+        with tempfile.TemporaryDirectory() as raw_dir:
+            root = Path(raw_dir)
+            transcript = root / "session.jsonl"
+            transcript.write_text(
+                '{"message":{"usage":{"input_tokens":2,"output_tokens":3,'
+                '"cache_creation_input_tokens":5,"cache_read_input_tokens":7}}}\n',
+                encoding="utf-8",
+            )
+            manifest = root / "metrics.json"
+            manifest.write_text(
+                json.dumps(
+                    {
+                        "version": 1,
+                        "session_root": ".",
+                        "transcripts": [
+                            {"path": transcript.name, "scope": "orchestrator"}
+                        ],
+                        "artifacts": [],
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            metrics = build_session_metrics(manifest, transcript, None)
+
+            self.assertEqual(
+                metrics["tokens"]["aggregate"],
+                {
+                    "input_tokens": 2,
+                    "output_tokens": 3,
+                    "cache_creation_input_tokens": 5,
+                    "cache_read_input_tokens": 7,
+                    "total": 17,
+                },
+            )
+
+    def test_duplicate_missing_artifacts_have_one_unavailable_source(self):
+        with tempfile.TemporaryDirectory() as raw_dir:
+            root = Path(raw_dir)
+            manifest = root / "metrics.json"
+            manifest.write_text(
+                json.dumps(
+                    {
+                        "version": 1,
+                        "session_root": ".",
+                        "transcripts": [],
+                        "artifacts": [
+                            {"path": "missing.png", "kind": "screenshot"},
+                            {"path": "missing.png", "kind": "screenshot"},
+                        ],
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            metrics = build_session_metrics(manifest, None, None)
+            artifact_sources = [
+                source
+                for source in metrics["sources"]
+                if source["kind"] == "artifact"
+            ]
+
+            self.assertEqual(len(artifact_sources), 1)
+            self.assertEqual(artifact_sources[0]["status"], "missing")
+
     def test_manifest_cannot_read_paths_outside_session_root(self):
         with tempfile.TemporaryDirectory() as raw_dir:
             root = Path(raw_dir)

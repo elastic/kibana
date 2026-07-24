@@ -327,9 +327,12 @@ def _artifact_metrics(
 
     by_kind: dict[str, dict[str, int]] = {}
     sources: list[dict[str, object]] = []
-    counted_paths: set[Path] = set()
+    seen_paths: set[Path] = set()
     for root, artifact in artifacts:
         path = _resolve_manifest_path(root, artifact.path)
+        if path in seen_paths:
+            continue
+        seen_paths.add(path)
         source = {"kind": "artifact", "path": str(path), "artifact_kind": artifact.kind}
         try:
             size = path.stat().st_size
@@ -337,9 +340,6 @@ def _artifact_metrics(
             source["status"] = "missing"
             sources.append(source)
             continue
-        if path in counted_paths:
-            continue
-        counted_paths.add(path)
         stats = by_kind.setdefault(artifact.kind, {"files": 0, "bytes": 0})
         stats["files"] += 1
         stats["bytes"] += size
@@ -445,21 +445,32 @@ def build_session_metrics(
         artifact_root = manifest_root
 
     transcript_results: list[TranscriptResult] = []
+    transcript_paths: set[Path] = set()
+
+    def add_transcript(
+        path: Path,
+        scope: str = "orchestrator",
+        name: str | None = None,
+    ) -> None:
+        resolved_path = path.resolve()
+        if resolved_path in transcript_paths:
+            return
+        transcript_paths.add(resolved_path)
+        transcript_results.append(parse_transcript(path, scope, name))
+
     if manifest:
         for entry in _manifest_transcripts(manifest):
             path = _resolve_manifest_path(manifest_root, entry.path)
-            transcript_results.append(
-                parse_transcript(path, entry.scope, entry.name)
-            )
+            add_transcript(path, entry.scope, entry.name)
     elif explicit_transcript is not None:
-        transcript_results.append(parse_transcript(explicit_transcript))
+        add_transcript(explicit_transcript)
     else:
         auto_transcript = resolve_transcript(None)
         if auto_transcript is not None:
-            transcript_results.append(parse_transcript(auto_transcript))
+            add_transcript(auto_transcript)
 
     if explicit_transcript is not None and manifest:
-        transcript_results.append(parse_transcript(explicit_transcript))
+        add_transcript(explicit_transcript)
 
     tokens, token_sources = _token_metrics(transcript_results)
     artifacts, artifact_sources = _artifact_metrics(
