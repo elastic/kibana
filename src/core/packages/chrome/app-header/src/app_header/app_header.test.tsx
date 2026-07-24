@@ -22,6 +22,12 @@ import type { AppHeaderMetadataItems } from '../types';
 import { AppHeaderView, DiscoverAppHeader } from './app_header';
 import { APP_HEADER_TEST_SUBJECTS } from './test_subjects';
 
+const createChromeWithIntegrationsAccess = (canAccessIntegrations: boolean) => {
+  const chrome = chromeServiceMock.createStartContract();
+  chrome.componentDeps.capabilities.navLinks.integrations = canAccessIntegrations;
+  return chrome;
+};
+
 const renderAppHeader = (
   ui: React.ReactElement,
   chrome: InternalChromeStart = chromeServiceMock.createStartContract()
@@ -124,10 +130,47 @@ describe('AppHeaderView', () => {
   });
 
   it('renders when the only content is a static app menu item', async () => {
-    renderAppHeader(<AppHeaderView showAddIntegrations />);
+    renderAppHeader(
+      <AppHeaderView showAddIntegrations />,
+      createChromeWithIntegrationsAccess(true)
+    );
 
     expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.root)).toBeInTheDocument();
     expect(await screen.findByTestId(APP_MENU_TEST_SUBJECTS.root)).toBeInTheDocument();
+  });
+
+  it('shows Add integrations when capabilities.navLinks.integrations is true', async () => {
+    renderAppHeader(
+      <AppHeaderView title="Workflows" showAddIntegrations />,
+      createChromeWithIntegrationsAccess(true)
+    );
+
+    fireEvent.click(await screen.findByTestId(APP_MENU_TEST_SUBJECTS.overflowButton));
+    expect(await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.menuAddIntegrations)).toHaveAttribute(
+      'href',
+      '/app/integrations/browse'
+    );
+  });
+
+  it('hides Add integrations when capabilities.navLinks.integrations is false', async () => {
+    renderAppHeader(
+      <AppHeaderView title="Workflows" showAddIntegrations docLink="https://example.com/docs" />,
+      createChromeWithIntegrationsAccess(false)
+    );
+
+    fireEvent.click(await screen.findByTestId(APP_MENU_TEST_SUBJECTS.overflowButton));
+    expect(
+      screen.queryByTestId(APP_HEADER_TEST_SUBJECTS.menuAddIntegrations)
+    ).not.toBeInTheDocument();
+  });
+
+  it('does not render when Add integrations is the only content and access is denied', () => {
+    renderAppHeader(
+      <AppHeaderView showAddIntegrations />,
+      createChromeWithIntegrationsAccess(false)
+    );
+
+    expect(screen.queryByTestId(APP_HEADER_TEST_SUBJECTS.root)).not.toBeInTheDocument();
   });
 
   it('renders Discover tabs beside the title', () => {
