@@ -16,12 +16,7 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import {
-  spaceTest,
-  testData,
-  DEFAULT_TIME_RANGE,
-  DEFAULT_CONFIG,
-} from '../fixtures';
+import { spaceTest, testData, DEFAULT_TIME_RANGE, DEFAULT_CONFIG } from '../fixtures';
 
 const FIRST_DIMENSION = DEFAULT_CONFIG.dimensions[0].name;
 

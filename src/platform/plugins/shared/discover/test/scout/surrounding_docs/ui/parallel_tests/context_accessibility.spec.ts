@@ -8,12 +8,7 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import {
-  spaceTest,
-  testData,
-  loginAndGoToDiscover,
-  navigateToFirstDocContext,
-} from '../fixtures';
+import { spaceTest, testData, loginAndGoToDiscover, navigateToFirstDocContext } from '../fixtures';
 
 spaceTest.describe('Discover context - accessibility', { tag: '@local-stateful-classic' }, () => {
   spaceTest.beforeAll(async ({ scoutSpace }) => {

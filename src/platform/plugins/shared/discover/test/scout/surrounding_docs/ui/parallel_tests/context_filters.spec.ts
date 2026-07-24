@@ -17,10 +17,7 @@ import {
   everyFieldMatches,
   resolveDataViewId,
 } from '../fixtures';
-import {
-  FILTER_FIELD_GEO_SRC,
-  FILTER_VALUE_GEO_SRC_IN,
-} from '../fixtures/constants';
+import { FILTER_FIELD_GEO_SRC, FILTER_VALUE_GEO_SRC_IN } from '../fixtures/constants';
 
 const TEST_ANCHOR_FILTER_FIELD = testData.FILTER_FIELD_GEO_SRC;
 const TEST_ANCHOR_FILTER_VALUE = testData.FILTER_VALUE_GEO_SRC_IN;
