@@ -1,6 +1,6 @@
 # Significant Events Evaluations
 
-Evaluations for Significant Events, which assess the quality of LLM-based Knowledge Indicator (KI) feature extraction, KI query generation, KI feature exclusion, and KI feature deduplication across failure scenarios.
+Evaluations for Significant Events, covering the individual LLM-based pipeline stages: Knowledge Indicator (KI) feature extraction, KI query generation, KI feature exclusion/deduplication, discovery, and judge. For the full end-to-end replay evals (logs all the way to raised significant events), see the sibling suite [`@kbn/evals-suite-significant-events-live`](../kbn-evals-suite-significant-events-live/README.md), which builds on the infrastructure exported by this package.
 These evaluations support both qualitative (LLM-as-a-judge + deterministic CODE evaluators) and quantitative (trace-based) metrics.
 
 For general information about writing evaluation tests, configuration, and usage, see the main [`@kbn/evals` documentation](../kbn-evals/README.md).
@@ -13,6 +13,8 @@ For general information about writing evaluation tests, configuration, and usage
 | **KI query generation**      | `ki_query_generation/ki_query_generation.spec.ts`           | Can the LLM produce valid, hit-producing ES\|QL rules for significant event detection?    |
 | **KI feature exclusion**     | `ki_feature_exclusion/ki_feature_exclusion.spec.ts`         | Does the LLM respect excluded features and avoid regenerating them in follow-up runs?     |
 | **KI feature deduplication** | `ki_feature_deduplication/ki_feature_deduplication.spec.ts` | Are KIs stable and semantically unique across independent runs and iterative dedup loops? |
+| **Discovery agent**          | `discovery/discovery.spec.ts`                               | Does the discovery agent group detections into correct, evidence-backed discoveries (incl. continuation over time)? |
+| **Discovery judge**          | `discovery/judge.spec.ts`                                   | Does the judge promote real incidents to open events and dismiss benign noise?            |
 
 ## Prerequisites
 

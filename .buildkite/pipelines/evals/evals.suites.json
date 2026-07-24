@@ -84,6 +84,20 @@
       ]
     },
     {
+      "id": "significant-events-live",
+      "name": "Significant Events Live",
+      "slackChannel": "#significant-events-alerts",
+      "configPath": "x-pack/platform/packages/shared/kbn-evals-suite-significant-events-live/playwright.config.ts",
+      "tags": [
+        "platform",
+        "significant-events"
+      ],
+      "ciLabels": [
+        "evals:significant-events-live"
+      ],
+      "manualOnly": true
+    },
+    {
       "id": "llm-tasks",
       "name": "LLM Tasks",
       "slackChannel": "#appex-ai-infra-alerts",

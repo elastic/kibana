@@ -1329,6 +1329,8 @@
       "@kbn/evals-suite-siem-readiness/*": ["./x-pack/solutions/security/packages/kbn-evals-suite-siem-readiness/*"],
       "@kbn/evals-suite-significant-events": ["./x-pack/platform/packages/shared/kbn-evals-suite-significant-events"],
       "@kbn/evals-suite-significant-events/*": ["./x-pack/platform/packages/shared/kbn-evals-suite-significant-events/*"],
+      "@kbn/evals-suite-significant-events-live": ["./x-pack/platform/packages/shared/kbn-evals-suite-significant-events-live"],
+      "@kbn/evals-suite-significant-events-live/*": ["./x-pack/platform/packages/shared/kbn-evals-suite-significant-events-live/*"],
       "@kbn/evals-suite-smoke-tests": ["./x-pack/platform/packages/shared/kbn-evals-suite-smoke-tests"],
       "@kbn/evals-suite-smoke-tests/*": ["./x-pack/platform/packages/shared/kbn-evals-suite-smoke-tests/*"],
       "@kbn/evals-suite-streams": ["./x-pack/platform/packages/shared/kbn-evals-suite-streams"],

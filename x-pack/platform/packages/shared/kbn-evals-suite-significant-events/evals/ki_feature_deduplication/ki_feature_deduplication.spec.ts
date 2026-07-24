@@ -31,7 +31,7 @@ import {
   type KIFeatureExtractionScenario,
   type KIFeatureDeduplicationScenario,
 } from '../../src/datasets';
-import { buildAvailableSnapshotsBySource } from '../shared';
+import { buildAvailableSnapshotsBySource } from '../../src/data_generators/available_snapshots';
 import { collectSampleDocuments } from '../ki_feature_extraction/collect_sample_documents';
 
 interface AvailableDeduplicationScenario {

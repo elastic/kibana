@@ -18,7 +18,7 @@ const REPLAY_TEMP_PREFIX = 'sigevents-replay-temp-';
 const REINDEX_REQUEST_TIMEOUT_MS = 30 * 60 * 1000;
 const MAX_LOGGED_REINDEX_FAILURES = 5;
 
-const replayTempPrefix = (runId: number): string => `${REPLAY_TEMP_PREFIX}${runId}-`;
+export const replayTempPrefix = (runId: number): string => `${REPLAY_TEMP_PREFIX}${runId}-`;
 
 const TIMESTAMP_TRANSFORM_SCRIPT = `
   // Reset the _id field to null to avoid conflicts with subsequent reindex operations
@@ -63,7 +63,7 @@ const createReplayArtifacts = (): ReplayArtifacts => {
   };
 };
 
-const getLogsIndicesFromSnapshot = async ({
+export const getLogsIndicesFromSnapshot = async ({
   esClient,
   repoName,
   snapshotName,
@@ -96,7 +96,7 @@ const getLogsIndicesFromSnapshot = async ({
   return logsIndices;
 };
 
-const restoreLogsIndicesToTemp = async ({
+export const restoreLogsIndicesToTemp = async ({
   esClient,
   repoName,
   snapshotName,
@@ -131,7 +131,7 @@ const restoreLogsIndicesToTemp = async ({
   return logsIndices.map((indexName) => `${tempPrefix}${indexName}`);
 };
 
-const getMaxTimestampFromTempIndices = async ({
+export const getMaxTimestampFromTempIndices = async ({
   esClient,
   tempIndices,
   log,
@@ -192,7 +192,7 @@ const ensureLogsDataStream = async ({
   }
 };
 
-const getWriteIndexInfo = async ({
+export const getWriteIndexInfo = async ({
   esClient,
   log,
 }: {
@@ -215,7 +215,7 @@ const getWriteIndexInfo = async ({
   return { writeIndexName, previousDefaultPipeline };
 };
 
-const getReplayChainPipeline = async ({
+export const getReplayChainPipeline = async ({
   esClient,
   log,
   previousDefaultPipeline,
@@ -241,7 +241,7 @@ const getReplayChainPipeline = async ({
   }
 };
 
-const createReplayPipeline = async ({
+export const createReplayPipeline = async ({
   esClient,
   pipelineName,
   maxTimestamp,
@@ -276,7 +276,7 @@ const createReplayPipeline = async ({
   });
 };
 
-const setWriteIndexDefaultPipeline = async ({
+export const setWriteIndexDefaultPipeline = async ({
   esClient,
   writeIndexName,
   pipelineName,

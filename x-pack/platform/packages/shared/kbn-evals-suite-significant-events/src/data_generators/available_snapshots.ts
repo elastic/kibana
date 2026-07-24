@@ -7,20 +7,21 @@
 
 import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
-import type { GcsConfig } from '../src/data_generators/replay';
-import { listAvailableSnapshots } from '../src/data_generators/replay';
-import type { DatasetConfig, SnapshotSourceOverride } from '../src/datasets';
-import { resolveScenarioSnapshotSource, snapshotCatalogKey } from '../src/datasets';
+import type { GcsConfig } from './snapshot_run_config';
+import { listAvailableSnapshots } from './list_snapshots';
+import type { SnapshotSourceOverride } from '../datasets/types';
+import { resolveScenarioSnapshotSource, snapshotCatalogKey } from '../datasets';
 
 /**
  * For each dataset, resolves the GCS snapshot source for every scenario
  * (via `getScenarios`) and returns a map from catalog key → available snapshot names.
  * Collapses duplicate GCS sources so each bucket+prefix is listed only once.
+ * Generic over the dataset shape so sibling suites can use their own scenario configs.
  */
-export async function buildAvailableSnapshotsBySource(
-  datasets: DatasetConfig[],
+export async function buildAvailableSnapshotsBySource<TDataset extends { gcs: GcsConfig }>(
+  datasets: TDataset[],
   getScenarios: (
-    dataset: DatasetConfig
+    dataset: TDataset
   ) => Array<{ input: { scenario_id: string }; snapshot_source?: SnapshotSourceOverride }>,
   esClient: Client,
   log: ToolingLog

@@ -27,7 +27,7 @@ const toInputDetections = (discoveries: Array<Partial<Discovery>>): Array<Partia
  * `confirmed: true` itself before promoting (Critical Rule 5). Every field here is seeded by one of
  * the cascade `detections`, so the canonical input and this expected answer stay self-consistent.
  */
-const LEDGER_DB_CASCADE_DISCOVERY: Partial<Discovery> = {
+export const LEDGER_DB_CASCADE_DISCOVERY: Partial<Discovery> = {
   kind: 'discovery',
   event_id: 'transactionhistory__frontend-transactionhistory-read-timeout',
   title: 'Ledger backends — customer transaction connectivity failure',
@@ -225,7 +225,7 @@ const LEDGER_DB_CASCADE_DISCOVERY: Partial<Discovery> = {
 };
 
 /** Benign authentication activity spike — must stay a SEPARATE discovery from the failure cascade. */
-const BENIGN_AUTH_DISCOVERY: Partial<Discovery> = {
+export const BENIGN_AUTH_DISCOVERY: Partial<Discovery> = {
   kind: 'discovery',
   event_id: 'userservice__successful-user-login',
   title: 'Authentication activity — successful completion volume increase',
