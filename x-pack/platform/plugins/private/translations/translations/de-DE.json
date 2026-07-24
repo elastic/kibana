@@ -11164,7 +11164,6 @@
     "xpack.agentBuilder.round.error.workflowAborted.title": "Konversation abgebrochen",
     "xpack.agentBuilder.round.error.workflowExecution.title": "Workflow fehlgeschlagen",
     "xpack.agentBuilder.round.userInput": "Benutzereingabe",
-    "xpack.agentBuilder.roundAttachmentReferences.attachmentAdded": "Anhang hinzugefügt: {description}",
     "xpack.agentBuilder.roundAttachmentReferences.attachments": "Anhänge",
     "xpack.agentBuilder.roundResponseActions.copy": "Reaktion kopieren",
     "xpack.agentBuilder.roundResponseActions.copySuccess": "Reaktion in die Zwischenablage kopiert",
