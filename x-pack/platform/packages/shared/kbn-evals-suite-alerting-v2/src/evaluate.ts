@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import { evaluate as evalsBase } from '@kbn/evals';
 import { withPhoenixExecutor } from '@kbn/evals-phoenix-executor';
 import { RuleManagementChatClient } from './chat_client';
@@ -93,11 +94,12 @@ export const evaluate = base.extend<
   ],
   emailConnectorId: [
     async ({ kbnClient, log }, use) => {
+      const connectorName = `email-connector-eval-${uuidv4()}`;
       const { data } = await kbnClient.request<{ id: string }>({
         method: 'POST',
         path: '/api/actions/connector',
         body: {
-          name: 'email-connector-eval',
+          name: connectorName,
           connector_type_id: '.email',
           config: {
             from: 'alerts@example.com',
@@ -109,7 +111,7 @@ export const evaluate = base.extend<
           },
         },
       });
-      log.info(`Created eval email connector ${data.id}`);
+      log.info(`Created eval email connector ${data.id} (${connectorName})`);
       try {
         await use(data.id);
       } finally {
