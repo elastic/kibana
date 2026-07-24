@@ -27,36 +27,33 @@ evaluate.describe(
   'Alerting V2 rule-management skill - routing',
   { tag: tags.serverless.observability.complete },
   () => {
-    evaluate(
-      'observability use case routes to rule-management',
-      async ({ evaluateDataset }) => {
-        await evaluateDataset({
-          dataset: {
-            name: 'alerting-v2: rule-management observability routing',
-            description:
-              'An Observability / ops alerting request (metrics threshold) should load the ' +
-              'rule-management skill and must not load Security detection-rule-edit.',
-            examples: [
-              {
-                input: {
-                  turns: [
-                    'Alert me when average CPU usage on my hosts stays above 90% for 5 minutes.',
-                  ],
-                },
-                output: {
-                  criteria: [
-                    'The assistant treats this as an Observability / ops alerting request (e.g. host CPU threshold) rather than a Security/SIEM detection-rule request.',
-                    'The response progresses toward an Alerting V2 alert rule (clarifying details or composing) and does not create or propose a Security detection rule.',
-                  ],
-                  expectedSkills: [RULE_MANAGEMENT_SKILL_ID],
-                  notExpectedSkills: [DETECTION_RULE_EDIT_SKILL_ID],
-                },
+    evaluate('observability use case routes to rule-management', async ({ evaluateDataset }) => {
+      await evaluateDataset({
+        dataset: {
+          name: 'alerting-v2: rule-management observability routing',
+          description:
+            'An Observability / ops alerting request (metrics threshold) should load the ' +
+            'rule-management skill and must not load Security detection-rule-edit.',
+          examples: [
+            {
+              input: {
+                turns: [
+                  'Alert me when average CPU usage on my hosts stays above 90% for 5 minutes.',
+                ],
               },
-            ],
-          },
-        });
-      }
-    );
+              output: {
+                criteria: [
+                  'The assistant treats this as an Observability / ops alerting request (e.g. host CPU threshold) rather than a Security/SIEM detection-rule request.',
+                  'The response progresses toward an Alerting V2 alert rule (clarifying details or composing) and does not create or propose a Security detection rule.',
+                ],
+                expectedSkills: [RULE_MANAGEMENT_SKILL_ID],
+                notExpectedSkills: [DETECTION_RULE_EDIT_SKILL_ID],
+              },
+            },
+          ],
+        },
+      });
+    });
 
     evaluate('security use case routes to detection-rule-edit', async ({ evaluateDataset }) => {
       await evaluateDataset({

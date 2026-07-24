@@ -7,11 +7,7 @@
 
 import type { Evaluator, TaskOutput } from '@kbn/evals';
 import type { RuleManagementExample } from '../types';
-import {
-  getToolCallSteps,
-  requireNonEmptyStringList,
-  skippedResult,
-} from '../evaluator_utils';
+import { getToolCallSteps, requireNonEmptyStringList, skippedResult } from '../evaluator_utils';
 
 export const getUsedToolIds = (output: TaskOutput): string[] =>
   getToolCallSteps(output)

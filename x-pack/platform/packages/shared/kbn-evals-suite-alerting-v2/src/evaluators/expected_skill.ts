@@ -7,11 +7,7 @@
 
 import type { Evaluator, TaskOutput } from '@kbn/evals';
 import type { RuleManagementExample } from '../types';
-import {
-  getToolCallSteps,
-  requireNonEmptyStringList,
-  skippedResult,
-} from '../evaluator_utils';
+import { getToolCallSteps, requireNonEmptyStringList, skippedResult } from '../evaluator_utils';
 
 export const getSkillsLoadedFromSteps = (output: TaskOutput): string[] => {
   const seen: string[] = [];
@@ -49,10 +45,7 @@ const skillIsPresent = (skillName: string, loadedNames: string[]): boolean => {
   });
 };
 
-export const createExpectedSkillEvaluator = (): Evaluator<
-  RuleManagementExample,
-  TaskOutput
-> => ({
+export const createExpectedSkillEvaluator = (): Evaluator<RuleManagementExample, TaskOutput> => ({
   name: 'ExpectedSkill',
   kind: 'CODE',
   evaluate: async ({ output, expected }) => {

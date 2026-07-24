@@ -40,9 +40,9 @@ describe('createExpectedSkillEvaluator', () => {
   });
 
   it('throws when notExpectedSkills is an empty array', async () => {
-    await expect(
-      run(outputWithLoadedSkills([]), { notExpectedSkills: [] })
-    ).rejects.toThrow(/non-empty array of skills/i);
+    await expect(run(outputWithLoadedSkills([]), { notExpectedSkills: [] })).rejects.toThrow(
+      /non-empty array of skills/i
+    );
   });
 
   it('scores 1 when every expected skill was loaded', async () => {
