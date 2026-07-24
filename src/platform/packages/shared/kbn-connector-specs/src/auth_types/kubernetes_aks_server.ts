@@ -13,7 +13,7 @@ import {
   KubernetesAksAuth as KubernetesAksAuthDefinition,
   type KubernetesAksAuthSchema,
 } from './kubernetes_aks';
-import { configureKubernetesTls } from './kubernetes_tls_helpers';
+import { configurePemCaTls } from './pem_ca_tls_helpers';
 
 const AKS_SERVER_APP_ID = '6dae42f8-4368-4678-94ff-3960e28e3630';
 const AKS_TOKEN_SCOPE = `${AKS_SERVER_APP_ID}/.default`;
@@ -47,6 +47,6 @@ export const KubernetesAksAuth: AuthTypeSpec<KubernetesAksAuthSchema> = {
 
     axiosInstance.defaults.headers.common.Authorization = token;
 
-    return configureKubernetesTls(ctx, axiosInstance, secret);
+    return configurePemCaTls(ctx, axiosInstance, secret);
   },
 };

@@ -10,20 +10,20 @@
 import type { AxiosInstance } from 'axios';
 import type { AuthContext, AuthTypeSpec } from '../connector_spec';
 import {
-  KubernetesAuth as KubernetesAuthDefinition,
-  type KubernetesAuthSchema,
-} from './kubernetes';
-import { configureKubernetesTls } from './kubernetes_tls_helpers';
+  BearerWithTlsAuth as BearerWithTlsAuthDefinition,
+  type BearerWithTlsAuthSchema,
+} from './bearer_with_tls';
+import { configurePemCaTls } from './pem_ca_tls_helpers';
 
-export const KubernetesAuth: AuthTypeSpec<KubernetesAuthSchema> = {
-  ...KubernetesAuthDefinition,
+export const BearerWithTlsAuth: AuthTypeSpec<BearerWithTlsAuthSchema> = {
+  ...BearerWithTlsAuthDefinition,
   configure: async (
     ctx: AuthContext,
     axiosInstance: AxiosInstance,
-    secret: KubernetesAuthSchema
+    secret: BearerWithTlsAuthSchema
   ): Promise<AxiosInstance> => {
     axiosInstance.defaults.headers.common.Authorization = `Bearer ${secret.token}`;
 
-    return configureKubernetesTls(ctx, axiosInstance, secret);
+    return configurePemCaTls(ctx, axiosInstance, secret);
   },
 };

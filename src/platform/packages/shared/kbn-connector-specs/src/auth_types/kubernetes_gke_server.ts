@@ -14,7 +14,7 @@ import {
   KubernetesGkeAuth as KubernetesGkeAuthDefinition,
   type KubernetesGkeAuthSchema,
 } from './kubernetes_gke';
-import { configureKubernetesTls } from './kubernetes_tls_helpers';
+import { configurePemCaTls } from './pem_ca_tls_helpers';
 
 const GKE_TOKEN_SCOPE =
   'https://www.googleapis.com/auth/cloud-platform https://www.googleapis.com/auth/userinfo.email';
@@ -36,6 +36,6 @@ export const KubernetesGkeAuth: AuthTypeSpec<KubernetesGkeAuthSchema> = {
 
     axiosInstance.defaults.headers.common.Authorization = `Bearer ${accessToken}`;
 
-    return configureKubernetesTls(ctx, axiosInstance, secret);
+    return configurePemCaTls(ctx, axiosInstance, secret);
   },
 };
