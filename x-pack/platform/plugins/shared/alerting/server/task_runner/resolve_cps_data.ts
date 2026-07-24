@@ -21,11 +21,11 @@ export const resolveCpsData = async (
 
   try {
     const resolvedExpression = await esClient.transport
-      .request<{ [key: string]: { expression: string } }>({
+      .request<{ expression: string }>({
         method: 'GET',
         path: `/_project_routing/${npreName}`,
       })
-      .then((res) => res[npreName]?.expression ?? PROJECT_ROUTING_ALL)
+      .then((res) => res.expression ?? PROJECT_ROUTING_ALL)
       .catch((error: { statusCode?: number }) => {
         if (error?.statusCode === 404) {
           return PROJECT_ROUTING_ALL;

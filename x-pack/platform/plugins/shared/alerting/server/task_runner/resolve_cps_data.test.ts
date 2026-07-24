@@ -20,7 +20,7 @@ describe('resolveCpsData', () => {
   it('returns resolved expression and linked projects on success', async () => {
     esClient.transport.request
       .mockResolvedValueOnce({
-        kibana_space_default_default: { expression: '_alias:my-project' },
+        expression: '_alias:my-project',
       })
       .mockResolvedValueOnce({
         linked_projects: {
@@ -29,6 +29,16 @@ describe('resolveCpsData', () => {
       });
 
     const result = await resolveCpsData(esClient, 'default', logger);
+
+    expect(esClient.transport.request).toHaveBeenCalledWith(
+      expect.objectContaining({ path: '/_project_routing/kibana_space_default_default' })
+    );
+    expect(esClient.transport.request).toHaveBeenCalledWith(
+      expect.objectContaining({
+        path: '/_project/tags',
+        body: { project_routing: '_alias:my-project' },
+      })
+    );
 
     expect(result).toEqual({
       resolvedExpression: '_alias:my-project',
@@ -61,7 +71,7 @@ describe('resolveCpsData', () => {
   it('resolves the correct NPRE for a custom space', async () => {
     esClient.transport.request
       .mockResolvedValueOnce({
-        kibana_space_my_space_default: { expression: '_alias:custom-project' },
+        expression: '_alias:custom-project',
       })
       .mockResolvedValueOnce({
         linked_projects: {
@@ -80,10 +90,30 @@ describe('resolveCpsData', () => {
     });
   });
 
+  it('stamps origin provenance for an origin-routed space (regression for #279328)', async () => {
+    esClient.transport.request
+      .mockResolvedValueOnce({
+        expression: '_alias:_origin',
+      })
+      .mockResolvedValueOnce({ linked_projects: {} });
+
+    const result = await resolveCpsData(esClient, 'default', logger);
+
+    expect(esClient.transport.request).toHaveBeenCalledWith(
+      expect.objectContaining({
+        body: { project_routing: '_alias:_origin' },
+      })
+    );
+    expect(result).toEqual({
+      resolvedExpression: '_alias:_origin',
+      linkedProjects: [],
+    });
+  });
+
   it('returns empty linkedProjects when tags request fails', async () => {
     esClient.transport.request
       .mockResolvedValueOnce({
-        kibana_space_default_default: { expression: '_alias:*' },
+        expression: '_alias:*',
       })
       .mockRejectedValueOnce(new Error('tags failed'));
 
