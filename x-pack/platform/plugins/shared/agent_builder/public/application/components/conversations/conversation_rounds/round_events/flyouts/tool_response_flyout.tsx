@@ -52,6 +52,10 @@ const subAgentExecutionLabel = i18n.translate(
   { defaultMessage: 'Sub-agent execution' }
 );
 
+const toolLabel = i18n.translate('xpack.agentBuilder.conversation.toolResponseFlyout.toolLabel', {
+  defaultMessage: 'tool',
+});
+
 interface ToolResponseFlyoutProps {
   step: ToolCallStepData;
   onClose: () => void;
@@ -172,7 +176,9 @@ export const ToolResponseFlyout: React.FC<ToolResponseFlyoutProps> = ({
       )}
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
-          <h2 id="toolResponseFlyoutTitle">tool: {step.tool_id}</h2>
+          <h2 id="toolResponseFlyoutTitle">
+            {toolLabel}: {step.tool_id}
+          </h2>
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
