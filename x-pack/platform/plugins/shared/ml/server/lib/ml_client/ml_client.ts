@@ -183,11 +183,15 @@ export function getMlClient(
       return;
     }
 
-    const models = await mlSavedObjectService.getAllTrainedModelObjectsForAllSpaces(deploymentIds);
-    const existingModelIds = new Set(models.map((m) => m.attributes.model_id));
+    const allModels = await mlSavedObjectService.getAllTrainedModelObjectsForAllSpaces(
+      deploymentIds
+    );
+    const existingModelIds = new Set(allModels.map((m) => m.attributes.model_id));
+    // Keep only deployment IDs that are also used as model IDs in any space
     const knownDeploymentIds = deploymentIds.filter((id) => existingModelIds.has(id));
 
     if (knownDeploymentIds.length) {
+      // Verify the user has access to those models in the current space
       await checkModelIds(knownDeploymentIds, allowWildcards);
     }
   }
