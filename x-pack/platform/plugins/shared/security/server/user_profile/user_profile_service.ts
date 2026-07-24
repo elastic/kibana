@@ -400,7 +400,9 @@ export class UserProfileService {
       return { telemetry: {}, notApplicable: true };
     }
 
-    if (request.auth.isAuthenticated === false) {
+    // Fake requests carry a bound `profile_uid` instead of an HTTP auth state,
+    // so the standard `auth.isAuthenticated === false` gate doesn't apply.
+    if (!request.isFakeRequest && request.auth.isAuthenticated === false) {
       throw new Error('Request to get current user profile is not authenticated.');
     }
 
@@ -411,10 +413,18 @@ export class UserProfileService {
     let apiKeyRetrievalRequired: boolean | undefined;
     let fakeRequestProfileResolution: boolean | undefined;
 
-    if (await session.getSID(request)) {
+    if (request.isFakeRequest) {
+      profileId = getCurrentUser(request)?.profile_uid;
+      if (profileId) {
+        fakeRequestProfileResolution = true;
+        this.logger.debug(`Resolving current user profile directly from profile_uid [fake=true].`);
+      }
+    }
+
+    if (!profileId && (await session.getSID(request))) {
       this.logger.debug(`Request to get current user profile is authenticated via session.`);
       ({ profileId, sessionId } = await this.getCurrentUserProfileIdViaSession(session, request));
-    } else if (request.headers[RUNAS_HEADER]) {
+    } else if (!profileId && request.headers[RUNAS_HEADER]) {
       // When a proxy sets `es-security-runas-user`, the Authorization header belongs to the proxy
       // credential (e.g. `elastic`), not the effective user. Activating a profile from those
       // credentials would associate the avatar with the proxy account, not the impersonated user.
