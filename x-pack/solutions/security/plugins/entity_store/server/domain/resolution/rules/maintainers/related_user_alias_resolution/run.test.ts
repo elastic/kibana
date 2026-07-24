@@ -143,6 +143,78 @@ describe('runRelatedUserAliasResolution', () => {
     expect(result.lastRun).toMatchObject({ linksCreated: 0 });
   });
 
+  it('drops okta name-fragment values before candidate lookup', async () => {
+    esClient.search
+      .mockResolvedValueOnce(createSearchResponse([createSeed()]) as never)
+      .mockResolvedValueOnce(
+        createSearchResponse([
+          createSourceDoc(['Emily', 'Stone', 'Marie', 'Em'], {
+            'user.profile.first_name': 'Emily',
+            'user.profile.last_name': 'Stone',
+            'entityanalytics_okta.user.profile.first_name': 'Emily',
+            'entityanalytics_okta.user.profile.last_name': 'Stone',
+            'entityanalytics_okta.user.profile.middle_name': 'Marie',
+            'entityanalytics_okta.user.profile.nick_name': 'Em',
+          }),
+        ]) as never
+      );
+
+    const result = await runRelatedUserAliasResolution(createDeps({ esClient, resolutionClient }));
+
+    expect(esClient.search).toHaveBeenCalledTimes(2);
+    expect(cascadeLinkEntities).not.toHaveBeenCalled();
+    expect(result.lastRun).toMatchObject({ linksCreated: 0 });
+  });
+
+  it('keeps display_name for intentional display-name bridging after dropping fragments', async () => {
+    esClient.search
+      .mockResolvedValueOnce(createSearchResponse([createSeed()]) as never)
+      .mockResolvedValueOnce(
+        createSearchResponse([
+          createSourceDoc(['Emily', 'Stone', 'Emily Stone'], {
+            'user.profile.first_name': 'Emily',
+            'user.profile.last_name': 'Stone',
+            'entityanalytics_okta.user.profile.display_name': 'Emily Stone',
+          }),
+        ]) as never
+      )
+      .mockResolvedValueOnce(
+        createSearchResponse([
+          {
+            ...createCandidate('user:ad', 'active_directory', 'other-login'),
+            'user.full_name': 'Emily Stone',
+          },
+        ]) as never
+      );
+
+    const result = await runRelatedUserAliasResolution(createDeps({ esClient, resolutionClient }));
+
+    expect(esClient.search).toHaveBeenCalledTimes(3);
+    expect(esClient.search.mock.calls[2][0]).toEqual(
+      expect.objectContaining({
+        query: expect.objectContaining({
+          bool: expect.objectContaining({
+            filter: expect.arrayContaining([
+              expect.objectContaining({
+                bool: expect.objectContaining({
+                  should: expect.arrayContaining([
+                    {
+                      term: {
+                        'user.full_name': { value: 'Emily Stone', case_insensitive: true },
+                      },
+                    },
+                  ]),
+                }),
+              }),
+            ]),
+          }),
+        }),
+      })
+    );
+    expect(cascadeLinkEntities).toHaveBeenCalledWith('user:ad', ['user:seed@example.com@entra_id']);
+    expect(result.lastRun).toMatchObject({ linksCreated: 1 });
+  });
+
   it('drops well-known SID and generic service account values before candidate lookup', async () => {
     esClient.search
       .mockResolvedValueOnce(createSearchResponse([createSeed()]) as never)
