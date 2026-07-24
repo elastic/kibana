@@ -24,7 +24,7 @@ x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-t
 
 **Token usage:** run the token script and capture its output:
 ```bash
-python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts/session-token-usage.py
+python3 x-pack/solutions/security/plugins/security_solution/.agents/scripts/session-token-usage.py
 ```
 - If the script exits 0 and prints a line (e.g. `input=… output=… cache_create=… cache_read=… total=…`), reformat it into the token-usage line — replace `_` with `-` and `key=N` with `key N`, separated by `·`, and wrap the final `total N` in `**…**`. Example: `input=270 output=156097 … total=11512028` → `input 270 · output 156097 · … · **total 11512028**`.
 - If the script exits non-zero or prints nothing, write `**Token usage:** not available` — this is expected on non-Claude-Code harnesses (Cursor, Codex, etc.) or when the transcript is unavailable.

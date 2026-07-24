@@ -10,22 +10,27 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { EntityAnalyticsPrivileges } from '../../../../../common/api/entity_analytics';
 import { MissingPrivilegesCallout } from '../../missing_privileges_callout';
 
-export const EntityStoreMissingPrivilegesCallout = ({
+/**
+ * Shown when Entity Analytics is on but the user does not have the necessary privileges to stop it.
+ */
+export const EntityStoreMissingStopPrivilegesCallout = ({
   privileges,
 }: {
   privileges: EntityAnalyticsPrivileges;
 }) => (
   <MissingPrivilegesCallout
-    // Enabling the Entity Store enforces the install privilege set (manage/cluster/SO/source),
-    // not entity-index read+write, so surface that breakdown when the server provides it.
     privileges={{
-      ...privileges,
-      privileges: privileges.install_privileges ?? privileges.privileges,
+      has_all_required: false,
+      privileges: {
+        elasticsearch: {},
+        // Stop only needs the Kibana SO write checked under install_privileges. see `userHasEntityStoreStopPrivileges` for more details.
+        kibana: privileges.install_privileges?.kibana ?? {},
+      },
     }}
     title={
       <FormattedMessage
-        id="xpack.securitySolution.riskEngine.missingPrivilegesCallOut.title"
-        defaultMessage="Insufficient privileges to enable the Entity Store"
+        id="xpack.securitySolution.entityAnalytics.missingStopPrivilegesCallOut.title"
+        defaultMessage="Insufficient privileges to turn off Entity Analytics"
       />
     }
   />
