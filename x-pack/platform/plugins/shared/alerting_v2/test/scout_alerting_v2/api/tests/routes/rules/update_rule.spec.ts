@@ -65,18 +65,23 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
     }
   );
 
-  apiTest('update: should toggle the enabled field', async ({ apiClient, apiServices }) => {
-    const created = await apiServices.alertingV2.rules.create(
-      buildCreateRuleData({ metadata: { name: 'rule-to-disable' } })
-    );
-    expect(created.enabled).toBe(true);
-    const response = await apiClient.patch(getRuleUrl(created.id), {
-      headers: writerHeaders,
-      body: { enabled: false },
-    });
-    expect(response).toHaveStatusCode(200);
-    expect(response.body.enabled).toBe(false);
-  });
+  apiTest(
+    'update: should reject a body containing enabled and never toggle lifecycle',
+    async ({ apiClient, apiServices }) => {
+      const created = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({ metadata: { name: 'rule-to-disable' } })
+      );
+      expect(created.enabled).toBe(true);
+      const response = await apiClient.patch(getRuleUrl(created.id), {
+        headers: writerHeaders,
+        body: { enabled: false },
+      });
+      expect(response).toHaveStatusCode(400);
+
+      const stored = await apiServices.alertingV2.rules.get(created.id);
+      expect(stored.enabled).toBe(true);
+    }
+  );
 
   apiTest(
     'update: should update schedule.lookback while preserving schedule.every',

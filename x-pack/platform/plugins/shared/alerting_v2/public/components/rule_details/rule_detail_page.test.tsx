@@ -244,7 +244,11 @@ describe('RuleDetailPage', () => {
     const toggle = await screen.findByTestId('ruleDetailsEnabledSwitch');
     expect(toggle).toBeChecked();
     fireEvent.click(toggle);
-    expect(mockToggleRuleEnabled).toHaveBeenCalledWith({ id: 'rule-1', enabled: false });
+    expect(mockToggleRuleEnabled).toHaveBeenCalledWith({
+      id: 'rule-1',
+      enabled: false,
+      name: 'Test Signal Rule',
+    });
   });
 
   it('renders an unchecked enabled switch for disabled rules and enables the rule when toggled on', async () => {
@@ -252,7 +256,11 @@ describe('RuleDetailPage', () => {
     const toggle = await screen.findByTestId('ruleDetailsEnabledSwitch');
     expect(toggle).not.toBeChecked();
     fireEvent.click(toggle);
-    expect(mockToggleRuleEnabled).toHaveBeenCalledWith({ id: 'rule-1', enabled: true });
+    expect(mockToggleRuleEnabled).toHaveBeenCalledWith({
+      id: 'rule-1',
+      enabled: true,
+      name: 'Test Signal Rule',
+    });
   });
 
   it('disables the switch while the toggle mutation is in flight', async () => {
