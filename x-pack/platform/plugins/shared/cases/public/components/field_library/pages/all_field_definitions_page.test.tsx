@@ -98,4 +98,62 @@ describe('AllFieldDefinitionsPage', () => {
       within(screen.getByTestId('fieldDefinitionLabelCell')).getByText('—')
     ).toBeInTheDocument();
   });
+
+  describe('Required column', () => {
+    const renderWithDefinition = (definition: string) => {
+      mockGetFieldDefinitions.mockReturnValue({
+        data: { fieldDefinitions: [buildFieldDefinition({ definition })] },
+        isLoading: false,
+      });
+      renderWithTestingProviders(<AllFieldDefinitionsPage />);
+    };
+
+    it('shows the Required badge when validation.required is true', () => {
+      renderWithDefinition(
+        'name: my_field\ncontrol: INPUT_TEXT\ntype: keyword\nvalidation:\n  required: true\n'
+      );
+
+      expect(screen.getByTestId('fieldDefinitionRequiredBadge')).toHaveTextContent('Required');
+      expect(screen.queryByTestId('fieldDefinitionRequiredOnCloseBadge')).not.toBeInTheDocument();
+    });
+
+    it('shows the Required on close badge when validation.required_on_close is true', () => {
+      renderWithDefinition(
+        'name: my_field\ncontrol: INPUT_TEXT\ntype: keyword\nvalidation:\n  required_on_close: true\n'
+      );
+
+      expect(screen.getByTestId('fieldDefinitionRequiredOnCloseBadge')).toHaveTextContent(
+        'Required on close'
+      );
+      expect(screen.queryByTestId('fieldDefinitionRequiredBadge')).not.toBeInTheDocument();
+    });
+
+    it('shows both badges when both flags are set', () => {
+      renderWithDefinition(
+        'name: my_field\ncontrol: INPUT_TEXT\ntype: keyword\nvalidation:\n  required: true\n  required_on_close: true\n'
+      );
+
+      expect(screen.getByTestId('fieldDefinitionRequiredBadge')).toBeInTheDocument();
+      expect(screen.getByTestId('fieldDefinitionRequiredOnCloseBadge')).toBeInTheDocument();
+    });
+
+    it('shows a placeholder when neither flag is set (including required: false)', () => {
+      renderWithDefinition(
+        'name: my_field\ncontrol: INPUT_TEXT\ntype: keyword\nvalidation:\n  required: false\n'
+      );
+
+      expect(
+        within(screen.getByTestId('fieldDefinitionRequiredCell')).getByText('—')
+      ).toBeInTheDocument();
+      expect(screen.queryByTestId('fieldDefinitionRequiredBadge')).not.toBeInTheDocument();
+    });
+
+    it('shows a placeholder for a malformed definition', () => {
+      renderWithDefinition('control: [ {oops');
+
+      expect(
+        within(screen.getByTestId('fieldDefinitionRequiredCell')).getByText('—')
+      ).toBeInTheDocument();
+    });
+  });
 });
