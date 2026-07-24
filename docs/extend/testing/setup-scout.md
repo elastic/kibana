@@ -50,7 +50,7 @@ your-plugin/
 ```
 
 :::::::{tip}
-Large plugins can split tests into per-area [namespaces](#scout-namespaces) instead of placing them directly under the scout root.
+Large plugins can split tests into per-area [namespaces](#scout-namespaces) instead of placing them directly under the Scout root.
 :::::::
 
 ::::::::
@@ -141,7 +141,7 @@ Tweak the new Playwright config(s) and [write UI tests](./write-ui-tests.md) or 
 
 ## Organize large plugins with namespaces [scout-namespaces]
 
-By default, a plugin keeps all of its Scout tests directly under the scout root (`test/scout/{ui,api}/`). Large plugins can instead group tests into **namespaces** — single-level sub-directories named after a functional area:
+By default, a plugin keeps all of its Scout tests directly under the Scout root (`test/scout/{ui,api}/`). Large plugins can instead group tests into **namespaces** — single-level sub-directories named after a functional area:
 
 ```text
 your-plugin/
@@ -155,7 +155,7 @@ your-plugin/
         └── common/              # shared code (optional, reserved name)
 ```
 
-A namespace holds the same layout you'd otherwise place at the scout root, just one level deeper — its own Playwright config(s), fixtures, and tests (for example `test/scout/<namespace>/ui/playwright.config.ts`).
+A namespace holds the same layout you'd otherwise place at the Scout root, just one level deeper — its own Playwright config(s), fixtures, and tests (for example `test/scout/<namespace>/ui/playwright.config.ts`).
 
 **Why use namespaces?**
 
@@ -182,6 +182,6 @@ In interactive mode, if the plugin already uses namespaces, the generator lists 
 
 ::::::{important}
 - **One level only**: use `test/scout/<namespace>/{ui,api}/` — deeper nesting such as `.../<area>/<sub-area>/{ui,api}/` is not supported.
-- **Don't mix layouts**: a scout root is either entirely root-level (`test/scout/{ui,api}/`) or entirely namespace-based. Mixing the two fails the build. To adopt namespaces in an existing plugin, migrate the root-level tests into a namespace first.
+- **Don't mix layouts**: a Scout root is either entirely root-level (`test/scout/{ui,api}/`) or entirely namespace-based. Mixing the two fails the build. To adopt namespaces in an existing plugin, migrate the root-level tests into a namespace first.
 - **Naming**: start with a lowercase letter and use only lowercase letters, digits, and underscores. `ui`, `api`, `.meta`, and `common` are reserved (`common` is a plain shared-utilities directory with no Playwright config).
 ::::::
