@@ -216,7 +216,7 @@ export const registerGetTimeFieldRoute = (
       // Temporary: remove once dataset filtering is enabled by default in ES
       const datasetFilteringEnabled = await core.featureFlags.getBooleanValue(
         DATASET_FILTERING_FEATURE_FLAG_KEY,
-        true
+        false
       );
 
       try {
