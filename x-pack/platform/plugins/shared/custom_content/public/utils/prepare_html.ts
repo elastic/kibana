@@ -6,20 +6,25 @@
  */
 
 import DOMPurify from 'dompurify';
+import type { EuiThemeColorModeStandard } from '@elastic/eui';
 import { CUSTOM_CONTENT_CSP_META } from '../../common/constants';
 
-export function injectCsp(html: string): string {
+export function injectCsp(html: string, colorMode?: EuiThemeColorModeStandard): string {
   if (html.includes(CUSTOM_CONTENT_CSP_META)) return html;
+  const colorSchemeMeta = `<meta name="color-scheme" content="${
+    colorMode === 'DARK' ? 'dark' : 'light'
+  }">`;
+  const inject = CUSTOM_CONTENT_CSP_META + colorSchemeMeta;
   const headMatch = html.match(/<head[^>]*>/i);
   if (headMatch?.index !== undefined) {
     const at = headMatch.index + headMatch[0].length;
-    return html.slice(0, at) + CUSTOM_CONTENT_CSP_META + html.slice(at);
+    return html.slice(0, at) + inject + html.slice(at);
   }
-  return CUSTOM_CONTENT_CSP_META + html;
+  return inject + html;
 }
 
-export function prepareHtml(html: string): string {
-  return injectCsp(sanitizeHtml(stripMarkdownFences(html)));
+export function prepareHtml(html: string, colorMode?: EuiThemeColorModeStandard): string {
+  return injectCsp(sanitizeHtml(stripMarkdownFences(html)), colorMode);
 }
 
 export function sanitizeHtml(html: string): string {
@@ -53,4 +58,12 @@ const SCRIPT_TAG_PATTERN = /<script[\s>]/i;
 
 export function containsScript(template: string): boolean {
   return SCRIPT_TAG_PATTERN.test(template);
+}
+
+// LLMs can return plain text, markdown, or empty strings — any of which would render blank.
+// Require at least one HTML tag so the retry path kicks in for those non-renderable outputs.
+const HTML_TAG_PATTERN = /<[a-zA-Z]/;
+
+export function isValidTemplate(template: string): boolean {
+  return HTML_TAG_PATTERN.test(template);
 }
