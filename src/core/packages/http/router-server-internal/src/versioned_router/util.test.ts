@@ -8,7 +8,10 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { VersionedRouteResponseValidation, VersionedRouteValidation } from '@kbn/core-http-server';
+import type {
+  VersionedRouteResponseValidation,
+  VersionedRouteValidation,
+} from '@kbn/core-http-server';
 import {
   isCustomValidation,
   unwrapVersionedResponseBodyValidation,
@@ -79,7 +82,9 @@ describe('prepareVersionedRouteValidation', () => {
         request: { body: schema.string() },
         response: { 200: { body: () => schema.string() } },
       };
-      const factory = jest.fn((): VersionedRouteValidation<unknown, unknown, unknown> => validation);
+      const factory = jest.fn(
+        (): VersionedRouteValidation<unknown, unknown, unknown> => validation
+      );
 
       const prepared = prepareVersionedRouteValidation(
         { version: '1', validate: factory },
@@ -122,7 +127,9 @@ describe('prepareVersionedRouteValidation', () => {
         request: { body: schema.string() },
         response: { 200: { body: () => schema.string() } },
       };
-      const factory = jest.fn((): VersionedRouteValidation<unknown, unknown, unknown> => validation);
+      const factory = jest.fn(
+        (): VersionedRouteValidation<unknown, unknown, unknown> => validation
+      );
 
       const prepared = prepareVersionedRouteValidation(
         { version: '1', validate: factory },

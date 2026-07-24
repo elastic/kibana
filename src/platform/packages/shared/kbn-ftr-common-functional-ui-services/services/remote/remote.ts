@@ -90,10 +90,18 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
   });
 
   lifecycle.beforeEachTest.add(async () => {
+    if (lifecycle.isAborting) {
+      return;
+    }
     await driver.manage().setTimeouts({ implicit: config.get('timeouts.find') });
   });
 
   lifecycle.afterTestSuite.add(async () => {
+    // skip WebDriver calls that could themselves hang against a dead browser/session
+    if (lifecycle.isAborting) {
+      windowSizeStack.shift();
+      return;
+    }
     await tryWebDriverCall(async () => {
       // global cleanup
       const { width, height } = windowSizeStack.shift()!;

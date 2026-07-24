@@ -18,12 +18,9 @@ interface ActionPolicyActionsCellProps {
   onEdit: (id: string) => void;
   onClone: (policy: ActionPolicyResponse) => void;
   onDelete: (policy: ActionPolicyResponse) => void;
-  onEnable: (id: string) => void;
-  onDisable: (id: string) => void;
   onSnooze: (id: string, snoozedUntil: string) => void;
   onCancelSnooze: (id: string) => void;
   onUpdateApiKey: (id: string) => void;
-  isStateLoading: boolean;
   isDisabled?: boolean;
 }
 
@@ -34,12 +31,9 @@ export const ActionPolicyActionsCell = ({
   onEdit,
   onClone,
   onDelete,
-  onEnable,
-  onDisable,
   onSnooze,
   onCancelSnooze,
   onUpdateApiKey,
-  isStateLoading,
   isDisabled = false,
 }: ActionPolicyActionsCellProps) => {
   return (
@@ -96,12 +90,9 @@ export const ActionPolicyActionsCell = ({
               onEdit={onEdit}
               onClone={onClone}
               onDelete={onDelete}
-              onEnable={onEnable}
-              onDisable={onDisable}
               onSnooze={onSnooze}
               onCancelSnooze={onCancelSnooze}
               onUpdateApiKey={onUpdateApiKey}
-              isStateLoading={isStateLoading}
               isDisabled={isDisabled}
             />
           </EuiFlexItem>
