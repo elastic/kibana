@@ -39,10 +39,21 @@ const JS_YAML_LEGACY_CONSUMERS = [
   /^src[\/\\]platform[\/\\]plugins[\/\\]private[\/\\]interactive_setup[\/\\]server[\/\\]/,
   /^x-pack[\/\\]packages[\/\\]kbn-synthetics-private-location[\/\\]/,
   /^x-pack[\/\\]platform[\/\\]packages[\/\\]shared[\/\\]kbn-data-forge[\/\\]/,
+  /^x-pack[\/\\]platform[\/\\]packages[\/\\]shared[\/\\]kbn-inference-cli[\/\\]src[\/\\]eis[\/\\]get_eis_gateway_config\.ts$/,
+  /^x-pack[\/\\]platform[\/\\]packages[\/\\]shared[\/\\]kbn-inference-cli[\/\\]src[\/\\]eis[\/\\]get_service_configuration\.ts$/,
+  /^x-pack[\/\\]platform[\/\\]packages[\/\\]shared[\/\\]kbn-inference-cli[\/\\]src[\/\\]util[\/\\]write_kibana_config\.ts$/,
   /^x-pack[\/\\]platform[\/\\]packages[\/\\]shared[\/\\]response-ops[\/\\]alerting-v2-rule-form[\/\\]/,
   /^x-pack[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]agent_builder[\/\\]server[\/\\]services[\/\\]/,
   /^x-pack[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]fleet[\/\\]/,
   /^x-pack[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]inference[\/\\]scripts[\/\\]/,
+  /^x-pack[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]integration_assistant[\/\\]server[\/\\]graphs[\/\\]ecs[\/\\]pipeline\.ts$/,
+  /^x-pack[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]integration_assistant[\/\\]server[\/\\]integration_builder[\/\\]build_integration\.test\.ts$/,
+  /^x-pack[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]integration_assistant[\/\\]server[\/\\]integration_builder[\/\\]build_integration\.ts$/,
+  /^x-pack[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]integration_assistant[\/\\]server[\/\\]integration_builder[\/\\]data_stream\.ts$/,
+  /^x-pack[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]integration_assistant[\/\\]server[\/\\]integration_builder[\/\\]fields\.ts$/,
+  /^x-pack[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]integration_assistant[\/\\]server[\/\\]integration_builder[\/\\]pipeline\.ts$/,
+  /^x-pack[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]integration_assistant[\/\\]server[\/\\]util[\/\\]processors\.ts$/,
+  /^x-pack[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]integration_assistant[\/\\]server[\/\\]util[\/\\]samples\.ts$/,
   /^x-pack[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]rule_registry[\/\\]scripts[\/\\]/,
   /^x-pack[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]streams[\/\\]scripts[\/\\]/,
   /^x-pack[\/\\]solutions[\/\\]observability[\/\\]packages[\/\\]synthetics-test-data[\/\\]/,
@@ -52,8 +63,7 @@ const JS_YAML_LEGACY_CONSUMERS = [
   /^x-pack[\/\\]solutions[\/\\]observability[\/\\]plugins[\/\\]observability_onboarding[\/\\]server[\/\\]routes[\/\\]flow[\/\\]/,
   /^x-pack[\/\\]solutions[\/\\]observability[\/\\]plugins[\/\\]synthetics[\/\\]public[\/\\]/,
   /^x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]cloud_defend[\/\\]/,
-];
-
+  /^x-pack[\/\\]solutions[\/\\]security[\/\\]test[\/\\]security_solution_playwright[\/\\]api_utils[\/\\]api_key\.ts$/,
 ];
 
 module.exports = {
