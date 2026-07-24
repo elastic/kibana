@@ -287,24 +287,22 @@ export const getMigrateSystemIndicesStep = ({
 
   // EuiStepProps.title is typed as string in this EUI version, but the component renders
   // {title} in JSX so ReactNode works at runtime.
-  const title = (
-    isMigrationNeeded ? (
-      <>
-        {i18nTexts.title}{' '}
-        <EuiToolTip content={i18nTexts.requiredStepTooltip}>
-          <EuiBadge
-            color="danger"
-            iconType="warning"
-            data-test-subj="migrateSystemIndicesRequiredBadge"
-          >
-            {i18nTexts.requiredStep}
-          </EuiBadge>
-        </EuiToolTip>
-      </>
-    ) : (
-      i18nTexts.title
-    )
-  ) as unknown as string;
+  const title = (isMigrationNeeded ? (
+    <>
+      {i18nTexts.title}{' '}
+      <EuiToolTip content={i18nTexts.requiredStepTooltip}>
+        <EuiBadge
+          color="danger"
+          iconType="warning"
+          data-test-subj="migrateSystemIndicesRequiredBadge"
+        >
+          {i18nTexts.requiredStep}
+        </EuiBadge>
+      </EuiToolTip>
+    </>
+  ) : (
+    i18nTexts.title
+  )) as unknown as string;
 
   return {
     title,
