@@ -113,11 +113,6 @@ class ConversationClientImpl implements ConversationClient {
     return fromEs(document);
   }
 
-  /**
-   * Reports whether a conversation document physically exists. Callers must not
-   * treat this as an access check; it does not verify the current user owns the
-   * conversation, only that a document with the given id is present.
-   */
   async exists(conversationId: string): Promise<boolean> {
     const document = await this._get(conversationId);
 
@@ -139,7 +134,6 @@ class ConversationClientImpl implements ConversationClient {
       await this.storage.getClient().index({
         id,
         document: attributes,
-        // never overwrite an existing conversation, e.g. one owned by another user
         op_type: 'create',
       });
     } catch (error) {
