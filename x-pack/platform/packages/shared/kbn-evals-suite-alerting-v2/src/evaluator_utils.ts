@@ -10,6 +10,7 @@ import type { EvaluationResult, Evaluator, Example, TaskOutput } from '@kbn/eval
 import type { ConversationRound } from '@kbn/agent-builder-common';
 import type { PromptRequest } from '@kbn/agent-builder-common/agents';
 import { isAskUserQuestionPrompt } from '@kbn/agent-builder-common/agents';
+import type { ConversationOutput, ToolCallStep } from './types';
 
 /** Shared skip result when an expectation field is omitted. */
 export const skippedResult = (explanation: string): EvaluationResult => ({
@@ -17,6 +18,21 @@ export const skippedResult = (explanation: string): EvaluationResult => ({
   label: 'skipped',
   explanation,
 });
+
+export const requireNonEmptyStringList = (
+  value: readonly string[] | undefined,
+  fieldName: string,
+  itemLabel: string
+): readonly string[] => {
+  if (value == null) {
+    return [];
+  }
+  const items = value.filter((item) => item.length > 0);
+  if (items.length === 0) {
+    throw new Error(`${fieldName} must be a non-empty array of ${itemLabel}`);
+  }
+  return items;
+};
 
 export const getPrompts = (output: TaskOutput): PromptRequest[] => {
   const prompts = (output as { prompts?: unknown[] })?.prompts ?? [];
@@ -44,6 +60,12 @@ export const getAssistantMessages = (output: TaskOutput): string[] => {
     .filter(Boolean);
 };
 
+/** Tool-call steps from task output, including params/results when present. */
+export const getToolCallSteps = (output: TaskOutput): ToolCallStep[] => {
+  const steps = (output as { steps?: ToolCallStep[] })?.steps ?? [];
+  return steps.filter((step) => step?.type === 'tool_call');
+};
+
 export const summarizePrompt = (prompt: PromptRequest) => {
   if (isAskUserQuestionPrompt(prompt)) {
     return {
@@ -57,13 +79,6 @@ export const summarizePrompt = (prompt: PromptRequest) => {
   }
   return { type: prompt.type };
 };
-
-interface ConversationOutput {
-  rounds?: ConversationRound[];
-  messages?: Array<{ role?: string; message?: string }>;
-  errors?: unknown[];
-  traceId?: string;
-}
 
 const isConversationOutput = (output: unknown): output is ConversationOutput =>
   typeof output === 'object' && output !== null;

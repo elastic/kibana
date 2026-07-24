@@ -7,12 +7,8 @@
 
 import { getLatestVersion, type VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import type { Evaluator, TaskOutput } from '@kbn/evals';
-import { getAssistantMessages, skippedResult } from '../evaluator_utils';
-import type {
-  ExpectAttachmentDataFn,
-  ExpectRenderAttachment,
-  RuleManagementExample,
-} from '../types';
+import { getAssistantMessages, requireNonEmptyStringList, skippedResult } from '../evaluator_utils';
+import type { ExpectAttachmentDataFn, RuleManagementExample } from '../types';
 
 export const RENDER_ATTACHMENT_TAG_RE =
   /<render_attachment\b(?=[^>]*\bid\s*=\s*["'][^"']+["'])(?=[^>]*\bversion\s*=\s*["'][^"']+["'])[^>]*\/?>/i;
@@ -79,19 +75,6 @@ const getRenderedAttachmentTypes = (
   ),
 ];
 
-const requireNonEmptyAttachmentTypeList = (
-  value: ExpectRenderAttachment | undefined
-): ExpectRenderAttachment => {
-  if (value == null) {
-    return [];
-  }
-  const types = value.filter((type) => type.length > 0);
-  if (types.length === 0) {
-    throw new Error('expectRenderAttachment must be a non-empty array of attachment types');
-  }
-  return types;
-};
-
 const requireAttachmentDataFn = (
   value: ExpectAttachmentDataFn | undefined
 ): ExpectAttachmentDataFn | undefined => {
@@ -116,7 +99,11 @@ export const createExpectedRenderAttachmentEvaluator = (): Evaluator<
   name: 'ExpectedRenderAttachment',
   kind: 'CODE',
   evaluate: async ({ output, expected }) => {
-    const requiredTypes = requireNonEmptyAttachmentTypeList(expected?.expectRenderAttachment);
+    const requiredTypes = requireNonEmptyStringList(
+      expected?.expectRenderAttachment,
+      'expectRenderAttachment',
+      'attachment types'
+    );
     if (requiredTypes.length === 0) {
       return skippedResult('No render-attachment expectation for this example');
     }

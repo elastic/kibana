@@ -33,10 +33,8 @@ export interface ConverseResult {
   traceId?: string;
   /**
    * Structured prompts the agent asked the user to answer (e.g. `ask_user_question`
-   * or `confirmation`). Present when the round ended in the `awaiting_prompt` status.
-   * When non-empty, the conversation cannot be continued with a plain free-text turn —
-   * the API requires the caller to answer these prompts by id.
-   */
+   * or `confirmation`).
+    */
   prompts: PromptRequest[];
 }
 

@@ -9,7 +9,13 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import type { Evaluator, EvaluationResult, TaskOutput } from '@kbn/evals';
 import type { ConversationRound } from '@kbn/agent-builder-common';
 import { AgentPromptType } from '@kbn/agent-builder-common/agents';
-import { getAssistantMessages, messagesFromRounds, withLowScoreLogging } from './evaluator_utils';
+import {
+  getAssistantMessages,
+  getToolCallSteps,
+  messagesFromRounds,
+  requireNonEmptyStringList,
+  withLowScoreLogging,
+} from './evaluator_utils';
 
 const createLog = () => ({ warning: jest.fn() } as unknown as ToolingLog);
 
@@ -85,6 +91,52 @@ describe('getAssistantMessages', () => {
         ],
       } as TaskOutput)
     ).toEqual(['a1', 'a2']);
+  });
+});
+
+describe('getToolCallSteps', () => {
+  it('returns only tool_call steps, preserving params and results', () => {
+    expect(
+      getToolCallSteps({
+        steps: [
+          { type: 'reasoning', tool_id: 'ignored' },
+          {
+            type: 'tool_call',
+            tool_id: 'load_skill',
+            params: { skill: 'rule-management' },
+            results: [{ data: { skill: { id: 'rule-management' } } }],
+          },
+          { type: 'tool_call', tool_id: 'platform.core.list_indices', params: {} },
+        ],
+      } as TaskOutput)
+    ).toEqual([
+      {
+        type: 'tool_call',
+        tool_id: 'load_skill',
+        params: { skill: 'rule-management' },
+        results: [{ data: { skill: { id: 'rule-management' } } }],
+      },
+      { type: 'tool_call', tool_id: 'platform.core.list_indices', params: {} },
+    ]);
+  });
+});
+
+describe('requireNonEmptyStringList', () => {
+  it('returns an empty array when the value is omitted', () => {
+    expect(requireNonEmptyStringList(undefined, 'expectedSkills', 'skills')).toEqual([]);
+  });
+
+  it('returns the non-empty items when present', () => {
+    expect(requireNonEmptyStringList(['a', '', 'b'], 'expectedToolIds', 'tool-ids')).toEqual([
+      'a',
+      'b',
+    ]);
+  });
+
+  it('throws when the value is present but empty', () => {
+    expect(() => requireNonEmptyStringList([], 'expectedToolIds', 'tool-ids')).toThrow(
+      /expectedToolIds must be a non-empty array of tool-ids/i
+    );
   });
 });
 

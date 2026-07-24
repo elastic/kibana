@@ -6,6 +6,7 @@
  */
 
 import type { Example } from '@kbn/evals';
+import type { ConversationRound } from '@kbn/agent-builder-common';
 import type { PromptRequest } from '@kbn/agent-builder-common/agents';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 
@@ -47,4 +48,18 @@ export interface ConversationTurnResult {
   errors: unknown[];
   traceId?: string;
   prompts: PromptRequest[];
+}
+
+export interface ToolCallStep {
+  type?: string;
+  tool_id?: string;
+  params?: Record<string, unknown>;
+  results?: unknown[];
+}
+
+export interface ConversationOutput {
+  rounds?: ConversationRound[];
+  messages?: Array<{ role?: string; message?: string }>;
+  errors?: unknown[];
+  traceId?: string;
 }

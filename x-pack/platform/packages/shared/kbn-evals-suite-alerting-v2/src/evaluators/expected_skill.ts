@@ -7,24 +7,16 @@
 
 import type { Evaluator, TaskOutput } from '@kbn/evals';
 import type { RuleManagementExample } from '../types';
-import { skippedResult } from '../evaluator_utils';
-
-interface ConversationStep {
-  type?: string;
-  tool_id?: string;
-  params?: Record<string, unknown>;
-  results?: unknown[];
-}
-
-const getToolCallStepsWithParams = (output: TaskOutput): ConversationStep[] => {
-  const steps = (output as { steps?: ConversationStep[] })?.steps ?? [];
-  return steps.filter((s) => s?.type === 'tool_call');
-};
+import {
+  getToolCallSteps,
+  requireNonEmptyStringList,
+  skippedResult,
+} from '../evaluator_utils';
 
 export const getSkillsLoadedFromSteps = (output: TaskOutput): string[] => {
   const seen: string[] = [];
 
-  for (const step of getToolCallStepsWithParams(output)) {
+  for (const step of getToolCallSteps(output)) {
     if (step.tool_id === 'load_skill') {
       const skillParam = step.params?.skill;
       if (typeof skillParam === 'string') seen.push(skillParam);
@@ -57,20 +49,6 @@ const skillIsPresent = (skillName: string, loadedNames: string[]): boolean => {
   });
 };
 
-const requireNonEmptySkillList = (
-  value: readonly string[] | undefined,
-  fieldName: string
-): readonly string[] => {
-  if (value == null) {
-    return [];
-  }
-  const skills = value.filter((skill) => skill.length > 0);
-  if (skills.length === 0) {
-    throw new Error(`${fieldName} must be a non-empty array of skills`);
-  }
-  return skills;
-};
-
 export const createExpectedSkillEvaluator = (): Evaluator<
   RuleManagementExample,
   TaskOutput
@@ -79,8 +57,12 @@ export const createExpectedSkillEvaluator = (): Evaluator<
   kind: 'CODE',
   evaluate: async ({ output, expected }) => {
     const { expectedSkills, notExpectedSkills } = expected ?? {};
-    const requiredSkills = requireNonEmptySkillList(expectedSkills, 'expectedSkills');
-    const forbiddenSkills = requireNonEmptySkillList(notExpectedSkills, 'notExpectedSkills');
+    const requiredSkills = requireNonEmptyStringList(expectedSkills, 'expectedSkills', 'skills');
+    const forbiddenSkills = requireNonEmptyStringList(
+      notExpectedSkills,
+      'notExpectedSkills',
+      'skills'
+    );
 
     if (requiredSkills.length === 0 && forbiddenSkills.length === 0) {
       return skippedResult('No skill-load expectation for this example');
