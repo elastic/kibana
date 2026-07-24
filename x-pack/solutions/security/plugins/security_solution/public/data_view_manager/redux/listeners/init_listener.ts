@@ -162,7 +162,8 @@ export const createInitListener = (dependencies: {
             const exploreDataView = await createExploreDataView(
               { dataViews: dependencies.dataViews, spaces: dependencies.spaces },
               defaultDataView.title.split(','),
-              alertDataView.title
+              alertDataView.title,
+              { skipFetchFields: true }
             );
             listenerApi.dispatch(sharedDataViewManagerSlice.actions.addDataView(exploreDataView));
             listenerApi.dispatch(

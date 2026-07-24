@@ -179,6 +179,14 @@ describe('createInitListener', () => {
       selectDataViewAsync(expect.objectContaining({ scope: PageScope.explore }))
     );
 
+    // explore DV is created with skipFetchFields:true to avoid expensive _field_caps on non-explore pages
+    expect(jest.mocked(createExploreDataView)).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.anything(),
+      expect.anything(),
+      { skipFetchFields: true }
+    );
+
     expect(mockToastsDanger).not.toHaveBeenCalled();
   });
 
@@ -196,6 +204,24 @@ describe('createInitListener', () => {
     expect(jest.mocked(mockListenerApi.dispatch)).not.toBeCalledWith(
       selectDataViewAsync(expect.objectContaining({ scope: PageScope.explore }))
     );
+    expect(mockToastsDanger).not.toHaveBeenCalled();
+  });
+
+  it('should swallow explore data view creation errors without dispatching error action', async () => {
+    jest.mocked(createExploreDataView).mockRejectedValue(new Error('field caps too large'));
+    jest.mocked(mockDataViewsService.getIdsWithTitle).mockResolvedValue([]);
+
+    await listener.effect(sharedDataViewManagerSlice.actions.init([]), mockListenerApi);
+
+    // Main init should still succeed
+    expect(jest.mocked(createDefaultDataView)).toHaveBeenCalled();
+
+    // Error action should NOT be dispatched
+    expect(jest.mocked(mockListenerApi.dispatch)).not.toBeCalledWith(
+      sharedDataViewManagerSlice.actions.error()
+    );
+
+    // Toast should NOT be shown
     expect(mockToastsDanger).not.toHaveBeenCalled();
   });
 

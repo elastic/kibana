@@ -16,7 +16,8 @@ export const createExploreDataView = async (
     spaces: SpacesPluginStart;
   },
   defaultDataViewPatterns: string[],
-  alertsDataViewPattern: string
+  alertsDataViewPattern: string,
+  { skipFetchFields = false }: { skipFetchFields?: boolean } = {}
 ): Promise<DataView> => {
   const exploreDataViewPattern = defaultDataViewPatterns
     .filter((pattern) => pattern !== alertsDataViewPattern)
@@ -30,9 +31,7 @@ export const createExploreDataView = async (
       title: exploreDataViewPattern,
       managed: true,
     },
-    false, // skipFetchFields — always fetch fields so the data view is ready to use
-    false  // displayErrors — suppress the platform's built-in toast; callers handle errors
-    // appropriately: init_listener swallows silently (explore is not needed on Alerts/Dashboard),
-    // while useInitExploreDataView surfaces a danger toast (the user IS on an explore page).
+    skipFetchFields,
+    false // displayErrors — suppress platform toast; callers handle error feedback
   );
 };

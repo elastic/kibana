@@ -8,23 +8,29 @@
 import { useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux-v7';
 import { useLocation } from 'react-router-dom';
+import { i18n } from '@kbn/i18n';
 import { PageScope } from '../constants';
 import { sourcererAdapterSelector, sharedStateSelector } from '../redux/selectors';
 import { sharedDataViewManagerSlice } from '../redux/slices';
 import { selectDataViewAsync } from '../redux/actions';
 import { createExploreDataView } from '../utils/create_explore_data_view';
+import { loadDataViewFields } from '../utils/load_data_view_fields';
 import { useKibana } from '../../common/lib/kibana';
 import { getScopeFromPath } from '../../sourcerer/containers/sourcerer_paths';
 
 /**
- * Lazily initializes the explore data view scope.
+ * Lazily loads the explore data view fields when the user lands on an explore page.
  *
- * This hook is a no-op when the user is not on an explore page (Hosts, Users, Network). When the
- * user is on an explore page and the explore scope has not yet been initialized, it creates the
- * explore data view from the default data view patterns and dispatches the scope selection.
+ * This hook is a no-op unless the user is on an explore page (Hosts, Users, Network). The explore
+ * data view is normally created ahead of time by the init listener with `skipFetchFields:true`, so
+ * that broad index patterns don't trigger expensive `_field_caps` requests on unrelated pages such
+ * as Alerts or Dashboards. When the user actually navigates to an explore page, this hook:
+ * - refreshes the fields on the already-registered explore data view (the common path), or
+ * - creates the explore data view from scratch as a fallback, if the init listener's eager
+ *   creation failed.
  *
- * This avoids fetching large _field_caps responses for broad index patterns on unrelated
- * pages such as Alerts or Dashboards.
+ * On success the refreshed/created data view is dispatched to the store and selected for the
+ * explore scope. On failure a danger toast is surfaced, since the user is on a page that needs it.
  */
 export const useInitExploreDataView = (): void => {
   const {
@@ -52,11 +58,6 @@ export const useInitExploreDataView = (): void => {
       return;
     }
 
-    // Already initialized
-    if (exploreDataViewId) {
-      return;
-    }
-
     // Shared state not ready yet — default/alert DV IDs not available
     if (status !== 'ready' || !defaultDataViewId || !alertDataViewId) {
       return;
@@ -78,14 +79,26 @@ export const useInitExploreDataView = (): void => {
 
     (async () => {
       try {
-        const exploreDataView = await createExploreDataView(
-          { dataViews, spaces },
-          defaultDataViewTitle.split(','),
-          alertDataViewTitle
-        );
+        if (exploreDataViewId) {
+          // The init listener created the DV with skipFetchFields:true — refresh fields now
+          // that we know the user is on an explore page and actually needs them. Returns null
+          // (a no-op) if the fields are already populated, e.g. the user revisited the page.
+          const refreshedDV = await loadDataViewFields(dataViews, exploreDataViewId);
+          if (refreshedDV) {
+            dispatch(sharedDataViewManagerSlice.actions.addDataView(refreshedDV));
+            dispatch(selectDataViewAsync({ id: refreshedDV.id, scope: PageScope.explore }));
+          }
+        } else {
+          // Init listener failed to register the explore DV — create from scratch.
+          const exploreDataView = await createExploreDataView(
+            { dataViews, spaces },
+            defaultDataViewTitle.split(','),
+            alertDataViewTitle
+          );
 
-        dispatch(sharedDataViewManagerSlice.actions.addDataView(exploreDataView));
-        dispatch(selectDataViewAsync({ id: exploreDataView.id, scope: PageScope.explore }));
+          dispatch(sharedDataViewManagerSlice.actions.addDataView(exploreDataView));
+          dispatch(selectDataViewAsync({ id: exploreDataView.id, scope: PageScope.explore }));
+        }
 
         // NOTE: intentionally leave `isInitializingRef` set on success. The explore scope
         // selection is applied asynchronously (via the `selectDataViewAsync` listener), so
@@ -96,8 +109,17 @@ export const useInitExploreDataView = (): void => {
         // Allow a retry on the next dependency change if creation failed.
         isInitializingRef.current = false;
         notifications.toasts.addDanger({
-          title: 'Error initializing the explore data view',
-          text: `Error: ${error instanceof Error ? error.message : 'unknown'}`,
+          title: i18n.translate(
+            'xpack.securitySolution.dataViewManager.exploreDataView.initErrorTitle',
+            { defaultMessage: 'Error initializing the explore data view' }
+          ),
+          text: i18n.translate(
+            'xpack.securitySolution.dataViewManager.exploreDataView.initErrorText',
+            {
+              defaultMessage: 'Error: {errorMessage}',
+              values: { errorMessage: error instanceof Error ? error.message : 'unknown' },
+            }
+          ),
         });
       }
     })();

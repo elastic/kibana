@@ -35,11 +35,13 @@ jest.mock('../utils/create_explore_data_view', () => ({
 }));
 
 const mockAddDanger = jest.fn();
+const mockDataViewsGet = jest.fn();
+const mockRefreshFields = jest.fn();
 
 jest.mock('../../common/lib/kibana', () => ({
   useKibana: () => ({
     services: {
-      dataViews: { create: jest.fn() },
+      dataViews: { create: jest.fn(), get: mockDataViewsGet, refreshFields: mockRefreshFields },
       spaces: { getActiveSpace: async () => ({ id: 'default' }) },
       notifications: { toasts: { addDanger: mockAddDanger } },
     },
@@ -101,6 +103,12 @@ describe('useInitExploreDataView', () => {
       .mocked(useLocation)
       .mockReturnValue({ pathname: '/hosts' } as ReturnType<typeof useLocation>);
     jest.mocked(getScopeFromPath).mockReturnValue(PageScope.explore);
+    // By default the already-registered explore DV has fields, so the refresh path is a no-op.
+    mockDataViewsGet.mockResolvedValue({
+      id: 'explore-data-view-default',
+      fields: [{ name: '@timestamp' }],
+    });
+    mockRefreshFields.mockResolvedValue(undefined);
   });
 
   it('does nothing when not on an explore path, even if explore scope is uninitialized', () => {
@@ -136,6 +144,50 @@ describe('useInitExploreDataView', () => {
     expect(mockDispatch).toHaveBeenCalledWith(
       selectDataViewAsync({ id: 'explore-data-view-default', scope: PageScope.explore })
     );
+  });
+
+  it('refreshes fields on the existing explore data view when it has none', async () => {
+    const existingDataView = { id: 'explore-data-view-default', fields: [] as unknown[] };
+    mockDataViewsGet.mockResolvedValue(existingDataView);
+    mockSelectors({
+      exploreScope: { dataViewId: 'explore-data-view-default' },
+      shared: readySharedState,
+    });
+
+    renderHook(() => useInitExploreDataView());
+
+    await waitFor(() =>
+      expect(mockDataViewsGet).toHaveBeenCalledWith('explore-data-view-default', false)
+    );
+    expect(mockRefreshFields).toHaveBeenCalledWith(existingDataView, false);
+    expect(mockDispatch).toHaveBeenCalledWith(
+      sharedDataViewManagerSlice.actions.addDataView(existingDataView as any)
+    );
+    expect(mockDispatch).toHaveBeenCalledWith(
+      selectDataViewAsync({ id: 'explore-data-view-default', scope: PageScope.explore })
+    );
+    // The DV already exists — it must not be created from scratch.
+    expect(createExploreDataView).not.toHaveBeenCalled();
+  });
+
+  it('does nothing when the existing explore data view already has fields', async () => {
+    mockDataViewsGet.mockResolvedValue({
+      id: 'explore-data-view-default',
+      fields: [{ name: '@timestamp' }],
+    });
+    mockSelectors({
+      exploreScope: { dataViewId: 'explore-data-view-default' },
+      shared: readySharedState,
+    });
+
+    renderHook(() => useInitExploreDataView());
+
+    await waitFor(() =>
+      expect(mockDataViewsGet).toHaveBeenCalledWith('explore-data-view-default', false)
+    );
+    expect(mockRefreshFields).not.toHaveBeenCalled();
+    expect(createExploreDataView).not.toHaveBeenCalled();
+    expect(mockDispatch).not.toHaveBeenCalled();
   });
 
   it('does nothing when explore scope is already initialized', () => {
