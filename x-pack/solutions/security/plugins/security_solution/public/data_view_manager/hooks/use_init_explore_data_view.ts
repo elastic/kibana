@@ -8,7 +8,6 @@
 import { useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux-v7';
 import { useLocation } from 'react-router-dom';
-import { i18n } from '@kbn/i18n';
 import { PageScope } from '../constants';
 import { sourcererAdapterSelector, sharedStateSelector } from '../redux/selectors';
 import { sharedDataViewManagerSlice } from '../redux/slices';
@@ -30,11 +29,12 @@ import { getScopeFromPath } from '../../sourcerer/containers/sourcerer_paths';
  *   creation failed.
  *
  * On success the refreshed/created data view is dispatched to the store and selected for the
- * explore scope. On failure a danger toast is surfaced, since the user is on a page that needs it.
+ * explore scope. On failure the platform's own "Error fetching fields" toast is shown (via
+ * `refreshFields` with `displayErrors` defaulting to `true`) — no additional handling is needed.
  */
 export const useInitExploreDataView = (): void => {
   const {
-    services: { dataViews, spaces, notifications },
+    services: { dataViews, spaces },
   } = useKibana();
 
   const { pathname } = useLocation();
@@ -105,22 +105,10 @@ export const useInitExploreDataView = (): void => {
         // `exploreDataViewId` is not yet populated at this point. Keeping the guard set
         // prevents a re-render (e.g. triggered by `addDataView` updating the shared state)
         // from creating and dispatching a duplicate explore data view.
-      } catch (error: unknown) {
-        // Allow a retry on the next dependency change if creation failed.
+      } catch {
+        // Allow a retry on the next dependency change if field loading failed.
+        // The platform's own toast (shown by refreshFields) is the user-facing feedback.
         isInitializingRef.current = false;
-        notifications.toasts.addDanger({
-          title: i18n.translate(
-            'xpack.securitySolution.dataViewManager.exploreDataView.initErrorTitle',
-            { defaultMessage: 'Error initializing the explore data view' }
-          ),
-          text: i18n.translate(
-            'xpack.securitySolution.dataViewManager.exploreDataView.initErrorText',
-            {
-              defaultMessage: 'Error: {errorMessage}',
-              values: { errorMessage: error instanceof Error ? error.message : 'unknown' },
-            }
-          ),
-        });
       }
     })();
   }, [
@@ -132,7 +120,6 @@ export const useInitExploreDataView = (): void => {
     dataViewSpecs,
     dataViews,
     spaces,
-    notifications,
     dispatch,
   ]);
 };

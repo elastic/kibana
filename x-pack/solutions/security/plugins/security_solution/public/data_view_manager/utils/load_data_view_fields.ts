@@ -12,8 +12,9 @@ import type { DataView, DataViewsServicePublic } from '@kbn/data-views-plugin/pu
  * `skipFetchFields: true`, such as the explore data view). This is deferred until the fields are
  * actually needed to avoid expensive `_field_caps` requests on pages that don't use the data view.
  *
- * The lookup and refresh both pass `displayErrors: false`, so the platform's own error toast is
- * suppressed — callers are responsible for surfacing user-facing feedback on failure.
+ * `refreshFields` is called with `displayErrors` defaulting to `true`, so the platform surfaces its
+ * own "Error fetching fields" toast (which includes a "See the full error" button) on failure.
+ * The platform catches the error internally and does not re-throw, so no additional catch is needed.
  *
  * @returns the data view with its fields loaded, or `null` if it already had fields (no work done).
  */
@@ -27,7 +28,9 @@ export const loadDataViewFields = async (
     return null;
   }
 
-  await dataViews.refreshFields(dataView, false);
+  // Omitting the second arg lets displayErrors default to true: the platform shows its own
+  // "Error fetching fields" toast (with "See the full error") and catches the error internally.
+  await dataViews.refreshFields(dataView);
 
   return dataView;
 };

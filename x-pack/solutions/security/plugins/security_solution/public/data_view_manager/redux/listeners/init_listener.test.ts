@@ -8,7 +8,7 @@
 import type { AnyAction, Dispatch, ListenerEffectAPI } from 'redux-toolkit-v1';
 import { mockDataViewManagerState } from '../mock';
 import { createInitListener } from './init_listener';
-import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
+import type { DataView, DataViewsServicePublic } from '@kbn/data-views-plugin/public';
 import type { RootState } from '../reducer';
 import { sharedDataViewManagerSlice } from '../slices';
 import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID, PageScope } from '../../constants';
@@ -78,7 +78,9 @@ describe('createInitListener', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    jest.mocked(createExploreDataView).mockResolvedValue(mockExploreDataView as any);
+    jest
+      .mocked(createExploreDataView)
+      .mockResolvedValue(mockExploreDataView as unknown as DataView);
 
     jest.mocked(createDefaultDataView).mockResolvedValue({
       defaultDataView: { id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID, title: '' },

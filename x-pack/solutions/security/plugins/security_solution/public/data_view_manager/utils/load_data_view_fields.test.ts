@@ -26,7 +26,9 @@ describe('loadDataViewFields', () => {
     const result = await loadDataViewFields(mockDataViews as DataViewsServicePublic, 'explore-dv');
 
     expect(mockDataViews.get).toHaveBeenCalledWith('explore-dv', false);
-    expect(mockDataViews.refreshFields).toHaveBeenCalledWith(dataView, false);
+    // Called without a displayErrors arg so it defaults to true — the platform shows its own
+    // "Error fetching fields" toast on failure rather than re-throwing.
+    expect(mockDataViews.refreshFields).toHaveBeenCalledWith(dataView);
     expect(result).toBe(dataView);
   });
 
@@ -41,11 +43,14 @@ describe('loadDataViewFields', () => {
     expect(result).toBeNull();
   });
 
-  it('propagates errors from the underlying data views service', async () => {
-    jest.mocked(mockDataViews.get!).mockRejectedValue(new Error('field caps too large'));
+  it('propagates errors thrown by the get call', async () => {
+    // Errors from dataViews.get (e.g. saved-object not found) propagate to the caller.
+    // Note: refreshFields errors are handled by the platform internally (displayErrors=true)
+    // and are not re-thrown — the platform shows its own "Error fetching fields" toast.
+    jest.mocked(mockDataViews.get!).mockRejectedValue(new Error('saved object not found'));
 
     await expect(
       loadDataViewFields(mockDataViews as DataViewsServicePublic, 'explore-dv')
-    ).rejects.toThrow('field caps too large');
+    ).rejects.toThrow('saved object not found');
   });
 });

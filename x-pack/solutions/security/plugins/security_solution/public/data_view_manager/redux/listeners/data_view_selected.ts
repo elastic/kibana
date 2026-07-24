@@ -10,7 +10,6 @@ import type { AnyAction, Dispatch, ListenerEffectAPI } from 'redux-toolkit-v1';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { isEmpty } from 'lodash';
-import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core/public';
 import type { RootState } from '../reducer';
 import { scopes } from '../reducer';
@@ -167,11 +166,11 @@ export const createDataViewSelectedListener = (dependencies: {
         // data view, which is registered at init with skipFetchFields:true to avoid expensive
         // _field_caps requests on pages like Alerts), load the fields now that the user has
         // actively selected it. On success, Redux is updated so the UI re-renders with fields.
-        // On failure, a toast is shown so the user knows why the data view appears empty.
+        // On failure, the platform's "Error fetching fields" toast (with "See the full error")
+        // is shown automatically via refreshFields — no additional handling needed here.
         //
         // NOTE: skip this for PageScope.explore — useInitExploreDataView owns field loading
-        // for that scope and will surface an appropriate toast when the user navigates to an
-        // explore page. Doing it here would fire a toast from background init, not user action.
+        // for that scope. Doing it here would fire a toast from background init, not user action.
         const resolvedAdHocSpec = state.dataViewManager.shared.adhocDataViews.find(
           (dv) => dv.id === resolvedIdToUse
         );
@@ -194,23 +193,9 @@ export const createDataViewSelectedListener = (dependencies: {
                 sharedDataViewManagerSlice.actions.addDataView(refreshedDataView)
               );
             }
-          } catch (error: unknown) {
-            // Prefer the human-friendly `name` (e.g. "Security solution explore") over `title`,
-            // which is the raw comma-joined index pattern.
-            const dataViewLabel =
-              resolvedAdHocSpec.name ?? resolvedAdHocSpec.title ?? resolvedIdToUse;
-            dependencies.notifications.toasts.addDanger({
-              title: i18n.translate('xpack.securitySolution.dataViewManager.loadFieldsErrorTitle', {
-                defaultMessage: 'Error loading data view fields',
-              }),
-              text: i18n.translate('xpack.securitySolution.dataViewManager.loadFieldsErrorText', {
-                defaultMessage: 'Unable to load fields for "{dataViewLabel}". {errorMessage}',
-                values: {
-                  dataViewLabel,
-                  errorMessage: error instanceof Error ? error.message : '',
-                },
-              }),
-            });
+          } catch {
+            // The platform surfaces its own "Error fetching fields" toast (with a "See the full
+            // error" button) via refreshFields — no additional toast needed here.
           }
         }
       } else if (dataViewByIdError || adhocDataViewCreationError) {

@@ -8,6 +8,7 @@
 import { renderHook, waitFor } from '@testing-library/react';
 import { useSelector, useDispatch } from 'react-redux-v7';
 import { useLocation } from 'react-router-dom';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { useInitExploreDataView } from './use_init_explore_data_view';
 import { createExploreDataView } from '../utils/create_explore_data_view';
 import { getScopeFromPath } from '../../sourcerer/containers/sourcerer_paths';
@@ -34,7 +35,6 @@ jest.mock('../utils/create_explore_data_view', () => ({
   createExploreDataView: jest.fn(),
 }));
 
-const mockAddDanger = jest.fn();
 const mockDataViewsGet = jest.fn();
 const mockRefreshFields = jest.fn();
 
@@ -43,7 +43,6 @@ jest.mock('../../common/lib/kibana', () => ({
     services: {
       dataViews: { create: jest.fn(), get: mockDataViewsGet, refreshFields: mockRefreshFields },
       spaces: { getActiveSpace: async () => ({ id: 'default' }) },
-      notifications: { toasts: { addDanger: mockAddDanger } },
     },
   }),
 }));
@@ -60,8 +59,18 @@ const mockExploreDataView = {
 // title is exactly that same signal index. This mirrors production so the alerts-exclusion filter
 // in `createExploreDataView` is actually exercised.
 const ALERTS_INDEX_PATTERN = '.alerts-security.alerts-default';
-const readySharedState = {
-  status: 'ready' as const,
+
+// Explicitly typed so overrides (e.g. status: 'pristine', defaultDataViewId: null) don't require
+// `as any` casts at each call site.
+const readySharedState: {
+  status: 'pristine' | 'loading' | 'error' | 'ready';
+  defaultDataViewId: string | null;
+  alertDataViewId: string | null;
+  dataViews: Array<{ id: string; title: string }>;
+  adhocDataViews: unknown[];
+  signalIndex: null;
+} = {
+  status: 'ready',
   defaultDataViewId: 'default-dv-id',
   alertDataViewId: 'alert-dv-id',
   dataViews: [
@@ -97,7 +106,9 @@ describe('useInitExploreDataView', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.mocked(useDispatch).mockReturnValue(mockDispatch);
-    jest.mocked(createExploreDataView).mockResolvedValue(mockExploreDataView as any);
+    jest
+      .mocked(createExploreDataView)
+      .mockResolvedValue(mockExploreDataView as unknown as DataView);
     // Default to being on an explore page; individual tests override as needed.
     jest
       .mocked(useLocation)
@@ -138,7 +149,7 @@ describe('useInitExploreDataView', () => {
 
     await waitFor(() =>
       expect(mockDispatch).toHaveBeenCalledWith(
-        sharedDataViewManagerSlice.actions.addDataView(mockExploreDataView as any)
+        sharedDataViewManagerSlice.actions.addDataView(mockExploreDataView as unknown as DataView)
       )
     );
     expect(mockDispatch).toHaveBeenCalledWith(
@@ -159,9 +170,11 @@ describe('useInitExploreDataView', () => {
     await waitFor(() =>
       expect(mockDataViewsGet).toHaveBeenCalledWith('explore-data-view-default', false)
     );
-    expect(mockRefreshFields).toHaveBeenCalledWith(existingDataView, false);
+    // refreshFields is called without a displayErrors arg so it defaults to true,
+    // enabling the platform's own "Error fetching fields" toast on failure.
+    expect(mockRefreshFields).toHaveBeenCalledWith(existingDataView);
     expect(mockDispatch).toHaveBeenCalledWith(
-      sharedDataViewManagerSlice.actions.addDataView(existingDataView as any)
+      sharedDataViewManagerSlice.actions.addDataView(existingDataView as unknown as DataView)
     );
     expect(mockDispatch).toHaveBeenCalledWith(
       selectDataViewAsync({ id: 'explore-data-view-default', scope: PageScope.explore })
@@ -204,7 +217,7 @@ describe('useInitExploreDataView', () => {
   it('does nothing when shared state is not yet ready', () => {
     mockSelectors({
       exploreScope: { dataViewId: null },
-      shared: { ...readySharedState, status: 'pristine' as any },
+      shared: { ...readySharedState, status: 'pristine' },
     });
 
     renderHook(() => useInitExploreDataView());
@@ -215,7 +228,7 @@ describe('useInitExploreDataView', () => {
   it('does nothing when default data view id is not available yet', () => {
     mockSelectors({
       exploreScope: { dataViewId: null },
-      shared: { ...readySharedState, defaultDataViewId: null as any },
+      shared: { ...readySharedState, defaultDataViewId: null },
     });
 
     renderHook(() => useInitExploreDataView());
@@ -235,21 +248,18 @@ describe('useInitExploreDataView', () => {
     expect(createExploreDataView).not.toHaveBeenCalled();
   });
 
-  it('surfaces a danger toast and does not dispatch when creation fails', async () => {
+  it('does not dispatch when creation fails, allowing a retry on the next dependency change', async () => {
+    // The platform's own toast (shown via refreshFields with displayErrors=true) is the
+    // user-facing feedback on failure — the hook's catch block no longer adds its own toast.
     jest.mocked(createExploreDataView).mockRejectedValue(new Error('boom'));
     mockSelectors({ exploreScope: { dataViewId: null }, shared: readySharedState });
 
     renderHook(() => useInitExploreDataView());
 
-    await waitFor(() =>
-      expect(mockAddDanger).toHaveBeenCalledWith({
-        title: 'Error initializing the explore data view',
-        text: 'Error: boom',
-      })
-    );
+    await waitFor(() => expect(createExploreDataView).toHaveBeenCalled());
 
     expect(mockDispatch).not.toHaveBeenCalledWith(
-      sharedDataViewManagerSlice.actions.addDataView(mockExploreDataView as any)
+      sharedDataViewManagerSlice.actions.addDataView(expect.anything())
     );
   });
 

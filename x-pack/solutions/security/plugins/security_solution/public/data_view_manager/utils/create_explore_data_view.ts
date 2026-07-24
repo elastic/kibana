@@ -31,7 +31,6 @@ export const createExploreDataView = async (
       title: exploreDataViewPattern,
       managed: true,
     },
-    skipFetchFields,
-    false // displayErrors — suppress platform toast; callers handle error feedback
+    skipFetchFields
   );
 };
