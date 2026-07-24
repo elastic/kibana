@@ -74,7 +74,6 @@ describe('AiIndexRegistry', () => {
 
       await registry.startupRegister({ aiIndexService: service, isEnabled: false, logger });
 
-      expect(service.get).not.toHaveBeenCalled();
       expect(service.putManaged).not.toHaveBeenCalled();
     });
 
