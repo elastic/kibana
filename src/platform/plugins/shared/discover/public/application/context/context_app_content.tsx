@@ -40,6 +40,7 @@ import { DiscoverGrid } from '../../components/discover_grid';
 import { getDefaultRowsPerPage } from '../../../common/constants';
 import { LoadingStatus } from './services/context_query_state';
 import { ActionBar } from './components/action_bar/action_bar';
+import { ActionBarWarning } from './components/action_bar/action_bar_warning';
 import type { AppState } from './services/context_state';
 import { SurrDocType } from './services/context';
 import { MAX_CONTEXT_SIZE, MIN_CONTEXT_SIZE } from './services/constants';
@@ -114,6 +115,11 @@ export function ContextAppContent({
     predecessorsStatus === LoadingStatus.UNINITIALIZED;
   const areSuccessorsLoading =
     successorsStatus === LoadingStatus.LOADING || successorsStatus === LoadingStatus.UNINITIALIZED;
+
+  const showPredecessorsWarning =
+    !isAnchorLoading && !arePredecessorsLoading && predecessors.length < predecessorCount;
+  const showSuccessorsWarning =
+    !isAnchorLoading && !areSuccessorsLoading && successors.length < successorCount;
 
   const showTimeCol = useMemo(
     () => !config.get(DOC_HIDE_TIME_COLUMN_SETTING, false) && !!dataView.timeFieldName,
@@ -207,20 +213,25 @@ export function ContextAppContent({
             <EuiSpacer size="s" />
           </>
         )}
-        <ActionBarMemoized
-          type={SurrDocType.PREDECESSORS}
-          defaultStepSize={defaultStepSize}
-          docCount={predecessorCount}
-          docCountAvailable={predecessors.length}
-          onChangeCount={onChangeCount}
-          isLoading={arePredecessorsLoading}
-          isDisabled={isAnchorLoading}
-        />
+        {showPredecessorsWarning && (
+          <ActionBarWarning docCount={predecessors.length} type={SurrDocType.PREDECESSORS} />
+        )}
       </WrapperWithPadding>
       <div css={dscDocsGridCss}>
         <CellActionsProvider getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}>
           <DiscoverGrid
             ariaLabelledBy="surDocumentsAriaLabel"
+            externalAdditionalControls={
+              <ActionBarMemoized
+                key="predecessorsActionBar"
+                type={SurrDocType.PREDECESSORS}
+                defaultStepSize={defaultStepSize}
+                docCount={predecessorCount}
+                onChangeCount={onChangeCount}
+                isLoading={arePredecessorsLoading}
+                isDisabled={isAnchorLoading}
+              />
+            }
             cellActionsTriggerId={DISCOVER_CELL_ACTIONS_TRIGGER_ID}
             cellActionsMetadata={cellActionsMetadata}
             cellActionsHandling="append"
@@ -252,11 +263,16 @@ export function ContextAppContent({
         </CellActionsProvider>
       </div>
       <WrapperWithPadding>
+        {showSuccessorsWarning && (
+          <>
+            <ActionBarWarning docCount={successors.length} type={SurrDocType.SUCCESSORS} />
+            <EuiSpacer size="s" />
+          </>
+        )}
         <ActionBarMemoized
           type={SurrDocType.SUCCESSORS}
           defaultStepSize={defaultStepSize}
           docCount={successorCount}
-          docCountAvailable={successors.length}
           onChangeCount={onChangeCount}
           isLoading={areSuccessorsLoading}
           isDisabled={isAnchorLoading}
