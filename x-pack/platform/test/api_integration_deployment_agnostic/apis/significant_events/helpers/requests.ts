@@ -271,3 +271,37 @@ export async function deleteFeature(
     .expect(expectedStatusCode)
     .then((response) => response.body as { acknowledged: boolean });
 }
+
+// ---------------------------------------------------------------------------
+// Maintenance (pause / resume) helpers
+// ---------------------------------------------------------------------------
+
+export async function getMaintenanceStatus(
+  apiClient: SignificantEventsSupertestRepositoryClient,
+  expectStatusCode: number = 200
+) {
+  return apiClient
+    .fetch('GET /internal/significant_events/maintenance/_status')
+    .expect(expectStatusCode)
+    .then((response) => response.body);
+}
+
+export async function pauseMaintenance(
+  apiClient: SignificantEventsSupertestRepositoryClient,
+  expectStatusCode: number = 200
+) {
+  return apiClient
+    .fetch('POST /internal/significant_events/maintenance/_pause')
+    .expect(expectStatusCode)
+    .then((response) => response.body);
+}
+
+export async function resumeMaintenance(
+  apiClient: SignificantEventsSupertestRepositoryClient,
+  expectStatusCode: number = 200
+) {
+  return apiClient
+    .fetch('POST /internal/significant_events/maintenance/_resume')
+    .expect(expectStatusCode)
+    .then((response) => response.body);
+}

@@ -104,6 +104,24 @@ describe('SignificantEventItem', () => {
     expect(onClick).not.toHaveBeenCalled();
   });
 
+  it('marks the row as selected when isSelected is true', () => {
+    renderItem({ onClick: jest.fn(), isSelected: true });
+
+    expect(screen.getByTestId('nightshiftSignificantEventItem')).toHaveAttribute(
+      'aria-pressed',
+      'true'
+    );
+  });
+
+  it('marks the row as unselected when isSelected is false', () => {
+    renderItem({ onClick: jest.fn(), isSelected: false });
+
+    expect(screen.getByTestId('nightshiftSignificantEventItem')).toHaveAttribute(
+      'aria-pressed',
+      'false'
+    );
+  });
+
   it('renders the title as plain text, not a link or button', () => {
     const onClick = jest.fn();
     renderItem({ onClick });
