@@ -10,7 +10,7 @@ import type { HttpStart } from '@kbn/core/public';
 import type { TimeRange } from '@kbn/es-query';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { ISearchGeneric } from '@kbn/search-types';
-import { getESQLResults, getESQLTimeField } from '`@kbn/esql-utils`';
+import { getESQLResults, getESQLTimeField } from '@kbn/esql-utils';
 
 export type EsqlDataResult = ESQLSearchResponse;
 
