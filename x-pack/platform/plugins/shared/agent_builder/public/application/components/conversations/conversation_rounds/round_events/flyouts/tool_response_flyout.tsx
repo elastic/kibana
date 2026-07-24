@@ -28,6 +28,10 @@ import { JsonCodeBlock } from '../json_code_block';
 import { ToolResult } from '../results/tool_result';
 import { SubAgentExecutionFlyout } from './sub_agent_execution_flyout';
 
+const backLabel = i18n.translate('xpack.agentBuilder.conversation.toolResponseFlyout.back', {
+  defaultMessage: 'Back',
+});
+
 const parametersLabel = i18n.translate(
   'xpack.agentBuilder.conversation.toolResponseFlyout.parametersLabel',
   { defaultMessage: 'Parameters' }
@@ -51,9 +55,10 @@ const subAgentExecutionLabel = i18n.translate(
 interface ToolResponseFlyoutProps {
   step: ToolCallStepData;
   onClose: () => void;
+  onBack?: () => void;
 }
 
-export const ToolResponseFlyout: React.FC<ToolResponseFlyoutProps> = ({ step, onClose }) => {
+export const ToolResponseFlyout: React.FC<ToolResponseFlyoutProps> = ({ step, onClose, onBack }) => {
   const { euiTheme } = useEuiTheme();
   const [isSubFlyoutOpen, { on: openSubFlyout, off: closeSubFlyout }] = useBoolean();
 
@@ -139,7 +144,22 @@ export const ToolResponseFlyout: React.FC<ToolResponseFlyoutProps> = ({ step, on
   ];
 
   return (
-    <EuiFlyout onClose={onClose} aria-labelledby="toolResponseFlyoutTitle" size="m">
+    <EuiFlyout onClose={onClose} aria-labelledby="toolResponseFlyoutTitle" size="m" ownFocus={!onBack} outsideClickCloses={!!onBack}>
+      {onBack && (
+        <EuiFlyoutHeader
+          hasBorder
+          css={css`
+            && {
+              padding-block: 4px;
+              padding-left: 8px;
+            }
+          `}
+        >
+          <EuiButtonEmpty iconType="undo" onClick={onBack} flush="left" size="s" color="text">
+            <EuiText size="xs">{backLabel}</EuiText>
+          </EuiButtonEmpty>
+        </EuiFlyoutHeader>
+      )}
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
           <h2 id="toolResponseFlyoutTitle">tool: {step.tool_id}</h2>
@@ -152,7 +172,8 @@ export const ToolResponseFlyout: React.FC<ToolResponseFlyoutProps> = ({ step, on
         <SubAgentExecutionFlyout
           executionId={subAgentExecutionId}
           params={step.params}
-          onClose={closeSubFlyout}
+          onBack={closeSubFlyout}
+          onClose={onClose}
         />
       )}
     </EuiFlyout>
