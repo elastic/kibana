@@ -28636,7 +28636,6 @@
     "xpack.maps.styles.firstOrdinalSuffix": "st",
     "xpack.maps.styles.icon.customMapLabel": "定制图标调色板",
     "xpack.maps.styles.icon.iconPaletteSelectAriaLabel": "图标调色板",
-    "xpack.maps.styles.iconStops.deleteButtonAriaLabel": "删除",
     "xpack.maps.styles.iconStops.deleteButtonLabel": "删除",
     "xpack.maps.styles.invalidPercentileMsg": "百分位数必须是介于 0 到 100 之间但不包括它们的数字",
     "xpack.maps.styles.labelBorderSize.bottom": "底部",

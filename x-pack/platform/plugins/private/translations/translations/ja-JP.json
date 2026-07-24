@@ -28632,7 +28632,6 @@
     "xpack.maps.styles.firstOrdinalSuffix": "st",
     "xpack.maps.styles.icon.customMapLabel": "カスタムアイコンパレット",
     "xpack.maps.styles.icon.iconPaletteSelectAriaLabel": "アイコンパレット",
-    "xpack.maps.styles.iconStops.deleteButtonAriaLabel": "削除",
     "xpack.maps.styles.iconStops.deleteButtonLabel": "削除",
     "xpack.maps.styles.invalidPercentileMsg": "パーセンタイルは 0 より大きく、100 より小さい数値でなければなりません",
     "xpack.maps.styles.labelBorderSize.bottom": "一番下",

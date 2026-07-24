@@ -28531,7 +28531,6 @@
     "xpack.maps.styles.firstOrdinalSuffix": "st",
     "xpack.maps.styles.icon.customMapLabel": "Benutzerdefinierte Symbolpalette",
     "xpack.maps.styles.icon.iconPaletteSelectAriaLabel": "Icon-Palette",
-    "xpack.maps.styles.iconStops.deleteButtonAriaLabel": "Löschen",
     "xpack.maps.styles.iconStops.deleteButtonLabel": "Löschen",
     "xpack.maps.styles.invalidPercentileMsg": "Das Perzentil muss eine Zahl zwischen 0 und 100 sein, ausschließlich",
     "xpack.maps.styles.labelBorderSize.bottom": "Unten",

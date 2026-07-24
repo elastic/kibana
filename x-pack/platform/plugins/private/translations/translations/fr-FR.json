@@ -28489,7 +28489,6 @@
     "xpack.maps.styles.firstOrdinalSuffix": "er",
     "xpack.maps.styles.icon.customMapLabel": "Palette d'icônes personnalisée",
     "xpack.maps.styles.icon.iconPaletteSelectAriaLabel": "Palette d'icônes",
-    "xpack.maps.styles.iconStops.deleteButtonAriaLabel": "Supprimer",
     "xpack.maps.styles.iconStops.deleteButtonLabel": "Supprimer",
     "xpack.maps.styles.invalidPercentileMsg": "Le centile doit être un nombre compris entre 0 et 100, et exclusif",
     "xpack.maps.styles.labelBorderSize.bottom": "Bas",
