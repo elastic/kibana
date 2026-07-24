@@ -27,6 +27,7 @@ const getTestScheduler = () =>
   });
 
 const createConfig = (mainInternal: number): NewsfeedPluginBrowserConfig => ({
+  enabled: true,
   mainInterval: moment.duration(mainInternal, 'ms'),
   fetchInterval: moment.duration(mainInternal, 'ms'),
   service: {

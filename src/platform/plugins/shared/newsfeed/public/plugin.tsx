@@ -64,6 +64,7 @@ export class NewsfeedPublicPlugin
     });
 
     return {
+      isEnabled: this.config.enabled,
       createNewsFeed$: (endpoint: NewsfeedApiEndpoint) => {
         const config = Object.assign({}, this.config, {
           service: {

@@ -14,6 +14,7 @@ import { configSchema } from './config';
 export const config: PluginConfigDescriptor<NewsfeedConfigType> = {
   schema: configSchema,
   exposeToBrowser: {
+    enabled: true,
     service: true,
     mainInterval: true,
     fetchInterval: true,

@@ -15,6 +15,7 @@ export interface NewsfeedPluginStartDependencies {
 
 // Ideally, we may want to obtain the type from the configSchema and exposeToBrowser keys...
 export interface NewsfeedPluginBrowserConfig {
+  enabled: boolean;
   service: {
     urlRoot: string;
     pathTemplate: string;

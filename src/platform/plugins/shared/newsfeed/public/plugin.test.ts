@@ -12,6 +12,22 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { NewsfeedPublicPlugin } from './plugin';
 import { NewsfeedApiEndpoint } from './lib/api';
 import { screenshotModePluginMock } from '@kbn/screenshot-mode-plugin/public/mocks';
+import type { NewsfeedPluginBrowserConfig } from './types';
+
+const createPlugin = (config?: Partial<NewsfeedPluginBrowserConfig>) => {
+  return new NewsfeedPublicPlugin(
+    coreMock.createPluginInitializerContext({
+      enabled: true,
+      service: {
+        urlRoot: 'https://feeds.elastic.co',
+        pathTemplate: '/kibana/v{VERSION}.json',
+      },
+      mainInterval: '2m',
+      fetchInterval: '1d',
+      ...config,
+    })
+  );
+};
 
 describe('Newsfeed plugin', () => {
   let plugin: NewsfeedPublicPlugin;
@@ -25,7 +41,7 @@ describe('Newsfeed plugin', () => {
   });
 
   beforeEach(() => {
-    plugin = new NewsfeedPublicPlugin(coreMock.createPluginInitializerContext());
+    plugin = createPlugin();
   });
 
   describe('#start', () => {
@@ -57,6 +73,17 @@ describe('Newsfeed plugin', () => {
         jest.runOnlyPendingTimers();
         expect(window.fetch).toHaveBeenCalled();
         sub.unsubscribe();
+      });
+
+      it('exposes whether newsfeed is enabled', () => {
+        plugin = createPlugin({ enabled: false });
+        plugin.setup(coreMock.createSetup());
+
+        const startContract = plugin.start(coreMock.createStart(), {
+          screenshotMode: screenshotModePluginMock.createSetupContract(),
+        });
+
+        expect(startContract.isEnabled).toBe(false);
       });
     });
 

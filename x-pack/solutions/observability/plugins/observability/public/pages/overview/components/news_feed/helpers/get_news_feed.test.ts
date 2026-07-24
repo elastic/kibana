@@ -28,7 +28,6 @@ describe('getNewsFeed', () => {
     const newsFeed = await getNewsFeed({ http, kibanaVersion: '8.7.0' });
     expect(newsFeed.items).toEqual([]);
   });
-
   it('Returns array with the news feed', async () => {
     const http = {
       get: async () => {

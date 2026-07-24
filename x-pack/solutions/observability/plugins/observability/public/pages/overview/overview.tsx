@@ -63,7 +63,7 @@ export function OverviewPage() {
   );
 
   const { data: newsFeed } = useFetcher(() => {
-    if (Boolean(serverless) || !newsfeed) {
+    if (Boolean(serverless) || !newsfeed?.isEnabled) {
       return;
     }
 
