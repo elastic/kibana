@@ -837,8 +837,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                     title: 'legacy query',
                     description: '',
                     esql: {
-                      query:
-                        'FROM logs.otel.branch_e | WHERE KQL("message: ERROR")',
+                      query: 'FROM logs.otel.branch_e | WHERE KQL("message: ERROR")',
                     },
                   },
                 ],

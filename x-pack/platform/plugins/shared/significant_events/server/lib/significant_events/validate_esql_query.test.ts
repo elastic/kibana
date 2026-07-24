@@ -279,5 +279,4 @@ describe('validateEsqlQueryForStreamOrThrow', () => {
       ).toThrow('ES|QL query must use FROM $.query');
     });
   });
-
 });
