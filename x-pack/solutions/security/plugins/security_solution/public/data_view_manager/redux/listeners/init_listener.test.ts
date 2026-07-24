@@ -191,7 +191,9 @@ describe('createInitListener', () => {
   });
 
   it('silently swallows explore data view creation failure without showing an error modal', async () => {
-    jest.mocked(createExploreDataView).mockRejectedValue(new Error('_field_caps response too large'));
+    jest
+      .mocked(createExploreDataView)
+      .mockRejectedValue(new Error('_field_caps response too large'));
 
     await listener.effect(sharedDataViewManagerSlice.actions.init([]), mockListenerApi);
 
