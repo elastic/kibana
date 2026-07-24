@@ -23,8 +23,6 @@ export const RULE_EXECUTIONS_MAX_RESULT_WINDOW = 10_000;
  * reasonable URL length budget (256 chars per id * 10 ids ≈ 2,5KB).
  */
 export const RULE_EXECUTIONS_MAX_RULE_ID_FILTER = 10;
-export const getRuleExecutionsPagePerPageExceedsMaxMessage = (): string =>
-  `page * perPage cannot exceed ${RULE_EXECUTIONS_MAX_RESULT_WINDOW}.`;
 
 /**
  * Coarse ECS-aligned outcome (`event.outcome`) for a single rule execution.
@@ -90,7 +88,7 @@ export const getRuleExecutionsQuerySchema = z
       .describe(`Number of results per page.`),
   })
   .refine(({ page, perPage }) => page * perPage <= RULE_EXECUTIONS_MAX_RESULT_WINDOW, {
-    message: getRuleExecutionsPagePerPageExceedsMaxMessage(),
+    message: `page * perPage cannot exceed ${RULE_EXECUTIONS_MAX_RESULT_WINDOW}.`,
     path: ['page'],
   });
 export type GetRuleExecutionsQuery = z.infer<typeof getRuleExecutionsQuerySchema>;

@@ -6,7 +6,6 @@
  */
 
 import type { GetRuleExecutionsResponse } from '@kbn/alerting-v2-schemas';
-import { getRuleExecutionsPagePerPageExceedsMaxMessage } from '@kbn/alerting-v2-schemas';
 import { buildOasOperation, invalidResponseExample } from '../oas_utils';
 import type { AlertingOasOperationObject } from '../oas_types';
 
@@ -29,10 +28,11 @@ export const GET_RULE_EXECUTIONS_RESPONSE: GetRuleExecutionsResponse = {
   perPage: 20,
 };
 
+// Mirrors the page * perPage refinement message in getRuleExecutionsQuerySchema.
 const INVALID_RULE_EXECUTIONS_QUERY_RESPONSE = invalidResponseExample({
-  summary: 'page × perPage exceeds the max result window',
-  message: getRuleExecutionsPagePerPageExceedsMaxMessage(),
-  details: { errors: { '': [getRuleExecutionsPagePerPageExceedsMaxMessage()] } },
+  summary: 'Exceeds the max result window',
+  message: 'page * perPage cannot exceed 10000.',
+  details: { errors: { '': ['page * perPage cannot exceed 10000.'] } },
 });
 
 export const getRuleExecutionsOasExamples = (): AlertingOasOperationObject =>
