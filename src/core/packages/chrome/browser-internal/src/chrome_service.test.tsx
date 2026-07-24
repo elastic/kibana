@@ -729,6 +729,20 @@ describe('start', () => {
         subscription.unsubscribe();
         service.stop();
       });
+
+      it('should reset to visible when switching apps', async () => {
+        const startDeps = defaultStartDeps([new FakeApp('alpha')]);
+        const { navigateToApp } = startDeps.application;
+        const { chrome, service } = await start({ startDeps });
+
+        chrome.sideNav.setIsVisible(false);
+        expect(chrome.sideNav.getIsVisible()).toBe(false);
+
+        await navigateToApp('alpha');
+
+        expect(chrome.sideNav.getIsVisible()).toBe(true);
+        service.stop();
+      });
     });
 
     describe('width', () => {

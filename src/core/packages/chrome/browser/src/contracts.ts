@@ -327,6 +327,9 @@ export interface ChromeStart {
      * which hides the whole chrome, this only hides the side navigation while keeping the
      * rest of the chrome (e.g. the header) visible. Useful for focused, full-width
      * experiences such as onboarding flows.
+     *
+     * This is per-app state: it automatically resets to visible when navigating to
+     * another application.
      * @param isVisible The visibility of the side nav.
      */
     setIsVisible(isVisible: boolean): void;

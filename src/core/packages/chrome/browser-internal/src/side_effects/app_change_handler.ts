@@ -36,6 +36,9 @@ export function setupAppChangeHandler({
     state.appHeader.set(undefined);
     state.inlineAppHeader.set(false);
 
+    // Reset side nav visibility so an app that hides it cannot affect other apps
+    state.sideNav.visible.set(true);
+
     // Reset breadcrumbs
     state.breadcrumbs.classic.set([]);
     state.breadcrumbs.badges.set([]);
