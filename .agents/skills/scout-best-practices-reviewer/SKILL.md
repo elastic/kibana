@@ -41,6 +41,7 @@ Work through these numbered checks **in order, one at a time**, before the gener
 | 1 | **Custom server config earns its keep** | adds or updates a config set (files under `.../kbn-scout/.../config_sets/<name>/**`, a new `test/scout_<name>/` dir, or new `--serverConfigSet`) | Setting is runtime-toggleable → move it to `apiServices.core.settings(...)`. Duplicates an existing set's purpose/args → reuse that set, or ask its owners to extend it. → `docs/extend/testing/feature-flags.md`, `docs/extend/testing/scout-best-practices.md#prefer-runtime-feature-flags` |
 | 2 | **Spec lives where selective testing runs it** | adds or moves a spec that drives another plugin's app/UI (`page.gotoApp('<other>')`, another solution's `data-test-subj`, tags, or nav) | Host package doesn't own or `kbn_references`-depend on the code under test → relocate the spec to the owning plugin so PR CI actually runs it. → `docs/extend/testing/scout-best-practices.md#keep-tests-close-to-source-code` |
 | 3 | **Right test type, 100% justified** | adds or migrates a UI or API spec, or an FTR/Cypress→Scout migration | UI asserts data/logic only, or drives a pure local UI toggle already covered by a Jest unit/RTL test → move down the pyramid or remove. "It works / it's easier / that's how the FTR did it" isn't justification. → `docs/extend/testing/scout-best-practices.md#pick-the-right-test-type`, `docs/extend/testing/migrate-tests.md#dont-migrate-blindly` |
+| 4 | **Migration parity — no major coverage loss** | removes or replaces FTR/Cypress tests alongside new or changed Scout specs | Flag **only major** changes or drops: removed scenarios, dropped roles/error paths or classic/serverless coverage, weakened assertions or lost side-effect checks. Skip benign deltas — don't post an FYI parity map. Depth in **Migration parity analysis** below. → `docs/extend/testing/migrate-tests.md#dont-migrate-blindly` |
 
 ## Scope (be comprehensive)
 
@@ -89,7 +90,9 @@ Use these definitions when assigning severity:
 
 When in doubt, prefer a lower severity. Optimization suggestions (efficiency improvements) should be `minor` or `nit`, not `major`.
 
-### Migration parity analysis (required when migration is detected)
+### Migration parity analysis (Critical check 4 depth)
+
+Flag **only major** changes or drops — coverage that genuinely weakens. Skip benign deltas.
 
 - **Detect migration** when the PR removes/changes FTR tests (for example `test/functional/**`, `loadTestFile()`, FTR configs) alongside new/changed Scout specs.
 - **If migration is detected**:

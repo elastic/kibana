@@ -6,6 +6,10 @@ navigation_title: Best practices
 
 For test-type-specific guidance, see [UI](./ui-best-practices.md) and [API](./api-best-practices.md) test best practices.
 
+:::::{tip}
+**New to Scout?** Start with our [Scout introduction page](../testing/scout.md).
+:::::
+
 ## Pick the right test type [pick-the-right-test-type]
 
 Pick the test type **before** writing the test:
@@ -104,8 +108,6 @@ How these tests work:
 
 See [`src/core/server/integration_tests/saved_objects/migrations`](https://github.com/elastic/kibana/tree/main/src/core/server/integration_tests/saved_objects/migrations) for the full set of examples, and [`group1/v2_migration.test.ts`](https://github.com/elastic/kibana/blob/main/src/core/server/integration_tests/saved_objects/migrations/group1/v2_migration.test.ts) for a representative archive-based test.
 
-:::::{tip}
-**New to Scout?** Start with our [Scout introduction page](../testing/scout.md).
 :::::
 
 ## Design tests with a cloud-first mindset [design-tests-with-a-cloud-first-mindset]
@@ -122,7 +124,7 @@ A test should live in the plugin or package that owns the code it exercises. Whe
 - **API tests**: the routes under test should be defined in this plugin's `/server` directory.
 - **UI tests**: the UI being driven should come from this plugin's `/public` directory — a quick look there is usually enough to understand what the plugin renders and whether the test fits.
 
-This also keeps Scout's selective testing effective. On a PR, Scout runs a test config only when its **owning module** — the nearest `kibana.jsonc` to the spec on disk — is in the affected set: the modules the PR changed, plus every module that depends on them through `tsconfig.json` `kbn_references`. So a spec that drives plugin `X`'s app but lives in a package with no `kbn_references` edge to `X` silently won't run when `X` changes — a coverage gap you won't notice until the full suite runs post-merge on `kibana-on-merge`.
+This also keeps Scout's selective testing effective: on a PR it runs only the tests owned by the modules that PR affects, so a test placed outside the plugin that owns the code it covers may silently not run when that code changes — a coverage gap you won't notice until the full suite runs post-merge on `kibana-on-merge`.
 
 ## Prefer runtime feature flags [prefer-runtime-feature-flags]
 
