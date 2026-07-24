@@ -200,7 +200,9 @@ describe('CreateAiIndexPage', () => {
     typeId('Support triage');
 
     expect(
-      screen.getByText('Use only lowercase letters, numbers, hyphens, and underscores (no spaces).')
+      screen.getByText(
+        'Start with a lowercase letter or number, then use lowercase letters, numbers, hyphens, and underscores.'
+      )
     ).toBeInTheDocument();
     expect(screen.getByTestId('contextCreateAiIndexButton')).toBeDisabled();
   });
