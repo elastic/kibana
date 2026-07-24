@@ -16,7 +16,7 @@ import { ESQL_SEARCH_STRATEGY, cellHasFormulas, getEsQueryConfig } from '@kbn/da
 import type { IScopedSearchClient } from '@kbn/data-plugin/server';
 import { type Filter, buildEsQuery, extractTimeRange } from '@kbn/es-query';
 import {
-  getTimeFieldFromESQLQuery,
+  parseTimeFieldFromESQLQuery,
   appendLimitToQuery,
   getNamedParams,
   fixESQLQueryWithVariables,
@@ -87,7 +87,7 @@ export class CsvESQLGenerator {
     // Rewrite identifier-type (FIELDS/FUNCTIONS) variables (e.g. ?var → ??var) for ES compatibility
     const esqlQuery = fixESQLQueryWithVariables(this.job.query.esql, this.job.esqlVariables);
 
-    const timeFieldName = getTimeFieldFromESQLQuery(esqlQuery);
+    const timeFieldName = parseTimeFieldFromESQLQuery(esqlQuery);
     let timeRange;
     if (timeFieldName && this.job.filters) {
       ({ timeRange } = extractTimeRange(this.job.filters, timeFieldName));

@@ -8,6 +8,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import type { CustomCellRenderer } from '@kbn/unified-data-table';
+import type { RowControlColumn } from '@kbn/discover-utils';
 import { EntitiesDataTable } from './entities_data_table';
 import { DataViewContext, DEFAULT_ENTITIES_TABLE_CONFIG } from '.';
 import { TestProviders } from '../../../../common/mock';
@@ -32,7 +33,11 @@ const mockUseAlertsPrivileges = jest.mocked(useAlertsPrivileges);
 const mockUseGlobalTime = jest.mocked(useGlobalTime);
 const mockUseKibana = jest.mocked(useKibana);
 
-const capturedProps: { externalCustomRenderers?: CustomCellRenderer; columns?: string[] } = {};
+const capturedProps: {
+  externalCustomRenderers?: CustomCellRenderer;
+  columns?: string[];
+  rowAdditionalLeadingControls?: RowControlColumn[];
+} = {};
 
 jest.mock('@kbn/unified-data-table', () => {
   const actual = jest.requireActual('@kbn/unified-data-table');
@@ -41,9 +46,11 @@ jest.mock('@kbn/unified-data-table', () => {
     UnifiedDataTable: (props: {
       externalCustomRenderers?: CustomCellRenderer;
       columns?: string[];
+      rowAdditionalLeadingControls?: RowControlColumn[];
     }) => {
       capturedProps.externalCustomRenderers = props.externalCustomRenderers;
       capturedProps.columns = props.columns;
+      capturedProps.rowAdditionalLeadingControls = props.rowAdditionalLeadingControls;
       return <div data-test-subj="unifiedDataTable" />;
     },
   };
@@ -337,6 +344,36 @@ describe('EntitiesDataTable', () => {
       renderWithProviders(state);
 
       expect(capturedProps.columns).not.toContain('alerts');
+    });
+  });
+
+  describe('actions (leading control) column', () => {
+    it('gives the timeline action an explicit width so the "Actions" header renders as text', () => {
+      const state = createMockState();
+      (state.getRowsFromPages as jest.Mock).mockReturnValue([]);
+
+      renderWithProviders(state);
+
+      const timelineControl = capturedProps.rowAdditionalLeadingControls?.find(
+        (control) => control.id === 'entity-analytics-timeline-action'
+      );
+      expect(timelineControl).toBeDefined();
+      // Wide enough that UnifiedDataTable's ActionsHeader shows the label instead of the icon.
+      expect(timelineControl?.width).toBe(48);
+    });
+
+    it('omits the timeline action when the user cannot read timeline', () => {
+      mockUseUserPrivileges.mockReturnValue({
+        timelinePrivileges: { crud: false, read: false },
+        alertsPrivileges: { alerts: { read: true, edit: false, legacyUpdate: false } },
+      } as unknown as ReturnType<typeof useUserPrivileges>);
+
+      const state = createMockState();
+      (state.getRowsFromPages as jest.Mock).mockReturnValue([]);
+
+      renderWithProviders(state);
+
+      expect(capturedProps.rowAdditionalLeadingControls).toEqual([]);
     });
   });
 });
