@@ -46,9 +46,7 @@ describe('ToolResponseFlyout', () => {
     const user = userEvent.setup();
     const onBack = jest.fn();
     const onClose = jest.fn();
-    renderWithProviders(
-      <ToolResponseFlyout step={makeStep()} onClose={onClose} onBack={onBack} />
-    );
+    renderWithProviders(<ToolResponseFlyout step={makeStep()} onClose={onClose} onBack={onBack} />);
     await user.click(screen.getByRole('button', { name: 'Back' }));
     expect(onBack).toHaveBeenCalled();
     expect(onClose).not.toHaveBeenCalled();
