@@ -9,7 +9,7 @@ The commands below work the same way for both UI and API tests.
 :::::::
 
 ::::::{note}
-The examples use `<plugin-path>/test/scout/ui/playwright.config.ts`. If your plugin organizes tests into [namespaces](./setup-scout.md#scout-namespaces), point at the namespaced config instead — for example `<plugin-path>/test/scout/<namespace>/ui/playwright.config.ts`.
+The examples use `<plugin-path>/test/scout/ui/playwright.config.ts`. If your plugin organizes tests into [namespaces](./setup-scout.md#scout-namespaces), point at the namespaced config instead, for example `<plugin-path>/test/scout/<namespace>/ui/playwright.config.ts`.
 ::::::
 
 ## Local runs [scout-run-tests-local]
