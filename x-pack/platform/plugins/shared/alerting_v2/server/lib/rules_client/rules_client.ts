@@ -495,13 +495,6 @@ export class RulesClient {
 
     const { attrs: existingAttrs, version: existingVersion } = await this.getExistingRule(id);
 
-    // Enabling an already-enabled rule is a true no-op: it does not bump the
-    // change counter, re-write the SO, re-ensure the task, or emit a lifecycle
-    // event. This mirrors bulkEnableRules, which skips already-enabled rules.
-    if (existingAttrs.enabled) {
-      return transformRuleSoAttributesToRuleApiResponse(id, existingAttrs, existingVersion);
-    }
-
     const userProfileUid = await this.userService.getCurrentUserProfileUid();
     const nowIso = new Date().toISOString();
 
@@ -514,8 +507,12 @@ export class RulesClient {
       metadata: { ...existingAttrs.metadata, version: ruleVersion },
     };
 
-    // A disabled rule becoming enabled adds new scheduled load, so enforce the limit.
-    await this.validateSchedule({ updatedEvery: nextAttrs.schedule.every, checkLimit: true });
+    // Re-enabling an already-enabled rule is intentionally not short-circuited:
+    // it re-writes the SO and re-ensures the executor task (self-heal), and still
+    // emits `ruleEnabled`.
+    if (!existingAttrs.enabled) {
+      await this.validateSchedule({ updatedEvery: nextAttrs.schedule.every, checkLimit: true });
+    }
 
     await this.scheduleRuleExecutorTask({
       ruleId: id,
@@ -542,16 +539,12 @@ export class RulesClient {
 
     const { attrs: existingAttrs, version: existingVersion } = await this.getExistingRule(id);
 
-    // Disabling an already-disabled rule is a true no-op: it does not bump the
-    // change counter, re-write the SO, remove the task, or emit a lifecycle
-    // event. This mirrors bulkDisableRules, which skips already-disabled rules.
-    if (!existingAttrs.enabled) {
-      return transformRuleSoAttributesToRuleApiResponse(id, existingAttrs, existingVersion);
-    }
-
     const userProfileUid = await this.userService.getCurrentUserProfileUid();
     const nowIso = new Date().toISOString();
 
+    // Disabling an already-disabled rule is intentionally not short-circuited: it
+    // re-writes the SO and removes the executor task (self-heal), and still emits
+    // `ruleDisabled`.
     const ruleVersion = this.getNextVersion(existingAttrs.metadata.version);
     const nextAttrs: RuleSavedObjectAttributes = {
       ...existingAttrs,

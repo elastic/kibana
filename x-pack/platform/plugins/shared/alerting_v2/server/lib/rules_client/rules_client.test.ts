@@ -2112,17 +2112,17 @@ describe('RulesClient', () => {
         ]);
       });
 
-      it('is a no-op when the rule is already enabled', async () => {
+      it('re-writes the SO, re-ensures the task, and still emits ruleEnabled when already enabled (self-heal)', async () => {
         const client = createClient();
         mockGetExistingRule('rule-id-wf-enable-noop');
 
         await client.enableRule({ id: 'rule-id-wf-enable-noop' });
 
-        // Enabling an already-enabled rule does not touch the SO, re-ensure the
-        // task, or emit a lifecycle event (mirrors bulkEnableRules).
-        expect(rulesSavedObjectService.update).not.toHaveBeenCalled();
-        expect(ensureRuleExecutorTaskScheduledMock).not.toHaveBeenCalled();
-        expect(ruleEventPublisher.emitRuleEnabled).not.toHaveBeenCalled();
+        expect(rulesSavedObjectService.update).toHaveBeenCalled();
+        expect(ensureRuleExecutorTaskScheduledMock).toHaveBeenCalled();
+        expect(ruleEventPublisher.emitRuleEnabled).toHaveBeenCalledWith(request, [
+          expect.objectContaining({ ruleId: 'rule-id-wf-enable-noop', spaceId: 'space-1' }),
+        ]);
       });
     });
 
@@ -2138,17 +2138,17 @@ describe('RulesClient', () => {
         ]);
       });
 
-      it('is a no-op when the rule is already disabled', async () => {
+      it('re-writes the SO, removes the task, and still emits ruleDisabled when already disabled (self-heal)', async () => {
         const client = createClient();
         mockGetExistingRule('rule-id-wf-5', { ...workflowSoAttrs, enabled: false });
 
         await client.disableRule({ id: 'rule-id-wf-5' });
 
-        // Disabling an already-disabled rule does not touch the SO, remove the
-        // task, or emit a lifecycle event (mirrors bulkDisableRules).
-        expect(rulesSavedObjectService.update).not.toHaveBeenCalled();
-        expect(taskManager.removeIfExists).not.toHaveBeenCalled();
-        expect(ruleEventPublisher.emitRuleDisabled).not.toHaveBeenCalled();
+        expect(rulesSavedObjectService.update).toHaveBeenCalled();
+        expect(taskManager.removeIfExists).toHaveBeenCalled();
+        expect(ruleEventPublisher.emitRuleDisabled).toHaveBeenCalledWith(request, [
+          expect.objectContaining({ ruleId: 'rule-id-wf-5', spaceId: 'space-1' }),
+        ]);
       });
     });
 
