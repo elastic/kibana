@@ -560,7 +560,9 @@ export class SettingsPageObject extends FtrService {
       const flyOut = await this.testSubjects.exists('createAnyway');
       if (flyOut) {
         await this.testSubjects.click('createAnyway');
-      } else {
+      } else if (!(await this.testSubjects.exists('indexPatternEditorFlyout'))) {
+        // On a retry the flyout may already be open; re-clicking the list-page
+        // button here would be intercepted by the flyout's success callout.
         await this.clickAddNewIndexPatternButton();
       }
 
