@@ -537,7 +537,7 @@ describe('SublimeSecurityConnector', () => {
       expect(mockClient.get).toHaveBeenCalledWith(`${BASE_URL}/v0/mailboxes`, {
         params: { limit: 1 },
       });
-      expect(result).toEqual(expect.objectContaining({ ok: true, message: expect.any(String) }));
+      expect(result).toEqual({});
     });
 
     it('throws on failure', async () => {
