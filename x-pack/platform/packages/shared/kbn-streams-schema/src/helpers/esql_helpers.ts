@@ -486,36 +486,46 @@ function containsFunction(node: WalkerAstNode, fnName: string): boolean {
   return found;
 }
 
-function checkIsNotNullDenominator(
+/**
+ * For rate STATS (`*` + `/`), every COUNT in the STATS clause should carry a
+ * per-aggregation WHERE. Accept any condition (`IS NOT NULL`, `IN (...)`,
+ * equality) — the system prompt uses all three. Warn only when at least one
+ * COUNT is bare (`total = COUNT(*)` with no WHERE).
+ */
+function checkFilteredDenominator(
   statsCmd: ESQLCommand,
   commandsFromStats: ESQLCommand[],
   hints: string[]
 ): void {
   if (!hasRateComputation(commandsFromStats)) return;
 
-  let hasFilteredDenominator = false;
-  walk(statsCmd.args, {
-    visitFunction: (node) => {
-      if (node.name !== 'where' || node.subtype !== 'binary-expression') return;
-      const [aggSide, conditionSide] = node.args;
-      if (!aggSide) return;
-      if (!containsFunction(aggSide, 'count')) return;
+  let hasCount = false;
+  let hasUnfilteredCount = false;
 
-      if (!conditionSide || Array.isArray(conditionSide)) return;
-      if (
-        'type' in conditionSide &&
-        conditionSide.type === 'function' &&
-        (conditionSide as ESQLFunction).name === 'is not null'
-      ) {
-        hasFilteredDenominator = true;
+  for (const arg of statsCmd.args) {
+    if (Array.isArray(arg) || arg.type === 'option') continue;
+    if (arg.type !== 'function') continue;
+
+    // `alias = COUNT(*) WHERE <condition>` — any condition counts as filtered.
+    if (arg.name === 'where' && arg.subtype === 'binary-expression') {
+      const [aggSide] = arg.args;
+      if (aggSide && !Array.isArray(aggSide) && containsFunction(aggSide, 'count')) {
+        hasCount = true;
       }
-    },
-  });
+      continue;
+    }
 
-  if (hasFilteredDenominator) return;
+    // Bare `alias = COUNT(*)` (or unaliased COUNT) — unfiltered denominator risk.
+    if ((arg.name === '=' || arg.name === 'count') && containsFunction(arg, 'count')) {
+      hasCount = true;
+      hasUnfilteredCount = true;
+    }
+  }
+
+  if (!hasCount || !hasUnfilteredCount) return;
 
   hints.push(
-    'Note: The denominator appears to use unfiltered COUNT(*). In mixed streams, consider filtering with WHERE <field> IS NOT NULL to exclude rows without the target field.'
+    'Note: The denominator appears to use unfiltered COUNT(*). In mixed streams, filter it with WHERE <field> IS NOT NULL, IN (...), or an equality so rows without the target field are excluded.'
   );
 }
 
@@ -595,7 +605,7 @@ export function getStatsQueryHints(esql: string): string[] {
     );
   }
 
-  checkIsNotNullDenominator(statsCmd, commandsFromStats, hints);
+  checkFilteredDenominator(statsCmd, commandsFromStats, hints);
 
   const byArgs = findStatsByArgs(esql);
   if (byArgs) {

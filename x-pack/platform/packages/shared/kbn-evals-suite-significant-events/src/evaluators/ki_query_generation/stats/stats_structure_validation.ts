@@ -27,7 +27,7 @@ interface StatsQueryDetail {
  * - Bucket column is named `bucket` with a 1-minute interval
  * - Emits a final column named exactly `metric_value`
  * - No post-STATS `WHERE` that drops buckets (thresholds / sample floors)
- * - Denominator is filtered (`IS NOT NULL` for mixed streams)
+ * - Denominator is filtered (`IS NOT NULL`, `IN (...)`, or equality)
  * - No forbidden commands after STATS (`SORT`, `LIMIT`)
  * - No non-temporal GROUP BY dimensions (v0: time bucket only)
  *
@@ -55,7 +55,7 @@ export const statsStructureValidationEvaluator: KIQueryGenerationEvaluator = {
         hints.some((h) => h.includes('1-minute')),
         hints.some((h) => h.includes('metric_value')),
         hints.some((h) => h.includes('Avoid WHERE after STATS')),
-        hints.some((h) => h.includes('IS NOT NULL')),
+        hints.some((h) => h.includes('unfiltered COUNT')),
         hints.some((h) => h.includes('should not be used')),
         hints.some((h) => h.includes('GROUP BY')),
       ];

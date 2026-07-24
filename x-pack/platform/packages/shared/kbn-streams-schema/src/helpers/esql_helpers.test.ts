@@ -314,18 +314,29 @@ describe('getStatsQueryHints', () => {
     );
   });
 
-  it('notes missing IS NOT NULL on unfiltered total denominator', () => {
+  it('notes unfiltered COUNT(*) denominators in rate queries', () => {
     const hints = getStatsQueryHints(
       'FROM logs | STATS errors = COUNT(*) WHERE log.level == "ERROR", total = COUNT(*) BY bucket = BUCKET(@timestamp, 1 minute) | EVAL metric_value = CASE(total > 0, errors * 100.0 / total, 0) | KEEP bucket, metric_value'
     );
-    expect(hints).toEqual(expect.arrayContaining([expect.stringContaining('IS NOT NULL')]));
+    expect(hints).toEqual(expect.arrayContaining([expect.stringContaining('unfiltered COUNT(*)')]));
   });
 
-  it('does not note IS NOT NULL when denominator already filters', () => {
+  it('does not note unfiltered COUNT when denominator uses IS NOT NULL', () => {
     const hints = getStatsQueryHints(
       'FROM logs | STATS errors = COUNT(*) WHERE log.level == "ERROR", total = COUNT(*) WHERE log.level IS NOT NULL BY bucket = BUCKET(@timestamp, 1 minute) | EVAL metric_value = CASE(total > 0, errors * 100.0 / total, 0) | KEEP bucket, metric_value'
     );
-    expect(hints).not.toEqual(expect.arrayContaining([expect.stringContaining('IS NOT NULL')]));
+    expect(hints).not.toEqual(
+      expect.arrayContaining([expect.stringContaining('unfiltered COUNT(*)')])
+    );
+  });
+
+  it('does not note unfiltered COUNT when denominator uses IN (auth-rate shape)', () => {
+    const hints = getStatsQueryHints(
+      'FROM logs | STATS failures = COUNT(*) WHERE event.outcome == "failure", attempts = COUNT(*) WHERE event.outcome IN ("success", "failure") BY bucket = BUCKET(@timestamp, 1 minute) | EVAL metric_value = CASE(attempts > 0, failures * 100.0 / attempts, 0) | KEEP bucket, metric_value'
+    );
+    expect(hints).not.toEqual(
+      expect.arrayContaining([expect.stringContaining('unfiltered COUNT(*)')])
+    );
   });
 });
 
