@@ -255,8 +255,9 @@ Only write scenarios for things confirmed by the issue, linked docs, or Figma de
 **Immediately before writing the first scenario** — not before — read both reference files sequentially:
 - `references/optional-scenarios.md` — Gherkin rules, tags, priority levels, optional section templates, and formatting rules
 - `references/output-formats.md` — scenario structure, automation coverage format, and Gherkin self-review checklist
+- `references/critical-workflows.md` — team-owned critical-workflows registry consulted from the Priority levels section
 
-For each scenario, cross-reference the test coverage catalog from Step 1 and write it using the format defined in `references/output-formats.md`. Write scenarios in priority order within each feature area: P0 first, then P1, then P2. After writing all scenarios, populate the Test Execution Notes section by listing every scenario by name under its priority level.
+For each scenario, cross-reference the test coverage catalog from Step 1 and write it using the format defined in `references/output-formats.md`. Write scenarios in priority order within each feature area: P0 first, then P1, then P2. Priority is assigned per [`references/optional-scenarios.md`](references/optional-scenarios.md#priority-levels), which consults the owning team's [`references/critical-workflows.md`](references/critical-workflows.md) map when one is registered. After writing all scenarios, populate the Test Execution Notes section by listing every scenario by name under its priority level.
 
 ### Saving the draft
 
