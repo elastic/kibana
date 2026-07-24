@@ -7,10 +7,8 @@
 
 import type { HttpHandler } from '@kbn/core/public';
 import type { ToolingLog } from '@kbn/tooling-log';
-// This is eval-harness code (never shipped to the product runtime). The optional
-// capture side-channel writes the verbatim model answer + steps to a local,
-// gitignored JSONL so agent_eval_full.html can render the real response body
-// (the golden `.evaluation-scores` export only stores judge output).
+// Eval-harness capture side-channel: writes the verbatim model answer to a
+// local gitignored JSONL that feeds agent_eval_full.html.
 // eslint-disable-next-line @kbn/eslint/require_kbn_fs, import/no-nodejs-modules
 import { appendFileSync } from 'fs';
 import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
@@ -75,12 +73,7 @@ export class PersonaMatrixChatClient {
         traceId: resp.trace_id ?? null,
       };
 
-      // Optional side-channel capture: when PERSONA_MATRIX_CAPTURE points at a
-      // file path, append the verbatim model answer + steps for each converse
-      // call. This is what feeds the rich `response_message` / step-trace fields
-      // in agent_eval_full.html (the golden `.evaluation-scores` export only
-      // stores judge output, not the model's own answer). Opt-in + gitignored
-      // output → CI-safe.
+      // Capture the verbatim answer when PERSONA_MATRIX_CAPTURE is set.
       const capturePath = process.env.PERSONA_MATRIX_CAPTURE;
       if (capturePath) {
         try {
