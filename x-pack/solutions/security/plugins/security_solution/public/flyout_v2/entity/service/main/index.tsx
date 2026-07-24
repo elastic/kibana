@@ -212,6 +212,7 @@ export const Service: FC<ServiceProps> = memo(function Service({
             entityId: entityStoreEntityId,
             onShowEntity: onShowService,
             title: serviceName,
+            subTab: path.subTab as RiskScoreLeftPanelSubTab | undefined,
             origin:
               path.subTab === RiskScoreLeftPanelSubTab.RESOLUTION
                 ? FLYOUT_ORIGIN.RISK_SUMMARY_RESOLUTION
@@ -314,6 +315,7 @@ export const Service: FC<ServiceProps> = memo(function Service({
             isPreviewMode={false}
             entityStoreEntityId={entityStoreEntityId}
             onShowEntity={onShowRelatedEntityFromResolution}
+            riskScoreQueryId={SERVICE_PANEL_RISK_SCORE_QUERY_ID}
           />
         )}
       </FlyoutBody>
