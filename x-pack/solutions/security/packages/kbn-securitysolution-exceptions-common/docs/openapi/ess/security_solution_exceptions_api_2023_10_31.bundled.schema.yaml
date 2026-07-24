@@ -855,14 +855,14 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              byListIds:
+                value:
+                  list_ids:
+                    - simple_list_1
+                    - simple_list_2
+                  namespace_type: single
             schema:
-              examples:
-                byListIds:
-                  value:
-                    list_ids:
-                      - simple_list_1
-                      - simple_list_2
-                    namespace_type: single
               oneOf:
                 - additionalProperties: false
                   type: object
