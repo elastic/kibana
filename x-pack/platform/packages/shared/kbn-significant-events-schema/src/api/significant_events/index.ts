@@ -18,7 +18,6 @@ import {
   MAX_TEXT_LENGTH,
   MAX_TITLE_LENGTH,
 } from '../../significant_events/constants';
-import type { Discovery } from '../../significant_events/discoveries';
 import type { ChangePointType } from '../../significant_events/detections';
 import type { SignificantEvent } from '../../significant_events/events';
 
@@ -90,7 +89,6 @@ interface LifecycleDetection {
 
 interface EventLifecycleResponse {
   detections: LifecycleDetection[];
-  discoveries: Discovery[];
   events: SignificantEvent[];
 }
 

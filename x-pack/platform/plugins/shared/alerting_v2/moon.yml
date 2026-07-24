@@ -130,6 +130,9 @@ dependsOn:
   - '@kbn/es-types'
   - '@kbn/app-header'
   - '@kbn/core-chrome-browser-context-mocks'
+  - '@kbn/content-list'
+  - '@kbn/content-list-provider'
+  - '@kbn/content-list-toolbar'
 tags:
   - plugin
   - prod

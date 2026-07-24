@@ -8,6 +8,7 @@
  */
 
 import type { ScoutPage } from '..';
+import { SavedObjectSaveModal } from './saved_object_save_modal';
 
 // Increased timeout because new map container is not always loaded within default one
 const DEFAULT_MAP_LOADING_TIMEOUT = 20_000;
@@ -20,10 +21,10 @@ export class MapsPage {
   public readonly addLayerButton;
   public readonly layerAddForm;
   public readonly importFileButton;
-  public readonly savedObjectTitleInput;
   public readonly returnToOriginSwitch;
-  public readonly confirmSaveButton;
   public readonly documentsItem;
+  /** Save modal locators/actions, shared with other apps (e.g. Visualize) via `SavedObjectSaveModal`. */
+  public readonly saveModal: SavedObjectSaveModal;
 
   constructor(private readonly page: ScoutPage) {
     this.mapContainer = this.page.locator('#maps-plugin');
@@ -35,10 +36,9 @@ export class MapsPage {
     this.addLayerButton = this.page.testSubj.locator('addLayerButton');
     this.layerAddForm = this.page.testSubj.locator('layerAddForm');
     this.importFileButton = this.page.testSubj.locator('importFileButton');
-    this.savedObjectTitleInput = this.page.testSubj.locator('savedObjectTitle');
     this.returnToOriginSwitch = this.page.testSubj.locator('returnToOriginModeSwitch');
-    this.confirmSaveButton = this.page.testSubj.locator('confirmSaveSavedObjectButton');
     this.documentsItem = this.page.testSubj.locator('documents');
+    this.saveModal = new SavedObjectSaveModal(this.page);
   }
 
   async gotoNewMap() {
@@ -67,15 +67,14 @@ export class MapsPage {
   }
 
   async saveFromModal(title: string, { redirectToOrigin = true }: { redirectToOrigin?: boolean }) {
-    await this.savedObjectTitleInput.fill(title);
+    await this.saveModal.fillTitle(title);
     if (await this.returnToOriginSwitch.isVisible()) {
       const isChecked = (await this.returnToOriginSwitch.getAttribute('aria-checked')) === 'true';
       if (isChecked !== redirectToOrigin) {
         await this.returnToOriginSwitch.click();
       }
     }
-    await this.confirmSaveButton.click();
-    await this.confirmSaveButton.waitFor({ state: 'hidden' });
+    await this.saveModal.confirm();
   }
 
   getLayerToggleButton(displayName: string) {

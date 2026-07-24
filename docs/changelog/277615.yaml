@@ -1,0 +1,12 @@
+prs:
+- https://github.com/elastic/kibana/pull/277615
+issues:
+- https://github.com/elastic/rna-program/issues/684
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-07-21
+- product: kibana
+  target: 9.6.0
+title: "Fix query sandbox rejecting ES|QL data federation datasets"
+description: "Query sandbox ES|QL autocomplete and validation now resolve data federation datasets and views instead of reporting them as unknown data sources."
