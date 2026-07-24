@@ -228,9 +228,9 @@ describe('templates client', () => {
 
       const subClient = createTemplatesSubClient(clientArgs);
 
-      await expect(
-        subClient.deleteTemplate('requested-id')
-      ).rejects.toThrow('Template with id requested-id not found');
+      await expect(subClient.deleteTemplate('requested-id')).rejects.toThrow(
+        'Template with id requested-id not found'
+      );
     });
 
     it('updateTemplate requires manage rights on the TARGET owner when the owner changes', async () => {
