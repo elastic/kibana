@@ -47,8 +47,7 @@ describe('GraphQLConnector', () => {
       expect(GraphQLConnector.metadata.isTechnicalPreview).toBe(true);
     });
 
-    it('supports workflows and agentBuilder', () => {
-      expect(GraphQLConnector.metadata.supportedFeatureIds).toContain('workflows');
+    it('supports agentBuilder', () => {
       expect(GraphQLConnector.metadata.supportedFeatureIds).toContain('agentBuilder');
     });
   });
