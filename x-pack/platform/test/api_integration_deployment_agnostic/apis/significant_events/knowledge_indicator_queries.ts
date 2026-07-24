@@ -315,7 +315,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         const updatedRules = await alertingApi.searchRulesV2(roleAuthc);
         expect(updatedRules.body.items).to.have.length(1);
-        expect(updatedRules.body.items[0].metadata.name).to.eql(matchCountRuleName('updated title'));
+        expect(updatedRules.body.items[0].metadata.name).to.eql(
+          matchCountRuleName('updated title')
+        );
         expect(updatedRules.body.items[0].id).to.eql(initialRules.body.items[0].id);
       });
     });
