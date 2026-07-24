@@ -54,7 +54,7 @@ The full report always lives at `$SESSION_DIR/report.md` (written in full in Ste
 
 Open the chat response with a single bold headline — this is the first thing the user sees:
 
-- If all flows have status `completed` or `timed out` (none are `not started`, `cap reached`, or `session lost`):
+- If all flows have status `completed` or `timed out` (none are `not started`, `cap reached`, `session lost`, or `blocked`):
   ```
   **Session complete · <N> confirmed bugs (L1) · <Xh Ym> · <resolved session_dir>/report.md**
   ```
