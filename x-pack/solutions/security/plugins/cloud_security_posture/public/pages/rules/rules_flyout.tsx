@@ -204,7 +204,10 @@ const ruleState = (rule: CspBenchmarkRulesWithStates, switchRuleStates: () => Pr
             checked={rule?.state !== 'muted'}
             onChange={switchRuleStates}
             data-test-subj={RULES_FLYOUT_SWITCH_BUTTON}
-            label=" "
+            label={i18n.translate('xpack.csp.rules.flyout.enabledSwitchLabel', {
+              defaultMessage: 'Enabled',
+            })}
+            showLabel={false}
           />
         </>
       ),
