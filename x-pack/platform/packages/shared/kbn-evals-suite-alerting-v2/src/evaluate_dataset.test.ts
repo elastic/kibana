@@ -10,11 +10,7 @@ import type { PromptRequest } from '@kbn/agent-builder-common/agents';
 import type { Conversation, ConversationRound } from '@kbn/agent-builder-common';
 import type { TaskOutput } from '@kbn/evals';
 import type { ConverseResult, RuleManagementChatClient } from './chat_client';
-import {
-  buildPromptResponses,
-  collectScoredCriteria,
-  createTask,
-} from './evaluate_dataset';
+import { buildPromptResponses, collectScoredCriteria, createTask } from './evaluate_dataset';
 
 const askUserQuestion = (id: string, questionCount = 1): PromptRequest =>
   ({
@@ -100,9 +96,7 @@ describe('collectScoredCriteria', () => {
   });
 
   it('filters blank criteria strings', () => {
-    expect(collectScoredCriteria({ criteria: ['loads skill', '  ', ''] })).toEqual([
-      'loads skill',
-    ]);
+    expect(collectScoredCriteria({ criteria: ['loads skill', '  ', ''] })).toEqual(['loads skill']);
   });
 
   it('returns null when criteria is omitted so the evaluator can skip', () => {
@@ -122,9 +116,9 @@ describe('collectScoredCriteria', () => {
   });
 
   it('throws when criteria is present but not an array', () => {
-    expect(() =>
-      collectScoredCriteria({ criteria: 'loads skill' as unknown as string[] })
-    ).toThrow(/criteria must be an array/i);
+    expect(() => collectScoredCriteria({ criteria: 'loads skill' as unknown as string[] })).toThrow(
+      /criteria must be an array/i
+    );
   });
 });
 
@@ -306,7 +300,9 @@ describe('createTask', () => {
       getConversation,
     });
 
-    await expect(runTask(client, { turns: ['create a rule'] })).rejects.toThrow('conversation gone');
+    await expect(runTask(client, { turns: ['create a rule'] })).rejects.toThrow(
+      'conversation gone'
+    );
     expect(getConversation).toHaveBeenCalledWith('conv-xyz');
   });
 

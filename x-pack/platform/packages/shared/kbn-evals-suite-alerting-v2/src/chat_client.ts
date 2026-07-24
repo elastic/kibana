@@ -34,7 +34,7 @@ export interface ConverseResult {
   /**
    * Structured prompts the agent asked the user to answer (e.g. `ask_user_question`
    * or `confirmation`).
-    */
+   */
   prompts: PromptRequest[];
 }
 

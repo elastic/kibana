@@ -13,7 +13,11 @@ import {
   createExpectedRenderAttachmentEvaluator,
 } from './expected_attachment';
 
-const attachment = (id: string, type: string, data: Record<string, unknown> = {}): VersionedAttachment =>
+const attachment = (
+  id: string,
+  type: string,
+  data: Record<string, unknown> = {}
+): VersionedAttachment =>
   ({
     id,
     type,

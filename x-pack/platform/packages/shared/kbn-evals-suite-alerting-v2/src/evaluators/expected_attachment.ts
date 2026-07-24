@@ -109,7 +109,9 @@ export const createExpectedRenderAttachmentEvaluator = (): Evaluator<
     }
 
     const assistantMessages = getAssistantMessages(output);
-    const matchedRefs = assistantMessages.flatMap((message) => parseAllRenderAttachmentRefs(message));
+    const matchedRefs = assistantMessages.flatMap((message) =>
+      parseAllRenderAttachmentRefs(message)
+    );
     const attachments = getAttachments(output);
     const renderedTypes = getRenderedAttachmentTypes(matchedRefs, attachments);
     const missingTypes = requiredTypes.filter((type) => !renderedTypes.includes(type));

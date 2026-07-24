@@ -28,4 +28,3 @@ export const INDEX_DISCOVERY_TOOL_IDS = [
   platformCoreTools.indexExplorer,
   platformCoreTools.listIndices,
 ] as const;
-
