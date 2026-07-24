@@ -126,7 +126,7 @@ test.describe(
       await pageObjects.datePicker.setAbsoluteRange(dataQualityTimeRange);
 
       // Go to Streams main page
-      await pageObjects.streams.clickStreamsBreadcrumb();
+      await pageObjects.streams.backToStreamsMainPage();
       await pageObjects.streams.verifyDatePickerTimeRange(dataQualityTimeRange);
     });
 
@@ -195,7 +195,7 @@ test.describe(
       await pageObjects.streams.verifyDatePickerTimeRange(timeRange);
 
       // Verify on Main page
-      await pageObjects.streams.clickStreamsBreadcrumb();
+      await pageObjects.streams.backToStreamsMainPage();
       await pageObjects.streams.verifyDatePickerTimeRange(timeRange);
 
       // Navigate to a different stream and verify time persists
