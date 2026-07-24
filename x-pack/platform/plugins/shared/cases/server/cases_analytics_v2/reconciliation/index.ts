@@ -96,7 +96,7 @@ export function registerReconciliationTask({
       // twice. With `maxAttempts: 1`, recovery happens cleanly on the
       // next interval-driven run.
       maxAttempts: 1,
-      createTaskRunner: ({ taskInstance, abortController }) => ({
+      createTaskRunner: ({ taskInstance, signal }) => ({
         run: async () => {
           const previousState = (taskInstance.state ?? {}) as ReconciliationTaskState;
           const casesLastRunAt = clampCursorToNotFuture(previousState.cases_last_run_at, logger);
@@ -121,7 +121,7 @@ export function registerReconciliationTask({
 
           const deps = await getRunnerDeps();
 
-          // Cooperative cancellation. Task Manager aborts this controller
+          // Cooperative cancellation. Task Manager aborts this signal
           // on timeout or shutdown; it never reads the signal itself, so
           // it's on us to observe it. The three surface walks are
           // independent and each pins its own cursor when it doesn't
@@ -130,7 +130,6 @@ export function registerReconciliationTask({
           // whatever progress the completed surfaces made. A cancelled
           // surface leaves its cursor pinned, so the next tick re-walks
           // its window naturally.
-          const { signal } = abortController;
 
           // Cases first (the dimension table). A `LOOKUP JOIN .cases
           // ON case.id` from any post-fact-table walk consumer then

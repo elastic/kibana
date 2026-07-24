@@ -192,7 +192,7 @@ export function registerResetTask({
       // is the opposite of what a failure (often caused by ES pressure)
       // calls for.
       maxAttempts: 1,
-      createTaskRunner: ({ abortController }) => ({
+      createTaskRunner: ({ signal }) => ({
         run: async () => {
           // Throws on total failure, returns on success or partial
           // success. Task Manager auto-deletes one-shot tasks (no
@@ -272,10 +272,10 @@ export function registerResetTask({
               taskManager: deps.taskManager,
               intervalMinutes: reconciliationIntervalMinutes,
               pageDelayMs,
-              // Task Manager aborts this controller on timeout / shutdown;
+              // Task Manager aborts this signal on timeout / shutdown;
               // threaded into each surface walk so a cancelled reset bails
               // at the next page boundary instead of running to completion.
-              signal: abortController.signal,
+              signal,
               logger,
               onProgress: ({ phase, processed }) => {
                 // The three surfaces walk concurrently, so `phase` here is

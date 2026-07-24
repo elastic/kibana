@@ -51,7 +51,7 @@ const successResult = (): RunFullResetResult =>
  */
 const setupRunner = (
   tmStart: TaskManagerStartContract,
-  abortController = new AbortController()
+  signal = new AbortController().signal
 ) => {
   const taskManager = taskManagerMock.createSetup() as unknown as TaskManagerSetupContract;
   const logger = loggerMock.create();
@@ -76,12 +76,12 @@ const setupRunner = (
     .registerTaskDefinitions;
   const definitions = registerFn.mock.calls[0][0];
   const definition = definitions[RESET_TASK_TYPE];
-  // Task Manager passes a `{ taskInstance, abortController }` context to
-  // `createTaskRunner`; the reset runner reads `abortController.signal`.
-  const run = definition.createTaskRunner({ taskInstance: { state: {} }, abortController })
+  // Task Manager passes a `{ taskInstance, signal }` context to
+  // `createTaskRunner`; the reset runner reads the `signal` directly.
+  const run = definition.createTaskRunner({ taskInstance: { state: {} }, signal })
     .run as () => Promise<{ state: unknown }>;
 
-  return { run, definition, logger, definitions, abortController };
+  return { run, definition, logger, definitions, signal };
 };
 
 describe('reset_task', () => {
@@ -137,17 +137,15 @@ describe('reset_task', () => {
 
     it("threads Task Manager's abort signal into runFullReset for cooperative cancellation", async () => {
       const tmStart = taskManagerMock.createStart();
-      const abortController = new AbortController();
+      const { signal } = new AbortController();
       mockRunFullReset.mockResolvedValue(successResult());
 
-      const { run } = setupRunner(tmStart, abortController);
+      const { run } = setupRunner(tmStart, signal);
       await run();
 
       // The runner must forward the task's abort signal so an in-flight
       // reset bails at the next page boundary on timeout / shutdown.
-      expect(mockRunFullReset).toHaveBeenCalledWith(
-        expect.objectContaining({ signal: abortController.signal })
-      );
+      expect(mockRunFullReset).toHaveBeenCalledWith(expect.objectContaining({ signal }));
     });
 
     it('routes per-surface onProgress counts to the matching *_processed slot', async () => {
