@@ -16,8 +16,8 @@ import type {
   VersionedRouteResponseValidation,
   VersionedRouteValidation,
 } from '@kbn/core-http-server';
+import { onceCacheOnSuccess } from '@kbn/std';
 import { validRouteSecurity } from '../security_route_config_validator';
-import { onceCacheOnSuccess } from '../util';
 
 export function isCustomValidation(
   v: VersionedRouteCustomResponseBodyValidation | VersionedResponseBodyValidation

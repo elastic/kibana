@@ -28,6 +28,7 @@ import type { Logger } from '@kbn/logging';
 import type { DeepPartial } from '@kbn/utility-types';
 import type { Request } from '@hapi/hapi';
 import type { Mutable } from 'utility-types';
+import { onceCacheOnSuccess } from '@kbn/std';
 import type { InternalRouterRoute, RequestHandlerEnhanced, Router } from './router';
 import { CoreKibanaRequest } from './request';
 import { RouteValidator } from './validator';
@@ -40,7 +41,6 @@ import {
   getRouteFullPath,
   validOptions,
   prepareRouteConfigValidation,
-  onceCacheOnSuccess,
 } from './util';
 import { validRouteSecurity } from './security_route_config_validator';
 

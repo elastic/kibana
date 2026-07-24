@@ -9,7 +9,7 @@
 
 import { schema } from '@kbn/config-schema';
 import type { RouteValidator } from '@kbn/core-http-server';
-import { injectResponseHeaders, prepareResponseValidation, onceCacheOnSuccess } from './util';
+import { injectResponseHeaders, prepareResponseValidation } from './util';
 import { kibanaResponseFactory } from './response';
 
 describe('prepareResponseValidation', () => {
@@ -62,102 +62,5 @@ describe('injectResponseHeaders', () => {
       kibanaResponseFactory.ok({ headers: { foo: 'true', bar: 'false' } })
     );
     expect(result.options.headers).toEqual({ foo: 'false', bar: 'false', baz: 'true' });
-  });
-});
-
-describe('onceCacheOnSuccess', () => {
-  it('calls the factory once and caches the result on success', () => {
-    const factory = jest.fn(() => ({ value: 'success' }));
-    const memoized = onceCacheOnSuccess(factory);
-
-    const result1 = memoized();
-    const result2 = memoized();
-    const result3 = memoized();
-
-    expect(factory).toHaveBeenCalledTimes(1);
-    expect(result1).toEqual({ value: 'success' });
-    expect(result2).toEqual({ value: 'success' });
-    expect(result3).toEqual({ value: 'success' });
-    expect(result1).toBe(result2);
-    expect(result2).toBe(result3);
-  });
-
-  it('retries on failure instead of caching undefined', () => {
-    let attemptCount = 0;
-    const factory = jest.fn(() => {
-      attemptCount++;
-      if (attemptCount < 3) {
-        throw new Error(`Attempt ${attemptCount} failed`);
-      }
-      return { value: 'success' };
-    });
-
-    const memoized = onceCacheOnSuccess(factory);
-
-    // First two calls throw
-    expect(() => memoized()).toThrow('Attempt 1 failed');
-    expect(() => memoized()).toThrow('Attempt 2 failed');
-
-    // Third call succeeds
-    const result = memoized();
-    expect(result).toEqual({ value: 'success' });
-
-    // Fourth call returns cached result
-    const cachedResult = memoized();
-    expect(cachedResult).toEqual({ value: 'success' });
-    expect(cachedResult).toBe(result);
-
-    // Factory was called 3 times (not more)
-    expect(factory).toHaveBeenCalledTimes(3);
-  });
-
-  it('handles primitive values correctly', () => {
-    const factory = jest.fn(() => 42);
-    const memoized = onceCacheOnSuccess(factory);
-
-    const result1 = memoized();
-    const result2 = memoized();
-
-    expect(result1).toBe(42);
-    expect(result2).toBe(42);
-    expect(factory).toHaveBeenCalledTimes(1);
-  });
-
-  it('handles null as a successful result', () => {
-    const factory = jest.fn(() => null);
-    const memoized = onceCacheOnSuccess(factory);
-
-    const result1 = memoized();
-    const result2 = memoized();
-
-    expect(result1).toBeNull();
-    expect(result2).toBeNull();
-    expect(factory).toHaveBeenCalledTimes(1);
-  });
-
-  it('handles falsy values as successful results', () => {
-    const factory = jest.fn(() => false);
-    const memoized = onceCacheOnSuccess(factory);
-
-    const result1 = memoized();
-    const result2 = memoized();
-
-    expect(result1).toBe(false);
-    expect(result2).toBe(false);
-    expect(factory).toHaveBeenCalledTimes(1);
-  });
-
-  it('consistently retries when factory always throws', () => {
-    const factory = jest.fn(() => {
-      throw new Error('Always fails');
-    });
-
-    const memoized = onceCacheOnSuccess(factory);
-
-    for (let i = 0; i < 5; i++) {
-      expect(() => memoized()).toThrow('Always fails');
-    }
-
-    expect(factory).toHaveBeenCalledTimes(5);
   });
 });
