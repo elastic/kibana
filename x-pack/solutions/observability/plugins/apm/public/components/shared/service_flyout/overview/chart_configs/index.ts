@@ -10,20 +10,28 @@ import type { APMIndices } from '@kbn/apm-sources-access-plugin/common/config_sc
 import type { ServiceFlyoutIngestionType } from '../../service_flyout_context';
 import type { LatencyAggregationType } from '../../../../../../common/latency_aggregation_types';
 import {
+  APM_ERROR_RATE_TITLE,
+  buildApmErrorRateQuery,
+  buildApmLatencyQuery,
+  buildApmThroughputQuery,
   getCpuUsageChart,
-  getFailedTransactionRateChart,
-  getLatencyChart,
   getMemoryUsageChart,
-  getThroughputChart,
 } from './apm';
 import {
-  getOtelFailedTransactionRateChart,
-  getOtelLatencyChart,
-  getOtelThroughputChart,
+  OTEL_ERROR_RATE_TITLE,
+  buildOtelErrorRateQuery,
+  buildOtelLatencyQuery,
+  buildOtelThroughputQuery,
 } from './otel';
+import {
+  getErrorRateChart,
+  getLatencyChart,
+  getLatencyChartType,
+  getThroughputChart,
+} from './shared';
 import type { FlyoutLensChartConfigDefinition, ServiceScope } from './shared';
 
-export { getLatencyChartType } from './shared';
+export { getLatencyChartType };
 
 export function getChartDefinitions({
   indices,
@@ -51,18 +59,31 @@ export function getChartDefinitions({
   const scope: ServiceScope = { serviceName, environment, transactionType };
   const metricScope: ServiceScope = { serviceName, environment };
   const isOtel = ingestionType === 'unprocessedOtel';
+  const indexes = isOtel ? otelIndexes : transactionIndexes;
 
   return {
     keyMetrics: [
-      isOtel
-        ? getOtelLatencyChart(otelIndexes, scope, latencyAggregationType, latencyTitleAction)
-        : getLatencyChart(transactionIndexes, scope, latencyAggregationType, latencyTitleAction),
-      isOtel
-        ? getOtelFailedTransactionRateChart(otelIndexes, scope)
-        : getFailedTransactionRateChart(transactionIndexes, scope),
-      isOtel
-        ? getOtelThroughputChart(otelIndexes, scope)
-        : getThroughputChart(transactionIndexes, scope),
+      getLatencyChart({
+        indexes,
+        latencyAggregationType,
+        titleAction: latencyTitleAction,
+        buildQuery: isOtel
+          ? (idx, agg) => buildOtelLatencyQuery(idx, scope, agg)
+          : (idx, agg) => buildApmLatencyQuery(idx, scope, agg),
+      }),
+      getErrorRateChart({
+        indexes,
+        title: isOtel ? OTEL_ERROR_RATE_TITLE : APM_ERROR_RATE_TITLE,
+        buildQuery: isOtel
+          ? (idx) => buildOtelErrorRateQuery(idx, scope)
+          : (idx) => buildApmErrorRateQuery(idx, scope),
+      }),
+      getThroughputChart({
+        indexes,
+        buildQuery: isOtel
+          ? (idx) => buildOtelThroughputQuery(idx, scope)
+          : (idx) => buildApmThroughputQuery(idx, scope),
+      }),
     ],
     infrastructureMetrics: [
       getCpuUsageChart(metricIndexes, metricScope),
