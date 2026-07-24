@@ -40,8 +40,7 @@ export const IngestStep = () => {
       onNext={() => navigate(`${ONBOARDING_PATH}/search${pathQuery(path)}`)}
     >
       <ApiStep
-        snippets={api.snippets}
-        consoleRequest={api.request}
+        tabs={api.tabs}
         consoleComment={api.consoleComment}
         docsPanel={docsPanel}
         pills={pills}
