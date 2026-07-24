@@ -182,6 +182,7 @@ dependsOn:
   - '@kbn/scout'
   - '@kbn/core-user-storage-server-internal'
   - '@kbn/core-user-storage-common'
+  - '@kbn/repo-packages'
 tags:
   - core
   - package
@@ -195,6 +196,7 @@ fileGroups:
     - types/**/*
     - test_helpers/**/*
     - test/scout/**/*
+    - test/scout_nav_deps/**/*
     - utils/**/*
     - index.ts
     - '!target/**/*'
