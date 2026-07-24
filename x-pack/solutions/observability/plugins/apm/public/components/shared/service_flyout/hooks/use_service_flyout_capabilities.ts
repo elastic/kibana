@@ -8,10 +8,7 @@
 import { useAbortableAsync } from '@kbn/react-hooks';
 import type { HttpStart } from '@kbn/core/public';
 import type { Environment } from '../../../../../common/environment_rt';
-import type {
-  ServiceFlyoutCapabilities,
-  ServiceFlyoutIngestionType,
-} from '../service_flyout_context';
+import type { ServiceFlyoutCapabilities, ServiceSchemaType } from '../service_flyout_context';
 
 interface Params {
   http: HttpStart;
@@ -21,16 +18,16 @@ interface Params {
   end: string;
 }
 
-const CAPABILITIES_BY_INGESTION_TYPE: Record<
-  ServiceFlyoutIngestionType,
+const CAPABILITIES_BY_SCHEMA: Record<
+  ServiceSchemaType,
   Pick<ServiceFlyoutCapabilities, 'header' | 'overview' | 'footer'>
 > = {
-  apm: {
+  ecs: {
     header: { serviceNameLink: true, badges: true },
     overview: { transactions: true, transactionTypeFilter: true, infraMetrics: true },
     footer: { alerts: true, slos: true },
   },
-  unprocessedOtel: {
+  otel: {
     header: { serviceNameLink: false, badges: false },
     overview: { transactions: false, transactionTypeFilter: false, infraMetrics: false },
     footer: { alerts: false, slos: false },
@@ -46,7 +43,7 @@ export function useServiceFlyoutCapabilities({
 }: Params): ServiceFlyoutCapabilities {
   const { value, loading, error } = useAbortableAsync(
     ({ signal }) =>
-      http.fetch<{ ingestionType: ServiceFlyoutIngestionType }>(
+      http.fetch<{ schema: ServiceSchemaType }>(
         `/internal/apm/services/${encodeURIComponent(serviceName)}/ingestion_type`,
         { query: { environment, start, end }, signal }
       ),
@@ -57,7 +54,7 @@ export function useServiceFlyoutCapabilities({
     return {
       loading,
       error,
-      ingestionType: undefined,
+      schema: undefined,
       header: undefined,
       overview: undefined,
       footer: undefined,
@@ -67,7 +64,7 @@ export function useServiceFlyoutCapabilities({
   return {
     loading: false,
     error: undefined,
-    ingestionType: value.ingestionType,
-    ...CAPABILITIES_BY_INGESTION_TYPE[value.ingestionType],
+    schema: value.schema,
+    ...CAPABILITIES_BY_SCHEMA[value.schema],
   };
 }

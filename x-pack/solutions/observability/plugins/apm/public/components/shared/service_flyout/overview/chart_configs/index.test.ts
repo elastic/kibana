@@ -27,7 +27,7 @@ function buildDefinitions(
 ): ReturnType<typeof getChartDefinitions> {
   return getChartDefinitions({
     indices: MOCK_INDICES,
-    ingestionType: 'apm',
+    schema: 'ecs',
     serviceName: 'opbeans-java',
     environment: 'production',
     transactionType: 'request',
@@ -59,7 +59,7 @@ describe('service flyout chart_configs', () => {
 
     it('returns the same chart IDs for OTel ingestion', () => {
       const { keyMetrics, infrastructureMetrics } = buildDefinitions({
-        ingestionType: 'unprocessedOtel',
+        schema: 'otel',
       });
 
       expect(keyMetrics.map((c) => c.id)).toEqual([
@@ -80,7 +80,7 @@ describe('service flyout chart_configs', () => {
     });
 
     it('combines transaction and span indexes for OTel key metrics', () => {
-      const { keyMetrics } = buildDefinitions({ ingestionType: 'unprocessedOtel' });
+      const { keyMetrics } = buildDefinitions({ schema: 'otel' });
 
       keyMetrics.forEach(({ config }) => {
         expect(config?.dataset.esql).toContain(`FROM ${TRANSACTION_INDEXES},${SPAN_INDEXES}`);
@@ -88,8 +88,8 @@ describe('service flyout chart_configs', () => {
     });
 
     it('scopes infrastructure charts to the metric index for both ingestion types', () => {
-      (['apm', 'unprocessedOtel'] as const).forEach((ingestionType) => {
-        const { infrastructureMetrics } = buildDefinitions({ ingestionType });
+      (['ecs', 'otel'] as const).forEach((schema) => {
+        const { infrastructureMetrics } = buildDefinitions({ schema });
 
         infrastructureMetrics.forEach(({ config }) => {
           expect(config?.dataset.esql).toContain(METRIC_INDEXES);
@@ -119,7 +119,7 @@ describe('service flyout chart_configs', () => {
     it('returns chart layout without config when indices are undefined (OTel)', () => {
       const { keyMetrics } = buildDefinitions({
         indices: undefined,
-        ingestionType: 'unprocessedOtel',
+        schema: 'otel',
       });
 
       keyMetrics.forEach((chart) => {
@@ -137,7 +137,7 @@ describe('service flyout chart_configs', () => {
 
     it('attaches the latency title action to the OTel latency chart only', () => {
       const { keyMetrics } = buildDefinitions({
-        ingestionType: 'unprocessedOtel',
+        schema: 'otel',
         latencyTitleAction: 'latency-action',
       });
 

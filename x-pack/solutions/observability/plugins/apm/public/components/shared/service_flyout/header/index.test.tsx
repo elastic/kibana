@@ -79,7 +79,7 @@ describe('ServiceFlyoutHeader', () => {
       capabilities: {
         loading: false,
         error: undefined,
-        ingestionType: 'apm' as const,
+        schema: 'ecs' as const,
         header: { serviceNameLink: true, badges: true },
         overview: { transactions: true, transactionTypeFilter: true, infraMetrics: true },
         footer: { alerts: true, slos: true },
@@ -131,7 +131,7 @@ describe('ServiceFlyoutHeader', () => {
       capabilities: {
         loading: false,
         error: undefined,
-        ingestionType: 'unprocessedOtel' as const,
+        schema: 'otel' as const,
         header: { serviceNameLink: false, badges: false },
         overview: { transactions: false, transactionTypeFilter: false, infraMetrics: false },
         footer: { alerts: false, slos: false },

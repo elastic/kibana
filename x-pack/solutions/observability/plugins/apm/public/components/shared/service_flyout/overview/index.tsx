@@ -140,7 +140,7 @@ export function ServiceFlyoutOverview() {
     () =>
       getChartDefinitions({
         indices,
-        ingestionType: capabilities.ingestionType,
+        schema: capabilities.schema,
         serviceName: service.name,
         environment,
         transactionType: transactionType ?? '',
@@ -153,7 +153,7 @@ export function ServiceFlyoutOverview() {
         ),
       }),
     [
-      capabilities.ingestionType,
+      capabilities.schema,
       environment,
       indices,
       latencyAggregationType,

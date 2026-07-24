@@ -7,7 +7,7 @@
 
 import type { ReactNode } from 'react';
 import type { APMIndices } from '@kbn/apm-sources-access-plugin/common/config_schema';
-import type { ServiceFlyoutIngestionType } from '../../service_flyout_context';
+import type { ServiceSchemaType } from '../../service_flyout_context';
 import type { LatencyAggregationType } from '../../../../../../common/latency_aggregation_types';
 import {
   APM_ERROR_RATE_TITLE,
@@ -29,13 +29,13 @@ import {
   getLatencyChartType,
   getThroughputChart,
 } from './shared';
-import type { FlyoutLensChartConfigDefinition, ServiceScope } from './shared';
+import type { EcsServiceScope, FlyoutLensChartConfigDefinition, ServiceScope } from './shared';
 
 export { getLatencyChartType };
 
 export function getChartDefinitions({
   indices,
-  ingestionType,
+  schema,
   serviceName,
   environment,
   transactionType,
@@ -43,7 +43,7 @@ export function getChartDefinitions({
   latencyTitleAction,
 }: {
   indices: APMIndices | undefined;
-  ingestionType: ServiceFlyoutIngestionType | undefined;
+  schema: ServiceSchemaType | undefined;
   serviceName: string;
   environment: string;
   transactionType: string;
@@ -56,9 +56,10 @@ export function getChartDefinitions({
   const transactionIndexes = indices?.transaction;
   const otelIndexes = [indices?.transaction, indices?.span].filter(Boolean).join(',') || undefined;
   const metricIndexes = indices?.metric;
-  const scope: ServiceScope = { serviceName, environment, transactionType };
+  const ecsScope: EcsServiceScope = { serviceName, environment, transactionType };
+  const otelScope: ServiceScope = { serviceName, environment };
   const metricScope: ServiceScope = { serviceName, environment };
-  const isOtel = ingestionType === 'unprocessedOtel';
+  const isOtel = schema === 'otel';
   const indexes = isOtel ? otelIndexes : transactionIndexes;
 
   return {
@@ -68,21 +69,21 @@ export function getChartDefinitions({
         latencyAggregationType,
         titleAction: latencyTitleAction,
         buildQuery: isOtel
-          ? (idx, agg) => buildOtelLatencyQuery(idx, scope, agg)
-          : (idx, agg) => buildApmLatencyQuery(idx, scope, agg),
+          ? (idx, agg) => buildOtelLatencyQuery(idx, otelScope, agg)
+          : (idx, agg) => buildApmLatencyQuery(idx, ecsScope, agg),
       }),
       getErrorRateChart({
         indexes,
         title: isOtel ? OTEL_ERROR_RATE_TITLE : APM_ERROR_RATE_TITLE,
         buildQuery: isOtel
-          ? (idx) => buildOtelErrorRateQuery(idx, scope)
-          : (idx) => buildApmErrorRateQuery(idx, scope),
+          ? (idx) => buildOtelErrorRateQuery(idx, otelScope)
+          : (idx) => buildApmErrorRateQuery(idx, ecsScope),
       }),
       getThroughputChart({
         indexes,
         buildQuery: isOtel
-          ? (idx) => buildOtelThroughputQuery(idx, scope)
-          : (idx) => buildApmThroughputQuery(idx, scope),
+          ? (idx) => buildOtelThroughputQuery(idx, otelScope)
+          : (idx) => buildApmThroughputQuery(idx, ecsScope),
       }),
     ],
     infrastructureMetrics: [

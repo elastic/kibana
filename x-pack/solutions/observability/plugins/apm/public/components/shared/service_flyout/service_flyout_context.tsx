@@ -14,12 +14,12 @@ import type { PluginSetupContract as AlertingPluginPublicSetup } from '@kbn/aler
 import type { Environment } from '../../../../common/environment_rt';
 import type { ServiceFlyoutService } from './types';
 
-export type ServiceFlyoutIngestionType = 'apm' | 'unprocessedOtel';
+export type ServiceSchemaType = 'ecs' | 'otel';
 
 export interface ServiceFlyoutCapabilities {
   loading: boolean;
   error: Error | undefined;
-  ingestionType: ServiceFlyoutIngestionType | undefined;
+  schema: ServiceSchemaType | undefined;
   header: { serviceNameLink: boolean; badges: boolean } | undefined;
   overview:
     | { transactions: boolean; transactionTypeFilter: boolean; infraMetrics: boolean }

@@ -29,6 +29,7 @@ import {
   seriesColor,
 } from './shared';
 import type {
+  EcsServiceScope,
   FlyoutLensChartConfigDefinition,
   FlyoutLensChartProcessorEvent,
   ServiceScope,
@@ -54,7 +55,7 @@ function createApmBaseQuery({
 
 export function buildApmLatencyQuery(
   indexes: string,
-  scope: ServiceScope,
+  scope: EcsServiceScope,
   aggregation: string
 ): ComposerQuery {
   const query = createApmBaseQuery({ indexes, processorEvent: 'transaction', scope });
@@ -63,13 +64,13 @@ export function buildApmLatencyQuery(
   return query;
 }
 
-export function buildApmThroughputQuery(indexes: string, scope: ServiceScope): ComposerQuery {
+export function buildApmThroughputQuery(indexes: string, scope: EcsServiceScope): ComposerQuery {
   const query = createApmBaseQuery({ indexes, processorEvent: 'transaction', scope });
   query.pipe(`STATS COUNT(*) BY ${TIME_BUCKET_BY}`);
   return query;
 }
 
-export function buildApmErrorRateQuery(indexes: string, scope: ServiceScope): ComposerQuery {
+export function buildApmErrorRateQuery(indexes: string, scope: EcsServiceScope): ComposerQuery {
   const query = createApmBaseQuery({ indexes, processorEvent: 'transaction', scope });
   query.pipe(
     `STATS failure = COUNT(*) WHERE TO_STRING(${EVENT_OUTCOME}) == "failure", all = COUNT(*) WHERE (TO_STRING(${EVENT_OUTCOME}) IN ("failure", "success")) BY ${TIME_BUCKET_BY}`

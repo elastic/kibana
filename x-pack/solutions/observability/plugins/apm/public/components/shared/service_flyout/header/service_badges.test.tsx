@@ -59,7 +59,7 @@ function setupContext({
     capabilities: {
       loading: false,
       error: undefined,
-      ingestionType: 'apm' as const,
+      schema: 'ecs' as const,
       header: { serviceNameLink: true, badges: true },
       overview: { transactions: true, transactionTypeFilter: true, infraMetrics: true },
       footer: { alerts: true, slos: true },

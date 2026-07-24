@@ -21,7 +21,10 @@ export interface FlyoutLensChartConfigDefinition {
 export interface ServiceScope {
   serviceName: string;
   environment: string;
-  transactionType?: string;
+}
+
+export interface EcsServiceScope extends ServiceScope {
+  transactionType: string;
 }
 
 export type LensYAxis = LensSeriesLayer['yAxis'][number];

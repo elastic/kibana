@@ -11,9 +11,9 @@ import type { APMIndices } from '@kbn/apm-sources-access-plugin/server';
 import { PROCESSOR_EVENT, SERVICE_NAME } from '../../../common/es_fields/apm';
 import { environmentQuery } from '../../../common/utils/environment_query';
 
-export type ServiceIngestionType = 'apm' | 'unprocessedOtel';
+export type ServiceSchemaType = 'ecs' | 'otel';
 
-export async function getServiceIngestionType({
+export async function getServiceSchemaType({
   esClient,
   indices,
   serviceName,
@@ -27,7 +27,7 @@ export async function getServiceIngestionType({
   environment: string;
   start: number;
   end: number;
-}): Promise<{ ingestionType: ServiceIngestionType }> {
+}): Promise<{ schema: ServiceSchemaType }> {
   const response = await esClient.search({
     index: indices.transaction,
     track_total_hits: 1,
@@ -47,5 +47,5 @@ export async function getServiceIngestionType({
   const total = response.hits.total;
   const count = typeof total === 'number' ? total : total?.value ?? 0;
 
-  return { ingestionType: count > 0 ? 'apm' : 'unprocessedOtel' };
+  return { schema: count > 0 ? 'ecs' : 'otel' };
 }
