@@ -38,6 +38,7 @@
     "@kbn/css-utils",
     "@kbn/field-formats-common",
     "@kbn/ebt-click",
+    "@kbn/scout",
   ],
   "exclude": ["target/**/*"]
 }
