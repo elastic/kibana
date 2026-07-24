@@ -49,10 +49,7 @@ const successResult = (): RunFullResetResult =>
  * would invoke, and returns it alongside the mocks so tests can assert on
  * progress writes.
  */
-const setupRunner = (
-  tmStart: TaskManagerStartContract,
-  signal = new AbortController().signal
-) => {
+const setupRunner = (tmStart: TaskManagerStartContract, signal = new AbortController().signal) => {
   const taskManager = taskManagerMock.createSetup() as unknown as TaskManagerSetupContract;
   const logger = loggerMock.create();
   const savedObjectsClient = savedObjectsClientMock.create();
