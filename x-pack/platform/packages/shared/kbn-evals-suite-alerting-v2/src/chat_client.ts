@@ -51,7 +51,7 @@ export class RuleManagementChatClient {
       retries: 2,
       minTimeout: 2000,
       onFailedAttempt: (error) => {
-        const isLastAttempt = error.attemptNumber === error.retriesLeft + error.attemptNumber;
+        const isLastAttempt = error.retriesLeft === 0;
         if (isLastAttempt) {
           this.log.error(
             new Error(`Failed to call ${operationName} API after ${error.attemptNumber} attempts`, {

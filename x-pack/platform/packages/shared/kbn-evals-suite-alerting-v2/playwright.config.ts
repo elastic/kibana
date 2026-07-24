@@ -6,11 +6,18 @@
  */
 import Path from 'path';
 import { createPlaywrightEvalsConfig } from '@kbn/evals';
+import { defineConfig } from '@playwright/test';
 
-export default createPlaywrightEvalsConfig({
+const baseConfig = createPlaywrightEvalsConfig({
   testDir: Path.resolve(__dirname, './evals'),
   // The default Playwright test timeout (5m) is too low for some connector/model
   // combinations driving multi-step skill conversations. Keep this high enough to
   // avoid spurious timeouts, and use CI step timeouts to bound runtime.
   timeout: 30 * 60_000, // 30 minutes
+});
+
+export default defineConfig({
+  ...baseConfig,
+  // Shared data-forge indices / fixtures are not namespaced per worker.
+  workers: 1,
 });
