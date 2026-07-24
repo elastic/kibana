@@ -153,7 +153,7 @@ export const ToolResponseFlyout: React.FC<ToolResponseFlyoutProps> = ({
       aria-labelledby="toolResponseFlyoutTitle"
       size="m"
       ownFocus={!onBack}
-      outsideClickCloses={!!onBack}
+      outsideClickCloses={onBack ? true : undefined}
     >
       {onBack && (
         <EuiFlyoutHeader
