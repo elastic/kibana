@@ -146,8 +146,9 @@ export const MyConnector: ConnectorSpec = {
   test: {
     handler: async (ctx) => {
       await ctx.client.get(`${ctx.config.url}/health`);
-      return { ok: true, message: 'Connection successful' };
+      return {};
     },
+    enabled: true,
   },
 };
 ```
