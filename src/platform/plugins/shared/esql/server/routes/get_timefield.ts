@@ -18,24 +18,6 @@ import { EsqlService } from '@kbn/esql-server-utils';
 import { esqlRouteRequestCounter, getErrorStatusCode } from '../metrics';
 
 const ES_TIMESTAMP_FIELD_NAME = '@timestamp';
-// Temporary: remove once dataset filtering is enabled by default in ES
-const DATASET_FILTER_SETTING_KEY = 'esql.query.request_filter_on_dataset.enabled';
-
-const isDatasetFilteringEnabled = async (client: ElasticsearchClient): Promise<boolean> => {
-  try {
-    const settings = await client.cluster.getSettings({
-      include_defaults: true,
-      flat_settings: true,
-    });
-    const value =
-      settings.transient[DATASET_FILTER_SETTING_KEY] ??
-      settings.persistent[DATASET_FILTER_SETTING_KEY] ??
-      settings.defaults?.[DATASET_FILTER_SETTING_KEY];
-    return value === 'true' || value === true;
-  } catch {
-    return false;
-  }
-};
 
 const hasTimestampInFieldCapsResponse = (result: FieldCapsResponse) =>
   Boolean(result.fields && result.fields['@timestamp']);
@@ -88,7 +70,8 @@ const checkViewLikeSourceForTimestamp = async ({
 const resolveTimeField = async (
   client: ElasticsearchClient,
   query: string,
-  logger: Logger
+  logger: Logger,
+  datasetFilteringEnabled: boolean
 ): Promise<{ timeField: string | undefined }> => {
   // Query is of the form "from index | where timefield >= ?_tstart".
   // At this point we just want to extract the timefield if present in the query
@@ -124,7 +107,6 @@ const resolveTimeField = async (
     .filter(Boolean);
 
   // Temporary: remove once dataset filtering is enabled by default in ES
-  const datasetFilteringEnabled = await isDatasetFilteringEnabled(client);
   if (datasetFilteringEnabled) {
     const { datasets } = await service.getDatasets().catch(() => ({ datasets: [] }));
     const datasetNames = new Set(datasets.map(({ name }) => name));
@@ -206,6 +188,9 @@ const resolveTimeField = async (
   }
 };
 
+// Temporary: remove once dataset filtering is enabled by default in ES
+const DATASET_FILTERING_FEATURE_FLAG_KEY = 'esql.datasetFilteringEnabled';
+
 export const registerGetTimeFieldRoute = (
   router: IRouter,
   { logger }: PluginInitializerContext
@@ -229,9 +214,14 @@ export const registerGetTimeFieldRoute = (
       const { query } = request.body;
       const core = await requestHandlerContext.core;
       const client = core.elasticsearch.client.asCurrentUser;
+      // Temporary: remove once dataset filtering is enabled by default in ES
+      const datasetFilteringEnabled = await core.featureFlags.getBooleanValue(
+        DATASET_FILTERING_FEATURE_FLAG_KEY,
+        true
+      );
 
       try {
-        const body = await resolveTimeField(client, query, logger.get());
+        const body = await resolveTimeField(client, query, logger.get(), datasetFilteringEnabled);
         esqlRouteRequestCounter.add(1, {
           route: 'timefield',
           outcome: 'success',
