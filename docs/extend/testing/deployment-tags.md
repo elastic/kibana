@@ -32,8 +32,8 @@ test.describe(
 
 This is equivalent to assigning all of these tags:
 
-- `@local-stateful-*` (local stateful)
-- `@cloud-stateful-*` (Elastic Cloud)
+- `@local-stateful-classic` (local stateful)
+- `@cloud-stateful-classic` (Elastic Cloud)
 - `@local-serverless-security_complete` (local serverless)
 - `@cloud-serverless-security_complete` (Elastic Cloud)
 
