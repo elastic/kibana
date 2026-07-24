@@ -806,7 +806,7 @@ export const UpdateCaseRequest = lazySchema(() =>
             .optional(),
           extended_fields: CaseExtendedFields.optional(),
           /**
-      * The case template. Requires the `xpack.cases.templates.enabled` setting. Updating `template` is validation-only: switching the template validates the case's `extended_fields` against the new template's fields but does not inject template defaults (unlike create). Omit to leave the current template unchanged; set to `null` to clear it; set to `{ id, version }` to switch. When `version` is omitted, the latest version is resolved and pinned. After switching, use the get case fields API (`GET /api/cases/{case_id}/fields`) to see the fields the new template exposes.
+      * The case template. Requires the `xpack.cases.templates.enabled` setting. Updating `template` is validation-only: switching the template validates the case's `extended_fields` against the new template's fields but does not inject template defaults (unlike create). Omit to leave the current template unchanged; set to `null` to clear it; set to `{ id, version }` to switch. Unlike create, switching a template on update is an explicit versioned action: both `id` and `version` are required — the server does not resolve a latest version here. After switching, use the get case fields API (`GET /api/cases/{case_id}/fields`) to see the fields the new template exposes.
 
       */
           template: z
@@ -816,10 +816,10 @@ export const UpdateCaseRequest = lazySchema(() =>
                */
               id: z.string(),
               /**
-      * The template version to apply. Omit to use (and pin) the latest version.
+      * The template version to apply. Required on update: switching a template is an explicit versioned action, so the version must be specified.
 
       */
-              version: z.number().int().min(1).optional(),
+              version: z.number().int().min(1),
             })
             .nullable()
             .optional(),

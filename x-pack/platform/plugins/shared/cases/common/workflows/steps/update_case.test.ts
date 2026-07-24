@@ -58,6 +58,17 @@ describe('update_case common step definition', () => {
     ).toBe(true);
   });
 
+  it('rejects a template switch without a version in update case input', () => {
+    // Unlike create, switching a template on update is an explicit versioned action:
+    // the version is required and the server does not resolve a latest version here.
+    expect(
+      InputSchema.safeParse({
+        case_id: caseIdFixture,
+        updates: { template: { id: 'triage_template' } },
+      }).success
+    ).toBe(false);
+  });
+
   it('accepts clearing the template with null in update case input', () => {
     expect(
       InputSchema.safeParse({
