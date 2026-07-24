@@ -1,0 +1,76 @@
+{
+  "sha1": "82a8787982990888cb5f5950b100f256c03c4add",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
+  "tests": [
+    {
+      "id": "bb696bfc1a46610-62e78b299821a45",
+      "title": "Global setup",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution_serverless/test/scout/ui/parallel_tests/global.setup.ts",
+        "line": 10,
+        "column": 16
+      }
+    },
+    {
+      "id": "0bc1c73b9acf972-f7ecdc3f5d094f3",
+      "title": "serverless security navigation destinations navigation via search, sidebar cases link, cases app, and legacy management landing page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution_serverless/test/scout/ui/parallel_tests/navigation_destinations.spec.ts",
+        "line": 15,
+        "column": 14
+      }
+    },
+    {
+      "id": "0bc1c73b9acf972-374209cc35d4775",
+      "title": "serverless security navigation destinations navigates to maintenance windows",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution_serverless/test/scout/ui/parallel_tests/navigation_destinations.spec.ts",
+        "line": 70,
+        "column": 14
+      }
+    },
+    {
+      "id": "b760102fdea7e93-8fde21219c56e4f",
+      "title": "serverless security navigation security serverless side nav, breadcrumbs, Launchpad panel, and active nav highlight",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution_serverless/test/scout/ui/parallel_tests/navigation.spec.ts",
+        "line": 22,
+        "column": 14
+      }
+    },
+    {
+      "id": "b760102fdea7e93-c6ca0e098797183",
+      "title": "serverless security navigation shows a flat Alerts link when alerts-and-attacks alignment is disabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution_serverless/test/scout/ui/parallel_tests/navigation.spec.ts",
+        "line": 71,
+        "column": 14
+      }
+    }
+  ]
+}
