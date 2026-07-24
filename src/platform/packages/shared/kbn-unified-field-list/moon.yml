@@ -50,6 +50,7 @@ dependsOn:
   - '@kbn/css-utils'
   - '@kbn/field-formats-common'
   - '@kbn/ebt-click'
+  - '@kbn/scout'
 tags:
   - shared-browser
   - package
