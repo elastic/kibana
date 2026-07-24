@@ -34,9 +34,12 @@ export interface AppHeaderViewProps {
   back?: AppHeaderBack | AppHeaderBack[];
   tabs?: AppHeaderTab[];
   badges?: AppHeaderBadge[];
-  menu?: AppMenuConfig & { isCollapsed?: boolean };
+  menu?: AppMenuConfig;
+  /**
+   * @deprecated Temporary slot for `FavoriteButton` or a thin wrapper around it. Replace this with
+   * the typed favorite action API tracked in https://github.com/elastic/kibana/issues/271402.
+   */
   favorite?: ReactNode;
-  titleAppend?: ReactNode;
   metadata?: AppHeaderMetadataItems;
   /**
    * Defaults to `true`. Set to `false` only when the surrounding full-page layout provides its own
@@ -59,7 +62,39 @@ export interface AppHeaderViewProps {
   borderless?: boolean;
 }
 
-export const AppHeaderView = React.memo<AppHeaderViewProps>(
+interface AppHeaderViewInternalProps extends AppHeaderViewProps {
+  titleAppend?: ReactNode;
+}
+
+const getPublicAppHeaderViewProps = ({
+  title,
+  back,
+  tabs,
+  badges,
+  menu,
+  favorite,
+  metadata,
+  sticky,
+  spacing,
+  docLink,
+  showAddIntegrations,
+  borderless,
+}: AppHeaderViewProps): AppHeaderViewProps => ({
+  title,
+  back,
+  tabs,
+  badges,
+  menu,
+  favorite,
+  metadata,
+  sticky,
+  spacing,
+  docLink,
+  showAddIntegrations,
+  borderless,
+});
+
+const AppHeaderViewInternal = React.memo<AppHeaderViewInternalProps>(
   ({
     title,
     back,
@@ -132,20 +167,50 @@ export const AppHeaderView = React.memo<AppHeaderViewProps>(
   }
 );
 
+AppHeaderViewInternal.displayName = 'AppHeaderViewInternal';
+
+export const AppHeaderView = React.memo<AppHeaderViewProps>((props) => {
+  return <AppHeaderViewInternal {...getPublicAppHeaderViewProps(props)} />;
+});
+
 AppHeaderView.displayName = 'AppHeaderView';
 
 export interface AppHeaderProps extends AppHeaderViewProps {
   title: AppHeaderTitle;
 }
 
-export const AppHeader = React.memo<AppHeaderProps>((props) => {
+interface InlineAppHeaderProps extends AppHeaderViewInternalProps {
+  title: AppHeaderTitle;
+}
+
+const InlineAppHeader = React.memo<InlineAppHeaderProps>((props) => {
   const chrome = useChromeService();
   useLayoutEffect(() => {
     chrome.next.inlineAppHeader.set(true);
     return () => chrome.next.inlineAppHeader.set(false);
   }, [chrome]);
 
-  return <AppHeaderView {...props} />;
+  return <AppHeaderViewInternal {...props} />;
 });
 
+InlineAppHeader.displayName = 'InlineAppHeader';
+
+export const AppHeader = React.memo<AppHeaderProps>((props) => (
+  <InlineAppHeader {...getPublicAppHeaderViewProps(props)} title={props.title} />
+));
+
 AppHeader.displayName = 'AppHeader';
+
+export interface DiscoverAppHeaderProps extends AppHeaderProps {
+  tabsBar?: ReactNode;
+}
+
+export const DiscoverAppHeader = React.memo<DiscoverAppHeaderProps>(({ tabsBar, ...props }) => (
+  <InlineAppHeader
+    {...getPublicAppHeaderViewProps(props)}
+    title={props.title}
+    titleAppend={tabsBar}
+  />
+));
+
+DiscoverAppHeader.displayName = 'DiscoverAppHeader';

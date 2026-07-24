@@ -18,6 +18,9 @@ interface ConnectToProjectProps {
   isLoading: boolean;
   showLabel?: boolean;
   isCompact?: boolean;
+  apiKeyButtonFill?: boolean;
+  /** Identifies the page the button was clicked on, used in `data-telemetry-id`. */
+  telemetryPage: string;
 }
 
 export const ConnectToProject = ({
@@ -26,6 +29,8 @@ export const ConnectToProject = ({
   isLoading,
   showLabel = true,
   isCompact = false,
+  apiKeyButtonFill = true,
+  telemetryPage,
 }: ConnectToProjectProps) => {
   return (
     <>
@@ -47,13 +52,19 @@ export const ConnectToProject = ({
             elasticsearchUrl={elasticsearchUrl}
             isLoading={isLoading}
             isCompact={isCompact}
+            telemetryPage={telemetryPage}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           {isCompact ? (
-            <CompactApiKeys />
+            <CompactApiKeys telemetryPage={telemetryPage} />
           ) : (
-            <OnboardingApiKeys apiKey={apiKey} isLoading={isLoading} />
+            <OnboardingApiKeys
+              apiKey={apiKey}
+              isLoading={isLoading}
+              fill={apiKeyButtonFill}
+              telemetryPage={telemetryPage}
+            />
           )}
         </EuiFlexItem>
       </EuiFlexGroup>

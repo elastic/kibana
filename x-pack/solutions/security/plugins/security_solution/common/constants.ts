@@ -14,8 +14,9 @@ import * as i18n from './translations';
 import { MITRE_ATTACK_VERSION } from './detection_engine/mitre/mitre_version';
 
 export {
-  SecurityPageName,
+  ENABLE_ATTACK_DISCOVERY_WORKFLOWS_SETTING,
   ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING,
+  SecurityPageName,
 } from '@kbn/security-solution-navigation';
 
 /**

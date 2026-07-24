@@ -8,7 +8,7 @@
 import type { KibanaRequest, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { StreamsServer } from '@kbn/streams-plugin/server/types';
-import type { RelayClientContract } from '@kbn/significant-events-schema';
+import { RelayRequestError, type RelayClientContract } from '@kbn/actions-plugin/server';
 import type {
   SlackAppConnectResponse,
   SlackAppDisconnectResponse,
@@ -21,7 +21,6 @@ import {
   RELAY_APP_CONNECTION_SO_TYPE,
   type RelayAppConnectionAttributes,
 } from './saved_object';
-import { RelayRequestError } from './relay_error';
 import { SlackAppUnavailableError } from './errors';
 import { getKibanaUrl } from './get_kibana_url';
 
@@ -33,7 +32,7 @@ export class SlackAppService {
   }
 
   /**
-   * feature flag on + `relayService` configured (the injected singleton client exists) +
+   * feature flag on + `xpack.actions.relay` configured (the injected singleton client exists) +
    * agentBuilder available on this deployment.
    */
   private async getRelayClient(): Promise<RelayClientContract | undefined> {
@@ -119,19 +118,44 @@ export class SlackAppService {
     // only happens on success.
     const existingConnection = await this.readConnection(soClient);
 
-    // Mint a managed, least-privilege ES API key scoped to Agent Builder read. The key
+    // Mint a managed, read-only, least-privilege ES API key for the agent. The key
     // is granted on behalf of the connecting user but survives their deletion (ES keys
-    // outlive their owner). The connecting user must hold `agentBuilder:read`, otherwise
-    // the granted key is under-privileged (grant intersects with the owner's privileges).
-    // `monitor_inference` and the `actions` feature are required for converse to list
-    // inference endpoints and stack connectors (see getConnectorList).
+    // outlive their owner). Because the grant intersects with the owner's privileges, the
+    // connecting user must themselves hold every privilege below or the key is silently
+    // under-privileged.
+    //
+    // - Observability signals get direct ES read: the obs agent tools query them as this key
+    //   (asCurrentUser). Broad conventional patterns cover APM/OTel logs, metrics and traces
+    //   without regenerating the key when new data is onboarded.
+    // - Significant Events and Streams data is reached through the `streams` Kibana feature
+    //   (read), and connectors/LLM through `actions` (read) — both go via the internal Kibana
+    //   client, so no grants on system/dot indices (unsupported in serverless) are needed.
     const apiKeyResult = await this.server.security.authc.apiKeys.grantAsInternalUser(request, {
       name: 'nightshift-relay-agent-builder',
       metadata: { managed: true, managed_by: 'nightshift-relay', type: 'agent_builder_converse' },
       kibana_role_descriptors: {
         nightshift_relay_agent_builder: {
-          elasticsearch: { cluster: ['monitor_inference'], indices: [], run_as: [] },
-          kibana: [{ spaces: ['*'], feature: { agentBuilder: ['read'], actions: ['read'] } }],
+          elasticsearch: {
+            cluster: ['monitor_inference'],
+            indices: [
+              {
+                names: ['traces-*', 'logs-*', 'metrics-*', 'apm-*'],
+                privileges: ['read', 'view_index_metadata'],
+              },
+            ],
+            run_as: [],
+          },
+          kibana: [
+            {
+              spaces: ['*'],
+              feature: {
+                streams: ['read'],
+                agentBuilder: ['read'],
+                actions: ['read'],
+                workflowsManagement: ['read'],
+              },
+            },
+          ],
         },
       },
     });
