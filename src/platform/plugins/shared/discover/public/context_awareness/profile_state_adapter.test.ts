@@ -8,10 +8,7 @@
  */
 
 import type { SerializableRecord } from '@kbn/utility-types';
-import {
-  type ProfileStateDefinition,
-  ProfileStateRegistry,
-} from '../../common/context_awareness/profile_state';
+import { type ProfileStateDefinition, ProfileStateRegistry } from '../../common/context_awareness';
 import { TEST_PROFILE_STATE_DEF } from './__mocks__/profile_state';
 import {
   createProfileStateAdapterFactory,

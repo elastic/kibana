@@ -11,7 +11,7 @@ import {
   ProfileStateRegistry,
   ProfileStateType,
   type ProfileStateDefinition,
-} from '../../../common/context_awareness/profile_state';
+} from '../../../common/context_awareness';
 import type { SerializableRecord } from '@kbn/utility-types';
 
 export interface TestProfileState extends SerializableRecord {

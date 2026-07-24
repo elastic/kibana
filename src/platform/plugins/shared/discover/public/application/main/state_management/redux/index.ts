@@ -91,7 +91,7 @@ export {
   useRuntimeState,
   selectTabRuntimeState,
   selectDataSourceProfileId,
-  selectCurrentProfileUrlStateDefinition,
+  selectCurrentProfileStateDefinition,
   selectCurrentProfileUrlState,
   selectCurrentProfileLocatorState,
   selectIsDataViewUsedInMultipleRuntimeTabStates,

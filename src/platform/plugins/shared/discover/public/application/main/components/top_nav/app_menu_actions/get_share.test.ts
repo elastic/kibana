@@ -18,7 +18,7 @@ import { FetchStatus } from '../../../../types';
 import { internalStateActions, selectTabRuntimeState } from '../../../state_management/redux';
 import { ESQLVariableType } from '@kbn/esql-types';
 import { TEST_PROFILE_STATE_DEF } from '../../../../../context_awareness/__mocks__/profile_state';
-import { EXAMPLE_PROFILE_STATE_DEF } from '../../../../../../common/context_awareness/profile_state_definitions/example_profile_state';
+import { EXAMPLE_PROFILE_STATE_DEF } from '../../../../../../common/context_awareness';
 
 const mockDiscoverService = createDiscoverServicesMock();
 
@@ -71,6 +71,7 @@ describe('getShare', () => {
         authorizedRuleTypeIds: [],
       },
       currentTab: toolkit.getCurrentTab(),
+      runtimeStateManager: toolkit.runtimeStateManager,
       persistedDiscoverSession: undefined,
       totalHitsState: { result: 0, fetchStatus: FetchStatus.COMPLETE },
       hasUnsavedChanges: false,

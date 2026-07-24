@@ -71,7 +71,7 @@ import type { DiscoverStartPlugins } from './types';
 import type { DiscoverContextAppLocator } from './application/context/services/locator';
 import type { DiscoverSingleDocLocator } from './application/doc/locator';
 import type { DiscoverAppLocator } from '../common';
-import type { ProfileStateRegistry } from '../common/context_awareness/profile_state';
+import type { ProfileStateRegistry } from '../common/context_awareness';
 import type { ProfilesManager } from './context_awareness';
 import type { DiscoverEBTManager } from './ebt_manager';
 import {

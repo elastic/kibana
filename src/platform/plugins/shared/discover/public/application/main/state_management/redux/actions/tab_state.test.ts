@@ -30,7 +30,7 @@ import { TEST_PROFILE_STATE_DEF } from '../../../../../context_awareness/__mocks
 import {
   ProfileStateType,
   type ProfileStateDefinition,
-} from '../../../../../../common/context_awareness/profile_state';
+} from '../../../../../../common/context_awareness';
 
 interface SecondaryProfileState extends SerializableRecord {
   secondaryUrlValue: string;

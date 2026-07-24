@@ -11,7 +11,7 @@ context_awareness/
 ├── composable_profile.ts     # ComposableProfile, AppliedProfile, getMergedAccessor
 ├── toolkit.ts                # ContextAwarenessToolkit — toolkit injected by the host
 ├── in_memory_toolkit.ts      # Simplified toolkit implementation for non-tab hosts
-├── profile_state_adapter.ts  # Browser adapter contract and validated adapter factory
+├── profile_state_adapter.ts  # Host-backed profile state API and adapter factory
 ├── profile_service.ts        # BaseProfileService, ProfileService (sync), AsyncProfileService
 ├── profiles/                 # Per-level provider types and service subclasses
 ├── profiles_manager/         # ProfilesManager + ScopedProfilesManager
@@ -89,7 +89,7 @@ Three `BaseProfileService` subclasses exist, one per context level:
 
 ```
 Plugin start
-  ├─ getProfileStateRegistry()  ← lazy, memoized dynamic import in the browser
+  ├─ getProfileStateRegistry()
   └─ createProfileServices()
        └─ new ProfilesManager(root, dataSource, document)
             │
@@ -198,10 +198,10 @@ plugin.tsx  getDiscoverServicesWithProfiles()
 
 Profile state is typed state owned by profile providers and exposed through `ContextAwarenessToolkit.getStateAdapter()`. It lets profiles share state across extension points and other profiles without host-specific plumbing in the profile implementation.
 
-Serializable registry contracts and definitions live under `common/context_awareness`. All definitions are registered
-once by `createProfileStateRegistry()`, which is shared by browser and server locator implementations. The browser
-plugin loads this factory lazily through a memoized dynamic import used by both locator execution and Discover service
-construction; the server constructs the same registered factory directly. Each `ProfileStateDefinition<TState>` has:
+Profile state types and the registry live in `common/context_awareness/profile_state.ts`, while profile state
+definitions live under `common/context_awareness/profile_state_definitions`. All definitions are registered once by
+`createProfileStateRegistry()`, which is shared by browser and server locator implementations.
+Each `ProfileStateDefinition<TState>` has:
 
 - `key`: Unique storage key, enforced by `ProfileStateRegistry`.
 - `descriptor`: Field-level `ProfileStateType` metadata.

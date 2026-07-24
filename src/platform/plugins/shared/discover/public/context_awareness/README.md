@@ -315,17 +315,17 @@ so the same definition can be used by browser and server locators:
  * common/context_awareness/profile_state_definitions/example_profile_state.ts
  */
 
-import type { ProfileStateDefinition } from '../profile_state';
 import type { EuiPanelProps } from '@elastic/eui';
 import type { RowControlProps } from '@kbn/discover-utils';
-import { ProfileStateType } from '../profile_state';
+import type { SerializableRecord } from '@kbn/utility-types';
+import { ProfileStateType, type ProfileStateDefinition } from '../profile_state';
 
 // Define the state shape shared across profiles and extension point implementations
-type ExampleProfileState = {
+interface ExampleProfileState extends SerializableRecord {
   timestampColor: string;
   rowControlColor: NonNullable<RowControlProps['color']>;
   boxColor: NonNullable<EuiPanelProps['color']>;
-};
+}
 
 // Define a unique state key, field lifetime metadata, and the default typed state
 const EXAMPLE_PROFILE_STATE_DEF: ProfileStateDefinition<ExampleProfileState> = {
@@ -345,8 +345,7 @@ const EXAMPLE_PROFILE_STATE_DEF: ProfileStateDefinition<ExampleProfileState> = {
 
 Register the definition once in [`create_profile_state_registry.ts`](../../common/context_awareness/create_profile_state_registry.ts).
 The `key` must be unique, the `descriptor` describes the intended lifetime of each field, and `defaultState` is
-returned until state has been written. Import the definition directly from common in profile code; do not duplicate or
-re-export moved definitions from public modules.
+returned until state has been written.
 
 To opt into URL sync, return the definition from the active data source profile context:
 
@@ -360,15 +359,8 @@ resolve: () => ({
 ```
 
 Main Discover stores URL-backed fields in the `_p` URL parameter so they survive refreshes and browser history.
-Generated locator state includes only the active data source profile and expands its effective `Url` and `Persistent`
-values, including values equal to current defaults. Locator parsing preserves those explicit values: `Url` fields are
-encoded in `_p`, `Persistent` fields are carried in navigation state, and `Ui` fields are omitted. This lets Share and
-background-search locators reproduce the same effective state if definition defaults later change. Saved-object links
-remain minimal and do not include profile state.
-
-On normal locator navigation, profile state is restored in this precedence order: existing tab/local state, locator
-`Persistent` state, then URL `_p` state. Values equal to current defaults are stripped only after all sources are
-merged. Removing `_p` resets the active profile's URL-backed fields to its current definition defaults.
+Shared links restore supported `Url` and `Persistent` state for the active data source profile. `Ui` state is not
+included in shared links.
 
 Use `toolkit.getStateAdapter()` inside extension point implementations to read, observe, and update the state:
 

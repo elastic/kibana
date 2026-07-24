@@ -40,13 +40,13 @@ import {
   ProfileStateType,
   type ProfileStateDefinition,
   type ProfileStateDefaultsHandling,
-} from '../../../../../../common/context_awareness/profile_state';
-import type { ProfileStateMutationOptions } from '../../../../../context_awareness/profile_state_adapter';
+} from '../../../../../../common/context_awareness';
+import type { ProfileStateMutationOptions } from '../../../../../context_awareness';
 import { selectTab } from '../selectors';
 import {
   selectDataSourceProfileId,
   selectCurrentProfileUrlState,
-  selectCurrentProfileUrlStateDefinition,
+  selectCurrentProfileStateDefinition,
   selectTabRuntimeState,
 } from '../runtime_state';
 import type {
@@ -291,7 +291,7 @@ export const setProfileState = <TState extends SerializableRecord>(
       dispatch(internalStateSlice.actions.setProfileState({ tabId, key, profileState }));
     };
 
-    const profileUrlStateDefinition = selectCurrentProfileUrlStateDefinition(
+    const profileUrlStateDefinition = selectCurrentProfileStateDefinition(
       runtimeStateManager,
       tabId
     );

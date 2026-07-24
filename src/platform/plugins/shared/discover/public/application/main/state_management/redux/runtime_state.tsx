@@ -19,7 +19,7 @@ import {
   ProfileStateType,
   type ProfileStateMap,
   type ProfileStateRegistry,
-} from '../../../../../common/context_awareness/profile_state';
+} from '../../../../../common/context_awareness';
 import type { ContextAwarenessToolkit, ScopedProfilesManager } from '../../../../context_awareness';
 import type { TabState } from './types';
 import type { ScopedDiscoverEBTManager } from '../../../../ebt_manager';
@@ -135,7 +135,7 @@ export const selectDataSourceProfileId = (
     .getContexts().dataSourceContext.profileId;
 };
 
-export const selectCurrentProfileUrlStateDefinition = (
+export const selectCurrentProfileStateDefinition = (
   runtimeStateManager: RuntimeStateManager,
   tabId: string
 ) => {
@@ -161,7 +161,7 @@ export const selectCurrentProfileUrlState = ({
     profileStateMap,
     profileStateRegistry,
     stateTypes: [ProfileStateType.Url],
-    includeDefaultsWithoutExplicitState: false,
+    alwaysIncludeDefaults: false,
   });
 };
 
@@ -182,7 +182,7 @@ export const selectCurrentProfileLocatorState = ({
     profileStateMap,
     profileStateRegistry,
     stateTypes: [ProfileStateType.Url, ProfileStateType.Persistent],
-    includeDefaultsWithoutExplicitState: true,
+    alwaysIncludeDefaults: true,
   });
 };
 
@@ -192,23 +192,23 @@ const selectCurrentProfileState = ({
   profileStateMap,
   profileStateRegistry,
   stateTypes,
-  includeDefaultsWithoutExplicitState,
+  alwaysIncludeDefaults,
 }: {
   runtimeStateManager: RuntimeStateManager;
   tabId: string;
   profileStateMap: ProfileStateMap;
   profileStateRegistry: ProfileStateRegistry;
   stateTypes: ProfileStateType[];
-  includeDefaultsWithoutExplicitState: boolean;
+  alwaysIncludeDefaults: boolean;
 }): ProfileStateMap | undefined => {
-  const profileStateDefinition = selectCurrentProfileUrlStateDefinition(runtimeStateManager, tabId);
+  const profileStateDefinition = selectCurrentProfileStateDefinition(runtimeStateManager, tabId);
 
   if (!profileStateDefinition) {
     return undefined;
   }
 
   const filteredState = profileStateRegistry.filterFieldsByType({
-    profileState: includeDefaultsWithoutExplicitState
+    profileState: alwaysIncludeDefaults
       ? {
           ...profileStateDefinition.defaultState,
           ...profileStateMap[profileStateDefinition.key],

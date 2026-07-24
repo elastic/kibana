@@ -17,8 +17,7 @@ import type {
 } from './app_locator';
 import type { DiscoverAppState } from '../public';
 import { createDataViewDataSource, createEsqlDataSource } from './data_sources';
-import type { ProfileStateRegistry } from './context_awareness/profile_state';
-import { ProfileStateType } from './context_awareness/profile_state';
+import { ProfileStateType, type ProfileStateRegistry } from './context_awareness';
 import {
   APP_STATE_URL_KEY,
   GLOBAL_STATE_URL_KEY,

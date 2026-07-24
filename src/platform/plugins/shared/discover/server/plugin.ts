@@ -38,16 +38,16 @@ import {
   TRACES_PRODUCT_FEATURE_ID,
 } from '../common/constants';
 import { getSearchEmbeddableTransforms } from '../common/embeddable';
-import { createProfileStateRegistry } from '../common/context_awareness/create_profile_state_registry';
+import { createProfileStateRegistry } from '../common/context_awareness';
 
 export class DiscoverServerPlugin
   implements Plugin<object, DiscoverServerPluginStart, object, DiscoverServerPluginStartDeps>
 {
   private readonly config: ConfigSchema;
   private readonly logger: Logger;
+  private readonly profileStateRegistry = createProfileStateRegistry();
   private subscriptions: Subscription[] = [];
   private embeddableTransformsEnabled = true;
-  private readonly profileStateRegistry = createProfileStateRegistry();
 
   constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
     this.config = initializerContext.config.get();

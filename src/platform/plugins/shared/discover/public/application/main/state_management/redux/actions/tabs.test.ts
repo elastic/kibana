@@ -12,7 +12,7 @@ import { TEST_PROFILE_STATE_DEF } from '../../../../../context_awareness/__mocks
 import {
   ProfileStateType,
   type ProfileStateDefinition,
-} from '../../../../../../common/context_awareness/profile_state';
+} from '../../../../../../common/context_awareness';
 import { getDiscoverInternalStateMock } from '../../../../../__mocks__/discover_state.mock';
 import { createDiscoverServicesMock } from '../../../../../__mocks__/services';
 import { dataViewMockWithTimeField } from '@kbn/discover-utils/src/__mocks__';

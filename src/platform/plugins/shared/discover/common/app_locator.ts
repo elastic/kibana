@@ -16,7 +16,7 @@ import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { ControlPanelsState } from '@kbn/control-group-renderer';
 import type { ESQLControlVariable } from '@kbn/esql-types';
-import type { ProfileStateMap } from './context_awareness/profile_state';
+import type { ProfileStateMap } from './context_awareness';
 import type { VIEW_MODE, NEW_TAB_ID } from './constants';
 
 export const DISCOVER_APP_LOCATOR = 'DISCOVER_APP_LOCATOR';

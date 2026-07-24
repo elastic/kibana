@@ -25,7 +25,7 @@ import {
 import {
   ProfileStateType,
   type ProfileStateDefinition,
-} from '../../../../../common/context_awareness/profile_state';
+} from '../../../../../common/context_awareness';
 import { TEST_PROFILE_STATE_DEF } from '../../../../context_awareness/__mocks__/profile_state';
 import type { SerializableRecord } from '@kbn/utility-types';
 

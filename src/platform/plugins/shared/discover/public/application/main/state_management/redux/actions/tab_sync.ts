@@ -269,7 +269,6 @@ export const initializeAndSync: InternalStateThunkActionCreator<[TabActionPayloa
         getCurrentTabRuntimeState: () => selectTabRuntimeState(runtimeStateManager, tabId),
         profileStateRegistry: services.profileStateRegistry,
         runtimeStateManager,
-        tabId,
       }),
       {
         isDisabled: () =>

@@ -66,17 +66,22 @@ export type ProfileStateMap = Record<string, SerializableRecord | undefined>;
  */
 export type ProfileStateDefaultsHandling = 'none' | 'expand' | 'strip';
 
-export interface ProfileStateDefinitionReference {
-  key: string;
-  descriptor: Record<string, { type: ProfileStateType }>;
-  defaultState: SerializableRecord;
-}
+type ProfileStateDescriptorEntry<TState extends SerializableRecord> = [
+  keyof TState,
+  ProfileStateDescriptor<TState>[keyof TState]
+];
+
+const getProfileStateDescriptorEntries = <TState extends SerializableRecord>(
+  descriptor: ProfileStateDescriptor<TState>
+): Array<ProfileStateDescriptorEntry<TState>> => {
+  return Object.entries(descriptor) as Array<ProfileStateDescriptorEntry<TState>>;
+};
 
 /**
  * Registry of profile state definitions supported by Discover.
  */
 export class ProfileStateRegistry {
-  private readonly stateDefinitions = new Map<string, ProfileStateDefinitionReference>();
+  private readonly stateDefinitions = new Map<string, ProfileStateDefinition<SerializableRecord>>();
 
   /**
    * Registers a profile state definition. Keys must be globally unique.
@@ -112,6 +117,10 @@ export class ProfileStateRegistry {
   /**
    * Filters a profile state map by field lifetime type. Unregistered state keys and entries with no
    * matching fields are omitted from the returned map.
+   *
+   * When `defaultsHandling` is `expand`, each returned entry is merged over the registered default
+   * fields for the requested state types. When `defaultsHandling` is `strip`, default-valued fields
+   * are omitted from returned entries.
    */
   public pickStateByType({
     profileStateMap,
@@ -187,36 +196,45 @@ export class ProfileStateRegistry {
   /**
    * Filters one profile state object by field lifetime type using the registered definition for
    * `stateKey`.
+   *
+   * Returns `undefined` when the state key is not registered, the state is missing, or no fields
+   * match the requested type. When `defaultsHandling` is `expand`, the matching fields are merged
+   * over the registered default fields for the requested state types. When `defaultsHandling` is
+   * `strip`, fields equal to the registered defaults are omitted.
    */
-  public filterFieldsByType({
+  public filterFieldsByType<TState extends SerializableRecord>({
     profileState,
     stateKey,
     stateTypes,
     defaultsHandling = 'none',
   }: {
-    profileState: SerializableRecord | undefined;
-    stateKey: string;
+    profileState: Partial<TState> | undefined;
+    stateKey: ProfileStateDefinition<TState>['key'];
     stateTypes: ProfileStateType[] | Set<ProfileStateType>;
     defaultsHandling?: ProfileStateDefaultsHandling;
-  }): SerializableRecord | undefined {
-    const definition = this.stateDefinitions.get(stateKey);
+  }): Partial<TState> | undefined {
+    const definition = this.stateDefinitions.get(stateKey) as
+      | ProfileStateDefinition<TState>
+      | undefined;
 
     if (!definition || !profileState) {
       return undefined;
     }
 
     const stateTypeSet = stateTypes instanceof Set ? stateTypes : new Set(stateTypes);
-    const filteredState: SerializableRecord = {};
+    const filteredState: Partial<TState> = {};
 
     let shouldReturnFilteredState = false;
 
-    for (const [field, descriptor] of Object.entries(definition.descriptor)) {
+    for (const [field, descriptor] of getProfileStateDescriptorEntries(definition.descriptor)) {
       if (!stateTypeSet.has(descriptor.type)) {
         continue;
       }
 
       const profileStateHasField = Object.hasOwn(profileState, field);
 
+      // Expand fills requested defaults but only returns when at least one requested field is
+      // explicit; none preserves explicit fields; strip preserves explicit non-default fields.
       if (defaultsHandling === 'expand') {
         if (profileStateHasField) {
           shouldReturnFilteredState = true;

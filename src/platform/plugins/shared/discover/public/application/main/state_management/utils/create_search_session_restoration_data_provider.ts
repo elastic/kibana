@@ -14,7 +14,7 @@ import type { ReactiveTabRuntimeState, TabState } from '../redux';
 import type { RuntimeStateManager } from '../redux/runtime_state';
 import { selectCurrentProfileLocatorState } from '../redux/runtime_state';
 import { DISCOVER_APP_LOCATOR, type DiscoverAppLocatorParams } from '../../../../../common';
-import type { ProfileStateRegistry } from '../../../../../common/context_awareness/profile_state';
+import type { ProfileStateRegistry } from '../../../../../common/context_awareness';
 
 export function createSearchSessionRestorationDataProvider(deps: {
   data: DataPublicPluginStart;
@@ -23,7 +23,6 @@ export function createSearchSessionRestorationDataProvider(deps: {
   getCurrentTabRuntimeState: () => ReactiveTabRuntimeState;
   profileStateRegistry: ProfileStateRegistry;
   runtimeStateManager: RuntimeStateManager;
-  tabId: string;
 }): SearchSessionInfoProvider {
   return {
     getName: async () => {
@@ -57,7 +56,6 @@ function createUrlGeneratorState({
   getCurrentTabRuntimeState,
   profileStateRegistry,
   runtimeStateManager,
-  tabId,
   shouldRestoreSearchSession,
 }: {
   data: DataPublicPluginStart;
@@ -66,14 +64,14 @@ function createUrlGeneratorState({
   getCurrentTabRuntimeState: () => ReactiveTabRuntimeState;
   profileStateRegistry: ProfileStateRegistry;
   runtimeStateManager: RuntimeStateManager;
-  tabId: string;
   shouldRestoreSearchSession: boolean;
 }): DiscoverAppLocatorParams {
-  const appState = getCurrentTab().appState;
+  const currentTab = getCurrentTab();
+  const { appState } = currentTab;
   const profileState = selectCurrentProfileLocatorState({
     runtimeStateManager,
-    tabId,
-    profileStateMap: getCurrentTab().profileState,
+    tabId: currentTab.id,
+    profileStateMap: currentTab.profileState,
     profileStateRegistry,
   });
   const dataView = getCurrentTabRuntimeState().currentDataView$.getValue();

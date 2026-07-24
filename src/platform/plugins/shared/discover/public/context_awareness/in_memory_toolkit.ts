@@ -10,10 +10,7 @@
 import { isEqual } from 'lodash';
 import { BehaviorSubject, distinctUntilChanged } from 'rxjs';
 import type { SerializableRecord } from '@kbn/utility-types';
-import type {
-  ProfileStateDefinition,
-  ProfileStateRegistry,
-} from '../../common/context_awareness/profile_state';
+import type { ProfileStateDefinition, ProfileStateRegistry } from '../../common/context_awareness';
 import type { ContextAwarenessToolkit, ContextAwarenessToolkitActions } from './toolkit';
 import {
   createProfileStateAdapterFactory,

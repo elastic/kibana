@@ -86,12 +86,6 @@ export class DiscoverPlugin
   private contextLocator?: DiscoverContextAppLocator;
   private singleDocLocator?: DiscoverSingleDocLocator;
   private profileProviderSharedServices?: Promise<ProfileProviderSharedServices>;
-  private readonly getProfileStateRegistry = once(async () => {
-    const { createProfileStateRegistry } = await import(
-      '../common/context_awareness/create_profile_state_registry'
-    );
-    return createProfileStateRegistry();
-  });
 
   constructor(private readonly initializerContext: PluginInitializerContext<ConfigSchema>) {
     const experimental = this.initializerContext.config.get().experimental;
@@ -116,7 +110,7 @@ export class DiscoverPlugin
         getLocation: async (params) => {
           const [{ appLocatorGetLocation }, profileStateRegistry] = await Promise.all([
             getLocators(),
-            this.getProfileStateRegistry(),
+            getProfileStateRegistry(),
           ]);
           return appLocatorGetLocation({ useHash, profileStateRegistry }, params);
         },
@@ -410,7 +404,7 @@ export class DiscoverPlugin
     const [{ buildServices }, historyService, profileStateRegistry] = await Promise.all([
       getSharedServices(),
       getHistoryService(),
-      this.getProfileStateRegistry(),
+      getProfileStateRegistry(),
     ]);
     return buildServices({
       core,
@@ -520,4 +514,9 @@ const getHistoryService = once(async () => {
 const getEmptyEbtManager = once(async () => {
   const { DiscoverEBTManager } = await getSharedServices();
   return new DiscoverEBTManager(); // It is not initialized outside of Discover
+});
+
+const getProfileStateRegistry = once(async () => {
+  const { createProfileStateRegistry } = await getSharedServices();
+  return createProfileStateRegistry();
 });

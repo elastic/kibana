@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './logs';
-export * from './traces';
-export * from './apm';
-export type * from './observability';
-export * from './metrics';
+export {
+  METRICS_GRID_SETTINGS_DEFAULTS,
+  type HistogramPercentile,
+  type MetricsGridSettings,
+  type SimpleAggregation,
+} from './metrics_grid_settings';

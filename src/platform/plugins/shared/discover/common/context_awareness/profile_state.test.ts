@@ -7,37 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { TEST_PROFILE_STATE_DEF } from '../../public/context_awareness/__mocks__/profile_state';
 import {
   type ProfileStateDefinition,
   ProfileStateRegistry,
   ProfileStateType,
 } from './profile_state';
-import type { SerializableRecord } from '@kbn/utility-types';
-
-interface TestProfileState extends SerializableRecord {
-  uiValue: string;
-  urlValue: string;
-  persistentValue: string;
-  nestedValue: {
-    count: number;
-  };
-}
-
-const TEST_PROFILE_STATE_DEF: ProfileStateDefinition<TestProfileState> = {
-  key: 'testProfileState',
-  descriptor: {
-    uiValue: { type: ProfileStateType.Ui },
-    urlValue: { type: ProfileStateType.Url },
-    persistentValue: { type: ProfileStateType.Persistent },
-    nestedValue: { type: ProfileStateType.Ui },
-  },
-  defaultState: {
-    uiValue: 'defaultUi',
-    urlValue: 'defaultUrl',
-    persistentValue: 'defaultPersistent',
-    nestedValue: { count: 0 },
-  },
-};
 
 describe('ProfileStateRegistry', () => {
   it('registers and matches definitions', () => {

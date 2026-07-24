@@ -10,7 +10,7 @@
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import type { DiscoverAppLocatorParams } from '../../common';
 import { appLocatorGetLocationCommon } from '../../common/app_locator_get_location';
-import type { ProfileStateRegistry } from '../../common/context_awareness/profile_state';
+import type { ProfileStateRegistry } from '../../common/context_awareness';
 
 export const appLocatorGetLocation = (
   {

@@ -19,12 +19,12 @@ import { DISCOVER_APP_LOCATOR } from './app_locator';
 import type { SerializableRecord } from '@kbn/utility-types';
 import { createDataViewDataSource, createEsqlDataSource } from './data_sources';
 import { appLocatorGetLocationCommon } from './app_locator_get_location';
-import { createProfileStateRegistry } from './context_awareness/create_profile_state_registry';
+import { createProfileStateRegistry } from './context_awareness';
 import {
   type ProfileStateDefinition,
   ProfileStateRegistry,
   ProfileStateType,
-} from './context_awareness/profile_state';
+} from './context_awareness';
 import { NEW_TAB_ID } from './constants';
 
 const dataViewId: string = 'c367b774-a4c2-11ea-bb37-0242ac130002';
@@ -403,7 +403,7 @@ describe('Discover url generator', () => {
     });
   });
 
-  test('preserves explicit values after a registered default changes', async () => {
+  test('preserves an explicit value that matched a previous registered default', async () => {
     interface ChangedDefaultProfileState extends SerializableRecord {
       urlValue: string;
     }

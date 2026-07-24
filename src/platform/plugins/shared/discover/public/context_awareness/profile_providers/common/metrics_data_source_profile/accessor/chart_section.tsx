@@ -22,8 +22,8 @@ import { useDiscoverServices } from '../../../../../hooks/use_discover_services'
 import type { DiscoverAppState } from '../../../../../application/main/state_management/redux';
 import type { DataSourceProfileProvider } from '../../../../profiles';
 import type { ContextAwarenessToolkitActions } from '../../../../toolkit';
-import type { ProfileStateAdapter } from '../../../../profile_state_adapter';
-import { METRICS_GRID_SETTINGS_STATE_DEF } from '../../../../../../common/context_awareness/profile_state_definitions/metrics_grid_profile_state';
+import type { ProfileStateAdapter } from '../../../..';
+import { METRICS_GRID_SETTINGS_STATE_DEF } from '../../../../../../common/context_awareness';
 import { METRICS_DATA_SOURCE_PROFILE_ID } from '../profile';
 /**
  * Wrapper component that reads breakdownField from Discover's app state

@@ -54,7 +54,7 @@ import { buildDataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import type { SaveDiscoverSessionThunkParams } from '../application/main/state_management/redux/actions';
 import { filter, firstValueFrom, timeout } from 'rxjs';
 import { FetchStatus } from '../application/types';
-import type { ProfileStateMap } from '../../common/context_awareness/profile_state';
+import type { ProfileStateMap } from '../../common/context_awareness';
 
 interface CreateInternalStateStoreMockOptions {
   runtimeStateManager?: RuntimeStateManager;

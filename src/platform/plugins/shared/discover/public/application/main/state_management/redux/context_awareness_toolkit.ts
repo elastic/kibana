@@ -13,12 +13,12 @@ import type { SerializableRecord } from '@kbn/utility-types';
 import type {
   ProfileStateDefinition,
   ProfileStateRegistry,
-} from '../../../../../common/context_awareness/profile_state';
+} from '../../../../../common/context_awareness';
 import type { ContextAwarenessToolkit } from '../../../../context_awareness/toolkit';
 import {
   createProfileStateAdapterFactory,
   type ProfileStateAdapter,
-} from '../../../../context_awareness/profile_state_adapter';
+} from '../../../../context_awareness';
 import type { InternalStateStore } from './internal_state';
 import { internalStateActions } from '.';
 import { selectTab } from './selectors';
