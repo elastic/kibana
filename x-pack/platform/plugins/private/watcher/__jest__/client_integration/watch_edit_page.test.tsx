@@ -122,6 +122,42 @@ describe('<WatchEditPage />', () => {
     });
   });
 
+  describe('Advanced watch with an escaped JSON string value', () => {
+    // Regression test for https://github.com/elastic/kibana/issues/225232:
+    // the JSON editor used to run the watch through XJson mode, which rewrote
+    // any escaped string (e.g. a Slack webhook body) into """ triple-quote
+    // literals when the watch was loaded for editing.
+    const escapedBodyWatch = {
+      actions: {
+        'send-to-slack': {
+          webhook: {
+            body: '{ "blocks": [ { "type": "section" } ] }',
+          },
+        },
+      },
+    };
+
+    beforeEach(async () => {
+      ({ httpSetup, httpRequestsMockHelpers } = setupEnvironment());
+      routerHistoryPush = jest.fn();
+      registerRouter({ history: { push: routerHistoryPush } });
+
+      httpRequestsMockHelpers.setLoadWatchResponse(WATCH_ID, {
+        watch: { ...getWatch({ id: WATCH_ID }), watch: escapedBodyWatch },
+      });
+
+      renderWatchEditPage({ httpSetup, id: WATCH_ID });
+      await screen.findByTestId('jsonWatchForm');
+    });
+
+    test('does not rewrite escaped strings into triple-quote literals', () => {
+      const jsonEditorValue = screen.getByTestId('jsonEditor').getAttribute('data-currentvalue');
+
+      expect(jsonEditorValue).not.toContain('"""');
+      expect(JSON.parse(jsonEditorValue!)).toEqual(escapedBodyWatch);
+    });
+  });
+
   describe('Threshold watch', () => {
     const watch = {
       ...getWatch({

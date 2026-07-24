@@ -33,6 +33,7 @@ import { noop } from 'lodash/fp';
 import { AiButton, AiIcon } from '@kbn/shared-ux-ai-components';
 import { useKibana } from '../../../../common/lib/kibana';
 import type { HuntingLead } from './types';
+import { GeneratedOnLabel } from './generated_on_label';
 import { LeadCard } from './lead_card';
 import { LeadsBanner } from './leads_banner';
 import * as i18n from './translations';
@@ -104,21 +105,26 @@ export const TopThreatHuntingLeads: React.FC<TopThreatHuntingLeadsProps> = ({
   const toggleOptions = useCallback(() => setIsOptionsOpen((prev) => !prev), []);
   const closeOptions = useCallback(() => setIsOptionsOpen(false), []);
   const toggleOpen = useCallback(
-    () => setStoredIsOpen((prev) => !(prev ?? true)),
-    [setStoredIsOpen]
+    // `react-use`'s `useLocalStorage` setter closes over a stale `state` value
+    // (its deps omit `state`), so a functional updater like `prev => !prev` only
+    // flips correctly on the first click. Pass the current value explicitly.
+    () => setStoredIsOpen(!(storedIsOpen ?? true)),
+    [setStoredIsOpen, storedIsOpen]
   );
 
   const { getUrlForApp } = useKibana().services.application;
   const genAiSettingsUrl = getUrlForApp('management', { path: '/ai/genAiSettings' });
 
+  const isAgentChatExperienceDisabled = !isAgentChatExperienceEnabled;
+  const hasNoConnectorSelected = isAgentChatExperienceEnabled && !hasValidConnector;
   const generateTooltipContent = hasWritePermissionError
     ? i18n.GENERATE_DISABLED_NO_WRITE_PERMISSION_TOOLTIP
+    : hasNoConnectorSelected
+    ? i18n.GENERATE_DISABLED_NO_CONNECTOR_TOOLTIP
     : undefined;
-  const isGenerateDisabled = !!hasWritePermissionError;
+  const isGenerateDisabled = !!hasWritePermissionError || hasNoConnectorSelected;
   const renderCount = Math.min(leads.length, visibleCardCount);
   const hasFewLeads = leads.length < visibleCardCount;
-  const noConnector = !isAgentChatExperienceEnabled || !hasValidConnector;
-
   const openGenAiSettingsButton = (
     <EuiButton
       size="s"
@@ -229,11 +235,13 @@ export const TopThreatHuntingLeads: React.FC<TopThreatHuntingLeadsProps> = ({
       ? i18n.GENERATING_LEADS_DESCRIPTION
       : hasGenerated
       ? i18n.NO_DATA_DESCRIPTION
-      : noConnector
-      ? i18n.NO_CONNECTOR_DESCRIPTION
+      : isAgentChatExperienceDisabled
+      ? i18n.NO_AGENT_CHAT_EXPERIENCE_DESCRIPTION
+      : hasNoConnectorSelected
+      ? i18n.NO_CONNECTOR_SELECTED_DESCRIPTION
       : i18n.NO_LEADS_DESCRIPTION;
 
-    const actions = isGenerating ? undefined : noConnector ? (
+    const actions = isGenerating ? undefined : isAgentChatExperienceDisabled ? (
       openGenAiSettingsButton
     ) : (
       <>
@@ -300,24 +308,18 @@ export const TopThreatHuntingLeads: React.FC<TopThreatHuntingLeadsProps> = ({
             {leads.length > 0 && lastRunTimestamp && (
               <EuiFlexItem grow={false}>
                 <EuiText size="xs" color="subdued" data-test-subj="leadsGeneratedTimestamp">
-                  {i18n.getGeneratedOnLabel(lastRunTimestamp)}
+                  <GeneratedOnLabel timestamp={lastRunTimestamp} />
                 </EuiText>
               </EuiFlexItem>
             )}
             {leads.length > 0 && (
               <EuiFlexItem grow={false}>
-                <EuiToolTip
-                  content={
-                    hasWritePermissionError
-                      ? i18n.GENERATE_DISABLED_NO_WRITE_PERMISSION_TOOLTIP
-                      : undefined
-                  }
-                >
+                <EuiToolTip content={generateTooltipContent}>
                   <EuiButtonEmpty
                     size="s"
                     iconType="refresh"
                     isLoading={isGenerating}
-                    isDisabled={!!hasWritePermissionError}
+                    isDisabled={isGenerateDisabled}
                     onClick={onGenerate}
                     data-test-subj="refreshLeadsButton"
                   >
@@ -372,7 +374,7 @@ export const TopThreatHuntingLeads: React.FC<TopThreatHuntingLeadsProps> = ({
                     <EuiPanel paddingSize="m" hasBorder={false} hasShadow={false}>
                       <EuiSkeletonTitle size="xs" />
                       <EuiSpacer size="s" />
-                      <EuiSkeletonText lines={3} size="s" />
+                      <EuiSkeletonText lines={4} size="s" />
                     </EuiPanel>
                   </EuiFlexItem>
                 ))}

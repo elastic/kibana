@@ -17,6 +17,7 @@ export interface UiamOAuthClientLogo {
 export interface UiamOAuthConnectionsSummary {
   active?: string[];
   revoked?: string[];
+  expired?: string[];
 }
 
 export type UiamOAuthClientType = 'public' | 'confidential';
@@ -40,12 +41,15 @@ export interface UiamOAuthClientResponse {
 export interface UiamOAuthConnectionResponse {
   id: string;
   client_id: string;
+  client_name?: string;
   name?: string;
   resource: string;
   creation?: string;
   revoked?: boolean;
   revocation?: string;
   revocation_reason?: string;
+  expired?: boolean;
+  expiration?: string;
   scopes?: string[];
   user_id?: string;
 }
@@ -71,6 +75,16 @@ export interface UpdateUiamOAuthConnectionParams {
   name: string;
 }
 
+export interface UiamUserInfo {
+  email?: string;
+  first_name?: string;
+  last_name?: string;
+}
+
+export interface UiamResolvedUsersResponse {
+  users: Record<string, UiamUserInfo>;
+}
+
 /**
  * Interface for managing UIAM OAuth client and connection operations.
  */
@@ -86,13 +100,15 @@ export interface UiamOAuthType {
   ): Promise<UiamOAuthClientResponse | null>;
 
   /**
-   * Lists OAuth clients, optionally filtered by client ID.
+   * Lists OAuth clients, optionally filtered by client ID or project ID.
    * @param request The Kibana request containing the authorization header.
    * @param clientId Optional client ID filter.
+   * @param projectId Optional project ID filter.
    */
   listClients(
     request: KibanaRequest,
-    clientId?: string
+    clientId?: string,
+    projectId?: string
   ): Promise<{ clients: UiamOAuthClientResponse[] } | null>;
 
   /**
@@ -158,4 +174,14 @@ export interface UiamOAuthType {
     connectionId: string,
     reason?: string
   ): Promise<UiamOAuthConnectionResponse | null>;
+
+  /**
+   * Resolves one or more user IDs into basic user information.
+   * @param request The Kibana request containing the authorization header.
+   * @param userIds The user IDs to resolve.
+   */
+  resolveUsers(
+    request: KibanaRequest,
+    userIds: string[]
+  ): Promise<UiamResolvedUsersResponse | null>;
 }

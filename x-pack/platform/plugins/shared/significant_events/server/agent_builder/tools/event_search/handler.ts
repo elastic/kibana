@@ -5,29 +5,42 @@
  * 2.0.
  */
 
-import type { SignificantEvent } from '@kbn/significant-events-schema';
+import type { SignificantEvent, SignificantEventStatus } from '@kbn/significant-events-schema';
 import type { EventClient } from '../../../lib/significant_events/events';
 
+export interface EventSearchInput {
+  query?: string;
+  page?: number;
+  per_page?: number;
+  stream_names?: string[];
+  status?: SignificantEventStatus;
+}
 export async function searchEventsToolHandler({
   eventClient,
   params,
 }: {
   eventClient: EventClient;
-  params: {
-    query?: string;
-    stream_name?: string;
-    status?: string[];
-    page?: number;
-    per_page?: number;
-  };
-}): Promise<{ events: SignificantEvent[]; page: number; per_page: number; total: number }> {
-  const response = await eventClient.findLatestPaginated({
+  params: EventSearchInput;
+}): Promise<{
+  events: SignificantEvent[];
+  page: number;
+  per_page: number;
+  total: number;
+}> {
+  const sharedParams = {
     page: params.page,
     perPage: params.per_page,
     search: params.query,
-    stream: params.stream_name ? [params.stream_name] : undefined,
-    status: params.status,
-  });
+    stream: params.stream_names,
+  };
+
+  const response =
+    params.status !== undefined
+      ? await eventClient.findLatestByCurrentStatePaginated({
+          ...sharedParams,
+          status: params.status ? [params.status] : undefined,
+        })
+      : await eventClient.findLatestPaginated(sharedParams);
 
   return {
     events: response.hits,

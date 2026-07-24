@@ -46,9 +46,9 @@ export const upsertFeatureRoute = createServerRoute({
     server,
   }): Promise<{ acknowledged: boolean }> => {
     const scopedClients = await getScopedClients({ request });
-    const { licensing, uiSettingsClient, streamsClient } = scopedClients;
+    const { licensing, streamsClient } = scopedClients;
 
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    await assertSignificantEventsAccess({ server, licensing });
     await streamsClient.ensureStream(params.path.name);
 
     const kiClient = await scopedClients.getKnowledgeIndicatorClient();
@@ -105,15 +105,27 @@ export const deleteFeatureRoute = createServerRoute({
     request,
     getScopedClients,
     server,
+    logger,
   }): Promise<{ acknowledged: boolean }> => {
     const scopedClients = await getScopedClients({ request });
-    const { licensing, uiSettingsClient, streamsClient } = scopedClients;
+    const { licensing, streamsClient } = scopedClients;
 
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    await assertSignificantEventsAccess({ server, licensing });
     await streamsClient.ensureStream(params.path.name);
 
     const kiClient = await scopedClients.getKnowledgeIndicatorClient();
     await kiClient.bulk(params.path.name, [{ delete: { type: 'feature', id: params.path.id } }]);
+
+    try {
+      const definition = await streamsClient.getStream(params.path.name);
+      await kiClient.reconcileStream(definition);
+    } catch (err) {
+      logger.warn(
+        `reconcileStream after feature delete failed for stream "${params.path.name}": ${
+          err instanceof Error ? err.message : String(err)
+        }`
+      );
+    }
 
     return { acknowledged: true };
   },
@@ -148,9 +160,9 @@ export const listFeaturesRoute = createServerRoute({
     server,
   }): Promise<{ features: Feature[] }> => {
     const scopedClients = await getScopedClients({ request });
-    const { licensing, uiSettingsClient, streamsClient } = scopedClients;
+    const { licensing, streamsClient } = scopedClients;
 
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    await assertSignificantEventsAccess({ server, licensing });
     await streamsClient.ensureStream(params.path.name);
 
     const kiClient = await scopedClients.getKnowledgeIndicatorClient();
@@ -205,7 +217,6 @@ export const listAllFeaturesRoute = createServerRoute({
     await assertSignificantEventsAccess({
       server,
       licensing: scopedClients.licensing,
-      uiSettingsClient: scopedClients.uiSettingsClient,
     });
 
     const streams = await scopedClients.streamsClient.listStreams();
@@ -271,13 +282,14 @@ export const bulkFeaturesRoute = createServerRoute({
     request,
     getScopedClients,
     server,
+    logger,
   }): Promise<{ acknowledged: boolean }> => {
     const scopedClients = await getScopedClients({
       request,
     });
-    const { streamsClient, licensing, uiSettingsClient } = scopedClients;
+    const { streamsClient, licensing } = scopedClients;
 
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    await assertSignificantEventsAccess({ server, licensing });
 
     const {
       path: { name },
@@ -291,6 +303,20 @@ export const bulkFeaturesRoute = createServerRoute({
       'delete' in op ? { delete: { type: 'feature' as const, id: op.delete.id } } : op
     );
     await kiClient.bulk(name, kiOps);
+
+    const hasShrinkingOp = operations.some((op) => 'delete' in op || 'exclude' in op);
+    if (hasShrinkingOp) {
+      try {
+        const definition = await streamsClient.getStream(name);
+        await kiClient.reconcileStream(definition);
+      } catch (err) {
+        logger.warn(
+          `reconcileStream after bulk feature ops failed for stream "${name}": ${
+            err instanceof Error ? err.message : String(err)
+          }`
+        );
+      }
+    }
 
     return { acknowledged: true };
   },
@@ -332,9 +358,9 @@ export const bulkFeaturesAcrossStreamsRoute = createServerRoute({
     const scopedClients = await getScopedClients({
       request,
     });
-    const { licensing, uiSettingsClient } = scopedClients;
+    const { licensing, streamsClient } = scopedClients;
 
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    await assertSignificantEventsAccess({ server, licensing });
 
     const kiClient = await scopedClients.getKnowledgeIndicatorClient();
 
@@ -376,11 +402,16 @@ export const bulkFeaturesAcrossStreamsRoute = createServerRoute({
     let failed = 0;
     let skipped = skippedFromLookup;
 
+    const streamsWithShrinkingOps = new Set<string>();
+
     for (const [streamName, ops] of Object.entries(byStream)) {
       try {
         const { applied, skipped: streamSkipped } = await kiClient.bulk(streamName, ops);
         succeeded += applied;
         skipped += streamSkipped;
+        if (ops.some((op) => 'delete' in op || 'exclude' in op)) {
+          streamsWithShrinkingOps.add(streamName);
+        }
       } catch (error) {
         logger.error(
           `Bulk feature operation failed for stream ${streamName}: ${
@@ -388,6 +419,19 @@ export const bulkFeaturesAcrossStreamsRoute = createServerRoute({
           }`
         );
         failed += ops.length;
+      }
+    }
+
+    for (const streamName of streamsWithShrinkingOps) {
+      try {
+        const definition = await streamsClient.getStream(streamName);
+        await kiClient.reconcileStream(definition);
+      } catch (err) {
+        logger.warn(
+          `reconcileStream after bulk cross-stream feature ops failed for stream "${streamName}": ${
+            err instanceof Error ? err.message : String(err)
+          }`
+        );
       }
     }
 

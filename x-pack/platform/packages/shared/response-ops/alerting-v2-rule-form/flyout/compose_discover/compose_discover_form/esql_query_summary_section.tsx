@@ -6,21 +6,11 @@
  */
 
 import React from 'react';
-import {
-  EuiButton,
-  EuiButtonIcon,
-  EuiCallOut,
-  EuiCopy,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPanel,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
+import { EuiButton, EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { RuleQuery } from '../../../form/types';
-import { QuerySummary } from '../query_summary';
+import { QueryBlock, QuerySummary } from '../query_summary';
 
 /**
  * Read-only summary of the applied ES|QL query on step 1. The heuristic split
@@ -64,10 +54,6 @@ const NOT_DEFINED = i18n.translate('xpack.alertingV2.composeDiscover.esqlSummary
   defaultMessage: 'Not defined',
 });
 
-const COPY_LABEL = i18n.translate('xpack.alertingV2.composeDiscover.esqlSummary.copyAriaLabel', {
-  defaultMessage: 'Copy query',
-});
-
 const DESCRIPTIONS: Record<EsqlSummaryState, string> = {
   before_apply: i18n.translate(
     'xpack.alertingV2.composeDiscover.esqlSummary.beforeApplyDescription',
@@ -91,48 +77,6 @@ const DESCRIPTIONS: Record<EsqlSummaryState, string> = {
   empty: i18n.translate('xpack.alertingV2.composeDiscover.esqlSummary.emptyDescription', {
     defaultMessage: 'Define an ES|QL query in the editor',
   }),
-};
-
-interface QueryBlockProps {
-  label: React.ReactNode;
-  query: string;
-}
-
-const QueryBlock: React.FC<QueryBlockProps> = ({ label, query }) => {
-  const hasQuery = query.trim().length > 0;
-  return (
-    <>
-      <EuiFlexGroup
-        justifyContent="spaceBetween"
-        alignItems="center"
-        responsive={false}
-        gutterSize="xs"
-      >
-        <EuiFlexItem grow={false}>
-          <EuiText size="xs" color="subdued">
-            <strong>{label}</strong>
-          </EuiText>
-        </EuiFlexItem>
-        {hasQuery && (
-          <EuiFlexItem grow={false}>
-            <EuiCopy textToCopy={query}>
-              {(copy) => (
-                <EuiButtonIcon
-                  iconType="copyClipboard"
-                  color="text"
-                  aria-label={COPY_LABEL}
-                  onClick={copy}
-                  data-test-subj="esqlSummaryCopy"
-                />
-              )}
-            </EuiCopy>
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-      <EuiSpacer size="xs" />
-      <QuerySummary query={query} emptyMessage={NOT_DEFINED} />
-    </>
-  );
 };
 
 const EmptyCallout: React.FC = () => (
@@ -261,6 +205,7 @@ export const EsqlQuerySummarySection: React.FC<EsqlQuerySummarySectionProps> = (
               />
             }
             query={baseQuery}
+            emptyMessage={NOT_DEFINED}
           />
           <EuiSpacer size="m" />
           <QueryBlock
@@ -271,14 +216,11 @@ export const EsqlQuerySummarySection: React.FC<EsqlQuerySummarySectionProps> = (
               />
             }
             query={alertBlock}
+            emptyMessage={NOT_DEFINED}
           />
         </>
       ) : (
-        <EuiPanel color="subdued" paddingSize="m">
-          <EuiText size="s" color="subdued">
-            {NOT_DEFINED}
-          </EuiText>
-        </EuiPanel>
+        <QuerySummary query="" emptyMessage={NOT_DEFINED} />
       )}
 
       <EuiSpacer size="s" />

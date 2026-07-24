@@ -4,15 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
-import { agentConfigurationIntakeRt } from '@kbn/apm-common';
-import { toBooleanRt } from '@kbn/io-ts-utils';
+import { z } from '@kbn/zod/v4';
+import { BooleanFromString } from '@kbn/zod-helpers/v4';
+import { agentConfigurationIntakeSchema } from '@kbn/apm-common';
 import { defineRoute } from '../types';
 
 export const createOrUpdateAgentConfigurationRoute = defineRoute<void>()({
   endpoint: 'PUT /api/apm/settings/agent-configuration 2023-10-31',
-  params: t.intersection([
-    t.partial({ query: t.partial({ overwrite: toBooleanRt }) }),
-    t.type({ body: agentConfigurationIntakeRt }),
-  ]),
+  params: z.object({
+    query: z.object({ overwrite: BooleanFromString.optional() }).optional(),
+    body: agentConfigurationIntakeSchema,
+  }),
 });

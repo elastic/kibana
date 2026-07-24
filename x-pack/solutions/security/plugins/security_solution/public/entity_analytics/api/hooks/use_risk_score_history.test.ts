@@ -73,13 +73,12 @@ describe('useRiskScoreHistory', () => {
     );
   });
 
-  it('threads scoreType, pageSize and includeContributions through to the API call', async () => {
+  it('threads scoreType and includeContributions through to the API call', async () => {
     const { result } = renderHook(
       () =>
         useRiskScoreHistory({
           ...defaultParams,
           scoreType: 'base',
-          pageSize: 1,
           includeContributions: true,
         }),
       { wrapper: TestProviders }
@@ -90,7 +89,6 @@ describe('useRiskScoreHistory', () => {
       expect.objectContaining({
         params: expect.objectContaining({
           scoreType: 'base',
-          pageSize: 1,
           includeContributions: true,
         }),
       })

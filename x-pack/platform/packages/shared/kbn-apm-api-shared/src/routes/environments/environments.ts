@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
+import { z } from '@kbn/zod/v4';
 import type { Environment } from '@kbn/apm-types';
 import { defineRoute } from '../types';
-import { rangeRt } from '../../default_api_types';
+import { rangeSchema } from '../../default_api_types';
 
 export interface EnvironmentsResponse {
   environments: Environment[];
@@ -15,7 +15,7 @@ export interface EnvironmentsResponse {
 
 export const environmentsRoute = defineRoute<EnvironmentsResponse>()({
   endpoint: 'GET /internal/apm/environments',
-  params: t.type({
-    query: t.intersection([t.partial({ serviceName: t.string }), rangeRt]),
+  params: z.object({
+    query: rangeSchema.extend({ serviceName: z.string().optional() }),
   }),
 });

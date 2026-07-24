@@ -6,7 +6,7 @@
  */
 
 import type { ToolCallback, ToolDefinition } from '@kbn/inference-common';
-import type { MemoryService } from '../memory';
+import type { MemoryService } from '../../memory_and_investigation/lib/memory';
 
 /**
  * Memory tool definitions and callbacks for use in discovery flows

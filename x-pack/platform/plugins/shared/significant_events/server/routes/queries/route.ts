@@ -15,6 +15,7 @@ import {
 import { z } from '@kbn/zod/v4';
 import { STREAMS_API_PRIVILEGES } from '../../../common/constants';
 import { QueryNotFoundError } from '../../lib/errors/query_not_found_error';
+import { queryFromLink } from '../../lib/knowledge_indicators/knowledge_indicator_client/serializers';
 import {
   upsertStreamQueryRequest,
   bulkStreamQueriesRequest,
@@ -94,8 +95,8 @@ const listQueriesRoute = createServerRoute({
   },
   async handler({ params, request, getScopedClients, server }): Promise<ListQueriesResponse> {
     const scopedClients = await getScopedClients({ request });
-    const { streamsClient, licensing, uiSettingsClient } = scopedClients;
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    const { streamsClient, licensing } = scopedClients;
+    await assertSignificantEventsAccess({ server, licensing });
     await streamsClient.ensureStream(params.path.name);
 
     const {
@@ -160,12 +161,12 @@ const upsertQueryRoute = createServerRoute({
   }),
   handler: async ({ params, request, getScopedClients, server }): Promise<UpsertQueryResponse> => {
     const scopedClients = await getScopedClients({ request });
-    const { streamsClient, licensing, uiSettingsClient } = scopedClients;
+    const { streamsClient, licensing } = scopedClients;
     const {
       path: { name: streamName, queryId },
       body,
     } = params;
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    await assertSignificantEventsAccess({ server, licensing });
 
     const definition = await streamsClient.getStream(streamName);
 
@@ -244,8 +245,8 @@ const deleteQueryRoute = createServerRoute({
     server,
   }): Promise<DeleteQueryResponse> => {
     const scopedClients = await getScopedClients({ request });
-    const { streamsClient, licensing, uiSettingsClient } = scopedClients;
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    const { streamsClient, licensing } = scopedClients;
+    await assertSignificantEventsAccess({ server, licensing });
 
     const {
       path: { queryId, name: streamName },
@@ -254,7 +255,10 @@ const deleteQueryRoute = createServerRoute({
     const definition = await streamsClient.getStream(streamName);
 
     const kiClient = await scopedClients.getKnowledgeIndicatorClient();
-    const queryLink = await kiClient.bulkGetQueriesByIds(streamName, [queryId]);
+    // includeExpired: explicit-id action, so an expired query must stay reachable.
+    const queryLink = await kiClient.bulkGetQueriesByIds(streamName, [queryId], {
+      includeExpired: true,
+    });
     if (queryLink.length === 0) {
       throw new QueryNotFoundError(`Query [${queryId}] not found in stream [${streamName}]`);
     }
@@ -334,8 +338,8 @@ const bulkQueriesRoute = createServerRoute({
     server,
   }): Promise<BulkUpdateAssetsResponse> => {
     const scopedClients = await getScopedClients({ request });
-    const { streamsClient, licensing, uiSettingsClient } = scopedClients;
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    const { streamsClient, licensing } = scopedClients;
+    await assertSignificantEventsAccess({ server, licensing });
 
     const {
       path: { name: streamName },
@@ -391,10 +395,11 @@ const bulkQueriesRoute = createServerRoute({
     );
     const { [streamName]: currentLinks } = await kiClient.getStreamToQueryLinksMap([streamName]);
     const currentIds = new Set(currentLinks.map((l) => l.query.id));
+    // expires_at lives on the link, not `l.query` — using `l.query` alone would drop it.
     const nextQueries: StreamQuery[] = [
       ...currentLinks
         .filter((l) => !deleteIds.has(l.query.id))
-        .map((l) => indexQueriesById.get(l.query.id) ?? l.query),
+        .map((l) => indexQueriesById.get(l.query.id) ?? queryFromLink(l)),
       ...Array.from(indexQueriesById.values()).filter((q) => !currentIds.has(q.id)),
     ];
     await kiClient.syncQueries(definition, nextQueries, { currentLinks });

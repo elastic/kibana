@@ -13,6 +13,7 @@ export {
   buildVegaSavedVis,
   extractVegaSpecFromSavedVis,
   normalizeVegaConfig,
+  prettyPrintVegaSpec,
   VEGA_VIS_TYPE,
   type VegaConfig,
   type VegaSavedVis,

@@ -34,6 +34,9 @@ interface KnowledgeIndicatorFeaturesIdentifiedProps {
   docs_count: number;
   features_new: number;
   features_updated: number;
+  features_remapped: number;
+  semantic_verify_calls: number;
+  semantic_verify_reuses: number;
   total_filters: number;
   filters_capped: boolean;
   has_filtered_documents: boolean;
@@ -73,14 +76,14 @@ interface AgentToolEventCreateProps {
 
 interface AgentToolEventStatusUpdateProps {
   success: boolean;
-  event_id: string;
+  event_uuid: string;
   status: SignificantEventStatus;
   error_message?: string;
 }
 
 interface AgentToolEventInvestigationAttachProps {
   success: boolean;
-  event_id: string;
+  event_uuid: string;
   workflow_execution_id: string;
   error_message?: string;
 }
@@ -112,8 +115,12 @@ interface DetectionScanProps {
   duration_ms: number;
   /** Number of distinct rules covered by the change-point scan. */
   rules_scanned: number;
-  /** Resolved alerting engine backing the read: `v2` reads `.rule-events`, `v1` reads `.alerts-*`. */
-  alerting_engine: 'v1' | 'v2';
+  /** Rule-backed query count using the critical 1m cadence. */
+  critical_rule_count: number;
+  /** Rule-backed query count using the default 5m cadence. */
+  default_rule_count: number;
+  /** Alerting engine backing the read. */
+  alerting_engine: 'v2';
   /** The alerts-source index that was read (e.g. `.rule-events`). */
   alerts_source_index: string;
   /** The scan lookback window, e.g. `now-30m`. */
@@ -133,12 +140,42 @@ interface KnowledgeIndicatorOnboardingScheduledProps {
   skip_queries: boolean;
 }
 
+interface AgentToolEventWriteProps {
+  success: boolean;
+  event_id: string;
+  status: SignificantEventStatus;
+  written: boolean;
+  stream_names: string[];
+  error_message?: string;
+}
+
+interface AgentToolDiscoveryWriteProps {
+  success: boolean;
+  kind: 'discovery' | 'clearance' | 'handled';
+  event_id: string;
+  stream_names: string[];
+  written: boolean;
+  error_message?: string;
+}
+
+interface AgentToolEventSearchProps {
+  success: boolean;
+  result_count: number;
+  has_query: boolean;
+  has_stream_filter: boolean;
+  status_filter?: SignificantEventStatus;
+  error_message?: string;
+}
+
 export {
   type AgentBuilderKnowledgeIndicatorCreatedProps,
   type AgentToolKnowledgeIndicatorIdentificationStartedProps,
+  type AgentToolDiscoveryWriteProps,
   type AgentToolEventCreateProps,
   type AgentToolEventInvestigationAttachProps,
+  type AgentToolEventSearchProps,
   type AgentToolEventStatusUpdateProps,
+  type AgentToolEventWriteProps,
   type CodeAnalysisGroundingProps,
   type DetectionScanProps,
   type DiscoveryTriggeredProps,

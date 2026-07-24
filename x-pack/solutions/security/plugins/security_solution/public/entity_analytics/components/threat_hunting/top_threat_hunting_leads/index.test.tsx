@@ -6,10 +6,13 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render as rtlRender, screen, fireEvent } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
 
 import { TopThreatHuntingLeads } from '.';
 import type { HuntingLead, Observation } from './types';
+
+const render = (ui: React.ReactElement) => rtlRender(ui, { wrapper: I18nProvider });
 
 jest.mock('../../../../common/lib/kibana', () => ({
   useKibana: () => ({
@@ -19,6 +22,8 @@ jest.mock('../../../../common/lib/kibana', () => ({
       },
     },
   }),
+  useDateFormat: jest.fn(() => 'MMM D, YYYY @ HH:mm:ss.SSS'),
+  useTimeZone: jest.fn(() => 'UTC'),
 }));
 
 const mockOpenFlyout = jest.fn();
@@ -207,11 +212,20 @@ describe('TopThreatHuntingLeads', () => {
     expect(screen.queryByTestId('generateLeadsButton')).not.toBeInTheDocument();
   });
 
-  it('shows "Open GenAI Settings" button (not "Generate") under Agent experience when no valid connector is selected', () => {
+  it('shows disabled "Generate" and Options under Agent experience when no connector is available', () => {
     render(<TopThreatHuntingLeads {...defaultProps} connectorId="" hasValidConnector={false} />);
 
-    expect(screen.getByTestId('openGenAiSettingsButton')).toBeInTheDocument();
-    expect(screen.queryByTestId('generateLeadsButton')).not.toBeInTheDocument();
+    expect(
+      screen.getByText(
+        'No AI connector configured. Add a connector in Options to start generating leads'
+      )
+    ).toBeInTheDocument();
+    expect(screen.queryByTestId('openGenAiSettingsButton')).not.toBeInTheDocument();
+
+    const generateButton = screen.getByTestId('generateLeadsButton');
+    expect(generateButton).toBeInTheDocument();
+    expect(generateButton).toBeDisabled();
+    expect(screen.getByTestId('leadsOptionsButton')).toBeInTheDocument();
   });
 
   it('shows "Generate" button when no leads exist and calls onGenerate', () => {
@@ -399,5 +413,29 @@ describe('TopThreatHuntingLeads', () => {
     expect(mockOpenFlyout).not.toHaveBeenCalled();
     expect(onLeadClick).toHaveBeenCalledTimes(1);
     expect(onLeadClick).toHaveBeenCalledWith(lead);
+  });
+
+  it('toggles collapse and expand more than once without requiring a page refresh', () => {
+    const storageKey = 'securitySolution.entityAnalytics.topThreatHuntingLeads.expanded';
+    window.localStorage.removeItem(storageKey);
+
+    const leads = [createMockLead({ id: 'lead-1', title: 'Lead One' })];
+    render(<TopThreatHuntingLeads {...defaultProps} leads={leads} totalCount={1} />);
+
+    expect(screen.getByTestId('leadCard-lead-1')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Collapse' }));
+    expect(screen.queryByTestId('leadCard-lead-1')).not.toBeInTheDocument();
+    expect(window.localStorage.getItem(storageKey)).toBe('false');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Expand' }));
+    expect(screen.getByTestId('leadCard-lead-1')).toBeInTheDocument();
+    expect(window.localStorage.getItem(storageKey)).toBe('true');
+
+    // Second collapse must still work — previously the react-use functional
+    // updater stuck on a stale closed-over value after the first toggle.
+    fireEvent.click(screen.getByRole('button', { name: 'Collapse' }));
+    expect(screen.queryByTestId('leadCard-lead-1')).not.toBeInTheDocument();
+    expect(window.localStorage.getItem(storageKey)).toBe('false');
   });
 });

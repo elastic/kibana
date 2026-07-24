@@ -90,7 +90,11 @@ const toPhaseForFlyout = (phase: IlmPhase | undefined): IlmPolicyPhaseForFlyout 
   };
 };
 
-export function registerGetIlmPoliciesRoute({ router, lib: { handleEsError } }: RouteDependencies) {
+export function registerGetIlmPoliciesRoute({
+  router,
+  config,
+  lib: { handleEsError },
+}: RouteDependencies) {
   router.get(
     {
       path: addBasePath('/data_streams/ilm_policies'),
@@ -106,11 +110,18 @@ export function registerGetIlmPoliciesRoute({ router, lib: { handleEsError } }: 
       const { client } = (await context.core).elasticsearch;
 
       try {
-        const policiesByName = await client.asCurrentUser.ilm.getLifecycle();
+        const hasManageIlm = config.isSecurityEnabled()
+          ? (await client.asCurrentUser.security.hasPrivileges({ cluster: ['manage_ilm'] }))
+              .has_all_requested
+          : true;
+
+        // Only fetch policies when the user can manage ILM.
+        const policiesByName = hasManageIlm ? await client.asCurrentUser.ilm.getLifecycle() : {};
 
         const policies: IlmPolicyForFlyout[] = Object.entries(policiesByName).map(
           ([name, policyEntry]) => {
             const phases = policyEntry.policy?.phases;
+            const isManaged = policyEntry.policy?._meta?.managed === true;
 
             return {
               name,
@@ -122,11 +133,12 @@ export function registerGetIlmPoliciesRoute({ router, lib: { handleEsError } }: 
                 delete: toPhaseForFlyout(phases?.delete),
               },
               serializedPolicy: toSerializedPolicy(name, policyEntry),
+              ...(isManaged ? { isManaged: true } : {}),
             };
           }
         );
 
-        return response.ok({ body: policies });
+        return response.ok({ body: { hasManageIlm, policies } });
       } catch (error) {
         return handleEsError({ error, response });
       }

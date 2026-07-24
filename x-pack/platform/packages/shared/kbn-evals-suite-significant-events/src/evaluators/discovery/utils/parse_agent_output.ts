@@ -5,73 +5,112 @@
  * 2.0.
  */
 
+import { platformSignificantEventsTools } from '@kbn/agent-builder-common';
+import type { ConverseStep } from '@kbn/evals';
 import type { Discovery, SignificantEvent } from '@kbn/significant-events-schema';
 
-/**
- * The discovery discovery/judge agents have no emit tool and no enforced `structured_output` on
- * the public converse API, so (per their instructions) they return their result as a single JSON
- * object in the final agent message. These helpers recover that array. Conformance of each
- * item is graded separately by the `schema_validity` evaluator, so parsing casts loosely and returns
- * `[]` when the message is missing or not valid JSON.
- */
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null;
+interface DiscoveryWriteToolResult {
+  data?: {
+    results?: DiscoveryWriteItemResult[];
+  };
 }
 
-/**
- * Try to parse a JSON object from a text candidate (fenced block content or raw message).
- * Tolerates stray prose by slicing between the outermost braces.
- */
-function tryParseJsonObject(candidate: string): Record<string, unknown> | undefined {
-  const start = candidate.indexOf('{');
-  const end = candidate.lastIndexOf('}');
-  if (start === -1 || end === -1 || end < start) {
-    return undefined;
-  }
-  try {
-    const parsed = JSON.parse(candidate.slice(start, end + 1));
-    return isRecord(parsed) ? parsed : undefined;
-  } catch {
-    return undefined;
-  }
+interface EventsWriteToolResult {
+  data?: {
+    results?: EventsWriteItemResult[];
+  };
 }
 
-/**
- * Extract the first top-level JSON object from an agent message. Scans all ```json fenced
- * blocks in order and returns the first that parses as a valid JSON object, falling back to the
- * raw message. This prevents a preamble code fence (e.g. a tool-call example) from shadowing the
- * actual JSON payload when it appears later in the message.
- */
-function extractJsonObject(message: string): Record<string, unknown> | undefined {
-  if (!message) {
-    return undefined;
-  }
+type DiscoveryWriteItemResult = Pick<Discovery, 'event_id' | 'discovery_id'> & {
+  index: number;
+  written: boolean;
+  reason?: 'duplicate_within_window' | 'bulk_error';
+};
 
-  const fenceRegex = /```(?:json)?\s*([\s\S]*?)```/gi;
-  let match: RegExpExecArray | null;
-  while ((match = fenceRegex.exec(message)) !== null) {
-    const parsed = tryParseJsonObject(match[1]);
-    if (parsed) {
-      return parsed;
+type EventsWriteItemResult =
+  | {
+      index: number;
+      event_uuid: string;
+      event_id: string;
+      written: true;
     }
+  | {
+      index: number;
+      event_id: string;
+      written: false;
+      reason: 'bulk_error';
+    };
+
+interface IndexedResult {
+  index: number;
+}
+
+const toolCallSteps = (steps: ConverseStep[], toolId: string) =>
+  steps.filter((step) => step.type === 'tool_call' && step.tool_id === toolId && step.params);
+
+const getBulkItems = <T>(params: Record<string, unknown> | undefined, toolId: string): T[] => {
+  if (!Array.isArray(params?.items)) {
+    throw new Error(`${toolId}: expected params.items to be an array, got ${typeof params?.items}`);
   }
+  return params.items as T[];
+};
 
-  return tryParseJsonObject(message);
-}
+const validateAlignedResults = <T extends IndexedResult>(
+  results: T[],
+  itemCount: number,
+  toolId: string
+): T[] => {
+  if (results.length !== itemCount || results.some((result, index) => result.index !== index)) {
+    throw new Error(`${toolId} input and result arrays are not aligned`);
+  }
+  return results;
+};
 
-function parseArrayProperty<T>(message: string, key: string): T[] {
-  const obj = extractJsonObject(message);
-  const value = obj?.[key];
-  return Array.isArray(value) ? (value as T[]) : [];
-}
+/**
+ * Extract discoveries from `discovery_write` tool call steps.
+ */
+export const extractDiscoveriesFromToolCall = (steps: ConverseStep[]): Discovery[] =>
+  toolCallSteps(steps, platformSignificantEventsTools.discoveryWrite).flatMap((step) => {
+    const items = getBulkItems<Partial<Discovery>>(step.params, 'discovery_write');
+    const toolResult = (step.results?.[0] as DiscoveryWriteToolResult | undefined)?.data;
+    const results = toolResult?.results;
+    if (!Array.isArray(results)) {
+      throw new Error('discovery_write input and result arrays are not aligned');
+    }
+    return validateAlignedResults(results, items.length, 'discovery_write')
+      .map((result, index) =>
+        result.reason === 'bulk_error'
+          ? undefined
+          : ({
+              ...items[index],
+              event_id: result.event_id,
+              discovery_id: result.discovery_id,
+            } as Discovery)
+      )
+      .filter((discovery): discovery is Discovery => discovery !== undefined);
+  });
 
-/** Parse the discovery's `{ "discoveries": [...] }` message into `Discovery[]`. */
-export function parseDiscoveries(message: string): Discovery[] {
-  return parseArrayProperty<Discovery>(message, 'discoveries');
-}
-
-/** Parse the judge's `{ "significant_events": [...] }` message into `SignificantEvent[]`. */
-export function parseSignificantEvents(message: string): SignificantEvent[] {
-  return parseArrayProperty<SignificantEvent>(message, 'significant_events');
-}
+/**
+ * Extract significant events from `events_write` tool call steps.
+ * Merges generated identifiers from successful tool results into their corresponding inputs.
+ */
+export const extractSignificantEventsFromToolCall = (steps: ConverseStep[]): SignificantEvent[] =>
+  toolCallSteps(steps, platformSignificantEventsTools.eventsWrite).flatMap((step) => {
+    const items = getBulkItems<Partial<SignificantEvent>>(step.params, 'events_write');
+    const toolResult = (step.results?.[0] as EventsWriteToolResult | undefined)?.data;
+    const results = toolResult?.results;
+    if (!Array.isArray(results)) {
+      throw new Error('events_write input and result arrays are not aligned');
+    }
+    return validateAlignedResults(results, items.length, 'events_write')
+      .map((result, index) =>
+        result.written
+          ? ({
+              ...items[index],
+              event_id: result.event_id,
+              event_uuid: result.event_uuid,
+            } as SignificantEvent)
+          : undefined
+      )
+      .filter((event): event is SignificantEvent => event !== undefined);
+  });

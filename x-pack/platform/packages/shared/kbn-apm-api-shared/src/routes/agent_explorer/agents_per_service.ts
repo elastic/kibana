@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
+import { z } from '@kbn/zod/v4';
 import type { AgentName } from '@kbn/apm-types';
-import { environmentRt } from '@kbn/apm-types';
+import { environmentSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
-import { kueryRt, rangeRt, probabilityRt } from '../../default_api_types';
+import { kuerySchema, rangeSchema, probabilitySchema } from '../../default_api_types';
 
 export interface AgentExplorerAgentsResponse {
   items: Array<{
@@ -25,16 +25,10 @@ export interface AgentExplorerAgentsResponse {
 
 export const agentsPerServiceRoute = defineRoute<AgentExplorerAgentsResponse>()({
   endpoint: 'GET /internal/apm/get_agents_per_service',
-  params: t.type({
-    query: t.intersection([
-      environmentRt,
-      kueryRt,
-      rangeRt,
-      probabilityRt,
-      t.partial({
-        serviceName: t.string,
-        agentLanguage: t.string,
-      }),
-    ]),
+  params: z.object({
+    query: environmentSchema.merge(kuerySchema).merge(rangeSchema).merge(probabilitySchema).extend({
+      serviceName: z.string().optional(),
+      agentLanguage: z.string().optional(),
+    }),
   }),
 });

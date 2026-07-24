@@ -12,7 +12,6 @@ import {
   AGENT_BUILDER_NAV_ENABLED_SETTING_ID,
   AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
   AGENT_BUILDER_BASH_SUPPORT_SETTING_ID,
-  AGENT_BUILDER_UIAM_OAUTH_CLIENT_MANAGEMENT_SETTING_ID,
   AGENT_BUILDER_TRACING_ENABLED_SETTING_ID,
   AGENT_BUILDER_TRACING_USER_PROMPTS_SETTING_ID,
   AGENT_BUILDER_TRACING_LLM_RESPONSES_SETTING_ID,
@@ -67,24 +66,6 @@ export const registerUISettings = ({ uiSettings }: { uiSettings: UiSettingsServi
       experimental: true,
       requiresPageReload: false,
       readonly: false,
-    },
-    [AGENT_BUILDER_UIAM_OAUTH_CLIENT_MANAGEMENT_SETTING_ID]: {
-      description: i18n.translate(
-        'xpack.agentBuilder.uiSettings.uiamOAuthClientManagement.description',
-        {
-          defaultMessage:
-            'Internal gate for UIAM OAuth client management endpoints and the Agent Builder MCP Clients UI. Not intended for end-user use.',
-        }
-      ),
-      name: i18n.translate('xpack.agentBuilder.uiSettings.uiamOAuthClientManagement.name', {
-        defaultMessage: 'UIAM OAuth client management',
-      }),
-      schema: schema.boolean(),
-      value: false,
-      technicalPreview: true,
-      requiresPageReload: true,
-      readonly: true,
-      readonlyMode: 'strict',
     },
     [AGENT_BUILDER_TRACING_ENABLED_SETTING_ID]: {
       name: i18n.translate('xpack.agentBuilder.uiSettings.tracing.enabled.name', {

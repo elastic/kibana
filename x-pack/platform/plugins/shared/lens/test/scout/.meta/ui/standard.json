@@ -1,5 +1,9 @@
 {
-  "sha1": "a26f587ab84f5dac6c9b839455fb090098178a3b",
+  "sha1": "8e6eccef43cd63e7f320251c5920cc1c25c75f59",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
   "tests": [
     {
       "id": "0c1ac4bcdc59b0c-2867e4a4bffc4e3",
@@ -11,6 +15,176 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/tests/esql_conversion_disabled.spec.ts",
         "line": 28,
+        "column": 7
+      }
+    },
+    {
+      "id": "9190711720c7a39-e5040a56b0ee7d7",
+      "title": "Lens Convert to ES|QL should display ES|QL conversion modal for inline visualizations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/tests/esql_conversion_enabled.spec.ts",
+        "line": 54,
+        "column": 7
+      }
+    },
+    {
+      "id": "9190711720c7a39-0e83d94e28c3793",
+      "title": "Lens Convert to ES|QL should update and reflect the visualization configuration after the conversion",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/tests/esql_conversion_enabled.spec.ts",
+        "line": 80,
+        "column": 7
+      }
+    },
+    {
+      "id": "9190711720c7a39-d972ca73bd4e33a",
+      "title": "Lens Convert to ES|QL should correctly cancel the conversion and close the flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/tests/esql_conversion_enabled.spec.ts",
+        "line": 119,
+        "column": 7
+      }
+    },
+    {
+      "id": "9190711720c7a39-cfb66e0984c0af4",
+      "title": "Lens Convert to ES|QL should disable Convert to ES|QL button for visualizations saved to library",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/tests/esql_conversion_enabled.spec.ts",
+        "line": 143,
+        "column": 7
+      }
+    },
+    {
+      "id": "06988c58167e13b-e3b22d6d08f1ea3",
+      "title": "Lens metric trendline with custom time field renders trendline when referenced data view time field is not timestamp",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/tests/metric_trendline_custom_time_field.spec.ts",
+        "line": 66,
+        "column": 9
+      }
+    },
+    {
+      "id": "8f9c3936788a3bd-105fe7bf8fcfb38",
+      "title": "Lens TSDB query and editor behavior defaults to median without warnings for non-rolled-up metrics",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/tests/tsdb/query_behavior.spec.ts",
+        "line": 69,
+        "column": 7
+      }
+    },
+    {
+      "id": "8f9c3936788a3bd-3c36dec4a485fe5",
+      "title": "Lens TSDB query and editor behavior defaults to average and shows warnings for rolled-up metrics",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/tests/tsdb/query_behavior.spec.ts",
+        "line": 96,
+        "column": 7
+      }
+    },
+    {
+      "id": "8f9c3936788a3bd-238c6acecdfe8f9",
+      "title": "Lens TSDB query and editor behavior allows supported operations and rejects unsupported operations for time series fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/tests/tsdb/query_behavior.spec.ts",
+        "line": 136,
+        "column": 7
+      }
+    },
+    {
+      "id": "8f9c3936788a3bd-587724d93d7d87b",
+      "title": "Lens TSDB query and editor behavior shows time series dimension group only for breakdown field picker",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/tests/tsdb/query_behavior.spec.ts",
+        "line": 219,
         "column": 7
       }
     }

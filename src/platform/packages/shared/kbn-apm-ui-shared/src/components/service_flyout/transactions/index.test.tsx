@@ -13,9 +13,10 @@ import type { HttpStart } from '@kbn/core-http-browser';
 import { LatencyAggregationType } from '@kbn/apm-types';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { ServiceFlyoutTransactionsSection } from '.';
-import { useServiceFlyoutTransactions } from './hooks/use_service_flyout_transactions';
+import { useServiceFlyoutTransactionData } from './hooks/use_service_flyout_transaction_data';
+import * as TransactionsTableModule from '../../transactions_table';
 
-jest.mock('./hooks/use_service_flyout_transactions');
+jest.mock('./hooks/use_service_flyout_transaction_data');
 
 const FIXTURE_ITEMS = [
   {
@@ -39,6 +40,7 @@ const FIXTURE_ITEMS = [
 const DEFAULT_HOOK_RESULT = {
   items: FIXTURE_ITEMS,
   isLoading: false,
+  isSparklineLoading: false,
   maxCountExceeded: false,
   hasActiveAlerts: true,
   error: undefined,
@@ -68,11 +70,11 @@ const BASE_PROPS = {
   locators,
 };
 
-const mockedUseServiceFlyoutTransactions = useServiceFlyoutTransactions as jest.Mock;
+const mockedUseServiceFlyoutTransactionData = useServiceFlyoutTransactionData as jest.Mock;
 
 describe('ServiceFlyoutTransactionsSection', () => {
   beforeEach(() => {
-    mockedUseServiceFlyoutTransactions.mockReturnValue(DEFAULT_HOOK_RESULT);
+    mockedUseServiceFlyoutTransactionData.mockReturnValue(DEFAULT_HOOK_RESULT);
   });
 
   it('renders transaction names as links when locators are provided', () => {
@@ -105,7 +107,7 @@ describe('ServiceFlyoutTransactionsSection', () => {
   });
 
   it('omits the alerts column when hasActiveAlerts is false', () => {
-    mockedUseServiceFlyoutTransactions.mockReturnValue({
+    mockedUseServiceFlyoutTransactionData.mockReturnValue({
       ...DEFAULT_HOOK_RESULT,
       hasActiveAlerts: false,
     });
@@ -124,9 +126,89 @@ describe('ServiceFlyoutTransactionsSection', () => {
     expect(badge.getAttribute('href')).toContain('frontend-node');
   });
 
+  describe('sparkline loading state', () => {
+    let capturedIsSparklineLoading: boolean | undefined;
+    let tableSpy: jest.SpyInstance;
+
+    beforeEach(() => {
+      capturedIsSparklineLoading = undefined;
+      tableSpy = jest
+        .spyOn(TransactionsTableModule, 'TransactionsTable')
+        .mockImplementation(({ isSparklineLoading }) => {
+          capturedIsSparklineLoading = isSparklineLoading;
+          return null as unknown as React.ReactElement;
+        });
+    });
+
+    afterEach(() => {
+      tableSpy.mockRestore();
+    });
+
+    it('passes isSparklineLoading={true} to TransactionsTable while detailed stats are loading', () => {
+      mockedUseServiceFlyoutTransactionData.mockReturnValue({
+        ...DEFAULT_HOOK_RESULT,
+        isSparklineLoading: true,
+      });
+
+      render(<ServiceFlyoutTransactionsSection {...BASE_PROPS} />);
+
+      expect(capturedIsSparklineLoading).toBe(true);
+    });
+
+    it('passes isSparklineLoading={false} to TransactionsTable once detailed stats have loaded', () => {
+      render(<ServiceFlyoutTransactionsSection {...BASE_PROPS} />);
+
+      expect(capturedIsSparklineLoading).toBe(false);
+    });
+  });
+
+  describe('items passthrough', () => {
+    let capturedItems: unknown[] = [];
+    let tableSpy: jest.SpyInstance;
+
+    beforeEach(() => {
+      capturedItems = [];
+      tableSpy = jest
+        .spyOn(TransactionsTableModule, 'TransactionsTable')
+        .mockImplementation(({ items }) => {
+          capturedItems = items;
+          return null as unknown as React.ReactElement;
+        });
+    });
+
+    afterEach(() => {
+      tableSpy.mockRestore();
+    });
+
+    it('passes items from the hook directly to TransactionsTable', () => {
+      render(<ServiceFlyoutTransactionsSection {...BASE_PROPS} />);
+
+      expect(capturedItems).toEqual(FIXTURE_ITEMS);
+    });
+
+    it('passes items with sparkline series when hook returns them', () => {
+      const itemsWithSeries = [
+        {
+          ...FIXTURE_ITEMS[0],
+          latency: { value: 1200000, series: { value: [{ x: 1, y: 200 }] } },
+        },
+        FIXTURE_ITEMS[1],
+      ];
+      mockedUseServiceFlyoutTransactionData.mockReturnValue({
+        ...DEFAULT_HOOK_RESULT,
+        items: itemsWithSeries,
+      });
+
+      render(<ServiceFlyoutTransactionsSection {...BASE_PROPS} />);
+
+      expect((capturedItems as any[])[0].latency.series).toEqual({ value: [{ x: 1, y: 200 }] });
+      expect((capturedItems as any[])[1].latency.series).toBeUndefined();
+    });
+  });
+
   describe('error state', () => {
     it('renders the error callout when the hook returns an error', () => {
-      mockedUseServiceFlyoutTransactions.mockReturnValue({
+      mockedUseServiceFlyoutTransactionData.mockReturnValue({
         ...DEFAULT_HOOK_RESULT,
         error: new Error('network error'),
         items: [],

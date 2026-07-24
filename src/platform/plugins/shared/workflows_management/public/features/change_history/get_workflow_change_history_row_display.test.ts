@@ -25,7 +25,7 @@ describe('getWorkflowChangeHistoryRowDisplay', () => {
     });
   });
 
-  it('maps current committed rows to version numbers', () => {
+  it('maps current committed rows to the current badge and version number', () => {
     expect(
       getWorkflowChangeHistoryRowDisplay({
         id: 'evt-current',
@@ -35,6 +35,8 @@ describe('getWorkflowChangeHistoryRowDisplay', () => {
     ).toEqual({
       kind: 'current',
       version: 3,
+      badgeLabel: CURRENT_VERSION_ONLY_BADGE,
+      badgeColor: 'hollow',
     });
   });
 
