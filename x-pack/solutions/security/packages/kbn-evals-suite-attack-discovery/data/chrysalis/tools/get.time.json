@@ -1,0 +1,19 @@
+{
+  "id": "get.time",
+  "type": "esql",
+  "description": "Get the current date and time (UTC). Use this for naming incident channels/cases and for timestamps in summaries.",
+  "tags": [
+    "utility",
+    "time"
+  ],
+  "configuration": {
+    "query": "ROW current_time = NOW(), timezone = \"UTC\"",
+    "params": {}
+  },
+  "readonly": false,
+  "schema": {
+    "type": "object",
+    "properties": {},
+    "description": "Parameters needed to execute the query"
+  }
+}

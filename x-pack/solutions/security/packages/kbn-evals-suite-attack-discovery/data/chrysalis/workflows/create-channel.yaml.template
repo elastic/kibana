@@ -1,0 +1,61 @@
+name: create-channel
+description: Create a Slack incident channel, invite the on-call responder, and post an incident message.
+enabled: true
+tags:
+  - security
+  - incident-response
+  - slack
+inputs:
+  - name: channel_name
+    type: string
+    required: true
+    description: Base channel name (lowercase, hyphenated).
+  - name: message
+    type: string
+    required: true
+    description: Incident message to post in the new channel.
+  - name: oncall_email
+    type: string
+    required: false
+    default: "__CHRYSALIS_ONCALL_EMAIL__"
+    description: Email of the on-call responder to invite.
+triggers:
+  - type: manual
+steps:
+  - name: create_channel
+    type: http
+    connector-id: "__CHRYSALIS_SLACK_CONNECTOR_ID__"
+    with:
+      path: "/conversations.create"
+      method: "POST"
+      body:
+        name: "{{ inputs.channel_name }}-{{ execution.id | slice: 0, 8 }}"
+
+  - name: lookup_oncall
+    type: http
+    connector-id: "__CHRYSALIS_SLACK_CONNECTOR_ID__"
+    with:
+      path: "/users.lookupByEmail?email={{ inputs.oncall_email }}"
+      method: "POST"
+
+  - name: invite_oncall
+    type: http
+    connector-id: "__CHRYSALIS_SLACK_CONNECTOR_ID__"
+    with:
+      path: "/conversations.invite"
+      method: "POST"
+      body:
+        channel: "{{ steps.create_channel.output.data.channel.id }}"
+        users: "{{ steps.lookup_oncall.output.data.user.id }}"
+    on-failure:
+      continue: true
+
+  - name: post_message
+    type: http
+    connector-id: "__CHRYSALIS_SLACK_CONNECTOR_ID__"
+    with:
+      path: "/chat.postMessage"
+      method: "POST"
+      body:
+        channel: "{{ steps.create_channel.output.data.channel.id }}"
+        text: "{{ inputs.message }}"

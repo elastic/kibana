@@ -1,0 +1,46 @@
+name: create-case
+description: Create a case in Elastic Security from a confirmed attack discovery.
+enabled: true
+tags:
+  - security
+  - incident-response
+  - cases
+inputs:
+  - name: title
+    type: string
+    required: true
+    description: Short title for the case.
+  - name: description
+    type: string
+    required: true
+    description: Markdown body summarizing the attack, evidence, IOCs, and recommended actions.
+  - name: severity
+    type: string
+    required: false
+    default: "high"
+    description: Case severity - one of low, medium, high, critical.
+triggers:
+  - type: manual
+steps:
+  - name: create_security_case
+    type: kibana.request
+    with:
+      method: "POST"
+      path: "/api/cases"
+      body:
+        title: "{{ inputs.title }}"
+        description: "{{ inputs.description }}"
+        tags: ["chrysalis", "attack-discovery", "agent-builder"]
+        severity: "{{ inputs.severity }}"
+        owner: "securitySolution"
+        assignees: []
+        connector:
+          id: "none"
+          name: "none"
+          type: ".none"
+          fields: null
+        settings:
+          syncAlerts: false
+    on-failure:
+      retry:
+        max-attempts: 2
