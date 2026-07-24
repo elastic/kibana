@@ -14,6 +14,9 @@ import { createMetricAggregation, createTimeBucketAggregation } from './create_a
 import { firstNonNullable } from '../first_null_nullable';
 import type { ParsedMetricItem } from '../../../types';
 
+// Metric-specific streams can omit fields referenced by filters inherited from the parent query.
+const UNMAPPED_FIELDS_NULLIFY_SET_COMMAND = 'SET unmapped_fields="NULLIFY";';
+
 /**
  * Formats a single-line ES|QL query into a multi-line format where each
  * pipe command is on its own line with `  | ` indentation.
@@ -50,7 +53,7 @@ export function createESQLQuery({
   whereStatements = [],
   originalSource,
   gridSettings,
-}: CreateESQLQueryParams) {
+}: CreateESQLQueryParams): string {
   const { metricName, metricTypes, fieldTypes, indexName } = metricItem;
   const index = isSingleSource(originalSource) ? originalSource : indexName;
   const instrument = firstNonNullable(metricTypes);
@@ -89,5 +92,5 @@ export function createESQLQuery({
   // TODO rename instrument to match metrics_info response
   query.pipe(statsClause);
 
-  return formatQuery(query.print('basic'));
+  return `${UNMAPPED_FIELDS_NULLIFY_SET_COMMAND}\n${formatQuery(query.print('basic'))}`;
 }
