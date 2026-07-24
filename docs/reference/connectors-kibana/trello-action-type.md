@@ -29,8 +29,7 @@ API token
 ## Test connectors [trello-action-configuration]
 
 You can test connectors as you're creating or editing the connector in {{kib}}. The test verifies
-the connection by fetching the authenticated member's profile (`GET /1/members/me`). On success, it
-returns the Trello username associated with the API key and token.
+the connection by fetching the authenticated member's profile (`GET /1/members/me`).
 
 The Trello connector has the following actions:
 

@@ -291,26 +291,13 @@ export const Trello: ConnectorSpec = {
   ].join('\n'),
 
   test: {
+    enabled: true,
     description: i18n.translate('connectorSpecs.trello.test.description', {
       defaultMessage: 'Verifies Trello connection by fetching the current member',
     }),
     handler: async (ctx) => {
-      try {
-        const response = await ctx.client.get(`${BASE_URL}/members/me`);
-        const member = response.data;
-        return {
-          ok: true,
-          message: member?.username
-            ? `Successfully connected to Trello as ${member.username}`
-            : 'Successfully connected to Trello API',
-        };
-      } catch (error: unknown) {
-        const message =
-          error && typeof error === 'object' && 'message' in error
-            ? String((error as { message: unknown }).message)
-            : 'Unknown error';
-        return { ok: false, message };
-      }
+      const response = await ctx.client.get(`${BASE_URL}/members/me`);
+      return response.data;
     },
   },
 };

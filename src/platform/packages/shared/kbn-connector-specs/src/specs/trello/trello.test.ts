@@ -286,20 +286,19 @@ describe('Trello', () => {
     }
     const testHandler = Trello.test.handler;
 
-    it('returns ok: true with the connected username on success', async () => {
-      mockClient.get.mockResolvedValue({ data: { username: 'jdoe' } });
-      const result = await testHandler(mockContext);
-      expect(result).toEqual(
-        expect.objectContaining({ ok: true, message: expect.stringContaining('jdoe') })
-      );
+    it('has enabled: true so the connector is testable in Kibana', () => {
+      expect(Trello.test?.enabled).toBe(true);
     });
 
-    it('returns ok: false with an error message on failure', async () => {
-      mockClient.get.mockRejectedValue(new Error('Invalid key'));
+    it('returns the member data on success', async () => {
+      mockClient.get.mockResolvedValue({ data: { username: 'jdoe' } });
       const result = await testHandler(mockContext);
-      expect(result).toEqual(
-        expect.objectContaining({ ok: false, message: expect.stringContaining('Invalid key') })
-      );
+      expect(result).toEqual({ username: 'jdoe' });
+    });
+
+    it('throws on failure so the framework can surface the error', async () => {
+      mockClient.get.mockRejectedValue(new Error('Invalid key'));
+      await expect(testHandler(mockContext)).rejects.toThrow('Invalid key');
     });
   });
 });
