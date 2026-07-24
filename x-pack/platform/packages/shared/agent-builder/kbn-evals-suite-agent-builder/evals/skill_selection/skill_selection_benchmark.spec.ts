@@ -101,26 +101,19 @@ evaluate.describe(
   'Skill Selection Benchmark — Platform',
   { tag: [...tags.serverless.security.complete, ...tags.serverless.security.ease] },
   () => {
-    evaluate('visualization-creation routing', async ({ evaluateBenchmark }) => {
-      await evaluateBenchmark({
-        skillId: 'visualization-creation',
-        examples: VISUALIZATION_CREATION_EXAMPLES,
-      });
-    });
-
-    evaluate('graph-creation routing', async ({ evaluateBenchmark }) => {
-      await evaluateBenchmark({ skillId: 'graph-creation', examples: GRAPH_CREATION_EXAMPLES });
-    });
-
-    evaluate('skill-authoring routing', async ({ evaluateBenchmark }) => {
-      await evaluateBenchmark({ skillId: 'skill-authoring', examples: SKILL_AUTHORING_EXAMPLES });
-    });
-
-    evaluate('dashboard-management routing', async ({ evaluateBenchmark }) => {
-      await evaluateBenchmark({
-        skillId: 'dashboard-management',
-        examples: DASHBOARD_MANAGEMENT_EXAMPLES,
-      });
+    evaluate('all platform skill routing', async ({ evaluateBenchmark }) => {
+      await Promise.all([
+        evaluateBenchmark({
+          skillId: 'visualization-creation',
+          examples: VISUALIZATION_CREATION_EXAMPLES,
+        }),
+        evaluateBenchmark({ skillId: 'graph-creation', examples: GRAPH_CREATION_EXAMPLES }),
+        evaluateBenchmark({ skillId: 'skill-authoring', examples: SKILL_AUTHORING_EXAMPLES }),
+        evaluateBenchmark({
+          skillId: 'dashboard-management',
+          examples: DASHBOARD_MANAGEMENT_EXAMPLES,
+        }),
+      ]);
     });
   }
 );
@@ -131,39 +124,29 @@ evaluate.describe(
   'Skill Selection Benchmark — Streams',
   { tag: [...tags.serverless.security.complete, ...tags.serverless.security.ease] },
   () => {
-    evaluate('sig-events-memory routing', async ({ evaluateBenchmark }) => {
-      await evaluateBenchmark({
-        skillId: 'significant-events-memory',
-        examples: SIG_EVENTS_MEMORY_EXAMPLES,
-      });
-    });
-
-    evaluate('streams-management routing', async ({ evaluateBenchmark }) => {
-      await evaluateBenchmark({
-        skillId: 'streams-management',
-        examples: STREAMS_MANAGEMENT_EXAMPLES,
-      });
-    });
-
-    evaluate('sig-events-management routing', async ({ evaluateBenchmark }) => {
-      await evaluateBenchmark({
-        skillId: 'significant-events-management',
-        examples: SIG_EVENTS_MANAGEMENT_EXAMPLES,
-      });
-    });
-
-    evaluate('knowledge-indicators-management routing', async ({ evaluateBenchmark }) => {
-      await evaluateBenchmark({
-        skillId: 'knowledge-indicators-management',
-        examples: KNOWLEDGE_INDICATORS_MANAGEMENT_EXAMPLES,
-      });
-    });
-
-    evaluate('ki-identification-management routing', async ({ evaluateBenchmark }) => {
-      await evaluateBenchmark({
-        skillId: 'ki-identification-management',
-        examples: KI_IDENTIFICATION_MANAGEMENT_EXAMPLES,
-      });
+    evaluate('all streams skill routing', async ({ evaluateBenchmark }) => {
+      await Promise.all([
+        evaluateBenchmark({
+          skillId: 'significant-events-memory',
+          examples: SIG_EVENTS_MEMORY_EXAMPLES,
+        }),
+        evaluateBenchmark({
+          skillId: 'streams-management',
+          examples: STREAMS_MANAGEMENT_EXAMPLES,
+        }),
+        evaluateBenchmark({
+          skillId: 'significant-events-management',
+          examples: SIG_EVENTS_MANAGEMENT_EXAMPLES,
+        }),
+        evaluateBenchmark({
+          skillId: 'knowledge-indicators-management',
+          examples: KNOWLEDGE_INDICATORS_MANAGEMENT_EXAMPLES,
+        }),
+        evaluateBenchmark({
+          skillId: 'ki-identification-management',
+          examples: KI_IDENTIFICATION_MANAGEMENT_EXAMPLES,
+        }),
+      ]);
     });
   }
 );
@@ -174,48 +157,26 @@ evaluate.describe(
   'Skill Selection Benchmark — Security',
   { tag: [...tags.serverless.security.complete, ...tags.serverless.security.ease] },
   () => {
-    evaluate('alert-analysis routing', async ({ evaluateBenchmark }) => {
-      await evaluateBenchmark({ skillId: 'alert-analysis', examples: ALERT_ANALYSIS_EXAMPLES });
-    });
-
-    evaluate('threat-hunting routing', async ({ evaluateBenchmark }) => {
-      await evaluateBenchmark({ skillId: 'threat-hunting', examples: THREAT_HUNTING_EXAMPLES });
-    });
-
-    evaluate('entity-analytics routing', async ({ evaluateBenchmark }) => {
-      await evaluateBenchmark({ skillId: 'entity-analytics', examples: ENTITY_ANALYTICS_EXAMPLES });
-    });
-
-    evaluate('detection-rule-edit routing', async ({ evaluateBenchmark }) => {
-      await evaluateBenchmark({
-        skillId: 'detection-rule-edit',
-        examples: DETECTION_RULE_EDIT_EXAMPLES,
-      });
-    });
-
-    evaluate('find-security-rules routing', async ({ evaluateBenchmark }) => {
-      await evaluateBenchmark({ skillId: 'find-security-rules', examples: FIND_RULES_EXAMPLES });
-    });
-
-    evaluate('find-security-ml-jobs routing', async ({ evaluateBenchmark }) => {
-      await evaluateBenchmark({
-        skillId: 'find-security-ml-jobs',
-        examples: FIND_SECURITY_ML_JOBS_EXAMPLES,
-      });
-    });
-
-    evaluate(
-      'elastic-defend-configuration-troubleshooting routing',
-      async ({ evaluateBenchmark }) => {
-        await evaluateBenchmark({
+    evaluate('all security skill routing', async ({ evaluateBenchmark }) => {
+      await Promise.all([
+        evaluateBenchmark({ skillId: 'alert-analysis', examples: ALERT_ANALYSIS_EXAMPLES }),
+        evaluateBenchmark({ skillId: 'threat-hunting', examples: THREAT_HUNTING_EXAMPLES }),
+        evaluateBenchmark({ skillId: 'entity-analytics', examples: ENTITY_ANALYTICS_EXAMPLES }),
+        evaluateBenchmark({
+          skillId: 'detection-rule-edit',
+          examples: DETECTION_RULE_EDIT_EXAMPLES,
+        }),
+        evaluateBenchmark({ skillId: 'find-security-rules', examples: FIND_RULES_EXAMPLES }),
+        evaluateBenchmark({
+          skillId: 'find-security-ml-jobs',
+          examples: FIND_SECURITY_ML_JOBS_EXAMPLES,
+        }),
+        evaluateBenchmark({
           skillId: 'elastic-defend-configuration-troubleshooting',
           examples: AUTOMATIC_TROUBLESHOOTING_EXAMPLES,
-        });
-      }
-    );
-
-    evaluate('siem-readiness routing', async ({ evaluateBenchmark }) => {
-      await evaluateBenchmark({ skillId: 'siem-readiness', examples: SIEM_READINESS_EXAMPLES });
+        }),
+        evaluateBenchmark({ skillId: 'siem-readiness', examples: SIEM_READINESS_EXAMPLES }),
+      ]);
     });
   }
 );
@@ -226,15 +187,14 @@ evaluate.describe(
   'Skill Selection Benchmark — Observability',
   { tag: [...tags.serverless.security.complete, ...tags.serverless.security.ease] },
   () => {
-    evaluate('observability.investigation routing', async ({ evaluateBenchmark }) => {
-      await evaluateBenchmark({
-        skillId: 'observability.investigation',
-        examples: OBSERVABILITY_INVESTIGATION_EXAMPLES,
-      });
-    });
-
-    evaluate('service-map routing', async ({ evaluateBenchmark }) => {
-      await evaluateBenchmark({ skillId: 'service-map', examples: SERVICE_MAP_EXAMPLES });
+    evaluate('all observability skill routing', async ({ evaluateBenchmark }) => {
+      await Promise.all([
+        evaluateBenchmark({
+          skillId: 'observability.investigation',
+          examples: OBSERVABILITY_INVESTIGATION_EXAMPLES,
+        }),
+        evaluateBenchmark({ skillId: 'service-map', examples: SERVICE_MAP_EXAMPLES }),
+      ]);
     });
   }
 );
@@ -245,53 +205,37 @@ evaluate.describe(
   'Skill Selection Benchmark — Search',
   { tag: [...tags.serverless.security.complete, ...tags.serverless.security.ease] },
   () => {
-    evaluate('elasticsearch-onboarding routing', async ({ evaluateBenchmark }) => {
-      await evaluateBenchmark({
-        skillId: 'search.elasticsearch-onboarding',
-        examples: SEARCH_ELASTICSEARCH_ONBOARDING_EXAMPLES,
-      });
-    });
-
-    evaluate('elasticsearch-tutorial routing', async ({ evaluateBenchmark }) => {
-      await evaluateBenchmark({
-        skillId: 'search.elasticsearch-tutorial',
-        examples: SEARCH_ELASTICSEARCH_TUTORIAL_EXAMPLES,
-      });
-    });
-
-    evaluate('keyword-search routing', async ({ evaluateBenchmark }) => {
-      await evaluateBenchmark({
-        skillId: 'search.keyword-search',
-        examples: SEARCH_KEYWORD_SEARCH_EXAMPLES,
-      });
-    });
-
-    evaluate('vector-hybrid-search routing', async ({ evaluateBenchmark }) => {
-      await evaluateBenchmark({
-        skillId: 'search.vector-hybrid-search',
-        examples: SEARCH_VECTOR_HYBRID_SEARCH_EXAMPLES,
-      });
-    });
-
-    evaluate('rag-chatbot routing', async ({ evaluateBenchmark }) => {
-      await evaluateBenchmark({
-        skillId: 'search.rag-chatbot',
-        examples: SEARCH_RAG_CHATBOT_EXAMPLES,
-      });
-    });
-
-    evaluate('catalog-ecommerce routing', async ({ evaluateBenchmark }) => {
-      await evaluateBenchmark({
-        skillId: 'search.catalog-ecommerce',
-        examples: SEARCH_CATALOG_ECOMMERCE_EXAMPLES,
-      });
-    });
-
-    evaluate('use-case-library routing', async ({ evaluateBenchmark }) => {
-      await evaluateBenchmark({
-        skillId: 'search.use-case-library',
-        examples: SEARCH_USE_CASE_LIBRARY_EXAMPLES,
-      });
+    evaluate('all search skill routing', async ({ evaluateBenchmark }) => {
+      await Promise.all([
+        evaluateBenchmark({
+          skillId: 'search.elasticsearch-onboarding',
+          examples: SEARCH_ELASTICSEARCH_ONBOARDING_EXAMPLES,
+        }),
+        evaluateBenchmark({
+          skillId: 'search.elasticsearch-tutorial',
+          examples: SEARCH_ELASTICSEARCH_TUTORIAL_EXAMPLES,
+        }),
+        evaluateBenchmark({
+          skillId: 'search.keyword-search',
+          examples: SEARCH_KEYWORD_SEARCH_EXAMPLES,
+        }),
+        evaluateBenchmark({
+          skillId: 'search.vector-hybrid-search',
+          examples: SEARCH_VECTOR_HYBRID_SEARCH_EXAMPLES,
+        }),
+        evaluateBenchmark({
+          skillId: 'search.rag-chatbot',
+          examples: SEARCH_RAG_CHATBOT_EXAMPLES,
+        }),
+        evaluateBenchmark({
+          skillId: 'search.catalog-ecommerce',
+          examples: SEARCH_CATALOG_ECOMMERCE_EXAMPLES,
+        }),
+        evaluateBenchmark({
+          skillId: 'search.use-case-library',
+          examples: SEARCH_USE_CASE_LIBRARY_EXAMPLES,
+        }),
+      ]);
     });
   }
 );
