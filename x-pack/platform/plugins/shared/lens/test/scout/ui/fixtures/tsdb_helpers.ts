@@ -128,6 +128,23 @@ export const createTsdbScenarioTimeRange = (now = Date.now()): TsdbScenarioTimeR
   },
 });
 
+const runCleanupActions = async (
+  description: string,
+  actions: Array<() => Promise<void>>
+): Promise<void> => {
+  const errors: Error[] = [];
+  for (const action of actions) {
+    try {
+      await action();
+    } catch (error) {
+      errors.push(error instanceof Error ? error : new Error(String(error)));
+    }
+  }
+  if (errors.length > 0) {
+    throw new AggregateError(errors, `Failed to clean up ${description}`);
+  }
+};
+
 const getTsdbMapping = (removeTSDBFields = false): Record<string, MappingProperty> => ({
   '@timestamp': { type: 'date' },
   request: {
@@ -147,23 +164,6 @@ const getTsdbMapping = (removeTSDBFields = false): Record<string, MappingPropert
 export const test = baseTest.extend<LensUiTestFixtures, LensUiWorkerFixtures>({
   tsdbHelper: [
     async ({ esClient, log }, use) => {
-      const runCleanupActions = async (
-        description: string,
-        actions: Array<() => Promise<void>>
-      ): Promise<void> => {
-        const errors: Error[] = [];
-        for (const action of actions) {
-          try {
-            await action();
-          } catch (error) {
-            errors.push(error instanceof Error ? error : new Error(String(error)));
-          }
-        }
-        if (errors.length > 0) {
-          throw new AggregateError(errors, `Failed to clean up ${description}`);
-        }
-      };
-
       const deleteDataStream = async (stream: string): Promise<void> => {
         await runCleanupActions(`data stream "${stream}"`, [
           async () => {
@@ -413,19 +413,13 @@ export const test = baseTest.extend<LensUiTestFixtures, LensUiWorkerFixtures>({
     try {
       await use({ setup });
     } finally {
-      try {
-        for (const dataViewId of dataViewIds) {
-          await apiServices.dataViews.delete(dataViewId);
-        }
-      } finally {
-        try {
+      await runCleanupActions('TSDB scenario fixture', [
+        ...dataViewIds.map((dataViewId) => async () => apiServices.dataViews.delete(dataViewId)),
+        async () => {
           await uiSettings.unset('dateFormat:tz', 'defaultIndex', 'timepicker:timeDefaults');
-        } finally {
-          for (const cleanup of [...scenarioCleanups].reverse()) {
-            await cleanup();
-          }
-        }
-      }
+        },
+        ...[...scenarioCleanups].reverse(),
+      ]);
     }
   },
 });
