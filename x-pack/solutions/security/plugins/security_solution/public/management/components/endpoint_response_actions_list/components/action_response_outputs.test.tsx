@@ -126,7 +126,7 @@ describe('ActionResponseOutputs component', () => {
       );
 
       expect(renderResult.getByTestId('test-killProcessOutput')).not.toBeNull();
-      expect(renderResult.container.textContent).toContain('Process ID: 1234');
+      expect(renderResult.container.textContent).toContain('PID 1234');
     });
 
     it('should render the process result output for a suspend-process action', () => {
@@ -148,7 +148,7 @@ describe('ActionResponseOutputs component', () => {
       );
 
       expect(renderResult.getByTestId('test-killProcessOutput')).not.toBeNull();
-      expect(renderResult.container.textContent).toContain('Process ID: 4321');
+      expect(renderResult.container.textContent).toContain('PID 4321');
     });
   });
 });

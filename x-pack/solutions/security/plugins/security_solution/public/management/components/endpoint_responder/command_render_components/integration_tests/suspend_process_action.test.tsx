@@ -272,8 +272,8 @@ describe('When using the suspend-process action from response actions console', 
 
     const output = renderResult.getByTestId('killProcessResponseOutput').textContent ?? '';
 
-    expect(output).toContain('Process ID: 5');
-    expect(output).toContain('Entity ID: entity-foo');
+    expect(output).toContain('PID 5');
+    expect(output).toContain('Entity ID entity-foo');
   });
 
   it('should display the response code message as the result title', async () => {
@@ -303,9 +303,7 @@ describe('When using the suspend-process action from response actions console', 
         endpointActionResponseCodes['ra_suspend-process_success_done']
       );
     });
-    expect(renderResult.getByTestId('killProcessResponseOutput')).toHaveTextContent(
-      'Process ID: 5'
-    );
+    expect(renderResult.getByTestId('killProcessResponseOutput')).toHaveTextContent('PID 5');
   });
 
   it('should only display output fields that are present in the content', async () => {
@@ -335,9 +333,9 @@ describe('When using the suspend-process action from response actions console', 
 
     const output = renderResult.getByTestId('killProcessResponseOutput').textContent ?? '';
 
-    expect(output).toContain('Process ID: 5');
-    expect(output).not.toContain('Entity ID:');
-    expect(output).not.toContain('Process name:');
+    expect(output).toContain('PID 5');
+    expect(output).not.toContain('Entity ID');
+    expect(output).not.toContain('Name');
   });
 
   it('should show error if suspend-process failed to complete successfully', async () => {
