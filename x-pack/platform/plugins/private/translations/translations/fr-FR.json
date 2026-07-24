@@ -25328,8 +25328,6 @@
     "xpack.infra.logs.analysis.jobConfigurationOutdatedCalloutTitle": "La configuration de la tâche ML {moduleName} est obsolète",
     "xpack.infra.logs.analysis.jobDefinitionOutdatedCalloutMessage": "Une version plus récente de la tâche ML {moduleName} est disponible. Recréez la tâche pour déployer la version plus récente. Cette action supprime les anomalies précédemment détectées.",
     "xpack.infra.logs.analysis.jobDefinitionOutdatedCalloutTitle": "La définition de la tâche ML {moduleName} est obsolète",
-    "xpack.infra.logs.analysis.jobStoppedCalloutMessage": "La tâche ML a été arrêtée manuellement ou suite à un manque de ressources. Les nouvelles entrées de logs ne sont pas traitées tant que la tâche n'a pas été redémarrée.",
-    "xpack.infra.logs.analysis.jobStoppedCalloutTitle": "Tâche ML arrêtée",
     "xpack.infra.logs.analysis.logEntryCategoriesModuleDescription": "Utilisez le Machine Learning pour classer automatiquement les messages de logs.",
     "xpack.infra.logs.analysis.logEntryCategoriesModuleName": "Catégorisation",
     "xpack.infra.logs.analysis.logEntryExamplesViewAnomalyInMlLabel": "Afficher l'anomalie dans le Machine Learning",
