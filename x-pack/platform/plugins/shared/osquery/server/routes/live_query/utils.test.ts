@@ -10,6 +10,7 @@ import { lastValueFrom } from 'rxjs';
 import type { IScopedSearchClient } from '@kbn/data-plugin/server';
 import { Direction, OsqueryQueries } from '../../../common/search_strategy';
 import { getActionResponses } from './utils';
+import { OSQUERY_SEARCH_STRATEGY } from '../../search_strategy/constants';
 
 describe('getActionResponses', () => {
   it('returns aggregated action response stats', async () => {
@@ -48,7 +49,7 @@ describe('getActionResponses', () => {
         sort: { direction: Direction.desc, field: '@timestamp' },
         spaceId: 'default',
       }),
-      { strategy: 'osquerySearchStrategy' }
+      { strategy: OSQUERY_SEARCH_STRATEGY }
     );
     expect(response).toEqual({
       action_id: 'action-1',

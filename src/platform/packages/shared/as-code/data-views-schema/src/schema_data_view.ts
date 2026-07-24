@@ -54,6 +54,14 @@ export const dataViewSpecSchema = schema.object(
         },
       })
     ),
+    allow_hidden_indices: schema.maybe(
+      schema.boolean({
+        meta: {
+          title: 'Allow hidden and system indices',
+          description: 'When `true`, allows the data view to match hidden indices.',
+        },
+      })
+    ),
     field_settings: schema.maybe(
       schema.recordOf(schema.string({ minLength: 1 }), fieldSettingsSchema)
     ),
