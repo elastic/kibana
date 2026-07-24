@@ -93,6 +93,33 @@ const configSchema = schema.object({
      */
     maxDurationMs: schema.number({ defaultValue: 60_000, min: 1_000 }),
   }),
+  /**
+   * Configuration for the synchronous-execution log drain.
+   * The drain buffers workflow event-log writes in memory and flushes them to
+   * Elasticsearch out-of-band, keeping the sync execution hot path free of
+   * inline ES round-trips.
+   *
+   * Defaults are sized for ~1000 concurrent sync req/s × 4 step events each
+   * (~4000 events/sec inbound). Tune these values to your deployment's actual
+   * load if the `kibana.workflows.sync_log_drain.events.dropped` metric is non-zero.
+   */
+  syncLogDrain: schema.object({
+    /**
+     * How often (ms) the background timer flushes buffered events to ES.
+     * Lower values reduce event latency but increase write frequency.
+     */
+    intervalMs: schema.number({ defaultValue: 500, min: 100 }),
+    /**
+     * Maximum number of events held in the in-memory buffer before drop-oldest
+     * kicks in. ~5 s of inbound capacity at the default rate.
+     */
+    maxQueue: schema.number({ defaultValue: 20000, min: 1000 }),
+    /**
+     * Maximum number of events written to ES in a single drain tick.
+     * Should be ≥ intervalMs/1000 × peak inbound rate so one tick clears backlog.
+     */
+    maxBatch: schema.number({ defaultValue: 4000, min: 100 }),
+  }),
 });
 
 export type EventTriggersConfig = TypeOf<typeof EventTriggersConfigSchema>;

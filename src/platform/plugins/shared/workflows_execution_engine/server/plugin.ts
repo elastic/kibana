@@ -57,6 +57,7 @@ import { WorkflowExecutionTelemetryClient } from './lib/telemetry/workflow_execu
 import { validateWorkflowInputs } from './lib/validate_workflow_inputs';
 import { WorkflowsMeteringService } from './metering/metering_service';
 import { InMemoryExecutionPersistence } from './repositories/execution_persistence';
+import { LogsRepository } from './repositories/logs_repository';
 import { initializeLogsRepositoryDataStream } from './repositories/logs_repository/data_stream';
 import { StepExecutionRepository } from './repositories/step_execution_repository';
 import { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
@@ -84,6 +85,7 @@ import {
 } from './workflow_context_manager/build_workflow_context';
 import type { ContextDependencies } from './workflow_context_manager/types';
 import { WorkflowEventLoggerService } from './workflow_event_logger';
+import { SyncLogDrain } from './workflow_event_logger/sync_log_drain';
 import type {
   ResumeWorkflowExecutionParams,
   StartWorkflowExecutionParams,
@@ -159,6 +161,9 @@ export class WorkflowsExecutionEnginePlugin
   private initializePromise?: Promise<void>;
   /** Set in start(); used by task runners to pass parent-resume into run/resume without exposing it on the public plugin contract. */
   private internalResumeWorkflowExecutionHandler?: InternalResumeWorkflowExecution;
+  /** Long-lived drain that buffers sync-execution event-log writes and flushes them
+   *  to Elasticsearch out-of-band, keeping the sync hot path free of ES round-trips. */
+  private syncLogDrain?: SyncLogDrain;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
@@ -721,6 +726,17 @@ export class WorkflowsExecutionEnginePlugin
     const esClient = coreStart.elasticsearch.client.asInternalUser;
     void ensureWorkflowsDataStreamsRolledOver(this.logger.get('data-stream-rollover'), esClient);
 
+    // Construct the sync-execution log drain when the plugin is enabled.
+    // The drain buffers event-log writes from sync executions and flushes them
+    // to ES out-of-band so the synchronous call path has no inline ES writes.
+    if (this.config.syncExecution.enabled) {
+      this.syncLogDrain = new SyncLogDrain(
+        new LogsRepository(coreStart.dataStreams),
+        this.logger.get('sync_log_drain'),
+        this.config.syncLogDrain
+      );
+    }
+
     // Initialize ConcurrencyManager with dependencies
     const workflowTaskManager = new WorkflowTaskManager(plugins.taskManager);
     const workflowExecutionRepository = new WorkflowExecutionRepository(esClient, this.logger);
@@ -948,6 +964,7 @@ export class WorkflowsExecutionEnginePlugin
             workflowsExecutionEngine,
             workflowExecutionRepository: syncExecutionPersistence,
             stepExecutionRepository: syncExecutionPersistence,
+            syncLogDrain: this.syncLogDrain,
           });
 
           const output = getSynchronousWorkflowOutput(result.context?.output);
@@ -1575,7 +1592,9 @@ export class WorkflowsExecutionEnginePlugin
     };
   }
 
-  public stop() {}
+  public async stop() {
+    await this.syncLogDrain?.shutdown();
+  }
 
   private async initialize(coreStart: CoreStart): Promise<void> {
     if (!this.initializePromise) {

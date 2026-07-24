@@ -24,6 +24,7 @@ import type {
 } from '../repositories/execution_persistence';
 import type { WorkflowsExecutionEnginePluginStart } from '../types';
 import type { ContextDependencies } from '../workflow_context_manager/types';
+import type { SyncLogDrain } from '../workflow_event_logger/sync_log_drain';
 import { workflowExecutionLoop } from '../workflow_execution_loop';
 
 export const runWorkflowSync = async ({
@@ -36,6 +37,7 @@ export const runWorkflowSync = async ({
   workflowsExecutionEngine,
   workflowExecutionRepository,
   stepExecutionRepository,
+  syncLogDrain,
 }: {
   workflowExecution: EsWorkflowExecution;
   request: KibanaRequest;
@@ -46,6 +48,9 @@ export const runWorkflowSync = async ({
   workflowsExecutionEngine: WorkflowsExecutionEnginePluginStart;
   workflowExecutionRepository: WorkflowExecutionPersistence;
   stepExecutionRepository: StepExecutionPersistence;
+  /** When provided, event-log writes for this execution are buffered into
+   *  the drain instead of being written to Elasticsearch inline. */
+  syncLogDrain?: SyncLogDrain;
 }): Promise<EsWorkflowExecution> => {
   apm.currentTransaction?.setLabel('execution_mode', 'sync');
   const startTime = performance.now();
@@ -60,7 +65,7 @@ export const runWorkflowSync = async ({
       dependencies,
       request,
       workflowsExecutionEngine,
-      { workflowExecution, workflowExecutionRepository, stepExecutionRepository }
+      { workflowExecution, workflowExecutionRepository, stepExecutionRepository, syncLogDrain }
     );
 
     validateSyncWorkflow(

@@ -16,6 +16,37 @@ import { WorkflowGraphSetupError } from './workflow_graph_setup_error';
 import type { WorkflowsExecutionEngineConfig } from '../config';
 import { WorkflowExecutionTelemetryClient } from '../lib/telemetry/workflow_execution_telemetry_client';
 import { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
+import { WorkflowEventLoggerService } from '../workflow_event_logger/workflow_event_logger_service';
+
+// Hoisted mock — must be in the test file (not an imported side-effect) so that
+// setup_dependencies.ts receives the mocked WorkflowEventLoggerService when it is
+// first imported. Side-effect imports (like mocks.ts) are NOT hoisted and arrive
+// too late to intercept the module cache.
+jest.mock('../workflow_event_logger/workflow_event_logger_service', () => ({
+  WorkflowEventLoggerService: jest.fn().mockImplementation(() => ({
+    createLogger: jest.fn().mockReturnValue({
+      logInfo: jest.fn(),
+      logError: jest.fn(),
+      logWarn: jest.fn(),
+      logDebug: jest.fn(),
+      startTiming: jest.fn(),
+      stopTiming: jest.fn(),
+      createStepLogger: jest.fn().mockReturnValue({
+        logInfo: jest.fn(),
+        flushEvents: jest.fn(),
+      }),
+      flushEvents: jest.fn(),
+    }),
+    createWorkflowLogger: jest.fn(),
+    createExecutionLogger: jest.fn(),
+    createStepLogger: jest.fn(),
+    getExecutionLogs: jest.fn(),
+    getStepLogs: jest.fn(),
+    getLogsByLevel: jest.fn(),
+    searchLogs: jest.fn(),
+    getRecentLogs: jest.fn(),
+  })),
+}));
 
 import '../workflow_event_logger/mocks';
 jest.mock('../repositories/workflow_execution_repository');
@@ -66,6 +97,7 @@ describe('setupDependencies', () => {
     collectQueueMetrics: false,
     hitlExternalResume: { enabled: true },
     syncExecution: { enabled: false, maxDurationMs: 60_000 },
+    syncLogDrain: { intervalMs: 500, maxQueue: 20000, maxBatch: 4000 },
   };
 
   let mockDependencies: ReturnType<typeof mockContextDependencies>;
@@ -351,6 +383,51 @@ describe('setupDependencies', () => {
       expect(mockWorkflowExecutionRepository.getWorkflowExecutionById).toHaveBeenCalledWith(
         workflowRunId,
         spaceId
+      );
+    });
+  });
+
+  /**
+   * Machine-checked invariant: the syncLogDrain supplied to setupDependencies must
+   * be forwarded to WorkflowEventLoggerService so that every per-execution logger
+   * routes its flushEvents calls to the drain instead of writing to ES inline.
+   *
+   * If someone removes the forwarding at the setupDependencies callsite, this test
+   * fails while all drain unit tests still pass — making the regression visible.
+   */
+  describe('sync log drain wiring', () => {
+    beforeEach(() => {
+      const mockScopedClient = {
+        search: jest.fn(),
+        index: jest.fn(),
+      } as unknown as ElasticsearchClient;
+      mockDependencies.coreStart.elasticsearch.client.asScoped = jest.fn().mockReturnValue({
+        asCurrentUser: mockScopedClient,
+      });
+    });
+
+    it('passes syncLogDrain as the fourth argument to WorkflowEventLoggerService', async () => {
+      const mockFakeRequest = { headers: {} } as KibanaRequest;
+      const mockDrain = { enqueue: jest.fn(), shutdown: jest.fn() };
+
+      await setupDependencies(
+        workflowRunId,
+        spaceId,
+        mockLogger,
+        mockConfig,
+        mockDependencies,
+        mockFakeRequest,
+        undefined,
+        { syncLogDrain: mockDrain as any }
+      );
+
+      // WorkflowEventLoggerService is the hoisted jest.mock — its constructor is
+      // a jest.fn() so we can assert how setup_dependencies called it.
+      expect(WorkflowEventLoggerService).toHaveBeenCalledWith(
+        expect.anything(), // dataStreams
+        expect.anything(), // logger
+        expect.anything(), // enableConsoleLogging
+        mockDrain // syncLogDrain — removing the forwarding in setupDependencies breaks this
       );
     });
   });

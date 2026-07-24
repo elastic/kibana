@@ -106,4 +106,82 @@ describe('runWorkflowSync', () => {
       })
     );
   });
+
+  it('forwards syncLogDrain to setupDependencies so the logger chain can route events to the drain', async () => {
+    const completedExecution = {
+      id: 'execution-1',
+      spaceId: 'default',
+      workflowId: 'workflow-1',
+      isTestRun: false,
+      status: ExecutionStatus.COMPLETED,
+      context: {},
+      workflowDefinition: {
+        version: '1',
+        name: 'Test workflow',
+        enabled: true,
+        triggers: [],
+        steps: [],
+      },
+      yaml: '',
+      scopeStack: [],
+      createdAt: '2026-07-21T00:00:00.000Z',
+      error: null,
+      startedAt: '2026-07-21T00:00:00.000Z',
+      finishedAt: '2026-07-21T00:00:01.000Z',
+      cancelRequested: false,
+      duration: 1000,
+    } satisfies EsWorkflowExecution;
+    const setup = {
+      workflowExecutionGraph: { topologicalOrder: [] },
+      workflowRuntime: { start: jest.fn().mockResolvedValue(undefined) },
+      workflowExecutionState: {
+        getWorkflowExecution: jest.fn().mockReturnValue(completedExecution),
+      },
+      stepExecutionRuntimeFactory: {},
+      stepIoService: {},
+      workflowLogger: {},
+      workflowTaskManager: {},
+      nodesFactory: {},
+      workflowExecutionPersistence: {},
+      workflowExecutionRepository: undefined,
+      esClient: {},
+    };
+    (setupDependencies as jest.Mock).mockResolvedValue(setup);
+    (workflowExecutionLoop as jest.Mock).mockResolvedValue(undefined);
+
+    const mockDrain = { enqueue: jest.fn(), shutdown: jest.fn() };
+
+    await runWorkflowSync({
+      workflowExecution: completedExecution,
+      request: {} as Parameters<typeof runWorkflowSync>[0]['request'],
+      abortController: new AbortController(),
+      logger: {} as Parameters<typeof runWorkflowSync>[0]['logger'],
+      config: {} as Parameters<typeof runWorkflowSync>[0]['config'],
+      dependencies: Object.assign({} as Parameters<typeof runWorkflowSync>[0]['dependencies'], {
+        coreStart: {},
+        workflowsExtensions: { getStepDefinition: jest.fn() },
+      }),
+      workflowsExecutionEngine: {} as Parameters<
+        typeof runWorkflowSync
+      >[0]['workflowsExecutionEngine'],
+      workflowExecutionRepository: {} as Parameters<
+        typeof runWorkflowSync
+      >[0]['workflowExecutionRepository'],
+      stepExecutionRepository: {} as Parameters<
+        typeof runWorkflowSync
+      >[0]['stepExecutionRepository'],
+      syncLogDrain: mockDrain as any,
+    });
+
+    expect(setupDependencies).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.anything(),
+      expect.anything(),
+      expect.anything(),
+      expect.anything(),
+      expect.anything(),
+      expect.anything(),
+      expect.objectContaining({ syncLogDrain: mockDrain })
+    );
+  });
 });
