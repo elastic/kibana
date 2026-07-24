@@ -41,7 +41,7 @@ Compute per-flow duration from the `<!-- flow: ... | started: <ISO> | ended: <IS
 - **Over?** for total session: ⚠️ if `Session duration > session_timeout_minutes`
 - Flows cut short by the session cap are a signal to either raise `Session-timeout:` or reduce the number / scope of flows
 
-**Token usage:** input <N> · output <N> · cache-create <N> · cache-read <N> · **total <N>**
+**Token usage (Claude Code session):** input <N> · output <N> · cache-create <N> · cache-read <N> · **total <N>**
 _Populate from `x-pack/solutions/security/plugins/security_solution/.agents/scripts/session-token-usage.py` output (reformat: `cache_create=N` → `cache-create N`, etc.). If the legacy script exits non-zero or prints nothing (non-Claude-Code harness, transcript unavailable), write:_ `**Token usage:** not available` _— never omit this line. In parallel mode, sub-agent tokens are not included unless the optional structured manifest identifies worker transcripts._
 
 **Browser/tool payload bytes:** tool-input <N> · tool-output <N> · browser-events <N>

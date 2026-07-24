@@ -79,6 +79,7 @@ class TranscriptResult:
     status: str
     totals: TokenTotals | None
     usage_blocks: int
+    name: str | None = None
 
 
 @dataclass(frozen=True)
@@ -134,11 +135,12 @@ def _extract_usage(obj: Any) -> dict[str, Any] | None:
 def parse_transcript(
     path: Path,
     scope: str = "orchestrator",
+    name: str | None = None,
 ) -> TranscriptResult:
     """Parse supported JSONL usage blocks from one transcript."""
     source = str(path)
     if not path.is_file():
-        return TranscriptResult(source, scope, "missing", None, 0)
+        return TranscriptResult(source, scope, "missing", None, 0, name)
 
     totals = TokenTotals()
     usage_blocks = 0
@@ -175,11 +177,11 @@ def parse_transcript(
                     cache_read_input_tokens=values["cache_read_input_tokens"] or 0,
                 )
     except OSError:
-        return TranscriptResult(source, scope, "unreadable", None, 0)
+        return TranscriptResult(source, scope, "unreadable", None, 0, name)
 
     if usage_blocks == 0:
-        return TranscriptResult(source, scope, "empty", None, 0)
-    return TranscriptResult(source, scope, "available", totals, usage_blocks)
+        return TranscriptResult(source, scope, "empty", None, 0, name)
+    return TranscriptResult(source, scope, "available", totals, usage_blocks, name)
 
 
 def format_legacy_usage(totals: TokenTotals) -> str:
@@ -215,6 +217,25 @@ def _resolve_manifest_path(root: Path, relative_path: str) -> Path:
         candidate.relative_to(root)
     except ValueError as exc:
         raise ValueError(f"Manifest path escapes session root: {relative_path}") from exc
+    return candidate
+
+
+def _resolve_declared_root(
+    manifest_path: Path,
+    raw_root: object,
+    label: str,
+) -> Path:
+    if not isinstance(raw_root, str):
+        raise ValueError(f"Manifest {label} must be a string")
+
+    manifest_directory = manifest_path.parent.resolve()
+    candidate = (manifest_directory / raw_root).resolve()
+    try:
+        candidate.relative_to(manifest_directory)
+    except ValueError as exc:
+        raise ValueError(
+            f"Manifest {label} must remain within the manifest directory"
+        ) from exc
     return candidate
 
 
@@ -293,21 +314,26 @@ def _session_dir_artifacts(session_dir: Path) -> list[ManifestArtifact]:
 
 
 def _artifact_metrics(
-    root: Path,
+    manifest_root: Path,
     manifest_artifacts: list[ManifestArtifact],
     session_dir: Path | None,
 ) -> tuple[dict[str, object], list[dict[str, object]]]:
-    artifacts = list(manifest_artifacts)
+    artifacts = [(manifest_root, artifact) for artifact in manifest_artifacts]
     if session_dir is not None:
-        artifacts.extend(_session_dir_artifacts(session_dir))
+        artifacts.extend(
+            (session_dir.resolve(), artifact)
+            for artifact in _session_dir_artifacts(session_dir)
+        )
 
     by_kind: dict[str, dict[str, int]] = {}
     sources: list[dict[str, object]] = []
     counted_paths: set[Path] = set()
-    for artifact in artifacts:
+    for root, artifact in artifacts:
         path = _resolve_manifest_path(root, artifact.path)
         source = {"kind": "artifact", "path": str(path), "artifact_kind": artifact.kind}
-        if not path.is_file():
+        try:
+            size = path.stat().st_size
+        except OSError:
             source["status"] = "missing"
             sources.append(source)
             continue
@@ -316,9 +342,9 @@ def _artifact_metrics(
         counted_paths.add(path)
         stats = by_kind.setdefault(artifact.kind, {"files": 0, "bytes": 0})
         stats["files"] += 1
-        stats["bytes"] += path.stat().st_size
+        stats["bytes"] += size
         source["status"] = "available"
-        source["bytes"] = path.stat().st_size
+        source["bytes"] = size
         sources.append(source)
 
     status = "available" if by_kind else "not_available"
@@ -352,6 +378,8 @@ def _token_metrics(
             "status": result.status,
             "usage_blocks": result.usage_blocks,
         }
+        if result.name is not None:
+            source["name"] = result.name
         sources.append(source)
         if result.status != "available" or result.totals is None:
             continue
@@ -382,20 +410,47 @@ def build_session_metrics(
     """Build deterministic scoped token, payload, and artifact metrics."""
     manifest: dict[str, object] = {}
     manifest_root = session_dir.resolve() if session_dir is not None else None
+    artifact_root = manifest_root
+    manifest_sources: list[dict[str, object]] = []
     if manifest_path is not None and manifest_path.is_file():
         manifest = load_manifest(manifest_path)
-        raw_root = manifest.get("session_root", ".")
-        if not isinstance(raw_root, str):
-            raise ValueError("Manifest session_root must be a string")
-        manifest_root = (manifest_path.parent / raw_root).resolve()
+        manifest_root = _resolve_declared_root(
+            manifest_path,
+            manifest.get("session_root", "."),
+            "session_root",
+        )
+        artifact_root = _resolve_declared_root(
+            manifest_path,
+            manifest.get("artifact_root", manifest.get("session_root", ".")),
+            "artifact_root",
+        )
+        manifest_sources.append(
+            {
+                "kind": "manifest",
+                "path": str(manifest_path),
+                "status": "available",
+            }
+        )
+    elif manifest_path is not None:
+        manifest_sources.append(
+            {
+                "kind": "manifest",
+                "path": str(manifest_path),
+                "status": "missing",
+            }
+        )
     if manifest_root is None:
         manifest_root = Path.cwd().resolve()
+    if artifact_root is None:
+        artifact_root = manifest_root
 
     transcript_results: list[TranscriptResult] = []
     if manifest:
         for entry in _manifest_transcripts(manifest):
             path = _resolve_manifest_path(manifest_root, entry.path)
-            transcript_results.append(parse_transcript(path, entry.scope))
+            transcript_results.append(
+                parse_transcript(path, entry.scope, entry.name)
+            )
     elif explicit_transcript is not None:
         transcript_results.append(parse_transcript(explicit_transcript))
     else:
@@ -408,7 +463,7 @@ def build_session_metrics(
 
     tokens, token_sources = _token_metrics(transcript_results)
     artifacts, artifact_sources = _artifact_metrics(
-        manifest_root,
+        artifact_root,
         _manifest_artifacts(manifest) if manifest else [],
         session_dir,
     )
@@ -417,7 +472,7 @@ def build_session_metrics(
         "tokens": tokens,
         "payload_bytes": _payload_metrics(manifest),
         "artifacts": artifacts,
-        "sources": token_sources + artifact_sources,
+        "sources": manifest_sources + token_sources + artifact_sources,
     }
 
 

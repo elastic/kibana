@@ -182,6 +182,8 @@ class SessionMetricsParserTests(unittest.TestCase):
                     "browser_events": 303,
                 },
             )
+            self.assertEqual(metrics["sources"][0]["kind"], "manifest")
+            self.assertEqual(metrics["sources"][2]["name"], "flow-1")
             self.assertEqual(
                 json.loads(render_json_metrics(metrics)),
                 metrics,
@@ -239,6 +241,64 @@ class SessionMetricsParserTests(unittest.TestCase):
                 build_session_metrics(manifest, None, None)
 
             outside.unlink()
+
+    def test_session_directory_scan_uses_only_allowlisted_artifacts(self):
+        with tempfile.TemporaryDirectory() as raw_dir:
+            root = Path(raw_dir)
+            (root / "findings-flow-1.md").write_bytes(b"123")
+            (root / "report.md").write_bytes(b"1234")
+            (root / "config.json").write_bytes(b"12345")
+            (root / "screenshots").mkdir()
+            (root / "screenshots/step.webp").write_bytes(b"123456")
+            (root / "videos").mkdir()
+            (root / "videos/flow.webm").write_bytes(b"1234567")
+            (root / "request-body.json").write_bytes(b"do-not-count")
+
+            metrics = build_session_metrics(None, None, root)
+
+            self.assertEqual(
+                metrics["artifacts"]["by_kind"],
+                {
+                    "configuration": {"files": 1, "bytes": 5},
+                    "findings": {"files": 1, "bytes": 3},
+                    "report": {"files": 1, "bytes": 4},
+                    "screenshot": {"files": 1, "bytes": 6},
+                    "video": {"files": 1, "bytes": 7},
+                },
+            )
+            self.assertNotIn("request-body", metrics["artifacts"]["by_kind"])
+
+    def test_manifest_supports_a_declared_artifact_root(self):
+        with tempfile.TemporaryDirectory() as raw_dir:
+            root = Path(raw_dir)
+            artifact_root = root / "artifact-root"
+            artifact_root.mkdir()
+            (artifact_root / "detectors.js").write_bytes(b"12345")
+            manifest = root / "metrics.json"
+            manifest.write_text(
+                json.dumps(
+                    {
+                        "version": 1,
+                        "session_root": ".",
+                        "artifact_root": "artifact-root",
+                        "transcripts": [],
+                        "artifacts": [
+                            {
+                                "path": "detectors.js",
+                                "kind": "detector_source",
+                            }
+                        ],
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            metrics = build_session_metrics(manifest, None, None)
+
+            self.assertEqual(
+                metrics["artifacts"]["by_kind"]["detector_source"]["bytes"],
+                5,
+            )
 
     def test_json_mode_is_opt_in(self):
         with tempfile.TemporaryDirectory() as raw_dir:
