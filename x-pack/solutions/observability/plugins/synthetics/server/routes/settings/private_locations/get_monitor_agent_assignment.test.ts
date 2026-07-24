@@ -47,13 +47,10 @@ const setup = ({
   const getByIds = jest.fn().mockResolvedValue([{ condition: CONDITION }]);
   (PackagePolicyService as jest.Mock).mockImplementation(() => ({ getByIds }));
 
-  (getAgentHostInfo as jest.Mock).mockResolvedValue(
-    new Map([[HOST, { lastCheckin: Date.now() }]])
-  );
+  (getAgentHostInfo as jest.Mock).mockResolvedValue(new Map([[HOST, { lastCheckin: Date.now() }]]));
 
   const get =
-    getMonitorImpl ??
-    jest.fn().mockResolvedValue({ attributes: { id: queryId ?? CONFIG_ID } });
+    getMonitorImpl ?? jest.fn().mockResolvedValue({ attributes: { id: queryId ?? CONFIG_ID } });
 
   const routeContext = {
     server: { logger: { debug: jest.fn(), error: jest.fn() } },
