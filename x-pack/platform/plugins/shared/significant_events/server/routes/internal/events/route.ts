@@ -25,6 +25,7 @@ import { triggerInvestigationWorkflow } from '../../../lib/significant_events/ev
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import type { PaginatedResponse } from '../../../lib/significant_events/query_utils';
 import { createServerRoute } from '../../create_server_route';
+import { assertNotPaused } from '../../utils/assert_not_paused';
 import { assertSignificantEventsAccess } from '../../utils/assert_significant_events_access';
 
 const toArray = <T extends string>(val: T | T[] | undefined): T[] | undefined =>
@@ -315,10 +316,12 @@ const eventsTriggerInvestigationRoute = createServerRoute({
     getScopedClients,
     server,
     logger,
+    maintenanceService,
   }): Promise<{ executionId: string }> => {
     const { getEventClient, licensing } = await getScopedClients({ request });
 
     await assertSignificantEventsAccess({ server, licensing });
+    await assertNotPaused({ maintenanceService, request });
 
     const { hits } = await getEventClient().findByEventUuid(params.path.id);
     if (hits.length === 0) {

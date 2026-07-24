@@ -235,6 +235,7 @@ export const createTemplatesServiceMock = (): TemplatesServiceMock => {
     getTags: jest.fn(),
     getAuthors: jest.fn(),
     getTemplateVersionsForExtendedFieldSearch: jest.fn().mockResolvedValue([]),
+    getActiveTemplatesReferencingField: jest.fn().mockResolvedValue([]),
   });
 
   // the cast here is required because jest.Mocked tries to include private members and would throw an error
