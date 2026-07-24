@@ -291,6 +291,23 @@ describe('AlertConditionStep', () => {
     });
   });
 
+  describe('rule schedule', () => {
+    it('renders lookback window before the Rule schedule title and schedule field', () => {
+      renderStep({ queryCommitted: true });
+
+      const lookback = screen.getByText('Lookback Window');
+      const title = screen.getByText('Rule schedule');
+      const schedule = screen.getByText('Schedule');
+
+      expect(
+        lookback.compareDocumentPosition(title) & Node.DOCUMENT_POSITION_FOLLOWING
+      ).toBeTruthy();
+      expect(
+        title.compareDocumentPosition(schedule) & Node.DOCUMENT_POSITION_FOLLOWING
+      ).toBeTruthy();
+    });
+  });
+
   describe('group-by auto-population in tracking mode', () => {
     it('extracts BY columns from the base query (composed format)', async () => {
       renderStep(

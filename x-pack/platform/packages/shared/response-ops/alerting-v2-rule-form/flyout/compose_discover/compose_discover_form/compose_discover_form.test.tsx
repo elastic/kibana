@@ -453,13 +453,6 @@ describe('shell shared fields', () => {
     );
   };
 
-  it('renders ScheduleField and LookbackWindowField on condition step', () => {
-    renderShell({ step: 0 }, { kind: 'alert' });
-
-    expect(screen.getByText('Schedule')).toBeInTheDocument();
-    expect(screen.getByText('Lookback Window')).toBeInTheDocument();
-  });
-
   it('renders ModeSelect and AlertDelayField on behaviour step', () => {
     renderShell({ step: 1 }, { kind: 'alert' });
 

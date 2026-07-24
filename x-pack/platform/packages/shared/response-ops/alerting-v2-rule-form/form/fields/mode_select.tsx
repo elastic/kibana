@@ -7,13 +7,11 @@
 
 import React, { useCallback } from 'react';
 import {
-  EuiBadge,
   EuiCheckableCard,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
   EuiPanel,
-  EuiSpacer,
   EuiText,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -43,7 +41,7 @@ const SIGNAL_TITLE = i18n.translate('xpack.alertingV2.ruleForm.modeField.signal.
 
 const ALERT_DESCRIPTION = i18n.translate('xpack.alertingV2.ruleForm.modeField.alert.description', {
   defaultMessage:
-    'The rule tracks each problem as an alert episode from first breach to recovery, notifying your team along the way.',
+    'Tracks each problem as an alert episode and its lifecycle, link it to workflows to notify your team.',
 });
 
 const SIGNAL_DESCRIPTION = i18n.translate(
@@ -82,18 +80,6 @@ export const ModeSelect = ({
       <EuiText size="xs" color="subdued">
         <p>{ALERT_DESCRIPTION}</p>
       </EuiText>
-      <EuiSpacer size="s" />
-      <EuiFlexGroup gutterSize="xs" wrap>
-        <EuiFlexItem grow={false}>
-          <EuiBadge color="hollow" iconType="productDiscover">Discover</EuiBadge>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiBadge color="hollow" iconType="bell">Alerts</EuiBadge>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiBadge color="hollow" iconType="workflowsApp">Workflows</EuiBadge>
-        </EuiFlexItem>
-      </EuiFlexGroup>
     </>
   );
 
@@ -103,8 +89,6 @@ export const ModeSelect = ({
       <EuiText size="xs" color="subdued">
         <p>{SIGNAL_DESCRIPTION}</p>
       </EuiText>
-      <EuiSpacer size="s" />
-      <EuiBadge color="hollow" iconType="productDiscover">Discover</EuiBadge>
     </>
   );
 

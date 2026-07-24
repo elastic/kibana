@@ -226,9 +226,18 @@ export function AlertConditionStep({
         />
       </EuiFormRow>
       <EuiSpacer size="m" />
-      <ScheduleField />
-      <EuiSpacer size="m" />
       <LookbackWindowField />
+      <EuiSpacer size="m" />
+      <EuiTitle size="xs">
+        <h3>
+          <FormattedMessage
+            id="xpack.alertingV2.composeDiscover.alertCondition.ruleScheduleTitle"
+            defaultMessage="Rule schedule"
+          />
+        </h3>
+      </EuiTitle>
+      <EuiSpacer size="s" />
+      <ScheduleField />
     </>
   );
 }
