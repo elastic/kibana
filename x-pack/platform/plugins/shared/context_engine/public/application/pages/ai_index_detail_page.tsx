@@ -49,7 +49,7 @@ export const AiIndexDetailPage = () => {
           isLoading ? (
             <EuiSkeletonTitle size="l" data-test-subj="contextAiIndexTitleLoading" />
           ) : (
-            aiIndex?.name
+            aiIndex?.id
           )
         }
       />
