@@ -6,8 +6,7 @@
  */
 
 import { type DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
-import { ALL_LOGS_DATA_VIEW_ID, getAllLogsDataViewSpec } from '@kbn/discover-utils/src';
-import { KIBANA_OBSERVABILITY_PROJECT } from '@kbn/projects-solutions-groups';
+import { getAllLogsDataViewSpec } from '@kbn/discover-utils/src';
 import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
 import type { LocatorDefinition } from '@kbn/share-plugin/common';
 import type { LocatorClient } from '@kbn/share-plugin/common/url_service';
@@ -16,18 +15,6 @@ import type { LocatorClient } from '@kbn/share-plugin/common/url_service';
  * Locator used to link to all log sources in Discover.
  */
 export const LOGS_LOCATOR_ID = 'LOGS_LOCATOR';
-
-/**
- * Solution nav ids whose Discover root profiles register `ALL_LOGS_DATA_VIEW_ID`.
- * `null` corresponds to the Classic navigation (stateful).
- */
-const SOLUTION_NAV_IDS_WITH_ALL_LOGS_DATA_VIEW: ReadonlyArray<string | null> = [
-  null,
-  KIBANA_OBSERVABILITY_PROJECT,
-];
-
-const isAllLogsDataViewRegistered = (solutionNavId: string | null): boolean =>
-  SOLUTION_NAV_IDS_WITH_ALL_LOGS_DATA_VIEW.includes(solutionNavId);
 
 /**
  * Accepts the same parameters as `DiscoverAppLocatorParams`, but automatically sets the data view to all log sources.
@@ -42,7 +29,6 @@ export class LogsLocatorDefinition implements LocatorDefinition<LogsLocatorParam
       locators: LocatorClient;
       getLogSourcesService(): Promise<LogsDataAccessPluginStart['services']['logSourcesService']>;
       getIsEsqlDefault(): Promise<boolean>;
-      getActiveSolutionNavId(): Promise<string | null>;
     }
   ) {}
 
@@ -66,17 +52,6 @@ export class LogsLocatorDefinition implements LocatorDefinition<LogsLocatorParam
       return discoverAppLocator.getLocation(params);
     }
 
-    // The all-logs data view id is only registered by the Observability and Classic root profiles.
-    const solutionNavId = await this.deps.getActiveSolutionNavId();
-
-    if (isAllLogsDataViewRegistered(solutionNavId)) {
-      return discoverAppLocator.getLocation({
-        dataViewId: ALL_LOGS_DATA_VIEW_ID,
-        ...params,
-      });
-    }
-
-    // Other solutions (e.g. Security) have no profile registering the id, so build an ad-hoc spec.
     const flattenedLogSources = await this.getFlattenedLogSources();
 
     return discoverAppLocator.getLocation({
