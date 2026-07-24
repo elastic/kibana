@@ -1,5 +1,5 @@
 {
-  "sha1": "4634f523bda702d0923b3ae10795fb4e8b9e09b3",
+  "sha1": "d0493f6dd71d6a5be778be1f64ade4e4189bf1bb",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -613,7 +613,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/maintainers/host_target_raw_identifiers_maintainer_suite.spec.ts",
-        "line": 252,
+        "line": 259,
         "column": 14
       }
     },
@@ -629,7 +629,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/maintainers/host_target_raw_identifiers_maintainer_suite.spec.ts",
-        "line": 295,
+        "line": 302,
         "column": 16
       }
     },
@@ -645,7 +645,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/maintainers/host_target_raw_identifiers_maintainer_suite.spec.ts",
-        "line": 320,
+        "line": 327,
         "column": 16
       }
     },
@@ -693,7 +693,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/maintainers/user_target_raw_identifiers_maintainer_suite.spec.ts",
-        "line": 226,
+        "line": 236,
         "column": 14
       }
     },
@@ -709,7 +709,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/maintainers/user_target_raw_identifiers_maintainer_suite.spec.ts",
-        "line": 286,
+        "line": 296,
         "column": 14
       }
     },
@@ -725,7 +725,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/maintainers/user_target_raw_identifiers_maintainer_suite.spec.ts",
-        "line": 324,
+        "line": 334,
         "column": 14
       }
     },
@@ -741,7 +741,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/maintainers/user_target_raw_identifiers_maintainer_suite.spec.ts",
-        "line": 354,
+        "line": 364,
         "column": 14
       }
     },
