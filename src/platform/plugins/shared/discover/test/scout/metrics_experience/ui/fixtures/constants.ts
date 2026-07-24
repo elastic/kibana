@@ -87,7 +87,7 @@ export const DATA_VIEW_NAME = METRICS_TEST_INDEX_NAME;
 export const PUSH_FLYOUT_VIEWPORT = { width: 1920, height: 1080 } as const;
 
 export const KBN_ARCHIVE =
-  'src/platform/plugins/shared/discover/test/scout/ui/fixtures/metrics_experience/kbn_archives/metrics_data_view.json';
+  'src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/fixtures/kbn_archives/metrics_data_view.json';
 
 export const METRICS_EXPERIENCE_TAGS = [
   ...tags.stateful.all,
