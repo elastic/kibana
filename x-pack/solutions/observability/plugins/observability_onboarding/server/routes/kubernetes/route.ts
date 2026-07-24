@@ -7,6 +7,8 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import * as t from 'io-ts';
+import { z } from '@kbn/zod/v4';
+import { BooleanFromString } from '@kbn/zod-helpers/v4';
 import Boom from '@hapi/boom';
 import { termQuery } from '@kbn/observability-plugin/server';
 import type { estypes } from '@elastic/elasticsearch';
@@ -122,12 +124,13 @@ const createKubernetesOnboardingFlowRoute = createObservabilityOnboardingServerR
 
 const hasKubernetesDataRoute = createObservabilityOnboardingServerRoute({
   endpoint: 'GET /internal/observability_onboarding/kubernetes/{onboardingId}/has-data',
-  params: t.type({
-    path: t.type({
-      onboardingId: t.string,
+  params: z.object({
+    path: z.object({
+      onboardingId: z.string(),
     }),
-    query: t.partial({
-      start: t.string,
+    query: z.object({
+      start: z.string().optional(),
+      respectPreExistingData: BooleanFromString.default(true),
     }),
   }),
   security: {
@@ -138,7 +141,7 @@ const hasKubernetesDataRoute = createObservabilityOnboardingServerRoute({
   },
   async handler(resources): Promise<HasKubernetesDataRouteResponse> {
     const { onboardingId } = resources.params.path;
-    const { start } = resources.params.query;
+    const { start, respectPreExistingData } = resources.params.query;
     const { elasticsearch } = await resources.context.core;
 
     try {
@@ -182,15 +185,21 @@ const hasKubernetesDataRoute = createObservabilityOnboardingServerRoute({
       // runtime mapping (which times out on large clusters). Fall back to a
       // time-range-only query when a start time is provided.
       //
-      // We run this query even when hasPreExistingData is true: the OTel
-      // kubernetes flow uses respectPreExistingData=false, so the component
-      // ignores the pre-existing-data flag and must see hasData=true to show
-      // the CTA. Skipping the query when hasPreExistingData=true would cause
-      // a deadlock where the component polls forever but the server never
-      // returns hasData=true.
-      const wiredStreamQuery: estypes.QueryDslQueryContainer | undefined = start
-        ? { bool: { filter: [{ range: { '@timestamp': { gte: start } } }] } }
-        : undefined;
+      // Whether the query runs despite pre-existing data depends on the
+      // caller's contract, mirroring the client's respectPreExistingData
+      // prop:
+      // - respectPreExistingData=true (classic EA flow, default): skip the
+      //   query when pre-existing data exists, since old data continuing to
+      //   flow after `start` would make hasData a false positive and the UI
+      //   would report a successful onboarding.
+      // - respectPreExistingData=false (OTel flow): always run it. The
+      //   component ignores the pre-existing-data flag and must see
+      //   hasData=true to show the CTA; skipping the query would deadlock
+      //   the polling.
+      const wiredStreamQuery: estypes.QueryDslQueryContainer | undefined =
+        start && (!hasPreExistingData || !respectPreExistingData)
+          ? { bool: { filter: [{ range: { '@timestamp': { gte: start } } }] } }
+          : undefined;
 
       const searches: Array<Promise<estypes.SearchResponse>> = [
         elasticsearch.client.asCurrentUser.search({
