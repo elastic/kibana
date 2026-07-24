@@ -12,6 +12,7 @@ import {
   ExecutionStatus,
   NonTerminalExecutionStatuses,
 } from '@kbn/workflows';
+import { loggerMock } from '@kbn/logging-mocks';
 import { WorkflowExecutionRepository } from './workflow_execution_repository';
 import { WORKFLOWS_EXECUTIONS_INDEX } from '../../common';
 
@@ -40,7 +41,7 @@ describe('WorkflowExecutionRepository', () => {
         create: jest.fn().mockResolvedValue({}),
       },
     };
-    repository = new WorkflowExecutionRepository(esClient as any);
+    repository = new WorkflowExecutionRepository(esClient as any, loggerMock.create());
   });
 
   describe('createWorkflowExecution', () => {
