@@ -13,6 +13,7 @@ import { KIBANA_API_PREFIX } from '../../../../common/constants';
 import { extractWarningMessages } from '../../../lib/utils';
 import { send } from '../../../lib/es/es';
 import type { BaseResponseType } from '../../../types';
+import { isNDJSONContentType } from '../../containers/editor/utils/output_data';
 
 const { collapseLiteralStrings } = XJson;
 
@@ -155,7 +156,7 @@ export function sendRequest(args: RequestArgs): Promise<RequestResult[]> {
           } else if (body instanceof Blob) {
             // ndjson (and zip) responses arrive as a Blob from the core HTTP client
             const text = await body.text();
-            value = contentType.includes('ndjson') ? formatNdjson(text) : text;
+            value = isNDJSONContentType(contentType) ? formatNdjson(text) : text;
           } else {
             value = typeof body === 'string' ? body : JSON.stringify(body, null, 2);
           }
