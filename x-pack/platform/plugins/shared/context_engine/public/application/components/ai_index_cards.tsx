@@ -37,7 +37,7 @@ const AiIndexCard = ({ aiIndex, href }: { aiIndex: AiIndexHttpItem; href: string
       textAlign="left"
       titleSize="xs"
       paddingSize="l"
-      title={aiIndex.name}
+      title={aiIndex.id}
       href={href}
       footer={
         <>
