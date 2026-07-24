@@ -14,6 +14,8 @@ import { BulkGetRulesRoute } from '../routes/rules/get_rules_bulk_route';
 import { GetRuleRoute } from '../routes/rules/get_rule_route';
 import { DeleteRuleRoute } from '../routes/rules/delete_rule_route';
 import { BulkDeleteRulesRoute } from '../routes/rules/bulk_delete_rules_route';
+import { EnableRuleRoute } from '../routes/rules/enable_rule_route';
+import { DisableRuleRoute } from '../routes/rules/disable_rule_route';
 import { BulkEnableRulesRoute } from '../routes/rules/bulk_enable_rules_route';
 import { BulkDisableRulesRoute } from '../routes/rules/bulk_disable_rules_route';
 import { DeleteRulesByQueryRoute } from '../routes/rules/delete_rules_by_query_route';
@@ -65,6 +67,8 @@ export function bindRoutes({ bind }: ContainerModuleLoadOptions) {
   bind(Route).toConstantValue(BulkGetRulesRoute);
   bind(Route).toConstantValue(GetRuleRoute);
   bind(Route).toConstantValue(DeleteRuleRoute);
+  bind(Route).toConstantValue(EnableRuleRoute);
+  bind(Route).toConstantValue(DisableRuleRoute);
   bind(Route).toConstantValue(BulkDeleteRulesRoute);
   bind(Route).toConstantValue(BulkEnableRulesRoute);
   bind(Route).toConstantValue(BulkDisableRulesRoute);
