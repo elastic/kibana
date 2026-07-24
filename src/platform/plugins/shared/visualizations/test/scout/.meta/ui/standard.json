@@ -1,0 +1,35 @@
+{
+  "sha1": "",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
+  "tests": [
+    {
+      "id": "6d176948dd75781-1d8faaef16914e8",
+      "title": "Visualize - no data shows the integrations prompt when there is no data",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/visualizations/test/scout/ui/tests/no_data.spec.ts",
+        "line": 21,
+        "column": 7
+      }
+    },
+    {
+      "id": "6d176948dd75781-1245ebead9d9903",
+      "title": "Visualize - no data shows the create data view prompt when no data views exist",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/visualizations/test/scout/ui/tests/no_data.spec.ts",
+        "line": 42,
+        "column": 7
+      }
+    }
+  ]
+}

@@ -9,6 +9,7 @@
 
 import { expect } from '@kbn/scout/ui';
 import { spaceTest } from '../../fixtures/common';
+import { createDataViewFromSearchBar } from '../../fixtures/common/helpers';
 
 const navigateAwayAndBackToDiscover = async (pageObjects: {
   collapsibleNav: { clickItem: (itemName: 'Discover' | 'Dashboards') => Promise<void> };
@@ -56,31 +57,37 @@ spaceTest.describe('Discover side nav link', { tag: '@local-stateful-classic' },
     expect(await discover.getHitCount()).toBe('30');
   });
 
-  spaceTest('does not save the last URL if it was an ad-hoc data view', async ({ pageObjects }) => {
-    const { discover, queryBar } = pageObjects;
+  spaceTest(
+    'does not save the last URL if it was an ad-hoc data view',
+    async ({ page, pageObjects }) => {
+      const { discover, queryBar } = pageObjects;
 
-    await discover.writeAndSubmitKqlQuery('response:200');
-    await discover.createDataViewFromSearchBar({ name: 'logs', adHoc: true });
-    await discover.writeAndSubmitKqlQuery('response:503');
+      await discover.writeAndSubmitKqlQuery('response:200');
+      await createDataViewFromSearchBar(page, pageObjects, { name: 'logs', adHoc: true });
+      await discover.writeAndSubmitKqlQuery('response:503');
 
-    await navigateAwayAndBackToDiscover(pageObjects);
+      await navigateAwayAndBackToDiscover(pageObjects);
 
-    expect(await queryBar.getQuery()).toBe('response:200');
-    expect(await discover.getHitCount()).toBe('12,891');
-  });
+      expect(await queryBar.getQuery()).toBe('response:200');
+      expect(await discover.getHitCount()).toBe('12,891');
+    }
+  );
 
-  spaceTest('saves the last URL if the session was saved', async ({ pageObjects, scoutSpace }) => {
-    const { discover, queryBar } = pageObjects;
-    const savedSession = `side-nav-session-${scoutSpace.id}-${Date.now()}`;
+  spaceTest(
+    'saves the last URL if the session was saved',
+    async ({ page, pageObjects, scoutSpace }) => {
+      const { discover, queryBar } = pageObjects;
+      const savedSession = `side-nav-session-${scoutSpace.id}-${Date.now()}`;
 
-    await discover.createDataViewFromSearchBar({ name: 'logs', adHoc: true });
-    await discover.writeAndSubmitKqlQuery('response:404');
-    await discover.saveSearch(savedSession);
+      await createDataViewFromSearchBar(page, pageObjects, { name: 'logs', adHoc: true });
+      await discover.writeAndSubmitKqlQuery('response:404');
+      await discover.saveSearch(savedSession);
 
-    await navigateAwayAndBackToDiscover(pageObjects);
+      await navigateAwayAndBackToDiscover(pageObjects);
 
-    expect(await queryBar.getQuery()).toBe('response:404');
-    expect(await discover.getHitCount()).toBe('696');
-    expect(await discover.getCurrentQueryName()).toBe(savedSession);
-  });
+      expect(await queryBar.getQuery()).toBe('response:404');
+      expect(await discover.getHitCount()).toBe('696');
+      expect(await discover.getCurrentQueryName()).toBe(savedSession);
+    }
+  );
 });

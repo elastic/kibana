@@ -10,16 +10,24 @@
 import type { Locator } from 'playwright/test';
 import type { ScoutPage } from '..';
 
+// Detail page URL after a data view is saved: /management/kibana/dataViews/dataView/<id>
+export const DATA_VIEW_DETAIL_URL_PATTERN = /\/management\/kibana\/dataViews\/.+/;
+
 export class DataViewsManagementPage {
   public readonly createButton: Locator;
   public readonly headerBadge: Locator;
   public readonly table: Locator;
+  /** Header title on a single data view's detail page. */
+  public readonly detailPageTitle: Locator;
+  /** URL of a single data view's detail page (navigated to after saving). */
+  public readonly detailUrlPattern = DATA_VIEW_DETAIL_URL_PATTERN;
   private readonly noDataViewsPrompt: Locator;
 
   constructor(private readonly page: ScoutPage) {
     this.createButton = this.page.testSubj.locator('createDataViewButton');
     this.headerBadge = this.page.testSubj.locator('headerBadge');
     this.table = this.page.testSubj.locator('indexPatternTable');
+    this.detailPageTitle = this.page.testSubj.locator('indexPatternTitle');
     this.noDataViewsPrompt = this.page.testSubj.locator('noDataViewsPrompt');
   }
 

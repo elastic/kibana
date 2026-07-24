@@ -1,0 +1,254 @@
+{
+  "sha1": "",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
+  "tests": [
+    {
+      "id": "96273257bffb784-48de9390e7d009c",
+      "title": "Ingest logstash data to Elasticsearch",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "src/platform/plugins/shared/visualizations/test/scout/ui/parallel_tests/global.setup.ts",
+        "line": 13,
+        "column": 16
+      }
+    },
+    {
+      "id": "679d5aa057f8fe2-281d5f28abd03d9",
+      "title": "Visualize - chart types shows the expected visualization types for both recommended and legacy tabs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/visualizations/test/scout/ui/parallel_tests/chart_types.spec.ts",
+        "line": 28,
+        "column": 12
+      }
+    },
+    {
+      "id": "679d5aa057f8fe2-a94db7732e9cc2c",
+      "title": "Visualize - chart types shows the correct agg-based chart types",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/visualizations/test/scout/ui/parallel_tests/chart_types.spec.ts",
+        "line": 38,
+        "column": 12
+      }
+    },
+    {
+      "id": "9018eb520ae5666-7e714b5e016e292",
+      "title": "Visualize - data table - aggregations shows percentage columns",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/visualizations/test/scout/ui/parallel_tests/data_table_aggregations.spec.ts",
+        "line": 41,
+        "column": 14
+      }
+    },
+    {
+      "id": "9018eb520ae5666-b645b42f7f33567",
+      "title": "Visualize - data table - aggregations shows correct data when using average pipeline aggregation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/visualizations/test/scout/ui/parallel_tests/data_table_aggregations.spec.ts",
+        "line": 84,
+        "column": 14
+      }
+    },
+    {
+      "id": "9018eb520ae5666-1d442e79b2212ab",
+      "title": "Visualize - data table - aggregations shows correct data for a data table with date histogram",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/visualizations/test/scout/ui/parallel_tests/data_table_aggregations.spec.ts",
+        "line": 97,
+        "column": 14
+      }
+    },
+    {
+      "id": "9018eb520ae5666-2767a7c8505150e",
+      "title": "Visualize - data table - aggregations shows correct data when selecting a field by its custom name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/visualizations/test/scout/ui/parallel_tests/data_table_aggregations.spec.ts",
+        "line": 110,
+        "column": 14
+      }
+    },
+    {
+      "id": "9018eb520ae5666-ab93482f53be4b9",
+      "title": "Visualize - data table - aggregations shows correct data for a data table with top hits",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/visualizations/test/scout/ui/parallel_tests/data_table_aggregations.spec.ts",
+        "line": 124,
+        "column": 14
+      }
+    },
+    {
+      "id": "9018eb520ae5666-543619364522a3a",
+      "title": "Visualize - data table - aggregations shows correct data for a data table with range agg",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/visualizations/test/scout/ui/parallel_tests/data_table_aggregations.spec.ts",
+        "line": 137,
+        "column": 14
+      }
+    },
+    {
+      "id": "b396c231c00ce70-240d3c84c647c7b",
+      "title": "Visualize - data table - time filtering filters correctly for applied and pinned time filters",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/visualizations/test/scout/ui/parallel_tests/data_table_filtering.spec.ts",
+        "line": 34,
+        "column": 14
+      }
+    },
+    {
+      "id": "e541fac2bc5ffc1-af5a28f480e293f",
+      "title": "Visualize - data table - metrics on all levels renders metrics at the configured levels",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/visualizations/test/scout/ui/parallel_tests/data_table_metrics_all_levels.spec.ts",
+        "line": 47,
+        "column": 14
+      }
+    },
+    {
+      "id": "4b3ef5fa2722a91-59e3e8f5d541dd1",
+      "title": "Visualize - data table on an index without a time filter applies/resets params, saves, loads, and shows correct data",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/visualizations/test/scout/ui/parallel_tests/data_table_nontimeindex.spec.ts",
+        "line": 47,
+        "column": 14
+      }
+    },
+    {
+      "id": "4b3ef5fa2722a91-c2627ee548a2929",
+      "title": "Visualize - data table on an index without a time filter shows correct data when using average pipeline aggregation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/visualizations/test/scout/ui/parallel_tests/data_table_nontimeindex.spec.ts",
+        "line": 92,
+        "column": 14
+      }
+    },
+    {
+      "id": "4b3ef5fa2722a91-893b460c08820bf",
+      "title": "Visualize - data table on an index without a time filter renders and filters a date histogram data table",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/visualizations/test/scout/ui/parallel_tests/data_table_nontimeindex.spec.ts",
+        "line": 109,
+        "column": 14
+      }
+    },
+    {
+      "id": "7442f1226f4c849-a2c68f0a06e6365",
+      "title": "Visualize - data table on an index without a time filter - filters saves, disables the timefilter, and can be filtered from a dashboard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/visualizations/test/scout/ui/parallel_tests/data_table_notimeindex_filters.spec.ts",
+        "line": 36,
+        "column": 14
+      }
+    },
+    {
+      "id": "55fd1ef5a2a0936-b5d6a2fe3631b84",
+      "title": "Visualize - data table - other bucket shows and filters the \"Other\" bucket",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/visualizations/test/scout/ui/parallel_tests/data_table_other_bucket.spec.ts",
+        "line": 34,
+        "column": 14
+      }
+    },
+    {
+      "id": "fb0a374fe779f71-099a461b727a846",
+      "title": "Visualize - data table - params, save/load and inspector applies/resets params, saves, loads, and shows correct data",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/visualizations/test/scout/ui/parallel_tests/data_table_params.spec.ts",
+        "line": 47,
+        "column": 14
+      }
+    },
+    {
+      "id": "d20c299a8ea6464-c25ab82fd140fbd",
+      "title": "Visualize - data table - split tables splits a table into multiple tables",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/visualizations/test/scout/ui/parallel_tests/data_table_split_tables.spec.ts",
+        "line": 34,
+        "column": 14
+      }
+    },
+    {
+      "id": "b8fa9f96dda0678-435c7ea0666c311",
+      "title": "Visualize - embedding a data table opens a data table in embedded mode and supports filtering",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/visualizations/test/scout/ui/parallel_tests/embedding.spec.ts",
+        "line": 31,
+        "column": 12
+      }
+    }
+  ]
+}

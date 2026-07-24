@@ -132,4 +132,56 @@ export class VisualizeApp {
   getEditInLensButton() {
     return this.editInLensButton;
   }
+
+  /** Switches to the legacy tab and opens the aggregation-based visualization type list. */
+  async clickAggBasedVisualizations() {
+    await this.clickLegacyTab();
+    await this.clickVisType('aggbased');
+    await expect(this.visNewDialogTypes).toBeVisible();
+  }
+
+  /**
+   * Returns the visualization group titles currently shown in the new-visualization
+   * wizard (recommended or legacy tab), sorted alphabetically.
+   */
+  async getVisibleVisTypes(): Promise<string[]> {
+    await expect(this.visNewDialogGroups).toBeVisible();
+    const titles = await this.visNewDialogGroups.getByTestId('visTypeTitle').allInnerTexts();
+    return titles
+      .map((title) => title.trim())
+      .filter(Boolean)
+      .sort();
+  }
+
+  /** Returns the aggregation-based visualization type titles (unsorted). */
+  async getChartTypes(): Promise<string[]> {
+    await expect(this.visNewDialogTypes).toBeVisible();
+    const titles = await this.visNewDialogTypes.getByTestId('visTypeTitle').allInnerTexts();
+    return titles.map((title) => title.trim()).filter(Boolean);
+  }
+
+  /**
+   * Saves the current visualization to the library and waits for the breadcrumb to
+   * reflect the new title.
+   */
+  async saveVisualization(visName: string) {
+    await this.openSaveModal();
+    await this.saveToLibrary(visName);
+    await expect(this.page.testSubj.locator('breadcrumb last')).toHaveText(visName);
+  }
+
+  /** Navigates to the Visualize library listing from the breadcrumb, searches and opens a saved visualization. */
+  async loadSavedVisualization(visName: string) {
+    await this.page.testSubj.click('breadcrumb first');
+    await expect(this.landingPage).toBeVisible();
+    await this.page.testSubj.fill('tableListSearchBox', `"${visName}"`);
+    await this.page.keyboard.press('Enter');
+    await this.page.testSubj.locator('listingTable-isLoaded').waitFor({ state: 'visible' });
+    await this.openSavedVisualization(visName);
+  }
+
+  /** Opens the data view editor flyout from the Visualize "no data view" prompt. */
+  async openCreateDataViewFlyout() {
+    await this.page.testSubj.click('createDataViewButton');
+  }
 }

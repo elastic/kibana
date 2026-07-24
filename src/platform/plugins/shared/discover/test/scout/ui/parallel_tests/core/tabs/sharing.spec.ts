@@ -18,6 +18,7 @@ import {
 } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest } from '../../../fixtures/common';
+import { createDataViewFromSearchBar } from '../../../fixtures/common/helpers';
 
 const openSharedPage = async (page: ScoutPage, sharedUrl: string, kbnUrl: KibanaUrl) => {
   const sharedPage = extendPlaywrightPage({ page: await page.context().newPage(), kbnUrl });
@@ -230,7 +231,7 @@ spaceTest.describe('Discover tabs - sharing', { tag: '@local-stateful-classic' }
 
           await pageObjects.unifiedTabs.createNewTab();
           await pageObjects.discover.waitUntilTabIsLoaded();
-          await pageObjects.discover.createDataViewFromSearchBar({ name: 'logs', adHoc: true });
+          await createDataViewFromSearchBar(page, pageObjects, { name: 'logs', adHoc: true });
           await pageObjects.discover.waitUntilTabIsLoaded();
           await pageObjects.unifiedTabs.editTabLabel(1, 'unsaved');
           await pageObjects.filterBar.addFilter({

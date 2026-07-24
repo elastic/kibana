@@ -8,6 +8,9 @@
     "isolatedModules": false
   },
   "kbn_references": [
-    "@kbn/scout"
+    "@kbn/scout",
+    "@kbn/inspector-plugin",
+    "@kbn/data-view-editor-plugin",
+    "@kbn/test-subj-selector"
   ]
 }

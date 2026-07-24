@@ -59,8 +59,8 @@ test.describe.skip('Create Data View wizard', { tag: tags.stateful.classic }, ()
 
     await test.step('saving navigates to the data view detail page', async () => {
       await pageObjects.dataViewEditor.save();
-      await expect(page).toHaveURL(pageObjects.dataViewEditor.detailUrlPattern);
-      await expect(pageObjects.dataViewEditor.detailPageTitle).toHaveText(DATA_STREAM_NAME);
+      await expect(page).toHaveURL(pageObjects.dataViewsManagement.detailUrlPattern);
+      await expect(pageObjects.dataViewsManagement.detailPageTitle).toHaveText(DATA_STREAM_NAME);
     });
   });
 });
