@@ -91,7 +91,10 @@ const generateInsights = async ({
 
   return {
     ...(toolCall.function.arguments as { insights: AttackDiscovery[] }),
-    traceId: response.traceId,
+    // `traceId` is not surfaced on the executeUntilValid response type; the capture
+    // side-channel treats it as optional (`?? null`), so omit it rather than read a
+    // non-existent property.
+    traceId: undefined,
   };
 };
 

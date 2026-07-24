@@ -7,7 +7,7 @@
 
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import {
-  createExampleScopedSkillInvocationEvaluator,
+  createSkillInvocationEvaluator,
   createTrajectoryEvaluator,
   getToolCallSteps,
   withEvaluatorSpan,
@@ -17,7 +17,6 @@ import {
   type Evaluator,
   type TaskOutput,
 } from '@kbn/evals';
-import { createAgentBuilderCorrectnessEvaluators } from '@kbn/evals-extensions';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type {
   PersonaMatrixExample,
@@ -87,15 +86,10 @@ export function createEvaluatePersonaMatrixDataset({
     );
 
     const skillEvaluators = expectedSkills.map((skillName) =>
-      createExampleScopedSkillInvocationEvaluator({
+      createSkillInvocationEvaluator({
         traceEsClient,
         log,
         skillName,
-        resolveContext: (args) => {
-          const expectedSkill = (args.metadata as Record<string, unknown> | undefined)
-            ?.expectedSkill;
-          return { expectedSkill: typeof expectedSkill === 'string' ? expectedSkill : undefined };
-        },
       })
     );
 
@@ -111,7 +105,10 @@ export function createEvaluatePersonaMatrixDataset({
       },
     });
 
-    const correctnessEvaluators = createAgentBuilderCorrectnessEvaluators();
+    const correctnessEvaluators = [
+      evaluators.correctnessAnalysis(),
+      evaluators.groundednessAnalysis(),
+    ];
 
     const expectedToolCalledEvaluator = createPersonaMatrixExpectedToolCalledEvaluator();
 
