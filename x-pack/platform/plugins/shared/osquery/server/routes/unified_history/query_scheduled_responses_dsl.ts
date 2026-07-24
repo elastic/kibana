@@ -95,6 +95,11 @@ export const buildScheduledResponsesQuery = ({
             planned_time: { max: { field: 'planned_schedule_time' } },
             max_timestamp: { max: { field: '@timestamp' } },
             agent_count: { cardinality: { field: 'agent_id' } },
+            // Constant within a schedule bucket; lets rows whose pack saved object is not
+            // in this space (cross-project reads) still resolve their labels.
+            pack_id: { terms: { field: 'pack_id', size: 1 } },
+            pack_name: { terms: { field: 'pack_name', size: 1 } },
+            query_name: { terms: { field: 'query_name', size: 1 } },
             total_rows: {
               sum: { field: 'action_response.osquery.count' },
             },
