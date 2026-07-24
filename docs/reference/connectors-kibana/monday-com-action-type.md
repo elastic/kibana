@@ -50,10 +50,10 @@ The Monday.com connector exposes the following actions:
 :   Paginate through all items on a Monday.com board. Returns item names, column values, group membership, and a cursor for the next page. Pass the cursor from the previous response to fetch subsequent pages.
 
 `createItem`
-:   Create a new item (row) on a Monday.com board. Optionally assign it to a specific group and set initial column values. Use `getBoardInfo` to discover group IDs and column IDs before calling this action.
+:   Create a new item (row) on a Monday.com board (available on in Workflows). Optionally assign it to a specific group and set initial column values. Use `getBoardInfo` to discover group IDs and column IDs before calling this action.
 
 `changeItemColumnValues`
-:   Update one or more column values on an existing Monday.com item. Provide a map of column IDs to new values. Use `getBoardInfo` to discover column IDs and their expected value formats.
+:   Update one or more column values on an existing Monday.com item (available on in Workflows). Provide a map of column IDs to new values. Use `getBoardInfo` to discover column IDs and their expected value formats.
 
 ### Updates and comments
 
