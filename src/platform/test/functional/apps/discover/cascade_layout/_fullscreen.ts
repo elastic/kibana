@@ -7,6 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * Migration recommendation: Pare these way down. Cover most functionality with unit tests. Leave a single smoke test.
+ */
+
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../ftr_provider_context';
 

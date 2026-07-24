@@ -111,14 +111,35 @@ describe('SlackAppService', () => {
         request,
         expect.objectContaining({
           metadata: expect.objectContaining({ managed: true, managed_by: 'nightshift-relay' }),
-          kibana_role_descriptors: {
-            nightshift_relay_agent_builder: expect.objectContaining({
-              elasticsearch: { cluster: ['monitor_inference'], indices: [], run_as: [] },
-              kibana: [{ spaces: ['*'], feature: { agentBuilder: ['read'], actions: ['read'] } }],
-            }),
-          },
         })
       );
+
+      // Read-only, least-privilege: direct ES read on observability signals only (queried as
+      // this key), everything else (Streams, Significant Events, connectors) via Kibana features.
+      const { kibana_role_descriptors: descriptors } = grantAsInternalUser.mock.calls[0][1];
+      expect(descriptors.nightshift_relay_agent_builder).toEqual({
+        elasticsearch: {
+          cluster: ['monitor_inference'],
+          indices: [
+            {
+              names: ['traces-*', 'logs-*', 'metrics-*', 'apm-*'],
+              privileges: ['read', 'view_index_metadata'],
+            },
+          ],
+          run_as: [],
+        },
+        kibana: [
+          {
+            spaces: ['*'],
+            feature: {
+              streams: ['read'],
+              agentBuilder: ['read'],
+              actions: ['read'],
+              workflowsManagement: ['read'],
+            },
+          },
+        ],
+      });
       // The minted key is the caller-supplied credential; no relay-minted
       // secret exists anywhere in the exchange.
       expect(startInstall).toHaveBeenCalledWith({
