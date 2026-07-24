@@ -126,10 +126,10 @@ const hasKubernetesDataRoute = createObservabilityOnboardingServerRoute({
   endpoint: 'GET /internal/observability_onboarding/kubernetes/{onboardingId}/has-data',
   params: z.object({
     path: z.object({
-      onboardingId: z.string(),
+      onboardingId: z.string().max(36),
     }),
     query: z.object({
-      start: z.string().optional(),
+      start: z.string().max(64).optional(),
       respectPreExistingData: BooleanFromString.default(true),
     }),
   }),
