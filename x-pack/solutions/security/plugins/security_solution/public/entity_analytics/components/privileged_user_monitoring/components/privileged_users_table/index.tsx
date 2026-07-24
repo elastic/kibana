@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   useEuiTheme,
   EuiPanel,
@@ -51,28 +51,31 @@ const useOpenUserFlyout = () => {
   const { openFlyout } = useExpandableFlyoutApi();
   const { openUserFlyout } = useFlyoutApi();
 
-  return (userName: string) => {
-    if (enableNewFlyout) {
-      openUserFlyout({
-        userName,
-        scopeId: PRIVILEGED_USERS_TABLE_ID,
-        contextID: PRIVILEGED_USERS_TABLE_ID,
-        origin: FLYOUT_ORIGIN.PRIVILEGED_USERS_TABLE,
-      });
-      return;
-    }
-
-    openFlyout({
-      right: {
-        id: UserPanelKey,
-        params: {
+  return useCallback(
+    (userName: string) => {
+      if (enableNewFlyout) {
+        openUserFlyout({
           userName,
-          contextID: PRIVILEGED_USERS_TABLE_ID,
           scopeId: PRIVILEGED_USERS_TABLE_ID,
+          contextID: PRIVILEGED_USERS_TABLE_ID,
+          origin: FLYOUT_ORIGIN.PRIVILEGED_USERS_TABLE,
+        });
+        return;
+      }
+
+      openFlyout({
+        right: {
+          id: UserPanelKey,
+          params: {
+            userName,
+            contextID: PRIVILEGED_USERS_TABLE_ID,
+            scopeId: PRIVILEGED_USERS_TABLE_ID,
+          },
         },
-      },
-    });
-  };
+      });
+    },
+    [enableNewFlyout, openFlyout, openUserFlyout]
+  );
 };
 
 export const PrivilegedUsersTable: React.FC<{ spaceId: string }> = ({ spaceId }) => {

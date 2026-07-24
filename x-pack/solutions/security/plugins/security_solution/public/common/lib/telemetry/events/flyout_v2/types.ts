@@ -63,8 +63,6 @@ export type FlyoutTool = (typeof FLYOUT_TOOL)[keyof typeof FLYOUT_TOOL];
  * to distinguish otherwise-identical opens of the same tool from different buttons.
  */
 export const FLYOUT_ORIGIN = {
-  // Flyout reconstructed from URL state during application mount.
-  URL_RESTORE: 'url_restore',
   // Document/attack flyout header badge or footer "Take action" menu.
   // Header badge/button in the document or attack flyout.
   FLYOUT_HEADER: 'flyout_header',
@@ -195,6 +193,8 @@ export const FLYOUT_ORIGIN = {
   RECENT_ANOMALIES: 'recent_anomalies',
   // Threat hunting lead entity badge.
   THREAT_HUNTING_LEADS: 'threat_hunting_leads',
+  // Flyout reconstructed from URL state during application mount.
+  URL_RESTORE: 'url_restore',
   // "Analyze event" row-action button, shared across alerts table, timeline, and rule preview.
   ROW_ACTION: 'row_action',
 } as const;

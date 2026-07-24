@@ -203,14 +203,14 @@ export const buildEntityFlyoutV2NavigationState = (
 
 const getEntityAnalyticsNavigationPathWithFlyout = (
   flyout: EntityAnalyticsFlyoutNavigationState,
-  isNewFlyoutEnabled: boolean
+  isNewFlyoutEnabled: boolean,
+  descriptors?: FlyoutV2UrlParamValue | null
 ): string | undefined => {
   const searchParams = getEntityAnalyticsStateSearchParams();
   searchParams.delete(FLYOUT_PARAM_KEY);
   searchParams.delete(FLYOUT_V2_URL_PARAM);
 
   if (isNewFlyoutEnabled) {
-    const descriptors = buildEntityFlyoutV2NavigationState(flyout);
     if (!descriptors) return undefined;
     searchParams.set(FLYOUT_V2_URL_PARAM, encodeFlyoutV2UrlParam(descriptors));
     return `?${searchParams.toString()}`;
@@ -461,7 +461,8 @@ export const navigateToEntityAnalyticsWithFlyoutInApp = ({
   /** Whether to encode the destination using the new EUI flyout URL contract. */
   isNewFlyoutEnabled?: boolean;
 }): void => {
-  const path = getEntityAnalyticsNavigationPathWithFlyout(flyout, isNewFlyoutEnabled);
+  const descriptors = isNewFlyoutEnabled ? buildEntityFlyoutV2NavigationState(flyout) : null;
+  const path = getEntityAnalyticsNavigationPathWithFlyout(flyout, isNewFlyoutEnabled, descriptors);
   if (path == null) {
     return;
   }
@@ -483,11 +484,8 @@ export const navigateToEntityAnalyticsWithFlyoutInApp = ({
     replace: true,
   });
 
-  if (isNewFlyoutEnabled) {
-    const descriptors = buildEntityFlyoutV2NavigationState(flyout);
-    if (descriptors) {
-      notifyFlyoutV2Navigation({ urlParamKey: FLYOUT_V2_URL_PARAM, descriptors });
-    }
+  if (isNewFlyoutEnabled && descriptors) {
+    notifyFlyoutV2Navigation({ urlParamKey: FLYOUT_V2_URL_PARAM, descriptors });
   }
 
   if (!alreadyOnEaHomePage) {
