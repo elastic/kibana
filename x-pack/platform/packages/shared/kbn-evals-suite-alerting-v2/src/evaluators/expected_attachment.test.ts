@@ -11,7 +11,6 @@ import {
   RENDER_ATTACHMENT_TAG_RE,
   createExpectedAttachmentDataEvaluator,
   createExpectedRenderAttachmentEvaluator,
-  getAssistantMessages,
 } from './expected_attachment';
 
 const attachment = (id: string, type: string, data: Record<string, unknown> = {}): VersionedAttachment =>
@@ -63,32 +62,6 @@ const runAttachmentData = (output: TaskOutput, expected: Record<string, unknown>
     metadata: null,
   });
 
-describe('getAssistantMessages', () => {
-  it('reads assistant text from conversation rounds', () => {
-    expect(
-      getAssistantMessages({
-        rounds: [
-          { input: { message: 'u1' }, response: { message: 'a1' } },
-          { input: { message: 'u2' }, response: { message: 'a2' } },
-        ],
-      } as TaskOutput)
-    ).toEqual(['a1', 'a2']);
-  });
-
-  it('falls back to role-tagged messages when rounds are absent', () => {
-    expect(
-      getAssistantMessages({
-        messages: [
-          { role: 'user', message: 'u1' },
-          { role: 'assistant', message: 'a1' },
-          { role: 'user', message: 'u2' },
-          { role: 'assistant', message: 'a2' },
-        ],
-      } as TaskOutput)
-    ).toEqual(['a1', 'a2']);
-  });
-});
-
 describe('RENDER_ATTACHMENT_TAG_RE', () => {
   it('matches a self-closing tag with id and version', () => {
     expect(
@@ -125,13 +98,7 @@ describe('createExpectedRenderAttachmentEvaluator', () => {
       runRender(conversation('<render_attachment id="abc" version="1"/>'), {
         expectRenderAttachment: [],
       })
-    ).rejects.toThrow(/at least one attachment type/i);
-  });
-
-  it('throws when expectRenderAttachment is present but not an array', async () => {
-    await expect(
-      runRender(conversation('x'), { expectRenderAttachment: 'rule' })
-    ).rejects.toThrow(/must be a non-empty array/i);
+    ).rejects.toThrow(/non-empty array of attachment types/i);
   });
 
   it('scores 1 when every expected attachment type was rendered', async () => {

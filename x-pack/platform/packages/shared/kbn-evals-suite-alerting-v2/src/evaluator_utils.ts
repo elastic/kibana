@@ -25,6 +25,25 @@ export const getPrompts = (output: TaskOutput): PromptRequest[] => {
   );
 };
 
+/** Projects each conversation round into user/assistant message pairs. */
+export const messagesFromRounds = (
+  rounds: ConversationRound[]
+): Array<{ role: 'user' | 'assistant'; message: string }> =>
+  rounds.flatMap((round) => [
+    { role: 'user' as const, message: round.input.message },
+    { role: 'assistant' as const, message: round.response?.message ?? '' },
+  ]);
+
+/** Assistant message text from the task output's messages projection. */
+export const getAssistantMessages = (output: TaskOutput): string[] => {
+  const messages =
+    (output as { messages?: Array<{ role?: string; message?: string }> })?.messages ?? [];
+  return messages
+    .filter((message) => message?.role === 'assistant')
+    .map((message) => message?.message ?? '')
+    .filter(Boolean);
+};
+
 export const summarizePrompt = (prompt: PromptRequest) => {
   if (isAskUserQuestionPrompt(prompt)) {
     return {

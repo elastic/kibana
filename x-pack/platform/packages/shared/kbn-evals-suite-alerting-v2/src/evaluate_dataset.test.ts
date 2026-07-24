@@ -14,7 +14,6 @@ import {
   buildPromptResponses,
   collectScoredCriteria,
   createTask,
-  messagesFromRounds,
 } from './evaluate_dataset';
 
 const askUserQuestion = (id: string, questionCount = 1): PromptRequest =>
@@ -126,22 +125,6 @@ describe('collectScoredCriteria', () => {
     expect(() =>
       collectScoredCriteria({ criteria: 'loads skill' as unknown as string[] })
     ).toThrow(/criteria must be an array/i);
-  });
-});
-
-describe('messagesFromRounds', () => {
-  it('projects user input and assistant response from each round', () => {
-    expect(
-      messagesFromRounds([
-        round('first user', 'first assistant'),
-        round('second user', 'second assistant'),
-      ])
-    ).toEqual([
-      { role: 'user', message: 'first user' },
-      { role: 'assistant', message: 'first assistant' },
-      { role: 'user', message: 'second user' },
-      { role: 'assistant', message: 'second assistant' },
-    ]);
   });
 });
 

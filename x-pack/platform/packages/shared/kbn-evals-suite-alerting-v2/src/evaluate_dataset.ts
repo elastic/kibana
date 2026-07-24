@@ -33,7 +33,7 @@ import {
   createExpectedAttachmentDataEvaluator,
   createExpectedRenderAttachmentEvaluator,
 } from './evaluators/expected_attachment';
-import { skippedResult, withLowScoreLogging } from './evaluator_utils';
+import { messagesFromRounds, skippedResult, withLowScoreLogging } from './evaluator_utils';
 import type { ConversationTurnResult, EvaluateDataset, RuleManagementExample } from './types';
 
 /**
@@ -96,14 +96,6 @@ export const buildPromptResponses = (
   }
   return responses;
 };
-
-export const messagesFromRounds = (
-  rounds: ConversationRound[]
-): Array<{ role: 'user' | 'assistant'; message: string }> =>
-  rounds.flatMap((round) => [
-    { role: 'user' as const, message: round.input.message },
-    { role: 'assistant' as const, message: round.response?.message ?? '' },
-  ]);
 
 /**
  * Sends each scripted user turn over the same conversation, answering any pending

@@ -14,13 +14,16 @@ export const getUsedToolIds = (output: TaskOutput): string[] =>
     .map((toolCall) => toolCall.tool_id)
     .filter((toolId): toolId is string => Boolean(toolId));
 
-const requireNonEmptyStringList = (value: unknown, fieldName: string): readonly string[] => {
-  if (!Array.isArray(value)) {
-    throw new Error(`${fieldName} must be a non-empty array of tool-ids`);
+const requireNonEmptyToolIdList = (
+  value: readonly string[] | undefined,
+  fieldName: string
+): readonly string[] => {
+  if (value == null) {
+    return [];
   }
-  const ids = value.filter((item): item is string => typeof item === 'string' && item.length > 0);
+  const ids = value.filter((id) => id.length > 0);
   if (ids.length === 0) {
-    throw new Error(`${fieldName} must contain at least one tool-id`);
+    throw new Error(`${fieldName} must be a non-empty array of tool-ids`);
   }
   return ids;
 };
@@ -32,14 +35,12 @@ export const createExpectedToolCalledEvaluator = (): Evaluator<
   name: 'ExpectedToolCalled',
   kind: 'CODE',
   evaluate: async ({ output, expected }) => {
-    const expectedToolIds = expected?.expectedToolIds;
-
-    if (expectedToolIds == null) {
+    const requiredToolIds = requireNonEmptyToolIdList(expected?.expectedToolIds, 'expectedToolIds');
+    if (requiredToolIds.length === 0) {
       return skippedResult('No tool-call expectation for this example');
     }
 
-    const requiredToolIds = requireNonEmptyStringList(expectedToolIds, 'expectedToolIds');
-    const usedToolIds = getUsedToolIds(output as TaskOutput);
+    const usedToolIds = getUsedToolIds(output);
     const missingToolIds = requiredToolIds.filter((id) => !usedToolIds.includes(id));
 
     return {
@@ -56,14 +57,15 @@ export const createExpectedAnyOfToolIdsEvaluator = (): Evaluator<
   name: 'ExpectedAnyOfToolIds',
   kind: 'CODE',
   evaluate: async ({ output, expected }) => {
-    const expectedAnyOfToolIds = expected?.expectedAnyOfToolIds;
-
-    if (expectedAnyOfToolIds == null) {
+    const alternatives = requireNonEmptyToolIdList(
+      expected?.expectedAnyOfToolIds,
+      'expectedAnyOfToolIds'
+    );
+    if (alternatives.length === 0) {
       return skippedResult('No any-of tool-id expectation for this example');
     }
 
-    const alternatives = requireNonEmptyStringList(expectedAnyOfToolIds, 'expectedAnyOfToolIds');
-    const usedToolIds = getUsedToolIds(output as TaskOutput);
+    const usedToolIds = getUsedToolIds(output);
     const matchedToolIds = alternatives.filter((id) => usedToolIds.includes(id));
 
     return {

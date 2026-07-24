@@ -7,10 +7,14 @@
 
 import type { Example } from '@kbn/evals';
 import type { PromptRequest } from '@kbn/agent-builder-common/agents';
-import type {
-  ExpectAttachmentDataFn,
-  ExpectRenderAttachment,
-} from './evaluators/expected_attachment';
+import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
+
+/** Attachment types that must each be rendered via a `<render_attachment>` tag. */
+export type ExpectRenderAttachment = readonly string[];
+
+export type ExpectAttachmentDataFn = (
+  attachments: VersionedAttachment[]
+) => void | Promise<void>;
 
 export interface RuleManagementExample extends Example {
   input: {

@@ -7,8 +7,9 @@
 
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { Evaluator, EvaluationResult, TaskOutput } from '@kbn/evals';
+import type { ConversationRound } from '@kbn/agent-builder-common';
 import { AgentPromptType } from '@kbn/agent-builder-common/agents';
-import { withLowScoreLogging } from './evaluator_utils';
+import { getAssistantMessages, messagesFromRounds, withLowScoreLogging } from './evaluator_utils';
 
 const createLog = () => ({ warning: jest.fn() } as unknown as ToolingLog);
 
@@ -49,6 +50,43 @@ const params = {
   expected: { criteria: ['stays on Alerting V2'] },
   metadata: {},
 };
+
+describe('messagesFromRounds', () => {
+  it('projects user input and assistant response from each round', () => {
+    expect(
+      messagesFromRounds([
+        {
+          input: { message: 'first user' },
+          response: { message: 'first assistant' },
+        },
+        {
+          input: { message: 'second user' },
+          response: { message: 'second assistant' },
+        },
+      ] as ConversationRound[])
+    ).toEqual([
+      { role: 'user', message: 'first user' },
+      { role: 'assistant', message: 'first assistant' },
+      { role: 'user', message: 'second user' },
+      { role: 'assistant', message: 'second assistant' },
+    ]);
+  });
+});
+
+describe('getAssistantMessages', () => {
+  it('returns assistant message text from the messages projection', () => {
+    expect(
+      getAssistantMessages({
+        messages: [
+          { role: 'user', message: 'u1' },
+          { role: 'assistant', message: 'a1' },
+          { role: 'user', message: 'u2' },
+          { role: 'assistant', message: 'a2' },
+        ],
+      } as TaskOutput)
+    ).toEqual(['a1', 'a2']);
+  });
+});
 
 describe('withLowScoreLogging', () => {
   it('logs a report when the score is below 1', async () => {

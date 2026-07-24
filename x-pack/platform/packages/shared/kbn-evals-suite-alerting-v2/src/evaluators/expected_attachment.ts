@@ -5,10 +5,14 @@
  * 2.0.
  */
 
-import type { ConversationRound } from '@kbn/agent-builder-common';
 import { getLatestVersion, type VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import type { Evaluator, TaskOutput } from '@kbn/evals';
-import { skippedResult } from '../evaluator_utils';
+import { getAssistantMessages, skippedResult } from '../evaluator_utils';
+import type {
+  ExpectAttachmentDataFn,
+  ExpectRenderAttachment,
+  RuleManagementExample,
+} from '../types';
 
 export const RENDER_ATTACHMENT_TAG_RE =
   /<render_attachment\b(?=[^>]*\bid\s*=\s*["'][^"']+["'])(?=[^>]*\bversion\s*=\s*["'][^"']+["'])[^>]*\/?>/i;
@@ -18,13 +22,6 @@ export interface RenderAttachmentRef {
   version: number;
   tag: string;
 }
-
-/** Attachment types that must each be rendered via a `<render_attachment>` tag. */
-export type ExpectRenderAttachment = readonly string[];
-
-export type ExpectAttachmentDataFn = (
-  attachments: VersionedAttachment[]
-) => void | Promise<void>;
 
 /**
  * Latest current-version data among attachments of the given type
@@ -65,80 +62,75 @@ export const parseAllRenderAttachmentRefs = (message: string): RenderAttachmentR
   return refs;
 };
 
-export const getAssistantMessages = (output: TaskOutput): string[] => {
-  const rounds = (output as { rounds?: ConversationRound[] })?.rounds;
-  if (Array.isArray(rounds) && rounds.length > 0) {
-    return rounds.map((round) => round.response?.message ?? '').filter(Boolean);
-  }
-
-  // Fallback for unit fixtures that only provide a messages projection.
-  const messages =
-    (output as { messages?: Array<{ role?: string; message?: string }> })?.messages ?? [];
-  return messages
-    .filter((m) => m?.role === 'assistant')
-    .map((m) => m?.message ?? '')
-    .filter(Boolean);
-};
-
 const getAttachments = (output: TaskOutput): VersionedAttachment[] => {
   const attachments = (output as { attachments?: VersionedAttachment[] })?.attachments;
   return Array.isArray(attachments) ? attachments : [];
 };
 
-/** `null` means the field was omitted (skip); never returns `undefined`. */
-const getExpectRenderAttachment = (expected: unknown): ExpectRenderAttachment | null => {
-  const value = (expected as { expectRenderAttachment?: unknown } | null)?.expectRenderAttachment;
-  if (value === undefined || value === null) {
-    return null;
+/** Distinct attachment types that were referenced by `<render_attachment>` tags. */
+const getRenderedAttachmentTypes = (
+  refs: RenderAttachmentRef[],
+  attachments: VersionedAttachment[]
+): string[] => [
+  ...new Set(
+    refs
+      .map((ref) => attachments.find((attachment) => attachment.id === ref.id)?.type)
+      .filter((type): type is string => typeof type === 'string' && type.length > 0)
+  ),
+];
+
+const requireNonEmptyAttachmentTypeList = (
+  value: ExpectRenderAttachment | undefined
+): ExpectRenderAttachment => {
+  if (value == null) {
+    return [];
   }
-  if (!Array.isArray(value)) {
-    throw new Error('expectRenderAttachment must be a non-empty array of attachment types');
-  }
-  const types = value.filter((item): item is string => typeof item === 'string' && item.length > 0);
+  const types = value.filter((type) => type.length > 0);
   if (types.length === 0) {
-    throw new Error('expectRenderAttachment must contain at least one attachment type');
+    throw new Error('expectRenderAttachment must be a non-empty array of attachment types');
   }
   return types;
 };
 
-/** `null` means the field was omitted (skip); never returns `undefined`. */
-const getExpectAttachmentDataFn = (expected: unknown): ExpectAttachmentDataFn | null => {
-  const value = (expected as { expectAttachmentData?: unknown } | null)?.expectAttachmentData;
-  if (value === undefined || value === null) {
-    return null;
+const requireAttachmentDataFn = (
+  value: ExpectAttachmentDataFn | undefined
+): ExpectAttachmentDataFn | undefined => {
+  if (value == null) {
+    return undefined;
   }
   if (typeof value !== 'function') {
     throw new Error('expectAttachmentData must be a function');
   }
-  return value as ExpectAttachmentDataFn;
+  return value;
 };
 
-export const createExpectedRenderAttachmentEvaluator = (): Evaluator => ({
+const attachmentListMetadata = (attachments: VersionedAttachment[]) => ({
+  attachmentCount: attachments.length,
+  attachmentTypes: attachments.map((attachment) => attachment.type),
+});
+
+export const createExpectedRenderAttachmentEvaluator = (): Evaluator<
+  RuleManagementExample,
+  TaskOutput
+> => ({
   name: 'ExpectedRenderAttachment',
   kind: 'CODE',
   evaluate: async ({ output, expected }) => {
-    const expectation = getExpectRenderAttachment(expected);
-
-    if (expectation === null) {
+    const requiredTypes = requireNonEmptyAttachmentTypeList(expected?.expectRenderAttachment);
+    if (requiredTypes.length === 0) {
       return skippedResult('No render-attachment expectation for this example');
     }
 
-    const assistantMessages = getAssistantMessages(output as TaskOutput);
+    const assistantMessages = getAssistantMessages(output);
     const matchedRefs = assistantMessages.flatMap((message) => parseAllRenderAttachmentRefs(message));
-    const attachments = getAttachments(output as TaskOutput);
-    const renderedTypes = [
-      ...new Set(
-        matchedRefs
-          .map((ref) => attachments.find((attachment) => attachment.id === ref.id)?.type)
-          .filter((type): type is string => typeof type === 'string' && type.length > 0)
-      ),
-    ];
-    const missingTypes = expectation.filter((type) => !renderedTypes.includes(type));
+    const attachments = getAttachments(output);
+    const renderedTypes = getRenderedAttachmentTypes(matchedRefs, attachments);
+    const missingTypes = requiredTypes.filter((type) => !renderedTypes.includes(type));
 
     return {
       score: matchedRefs.length > 0 && missingTypes.length === 0 ? 1 : 0,
       metadata: {
-        expectRenderAttachment: expectation,
+        expectRenderAttachment: requiredTypes,
         matchedTags: matchedRefs.map((ref) => ref.tag),
         renderedTypes,
         missingTypes,
@@ -148,35 +140,29 @@ export const createExpectedRenderAttachmentEvaluator = (): Evaluator => ({
   },
 });
 
-export const createExpectedAttachmentDataEvaluator = (): Evaluator => ({
+export const createExpectedAttachmentDataEvaluator = (): Evaluator<
+  RuleManagementExample,
+  TaskOutput
+> => ({
   name: 'ExpectedAttachmentData',
   kind: 'CODE',
   evaluate: async ({ output, expected }) => {
-    const assertAttachmentData = getExpectAttachmentDataFn(expected);
-
-    if (assertAttachmentData === null) {
+    const assertAttachmentData = requireAttachmentDataFn(expected?.expectAttachmentData);
+    if (assertAttachmentData == null) {
       return skippedResult('No attachment-data expectation for this example');
     }
 
-    const attachments = getAttachments(output as TaskOutput);
+    const attachments = getAttachments(output);
+    const metadata = attachmentListMetadata(attachments);
 
     try {
       await assertAttachmentData(attachments);
-      return {
-        score: 1,
-        metadata: {
-          attachmentCount: attachments.length,
-          attachmentTypes: attachments.map((attachment) => attachment.type),
-        },
-      };
+      return { score: 1, metadata };
     } catch (error) {
       return {
         score: 0,
         explanation: error instanceof Error ? error.message : String(error),
-        metadata: {
-          attachmentCount: attachments.length,
-          attachmentTypes: attachments.map((attachment) => attachment.type),
-        },
+        metadata,
       };
     }
   },

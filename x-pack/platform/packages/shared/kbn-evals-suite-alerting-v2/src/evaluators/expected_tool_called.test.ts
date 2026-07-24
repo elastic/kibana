@@ -40,7 +40,7 @@ describe('createExpectedToolCalledEvaluator', () => {
 
   it('throws when expectedToolIds is an empty array', async () => {
     await expect(run(outputWithToolCalls([MANAGE_RULE]), { expectedToolIds: [] })).rejects.toThrow(
-      /at least one tool-id/i
+      /non-empty array of tool-ids/i
     );
   });
 
@@ -97,7 +97,7 @@ describe('createExpectedAnyOfToolIdsEvaluator', () => {
   it('throws when expectedAnyOfToolIds is an empty array', async () => {
     await expect(
       run(outputWithToolCalls([MANAGE_RULE]), { expectedAnyOfToolIds: [] })
-    ).rejects.toThrow(/at least one tool-id/i);
+    ).rejects.toThrow(/non-empty array of tool-ids/i);
   });
 
   it('scores 1 when one alternative was called', async () => {
