@@ -12,6 +12,8 @@ import { UnifiedTabs, type UnifiedTabsProps } from '@kbn/unified-tabs';
 import { i18n } from '@kbn/i18n';
 import { AppMenuComponent } from '@kbn/core-chrome-app-menu-components';
 import { MAX_DISCOVER_SESSION_TABS } from '@kbn/saved-search-plugin/common';
+import { css } from '@emotion/react';
+import { useEuiTheme } from '@elastic/eui';
 import { ChromeAppHeader, useIsChromeNextProjectHeader } from '../chrome_app_header';
 import { SingleTabView, type SingleTabViewProps } from '../single_tab_view';
 import {
@@ -40,6 +42,7 @@ export const TabsView = (props: SingleTabViewProps) => {
   const currentDataView = useCurrentTabRuntimeState((tab) => tab.currentDataView$);
   const scopedEbtManager = useCurrentTabRuntimeState((tab) => tab.scopedEbtManager$);
   const isChromeNextProjectHeader = useIsChromeNextProjectHeader();
+  const { euiTheme } = useEuiTheme();
 
   const { getTopTabMenuItems, getAdditionalTabMenuItems, topNavMenuItems } = useAppMenuData({
     currentDataView,
@@ -74,11 +77,30 @@ export const TabsView = (props: SingleTabViewProps) => {
 
   const wrapTabsBar = useMemo((): UnifiedTabsProps['wrapTabsBar'] => {
     if (isChromeNextProjectHeader) {
-      return (tabsBar) => (
-        <ChromeAppHeader menu={topNavMenuItems} hasTabs={Boolean(tabsBar)} tabsBar={tabsBar} />
-      );
+      return (tabsBar) => {
+        const tabsBarWithDelimiter = (
+          <>
+            {tabsBar}
+            <span // Vertical rule separator.
+              aria-hidden="true"
+              css={css`
+                width: ${euiTheme.border.width.thin};
+                height: 28px;
+                background-color: ${euiTheme.colors.borderBasePlain};
+              `}
+            />
+          </>
+        );
+        return (
+          <ChromeAppHeader
+            menu={topNavMenuItems}
+            hasTabs={Boolean(tabsBar)}
+            tabsBar={tabsBarWithDelimiter}
+          />
+        );
+      };
     }
-  }, [isChromeNextProjectHeader, topNavMenuItems]);
+  }, [isChromeNextProjectHeader, topNavMenuItems, euiTheme]);
 
   const appendRight = useMemo(() => {
     if (!isChromeNextProjectHeader) {
