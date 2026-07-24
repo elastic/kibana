@@ -63,6 +63,7 @@ const tryResolveFallbackConnector = async ({
     // Ignore errors — fall through to connector list fallback
   }
 
+  // Fall back to the full connector list, preferring the platform default
   const connectors = await inference.getConnectorList(request).catch(() => undefined);
   if (connectors && connectors.length > 0) {
     return selectFallbackConnector(connectors);
