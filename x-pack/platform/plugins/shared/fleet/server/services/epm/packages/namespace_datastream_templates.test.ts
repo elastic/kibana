@@ -193,17 +193,17 @@ function makeEsClientWithTemplate(composedOf: string[] = BASE_COMPOSED_OF) {
   // Base template calls return the mock template; NS template calls (identified by the
   // `@namespace.` marker) return 404 — NS templates don't pre-exist by default, so the
   // pre-flight check correctly treats the base being in overlapping as a user conflict.
-  esClient.indices.getIndexTemplate.mockImplementation(({ name }: { name: string }) => {
-    if (name.includes('@namespace.')) {
+  esClient.indices.getIndexTemplate.mockImplementation((params: any) => {
+    if ((params?.name as string).includes('@namespace.')) {
       return Promise.reject({ meta: { statusCode: 404 } });
     }
     return Promise.resolve({
       index_templates: [
         {
-          name,
+          name: params?.name,
           index_template: {
             composed_of: composedOf,
-            index_patterns: [`${name}-*`],
+            index_patterns: [`${params?.name}-*`],
             priority: 200,
             template: { settings: {}, mappings: {} },
             data_stream: {},
