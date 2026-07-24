@@ -32,7 +32,7 @@ engine:
   env:
     ANTHROPIC_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
     ANTHROPIC_BASE_URL: https://openrouter.ai/api
-    ANTHROPIC_DEFAULT_OPUS_MODEL: anthropic/claude-opus-4.8
+    ANTHROPIC_DEFAULT_OPUS_MODEL: anthropic/claude-opus-4.8[1m]
     ANTHROPIC_DEFAULT_HAIKU_MODEL: anthropic/claude-haiku-4.5
     ANTHROPIC_DEFAULT_SONNET_MODEL: anthropic/claude-sonnet-4.6
     CLAUDE_CODE_EFFORT_LEVEL: high
