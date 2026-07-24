@@ -96,6 +96,17 @@ describe('validateEsqlQueryForStreamOrThrow', () => {
         validateEsqlQueryForStreamOrThrow({ esqlQuery: '{{INVALID ESQL}}', stream })
       ).toThrow(expect.objectContaining({ statusCode: 400 }));
     });
+
+    it('should fail closed on parser errors even when a valid FROM is present', () => {
+      const stream = createWiredStreamDefinition('logs');
+
+      expect(() =>
+        validateEsqlQueryForStreamOrThrow({
+          esqlQuery: 'FROM logs, logs.* | WHERE message == "unterminated',
+          stream,
+        })
+      ).toThrow('Invalid ES|QL query');
+    });
   });
 
   describe('FROM clause validation', () => {
@@ -269,46 +280,35 @@ describe('validateEsqlQueryForStreamOrThrow', () => {
     });
   });
 
-  describe('METADATA validation', () => {
-    it('should throw when METADATA is missing entirely', () => {
+  describe('METADATA is optional', () => {
+    it('should accept a query without METADATA', () => {
       const stream = createWiredStreamDefinition('logs');
 
       expect(() =>
         validateEsqlQueryForStreamOrThrow({
-          esqlQuery: 'FROM logs, logs.*',
+          esqlQuery: 'FROM logs, logs.* | WHERE level == "error"',
           stream,
         })
-      ).toThrow('ES|QL query METADATA must include both `_id` and `_source`');
+      ).not.toThrow();
     });
 
-    it('should throw when _id is missing from METADATA', () => {
-      const stream = createWiredStreamDefinition('logs');
-
-      expect(() =>
-        validateEsqlQueryForStreamOrThrow({
-          esqlQuery: 'FROM logs, logs.* METADATA _source',
-          stream,
-        })
-      ).toThrow('ES|QL query METADATA must include both `_id` and `_source`');
-    });
-
-    it('should throw when _source is missing from METADATA', () => {
-      const stream = createWiredStreamDefinition('logs');
-
-      expect(() =>
-        validateEsqlQueryForStreamOrThrow({
-          esqlQuery: 'FROM logs, logs.* METADATA _id',
-          stream,
-        })
-      ).toThrow('ES|QL query METADATA must include both `_id` and `_source`');
-    });
-
-    it('should accept METADATA with both _id and _source', () => {
+    it('should still accept METADATA _id, _source (compiler strips it later)', () => {
       const stream = createWiredStreamDefinition('logs');
 
       expect(() =>
         validateEsqlQueryForStreamOrThrow({
           esqlQuery: 'FROM logs, logs.* METADATA _id, _source',
+          stream,
+        })
+      ).not.toThrow();
+    });
+
+    it('should accept a partial METADATA list', () => {
+      const stream = createWiredStreamDefinition('logs');
+
+      expect(() =>
+        validateEsqlQueryForStreamOrThrow({
+          esqlQuery: 'FROM logs, logs.* METADATA _id',
           stream,
         })
       ).not.toThrow();

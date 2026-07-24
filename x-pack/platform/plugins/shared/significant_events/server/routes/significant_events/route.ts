@@ -14,16 +14,25 @@ import { fetchQueryOccurrencesFromAlerts } from '../../lib/significant_events/fe
 import { getQueryOccurrencesResponse } from '../../oas_examples';
 import { createServerRoute } from '../create_server_route';
 import { assertSignificantEventsAccess } from '../utils/assert_significant_events_access';
-import { assertValidDateRange, makeIsoDateFromString } from '../utils/iso_date_param';
 import { searchModeSchema } from '../utils/search_mode';
+
+// Make sure strings are expected for input, but still converted to a
+// Date, without breaking the OpenAPI generator.
+// Descriptions must be on the inner z.string() so they propagate to OAS parameters.
+const makeDateFromString = (description: string) =>
+  z
+    .string()
+    .max(MAX_ID_LENGTH)
+    .describe(description)
+    .transform((input) => new Date(input));
 
 const readSignificantEventsKIQueryOccurrenceStatsRoute = createServerRoute({
   endpoint: 'GET /api/streams/{name}/significant_events 2023-10-31',
   params: z.object({
     path: z.object({ name: z.string().max(MAX_ID_LENGTH).describe('The name of the stream.') }),
     query: z.object({
-      from: makeIsoDateFromString('Start of the time range as an ISO 8601 date string.'),
-      to: makeIsoDateFromString('End of the time range as an ISO 8601 date string.'),
+      from: makeDateFromString('Start of the time range as an ISO 8601 date string.'),
+      to: makeDateFromString('End of the time range as an ISO 8601 date string.'),
       bucketSize: z
         .string()
         .max(MAX_ID_LENGTH)
@@ -100,7 +109,6 @@ const readSignificantEventsKIQueryOccurrenceStatsRoute = createServerRoute({
     });
     const { name } = params.path;
     const { from, to, bucketSize, query, searchMode } = params.query;
-    assertValidDateRange(from, to);
 
     const [kiClient, { alertsReader }] = await Promise.all([
       scopedClients.getKnowledgeIndicatorClient(),

@@ -472,7 +472,7 @@ describe('fetchQueryOccurrencesFromAlerts', () => {
       };
       expect(calledWith.query).toContain('.rule-events');
       expect(calledWith.query).toContain(
-        'EVAL metric_value = TO_INTEGER(FIELD_EXTRACT(data, "metric_value"))'
+        'EVAL metric_value = TO_LONG(FIELD_EXTRACT(data, "metric_value"))'
       );
       expect(calledWith.query).toContain(
         'EVAL bucket = TO_DATETIME(TO_LONG(FIELD_EXTRACT(data, "bucket")))'

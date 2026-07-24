@@ -6,7 +6,7 @@
  */
 
 import { stripMetadata } from '@kbn/streams-schema';
-import { assertCanCompileMatchMetric, stripTrailingPipeCommands } from './can_compile_match_metric';
+import { buildMatchMetricBase } from './can_compile_match_metric';
 import {
   METRIC_SERIES_BUCKET_FIELD,
   METRIC_SERIES_LIMIT,
@@ -16,10 +16,6 @@ import {
 /** Strip all METADATA columns; count series does not need `_id` / `_source`. */
 const METADATA_TO_STRIP = ['_id', '_source', '_index', '_version'] as const;
 
-function toFilterOnlyBase(esqlQuery: string): string {
-  return stripTrailingPipeCommands(stripMetadata(esqlQuery, [...METADATA_TO_STRIP]));
-}
-
 /**
  * Compiles a filter-only MATCH KI into an Alerting v2 breach query that emits
  * closed-minute `{ bucket, metric_value }` rows (COUNT(*)).
@@ -28,9 +24,9 @@ function toFilterOnlyBase(esqlQuery: string): string {
  * `time_field`. The in-query `DATE_TRUNC(NOW())` drops the open current minute.
  */
 export function compileMatchCountBreachQuery(esqlQuery: string, timestampField: string): string {
-  assertCanCompileMatchMetric(esqlQuery);
-
-  const base = toFilterOnlyBase(esqlQuery);
+  // Parse once: assert filter-only eligibility and peel trailing SORT/LIMIT/KEEP
+  // via AST source-slicing (never a text regex), then drop METADATA columns.
+  const base = stripMetadata(buildMatchMetricBase(esqlQuery), [...METADATA_TO_STRIP]);
 
   // Keep `bucket` as a datetime (no TO_LONG here). Alerting persists the ES|QL
   // date value; readers project with TO_DATETIME(TO_LONG(FIELD_EXTRACT(...))).

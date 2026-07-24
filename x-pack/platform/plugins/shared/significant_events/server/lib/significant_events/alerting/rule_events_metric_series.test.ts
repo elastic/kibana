@@ -21,7 +21,7 @@ describe('projectMetricSeriesColumns', () => {
     );
 
     expect(request.query).toContain(
-      'EVAL metric_value = TO_INTEGER(FIELD_EXTRACT(data, "metric_value"))'
+      'EVAL metric_value = TO_LONG(FIELD_EXTRACT(data, "metric_value"))'
     );
     expect(request.query).toContain(
       'EVAL bucket = TO_DATETIME(TO_LONG(FIELD_EXTRACT(data, "bucket")))'

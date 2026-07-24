@@ -25,16 +25,26 @@ export const RULE_EVENTS_INDEX = '.rule-events';
  * not columns. Every ES|QL read path must go through {@link projectMetricSeriesColumns}:
  *
  * ```esql
- * | EVAL metric_value = TO_INTEGER(FIELD_EXTRACT(data, "metric_value"))
+ * | EVAL metric_value = TO_LONG(FIELD_EXTRACT(data, "metric_value"))
  * | EVAL bucket = TO_DATETIME(TO_LONG(FIELD_EXTRACT(data, "bucket")))
  * ```
+ *
+ * Invariant: this projection assumes Alerting v2 persists the ES|QL date column
+ * as epoch millis, which the Arrow streaming write path guarantees. `TO_LONG`
+ * cannot parse an ISO-8601 string — if `bucket` were ever persisted as ISO text,
+ * this EVAL would yield NULL and the reader's `bucket IS NOT NULL` guard would
+ * silently empty the occurrences chart. The painless runtime mapping used by
+ * change-point additionally tolerates ISO (`ZonedDateTime.parse`), so keep both
+ * read paths in sync if that persistence format ever changes.
  */
 export function projectMetricSeriesColumns(query: ComposerQuery): ComposerQuery {
   const dataCol = esql.col('data');
   const bucketKey = esql.str(METRIC_SERIES_BUCKET_FIELD);
   const valueKey = esql.str(METRIC_SERIES_VALUE_FIELD);
 
-  return query.pipe`EVAL metric_value = TO_INTEGER(FIELD_EXTRACT(${dataCol}, ${valueKey}))`
+  // `metric_value` is a `long` in the runtime mapping; TO_LONG keeps the ES|QL
+  // read path type-symmetric with it.
+  return query.pipe`EVAL metric_value = TO_LONG(FIELD_EXTRACT(${dataCol}, ${valueKey}))`
     .pipe`EVAL bucket = TO_DATETIME(TO_LONG(FIELD_EXTRACT(${dataCol}, ${bucketKey})))`;
 }
 

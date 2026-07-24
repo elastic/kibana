@@ -67,7 +67,7 @@ describe('SignificantEventsAlertsReaderV2', () => {
     expect(request.query).toContain(`space_id == "${SPACE_ID}"`);
     expect(request.query).toContain(`rule.id IN ("${RULE_UUID}")`);
     expect(request.query).toContain(
-      'EVAL metric_value = TO_INTEGER(FIELD_EXTRACT(data, "metric_value"))'
+      'EVAL metric_value = TO_LONG(FIELD_EXTRACT(data, "metric_value"))'
     );
     expect(request.query).toContain(
       'EVAL bucket = TO_DATETIME(TO_LONG(FIELD_EXTRACT(data, "bucket")))'
@@ -94,18 +94,19 @@ describe('SignificantEventsAlertsReaderV2', () => {
     ).toThrow(/rangeFromIso and rangeToIso/);
   });
 
-  it('counts alerts with track_total_hits for the idle gate', async () => {
+  it('counts alerts with terminate_after for the idle gate', async () => {
     const { client, search } = createEsClient();
-    search.mockResolvedValue({ hits: { total: { value: 21 } } });
+    search.mockResolvedValue({ hits: { total: { value: 1 } } });
 
     const result = await reader.countAlerts(client, { lookback: LOOKBACK, spaceId: SPACE_ID });
 
-    expect(result).toBe(21);
+    expect(result).toBe(1);
     expect(search).toHaveBeenCalledWith('significant_events_alerts_v2_count_alerts', {
       index: '.rule-events',
       ignore_unavailable: true,
       size: 0,
-      track_total_hits: true,
+      track_total_hits: 1,
+      terminate_after: 1,
       query: {
         bool: {
           filter: [

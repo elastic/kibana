@@ -99,11 +99,15 @@ export class SignificantEventsAlertsReaderV2 implements ISignificantEventsAlerts
     esClient: TracedElasticsearchClient,
     { lookback, spaceId, ruleUuid }: CountDetectionAlertsParams
   ): Promise<number> {
+    // The idle gate only needs "any activity" (> 0), so avoid exact-counting the
+    // full window: `terminate_after: 1` stops each shard after its first match and
+    // `track_total_hits: 1` caps the tracked total (0 stays 0, any match reads >= 1).
     const response = await esClient.search('significant_events_alerts_v2_count_alerts', {
       index: this.index,
       ignore_unavailable: true,
       size: 0,
-      track_total_hits: true,
+      track_total_hits: 1,
+      terminate_after: 1,
       query: {
         bool: {
           filter: buildRuleEventsSignalFilter({ lookback, spaceId, ruleUuid }),

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { Parser } from '@elastic/esql';
 import { canCompileMatchMetric, stripTrailingPipeCommands } from './can_compile_match_metric';
 import { compileMatchCountBreachQuery } from './match_count_query_compiler';
 import {
@@ -40,6 +41,20 @@ describe('stripTrailingPipeCommands', () => {
     expect(
       stripTrailingPipeCommands('FROM logs-* | SORT @timestamp DESC | WHERE level == "error"')
     ).toBe('FROM logs-* | SORT @timestamp DESC | WHERE level == "error"');
+  });
+
+  it('peels trailing SORT/LIMIT without corrupting a pipe inside a WHERE string literal', () => {
+    expect(
+      stripTrailingPipeCommands(
+        'FROM logs-* | WHERE message == "queue full | LIMIT exceeded" | SORT @timestamp DESC | LIMIT 10'
+      )
+    ).toBe('FROM logs-* | WHERE message == "queue full | LIMIT exceeded"');
+  });
+
+  it('leaves a pipe inside a string literal untouched when there is nothing to peel', () => {
+    expect(
+      stripTrailingPipeCommands('FROM logs-* | WHERE message == "queue full | LIMIT exceeded"')
+    ).toBe('FROM logs-* | WHERE message == "queue full | LIMIT exceeded"');
   });
 });
 
@@ -82,6 +97,16 @@ describe('canCompileMatchMetric', () => {
   it('rejects empty and unparseable queries', () => {
     expect(canCompileMatchMetric('   ')).toBe(false);
     expect(canCompileMatchMetric('NOT VALID ESQL !!!')).toBe(false);
+  });
+
+  it('fails closed on parser errors (e.g. an unterminated string literal)', () => {
+    expect(canCompileMatchMetric('FROM logs-* | WHERE message == "queue full')).toBe(false);
+  });
+
+  it('accepts a filter-only query with a pipe inside a WHERE string literal', () => {
+    expect(
+      canCompileMatchMetric('FROM logs-* | WHERE message == "queue full | LIMIT exceeded"')
+    ).toBe(true);
   });
 });
 
@@ -132,5 +157,25 @@ describe('compileMatchCountBreachQuery', () => {
         '@timestamp'
       )
     ).toThrow(/filter-only/);
+  });
+
+  it('fails closed for queries with parser errors', () => {
+    expect(() =>
+      compileMatchCountBreachQuery('FROM logs-* | WHERE message == "queue full', '@timestamp')
+    ).toThrow(/filter-only/);
+  });
+
+  it('preserves a pipe inside a WHERE literal and emits valid ES|QL', () => {
+    const compiled = compileMatchCountBreachQuery(
+      'FROM logs-* | WHERE message == "queue full | LIMIT exceeded" | SORT @timestamp DESC | LIMIT 10',
+      '@timestamp'
+    );
+
+    // The author WHERE (literal intact) survives; trailing SORT/LIMIT are peeled.
+    expect(compiled.split('\n| ')[0]).toBe(
+      'FROM logs-* | WHERE message == "queue full | LIMIT exceeded"'
+    );
+    // The compiled breach query must itself parse cleanly (no corrupted literal).
+    expect(Parser.parse(compiled).errors).toHaveLength(0);
   });
 });

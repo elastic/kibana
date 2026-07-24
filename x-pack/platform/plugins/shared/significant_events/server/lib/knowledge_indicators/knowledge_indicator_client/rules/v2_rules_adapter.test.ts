@@ -198,7 +198,7 @@ describe('RulesAdapterV2', () => {
       ]);
     });
 
-    it('strips METADATA and does not append MAX_ALERTS_PER_EXECUTION before the count', async () => {
+    it('strips METADATA and does not append the author LIMIT before the count', async () => {
       const mock = makeRulesClientMock();
       mock.createRule.mockResolvedValue({} as never);
       const adapter = makeAdapter(mock);

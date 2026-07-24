@@ -65,7 +65,7 @@ export function buildChangePointHistogramWindow(lookback: string): ChangePointHi
  * DSL equivalent of:
  *
  * ```esql
- * | EVAL metric_value = TO_INTEGER(FIELD_EXTRACT(data, "metric_value"))
+ * | EVAL metric_value = TO_LONG(FIELD_EXTRACT(data, "metric_value"))
  * | EVAL bucket = TO_DATETIME(TO_LONG(FIELD_EXTRACT(data, "bucket")))
  * | STATS minute_value = MAX(metric_value) BY source_minute = DATE_TRUNC(1 minute, bucket)
  * | STATS metric_value = SUM(minute_value) BY bucket = BUCKET(source_minute, <interval>)
