@@ -26,7 +26,9 @@ export const KillProcessActionResult = memo<
 
   const actionRequestBody = useMemo<undefined | KillProcessRequestBody>(() => {
     const { endpointId, agentType } = command.commandDefinition?.meta ?? {};
-    const parameters = parsedKillOrSuspendParameter(command.args.args);
+    // `kill-descendants` is a bare boolean flag; it is only ever defined for the `endpoint` agent type
+    const killDescendants = command.args.hasArg('kill-descendants');
+    const parameters = parsedKillOrSuspendParameter(command.args.args, killDescendants);
 
     return endpointId
       ? ({
@@ -36,7 +38,7 @@ export const KillProcessActionResult = memo<
           parameters,
         } as KillProcessRequestBody)
       : undefined;
-  }, [command.args.args, command.commandDefinition?.meta]);
+  }, [command.args, command.commandDefinition?.meta]);
 
   const { result, actionDetails } = useConsoleActionSubmitter<KillProcessRequestBody>({
     ResultComponent,

@@ -143,6 +143,7 @@ export const TakeAction = ({
       fill
       iconType="chevronSingleDown"
       iconSide="right"
+      aria-haspopup="menu"
       onClick={() => setPopoverOpen(!isPopoverOpen)}
     >
       <FormattedMessage id="xpack.csp.flyout.takeActionButton" defaultMessage="Take action" />
@@ -158,6 +159,7 @@ export const TakeAction = ({
         aria-label={kbnI18n.translate('xpack.csp.flyout.moreActionsButton', {
           defaultMessage: 'More actions',
         })}
+        aria-haspopup="menu"
         iconType="boxesVertical"
         color="primary"
         isLoading={isLoading}
@@ -206,6 +208,10 @@ export const TakeAction = ({
       panelPaddingSize="none"
       anchorPosition="downLeft"
       data-test-subj={TAKE_ACTION_SUBJ}
+      aria-label={kbnI18n.translate('xpack.csp.flyout.actionsPopoverAriaLabel', {
+        defaultMessage: 'Actions',
+      })}
+      panelProps={{ role: 'none' }}
     >
       <EuiContextMenuPanel items={actionsItems} />
     </EuiPopover>
