@@ -595,6 +595,85 @@ export class TemplatesService {
    * writes are used on create/update), so the practical collision window is small. Enforcing true
    * atomicity would require a dedicated uniqueness SO or an alias/lock, which is out of scope here.
    */
+
+  /**
+   * Returns the names of active (non-deleted, latest-version) templates for the given owner
+   * that contain a `$ref: <fieldName>` reference in their YAML definition.
+   *
+   * Used by the field-definitions client to block deleting a library field that is still
+   * referenced by at least one template.
+   */
+  async getActiveTemplatesReferencingField(
+    owner: string,
+    fieldName: string
+  ): Promise<Array<{ name: string }>> {
+    interface SearchResult {
+      hits: {
+        hits: SavedObjectsRawDoc[];
+        total: { value: number };
+      };
+    }
+
+    const escapedOwner = escapeKuery(owner);
+    const SO = CASE_TEMPLATE_SAVED_OBJECT;
+
+    // Push the $ref lookup down to ES: only fetch candidate templates whose
+    // `definition` text contains the token sequence `ref <fieldName>` (the
+    // standard analyzer strips `$` and `:`, leaving adjacent tokens).
+    // match_phrase requires the tokens to be adjacent and in order, so this
+    // is a tight pre-filter that virtually eliminates false positives.
+    // The exact YAML parse below is the correctness gate — it handles any
+    // residual analyzer edge-cases and alias-overridden ref fields.
+    const filters = [
+      toElasticsearchQuery(fromKueryExpression(`${SO}.owner: "${escapedOwner}"`)),
+      toElasticsearchQuery(fromKueryExpression(`${SO}.isLatest: true`)),
+      toElasticsearchQuery(fromKueryExpression(`NOT ${SO}.deletedAt: *`)),
+    ];
+
+    const findResult = (await this.dependencies.unsecuredSavedObjectsClient.search({
+      type: SO,
+      namespaces: [this.dependencies.namespace],
+      from: 0,
+      size: 10000,
+      query: {
+        bool: {
+          filter: filters,
+          must: [
+            {
+              match_phrase: {
+                [`${SO}.definition`]: `$ref: ${fieldName}`,
+              },
+            },
+          ],
+        },
+      },
+    })) as SearchResult;
+
+    const referencing: Array<{ name: string }> = [];
+
+    for (const hit of findResult.hits.hits) {
+      const so = this.dependencies.savedObjectsSerializer.rawToSavedObject<Template>(hit);
+      try {
+        const parsed = parseYaml(so.attributes.definition ?? '');
+        const fields: unknown[] = Array.isArray(parsed?.fields) ? parsed.fields : [];
+        const hasRef = fields.some(
+          (f) =>
+            typeof f === 'object' &&
+            f !== null &&
+            '$ref' in f &&
+            (f as Record<string, unknown>).$ref === fieldName
+        );
+        if (hasRef) {
+          referencing.push({ name: so.attributes.name });
+        }
+      } catch {
+        // Unparseable YAML — skip; do not block the delete for a corrupt template
+      }
+    }
+
+    return referencing;
+  }
+
   private async assertTemplateNameIsUnique({
     name,
     owner,
