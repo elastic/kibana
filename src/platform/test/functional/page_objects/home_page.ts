@@ -76,7 +76,9 @@ export class HomePageObject extends FtrService {
       const panelAttributes = await Promise.all(
         solutionPanels.map((panel) => panel.getAttribute('data-test-subj'))
       );
-      return panelAttributes.map((attributeValue) => attributeValue?.split('homeSolutionPanel_')[1]);
+      return panelAttributes.map(
+        (attributeValue) => attributeValue?.split('homeSolutionPanel_')[1]
+      );
     });
   }
 
