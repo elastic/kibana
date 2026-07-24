@@ -41,6 +41,21 @@ describe('PROMQL summary', () => {
       expectedNewColumns: ['step', 'col0'],
     });
   });
-  it.todo('returns query text as column name when no label is provided');
-  it.todo('collects columns derivated from grouping inside the query');
+  it('returns the query expression text as column name when no label is provided', () => {
+    const expression = 'rate(http_requests_total[5m])';
+    assertSummary(`PROMQL index=metrics ${expression}`, {
+      expectedNewColumns: ['step', expression],
+    });
+  });
+  it('collects columns derivated from grouping inside the query', () => {
+    const expression = 'sum by (job, instance) (rate(http_requests_total[5m]))';
+    assertSummary(`PROMQL index=metrics ${expression}`, {
+      expectedNewColumns: ['step', expression, 'job', 'instance'],
+    });
+  });
+  it('collects grouping columns together with a user-defined label', () => {
+    assertSummary('PROMQL index=metrics col0=(sum by (job) (rate(http_requests_total[5m])))', {
+      expectedNewColumns: ['step', 'col0', 'job'],
+    });
+  });
 });

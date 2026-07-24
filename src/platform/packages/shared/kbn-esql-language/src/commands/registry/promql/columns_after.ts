@@ -7,11 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { ESQLCommand, ESQLAstPromqlCommand } from '@elastic/esql/types';
-import { isBinaryExpression, isIdentifier, type PromQLAstExpression, Walker } from '@elastic/esql';
 import type { ESQLColumnData, ESQLUserDefinedColumn } from '../types';
 import type { IAdditionalFields } from '../registry';
 import { findPipeOutsideQuotes } from '../../definitions/utils/shared';
-import { PromqlParamName } from './utils';
+import { getPromqlOutputMetadata, getPromqlUserDefinedColumn, PromqlParamName } from './utils';
 
 export const columnsAfter = async (
   command: ESQLCommand,
@@ -49,15 +48,9 @@ export const columnsAfter = async (
 };
 
 function getUserDefinedColumn(command: ESQLAstPromqlCommand): ESQLUserDefinedColumn | undefined {
-  const { query } = command;
-
-  if (!isBinaryExpression(query) || query.name !== '=') {
-    return undefined;
-  }
-
   // Grammar: valueName is always UNQUOTED_IDENTIFIER | QUOTED_IDENTIFIER
-  const target = query.args[0];
-  if (!isIdentifier(target)) {
+  const target = getPromqlUserDefinedColumn(command);
+  if (!target) {
     return undefined;
   }
 
@@ -90,31 +83,7 @@ function getPromqlOutputColumns(
   metrics: Set<string>;
   breakdownLabels: Set<string>;
 } {
-  const metrics = new Set<string>();
-  const breakdownLabels = new Set<string>();
-  let expression: PromQLAstExpression | undefined;
-
-  Walker.walk(command, {
-    promql: {
-      visitPromqlQuery: (node) => {
-        expression ??= node.expression;
-      },
-      visitPromqlSelector: (node) => {
-        if (node.metric?.name) {
-          metrics.add(node.metric.name);
-        }
-      },
-      visitPromqlFunction: (node) => {
-        if (node.grouping) {
-          for (const label of node.grouping.args) {
-            if (label.name) {
-              breakdownLabels.add(label.name);
-            }
-          }
-        }
-      },
-    },
-  });
+  const { expression, metrics, breakdownLabels } = getPromqlOutputMetadata(command);
 
   const expressionColumn =
     expression && expression.type !== 'selector' && !hasUserDefinedColumn

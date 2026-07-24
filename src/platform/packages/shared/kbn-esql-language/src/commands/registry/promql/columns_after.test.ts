@@ -107,7 +107,7 @@ describe('PROMQL columnsAfter', () => {
 
   it('reconstructs the expression column name when a pipe follows and no col0= is provided', async () => {
     const expression = 'rate(http_requests_total[5m])';
-    const query = `PROMQL index=metrics ${expression} | KEEP http_requests_total`;
+    const query = `PROMQL index=metrics (${expression}) | KEEP http_requests_total`;
     const {
       root: {
         commands: [command],
@@ -126,6 +126,33 @@ describe('PROMQL columnsAfter', () => {
     expect(result[1]).toEqual(
       expect.objectContaining({ name: expression, type: 'unknown', userDefined: true })
     );
+  });
+
+  it('returns both the expression column and breakdown labels', async () => {
+    const expression = 'sum by (job) (rate(http_requests_total[5m]))';
+    const query = `PROMQL index=metrics ${expression} | KEEP job`;
+    const {
+      root: {
+        commands: [command],
+      },
+    } = Parser.parseQuery(query);
+
+    const result = await columnsAfter(command, [], query, {
+      fromFrom: () => Promise.resolve([]),
+      fromJoin: () => Promise.resolve([]),
+      fromEnrich: () => Promise.resolve([]),
+      fromPromql: () =>
+        Promise.resolve([
+          { name: 'job', type: 'keyword', userDefined: false },
+          { name: 'http_requests_total', type: 'double', userDefined: false },
+        ]),
+    });
+
+    expect(result.map(({ name }) => name)).toEqual(['step', expression, 'job']);
+    expect(result[1]).toEqual(
+      expect.objectContaining({ name: expression, type: 'unknown', userDefined: true })
+    );
+    expect(result[2]).toEqual({ name: 'job', type: 'keyword', userDefined: false });
   });
 
   it('does not treat pipe inside label string as command delimiter', async () => {
