@@ -58,7 +58,8 @@ type MemoizedSources = MemoizedFn<
   [
     CoreStart,
     (() => Promise<ILicense | undefined>) | undefined,
-    ((sources: ESQLSourceResult[]) => Promise<ESQLSourceResult[]>) | undefined
+    ((sources: ESQLSourceResult[]) => Promise<ESQLSourceResult[]>) | undefined,
+    AbortSignal | undefined
   ],
   ReturnType<typeof getESQLSources>
 >;
@@ -110,12 +111,18 @@ export const useEsqlCallbacks = ({
   const columnsAbortControllerRef = useRef<AbortController | undefined>(undefined);
   const previousColumnsQueryRef = useRef<string | undefined>(undefined);
   const lifecycleAbortControllerRef = useRef(new AbortController());
+  const sourcesAbortControllerRef = useRef(new AbortController());
 
   const getSources = useCallback(async () => {
     clearCacheWhenOld(dataSourcesCache, DATA_SOURCES_CACHE_KEY);
     const getLicense = esqlService?.getLicense;
     const enrichSources = esqlService?.enrichSources;
-    const sources = await memoizedSources(core, getLicense, enrichSources).result;
+    const sources = await memoizedSources(
+      core,
+      getLicense,
+      enrichSources,
+      sourcesAbortControllerRef.current.signal
+    ).result;
     return sources;
   }, [dataSourcesCache, memoizedSources, core, esqlService]);
 
@@ -185,12 +192,14 @@ export const useEsqlCallbacks = ({
   // Abort any in-flight requests when the editor unmounts.
   useEffect(() => {
     const lifecycleController = lifecycleAbortControllerRef.current;
+    const sourcesController = sourcesAbortControllerRef.current;
     return () => {
       columnsAbortControllerRef.current?.abort();
       if (previousColumnsQueryRef.current) {
         esqlFieldsCache.delete(previousColumnsQueryRef.current);
       }
       lifecycleController.abort();
+      sourcesController.abort();
     };
   }, [esqlFieldsCache]);
 

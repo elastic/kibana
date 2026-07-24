@@ -12,9 +12,23 @@ import type { Logger } from '@kbn/logging';
 import { validateEsqlQuery } from '@kbn/agent-builder-genai-utils';
 import { buildServerESQLCallbacks } from '@kbn/esql-server-utils';
 import { createVisualizationGraph } from './graph_lens';
-import { guessChartType } from './guess_chart_type';
 import { getSchemaForChartType } from './schemas';
 import type { VisualizationConfig } from './types';
+
+const SUPPORTED_CHART_TYPES = new Set<string>(Object.values(SupportedChartType));
+
+const getExistingChartType = (
+  existingConfig: VisualizationConfig | null
+): SupportedChartType | undefined => {
+  if (!existingConfig || !('type' in existingConfig)) {
+    return undefined;
+  }
+
+  const { type } = existingConfig;
+  return typeof type === 'string' && SUPPORTED_CHART_TYPES.has(type)
+    ? (type as SupportedChartType)
+    : undefined;
+};
 
 export interface BuildLensConfigParams {
   nlQuery: string;
@@ -52,15 +66,11 @@ export const buildLensConfig = async ({
   events,
   esClient,
 }: BuildLensConfigParams): Promise<BuildLensConfigResult> => {
-  let selectedChartType: SupportedChartType = chartType || SupportedChartType.Metric;
-
-  if (!chartType) {
-    logger.debug('Chart type not provided, using LLM to suggest one');
-    const existingType =
-      parsedExistingConfig && 'type' in parsedExistingConfig
-        ? String(parsedExistingConfig.type)
-        : undefined;
-    selectedChartType = await guessChartType(modelProvider, nlQuery, existingType);
+  const selectedChartType = chartType ?? getExistingChartType(parsedExistingConfig);
+  if (!selectedChartType) {
+    throw new Error(
+      'A supported chart type is required when creating a Lens visualization or editing one without a supported existing chart type.'
+    );
   }
 
   const schema = getSchemaForChartType(selectedChartType);

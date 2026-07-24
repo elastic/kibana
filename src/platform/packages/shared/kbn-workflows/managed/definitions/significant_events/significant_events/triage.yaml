@@ -107,7 +107,7 @@ steps:
   # -----------------------------------------------------------------------
   - name: run_judge_agent
     type: ai.agent
-    agent-id: "platform.streams.sig-events.discovery-judge"
+    agent-id: "significant_events.discovery-judge"
     # Keep connector-id-by-feature/plugin-id/aggregate-by in sync with @kbn/significant-events-schema
     # inference_feature_ids.ts (SIGNIFICANT_EVENTS_TRIAGE_INFERENCE_FEATURE_ID /
     # SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID). Own feature — judge is a lighter,
@@ -116,6 +116,7 @@ steps:
     plugin-id: 'significant_events_triage'
     aggregate-by: 'significant_events'
     create-conversation: true
+    public-conversation: true
     with:
       message: |
         ## Unreviewed Discoveries

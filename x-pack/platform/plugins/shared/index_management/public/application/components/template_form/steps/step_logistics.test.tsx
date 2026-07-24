@@ -15,7 +15,7 @@ let mockIsServerless = false;
 
 jest.mock('../../../app_context', () => ({
   useAppContext: () => ({
-    config: { isServerless: mockIsServerless },
+    config: { isServerless: mockIsServerless, enableIndexMode: true },
     plugins: { cloud: undefined },
     core: {
       application: { capabilities: { management: { stack: { license_management: true } } } },
