@@ -123463,9 +123463,20 @@ components:
                       minimum: 1
                       nullable: true
                       type: number
+                    docsCountPercentage:
+                      default: null
+                      maximum: 100
+                      minimum: 1
+                      nullable: true
+                      type: number
                     enabled:
                       default: true
                       type: boolean
+                    thresholdType:
+                      enum:
+                        - count
+                        - percentage
+                      type: string
                     timeInterval:
                       default: null
                       nullable: true
