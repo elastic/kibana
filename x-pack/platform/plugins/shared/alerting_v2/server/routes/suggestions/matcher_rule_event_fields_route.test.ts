@@ -8,7 +8,7 @@
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { MatcherSuggestionsService } from '../../lib/services/matcher_suggestions_service/matcher_suggestions_service';
 import { createRouteDependencies } from '../test_utils';
-import { MatcherDataFieldsRoute } from './matcher_data_fields_route';
+import { MatcherRuleEventFieldsRoute } from './matcher_rule_event_fields_route';
 
 const createSuggestionsService = (): jest.Mocked<MatcherSuggestionsService> =>
   ({
@@ -16,14 +16,14 @@ const createSuggestionsService = (): jest.Mocked<MatcherSuggestionsService> =>
     getSuggestions: jest.fn(),
   } as unknown as jest.Mocked<MatcherSuggestionsService>);
 
-describe('MatcherDataFieldsRoute', () => {
+describe('MatcherRuleEventFieldsRoute', () => {
   it('calls getDataFieldNames with undefined when no matcher query param is provided', async () => {
     const { ctx } = createRouteDependencies();
     const request = httpServerMock.createKibanaRequest({ query: {} });
     const suggestionsService = createSuggestionsService();
     suggestionsService.getDataFieldNames.mockResolvedValue(['data.host.name']);
 
-    const route = new MatcherDataFieldsRoute(ctx, request, suggestionsService);
+    const route = new MatcherRuleEventFieldsRoute(ctx, request, suggestionsService);
 
     await route.handle();
 
@@ -39,7 +39,7 @@ describe('MatcherDataFieldsRoute', () => {
     const suggestionsService = createSuggestionsService();
     suggestionsService.getDataFieldNames.mockResolvedValue([]);
 
-    const route = new MatcherDataFieldsRoute(ctx, request, suggestionsService);
+    const route = new MatcherRuleEventFieldsRoute(ctx, request, suggestionsService);
 
     await route.handle();
 
@@ -53,7 +53,7 @@ describe('MatcherDataFieldsRoute', () => {
     const suggestionsService = createSuggestionsService();
     suggestionsService.getDataFieldNames.mockRejectedValue(new Error('boom'));
 
-    const route = new MatcherDataFieldsRoute(ctx, request, suggestionsService);
+    const route = new MatcherRuleEventFieldsRoute(ctx, request, suggestionsService);
 
     await route.handle();
 

@@ -63,6 +63,11 @@ const createStartContractMock = () => {
       legacyActionMenu$: new BehaviorSubject<MountPoint | undefined>(
         undefined
       ) as unknown as DeeplyMockedKeys<Observable<MountPoint | undefined>>,
+      capabilities: lazyObject({
+        navLinks: {},
+        management: {},
+        catalogue: {},
+      }),
     }),
     sidebar: lazyObject(sidebar),
     navLinks: lazyObject({
