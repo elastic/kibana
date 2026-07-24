@@ -10,7 +10,12 @@ export { test, spaceTest } from './src/playwright';
 
 // Security-specific test constants
 export { CUSTOM_QUERY_RULE } from './src/playwright/constants/detection_rules';
-export { PREVALENCE_SOURCE_IP } from './src/playwright/fixtures/worker/apis/prevalence';
+export {
+  PREVALENCE_SOURCE_IP,
+  PREVALENCE_DESTINATION_IP,
+  PREVALENCE_HOST_NAME,
+  PREVALENCE_USER_NAME,
+} from './src/playwright/fixtures/worker/apis/prevalence';
 export { ANALYZER_ORIGIN_PROCESS_NAME } from './src/playwright/fixtures/worker/apis/analyzer';
 export { NETWORK_SOURCE_IP } from './src/playwright/fixtures/worker/apis/network';
 export { HOST_NAME } from './src/playwright/fixtures/worker/apis/host';

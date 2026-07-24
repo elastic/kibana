@@ -9,6 +9,9 @@ import type { EsClient, ScoutLogger } from '@kbn/scout';
 import { measurePerformanceAsync } from '@kbn/scout';
 
 export const PREVALENCE_SOURCE_IP = '1.2.3.4' as const;
+export const PREVALENCE_DESTINATION_IP = '5.6.7.8' as const;
+export const PREVALENCE_HOST_NAME = 'scout-host' as const;
+export const PREVALENCE_USER_NAME = 'scout-user' as const;
 
 export interface PrevalenceFixture {
   /** Index containing the source events; pass as the detection rule's target index. */
@@ -17,8 +20,8 @@ export interface PrevalenceFixture {
 
 export interface PrevalenceApiService {
   /**
-   * Indexes a source document containing `source.ip` so that field appears in the
-   * prevalence table as a ChildLink for the network-details flyout.
+   * Indexes a source document containing linked investigation fields used by the
+   * document-flyout and prevalence tests.
    *
    * Index naming is space-scoped so parallel workers never collide.
    */
@@ -48,6 +51,9 @@ export const getPrevalenceApiService = ({
         document: {
           '@timestamp': new Date().toISOString(),
           source: { ip: PREVALENCE_SOURCE_IP },
+          destination: { ip: PREVALENCE_DESTINATION_IP },
+          host: { name: PREVALENCE_HOST_NAME },
+          user: { name: PREVALENCE_USER_NAME },
           event: { kind: 'event' },
         },
         refresh: true,

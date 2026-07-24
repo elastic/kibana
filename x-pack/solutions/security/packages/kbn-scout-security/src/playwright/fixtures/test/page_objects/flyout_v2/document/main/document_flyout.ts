@@ -312,9 +312,9 @@ export class DocumentFlyout {
   }
 
   /**
-   * Returns the child-flyout link rendered for a "special" highlighted field, scoped to that
-   * field's row in the Highlighted fields table. These fields (e.g. IP fields) open a related
-   * tool/child flyout on click; today only IP fields (source.ip / destination.ip) are supported.
+   * Returns the child-flyout link rendered for a supported highlighted field, scoped to that
+   * field's row in the Highlighted fields table. Supported fields include IP addresses, host and
+   * user names, and the rule name.
    */
   highlightedFieldChildLink(field: string): Locator {
     return (
