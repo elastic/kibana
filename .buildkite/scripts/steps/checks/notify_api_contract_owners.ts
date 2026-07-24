@@ -28,8 +28,8 @@ interface ImpactReport {
   entries: ImpactEntry[];
 }
 
-// Legacy context id, kept so an existing comment on an in-flight PR is updated in
-// place rather than duplicated when this check moves to whole-surface detection.
+// Kept stable so CI reruns on in-flight PRs update the existing comment in place
+// rather than posting a duplicate alongside the old one.
 const COMMENT_CONTEXT = 'api-contracts-tf-breaking';
 
 const ALLOWLIST_PATH = 'packages/kbn-api-contracts/allowlist.json';
@@ -93,7 +93,7 @@ The following breaking change(s) were detected across the stable and Technical P
 ${sections}
 ### What to do
 
-1. **Fix the breaking change** if it was unintentional, then regenerate the OAS with \`node scripts/capture_oas_snapshot --update\`.
+1. **Fix the breaking change** if it was unintentional.
 2. **If intentional**, add an approved entry to [\`${ALLOWLIST_PATH}\`](https://github.com/elastic/kibana/blob/main/${ALLOWLIST_PATH}) and coordinate with the owning team. Use the \`oasdiffId\` and \`source\` values from the table above to [scope the allowlist entry](https://github.com/elastic/kibana/blob/main/${README_PATH}#granular-suppression) to this specific change.
 
 See the [\`@kbn/api-contracts\` README](https://github.com/elastic/kibana/blob/main/${README_PATH}) for tier definitions and the allowlist workflow.`;

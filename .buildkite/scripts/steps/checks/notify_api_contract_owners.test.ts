@@ -14,10 +14,12 @@ jest.mock('#pipeline-utils', () => ({
 import { buildCommentBody, type ImpactEntry } from './notify_api_contract_owners';
 
 const entry = (overrides: Partial<ImpactEntry> = {}): ImpactEntry => ({
-  path: '/api/x',
-  method: 'POST',
+  path: '/api/spaces/space',
+  method: 'GET',
   reason: 'Endpoint removed',
   tier: 'stable',
+  terraformResource: 'elasticstack_kibana_space',
+  owners: ['@elastic/kibana-security'],
   ...overrides,
 });
 
@@ -30,13 +32,13 @@ describe('buildCommentBody', () => {
     expect(body).toContain(
       '| Endpoint | Reason | oasdiffId | Source | Terraform Resource | Owners |'
     );
-    expect(body).toContain('| `/api/x` `POST` |');
+    expect(body).toContain('| `/api/spaces/space` `GET` |');
   });
 
   it('groups changes into separate stable and tech_preview sections', () => {
     const body = buildCommentBody([
-      entry({ path: '/api/stable' }),
-      entry({ path: '/api/preview', tier: 'tech_preview' }),
+      entry({ path: '/api/spaces/space' }),
+      entry({ path: '/api/fleet/agent_policies', method: 'POST', tier: 'tech_preview' }),
     ]);
 
     expect(body).toContain('### Stable (GA) (1)');
@@ -65,8 +67,8 @@ describe('buildCommentBody', () => {
   });
 
   it('leaves the Terraform cell empty when the change maps to no provider API', () => {
-    const body = buildCommentBody([entry()]);
-    const dataRow = body.split('\n').find((l) => l.includes('`/api/x`'))!;
+    const body = buildCommentBody([entry({ terraformResource: undefined, owners: undefined })]);
+    const dataRow = body.split('\n').find((l) => l.includes('`/api/spaces/space`'))!;
 
     // trailing "| <terraform> | <owners> |" both empty
     expect(dataRow).toMatch(/\|\s*\|\s*\|$/);
@@ -76,10 +78,10 @@ describe('buildCommentBody', () => {
     expect(
       buildCommentBody([
         entry({ owners: ['@elastic/fleet'] }),
-        entry({ path: '/api/y', owners: ['@elastic/fleet'] }),
+        entry({ path: '/api/fleet/agent_policies', method: 'POST', owners: ['@elastic/fleet'] }),
       ])
     ).toContain('cc @elastic/fleet\n');
-    expect(buildCommentBody([entry()])).toContain('cc _unknown_');
+    expect(buildCommentBody([entry({ owners: undefined })])).toContain('cc _unknown_');
   });
 
   it('escapes pipe characters and newlines in the reason field', () => {
@@ -92,7 +94,7 @@ describe('buildCommentBody', () => {
   it('omits the method badge when method is undefined', () => {
     const body = buildCommentBody([entry({ method: undefined })]);
 
-    expect(body).toContain('| `/api/x` |');
+    expect(body).toContain('| `/api/spaces/space` |');
     expect(body).not.toMatch(/`GET`|`POST`|`PUT`|`DELETE`/);
   });
 
