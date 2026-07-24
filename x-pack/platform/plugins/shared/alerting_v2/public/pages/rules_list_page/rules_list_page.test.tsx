@@ -1010,7 +1010,11 @@ describe('RulesListPage', () => {
     // Click the switch for the enabled rule (rule-1) — should disable it
     fireEvent.click(screen.getByTestId('ruleEnabledSwitch-rule-1'));
 
-    expect(mockToggleEnabledMutate).toHaveBeenCalledWith({ id: 'rule-1', enabled: false });
+    expect(mockToggleEnabledMutate).toHaveBeenCalledWith({
+      id: 'rule-1',
+      enabled: false,
+      name: 'Rule One',
+    });
   });
 
   it('shows "Clone" action in the context menu', async () => {
@@ -1270,7 +1274,7 @@ describe('RulesListPage', () => {
       fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
 
       expect(mockBulkDeleteMutate).toHaveBeenCalledWith(
-        { ids: ['rule-1'] },
+        { mode: 'by_ids', ids: ['rule-1'] },
         expect.objectContaining({ onSuccess: expect.any(Function), onError: expect.any(Function) })
       );
     });
@@ -1305,7 +1309,7 @@ describe('RulesListPage', () => {
       fireEvent.click(screen.getByTestId('bulkEnableRules'));
 
       expect(mockBulkEnableMutate).toHaveBeenCalledWith(
-        { ids: ['rule-1'] },
+        { mode: 'by_ids', ids: ['rule-1'] },
         expect.objectContaining({ onSuccess: expect.any(Function) })
       );
     });
@@ -1320,7 +1324,7 @@ describe('RulesListPage', () => {
       fireEvent.click(screen.getByTestId('bulkDisableRules'));
 
       expect(mockBulkDisableMutate).toHaveBeenCalledWith(
-        { ids: ['rule-1'] },
+        { mode: 'by_ids', ids: ['rule-1'] },
         expect.objectContaining({ onSuccess: expect.any(Function) })
       );
     });
@@ -1351,7 +1355,7 @@ describe('RulesListPage', () => {
       fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
 
       expect(mockBulkDeleteMutate).toHaveBeenCalledWith(
-        { ids: expect.arrayContaining(['rule-1', 'rule-2']) },
+        { mode: 'by_ids', ids: expect.arrayContaining(['rule-1', 'rule-2']) },
         expect.objectContaining({ onSuccess: expect.any(Function), onError: expect.any(Function) })
       );
     });

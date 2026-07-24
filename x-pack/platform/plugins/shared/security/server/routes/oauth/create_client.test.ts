@@ -11,6 +11,7 @@ import type { RequestHandler } from '@kbn/core/server';
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import type { UiamOAuthType } from '@kbn/core-security-server';
+import type { KibanaSolution } from '@kbn/projects-solutions-groups';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 
 import { defineCreateOAuthClientRoute } from './create_client';
@@ -21,6 +22,7 @@ import { routeDefinitionParamsMock } from '../index.mock';
 
 const RESOURCE = 'https://test-project.kb.us-central1.gcp.elastic.cloud/api/agent_builder/mcp';
 const PROJECT_ID = 'mock-project-id';
+const UIAM_PROJECT_TYPE = 'elasticsearch';
 
 const mcpConfig = {
   mcp: {
@@ -48,13 +50,16 @@ describe('Create OAuth Client route', () => {
 
   function setup(
     rawConfig: Record<string, unknown> = mcpConfig,
-    options: { serverlessProjectId?: string } = {}
+    options: { serverlessProjectId?: string; serverlessProjectType?: KibanaSolution } = {}
   ) {
     const mockRouteDefinitionParams = routeDefinitionParamsMock.create(rawConfig, {
       serverless: true,
     });
     mockRouteDefinitionParams.serverlessProjectId =
       'serverlessProjectId' in options ? options.serverlessProjectId : PROJECT_ID;
+    if ('serverlessProjectType' in options) {
+      mockRouteDefinitionParams.serverlessProjectType = options.serverlessProjectType;
+    }
     const authcMock = authenticationServiceMock.createStart();
     mockRouteDefinitionParams.getAuthenticationService.mockReturnValue(authcMock);
 
@@ -91,7 +96,7 @@ describe('Create OAuth Client route', () => {
     expect(response.payload).toEqual({ message: 'test forbidden message' });
   });
 
-  it('injects the configured resource and serverless project id and returns the created client on success', async () => {
+  it('injects the configured resource, serverless project id and project type and returns the created client on success', async () => {
     const mockClient = {
       id: 'client-1',
       resource: RESOURCE,
@@ -111,9 +116,42 @@ describe('Create OAuth Client route', () => {
       client_name: 'Test',
       resource: RESOURCE,
       project_id: PROJECT_ID,
+      project_type: UIAM_PROJECT_TYPE,
     });
     expect(response.status).toBe(200);
     expect(response.payload).toEqual(mockClient);
+  });
+
+  it('maps the `search` solution to the `elasticsearch` UIAM project type', async () => {
+    ({ routeHandler, oauthMock } = setup(mcpConfig, { serverlessProjectType: 'search' }));
+    oauthMock.createClient.mockResolvedValue({ id: 'client-1', resource: RESOURCE });
+
+    await routeHandler(
+      getMockContext(),
+      httpServerMock.createKibanaRequest({ body: { client_name: 'Test' } }),
+      kibanaResponseFactory
+    );
+
+    expect(oauthMock.createClient).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ project_type: 'elasticsearch' })
+    );
+  });
+
+  it('passes through a directly-matching project type unchanged', async () => {
+    ({ routeHandler, oauthMock } = setup(mcpConfig, { serverlessProjectType: 'security' }));
+    oauthMock.createClient.mockResolvedValue({ id: 'client-1', resource: RESOURCE });
+
+    await routeHandler(
+      getMockContext(),
+      httpServerMock.createKibanaRequest({ body: { client_name: 'Test' } }),
+      kibanaResponseFactory
+    );
+
+    expect(oauthMock.createClient).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ project_type: 'security' })
+    );
   });
 
   it('rejects unknown body fields (including `resource`) at the schema layer', () => {
@@ -188,6 +226,7 @@ describe('Create OAuth Client route', () => {
       client_name: 'Test',
       resource: RESOURCE,
       project_id: PROJECT_ID,
+      project_type: UIAM_PROJECT_TYPE,
     });
   });
 
@@ -208,11 +247,42 @@ describe('Create OAuth Client route', () => {
       client_name: 'Test',
       resource: RESOURCE,
       project_id: PROJECT_ID,
+      project_type: UIAM_PROJECT_TYPE,
     });
   });
 
   it('returns 404 when the serverless project id is not configured', async () => {
     ({ routeHandler, oauthMock } = setup(mcpConfig, { serverlessProjectId: undefined }));
+
+    const response = await routeHandler(
+      getMockContext(),
+      httpServerMock.createKibanaRequest({
+        body: { client_name: 'Test' },
+      }),
+      kibanaResponseFactory
+    );
+
+    expect(response.status).toBe(404);
+    expect(oauthMock.createClient).not.toHaveBeenCalled();
+  });
+
+  it('returns 404 when the serverless project type is not configured', async () => {
+    ({ routeHandler, oauthMock } = setup(mcpConfig, { serverlessProjectType: undefined }));
+
+    const response = await routeHandler(
+      getMockContext(),
+      httpServerMock.createKibanaRequest({
+        body: { client_name: 'Test' },
+      }),
+      kibanaResponseFactory
+    );
+
+    expect(response.status).toBe(404);
+    expect(oauthMock.createClient).not.toHaveBeenCalled();
+  });
+
+  it('returns 404 when the serverless project type has no UIAM mapping', async () => {
+    ({ routeHandler, oauthMock } = setup(mcpConfig, { serverlessProjectType: 'workplaceai' }));
 
     const response = await routeHandler(
       getMockContext(),

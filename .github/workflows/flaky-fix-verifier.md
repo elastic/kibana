@@ -189,7 +189,7 @@ safe-outputs:
   # Custom safe-job: take the draft fix PR out of draft once verification is done.
   jobs:
     mark-pr-ready:
-      description: 'Take the draft fix PR out of draft (mark it ready for review). Call exactly once, and only after you have applied a terminal `flaky-fix-check:*` label (passed, failed, inconclusive, or skipped). Never call it while still iterating. It is a no-op when the PR is already out of draft.'
+      description: 'Take the draft fix PR out of draft (mark it ready for review) and enable auto-merge (squash) so it merges once required CI is green and it has an approval. Call exactly once, and only after you have applied a terminal `flaky-fix-check:*` label (passed, failed, inconclusive, or skipped). Never call it while still iterating.'
       runs-on: ubuntu-latest
       needs: safe_outputs
       permissions:
@@ -214,20 +214,34 @@ safe-outputs:
               }
               const { owner, repo } = context.repo;
               const { data: pr } = await github.rest.pulls.get({ owner, repo, pull_number: prNumber });
-              if (!pr.draft) {
-                core.info(`PR #${prNumber} is already out of draft; nothing to do.`);
+              if (pr.draft) {
+                try {
+                  // markPullRequestReadyForReview only exists on the GraphQL API and needs the PR node id.
+                  await github.graphql(
+                    'mutation($id: ID!) { markPullRequestReadyForReview(input: { pullRequestId: $id }) { pullRequest { isDraft } } }',
+                    { id: pr.node_id }
+                  );
+                  core.info(`Marked PR #${prNumber} ready for review.`);
+                } catch (err) {
+                  // Non-fatal: a failure to mark ready must not fail the verification run.
+                  core.warning(`Could not mark PR #${prNumber} ready for review: ${err.status || ''} ${err.message}`);
+                }
+              } else {
+                core.info(`PR #${prNumber} is already out of draft.`);
+              }
+              if (pr.state !== 'open' || pr.merged) {
+                core.info(`PR #${prNumber} is not open; skipping auto-merge.`);
                 return;
               }
               try {
-                // markPullRequestReadyForReview only exists on the GraphQL API and needs the PR node id.
                 await github.graphql(
-                  'mutation($id: ID!) { markPullRequestReadyForReview(input: { pullRequestId: $id }) { pullRequest { isDraft } } }',
+                  'mutation($id: ID!) { enablePullRequestAutoMerge(input: { pullRequestId: $id, mergeMethod: SQUASH }) { pullRequest { autoMergeRequest { enabledAt } } } }',
                   { id: pr.node_id }
                 );
-                core.info(`Marked PR #${prNumber} ready for review.`);
+                core.info(`Enabled auto-merge (squash) for PR #${prNumber}.`);
               } catch (err) {
-                // Non-fatal: a failure to mark ready must not fail the verification run.
-                core.warning(`Could not mark PR #${prNumber} ready for review: ${err.status || ''} ${err.message}`);
+                // Non-fatal: auto-merge may be rejected (e.g. all requirements already met, or a transient draft-state race); a human can still merge.
+                core.warning(`Could not enable auto-merge for PR #${prNumber}: ${err.status || ''} ${err.message}`);
               }
 
 strict: false

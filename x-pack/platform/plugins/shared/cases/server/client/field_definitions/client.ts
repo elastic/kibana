@@ -131,6 +131,20 @@ export const createFieldDefinitionsSubClient = (
         operation: Operations.manageTemplate,
         entities: [{ owner: fieldDef.attributes.owner, id: fieldDef.id }],
       });
+
+      const { templatesService } = services;
+      const referencingTemplates = await templatesService.getActiveTemplatesReferencingField(
+        fieldDef.attributes.owner,
+        fieldDef.attributes.name
+      );
+
+      if (referencingTemplates.length > 0) {
+        const names = referencingTemplates.map(({ name }) => `"${name}"`).join(', ');
+        throw Boom.conflict(
+          `Cannot delete field definition "${fieldDef.attributes.name}": it is referenced by ${referencingTemplates.length} active template(s): ${names}`
+        );
+      }
+
       return fieldDefinitionsService.deleteFieldDefinition(id);
     },
   };
