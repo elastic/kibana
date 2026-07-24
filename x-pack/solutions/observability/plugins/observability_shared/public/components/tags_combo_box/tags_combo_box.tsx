@@ -6,24 +6,20 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import type { EuiComboBoxOptionOption, EuiComboBoxProps } from '@elastic/eui';
 import { EuiButtonIcon, EuiComboBox, EuiCopy, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { createTagsPasteHandler, getNewTags, splitTags } from './tags_input';
 
-export interface TagsComboBoxProps {
+// Everything except the props this component derives internally from `selectedTags` passes
+// straight through to the underlying `EuiComboBox` (fullWidth, isInvalid, placeholder, etc.).
+export interface TagsComboBoxProps
+  extends Omit<
+    EuiComboBoxProps<string>,
+    'selectedOptions' | 'onChange' | 'onCreateOption' | 'onPaste'
+  > {
   selectedTags: string[];
   onChange: (tags: string[]) => void;
-  options?: Array<EuiComboBoxOptionOption<string>>;
-  placeholder?: string;
-  'aria-label'?: string;
-  isInvalid?: boolean;
-  isDisabled?: boolean;
-  isClearable?: boolean;
-  fullWidth?: boolean;
-  id?: string;
-  onBlur?: () => void;
-  'data-test-subj'?: string;
   copyButtonDataTestSubj?: string;
 }
 
@@ -39,17 +35,8 @@ const COPY_TAGS_LABEL = i18n.translate('xpack.observabilityShared.tagsComboBox.c
 export function TagsComboBox({
   selectedTags,
   onChange,
-  options = [],
-  placeholder,
-  isInvalid,
-  isDisabled,
-  isClearable,
-  fullWidth,
-  id,
-  onBlur,
   copyButtonDataTestSubj,
-  'aria-label': ariaLabel,
-  'data-test-subj': dataTestSubj,
+  ...euiComboBoxProps
 }: TagsComboBoxProps) {
   const selectedOptions = useMemo<Array<EuiComboBoxOptionOption<string>>>(
     () => selectedTags.map((tag) => ({ label: tag, value: tag })),
@@ -84,20 +71,11 @@ export function TagsComboBox({
     <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="flexStart">
       <EuiFlexItem>
         <EuiComboBox<string>
-          id={id}
-          fullWidth={fullWidth}
-          aria-label={ariaLabel}
-          placeholder={placeholder}
-          isInvalid={isInvalid}
-          isDisabled={isDisabled}
-          isClearable={isClearable}
-          options={options}
+          {...euiComboBoxProps}
           selectedOptions={selectedOptions}
           onChange={onComboChange}
           onCreateOption={onCreateOption}
           onPaste={onPaste}
-          onBlur={onBlur}
-          data-test-subj={dataTestSubj}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
