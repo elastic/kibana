@@ -1609,6 +1609,29 @@ describe('TemplatesService', () => {
 
         expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
       });
+
+      it('does NOT apply the create-only count cap on the update dry_run preflight', async () => {
+        const service = createService();
+        // Owner is at the limit, but an update (identified by `excludeTemplateId`) edits an existing
+        // template in place — it must not be rejected by the create-only count cap.
+        unsecuredSavedObjectsClient.find.mockResolvedValue({
+          page: 1,
+          per_page: 0,
+          total: 200,
+          saved_objects: [],
+        } as unknown as SavedObjectsFindResponse<Template>);
+
+        await expect(
+          service.validateWriteInput(
+            {
+              name: 'Edited In Place',
+              owner: 'securitySolution',
+              definition: buildDefinition('Edited In Place'),
+            },
+            { excludeTemplateId: 'template-id' }
+          )
+        ).resolves.toBeUndefined();
+      });
     });
 
     describe('MAX_FIELDS_PER_TEMPLATE', () => {
@@ -1689,85 +1712,36 @@ describe('TemplatesService', () => {
       });
     });
 
-    describe('MAX_VERSIONS_PER_TEMPLATE', () => {
-      it('rejects update once the template has reached the version cap', async () => {
-        const service = createService();
-        jest
-          .spyOn(
-            service as unknown as Record<'_getTemplate', typeof service.getTemplate>,
-            '_getTemplate'
-          )
-          .mockResolvedValue({
-            id: 'template-so-id',
-            attributes: {
-              templateId: 'template-id',
-              name: 'Busy Template',
-              owner: 'securitySolution',
-              definition: buildDefinition('Busy Template'),
-              templateVersion: 100,
-              deletedAt: null,
-            },
-          } as SavedObject<Template>);
-
-        await expect(
-          service.updateTemplate('template-id', {
+    it('does not cap version history: allows update well past the former version limit', async () => {
+      const service = createService();
+      jest
+        .spyOn(
+          service as unknown as Record<'_getTemplate', typeof service.getTemplate>,
+          '_getTemplate'
+        )
+        .mockResolvedValue({
+          id: 'template-so-id',
+          attributes: {
+            templateId: 'template-id',
             name: 'Busy Template',
             owner: 'securitySolution',
             definition: buildDefinition('Busy Template'),
-          })
-        ).rejects.toThrow('Cannot create more than 100 versions of a template.');
+            templateVersion: 1000,
+            deletedAt: null,
+          },
+        } as SavedObject<Template>);
 
-        expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+      await service.updateTemplate('template-id', {
+        name: 'Busy Template',
+        owner: 'securitySolution',
+        definition: buildDefinition('Busy Template'),
       });
 
-      it('allows update at one below the version cap', async () => {
-        const service = createService();
-        jest
-          .spyOn(
-            service as unknown as Record<'_getTemplate', typeof service.getTemplate>,
-            '_getTemplate'
-          )
-          .mockResolvedValue({
-            id: 'template-so-id',
-            attributes: {
-              templateId: 'template-id',
-              name: 'Busy Template',
-              owner: 'securitySolution',
-              definition: buildDefinition('Busy Template'),
-              templateVersion: 99,
-              deletedAt: null,
-            },
-          } as SavedObject<Template>);
-
-        await service.updateTemplate('template-id', {
-          name: 'Busy Template',
-          owner: 'securitySolution',
-          definition: buildDefinition('Busy Template'),
-        });
-
-        expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
-          CASE_TEMPLATE_SAVED_OBJECT,
-          expect.objectContaining({ templateVersion: 100 }),
-          expect.any(Object)
-        );
-      });
-
-      it('surfaces the version cap on the update dry_run preflight', async () => {
-        const service = createService();
-
-        await expect(
-          service.validateWriteInput(
-            {
-              name: 'Busy Template',
-              owner: 'securitySolution',
-              definition: buildDefinition('Busy Template'),
-            },
-            { excludeTemplateId: 'template-id', currentVersion: 100 }
-          )
-        ).rejects.toThrow('Cannot create more than 100 versions of a template.');
-
-        expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
-      });
+      expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+        CASE_TEMPLATE_SAVED_OBJECT,
+        expect.objectContaining({ templateVersion: 1001 }),
+        expect.any(Object)
+      );
     });
   });
 

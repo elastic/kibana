@@ -212,15 +212,18 @@ export const MAX_FIELD_DEFINITIONS_PER_OWNER = 200 as const;
 /**
  * Caps on the templates-v2 / extended-fields system, enforced on new writes only (existing data is
  * never retroactively rejected). These bound what the public mutative template API can create so
- * automation cannot grow templates, per-template fields, version history, or field values without
+ * automation cannot grow the number of templates, per-template fields, or field values without
  * limit. Enforced in the templates service write path (create/update and their `dry_run`
  * preflight), which both the public routes and the internal editor routes call through — so one
  * gate covers every mutative entry point. Deliberately NOT applied on the shared read schema, which
  * also validates already-stored definitions.
+ *
+ * NOTE: version *history* is intentionally uncapped. `templateVersion` is monotonic and each update
+ * persists a new version SO, but pruning old snapshots is a separate garbage-collection concern
+ * tracked as a follow-up rather than a per-write limit that would reject legitimate edits.
  */
 export const MAX_TEMPLATES_PER_OWNER = 200 as const;
 export const MAX_FIELDS_PER_TEMPLATE = 200 as const;
-export const MAX_VERSIONS_PER_TEMPLATE = 100 as const;
 /**
  * Backstop on a single stored extended-field value. ES `flattened` fields have no key-count limit
  * and subfields don't count toward `index.mapping.total_fields.limit`, but Lucene rejects a keyword

@@ -208,10 +208,10 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     describe('resource limits', () => {
-      // The per-owner template count (200) and per-template version (100) caps are exhaustively
-      // covered at the service unit-test boundary; seeding them over HTTP would slow this suite for
-      // little added signal. Here we verify only that the field-count cap is wired through the
-      // public create + dry_run routes end-to-end.
+      // The per-owner template count (200) cap is exhaustively covered at the service unit-test
+      // boundary; seeding it over HTTP would slow this suite for little added signal. Here we verify
+      // only that the field-count cap is wired through the public create + dry_run routes end-to-end.
+      // (Version history is intentionally uncapped — see the templates service unit tests.)
       it('rejects create when a definition declares more than 200 fields', async () => {
         const { body } = await requestAs('post', TEMPLATES_URL)
           .send(buildWriteBody('Too Many Fields', { definition: buildDefinitionWithFields(201) }))

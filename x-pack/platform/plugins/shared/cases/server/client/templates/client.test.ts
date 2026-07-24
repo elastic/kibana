@@ -215,6 +215,24 @@ describe('templates client', () => {
       }
     );
 
+    it('hides existence using the REQUEST id so the 404 is indistinguishable from a missing id', async () => {
+      // Stored template resolves under a different internal templateId than the request used. The
+      // hide-existence 404 must echo the request id (like the missing-id 404), never the stored one,
+      // or the differing message leaks that the template exists.
+      const template = createTemplateSavedObject('securitySolution');
+      template.attributes.templateId = 'internal-stored-id';
+      clientArgs.services.templatesService.getTemplate.mockResolvedValueOnce(template);
+      clientArgs.authorization.ensureAuthorized
+        .mockRejectedValueOnce(Boom.forbidden('no manage'))
+        .mockRejectedValueOnce(Boom.forbidden('no read'));
+
+      const subClient = createTemplatesSubClient(clientArgs);
+
+      await expect(
+        subClient.deleteTemplate('requested-id')
+      ).rejects.toThrow('Template with id requested-id not found');
+    });
+
     it('updateTemplate requires manage rights on the TARGET owner when the owner changes', async () => {
       const template = createTemplateSavedObject('securitySolution');
       clientArgs.services.templatesService.getTemplate.mockResolvedValueOnce(template);
