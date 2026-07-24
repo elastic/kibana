@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, debounceTime, filter, withLatestFrom } from 'rxjs';
 
 import { startTrackingHistory } from '@kbn/rxjs-history';
 
@@ -56,14 +56,12 @@ export function initializeHistoryManager({
     }
   );
 
-  // when the Dashboard state changes, add the new state to the history stack
   const onAnyStateChangeSubscription = unsavedChanges$
-    // .pipe(
-    //   filter(([anyStateChange, dataLoading]) => {
-    //     console.log({ dataLoading });
-    //     return !Boolean(dataLoading); // wait until done loading before updating history
-    //   })
-    // )
+    .pipe(
+      debounceTime(60),
+      withLatestFrom(hasOverlays$),
+      filter(([state, hasOverlays]) => !hasOverlays) // do not push to history as long as an editor is open
+    )
     .subscribe(() => {
       dashboardCurrentState$.next(getState());
     });
