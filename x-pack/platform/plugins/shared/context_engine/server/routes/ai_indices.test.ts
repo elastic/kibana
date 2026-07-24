@@ -130,7 +130,6 @@ describe('ai indices routes', () => {
     const putRequest = {
       params: { aiIndexId: 'customer_support' },
       body: {
-        name: 'customer_support',
         dest: { type: 'data_stream', value: 'ai-index-ds-customer_support*' },
         automations: [{ type: 'workflow', value: 'nightly-refresh' }],
         sources: [{ type: 'esql', value: 'FROM ai-index-ds-customer_support | LIMIT 10' }],
@@ -186,7 +185,6 @@ describe('ai indices routes', () => {
     it('returns the AI index', async () => {
       const aiIndex = {
         id: 'customer_support',
-        name: 'customer_support',
         dest: { type: 'data_stream' as const, value: 'ai-index-ds-customer_support*' },
         automations: [{ type: 'workflow' as const, value: 'nightly-refresh' }],
         sources: [{ type: 'esql' as const, value: 'FROM ai-index-ds-customer_support | LIMIT 10' }],
@@ -254,7 +252,6 @@ describe('ai indices routes', () => {
 
   describe('PUT body validation', () => {
     const validBody = {
-      name: 'customer_support',
       dest: { type: 'data_stream', value: 'ai-index-ds-customer_support' },
       automations: [{ type: 'workflow', value: 'nightly-refresh' }],
       sources: [{ type: 'esql', value: 'FROM ai-index-ds-customer_support | LIMIT 10' }],
@@ -336,6 +333,40 @@ describe('ai indices routes', () => {
         value: `FROM index-${i}`,
       }));
       expect(() => validateBody({ ...validBody, sources })).toThrow();
+    });
+  });
+
+  describe('aiIndexId param validation', () => {
+    const validateParams = (params: Record<string, unknown>) => {
+      const { validate } = getRoute('PUT', aiIndexByIdPath);
+      if (!validate || !validate.request?.params) {
+        throw new Error('expected a PUT params schema');
+      }
+      return validate.request.params.validate(params);
+    };
+
+    it.each(['customer_support', 'logs-app', 'index-123', 'a', '1', 'a_b-c'])(
+      'accepts a valid id %p',
+      (aiIndexId) => {
+        expect(() => validateParams({ aiIndexId })).not.toThrow();
+      }
+    );
+
+    it.each([
+      'Customer_Support',
+      'has space',
+      'has.dot',
+      'emoji😀',
+      'slash/id',
+      'tilde~',
+      '_leading_underscore',
+      '-leading-hyphen',
+    ])('rejects an id with disallowed characters %p', (aiIndexId) => {
+      expect(() => validateParams({ aiIndexId })).toThrow(/lowercase letters, numbers, hyphens/);
+    });
+
+    it('rejects an empty id', () => {
+      expect(() => validateParams({ aiIndexId: '' })).toThrow();
     });
   });
 });

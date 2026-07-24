@@ -31,7 +31,6 @@ export interface AiIndexAutomation {
 }
 
 export interface AiIndexProperties {
-  name: string;
   description?: string;
   dest: AiIndexDest;
   automations: AiIndexAutomation[];
