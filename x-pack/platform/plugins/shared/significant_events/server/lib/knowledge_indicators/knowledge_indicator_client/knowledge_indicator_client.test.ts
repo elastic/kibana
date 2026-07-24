@@ -648,8 +648,8 @@ describe('KnowledgeIndicatorClient.findIndicators search', () => {
     expect(query).not.toContain('query.esql');
     expect(query).not.toContain('query.features.id');
     expect(query).toContain('EVAL _score = CASE');
-    expect(query).toContain('CASE(TO_LOWER(title) LIKE "*checkout*", 3, 0.0)');
-    expect(query).toContain('CASE(TO_LOWER(description) LIKE "*checkout*", 2, 0.0)');
+    expect(query).toContain('CASE(TO_LOWER(title) LIKE "*checkout*", 3.0, 0.0)');
+    expect(query).toContain('CASE(TO_LOWER(description) LIKE "*checkout*", 2.0, 0.0)');
   });
 
   it('uses only query fields when type is [query]', async () => {
@@ -686,9 +686,24 @@ describe('KnowledgeIndicatorClient.findIndicators search', () => {
     const { query } = rankRequest(rankEsql);
     // Substring form: join the multivalue then apply the shared `*<query>*` pattern.
     expect(query).toContain('MV_CONCAT(TO_LOWER(tags), " ") LIKE "*client*"');
-    expect(query).toContain('CASE(MV_CONCAT(TO_LOWER(tags), " ") LIKE "*client*", 1, 0.0)');
+    expect(query).toContain('CASE(MV_CONCAT(TO_LOWER(tags), " ") LIKE "*client*", 1.0, 0.0)');
     // The exact-element form must be gone.
     expect(query).not.toContain('MV_CONTAINS');
+  });
+
+  it('uses double keyword scores in hybrid search', async () => {
+    const { client, runEsql, rankEsql } = makeClientWithRanker();
+    runEsql.mockResolvedValueOnce({ hits: [createFeatureDoc()] });
+
+    await client.findIndicators(STREAM, 'checkout service', {
+      types: [KI_TYPE_FEATURE],
+      searchMode: 'hybrid',
+    });
+
+    const { query } = rankRequest(rankEsql);
+    expect(query).toContain('FUSE RRF');
+    expect(query).toContain('CASE(TO_LOWER(title) LIKE "*checkout service*", 3.0, 0.0)');
+    expect(query).toContain('CASE(TO_LOWER(description) LIKE "*checkout service*", 2.0, 0.0)');
   });
 
   it('normalizes and thresholds semantic scores in ES|QL', async () => {
