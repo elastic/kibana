@@ -278,6 +278,7 @@ export class CasesClientFactory {
 
     const fieldDefinitionsService = new FieldDefinitionsService({
       unsecuredSavedObjectsClient,
+      refreshAnalyticsV2DataView,
     });
 
     const templatesService = new TemplatesService({

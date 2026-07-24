@@ -29,6 +29,7 @@ import type {
 import { BulkCreateCasesResponseRt, BulkCreateCasesRequestRt } from '../../../common/types/api';
 import { validateCustomFields } from './validators';
 import { normalizeCreateCaseRequest } from './utils';
+import { ensureTemplateVersionIsPinned } from './expand_template_defaults';
 import type { BulkCreateCasesArgs } from '../../services/cases/types';
 import type { NotifyAssigneesArgs } from '../../services/notifications/types';
 import type { CaseTransformedAttributes } from '../../common/types/case';
@@ -202,6 +203,14 @@ const validateRequest = ({
 
   validateCustomFields(customFieldsValidationParams);
   validateAssigneesUsage({ assignees: theCase.assignees, hasPlatinumLicenseOrGreater });
+
+  // bulkCreate has no HTTP route — its callers (the cases connector) resolve templates
+  // themselves and always pin a version. Server-side template expansion (which resolves an
+  // omitted version to latest) is deliberately limited to `create`: running it here would
+  // silently change connector behavior (e.g. template assignees under the rule's request
+  // context). Reject an unpinned reference instead of storing one that close-time
+  // `required_on_close` validation cannot resolve.
+  ensureTemplateVersionIsPinned(theCase.template);
 };
 
 const validateAssigneesUsage = ({

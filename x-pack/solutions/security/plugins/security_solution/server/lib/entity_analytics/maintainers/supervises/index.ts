@@ -24,7 +24,7 @@ export const supervisesMaintainer: RegisterEntityMaintainerConfig = {
     status,
     crudClient,
     entityMetadataClient,
-    abortController,
+    signal,
     telemetry,
   }) => {
     const namespace = status.metadata.namespace;
@@ -51,7 +51,7 @@ export const supervisesMaintainer: RegisterEntityMaintainerConfig = {
       crudClient,
       entityMetadataClient,
       integrations: buildSupervisesConfigs(lastProcessedTimestamp),
-      abortController,
+      signal,
       telemetryCollector: collector,
     });
 
@@ -84,8 +84,8 @@ export const supervisesMaintainer: RegisterEntityMaintainerConfig = {
 
     // Do not advance the watermark if the run was aborted — the next run should
     // re-process the same window to avoid missing entities.
-    if (abortController.signal.aborted) {
-      logger.info('[supervises] Run was aborted; watermark not advanced');
+    if (signal.aborted) {
+      logger.info('Run was aborted; watermark not advanced');
       return status.state;
     }
 

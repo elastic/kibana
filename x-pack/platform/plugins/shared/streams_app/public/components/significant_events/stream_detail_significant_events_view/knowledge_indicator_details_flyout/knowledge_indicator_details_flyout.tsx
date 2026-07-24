@@ -24,7 +24,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { KnowledgeIndicator } from '@kbn/streams-ai';
-import { isComputedFeature } from '@kbn/significant-events-schema';
+import { isComputedFeature, QUERY_TYPE_STATS } from '@kbn/significant-events-schema';
 import type { Feature } from '@kbn/significant-events-schema';
 import { upperFirst } from 'lodash';
 import React, { useCallback, useMemo, useState } from 'react';
@@ -41,6 +41,8 @@ import {
   RESTORE_LABEL,
   PROMOTE_LABEL,
 } from '../hooks/use_knowledge_indicator_actions';
+import { useBlocksNewActivity } from '../../../../hooks/significant_events/use_significant_events_maintenance';
+import { STATS_PROMOTE_DISABLED_TOOLTIP } from '../../significant_events_discovery/components/queries_table/translations';
 import { DeleteTableItemsModal } from '../delete_table_items_modal';
 import { getKnowledgeIndicatorStreamName } from '../utils/get_knowledge_indicator_stream_name';
 import { KnowledgeIndicatorFeatureDetailsContent } from './knowledge_indicator_feature_details_content';
@@ -76,6 +78,7 @@ export function KnowledgeIndicatorDetailsFlyout({
     promoteQuery,
     isMutating: isActionMutating,
   } = useKnowledgeIndicatorActions({ streamName, onSuccess: onClose });
+  const { blocksActivity, activityBlockTooltip } = useBlocksNewActivity();
 
   const { deleteKnowledgeIndicatorsInBulk, isDeleting: isKIDeleting } =
     useStreamKnowledgeIndicatorsBulkDelete({ streamName, onSuccess: onClose });
@@ -154,41 +157,47 @@ export function KnowledgeIndicatorDetailsFlyout({
     return items;
   }, [excludeFeature, isMutating, knowledgeIndicator, restoreFeature]);
 
-  const queryActionItems = useMemo(
-    () =>
-      knowledgeIndicator.kind === 'query'
+  const queryActionItems = useMemo(() => {
+    if (knowledgeIndicator.kind !== 'query') {
+      return [];
+    }
+
+    const isStats = knowledgeIndicator.query.type === QUERY_TYPE_STATS;
+    const isPromoteDisabled = isMutating || blocksActivity || isStats;
+    const promoteTooltip =
+      activityBlockTooltip ?? (isStats ? STATS_PROMOTE_DISABLED_TOOLTIP : undefined);
+
+    return [
+      ...(!knowledgeIndicator.rule.backed
         ? [
-            ...(!knowledgeIndicator.rule.backed
-              ? [
-                  <EuiContextMenuItem
-                    key="query-promote"
-                    icon="plusCircle"
-                    disabled={isMutating}
-                    onClick={() => {
-                      setIsActionsMenuOpen(false);
-                      promoteQuery(knowledgeIndicator.query.id);
-                    }}
-                  >
-                    {PROMOTE_LABEL}
-                  </EuiContextMenuItem>,
-                ]
-              : []),
             <EuiContextMenuItem
-              key="query-delete"
-              icon="trash"
-              color="danger"
-              disabled={isMutating}
+              key="query-promote"
+              icon="plusCircle"
+              disabled={isPromoteDisabled}
+              toolTipContent={promoteTooltip}
               onClick={() => {
                 setIsActionsMenuOpen(false);
-                setShowDeleteModal(true);
+                promoteQuery(knowledgeIndicator.query.id);
               }}
             >
-              {DELETE_LABEL}
+              {PROMOTE_LABEL}
             </EuiContextMenuItem>,
           ]
-        : [],
-    [isMutating, knowledgeIndicator, promoteQuery]
-  );
+        : []),
+      <EuiContextMenuItem
+        key="query-delete"
+        icon="trash"
+        color="danger"
+        disabled={isMutating}
+        onClick={() => {
+          setIsActionsMenuOpen(false);
+          setShowDeleteModal(true);
+        }}
+      >
+        {DELETE_LABEL}
+      </EuiContextMenuItem>,
+    ];
+  }, [activityBlockTooltip, blocksActivity, isMutating, knowledgeIndicator, promoteQuery]);
 
   const title =
     knowledgeIndicator.kind === 'feature'
