@@ -198,16 +198,6 @@ export class VisualizeApp {
     return titles.map((title) => title.trim()).filter(Boolean);
   }
 
-  /** Clicks the data-table aggregation-based visualization type. */
-  async clickDataTable() {
-    await this.page.testSubj.click('visType-table');
-  }
-
-  /** Selects the source data view / saved search for a new aggregation-based visualization. */
-  async clickNewSearch(dataView = 'logstash-*') {
-    await this.selectDataSource(dataView);
-  }
-
   /**
    * Saves the current visualization to the library and waits for the breadcrumb to
    * reflect the new title.
