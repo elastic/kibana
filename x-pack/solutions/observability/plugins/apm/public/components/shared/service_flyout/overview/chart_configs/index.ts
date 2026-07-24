@@ -16,7 +16,11 @@ import {
   getMemoryUsageChart,
   getThroughputChart,
 } from './apm';
-import { getOtelLatencyChart } from './otel';
+import {
+  getOtelFailedTransactionRateChart,
+  getOtelLatencyChart,
+  getOtelThroughputChart,
+} from './otel';
 import type { FlyoutLensChartConfigDefinition, ServiceScope } from './shared';
 
 export { getLatencyChartType } from './shared';
@@ -53,8 +57,12 @@ export function getChartDefinitions({
       isOtel
         ? getOtelLatencyChart(otelIndexes, scope, latencyAggregationType, latencyTitleAction)
         : getLatencyChart(transactionIndexes, scope, latencyAggregationType, latencyTitleAction),
-      getThroughputChart(transactionIndexes, scope),
-      getFailedTransactionRateChart(transactionIndexes, scope),
+      isOtel
+        ? getOtelThroughputChart(otelIndexes, scope)
+        : getThroughputChart(transactionIndexes, scope),
+      isOtel
+        ? getOtelFailedTransactionRateChart(otelIndexes, scope)
+        : getFailedTransactionRateChart(transactionIndexes, scope),
     ],
     infrastructureMetrics: [
       getCpuUsageChart(metricIndexes, metricScope),

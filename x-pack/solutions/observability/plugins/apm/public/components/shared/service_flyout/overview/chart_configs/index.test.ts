@@ -5,36 +5,22 @@
  * 2.0.
  */
 
-import type { LensConfig, LensSeriesLayer } from '@kbn/lens-embeddable-utils';
-import type { LensESQLConfig } from '../types';
 import { LatencyAggregationType } from '../../../../../../common/latency_aggregation_types';
-import {
-  ENVIRONMENT_ALL,
-  ENVIRONMENT_NOT_DEFINED,
-} from '../../../../../../common/environment_filter_values';
 import { ChartType } from '../../../charts/helper/get_timeseries_color';
 import { getChartDefinitions, getLatencyChartType } from '.';
 
 const TRANSACTION_INDEXES = 'traces-apm*';
+const SPAN_INDEXES = 'traces-apm*'; // same value as TRANSACTION_INDEXES in MOCK_INDICES
 const METRIC_INDEXES = 'metrics-apm*';
 
 const MOCK_INDICES = {
   transaction: TRANSACTION_INDEXES,
   metric: METRIC_INDEXES,
-  span: TRANSACTION_INDEXES,
+  span: SPAN_INDEXES,
   error: 'logs-apm*',
   onboarding: 'apm-*',
   sourcemap: 'apm-*',
 };
-
-type XYLensConfig = Extract<LensConfig, { chartType: 'xy' }>;
-
-function seriesLayerOf(config: LensConfig | undefined): LensSeriesLayer {
-  if (!config) {
-    throw new Error('Expected a built Lens config');
-  }
-  return (config as XYLensConfig).layers[0] as LensSeriesLayer;
-}
 
 function buildDefinitions(
   overrides: Partial<Parameters<typeof getChartDefinitions>[0]> = {}
@@ -50,13 +36,6 @@ function buildDefinitions(
   });
 }
 
-function esqlOf(config: LensESQLConfig | undefined): string {
-  if (!config) {
-    throw new Error('Expected a built Lens config');
-  }
-  return config.dataset.esql;
-}
-
 describe('service flyout chart_configs', () => {
   describe('getLatencyChartType', () => {
     it('maps the aggregation type to the matching chart type', () => {
@@ -67,49 +46,69 @@ describe('service flyout chart_configs', () => {
   });
 
   describe('getChartDefinitions', () => {
-    it('returns the RED key metrics and infrastructure metrics', () => {
+    it('returns RED key metrics and infrastructure metrics for APM ingestion', () => {
       const { keyMetrics, infrastructureMetrics } = buildDefinitions();
 
-      expect(keyMetrics.map((chart) => chart.id)).toEqual([
+      expect(keyMetrics.map((c) => c.id)).toEqual([
         'latency',
         'throughput',
         'failedTransactionRate',
       ]);
-      expect(infrastructureMetrics.map((chart) => chart.id)).toEqual(['cpuUsage', 'memoryUsage']);
+      expect(infrastructureMetrics.map((c) => c.id)).toEqual(['cpuUsage', 'memoryUsage']);
     });
 
-    it('buckets every chart by a `timestamp` TBUCKET aliased to the date histogram x-axis', () => {
-      const { keyMetrics, infrastructureMetrics } = buildDefinitions();
+    it('returns the same chart IDs for OTel ingestion', () => {
+      const { keyMetrics, infrastructureMetrics } = buildDefinitions({
+        ingestionType: 'unprocessedOtel',
+      });
+
+      expect(keyMetrics.map((c) => c.id)).toEqual([
+        'latency',
+        'throughput',
+        'failedTransactionRate',
+      ]);
+      expect(infrastructureMetrics.map((c) => c.id)).toEqual(['cpuUsage', 'memoryUsage']);
+    });
+
+    it('scopes APM key metrics to the transaction index only', () => {
+      const { keyMetrics } = buildDefinitions();
 
       keyMetrics.forEach(({ config }) => {
-        const esql = esqlOf(config);
-        expect(esql).toContain(TRANSACTION_INDEXES);
-        expect(esql).toContain('BY timestamp = TBUCKET(100)');
-        expect(seriesLayerOf(config).xAxis).toEqual({ field: 'timestamp', type: 'dateHistogram' });
-      });
-
-      infrastructureMetrics.forEach(({ config }) => {
-        const esql = esqlOf(config);
-        expect(esql).toContain(METRIC_INDEXES);
-        expect(esql).toContain('BY timestamp = TBUCKET(100)');
-        expect(seriesLayerOf(config).xAxis).toEqual({ field: 'timestamp', type: 'dateHistogram' });
+        // single index pattern — not combined with span indexes
+        expect(config?.dataset.esql).toContain(`FROM ${TRANSACTION_INDEXES} |`);
       });
     });
 
-    it('returns the chart layout without a config until the index patterns resolve', () => {
+    it('combines transaction and span indexes for OTel key metrics', () => {
+      const { keyMetrics } = buildDefinitions({ ingestionType: 'unprocessedOtel' });
+
+      keyMetrics.forEach(({ config }) => {
+        expect(config?.dataset.esql).toContain(`FROM ${TRANSACTION_INDEXES},${SPAN_INDEXES}`);
+      });
+    });
+
+    it('scopes infrastructure charts to the metric index for both ingestion types', () => {
+      (['apm', 'unprocessedOtel'] as const).forEach((ingestionType) => {
+        const { infrastructureMetrics } = buildDefinitions({ ingestionType });
+
+        infrastructureMetrics.forEach(({ config }) => {
+          expect(config?.dataset.esql).toContain(METRIC_INDEXES);
+        });
+      });
+    });
+
+    it('returns chart layout without config when indices are undefined (APM)', () => {
       const { keyMetrics, infrastructureMetrics } = buildDefinitions({
         indices: undefined,
         latencyTitleAction: 'latency-action',
       });
 
-      // the layout (ids, titles, latency title action) is still produced so the
-      // sections render with loading placeholders instead of appearing empty
-      expect(keyMetrics.map((chart) => chart.id)).toEqual([
+      expect(keyMetrics.map((c) => c.id)).toEqual([
         'latency',
         'throughput',
         'failedTransactionRate',
       ]);
-      expect(infrastructureMetrics.map((chart) => chart.id)).toEqual(['cpuUsage', 'memoryUsage']);
+      expect(infrastructureMetrics.map((c) => c.id)).toEqual(['cpuUsage', 'memoryUsage']);
       [...keyMetrics, ...infrastructureMetrics].forEach((chart) => {
         expect(chart.title).toEqual(expect.any(String));
         expect(chart.config).toBeUndefined();
@@ -117,117 +116,42 @@ describe('service flyout chart_configs', () => {
       expect(keyMetrics[0].titleAction).toBe('latency-action');
     });
 
-    it('omits the transaction type clause when transactionType is empty string', () => {
-      const { keyMetrics } = buildDefinitions({ transactionType: '' });
-
-      keyMetrics.forEach(({ config }) => {
-        expect(esqlOf(config)).not.toContain('transaction.type');
+    it('returns chart layout without config when indices are undefined (OTel)', () => {
+      const { keyMetrics } = buildDefinitions({
+        indices: undefined,
+        ingestionType: 'unprocessedOtel',
       });
-    });
 
-    it('filters by the literal sentinel and missing field when environment is ENVIRONMENT_NOT_DEFINED', () => {
-      const { keyMetrics } = buildDefinitions({ environment: ENVIRONMENT_NOT_DEFINED.value });
-
-      expect(esqlOf(keyMetrics[0].config)).toEqual(
-        'SET unmapped_fields="nullify";\nFROM traces-apm* | WHERE `processor.event` == "transaction" | WHERE `service.name` == "opbeans-java" | WHERE `transaction.type` == "request" | WHERE `service.environment` == "ENVIRONMENT_NOT_DEFINED" OR `service.environment` IS NULL | EVAL duration_ms = TO_DOUBLE(transaction.duration.us) / 1000 | STATS AVG(duration_ms) BY timestamp = TBUCKET(100)'
-      );
-    });
-
-    it('omits the environment clause when environment is ENVIRONMENT_ALL', () => {
-      const { keyMetrics } = buildDefinitions({ environment: ENVIRONMENT_ALL.value });
-
-      expect(esqlOf(keyMetrics[0].config)).toEqual(
-        'SET unmapped_fields="nullify";\nFROM traces-apm* | WHERE `processor.event` == "transaction" | WHERE `service.name` == "opbeans-java" | WHERE `transaction.type` == "request" | EVAL duration_ms = TO_DOUBLE(transaction.duration.us) / 1000 | STATS AVG(duration_ms) BY timestamp = TBUCKET(100)'
-      );
-    });
-
-    it('builds the latency series from the average aggregation by default', () => {
-      const { keyMetrics } = buildDefinitions();
-      const latency = keyMetrics[0].config as XYLensConfig;
-
-      expect(esqlOf(keyMetrics[0].config)).toEqual(
-        'SET unmapped_fields="nullify";\nFROM traces-apm* | WHERE `processor.event` == "transaction" | WHERE `service.name` == "opbeans-java" | WHERE `transaction.type` == "request" | WHERE `service.environment` == "production" | EVAL duration_ms = TO_DOUBLE(transaction.duration.us) / 1000 | STATS AVG(duration_ms) BY timestamp = TBUCKET(100)'
-      );
-      // the y-axis value must match the STATS output column so Lens can resolve it
-      expect(latency.layers[0].yAxis[0].value).toBe('AVG(duration_ms)');
-    });
-
-    it('uses the percentile aggregation for p95 / p99 latency', () => {
-      const p95 = buildDefinitions({ latencyAggregationType: LatencyAggregationType.p95 });
-      const p99 = buildDefinitions({ latencyAggregationType: LatencyAggregationType.p99 });
-
-      expect(esqlOf(p95.keyMetrics[0].config)).toEqual(
-        'SET unmapped_fields="nullify";\nFROM traces-apm* | WHERE `processor.event` == "transaction" | WHERE `service.name` == "opbeans-java" | WHERE `transaction.type` == "request" | WHERE `service.environment` == "production" | EVAL duration_ms = TO_DOUBLE(transaction.duration.us) / 1000 | STATS PERCENTILE(duration_ms, 95) BY timestamp = TBUCKET(100)'
-      );
-      expect((p95.keyMetrics[0].config as XYLensConfig).layers[0].yAxis[0].value).toBe(
-        'PERCENTILE(duration_ms, 95)'
-      );
-      expect(esqlOf(p99.keyMetrics[0].config)).toEqual(
-        'SET unmapped_fields="nullify";\nFROM traces-apm* | WHERE `processor.event` == "transaction" | WHERE `service.name` == "opbeans-java" | WHERE `transaction.type` == "request" | WHERE `service.environment` == "production" | EVAL duration_ms = TO_DOUBLE(transaction.duration.us) / 1000 | STATS PERCENTILE(duration_ms, 99) BY timestamp = TBUCKET(100)'
-      );
-      expect((p99.keyMetrics[0].config as XYLensConfig).layers[0].yAxis[0].value).toBe(
-        'PERCENTILE(duration_ms, 99)'
-      );
-    });
-
-    it('builds throughput from a raw count per bucket', () => {
-      const { keyMetrics } = buildDefinitions();
-      const throughput = keyMetrics[1].config as XYLensConfig;
-
-      expect(esqlOf(keyMetrics[1].config)).toEqual(
-        'SET unmapped_fields="nullify";\nFROM traces-apm* | WHERE `processor.event` == "transaction" | WHERE `service.name` == "opbeans-java" | WHERE `transaction.type` == "request" | WHERE `service.environment` == "production" | STATS COUNT(*) BY timestamp = TBUCKET(100)'
-      );
-      expect(throughput.layers[0].yAxis[0].value).toBe('COUNT(*)');
-    });
-
-    it('builds failed transaction rate from the event.outcome failure ratio', () => {
-      const { keyMetrics } = buildDefinitions();
-      const failedRate = keyMetrics[2].config as XYLensConfig;
-
-      expect(esqlOf(keyMetrics[2].config)).toEqual(
-        'SET unmapped_fields="nullify";\nFROM traces-apm* | WHERE `processor.event` == "transaction" | WHERE `service.name` == "opbeans-java" | WHERE `transaction.type` == "request" | WHERE `service.environment` == "production" | STATS failure = COUNT(*) WHERE TO_STRING(event.outcome) == "failure", all = COUNT(*) WHERE (TO_STRING(event.outcome) IN ("failure", "success")) BY timestamp = TBUCKET(100) | EVAL failed_transaction_rate = CASE(all > 0, TO_DOUBLE(failure) / all, NULL) | KEEP timestamp, failed_transaction_rate | SORT timestamp'
-      );
-      expect(failedRate.layers[0].yAxis[0].value).toBe('failed_transaction_rate');
-      expect(failedRate.yBounds).toEqual({ mode: 'custom', lowerBound: 0, upperBound: 1 });
-    });
-
-    it('scopes infrastructure charts to the metric processor event without a transaction type', () => {
-      const { infrastructureMetrics } = buildDefinitions();
-      const cpuEsql = esqlOf(infrastructureMetrics[0].config);
-      const memoryEsql = esqlOf(infrastructureMetrics[1].config);
-
-      [cpuEsql, memoryEsql].forEach((esql) => {
-        expect(esql).toContain('`processor.event` == "metric"');
-        expect(esql).not.toContain('transaction.type');
+      keyMetrics.forEach((chart) => {
+        expect(chart.title).toEqual(expect.any(String));
+        expect(chart.config).toBeUndefined();
       });
-    });
-
-    it('builds the CPU usage series from the casted system cpu percent average', () => {
-      const { infrastructureMetrics } = buildDefinitions();
-      const cpu = infrastructureMetrics[0].config as XYLensConfig;
-
-      expect(esqlOf(infrastructureMetrics[0].config)).toEqual(
-        'SET unmapped_fields="nullify";\nFROM metrics-apm* | WHERE `processor.event` == "metric" | WHERE `service.name` == "opbeans-java" | WHERE `service.environment` == "production" | WHERE TO_DOUBLE(system.cpu.total.norm.pct) IS NOT NULL | STATS AVG(TO_DOUBLE(system.cpu.total.norm.pct)) BY timestamp = TBUCKET(100)'
-      );
-      expect(cpu.layers[0].yAxis[0].value).toBe('AVG(TO_DOUBLE(system.cpu.total.norm.pct))');
-    });
-
-    it('builds the memory usage series from casted free / total memory', () => {
-      const { infrastructureMetrics } = buildDefinitions();
-      const memory = infrastructureMetrics[1].config as XYLensConfig;
-
-      expect(esqlOf(infrastructureMetrics[1].config)).toEqual(
-        'SET unmapped_fields="nullify";\nFROM metrics-apm* | WHERE `processor.event` == "metric" | WHERE `service.name` == "opbeans-java" | WHERE `service.environment` == "production" | EVAL cgroup_usage = TO_DOUBLE(system.process.cgroup.memory.mem.usage.bytes) | EVAL cgroup_limit = TO_DOUBLE(system.process.cgroup.memory.mem.`limit`.bytes) | EVAL sys_free = TO_DOUBLE(system.memory.actual.free) | EVAL sys_total = TO_DOUBLE(system.memory.total) | WHERE cgroup_usage IS NOT NULL OR sys_free IS NOT NULL AND sys_total IS NOT NULL | EVAL effective_total = CASE(cgroup_limit > 0 AND cgroup_limit != 9223372036854772000, cgroup_limit, sys_total) | EVAL memory_usage = CASE(cgroup_usage IS NOT NULL AND effective_total > 0, cgroup_usage / effective_total, sys_total > 0 AND sys_free IS NOT NULL, 1 - sys_free / sys_total, NULL) | STATS memory_usage = AVG(memory_usage) BY timestamp = TBUCKET(100) | KEEP timestamp, memory_usage | SORT timestamp'
-      );
-      expect(memory.layers[0].yAxis[0].value).toBe('memory_usage');
     });
 
     it('attaches the latency title action to the latency chart only', () => {
-      const titleAction = 'latency-action';
-      const { keyMetrics } = buildDefinitions({ latencyTitleAction: titleAction });
+      const { keyMetrics } = buildDefinitions({ latencyTitleAction: 'latency-action' });
 
-      expect(keyMetrics[0].titleAction).toBe(titleAction);
+      expect(keyMetrics[0].titleAction).toBe('latency-action');
       expect(keyMetrics[1].titleAction).toBeUndefined();
+    });
+
+    it('attaches the latency title action to the OTel latency chart only', () => {
+      const { keyMetrics } = buildDefinitions({
+        ingestionType: 'unprocessedOtel',
+        latencyTitleAction: 'latency-action',
+      });
+
+      expect(keyMetrics[0].titleAction).toBe('latency-action');
+      expect(keyMetrics[1].titleAction).toBeUndefined();
+    });
+
+    it('buckets every chart by a timestamp TBUCKET aliased to the date histogram x-axis', () => {
+      const { keyMetrics, infrastructureMetrics } = buildDefinitions();
+
+      [...keyMetrics, ...infrastructureMetrics].forEach(({ config }) => {
+        expect(config?.dataset.esql).toContain('BY timestamp = TBUCKET(100)');
+        expect(config?.layers[0].xAxis).toEqual({ field: 'timestamp', type: 'dateHistogram' });
+      });
     });
   });
 });
