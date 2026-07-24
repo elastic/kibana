@@ -69,8 +69,6 @@ export const SubAgentExecutionFlyout: React.FC<SubAgentExecutionFlyoutProps> = (
   const { euiTheme } = useEuiTheme();
   const displayMessage = response?.message ?? streamingMessage;
   const isRunning = !response && !error;
-  const isStreaming =
-    !isCompleted && isRunning && (executionSteps.length > 0 || !!streamingMessage);
   const hasError = Boolean(error);
 
   const euiSteps = [
@@ -90,7 +88,7 @@ export const SubAgentExecutionFlyout: React.FC<SubAgentExecutionFlyoutProps> = (
       : []),
     {
       title: executionLabel,
-      status: (hasError ? 'danger' : isStreaming ? 'loading' : 'complete') as
+      status: (hasError ? 'danger' : isRunning && !isCompleted ? 'loading' : 'complete') as
         | 'danger'
         | 'loading'
         | 'complete',
