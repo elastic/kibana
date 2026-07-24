@@ -321,6 +321,22 @@ describe('discovery tools', () => {
     expect(result.type).toBe(ToolResultType.error);
   });
 
+  it('refuses to list datasets when the caller lacks read_evals', async () => {
+    const list = jest.fn();
+    const { deps } = createDeps({
+      getStartDependencies: jest.fn().mockResolvedValue({
+        ...securityWith(false),
+        evals: { datasetService: { getClient: () => ({ list }) } },
+      }) as unknown as EvalExperimentsToolDeps['getStartDependencies'],
+    });
+
+    const result = firstResult(await listEvalDatasetsTool(deps).handler({}, createContext()));
+
+    expect(result.type).toBe(ToolResultType.error);
+    expect(result.data.message).toMatch(/read_evals/);
+    expect(list).not.toHaveBeenCalled();
+  });
+
   it('lists evaluators via the evals start contract', async () => {
     const { deps } = createDeps({
       getStartDependencies: jest.fn().mockResolvedValue({
@@ -343,6 +359,22 @@ describe('discovery tools', () => {
 
     expect(result.data.evaluators).toHaveLength(1);
     expect(result.data.evaluators[0].needsJudgeConnector).toBe(true);
+  });
+
+  it('refuses to list evaluators when the caller lacks read_evals', async () => {
+    const listEvaluators = jest.fn();
+    const { deps } = createDeps({
+      getStartDependencies: jest.fn().mockResolvedValue({
+        ...securityWith(false),
+        evals: { listEvaluators },
+      }) as unknown as EvalExperimentsToolDeps['getStartDependencies'],
+    });
+
+    const result = firstResult(await listEvaluatorsTool(deps).handler({}, createContext()));
+
+    expect(result.type).toBe(ToolResultType.error);
+    expect(result.data.message).toMatch(/read_evals/);
+    expect(listEvaluators).not.toHaveBeenCalled();
   });
 
   it('lists model connectors via the evals start contract', async () => {

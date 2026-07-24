@@ -8,7 +8,8 @@
 import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
-import { evalsTools, otherResult, toErrorResult } from './common';
+import { errorResult, evalsTools, otherResult, toErrorResult } from './common';
+import { hasReadEvalsPrivilege } from './check_privileges';
 import type { EvalExperimentsToolDeps } from './deps';
 
 const schema = z.object({});
@@ -25,9 +26,14 @@ export const listEvaluatorsTool = (
   description:
     'List available evaluators (name, version, kind, description). `llm` evaluators require a judge connector_id (needsJudgeConnector=true); `code` evaluators do not.',
   schema,
-  handler: async () => {
+  handler: async (_args, { request, spaceId }) => {
     try {
-      const { evals } = await deps.getStartDependencies();
+      const { evals, security } = await deps.getStartDependencies();
+      if (!(await hasReadEvalsPrivilege({ security, request, spaceId }))) {
+        return errorResult(
+          'You do not have the read_evals privilege required to list evaluators in this space.'
+        );
+      }
       if (!evals.listEvaluators) {
         return toErrorResult(
           new Error('the evals evaluator registry is unavailable'),
