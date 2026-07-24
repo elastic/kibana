@@ -56,11 +56,8 @@ export function EventFlyout({ event, onClose, onChatClick }: EventFlyoutProps): 
     if (!selectedDetection) {
       return undefined;
     }
-    return findDetectionSignal(selectedDetection, {
-      discoveries: lifecycleQuery.data?.discoveries,
-      eventSignals: event.signals,
-    });
-  }, [event.signals, lifecycleQuery.data?.discoveries, selectedDetection]);
+    return findDetectionSignal(selectedDetection, lifecycleQuery.data?.events);
+  }, [lifecycleQuery.data?.events, selectedDetection]);
 
   const closeDetectionFlyout = useCallback(() => {
     setSelectedDetectionId(undefined);

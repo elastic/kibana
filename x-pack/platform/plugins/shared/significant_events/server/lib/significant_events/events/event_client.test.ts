@@ -120,6 +120,25 @@ describe('EventClient', () => {
   });
 
   describe('findLatestByCurrentStatePaginated', () => {
+    it('filters stable event IDs after latest-state reduction', async () => {
+      const { client, query } = createSearchClient({
+        hits: [],
+        total: 0,
+      });
+
+      await client.findLatestByCurrentStatePaginated({
+        eventIds: ['checkout-failure', 'payment-failure'],
+      });
+
+      const dataQuery = query.mock.calls
+        .map((call) => (call[0] as { query: string }).query)
+        .find((q) => !q.includes('STATS total'));
+      expect(dataQuery).toContain('event_id IN ("checkout-failure", "payment-failure")');
+      expect(dataQuery!.indexOf('INLINE STATS latest_ts')).toBeLessThan(
+        dataQuery!.indexOf('event_id IN')
+      );
+    });
+
     it('filters open state after latest-per-slug reduction', async () => {
       const { client, query } = createSearchClient({
         hits: [],
