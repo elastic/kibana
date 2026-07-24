@@ -19,7 +19,6 @@ import { ContextLandingPage } from './context_landing_page';
 
 const buildAiIndex = (overrides: Partial<AiIndexHttpItem> = {}): AiIndexHttpItem => ({
   id: 'my-ai-index',
-  name: 'My AI index',
   managed: false,
   dest: { type: 'data_stream', value: 'ai-index-ds-my-ai-index' },
   automations: [],
@@ -87,14 +86,13 @@ describe('ContextLandingPage', () => {
       ai_indices: [
         buildAiIndex({
           id: 'first',
-          name: 'First index',
           sources: [
             { type: 'esql', value: 'FROM a' },
             { type: 'esql', value: 'FROM b' },
           ],
           automations: [{ type: 'workflow', value: 'nightly' }],
         }),
-        buildAiIndex({ id: 'second', name: 'Second index' }),
+        buildAiIndex({ id: 'second' }),
       ],
     });
 
@@ -103,7 +101,7 @@ describe('ContextLandingPage', () => {
     const cards = await screen.findAllByTestId('contextAiIndexCard');
     expect(cards).toHaveLength(2);
 
-    const firstLink = screen.getByRole('link', { name: /First index/ });
+    const firstLink = screen.getByRole('link', { name: /first/ });
     expect(firstLink).toHaveAttribute('href', '/app/context_engine/indexes/first');
 
     const [firstSources, secondSources] = screen.getAllByTestId('contextAiIndexCardSources');

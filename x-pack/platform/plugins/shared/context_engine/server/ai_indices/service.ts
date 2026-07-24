@@ -33,9 +33,8 @@ const INDEX_PREFIX = `${DEST_INDEX_PREFIX}idx-`;
 
 const toAiIndexItem = (id: string, document: AiIndexDocument): AiIndexHttpItem => ({
   id,
-  name: document.name,
   ...(document.description !== undefined && { description: document.description }),
-  managed: document.managed,
+  managed: document.managed ?? false,
   dest: document.dest,
   automations: document.automations,
   sources: document.sources,
@@ -132,11 +131,12 @@ export class AiIndexService {
     const response = await this.storageClient.search({
       size: MAX_AI_INDICES,
       track_total_hits: false,
-      sort: [{ name: 'asc' }],
     });
-    return response.hits.hits.flatMap((hit) =>
-      hit._id ? [toAiIndexItem(hit._id, hit._source as AiIndexDocument)] : []
-    );
+    // Sorted by id in memory: Elasticsearch disallows sorting on `_id`, and the
+    // result set is bounded by MAX_AI_INDICES.
+    return response.hits.hits
+      .flatMap((hit) => (hit._id ? [toAiIndexItem(hit._id, hit._source as AiIndexDocument)] : []))
+      .sort((a, b) => a.id.localeCompare(b.id));
   }
 
   /**
@@ -151,7 +151,12 @@ export class AiIndexService {
     if (existing.document.managed) {
       throw new AiIndexManagedError(aiIndexId);
     }
-    await this.storageClient.delete({ id: aiIndexId });
+    // Re-check the delete result: the entry may have been removed concurrently
+    // between the existence lookup above and this call.
+    const { result } = await this.storageClient.delete({ id: aiIndexId });
+    if (result === 'not_found') {
+      throw new AiIndexNotFoundError(aiIndexId);
+    }
   }
 
   private async findDocument(aiIndexId: string): Promise<

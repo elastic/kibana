@@ -20,7 +20,7 @@ import {
   OBSERVABILITY_GET_TRACES_TOOL_ID,
 } from '../../../agent_builder/agents/discovery/constants';
 
-export const SIGNIFICANT_EVENTS_INVESTIGATION_AGENT_ID = 'platform.sig_events.investigation';
+export const SIGNIFICANT_EVENTS_INVESTIGATION_AGENT_ID = 'significant_events.investigation';
 export const SIGNIFICANT_EVENTS_INVESTIGATION_AGENT_TYPE_ID =
   'platform.sig_events.investigation-type';
 

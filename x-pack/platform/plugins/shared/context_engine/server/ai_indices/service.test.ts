@@ -56,7 +56,6 @@ const createConflictError = () =>
   });
 
 const aiIndexDocument: AiIndexDocument = {
-  name: 'customer_support',
   description: 'KIs representing previously answered, commonly asked questions',
   managed: false,
   dest: { type: 'data_stream', value: 'ai-index-ds-customer_support*' },
@@ -102,7 +101,6 @@ describe('AiIndexService', () => {
 
   describe('put', () => {
     const properties = {
-      name: 'customer_support',
       description: 'KIs representing previously answered, commonly asked questions',
       dest: { type: 'data_stream' as const, value: 'ai-index-ds-customer_support*' },
       automations: [{ type: 'workflow' as const, value: 'nightly-refresh' }],
@@ -176,7 +174,7 @@ describe('AiIndexService', () => {
       );
     });
 
-    it('throws AiIndexConflictError when the entry is managed', async () => {
+    it('throws AiIndexManagedError when the entry is managed', async () => {
       storageClient.get.mockResolvedValue({
         _id: 'customer_support',
         _index: '.contextengine-ai-indices',
@@ -438,6 +436,21 @@ describe('AiIndexService', () => {
       });
     });
 
+    it('defaults managed to false for legacy documents without the field', async () => {
+      const legacyDocument = { ...aiIndexDocument };
+      delete (legacyDocument as { managed?: boolean }).managed;
+      storageClient.get.mockResolvedValue({
+        _id: 'customer_support',
+        _index: '.contextengine-ai-indices',
+        found: true,
+        _source: legacyDocument,
+      });
+
+      await expect(service.get('customer_support')).resolves.toEqual(
+        expect.objectContaining({ id: 'customer_support', managed: false })
+      );
+    });
+
     it('throws AiIndexNotFoundError when the AI index does not exist', async () => {
       storageClient.get.mockRejectedValue(createNotFoundError());
 
@@ -452,7 +465,7 @@ describe('AiIndexService', () => {
   });
 
   describe('list', () => {
-    it('returns AI indices mapped from search hits', async () => {
+    it('returns AI indices mapped from search hits, sorted by id', async () => {
       storageClient.search.mockResolvedValue({
         took: 1,
         timed_out: false,
@@ -464,17 +477,17 @@ describe('AiIndexService', () => {
               _index: '.contextengine-ai-indices',
               _source: aiIndexDocument,
             },
+            { _id: 'billing', _index: '.contextengine-ai-indices', _source: aiIndexDocument },
           ],
         },
       } as unknown as Awaited<ReturnType<AiIndexStorageClient['search']>>);
 
       await expect(service.list()).resolves.toEqual([
+        { id: 'billing', ...aiIndexDocument },
         { id: 'customer_support', ...aiIndexDocument },
       ]);
 
-      expect(storageClient.search).toHaveBeenCalledWith(
-        expect.objectContaining({ size: 100, sort: [{ name: 'asc' }] })
-      );
+      expect(storageClient.search).toHaveBeenCalledWith(expect.objectContaining({ size: 100 }));
     });
   });
 
@@ -499,7 +512,7 @@ describe('AiIndexService', () => {
       expect(storageClient.delete).not.toHaveBeenCalled();
     });
 
-    it('throws AiIndexConflictError when the entry is managed', async () => {
+    it('throws AiIndexManagedError when the entry is managed', async () => {
       storageClient.get.mockResolvedValue({
         _id: 'customer_support',
         _index: '.contextengine-ai-indices',
@@ -509,6 +522,18 @@ describe('AiIndexService', () => {
 
       await expect(service.delete('customer_support')).rejects.toBeInstanceOf(AiIndexManagedError);
       expect(storageClient.delete).not.toHaveBeenCalled();
+    });
+
+    it('throws AiIndexNotFoundError when the entry is removed concurrently', async () => {
+      storageClient.get.mockResolvedValue({
+        _id: 'customer_support',
+        _index: '.contextengine-ai-indices',
+        found: true,
+        _source: aiIndexDocument,
+      });
+      storageClient.delete.mockResolvedValue({ acknowledged: true, result: 'not_found' });
+
+      await expect(service.delete('customer_support')).rejects.toBeInstanceOf(AiIndexNotFoundError);
     });
   });
 });

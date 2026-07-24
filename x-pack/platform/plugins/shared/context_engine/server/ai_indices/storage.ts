@@ -20,7 +20,6 @@ const storageSettings = {
   name: aiIndicesIndexName,
   schema: {
     properties: {
-      name: types.keyword({}),
       description: types.text({}),
       managed: types.boolean({}),
       date_created: types.date({}),
@@ -39,9 +38,10 @@ const storageSettings = {
 } satisfies IndexStorageSettings;
 
 export interface AiIndexDocument {
-  name: string;
   description?: string;
-  managed: boolean;
+  // Optional for backward compatibility with entries written before managed
+  // indices existed; absence is treated as unmanaged (`false`) on read.
+  managed?: boolean;
   date_created: string;
   date_modified: string;
   dest: AiIndexDest;

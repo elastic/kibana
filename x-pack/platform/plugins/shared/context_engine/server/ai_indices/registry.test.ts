@@ -12,7 +12,6 @@ import type { AiIndexService } from './service';
 import type { AiIndexProperties } from '../../common/http_api/ai_indices';
 
 const makeProperties = (overrides: Partial<AiIndexProperties> = {}): AiIndexProperties => ({
-  name: 'Test Index',
   description: 'A test AI index',
   dest: { type: 'index', value: 'ai-index-idx-test' },
   automations: [],
@@ -142,14 +141,14 @@ describe('AiIndexRegistry', () => {
         get: jest.fn().mockRejectedValue(new AiIndexNotFoundError('any')),
         putManaged: jest.fn().mockResolvedValue('created'),
       });
-      registry.register('a', makeProperties({ name: 'A' }));
-      registry.register('b', makeProperties({ name: 'B' }));
+      registry.register('a', makeProperties({ description: 'A' }));
+      registry.register('b', makeProperties({ description: 'B' }));
 
       await registry.startupRegister({ aiIndexService: service, isEnabled: true, logger });
 
       expect(service.putManaged).toHaveBeenCalledTimes(2);
-      expect(service.putManaged).toHaveBeenCalledWith('a', makeProperties({ name: 'A' }));
-      expect(service.putManaged).toHaveBeenCalledWith('b', makeProperties({ name: 'B' }));
+      expect(service.putManaged).toHaveBeenCalledWith('a', makeProperties({ description: 'A' }));
+      expect(service.putManaged).toHaveBeenCalledWith('b', makeProperties({ description: 'B' }));
     });
   });
 });

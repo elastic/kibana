@@ -64,6 +64,7 @@ spaceTest.describe(
           await openInLens();
           await lens.configureDimension(TIMESTAMP_X_AXIS_DIMENSION);
           await lens.goBackToPreviousApp();
+          await expect(lens.getDiscardChangesModal()).toBeVisible();
           await lens.confirmDiscardChangesModal();
           await expect(visualize.getEditInLensButton()).toBeVisible();
         });
@@ -75,6 +76,7 @@ spaceTest.describe(
             addToDashboard: 'none',
           });
           await lens.goBackToPreviousApp();
+          await expect(lens.getDiscardChangesModal()).toBeHidden();
           await expect(visualize.getEditInLensButton()).toBeVisible();
         });
       }

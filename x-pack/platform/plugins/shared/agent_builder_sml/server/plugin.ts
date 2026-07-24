@@ -92,7 +92,6 @@ export class AgentBuilderSmlPlugin
     });
 
     setupDeps.contextEngine?.registerAiIndex('elastic', {
-      name: 'Elastic',
       description:
         'Kibana resources available for use in Agent Builder, including dashboards, ' +
         'visualizations, connectors, workflows, alerting rules, action policies, ' +
