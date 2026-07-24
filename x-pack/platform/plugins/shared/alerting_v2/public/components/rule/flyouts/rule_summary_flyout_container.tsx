@@ -63,9 +63,7 @@ export const RuleSummaryFlyoutContainer = ({ ruleId, onClose, onEdit, onClone }:
         onEdit={onEdit}
         onClone={onClone}
         onDelete={(r) => setRuleToDelete(r)}
-        onToggleEnabled={(r) =>
-          toggleRuleEnabled({ id: r.id, enabled: !r.enabled, name: r.metadata.name })
-        }
+        onToggleEnabled={(r) => toggleRuleEnabled({ id: r.id, enabled: !r.enabled })}
       />
       {ruleToDelete && (
         <DeleteConfirmationModal
