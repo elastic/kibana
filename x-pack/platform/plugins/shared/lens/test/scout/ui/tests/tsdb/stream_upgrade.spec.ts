@@ -18,9 +18,10 @@ import {
 import type { TsdbScenario, TsdbScenarioIndex } from '../../fixtures';
 
 const RESOURCE_SUFFIX = `${process.pid}-${Date.now()}`;
-const BASE_STREAM = `lens-tsdb-upgrade-${RESOURCE_SUFFIX}`;
-const REGULAR_INDEX = `lens-tsdb-regular-${RESOURCE_SUFFIX}`;
-const ADDITIONAL_TSDB_STREAM = `lens-tsdb-additional-${RESOURCE_SUFFIX}`;
+// Serverless Security's editor role grants data access to the sample-data namespace.
+const BASE_STREAM = `kibana_sample_data_lens_tsdb_upgrade_${RESOURCE_SUFFIX}`;
+const REGULAR_INDEX = `kibana_sample_data_lens_tsdb_regular_${RESOURCE_SUFFIX}`;
+const ADDITIONAL_TSDB_STREAM = `kibana_sample_data_lens_tsdb_additional_${RESOURCE_SUFFIX}`;
 const TIME_RANGE = createTsdbScenarioTimeRange();
 
 interface ScenarioContext {
