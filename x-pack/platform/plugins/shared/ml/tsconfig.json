@@ -159,5 +159,6 @@
     "@kbn/lens-common",
     "@kbn/scout",
     "@kbn/core-http-common",
+    "@kbn/app-header"
   ]
 }

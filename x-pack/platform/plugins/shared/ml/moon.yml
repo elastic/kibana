@@ -157,6 +157,7 @@ dependsOn:
   - '@kbn/lens-common'
   - '@kbn/scout'
   - '@kbn/core-http-common'
+  - '@kbn/app-header'
 tags:
   - plugin
   - prod
