@@ -249,7 +249,7 @@ run(
         terraformImpact.impactedChanges.map((impact) => [impact.change, impact])
       );
 
-      // Only stable and tech_preview breaks are caught. Experimental breaks are
+      // Only stable and tech_preview breaking changes are caught. Experimental are
       // excluded entirely: not reported, not counted.
       const entries: ImpactReportEntry[] = [];
       for (const change of breakingChanges) {

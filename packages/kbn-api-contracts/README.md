@@ -1,10 +1,10 @@
 # @kbn/api-contracts
 
-Detects breaking changes across Kibana's public REST API surface, by comparing OpenAPI specs between the PR branch and the base branch using [oasdiff](https://github.com/oasdiff/oasdiff).
+Detects breaking changes across Kibana's public REST API surface (inlcuding APIs in technical preview), by comparing OpenAPI specs between the PR branch and the base branch using [oasdiff](https://github.com/oasdiff/oasdiff).
 
 ## Overview
 
-This package runs in CI on every PR. It compares the current branch's OAS files against the base branch (e.g. `main`) to detect breaking API changes across the whole surface, classifies each by stability tier, and catches the ones in **stable** and **tech_preview** APIs. Experimental-tier breaks are excluded. Terraform provider ownership is attached as enrichment so a caught change can also be flagged as affecting the provider.
+This package runs in CI on every PR. It compares the current branch's OAS files against the base branch (e.g. `main`) to detect breaking API changes across the whole surface, classifies each by stability tier, and catches the ones in **stable** and **tech_preview** APIs. Experimental-tier breaking changes (BCs) are excluded. Terraform provider ownership is attached as enrichment so a caught change can also be flagged as affecting the provider.
 
 **Flow:**
 
@@ -12,7 +12,7 @@ This package runs in CI on every PR. It compares the current branch's OAS files 
 git show base OAS → oasdiff diff → parse → apply allowlist → classify by tier (drop experimental) → enrich with TF ownership → report → notify owners
 ```
 
-By default the check is a soft gate: a caught stable/tech_preview break fails the check (non-zero exit) but Buildkite `soft_fail: true` keeps merge unblocked, so the failure is a visible warning. Removing `soft_fail` from `.buildkite/pipelines/pull_request/api_contracts.yml` turns it into a hard merge gate.
+By default the check is a soft gate: a BC caught in stable/tech_preview fails the check (non-zero exit) but Buildkite `soft_fail: true` keeps merge unblocked, so the failure is a visible warning. Removing `soft_fail` from `.buildkite/pipelines/pull_request/api_contracts.yml` turns it into a hard merge gate.
 
 **Key components:**
 
@@ -53,16 +53,16 @@ By default the check is a soft gate: a caught stable/tech_preview break fails th
 
 oasdiff detects these as breaking:
 
-| Change Type                   | oasdiff ID(s)                                                                 | Example                                             |
-| ----------------------------- | ----------------------------------------------------------------------------- | --------------------------------------------------- |
-| **Path removed**              | `api-path-removed-without-deprecation`                                        | `DELETE /api/spaces/space` removed entirely         |
-| **Method removed**            | `api-removed-without-deprecation`, `api-removed-before-sunset`                | `POST` removed from `/api/fleet/agents`             |
-| **Request property removed**  | `request-property-removed` ⚠️                                                 | Request body field `name` removed                   |
-| **Parameter removed**         | `request-parameter-removed` ⚠️                                                | Query param `filter` removed from `GET /api/agents` |
-| **Response property removed** | `response-required-property-removed`, `response-optional-property-removed` ⚠️ | Response field `id` removed from `200` response     |
-| **Required property added**   | `new-required-request-property`                                               | New required `email` field on request body          |
-| **Optional made required**    | `request-parameter-became-required`                                           | `filter` query param becomes required               |
-| **Type changed**              | `response-property-type-changed`                                              | `id` changed from string to number                  |
+| Change Type                   | oasdiff ID(s)                                                                 | Example                                                                                                |
+| ----------------------------- | ----------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| **Path removed**              | `api-path-removed-without-deprecation`                                        | `DELETE /api/spaces/space` removed entirely                                                            |
+| **Method removed**            | `api-removed-without-deprecation`, `api-removed-before-sunset`                | `POST` removed from `/api/fleet/agents`                                                                |
+| **Request property removed**  | `request-property-removed` ⚠️                                                 | Request body field `name` removed                                                                      |
+| **Parameter removed**         | `request-parameter-removed` ⚠️                                                | Query param `filter` removed from `GET /api/agents`                                                    |
+| **Response property removed** | `response-required-property-removed`, `response-optional-property-removed` ⚠️ | Response field `id` removed from `200` response                                                        |
+| **Required property added**   | `new-required-request-property`                                               | New required `email` field on request body                                                             |
+| **Optional made required**    | `request-parameter-became-required`                                           | `filter` query param becomes required                                                                  |
+| **Type changed**              | `response-property-type-changed`                                              | `id` changed from string to number                                                                     |
 | **Request body tightened**    | `kbn:request-additional-properties-tightened`                                 | Request body schema gains `additionalProperties: false` (clients sending unknown keys now receive 400) |
 
 ⚠️ oasdiff classifies these as warnings, but they are treated as breaking here because clients (including the Terraform provider) depend on these fields.
@@ -172,7 +172,7 @@ node scripts/check_api_contracts.js \
 - `--terraformApisPath` - Override TF API inventory path (ownership enrichment only)
 - `--reportPath` - Write a JSON impact report to this path (used by CI for PR notifications)
 
-The check always diffs the full public OAS surface and catches stable/tech_preview breaks. There are no per-tier enforcement flags: the soft-vs-hard merge gate is Buildkite `soft_fail` on the API Contracts step, and the per-change escape hatch is the [allowlist](#allowlist).
+The check always diffs the full public OAS surface and catches stable/tech_preview breaking changes. There are no per-tier enforcement flags: the soft-vs-hard merge gate is Buildkite `soft_fail` on the API Contracts step, and the per-change escape hatch is the [allowlist](#allowlist).
 
 **Prerequisites:** oasdiff must be installed and available in PATH (or set `OASDIFF_BIN`):
 
@@ -186,7 +186,7 @@ brew install oasdiff
 When the check fails, CI posts a PR comment tagging the owning teams for the affected endpoints.
 
 1. **Review the report** - identifies which endpoints, what changed, their stability tier, and who owns them
-2. **If unintentional:** fix the code to maintain compatibility, then regenerate the OAS snapshot with `node scripts/capture_oas_snapshot --update` and commit the result
+2. **If unintentional:** fix the code to maintain compatibility.
 3. **If intentional:** add an allowlist entry with team approval (see [Allowlist](#allowlist)), coordinating with the owning team
 
 ## Troubleshooting

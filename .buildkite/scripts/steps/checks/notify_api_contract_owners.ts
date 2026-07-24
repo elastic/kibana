@@ -10,11 +10,6 @@
 import { readFileSync, existsSync } from 'fs';
 import { upsertComment } from '#pipeline-utils';
 
-// Mirrors ImpactReport in packages/kbn-api-contracts/src/report/write_impact_report.ts.
-// The two are kept in sync by hand, since this script is a separate workspace.
-// Only stable and tech_preview breaks reach the report; experimental is dropped
-// upstream. Terraform fields are ownership enrichment, present only when the
-// change maps to a provider API.
 type CaughtTier = 'stable' | 'tech_preview';
 
 export interface ImpactEntry {
