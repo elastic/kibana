@@ -28,6 +28,7 @@ import { RoundEvents } from '../round_events';
 import { JsonCodeBlock } from '../json_code_block';
 import { FlyoutStackContext } from './flyout_stack_context';
 import { ToolResponseFlyout } from './tool_response_flyout';
+import { parametersLabel, executionLabel, resultLabel } from './flyout_labels';
 
 const backLabel = i18n.translate('xpack.agentBuilder.roundEvents.subAgentExecutionFlyout.back', {
   defaultMessage: 'Back',
@@ -41,21 +42,6 @@ const subAgentExecutionTitle = i18n.translate(
 const executionIdLabel = i18n.translate(
   'xpack.agentBuilder.roundEvents.subAgentExecutionFlyout.executionIdLabel',
   { defaultMessage: 'Execution ID' }
-);
-
-const parametersLabel = i18n.translate(
-  'xpack.agentBuilder.conversation.toolResponseFlyout.parametersLabel',
-  { defaultMessage: 'Parameters' }
-);
-
-const executionLabel = i18n.translate(
-  'xpack.agentBuilder.conversation.toolResponseFlyout.executionLabel',
-  { defaultMessage: 'Execution' }
-);
-
-const resultLabel = i18n.translate(
-  'xpack.agentBuilder.conversation.toolResponseFlyout.resultLabel',
-  { defaultMessage: 'Result' }
 );
 
 interface SubAgentExecutionFlyoutProps {
@@ -166,13 +152,15 @@ export const SubAgentExecutionFlyout: React.FC<SubAgentExecutionFlyoutProps> = (
             hasBorder
             css={css`
               && {
-                padding-block: 4px;
-                padding-left: 8px;
+                padding-block: ${euiTheme.size.xs};
+                padding-left: ${euiTheme.size.s};
               }
             `}
           >
             <EuiButtonEmpty iconType="undo" onClick={onBack} flush="left" size="s" color="text">
-              <EuiText size="xs">{backLabel}</EuiText>
+              <EuiText size="xs" component="span">
+                {backLabel}
+              </EuiText>
             </EuiButtonEmpty>
           </EuiFlyoutHeader>
         )}
@@ -181,7 +169,7 @@ export const SubAgentExecutionFlyout: React.FC<SubAgentExecutionFlyoutProps> = (
             <h2 id="subAgentExecutionFlyoutTitle">{subAgentExecutionTitle}</h2>
           </EuiTitle>
           <EuiSpacer size="xs" />
-          <EuiText size="s" color={`${euiTheme.colors.textSubdued}`}>
+          <EuiText size="s" color={euiTheme.colors.textSubdued}>
             <p>
               {executionIdLabel} {executionId}
             </p>

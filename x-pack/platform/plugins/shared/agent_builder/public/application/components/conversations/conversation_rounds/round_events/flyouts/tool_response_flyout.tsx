@@ -27,25 +27,11 @@ import { isErrorResult } from '@kbn/agent-builder-common/tools/tool_result';
 import { JsonCodeBlock } from '../json_code_block';
 import { ToolResult } from '../results/tool_result';
 import { SubAgentExecutionFlyout } from './sub_agent_execution_flyout';
+import { parametersLabel, executionLabel, resultLabel } from './flyout_labels';
 
 const backLabel = i18n.translate('xpack.agentBuilder.conversation.toolResponseFlyout.back', {
   defaultMessage: 'Back',
 });
-
-const parametersLabel = i18n.translate(
-  'xpack.agentBuilder.conversation.toolResponseFlyout.parametersLabel',
-  { defaultMessage: 'Parameters' }
-);
-
-const executionLabel = i18n.translate(
-  'xpack.agentBuilder.conversation.toolResponseFlyout.executionLabel',
-  { defaultMessage: 'Execution' }
-);
-
-const resultLabel = i18n.translate(
-  'xpack.agentBuilder.conversation.toolResponseFlyout.resultLabel',
-  { defaultMessage: 'Result' }
-);
 
 const subAgentExecutionLabel = i18n.translate(
   'xpack.agentBuilder.conversation.toolResponseFlyout.subAgentExecutionLabel',
@@ -170,7 +156,9 @@ export const ToolResponseFlyout: React.FC<ToolResponseFlyoutProps> = ({
           `}
         >
           <EuiButtonEmpty iconType="undo" onClick={onBack} flush="left" size="s" color="text">
-            <EuiText size="xs">{backLabel}</EuiText>
+            <EuiText size="xs" component="span">
+              {backLabel}
+            </EuiText>
           </EuiButtonEmpty>
         </EuiFlyoutHeader>
       )}
