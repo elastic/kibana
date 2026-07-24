@@ -7,48 +7,6 @@
       "pretty": "__flag__",
       "routing": []
     },
-    "data_autocomplete_rules": {
-      "_source": {
-        "__one_of": [
-          true,
-          false,
-          {
-            "exclude_vectors": {
-              "__one_of": [
-                true,
-                false
-              ]
-            },
-            "excludes": "",
-            "includes": ""
-          },
-          ""
-        ]
-      },
-      "docvalue_fields": {
-        "__any_of": [
-          {
-            "field": "",
-            "format": "",
-            "include_unmapped": {
-              "__one_of": [
-                true,
-                false
-              ]
-            }
-          },
-          ""
-        ]
-      },
-      "stored_fields": "",
-      "fields": "",
-      "knn": {
-        "field": "",
-        "query_vector": [],
-        "k": "",
-        "num_candidates": ""
-      }
-    },
     "methods": [
       "GET",
       "POST"

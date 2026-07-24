@@ -123,6 +123,24 @@ describe('generateBodyParams', () => {
 
       expect(generateBodyParams(requestType, mockSchema, {})).toEqual({});
     });
+
+    it('SHOULD omit unannotated properties when the endpoint has no public environment', () => {
+      const requestType = makeRequestWithBody([
+        getMockProperty({ propertyName: 'secret_value' }),
+        {
+          ...getMockProperty({ propertyName: 'stack_only' }),
+          availability: { stack: {} },
+        },
+      ]);
+
+      expect(generateBodyParams(requestType, mockSchema, {})).toEqual({});
+      expect(
+        generateBodyParams(requestType, mockSchema, {
+          stack: { visibility: SpecificationTypes.Visibility.private },
+          serverless: { visibility: SpecificationTypes.Visibility.private },
+        })
+      ).toEqual({});
+    });
   });
 
   it('generates __one_of for enum properties', () => {

@@ -13,11 +13,6 @@ import { createFlagError } from '@kbn/dev-cli-errors';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { ToolingLog } from '@kbn/tooling-log';
 import {
-  AUTOCOMPLETE_DEFINITIONS_FOLDER,
-  GENERATED_SUBFOLDER,
-  OVERRIDES_SUBFOLDER,
-} from '@kbn/console-plugin/common/constants';
-import {
   compareOverrideAuditStates,
   createOverrideAuditState,
   formatOverrideAuditDiff,
@@ -26,6 +21,11 @@ import {
   readOverrideAuditState,
   writeOverrideAuditState,
 } from './audit_overrides';
+import {
+  CONSOLE_DEFINITIONS_FOLDER,
+  GENERATED_SUBFOLDER,
+  OVERRIDES_SUBFOLDER,
+} from './console_definition_paths';
 
 export const auditConsoleDefinitionOverrides = ({
   generatedFolder,
@@ -38,7 +38,7 @@ export const auditConsoleDefinitionOverrides = ({
 }) => {
   const auditState = createOverrideAuditState({
     generatedFolder,
-    overridesFolder: Path.resolve(AUTOCOMPLETE_DEFINITIONS_FOLDER, OVERRIDES_SUBFOLDER),
+    overridesFolder: Path.resolve(CONSOLE_DEFINITIONS_FOLDER, OVERRIDES_SUBFOLDER),
   });
   if (auditState.orphanOverrides.length > 0) {
     throw createFlagError(
@@ -71,7 +71,7 @@ export function runAuditConsoleDefinitionOverridesCli() {
     ({ log, flags }) => {
       const generatedFolder = flags.dest
         ? Path.resolve(REPO_ROOT, `${flags.dest}`)
-        : Path.resolve(AUTOCOMPLETE_DEFINITIONS_FOLDER, GENERATED_SUBFOLDER);
+        : Path.resolve(CONSOLE_DEFINITIONS_FOLDER, GENERATED_SUBFOLDER);
       auditConsoleDefinitionOverrides({
         generatedFolder,
         updateOverrideAudit: Boolean(flags.updateOverrideAudit),

@@ -62,13 +62,19 @@ export const generateBodyParams = (
   endpointAvailability: SpecificationTypes.Availabilities
 ): Record<string, unknown> => {
   const { body } = requestType;
+  const publicEndpointEnvironments = endpointEnvironments.filter((environment) =>
+    isAvailabilityPublic(endpointAvailability[environment])
+  );
+  // Endpoints with no public environment are never loaded by SpecDefinitionsService,
+  // so emitting body rules would only commit shapes that are never served.
+  if (publicEndpointEnvironments.length === 0) {
+    return {};
+  }
   const context: ConversionContext = {
     schema,
     genericBindings: new Map(),
     visitedTypes: new Set(),
-    endpointEnvironments: endpointEnvironments.filter((environment) =>
-      isAvailabilityPublic(endpointAvailability[environment])
-    ),
+    endpointEnvironments: publicEndpointEnvironments,
   };
   if (body.kind === 'properties') {
     // the parent request type can define additional body properties

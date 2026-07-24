@@ -10,11 +10,6 @@
 import fs from 'fs';
 import os from 'os';
 import Path from 'path';
-import {
-  AUTOCOMPLETE_DEFINITIONS_FOLDER,
-  GENERATED_SUBFOLDER,
-  OVERRIDES_SUBFOLDER,
-} from '@kbn/console-plugin/common/constants';
 import type { EndpointDescription } from '@kbn/console-plugin/common/types';
 import {
   compareOverrideAuditStates,
@@ -23,6 +18,11 @@ import {
   OVERRIDE_AUDIT_BASELINE_FILE,
   readOverrideAuditState,
 } from './audit_overrides';
+import {
+  CONSOLE_DEFINITIONS_FOLDER,
+  GENERATED_SUBFOLDER,
+  OVERRIDES_SUBFOLDER,
+} from './console_definition_paths';
 
 const writeDefinition = ({
   folder,
@@ -325,8 +325,8 @@ describe('override conflict audit', () => {
 
   it('WHEN auditing committed definitions SHOULD match the approved baseline', () => {
     const actual = createOverrideAuditState({
-      generatedFolder: Path.resolve(AUTOCOMPLETE_DEFINITIONS_FOLDER, GENERATED_SUBFOLDER),
-      overridesFolder: Path.resolve(AUTOCOMPLETE_DEFINITIONS_FOLDER, OVERRIDES_SUBFOLDER),
+      generatedFolder: Path.resolve(CONSOLE_DEFINITIONS_FOLDER, GENERATED_SUBFOLDER),
+      overridesFolder: Path.resolve(CONSOLE_DEFINITIONS_FOLDER, OVERRIDES_SUBFOLDER),
     });
     const baseline = readOverrideAuditState(OVERRIDE_AUDIT_BASELINE_FILE);
 

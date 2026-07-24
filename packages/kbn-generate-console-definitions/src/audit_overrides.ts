@@ -11,11 +11,14 @@ import { createHash } from 'crypto';
 import fs from 'fs';
 import Path from 'path';
 import { isEqual } from 'lodash';
-import { AUTOCOMPLETE_ATOMIC_RULE_KEYS } from '@kbn/console-plugin/common/constants';
 import type { EndpointDefinition, EndpointDescription } from '@kbn/console-plugin/common/types';
 
 const AUDIT_VERSION = 1 as const;
 const WHOLE_BODY_KEY = '<body>';
+// Mirrors the body compiler's atomic-rule keys (see AUTOCOMPLETE_ATOMIC_RULE_KEYS in
+// console-plugin common constants). Kept local so this dev tool does not depend on the
+// plugin's runtime constants; keep the two lists in sync if the compiler gains a new key.
+const OVERRIDE_ATOMIC_RULE_KEYS = ['__scope_link', '__one_of', '__any_of'] as const;
 
 export interface ConflictFingerprint {
   generatedHash: string;
@@ -102,7 +105,7 @@ const collectDefinitionConflicts = ({
   if (!generatedRules || !overrideRules) {
     return;
   }
-  if (AUTOCOMPLETE_ATOMIC_RULE_KEYS.some((key) => Object.hasOwn(overrideRules, key))) {
+  if (OVERRIDE_ATOMIC_RULE_KEYS.some((key) => Object.hasOwn(overrideRules, key))) {
     if (!isEqual(generatedRules, overrideRules)) {
       addConflict({
         conflicts,

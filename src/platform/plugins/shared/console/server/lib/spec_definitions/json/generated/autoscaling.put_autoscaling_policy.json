@@ -16,10 +16,6 @@
         "0"
       ]
     },
-    "data_autocomplete_rules": {
-      "roles": [],
-      "deciders": {}
-    },
     "methods": [
       "PUT"
     ],

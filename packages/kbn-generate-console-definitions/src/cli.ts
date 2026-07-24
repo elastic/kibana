@@ -12,9 +12,9 @@ import fs from 'fs';
 import { run } from '@kbn/dev-cli-runner';
 import { createFlagError } from '@kbn/dev-cli-errors';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { AUTOCOMPLETE_DEFINITIONS_FOLDER } from '@kbn/console-plugin/common/constants';
 import { generateConsoleDefinitions } from './generate_console_definitions';
 import { auditConsoleDefinitionOverrides } from './audit_overrides_cli';
+import { CONSOLE_DEFINITIONS_FOLDER, GENERATED_SUBFOLDER } from './console_definition_paths';
 
 export function runGenerateConsoleDefinitionsCli() {
   run(
@@ -30,7 +30,7 @@ export function runGenerateConsoleDefinitionsCli() {
       }
       let definitionsFolder = Path.resolve(REPO_ROOT, `${dest}`);
       if (!dest) {
-        definitionsFolder = Path.resolve(AUTOCOMPLETE_DEFINITIONS_FOLDER, 'generated');
+        definitionsFolder = Path.resolve(CONSOLE_DEFINITIONS_FOLDER, GENERATED_SUBFOLDER);
       }
       log.info(`autocomplete definitions folder ${definitionsFolder}`);
       if (!fs.existsSync(definitionsFolder)) {
