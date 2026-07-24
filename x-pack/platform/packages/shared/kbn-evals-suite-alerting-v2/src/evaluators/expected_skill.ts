@@ -57,6 +57,20 @@ const skillIsPresent = (skillName: string, loadedNames: string[]): boolean => {
   });
 };
 
+const requireNonEmptySkillList = (
+  value: readonly string[] | undefined,
+  fieldName: string
+): readonly string[] => {
+  if (value == null) {
+    return [];
+  }
+  const skills = value.filter((skill) => skill.length > 0);
+  if (skills.length === 0) {
+    throw new Error(`${fieldName} must be a non-empty array of skills`);
+  }
+  return skills;
+};
+
 export const createExpectedSkillEvaluator = (): Evaluator<
   RuleManagementExample,
   TaskOutput
@@ -64,37 +78,12 @@ export const createExpectedSkillEvaluator = (): Evaluator<
   name: 'ExpectedSkill',
   kind: 'CODE',
   evaluate: async ({ output, expected }) => {
-    const expectedSkills = expected?.expectedSkills;
-    const notExpectedSkills = expected?.notExpectedSkills;
+    const { expectedSkills, notExpectedSkills } = expected ?? {};
+    const requiredSkills = requireNonEmptySkillList(expectedSkills, 'expectedSkills');
+    const forbiddenSkills = requireNonEmptySkillList(notExpectedSkills, 'notExpectedSkills');
 
-    if (expectedSkills == null && notExpectedSkills == null) {
+    if (requiredSkills.length === 0 && forbiddenSkills.length === 0) {
       return skippedResult('No skill-load expectation for this example');
-    }
-
-    let requiredSkills: readonly string[] = [];
-    if (expectedSkills != null) {
-      if (!Array.isArray(expectedSkills)) {
-        throw new Error('expectedSkills must be a non-empty array of skills');
-      }
-      requiredSkills = expectedSkills.filter(
-        (skill): skill is string => typeof skill === 'string' && skill.length > 0
-      );
-      if (requiredSkills.length === 0) {
-        throw new Error('expectedSkills must contain at least one skill');
-      }
-    }
-
-    let forbiddenSkills: readonly string[] = [];
-    if (notExpectedSkills != null) {
-      if (!Array.isArray(notExpectedSkills)) {
-        throw new Error('notExpectedSkills must be a non-empty array of skills');
-      }
-      forbiddenSkills = notExpectedSkills.filter(
-        (skill): skill is string => typeof skill === 'string' && skill.length > 0
-      );
-      if (forbiddenSkills.length === 0) {
-        throw new Error('notExpectedSkills must contain at least one skill');
-      }
     }
 
     const loadedNames = getSkillsLoadedFromSteps(output as TaskOutput);
