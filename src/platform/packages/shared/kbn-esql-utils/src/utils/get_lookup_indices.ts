@@ -11,8 +11,6 @@ import type { ESQLSource } from '@elastic/esql/types';
 import { Parser, isSource } from '@elastic/esql';
 import { COORDINATOR_LOOKUP_JOIN_PREFIX } from '@kbn/esql-language';
 
-const COORDINATOR_LOOKUP_JOIN_SOURCE_PREFIX = `${COORDINATOR_LOOKUP_JOIN_PREFIX}:`;
-
 /**
  * Extracts and returns a list of unique lookup indices from the provided ESQL query by parsing the query and traversing its AST.
  *
@@ -29,9 +27,12 @@ export function getLookupIndicesFromQuery(esqlQuery: string): string[] {
     if (command.name === 'join') {
       const indexName = command.args.find<ESQLSource>(isSource);
       if (indexName?.name) {
-        const lookupIndexName = indexName.name.startsWith(COORDINATOR_LOOKUP_JOIN_SOURCE_PREFIX)
-          ? indexName.name.slice(COORDINATOR_LOOKUP_JOIN_SOURCE_PREFIX.length)
-          : indexName.name;
+        const isCoordinatorTarget =
+          indexName.prefix?.valueUnquoted === COORDINATOR_LOOKUP_JOIN_PREFIX;
+        const lookupIndexName =
+          isCoordinatorTarget && indexName.index?.valueUnquoted
+            ? indexName.index.valueUnquoted
+            : indexName.name;
         indexNames.push(lookupIndexName);
       }
     }

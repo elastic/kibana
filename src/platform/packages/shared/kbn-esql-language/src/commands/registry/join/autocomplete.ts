@@ -26,6 +26,8 @@ import { esqlCommandRegistry } from '..';
 import { suggestForExpression } from '../../definitions/utils';
 import { COORDINATOR_LOOKUP_JOIN_PREFIX } from '../../definitions/constants';
 
+const COORDINATOR_LOOKUP_JOIN_QUALIFIER = `${COORDINATOR_LOOKUP_JOIN_PREFIX}:`;
+
 export async function autocomplete(
   query: string,
   command: ESQLAstAllCommands,
@@ -77,15 +79,17 @@ export async function autocomplete(
       const joinSources = context?.joinSources;
       const suggestions: ISuggestionItem[] = [];
       // _coordinator: is a lookup target qualifier, not part of the index name to create.
-      const isCoordinatorTarget = indexNameInput.startsWith(`${COORDINATOR_LOOKUP_JOIN_PREFIX}:`);
+      const lookupIndexName = indexNameInput.startsWith(COORDINATOR_LOOKUP_JOIN_QUALIFIER)
+        ? indexNameInput.slice(COORDINATOR_LOOKUP_JOIN_QUALIFIER.length)
+        : indexNameInput;
 
-      const canCreate = (await callbacks?.canCreateLookupIndex?.(indexNameInput)) ?? false;
+      const canCreate = (await callbacks?.canCreateLookupIndex?.(lookupIndexName)) ?? false;
 
       const indexAlreadyExists = joinSources?.some(
-        (source) => source.name === indexNameInput || source.aliases.includes(indexNameInput)
+        (source) => source.name === lookupIndexName || source.aliases.includes(lookupIndexName)
       );
-      if (canCreate && !indexAlreadyExists && !isCoordinatorTarget) {
-        const createIndexCommandSuggestion = getLookupIndexCreateSuggestion(indexNameInput);
+      if (canCreate && !indexAlreadyExists) {
+        const createIndexCommandSuggestion = getLookupIndexCreateSuggestion(lookupIndexName);
         suggestions.push(createIndexCommandSuggestion);
       }
 
