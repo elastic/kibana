@@ -28,77 +28,8 @@ Consumers:
 Shared across both skills to avoid drift on transcript parsing and edge-case handling.
 """
 
-import json
-import os
 import sys
-from pathlib import Path
-
-
-def resolve_transcript(explicit_path=None):
-    """Return the path to the JSONL transcript, or None if not found."""
-    if explicit_path:
-        p = Path(explicit_path)
-        return p if p.is_file() else None
-
-    session_id = os.environ.get('CLAUDE_CODE_SESSION_ID', '').strip()
-    if not session_id:
-        return None
-
-    # cwd slug: replace '/' with '-' (leading '/' becomes leading '-')
-    cwd_slug = os.getcwd().replace('/', '-')
-    transcript = Path.home() / '.claude' / 'projects' / cwd_slug / f'{session_id}.jsonl'
-    if transcript.is_file():
-        return transcript
-
-    # Session ID was set but the specific file wasn't found — don't guess with a
-    # different session's transcript; return None so the caller writes "not available".
-    return None
-
-
-def sum_tokens(transcript_path):
-    """
-    Sum token fields across all lines in the JSONL transcript.
-
-    Each line may be a JSON object with a top-level 'usage' key (older format)
-    or a 'message' key whose value has a 'usage' sub-key (newer format).
-    Unrecognised or unparseable lines are silently skipped.
-    """
-    totals = {
-        'input_tokens': 0,
-        'output_tokens': 0,
-        'cache_creation_input_tokens': 0,
-        'cache_read_input_tokens': 0,
-    }
-    usage_blocks = 0
-
-    with open(transcript_path, encoding='utf-8') as fh:
-        for raw in fh:
-            raw = raw.strip()
-            if not raw:
-                continue
-            try:
-                obj = json.loads(raw)
-            except json.JSONDecodeError:
-                continue
-
-            # Try 'message.usage' first (Claude Code ≥ 2025 format)
-            usage = None
-            msg = obj.get('message')
-            if isinstance(msg, dict):
-                usage = msg.get('usage')
-            # Fall back to top-level 'usage'
-            if not isinstance(usage, dict):
-                usage = obj.get('usage')
-            if not isinstance(usage, dict):
-                continue
-
-            usage_blocks += 1
-            for key in totals:
-                v = usage.get(key, 0)
-                if isinstance(v, (int, float)):
-                    totals[key] += int(v)
-
-    return totals, usage_blocks
+from session_metrics import format_legacy_usage, parse_transcript, resolve_transcript
 
 
 def main():
@@ -109,25 +40,11 @@ def main():
         # Not Claude Code or transcript missing — caller writes "not available"
         sys.exit(1)
 
-    try:
-        t, usage_blocks = sum_tokens(transcript)
-    except OSError:
+    result = parse_transcript(transcript)
+    if result.status != "available" or result.totals is None:
         sys.exit(1)
 
-    if usage_blocks == 0:
-        # Transcript exists but contains no usage blocks — format unrecognised or
-        # session ended before any exchange was recorded. Treat as unreadable so
-        # the caller writes "not available" rather than a misleading "total 0".
-        sys.exit(1)
-
-    total = sum(t.values())
-    print(
-        f"input={t['input_tokens']} "
-        f"output={t['output_tokens']} "
-        f"cache_create={t['cache_creation_input_tokens']} "
-        f"cache_read={t['cache_read_input_tokens']} "
-        f"total={total}"
-    )
+    print(format_legacy_usage(result.totals))
     sys.exit(0)
 
 
