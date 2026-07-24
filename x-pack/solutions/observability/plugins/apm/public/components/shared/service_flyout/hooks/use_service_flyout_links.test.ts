@@ -13,13 +13,24 @@ jest.mock('../../../../hooks/use_manage_slos_url', () => ({
   getManageSlosUrl: jest.fn(() => '/app/slos?serviceName=opbeans-java'),
 }));
 
+jest.mock('./use_apm_indices', () => ({
+  useApmIndices: () => ({
+    indices: {
+      transaction: 'traces-apm-*',
+      span: 'traces-apm-*',
+      error: 'logs-apm.error-*',
+      metric: 'metrics-apm-*',
+    },
+  }),
+}));
+
 jest.mock('../footer/hooks/use_alerts_href', () => ({
   useAlertsHref: jest.fn(() => '/app/observability/alerts?mock'),
 }));
 
-const mockUseDiscoverHref = jest.fn();
-jest.mock('../../links/discover_links/use_discover_href', () => ({
-  useDiscoverHref: (args: unknown) => mockUseDiscoverHref(args),
+const mockUseFlyoutDiscoverHref = jest.fn();
+jest.mock('./use_flyout_discover_href', () => ({
+  useFlyoutDiscoverHref: (args: unknown) => mockUseFlyoutDiscoverHref(args),
 }));
 
 const mockGetRedirectUrl = jest.fn(
@@ -64,10 +75,10 @@ describe('useServiceFlyoutLinks', () => {
   beforeEach(() => {
     mockLocatorsGet.mockClear();
     mockGetRedirectUrl.mockClear();
-    mockUseDiscoverHref.mockClear();
+    mockUseFlyoutDiscoverHref.mockClear();
     mockUseServiceFlyoutContext.mockClear();
     mockUseServiceFlyoutContext.mockReturnValue(makeContext());
-    mockUseDiscoverHref.mockImplementation(({ indexType }: { indexType: string }) =>
+    mockUseFlyoutDiscoverHref.mockImplementation(({ indexType }: { indexType: string }) =>
       indexType === 'traces' ? '/app/discover/traces' : '/app/discover/logs'
     );
   });
@@ -100,7 +111,7 @@ describe('useServiceFlyoutLinks', () => {
     mockUseServiceFlyoutContext.mockReturnValue(makeContext({ transactionType: 'request' }));
     renderHook(() => useServiceFlyoutLinks());
 
-    expect(mockUseDiscoverHref).toHaveBeenCalledWith(
+    expect(mockUseFlyoutDiscoverHref).toHaveBeenCalledWith(
       expect.objectContaining({
         indexType: 'traces',
         queryParams: {
@@ -116,7 +127,7 @@ describe('useServiceFlyoutLinks', () => {
   it('passes empty string transactionType to the Discover traces link before the type resolves', () => {
     renderHook(() => useServiceFlyoutLinks());
 
-    expect(mockUseDiscoverHref).toHaveBeenCalledWith(
+    expect(mockUseFlyoutDiscoverHref).toHaveBeenCalledWith(
       expect.objectContaining({
         indexType: 'traces',
         queryParams: expect.objectContaining({ transactionType: '' }),
@@ -127,7 +138,7 @@ describe('useServiceFlyoutLinks', () => {
   it('scopes the Discover logs link to the service and environment, without transactionType', () => {
     renderHook(() => useServiceFlyoutLinks());
 
-    const logsCall = mockUseDiscoverHref.mock.calls.find(
+    const logsCall = mockUseFlyoutDiscoverHref.mock.calls.find(
       ([args]: [{ indexType: string }]) => args.indexType === 'error'
     );
     expect(logsCall?.[0].queryParams).not.toHaveProperty('transactionType');

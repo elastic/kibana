@@ -12,7 +12,8 @@ import { APM_APP_LOCATOR_ID } from '../../../../locator/service_detail_locator';
 import { getManageSlosUrl } from '../../../../hooks/use_manage_slos_url';
 import { useServiceFlyoutContext } from '../service_flyout_context';
 import { useAlertsHref } from '../footer/hooks/use_alerts_href';
-import { useDiscoverHref } from '../../links/discover_links/use_discover_href';
+import { useApmIndices } from './use_apm_indices';
+import { useFlyoutDiscoverHref } from './use_flyout_discover_href';
 
 export function useServiceFlyoutLinks() {
   const {
@@ -22,6 +23,7 @@ export function useServiceFlyoutLinks() {
   } = useServiceFlyoutContext();
   const serviceName = service.name;
   const canReadSlos = !!core.application?.capabilities?.slo?.read;
+  const { indices } = useApmIndices({ http: core.http });
 
   const apm = useMemo(() => {
     const locator = share?.url?.locators?.get(APM_APP_LOCATOR_ID);
@@ -51,14 +53,18 @@ export function useServiceFlyoutLinks() {
 
   const alerts = useAlertsHref();
 
-  const tracesDiscover = useDiscoverHref({
+  const tracesDiscover = useFlyoutDiscoverHref({
+    share,
+    indices,
     indexType: 'traces',
     rangeFrom,
     rangeTo,
     queryParams: { serviceName, transactionType, environment, sortDirection: 'DESC' },
   });
 
-  const logsDiscover = useDiscoverHref({
+  const logsDiscover = useFlyoutDiscoverHref({
+    share,
+    indices,
     indexType: 'error',
     rangeFrom,
     rangeTo,
