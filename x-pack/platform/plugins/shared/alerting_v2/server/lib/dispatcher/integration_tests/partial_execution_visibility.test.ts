@@ -6,16 +6,19 @@
  */
 
 /**
- * Reproduces https://github.com/elastic/rna-program/issues/437
+ * Verifies the fix for https://github.com/elastic/rna-program/issues/437
  *
  * The rule executor writes alert events in streaming batches with
- * `refresh: false`. Index auto-refresh can make an earlier batch searchable
- * while a later batch of the SAME execution is still unwritten/unsearchable.
- * If a dispatcher cycle runs inside that window, it sees a partial set of
- * episodes, dispatches an aggregate group built from them, and records a
- * `notified` action for the group. When the remaining episodes become
- * visible, they resolve to the same deterministic action group id and
- * throttling suppresses them — the notification for those episodes is lost.
+ * `refresh: false`, so index auto-refresh can make an earlier batch searchable
+ * while a later batch of the SAME execution is still unsearchable. Without a
+ * guard, a dispatcher cycle running inside that window would act on a partial
+ * set of episodes and later suppress the remaining ones as already-notified.
+ *
+ * The fix has the executor write an `execution_end_marker` document as the last
+ * write of each execution, and the dispatcher only processes an execution's
+ * episodes once that marker is visible. This test asserts the resulting
+ * behavior: a partially-visible execution produces no notification, and once
+ * the marker lands every episode is delivered together in a single dispatch.
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
@@ -68,6 +71,7 @@ const GROUP_HASH_HOST_B = 'group-hash-host-b';
 const GROUP_HASH_HOST_C = 'group-hash-host-c';
 
 function createAlertEvent(params: {
+  execution: { uuid: string };
   timestamp: string;
   groupHash: string;
   host: string;
@@ -75,6 +79,7 @@ function createAlertEvent(params: {
 }): AlertEvent {
   return {
     '@timestamp': params.timestamp,
+    execution: params.execution,
     rule: { id: RULE_ID, version: 1 },
     group_hash: params.groupHash,
     data: { 'host.name': params.host },
@@ -83,6 +88,17 @@ function createAlertEvent(params: {
     type: 'alert',
     episode: { id: params.episodeId, status: 'active' },
     space_id: 'default',
+  };
+}
+
+function createExecutionEndMarkerEvent(params: {
+  execution: { uuid: string };
+  timestamp: string;
+}): Partial<AlertEvent> {
+  return {
+    '@timestamp': params.timestamp,
+    execution: params.execution,
+    type: 'execution_end_marker',
   };
 }
 
@@ -199,7 +215,7 @@ describe('dispatcher: partial visibility of a rule execution (issue #437)', () =
   });
 
   /** Writes alert events the way the rule executor does (`refresh: false`). */
-  async function writeAlertEventsBatch(events: AlertEvent[]): Promise<void> {
+  async function writeAlertEventsBatch(events: Partial<AlertEvent>[]): Promise<void> {
     const result = await storageService.bulkIndexDocs({
       index: ALERT_EVENTS_DATA_STREAM,
       docs: events,
@@ -228,6 +244,7 @@ describe('dispatcher: partial visibility of a rule execution (issue #437)', () =
   }
 
   it('delivers every episode of an execution even when the dispatcher observes the execution partially', async () => {
+    const execution: { uuid: string } = { uuid: 'execution-1' };
     const now = Date.now();
     const eventTimestamp = new Date(now - 5_000).toISOString();
     const lateEventTimestamp = new Date(now - 4_000).toISOString();
@@ -237,12 +254,14 @@ describe('dispatcher: partial visibility of a rule execution (issue #437)', () =
     // in two streaming batches. Batch 1 becomes searchable via auto-refresh.
     await writeAlertEventsBatch([
       createAlertEvent({
+        execution,
         timestamp: eventTimestamp,
         groupHash: GROUP_HASH_HOST_A,
         host: 'host-a',
         episodeId: 'episode-host-a',
       }),
       createAlertEvent({
+        execution,
         timestamp: eventTimestamp,
         groupHash: GROUP_HASH_HOST_B,
         host: 'host-b',
@@ -251,35 +270,39 @@ describe('dispatcher: partial visibility of a rule execution (issue #437)', () =
     ]);
     await refresh(ALERT_EVENTS_DATA_STREAM);
 
-    // Dispatcher cycle 1 runs before batch 2 is searchable: it only sees
-    // E1 (host-a) and E2 (host-b).
+    // Dispatcher cycle 1 sees E1 (host-a) and E2 (host-b) but no marker yet, so
+    // the execution is treated as incomplete and nothing is dispatched.
     await dispatcherService.run({ previousStartedAt });
 
-    expect(scheduleWorkflow).toHaveBeenCalledTimes(1);
-    expect(dispatchedGroupHashes().sort()).toEqual([GROUP_HASH_HOST_A, GROUP_HASH_HOST_B]);
+    expect(scheduleWorkflow).toHaveBeenCalledTimes(0);
 
     // The dispatcher's own writes become searchable before the next cycle.
     await refresh(ALERT_ACTIONS_DATA_STREAM);
 
-    // Batch 2 (E3, host-c) lands and the executor's final explicit refresh
-    // makes it searchable.
+    // Batch 2 (E3, host-c) lands, followed by the execution-end marker as the
+    // last write of the execution.
     await writeAlertEventsBatch([
       createAlertEvent({
+        execution,
         timestamp: lateEventTimestamp,
         groupHash: GROUP_HASH_HOST_C,
         host: 'host-c',
         episodeId: 'episode-host-c',
       }),
+      createExecutionEndMarkerEvent({ execution, timestamp: lateEventTimestamp }),
     ]);
     await refresh(ALERT_EVENTS_DATA_STREAM);
 
-    // Dispatcher cycle 2 picks up E3. It belongs to the same logical
-    // execution, so it must reach the user — not be throttled away because
-    // the group built from the partial view was already notified.
+    // Dispatcher cycle 2 sees the marker, so the whole execution is now
+    // eligible and all three episodes are dispatched together — no episode is
+    // lost to throttling from a partial notification.
     await dispatcherService.run({ previousStartedAt });
 
-    const hashes = dispatchedGroupHashes();
-    expect(hashes).toContain(GROUP_HASH_HOST_C);
+    expect(dispatchedGroupHashes().sort()).toEqual([
+      GROUP_HASH_HOST_A,
+      GROUP_HASH_HOST_B,
+      GROUP_HASH_HOST_C,
+    ]);
 
     await refresh(ALERT_ACTIONS_DATA_STREAM);
     const suppressActionsForHostC = (await fetchActions()).filter(
