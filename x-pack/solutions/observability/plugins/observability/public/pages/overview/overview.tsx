@@ -63,9 +63,11 @@ export function OverviewPage() {
   );
 
   const { data: newsFeed } = useFetcher(() => {
-    if (!Boolean(serverless)) {
-      return getNewsFeed({ http, kibanaVersion, newsfeedEnabled: Boolean(newsfeed) });
+    if (Boolean(serverless) || !newsfeed) {
+      return;
     }
+
+    return getNewsFeed({ http, kibanaVersion });
   }, [http, kibanaVersion, newsfeed, serverless]);
 
   const { hasDataMap } = useHasData();
