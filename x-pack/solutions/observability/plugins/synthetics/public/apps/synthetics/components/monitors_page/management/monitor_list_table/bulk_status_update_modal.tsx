@@ -18,7 +18,8 @@ import { i18n } from '@kbn/i18n';
 import type { EncryptedSyntheticsSavedMonitor } from '../../../../../../../common/runtime_types';
 import { ConfigKey } from '../../../../../../../common/runtime_types';
 import { useCanUsePublicLocationsPermission } from '../../../../../../hooks/use_capabilities';
-import { useGetUrlParams } from '../../../../hooks';
+import { useKibanaSpace } from '../../../../../../hooks/use_kibana_space';
+import { getMonitorSpaceToAppend } from '../../../../hooks';
 import { fetchBulkUpdateMonitors } from '../../../../state';
 import { kibanaService } from '../../../../../../utils/kibana_service';
 import { isMonitorBulkEditable } from './bulk_edit_eligibility';
@@ -37,7 +38,7 @@ export const BulkStatusUpdateModal = ({
   reloadPage: () => void;
 }) => {
   const [isUpdating, setIsUpdating] = useState(false);
-  const { spaceId } = useGetUrlParams();
+  const { space } = useKibanaSpace();
   const canUsePublicLocations = useCanUsePublicLocationsPermission();
   const modalTitleId = useGeneratedHtmlId();
   const skippedAccordionId = useGeneratedHtmlId();
@@ -46,30 +47,49 @@ export const BulkStatusUpdateModal = ({
   // project/terraform monitors are rejected server-side, and public-location
   // monitors require the elastic-managed-locations capability. Ineligible
   // monitors are surfaced as skipped so the user understands why.
-  const { eligibleIds, skippedMonitors } = useMemo(() => {
-    const eligible: string[] = [];
+  //
+  // Monitors are multi-space saved objects and the bulk API resolves ids within
+  // a single space, so a monitor only visible via "show from all spaces" must be
+  // updated in a space it belongs to. Group eligible ids by their target space
+  // (reusing the cross-space edit-link logic) and issue one request per space;
+  // an `undefined` target resolves to the current space.
+  const { updatesBySpace, skippedMonitors, eligibleCount } = useMemo(() => {
+    const bySpace = new Map<string | undefined, string[]>();
     const skipped: Array<{ id: string; name: string }> = [];
+    let eligible = 0;
     for (const monitor of monitors) {
       const id = monitor[ConfigKey.CONFIG_ID];
-      if (isMonitorBulkEditable(monitor, canUsePublicLocations)) {
-        eligible.push(id);
-      } else {
+      if (!isMonitorBulkEditable(monitor, canUsePublicLocations)) {
         skipped.push({ id, name: monitor[ConfigKey.NAME] });
+        continue;
       }
+      eligible += 1;
+      const { spaceId: targetSpaceId } = getMonitorSpaceToAppend(
+        space,
+        monitor[ConfigKey.KIBANA_SPACES]
+      );
+      const ids = bySpace.get(targetSpaceId) ?? [];
+      ids.push(id);
+      bySpace.set(targetSpaceId, ids);
     }
-    return { eligibleIds: eligible, skippedMonitors: skipped };
-  }, [monitors, canUsePublicLocations]);
+    return { updatesBySpace: bySpace, skippedMonitors: skipped, eligibleCount: eligible };
+  }, [monitors, canUsePublicLocations, space]);
 
   const handleConfirm = useCallback(async () => {
     setIsUpdating(true);
     try {
-      const { result } = await fetchBulkUpdateMonitors({
-        updates: eligibleIds.map((id) => ({
-          id,
-          attributes: { [ConfigKey.ENABLED]: enabled },
-        })),
-        spaceId,
-      });
+      const responses = await Promise.all(
+        [...updatesBySpace.entries()].map(([targetSpaceId, ids]) =>
+          fetchBulkUpdateMonitors({
+            updates: ids.map((id) => ({
+              id,
+              attributes: { [ConfigKey.ENABLED]: enabled },
+            })),
+            spaceId: targetSpaceId,
+          })
+        )
+      );
+      const result = responses.flatMap((response) => response.result);
       const failedCount = result.filter((entry) => !entry.updated).length;
       const updatedCount = result.length - failedCount;
 
@@ -96,24 +116,24 @@ export const BulkStatusUpdateModal = ({
       onCompleted?.();
       onClose();
     }
-  }, [eligibleIds, enabled, spaceId, reloadPage, onCompleted, onClose]);
+  }, [updatesBySpace, enabled, reloadPage, onCompleted, onClose]);
 
   return (
     <EuiConfirmModal
       aria-labelledby={modalTitleId}
-      title={getTitle(enabled, eligibleIds.length)}
+      title={getTitle(enabled, eligibleCount)}
       titleProps={{ id: modalTitleId }}
       onCancel={onClose}
       onConfirm={handleConfirm}
       cancelButtonText={CANCEL_LABEL}
       confirmButtonText={enabled ? ENABLE_LABEL : DISABLE_LABEL}
-      confirmButtonDisabled={eligibleIds.length === 0}
+      confirmButtonDisabled={eligibleCount === 0}
       buttonColor="primary"
       defaultFocusedButton="confirm"
       isLoading={isUpdating}
     >
       <EuiText size="s">
-        <p>{getDescription(enabled, eligibleIds.length)}</p>
+        <p>{getDescription(enabled, eligibleCount)}</p>
       </EuiText>
       {skippedMonitors.length > 0 && (
         <>

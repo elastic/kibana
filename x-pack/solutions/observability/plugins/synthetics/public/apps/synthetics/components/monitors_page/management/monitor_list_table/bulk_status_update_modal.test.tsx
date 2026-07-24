@@ -11,13 +11,12 @@ import type { EncryptedSyntheticsSavedMonitor } from '../../../../../../../commo
 import { ConfigKey, SourceType } from '../../../../../../../common/runtime_types';
 import { render } from '../../../../utils/testing/rtl_helpers';
 import { kibanaService } from '../../../../../../utils/kibana_service';
-import { useGetUrlParams } from '../../../../hooks';
 import { fetchBulkUpdateMonitors } from '../../../../state';
+import { useKibanaSpace } from '../../../../../../hooks/use_kibana_space';
 import { BulkStatusUpdateModal } from './bulk_status_update_modal';
 
-jest.mock('../../../../hooks', () => ({
-  ...jest.requireActual('../../../../hooks'),
-  useGetUrlParams: jest.fn(),
+jest.mock('../../../../../../hooks/use_kibana_space', () => ({
+  useKibanaSpace: jest.fn(),
 }));
 
 jest.mock('../../../../state', () => ({
@@ -25,7 +24,7 @@ jest.mock('../../../../state', () => ({
   fetchBulkUpdateMonitors: jest.fn(),
 }));
 
-const useGetUrlParamsMock = useGetUrlParams as jest.MockedFunction<typeof useGetUrlParams>;
+const useKibanaSpaceMock = useKibanaSpace as jest.MockedFunction<typeof useKibanaSpace>;
 const fetchBulkUpdateMonitorsMock = fetchBulkUpdateMonitors as jest.MockedFunction<
   typeof fetchBulkUpdateMonitors
 >;
@@ -33,13 +32,18 @@ const fetchBulkUpdateMonitorsMock = fetchBulkUpdateMonitors as jest.MockedFuncti
 const makeMonitor = (
   id: string,
   name: string,
-  { origin = SourceType.UI, enabled = true }: { origin?: SourceType; enabled?: boolean } = {}
+  {
+    origin = SourceType.UI,
+    enabled = true,
+    spaces,
+  }: { origin?: SourceType; enabled?: boolean; spaces?: string[] } = {}
 ): EncryptedSyntheticsSavedMonitor =>
   ({
     [ConfigKey.CONFIG_ID]: id,
     [ConfigKey.NAME]: name,
     [ConfigKey.ENABLED]: enabled,
     [ConfigKey.MONITOR_SOURCE_TYPE]: origin,
+    ...(spaces ? { [ConfigKey.KIBANA_SPACES]: spaces } : {}),
   } as unknown as EncryptedSyntheticsSavedMonitor);
 
 describe('<BulkStatusUpdateModal />', () => {
@@ -48,8 +52,8 @@ describe('<BulkStatusUpdateModal />', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    useGetUrlParamsMock.mockReturnValue({ spaceId: 'default' } as ReturnType<
-      typeof useGetUrlParams
+    useKibanaSpaceMock.mockReturnValue({ space: { id: 'default' } } as ReturnType<
+      typeof useKibanaSpace
     >);
     fetchBulkUpdateMonitorsMock.mockResolvedValue({ result: [] });
   });
@@ -90,7 +94,7 @@ describe('<BulkStatusUpdateModal />', () => {
 
     await waitFor(() => {
       expect(fetchBulkUpdateMonitorsMock).toHaveBeenCalledWith({
-        spaceId: 'default',
+        spaceId: undefined,
         updates: [
           { id: 'ui-1', attributes: { [ConfigKey.ENABLED]: true } },
           { id: 'ui-2', attributes: { [ConfigKey.ENABLED]: true } },
@@ -99,6 +103,47 @@ describe('<BulkStatusUpdateModal />', () => {
     });
     expect(reloadPage).toHaveBeenCalledTimes(1);
     expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it('groups monitors by space and issues one request per space', async () => {
+    // `home` lives in the current space, `away` only in another space (visible
+    // via "show from all spaces"), and `shared` is shared to all spaces.
+    const monitors = [
+      makeMonitor('home', 'Home monitor', { enabled: false, spaces: ['default'] }),
+      makeMonitor('away', 'Away monitor', { enabled: false, spaces: ['team-b'] }),
+      makeMonitor('shared', 'Shared monitor', { enabled: false, spaces: ['*'] }),
+    ];
+    fetchBulkUpdateMonitorsMock.mockResolvedValue({
+      result: [{ id: 'x', updated: true }],
+    });
+
+    const { getByTestId } = render(
+      <BulkStatusUpdateModal
+        monitors={monitors}
+        enabled={true}
+        onClose={onClose}
+        reloadPage={reloadPage}
+      />
+    );
+
+    clickConfirm(getByTestId);
+
+    await waitFor(() => {
+      expect(fetchBulkUpdateMonitorsMock).toHaveBeenCalledTimes(2);
+    });
+    // Current-space + all-spaces monitors are updated in the current space.
+    expect(fetchBulkUpdateMonitorsMock).toHaveBeenCalledWith({
+      spaceId: undefined,
+      updates: [
+        { id: 'home', attributes: { [ConfigKey.ENABLED]: true } },
+        { id: 'shared', attributes: { [ConfigKey.ENABLED]: true } },
+      ],
+    });
+    // The cross-space monitor is updated in the space it actually belongs to.
+    expect(fetchBulkUpdateMonitorsMock).toHaveBeenCalledWith({
+      spaceId: 'team-b',
+      updates: [{ id: 'away', attributes: { [ConfigKey.ENABLED]: true } }],
+    });
   });
 
   it('disables the confirm button when every selected monitor is skipped', () => {
