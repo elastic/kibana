@@ -97,7 +97,11 @@ export class RelayClient implements RelayClientContract {
     );
     const body = response.data as RelayBindingsListResponse | undefined;
 
-    if (!Array.isArray(body?.bindings)) {
+    if (body?.bindings === undefined) {
+      return { bindings: [], nextCursor: body?.next_cursor };
+    }
+
+    if (!Array.isArray(body.bindings)) {
       throw new RelayRequestError(
         `/v1/slack/tenants/${encodeURIComponent(tenantKey)}/bindings`,
         response.status,
