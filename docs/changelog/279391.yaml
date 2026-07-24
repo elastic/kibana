@@ -1,0 +1,12 @@
+prs:
+- https://github.com/elastic/kibana/pull/279391
+issues:
+- https://github.com/elastic/kibana/issues/279388
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-07-22
+- product: kibana
+areas:
+- Search and data
+title: Fix escape_string double-quote values corrupting surrounding YAML

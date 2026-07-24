@@ -1,0 +1,9 @@
+prs:
+- https://github.com/elastic/kibana/pull/278778
+type: feature
+products:
+- product: cloud-serverless
+  target: 2026-07-22
+- product: kibana
+title: Add a channel selector to the Slack action in the Rule form
+description: The Slack action in rule form now allows the user to select a channel from a combobox. In case the desired channel is not shown in the list, the user is still able to define it manually using the YAML editor, just as of today.

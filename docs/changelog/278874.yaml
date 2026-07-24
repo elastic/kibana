@@ -1,0 +1,12 @@
+prs:
+- https://github.com/elastic/kibana/pull/278874
+issues:
+- https://github.com/elastic/kibana/issues/276883
+type: feature
+products:
+- product: cloud-serverless
+  target: 2026-07-22
+- product: kibana
+areas:
+- Dashboards and visualizations
+title: Allow filtering dashboards and links list routes by tag names

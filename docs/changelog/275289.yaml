@@ -1,0 +1,11 @@
+prs:
+- https://github.com/elastic/kibana/pull/275289
+issues:
+- https://github.com/elastic/kibana/issues/259298
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-07-22
+- product: kibana
+title: Filter anomaly alerts by event.ingested
+description: Fix duplicate APM anomaly detection alerts by filtering ML results on `event.ingested` (result write time) instead of the anomaly bucket time.

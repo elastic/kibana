@@ -1,0 +1,13 @@
+prs:
+- https://github.com/elastic/kibana/pull/278923
+issues:
+- https://github.com/elastic/kibana/issues/270626
+type: feature
+products:
+- product: cloud-serverless
+  target: 2026-07-22
+- product: kibana
+areas:
+- Search and data
+title: 'Add rotate uninstall token API and UI '
+description: Added a **Rotate uninstall token** button to the agent policy tamper protection settings and a corresponding `POST /api/fleet/uninstall_tokens/{agentPolicyId}/rotate` API endpoint. This allows operators to invalidate a leaked uninstall token without having to recreate the policy and migrate agents.

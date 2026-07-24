@@ -1,0 +1,11 @@
+prs:
+- https://github.com/elastic/kibana/pull/279314
+type: enhancement
+products:
+- product: cloud-serverless
+  target: 2026-07-22
+- product: kibana
+areas:
+- Search and data
+title: Hide Manage regions for read-only users
+description: Improves the Elastic Inference Service page by hiding Manage regions for users with read-only access.

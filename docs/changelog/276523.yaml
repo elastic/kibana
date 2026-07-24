@@ -1,0 +1,8 @@
+prs:
+- https://github.com/elastic/kibana/pull/276523
+type: enhancement
+products:
+- product: cloud-serverless
+  target: 2026-07-22
+- product: kibana
+title: Show "Creating action" message in Response Console while action is being created

@@ -1,0 +1,11 @@
+prs:
+- https://github.com/elastic/kibana/pull/275711
+type: breaking-change
+products:
+- product: cloud-serverless
+  target: 2026-07-22
+- product: kibana
+title: Limit request sizes for endpoint metadata APIs
+description: Endpoint metadata, policy response, protection note, and script listing APIs now validate request field lengths.
+impact: Requests that exceed the new field-length limits are rejected.
+action: Update API clients to keep request fields within the documented limits.

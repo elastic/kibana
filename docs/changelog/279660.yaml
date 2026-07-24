@@ -1,0 +1,8 @@
+prs:
+- https://github.com/elastic/kibana/pull/279660
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-07-22
+- product: kibana
+title: Rename .ai-index-* to ai-index-*
