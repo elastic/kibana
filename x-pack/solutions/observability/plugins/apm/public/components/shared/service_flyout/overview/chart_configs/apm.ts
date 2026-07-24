@@ -6,12 +6,8 @@
  */
 
 import type { ReactNode } from 'react';
-import { esql, type ComposerQuery } from '@elastic/esql';
+import { esql } from '@elastic/esql';
 import { i18n } from '@kbn/i18n';
-import type { LensConfig, LensSeriesLayer } from '@kbn/lens-embeddable-utils';
-import type { APMIndices } from '@kbn/apm-sources-access-plugin/common/config_schema';
-import type { LensESQLConfig } from './types';
-import type { ServiceFlyoutIngestionType } from '../service_flyout_context';
 import {
   EVENT_OUTCOME,
   METRIC_CGROUP_MEMORY_LIMIT_BYTES,
@@ -24,40 +20,26 @@ import {
   SERVICE_NAME,
   TRANSACTION_DURATION,
   TRANSACTION_TYPE,
-} from '../../../../../common/es_fields/apm';
+} from '../../../../../../common/es_fields/apm';
 import {
   ENVIRONMENT_ALL,
   ENVIRONMENT_NOT_DEFINED,
-} from '../../../../../common/environment_filter_values';
-import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
-import { ChartType, getTimeSeriesColor } from '../../charts/helper/get_timeseries_color';
-
-type FlyoutLensChartProcessorEvent = 'transaction' | 'metric';
-
-interface FlyoutLensChartConfigDefinition {
-  id: string;
-  title: string;
-  titleAction?: ReactNode;
-  config?: LensESQLConfig;
-}
-
-type LensYAxis = LensSeriesLayer['yAxis'][number];
-
-const TIME_BUCKET_FIELD = 'timestamp';
-const TIME_BUCKET_BY = `${TIME_BUCKET_FIELD} = TBUCKET(100)`;
-const ESQL_NULLIFY_UNMAPPED_FIELDS = 'SET unmapped_fields="nullify";';
-
-// When no limit is specified in the container, docker allows the app as much memory / swap memory
-// as it wants. This number represents the max possible value for the limit field. Stored as a
-// string to avoid JS floating-point precision loss. The equivalent Painless constant lives at:
-// https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/apm/server/routes/metrics/by_agent/shared/memory/index.ts#L87
-const CGROUP_LIMIT_MAX_VALUE = '9223372036854771712';
-
-interface ServiceScope {
-  serviceName: string;
-  environment: string;
-  transactionType?: string;
-}
+} from '../../../../../../common/environment_filter_values';
+import type { LatencyAggregationType } from '../../../../../../common/latency_aggregation_types';
+import { ChartType } from '../../../charts/helper/get_timeseries_color';
+import {
+  CGROUP_LIMIT_MAX_VALUE,
+  TIME_BUCKET_BY,
+  buildChartDefinition,
+  getLatencyAggregationConfig,
+  getLatencyChartType,
+  seriesColor,
+} from './shared';
+import type {
+  FlyoutLensChartConfigDefinition,
+  FlyoutLensChartProcessorEvent,
+  ServiceScope,
+} from './shared';
 
 function createBaseServiceQuery({
   indexes,
@@ -67,7 +49,7 @@ function createBaseServiceQuery({
   indexes: string;
   processorEvent: FlyoutLensChartProcessorEvent;
   scope: ServiceScope;
-}): ComposerQuery {
+}) {
   const { serviceName, environment, transactionType } = scope;
 
   const query = esql.from(indexes).where`${esql.col(PROCESSOR_EVENT)} == ${processorEvent}`
@@ -91,107 +73,7 @@ function createBaseServiceQuery({
   return query;
 }
 
-function printQuery(query: ComposerQuery): string {
-  return `${query.print('basic')}`;
-}
-
-const seriesColor = (chartType: ChartType) => getTimeSeriesColor(chartType).currentPeriodColor;
-
-type LensYBounds = Extract<LensConfig, { chartType: 'xy' }>['yBounds'];
-
-function buildChartDefinition({
-  id,
-  title,
-  titleAction,
-  indexes,
-  buildQuery,
-  yAxis,
-  yBounds,
-}: {
-  id: string;
-  title: string;
-  titleAction?: ReactNode;
-  indexes: string | undefined;
-  buildQuery: (indexes: string) => ComposerQuery;
-  yAxis: LensYAxis[];
-  yBounds?: LensYBounds;
-}): FlyoutLensChartConfigDefinition {
-  if (!indexes) {
-    return { id, title, titleAction };
-  }
-
-  const config: LensESQLConfig = {
-    chartType: 'xy',
-    title,
-    dataset: { esql: `${ESQL_NULLIFY_UNMAPPED_FIELDS}\n${printQuery(buildQuery(indexes))}` },
-    layers: [
-      {
-        type: 'series',
-        seriesType: 'line',
-        xAxis: { field: TIME_BUCKET_FIELD, type: 'dateHistogram' },
-        yAxis,
-      },
-    ],
-    legend: { show: false },
-    fittingFunction: 'Linear',
-    axisTitleVisibility: {
-      showXAxisTitle: false,
-      showYAxisTitle: false,
-      showYRightAxisTitle: false,
-    },
-    ...(yBounds ? { yBounds } : {}),
-  };
-
-  return { id, title, titleAction, config };
-}
-
-interface LatencyAggregationConfig {
-  label: string;
-  aggregation: string;
-}
-
-function getLatencyAggregationConfig(
-  latencyAggregationType: LatencyAggregationType
-): LatencyAggregationConfig {
-  switch (latencyAggregationType) {
-    case LatencyAggregationType.p95:
-      return {
-        label: i18n.translate('xpack.apm.serviceFlyout.latency95thSeriesLabel', {
-          defaultMessage: '95th percentile',
-        }),
-        aggregation: 'PERCENTILE(duration_ms, 95)',
-      };
-    case LatencyAggregationType.p99:
-      return {
-        label: i18n.translate('xpack.apm.serviceFlyout.latency99thSeriesLabel', {
-          defaultMessage: '99th percentile',
-        }),
-        aggregation: 'PERCENTILE(duration_ms, 99)',
-      };
-    case LatencyAggregationType.avg:
-    default:
-      return {
-        label: i18n.translate('xpack.apm.serviceFlyout.latencyAverageSeriesLabel', {
-          defaultMessage: 'Average latency',
-        }),
-        aggregation: 'AVG(duration_ms)',
-      };
-  }
-}
-
-export function getLatencyChartType(latencyAggregationType: LatencyAggregationType): ChartType {
-  switch (latencyAggregationType) {
-    case LatencyAggregationType.p95:
-      return ChartType.LATENCY_P95;
-    case LatencyAggregationType.p99:
-      return ChartType.LATENCY_P99;
-    case LatencyAggregationType.avg:
-    default:
-      return ChartType.LATENCY_AVG;
-  }
-}
-
-function getLatencyChart(
+export function getLatencyChart(
   indexes: string | undefined,
   scope: ServiceScope,
   latencyAggregationType: LatencyAggregationType,
@@ -206,7 +88,6 @@ function getLatencyChart(
     }),
     titleAction,
     indexes,
-
     buildQuery: (idx) => {
       const query = createBaseServiceQuery({ indexes: idx, processorEvent: 'transaction', scope });
       query.pipe(`EVAL duration_ms = TO_DOUBLE(${TRANSACTION_DURATION}) / 1000`);
@@ -226,7 +107,7 @@ function getLatencyChart(
   });
 }
 
-function getThroughputChart(
+export function getThroughputChart(
   indexes: string | undefined,
   scope: ServiceScope
 ): FlyoutLensChartConfigDefinition {
@@ -236,7 +117,6 @@ function getThroughputChart(
       defaultMessage: 'Throughput',
     }),
     indexes,
-
     buildQuery: (idx) => {
       const query = createBaseServiceQuery({ indexes: idx, processorEvent: 'transaction', scope });
       query.pipe(`STATS COUNT(*) BY ${TIME_BUCKET_BY}`);
@@ -256,7 +136,7 @@ function getThroughputChart(
   });
 }
 
-function getFailedTransactionRateChart(
+export function getFailedTransactionRateChart(
   indexes: string | undefined,
   scope: ServiceScope
 ): FlyoutLensChartConfigDefinition {
@@ -268,7 +148,6 @@ function getFailedTransactionRateChart(
     id: 'failedTransactionRate',
     title,
     indexes,
-
     buildQuery: (idx) => {
       const query = createBaseServiceQuery({ indexes: idx, processorEvent: 'transaction', scope });
       query.pipe(
@@ -292,7 +171,7 @@ function getFailedTransactionRateChart(
   });
 }
 
-function getCpuUsageChart(
+export function getCpuUsageChart(
   indexes: string | undefined,
   scope: ServiceScope
 ): FlyoutLensChartConfigDefinition {
@@ -305,7 +184,6 @@ function getCpuUsageChart(
     id: 'cpuUsage',
     title,
     indexes,
-
     buildQuery: (idx) => {
       const query = createBaseServiceQuery({ indexes: idx, processorEvent: 'metric', scope });
       query.pipe(`WHERE TO_DOUBLE(${METRIC_SYSTEM_CPU_PERCENT}) IS NOT NULL`);
@@ -325,7 +203,7 @@ function getCpuUsageChart(
   });
 }
 
-function getMemoryUsageChart(
+export function getMemoryUsageChart(
   indexes: string | undefined,
   scope: ServiceScope
 ): FlyoutLensChartConfigDefinition {
@@ -337,7 +215,6 @@ function getMemoryUsageChart(
     id: 'memoryUsage',
     title,
     indexes,
-
     buildQuery: (idx) => {
       const query = createBaseServiceQuery({ indexes: idx, processorEvent: 'metric', scope });
       query.pipe(`EVAL cgroup_usage = TO_DOUBLE(${METRIC_CGROUP_MEMORY_USAGE_BYTES})`);
@@ -369,42 +246,4 @@ function getMemoryUsageChart(
       },
     ],
   });
-}
-
-export function getChartDefinitions({
-  indices,
-  ingestionType,
-  serviceName,
-  environment,
-  transactionType,
-  latencyAggregationType,
-  latencyTitleAction,
-}: {
-  indices: APMIndices | undefined;
-  ingestionType: ServiceFlyoutIngestionType | undefined;
-  serviceName: string;
-  environment: string;
-  transactionType: string;
-  latencyAggregationType: LatencyAggregationType;
-  latencyTitleAction?: ReactNode;
-}): {
-  keyMetrics: FlyoutLensChartConfigDefinition[];
-  infrastructureMetrics: FlyoutLensChartConfigDefinition[];
-} {
-  const transactionIndexes = indices?.transaction;
-  const metricIndexes = indices?.metric;
-  const scope: ServiceScope = { serviceName, environment, transactionType };
-  const metricScope: ServiceScope = { serviceName, environment };
-
-  return {
-    keyMetrics: [
-      getLatencyChart(transactionIndexes, scope, latencyAggregationType, latencyTitleAction),
-      getThroughputChart(transactionIndexes, scope),
-      getFailedTransactionRateChart(transactionIndexes, scope),
-    ],
-    infrastructureMetrics: [
-      getCpuUsageChart(metricIndexes, metricScope),
-      getMemoryUsageChart(metricIndexes, metricScope),
-    ],
-  };
 }

@@ -6,14 +6,14 @@
  */
 
 import type { LensConfig, LensSeriesLayer } from '@kbn/lens-embeddable-utils';
-import type { LensESQLConfig } from './types';
-import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
+import type { LensESQLConfig } from '../types';
+import { LatencyAggregationType } from '../../../../../../common/latency_aggregation_types';
 import {
   ENVIRONMENT_ALL,
   ENVIRONMENT_NOT_DEFINED,
-} from '../../../../../common/environment_filter_values';
-import { ChartType } from '../../charts/helper/get_timeseries_color';
-import { getChartDefinitions, getLatencyChartType } from './chart_configs';
+} from '../../../../../../common/environment_filter_values';
+import { ChartType } from '../../../charts/helper/get_timeseries_color';
+import { getChartDefinitions, getLatencyChartType } from '.';
 
 const TRANSACTION_INDEXES = 'traces-apm*';
 const METRIC_INDEXES = 'metrics-apm*';
