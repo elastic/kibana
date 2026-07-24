@@ -86,8 +86,8 @@ const getAttachments = (output: TaskOutput): VersionedAttachment[] => {
 };
 
 /** `null` means the field was omitted (skip); never returns `undefined`. */
-const getExpectRenderAttachment = (metadata: unknown): ExpectRenderAttachment | null => {
-  const value = (metadata as { expectRenderAttachment?: unknown } | null)?.expectRenderAttachment;
+const getExpectRenderAttachment = (expected: unknown): ExpectRenderAttachment | null => {
+  const value = (expected as { expectRenderAttachment?: unknown } | null)?.expectRenderAttachment;
   if (value === undefined || value === null) {
     return null;
   }
@@ -102,8 +102,8 @@ const getExpectRenderAttachment = (metadata: unknown): ExpectRenderAttachment | 
 };
 
 /** `null` means the field was omitted (skip); never returns `undefined`. */
-const getExpectAttachmentDataFn = (metadata: unknown): ExpectAttachmentDataFn | null => {
-  const value = (metadata as { expectAttachmentData?: unknown } | null)?.expectAttachmentData;
+const getExpectAttachmentDataFn = (expected: unknown): ExpectAttachmentDataFn | null => {
+  const value = (expected as { expectAttachmentData?: unknown } | null)?.expectAttachmentData;
   if (value === undefined || value === null) {
     return null;
   }
@@ -116,8 +116,8 @@ const getExpectAttachmentDataFn = (metadata: unknown): ExpectAttachmentDataFn | 
 export const createExpectedRenderAttachmentEvaluator = (): Evaluator => ({
   name: 'ExpectedRenderAttachment',
   kind: 'CODE',
-  evaluate: async ({ output, metadata }) => {
-    const expectation = getExpectRenderAttachment(metadata);
+  evaluate: async ({ output, expected }) => {
+    const expectation = getExpectRenderAttachment(expected);
 
     if (expectation === null) {
       return skippedResult('No render-attachment expectation for this example');
@@ -151,8 +151,8 @@ export const createExpectedRenderAttachmentEvaluator = (): Evaluator => ({
 export const createExpectedAttachmentDataEvaluator = (): Evaluator => ({
   name: 'ExpectedAttachmentData',
   kind: 'CODE',
-  evaluate: async ({ output, metadata }) => {
-    const assertAttachmentData = getExpectAttachmentDataFn(metadata);
+  evaluate: async ({ output, expected }) => {
+    const assertAttachmentData = getExpectAttachmentDataFn(expected);
 
     if (assertAttachmentData === null) {
       return skippedResult('No attachment-data expectation for this example');

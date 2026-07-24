@@ -61,10 +61,8 @@ evaluate.describe(
                     'The final manage_action_policy call ends with a validate operation, and validation succeeds (after corrective retries if needed).',
                     'The assistant never claims the rule, workflow, or action policy has been created, saved, or activated — it directs the user to save in order Rule → Workflow → Action Policy via the attachment action buttons.',
                   ],
-                },
-                metadata: {
                   expectedSkills: [RULE_MANAGEMENT_SKILL_ID, WORKFLOW_AUTHORING_SKILL_ID],
-                  notExpectedSkill: DETECTION_RULE_EDIT_SKILL_ID,
+                  notExpectedSkills: [DETECTION_RULE_EDIT_SKILL_ID],
                   // The full Part 3 flow also composes the rule and generates the
                   // notification workflow before the policy is wired up.
                   expectedToolIds: [

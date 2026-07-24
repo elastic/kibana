@@ -65,12 +65,10 @@ const makeChatClient = ({
   responses,
   conversation = conversationResult(),
   getConversation = jest.fn(async () => conversation),
-  listAttachments = jest.fn(async () => []),
 }: {
   responses: ConverseResult[];
   conversation?: Conversation;
   getConversation?: jest.Mock;
-  listAttachments?: jest.Mock;
 }) => {
   const calls: Array<Record<string, unknown>> = [];
   let index = 0;
@@ -79,10 +77,9 @@ const makeChatClient = ({
     return responses[index++] ?? converseResult();
   });
   return {
-    client: { converse, getConversation, listAttachments } as unknown as RuleManagementChatClient,
+    client: { converse, getConversation } as unknown as RuleManagementChatClient,
     calls,
     getConversation,
-    listAttachments,
   };
 };
 
@@ -293,7 +290,7 @@ describe('createTask', () => {
         ],
       },
     ];
-    const { client, getConversation, listAttachments } = makeChatClient({
+    const { client, getConversation } = makeChatClient({
       responses: [converseResult({ conversationId: 'conv-xyz' })],
       conversation: conversationResult({
         id: 'conv-xyz',
@@ -308,7 +305,6 @@ describe('createTask', () => {
     };
 
     expect(getConversation).toHaveBeenCalledWith('conv-xyz');
-    expect(listAttachments).not.toHaveBeenCalled();
     expect(output.conversationId).toBe('conv-xyz');
     expect(output.attachments).toEqual([
       expect.objectContaining({
@@ -318,40 +314,27 @@ describe('createTask', () => {
     ]);
   });
 
-  it('falls back to listAttachments when GET conversation fails', async () => {
-    const listAttachments = jest.fn(async () => [
-      {
-        id: 'att-fallback',
-        type: 'rule',
-        current_version: 1,
-        versions: [],
-      },
-    ]);
+  it('throws when GET conversation fails after retries', async () => {
     const getConversation = jest.fn(async () => {
       throw new Error('conversation gone');
     });
     const { client } = makeChatClient({
       responses: [converseResult({ conversationId: 'conv-xyz' })],
       getConversation,
-      listAttachments,
     });
 
-    const output = (await runTask(client, { turns: ['create a rule'] })) as TaskOutput & {
-      attachments?: unknown[];
-      rounds?: unknown[];
-      errors?: unknown[];
-    };
-
+    await expect(runTask(client, { turns: ['create a rule'] })).rejects.toThrow('conversation gone');
     expect(getConversation).toHaveBeenCalledWith('conv-xyz');
-    expect(listAttachments).toHaveBeenCalledWith('conv-xyz');
-    expect(output.attachments).toEqual([expect.objectContaining({ id: 'att-fallback' })]);
-    expect(output.rounds).toEqual([]);
-    expect(output.errors).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          error: expect.objectContaining({ message: 'conversation gone' }),
-        }),
-      ])
+  });
+
+  it('throws when converse returns no conversationId', async () => {
+    const { client, getConversation } = makeChatClient({
+      responses: [converseResult({ conversationId: undefined })],
+    });
+
+    await expect(runTask(client, { turns: ['create a rule'] })).rejects.toThrow(
+      /No conversationId after converse/
     );
+    expect(getConversation).not.toHaveBeenCalled();
   });
 });

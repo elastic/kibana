@@ -11,7 +11,6 @@ import {
   type EvalsExecutorClient,
   type EvaluationDataset,
   type Evaluator,
-  type Example,
   type ExperimentTask,
   type TaskOutput,
 } from '@kbn/evals';
@@ -33,47 +32,9 @@ import {
 import {
   createExpectedAttachmentDataEvaluator,
   createExpectedRenderAttachmentEvaluator,
-  type ExpectAttachmentDataFn,
-  type ExpectRenderAttachment,
 } from './evaluators/expected_attachment';
 import { skippedResult, withLowScoreLogging } from './evaluator_utils';
-
-export interface RuleManagementExample extends Example {
-  input: {
-    /**
-     * Ordered user messages. Each turn is sent sequentially over the same
-     * `conversation_id`, so the agent retains context between messages.
-     * Skill/tool/criteria assertions are evaluated across the whole
-     * conversation (the union of all turns' steps and messages). Use a
-     * one-element array for a single-turn example.
-     */
-    turns: string[];
-  };
-  output: {
-    /**
-     * Free-form quality criteria scored by the LLM Criteria judge.
-     * Omit to skip the Criteria evaluator; if present, must contain at least
-     * one non-empty string.
-     */
-    criteria?: string[];
-  };
-  metadata?: {
-    expectedToolIds?: readonly string[];
-    expectedAnyOfToolIds?: readonly string[];
-    expectRenderAttachment?: ExpectRenderAttachment;
-    expectAttachmentData?: ExpectAttachmentDataFn;
-    expectedSkills?: readonly string[];
-    notExpectedSkill?: string;
-  } | null;
-}
-
-export type EvaluateDataset = (params: {
-  dataset: {
-    name: string;
-    description: string;
-    examples: RuleManagementExample[];
-  };
-}) => Promise<void>;
+import type { ConversationTurnResult, EvaluateDataset, RuleManagementExample } from './types';
 
 /**
  * Resolves Criteria strings from example output.
@@ -136,10 +97,6 @@ export const buildPromptResponses = (
   return responses;
 };
 
-/**
- * Project Criteria-compatible messages from persisted conversation rounds.
- * `role` reflects which round field the text came from (`input` vs `response`).
- */
 export const messagesFromRounds = (
   rounds: ConversationRound[]
 ): Array<{ role: 'user' | 'assistant'; message: string }> =>
@@ -148,83 +105,76 @@ export const messagesFromRounds = (
     { role: 'assistant' as const, message: round.response?.message ?? '' },
   ]);
 
+/**
+ * Sends each scripted user turn over the same conversation, answering any pending
+ * prompts from the previous turn so multi-turn flows can continue.
+ */
+export const runConversationTurns = async (
+  chatClient: RuleManagementChatClient,
+  turns: string[]
+): Promise<ConversationTurnResult> => {
+  let conversationId: string | undefined;
+  const steps: unknown[] = [];
+  const errors: unknown[] = [];
+  let traceId: string | undefined;
+  const prompts: PromptRequest[] = [];
+  // Prompts the agent is awaiting a response to, carried over between turns so the next
+  // scripted turn is delivered as the answer rather than a rejected free-text message.
+  let pendingPrompts: PromptRequest[] = [];
+
+  for (const turnText of turns) {
+    const response = await chatClient.converse({
+      messages: [{ message: turnText }],
+      conversationId,
+      promptResponses:
+        pendingPrompts.length > 0 ? buildPromptResponses(pendingPrompts, turnText) : undefined,
+    });
+    conversationId = response.conversationId ?? conversationId;
+    if (response.steps) steps.push(...response.steps);
+    errors.push(...response.errors);
+    traceId = response.traceId ?? traceId;
+    prompts.push(...response.prompts);
+    pendingPrompts = response.prompts;
+  }
+
+  return { conversationId, steps, errors, traceId, prompts };
+};
+
+/**
+ * Loads authoritative rounds + attachments from GET conversation.
+ * Retries live in the chat client; after they are exhausted this throws — the
+ * conversation is the core of the eval task, so we do not degrade silently.
+ */
+export const loadConversationState = async (
+  chatClient: RuleManagementChatClient,
+  conversationId: string | undefined
+): Promise<{ rounds: ConversationRound[]; attachments: VersionedAttachment[] }> => {
+  if (!conversationId) {
+    throw new Error('No conversationId after converse; cannot load conversation state');
+  }
+
+  const conversation = await chatClient.getConversation(conversationId);
+  return {
+    rounds: conversation.rounds ?? [],
+    attachments: conversation.attachments ?? [],
+  };
+};
+
 export const createTask = (
   chatClient: RuleManagementChatClient
 ): ExperimentTask<RuleManagementExample, TaskOutput> => {
   return async ({ input }) => {
-    const userTurns = input.turns;
-
-    let conversationId: string | undefined;
-    const steps: unknown[] = [];
-    const errors: unknown[] = [];
-    let traceId: string | undefined;
-    // Structured prompts (e.g. `ask_user_question`) the agent asked across the conversation.
-    // Surfaced in the task output so the LLM Criteria judge and low-score logs can see what
-    // was asked even when assistant prose is empty.
-    const prompts: PromptRequest[] = [];
-    // Prompts the agent is awaiting a response to, carried over between turns so the next
-    // scripted turn is delivered as the answer rather than a rejected free-text message.
-    let pendingPrompts: PromptRequest[] = [];
-
-    for (let turnIndex = 0; turnIndex < userTurns.length; turnIndex++) {
-      const turnText = userTurns[turnIndex];
-      const response = await chatClient.converse({
-        messages: [{ message: turnText }],
-        conversationId,
-        promptResponses:
-          pendingPrompts.length > 0 ? buildPromptResponses(pendingPrompts, turnText) : undefined,
-      });
-      conversationId = response.conversationId ?? conversationId;
-      if (response.steps) steps.push(...response.steps);
-      errors.push(...response.errors);
-      traceId = response.traceId ?? traceId;
-      prompts.push(...response.prompts);
-      pendingPrompts = response.prompts;
-    }
-
-    // Authoritative transcript + attachments come from GET conversation (rounds),
-    // not from a harness-synthesized message list.
-    let rounds: ConversationRound[] = [];
-    let attachments: VersionedAttachment[] = [];
-    if (conversationId) {
-      try {
-        const conversation = await chatClient.getConversation(conversationId);
-        rounds = conversation.rounds ?? [];
-        attachments = conversation.attachments ?? [];
-      } catch (error) {
-        errors.push({
-          error: {
-            message: error instanceof Error ? error.message : 'Failed to get conversation',
-            stack: error instanceof Error ? error.stack : undefined,
-          },
-          type: 'error',
-        });
-        try {
-          attachments = await chatClient.listAttachments(conversationId);
-        } catch (attachmentError) {
-          errors.push({
-            error: {
-              message:
-                attachmentError instanceof Error
-                  ? attachmentError.message
-                  : 'Failed to list attachments',
-              stack: attachmentError instanceof Error ? attachmentError.stack : undefined,
-            },
-            type: 'error',
-          });
-        }
-      }
-    }
+    const turnResult = await runConversationTurns(chatClient, input.turns);
+    const { rounds, attachments } = await loadConversationState(
+      chatClient,
+      turnResult.conversationId
+    );
 
     return {
-      errors,
+      ...turnResult,
       rounds,
-      messages: messagesFromRounds(rounds),
-      steps,
-      traceId,
-      prompts,
-      conversationId,
       attachments,
+      messages: messagesFromRounds(rounds),
     };
   };
 };

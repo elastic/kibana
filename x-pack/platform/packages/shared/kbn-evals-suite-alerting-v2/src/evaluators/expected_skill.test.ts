@@ -18,12 +18,12 @@ const outputWithLoadedSkills = (skillNames: string[]): TaskOutput =>
     })),
   } as unknown as TaskOutput);
 
-const run = (output: TaskOutput, metadata: Record<string, unknown> | null) =>
+const run = (output: TaskOutput, expected: Record<string, unknown> | null) =>
   createExpectedSkillEvaluator().evaluate({
     input: {},
     output,
-    expected: {},
-    metadata,
+    expected: expected ?? {},
+    metadata: null,
   });
 
 describe('createExpectedSkillEvaluator', () => {
@@ -39,10 +39,10 @@ describe('createExpectedSkillEvaluator', () => {
     ).rejects.toThrow(/at least one skill/i);
   });
 
-  it('throws when notExpectedSkill is an empty string', async () => {
+  it('throws when notExpectedSkills is an empty array', async () => {
     await expect(
-      run(outputWithLoadedSkills([]), { notExpectedSkill: '' })
-    ).rejects.toThrow(/non-empty string/i);
+      run(outputWithLoadedSkills([]), { notExpectedSkills: [] })
+    ).rejects.toThrow(/at least one skill/i);
   });
 
   it('scores 1 when every expected skill was loaded', async () => {
@@ -66,18 +66,21 @@ describe('createExpectedSkillEvaluator', () => {
     expect(result.score).toBe(0);
   });
 
-  it('scores 1 when a forbidden skill was not loaded', async () => {
+  it('scores 1 when no forbidden skill was loaded', async () => {
     const result = await run(outputWithLoadedSkills([]), {
-      notExpectedSkill: RULE_MANAGEMENT_SKILL_ID,
+      notExpectedSkills: [RULE_MANAGEMENT_SKILL_ID],
     });
     expect(result.score).toBe(1);
   });
 
   it('scores 0 when a forbidden skill was loaded', async () => {
     const result = await run(outputWithLoadedSkills([RULE_MANAGEMENT_SKILL_ID]), {
-      notExpectedSkill: RULE_MANAGEMENT_SKILL_ID,
+      notExpectedSkills: [RULE_MANAGEMENT_SKILL_ID],
     });
     expect(result.score).toBe(0);
+    expect(result.metadata).toEqual(
+      expect.objectContaining({ unexpectedlyLoadedSkills: [RULE_MANAGEMENT_SKILL_ID] })
+    );
   });
 
   it('scores 1 when every skill in expectedSkills was loaded', async () => {

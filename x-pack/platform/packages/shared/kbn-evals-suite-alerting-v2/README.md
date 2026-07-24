@@ -100,5 +100,8 @@ node scripts/jest x-pack/platform/packages/shared/kbn-evals-suite-alerting-v2
 - `evals/rule_management/rule_management.spec.ts` — skill routing + rule composition
 - `evals/rule_management/action_policy.spec.ts` — notification / action-policy flow
 
+Example ground truth lives entirely under `output` (skills, tools, attachments, criteria).
+Evaluators receive that object as `expected`. Omit a field to skip the matching scorer.
+
 Low-score evaluator failures log the Playwright **test title** plus conversation transcript
 for triage (see `src/evaluator_utils.ts`).

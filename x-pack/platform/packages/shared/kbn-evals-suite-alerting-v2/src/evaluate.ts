@@ -8,7 +8,8 @@
 import { evaluate as evalsBase } from '@kbn/evals';
 import { withPhoenixExecutor } from '@kbn/evals-phoenix-executor';
 import { RuleManagementChatClient } from './chat_client';
-import { createEvaluateDataset, type EvaluateDataset } from './evaluate_dataset';
+import { createEvaluateDataset } from './evaluate_dataset';
+import type { EvaluateDataset } from './types';
 import {
   ADMIN_CONSOLE_INDEX,
   HOST_METRICS_INDEX,
@@ -31,25 +32,13 @@ export const evaluate = base.extend<
     fullStackData: void;
     /**
      * Resolves to the seeded host-metrics index pattern
-     * ({@link HOST_METRICS_INDEX}), seeding via {@link fullStackData}. Use it
-     * for compose specs whose ES|QL must validate against a real metrics index.
      */
     hostMetricsIndex: string;
     /**
      * Resolves to the seeded admin-console index pattern
-     * ({@link ADMIN_CONSOLE_INDEX}), seeding via {@link fullStackData}. Use for
-     * compose specs where the user refers to "admin console" data by name and
-     * the agent must discover the concrete index / error fields.
      */
     adminConsoleIndex: string;
-    /**
-     * Creates a test `.email` connector (the `__json` service delivers nothing)
-     * before the test and deletes it afterwards, resolving to the connector id.
-     * The rule-management skill's default notification setup (Part 3) looks up
-     * an email connector via `platform.workflows.get_connectors`; without one
-     * the agent is instructed to stop and point the user at Stack Management,
-     * so notification-flow specs must seed a connector.
-     */
+    /** Creates a test `.email` connector */
     emailConnectorId: string;
   },
   {

@@ -47,20 +47,20 @@ const conversation = (
     attachments,
   } as unknown as TaskOutput);
 
-const runRender = (output: TaskOutput, metadata: Record<string, unknown> | null) =>
+const runRender = (output: TaskOutput, expected: Record<string, unknown> | null) =>
   createExpectedRenderAttachmentEvaluator().evaluate({
     input: {},
     output,
-    expected: {},
-    metadata,
+    expected: expected ?? {},
+    metadata: null,
   });
 
-const runAttachmentData = (output: TaskOutput, metadata: Record<string, unknown> | null) =>
+const runAttachmentData = (output: TaskOutput, expected: Record<string, unknown> | null) =>
   createExpectedAttachmentDataEvaluator().evaluate({
     input: {},
     output,
-    expected: {},
-    metadata,
+    expected: expected ?? {},
+    metadata: null,
   });
 
 describe('getAssistantMessages', () => {

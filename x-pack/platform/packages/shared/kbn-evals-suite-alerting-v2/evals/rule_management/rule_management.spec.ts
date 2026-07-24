@@ -48,10 +48,8 @@ evaluate.describe(
                     'The assistant treats this as an Observability / ops alerting request (e.g. host CPU threshold) rather than a Security/SIEM detection-rule request.',
                     'The response progresses toward an Alerting V2 alert rule (clarifying details or composing) and does not create or propose a Security detection rule.',
                   ],
-                },
-                metadata: {
                   expectedSkills: [RULE_MANAGEMENT_SKILL_ID],
-                  notExpectedSkill: DETECTION_RULE_EDIT_SKILL_ID,
+                  notExpectedSkills: [DETECTION_RULE_EDIT_SKILL_ID],
                 },
               },
             ],
@@ -79,10 +77,8 @@ evaluate.describe(
                   'The assistant treats this as a Security/SIEM detection-rule request (brute-force login attempts) rather than an Alerting V2 / Observability alert-rule request.',
                   'The response progresses toward a Security detection rule and does not compose an Alerting V2 rule via manage_rule.',
                 ],
-              },
-              metadata: {
                 expectedSkills: [DETECTION_RULE_EDIT_SKILL_ID],
-                notExpectedSkill: RULE_MANAGEMENT_SKILL_ID,
+                notExpectedSkills: [RULE_MANAGEMENT_SKILL_ID],
               },
             },
           ],
@@ -124,10 +120,8 @@ evaluate.describe(
                     'The set_query operation validates successfully against Elasticsearch, and the final manage_rule call ends with a validate operation.',
                     'The assistant directs the user to the Create rule button / attachment actions instead of claiming the rule was persisted via API.',
                   ],
-                },
-                metadata: {
                   expectedSkills: [RULE_MANAGEMENT_SKILL_ID],
-                  notExpectedSkill: DETECTION_RULE_EDIT_SKILL_ID,
+                  notExpectedSkills: [DETECTION_RULE_EDIT_SKILL_ID],
                   expectedToolIds: [ALERTING_TOOL_IDS.manageRule],
                   expectRenderAttachment: [RULE_ATTACHMENT_TYPE],
                   expectAttachmentData: (attachments) => {
@@ -190,10 +184,8 @@ evaluate.describe(
                     'The set_query operation validates successfully against Elasticsearch (the index and fields exist), and the final manage_rule call ends with a validate operation.',
                     'The assistant directs the user to the Create rule button / attachment actions instead of claiming the rule was persisted via API.',
                   ],
-                },
-                metadata: {
                   expectedSkills: [RULE_MANAGEMENT_SKILL_ID],
-                  notExpectedSkill: DETECTION_RULE_EDIT_SKILL_ID,
+                  notExpectedSkills: [DETECTION_RULE_EDIT_SKILL_ID],
                   expectedToolIds: [ALERTING_TOOL_IDS.manageRule],
                   expectRenderAttachment: [RULE_ATTACHMENT_TYPE],
                   expectAttachmentData: (attachments) => {
@@ -250,10 +242,8 @@ evaluate.describe(
                     'The set_query operation validates successfully against Elasticsearch, and the final manage_rule call ends with a validate operation.',
                     'The assistant directs the user to the Create rule button / attachment actions instead of claiming the rule was persisted via API.',
                   ],
-                },
-                metadata: {
                   expectedSkills: [RULE_MANAGEMENT_SKILL_ID],
-                  notExpectedSkill: DETECTION_RULE_EDIT_SKILL_ID,
+                  notExpectedSkills: [DETECTION_RULE_EDIT_SKILL_ID],
                   // Index is only named colloquially, so the agent must discover it and
                   // inspect mappings before composing.
                   expectedToolIds: [ALERTING_TOOL_IDS.manageRule, INDEX_MAPPING_TOOL_ID],

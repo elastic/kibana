@@ -10,7 +10,6 @@ import type { HttpHandler } from '@kbn/core/public';
 import type { KbnClient } from '@kbn/kbn-client';
 import { agentBuilderDefaultAgentId, type Conversation } from '@kbn/agent-builder-common';
 import type { PromptRequest, PromptResponse } from '@kbn/agent-builder-common/agents';
-import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import pRetry from 'p-retry';
 
 interface ConverseParams {
@@ -156,18 +155,5 @@ export class RuleManagementChatClient {
     });
 
     return data;
-  };
-
-  listAttachments = async (conversationId: string): Promise<VersionedAttachment[]> => {
-    this.log.info(`Listing attachments for conversation ${conversationId}`);
-
-    const { data } = await this.executeWithRetry('listAttachments', async () => {
-      return this.kbnClient.request<{ results?: VersionedAttachment[] }>({
-        method: 'GET',
-        path: `/api/agent_builder/conversations/${conversationId}/attachments`,
-      });
-    });
-
-    return data.results ?? [];
   };
 }

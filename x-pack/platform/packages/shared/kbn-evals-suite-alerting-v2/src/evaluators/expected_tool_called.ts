@@ -6,7 +6,7 @@
  */
 
 import { getToolCallSteps, type Evaluator, type TaskOutput } from '@kbn/evals';
-import type { RuleManagementExample } from '../evaluate_dataset';
+import type { RuleManagementExample } from '../types';
 import { skippedResult } from '../evaluator_utils';
 
 export const getUsedToolIds = (output: TaskOutput): string[] =>
@@ -31,8 +31,8 @@ export const createExpectedToolCalledEvaluator = (): Evaluator<
 > => ({
   name: 'ExpectedToolCalled',
   kind: 'CODE',
-  evaluate: async ({ output, metadata }) => {
-    const expectedToolIds = metadata?.expectedToolIds;
+  evaluate: async ({ output, expected }) => {
+    const expectedToolIds = expected?.expectedToolIds;
 
     if (expectedToolIds == null) {
       return skippedResult('No tool-call expectation for this example');
@@ -55,8 +55,8 @@ export const createExpectedAnyOfToolIdsEvaluator = (): Evaluator<
 > => ({
   name: 'ExpectedAnyOfToolIds',
   kind: 'CODE',
-  evaluate: async ({ output, metadata }) => {
-    const expectedAnyOfToolIds = metadata?.expectedAnyOfToolIds;
+  evaluate: async ({ output, expected }) => {
+    const expectedAnyOfToolIds = expected?.expectedAnyOfToolIds;
 
     if (expectedAnyOfToolIds == null) {
       return skippedResult('No any-of tool-id expectation for this example');

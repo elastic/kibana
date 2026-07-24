@@ -6,7 +6,7 @@
  */
 
 import type { Evaluator, TaskOutput } from '@kbn/evals';
-import type { RuleManagementExample } from '../evaluate_dataset';
+import type { RuleManagementExample } from '../types';
 import { skippedResult } from '../evaluator_utils';
 
 interface ConversationStep {
@@ -63,11 +63,11 @@ export const createExpectedSkillEvaluator = (): Evaluator<
 > => ({
   name: 'ExpectedSkill',
   kind: 'CODE',
-  evaluate: async ({ output, metadata }) => {
-    const expectedSkills = metadata?.expectedSkills;
-    const notExpectedSkill = metadata?.notExpectedSkill;
+  evaluate: async ({ output, expected }) => {
+    const expectedSkills = expected?.expectedSkills;
+    const notExpectedSkills = expected?.notExpectedSkills;
 
-    if (expectedSkills == null && notExpectedSkill == null) {
+    if (expectedSkills == null && notExpectedSkills == null) {
       return skippedResult('No skill-load expectation for this example');
     }
 
@@ -84,28 +84,34 @@ export const createExpectedSkillEvaluator = (): Evaluator<
       }
     }
 
-    if (notExpectedSkill != null) {
-      if (typeof notExpectedSkill !== 'string' || notExpectedSkill.length === 0) {
-        throw new Error('notExpectedSkill must be a non-empty string');
+    let forbiddenSkills: readonly string[] = [];
+    if (notExpectedSkills != null) {
+      if (!Array.isArray(notExpectedSkills)) {
+        throw new Error('notExpectedSkills must be a non-empty array of skills');
+      }
+      forbiddenSkills = notExpectedSkills.filter(
+        (skill): skill is string => typeof skill === 'string' && skill.length > 0
+      );
+      if (forbiddenSkills.length === 0) {
+        throw new Error('notExpectedSkills must contain at least one skill');
       }
     }
 
     const loadedNames = getSkillsLoadedFromSteps(output as TaskOutput);
     const missingSkills = requiredSkills.filter((skill) => !skillIsPresent(skill, loadedNames));
+    const unexpectedlyLoadedSkills = forbiddenSkills.filter((skill) =>
+      skillIsPresent(skill, loadedNames)
+    );
 
-    const checks: boolean[] = [missingSkills.length === 0];
-    if (notExpectedSkill != null) {
-      checks.push(!skillIsPresent(notExpectedSkill, loadedNames));
-    }
-
-    const passed = checks.every(Boolean);
+    const passed = missingSkills.length === 0 && unexpectedlyLoadedSkills.length === 0;
 
     return {
       score: passed ? 1 : 0,
       metadata: {
         expectedSkills: requiredSkills,
         missingSkills,
-        notExpectedSkill,
+        notExpectedSkills: forbiddenSkills,
+        unexpectedlyLoadedSkills,
         loadedNames,
       },
     };

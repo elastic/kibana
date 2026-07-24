@@ -24,12 +24,12 @@ const outputWithToolCalls = (toolIds: string[]): TaskOutput =>
   } as unknown as TaskOutput);
 
 describe('createExpectedToolCalledEvaluator', () => {
-  const run = (output: TaskOutput, metadata: Record<string, unknown> | null) =>
+  const run = (output: TaskOutput, expected: Record<string, unknown> | null) =>
     createExpectedToolCalledEvaluator().evaluate({
       input: {},
       output,
-      expected: {},
-      metadata,
+      expected: expected ?? {},
+      metadata: null,
     });
 
   it('skips when there is no tool-call expectation', async () => {
@@ -80,12 +80,12 @@ describe('createExpectedToolCalledEvaluator', () => {
 });
 
 describe('createExpectedAnyOfToolIdsEvaluator', () => {
-  const run = (output: TaskOutput, metadata: Record<string, unknown> | null) =>
+  const run = (output: TaskOutput, expected: Record<string, unknown> | null) =>
     createExpectedAnyOfToolIdsEvaluator().evaluate({
       input: {},
       output,
-      expected: {},
-      metadata,
+      expected: expected ?? {},
+      metadata: null,
     });
 
   it('skips when there is no any-of expectation', async () => {
