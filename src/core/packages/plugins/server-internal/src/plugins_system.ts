@@ -7,11 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { map } from 'rxjs';
+import pRetry from 'p-retry';
 import { withTimeout, isPromise } from '@kbn/std';
 import type { DiscoveredPlugin, PluginName } from '@kbn/core-base-common';
 import type { CoreContext } from '@kbn/core-base-server-internal';
 import type { Logger } from '@kbn/logging';
 import { PluginType } from '@kbn/core-base-common';
+import type { LazyInitContext } from '@kbn/core-plugins-server';
+import { isDeferredInitializationError } from '@kbn/core-deferred-init-common';
 import type { PluginWrapper } from './plugin';
 import { type PluginDependencies } from './types';
 import {
@@ -25,8 +29,23 @@ import type {
   PluginsServiceStartDeps,
 } from './plugins_service';
 import { RuntimePluginContractResolver } from './plugin_contract_resolver';
+import {
+  type DeferredInitEngine,
+  toServiceStatus,
+  DEFERRED_INIT_BACKOFF_BASE_MS,
+  DEFERRED_INIT_BACKOFF_FACTOR,
+  DEFERRED_INIT_BACKOFF_MAX_MS,
+} from './deferred_init';
 
 const Sec = 1000;
+/**
+ * How many times to retry a plugin's `start()` when it fails because a dependency's deferred
+ * init hasn't succeeded yet (a {@link DeferredInitializationError} with `retriable: true`). Any
+ * other error aborts immediately, same as today. Backoff is on the same 2s-60s jittered scale as
+ * {@link DeferredInitEngine}'s own cooldown, so this isn't retrying faster than the dependency
+ * could plausibly recover.
+ */
+const START_RETRY_ATTEMPTS = 8;
 
 /** @internal */
 export class PluginsSystem<T extends PluginType> {
@@ -37,7 +56,11 @@ export class PluginsSystem<T extends PluginType> {
   private readonly satupPlugins: PluginName[] = [];
   private sortedPluginNames?: Set<string>;
 
-  constructor(private readonly coreContext: CoreContext, public readonly type: T) {
+  constructor(
+    private readonly coreContext: CoreContext,
+    public readonly type: T,
+    private readonly deferredInitEngine?: DeferredInitEngine
+  ) {
     this.log = coreContext.logger.get('plugins-system', this.type);
   }
 
@@ -98,6 +121,9 @@ export class PluginsSystem<T extends PluginType> {
 
     const runtimeDependencies = buildPluginRuntimeDependencyMap(this.plugins);
     this.runtimeResolver.setDependencyMap(runtimeDependencies);
+    if (this.deferredInitEngine) {
+      this.runtimeResolver.setDeferredInitEngine(this.deferredInitEngine);
+    }
 
     const sortedPlugins = new Map(
       [...this.getTopologicallySortedPluginNames()]
@@ -132,10 +158,31 @@ export class PluginsSystem<T extends PluginType> {
           deps: deps as PluginsServiceSetupDeps,
           plugin,
           runtimeResolver: this.runtimeResolver,
+          deferredInitEngine: this.deferredInitEngine,
         });
       }
 
       await plugin.init();
+
+      if (
+        this.type !== PluginType.preboot &&
+        this.deferredInitEngine &&
+        plugin.enableLazyInitialize
+      ) {
+        const setupDeps = deps as PluginsServiceSetupDeps;
+        const engine = this.deferredInitEngine;
+        engine.register(plugin.name);
+        // Path A: core reflects deferred-init state into the plugin's /status entry, so the
+        // plugin author writes no status code. Registered during setup, before status.start().
+        setupDeps.status.plugins.set(
+          plugin.name,
+          engine.state$(plugin.name).pipe(map((state) => toServiceStatus(plugin.name, state)))
+        );
+        this.log.info(
+          `Plugin "${plugin.name}" opted into deferred initialization; its Elasticsearch work will run lazily on first request, not at boot.`
+        );
+      }
+
       let contract: unknown;
       const contractOrPromise = plugin.setup(pluginSetupContext, pluginDepContracts);
       if (isPromise(contractOrPromise)) {
@@ -195,39 +242,116 @@ export class PluginsSystem<T extends PluginType> {
         return depContracts;
       }, {} as Record<PluginName, unknown>);
 
-      let contract: unknown;
-      const contractOrPromise = plugin.start(
-        createPluginStartContext({ deps, plugin, runtimeResolver: this.runtimeResolver }),
+      const contract = await this.startPluginWithRetry(
+        pluginName,
+        plugin,
+        deps,
         pluginDepContracts
       );
-      if (isPromise(contractOrPromise)) {
-        if (this.coreContext.env.mode.dev) {
-          this.log.warn(
-            `Plugin ${pluginName} is using asynchronous start lifecycle. Asynchronous plugins support will be removed in a later version.`
-          );
-        }
-        const contractMaybe = await withTimeout({
-          promise: contractOrPromise,
-          timeoutMs: 10 * Sec,
-        });
 
-        if (contractMaybe.timedout) {
-          throw new Error(
-            `Start lifecycle of "${pluginName}" plugin wasn't completed in 10sec. Consider disabling the plugin and re-start.`
-          );
-        } else {
-          contract = contractMaybe.value;
-        }
-      } else {
-        contract = contractOrPromise;
+      // Attach the deferred-init runner before moving on to the next plugin. Dependencies start
+      // before dependents (topological order), so a dependent that calls
+      // `core.plugins.loadPluginContract` for a lazy dependency during its own `start()` must
+      // already find the runner attached — attaching it only after the whole start loop
+      // finished would miss that case.
+      if (this.deferredInitEngine && plugin.enableLazyInitialize) {
+        const ctx: LazyInitContext = {
+          elasticsearch: { client: deps.elasticsearch.client.asInternalUser },
+          savedObjects: deps.savedObjects.createInternalRepository(),
+          logger: this.coreContext.logger.get('deferred-init', pluginName),
+        };
+        this.deferredInitEngine.setRunner(
+          pluginName,
+          (lazyCtx) => plugin.runLazyInitialize(lazyCtx),
+          ctx
+        );
       }
 
       contracts.set(pluginName, contract);
+      // Unblocks any dependent whose own `start()` is mid-loop, already awaiting this plugin's
+      // contract via `onStart`/`loadPluginContract` — otherwise that dependent would have to wait
+      // for the whole loop (including its own `start()` call) to finish, which can't happen.
+      this.runtimeResolver.notifyStartContractAvailable(pluginName, contract);
     }
 
     this.runtimeResolver.resolveStartRequests(contracts);
 
     return contracts;
+  }
+
+  /**
+   * Calls a plugin's `start()`, retrying the whole call (with backoff) if it fails because a
+   * dependency's deferred init hasn't succeeded yet. Any other error aborts immediately, so a
+   * genuine plugin bug still fails boot exactly as it did before this retry existed.
+   *
+   * Since a retry re-invokes `start()` from scratch, plugins that call
+   * `core.plugins.loadPluginContract` from `start()` must keep their `start()` idempotent (safe
+   * to run more than once) — this is a hard requirement for opting into that pattern, not just
+   * good practice, since a slow dependency can now cause several attempts.
+   */
+  private async startPluginWithRetry(
+    pluginName: PluginName,
+    plugin: PluginWrapper,
+    deps: PluginsServiceStartDeps,
+    pluginDepContracts: Record<PluginName, unknown>
+  ): Promise<unknown> {
+    const attemptStart = async (): Promise<unknown> => {
+      const contractOrPromise = plugin.start(
+        createPluginStartContext({ deps, plugin, runtimeResolver: this.runtimeResolver }),
+        pluginDepContracts
+      );
+
+      if (!isPromise(contractOrPromise)) {
+        return contractOrPromise;
+      }
+
+      if (this.coreContext.env.mode.dev) {
+        this.log.warn(
+          `Plugin ${pluginName} is using asynchronous start lifecycle. Asynchronous plugins support will be removed in a later version.`
+        );
+      }
+      const contractMaybe = await withTimeout({
+        promise: contractOrPromise,
+        timeoutMs: 10 * Sec,
+      });
+
+      if (contractMaybe.timedout) {
+        throw new Error(
+          `Start lifecycle of "${pluginName}" plugin wasn't completed in 10sec. Consider disabling the plugin and re-start.`
+        );
+      }
+      return contractMaybe.value;
+    };
+
+    return pRetry(
+      async () => {
+        try {
+          return await attemptStart();
+        } catch (error) {
+          if (isDeferredInitializationError(error) && error.retriable) {
+            throw error;
+          }
+          // Not a retriable deferred-init error (either a genuine plugin failure, or a
+          // deferred-init misconfiguration that retrying can't fix): abort right away instead of
+          // burning through the retry budget.
+          throw new pRetry.AbortError(error instanceof Error ? error : new Error(String(error)));
+        }
+      },
+      {
+        retries: START_RETRY_ATTEMPTS,
+        factor: DEFERRED_INIT_BACKOFF_FACTOR,
+        minTimeout: DEFERRED_INIT_BACKOFF_BASE_MS,
+        maxTimeout: DEFERRED_INIT_BACKOFF_MAX_MS,
+        randomize: true,
+        onFailedAttempt: (error) => {
+          this.log.warn(
+            `Start lifecycle of "${pluginName}" failed on attempt ${error.attemptNumber} ` +
+              `(${error.retriesLeft} retries left): ${error.message}. Retrying because a ` +
+              `dependency's deferred init hasn't completed yet.`
+          );
+        },
+      }
+    );
   }
 
   public async stopPlugins() {
@@ -293,6 +417,7 @@ export class PluginsSystem<T extends PluginType> {
             runtimePluginDependencies: plugin.manifest.runtimePluginDependencies,
             requiredBundles: plugin.manifest.requiredBundles,
             enabledOnAnonymousPages: plugin.manifest.enabledOnAnonymousPages,
+            enableLazyInitialize: plugin.manifest.enableLazyInitialize,
           },
         ];
       })

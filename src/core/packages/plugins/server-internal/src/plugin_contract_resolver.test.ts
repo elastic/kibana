@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { DeferredInitEngine } from './deferred_init';
 import { RuntimePluginContractResolver } from './plugin_contract_resolver';
 
 const nextTick = () => new Promise((resolve) => setTimeout(resolve, 1));
@@ -338,6 +339,163 @@ describe('RuntimePluginContractResolver', () => {
       ).toThrowErrorMatchingInlineSnapshot(
         `"Dynamic contract resolving requires the dependencies to be declared in the plugin manifest.Undeclared dependencies: undeclaredPlugin1, undeclaredPlugin2"`
       );
+    });
+
+    describe('notifyStartContractAvailable', () => {
+      it('resolves a request as soon as its dependency becomes available, before resolveStartRequests', async () => {
+        const handler = jest.fn();
+        resolver.onStart(SOURCE_PLUGIN, ['pluginA']).then((contracts) => handler(contracts));
+
+        await fewTicks();
+        expect(handler).not.toHaveBeenCalled();
+
+        // Simulates the mid-loop notification `PluginsSystem.startPlugins` sends right after
+        // `pluginA`'s own `start()` returns -- notably, *before* the whole loop (and therefore
+        // `resolveStartRequests`) has finished. Without this, a plugin awaiting `pluginA`'s
+        // contract from inside its own `start()` would deadlock.
+        resolver.notifyStartContractAvailable('pluginA', pluginAContract);
+        await fewTicks();
+
+        expect(handler).toHaveBeenCalledTimes(1);
+        expect(handler).toHaveBeenCalledWith({
+          pluginA: { found: true, contract: pluginAContract },
+        });
+      });
+
+      it('only resolves a multi-dependency request once every dependency has been notified', async () => {
+        const handler = jest.fn();
+        resolver
+          .onStart(SOURCE_PLUGIN, ['pluginA', 'pluginB'])
+          .then((contracts) => handler(contracts));
+
+        resolver.notifyStartContractAvailable('pluginA', pluginAContract);
+        await fewTicks();
+        expect(handler).not.toHaveBeenCalled();
+
+        const pluginBContract = Symbol();
+        resolver.notifyStartContractAvailable('pluginB', pluginBContract);
+        await fewTicks();
+
+        expect(handler).toHaveBeenCalledTimes(1);
+        expect(handler).toHaveBeenCalledWith({
+          pluginA: { found: true, contract: pluginAContract },
+          pluginB: { found: true, contract: pluginBContract },
+        });
+      });
+
+      it('leaves a request pending for resolveStartRequests to close out when its dependency never starts', async () => {
+        const handler = jest.fn();
+        resolver
+          .onStart(SOURCE_PLUGIN, ['pluginA', 'pluginC'])
+          .then((contracts) => handler(contracts));
+
+        // pluginA starts; pluginC is disabled/missing and will never be notified.
+        resolver.notifyStartContractAvailable('pluginA', pluginAContract);
+        await fewTicks();
+        expect(handler).not.toHaveBeenCalled();
+
+        resolver.resolveStartRequests(toMap({ pluginA: pluginAContract }));
+        await fewTicks();
+
+        expect(handler).toHaveBeenCalledTimes(1);
+        expect(handler).toHaveBeenCalledWith({
+          pluginA: { found: true, contract: pluginAContract },
+          pluginC: { found: false },
+        });
+      });
+
+      it('does not resolve a since-satisfied request a second time when resolveStartRequests runs', async () => {
+        const handler = jest.fn();
+        resolver.onStart(SOURCE_PLUGIN, ['pluginA']).then((contracts) => handler(contracts));
+
+        resolver.notifyStartContractAvailable('pluginA', pluginAContract);
+        await fewTicks();
+        expect(handler).toHaveBeenCalledTimes(1);
+
+        resolver.resolveStartRequests(toMap({ pluginA: pluginAContract }));
+        await fewTicks();
+
+        expect(handler).toHaveBeenCalledTimes(1);
+      });
+    });
+  });
+
+  describe('loadPluginContract', () => {
+    const createEngineMock = (): jest.Mocked<DeferredInitEngine> =>
+      ({
+        isRegistered: jest.fn(),
+        waitUntilAvailable: jest.fn(),
+      } as unknown as jest.Mocked<DeferredInitEngine>);
+
+    it('resolves with the contract once found, without an engine attached', async () => {
+      resolver.resolveStartRequests(toMap({ pluginA: pluginAContract }));
+
+      await expect(resolver.loadPluginContract(SOURCE_PLUGIN, 'pluginA')).resolves.toBe(
+        pluginAContract
+      );
+    });
+
+    it('throws when the dependency contract is not found', async () => {
+      resolver.resolveStartRequests(toMap({}));
+
+      await expect(resolver.loadPluginContract(SOURCE_PLUGIN, 'pluginA')).rejects.toThrow(
+        'Cannot load contract for plugin "pluginA": it is missing, disabled, or has no start contract.'
+      );
+    });
+
+    it('does not wait on the engine when the dependency is not registered as lazy-init', async () => {
+      const engine = createEngineMock();
+      engine.isRegistered.mockReturnValue(false);
+      resolver.setDeferredInitEngine(engine);
+      resolver.resolveStartRequests(toMap({ pluginA: pluginAContract }));
+
+      await expect(resolver.loadPluginContract(SOURCE_PLUGIN, 'pluginA')).resolves.toBe(
+        pluginAContract
+      );
+      expect(engine.waitUntilAvailable).not.toHaveBeenCalled();
+    });
+
+    it('waits on the engine when the dependency is registered as lazy-init', async () => {
+      const engine = createEngineMock();
+      engine.isRegistered.mockReturnValue(true);
+      engine.waitUntilAvailable.mockResolvedValue(undefined);
+      resolver.setDeferredInitEngine(engine);
+      resolver.resolveStartRequests(toMap({ pluginA: pluginAContract }));
+
+      await expect(resolver.loadPluginContract(SOURCE_PLUGIN, 'pluginA')).resolves.toBe(
+        pluginAContract
+      );
+      expect(engine.waitUntilAvailable).toHaveBeenCalledWith('pluginA');
+    });
+
+    it('rejects if the engine ultimately fails to become available', async () => {
+      const engine = createEngineMock();
+      engine.isRegistered.mockReturnValue(true);
+      const deferredInitError = new Error('deferred init failed');
+      engine.waitUntilAvailable.mockRejectedValue(deferredInitError);
+      resolver.setDeferredInitEngine(engine);
+      resolver.resolveStartRequests(toMap({ pluginA: pluginAContract }));
+
+      await expect(resolver.loadPluginContract(SOURCE_PLUGIN, 'pluginA')).rejects.toBe(
+        deferredInitError
+      );
+    });
+
+    it('resolves once the dependency is notified, without waiting for resolveStartRequests', async () => {
+      // Regression test for a deadlock: a plugin calling `loadPluginContract` on an
+      // already-started dependency from inside its OWN `start()` must not have to wait for
+      // `resolveStartRequests`, since that's only called after the whole `startPlugins` loop --
+      // including this very `start()` call -- has finished.
+      const handler = jest.fn();
+      resolver.loadPluginContract(SOURCE_PLUGIN, 'pluginA').then(handler);
+
+      await fewTicks();
+      expect(handler).not.toHaveBeenCalled();
+
+      resolver.notifyStartContractAvailable('pluginA', pluginAContract);
+      await fewTicks();
+
+      expect(handler).toHaveBeenCalledWith(pluginAContract);
     });
   });
 });
