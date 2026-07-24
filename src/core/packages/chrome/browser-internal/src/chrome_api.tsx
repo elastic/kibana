@@ -178,6 +178,9 @@ export function createChromeApi({
       getWidth$: () => state.sideNav.width.$,
       getWidth: () => state.sideNav.width.get(),
       setWidth: state.sideNav.width.set,
+      getIsVisible$: () => state.sideNav.visible.$,
+      getIsVisible: () => state.sideNav.visible.get(),
+      setIsVisible: state.sideNav.visible.set,
     },
 
     // Project Navigation

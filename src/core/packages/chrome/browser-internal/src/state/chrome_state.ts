@@ -51,6 +51,7 @@ export interface ChromeState {
   sideNav: {
     collapsed: State<boolean>;
     width: State<number>;
+    visible: State<boolean>;
   };
 
   /** Breadcrumbs state (includes legacy badge from setBadge()) */
@@ -107,6 +108,7 @@ export function createChromeState({ application, docLinks }: ChromeStateDeps): C
   // Side Nav
   const sideNavCollapsed = createPersistedState(IS_SIDENAV_COLLAPSED_KEY, false);
   const sideNavWidth = createState<number>(INITIAL_SIDENAV_WIDTH);
+  const sideNavVisible = createState<boolean>(true);
 
   // Breadcrumbs (legacyBadge powers setBadge() -> breadcrumbs badge pipeline)
   const {
@@ -149,6 +151,7 @@ export function createChromeState({ application, docLinks }: ChromeStateDeps): C
     sideNav: {
       collapsed: sideNavCollapsed,
       width: sideNavWidth,
+      visible: sideNavVisible,
     },
     breadcrumbs: {
       classic: breadcrumbs,

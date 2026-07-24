@@ -30,6 +30,7 @@ import type { ChromeComponentsDeps } from '@kbn/core-chrome-browser-components';
 import {
   useChromeStyle,
   useIsChromeVisible,
+  useIsSideNavVisible,
   useSidebarWidth,
   useSideNavWidth,
 } from '@kbn/core-chrome-browser-hooks';
@@ -105,6 +106,7 @@ export class GridLayout implements LayoutService {
 
     const GridLayoutContent = React.memo(() => {
       const chromeVisible = useIsChromeVisible();
+      const sideNavVisible = useIsSideNavVisible();
       const hasHeaderBanner = useHasHeaderBanner();
       const chromeStyle = useChromeStyle();
       const hasAppMenu = useHasAppMenu();
@@ -142,7 +144,9 @@ export class GridLayout implements LayoutService {
             applicationTopBar = <AppMenuBar />;
           }
 
-          navigation = <GridLayoutProjectSideNav />;
+          if (sideNavVisible) {
+            navigation = <GridLayoutProjectSideNav />;
+          }
         }
       }
 

@@ -25,12 +25,14 @@ const OnboardingRoutes = () => {
   } = useKibana<ServerlessVectordbServices>();
 
   // Capture before child components can call markOnboardingSeen()
-  const [showChrome] = useState(() => hasSeenOnboarding());
+  const [showSideNav] = useState(() => hasSeenOnboarding());
 
+  // On first view, hide only the side nav (the header stays visible) for a
+  // focused, full-width onboarding experience. Restore it on exit.
   useEffect(() => {
-    chrome.setIsVisible(showChrome);
-    return () => chrome.setIsVisible(true);
-  }, [chrome, showChrome]);
+    chrome.sideNav.setIsVisible(showSideNav);
+    return () => chrome.sideNav.setIsVisible(true);
+  }, [chrome, showSideNav]);
 
   return (
     <Routes>

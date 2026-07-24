@@ -699,6 +699,38 @@ describe('start', () => {
       });
     });
 
+    describe('visibility', () => {
+      it('should be visible by default', async () => {
+        const { chrome, service } = await start();
+
+        expect(chrome.sideNav.getIsVisible()).toBe(true);
+        expect(await firstValueFrom(chrome.sideNav.getIsVisible$())).toBe(true);
+
+        service.stop();
+      });
+
+      it('should update the isVisible$ observable', async () => {
+        const { chrome, service } = await start();
+        const values: boolean[] = [];
+        const subscription = chrome.sideNav
+          .getIsVisible$()
+          .subscribe((isVisible) => values.push(isVisible));
+
+        chrome.sideNav.setIsVisible(false);
+
+        expect(chrome.sideNav.getIsVisible()).toBe(false);
+        expect(values).toEqual([true, false]);
+
+        chrome.sideNav.setIsVisible(true);
+
+        expect(chrome.sideNav.getIsVisible()).toBe(true);
+        expect(values).toEqual([true, false, true]);
+
+        subscription.unsubscribe();
+        service.stop();
+      });
+    });
+
     describe('width', () => {
       it('should return 0 by default', async () => {
         const { chrome, service } = await start();
