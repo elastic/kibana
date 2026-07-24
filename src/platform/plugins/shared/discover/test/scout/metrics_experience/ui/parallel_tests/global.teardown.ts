@@ -8,21 +8,24 @@
  */
 
 import { globalTeardownHook } from '@kbn/scout';
-import {
-  METRICS_TEST_INDEX_NAME,
-  METRICS_TEST_INDEX_NAME_OTHER,
-} from '../fixtures/constants';
+import { METRICS_TEST_INDEX_NAME, METRICS_TEST_INDEX_NAME_OTHER } from '../fixtures/constants';
 
-globalTeardownHook('Teardown metrics experience tests data', async ({ esClient, apiServices, log }) => {
-  log.debug('[teardown:metrics] resetting feature flag overrides');
-  await apiServices.core.settings({
-    'feature_flags.overrides': {
-      'discover.metricsExperienceEditGridSettingsEnabled': null,
-      'discover.metricsExperienceSortEnabled': null,
-    },
-  });
+globalTeardownHook(
+  'Teardown metrics experience tests data',
+  async ({ esClient, apiServices, log }) => {
+    log.debug('[teardown:metrics] resetting feature flag overrides');
+    await apiServices.core.settings({
+      'feature_flags.overrides': {
+        'discover.metricsExperienceEditGridSettingsEnabled': null,
+        'discover.metricsExperienceSortEnabled': null,
+      },
+    });
 
-  log.debug('[teardown:metrics] deleting custom metrics test indices');
-  await esClient.indices.delete({ index: METRICS_TEST_INDEX_NAME, ignore_unavailable: true });
-  await esClient.indices.delete({ index: METRICS_TEST_INDEX_NAME_OTHER, ignore_unavailable: true });
-});
+    log.debug('[teardown:metrics] deleting custom metrics test indices');
+    await esClient.indices.delete({ index: METRICS_TEST_INDEX_NAME, ignore_unavailable: true });
+    await esClient.indices.delete({
+      index: METRICS_TEST_INDEX_NAME_OTHER,
+      ignore_unavailable: true,
+    });
+  }
+);

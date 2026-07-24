@@ -15,12 +15,7 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import {
-  spaceTest,
-  testData,
-  DEFAULT_TIME_RANGE,
-  DIMENSIONS_PAGINATION,
-} from '../fixtures';
+import { spaceTest, testData, DEFAULT_TIME_RANGE, DIMENSIONS_PAGINATION } from '../fixtures';
 
 const { TOTAL_PAGES, PAGE_SIZE, LAST_PAGE_ITEMS } = DIMENSIONS_PAGINATION;
 

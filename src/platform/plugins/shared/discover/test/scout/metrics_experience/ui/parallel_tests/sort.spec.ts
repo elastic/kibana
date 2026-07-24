@@ -14,12 +14,7 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import {
-  spaceTest,
-  testData,
-  DEFAULT_TIME_RANGE,
-  DEFAULT_CONFIG,
-} from '../fixtures';
+import { spaceTest, testData, DEFAULT_TIME_RANGE, DEFAULT_CONFIG } from '../fixtures';
 
 const ALPHABETICALLY_SORTED_METRICS = [...DEFAULT_CONFIG.metrics].sort((a, b) =>
   a.name.localeCompare(b.name)
