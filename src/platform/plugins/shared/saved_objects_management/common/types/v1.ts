@@ -49,6 +49,7 @@ export interface SavedObjectWithMetadata<T = unknown> {
   updated_at?: string;
   managed?: boolean;
   attributes: T;
+  namespace?: string;
   namespaces?: string[];
   references: SavedObjectReference[];
 }
@@ -65,6 +66,7 @@ export interface SavedObjectRelation {
   meta: SavedObjectMetadata;
   managed: boolean;
   references: SavedObjectReference[];
+  namespaces?: string[];
 }
 
 /**
@@ -159,6 +161,7 @@ export interface RelationshipsQueryHTTP {
 export interface RelationshipsResponseHTTP {
   relations: SavedObjectRelation[];
   invalidRelations: SavedObjectInvalidRelation[];
+  targetNamespaces?: string[];
 }
 
 export interface ScrollCountBodyHTTP {

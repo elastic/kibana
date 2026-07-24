@@ -186,6 +186,7 @@ export const Tabs: React.FC<TabsProps> = ({
     savedObjectsManagement,
     savedObjectsTagging,
     dataViewMgmtService,
+    spaces,
     ...startServices
   } = useKibana<IndexPatternManagmentContext>().services;
   const [fieldFilter, setFieldFilter] = useState<string>('');
@@ -580,6 +581,8 @@ export const Tabs: React.FC<TabsProps> = ({
                 getDefaultTitle={savedObjectsManagement.getDefaultTitle}
                 getSavedObjectLabel={savedObjectsManagement.getSavedObjectLabel}
                 savedObjectsTagging={savedObjectsTagging}
+                spacesApi={spaces}
+                targetNamespaces={indexPattern.namespaces}
               />
             </Fragment>
           );
@@ -611,6 +614,7 @@ export const Tabs: React.FC<TabsProps> = ({
       allowedTypes,
       relationships,
       dataViewMgmtService,
+      spaces,
     ]
   );
 

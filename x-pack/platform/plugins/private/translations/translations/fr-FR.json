@@ -5311,7 +5311,6 @@
     "indexPatternManagement.dataViewTable.createBtn": "Créer une vue de données",
     "indexPatternManagement.dataViewTable.dataViewColumnName": "Vue de données",
     "indexPatternManagement.dataViewTable.deleteButtonLabel": "Supprimer {selectedItems, number} {selectedItems, plural, one {Data View} other {Data Views} }",
-    "indexPatternManagement.dataViewTable.deleteConfirmSummary": "Suppression réussie de {count, number} {count, plural, one {data view} other {data views} }.",
     "indexPatternManagement.dataViewTable.deleteDanger": "Au moins une des data views que vous souhaitez supprimer est utilisée par un autre objet Kibana. Consultez la liste des objets concernés pour éviter de perturber les autres utilisateurs de Kibana qui en dépendent. La suppression des vues de données les supprime définitivement de tous les espaces et ne peut pas être annulée.",
     "indexPatternManagement.dataViewTable.deleteSuccessToast": "Suppression réussie de {count, number} {count, plural, one {data view} other {vues de données}}.",
     "indexPatternManagement.dataViewTable.deleteWarning": "La suppression d’une data view l’enlève définitivement de tous les espaces et empêche tous les utilisateurs de l’utiliser dans une application Kibana telle que Discover, les tableaux de bord ou Lens. Cette action ne peut pas être annulée.",

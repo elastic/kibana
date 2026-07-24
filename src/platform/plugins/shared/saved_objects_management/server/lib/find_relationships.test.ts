@@ -13,7 +13,11 @@ import { findRelationships } from './find_relationships';
 import { managementMock } from '../services/management.mock';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
-const createObj = (parts: Partial<SavedObject<any>>): SavedObject<any> => ({
+// `namespace` isn't part of the public `SavedObject` type, but `client.find()` populates it at
+// runtime for single-namespace types in lieu of `namespaces` (see find_relationships.ts).
+const createObj = (
+  parts: Partial<SavedObject<any>> & { namespace?: string }
+): SavedObject<any> & { namespace?: string } => ({
   id: 'id',
   type: 'type',
   attributes: {},
@@ -115,7 +119,142 @@ describe('findRelationships', () => {
       hasReference: { type, id },
       perPage: 20,
       type: referenceTypes,
+      namespaces: ['*'],
     });
+  });
+
+  it('returns the target namespaces alongside the relations', async () => {
+    const type = 'dashboard';
+    const id = 'some-id';
+
+    savedObjectsClient.get.mockResolvedValue(
+      createObj({
+        id,
+        type,
+        namespaces: ['default', 'space-a'],
+      })
+    );
+    savedObjectsClient.bulkGet.mockResolvedValue({ saved_objects: [] });
+    savedObjectsClient.find.mockResolvedValue(createFindResponse([]));
+
+    const { targetNamespaces } = await findRelationships({
+      type,
+      id,
+      size: 20,
+      client: savedObjectsClient,
+      referenceTypes: [],
+      savedObjectsManagement: managementService,
+    });
+
+    expect(targetNamespaces).toEqual(['default', 'space-a']);
+  });
+
+  it('preserves the namespaces of each related object', async () => {
+    const type = 'dashboard';
+    const id = 'some-id';
+    const references = [
+      {
+        type: 'some-type',
+        id: 'ref-1',
+        name: 'ref 1',
+      },
+    ];
+
+    savedObjectsClient.get.mockResolvedValue(
+      createObj({
+        id,
+        type,
+        references,
+      })
+    );
+    savedObjectsClient.bulkGet.mockResolvedValue({
+      saved_objects: [
+        createObj({
+          type: 'some-type',
+          id: 'ref-1',
+          namespaces: ['default'],
+        }),
+      ],
+    });
+    savedObjectsClient.find.mockResolvedValue(
+      createFindResponse([
+        createObj({
+          type: 'parent-type',
+          id: 'parent-id',
+          namespaces: ['space-a'],
+        }),
+      ])
+    );
+
+    const { relations } = await findRelationships({
+      type,
+      id,
+      size: 20,
+      client: savedObjectsClient,
+      referenceTypes: ['some-type', 'parent-type'],
+      savedObjectsManagement: managementService,
+    });
+
+    expect(relations).toEqual([
+      {
+        id: 'ref-1',
+        relationship: 'child',
+        type: 'some-type',
+        meta: expect.any(Object),
+        managed: false,
+        references: [],
+        namespaces: ['default'],
+      },
+      {
+        id: 'parent-id',
+        relationship: 'parent',
+        type: 'parent-type',
+        meta: expect.any(Object),
+        managed: false,
+        references: [],
+        namespaces: ['space-a'],
+      },
+    ]);
+  });
+
+  it('derives namespaces from the singular `namespace` field for single-namespace parent relations', async () => {
+    // client.find() only populates the plural `namespaces` field for multi-namespace types; for
+    // single-namespace types (e.g. dashboards) it returns a singular `namespace` field instead.
+    const type = 'dashboard';
+    const id = 'some-id';
+
+    savedObjectsClient.get.mockResolvedValue(createObj({ id, type }));
+    savedObjectsClient.bulkGet.mockResolvedValue({ saved_objects: [] });
+    savedObjectsClient.find.mockResolvedValue(
+      createFindResponse([
+        createObj({
+          type: 'dashboard',
+          id: 'parent-id',
+          namespace: 'space-b',
+        }),
+      ])
+    );
+
+    const { relations } = await findRelationships({
+      type,
+      id,
+      size: 20,
+      client: savedObjectsClient,
+      referenceTypes: ['dashboard'],
+      savedObjectsManagement: managementService,
+    });
+
+    expect(relations).toEqual([
+      {
+        id: 'parent-id',
+        relationship: 'parent',
+        type: 'dashboard',
+        meta: expect.any(Object),
+        managed: false,
+        references: [],
+        namespaces: ['space-b'],
+      },
+    ]);
   });
 
   it('returns the child and parent references of the object', async () => {

@@ -10,6 +10,7 @@
 import React from 'react';
 import { shallowWithI18nProvider } from '@kbn/test-jest-helpers';
 import { httpServiceMock } from '@kbn/core/public/mocks';
+import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
 import type { SavedObjectManagementTypeInfo } from '../../../../common/types';
 import type { RelationshipsProps } from './relationships';
 import { RelationshipsClass as Relationships } from './relationships';
@@ -396,5 +397,74 @@ describe('Relationships', () => {
 
     expect(props.getRelationships).toHaveBeenCalled();
     expect(component).toMatchSnapshot();
+  });
+
+  it('renders a Spaces column and a space-aware link when a relation lives in another space', async () => {
+    const basePath = httpServiceMock.createBasePath({ serverBasePath: '' });
+    basePath.get.mockReturnValue('/s/space-a');
+    const spacesApi = spacesPluginMock.createStartContract();
+
+    const props: RelationshipsProps = {
+      goInspectObject: () => {},
+      canGoInApp: () => true,
+      basePath,
+      spacesApi,
+      getRelationships: jest.fn().mockImplementation(() => ({
+        relations: [
+          {
+            type: 'dashboard',
+            id: '1',
+            relationship: 'parent',
+            meta: {
+              icon: 'dashboardApp',
+              inAppUrl: {
+                path: '/app/dashboards#/view/1',
+                uiCapabilitiesPath: 'dashboard_v2.show',
+              },
+              title: 'My Dashboard',
+            },
+            namespaces: ['space-b'],
+          },
+        ],
+        invalidRelations: [],
+      })),
+      savedObject: {
+        id: '1',
+        type: 'index-pattern',
+        attributes: {},
+        references: [],
+        namespaces: ['space-a', 'space-b'],
+        meta: {
+          title: 'MyIndexPattern*',
+          icon: 'indexPatternApp',
+          inAppUrl: {
+            path: '/management/kibana/dataViews/dataView/1',
+            uiCapabilitiesPath: 'management.kibana.indexPatterns',
+          },
+        },
+      },
+      allowedTypes,
+      close: jest.fn(),
+    };
+
+    const component = shallowWithI18nProvider(<Relationships {...baseProps} {...props} />);
+    await new Promise((resolve) => process.nextTick(resolve));
+    component.update();
+
+    const columns = component.find('EuiInMemoryTable').prop<Array<Record<string, any>>>('columns');
+    const spacesColumn = columns.find((column) => column.field === 'namespaces');
+    expect(spacesColumn).toBeDefined();
+
+    const relation = { namespaces: ['space-b'] };
+    const spacesCell = shallowWithI18nProvider(spacesColumn!.render(relation.namespaces, relation));
+    const spaceList = spacesCell.find(spacesApi.ui.components.getSpaceList);
+    expect(spaceList.prop('namespaces')).toEqual(['space-b']);
+
+    const titleColumn = columns.find((column) => column.field === 'meta.title');
+    const titleElement = titleColumn!.render('My Dashboard', {
+      meta: { inAppUrl: { path: '/app/dashboards#/view/1' } },
+      namespaces: ['space-b'],
+    });
+    expect(titleElement.props.href).toBe('/s/space-b/app/dashboards#/view/1');
   });
 });
