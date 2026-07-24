@@ -37,7 +37,8 @@ primitive behind the React APIs.
 
 Discover uses `DiscoverAppHeader` from `@kbn/app-header/discover` to place its UnifiedTabs bar beside
 the title. This is a Discover-specific layout exception; other apps should use the structured
-`tabs` or `badges` props on `AppHeader`.
+`tabs` or `badges` props on `AppHeader`. The public header components discard undeclared props, so
+this internal title slot cannot be forced through a type suppression.
 
 ## Editable titles
 

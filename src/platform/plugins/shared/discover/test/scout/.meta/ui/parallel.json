@@ -1,5 +1,5 @@
 {
-  "sha1": "9c37bf0d149ce6a9ac3e86a65af0ca41b21ceaae",
+  "sha1": "b5b6e973a6d0827905c2492de064056311e4c002",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -878,6 +878,123 @@
       }
     },
     {
+      "id": "82fe1f21def6a98-fe7b9b988f28b9d",
+      "title": "Discover ES|QL columns - changing the query resets columns only for certain query changes",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/esql/esql_columns_query_changes.spec.ts",
+        "line": 43,
+        "column": 14
+      }
+    },
+    {
+      "id": "82fe1f21def6a98-32910af8cc50a4f",
+      "title": "Discover ES|QL columns - changing the query recovers from an error and resets columns correctly for a transformational query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/esql/esql_columns_query_changes.spec.ts",
+        "line": 66,
+        "column": 14
+      }
+    },
+    {
+      "id": "82fe1f21def6a98-45214278fd76025",
+      "title": "Discover ES|QL columns - changing the query sets fields correctly when the initial query returns no results",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/esql/esql_columns_query_changes.spec.ts",
+        "line": 91,
+        "column": 14
+      }
+    },
+    {
+      "id": "7266efac45abb8b-5b9836fbd9accce",
+      "title": "Discover ES|QL columns - initial columns renders initial columns for non-transformational commands",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/esql/esql_columns.spec.ts",
+        "line": 42,
+        "column": 14
+      }
+    },
+    {
+      "id": "7266efac45abb8b-e482d6949111160",
+      "title": "Discover ES|QL columns - initial columns renders custom columns for non-transformational commands",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/esql/esql_columns.spec.ts",
+        "line": 50,
+        "column": 14
+      }
+    },
+    {
+      "id": "7266efac45abb8b-78cf393186c4dfc",
+      "title": "Discover ES|QL columns - initial columns renders initial columns for a transformational command",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/esql/esql_columns.spec.ts",
+        "line": 62,
+        "column": 14
+      }
+    },
+    {
+      "id": "7266efac45abb8b-a40e6dc3ec5b7de",
+      "title": "Discover ES|QL columns - initial columns renders custom columns for a transformational command",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/esql/esql_columns.spec.ts",
+        "line": 67,
+        "column": 14
+      }
+    },
+    {
+      "id": "7266efac45abb8b-63e2da5e0fdc5e6",
+      "title": "Discover ES|QL columns - initial columns restores columns correctly when switching between saved searches",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/esql/esql_columns.spec.ts",
+        "line": 72,
+        "column": 14
+      }
+    },
+    {
+      "id": "d937d1ce3f77feb-5c9d907f4056918",
+      "title": "Discover ES|QL results formatting with columnsMeta formats ES|QL columns using columnsMeta when the type differs from the data-view field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/esql/esql_formatting.spec.ts",
+        "line": 52,
+        "column": 14
+      }
+    },
+    {
       "id": "7abc737cf80f02c-2cfd5e822a3757a",
       "title": "Discover field data shows expected hit counts for KQL field data queries",
       "expectedStatus": "passed",
@@ -990,7 +1107,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/filter_editor.spec.ts",
-        "line": 118,
+        "line": 119,
         "column": 12
       }
     },
@@ -1003,7 +1120,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/filter_editor.spec.ts",
-        "line": 126,
+        "line": 127,
         "column": 12
       }
     },
@@ -1016,7 +1133,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/filter_editor.spec.ts",
-        "line": 134,
+        "line": 135,
         "column": 12
       }
     },
@@ -2607,6 +2724,188 @@
       }
     },
     {
+      "id": "1cdd31455ceb7ea-66d68af59d45f37",
+      "title": "Discover unsaved changes indicator should not show the indicator initially nor after changes to a draft saved search",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/unsaved_changes_indicator.spec.ts",
+        "line": 61,
+        "column": 12
+      }
+    },
+    {
+      "id": "1cdd31455ceb7ea-98b06ec124bf1d1",
+      "title": "Discover unsaved changes indicator should show the indicator only after changes to a persisted saved search",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/unsaved_changes_indicator.spec.ts",
+        "line": 72,
+        "column": 12
+      }
+    },
+    {
+      "id": "1cdd31455ceb7ea-70f31122f3a1a0b",
+      "title": "Discover unsaved changes indicator should not show the indicator after loading a saved search, only after changes",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/unsaved_changes_indicator.spec.ts",
+        "line": 89,
+        "column": 12
+      }
+    },
+    {
+      "id": "1cdd31455ceb7ea-72de09fcf67d283",
+      "title": "Discover unsaved changes indicator should not show the indicator after loading an ES|QL saved search, only after changes",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/unsaved_changes_indicator.spec.ts",
+        "line": 104,
+        "column": 12
+      }
+    },
+    {
+      "id": "1cdd31455ceb7ea-bd3f21386f403a3",
+      "title": "Discover unsaved changes indicator should allow reverting changes",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/unsaved_changes_indicator.spec.ts",
+        "line": 118,
+        "column": 12
+      }
+    },
+    {
+      "id": "1cdd31455ceb7ea-72e53721adb6d63",
+      "title": "Discover unsaved changes indicator should hide the indicator once user manually reverts changes",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/unsaved_changes_indicator.spec.ts",
+        "line": 158,
+        "column": 12
+      }
+    },
+    {
+      "id": "1cdd31455ceb7ea-480bafd70ff8501",
+      "title": "Discover unsaved changes indicator should not show the indicator after pinning a filter, but should appear after disabling a filter",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/unsaved_changes_indicator.spec.ts",
+        "line": 203,
+        "column": 12
+      }
+    },
+    {
       "id": "ef0516f500ea2ee-aaf15abc562feec",
       "title": "Discover URL state should show a warning and fall back to the default data view when navigating to a URL with an invalid data view ID",
       "expectedStatus": "passed",
@@ -2707,6 +3006,58 @@
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/url_state.spec.ts",
         "line": 136,
+        "column": 12
+      }
+    },
+    {
+      "id": "8420396ab8cdda9-a83f4d0b439c1d5",
+      "title": "Discover view mode toggle should show Documents tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/view_mode_toggle.spec.ts",
+        "line": 28,
+        "column": 12
+      }
+    },
+    {
+      "id": "8420396ab8cdda9-73b0ec4263788b4",
+      "title": "Discover view mode toggle should show an error callout on invalid query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/view_mode_toggle.spec.ts",
+        "line": 36,
+        "column": 12
+      }
+    },
+    {
+      "id": "8420396ab8cdda9-2b6b9b641321e29",
+      "title": "Discover view mode toggle should hide view mode toggle in fullscreen mode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/view_mode_toggle.spec.ts",
+        "line": 48,
+        "column": 12
+      }
+    },
+    {
+      "id": "8420396ab8cdda9-e02be8edc024f57",
+      "title": "Discover view mode toggle should not show view mode toggle for ES|QL searches",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/view_mode_toggle.spec.ts",
+        "line": 58,
         "column": 12
       }
     },

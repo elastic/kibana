@@ -72,6 +72,37 @@ export const fetchDeleteMonitor = async ({
   );
 };
 
+export interface BulkUpdateMonitorRequest {
+  id: string;
+  attributes: Partial<EncryptedSyntheticsMonitor>;
+}
+
+export interface BulkUpdateMonitorsResult {
+  id: string;
+  updated: boolean;
+  error?: string;
+}
+
+export interface BulkUpdateMonitorsResponse {
+  result: BulkUpdateMonitorsResult[];
+  errors?: unknown[];
+}
+
+export const fetchBulkUpdateMonitors = async ({
+  updates,
+  spaceId,
+}: {
+  updates: BulkUpdateMonitorRequest[];
+  spaceId?: string;
+}): Promise<BulkUpdateMonitorsResponse> => {
+  return await apiService.put(
+    SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_BULK_UPDATE,
+    { updates },
+    null,
+    { version: INITIAL_REST_VERSION, spaceId }
+  );
+};
+
 export const fetchUpsertMonitor = async ({
   monitor,
   configId,

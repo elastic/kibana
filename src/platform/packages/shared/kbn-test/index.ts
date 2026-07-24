@@ -76,6 +76,13 @@ export type { JestConfigResult, JestValidationResult } from './src/jest/run_cont
 
 export { runJestAll } from './src/jest/run_all';
 
+export { runJestNegative, NEGATIVE_SCENARIOS, evaluateScenario } from './src/jest/run_negative';
+export type {
+  NegativeScenario,
+  ScenarioEvaluation,
+  ScenarioOutcome,
+} from './src/jest/run_negative';
+
 export {
   runJestViaMoon,
   parseMoonJestOutput,
