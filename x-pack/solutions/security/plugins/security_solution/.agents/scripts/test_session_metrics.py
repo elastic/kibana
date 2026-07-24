@@ -10,6 +10,7 @@ from pathlib import Path
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 SCRIPT = SCRIPT_DIR / "session-token-usage.py"
+EXPLORATORY_TESTER_DIR = SCRIPT_DIR.parent / "skills" / "exploratory-tester"
 sys.path.insert(0, str(SCRIPT_DIR))
 
 from session_metrics import (  # noqa: E402
@@ -280,6 +281,20 @@ class SessionMetricsParserTests(unittest.TestCase):
             metrics = json.loads(result.stdout)
             self.assertEqual(metrics["tokens"]["status"], "not_available")
             self.assertEqual(metrics["payload_bytes"]["status"], "not_available")
+
+    def test_report_contract_keeps_metrics_separate_from_findings(self):
+        report_template = (
+            EXPLORATORY_TESTER_DIR / "templates" / "report-format.md"
+        ).read_text(encoding="utf-8")
+        phase_three = (
+            EXPLORATORY_TESTER_DIR / "phases" / "3-report.md"
+        ).read_text(encoding="utf-8")
+
+        self.assertIn("**Token usage:**", report_template)
+        self.assertIn("**Browser/tool payload bytes:**", report_template)
+        self.assertIn("**Session artifact bytes:**", report_template)
+        self.assertIn("not available", report_template)
+        self.assertIn("Level 1 findings are never suppressed", phase_three)
 
 
 if __name__ == "__main__":
