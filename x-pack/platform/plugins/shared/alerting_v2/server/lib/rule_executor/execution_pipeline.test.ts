@@ -18,6 +18,7 @@ import {
 } from './test_utils';
 import { createMetricCollectorFactory } from './metrics/metric_collector_factory.mock';
 import { createMockRuleExecutorEventPublisher } from '../events/rule_executor_event_publisher/rule_executor_event_publisher.mock';
+import { createMockStorageServiceContract } from '../services/storage_service/storage_service.mock';
 import { MetricsMiddleware } from './metrics/metrics_middleware';
 import { EmittedCountersRecorder } from './metrics/recorders/emitted_counters_recorder';
 import { RULE_EXECUTION_COUNTERS } from './metrics/counters';
@@ -54,7 +55,8 @@ describe('RuleExecutionPipeline', () => {
         [step1, step2, step3],
         [],
         createMetricCollectorFactory(),
-        createMockRuleExecutorEventPublisher()
+        createMockRuleExecutorEventPublisher(),
+        createMockStorageServiceContract()
       );
       const input = createRuleExecutionPipelineInput();
 
@@ -95,7 +97,8 @@ describe('RuleExecutionPipeline', () => {
         [step1, step2, step3],
         [],
         createMetricCollectorFactory(),
-        createMockRuleExecutorEventPublisher()
+        createMockRuleExecutorEventPublisher(),
+        createMockStorageServiceContract()
       );
       const input = createRuleExecutionPipelineInput();
 
@@ -136,7 +139,8 @@ describe('RuleExecutionPipeline', () => {
         [step1, step2, step3],
         [],
         createMetricCollectorFactory(),
-        createMockRuleExecutorEventPublisher()
+        createMockRuleExecutorEventPublisher(),
+        createMockStorageServiceContract()
       );
       const input = createRuleExecutionPipelineInput();
 
@@ -177,7 +181,8 @@ describe('RuleExecutionPipeline', () => {
         [step1, step2],
         [],
         createMetricCollectorFactory(),
-        createMockRuleExecutorEventPublisher()
+        createMockRuleExecutorEventPublisher(),
+        createMockStorageServiceContract()
       );
       const input = createRuleExecutionPipelineInput();
 
@@ -191,7 +196,8 @@ describe('RuleExecutionPipeline', () => {
         [],
         [],
         createMetricCollectorFactory(),
-        createMockRuleExecutorEventPublisher()
+        createMockRuleExecutorEventPublisher(),
+        createMockStorageServiceContract()
       );
       const input = createRuleExecutionPipelineInput();
 
@@ -246,7 +252,8 @@ describe('RuleExecutionPipeline', () => {
         [step1],
         [middleware1, middleware2],
         createMetricCollectorFactory(),
-        createMockRuleExecutorEventPublisher()
+        createMockRuleExecutorEventPublisher(),
+        createMockStorageServiceContract()
       );
       const input = createRuleExecutionPipelineInput();
 
@@ -280,7 +287,8 @@ describe('RuleExecutionPipeline', () => {
         [step],
         [],
         createMetricCollectorFactory(),
-        createMockRuleExecutorEventPublisher()
+        createMockRuleExecutorEventPublisher(),
+        createMockStorageServiceContract()
       );
       const input = createRuleExecutionPipelineInput();
 
@@ -306,7 +314,8 @@ describe('RuleExecutionPipeline', () => {
         [step],
         [],
         createMetricCollectorFactory(),
-        createMockRuleExecutorEventPublisher()
+        createMockRuleExecutorEventPublisher(),
+        createMockStorageServiceContract()
       );
       const input = createRuleExecutionPipelineInput({ abortSignal: abortController.signal });
 
@@ -343,7 +352,8 @@ describe('RuleExecutionPipeline', () => {
         [step1],
         [errorMiddleware],
         createMetricCollectorFactory(),
-        createMockRuleExecutorEventPublisher()
+        createMockRuleExecutorEventPublisher(),
+        createMockStorageServiceContract()
       );
       const input = createRuleExecutionPipelineInput();
 
@@ -385,7 +395,8 @@ describe('RuleExecutionPipeline', () => {
         [],
         [],
         createMetricCollectorFactory({ startedAt }),
-        createMockRuleExecutorEventPublisher()
+        createMockRuleExecutorEventPublisher(),
+        createMockStorageServiceContract()
       );
 
       const result = await pipeline.execute(createRuleExecutionPipelineInput());
@@ -415,7 +426,8 @@ describe('RuleExecutionPipeline', () => {
         [step1, step2],
         [createMetricsMiddleware(loggerService)],
         createMetricCollectorFactory({ startedAt }),
-        createMockRuleExecutorEventPublisher()
+        createMockRuleExecutorEventPublisher(),
+        createMockStorageServiceContract()
       );
 
       const result = await pipeline.execute(createRuleExecutionPipelineInput());
@@ -445,7 +457,8 @@ describe('RuleExecutionPipeline', () => {
         [ruleStep, storeStep],
         [createMetricsMiddleware(loggerService)],
         createMetricCollectorFactory({ startedAt }),
-        eventPublisher
+        eventPublisher,
+        createMockStorageServiceContract()
       );
 
       const input = createRuleExecutionPipelineInput({
@@ -480,7 +493,8 @@ describe('RuleExecutionPipeline', () => {
         [ruleStep],
         [createMetricsMiddleware(loggerService)],
         createMetricCollectorFactory({ startedAt }),
-        eventPublisher
+        eventPublisher,
+        createMockStorageServiceContract()
       );
 
       await pipeline.execute(createRuleExecutionPipelineInput());
@@ -502,7 +516,8 @@ describe('RuleExecutionPipeline', () => {
         [],
         [createMetricsMiddleware(loggerService)],
         createMetricCollectorFactory({ startedAt }),
-        eventPublisher
+        eventPublisher,
+        createMockStorageServiceContract()
       );
 
       await pipeline.execute(createRuleExecutionPipelineInput());
@@ -525,7 +540,8 @@ describe('RuleExecutionPipeline', () => {
         [step],
         [createMetricsMiddleware(loggerService)],
         createMetricCollectorFactory({ startedAt }),
-        eventPublisher
+        eventPublisher,
+        createMockStorageServiceContract()
       );
 
       await expect(
@@ -551,7 +567,8 @@ describe('RuleExecutionPipeline', () => {
         [ruleStep],
         [createMetricsMiddleware(loggerService)],
         createMetricCollectorFactory({ startedAt }),
-        eventPublisher
+        eventPublisher,
+        createMockStorageServiceContract()
       );
 
       await pipeline.execute(createRuleExecutionPipelineInput());
@@ -573,7 +590,8 @@ describe('RuleExecutionPipeline', () => {
         [ruleStep, step2],
         [createMetricsMiddleware(loggerService)],
         createMetricCollectorFactory({ startedAt }),
-        eventPublisher
+        eventPublisher,
+        createMockStorageServiceContract()
       );
 
       const result = await pipeline.execute(createRuleExecutionPipelineInput());

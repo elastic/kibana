@@ -51,7 +51,7 @@ const mappings: MappingsDefinition = {
 };
 
 const alertEventStatusSchema = z.enum(['breached', 'recovered', 'no_data']);
-const alertEventTypeSchema = z.enum(['signal', 'alert']);
+const alertEventTypeSchema = z.enum(['signal', 'alert', 'execution_end_marker']);
 const alertEpisodeStatusSchema = z.enum(['inactive', 'pending', 'active', 'recovering']);
 const alertEpisodeStatusCountSchema = z.number().int().optional();
 const alertEventSeveritySchema = z.enum(['info', 'low', 'medium', 'high', 'critical']);
@@ -65,7 +65,7 @@ export const alertEventSchema = z.object({
   '@timestamp': z.string(),
   execution: z.object({
     uuid: z.string(),
-  }),
+  }).optional(),
   scheduled_timestamp: z.string().optional(),
   rule: z.object({
     id: z.string(),

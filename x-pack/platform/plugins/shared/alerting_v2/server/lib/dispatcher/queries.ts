@@ -21,15 +21,23 @@ import type { AlertEpisode, ActionGroupId } from './types';
 // without the explicit DROP it rides through the INLINE STATS buffer and can exceed ~16.8 MB.
 export const getDispatchableAlertEventsQuery = (): EsqlRequest => {
   const alertEventType: AlertEventType = 'alert';
+  const executionEndMarkerType: AlertEventType = 'execution_end_marker';
+
+  // Now - 6 mins
+  const fallbackCutoff = new Date(Date.now() - 6 * 60 * 1000).toISOString();
 
   return esql`FROM ${ALERT_EVENTS_DATA_STREAM},${ALERT_ACTIONS_DATA_STREAM} METADATA _source
-      | WHERE type IS NULL OR type == ${alertEventType}
+      | WHERE type IS NULL OR type == ${alertEventType} OR type == ${executionEndMarkerType}
       | EVAL
+          execution_uuid = execution.uuid,
           rule_id = COALESCE(rule.id, rule_id),
           episode_id = COALESCE(episode.id, episode_id),
           episode_status = episode.status,
           data_json = CASE(type IS NOT NULL, JSON_EXTRACT(_source, "$.data"), NULL)
-      | DROP episode.id, rule.id, episode.status, _source
+      | DROP episode.id, rule.id, episode.status, _source, execution.uuid
+      | INLINE STATS execution_end_marker_timestamp = MAX(@timestamp) WHERE type == "execution_end_marker" BY execution_uuid
+      | WHERE type IS NULL OR type == ${alertEventType}
+      | WHERE type is NULL or execution_end_marker_timestamp IS NOT NULL OR @timestamp < ${fallbackCutoff}::datetime
       | INLINE STATS last_fired = max(last_series_event_timestamp) WHERE action_type == "fire" OR action_type == "suppress" OR action_type == "unmatched" BY rule_id, group_hash
       | WHERE last_fired IS NULL OR last_fired < @timestamp
       | STATS
