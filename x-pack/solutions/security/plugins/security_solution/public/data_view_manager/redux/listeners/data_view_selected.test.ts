@@ -316,7 +316,9 @@ describe('createDataViewSelectedListener', () => {
       );
 
       expect(mockDataViewsService.get).toHaveBeenCalledWith('adhoc_no-fields-*', false);
-      expect(mockDataViewsService.refreshFields).toHaveBeenCalledWith(refreshedDataView, false);
+      // Called without a displayErrors arg (defaults to true) so the platform shows its own
+      // "Error fetching fields" toast on failure rather than re-throwing.
+      expect(mockDataViewsService.refreshFields).toHaveBeenCalledWith(refreshedDataView);
       expect(mockDispatch).toHaveBeenCalledWith(
         sharedDataViewManagerSlice.actions.addDataView(refreshedDataView as never)
       );
@@ -344,7 +346,9 @@ describe('createDataViewSelectedListener', () => {
       expect(mockToastsDanger).not.toHaveBeenCalled();
     });
 
-    it('shows a toast using the friendly name when field loading fails', async () => {
+    it('does not dispatch and does not show a custom toast when field loading fails', async () => {
+      // refreshFields uses displayErrors=true (the default) so the platform's own
+      // "Error fetching fields" toast is shown — no additional toast from this listener.
       jest.mocked(mockDataViewsService.get).mockRejectedValue(new Error('field caps too large'));
 
       await listener.effect(
@@ -352,10 +356,10 @@ describe('createDataViewSelectedListener', () => {
         mockListenerApi
       );
 
-      expect(mockToastsDanger).toHaveBeenCalledWith({
-        title: 'Error loading data view fields',
-        text: 'Unable to load fields for "Friendly view name". field caps too large',
-      });
+      expect(mockToastsDanger).not.toHaveBeenCalled();
+      expect(mockDispatch).not.toHaveBeenCalledWith(
+        sharedDataViewManagerSlice.actions.addDataView(expect.anything())
+      );
     });
   });
 });
