@@ -7,7 +7,7 @@
 
 import { useCallback, useMemo } from 'react';
 import { useQueryClient } from '@kbn/react-query';
-import produce from 'immer';
+import produce from 'immer-v9';
 import type { Conversation, ConversationWithoutRounds } from '@kbn/agent-builder-common';
 
 import { queryKeys } from '../query_keys';

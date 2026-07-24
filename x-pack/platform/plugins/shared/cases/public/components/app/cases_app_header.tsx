@@ -12,9 +12,9 @@ import { useCasesPageLayout } from './cases_page_layout';
 
 export const CasesAppHeader = (props: AppHeaderProps) => {
   const { variant } = useCasesPageLayout();
-  const usesCompactHeader = variant === 'compact' || variant === 'fullHeight';
+  const spacing = props.spacing ?? (variant === 'legacy' ? 'flush' : 'standard');
 
-  return <AppHeader {...props} padding={usesCompactHeader ? 'm' : props.padding} />;
+  return <AppHeader {...props} spacing={spacing} />;
 };
 
 CasesAppHeader.displayName = 'CasesAppHeader';

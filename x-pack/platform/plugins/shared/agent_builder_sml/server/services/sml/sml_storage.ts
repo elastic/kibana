@@ -10,7 +10,7 @@ import type { IndexStorageSettings } from '@kbn/storage-adapter';
 import { StorageIndexAdapter, types } from '@kbn/storage-adapter';
 import type { SmlDocument } from './types';
 
-export const smlIndexName = '.ai-index-idx-sml-data';
+export const smlIndexName = 'ai-index-idx-sml-data';
 
 const SEMANTIC_MULTI_FIELD = {
   semantic: types.semantic_text({}),

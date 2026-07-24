@@ -39,6 +39,7 @@ import {
 import type { QueryTab } from './types';
 import { CpsPicker } from './cps_picker';
 import { useResolveTimeField } from './use_resolve_time_field';
+import { extractFromSourceQuery } from './extract_from_source_query';
 import { MIN_EDITOR_HEIGHT } from './constants';
 
 /**
@@ -68,6 +69,8 @@ export interface QuerySandboxProps {
   /**
    * When provided, time-field resolution is owned by the parent (e.g. compose
    * flyout) and the sandbox only displays the options without fetching.
+   * Pass `undefined` (not `[]`) to let the sandbox resolve the time field itself —
+   * an empty array skips resolution and renders an empty time-field select.
    */
   timeFieldOptions?: Array<{ value: string; text: string }>;
   /** Required with `timeFieldOptions` when the parent gates autoRun on resolution. */
@@ -166,10 +169,23 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
     enabled: !skipTimeFieldResolution,
     http: services.http,
     dataViews: services.dataViews,
+    search: services.data.search.search,
   });
 
   const timeFieldOptions = timeFieldOptionsProp ?? resolvedTimeFieldOptions;
   const isTimeFieldResolved = isTimeFieldResolvedProp ?? resolvedIsTimeFieldResolved;
+
+  // Time-field select display state. When the current field isn't on the index
+  // (no date fields, or a stored `@timestamp` on an index that only has
+  // `timestamp`), show a blank selection + invalid state so the user picks one,
+  // rather than fabricating `@timestamp`. Only flag invalid once a source query
+  // is present.
+  const hasSourceQuery = useMemo(() => Boolean(extractFromSourceQuery(query)), [query]);
+  const currentTimeFieldIsOption = useMemo(
+    () => timeFieldOptions.some((option) => option.value === timeField),
+    [timeFieldOptions, timeField]
+  );
+  const timeFieldInvalid = hasSourceQuery && !currentTimeFieldIsOption;
 
   const {
     columns,
@@ -269,7 +285,9 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
         <EuiFlexItem grow={false} style={{ width: 200, minWidth: 0 }}>
           <EuiSelect
             options={timeFieldOptions}
-            value={timeField}
+            value={currentTimeFieldIsOption ? timeField : ''}
+            hasNoInitialSelection={!currentTimeFieldIsOption}
+            isInvalid={timeFieldInvalid}
             aria-label={i18n.translate(
               'xpack.alertingV2.composeDiscover.querySandbox.timeFieldAriaLabel',
               { defaultMessage: 'Time field for rule execution' }

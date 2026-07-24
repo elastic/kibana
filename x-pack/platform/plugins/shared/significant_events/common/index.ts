@@ -23,6 +23,7 @@ export {
   DEFAULT_EXTRACTION_INTERVAL_HOURS,
   MIN_EXTRACTION_INTERVAL_HOURS,
   DEFAULT_SIG_EVENTS_SCHEDULED_DETECTION_INTERVAL_MINUTES,
+  DEFAULT_SIG_EVENTS_TARGET_COVERAGE_MINUTES,
   DEFAULT_SIG_EVENTS_SCHEDULED_DISCOVERY_BATCH_SIZE,
   DEFAULT_SIG_EVENTS_SCHEDULED_MAX_REVIEW_PASSES,
   DEFAULT_SIG_EVENTS_SCHEDULED_REVIEW_INTERVAL_MINUTES,
@@ -41,6 +42,20 @@ export {
   type PendingSignificantEventAttachment,
 } from './significant_event_attachment';
 
+export {
+  KI_FEATURE_ATTACHMENT_TYPE,
+  decodeFeatureAttachmentOrigin,
+  encodeFeatureAttachmentOrigin,
+  type KiFeatureAttachment,
+  type PendingKiFeatureAttachment,
+} from './ki_feature_attachment';
+
+export {
+  SIGNIFICANT_EVENT_DETECTION_ATTACHMENT_TYPE,
+  type SignificantEventDetectionAttachment,
+  type PendingSignificantEventDetectionAttachment,
+} from './significant_event_detection_attachment';
+
 export { SIGNIFICANT_EVENTS_REQUIRED_PLUGINS } from './significant_events_availability';
 export type {
   SignificantEventsRequiredPlugin,
@@ -51,7 +66,26 @@ export type {
 export { RELAY_APP_CONNECTION_STATUS } from './slack_app/types';
 export type {
   RelayAppConnectionStatus,
+  SlackAppBindChannelResponse,
+  SlackAppBindingsResponse,
   SlackAppConnectResponse,
-  SlackAppStatusResponse,
   SlackAppDisconnectResponse,
+  SlackAppStatusResponse,
+  SlackAppUnbindChannelResponse,
+  SlackChannelBinding,
+  SlackChannelBindingStatus,
 } from './slack_app/types';
+
+export type {
+  SignificantEventsMaintenanceFailure,
+  SignificantEventsMaintenanceSummary,
+  SignificantEventsMaintenanceStatus,
+  SignificantEventsMaintenanceFeatureSettings,
+} from './maintenance/types';
+
+export {
+  DEFAULT_MAINTENANCE_STATE,
+  isMaintenanceState,
+  stateBlocksNewActivity,
+} from './maintenance/state_machine';
+export type { SignificantEventsMaintenanceState } from './maintenance/state_machine';
