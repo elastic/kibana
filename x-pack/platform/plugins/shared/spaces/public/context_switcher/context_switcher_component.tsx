@@ -89,11 +89,9 @@ const ContextSwitcherInner = ({
     (spaceId, event) => {
       const url = addSpaceIdToPath(core.http.basePath.serverBasePath, spaceId, ENTER_SPACE_PATH);
 
-      const middleClick = event.type === 'click' && 'button' in event && event.button === 1;
-
       if (event.shiftKey) {
         window.open(url);
-      } else if (event.ctrlKey || event.metaKey || middleClick) {
+      } else if (event.ctrlKey || event.metaKey) {
         window.open(url, '_blank');
       } else {
         core.application.navigateToUrl(url);

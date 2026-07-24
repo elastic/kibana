@@ -138,8 +138,8 @@ export const ContextSwitcher = ({
     ({ item, event }) => {
       spaces.onSelect(item.id, event);
 
-      const middleClick = event.type === 'click' && 'button' in event && event.button === 1;
-      if (event.ctrlKey || event.metaKey || middleClick) {
+      // Keep popover open when opening in a new tab/window (cmd/ctrl/shift).
+      if (event.ctrlKey || event.metaKey || event.shiftKey) {
         return;
       }
 
