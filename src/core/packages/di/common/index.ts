@@ -10,5 +10,5 @@
 export type { CoreDiServiceSetup, CoreDiServiceStart } from './src/contracts';
 export { Logger, LoggerFactory } from './src/services/logging';
 export { OnSetup, OnStart, PluginSetup, PluginStart, Setup, Start } from './src/services/plugin';
-export { createToken } from './src/token';
-export type { ServiceToken, ServiceTypeOf } from './src/token';
+export { createToken, type ServiceToken, type ServiceTypeOf } from './src/token';
+export { KibanaContainerModule, type KibanaContainerModuleLoadOptions } from './src/module';
