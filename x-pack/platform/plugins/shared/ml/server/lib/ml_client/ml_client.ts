@@ -584,6 +584,7 @@ export function getMlClient(
     },
     async updateTrainedModelDeployment(...p: Parameters<MlClient['updateTrainedModelDeployment']>) {
       await modelIdsCheck(p);
+      await deploymentIdsCheck(p);
 
       const { deployment_id: deploymentId, model_id: modelId, ...bodyParams } = p[0];
       // TODO use mlClient.updateTrainedModelDeployment when esClient is updated
