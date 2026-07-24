@@ -191,22 +191,40 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(rules.body.items[0].metadata.name).to.eql(matchCountRuleName(query.title));
       });
 
-      it('returns 400 and does not save when ES|QL query is missing METADATA _id,_source', async () => {
-        const queryId = v4();
-        await apiClient
+      it('accepts MATCH queries without METADATA _id,_source', async () => {
+        const query = {
+          id: v4(),
+          type: 'match' as const,
+          title: 'no metadata',
+          description: '',
+          esql: {
+            query: `FROM ${STREAM_NAME},${STREAM_NAME}.* | WHERE KQL("message:'x'")`,
+          },
+        };
+        const upsertQueryResponse = await apiClient
           .fetch('PUT /api/streams/{name}/queries/{queryId} 2023-10-31', {
             params: {
-              path: { name: STREAM_NAME, queryId },
+              path: { name: STREAM_NAME, queryId: query.id },
               body: {
-                title: 'missing metadata',
-                esql: { query: `FROM ${STREAM_NAME},${STREAM_NAME}.* | WHERE KQL("message:'x'")` },
+                title: query.title,
+                esql: query.esql,
               },
             },
           })
-          .expect(400);
+          .expect(200)
+          .then((res) => res.body);
+        expect(upsertQueryResponse.acknowledged).to.be(true);
 
         const getQueriesResponse = await getQueries(apiClient, STREAM_NAME);
-        expect(getQueriesResponse.queries).to.eql([]);
+        expect(getQueriesResponse.queries).to.eql([query]);
+
+        // Breach query is still compiled to a metric series (METADATA is optional to store).
+        const rules = await alertingApi.searchRulesV2(roleAuthc);
+        expect(rules.body.items).to.have.length(1);
+        expect(rules.body.items[0].query.breach.query).to.contain(
+          'STATS metric_value = COUNT(*) BY bucket = BUCKET(@timestamp, 1 minute)'
+        );
+        expect(rules.body.items[0].query.breach.query).not.to.contain('METADATA');
       });
 
       it('returns 400 and does not save when ES|QL query references invalid sources', async () => {
