@@ -1,5 +1,5 @@
 {
-  "sha1": "84b3e4fe4872134751fbce65eb55ff7a52936a1f",
+  "sha1": "de7ab4476d8bf945885f4c5274847308a3999a91",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -547,7 +547,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_access_control_api.spec.ts",
-        "line": 712,
+        "line": 743,
         "column": 12
       }
     },
@@ -1011,7 +1011,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_callback_api.spec.ts",
-        "line": 143,
+        "line": 144,
         "column": 12
       }
     },
@@ -1043,7 +1043,71 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_callback_api.spec.ts",
-        "line": 282,
+        "line": 283,
+        "column": 12
+      }
+    },
+    {
+      "id": "23808d62419391b-82a75a6c138a614",
+      "title": "Agent Builder - converse callback API returns the existing execution for a replayed idempotency key",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_callback_api.spec.ts",
+        "line": 339,
+        "column": 12
+      }
+    },
+    {
+      "id": "23808d62419391b-e3a4852c5eeefc2",
+      "title": "Agent Builder - converse callback API schedules a single execution for concurrent duplicate deliveries",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_callback_api.spec.ts",
+        "line": 418,
+        "column": 12
+      }
+    },
+    {
+      "id": "23808d62419391b-be5f9d8b14fa9ea",
+      "title": "Agent Builder - converse callback API schedules separate executions for the same key on different origins",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_callback_api.spec.ts",
+        "line": 480,
+        "column": 12
+      }
+    },
+    {
+      "id": "23808d62419391b-a98d347436e2dcf",
+      "title": "Agent Builder - converse callback API prefers a caller-provided execution id over the idempotency key",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_callback_api.spec.ts",
+        "line": 531,
         "column": 12
       }
     },
@@ -1059,7 +1123,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_callback_api.spec.ts",
-        "line": 337,
+        "line": 576,
         "column": 12
       }
     },

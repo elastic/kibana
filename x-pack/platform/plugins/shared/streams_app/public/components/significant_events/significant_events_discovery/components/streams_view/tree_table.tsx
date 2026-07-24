@@ -64,6 +64,8 @@ export function StreamsTreeTable({
   streamOnboardingResultMap,
   searchQuery,
   selection,
+  blocksActivity = false,
+  activityBlockTooltip,
   onOnboardStreamActionClick,
   onStopOnboardingActionClick,
 }: {
@@ -72,6 +74,10 @@ export function StreamsTreeTable({
   loading?: boolean;
   searchQuery: Query;
   selection: EuiTableSelectionType<TableRow>;
+  /** When true, per-row onboard actions are disabled (global pause / status loading). */
+  blocksActivity?: boolean;
+  /** Explains why onboard actions are disabled (loading / error / paused). */
+  activityBlockTooltip?: string;
   onOnboardStreamActionClick: (streamName: string) => void;
   onStopOnboardingActionClick: (streamName: string) => void;
 }) {
@@ -467,13 +473,14 @@ export function StreamsTreeTable({
                 return (
                   <EuiToolTip
                     position="top"
-                    content={RUN_STREAM_ONBOARDING_BUTTON_LABEL}
+                    content={activityBlockTooltip ?? RUN_STREAM_ONBOARDING_BUTTON_LABEL}
                     display="block"
                     disableScreenReaderOutput
                   >
                     <EuiButtonIcon
                       iconType="radar"
                       aria-label={RUN_STREAM_ONBOARDING_BUTTON_LABEL}
+                      disabled={blocksActivity}
                       onClick={() => onOnboardStreamActionClick(item.stream.name)}
                     />
                   </EuiToolTip>
