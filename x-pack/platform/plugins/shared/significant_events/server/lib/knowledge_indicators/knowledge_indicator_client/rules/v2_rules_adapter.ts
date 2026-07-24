@@ -12,6 +12,7 @@ import { QUERY_TYPE_STATS } from '@kbn/significant-events-schema';
 import { MAX_ALERTS_PER_EXECUTION } from '../../../significant_events/rules/constants';
 import { getRuleLookbackInterval } from '../../../significant_events/rules/schedule';
 import {
+  STREAMS_RULE_STREAM_TAG_PREFIX,
   streamNameFromTag,
   toStreamTag,
   type IRulesManagementClient,
@@ -81,14 +82,13 @@ export class RulesAdapterV2 implements IRulesManagementClient {
   }
 
   async findStreamNamesWithOwnedRules(): Promise<string[]> {
-    // `getTags` is a terms aggregation over `metadata.tags`: distinct tags in
-    // one call rather than paging every rule. Each owned rule carries one
-    // `sigevents:stream:<name>` tag, so prefix-filtering yields owning streams.
-    const tags = await this.rulesClient.getTags();
+    // Filters rules, not tags: matched rules return all their tags, so drop non-ownership ones below.
+    const escapedPrefix = STREAMS_RULE_STREAM_TAG_PREFIX.replace(/:/g, '\\:');
+    const tags = await this.rulesClient.getTags({ filter: `metadata.tags: ${escapedPrefix}*` });
     const streamNames = new Set<string>();
     for (const tag of tags) {
       const streamName = streamNameFromTag(tag);
-      if (streamName !== undefined) {
+      if (streamName) {
         streamNames.add(streamName);
       }
     }
