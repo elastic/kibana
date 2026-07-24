@@ -70,21 +70,18 @@ function prepareValidation(validation: VersionedRouteValidation<unknown, unknown
 
 // Integration tested in ./core_versioned_route.test.ts
 export function prepareVersionedRouteValidation(
-  options: AddVersionOpts<unknown, unknown, unknown>,
-  isDev: boolean = false
+  options: AddVersionOpts<unknown, unknown, unknown>
 ): AddVersionOpts<unknown, unknown, unknown> {
   const { validate: originalValidate, security, ...rest } = options;
   let validate = originalValidate;
 
   if (typeof originalValidate === 'function') {
-    if (isDev) {
-      // Eager path — call immediately so errors surface at addVersion() time
-      validate = prepareValidation(originalValidate());
-    } else {
-      // Deferred path — use onceCacheOnSuccess to retry on failure instead of
-      // silently bypassing validation after the first construction error.
-      validate = onceCacheOnSuccess(() => prepareValidation(originalValidate())) as any;
-    }
+    // Deferred path — use onceCacheOnSuccess to retry on failure instead of
+    // silently bypassing validation after the first construction error.
+    // Note: versioned route thunks cannot be called eagerly because they may
+    // depend on other plugins' runtime state (e.g. embeddable schemas) that
+    // is not available until all plugins finish setup.
+    validate = onceCacheOnSuccess(() => prepareValidation(originalValidate())) as any;
   } else if (typeof validate === 'object' && validate !== null) {
     validate = prepareValidation(validate);
   }

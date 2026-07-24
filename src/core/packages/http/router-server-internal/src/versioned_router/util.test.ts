@@ -61,53 +61,18 @@ describe('prepareVersionedRouteValidation', () => {
     });
   });
 
-  describe('isDev parameter', () => {
-    it('isDev=true: calls factory immediately, throws at addVersion time on error', () => {
-      const brokenFactory = jest.fn(() => {
-        throw new Error('Schema construction failed');
-      });
-
-      expect(() => {
-        prepareVersionedRouteValidation(
-          { version: '1', validate: brokenFactory },
-          true // isDev
-        );
-      }).toThrow('Schema construction failed');
-
-      expect(brokenFactory).toHaveBeenCalledTimes(1);
-    });
-
-    it('isDev=true: stores plain object (eagerly constructed validation)', () => {
-      const validation: VersionedRouteValidation<unknown, unknown, unknown> = {
-        request: { body: schema.string() },
-        response: { 200: { body: () => schema.string() } },
-      };
-      const factory = jest.fn(
-        (): VersionedRouteValidation<unknown, unknown, unknown> => validation
-      );
-
-      const prepared = prepareVersionedRouteValidation(
-        { version: '1', validate: factory },
-        true // isDev
-      );
-
-      // validate should be a plain object (not a function)
-      expect(typeof prepared.validate).toBe('object');
-      expect(prepared.validate).not.toBe(validation); // prepareValidation wraps it
-      expect(factory).toHaveBeenCalledTimes(1); // called immediately at addVersion time
-    });
-
-    it('isDev=false: defers construction with success-only memoizer, retries on failure', () => {
+  describe('deferred validation with onceCacheOnSuccess', () => {
+    it('defers construction and retries on failure', () => {
       let attemptCount = 0;
       const brokenFactory = jest.fn(() => {
         attemptCount++;
         throw new Error(`Attempt ${attemptCount}`);
       });
 
-      const prepared = prepareVersionedRouteValidation(
-        { version: '1', validate: brokenFactory },
-        false // isDev — deferred
-      );
+      const prepared = prepareVersionedRouteValidation({
+        version: '1',
+        validate: brokenFactory,
+      });
 
       // Factory is not called yet
       expect(brokenFactory).toHaveBeenCalledTimes(0);
@@ -122,7 +87,7 @@ describe('prepareVersionedRouteValidation', () => {
       expect(brokenFactory).toHaveBeenCalledTimes(3);
     });
 
-    it('isDev=false: caches on success, returns same object on subsequent calls', () => {
+    it('caches on success, returns same object on subsequent calls', () => {
       const validation: VersionedRouteValidation<unknown, unknown, unknown> = {
         request: { body: schema.string() },
         response: { 200: { body: () => schema.string() } },
@@ -131,10 +96,10 @@ describe('prepareVersionedRouteValidation', () => {
         (): VersionedRouteValidation<unknown, unknown, unknown> => validation
       );
 
-      const prepared = prepareVersionedRouteValidation(
-        { version: '1', validate: factory },
-        false // isDev — deferred
-      );
+      const prepared = prepareVersionedRouteValidation({
+        version: '1',
+        validate: factory,
+      });
 
       // Call the validate function twice
       const result1 = (prepared.validate as () => any)();
