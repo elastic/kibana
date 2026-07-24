@@ -47,21 +47,23 @@ export const ApiKeyQueryAuth: AuthTypeSpec<AuthSchemaType> = {
 
     const paramNames =
       defaults?.paramNames && Array.isArray(defaults.paramNames)
-        ? defaults.paramNames.filter(isString)
+        ? defaults.paramNames.filter((s): s is string => isString(s) && s.length > 0)
         : undefined;
 
     if (paramNames && paramNames.length > 0) {
-      return z.object(
-        Object.fromEntries(
-          paramNames.map((paramName) => [
-            paramName,
-            z
-              .string()
-              .min(1, { message: i18n.API_KEY_QUERY_REQUIRED_MESSAGE })
-              .meta({ sensitive: true, label: paramName }),
-          ])
+      return z
+        .object(
+          Object.fromEntries(
+            paramNames.map((paramName) => [
+              paramName,
+              z
+                .string()
+                .min(1, { message: i18n.API_KEY_QUERY_REQUIRED_MESSAGE })
+                .meta({ sensitive: true, label: paramName }),
+            ])
+          )
         )
-      );
+        .meta(existingMeta);
     }
 
     return schemaToUse.meta(existingMeta);

@@ -38,6 +38,18 @@ describe('ApiKeyQueryAuth', () => {
       expect(schema?.shape.key.meta()).toMatchObject({ sensitive: true });
       expect(schema?.shape.token.meta()).toMatchObject({ sensitive: true });
     });
+
+    it('applies the authentication section label to the paramNames schema', () => {
+      const schema = ApiKeyQueryAuth.normalizeSchema?.({ paramNames: ['key', 'token'] });
+      expect(schema?.meta()).toMatchObject({ label: expect.any(String) });
+    });
+
+    it('filters out empty-string entries from paramNames', () => {
+      const schema = ApiKeyQueryAuth.normalizeSchema?.({ paramNames: ['key', '', 'token'] });
+      expect(schema?.shape.key).toBeDefined();
+      expect(schema?.shape.token).toBeDefined();
+      expect(schema?.shape['']).toBeUndefined();
+    });
   });
 
   describe('configure', () => {

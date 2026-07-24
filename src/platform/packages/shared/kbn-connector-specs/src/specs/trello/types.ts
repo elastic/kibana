@@ -123,46 +123,52 @@ export const CreateCardInputSchema = lazySchema(() =>
 export type CreateCardInput = z.infer<typeof CreateCardInputSchema>;
 
 export const UpdateCardInputSchema = lazySchema(() =>
-  z.object({
-    cardId: trelloId('card'),
-    name: z.string().min(1).max(16384).optional().describe('New title for the card.'),
-    desc: z.string().max(16384).optional().describe('New description text for the card.'),
-    due: z
-      .string()
-      .max(100)
-      .nullable()
-      .optional()
-      .describe(
-        'New due date as an ISO 8601 datetime string, or null to clear the due date. ' +
-          'Passing null sends the sentinel value "null" that the Trello API requires to remove a due date.'
-      ),
-    idList: trelloId('list')
-      .optional()
-      .describe('Target list ID to move the card into a different list.'),
-    pos: cardPosition()
-      .optional()
-      .describe('New position within its list: "top", "bottom", or a positive number.'),
-    closed: z
-      .boolean()
-      .optional()
-      .describe(
-        'Set true to archive the card, or false to unarchive it. This is the only way to remove a card through this connector — there is no hard-delete action.'
-      ),
-    idMembers: z
-      .string()
-      .max(2000)
-      .optional()
-      .describe(
-        'Comma-separated Trello member IDs to assign to the card, replacing the current assignment. Use listBoardMembers to resolve names to IDs.'
-      ),
-    idLabels: z
-      .string()
-      .max(2000)
-      .optional()
-      .describe(
-        'Comma-separated Trello label IDs to apply to the card, replacing the current labels. Use listBoardLabels to resolve label names to IDs.'
-      ),
-  })
+  z
+    .object({
+      cardId: trelloId('card'),
+      name: z.string().min(1).max(16384).optional().describe('New title for the card.'),
+      desc: z.string().max(16384).optional().describe('New description text for the card.'),
+      due: z
+        .string()
+        .max(100)
+        .nullable()
+        .optional()
+        .describe(
+          'New due date as an ISO 8601 datetime string, or null to clear the due date. ' +
+            'Passing null sends the sentinel value "null" that the Trello API requires to remove a due date.'
+        ),
+      idList: trelloId('list')
+        .optional()
+        .describe('Target list ID to move the card into a different list.'),
+      pos: cardPosition()
+        .optional()
+        .describe('New position within its list: "top", "bottom", or a positive number.'),
+      closed: z
+        .boolean()
+        .optional()
+        .describe(
+          'Set true to archive the card, or false to unarchive it. This is the only way to remove a card through this connector — there is no hard-delete action.'
+        ),
+      idMembers: z
+        .string()
+        .max(2000)
+        .optional()
+        .describe(
+          'Comma-separated Trello member IDs to assign to the card, replacing the current assignment. Use listBoardMembers to resolve names to IDs.'
+        ),
+      idLabels: z
+        .string()
+        .max(2000)
+        .optional()
+        .describe(
+          'Comma-separated Trello label IDs to apply to the card, replacing the current labels. Use listBoardLabels to resolve label names to IDs.'
+        ),
+    })
+    .refine(
+      ({ name, desc, due, idList, pos, closed, idMembers, idLabels }) =>
+        [name, desc, due, idList, pos, closed, idMembers, idLabels].some((v) => v !== undefined),
+      { message: 'At least one field besides cardId must be provided' }
+    )
 );
 export type UpdateCardInput = z.infer<typeof UpdateCardInputSchema>;
 

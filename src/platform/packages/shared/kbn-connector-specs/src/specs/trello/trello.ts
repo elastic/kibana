@@ -204,7 +204,7 @@ export const Trello: ConnectorSpec = {
       handler: async (ctx, input: SearchInput) => {
         const params: Record<string, string | number> = {
           query: input.query,
-          modelTypes: input.modelTypes ?? 'cards,boards',
+          modelTypes: input.modelTypes || 'cards,boards',
           cards_limit: input.cardsLimit ?? 10,
           boards_limit: input.boardsLimit ?? 10,
         };
@@ -223,8 +223,8 @@ export const Trello: ConnectorSpec = {
         const body = new URLSearchParams();
         body.set('idList', input.listId);
         body.set('name', input.name);
-        if (input.desc) body.set('desc', input.desc);
-        if (input.due) body.set('due', input.due);
+        if (input.desc !== undefined) body.set('desc', input.desc);
+        if (input.due !== undefined) body.set('due', input.due);
         if (input.pos !== undefined) body.set('pos', String(input.pos));
         if (input.idMembers) body.set('idMembers', input.idMembers);
         if (input.idLabels) body.set('idLabels', input.idLabels);

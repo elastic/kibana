@@ -9,6 +9,7 @@
 
 import type { ActionContext } from '../../connector_spec';
 import { Trello } from './trello';
+import { UpdateCardInputSchema } from './types';
 
 const BASE_URL = 'https://api.trello.com/1';
 
@@ -94,6 +95,17 @@ describe('Trello', () => {
       });
       expect(mockClient.get).toHaveBeenCalledWith(`${BASE_URL}/boards/board1/members`);
       expect(result).toEqual([{ id: 'member1', username: 'jdoe', fullName: 'Jane Doe' }]);
+    });
+  });
+
+  describe('getCardComments action', () => {
+    it('fetches card actions filtered to commentCard only', async () => {
+      mockClient.get.mockResolvedValue({ data: [{ id: 'action1', type: 'commentCard' }] });
+      const result = await Trello.actions.getCardComments.handler(mockContext, { cardId: 'card1' });
+      expect(mockClient.get).toHaveBeenCalledWith(`${BASE_URL}/cards/card1/actions`, {
+        params: { filter: 'commentCard' },
+      });
+      expect(result).toEqual([{ id: 'action1', type: 'commentCard' }]);
     });
   });
 
@@ -236,6 +248,21 @@ describe('Trello', () => {
         idMembers: 'member1,member2',
         idLabels: 'label1',
       });
+    });
+  });
+
+  describe('UpdateCardInputSchema validation', () => {
+    it('rejects a call with only cardId and no update fields', () => {
+      const result = UpdateCardInputSchema.safeParse({ cardId: 'abc123def456abc123def456' });
+      expect(result.success).toBe(false);
+    });
+
+    it('accepts a call with at least one update field', () => {
+      const result = UpdateCardInputSchema.safeParse({
+        cardId: 'abc123def456abc123def456',
+        closed: true,
+      });
+      expect(result.success).toBe(true);
     });
   });
 
