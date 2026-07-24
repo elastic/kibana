@@ -111,9 +111,9 @@ const expectScenarioData = ({
   expect(counterBars?.[0]?.y).toBe(5000);
   expect(counterBars?.[counterBars.length - 1]?.y).toBe(5000);
 
-  // Bucket boundaries can vary with chart interval selection. The lower bound still accounts for
-  // every queried source explicitly, including the downsample target that duplicates its source
-  // stream's documents. A missing regular index or stream therefore cannot be masked by that copy.
+  // Bucket boundaries can vary with chart interval selection. The lower bound accounts for every
+  // logical scenario index. Lens does not count a downsample target as an additional contribution
+  // beside its source stream, so a missing regular index or stream still lowers this total by 100.
   const columnsToCheck = countBars ? countBars.length / 2 : 0;
   expect(sumFirstNValues(columnsToCheck, countBars)).toBeGreaterThan(
     expectedDocumentCountBeforeUpgrade - 1

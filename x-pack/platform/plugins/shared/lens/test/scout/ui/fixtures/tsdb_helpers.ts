@@ -363,8 +363,9 @@ export const test = baseTest.extend<LensUiTestFixtures, LensUiWorkerFixtures>({
             dataViewTitle: `${indexes.map(({ index }) => index).join(',')}${
               downsampledTargetIndex ? `,${downsampledTargetIndex}` : ''
             }`,
-            expectedDocumentCountBeforeUpgrade:
-              (indexes.length + (downsampledTargetIndex ? 1 : 0)) * TSDB_SCENARIO_DOCUMENT_COUNT,
+            // Lens count aggregation treats the downsample target as the stream's rolled-up data;
+            // it does not add another logical source contribution for that target.
+            expectedDocumentCountBeforeUpgrade: indexes.length * TSDB_SCENARIO_DOCUMENT_COUNT,
             cleanup,
           };
         } catch (error) {
