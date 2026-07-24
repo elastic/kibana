@@ -28,6 +28,7 @@ const getRecurringRequestSchema = (recurringMetaId?: string) =>
       end: schema.maybe(
         schema.string({
           validate: validateEndDateV1,
+          maxLength: 100,
           meta: {
             description:
               'The end date of a recurring schedule, provided in ISO 8601 format and set to the UTC timezone. For example: `2025-04-01T00:00:00.000Z`.',
@@ -37,6 +38,7 @@ const getRecurringRequestSchema = (recurringMetaId?: string) =>
       every: schema.maybe(
         schema.string({
           validate: validateIntervalAndFrequencyV1,
+          maxLength: 100,
           meta: {
             description:
               'The interval and frequency of a recurring schedule. It allows values in `<integer><unit>` format. `<unit>` is one of `d`, `w`, `M`, or `y` for days, weeks, months, years. For example: `15d`, `2w`, `3m`, `1y`.',
@@ -44,8 +46,9 @@ const getRecurringRequestSchema = (recurringMetaId?: string) =>
         })
       ),
       onWeekDay: schema.maybe(
-        schema.arrayOf(schema.string(), {
+        schema.arrayOf(schema.string({ maxLength: 10 }), {
           minSize: 1,
+          maxSize: 77,
           validate: validateOnWeekDayV1,
           meta: {
             description:
@@ -62,6 +65,7 @@ const getRecurringRequestSchema = (recurringMetaId?: string) =>
           }),
           {
             minSize: 1,
+            maxSize: 31,
             meta: {
               description:
                 'The specific days of the month for a recurring schedule. Valid values are 1-31.',
@@ -78,6 +82,7 @@ const getRecurringRequestSchema = (recurringMetaId?: string) =>
           }),
           {
             minSize: 1,
+            maxSize: 12,
             meta: {
               description: 'The specific months for a recurring schedule. Valid values are 1-12.',
             },
@@ -105,6 +110,7 @@ export const getScheduleRequestSchema = ({
     {
       start: schema.string({
         validate: validateStartDateV1,
+        maxLength: 100,
         meta: {
           description:
             'The start date and time of the schedule, provided in ISO 8601 format and set to the UTC timezone. For example: `2025-03-12T12:00:00.000Z`.',
@@ -112,6 +118,7 @@ export const getScheduleRequestSchema = ({
       }),
       duration: schema.string({
         validate: validateDurationV1,
+        maxLength: 100,
         meta: {
           description:
             'The duration of the schedule. It allows values in `<integer><unit>` format. `<unit>` is one of `d`, `h`, `m`, or `s` for hours, minutes, seconds. For example: `1d`, `5h`, `30m`, `5000s`.',
@@ -120,6 +127,7 @@ export const getScheduleRequestSchema = ({
       timezone: schema.maybe(
         schema.string({
           validate: validateTimezoneV1,
+          maxLength: 64,
           meta: {
             description: 'The timezone of the schedule. The default timezone is UTC.',
           },
@@ -155,7 +163,8 @@ const getRecurringResponseSchema = (recurringMetaId?: string) =>
         })
       ),
       onWeekDay: schema.maybe(
-        schema.arrayOf(schema.string(), {
+        schema.arrayOf(schema.string({ maxLength: 10 }), {
+          maxSize: 77,
           meta: {
             description:
               'The specific days of the week (`[MO,TU,WE,TH,FR,SA,SU]`) or nth day of month (`[+1MO, -3FR, +2WE, -4SA, -5SU]`) for a recurring schedule.',
@@ -164,6 +173,7 @@ const getRecurringResponseSchema = (recurringMetaId?: string) =>
       ),
       onMonthDay: schema.maybe(
         schema.arrayOf(schema.number(), {
+          maxSize: 31,
           meta: {
             description:
               'The specific days of the month for a recurring schedule. Valid values are 1-31.',
@@ -172,6 +182,7 @@ const getRecurringResponseSchema = (recurringMetaId?: string) =>
       ),
       onMonth: schema.maybe(
         schema.arrayOf(schema.number(), {
+          maxSize: 12,
           meta: {
             description: 'The specific months for a recurring schedule. Valid values are 1-12.',
           },
