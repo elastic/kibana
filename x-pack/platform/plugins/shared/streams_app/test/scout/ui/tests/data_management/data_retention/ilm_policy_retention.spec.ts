@@ -69,7 +69,7 @@ test.describe('Stream data retention - ILM policy', { tag: tags.stateful.classic
   test('should select and save ILM policy', async ({ page }) => {
     await openLifecycleMethodFlyout(page);
     await toggleInheritSwitch(page, false);
-    await selectIlmPolicy(page, '.alerts-ilm-policy');
+    await selectIlmPolicy(page, '.alerts-ilm-policy', { managed: true });
 
     // Save changes
     await saveRetentionChanges(page);
@@ -83,7 +83,7 @@ test.describe('Stream data retention - ILM policy', { tag: tags.stateful.classic
   test('should display selected ILM policy name', async ({ page }) => {
     await openLifecycleMethodFlyout(page);
     await toggleInheritSwitch(page, false);
-    await selectIlmPolicy(page, '.alerts-ilm-policy');
+    await selectIlmPolicy(page, '.alerts-ilm-policy', { managed: true });
 
     // Save changes
     await saveRetentionChanges(page);
@@ -97,7 +97,7 @@ test.describe('Stream data retention - ILM policy', { tag: tags.stateful.classic
   test('should persist ILM policy selection across page reload', async ({ page, pageObjects }) => {
     await openLifecycleMethodFlyout(page);
     await toggleInheritSwitch(page, false);
-    await selectIlmPolicy(page, '.alerts-ilm-policy');
+    await selectIlmPolicy(page, '.alerts-ilm-policy', { managed: true });
     await saveRetentionChanges(page);
 
     // Reload page
@@ -116,8 +116,8 @@ test.describe('Stream data retention - ILM policy', { tag: tags.stateful.classic
     // First set an ILM policy
     await openLifecycleMethodFlyout(page);
     await toggleInheritSwitch(page, false);
-    await selectIlmPolicy(page, '.alerts-ilm-policy');
-    await saveRetentionChanges(page);
+    await selectIlmPolicy(page, '.alerts-ilm-policy', { managed: true });
+    await saveRetentionChanges(page, { waitForIlmStats: true });
 
     // Click on the hot phase button using test ID
     await page.getByTestId('lifecyclePhase-hot-button').click();
@@ -239,7 +239,7 @@ test.describe('Stream data retention - ILM policy', { tag: tags.stateful.classic
         await openLifecycleMethodFlyout(page);
         await toggleInheritSwitch(page, false);
         await selectIlmPolicy(page, policyName);
-        await saveRetentionChanges(page);
+        await saveRetentionChanges(page, { waitForIlmStats: true });
 
         // Verify downsampling is rendered for the policy
         await expect(page.getByTestId('downsamplingBar-label')).toBeVisible();
@@ -307,7 +307,7 @@ test.describe('Stream data retention - ILM policy', { tag: tags.stateful.classic
         await openLifecycleMethodFlyout(page);
         await toggleInheritSwitch(page, false);
         await selectIlmPolicy(page, policyName);
-        await saveRetentionChanges(page);
+        await saveRetentionChanges(page, { waitForIlmStats: true });
 
         // Verify downsampling is rendered for the policy
         await expect(page.getByTestId('downsamplingBar-label')).toBeVisible();
@@ -378,7 +378,7 @@ test.describe('Stream data retention - ILM policy', { tag: tags.stateful.classic
         await openLifecycleMethodFlyout(page);
         await toggleInheritSwitch(page, false);
         await selectIlmPolicy(page, policyName);
-        await saveRetentionChanges(page);
+        await saveRetentionChanges(page, { waitForIlmStats: true });
 
         // Verify there is no downsampling step before editing (empty state is always rendered for TSDB)
         await expect(page.getByTestId('downsamplingBar-emptyLabel')).toBeVisible();
