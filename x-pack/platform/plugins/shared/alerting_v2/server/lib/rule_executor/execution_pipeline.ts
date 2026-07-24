@@ -34,6 +34,7 @@ import {
 import { StorageServiceInternalToken } from '../services/storage_service/tokens';
 import type { StorageServiceContract } from '../services/storage_service/storage_service';
 import { ALERT_EVENTS_DATA_STREAM, AlertEvent } from '../../resources/datastreams/alert_events';
+import { buildExecutionUuid } from './build_alert_events';
 
 /**
  * Raw input from the task runner.
@@ -119,9 +120,20 @@ export class RuleExecutionPipeline implements RuleExecutionPipelineContract {
       // monotonic auto-refresh therefore guarantees: marker visible =>
       // every event of this execution visible. The dispatcher gates on this so
       // it never acts on a partially-written execution (rna-program#437).
+      // Must match the uuid the alert-event builder stamps on `execution.uuid`
+      // (deterministic from ruleId/spaceId/scheduledAt), NOT the Task Manager
+      // run uuid in `rawInput.executionUuid` — otherwise the dispatcher's gate
+      // groups the marker and the events under different uuids and never
+      // correlates them.
       await writeExecutionEndMarkerDoc({
         params: {
-          execution: { uuid: rawInput.executionUuid },
+          execution: {
+            uuid: buildExecutionUuid({
+              ruleId: rawInput.ruleId,
+              spaceId: rawInput.spaceId,
+              scheduledTimestamp: rawInput.scheduledAt,
+            }),
+          },
           timestamp: new Date().toISOString(),
           rule: { id: rawInput.ruleId },
           spaceId: rawInput.spaceId,
