@@ -33,6 +33,7 @@ import {
 } from '../../../../common/endpoint/constants';
 import { withEndpointAuthz } from '../with_endpoint_authz';
 import { errorHandler } from '../error_handler';
+import { EndpointAuthorizationError } from '../../errors';
 import { buildIndexNameWithNamespace } from '../../../../common/endpoint/utils/index_name_utilities';
 import { buildBaseEndpointMetadataFilter } from '../../../../common/endpoint/utils/endpoint_metadata_filter';
 import { prefixIndexPatternsWithCcs } from '../../utils/ccs_utils';
@@ -113,6 +114,22 @@ export const getEndpointSuggestionsRequestHandler = (
 
       const suggestionType = request.params.suggestion_type;
 
+      const endpointAuthz = await securitySolutionContext.getEndpointAuthz();
+      const isAuthorizedForSuggestionType: Record<
+        EndpointSuggestionsParams['suggestion_type'],
+        boolean
+      > = {
+        eventFilters: endpointAuthz.canWriteEventFilters,
+        trustedApps: endpointAuthz.canWriteTrustedApplications,
+        trustedDevices: endpointAuthz.canWriteTrustedDevices,
+        endpointExceptions: endpointAuthz.canWriteEndpointExceptions,
+        endpoints: endpointAuthz.canReadEndpointList,
+      };
+
+      if (!isAuthorizedForSuggestionType[suggestionType]) {
+        throw new EndpointAuthorizationError();
+      }
+
       if (
         suggestionType === 'eventFilters' ||
         (isTrustedAppsAdvancedModeFFEnabled && suggestionType === 'trustedApps') ||
@@ -181,7 +198,7 @@ export const getEndpointSuggestionsRequestHandler = (
 
       // Avoid adding endpoint alerts log access to kibana_system role by using current user,
       // as the index may contain user data.
-      // https://docs.elastic.dev/kibana-dev-docs/key-concepts/security-kibana-system-user
+      // https://www.elastic.co/docs/extend/kibana/key-concepts/security/system-user
       const elasticsearchClient =
         suggestionType === 'endpointExceptions'
           ? elasticsearch.client.asCurrentUser
