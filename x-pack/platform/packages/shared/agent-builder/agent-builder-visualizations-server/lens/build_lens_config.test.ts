@@ -30,10 +30,6 @@ jest.mock('./schemas', () => ({
   getSchemaForChartType: jest.fn(() => ({})),
 }));
 
-jest.mock('./guess_chart_type', () => ({
-  guessChartType: jest.fn(),
-}));
-
 const mockedValidateEsqlQuery = jest.mocked(validateEsqlQuery);
 const mockedBuildCallbacks = jest.mocked(buildServerESQLCallbacks);
 const mockedCreateGraph = jest.mocked(createVisualizationGraph);
@@ -78,13 +74,53 @@ describe('buildLensConfig', () => {
   const run = (esql?: string) =>
     buildLensConfig({
       nlQuery: 'count of logs',
-      chartType: SupportedChartType.Metric, // pass a chartType so guessChartType is skipped
+      chartType: SupportedChartType.Metric,
       esql,
       modelProvider,
       logger,
       events,
       esClient,
     });
+
+  it('uses an explicitly provided chart type', async () => {
+    const result = await run();
+
+    expect(result.selectedChartType).toBe(SupportedChartType.Metric);
+    expect(invoke).toHaveBeenCalledWith(
+      expect.objectContaining({ chartType: SupportedChartType.Metric })
+    );
+  });
+
+  it('preserves the existing supported chart type when none is provided', async () => {
+    const result = await buildLensConfig({
+      nlQuery: 'change the title',
+      parsedExistingConfig: { type: SupportedChartType.XY },
+      modelProvider,
+      logger,
+      events,
+      esClient,
+    });
+
+    expect(result.selectedChartType).toBe(SupportedChartType.XY);
+    expect(invoke).toHaveBeenCalledWith(
+      expect.objectContaining({ chartType: SupportedChartType.XY })
+    );
+  });
+
+  it('rejects a missing chart type when the existing type is unsupported', async () => {
+    await expect(
+      buildLensConfig({
+        nlQuery: 'change the title',
+        parsedExistingConfig: { type: 'unsupported' },
+        modelProvider,
+        logger,
+        events,
+        esClient,
+      })
+    ).rejects.toThrow('A supported chart type is required');
+
+    expect(mockedCreateGraph).not.toHaveBeenCalled();
+  });
 
   it('passes a valid provided ES|QL through to the graph verbatim', async () => {
     await run(PROVIDED_ESQL);

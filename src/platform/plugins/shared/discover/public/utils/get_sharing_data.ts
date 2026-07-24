@@ -14,7 +14,7 @@ import type {
   ISearchSource,
   SerializedSearchSourceFields,
 } from '@kbn/data-plugin/public';
-import type { Filter } from '@kbn/es-query';
+import type { Filter, TimeRange } from '@kbn/es-query';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import {
   getSortForSearchSource,
@@ -32,7 +32,8 @@ import { showTimeFieldColumn } from './show_time_field_column';
 export async function getSharingData(
   currentSearchSource: ISearchSource,
   state: DiscoverAppState,
-  services: { uiSettings: IUiSettingsClient; data: DataPublicPluginStart }
+  services: { uiSettings: IUiSettingsClient; data: DataPublicPluginStart },
+  absoluteTimeRange?: TimeRange
 ) {
   const { uiSettings, data } = services;
   const searchSource = currentSearchSource.createCopy();
@@ -63,7 +64,10 @@ export async function getSharingData(
     query,
   });
 
-  const absoluteTimeFilter = data.query.timefilter.timefilter.createFilter(index);
+  const absoluteTimeFilter = data.query.timefilter.timefilter.createFilter(
+    index,
+    absoluteTimeRange
+  );
   const relativeTimeFilter = data.query.timefilter.timefilter.createRelativeFilter(index);
   return {
     getSearchSource: ({
