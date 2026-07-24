@@ -17,8 +17,12 @@ interface RulesListAutoRefreshProps {
   onRefresh: () => void;
 }
 
-const flexGroupStyle = {
-  marginLeft: 'auto',
+const autoRefreshCss = {
+  flexShrink: 0,
+};
+
+const lastUpdateTextCss = {
+  whiteSpace: 'nowrap' as const,
 };
 
 const getLastUpdateText = (lastUpdate: string) => {
@@ -104,9 +108,21 @@ export const RulesListAutoRefresh = (props: RulesListAutoRefreshProps) => {
   );
 
   return (
-    <EuiFlexGroup data-test-subj="rulesListAutoRefresh" alignItems="center">
-      <EuiFlexItem grow={false} style={flexGroupStyle}>
-        <EuiText data-test-subj="rulesListAutoRefresh-lastUpdateText" size="s" color="subdued">
+    <EuiFlexGroup
+      data-test-subj="rulesListAutoRefresh"
+      alignItems="center"
+      gutterSize="s"
+      responsive={false}
+      wrap={false}
+      css={autoRefreshCss}
+    >
+      <EuiFlexItem grow={false}>
+        <EuiText
+          data-test-subj="rulesListAutoRefresh-lastUpdateText"
+          size="s"
+          color="subdued"
+          css={lastUpdateTextCss}
+        >
           {lastUpdateText}
         </EuiText>
       </EuiFlexItem>

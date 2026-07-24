@@ -1041,6 +1041,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
           columns={[selectionColumn, ...rulesListColumns]}
           sorting={{ sort }}
           rowHeader="name"
+          responsiveBreakpoint={false}
           rowProps={rowProps}
           css={ruleRowCss}
           cellProps={(rule: RuleTableItem) => ({

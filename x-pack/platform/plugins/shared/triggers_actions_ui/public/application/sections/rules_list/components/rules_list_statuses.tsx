@@ -26,6 +26,10 @@ interface RulesListStatusesProps {
   rulesLastRunOutcomes: Record<string, number>;
 }
 
+const rulesListStatusesCss = {
+  flexShrink: 0,
+};
+
 export const RulesListStatuses = (props: RulesListStatusesProps) => {
   const { euiTheme } = useEuiTheme();
   const { rulesStatuses, rulesLastRunOutcomes } = props;
@@ -34,7 +38,13 @@ export const RulesListStatuses = (props: RulesListStatusesProps) => {
 
   if (isRuleUsingExecutionStatus) {
     return (
-      <EuiFlexGroup alignItems="center" gutterSize="none">
+      <EuiFlexGroup
+        alignItems="center"
+        gutterSize="none"
+        responsive={false}
+        wrap={false}
+        css={rulesListStatusesCss}
+      >
         <EuiFlexItem grow={false}>
           <EuiHealth color={euiTheme.colors.success} data-test-subj="totalActiveRulesCount">
             {RULE_STATUS_ACTIVE(rulesStatuses.active)}
@@ -70,7 +80,13 @@ export const RulesListStatuses = (props: RulesListStatusesProps) => {
   }
 
   return (
-    <EuiFlexGroup alignItems="center" gutterSize="none">
+    <EuiFlexGroup
+      alignItems="center"
+      gutterSize="none"
+      responsive={false}
+      wrap={false}
+      css={rulesListStatusesCss}
+    >
       <EuiFlexItem grow={false}>
         <EuiHealth color={euiTheme.colors.success} data-test-subj="totalSucceededRulesCount">
           {RULE_LAST_RUN_OUTCOME_SUCCEEDED_DESCRIPTION(rulesLastRunOutcomes.succeeded)}
