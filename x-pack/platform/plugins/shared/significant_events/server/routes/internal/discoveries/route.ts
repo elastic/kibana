@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { discoverySchema, type Discovery } from '@kbn/significant-events-schema';
+import type { Discovery } from '@kbn/significant-events-schema';
 import { z } from '@kbn/zod/v4';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import type { PaginatedResponse } from '../../../lib/significant_events/query_utils';
@@ -46,31 +46,6 @@ const discoveriesSearchRoute = createServerRoute({
   },
 });
 
-const discoveriesBulkCreateRoute = createServerRoute({
-  endpoint: 'POST /internal/significant_events/discoveries',
-  options: {
-    access: 'internal',
-    summary: 'Bulk create discoveries',
-    description: 'Create discovery entities in bulk.',
-  },
-  security: {
-    authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
-    },
-  },
-  params: z.object({
-    body: z.array(discoverySchema),
-  }),
-  handler: async ({ params, request, getScopedClients, server }) => {
-    const { getDiscoveryClient, licensing } = await getScopedClients({ request });
-
-    await assertSignificantEventsAccess({ server, licensing });
-
-    return getDiscoveryClient().bulkCreate(params.body);
-  },
-});
-
 export const internalDiscoveriesRoutes = {
   ...discoveriesSearchRoute,
-  ...discoveriesBulkCreateRoute,
 };
