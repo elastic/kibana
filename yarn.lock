@@ -7144,6 +7144,9 @@
 
 "@kbn/evals-suite-security-esql-generation-regression@link:x-pack/solutions/security/packages/kbn-evals-suite-security-esql-generation-regression":
   version "0.0.0"
+
+"@kbn/evals-suite-security-persona-matrix@link:x-pack/solutions/security/packages/kbn-evals-suite-security-persona-matrix":
+  version "0.0.0"
   uid ""
 
 "@kbn/evals-suite-siem-readiness@link:x-pack/solutions/security/packages/kbn-evals-suite-siem-readiness":

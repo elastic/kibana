@@ -32,12 +32,9 @@ It is managed via the Evals dataset API on the golden cluster: https://kbn-evals
 
 ### Default (CI / golden cluster)
 
-By default, the suite uses the checked-in reference JSONL at
-`data/eval_dataset_attack_discovery_all_scenarios.jsonl`. When
-`EVALUATIONS_KBN_URL` points at the golden cluster (CI via Vault, or
-`--datasets-profile dev-vault` locally), it resolves the full dataset by name.
-The name defaults to `Attack Discovery All Scenarios` and can be overridden with
-`ATTACK_DISCOVERY_DATASET_NAME`.
+By default, the suite uses `trustUpstreamDataset: true` and resolves the dataset
+by name from the golden cluster. The name defaults to `attack_discovery: bundled alerts (jsonl)`
+and can be overridden with `ATTACK_DISCOVERY_DATASET_NAME`.
 
 This requires `EVALUATIONS_KBN_URL` and `EVALUATIONS_KBN_API_KEY` to be set
 (automatically configured in CI via the vault config, or locally via `local_ci_env.sh`).
@@ -240,45 +237,3 @@ the configured deployment may not exist (or may not be reachable from your envir
 
 This suite is **Node-only** (Playwright eval suite). It includes a package-local ESLint override:
 - `./.eslintrc.js` disables `import/no-nodejs-modules` inside this package
-
----
-
-## Chrysalis Agentic SOC parity (Insights + Chrysalis)
-
-Exported from Chrysalis's eval cluster (`2f69892…`) for kbn-evals parity with `tools/eis-benchmark/`.
-
-### Dedup Insights alerts (AD fixture)
-
-The Insights detection rule re-emits signals; dedup to one alert per `kibana.alert.original_event.id` before AD runs:
-
-```bash
-ES_URL=https://<es-host> ES_AUTH='user:pass' \
-  node x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery/scripts/dedup_insights_alerts.mjs \
-  --from-es \
-  --out x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery/data/chrysalis/insights_alerts_deduped_gold.ndjson
-```
-
-Cluster export (Jul 2026) yields **87** unique alerts (methodology cites ~95 — request source NDJSON if exact parity is required). See `data/chrysalis/insights_alerts_deduped_gold.meta.json`.
-
-### Seed Chrysalis agent + workflows (Scout / eval prep)
-
-From a Scout spec or dev script with `esClient` + Kibana `fetch`:
-
-```typescript
-import { seedChrysalisChrysalisEvalStack } from '../../src/chrysalis/seed_chrysalis_eval';
-
-await seedChrysalisChrysalisEvalStack(esClient, fetch, {
-  virustotalApiKey: process.env.VIRUSTOTAL_API_KEY,
-  slackConnectorId: process.env.CHRYSALIS_SLACK_CONNECTOR_ID,
-  oncallEmail: process.env.CHRYSALIS_ONCALL_EMAIL,
-});
-```
-
-Templates live under `data/chrysalis/` (agent JSON + workflow YAML templates). **Not seeded:** `get.time` and `check.on.call.schedule` workflow tools — still on Chrysalis's deployment only; export from harness repo when available.
-
-| Env var | Purpose |
-|---|---|
-| `VIRUSTOTAL_API_KEY` | Required for `vt-hash-lookup` workflow |
-| `CHRYSALIS_SLACK_CONNECTOR_ID` | Slack connector for `create-channel` |
-| `CHRYSALIS_ONCALL_EMAIL` | Default on-call invite email |
-| `CHRYSALIS_INSIGHTS_NDJSON_PATH` | Override insights bulk fixture path |

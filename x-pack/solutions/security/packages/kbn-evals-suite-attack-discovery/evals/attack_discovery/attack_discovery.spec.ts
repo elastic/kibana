@@ -40,53 +40,22 @@ const resolveDatasetOffset = (): number | undefined => {
   return Math.max(0, Math.floor(parsed));
 };
 
-const GOLDEN_CLUSTER_KBN_URL_MARKERS = ['kbn-evals-serverless', 'gcp.elastic.cloud'] as const;
-
 /**
- * Use golden-cluster upstream resolution when explicitly named or when
- * EVALUATIONS_KBN_URL points at the managed evals cluster (CI / dev-vault).
- * Local Scout runs default to the checked-in reference JSONL instead.
+ * When ATTACK_DISCOVERY_DATASET_JSONL_PATH is set, load from local JSONL.
+ * Otherwise, resolve the dataset by name from the golden cluster.
  */
-const shouldResolveFromGoldenCluster = (): boolean => {
-  const kibanaUrl = process.env.KIBANA_URL ?? '';
-  // Local Scout runs use bundled JSONL even when scores export to golden via EVALUATIONS_KBN_URL.
-  if (/localhost|127\.0\.0\.1/.test(kibanaUrl)) {
-    return false;
-  }
-
-  if (process.env.ATTACK_DISCOVERY_DATASET_NAME) {
-    return true;
-  }
-
-  const evaluationsKbnUrl = process.env.EVALUATIONS_KBN_URL ?? '';
-  return GOLDEN_CLUSTER_KBN_URL_MARKERS.some((marker) => evaluationsKbnUrl.includes(marker));
-};
+const useLocalJsonl = (): boolean => Boolean(process.env.ATTACK_DISCOVERY_DATASET_JSONL_PATH);
 
 evaluate.describe('Attack Discovery', { tag: tags.stateful.classic }, () => {
-  /**
-   * Full dataset evaluation — three modes (priority order):
-   *
-   * 1. **Explicit JSONL path** (`ATTACK_DISCOVERY_DATASET_JSONL_PATH`)
-   * 2. **Golden cluster** (`ATTACK_DISCOVERY_DATASET_NAME` or golden `EVALUATIONS_KBN_URL`)
-   * 3. **Bundled reference JSONL** at `data/eval_dataset_attack_discovery_all_scenarios.jsonl`
-   */
   evaluate('bundled alerts (jsonl)', async ({ evaluateDataset }) => {
-    const jsonlPath = process.env.ATTACK_DISCOVERY_DATASET_JSONL_PATH;
-    const jsonlOptions = {
-      offset: resolveDatasetOffset(),
-      limit: resolveDatasetLimit(),
-    };
-
-    if (jsonlPath) {
+    if (useLocalJsonl()) {
       const dataset = await loadAttackDiscoveryBundledAlertsJsonlDataset({
-        jsonlPath,
-        ...jsonlOptions,
+        jsonlPath: process.env.ATTACK_DISCOVERY_DATASET_JSONL_PATH,
+        offset: resolveDatasetOffset(),
+        limit: resolveDatasetLimit(),
       });
       await evaluateDataset({ dataset });
-      return;
-    }
-
-    if (shouldResolveFromGoldenCluster()) {
+    } else {
       await evaluateDataset({
         dataset: {
           name: resolveDatasetName(),
@@ -95,11 +64,7 @@ evaluate.describe('Attack Discovery', { tag: tags.stateful.classic }, () => {
         },
         trustUpstreamDataset: true,
       });
-      return;
     }
-
-    const dataset = await loadAttackDiscoveryBundledAlertsJsonlDataset(jsonlOptions);
-    await evaluateDataset({ dataset });
   });
 
   evaluate.describe('modes smoke', () => {
@@ -114,14 +79,7 @@ evaluate.describe('Attack Discovery', { tag: tags.stateful.classic }, () => {
               snapshotConfig.basePath
             }, snapshot="${snapshotConfig.snapshotName ?? 'latest'}")...`
           );
-          try {
-            await restoreAlertsSnapshot({ esClient, log, config: snapshotConfig });
-          } catch (err) {
-            const message = err instanceof Error ? err.message : String(err);
-            log.warning(
-              `[attack-discovery] snapshot restore failed: ${message}; continuing smoke against existing alerts.`
-            );
-          }
+          await restoreAlertsSnapshot({ esClient, log, config: snapshotConfig });
         } else {
           log.info(
             'Skipping snapshot restore (missing GCS_CREDENTIALS or explicitly disabled). ' +
@@ -184,63 +142,6 @@ evaluate.describe('Attack Discovery', { tag: tags.stateful.classic }, () => {
               runAttackDiscovery({
                 inferenceClient,
                 attackDiscoveryClient,
-                input,
-                log,
-              }),
-          },
-          [
-            {
-              name: 'Ran',
-              kind: 'CODE',
-              evaluate: async ({ output }) => ({ score: Array.isArray(output?.insights) ? 1 : 0 }),
-            },
-          ]
-        );
-      }
-    );
-
-    evaluate(
-      'generateApi mode (defaults)',
-      async ({
-        executorClient,
-        generateApiClient,
-        inferenceClient,
-        log,
-        attackDiscoveryClient,
-      }) => {
-        const connectorId = process.env.ATTACK_DISCOVERY_GENERATE_API_CONNECTOR_ID;
-        if (!connectorId) {
-          log.info(
-            'Skipping generateApi smoke test (missing ATTACK_DISCOVERY_GENERATE_API_CONNECTOR_ID)'
-          );
-          return;
-        }
-
-        await executorClient.runExperiment(
-          {
-            datasets: [
-              {
-                name: 'attack discovery: generateApi smoke',
-                description: 'Smoke test for the generateApi mode (production _generate pipeline)',
-                examples: [
-                  {
-                    input: {
-                      mode: 'generateApi',
-                      connectorId,
-                      size: 10,
-                      start: '2023-06-01T00:00:00.000Z',
-                      end: '2023-12-31T23:59:59.999Z',
-                    } as const,
-                    output: { attackDiscoveries: [] },
-                  },
-                ],
-              },
-            ],
-            task: async ({ input }) =>
-              runAttackDiscovery({
-                inferenceClient,
-                attackDiscoveryClient,
-                generateApiClient,
                 input,
                 log,
               }),
