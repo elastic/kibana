@@ -1,5 +1,9 @@
 {
-  "sha1": "67a81345ddcbff97602a970df9c912ec77780659",
+  "sha1": "19268882679d448b4122c274c52411fb3ca37f3d",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
   "tests": [
     {
       "id": "686afb1e43c1702-93eb078795ca679",
@@ -461,7 +465,7 @@
       ],
       "location": {
         "file": "src/core/test/scout/api/tests/ui_settings_crud.spec.ts",
-        "line": 90,
+        "line": 81,
         "column": 10
       }
     },
@@ -483,7 +487,7 @@
       ],
       "location": {
         "file": "src/core/test/scout/api/tests/ui_settings_crud.spec.ts",
-        "line": 107,
+        "line": 98,
         "column": 10
       }
     },
@@ -505,7 +509,7 @@
       ],
       "location": {
         "file": "src/core/test/scout/api/tests/ui_settings_crud.spec.ts",
-        "line": 129,
+        "line": 111,
         "column": 10
       }
     },

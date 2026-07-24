@@ -1805,6 +1805,13 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.ai_agent.index.ts @elastic/nightshift-context-and-research-team
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.ai_agent.stateful.config.ts @elastic/nightshift-context-and-research-team
 
+# Evals
+/x-pack/platform/test/api_integration_deployment_agnostic/apis/evals @elastic/nightshift-context-and-research-team
+/x-pack/platform/test/api_integration_deployment_agnostic/configs/serverless/oblt.evals.feature_flag.index.ts @elastic/nightshift-context-and-research-team
+/x-pack/platform/test/api_integration_deployment_agnostic/configs/serverless/oblt.evals.feature_flag.serverless.config.ts @elastic/nightshift-context-and-research-team
+/x-pack/platform/test/api_integration_deployment_agnostic/configs/stateful/platform.evals.feature_flag.index.ts @elastic/nightshift-context-and-research-team
+/x-pack/platform/test/api_integration_deployment_agnostic/configs/stateful/platform.evals.feature_flag.stateful.config.ts @elastic/nightshift-context-and-research-team
+
 # Infra Obs
 ## This plugin mostly contains the codebase for the infra services, but also includes some code for the Logs UI app.
 ## To keep @elastic/obs-exploration-team as codeowner of the Logs UI code without requiring a review for all the other code changes
@@ -2198,8 +2205,7 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /src/platform/packages/shared/kbn-lazy-object @elastic/kibana-operations @elastic/observability-ui
 
 # QA - AppEx QA
-/docs/extend/scout.md @elastic/appex-qa
-/docs/extend/scout/** @elastic/appex-qa
+/docs/extend/testing/ @elastic/appex-qa
 /x-pack/platform/test/index.d.ts @elastic/appex-qa
 /src/platform/packages/shared/kbn-es/src/serverless_resources/project_roles/es/roles.yml @elastic/appex-qa
 /src/platform/packages/shared/kbn-es/src/serverless_resources/project_roles/oblt/roles.yml @elastic/appex-qa
@@ -3751,13 +3757,13 @@ x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetic
 
 # Macroscope Check Run Agents
 /.macroscope/backport-review.md @elastic/appex-qa
-/.macroscope/scout-review.md @elastic/appex-qa
 /.macroscope/flaky-test-runner-nudge.md @elastic/appex-qa
 
 # These files influence agent behavior and are loaded into every new agent session.
 # Changes here can have repo-wide impact (what instructions/tools/context an agent sees), so require
 # tech lead review by default.
 /AGENTS.md @elastic/kibana-tech-leads
+/AI.md @elastic/kibana-tech-leads
 .cursorignore @elastic/kibana-tech-leads
 /.claude/ @elastic/kibana-tech-leads
 /.agents/skills/ @elastic/kibana-tech-leads
