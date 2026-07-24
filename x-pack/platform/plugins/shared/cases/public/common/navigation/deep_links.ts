@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { AppDeepLink } from '@kbn/core/public';
+import { CasesDeepLinkId, type ICasesDeepLinkId } from '@kbn/cases-components';
 import {
   DEFAULT_BASE_PATH,
   getCreateCasePath,
@@ -14,14 +15,7 @@ import {
   getCasesConfigureTemplatesPath,
 } from './paths';
 
-export const CasesDeepLinkId = {
-  cases: 'cases',
-  casesCreate: 'cases_create',
-  casesConfigure: 'cases_configure',
-  casesTemplates: 'cases_templates',
-} as const;
-
-export type ICasesDeepLinkId = (typeof CasesDeepLinkId)[keyof typeof CasesDeepLinkId];
+export { CasesDeepLinkId, type ICasesDeepLinkId };
 
 export const getCasesDeepLinks = <T extends AppDeepLink = AppDeepLink>({
   basePath = DEFAULT_BASE_PATH,

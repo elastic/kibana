@@ -23,7 +23,6 @@
       "agentBuilder"
     ],
     "requiredBundles": [
-      "cases",
       "data",
       "inspector",
       "kibanaReact",

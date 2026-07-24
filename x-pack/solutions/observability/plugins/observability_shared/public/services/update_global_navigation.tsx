@@ -14,7 +14,7 @@ import type {
   Capabilities,
 } from '@kbn/core/public';
 import { AppStatus, type PricingServiceStart } from '@kbn/core/public';
-import { CasesDeepLinkId } from '@kbn/cases-plugin/public';
+import { CasesDeepLinkId } from '@kbn/cases-components';
 import { casesFeatureId } from '../../common';
 
 /** Capability-based Observability access — pricing tiers do not affect this. */
