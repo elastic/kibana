@@ -9,7 +9,7 @@ import { TaskManagerPlugin } from './plugin';
 import { KibanaDiscoveryService } from './kibana_discovery_service';
 
 import { coreMock } from '@kbn/core/server/mocks';
-import { ApiKeyType, type TaskManagerConfig } from './config';
+import { ActivityTrackingMode, ApiKeyType, type TaskManagerConfig } from './config';
 import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 import { taskPollingLifecycleMock } from './polling_lifecycle.mock';
 import { TaskPollingLifecycle } from './polling_lifecycle';
@@ -30,6 +30,14 @@ const discoveryIsStarted = jest.spyOn(KibanaDiscoveryService.prototype, 'isStart
 
 const coreStart = coreMock.createStart();
 const pluginInitializerContextParams = {
+  activity_tracking: {
+    enabled: false,
+    mode: ActivityTrackingMode.Off,
+    sample_rate: 0.1,
+    task_types: [],
+    sampler_interval: 30000,
+    dead_task_threshold: 60000,
+  },
   max_attempts: 9,
   poll_interval: 3000,
   version_conflict_threshold: 80,

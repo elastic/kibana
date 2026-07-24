@@ -115,6 +115,17 @@ export const EventSchema = schema.maybe(
                 uuid: ecsString(),
               })
             ),
+            run: schema.maybe(
+              schema.object({
+                active_ms: ecsStringOrNumber(),
+                idle_ms: ecsStringOrNumber(),
+                active_ratio: ecsNumber(),
+                longest_idle_gap_ms: ecsStringOrNumber(),
+                longest_event_loop_block_ms: ecsStringOrNumber(),
+                callbacks: ecsStringOrNumber(),
+                max_memory_per_callback_bytes: ecsStringOrNumber(),
+              })
+            ),
           })
         ),
         alerting: schema.maybe(

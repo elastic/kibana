@@ -69,6 +69,7 @@ import { TaskErrorSource } from '../../common/constants';
 import { getExecutionId } from '../lib/get_execution_id';
 import { EVENT_LOG_ACTIONS, EventLogOutcomes } from '../constants';
 import { millisToNanos } from '../lib/millis_to_nanos';
+import { getTaskActivityRunFields } from '../task_activity_tracking';
 
 export const EMPTY_RUN_RESULT: SuccessfulRunResult = { state: {} };
 
@@ -1176,6 +1177,9 @@ export class TaskManagerRunner implements TaskRunner {
           ...(error.stack ? { stack_trace: error.stack } : {}),
         }
       : {};
+    // When per-task activity tracking is enabled, enrich the run document with
+    // on-CPU / idle / memory accounting. Returns undefined (no-op) when disabled.
+    const runActivity = getTaskActivityRunFields(this.id, taskTiming.stop - taskTiming.start);
     this.eventLogger.logEvent({
       event: {
         action: EVENT_LOG_ACTIONS.taskRun,
@@ -1192,6 +1196,7 @@ export class TaskManagerRunner implements TaskRunner {
           scheduled: task.scheduledAt.toISOString(),
           schedule_delay: scheduleDelayNs,
           execution: { uuid: this.uuid },
+          ...(runActivity ? { run: runActivity } : {}),
         },
       },
       message,

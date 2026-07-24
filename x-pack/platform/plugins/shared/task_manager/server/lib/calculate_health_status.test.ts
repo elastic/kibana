@@ -10,13 +10,21 @@ import { HealthStatus } from '../monitoring';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { calculateHealthStatus } from './calculate_health_status';
 import { cloneDeep } from 'lodash';
-import { ApiKeyType } from '../config';
+import { ActivityTrackingMode, ApiKeyType } from '../config';
 
 const now = '2023-05-09T13:00:00.000Z';
 Date.now = jest.fn().mockReturnValue(new Date(now));
 
 const logger = loggingSystemMock.create().get();
 const config = {
+  activity_tracking: {
+    enabled: false,
+    mode: ActivityTrackingMode.Off,
+    sample_rate: 0.1,
+    task_types: [],
+    sampler_interval: 30000,
+    dead_task_threshold: 60000,
+  },
   discovery: {
     active_nodes_lookback: '30s',
     interval: 10000,

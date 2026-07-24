@@ -41,6 +41,32 @@ exports.EcsCustomPropertyMappings = {
               },
             },
           },
+          // per-task execution accounting (task manager activity tracking)
+          run: {
+            properties: {
+              active_ms: {
+                type: 'long',
+              },
+              idle_ms: {
+                type: 'long',
+              },
+              active_ratio: {
+                type: 'float',
+              },
+              longest_idle_gap_ms: {
+                type: 'long',
+              },
+              longest_event_loop_block_ms: {
+                type: 'long',
+              },
+              callbacks: {
+                type: 'long',
+              },
+              max_memory_per_callback_bytes: {
+                type: 'long',
+              },
+            },
+          },
         },
       },
       // alerting specific fields

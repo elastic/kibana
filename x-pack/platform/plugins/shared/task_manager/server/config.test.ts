@@ -12,6 +12,14 @@ describe('config validation', () => {
     const config: Record<string, unknown> = {};
     expect(configSchema.validate(config)).toMatchInlineSnapshot(`
       Object {
+        "activity_tracking": Object {
+          "dead_task_threshold": 60000,
+          "enabled": false,
+          "mode": "full",
+          "sample_rate": 0.1,
+          "sampler_interval": 30000,
+          "task_types": Array [],
+        },
         "allow_reading_invalid_state": true,
         "api_key_type": "es",
         "auto_calculate_default_ech_capacity": false,
@@ -76,6 +84,14 @@ describe('config validation', () => {
     const config: Record<string, unknown> = {};
     expect(configSchema.validate(config)).toMatchInlineSnapshot(`
       Object {
+        "activity_tracking": Object {
+          "dead_task_threshold": 60000,
+          "enabled": false,
+          "mode": "full",
+          "sample_rate": 0.1,
+          "sampler_interval": 30000,
+          "task_types": Array [],
+        },
         "allow_reading_invalid_state": true,
         "api_key_type": "es",
         "auto_calculate_default_ech_capacity": false,
@@ -138,6 +154,14 @@ describe('config validation', () => {
     };
     expect(configSchema.validate(config)).toMatchInlineSnapshot(`
       Object {
+        "activity_tracking": Object {
+          "dead_task_threshold": 60000,
+          "enabled": false,
+          "mode": "full",
+          "sample_rate": 0.1,
+          "sampler_interval": 30000,
+          "task_types": Array [],
+        },
         "allow_reading_invalid_state": true,
         "api_key_type": "es",
         "auto_calculate_default_ech_capacity": false,

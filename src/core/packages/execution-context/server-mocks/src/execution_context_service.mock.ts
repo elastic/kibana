@@ -40,6 +40,7 @@ const createInternalSetupContractMock = () => {
 const createSetupContractMock = () => {
   const mock: jest.Mocked<ExecutionContextSetup> = {
     withContext: jest.fn(),
+    get: jest.fn(),
     getAsLabels: jest.fn(),
   };
   mock.withContext.mockImplementation(withContextMock);

@@ -17,7 +17,7 @@ import {
 } from '../task_events';
 import type { TaskLifecycleEvent } from '../polling_lifecycle';
 import type { AggregatedStat } from '../lib/runtime_statistics_aggregator';
-import { ApiKeyType, type TaskManagerConfig } from '../config';
+import { ActivityTrackingMode, ApiKeyType, type TaskManagerConfig } from '../config';
 import { createAggregator } from './create_aggregator';
 import type { TaskClaimMetric } from './task_claim_metrics_aggregator';
 import { TaskClaimMetricsAggregator } from './task_claim_metrics_aggregator';
@@ -38,6 +38,14 @@ import { TaskOverdueMetricsAggregator } from './task_overdue_metrics_aggregator'
 const logger = loggingSystemMock.createLogger();
 const mockMetricsAggregator = metricsAggregatorMock.create();
 const config: TaskManagerConfig = {
+  activity_tracking: {
+    enabled: false,
+    mode: ActivityTrackingMode.Off,
+    sample_rate: 0.1,
+    task_types: [],
+    sampler_interval: 30000,
+    dead_task_threshold: 60000,
+  },
   discovery: {
     active_nodes_lookback: '30s',
     interval: 10000,
