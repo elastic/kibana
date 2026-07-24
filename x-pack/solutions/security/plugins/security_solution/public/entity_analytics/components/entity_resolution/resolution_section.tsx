@@ -87,8 +87,6 @@ export const ResolutionSection: React.FC<ResolutionSectionProps> = ({
         return;
       }
 
-      if (!EntityPanelKeyByType[entityType]) return;
-
       const sharedParams = { entityId: clickedEntityId, contextID: scopeId, scopeId };
 
       if (enableNewFlyout) {

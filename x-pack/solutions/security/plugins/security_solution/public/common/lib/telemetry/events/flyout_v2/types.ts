@@ -179,6 +179,12 @@ export const FLYOUT_ORIGIN = {
   ENTITIES_TABLE: 'entities_table',
   // Entity Analytics Entity Store list preview button.
   ENTITY_STORE_LIST: 'entity_store_list',
+  // Entity Analytics dashboard risk score table entity link.
+  ENTITY_ANALYTICS_RISK_SCORE: 'entity_analytics_risk_score',
+  // Risk score management preview table entity link.
+  RISK_SCORE_PREVIEW: 'risk_score_preview',
+  // Entity attachment action in AI chat.
+  AI_CHAT_ENTITY_ATTACHMENT: 'ai_chat_entity_attachment',
   // Privileged user monitoring users table.
   PRIVILEGED_USERS_TABLE: 'privileged_users_table',
   // Privileged access detection chart entity link.

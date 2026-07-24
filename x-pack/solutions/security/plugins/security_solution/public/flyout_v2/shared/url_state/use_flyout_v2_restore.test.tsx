@@ -20,6 +20,8 @@ import { useEsDocSearch } from '@kbn/unified-doc-viewer-plugin/public';
 import { useIsNewFlyoutEnabled } from '../../../common/hooks/use_is_new_flyout_enabled';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { PageScope } from '../../../data_view_manager/constants';
+import { notifyFlyoutV2Navigation } from './flyout_v2_navigation';
+import { FLYOUT_ORIGIN } from '../../../common/lib/telemetry/events/flyout_v2/types';
 
 // ---------------------------------------------------------------------------
 // Mocks
@@ -141,6 +143,65 @@ describe('useFlyoutV2RestoreFromUrl', () => {
       jest.runAllTimers();
     });
     expect(mockFlyoutApi.openDocumentFlyoutFromIndex).not.toHaveBeenCalled();
+  });
+
+  it('opens a flyout notified by same-app navigation after the restore hook is mounted', () => {
+    renderRestore('/');
+
+    act(() => {
+      notifyFlyoutV2Navigation({
+        urlParamKey: FLYOUT_V2_URL_PARAM,
+        descriptors: [
+          {
+            kind: 'host',
+            hostName: 'web-01',
+            entityId: 'host:web-01',
+            scopeId: 'agent-builder-entity-card',
+            origin: FLYOUT_ORIGIN.AI_CHAT_ENTITY_ATTACHMENT,
+          },
+        ],
+      });
+    });
+
+    expect(mockFlyoutApi.openHostFlyout).toHaveBeenCalledWith({
+      hostName: 'web-01',
+      entityId: 'host:web-01',
+      scopeId: 'agent-builder-entity-card',
+      origin: FLYOUT_ORIGIN.AI_CHAT_ENTITY_ATTACHMENT,
+    });
+  });
+
+  it('forwards the navigation origin to a restored entity tool and its child', () => {
+    renderRestore(
+      buildUrl([
+        {
+          kind: 'entityGraphView',
+          entityId: 'host:web-01',
+          scopeId: 'agent-builder-entity-card',
+          entityName: 'web-01',
+          entityType: 'host',
+          origin: FLYOUT_ORIGIN.AI_CHAT_ENTITY_ATTACHMENT,
+        },
+        {
+          kind: 'host',
+          hostName: 'web-01',
+          entityId: 'host:web-01',
+          scopeId: 'agent-builder-entity-card',
+          origin: FLYOUT_ORIGIN.AI_CHAT_ENTITY_ATTACHMENT,
+        },
+      ])
+    );
+
+    act(() => {
+      jest.runAllTimers();
+    });
+
+    expect(mockFlyoutApi.openEntityGraphView).toHaveBeenCalledWith(
+      expect.objectContaining({ origin: FLYOUT_ORIGIN.AI_CHAT_ENTITY_ATTACHMENT })
+    );
+    expect(mockFlyoutApi.openHostFlyoutAsChild).toHaveBeenCalledWith(
+      expect.objectContaining({ origin: FLYOUT_ORIGIN.AI_CHAT_ENTITY_ATTACHMENT })
+    );
   });
 
   // -----------------------------------------------------------------------

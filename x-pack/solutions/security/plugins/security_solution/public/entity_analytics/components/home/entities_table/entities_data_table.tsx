@@ -219,9 +219,6 @@ export const EntitiesDataTable = ({
       const { entityType, entityName, entityId } = getEntityFields(doc);
       if (!entityType || !entityName || !entityId) return;
 
-      // Generic entities have no dedicated panel in this table.
-      if (!EntityPanelKeyByType[entityType]) return;
-
       const sharedParams = { entityId, contextID: tableId, scopeId: tableId };
 
       if (enableNewFlyout) {
@@ -234,6 +231,7 @@ export const EntitiesDataTable = ({
         return;
       }
 
+      // Generic entities have no dedicated panel in the legacy flyout.
       const panelKey = EntityPanelKeyByType[entityType];
       const paramName = EntityPanelParamByType[entityType];
       if (panelKey && paramName) {

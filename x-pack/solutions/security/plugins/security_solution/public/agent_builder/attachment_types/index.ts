@@ -112,6 +112,7 @@ export const registerEntityAttachment = ({
   experimentalFeatures,
   resolveSecurityCanvasContext,
   searchSession,
+  uiSettings,
 }: {
   attachments: AttachmentServiceStartContract;
   application: ApplicationStart;
@@ -120,6 +121,7 @@ export const registerEntityAttachment = ({
   experimentalFeatures: ExperimentalFeatures;
   resolveSecurityCanvasContext: () => Promise<SecurityCanvasEmbeddedBundle>;
   searchSession?: ISessionService;
+  uiSettings: IUiSettingsClient;
 }): void => {
   void import(
     /* webpackChunkName: "security_entity_attachment_rich" */
@@ -134,6 +136,7 @@ export const registerEntityAttachment = ({
         chrome,
         resolveSecurityCanvasContext,
         searchSession,
+        uiSettings,
       })
     );
   });

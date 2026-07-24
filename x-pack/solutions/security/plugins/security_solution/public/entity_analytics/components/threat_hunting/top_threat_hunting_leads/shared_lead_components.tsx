@@ -91,7 +91,7 @@ export const EntityBadge: React.FC<EntityBadgeProps> = ({ entity, scopeId }) => 
     );
   }
 
-  if (!EntityPanelKeyByType[entity.type]) {
+  if (!enableNewFlyout && !EntityPanelKeyByType[entity.type]) {
     return (
       <EuiBadge color="hollow" css={entityBadgeContainerCss}>
         {badgeContent}

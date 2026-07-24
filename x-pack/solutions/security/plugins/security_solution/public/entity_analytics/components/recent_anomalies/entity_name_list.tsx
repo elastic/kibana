@@ -38,8 +38,6 @@ export const EntityNameList: React.FC<EntityNameListProps> = ({
 
   const handleOpenEntityFlyout = (entity: EntityMetadata) => {
     const entityType = entity.entityType as EntityType;
-    if (!EntityPanelKeyByType[entityType]) return;
-
     const sharedParams = {
       entityId: entity.entityId,
       contextID: contextId,

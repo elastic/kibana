@@ -39,6 +39,9 @@ import { useEntityAnalyticsRiskScorePanelData } from './use_entity_analytics_ris
 import { RiskEnginePrivilegesCallOut } from '../risk_engine_privileges_callout';
 import { useMissingRiskEnginePrivileges } from '../../hooks/use_missing_risk_engine_privileges';
 import { EntityEventTypes } from '../../../common/lib/telemetry';
+import { FLYOUT_ORIGIN } from '../../../common/lib/telemetry/events/flyout_v2/types';
+import { useIsNewFlyoutEnabled } from '../../../common/hooks/use_is_new_flyout_enabled';
+import { useFlyoutApi } from '../../../flyout_v2/use_flyout_api';
 import { RiskScoresNoDataDetected } from '../risk_score_no_data_detected';
 import { RiskScoreHeaderTitle } from '../risk_score_header_title';
 import { RiskScoreDonutChart } from '../risk_score_donut_chart';
@@ -56,6 +59,8 @@ const EntityAnalyticsRiskScoresComponent = <T extends EntityType>({
   const openAlertsPageWithFilters = useNavigateToAlertsPageWithFilters();
   const { telemetry } = useKibana().services;
   const { openRightPanel } = useExpandableFlyoutApi();
+  const enableNewFlyout = useIsNewFlyoutEnabled();
+  const { openHostFlyout, openUserFlyout, openServiceFlyout } = useFlyoutApi();
   const entityNameField = EntityTypeToIdentifierField[riskEntity];
 
   const openEntityOnAlertsPage = useCallback(
@@ -74,6 +79,23 @@ const EntityAnalyticsRiskScoresComponent = <T extends EntityType>({
 
   const openEntityOnExpandableFlyout = useCallback(
     (entityName: string) => {
+      if (enableNewFlyout) {
+        const sharedParams = {
+          scopeId: ENTITY_RISK_SCORE_TABLE_ID,
+          contextID: ENTITY_RISK_SCORE_TABLE_ID,
+          origin: FLYOUT_ORIGIN.ENTITY_ANALYTICS_RISK_SCORE,
+        };
+
+        if (riskEntity === 'host') {
+          openHostFlyout({ hostName: entityName, ...sharedParams });
+        } else if (riskEntity === 'user') {
+          openUserFlyout({ userName: entityName, ...sharedParams });
+        } else if (riskEntity === 'service') {
+          openServiceFlyout({ serviceName: entityName, ...sharedParams });
+        }
+        return;
+      }
+
       const panelKey = EntityPanelKeyByType[riskEntity];
       const panelParam = EntityPanelParamByType[riskEntity];
       if (panelKey && panelParam) {
@@ -87,7 +109,7 @@ const EntityAnalyticsRiskScoresComponent = <T extends EntityType>({
         });
       }
     },
-    [openRightPanel, riskEntity]
+    [enableNewFlyout, openHostFlyout, openRightPanel, openServiceFlyout, openUserFlyout, riskEntity]
   );
 
   const { toggleStatus, setToggleStatus } = useQueryToggle(entity.tableQueryId);

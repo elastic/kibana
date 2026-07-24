@@ -111,8 +111,6 @@ export const ResolutionGroupTab: React.FC<ResolutionGroupTabProps> = ({
       }
 
       const secEntityType = entityType as SecurityEntityType;
-      if (!EntityPanelKeyByType[secEntityType]) return;
-
       const sharedParams = { entityId: clickedEntityId, contextID: scopeId, scopeId };
 
       if (enableNewFlyout) {

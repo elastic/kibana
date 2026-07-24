@@ -233,7 +233,14 @@ const HostEntityFlyoutOverviewCanvas: React.FC<{
   entityId?: string;
   attachmentRiskStats?: EntityAttachmentRiskStats;
   attachmentResolutionRiskStats?: EntityAttachmentRiskStats;
-}> = ({ hostName, entityId, attachmentRiskStats, attachmentResolutionRiskStats }) => {
+  hideHeaderIcons: boolean;
+}> = ({
+  hostName,
+  entityId,
+  attachmentRiskStats,
+  attachmentResolutionRiskStats,
+  hideHeaderIcons,
+}) => {
   const euidApi = useEntityStoreEuidApi();
 
   const safeContextID = AGENT_BUILDER_ENTITY_CARD_SCOPE;
@@ -451,6 +458,7 @@ const HostEntityFlyoutOverviewCanvas: React.FC<{
             entityStoreEntityId={entityStoreEntityId}
             prefetchedResolutionRisk={prefetchedResolutionRisk}
             riskScoreQueryId={AGENT_BUILDER_HOST_PANEL_RISK_SCORE_QUERY_ID}
+            hideHeaderIcons={hideHeaderIcons}
           />
         )}
       </FlyoutBody>
@@ -536,7 +544,14 @@ const UserEntityFlyoutOverviewCanvas: React.FC<{
   entityId?: string;
   attachmentRiskStats?: EntityAttachmentRiskStats;
   attachmentResolutionRiskStats?: EntityAttachmentRiskStats;
-}> = ({ userName, entityId: entityIdProp, attachmentRiskStats, attachmentResolutionRiskStats }) => {
+  hideHeaderIcons: boolean;
+}> = ({
+  userName,
+  entityId: entityIdProp,
+  attachmentRiskStats,
+  attachmentResolutionRiskStats,
+  hideHeaderIcons,
+}) => {
   const euidApi = useEntityStoreEuidApi();
 
   const safeContextID = AGENT_BUILDER_ENTITY_CARD_SCOPE;
@@ -754,6 +769,7 @@ const UserEntityFlyoutOverviewCanvas: React.FC<{
             entityStoreEntityId={entityStoreEntityId}
             prefetchedResolutionRisk={prefetchedResolutionRisk}
             riskScoreQueryId={AGENT_BUILDER_USER_PANEL_RISK_SCORE_QUERY_ID}
+            hideHeaderIcons={hideHeaderIcons}
           />
         )}
       </FlyoutBody>
@@ -830,7 +846,14 @@ const ServiceEntityFlyoutOverviewCanvas: React.FC<{
   entityId: string;
   attachmentRiskStats?: EntityAttachmentRiskStats;
   attachmentResolutionRiskStats?: EntityAttachmentRiskStats;
-}> = ({ serviceName, entityId, attachmentRiskStats, attachmentResolutionRiskStats }) => {
+  hideHeaderIcons: boolean;
+}> = ({
+  serviceName,
+  entityId,
+  attachmentRiskStats,
+  attachmentResolutionRiskStats,
+  hideHeaderIcons,
+}) => {
   const safeContextID = AGENT_BUILDER_ENTITY_CARD_SCOPE;
   const scopeId = AGENT_BUILDER_ENTITY_CARD_SCOPE;
   const isPreviewMode = false;
@@ -1004,6 +1027,7 @@ const ServiceEntityFlyoutOverviewCanvas: React.FC<{
             entityStoreEntityId={entityStoreEntityId}
             prefetchedResolutionRisk={prefetchedResolutionRisk}
             riskScoreQueryId={AGENT_BUILDER_SERVICE_PANEL_RISK_SCORE_QUERY_ID}
+            hideHeaderIcons={hideHeaderIcons}
           />
         )}
       </FlyoutBody>
@@ -1022,6 +1046,8 @@ export interface EntityCardFlyoutOverviewCanvasProps {
   riskStats?: EntityAttachmentRiskStats;
   /** Resolution-group risk fallback; threaded through to {@link FlyoutRiskSummary}. */
   resolutionRiskStats?: EntityAttachmentRiskStats;
+  /** Hides redundant section-header arrows when navigation targets the v2 flyout. */
+  hideHeaderIcons?: boolean;
 }
 
 /**
@@ -1038,6 +1064,7 @@ export const EntityCardFlyoutOverviewCanvas: React.FC<EntityCardFlyoutOverviewCa
   identifier,
   riskStats,
   resolutionRiskStats,
+  hideHeaderIcons = false,
 }) => {
   const { data, isLoading } = useEntityForAttachment(identifier);
 
@@ -1063,6 +1090,7 @@ export const EntityCardFlyoutOverviewCanvas: React.FC<EntityCardFlyoutOverviewCa
         entityId={entityId}
         attachmentRiskStats={riskStats}
         attachmentResolutionRiskStats={resolutionRiskStats}
+        hideHeaderIcons={hideHeaderIcons}
       />
     );
   }
@@ -1075,6 +1103,7 @@ export const EntityCardFlyoutOverviewCanvas: React.FC<EntityCardFlyoutOverviewCa
         entityId={entityId}
         attachmentRiskStats={riskStats}
         attachmentResolutionRiskStats={resolutionRiskStats}
+        hideHeaderIcons={hideHeaderIcons}
       />
     );
   }
@@ -1087,6 +1116,7 @@ export const EntityCardFlyoutOverviewCanvas: React.FC<EntityCardFlyoutOverviewCa
         entityId={entityId}
         attachmentRiskStats={riskStats}
         attachmentResolutionRiskStats={resolutionRiskStats}
+        hideHeaderIcons={hideHeaderIcons}
       />
     );
   }

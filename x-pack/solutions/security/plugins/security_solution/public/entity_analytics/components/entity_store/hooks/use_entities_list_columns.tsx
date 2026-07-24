@@ -69,8 +69,6 @@ export const useEntitiesListColumns = (): EntitiesListColumns => {
 
         const value = record.entity?.name;
         const onClick = () => {
-          if (!EntityPanelKeyByType[entityType]) return;
-
           const sharedParams = {
             entityId: record.entity?.id,
             contextID: ENTITIES_LIST_TABLE_ID,
@@ -98,7 +96,7 @@ export const useEntitiesListColumns = (): EntitiesListColumns => {
           }
         };
 
-        if (!value || !EntityPanelKeyByType[entityType]) {
+        if (!value || (!enableNewFlyout && !EntityPanelKeyByType[entityType])) {
           return null;
         }
 

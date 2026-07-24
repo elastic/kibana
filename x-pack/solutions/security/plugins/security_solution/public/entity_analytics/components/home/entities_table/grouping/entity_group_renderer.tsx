@@ -77,8 +77,6 @@ const ResolutionGroupPanel = ({
       e.stopPropagation();
       if (!targetEntityName || !entityType) return;
 
-      if (!EntityPanelKeyByType[entityType]) return;
-
       const sharedParams = { entityId, contextID: tableId, scopeId: tableId };
 
       if (enableNewFlyout) {

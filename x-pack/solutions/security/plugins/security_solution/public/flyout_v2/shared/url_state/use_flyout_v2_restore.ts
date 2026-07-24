@@ -58,6 +58,7 @@ import type {
   UserDescriptor,
 } from './flyout_v2_url_param';
 import { decodeFlyoutV2UrlParam } from './flyout_v2_url_param';
+import { subscribeToFlyoutV2Navigation } from './flyout_v2_navigation';
 
 // ---------------------------------------------------------------------------
 // Constants — which descriptor kinds require an async data fetch
@@ -152,7 +153,8 @@ export const openDescriptorAsStart = (
   ctx: RestoreContext,
   api: FlyoutApi
 ): void => {
-  const { kind } = descriptor;
+  const { kind, origin } = descriptor;
+  const originParams = origin ? { origin } : {};
 
   switch (kind) {
     // --- Document main flyouts ---
@@ -302,17 +304,17 @@ export const openDescriptorAsStart = (
     // --- Entity main flyouts ---
     case 'host': {
       const { hostName, entityId, scopeId } = descriptor as HostDescriptor;
-      api.openHostFlyout({ hostName, entityId, scopeId });
+      api.openHostFlyout({ hostName, entityId, scopeId, ...originParams });
       break;
     }
     case 'user': {
       const { userName, entityId, scopeId } = descriptor as UserDescriptor;
-      api.openUserFlyout({ userName, entityId, scopeId });
+      api.openUserFlyout({ userName, entityId, scopeId, ...originParams });
       break;
     }
     case 'service': {
       const { serviceName, entityId, scopeId } = descriptor as ServiceDescriptor;
-      api.openServiceFlyout({ serviceName, entityId, scopeId });
+      api.openServiceFlyout({ serviceName, entityId, scopeId, ...originParams });
       break;
     }
     case 'genericEntity': {
@@ -338,6 +340,7 @@ export const openDescriptorAsStart = (
           | EntityType.service,
         entityName: d.entityName,
         entityId: d.entityId,
+        ...originParams,
         onShowEntity: buildShowEntityCallback(api, {
           entityType: d.entityType,
           entityName: d.entityName,
@@ -352,6 +355,7 @@ export const openDescriptorAsStart = (
         entityType: d.entityType as unknown as EntityType.host | EntityType.user,
         value: d.value,
         entityId: d.entityId,
+        ...originParams,
         onOpenEntity: buildShowEntityCallback(api, {
           entityType: d.entityType,
           entityName: d.value,
@@ -369,6 +373,7 @@ export const openDescriptorAsStart = (
           | EntityType.generic,
         value: d.value,
         entityId: d.entityId,
+        ...originParams,
         onShowEntity: buildShowEntityCallback(api, {
           entityType: d.entityType,
           entityName: d.value,
@@ -386,6 +391,7 @@ export const openDescriptorAsStart = (
           | EntityType.generic,
         value: d.value,
         entityId: d.entityId,
+        ...originParams,
         onShowEntity: buildShowEntityCallback(api, {
           entityType: d.entityType,
           entityName: d.value,
@@ -400,6 +406,7 @@ export const openDescriptorAsStart = (
         value: d.value,
         entityId: d.entityId,
         entityType: d.entityType as unknown as EntityType.host | EntityType.generic | undefined,
+        ...originParams,
         onShowHost: buildShowEntityCallback(api, {
           entityType: d.entityType,
           entityName: d.value,
@@ -414,6 +421,7 @@ export const openDescriptorAsStart = (
         entityId: d.entityId,
         scopeId: d.scopeId,
         entityName: d.entityName,
+        ...originParams,
         onShowEntity: noop,
         onShowOriginatingEntity: buildShowEntityCallback(api, {
           entityType: d.entityType,
@@ -431,6 +439,7 @@ export const openDescriptorAsStart = (
         entityType: d.entityType as EntityType,
         entityName: d.entityName,
         scopeId: d.scopeId,
+        ...originParams,
         onShowEntity: buildShowEntityCallback(api, {
           entityType: d.entityType,
           entityName: d.entityName,
@@ -514,7 +523,8 @@ export const openDescriptorAsChild = (
   ctx: RestoreContext,
   api: FlyoutApi
 ): void => {
-  const { kind } = descriptor;
+  const { kind, origin } = descriptor;
+  const originParams = origin ? { origin } : {};
 
   switch (kind) {
     // Main flyouts that have an explicit AsChild variant
@@ -536,17 +546,17 @@ export const openDescriptorAsChild = (
     }
     case 'host': {
       const { hostName, entityId, scopeId } = descriptor as HostDescriptor;
-      api.openHostFlyoutAsChild({ hostName, entityId, scopeId });
+      api.openHostFlyoutAsChild({ hostName, entityId, scopeId, ...originParams });
       break;
     }
     case 'user': {
       const { userName, entityId, scopeId } = descriptor as UserDescriptor;
-      api.openUserFlyoutAsChild({ userName, entityId, scopeId });
+      api.openUserFlyoutAsChild({ userName, entityId, scopeId, ...originParams });
       break;
     }
     case 'service': {
       const { serviceName, entityId, scopeId } = descriptor as ServiceDescriptor;
-      api.openServiceFlyoutAsChild({ serviceName, entityId, scopeId });
+      api.openServiceFlyoutAsChild({ serviceName, entityId, scopeId, ...originParams });
       break;
     }
     case 'genericEntity': {
@@ -637,6 +647,22 @@ export const useFlyoutV2RestoreFromUrl = (urlParamKey: string): void => {
     const raw = new URLSearchParams(history.location.search).get(urlParamKey);
     return raw != null && decodeFlyoutV2UrlParam(raw) === null;
   });
+
+  // The restore state above is intentionally mount-only. Agent Builder can also navigate to a
+  // different entity while Entity Analytics is already mounted, so handle that same-app signal
+  // directly instead of waiting for a remount that will not happen.
+  useEffect(
+    () =>
+      subscribeToFlyoutV2Navigation(({ urlParamKey: navigationParamKey, descriptors: next }) => {
+        if (!isNewFlyoutEnabled || navigationParamKey !== urlParamKey) return;
+        const [first, second] = next;
+        openDescriptorAsStart(first, {}, flyoutApi);
+        if (second) {
+          openDescriptorAsChild(second, {}, flyoutApi);
+        }
+      }),
+    [flyoutApi, isNewFlyoutEnabled, urlParamKey]
+  );
 
   // Strip malformed param once on mount.
   useEffect(() => {

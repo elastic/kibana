@@ -375,6 +375,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         resolveSecurityCanvasContext: () =>
           this.getSecurityCanvasContext(core, plugins as StartPluginsDependencies),
         searchSession: plugins.data.search.session,
+        uiSettings: core.uiSettings,
       });
       if (this.experimentalFeatures.rulePreviewAttachmentEnabled) {
         registerRulePreviewAttachment({
