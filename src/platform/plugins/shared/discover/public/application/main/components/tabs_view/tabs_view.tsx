@@ -78,10 +78,11 @@ export const TabsView = (props: SingleTabViewProps) => {
   const wrapTabsBar = useMemo((): UnifiedTabsProps['wrapTabsBar'] => {
     if (isChromeNextProjectHeader) {
       return (tabsBar) => {
-        const tabsBarWithDelimiter = (
+        // Vertical rule separator.
+        const tabsBarWithDelimiter = tabsBar ? (
           <>
             {tabsBar}
-            <span // Vertical rule separator.
+            <span
               aria-hidden="true"
               css={css`
                 width: ${euiTheme.border.width.thin};
@@ -90,6 +91,8 @@ export const TabsView = (props: SingleTabViewProps) => {
               `}
             />
           </>
+        ) : (
+          tabsBar
         );
         return (
           <ChromeAppHeader

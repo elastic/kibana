@@ -8,7 +8,7 @@
  */
 
 import React, { Fragment, memo, useEffect, useRef, useMemo, useCallback } from 'react';
-import { EuiPage, EuiPageBody, euiPaddingSize, type UseEuiTheme } from '@elastic/eui';
+import { EuiPage, EuiPageBody } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { cloneDeep } from 'lodash';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
@@ -294,19 +294,4 @@ const componentStyles = {
     height: '100%',
   }),
   docsPage: kbnFullBodyHeightCss('102px'), // 48px app header + 54px action bar height
-  title: (themeContext: UseEuiTheme) => {
-    const { euiTheme } = themeContext;
-    const titlePadding = euiPaddingSize(themeContext, 's');
-
-    return css({
-      padding: `${titlePadding} ${titlePadding} 0`,
-      fontWeight: euiTheme.font.weight.bold,
-    });
-  },
-  documentId: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      backgroundColor: euiTheme.colors.backgroundBaseWarning,
-      color: euiTheme.colors.textWarning,
-      padding: `0 ${euiTheme.size.xs}`,
-    }),
 };
