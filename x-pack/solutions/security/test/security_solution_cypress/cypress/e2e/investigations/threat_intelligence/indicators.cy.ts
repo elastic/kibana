@@ -71,9 +71,7 @@ const URL_WITH_CONTRADICTORY_FILTERS =
 
 const THREAT_INTELLIGENCE_API = '**/internal/search/threatIntelligenceSearchStrategy';
 
-// FLAKY: https://github.com/elastic/kibana/issues/246885
-// Failing: See https://github.com/elastic/kibana/issues/246405
-describe.skip('Single indicator', { tags: ['@ess'] }, () => {
+describe('Single indicator', { tags: ['@ess'] }, () => {
   before(() => cy.task('esArchiverLoad', { archiveName: 'ti_indicators_data_single' }));
 
   after(() => cy.task('esArchiverUnload', { archiveName: 'ti_indicators_data_single' }));

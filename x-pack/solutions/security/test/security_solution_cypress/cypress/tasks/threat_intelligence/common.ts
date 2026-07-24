@@ -21,6 +21,7 @@ import {
   FLYOUT_TAKE_ACTION_BUTTON,
   INDICATORS_TABLE,
   INDICATORS_TABLE_MORE_ACTION_BUTTON_ICON,
+  REFRESH_BUTTON,
   TOGGLE_FLYOUT_BUTTON,
 } from '../../screens/threat_intelligence/indicators';
 
@@ -82,9 +83,25 @@ export const navigateToFlyoutJsonTab = () => {
 };
 
 /**
- * Wait for the view to be fully loaded
+ * Wait for the view to be fully loaded.
+ *
+ * The indicators table only renders once the underlying search has resolved with at least one
+ * hit (see `IndicatorsTable`'s `isLoading`/`indicatorCount` gating in the app code). On a fresh
+ * page load, the initial indicators search can occasionally resolve before the page's data
+ * view/index pattern has fully settled, leaving the table permanently absent even though the
+ * underlying data exists (see #239929, #246404, #246405, and #246885). Rather than passively
+ * polling the DOM for the whole timeout budget, click the query bar's refresh button every so
+ * often to re-trigger the search — this reliably recovers the view instead of a single wait.
  */
 export const waitForViewToBeLoaded = () => {
+  recurse(
+    () => {
+      cy.get(REFRESH_BUTTON).should('exist').click();
+      return cy.get('body').then(($body) => $body.find(INDICATORS_TABLE).length > 0);
+    },
+    (isTableVisible) => isTableVisible === true
+  );
+
   cy.get(INDICATORS_TABLE).should('exist');
   cy.get(BARCHART_WRAPPER).should('exist');
   waitForViewToBeUpdated();
