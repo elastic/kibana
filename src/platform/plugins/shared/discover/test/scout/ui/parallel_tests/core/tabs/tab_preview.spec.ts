@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PageObjects } from '@kbn/scout';
+import type { PageObjects, ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest } from '../../../fixtures/common';
+import { createDataViewFromSearchBar } from '../../../fixtures/common/helpers';
 
 const DISCOVER_SESSION_NAME = 'tab preview test';
 const ESQL_QUERY = 'FROM logstash-* | WHERE extension.raw == "png" and bytes > 10000';
@@ -49,7 +50,7 @@ const getAllTabPreviewContent = async (pageObjects: PageObjects) => {
   return previews;
 };
 
-const createTabsWithPreviewContent = async (pageObjects: PageObjects) => {
+const createTabsWithPreviewContent = async (page: ScoutPage, pageObjects: PageObjects) => {
   const { discover, queryBar, unifiedTabs } = pageObjects;
 
   await spaceTest.step('tab 0: rename the default tab', async () => {
@@ -69,7 +70,7 @@ const createTabsWithPreviewContent = async (pageObjects: PageObjects) => {
     await unifiedTabs.createNewTab();
     await discover.waitUntilTabIsLoaded();
     await unifiedTabs.editTabLabel(2, 'with different data view');
-    await discover.createDataViewFromSearchBar({ name: 'logs', adHoc: true });
+    await createDataViewFromSearchBar(page, pageObjects, { name: 'logs', adHoc: true });
   });
 
   await spaceTest.step('tab 3: switch to ES|QL and set an ES|QL query', async () => {
@@ -95,21 +96,21 @@ spaceTest.describe('Discover tabs - tab preview', { tag: '@local-stateful-classi
     await discoverScoutSpace.teardownDiscoverDefaults();
   });
 
-  spaceTest('should show the correct content', async ({ pageObjects }) => {
-    await createTabsWithPreviewContent(pageObjects);
+  spaceTest('should show the correct content', async ({ page, pageObjects }) => {
+    await createTabsWithPreviewContent(page, pageObjects);
     expect(await getAllTabPreviewContent(pageObjects)).toStrictEqual(EXPECTED_TAB_PREVIEWS);
   });
 
   spaceTest('should preserve content after refresh', async ({ page, pageObjects }) => {
-    await createTabsWithPreviewContent(pageObjects);
+    await createTabsWithPreviewContent(page, pageObjects);
     await page.reload();
     await pageObjects.discover.waitUntilTabIsLoaded();
 
     expect(await getAllTabPreviewContent(pageObjects)).toStrictEqual(EXPECTED_TAB_PREVIEWS);
   });
 
-  spaceTest('should preserve content after saving and loading', async ({ pageObjects }) => {
-    await createTabsWithPreviewContent(pageObjects);
+  spaceTest('should preserve content after saving and loading', async ({ page, pageObjects }) => {
+    await createTabsWithPreviewContent(page, pageObjects);
     await pageObjects.discover.saveSearch(DISCOVER_SESSION_NAME);
     await pageObjects.discover.waitUntilTabIsLoaded();
     await pageObjects.discover.clickNewSearch();

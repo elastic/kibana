@@ -7,35 +7,59 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ScoutParallelTestFixtures } from '@kbn/scout';
-import { createLazyPageObject, spaceTest as spaceBaseTest } from '@kbn/scout';
+import type { ScoutParallelTestFixtures, ScoutTestFixtures } from '@kbn/scout';
+import { createLazyPageObject, spaceTest as spaceBaseTest, test as baseTest } from '@kbn/scout';
 import { Inspector } from '@kbn/inspector-plugin/test/scout/ui/fixtures/page_objects';
+import { DataViewEditorPage } from '@kbn/data-view-editor-plugin/test/scout/ui/fixtures/page_objects';
+import { VisualizeEditor, VisualizeChart } from './page_objects';
 
-// The `inspector` page object is owned by the inspector plugin (the same one Discover
-// reuses); the rest (visualize, visEditor, visChart, filterBar, dashboard, discover)
-// come from core `@kbn/scout`. Extending `spaceTest` locally avoids registering a
-// second, conflicting `inspector` on the shared core `PageObjects` type.
-export type VisualizePageObjects = ScoutParallelTestFixtures['pageObjects'] & {
+// `inspector` (owned by the inspector plugin) and `dataViewEditor` (owned by the
+// data_view_editor plugin) are reused from their owning plugins; `visEditor` /
+// `visChart` are Visualize-specific and live in this plugin. Everything else comes
+// from core `@kbn/scout`. Extending the base tests locally avoids registering these
+// on the shared core `PageObjects` type.
+export type VisualizeParallelPageObjects = ScoutParallelTestFixtures['pageObjects'] & {
   inspector: Inspector;
+  visEditor: VisualizeEditor;
+  visChart: VisualizeChart;
 };
 
-export interface VisualizeTestFixtures extends ScoutParallelTestFixtures {
-  pageObjects: VisualizePageObjects;
+export interface VisualizeParallelTestFixtures extends ScoutParallelTestFixtures {
+  pageObjects: VisualizeParallelPageObjects;
 }
 
-export const spaceTest = spaceBaseTest.extend<VisualizeTestFixtures>({
+export const spaceTest = spaceBaseTest.extend<VisualizeParallelTestFixtures>({
   pageObjects: async ({ pageObjects, page }, use) => {
-    const extendedPageObjects: VisualizePageObjects = {
+    const extendedPageObjects: VisualizeParallelPageObjects = {
       ...pageObjects,
       inspector: createLazyPageObject(Inspector, page),
+      visEditor: createLazyPageObject(VisualizeEditor, page),
+      visChart: createLazyPageObject(VisualizeChart, page),
     };
 
     await use(extendedPageObjects);
   },
 });
 
-// The sequential (`tests/`) suite only relies on core page objects.
-export { test } from '@kbn/scout';
+// The sequential (`tests/`) suite reuses the data view editor flyout page object.
+export type VisualizeSequentialPageObjects = ScoutTestFixtures['pageObjects'] & {
+  dataViewEditor: DataViewEditorPage;
+};
+
+export interface VisualizeSequentialTestFixtures extends ScoutTestFixtures {
+  pageObjects: VisualizeSequentialPageObjects;
+}
+
+export const test = baseTest.extend<VisualizeSequentialTestFixtures>({
+  pageObjects: async ({ pageObjects, page }, use) => {
+    const extendedPageObjects: VisualizeSequentialPageObjects = {
+      ...pageObjects,
+      dataViewEditor: createLazyPageObject(DataViewEditorPage, page),
+    };
+
+    await use(extendedPageObjects);
+  },
+});
 
 export * as testData from './constants';
 export {

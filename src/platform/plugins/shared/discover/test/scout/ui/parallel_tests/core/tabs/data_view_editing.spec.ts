@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest, type DiscoverPageObjects } from '../../../fixtures/common';
+import { createDataViewFromSearchBar } from '../../../fixtures/common/helpers';
 
 const RUNTIME_FIELD_SCRIPT = 'emit("runtime field value")';
 
@@ -35,10 +37,12 @@ const dataViewCases = [
 
 const prepareDataView = async ({
   isAdHocDataView,
+  page,
   pageObjects,
   name,
 }: {
   isAdHocDataView: boolean;
+  page: ScoutPage;
   pageObjects: DiscoverPageObjects;
   name: string;
 }) => {
@@ -46,7 +50,7 @@ const prepareDataView = async ({
     return;
   }
 
-  await pageObjects.discover.createDataViewFromSearchBar({ name, adHoc: true });
+  await createDataViewFromSearchBar(page, pageObjects, { name, adHoc: true });
   await pageObjects.discover.waitUntilTabIsLoaded();
 };
 
@@ -91,12 +95,13 @@ spaceTest.describe('Discover tabs - data view editing', { tag: '@local-stateful-
     newFieldStateInOriginalTab,
     editedFieldStateInOriginalTab,
   } of dataViewCases) {
-    spaceTest(`can edit ${type} data view name`, async ({ pageObjects }) => {
+    spaceTest(`can edit ${type} data view name`, async ({ page, pageObjects }) => {
       const { discover, unifiedTabs } = pageObjects;
       const editedName = 'logstash edited name';
 
       await prepareDataView({
         isAdHocDataView,
+        page,
         pageObjects,
         name: 'logstash',
       });
@@ -121,11 +126,12 @@ spaceTest.describe('Discover tabs - data view editing', { tag: '@local-stateful-
 
     spaceTest(
       `can create runtime fields for the same ${type} data view in both tabs`,
-      async ({ pageObjects }) => {
+      async ({ page, pageObjects }) => {
         const { discover, unifiedFieldList, unifiedTabs } = pageObjects;
 
         await prepareDataView({
           isAdHocDataView,
+          page,
           pageObjects,
           name: 'logst',
         });
@@ -188,14 +194,14 @@ spaceTest.describe('Discover tabs - data view editing', { tag: '@local-stateful-
 
     spaceTest(
       `can create runtime fields for a different ${type} data view`,
-      async ({ pageObjects }) => {
+      async ({ page, pageObjects }) => {
         const { discover, unifiedFieldList, unifiedTabs } = pageObjects;
         const firstTabName = await discover.getSelectedDataViewName();
         const newFieldName = '_test_new_field2';
 
         await unifiedTabs.createNewTab();
         await discover.waitUntilTabIsLoaded();
-        await discover.createDataViewFromSearchBar({
+        await createDataViewFromSearchBar(page, pageObjects, {
           name: secondDataViewName,
           adHoc: isAdHocDataView,
         });

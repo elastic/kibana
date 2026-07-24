@@ -13,7 +13,6 @@ import type { ScoutTestConfig } from '../../types';
 import { CollapsibleNav } from './collapsible_nav';
 import { DashboardApp } from './dashboard_app';
 import { DataGrid } from './data_grid';
-import { DataViewEditor } from './data_view_editor';
 import { DataViewsManagementPage } from './data_views_management_page';
 import { DatePicker } from './date_picker';
 import { DiscoverApp } from './discover_app';
@@ -29,8 +28,6 @@ import { LoginPage } from './login_page';
 import { HomePage } from './home_page';
 import { OverlaysPage } from './overlays';
 import { VisualizeApp } from './visualize_app';
-import { VisualizeEditor } from './visualize_editor';
-import { VisualizeChart } from './visualize_chart';
 import { UnifiedTabs } from './unified_tabs';
 import {
   ContentListWrapper,
@@ -45,7 +42,6 @@ export {
   DiscoverApp,
   FilterBar,
   DataGrid,
-  DataViewEditor,
   DataViewsManagementPage,
   QueryBar,
   UnifiedTabs,
@@ -65,7 +61,6 @@ export interface PageObjectsFixtures {
 export interface PageObjects {
   datePicker: DatePicker;
   dataGrid: DataGrid;
-  dataViewEditor: DataViewEditor;
   dataViewsManagement: DataViewsManagementPage;
   discover: DiscoverApp;
   dashboard: DashboardApp;
@@ -81,8 +76,6 @@ export interface PageObjects {
   login: LoginPage;
   overlays: OverlaysPage;
   visualize: VisualizeApp;
-  visEditor: VisualizeEditor;
-  visChart: VisualizeChart;
   unifiedTabs: UnifiedTabs;
 }
 
@@ -96,7 +89,6 @@ export function createCorePageObjects(fixtures: PageObjectsFixtures): PageObject
   return {
     datePicker: createLazyPageObject(DatePicker, fixtures.page),
     dataGrid: createLazyPageObject(DataGrid, fixtures.page),
-    dataViewEditor: createLazyPageObject(DataViewEditor, fixtures.page),
     dataViewsManagement: createLazyPageObject(DataViewsManagementPage, fixtures.page),
     dashboard: createLazyPageObject(DashboardApp, fixtures.page),
     discover: createLazyPageObject(DiscoverApp, fixtures.page),
@@ -112,8 +104,6 @@ export function createCorePageObjects(fixtures: PageObjectsFixtures): PageObject
     login: createLazyPageObject(LoginPage, fixtures.page, fixtures.kbnUrl),
     overlays: createLazyPageObject(OverlaysPage, fixtures.page),
     visualize: createLazyPageObject(VisualizeApp, fixtures.page),
-    visEditor: createLazyPageObject(VisualizeEditor, fixtures.page),
-    visChart: createLazyPageObject(VisualizeChart, fixtures.page),
     unifiedTabs: createLazyPageObject(UnifiedTabs, fixtures.page),
   };
 }

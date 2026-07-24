@@ -7,32 +7,32 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ScoutPage } from '..';
-import { expect } from '..';
+import type { Locator, ScoutPage } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 
 /**
- * Page object for the shared data view editor flyout (`indexPatternEditorFlyout`).
+ * Page object for the data view editor flyout (`indexPatternEditorFlyout`).
  *
- * The flyout is opened by many surfaces (Discover, Dashboard, Visualize, the
- * Data Views management app, Lens, ...), so this lives in core `@kbn/scout`.
- * Open the flyout from the relevant surface first (e.g. click the
- * `createDataViewButton` prompt), then drive it through this page object.
+ * Owned by the `data_view_editor` plugin and exposed via `@kbn/data-view-editor-plugin`
+ * so other Scout suites (e.g. Visualize) can drive the flyout without duplicating it.
+ * Open the flyout from the relevant surface first (e.g. the Data Views management
+ * "create" button or a "no data view" prompt), then interact through this page object.
  */
-export class DataViewEditor {
-  private readonly flyout;
-  private readonly form;
-  readonly nameInput;
-  readonly titleInput;
-  readonly timestampField;
-  readonly saveButton;
+export class DataViewEditorPage {
+  private readonly flyout: Locator;
+  private readonly form: Locator;
+  readonly nameInput: Locator;
+  readonly titleInput: Locator;
+  readonly timestampField: Locator;
+  readonly saveButton: Locator;
 
   constructor(private readonly page: ScoutPage) {
-    this.flyout = this.page.testSubj.locator('indexPatternEditorFlyout');
-    this.form = this.page.testSubj.locator('indexPatternEditorForm');
-    this.nameInput = this.page.testSubj.locator('createIndexPatternNameInput');
-    this.titleInput = this.page.testSubj.locator('createIndexPatternTitleInput');
-    this.timestampField = this.page.testSubj.locator('timestampField');
-    this.saveButton = this.page.testSubj.locator('saveIndexPatternButton');
+    this.flyout = page.testSubj.locator('indexPatternEditorFlyout');
+    this.form = page.testSubj.locator('indexPatternEditorForm');
+    this.nameInput = page.testSubj.locator('createIndexPatternNameInput');
+    this.titleInput = page.testSubj.locator('createIndexPatternTitleInput');
+    this.timestampField = page.testSubj.locator('timestampField');
+    this.saveButton = page.testSubj.locator('saveIndexPatternButton');
   }
 
   async waitForFlyout(): Promise<void> {

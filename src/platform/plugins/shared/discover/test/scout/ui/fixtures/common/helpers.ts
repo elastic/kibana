@@ -9,10 +9,58 @@
 
 import type { ScoutPage, ScoutTestFixtures } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
+import { DataViewEditorPage } from '@kbn/data-view-editor-plugin/test/scout/ui/fixtures/page_objects';
 import { DISCOVER_QUERY_MODE_KEY } from '../../../../../common/constants';
 import { testData } from '.';
 
 export type QueryMode = 'classic' | 'esql';
+
+export interface DataViewOptions {
+  /** Data view title; `*` is appended automatically by the editor. */
+  name: string;
+  /** Create a temporary ("ad hoc") data view via "Explore" instead of saving. */
+  adHoc?: boolean;
+}
+
+/**
+ * Drives the shared data view editor flyout (owned by the `data_view_editor` plugin).
+ * FTR passes the base name and relies on the editor auto-appending `*`; the page object
+ * fills the title verbatim, so append the wildcard here to preserve that contract.
+ */
+const fillAndSubmitDataViewEditor = async (
+  page: ScoutPage,
+  { name, adHoc = false }: DataViewOptions
+): Promise<void> => {
+  const dataViewEditor = new DataViewEditorPage(page);
+  await dataViewEditor.setTitle(name.endsWith('*') ? name : `${name}*`);
+  await dataViewEditor.save({ adHoc });
+};
+
+/**
+ * Creates a new data view from the Discover search bar data-view switcher
+ * (classic mode only).
+ */
+export const createDataViewFromSearchBar = async (
+  page: ScoutPage,
+  pageObjects: ScoutTestFixtures['pageObjects'],
+  options: DataViewOptions
+): Promise<void> => {
+  await pageObjects.discover.openDataViewSwitcher();
+  await page.testSubj.click('dataview-create-new');
+  await fillAndSubmitDataViewEditor(page, options);
+  await pageObjects.discover.waitUntilTabIsLoaded();
+};
+
+/** Creates a new data view from the Discover "no data view" prompt. */
+export const createDataViewFromNoDataPrompt = async (
+  page: ScoutPage,
+  pageObjects: ScoutTestFixtures['pageObjects'],
+  options: DataViewOptions
+): Promise<void> => {
+  await page.testSubj.click('createDataViewButton');
+  await fillAndSubmitDataViewEditor(page, options);
+  await pageObjects.discover.waitUntilTabIsLoaded();
+};
 
 export const expectSampleSizeFooter = async ({
   pageObjects,

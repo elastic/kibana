@@ -8,8 +8,8 @@
  */
 
 import { subj } from '@kbn/test-subj-selector';
-import type { ScoutPage } from '..';
-import { expect } from '..';
+import type { ScoutPage } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 
 /**
  * Page object for reading a rendered visualization, focused on the data table

@@ -7,5 +7,10 @@
     "types": ["node"],
     "isolatedModules": false
   },
-  "kbn_references": ["@kbn/scout", "@kbn/inspector-plugin"]
+  "kbn_references": [
+    "@kbn/scout",
+    "@kbn/inspector-plugin",
+    "@kbn/data-view-editor-plugin",
+    "@kbn/test-subj-selector"
+  ]
 }

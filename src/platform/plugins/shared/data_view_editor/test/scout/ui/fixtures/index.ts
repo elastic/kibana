@@ -7,9 +7,32 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// The data view editor flyout and the data views management page are both driven
-// through core `@kbn/scout` page objects (`dataViewEditor` / `dataViewsManagement`),
-// so no plugin-local page objects are needed here.
-export { test } from '@kbn/scout';
+import type { PageObjects, ScoutTestFixtures, ScoutWorkerFixtures } from '@kbn/scout';
+import { test as baseTest, createLazyPageObject } from '@kbn/scout';
+import { DataViewEditorPage } from './page_objects';
+
+export interface DataViewEditorTestFixtures extends ScoutTestFixtures {
+  pageObjects: PageObjects & {
+    dataViewEditor: DataViewEditorPage;
+  };
+}
+
+export const test = baseTest.extend<DataViewEditorTestFixtures, ScoutWorkerFixtures>({
+  pageObjects: async (
+    {
+      pageObjects,
+      page,
+    }: {
+      pageObjects: DataViewEditorTestFixtures['pageObjects'];
+      page: DataViewEditorTestFixtures['page'];
+    },
+    use: (pageObjects: DataViewEditorTestFixtures['pageObjects']) => Promise<void>
+  ) => {
+    await use({
+      ...pageObjects,
+      dataViewEditor: createLazyPageObject(DataViewEditorPage, page),
+    });
+  },
+});
 
 export { CUSTOM_ROLES } from './custom_roles';

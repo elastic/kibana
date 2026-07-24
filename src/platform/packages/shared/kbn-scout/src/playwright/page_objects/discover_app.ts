@@ -11,7 +11,6 @@ import type { Download } from 'playwright-core';
 import type { Locator } from '../../..';
 import type { ScoutPage } from '..';
 import { DataGrid } from './data_grid';
-import { DataViewEditor } from './data_view_editor';
 import { expect } from '..';
 import { KibanaCodeEditorWrapper } from '../ui_components';
 import { resolveSelector } from '../utils';
@@ -24,13 +23,6 @@ export interface DiscoverGotoOptions {
   queryMode: DiscoverQueryMode;
 }
 
-export interface DataViewOptions {
-  /** Data view title; `*` is appended automatically by the editor. */
-  name: string;
-  /** Create a temporary ("ad hoc") data view via "Explore" instead of saving. */
-  adHoc?: boolean;
-}
-
 interface TimeoutOptions {
   timeout?: number;
 }
@@ -40,12 +32,10 @@ const DEFAULT_SAVE_MODAL_TIMEOUT = 30_000;
 export class DiscoverApp {
   public readonly codeEditor: KibanaCodeEditorWrapper;
   private readonly dataGrid: DataGrid;
-  private readonly dataViewEditor: DataViewEditor;
 
   constructor(private readonly page: ScoutPage) {
     this.codeEditor = new KibanaCodeEditorWrapper(page);
     this.dataGrid = new DataGrid(page);
-    this.dataViewEditor = new DataViewEditor(page);
   }
 
   async goto(options: DiscoverGotoOptions) {
@@ -92,7 +82,8 @@ export class DiscoverApp {
     });
   }
 
-  private async openDataViewSwitcher() {
+  /** Opens the Discover data view switcher popover (classic mode). */
+  async openDataViewSwitcher() {
     const dataViewSwitch = await this.getVisibleDataViewSwitch();
     await this.hideTabPreview();
     await dataViewSwitch.click();
@@ -130,33 +121,6 @@ export class DiscoverApp {
    */
   async getSelectedDataViewName(): Promise<string> {
     return (await this.getSelectedDataView().innerText()).trim();
-  }
-
-  private async fillAndSubmitDataViewEditor({ name, adHoc = false }: DataViewOptions) {
-    // FTR passes the base name and relies on the editor auto-appending `*` as the
-    // user types. The `DataViewEditor` page object sets the title verbatim, so append
-    // the wildcard here to preserve that contract (`* will be added automatically`).
-    const title = name.endsWith('*') ? name : `${name}*`;
-
-    await this.dataViewEditor.setTitle(title);
-    await this.dataViewEditor.save({ adHoc });
-
-    await this.waitUntilTabIsLoaded();
-  }
-
-  /**
-   * Creates a new data view from the Discover search bar data-view switcher
-   * (classic mode only). The editor appends `*` to the title automatically.
-   */
-  async createDataViewFromSearchBar(options: DataViewOptions) {
-    await this.openDataViewSwitcher();
-    await this.page.testSubj.click('dataview-create-new');
-    await this.fillAndSubmitDataViewEditor(options);
-  }
-
-  async createDataViewFromNoDataPrompt(options: DataViewOptions) {
-    await this.page.testSubj.click('createDataViewButton');
-    await this.fillAndSubmitDataViewEditor(options);
   }
 
   async getAvailableDataViewsFromSearchBar(): Promise<string[]> {

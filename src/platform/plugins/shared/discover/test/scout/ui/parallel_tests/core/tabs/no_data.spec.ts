@@ -11,6 +11,7 @@ import type { ScoutPage, SpaceSolutionView } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import type { DiscoverTestFixtures, DiscoverWorkerFixtures } from '../../../fixtures/common';
 import { spaceTest } from '../../../fixtures/common';
+import { createDataViewFromNoDataPrompt } from '../../../fixtures/common/helpers';
 import { DEFAULT_TIME_RANGE } from '../../../fixtures/common/constants';
 
 const prepareDiscoverWithoutCustomDataViews = async ({
@@ -87,7 +88,7 @@ spaceTest.describe(
         });
 
         await spaceTest.step('create a data view and show the tabs bar', async () => {
-          await discover.createDataViewFromNoDataPrompt({ name: 'logstash' });
+          await createDataViewFromNoDataPrompt(page, pageObjects, { name: 'logstash' });
 
           expect(await discover.getSelectedDataViewName()).toBe('logstash*');
           expect(await dataGrid.getDocTableRowCount()).toBeGreaterThan(0);

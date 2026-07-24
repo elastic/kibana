@@ -14,6 +14,7 @@
 
 import { expect } from '@kbn/scout/ui';
 import { spaceTest } from '../../../fixtures/common';
+import { createDataViewFromSearchBar } from '../../../fixtures/common/helpers';
 
 spaceTest.describe('Discover tabs - opening a new tab', { tag: '@local-stateful-classic' }, () => {
   spaceTest.beforeAll(async ({ discoverScoutSpace }) => {
@@ -30,7 +31,7 @@ spaceTest.describe('Discover tabs - opening a new tab', { tag: '@local-stateful-
     await discoverScoutSpace.teardownDiscoverDefaults();
   });
 
-  spaceTest('should create a new tab in classic mode', async ({ pageObjects }) => {
+  spaceTest('should create a new tab in classic mode', async ({ page, pageObjects }) => {
     const { discover, filterBar, queryBar, unifiedTabs } = pageObjects;
     const KQL_QUERY = 'machine.os: "macOS"';
 
@@ -42,7 +43,7 @@ spaceTest.describe('Discover tabs - opening a new tab', { tag: '@local-stateful-
         await unifiedTabs.createNewTab();
         await discover.waitUntilTabIsLoaded();
 
-        await discover.createDataViewFromSearchBar({ name: 'logsta' });
+        await createDataViewFromSearchBar(page, pageObjects, { name: 'logsta' });
         await discover.waitUntilTabIsLoaded();
 
         await filterBar.addFilter({ field: 'extension', operator: 'is', value: 'jpeg' });
@@ -88,7 +89,7 @@ spaceTest.describe('Discover tabs - opening a new tab', { tag: '@local-stateful-
     );
   });
 
-  spaceTest('should create a new tab in ES|QL mode', async ({ pageObjects }) => {
+  spaceTest('should create a new tab in ES|QL mode', async ({ page, pageObjects }) => {
     const { discover, unifiedTabs } = pageObjects;
     const defaultQuery = 'FROM logst*';
     const updatedQuery = 'FROM logst* | LIMIT 1050';
@@ -97,7 +98,7 @@ spaceTest.describe('Discover tabs - opening a new tab', { tag: '@local-stateful-
 
     await spaceTest.step('tab 0: create an ad hoc data view from the search bar', async () => {
       expect(await discover.getCurrentQueryMode()).toBe('classic');
-      await discover.createDataViewFromSearchBar({ name: 'logst' });
+      await createDataViewFromSearchBar(page, pageObjects, { name: 'logst' });
     });
 
     await spaceTest.step(
