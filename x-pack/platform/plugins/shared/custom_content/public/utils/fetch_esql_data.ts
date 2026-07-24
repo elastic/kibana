@@ -26,7 +26,7 @@ export async function fetchEsqlData(
   if (timeRange) {
     let timeField: string | undefined;
     try {
-      timeField = (await getESQLTimeFieldFromQuery({ query: esqlQuery, http })) ?? undefined;
+      timeField = (await getESQLTimeField({ query: esqlQuery, http })) ?? undefined;
     } catch {
       // field caps unavailable — render without time filter
     }
