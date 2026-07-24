@@ -7,7 +7,7 @@
 
 import React, { memo, useMemo } from 'react';
 import type { EuiTextProps } from '@elastic/eui';
-import { EuiCode, EuiText } from '@elastic/eui';
+import { EuiTextColor, EuiCode, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { RESPONSE_ACTION_STATUS } from '../../common/translations';
 import { EndpointActionFailureMessage } from '../endpoint_action_failure_message';
@@ -68,7 +68,7 @@ export const KillSuspendProcessActionResult = memo<KillSuspendProcessActionResul
           <span key={`${agentId}-pid`}>
             <FormattedMessage
               id="xpack.securitySolution.management.killProcessActionResult.pid"
-              defaultMessage="Process ID = {pid}"
+              defaultMessage="PID {pid}"
               values={{ pid: <EuiCode>{hostOutput?.pid}</EuiCode> }}
             />
           </span>
@@ -77,14 +77,14 @@ export const KillSuspendProcessActionResult = memo<KillSuspendProcessActionResul
 
       if (hostOutput?.entity_id) {
         if (processResultData.length > 0) {
-          processResultData.push(' | ');
+          processResultData.push(<EuiTextColor color="subdued">{' | '}</EuiTextColor>);
         }
 
         processResultData.push(
           <span key={`${agentId}-entityId`}>
             <FormattedMessage
               id="xpack.securitySolution.management.killProcessActionResult.entityId"
-              defaultMessage="Entity ID: {entityId}"
+              defaultMessage="Entity ID {entityId}"
               values={{ entityId: <EuiCode>{hostOutput?.entity_id}</EuiCode> }}
             />
           </span>
@@ -93,14 +93,14 @@ export const KillSuspendProcessActionResult = memo<KillSuspendProcessActionResul
 
       if (hostOutput?.process_name) {
         if (processResultData.length > 0) {
-          processResultData.push(' | ');
+          processResultData.push(<EuiTextColor color="subdued">{' | '}</EuiTextColor>);
         }
 
         processResultData.push(
           <span key={`${agentId}-processName`}>
             <FormattedMessage
               id="xpack.securitySolution.management.killProcessActionResult.processName"
-              defaultMessage="Process name: {processName}"
+              defaultMessage="Name {processName}"
               values={{ processName: <EuiCode>{hostOutput?.process_name}</EuiCode> }}
             />
           </span>
@@ -109,14 +109,14 @@ export const KillSuspendProcessActionResult = memo<KillSuspendProcessActionResul
 
       if (hostOutput?.command) {
         if (processResultData.length > 0) {
-          processResultData.push(' | ');
+          processResultData.push(<EuiTextColor color="subdued">{' | '}</EuiTextColor>);
         }
 
         processResultData.push(
           <span key={`${agentId}-command`}>
             <FormattedMessage
               id="xpack.securitySolution.management.killProcessActionResult.command"
-              defaultMessage="Process command: {command}"
+              defaultMessage="Command {command}"
               values={{ command: <EuiCode>{hostOutput?.command}</EuiCode> }}
             />
           </span>
