@@ -20,7 +20,7 @@ x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-t
 
 ### Populate Timing & Cost
 
-**Per-flow rows:** read the `<!-- flow: <name> | started: <ISO> | ended: <ISO> | duration: <Xm Ys> -->` header from each `findings-flow-<N>.md`. Use `started` and `duration` directly for `Started` and `Duration`. Derive `Status` from these sources — no findings file for the flow → `not started`; flow is in `config.json → skipped_setup` or `deferred_flows` → the reason recorded there; findings file contains `session lost` markers → `session lost`; otherwise → `completed`. Compute `Over?` by comparing `duration` against `config.json → flows[N].timeout_minutes`. The `Total session` row duration = report-written time − `session_started_at` from `config.json`.
+**Per-flow rows:** read the `<!-- flow: <name> | started: <ISO> | ended: <ISO> | duration: <Xm Ys> -->` header from each `findings-flow-<N>.md`. Use `started` and `duration` directly for `Started` and `Duration`. Derive `Status` from these sources — no findings file for the flow → `not started`; flow is in `config.json → skipped_setup` or `deferred_flows` → the reason recorded there; findings file contains `session lost` markers → `session lost`; `duration` exceeds `config.json → flows[N].timeout_minutes` → `timed out`; otherwise → `completed`. Compute `Over?` by comparing `duration` against `config.json → flows[N].timeout_minutes`. The `Total session` row duration = report-written time − `session_started_at` from `config.json`.
 
 **Token usage:** run the token script and capture its output:
 ```bash
@@ -65,13 +65,13 @@ Open the chat response with a single bold headline — this is the first thing t
 
 Where:
 - `<N>` — Level 1 count from the Summary section (write `0 confirmed bugs (L1)` when N=0, never omit it)
-- `<Xh Ym>` — Total session duration from the `Total session` row of the Timing & Cost table
+- `<Xh Ym>` — Total session duration from the `Total session` row of the Timing & Cost table; omit the hours component when under 60 minutes (e.g. `25m`, not `0h 25m`)
 - `<resolved session_dir>` — the `session_dir` value from `config.json` (the actual path, never the literal `$SESSION_DIR`)
 
 **Chat summary — in this order:**
 1. Header metadata (Area, Environment, Space, Role, User, Date, Mode, Flows explored, Session duration) — always include, it's short.
 2. Timing & Cost table + Summary counts — always include, both are already short.
-3. **Level 1 — Confirmed Bugs, in full finding format** (Steps followed / Current behavior / Expected behavior / Why this might be an issue / Evidence) — these are the must-read, low-volume, high-stakes items.
+3. **Level 1 — Confirmed Bugs, in full finding format** (as defined in `templates/report-format.md`) — these are the must-read, low-volume, high-stakes items.
 4. **Level 2 and Level 3 — title only, one line each**, no detail (e.g. `- [L2] <title>`, `- [L3] <title>`). This is enough for the user to answer the reclassification question below without opening the file.
 5. Closing line: `Full report with evidence detail: <resolved session_dir>/report.md`
 
