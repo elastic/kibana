@@ -188,6 +188,7 @@ export const ToolResponseFlyout: React.FC<ToolResponseFlyoutProps> = ({
         <SubAgentExecutionFlyout
           executionId={subAgentExecutionId}
           params={step.params}
+          isCompleted={!isSubAgentRunning}
           onBack={closeSubFlyout}
           onClose={onClose}
         />

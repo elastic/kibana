@@ -61,6 +61,7 @@ const resultLabel = i18n.translate(
 interface SubAgentExecutionFlyoutProps {
   executionId: string;
   params?: Record<string, unknown>;
+  isCompleted?: boolean;
   onBack?: () => void;
   onClose: () => void;
 }
@@ -68,6 +69,7 @@ interface SubAgentExecutionFlyoutProps {
 export const SubAgentExecutionFlyout: React.FC<SubAgentExecutionFlyoutProps> = ({
   executionId,
   params,
+  isCompleted = false,
   onBack,
   onClose,
 }) => {
@@ -81,6 +83,8 @@ export const SubAgentExecutionFlyout: React.FC<SubAgentExecutionFlyoutProps> = (
   const { euiTheme } = useEuiTheme();
   const displayMessage = response?.message ?? streamingMessage;
   const isRunning = !response && !error;
+  const isStreaming =
+    !isCompleted && isRunning && (executionSteps.length > 0 || !!streamingMessage);
   const hasError = Boolean(error);
 
   const euiSteps = [
@@ -100,7 +104,7 @@ export const SubAgentExecutionFlyout: React.FC<SubAgentExecutionFlyoutProps> = (
       : []),
     {
       title: executionLabel,
-      status: (hasError ? 'danger' : isRunning ? 'loading' : 'complete') as
+      status: (hasError ? 'danger' : isStreaming ? 'loading' : 'complete') as
         | 'danger'
         | 'loading'
         | 'complete',
