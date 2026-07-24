@@ -9,4 +9,3 @@ import type { DataSourceWithSecrets } from '../../common/datasource_types';
 
 /** React-hook-form values; data source `type` is flyout UI state, not a form field. */
 export type CreateDataSourceFlyoutFormValues = Omit<DataSourceWithSecrets, 'type'>;
-
