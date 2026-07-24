@@ -2682,7 +2682,6 @@
     "discover.confirmModal.confirmTextDescription": "Nicht gespeicherte Änderungen gehen verloren, wenn Sie eine andere Discover-Sitzung öffnen, bevor Sie zu dieser Sitzung zurückkehren.",
     "discover.confirmModal.title": "Nicht gespeicherte Änderungen",
     "discover.context.breadcrumb": "Umgebende Dokumentation",
-    "discover.context.contextOfTitle": "Dokumente im Zusammenhang mit {anchorId}",
     "discover.context.failedToLoadAnchorDocumentDescription": "Das Ankerdokument konnte nicht geladen werden",
     "discover.context.failedToLoadAnchorDocumentErrorDescription": "Das Ankerdokument konnte nicht geladen werden.",
     "discover.context.invalidTieBreakerFiledSetting": "Ungültige Tie-Breaker-Feldeinstellung",
