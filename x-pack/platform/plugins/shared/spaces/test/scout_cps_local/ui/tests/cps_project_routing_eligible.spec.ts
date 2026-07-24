@@ -157,8 +157,8 @@ test.describe('Spaces CPS project routing - eligible tier', { tag: CPS_ELIGIBLE_
     // Discover registers CPS picker access as EDITABLE; Security home leaves it
     // DISABLED (disabled chrome button), so assert against Discover.
     await page.goto(kbnUrl.app('discover', { space: spaceId }));
-    await expect(pageObjects.spaces.projectPickerButtonLocator()).toBeVisible();
-    await expect(pageObjects.spaces.projectPickerButtonLocator()).toHaveText('All');
+    await expect(pageObjects.spaces.cpsProjectPickerButtonLocator()).toBeVisible();
+    await expect(pageObjects.spaces.cpsProjectPickerButtonLocator()).toHaveText('All');
 
     await page.goto(kbnUrl.app(`management/kibana/spaces/edit/${spaceId}`, { space: spaceId }));
     await pageObjects.spaces.waitForProjectRoutingPicker();
@@ -168,8 +168,8 @@ test.describe('Spaces CPS project routing - eligible tier', { tag: CPS_ELIGIBLE_
 
     await page.goto(kbnUrl.app('discover', { space: spaceId }));
     // Origin-only scope shows "1/N" instead of "All" in the chrome picker.
-    await expect(pageObjects.spaces.projectPickerButtonLocator()).toBeVisible();
-    await expect(pageObjects.spaces.projectPickerButtonLocator()).not.toHaveText('All');
-    await expect(pageObjects.spaces.projectPickerButtonLocator()).toHaveText(/\d+\/\d+/);
+    await expect(pageObjects.spaces.cpsProjectPickerButtonLocator()).toBeVisible();
+    await expect(pageObjects.spaces.cpsProjectPickerButtonLocator()).not.toHaveText('All');
+    await expect(pageObjects.spaces.cpsProjectPickerButtonLocator()).toHaveText(/\d+\/\d+/);
   });
 });

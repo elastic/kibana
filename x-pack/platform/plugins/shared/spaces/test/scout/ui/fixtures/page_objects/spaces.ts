@@ -209,13 +209,11 @@ export class SpacesPage {
     await this.originProjectRoutingButtonLocator().click();
   }
 
-  /** True when the project-routing button group is disabled (read-only capability). */
-  async isProjectRoutingPickerDisabled() {
-    return await this.allProjectsRoutingButtonLocator().isDisabled();
-  }
-
-  /** Chrome nav project picker (visible when CPS is enabled and projects are linked). */
-  projectPickerButtonLocator() {
+  /**
+   * CPS chrome nav project-picker button (not Spaces management UI).
+   * Belongs with CPS chrome-nav page objects if/when those are introduced.
+   */
+  cpsProjectPickerButtonLocator() {
     return this.page.testSubj.locator('project-picker-button');
   }
 
