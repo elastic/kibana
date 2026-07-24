@@ -447,6 +447,16 @@ export class WorkflowExecutionRuntimeManager {
       // Preserve a terminal status already written by cancel/timeout paths.
       // A stale cursor error must not downgrade CANCELLED → FAILED.
       workflowExecutionUpdate.status = workflowExecution.status;
+      // When the status is FAILED (e.g. set by workflow.fail via setWorkflowStatus),
+      // the cursor error was captured separately and must also be persisted.
+      if (
+        workflowExecution.status === ExecutionStatus.FAILED &&
+        this.workflowExecutionCursor.error
+      ) {
+        workflowExecutionUpdate.error = ExecutionError.fromError(
+          this.workflowExecutionCursor.error
+        ).toSerializableObject();
+      }
     } else if (this.workflowExecutionCursor.error) {
       workflowExecutionUpdate.status = ExecutionStatus.FAILED;
       workflowExecutionUpdate.error = ExecutionError.fromError(
