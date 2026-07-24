@@ -464,9 +464,8 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
         : `${KIBANA_SERVERLESS_APIS}group/endpoint-security-detections-api`,
       configureAlertSuppression: `${ELASTIC_DOCS}solutions/security/detect-and-alert/alert-suppression#configure-alert-suppression`,
       attacksPage: `${ELASTIC_DOCS}solutions/security/ai/attacks-page`,
-      // TODO(MITRE-v19 docs): swap to the published page covering how to update outdated
-      // MITRE ATT&CK mappings on detection rules once it ships.
       mitreCoverage: `${ELASTIC_DOCS}solutions/security/detect-and-alert/mitre-attack-coverage`,
+      remapMitreAttack: `${ELASTIC_DOCS}solutions/security/detect-and-alert/remap-mitre-attack`,
     },
     server: {
       protocol: `${ELASTIC_DOCS}reference/kibana/configuration-reference/general-settings#server-protocol`,

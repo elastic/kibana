@@ -23,7 +23,6 @@ interface CreatedAiIndex {
 
 const buildAiIndexProperties = (sources: AiIndexSource[]): { id: string } & AiIndexProperties => ({
   id: DEFAULT_AI_INDEX_NAME,
-  name: DEFAULT_AI_INDEX_NAME,
   dest: { type: 'data_stream', value: DEFAULT_AI_INDEX_DATA_STREAM },
   automations: [],
   sources,
