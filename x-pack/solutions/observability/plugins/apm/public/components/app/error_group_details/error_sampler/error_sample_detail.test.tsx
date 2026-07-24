@@ -163,7 +163,7 @@ describe('ErrorSampleDetails', () => {
     expect(screen.getByText('Error sample')).toBeInTheDocument();
   });
 
-  it('renders issue context for the selected error sample', () => {
+  it('renders error context for the selected error sample', () => {
     render(
       <ErrorSampleDetails
         onSampleClick={jest.fn()}
@@ -176,7 +176,6 @@ describe('ErrorSampleDetails', () => {
       { wrapper: Wrapper }
     );
 
-    expect(screen.getByText('Issue context')).toBeInTheDocument();
     expect(screen.getByText('Group ID')).toBeInTheDocument();
     expect(screen.getByText('test-group-id')).toBeInTheDocument();
     expect(screen.getByText('Occurrences')).toBeInTheDocument();

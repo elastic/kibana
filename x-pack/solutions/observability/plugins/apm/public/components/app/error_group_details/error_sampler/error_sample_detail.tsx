@@ -192,27 +192,27 @@ export function ErrorSampleDetails({
   const sdkName = error?.agent?.name;
   const sdkVersion = error?.agent?.version;
   const sdkLabel = [sdkName, sdkVersion].filter(Boolean).join(' ');
-  const issueContextItems = [
+  const errorContextItems = [
     {
-      title: i18n.translate('xpack.apm.errorSampleDetails.issueContext.groupIdLabel', {
+      title: i18n.translate('xpack.apm.errorSampleDetails.errorContext.groupIdLabel', {
         defaultMessage: 'Group ID',
       }),
       description: groupId || NOT_AVAILABLE_LABEL,
     },
     {
-      title: i18n.translate('xpack.apm.errorSampleDetails.issueContext.occurrencesLabel', {
+      title: i18n.translate('xpack.apm.errorSampleDetails.errorContext.occurrencesLabel', {
         defaultMessage: 'Occurrences',
       }),
       description: String(occurrencesCount),
     },
     {
-      title: i18n.translate('xpack.apm.errorSampleDetails.issueContext.typeLabel', {
+      title: i18n.translate('xpack.apm.errorSampleDetails.errorContext.typeLabel', {
         defaultMessage: 'Type',
       }),
       description: errorType || NOT_AVAILABLE_LABEL,
     },
     {
-      title: i18n.translate('xpack.apm.errorSampleDetails.issueContext.sdkLabel', {
+      title: i18n.translate('xpack.apm.errorSampleDetails.errorContext.sdkLabel', {
         defaultMessage: 'SDK',
       }),
       description: sdkLabel || NOT_AVAILABLE_LABEL,
@@ -347,18 +347,10 @@ export function ErrorSampleDetails({
       <EuiSpacer />
       {!isLoading && (
         <>
-          <EuiTitle size="xxs">
-            <h4>
-              {i18n.translate('xpack.apm.errorSampleDetails.issueContextTitle', {
-                defaultMessage: 'Issue context',
-              })}
-            </h4>
-          </EuiTitle>
-          <EuiSpacer size="s" />
           <EuiDescriptionList
             type="responsiveColumn"
             columnWidths={['20%', '80%']}
-            listItems={issueContextItems}
+            listItems={errorContextItems}
           />
           <EuiSpacer />
         </>
