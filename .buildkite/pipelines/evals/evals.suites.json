@@ -33,7 +33,7 @@
     {
       "id": "alerting-v2",
       "name": "Alerting V2",
-      "slackChannel": "#rna-program-eng",
+      "slackChannel": "#rna-program-notify",
       "configPath": "x-pack/platform/packages/shared/kbn-evals-suite-alerting-v2/playwright.config.ts",
       "serverConfigSet": "evals_alerting_v2",
       "tags": [

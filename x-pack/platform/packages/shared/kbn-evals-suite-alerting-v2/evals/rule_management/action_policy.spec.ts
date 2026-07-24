@@ -14,7 +14,7 @@ import {
 import { expect } from '@playwright/test';
 import { tags } from '@kbn/scout';
 import { parse as parseYaml } from 'yaml';
-import { evaluate as base } from '../../src/evaluate';
+import { evaluate } from '../../src/evaluate';
 import {
   ALERTING_TOOL_IDS,
   DETECTION_RULE_EDIT_SKILL_ID,
@@ -23,18 +23,7 @@ import {
   WORKFLOW_GENERATION_TOOL_ID,
   WORKFLOW_YAML_ATTACHMENT_TYPE,
 } from '../../src/constants';
-import type { EvaluateDataset } from '../../src/evaluate_dataset';
-import { createEvaluateDataset } from '../../src/evaluate_dataset';
 import { getLatestAttachmentData } from '../../src/evaluators/expected_attachment';
-
-const evaluate = base.extend<{ evaluateDataset: EvaluateDataset }, {}>({
-  evaluateDataset: [
-    ({ chatClient, evaluators, executorClient, log }, use) => {
-      use(createEvaluateDataset({ chatClient, evaluators, executorClient, log }));
-    },
-    { scope: 'test' },
-  ],
-});
 
 evaluate.describe(
   'Alerting V2 rule-management skill - action policies (notifications)',

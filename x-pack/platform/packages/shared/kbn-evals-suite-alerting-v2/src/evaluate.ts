@@ -8,6 +8,7 @@
 import { evaluate as evalsBase } from '@kbn/evals';
 import { withPhoenixExecutor } from '@kbn/evals-phoenix-executor';
 import { RuleManagementChatClient } from './chat_client';
+import { createEvaluateDataset, type EvaluateDataset } from './evaluate_dataset';
 import {
   ADMIN_CONSOLE_INDEX,
   HOST_METRICS_INDEX,
@@ -19,6 +20,7 @@ const base = withPhoenixExecutor(evalsBase);
 
 export const evaluate = base.extend<
   {
+    evaluateDataset: EvaluateDataset;
     /**
      * Seeds all data-forge eval data (see `full_stack_data.ts`) before the test
      * and cleans it up afterwards. Only tests that (transitively) destructure
@@ -55,13 +57,19 @@ export const evaluate = base.extend<
   }
 >({
   chatClient: [
-    async ({ fetch, log, connector }, use) => {
-      const chatClient = new RuleManagementChatClient(fetch, log, connector.id);
+    async ({ fetch, kbnClient, log, connector }, use) => {
+      const chatClient = new RuleManagementChatClient(fetch, kbnClient, log, connector.id);
       await use(chatClient);
     },
     {
       scope: 'worker',
     },
+  ],
+  evaluateDataset: [
+    ({ chatClient, evaluators, executorClient, log }, use) => {
+      use(createEvaluateDataset({ chatClient, evaluators, executorClient, log }));
+    },
+    { scope: 'test' },
   ],
   fullStackData: [
     async ({ esClient, log }, use) => {
@@ -88,8 +96,6 @@ export const evaluate = base.extend<
   ],
   emailConnectorId: [
     async ({ kbnClient, log }, use) => {
-      // Mirrors the obs-ai-assistant connector eval: the `__json` email service
-      // is a no-op test transport, so nothing is actually sent.
       const { data } = await kbnClient.request<{ id: string }>({
         method: 'POST',
         path: '/api/actions/connector',

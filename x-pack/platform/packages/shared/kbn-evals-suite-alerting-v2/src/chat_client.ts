@@ -7,6 +7,7 @@
 
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { HttpHandler } from '@kbn/core/public';
+import type { KbnClient } from '@kbn/kbn-client';
 import { agentBuilderDefaultAgentId, type Conversation } from '@kbn/agent-builder-common';
 import type { PromptRequest, PromptResponse } from '@kbn/agent-builder-common/agents';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
@@ -43,6 +44,7 @@ export interface ConverseResult {
 export class RuleManagementChatClient {
   constructor(
     private readonly fetch: HttpHandler,
+    private readonly kbnClient: KbnClient,
     private readonly log: ToolingLog,
     private readonly connectorId: string
   ) {}
@@ -146,27 +148,26 @@ export class RuleManagementChatClient {
   getConversation = async (conversationId: string): Promise<Conversation> => {
     this.log.info(`Fetching conversation ${conversationId}`);
 
-    const response = await this.executeWithRetry('getConversation', async () => {
-      return this.fetch(`/api/agent_builder/conversations/${conversationId}`, {
+    const { data } = await this.executeWithRetry('getConversation', async () => {
+      return this.kbnClient.request<Conversation>({
         method: 'GET',
-        version: '2023-10-31',
+        path: `/api/agent_builder/conversations/${conversationId}`,
       });
     });
 
-    return response as Conversation;
+    return data;
   };
 
   listAttachments = async (conversationId: string): Promise<VersionedAttachment[]> => {
     this.log.info(`Listing attachments for conversation ${conversationId}`);
 
-    const response = await this.executeWithRetry('listAttachments', async () => {
-      return this.fetch(`/api/agent_builder/conversations/${conversationId}/attachments`, {
+    const { data } = await this.executeWithRetry('listAttachments', async () => {
+      return this.kbnClient.request<{ results?: VersionedAttachment[] }>({
         method: 'GET',
-        version: '2023-10-31',
+        path: `/api/agent_builder/conversations/${conversationId}/attachments`,
       });
     });
 
-    const body = response as { results?: VersionedAttachment[] };
-    return body.results ?? [];
+    return data.results ?? [];
   };
 }
