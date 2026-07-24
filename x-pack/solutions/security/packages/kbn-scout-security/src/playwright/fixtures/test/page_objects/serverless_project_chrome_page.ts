@@ -95,6 +95,11 @@ export class ServerlessProjectChromePage {
     if ((await this.moreMenuTrigger.count()) === 0 || !(await this.moreMenuTrigger.isVisible())) {
       return;
     }
+    // Already open: re-clicking would hit the popover's full-viewport click-to-close
+    // mask (rendered over the trigger while open) instead of the trigger itself, timing out.
+    if ((await this.moreMenuTrigger.getAttribute('aria-expanded')) === 'true') {
+      return;
+    }
     await this.moreMenuTrigger.click();
     await this.morePopover.waitFor({
       state: 'visible',
