@@ -34,6 +34,7 @@ import type { AppMenuDiscoverParams } from './app_menu_actions';
 import {
   getAlertsAppMenuItem,
   getCreateRuleOptionsAppMenuItem,
+  getExportSessionJsonAppMenuItem,
   getNewSearchAppMenuItem,
   getOpenSearchAppMenuItem,
   getShareAppMenuItem,
@@ -220,6 +221,10 @@ export const useTopNavLinks = ({
           dispatch(internalStateActions.openDiscoverSession({ discoverSessionId })),
       });
       items.push(openSearchMenuItem);
+    }
+
+    if (!services.embeddableEditor.isEmbeddedEditor()) {
+      items.push(getExportSessionJsonAppMenuItem({ persistedDiscoverSession }));
     }
 
     const shareAppMenuItem = getShareAppMenuItem({
