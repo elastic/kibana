@@ -134,8 +134,14 @@ export const ContextSwitcher = ({
   }, [environmentContext, spaces.active.name, spaces.items.length]);
 
   const handleSpaceSelect = useCallback<SpacesListViewProps['onSelect']>(
-    ({ item }) => {
-      spaces.onSelect(item.id);
+    ({ item, event }) => {
+      spaces.onSelect(item.id, event);
+
+      const middleClick = event.type === 'click' && 'button' in event && event.button === 1;
+      if (event.ctrlKey || event.metaKey || middleClick) {
+        return;
+      }
+
       closePopover();
     },
     [spaces, closePopover]

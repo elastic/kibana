@@ -101,7 +101,7 @@ describe('ContextSwitcher', () => {
     await waitForEuiPopoverOpen();
     expect(trigger).toHaveAttribute('aria-pressed', 'true');
     await user.click(screen.getByTestId('space-obs'));
-    expect(onSelect).toHaveBeenCalledWith('obs');
+    expect(onSelect).toHaveBeenCalledWith('obs', expect.any(Object));
     await waitForEuiPopoverClose();
     expect(trigger).toHaveAttribute('aria-pressed', 'false');
   });
