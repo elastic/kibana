@@ -69,8 +69,6 @@ tasks:
       - '--collect'
       - core-js
       - '--collect'
-      - css-loader
-      - '--collect'
       - fastest-levenshtein
       - '--collect'
       - fp-ts
@@ -84,8 +82,6 @@ tasks:
       - jquery
       - '--collect'
       - lodash
-      - '--collect'
-      - mini-css-extract-plugin
       - '--collect'
       - moment
       - '--collect'
