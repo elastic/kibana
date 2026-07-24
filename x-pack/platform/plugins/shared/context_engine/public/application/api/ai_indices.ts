@@ -10,6 +10,7 @@ import type { HttpStart } from '@kbn/core-http-browser';
 import { AI_INDEX_API_VERSION, aiIndexByIdPath, aiIndexPath } from '../../../common/constants';
 import type {
   AiIndexProperties,
+  CreateAiIndexResponse,
   GetAiIndexResponse,
   ListAiIndexResponse,
   PutAiIndexResponse,
@@ -45,22 +46,36 @@ export const getAiIndex = (
     ...(signal ? { signal } : {}),
   });
 
-interface PutAiIndexArgs {
+interface CreateAiIndexArgs {
   aiIndexId: string;
   properties: AiIndexProperties;
-  /** When true, the request fails with a 409 instead of overwriting an existing id. */
-  createOnly?: boolean;
 }
 
 /**
- * Upserts the full AI index record.
+ * Creates a new AI index. Fails with a 409 if the id already exists.
+ */
+export const createAiIndex = (
+  http: HttpStart,
+  { aiIndexId, properties }: CreateAiIndexArgs
+): Promise<CreateAiIndexResponse> =>
+  http.post<CreateAiIndexResponse>(aiIndexPath, {
+    version: AI_INDEX_API_VERSION,
+    body: JSON.stringify({ id: aiIndexId, ...properties }),
+  });
+
+interface PutAiIndexArgs {
+  aiIndexId: string;
+  properties: AiIndexProperties;
+}
+
+/**
+ * Creates or fully replaces an AI index record.
  */
 export const putAiIndex = (
   http: HttpStart,
-  { aiIndexId, properties, createOnly }: PutAiIndexArgs
+  { aiIndexId, properties }: PutAiIndexArgs
 ): Promise<PutAiIndexResponse> =>
   http.put<PutAiIndexResponse>(buildPath(aiIndexByIdPath, { aiIndexId }), {
     version: AI_INDEX_API_VERSION,
     body: JSON.stringify(properties),
-    ...(createOnly ? { query: { create_only: true } } : {}),
   });

@@ -52,22 +52,35 @@ export class AiIndexService {
   }
 
   /**
-   * Creates or fully replaces an AI index, preserving `date_created` on update.
-   * Concurrent writes are guarded with optimistic concurrency control; a losing
-   * writer gets a {@link AiIndexConflictError}.
-   *
-   * With `createOnly`, an existing id is rejected with an
-   * {@link AiIndexAlreadyExistsError} instead of being overwritten. Enforced
-   * atomically by Elasticsearch's `op_type: 'create'`, so it is race-free.
+   * Creates a new AI index. An existing id is rejected with an
+   * {@link AiIndexAlreadyExistsError}; this is enforced atomically by
+   * Elasticsearch's `op_type: 'create'`, so it is race-free (no read needed).
    */
-  async put(
-    aiIndexId: string,
-    properties: AiIndexProperties,
-    { createOnly = false }: { createOnly?: boolean } = {}
-  ): Promise<'created' | 'updated'> {
+  async create(aiIndexId: string, properties: AiIndexProperties): Promise<void> {
     await this.assertValidDest(properties.dest);
 
-    const existing = createOnly ? undefined : await this.findDocument(aiIndexId);
+    const now = new Date().toISOString();
+    const document: AiIndexDocument = { ...properties, date_created: now, date_modified: now };
+
+    try {
+      await this.storageClient.index({ id: aiIndexId, document, op_type: 'create' });
+    } catch (error) {
+      if (isResponseError(error) && error.statusCode === 409) {
+        throw new AiIndexAlreadyExistsError(aiIndexId);
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * Creates or fully replaces an AI index, preserving `date_created` on update.
+   * Concurrent writes are guarded with optimistic concurrency control; a losing
+   * writer gets an {@link AiIndexConflictError}.
+   */
+  async put(aiIndexId: string, properties: AiIndexProperties): Promise<'created' | 'updated'> {
+    await this.assertValidDest(properties.dest);
+
+    const existing = await this.findDocument(aiIndexId);
     const now = new Date().toISOString();
     const document: AiIndexDocument = {
       ...properties,
@@ -90,9 +103,7 @@ export class AiIndexService {
       return 'created';
     } catch (error) {
       if (isResponseError(error) && error.statusCode === 409) {
-        throw createOnly
-          ? new AiIndexAlreadyExistsError(aiIndexId)
-          : new AiIndexConflictError(aiIndexId);
+        throw new AiIndexConflictError(aiIndexId);
       }
       throw error;
     }

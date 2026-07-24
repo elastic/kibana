@@ -79,7 +79,7 @@ describe('CreateAiIndexPage', () => {
 
   it('creates an AI index without any source', async () => {
     const services = coreMock.createStart();
-    services.http.put.mockResolvedValue({ status: 'created' });
+    services.http.post.mockResolvedValue({});
 
     renderWithProviders(services);
 
@@ -87,10 +87,11 @@ describe('CreateAiIndexPage', () => {
     fireEvent.click(screen.getByTestId('contextCreateAiIndexButton'));
 
     await waitFor(() => {
-      expect(services.http.put).toHaveBeenCalledWith(
-        '/api/context_engine/ai_index/support-ticket-triage',
+      expect(services.http.post).toHaveBeenCalledWith(
+        '/api/context_engine/ai_index',
         expect.objectContaining({
           body: JSON.stringify({
+            id: VALID_ID,
             dest: { type: 'index', value: 'ai-index-idx-support-ticket-triage' },
             automations: [],
             sources: [],
@@ -102,7 +103,7 @@ describe('CreateAiIndexPage', () => {
 
   it('includes the description in the create request when provided', async () => {
     const services = coreMock.createStart();
-    services.http.put.mockResolvedValue({ status: 'created' });
+    services.http.post.mockResolvedValue({});
 
     renderWithProviders(services);
 
@@ -111,10 +112,11 @@ describe('CreateAiIndexPage', () => {
     fireEvent.click(screen.getByTestId('contextCreateAiIndexButton'));
 
     await waitFor(() => {
-      expect(services.http.put).toHaveBeenCalledWith(
-        '/api/context_engine/ai_index/support-ticket-triage',
+      expect(services.http.post).toHaveBeenCalledWith(
+        '/api/context_engine/ai_index',
         expect.objectContaining({
           body: JSON.stringify({
+            id: VALID_ID,
             description: 'Context for triaging support tickets',
             dest: { type: 'index', value: 'ai-index-idx-support-ticket-triage' },
             automations: [],
@@ -127,7 +129,7 @@ describe('CreateAiIndexPage', () => {
 
   it('creates an index-backed AI index and navigates to its detail page', async () => {
     const services = coreMock.createStart();
-    services.http.put.mockResolvedValue({ status: 'created' });
+    services.http.post.mockResolvedValue({});
 
     renderWithProviders(services);
 
@@ -136,10 +138,11 @@ describe('CreateAiIndexPage', () => {
     fireEvent.click(screen.getByTestId('contextCreateAiIndexButton'));
 
     await waitFor(() => {
-      expect(services.http.put).toHaveBeenCalledWith(
-        '/api/context_engine/ai_index/support-ticket-triage',
+      expect(services.http.post).toHaveBeenCalledWith(
+        '/api/context_engine/ai_index',
         expect.objectContaining({
           body: JSON.stringify({
+            id: VALID_ID,
             dest: { type: 'index', value: 'ai-index-idx-support-ticket-triage' },
             automations: [],
             sources: [{ type: 'esql', value: 'FROM logs-* | LIMIT 10' }],
@@ -155,7 +158,7 @@ describe('CreateAiIndexPage', () => {
 
   it('creates a data-stream-backed AI index when that storage type is selected', async () => {
     const services = coreMock.createStart();
-    services.http.put.mockResolvedValue({ status: 'created' });
+    services.http.post.mockResolvedValue({});
 
     renderWithProviders(services);
 
@@ -165,10 +168,11 @@ describe('CreateAiIndexPage', () => {
     fireEvent.click(screen.getByTestId('contextCreateAiIndexButton'));
 
     await waitFor(() => {
-      expect(services.http.put).toHaveBeenCalledWith(
-        '/api/context_engine/ai_index/support-ticket-triage',
+      expect(services.http.post).toHaveBeenCalledWith(
+        '/api/context_engine/ai_index',
         expect.objectContaining({
           body: JSON.stringify({
+            id: VALID_ID,
             dest: { type: 'data_stream', value: 'ai-index-ds-support-ticket-triage' },
             automations: [],
             sources: [{ type: 'esql', value: 'FROM logs-* | LIMIT 10' }],
@@ -180,7 +184,7 @@ describe('CreateAiIndexPage', () => {
 
   it('does not navigate when the create request fails', async () => {
     const services = coreMock.createStart();
-    services.http.put.mockRejectedValue(new Error('boom'));
+    services.http.post.mockRejectedValue(new Error('boom'));
 
     renderWithProviders(services);
 
@@ -207,9 +211,9 @@ describe('CreateAiIndexPage', () => {
     expect(screen.getByTestId('contextCreateAiIndexButton')).toBeDisabled();
   });
 
-  it('sends create_only so a duplicate id is rejected by the server', async () => {
+  it('posts to the create endpoint so a duplicate id is rejected by the server', async () => {
     const services = coreMock.createStart();
-    services.http.put.mockResolvedValue({ status: 'created' });
+    services.http.post.mockResolvedValue({});
 
     renderWithProviders(services);
 
@@ -217,16 +221,16 @@ describe('CreateAiIndexPage', () => {
     fireEvent.click(screen.getByTestId('contextCreateAiIndexButton'));
 
     await waitFor(() => {
-      expect(services.http.put).toHaveBeenCalledWith(
-        '/api/context_engine/ai_index/support-ticket-triage',
-        expect.objectContaining({ query: { create_only: true } })
+      expect(services.http.post).toHaveBeenCalledWith(
+        '/api/context_engine/ai_index',
+        expect.objectContaining({ body: expect.stringContaining(`"id":"${VALID_ID}"`) })
       );
     });
   });
 
   it('surfaces a server conflict as an error toast', async () => {
     const services = coreMock.createStart();
-    services.http.put.mockRejectedValue({
+    services.http.post.mockRejectedValue({
       body: { statusCode: 409, message: "AI index 'support-ticket-triage' already exists" },
     });
 

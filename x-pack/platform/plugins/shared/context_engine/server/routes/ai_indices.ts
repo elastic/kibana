@@ -23,6 +23,7 @@ import {
   aiIndexPath,
 } from '../../common/constants';
 import type {
+  CreateAiIndexResponse,
   DeleteAiIndexResponse,
   GetAiIndexResponse,
   ListAiIndexResponse,
@@ -46,26 +47,18 @@ const WRITE_SECURITY: RouteSecurity = {
   authz: { requiredPrivileges: [apiPrivileges.writeContextEngine] },
 };
 
+const aiIndexIdSchema = schema.string({
+  minLength: 1,
+  maxLength: MAX_AI_INDEX_ID_LENGTH,
+  validate: validateAiIndexId,
+  meta: { description: 'The unique identifier of the AI index.' },
+});
+
 const aiIndexIdParamsSchema = schema.object({
-  aiIndexId: schema.string({
-    minLength: 1,
-    maxLength: MAX_AI_INDEX_ID_LENGTH,
-    validate: validateAiIndexId,
-    meta: { description: 'The unique identifier of the AI index.' },
-  }),
+  aiIndexId: aiIndexIdSchema,
 });
 
-const putAiIndexQuerySchema = schema.object({
-  create_only: schema.boolean({
-    defaultValue: false,
-    meta: {
-      description:
-        'When true, the request fails with a 409 if an AI index with this id already exists instead of overwriting it.',
-    },
-  }),
-});
-
-const putAiIndexBodySchema = schema.object({
+const aiIndexPropertiesSchema = {
   description: schema.maybe(
     schema.string({
       maxLength: MAX_AI_INDEX_DESCRIPTION_LENGTH,
@@ -112,7 +105,10 @@ const putAiIndexBodySchema = schema.object({
       meta: { description: 'Additional sources that provide context for the AI index.' },
     }
   ),
-});
+};
+
+const createAiIndexBodySchema = schema.object({ id: aiIndexIdSchema, ...aiIndexPropertiesSchema });
+const putAiIndexBodySchema = schema.object(aiIndexPropertiesSchema);
 
 const withContextEngineFeatureFlag =
   <P, Q, B>(handler: RequestHandler<P, Q, B>): RequestHandler<P, Q, B> =>
@@ -146,6 +142,41 @@ export const registerAiIndexRoutes = ({
   router: IRouter;
   getAiIndexService: () => AiIndexService;
 }) => {
+  // Create an AI index
+  router.versioned
+    .post({
+      path: aiIndexPath,
+      security: WRITE_SECURITY,
+      access: 'public',
+      summary: 'Create an AI index',
+      description:
+        'Creates an AI index record attached to a data stream or index pattern. Fails with a 409 if an AI index with the same id already exists.',
+      options: {
+        tags: ['oas-tag:context engine'],
+        availability: { stability: 'experimental' },
+      },
+    })
+    .addVersion(
+      {
+        version: AI_INDEX_API_VERSION,
+        validate: {
+          request: {
+            body: createAiIndexBodySchema,
+          },
+        },
+      },
+      withContextEngineFeatureFlag(async (ctx, request, response) => {
+        try {
+          const { id, ...properties } = request.body;
+          await getAiIndexService().create(id, properties);
+          const body: CreateAiIndexResponse = { status: 'created' };
+          return response.created({ body });
+        } catch (error) {
+          return handleAiIndexError(error, response);
+        }
+      })
+    );
+
   // Create or update an AI index
   router.versioned
     .put({
@@ -154,7 +185,7 @@ export const registerAiIndexRoutes = ({
       access: 'public',
       summary: 'Create or update an AI index',
       description:
-        'Creates or updates an AI index record attached to an existing data stream or index pattern.',
+        'Creates or updates an AI index record attached to a data stream or index pattern.',
       options: {
         tags: ['oas-tag:context engine'],
         availability: { stability: 'experimental' },
@@ -166,16 +197,13 @@ export const registerAiIndexRoutes = ({
         validate: {
           request: {
             params: aiIndexIdParamsSchema,
-            query: putAiIndexQuerySchema,
             body: putAiIndexBodySchema,
           },
         },
       },
       withContextEngineFeatureFlag(async (ctx, request, response) => {
         try {
-          const status = await getAiIndexService().put(request.params.aiIndexId, request.body, {
-            createOnly: request.query.create_only,
-          });
+          const status = await getAiIndexService().put(request.params.aiIndexId, request.body);
           const body: PutAiIndexResponse = { status };
           return status === 'created' ? response.created({ body }) : response.ok({ body });
         } catch (error) {

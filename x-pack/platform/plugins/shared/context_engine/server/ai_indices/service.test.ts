@@ -98,14 +98,49 @@ describe('AiIndexService', () => {
     });
   });
 
-  describe('put', () => {
-    const properties = {
-      description: 'KIs representing previously answered, commonly asked questions',
-      dest: { type: 'data_stream' as const, value: 'ai-index-ds-customer_support*' },
-      automations: [{ type: 'workflow' as const, value: 'nightly-refresh' }],
-      sources: [{ type: 'esql' as const, value: 'FROM ai-index-customer_support | LIMIT 10' }],
-    };
+  const properties = {
+    description: 'KIs representing previously answered, commonly asked questions',
+    dest: { type: 'data_stream' as const, value: 'ai-index-ds-customer_support*' },
+    automations: [{ type: 'workflow' as const, value: 'nightly-refresh' }],
+    sources: [{ type: 'esql' as const, value: 'FROM ai-index-customer_support | LIMIT 10' }],
+  };
 
+  describe('create', () => {
+    it('creates with op_type create, without looking up the existing document', async () => {
+      await expect(service.create('customer_support', properties)).resolves.toBeUndefined();
+
+      expect(storageClient.get).not.toHaveBeenCalled();
+      expect(storageClient.index).toHaveBeenCalledWith({
+        id: 'customer_support',
+        op_type: 'create',
+        document: expect.objectContaining({
+          ...properties,
+          date_created: expect.any(String),
+          date_modified: expect.any(String),
+        }),
+      });
+    });
+
+    it('throws AiIndexAlreadyExistsError when the id already exists (409)', async () => {
+      storageClient.index.mockRejectedValue(createConflictError());
+
+      await expect(service.create('customer_support', properties)).rejects.toBeInstanceOf(
+        AiIndexAlreadyExistsError
+      );
+    });
+
+    it('rejects an invalid dest before writing', async () => {
+      await expect(
+        service.create('customer_support', {
+          ...properties,
+          dest: { type: 'data_stream', value: 'customer_support*' },
+        })
+      ).rejects.toBeInstanceOf(InvalidAiIndexDestError);
+      expect(storageClient.index).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('put', () => {
     it('creates an AI index with op_type create when none exists', async () => {
       storageClient.get.mockRejectedValue(createNotFoundError());
 
@@ -170,27 +205,6 @@ describe('AiIndexService', () => {
       await expect(service.put('customer_support', properties)).rejects.toBeInstanceOf(
         AiIndexConflictError
       );
-    });
-
-    describe('createOnly', () => {
-      it('creates without looking up the existing document', async () => {
-        await expect(
-          service.put('customer_support', properties, { createOnly: true })
-        ).resolves.toBe('created');
-
-        expect(storageClient.get).not.toHaveBeenCalled();
-        expect(storageClient.index).toHaveBeenCalledWith(
-          expect.objectContaining({ id: 'customer_support', op_type: 'create' })
-        );
-      });
-
-      it('throws AiIndexAlreadyExistsError when the id already exists (409)', async () => {
-        storageClient.index.mockRejectedValue(createConflictError());
-
-        await expect(
-          service.put('customer_support', properties, { createOnly: true })
-        ).rejects.toBeInstanceOf(AiIndexAlreadyExistsError);
-      });
     });
 
     it('allows a data_stream dest with no matches yet (lazy creation)', async () => {
