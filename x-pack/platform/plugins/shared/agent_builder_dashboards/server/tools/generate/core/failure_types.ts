@@ -10,6 +10,7 @@ export const DASHBOARD_OPERATION_FAILURE_TYPES = {
   addPanels: 'add_panels',
   addControls: 'add_controls',
   editPanels: 'edit_panels',
+  prettifyPanelConfigs: 'prettify_panel_configs',
   updatePanelLayouts: 'update_panel_layouts',
 } as const;
 

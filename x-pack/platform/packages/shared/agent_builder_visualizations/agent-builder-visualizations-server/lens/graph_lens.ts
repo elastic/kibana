@@ -130,7 +130,8 @@ export const createVisualizationGraph = async (
   logger: Logger,
   events: ToolEventEmitter,
   esClient: IScopedClusterClient,
-  includeTimeRange = true
+  includeTimeRange = true,
+  additionalChartConfigInstructions?: string
 ) => {
   const defaultModel = await modelProvider.getDefaultModel();
 
@@ -225,6 +226,7 @@ export const createVisualizationGraph = async (
       chartType: state.chartType,
       schema: state.schema,
       existingConfig: state.existingConfig,
+      additionalChartConfigInstructions,
       additionalContext,
     });
 

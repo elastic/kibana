@@ -71,6 +71,7 @@ export const prepareOperationExecution = async ({
     failures,
     panelAuthoringNotes,
     resolvedPanelCreationRequests,
+    contentResolvedPanelIds: new Set(),
     resolvePanelContent,
     resolveCustomContentTemplate,
   };
