@@ -105,9 +105,9 @@ export default function (providerContext: FtrProviderContext) {
 
     let agentPolicyId: string;
     before(async () => {
+      await fleetAndAgents.setup();
       const agentPolicy = await createAgentPolicy();
       agentPolicyId = agentPolicy.id;
-      await fleetAndAgents.setup();
     });
 
     after(async () => {
