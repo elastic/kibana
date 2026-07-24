@@ -106,7 +106,7 @@ export const ApiStep = ({ tabs, consoleComment, docsPanel, pills, step, path }: 
       <EuiPanel paddingSize="s" hasBorder={false} hasShadow={false} color="subdued">
         {pills.length > 0 && (
           <>
-            <EuiPanel paddingSize="s" hasBorder={false} hasShadow={false} color="subdued">
+            <EuiPanel paddingSize="s" color="transparent">
               <OnboardingPills pills={pills} telemetryPrefix={telemetryPrefix} />
             </EuiPanel>
             <EuiSpacer size="s" />
@@ -211,7 +211,7 @@ export const ApiStep = ({ tabs, consoleComment, docsPanel, pills, step, path }: 
           </EuiCodeBlock>
         </EuiPanel>
         <EuiSpacer size="s" />
-        <EuiPanel paddingSize="xs" hasBorder={false} hasShadow={false} color="transparent">
+        <EuiPanel paddingSize="s" hasBorder={false} hasShadow={false} color="transparent">
           <EuiFlexGroup gutterSize="s" direction="row" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>
               <EuiIcon color="subdued" size="m" type="bulb" aria-hidden={true} />

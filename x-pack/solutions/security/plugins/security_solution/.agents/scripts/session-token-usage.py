@@ -16,10 +16,16 @@ Transcript location:
     and <session-id> = $CLAUDE_CODE_SESSION_ID environment variable.
 
 Usage:
-    python3 scripts/session-token-usage.py [TRANSCRIPT_PATH]
+    python3 x-pack/solutions/security/plugins/security_solution/.agents/scripts/session-token-usage.py [TRANSCRIPT_PATH]
 
 If TRANSCRIPT_PATH is given it overrides the auto-resolved location.
-Run this at the end of Phase 3 (Step 3a) while building the Timing & Cost section.
+
+Consumers:
+- `exploratory-tester`: invoked from Phase 3 (Step 3a) while building the Timing & Cost section.
+- `test-plan-generator`: invoked from Step 3 sub-step 7 (generate) and mode-update.md Step 6 (update)
+  while building the `<!-- tokens: … -->` comment marker and the chat "Token usage:" line.
+
+Shared across both skills to avoid drift on transcript parsing and edge-case handling.
 """
 
 import json

@@ -9,7 +9,7 @@ import React, { useEffect, useMemo } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import type { UseEuiTheme } from '@elastic/eui';
-import { EuiButton, EuiButtonEmpty } from '@elastic/eui';
+import { EuiBetaBadge, EuiButton, EuiButtonEmpty, EuiFlexGroup } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { MANAGEMENT_APP_ID } from '@kbn/management-plugin/public';
 import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
@@ -55,7 +55,16 @@ export const AgentBuilderMcpClients = () => {
     <KibanaPageTemplate data-test-subj="agentBuilderMcpClientsListPage">
       <KibanaPageTemplate.Header
         css={headerStyles}
-        pageTitle={labels.tools.mcpClients.title}
+        pageTitle={
+          <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+            {labels.tools.mcpClients.title}
+            <EuiBetaBadge
+              label={labels.tools.mcpClients.techPreviewBadgeLabel}
+              tooltipContent={labels.tools.mcpClients.techPreviewBadgeDescription}
+              size="m"
+            />
+          </EuiFlexGroup>
+        }
         description={labels.tools.mcpClients.description}
         rightSideItems={[
           <EuiButton
