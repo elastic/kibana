@@ -39,8 +39,8 @@
 
 **Interfaces:**
 - `TokenTotals(input_tokens: int, output_tokens: int, cache_creation_input_tokens: int, cache_read_input_tokens: int)` — immutable token totals with addition and legacy total calculation.
-- `TranscriptResult(source: str, scope: str, status: str, totals: TokenTotals | None, usage_blocks: int)` — one transcript’s result, where status is `available`, `missing`, `unreadable`, or `empty`.
-- `parse_transcript(path: Path, scope: str = "orchestrator") -> TranscriptResult`.
+- `TranscriptResult(source: str, scope: str, status: str, totals: TokenTotals | None, usage_blocks: int, name: str | None = None)` — one transcript’s result, where status is `available`, `missing`, `unreadable`, or `empty`.
+- `parse_transcript(path: Path, scope: str = "orchestrator", name: str | None = None) -> TranscriptResult`.
 - `format_legacy_usage(totals: TokenTotals) -> str`.
 - `resolve_transcript(explicit_path: str | None) -> Path | None`.
 
@@ -77,9 +77,7 @@ Also cover malformed lines, an empty transcript, a missing transcript, negative/
 Run:
 
 ```bash
-python3 -m unittest \
-  x-pack/solutions/security/plugins/security_solution/.agents/scripts/test_session_metrics.py \
-  -v
+python3 x-pack/solutions/security/plugins/security_solution/.agents/scripts/test_session_metrics.py -v
 ```
 
 Expected: collection fails because `session_metrics` and its parser interfaces do not exist yet.
@@ -98,7 +96,7 @@ Do not add structured output to the default invocation.
 
 - [ ] **Step 4: Run the focused tests and verify green.**
 
-Run the same `python3 -m unittest ... -v` command. Expected: all parser and compatibility tests pass, including the exact legacy output assertion.
+Run the same direct test-file command. Expected: all parser and compatibility tests pass, including the exact legacy output assertion.
 
 - [ ] **Step 5: Commit the parser extraction.**
 
@@ -131,6 +129,7 @@ Add tests for a manifest shaped as follows:
 {
   "version": 1,
   "session_root": ".",
+  "artifact_root": ".",
   "transcripts": [
     {"path": "orchestrator.jsonl", "scope": "orchestrator"},
     {"path": "worker-1.jsonl", "scope": "worker", "name": "flow-1"}
@@ -172,9 +171,7 @@ Also assert that missing payload counters produce `{"status": "not_available"}` 
 Run:
 
 ```bash
-python3 -m unittest \
-  x-pack/solutions/security/plugins/security_solution/.agents/scripts/test_session_metrics.py \
-  -v
+python3 x-pack/solutions/security/plugins/security_solution/.agents/scripts/test_session_metrics.py -v
 ```
 
 Expected: the new manifest and metrics assertions fail because structured metrics are not implemented.
@@ -183,7 +180,7 @@ Expected: the new manifest and metrics assertions fail because structured metric
 
 In `session_metrics.py`:
 
-1. Resolve manifest-relative paths against `session_root`, reject paths outside that root, and accept only `orchestrator` or `worker` scopes.
+1. Resolve manifest-relative transcript paths against `session_root` and artifact paths against `artifact_root`; both declared roots must remain inside the manifest directory, and each path must remain inside its selected root.
 2. Parse all listed transcripts into per-source results and aggregate only `available` results by scope and globally. Preserve unavailable source records in `sources`.
 3. Measure only explicit artifact entries plus known files under an optional `session_dir`: findings Markdown, `report.md`, configuration JSON, screenshot image extensions, video extensions, and detector-source files. Do not recursively scan arbitrary files.
 4. Validate payload counters as finite, non-negative integers and return `not_available` when the manifest omits them.
@@ -218,9 +215,7 @@ If no usable transcript exists, set token status to `not_available`; do not emit
 Run:
 
 ```bash
-python3 -m unittest \
-  x-pack/solutions/security/plugins/security_solution/.agents/scripts/test_session_metrics.py \
-  -v
+python3 x-pack/solutions/security/plugins/security_solution/.agents/scripts/test_session_metrics.py -v
 ```
 
 Expected: parser, scoped aggregation, path-safety, artifact, payload, and unavailable-state tests pass.
@@ -302,9 +297,7 @@ Keep the default path equivalent to the current command. In JSON mode, parse the
 Run:
 
 ```bash
-python3 -m unittest \
-  x-pack/solutions/security/plugins/security_solution/.agents/scripts/test_session_metrics.py \
-  -v
+python3 x-pack/solutions/security/plugins/security_solution/.agents/scripts/test_session_metrics.py -v
 python3 x-pack/solutions/security/plugins/security_solution/.agents/scripts/session-token-usage.py \
   --json --session-dir x-pack/solutions/security/plugins/security_solution/.agents/scripts
 ```
@@ -363,9 +356,7 @@ In Step 3a, instruct the agent to run structured metrics after the session direc
 Run:
 
 ```bash
-python3 -m unittest \
-  x-pack/solutions/security/plugins/security_solution/.agents/scripts/test_session_metrics.py \
-  -v
+python3 x-pack/solutions/security/plugins/security_solution/.agents/scripts/test_session_metrics.py -v
 ```
 
 Expected: all parser/CLI/report-contract tests pass, and the existing Level 1 suppression language remains present.
@@ -392,9 +383,7 @@ python3 -m py_compile \
   x-pack/solutions/security/plugins/security_solution/.agents/scripts/session_metrics.py \
   x-pack/solutions/security/plugins/security_solution/.agents/scripts/session-token-usage.py \
   x-pack/solutions/security/plugins/security_solution/.agents/scripts/test_session_metrics.py
-python3 -m unittest \
-  x-pack/solutions/security/plugins/security_solution/.agents/scripts/test_session_metrics.py \
-  -v
+python3 x-pack/solutions/security/plugins/security_solution/.agents/scripts/test_session_metrics.py -v
 ```
 
 Expected: compilation succeeds and every focused test passes.
