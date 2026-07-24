@@ -8,6 +8,7 @@
 import type { ReactNode } from 'react';
 import { esql } from '@elastic/esql';
 import { i18n } from '@kbn/i18n';
+import { DURATION, KIND } from '@kbn/apm-types/es_fields';
 import { SERVICE_ENVIRONMENT, SERVICE_NAME } from '../../../../../../common/es_fields/apm';
 import {
   ENVIRONMENT_ALL,
@@ -26,7 +27,7 @@ import type { FlyoutLensChartConfigDefinition, ServiceScope } from './shared';
 function createOtelSpanBaseQuery({ indexes, scope }: { indexes: string; scope: ServiceScope }) {
   const { serviceName, environment } = scope;
 
-  const query = esql.from(indexes).where`${esql.col('span.kind')} IN ("SERVER", "CONSUMER")`
+  const query = esql.from(indexes).where`${esql.col(KIND)} IN ("Server", "Consumer")`
     .where`${esql.col(SERVICE_NAME)} == ${serviceName}`;
 
   if (environment === ENVIRONMENT_NOT_DEFINED.value) {
@@ -56,9 +57,8 @@ export function getOtelLatencyChart(
     titleAction,
     indexes,
     buildQuery: (idx) => {
-      // TODO: verify OTel duration field name and unit (assumed nanoseconds)
       const query = createOtelSpanBaseQuery({ indexes: idx, scope });
-      query.pipe(`EVAL duration_ms = TO_DOUBLE(duration) / 1000000`);
+      query.pipe(`EVAL duration_ms = TO_DOUBLE(${DURATION}) / 1000000`);
       query.pipe(`STATS ${aggregation} BY ${TIME_BUCKET_BY}`);
       return query;
     },
