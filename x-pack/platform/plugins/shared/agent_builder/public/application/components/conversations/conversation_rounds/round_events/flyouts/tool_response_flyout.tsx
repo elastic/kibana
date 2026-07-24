@@ -58,7 +58,11 @@ interface ToolResponseFlyoutProps {
   onBack?: () => void;
 }
 
-export const ToolResponseFlyout: React.FC<ToolResponseFlyoutProps> = ({ step, onClose, onBack }) => {
+export const ToolResponseFlyout: React.FC<ToolResponseFlyoutProps> = ({
+  step,
+  onClose,
+  onBack,
+}) => {
   const { euiTheme } = useEuiTheme();
   const [isSubFlyoutOpen, { on: openSubFlyout, off: closeSubFlyout }] = useBoolean();
 
@@ -144,7 +148,13 @@ export const ToolResponseFlyout: React.FC<ToolResponseFlyoutProps> = ({ step, on
   ];
 
   return (
-    <EuiFlyout onClose={onClose} aria-labelledby="toolResponseFlyoutTitle" size="m" ownFocus={!onBack} outsideClickCloses={!!onBack}>
+    <EuiFlyout
+      onClose={onClose}
+      aria-labelledby="toolResponseFlyoutTitle"
+      size="m"
+      ownFocus={!onBack}
+      outsideClickCloses={!!onBack}
+    >
       {onBack && (
         <EuiFlyoutHeader
           hasBorder
