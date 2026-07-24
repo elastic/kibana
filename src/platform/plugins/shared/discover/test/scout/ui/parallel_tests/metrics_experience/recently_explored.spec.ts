@@ -49,7 +49,11 @@ spaceTest.describe(
       await expect(targetTitle).not.toHaveText('');
       const targetMetricName = await targetTitle.textContent();
 
-      await metricsExperience.recordInteraction(1);
+      // Interacting with a card records it (only panel actions count, not the chart body).
+      await metricsExperience.openInsightsFlyout(1);
+      await metricsExperience.flyout.closeButton.click();
+      await metricsExperience.flyout.container.waitFor({ state: 'hidden' });
+
       await metricsExperience.selectSortBy('recency');
 
       // The interacted metric moves to the front.

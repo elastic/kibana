@@ -119,10 +119,6 @@ export class MetricsExperiencePage {
     await this.page.testSubj.locator(`metricsExperienceSortOption-${sortBy}`).click();
   }
 
-  public async recordInteraction(index: number): Promise<void> {
-    await this.getCardByIndex(index).click();
-  }
-
   public async toggleFullscreen(): Promise<void> {
     // Entering fullscreen triggers `handleEuiFullScreenChanges` which calls
     // `chrome.setIsVisible(false)` asynchronously. Wait for the chrome header
