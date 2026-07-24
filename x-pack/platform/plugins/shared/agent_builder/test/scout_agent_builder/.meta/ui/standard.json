@@ -1,5 +1,5 @@
 {
-  "sha1": "3fc4feb1a222ec5f9c4d04e06094903e17833042",
+  "sha1": "97ed58ac308aed76642d660258f8cbbf07add932",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -348,7 +348,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/mcp_clients.spec.ts",
-        "line": 40,
+        "line": 45,
         "column": 9
       }
     },
@@ -361,7 +361,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/mcp_clients.spec.ts",
-        "line": 47,
+        "line": 52,
         "column": 9
       }
     },
@@ -374,7 +374,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/mcp_clients.spec.ts",
-        "line": 76,
+        "line": 81,
         "column": 9
       }
     },
@@ -387,7 +387,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/mcp_clients.spec.ts",
-        "line": 95,
+        "line": 100,
         "column": 9
       }
     },
@@ -400,7 +400,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/mcp_clients.spec.ts",
-        "line": 137,
+        "line": 142,
         "column": 9
       }
     },
@@ -413,7 +413,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/mcp_clients.spec.ts",
-        "line": 161,
+        "line": 166,
         "column": 9
       }
     },

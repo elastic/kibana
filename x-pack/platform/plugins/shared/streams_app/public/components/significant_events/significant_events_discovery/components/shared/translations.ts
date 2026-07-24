@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { Discovery, SignificantEventStatus } from '@kbn/significant-events-schema';
+import type { SignificantEventStatus } from '@kbn/significant-events-schema';
 
 export const FIND_SIGNIFICANT_EVENTS_LABEL = i18n.translate(
   'xpack.streams.significantEventsDiscovery.findSignificantEventsLabel',
@@ -166,18 +166,6 @@ export const CHANGE_TYPE_LABELS: Record<string, string> = {
 
 export const changeTypeLabel = (type?: string): string =>
   (type ? CHANGE_TYPE_LABELS[type] : undefined) ?? type ?? '-';
-
-export const DISCOVERY_KIND_LABELS: Record<Discovery['kind'], string> = {
-  discovery: i18n.translate('xpack.streams.discovery.kind.discovery', {
-    defaultMessage: 'Discovery',
-  }),
-  clearance: i18n.translate('xpack.streams.discovery.kind.clearance', {
-    defaultMessage: 'Cleared',
-  }),
-  handled: i18n.translate('xpack.streams.discovery.kind.handled', {
-    defaultMessage: 'Processed',
-  }),
-};
 
 export const SIGNIFICANT_EVENT_STATUS_LABELS: Record<SignificantEventStatus, string> = {
   open: i18n.translate('xpack.streams.significantEvent.status.open', {

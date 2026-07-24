@@ -12,39 +12,39 @@ import { z } from '@kbn/zod/v4';
 import { inject, injectable } from 'inversify';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { MatcherSuggestionsService } from '../../lib/services/matcher_suggestions_service/matcher_suggestions_service';
-import { ALERTING_V2_ACTION_POLICY_API_PATH } from '../constants';
+import { ALERTING_V2_SUGGESTIONS_RULE_EVENT_FIELDS_API_PATH } from '../constants';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
 
-const matcherDataFieldsQuerySchema = z.object({
+const matcherRuleEventFieldsQuerySchema = z.object({
   matcher: z.string().min(1).max(2048).optional(),
 });
 
-const matcherDataFieldsResponseSchema = z
+const matcherRuleEventFieldsResponseSchema = z
   .array(z.string())
-  .describe('The list of available matcher data field names');
+  .describe('The list of available rule event field names');
 
 @injectable()
-export class MatcherDataFieldsRoute extends BaseAlertingRoute {
+export class MatcherRuleEventFieldsRoute extends BaseAlertingRoute {
   static method = 'get' as const;
-  static path = `${ALERTING_V2_ACTION_POLICY_API_PATH}/suggestions/data_fields`;
+  static path = ALERTING_V2_SUGGESTIONS_RULE_EVENT_FIELDS_API_PATH;
   static security: RouteSecurity = {
     authz: {
       requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.alerts.read],
     },
   };
   static routeOptions = {
-    summary: 'Get matcher data fields suggestions',
-    description: 'Get suggestions for matcher data fields.',
+    summary: 'Get rule event fields suggestions',
+    description: 'Get suggestions for field names from the .rule-events data stream.',
   } as const;
   static schemas = {
     request: {
-      query: matcherDataFieldsQuerySchema,
+      query: matcherRuleEventFieldsQuerySchema,
     },
     response: {
       200: {
-        body: () => matcherDataFieldsResponseSchema,
-        description: 'Returns the available matcher data field names.',
+        body: () => matcherRuleEventFieldsResponseSchema,
+        description: 'Returns the available rule event field names.',
       },
       400: {
         body: () => errorResponseSchema,
@@ -53,14 +53,14 @@ export class MatcherDataFieldsRoute extends BaseAlertingRoute {
     },
   };
 
-  protected readonly routeName = 'matcher data fields suggestions';
+  protected readonly routeName = 'matcher rule event fields suggestions';
 
   constructor(
     @inject(AlertingRouteContext) ctx: AlertingRouteContext,
     @inject(Request)
     private readonly request: KibanaRequest<
       unknown,
-      z.infer<typeof matcherDataFieldsQuerySchema>,
+      z.infer<typeof matcherRuleEventFieldsQuerySchema>,
       unknown
     >,
     @inject(MatcherSuggestionsService)
