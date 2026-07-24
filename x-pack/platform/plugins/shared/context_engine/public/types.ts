@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import type { ConsolePluginStart } from '@kbn/console-plugin/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
+
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ContextEnginePluginSetup {}
 
@@ -14,5 +17,7 @@ export interface ContextEnginePluginStart {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ContextEngineSetupDependencies {}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface ContextEngineStartDependencies {}
+export interface ContextEngineStartDependencies {
+  share: SharePluginStart;
+  console?: ConsolePluginStart;
+}

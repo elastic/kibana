@@ -7,13 +7,18 @@
 
 import { i18n } from '@kbn/i18n';
 import { useCallback, useState } from 'react';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import { useKibana } from '../../hooks/use_kibana';
 import { callObservabilityOnboardingApi } from '../../services/rest/create_call_api';
 import type { ApiEndpointId } from '../../../common/api_endpoints';
+import { readStoredFlags, sanitizeStoredFlags } from './read_stored_flags';
+
+const CREATED_KEYS_STORAGE_KEY = 'observabilityOnboarding.apiEndpoints.createdKeys';
 
 export interface UseApiKeysResult {
   encodedApiKeys: Partial<Record<ApiEndpointId, string>>;
+  keyCreatedBeforeByEndpointId: Partial<Record<ApiEndpointId, boolean>>;
   creatingEndpointId?: ApiEndpointId;
   createApiKey: (endpointId: ApiEndpointId) => Promise<void>;
 }
@@ -26,6 +31,8 @@ export function useApiKeys(): UseApiKeysResult {
   const [creatingEndpointId, setCreatingEndpointId] = useState<ApiEndpointId | undefined>(
     undefined
   );
+  const [createdKeysInStorage, setCreatedKeysInStorage] =
+    useLocalStorage<Partial<Record<ApiEndpointId, boolean>>>(CREATED_KEYS_STORAGE_KEY);
 
   const createApiKey = useCallback(
     async (endpointId: ApiEndpointId) => {
@@ -36,6 +43,10 @@ export function useApiKeys(): UseApiKeysResult {
           { signal: null, params: { path: { id: endpointId } } }
         );
         setEncodedApiKeys((previous) => ({ ...previous, [endpointId]: encodedApiKey }));
+        setCreatedKeysInStorage({
+          ...readStoredFlags(CREATED_KEYS_STORAGE_KEY),
+          [endpointId]: true,
+        });
         notifications?.toasts.addSuccess({
           title: i18n.translate('xpack.observability_onboarding.apiEndpoints.createKeySuccess', {
             defaultMessage: 'API key created successfully',
@@ -58,8 +69,13 @@ export function useApiKeys(): UseApiKeysResult {
         setCreatingEndpointId(undefined);
       }
     },
-    [notifications]
+    [notifications, setCreatedKeysInStorage]
   );
 
-  return { encodedApiKeys, creatingEndpointId, createApiKey };
+  return {
+    encodedApiKeys,
+    keyCreatedBeforeByEndpointId: sanitizeStoredFlags(createdKeysInStorage),
+    creatingEndpointId,
+    createApiKey,
+  };
 }

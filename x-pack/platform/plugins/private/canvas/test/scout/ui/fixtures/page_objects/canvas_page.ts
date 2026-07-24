@@ -295,6 +295,22 @@ export class CanvasPage {
       .locator(`savedObjectTitle${name.split(' ').join('-')}`)
       .click({ timeout: 20_000 });
     await this.closeAddFromLibrary();
+    // Adding a panel auto-selects it, and Canvas renders its selection/interaction overlay
+    // on top of the panel — covering the hover actions. Canvas has no Escape-to-deselect
+    // shortcut, so clear the selection with a background click before any panel interaction.
+    await this.deselectAllElements();
+  }
+
+  /**
+   * Deselect any selected workpad element by clicking an empty region of the workpad.
+   * The default panel sits at the top-left, so the bottom-right corner is reliably empty.
+   */
+  async deselectAllElements() {
+    const box = await this.workpadPage.boundingBox();
+    if (!box) {
+      return;
+    }
+    await this.page.mouse.click(box.x + box.width * 0.9, box.y + box.height * 0.9);
   }
 
   /** Locator for an embeddable panel heading on the workpad by its space-stripped title id. */

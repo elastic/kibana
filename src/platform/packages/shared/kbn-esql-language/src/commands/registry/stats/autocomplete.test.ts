@@ -23,6 +23,7 @@ import {
 } from '../../../__tests__/commands/autocomplete';
 import {
   comparisonFunctions,
+  matchOperators,
   patternMatchOperators,
   inOperators,
   nullCheckOperators,
@@ -540,6 +541,7 @@ describe('STATS Autocomplete', () => {
           await statsExpectSuggestions('FROM a | STATS MIN(b) WHERE keywordField ', [
             ...getOperatorSuggestions([
               ...comparisonFunctions,
+              ...matchOperators,
               ...patternMatchOperators,
               ...inOperators,
               ...nullCheckOperators,
