@@ -17,9 +17,9 @@ those prefixes.
 | Field | ES|QL type | Purpose |
 |---|---|---|
 | `type` | keyword | Categorization — e.g. `"index_metadata"`, `"document"`, `"entity_profile"` |
-| `title` | text | Short display name; primary semantic surface via `title.semantic` |
+| `title` | text | Short name of the KI or its backing entity; semantic via `title.semantic` |
 | `content` | text | Full text: purpose, questions answered, access patterns; semantic via `content.semantic` |
-| `description` | text | Routing heuristic — what the KI does NOT contain; semantic via `description.semantic` |
+| `description` | text | Short description of this KI; semantic via `description.semantic` |
 | `tags` | keyword | Filter facets |
 | `attributes` | flattened | Structured keyword-queryable metadata (status, themes, entity names, etc.) |
 
@@ -97,9 +97,7 @@ Replace `type == "index_metadata"` with any combination of `type` or `tags` filt
   whenever you use `:` match operators or `FUSE`. Omitting it causes a missing-field error.
 - **FORK branches** — each branch is an independent sub-query executed in parallel. A generous
   per-branch `LIMIT` (e.g. 20) ensures FUSE has enough candidates.
-- **FUSE** — combines branches with reciprocal rank fusion. Score = sum of `1 / (rank + 60)`
-  across all branches the document appeared in. A document matching both branches beats one
-  matching only one branch.
+- **FUSE** — merges branches into a single ranked result set (using reciprocal rank fusion - RRF - by default).
 - **Dot notation for semantic sub-fields** — use `content.semantic`, not `content_semantic`.
 
 ---
