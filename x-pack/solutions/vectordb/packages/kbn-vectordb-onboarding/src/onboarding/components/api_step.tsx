@@ -20,6 +20,8 @@ import {
   EuiPanel,
   EuiPopover,
   EuiSpacer,
+  EuiTab,
+  EuiTabs,
   EuiText,
   EuiTextColor,
   EuiTitle,
@@ -28,7 +30,7 @@ import { i18n } from '@kbn/i18n';
 import { TryInConsoleButton } from '@kbn/try-in-console';
 import { useKibana } from '../../services';
 import { DEFAULT_LANGUAGE, LANGUAGES, type Language, type SnippetSet } from './languages';
-import { fillPlaceholders } from './snippets';
+import { fillPlaceholders } from './console_snippets';
 import { useOnboardingCredentials } from '../../hooks/use_onboarding_credentials';
 import type { DocsPanelProps, OnboardingPill, VectorPath, WizardStep } from '../types';
 import { OnboardingDocPanel } from './onboarding_doc_panel';
@@ -36,9 +38,15 @@ import { OnboardingPills } from './onboarding_pills';
 
 const SNIPPET_OVERFLOW_HEIGHT = 420;
 
-interface ApiStepProps {
+export interface ApiStepTab {
+  id: string;
+  label: string;
   snippets: SnippetSet;
   consoleRequest: string;
+}
+
+interface ApiStepProps {
+  tabs: ApiStepTab[];
   consoleComment: string;
   docsPanel: DocsPanelProps[];
   pills: OnboardingPill[];
@@ -46,21 +54,17 @@ interface ApiStepProps {
   path: VectorPath;
 }
 
-export const ApiStep = ({
-  snippets,
-  consoleRequest,
-  consoleComment,
-  docsPanel,
-  pills,
-  step,
-  path,
-}: ApiStepProps) => {
+export const ApiStep = ({ tabs, consoleComment, docsPanel, pills, step, path }: ApiStepProps) => {
   const {
     services: { application, share, console: consolePlugin },
   } = useKibana();
   const { elasticsearchUrl, apiKey } = useOnboardingCredentials();
   const [language, setLanguage] = useState<Language>(DEFAULT_LANGUAGE);
   const [isLanguagePopoverOpen, setIsLanguagePopoverOpen] = useState(false);
+  const [selectedTabId, setSelectedTabId] = useState(tabs[0].id);
+
+  const selectedTab = tabs.find((tab) => tab.id === selectedTabId) ?? tabs[0];
+  const { snippets, consoleRequest } = selectedTab;
 
   const selectedLanguage = LANGUAGES.find((l) => l.id === language);
   const syntax = selectedLanguage?.syntax ?? 'python';
@@ -111,11 +115,28 @@ export const ApiStep = ({
         <EuiPanel paddingSize="none" hasBorder={false} hasShadow={true} color="plain">
           <EuiPanel paddingSize="s" hasShadow={false} color="transparent">
             <EuiFlexGroup
-              justifyContent="flexEnd"
+              justifyContent="spaceBetween"
               alignItems="center"
               gutterSize="s"
               responsive={false}
             >
+              <EuiFlexItem grow={true}>
+                {tabs.length > 1 && (
+                  <EuiTabs size="s" bottomBorder={false}>
+                    {tabs.map((tab) => (
+                      <EuiTab
+                        key={tab.id}
+                        isSelected={tab.id === selectedTab.id}
+                        onClick={() => setSelectedTabId(tab.id)}
+                        data-test-subj={`vectordbWizardSnippetTab-${tab.id}`}
+                        data-telemetry-id={`${telemetryPrefix}-selectTab-${tab.id}`}
+                      >
+                        {tab.label}
+                      </EuiTab>
+                    ))}
+                  </EuiTabs>
+                )}
+              </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiPopover
                   button={

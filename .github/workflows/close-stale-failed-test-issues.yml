@@ -101,7 +101,7 @@ jobs:
                 repo: context.repo.repo,
                 issue_number: item.number,
                 body: [
-                  `Closing as this test hasn't failed in ${DAYS_UNTIL_CLOSE} days. It'll reopen automatically on a new failure.`,
+                  `Closing as this test hasn't failed in 3 weeks, which likely means the flakiness has resolved itself. This issue will reopen automatically if the test fails again.`,
                   '',
                   '<!-- failed-test-stale-closed -->',
                 ].join('\n'),
