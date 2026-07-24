@@ -8,7 +8,7 @@
 import type { Logger } from '@kbn/logging';
 import type { AiIndexProperties } from '../../common/http_api/ai_indices';
 import type { AiIndexService } from './service';
-import { AiIndexNotFoundError, InvalidAiIndexDestError } from './errors';
+import { AiIndexConflictError, AiIndexIdConflictError, InvalidAiIndexDestError } from './errors';
 
 export class AiIndexRegistry {
   private readonly entries = new Map<string, AiIndexProperties>();
@@ -56,27 +56,26 @@ export class AiIndexRegistry {
     aiIndexService: AiIndexService;
     logger: Logger;
   }): Promise<void> {
+    // Idempotent upsert on every startup: `putManaged` is the source of truth,
+    // so it creates the entry on first boot and refreshes it on later boots
+    // (picking up any registration changes without a manual recovery step).
     try {
-      await aiIndexService.get(id);
-      logger.debug(`AI index '${id}' already registered — skipping`);
-      return;
-    } catch (err) {
-      if (!(err instanceof AiIndexNotFoundError)) {
-        logger.warn(
-          `Failed to check AI index '${id}' registration status: ${
-            err instanceof Error ? err.message : String(err)
-          }`
-        );
-        return;
+      const result = await aiIndexService.putManaged(id, properties);
+      if (result === 'created') {
+        logger.info(`AI index '${id}' registered successfully`);
+      } else {
+        logger.debug(`AI index '${id}' registration refreshed`);
       }
-    }
-
-    try {
-      await aiIndexService.putManaged(id, properties);
-      logger.info(`AI index '${id}' registered successfully`);
     } catch (err) {
       if (err instanceof InvalidAiIndexDestError) {
         logger.warn(`AI index '${id}' dest is not valid: '${err.message}'. Skipped.`);
+      } else if (err instanceof AiIndexIdConflictError) {
+        logger.warn(
+          `AI index '${id}' is already registered as a user-owned index; skipping managed registration.`
+        );
+      } else if (err instanceof AiIndexConflictError) {
+        // Another Kibana instance registered this entry concurrently; benign.
+        logger.debug(`AI index '${id}' was registered concurrently — skipping.`);
       } else {
         logger.warn(
           `Failed to register AI index '${id}': ${err instanceof Error ? err.message : String(err)}`

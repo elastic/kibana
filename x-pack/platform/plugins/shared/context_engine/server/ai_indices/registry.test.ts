@@ -7,7 +7,7 @@
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { AiIndexRegistry } from './registry';
-import { AiIndexNotFoundError, InvalidAiIndexDestError } from './errors';
+import { AiIndexConflictError, AiIndexIdConflictError, InvalidAiIndexDestError } from './errors';
 import type { AiIndexService } from './service';
 import type { AiIndexProperties } from '../../common/http_api/ai_indices';
 
@@ -41,7 +41,6 @@ describe('AiIndexRegistry', () => {
   describe('register()', () => {
     it('buffers a registration before startupRegister is called', async () => {
       const service = makeServiceMock({
-        get: jest.fn().mockRejectedValue(new AiIndexNotFoundError('test')),
         putManaged: jest.fn().mockResolvedValue('created'),
       });
 
@@ -79,26 +78,8 @@ describe('AiIndexRegistry', () => {
       expect(service.putManaged).not.toHaveBeenCalled();
     });
 
-    it('skips putManaged() when entry already exists', async () => {
+    it('calls putManaged() to create a new entry', async () => {
       const service = makeServiceMock({
-        get: jest.fn().mockResolvedValue({
-          id: 'test',
-          managed: true,
-          ...makeProperties(),
-          date_created: '',
-          date_modified: '',
-        }),
-      });
-      registry.register('test', makeProperties());
-
-      await registry.startupRegister({ aiIndexService: service, isEnabled: true, logger });
-
-      expect(service.putManaged).not.toHaveBeenCalled();
-    });
-
-    it('calls putManaged() when entry does not exist', async () => {
-      const service = makeServiceMock({
-        get: jest.fn().mockRejectedValue(new AiIndexNotFoundError('test')),
         putManaged: jest.fn().mockResolvedValue('created'),
       });
       registry.register('test', makeProperties());
@@ -108,9 +89,20 @@ describe('AiIndexRegistry', () => {
       expect(service.putManaged).toHaveBeenCalledWith('test', makeProperties());
     });
 
+    it('refreshes an existing managed entry via putManaged() on every startup', async () => {
+      const service = makeServiceMock({
+        putManaged: jest.fn().mockResolvedValue('updated'),
+      });
+      registry.register('test', makeProperties());
+
+      await registry.startupRegister({ aiIndexService: service, isEnabled: true, logger });
+
+      expect(service.putManaged).toHaveBeenCalledWith('test', makeProperties());
+      expect(logger.warn).not.toHaveBeenCalled();
+    });
+
     it('logs a warning and does not throw when putManaged() throws InvalidAiIndexDestError', async () => {
       const service = makeServiceMock({
-        get: jest.fn().mockRejectedValue(new AiIndexNotFoundError('test')),
         putManaged: jest.fn().mockRejectedValue(new InvalidAiIndexDestError('dest not ready')),
       });
       registry.register('test', makeProperties());
@@ -122,9 +114,34 @@ describe('AiIndexRegistry', () => {
       expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('dest not ready'));
     });
 
+    it('logs a warning and skips when the id is taken by a user-owned index', async () => {
+      const service = makeServiceMock({
+        putManaged: jest.fn().mockRejectedValue(new AiIndexIdConflictError('test')),
+      });
+      registry.register('test', makeProperties());
+
+      await expect(
+        registry.startupRegister({ aiIndexService: service, isEnabled: true, logger })
+      ).resolves.not.toThrow();
+
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('user-owned index'));
+    });
+
+    it('treats a concurrent registration (AiIndexConflictError) as benign', async () => {
+      const service = makeServiceMock({
+        putManaged: jest.fn().mockRejectedValue(new AiIndexConflictError('test')),
+      });
+      registry.register('test', makeProperties());
+
+      await expect(
+        registry.startupRegister({ aiIndexService: service, isEnabled: true, logger })
+      ).resolves.not.toThrow();
+
+      expect(logger.warn).not.toHaveBeenCalled();
+    });
+
     it('logs a warning and does not throw when putManaged() throws an unexpected error', async () => {
       const service = makeServiceMock({
-        get: jest.fn().mockRejectedValue(new AiIndexNotFoundError('test')),
         putManaged: jest.fn().mockRejectedValue(new Error('ES cluster unavailable')),
       });
       registry.register('test', makeProperties());
@@ -138,7 +155,6 @@ describe('AiIndexRegistry', () => {
 
     it('registers multiple entries independently', async () => {
       const service = makeServiceMock({
-        get: jest.fn().mockRejectedValue(new AiIndexNotFoundError('any')),
         putManaged: jest.fn().mockResolvedValue('created'),
       });
       registry.register('a', makeProperties({ description: 'A' }));

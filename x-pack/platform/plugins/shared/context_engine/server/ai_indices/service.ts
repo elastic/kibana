@@ -19,6 +19,7 @@ import {
   AiIndexConflictError,
   AiIndexManagedError,
   AiIndexNotFoundError,
+  AiIndexIdConflictError,
 } from './errors';
 import type { AiIndexDocument, AiIndexStorageClient } from './storage';
 import { createAiIndexStorageClient } from './storage';
@@ -76,6 +77,13 @@ export class AiIndexService {
   /**
    * Creates or fully replaces a managed AI index. Managed entries are owned by
    * the registering plugin and cannot be mutated via the public API.
+   *
+   * This is an idempotent upsert: it is safe to call on every startup, so a
+   * managed entry always reflects the latest registration (the source of truth
+   * lives in code). It will overwrite an existing managed entry, but refuses to
+   * clobber a user-owned (unmanaged) entry that squats the same id, throwing
+   * {@link AiIndexIdConflictError} so the collision surfaces instead of
+   * silently destroying user data.
    */
   async putManaged(
     aiIndexId: string,
@@ -83,6 +91,9 @@ export class AiIndexService {
   ): Promise<'created' | 'updated'> {
     await this.assertValidDest(properties.dest);
     const existing = await this.findDocument(aiIndexId);
+    if (existing && !existing.document.managed) {
+      throw new AiIndexIdConflictError(aiIndexId);
+    }
     return this.writeDocument(aiIndexId, { ...properties, managed: true }, existing);
   }
 

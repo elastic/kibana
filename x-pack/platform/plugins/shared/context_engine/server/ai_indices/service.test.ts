@@ -14,6 +14,7 @@ import {
   AiIndexConflictError,
   AiIndexManagedError,
   AiIndexNotFoundError,
+  AiIndexIdConflictError,
 } from './errors';
 import type { AiIndexDocument, AiIndexStorageClient } from './storage';
 import { createAiIndexStorageClient } from './storage';
@@ -397,18 +398,21 @@ describe('AiIndexService', () => {
 
   describe('putManaged', () => {
     const properties = {
-      name: 'elastic',
+      description: 'Elastic managed AI index',
       dest: { type: 'index' as const, value: 'ai-index-idx-sml-data' },
       automations: [],
       sources: [],
     };
 
-    it('writes managed: true to the document', async () => {
+    const mockValidIndexDest = () =>
       esClient.indices.resolveIndex.mockResponse({
         indices: [{ name: 'ai-index-idx-sml-data', attributes: ['open'] }],
         aliases: [],
         data_streams: [],
       });
+
+    it('writes managed: true to the document', async () => {
+      mockValidIndexDest();
       storageClient.get.mockRejectedValue(createNotFoundError());
 
       await expect(service.putManaged('elastic', properties)).resolves.toBe('created');
@@ -418,6 +422,40 @@ describe('AiIndexService', () => {
           document: expect.objectContaining({ managed: true }),
         })
       );
+    });
+
+    it('overwrites an existing managed entry (idempotent upsert)', async () => {
+      mockValidIndexDest();
+      storageClient.get.mockResolvedValue({
+        _id: 'elastic',
+        _index: '.contextengine-ai-indices',
+        found: true,
+        _seq_no: 7,
+        _primary_term: 2,
+        _source: { ...aiIndexDocument, managed: true },
+      });
+
+      await expect(service.putManaged('elastic', properties)).resolves.toBe('updated');
+
+      const [indexArgs] = storageClient.index.mock.calls[0];
+      expect(indexArgs.if_seq_no).toBe(7);
+      expect(indexArgs.if_primary_term).toBe(2);
+      expect(indexArgs.document?.managed).toBe(true);
+    });
+
+    it('throws AiIndexIdConflictError when the id is taken by an unmanaged entry', async () => {
+      mockValidIndexDest();
+      storageClient.get.mockResolvedValue({
+        _id: 'elastic',
+        _index: '.contextengine-ai-indices',
+        found: true,
+        _source: { ...aiIndexDocument, managed: false },
+      });
+
+      await expect(service.putManaged('elastic', properties)).rejects.toBeInstanceOf(
+        AiIndexIdConflictError
+      );
+      expect(storageClient.index).not.toHaveBeenCalled();
     });
   });
 
