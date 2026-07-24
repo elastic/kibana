@@ -75,7 +75,7 @@
   },
   "engines": {
     "node": "24.18.0",
-    "pnpm": "^9.15.0"
+    "pnpm": "^11.17.0"
   },
   "dependencies": {
     "@a2a-js/sdk": "0.3.4",
@@ -2217,7 +2217,7 @@
     "xmlbuilder": "15.1.1",
     "yaml-language-server": "1.23.0"
   },
-  "packageManager": "pnpm@9.15.9",
+  "packageManager": "pnpm@11.17.0",
   "pnpm": {
     "onlyBuiltDependencies": [
       "chromedriver",
@@ -2300,6 +2300,10 @@
       "vscode-languageserver-types": "3.17.5",
       "yauzl": "3.4.0",
       "zod": "4.4.3"
-    }
+    },
+    "ignoredBuiltDependencies": [
+      "ms-chromium-edge-driver",
+      "puppeteer"
+    ]
   }
 }

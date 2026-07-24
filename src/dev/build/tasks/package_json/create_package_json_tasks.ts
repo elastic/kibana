@@ -9,6 +9,8 @@
 
 import type { PluginPackage } from '@kbn/repo-packages';
 import { findUsedDependencies } from './find_used_dependencies';
+import type { PnpmField } from './render_pnpm_workspace';
+import { renderPnpmWorkspace } from './render_pnpm_workspace';
 import type { Task } from '../../lib';
 import { read, write } from '../../lib';
 
@@ -55,7 +57,6 @@ export const CreatePackageJson: Task = {
       engines: {
         node: pkg.engines?.node,
       },
-      pnpm: pkg.pnpm,
       dependencies: {
         // include dependencies which are explicitly used
         ...(await findUsedDependencies(transformedDeps, build.resolvePath('.'), plugins)),
@@ -67,6 +68,15 @@ export const CreatePackageJson: Task = {
     };
 
     await write(build.resolvePath('package.json'), JSON.stringify(newPkg, null, '  '));
+
+    // pnpm 11 reads install settings + overrides only from pnpm-workspace.yaml,
+    // not package.json. This local (settings-only, no `packages:`) file makes the
+    // build dir its own workspace root, so the in-build install resolves the same
+    // hoisted layout + pinned overrides as the repo. Removed by CleanPackageManagerRelatedFiles.
+    await write(
+      build.resolvePath('pnpm-workspace.yaml'),
+      renderPnpmWorkspace(pkg.pnpm as PnpmField | undefined)
+    );
   },
 };
 
@@ -79,7 +89,6 @@ export const RemovePackageJsonDeps: Task = {
 
     delete pkg.dependencies;
     delete pkg.private;
-    delete pkg.pnpm;
 
     await write(build.resolvePath('package.json'), JSON.stringify(pkg, null, '  '));
   },

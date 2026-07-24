@@ -11,8 +11,5 @@
     "make:docs": "./documentation/make_docs.sh",
     "postmake:docs": "pnpm run lint:fix:docs",
     "lint:fix:docs": "cd ../../../../.. && node ./scripts/eslint --fix ./src/platform/packages/private/kbn-language-documentation/src/sections/generated"
-  },
-  "devDependencies": {
-    "typescript": "5.9.3"
   }
 }

@@ -21,8 +21,10 @@ export const InstallDependencies: Task = {
     // importer mismatch). pnpm reconciles the changed importer while reusing the
     // lockfile's existing resolutions for unchanged third-party ranges, so
     // transitive caret deps stay pinned to the repo's versions instead of drifting.
-    // `--ignore-workspace` is required because the build dir lives under the repo,
-    // and pnpm would otherwise walk up to the repo's pnpm-workspace.yaml.
+    // The build dir carries its own settings-only pnpm-workspace.yaml (see
+    // CreatePackageJson); pnpm treats it as the workspace root, so it does NOT walk
+    // up to the repo root AND it applies our hoisted linker + overrides (both of
+    // which `--ignore-workspace` would suppress under pnpm 11).
     await exec(
       log,
       'pnpm',
@@ -32,7 +34,6 @@ export const InstallDependencies: Task = {
         // NOTE: do NOT pass --no-optional. pnpm omits optional deps (e.g.
         // @pkgjs/parseargs) from the lockfile under that flag, then the install's
         // own integrity check rejects the lockfile as missing those entries.
-        '--ignore-workspace',
         '--no-frozen-lockfile',
         '--config.confirmModulesPurge=false',
         '--prefer-offline',
