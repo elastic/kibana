@@ -2641,6 +2641,26 @@ src/platform/packages/shared/kbn-connector-specs/src/lib/generate_secrets_schema
 x-pack/platform/plugins/shared/actions/server/lib/relay @elastic/nightshift-context-and-research-team
 
 
+## Bearer with TLS / PEM CA
+src/platform/packages/shared/kbn-connector-specs/src/auth_types/bearer_with_tls.ts @elastic/nightshift-context-and-research-team
+src/platform/packages/shared/kbn-connector-specs/src/auth_types/bearer_with_tls_server.ts @elastic/nightshift-context-and-research-team
+src/platform/packages/shared/kbn-connector-specs/src/auth_types/pem_ca_tls_helpers.ts @elastic/nightshift-context-and-research-team
+src/platform/packages/shared/kbn-connector-specs/src/auth_types/pem_ca_tls_schema.ts @elastic/nightshift-context-and-research-team
+
+## Kubernetes auth
+src/platform/packages/shared/kbn-connector-specs/src/auth_types/eks_token_helpers.ts @elastic/nightshift-context-and-research-team
+src/platform/packages/shared/kbn-connector-specs/src/auth_types/eks_token_helpers.test.ts @elastic/nightshift-context-and-research-team
+src/platform/packages/shared/kbn-connector-specs/src/auth_types/kubernetes_aks.ts @elastic/nightshift-context-and-research-team
+src/platform/packages/shared/kbn-connector-specs/src/auth_types/kubernetes_aks.test.ts @elastic/nightshift-context-and-research-team
+src/platform/packages/shared/kbn-connector-specs/src/auth_types/kubernetes_aks_server.ts @elastic/nightshift-context-and-research-team
+src/platform/packages/shared/kbn-connector-specs/src/auth_types/kubernetes_eks.ts @elastic/nightshift-context-and-research-team
+src/platform/packages/shared/kbn-connector-specs/src/auth_types/kubernetes_eks.test.ts @elastic/nightshift-context-and-research-team
+src/platform/packages/shared/kbn-connector-specs/src/auth_types/kubernetes_eks_server.ts @elastic/nightshift-context-and-research-team
+src/platform/packages/shared/kbn-connector-specs/src/auth_types/kubernetes_gke.ts @elastic/nightshift-context-and-research-team
+src/platform/packages/shared/kbn-connector-specs/src/auth_types/kubernetes_gke.test.ts @elastic/nightshift-context-and-research-team
+src/platform/packages/shared/kbn-connector-specs/src/auth_types/kubernetes_gke_server.ts @elastic/nightshift-context-and-research-team
+
+
 # Connector Specs
 src/platform/packages/shared/kbn-connector-specs/src/all_specs.ts
 src/platform/packages/shared/kbn-connector-specs/src/connector_icons_map.ts
