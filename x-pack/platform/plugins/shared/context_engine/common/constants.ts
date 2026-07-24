@@ -17,13 +17,22 @@ export const aiIndexByIdPath = `${aiIndexPath}/{aiIndexId}`;
 export const AI_INDEX_API_VERSION = '2023-10-31';
 
 /**
+ * TODO: delete me !TEMPORARY!
+ * Fixed identity used by the create page while it has no dedicated form. The
+ * backing data stream is created from Dev Console (the "Create AI index dest"
+ * button), and the create call reuses the same name so the two always agree.
+ * Because the id is fixed, repeated creates upsert the same AI index record.
+ */
+export const DEFAULT_AI_INDEX_NAME = 'my-ai-index';
+export const DEFAULT_AI_INDEX_DATA_STREAM = `.ai-index-ds-${DEFAULT_AI_INDEX_NAME}`;
+
+/**
  * Hard limit on the number of AI indices returned by the list API.
  * TODO: Remove this limit (or make it configurable) and add pagination support to List API.
  */
 export const MAX_AI_INDICES = 100;
 
 export const MAX_AI_INDEX_ID_LENGTH = 256;
-export const MAX_AI_INDEX_NAME_LENGTH = 256;
 export const MAX_AI_INDEX_DESCRIPTION_LENGTH = 2048;
 export const MAX_AI_INDEX_DEST_VALUE_LENGTH = 1024;
 export const MAX_AI_INDEX_AUTOMATION_LENGTH = 1024;
