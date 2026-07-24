@@ -8,6 +8,9 @@
 /** Artifact type identifier for runbooks */
 export const RUNBOOK_ARTIFACT_TYPE = 'runbook';
 
+/** Artifact type identifier for linked dashboards */
+export const DASHBOARD_ARTIFACT_TYPE = 'dashboard';
+
 /** Default maximum character length for artifact values (applies when no type-specific override exists) */
 export const DEFAULT_ARTIFACT_VALUE_LIMIT = 1024;
 

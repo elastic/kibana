@@ -71,6 +71,7 @@ export class FindingsCollector {
         existing.serverlessBaselineUrl ??= f.serverlessBaselineUrl;
         existing.fixHint ??= f.fixHint;
         existing.docsAnchor ??= f.docsAnchor;
+        existing.details ??= f.details;
       } else {
         seen.set(key, { ...f });
       }

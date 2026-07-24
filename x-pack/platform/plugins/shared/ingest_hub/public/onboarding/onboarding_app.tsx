@@ -12,8 +12,11 @@ import { Router, Route } from '@kbn/shared-ux-router';
 import { useLocation } from 'react-router-dom';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import type { IngestHubStartDependencies } from '../types';
 
 import { OnboardingShell } from './onboarding_shell';
+import { OnboardingFlowProvider } from './onboarding_flow_context';
 
 const DEFAULT_RETURN_APP = 'integrations';
 
@@ -27,19 +30,28 @@ function RootRedirect() {
   return null;
 }
 
-export function renderOnboardingApp(coreStart: CoreStart, params: AppMountParameters) {
+export function renderOnboardingApp(
+  coreStart: CoreStart,
+  params: AppMountParameters,
+  deps: IngestHubStartDependencies = {}
+) {
+  const queryClient = new QueryClient();
   const root = createRoot(params.element);
   root.render(
     coreStart.rendering.addContext(
-      <KibanaContextProvider services={coreStart}>
-        <Router history={params.history}>
-          <Route exact path="/">
-            <RootRedirect />
-          </Route>
-          <Route path="/:integrationId">
-            <OnboardingShell />
-          </Route>
-        </Router>
+      <KibanaContextProvider services={{ ...coreStart, cloud: deps.cloud }}>
+        <QueryClientProvider client={queryClient}>
+          <OnboardingFlowProvider>
+            <Router history={params.history}>
+              <Route exact path="/">
+                <RootRedirect />
+              </Route>
+              <Route path="/:integrationId">
+                <OnboardingShell />
+              </Route>
+            </Router>
+          </OnboardingFlowProvider>
+        </QueryClientProvider>
       </KibanaContextProvider>
     )
   );

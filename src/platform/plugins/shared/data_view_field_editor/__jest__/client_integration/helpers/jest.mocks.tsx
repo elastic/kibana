@@ -13,8 +13,6 @@ import { of } from 'rxjs';
 const mockUseEffect = useEffect;
 const mockOf = of;
 
-jest.mock('@kbn/esql-language', () => ({}));
-
 const EDITOR_ID = 'testEditor';
 const MONACO_MODULE = '@kbn/monaco';
 

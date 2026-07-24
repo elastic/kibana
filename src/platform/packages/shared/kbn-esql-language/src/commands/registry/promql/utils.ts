@@ -8,7 +8,7 @@
  */
 import { within } from '@elastic/esql';
 import type { ESQLAstAllCommands, ESQLAstPromqlCommand } from '@elastic/esql/types';
-import { correctPromqlQuerySyntax, getBracketsToClose } from '../../definitions/utils/ast';
+import { getBracketsToClose } from '../../definitions/utils/ast';
 import { getPreGroupedAggregationName } from '../../definitions/utils/promql';
 import { getTrailingIdentifier } from '../../definitions/utils/shared';
 
@@ -20,6 +20,7 @@ export enum PromqlParamValueType {
 
 export enum PromqlParamName {
   Index = 'index',
+  Time = 'time',
   Step = 'step',
   Start = 'start',
   End = 'end',
@@ -84,6 +85,11 @@ export const PROMQL_PARAMS: PromqlParamDefinition[] = [
     valueType: PromqlParamValueType.TimeseriesSources,
   },
   {
+    name: PromqlParamName.Time,
+    description: 'Instant query evaluation time',
+    valueType: PromqlParamValueType.DateLiterals,
+  },
+  {
     name: PromqlParamName.Step,
     description: 'Query resolution step (e.g. 1m, 5m, 1h)',
     valueType: PromqlParamValueType.Static,
@@ -111,6 +117,29 @@ export const PROMQL_PARAMS: PromqlParamDefinition[] = [
 ];
 
 export const PROMQL_PARAM_NAMES: string[] = PROMQL_PARAMS.map(({ name }) => name);
+
+export const PROMQL_RANGE_PARAM_NAMES = [
+  PromqlParamName.Step,
+  PromqlParamName.Buckets,
+  PromqlParamName.Start,
+  PromqlParamName.End,
+] as const;
+
+export const PROMQL_PARAM_CONFLICTS: Readonly<Record<string, readonly string[]>> = {
+  [PromqlParamName.Step]: [PromqlParamName.Buckets, PromqlParamName.Time],
+  [PromqlParamName.Buckets]: [PromqlParamName.Step, PromqlParamName.Time],
+  [PromqlParamName.Start]: [PromqlParamName.Time],
+  [PromqlParamName.End]: [PromqlParamName.Time],
+  [PromqlParamName.Time]: PROMQL_RANGE_PARAM_NAMES,
+};
+
+export function isPromqlParamAvailable(name: string, usedParams: Set<string>): boolean {
+  if (usedParams.has(name)) {
+    return false;
+  }
+
+  return !PROMQL_PARAM_CONFLICTS[name]?.some((param) => usedParams.has(param));
+}
 
 const PARAM_ASSIGNMENT_PATTERNS = PROMQL_PARAM_NAMES.map((param) => ({
   param,
@@ -144,10 +173,8 @@ function getPromqlQuerySlice(
     return undefined;
   }
 
-  const text = correctPromqlQuerySyntax(rawText);
-
-  // Keep original length to clamp cursor (cursor shouldn't appear on added brackets)
-  return { text, start: queryBounds.queryStart, originalLength: rawText.length };
+  // Keep original length to clamp cursor after the query parser adds syntax fixups.
+  return { text: rawText, start: queryBounds.queryStart, originalLength: rawText.length };
 }
 
 function getPromqlQueryBounds(

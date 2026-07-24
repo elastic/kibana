@@ -1,0 +1,8 @@
+prs:
+- https://github.com/elastic/kibana/pull/269743
+type: enhancement
+products:
+- product: cloud-serverless
+  target: 2026-07-09
+title: Add managed alert analysis workflow in Elastic Security
+description: "Adds a Security alert analysis managed workflow with configuration in the rules section. The workflow searches for related alerts, rule details, and closure context around each alert."

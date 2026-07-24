@@ -15,7 +15,6 @@ import type { CoreStart } from '@kbn/core/public';
 import type { Reference } from '@kbn/content-management-utils';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
-import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { OpenContentEditorParams } from '@kbn/content-management-content-editor';
 import type { TableListTabParentProps } from '@kbn/content-management-tabbed-table-list-view';
 import { TableListViewTable } from '@kbn/content-management-table-list-view-table';
@@ -36,19 +35,11 @@ import {
   getVisualizationListingTableStyles,
 } from '@kbn/visualization-listing-components';
 
-interface SavedObjectWithReferences {
-  id: string;
-  type: string;
-  attributes: Record<string, unknown>;
-  references: Reference[];
-}
-
 interface VisualizationTableListProps {
   core: CoreStart;
   visualizations: VisualizationsStart;
   contentManagement: ContentManagementPublicStart;
   embeddable: EmbeddableStart;
-  savedObjectsTagging?: SavedObjectsTaggingApi;
   parentProps: TableListTabParentProps;
 }
 
@@ -57,10 +48,9 @@ export const VisualizationTableList = ({
   visualizations,
   contentManagement,
   embeddable,
-  savedObjectsTagging,
   parentProps,
 }: VisualizationTableListProps) => {
-  const { getBreadcrumbs, onFetchSuccess, setPageDataTestSubject } = parentProps;
+  const { getBreadcrumbs, onFetchSuccess, setPageDataTestSubject, showCreateButton } = parentProps;
   const euiThemeContext = useEuiTheme();
   const tableStyles = useMemo(
     () => getVisualizationListingTableStyles(euiThemeContext),
@@ -74,16 +64,25 @@ export const VisualizationTableList = ({
   const visualizedUserContent = useRef<VisualizeUserContent[]>();
   const closeNewVisModal = useRef(() => {});
 
-  const createNewVis = useCallback(async () => {
-    const currentApp = await firstValueFrom(core.application.currentAppId$);
-    const breadcrumbs = currentApp ? getBreadcrumbs?.(currentApp) : undefined;
-    closeNewVisModal.current = visualizations.showNewVisModal({
-      originatingApp: currentApp,
-      originatingPath: window.location.hash,
-      breadcrumbs,
-      outsideVisualizeApp: currentApp !== VISUALIZE_APP_NAME,
-    });
-  }, [visualizations, core.application, getBreadcrumbs]);
+  const createNewVis = useCallback(() => {
+    firstValueFrom(core.application.currentAppId$)
+      .then((currentApp) => {
+        const breadcrumbs = currentApp ? getBreadcrumbs?.(currentApp) : undefined;
+        closeNewVisModal.current = visualizations.showNewVisModal({
+          originatingApp: currentApp,
+          originatingPath: window.location.hash,
+          breadcrumbs,
+          outsideVisualizeApp: currentApp !== VISUALIZE_APP_NAME,
+        });
+      })
+      .catch((error) => {
+        core.notifications.toasts.addError(error, {
+          title: i18n.translate('visualizationListing.visualizeListingCreateErrorTitle', {
+            defaultMessage: 'Error opening new visualization modal',
+          }),
+        });
+      });
+  }, [visualizations, core.application, core.notifications.toasts, getBreadcrumbs]);
 
   useEffect(() => {
     return () => {
@@ -157,37 +156,17 @@ export const VisualizationTableList = ({
   );
 
   const onContentEditorSave = useCallback(
-    async (args: { id: string; title: string; description?: string; tags: string[] }) => {
+    async (args: { id: string; title: string; description?: string }) => {
       const content = visualizedUserContent.current?.find(({ id }) => id === args.id);
-
       if (content) {
-        const result = (await contentManagement.client.get({
-          contentTypeId: content.savedObjectType,
-          id: content.id,
-        })) as { item: SavedObjectWithReferences };
-
-        if (result?.item) {
-          let references = result.item.references || [];
-          if (savedObjectsTagging) {
-            references = savedObjectsTagging.ui.updateTagsReferences(references, args.tags || []);
-          }
-
-          await contentManagement.client.update({
-            contentTypeId: content.savedObjectType,
-            id: content.id,
-            data: {
-              ...result.item.attributes,
-              title: args.title,
-              description: args.description ?? '',
-            },
-            options: {
-              references,
-            },
-          });
-        }
+        // Note: the visualize listing table does not currently support tag editing
+        await visualizations.updateVisualizationLibraryItem(content.id, content.type, {
+          title: args.title,
+          description: args.description ?? '',
+        });
       }
     },
-    [contentManagement, savedObjectsTagging]
+    [visualizations]
   );
 
   const contentEditorValidators: OpenContentEditorParams['customValidators'] = useMemo(
@@ -244,7 +223,7 @@ export const VisualizationTableList = ({
           customValidators: contentEditorValidators,
         }}
         emptyPrompt={noItemsFragment}
-        createItem={createNewVis}
+        createItem={showCreateButton === false ? undefined : createNewVis}
         customTableColumn={getCustomColumn()}
         customSortingOptions={getCustomSortingOptions()}
         initialPageSize={initialPageSize}

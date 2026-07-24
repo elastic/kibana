@@ -29,6 +29,7 @@ import { useDefaultModelSettings } from '../../hooks/use_default_model_settings'
 import { useDefaultModelValidation } from '../../hooks/use_default_model_validation';
 import { useConnectors } from '../../hooks/use_connectors';
 import { useKibana } from '../../hooks/use_kibana';
+import { useInferenceCapabilities } from '../../hooks/use_inference_capabilities';
 import { useUsageTracker } from '../../contexts/usage_tracker_context';
 import { EventType } from '../../analytics/constants';
 import { getModelStatus, isModelDeprecated } from '../../utils/eis_utils';
@@ -63,6 +64,7 @@ export const ModelSettings: React.FC = () => {
   const {
     services: { application, http },
   } = useKibana();
+  const { canManage } = useInferenceCapabilities();
   const usageTracker = useUsageTracker();
   const deprecatedEndpointsMap: Map<string, EndpointDeprecationInfo> = useMemo(() => {
     if (connectorsLoading || !connectors) return new Map();
@@ -121,6 +123,7 @@ export const ModelSettings: React.FC = () => {
 
   const isDirty = isFeatureDirty || isDefaultModelDirty;
   const hasNoModels = !connectorsLoading && connectors && !connectors.length;
+  const hasAdvancedSettingsSavePermission = application.capabilities.advancedSettings.save === true;
 
   const history = useHistory();
   const unblockRef = useRef<(() => void) | null>(null);
@@ -218,17 +221,21 @@ export const ModelSettings: React.FC = () => {
         paddingSize="none"
         restrictWidth={true}
         rightSideItems={[
-          <EuiButton
-            fill
-            onClick={handleSave}
-            isLoading={isFeatureSaving}
-            isDisabled={!isDirty || !defaultModelValidation.isValid}
-            data-test-subj="save-settings-button"
-          >
-            {i18n.translate('xpack.searchInferenceEndpoints.settings.saveButton', {
-              defaultMessage: 'Save settings',
-            })}
-          </EuiButton>,
+          ...(canManage
+            ? [
+                <EuiButton
+                  fill
+                  onClick={handleSave}
+                  isLoading={isFeatureSaving}
+                  isDisabled={!isDirty || !defaultModelValidation.isValid}
+                  data-test-subj="save-settings-button"
+                >
+                  {i18n.translate('xpack.searchInferenceEndpoints.settings.saveButton', {
+                    defaultMessage: 'Save settings',
+                  })}
+                </EuiButton>,
+              ]
+            : []),
           <EuiButtonEmpty
             iconType="popout"
             iconSide="right"
@@ -250,6 +257,33 @@ export const ModelSettings: React.FC = () => {
         data-test-subj="modelSettingsContent"
         restrictWidth={true}
       >
+        {!hasAdvancedSettingsSavePermission && (
+          <>
+            <EuiCallOut
+              title={i18n.translate(
+                'xpack.searchInferenceEndpoints.settings.noAdvancedSettingsPermission.title',
+                {
+                  defaultMessage: 'Advanced Settings permission required',
+                }
+              )}
+              color="warning"
+              iconType="lock"
+              data-test-subj="noAdvancedSettingsPermissionCallout"
+              announceOnMount={false}
+            >
+              <p data-test-subj="noAdvancedSettingsPermissionCalloutDescription">
+                {i18n.translate(
+                  'xpack.searchInferenceEndpoints.settings.noAdvancedSettingsPermission.description',
+                  {
+                    defaultMessage:
+                      'Saving the default AI model setting requires the Advanced Settings: All privilege. Contact your administrator if you need to make changes.',
+                  }
+                )}
+              </p>
+            </EuiCallOut>
+            <EuiSpacer size="l" />
+          </>
+        )}
         {showFeatureSections && invalidEndpointIds.size > 0 && (
           <>
             <EuiCallOut
@@ -323,6 +357,7 @@ export const ModelSettings: React.FC = () => {
         <DefaultModelSection
           defaultModelSettings={defaultModelSettings}
           validation={defaultModelValidation}
+          disabled={!canManage || !hasAdvancedSettingsSavePermission}
         />
         {showFeatureSections && (
           <>
@@ -370,6 +405,7 @@ export const ModelSettings: React.FC = () => {
                     isBeta={section.isBeta}
                     isTechPreview={section.isTechPreview}
                     globalDefaultId={defaultModelState.defaultModelId}
+                    canManage={canManage}
                   />
                   <EuiSpacer size="xl" />
                 </React.Fragment>

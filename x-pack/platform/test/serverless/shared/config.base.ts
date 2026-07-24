@@ -204,7 +204,10 @@ export default async () => {
       ],
     },
 
-    security: { disableTestUser: true },
+    security: {
+      disableTestUser: true,
+      cookieLogin: false, // serverless uses SAML-based auth, not basic-auth cookie login
+    },
 
     // Used by FTR to recognize serverless project and change its behavior accordingly
     serverless: true,

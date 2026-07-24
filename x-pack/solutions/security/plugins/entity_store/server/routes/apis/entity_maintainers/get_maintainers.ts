@@ -6,7 +6,7 @@
  */
 
 import type { IKibanaResponse } from '@kbn/core-http-server';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
+import { buildStrictRouteValidationWithZod } from '../utils/build_strict_route_validation';
 import type {
   GetEntityMaintainersResponse,
   EntityMaintainerResponseItem,
@@ -53,7 +53,7 @@ export function registerGetMaintainers(router: EntityStorePluginRouter) {
         version: API_VERSIONS.internal.v2,
         validate: {
           request: {
-            query: buildRouteValidationWithZod(maintainerIdsQuerySchema),
+            query: buildStrictRouteValidationWithZod(maintainerIdsQuerySchema),
           },
         },
       },

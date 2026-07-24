@@ -8,6 +8,7 @@
 import type { NewPackagePolicy, PackageInfo, PackagePolicy } from '../../types';
 import { getInputId } from '../agent_policies/package_policies_to_agent_inputs';
 import { getInputEffectiveName } from '../../../common/services';
+import { FLEET_ENDPOINT_PACKAGE } from '../../../common/constants/epm';
 
 /**
  * Populate the ids for inputs and streams of a package policy if they are not already set
@@ -21,8 +22,16 @@ export function getInputsWithIds(
   allEnabled?: boolean,
   packageInfo?: PackageInfo
 ): PackagePolicy['inputs'] {
+  const packageName = packageInfo?.name ?? packagePolicy.package?.name;
+  const isEndpointPackage = packageName === FLEET_ENDPOINT_PACKAGE;
+
   return packagePolicy.inputs.map((input) => {
-    const inputId = input.id ? input.id : getInputId(input, packagePolicyId, packageInfo);
+    const inputId =
+      isEndpointPackage && packagePolicyId
+        ? packagePolicyId
+        : input.id
+        ? input.id
+        : getInputId(input, packagePolicyId, packageInfo);
 
     return {
       ...input,

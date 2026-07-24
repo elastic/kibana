@@ -64,6 +64,7 @@ export class UiamProvisioningFeatureFlagScheduler {
               `Error scheduling task ${TASK_TYPE}, received ${(e as Error).message}`,
               { tags: TAGS }
             );
+            return;
           }
         } else {
           return;

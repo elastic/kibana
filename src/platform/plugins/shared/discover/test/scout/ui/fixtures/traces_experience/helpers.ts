@@ -19,12 +19,21 @@ import type { TracesExperiencePage } from './page_objects';
 async function waitForTracesProfileApplied(
   pageObjects: PageObjects & { tracesExperience: TracesExperiencePage }
 ) {
-  const [firstProfileSpecificColumn] = pageObjects.tracesExperience.grid.profileSpecificColumns;
+  const { profileSpecificColumns } = pageObjects.tracesExperience.grid;
 
-  await expect(pageObjects.discover.getColumnHeader(firstProfileSpecificColumn)).toBeVisible({
-    timeout: 30_000,
-  });
-  await pageObjects.discover.waitForDocTableRendered();
+  // Wait for every profile-specific column before checking render stability.
+  // Waiting for only the first column risks calling waitForDocTableRendered
+  // while the remaining columns are still being applied, which briefly resets
+  // data-render-complete and can cause the stability window to never be reached.
+  for (const column of profileSpecificColumns) {
+    await expect(pageObjects.dataGrid.getColumnHeader(column)).toBeVisible({
+      timeout: 30_000,
+    });
+  }
+
+  // Ensure the in-flight search / column swap finished
+  await pageObjects.discover.waitUntilSearchingHasFinished();
+  await pageObjects.dataGrid.waitForDocTableRendered();
 }
 
 export async function expectTracesExperienceEnabled(
@@ -34,7 +43,7 @@ export async function expectTracesExperienceEnabled(
   await waitForTracesProfileApplied(pageObjects);
 
   for (const column of pageObjects.tracesExperience.grid.expectedColumns) {
-    await expect(pageObjects.discover.getColumnHeader(column)).toBeVisible();
+    await expect(pageObjects.dataGrid.getColumnHeader(column)).toBeVisible();
   }
 
   if (shouldCheckForREDMetricsCharts) {

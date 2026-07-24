@@ -16,7 +16,14 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 
-export const usePaneStyles = () => {
+/**
+ * @param zIndexOverride When the new flyout system is enabled, this is dynamically computed by
+ * `useTimelinePortalZIndex` so that Timeline stays correctly stacked relative to the new
+ * EUI-managed flyouts. Falls back to the static `maskBelowHeader` theme value otherwise (ie the
+ * legacy expandable flyout system, where `TimelineFlyout`/`SecuritySolutionFlyout` handle their own
+ * fixed offsets relative to that same static value).
+ */
+export const usePaneStyles = (zIndexOverride?: number) => {
   const EuiTheme = useEuiTheme();
   const { euiTheme } = EuiTheme;
 
@@ -29,7 +36,7 @@ export const usePaneStyles = () => {
     bottom: var(--kbn-layout--application-bottom, 0px);
     // TODO EUI: add color with transparency
     background: ${transparentize(euiTheme.colors.plainDark, 0.5)};
-    z-index: ${euiTheme.levels.maskBelowHeader};
+    z-index: ${zIndexOverride ?? euiTheme.levels.maskBelowHeader};
 
     ${euiCanAnimate} {
       animation: ${euiAnimFadeIn} ${euiTheme.animation.fast} ease-in;

@@ -21,6 +21,7 @@ exports[`OverwrittenSessionPage renders as expected 1`] = `
         data-test-subj="secAuthenticationStatePageLogo"
       >
         <span
+          aria-hidden="true"
           data-euiicon-type="logoElastic"
         />
       </span>

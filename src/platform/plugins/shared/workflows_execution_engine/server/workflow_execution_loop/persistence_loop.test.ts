@@ -30,7 +30,7 @@ const makeParams = (
     workflowLogger: {
       flushEvents: jest.fn().mockResolvedValue(undefined),
     },
-    taskAbortController: new AbortController(),
+    signal: new AbortController().signal,
   } as unknown as jest.Mocked<WorkflowExecutionLoopParams>;
 };
 
@@ -63,6 +63,22 @@ describe('persistenceLoop', () => {
     // Flush is synchronous (0 ms delay), so after one tick it's waiting on the 500 ms interval.
     // Advance timers a little, then abort.
     jest.advanceTimersByTime(100);
+    abortController.abort();
+    jest.advanceTimersByTime(500);
+
+    await expect(loopPromise).resolves.toBeUndefined();
+  });
+
+  it('passes the task abort signal to workflow log flushes', async () => {
+    const abortController = new AbortController();
+    const params = makeParams({ status: ExecutionStatus.RUNNING });
+
+    const loopPromise = persistenceLoop(params, abortController.signal);
+
+    expect(params.workflowLogger.flushEvents).toHaveBeenCalledWith({
+      signal: params.signal,
+    });
+
     abortController.abort();
     jest.advanceTimersByTime(500);
 

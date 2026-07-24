@@ -176,6 +176,9 @@ interface MonitorInfo {
   type: string;
   schedule: { number: string; unit: string };
   locations: Array<{ id: string; label: string }>;
+  tags: string[];
+  urls: string;
+  projectId: string;
 }
 
 const fetchAllMonitors = async (): Promise<MonitorInfo[]> => {
@@ -189,6 +192,9 @@ const fetchAllMonitors = async (): Promise<MonitorInfo[]> => {
       unit: String(m.schedule?.unit ?? 'm'),
     },
     locations: (m.locations ?? []).map((l: any) => ({ id: l.id, label: l.label })),
+    tags: m.tags ?? [],
+    urls: m.urls ?? m.hosts ?? '',
+    projectId: m.project_id ?? '',
   }));
 };
 
@@ -237,17 +243,30 @@ const buildSummaryDoc = (
       gte: ts.clone().subtract(5, 'minutes').toISOString(),
     },
   };
+  const stateId = `${monitor.configId}-${location.id}-summary-${ts.valueOf()}`;
+  const stateDurationMs = isDown ? randomInt(300000, 7200000) : 0;
   (doc as any).state = {
     ...(doc as any).state,
-    started_at: ts.clone().subtract(1, 'seconds').toISOString(),
-    duration_ms: Math.round(durationUs / 1000),
+    id: stateId,
+    started_at: ts
+      .clone()
+      .subtract(isDown ? stateDurationMs : 1000, 'milliseconds')
+      .toISOString(),
+    duration_ms: stateDurationMs,
   };
   (doc as any).data_stream = {
     namespace: 'default',
     type: 'synthetics',
     dataset: monitor.type === 'browser' ? 'browser' : monitor.type,
   };
+  (doc as any).tags = monitor.tags;
   (doc as any).meta = { space_id: 'default' };
+  if (monitor.projectId) {
+    (doc as any).monitor = {
+      ...(doc as any).monitor,
+      project: { id: monitor.projectId },
+    };
+  }
   const index = `synthetics-${monitor.type === 'browser' ? 'browser' : monitor.type}-default`;
   return { doc, index, isDown };
 };
@@ -346,6 +365,418 @@ const runLiveMode = async (monitors: MonitorInfo[]) => {
 };
 
 const randomInt = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min;
+
+// ---------------------------------------------------------------------------
+// Error data generation for the Errors Overview page (PR #211205)
+// ---------------------------------------------------------------------------
+
+interface ErrorCategory {
+  getMessage: (variant: number) => string;
+  statusCode?: number;
+  domain: string;
+  errorType: string;
+  onlyCurrentPeriod?: boolean;
+  intermittent?: boolean;
+}
+
+const ERROR_CATEGORIES: Record<string, ErrorCategory> = {
+  'Bad URL': {
+    getMessage: (v) =>
+      [
+        'DNS resolution failed: could not resolve host this-url-does-not-exist-12345.example.com',
+        'DNS lookup error: NXDOMAIN for this-url-does-not-exist-12345.example.com',
+        'DNS resolution timeout: no response from DNS server for this-url-does-not-exist-12345.example.com',
+      ][v % 3],
+    domain: 'this-url-does-not-exist-12345.example.com',
+    errorType: 'io',
+  },
+  'DNS Failure': {
+    getMessage: (v) =>
+      [
+        'DNS resolution failed: could not resolve host nonexistent-api.example.net',
+        'DNS lookup error: NXDOMAIN for nonexistent-api.example.net',
+        'DNS resolution timeout: no response from DNS server for nonexistent-api.example.net',
+      ][v % 3],
+    domain: 'nonexistent-api.example.net',
+    errorType: 'io',
+  },
+  'Body Mismatch': {
+    getMessage: () =>
+      'body mismatch: expected string "this-string-will-never-be-found-xyz" not found in response body',
+    statusCode: 200,
+    domain: 'www.google.com',
+    errorType: 'validate',
+  },
+  'API Gateway 503': {
+    getMessage: (v) =>
+      [
+        'received status code 503 Service Unavailable expecting [200] from api-gateway.example.com',
+        'HTTP 503: api-gateway.example.com is temporarily unavailable',
+        'server error: api-gateway.example.com responded with status 503',
+      ][v % 3],
+    statusCode: 503,
+    domain: 'api-gateway.example.com',
+    errorType: 'validate',
+  },
+  'SSL Expired': {
+    getMessage: (v) =>
+      [
+        'x509: certificate has expired for checkout.example.com',
+        'SSL handshake failed: certificate verification error for checkout.example.com',
+        'TLS error: certificate not valid after 2024-01-15 for checkout.example.com',
+      ][v % 3],
+    domain: 'checkout.example.com',
+    errorType: 'io',
+    onlyCurrentPeriod: true,
+  },
+  'Auth 401': {
+    getMessage: (v) =>
+      [
+        'received status code 401 Unauthorized expecting [200] from secure-api.example.com',
+        'authentication failed: secure-api.example.com returned 401 Unauthorized',
+        'HTTP 401: invalid credentials for secure-api.example.com/api/v1/auth',
+      ][v % 3],
+    statusCode: 401,
+    domain: 'secure-api.example.com',
+    errorType: 'validate',
+    onlyCurrentPeriod: true,
+  },
+  'Rate Limited 429': {
+    getMessage: (v) =>
+      [
+        'received status code 429 Too Many Requests expecting [200] from rate-api.example.com',
+        'HTTP 429: rate limit exceeded on rate-api.example.com',
+        'rate limited: rate-api.example.com returned 429 after exceeding quota',
+      ][v % 3],
+    statusCode: 429,
+    domain: 'rate-api.example.com',
+    errorType: 'validate',
+    intermittent: true,
+  },
+  'Payment Service': {
+    getMessage: (v) =>
+      [
+        'received status code 502 Bad Gateway expecting [200] from payment.example.com',
+        'HTTP 502: upstream connection error from payment.example.com',
+        'server error: payment.example.com responded with status 502',
+      ][v % 3],
+    statusCode: 502,
+    domain: 'payment.example.com',
+    errorType: 'validate',
+  },
+  'Bad Port': {
+    getMessage: (v) =>
+      [
+        'connection refused: tcp dial localhost:59999 connection was refused',
+        'connection error: failed to connect to localhost:59999 - ECONNREFUSED',
+        'tcp connection failed: localhost:59999 actively refused the connection',
+      ][v % 3],
+    domain: 'localhost',
+    errorType: 'io',
+  },
+  Database: {
+    getMessage: (v) =>
+      [
+        'connection refused: tcp dial db-primary.internal:5432 connection was refused',
+        'connection timeout: exceeded 10000ms waiting for db-primary.internal:5432',
+        'tcp connection failed: db-primary.internal:5432 actively refused the connection',
+      ][v % 3],
+    domain: 'db-primary.internal',
+    errorType: 'io',
+  },
+  'Bad Host': {
+    getMessage: (v) =>
+      [
+        'ping 192.0.2.1: destination host unreachable',
+        'ICMP: no route to host 192.0.2.1',
+        'ping 192.0.2.1: request timed out',
+      ][v % 3],
+    domain: '',
+    errorType: 'io',
+  },
+  'CDN Node': {
+    getMessage: (v) =>
+      [
+        'ping 203.0.113.50: destination host unreachable',
+        'ICMP: no route to host 203.0.113.50',
+        'ping 203.0.113.50: request timed out',
+      ][v % 3],
+    domain: '',
+    errorType: 'io',
+  },
+  'Bad Assertion': {
+    getMessage: (v) =>
+      [
+        'waiting for selector "#nonexistent-element-xyz" failed: timeout 5000ms exceeded',
+        'element "#nonexistent-element-xyz" not found within 5000ms',
+        'selector "#nonexistent-element-xyz" did not match any elements',
+      ][v % 3],
+    domain: 'www.google.com',
+    errorType: 'validate',
+  },
+  'Login Timeout': {
+    getMessage: (v) =>
+      [
+        'waiting for selector "#login-form" failed: timeout 30000ms exceeded at app.example.com',
+        'navigation timeout: page app.example.com/login did not load within 30000ms',
+        'element "#login-form" not found within 30000ms at app.example.com',
+      ][v % 3],
+    domain: 'app.example.com',
+    errorType: 'validate',
+  },
+  'Checkout Error': {
+    getMessage: (v) =>
+      [
+        "JavaScript error: TypeError: Cannot read properties of null (reading 'submit') at shop.example.com/checkout",
+        'JS runtime error: Uncaught TypeError at shop.example.com/checkout - null reference',
+        'page error: TypeError: null is not an object at shop.example.com/checkout',
+      ][v % 3],
+    domain: 'shop.example.com',
+    errorType: 'validate',
+    onlyCurrentPeriod: true,
+  },
+};
+
+const findErrorCategory = (monitorName: string): ErrorCategory | undefined => {
+  for (const [keyword, category] of Object.entries(ERROR_CATEGORIES)) {
+    if (monitorName.includes(keyword)) {
+      return category;
+    }
+  }
+  return undefined;
+};
+
+const generateHourSlots = (minHour: number, maxHour: number, count: number): number[] => {
+  const available = Array.from({ length: maxHour - minHour + 1 }, (_, i) => minHour + i);
+  const shuffled = available.sort(() => Math.random() - 0.5);
+  return shuffled.slice(0, Math.min(count, available.length)).sort((a, b) => a - b);
+};
+
+interface ErrorDocParams {
+  monitor: MonitorInfo;
+  location: { id: string; label: string };
+  timestamp: string;
+  stateId: string;
+  stateDurationMs: number;
+  stateStartedAt: string;
+  errorMessage: string;
+  errorType: string;
+  domain: string;
+  statusCode?: number;
+  durationUs: number;
+}
+
+const makeErrorDoc = ({
+  monitor,
+  location,
+  timestamp,
+  stateId,
+  stateDurationMs,
+  stateStartedAt,
+  errorMessage,
+  errorType,
+  domain,
+  statusCode,
+  durationUs,
+}: ErrorDocParams): Record<string, any> => {
+  const checkGroup = `${monitor.configId}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+
+  const doc: Record<string, any> = {
+    '@timestamp': timestamp,
+    summary: { up: 0, down: 1, final_attempt: true },
+    monitor: {
+      duration: { us: durationUs },
+      origin: 'ui',
+      ip: '0.0.0.0',
+      name: monitor.name,
+      fleet_managed: true,
+      check_group: checkGroup,
+      timespan: {
+        lt: moment(timestamp).add(5, 'minutes').toISOString(),
+        gte: moment(timestamp).subtract(5, 'minutes').toISOString(),
+      },
+      id: monitor.configId,
+      type: monitor.type,
+      status: 'down',
+    },
+    config_id: monitor.configId,
+    state: {
+      id: stateId,
+      duration_ms: stateDurationMs,
+      started_at: stateStartedAt,
+      up: 0,
+      down: 1,
+      checks: 1,
+      ends: null,
+      flap_history: [],
+      status: 'down',
+    },
+    error: {
+      message: errorMessage,
+      type: errorType,
+    },
+    observer: {
+      name: location.id,
+      geo: {
+        name: location.label,
+        location: '0.0, 0.0',
+      },
+    },
+    tags: monitor.tags,
+    data_stream: {
+      namespace: 'default',
+      type: 'synthetics',
+      dataset: monitor.type === 'browser' ? 'browser' : monitor.type,
+    },
+    meta: { space_id: 'default' },
+    agent: {
+      name: 'docker-fleet-server',
+      id: 'dd39a87d-a1e5-45a1-8dd9-e78d6a1391c6',
+      type: 'heartbeat',
+      ephemeral_id: '264bb432-93f6-4aa6-a14d-266c53b9e7c7',
+      version: '8.7.0',
+    },
+    ecs: { version: '8.0.0' },
+    event: {
+      agent_id_status: 'verified',
+      ingested: timestamp,
+      dataset: monitor.type === 'browser' ? 'browser' : monitor.type,
+    },
+  };
+
+  if (domain) {
+    doc.url = {
+      scheme: 'https',
+      port: 443,
+      domain,
+      full: `https://${domain}`,
+    };
+  }
+
+  if (statusCode !== undefined) {
+    doc.http = {
+      response: {
+        status_code: statusCode,
+        body: { bytes: 0 },
+      },
+    };
+  }
+
+  if (monitor.projectId) {
+    doc.monitor.project = { id: monitor.projectId };
+  }
+
+  return doc;
+};
+
+/**
+ * Generates comprehensive error documents for the Errors Overview page.
+ *
+ * Covers: error stats, error groups (categorize_text), error insights
+ * (domains, tags, status codes, monitor types, emerging terms),
+ * top failing monitors (by errors, rate, downtime), errors over time chart,
+ * and pattern classification (persistent / intermittent / new).
+ *
+ * Data spans current period (0-24h ago) and previous period (24-48h ago)
+ * for trend comparison with delta indicators.
+ */
+const ingestErrorData = async (monitors: MonitorInfo[]) => {
+  const now = moment();
+  let errorDocCount = 0;
+
+  for (const monitor of monitors) {
+    if (!monitor.name.toLowerCase().includes('down')) continue;
+    if (monitor.locations.length === 0) continue;
+
+    const category = findErrorCategory(monitor.name);
+    if (!category) continue;
+
+    const index = `synthetics-${monitor.type === 'browser' ? 'browser' : monitor.type}-default`;
+
+    for (const location of monitor.locations) {
+      // --- Current period (last 24 hours) ---
+      let currentHours: number[];
+
+      if (category.onlyCurrentPeriod) {
+        // "new" pattern: only in the last ~6 hours so classifyPattern sees no early-bucket errors
+        currentHours = generateHourSlots(0, 5, randomInt(3, 5));
+      } else if (category.intermittent) {
+        // "intermittent" pattern: scattered across 24h but < 75% bucket coverage
+        currentHours = generateHourSlots(0, 23, randomInt(6, 12));
+      } else {
+        // "persistent" pattern: errors in >= 75% of hourly buckets
+        currentHours = generateHourSlots(0, 23, randomInt(18, 23));
+      }
+
+      let msgVariant = 0;
+      for (const hoursAgo of currentHours) {
+        const stateId = `${monitor.configId}-${location.id}-cur-${hoursAgo}`;
+        const stateDurationMs = randomInt(60000, 1800000);
+        const docsInHour = randomInt(1, 3);
+
+        for (let d = 0; d < docsInHour; d++) {
+          const minutesAgo = hoursAgo * 60 + randomInt(0, 55);
+          const ts = now.clone().subtract(minutesAgo, 'minutes');
+
+          const doc = makeErrorDoc({
+            monitor,
+            location,
+            timestamp: ts.toISOString(),
+            stateId,
+            stateDurationMs,
+            stateStartedAt: ts.clone().subtract(stateDurationMs, 'milliseconds').toISOString(),
+            errorMessage: category.getMessage(msgVariant++),
+            errorType: category.errorType,
+            domain: category.domain,
+            statusCode: category.statusCode,
+            durationUs: randomInt(50000, 500000),
+          });
+
+          await indexSummaryDoc(index, doc);
+          errorDocCount++;
+        }
+      }
+
+      // --- Previous period (24-48 hours ago) for trend comparison ---
+      if (!category.onlyCurrentPeriod) {
+        const prevHours = category.intermittent
+          ? generateHourSlots(24, 47, randomInt(4, 8))
+          : generateHourSlots(24, 47, randomInt(14, 20));
+
+        for (const hoursAgo of prevHours) {
+          const stateId = `${monitor.configId}-${location.id}-prev-${hoursAgo}`;
+          const stateDurationMs = randomInt(60000, 1200000);
+          const docsInHour = randomInt(1, 2);
+
+          for (let d = 0; d < docsInHour; d++) {
+            const minutesAgo = hoursAgo * 60 + randomInt(0, 55);
+            const ts = now.clone().subtract(minutesAgo, 'minutes');
+
+            const doc = makeErrorDoc({
+              monitor,
+              location,
+              timestamp: ts.toISOString(),
+              stateId,
+              stateDurationMs,
+              stateStartedAt: ts.clone().subtract(stateDurationMs, 'milliseconds').toISOString(),
+              errorMessage: category.getMessage(msgVariant++),
+              errorType: category.errorType,
+              domain: category.domain,
+              statusCode: category.statusCode,
+              durationUs: randomInt(50000, 500000),
+            });
+
+            await indexSummaryDoc(index, doc);
+            errorDocCount++;
+          }
+        }
+      }
+    }
+  }
+
+  await esClient.indices.refresh({ index: 'synthetics-*' });
+  return { errorDocCount };
+};
 
 const createMonitor = async (monitor: Record<string, any>) => {
   try {
@@ -974,6 +1405,123 @@ step('Fill credentials', async () => {
   );
 
   // ---------------------------------------------------------------------------
+  // Error-scenario monitors — for the Errors Overview page
+  // Covers: multiple monitor types, varied tags/domains/status codes,
+  // persistent/intermittent/new error patterns, multiple locations
+  // ---------------------------------------------------------------------------
+  console.log('\n=== Creating error-scenario monitors ===');
+
+  await createMonitor(
+    httpMonitor({
+      name: 'HTTP Down – API Gateway 503',
+      urls: 'https://api-gateway.example.com',
+      tags: ['api', 'production', 'critical'],
+      schedule: { number: '3', unit: 'm' },
+      locations: allLocations,
+    })
+  );
+
+  await createMonitor(
+    httpMonitor({
+      name: 'HTTP Down – SSL Expired',
+      urls: 'https://checkout.example.com',
+      tags: ['production', 'security'],
+      schedule: { number: '5', unit: 'm' },
+      locations: [privateLocUS, privateLocEU],
+    })
+  );
+
+  await createMonitor(
+    httpMonitor({
+      name: 'HTTP Down – DNS Failure',
+      urls: 'https://nonexistent-api.example.net',
+      tags: ['infrastructure', 'dns'],
+      schedule: { number: '5', unit: 'm' },
+      locations: [privateLocUS],
+    })
+  );
+
+  await createMonitor(
+    httpMonitor({
+      name: 'HTTP Down – Auth 401',
+      urls: 'https://secure-api.example.com/api/v1/auth',
+      tags: ['api', 'auth', 'staging'],
+      schedule: { number: '5', unit: 'm' },
+      locations: threeLocations,
+    })
+  );
+
+  await createMonitor(
+    httpMonitor({
+      name: 'HTTP Down – Rate Limited 429',
+      urls: 'https://rate-api.example.com',
+      tags: ['api', 'production'],
+      schedule: { number: '5', unit: 'm' },
+      locations: [privateLocEU],
+    })
+  );
+
+  await createMonitor(
+    httpMonitor({
+      name: 'HTTP Down – Payment Service',
+      urls: 'https://payment.example.com',
+      tags: ['payment', 'production', 'critical'],
+      schedule: { number: '3', unit: 'm' },
+      project_id: 'ecommerce-app',
+      locations: fourLocations,
+    })
+  );
+
+  await createMonitor(
+    tcpMonitor({
+      name: 'TCP Down – Database',
+      hosts: 'db-primary.internal:5432',
+      tags: ['infrastructure', 'database', 'critical'],
+      schedule: { number: '1', unit: 'm' },
+      locations: [privateLocUS, privateLocEU],
+    })
+  );
+
+  await createMonitor(
+    icmpMonitor({
+      name: 'ICMP Down – CDN Node',
+      hosts: '203.0.113.50',
+      tags: ['infrastructure', 'cdn'],
+      schedule: { number: '3', unit: 'm' },
+      locations: [privateLocUS, privateLocAP],
+    })
+  );
+
+  await createMonitor(
+    browserMonitor({
+      name: 'Browser Down – Login Timeout',
+      urls: 'https://app.example.com/login',
+      tags: ['production', 'auth', 'critical'],
+      schedule: { number: '10', unit: 'm' },
+      'source.inline.script': `step('Load login page', async () => {
+  await page.goto('https://app.example.com/login');
+  await page.waitForSelector('#login-form', { timeout: 30000 });
+});`,
+      locations: threeLocations,
+    })
+  );
+
+  await createMonitor(
+    browserMonitor({
+      name: 'Browser Down – Checkout Error',
+      urls: 'https://shop.example.com/checkout',
+      tags: ['ecommerce', 'production'],
+      schedule: { number: '15', unit: 'm' },
+      project_id: 'ecommerce-app',
+      'source.inline.script': `step('Complete checkout', async () => {
+  await page.goto('https://shop.example.com/checkout');
+  await page.click('#submit-order');
+});`,
+      locations: [privateLocUS],
+    })
+  );
+
+  // ---------------------------------------------------------------------------
   // Monitors with project_id — to test "group by project" grouping
   // ---------------------------------------------------------------------------
 
@@ -1151,6 +1699,14 @@ step('Fill credentials', async () => {
   const { upCount, downCount } = await ingestSummaryData(allMonitors);
   console.log(`  ✓ Ingested ${upCount} up + ${downCount} down summary docs`);
 
+  // ---------------------------------------------------------------------------
+  // Ingest rich error data for the Errors Overview page
+  // ---------------------------------------------------------------------------
+  console.log('\n=== Ingesting error data (48h window) ===');
+
+  const { errorDocCount } = await ingestErrorData(allMonitors);
+  console.log(`  ✓ Ingested ${errorDocCount} error docs across current + previous periods`);
+
   if (cliArgs.live) {
     await runLiveMode(allMonitors);
   }
@@ -1159,19 +1715,19 @@ step('Fill credentials', async () => {
 
   console.log('Summary of created monitors:');
 
-  console.log('  HTTP:      16 monitors (12 standard + 4 edge-case)');
+  console.log('  HTTP:      22 monitors (12 standard + 6 error-scenario + 4 edge-case)');
 
-  console.log('  TCP:       8 monitors');
+  console.log('  TCP:       9 monitors (7 standard + 1 error-scenario + 1 disabled)');
 
-  console.log('  ICMP:      6 monitors');
+  console.log('  ICMP:      7 monitors (5 standard + 1 error-scenario + 1 disabled)');
 
-  console.log('  Browser:   10 monitors');
+  console.log('  Browser:   12 monitors (7 standard + 2 error-scenario + 3 project)');
 
   console.log(
-    '  w/ Project: 7 monitors (3 projects: ecommerce-app, infra-monitoring, mobile-app-backend)'
+    '  w/ Project: 9 monitors (3 projects: ecommerce-app, infra-monitoring, mobile-app-backend)'
   );
 
-  console.log('  Total:     ~40 monitors across 5 private locations');
+  console.log('  Total:     ~50 monitors across 5 private locations');
 
   console.log('\nGroup-by coverage:');
 
@@ -1184,4 +1740,22 @@ step('Fill credentials', async () => {
   console.log('  By Project:  ecommerce-app, infra-monitoring, mobile-app-backend');
 
   console.log('  By Monitor:  each monitor is uniquely named');
+
+  console.log('\nErrors page coverage:');
+
+  console.log('  15 "down" monitors generating error data');
+
+  console.log(
+    '  Error groups: DNS, timeout, HTTP 5xx, SSL, connection refused, body mismatch, ...'
+  );
+
+  console.log(
+    '  Patterns:    persistent (DNS, 503, conn refused), intermittent (429), new (SSL, 401, JS error)'
+  );
+
+  console.log(
+    '  Insights:    domains (8+), tags (15+), status codes (200/401/429/502/503), all 4 monitor types'
+  );
+
+  console.log('  Trend:       current + previous period data for delta indicators');
 };

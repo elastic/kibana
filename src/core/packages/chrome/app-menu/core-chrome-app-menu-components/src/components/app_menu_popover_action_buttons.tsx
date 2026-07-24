@@ -12,6 +12,7 @@ import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { AppMenuActionButton } from './app_menu_action_button';
 import type { AppMenuPrimaryActionItem } from '../types';
+import { APP_MENU_TEST_SUBJECTS } from '../test_subjects';
 
 interface AppMenuPopoverActionButtonsProps {
   primaryActionItem?: AppMenuPrimaryActionItem;
@@ -37,10 +38,20 @@ export const AppMenuPopoverActionButtons = ({
     setOpenPopoverId(null);
   };
 
+  const commonProps = {
+    isPopoverOpen: openPopoverId === primaryActionItem.id,
+    onPopoverToggle: () => handlePopoverToggle(primaryActionItem.id),
+    onPopoverClose: handleOnPopoverClose,
+    onCloseOverflowButton,
+    fullWidth: true as const,
+  };
+
   const containerCss = css`
     margin-top: ${euiTheme.size.m};
     margin-bottom: ${euiTheme.size.m};
   `;
+
+  const hasRun = 'run' in primaryActionItem && typeof primaryActionItem.run === 'function';
 
   return (
     <EuiFlexGroup
@@ -49,26 +60,22 @@ export const AppMenuPopoverActionButtons = ({
       gutterSize="m"
       alignItems="stretch"
       css={containerCss}
-      data-test-subj="app-menu-popover-action-buttons-container"
+      data-test-subj={APP_MENU_TEST_SUBJECTS.popoverActionButtonsContainer}
     >
-      {primaryActionItem && (
-        <EuiFlexItem>
+      <EuiFlexItem>
+        {hasRun ? (
           <AppMenuActionButton
             {...primaryActionItem}
+            {...commonProps}
             run={(params) => {
-              primaryActionItem?.run?.(params);
+              primaryActionItem.run?.(params);
               onCloseOverflowButton?.();
             }}
-            isPopoverOpen={openPopoverId === primaryActionItem.id}
-            onPopoverToggle={() => {
-              handlePopoverToggle(primaryActionItem.id);
-            }}
-            onPopoverClose={handleOnPopoverClose}
-            onCloseOverflowButton={onCloseOverflowButton}
-            fullWidth
           />
-        </EuiFlexItem>
-      )}
+        ) : (
+          <AppMenuActionButton {...primaryActionItem} {...commonProps} />
+        )}
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };

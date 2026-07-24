@@ -45,11 +45,12 @@ import {
 import { css } from '@emotion/css';
 import { CodeEditor } from '@kbn/code-editor';
 import { isHttpFetchError } from '@kbn/core-http-browser';
+import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { useHistory, useParams } from 'react-router-dom';
 import { TraceWaterfall, useTraceSpans } from '@kbn/llm-trace-waterfall';
 import type {
   DatasetExample,
-  EvaluationRunSummary,
+  EvaluationExperimentSummary,
   EvaluationScoreDocument,
 } from '@kbn/evals-common';
 import {
@@ -58,11 +59,12 @@ import {
   useDeleteExample,
   useEvalsTraceFetcher,
   useExampleScores,
-  useEvaluationRuns,
+  useEvaluationExperiments,
   useUpdateDataset,
   useUpdateExample,
 } from '../../hooks/use_evals_api';
 import { useEvalsPermissions } from '../../hooks/use_evals_permissions';
+import { DeleteDatasetModal } from '../../components/delete_dataset_modal';
 import * as i18n from './translations';
 
 type JsonObject = Record<string, unknown>;
@@ -111,7 +113,7 @@ export const DatasetDetailPage: React.FC = () => {
     data: runsData,
     isLoading: isRunsLoading,
     error: runsError,
-  } = useEvaluationRuns({
+  } = useEvaluationExperiments({
     datasetId,
     page: 1,
     perPage: 100,
@@ -134,6 +136,7 @@ export const DatasetDetailPage: React.FC = () => {
   const [createOutput, setCreateOutput] = useState('{}');
   const [createMetadata, setCreateMetadata] = useState('{}');
   const [deletingExample, setDeletingExample] = useState<DatasetExample | null>(null);
+  const [isDeleteDatasetModalOpen, setIsDeleteDatasetModalOpen] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTraceId, setSelectedTraceId] = useState<string | null>(null);
@@ -365,20 +368,37 @@ export const DatasetDetailPage: React.FC = () => {
     []
   );
 
-  const runsColumns: Array<EuiBasicTableColumn<EvaluationRunSummary>> = useMemo(
+  const runsColumns: Array<EuiBasicTableColumn<EvaluationExperimentSummary>> = useMemo(
     () => [
       {
-        field: 'run_id',
-        name: i18n.COLUMN_RUN_ID,
-        render: (runId: string) => (
-          <EuiLink
-            onClick={() =>
-              history.push(`/runs/${runId}?dataset_id=${encodeURIComponent(datasetId)}`)
-            }
-          >
-            {truncate(runId, 12)}
-          </EuiLink>
-        ),
+        field: 'experiment_name',
+        name: i18n.COLUMN_RUN_NAME,
+        render: (_name: string | null | undefined, row: EvaluationExperimentSummary) => {
+          const isSuiteRun = !!row.suite_id;
+          const displayName = isSuiteRun
+            ? row.suite_id ?? row.experiment_name ?? truncate(row.experiment_id, 12)
+            : row.experiment_name ?? truncate(row.experiment_id, 12);
+          const executionId = row.execution_id ?? row.experiment_id;
+          const dsParam = encodeURIComponent(datasetId);
+          const query = `?execution_id=${encodeURIComponent(executionId)}&dataset_id=${dsParam}`;
+          const modelId = row.task_model?.id;
+          return (
+            <EuiToolTip content={executionId}>
+              <div tabIndex={0}>
+                <EuiLink
+                  {...reactRouterNavigate(history, `/experiments/${row.experiment_id}${query}`)}
+                >
+                  {displayName}
+                </EuiLink>
+                {modelId ? (
+                  <EuiText size="xs" color="subdued">
+                    {modelId}
+                  </EuiText>
+                ) : null}
+              </div>
+            </EuiToolTip>
+          );
+        },
       },
       {
         field: 'timestamp',
@@ -386,19 +406,21 @@ export const DatasetDetailPage: React.FC = () => {
         render: (timestamp: string) => formatDate(timestamp),
       },
       {
-        field: 'suite_id',
-        name: i18n.COLUMN_RUN_SUITE,
-        render: (value?: string) => value ?? '-',
-      },
-      {
-        field: 'task_model',
-        name: i18n.COLUMN_RUN_TASK_MODEL,
-        render: (value: EvaluationRunSummary['task_model']) => value?.id ?? '-',
-      },
-      {
         field: 'evaluator_model',
         name: i18n.COLUMN_RUN_EVALUATOR_MODEL,
-        render: (value: EvaluationRunSummary['evaluator_model']) => value?.id ?? '-',
+        render: (value: EvaluationExperimentSummary['evaluator_model']) => value?.id ?? '-',
+      },
+      {
+        field: 'git_branch',
+        name: i18n.COLUMN_RUN_BRANCH,
+        render: (value: string | null | undefined) =>
+          value ? <EuiBadge color="hollow">{value}</EuiBadge> : '-',
+      },
+      {
+        field: 'total_repetitions',
+        name: i18n.COLUMN_RUN_REPS,
+        width: '80px',
+        render: (value: number | undefined) => String(value ?? 1),
       },
     ],
     [datasetId, history]
@@ -416,21 +438,23 @@ export const DatasetDetailPage: React.FC = () => {
     return parts.join(' · ');
   }, [dataset]);
 
-  interface RunScoreRow {
+  interface ExperimentScoreRow {
     runId: string;
+    experimentName?: string;
     timestamp?: string;
     taskModelId?: string;
     scores: EvaluationScoreDocument[];
     traceIds: string[];
   }
 
-  const exampleRunRows = useMemo<RunScoreRow[]>(() => {
-    const groupedRuns = new Map<string, RunScoreRow>();
+  const exampleRunRows = useMemo<ExperimentScoreRow[]>(() => {
+    const groupedRuns = new Map<string, ExperimentScoreRow>();
     for (const score of exampleScoresData?.scores ?? []) {
-      const existing = groupedRuns.get(score.run_id);
+      const existing = groupedRuns.get(score.experiment_id);
       if (!existing) {
-        groupedRuns.set(score.run_id, {
-          runId: score.run_id,
+        groupedRuns.set(score.experiment_id, {
+          runId: score.experiment_id,
+          experimentName: score.experiment_name,
           timestamp: score['@timestamp'],
           taskModelId: score.task.model.id,
           scores: [score],
@@ -459,32 +483,39 @@ export const DatasetDetailPage: React.FC = () => {
     });
   }, [exampleScoresData?.scores]);
 
-  const exampleRunColumns: Array<EuiBasicTableColumn<RunScoreRow>> = useMemo(
+  const exampleRunColumns: Array<EuiBasicTableColumn<ExperimentScoreRow>> = useMemo(
     () => [
       {
         field: 'runId',
-        name: i18n.COLUMN_EXPERIMENT_RUN_ID,
-        width: '180px',
-        render: (runId: string) => (
-          <EuiLink
-            onClick={() =>
-              history.push(`/runs/${runId}?dataset_id=${encodeURIComponent(datasetId)}`)
-            }
-          >
-            {truncate(runId, 12)}
-          </EuiLink>
-        ),
+        name: i18n.COLUMN_RUN_NAME,
+        render: (_runId: string, row: ExperimentScoreRow) => {
+          const displayName = row.experimentName ?? truncate(row.runId, 12);
+          return (
+            <EuiToolTip content={row.runId}>
+              <div tabIndex={0}>
+                <EuiLink
+                  {...reactRouterNavigate(
+                    history,
+                    `/experiments/${row.runId}?dataset_id=${encodeURIComponent(datasetId)}`
+                  )}
+                >
+                  {displayName}
+                </EuiLink>
+                {row.taskModelId ? (
+                  <EuiText size="xs" color="subdued">
+                    {row.taskModelId}
+                  </EuiText>
+                ) : null}
+              </div>
+            </EuiToolTip>
+          );
+        },
       },
       {
         field: 'timestamp',
         name: i18n.COLUMN_EXPERIMENT_TIMESTAMP,
         width: '180px',
         render: (timestamp?: string) => formatDate(timestamp),
-      },
-      {
-        field: 'taskModelId',
-        name: i18n.COLUMN_EXPERIMENT_TASK_MODEL,
-        render: (taskModelId?: string) => taskModelId ?? '-',
       },
       {
         field: 'scores',
@@ -605,14 +636,29 @@ export const DatasetDetailPage: React.FC = () => {
             <EuiFlexItem grow={false}>
               <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
                 <EuiFlexItem grow={false}>
-                  <EuiButton iconType="plusInCircle" onClick={openCreateExampleFlyout} fill>
-                    {i18n.ADD_EXAMPLE_BUTTON}
-                  </EuiButton>
+                  <EuiToolTip content={i18n.EDIT_DESCRIPTION_BUTTON} disableScreenReaderOutput>
+                    <EuiButtonIcon
+                      iconType="pencil"
+                      display="base"
+                      size="m"
+                      onClick={openMetadataModal}
+                      aria-label={i18n.EDIT_DESCRIPTION_BUTTON}
+                      data-test-subj="editDatasetMetadataButton"
+                    />
+                  </EuiToolTip>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty iconType="pencil" onClick={openMetadataModal}>
-                    {i18n.EDIT_METADATA_BUTTON}
-                  </EuiButtonEmpty>
+                  <EuiToolTip content={i18n.DELETE_DATASET_BUTTON} disableScreenReaderOutput>
+                    <EuiButtonIcon
+                      iconType="trash"
+                      display="base"
+                      size="m"
+                      color="danger"
+                      onClick={() => setIsDeleteDatasetModalOpen(true)}
+                      aria-label={i18n.DELETE_DATASET_BUTTON}
+                      data-test-subj="deleteDatasetButton"
+                    />
+                  </EuiToolTip>
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
@@ -655,15 +701,32 @@ export const DatasetDetailPage: React.FC = () => {
               <h3>{i18n.getExamplesCountTitle(dataset.examples.length)}</h3>
             </EuiTitle>
             <EuiSpacer size="m" />
-            <EuiFlexGroup>
-              <EuiFlexItem>
+            <EuiFlexGroup
+              gutterSize="m"
+              alignItems="center"
+              responsive={false}
+              justifyContent="spaceBetween"
+            >
+              <EuiFlexItem
+                className={css`
+                  max-width: 500px;
+                `}
+              >
                 <EuiFieldSearch
                   placeholder={i18n.SEARCH_EXAMPLES_PLACEHOLDER}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   isClearable
+                  fullWidth
                 />
               </EuiFlexItem>
+              {canManage ? (
+                <EuiFlexItem grow={false}>
+                  <EuiButton iconType="plusInCircle" onClick={openCreateExampleFlyout} fill>
+                    {i18n.ADD_EXAMPLE_BUTTON}
+                  </EuiButton>
+                </EuiFlexItem>
+              ) : null}
             </EuiFlexGroup>
             <EuiSpacer size="m" />
             <EuiBasicTable<DatasetExample>
@@ -694,9 +757,9 @@ export const DatasetDetailPage: React.FC = () => {
               <h3>{i18n.RUNS_SECTION_TITLE}</h3>
             </EuiTitle>
             <EuiSpacer size="s" />
-            <EuiBasicTable<EvaluationRunSummary>
+            <EuiBasicTable<EvaluationExperimentSummary>
               tableCaption={i18n.RUNS_SECTION_TITLE}
-              items={runsData?.runs ?? []}
+              items={runsData?.experiments ?? []}
               columns={runsColumns}
               loading={isRunsLoading}
               noItemsMessage={i18n.RUNS_EMPTY_MESSAGE}
@@ -714,6 +777,7 @@ export const DatasetDetailPage: React.FC = () => {
           minWidth={400}
           maxWidth={800}
           aria-labelledby="exampleFlyoutTitle"
+          hideCloseButton
         >
           <EuiFlyoutHeader hasBorder>
             <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
@@ -724,29 +788,48 @@ export const DatasetDetailPage: React.FC = () => {
                   </h2>
                 </EuiTitle>
               </EuiFlexItem>
-              {canManage ? (
-                <EuiFlexItem grow={false}>
-                  <EuiFlexGroup gutterSize="s" responsive={false}>
-                    {!isEditingExample ? (
-                      <>
-                        <EuiFlexItem grow={false}>
-                          <EuiButton size="s" iconType="pencil" onClick={enterEditMode}>
-                            {i18n.EDIT_EXAMPLE_BUTTON}
-                          </EuiButton>
-                        </EuiFlexItem>
-                        <EuiFlexItem grow={false}>
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
+                  {canManage && !isEditingExample ? (
+                    <>
+                      <EuiFlexItem grow={false}>
+                        <EuiToolTip content={i18n.EDIT_EXAMPLE_BUTTON} disableScreenReaderOutput>
                           <EuiButtonIcon
-                            aria-label={i18n.DELETE_EXAMPLE_BUTTON}
+                            iconType="pencil"
+                            display="base"
+                            size="m"
+                            onClick={enterEditMode}
+                            aria-label={i18n.EDIT_EXAMPLE_BUTTON}
+                          />
+                        </EuiToolTip>
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiToolTip content={i18n.DELETE_EXAMPLE_BUTTON} disableScreenReaderOutput>
+                          <EuiButtonIcon
                             iconType="trash"
+                            display="base"
+                            size="m"
                             color="danger"
                             onClick={() => setDeletingExample(selectedExample)}
+                            aria-label={i18n.DELETE_EXAMPLE_BUTTON}
                           />
-                        </EuiFlexItem>
-                      </>
-                    ) : null}
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-              ) : null}
+                        </EuiToolTip>
+                      </EuiFlexItem>
+                    </>
+                  ) : null}
+                  <EuiFlexItem grow={false}>
+                    <EuiToolTip content={i18n.CLOSE_FLYOUT_BUTTON} disableScreenReaderOutput>
+                      <EuiButtonIcon
+                        iconType="cross"
+                        color="text"
+                        size="m"
+                        onClick={closeFlyout}
+                        aria-label={i18n.CLOSE_FLYOUT_BUTTON}
+                      />
+                    </EuiToolTip>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlyoutHeader>
           <EuiFlyoutBody>
@@ -854,7 +937,7 @@ export const DatasetDetailPage: React.FC = () => {
                     <p>{i18n.getExperimentRunsLoadError(String(exampleScoresError))}</p>
                   </EuiText>
                 ) : (
-                  <EuiBasicTable<RunScoreRow>
+                  <EuiBasicTable<ExperimentScoreRow>
                     tableCaption={i18n.FLYOUT_EXPERIMENT_RUNS_SECTION}
                     items={exampleRunRows}
                     columns={exampleRunColumns}
@@ -976,10 +1059,10 @@ export const DatasetDetailPage: React.FC = () => {
 
       {/* Edit metadata modal */}
       {isMetadataModalOpen ? (
-        <EuiModal onClose={closeModals} aria-labelledby="editMetadataModalTitle">
+        <EuiModal onClose={closeModals} aria-labelledby="editDescriptionModalTitle">
           <EuiModalHeader>
-            <EuiModalHeaderTitle id="editMetadataModalTitle">
-              {i18n.EDIT_METADATA_MODAL_TITLE}
+            <EuiModalHeaderTitle id="editDescriptionModalTitle">
+              {i18n.EDIT_DESCRIPTION_MODAL_TITLE}
             </EuiModalHeaderTitle>
           </EuiModalHeader>
           <EuiModalBody>
@@ -1007,6 +1090,17 @@ export const DatasetDetailPage: React.FC = () => {
             </EuiButton>
           </EuiModalFooter>
         </EuiModal>
+      ) : null}
+
+      {/* Delete dataset confirmation */}
+      {isDeleteDatasetModalOpen && dataset ? (
+        <DeleteDatasetModal
+          datasetId={dataset.id}
+          datasetName={dataset.name}
+          examplesCount={dataset.examples.length}
+          onClose={() => setIsDeleteDatasetModalOpen(false)}
+          onDeleted={() => history.push('/datasets')}
+        />
       ) : null}
 
       {/* Delete example confirmation */}

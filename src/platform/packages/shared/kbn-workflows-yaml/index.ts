@@ -76,6 +76,8 @@ export {
   parseLineForCompletion,
   isVariableLineParseResult,
 } from './common/yaml/parse_line_for_completion';
+export { getStepNodesWithType, isStepLikeMap } from './common/yaml/get_step_nodes_with_type';
+export { getTriggerNodesWithType } from './common/yaml/get_trigger_nodes_with_type';
 export type {
   LineParseResult,
   VariableLineParseResult,

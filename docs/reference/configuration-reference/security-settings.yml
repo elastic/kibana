@@ -204,8 +204,6 @@ groups:
 
   - group: Discontinued SAML settings
     id: discontinued-saml-settings
-    description: |
-      The following settings are available in {{ecloud}} for all supported versions before 8.0:
     settings:
 
       - setting: xpack.security.authProviders
@@ -213,9 +211,9 @@ groups:
           Set to `saml` to instruct Kibana to use SAML SSO as the authentication method.
         datatype: string
         applies_to:
-          ech: removed
-          stack: unavailable
-          self: unavailable
+          ech: ga
+          stack: ga 6.4, removed 8.0
+          self: ga
 
       - setting: xpack.security.public.protocol
         description: |
@@ -225,45 +223,45 @@ groups:
           - option: http
           - option: https
         applies_to:
-          ech: removed
-          stack: unavailable
-          self: unavailable
+          ech: ga
+          stack: ga 6.4, removed 8.0
+          self: ga
 
       - setting: xpack.security.public.hostname
         description: |
           Set to a fully qualified hostname to connect your users to the proxy server.
         datatype: string
         applies_to:
-          ech: removed
-          stack: unavailable
-          self: unavailable
+          ech: ga
+          stack: ga 6.4, removed 8.0
+          self: ga
 
       - setting: xpack.security.public.port
         description: |
           The port number that connects your users to the proxy server (for example, 80 for HTTP or 443 for HTTPS).
         datatype: int
         applies_to:
-          ech: removed
-          stack: unavailable
-          self: unavailable
+          ech: ga
+          stack: ga 6.4, removed 8.0
+          self: ga
 
       - setting: xpack.security.authc.saml.useRelayStateDeepLink
         description: |
           Specifies if Kibana should treat the `RelayState` parameter as a deep link when Identity Provider Initiated login flow is used.
         datatype: bool
         applies_to:
-          ech: removed
-          stack: unavailable
-          self: unavailable
+          ech: ga
+          stack: ga 6.8, removed 7.0
+          self: ga
 
       - setting: server.xsrf.whitelist
         description: |
           Explicitly allows the SAML authentication URL within Kibana, so that the Kibana server doesn't reject external authentication messages that originate from your Identity Provider. This setting is renamed to `server.xsrf.allowlist` in version 8.0.0.
         datatype: string
         applies_to:
-          ech: removed
-          stack: unavailable
-          self: unavailable
+          ech: ga
+          stack: ga 6.4, removed 8.0
+          self: ga
 
   - group: OpenID Connect authentication provider settings
     id: oidc-authentication-provider-settings
@@ -474,10 +472,9 @@ groups:
       - setting: xpack.security.session.concurrentSessions.maxSessions
         description: |
           Set the maximum number of sessions each user is allowed to have active at any given time. By default, no limit is applied. If set, the value of this option should be an integer between `1` and `1000`. When the limit is exceeded, the oldest session is automatically invalidated.
-          It is available in {{ecloud}} 8.7.0 and later versions.
         datatype: int
         applies_to:
-          stack: ga
+          stack: ga 8.7
           ech: ga
           self: ga
 

@@ -7,7 +7,6 @@
 
 import React, { useMemo } from 'react';
 import {
-  EuiBadge,
   EuiButtonGroup,
   EuiButtonIcon,
   EuiComboBox,
@@ -16,139 +15,34 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiText,
+  EuiToolTip,
   htmlIdGenerator,
   useEuiTheme,
 } from '@elastic/eui';
 import type { EuiButtonGroupOptionProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { AlertStatus } from '@kbn/rule-data-utils';
-import {
-  ALERT_STATUS_ACTIVE,
-  ALERT_STATUS_DELAYED,
-  ALERT_STATUS_RECOVERED,
-  ALERT_STATUS_UNTRACKED,
-} from '@kbn/rule-data-utils';
 import { css } from '@emotion/react';
-import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
+import type { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
 import type { SloStatus } from '../../../../common/service_inventory';
 import type { ServiceMapNode } from '../../../../common/service_map';
 import type { ConnectionFilter } from './apply_service_map_visibility';
 import type { ServiceMapFilterOptionCounts } from './service_map_filter_option_counts';
+import {
+  getDecoratedAlertStatusOptions,
+  getDecoratedAnomalySeverityOptions,
+  getDecoratedConnectionOptions,
+  getDecoratedSloStatusOptions,
+} from './service_map_filter_combobox_options';
 import { ServiceMapFindInPage } from './service_map_find_in_page';
 
 export type ServiceMapOrientation = 'horizontal' | 'vertical';
 
-const CONNECTION_FILTER_OPTIONS: { value: ConnectionFilter; label: string }[] = [
-  {
-    value: 'orphaned',
-    label: i18n.translate('xpack.apm.serviceMap.controls.connectionOrphaned', {
-      defaultMessage: 'No connections',
-    }),
-  },
-  {
-    value: 'connected',
-    label: i18n.translate('xpack.apm.serviceMap.controls.connectionConnected', {
-      defaultMessage: 'With connections',
-    }),
-  },
-];
-
-const ALERT_STATUS_OPTIONS: { value: AlertStatus; label: string }[] = [
-  {
-    value: ALERT_STATUS_ACTIVE,
-    label: i18n.translate('xpack.apm.serviceMap.controls.alertStatusActive', {
-      defaultMessage: 'Active',
-    }),
-  },
-  {
-    value: ALERT_STATUS_RECOVERED,
-    label: i18n.translate('xpack.apm.serviceMap.controls.alertStatusRecovered', {
-      defaultMessage: 'Recovered',
-    }),
-  },
-  {
-    value: ALERT_STATUS_UNTRACKED,
-    label: i18n.translate('xpack.apm.serviceMap.controls.alertStatusUntracked', {
-      defaultMessage: 'Untracked',
-    }),
-  },
-  {
-    value: ALERT_STATUS_DELAYED,
-    label: i18n.translate('xpack.apm.serviceMap.controls.alertStatusDelayed', {
-      defaultMessage: 'Delayed',
-    }),
-  },
-];
-
-const SLO_STATUS_OPTIONS: { value: SloStatus; label: string }[] = [
-  {
-    value: 'healthy',
-    label: i18n.translate('xpack.apm.serviceMap.controls.sloHealthy', {
-      defaultMessage: 'Healthy',
-    }),
-  },
-  {
-    value: 'degrading',
-    label: i18n.translate('xpack.apm.serviceMap.controls.sloDegrading', {
-      defaultMessage: 'Degrading',
-    }),
-  },
-  {
-    value: 'violated',
-    label: i18n.translate('xpack.apm.serviceMap.controls.sloViolated', {
-      defaultMessage: 'Violated',
-    }),
-  },
-  {
-    value: 'noData',
-    label: i18n.translate('xpack.apm.serviceMap.controls.sloNoData', {
-      defaultMessage: 'No data',
-    }),
-  },
-];
-
-const ANOMALY_SEVERITY_OPTIONS: { value: ML_ANOMALY_SEVERITY; label: string }[] = [
-  {
-    value: ML_ANOMALY_SEVERITY.CRITICAL,
-    label: i18n.translate('xpack.apm.serviceMap.controls.anomalySeverityCritical', {
-      defaultMessage: 'Critical',
-    }),
-  },
-  {
-    value: ML_ANOMALY_SEVERITY.MAJOR,
-    label: i18n.translate('xpack.apm.serviceMap.controls.anomalySeverityMajor', {
-      defaultMessage: 'Major',
-    }),
-  },
-  {
-    value: ML_ANOMALY_SEVERITY.MINOR,
-    label: i18n.translate('xpack.apm.serviceMap.controls.anomalySeverityMinor', {
-      defaultMessage: 'Minor',
-    }),
-  },
-  {
-    value: ML_ANOMALY_SEVERITY.WARNING,
-    label: i18n.translate('xpack.apm.serviceMap.controls.anomalySeverityWarning', {
-      defaultMessage: 'Warning',
-    }),
-  },
-  {
-    value: ML_ANOMALY_SEVERITY.LOW,
-    label: i18n.translate('xpack.apm.serviceMap.controls.anomalySeverityLow', {
-      defaultMessage: 'Low',
-    }),
-  },
-  {
-    value: ML_ANOMALY_SEVERITY.UNKNOWN,
-    label: i18n.translate('xpack.apm.serviceMap.controls.anomalySeverityUnknown', {
-      defaultMessage: 'Unknown',
-    }),
-  },
-];
-
 export interface ServiceMapOptionsPanelToggleProps {
   isExpanded: boolean;
   onExpandedChange: (next: boolean) => void;
+  /** When true, show a small dot on the toggle indicating filters or a search query are active. */
+  hasActiveControls?: boolean;
 }
 
 export interface ServiceMapOptionsPanelProps {
@@ -164,6 +58,10 @@ export interface ServiceMapOptionsPanelProps {
   onAnomalySeverityFilterChange: (next: ML_ANOMALY_SEVERITY[]) => void;
   mapOrientation: ServiceMapOrientation;
   onMapOrientationChange: (next: ServiceMapOrientation) => void;
+  /** Pass-through to ServiceMapFindInPage for controlled search query. */
+  searchQuery?: string;
+  /** Pass-through to ServiceMapFindInPage; called whenever the user edits the search field. */
+  onSearchQueryChange?: (next: string) => void;
 }
 
 /** Same hit target as map zoom / fit controls in graph.tsx (2 × base size). */
@@ -187,16 +85,50 @@ const useToolbarToggleIconCss = () => {
 export function ServiceMapOptionsPanelToggle({
   isExpanded,
   onExpandedChange,
+  hasActiveControls = false,
 }: ServiceMapOptionsPanelToggleProps) {
   const mapToolbarToggleIconCss = useToolbarToggleIconCss();
+  const { euiTheme } = useEuiTheme();
 
-  const toggleLabel = isExpanded
+  // Only badge while collapsed — once open the chips themselves communicate the same thing.
+  const showBadge = hasActiveControls && !isExpanded;
+
+  const baseLabel = isExpanded
     ? i18n.translate('xpack.apm.serviceMap.controls.hideControls', {
         defaultMessage: 'Hide controls',
       })
     : i18n.translate('xpack.apm.serviceMap.controls.showControls', {
         defaultMessage: 'Show controls',
       });
+
+  const toggleLabel = showBadge
+    ? i18n.translate('xpack.apm.serviceMap.controls.showControlsWithActiveFilters', {
+        defaultMessage: '{baseLabel} (filters active)',
+        values: { baseLabel },
+      })
+    : baseLabel;
+
+  const panelWrapperCss = useMemo(
+    () => css`
+      position: relative;
+    `,
+    []
+  );
+
+  const badgeCss = useMemo(
+    () => css`
+      position: absolute;
+      top: -${euiTheme.size.xs};
+      right: -${euiTheme.size.xs};
+      width: ${euiTheme.size.s};
+      height: ${euiTheme.size.s};
+      border-radius: 50%;
+      background-color: ${euiTheme.colors.accent};
+      border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.emptyShade};
+      pointer-events: none;
+    `,
+    [euiTheme]
+  );
 
   return (
     <EuiPanel
@@ -206,6 +138,7 @@ export function ServiceMapOptionsPanelToggle({
       paddingSize="none"
       borderRadius="m"
       grow={false}
+      css={panelWrapperCss}
     >
       <EuiFlexGroup
         justifyContent="center"
@@ -213,21 +146,29 @@ export function ServiceMapOptionsPanelToggle({
         gutterSize="none"
         responsive={false}
       >
-        <EuiButtonIcon
-          display="empty"
-          color={isExpanded ? 'primary' : 'text'}
-          size="s"
-          iconType="controls"
-          css={mapToolbarToggleIconCss}
-          onClick={() => onExpandedChange(!isExpanded)}
-          aria-expanded={isExpanded}
-          title={toggleLabel}
-          aria-label={toggleLabel}
-          data-test-subj={
-            isExpanded ? 'serviceMapHideControlsButton' : 'serviceMapShowControlsButton'
-          }
-        />
+        <EuiToolTip content={toggleLabel} disableScreenReaderOutput>
+          <EuiButtonIcon
+            display="empty"
+            color={isExpanded ? 'primary' : 'text'}
+            size="s"
+            iconType="controls"
+            css={mapToolbarToggleIconCss}
+            onClick={() => onExpandedChange(!isExpanded)}
+            aria-expanded={isExpanded}
+            aria-label={toggleLabel}
+            data-test-subj={
+              isExpanded ? 'serviceMapHideControlsButton' : 'serviceMapShowControlsButton'
+            }
+          />
+        </EuiToolTip>
       </EuiFlexGroup>
+      {showBadge && (
+        <span
+          css={badgeCss}
+          data-test-subj="serviceMapOptionsPanelToggleActiveIndicator"
+          aria-hidden="true"
+        />
+      )}
     </EuiPanel>
   );
 }
@@ -245,90 +186,27 @@ export function ServiceMapOptionsPanel({
   onAnomalySeverityFilterChange,
   mapOrientation,
   onMapOrientationChange,
+  searchQuery,
+  onSearchQueryChange,
 }: ServiceMapOptionsPanelProps) {
-  const connectionCounts = filterOptionCounts.connection;
-  const alertCounts = filterOptionCounts.alerts;
-  const sloStatusCounts = filterOptionCounts.slo;
-  const anomalySeverityCounts = filterOptionCounts.anomaly;
-
   const connectionFilterComboBoxOptions = useMemo(
-    () =>
-      CONNECTION_FILTER_OPTIONS.map((opt) => {
-        let count: number;
-        switch (opt.value) {
-          case 'orphaned':
-            count = connectionCounts.orphaned;
-            break;
-          case 'connected':
-            count = connectionCounts.connected;
-            break;
-        }
-        return {
-          label: opt.label,
-          value: opt.value,
-          append: (
-            <EuiBadge color={count === 0 ? 'subdued' : 'hollow'} title={String(count)}>
-              {count}
-            </EuiBadge>
-          ),
-          disabled: count === 0,
-        };
-      }),
-    [connectionCounts]
+    () => getDecoratedConnectionOptions(filterOptionCounts.connection),
+    [filterOptionCounts.connection]
   );
 
   const alertStatusComboBoxOptions = useMemo(
-    () =>
-      ALERT_STATUS_OPTIONS.map((opt) => {
-        const count = alertCounts[opt.value] ?? 0;
-        return {
-          label: opt.label,
-          value: opt.value,
-          append: (
-            <EuiBadge color={count === 0 ? 'subdued' : 'hollow'} title={String(count)}>
-              {count}
-            </EuiBadge>
-          ),
-          disabled: count === 0,
-        };
-      }),
-    [alertCounts]
+    () => getDecoratedAlertStatusOptions(filterOptionCounts.alerts),
+    [filterOptionCounts.alerts]
   );
 
   const sloStatusComboBoxOptions = useMemo(
-    () =>
-      SLO_STATUS_OPTIONS.map((opt) => {
-        const count = sloStatusCounts[opt.value] ?? 0;
-        return {
-          label: opt.label,
-          value: opt.value,
-          append: (
-            <EuiBadge color={count === 0 ? 'subdued' : 'hollow'} title={String(count)}>
-              {count}
-            </EuiBadge>
-          ),
-          disabled: count === 0,
-        };
-      }),
-    [sloStatusCounts]
+    () => getDecoratedSloStatusOptions(filterOptionCounts.slo),
+    [filterOptionCounts.slo]
   );
 
   const anomalyFilterComboBoxOptions = useMemo(
-    () =>
-      ANOMALY_SEVERITY_OPTIONS.map((opt) => {
-        const count = anomalySeverityCounts[opt.value] ?? 0;
-        return {
-          label: opt.label,
-          value: opt.value,
-          append: (
-            <EuiBadge color={count === 0 ? 'subdued' : 'hollow'} title={String(count)}>
-              {count}
-            </EuiBadge>
-          ),
-          disabled: count === 0,
-        };
-      }),
-    [anomalySeverityCounts]
+    () => getDecoratedAnomalySeverityOptions(filterOptionCounts.anomaly),
+    [filterOptionCounts.anomaly]
   );
 
   /** Width constraint for the floating panel; height follows content. */
@@ -378,7 +256,11 @@ export function ServiceMapOptionsPanel({
       grow={false}
       css={panelSizingCss}
     >
-      <ServiceMapFindInPage nodes={nodes} />
+      <ServiceMapFindInPage
+        nodes={nodes}
+        searchQuery={searchQuery}
+        onSearchQueryChange={onSearchQueryChange}
+      />
 
       <EuiHorizontalRule margin="m" />
 
@@ -393,7 +275,7 @@ export function ServiceMapOptionsPanel({
 
       <EuiComboBox
         placeholder={i18n.translate('xpack.apm.serviceMap.controls.connectionFilter', {
-          defaultMessage: 'Connections',
+          defaultMessage: 'Dependencies',
         })}
         options={connectionFilterComboBoxOptions}
         selectedOptions={connectionFilter.map((value) => {
@@ -401,14 +283,14 @@ export function ServiceMapOptionsPanel({
           return { label: opt?.label ?? value, value };
         })}
         onChange={(selected) => {
-          onConnectionFilterChange(selected.map((s) => (s.value ?? s.label) as ConnectionFilter));
+          onConnectionFilterChange(selected.map((s) => s.value as ConnectionFilter));
         }}
         fullWidth
         compressed
         isClearable
         data-test-subj="serviceMapConnectionFilter"
         aria-label={i18n.translate('xpack.apm.serviceMap.controls.connectionFilterAriaLabel', {
-          defaultMessage: 'Filter by connection status',
+          defaultMessage: 'Filter by dependency status',
         })}
       />
 
@@ -424,7 +306,7 @@ export function ServiceMapOptionsPanel({
           return { label: opt?.label ?? value, value };
         })}
         onChange={(selected) => {
-          onAlertStatusFilterChange(selected.map((s) => (s.value ?? s.label) as AlertStatus));
+          onAlertStatusFilterChange(selected.map((s) => s.value as AlertStatus));
         }}
         fullWidth
         compressed
@@ -439,7 +321,7 @@ export function ServiceMapOptionsPanel({
 
       <EuiComboBox
         placeholder={i18n.translate('xpack.apm.serviceMap.controls.sloStatusFilter', {
-          defaultMessage: 'SLO Status',
+          defaultMessage: 'SLO status',
         })}
         options={sloStatusComboBoxOptions}
         selectedOptions={sloStatusFilter.map((value) => {
@@ -447,7 +329,7 @@ export function ServiceMapOptionsPanel({
           return { label: opt?.label ?? value, value };
         })}
         onChange={(selected) => {
-          onSloStatusFilterChange(selected.map((s) => (s.value ?? s.label) as SloStatus));
+          onSloStatusFilterChange(selected.map((s) => s.value as SloStatus));
         }}
         fullWidth
         compressed
@@ -470,9 +352,7 @@ export function ServiceMapOptionsPanel({
           return { label: opt?.label ?? value, value };
         })}
         onChange={(selected) => {
-          onAnomalySeverityFilterChange(
-            selected.map((s) => (s.value ?? s.label) as ML_ANOMALY_SEVERITY)
-          );
+          onAnomalySeverityFilterChange(selected.map((s) => s.value as ML_ANOMALY_SEVERITY));
         }}
         fullWidth
         compressed

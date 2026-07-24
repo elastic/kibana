@@ -19,7 +19,8 @@ import {
   getInvalidFieldMessage,
   getFilter,
   getFormatFromPreviousColumn,
-  isColumnOfType,
+  hasOperationType,
+  getBooleanParam,
 } from './helpers';
 import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
 import { updateColumnParam } from '../layer_helpers';
@@ -128,10 +129,9 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
       reducedTimeRange: columnParams?.reducedTimeRange || previousColumn?.reducedTimeRange,
       params: {
         ...getFormatFromPreviousColumn(previousColumn),
-        emptyAsNull:
-          previousColumn && isColumnOfType<CountIndexPatternColumn>(COUNT_ID, previousColumn)
-            ? previousColumn.params?.emptyAsNull
-            : !columnParams?.usedInMath,
+        emptyAsNull: hasOperationType(previousColumn, COUNT_ID)
+          ? getBooleanParam(previousColumn, 'emptyAsNull')
+          : !columnParams?.usedInMath,
       },
     };
   },

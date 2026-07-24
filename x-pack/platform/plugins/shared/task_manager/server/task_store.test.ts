@@ -27,7 +27,7 @@ import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks
 import type { SearchOpts, AggregationOpts } from './task_store';
 import { TaskStore, taskInstanceToAttributes } from './task_store';
 import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
-import type { SavedObjectAttributes, IBasePath, SavedObjectsServiceStart } from '@kbn/core/server';
+import type { SavedObjectAttributes, SavedObjectsServiceStart } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 
@@ -73,8 +73,6 @@ const randomId = () => `id-${_.random(1, 20)}`;
 
 const coreStart = coreMock.createStart();
 const mockExecutionContextStart = executionContextServiceMock.createSetupContract();
-
-const basePathMock = { get: () => '/', serverBasePath: '/' } as unknown as IBasePath;
 
 beforeEach(() => {
   jest.resetAllMocks();
@@ -151,7 +149,6 @@ describe('TaskStore', () => {
         security: coreStart.security,
         canEncryptSavedObjects: true,
         getIsSecurityEnabled: () => true,
-        basePath: basePathMock,
         executionContext: mockExecutionContextStart,
         apiKeyStrategy: new EsApiKeyStrategy(),
       });
@@ -282,7 +279,6 @@ describe('TaskStore', () => {
         security: coreStart.security,
         canEncryptSavedObjects: true,
         getIsSecurityEnabled: () => false,
-        basePath: basePathMock,
         executionContext: mockExecutionContextStart,
         apiKeyStrategy: new EsApiKeyStrategy(),
       });
@@ -392,12 +388,7 @@ describe('TaskStore', () => {
         }
       );
 
-      expect(getApiKeyAndUserScope).toHaveBeenCalledWith(
-        [task],
-        request,
-        coreStart.security,
-        basePathMock
-      );
+      expect(getApiKeyAndUserScope).toHaveBeenCalledWith([task], request, coreStart.security, {});
 
       expect(savedObjectsClient.create).not.toHaveBeenCalled();
 
@@ -438,7 +429,6 @@ describe('TaskStore', () => {
         security: coreStart.security,
         canEncryptSavedObjects: false,
         getIsSecurityEnabled: () => true,
-        basePath: basePathMock,
         executionContext: mockExecutionContextStart,
         apiKeyStrategy: new EsApiKeyStrategy(),
       });
@@ -563,7 +553,6 @@ describe('TaskStore', () => {
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
-        basePath: basePathMock,
         executionContext: mockExecutionContextStart,
         apiKeyStrategy: new EsApiKeyStrategy(),
       });
@@ -692,7 +681,6 @@ describe('TaskStore', () => {
         security: coreStart.security,
         canEncryptSavedObjects: true,
         getIsSecurityEnabled: () => true,
-        basePath: basePathMock,
         executionContext: mockExecutionContextStart,
         apiKeyStrategy: new EsApiKeyStrategy(),
       });
@@ -862,7 +850,6 @@ describe('TaskStore', () => {
         security: coreStart.security,
         canEncryptSavedObjects: true,
         getIsSecurityEnabled: () => true,
-        basePath: basePathMock,
         executionContext: mockExecutionContextStart,
         apiKeyStrategy: new EsApiKeyStrategy(),
       });
@@ -968,7 +955,6 @@ describe('TaskStore', () => {
         security: coreStart.security,
         canEncryptSavedObjects: true,
         getIsSecurityEnabled: () => true,
-        basePath: basePathMock,
         executionContext: mockExecutionContextStart,
         apiKeyStrategy: new EsApiKeyStrategy(),
       });
@@ -1068,7 +1054,6 @@ describe('TaskStore', () => {
         security: coreStart.security,
         canEncryptSavedObjects: true,
         getIsSecurityEnabled: () => true,
-        basePath: basePathMock,
         executionContext: mockExecutionContextStart,
         apiKeyStrategy: new EsApiKeyStrategy(),
       });
@@ -1187,7 +1172,6 @@ describe('TaskStore', () => {
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
-        basePath: basePathMock,
         executionContext: mockExecutionContextStart,
         apiKeyStrategy: new EsApiKeyStrategy(),
       });
@@ -1317,7 +1301,6 @@ describe('TaskStore', () => {
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
-        basePath: basePathMock,
         executionContext: mockExecutionContextStart,
         apiKeyStrategy: new EsApiKeyStrategy(),
       });
@@ -1549,7 +1532,6 @@ describe('TaskStore', () => {
         savedObjectsService: mockSavedObjectsService as unknown as SavedObjectsServiceStart,
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
-        basePath: basePathMock,
         executionContext: mockExecutionContextStart,
         apiKeyStrategy: new EsApiKeyStrategy(),
       });
@@ -1884,7 +1866,7 @@ describe('TaskStore', () => {
         [{ ...bulkUpdateTask, apiKey: mockApiKey, userScope: mockUserScope }],
         mockRequest,
         coreStart.security,
-        basePathMock
+        {}
       );
 
       expect(mockScopedClient.bulkUpdate).toHaveBeenCalledWith(
@@ -1985,7 +1967,7 @@ describe('TaskStore', () => {
         ],
         mockRequest,
         coreStart.security,
-        basePathMock
+        {}
       );
 
       expect(mockScopedClient.bulkUpdate).toHaveBeenCalledWith(
@@ -2093,7 +2075,7 @@ describe('TaskStore', () => {
         ],
         mockRequest,
         coreStart.security,
-        basePathMock
+        {}
       );
 
       expect(mockScopedClient.bulkUpdate).toHaveBeenCalledWith(
@@ -2386,7 +2368,6 @@ describe('TaskStore', () => {
         } as unknown as SavedObjectsServiceStart,
         security: coreStart.security,
         getIsSecurityEnabled: () => false,
-        basePath: basePathMock,
         executionContext: mockExecutionContextStart,
         apiKeyStrategy: new EsApiKeyStrategy(),
       });
@@ -2462,7 +2443,6 @@ describe('TaskStore', () => {
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
-        basePath: basePathMock,
         executionContext: mockExecutionContextStart,
         apiKeyStrategy: new EsApiKeyStrategy(),
       });
@@ -3073,7 +3053,6 @@ describe('TaskStore', () => {
         security: coreStart.security,
         canEncryptSavedObjects: true,
         getIsSecurityEnabled: () => true,
-        basePath: basePathMock,
         executionContext: mockExecutionContextStart,
         apiKeyStrategy: new EsApiKeyStrategy(),
       });
@@ -3203,7 +3182,6 @@ describe('TaskStore', () => {
         security: coreStart.security,
         canEncryptSavedObjects: true,
         getIsSecurityEnabled: () => true,
-        basePath: basePathMock,
         executionContext: mockExecutionContextStart,
         apiKeyStrategy: new EsApiKeyStrategy(),
       });
@@ -3294,7 +3272,6 @@ describe('TaskStore', () => {
         security: coreStart.security,
         canEncryptSavedObjects: true,
         getIsSecurityEnabled: () => true,
-        basePath: basePathMock,
         executionContext: mockExecutionContextStart,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         apiKeyStrategy: spyStrategy as any,
@@ -3378,7 +3355,6 @@ describe('TaskStore', () => {
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
-        basePath: basePathMock,
         executionContext: mockExecutionContextStart,
         apiKeyStrategy: new EsApiKeyStrategy(),
       });
@@ -3447,7 +3423,6 @@ describe('TaskStore', () => {
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
-        basePath: basePathMock,
         executionContext: mockExecutionContextStart,
         apiKeyStrategy: new EsApiKeyStrategy(),
       });
@@ -3551,7 +3526,6 @@ describe('TaskStore', () => {
             savedObjectsService: coreStart.savedObjects,
             security: coreStart.security,
             getIsSecurityEnabled: () => true,
-            basePath: basePathMock,
             executionContext: mockExecutionContextStart,
             apiKeyStrategy: new EsApiKeyStrategy(),
           });
@@ -3582,7 +3556,6 @@ describe('TaskStore', () => {
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
-        basePath: basePathMock,
         executionContext: mockExecutionContextStart,
         apiKeyStrategy: new EsApiKeyStrategy(),
       });
@@ -3611,7 +3584,6 @@ describe('TaskStore', () => {
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
-        basePath: basePathMock,
         executionContext: mockExecutionContextStart,
         apiKeyStrategy: new EsApiKeyStrategy(),
       });
@@ -3642,7 +3614,6 @@ describe('TaskStore', () => {
         security: coreStart.security,
         canEncryptSavedObjects: true,
         getIsSecurityEnabled: () => true,
-        basePath: basePathMock,
         executionContext: mockExecutionContextStart,
         apiKeyStrategy: new EsApiKeyStrategy(),
       });
@@ -3854,7 +3825,7 @@ describe('TaskStore', () => {
         [task1, task2],
         request,
         coreStart.security,
-        basePathMock
+        {}
       );
 
       expect(savedObjectsClient.create).not.toHaveBeenCalled();
@@ -3917,7 +3888,6 @@ describe('TaskStore', () => {
         security: coreStart.security,
         canEncryptSavedObjects: false,
         getIsSecurityEnabled: () => true,
-        basePath: basePathMock,
         executionContext: mockExecutionContextStart,
         apiKeyStrategy: new EsApiKeyStrategy(),
       });
@@ -3954,7 +3924,6 @@ describe('TaskStore', () => {
         security: coreStart.security,
         canEncryptSavedObjects: true,
         getIsSecurityEnabled: () => false,
-        basePath: basePathMock,
         executionContext: mockExecutionContextStart,
         apiKeyStrategy: new EsApiKeyStrategy(),
       });
@@ -4214,7 +4183,6 @@ describe('TaskStore', () => {
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
-        basePath: basePathMock,
         executionContext: mockExecutionContextStart,
         apiKeyStrategy: new EsApiKeyStrategy(),
       });
@@ -4268,7 +4236,6 @@ describe('TaskStore', () => {
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
-        basePath: basePathMock,
         executionContext: mockExecutionContextStart,
         apiKeyStrategy: new EsApiKeyStrategy(),
       });
@@ -4318,7 +4285,6 @@ describe('TaskStore', () => {
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
-        basePath: basePathMock,
         executionContext: mockExecutionContextStart,
         apiKeyStrategy: new EsApiKeyStrategy(),
       });
@@ -4357,7 +4323,6 @@ describe('TaskStore', () => {
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
-        basePath: basePathMock,
         executionContext: mockExecutionContextStart,
         apiKeyStrategy: new EsApiKeyStrategy(),
       });
@@ -4476,7 +4441,6 @@ describe('TaskStore', () => {
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
-        basePath: basePathMock,
         executionContext: mockExecutionContextStart,
         apiKeyStrategy: new EsApiKeyStrategy(),
       });

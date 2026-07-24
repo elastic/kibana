@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { StabilityLevel } from '@kbn/workflows';
 import type { z } from '@kbn/zod/v4';
 
 /**
@@ -42,7 +43,7 @@ export interface TriggerSnippets {
  * - id: globally unique, namespaced format <solution>.<event>
  * - eventSchema: must be a Zod object schema that rejects unknown fields
  *
- * Server and agent tooling read title, description, documentation, and snippets from here.
+ * Server and agent tooling read title and description from here; documentation and snippets are optional.
  * Public definitions spread this object and add UI-only fields (e.g. icon).
  */
 export interface CommonTriggerDefinition<EventSchema extends z.ZodType = z.ZodType> {
@@ -57,11 +58,11 @@ export interface CommonTriggerDefinition<EventSchema extends z.ZodType = z.ZodTy
   /**
    * Short human-readable name for this trigger (UI and agent catalog label).
    */
-  title?: string;
+  title: string;
   /**
    * User-facing description of when this trigger is emitted.
    */
-  description?: string;
+  description: string;
   /**
    * Documentation (details + YAML examples), aligned with step definitions.
    */
@@ -70,4 +71,9 @@ export interface CommonTriggerDefinition<EventSchema extends z.ZodType = z.ZodTy
    * Pre-filled values for snippet insertion (e.g. on.condition).
    */
   snippets?: TriggerSnippets;
+  /**
+   * API stability level for this trigger (e.g. 'tech_preview', 'beta', 'stable').
+   * Required so every trigger explicitly declares its contract. Set 'stable' for GA triggers (no badge).
+   */
+  stability: StabilityLevel;
 }

@@ -38,7 +38,6 @@ export interface RenderingMetadata {
   themeVersion: ThemeVersion;
   darkMode: DarkModeValue;
   stylesheetPaths: string[];
-  scriptPaths: string[];
   /** Font URLs to preload via <link rel="preload" as="font"> (rspack mode only) */
   preloadFonts?: string[];
   /** When true, adds font-display: swap to @font-face declarations (rspack mode only) */
@@ -89,14 +88,29 @@ export interface IRenderOptions {
 }
 
 /** @internal */
+export interface RenderingResponse {
+  /** The rendered HTML body. */
+  body: string;
+  /**
+   * Response headers the renderer wants attached to the HTTP response (e.g.,
+   * the `Set-Cookie` carrying the resolved locale). Callers should merge
+   * these with any caller-provided headers when building the response.
+   */
+  headers: Record<string, string>;
+}
+
+/** @internal */
 export interface InternalRenderingServiceSetup {
   /**
-   * Generate a `KibanaResponse` which renders an HTML page bootstrapped
-   * with the `core` bundle or the ID of another specified legacy bundle.
+   * Renders an HTML page bootstrapped with the `core` bundle (or another
+   * specified legacy bundle), and returns the body alongside response
+   * headers the caller should set (e.g., `Set-Cookie` for the resolved
+   * locale).
    *
    * @example
    * ```ts
-   * const html = await rendering.render(request, uiSettings);
+   * const { body, headers } = await rendering.render(request, uiSettings);
+   * return response.ok({ body, headers });
    * ```
    */
   render(
@@ -106,7 +120,7 @@ export interface InternalRenderingServiceSetup {
       globalClient: IUiSettingsClient;
     },
     options?: IRenderOptions
-  ): Promise<string>;
+  ): Promise<RenderingResponse>;
 }
 
 /** @internal */

@@ -52,12 +52,15 @@ export class MlLocatorDefinition implements LocatorDefinition<MlLocatorParams> {
       case ML_PAGES.DATA_FRAME_ANALYTICS_EXPLORATION:
         path = formatDataFrameAnalyticsExplorationUrl('', params.pageState);
         break;
-      case ML_PAGES.AIOPS_CHANGE_POINT_DETECTION:
-        path = formatChangePointDetectionUrl(
-          '',
-          params.pageState as ChangePointDetectionQueryState
-        );
+      case ML_PAGES.AIOPS_CHANGE_POINT_DETECTION: {
+        const cpState = params.pageState as ChangePointDetectionQueryState;
+        if (cpState?.fieldConfigs && cpState?.index) {
+          path = formatChangePointDetectionUrl('', cpState);
+        } else {
+          path = formatGenericMlUrl('', params.page, params.pageState);
+        }
         break;
+      }
       default:
         path = formatGenericMlUrl('', params.page, params.pageState);
         break;

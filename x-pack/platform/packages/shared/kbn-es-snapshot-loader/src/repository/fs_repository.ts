@@ -21,12 +21,13 @@ export function createFsRepository(config: FsRepositoryConfig): RepositoryStrate
         throw new Error('FS repository location is required');
       }
     },
-    async register({ esClient, repoName }) {
+    async register({ esClient, repoName, verify }) {
       await esClient.snapshot.createRepository(
         {
           name: repoName,
           master_timeout: '2m',
           timeout: '2m',
+          verify: verify ?? false,
           body: {
             type: 'fs',
             settings: {

@@ -64,6 +64,7 @@ export const EPM_API_ROUTES = {
   BULK_ROLLBACK_AVAILABLE_CHECK_PATTERN: `${INTERNAL_ROOT}/epm/packages/_bulk_rollback/available_check`,
   REAUTHORIZE_TRANSFORMS: `${EPM_PACKAGES_ONE}/transforms/authorize`,
   REVIEW_UPGRADE_PATTERN: `${EPM_PACKAGES_MANY}/{pkgName}/review_upgrade`,
+  ILM_POLICIES_PATTERN: `${INTERNAL_ROOT}/epm/ilm_policies`,
 };
 
 // Data stream API routes
@@ -215,10 +216,30 @@ export const AGENT_API_ROUTES = {
   GENERATE_REPORT_PATTERN: `${INTERNAL_ROOT}/agents/reporting/generate`,
 };
 
+// Canonical managed integrations API (formerly "agentless policies"). New code should use these.
+export const MANAGED_INTEGRATIONS_ROUTES = {
+  CREATE_PATTERN: `${API_ROOT}/managed_integrations`,
+  LIST_PATTERN: `${API_ROOT}/managed_integrations`,
+  GET_PATTERN: `${API_ROOT}/managed_integrations/{policyId}`,
+  UPDATE_PATTERN: `${API_ROOT}/managed_integrations/{policyId}`,
+  DELETE_PATTERN: `${API_ROOT}/managed_integrations/{policyId}`,
+  UPGRADE_PATTERN: `${API_ROOT}/managed_integrations/_upgrade`,
+  UPGRADE_DRYRUN_PATTERN: `${API_ROOT}/managed_integrations/_upgrade/dryrun`,
+  SYNC_PATTERN: `${INTERNAL_ROOT}/managed_integrations/_sync`,
+  BULK_THROUGHPUT_PATTERN: `${INTERNAL_ROOT}/managed_integrations/bulk_throughput`,
+};
+
+// Deprecated public aliases retained for backward compatibility: they are registered against the
+// same handlers as MANAGED_INTEGRATIONS_ROUTES so existing clients keep working. Only the public
+// routes are aliased — the internal `_sync`/`bulk_throughput` routes moved without an alias.
 export const AGENTLESS_POLICIES_ROUTES = {
   CREATE_PATTERN: `${API_ROOT}/agentless_policies`,
+  LIST_PATTERN: `${API_ROOT}/agentless_policies`,
+  GET_PATTERN: `${API_ROOT}/agentless_policies/{policyId}`,
+  UPDATE_PATTERN: `${API_ROOT}/agentless_policies/{policyId}`,
   DELETE_PATTERN: `${API_ROOT}/agentless_policies/{policyId}`,
-  SYNC_PATTERN: `${INTERNAL_ROOT}/agentless_policies/_sync`,
+  UPGRADE_PATTERN: `${API_ROOT}/agentless_policies/_upgrade`,
+  UPGRADE_DRYRUN_PATTERN: `${API_ROOT}/agentless_policies/_upgrade/dryrun`,
 };
 
 export const ENROLLMENT_API_KEY_ROUTES = {
@@ -232,6 +253,7 @@ export const ENROLLMENT_API_KEY_ROUTES = {
 export const UNINSTALL_TOKEN_ROUTES = {
   LIST_PATTERN: `${API_ROOT}/uninstall_tokens`,
   INFO_PATTERN: `${API_ROOT}/uninstall_tokens/{uninstallTokenId}`,
+  ROTATE_PATTERN: `${API_ROOT}/uninstall_tokens/{agentPolicyId}/rotate`,
 };
 
 // Agents setup API routes
@@ -270,6 +292,7 @@ export const REMOTE_SYNCED_INTEGRATIONS_API_ROUTES = {
 };
 
 export const CREATE_STANDALONE_AGENT_API_KEY_ROUTE = `${INTERNAL_ROOT}/create_standalone_agent_api_key`;
+export const CREATE_MANAGED_OTLP_API_KEY_ROUTE = `${INTERNAL_ROOT}/create_managed_otlp_api_key`;
 
 // Fleet debug routes
 export const FLEET_DEBUG_ROUTES = {

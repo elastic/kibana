@@ -195,6 +195,19 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await deleteStream(apiClient, rootQueryStreamName);
       });
 
+      it('should reject root-level query stream with legacy logs root name', async () => {
+        const response = (await putStream(
+          apiClient,
+          'logs',
+          createQueryStreamRequest('FROM logs.otel | LIMIT 10', getEsqlViewName('logs')),
+          400
+        )) as unknown as { message: string };
+
+        expect(response.message).to.contain(
+          'Cannot create query stream: a stream with name "logs" is reserved for the legacy root stream'
+        );
+      });
+
       it('should reject child referencing grandparent instead of immediate parent', async () => {
         // First create an intermediate query stream (child of wired parent)
         const intermediateChildName = `${PARENT_STREAM_NAME}.intermediate`;

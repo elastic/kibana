@@ -57,11 +57,13 @@ export interface SavedObjectsCheckFinding {
   severity: FindingSeverity;
   typeName?: string;
   message: string;
+  /** Plain-text supplement (e.g. fixture diff) rendered separately in PR comments. */
+  details?: string;
   fixHint?: string;
   /**
    * Path fragment appended to the Saved Objects docs base URL.
    * MUST start with `#` (anchor on the same page, e.g. `#defining-model-versions`)
-   * or `/` (relative path, e.g. `/validate#troubleshooting`).
+   * or `/` (relative path, e.g. `/troubleshooting#existing-type-mutated-migrations`).
    * A value without a leading `#` or `/` will produce a malformed URL.
    */
   docsAnchor?: string;
@@ -81,8 +83,15 @@ export interface TypeChangeDetails {
 
 export interface SavedObjectsCheckReport {
   status: 'pass' | 'fail';
+  /** Requested baseline commit (e.g. merge-base) passed to `--baseline`. */
   baseline?: string;
+  /** GCS snapshot commit actually used when it differs from {@link baseline}. */
+  baselineSnapshotSha?: string;
+  /** True when the baseline snapshot came from an ancestor of {@link baseline}. */
+  baselineSnapshotUsedAncestor?: boolean;
   serverlessBaseline?: string;
+  serverlessBaselineSnapshotSha?: string;
+  serverlessBaselineSnapshotUsedAncestor?: boolean;
   newTypes: string[];
   updatedTypes: string[];
   removedTypes: string[];

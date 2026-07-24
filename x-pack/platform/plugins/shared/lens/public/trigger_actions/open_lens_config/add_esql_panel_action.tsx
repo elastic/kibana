@@ -30,20 +30,26 @@ export class AddESQLPanelAction implements Action<EmbeddableApiContext> {
 
   public getDisplayName(): string {
     return i18n.translate('xpack.lens.app.createVisualizationLabel', {
-      defaultMessage: 'ES|QL',
+      defaultMessage: 'Visualization (query)',
+    });
+  }
+
+  public getDisplayNameTooltip() {
+    return i18n.translate('xpack.lens.app.createVisualizationDescription', {
+      defaultMessage: 'Build charts, metrics, and tables with ES|QL.',
     });
   }
 
   public getIconType() {
     // need to create a new one
-    return 'esqlVis';
+    return 'editorCodeBlock';
   }
 
   public async isCompatible({ embeddable }: EmbeddableApiContext) {
     return apiIsPresentationContainer(embeddable) && this.core.uiSettings.get(ENABLE_ESQL);
   }
 
-  public async execute({ embeddable: api }: EmbeddableApiContext) {
+  public async execute({ embeddable: api, returnFocus }: EmbeddableApiContext) {
     if (!apiIsPresentationContainer(api)) throw new IncompatibleActionError();
     if (!api || !apiHasAppContext(api)) {
       return;
@@ -70,7 +76,7 @@ export class AddESQLPanelAction implements Action<EmbeddableApiContext> {
           closeFlyout,
         });
       },
-      options: { uuid },
+      options: { uuid, returnFocus },
     });
   }
 }

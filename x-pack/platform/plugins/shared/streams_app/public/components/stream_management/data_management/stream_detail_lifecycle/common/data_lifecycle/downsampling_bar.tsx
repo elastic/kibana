@@ -18,7 +18,7 @@ const noDownsamplingLabel = i18n.translate('xpack.streams.dataLifecycleSummary.n
   defaultMessage: 'No downsampling',
 });
 
-const getDownsamplingLayout = (segments: DownsamplingSegment[]) => {
+export const getDownsamplingLayout = (segments: DownsamplingSegment[]) => {
   const deleteIndex = segments.findIndex((segment) => segment.isDelete);
   const spanEndIndex = deleteIndex === -1 ? segments.length - 1 : Math.max(deleteIndex - 1, 0);
 
@@ -36,46 +36,34 @@ const getDownsamplingLayout = (segments: DownsamplingSegment[]) => {
     }));
   }
 
-  const firstStepIndex = stepIndices[0];
-  const secondStepIndex = stepIndices.length > 1 ? stepIndices[1] : null;
   const lastStepIndex = stepIndices[stepIndices.length - 1];
+
+  // Each step's bar spans every column up to (but not including) the next step's column, so it
+  // covers any extra non-step columns in between — e.g. a frozen `min_age` boundary inserted between
+  // two downsample steps. The last step spans to the end (before delete). Columns that fall inside a
+  // step's span are hidden so they don't render an empty panel that visually truncates the step bar.
+  const nextStepByIndex = (index: number): number | undefined =>
+    stepIndices.find((stepIndex) => stepIndex > index);
 
   return segments.map((segment, index) => {
     const columnStart = index + 1;
 
-    // Handle delete segment
     if (segment.isDelete) {
       return { segment, span: 1, hidden: false, columnStart };
     }
 
-    // First step: span until second step (or until last step logic takes over if only one step)
-    if (index === firstStepIndex && secondStepIndex !== null && firstStepIndex !== lastStepIndex) {
-      const span = secondStepIndex - firstStepIndex;
+    if (segment.step) {
+      const span =
+        index === lastStepIndex
+          ? Math.max(spanEndIndex - index + 1, 1)
+          : Math.max((nextStepByIndex(index) ?? index + 1) - index, 1);
       return { segment, span, hidden: false, columnStart };
     }
 
-    // Hide segments between first and second step
-    if (
-      secondStepIndex !== null &&
-      index > firstStepIndex &&
-      index < secondStepIndex &&
-      firstStepIndex !== lastStepIndex
-    ) {
-      return { segment, span: 1, hidden: true, columnStart };
-    }
-
-    // Last step: span until end (before delete)
-    if (index === lastStepIndex) {
-      const span = Math.max(spanEndIndex - lastStepIndex + 1, 1);
-      return { segment, span, hidden: false, columnStart };
-    }
-
-    // Hide segments between last step and end
-    if (index > lastStepIndex && index <= spanEndIndex) {
-      return { segment, span: 1, hidden: true, columnStart };
-    }
-
-    return { segment, span: 1, hidden: false, columnStart };
+    // Non-step column: hide it if it falls within a step's span (i.e. before the last covered
+    // column), otherwise render it as-is.
+    const hidden = index <= spanEndIndex && index > stepIndices[0];
+    return { segment, span: 1, hidden, columnStart };
   });
 };
 
@@ -88,6 +76,8 @@ export interface DownsamplingBarProps {
   editedDownsampleStepIndex?: number;
   canManageLifecycle: boolean;
   isEditLifecycleFlyoutOpen?: boolean;
+  /** While true, all click interactions are disabled: no popover opens and no navigation occurs. */
+  disableInteractions?: boolean;
 }
 
 export const DownsamplingBar = ({
@@ -99,6 +89,7 @@ export const DownsamplingBar = ({
   editedDownsampleStepIndex,
   canManageLifecycle,
   isEditLifecycleFlyoutOpen,
+  disableInteractions,
 }: DownsamplingBarProps) => {
   const phaseColors = usePhaseColors();
   const { getDownsamplingColor } = useDownsamplingColors();
@@ -181,6 +172,7 @@ export const DownsamplingBar = ({
                       )}
                       canManageLifecycle={canManageLifecycle}
                       isEditLifecycleFlyoutOpen={isEditLifecycleFlyoutOpen}
+                      disableInteractions={disableInteractions}
                     />
                   ) : segment.isDelete ? (
                     <EuiPanel

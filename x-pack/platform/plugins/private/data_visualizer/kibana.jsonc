@@ -29,6 +29,8 @@
       "home",
       "lens",
       "dataViewFieldEditor",
+      "dataViewEditor",
+      "contentManagement",
       "customIntegrations",
       "cloud",
       "cps"
@@ -41,6 +43,7 @@
       "uiActions",
       "lens",
       "esql",
+      "savedObjectsFinder"
     ]
   }
 }

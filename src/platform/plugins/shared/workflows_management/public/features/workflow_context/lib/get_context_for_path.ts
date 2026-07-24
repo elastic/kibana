@@ -7,11 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import _ from 'lodash';
 import type { Document } from 'yaml';
 import type { WorkflowYaml } from '@kbn/workflows';
 import { DynamicStepContextSchema, getStepId, WhileContextSchema } from '@kbn/workflows';
-import { isAtomic, isEnterForeach, isEnterWhile, type WorkflowGraph } from '@kbn/workflows/graph';
+import {
+  isAtomic,
+  isEnterForeach,
+  isEnterParallel,
+  isEnterWhile,
+  type WorkflowGraph,
+} from '@kbn/workflows/graph';
 import { DataMapStepTypeId } from '@kbn/workflows-extensions/common';
 import type { z } from '@kbn/zod/v4';
 import { getContextSchemaWithTemplateLocals } from './extend_context_with_template_locals';
@@ -22,6 +27,7 @@ import {
 import { getForeachStateSchema } from './get_foreach_state_schema';
 import { getNearestStepPath } from './get_nearest_step_path';
 import { getStepsCollectionSchema } from './get_steps_collection_schema';
+import { getValueAtYamlPath } from './get_value_at_yaml_path';
 import { getVariablesSchema } from './get_variables_schema';
 import { getWorkflowContextSchema } from './get_workflow_context_schema';
 
@@ -79,25 +85,32 @@ export function getContextSchemaForPath(
   workflowGraph: WorkflowGraph,
   path: Array<string | number>,
   yamlDocument?: Document | null,
-  offset?: number
+  offset?: number,
+  yamlSource?: string
 ): typeof DynamicStepContextSchema {
-  let schema: typeof DynamicStepContextSchema = DynamicStepContextSchema.merge(
+  const schema: typeof DynamicStepContextSchema = DynamicStepContextSchema.merge(
     getWorkflowContextSchema(definition as WorkflowYaml, yamlDocument)
   ) as typeof DynamicStepContextSchema;
 
   const nearestStepPath = getNearestStepPath(path);
   if (!nearestStepPath) {
-    return maybeExtendWithTemplateLocals(schema, yamlDocument, offset);
+    return maybeExtendWithTemplateLocals(schema, yamlDocument, offset, yamlSource);
   }
-  const nearestStep = _.get(definition, nearestStepPath);
+  const nearestStep = getValueAtYamlPath<{ name: string } | undefined>(definition, nearestStepPath);
   if (!nearestStep) {
-    return maybeExtendWithTemplateLocals(schema, yamlDocument, offset);
+    return maybeExtendWithTemplateLocals(schema, yamlDocument, offset, yamlSource);
   }
 
-  schema = getContextSchemaForStep(schema, workflowGraph, nearestStep.name);
-  schema = extendWithPathSpecificContext(schema, nearestStep, path.slice(nearestStepPath.length));
-
-  return maybeExtendWithTemplateLocals(schema, yamlDocument, offset);
+  return maybeExtendWithTemplateLocals(
+    extendWithPathSpecificContext(
+      getContextSchemaForStep(schema, workflowGraph, nearestStep.name),
+      nearestStep,
+      path.slice(nearestStepPath.length)
+    ),
+    yamlDocument,
+    offset,
+    yamlSource
+  );
 }
 
 export function extendWithPathSpecificContext(
@@ -116,10 +129,11 @@ export function extendWithPathSpecificContext(
 function maybeExtendWithTemplateLocals(
   schema: typeof DynamicStepContextSchema,
   yamlDocument?: Document | null,
-  offset?: number
+  offset?: number,
+  yamlSource?: string
 ): typeof DynamicStepContextSchema {
   if (yamlDocument != null && offset !== undefined) {
-    return getContextSchemaWithTemplateLocals(yamlDocument, offset, schema);
+    return getContextSchemaWithTemplateLocals(yamlDocument, offset, schema, yamlSource);
   }
   return schema;
 }
@@ -135,7 +149,11 @@ function getStepContextSchemaEnrichmentEntries(
   for (const nodeId of stack) {
     const node = workflowExecutionGraph.getNode(nodeId);
 
-    if (isEnterForeach(node)) {
+    // A dynamic `foreach` parallel step fans out over a list, exposing the same
+    // `foreach.item` / `foreach.index` context to each branch body as a foreach
+    // loop. (For static `branches`, `getForeachStateSchema` returns a permissive
+    // schema since there is no per-item context.)
+    if (isEnterForeach(node) || isEnterParallel(node)) {
       enrichments.push({
         key: 'foreach',
         value: getForeachStateSchema(stepContextSchema, node.configuration),

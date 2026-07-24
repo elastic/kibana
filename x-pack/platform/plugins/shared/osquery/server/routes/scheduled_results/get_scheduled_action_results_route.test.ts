@@ -11,9 +11,15 @@ import type { RequestHandler } from '@kbn/core/server';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import type { IScopedSearchClient } from '@kbn/data-plugin/server';
 import { API_VERSIONS, DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../common/constants';
+import { OSQUERY_INTEGRATION_NAME } from '../../../common';
 import { Direction, OsqueryQueries } from '../../../common/search_strategy';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+import { OSQUERY_SEARCH_STRATEGY } from '../../search_strategy/constants';
 import { getScheduledActionResultsRoute } from './get_scheduled_action_results_route';
+
+jest.mock('../../utils/get_internal_saved_object_client', () => ({
+  createInternalSavedObjectsClientForSpaceId: jest.fn().mockResolvedValue({}),
+}));
 
 const ROUTE_PATH = '/api/osquery/scheduled_results/{scheduleId}/{executionCount}';
 
@@ -101,7 +107,7 @@ describe('getScheduledActionResultsRoute', () => {
 
   const expectedSearchOptions = {
     abortSignal: expect.any(AbortSignal),
-    strategy: 'osquerySearchStrategy',
+    strategy: OSQUERY_SEARCH_STRATEGY,
   };
 
   const registerRoute = (osqueryContext: OsqueryAppContext) => {
@@ -242,6 +248,68 @@ describe('getScheduledActionResultsRoute', () => {
 
       expect(mockSearchFn).toHaveBeenCalledWith(
         expect.objectContaining({ spaceId: 'default' }),
+        expectedSearchOptions
+      );
+    });
+  });
+
+  describe('integration namespace scoping', () => {
+    it('passes resolved integration namespaces to the search strategy', async () => {
+      const mockSearchFn = jest
+        .fn()
+        .mockReturnValue(of(createMockScheduledResponse({ packId: '' })));
+
+      const mockOsqueryContext = {
+        logFactory: { get: jest.fn().mockReturnValue({ debug: jest.fn() }) },
+        service: {
+          getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }),
+          getIntegrationNamespaces: jest
+            .fn()
+            .mockResolvedValue({ [OSQUERY_INTEGRATION_NAME]: ['team.a'] }),
+        },
+      } as unknown as OsqueryAppContext;
+
+      registerRoute(mockOsqueryContext);
+
+      const mockRequest = httpServerMock.createKibanaRequest({
+        params: { scheduleId: 'sched-1', executionCount: 1 },
+        query: {},
+      });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(createMockContext(mockSearchFn) as any, mockRequest, mockResponse);
+
+      expect(mockSearchFn).toHaveBeenCalledWith(
+        expect.objectContaining({ integrationNamespaces: ['team.a'] }),
+        expectedSearchOptions
+      );
+    });
+
+    it('passes undefined namespaces when Fleet resolves none', async () => {
+      const mockSearchFn = jest
+        .fn()
+        .mockReturnValue(of(createMockScheduledResponse({ packId: '' })));
+
+      const mockOsqueryContext = {
+        logFactory: { get: jest.fn().mockReturnValue({ debug: jest.fn() }) },
+        service: {
+          getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }),
+          getIntegrationNamespaces: jest.fn().mockResolvedValue({}),
+        },
+      } as unknown as OsqueryAppContext;
+
+      registerRoute(mockOsqueryContext);
+
+      const mockRequest = httpServerMock.createKibanaRequest({
+        params: { scheduleId: 'sched-1', executionCount: 1 },
+        query: {},
+      });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(createMockContext(mockSearchFn) as any, mockRequest, mockResponse);
+
+      expect(mockSearchFn).toHaveBeenCalledWith(
+        expect.objectContaining({ integrationNamespaces: undefined }),
         expectedSearchOptions
       );
     });

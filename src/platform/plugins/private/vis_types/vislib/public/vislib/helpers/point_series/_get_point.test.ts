@@ -19,7 +19,7 @@ describe('getPoint', function () {
 
   beforeAll(() => {
     deserialize = jest.fn(() => ({
-      convert: jest.fn((v) => v),
+      convertToText: jest.fn((v) => v),
     })) as any;
 
     setFormatService({

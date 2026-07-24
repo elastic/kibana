@@ -1,6 +1,23 @@
 {
-  "sha1": "cc9ca35b36110b9dba7c2f2b47a38b9190b47907",
+  "sha1": "5201ff61da7dc4bc356eb35f2103214410fd7b00",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
   "tests": [
+    {
+      "id": "cf54e1b20d6357b-1f97aad70eeb339",
+      "title": "Teardown uptime test data",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/uptime/test/scout/ui/tests/global.teardown.ts",
+        "line": 10,
+        "column": 19
+      }
+    },
     {
       "id": "6393a5cc96ae333-5ac88d9d8aa60c3",
       "title": "Ingest uptime test data",
@@ -23,8 +40,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/uptime/test/scout/ui/tests/certificates.spec.ts",
-        "line": 120,
-        "column": 7
+        "line": 122,
+        "column": 5
       }
     },
     {
@@ -36,8 +53,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/uptime/test/scout/ui/tests/certificates.spec.ts",
-        "line": 143,
-        "column": 7
+        "line": 144,
+        "column": 20
       }
     },
     {
@@ -49,8 +66,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/uptime/test/scout/ui/tests/certificates.spec.ts",
-        "line": 161,
-        "column": 7
+        "line": 162,
+        "column": 20
       }
     },
     {
@@ -128,6 +145,19 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/uptime/test/scout/ui/tests/monitor_details.spec.ts",
         "line": 16,
+        "column": 7
+      }
+    },
+    {
+      "id": "21bac76d046ec23-6dae3f82b1ac81f",
+      "title": "MonitorStatusFlyoutInAlertingApp opens monitor status alert flyout and verifies the form renders",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/uptime/test/scout/ui/tests/monitor_status_alert_flyout.spec.ts",
+        "line": 12,
         "column": 7
       }
     },
@@ -271,6 +301,19 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/uptime/test/scout/ui/tests/settings.spec.ts",
         "line": 66,
+        "column": 7
+      }
+    },
+    {
+      "id": "ee9067f40536327-eacd05fe9ca70c1",
+      "title": "SimpleDownAlert enables and disables a simple status alert from the monitor list",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/uptime/test/scout/ui/tests/simple_down_alert.spec.ts",
+        "line": 78,
         "column": 7
       }
     },

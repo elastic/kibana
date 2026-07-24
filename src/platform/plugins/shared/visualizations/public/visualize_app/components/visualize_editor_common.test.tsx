@@ -12,7 +12,7 @@ import React from 'react';
 import { shallowWithIntl, mountWithIntl } from '@kbn/test-jest-helpers';
 import { VisualizeEditorCommon } from './visualize_editor_common';
 import type { VisualizeEditorVisInstance } from '../types';
-import { VizChartWarning } from './viz_chart_warning';
+import { VisChartWarning } from './vis_chart_warning';
 
 const mockGetLegacyUrlConflict = jest.fn();
 const mockRedirectLegacyUrl = jest.fn(() => Promise.resolve());
@@ -159,6 +159,6 @@ describe('VisualizeEditorCommon', () => {
         }
       />
     );
-    expect(wrapper.find(VizChartWarning).length).toBe(0);
+    expect(wrapper.find(VisChartWarning).length).toBe(0);
   });
 });

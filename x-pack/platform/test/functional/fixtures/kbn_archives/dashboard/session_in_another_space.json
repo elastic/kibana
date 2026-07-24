@@ -113,7 +113,11 @@
       "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"filter\":[]}"
     },
     "optionsJSON": "{\"darkTheme\":false,\"useMargins\":true,\"hidePanelTitles\":false}",
-    "panelsJSON": "[{\"version\":\"7.3.0\",\"type\":\"visualization\",\"gridData\":{\"w\":24,\"h\":15,\"x\":0,\"y\":0,\"i\":\"1\"},\"panelIndex\":\"1\",\"embeddableConfig\":{\"enhancements\":{}},\"panelRefName\":\"panel_1\"},{\"version\":\"7.3.0\",\"type\":\"visualization\",\"gridData\":{\"w\":48,\"h\":15,\"x\":0,\"y\":15,\"i\":\"2\"},\"panelIndex\":\"2\",\"embeddableConfig\":{\"enhancements\":{}},\"panelRefName\":\"panel_2\"}]",
+    "panelsJSON": "[{\"version\":\"7.3.0\",\"type\":\"visualization\",\"gridData\":{\"w\":24,\"h\":15,\"x\":0,\"y\":0,\"i\":\"1\"},\"panelIndex\":\"1\",\"embeddableConfig\":{\"enhancements\":{}},\"panelRefName\":\"panel_1\"}]",
+    "refreshInterval": {
+      "pause": true,
+      "value": 0
+    },
     "timeRestore": true,
     "timeFrom": "2015-09-19T17:34:10.297Z",
     "timeTo": "2015-09-23T00:09:17.180Z",
@@ -128,13 +132,8 @@
   "originId": "my-dashboard-with-delay",
   "references": [
     {
-      "id": "73f456f1-e0df-570b-82c1-0ff40e1321b9",
-      "name": "1:panel_1",
-      "type": "visualization"
-    },
-    {
       "id": "a1b2c3d4-e5f6-789a-bcde-f0123456789a",
-      "name": "2:panel_2",
+      "name": "1:panel_1",
       "type": "visualization"
     }
   ],

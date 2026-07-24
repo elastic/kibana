@@ -32,16 +32,12 @@ describe('PersistableStateAttachmentTypeRegistry', () => {
 
       expect(item).toMatchInlineSnapshot(`
         Object {
-          "extract": [Function],
           "id": "test",
-          "inject": [Function],
           "telemetry": [Function],
         }
       `);
 
       expect(item.telemetry(attachmentState, { foo: 'bar' })).toEqual({ foo: 'bar' });
-      expect(item.inject(attachmentState, [])).toEqual(attachmentState);
-      expect(item.extract(attachmentState)).toEqual({ state: attachmentState, references: [] });
     });
 
     it('throws error if item is already registered', () => {

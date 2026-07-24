@@ -8,3 +8,24 @@
 export { entityRiskScoreTool, SECURITY_ENTITY_RISK_SCORE_TOOL_ID } from './entity_risk_score_tool';
 export { getEntityTool, SECURITY_GET_ENTITY_TOOL_ID } from './get_entity_tool';
 export { searchEntitiesTool, SECURITY_SEARCH_ENTITIES_TOOL_ID } from './search_entities_tool';
+export {
+  addEntitiesToWatchlistTool,
+  createWatchlistTool,
+  deleteWatchlistTool,
+  listWatchlistsTool,
+  removeEntitiesFromWatchlistTool,
+  SECURITY_ADD_ENTITIES_TO_WATCHLIST_TOOL_ID,
+  SECURITY_CREATE_WATCHLIST_TOOL_ID,
+  SECURITY_DELETE_WATCHLIST_TOOL_ID,
+  SECURITY_LIST_WATCHLISTS_TOOL_ID,
+  SECURITY_REMOVE_ENTITIES_FROM_WATCHLIST_TOOL_ID,
+  SECURITY_UPDATE_WATCHLIST_TOOL_ID,
+  updateWatchlistTool,
+} from './watchlists';
+export { listLeadsTool, SECURITY_LIST_LEADS_TOOL_ID } from './leads/list_leads_tool';
+export { generateLeadsTool, SECURITY_GENERATE_LEADS_TOOL_ID } from './leads/generate_leads_tool';
+export { dismissLeadTool, SECURITY_DISMISS_LEAD_TOOL_ID } from './leads/dismiss_lead_tool';
+export {
+  setAssetCriticalityTool,
+  SECURITY_SET_ASSET_CRITICALITY_TOOL_ID,
+} from './set_asset_criticality_tool';

@@ -137,7 +137,7 @@ export const getBottomRect = (
     y1: undefined,
   },
   header: headerLabel,
-  details: formatter?.convert(currentValue) || currentValue?.toString(),
+  details: formatter?.convertToText(currentValue) || currentValue?.toString(),
 });
 
 export const getHorizontalRect = (
@@ -154,7 +154,7 @@ export const getHorizontalRect = (
     y1: isFillAbove ? nextValue : currentValue,
   },
   header: headerLabel,
-  details: formatter?.convert(currentValue) || currentValue?.toString(),
+  details: formatter?.convertToText(currentValue) || currentValue?.toString(),
 });
 
 const sortReferenceLinesByGroup = (referenceLines: ReferenceLineConfig[], group: FillStyle) => {

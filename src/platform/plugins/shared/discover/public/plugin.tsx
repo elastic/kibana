@@ -184,7 +184,7 @@ export class DiscoverPlugin
       euiIconType: 'logoKibana',
       defaultPath: '#/',
       category: DEFAULT_APP_CATEGORIES.kibana,
-      visibleIn: ['globalSearch', 'sideNav', 'kibanaOverview'],
+      visibleIn: ['globalSearch', 'classicSideNav', 'projectSideNav', 'kibanaOverview'],
       mount: async (params: AppMountParameters) => {
         const [[coreStart, discoverStartPlugins], historyService, ebtManager, { renderApp }] =
           await Promise.all([
@@ -353,7 +353,11 @@ export class DiscoverPlugin
   }) {
     const [
       { rootProfileService, dataSourceProfileService, documentProfileService, profilesManager },
-      { createProfileProviderSharedServices, registerProfileProviders },
+      {
+        createProfileProviderSharedServices,
+        registerProfileProviders,
+        registerProfileStateDefinitions,
+      },
     ] = await Promise.all([
       this.createProfileServices(),
       import('./context_awareness/profile_providers'),
@@ -370,6 +374,8 @@ export class DiscoverPlugin
         setHeaderActionMenu,
       }),
     ]);
+
+    registerProfileStateDefinitions(services.profileStateRegistry);
 
     registerProfileProviders({
       rootProfileService,

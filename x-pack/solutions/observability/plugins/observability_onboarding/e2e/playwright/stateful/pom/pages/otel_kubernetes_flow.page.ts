@@ -22,31 +22,41 @@ export class OtelKubernetesFlowPage {
     );
   }
 
-  public async copyHelmRepositorySnippetToClipboard() {
-    await this.page
-      .getByTestId('observabilityOnboardingOtelKubernetesPanelAddRepositoryCopyToClipboard')
-      .click();
+  public async getHelmRepositorySnippet() {
+    return await this.page
+      .getByTestId('observabilityOnboardingOtelKubernetesAddRepositorySnippet')
+      .textContent();
   }
 
   public async copyInstallStackSnippetToClipboard() {
     await this.page
-      .getByTestId('observabilityOnboardingOtelKubernetesPanelInstallStackCopyToClipboard')
+      .getByTestId('observabilityOnboardingOtelKubernetesInstallStackSnippetCopyButtonIcon')
       .click();
   }
 
   public async switchInstrumentationInstructions(language: 'nodejs' | 'java' | 'python' | 'go') {
-    await this.page.getByTestId(language).click();
+    await this.page
+      .getByTestId('observabilityOnboardingKubernetesOtelInstrumentationSwitch')
+      .click();
+    await this.page.getByRole('button', { name: language === 'java' ? 'Java' : language }).click();
+  }
+
+  public async selectNamespaceInstrumentationInstructions() {
+    await this.page
+      .getByTestId('observabilityOnboardingKubernetesOtelAnnotationMode-namespace')
+      .getByRole('radio')
+      .click();
   }
 
   public async getAnnotateAllResourceSnippet() {
     return await this.page
-      .getByTestId('observabilityOnboardingOtelKubernetesPanelAnnotateAllResourcesSnippet')
+      .getByTestId('observabilityOnboardingKubernetesOtelInstrumentationNamespaceSnippet')
       .textContent();
   }
 
   public async getRestartDeploymentSnippet() {
     return await this.page
-      .getByTestId('observabilityOnboardingOtelKubernetesPanelRestartDeploymentSnippet')
+      .getByTestId('observabilityOnboardingKubernetesOtelInstrumentationRestartCommand')
       .textContent();
   }
 
@@ -65,22 +75,6 @@ export class OtelKubernetesFlowPage {
       return newPage;
     } else {
       throw new Error('Dashboard URL not found');
-    }
-  }
-
-  public async openServiceInventoryInNewTab(): Promise<Page> {
-    const serviceInventoryURL = await this.page
-      .getByTestId('observabilityOnboardingDataIngestStatusActionLink-services')
-      .getAttribute('href');
-
-    if (serviceInventoryURL) {
-      const newPage = await this.context.newPage();
-
-      await newPage.goto(serviceInventoryURL);
-
-      return newPage;
-    } else {
-      throw new Error('Service inventory URL not found');
     }
   }
 

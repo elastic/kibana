@@ -34,5 +34,6 @@ describe('BodySchema historySnapshot', () => {
     expect(BodySchema.safeParse({}).success).toBe(true);
     expect(BodySchema.safeParse({ entityTypes: ['host'] }).success).toBe(true);
     expect(BodySchema.safeParse({ logExtraction: { lookbackPeriod: '12h' } }).success).toBe(true);
+    expect(BodySchema.safeParse({ historySnapshot: { frequency: '1h' } }).success).toBe(true);
   });
 });

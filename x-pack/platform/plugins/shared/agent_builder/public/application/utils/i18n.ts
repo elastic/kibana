@@ -50,6 +50,27 @@ export const labels = {
     newToolButton: i18n.translate('xpack.agentBuilder.tools.newToolButton', {
       defaultMessage: 'New tool',
     }),
+    mcpServerConnectionButton: i18n.translate(
+      'xpack.agentBuilder.tools.mcpServerConnectionButton',
+      {
+        defaultMessage: 'Manage MCP',
+      }
+    ),
+    copyMcpServerUrlButton: i18n.translate('xpack.agentBuilder.tools.copyMcpServerUrlButton', {
+      defaultMessage: 'Copy MCP Server URL',
+    }),
+    bulkImportMcpToolsButton: i18n.translate('xpack.agentBuilder.tools.bulkImportMcpToolsButton', {
+      defaultMessage: 'Bulk import MCP tools',
+    }),
+    manageMcpClientsButton: i18n.translate('xpack.agentBuilder.tools.manageMcpClientsButton', {
+      defaultMessage: 'Manage MCP clients (OAuth)',
+    }),
+    aboutMcpServerDocumentationButton: i18n.translate(
+      'xpack.agentBuilder.tools.aboutMcpServerDocumentationButton',
+      {
+        defaultMessage: 'Documentation',
+      }
+    ),
     newToolTitle: i18n.translate('xpack.agentBuilder.tools.newToolTitle', {
       defaultMessage: 'Create a new tool',
     }),
@@ -537,6 +558,12 @@ export const labels = {
           defaultMessage: 'Add MCP client',
         }
       ),
+      manageApplicationConnectionsButtonLabel: i18n.translate(
+        'xpack.agentBuilder.mcpClients.manageApplicationConnectionsButtonLabel',
+        {
+          defaultMessage: 'Manage application connections',
+        }
+      ),
       searchMcpClientsPlaceholder: i18n.translate(
         'xpack.agentBuilder.mcpClients.searchMcpClientsPlaceholder',
         {
@@ -575,7 +602,7 @@ export const labels = {
       ),
       name: i18n.translate('xpack.agentBuilder.mcpClients.name', { defaultMessage: 'Name' }),
       connections: i18n.translate('xpack.agentBuilder.mcpClients.connections', {
-        defaultMessage: 'Connections',
+        defaultMessage: 'Active connections',
       }),
       status: i18n.translate('xpack.agentBuilder.mcpClients.status', {
         defaultMessage: 'Status',
@@ -758,83 +785,6 @@ export const labels = {
           defaultMessage: 'Failed to create MCP client',
         }),
       },
-      details: {
-        clientIdLabel: i18n.translate('xpack.agentBuilder.mcpClients.details.clientIdLabel', {
-          defaultMessage: 'Client ID',
-        }),
-        serverUrlLabel: i18n.translate('xpack.agentBuilder.mcpClients.details.serverUrlLabel', {
-          defaultMessage: 'MCP server URL',
-        }),
-        closeButton: i18n.translate('xpack.agentBuilder.mcpClients.details.closeButton', {
-          defaultMessage: 'Close',
-        }),
-        copyClientId: i18n.translate('xpack.agentBuilder.mcpClients.details.copyClientId', {
-          defaultMessage: 'Copy Client ID',
-        }),
-        copyServerUrl: i18n.translate('xpack.agentBuilder.mcpClients.details.copyServerUrl', {
-          defaultMessage: 'Copy MCP server URL',
-        }),
-        modal: {
-          title: (name: string) =>
-            i18n.translate('xpack.agentBuilder.mcpClients.details.modal.title', {
-              defaultMessage: 'Copy server details for {name}',
-              values: { name },
-            }),
-          description: i18n.translate('xpack.agentBuilder.mcpClients.details.modal.description', {
-            defaultMessage:
-              'Copy the new Client ID and the Server URL into the application config file, and save your changes. To apply the new configuration, restart the application.',
-          }),
-          clientSecretLabel: i18n.translate(
-            'xpack.agentBuilder.mcpClients.details.modal.clientSecretLabel',
-            {
-              defaultMessage: 'MCP client secret',
-            }
-          ),
-          secretWarning: i18n.translate(
-            'xpack.agentBuilder.mcpClients.details.modal.secretWarning',
-            {
-              defaultMessage:
-                "Here's your confidential MCP client. We won't show it again, make sure to copy or download it now.",
-            }
-          ),
-          copySecret: i18n.translate('xpack.agentBuilder.mcpClients.details.modal.copySecret', {
-            defaultMessage: 'Copy client secret',
-          }),
-          downloadSecret: i18n.translate(
-            'xpack.agentBuilder.mcpClients.details.modal.downloadSecret',
-            {
-              defaultMessage: 'Download client secret',
-            }
-          ),
-          toggleSecretVisibility: i18n.translate(
-            'xpack.agentBuilder.mcpClients.details.modal.toggleSecretVisibility',
-            {
-              defaultMessage: 'Toggle secret visibility',
-            }
-          ),
-        },
-        flyout: {
-          serverDetailsHeading: i18n.translate(
-            'xpack.agentBuilder.mcpClients.details.flyout.serverDetailsHeading',
-            {
-              defaultMessage: 'Server details',
-            }
-          ),
-          clientSecretRequiredTitle: i18n.translate(
-            'xpack.agentBuilder.mcpClients.details.flyout.clientSecretRequiredTitle',
-            {
-              defaultMessage: 'Client secret required',
-            }
-          ),
-          clientSecretRequiredBody: i18n.translate(
-            'xpack.agentBuilder.mcpClients.details.flyout.clientSecretRequiredBody',
-            {
-              defaultMessage:
-                'This client was created with a client secret. The secret is required for authentication but is not shown here. Please use the copy you saved when it was created.',
-            }
-          ),
-        },
-      },
       revoke: {
         title: (name: string) =>
           i18n.translate('xpack.agentBuilder.mcpClients.revoke.title', {
@@ -905,7 +855,6 @@ export const labels = {
         defaultMessage: 'Available skills for AI agents: {skillsCount} skills',
         values: { skillsCount },
       }),
-    skillIdLabel: i18n.translate('xpack.agentBuilder.skills.idLabel', { defaultMessage: 'ID' }),
     nameLabel: i18n.translate('xpack.agentBuilder.skills.nameLabel', { defaultMessage: 'Name' }),
     descriptionLabel: i18n.translate('xpack.agentBuilder.skills.descriptionLabel', {
       defaultMessage: 'Description',
@@ -929,6 +878,9 @@ export const labels = {
       }),
       fileNameHelp: i18n.translate('xpack.agentBuilder.skills.referencedFileCard.fileNameHelp', {
         defaultMessage: 'Do not include .md — it is added automatically.',
+      }),
+      advancedLabel: i18n.translate('xpack.agentBuilder.skills.referencedFileCard.advancedLabel', {
+        defaultMessage: 'Advanced: folder path (default: skill root)',
       }),
       folderPathLabel: i18n.translate(
         'xpack.agentBuilder.skills.referencedFileCard.folderPathLabel',
@@ -956,17 +908,32 @@ export const labels = {
           defaultMessage: 'Referenced file markdown content',
         }
       ),
-      estimatedTokens: (count: number) =>
-        i18n.translate('xpack.agentBuilder.skills.referencedFileCard.estimatedTokens', {
-          defaultMessage: 'Estimated tokens: {count}',
-          values: { count },
-        }),
     },
     referencedFileSection: {
-      description: i18n.translate('xpack.agentBuilder.skills.referencedFileSection.description', {
+      description: i18n.translate('xpack.agentBuilder.skills.referencedFileSection.descriptionV2', {
         defaultMessage:
-          'Attach extra markdown files that belong to this skill. Paths are relative to the skill folder.',
+          'Optional reference material the agent can pull into context when it uses this skill, such as query templates, examples, or naming conventions that are too long for the instructions above.',
       }),
+      emptyStateTitle: i18n.translate(
+        'xpack.agentBuilder.skills.referencedFileSection.emptyStateTitle',
+        {
+          defaultMessage: 'No reference files yet',
+        }
+      ),
+      emptyStateDescription: i18n.translate(
+        'xpack.agentBuilder.skills.referencedFileSection.emptyStateDescription',
+        {
+          defaultMessage:
+            'Reference files are markdown snippets saved with the skill. When an agent uses this skill, their content can be added to its context. You enter the content here manually.',
+        }
+      ),
+      uploadingNotAvailable: i18n.translate(
+        'xpack.agentBuilder.skills.referencedFileSection.uploadingNotAvailable',
+        {
+          defaultMessage:
+            "Uploading files or pointing to a folder isn't available yet, so content is added manually for now.",
+        }
+      ),
       addFileButton: i18n.translate(
         'xpack.agentBuilder.skills.referencedFileSection.addFileButton',
         {
@@ -984,12 +951,40 @@ export const labels = {
           defaultMessage: 'Remove this additional file',
         }
       ),
+      editFileAriaLabel: i18n.translate(
+        'xpack.agentBuilder.skills.referencedFileSection.editFileAriaLabel',
+        {
+          defaultMessage: 'Edit file',
+        }
+      ),
+      doneButton: i18n.translate('xpack.agentBuilder.skills.referencedFileSection.doneButton', {
+        defaultMessage: 'Done',
+      }),
+      cancelButton: i18n.translate('xpack.agentBuilder.skills.referencedFileSection.cancelButton', {
+        defaultMessage: 'Cancel',
+      }),
+      compactTokenCount: (count: number) =>
+        i18n.translate('xpack.agentBuilder.skills.referencedFileSection.compactTokenCount', {
+          defaultMessage: '~{count, plural, one {# token} other {# tokens}}',
+          values: { count },
+        }),
+      unnamedFilePlaceholder: i18n.translate(
+        'xpack.agentBuilder.skills.referencedFileSection.unnamedFilePlaceholder',
+        {
+          defaultMessage: '(unnamed)',
+        }
+      ),
       emptyReadOnly: i18n.translate(
         'xpack.agentBuilder.skills.referencedFileSection.emptyReadOnly',
         {
           defaultMessage: 'This skill has no additional files.',
         }
       ),
+      readOnlyFilesCount: (count: number) =>
+        i18n.translate('xpack.agentBuilder.skills.referencedFileSection.readOnlyFilesCount', {
+          defaultMessage: '{count, plural, one {# file} other {# files}}',
+          values: { count },
+        }),
       addFileButtonDisabledTooltip: (max: number) =>
         i18n.translate(
           'xpack.agentBuilder.skills.referencedFileSection.addFileButtonDisabledTooltip',
@@ -1007,6 +1002,11 @@ export const labels = {
           }
         ),
     },
+    referencedFilesSectionTitle: (count: number) =>
+      i18n.translate('xpack.agentBuilder.skills.referencedFilesSectionTitle', {
+        defaultMessage: 'Reference files ({count})',
+        values: { count },
+      }),
     typeLabel: i18n.translate('xpack.agentBuilder.skills.typeLabel', { defaultMessage: 'Type' }),
     saveButtonLabel: i18n.translate('xpack.agentBuilder.skills.saveButtonLabel', {
       defaultMessage: 'Save',
@@ -1654,6 +1654,54 @@ export const labels = {
       'xpack.agentBuilder.agentConnectors.detail.removeCancelButton',
       { defaultMessage: 'Cancel' }
     ),
+    subActionsSectionTitle: (count: number) =>
+      i18n.translate('xpack.agentBuilder.agentConnectors.detail.subActionsSectionTitle', {
+        defaultMessage: 'Sub-actions ({count} available)',
+        values: { count },
+      }),
+    connectionSectionTitle: i18n.translate(
+      'xpack.agentBuilder.agentConnectors.detail.connectionSectionTitle',
+      { defaultMessage: 'Connection' }
+    ),
+    oauthConnectedStatus: i18n.translate(
+      'xpack.agentBuilder.agentConnectors.detail.oauthConnectedStatus',
+      { defaultMessage: 'OAuth connected' }
+    ),
+    oauthDisconnectedStatus: i18n.translate(
+      'xpack.agentBuilder.agentConnectors.detail.oauthDisconnectedStatus',
+      { defaultMessage: 'OAuth disconnected' }
+    ),
+    missingSecretsStatus: i18n.translate(
+      'xpack.agentBuilder.agentConnectors.detail.missingSecretsStatus',
+      { defaultMessage: 'Missing credentials' }
+    ),
+    sharedCredentialsStatus: i18n.translate(
+      'xpack.agentBuilder.agentConnectors.detail.sharedCredentialsStatus',
+      { defaultMessage: 'Shared credentials' }
+    ),
+    authenticateLink: i18n.translate('xpack.agentBuilder.agentConnectors.detail.authenticateLink', {
+      defaultMessage: 'Authenticate',
+    }),
+    reauthenticateLink: i18n.translate(
+      'xpack.agentBuilder.agentConnectors.detail.reauthenticateLink',
+      { defaultMessage: 'Re-authenticate' }
+    ),
+    usedBySectionTitle: i18n.translate(
+      'xpack.agentBuilder.agentConnectors.detail.usedBySectionTitle',
+      { defaultMessage: 'Used by' }
+    ),
+    usedByAgentsMessage: (count: number) =>
+      i18n.translate('xpack.agentBuilder.agentConnectors.detail.usedByAgentsMessage', {
+        defaultMessage: '{count} other {count, plural, one {agent} other {agents}}',
+        values: { count },
+      }),
+    notUsedByOtherAgents: i18n.translate(
+      'xpack.agentBuilder.agentConnectors.detail.notUsedByOtherAgents',
+      { defaultMessage: 'Not used by other agents' }
+    ),
+    usedByLoadError: i18n.translate('xpack.agentBuilder.agentConnectors.detail.usedByLoadError', {
+      defaultMessage: 'Failed to load agents',
+    }),
   },
   agentTools: {
     pageDescription: i18n.translate('xpack.agentBuilder.agentTools.pageDescription', {
@@ -1663,12 +1711,37 @@ export const labels = {
     addToolButton: i18n.translate('xpack.agentBuilder.agentTools.addToolButton', {
       defaultMessage: 'Add tool',
     }),
-    fromLibraryMenuItem: i18n.translate('xpack.agentBuilder.agentTools.fromLibraryMenuItem', {
-      defaultMessage: 'From library',
+    importFromLibraryMenuItem: i18n.translate(
+      'xpack.agentBuilder.agentTools.importFromLibraryMenuItem',
+      {
+        defaultMessage: 'Import from tool library',
+      }
+    ),
+    createToolMenuItem: i18n.translate('xpack.agentBuilder.agentTools.createToolMenuItem', {
+      defaultMessage: 'Create a tool',
     }),
-    createNewToolMenuItem: i18n.translate('xpack.agentBuilder.agentTools.createNewToolMenuItem', {
+    createToolFlyoutTitle: i18n.translate('xpack.agentBuilder.agentTools.createToolFlyoutTitle', {
       defaultMessage: 'Create new tool',
     }),
+    createToolFlyoutSubtitle: i18n.translate(
+      'xpack.agentBuilder.agentTools.createToolFlyoutSubtitle',
+      {
+        defaultMessage: 'This tool is saved to your tool library and attached to this agent.',
+      }
+    ),
+    createToolFlyoutCallout: i18n.translate(
+      'xpack.agentBuilder.agentTools.createToolFlyoutCallout',
+      {
+        defaultMessage:
+          'On save, this tool is added to this agent automatically. You can edit or remove it later from the Tools tab.',
+      }
+    ),
+    saveAndAttachButtonLabel: i18n.translate(
+      'xpack.agentBuilder.agentTools.saveAndAttachButtonLabel',
+      {
+        defaultMessage: 'Save and attach',
+      }
+    ),
     searchActiveToolsPlaceholder: i18n.translate(
       'xpack.agentBuilder.agentTools.searchActiveToolsPlaceholder',
       {
@@ -2693,22 +2766,27 @@ export const labels = {
         { defaultMessage: 'Enter a color hex code' }
       ),
       accessTitle: i18n.translate('xpack.agentBuilder.overview.editDetails.accessTitle', {
-        defaultMessage: 'Access',
+        defaultMessage: 'Access control',
       }),
       accessDescription: i18n.translate(
         'xpack.agentBuilder.overview.editDetails.accessDescription',
         { defaultMessage: 'Control who can view and edit this agent.' }
       ),
-      visibilityLabel: i18n.translate('xpack.agentBuilder.overview.editDetails.visibilityLabel', {
-        defaultMessage: 'Visibility',
-      }),
-      visibilityDisabledReason: i18n.translate(
-        'xpack.agentBuilder.overview.editDetails.visibilityDisabledReason',
-        { defaultMessage: 'Only the owner or an administrator can change visibility.' }
+      accessControlModeLabel: i18n.translate(
+        'xpack.agentBuilder.overview.editDetails.accessControlModeLabel',
+        {
+          defaultMessage: 'Access control',
+        }
       ),
-      visibilityAriaLabel: i18n.translate(
-        'xpack.agentBuilder.overview.editDetails.visibilityAriaLabel',
-        { defaultMessage: 'Agent visibility' }
+      accessControlModeDisabledReason: i18n.translate(
+        'xpack.agentBuilder.overview.editDetails.accessControlModeDisabledReason',
+        {
+          defaultMessage: 'Only the owner or an administrator can change the access control mode.',
+        }
+      ),
+      accessControlModeAriaLabel: i18n.translate(
+        'xpack.agentBuilder.overview.editDetails.accessControlModeAriaLabel',
+        { defaultMessage: 'Agent access control mode' }
       ),
       customizationTitle: i18n.translate(
         'xpack.agentBuilder.overview.editDetails.customizationTitle',
@@ -2744,6 +2822,10 @@ export const labels = {
       workflowLabel: i18n.translate('xpack.agentBuilder.overview.editDetails.workflowLabel', {
         defaultMessage: 'Workflows',
       }),
+      workflowAdminOnlyReason: i18n.translate(
+        'xpack.agentBuilder.overview.editDetails.workflowAdminOnlyReason',
+        { defaultMessage: 'Only administrators can configure pre-execution workflows.' }
+      ),
       instructionsTitle: i18n.translate(
         'xpack.agentBuilder.overview.editDetails.instructionsTitle',
         { defaultMessage: 'Custom Instructions' }

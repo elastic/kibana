@@ -7,6 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * Migration recommendation: MIGRATE TO SCOUT. Integration test for the runtime fields editor across many components and two plugins.
+ */
+
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
@@ -14,7 +18,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
-  const esArchiver = getService('esArchiver');
   const fieldEditor = getService('fieldEditor');
   const security = getService('security');
   const dataGrid = getService('dataGrid');
@@ -43,9 +46,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('discover integration with runtime fields editor', function describeIndexTests() {
     before(async function () {
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
-      await esArchiver.loadIfNeeded(
-        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
-      );
       await kibanaServer.importExport.load(
         'src/platform/test/functional/fixtures/kbn_archiver/discover'
       );

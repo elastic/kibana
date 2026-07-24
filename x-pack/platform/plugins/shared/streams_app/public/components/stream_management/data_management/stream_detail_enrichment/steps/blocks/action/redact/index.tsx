@@ -9,16 +9,17 @@ import React, { useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
-  EuiSpacer,
-  EuiFieldText,
-  EuiFormRow,
+  EuiButtonEmpty,
+  EuiButtonIcon,
   EuiCode,
+  EuiComboBox,
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButtonIcon,
-  EuiButtonEmpty,
-  EuiComboBox,
+  EuiFormRow,
+  EuiSpacer,
   EuiText,
+  EuiToolTip,
   type EuiComboBoxOptionOption,
 } from '@elastic/eui';
 import { useController, useFieldArray, useFormContext } from 'react-hook-form';
@@ -272,16 +273,24 @@ const PatternField = ({ index, onRemove, canRemove }: PatternFieldProps) => {
       </EuiFlexItem>
       {canRemove && (
         <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            iconType="trash"
-            color="danger"
-            onClick={onRemove}
-            aria-label={i18n.translate(
+          <EuiToolTip
+            content={i18n.translate(
               'xpack.streams.streamDetailView.managementTab.enrichment.processor.redactRemovePattern',
               { defaultMessage: 'Remove pattern' }
             )}
-            data-test-subj={`streamsAppRedactRemovePatternButton-${index}`}
-          />
+            disableScreenReaderOutput
+          >
+            <EuiButtonIcon
+              iconType="trash"
+              color="danger"
+              onClick={onRemove}
+              aria-label={i18n.translate(
+                'xpack.streams.streamDetailView.managementTab.enrichment.processor.redactRemovePattern',
+                { defaultMessage: 'Remove pattern' }
+              )}
+              data-test-subj={`streamsAppRedactRemovePatternButton-${index}`}
+            />
+          </EuiToolTip>
         </EuiFlexItem>
       )}
     </EuiFlexGroup>
