@@ -123,6 +123,35 @@ describe('useResolveTimeField', () => {
     });
   });
 
+  it('preserves the saved timeField and reports isTimeFieldResolved true when field discovery errors', async () => {
+    const onTimeFieldChange = jest.fn();
+    (useDataFields as jest.Mock).mockReturnValue({
+      data: {},
+      isLoading: false,
+      isError: true,
+    });
+
+    const { result } = renderHook(
+      () =>
+        useResolveTimeField({
+          ...defaultParams,
+          timeField: 'event.start',
+          onTimeFieldChange,
+        }),
+      { wrapper: createWrapper() }
+    );
+
+    // API fallback runs (field-caps errored so dateFields is empty)...
+    await waitFor(() => {
+      expect(getESQLTimeField).toHaveBeenCalled();
+    });
+    // ...but nothing clears the saved timeField.
+    expect(onTimeFieldChange).not.toHaveBeenCalled();
+    // The existing selection is treated as unverified-but-valid so the form
+    // remains submittable; the warning callout surfaces the discovery failure.
+    expect(result.current.isTimeFieldResolved).toBe(true);
+  });
+
   it('clears the current field (does not fabricate) when none can be resolved', async () => {
     const onTimeFieldChange = jest.fn();
 
