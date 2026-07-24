@@ -8,7 +8,3 @@
 export const buildAgentBuilderTracesIndexPattern = (spaceId: string) => {
   return `traces-agent_builder.otel-${spaceId}`;
 };
-
-export const buildAgentBuilderTraceLogsIndexPattern = (spaceId: string) => {
-  return `logs-agent_builder.otel-${spaceId}`;
-};

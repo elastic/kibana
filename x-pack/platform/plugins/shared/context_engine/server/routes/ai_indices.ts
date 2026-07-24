@@ -16,7 +16,6 @@ import {
   MAX_AI_INDEX_DESCRIPTION_LENGTH,
   MAX_AI_INDEX_DEST_VALUE_LENGTH,
   MAX_AI_INDEX_ID_LENGTH,
-  MAX_AI_INDEX_NAME_LENGTH,
   MAX_AI_INDEX_SOURCE_VALUE_LENGTH,
   MAX_AI_INDEX_SOURCES,
   MAX_AI_INDICES,
@@ -30,6 +29,7 @@ import type {
   PutAiIndexResponse,
 } from '../../common/http_api/ai_indices';
 import { apiPrivileges } from '../../common/features';
+import { validateAiIndexId } from '../../common/validation';
 import {
   InvalidAiIndexDestError,
   AiIndexConflictError,
@@ -49,19 +49,12 @@ const aiIndexIdParamsSchema = schema.object({
   aiIndexId: schema.string({
     minLength: 1,
     maxLength: MAX_AI_INDEX_ID_LENGTH,
+    validate: validateAiIndexId,
     meta: { description: 'The unique identifier of the AI index.' },
   }),
 });
 
 const putAiIndexBodySchema = schema.object({
-  name: schema.string({
-    minLength: 1,
-    maxLength: MAX_AI_INDEX_NAME_LENGTH,
-    meta: {
-      description:
-        'Display name for the AI index. Separate from the id so it can be renamed if necessary.',
-    },
-  }),
   description: schema.maybe(
     schema.string({
       maxLength: MAX_AI_INDEX_DESCRIPTION_LENGTH,

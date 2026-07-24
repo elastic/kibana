@@ -16,6 +16,7 @@ import {
   type PromoteResult,
 } from '../../../../hooks/significant_events/use_queries_api';
 import { useStreamFeaturesApi } from '../../../../hooks/significant_events/use_stream_features_api';
+import { getFormattedError } from '../../../../util/errors';
 import {
   PROMOTE_QUERY_ALREADY_PROMOTED,
   STATS_PROMOTE_DISABLED_TOOLTIP,
@@ -61,7 +62,7 @@ export function useKnowledgeIndicatorActions({
       onSuccess?.();
     },
     onError: (error) => {
-      toasts.addError(error, { title: EXCLUDE_ERROR_TOAST });
+      toasts.addError(getFormattedError(error), { title: EXCLUDE_ERROR_TOAST });
     },
   });
 
@@ -76,7 +77,7 @@ export function useKnowledgeIndicatorActions({
       onSuccess?.();
     },
     onError: (error) => {
-      toasts.addError(error, { title: RESTORE_ERROR_TOAST });
+      toasts.addError(getFormattedError(error), { title: RESTORE_ERROR_TOAST });
     },
   });
 
@@ -97,7 +98,7 @@ export function useKnowledgeIndicatorActions({
       onSuccess?.();
     },
     onError: (error) => {
-      toasts.addError(error, { title: PROMOTE_ERROR_TOAST });
+      toasts.addError(getFormattedError(error), { title: PROMOTE_ERROR_TOAST });
     },
   });
 

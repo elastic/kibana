@@ -33,6 +33,7 @@ describe('createSignificantEventsAlertingContextResolver', () => {
 
     expect(context.alertsReader).toBe(ALERTS_READER_V2);
     expect(context.rulesClient).toBeInstanceOf(RulesAdapterV2);
+    expect(context.alertingV2RulesClient).toBe(v2Client);
   });
 
   it('caches context resolution within a request via the resolver factory', async () => {
