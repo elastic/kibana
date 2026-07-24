@@ -18,6 +18,7 @@ import * as testData from './constants';
 export interface DiscoverScoutSpace extends ScoutSpaceParallelFixture {
   setupDiscoverDefaults: (options?: { loadFlightsDataView?: boolean }) => Promise<void>;
   teardownDiscoverDefaults: () => Promise<void>;
+  getDataViewId: (title: string) => string;
 }
 
 export type DiscoverWorkerFixtures = ScoutParallelWorkerFixtures & {
@@ -27,12 +28,20 @@ export type DiscoverWorkerFixtures = ScoutParallelWorkerFixtures & {
 export const spaceTest = spaceBaseTest.extend<ScoutParallelTestFixtures, DiscoverWorkerFixtures>({
   discoverScoutSpace: [
     async ({ scoutSpace }, use) => {
+      const dataViewIds = new Map<string, string>();
+      const loadSavedObjects = async (path: string) => {
+        const imported = await scoutSpace.savedObjects.load(path);
+        imported
+          .filter(({ type }) => type === 'index-pattern')
+          .forEach(({ id, title }) => dataViewIds.set(title, id));
+      };
+
       const discoverScoutSpace: DiscoverScoutSpace = {
         ...scoutSpace,
         setupDiscoverDefaults: async ({ loadFlightsDataView = false } = {}) => {
-          await scoutSpace.savedObjects.load(testData.DISCOVER_KBN_ARCHIVE);
+          await loadSavedObjects(testData.DISCOVER_KBN_ARCHIVE);
           if (loadFlightsDataView) {
-            await scoutSpace.savedObjects.load(testData.FLIGHTS_KBN_ARCHIVE);
+            await loadSavedObjects(testData.FLIGHTS_KBN_ARCHIVE);
           }
           await scoutSpace.uiSettings.setDefaultIndex(testData.DEFAULT_DATA_VIEW);
           await scoutSpace.uiSettings.setDefaultTime(testData.DEFAULT_TIME_RANGE);
@@ -40,6 +49,10 @@ export const spaceTest = spaceBaseTest.extend<ScoutParallelTestFixtures, Discove
         teardownDiscoverDefaults: async () => {
           await scoutSpace.uiSettings.unset('defaultIndex', 'timepicker:timeDefaults');
           await scoutSpace.savedObjects.cleanStandardList();
+          dataViewIds.clear();
+        },
+        getDataViewId: (title) => {
+          return dataViewIds.get(title) ?? title;
         },
       };
 
