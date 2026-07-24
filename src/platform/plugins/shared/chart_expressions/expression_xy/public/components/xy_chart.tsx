@@ -96,7 +96,7 @@ import {
   getLinesCausedPaddings,
   validateExtent,
   getOriginalAxisPosition,
-  getDecimalsFromFormat,
+  getMaximumFractionDigits,
 } from '../helpers';
 import { getXDomain, XyEndzones } from './x_domain';
 import { getLegendAction } from './legend_action';
@@ -386,7 +386,7 @@ export function XYChart({
     xAxisColumn?.id ? fieldFormats[dataLayers[0].layerId].xAccessors[xAxisColumn?.id] : undefined
   );
 
-  const xTickDecimals = getDecimalsFromFormat(xAxisFormatter);
+  const xTickMfd = getMaximumFractionDigits(xAxisFormatter);
 
   // This is a safe formatter for the xAccessor that abstracts the knowledge of already formatted layers
   const safeXAccessorLabelRenderer = (value: unknown): string =>
@@ -995,7 +995,7 @@ export function XYChart({
               gridLine={gridLineStyle}
               hide={xAxisConfig?.hide || dataLayers[0]?.simpleView || !dataLayers[0]?.xAccessor}
               tickFormat={(d) => safeXAccessorLabelRenderer(d) || ''}
-              maximumFractionDigits={xTickDecimals}
+              maximumFractionDigits={xTickMfd}
               style={xAxisStyle}
               showOverlappingLabels={xAxisConfig?.showOverlappingLabels}
               showDuplicatedTicks={xAxisConfig?.showDuplicates}
@@ -1009,10 +1009,7 @@ export function XYChart({
               />
             )}
             {yAxesConfiguration.map((axis) => {
-              const tickDecimals = axis.formatter
-                ? getDecimalsFromFormat(axis.formatter)
-                : undefined;
-
+              const mfd = axis.formatter ? getMaximumFractionDigits(axis.formatter) : undefined;
               return (
                 <Axis
                   key={axis.groupId}
@@ -1025,7 +1022,7 @@ export function XYChart({
                   }}
                   hide={axis.hide || dataLayers[0]?.simpleView}
                   tickFormat={(d) => axis.formatter?.convertToText(d) || ''}
-                  maximumFractionDigits={tickDecimals}
+                  maximumFractionDigits={mfd}
                   style={getYAxesStyle(axis)}
                   domain={getYAxisDomain(axis)}
                   showOverlappingLabels={axis.showOverlappingLabels}

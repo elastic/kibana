@@ -19,7 +19,7 @@ describe('config validation', () => {
           },
           "analyticsV2": Object {
             "enableAdminRoutes": false,
-            "enabled": false,
+            "enabled": true,
             "reconciliationIntervalMinutes": 30,
             "resetPageDelayMs": 0,
             "resetTaskTimeoutMinutes": 60,
@@ -169,6 +169,21 @@ describe('config validation', () => {
     it('allows chat.enabled to be set to false', () => {
       const config = ConfigSchema.validate({ chat: { enabled: false } });
       expect(config.chat.enabled).toBe(false);
+    });
+
+    it('sets analyticsV2.enabled default to true', () => {
+      const config = ConfigSchema.validate({});
+      expect(config.analyticsV2.enabled).toBe(true);
+    });
+
+    it('allows analyticsV2.enabled to be set to true', () => {
+      const config = ConfigSchema.validate({ analyticsV2: { enabled: true } });
+      expect(config.analyticsV2.enabled).toBe(true);
+    });
+
+    it('allows analyticsV2.enabled to be set to false explicitly', () => {
+      const config = ConfigSchema.validate({ analyticsV2: { enabled: false } });
+      expect(config.analyticsV2.enabled).toBe(false);
     });
 
     it('sets templates.enabled default to true', () => {
