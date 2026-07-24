@@ -364,7 +364,7 @@ export const AnsibleControllerConnector: ConnectorSpec = {
     ),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
-    supportedFeatureIds: ['workflows', 'agentBuilder'],
+    supportedFeatureIds: ['agentBuilder'],
   },
 
   auth: {
