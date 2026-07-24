@@ -9,7 +9,10 @@ import expect from '@kbn/expect';
 import { CustomFieldTypes } from '@kbn/cases-plugin/common/types/domain';
 import { CASES_INTERNAL_URL } from '@kbn/cases-plugin/common/constants';
 import { CaseSeverity } from '@kbn/cases-plugin/common/types/domain';
-import type { CasesFindResponse } from '@kbn/cases-plugin/common/types/api';
+import type {
+  CasesFindResponse,
+  CasesSearchResponse,
+} from '@kbn/cases-plugin/common/types/api';
 
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { postCaseReq, findCasesResp, getPostCaseRequest } from '../../../../common/lib/mock';
@@ -43,7 +46,7 @@ const stripExtendedFieldLabels = (response: CasesFindResponse): CasesFindRespons
 
 // Unlike the public find API, the internal search API also returns `mttr` so the cases list
 // metrics bar reflects the same query as the table. Null when no matching case has closed.
-const searchCasesResp: CasesFindResponse = {
+const searchCasesResp: CasesSearchResponse = {
   ...findCasesResp,
   mttr: null,
 };

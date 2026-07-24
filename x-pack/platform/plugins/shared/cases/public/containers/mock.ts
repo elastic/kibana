@@ -62,7 +62,7 @@ import type {
   PersistableStateAttachmentType,
 } from '../client/attachment_framework/types';
 import type {
-  CasesFindResponse,
+  CasesSearchResponse,
   CasesSimilarResponse,
   UserActionWithResponse,
 } from '../../common/types/api';
@@ -631,7 +631,7 @@ export const casesSnake: Cases = [
   caseWithRegisteredAttachmentsSnake,
 ];
 
-export const allCasesSnake: CasesFindResponse = {
+export const allCasesSnake: CasesSearchResponse = {
   cases: casesSnake,
   page: 1,
   per_page: 5,

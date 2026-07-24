@@ -6,7 +6,7 @@
  */
 
 import type { Case } from '../../../common/types/domain';
-import { CustomFieldTypes } from '../../../common/types/domain';
+import { CaseStatuses, CustomFieldTypes } from '../../../common/types/domain';
 
 import {
   MAX_ASSIGNEES_FILTER_LENGTH,
@@ -105,6 +105,40 @@ describe('search', () => {
       expect(res.count_in_progress_cases).toBe(2);
       expect(res.count_closed_cases).toBe(3);
       expect(res.mttr).toBe(120);
+    });
+
+    it('strips the status clause from the stats query so all three status counts populate under a single-status filter', async () => {
+      const searchRequest = createCasesClientMockSearchRequest({ status: [CaseStatuses.open] });
+      await search(searchRequest, clientArgs, casesClientMock);
+
+      const call = clientArgs.services.caseService.searchCasesGroupedByID.mock.calls[0][0];
+
+      // The stats query is built with `status: undefined` so open/in-progress/closed counts are all
+      // computed even when the list itself is filtered to a single status. The serialized filter
+      // must therefore not mention the requested status.
+      const statsFilter = JSON.stringify(call.statsOptions?.filter ?? null);
+      expect(statsFilter).not.toContain('status');
+    });
+
+    it('returns mttr: null (not 0) when the search yields no stats', async () => {
+      clientArgs.services.caseService.searchCasesGroupedByID.mockResolvedValueOnce({
+        page: 1,
+        perPage: 10,
+        total: 0,
+        casesMap: new Map<string, Case>(),
+        searchStats: {
+          statusStats: { open: 0, 'in-progress': 0, closed: 0 },
+          mttr: null,
+        },
+      });
+
+      const searchRequest = createCasesClientMockSearchRequest({ search: 'no-matches' });
+      const res = await search(searchRequest, clientArgs, casesClientMock);
+
+      expect(res.mttr).toBeNull();
+      expect(res.count_open_cases).toBe(0);
+      expect(res.count_in_progress_cases).toBe(0);
+      expect(res.count_closed_cases).toBe(0);
     });
 
     it('fetches global field definitions for search when templates are enabled', async () => {

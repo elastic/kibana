@@ -11,8 +11,8 @@ import Boom from '@hapi/boom';
 import { spaceIdToNamespace } from '@kbn/spaces-plugin/server/lib/utils/namespace';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import type { CustomFieldsConfiguration } from '../../../common/types/domain';
-import type { CasesSearchRequest, CasesFindResponse } from '../../../common/types/api';
-import { CasesSearchRequestRt, CasesFindResponseRt } from '../../../common/types/api';
+import type { CasesSearchRequest, CasesSearchResponse } from '../../../common/types/api';
+import { CasesSearchRequestRt, CasesSearchResponseRt } from '../../../common/types/api';
 import { decodeWithExcessOrThrow, decodeOrThrow } from '../../common/runtime_types';
 
 import { createCaseError } from '../../common/error';
@@ -40,7 +40,7 @@ export const search = async (
   params: CasesSearchRequest,
   clientArgs: CasesClientArgs,
   casesClient: CasesClient
-): Promise<CasesFindResponse> => {
+): Promise<CasesSearchResponse> => {
   const {
     services: { caseService, licensingService, templatesService, fieldDefinitionsService },
     authorization,
@@ -210,7 +210,7 @@ export const search = async (
 
     res.cases = enrichCasesWithFieldLabels(res.cases, templateSOs, globalFields);
 
-    return decodeOrThrow(CasesFindResponseRt)(res);
+    return decodeOrThrow(CasesSearchResponseRt)(res);
   } catch (error) {
     throw createCaseError({
       message: `Failed to find cases: ${JSON.stringify(params)}: ${error}`,
