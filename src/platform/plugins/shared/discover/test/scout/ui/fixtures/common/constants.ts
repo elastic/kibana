@@ -16,6 +16,13 @@ export const DISCOVER_KBN_ARCHIVE = 'src/platform/test/functional/fixtures/kbn_a
 export const FLIGHTS_KBN_ARCHIVE =
   'src/platform/test/functional/fixtures/kbn_archiver/kibana_sample_data_flights_index_pattern';
 
+/**
+ * Saved searches exercising ES|QL column rendering (initial/custom columns for
+ * transformational and non-transformational commands).
+ */
+export const DISCOVER_ESQL_COLUMNS_KBN_ARCHIVE =
+  'src/platform/test/functional/fixtures/kbn_archiver/discover_esql_columns';
+
 export const DEFAULT_DATA_VIEW = 'logstash-*';
 
 export const SAVED_SEARCH_TITLE = 'A Saved Search';
