@@ -138,7 +138,10 @@ test.describe(
         await nav.goto();
         await nav.waitForLoad();
 
-        await page.testSubj.click('nav-search-reveal');
+        await page.testSubj
+          .locator('chromeNextGlobalHeaderSearchButton')
+          .or(page.testSubj.locator('nav-search-reveal'))
+          .click();
         await page.testSubj.fill('nav-search-input', 'Elastic Inference');
         await expect(
           page.testSubj

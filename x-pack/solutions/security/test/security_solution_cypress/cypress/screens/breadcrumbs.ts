@@ -12,4 +12,4 @@ export const APP_HEADER_BACK_MENU_ITEM = '.euiContextMenuItem';
 export const RULE_MANAGEMENT_PAGE_TITLE = 'Detection rules (SIEM)';
 
 export const RULE_MANAGEMENT_PAGE_BREADCRUMB =
-  '[data-test-subj~="breadcrumb"][title="Detection rules (SIEM)"]';
+  '[data-test-subj~="breadcrumb"][title="Detection rules (SIEM)"]:not([data-test-subj~="last"])';

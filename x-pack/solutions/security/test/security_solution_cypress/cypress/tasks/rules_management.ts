@@ -30,16 +30,11 @@ export function navigateBackToRulesManagement(): void {
     .first()
     .should('be.visible')
     .then(($control) => {
-      const menuId = $control.attr('aria-controls');
       const opensMenu = $control.attr('aria-haspopup') === 'menu';
 
       cy.wrap($control).click();
       if (opensMenu) {
-        if (!menuId) {
-          throw new Error('Rules management back button does not identify its menu');
-        }
-        cy.get(`#${menuId}`)
-          .contains(APP_HEADER_BACK_MENU_ITEM, RULE_MANAGEMENT_PAGE_TITLE)
+        cy.contains(APP_HEADER_BACK_MENU_ITEM, RULE_MANAGEMENT_PAGE_TITLE)
           .should('be.visible')
           .click();
       }
