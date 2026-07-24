@@ -65,7 +65,7 @@ spaceTest.describe(
         });
 
         await spaceTest.step('has the inspector enabled', async () => {
-          await expect(inspector.getOpenButton()).toBeEnabled();
+          expect(await inspector.canBeOpened()).toBe(true);
         });
 
         await spaceTest.step('shows correct data in the inspector', async () => {

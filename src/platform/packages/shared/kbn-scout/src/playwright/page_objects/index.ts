@@ -30,7 +30,6 @@ import { OverlaysPage } from './overlays';
 import { VisualizeApp } from './visualize_app';
 import { VisualizeEditor } from './visualize_editor';
 import { VisualizeChart } from './visualize_chart';
-import { Inspector } from './inspector';
 import { UnifiedTabs } from './unified_tabs';
 import {
   ContentListWrapper,
@@ -81,7 +80,6 @@ export interface PageObjects {
   visualize: VisualizeApp;
   visEditor: VisualizeEditor;
   visChart: VisualizeChart;
-  inspector: Inspector;
   unifiedTabs: UnifiedTabs;
 }
 
@@ -112,7 +110,6 @@ export function createCorePageObjects(fixtures: PageObjectsFixtures): PageObject
     visualize: createLazyPageObject(VisualizeApp, fixtures.page),
     visEditor: createLazyPageObject(VisualizeEditor, fixtures.page),
     visChart: createLazyPageObject(VisualizeChart, fixtures.page),
-    inspector: createLazyPageObject(Inspector, fixtures.page),
     unifiedTabs: createLazyPageObject(UnifiedTabs, fixtures.page),
   };
 }

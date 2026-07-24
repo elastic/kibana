@@ -48,6 +48,14 @@ export class Inspector {
     };
   }
 
+  /**
+   * Resolves to whether the inspector can be opened for the currently rendered
+   * panel/visualization, i.e. the "Inspect" toolbar button is enabled.
+   */
+  async canBeOpened(): Promise<boolean> {
+    return this.page.testSubj.locator('openInspectorButton').isEnabled();
+  }
+
   async open() {
     await this.page.testSubj.click('openInspectorButton');
     await this.panel.waitFor({ state: 'visible' });
