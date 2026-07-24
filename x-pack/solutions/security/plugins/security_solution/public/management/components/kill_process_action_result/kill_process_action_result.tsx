@@ -43,19 +43,24 @@ export const KillSuspendProcessActionResult = memo<KillSuspendProcessActionResul
     const getTestId = useTestIdGenerator(dataTestSubj);
     const agentId = _agentId || action.agents[0];
     const command = action.command;
-    const { wasSuccessful, isCompleted } = action.agentState[agentId] ?? {
-      wasSuccessful: action.wasSuccessful,
-      isCompleted: action.isCompleted,
-      completedAt: action.completedAt,
-      wasCanceled: action.wasCanceled,
-    };
-    const hostOutput = action.outputs?.[agentId]?.content;
+
+    const { wasSuccessful, isCompleted } = useMemo(() => {
+      return (
+        action.agentState[agentId] ?? {
+          wasSuccessful: action.wasSuccessful,
+          isCompleted: action.isCompleted,
+          completedAt: action.completedAt,
+          wasCanceled: action.wasCanceled,
+        }
+      );
+    }, [action, agentId]);
 
     const processResult: React.ReactNode = useMemo(() => {
       if (!isCompleted) {
         return null;
       }
 
+      const hostOutput = action.outputs?.[agentId]?.content;
       const processResultData: React.ReactNode[] = [];
 
       if (hostOutput?.pid) {
@@ -119,14 +124,7 @@ export const KillSuspendProcessActionResult = memo<KillSuspendProcessActionResul
       }
 
       return processResultData;
-    }, [
-      agentId,
-      hostOutput?.command,
-      hostOutput?.entity_id,
-      hostOutput?.pid,
-      hostOutput?.process_name,
-      isCompleted,
-    ]);
+    }, [action.outputs, agentId, isCompleted]);
 
     if (command !== 'kill-process' && command !== 'suspend-process') {
       window.console.warn(
@@ -151,46 +149,6 @@ export const KillSuspendProcessActionResult = memo<KillSuspendProcessActionResul
                   defaultMessage="Action result:"
                 />
                 <div>{processResult}</div>
-
-                {/* FIXME:PT delete this once dev. is done */}
-                <div style={{ display: 'none' }}>
-                  {hostOutput?.pid && (
-                    <div>
-                      <FormattedMessage
-                        id="xpack.securitySolution.management.killProcessActionResult.pid"
-                        defaultMessage="Process ID: {pid}"
-                        values={{ pid: hostOutput?.pid }}
-                      />
-                    </div>
-                  )}
-                  {hostOutput?.entity_id && (
-                    <div>
-                      <FormattedMessage
-                        id="xpack.securitySolution.management.killProcessActionResult.entityId"
-                        defaultMessage="Entity ID: {entityId}"
-                        values={{ entityId: hostOutput?.entity_id }}
-                      />
-                    </div>
-                  )}
-                  {hostOutput?.process_name && (
-                    <div>
-                      <FormattedMessage
-                        id="xpack.securitySolution.management.killProcessActionResult.processName"
-                        defaultMessage="Process name: {processName}"
-                        values={{ processName: hostOutput?.process_name }}
-                      />
-                    </div>
-                  )}
-                  {hostOutput?.command && (
-                    <div>
-                      <FormattedMessage
-                        id="xpack.securitySolution.management.killProcessActionResult.command"
-                        defaultMessage="Process command: {command}"
-                        values={{ command: hostOutput?.command }}
-                      />
-                    </div>
-                  )}
-                </div>
               </div>
             ) : (
               <EndpointActionFailureMessage
