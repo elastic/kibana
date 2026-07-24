@@ -21,29 +21,46 @@ import { z, lazySchema } from '@kbn/zod/v4';
 import { UISchemas, type ConnectorSpec } from '../../connector_spec';
 import { withMcpClient, callToolContent, callToolJson } from '../../lib/mcp';
 import type {
+  ArchiveItemInput,
   CallToolInput,
   ChangeItemColumnValuesInput,
   CreateItemInput,
+  CreateNotificationInput,
+  CreateSubitemInput,
   CreateUpdateInput,
+  DeleteItemInput,
+  EditUpdateInput,
   GetBoardInfoInput,
   GetBoardItemsInput,
+  GetItemInput,
+  GetItemsByColumnValueInput,
   GetUpdatesInput,
+  MoveItemToGroupInput,
   SearchInput,
 } from './types';
 import {
+  ArchiveItemInputSchema,
   CallToolInputSchema,
   ChangeItemColumnValuesInputSchema,
   CreateItemInputSchema,
+  CreateNotificationInputSchema,
+  CreateSubitemInputSchema,
   CreateUpdateInputSchema,
+  DeleteItemInputSchema,
+  EditUpdateInputSchema,
   GetBoardInfoInputSchema,
   GetBoardItemsInputSchema,
+  GetItemInputSchema,
+  GetItemsByColumnValueInputSchema,
   GetUpdatesInputSchema,
   ListToolsInputSchema,
+  MoveItemToGroupInputSchema,
   SearchInputSchema,
   WhoAmIInputSchema,
 } from './types';
 
 const MONDAY_MCP_SERVER_URL = 'https://mcp.monday.com/mcp';
+const MONDAY_API_URL = 'https://api.monday.com/v2';
 
 export const MondayCom: ConnectorSpec = {
   metadata: {
@@ -128,14 +145,14 @@ export const MondayCom: ConnectorSpec = {
     search: {
       isTool: true,
       description:
-        'Search Monday.com by keyword within a specific object type. Provide search_term and ' +
-        'search_type (one of BOARD, DOCUMENTS, FOLDERS, WORKSPACES, UPDATES, ITEMS, ' +
+        'Search Monday.com by keyword within a specific object type. Provide searchTerm and ' +
+        'searchType (one of BOARD, DOCUMENTS, FOLDERS, WORKSPACES, UPDATES, ITEMS, ' +
         'TIMELINE_ITEMS, DASHBOARDS). Returns matching objects with names and IDs.',
       input: SearchInputSchema,
       handler: async (ctx, input: SearchInput) => {
         return callToolJson(ctx, 'search', {
-          search_term: input.search_term,
-          search_type: input.search_type,
+          searchTerm: input.searchTerm,
+          searchType: input.searchType,
         });
       },
     },
@@ -150,7 +167,7 @@ export const MondayCom: ConnectorSpec = {
       input: GetBoardInfoInputSchema,
       handler: async (ctx, input: GetBoardInfoInput) => {
         return callToolJson(ctx, 'get_board_info', {
-          board_id: input.board_id,
+          boardId: input.boardId,
         });
       },
     },
@@ -164,7 +181,7 @@ export const MondayCom: ConnectorSpec = {
       input: GetBoardItemsInputSchema,
       handler: async (ctx, input: GetBoardItemsInput) => {
         return callToolJson(ctx, 'get_board_items_page', {
-          board_id: input.board_id,
+          boardId: input.boardId,
           cursor: input.cursor,
           limit: input.limit,
         });
@@ -172,6 +189,45 @@ export const MondayCom: ConnectorSpec = {
     },
 
     // ── Items ─────────────────────────────────────────────────────────────────
+    getItem: {
+      isTool: true,
+      description:
+        'Retrieve a single Monday.com item by ID. Returns the item name, all column values, ' +
+        'group membership, and parent board ID. Use this when you already know the item ID ' +
+        'and need its full details without paginating a board.',
+      input: GetItemInputSchema,
+      handler: async (ctx, input: GetItemInput) => {
+        const { data } = await ctx.client.post(MONDAY_API_URL, {
+          query:
+            'query GetItem($ids: [ID!]) { items(ids: $ids) { id name board { id } group { id title } column_values { id text value } } }',
+          variables: { ids: [String(input.itemId)] },
+        });
+        return data?.data?.items?.[0] ?? null;
+      },
+    },
+
+    getItemsByColumnValue: {
+      isTool: true,
+      description:
+        'Find items on a Monday.com board where a specific column matches a given value. ' +
+        'Use getBoardInfo to discover column IDs and the expected value format for each column type. ' +
+        'Returns matching items with their names, column values, and group membership.',
+      input: GetItemsByColumnValueInputSchema,
+      handler: async (ctx, input: GetItemsByColumnValueInput) => {
+        const { data } = await ctx.client.post(MONDAY_API_URL, {
+          query:
+            'query GetItemsByColumnValue($boardId: ID!, $columnId: String!, $columnValues: [String!]!, $limit: Int) { items_page_by_column_values(board_id: $boardId, columns: [{ column_id: $columnId, column_values: $columnValues }], limit: $limit) { items { id name group { id title } column_values { id text value } } } }',
+          variables: {
+            boardId: String(input.boardId),
+            columnId: input.columnId,
+            columnValues: [input.columnValue],
+            limit: input.limit,
+          },
+        });
+        return data?.data?.items_page_by_column_values ?? null;
+      },
+    },
+
     createItem: {
       isTool: false,
       description:
@@ -181,11 +237,10 @@ export const MondayCom: ConnectorSpec = {
       input: CreateItemInputSchema,
       handler: async (ctx, input: CreateItemInput) => {
         return callToolJson(ctx, 'create_item', {
-          board_id: input.board_id,
-          name: input.item_name,
-          group_id: input.group_id,
-          column_values:
-            input.column_values != null ? JSON.stringify(input.column_values) : undefined,
+          boardId: input.boardId,
+          name: input.itemName,
+          groupId: input.groupId,
+          columnValues: input.columnValues != null ? JSON.stringify(input.columnValues) : '{}',
         });
       },
     },
@@ -199,10 +254,76 @@ export const MondayCom: ConnectorSpec = {
       input: ChangeItemColumnValuesInputSchema,
       handler: async (ctx, input: ChangeItemColumnValuesInput) => {
         return callToolJson(ctx, 'change_item_column_values', {
-          board_id: input.board_id,
-          item_id: input.item_id,
-          column_values: JSON.stringify(input.column_values),
+          boardId: input.boardId,
+          itemId: input.itemId,
+          columnValues: JSON.stringify(input.columnValues),
         });
+      },
+    },
+
+    createSubitem: {
+      isTool: false,
+      description:
+        'Create a subitem under an existing Monday.com item. Subitems share the same column ' +
+        "structure as the parent board's subitems board. Returns the created subitem with its ID.",
+      input: CreateSubitemInputSchema,
+      handler: async (ctx, input: CreateSubitemInput) => {
+        const { data } = await ctx.client.post(MONDAY_API_URL, {
+          query:
+            'mutation CreateSubitem($parentItemId: ID!, $itemName: String!, $columnValues: JSON) { create_subitem(parent_item_id: $parentItemId, item_name: $itemName, column_values: $columnValues) { id name board { id } } }',
+          variables: {
+            parentItemId: String(input.parentItemId),
+            itemName: input.subitemName,
+            columnValues: input.columnValues != null ? JSON.stringify(input.columnValues) : null,
+          },
+        });
+        return data?.data?.create_subitem ?? null;
+      },
+    },
+
+    moveItemToGroup: {
+      isTool: false,
+      description:
+        'Move a Monday.com item to a different group within the same board. Use getBoardInfo to ' +
+        'discover available group IDs. Returns the moved item with its updated group.',
+      input: MoveItemToGroupInputSchema,
+      handler: async (ctx, input: MoveItemToGroupInput) => {
+        const { data } = await ctx.client.post(MONDAY_API_URL, {
+          query:
+            'mutation MoveItem($itemId: ID!, $groupId: String!) { move_item_to_group(item_id: $itemId, group_id: $groupId) { id } }',
+          variables: { itemId: String(input.itemId), groupId: input.groupId },
+        });
+        return data?.data?.move_item_to_group ?? null;
+      },
+    },
+
+    archiveItem: {
+      isTool: false,
+      description:
+        'Archive a Monday.com item. Archived items are hidden from the board view but remain ' +
+        'accessible via filters and are not permanently deleted. Returns the archived item.',
+      input: ArchiveItemInputSchema,
+      handler: async (ctx, input: ArchiveItemInput) => {
+        const { data } = await ctx.client.post(MONDAY_API_URL, {
+          query: 'mutation ArchiveItem($itemId: ID!) { archive_item(item_id: $itemId) { id } }',
+          variables: { itemId: String(input.itemId) },
+        });
+        return data?.data?.archive_item ?? null;
+      },
+    },
+
+    deleteItem: {
+      isTool: false,
+      description:
+        'Permanently delete a Monday.com item and all its subitems and updates. ' +
+        'This action cannot be undone. Returns the deleted item ID.',
+      input: DeleteItemInputSchema,
+      handler: async (ctx, input: DeleteItemInput) => {
+        const { data } = await ctx.client.post(MONDAY_API_URL, {
+          query: 'mutation DeleteItem($itemId: ID!) { delete_item(item_id: $itemId) { id } }',
+          variables: { itemId: String(input.itemId) },
+        });
+        return data?.data?.delete_item ?? null;
       },
     },
 
@@ -216,7 +337,7 @@ export const MondayCom: ConnectorSpec = {
       input: CreateUpdateInputSchema,
       handler: async (ctx, input: CreateUpdateInput) => {
         return callToolJson(ctx, 'create_update', {
-          item_id: input.item_id,
+          itemId: input.itemId,
           body: input.body,
         });
       },
@@ -225,15 +346,47 @@ export const MondayCom: ConnectorSpec = {
     getUpdates: {
       isTool: true,
       description:
-        'Retrieve updates (comments) posted on a Monday.com item or board. Pass object_id (the item ' +
-        'or board ID as a string) and object_type ("Item" or "Board"). Returns update text, author, ' +
+        'Retrieve updates (comments) posted on a Monday.com item or board. Pass objectId (the item ' +
+        'or board ID as a string) and objectType ("Item" or "Board"). Returns update text, author, ' +
         'and timestamps in reverse-chronological order.',
       input: GetUpdatesInputSchema,
       handler: async (ctx, input: GetUpdatesInput) => {
         return callToolJson(ctx, 'get_updates', {
-          object_id: input.object_id,
-          object_type: input.object_type,
+          objectId: input.objectId,
+          objectType: input.objectType,
           limit: input.limit,
+        });
+      },
+    },
+
+    editUpdate: {
+      isTool: true,
+      description:
+        'Edit the body of an existing update (comment) on a Monday.com item. Use getUpdates to ' +
+        'retrieve the update ID. Replaces the full body text; returns the updated update.',
+      input: EditUpdateInputSchema,
+      handler: async (ctx, input: EditUpdateInput) => {
+        const { data } = await ctx.client.post(MONDAY_API_URL, {
+          query:
+            'mutation EditUpdate($id: ID!, $body: String!) { edit_update(id: $id, body: $body) { id body } }',
+          variables: { id: String(input.updateId), body: input.body },
+        });
+        return data?.data?.edit_update ?? null;
+      },
+    },
+
+    createNotification: {
+      isTool: true,
+      description:
+        'Send an in-app notification to a Monday.com user. Set targetType to "Project" to link ' +
+        'to an item, or "Post" to link to an update (comment). Use whoAmI to look up user IDs.',
+      input: CreateNotificationInputSchema,
+      handler: async (ctx, input: CreateNotificationInput) => {
+        return callToolJson(ctx, 'create_notification', {
+          user_id: input.userId,
+          target_id: input.targetId,
+          text: input.text,
+          target_type: input.targetType,
         });
       },
     },
@@ -293,11 +446,27 @@ export const MondayCom: ConnectorSpec = {
     '',
     '### Finding boards and items',
     'Use `search` to find boards or documents by keyword, then `getBoardInfo` to inspect column structure.',
-    'To paginate through items on a board, call `getBoardItemsPage` repeatedly with the `cursor` from each response until no cursor is returned.',
+    'To paginate through all items on a board, call `getBoardItemsPage` repeatedly with the `cursor` from each response until no cursor is returned.',
+    'To fetch a single known item, prefer `getItem` over paginating the whole board.',
+    'To find items where a column matches a value (e.g. status = "Done"), use `getItemsByColumnValue` — call `getBoardInfo` first to learn the column ID and value format.',
+    '',
+    '### Writing items (Workflows only)',
+    'The following actions are available in Workflows but not as AI agent tools:',
+    '- `createItem`: creates a new board item. `itemName` is required; `groupId` and `columnValues` are optional.',
+    '- `changeItemColumnValues`: updates column values on an existing item. Pass a `columnValues` map keyed by column ID.',
+    '- `createSubitem`: creates a subitem under a parent item by `parentItemId`.',
+    '- `moveItemToGroup`: moves an item to a different group within the same board. Use `getBoardInfo` to discover group IDs.',
+    '- `archiveItem`: hides an item from the board without deleting it (reversible via Monday.com UI).',
+    '- `deleteItem`: permanently deletes an item and all its subitems and updates. Cannot be undone.',
     '',
     '### Comments and updates',
-    'Use `createUpdate` to post a comment on an item and `getUpdates` to read the discussion thread. ' +
-      '`getUpdates` requires `object_id` (the item or board ID as a string) and `object_type` ("Item" or "Board").',
+    'Use `createUpdate` to post a comment on an item and `getUpdates` to read the discussion thread.',
+    '`getUpdates` requires `objectId` (the item or board ID as a string) and `objectType` ("Item" or "Board").',
+    'To edit an existing comment, call `editUpdate` with the update ID from `getUpdates`.',
+    '',
+    '### Notifications',
+    'Use `createNotification` to send an in-app notification to a user. Set `targetType` to "Project" to link to an item, or "Post" to link to an update.',
+    'Use `whoAmI` to look up user IDs.',
     '',
     '### Advanced operations',
     'The Monday.com MCP server exposes 60+ tools. Use `listTools` to discover available tools, then `callTool` to invoke them.',
@@ -306,6 +475,6 @@ export const MondayCom: ConnectorSpec = {
     '- Board IDs and item IDs are integers. Group IDs and column IDs are strings.',
     '- Column value formats differ by column type — always check with `getBoardInfo` before updating.',
     '- Status columns require a label (text) value, not a numeric ID.',
-    '- The `change_item_column_values` tool accepts a JSON-stringified column values object.',
+    '- `createNotification`: set `targetType` to "Project" for items or "Post" for updates.',
   ].join('\n'),
 };

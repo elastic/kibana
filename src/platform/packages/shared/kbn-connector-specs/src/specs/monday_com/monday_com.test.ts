@@ -27,8 +27,9 @@ const parse = <K extends keyof typeof MondayCom.actions>(action: K, raw: Record<
   MondayCom.actions[action].input.parse(raw);
 
 describe('MondayCom', () => {
+  const mockPost = jest.fn();
   const mockContext = {
-    client: {},
+    client: { post: mockPost },
     log: {},
     config: { serverUrl: 'https://mcp.monday.com/mcp' },
   } as unknown as ActionContext;
@@ -42,6 +43,7 @@ describe('MondayCom', () => {
     mockListTools.mockResolvedValue({
       tools: Array.from({ length: 62 }, (_, i) => ({ name: `tool_${i}` })),
     });
+    mockPost.mockResolvedValue({ data: { data: mockJson } });
   });
 
   it('should be defined', () => {
@@ -147,14 +149,18 @@ describe('MondayCom', () => {
       expect(MondayCom.actions.search.isTool).toBe(true);
     });
 
-    it('calls search with search_term and search_type', async () => {
-      const input = parse('search', { search_term: 'Q3 roadmap', search_type: 'BOARD' });
+    it('calls search with searchTerm and searchType', async () => {
+      const input = parse('search', { searchTerm: 'Q3 roadmap', searchType: 'BOARD' });
       await MondayCom.actions.search.handler(mockContext, input);
 
       expect(mockCallTool).toHaveBeenCalledWith({
         name: 'search',
-        arguments: { search_term: 'Q3 roadmap', search_type: 'BOARD' },
+        arguments: { searchTerm: 'Q3 roadmap', searchType: 'BOARD' },
       });
+    });
+
+    it('rejects an empty searchTerm', () => {
+      expect(() => parse('search', { searchTerm: '', searchType: 'BOARD' })).toThrow();
     });
   });
 
@@ -163,13 +169,13 @@ describe('MondayCom', () => {
       expect(MondayCom.actions.getBoardInfo.isTool).toBe(true);
     });
 
-    it('calls get_board_info with board_id', async () => {
-      const input = parse('getBoardInfo', { board_id: 99887766 });
+    it('calls get_board_info with boardId', async () => {
+      const input = parse('getBoardInfo', { boardId: 99887766 });
       await MondayCom.actions.getBoardInfo.handler(mockContext, input);
 
       expect(mockCallTool).toHaveBeenCalledWith({
         name: 'get_board_info',
-        arguments: { board_id: 99887766 },
+        arguments: { boardId: 99887766 },
       });
     });
   });
@@ -180,88 +186,195 @@ describe('MondayCom', () => {
     });
 
     it('calls get_board_items_page with defaults applied', async () => {
-      const input = parse('getBoardItemsPage', { board_id: 99887766 });
+      const input = parse('getBoardItemsPage', { boardId: 99887766 });
       await MondayCom.actions.getBoardItemsPage.handler(mockContext, input);
 
       expect(mockCallTool).toHaveBeenCalledWith({
         name: 'get_board_items_page',
-        arguments: { board_id: 99887766, cursor: undefined, limit: 50 },
+        arguments: { boardId: 99887766, cursor: undefined, limit: 50 },
       });
     });
 
     it('calls get_board_items_page with cursor and custom limit', async () => {
-      const input = parse('getBoardItemsPage', {
-        board_id: 99887766,
-        cursor: 'abc123',
-        limit: 100,
-      });
+      const input = parse('getBoardItemsPage', { boardId: 99887766, cursor: 'abc123', limit: 100 });
       await MondayCom.actions.getBoardItemsPage.handler(mockContext, input);
 
       expect(mockCallTool).toHaveBeenCalledWith({
         name: 'get_board_items_page',
-        arguments: { board_id: 99887766, cursor: 'abc123', limit: 100 },
+        arguments: { boardId: 99887766, cursor: 'abc123', limit: 100 },
       });
     });
   });
 
-  describe('createItem action', () => {
+  describe('getItem action', () => {
     it('is exposed as a tool', () => {
-      expect(MondayCom.actions.createItem.isTool).toBe(true);
+      expect(MondayCom.actions.getItem.isTool).toBe(true);
     });
 
-    it('calls create_item with required fields', async () => {
-      const input = parse('createItem', { board_id: 99887766, item_name: 'Fix login bug' });
+    it('posts a GetItem GraphQL query with the item ID', async () => {
+      const input = parse('getItem', { itemId: 11223344 });
+      await MondayCom.actions.getItem.handler(mockContext, input);
+
+      expect(mockPost).toHaveBeenCalledWith(
+        'https://api.monday.com/v2',
+        expect.objectContaining({ variables: { ids: ['11223344'] } })
+      );
+    });
+  });
+
+  describe('getItemsByColumnValue action', () => {
+    it('is exposed as a tool', () => {
+      expect(MondayCom.actions.getItemsByColumnValue.isTool).toBe(true);
+    });
+
+    it('posts an items_page_by_column_values query with correct variables', async () => {
+      const input = parse('getItemsByColumnValue', {
+        boardId: 99887766,
+        columnId: 'project_status',
+        columnValue: 'Done',
+      });
+      await MondayCom.actions.getItemsByColumnValue.handler(mockContext, input);
+
+      expect(mockPost).toHaveBeenCalledWith(
+        'https://api.monday.com/v2',
+        expect.objectContaining({
+          variables: {
+            boardId: '99887766',
+            columnId: 'project_status',
+            columnValues: ['Done'],
+            limit: 50,
+          },
+        })
+      );
+    });
+  });
+
+  describe('createItem action', () => {
+    it('is not exposed as a tool', () => {
+      expect(MondayCom.actions.createItem.isTool).toBe(false);
+    });
+
+    it('calls create_item with required fields and empty columnValues default', async () => {
+      const input = parse('createItem', { boardId: 99887766, itemName: 'Fix login bug' });
       await MondayCom.actions.createItem.handler(mockContext, input);
 
       expect(mockCallTool).toHaveBeenCalledWith({
         name: 'create_item',
         arguments: {
-          board_id: 99887766,
+          boardId: 99887766,
           name: 'Fix login bug',
-          group_id: undefined,
-          column_values: undefined,
+          groupId: undefined,
+          columnValues: '{}',
         },
       });
     });
 
-    it('JSON-stringifies column_values before sending to MCP', async () => {
+    it('JSON-stringifies columnValues before sending to MCP', async () => {
       const input = parse('createItem', {
-        board_id: 99887766,
-        item_name: 'Fix login bug',
-        column_values: { status: { label: 'Done' } },
+        boardId: 99887766,
+        itemName: 'Fix login bug',
+        columnValues: { status: { label: 'Done' } },
       });
       await MondayCom.actions.createItem.handler(mockContext, input);
 
       expect(mockCallTool).toHaveBeenCalledWith({
         name: 'create_item',
         arguments: expect.objectContaining({
-          column_values: JSON.stringify({ status: { label: 'Done' } }),
+          columnValues: JSON.stringify({ status: { label: 'Done' } }),
         }),
       });
     });
   });
 
   describe('changeItemColumnValues action', () => {
-    it('is exposed as a tool', () => {
-      expect(MondayCom.actions.changeItemColumnValues.isTool).toBe(true);
+    it('is not exposed as a tool', () => {
+      expect(MondayCom.actions.changeItemColumnValues.isTool).toBe(false);
     });
 
-    it('calls change_item_column_values with snake_case keys and JSON-stringified column_values', async () => {
+    it('calls change_item_column_values with camelCase keys and JSON-stringified columnValues', async () => {
       const input = parse('changeItemColumnValues', {
-        board_id: 99887766,
-        item_id: 11223344,
-        column_values: { status: { label: 'Done' } },
+        boardId: 99887766,
+        itemId: 11223344,
+        columnValues: { status: { label: 'Done' } },
       });
       await MondayCom.actions.changeItemColumnValues.handler(mockContext, input);
 
       expect(mockCallTool).toHaveBeenCalledWith({
         name: 'change_item_column_values',
         arguments: {
-          board_id: 99887766,
-          item_id: 11223344,
-          column_values: JSON.stringify({ status: { label: 'Done' } }),
+          boardId: 99887766,
+          itemId: 11223344,
+          columnValues: JSON.stringify({ status: { label: 'Done' } }),
         },
       });
+    });
+  });
+
+  describe('createSubitem action', () => {
+    it('is not exposed as a tool', () => {
+      expect(MondayCom.actions.createSubitem.isTool).toBe(false);
+    });
+
+    it('posts a CreateSubitem GraphQL mutation with parentItemId and subitemName', async () => {
+      const input = parse('createSubitem', { parentItemId: 11223344, subitemName: 'Sub task' });
+      await MondayCom.actions.createSubitem.handler(mockContext, input);
+
+      expect(mockPost).toHaveBeenCalledWith(
+        'https://api.monday.com/v2',
+        expect.objectContaining({
+          variables: { parentItemId: '11223344', itemName: 'Sub task', columnValues: null },
+        })
+      );
+    });
+  });
+
+  describe('moveItemToGroup action', () => {
+    it('is not exposed as a tool', () => {
+      expect(MondayCom.actions.moveItemToGroup.isTool).toBe(false);
+    });
+
+    it('posts a MoveItem GraphQL mutation', async () => {
+      const input = parse('moveItemToGroup', { itemId: 11223344, groupId: 'new_group29179' });
+      await MondayCom.actions.moveItemToGroup.handler(mockContext, input);
+
+      expect(mockPost).toHaveBeenCalledWith(
+        'https://api.monday.com/v2',
+        expect.objectContaining({
+          variables: { itemId: '11223344', groupId: 'new_group29179' },
+        })
+      );
+    });
+  });
+
+  describe('archiveItem action', () => {
+    it('is not exposed as a tool', () => {
+      expect(MondayCom.actions.archiveItem.isTool).toBe(false);
+    });
+
+    it('posts an ArchiveItem GraphQL mutation', async () => {
+      const input = parse('archiveItem', { itemId: 11223344 });
+      await MondayCom.actions.archiveItem.handler(mockContext, input);
+
+      expect(mockPost).toHaveBeenCalledWith(
+        'https://api.monday.com/v2',
+        expect.objectContaining({ variables: { itemId: '11223344' } })
+      );
+    });
+  });
+
+  describe('deleteItem action', () => {
+    it('is not exposed as a tool', () => {
+      expect(MondayCom.actions.deleteItem.isTool).toBe(false);
+    });
+
+    it('posts a DeleteItem GraphQL mutation', async () => {
+      const input = parse('deleteItem', { itemId: 11223344 });
+      await MondayCom.actions.deleteItem.handler(mockContext, input);
+
+      expect(mockPost).toHaveBeenCalledWith(
+        'https://api.monday.com/v2',
+        expect.objectContaining({ variables: { itemId: '11223344' } })
+      );
     });
   });
 
@@ -270,9 +383,9 @@ describe('MondayCom', () => {
       expect(MondayCom.actions.createUpdate.isTool).toBe(true);
     });
 
-    it('calls create_update with item_id and body', async () => {
+    it('calls create_update with itemId and body', async () => {
       const input = parse('createUpdate', {
-        item_id: 11223344,
+        itemId: 11223344,
         body: 'This has been resolved in the latest deployment.',
       });
       await MondayCom.actions.createUpdate.handler(mockContext, input);
@@ -280,7 +393,7 @@ describe('MondayCom', () => {
       expect(mockCallTool).toHaveBeenCalledWith({
         name: 'create_update',
         arguments: {
-          item_id: 11223344,
+          itemId: 11223344,
           body: 'This has been resolved in the latest deployment.',
         },
       });
@@ -292,23 +405,65 @@ describe('MondayCom', () => {
       expect(MondayCom.actions.getUpdates.isTool).toBe(true);
     });
 
-    it('calls get_updates with object_id, object_type, and limit', async () => {
-      const input = parse('getUpdates', { object_id: '11223344' });
+    it('calls get_updates with objectId, objectType, and limit defaults', async () => {
+      const input = parse('getUpdates', { objectId: '11223344' });
       await MondayCom.actions.getUpdates.handler(mockContext, input);
 
       expect(mockCallTool).toHaveBeenCalledWith({
         name: 'get_updates',
-        arguments: { object_id: '11223344', object_type: 'Item', limit: 25 },
+        arguments: { objectId: '11223344', objectType: 'Item', limit: 25 },
       });
     });
 
-    it('calls get_updates with object_type Board when specified', async () => {
-      const input = parse('getUpdates', { object_id: '99887766', object_type: 'Board' });
+    it('calls get_updates with objectType Board when specified', async () => {
+      const input = parse('getUpdates', { objectId: '99887766', objectType: 'Board' });
       await MondayCom.actions.getUpdates.handler(mockContext, input);
 
       expect(mockCallTool).toHaveBeenCalledWith({
         name: 'get_updates',
-        arguments: { object_id: '99887766', object_type: 'Board', limit: 25 },
+        arguments: { objectId: '99887766', objectType: 'Board', limit: 25 },
+      });
+    });
+  });
+
+  describe('editUpdate action', () => {
+    it('is exposed as a tool', () => {
+      expect(MondayCom.actions.editUpdate.isTool).toBe(true);
+    });
+
+    it('posts an EditUpdate GraphQL mutation', async () => {
+      const input = parse('editUpdate', { updateId: 98765, body: 'Corrected text.' });
+      await MondayCom.actions.editUpdate.handler(mockContext, input);
+
+      expect(mockPost).toHaveBeenCalledWith(
+        'https://api.monday.com/v2',
+        expect.objectContaining({ variables: { id: '98765', body: 'Corrected text.' } })
+      );
+    });
+  });
+
+  describe('createNotification action', () => {
+    it('is exposed as a tool', () => {
+      expect(MondayCom.actions.createNotification.isTool).toBe(true);
+    });
+
+    it('calls create_notification with numeric userId and targetId', async () => {
+      const input = parse('createNotification', {
+        userId: 110260364,
+        targetId: 11223344,
+        text: 'Task updated',
+        targetType: 'Project',
+      });
+      await MondayCom.actions.createNotification.handler(mockContext, input);
+
+      expect(mockCallTool).toHaveBeenCalledWith({
+        name: 'create_notification',
+        arguments: {
+          user_id: 110260364,
+          target_id: 11223344,
+          text: 'Task updated',
+          target_type: 'Project',
+        },
       });
     });
   });

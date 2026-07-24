@@ -49,11 +49,29 @@ The Monday.com connector exposes the following actions:
 `getBoardItemsPage`
 :   Paginate through all items on a Monday.com board. Returns item names, column values, group membership, and a cursor for the next page. Pass the cursor from the previous response to fetch subsequent pages.
 
+`getItem`
+:   Retrieve a single Monday.com item by ID. Returns the item name, all column values, group membership, and parent board ID. Use this when you already know the item ID and need its full details without paginating a board.
+
+`getItemsByColumnValue`
+:   Find items on a Monday.com board where a specific column matches a given value. Use `getBoardInfo` to discover column IDs and the expected value format for each column type. Returns matching items with their names, column values, and group membership.
+
 `createItem`
-:   Create a new item (row) on a Monday.com board (available on in Workflows). Optionally assign it to a specific group and set initial column values. Use `getBoardInfo` to discover group IDs and column IDs before calling this action.
+:   Create a new item (row) on a Monday.com board (available in Workflows only). Optionally assign it to a specific group and set initial column values. Use `getBoardInfo` to discover group IDs and column IDs before calling this action.
 
 `changeItemColumnValues`
-:   Update one or more column values on an existing Monday.com item (available on in Workflows). Provide a map of column IDs to new values. Use `getBoardInfo` to discover column IDs and their expected value formats.
+:   Update one or more column values on an existing Monday.com item (available in Workflows only). Provide a map of column IDs to new values. Use `getBoardInfo` to discover column IDs and their expected value formats.
+
+`createSubitem`
+:   Create a subitem under an existing Monday.com item (available in Workflows only). Subitems share the column structure of the parent board's subitems board. Returns the created subitem with its ID.
+
+`moveItemToGroup`
+:   Move a Monday.com item to a different group within the same board (available in Workflows only). Use `getBoardInfo` to discover available group IDs.
+
+`archiveItem`
+:   Archive a Monday.com item (available in Workflows only). Archived items are hidden from the board view but remain accessible via filters and are not permanently deleted.
+
+`deleteItem`
+:   Permanently delete a Monday.com item and all its subitems and updates (available in Workflows only). This action cannot be undone.
 
 ### Updates and comments
 
@@ -62,6 +80,14 @@ The Monday.com connector exposes the following actions:
 
 `getUpdates`
 :   Retrieve updates (comments) posted on a Monday.com item. Returns update text, author, and timestamps in reverse-chronological order.
+
+`editUpdate`
+:   Edit the body of an existing update (comment) on a Monday.com item. Use `getUpdates` to retrieve the update ID before calling this action. Replaces the full body text.
+
+### Notifications
+
+`createNotification`
+:   Send an in-app notification to a Monday.com user. Set `targetType` to `Project` to link to an item, or `Post` to link to an update (comment). Use `whoAmI` to look up user IDs.
 
 ### Utilities
 
