@@ -33,6 +33,7 @@ steps:
     plugin-id: "significant_events_memory_gap_detection"
     aggregate-by: "significant_events"
     create-conversation: true
+    public-conversation: true
     with:
       timeout: 1800s
       message: |
