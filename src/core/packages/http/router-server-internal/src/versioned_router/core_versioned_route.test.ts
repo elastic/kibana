@@ -567,7 +567,6 @@ describe('Versioned route', () => {
       expect(validateOutputFn).toHaveBeenCalledTimes(0);
       expect(custom).toHaveBeenCalledTimes(1);
     });
-
   });
 
   it('allows using default resolution for specific internal routes', async () => {
