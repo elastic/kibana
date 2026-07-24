@@ -70,7 +70,7 @@ export default ({ getService }: FtrProviderContext): void => {
         );
       });
 
-      it('routes a legacy `user` comment to cases-comments while a unified comment lands in cases-attachments', async () => {
+      it('lifts a legacy `user` comment onto cases-attachments alongside a unified comment', async () => {
         const postedCase = await createCase(supertest, postCaseReq);
 
         const legacyCase = await createComment({
@@ -93,11 +93,12 @@ export default ({ getService }: FtrProviderContext): void => {
         });
         const unifiedId = unifiedCase.comments!.find((c) => c.id !== legacyId)!.id;
 
-        // The legacy `user` type is not lifted; it stays on the legacy SO.
-        expect((await searchSO(CASE_COMMENT_SAVED_OBJECT, legacyId)).hits.hits.length).to.be(1);
-        expect((await searchSO(CASE_ATTACHMENT_SAVED_OBJECT, legacyId)).hits.hits.length).to.be(0);
+        // With the flag ON the write target is the unified SO for every request
+        // shape, so the legacy `user` payload is lifted onto cases-attachments.
+        expect((await searchSO(CASE_ATTACHMENT_SAVED_OBJECT, legacyId)).hits.hits.length).to.be(1);
+        expect((await searchSO(CASE_COMMENT_SAVED_OBJECT, legacyId)).hits.hits.length).to.be(0);
 
-        // The unified `comment` type lands on the unified SO.
+        // The unified `comment` type also lands on cases-attachments.
         expect((await searchSO(CASE_ATTACHMENT_SAVED_OBJECT, unifiedId)).hits.hits.length).to.be(1);
         expect((await searchSO(CASE_COMMENT_SAVED_OBJECT, unifiedId)).hits.hits.length).to.be(0);
       });
@@ -279,7 +280,7 @@ export default ({ getService }: FtrProviderContext): void => {
       it('deletes all comments across both cases-comments and cases-attachments SOs', async () => {
         const postedCase = await createCase(supertest, postCaseReq);
 
-        // Legacy `user` comment lands on cases-comments.
+        // Legacy `user` comment is lifted onto cases-attachments (flag ON).
         const legacyCase = await createComment({
           supertest,
           caseId: postedCase.id,
@@ -287,7 +288,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
         const legacyId = legacyCase.comments![0].id;
 
-        // Unified `comment` lands on cases-attachments.
+        // Unified `comment` also lands on cases-attachments.
         const unifiedCase = await bulkCreateAttachments({
           supertest,
           caseId: postedCase.id,
@@ -312,8 +313,8 @@ export default ({ getService }: FtrProviderContext): void => {
         });
         expect(refreshedCase.totalComment).to.be(0);
 
-        // Both underlying SO rows are gone.
-        expect((await searchSO(CASE_COMMENT_SAVED_OBJECT, legacyId)).hits.hits.length).to.be(0);
+        // Both attachments lived on cases-attachments (flag ON); both are gone.
+        expect((await searchSO(CASE_ATTACHMENT_SAVED_OBJECT, legacyId)).hits.hits.length).to.be(0);
         expect((await searchSO(CASE_ATTACHMENT_SAVED_OBJECT, unifiedId)).hits.hits.length).to.be(0);
       });
     });

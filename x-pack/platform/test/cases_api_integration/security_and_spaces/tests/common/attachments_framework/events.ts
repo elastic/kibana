@@ -270,7 +270,7 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(['security.event', 'event']).to.contain(fetched.type);
       });
 
-      it('routes a legacy `event` to cases-comments while a unified event lands in cases-attachments', async () => {
+      it('lifts a legacy `event` onto cases-attachments alongside a unified event', async () => {
         const postedCase = await createCase(supertest, postCaseReq);
 
         const legacyCase = await createComment({
@@ -294,6 +294,21 @@ export default ({ getService }: FtrProviderContext): void => {
         });
         const unifiedId = unifiedCase.comments!.find((c) => c.id !== legacyId)!.id;
 
+        // With the flag ON the write target is the unified SO for every request
+        // shape, so the legacy `event` payload is lifted onto cases-attachments.
+        const legacyOnUnifiedSO = await es.search({
+          index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+          query: {
+            bool: {
+              must: [
+                { term: { type: CASE_ATTACHMENT_SAVED_OBJECT } },
+                { term: { _id: `${CASE_ATTACHMENT_SAVED_OBJECT}:${legacyId}` } },
+              ],
+            },
+          },
+        });
+        expect(legacyOnUnifiedSO.hits.hits.length).to.be(1);
+
         const legacyOnLegacySO = await es.search({
           index: ALERTING_CASES_SAVED_OBJECT_INDEX,
           query: {
@@ -305,7 +320,7 @@ export default ({ getService }: FtrProviderContext): void => {
             },
           },
         });
-        expect(legacyOnLegacySO.hits.hits.length).to.be(1);
+        expect(legacyOnLegacySO.hits.hits.length).to.be(0);
 
         const unifiedOnUnifiedSO = await es.search({
           index: ALERTING_CASES_SAVED_OBJECT_INDEX,
@@ -324,7 +339,7 @@ export default ({ getService }: FtrProviderContext): void => {
       it('totalEvents equals the union of legacy and unified events', async () => {
         const postedCase = await createCase(supertest, postCaseReq);
 
-        // One legacy event (cases-comments).
+        // One legacy event (lifted onto cases-attachments when the flag is ON).
         await createComment({
           supertest,
           caseId: postedCase.id,

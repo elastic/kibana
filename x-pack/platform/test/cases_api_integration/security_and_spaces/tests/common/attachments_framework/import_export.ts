@@ -6,7 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import { join } from 'path';
 import type { SavedObject } from '@kbn/core/server';
 import {
   CASE_ATTACHMENT_SAVED_OBJECT,
@@ -75,23 +74,41 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(legacySOs.length).to.eql(0);
     });
 
-    it('imports a cases-attachments ndjson fixture and reads the attachment back', async () => {
+    it('re-imports an exported unified cases-attachments SO and reads the attachment back', async () => {
+      const postedCase = await createCase(supertestService, getPostCaseRequest());
+      await bulkCreateAttachments({
+        supertest: supertestService,
+        caseId: postedCase.id,
+        params: [
+          {
+            type: 'comment' as const,
+            data: { content: 'A unified comment for my case' },
+            owner: 'securitySolutionFixture',
+          },
+        ],
+      });
+
+      // Export (real SO version fields are preserved) then clear the case, so
+      // the import recreates both the case and its unified attachment SO.
+      const { text: exported } = await supertestService
+        .post(`/api/saved_objects/_export`)
+        .send({ type: ['cases'], excludeExportDetails: true, includeReferencesDeep: true })
+        .set('kbn-xsrf', 'true');
+
+      const exportedObjects = ndjsonToObject(exported);
+      expect(exportedObjects.some((so) => so.type === CASE_ATTACHMENT_SAVED_OBJECT)).to.be(true);
+
+      await deleteAllCaseItems(es);
+
       await supertestService
         .post('/api/saved_objects/_import')
         .query({ overwrite: true })
-        .attach(
-          'file',
-          join(
-            __dirname,
-            '../../../../common/fixtures/saved_object_exports/single_case_with_unified_attachment.ndjson'
-          )
-        )
+        .attach('file', Buffer.from(exported), 'export.ndjson')
         .set('kbn-xsrf', 'true')
         .expect(200);
 
       const findResponse = await findCases({ supertest: supertestService, query: {} });
       expect(findResponse.total).to.eql(1);
-      expect(findResponse.cases[0].title).to.eql('A case with a unified attachment');
 
       const commentsResponse = await findAttachments({
         supertest: supertestService,
