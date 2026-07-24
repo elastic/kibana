@@ -27,8 +27,8 @@ interface SaveSourcesVariables {
 
 /**
  * Persists a new set of sources on an existing AI index. The PUT endpoint is an
- * upsert of the full record, so the current name, description, dest and
- * automations are carried over unchanged and only the sources are replaced.
+ * upsert of the full record, so the current description, dest and automations
+ * are carried over unchanged and only the sources are replaced.
  */
 export const useSaveAiIndexSources = () => {
   const {
@@ -39,7 +39,6 @@ export const useSaveAiIndexSources = () => {
   const { mutateAsync, isLoading } = useMutation<PutAiIndexResponse, Error, SaveSourcesVariables>({
     mutationFn: ({ aiIndex, selectedSources }) => {
       const properties: AiIndexProperties = {
-        name: aiIndex.name,
         ...(aiIndex.description !== undefined ? { description: aiIndex.description } : {}),
         dest: aiIndex.dest,
         automations: aiIndex.automations,
