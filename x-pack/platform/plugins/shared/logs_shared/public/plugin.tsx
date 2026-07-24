@@ -40,10 +40,6 @@ export class LogsSharedPlugin implements LogsSharedClientPluginClass {
           const [coreStart] = await coreSetup.getStartServices();
           return coreStart.featureFlags.getBooleanValue(IS_ESQL_DEFAULT_FEATURE_FLAG_KEY, false);
         },
-        getActiveSolutionNavId: async () => {
-          const [coreStart] = await coreSetup.getStartServices();
-          return coreStart.chrome.getActiveSolutionNavId();
-        },
       })
     );
 
