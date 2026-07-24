@@ -12,8 +12,10 @@ sys.path.insert(0, str(SCRIPT_DIR))
 
 from session_metrics import (  # noqa: E402
     TokenTotals,
+    build_session_metrics,
     format_legacy_usage,
     parse_transcript,
+    render_json_metrics,
     resolve_transcript,
 )
 
@@ -87,6 +89,142 @@ class SessionMetricsParserTests(unittest.TestCase):
             finally:
                 if previous_session_id is not None:
                     os.environ["CLAUDE_CODE_SESSION_ID"] = previous_session_id
+
+    def test_build_session_metrics_aggregates_scoped_transcripts_and_artifacts(self):
+        with tempfile.TemporaryDirectory() as raw_dir:
+            root = Path(raw_dir)
+            (root / "orchestrator.jsonl").write_text(
+                '{"message":{"usage":{"input_tokens":2,"output_tokens":3,'
+                '"cache_creation_input_tokens":5,"cache_read_input_tokens":7}}}\n',
+                encoding="utf-8",
+            )
+            (root / "worker-1.jsonl").write_text(
+                '{"message":{"usage":{"input_tokens":11,"output_tokens":13,'
+                '"cache_creation_input_tokens":17,"cache_read_input_tokens":19}}}\n',
+                encoding="utf-8",
+            )
+            (root / "findings-flow-1.md").write_text("abc", encoding="utf-8")
+            (root / "screenshots").mkdir()
+            (root / "screenshots/step.png").write_bytes(b"1234")
+            (root / "detectors.js").write_bytes(b"12345")
+            manifest = root / "metrics.json"
+            manifest.write_text(
+                json.dumps(
+                    {
+                        "version": 1,
+                        "session_root": ".",
+                        "transcripts": [
+                            {
+                                "path": "orchestrator.jsonl",
+                                "scope": "orchestrator",
+                            },
+                            {
+                                "path": "worker-1.jsonl",
+                                "scope": "worker",
+                                "name": "flow-1",
+                            },
+                        ],
+                        "artifacts": [
+                            {
+                                "path": "findings-flow-1.md",
+                                "kind": "findings",
+                            },
+                            {
+                                "path": "screenshots/step.png",
+                                "kind": "screenshot",
+                            },
+                            {
+                                "path": "detectors.js",
+                                "kind": "detector_source",
+                            },
+                        ],
+                        "payload_bytes": {
+                            "tool_input": 101,
+                            "tool_output": 202,
+                            "browser_events": 303,
+                        },
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            metrics = build_session_metrics(manifest, None, None)
+
+            self.assertEqual(metrics["schema_version"], 1)
+            self.assertEqual(
+                metrics["tokens"]["by_scope"]["worker"]["output_tokens"],
+                13,
+            )
+            self.assertEqual(
+                metrics["artifacts"]["by_kind"]["screenshot"]["bytes"],
+                4,
+            )
+            self.assertEqual(
+                metrics["payload_bytes"],
+                {
+                    "status": "available",
+                    "tool_input": 101,
+                    "tool_output": 202,
+                    "browser_events": 303,
+                },
+            )
+            self.assertEqual(
+                json.loads(render_json_metrics(metrics)),
+                metrics,
+            )
+
+    def test_build_session_metrics_marks_unavailable_payloads(self):
+        with tempfile.TemporaryDirectory() as raw_dir:
+            root = Path(raw_dir)
+            manifest = root / "metrics.json"
+            manifest.write_text(
+                json.dumps(
+                    {
+                        "version": 1,
+                        "session_root": ".",
+                        "transcripts": [],
+                        "artifacts": [],
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            metrics = build_session_metrics(manifest, None, None)
+
+            self.assertEqual(
+                metrics["payload_bytes"],
+                {"status": "not_available"},
+            )
+            self.assertEqual(metrics["tokens"]["status"], "not_available")
+            self.assertEqual(metrics["artifacts"]["status"], "not_available")
+
+    def test_manifest_cannot_read_paths_outside_session_root(self):
+        with tempfile.TemporaryDirectory() as raw_dir:
+            root = Path(raw_dir)
+            outside = root.parent / "outside-metrics-fixture.txt"
+            outside.write_text("secret", encoding="utf-8")
+            manifest = root / "metrics.json"
+            manifest.write_text(
+                json.dumps(
+                    {
+                        "version": 1,
+                        "session_root": ".",
+                        "transcripts": [],
+                        "artifacts": [
+                            {
+                                "path": "../outside-metrics-fixture.txt",
+                                "kind": "report",
+                            }
+                        ],
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            with self.assertRaises(ValueError):
+                build_session_metrics(manifest, None, None)
+
+            outside.unlink()
 
 
 if __name__ == "__main__":
