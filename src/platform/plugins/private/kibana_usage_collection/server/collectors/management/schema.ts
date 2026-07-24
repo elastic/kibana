@@ -573,13 +573,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Whether the Context Engine is enabled.' },
   },
-  'agentBuilder:uiamOAuthClientManagement': {
-    type: 'boolean',
-    _meta: {
-      description:
-        'Whether UIAM OAuth client management endpoints and the Agent Builder MCP Clients UI are enabled.',
-    },
-  },
   'agentBuilder:tracing:enabled': {
     type: 'boolean',
     _meta: {
