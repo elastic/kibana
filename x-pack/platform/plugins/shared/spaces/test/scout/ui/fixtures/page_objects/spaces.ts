@@ -210,8 +210,7 @@ export class SpacesPage {
   }
 
   /**
-   * CPS chrome nav project-picker button (not Spaces management UI).
-   * Belongs with CPS chrome-nav page objects if/when those are introduced.
+   * CPS chrome nav project-picker button (visible when CPS is enabled and projects are linked).
    */
   cpsProjectPickerButtonLocator() {
     return this.page.testSubj.locator('project-picker-button');
