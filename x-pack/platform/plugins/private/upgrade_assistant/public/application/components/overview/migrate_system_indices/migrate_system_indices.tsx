@@ -104,12 +104,12 @@ const i18nTexts = {
     );
   },
   requiredStep: i18n.translate('xpack.upgradeAssistant.overview.systemIndices.requiredStep', {
-    defaultMessage: 'Required step',
+    defaultMessage: 'Critical step',
   }),
   requiredStepTooltip: i18n.translate(
     'xpack.upgradeAssistant.overview.systemIndices.requiredStepTooltip',
     {
-      defaultMessage: 'Not completing this step will result in cluster failure.',
+      defaultMessage: 'Complete this step, or Elasticsearch might fail to start after the upgrade.',
     }
   ),
   noMigrationNeeded: i18n.translate(
