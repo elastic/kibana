@@ -35,7 +35,9 @@ export const getAgentIdFromFields = (fields?: estypes.SearchHit['fields']): stri
  * @param fields - The fields object from an Elasticsearch SearchHit
  * @returns The agent hostname if found, undefined otherwise
  */
-export const getAgentNameFromFields = (fields?: estypes.SearchHit['fields']): string | undefined => {
+export const getAgentNameFromFields = (
+  fields?: estypes.SearchHit['fields']
+): string | undefined => {
   if (!fields) return undefined;
 
   return (fields['agent.name']?.[0] as string) ?? (fields['host.name']?.[0] as string);
