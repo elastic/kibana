@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
+import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { createMockServices } from '@kbn/alerting-v2-episodes-ui/hooks/test_utils';
 import { useFetchEpisodeTagOptions } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_tag_options';
 import { useBulkGetProfiles } from '@kbn/alerting-v2-episodes-ui/hooks/use_bulk_get_profiles';
@@ -15,6 +16,12 @@ import { TestProviders } from '../../../test_utils/test_providers';
 import { EpisodesFilterBar } from './episodes_filter_bar';
 
 jest.mock('react-use/lib/useDebounce', () => jest.fn());
+
+jest.mock('@kbn/alerting-v2-rule-form', () => ({
+  AlertingDateRangePicker: ({ 'data-test-subj': dataTestSubj }: { 'data-test-subj'?: string }) => (
+    <div data-test-subj={dataTestSubj} />
+  ),
+}));
 
 jest.mock('@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_tag_options', () => ({
   useFetchEpisodeTagOptions: jest.fn(),
@@ -33,6 +40,7 @@ const mockFetchRulesSearch = jest.mocked(fetchRulesSearch);
 const mockUseBulkGetProfiles = jest.mocked(useBulkGetProfiles);
 
 const mockEpisodeServices = createMockServices();
+const mockNotifications = notificationServiceMock.createStartContract();
 
 const defaultProps = {
   filterState: { status: ['active'] },
@@ -45,6 +53,8 @@ const defaultProps = {
     http: mockEpisodeServices.http,
     expressions: mockEpisodeServices.expressions,
     spaces: mockEpisodeServices.spaces,
+    data: mockEpisodeServices.data,
+    notifications: mockNotifications,
   },
 };
 
@@ -78,5 +88,6 @@ describe('EpisodesFilterBar', () => {
     expect(screen.getByTestId('episodesFilterBar-rule-button')).toBeInTheDocument();
     expect(screen.getByTestId('episodesFilterBar-tags-button')).toBeInTheDocument();
     expect(screen.getByTestId('episodesFilterBar-assignee-button')).toBeInTheDocument();
+    expect(screen.getByTestId('episodesFilterBar-datePicker')).toBeInTheDocument();
   });
 });

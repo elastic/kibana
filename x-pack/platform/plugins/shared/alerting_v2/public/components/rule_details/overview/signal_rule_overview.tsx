@@ -14,15 +14,14 @@ import {
   EuiLoadingChart,
   EuiPanel,
   EuiSpacer,
-  EuiSuperDatePicker,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import type { OnTimeChangeProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { getRootEsqlQuery } from '@kbn/alerting-v2-schemas';
 import { intervalToMs } from '@kbn/alerting-v2-episodes-ui/utils/histogram_utils';
+import { AlertingDateRangePicker } from '@kbn/alerting-v2-rule-form';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import { PluginStart } from '@kbn/core-di';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -48,15 +47,11 @@ export const SignalRuleOverview: React.FC = () => {
   const share = useService(PluginStart('share')) as SharePluginStart;
   const application = useService(CoreStart('application'));
   const uiSettings = useService(CoreStart('uiSettings'));
+  const notifications = useService(CoreStart('notifications'));
   const rule = useRule();
   const timeZone = uiSettings.get<string>('dateFormat:tz', 'Browser');
 
   const [timeRange, setTimeRange] = useAlertTimelineUrlState(DEFAULT_ACTIVITY_TIME_RANGE);
-
-  const handleTimeChange = useCallback(
-    (next: OnTimeChangeProps) => setTimeRange({ from: next.start, to: next.end }),
-    [setTimeRange]
-  );
 
   const onBrushRange = useCallback(
     (fromMs: number, toMs: number) =>
@@ -255,16 +250,16 @@ export const SignalRuleOverview: React.FC = () => {
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiSuperDatePicker
-            compressed
-            width="auto"
-            start={timeRange.from}
-            end={timeRange.to}
-            onTimeChange={handleTimeChange}
+          <AlertingDateRangePicker
+            from={timeRange.from}
+            to={timeRange.to}
+            onChange={setTimeRange}
+            data={data}
+            notifications={notifications}
             onRefresh={handleRefresh}
             isLoading={isLoading}
-            showUpdateButton="iconOnly"
-            updateButtonProps={{ fill: false }}
+            showTimeWindowButtons
+            width="auto"
             data-test-subj="signalOverviewDatePicker"
           />
         </EuiFlexItem>

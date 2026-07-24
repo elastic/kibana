@@ -14,11 +14,9 @@ import {
   EuiLoadingChart,
   EuiPanel,
   EuiSpacer,
-  EuiSuperDatePicker,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import type { OnTimeChangeProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getRootEsqlQuery } from '@kbn/alerting-v2-schemas';
 import { CoreStart, useService } from '@kbn/core-di-browser';
@@ -27,6 +25,7 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { deriveAlertTimelineData } from '@kbn/alerting-v2-episodes-ui/alert_timeline';
 import { AlertTimelineLegend } from '@kbn/alerting-v2-episodes-ui/alert_timeline';
+import { AlertingDateRangePicker } from '@kbn/alerting-v2-rule-form';
 import { useRule } from '../../rule_context';
 import { useFetchRuleEvents } from '../../../../hooks/use_fetch_rule_events';
 import { getDiscoverHrefForRuleQuery } from '../../../../utils/discover_href_for_episode';
@@ -43,6 +42,7 @@ export const AlertTimelineSection: React.FC = () => {
   const application = useService(CoreStart('application'));
   const uiSettings = useService(CoreStart('uiSettings'));
   const http = useService(CoreStart('http'));
+  const notifications = useService(CoreStart('notifications'));
   const rule = useRule();
   const groupingFields = rule.grouping?.fields;
   const hasGroupingFields = (groupingFields?.length ?? 0) > 0;
@@ -50,13 +50,6 @@ export const AlertTimelineSection: React.FC = () => {
 
   const [timeRange, setTimeRange] = useAlertTimelineUrlState(DEFAULT_ACTIVITY_TIME_RANGE);
   const [refreshTick, setRefreshTick] = useState(0);
-
-  const handleTimeChange = useCallback(
-    (next: OnTimeChangeProps) => {
-      setTimeRange({ from: next.start, to: next.end });
-    },
-    [setTimeRange]
-  );
 
   const handleRefresh = useCallback(() => setRefreshTick((n) => n + 1), []);
 
@@ -141,16 +134,16 @@ export const AlertTimelineSection: React.FC = () => {
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiSuperDatePicker
-            compressed
-            width="auto"
-            start={timeRange.from}
-            end={timeRange.to}
-            onTimeChange={handleTimeChange}
+          <AlertingDateRangePicker
+            from={timeRange.from}
+            to={timeRange.to}
+            onChange={setTimeRange}
+            data={data}
+            notifications={notifications}
             onRefresh={handleRefresh}
             isLoading={isLoading}
-            showUpdateButton="iconOnly"
-            updateButtonProps={{ fill: false }}
+            showTimeWindowButtons
+            width="auto"
             data-test-subj="alertTimelineDatePicker"
           />
         </EuiFlexItem>

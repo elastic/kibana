@@ -32,12 +32,19 @@ jest.mock('../../rule_context', () => ({
   }),
 }));
 
+jest.mock('@kbn/alerting-v2-rule-form', () => ({
+  AlertingDateRangePicker: ({ 'data-test-subj': dataTestSubj }: { 'data-test-subj'?: string }) => (
+    <div data-test-subj={dataTestSubj} />
+  ),
+}));
+
 const mockServices: Record<string, unknown> = {
   data: {},
   share: {},
   application: { capabilities: {}, navigateToUrl: jest.fn() },
   uiSettings: { get: jest.fn(() => 'Browser') },
   http: { basePath: { prepend: (path: string) => path } },
+  notifications: { toasts: { addDanger: jest.fn(), addWarning: jest.fn() } },
 };
 
 jest.mock('@kbn/core-di-browser', () => ({
@@ -74,6 +81,7 @@ describe('AlertTimelineSection', () => {
   it('renders the section with an empty prompt when there are no episodes', () => {
     renderSection();
     expect(screen.getByTestId('ruleAlertTimelineSection')).toBeInTheDocument();
+    expect(screen.getByTestId('alertTimelineDatePicker')).toBeInTheDocument();
     expect(screen.getByTestId('alertTimelineSectionEmpty')).toBeInTheDocument();
   });
 

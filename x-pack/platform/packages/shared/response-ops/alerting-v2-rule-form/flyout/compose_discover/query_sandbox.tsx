@@ -17,7 +17,6 @@ import {
   EuiPanel,
   EuiSelect,
   EuiSpacer,
-  EuiSuperDatePicker,
   EuiTabs,
   EuiText,
   EuiToolTip,
@@ -28,6 +27,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { CodeEditor, ESQL_LANG_ID, type monaco } from '@kbn/code-editor';
 import { useRuleFormServices } from '../../form/contexts/rule_form_context';
+import { AlertingDateRangePicker } from '../../date_range_picker';
 import { useQueryExecution } from './use_query_execution';
 import { ComposeDiscoverChart } from './compose_discover_chart';
 import {
@@ -139,6 +139,13 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
   const isReadOnly = !onQueryChange;
   const hasTabs = Boolean(tabProps?.tabs?.length);
   const skipTimeFieldResolution = timeFieldOptionsProp !== undefined;
+
+  const handleDateRangeChange = useCallback(
+    ({ from, to }: { from: string; to: string }) => {
+      onDateRangeChange({ dateStart: from, dateEnd: to });
+    },
+    [onDateRangeChange]
+  );
 
   const splitTabs = useMemo(() => {
     if (!tabProps?.tabs?.length) return [];
@@ -302,16 +309,15 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
             data-test-subj="querySandboxTimeField"
           />
         </EuiFlexItem>
-        <EuiFlexItem grow>
-          <EuiSuperDatePicker
-            start={dateRange.dateStart}
-            end={dateRange.dateEnd}
-            onTimeChange={({ start, end }) => {
-              onDateRangeChange({ dateStart: start, dateEnd: end });
-            }}
-            showUpdateButton={false}
-            compressed
-            width="full"
+        <EuiFlexItem grow={false}>
+          <AlertingDateRangePicker
+            from={dateRange.dateStart}
+            to={dateRange.dateEnd}
+            onChange={handleDateRangeChange}
+            data={services.data}
+            notifications={services.notifications}
+            width="auto"
+            data-test-subj="querySandboxDatePicker"
           />
         </EuiFlexItem>
         {headerActions && <EuiFlexItem grow={false}>{headerActions}</EuiFlexItem>}

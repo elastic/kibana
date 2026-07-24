@@ -17,7 +17,6 @@ import {
   EuiFlexItem,
   EuiFilterGroup,
   EuiFieldSearch,
-  EuiSuperDatePicker,
   useEuiTheme,
 } from '@elastic/eui';
 import type { EpisodesFilterState } from '@kbn/alerting-v2-episodes-ui/queries/episodes_query';
@@ -29,7 +28,10 @@ import { AlertEpisodesTagFilter } from '@kbn/alerting-v2-episodes-ui/components/
 import { AlertEpisodesAssigneeFilter } from '@kbn/alerting-v2-episodes-ui/components/filters/assignee_filter';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { HttpStart } from '@kbn/core-http-browser';
+import type { NotificationsStart } from '@kbn/core/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import { AlertingDateRangePicker } from '@kbn/alerting-v2-rule-form';
 import useDebounce from 'react-use/lib/useDebounce';
 import { css } from '@emotion/react';
 import * as i18n from '../translations';
@@ -43,7 +45,13 @@ export interface EpisodesFilterBarProps {
   assigneeUids: string[];
   onRefresh?: () => void;
   isLoading?: boolean;
-  services: { http: HttpStart; expressions: ExpressionsStart; spaces: SpacesPluginStart };
+  services: {
+    http: HttpStart;
+    expressions: ExpressionsStart;
+    spaces: SpacesPluginStart;
+    data: DataPublicPluginStart;
+    notifications: NotificationsStart;
+  };
 }
 
 export const EpisodesFilterBar = ({
@@ -175,18 +183,17 @@ export const EpisodesFilterBar = ({
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiSuperDatePicker
-          compressed
-          start={timeRange.from}
-          end={timeRange.to}
-          onTimeChange={({ start, end }) => onTimeChange({ from: start, to: end })}
+        <AlertingDateRangePicker
+          from={timeRange.from}
+          to={timeRange.to}
+          onChange={onTimeChange}
+          data={services.data}
+          notifications={services.notifications}
           onRefresh={onRefresh}
           isLoading={isLoading}
-          showUpdateButton="iconOnly"
-          updateButtonProps={{
-            fill: false,
-          }}
+          showTimeWindowButtons
           width="auto"
+          data-test-subj="episodesFilterBar-datePicker"
         />
       </EuiFlexItem>
     </EuiFlexGroup>
