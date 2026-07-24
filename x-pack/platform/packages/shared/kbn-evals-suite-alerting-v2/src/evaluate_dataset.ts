@@ -58,37 +58,12 @@ export interface RuleManagementExample extends Example {
     criteria?: string[];
   };
   metadata?: {
-    /** The conversation must call every tool in this list at least once. */
     expectedToolIds?: readonly string[];
-    /**
-     * Alternative tool expectation: the conversation must call at least one of
-     * these tools (e.g. `index_explorer` OR `list_indices`). Put hard
-     * single-tool requirements in {@link expectedToolIds} instead.
-     */
     expectedAnyOfToolIds?: readonly string[];
-    /**
-     * Attachment types (e.g. `rule`, `workflow.yaml`, `action_policy`) that must
-     * each be rendered via a `<render_attachment>` tag whose id resolves to that
-     * type in the conversation attachments.
-     */
     expectRenderAttachment?: ExpectRenderAttachment;
-    /**
-     * Jest-style callback that receives every conversation attachment so the
-     * example can pick and assert against whichever payload(s) it cares about.
-     * In-memory only — not serializable to Phoenix datasets.
-     */
     expectAttachmentData?: ExpectAttachmentDataFn;
-    /**
-     * The conversation must load **every** skill in this list at least once.
-     * Use a one-element array for a single skill. Prefer this over a singular
-     * field — there is no `expectedSkill` on this type (excess-property checks
-     * reject it in specs).
-     */
     expectedSkills?: readonly string[];
-    /** The conversation must NOT load this skill. */
-    shouldNotActivateSkill?: string;
-    /** Human-readable label describing the intent under test. */
-    query_intent?: string;
+    notExpectedSkill?: string;
   } | null;
 }
 
@@ -259,11 +234,13 @@ export const createEvaluateDataset = ({
   evaluators,
   executorClient,
   log,
+  testTitle,
 }: {
   chatClient: RuleManagementChatClient;
   evaluators: DefaultEvaluators;
   executorClient: EvalsExecutorClient;
   log: ToolingLog;
+  testTitle?: string;
 }): EvaluateDataset => {
   return async ({ dataset: { name, description, examples } }) => {
     const dataset = { name, description, examples } satisfies EvaluationDataset;
@@ -276,7 +253,7 @@ export const createEvaluateDataset = ({
         createExpectedRenderAttachmentEvaluator(),
         createExpectedAttachmentDataEvaluator(),
         createCriteriaEvaluator(evaluators),
-      ].map((evaluator) => withLowScoreLogging(evaluator, log))
+      ].map((evaluator) => withLowScoreLogging(evaluator, log, { testTitle }))
     );
 
     await executorClient.runExperiment(

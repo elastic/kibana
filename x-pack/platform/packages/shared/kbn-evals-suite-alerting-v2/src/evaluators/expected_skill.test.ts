@@ -39,9 +39,9 @@ describe('createExpectedSkillEvaluator', () => {
     ).rejects.toThrow(/at least one skill/i);
   });
 
-  it('throws when shouldNotActivateSkill is an empty string', async () => {
+  it('throws when notExpectedSkill is an empty string', async () => {
     await expect(
-      run(outputWithLoadedSkills([]), { shouldNotActivateSkill: '' })
+      run(outputWithLoadedSkills([]), { notExpectedSkill: '' })
     ).rejects.toThrow(/non-empty string/i);
   });
 
@@ -68,14 +68,14 @@ describe('createExpectedSkillEvaluator', () => {
 
   it('scores 1 when a forbidden skill was not loaded', async () => {
     const result = await run(outputWithLoadedSkills([]), {
-      shouldNotActivateSkill: RULE_MANAGEMENT_SKILL_ID,
+      notExpectedSkill: RULE_MANAGEMENT_SKILL_ID,
     });
     expect(result.score).toBe(1);
   });
 
   it('scores 0 when a forbidden skill was loaded', async () => {
     const result = await run(outputWithLoadedSkills([RULE_MANAGEMENT_SKILL_ID]), {
-      shouldNotActivateSkill: RULE_MANAGEMENT_SKILL_ID,
+      notExpectedSkill: RULE_MANAGEMENT_SKILL_ID,
     });
     expect(result.score).toBe(0);
   });

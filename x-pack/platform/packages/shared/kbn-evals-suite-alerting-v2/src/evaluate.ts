@@ -66,8 +66,16 @@ export const evaluate = base.extend<
     },
   ],
   evaluateDataset: [
-    ({ chatClient, evaluators, executorClient, log }, use) => {
-      use(createEvaluateDataset({ chatClient, evaluators, executorClient, log }));
+    ({ chatClient, evaluators, executorClient, log }, use, testInfo) => {
+      use(
+        createEvaluateDataset({
+          chatClient,
+          evaluators,
+          executorClient,
+          log,
+          testTitle: testInfo.title,
+        })
+      );
     },
     { scope: 'test' },
   ],

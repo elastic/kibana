@@ -65,9 +65,9 @@ export const createExpectedSkillEvaluator = (): Evaluator<
   kind: 'CODE',
   evaluate: async ({ output, metadata }) => {
     const expectedSkills = metadata?.expectedSkills;
-    const shouldNotActivateSkill = metadata?.shouldNotActivateSkill;
+    const notExpectedSkill = metadata?.notExpectedSkill;
 
-    if (expectedSkills == null && shouldNotActivateSkill == null) {
+    if (expectedSkills == null && notExpectedSkill == null) {
       return skippedResult('No skill-load expectation for this example');
     }
 
@@ -84,9 +84,9 @@ export const createExpectedSkillEvaluator = (): Evaluator<
       }
     }
 
-    if (shouldNotActivateSkill != null) {
-      if (typeof shouldNotActivateSkill !== 'string' || shouldNotActivateSkill.length === 0) {
-        throw new Error('shouldNotActivateSkill must be a non-empty string');
+    if (notExpectedSkill != null) {
+      if (typeof notExpectedSkill !== 'string' || notExpectedSkill.length === 0) {
+        throw new Error('notExpectedSkill must be a non-empty string');
       }
     }
 
@@ -94,8 +94,8 @@ export const createExpectedSkillEvaluator = (): Evaluator<
     const missingSkills = requiredSkills.filter((skill) => !skillIsPresent(skill, loadedNames));
 
     const checks: boolean[] = [missingSkills.length === 0];
-    if (shouldNotActivateSkill != null) {
-      checks.push(!skillIsPresent(shouldNotActivateSkill, loadedNames));
+    if (notExpectedSkill != null) {
+      checks.push(!skillIsPresent(notExpectedSkill, loadedNames));
     }
 
     const passed = checks.every(Boolean);
@@ -105,7 +105,7 @@ export const createExpectedSkillEvaluator = (): Evaluator<
       metadata: {
         expectedSkills: requiredSkills,
         missingSkills,
-        shouldNotActivateSkill,
+        notExpectedSkill,
         loadedNames,
       },
     };

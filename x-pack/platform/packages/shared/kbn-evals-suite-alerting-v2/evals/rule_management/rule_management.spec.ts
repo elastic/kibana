@@ -50,9 +50,8 @@ evaluate.describe(
                   ],
                 },
                 metadata: {
-                  query_intent: 'Observability routing — host CPU threshold alert',
                   expectedSkills: [RULE_MANAGEMENT_SKILL_ID],
-                  shouldNotActivateSkill: DETECTION_RULE_EDIT_SKILL_ID,
+                  notExpectedSkill: DETECTION_RULE_EDIT_SKILL_ID,
                 },
               },
             ],
@@ -82,9 +81,8 @@ evaluate.describe(
                 ],
               },
               metadata: {
-                query_intent: 'Security routing — brute-force detection rule',
                 expectedSkills: [DETECTION_RULE_EDIT_SKILL_ID],
-                shouldNotActivateSkill: RULE_MANAGEMENT_SKILL_ID,
+                notExpectedSkill: RULE_MANAGEMENT_SKILL_ID,
               },
             },
           ],
@@ -128,9 +126,8 @@ evaluate.describe(
                   ],
                 },
                 metadata: {
-                  query_intent: 'UI entry point — Create with AI Agent guided setup then compose',
                   expectedSkills: [RULE_MANAGEMENT_SKILL_ID],
-                  shouldNotActivateSkill: DETECTION_RULE_EDIT_SKILL_ID,
+                  notExpectedSkill: DETECTION_RULE_EDIT_SKILL_ID,
                   expectedToolIds: [ALERTING_TOOL_IDS.manageRule],
                   expectRenderAttachment: [RULE_ATTACHMENT_TYPE],
                   expectAttachmentData: (attachments) => {
@@ -195,10 +192,8 @@ evaluate.describe(
                   ],
                 },
                 metadata: {
-                  query_intent:
-                    'Fully-specified compose — CPU alert rule with index, threshold, grouping, duration',
                   expectedSkills: [RULE_MANAGEMENT_SKILL_ID],
-                  shouldNotActivateSkill: DETECTION_RULE_EDIT_SKILL_ID,
+                  notExpectedSkill: DETECTION_RULE_EDIT_SKILL_ID,
                   expectedToolIds: [ALERTING_TOOL_IDS.manageRule],
                   expectRenderAttachment: [RULE_ATTACHMENT_TYPE],
                   expectAttachmentData: (attachments) => {
@@ -257,10 +252,8 @@ evaluate.describe(
                   ],
                 },
                 metadata: {
-                  query_intent:
-                    'Vague compose — admin console errors > 3 in 5m (discover + compose)',
                   expectedSkills: [RULE_MANAGEMENT_SKILL_ID],
-                  shouldNotActivateSkill: DETECTION_RULE_EDIT_SKILL_ID,
+                  notExpectedSkill: DETECTION_RULE_EDIT_SKILL_ID,
                   // Index is only named colloquially, so the agent must discover it and
                   // inspect mappings before composing.
                   expectedToolIds: [ALERTING_TOOL_IDS.manageRule, INDEX_MAPPING_TOOL_ID],

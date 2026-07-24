@@ -83,23 +83,23 @@ export const withLowScoreLogging = <
   TTaskOutput extends TaskOutput = TaskOutput
 >(
   evaluator: Evaluator<TExample, TTaskOutput>,
-  log: ToolingLog
+  log: ToolingLog,
+  options?: { testTitle?: string }
 ): Evaluator<TExample, TTaskOutput> => ({
   ...evaluator,
   evaluate: async (params) => {
     const result = await evaluator.evaluate(params);
 
     if (typeof result.score === 'number' && result.score < 1) {
-      const { output, expected, metadata } = params;
+      const { output, expected } = params;
       const conversationOutput: ConversationOutput = isConversationOutput(output) ? output : {};
-      const intent =
-        (metadata as { query_intent?: string } | null)?.query_intent ?? '(no query_intent)';
+      const testTitle = options?.testTitle ?? '(unknown test)';
       const prompts = getPrompts(output as TaskOutput);
       const errors = conversationOutput.errors ?? [];
 
       const sections = [
         `\n━━━━━━ LOW SCORE: ${evaluator.name} = ${result.score} ━━━━━━`,
-        `Intent:      ${intent}`,
+        `Test:        ${testTitle}`,
         result.label ? `Label:       ${result.label}` : undefined,
         `Explanation: ${result.explanation ?? '(none)'}`,
         result.reasoning ? `Reasoning:   ${result.reasoning}` : undefined,

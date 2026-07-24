@@ -63,10 +63,8 @@ evaluate.describe(
                   ],
                 },
                 metadata: {
-                  query_intent:
-                    'Notification setup — compose rule, offer notifications, then action policy on accept',
                   expectedSkills: [RULE_MANAGEMENT_SKILL_ID, WORKFLOW_AUTHORING_SKILL_ID],
-                  shouldNotActivateSkill: DETECTION_RULE_EDIT_SKILL_ID,
+                  notExpectedSkill: DETECTION_RULE_EDIT_SKILL_ID,
                   // The full Part 3 flow also composes the rule and generates the
                   // notification workflow before the policy is wired up.
                   expectedToolIds: [
