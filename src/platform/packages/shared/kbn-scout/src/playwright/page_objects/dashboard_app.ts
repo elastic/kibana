@@ -1149,6 +1149,14 @@ export class DashboardApp {
     return this.page.testSubj.locator(`dashboardListingTitleLink-${title.split(' ').join('-')}`);
   }
 
+  // Project (chrome-next) shows the dashboard title in the app header; classic chrome shows it as
+  // the last breadcrumb. `.or()` keeps callers layout-agnostic without a runtime gate.
+  getAppTitle() {
+    return this.page.testSubj
+      .locator('appHeaderTitle')
+      .or(this.page.testSubj.locator('breadcrumb last'));
+  }
+
   // ============================================================
   // Fullscreen
   // ============================================================

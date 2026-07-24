@@ -36,7 +36,8 @@ const aiIndexBody = {
   sources: [{ type: 'esql', value: `FROM ${DEST_DATA_STREAM} | LIMIT 1` }],
 };
 
-apiTest.describe('context engine AI indices API', { tag: tags.stateful.classic }, () => {
+// Failing: See https://github.com/elastic/kibana/issues/280639
+apiTest.describe.skip('context engine AI indices API', { tag: tags.stateful.classic }, () => {
   let adminApiCredentials: RoleApiCredentials;
   let viewerApiCredentials: RoleApiCredentials;
 
