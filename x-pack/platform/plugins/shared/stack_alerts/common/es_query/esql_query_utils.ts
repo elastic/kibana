@@ -142,11 +142,13 @@ export const toGroupedEsqlQueryHits = async (
   const longAlertIds: Set<string> = new Set<string>();
   const rows: EsqlDocument[] = [];
   const mappedAlertIds: Record<string, Array<string | null>> = {};
+  const mappedAlertIdFields: Record<string, string[]> = {};
   const groupedHits: Record<string, EsqlHit[]> = {};
   for (let r = 0; r < table.values.length; r++) {
     const row = table.values[r];
     const document = rowToDocument(table.columns, row);
-    const mappedAlertId = alertIdFields.filter((a) => !isNil(document[a])).map((a) => document[a]);
+    const filteredAlertIdFields = alertIdFields.filter((a) => !isNil(document[a]));
+    const mappedAlertId = filteredAlertIdFields.map((a) => document[a]);
     if (mappedAlertId.length > 0) {
       const alertId = mappedAlertId.join(',');
       const hit = {
@@ -160,6 +162,7 @@ export const toGroupedEsqlQueryHits = async (
       } else {
         groupedHits[alertId] = [hit];
         mappedAlertIds[alertId] = mappedAlertId;
+        mappedAlertIdFields[alertId] = filteredAlertIdFields;
       }
 
       if (isPreview) {
@@ -181,6 +184,7 @@ export const toGroupedEsqlQueryHits = async (
       buckets: entries(groupedHits).map(([key, value]) => {
         return {
           key: mappedAlertIds[key],
+          keyFields: mappedAlertIdFields[key],
           doc_count: value.length,
           topHitsAgg: {
             hits: {
@@ -264,7 +268,7 @@ export const getAlertIdFields = (query: string, resultColumns: EsqlResultColumn[
 };
 
 const getLastStatsCommandIndex = (commands: ESQLAstCommand[]): number =>
-  findLastIndex(commands, (c) => c.name === 'stats');
+  findLastIndex(commands, (c) => c.name === 'stats' || c.name === 'inline stats');
 
 const getByOption = (astCommand: ESQLAstCommand): ESQLCommandOption | undefined => {
   for (const statsArg of astCommand.args) {

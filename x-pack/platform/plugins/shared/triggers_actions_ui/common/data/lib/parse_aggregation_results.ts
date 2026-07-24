@@ -89,11 +89,12 @@ export const parseAggregationResults = ({
     if (resultLimit && results.results.length === resultLimit) break;
 
     const groupName = `${groupBucket?.key}`;
-    const groupKeys = [termField ?? []].flat();
+    // group buckets may carry their own field names in keyFields when its key values were filtered
+    const groupFields = groupBucket?.keyFields ?? termField;
+    const groupKeys = [groupFields ?? []].flat();
     const groupValues = [groupBucket.key].flat();
-
     const groups =
-      termField && groupBucket?.key
+      groupFields && groupBucket?.key
         ? groupKeys.reduce<Group[]>((resultGroups, groupByItem, groupIndex) => {
             resultGroups.push({
               field: groupByItem,
@@ -102,15 +103,13 @@ export const parseAggregationResults = ({
             return resultGroups;
           }, [])
         : undefined;
-
     const groupingObject =
-      termField && groupBucket?.key
+      groupFields && groupBucket?.key
         ? groupKeys.reduce<Record<string, unknown>>((resultGroups, groupByItem, groupIndex) => {
             resultGroups[groupByItem] = groupValues[groupIndex];
             return resultGroups;
           }, {})
         : undefined;
-
     const sourceFields: { [key: string]: string[] } = {};
     if (generateSourceFieldsFromHits) {
       sourceFieldsParams.forEach((field) => {
