@@ -15,10 +15,7 @@ const ALLOWED_BASE_COMMANDS = new Set(['from', 'where']);
 const TRAILING_COMMANDS = new Set(['sort', 'limit', 'keep']);
 
 interface FilterOnlyParse {
-  /**
-   * Query source with the trailing run of SORT/LIMIT/KEEP peeled off. METADATA
-   * is preserved here — the compiler strips it separately.
-   */
+  /** Query source with the trailing run of SORT/LIMIT/KEEP peeled off. */
   base: string;
   /** Lowercased command names of the peeled base, in order. */
   commandNames: string[];
@@ -90,8 +87,8 @@ export function stripTrailingPipeCommands(query: string): string {
 /**
  * Returns true when a stored MATCH KI can be compiled into a count metric-series
  * breach query. Eligible shape, after peeling trailing SORT/LIMIT/KEEP: `FROM`
- * (optional METADATA) plus zero or more `WHERE` clauses — no mid-pipeline STATS,
- * KEEP, SORT, LIMIT, EVAL, etc. Unparseable queries are ineligible (fail closed).
+ * plus zero or more `WHERE` clauses — no mid-pipeline STATS, KEEP, SORT, LIMIT,
+ * EVAL, etc. Unparseable queries are ineligible (fail closed).
  *
  * Ineligible queries must fail closed at install/promote — never fall back to
  * copying per-document rows into `.rule-events`.
@@ -102,8 +99,8 @@ export function canCompileMatchMetric(esqlQuery: string): boolean {
 
 /**
  * Shared base builder for the compiler: parses once, enforces filter-only
- * eligibility, and returns the peeled base (METADATA still present — the
- * compiler strips it). Throws when the query is ineligible or unparseable.
+ * eligibility, and returns the peeled base. Throws when the query is
+ * ineligible or unparseable.
  */
 export function buildMatchMetricBase(esqlQuery: string): string {
   const { base, eligible } = parseFilterOnly(esqlQuery);

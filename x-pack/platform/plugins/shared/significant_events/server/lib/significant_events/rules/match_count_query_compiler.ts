@@ -5,16 +5,12 @@
  * 2.0.
  */
 
-import { stripMetadata } from '@kbn/streams-schema';
 import { buildMatchMetricBase } from './can_compile_match_metric';
 import {
   METRIC_SERIES_BUCKET_FIELD,
   METRIC_SERIES_LIMIT,
   METRIC_SERIES_VALUE_FIELD,
 } from './metric_series_contract';
-
-/** Strip all METADATA columns; count series does not need `_id` / `_source`. */
-const METADATA_TO_STRIP = ['_id', '_source', '_index', '_version'] as const;
 
 /**
  * Compiles a filter-only MATCH KI into an Alerting v2 breach query that emits
@@ -25,8 +21,8 @@ const METADATA_TO_STRIP = ['_id', '_source', '_index', '_version'] as const;
  */
 export function compileMatchCountBreachQuery(esqlQuery: string, timestampField: string): string {
   // Parse once: assert filter-only eligibility and peel trailing SORT/LIMIT/KEEP
-  // via AST source-slicing (never a text regex), then drop METADATA columns.
-  const base = stripMetadata(buildMatchMetricBase(esqlQuery), [...METADATA_TO_STRIP]);
+  // via AST source-slicing (never a text regex).
+  const base = buildMatchMetricBase(esqlQuery);
 
   // Keep `bucket` as a datetime (no TO_LONG here). Alerting persists the ES|QL
   // date value; readers project with TO_DATETIME(TO_LONG(FIELD_EXTRACT(...))).

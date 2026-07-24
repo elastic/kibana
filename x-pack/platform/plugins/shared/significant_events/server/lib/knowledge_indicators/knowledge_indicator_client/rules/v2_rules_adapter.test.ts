@@ -43,7 +43,7 @@ const createDefinition: SignificantEventsRuleDefinition = {
   name: 'High error rate (match count)',
   streamName: 'my-stream',
   timestampField: '@timestamp',
-  esqlQuery: 'FROM logs-* METADATA _id, _source | WHERE level == "error"',
+  esqlQuery: 'FROM logs-* | WHERE level == "error"',
   schedule: { interval: METRIC_SERIES_EVERY },
 };
 
@@ -51,7 +51,7 @@ const updateDefinition: SignificantEventsRuleDefinition = {
   name: 'Updated title (match count)',
   streamName: 'my-stream',
   timestampField: '@timestamp',
-  esqlQuery: 'FROM logs-* METADATA _id, _source | WHERE level == "error"',
+  esqlQuery: 'FROM logs-* | WHERE level == "error"',
   schedule: { interval: METRIC_SERIES_EVERY },
 };
 
@@ -60,7 +60,6 @@ function expectMetricSeriesBreach(query: string) {
   expect(query).toContain('KEEP bucket, metric_value');
   expect(query).toContain('SORT bucket DESC');
   expect(query).toContain(`LIMIT ${METRIC_SERIES_LIMIT}`);
-  expect(query).not.toContain('METADATA');
   expect(query).not.toContain('LIMIT 1000');
   expect(query).not.toContain('TO_LONG');
   expect(query).not.toContain('DATE_FORMAT');
@@ -157,38 +156,6 @@ describe('RulesAdapterV2', () => {
       };
       expect(data.time_field).toBe('event.ingested');
       expect(data.query.breach.query).toContain('BUCKET(event.ingested, 1 minute)');
-    });
-
-    it('includes stream and metric-series tags', async () => {
-      const mock = makeRulesClientMock();
-      mock.createRule.mockResolvedValue({} as never);
-      const adapter = makeAdapter(mock);
-      await adapter.createRule('rule-1', {
-        ...createDefinition,
-        streamName: 'web-server.errors',
-      });
-
-      const data = lastCreateCall(mock).data as { metadata: { tags: string[] } };
-      expect(data.metadata.tags).toEqual([
-        'sigevents:stream:web-server.errors',
-        METRIC_SERIES_RULE_TAG,
-      ]);
-    });
-
-    it('strips METADATA and does not append the author LIMIT before the count', async () => {
-      const mock = makeRulesClientMock();
-      mock.createRule.mockResolvedValue({} as never);
-      const adapter = makeAdapter(mock);
-      await adapter.createRule('rule-1', {
-        ...createDefinition,
-        esqlQuery: 'FROM logs-* METADATA _id, _source | WHERE level == "error" | LIMIT 500',
-      });
-
-      const data = lastCreateCall(mock).data as {
-        query: { breach: { query: string } };
-      };
-      expectMetricSeriesBreach(data.query.breach.query);
-      expect(data.query.breach.query).not.toContain('| LIMIT 500');
     });
   });
 

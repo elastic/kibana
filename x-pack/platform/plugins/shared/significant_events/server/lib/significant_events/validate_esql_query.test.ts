@@ -133,7 +133,7 @@ describe('validateEsqlQueryForStreamOrThrow', () => {
 
       expect(() =>
         validateEsqlQueryForStreamOrThrow({
-          esqlQuery: 'FROM logs, logs.* METADATA _id, _source',
+          esqlQuery: 'FROM logs, logs.*',
           stream,
         })
       ).not.toThrow();
@@ -144,7 +144,7 @@ describe('validateEsqlQueryForStreamOrThrow', () => {
 
       expect(() =>
         validateEsqlQueryForStreamOrThrow({
-          esqlQuery: 'FROM logs.*, logs METADATA _id, _source',
+          esqlQuery: 'FROM logs.*, logs',
           stream,
         })
       ).toThrow('ES|QL query must use FROM logs, logs.*');
@@ -155,7 +155,7 @@ describe('validateEsqlQueryForStreamOrThrow', () => {
 
       expect(() =>
         validateEsqlQueryForStreamOrThrow({
-          esqlQuery: 'FROM logs METADATA _id, _source',
+          esqlQuery: 'FROM logs',
           stream,
         })
       ).toThrow('ES|QL query must use FROM logs, logs.*');
@@ -166,7 +166,7 @@ describe('validateEsqlQueryForStreamOrThrow', () => {
 
       expect(() =>
         validateEsqlQueryForStreamOrThrow({
-          esqlQuery: 'FROM logs.* METADATA _id, _source',
+          esqlQuery: 'FROM logs.*',
           stream,
         })
       ).toThrow('ES|QL query must use FROM logs, logs.*');
@@ -177,7 +177,7 @@ describe('validateEsqlQueryForStreamOrThrow', () => {
 
       expect(() =>
         validateEsqlQueryForStreamOrThrow({
-          esqlQuery: 'FROM metrics, metrics.* METADATA _id, _source',
+          esqlQuery: 'FROM metrics, metrics.*',
           stream,
         })
       ).toThrow('ES|QL query must use FROM logs, logs.*');
@@ -190,7 +190,7 @@ describe('validateEsqlQueryForStreamOrThrow', () => {
 
       expect(() =>
         validateEsqlQueryForStreamOrThrow({
-          esqlQuery: 'FROM metrics-custom METADATA _id, _source',
+          esqlQuery: 'FROM metrics-custom',
           stream,
         })
       ).not.toThrow();
@@ -201,7 +201,7 @@ describe('validateEsqlQueryForStreamOrThrow', () => {
 
       expect(() =>
         validateEsqlQueryForStreamOrThrow({
-          esqlQuery: 'FROM metrics-custom, metrics-custom.* METADATA _id, _source',
+          esqlQuery: 'FROM metrics-custom, metrics-custom.*',
           stream,
         })
       ).not.toThrow();
@@ -212,7 +212,7 @@ describe('validateEsqlQueryForStreamOrThrow', () => {
 
       expect(() =>
         validateEsqlQueryForStreamOrThrow({
-          esqlQuery: 'FROM metrics-custom.* METADATA _id, _source',
+          esqlQuery: 'FROM metrics-custom.*',
           stream,
         })
       ).toThrow(
@@ -225,7 +225,7 @@ describe('validateEsqlQueryForStreamOrThrow', () => {
 
       expect(() =>
         validateEsqlQueryForStreamOrThrow({
-          esqlQuery: 'FROM logs METADATA _id, _source',
+          esqlQuery: 'FROM logs',
           stream,
         })
       ).toThrow(
@@ -240,7 +240,7 @@ describe('validateEsqlQueryForStreamOrThrow', () => {
 
       expect(() =>
         validateEsqlQueryForStreamOrThrow({
-          esqlQuery: 'FROM $.query METADATA _id, _source',
+          esqlQuery: 'FROM $.query',
           stream,
         })
       ).not.toThrow();
@@ -251,7 +251,7 @@ describe('validateEsqlQueryForStreamOrThrow', () => {
 
       expect(() =>
         validateEsqlQueryForStreamOrThrow({
-          esqlQuery: 'FROM "$.query" METADATA _id, _source',
+          esqlQuery: 'FROM "$.query"',
           stream,
         })
       ).not.toThrow();
@@ -262,7 +262,7 @@ describe('validateEsqlQueryForStreamOrThrow', () => {
 
       expect(() =>
         validateEsqlQueryForStreamOrThrow({
-          esqlQuery: 'FROM query, query.* METADATA _id, _source',
+          esqlQuery: 'FROM query, query.*',
           stream,
         })
       ).toThrow('ES|QL query must use FROM $.query');
@@ -273,45 +273,11 @@ describe('validateEsqlQueryForStreamOrThrow', () => {
 
       expect(() =>
         validateEsqlQueryForStreamOrThrow({
-          esqlQuery: 'FROM $.other METADATA _id, _source',
+          esqlQuery: 'FROM $.other',
           stream,
         })
       ).toThrow('ES|QL query must use FROM $.query');
     });
   });
 
-  describe('METADATA is optional', () => {
-    it('should accept a query without METADATA', () => {
-      const stream = createWiredStreamDefinition('logs');
-
-      expect(() =>
-        validateEsqlQueryForStreamOrThrow({
-          esqlQuery: 'FROM logs, logs.* | WHERE level == "error"',
-          stream,
-        })
-      ).not.toThrow();
-    });
-
-    it('should still accept METADATA _id, _source (compiler strips it later)', () => {
-      const stream = createWiredStreamDefinition('logs');
-
-      expect(() =>
-        validateEsqlQueryForStreamOrThrow({
-          esqlQuery: 'FROM logs, logs.* METADATA _id, _source',
-          stream,
-        })
-      ).not.toThrow();
-    });
-
-    it('should accept a partial METADATA list', () => {
-      const stream = createWiredStreamDefinition('logs');
-
-      expect(() =>
-        validateEsqlQueryForStreamOrThrow({
-          esqlQuery: 'FROM logs, logs.* METADATA _id',
-          stream,
-        })
-      ).not.toThrow();
-    });
-  });
 });

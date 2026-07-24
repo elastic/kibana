@@ -8,7 +8,6 @@
 import type { Client } from '@elastic/elasticsearch';
 import type { BulkOperationContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { ensureMetadata } from '@kbn/streams-schema';
 import type { SeedContext, SeededQuery } from '../types';
 import { deterministicId } from '../types';
 
@@ -48,7 +47,7 @@ export async function seedAlerts(
   await esClient.indices.refresh({ index: `${ctx.streamName}*` });
 
   for (const seededQuery of seededQueries) {
-    const queryText = ensureMetadata(seededQuery.esql);
+    const queryText = seededQuery.esql;
 
     const esqlResult = await esClient.esql.query({
       query: queryText,

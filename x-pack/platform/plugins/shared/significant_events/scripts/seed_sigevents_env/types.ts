@@ -29,8 +29,7 @@ export function getSynthtraceDefaultStream(): string {
 /**
  * Builds the required ESQL FROM preamble for wired streams.
  * Both the stream and its wildcard child pattern are required
- * (validated server-side by validateEsqlQueryForStreamOrThrow). METADATA is no
- * longer required — the metric-series compiler strips it regardless.
+ * (validated server-side by validateEsqlQueryForStreamOrThrow).
  */
 export const fromStream = (streamName: string) => `FROM ${streamName}, ${streamName}.*`;
 

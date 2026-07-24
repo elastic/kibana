@@ -75,7 +75,7 @@ describe('createQueryKnowledgeIndicatorToolHandler', () => {
       queryInput: {
         title: 'Suspicious query',
         description: 'Find suspicious events',
-        esql: { query: 'FROM logs.test, logs.test.* METADATA _id, _source' },
+        esql: { query: 'FROM logs.test, logs.test.*' },
       },
       logger,
     });
@@ -101,7 +101,7 @@ describe('createQueryKnowledgeIndicatorToolHandler', () => {
         queryInput: {
           title: 'Suspicious query',
           description: 'Find suspicious events',
-          esql: { query: 'FROM logs.test, logs.test.* METADATA _id, _source' },
+          esql: { query: 'FROM logs.test, logs.test.*' },
         },
         logger,
       })

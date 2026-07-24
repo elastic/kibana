@@ -181,7 +181,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               description: '',
               esql: {
                 query:
-                  'FROM logs.otel.web-app,logs.otel.web-app.* METADATA _id, _source | WHERE KQL("attributes.response_time_ms > 100")',
+                  'FROM logs.otel.web-app,logs.otel.web-app.* | WHERE KQL("attributes.response_time_ms > 100")',
               },
             },
           },
@@ -352,7 +352,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(restoredQueries.queries).to.have.length(1);
         expect(restoredQueries.queries[0].title).to.eql('Slow Requests');
         expect(restoredQueries.queries[0].esql.query).to.eql(
-          'FROM logs.otel.web-app,logs.otel.web-app.* METADATA _id, _source | WHERE KQL("attributes.response_time_ms > 100")'
+          'FROM logs.otel.web-app,logs.otel.web-app.* | WHERE KQL("attributes.response_time_ms > 100")'
         );
 
         // Verify the underlying alerting rule also survived and is still enabled

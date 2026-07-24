@@ -48,11 +48,8 @@ describe('canCompileMatchMetric', () => {
     expect(canCompileMatchMetric('FROM logs-* | WHERE level == "error"')).toBe(true);
   });
 
-  it('accepts FROM-only, METADATA, and trailing SORT/LIMIT', () => {
+  it('accepts FROM-only and trailing SORT/LIMIT', () => {
     expect(canCompileMatchMetric('FROM logs-*')).toBe(true);
-    expect(
-      canCompileMatchMetric('FROM logs-* METADATA _id, _source | WHERE level == "error"')
-    ).toBe(true);
     expect(
       canCompileMatchMetric(
         'FROM logs-* | WHERE level == "error" | SORT @timestamp DESC | LIMIT 10'
@@ -98,12 +95,11 @@ describe('canCompileMatchMetric', () => {
 describe('compileMatchCountBreachQuery', () => {
   it('compiles a MATCH KI into a closed-minute count series', () => {
     const compiled = compileMatchCountBreachQuery(
-      'FROM logs-* METADATA _id, _source | WHERE level == "error"',
+      'FROM logs-* | WHERE level == "error"',
       '@timestamp'
     );
 
     expect(compiled).toContain('FROM logs-*');
-    expect(compiled).not.toContain('METADATA');
     expect(compiled).not.toContain('?_tend');
     expect(compiled).toContain(
       'STATS metric_value = COUNT(*) BY bucket = BUCKET(@timestamp, 1 minute)'
