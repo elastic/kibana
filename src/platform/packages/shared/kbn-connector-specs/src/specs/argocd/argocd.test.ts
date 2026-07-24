@@ -50,9 +50,9 @@ describe('ArgocdConnector', () => {
   });
 
   describe('auth', () => {
-    it('recommends the argocd auth type', () => {
+    it('recommends the bearer_with_tls auth type', () => {
       const auth = ArgocdConnector.auth?.types.find(
-        (t): t is AuthTypeDef => typeof t === 'object' && t.type === 'argocd'
+        (t): t is AuthTypeDef => typeof t === 'object' && t.type === 'bearer_with_tls'
       );
       expect(auth).toBeDefined();
       expect(auth?.isRecommended).toBe(true);
@@ -65,8 +65,10 @@ describe('ArgocdConnector', () => {
         isEarsExperimentalEnabled: false,
       });
 
-      expect(schema.safeParse({ authType: 'argocd', token: 'argo-token' }).success).toBe(true);
-      expect(schema.safeParse({ authType: 'argocd', token: '' }).success).toBe(false);
+      expect(schema.safeParse({ authType: 'bearer_with_tls', token: 'argo-token' }).success).toBe(
+        true
+      );
+      expect(schema.safeParse({ authType: 'bearer_with_tls', token: '' }).success).toBe(false);
     });
   });
 

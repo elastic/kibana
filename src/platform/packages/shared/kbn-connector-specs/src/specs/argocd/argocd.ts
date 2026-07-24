@@ -420,9 +420,51 @@ export const ArgocdConnector: ConnectorSpec = {
   auth: {
     types: [
       {
-        type: 'argocd',
+        type: 'bearer_with_tls',
         isRecommended: true,
         defaults: {},
+        overrides: {
+          label: i18n.translate('core.kibanaConnectorSpecs.argocd.auth.bearerWithTls.label', {
+            defaultMessage: 'API token',
+          }),
+          meta: {
+            token: {
+              label: i18n.translate(
+                'core.kibanaConnectorSpecs.argocd.auth.bearerWithTls.tokenLabel',
+                { defaultMessage: 'Token' }
+              ),
+              helpText: i18n.translate(
+                'core.kibanaConnectorSpecs.argocd.auth.bearerWithTls.tokenHelpText',
+                {
+                  defaultMessage:
+                    'A long-lived Argo CD account or project-role API token. Do not use short-lived session JWTs from username/password login.',
+                }
+              ),
+            },
+            caCert: {
+              label: i18n.translate(
+                'core.kibanaConnectorSpecs.argocd.auth.bearerWithTls.caLabel',
+                { defaultMessage: 'Server CA certificate (PEM)' }
+              ),
+              helpText: i18n.translate(
+                'core.kibanaConnectorSpecs.argocd.auth.bearerWithTls.caHelpText',
+                {
+                  defaultMessage:
+                    'Paste the PEM-encoded certificate authority used to verify the Argo CD server. Leave empty to rely on the system trust store or to disable verification.',
+                }
+              ),
+            },
+            verificationMode: {
+              helpText: i18n.translate(
+                'core.kibanaConnectorSpecs.argocd.auth.bearerWithTls.verificationModeHelpText',
+                {
+                  defaultMessage:
+                    'How to verify the Argo CD server TLS certificate. "full" verifies the certificate and hostname, "certificate" verifies the certificate only, and "none" disables verification (not recommended).',
+                }
+              ),
+            },
+          },
+        },
       },
     ],
   },

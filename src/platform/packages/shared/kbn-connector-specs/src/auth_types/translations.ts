@@ -356,87 +356,51 @@ export const GCP_SERVICE_ACCOUNT_SCOPE_HELP_TEXT = i18n.translate(
   }
 );
 
-export const ARGOCD_AUTH_LABEL = i18n.translate('connectorSpecs.argocdAuth.label', {
+export const BEARER_WITH_TLS_AUTH_LABEL = i18n.translate('connectorSpecs.bearerWithTlsAuth.label', {
   defaultMessage: 'API token',
 });
 
-export const ARGOCD_AUTH_TOKEN_LABEL = i18n.translate('connectorSpecs.argocdAuth.token.label', {
-  defaultMessage: 'Token',
-});
-
-export const ARGOCD_AUTH_TOKEN_REQUIRED_MESSAGE = i18n.translate(
-  'connectorSpecs.argocdAuth.token.requiredMessage',
-  {
-    defaultMessage: 'An Argo CD API token is required.',
-  }
-);
-
-export const ARGOCD_AUTH_CA_LABEL = i18n.translate('connectorSpecs.argocdAuth.ca.label', {
-  defaultMessage: 'Server CA certificate (PEM)',
-});
-
-export const ARGOCD_AUTH_CA_HELP_TEXT = i18n.translate('connectorSpecs.argocdAuth.ca.helpText', {
-  defaultMessage:
-    'Paste the PEM-encoded certificate authority used to verify the Argo CD server. Leave empty to rely on the system trust store or to disable verification.',
-});
-
-export const ARGOCD_AUTH_VERIFICATION_MODE_LABEL = i18n.translate(
-  'connectorSpecs.argocdAuth.verificationMode.label',
-  {
-    defaultMessage: 'Verification mode',
-  }
-);
-
-export const ARGOCD_AUTH_VERIFICATION_MODE_HELP_TEXT = i18n.translate(
-  'connectorSpecs.argocdAuth.verificationMode.helpText',
-  {
-    defaultMessage:
-      'How to verify the Argo CD server TLS certificate. "full" verifies the certificate and hostname, "certificate" verifies the certificate only, and "none" disables verification (not recommended).',
-  }
-);
-
-export const KUBERNETES_AUTH_LABEL = i18n.translate('connectorSpecs.kubernetesAuth.label', {
-  defaultMessage: 'Service account token',
-});
-
-export const KUBERNETES_AUTH_TOKEN_LABEL = i18n.translate(
-  'connectorSpecs.kubernetesAuth.token.label',
+export const BEARER_WITH_TLS_AUTH_TOKEN_LABEL = i18n.translate(
+  'connectorSpecs.bearerWithTlsAuth.token.label',
   {
     defaultMessage: 'Token',
   }
 );
 
-export const KUBERNETES_AUTH_TOKEN_REQUIRED_MESSAGE = i18n.translate(
-  'connectorSpecs.kubernetesAuth.token.requiredMessage',
+export const BEARER_WITH_TLS_AUTH_TOKEN_REQUIRED_MESSAGE = i18n.translate(
+  'connectorSpecs.bearerWithTlsAuth.token.requiredMessage',
   {
-    defaultMessage: 'A service account bearer token is required.',
+    defaultMessage: 'An API token is required.',
   }
 );
 
-export const KUBERNETES_AUTH_CA_LABEL = i18n.translate('connectorSpecs.kubernetesAuth.ca.label', {
-  defaultMessage: 'Cluster CA certificate (PEM)',
-});
+export const BEARER_WITH_TLS_AUTH_CA_LABEL = i18n.translate(
+  'connectorSpecs.bearerWithTlsAuth.ca.label',
+  {
+    defaultMessage: 'CA certificate (PEM)',
+  }
+);
 
-export const KUBERNETES_AUTH_CA_HELP_TEXT = i18n.translate(
-  'connectorSpecs.kubernetesAuth.ca.helpText',
+export const BEARER_WITH_TLS_AUTH_CA_HELP_TEXT = i18n.translate(
+  'connectorSpecs.bearerWithTlsAuth.ca.helpText',
   {
     defaultMessage:
-      'Paste the PEM-encoded certificate authority used to verify the API server. Leave empty to rely on the system trust store or to disable verification.',
+      'Paste the PEM-encoded certificate authority used to verify the server. Leave empty to rely on the system trust store or to disable verification.',
   }
 );
 
-export const KUBERNETES_AUTH_VERIFICATION_MODE_LABEL = i18n.translate(
-  'connectorSpecs.kubernetesAuth.verificationMode.label',
+export const BEARER_WITH_TLS_AUTH_VERIFICATION_MODE_LABEL = i18n.translate(
+  'connectorSpecs.bearerWithTlsAuth.verificationMode.label',
   {
     defaultMessage: 'Verification mode',
   }
 );
 
-export const KUBERNETES_AUTH_VERIFICATION_MODE_HELP_TEXT = i18n.translate(
-  'connectorSpecs.kubernetesAuth.verificationMode.helpText',
+export const BEARER_WITH_TLS_AUTH_VERIFICATION_MODE_HELP_TEXT = i18n.translate(
+  'connectorSpecs.bearerWithTlsAuth.verificationMode.helpText',
   {
     defaultMessage:
-      'How to verify the API server TLS certificate. "full" verifies the certificate and hostname, "certificate" verifies the certificate only, and "none" disables verification (not recommended).',
+      'How to verify the server TLS certificate. "full" verifies the certificate and hostname, "certificate" verifies the certificate only, and "none" disables verification (not recommended).',
   }
 );
 

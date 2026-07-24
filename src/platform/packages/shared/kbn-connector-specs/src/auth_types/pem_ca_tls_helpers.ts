@@ -12,22 +12,17 @@ import { isString } from 'lodash';
 import type { SSLSettings } from '@kbn/actions-utils';
 import type { AuthContext } from '../connector_spec';
 import { configureAxiosInstanceWithSsl } from '../lib/configure_axios_instance_with_ssl';
-import type { KubernetesTlsFields } from './kubernetes_tls_schema';
+import type { PemCaTlsFields } from './pem_ca_tls_schema';
 
 /**
- * TLS settings shared by every Kubernetes auth variant. Kubernetes API servers
- * almost always present a certificate signed by a private (cluster) CA, so all
- * variants let the user paste the PEM CA and pick a verification mode.
+ * Applies an optional pasted PEM CA / verification mode to the axios instance.
+ * The CA is provided as PEM text (not a base64-encoded file upload), so it is
+ * passed to the SSL layer as a UTF-8 buffer.
  */
-/**
- * Applies the cluster CA / verification mode to the axios instance. The CA is
- * provided as PEM text (not a base64-encoded file upload), so it is passed to
- * the SSL layer as a UTF-8 buffer.
- */
-export const configureKubernetesTls = (
+export const configurePemCaTls = (
   ctx: AuthContext,
   axiosInstance: AxiosInstance,
-  secret: KubernetesTlsFields
+  secret: PemCaTlsFields
 ): AxiosInstance => {
   const sslOverrides: SSLSettings = {
     ...(isString(secret.verificationMode) ? { verificationMode: secret.verificationMode } : {}),
