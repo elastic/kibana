@@ -112,7 +112,7 @@ describe('useRelayAppBindings', () => {
     expect(result.current.isLoading).toBe(true);
   });
 
-  it('returns empty bindings on error without throwing', async () => {
+  it('returns empty bindings and shows an error toast on error without throwing', async () => {
     httpGet.mockRejectedValue(new Error('relay error'));
     const { wrapper } = createSetup();
     const { result } = renderHook(() => useRelayAppBindings(true), { wrapper });
@@ -120,6 +120,10 @@ describe('useRelayAppBindings', () => {
     await flush();
     expect(result.current.bindings).toEqual([]);
     expect(result.current.isLoading).toBe(false);
+    expect(addError).toHaveBeenCalledWith(
+      expect.any(Error),
+      expect.objectContaining({ title: expect.stringContaining('channels') })
+    );
   });
 });
 

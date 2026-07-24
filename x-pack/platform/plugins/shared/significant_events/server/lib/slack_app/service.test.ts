@@ -659,7 +659,7 @@ describe('SlackAppService', () => {
       });
     });
 
-    it('returns empty bindings and logs a warning when the bindings API call fails', async () => {
+    it('rethrows and logs a warning when the bindings API call fails', async () => {
       const { server, soClient } = createHarnessWithListBindings();
       soClient.get.mockResolvedValue({
         attributes: {
@@ -667,13 +667,17 @@ describe('SlackAppService', () => {
           tenantKey: 'tenant-A',
         },
       });
-      listBindings.mockRejectedValue(
-        new RelayRequestError('/v1/slack/tenants/tenant-A/bindings', 403, 'not installed')
+      const relayError = new RelayRequestError(
+        '/v1/slack/tenants/tenant-A/bindings',
+        403,
+        'not installed'
       );
+      listBindings.mockRejectedValue(relayError);
 
-      await expect(new SlackAppService(server).listBindings(request)).resolves.toEqual({
-        bindings: [],
-      });
+      await expect(new SlackAppService(server).listBindings(request)).rejects.toBe(relayError);
+      expect(server.logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to list bindings from Relay')
+      );
     });
   });
 

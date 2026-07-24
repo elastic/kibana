@@ -112,7 +112,12 @@ const bindingsSlackAppRoute = createServerRoute({
     }),
   }),
   handler: async ({ params, request, server }): Promise<SlackAppBindingsResponse> => {
-    return new SlackAppService(server).listBindings(request, params.query);
+    try {
+      return await new SlackAppService(server).listBindings(request, params.query);
+    } catch (error) {
+      if (error instanceof RelayRequestError) throwRelayError(error);
+      throw error;
+    }
   },
 });
 

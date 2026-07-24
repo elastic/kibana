@@ -344,7 +344,7 @@ export class SlackAppService {
       });
     } catch (error) {
       this.logger.warn(`Failed to list bindings from Relay: ${this.toErrorMessage(error)}`);
-      return { bindings: [] };
+      throw error;
     }
 
     // The Relay returns only this deployment's own SUB bindings (the connected channels),

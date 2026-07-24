@@ -46,7 +46,7 @@ export interface UseRelayAppBindings {
  */
 export function useRelayAppBindings(enabled: boolean, cursor?: string): UseRelayAppBindings {
   const {
-    core: { http },
+    core: { http, notifications },
   } = useKibana();
 
   const query = useQuery<SlackAppBindingsResponse, Error>({
@@ -59,6 +59,14 @@ export function useRelayAppBindings(enabled: boolean, cursor?: string): UseRelay
     enabled,
     retry: false,
     keepPreviousData: true,
+    onError: (error) => {
+      notifications.toasts.addError(getFormattedError(error), {
+        title: i18n.translate(
+          'xpack.streams.significantEventsDiscovery.settings.apps.listBindingsError',
+          { defaultMessage: 'Failed to load connected Slack channels' }
+        ),
+      });
+    },
     // Connected channels only change via bind/unbind in this UI (which invalidate this
     // query), so cached pages stay fresh and paging back to one avoids a redundant fetch.
     staleTime: 30_000,
