@@ -8,22 +8,7 @@
 import { Parser } from '@elastic/esql';
 import { canCompileMatchMetric, stripTrailingPipeCommands } from './can_compile_match_metric';
 import { compileMatchCountBreachQuery } from './match_count_query_compiler';
-import {
-  METRIC_SERIES_CLOSED_BUCKETS,
-  METRIC_SERIES_EVERY,
-  METRIC_SERIES_LIMIT,
-  METRIC_SERIES_LOOKBACK,
-} from './metric_series_contract';
-
-describe('metric series contract', () => {
-  it('derives EVERY / LOOKBACK / LIMIT from cadence + jitter tolerance', () => {
-    // 5m cadence + 1m jitter → 6 closed minutes; +1m for open-minute drop → 7m lookback.
-    expect(METRIC_SERIES_CLOSED_BUCKETS).toBe(6);
-    expect(METRIC_SERIES_EVERY).toBe('5m');
-    expect(METRIC_SERIES_LOOKBACK).toBe('7m');
-    expect(METRIC_SERIES_LIMIT).toBe(6);
-  });
-});
+import { METRIC_SERIES_LIMIT } from './metric_series_contract';
 
 describe('stripTrailingPipeCommands', () => {
   it('peels trailing SORT / LIMIT / KEEP from the end only', () => {

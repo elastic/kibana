@@ -27,17 +27,10 @@ const makeQueryLink = (severityScore?: number): QueryLink => ({
 });
 
 describe('toRuleDefinition', () => {
-  it.each([[85], [80], [60], [undefined]])(
-    'always uses metric-series execution interval for severity %s',
-    (severityScore) => {
-      expect(toRuleDefinition(makeQueryLink(severityScore)).schedule.interval).toBe(
-        METRIC_SERIES_EVERY
-      );
-    }
-  );
-
   it('maps a query link to the v2-native Significant Events rule definition', () => {
-    expect(toRuleDefinition(makeQueryLink())).toEqual({
+    // Severity no longer changes execution cadence — critical vs default only
+    // affects analysis profiles, so a high score still uses METRIC_SERIES_EVERY.
+    expect(toRuleDefinition(makeQueryLink(85))).toEqual({
       name: `Error logs${METRIC_SERIES_RULE_NAME_SUFFIX}`,
       streamName: 'logs.test',
       timestampField: '@timestamp',

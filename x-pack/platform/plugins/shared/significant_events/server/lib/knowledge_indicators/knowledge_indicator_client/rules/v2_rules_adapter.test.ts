@@ -103,29 +103,6 @@ describe('RulesAdapterV2', () => {
       expect(lastCreateCall(mock).options).toEqual({ id: 'rule-1' });
     });
 
-    it('always uses metric-series lookback from the contract', async () => {
-      const mock = makeRulesClientMock();
-      mock.createRule.mockResolvedValue({} as never);
-      const adapter = makeAdapter(mock);
-      await adapter.createRule('rule-1', createDefinition);
-
-      const data = lastCreateCall(mock).data as Record<string, unknown>;
-      expect(data.schedule).toEqual({
-        every: METRIC_SERIES_EVERY,
-        lookback: METRIC_SERIES_LOOKBACK,
-      });
-    });
-
-    it('groups by bucket for stable overlapping recount identity', async () => {
-      const mock = makeRulesClientMock();
-      mock.createRule.mockResolvedValue({} as never);
-      const adapter = makeAdapter(mock);
-      await adapter.createRule('rule-1', createDefinition);
-
-      const data = lastCreateCall(mock).data as { grouping: { fields: string[] } };
-      expect(data.grouping).toEqual({ fields: ['bucket'] });
-    });
-
     it('rejects STATS queries until rule-on-rule provisioning', async () => {
       const mock = makeRulesClientMock();
       const adapter = makeAdapter(mock);

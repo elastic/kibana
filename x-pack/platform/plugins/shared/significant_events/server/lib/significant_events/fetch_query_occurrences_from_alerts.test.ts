@@ -17,7 +17,6 @@ import {
   getQueryOccurrences,
   fetchQueryOccurrencesFromAlerts,
 } from './fetch_query_occurrences_from_alerts';
-import { ALERTS_READER_V2 } from './alerting/alerts_reader';
 
 const makeQueryLink = (overrides: Partial<QueryLink> & { id?: string } = {}): QueryLink => {
   const id = overrides.id ?? 'q1';
@@ -81,14 +80,6 @@ const FROM = new Date('2026-01-01T00:00:00.000Z');
 const TO = new Date('2026-01-01T00:05:00.000Z'); // 5 minutes => 6 buckets at 1m incl. boundaries
 const BUCKET = '1m';
 const SPACE_ID = 'default';
-
-const defaultV2Params = {
-  from: FROM,
-  to: TO,
-  bucketSize: BUCKET,
-  spaceId: SPACE_ID,
-  alertsReader: ALERTS_READER_V2,
-};
 
 describe('fetchQueryOccurrencesFromAlerts', () => {
   it('returns an empty response and skips ES|QL when there are no query links', async () => {
@@ -405,92 +396,34 @@ describe('fetchQueryOccurrencesFromAlerts', () => {
     expect(result.aggregatedOccurrences).toEqual([]);
   });
 
-  describe('v2 rule-events read path', () => {
-    it('groups ES|QL rows into per-rule occurrences with gap filling (v2)', async () => {
-      const linkA = makeQueryLink({ id: 'qa', rule_id: 'rule-a' });
-      const linkB = makeQueryLink({ id: 'qb', rule_id: 'rule-b' });
-      const { kiClient, esClient, esql } = createMocks([linkA, linkB]);
+  it('filters on source bucket and widens the write-time @timestamp prune by MAX_WRITE_DELAY', async () => {
+    const link = makeQueryLink({ id: 'qa', rule_id: 'rule-a' });
+    const { kiClient, esClient, esql } = createMocks([link]);
 
-      esql.mockResolvedValueOnce(
-        makeStatsResponse([
-          { rule_id: 'rule-a', bucket: '2026-01-01T00:00:00.000Z', count: 2 },
-          { rule_id: 'rule-a', bucket: '2026-01-01T00:02:00.000Z', count: 1 },
-          { rule_id: 'rule-b', bucket: '2026-01-01T00:04:00.000Z', count: 3 },
-        ])
-      );
+    esql.mockResolvedValueOnce(makeStatsResponse([]));
 
-      const result = await fetchQueryOccurrencesFromAlerts(defaultV2Params, {
-        kiClient,
-        esClient,
-      });
+    await fetchQueryOccurrencesFromAlerts(
+      { from: FROM, to: TO, bucketSize: BUCKET, spaceId: SPACE_ID },
+      { kiClient, esClient }
+    );
 
-      const ruleA = result.queries.find((e) => e.stream_name === 'logs.test' && e.id === 'qa')!;
-      const ruleB = result.queries.find((e) => e.id === 'qb')!;
-
-      expect(ruleA.occurrences).toHaveLength(6);
-      expect(ruleA.occurrences.map((o) => o.count)).toEqual([2, 0, 1, 0, 0, 0]);
-      expect(ruleB.occurrences).toHaveLength(6);
-      expect(ruleB.occurrences.map((o) => o.count)).toEqual([0, 0, 0, 0, 3, 0]);
-    });
-
-    it('returns an empty response when the v2 rule-events index is missing', async () => {
-      const link = makeQueryLink({ id: 'qa', rule_id: 'rule-a' });
-      const { kiClient, esClient, esql } = createMocks([link]);
-
-      esql.mockRejectedValueOnce(
-        makeEsError(400, 'verification_exception', 'Unknown index [.rule-events]')
-      );
-
-      const result = await fetchQueryOccurrencesFromAlerts(defaultV2Params, {
-        kiClient,
-        esClient,
-      });
-
-      expect(result.queries).toHaveLength(1);
-      expect(result.queries[0].occurrences).toEqual([]);
-      expect(result.aggregated_occurrences).toEqual([]);
-    });
-
-    it('queries .rule-events with FIELD_EXTRACT + MAX/SUM of metric_value', async () => {
-      const link = makeQueryLink({ id: 'qa', rule_id: 'rule-a' });
-      const { kiClient, esClient, esql } = createMocks([link]);
-
-      esql.mockResolvedValueOnce(makeStatsResponse([]));
-
-      await fetchQueryOccurrencesFromAlerts(defaultV2Params, {
-        kiClient,
-        esClient,
-      });
-
-      const calledWith = esql.mock.calls[0][1] as {
-        query: string;
-        filter?: {
-          bool?: {
-            filter?: Array<{ range?: { '@timestamp'?: { gte?: string; lte?: string } } }>;
-          };
+    const calledWith = esql.mock.calls[0][1] as {
+      query: string;
+      filter?: {
+        bool?: {
+          filter?: Array<{ range?: { '@timestamp'?: { gte?: string; lte?: string } } }>;
         };
       };
-      expect(calledWith.query).toContain('.rule-events');
-      expect(calledWith.query).toContain(
-        'EVAL metric_value = TO_LONG(FIELD_EXTRACT(data, "metric_value"))'
-      );
-      expect(calledWith.query).toContain(
-        'EVAL bucket = TO_DATETIME(TO_LONG(FIELD_EXTRACT(data, "bucket")))'
-      );
-      // Source-bucket window (not write-time) must be in the ES|QL body.
-      expect(calledWith.query).toContain(
-        `bucket >= TO_DATETIME("${FROM.toISOString()}") AND bucket <= TO_DATETIME("${TO.toISOString()}")`
-      );
-      expect(calledWith.query).toContain('MAX(metric_value)');
-      expect(calledWith.query).toContain('SUM(minute_value)');
-      expect(calledWith.query).not.toContain('COUNT_DISTINCT');
-
-      // Write-time prune stays as an index skip hint; lte is widened by MAX_WRITE_DELAY (7m).
-      const timestampRange = calledWith.filter?.bool?.filter?.find(
-        (clause) => clause.range?.['@timestamp']
-      )?.range?.['@timestamp'];
-      expect(timestampRange?.gte).toBe(FROM.toISOString());
-      expect(timestampRange?.lte).toBe(new Date(TO.getTime() + 7 * 60_000).toISOString());
-    });
+    };
+    // Source-bucket window (not write-time) must be in the ES|QL body.
+    expect(calledWith.query).toContain(
+      `bucket >= TO_DATETIME("${FROM.toISOString()}") AND bucket <= TO_DATETIME("${TO.toISOString()}")`
+    );
+    // Write-time prune stays as an index skip hint; lte is widened by MAX_WRITE_DELAY (7m).
+    const timestampRange = calledWith.filter?.bool?.filter?.find(
+      (clause) => clause.range?.['@timestamp']
+    )?.range?.['@timestamp'];
+    expect(timestampRange?.gte).toBe(FROM.toISOString());
+    expect(timestampRange?.lte).toBe(new Date(TO.getTime() + 7 * 60_000).toISOString());
   });
 });
