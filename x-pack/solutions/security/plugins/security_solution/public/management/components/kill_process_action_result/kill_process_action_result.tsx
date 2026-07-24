@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import type { EuiTextProps } from '@elastic/eui';
-import { EuiText } from '@elastic/eui';
+import { EuiCode, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { RESPONSE_ACTION_STATUS } from '../../common/translations';
 import { EndpointActionFailureMessage } from '../endpoint_action_failure_message';
@@ -51,6 +51,83 @@ export const KillSuspendProcessActionResult = memo<KillSuspendProcessActionResul
     };
     const hostOutput = action.outputs?.[agentId]?.content;
 
+    const processResult: React.ReactNode = useMemo(() => {
+      if (!isCompleted) {
+        return null;
+      }
+
+      const processResultData: React.ReactNode[] = [];
+
+      if (hostOutput?.pid) {
+        processResultData.push(
+          <span key={`${agentId}-pid`}>
+            <FormattedMessage
+              id="xpack.securitySolution.management.killProcessActionResult.pid"
+              defaultMessage="Process ID = {pid}"
+              values={{ pid: <EuiCode>{hostOutput?.pid}</EuiCode> }}
+            />
+          </span>
+        );
+      }
+
+      if (hostOutput?.entity_id) {
+        if (processResultData.length > 0) {
+          processResultData.push(' | ');
+        }
+
+        processResultData.push(
+          <span key={`${agentId}-entityId`}>
+            <FormattedMessage
+              id="xpack.securitySolution.management.killProcessActionResult.entityId"
+              defaultMessage="Entity ID: {entityId}"
+              values={{ entityId: <EuiCode>{hostOutput?.entity_id}</EuiCode> }}
+            />
+          </span>
+        );
+      }
+
+      if (hostOutput?.process_name) {
+        if (processResultData.length > 0) {
+          processResultData.push(' | ');
+        }
+
+        processResultData.push(
+          <span key={`${agentId}-processName`}>
+            <FormattedMessage
+              id="xpack.securitySolution.management.killProcessActionResult.processName"
+              defaultMessage="Process name: {processName}"
+              values={{ processName: <EuiCode>{hostOutput?.process_name}</EuiCode> }}
+            />
+          </span>
+        );
+      }
+
+      if (hostOutput?.command) {
+        if (processResultData.length > 0) {
+          processResultData.push(' | ');
+        }
+
+        processResultData.push(
+          <span key={`${agentId}-command`}>
+            <FormattedMessage
+              id="xpack.securitySolution.management.killProcessActionResult.command"
+              defaultMessage="Process command: {command}"
+              values={{ command: <EuiCode>{hostOutput?.command}</EuiCode> }}
+            />
+          </span>
+        );
+      }
+
+      return processResultData;
+    }, [
+      agentId,
+      hostOutput?.command,
+      hostOutput?.entity_id,
+      hostOutput?.pid,
+      hostOutput?.process_name,
+      isCompleted,
+    ]);
+
     if (command !== 'kill-process' && command !== 'suspend-process') {
       window.console.warn(
         `KillProcessActionResult: Action provided not a kill-process or suspend-process command`
@@ -71,45 +148,49 @@ export const KillSuspendProcessActionResult = memo<KillSuspendProcessActionResul
               <div>
                 <FormattedMessage
                   id="xpack.securitySolution.management.killProcessActionResult.processInfo"
-                  defaultMessage="Result:"
+                  defaultMessage="Action result:"
                 />
+                <div>{processResult}</div>
 
-                {hostOutput?.pid && (
-                  <div>
-                    <FormattedMessage
-                      id="xpack.securitySolution.management.killProcessActionResult.pid"
-                      defaultMessage="Process ID: {pid}"
-                      values={{ pid: hostOutput?.pid }}
-                    />
-                  </div>
-                )}
-                {hostOutput?.entity_id && (
-                  <div>
-                    <FormattedMessage
-                      id="xpack.securitySolution.management.killProcessActionResult.entityId"
-                      defaultMessage="Entity ID: {entityId}"
-                      values={{ entityId: hostOutput?.entity_id }}
-                    />
-                  </div>
-                )}
-                {hostOutput?.process_name && (
-                  <div>
-                    <FormattedMessage
-                      id="xpack.securitySolution.management.killProcessActionResult.processName"
-                      defaultMessage="Process name: {processName}"
-                      values={{ processName: hostOutput?.process_name }}
-                    />
-                  </div>
-                )}
-                {hostOutput?.command && (
-                  <div>
-                    <FormattedMessage
-                      id="xpack.securitySolution.management.killProcessActionResult.command"
-                      defaultMessage="Process command: {command}"
-                      values={{ command: hostOutput?.command }}
-                    />
-                  </div>
-                )}
+                {/* FIXME:PT delete this once dev. is done */}
+                <div style={{ display: 'none' }}>
+                  {hostOutput?.pid && (
+                    <div>
+                      <FormattedMessage
+                        id="xpack.securitySolution.management.killProcessActionResult.pid"
+                        defaultMessage="Process ID: {pid}"
+                        values={{ pid: hostOutput?.pid }}
+                      />
+                    </div>
+                  )}
+                  {hostOutput?.entity_id && (
+                    <div>
+                      <FormattedMessage
+                        id="xpack.securitySolution.management.killProcessActionResult.entityId"
+                        defaultMessage="Entity ID: {entityId}"
+                        values={{ entityId: hostOutput?.entity_id }}
+                      />
+                    </div>
+                  )}
+                  {hostOutput?.process_name && (
+                    <div>
+                      <FormattedMessage
+                        id="xpack.securitySolution.management.killProcessActionResult.processName"
+                        defaultMessage="Process name: {processName}"
+                        values={{ processName: hostOutput?.process_name }}
+                      />
+                    </div>
+                  )}
+                  {hostOutput?.command && (
+                    <div>
+                      <FormattedMessage
+                        id="xpack.securitySolution.management.killProcessActionResult.command"
+                        defaultMessage="Process command: {command}"
+                        values={{ command: hostOutput?.command }}
+                      />
+                    </div>
+                  )}
+                </div>
               </div>
             ) : (
               <EndpointActionFailureMessage
