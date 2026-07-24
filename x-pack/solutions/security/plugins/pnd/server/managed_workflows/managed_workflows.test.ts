@@ -19,10 +19,23 @@ const YAML_DIR = path.resolve(
 const loadYaml = (name: string) =>
   yamlLib.parse(fs.readFileSync(path.join(YAML_DIR, name), 'utf8')) as any;
 
-const WATCH_FLOOR_YAML = loadYaml('watch_floor.yaml');
-const WATCH_DARK_YAML = loadYaml('watch_dark.yaml');
-const WATCH_DEEP_YAML = loadYaml('watch_deep.yaml');
+const WATCH_FLOOR_YAML = loadYaml('watch_floor_orchestrator.yaml');
+const WATCH_DARK_YAML = loadYaml('watch_dark_orchestrator.yaml');
+const WATCH_DEEP_YAML = loadYaml('watch_deep_orchestrator.yaml');
 const WATCH_OFFICER_YAML = loadYaml('watch_officer.yaml');
+
+const ORCHESTRATOR_IDS = [
+  'system-security-watch-floor',
+  'system-security-watch-dark',
+  'system-security-watch-deep',
+  'system-security-watch-officer',
+];
+
+const EXPECTED_WORKER_IDS = [
+  'system-security-watch-floor-worker',
+  'system-security-watch-dark-worker',
+  'system-security-watch-deep-worker',
+];
 
 const ALL_YAMLS = [
   { id: 'system-security-watch-floor', name: 'Watch Floor', yaml: WATCH_FLOOR_YAML },
@@ -44,19 +57,30 @@ const makeItem = (id: string, name: string, yaml: any) => ({
 });
 
 describe('PND managed watch workflows', () => {
-  it('registers exactly 4 watch IDs', () => {
-    expect(PND_WATCH_WORKFLOW_IDS).toHaveLength(4);
+  it('registers every orchestrator and its workers', () => {
+    // D10: a Watch is an Orchestrator workflow plus the domain Workers it
+    // invokes via `workflow.execute`. The registry therefore holds more than
+    // one workflow per Watch — it previously held exactly 4 (one per Watch),
+    // before the orchestrator/worker split.
+    expect(PND_WATCH_WORKFLOW_IDS.length).toBeGreaterThanOrEqual(4);
+    expect(PND_WATCH_WORKFLOW_IDS).toEqual(expect.arrayContaining(ORCHESTRATOR_IDS));
+
+    // Every orchestrator that fans out to a worker has that worker registered
+    // too, otherwise `workflow.execute` resolves to nothing at runtime.
+    for (const workerId of EXPECTED_WORKER_IDS) {
+      expect(PND_WATCH_WORKFLOW_IDS).toContain(workerId);
+    }
   });
 
   it('all YAMLs parse with valid name', () => {
-    for (const { name, yaml } of ALL_YAMLS) {
+    for (const { yaml } of ALL_YAMLS) {
       expect(yaml.name).toBeTruthy();
       expect(typeof yaml.name).toBe('string');
     }
   });
 
   it('all YAMLs have at least one step', () => {
-    for (const { name, yaml } of ALL_YAMLS) {
+    for (const { yaml } of ALL_YAMLS) {
       expect(yaml.steps.length).toBeGreaterThan(0);
     }
   });
@@ -68,9 +92,12 @@ describe('PND managed watch workflows', () => {
       makeItem('system-security-watch-floor', 'Watch Floor', WATCH_FLOOR_YAML) as any
     );
 
-    it('projects alert-analysis skill in callables', () => {
-      const skillIds = watch.callables.map((c) => c.id);
-      expect(skillIds).toContain('alert-analysis');
+    it('delegates to the Floor worker (D10 orchestrator/worker split)', () => {
+      // Callables are derived from the executable graph. An orchestrator only
+      // runs `workflow.execute` against its worker, so the worker (not the
+      // skill that worker itself invokes) is what it exposes.
+      const callables = watch.callables.map((c) => c.id);
+      expect(callables).toContain('system-security-watch-floor-worker');
     });
 
     it('has event trigger (alert-driven)', () => {
@@ -90,9 +117,9 @@ describe('PND managed watch workflows', () => {
       makeItem('system-security-watch-dark', 'Dark Watch', WATCH_DARK_YAML) as any
     );
 
-    it('projects threat-intelligence skill in callables', () => {
-      const skillIds = watch.callables.map((c) => c.id);
-      expect(skillIds).toContain('threat-intelligence');
+    it('delegates to the Dark worker (D10 orchestrator/worker split)', () => {
+      const callables = watch.callables.map((c) => c.id);
+      expect(callables).toContain('system-security-watch-dark-worker');
     });
 
     it('has scheduled trigger', () => {
@@ -116,9 +143,9 @@ describe('PND managed watch workflows', () => {
       makeItem('system-security-watch-deep', 'Deep Watch', WATCH_DEEP_YAML) as any
     );
 
-    it('projects deep-watch-forensics skill in callables', () => {
-      const skillIds = watch.callables.map((c) => c.id);
-      expect(skillIds).toContain('deep-watch-forensics');
+    it('delegates to the Deep worker (D10 orchestrator/worker split)', () => {
+      const callables = watch.callables.map((c) => c.id);
+      expect(callables).toContain('system-security-watch-deep-worker');
     });
 
     it('has manual trigger (on-demand)', () => {

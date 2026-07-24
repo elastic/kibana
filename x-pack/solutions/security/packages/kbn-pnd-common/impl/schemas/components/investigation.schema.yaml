@@ -10,18 +10,32 @@ components:
       type: string
       enum: [investigation, proposal, incident]
 
+    TemplateVersion:
+      type: integer
+      minimum: 1
+      description: >-
+        Template revision this record was instantiated from. Pinned on the record at
+        creation so a later template revision does not retroactively change how an
+        existing record is validated or rendered.
+
     RecommendedAction:
       type: string
-      enum: [contain, escalate, investigate, tune]
+      enum: [contain, escalate, investigate, tune, create]
       description: Brief bucket recommendation for an investigation
 
     ProposalStatus:
       type: string
-      enum: [pending, approved, modified, dismissed, executed]
+      enum: [pending, approved, modified, dismissed, escalated, deferred, executed]
+
+    DismissalReason:
+      type: string
+      description: Structured reason an analyst dismissed a proposal (MVP requirement).
+      enum:
+        [wrong, duplicate, insufficient_evidence, low_value, out_of_scope, already_handled, other]
 
     WatchTier:
       type: string
-      enum: [floor, officer, dark, deep]
+      enum: [floor, officer, dark, deep, detection]
 
     EvidenceRef:
       type: object
@@ -80,6 +94,8 @@ components:
         template_id:
           type: string
           enum: [investigation]
+        template_version:
+          $ref: '#/components/schemas/TemplateVersion'
         title:
           type: string
         createdAt:
@@ -151,6 +167,8 @@ components:
         template_id:
           type: string
           enum: [proposal]
+        template_version:
+          $ref: '#/components/schemas/TemplateVersion'
         parentConversationId:
           type: string
           description: Investigation id this proposal belongs to
@@ -188,6 +206,14 @@ components:
           type: string
         recommendation:
           type: string
+        dismissalReason:
+          $ref: '#/components/schemas/DismissalReason'
+          description: Set when status is dismissed; structured reason (MVP requirement).
+        evidenceAgainst:
+          type: array
+          description: Contrary evidence — shown alongside supporting evidenceRefs so uncertainty is visible (MVP requirement).
+          items:
+            $ref: '#/components/schemas/EvidenceRef'
 
     Incident:
       type: object
@@ -202,6 +228,8 @@ components:
         template_id:
           type: string
           enum: [incident]
+        template_version:
+          $ref: '#/components/schemas/TemplateVersion'
         forkedFromInvestigationId:
           type: string
         watch_id:

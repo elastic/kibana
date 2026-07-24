@@ -67,6 +67,16 @@ export const TEMPLATE_IDS = [
   TEMPLATE_ID_INCIDENT,
 ] as const;
 
+/**
+ * Current revision of the PND conversation templates. Producers stamp this onto
+ * every record they create so a later template revision does not retroactively
+ * change how already-persisted records are validated or rendered.
+ *
+ * Bump when a template gains, removes, or changes the meaning of a field.
+ * Records written before the bump keep their original value.
+ */
+export const TEMPLATE_VERSION_CURRENT = 1 as const;
+
 export const API_VERSIONS = {
   internal: {
     v1: '1',

@@ -25,13 +25,13 @@ const YAML_DIR = path.resolve(
   '../../../../../../../../src/platform/packages/shared/kbn-workflows/managed/definitions/pnd'
 );
 const WATCH_DEEP_YAML = yamlLib.parse(
-  fs.readFileSync(path.join(YAML_DIR, 'watch_deep.yaml'), 'utf8')
+  fs.readFileSync(path.join(YAML_DIR, 'watch_deep_orchestrator.yaml'), 'utf8')
 ) as WorkflowYaml;
 const WATCH_DARK_YAML = yamlLib.parse(
-  fs.readFileSync(path.join(YAML_DIR, 'watch_dark.yaml'), 'utf8')
+  fs.readFileSync(path.join(YAML_DIR, 'watch_dark_orchestrator.yaml'), 'utf8')
 ) as WorkflowYaml;
 const WATCH_FLOOR_YAML = yamlLib.parse(
-  fs.readFileSync(path.join(YAML_DIR, 'watch_floor.yaml'), 'utf8')
+  fs.readFileSync(path.join(YAML_DIR, 'watch_floor_orchestrator.yaml'), 'utf8')
 ) as WorkflowYaml;
 
 // ── helpers ──────────────────────────────────────────────────────────────
@@ -242,7 +242,7 @@ steps:
     expect(watch.callables[0].kind).toBe('skill');
   });
 
-  it('extracts multiple skills from Dark Watch YAML', () => {
+  it('extracts the delegated worker from Dark Watch orchestrator YAML', () => {
     const watch = projectWorkflowToWatch(
       makeListItem({
         id: 'system-security-watch-dark',
@@ -252,11 +252,16 @@ steps:
       })
     );
     expect(watch.callables.length).toBeGreaterThanOrEqual(1);
-    const skillIds = watch.callables.map((c) => c.id);
-    expect(skillIds).toContain('threat-intelligence');
+    // Post-D10 the orchestrator delegates via `workflow.execute`; the skill
+    // itself is invoked one level down, inside the worker.
+    const callableIds = watch.callables.map((c) => c.id);
+    expect(callableIds).toContain('system-security-watch-dark-worker');
+    expect(watch.callables.find((c) => c.id === 'system-security-watch-dark-worker')?.kind).toBe(
+      'workflow'
+    );
   });
 
-  it('extracts deep-watch-forensics from Deep Watch YAML', () => {
+  it('extracts the delegated worker from Deep Watch orchestrator YAML', () => {
     const watch = projectWorkflowToWatch(
       makeListItem({
         id: 'system-security-watch-deep',
@@ -266,11 +271,11 @@ steps:
       })
     );
     expect(watch.callables.length).toBeGreaterThanOrEqual(1);
-    const skillIds = watch.callables.map((c) => c.id);
-    expect(skillIds).toContain('deep-watch-forensics');
+    const callableIds = watch.callables.map((c) => c.id);
+    expect(callableIds).toContain('system-security-watch-deep-worker');
   });
 
-  it('extracts alert-analysis from Watch Floor YAML', () => {
+  it('extracts the delegated worker from Watch Floor orchestrator YAML', () => {
     const watch = projectWorkflowToWatch(
       makeListItem({
         id: 'system-security-watch-floor',
@@ -279,8 +284,8 @@ steps:
         managed: true,
       })
     );
-    const skillIds = watch.callables.map((c) => c.id);
-    expect(skillIds).toContain('alert-analysis');
+    const callableIds = watch.callables.map((c) => c.id);
+    expect(callableIds).toContain('system-security-watch-floor-worker');
   });
 
   it('humanizes skill ids when no name override provided', () => {

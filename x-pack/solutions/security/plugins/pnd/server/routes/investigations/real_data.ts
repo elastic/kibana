@@ -11,6 +11,7 @@
  * details.
  */
 
+import { TEMPLATE_VERSION_CURRENT } from '@kbn/pnd-common';
 import type { ListInvestigationsResponse } from '@kbn/pnd-common';
 import type { ListInvestigationProposalsResponse } from '@kbn/pnd-common';
 
@@ -20,6 +21,7 @@ export const realInvestigations: ListInvestigationsResponse['investigations'] = 
   {
     id: 'inv-dark-chrysalis-001',
     template_id: 'investigation' as const,
+    template_version: TEMPLATE_VERSION_CURRENT,
     title: 'Chrysalis Backdoor — endpoint beaconing to known C2',
     createdAt: '2026-07-23T00:18:14Z',
     updatedAt: '2026-07-23T00:22:30Z',
@@ -71,6 +73,7 @@ export const realInvestigations: ListInvestigationsResponse['investigations'] = 
   {
     id: 'inv-dark-credential-dump-002',
     template_id: 'investigation' as const,
+    template_version: TEMPLATE_VERSION_CURRENT,
     title: 'Credential harvesting tool detected on production endpoint',
     createdAt: '2026-07-23T00:18:15Z',
     updatedAt: '2026-07-23T00:21:00Z',
@@ -120,6 +123,7 @@ export const realProposals: Record<string, ListInvestigationProposalsResponse['p
     {
       id: 'prop-escalate-deep-001',
       template_id: 'proposal' as const,
+      template_version: TEMPLATE_VERSION_CURRENT,
       parentConversationId: 'inv-dark-chrysalis-001',
       type: 'escalate',
       confidence: 0.94,
@@ -154,6 +158,7 @@ export const realProposals: Record<string, ListInvestigationProposalsResponse['p
     {
       id: 'prop-contain-isolate-001',
       template_id: 'proposal' as const,
+      template_version: TEMPLATE_VERSION_CURRENT,
       parentConversationId: 'inv-dark-credential-dump-002',
       type: 'contain',
       confidence: 0.88,

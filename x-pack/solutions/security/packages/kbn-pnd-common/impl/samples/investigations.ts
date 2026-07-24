@@ -10,6 +10,7 @@ import {
   SYSTEM_SECURITY_WATCH_FLOOR_ID,
   SYSTEM_SECURITY_WATCH_OFFICER_ID,
   TEMPLATE_ID_INVESTIGATION,
+  TEMPLATE_VERSION_CURRENT,
 } from '../../constants';
 import type { Investigation } from '../schemas/components/investigation.gen';
 
@@ -28,6 +29,7 @@ const containInvestigations: Investigation[] = [
   {
     id: 'inv-officer-impossible-travel-001',
     template_id: TEMPLATE_ID_INVESTIGATION,
+    template_version: TEMPLATE_VERSION_CURRENT,
     title: 'Impossible travel — exec account (cfo@corp)',
     createdAt: '2026-07-20T13:10:00Z',
     updatedAt: '2026-07-20T14:05:00Z',
@@ -65,6 +67,7 @@ const containInvestigations: Investigation[] = [
   {
     id: 'inv-officer-sales-nas-002',
     template_id: TEMPLATE_ID_INVESTIGATION,
+    template_version: TEMPLATE_VERSION_CURRENT,
     title: 'Ransomware encryption — Sales file server',
     createdAt: '2026-07-20T08:20:00Z',
     updatedAt: '2026-07-20T09:05:00Z',
@@ -95,6 +98,7 @@ const containInvestigations: Investigation[] = [
   {
     id: 'inv-floor-domain-admins-003',
     template_id: TEMPLATE_ID_INVESTIGATION,
+    template_version: TEMPLATE_VERSION_CURRENT,
     title: 'Unauthorized Domain Admins elevation',
     createdAt: '2026-07-20T02:43:00Z',
     updatedAt: '2026-07-20T13:55:00Z',
@@ -125,6 +129,7 @@ const containInvestigations: Investigation[] = [
   {
     id: 'inv-officer-sales-nas-isolation-004',
     template_id: TEMPLATE_ID_INVESTIGATION,
+    template_version: TEMPLATE_VERSION_CURRENT,
     title: 'Isolation in progress — Sales-NAS',
     createdAt: '2026-07-20T09:10:00Z',
     updatedAt: '2026-07-20T14:00:00Z',
@@ -158,6 +163,7 @@ const escalateInvestigations: Investigation[] = [
   {
     id: 'inv-floor-findb-staged-005',
     template_id: TEMPLATE_ID_INVESTIGATION,
+    template_version: TEMPLATE_VERSION_CURRENT,
     title: 'Staged archive — FIN-DB-02',
     createdAt: '2026-07-20T11:40:00Z',
     updatedAt: '2026-07-20T12:10:00Z',
@@ -188,6 +194,7 @@ const escalateInvestigations: Investigation[] = [
   {
     id: 'inv-floor-phishing-url-006',
     template_id: TEMPLATE_ID_INVESTIGATION,
+    template_version: TEMPLATE_VERSION_CURRENT,
     title: 'Phishing — invoice lure (Finance)',
     createdAt: '2026-07-20T10:05:00Z',
     updatedAt: '2026-07-20T10:40:00Z',
@@ -221,6 +228,7 @@ const investigateInvestigations: Investigation[] = [
   {
     id: 'inv-dark-beacon-corroborated-001',
     template_id: TEMPLATE_ID_INVESTIGATION,
+    template_version: TEMPLATE_VERSION_CURRENT,
     title: 'Corroborated C2 beacon · host-srv-db02 + host-srv-app01',
     createdAt: '2026-07-20T03:05:00Z',
     updatedAt: '2026-07-20T03:15:00Z',
@@ -261,6 +269,7 @@ const tuneInvestigations: Investigation[] = [
   {
     id: 'inv-floor-oauth-tune-007',
     template_id: TEMPLATE_ID_INVESTIGATION,
+    template_version: TEMPLATE_VERSION_CURRENT,
     title: 'OAuth token abuse · app-salesforce-sync',
     createdAt: '2026-07-20T11:15:00Z',
     updatedAt: '2026-07-20T11:20:00Z',
@@ -286,6 +295,7 @@ const resolvedInvestigations: Investigation[] = [
   {
     id: 'inv-dark-mailbox-auto-008',
     template_id: TEMPLATE_ID_INVESTIGATION,
+    template_version: TEMPLATE_VERSION_CURRENT,
     title: 'Mailbox forwarding rule removed — j.reyes',
     createdAt: '2026-07-20T01:10:00Z',
     updatedAt: '2026-07-20T01:25:00Z',

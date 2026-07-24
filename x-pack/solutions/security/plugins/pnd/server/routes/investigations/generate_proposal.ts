@@ -6,7 +6,13 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { API_VERSIONS, INTERNAL_API_ACCESS, PND_INVESTIGATION_URL_TEMPLATE } from '@kbn/pnd-common';
+import {
+  API_VERSIONS,
+  INTERNAL_API_ACCESS,
+  PND_INVESTIGATION_URL_TEMPLATE,
+  TEMPLATE_VERSION_CURRENT,
+} from '@kbn/pnd-common';
+
 import type { Proposal } from '@kbn/pnd-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
@@ -265,6 +271,7 @@ export const registerGenerateProposalRoute = ({
           const proposal: Proposal = {
             id: `prop-llm-${Date.now()}`,
             template_id: 'proposal',
+            template_version: TEMPLATE_VERSION_CURRENT,
             parentConversationId: id,
             type: decision.type,
             confidence: decision.confidence,

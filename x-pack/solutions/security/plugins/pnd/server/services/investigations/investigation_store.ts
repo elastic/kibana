@@ -6,17 +6,29 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import type {
   GetInvestigationResponse,
   ListInvestigationProposalsResponse,
   ListInvestigationsResponse,
+  TimelineEvent,
 } from '@kbn/pnd-common';
+import {
+  canonicalProposalsMapping,
+  evidenceMapping,
+  investigationsMapping,
+  MAPPINGS_VERSION,
+  proposalsMapping,
+  workerEvaluationsMapping,
+} from './mappings';
+
 import { realInvestigations, realProposals } from '../../routes/investigations/real_data';
 import type {
   Proposal as CanonicalProposal,
   EvidencePackage,
   WorkerEvaluationRecord,
 } from '../../common/schemas';
+import type { DetectionChangeSignal } from '../../common/schemas/detection_change';
 
 type Investigation = ListInvestigationsResponse['investigations'][number];
 type Proposal = ListInvestigationProposalsResponse['proposals'][number];
@@ -35,15 +47,29 @@ export const PND_CANONICAL_PROPOSALS_INDEX = 'pnd-canonical-proposals';
  * Terminal + intermediate proposal states an analyst decision can move a
  * proposal into. Persisted on the proposal document in ES.
  */
+export type DismissalReason =
+  | 'wrong'
+  | 'duplicate'
+  | 'insufficient_evidence'
+  | 'low_value'
+  | 'out_of_scope'
+  | 'already_handled'
+  | 'other';
+
 export type ProposalStatusUpdate =
   | { status: 'approved' }
-  | { status: 'dismissed'; rejectionReason?: string }
-  | { status: 'modified'; analystReasoning: string };
+  | { status: 'dismissed'; rejectionReason?: string; dismissalReason?: DismissalReason }
+  | { status: 'modified'; analystReasoning: string }
+  | { status: 'escalated'; caseRef?: string }
+  | { status: 'deferred'; sla?: string }
+  | { status: 'pending'; assignee: string | null };
 
 interface ProposalDoc extends Proposal {
   investigationId: string;
   rejectionReason?: string;
+  dismissalReason?: DismissalReason;
   analystReasoning?: string;
+  caseRef?: string;
 }
 
 /**
@@ -81,27 +107,74 @@ export class InvestigationStore {
   }
 
   private async bootstrap(esClient: ElasticsearchClient): Promise<void> {
-    await this.ensureIndex(esClient, PND_INVESTIGATIONS_INDEX);
-    await this.ensureIndex(esClient, PND_PROPOSALS_INDEX);
-    await this.ensureIndex(esClient, PND_EVIDENCE_INDEX);
-    await this.ensureIndex(esClient, PND_WORKER_EVAL_INDEX);
-    await this.ensureIndex(esClient, PND_CANONICAL_PROPOSALS_INDEX);
+    await this.ensureIndex(esClient, PND_INVESTIGATIONS_INDEX, investigationsMapping);
+    await this.ensureIndex(esClient, PND_PROPOSALS_INDEX, proposalsMapping);
+    await this.ensureIndex(esClient, PND_EVIDENCE_INDEX, evidenceMapping);
+    await this.ensureIndex(esClient, PND_WORKER_EVAL_INDEX, workerEvaluationsMapping);
+    await this.ensureIndex(esClient, PND_CANONICAL_PROPOSALS_INDEX, canonicalProposalsMapping);
     await this.seedIfEmpty(esClient);
   }
 
-  private async ensureIndex(esClient: ElasticsearchClient, index: string): Promise<void> {
+  private async ensureIndex(
+    esClient: ElasticsearchClient,
+    index: string,
+    mappings: MappingTypeMapping
+  ): Promise<void> {
     const exists = await esClient.indices.exists({ index });
+
     if (exists) {
-      return;
+      if (await this.hasCurrentMappings(esClient, index)) {
+        return;
+      }
+      // The index predates the explicit mappings (or was created against an
+      // older revision). Its fields are typed wrong in ways that cannot be
+      // fixed in place: ES forbids changing an existing field's type, so a
+      // `confidence` mapped as `long` stays `long` and keeps truncating 0.85
+      // to 0. Reindexing is not worth it here — every document in these
+      // indices is either demo seed data or reproducible Watch output, so the
+      // index is dropped and reseeded.
+      //
+      // This is a spike-scoped decision. A deployment that must preserve
+      // analyst decisions across an upgrade needs a versioned index behind an
+      // alias plus a reindex, not this.
+      this.logger.warn(
+        `PND: index ${index} has outdated mappings (expected _meta.mappingsVersion=${MAPPINGS_VERSION}); deleting and reseeding. Persisted documents in this index are discarded.`
+      );
+      await esClient.indices.delete({ index });
     }
+
     await esClient.indices.create({
       index,
       settings: { number_of_shards: 1, number_of_replicas: 0 },
-      // Dynamic mapping is sufficient for the demo document shapes; the id
-      // fields we filter/sort on are keywords by default for the ids we use.
-      mappings: { dynamic: true },
+      // Explicit mappings: ids/enums are keyword so they can be filtered without
+      // a `.keyword` suffix, scores keep their numeric type regardless of which
+      // document lands first, and `events` is nested so per-event queries do not
+      // match across the array. See ./mappings.ts.
+      mappings: {
+        ...mappings,
+        // Stamped so a later boot can tell a current index from a stale one.
+        _meta: { ...(mappings._meta ?? {}), mappingsVersion: MAPPINGS_VERSION },
+      },
     });
-    this.logger.info(`PND: created index ${index}`);
+    this.logger.info(`PND: created index ${index} (mappingsVersion ${MAPPINGS_VERSION})`);
+  }
+
+  /**
+   * True when the index was created with the current mappings revision.
+   * Anything else — a missing marker (created under `dynamic: true`) or an
+   * older number — counts as stale.
+   */
+  private async hasCurrentMappings(esClient: ElasticsearchClient, index: string): Promise<boolean> {
+    try {
+      const response = await esClient.indices.getMapping({ index });
+      const meta = response[index]?.mappings?._meta as { mappingsVersion?: number } | undefined;
+      return meta?.mappingsVersion === MAPPINGS_VERSION;
+    } catch (error) {
+      // Treat an unreadable mapping as stale rather than assuming it is fine:
+      // recreating is safe here, silently querying a mis-mapped index is not.
+      this.logger.warn(`PND: could not read mappings for ${index}: ${error?.message}`);
+      return false;
+    }
   }
 
   private async seedIfEmpty(esClient: ElasticsearchClient): Promise<void> {
@@ -144,7 +217,9 @@ export class InvestigationStore {
       index: PND_INVESTIGATIONS_INDEX,
       size: 1000,
       query: { match_all: {} },
-      sort: [{ priorityScore: { order: 'desc', unmapped_type: 'long' } }],
+      // `priorityScore` is mapped as `integer`, so no `unmapped_type` fallback
+      // is needed. Investigations without a score sort last.
+      sort: [{ priorityScore: { order: 'desc', missing: '_last' } }],
     });
     const investigations = result.hits.hits
       .map((hit) => hit._source)
@@ -179,8 +254,12 @@ export class InvestigationStore {
     const result = await esClient.search<ProposalDoc>({
       index: PND_PROPOSALS_INDEX,
       size: 1000,
-      query: { term: { 'investigationId.keyword': investigationId } },
+      // `investigationId` is now mapped as `keyword`, so it is filtered directly.
+      // The previous `investigationId.keyword` path only existed because dynamic
+      // mapping made the field `text` with a `.keyword` subfield.
+      query: { term: { investigationId } },
     });
+
     const proposals = result.hits.hits
       .map((hit) => hit._source)
       .filter((src): src is ProposalDoc => src != null)
@@ -199,11 +278,21 @@ export class InvestigationStore {
   ): Promise<ProposalStatusUpdate | null> {
     await this.ensureReady(esClient);
     const doc: Record<string, unknown> = { status: update.status };
-    if (update.status === 'dismissed' && update.rejectionReason != null) {
-      doc.rejectionReason = update.rejectionReason;
+    if (update.status === 'dismissed') {
+      if (update.rejectionReason != null) doc.rejectionReason = update.rejectionReason;
+      if (update.dismissalReason != null) doc.dismissalReason = update.dismissalReason;
     }
     if (update.status === 'modified') {
       doc.analystReasoning = update.analystReasoning;
+    }
+    if (update.status === 'escalated' && update.caseRef != null) {
+      doc.caseRef = update.caseRef;
+    }
+    if (update.status === 'deferred' && update.sla != null) {
+      doc.sla = update.sla;
+    }
+    if (update.status === 'pending') {
+      doc.assignee = update.assignee;
     }
 
     try {
@@ -300,6 +389,103 @@ export class InvestigationStore {
     } catch (error) {
       this.logger.warn(
         `PND: could not record escalation lineage for ${args.investigationId}: ${error?.message}`
+      );
+    }
+  }
+
+  /**
+   * Wire a completed Deep Watch worker run back into the investigation:
+   * append the worker's forensic timeline events, flip the investigation
+   * status to `deep-watch-complete`, and (optionally) overwrite the summary
+   * with the worker verdict. Idempotent per event id — re-running the worker
+   * will not duplicate events that were already appended.
+   */
+  public async recordDeepWatchOutcome(
+    esClient: ElasticsearchClient,
+    args: {
+      investigationId: string;
+      events: TimelineEvent[];
+      status?: string;
+      summary?: string | null;
+    }
+  ): Promise<void> {
+    await this.ensureReady(esClient);
+    try {
+      await esClient.update({
+        index: PND_INVESTIGATIONS_INDEX,
+        id: args.investigationId,
+        script: {
+          source: `
+            if (ctx._source.events == null) { ctx._source.events = [] }
+            for (evt in params.events) {
+              boolean exists = false;
+              for (existing in ctx._source.events) {
+                if (existing.id == evt.id) { exists = true; break; }
+              }
+              if (!exists) { ctx._source.events.add(evt); }
+            }
+            if (params.status != null) { ctx._source.status = params.status; }
+            if (params.summary != null) { ctx._source.summary = params.summary; }
+          `,
+          params: {
+            events: args.events,
+            status: args.status ?? null,
+            summary: args.summary ?? null,
+          },
+        },
+        refresh: true,
+      });
+    } catch (error) {
+      this.logger.warn(
+        `PND: could not record Deep Watch outcome for ${args.investigationId}: ${error?.message}`
+      );
+    }
+  }
+
+  /**
+   * Attach a Detection Change Signal to an Investigation (delta #1/#2). Idempotently appends a
+   * `detection-change` timeline event and persists the structured signal onto the investigation
+   * doc's `detectionChangeSignals` array so Detection Watch can consume it. The producing worker
+   * never creates or tunes rules — it only surfaces the gap.
+   */
+  public async recordDetectionChangeSignal(
+    esClient: ElasticsearchClient,
+    args: {
+      investigationId: string;
+      signal: DetectionChangeSignal;
+      event: TimelineEvent;
+    }
+  ): Promise<void> {
+    await this.ensureReady(esClient);
+    try {
+      await esClient.update({
+        index: PND_INVESTIGATIONS_INDEX,
+        id: args.investigationId,
+        script: {
+          source: `
+            if (ctx._source.events == null) { ctx._source.events = [] }
+            boolean evtExists = false;
+            for (existing in ctx._source.events) {
+              if (existing.id == params.event.id) { evtExists = true; break; }
+            }
+            if (!evtExists) { ctx._source.events.add(params.event); }
+            if (ctx._source.detectionChangeSignals == null) { ctx._source.detectionChangeSignals = [] }
+            boolean sigExists = false;
+            for (existing in ctx._source.detectionChangeSignals) {
+              if (existing.runId == params.signal.runId) { sigExists = true; break; }
+            }
+            if (!sigExists) { ctx._source.detectionChangeSignals.add(params.signal); }
+          `,
+          params: {
+            event: args.event,
+            signal: args.signal,
+          },
+        },
+        refresh: true,
+      });
+    } catch (error) {
+      this.logger.warn(
+        `PND: could not record detection-change signal for ${args.investigationId}: ${error?.message}`
       );
     }
   }

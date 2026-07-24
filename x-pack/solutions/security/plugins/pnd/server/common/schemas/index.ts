@@ -9,3 +9,4 @@ export * from './versions';
 export * from './proposal';
 export * from './evidence_package';
 export * from './worker_evaluation_record';
+export * from './detection_change';
