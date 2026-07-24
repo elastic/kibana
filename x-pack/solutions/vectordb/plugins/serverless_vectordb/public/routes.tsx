@@ -28,10 +28,12 @@ const OnboardingRoutes = () => {
   const [showSideNav] = useState(() => hasSeenOnboarding());
 
   // On first view, hide only the side nav (the header stays visible) for a
-  // focused, full-width onboarding experience. Restore it on exit.
+  // focused, full-width onboarding experience. Restore the previous
+  // visibility on exit.
   useEffect(() => {
+    const wasVisible = chrome.sideNav.getIsVisible();
     chrome.sideNav.setIsVisible(showSideNav);
-    return () => chrome.sideNav.setIsVisible(true);
+    return () => chrome.sideNav.setIsVisible(wasVisible);
   }, [chrome, showSideNav]);
 
   return (
