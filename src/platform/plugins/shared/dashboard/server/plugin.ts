@@ -27,6 +27,10 @@ import type {
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import { registerContentInsights } from '@kbn/content-management-content-insights-server';
+import {
+  AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG,
+  AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG_DEFAULT,
+} from '@kbn/as-code-shared-schemas';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
 import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/server';
@@ -148,7 +152,7 @@ export class DashboardPlugin
   public start(core: CoreStart, plugins: StartDeps) {
     this.logger.debug('dashboard: Started');
 
-    setKibanaServices(plugins, this.logger);
+    setKibanaServices(core, plugins, this.logger);
 
     if (plugins.share) {
       plugins.share.url.locators.create(
@@ -174,17 +178,27 @@ export class DashboardPlugin
     }
 
     // Do not call getDashboardStateSchema when registering plugin.
-    // Plugin is registered during setup and before all plugins have reigistered embeddable schemas.
+    // Plugin is registered during setup and before all plugins have registered embeddable schemas.
     // Instead, use once to only call getDashboardStateSchema the first time client is executed.
     const getCachedDashboardStateSchema = once(() => {
       return getDashboardStateSchema(false);
     });
 
     return {
-      scanDashboards,
+      scanDashboards: (
+        savedObjectsClient: SavedObjectsClientContract,
+        page: number,
+        perPage: number
+      ) => scanDashboards(savedObjectsClient, page, perPage, getCachedDashboardStateSchema()),
       client: {
-        read: async (savedObjectsClient: SavedObjectsClientContract, id: string) =>
-          (await read(savedObjectsClient, getCachedDashboardStateSchema(), id)).body,
+        read: async (savedObjectsClient: SavedObjectsClientContract, id: string) => {
+          const useGASchemas = await core.featureFlags.getBooleanValue(
+            AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG,
+            AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG_DEFAULT
+          );
+          return (await read(savedObjectsClient, getCachedDashboardStateSchema(), id, useGASchemas))
+            .body;
+        },
       },
     };
   }

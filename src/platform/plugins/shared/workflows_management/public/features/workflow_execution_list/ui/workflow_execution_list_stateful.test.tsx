@@ -42,6 +42,10 @@ jest.mock('../../../hooks/use_workflow_url_state', () => ({
   }),
 }));
 
+jest.mock('../../../hooks/use_workflows_experimental_ui_setting', () => ({
+  useWorkflowsExperimentalUiSetting: jest.fn().mockReturnValue(false),
+}));
+
 const mockWorkflowExecutions: WorkflowExecutionListDto = {
   results: [
     {
@@ -151,8 +155,7 @@ describe('WorkflowExecutionList (stateful)', () => {
   it('calls useWorkflowExecutions with the workflowId', () => {
     renderComponent('wf-123');
     expect(mockUseWorkflowExecutions).toHaveBeenCalledWith(
-      expect.objectContaining({ workflowId: 'wf-123' }),
-      expect.any(Object)
+      expect.objectContaining({ workflowId: 'wf-123' })
     );
   });
 

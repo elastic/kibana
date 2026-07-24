@@ -58,6 +58,15 @@ const context = {
 } as unknown as RulesClientContext;
 
 describe('validate snooze params and body', () => {
+  beforeEach(() => {
+    savedObjectsMock.update = jest.fn().mockResolvedValue({
+      id: '123',
+      type: 'alert',
+      attributes: { snoozeSchedule: [] },
+      references: [],
+    });
+  });
+
   afterEach(() => {
     jest.clearAllMocks();
   });
@@ -232,7 +241,13 @@ describe('snoozeRule change tracking', () => {
   beforeEach(() => {
     getBeforeSetup(rulesClientParams, taskManager, ruleTypeRegistry);
     unsecuredSavedObjectsClient.get.mockResolvedValue(existingRuleSO);
-    unsecuredSavedObjectsClient.update.mockResolvedValue(updatedRuleSO);
+    unsecuredSavedObjectsClient.update.mockResolvedValue({
+      id: 'rule-1',
+      type: 'alert',
+      updated_at: '2023-03-05T10:30:00.000Z',
+      attributes: { snoozeSchedule: updatedRuleSO.attributes.snoozeSchedule },
+      references: [],
+    });
     setRuleType();
   });
 
@@ -253,7 +268,7 @@ describe('snoozeRule change tracking', () => {
     );
   });
 
-  test('captures the full post-snooze attributes and references of the rule', async () => {
+  test('captures the full post-snooze attributes of the rule', async () => {
     const changeTrackingService = createChangeTrackingService();
     const trackingClient = new RulesClient({ ...rulesClientParams, changeTrackingService });
 
@@ -261,38 +276,48 @@ describe('snoozeRule change tracking', () => {
 
     expect(changeTrackingService.logBulk).toHaveBeenCalledWith(
       [
-        {
-          // setGlobalDate pins Date.now() to mockedDateString.
-          timestamp: '2019-02-12T21:01:22.479Z',
-          objectId: 'rule-1',
-          objectType: RULE_SAVED_OBJECT_TYPE,
-          module: 'stack',
-          snapshot: {
-            attributes: updatedRuleSO.attributes,
-            references: updatedRuleSO.references,
-          },
-        },
+        expect.objectContaining({
+          snapshot: expect.objectContaining({
+            id: 'rule-1',
+            name: 'rule one',
+            alertTypeId: 'myType',
+            consumer: 'myApp',
+            createdAt: '2019-02-12T21:01:22.479Z',
+            updatedAt: '2019-02-12T21:01:22.479Z',
+          }),
+        }),
       ],
       expect.any(Object)
     );
   });
 
-  test('stamps the change with the time captured immediately before the SO update', async () => {
+  test('captures the context of the rule', async () => {
     const changeTrackingService = createChangeTrackingService();
     const trackingClient = new RulesClient({ ...rulesClientParams, changeTrackingService });
 
-    const startTimeMs = Date.parse('2030-06-01T08:00:00.000Z');
-    const dateNowSpy = jest.spyOn(Date, 'now').mockReturnValue(startTimeMs);
+    await trackingClient.snooze({ id: 'rule-1', snoozeSchedule });
 
-    try {
-      await trackingClient.snooze({ id: 'rule-1', snoozeSchedule });
+    expect(changeTrackingService.logBulk).toHaveBeenCalledWith(
+      [
+        expect.objectContaining({
+          objectId: 'rule-1',
+          objectType: RULE_SAVED_OBJECT_TYPE,
+          module: 'stack',
+        }),
+      ],
+      expect.any(Object)
+    );
+  });
 
-      expect(changeTrackingService.logBulk).toHaveBeenCalledTimes(1);
-      const [changes] = changeTrackingService.logBulk.mock.calls[0];
-      expect(changes[0].timestamp).toBe('2030-06-01T08:00:00.000Z');
-    } finally {
-      dateNowSpy.mockRestore();
-    }
+  test('stamps the change with updated_at from the saved object', async () => {
+    const changeTrackingService = createChangeTrackingService();
+    const trackingClient = new RulesClient({ ...rulesClientParams, changeTrackingService });
+
+    await trackingClient.snooze({ id: 'rule-1', snoozeSchedule });
+
+    expect(changeTrackingService.logBulk).toHaveBeenCalledTimes(1);
+    const [changes] = changeTrackingService.logBulk.mock.calls[0];
+    expect(changes[0].timestamp).toBe('2023-03-05T10:30:00.000Z');
   });
 
   test('logs the change only after the OCC retry succeeds', async () => {
@@ -334,5 +359,21 @@ describe('snoozeRule change tracking', () => {
     await trackingClient.snooze({ id: 'rule-1', snoozeSchedule });
 
     expect(changeTrackingService.logBulk).not.toHaveBeenCalled();
+  });
+
+  test('captures rule.revision in object.sequence', async () => {
+    const changeTrackingService = createChangeTrackingService();
+    const trackingClient = new RulesClient({ ...rulesClientParams, changeTrackingService });
+
+    await trackingClient.snooze({ id: 'rule-1', snoozeSchedule });
+
+    expect(changeTrackingService.logBulk).toHaveBeenCalledWith(
+      [
+        expect.objectContaining({
+          sequence: 0,
+        }),
+      ],
+      expect.any(Object)
+    );
   });
 });

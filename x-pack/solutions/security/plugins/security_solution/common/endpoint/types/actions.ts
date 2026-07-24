@@ -32,7 +32,19 @@ export interface ActionResponseOutput<
   TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput
 > {
   type: 'json' | 'text';
-  content: TOutputContent;
+  content: {
+    /**
+     * If action was canceled, this property would include a static value of `manual` or `action`.
+     * `manual`: the action was canceled by a user directly on the host using the `elastic-defend` executable.
+     * `action`: the action was canceled by a `cancel` action
+     */
+    canceled_by?: string;
+    /**
+     * If action was canceled by an `action`, this property MAY have the cancel's action id. For 3rd party EDR
+     * this value may not be available and thus will be empty string in those cases
+     */
+    canceled_id?: string;
+  } & TOutputContent;
 }
 
 export interface ProcessesEntry {
@@ -247,12 +259,16 @@ export interface ResponseActionParametersWithPid {
   pid: number;
   entity_id?: never;
   process_name?: never;
+  /** Also terminate the descendent (child) processes. Valid for `endpoint` agent type only. */
+  kill_descendants?: boolean;
 }
 
 export interface ResponseActionParametersWithEntityId {
   pid?: never;
   process_name?: never;
   entity_id: string;
+  /** Also terminate the descendent (child) processes. Valid for `endpoint` agent type only. */
+  kill_descendants?: boolean;
 }
 
 export interface ResponseActionParametersWithProcessName {
@@ -475,6 +491,7 @@ export type PendingActionsRequestQuery = TypeOf<typeof ActionStatusRequestSchema
 export interface ActionDetailsAgentState {
   isCompleted: boolean;
   wasSuccessful: boolean;
+  wasCanceled: boolean;
   errors: undefined | string[];
   completedAt: string | undefined;
 }
@@ -517,6 +534,8 @@ export interface ActionDetails<
   isCompleted: boolean;
   /** If the action was successful */
   wasSuccessful: boolean;
+  /** If the action was canceled */
+  wasCanceled: boolean;
   /** Any errors encountered if `wasSuccessful` is `false` */
   errors: undefined | string[];
   /** The date when the initial action request was submitted */

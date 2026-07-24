@@ -34,6 +34,7 @@ import type { Schema, VisualizationsSetup, VisualizationsStart } from '.';
 
 const createSetupContract = (): VisualizationsSetup => ({
   createBaseVisualization: jest.fn(),
+  createBaseVisualizationAsync: jest.fn(),
   registerAlias: jest.fn(),
   visEditorsRegistry: { registerDefault: jest.fn(), register: jest.fn(), get: jest.fn() },
   listingViewRegistry: { add: jest.fn() },
@@ -47,6 +48,7 @@ const createStartContract = (): VisualizationsStart => ({
   unRegisterAlias: jest.fn(),
   showNewVisModal: jest.fn(),
   findListItems: jest.fn().mockResolvedValue({ total: 0, hits: [] }),
+  updateVisualizationLibraryItem: jest.fn(),
 });
 
 const createInstance = async () => {

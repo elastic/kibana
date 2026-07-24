@@ -15,6 +15,7 @@ import {
   type AsCodeSavedDataView,
 } from '@kbn/as-code-data-views-schema';
 import { toStoredDataView } from './to_stored_data_view';
+import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 
 describe('toStoredDataView', () => {
   it('converts data_view_reference data_source to string id', () => {
@@ -46,15 +47,27 @@ describe('toStoredDataView', () => {
       fieldFormats: {
         rt: { id: 'string', params: undefined },
       },
-      fieldAttrs: {
-        rt: {},
-      },
       runtimeFieldMap: {
         rt: {
           type: 'keyword',
           script: { source: 'emit(doc["id"].value)' },
         },
       },
+    });
+  });
+
+  it('maps inline allow_hidden_indices to allowHidden', () => {
+    const dataView: AsCodeDataViewSpec = {
+      type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+      index_pattern: 'my-hidden-*',
+      time_field: '@timestamp',
+      allow_hidden_indices: true,
+    };
+    const result = toStoredDataView(dataView);
+    expect(result).toEqual({
+      title: 'my-hidden-*',
+      timeFieldName: '@timestamp',
+      allowHidden: true,
     });
   });
 
@@ -118,9 +131,6 @@ describe('toStoredDataView', () => {
       fieldFormats: {
         rt: { id: 'string', params: undefined },
       },
-      fieldAttrs: {
-        rt: {},
-      },
     });
   });
 
@@ -153,6 +163,36 @@ describe('toStoredDataView', () => {
           rt: { count: 5 },
         },
       });
+    });
+
+    it('maps field_filters to sourceFilters', () => {
+      const dataView: AsCodeSavedDataView = {
+        id: 'dv-1',
+        index_pattern: 'logs-*',
+        field_filters: ['field_a', 'field_b'],
+      };
+
+      const result = toStoredDataView(dataView);
+      expect(result).toEqual(
+        expect.objectContaining({
+          sourceFilters: [{ value: 'field_a' }, { value: 'field_b' }],
+        })
+      );
+    });
+
+    it('omits sourceFilters when field_filters is undefined', () => {
+      const dataView: AsCodeSavedDataView = {
+        id: 'dv-2',
+        index_pattern: 'logs-*',
+      };
+
+      const result = toStoredDataView(dataView);
+      expect(result).toEqual(
+        expect.objectContaining({
+          title: 'logs-*',
+        })
+      );
+      expect((result as DataViewSpec).sourceFilters).toBeUndefined();
     });
   });
 });

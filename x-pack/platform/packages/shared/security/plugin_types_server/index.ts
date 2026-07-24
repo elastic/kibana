@@ -52,6 +52,7 @@ export type {
   CasesActions,
   CheckPrivileges,
   AlertingActions,
+  AlertsActions,
   AppActions,
   ApiActions,
   CheckPrivilegesDynamically,
@@ -65,6 +66,7 @@ export type {
   UserProfileServiceStart,
   UserProfileSuggestParams,
   UserProfileGetCurrentParams,
+  UserProfileGetCurrentProfileIdParams,
   UserProfileBulkGetParams,
   UserProfileRequiredPrivileges,
 } from './src/user_profile';

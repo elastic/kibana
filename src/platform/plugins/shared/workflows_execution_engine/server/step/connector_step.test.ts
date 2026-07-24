@@ -108,6 +108,98 @@ describe('ConnectorStepImpl', () => {
     );
   });
 
+  it('forwards email attachment inputs unchanged to the connector executor', async () => {
+    const { stepExecutionRuntime, connectorExecutor, workflowRuntime, workflowLogger } =
+      createMocks();
+    const attachments = [
+      {
+        filename: 'report.csv',
+        contentType: 'text/csv',
+        content: 'host,risk\nhost-1,high\n',
+      },
+    ];
+
+    connectorExecutor.execute.mockResolvedValue({
+      status: 'ok',
+      data: undefined,
+    });
+
+    const withInputs = {
+      to: ['ops@example.com'],
+      subject: 'Daily CSV report',
+      message: 'Attached is the generated report.',
+      attachments,
+    };
+
+    const step = {
+      name: 'send-report',
+      stepId: 'send-report',
+      type: 'email',
+      'connector-id': 'stakeholder-email',
+      with: withInputs,
+    };
+
+    const impl = new ConnectorStepImpl(
+      step,
+      stepExecutionRuntime as any,
+      connectorExecutor as any,
+      workflowRuntime as any,
+      workflowLogger as any
+    );
+
+    const result = await (impl as any)._run(withInputs);
+
+    expect(result.error).toBeUndefined();
+    expect(connectorExecutor.execute).toHaveBeenCalledWith(
+      expect.objectContaining({
+        connectorType: 'email',
+        connectorNameOrId: 'stakeholder-email',
+        input: withInputs,
+      })
+    );
+  });
+
+  it('executes a regular connector with a rendered connector-id', async () => {
+    const { stepExecutionRuntime, connectorExecutor, workflowRuntime, workflowLogger } =
+      createMocks();
+
+    stepExecutionRuntime.contextManager.renderValueAccordingToContext.mockImplementation((value) =>
+      value === '{{ inputs.connector_id }}' ? 'conn-456' : value
+    );
+    connectorExecutor.execute.mockResolvedValue({
+      status: 'ok',
+      data: { result: 'success' },
+    });
+
+    const step = {
+      name: 'my-connector',
+      stepId: 'my-connector',
+      type: 'slack',
+      'connector-id': '{{ inputs.connector_id }}',
+      with: { text: 'hi' },
+    };
+
+    const impl = new ConnectorStepImpl(
+      step,
+      stepExecutionRuntime as any,
+      connectorExecutor as any,
+      workflowRuntime as any,
+      workflowLogger as any
+    );
+
+    const result = await (impl as any)._run({ text: 'hi' });
+    expect(result.output).toEqual({ result: 'success' });
+    expect(stepExecutionRuntime.contextManager.renderValueAccordingToContext).toHaveBeenCalledWith(
+      '{{ inputs.connector_id }}'
+    );
+    expect(connectorExecutor.execute).toHaveBeenCalledWith(
+      expect.objectContaining({
+        connectorType: 'slack',
+        connectorNameOrId: 'conn-456',
+      })
+    );
+  });
+
   it('handles connector error status', async () => {
     const { stepExecutionRuntime, connectorExecutor, workflowRuntime, workflowLogger } =
       createMocks();
@@ -136,6 +228,39 @@ describe('ConnectorStepImpl', () => {
     const result = await (impl as any)._run({});
     expect(result.error).toBeDefined();
     expect(result.error.message).toBe('connector failed');
+  });
+
+  it('describes the connector step when the error carries no message', async () => {
+    const { stepExecutionRuntime, connectorExecutor, workflowRuntime, workflowLogger } =
+      createMocks();
+
+    connectorExecutor.execute.mockResolvedValue({
+      status: 'error',
+      message: null,
+      serviceMessage: null,
+    });
+
+    const step = {
+      name: 'generate_queries',
+      stepId: 'generate_queries',
+      type: 'slack',
+      'connector-id': 'conn-123',
+    };
+
+    const impl = new ConnectorStepImpl(
+      step,
+      stepExecutionRuntime as any,
+      connectorExecutor as any,
+      workflowRuntime as any,
+      workflowLogger as any
+    );
+
+    const result = await (impl as any)._run({});
+    expect(result.error).toBeDefined();
+    expect(result.error.message).not.toBe('Unknown error');
+    expect(result.error.message).toBe(
+      "Connector 'generate_queries' (slack) failed with status 'error'"
+    );
   });
 
   it('returns ResponseSizeLimitError when maxContentLength exceeded', async () => {

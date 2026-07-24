@@ -8,7 +8,7 @@
 import type { IRouter } from '@kbn/core/server';
 import { lastValueFrom } from 'rxjs';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { escapeKuery } from '@kbn/es-query';
 import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 
@@ -20,6 +20,7 @@ import type {
 } from '../../../common/search_strategy';
 import { OsqueryQueries } from '../../../common/search_strategy';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+import { OSQUERY_SEARCH_STRATEGY } from '../../search_strategy/constants';
 import { createExportRouteHandler } from '../export/create_export_route_handler';
 import {
   exportLiveQueryParamsSchema,
@@ -82,7 +83,7 @@ export const exportLiveQueryResultsRoute = (
                 factoryQueryType: OsqueryQueries.actionDetails,
                 spaceId,
               },
-              { abortSignal: abortController.signal, strategy: 'osquerySearchStrategy' }
+              { abortSignal: abortController.signal, strategy: OSQUERY_SEARCH_STRATEGY }
             )
           );
 

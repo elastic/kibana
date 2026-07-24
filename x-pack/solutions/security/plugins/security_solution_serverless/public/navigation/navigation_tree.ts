@@ -15,6 +15,8 @@ import {
 } from '@kbn/security-solution-navigation';
 import { i18nStrings, securityLink } from '@kbn/security-solution-navigation/links';
 import { defaultNavigationTree } from '@kbn/security-solution-navigation/navigation_tree';
+import { AGENT_BUILDER_NAV_AT_TOP_FLAG } from '@kbn/navigation-plugin/public';
+import { getWorkflowsNavPanel } from '@kbn/deeplinks-workflows';
 
 import { type Services } from '../common/services';
 import { createManagementFooterItemsTree } from './management_footer_items';
@@ -28,7 +30,16 @@ export const createNavigationTree = async (
   services: Services,
   chatExperience: AIChatExperience = AIChatExperience.Classic
 ): Promise<NavigationTreeDefinition> => {
-  const showAlertingV2 = Boolean(services.application.capabilities.alertingVTwo);
+  const showAgentBuilder = chatExperience === AIChatExperience.Agent;
+  const agentBuilderNavAtTop = services.featureFlags.getBooleanValue(
+    AGENT_BUILDER_NAV_AT_TOP_FLAG,
+    false
+  );
+  const agentBuilderLink = {
+    icon: 'productAgent',
+    link: 'agent_builder' as AppDeepLinkId,
+  };
+
   return {
     body: [
       {
@@ -38,6 +49,7 @@ export const createNavigationTree = async (
         icon: 'logoSecurity',
         renderAs: 'home',
       },
+      ...(showAgentBuilder && agentBuilderNavAtTop ? [agentBuilderLink] : []),
       {
         link: 'inbox' as AppDeepLinkId,
         icon: 'email',
@@ -48,24 +60,19 @@ export const createNavigationTree = async (
       },
       defaultNavigationTree.dashboards(),
       defaultNavigationTree.rules(),
-      services.uiSettings.get(ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING, false)
+      services.uiSettings.get(
+        ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING,
+        services.experimentalFeatures.enableAlertsAndAttacksAlignment
+      )
         ? defaultNavigationTree.alertDetections()
         : {
             id: SecurityPageName.alerts,
             icon: 'warning',
             link: securityLink(SecurityPageName.alerts),
           },
-      {
-        link: 'workflows',
-      },
-      ...(chatExperience === AIChatExperience.Agent
-        ? [
-            {
-              icon: 'productAgent',
-              link: 'agent_builder' as AppDeepLinkId,
-            },
-          ]
-        : []),
+      ...getWorkflowsNavPanel(services),
+      // TODO: remove this item when agentBuilderNavAtTop is enabled by default and the Agent Builder link is always at the top of the nav
+      ...(showAgentBuilder && !agentBuilderNavAtTop ? [agentBuilderLink] : []),
       {
         id: SecurityPageName.attackDiscovery,
         icon: 'bolt',
@@ -149,7 +156,7 @@ export const createNavigationTree = async (
         title: i18nStrings.devTools,
         icon: 'code',
       },
-      createManagementFooterItemsTree(chatExperience, showAlertingV2),
+      createManagementFooterItemsTree(services, chatExperience),
     ],
   };
 };

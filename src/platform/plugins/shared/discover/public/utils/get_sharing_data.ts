@@ -14,16 +14,17 @@ import type {
   ISearchSource,
   SerializedSearchSourceFields,
 } from '@kbn/data-plugin/public';
-import type { Filter } from '@kbn/es-query';
+import type { Filter, TimeRange } from '@kbn/es-query';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import {
-  DOC_HIDE_TIME_COLUMN_SETTING,
   getSortForSearchSource,
   isNestedFieldParent,
   SORT_DEFAULT_ORDER_SETTING,
 } from '@kbn/discover-utils';
+import type { AggregateQuery, Query } from '@kbn/es-query';
 import type { DiscoverAppState } from '../application/main/state_management/redux';
 import { isEqualFilters } from '../application/main/state_management/utils/state_comparators';
+import { showTimeFieldColumn } from './show_time_field_column';
 
 /**
  * Preparing data to share the current state as link or CSV/Report
@@ -32,7 +33,7 @@ export async function getSharingData(
   currentSearchSource: ISearchSource,
   state: DiscoverAppState,
   services: { uiSettings: IUiSettingsClient; data: DataPublicPluginStart },
-  isEsqlMode?: boolean
+  absoluteTimeRange?: TimeRange
 ) {
   const { uiSettings, data } = services;
   const searchSource = currentSearchSource.createCopy();
@@ -52,22 +53,21 @@ export async function getSharingData(
   searchSource.removeField('aggs');
   searchSource.removeField('size');
 
-  // Columns that the user has selected in the saved search
-  let columns = state.columns || [];
+  const query = state.query ?? currentSearchSource.getField('query');
 
-  if (columns && columns.length > 0) {
-    // conditionally add the time field column:
-    let timeFieldName: string | undefined;
-    const hideTimeColumn = uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING);
-    if (!hideTimeColumn && index && index.timeFieldName && !isEsqlMode) {
-      timeFieldName = index.timeFieldName;
-    }
-    if (timeFieldName && !columns.includes(timeFieldName)) {
-      columns = [timeFieldName, ...columns];
-    }
-  }
+  // in ES|QL mode this `columns` array will be used only to generate CSV for Dashboard panels (CSV v2)
+  // in Classic mode this `columns` array will be used to generate CSV for both Discover page and Dashboard panels (CSV v1)
+  const columns = getColumnsWithTimeField({
+    columns: state.columns || [],
+    timeFieldName: index?.timeFieldName,
+    uiSettings,
+    query,
+  });
 
-  const absoluteTimeFilter = data.query.timefilter.timefilter.createFilter(index);
+  const absoluteTimeFilter = data.query.timefilter.timefilter.createFilter(
+    index,
+    absoluteTimeRange
+  );
   const relativeTimeFilter = data.query.timefilter.timefilter.createRelativeFilter(index);
   return {
     getSearchSource: ({
@@ -116,8 +116,10 @@ export async function getSharingData(
             let field = column;
 
             // If this column is a nested field, add a wildcard to the field name in order to fetch
-            // all leaf fields for the report, since the fields API doesn't support nested field roots
-            if (isNestedFieldParent(column, index)) {
+            // all leaf fields for the report, since the fields API doesn't support nested field roots.
+            // In ES|QL mode there is no data view (`index` is undefined) and nested field roots do
+            // not apply, so the check is skipped.
+            if (index && isNestedFieldParent(column, index)) {
               field = `${column}.*`;
             }
 
@@ -130,6 +132,28 @@ export async function getSharingData(
     },
     columns,
   };
+}
+
+export function getColumnsWithTimeField({
+  columns,
+  timeFieldName,
+  uiSettings,
+  query,
+}: {
+  columns: string[];
+  timeFieldName: string | undefined;
+  uiSettings: IUiSettingsClient;
+  query?: AggregateQuery | Query;
+}): string[] {
+  if (
+    timeFieldName &&
+    columns.length > 0 &&
+    !columns.includes(timeFieldName) &&
+    showTimeFieldColumn({ uiSettings, query })
+  ) {
+    return [timeFieldName, ...columns];
+  }
+  return columns;
 }
 
 export interface DiscoverCapabilities {

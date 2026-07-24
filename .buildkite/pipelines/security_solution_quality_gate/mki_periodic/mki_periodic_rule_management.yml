@@ -421,6 +421,23 @@ steps:
         soft_fail:
           - exit_status: 101
 
+      - label: 'API MKI - rule_management:essentials:qa:serverless'
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_management:essentials:qa:serverless
+        key: rule_management:essentials:qa:serverless
+        agents:
+          image: family/kibana-ubuntu-2404
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-4
+        timeout_in_minutes: 120
+        retry:
+          automatic:
+            - exit_status: '1'
+              limit: 2
+        soft_fail:
+          - exit_status: 101
+
+
       - label: 'API MKI - rule_bulk_actions:qa:serverless'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_bulk_actions:qa:serverless
         key: rule_bulk_actions:qa:serverless
@@ -456,22 +473,6 @@ steps:
       - label: 'API MKI - rule_read:essentials:qa:serverless'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_read:essentials:qa:serverless
         key: rule_read:essentials:qa:serverless
-        agents:
-          image: family/kibana-ubuntu-2404
-          imageProject: elastic-images-prod
-          provider: gcp
-          machineType: n2-standard-4
-        timeout_in_minutes: 120
-        retry:
-          automatic:
-            - exit_status: '1'
-              limit: 2
-        soft_fail:
-          - exit_status: 101
-
-      - label: 'API MKI - rules_management:essentials:qa:serverless'
-        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rules_management:essentials:qa:serverless
-        key: rules_management:essentials:qa:serverless
         agents:
           image: family/kibana-ubuntu-2404
           imageProject: elastic-images-prod

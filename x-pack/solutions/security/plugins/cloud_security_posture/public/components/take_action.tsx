@@ -15,6 +15,7 @@ import {
   EuiFlexItem,
   EuiPopover,
   EuiText,
+  EuiToolTip,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { toMountPoint } from '@kbn/react-kibana-mount';
@@ -36,7 +37,7 @@ import type { CloudSecurityPostureStartServices } from '../types';
 
 const RULE_PAGE_PATH = '/app/security/rules/id/';
 
-interface TakeActionProps {
+export interface TakeActionProps {
   createRuleFn?: (http: HttpSetup) => Promise<RuleResponse>;
   enableBenchmarkRuleFn?: () => Promise<void>;
   disableBenchmarkRuleFn?: () => Promise<void>;
@@ -142,20 +143,29 @@ export const TakeAction = ({
       fill
       iconType="chevronSingleDown"
       iconSide="right"
+      aria-haspopup="menu"
       onClick={() => setPopoverOpen(!isPopoverOpen)}
     >
       <FormattedMessage id="xpack.csp.flyout.takeActionButton" defaultMessage="Take action" />
     </EuiButton>
   ) : (
-    <EuiButtonIcon
-      aria-label={kbnI18n.translate('xpack.csp.flyout.moreActionsButton', {
+    <EuiToolTip
+      content={kbnI18n.translate('xpack.csp.flyout.moreActionsButton', {
         defaultMessage: 'More actions',
       })}
-      iconType="boxesVertical"
-      color="primary"
-      isLoading={isLoading}
-      onClick={() => setPopoverOpen(!isPopoverOpen)}
-    />
+      disableScreenReaderOutput
+    >
+      <EuiButtonIcon
+        aria-label={kbnI18n.translate('xpack.csp.flyout.moreActionsButton', {
+          defaultMessage: 'More actions',
+        })}
+        aria-haspopup="menu"
+        iconType="boxesVertical"
+        color="primary"
+        isLoading={isLoading}
+        onClick={() => setPopoverOpen(!isPopoverOpen)}
+      />
+    </EuiToolTip>
   );
   const actionsItems = [];
 
@@ -198,6 +208,10 @@ export const TakeAction = ({
       panelPaddingSize="none"
       anchorPosition="downLeft"
       data-test-subj={TAKE_ACTION_SUBJ}
+      aria-label={kbnI18n.translate('xpack.csp.flyout.actionsPopoverAriaLabel', {
+        defaultMessage: 'Actions',
+      })}
+      panelProps={{ role: 'none' }}
     >
       <EuiContextMenuPanel items={actionsItems} />
     </EuiPopover>

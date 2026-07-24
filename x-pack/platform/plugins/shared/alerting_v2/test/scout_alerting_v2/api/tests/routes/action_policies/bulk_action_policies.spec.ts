@@ -9,12 +9,12 @@ import { expect } from '@kbn/scout/api';
 import type { RoleApiCredentials } from '@kbn/scout';
 import { ID_MAX_LENGTH, MAX_BULK_ITEMS } from '@kbn/alerting-v2-schemas';
 import {
-  ALL_ROLE,
+  ALERTING_V2_ACTION_POLICIES_ALL_ROLE,
+  ALERTING_V2_ACTION_POLICIES_READ_ROLE,
   apiTest,
   buildCreateActionPolicyData,
   getBulkActionPoliciesUrl,
   NO_ACCESS_ROLE,
-  READ_ROLE,
   testData,
 } from '../../../fixtures';
 
@@ -26,7 +26,9 @@ apiTest.describe('Bulk action policies API', { tag: '@local-stateful-classic' },
   let writerHeaders: Record<string, string>;
 
   apiTest.beforeAll(async ({ requestAuth }) => {
-    writerCredentials = await requestAuth.getApiKeyForCustomRole(ALL_ROLE);
+    writerCredentials = await requestAuth.getApiKeyForCustomRole(
+      ALERTING_V2_ACTION_POLICIES_ALL_ROLE
+    );
     writerHeaders = { ...writerCredentials.apiKeyHeader };
   });
 
@@ -418,6 +420,25 @@ apiTest.describe('Bulk action policies API', { tag: '@local-stateful-classic' },
   });
 
   apiTest(
+    'validation: rejects body with unknown top-level keys (strict schema)',
+    async ({ apiClient, apiServices }) => {
+      const created = await apiServices.alertingV2.actionPolicies.create(
+        buildCreateActionPolicyData({ name: 'bulk-strict-top-level' })
+      );
+
+      const response = await apiClient.post(getBulkActionPoliciesUrl(), {
+        headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
+        body: {
+          actions: [{ id: created.id, action: 'enable' }],
+          unknownField: 'x',
+        },
+      });
+
+      expect(response).toHaveStatusCode(400);
+    }
+  );
+
+  apiTest(
     'validation: rejects snooze action without snoozedUntil',
     async ({ apiClient, apiServices }) => {
       const created = await apiServices.alertingV2.actionPolicies.create(
@@ -489,7 +510,9 @@ apiTest.describe('Bulk action policies API', { tag: '@local-stateful-classic' },
   apiTest(
     'authorization: 403 with read-only alerting_v2 privileges',
     async ({ apiClient, apiServices, requestAuth }) => {
-      const readerCredentials = await requestAuth.getApiKeyForCustomRole(READ_ROLE);
+      const readerCredentials = await requestAuth.getApiKeyForCustomRole(
+        ALERTING_V2_ACTION_POLICIES_READ_ROLE
+      );
       const created = await apiServices.alertingV2.actionPolicies.create(
         buildCreateActionPolicyData({ name: 'reader-bulk' })
       );

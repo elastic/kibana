@@ -59,12 +59,14 @@ export async function persistenceLoop(
       return;
     }
 
-    await flushState(params);
+    await flushState(params, {
+      workflowLogFlushSignal: params.signal,
+    });
 
     try {
       const waitSpan = apm.startSpan('persistence wait', 'workflow', 'wait');
       await Promise.race([
-        abortableTimeout(FLUSH_INTERVAL_MS, params.taskAbortController.signal),
+        abortableTimeout(FLUSH_INTERVAL_MS, params.signal),
         persistenceAbortSignal
           ? new Promise<void>((_, reject) => {
               if (persistenceAbortSignal.aborted) {

@@ -33,6 +33,7 @@ import type {
 } from '@kbn/lens-common';
 import type { FormBasedDimensionEditorProps } from './dimension_panel';
 import type { OperationSupportMatrix } from './operation_support';
+import { getSingleValue } from '../pure_utils';
 import {
   operationDefinitionMap,
   getOperationDisplay,
@@ -46,6 +47,7 @@ import {
   deleteColumn,
 } from '../operations';
 import { mergeLayer } from '../state_helpers';
+import { getColumnParamsForNewBucket } from '../include_empty_rows_defaults';
 import { getReferencedField, hasField } from '../pure_utils';
 import { fieldIsInvalid, getSamplingValue, isSamplingValueEnabled } from '../utils';
 import { BucketNestingEditor } from './bucket_nesting_editor';
@@ -110,6 +112,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
     enableFormatSelector = true,
     layerType,
     paramEditorCustomProps,
+    activeVisualizationTypeId,
   } = props;
   const services = {
     data: props.data,
@@ -610,6 +613,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
               op: operationType,
               visualizationGroups: dimensionGroups,
               targetGroup: props.groupId,
+              columnParams: getColumnParamsForNewBucket(operationType, activeVisualizationTypeId),
             });
             if (
               temporaryQuickFunction &&
@@ -622,17 +626,23 @@ export function DimensionEditor(props: DimensionEditorProps) {
             return;
           } else if (!selectedColumn || !compatibleWithCurrentField) {
             const possibleFields = fieldByOperation.get(operationType) ?? new Set<string>();
+            const columnParams = getColumnParamsForNewBucket(
+              operationType,
+              activeVisualizationTypeId
+            );
 
             let newLayer: FormBasedLayer;
-            if (possibleFields.size === 1) {
+            const singleField = getSingleValue(possibleFields);
+            if (singleField) {
               newLayer = insertOrReplaceColumn({
                 layer: props.state.layers[props.layerId],
                 indexPattern: currentIndexPattern,
                 columnId,
                 op: operationType,
-                field: currentIndexPattern.getFieldByName(possibleFields.values().next().value!),
+                field: currentIndexPattern.getFieldByName(singleField),
                 visualizationGroups: dimensionGroups,
                 targetGroup: props.groupId,
+                columnParams,
               });
             } else {
               newLayer = insertOrReplaceColumn({
@@ -644,6 +654,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
                 field: possibleFields.has(DOCUMENT_FIELD_NAME) ? documentField : undefined,
                 visualizationGroups: dimensionGroups,
                 targetGroup: props.groupId,
+                columnParams,
               });
             }
             if (
@@ -677,6 +688,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
               ? currentIndexPattern.getFieldByName(selectedColumn.sourceField)
               : undefined,
             visualizationGroups: dimensionGroups,
+            columnParams: getColumnParamsForNewBucket(operationType, activeVisualizationTypeId),
           });
           setStateWrapper(newLayer);
         },
@@ -882,6 +894,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
           dimensionGroups={dimensionGroups}
           groupId={props.groupId}
           operationDefinitionMap={operationDefinitionMap}
+          activeVisualizationTypeId={activeVisualizationTypeId}
         />
       ) : null}
       {!isFullscreen && !incompleteInfo && !hideGrouping && temporaryState === 'none' && (

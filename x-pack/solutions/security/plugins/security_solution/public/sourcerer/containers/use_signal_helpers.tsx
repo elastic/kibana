@@ -5,18 +5,14 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useCallback, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
-import { useDispatch, useSelector } from 'react-redux';
 import { PageScope } from '../../data_view_manager/constants';
-import { sourcererActions, sourcererSelectors } from '../store';
-import { useSourcererDataView } from '.';
 import { useDataView as useOldDataView } from '../../common/containers/source/use_data_view';
 import { useAppToasts } from '../../common/hooks/use_app_toasts';
 import { useKibana } from '../../common/lib/kibana';
 import { useDataView } from '../../data_view_manager/hooks/use_data_view';
 import { useSignalIndexName } from '../../data_view_manager/hooks/use_signal_index_name';
-import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { useSecuritySolutionInitialization } from '../../common/components/initialization/use_security_solution_initialization';
 import {
   INITIALIZATION_FLOW_SECURITY_DATA_VIEWS,
@@ -29,53 +25,37 @@ export const useSignalHelpers = (): {
   /* when false, signal index has been initiated */
   signalIndexNeedsInit: boolean;
 } => {
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+  const { dataView, status } = useDataView(PageScope.alerts);
+  const indicesExist = dataView.hasMatchedIndices();
 
-  const { indicesExist } = useSourcererDataView(PageScope.alerts);
   const { indexFieldsSearch } = useOldDataView();
-  const dispatch = useDispatch();
   const { addError } = useAppToasts();
   const abortCtrl = useRef(new AbortController());
   const {
     data: { dataViews },
   } = useKibana().services;
 
-  const signalIndexNameSourcerer = useSelector(sourcererSelectors.signalIndexName);
   const experimentalSignalIndexName = useSignalIndexName();
-  const oldDefaultDataView = useSelector(sourcererSelectors.defaultDataView);
 
   // Request sourcerer data view initialization from the backend (legacy path only).
-  const initState = useSecuritySolutionInitialization(
-    newDataViewPickerEnabled ? [] : [INITIALIZATION_FLOW_SECURITY_DATA_VIEWS]
-  );
-  const sourcererInitResult = initState[INITIALIZATION_FLOW_SECURITY_DATA_VIEWS];
+  const initState = useSecuritySolutionInitialization([INITIALIZATION_FLOW_SECURITY_DATA_VIEWS]);
+  // @ts-ignore
+  const dataViewInitResult = initState[INITIALIZATION_FLOW_SECURITY_DATA_VIEWS];
   const initPayload =
-    sourcererInitResult?.result?.status === INITIALIZATION_FLOW_STATUS_READY
-      ? sourcererInitResult.result.payload
+    dataViewInitResult?.result?.status === INITIALIZATION_FLOW_STATUS_READY
+      ? dataViewInitResult.result.payload
       : null;
 
-  useEffect(() => {
-    if (newDataViewPickerEnabled || initPayload === null) return;
-    dispatch(sourcererActions.setSourcererDataViews(initPayload));
-    dispatch(sourcererActions.setSignalIndexName({ signalIndexName: initPayload.signalIndexName }));
-  }, [dispatch, initPayload, newDataViewPickerEnabled]);
+  const signalIndexName = experimentalSignalIndexName;
 
-  const signalIndexName = newDataViewPickerEnabled
-    ? experimentalSignalIndexName
-    : signalIndexNameSourcerer;
-
-  const { dataView: experimentalDefaultDataView, status } = useDataView(PageScope.alerts);
-
-  const defaultDataViewPattern = newDataViewPickerEnabled
-    ? experimentalDefaultDataView.getIndexPattern() ?? ''
-    : oldDefaultDataView.title;
+  const defaultDataViewPattern = dataView.getIndexPattern() ?? '';
 
   const signalIndexNeedsInit = useMemo(() => {
-    if (newDataViewPickerEnabled && status === 'pristine') {
+    if (status === 'pristine') {
       return false;
     }
     return !defaultDataViewPattern.includes(`${signalIndexName}`);
-  }, [defaultDataViewPattern, newDataViewPickerEnabled, signalIndexName, status]);
+  }, [defaultDataViewPattern, signalIndexName, status]);
 
   const shouldWePollForIndex = useMemo(
     () => !indicesExist && !signalIndexNeedsInit,

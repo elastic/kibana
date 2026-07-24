@@ -564,6 +564,7 @@ describe('updateRuleApiKey()', () => {
     const updatedRuleSO = {
       id: '1',
       type: RULE_SAVED_OBJECT_TYPE,
+      updated_at: '2023-03-05T10:30:00.000Z',
       attributes: {
         name: ruleName,
         alertTypeId: 'myType',
@@ -574,6 +575,7 @@ describe('updateRuleApiKey()', () => {
         apiKeyCreatedByUser: false,
         revision: 0,
         updatedBy: 'elastic',
+        createdAt: '2019-02-12T21:01:22.479Z',
         updatedAt: '2019-02-12T21:01:22.479Z',
         actions: [],
       },
@@ -633,7 +635,7 @@ describe('updateRuleApiKey()', () => {
       );
     });
 
-    test('captures the full post-update attributes and references of the rule', async () => {
+    test('captures the full post-update attributes of the rule', async () => {
       const changeTrackingService = createChangeTrackingService();
       const trackingClient = new RulesClient({ ...rulesClientParams, changeTrackingService });
       setRuleType();
@@ -648,45 +650,63 @@ describe('updateRuleApiKey()', () => {
 
       expect(changeTrackingService.logBulk).toHaveBeenCalledWith(
         [
-          {
-            // setGlobalDate pins Date.now() to mockedDateString.
-            timestamp: '2019-02-12T21:01:22.479Z',
-            objectId: '1',
-            objectType: RULE_SAVED_OBJECT_TYPE,
-            module: 'stack',
-            snapshot: {
-              attributes: updatedRuleSO.attributes,
-              references: updatedRuleSO.references,
-            },
-          },
+          expect.objectContaining({
+            snapshot: expect.objectContaining({
+              id: '1',
+              name: ruleName,
+              alertTypeId: 'myType',
+              consumer: 'myApp',
+              apiKey: Buffer.from('234:abc').toString('base64'),
+              createdAt: '2019-02-12T21:01:22.479Z',
+              updatedAt: '2019-02-12T21:01:22.479Z',
+            }),
+          }),
         ],
         expect.any(Object)
       );
     });
 
-    test('stamps the change with the time captured immediately before the SO update', async () => {
+    test('captures the context of the rule', async () => {
       const changeTrackingService = createChangeTrackingService();
       const trackingClient = new RulesClient({ ...rulesClientParams, changeTrackingService });
       setRuleType();
 
-      const startTimeMs = Date.parse('2030-06-01T08:00:00.000Z');
-      const dateNowSpy = jest.spyOn(Date, 'now').mockReturnValue(startTimeMs);
+      rulesClientParams.createAPIKey.mockResolvedValueOnce({
+        apiKeysEnabled: true,
+        result: { id: '234', name: '123', api_key: 'abc' },
+      });
+      unsecuredSavedObjectsClient.update.mockResolvedValueOnce(updatedRuleSO);
 
-      try {
-        rulesClientParams.createAPIKey.mockResolvedValueOnce({
-          apiKeysEnabled: true,
-          result: { id: '234', name: '123', api_key: 'abc' },
-        });
-        unsecuredSavedObjectsClient.update.mockResolvedValueOnce(updatedRuleSO);
+      await trackingClient.updateRuleApiKey({ id: '1' });
 
-        await trackingClient.updateRuleApiKey({ id: '1' });
+      expect(changeTrackingService.logBulk).toHaveBeenCalledWith(
+        [
+          expect.objectContaining({
+            objectId: '1',
+            objectType: RULE_SAVED_OBJECT_TYPE,
+            module: 'stack',
+          }),
+        ],
+        expect.any(Object)
+      );
+    });
 
-        expect(changeTrackingService.logBulk).toHaveBeenCalledTimes(1);
-        const [changes] = changeTrackingService.logBulk.mock.calls[0];
-        expect(changes[0].timestamp).toBe('2030-06-01T08:00:00.000Z');
-      } finally {
-        dateNowSpy.mockRestore();
-      }
+    test('stamps the change with updated_at from the saved object', async () => {
+      const changeTrackingService = createChangeTrackingService();
+      const trackingClient = new RulesClient({ ...rulesClientParams, changeTrackingService });
+      setRuleType();
+
+      rulesClientParams.createAPIKey.mockResolvedValueOnce({
+        apiKeysEnabled: true,
+        result: { id: '234', name: '123', api_key: 'abc' },
+      });
+      unsecuredSavedObjectsClient.update.mockResolvedValueOnce(updatedRuleSO);
+
+      await trackingClient.updateRuleApiKey({ id: '1' });
+
+      expect(changeTrackingService.logBulk).toHaveBeenCalledTimes(1);
+      const [changes] = changeTrackingService.logBulk.mock.calls[0];
+      expect(changes[0].timestamp).toBe('2023-03-05T10:30:00.000Z');
     });
 
     test('logs the change only after the OCC retry succeeds (no logging on the failed attempt)', async () => {
@@ -751,6 +771,29 @@ describe('updateRuleApiKey()', () => {
       await trackingClient.updateRuleApiKey({ id: '1' });
 
       expect(changeTrackingService.logBulk).not.toHaveBeenCalled();
+    });
+
+    test('captures rule.revision in object.sequence', async () => {
+      const changeTrackingService = createChangeTrackingService();
+      const trackingClient = new RulesClient({ ...rulesClientParams, changeTrackingService });
+      setRuleType();
+
+      rulesClientParams.createAPIKey.mockResolvedValueOnce({
+        apiKeysEnabled: true,
+        result: { id: '234', name: '123', api_key: 'abc' },
+      });
+      unsecuredSavedObjectsClient.update.mockResolvedValueOnce(updatedRuleSO);
+
+      await trackingClient.updateRuleApiKey({ id: '1' });
+
+      expect(changeTrackingService.logBulk).toHaveBeenCalledWith(
+        [
+          expect.objectContaining({
+            sequence: 0,
+          }),
+        ],
+        expect.any(Object)
+      );
     });
   });
 });

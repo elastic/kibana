@@ -44,14 +44,14 @@ const alwaysCondition: Condition = { always: {} };
 
 describe('definitionToESQLQuery', () => {
   describe('basic query structure', () => {
-    it('generates FROM parent view with METADATA _source and WHERE clause', async () => {
+    it('generates FROM parent view with METADATA _id, _source and WHERE clause', async () => {
       const result = await definitionToESQLQuery({
         definition: createDraftDefinition(),
         routingCondition: eqCondition,
       });
       expect(result).toBe(
         [
-          'FROM $.logs.otel METADATA _source',
+          'FROM $.logs.otel METADATA _id, _source',
           '| WHERE COALESCE(`service.name` == "nginx", FALSE)',
         ].join('\n')
       );
@@ -62,7 +62,7 @@ describe('definitionToESQLQuery', () => {
         definition: createDraftDefinition(),
         routingCondition: alwaysCondition,
       });
-      expect(result).toBe('FROM $.logs.otel METADATA _source');
+      expect(result).toBe('FROM $.logs.otel METADATA _id, _source');
     });
 
     it('supports compound AND routing conditions', async () => {
@@ -72,7 +72,7 @@ describe('definitionToESQLQuery', () => {
       });
       expect(result).toBe(
         [
-          'FROM $.logs.otel METADATA _source',
+          'FROM $.logs.otel METADATA _id, _source',
           '| WHERE COALESCE(`service.name` == "nginx", FALSE) AND COALESCE(`log.level` == "error", FALSE)',
         ].join('\n')
       );
@@ -95,7 +95,7 @@ describe('definitionToESQLQuery', () => {
       });
       expect(result).toBe(
         [
-          'FROM $.logs.otel.nginx METADATA _source',
+          'FROM $.logs.otel.nginx METADATA _id, _source',
           '| WHERE COALESCE(`service.name` == "nginx", FALSE)',
         ].join('\n')
       );
@@ -121,7 +121,7 @@ describe('definitionToESQLQuery', () => {
       });
       expect(result).toBe(
         [
-          'FROM $.logs.otel METADATA _source',
+          'FROM $.logs.otel METADATA _id, _source',
           '| WHERE COALESCE(`service.name` == "nginx", FALSE)',
           '| WHERE NOT(old_field IS NULL)',
           '  | WHERE new_field IS NULL',
@@ -154,7 +154,7 @@ describe('definitionToESQLQuery', () => {
       });
       expect(result).toBe(
         [
-          'FROM $.logs.otel METADATA _source',
+          'FROM $.logs.otel METADATA _id, _source',
           '| WHERE COALESCE(`service.name` == "nginx", FALSE)',
         ].join('\n')
       );
@@ -185,7 +185,7 @@ describe('definitionToESQLQuery', () => {
       });
       expect(result).toBe(
         [
-          'FROM $.logs.otel METADATA _source',
+          'FROM $.logs.otel METADATA _id, _source',
           '| WHERE COALESCE(`service.name` == "nginx", FALSE)',
         ].join('\n')
       );
@@ -223,7 +223,7 @@ describe('definitionToESQLQuery', () => {
         routingCondition: alwaysCondition,
         includeProcessing: false,
       });
-      expect(result).toBe('FROM $.logs.otel METADATA _source');
+      expect(result).toBe('FROM $.logs.otel METADATA _id, _source');
       expect(result).not.toContain('RENAME');
       expect(result).not.toContain('TO_LONG');
     });

@@ -6,7 +6,7 @@
  */
 
 import React, { memo } from 'react';
-import { EuiPopover, EuiText, EuiButtonIcon, EuiLink } from '@elastic/eui';
+import { EuiButtonIcon, EuiLink, EuiPopover, EuiText, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useBoolean } from '@kbn/react-hooks';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -20,11 +20,18 @@ export const EsqlInfoIcon = memo(function EsqlInfoIcon(): JSX.Element {
   const [isPopoverOpen, { off: closePopover, on: togglePopover }] = useBoolean(false);
 
   const button = (
-    <EuiButtonIcon iconType="info" onClick={togglePopover} aria-label={i18n.ARIA_LABEL} />
+    <EuiToolTip content={i18n.ARIA_LABEL} disableScreenReaderOutput>
+      <EuiButtonIcon iconType="info" onClick={togglePopover} aria-label={i18n.ARIA_LABEL} />
+    </EuiToolTip>
   );
 
   return (
-    <EuiPopover button={button} isOpen={isPopoverOpen} closePopover={closePopover}>
+    <EuiPopover
+      button={button}
+      isOpen={isPopoverOpen}
+      closePopover={closePopover}
+      aria-label={i18n.ARIA_LABEL}
+    >
       <EuiText size="s">
         <FormattedMessage
           id="xpack.securitySolution.ruleManagement.esqlQuery.esqlInfoTooltipContent"

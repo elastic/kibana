@@ -7,6 +7,8 @@
 
 import React from 'react';
 import { EuiCard, EuiTextColor, useEuiTheme } from '@elastic/eui';
+import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
+import { useHistory } from 'react-router-dom';
 import { LogoIcon } from '../shared/logo_icon';
 import type { IntegrationTileData } from './integration_tiles';
 
@@ -15,8 +17,10 @@ interface Props {
 }
 
 export const IntegrationTile = ({ tile }: Props) => {
+  const history = useHistory();
   const { euiTheme, colorMode } = useEuiTheme();
   const resolvedLogo = colorMode === 'DARK' ? tile.darkLogo ?? tile.logo : tile.logo;
+  const routeNavigation = tile.route ? reactRouterNavigate(history, tile.route) : undefined;
 
   return (
     <EuiCard
@@ -36,7 +40,8 @@ export const IntegrationTile = ({ tile }: Props) => {
       }
       title={tile.title}
       description={<EuiTextColor color="subdued">{tile.description}</EuiTextColor>}
-      onClick={() => {}}
+      data-test-subj={`observabilityOnboardingIntegrationTile-${tile.id}`}
+      {...routeNavigation}
     />
   );
 };

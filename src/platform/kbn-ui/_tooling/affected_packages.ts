@@ -10,6 +10,7 @@
 import fs from 'fs';
 import path from 'path';
 
+import yaml from 'js-yaml';
 import {
   getMoonChangedFiles,
   getAffectedMoonProjectsFromChangedFiles,
@@ -25,10 +26,16 @@ export const FORCE_ALL_CHANGED_PATHS = new Set<string>([
   '.buildkite/pipeline-resource-definitions/kibana-kbn-ui-publish.yml',
 ]);
 
+interface MoonYml {
+  id: string;
+  dependsOn?: string[];
+}
+
 interface ResolveAffectedPackagesOptions {
   changedFiles: string[];
   affectedProjects: MoonProject[];
   packageNames: string[];
+  kbnUiRoot: string;
 }
 
 const getAllPackageNames = (kbnUiRoot: string): string[] =>
@@ -57,17 +64,79 @@ export const getPackageNameFromSourceRoot = (
   return packageNames.includes(packageName) ? packageName : undefined;
 };
 
+/**
+ * Returns `packageNames` in topological order (dependencies before dependents)
+ * using each package's moon.yml `dependsOn` field. Only intra-kbn-ui edges are
+ * considered; dependencies on packages outside kbn-ui don't affect ordering.
+ * Alphabetical tie-breaking ensures deterministic output.
+ * Throws if a dependency cycle is detected.
+ */
+export const topologicallySortPackages = (packageNames: string[], kbnUiRoot: string): string[] => {
+  // Read each packages moon.yml
+  const moonData = new Map<string, MoonYml>();
+  for (const name of packageNames) {
+    moonData.set(
+      name,
+      yaml.load(fs.readFileSync(path.join(kbnUiRoot, name, 'moon.yml'), 'utf-8')) as MoonYml
+    );
+  }
+
+  // Map @kbn/... id -> directory name (so that its kbn-ui packages only)
+  const idToName = new Map<string, string>();
+  for (const [name, { id }] of moonData) {
+    idToName.set(id, name);
+  }
+
+  // dependents[A] = packages that must come AFTER A in the build order.
+  const dependents = new Map<string, Set<string>>(packageNames.map((n) => [n, new Set()]));
+  const inDegree = new Map<string, number>(packageNames.map((n) => [n, 0]));
+
+  for (const [name, { dependsOn = [] }] of moonData) {
+    for (const depId of dependsOn) {
+      const depName = idToName.get(depId);
+      if (depName !== undefined) {
+        dependents.get(depName)!.add(name);
+        inDegree.set(name, inDegree.get(name)! + 1);
+      }
+    }
+  }
+
+  const queue = packageNames.filter((n) => inDegree.get(n) === 0).sort();
+  const sorted: string[] = [];
+
+  while (queue.length > 0) {
+    const name = queue.shift()!;
+    sorted.push(name);
+    for (const dep of [...dependents.get(name)!].sort()) {
+      const deg = inDegree.get(dep)! - 1;
+      inDegree.set(dep, deg);
+      if (deg === 0) {
+        const pos = queue.findIndex((n) => n > dep);
+        queue.splice(pos === -1 ? queue.length : pos, 0, dep);
+      }
+    }
+  }
+
+  if (sorted.length !== packageNames.length) {
+    const cycled = packageNames.filter((n) => !sorted.includes(n));
+    throw new Error(`Cyclic dependency detected among kbn-ui packages: ${cycled.join(', ')}`);
+  }
+
+  return sorted;
+};
+
 export const resolveAffectedPackages = ({
   changedFiles,
   affectedProjects,
   packageNames,
+  kbnUiRoot,
 }: ResolveAffectedPackagesOptions): string[] => {
   if (changedFiles.length === 0) {
     return [];
   }
 
   if (shouldForceAllPackages(changedFiles)) {
-    return packageNames;
+    return topologicallySortPackages(packageNames, kbnUiRoot);
   }
 
   const affectedPackageNames = new Set<string>();
@@ -78,7 +147,7 @@ export const resolveAffectedPackages = ({
     }
   }
 
-  return Array.from(affectedPackageNames).sort();
+  return topologicallySortPackages(Array.from(affectedPackageNames), kbnUiRoot);
 };
 
 const usage = (): string => 'usage: affected_packages.ts <base-ref> [head-ref]';
@@ -107,6 +176,7 @@ const main = async (argv = process.argv.slice(2)): Promise<void> => {
     changedFiles,
     affectedProjects,
     packageNames,
+    kbnUiRoot,
   })) {
     process.stdout.write(`${packageName}\n`);
   }

@@ -24,6 +24,7 @@ test.describe('Rules page navigation and loading', { tag: tags.stateful.classic 
   test.beforeEach(async ({ browserAuth, page }) => {
     await browserAuth.loginAsAdmin();
     await page.gotoApp('rules');
+    await page.waitForURL(/\/app\/management\/insightsAndAlerting\/triggersActions/);
   });
 
   test.afterAll(async ({ apiServices }) => {
@@ -32,12 +33,12 @@ test.describe('Rules page navigation and loading', { tag: tags.stateful.classic 
     }
   });
 
-  test('navigates to /app/rules successfully', async ({ page }) => {
-    expect(page.url()).toContain('/app/rules');
+  test('redirects to Stack Management rules page', async ({ page }) => {
+    expect(page.url()).toContain('/app/management/insightsAndAlerting/triggersActions');
   });
 
   test('loads with the correct page title', async ({ page }) => {
-    await expect(page.testSubj.locator('appTitle')).toHaveText('Rules');
+    await expect(page.testSubj.locator('appHeaderTitle')).toHaveText('Rules');
   });
 
   test('displays the rules list', async ({ page }) => {

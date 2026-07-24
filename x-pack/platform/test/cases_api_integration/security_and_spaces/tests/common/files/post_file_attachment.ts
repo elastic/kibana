@@ -13,7 +13,7 @@ import {
 } from '@kbn/cases-plugin/common/constants';
 import { constructFileKindIdByOwner } from '@kbn/cases-plugin/common/files';
 import { FILE_SO_TYPE } from '@kbn/files-plugin/common';
-import type { AttachmentRequest } from '@kbn/cases-plugin/common/types/api';
+import type { AttachmentRequestV2 } from '@kbn/cases-plugin/common/types/api';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   fileMetadata,
@@ -159,7 +159,7 @@ export default ({ getService }: FtrProviderContext): void => {
             soType: FILE_SO_TYPE,
             files: [fileMetadata()],
           },
-        } as unknown as AttachmentRequest;
+        } as AttachmentRequestV2;
 
         const patchedCase = await createComment({
           supertest,
@@ -204,7 +204,7 @@ export default ({ getService }: FtrProviderContext): void => {
             files: [fileMetadata()],
             extraField: 'nope',
           },
-        } as unknown as AttachmentRequest;
+        } as AttachmentRequestV2;
 
         await createComment({
           supertest,

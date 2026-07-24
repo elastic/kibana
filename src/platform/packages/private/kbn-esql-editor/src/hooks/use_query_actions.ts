@@ -25,7 +25,6 @@ interface UseQueryActionsParams {
   measuredEditorWidth: number;
   onTextLangQuerySubmit: ESQLEditorProps['onTextLangQuerySubmit'];
   onQueryUpdate: (value: string) => void;
-  setCodeStateOnSubmission: (code: string) => void;
   telemetryService: ESQLEditorTelemetryService;
 }
 
@@ -37,7 +36,6 @@ export const useQueryActions = ({
   measuredEditorWidth,
   onTextLangQuerySubmit,
   onQueryUpdate,
-  setCodeStateOnSubmission,
   telemetryService,
 }: UseQueryActionsParams) => {
   const [isQueryLoading, setIsQueryLoading] = useState(true);
@@ -58,9 +56,6 @@ export const useQueryActions = ({
         abortControllerRef.current = abc;
 
         const currentValue = editorRef.current?.getValue();
-        if (currentValue != null) {
-          setCodeStateOnSubmission(currentValue);
-        }
 
         if (currentValue) {
           telemetryService.trackQuerySubmitted({
@@ -71,14 +66,7 @@ export const useQueryActions = ({
         onTextLangQuerySubmit({ esql: currentValue } as AggregateQuery, abc);
       }
     },
-    [
-      isLoading,
-      allowQueryCancellation,
-      onTextLangQuerySubmit,
-      telemetryService,
-      editorRef,
-      setCodeStateOnSubmission,
-    ]
+    [isLoading, allowQueryCancellation, onTextLangQuerySubmit, telemetryService, editorRef]
   );
 
   const onUpdateAndSubmitQuery = useCallback(
@@ -145,6 +133,12 @@ export const useQueryActions = ({
   useEffect(() => {
     if (!isLoading) setIsQueryLoading(false);
   }, [isLoading]);
+
+  useEffect(() => {
+    return () => {
+      abortControllerRef.current.abort();
+    };
+  }, []);
 
   const queryRunButtonProperties = useMemo(() => {
     if (allowQueryCancellation && isLoading) {

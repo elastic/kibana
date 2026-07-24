@@ -97,7 +97,6 @@ export default async function ({ readConfigFile, log }: FtrConfigProviderContext
           enableSloTemplates: true,
           enableVersionSpecificPolicies: true,
           enableOpAMP: true,
-          enableIntegrationConditions: true,
           enableCloudOnboardingDeployments: true,
         })}`,
         `--xpack.fleet.agentless.enabled=true`,

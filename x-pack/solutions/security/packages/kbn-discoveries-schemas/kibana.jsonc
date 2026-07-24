@@ -1,0 +1,9 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/discoveries-schemas",
+  "owner": [
+    "@elastic/security-threat-hunting"
+  ],
+  "group": "security",
+  "visibility": "shared"
+}

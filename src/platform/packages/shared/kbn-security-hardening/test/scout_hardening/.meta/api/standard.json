@@ -1,0 +1,31 @@
+{
+  "sha1": "0abeca4900a6a9e3e7c2eaa3467e3e2f317e3dbe",
+  "tests": [
+    {
+      "id": "a20753d23187ad8-c5cb9dd0c2e85bc",
+      "title": "code generation from strings is disallowed eval is blocked on the server",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-security-hardening/test/scout_hardening/api/tests/code_generation.spec.ts",
+        "line": 24,
+        "column": 12
+      }
+    },
+    {
+      "id": "a20753d23187ad8-008298b2e15baef",
+      "title": "code generation from strings is disallowed Function constructor is blocked on the server",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-security-hardening/test/scout_hardening/api/tests/code_generation.spec.ts",
+        "line": 39,
+        "column": 12
+      }
+    }
+  ]
+}

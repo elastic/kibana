@@ -8,10 +8,14 @@
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { SyntheticsEsClient } from '../lib';
 import { createEsParams } from '../lib';
+import { getCheckGroupTimeRangeFilter } from '../../common/constants/client_defaults';
+import { getSyntheticsCcsIndex } from '../../common/get_synthetics_indices';
 import type { JourneyStep, Ping, SyntheticsJourneyApiResponse } from '../../common/runtime_types';
 
 export interface GetJourneyDetails {
   checkGroup: string;
+  remoteName?: string;
+  timestamp?: string;
 }
 
 type DocumentSource = (Ping & { '@timestamp': string; synthetics: { type: string } }) | JourneyStep;
@@ -19,12 +23,21 @@ type DocumentSource = (Ping & { '@timestamp': string; synthetics: { type: string
 export const getJourneyDetails = async ({
   syntheticsEsClient,
   checkGroup,
+  remoteName,
+  timestamp,
 }: GetJourneyDetails & {
   syntheticsEsClient: SyntheticsEsClient;
 }): Promise<SyntheticsJourneyApiResponse['details']> => {
+  const index = getSyntheticsCcsIndex(remoteName, syntheticsEsClient.heartbeatIndices);
+
   const params = createEsParams({
+    index,
     query: {
       bool: {
+        // The current-run lookup targets a single `check_group`, so it can be
+        // bounded to the run's `@timestamp` to prune frozen-tier shards. The
+        // sibling (previous/next) queries below are intentionally left unbounded
+        // since an adjacent run can be arbitrarily far away in time.
         filter: [
           {
             term: {
@@ -36,7 +49,8 @@ export const getJourneyDetails = async ({
               'synthetics.type': ['journey/start', 'heartbeat/summary'],
             },
           },
-        ],
+          ...(timestamp ? [getCheckGroupTimeRangeFilter(timestamp)] : []),
+        ] as QueryDslQueryContainer[],
       },
     },
     size: 2,
@@ -61,6 +75,7 @@ export const getJourneyDetails = async ({
 
   if (journeySource && foundJourney) {
     const baseSiblingParams = createEsParams({
+      index,
       query: {
         bool: {
           must_not: [

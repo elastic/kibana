@@ -8,12 +8,13 @@
 import Fs from 'fs';
 import Path from 'path';
 import { createHash } from 'crypto';
-import { spawn, type SpawnOptions } from 'child_process';
+import { execFileSync, spawn, type SpawnOptions } from 'child_process';
 import type { ToolingLog } from '@kbn/tooling-log';
 
 const EVALS_DIR = 'target/evals';
 const STATE_FILE = 'target/evals/services.json';
 const DEFAULT_SERVER_CONFIG_SET = 'evals_tracing';
+export const EDOT_CONTAINER_NAME = 'kibana-edot-collector';
 
 export type ServiceName = 'edot' | 'scout';
 
@@ -25,6 +26,8 @@ interface ServiceEntry {
   connectorsHash?: string;
   /** The serverConfigSet used to start Scout */
   serverConfigSet?: string;
+  /** SHA-256 of env vars forwarded to Scout (e.g. TRACING_EXPORTERS, GCS_CREDENTIALS) */
+  envHash?: string;
 }
 
 interface ServicesState {
@@ -67,6 +70,11 @@ export const connectorsHash = (): string => {
   return createHash('sha256').update(raw).digest('hex').slice(0, 12);
 };
 
+export const scoutEnvHash = (env: Record<string, string> | undefined): string => {
+  const parts = [env?.TRACING_EXPORTERS ?? '', env?.GCS_CREDENTIALS ?? ''];
+  return createHash('sha256').update(parts.join('\0')).digest('hex').slice(0, 12);
+};
+
 export const isServiceRunning = (repoRoot: string, name: ServiceName): boolean => {
   const state = readState(repoRoot);
   const entry = state[name];
@@ -75,11 +83,13 @@ export const isServiceRunning = (repoRoot: string, name: ServiceName): boolean =
 
 /**
  * Returns true if the running Scout was started with a different set of connectors
- * than what's currently in the environment, or with a different serverConfigSet.
+ * than what's currently in the environment, a different serverConfigSet, or
+ * different forwarded env vars (e.g. TRACING_EXPORTERS, GCS_CREDENTIALS).
  */
 export const isScoutStale = (
   repoRoot: string,
-  requestedConfigSet?: string
+  requestedConfigSet?: string,
+  scoutEnv?: Record<string, string>
 ): { stale: boolean; reason?: string } => {
   const state = readState(repoRoot);
   const entry = state.scout;
@@ -87,6 +97,11 @@ export const isScoutStale = (
 
   if (entry.connectorsHash !== connectorsHash()) {
     return { stale: true, reason: 'KIBANA_TESTING_AI_CONNECTORS changed' };
+  }
+
+  const currentEnvHash = scoutEnvHash(scoutEnv);
+  if (entry.envHash && entry.envHash !== currentEnvHash) {
+    return { stale: true, reason: 'TRACING_EXPORTERS or GCS_CREDENTIALS changed' };
   }
 
   const runningConfigSet = entry.serverConfigSet ?? DEFAULT_SERVER_CONFIG_SET;
@@ -117,6 +132,7 @@ export const startService = (
   opts?: {
     connectorsHash?: string;
     serverConfigSet?: string;
+    envHash?: string;
     env?: Record<string, string | undefined>;
   }
 ): number => {
@@ -148,14 +164,136 @@ export const startService = (
     startedAt: new Date().toISOString(),
     ...(opts?.connectorsHash ? { connectorsHash: opts.connectorsHash } : {}),
     ...(opts?.serverConfigSet ? { serverConfigSet: opts.serverConfigSet } : {}),
+    ...(opts?.envHash ? { envHash: opts.envHash } : {}),
   };
   writeState(repoRoot, state);
 
   return pid;
 };
 
+export const isEdotDockerRunning = (): boolean => {
+  try {
+    const result = execFileSync(
+      'docker',
+      ['ps', '--filter', `name=${EDOT_CONTAINER_NAME}`, '--format', '{{.Names}}'],
+      { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'], timeout: 5_000 }
+    ).trim();
+    return result.split('\n').some((name) => name.trim() === EDOT_CONTAINER_NAME);
+  } catch {
+    return false;
+  }
+};
+
+/**
+ * Stop the EDOT Docker container. The container runs independently of the
+ * tracked node process, so killing the PID alone is not enough.
+ */
+const stopEdotDockerContainer = (repoRoot: string, log: ToolingLog): void => {
+  if (!isEdotDockerRunning()) {
+    return;
+  }
+
+  const composePath = Path.join(repoRoot, 'data/edot_collector/docker-compose.yaml');
+
+  if (Fs.existsSync(composePath)) {
+    try {
+      execFileSync('docker', ['compose', '-f', composePath, 'down'], {
+        encoding: 'utf8',
+        stdio: ['ignore', 'pipe', 'pipe'],
+        timeout: 15_000,
+      });
+      log.info('[edot] Docker container stopped via compose');
+      return;
+    } catch (err) {
+      const { signal, stderr } = err as Record<string, unknown>;
+      if (signal != null) {
+        log.warning('[edot] docker compose down timed out, falling back to docker stop');
+      } else {
+        const detail = typeof stderr === 'string' && stderr.trim() ? stderr.trim() : String(err);
+        log.warning(`[edot] docker compose down failed (${detail}), falling back to docker stop`);
+      }
+    }
+  } else {
+    log.info('[edot] compose file not found, using docker stop');
+  }
+
+  try {
+    execFileSync('docker', ['stop', EDOT_CONTAINER_NAME], {
+      stdio: 'ignore',
+      timeout: 15_000,
+    });
+    log.info('[edot] Docker container stopped');
+  } catch (err) {
+    log.warning(`[edot] docker stop failed (${err instanceof Error ? err.message : err})`);
+  }
+};
+
+/**
+ * Best-effort kill of a process group. Useful when the group leader (tracked
+ * PID) has exited but children (ES, Kibana) may still be running.
+ * Returns true if any process in the group was signalled.
+ */
+const killProcessGroup = (pid: number, signal: NodeJS.Signals, log?: ToolingLog): boolean => {
+  try {
+    process.kill(-pid, signal);
+    return true;
+  } catch (err) {
+    if (log && (err as NodeJS.ErrnoException).code !== 'ESRCH') {
+      log.warning(`Failed to signal process group ${pid}: ${(err as Error).message}`);
+    }
+    return false;
+  }
+};
+
+/**
+ * Returns true if any process in the given process group is still alive.
+ */
+const isProcessGroupAlive = (pid: number): boolean => {
+  try {
+    process.kill(-pid, 0);
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+/**
+ * Send SIGTERM to a process group, wait up to {@link timeoutMs} for all
+ * members to exit, then SIGKILL any survivors.
+ */
+const terminateProcessGroup = async (
+  pid: number,
+  log: ToolingLog,
+  label: string,
+  timeoutMs = 10_000
+): Promise<void> => {
+  if (!killProcessGroup(pid, 'SIGTERM', log)) {
+    return;
+  }
+
+  const deadline = Date.now() + timeoutMs;
+  while (isProcessGroupAlive(pid) && Date.now() < deadline) {
+    await new Promise((r) => setTimeout(r, 500));
+  }
+
+  if (isProcessGroupAlive(pid)) {
+    log.warning(`[${label}] did not stop gracefully, sending SIGKILL`);
+    killProcessGroup(pid, 'SIGKILL', log);
+
+    const killDeadline = Date.now() + 2_000;
+    while (isProcessGroupAlive(pid) && Date.now() < killDeadline) {
+      await new Promise((r) => setTimeout(r, 100));
+    }
+
+    if (isProcessGroupAlive(pid)) {
+      log.warning(`[${label}] process group ${pid} still alive after SIGKILL`);
+    }
+  }
+};
+
 /**
  * Stop a service by PID. Sends SIGTERM, waits briefly, then SIGKILL if needed.
+ * For EDOT, also tears down the Docker container.
  */
 export const stopService = async (
   repoRoot: string,
@@ -167,58 +305,49 @@ export const stopService = async (
 
   if (!entry) {
     log.info(`[${name}] no tracked process`);
+    if (name === 'edot') {
+      stopEdotDockerContainer(repoRoot, log);
+    }
     return false;
   }
 
   if (!isAlive(entry.pid)) {
-    log.info(`[${name}] already stopped (PID ${entry.pid})`);
+    log.info(`[${name}] tracked process already exited (PID ${entry.pid})`);
+
+    await terminateProcessGroup(entry.pid, log, name);
+
+    if (name === 'edot') {
+      stopEdotDockerContainer(repoRoot, log);
+    }
+
     delete state[name];
     writeState(repoRoot, state);
-    return false;
+    return true;
   }
 
   log.info(`[${name}] stopping (PID ${entry.pid})...`);
 
-  // Kill the process group (negative PID) so Scout's child ES/Kibana processes also die
-  try {
-    process.kill(-entry.pid, 'SIGTERM');
-  } catch {
-    try {
-      process.kill(entry.pid, 'SIGTERM');
-    } catch {
-      // already dead
-    }
+  await terminateProcessGroup(entry.pid, log, name);
+
+  if (name === 'edot') {
+    stopEdotDockerContainer(repoRoot, log);
   }
 
-  // Wait up to 10s for graceful shutdown
-  const deadline = Date.now() + 10_000;
-  while (isAlive(entry.pid) && Date.now() < deadline) {
-    await new Promise((r) => setTimeout(r, 500));
+  if (isProcessGroupAlive(entry.pid)) {
+    log.warning(`[${name}] may not have fully stopped (PID ${entry.pid})`);
+  } else {
+    log.info(`[${name}] stopped`);
   }
-
-  if (isAlive(entry.pid)) {
-    log.warning(`[${name}] did not stop gracefully, sending SIGKILL`);
-    try {
-      process.kill(-entry.pid, 'SIGKILL');
-    } catch {
-      try {
-        process.kill(entry.pid, 'SIGKILL');
-      } catch {
-        // already dead
-      }
-    }
-  }
-
-  log.info(`[${name}] stopped`);
   delete state[name];
   writeState(repoRoot, state);
   return true;
 };
 
-export const stopAll = async (repoRoot: string, log: ToolingLog): Promise<void> => {
+export const stopAll = async (repoRoot: string, log: ToolingLog): Promise<boolean> => {
   // Stop Scout first (it has child processes), then EDOT
-  await stopService(repoRoot, 'scout', log);
-  await stopService(repoRoot, 'edot', log);
+  const scoutStopped = await stopService(repoRoot, 'scout', log);
+  const edotStopped = await stopService(repoRoot, 'edot', log);
+  return scoutStopped || edotStopped;
 };
 
 /**

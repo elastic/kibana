@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
-import { layoutVar, layoutLevels } from '@kbn/core-chrome-layout-constants';
+import { layoutVar, layoutLevels } from '@kbn/ui-chrome-layout-constants';
 
 const overlayStyle = css`
   pointer-events: none;

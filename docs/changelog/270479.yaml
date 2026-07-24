@@ -1,0 +1,12 @@
+prs:
+- https://github.com/elastic/kibana/pull/270479
+issues:
+- https://github.com/elastic/kibana/issues/219253
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-06-01
+areas:
+- Search and data
+title: Mark invalid HTTP methods as errors in Dev Tools Console
+description: Marks invalid HTTP methods (e.g. `GETT`, `POSTS`) as errors in the Dev Tools Console.

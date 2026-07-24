@@ -1,0 +1,56 @@
+products:
+- product: cloud-serverless
+  target: 2026-07-13
+  lifecycle: preview
+  repo: kibana
+  owner: elastic
+release-date: 2026-07-13
+entries:
+- file:
+    name: 268951.yaml
+    checksum: 5895245a35a8a2fce86dd0da3a23f598ab31698f
+  type: breaking-change
+  title: Dashboards API search endpoint uses a new response schema and enforces a page size limit
+  products:
+  - product: cloud-serverless
+    target: 2026-07-07
+  description: The response envelope for the Dashboards API search endpoint changed from `{ dashboards, page, total }` to `{ data, meta }`, where the pagination fields (`page`, `per_page`, and `total`) move under `meta`. The endpoint also enforces a maximum `per_page` of 1000.
+  impact: Requests that set `per_page` above 1000 are rejected. Clients that read `dashboards`, `page`, or `total` from the top level of the response no longer receive those fields.
+  action: Update Dashboards API search clients to read results from `data` and pagination from `meta`, and keep `per_page` at or below 1000. Refer to the [Dashboards API reference](https://dashboardsapispec.kibana.dev/index.html) for the updated schemas.
+  areas:
+  - Dashboards and visualizations
+  prs:
+  - https://github.com/elastic/kibana/pull/268951
+  issues:
+  - https://github.com/elastic/kibana/issues/267607
+- file:
+    name: 1783971707-the-dashboards-and-visualizations-apis-are-now-gen.yaml
+    checksum: e3020cffae02a60f62f7d138187da29173f89934
+  type: feature
+  title: The Dashboards and Visualizations APIs are now generally available
+  products:
+  - product: cloud-serverless
+    target: 2026-07-13
+  description: This introduces breaking changes to their request and response schemas. Refer to [Breaking changes](https://www.elastic.co/docs/release-notes/cloud-serverless/breaking-changes) for details and the actions you might need to take.
+  prs:
+  - '# PRIVATE: https://github.com/elastic/docs-content/pull/7338'
+  issues:
+  - https://github.com/elastic/roadmap/issues/285
+- file:
+    name: 274792.yaml
+    checksum: e6fb325677e516e0d7cbaf71c7f24a36a017d5f7
+  type: breaking-change
+  title: Dashboards and Visualizations APIs use short-hand duration units
+  products:
+  - product: cloud-serverless
+    target: 2026-07-09
+  description: The `duration` format used in visualization configuration now uses short-hand unit values aligned with {{esql}} conventions for its `from` and `to` options. This affects the `api/visualizations` and `api/dashboards` APIs, for both by-value and by-reference panels. For example, `minutes` becomes `min`, `humanize` becomes `auto-approximate`, and `humanizePrecise` becomes `auto`.
+  impact: API requests that configure duration formats with the previous verbose unit names (for example, `minutes`, `humanize`, or `asMilliseconds`) are rejected.
+  action: Update the duration `from` and `to` values in your visualization and dashboard panel API payloads to the new short-hand units. Refer to the [Dashboards API reference](https://dashboardsapispec.kibana.dev/index.html) for the updated schemas.
+  areas:
+  - Alerting and reporting
+  - Dashboards and visualizations
+  prs:
+  - https://github.com/elastic/kibana/pull/274792
+  issues:
+  - https://github.com/elastic/kibana/issues/265849

@@ -22,6 +22,7 @@ import {
 import { usePollingAgentCount } from '../../../../components';
 import { useGetCreateApiKey } from '../../../../../../components/agent_enrollment_flyout/hooks';
 
+import { useManagedOtlp } from './use_managed_otlp';
 import { AddCollectorFlyout } from './add_collector_flyout';
 
 jest.mock('../../../../hooks', () => ({
@@ -43,6 +44,9 @@ jest.mock('../../../../components', () => ({
 jest.mock('../../../../../../components/agent_enrollment_flyout/hooks', () => ({
   useGetCreateApiKey: jest.fn(),
 }));
+jest.mock('./use_managed_otlp', () => ({
+  useManagedOtlp: jest.fn(),
+}));
 
 const mockedSendGetOneAgentPolicy = jest.mocked(sendGetOneAgentPolicy);
 const mockedSendCreateAgentPolicyForRq = jest.mocked(sendCreateAgentPolicyForRq);
@@ -52,6 +56,7 @@ const mockedUsePollingAgentCount = jest.mocked(usePollingAgentCount);
 const mockedUseFleetStatus = jest.mocked(useFleetStatus);
 const mockedUseGetCreateApiKey = jest.mocked(useGetCreateApiKey);
 const mockedUseStartServices = jest.mocked(useStartServices);
+const mockedUseManagedOtlp = jest.mocked(useManagedOtlp);
 
 describe('AddCollectorFlyout', () => {
   let renderer: TestRenderer;
@@ -83,11 +88,21 @@ describe('AddCollectorFlyout', () => {
     } as any);
 
     mockedUseFleetStatus.mockReturnValue({ spaceId: 'default' } as any);
-    mockedUseStartServices.mockReturnValue({ cloud: { isCloudEnabled: false } } as any);
+    mockedUseStartServices.mockReturnValue({
+      cloud: { isCloudEnabled: false },
+      docLinks: { links: { fleet: { managedOtlp: 'https://example.test/motlp' } } },
+    } as any);
     mockedUseGetCreateApiKey.mockReturnValue({
       apiKey: undefined,
       apiKeyEncoded: undefined,
       isLoading: false,
+      onCreateApiKey: jest.fn(),
+    });
+    mockedUseManagedOtlp.mockReturnValue({
+      available: false,
+      endpoint: undefined,
+      apiKeyEncoded: undefined,
+      isCreatingApiKey: false,
       onCreateApiKey: jest.fn(),
     });
   });
@@ -200,6 +215,28 @@ describe('AddCollectorFlyout', () => {
     expect(configYaml).toContain('Authorization: "ApiKey space-created-token"');
   });
 
+  it('does not fetch OpAMP policy/token until spaceId is resolved (prevents Default-space mis-enrollment)', async () => {
+    // Start with spaceId undefined (simulates the async resolution race on first render)
+    mockedUseFleetStatus.mockReturnValue({ spaceId: undefined } as any);
+
+    mockedSendGetOneAgentPolicy.mockResolvedValue({
+      data: { item: { id: 'my-space-opamp' } },
+    } as any);
+    mockedSendGetEnrollmentAPIKeys.mockResolvedValue({
+      data: { items: [{ api_key: 'space-token' }] },
+    } as any);
+
+    renderFlyout();
+
+    // Give React a tick to flush any immediate effects
+    await new Promise((r) => setTimeout(r, 50));
+
+    // Neither the lookup nor the create should have fired while space is unknown
+    expect(mockedSendGetOneAgentPolicy).not.toHaveBeenCalled();
+    expect(mockedSendCreateAgentPolicyForRq).not.toHaveBeenCalled();
+    expect(mockedSendGetEnrollmentAPIKeys).not.toHaveBeenCalled();
+  });
+
   it('renders a user-facing error when policy/token setup fails', async () => {
     mockedSendGetOneAgentPolicy.mockRejectedValue(new Error('setup failed'));
 
@@ -302,7 +339,10 @@ describe('AddCollectorFlyout', () => {
     });
 
     it('includes insecure_skip_verify when not on cloud', async () => {
-      mockedUseStartServices.mockReturnValue({ cloud: { isCloudEnabled: false } } as any);
+      mockedUseStartServices.mockReturnValue({
+        cloud: { isCloudEnabled: false },
+        docLinks: { links: { fleet: { managedOtlp: 'https://example.test/motlp' } } },
+      } as any);
 
       const component = renderFlyout();
 
@@ -313,7 +353,10 @@ describe('AddCollectorFlyout', () => {
     });
 
     it('omits insecure_skip_verify when on cloud', async () => {
-      mockedUseStartServices.mockReturnValue({ cloud: { isCloudEnabled: true } } as any);
+      mockedUseStartServices.mockReturnValue({
+        cloud: { isCloudEnabled: true },
+        docLinks: { links: { fleet: { managedOtlp: 'https://example.test/motlp' } } },
+      } as any);
 
       const component = renderFlyout();
 
@@ -518,6 +561,161 @@ describe('AddCollectorFlyout', () => {
         expect(yaml).not.toContain('tags:');
         expect(yaml).not.toContain('deployment:');
       });
+    });
+  });
+
+  describe('runtime selector', () => {
+    beforeEach(() => {
+      mockedSendGetOneAgentPolicy.mockResolvedValue({
+        data: { item: { id: 'opamp' } },
+      } as any);
+      mockedSendGetEnrollmentAPIKeys.mockResolvedValue({
+        data: { items: [{ api_key: 'test-token' }] },
+      } as any);
+    });
+
+    it('defaults to Elastic Agent with ./otelcol command', async () => {
+      const component = renderFlyout();
+
+      await waitFor(() => component.getByTestId('runCollectorCommand'));
+
+      expect(component.getByTestId('runCollectorCommand').textContent).toContain(
+        './otelcol --config ./otel-opamp.yaml'
+      );
+      expect(component.getByTestId('runCollectorCommand').textContent).not.toContain(
+        'otelcol-contrib'
+      );
+    });
+
+    it('Elastic Agent filter button is active by default', async () => {
+      const component = renderFlyout();
+
+      await waitFor(() => component.getByTestId('runCollectorCommand'));
+
+      const elasticAgentBtn = component.getByText('Elastic Agent').closest('button');
+      const otelContribBtn = component.getByText('OTel Contrib Collector').closest('button');
+
+      expect(elasticAgentBtn).toHaveAttribute('aria-pressed', 'true');
+      expect(otelContribBtn).toHaveAttribute('aria-pressed', 'false');
+    });
+
+    it('switching to OTel Contrib Collector shows otelcol-contrib command', async () => {
+      const component = renderFlyout();
+
+      await waitFor(() => component.getByTestId('runCollectorCommand'));
+
+      fireEvent.click(component.getByText('OTel Contrib Collector'));
+
+      expect(component.getByTestId('runCollectorCommand').textContent).toContain(
+        './otelcol-contrib --config ./otel-opamp.yaml'
+      );
+      expect(component.getByTestId('runCollectorCommand').textContent).not.toContain(
+        './otelcol --config ./otel-opamp.yaml'
+      );
+    });
+
+    it('switching back to Elastic Agent restores otelcol command', async () => {
+      const component = renderFlyout();
+
+      await waitFor(() => component.getByTestId('runCollectorCommand'));
+
+      fireEvent.click(component.getByText('OTel Contrib Collector'));
+      fireEvent.click(component.getByText('Elastic Agent'));
+
+      expect(component.getByTestId('runCollectorCommand').textContent).toContain(
+        './otelcol --config ./otel-opamp.yaml'
+      );
+      expect(component.getByTestId('runCollectorCommand').textContent).not.toContain(
+        'otelcol-contrib'
+      );
+    });
+  });
+
+  describe('Managed OTLP', () => {
+    beforeEach(() => {
+      mockedSendGetOneAgentPolicy.mockResolvedValue({
+        data: { item: { id: 'opamp' } },
+      } as any);
+      mockedSendGetEnrollmentAPIKeys.mockResolvedValue({
+        data: { items: [{ api_key: 'test-token' }] },
+      } as any);
+    });
+
+    it('uses the elasticsearch/otel exporter when MOTLP is unavailable', async () => {
+      const component = renderFlyout();
+
+      await waitFor(() => {
+        const yaml = component.getByTestId('opampConfigYaml').textContent ?? '';
+        expect(yaml).toContain('elasticsearch/otel:');
+        expect(yaml).toContain('api_key: "${API_KEY}"');
+        expect(yaml).not.toContain('otlp/managed');
+      });
+      expect(component.queryByTestId('addCollectorManagedOtlpDocsLink')).not.toBeInTheDocument();
+    });
+
+    it('uses the otlp/managed exporter and inlines the managed OTLP docs link when MOTLP is available', async () => {
+      mockedUseManagedOtlp.mockReturnValue({
+        available: true,
+        endpoint: 'https://motlp.example.com:443',
+        apiKeyEncoded: undefined,
+        isCreatingApiKey: false,
+        onCreateApiKey: jest.fn(),
+      });
+
+      const component = renderFlyout();
+
+      await waitFor(() => {
+        const yaml = component.getByTestId('opampConfigYaml').textContent ?? '';
+        expect(yaml).toContain('otlp/managed:');
+        expect(yaml).toContain('endpoint: "https://motlp.example.com:443"');
+        expect(yaml).toContain('Authorization: "ApiKey ${API_KEY}"');
+        expect(yaml).not.toContain('elasticsearch/otel');
+      });
+      expect(component.getByTestId('addCollectorManagedOtlpDocsLink')).toBeInTheDocument();
+    });
+
+    it('inlines the created APM API key into the Authorization header', async () => {
+      mockedUseManagedOtlp.mockReturnValue({
+        available: true,
+        endpoint: 'https://motlp.example.com:443',
+        apiKeyEncoded: 'my-apm-key',
+        isCreatingApiKey: false,
+        onCreateApiKey: jest.fn(),
+      });
+
+      const component = renderFlyout();
+
+      await waitFor(() => {
+        const yaml = component.getByTestId('opampConfigYaml').textContent ?? '';
+        expect(yaml).toContain('Authorization: "ApiKey my-apm-key"');
+        expect(yaml).not.toContain('${API_KEY}');
+      });
+    });
+
+    it('routes the Create API key button to the MOTLP creator when available', async () => {
+      const onCreateMotlpApiKey = jest.fn();
+      mockedUseManagedOtlp.mockReturnValue({
+        available: true,
+        endpoint: 'https://motlp.example.com:443',
+        apiKeyEncoded: undefined,
+        isCreatingApiKey: false,
+        onCreateApiKey: onCreateMotlpApiKey,
+      });
+      const onCreateEsApiKey = jest.fn();
+      mockedUseGetCreateApiKey.mockReturnValue({
+        apiKey: undefined,
+        apiKeyEncoded: undefined,
+        isLoading: false,
+        onCreateApiKey: onCreateEsApiKey,
+      });
+
+      const component = renderFlyout();
+
+      await waitFor(() => component.getByTestId('opampConfigYaml'));
+
+      fireEvent.click(component.getByText('Create API key'));
+      expect(onCreateMotlpApiKey).toHaveBeenCalledTimes(1);
+      expect(onCreateEsApiKey).not.toHaveBeenCalled();
     });
   });
 });

@@ -19,6 +19,7 @@
   ],
   "kbn_references": [
     "@kbn/content-list",
+    "@kbn/content-list-provider-client",
     "@kbn/content-list-provider",
     "@kbn/content-list-mock-data",
     "@kbn/content-management-favorites-public",

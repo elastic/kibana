@@ -41,7 +41,6 @@ export const createEditTagsAction = (deps: EditTagsActionDeps): EpisodeAction =>
   execute: async ({ episodes, onSuccess }: EpisodeActionContext) => {
     const currentTags = episodes.length === 1 ? episodes[0].last_tags ?? [] : [];
     const tags = await openTagsFlyout(deps.overlays, deps.rendering, currentTags, {
-      http: deps.http,
       expressions: deps.expressions,
       spaces: deps.spaces,
       queryClient: deps.queryClient,

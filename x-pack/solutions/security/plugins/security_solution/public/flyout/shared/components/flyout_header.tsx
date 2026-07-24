@@ -11,19 +11,26 @@ import { EuiFlyoutHeader, EuiPanel } from '@elastic/eui';
 
 interface FlyoutHeaderProps extends React.ComponentProps<typeof EuiFlyoutHeader> {
   children: React.ReactNode;
+  /**
+   * Overrides for the inner `EuiPanel` that provides the recommended `16px` padding. Callers can
+   * e.g. pass `{ paddingSize: 'none' }` to render a more compact header.
+   */
+  panelProps?: React.ComponentProps<typeof EuiPanel>;
 }
 
 /**
  * Wrapper of `EuiFlyoutHeader`, setting the recommended `16px` padding using a EuiPanel.
  */
-export const FlyoutHeader: FC<FlyoutHeaderProps> = memo(({ children, ...flyoutHeaderProps }) => {
-  return (
-    <EuiFlyoutHeader hasBorder {...flyoutHeaderProps}>
-      <EuiPanel hasShadow={false} color="transparent">
-        {children}
-      </EuiPanel>
-    </EuiFlyoutHeader>
-  );
-});
+export const FlyoutHeader: FC<FlyoutHeaderProps> = memo(
+  ({ children, panelProps, ...flyoutHeaderProps }) => {
+    return (
+      <EuiFlyoutHeader hasBorder {...flyoutHeaderProps}>
+        <EuiPanel hasShadow={false} color="transparent" {...panelProps}>
+          {children}
+        </EuiPanel>
+      </EuiFlyoutHeader>
+    );
+  }
+);
 
 FlyoutHeader.displayName = 'FlyoutHeader';

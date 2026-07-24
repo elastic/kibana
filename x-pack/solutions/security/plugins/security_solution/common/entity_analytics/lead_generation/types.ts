@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { MAX_LEADS_PER_RUN } from './constants';
 
 // ---------------------------------------------------------------------------
 // Enums
@@ -47,6 +48,13 @@ export type Observation = z.infer<typeof observationSchema>;
 export const leadEntitySchema = z.object({
   type: z.string(),
   name: z.string(),
+  /**
+   * Entity Store unique identifier (EUID, e.g. `"host:8c67cb16-..."`). Used to
+   * open the correct entity flyout by id rather than by (potentially
+   * ambiguous) display name. Optional for backwards compatibility with leads
+   * persisted before this field was introduced.
+   */
+  id: z.string().optional(),
 });
 
 export type LeadEntity = z.infer<typeof leadEntitySchema>;
@@ -80,7 +88,7 @@ export type Lead = z.infer<typeof leadSchema>;
 
 export const leadGenerationEngineConfigSchema = z.object({
   minObservations: z.number().int().min(0).default(1),
-  maxLeads: z.number().int().min(1).default(10),
+  maxLeads: z.number().int().min(1).default(MAX_LEADS_PER_RUN),
   corroborationBonus: z.number().min(0).max(1).default(0.15),
   diversityBonus: z.number().min(0).max(1).default(0.1),
   normalizationCeiling: z.number().min(1).default(100),

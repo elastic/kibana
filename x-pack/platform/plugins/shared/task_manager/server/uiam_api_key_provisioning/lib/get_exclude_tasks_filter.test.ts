@@ -7,10 +7,13 @@
 
 import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import {
+  API_KEY_CREATOR_NOT_ORG_MEMBER_ERROR_CODE,
+  NON_CLOUD_USER_API_KEY_CREATOR_ERROR_CODE,
+  PERMANENT_UIAM_CONVERSION_ERROR_CODES,
   UiamApiKeyProvisioningEntityType,
   UiamApiKeyProvisioningStatus,
 } from '@kbn/uiam-api-keys-provisioning-status';
-import { NON_CLOUD_USER_API_KEY_CREATOR_ERROR_CODE, GET_STATUS_BATCH_SIZE } from '../constants';
+import { GET_STATUS_BATCH_SIZE } from '../constants';
 import { UIAM_API_KEYS_PROVISIONING_STATUS_SAVED_OBJECT_TYPE } from '../uiam_api_keys_provisioning_status_saved_object';
 import { getExcludeTasksFilter } from './get_exclude_tasks_filter';
 
@@ -66,7 +69,64 @@ describe('getExcludeTasksFilter', () => {
     expect(result.sort()).toEqual(['t1', 't2']);
   });
 
-  it('includes failed non-Cloud-user conversion errors in the exclusion query', async () => {
+  it.each(PERMANENT_UIAM_CONVERSION_ERROR_CODES)(
+    'includes failed permanent UIAM conversion error code %s in the exclusion query',
+    async (errorCode) => {
+      const client = savedObjectsRepositoryMock.create();
+      client.find.mockResolvedValue({
+        saved_objects: [
+          createStatusSavedObject(
+            'task-1',
+            UiamApiKeyProvisioningStatus.FAILED,
+            undefined,
+            errorCode
+          ),
+        ],
+        total: 1,
+        per_page: 500,
+        page: 1,
+      });
+
+      const result = await getExcludeTasksFilter(client);
+      expect(result).toBeDefined();
+
+      const findFilter = client.find.mock.calls[0][0].filter;
+      expect(findFilter.function).toBe('and');
+      expect(findFilter.arguments[0].function).toBe('or');
+      expect(findFilter.arguments[0].arguments).toContainEqual(
+        expect.objectContaining({
+          function: 'and',
+          arguments: expect.arrayContaining([
+            expect.objectContaining({
+              function: 'is',
+              arguments: expect.arrayContaining([
+                expect.objectContaining({
+                  value: `${UIAM_API_KEYS_PROVISIONING_STATUS_SAVED_OBJECT_TYPE}.attributes.status`,
+                }),
+                expect.objectContaining({ value: UiamApiKeyProvisioningStatus.FAILED }),
+              ]),
+            }),
+            expect.objectContaining({
+              function: 'or',
+              arguments: expect.arrayContaining([
+                expect.objectContaining({
+                  function: 'is',
+                  arguments: expect.arrayContaining([
+                    expect.objectContaining({
+                      value: `${UIAM_API_KEYS_PROVISIONING_STATUS_SAVED_OBJECT_TYPE}.attributes.errorCode`,
+                    }),
+                    expect.objectContaining({ value: errorCode }),
+                  ]),
+                }),
+              ]),
+            }),
+          ]),
+        })
+      );
+    }
+  );
+
+  it('ors all permanent UIAM conversion error codes inside the failed branch', async () => {
     const client = savedObjectsRepositoryMock.create();
     client.find.mockResolvedValue({
       saved_objects: [
@@ -76,43 +136,31 @@ describe('getExcludeTasksFilter', () => {
           undefined,
           NON_CLOUD_USER_API_KEY_CREATOR_ERROR_CODE
         ),
+        createStatusSavedObject(
+          'task-2',
+          UiamApiKeyProvisioningStatus.FAILED,
+          undefined,
+          API_KEY_CREATOR_NOT_ORG_MEMBER_ERROR_CODE
+        ),
       ],
-      total: 1,
+      total: 2,
       per_page: 500,
       page: 1,
     });
 
-    const result = await getExcludeTasksFilter(client);
-    expect(result).toBeDefined();
-
+    await getExcludeTasksFilter(client);
     const findFilter = client.find.mock.calls[0][0].filter;
-    expect(findFilter.function).toBe('and');
-    expect(findFilter.arguments[0].function).toBe('or');
-    expect(findFilter.arguments[0].arguments).toContainEqual(
-      expect.objectContaining({
-        function: 'and',
-        arguments: expect.arrayContaining([
-          expect.objectContaining({
-            function: 'is',
-            arguments: expect.arrayContaining([
-              expect.objectContaining({
-                value: `${UIAM_API_KEYS_PROVISIONING_STATUS_SAVED_OBJECT_TYPE}.attributes.status`,
-              }),
-              expect.objectContaining({ value: UiamApiKeyProvisioningStatus.FAILED }),
-            ]),
-          }),
-          expect.objectContaining({
-            function: 'is',
-            arguments: expect.arrayContaining([
-              expect.objectContaining({
-                value: `${UIAM_API_KEYS_PROVISIONING_STATUS_SAVED_OBJECT_TYPE}.attributes.errorCode`,
-              }),
-              expect.objectContaining({ value: NON_CLOUD_USER_API_KEY_CREATOR_ERROR_CODE }),
-            ]),
-          }),
-        ]),
-      })
+    const failedBranch = findFilter.arguments[0].arguments.find(
+      (arg: { function: string }) => arg.function === 'and'
     );
+    const errorCodeOrNode = failedBranch.arguments.find(
+      (arg: { function: string }) => arg.function === 'or'
+    );
+    expect(errorCodeOrNode.arguments).toHaveLength(PERMANENT_UIAM_CONVERSION_ERROR_CODES.length);
+    const codes = errorCodeOrNode.arguments.map(
+      (arg: { arguments: Array<{ value: string }> }) => arg.arguments[1].value
+    );
+    expect(codes.sort()).toEqual([...PERMANENT_UIAM_CONVERSION_ERROR_CODES].sort());
   });
 
   it('paginates through multiple pages of status docs', async () => {

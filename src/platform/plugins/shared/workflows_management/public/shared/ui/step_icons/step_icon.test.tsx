@@ -15,6 +15,9 @@ import { useKibana } from '../../../hooks/use_kibana';
 
 // Activates the __mocks__/use_kibana.ts auto-mock which uses createStartServicesMock()
 jest.mock('../../../hooks/use_kibana');
+jest.mock('@kbn/connector-specs/icons', () => ({
+  ConnectorIconsMap: new Map([['.sharepoint-online', 'logoKibana']]),
+}));
 
 // Capture the services before any test resets mocks
 const mockServices = jest.mocked(useKibana)().services;
@@ -122,6 +125,22 @@ describe('StepIcon', () => {
         <StepIcon stepType="some_unknown_type" executionStatus={undefined} />
       );
       expect(container.querySelector('[data-euiicon-type="plugs"]')).toBeInTheDocument();
+    });
+
+    it('renders connector spec icons for v2 action type ids', () => {
+      const { container } = render(
+        <StepIcon stepType=".sharepoint-online" executionStatus={undefined} />
+      );
+
+      expect(container.querySelector('[data-euiicon-type="logoKibana"]')).toBeInTheDocument();
+      expect(container.querySelector('[data-euiicon-type="plugs"]')).not.toBeInTheDocument();
+    });
+
+    it('falls back to hardcoded icons for legacy action type ids', () => {
+      const { container } = render(<StepIcon stepType=".slack" executionStatus={undefined} />);
+
+      expect(container.querySelector('[data-euiicon-type="logoSlack"]')).toBeInTheDocument();
+      expect(container.querySelector('[data-euiicon-type="plugs"]')).not.toBeInTheDocument();
     });
   });
 

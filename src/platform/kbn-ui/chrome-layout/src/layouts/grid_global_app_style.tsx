@@ -14,7 +14,7 @@ import {
   APP_FIXED_VIEWPORT_ID,
   APP_MAIN_SCROLL_CONTAINER_ID,
   layoutVar,
-} from '@kbn/core-chrome-layout-constants';
+} from '@kbn/ui-chrome-layout-constants';
 import { CommonGlobalAppStyles } from './global_app_styles';
 import type { ChromeStyle } from '../layout.types';
 

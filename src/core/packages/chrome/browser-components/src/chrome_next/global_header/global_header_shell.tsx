@@ -58,6 +58,7 @@ const useGlobalHeaderStyles = () => {
       align-items: center;
       gap: ${euiTheme.size.xs};
       margin-inline-end: ${euiTheme.size.xs};
+      margin-inline-start: ${euiTheme.size.xs};
     `;
 
     const spacer = css`
@@ -129,9 +130,12 @@ export const ChromeNextGlobalHeaderShell = React.memo<ChromeNextGlobalHeaderShel
             {logo}
           </div>
           {switcher && (
-            <div css={styles.switcherSlot} data-test-subj="chromeNextGlobalHeaderSwitcher">
-              {switcher}
-            </div>
+            <>
+              <div css={styles.separator} />
+              <div css={styles.switcherSlot} data-test-subj="chromeNextGlobalHeaderSwitcher">
+                {switcher}
+              </div>
+            </>
           )}
         </div>
         <div css={styles.separator} />

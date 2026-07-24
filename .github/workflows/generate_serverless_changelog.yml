@@ -56,10 +56,9 @@ jobs:
         continue-on-error: true
         uses: slackapi/slack-github-action@91efab103c0de0a537f72a35f6b8cda0ee76bf0a # v2.1.1
         with:
-          method: chat.postMessage
-          token: ${{ secrets.SLACK_TOKEN_FAILED_TEST_NOTIFIER }}
+          webhook: ${{ secrets.DEPLOY_TAGGER_SLACK_WEBHOOK_URL }}
+          webhook-type: incoming-webhook
           payload: |
-            channel: ${{ vars.SLACK_KIBANA_MISSION_CONTROL_CHANNEL }}
             blocks:
               - type: section
                 text:

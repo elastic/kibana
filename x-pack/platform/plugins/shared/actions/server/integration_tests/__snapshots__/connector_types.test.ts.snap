@@ -135,6 +135,10 @@ Object {
           "type": "string",
         },
         Object {
+          "const": "webhook-oauth2-password",
+          "type": "string",
+        },
+        Object {
           "const": null,
           "type": "null",
         },
@@ -637,6 +641,9 @@ exports[`Connector type config checks detect connector type changes for: .email 
 Object {
   "additionalProperties": false,
   "properties": Object {
+    "allowHtml": Object {
+      "type": "boolean",
+    },
     "clientId": Object {
       "anyOf": Array [
         Object {
@@ -1173,6 +1180,10 @@ Object {
           "type": "string",
         },
         Object {
+          "const": "webhook-oauth2-password",
+          "type": "string",
+        },
+        Object {
           "const": null,
           "type": "null",
         },
@@ -1434,6 +1445,36 @@ Object {
       },
       "type": "object",
     },
+    "form_data": Object {
+      "additionalProperties": Object {
+        "properties": Object {
+          "content": Object {
+            "type": "string",
+          },
+          "content_type": Object {
+            "type": "string",
+          },
+          "encoding": Object {
+            "enum": Array [
+              "utf8",
+              "base64",
+            ],
+            "type": "string",
+          },
+          "filename": Object {
+            "type": "string",
+          },
+        },
+        "required": Array [
+          "content",
+        ],
+        "type": "object",
+      },
+      "propertyNames": Object {
+        "type": "string",
+      },
+      "type": "object",
+    },
     "headers": Object {
       "additionalProperties": Object {
         "type": "string",
@@ -1531,6 +1572,36 @@ Object {
         "skip_ssl_verification": Object {
           "type": "boolean",
         },
+      },
+      "type": "object",
+    },
+    "form_data": Object {
+      "additionalProperties": Object {
+        "properties": Object {
+          "content": Object {
+            "type": "string",
+          },
+          "content_type": Object {
+            "type": "string",
+          },
+          "encoding": Object {
+            "enum": Array [
+              "utf8",
+              "base64",
+            ],
+            "type": "string",
+          },
+          "filename": Object {
+            "type": "string",
+          },
+        },
+        "required": Array [
+          "content",
+        ],
+        "type": "object",
+      },
+      "propertyNames": Object {
+        "type": "string",
       },
       "type": "object",
     },
@@ -4820,6 +4891,10 @@ Object {
         },
         Object {
           "const": "webhook-oauth2-client-credentials",
+          "type": "string",
+        },
+        Object {
+          "const": "webhook-oauth2-password",
           "type": "string",
         },
         Object {

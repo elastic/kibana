@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-jest.mock('@kbn/core-chrome-layout-constants', () => ({
+jest.mock('@kbn/ui-chrome-layout-constants', () => ({
   MAIN_CONTENT_SELECTORS: ['#main-content'],
 }));
 

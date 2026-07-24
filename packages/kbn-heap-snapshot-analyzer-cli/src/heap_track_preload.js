@@ -22,6 +22,32 @@ if (process.env.HEAP_TRACK_FORCE === '1' || process.env.isDevCliChild === 'true'
   const inspector = require('inspector');
   const fs = require('fs');
   const path = require('path');
+  const Module = require('module');
+
+  // Multi-parent require edge graph. Node's require.cache only keeps the
+  // first parent that loaded a given module — every later requirer is
+  // invisible. To answer "who actually pulls X server-side?" we patch
+  // Module.prototype.require here in the preload (which runs before any
+  // user code) and record every (parent, child) edge as it happens. This
+  // is the same hook point as `require-in-the-middle`, just observe-only.
+  const requireEdges = new Map(); // child filename -> Set<parent filename | '<entry>'>
+  const origRequire = Module.prototype.require;
+  Module.prototype.require = function patchedRequire(request) {
+    const exported = origRequire.apply(this, arguments);
+    try {
+      const child = Module._resolveFilename(request, this);
+      const parent = (this && this.filename) || '<entry>';
+      let parents = requireEdges.get(child);
+      if (!parents) {
+        parents = new Set();
+        requireEdges.set(child, parents);
+      }
+      parents.add(parent);
+    } catch (_) {
+      // Ignore unresolvable requests (conditional requires, etc.).
+    }
+    return exported;
+  };
 
   const session = new inspector.Session();
   session.connect();
@@ -95,7 +121,41 @@ if (process.env.HEAP_TRACK_FORCE === '1' || process.env.isDevCliChild === 'true'
 
   process.on('SIGUSR2', takeSnapshot);
 
+  // SIGUSR1: dump the multi-parent require edge graph collected by the
+  // patched Module.prototype.require above. Output is JSONL, one line per
+  // module: {"id": "<absolute path>", "parents": ["<absolute path>", ...]}.
+  // Modules requested by the entry script appear with parent "<entry>".
+  // Unlike Node's require.cache (which only keeps the FIRST requirer), this
+  // captures every distinct caller of every module.
+  const dumpRequireCache = () => {
+    const outDir = process.env.HEAP_TRACK_DIR || process.cwd();
+    const outPath =
+      process.env.REQUIRE_CACHE_OUTPUT ||
+      path.join(outDir, `require-cache-${new Date().toISOString().replace(/[:.]/g, '-')}.jsonl`);
+
+    const start = Date.now();
+    const stream = fs.createWriteStream(outPath);
+    let count = 0;
+    let edgeCount = 0;
+    for (const [id, parents] of requireEdges) {
+      const arr = Array.from(parents);
+      edgeCount += arr.length;
+      stream.write(JSON.stringify({ id, parents: arr }) + '\n');
+      count++;
+    }
+    stream.end(() => {
+      const elapsed = ((Date.now() - start) / 1000).toFixed(2);
+      const sizeKb = (fs.statSync(outPath).size / 1024).toFixed(1);
+      console.error(
+        `[heap-track] require graph dumped (${count} modules, ${edgeCount} edges, ${sizeKb} KB) in ${elapsed}s -> ${outPath}`
+      );
+    });
+  };
+
+  process.on('SIGUSR1', dumpRequireCache);
+
   console.error(
-    `[heap-track] preload installed (PID ${process.pid}) — kill -SIGUSR2 ${process.pid} to capture`
+    `[heap-track] preload installed (PID ${process.pid}) — ` +
+      `SIGUSR2 = heap snapshot, SIGUSR1 = require.cache dump`
   );
 }

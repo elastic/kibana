@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { AppMenuComponent } from './components';
+export { AppMenuComponent, type AppMenuBreakpointSource } from './components';
 export { AppMenuItem } from './components';
 export { AppMenuActionButton } from './components';
 export { AppMenuOverflowButton } from './components';
@@ -27,7 +27,13 @@ export type {
   AppMenuSwitch,
 } from './types';
 
-export { APP_MENU_ITEM_LIMIT, DEFAULT_POPOVER_WIDTH } from './constants';
+export { APP_MENU_ITEM_LIMIT, APP_MENU_SHARE_ID, DEFAULT_POPOVER_WIDTH } from './constants';
+
+export {
+  APP_MENU_TEST_SUBJECTS,
+  getAppMenuItemTestSubj,
+  getAppMenuActionButtonTestSubj,
+} from './test_subjects';
 
 export {
   getDisplayedItemsAllowedAmount,
@@ -40,4 +46,5 @@ export {
   getPopoverActionItems,
   getPopoverSwitchItems,
   getIsSelectedColor,
+  hasNonGlobalStaticItems,
 } from './utils';

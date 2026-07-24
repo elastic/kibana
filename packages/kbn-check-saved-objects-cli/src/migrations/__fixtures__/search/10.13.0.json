@@ -55,7 +55,7 @@
       "description": "Fixture saved search used for modelVersion migration checks",
       "tabs": [
         {
-          "id": "ed668b76-545d-5729-94c1-2eabade8ae48",
+          "id": { "$match": "uuid" },
           "label": "Untitled",
           "attributes": {
             "columns": ["@timestamp", "message"],
@@ -96,7 +96,7 @@
       "description": "",
       "tabs": [
         {
-          "id": "8a7dda1f-2493-44dd-a0e9-7c6557d02f3a",
+          "id": { "$match": "uuid" },
           "label": "Untitled",
           "attributes": {
             "columns": [],

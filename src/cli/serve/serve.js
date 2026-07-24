@@ -462,6 +462,7 @@ function tryConfigureServerlessSamlProvider(rawConfig, opts, extraCliOptions) {
   // Ensure the plugin is loaded in dynamically to exclude from production build
   const {
     MOCK_IDP_REALM_NAME,
+    MOCK_IDP_UIAM_OAUTH_BASE_URL,
     MOCK_IDP_UIAM_SERVICE_URL,
     MOCK_IDP_UIAM_SHARED_SECRET,
     MOCK_IDP_UIAM_ORGANIZATION_ID,
@@ -514,6 +515,14 @@ function tryConfigureServerlessSamlProvider(rawConfig, opts, extraCliOptions) {
     lodashSet(rawConfig, 'xpack.security.uiam.ssl.key', KBN_KEY_PATH);
     lodashSet(rawConfig, 'xpack.security.uiam.ssl.verificationMode', 'none');
     lodashSet(rawConfig, 'mockIdpPlugin.uiam.enabled', true);
+
+    // SAML POST binding submits the response cross-origin to UIAM's ACS endpoint, so the
+    // enforced `form-action` directive (default `'self'`) needs to allow the UIAM origin.
+    const uiamOAuthOrigin = new url.URL(MOCK_IDP_UIAM_OAUTH_BASE_URL).origin;
+    const existingFormAction = _.get(rawConfig, 'csp.form_action', []);
+    if (!existingFormAction.includes(uiamOAuthOrigin)) {
+      lodashSet(rawConfig, 'csp.form_action', [...existingFormAction, uiamOAuthOrigin]);
+    }
 
     if (!_.has(rawConfig, 'xpack.security.uiam.url')) {
       lodashSet(rawConfig, 'xpack.security.uiam.url', MOCK_IDP_UIAM_SERVICE_URL);

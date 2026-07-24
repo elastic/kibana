@@ -20,6 +20,7 @@ import {
   type GroundTruth,
   type ExperimentTask,
   type TaskOutput,
+  type Evaluator,
 } from '@kbn/evals';
 import type { EsClient } from '@kbn/scout';
 import type { ToolingLog } from '@kbn/tooling-log';
@@ -32,6 +33,7 @@ import {
   getStringMeta,
   getToolCallSteps,
 } from '@kbn/evals';
+import { isInternalTool } from '@kbn/agent-builder-common/tools';
 import type { AgentBuilderEvaluationChatClient } from './chat_client';
 import { extractSearchRetrievedDocs } from './rag_extractor';
 
@@ -59,6 +61,43 @@ export type EvaluateDataset = ({
 }) => Promise<void>;
 
 export type EvaluateExternalDataset = (datasetName: string) => Promise<void>;
+
+/**
+ * Builds a deterministic CODE evaluator that asserts the final assistant message contains every
+ * string listed under `metadata[metadataKey]`. Returns score 1 when the metadata key is absent or
+ * empty, so datasets that don't opt in are unaffected. Matching is case-insensitive, and `missing`
+ * is derived with the same rule so the debug metadata never contradicts the score.
+ */
+const createRequiredTermsEvaluator = ({
+  name,
+  metadataKey,
+}: {
+  name: string;
+  metadataKey: string;
+}): Evaluator => ({
+  name,
+  kind: 'CODE',
+  evaluate: async ({ output, metadata }) => {
+    const raw = metadata?.[metadataKey];
+    const required = Array.isArray(raw)
+      ? (raw as unknown[]).filter((term): term is string => typeof term === 'string')
+      : [];
+    if (required.length === 0) return { score: 1 };
+
+    const answer = getFinalAssistantMessage(output as TaskOutput);
+    const lowerAnswer = answer.toLowerCase();
+    const missing = required.filter((term) => !lowerAnswer.includes(term.toLowerCase()));
+
+    return {
+      score: missing.length === 0 ? 1 : 0,
+      metadata: {
+        [metadataKey]: required,
+        missing,
+        answerPreview: answer.slice(0, 600),
+      },
+    };
+  },
+});
 
 function configureExperiment({
   evaluators,
@@ -122,18 +161,45 @@ function configureExperiment({
 
   const selectedEvaluators = selectEvaluators([
     {
+      name: 'ExpectedToolCalled',
+      kind: 'CODE' as const,
+      evaluate: async ({ output, metadata }) => {
+        const expectedToolId = getStringMeta(metadata, 'expectedToolId');
+        if (!expectedToolId) return { score: 1 };
+
+        const toolCalls = getToolCallSteps(output as TaskOutput);
+        if (toolCalls.length === 0) {
+          return { score: 0, metadata: { reason: 'No tool calls found', expectedToolId } };
+        }
+
+        const usedToolIds = toolCalls.map((t) => t.tool_id).filter(Boolean);
+        const invoked = usedToolIds.includes(expectedToolId);
+
+        return {
+          score: invoked ? 1 : 0,
+          metadata: { expectedToolId, usedToolIds },
+        };
+      },
+    },
+    {
       name: 'ToolUsageOnly',
       kind: 'CODE' as const,
       evaluate: async ({ output, metadata }) => {
         const expectedOnlyToolId = getStringMeta(metadata, 'expectedOnlyToolId');
         if (!expectedOnlyToolId) return { score: 1 };
 
+        // Exclude attachment/filestore/internal framework tools (see isInternalTool).
         const toolCalls = getToolCallSteps(output as TaskOutput);
-        if (toolCalls.length === 0) {
-          return { score: 0, metadata: { reason: 'No tool calls found', expectedOnlyToolId } };
+        const domainToolCalls = toolCalls.filter((t) => t.tool_id && !isInternalTool(t.tool_id));
+
+        if (domainToolCalls.length === 0) {
+          return {
+            score: 0,
+            metadata: { reason: 'No domain tool calls found', expectedOnlyToolId },
+          };
         }
 
-        const usedToolIds = toolCalls.map((t) => t.tool_id).filter(Boolean);
+        const usedToolIds = domainToolCalls.map((t) => t.tool_id).filter(Boolean);
         const hasExpected = usedToolIds.includes(expectedOnlyToolId);
         const allExpected = usedToolIds.every((id) => id === expectedOnlyToolId);
 
@@ -179,6 +245,14 @@ function configureExperiment({
         };
       },
     },
+    // Asserts seeded alert _ids appear verbatim in the final response (alert-triage grounded evals).
+    createRequiredTermsEvaluator({
+      name: 'RequiredAlertIdsInResponse',
+      metadataKey: 'requiredAlertIds',
+    }),
+    // Guards that literal terms (e.g. seeded risk scores) appear in the final response, catching
+    // regressions where the tool silently reads 0 for fields like kibana.alert.risk_score.
+    createRequiredTermsEvaluator({ name: 'RequiredTermsInResponse', metadataKey: 'requiredTerms' }),
     ...createQuantitativeCorrectnessEvaluators(),
     createQuantitativeGroundednessEvaluator(),
     ...ragEvaluators,
@@ -216,13 +290,20 @@ function configureExperiment({
             explanation: 'No traceId available for skill invocation check',
           };
         }
+        if (!/^[a-zA-Z0-9_-]+$/.test(traceId)) {
+          return {
+            score: null,
+            label: 'error',
+            explanation: `Invalid traceId for skill invocation check: ${traceId}`,
+          };
+        }
 
         const query = `FROM traces-*
-| WHERE trace.id == "${traceId}"
+| WHERE trace_id == "${traceId}"
 | STATS skill_invoked = COUNT(
     CASE(
       attributes.gen_ai.tool.name == "filestore.read"
-        AND attributes.elastic.tool.parameters LIKE "*/${skillName}/SKILL.md*",
+        AND attributes.gen_ai.tool.call.arguments LIKE "*/${skillName}/SKILL.md*",
       1,
       NULL
     )
@@ -296,7 +377,7 @@ export function createEvaluateDataset({
 
     await executorClient.runExperiment(
       {
-        dataset,
+        datasets: [dataset],
         task,
       },
       selectedEvaluators
@@ -328,14 +409,16 @@ export function createEvaluateExternalDataset({
 
     await executorClient.runExperiment(
       {
-        dataset: {
-          name: datasetName,
-          description: resolvesFromPhoenix
-            ? 'External dataset resolved from Phoenix by name'
-            : 'External dataset resolved from Elasticsearch by name',
-          // Examples are resolved from upstream dataset storage, not provided in code.
-          examples: [],
-        },
+        datasets: [
+          {
+            name: datasetName,
+            description: resolvesFromPhoenix
+              ? 'External dataset resolved from Phoenix by name'
+              : 'External dataset resolved from Elasticsearch by name',
+            // Examples are resolved from upstream dataset storage, not provided in code.
+            examples: [],
+          },
+        ],
         task,
         trustUpstreamDataset: true,
       },

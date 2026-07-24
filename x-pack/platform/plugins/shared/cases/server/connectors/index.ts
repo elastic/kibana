@@ -31,6 +31,7 @@ export function registerConnectorTypes({
   getSpaceId,
   serverlessProjectType,
   isCasesAttachmentsEnabled,
+  isTemplatesEnabled,
 }: {
   actions: ActionsPluginSetupContract;
   alerting: AlertingServerSetup;
@@ -40,6 +41,7 @@ export function registerConnectorTypes({
   getSpaceId: (request?: KibanaRequest) => string;
   serverlessProjectType?: ServerlessProjectType;
   isCasesAttachmentsEnabled: boolean;
+  isTemplatesEnabled: boolean;
 }) {
   const getUnsecuredSavedObjectsClient = async (
     request: KibanaRequest,
@@ -79,6 +81,7 @@ export function registerConnectorTypes({
       getUiSettingsClient,
       serverlessProjectType,
       isCasesAttachmentsEnabled,
+      isTemplatesEnabled,
     })
   );
 

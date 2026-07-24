@@ -27,10 +27,10 @@
     "@kbn/test",
     "@kbn/test-subj-selector",
     "@kbn/ftr-common-functional-services",
-    "@kbn/spaces-plugin",
     "@kbn/scout-info",
     "@kbn/test-suites-xpack-platform",
     "@kbn/es-query",
     "@kbn/core-chrome-layout-constants",
+    "@kbn/core-spaces-common",
   ]
 }

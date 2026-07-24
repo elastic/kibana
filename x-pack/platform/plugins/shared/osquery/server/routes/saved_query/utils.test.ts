@@ -8,7 +8,7 @@
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { PackageClient } from '@kbn/fleet-plugin/server';
 import type { KibanaAssetReference, KibanaSavedObjectType } from '@kbn/fleet-plugin/common';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import {
   getInstalledSavedQueriesMap,
   getPrebuiltSavedQueryIds,

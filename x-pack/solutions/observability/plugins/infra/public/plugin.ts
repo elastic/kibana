@@ -68,6 +68,58 @@ import {
 import type { LogsAppRoutes, LogsRoute } from './pages/logs/routes';
 import { getLogsAppRoutes } from './pages/logs/routes';
 
+// !! Need to be kept in sync with the routes in x-pack/solutions/observability/plugins/infra/public/pages/metrics/index.tsx
+export const getInfraDeepLinks = ({
+  metricsExplorerEnabled,
+}: {
+  metricsExplorerEnabled: boolean;
+}): AppDeepLink[] => {
+  const visibleIn: AppDeepLinkLocations[] = ['globalSearch', 'projectSideNav'];
+
+  return [
+    {
+      id: 'inventory',
+      title: inventoryTitle,
+      path: '/inventory',
+      visibleIn,
+    },
+    {
+      id: 'hosts',
+      title: i18n.translate('xpack.infra.homePage.metricsHostsTabTitle', {
+        defaultMessage: 'Hosts',
+      }),
+      path: '/hosts',
+      visibleIn,
+    },
+    ...(metricsExplorerEnabled
+      ? [
+          {
+            id: 'metrics-explorer',
+            title: i18n.translate('xpack.infra.homePage.metricsExplorerTabTitle', {
+              defaultMessage: 'Metrics Explorer',
+            }),
+            path: '/explorer',
+            visibleIn,
+          },
+        ]
+      : []),
+    {
+      id: 'settings',
+      title: i18n.translate('xpack.infra.homePage.settingsTabTitle', {
+        defaultMessage: 'Settings',
+      }),
+      path: '/settings',
+      visibleIn: ['globalSearch'],
+    },
+    {
+      id: 'assetDetails',
+      title: '', // Internal deep link, not shown in the UI. Title is dynamically set in the app.
+      path: '/detail',
+      visibleIn: [],
+    },
+  ];
+};
+
 export class Plugin implements InfraClientPluginClass {
   public config: InfraPublicConfig;
   private inventoryViews: InventoryViewsService;
@@ -214,56 +266,6 @@ export class Plugin implements InfraClientPluginClass {
         return renderApp(coreStart, plugins, pluginStart, isLogsExplorerAccessible, params);
       },
     });
-
-    // !! Need to be kept in sync with the routes in x-pack/solutions/observability/plugins/infra/public/pages/metrics/index.tsx
-    const getInfraDeepLinks = ({
-      metricsExplorerEnabled,
-    }: {
-      metricsExplorerEnabled: boolean;
-    }): AppDeepLink[] => {
-      const visibleIn: AppDeepLinkLocations[] = ['globalSearch'];
-
-      return [
-        {
-          id: 'inventory',
-          title: inventoryTitle,
-          path: '/inventory',
-          visibleIn,
-        },
-        {
-          id: 'hosts',
-          title: i18n.translate('xpack.infra.homePage.metricsHostsTabTitle', {
-            defaultMessage: 'Hosts',
-          }),
-          path: '/hosts',
-          visibleIn,
-        },
-        ...(metricsExplorerEnabled
-          ? [
-              {
-                id: 'metrics-explorer',
-                title: i18n.translate('xpack.infra.homePage.metricsExplorerTabTitle', {
-                  defaultMessage: 'Metrics Explorer',
-                }),
-                path: '/explorer',
-              },
-            ]
-          : []),
-        {
-          id: 'settings',
-          title: i18n.translate('xpack.infra.homePage.settingsTabTitle', {
-            defaultMessage: 'Settings',
-          }),
-          path: '/settings',
-        },
-        {
-          id: 'assetDetails',
-          title: '', // Internal deep link, not shown in the UI. Title is dynamically set in the app.
-          path: '/detail',
-          visibleIn: [],
-        },
-      ];
-    };
 
     core.application.register({
       id: 'metrics',

@@ -7,6 +7,7 @@
 
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import type { IUiSettingsClient } from '@kbn/core/server';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { ToolHandlerContext } from '@kbn/agent-builder-server/tools/handler';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
@@ -14,7 +15,6 @@ import { TaskStatus } from '@kbn/streams-schema';
 import type { ZodObject } from '@kbn/zod/v4';
 import type { z } from '@kbn/zod/v4';
 import type { StreamsClient } from '../../lib/streams/client';
-import type { QueryClient } from '../../lib/streams/assets/query/query_client';
 import type { AttachmentClient } from '../../lib/streams/attachments/attachment_client';
 import type { RouteHandlerScopedClients, GetScopedClients } from '../../routes/types';
 import type { TaskClient } from '../../lib/tasks/task_client';
@@ -27,7 +27,13 @@ import type { StreamsTaskType } from '../../lib/tasks/task_definitions';
  */
 type ToolScopedClients = Pick<
   RouteHandlerScopedClients,
-  'streamsClient' | 'scopedClusterClient' | 'getQueryClient' | 'attachmentClient' | 'taskClient'
+  | 'streamsClient'
+  | 'scopedClusterClient'
+  | 'getKnowledgeIndicatorClient'
+  | 'uiSettingsClient'
+  | 'attachmentClient'
+  | 'taskClient'
+  | 'uiSettingsClient'
 >;
 
 /**
@@ -59,6 +65,8 @@ export const createMockGetScopedClients = () => {
       | 'upsertStream'
       | 'forkStream'
       | 'deleteStream'
+      | 'createQueryStream'
+      | 'ensureStream'
     >
   > = {
     getStream: jest.fn(),
@@ -69,13 +77,14 @@ export const createMockGetScopedClients = () => {
     upsertStream: jest.fn().mockResolvedValue({ acknowledged: true, result: 'updated' }),
     forkStream: jest.fn().mockResolvedValue({ acknowledged: true, result: 'created' }),
     deleteStream: jest.fn().mockResolvedValue({ acknowledged: true, result: 'deleted' }),
+    createQueryStream: jest.fn().mockResolvedValue({ acknowledged: true, result: 'created' }),
+    ensureStream: jest.fn().mockResolvedValue(undefined),
   };
 
-  const queryClient: jest.Mocked<Pick<QueryClient, 'getAssets'>> = {
-    getAssets: jest.fn().mockResolvedValue([]),
+  const uiSettingsClient: jest.Mocked<Pick<IUiSettingsClient, 'get'>> = {
+    // Query streams enabled by default; individual tests can override.
+    get: jest.fn().mockResolvedValue(true),
   };
-
-  const getQueryClient = jest.fn().mockResolvedValue(queryClient);
 
   const attachmentClient: jest.Mocked<Pick<AttachmentClient, 'getAttachments'>> = {
     getAttachments: jest.fn().mockResolvedValue([]),
@@ -96,9 +105,10 @@ export const createMockGetScopedClients = () => {
   } = {
     streamsClient,
     scopedClusterClient,
-    getQueryClient,
+    uiSettingsClient,
     attachmentClient,
     taskClient,
+    getKnowledgeIndicatorClient: jest.fn().mockRejectedValue(new Error('Not implemented')),
   };
 
   const getScopedClients = jest
@@ -110,9 +120,9 @@ export const createMockGetScopedClients = () => {
     streamsClient,
     esClient,
     scopedClusterClient,
-    getQueryClient,
     attachmentClient,
     taskClient,
+    uiSettingsClient,
   };
 };
 
