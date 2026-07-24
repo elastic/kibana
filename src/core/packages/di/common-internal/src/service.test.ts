@@ -35,7 +35,7 @@ describe('CoreInjectionService', () => {
     let setup: ReturnType<CoreInjectionService['setup']>;
 
     beforeEach(() => {
-      jest.spyOn(Container.prototype, 'load').mockReturnValue(undefined);
+      jest.spyOn(Container.prototype, 'load').mockResolvedValue(undefined);
       setup = service.setup();
     });
 

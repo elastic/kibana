@@ -155,7 +155,7 @@ export function createTaskRunnerFactory({
           const runner = scope.get(taskRunnerClass);
           return await runner.run({ taskInstance, signal, executionUuid });
         } finally {
-          await scope.unbindAllAsync();
+          await scope.unbindAll();
         }
       },
     });

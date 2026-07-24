@@ -35,8 +35,8 @@ function createContainer() {
     'isBound',
     'loadAsync',
     'load',
-    'unbindAsync',
-    'unbindAllAsync',
+    'unbind',
+    'unbindAll',
   ]) {
     jest.spyOn(container, method as MethodKeysOf<Container>);
   }

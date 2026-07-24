@@ -87,7 +87,7 @@ describe('application', () => {
 
       mountSpy = jest.spyOn(TestApplication.prototype, 'mount');
       unmountSpy = jest.spyOn(TestApplication.prototype, 'unmount');
-      unbindAllSpy = jest.spyOn(fork, 'unbindAllAsync');
+      unbindAllSpy = jest.spyOn(fork, 'unbindAll');
 
       setup();
       [{ mount }] = application.register.mock.lastCall!;

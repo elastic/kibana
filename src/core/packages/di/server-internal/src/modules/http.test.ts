@@ -100,7 +100,7 @@ describe('http', () => {
       ok: jest.fn(() => 'something'),
     } as unknown as jest.Mocked<KibanaResponseFactory>;
     const fork = injection.fork();
-    const unbindAllSpy = jest.spyOn(fork, 'unbindAllAsync');
+    const unbindAllSpy = jest.spyOn(fork, 'unbindAll');
 
     await expect(handler({} as any, request, response)).resolves.toBe('something');
     expect(response.ok).toHaveBeenCalled();
