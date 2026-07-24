@@ -224,4 +224,17 @@ export const ConnectorIconsMap: Map<
     '.argocd',
     lazy(() => import(/* webpackChunkName: "connectorIconArgocd" */ './specs/argocd/icon')),
   ],
+  [
+    '.sublime_security',
+    lazy(
+      () =>
+        import(
+          /* webpackChunkName: "connectorIconSublimeSecurity" */ './specs/sublime_security/icon'
+        )
+    ),
+  ],
+  [
+    '.kubernetes',
+    lazy(() => import(/* webpackChunkName: "connectorIconKubernetes" */ './specs/kubernetes/icon')),
+  ],
 ]);
