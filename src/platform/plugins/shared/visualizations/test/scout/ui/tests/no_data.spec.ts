@@ -8,7 +8,7 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import { test, testData } from '../fixtures';
+import { test, testData, deleteIndicesByPattern } from '../fixtures';
 
 // Sequential suite: these tests mutate global cluster state (ES data + data views),
 // so they run in the single-worker `tests/` config instead of the space-isolated
@@ -30,19 +30,8 @@ test.describe('Visualize - no data', { tag: ['@local-stateful-classic'] }, () =>
     esClient,
     kbnClient,
   }) => {
-    // Scout's esArchiver fixture is load-only by design, so remove the logstash
-    // indices directly to reach an empty-cluster state for this sequential suite.
-    // `action.destructive_requires_name` rejects wildcard deletes, so resolve the
-    // concrete index names first (a read, which allows wildcards) and delete those.
-    const existing = await esClient.indices.get({
-      index: 'logstash-*',
-      allow_no_indices: true,
-      ignore_unavailable: true,
-    });
-    const indices = Object.keys(existing);
-    if (indices.length > 0) {
-      await esClient.indices.delete({ index: indices });
-    }
+    // Drive the cluster to an empty-data state so the "Add integrations" prompt renders.
+    await deleteIndicesByPattern(esClient, 'logstash-*');
     await kbnClient.savedObjects.clean({ types: ['search', 'index-pattern'] });
 
     await page.gotoApp('visualize');

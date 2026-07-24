@@ -38,4 +38,8 @@ export const spaceTest = spaceBaseTest.extend<VisualizeTestFixtures>({
 export { test } from '@kbn/scout';
 
 export * as testData from './constants';
-export { loadVisualizeSuiteDefaults, cleanupVisualizeSuiteDefaults } from './helpers';
+export {
+  loadVisualizeSuiteDefaults,
+  cleanupVisualizeSuiteDefaults,
+  deleteIndicesByPattern,
+} from './helpers';
