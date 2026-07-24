@@ -8,7 +8,7 @@
  */
 
 import type { PageObjects, ScoutPage } from '@kbn/scout';
-import type { DiscoverPageObjects } from '../..';
+import type { DiscoverPageObjects } from '../../../../common/ui/fixtures';
 import type { ApmPage } from './apm';
 import type { TracesFlyout } from './flyout';
 import type { TracesGrid } from './grid';
