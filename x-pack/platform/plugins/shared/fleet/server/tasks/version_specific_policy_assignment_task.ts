@@ -88,14 +88,14 @@ export class VersionSpecificPolicyAssignmentTask {
         timeout: TIMEOUT,
         createTaskRunner: ({
           taskInstance,
-          abortController,
+          signal,
         }: {
           taskInstance: ConcreteTaskInstance;
-          abortController: AbortController;
+          signal: AbortSignal;
         }) => {
           return {
             run: async () => {
-              return this.runTask(taskInstance, core, abortController);
+              return this.runTask(taskInstance, core, signal);
             },
             cancel: async () => {},
           };
@@ -143,7 +143,7 @@ export class VersionSpecificPolicyAssignmentTask {
   public runTask = async (
     taskInstance: ConcreteTaskInstance,
     core: CoreSetup,
-    abortController: AbortController
+    signal: AbortSignal
   ) => {
     if (!appContextService.getExperimentalFeatures().enableVersionSpecificPolicies) {
       this.logger.debug(
@@ -174,7 +174,7 @@ export class VersionSpecificPolicyAssignmentTask {
     const soClient = appContextService.getInternalUserSOClientWithoutSpaceExtension();
 
     try {
-      await this.processAgentPoliciesWithVersionConditions(esClient, soClient, abortController);
+      await this.processAgentPoliciesWithVersionConditions(esClient, soClient, signal);
       this.endRun('success');
     } catch (err) {
       if (err instanceof errors.RequestAbortedError) {
@@ -201,7 +201,7 @@ export class VersionSpecificPolicyAssignmentTask {
   private async processAgentPoliciesWithVersionConditions(
     esClient: ElasticsearchClient,
     soClient: SavedObjectsClientContract,
-    abortController: AbortController
+    signal: AbortSignal
   ) {
     // Fetch agent policies with version conditions in batches
     const agentPolicyFetcher = await agentPolicyService.fetchAllAgentPolicies(soClient, {
@@ -222,13 +222,8 @@ export class VersionSpecificPolicyAssignmentTask {
       }
 
       for (const agentPolicy of agentPolicyPageResults) {
-        throwIfAborted(abortController);
-        await this.processAgentPolicyForVersionAssignment(
-          esClient,
-          soClient,
-          agentPolicy,
-          abortController
-        );
+        throwIfAborted(signal);
+        await this.processAgentPolicyForVersionAssignment(esClient, soClient, agentPolicy, signal);
       }
     }
   }
@@ -240,7 +235,7 @@ export class VersionSpecificPolicyAssignmentTask {
     esClient: ElasticsearchClient,
     soClient: SavedObjectsClientContract,
     agentPolicy: AgentPolicy,
-    abortController: AbortController
+    signal: AbortSignal
   ) {
     this.logger.debug(
       `[VersionSpecificPolicyAssignmentTask] Processing agent policy ${agentPolicy.id}`
@@ -251,7 +246,7 @@ export class VersionSpecificPolicyAssignmentTask {
       esClient,
       soClient,
       agentPolicy.id,
-      abortController
+      signal
     );
 
     if (agentVersionGroups.length === 0) {
@@ -267,7 +262,7 @@ export class VersionSpecificPolicyAssignmentTask {
       soClient,
       agentPolicy.id,
       agentVersionGroups,
-      abortController
+      signal
     );
   }
 
@@ -286,7 +281,7 @@ export class VersionSpecificPolicyAssignmentTask {
     esClient: ElasticsearchClient,
     soClient: SavedObjectsClientContract,
     agentPolicyId: string,
-    abortController: AbortController
+    signal: AbortSignal
   ): Promise<AgentVersionGroup[]> {
     const agentsByMinorVersion = new Map<string, string[]>();
 
@@ -341,7 +336,7 @@ export class VersionSpecificPolicyAssignmentTask {
     });
 
     for await (const agentsBatch of agentsFetcher) {
-      throwIfAborted(abortController);
+      throwIfAborted(signal);
 
       for (const agent of agentsBatch) {
         const agentVersion = agent.agent?.version;
@@ -414,7 +409,7 @@ export class VersionSpecificPolicyAssignmentTask {
     soClient: SavedObjectsClientContract,
     parentPolicyId: string,
     agentVersionGroups: AgentVersionGroup[],
-    abortController: AbortController
+    signal: AbortSignal
   ) {
     // Deploy the parent policy with version-specific policies for each version found
     const versionsToCreate = agentVersionGroups.map((group) => group.minorVersion);
@@ -473,13 +468,8 @@ export class VersionSpecificPolicyAssignmentTask {
       await pMap(
         agentVersionGroups,
         async (versionGroup) => {
-          throwIfAborted(abortController);
-          await this.reassignAgentsToVersionedPolicy(
-            esClient,
-            soClient,
-            versionGroup,
-            abortController
-          );
+          throwIfAborted(signal);
+          await this.reassignAgentsToVersionedPolicy(esClient, soClient, versionGroup, signal);
         },
         {
           concurrency: MAX_CONCURRENT_REASSIGNMENTS,
@@ -499,7 +489,7 @@ export class VersionSpecificPolicyAssignmentTask {
     esClient: ElasticsearchClient,
     soClient: SavedObjectsClientContract,
     versionGroup: AgentVersionGroup,
-    abortController: AbortController
+    signal: AbortSignal
   ) {
     const { minorVersion, agentPolicyId, agentIds } = versionGroup;
     const targetPolicyId = `${agentPolicyId}${AGENT_POLICY_VERSION_SEPARATOR}${minorVersion}`;
