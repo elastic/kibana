@@ -35,7 +35,7 @@ interface ManageRegionsModalProps {
 }
 
 const modalStyles = ({ euiTheme }: UseEuiTheme) => css`
-  min-width: ${euiTheme.base * 35}px;
+  min-width: ${euiTheme.base * 45}px;
 `;
 
 export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose }) => {

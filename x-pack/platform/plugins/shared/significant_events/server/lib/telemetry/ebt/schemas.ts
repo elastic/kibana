@@ -182,6 +182,24 @@ const knowledgeIndicatorFeaturesIdentifiedSchema: RootSchema<KnowledgeIndicatorF
         description: 'Existing features updated in this iteration',
       },
     },
+    features_remapped: {
+      type: 'long',
+      _meta: {
+        description: 'Features remapped to a previously known id in this iteration',
+      },
+    },
+    semantic_verify_calls: {
+      type: 'long',
+      _meta: {
+        description: 'Calls to semantic duplicate verification in this iteration',
+      },
+    },
+    semantic_verify_reuses: {
+      type: 'long',
+      _meta: {
+        description: 'Semantic verifications that reused a known feature id',
+      },
+    },
     input_tokens_used: {
       type: 'long',
       _meta: {
@@ -651,6 +669,18 @@ const agentToolEventSearchSchema: RootSchema<AgentToolEventSearchProps> = {
     _meta: {
       description: 'The state filter applied to the search (open or closed)',
       optional: true,
+    },
+  },
+  view: {
+    type: 'keyword',
+    _meta: {
+      description: 'The requested event response view (compact or full)',
+    },
+  },
+  page: {
+    type: 'long',
+    _meta: {
+      description: 'The requested event search page',
     },
   },
   error_message: {

@@ -30,14 +30,14 @@ const API_HEADERS = {
 };
 
 const aiIndexBody = {
-  name: 'scout_test_ai_index',
   description: 'AI index created by the Scout API test suite',
   dest: { type: 'data_stream', value: DEST_DATA_STREAM },
   automations: [{ type: 'workflow', value: 'scout-automation' }],
   sources: [{ type: 'esql', value: `FROM ${DEST_DATA_STREAM} | LIMIT 1` }],
 };
 
-apiTest.describe('context engine AI indices API', { tag: tags.stateful.classic }, () => {
+// Failing: See https://github.com/elastic/kibana/issues/280639
+apiTest.describe.skip('context engine AI indices API', { tag: tags.stateful.classic }, () => {
   let adminApiCredentials: RoleApiCredentials;
   let viewerApiCredentials: RoleApiCredentials;
 
@@ -181,7 +181,6 @@ apiTest.describe('context engine AI indices API', { tag: tags.stateful.classic }
       headers: { ...adminApiCredentials.apiKeyHeader, ...API_HEADERS },
       responseType: 'json',
       body: {
-        name: INDEX_AI_INDEX_ID,
         dest: { type: 'index', value: `${DEST_INDEX}*` },
         automations: [],
         sources: [],
@@ -228,6 +227,16 @@ apiTest.describe('context engine AI indices API', { tag: tags.stateful.classic }
       headers: { ...adminApiCredentials.apiKeyHeader, ...API_HEADERS },
       responseType: 'json',
       body: bodyWithoutDest,
+    });
+
+    expect(response).toHaveStatusCode(400);
+  });
+
+  apiTest('rejects an id with disallowed characters', async ({ apiClient }) => {
+    const response = await apiClient.put('api/context_engine/ai_index/Invalid_ID', {
+      headers: { ...adminApiCredentials.apiKeyHeader, ...API_HEADERS },
+      responseType: 'json',
+      body: aiIndexBody,
     });
 
     expect(response).toHaveStatusCode(400);
