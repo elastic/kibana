@@ -12,7 +12,7 @@ import type { RouteSecurity } from '@kbn/core-http-server';
 import { inject, injectable } from 'inversify';
 import { Request } from '@kbn/core-di-server';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
-import { ALERTING_V2_MATCHER_VALUE_SUGGESTIONS_API_PATH } from '../constants';
+import { ALERTING_V2_INTERNAL_SUGGESTIONS_MATCHER_VALUES_API_PATH } from '../constants';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { MatcherSuggestionsService } from '../../lib/services/matcher_suggestions_service/matcher_suggestions_service';
@@ -21,6 +21,9 @@ const suggestionsBodySchema = z
   .object({
     field: z.string().min(1).max(256).describe('The field to suggest values for.'),
     query: z.string().max(1024).describe('Optional search query for filtering suggestions.'),
+    // Sent by @kbn/kql's value suggestion provider; unused by this route.
+    fieldMeta: z.unknown().optional(),
+    filters: z.unknown().optional(),
   })
   .strict();
 
@@ -29,7 +32,7 @@ type SuggestionsBody = z.infer<typeof suggestionsBodySchema>;
 @injectable()
 export class MatcherValueSuggestionsRoute extends BaseAlertingRoute {
   static method = 'post' as const;
-  static path = ALERTING_V2_MATCHER_VALUE_SUGGESTIONS_API_PATH;
+  static path = ALERTING_V2_INTERNAL_SUGGESTIONS_MATCHER_VALUES_API_PATH;
   static security: RouteSecurity = {
     authz: {
       requiredPrivileges: [
