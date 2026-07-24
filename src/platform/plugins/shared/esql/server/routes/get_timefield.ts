@@ -11,15 +11,17 @@ import type { ElasticsearchClient, IRouter, PluginInitializerContext } from '@kb
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { FieldCapsResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger } from '@kbn/logging';
-import { getIndexPatternFromESQLQuery, parseTimeFieldFromESQLQuery } from '@kbn/esql-utils';
+import {
+  getIndexPatternFromESQLQuery,
+  parseTimeFieldFromESQLQuery,
+  ESQL_DATASET_FILTERING_FEATURE_FLAG,
+} from '@kbn/esql-utils';
 import { Parser, isSubQuery } from '@elastic/esql';
 import { TIMEFIELD_ROUTE } from '@kbn/esql-types';
 import { EsqlService } from '@kbn/esql-server-utils';
 import { esqlRouteRequestCounter, getErrorStatusCode } from '../metrics';
 
 const ES_TIMESTAMP_FIELD_NAME = '@timestamp';
-// Temporary: remove once dataset filtering is enabled by default in ES
-const DATASET_FILTERING_FEATURE_FLAG_KEY = 'esql.datasetFilteringEnabled';
 
 const hasTimestampInFieldCapsResponse = (result: FieldCapsResponse) =>
   Boolean(result.fields && result.fields['@timestamp']);
@@ -215,7 +217,7 @@ export const registerGetTimeFieldRoute = (
       const client = core.elasticsearch.client.asCurrentUser;
       // Temporary: remove once dataset filtering is enabled by default in ES
       const datasetFilteringEnabled = await core.featureFlags.getBooleanValue(
-        DATASET_FILTERING_FEATURE_FLAG_KEY,
+        ESQL_DATASET_FILTERING_FEATURE_FLAG,
         true
       );
 
