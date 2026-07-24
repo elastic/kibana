@@ -3,7 +3,7 @@ navigation_title: "Databricks"
 type: reference
 description: "Use the Databricks connector to execute SQL queries, discover tables and schemas, and poll async query results in Databricks."
 applies_to:
-  stack: preview 9.5
+  stack: preview 9.6
   serverless: preview
 ---
 
@@ -27,8 +27,6 @@ MCP server URL
 
     - **OAuth Authorization Code** (recommended): Uses the Databricks workspace-level OIDC authorization code flow. Requires a Client ID, Client Secret, Authorization URL, and Token URL from a registered Databricks OAuth application. See [OAuth credentials](#databricks-oauth-credentials) for setup instructions.
     - **Personal access token (PAT)**: A Databricks personal access token for quick testing or automated access.
-
-## Test connectors [databricks-action-configuration]
 
 ## Connector actions [databricks-connector-actions]
 
