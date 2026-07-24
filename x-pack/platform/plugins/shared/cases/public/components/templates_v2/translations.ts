@@ -1059,6 +1059,15 @@ export const ACTION_NEW_FIELD_DESC = i18n.translate(
   { defaultMessage: 'Scaffold a custom field of any type' }
 );
 
+export const ACTION_CHANGE_FIELD_TYPE_TITLE = i18n.translate(
+  'xpack.cases.templates.actionsMenu.changeFieldType.title',
+  { defaultMessage: 'Change field type' }
+);
+export const ACTION_CHANGE_FIELD_TYPE_DESC = i18n.translate(
+  'xpack.cases.templates.actionsMenu.changeFieldType.desc',
+  { defaultMessage: 'Replace this field with a fresh scaffold of a different type' }
+);
+
 export const ACTION_FIELD_LIBRARY_TITLE = i18n.translate(
   'xpack.cases.templates.actionsMenu.fieldLibrary.title',
   { defaultMessage: 'Field library' }
@@ -1089,6 +1098,11 @@ export const ACTION_CONDITIONAL_DESC = i18n.translate(
 export const ACTIONS_MENU_SELECT_A_FIELD = i18n.translate(
   'xpack.cases.templates.actionsMenu.selectAField',
   { defaultMessage: 'Place the cursor on a field to enable this action' }
+);
+
+export const ACTIONS_MENU_NO_FIELD_YET = i18n.translate(
+  'xpack.cases.templates.actionsMenu.noFieldYet',
+  { defaultMessage: 'Create a field to enable this action' }
 );
 
 export const ACTIONS_MENU_SEARCH_FIELDS = i18n.translate(

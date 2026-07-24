@@ -12317,7 +12317,6 @@
     "xpack.apm.appName": "APM",
     "xpack.apm.betaBadgeDescription": "現在、この機能はベータです。不具合を見つけた場合やご意見がある場合、サポートに問い合わせるか、またはディスカッションフォーラムにご報告ください。",
     "xpack.apm.betaBadgeLabel": "ベータ",
-    "xpack.apm.chart.annotation.version": "バージョン",
     "xpack.apm.chart.comparison.defaultPreviousPeriodLabel": "前の期間",
     "xpack.apm.chart.cpuSeries.processAverageLabel": "プロセス平均",
     "xpack.apm.chart.cpuSeries.processMaxLabel": "プロセス最大",
