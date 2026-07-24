@@ -504,9 +504,19 @@ describe('HubSpotConnector', () => {
 
       expect(mockClient.get).toHaveBeenCalledWith(
         'https://api.hubapi.com/crm/v3/objects/contacts',
-        { params: { limit: 1 } }
+        expect.objectContaining({ params: { limit: 1 } })
       );
       expect(result).toEqual({});
+    });
+
+    it('should throw with scope-specific message when contacts endpoint returns 403', async () => {
+      mockClient.get.mockResolvedValue({ status: 403, data: {} });
+
+      const test = HubSpotConnector.test;
+      if (!test) throw new Error('Expected HubSpotConnector.test to be defined');
+      await expect(test.handler(mockContext)).rejects.toThrow(
+        'HubSpot API returned status 403. Check that your Service Key or Private App token is valid and has the crm.objects.contacts.read scope.'
+      );
     });
 
     it('should throw on error', async () => {

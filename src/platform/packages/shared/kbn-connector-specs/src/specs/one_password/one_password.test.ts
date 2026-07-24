@@ -279,5 +279,19 @@ describe('OnePasswordConnector', () => {
       }
       await expect(OnePasswordConnector.test.handler(mockContext)).rejects.toThrow('Network error');
     });
+
+    it('should surface structured API error body on non-2xx response', async () => {
+      const err = Object.assign(new Error('Forbidden'), {
+        response: { status: 403, data: { code: 7, message: 'no_owner_remain', details: [] } },
+      });
+      (mockClient.get as jest.Mock).mockRejectedValue(err);
+
+      if (!OnePasswordConnector.test) {
+        throw new Error('Test handler not defined');
+      }
+      await expect(OnePasswordConnector.test.handler(mockContext)).rejects.toThrow(
+        '1Password API error (403):'
+      );
+    });
   });
 });

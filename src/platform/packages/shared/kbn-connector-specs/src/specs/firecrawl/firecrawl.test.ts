@@ -372,13 +372,15 @@ describe('FirecrawlConnector', () => {
       await expect(FirecrawlConnector.test.handler(mockContext)).rejects.toThrow();
     });
 
-    it('should throw on error when API returns 401', async () => {
+    it('should throw with specific message when API returns 401', async () => {
       const err = new Error('Unauthorized') as Error & { response?: { status: number } };
       err.response = { status: 401 };
       mockClient.post.mockRejectedValue(err);
 
       if (!FirecrawlConnector.test) throw new Error('Test handler not defined');
-      await expect(FirecrawlConnector.test.handler(mockContext)).rejects.toThrow();
+      await expect(FirecrawlConnector.test.handler(mockContext)).rejects.toThrow(
+        'Invalid or missing API key'
+      );
     });
   });
 });

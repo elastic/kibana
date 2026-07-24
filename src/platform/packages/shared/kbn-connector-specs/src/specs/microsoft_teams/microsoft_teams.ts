@@ -368,9 +368,12 @@ export const MicrosoftTeams: ConnectorSpec = {
       const url = isAppOnly
         ? 'https://graph.microsoft.com/v1.0/teams'
         : 'https://graph.microsoft.com/v1.0/me/joinedTeams';
-      await ctx.client.get(url, {
+      const response = await ctx.client.get(url, {
         params: { $select: 'id,displayName' },
       });
+      if (!response?.data || !Array.isArray(response.data.value)) {
+        throw new Error('Unexpected Graph API response: missing value array');
+      }
       return {};
     },
     enabled: true,

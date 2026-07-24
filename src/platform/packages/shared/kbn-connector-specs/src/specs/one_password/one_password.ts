@@ -205,9 +205,13 @@ export const OnePasswordConnector: ConnectorSpec = {
     handler: async (ctx) => {
       ctx.log.debug('1Password test handler');
       const { accountUuid } = ctx.config as { accountUuid: string };
-      await ctx.client.get(`${BASE_URL}/accounts/${accountUuid}/users`, {
-        params: { maxPageSize: 1 },
-      });
+      try {
+        await ctx.client.get(`${BASE_URL}/accounts/${accountUuid}/users`, {
+          params: { maxPageSize: 1 },
+        });
+      } catch (error) {
+        throwWithApiError(error);
+      }
       return {};
     },
     enabled: true,

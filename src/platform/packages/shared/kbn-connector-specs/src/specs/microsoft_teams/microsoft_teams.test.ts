@@ -1000,6 +1000,15 @@ describe('MicrosoftTeams', () => {
       expect(result).toEqual({});
     });
 
+    it('should throw when Graph API response is missing value array', async () => {
+      mockClient.get.mockResolvedValue({ data: {} });
+
+      if (!MicrosoftTeams.test) throw new Error('Test handler not defined');
+      await expect(MicrosoftTeams.test.handler(mockContext)).rejects.toThrow(
+        'Unexpected Graph API response: missing value array'
+      );
+    });
+
     it('should throw on invalid credentials', async () => {
       mockClient.get.mockRejectedValue(new Error('Invalid credentials'));
 

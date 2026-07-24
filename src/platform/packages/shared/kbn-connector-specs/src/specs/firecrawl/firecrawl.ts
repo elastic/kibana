@@ -237,9 +237,17 @@ export const FirecrawlConnector: ConnectorSpec = {
     }),
     handler: async (ctx) => {
       ctx.log.debug('Firecrawl test handler');
-      await ctx.client.post(`${FIRECRAWL_API_BASE}/v2/scrape`, {
-        url: 'https://example.com',
-      });
+      try {
+        await ctx.client.post(`${FIRECRAWL_API_BASE}/v2/scrape`, {
+          url: 'https://example.com',
+        });
+      } catch (error) {
+        const err = error as { response?: { status?: number } };
+        if (err.response?.status === 401) {
+          throw new Error('Invalid or missing API key');
+        }
+        throw error;
+      }
       return {};
     },
     enabled: true,

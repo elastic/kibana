@@ -317,9 +317,16 @@ export const HubSpotConnector: ConnectorSpec = {
       defaultMessage: 'Verifies HubSpot connection by fetching contacts',
     }),
     handler: async (ctx) => {
-      await ctx.client.get(`${HUBSPOT_API_BASE}/crm/v3/objects/contacts`, {
+      const response = await ctx.client.get(`${HUBSPOT_API_BASE}/crm/v3/objects/contacts`, {
         params: { limit: 1 },
+        validateStatus: () => true,
       });
+      if (response.status !== 200 && response.status !== 204) {
+        throw new Error(
+          `HubSpot API returned status ${response.status}. Check that your Service Key or Private App ` +
+            `token is valid and has the crm.objects.contacts.read scope.`
+        );
+      }
       return {};
     },
     enabled: true,
