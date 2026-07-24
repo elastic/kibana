@@ -403,6 +403,7 @@ export const LocationAgentDetails = ({
           columns={columns}
           tableLayout="auto"
           noItemsMessage={NO_AGENTS_LABEL}
+          tableCaption={AGENTS_TABLE_CAPTION}
         />
       </EuiPanel>
       {flyoutAgent && (
@@ -651,3 +652,10 @@ const DISTRIBUTION_HELP = i18n.translate(
 const NO_AGENTS_LABEL = i18n.translate('xpack.synthetics.privateLocation.agentDetails.noAgents', {
   defaultMessage: 'No agents enrolled for this location yet.',
 });
+
+const AGENTS_TABLE_CAPTION = i18n.translate(
+  'xpack.synthetics.privateLocation.agentDetails.tableCaption',
+  {
+    defaultMessage: 'Per-agent monitor distribution and health for this private location.',
+  }
+);
