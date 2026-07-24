@@ -328,10 +328,12 @@ describe('RulesClient', () => {
     it('does not schedule the executor task when updating a disabled rule', async () => {
       const client = createClient();
 
-      rulesSavedObjectService.get.mockResolvedValueOnce({
+      mockSavedObjectsClient.get.mockResolvedValueOnce({
         attributes: { ...baseSoAttrs, enabled: false },
         version: 'WzEsMV0=',
         id: 'rule-id-disabled',
+        type: RULE_SAVED_OBJECT_TYPE,
+        references: [],
       });
 
       await client.updateRule({
@@ -343,11 +345,12 @@ describe('RulesClient', () => {
       // lifecycle transitions are owned exclusively by enableRule/disableRule.
       expect(ensureRuleExecutorTaskScheduledMock).not.toHaveBeenCalled();
       // The stored (disabled) state is still persisted.
-      expect(rulesSavedObjectService.update).toHaveBeenCalledWith({
-        id: 'rule-id-disabled',
-        attrs: expect.objectContaining({ enabled: false }),
-        version: 'WzEsMV0=',
-      });
+      expect(mockSavedObjectsClient.update).toHaveBeenCalledWith(
+        RULE_SAVED_OBJECT_TYPE,
+        'rule-id-disabled',
+        expect.objectContaining({ enabled: false }),
+        { version: 'WzEsMV0=', mergeAttributes: false }
+      );
     });
 
     it('updates the description of a rule', async () => {

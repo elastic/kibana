@@ -11,7 +11,7 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useToggleRuleEnabled } from './use_toggle_rule_enabled';
 import { useService, CoreStart } from '@kbn/core-di-browser';
 import { RulesApi } from '../services/rules_api';
-import type { BulkResponse } from '@kbn/alerting-v2-schemas';
+import type { BulkOperationResponse } from '@kbn/alerting-v2-schemas';
 
 jest.mock('@kbn/core-di-browser');
 jest.mock('../services/rules_api');
@@ -19,7 +19,7 @@ jest.mock('../services/rules_api');
 const mockUseService = useService as jest.MockedFunction<typeof useService>;
 const mockCoreStart = CoreStart as jest.MockedFunction<typeof CoreStart>;
 
-const successResponse: BulkResponse = { affected_count: 1, errors: [] };
+const successResponse: BulkOperationResponse = { rules: [], errors: [] };
 
 const createWrapper = () => {
   const queryClient = new QueryClient({
@@ -99,9 +99,9 @@ describe('useToggleRuleEnabled', () => {
 
   it('shows a danger toast when the bulk response reports a per-rule error', async () => {
     mockBulkEnableRules.mockResolvedValue({
-      affected_count: 0,
-      errors: [{ id: 'rule-1', error: { code: 'RULE_NOT_FOUND', message: 'not found' } }],
-    } satisfies BulkResponse);
+      rules: [],
+      errors: [{ id: 'rule-1', error: { message: 'not found', statusCode: 404 } }],
+    } satisfies BulkOperationResponse);
     const { result } = renderHook(() => useToggleRuleEnabled(), { wrapper: createWrapper() });
 
     result.current.mutate({ id: 'rule-1', enabled: true, name: 'My CPU Alert' });
