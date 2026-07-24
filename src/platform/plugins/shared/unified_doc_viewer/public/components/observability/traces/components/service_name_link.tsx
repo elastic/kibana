@@ -11,6 +11,7 @@ import { EuiLink } from '@elastic/eui';
 import { getRouterLinkProps } from '@kbn/router-utils';
 import React, { useState } from 'react';
 import { EBT_CLICK_ACTIONS, getEbtProps, type EbtClickAttrs } from '@kbn/ebt-click';
+import { ENVIRONMENT_ALL_VALUE } from '@kbn/apm-types';
 import { getUnifiedDocViewerServices } from '../../../../plugin';
 import { useFlyoutHistoryKey } from '../../../doc_viewer_flyout/flyout_history_key_context';
 import { ServiceNameWithIcon } from './service_name_with_icon';
@@ -22,6 +23,7 @@ export const UNIFIED_DOC_VIEWER_ABOUT_SOURCE = 'unified_doc_viewer_about';
 interface ServiceNameLinkProps {
   serviceName: string;
   agentName?: string;
+  environment?: string;
   formattedServiceName: React.ReactNode;
   'data-test-subj': string;
   ebt: Omit<EbtClickAttrs, 'action'>;
@@ -30,6 +32,7 @@ interface ServiceNameLinkProps {
 export function ServiceNameLink({
   serviceName,
   agentName,
+  environment,
   formattedServiceName,
   'data-test-subj': dataTestSubj,
   ebt,
@@ -67,7 +70,7 @@ export function ServiceNameLink({
           serviceFlyoutFeature.renderServiceFlyout({
             serviceName,
             agentName,
-            environment: 'ENVIRONMENT_ALL',
+            environment: environment ?? ENVIRONMENT_ALL_VALUE,
             rangeFrom: timeRangeFrom,
             rangeTo: timeRangeTo,
             source: UNIFIED_DOC_VIEWER_ABOUT_SOURCE,

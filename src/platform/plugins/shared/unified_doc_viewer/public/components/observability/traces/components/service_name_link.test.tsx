@@ -9,6 +9,7 @@
 
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
+import { ENVIRONMENT_ALL_VALUE } from '@kbn/apm-types';
 import { ServiceNameLink, UNIFIED_DOC_VIEWER_ABOUT_SOURCE } from './service_name_link';
 import { getUnifiedDocViewerServices } from '../../../../plugin';
 import { useFlyoutHistoryKey } from '../../../doc_viewer_flyout/flyout_history_key_context';
@@ -23,7 +24,6 @@ jest.mock('../../../doc_viewer_flyout/flyout_history_key_context', () => ({
 
 const SERVICE_NAME = 'opbeans-java';
 const APM_HREF = 'http://apm/services/opbeans-java';
-const ENVIRONMENT_ALL = 'ENVIRONMENT_ALL';
 
 const mockGetTime = jest.fn(() => ({ from: 'now-15m', to: 'now' }));
 const mockGetRedirectUrl = jest.fn(() => APM_HREF);
@@ -117,7 +117,7 @@ describe('ServiceNameLink with service flyout feature registered', () => {
     expect(screen.queryByTestId('serviceFlyoutMock')).not.toBeInTheDocument();
   });
 
-  it('passes serviceName, agentName, environment and time range to renderServiceFlyout', () => {
+  it('falls back to ENVIRONMENT_ALL when no environment prop is provided', () => {
     mockGetTime.mockReturnValue({ from: 'now-30m', to: 'now' });
 
     render(<ServiceNameLink {...defaultProps} agentName="java" />);
@@ -127,11 +127,20 @@ describe('ServiceNameLink with service flyout feature registered', () => {
       expect.objectContaining({
         serviceName: SERVICE_NAME,
         agentName: 'java',
-        environment: ENVIRONMENT_ALL,
+        environment: ENVIRONMENT_ALL_VALUE,
         rangeFrom: 'now-30m',
         rangeTo: 'now',
         source: UNIFIED_DOC_VIEWER_ABOUT_SOURCE,
       })
+    );
+  });
+
+  it('passes the document environment to renderServiceFlyout when provided', () => {
+    render(<ServiceNameLink {...defaultProps} environment="production" />);
+    fireEvent.click(screen.getByTestId('serviceNameLink'));
+
+    expect(mockRenderServiceFlyout).toHaveBeenCalledWith(
+      expect.objectContaining({ environment: 'production' })
     );
   });
 

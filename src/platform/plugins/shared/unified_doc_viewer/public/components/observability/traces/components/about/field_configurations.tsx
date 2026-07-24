@@ -55,6 +55,7 @@ export const getSharedFieldConfigurations = (
               <ServiceNameLink
                 serviceName={value as string}
                 agentName={flattenedHit[AGENT_NAME] ?? ''}
+                environment={flattenedHit[SERVICE_ENVIRONMENT]}
                 formattedServiceName={content}
                 data-test-subj="unifiedDocViewerObservabilityTracesServiceNameLink"
                 ebt={aboutEbt}
