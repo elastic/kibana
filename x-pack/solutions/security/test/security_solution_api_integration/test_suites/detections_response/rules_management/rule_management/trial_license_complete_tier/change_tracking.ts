@@ -339,7 +339,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const { body: rule } = await detectionsApi.readRule({ query: { rule_id: ruleId } });
 
-        await refreshHistory();
+        await refreshChangeHistory(es);
 
         const { body } = await detectionsApi
           .ruleChangesHistory({ params: { ruleId: rule.id }, query: {} })
@@ -655,7 +655,7 @@ export default ({ getService }: FtrProviderContext): void => {
           overwrite: false,
         });
 
-        await refreshHistory();
+        await refreshChangeHistory(es);
 
         // First chunk, past main's 50-chunk, past planned 300/500 batches, and the final remainder.
         const sampleIndexes = [0, 50, 300, 500, ruleCount - 1];
@@ -690,7 +690,7 @@ export default ({ getService }: FtrProviderContext): void => {
           overwrite: false,
         });
 
-        await clearHistory();
+        await clearChangeHistory(es);
 
         await importRulesWithSuccess({
           getService,
@@ -704,7 +704,7 @@ export default ({ getService }: FtrProviderContext): void => {
           overwrite: true,
         });
 
-        await refreshHistory();
+        await refreshChangeHistory(es);
 
         const sampleIndexes = [0, 50, 300, 500, ruleCount - 1];
 
