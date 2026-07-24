@@ -11,6 +11,7 @@ import type { CoreService, CoreContext } from '@kbn/core-base-browser-internal';
 import type { PluginName, PluginOpaqueId } from '@kbn/core-base-common';
 import type { InjectedMetadataPlugin } from '@kbn/core-injected-metadata-common-internal';
 import type { InternalCoreSetup, InternalCoreStart } from '@kbn/core-lifecycle-browser-internal';
+import type { InternalChromeStart } from '@kbn/core-chrome-browser-internal-types';
 import { PluginWrapper } from './plugin';
 import {
   createPluginInitializerContext,
@@ -164,6 +165,7 @@ export class PluginsService
         opaqueIdToPluginId: new Map<PluginOpaqueId, PluginName>(
           [...this.plugins].map(([pluginName, plugin]) => [plugin.opaqueId, pluginName])
         ),
+        getNavTrees: () => (deps.chrome as InternalChromeStart).project.getNavTreeDependencies(),
       });
     }
 

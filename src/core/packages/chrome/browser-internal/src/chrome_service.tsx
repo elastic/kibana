@@ -83,7 +83,13 @@ export class ChromeService {
   constructor(private readonly params: ConstructorParams) {
     this.logger = params.coreContext.logger.get('chrome-browser');
     this.isServerless = params.coreContext.env.packageInfo.buildFlavor === 'serverless';
-    this.projectNavigation = new ProjectNavigationService(this.isServerless);
+    // Collect cross-plugin navigation dependencies only when explicitly enabled via the internal
+    // `plugins.exposeNavDependencies` config, for the navigation-dependency enforcement test
+    // (see https://github.com/elastic/kibana/issues/66682).
+    this.projectNavigation = new ProjectNavigationService(
+      this.isServerless,
+      params.coreContext.env.exposeNavDependencies ?? false
+    );
     this.sidebar = new SidebarService({ basePath: params.basePath });
   }
 

@@ -64,7 +64,7 @@ export class ServerlessObservabilityPlugin
         });
       })
     );
-    serverless.initNavigation('oblt', navigationTree$);
+    serverless.initNavigation('oblt', navigationTree$, 'serverlessObservability');
 
     if (workflowsManagement && !core.pricing.isFeatureAvailable('observability:workflows')) {
       workflowsManagement.setUnavailableInServerlessTier({

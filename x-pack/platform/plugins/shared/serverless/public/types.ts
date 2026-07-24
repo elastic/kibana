@@ -23,7 +23,16 @@ export interface ServerlessPluginStart {
     breadcrumbs: ChromeBreadcrumb | ChromeBreadcrumb[],
     params?: Partial<ChromeSetProjectBreadcrumbsParams>
   ) => void;
-  initNavigation(id: SolutionId, navigationTree$: Observable<NavigationTreeDefinition>): void;
+  initNavigation(
+    id: SolutionId,
+    navigationTree$: Observable<NavigationTreeDefinition>,
+    /**
+     * Id of the plugin that owns this navigation tree. When provided, Core (in development builds)
+     * attributes the tree's `link` references to this plugin for the navigation-dependency
+     * enforcement test (see https://github.com/elastic/kibana/issues/66682).
+     */
+    ownerPluginId?: string
+  ): void;
   getNavigationCards$(
     roleManagementEnabled?: boolean,
     extendCardNavDefinitions?: Record<string, CardNavExtensionDefinition>
