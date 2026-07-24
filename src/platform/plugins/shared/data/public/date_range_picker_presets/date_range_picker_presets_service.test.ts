@@ -79,17 +79,17 @@ describe('DateRangePickerPresetsService', () => {
   });
 
   describe('getCanWrite$', () => {
-    it('delegates to userStorage.canWrite$()', async () => {
+    it('delegates to userStorage.isAvailable()', async () => {
       const { core, service } = setup();
-      core.userStorage.canWrite$.mockReturnValue(of(true));
+      core.userStorage.isAvailable.mockReturnValue(true);
 
       expect(await firstValueFrom(service.getCanWrite$())).toBe(true);
-      expect(core.userStorage.canWrite$).toHaveBeenCalled();
+      expect(core.userStorage.isAvailable).toHaveBeenCalled();
     });
 
-    it('is false when userStorage reports it cannot write (e.g. no profile)', async () => {
+    it('is false when userStorage reports it is unavailable (e.g. no profile)', async () => {
       const { core, service } = setup();
-      core.userStorage.canWrite$.mockReturnValue(of(false));
+      core.userStorage.isAvailable.mockReturnValue(false);
 
       expect(await firstValueFrom(service.getCanWrite$())).toBe(false);
     });

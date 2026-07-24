@@ -80,18 +80,6 @@ export class UserStorageClient implements IUserStorageClient {
     return this.available;
   }
 
-  public isAvailable$(): Observable<boolean> {
-    return of(this.available);
-  }
-
-  public canWrite(): boolean {
-    return this.isAvailable();
-  }
-
-  public canWrite$(): Observable<boolean> {
-    return this.isAvailable$();
-  }
-
   public peek<T = unknown>(key: string): T | undefined;
   public peek<T = unknown>(key: string, defaultValue: T): T;
   public peek<T = unknown>(key: string, defaultValue?: T): T | undefined {

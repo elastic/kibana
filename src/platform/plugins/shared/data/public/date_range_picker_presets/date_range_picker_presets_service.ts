@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { map, type Observable } from 'rxjs';
+import { map, of, type Observable } from 'rxjs';
 
 import type { CoreStart } from '@kbn/core/public';
 import {
@@ -63,7 +63,9 @@ export class DateRangePickerPresetsService implements IDateRangePickerPresetsSer
   }
 
   public getCanWrite$(): Observable<boolean> {
-    return this.userStorage.canWrite$();
+    // `isAvailable()` is a static, page-render-time signal; wrap it as a
+    // one-shot observable to preserve this service's reactive contract.
+    return of(this.userStorage.isAvailable());
   }
 
   public async savePreset(preset: PresetItem): Promise<SavePresetOutcome> {

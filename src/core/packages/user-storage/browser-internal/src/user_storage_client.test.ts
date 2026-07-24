@@ -26,21 +26,10 @@ const buildClient = (initialValues: Record<string, unknown> = {}, available = tr
 };
 
 describe('UserStorageClient', () => {
-  describe('isAvailable / canWrite', () => {
+  describe('isAvailable', () => {
     it('reflects the `available` flag passed at construction', () => {
       expect(buildClient({}, true).client.isAvailable()).toBe(true);
       expect(buildClient({}, false).client.isAvailable()).toBe(false);
-    });
-
-    it('canWrite mirrors isAvailable', () => {
-      expect(buildClient({}, true).client.canWrite()).toBe(true);
-      expect(buildClient({}, false).client.canWrite()).toBe(false);
-    });
-
-    it('isAvailable$/canWrite$ emit the current value', async () => {
-      const { client } = buildClient({}, true);
-      await expect(firstValueFrom(client.isAvailable$())).resolves.toBe(true);
-      await expect(firstValueFrom(client.canWrite$())).resolves.toBe(true);
     });
   });
 

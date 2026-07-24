@@ -57,26 +57,16 @@ export type UserStorageValue<T> =
  */
 export interface IUserStorageClient {
   /**
-   * Whether user storage is available for the current user/session (e.g. `false`
-   * for anonymous users or users without a `profile_uid`). A static, page-render-time
-   * signal — does not change over the lifetime of a page load.
+   * Whether user storage is available for the current user/session: `false` for
+   * anonymous users, users without a `profile_uid`, or when the auth realm denies
+   * access to user-storage saved objects. A single condition gates both read
+   * preloading and writes. A static, page-render-time signal — does not change
+   * over the lifetime of a page load.
    *
-   * Consumers should gate save/delete affordances on this (or {@link canWrite})
-   * rather than querying user profile state directly.
+   * Gate save/delete affordances on this rather than querying user profile state
+   * directly.
    */
   isAvailable(): boolean;
-  /** Observable counterpart to {@link isAvailable}. Emits once with the current value. */
-  isAvailable$(): Observable<boolean>;
-
-  /**
-   * Whether the current user can persist writes. Today this is identical to
-   * {@link isAvailable} (write access and read access share the same `profile_uid`
-   * requirement), but is exposed separately so availability and writeability can
-   * diverge in the future without a consumer-facing API change.
-   */
-  canWrite(): boolean;
-  /** Observable counterpart to {@link canWrite}. Emits once with the current value. */
-  canWrite$(): Observable<boolean>;
 
   /**
    * Pure synchronous read from the local cache with no side effects.

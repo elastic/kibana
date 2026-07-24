@@ -19,9 +19,6 @@ const buildClient = (initial: Record<string, unknown> = {}): IUserStorageClient 
   const subject$ = new BehaviorSubject<Record<string, unknown>>(cache);
   const client: IUserStorageClient = {
     isAvailable: () => true,
-    isAvailable$: () => new BehaviorSubject(true).asObservable(),
-    canWrite: () => true,
-    canWrite$: () => new BehaviorSubject(true).asObservable(),
     peek: ((key: string, defaultValue?: unknown) =>
       (cache[key] !== undefined
         ? cache[key]

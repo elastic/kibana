@@ -7,18 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { of, Subject } from 'rxjs';
+import { Subject } from 'rxjs';
 import { lazyObject } from '@kbn/lazy-object';
 import type { IUserStorageClient } from '@kbn/core-user-storage-browser';
 
 export const clientMock = (): jest.Mocked<IUserStorageClient> => {
   const mock: jest.Mocked<IUserStorageClient> = lazyObject({
-    // Default to a writable client — most tests exercise an authenticated
-    // user; override per-test for anonymous/no-profile scenarios.
+    // Default to an available (writable) client — most tests exercise an
+    // authenticated user; override per-test for anonymous/no-profile scenarios.
     isAvailable: jest.fn().mockReturnValue(true),
-    isAvailable$: jest.fn().mockReturnValue(of(true)),
-    canWrite: jest.fn().mockReturnValue(true),
-    canWrite$: jest.fn().mockReturnValue(of(true)),
     peek: jest.fn(),
     get: jest.fn().mockResolvedValue(undefined),
     get$: jest.fn().mockReturnValue(new Subject<unknown>()),

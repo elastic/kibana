@@ -231,8 +231,7 @@ The browser surface is in `@kbn/core-user-storage-browser` and is exposed on `co
 
 | Method | Returns | Notes |
 |---|---|---|
-| `isAvailable()` / `isAvailable$()` | `boolean` / `Observable<boolean>` | Whether User Storage is available for the current user (`false` for anonymous / no-`profile_uid` users). Static for the lifetime of a page load. Check this — not user profile state — before offering save/delete UI. |
-| `canWrite()` / `canWrite$()` | `boolean` / `Observable<boolean>` | Whether the current user can persist writes. Today identical to `isAvailable`, kept distinct so read/write access can diverge later without an API change. |
+| `isAvailable()` | `boolean` | Whether User Storage is available for the current user (`false` for anonymous / no-`profile_uid` users, or when the auth realm denies access). A single condition gates both read preloading and writes. Static for the lifetime of a page load. Check this — not user profile state — before offering save/delete UI. |
 | `peek<T>(key, default?)` | `T \| undefined` | Pure, synchronous cache read; never fetches, never `await`s. Safe in React render, and the right choice for `preload: true` keys (always cached at first paint) or any best-effort snapshot where you don't want to trigger a fetch. |
 | `get<T>(key, default?)` | `Promise<T \| undefined>` | Safe, resolved read: resolves once the effective value is known, awaiting a lazy fetch if needed. Rejects if the fetch fails. Use this (or `update`) as the read half of a read-modify-write. |
 | `get$<T>(key, default?)` | `Observable<T \| undefined>` | Cache snapshot, then every future value for the key. The first emission may be a temporary default for a non-preloaded key — see `getState$` if you need to tell that apart from a resolved value. |
@@ -246,7 +245,7 @@ The browser surface is in `@kbn/core-user-storage-browser` and is exposed on `co
 ```typescript
 import type { IUserStorageClient } from '@kbn/core-user-storage-browser';
 
-if (core.userStorage.canWrite()) {
+if (core.userStorage.isAvailable()) {
   const layout = await core.userStorage.get<NavLayout>('myPlugin:nav-layout', defaultLayout);
   await core.userStorage.set('myPlugin:nav-layout', nextLayout);
   await core.userStorage.remove('myPlugin:tour-dismissed');
@@ -390,7 +389,7 @@ The browser mock's `createStartContract()` returns a fully-mocked `IUserStorageC
 
 ### No fallback for missing `profile_uid`
 
-If your feature must work for users without a profile (anonymous pages, API-key auth), do not depend on User Storage. Check `core.userStorage.isAvailable()` (or `canWrite()`) before offering save/delete UI — for these users it's `false`, the browser cache will be empty, and writes will return `403`. Either layer over `localStorage` for those cases or design the feature so missing User Storage is acceptable (e.g. fall back to defaults).
+If your feature must work for users without a profile (anonymous pages, API-key auth), do not depend on User Storage. Check `core.userStorage.isAvailable()` before offering save/delete UI — for these users it's `false`, the browser cache will be empty, and writes will return `403`. Either layer over `localStorage` for those cases or design the feature so missing User Storage is acceptable (e.g. fall back to defaults).
 
 ### Single-tab consistency
 
