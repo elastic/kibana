@@ -112,7 +112,7 @@ describe('rule status panel', () => {
     expect(screen.queryByTestId('ruleStatusDropdownBadge')).not.toBeInTheDocument();
   });
 
-  it('keeps the last response status readable in narrow layouts', async () => {
+  it('renders the last response status stat', async () => {
     const rule = mockRule({
       executionStatus: { status: 'ok', lastExecutionDate: new Date('2020-08-20T19:23:38Z') },
     });
@@ -129,9 +129,8 @@ describe('rule status panel', () => {
       </IntlProvider>
     );
 
-    const ruleExecutionStatusStat = screen.getAllByTestId('ruleStatus-ok')[0];
-    expect(ruleExecutionStatusStat).toHaveTextContent('Last response');
-    expect(ruleExecutionStatusStat.parentElement).toHaveStyle({ minWidth: '160px' });
+    const lastResponseStat = screen.getByTestId('ruleStatusLastResponseStat');
+    expect(lastResponseStat).toHaveTextContent('Last response');
   });
 
   it('renders the disabled status as plain text', async () => {

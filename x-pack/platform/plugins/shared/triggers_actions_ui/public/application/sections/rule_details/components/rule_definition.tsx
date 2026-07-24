@@ -230,7 +230,7 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = memo
       <EuiFlexItem
         data-test-subj="ruleSummaryRuleDefinition"
         grow={3}
-        style={{ minWidth: 'min(100%, 500px)' }}
+        css={{ minWidth: 'min(100%, 500px)' }}
       >
         <EuiPanel color="subdued" hasBorder={false} paddingSize="m">
           <EuiFlexGroup justifyContent="spaceBetween">

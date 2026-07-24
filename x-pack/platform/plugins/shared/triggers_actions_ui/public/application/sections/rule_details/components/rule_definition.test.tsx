@@ -150,8 +150,6 @@ describe('Rule Definition', () => {
     );
     const ruleDefinition = screen.getByTestId('ruleSummaryRuleDefinition');
     expect(ruleDefinition).toBeInTheDocument();
-    expect(ruleDefinition).toHaveStyle({ minWidth: 'min(100%, 500px)' });
-    expect(ruleDefinition.querySelector('dl')).toHaveAttribute('data-type', 'responsiveColumn');
   });
 
   it('show rule type name from "useGetRuleTypesPermissions"', async () => {

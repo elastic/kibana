@@ -151,7 +151,7 @@ export const RuleStatusPanel: React.FC<RuleStatusPanelWithApiProps> = ({
       <EuiHorizontalRule margin="none" />
       <EuiPanel hasShadow={false}>
         <EuiFlexGroup gutterSize="none" direction="row" wrap>
-          <EuiFlexItem style={{ minWidth: 160 }}>
+          <EuiFlexItem data-test-subj="ruleStatusLastResponseStat" css={{ minWidth: 160 }}>
             <EuiStat
               data-test-subj={`ruleStatus-${rule.executionStatus.status}`}
               titleSize="xxs"
