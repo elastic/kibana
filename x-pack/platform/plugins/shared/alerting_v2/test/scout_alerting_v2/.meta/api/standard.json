@@ -1,5 +1,5 @@
 {
-  "sha1": "9cdaba5957fd8aedc2b09b8955ad5c6451dfbff2",
+  "sha1": "55ef8278691df1577197481a6e920777af60b505",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -929,110 +929,6 @@
       }
     },
     {
-      "id": "511e44aec89a669-d6ea6bec654d255",
-      "title": "Matcher data fields suggestions API returns the union of data.* field names across all matching alerts when no matcher is given",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/matcher_data_fields_suggestions.spec.ts",
-        "line": 82,
-        "column": 10
-      }
-    },
-    {
-      "id": "511e44aec89a669-882d56d967076af",
-      "title": "Matcher data fields suggestions API narrows fields when matcher selects a single rule via rule.id",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/matcher_data_fields_suggestions.spec.ts",
-        "line": 103,
-        "column": 10
-      }
-    },
-    {
-      "id": "511e44aec89a669-44a0edc5bdf7249",
-      "title": "Matcher data fields suggestions API falls back to the unfiltered result when matcher cannot be parsed",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/matcher_data_fields_suggestions.spec.ts",
-        "line": 118,
-        "column": 10
-      }
-    },
-    {
-      "id": "511e44aec89a669-222b539d5e76e73",
-      "title": "Matcher data fields suggestions API falls back to the unfiltered result when matcher only references dropped fields",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/matcher_data_fields_suggestions.spec.ts",
-        "line": 132,
-        "column": 10
-      }
-    },
-    {
-      "id": "511e44aec89a669-ef0d3f951a5cba0",
-      "title": "Matcher data fields suggestions API validation: rejects empty matcher with a 400",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/matcher_data_fields_suggestions.spec.ts",
-        "line": 147,
-        "column": 10
-      }
-    },
-    {
-      "id": "511e44aec89a669-cda8477863a44a8",
-      "title": "Matcher data fields suggestions API validation: rejects matcher longer than the schema limit with a 400",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/matcher_data_fields_suggestions.spec.ts",
-        "line": 157,
-        "column": 10
-      }
-    },
-    {
-      "id": "511e44aec89a669-c2fe2ca7fecde3f",
-      "title": "Matcher data fields suggestions API authorization: returns 200 for a user with read-only privileges",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/matcher_data_fields_suggestions.spec.ts",
-        "line": 170,
-        "column": 10
-      }
-    },
-    {
-      "id": "511e44aec89a669-898e04400f23442",
-      "title": "Matcher data fields suggestions API authorization: returns 403 for a user without alerting_v2 privileges",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/matcher_data_fields_suggestions.spec.ts",
-        "line": 186,
-        "column": 10
-      }
-    },
-    {
       "id": "68529d4b0bcd626-fe2b1c0e2bc71ac",
       "title": "Matcher value suggestions API validation: rejects body with unknown top-level keys (strict schema)",
       "expectedStatus": "passed",
@@ -1041,7 +937,20 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/matcher_value_suggestions.spec.ts",
-        "line": 22,
+        "line": 25,
+        "column": 10
+      }
+    },
+    {
+      "id": "68529d4b0bcd626-f1921131d49e12b",
+      "title": "Matcher value suggestions API validation: accepts fieldMeta and filters sent by the KQL value suggestion provider",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/matcher_value_suggestions.spec.ts",
+        "line": 44,
         "column": 10
       }
     },
@@ -7672,6 +7581,110 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/upsert_rule.spec.ts",
         "line": 306,
+        "column": 10
+      }
+    },
+    {
+      "id": "bdac3bbd44714f4-e35a15e1cb7bd4c",
+      "title": "Rule event fields suggestions API returns the union of data.* field names across all matching alerts when no matcher is given",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_event_fields_suggestions.spec.ts",
+        "line": 83,
+        "column": 10
+      }
+    },
+    {
+      "id": "bdac3bbd44714f4-72f9da95bd9172c",
+      "title": "Rule event fields suggestions API narrows fields when matcher selects a single rule via rule.id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_event_fields_suggestions.spec.ts",
+        "line": 104,
+        "column": 10
+      }
+    },
+    {
+      "id": "bdac3bbd44714f4-ea3e3e07112398d",
+      "title": "Rule event fields suggestions API falls back to the unfiltered result when matcher cannot be parsed",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_event_fields_suggestions.spec.ts",
+        "line": 122,
+        "column": 10
+      }
+    },
+    {
+      "id": "bdac3bbd44714f4-44a2f5d3a603ce8",
+      "title": "Rule event fields suggestions API falls back to the unfiltered result when matcher only references dropped fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_event_fields_suggestions.spec.ts",
+        "line": 136,
+        "column": 10
+      }
+    },
+    {
+      "id": "bdac3bbd44714f4-fdcb48ef8a6e538",
+      "title": "Rule event fields suggestions API validation: rejects empty matcher with a 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_event_fields_suggestions.spec.ts",
+        "line": 154,
+        "column": 10
+      }
+    },
+    {
+      "id": "bdac3bbd44714f4-5b801ad7b6a08a0",
+      "title": "Rule event fields suggestions API validation: rejects matcher longer than the schema limit with a 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_event_fields_suggestions.spec.ts",
+        "line": 164,
+        "column": 10
+      }
+    },
+    {
+      "id": "bdac3bbd44714f4-7769c37cc0e3f41",
+      "title": "Rule event fields suggestions API authorization: returns 200 for a user with read-only privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_event_fields_suggestions.spec.ts",
+        "line": 177,
+        "column": 10
+      }
+    },
+    {
+      "id": "bdac3bbd44714f4-77c75d547010bfc",
+      "title": "Rule event fields suggestions API authorization: returns 403 for a user without alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_event_fields_suggestions.spec.ts",
+        "line": 193,
         "column": 10
       }
     },
