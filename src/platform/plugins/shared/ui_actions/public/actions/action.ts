@@ -25,6 +25,10 @@ export interface ActionExecutionMeta {
    * The event that caused the action to execute (e.g., mouse click, keyboard event)
    */
   event?: React.MouseEvent;
+  /**
+   * Returns focus to the control that opened the action.
+   */
+  returnFocus?: () => void;
 }
 
 /**
