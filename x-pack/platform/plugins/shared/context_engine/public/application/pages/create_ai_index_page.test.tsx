@@ -86,7 +86,6 @@ describe('CreateAiIndexPage', () => {
         '/api/context_engine/ai_index/my-ai-index',
         expect.objectContaining({
           body: JSON.stringify({
-            name: 'my-ai-index',
             dest: { type: 'data_stream', value: '.ai-index-ds-my-ai-index' },
             automations: [],
             sources: [{ type: 'esql', value: 'FROM logs-* | LIMIT 10' }],
