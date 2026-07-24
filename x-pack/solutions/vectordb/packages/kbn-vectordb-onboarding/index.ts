@@ -13,11 +13,6 @@ export { IngestStep } from './src/onboarding/steps/ingest_step';
 export { SearchStep } from './src/onboarding/steps/search_step';
 export { ConnectToProject } from './src/connection_details/connect_to_project';
 export { TutorialsPage } from './src/tutorials/tutorials_page';
-export {
-  markTutorialComplete,
-  isTutorialComplete,
-  useTutorialProgress,
-} from './src/tutorials/use_tutorial_progress';
 export type { OnboardingServices } from './src/services';
 export { useOnboardingCredentials } from './src/hooks/use_onboarding_credentials';
 export type { OnboardingCredentials } from './src/hooks/use_onboarding_credentials';

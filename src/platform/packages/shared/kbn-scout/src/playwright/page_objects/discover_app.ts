@@ -323,7 +323,7 @@ export class DiscoverApp {
   }
 
   async openSaveSearchModal(name?: string) {
-    await this.page.testSubj.click('discoverSaveButton');
+    await this.clickAppMenuItem('discoverSaveButton');
     await this.page.testSubj.locator('savedObjectSaveModal').waitFor({ state: 'visible' });
     if (name !== undefined) {
       await this.page.testSubj.fill('savedObjectTitle', name);
@@ -348,7 +348,7 @@ export class DiscoverApp {
   }
 
   async saveSearchAsNew(name: string) {
-    await this.page.testSubj.click('discoverSaveButton');
+    await this.clickAppMenuItem('discoverSaveButton');
     await this.page.testSubj.fill('savedObjectTitle', name);
     const checkbox = this.page.testSubj.locator('saveAsNewCheckbox');
     if (!(await checkbox.isChecked())) {
@@ -358,7 +358,7 @@ export class DiscoverApp {
   }
 
   async saveUnsavedChanges() {
-    await this.page.testSubj.click('discoverSaveButton');
+    await this.clickAppMenuItem('discoverSaveButton');
     await this.page.testSubj.waitForSelector('confirmSaveSavedObjectButton', { state: 'visible' });
     await this.confirmSaveModal();
     await this.waitUntilSearchingHasFinished();
@@ -490,8 +490,12 @@ export class DiscoverApp {
   }
 
   async getCurrentQueryName(): Promise<string> {
-    const breadcrumb = this.page.testSubj.locator('breadcrumb last');
-    return await breadcrumb.innerText();
+    // Project (chrome-next) shows the saved search name in the app header; classic chrome shows it
+    // as the last breadcrumb. `.or()` keeps this layout-agnostic without a runtime gate.
+    const title = this.page.testSubj
+      .locator('appHeaderTitle')
+      .or(this.page.testSubj.locator('breadcrumb last'));
+    return await title.innerText();
   }
 
   async loadSavedSearch(searchName: string) {
@@ -612,6 +616,24 @@ export class DiscoverApp {
    */
   async getBreakdownFieldValue(): Promise<string> {
     return this.page.testSubj.innerText('unifiedHistogramBreakdownSelectorButton');
+  }
+
+  /**
+   * Clears the histogram breakdown field by selecting the "No breakdown" option.
+   */
+  async clearBreakdownField() {
+    await this.page.testSubj.click('unifiedHistogramBreakdownSelectorButton');
+    await this.page.testSubj.waitForSelector('unifiedHistogramBreakdownSelectorSelectable', {
+      state: 'visible',
+    });
+    await this.page
+      .locator(
+        `[data-test-subj="unifiedHistogramBreakdownSelectorSelectable"] .euiSelectableListItem[value="__EMPTY_SELECTOR_OPTION__"]`
+      )
+      .click();
+    await this.page.testSubj.waitForSelector('unifiedHistogramBreakdownSelectorSelectable', {
+      state: 'hidden',
+    });
   }
 
   async expandTimeRangeAsSuggestedInNoResultsMessage() {

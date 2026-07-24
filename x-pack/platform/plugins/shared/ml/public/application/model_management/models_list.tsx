@@ -77,6 +77,7 @@ import { JobSpacesSyncFlyout } from '../components/job_spaces_sync';
 import { HelpMenu } from '../components/help_menu';
 import { MlAppHeader } from '../components/ml_app_header';
 import { useTrainedModelsMenu } from './hooks/use_trained_models_menu';
+import { DatePicker } from '../components/ml_page/date_picker';
 
 interface PageUrlState {
   pageKey: typeof ML_PAGES.TRAINED_MODELS_MANAGE;
@@ -615,7 +616,6 @@ export const ModelsList: FC<Props> = ({
         })}
         menu={menu}
         docLink={helpLink}
-        showDatePicker
       />
       <div data-test-subj="mlTrainedModelsList">
         <SpaceManagementContextWrapper>
@@ -637,6 +637,10 @@ export const ModelsList: FC<Props> = ({
                   onChange={(e) => updatePageState({ showAll: e.target.checked })}
                   data-test-subj="mlModelsShowAllSwitch"
                 />
+              </EuiFlexItem>
+              <EuiFlexItem />
+              <EuiFlexItem grow={false}>
+                <DatePicker />
               </EuiFlexItem>
             </EuiFlexGroup>
           ) : null}

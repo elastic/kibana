@@ -24,7 +24,7 @@ const SEVERITY_CALIBRATION_CRITERIA: EvaluationCriterion[] = [
   },
   {
     id: 'critical_severity_requires_confirmed_impact',
-    text: '"80-critical" severity is warranted only for confirmed user-task-blocking failures affecting a core user journey or confirmed live sensitive-data exposure with broad blast radius; bounded or partial impact belongs at "60-high" or "40-medium".',
+    text: '"80-critical" severity applies to a site-wide/global outage affecting all or most customers, a confirmed failure that fully blocks a customer-facing operation for everyone who reaches it (no successful completions on the affected path), or confirmed active exposure of PII, PCI, CVV, SSN, credentials, secrets, tokens. One mandatory service, dependency, or endpoint can qualify when its failure blocks the operation end-to-end; unrelated services need not also fail. When the operation still completes for some (degraded, intermittent, or partial), impact is confined to a limited cohort, or impact is not yet confirmed, the correct tier is "60-high" or lower.',
   },
   {
     id: 'weak_signals_low_severity',
@@ -44,7 +44,7 @@ const CONFIDENCE_CALIBRATION_CRITERIA: EvaluationCriterion[] = [
   },
   {
     id: 'strong_corroboration_high_confidence',
-    text: 'Only strongly corroborated findings (multiple confirmed evidences plus aligned KI backing, with no contradiction) may claim high confidence (>=0.85).',
+    text: 'Only strongly corroborated findings (multiple confirmed evidences plus aligned KI backing from the input topology or this cycle’s KI search, with no contradiction) may claim high confidence (>=0.85). The judge need not repeat KI search when the discovery already carries aligned causal_features or blast_radius.',
   },
 ];
 
