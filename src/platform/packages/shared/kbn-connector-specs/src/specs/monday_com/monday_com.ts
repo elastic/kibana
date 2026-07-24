@@ -173,7 +173,7 @@ export const MondayCom: ConnectorSpec = {
 
     // ── Items ─────────────────────────────────────────────────────────────────
     createItem: {
-      isTool: true,
+      isTool: false,
       description:
         'Create a new item (row) on a Monday.com board. Optionally assign it to a specific group ' +
         'and set initial column values. Use getBoardInfo to discover group IDs and column IDs and ' +
@@ -191,7 +191,7 @@ export const MondayCom: ConnectorSpec = {
     },
 
     changeItemColumnValues: {
-      isTool: true,
+      isTool: false,
       description:
         'Update one or more column values on an existing Monday.com item. Provide a map of column ' +
         'IDs to new values. Use getBoardInfo to discover column IDs and their expected value formats ' +
@@ -294,12 +294,6 @@ export const MondayCom: ConnectorSpec = {
     '### Finding boards and items',
     'Use `search` to find boards or documents by keyword, then `getBoardInfo` to inspect column structure.',
     'To paginate through items on a board, call `getBoardItemsPage` repeatedly with the `cursor` from each response until no cursor is returned.',
-    '',
-    '### Creating and updating items',
-    'Before calling `createItem` or `changeItemColumnValues`, call `getBoardInfo` to discover:',
-    '  - Group IDs (for placing items in the right section)',
-    '  - Column IDs and their types (status, person, date, text, etc.)',
-    '  - The expected value format for each column type',
     '',
     '### Comments and updates',
     'Use `createUpdate` to post a comment on an item and `getUpdates` to read the discussion thread. ' +
