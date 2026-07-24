@@ -19,7 +19,7 @@ const renderSortSelector = (sort: MetricsSort) => {
 };
 
 describe('useSortSelector', () => {
-  it('preserves the current direction when the sort field changes', () => {
+  it('forces ascending direction when switching to the recency field', () => {
     const { result, onChange } = renderSortSelector([
       METRICS_SORT_BY.alphabetically,
       METRICS_SORT_DIRECTION.desc,
@@ -30,7 +30,24 @@ describe('useSortSelector', () => {
       label: 'Recently explored',
     });
 
-    expect(onChange).toHaveBeenCalledWith([METRICS_SORT_BY.recency, METRICS_SORT_DIRECTION.desc]);
+    expect(onChange).toHaveBeenCalledWith([METRICS_SORT_BY.recency, METRICS_SORT_DIRECTION.asc]);
+  });
+
+  it('preserves the current direction when switching to a non-recency field', () => {
+    const { result, onChange } = renderSortSelector([
+      METRICS_SORT_BY.recency,
+      METRICS_SORT_DIRECTION.desc,
+    ]);
+
+    result.current.handleSortByChange({
+      value: METRICS_SORT_BY.alphabetically,
+      label: 'Alphabetically',
+    });
+
+    expect(onChange).toHaveBeenCalledWith([
+      METRICS_SORT_BY.alphabetically,
+      METRICS_SORT_DIRECTION.desc,
+    ]);
   });
 
   it('falls back to the current field when no option is provided', () => {

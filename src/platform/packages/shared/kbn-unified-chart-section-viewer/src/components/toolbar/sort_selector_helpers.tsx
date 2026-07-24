@@ -51,10 +51,15 @@ const directionOptions = [
 
 interface SortDirectionToggleProps {
   direction: MetricsSortDirection;
+  isDisabled: boolean;
   onChange: (direction: MetricsSortDirection) => void;
 }
 
-export const SortDirectionToggle = ({ direction, onChange }: SortDirectionToggleProps) => (
+export const SortDirectionToggle = ({
+  direction,
+  isDisabled,
+  onChange,
+}: SortDirectionToggleProps) => (
   <EuiButtonGroup
     isIconOnly
     buttonSize="compressed"
@@ -62,5 +67,6 @@ export const SortDirectionToggle = ({ direction, onChange }: SortDirectionToggle
     options={directionOptions}
     idSelected={direction}
     onChange={(id) => onChange(id as MetricsSortDirection)}
+    isDisabled={isDisabled}
   />
 );

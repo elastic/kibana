@@ -59,5 +59,21 @@ spaceTest.describe(
       // The interacted metric moves to the front.
       await expect(metricsExperience.getCardTitle(0)).toHaveText(String(targetMetricName));
     });
+
+    spaceTest('disables the direction toggle when sorting by recency', async ({ pageObjects }) => {
+      await pageObjects.discover.writeAndSubmitEsqlQuery(testData.ESQL_QUERIES.TS);
+      const { metricsExperience } = pageObjects;
+
+      await expect(metricsExperience.grid).toBeVisible();
+
+      // Alphabetical sort (the default) lets the user pick a direction.
+      await expect(metricsExperience.sortDirectionAsc).toBeEnabled();
+      await expect(metricsExperience.sortDirectionDesc).toBeEnabled();
+
+      // Recency is always most-recent-first, so the direction toggle is disabled.
+      await metricsExperience.selectSortBy('recency');
+      await expect(metricsExperience.sortDirectionAsc).toBeDisabled();
+      await expect(metricsExperience.sortDirectionDesc).toBeDisabled();
+    });
   }
 );
