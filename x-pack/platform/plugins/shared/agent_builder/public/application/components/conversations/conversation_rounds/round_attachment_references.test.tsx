@@ -142,6 +142,30 @@ describe('RoundAttachmentReferences', () => {
     expect(container.querySelector('[data-euiicon-type="document"]')).toBeInTheDocument();
   });
 
+  it('falls back to description, then type, when the referenced version cannot be resolved', () => {
+    mockGetAttachmentUiDefinition.mockReturnValue({
+      getLabel: () => 'Registry Label',
+      getIcon: () => 'code',
+    });
+
+    render(
+      <RoundAttachmentReferences
+        attachmentRefs={[
+          { attachment_id: 'a', version: 2, actor: ATTACHMENT_REF_ACTOR.user },
+          { attachment_id: 'b', version: 2, actor: ATTACHMENT_REF_ACTOR.user },
+        ]}
+        conversationAttachments={[makeVersioned('a', 'Description Label'), makeVersioned('b')]}
+      />
+    );
+
+    // With description: uses description (skips getLabel since version is wrong)
+    expect(screen.getByText('Description Label')).toBeInTheDocument();
+    // Without description: falls back to type
+    expect(screen.getByText('text')).toBeInTheDocument();
+    // getLabel is never used when the version can't be resolved
+    expect(screen.queryByText('Registry Label')).not.toBeInTheDocument();
+  });
+
   it('keeps the full title in the DOM (truncation is CSS-only)', () => {
     const longTitle = 'A very long attachment title that definitely exceeds the pill width';
     render(

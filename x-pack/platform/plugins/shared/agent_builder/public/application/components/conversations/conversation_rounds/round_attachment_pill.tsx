@@ -18,13 +18,17 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
-import { getLatestVersion, getVersion } from '@kbn/agent-builder-common/attachments';
+import { getVersion } from '@kbn/agent-builder-common/attachments';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
 
 const MAX_PILL_WIDTH = 320;
 const DEFAULT_ICON = 'document';
 
 const pillTitleStyles = css(euiTextTruncate());
+
+const pillTitleContainerStyles = css`
+  min-inline-size: 0;
+`;
 
 export interface RoundAttachmentPillProps {
   attachment: VersionedAttachment;
@@ -39,16 +43,19 @@ export const RoundAttachmentPill: React.FC<RoundAttachmentPillProps> = ({
   const { attachmentsService } = useAgentBuilderServices();
   const uiDefinition = attachmentsService.getAttachmentUiDefinition(attachment.type);
 
-  const versionData = getVersion(attachment, version) ?? getLatestVersion(attachment);
-  const title =
-    uiDefinition?.getLabel({
-      id: attachment.id,
-      type: attachment.type,
-      data: versionData?.data ?? {},
-      ...(attachment.description !== undefined ? { description: attachment.description } : {}),
-    }) ||
-    attachment.description ||
-    attachment.type;
+  const versionData = getVersion(attachment, version);
+  const versionTitle = versionData
+    ? uiDefinition?.getLabel({
+        id: attachment.id,
+        type: attachment.type,
+        data: versionData.data,
+
+        ...(attachment.description !== undefined ? { description: attachment.description } : {}),
+      })
+    : undefined;
+
+  const fallbackTitle = attachment.description || attachment.type;
+  const title = versionTitle || fallbackTitle;
 
   const pillStyles = css`
     padding: ${euiTheme.size.xxs} ${euiTheme.size.xs};
@@ -71,7 +78,7 @@ export const RoundAttachmentPill: React.FC<RoundAttachmentPillProps> = ({
           <EuiFlexItem grow={false}>
             <EuiIcon type={uiDefinition?.getIcon?.() ?? DEFAULT_ICON} aria-hidden={true} />
           </EuiFlexItem>
-          <EuiFlexItem grow={false} css={pillTitleStyles}>
+          <EuiFlexItem grow={false} css={pillTitleContainerStyles}>
             <EuiText size="s" css={pillTitleStyles}>
               {title}
             </EuiText>
