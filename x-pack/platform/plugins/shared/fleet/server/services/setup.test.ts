@@ -9,7 +9,6 @@ import { errors } from '@elastic/elasticsearch';
 
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
-import { LockAcquisitionError } from '@kbn/lock-manager';
 
 import { MessageSigningError } from '../../common/errors';
 import { createAppContextStartContractMock, xpackMocks } from '../mocks';
@@ -20,7 +19,7 @@ import { appContextService } from './app_context';
 import { getInstallations } from './epm/packages';
 import { setupUpgradeManagedPackagePolicies } from './setup/managed_package_policies';
 import { getPreconfiguredDeleteUnenrolledAgentsSettingFromConfig } from './preconfiguration/delete_unenrolled_agent_setting';
-import { _runSetupWithLock, setupFleet } from './setup';
+import { setupFleet } from './setup';
 import { isPackageInstalled } from './epm/packages/install';
 import { upgradeAgentPolicySchemaVersion } from './setup/upgrade_agent_policy_schema_version';
 import { createCCSIndexPatterns } from './setup/fleet_synced_integrations';
@@ -243,44 +242,5 @@ describe('setupFleet', () => {
         },
       ],
     });
-  });
-});
-
-describe('_runSetupWithLock', () => {
-  let mockedWithLock: jest.Mock<any, any, any>;
-  beforeEach(() => {
-    mockedWithLock = jest.fn();
-    mockedAppContextService.getLockManagerService.mockReturnValue({
-      withLock: mockedWithLock as any,
-    } as any);
-  });
-  it('should retry on lock acquisition error', async () => {
-    mockedWithLock
-      .mockImplementationOnce(async () => {
-        throw new LockAcquisitionError('test');
-      })
-      .mockImplementationOnce(async (id, fn) => {
-        return fn();
-      });
-
-    const setupFn = jest.fn();
-    await _runSetupWithLock(setupFn);
-
-    expect(setupFn).toHaveBeenCalled();
-    expect(mockedWithLock).toHaveBeenCalledTimes(2);
-  });
-
-  it('should not retry on setupFn error', async () => {
-    mockedWithLock.mockImplementation(async (id, fn) => {
-      return fn();
-    });
-
-    const setupFn = jest.fn();
-    setupFn.mockRejectedValue(new Error('test'));
-
-    await expect(_runSetupWithLock(setupFn)).rejects.toThrow(/test/);
-
-    expect(setupFn).toHaveBeenCalled();
-    expect(mockedWithLock).toHaveBeenCalledTimes(1);
   });
 });
