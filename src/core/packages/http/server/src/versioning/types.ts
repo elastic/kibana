@@ -326,7 +326,7 @@ export interface VersionedRouteValidation<P, Q, B> {
    */
   response?: VersionedRouteResponseValidation;
   /**
-   * Maps request validation failures to custom responses.
+   * Handler that allows mapping request validation failures to custom responses.
    *
    * @public
    */
