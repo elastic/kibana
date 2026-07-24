@@ -14,10 +14,11 @@ import {
   SIGNIFICANT_EVENTS_MEMORY_CONSOLIDATION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_MEMORY_CONVERSATION_SCRAPER_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_MEMORY_GAP_DETECTION_WORKFLOW_ID,
-  SIGNIFICANT_EVENTS_MEMORY_SYNTHESIS_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import { STREAMS_API_PRIVILEGES } from '../../../common/constants';
+import { MEMORY_WORKFLOW_IDS } from '../../lib/maintenance/managed_workflow_targets';
 import { createServerRoute } from '../../routes/create_server_route';
 import type {
   MemoryEntry,
@@ -28,6 +29,7 @@ import type {
 import { MemoryServiceImpl } from '../lib/memory';
 import { triggerMemorySynthesisWorkflow } from '../lib/memory/trigger_memory_synthesis_workflow';
 import { assertSignificantEventsAccess } from '../../routes/utils/assert_significant_events_access';
+import { assertNotPaused } from '../../routes/utils/assert_not_paused';
 
 const createMemoryService = (esClient: ElasticsearchClient, logger: Logger) =>
   new MemoryServiceImpl({ logger, esClient });
@@ -444,9 +446,11 @@ const createWorkflowTriggerRoute = (
       server,
       logger,
       getScopedClients,
+      maintenanceService,
     }): Promise<{ executionId: string }> => {
       const { licensing } = await getScopedClients({ request });
       await assertSignificantEventsAccess({ server, licensing });
+      await assertNotPaused({ maintenanceService, request });
 
       const wfMgmt = server.workflowsManagement;
       if (!wfMgmt) {
@@ -455,10 +459,14 @@ const createWorkflowTriggerRoute = (
         );
       }
 
-      // Use the user's current space so the execution appears in the Workflows UI.
-      const spaceId = server.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
+      // Documents live in the global workflow space; executions run in the caller's
+      // space so they appear in that space's Workflows UI.
+      const executionSpaceId = server.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
 
-      const workflow = await wfMgmt.management.getWorkflow(managedWorkflowId, spaceId);
+      const workflow = await wfMgmt.management.getWorkflow(
+        managedWorkflowId,
+        GLOBAL_WORKFLOW_SPACE_ID
+      );
       if (!workflow || !workflow.definition) {
         throw notFound(
           `Managed workflow "${managedWorkflowId}" not found. Kibana may still be starting up.`
@@ -467,7 +475,7 @@ const createWorkflowTriggerRoute = (
 
       const executionId = await wfMgmt.management.runWorkflow(
         { ...workflow, definition: workflow.definition },
-        spaceId,
+        executionSpaceId,
         {},
         request,
         'significant-events-memory-ui'
@@ -500,9 +508,11 @@ const synthesizeMemoryRoute = createServerRoute({
     server,
     logger,
     getScopedClients,
+    maintenanceService,
   }): Promise<{ executionId: string }> => {
     const { licensing } = await getScopedClients({ request });
     await assertSignificantEventsAccess({ server, licensing });
+    await assertNotPaused({ maintenanceService, request });
 
     const executionId = await triggerMemorySynthesisWorkflow({
       workflowsManagement: server.workflowsManagement,
@@ -528,13 +538,6 @@ const detectGapsRoute = createWorkflowTriggerRoute(
   'Trigger gap detection for memory'
 );
 
-const MEMORY_WORKFLOW_IDS = [
-  SIGNIFICANT_EVENTS_MEMORY_CONVERSATION_SCRAPER_WORKFLOW_ID,
-  SIGNIFICANT_EVENTS_MEMORY_CONSOLIDATION_WORKFLOW_ID,
-  SIGNIFICANT_EVENTS_MEMORY_SYNTHESIS_WORKFLOW_ID,
-  SIGNIFICANT_EVENTS_MEMORY_GAP_DETECTION_WORKFLOW_ID,
-] as const;
-
 const getMemoryWorkflowsEnabledRoute = createServerRoute({
   endpoint: 'GET /internal/streams/memory/_workflows/enabled',
   options: { access: 'internal', summary: 'Get enabled state of all memory workflows' },
@@ -559,9 +562,8 @@ const getMemoryWorkflowsEnabledRoute = createServerRoute({
       };
     }
 
-    const spaceId = server.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
     const fetchedWorkflows = await Promise.all(
-      MEMORY_WORKFLOW_IDS.map((id) => wfMgmt.management.getWorkflow(id, spaceId))
+      MEMORY_WORKFLOW_IDS.map((id) => wfMgmt.management.getWorkflow(id, GLOBAL_WORKFLOW_SPACE_ID))
     );
     const workflows = MEMORY_WORKFLOW_IDS.map((id, index) => ({
       id,
@@ -583,6 +585,7 @@ const setMemoryWorkflowsEnabledRoute = createServerRoute({
     server,
     logger,
     getScopedClients,
+    maintenanceService,
   }): Promise<{ success: boolean }> => {
     const { licensing } = await getScopedClients({ request });
     await assertSignificantEventsAccess({ server, licensing });
@@ -594,8 +597,12 @@ const setMemoryWorkflowsEnabledRoute = createServerRoute({
       );
     }
 
-    const spaceId = server.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
     const { enabled } = params.body;
+
+    // Block turning memory workflows back on while paused; disabling stays allowed.
+    if (enabled) {
+      await assertNotPaused({ maintenanceService, request });
+    }
 
     // Toggle every workflow we can and collect per-workflow failures rather than
     // throwing on the first one, so a partial installation doesn't leave the
@@ -606,7 +613,10 @@ const setMemoryWorkflowsEnabledRoute = createServerRoute({
     const failures: string[] = [];
 
     for (const managedWorkflowId of MEMORY_WORKFLOW_IDS) {
-      const workflow = await wfMgmt.management.getWorkflow(managedWorkflowId, spaceId);
+      const workflow = await wfMgmt.management.getWorkflow(
+        managedWorkflowId,
+        GLOBAL_WORKFLOW_SPACE_ID
+      );
       if (!workflow) {
         failures.push(`"${managedWorkflowId}" was not found`);
         continue;
@@ -619,7 +629,7 @@ const setMemoryWorkflowsEnabledRoute = createServerRoute({
       const result = await wfMgmt.management.updateWorkflow(
         workflow.id,
         { enabled },
-        spaceId,
+        GLOBAL_WORKFLOW_SPACE_ID,
         request
       );
       if (result.enabled !== enabled) {
@@ -649,7 +659,11 @@ const setMemoryWorkflowsEnabledRoute = createServerRoute({
       throw serverUnavailable(message);
     }
 
-    logger.info(`Memory workflows ${enabled ? 'enabled' : 'disabled'} for space "${spaceId}".`);
+    logger.info(
+      `Memory workflows ${
+        enabled ? 'enabled' : 'disabled'
+      } for space "${GLOBAL_WORKFLOW_SPACE_ID}".`
+    );
     return { success: true };
   },
 });

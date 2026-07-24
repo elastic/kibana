@@ -96,6 +96,7 @@ toc:
           - file: connectors-kibana/hubspot-action-type.md
           - file: connectors-kibana/jina-action-type.md
           - file: connectors-kibana/jira-cloud-action-type.md
+          - file: connectors-kibana/kubernetes-action-type.md
           - file: connectors-kibana/microsoft-teams-action-type.md
           - file: connectors-kibana/notion-action-type.md
           - file: connectors-kibana/one-drive-action-type.md
@@ -109,6 +110,7 @@ toc:
           - file: connectors-kibana/shodan-action-type.md
           - file: connectors-kibana/slack-v2-action-type.md
           - file: connectors-kibana/snowflake-action-type.md
+          - file: connectors-kibana/sublime-security-action-type.md
           - file: connectors-kibana/tavily-action-type.md
           - file: connectors-kibana/urlvoid-action-type.md
           - file: connectors-kibana/virustotal-action-type.md

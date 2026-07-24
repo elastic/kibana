@@ -155,7 +155,9 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
         onEdit={(r) => onEditInFlyout(r)}
         onClone={(r) => onCloneInFlyout(r)}
         onDelete={(r) => setRuleToDelete(r)}
-        onToggleEnabled={(r) => toggleEnabledMutation.mutate({ id: r.id, enabled: !r.enabled })}
+        onToggleEnabled={(r) =>
+          toggleEnabledMutation.mutate({ id: r.id, enabled: !r.enabled, name: r.metadata.name })
+        }
         togglingRuleId={
           toggleEnabledMutation.isLoading ? toggleEnabledMutation.variables?.id : undefined
         }
@@ -180,7 +182,9 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
             onCloneInFlyout(r);
           }}
           onDelete={(r) => setRuleToDelete(r)}
-          onToggleEnabled={(r) => toggleEnabledMutation.mutate({ id: r.id, enabled: !r.enabled })}
+          onToggleEnabled={(r) =>
+            toggleEnabledMutation.mutate({ id: r.id, enabled: !r.enabled, name: r.metadata.name })
+          }
         />
       ) : null}
       {ruleToDelete ? (

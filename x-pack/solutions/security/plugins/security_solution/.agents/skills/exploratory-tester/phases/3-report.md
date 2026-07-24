@@ -20,11 +20,11 @@ x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-t
 
 ### Populate Timing & Cost
 
-**Per-flow rows:** read the `<!-- flow: <name> | started: <ISO> | ended: <ISO> | duration: <Xm Ys> -->` header from each `findings-flow-<N>.md`. Use `started` and `duration` directly for `Started` and `Duration`. Derive `Status` from these sources — no findings file for the flow → `not started`; flow is in `config.json → skipped_setup` or `deferred_flows` → the reason recorded there; findings file contains `session lost` markers → `session lost`; otherwise → `completed`. Compute `Over?` by comparing `duration` against `config.json → flows[N].timeout_minutes`. The `Total session` row duration = report-written time − `session_started_at` from `config.json`.
+**Per-flow rows:** read the `<!-- flow: <name> | started: <ISO> | ended: <ISO> | duration: <Xm Ys> -->` header from each `findings-flow-<N>.md`. Use `started` and `duration` directly for `Started` and `Duration`. Derive `Status` from these sources — no findings file for the flow → `not started`; flow is in `config.json → skipped_setup` or `deferred_flows` → the reason recorded there; findings file contains `session lost` markers → `session lost`; `duration` exceeds `config.json → flows[N].timeout_minutes` → `timed out`; otherwise → `completed`. Compute `Over?` by comparing `duration` against `config.json → flows[N].timeout_minutes`. The `Total session` row duration = report-written time − `session_started_at` from `config.json`.
 
 **Token usage:** run the token script and capture its output:
 ```bash
-python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts/session-token-usage.py
+python3 x-pack/solutions/security/plugins/security_solution/.agents/scripts/session-token-usage.py
 ```
 - If the script exits 0 and prints a line (e.g. `input=… output=… cache_create=… cache_read=… total=…`), reformat it into the token-usage line — replace `_` with `-` and `key=N` with `key N`, separated by `·`, and wrap the final `total N` in `**…**`. Example: `input=270 output=156097 … total=11512028` → `input 270 · output 156097 · … · **total 11512028**`.
 - If the script exits non-zero or prints nothing, write `**Token usage:** not available` — this is expected on non-Claude-Code harnesses (Cursor, Codex, etc.) or when the transcript is unavailable.
@@ -50,7 +50,32 @@ Populate the **Recommended Follow-up** section from `config.json → deferred_fl
 
 ## Step 3c — Present report
 
-Present `report.md` to the user and ask:
+The full report always lives at `$SESSION_DIR/report.md` (written in full in Step 3a). **In chat, present a condensed summary, not the raw file** — pasting every finding's full evidence block (screenshots, console/network lines, video paths) into chat buries the signal the user needs to act on, especially for multi-flow sessions.
+
+Open the chat response with a single bold headline — this is the first thing the user sees:
+
+- If all flows have status `completed` or `timed out` (none are `not started`, `cap reached`, `session lost`, or `blocked`):
+  ```
+  **Session complete · <N> confirmed bugs (L1) · <Xh Ym> · <resolved session_dir>/report.md**
+  ```
+- Otherwise:
+  ```
+  **Session ended · <N> confirmed bugs (L1) · <Xh Ym> · <resolved session_dir>/report.md**
+  ```
+
+Where:
+- `<N>` — Level 1 count from the Summary section (write `0 confirmed bugs (L1)` when N=0, never omit it)
+- `<Xh Ym>` — Total session duration from the `Total session` row of the Timing & Cost table; omit the hours component when under 60 minutes (e.g. `25m`, not `0h 25m`)
+- `<resolved session_dir>` — the `session_dir` value from `config.json` (the actual path, never the literal `$SESSION_DIR`)
+
+**Chat summary — in this order:**
+1. Header metadata (Area, Environment, Space, Role, User, Date, Mode, Flows explored, Session duration) — always include, it's short.
+2. Timing & Cost table + Summary counts — always include, both are already short.
+3. **Level 1 — Confirmed Bugs, in full finding format** (as defined in `templates/report-format.md`) — these are the must-read, low-volume, high-stakes items.
+4. **Level 2 and Level 3 — title only, one line each**, no detail (e.g. `- [L2] <title>`, `- [L3] <title>`). This is enough for the user to answer the reclassification question below without opening the file.
+5. Closing line: `Full report with evidence detail: <resolved session_dir>/report.md`
+
+Then ask:
 
 > "Review complete. Are there any Level 2 or Level 3 findings you want to reclassify as false positives before I update the knowledge file?"
 
