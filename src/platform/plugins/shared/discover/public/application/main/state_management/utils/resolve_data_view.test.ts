@@ -7,15 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DataView } from '@kbn/data-views-plugin/public';
-import { ALL_LOGS_DATA_VIEW_ID, getAllLogsDataViewSpec } from '@kbn/discover-utils/src';
-import {
-  buildDataViewMock,
-  dataViewMock,
-  deepMockedFields,
-} from '@kbn/discover-utils/src/__mocks__';
-import { loadAndResolveDataView, loadDataView } from './resolve_data_view';
-import { createRuntimeStateManager } from '../redux';
+import { loadDataView } from './resolve_data_view';
+import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { discoverServiceMock as services } from '../../../../__mocks__/services';
 
 describe('Resolve data view tests', () => {
@@ -42,38 +35,5 @@ describe('Resolve data view tests', () => {
     expect(result.loadedDataView).toEqual(dataViewMock);
     expect(result.requestedDataViewFound).toBe(false);
     expect(result.requestedDataViewId).toBe(dataViewId);
-  });
-});
-
-describe('loadAndResolveDataView', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  it('reuses a profile-managed ad hoc data view instead of recreating it when the location spec collides', async () => {
-    const managedDataView = {
-      ...buildDataViewMock({
-        id: ALL_LOGS_DATA_VIEW_ID,
-        name: 'All logs',
-        fields: deepMockedFields,
-        isPersisted: false,
-      }),
-      managed: true,
-    } as DataView;
-
-    const runtimeStateManager = createRuntimeStateManager();
-    runtimeStateManager.adHocDataViews$.next([managedDataView]);
-
-    const result = await loadAndResolveDataView({
-      locationDataViewSpec: getAllLogsDataViewSpec({ allLogsIndexPattern: 'logs-*' }),
-      savedDataViews: [],
-      runtimeStateManager,
-      services,
-    });
-
-    expect(result.dataView).toBe(managedDataView);
-    expect(result.fallback).toBe(false);
-    expect(services.dataViews.clearInstanceCache).not.toHaveBeenCalled();
-    expect(services.dataViews.create).not.toHaveBeenCalled();
   });
 });

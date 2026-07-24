@@ -203,18 +203,12 @@ export const loadAndResolveDataView = async ({
   const { dataViews, toastNotifications } = services;
   const adHocDataViews = runtimeStateManager.adHocDataViews$.getValue();
 
-  // If the location spec collides with a profile-managed ad hoc data view,
-  // reuse it instead of clearing the cache and recreating it (avoids churn).
-  const managedProfileDataView = locationDataViewSpec?.id
-    ? adHocDataViews.find((dv) => dv.id === locationDataViewSpec.id && dv.managed)
-    : undefined;
-
   // Check ad hoc data views first, unless a data view spec is supplied,
   // then attempt to load one if none is found
   let fallback = false;
-  let dataView =
-    managedProfileDataView ??
-    (locationDataViewSpec ? undefined : adHocDataViews.find((dv) => dv.id === dataViewId));
+  let dataView = locationDataViewSpec
+    ? undefined
+    : adHocDataViews.find((dv) => dv.id === dataViewId);
 
   if (!dataView) {
     const dataViewData = await loadDataView({
