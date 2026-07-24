@@ -20,6 +20,8 @@ import {
   EuiFlexItem,
   EuiCode,
   EuiLink,
+  EuiBadge,
+  EuiToolTip,
 } from '@elastic/eui';
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 
@@ -31,6 +33,7 @@ import { MigrateSystemIndicesButton } from './migrate_button';
 
 interface Props {
   setIsComplete: OverviewStepProps['setIsComplete'];
+  setIsMigrationNeeded: (needed: boolean) => void;
 }
 
 const getFailureCauses = (features: SystemIndicesMigrationFeature[]) => {
@@ -100,6 +103,15 @@ const i18nTexts = {
       />
     );
   },
+  requiredStep: i18n.translate('xpack.upgradeAssistant.overview.systemIndices.requiredStep', {
+    defaultMessage: 'Required step',
+  }),
+  requiredStepTooltip: i18n.translate(
+    'xpack.upgradeAssistant.overview.systemIndices.requiredStepTooltip',
+    {
+      defaultMessage: 'Not completing this step will result in cluster failure.',
+    }
+  ),
   noMigrationNeeded: i18n.translate(
     'xpack.upgradeAssistant.overview.systemIndices.noMigrationNeeded',
     {
@@ -147,13 +159,18 @@ const i18nTexts = {
   },
 };
 
-const MigrateSystemIndicesStep: FunctionComponent<Props> = ({ setIsComplete }) => {
+const MigrateSystemIndicesStep: FunctionComponent<Props> = ({
+  setIsComplete,
+  setIsMigrationNeeded,
+}) => {
   const { beginSystemIndicesMigration, startMigrationStatus, migrationStatus, setShowFlyout } =
     useMigrateSystemIndices();
 
   useEffect(() => {
-    setIsComplete(migrationStatus.data?.migration_status === 'NO_MIGRATION_NEEDED');
-    // Depending upon setIsComplete would create an infinite loop.
+    const status = migrationStatus.data?.migration_status;
+    setIsComplete(status === 'NO_MIGRATION_NEEDED');
+    setIsMigrationNeeded(!!status && status !== 'NO_MIGRATION_NEEDED');
+    // Depending upon setIsComplete/setIsMigrationNeeded would create an infinite loop.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [migrationStatus.data?.migration_status]);
 
@@ -255,18 +272,42 @@ const MigrateSystemIndicesStep: FunctionComponent<Props> = ({ setIsComplete }) =
 
 interface CustomProps {
   docLinks: DocLinksStart;
+  isMigrationNeeded: boolean;
+  setIsMigrationNeeded: (needed: boolean) => void;
 }
 
 export const getMigrateSystemIndicesStep = ({
   isComplete,
-
   setIsComplete,
   docLinks,
+  isMigrationNeeded,
+  setIsMigrationNeeded,
 }: OverviewStepProps & CustomProps): EuiStepProps => {
   const status = isComplete ? 'complete' : 'incomplete';
 
+  // EuiStepProps.title is typed as string in this EUI version, but the component renders
+  // {title} in JSX so ReactNode works at runtime.
+  const title = (
+    isMigrationNeeded ? (
+      <>
+        {i18nTexts.title}{' '}
+        <EuiToolTip content={i18nTexts.requiredStepTooltip}>
+          <EuiBadge
+            color="danger"
+            iconType="warning"
+            data-test-subj="migrateSystemIndicesRequiredBadge"
+          >
+            {i18nTexts.requiredStep}
+          </EuiBadge>
+        </EuiToolTip>
+      </>
+    ) : (
+      i18nTexts.title
+    )
+  ) as unknown as string;
+
   return {
-    title: i18nTexts.title,
+    title,
     status,
     'data-test-subj': `migrateSystemIndicesStep-${status}`,
     children: (
@@ -277,7 +318,10 @@ export const getMigrateSystemIndicesStep = ({
 
         <EuiSpacer size="m" />
 
-        <MigrateSystemIndicesStep setIsComplete={setIsComplete} />
+        <MigrateSystemIndicesStep
+          setIsComplete={setIsComplete}
+          setIsMigrationNeeded={setIsMigrationNeeded}
+        />
       </>
     ),
   };
