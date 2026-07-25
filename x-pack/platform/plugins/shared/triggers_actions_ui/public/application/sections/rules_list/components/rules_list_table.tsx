@@ -972,7 +972,13 @@ export const RulesListTable = (props: RulesListTableProps) => {
     <EuiFlexGroup gutterSize="none" direction="column">
       <EuiFlexGroup justifyContent="spaceBetween" gutterSize="none" alignItems="center">
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup justifyContent="flexStart" gutterSize="s" alignItems="center">
+          <EuiFlexGroup
+            justifyContent="flexStart"
+            gutterSize="s"
+            alignItems="center"
+            responsive={false}
+            wrap={false}
+          >
             <EuiFlexItem grow={false}>
               {numberOfSelectedRules > 0 ? (
                 renderSelectAllDropdown?.()
@@ -1001,6 +1007,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
             </EuiFlexItem>
             {numberOfFilters > 0 && (
               <EuiFlexItem
+                grow={false}
                 css={{
                   borderLeft: euiTheme.border.thin,
                   paddingLeft: euiTheme.size.m,
