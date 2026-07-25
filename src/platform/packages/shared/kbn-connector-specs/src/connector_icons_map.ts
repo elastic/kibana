@@ -233,4 +233,8 @@ export const ConnectorIconsMap: Map<
     '.workday',
     lazy(() => import(/* webpackChunkName: "connectorIconWorkday" */ './specs/workday/icon')),
   ],
+  [
+    '.kubernetes',
+    lazy(() => import(/* webpackChunkName: "connectorIconKubernetes" */ './specs/kubernetes/icon')),
+  ],
 ]);
