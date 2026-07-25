@@ -108,8 +108,8 @@ describe('Databricks', () => {
       expect(oauthType).toMatchObject({
         type: 'oauth_authorization_code',
         defaults: {
-          scope: 'sql offline_access',
-            scope: 'all-apis offline_access',
+          scope: 'all-apis offline_access',
+        },
       });
     });
 
