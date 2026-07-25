@@ -51,12 +51,6 @@ interface RulesListFiltersBarProps {
 }
 
 const ENTER_KEY = 13;
-
-const rulesListSummaryBarCss = {
-  overflowX: 'auto' as const,
-  overflowY: 'hidden' as const,
-};
-
 export const RulesListFiltersBar = React.memo((props: RulesListFiltersBarProps) => {
   const {
     actionTypes,
@@ -218,27 +212,18 @@ export const RulesListFiltersBar = React.memo((props: RulesListFiltersBarProps) 
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
-      <EuiFlexGroup
-        alignItems="center"
-        justifyContent="spaceBetween"
-        gutterSize="s"
-        responsive={false}
-        wrap={false}
-        css={rulesListSummaryBarCss}
-      >
+      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="m" wrap>
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup
-            alignItems="flexStart"
-            direction="column"
-            gutterSize="xs"
-            responsive={false}
-            wrap={false}
-          >
-            <RulesListStatuses
-              rulesStatuses={rulesStatusesTotal}
-              rulesLastRunOutcomes={rulesLastRunOutcomesTotal}
-            />
-            <RulesListAutoRefresh lastUpdate={lastUpdate} onRefresh={onRefreshRules} />
+          <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false} wrap>
+            <EuiFlexItem grow={false}>
+              <RulesListStatuses
+                rulesStatuses={rulesStatusesTotal}
+                rulesLastRunOutcomes={rulesLastRunOutcomesTotal}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <RulesListAutoRefresh lastUpdate={lastUpdate} onRefresh={onRefreshRules} />
+            </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
         {rulesStatusesTotal.error > 0 && (
