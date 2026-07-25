@@ -11,8 +11,7 @@ import { readFileSync, existsSync } from 'fs';
 import { upsertComment } from '#pipeline-utils';
 
 // Mirrors StabilityTier in @kbn/api-contracts. Kept as a local type because the
-// notifier only reads the JSON report and this workspace does not depend on the
-// package.
+// notifier only reads the JSON report
 type Tier = 'stable' | 'tech_preview' | 'experimental';
 
 export interface ImpactEntry {

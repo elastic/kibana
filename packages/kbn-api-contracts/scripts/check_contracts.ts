@@ -241,7 +241,7 @@ run(
 
       // Classify every breaking change by tier. All tiers are reported so the PR
       // notifier can surface experimental breaks as an informational section, but
-      // only stable and tech_preview gate: experimental APIs are allowed to break.
+      // only stable and tech_preview gate: experimental APIs do not
       const entries: ImpactReportEntry[] = breakingChanges.map((change) => {
         const { tier, since } = resolveTier(baseOas, change);
         const entry: ImpactReportEntry = {
@@ -281,7 +281,7 @@ run(
 
       log.error(formatFailure(entries));
       throw new Error(
-        `Caught ${gatingEntries.length} breaking change(s) in stable/tech_preview APIs: ` +
+        `Detected ${gatingEntries.length} breaking change(s) in stable/tech_preview APIs: ` +
           `${stableCount} stable, ${techPreviewCount} tech_preview`
       );
     } finally {

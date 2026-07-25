@@ -35,13 +35,13 @@ const expectOutputContains = (output: string, ...substrings: string[]) => {
 };
 
 describe('formatFailure', () => {
-  it('formats a single caught change with its tier', () => {
+  it('formats a single detected change with its tier', () => {
     const output = formatFailure([stableEntry('/api/test')]);
 
     expectOutputContains(
       output,
-      'API CONTRACT BREAKING CHANGES CAUGHT',
-      'Caught 1 breaking change(s) in stable/tech_preview APIs (1 stable, 0 tech_preview)',
+      'API CONTRACT BREAKING CHANGES DETECTED',
+      'Detected 1 breaking change(s) in stable/tech_preview APIs (1 stable, 0 tech_preview)',
       '1. Endpoint removed',
       'Path: /api/test',
       'Tier: Stable (GA)',
@@ -57,7 +57,7 @@ describe('formatFailure', () => {
 
     expectOutputContains(
       output,
-      'Caught 2 breaking change(s) in stable/tech_preview APIs (1 stable, 1 tech_preview)',
+      'Detected 2 breaking change(s) in stable/tech_preview APIs (1 stable, 1 tech_preview)',
       'Tier: Stable (GA)',
       'Tier: Technical Preview',
       'Method: DELETE'
@@ -72,7 +72,7 @@ describe('formatFailure', () => {
     expectOutputContains(
       output,
       // count reflects only the gating (stable/tech_preview) change
-      'Caught 1 breaking change(s) in stable/tech_preview APIs (1 stable, 0 tech_preview)',
+      'Detected 1 breaking change(s) in stable/tech_preview APIs (1 stable, 0 tech_preview)',
       'Informational — not blocking merge',
       'Tier: Experimental',
       '/api/exp'

@@ -38,7 +38,7 @@ describe('writeImpactReport', () => {
     expect(JSON.parse(readFileSync(reportPath, 'utf-8'))).toEqual(report);
   });
 
-  it('writes an empty entries array when there are no caught changes', () => {
+  it('writes an empty entries array when there are no detected changes', () => {
     mkdirSync(resolve(reportPath, '..'), { recursive: true });
 
     writeImpactReport(reportPath, { entries: [] });
@@ -47,7 +47,7 @@ describe('writeImpactReport', () => {
     expect(written.entries).toEqual([]);
   });
 
-  it('preserves the optional since field', () => {
+  it('preserves the optional "since" field', () => {
     const report: ImpactReport = {
       entries: [
         {

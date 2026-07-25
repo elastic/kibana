@@ -13,7 +13,7 @@ import { ESCALATION_LINK } from './links';
 
 const HEADER = `
 ╔════════════════════════════════════════════════════════════════════════════╗
-║                     API CONTRACT BREAKING CHANGES CAUGHT                   ║
+║                     API CONTRACT BREAKING CHANGES DETECTED                 ║
 ╚════════════════════════════════════════════════════════════════════════════╝
 
 `.split('\n');
@@ -62,7 +62,7 @@ break. They are listed for visibility only and do not fail this check.
 `.split('\n');
 
 /**
- * Format the CI-log summary for caught breaking changes. Gating tiers (stable
+ * Format the CI-log summary for detected breaking changes. Gating tiers (stable
  * first, then tech_preview) lead the report and drive the summary count;
  * experimental changes, if any, follow in a clearly non-blocking section. Entries
  * are already tier-classified by check_contracts, so this is presentation only.
@@ -78,7 +78,7 @@ export function formatFailure(entries: ImpactReportEntry[]): string {
 
   return [
     ...HEADER,
-    `Caught ${gating.length} breaking change(s) in stable/tech_preview APIs ` +
+    `Detected ${gating.length} breaking change(s) in stable/tech_preview APIs ` +
       `(${stable.length} stable, ${techPreview.length} tech_preview):`,
     '',
     ...gating.flatMap(formatEntry),

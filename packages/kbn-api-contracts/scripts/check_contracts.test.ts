@@ -463,7 +463,7 @@ describe('check_contracts', () => {
       primeLoadOas(baseSpec({ '/api/x': { post: { 'x-state': 'Generally available' } } }));
 
       await expect(runCallback({ flags: defaultFlags, log: mockLog })).rejects.toThrow(
-        'Caught 1 breaking change(s) in stable/tech_preview APIs: 1 stable, 0 tech_preview'
+        'Detected 1 breaking change(s) in stable/tech_preview APIs: 1 stable, 0 tech_preview'
       );
       expect(mockLog.error).toHaveBeenCalledWith('FAILURE REPORT');
     });
@@ -531,7 +531,7 @@ describe('check_contracts', () => {
       );
 
       await expect(runCallback({ flags: defaultFlags, log: mockLog })).rejects.toThrow(
-        'Caught 2 breaking change(s) in stable/tech_preview APIs: 1 stable, 1 tech_preview'
+        'Detected 2 breaking change(s) in stable/tech_preview APIs: 1 stable, 1 tech_preview'
       );
       expect(mockLog.info).toHaveBeenCalledWith(
         '1 experimental-tier breaking change(s) reported (informational, not blocking)'
@@ -620,7 +620,7 @@ describe('check_contracts', () => {
       }));
 
       await expect(runCallback({ flags: defaultFlags, log: mockLog })).rejects.toThrow(
-        'Caught 1 breaking change(s) in stable/tech_preview APIs: 1 stable, 0 tech_preview'
+        'Detected 1 breaking change(s) in stable/tech_preview APIs: 1 stable, 0 tech_preview'
       );
 
       expect(mockFormatFailure).toHaveBeenCalledTimes(1);

@@ -4,7 +4,7 @@ Detects breaking changes across Kibana's public REST API surface (including APIs
 
 ## Overview
 
-This package runs in CI on every PR. It compares the current branch's OAS files against the base branch (e.g. `main`) to detect breaking API changes across the whole surface and classifies each by stability tier. Breaking changes in **stable** and **tech_preview** APIs gate the check (fail it); **experimental** breaking changes are reported for visibility only and never gate, because experimental APIs are allowed to break.
+This package runs in CI on every PR. It compares the current branch's OAS files against the base branch (e.g. `main`) to detect breaking API changes across the whole surface and classifies each by stability tier. Breaking changes in **stable** and **tech_preview** APIs gate the check (fail it); **experimental** breaking changes are reported for visibility only and won't fail the check.
 
 **Flow:**
 
@@ -12,7 +12,7 @@ This package runs in CI on every PR. It compares the current branch's OAS files 
 git show base OAS → oasdiff diff → parse → apply allowlist → classify by tier → report → notify
 ```
 
-By default the check is a soft gate: a BC caught in stable/tech_preview fails the check (non-zero exit) but Buildkite `soft_fail: true` keeps merge unblocked, so the failure is a visible warning. Removing `soft_fail` from `.buildkite/pipelines/pull_request/api_contracts.yml` turns it into a hard merge gate.
+By default the check is a soft gate: a BC detected in stable/tech_preview fails the check (non-zero exit) but Buildkite `soft_fail: true` keeps merge unblocked, so the failure is a visible warning. Removing `soft_fail` from `.buildkite/pipelines/pull_request/api_contracts.yml` turns it into a hard merge gate.
 
 **Key components:**
 
@@ -101,7 +101,7 @@ Example targeting the new request-body tightening rule:
 **Required fields:** `path`, `method`, `reason`, `approvedBy`, `oasdiffId`, `source` (the last two only required for granular suppression).
 **Optional fields:** `prUrl`, `expiresAt`.
 
-### Coarse form (⚠️ avoid unless absolutely necessary — this masks all future breaks on the endpoint)
+### Coarse form (⚠️ avoid unless absolutely necessary — this masks all future breaking changes on the endpoint)
 
 Omitting `oasdiffId` and `source` makes the entry suppress **every** breaking change for that `(path, method)`. This is dangerous: a coarse entry approved today silently swallows any unrelated tightening, removal, or type change that lands on the same endpoint in the future. Reach for it only when several distinct, approved changes ship together and a single granular entry per change is impractical.
 
@@ -125,11 +125,11 @@ Omitting `oasdiffId` and `source` makes the entry suppress **every** breaking ch
 The tier of a breaking change is resolved from the affected operation's `x-state` in the **base** spec (the API as it existed before the change), defaulting to `stable` when no `x-state` is declared — the most conservative choice, since an unknown state can only resolve up to `stable` and never silently into experimental.
 
 - **stable** / **tech_preview** — gate the check. A breaking change here fails the check.
-- **experimental** — reported for visibility only. Experimental APIs are allowed to break, so these never fail the check.
+- **experimental** — reported for visibility only. Experimental APIs are allowed to introduce breaking changes, so these never fail the check.
 
 ### CI notifications
 
-CI posts (or updates) a PR comment whenever there is anything to report, **regardless of whether the check fails** (the check can exit 0 with nothing gating, e.g. when every gating break is allowlisted or only experimental changes were found). The comment groups changes by stability tier, with experimental changes in a clearly labeled non-blocking section. When there is nothing to report, no comment is posted.
+CI posts (or updates) a PR comment whenever there is anything to report, **regardless of whether the check fails** (the check can exit 0 with nothing gating, e.g. when every gating break is allowlisted or only experimental changes were found). The comment groups changes by stability tier, with experimental changes in a clearly labeled **non-blocking** section. When there is nothing to report, no comment is posted.
 
 ## Usage
 
@@ -170,13 +170,15 @@ brew install oasdiff
 # or: curl -fsSL https://raw.githubusercontent.com/oasdiff/oasdiff/main/install.sh | sh
 ```
 
-## Handling CI Failures
+## Handling CI Notifications
 
-When the check fails, CI posts a PR comment listing the affected endpoints grouped by stability tier.
+When the check detects changes, CI posts a PR comment listing the affected endpoints grouped by stability tier.
 
 1. **Review the report** - identifies which endpoints, what changed, and their stability tier
 2. **If unintentional:** fix the code to maintain compatibility.
-3. **If intentional:** add an allowlist entry with team approval (see [Allowlist](#allowlist)), coordinating with the owning team
+3. **If intentional:** add an allowlist entry with team approval (see [Allowlist](#allowlist)), coordinating with the owning team.
+
+**Important** Adding an allowlist entry does not absolve API owners from going through the Breaking Changes comittee. Every API that is stable and in technical preview has to follow the formal breaking change process for approval.
 
 ## Troubleshooting
 

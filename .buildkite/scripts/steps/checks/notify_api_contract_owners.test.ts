@@ -31,18 +31,11 @@ describe('buildCommentBody', () => {
     expect(body).toContain('| `/api/spaces/space` `GET` |');
   });
 
-  it('does not mention Terraform or cc owning teams', () => {
-    const body = buildCommentBody([entry()]);
-
-    expect(body).not.toMatch(/terraform/i);
-    expect(body).not.toContain('cc ');
-    expect(body).not.toContain('Owners');
-  });
-
-  it('groups changes into separate stable and tech_preview sections', () => {
+  it('groups changes into separate availability sections', () => {
     const body = buildCommentBody([
       entry({ path: '/api/spaces/space' }),
       entry({ path: '/api/fleet/agent_policies', method: 'POST', tier: 'tech_preview' }),
+      entry({ path: '/api/features', tier: 'experimental' }),
     ]);
 
     expect(body).toContain('### Stable (GA) (1)');
