@@ -303,10 +303,9 @@ bundle:
   directory: docs/changelog
   # Output directory for bundled changelog files
   output_directory: docs/releases
-  # Whether to resolve (copy contents) by default
-  resolve: true
   repo: kibana
   owner: elastic
+  branch: main
   link_allow_repos:
     - elastic/kibana
     - elastic/elasticsearch
