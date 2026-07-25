@@ -21,8 +21,8 @@ export function getStabilityFromXState(
   if (lower.startsWith('technical preview')) {
     return 'tech_preview';
   }
-  if (lower.startsWith('beta')) {
-    return 'beta';
+  if (lower.startsWith('experimental') || lower.startsWith('beta')) {
+    return 'experimental';
   }
   return undefined;
 }

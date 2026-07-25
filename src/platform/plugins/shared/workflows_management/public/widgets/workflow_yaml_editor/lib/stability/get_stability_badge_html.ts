@@ -67,9 +67,9 @@ export function getStabilityBadgeHtml(stability: StabilityLevel | undefined): st
     });
     return buildStabilityBadgeHtml(label, getStabilityBadgeColors());
   }
-  if (stability === 'beta') {
-    const label = i18n.translate('workflows.actionsMenu.betaBadge', {
-      defaultMessage: 'Beta',
+  if (stability === 'experimental') {
+    const label = i18n.translate('workflows.actionsMenu.experimentalBadge', {
+      defaultMessage: 'Experimental',
     });
     return buildStabilityBadgeHtml(label, getStabilityBadgeColors());
   }

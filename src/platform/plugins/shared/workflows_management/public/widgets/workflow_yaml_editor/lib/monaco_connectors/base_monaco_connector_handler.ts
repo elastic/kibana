@@ -161,7 +161,7 @@ export abstract class BaseMonacoConnectorHandler implements MonacoConnectorHandl
     const mapStability = getCachedAllConnectorsMap()?.get(connectorType)?.stability;
     const listStability = getCachedAllConnectors().find((c) => c.type === connectorType)?.stability;
     const stability = mapStability ?? listStability;
-    if (stability === 'tech_preview' || stability === 'beta') {
+    if (stability === 'tech_preview' || stability === 'experimental') {
       return stability;
     }
     return undefined;

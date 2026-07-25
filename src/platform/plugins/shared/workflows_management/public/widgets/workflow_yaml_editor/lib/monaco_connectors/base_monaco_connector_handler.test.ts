@@ -66,7 +66,7 @@ class TestHandler extends BaseMonacoConnectorHandler {
   }
 
   public exposedPrependStabilityBadgeToContent(
-    stability: 'tech_preview' | 'beta' | 'stable' | undefined,
+    stability: 'tech_preview' | 'experimental' | 'stable' | undefined,
     bodyLines: string[]
   ): string {
     return this.prependStabilityBadgeToContent(stability, bodyLines);
@@ -309,11 +309,13 @@ describe('BaseMonacoConnectorHandler', () => {
       );
     });
 
-    it('should return beta stability from cached connectors', () => {
+    it('should return experimental stability from cached connectors', () => {
       (getCachedAllConnectors as jest.Mock).mockReturnValue([
-        { type: 'elasticsearch.search', stability: 'beta' },
+        { type: 'elasticsearch.search', stability: 'experimental' },
       ]);
-      expect(handler.exposedGetConnectorStabilityFromCache('elasticsearch.search')).toBe('beta');
+      expect(handler.exposedGetConnectorStabilityFromCache('elasticsearch.search')).toBe(
+        'experimental'
+      );
     });
 
     it('should return stability from connectors map when static list is empty', () => {
@@ -330,7 +332,7 @@ describe('BaseMonacoConnectorHandler', () => {
 
     it('should prefer connectors map stability over static list', () => {
       (getCachedAllConnectors as jest.Mock).mockReturnValue([
-        { type: 'slack.postMessage', stability: 'beta' },
+        { type: 'slack.postMessage', stability: 'experimental' },
       ]);
       (getCachedAllConnectorsMap as jest.Mock).mockReturnValue(
         new Map([['slack.postMessage', { type: 'slack.postMessage', stability: 'tech_preview' }]])

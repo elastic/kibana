@@ -588,7 +588,7 @@ export type CompletionFn = () => Promise<
   Array<{ label: string; value: string; detail?: string; documentation?: string }>
 >;
 
-export type StabilityLevel = 'stable' | 'beta' | 'tech_preview';
+export type StabilityLevel = 'stable' | 'experimental' | 'tech_preview';
 
 export interface BaseConnectorContract {
   type: string;

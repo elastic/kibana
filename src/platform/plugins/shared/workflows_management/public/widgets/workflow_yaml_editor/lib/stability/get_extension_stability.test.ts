@@ -11,9 +11,9 @@ import type { StabilitySource } from './get_extension_stability';
 import { getExtensionStability } from './get_extension_stability';
 
 describe('getExtensionStability', () => {
-  it('returns explicit beta stability', () => {
-    const definition: StabilitySource = { stability: 'beta' };
-    expect(getExtensionStability(definition)).toBe('beta');
+  it('returns explicit experimental stability', () => {
+    const definition: StabilitySource = { stability: 'experimental' };
+    expect(getExtensionStability(definition)).toBe('experimental');
   });
 
   it('returns undefined for stable extension definitions', () => {

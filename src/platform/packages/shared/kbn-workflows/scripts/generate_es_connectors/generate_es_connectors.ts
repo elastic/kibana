@@ -328,7 +328,7 @@ function generateMethodsAndPatterns(endpoint: SpecificationTypes.Endpoint): {
 }
 
 const SPEC_STABILITY_MAP: Partial<Record<SpecificationTypes.Stability, StabilityLevel>> = {
-  beta: 'beta',
+  beta: 'experimental',
   experimental: 'tech_preview',
 };
 

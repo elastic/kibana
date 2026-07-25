@@ -176,10 +176,10 @@ export function ActionsMenu({
                     css={styles.techPreviewBadge}
                   />
                 )}
-                {action.stability === 'beta' && (
+                {action.stability === 'experimental' && (
                   <EuiBetaBadge
-                    label={i18n.translate('workflows.actionsMenu.betaBadge', {
-                      defaultMessage: 'Beta',
+                    label={i18n.translate('workflows.actionsMenu.experimentalBadge', {
+                      defaultMessage: 'Experimental',
                     })}
                     size="s"
                     css={styles.techPreviewBadge}

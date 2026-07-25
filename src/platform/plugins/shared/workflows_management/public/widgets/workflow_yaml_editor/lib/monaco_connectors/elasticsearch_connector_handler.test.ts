@@ -53,7 +53,7 @@ describe('ElasticsearchMonacoConnectorHandler', () => {
         type: 'elasticsearch.index',
         description: 'Index a document',
         documentation: 'https://elastic.co/guide/en/{branch}/index-api.html',
-        stability: 'beta',
+        stability: 'experimental',
         methods: ['PUT'],
         patterns: ['/{index}/_doc/{id}'],
       },
@@ -145,7 +145,7 @@ describe('ElasticsearchMonacoConnectorHandler', () => {
       expect(result).toBeNull();
     });
 
-    it('should include stability note for beta connectors', async () => {
+    it('should include stability note for experimental connectors', async () => {
       buildElasticsearchRequest.mockReturnValue({
         method: 'PUT',
         path: '/my-index/_doc/1',
@@ -162,7 +162,7 @@ describe('ElasticsearchMonacoConnectorHandler', () => {
       const result = await handler.generateHoverContent(context);
 
       expect(result).not.toBeNull();
-      expect(result?.value).toContain('Beta');
+      expect(result?.value).toContain('Experimental');
       expect(result?.value.indexOf('<img src="data:image/svg+xml,')).toBeLessThan(
         result!.value.indexOf('**Endpoint**')
       );

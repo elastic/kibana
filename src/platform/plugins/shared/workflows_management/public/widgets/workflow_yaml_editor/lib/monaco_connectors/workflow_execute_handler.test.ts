@@ -125,7 +125,7 @@ describe('WorkflowExecuteMonacoConnectorHandler', () => {
 
       expect(result).not.toBeNull();
       expect(result?.value).not.toContain('Technical Preview');
-      expect(result?.value).not.toContain('Beta');
+      expect(result?.value).not.toContain('Experimental');
     });
   });
 

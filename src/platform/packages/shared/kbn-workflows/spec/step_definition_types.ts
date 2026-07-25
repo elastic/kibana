@@ -112,7 +112,7 @@ export interface BaseStepDefinition<
   documentation?: StepDocumentation;
 
   /**
-   * API stability level for this step (e.g. 'tech_preview', 'beta', 'stable').
+   * API stability level for this step (e.g. 'tech_preview', 'experimental', 'stable').
    * Built-in steps: omit means stable (no badge). Extension-registered steps: omit
    * defaults to tech_preview in the UI; set 'stable' explicitly to graduate.
    */

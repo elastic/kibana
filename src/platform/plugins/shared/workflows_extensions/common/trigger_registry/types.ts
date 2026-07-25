@@ -72,7 +72,7 @@ export interface CommonTriggerDefinition<EventSchema extends z.ZodType = z.ZodTy
    */
   snippets?: TriggerSnippets;
   /**
-   * API stability level for this trigger (e.g. 'tech_preview', 'beta', 'stable').
+   * API stability level for this trigger (e.g. 'tech_preview', 'experimental', 'stable').
    * Required so every trigger explicitly declares its contract. Set 'stable' for GA triggers (no badge).
    */
   stability: StabilityLevel;

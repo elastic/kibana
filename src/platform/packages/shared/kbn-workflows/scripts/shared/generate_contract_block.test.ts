@@ -19,7 +19,7 @@ const baseContract: ContractMeta = {
   methods: ['GET', 'POST'],
   patterns: ['/_search', '/{index}/_search'],
   documentation: 'https://elastic.co/docs/search',
-  stability: 'beta',
+  stability: 'experimental',
   parameterTypes: {
     headerParams: [],
     pathParams: ['index'],
@@ -45,7 +45,7 @@ describe('escapeString', () => {
 describe('generateContractBlock', () => {
   it('should include all fields when optional fields are present', () => {
     const result = generateContractBlock(baseContract);
-    expect(result).toContain("stability: 'beta'");
+    expect(result).toContain("stability: 'experimental'");
     expect(result).toContain('`Search API`');
     expect(result).toContain('`Runs a search query`');
     expect(result).toContain("'https://elastic.co/docs/search'");

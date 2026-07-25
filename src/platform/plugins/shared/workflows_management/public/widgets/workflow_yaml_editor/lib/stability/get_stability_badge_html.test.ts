@@ -25,9 +25,9 @@ describe('getStabilityBadgeHtml', () => {
     expect(html).toContain('Tech preview');
   });
 
-  it('returns beta badge markup', () => {
-    const html = getStabilityBadgeHtml('beta');
-    expect(html).toContain('Beta');
+  it('returns experimental badge markup', () => {
+    const html = getStabilityBadgeHtml('experimental');
+    expect(html).toContain('Experimental');
   });
 
   it('returns empty string for stable stability without requiring theme', () => {
@@ -63,7 +63,7 @@ describe('buildStabilityBadgeHtml', () => {
   });
 
   it('allocates wider badges for long labels', () => {
-    const short = buildStabilityBadgeHtml('Beta', { fill: '#fff', stroke: '#000', text: '#111' });
+    const short = buildStabilityBadgeHtml('Exp', { fill: '#fff', stroke: '#000', text: '#111' });
     const long = buildStabilityBadgeHtml('A very long experimental label', {
       fill: '#fff',
       stroke: '#000',

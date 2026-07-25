@@ -17,7 +17,7 @@ export interface StabilitySource {
  * Stability level for extension-registered steps and triggers (hover badge + suggest parity for tech preview).
  */
 export function getExtensionStability(definition: StabilitySource): StabilityLevel | undefined {
-  if (definition.stability === 'beta' || definition.stability === 'tech_preview') {
+  if (definition.stability === 'experimental' || definition.stability === 'tech_preview') {
     return definition.stability;
   }
   if (definition.stability === 'stable') {
