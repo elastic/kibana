@@ -178,7 +178,7 @@ When the check detects changes, CI posts a PR comment listing the affected endpo
 2. **If unintentional:** fix the code to maintain compatibility.
 3. **If intentional:** add an allowlist entry with team approval (see [Allowlist](#allowlist)), coordinating with the owning team.
 
-**Important** Adding an allowlist entry does not absolve API owners from going through the Breaking Changes comittee. Every API that is stable and in technical preview has to follow the formal breaking change process for approval.
+**Important:** Adding an allowlist entry does not absolve API owners from going through the Breaking Changes committee. Every stable and Technical Preview API has to follow the formal breaking change process for approval.
 
 ## Troubleshooting
 
