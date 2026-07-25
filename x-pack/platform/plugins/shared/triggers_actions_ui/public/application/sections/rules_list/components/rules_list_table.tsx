@@ -970,7 +970,13 @@ export const RulesListTable = (props: RulesListTableProps) => {
 
   return (
     <EuiFlexGroup gutterSize="none" direction="column">
-      <EuiFlexGroup justifyContent="spaceBetween" gutterSize="none" alignItems="center">
+      <EuiFlexGroup
+        justifyContent="spaceBetween"
+        gutterSize="none"
+        alignItems="center"
+        responsive={false}
+        wrap={false}
+      >
         <EuiFlexItem grow={false}>
           <EuiFlexGroup
             justifyContent="flexStart"
