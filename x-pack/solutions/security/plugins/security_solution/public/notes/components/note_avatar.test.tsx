@@ -41,7 +41,8 @@ describe('NoteAvatar', () => {
 
     const avatar = getByTestId(TEST_ID);
     expect(avatar).toBeInTheDocument();
-    expect(avatar.querySelector('img')).toHaveAttribute('src', 'my-image-url');
+    // EuiAvatar renders the profile image as a CSS background, not an <img> element
+    expect(avatar).toHaveStyle('background-image: url(my-image-url)');
   });
 
   it('should render the profile initials and color when the matching user profile has them', () => {

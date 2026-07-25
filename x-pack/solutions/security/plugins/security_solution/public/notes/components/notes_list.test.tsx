@@ -90,7 +90,8 @@ describe('NotesList', () => {
     );
 
     const avatar = getByTestId(`${NOTE_AVATAR_TEST_ID}-0`);
-    expect(avatar.querySelector('img')).toHaveAttribute('src', 'my-image-url');
+    // EuiAvatar renders the profile image as a CSS background, not an <img> element
+    expect(avatar).toHaveStyle('background-image: url(my-image-url)');
   });
 
   it('should render ? in avatar is user is missing', () => {
