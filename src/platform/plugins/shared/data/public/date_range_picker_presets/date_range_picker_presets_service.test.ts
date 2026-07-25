@@ -144,10 +144,7 @@ describe('DateRangePickerPresetsService', () => {
       );
     });
 
-    it('regression: reads the resolved (not unhydrated peek) value as the mutation base', async () => {
-      // Simulates a save issued before a lazy key has hydrated: `get()` awaits
-      // the real stored value instead of racing an unseeded default (the bug
-      // this migration to `update()` fixes — see elastic/kibana#276110).
+    it('reads the resolved (not unhydrated peek) value as the mutation base', async () => {
       const { core, service } = setup();
       const existing = storedPresets([{ start: 'now-1h', end: 'now', label: 'Existing' }]);
       let resolveGet: (value: StoredPresets) => void;
