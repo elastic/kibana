@@ -196,12 +196,13 @@ export function sendRequest(args: RequestArgs): Promise<RequestResult[]> {
 
         const { statusCode, statusText } = extractStatusCodeAndText(response, path);
 
+        const errorContentType = getContentType(response);
+
         if (statusCode === 200 && !errorBody) {
           value = 'OK';
         } else if (errorBody instanceof Blob) {
-          const errorContentType = getContentType(response);
           const text = await errorBody.text();
-          value = errorContentType.includes('ndjson') ? formatNdjson(text) : text;
+          value = isNDJSONContentType(errorContentType) ? formatNdjson(text) : text;
         } else if (errorBody) {
           value = JSON.stringify(errorBody, null, 2);
         } else {
@@ -223,7 +224,7 @@ export function sendRequest(args: RequestArgs): Promise<RequestResult[]> {
         const result = {
           response: {
             value,
-            contentType: getContentType(response),
+            contentType: errorContentType,
             timeMs: Date.now() - startTime,
             statusCode,
             statusText,
