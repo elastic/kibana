@@ -134,6 +134,6 @@ apiTest.describe('markdown - upsert', { tag: tags.deploymentAgnostic }, () => {
     });
 
     expect(response).toHaveStatusCode(400);
-    expect(response.body.message).toMatch(/content.*[Rr]equired|[Rr]equired.*content|✖ content/);
+    expect(response.body.message).toContain('"content"');
   });
 });

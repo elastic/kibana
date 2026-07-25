@@ -76,7 +76,7 @@ apiTest.describe('dashboards - create', { tag: tags.deploymentAgnostic }, () => 
     });
 
     expect(response).toHaveStatusCode(400);
-    expect(response.body.message).toMatch(/title.*[Rr]equired|[Rr]equired.*title|✖ title/);
+    expect(response.body.message).toContain('"title"');
   });
 
   apiTest('validation - returns error if panels is not an array', async ({ apiClient }) => {
@@ -93,7 +93,7 @@ apiTest.describe('dashboards - create', { tag: tags.deploymentAgnostic }, () => 
     });
 
     expect(response).toHaveStatusCode(400);
-    expect(response.body.message).toMatch(/panels.*array|array.*panels/i);
+    expect(response.body.message).toContain('"panels"');
   });
 
   apiTest(

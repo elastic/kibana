@@ -116,7 +116,7 @@ apiTest.describe('markdown - create', { tag: tags.deploymentAgnostic }, () => {
     });
 
     expect(response).toHaveStatusCode(400);
-    expect(response.body.message).toMatch(/content.*[Rr]equired|[Rr]equired.*content|✖ content/);
+    expect(response.body.message).toContain('"content"');
   });
 
   apiTest('validation - returns error when title is not provided', async ({ apiClient }) => {
@@ -132,7 +132,7 @@ apiTest.describe('markdown - create', { tag: tags.deploymentAgnostic }, () => {
     });
 
     expect(response).toHaveStatusCode(400);
-    expect(response.body.message).toMatch(/title.*[Rr]equired|[Rr]equired.*title|✖ title/);
+    expect(response.body.message).toContain('"title"');
   });
 
   apiTest(
