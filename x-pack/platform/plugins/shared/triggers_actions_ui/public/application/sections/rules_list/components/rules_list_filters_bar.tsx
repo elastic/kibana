@@ -214,42 +214,46 @@ export const RulesListFiltersBar = React.memo((props: RulesListFiltersBarProps) 
       <EuiSpacer size="m" />
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="m" wrap>
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false} wrap>
-            <EuiFlexItem grow={false}>
-              <RulesListStatuses
-                rulesStatuses={rulesStatusesTotal}
-                rulesLastRunOutcomes={rulesLastRunOutcomesTotal}
-              />
-            </EuiFlexItem>
+          <RulesListStatuses
+            rulesStatuses={rulesStatusesTotal}
+            rulesLastRunOutcomes={rulesLastRunOutcomesTotal}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFlexGroup alignItems="center" justifyContent="flexEnd" gutterSize="m" wrap>
             <EuiFlexItem grow={false}>
               <RulesListAutoRefresh lastUpdate={lastUpdate} onRefresh={onRefreshRules} />
             </EuiFlexItem>
+            {rulesStatusesTotal.error > 0 && (
+              <EuiFlexItem grow={false}>
+                <EuiLink
+                  data-test-subj="expandRulesError"
+                  color="primary"
+                  onClick={onToggleRuleErrors}
+                >
+                  {!showErrors && (
+                    <FormattedMessage
+                      id="xpack.triggersActionsUI.sections.rulesList.showAllErrors"
+                      defaultMessage="Show {totalStatusesError, plural, one {error} other {errors}}"
+                      values={{
+                        totalStatusesError: rulesStatusesTotal.error,
+                      }}
+                    />
+                  )}
+                  {showErrors && (
+                    <FormattedMessage
+                      id="xpack.triggersActionsUI.sections.rulesList.hideAllErrors"
+                      defaultMessage="Hide {totalStatusesError, plural, one {error} other {errors}}"
+                      values={{
+                        totalStatusesError: rulesStatusesTotal.error,
+                      }}
+                    />
+                  )}
+                </EuiLink>
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         </EuiFlexItem>
-        {rulesStatusesTotal.error > 0 && (
-          <EuiFlexItem grow={false}>
-            <EuiLink data-test-subj="expandRulesError" color="primary" onClick={onToggleRuleErrors}>
-              {!showErrors && (
-                <FormattedMessage
-                  id="xpack.triggersActionsUI.sections.rulesList.showAllErrors"
-                  defaultMessage="Show {totalStatusesError, plural, one {error} other {errors}}"
-                  values={{
-                    totalStatusesError: rulesStatusesTotal.error,
-                  }}
-                />
-              )}
-              {showErrors && (
-                <FormattedMessage
-                  id="xpack.triggersActionsUI.sections.rulesList.hideAllErrors"
-                  defaultMessage="Hide {totalStatusesError, plural, one {error} other {errors}}"
-                  values={{
-                    totalStatusesError: rulesStatusesTotal.error,
-                  }}
-                />
-              )}
-            </EuiLink>
-          </EuiFlexItem>
-        )}
       </EuiFlexGroup>
     </>
   );
