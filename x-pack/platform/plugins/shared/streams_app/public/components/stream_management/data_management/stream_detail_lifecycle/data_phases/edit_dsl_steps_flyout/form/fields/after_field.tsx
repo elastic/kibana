@@ -17,13 +17,9 @@ import {
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect } from '@elastic/eui';
 
+import { getTimingBoundHelpText, type HelpTextBound } from '@kbn/data-lifecycle-phases';
 import type { PreservedTimeUnit, TimeUnit } from '../types';
-import {
-  formatDuration,
-  getTimingBoundHelpText,
-  getUnitSelectOptions,
-  type HelpTextBound,
-} from '../../../shared';
+import { formatDuration, getUnitSelectOptions } from '../../../shared';
 import { getStepIndexFromArrayItemPath, toMilliseconds } from '../utils';
 import { MAX_DOWNSAMPLE_STEPS } from '../constants';
 import {
