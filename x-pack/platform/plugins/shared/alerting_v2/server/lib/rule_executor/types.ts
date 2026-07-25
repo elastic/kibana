@@ -29,7 +29,6 @@ export interface RulePipelineState {
   readonly queryPayload?: QueryPayload;
   readonly esqlRowBatch?: ReadonlyArray<Record<string, unknown>>;
   readonly alertEventsBatch?: ReadonlyArray<AlertEvent>;
-  readonly dataPresentGroupHashes?: ReadonlySet<string>;
   readonly newEpisodeIds?: ReadonlyArray<string>;
 }
 
