@@ -366,6 +366,13 @@ export interface ConversationOrigin {
   external_conversation_id: string;
 }
 
+export interface ConversationTemplateReference {
+  id: string;
+  version: number;
+}
+
+export type ConversationExtendedFields = Record<string, string>;
+
 export interface ConversationOriginAuthor {
   /** Stable author identifier in the external origin. */
   id: string;
@@ -456,6 +463,10 @@ export interface Conversation {
   access_control?: ConversationAccessControl;
   /** External origin used to resolve conversations submitted by stateless relays. */
   origin?: ConversationOrigin;
+  /** Pinned template version used to validate and search conversation extended fields. */
+  template?: ConversationTemplateReference;
+  /** Template/global field values stored by generated storage key. */
+  extended_fields?: ConversationExtendedFields;
 }
 
 export type TodoStatus = 'pending' | 'in_progress' | 'completed' | 'cancelled';

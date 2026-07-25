@@ -15,6 +15,8 @@ import type {
   ConversationInternalState,
   ConversationRoundStatus,
   ConversationOrigin,
+  ConversationTemplateReference,
+  ConversationExtendedFields,
 } from '@kbn/agent-builder-common/chat';
 import type { PersistentConversationRound } from './types';
 
@@ -31,6 +33,11 @@ const storageSettings = {
       title: types.text({}),
       created_at: types.date({}),
       updated_at: types.date({}),
+      template: types.object({
+        properties: { id: types.keyword({}), version: types.long({}) },
+        dynamic: false,
+      }),
+      extended_fields: types.flattened({}),
       conversation_rounds: types.object({ dynamic: false, properties: {} }),
       attachments: types.object({ dynamic: false, properties: {} }),
       state: types.object({ dynamic: false, properties: {} }),
@@ -69,6 +76,8 @@ export interface ConversationProperties {
   workspace_id?: string;
   access_control?: ConversationAccessControl;
   origin?: ConversationOrigin;
+  template?: ConversationTemplateReference;
+  extended_fields?: ConversationExtendedFields;
   // legacy field
   rounds?: PersistentConversationRound[];
 }

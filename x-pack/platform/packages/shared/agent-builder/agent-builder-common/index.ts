@@ -251,6 +251,10 @@ export {
   createUserQuestionAskedEvent,
   createUserQuestionAnsweredEvent,
   type ConversationListOptions,
+  type ConversationSearchFilters,
+  type ConversationExtendedFieldFilter,
+  type ConversationTemplateReference,
+  type ConversationExtendedFields,
 } from './chat';
 export {
   type PublicSkillDefinition,

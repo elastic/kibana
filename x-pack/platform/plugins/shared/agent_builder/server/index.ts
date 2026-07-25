@@ -21,6 +21,7 @@ export type {
   ToolsStart,
   ConversationsStart,
   ReadOnlyConversationClient,
+  ConversationWriterClient,
 } from './types';
 
 export type { ConversationListOptions } from '@kbn/agent-builder-common';

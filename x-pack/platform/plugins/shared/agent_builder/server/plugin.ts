@@ -304,6 +304,16 @@ export class AgentBuilderPlugin
             list: client.list.bind(client),
           };
         },
+        getScopedWriterClient: async ({ request }) => {
+          const client = await conversations.getScopedClient({ request });
+          return {
+            get: client.get.bind(client),
+            list: client.list.bind(client),
+            create: client.create.bind(client),
+            update: client.update.bind(client),
+            delete: client.delete.bind(client),
+          };
+        },
       },
     };
   }

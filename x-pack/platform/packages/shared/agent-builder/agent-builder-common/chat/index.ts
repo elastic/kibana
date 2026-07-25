@@ -23,6 +23,8 @@ export {
   type Conversation,
   type ConversationOrigin,
   type ConversationOriginAuthor,
+  type ConversationTemplateReference,
+  type ConversationExtendedFields,
   type RoundInputOrigin,
   type ConversationRoundOrigin,
   type ConversationInternalState,
@@ -129,4 +131,8 @@ export {
   createUserQuestionAnsweredEvent,
 } from './events';
 export type { RoundState } from './round_state';
-export type { ConversationListOptions } from './conversation_list';
+export type {
+  ConversationExtendedFieldFilter,
+  ConversationListOptions,
+  ConversationSearchFilters,
+} from './conversation_list';

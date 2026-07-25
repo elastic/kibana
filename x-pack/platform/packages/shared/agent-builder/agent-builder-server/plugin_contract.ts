@@ -197,13 +197,76 @@ export interface ReadOnlyConversationClient {
 }
 
 /**
- * AgentBuilder conversations service's start contract (read-only).
+ * A write-capable conversation client. Extends the read-only client with
+ * create, update, and delete operations. Exposed via
+ * {@link ConversationsStart.getScopedWriterClient} — opt-in, separate from
+ * the read-only path so plugins that never call it cannot write.
+ */
+export interface ConversationWriterClient extends ReadOnlyConversationClient {
+  /**
+   * Create a new conversation. The caller is stamped as the owner.
+   */
+  create(conversation: ConversationWriterCreateRequest): Promise<Conversation>;
+  /**
+   * Update an existing conversation. Requires owner or converse access.
+   */
+  update(conversationUpdate: ConversationWriterUpdateRequest): Promise<Conversation>;
+  /**
+   * Delete a conversation. Requires owner access.
+   */
+  delete(conversationId: string): Promise<boolean>;
+}
+
+/**
+ * Request shape for creating a conversation via the writer client.
+ * Omits system-managed fields (id, created_at, updated_at, user).
+ */
+export type ConversationWriterCreateRequest = Omit<
+  Conversation,
+  'id' | 'created_at' | 'updated_at' | 'user'
+> & {
+  id?: string;
+};
+
+/**
+ * Request shape for updating a conversation via the writer client.
+ */
+export type ConversationWriterUpdateRequest = Pick<Conversation, 'id'> &
+  Partial<
+    Pick<
+      Conversation,
+      | 'title'
+      | 'rounds'
+      | 'attachments'
+      | 'state'
+      | 'status'
+      | 'read'
+      | 'workspace_id'
+      | 'template'
+      | 'extended_fields'
+    >
+  >;
+
+/**
+ * AgentBuilder conversations service's start contract.
+ *
+ * Read access is the default. Write access is opt-in via
+ * {@link getScopedWriterClient}.
  */
 export interface ConversationsStart {
   /**
    * Returns a read-only conversation client scoped to the given request's user and space.
    */
   getScopedClient(opts: { request: KibanaRequest }): Promise<ReadOnlyConversationClient>;
+  /**
+   * Returns a write-capable conversation client scoped to the given request's user and space.
+   *
+   * Write access is opt-in: plugins that never call this method cannot write.
+   * Authorization is enforced per-operation by the underlying client (create
+   * stamps the caller as owner; update requires owner/converse access; delete
+   * requires owner access; all denials are masked as not-found).
+   */
+  getScopedWriterClient(opts: { request: KibanaRequest }): Promise<ConversationWriterClient>;
 }
 
 /**
