@@ -30,9 +30,7 @@ interface ConnectorSmlTypeDeps {
 /**
  * Creates the SML type definition for connectors.
  *
- * Connectors are indexed into the SML exclusively via event-driven calls
- * in the connector lifecycle handler (onPostCreate / onPostDelete).
- * No crawling is needed — `list` yields nothing and `fetchFrequency` is omitted.
+ * Connectors are indexed into the SML via event-driven calls and during periodic crawls.
  */
 export const createConnectorSmlType = (deps: ConnectorSmlTypeDeps): SmlTypeDefinition => {
   const { getActionSavedObjectsClient, logger } = deps;
