@@ -1,5 +1,5 @@
 {
-  "sha1": "d0493f6dd71d6a5be778be1f64ade4e4189bf1bb",
+  "sha1": "e7acda533be7b2fc955848b81c9b946d77bf73c3",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -533,7 +533,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/maintainers/entity_maintainers.spec.ts",
-        "line": 104,
+        "line": 120,
         "column": 10
       }
     },
@@ -549,7 +549,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/maintainers/entity_maintainers.spec.ts",
-        "line": 132,
+        "line": 150,
         "column": 10
       }
     },
@@ -565,7 +565,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/maintainers/entity_maintainers.spec.ts",
-        "line": 152,
+        "line": 170,
         "column": 10
       }
     },
