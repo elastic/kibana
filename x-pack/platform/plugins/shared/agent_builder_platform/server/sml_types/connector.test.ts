@@ -152,6 +152,16 @@ describe('connectorSmlType', () => {
       expect(mockFinder.close).toHaveBeenCalledTimes(1);
     });
 
+    it('propagates error when createPointInTimeFinder throws (e.g. action type mappings absent)', async () => {
+      mockSavedObjectsClient.createPointInTimeFinder.mockImplementationOnce(() => {
+        throw new Error("Unknown saved object type: 'action' is not a registered type");
+      });
+
+      await expect(collectPages(connectorSmlType.list(createContext() as never))).rejects.toThrow(
+        "Unknown saved object type: 'action' is not a registered type"
+      );
+    });
+
     it('falls back to empty spaces array when namespaces is undefined', async () => {
       async function* singlePage() {
         yield {

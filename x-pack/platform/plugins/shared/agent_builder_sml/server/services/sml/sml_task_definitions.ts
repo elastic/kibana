@@ -110,8 +110,9 @@ export const registerSmlCrawlerTaskDefinition = ({
 
             const esClient = elasticsearch.client.asInternalUser;
 
-            // connectors are hidden, so we need action here to expose them during crawl
-            const soRepository = savedObjects.createInternalRepository(['action']);
+            const soRepository = savedObjects.createInternalRepository([
+              ...(definition.requiredHiddenTypes ?? []),
+            ]);
 
             try {
               await smlService.getCrawler().crawl({
