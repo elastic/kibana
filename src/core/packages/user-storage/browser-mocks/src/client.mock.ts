@@ -13,8 +13,6 @@ import type { IUserStorageClient } from '@kbn/core-user-storage-browser';
 
 export const clientMock = (): jest.Mocked<IUserStorageClient> => {
   const mock: jest.Mocked<IUserStorageClient> = lazyObject({
-    // Default to an available (writable) client — most tests exercise an
-    // authenticated user; override per-test for anonymous/no-profile scenarios.
     isAvailable: jest.fn().mockReturnValue(true),
     peek: jest.fn(),
     get: jest.fn().mockResolvedValue(undefined),
@@ -27,8 +25,7 @@ export const clientMock = (): jest.Mocked<IUserStorageClient> => {
     getHttpError$: jest.fn().mockReturnValue(new Subject<Error>()),
   });
 
-  // Mirror the real client's resolved read-modify-write so tests can drive it
-  // by mocking `get` (or `set`) rather than reimplementing `update` per test.
+  // Mirror the real client's resolved read-modify-write behavior.
   mock.update.mockImplementation(
     async (key: string, defaultValue: unknown, updater: (current: unknown) => unknown) => {
       const current = await mock.get(key, defaultValue);

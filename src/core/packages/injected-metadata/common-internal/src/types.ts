@@ -96,7 +96,6 @@ export interface InjectedMetadata {
   };
   customBranding: Pick<CustomBranding, 'logo' | 'customizedLogo' | 'pageTitle'>;
   userStorage: {
-    /** Whether user storage is available for the current user (e.g. `false` for anonymous/no-profile users). */
     available: boolean;
     values: Record<string, unknown>;
   };

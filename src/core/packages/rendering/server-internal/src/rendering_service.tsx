@@ -422,8 +422,7 @@ export class RenderingService {
     const userStorage = this.userStorageStart;
     if (!userStorage) return { available: false, values: {} };
 
-    // A `null` scoped client means the current user has no `profile_uid` (e.g.
-    // anonymous auth, API-key auth) — user storage is unavailable for them.
+    // A `null` scoped client means the current user has no `profile_uid` and user storage is not available.
     const client = userStorage.asScoped(request);
     if (!client) return { available: false, values: {} };
 
@@ -433,9 +432,7 @@ export class RenderingService {
     } catch (err) {
       // Authorization errors are expected for users whose auth realm does not
       // grant access to user-storage saved objects (e.g. certain SAML configs).
-      // Degrade gracefully so the page still renders with default values, but
-      // treat user storage as unavailable so the browser doesn't offer writes
-      // that would just 403.
+      // Degrade gracefully so the page still renders with default values.
       if (
         SavedObjectsErrorHelpers.isForbiddenError(err) ||
         SavedObjectsErrorHelpers.isNotAuthorizedError(err)

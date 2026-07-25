@@ -92,9 +92,8 @@ export function useUserStorage<T = unknown>(
         : client.getState$<T>(key),
     [client, key, defaultValue]
   );
-  // Use peek (pure, no side effects) for the synchronous initial render value,
-  // reported as 'loading' until the getState$ subscription (which runs inside
-  // an effect after the first commit — safe under concurrent mode) settles it.
+
+  // peek() is side-effect-free, so it's safe as the initial render value under concurrent mode.
   const initialValue =
     defaultValue !== undefined ? client.peek<T>(key, defaultValue) : client.peek<T>(key);
   const state = useObservable<UserStorageValue<T | undefined>>(state$, {

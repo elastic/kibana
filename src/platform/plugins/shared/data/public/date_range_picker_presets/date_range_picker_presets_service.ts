@@ -63,8 +63,6 @@ export class DateRangePickerPresetsService implements IDateRangePickerPresetsSer
   }
 
   public getCanWrite$(): Observable<boolean> {
-    // `isAvailable()` is a static, page-render-time signal; wrap it as a
-    // one-shot observable to preserve this service's reactive contract.
     return of(this.userStorage.isAvailable());
   }
 

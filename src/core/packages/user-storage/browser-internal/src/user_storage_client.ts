@@ -90,10 +90,7 @@ export class UserStorageClient implements IUserStorageClient {
   public get<T = unknown>(key: string): Promise<T | undefined>;
   public get<T = unknown>(key: string, defaultValue: T): Promise<T>;
   public async get<T = unknown>(key: string, defaultValue?: T): Promise<T | undefined> {
-    // A cached value is always non-`undefined`: the server contract guarantees
-    // resolved values are never `undefined` (registration rejects schemas that
-    // accept it — see server-internal user_storage_service `register`), so
-    // `undefined` here unambiguously means "not yet hydrated".
+    // A cached value is always non-`undefined` - undefined indicates "not yet fetched"
     const cached = this.cache[key];
     const value = cached !== undefined ? cached : await this.startFetch(key);
     return value !== undefined ? (value as T) : defaultValue;
@@ -106,8 +103,6 @@ export class UserStorageClient implements IUserStorageClient {
       defaultValue !== undefined ? this.peek<T>(key, defaultValue) : this.peek<T>(key);
 
     return concat(
-      // Synchronous cache snapshot; also kicks off the lazy fetch (if any) so
-      // that the merged `loaded$` source below eventually re-emits.
       defer(() => {
         this.triggerLazyFetch(key);
         return of(getCurrent());
@@ -211,12 +206,10 @@ export class UserStorageClient implements IUserStorageClient {
     defaultValue: T,
     updater: (current: T) => T
   ): Promise<T> {
-    // Resolved read: never build the mutation on an unhydrated cache/default.
+    // Ensure hydration is complete before calling the updater
     const current = await this.get<T>(key, defaultValue);
     const next = updater(current);
 
-    // Updater opted out of the mutation (e.g. duplicate/limit-reached) by
-    // returning the same reference it was given — skip the write entirely.
     if (next === current) return current;
 
     return this.set<T>(key, next);
@@ -263,11 +256,9 @@ export class UserStorageClient implements IUserStorageClient {
     return promise;
   }
 
-  /** Fire-and-forget entry point for callers that can't await the fetch (e.g. `get$`). */
   private triggerLazyFetch(key: string): void {
-    // Failures are already published via `getHttpError$` inside `startFetch`;
-    // swallow the rejection here so it doesn't surface as an unhandled
-    // promise rejection.
-    void this.startFetch(key).catch(() => {});
+    void this.startFetch(key).catch(() => {
+      // empty catch: errors are already published to `getHttpError$`
+    });
   }
 }

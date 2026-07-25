@@ -324,7 +324,11 @@ const NavLayoutEditor = () => {
 };
 ```
 
-`useUserStorage(key, defaultValue?)` returns `[value, setter, state]`, backed by `getState$` under the hood. `value` re-renders on every cache change; the setter persists via HTTP, refreshes the cache on success, and resolves to the validated value (if the HTTP write fails, the cache is unchanged, the returned promise rejects, and the error is published to `getHttpError$`). `state.status` is `'loading'` | `'resolved'` | `'error'` (with `state.error` set for the last one) — use it to tell a temporary fallback apart from the resolved value, and to keep destructive actions disabled until it settles:
+`useUserStorage(key, defaultValue?)` returns `[value, setter, state]`. `value`
+re-renders on every cache change; the setter persists via HTTP and refreshes the cache
+on success. `state.status` is `'loading'` | `'resolved'` | `'error'` (with `state.error`
+set for the last one) — use it to tell a temporary fallback apart from the resolved
+value, and to keep destructive actions disabled until it settles:
 
 ```tsx
 const [layout, setLayout, { status }] = useUserStorage<NavLayout>('myPlugin:nav-layout', {

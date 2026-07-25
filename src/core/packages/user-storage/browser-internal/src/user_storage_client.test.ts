@@ -74,9 +74,7 @@ describe('UserStorageClient', () => {
     });
 
     it('resolves the defaultValue when the fetch resolves with no value', async () => {
-      // Defensive: the server contract guarantees resolved values are never
-      // `undefined` (registration rejects such schemas), but if one slips
-      // through, `get` still falls back to the caller's default.
+      // Defensive: the server contract shouldn't return `undefined`, but if it does, fall back to the default.
       const { client, api } = buildClient({});
       api.get.mockResolvedValue(undefined);
 
@@ -322,9 +320,6 @@ describe('UserStorageClient', () => {
 
   describe('update', () => {
     it('reads the resolved (not unhydrated) current value as the mutation base', async () => {
-      // Regression for the presets data-loss race (elastic/kibana#276110): a
-      // save issued before a lazy key hydrates must not compute its mutation
-      // from the caller's default — it must await the real stored value.
       const { client, api } = buildClient({});
       let resolveFetch!: (v: { items: string[] }) => void;
       api.get.mockReturnValue(
@@ -335,8 +330,7 @@ describe('UserStorageClient', () => {
         items: [...current.items, 'new'],
       }));
 
-      // Cache is still unhydrated at this point — if `update` read via `peek`
-      // it would compute from `{ items: [] }` instead of the real stored value.
+      // Resolve only after update() has been called against the still-unhydrated cache.
       resolveFetch({ items: ['existing'] });
 
       await updatePromise;
@@ -345,8 +339,7 @@ describe('UserStorageClient', () => {
     });
 
     it('skips the write when the updater returns the same reference (no-op)', async () => {
-      // The client clones `initialValues` internally, so assert against the
-      // cached (post-clone) reference rather than the object passed in here.
+      // Assert against the cached reference; the client clones `initialValues` internally.
       const { client, api } = buildClient({ key: { items: ['a'] } });
       const cached = client.peek('key');
 
