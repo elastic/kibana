@@ -38,17 +38,41 @@ import { UISchemas, type ConnectorSpec } from '../../connector_spec';
 import { withMcpClient, callToolContent, callToolJson } from '../../lib/mcp';
 import type {
   CallToolInput,
+  CancelRunInput,
+  ClusterIdInput,
   ExecuteStatementInput,
-  RunQueryInput,
+  GetAlertInput,
+  GetRunInput,
+  GetRunOutputInput,
+  ListRunsInput,
   PollResponseInput,
+  RepairRunInput,
+  RunJobNowInput,
+  RunQueryInput,
+  WarehouseIdInput,
 } from './types';
 import {
   CallToolInputSchema,
+  CancelRunInputSchema,
+  ClusterIdInputSchema,
   ExecuteStatementInputSchema,
+  GetAlertInputSchema,
+  GetRunInputSchema,
+  GetRunOutputInputSchema,
+  ListAlertsInputSchema,
+  ListClustersInputSchema,
+  ListRunsInputSchema,
   ListToolsInputSchema,
+  ListWarehousesInputSchema,
   PollResponseInputSchema,
+  RepairRunInputSchema,
+  RunJobNowInputSchema,
   RunQueryInputSchema,
+  WarehouseIdInputSchema,
 } from './types';
+
+const workspaceOrigin = (ctx: { config?: Record<string, unknown> }): string =>
+  new URL(ctx.config?.serverUrl as string).origin;
 
 export const Databricks: ConnectorSpec = {
   metadata: {
@@ -56,7 +80,7 @@ export const Databricks: ConnectorSpec = {
     displayName: 'Databricks',
     description: i18n.translate('core.kibanaConnectorSpecs.databricks.metadata.description', {
       defaultMessage:
-        'Execute SQL queries, discover tables and schemas, and poll async query results in Databricks',
+        'Execute SQL queries, manage jobs, clusters, and warehouses, and monitor alerts in Databricks',
     }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
@@ -221,6 +245,222 @@ export const Databricks: ConnectorSpec = {
         return callToolContent(ctx, input.name, input.arguments);
       },
     },
+
+    // ── Jobs REST API ─────────────────────────────────────────────────────────
+    listRuns: {
+      isTool: true,
+      description:
+        'List job runs in the Databricks workspace. Optionally filter by job ID, active-only, or page size. ' +
+        'Returns run metadata including run_id, job_id, state, start_time, and task results. ' +
+        'Use getRun for full details on a specific run.',
+      input: ListRunsInputSchema,
+      handler: async (ctx, input: ListRunsInput) => {
+        const params: Record<string, unknown> = {};
+        if (input.jobId !== undefined) params.job_id = input.jobId;
+        if (input.activeOnly !== undefined) params.active_only = input.activeOnly;
+        if (input.limit !== undefined) params.limit = input.limit;
+        if (input.pageToken !== undefined) params.page_token = input.pageToken;
+        const { data } = await ctx.client.get(`${workspaceOrigin(ctx)}/api/2.1/jobs/runs/list`, {
+          params,
+        });
+        return data;
+      },
+    },
+
+    getRun: {
+      isTool: true,
+      description:
+        'Get details for a specific job run by run ID. Returns the full run object including state, ' +
+        'tasks, start/end times, and error messages. Use this to check run status or retrieve task details.',
+      input: GetRunInputSchema,
+      handler: async (ctx, input: GetRunInput) => {
+        const { data } = await ctx.client.get(`${workspaceOrigin(ctx)}/api/2.1/jobs/runs/get`, {
+          params: { run_id: input.runId },
+        });
+        return data;
+      },
+    },
+
+    getRunOutput: {
+      isTool: true,
+      description:
+        'Retrieve the output of a completed task run (notebook output, logs, return values). ' +
+        "Requires a task-level run ID from getRun's tasks[].run_id. " +
+        'Call getRun first, then pass one of the task run IDs from the tasks array.',
+      input: GetRunOutputInputSchema,
+      handler: async (ctx, input: GetRunOutputInput) => {
+        const { data } = await ctx.client.get(
+          `${workspaceOrigin(ctx)}/api/2.1/jobs/runs/get-output`,
+          { params: { run_id: input.runId } }
+        );
+        return data;
+      },
+    },
+
+    runJobNow: {
+      isTool: false,
+      description:
+        'Trigger a Databricks job run immediately. Optionally override job parameters. ' +
+        'Returns a run_id — use getRun or listRuns to track progress.',
+      input: RunJobNowInputSchema,
+      handler: async (ctx, input: RunJobNowInput) => {
+        const body: Record<string, unknown> = { job_id: input.jobId };
+        if (input.jobParameters !== undefined) body.job_parameters = input.jobParameters;
+        const { data } = await ctx.client.post(
+          `${workspaceOrigin(ctx)}/api/2.1/jobs/run-now`,
+          body
+        );
+        return data;
+      },
+    },
+
+    cancelRun: {
+      isTool: false,
+      description:
+        'Cancel an active Databricks job run. The run must be in PENDING or RUNNING state. ' +
+        'Cancellation is asynchronous — poll getRun until state is CANCELLED.',
+      input: CancelRunInputSchema,
+      handler: async (ctx, input: CancelRunInput) => {
+        const { data } = await ctx.client.post(`${workspaceOrigin(ctx)}/api/2.1/jobs/runs/cancel`, {
+          run_id: input.runId,
+        });
+        return data;
+      },
+    },
+
+    repairRun: {
+      isTool: false,
+      description:
+        'Re-run one or more failed tasks in a completed job run without re-running tasks that succeeded. ' +
+        'Specify rerunTasks to target specific task keys, or set rerunAllFailedTasks to retry everything that failed. ' +
+        'Returns a repair_id — use getRun to track the repaired run.',
+      input: RepairRunInputSchema,
+      handler: async (ctx, input: RepairRunInput) => {
+        const body: Record<string, unknown> = { run_id: input.runId };
+        if (input.rerunTasks !== undefined) body.rerun_tasks = input.rerunTasks;
+        if (input.rerunAllFailedTasks !== undefined)
+          body.rerun_all_failed_tasks = input.rerunAllFailedTasks;
+        if (input.latestRepairId !== undefined) body.latest_repair_id = input.latestRepairId;
+        const { data } = await ctx.client.post(
+          `${workspaceOrigin(ctx)}/api/2.1/jobs/runs/repair`,
+          body
+        );
+        return data;
+      },
+    },
+
+    // ── Clusters REST API ─────────────────────────────────────────────────────
+    listClusters: {
+      isTool: true,
+      description:
+        'List all clusters in the Databricks workspace. Returns cluster metadata including cluster_id, ' +
+        'cluster_name, state (RUNNING, TERMINATED, PENDING, etc.), spark_version, and node type. ' +
+        'Use this to discover available clusters before starting or restarting one.',
+      input: ListClustersInputSchema,
+      handler: async (ctx) => {
+        const { data } = await ctx.client.get(`${workspaceOrigin(ctx)}/api/2.0/clusters/list`);
+        return data;
+      },
+    },
+
+    startCluster: {
+      isTool: false,
+      description:
+        'Start a terminated Databricks cluster. The cluster must be in TERMINATED state. ' +
+        'Startup is asynchronous — use listClusters to poll until state is RUNNING.',
+      input: ClusterIdInputSchema,
+      handler: async (ctx, input: ClusterIdInput) => {
+        const { data } = await ctx.client.post(`${workspaceOrigin(ctx)}/api/2.0/clusters/start`, {
+          cluster_id: input.clusterId,
+        });
+        return data;
+      },
+    },
+
+    restartCluster: {
+      isTool: false,
+      description:
+        'Restart a running Databricks cluster. The cluster must be in RUNNING state. ' +
+        'Restart is asynchronous — use listClusters to poll until state returns to RUNNING.',
+      input: ClusterIdInputSchema,
+      handler: async (ctx, input: ClusterIdInput) => {
+        const { data } = await ctx.client.post(`${workspaceOrigin(ctx)}/api/2.0/clusters/restart`, {
+          cluster_id: input.clusterId,
+        });
+        return data;
+      },
+    },
+
+    // ── Warehouses REST API ───────────────────────────────────────────────────
+    listWarehouses: {
+      isTool: true,
+      description:
+        'List all SQL warehouses in the Databricks workspace. Returns warehouse metadata including id, ' +
+        'name, state (RUNNING, STOPPED, STARTING, etc.), cluster_size, and auto_stop_mins. ' +
+        'Use this to find the warehouse ID before starting or stopping one.',
+      input: ListWarehousesInputSchema,
+      handler: async (ctx) => {
+        const { data } = await ctx.client.get(`${workspaceOrigin(ctx)}/api/2.0/sql/warehouses`);
+        return data;
+      },
+    },
+
+    startWarehouse: {
+      isTool: false,
+      description:
+        'Start a stopped SQL warehouse. Startup is asynchronous — use listWarehouses to poll ' +
+        'until state is RUNNING before submitting queries.',
+      input: WarehouseIdInputSchema,
+      handler: async (ctx, input: WarehouseIdInput) => {
+        const { data } = await ctx.client.post(
+          `${workspaceOrigin(ctx)}/api/2.0/sql/warehouses/${input.warehouseId}/start`
+        );
+        return data;
+      },
+    },
+
+    stopWarehouse: {
+      isTool: false,
+      description:
+        'Stop a running SQL warehouse. Use this to save costs when the warehouse is no longer needed. ' +
+        'Stop is asynchronous — use listWarehouses to confirm state transitions to STOPPED.',
+      input: WarehouseIdInputSchema,
+      handler: async (ctx, input: WarehouseIdInput) => {
+        const { data } = await ctx.client.post(
+          `${workspaceOrigin(ctx)}/api/2.0/sql/warehouses/${input.warehouseId}/stop`
+        );
+        return data;
+      },
+    },
+
+    // ── Alerts REST API ───────────────────────────────────────────────────────
+    listAlerts: {
+      isTool: true,
+      description:
+        'List all SQL alerts in the Databricks workspace. Returns alert metadata including id, name, ' +
+        'state (OK, TRIGGERED, UNKNOWN), query_id, and condition. ' +
+        'Use getAlert for full details on a specific alert.',
+      input: ListAlertsInputSchema,
+      handler: async (ctx) => {
+        const { data } = await ctx.client.get(`${workspaceOrigin(ctx)}/api/2.0/sql/alerts`);
+        return data;
+      },
+    },
+
+    getAlert: {
+      isTool: true,
+      description:
+        'Get details for a specific SQL alert by ID. Returns the full alert definition including ' +
+        'the associated query, condition (op, value, empty_result_state), notification schedule, ' +
+        'and current state.',
+      input: GetAlertInputSchema,
+      handler: async (ctx, input: GetAlertInput) => {
+        const { data } = await ctx.client.get(
+          `${workspaceOrigin(ctx)}/api/2.0/sql/alerts/${input.alertId}`
+        );
+        return data;
+      },
+    },
   },
 
   test: {
@@ -244,10 +484,10 @@ export const Databricks: ConnectorSpec = {
     '',
     '### Choosing between `runQuery` and `executeStatement`',
     '- Use `runQuery` for read-only SQL: SELECT, SHOW, DESCRIBE, EXPLAIN, and WITH queries.',
-    '- Use `executeStatement` for DML (INSERT, UPDATE, DELETE) or DDL (CREATE, ALTER, DROP) — this action is available to workflows but is not exposed to AI agents.',
+    '- Use `executeStatement` for DML (INSERT, UPDATE, DELETE) or DDL (CREATE, ALTER, DROP) — workflow-only, not exposed to AI agents.',
     '- Prefer `runQuery` for all data exploration and analytics — it prevents accidental mutations.',
     '',
-    '### Async polling pattern',
+    '### SQL async polling pattern',
     '1. Call `runQuery` or `executeStatement` with your SQL statement.',
     '2. If the response contains a `statement_id`, the query is still running.',
     '3. Call `pollResponse` with the `statement_id` until the status is "SUCCEEDED" or "FAILED".',
@@ -264,10 +504,29 @@ export const Databricks: ConnectorSpec = {
     'Always qualify table names with catalog.schema.table (e.g., `main.default.customers`) to avoid ambiguity.',
     'Use LIMIT to control result size — Databricks returns large result sets as paginated chunks.',
     '',
+    '### Jobs',
+    '- Use `listRuns` to find recent runs; filter by `jobId` or `activeOnly` to narrow results.',
+    '- Use `getRun` to check run status and retrieve task-level details.',
+    "- Use `getRunOutput` with a task-level run ID from `getRun`'s `tasks[].run_id` — NOT the top-level `run_id` from `runJobNow`.",
+    '- `runJobNow`, `cancelRun`, and `repairRun` are workflow-only (not exposed to agents).',
+    '',
+    '### Clusters',
+    '- Use `listClusters` to discover available clusters and their current state.',
+    '- `startCluster` and `restartCluster` are async — poll `listClusters` until state is RUNNING.',
+    '- These actions are workflow-only and not exposed to agents.',
+    '',
+    '### Warehouses',
+    '- Use `listWarehouses` to find warehouse IDs and check whether they are RUNNING or STOPPED.',
+    '- `startWarehouse` / `stopWarehouse` are async and workflow-only.',
+    '- If SQL queries fail with a warehouse unavailable error, the warehouse likely needs to be started.',
+    '',
+    '### Alerts',
+    '- Use `listAlerts` to see all SQL alerts and their current state (OK, TRIGGERED, UNKNOWN).',
+    '- Use `getAlert` to retrieve the full condition, query, and notification config for a specific alert.',
+    '',
     '### Common gotchas',
     '- The MCP server URL is workspace-specific — each Databricks workspace has a different hostname.',
-    '- If queries fail with a warehouse unavailable error, inform the user that the SQL warehouse may need to be started in the Databricks workspace UI — this requires manual operator action.',
-    '- Result sets for large queries are returned in chunks. Check the response metadata for pagination info.',
+    '- REST API calls derive the workspace base URL from the configured MCP server URL automatically.',
     '- Databricks SQL identifiers (catalog, schema, table) are case-insensitive but returned in lowercase.',
   ].join('\n'),
 };

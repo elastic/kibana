@@ -22,6 +22,10 @@ jest.mock('../../lib/mcp/with_mcp_client', () => ({
   }),
 }));
 
+// REST API mocks
+const mockGet = jest.fn();
+const mockPost = jest.fn();
+
 // Apply Zod defaults the way the framework does before invoking a handler.
 const parse = <K extends keyof typeof Databricks.actions>(
   action: K,
@@ -33,10 +37,12 @@ const DATABRICKS_MCP_SERVER_URL =
 
 describe('Databricks', () => {
   const mockContext = {
-    client: {},
+    client: { get: mockGet, post: mockPost },
     log: {},
     config: { serverUrl: DATABRICKS_MCP_SERVER_URL },
   } as unknown as ActionContext;
+
+  const WORKSPACE_ORIGIN = 'https://adb-1234567890123456.7.azuredatabricks.net';
 
   const mockResultSet = {
     statement_id: 'stmt-01ef1234',
@@ -61,6 +67,8 @@ describe('Databricks', () => {
         { name: 'poll_sql_result' },
       ],
     });
+    mockGet.mockResolvedValue({ data: {} });
+    mockPost.mockResolvedValue({ data: {} });
   });
 
   it('should be defined', () => {
@@ -274,6 +282,225 @@ describe('Databricks', () => {
       expect(Databricks.skill).toContain('runQuery');
       expect(Databricks.skill).toContain('executeStatement');
       expect(Databricks.skill).toContain('pollResponse');
+    });
+  });
+
+  describe('listRuns action', () => {
+    it('is exposed as a tool', () => {
+      expect(Databricks.actions.listRuns.isTool).toBe(true);
+    });
+
+    it('calls GET /api/2.1/jobs/runs/list with no params when none provided', async () => {
+      const input = parse('listRuns', {});
+      await Databricks.actions.listRuns.handler(mockContext, input);
+      expect(mockGet).toHaveBeenCalledWith(`${WORKSPACE_ORIGIN}/api/2.1/jobs/runs/list`, {
+        params: {},
+      });
+    });
+
+    it('passes jobId, activeOnly, and limit as snake_case params', async () => {
+      const input = parse('listRuns', { jobId: 42, activeOnly: true, limit: 10 });
+      await Databricks.actions.listRuns.handler(mockContext, input);
+      expect(mockGet).toHaveBeenCalledWith(`${WORKSPACE_ORIGIN}/api/2.1/jobs/runs/list`, {
+        params: { job_id: 42, active_only: true, limit: 10 },
+      });
+    });
+  });
+
+  describe('getRun action', () => {
+    it('is exposed as a tool', () => {
+      expect(Databricks.actions.getRun.isTool).toBe(true);
+    });
+
+    it('calls GET /api/2.1/jobs/runs/get with run_id', async () => {
+      const input = parse('getRun', { runId: 455644833 });
+      await Databricks.actions.getRun.handler(mockContext, input);
+      expect(mockGet).toHaveBeenCalledWith(`${WORKSPACE_ORIGIN}/api/2.1/jobs/runs/get`, {
+        params: { run_id: 455644833 },
+      });
+    });
+  });
+
+  describe('getRunOutput action', () => {
+    it('is exposed as a tool', () => {
+      expect(Databricks.actions.getRunOutput.isTool).toBe(true);
+    });
+
+    it('calls GET /api/2.1/jobs/runs/get-output with run_id', async () => {
+      const input = parse('getRunOutput', { runId: 455644833 });
+      await Databricks.actions.getRunOutput.handler(mockContext, input);
+      expect(mockGet).toHaveBeenCalledWith(`${WORKSPACE_ORIGIN}/api/2.1/jobs/runs/get-output`, {
+        params: { run_id: 455644833 },
+      });
+    });
+  });
+
+  describe('runJobNow action', () => {
+    it('is not exposed as a tool', () => {
+      expect(Databricks.actions.runJobNow.isTool).toBe(false);
+    });
+
+    it('calls POST /api/2.1/jobs/runs/now with job_id', async () => {
+      const input = parse('runJobNow', { jobId: 11223344 });
+      await Databricks.actions.runJobNow.handler(mockContext, input);
+      expect(mockPost).toHaveBeenCalledWith(`${WORKSPACE_ORIGIN}/api/2.1/jobs/run-now`, {
+        job_id: 11223344,
+      });
+    });
+
+    it('includes job_parameters when provided', async () => {
+      const input = parse('runJobNow', { jobId: 11223344, jobParameters: { env: 'prod' } });
+      await Databricks.actions.runJobNow.handler(mockContext, input);
+      expect(mockPost).toHaveBeenCalledWith(`${WORKSPACE_ORIGIN}/api/2.1/jobs/run-now`, {
+        job_id: 11223344,
+        job_parameters: { env: 'prod' },
+      });
+    });
+  });
+
+  describe('cancelRun action', () => {
+    it('is not exposed as a tool', () => {
+      expect(Databricks.actions.cancelRun.isTool).toBe(false);
+    });
+
+    it('calls POST /api/2.1/jobs/runs/cancel with run_id', async () => {
+      const input = parse('cancelRun', { runId: 455644833 });
+      await Databricks.actions.cancelRun.handler(mockContext, input);
+      expect(mockPost).toHaveBeenCalledWith(`${WORKSPACE_ORIGIN}/api/2.1/jobs/runs/cancel`, {
+        run_id: 455644833,
+      });
+    });
+  });
+
+  describe('repairRun action', () => {
+    it('is not exposed as a tool', () => {
+      expect(Databricks.actions.repairRun.isTool).toBe(false);
+    });
+
+    it('calls POST /api/2.1/jobs/runs/repair with run_id', async () => {
+      const input = parse('repairRun', { runId: 455644833 });
+      await Databricks.actions.repairRun.handler(mockContext, input);
+      expect(mockPost).toHaveBeenCalledWith(`${WORKSPACE_ORIGIN}/api/2.1/jobs/runs/repair`, {
+        run_id: 455644833,
+      });
+    });
+
+    it('includes rerunTasks and latestRepairId when provided', async () => {
+      const input = parse('repairRun', {
+        runId: 455644833,
+        rerunTasks: ['task_a', 'task_b'],
+        latestRepairId: 789,
+      });
+      await Databricks.actions.repairRun.handler(mockContext, input);
+      expect(mockPost).toHaveBeenCalledWith(`${WORKSPACE_ORIGIN}/api/2.1/jobs/runs/repair`, {
+        run_id: 455644833,
+        rerun_tasks: ['task_a', 'task_b'],
+        latest_repair_id: 789,
+      });
+    });
+  });
+
+  describe('listClusters action', () => {
+    it('is exposed as a tool', () => {
+      expect(Databricks.actions.listClusters.isTool).toBe(true);
+    });
+
+    it('calls GET /api/2.0/clusters/list', async () => {
+      const input = parse('listClusters', {});
+      await Databricks.actions.listClusters.handler(mockContext, input);
+      expect(mockGet).toHaveBeenCalledWith(`${WORKSPACE_ORIGIN}/api/2.0/clusters/list`);
+    });
+  });
+
+  describe('startCluster action', () => {
+    it('is not exposed as a tool', () => {
+      expect(Databricks.actions.startCluster.isTool).toBe(false);
+    });
+
+    it('calls POST /api/2.0/clusters/start with cluster_id', async () => {
+      const input = parse('startCluster', { clusterId: '0923-164208-meows279' });
+      await Databricks.actions.startCluster.handler(mockContext, input);
+      expect(mockPost).toHaveBeenCalledWith(`${WORKSPACE_ORIGIN}/api/2.0/clusters/start`, {
+        cluster_id: '0923-164208-meows279',
+      });
+    });
+  });
+
+  describe('restartCluster action', () => {
+    it('is not exposed as a tool', () => {
+      expect(Databricks.actions.restartCluster.isTool).toBe(false);
+    });
+
+    it('calls POST /api/2.0/clusters/restart with cluster_id', async () => {
+      const input = parse('restartCluster', { clusterId: '0923-164208-meows279' });
+      await Databricks.actions.restartCluster.handler(mockContext, input);
+      expect(mockPost).toHaveBeenCalledWith(`${WORKSPACE_ORIGIN}/api/2.0/clusters/restart`, {
+        cluster_id: '0923-164208-meows279',
+      });
+    });
+  });
+
+  describe('listWarehouses action', () => {
+    it('is exposed as a tool', () => {
+      expect(Databricks.actions.listWarehouses.isTool).toBe(true);
+    });
+
+    it('calls GET /api/2.0/sql/warehouses', async () => {
+      const input = parse('listWarehouses', {});
+      await Databricks.actions.listWarehouses.handler(mockContext, input);
+      expect(mockGet).toHaveBeenCalledWith(`${WORKSPACE_ORIGIN}/api/2.0/sql/warehouses`);
+    });
+  });
+
+  describe('startWarehouse action', () => {
+    it('is not exposed as a tool', () => {
+      expect(Databricks.actions.startWarehouse.isTool).toBe(false);
+    });
+
+    it('calls POST /api/2.0/sql/warehouses/{id}/start', async () => {
+      const input = parse('startWarehouse', { warehouseId: 'abc123' });
+      await Databricks.actions.startWarehouse.handler(mockContext, input);
+      expect(mockPost).toHaveBeenCalledWith(
+        `${WORKSPACE_ORIGIN}/api/2.0/sql/warehouses/abc123/start`
+      );
+    });
+  });
+
+  describe('stopWarehouse action', () => {
+    it('is not exposed as a tool', () => {
+      expect(Databricks.actions.stopWarehouse.isTool).toBe(false);
+    });
+
+    it('calls POST /api/2.0/sql/warehouses/{id}/stop', async () => {
+      const input = parse('stopWarehouse', { warehouseId: 'abc123' });
+      await Databricks.actions.stopWarehouse.handler(mockContext, input);
+      expect(mockPost).toHaveBeenCalledWith(
+        `${WORKSPACE_ORIGIN}/api/2.0/sql/warehouses/abc123/stop`
+      );
+    });
+  });
+
+  describe('listAlerts action', () => {
+    it('is exposed as a tool', () => {
+      expect(Databricks.actions.listAlerts.isTool).toBe(true);
+    });
+
+    it('calls GET /api/2.0/sql/alerts', async () => {
+      const input = parse('listAlerts', {});
+      await Databricks.actions.listAlerts.handler(mockContext, input);
+      expect(mockGet).toHaveBeenCalledWith(`${WORKSPACE_ORIGIN}/api/2.0/sql/alerts`);
+    });
+  });
+
+  describe('getAlert action', () => {
+    it('is exposed as a tool', () => {
+      expect(Databricks.actions.getAlert.isTool).toBe(true);
+    });
+
+    it('calls GET /api/2.0/sql/alerts/{id}', async () => {
+      const input = parse('getAlert', { alertId: 'abc123def456' });
+      await Databricks.actions.getAlert.handler(mockContext, input);
+      expect(mockGet).toHaveBeenCalledWith(`${WORKSPACE_ORIGIN}/api/2.0/sql/alerts/abc123def456`);
     });
   });
 });

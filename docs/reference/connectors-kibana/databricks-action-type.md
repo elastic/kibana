@@ -1,7 +1,7 @@
 ---
 navigation_title: "Databricks"
 type: reference
-description: "Use the Databricks connector to execute SQL queries, discover tables and schemas, and poll async query results in Databricks."
+description: "Use the Databricks connector to execute SQL queries, manage jobs and clusters, control SQL warehouses, and monitor alerts in Databricks."
 applies_to:
   stack: preview 9.6
   serverless: preview
@@ -9,7 +9,7 @@ applies_to:
 
 # Databricks connector [databricks-action-type]
 
-The Databricks connector connects to the Databricks managed SQL MCP server at `https://<workspace>/api/2.0/mcp/sql`. Agents and workflows use the connector to execute SQL statements against a Databricks SQL warehouse, discover catalogs, schemas, and tables, and poll asynchronous query results. The connector also supports other Databricks MCP servers such as Genie and AI Search by changing the server URL.
+The Databricks connector connects to the Databricks managed SQL MCP server at `https://<workspace>/api/2.0/mcp/sql` and the Databricks REST API. Agents and workflows use the connector to execute SQL statements, manage jobs and clusters, control SQL warehouses, and monitor alerts. The connector also supports other Databricks MCP servers such as Genie and AI Search by changing the server URL.
 
 ## Create connectors in {{kib}} [define-databricks-ui]
 
@@ -45,6 +45,74 @@ The Databricks connector exposes the following actions:
 `pollResponse`
 :   Poll the status and retrieve results for a previously submitted SQL query. Use this when `runQuery` or `executeStatement` returns a `statement_id` instead of immediate results. Returns the query status (`RUNNING`, `SUCCEEDED`, `FAILED`, `CANCELLED`) and, when complete, the result set. Poll repeatedly until the status is `SUCCEEDED` or `FAILED`.
     - `statementId` (required): The statement ID returned by `runQuery` or `executeStatement` (for example, `01ef1234-5678-abcd-efab-cdef01234567`).
+
+### Jobs
+
+`listRuns`
+:   List job runs in the workspace. Returns run metadata including state, start time, and task results. Optionally filter by job ID or active-only runs.
+    - `jobId` (optional): Filter to runs from a specific job.
+    - `activeOnly` (optional): If `true`, return only active runs (`PENDING`, `RUNNING`, `TERMINATING`).
+    - `limit` (optional): Maximum number of runs to return (default 25, max 100).
+    - `pageToken` (optional): Cursor from a previous response for pagination.
+
+`getRun`
+:   Get full details for a specific job run, including state, tasks, start/end times, and error messages.
+    - `runId` (required): The run ID to retrieve (for example, `455644833`).
+
+`getRunOutput`
+:   Retrieve the output of a completed task run (notebook output, return values, logs). Requires a task-level run ID from `getRun`'s `tasks[].run_id` — **not** the top-level `run_id` returned by `runJobNow` or `listRuns`. Call `getRun` first to find the task run IDs.
+    - `runId` (required): A task-level run ID from `getRun`'s `tasks[].run_id`.
+
+`runJobNow` _(workflow only)_
+:   Trigger a Databricks job run immediately. Returns a `run_id` to track progress with `getRun`.
+    - `jobId` (required): The job ID to trigger.
+    - `jobParameters` (optional): Key-value pairs to override job parameters (for example, `{ "env": "prod" }`).
+
+`cancelRun` _(workflow only)_
+:   Cancel an active job run. The run must be in `PENDING` or `RUNNING` state. Cancellation is asynchronous — poll `getRun` until state is `CANCELLED`.
+    - `runId` (required): The run ID to cancel.
+
+`repairRun` _(workflow only)_
+:   Re-run failed tasks in a completed job run without re-running tasks that succeeded. Returns a `repair_id`.
+    - `runId` (required): The run ID to repair.
+    - `rerunTasks` (optional): Task keys to re-run. Omit to re-run all failed tasks.
+    - `rerunAllFailedTasks` (optional): If `true`, re-run all failed tasks.
+    - `latestRepairId` (optional): ID of the most recent repair when chaining multiple repairs.
+
+### Clusters
+
+`listClusters`
+:   List all clusters in the workspace. Returns cluster metadata including `cluster_id`, `cluster_name`, `state` (`RUNNING`, `TERMINATED`, `PENDING`), `spark_version`, and node type.
+
+`startCluster` _(workflow only)_
+:   Start a terminated cluster. Startup is asynchronous — poll `listClusters` until state is `RUNNING`.
+    - `clusterId` (required): The cluster ID (for example, `0923-164208-meows279`).
+
+`restartCluster` _(workflow only)_
+:   Restart a running cluster. Restart is asynchronous — poll `listClusters` until state returns to `RUNNING`.
+    - `clusterId` (required): The cluster ID.
+
+### SQL warehouses
+
+`listWarehouses`
+:   List all SQL warehouses in the workspace. Returns warehouse metadata including `id`, `name`, `state` (`RUNNING`, `STOPPED`, `STARTING`), `cluster_size`, and `auto_stop_mins`.
+
+`startWarehouse` _(workflow only)_
+:   Start a stopped SQL warehouse. Startup is asynchronous — poll `listWarehouses` until state is `RUNNING`.
+    - `warehouseId` (required): The SQL warehouse ID.
+
+`stopWarehouse` _(workflow only)_
+:   Stop a running SQL warehouse to save costs. Stop is asynchronous — poll `listWarehouses` until state is `STOPPED`.
+    - `warehouseId` (required): The SQL warehouse ID.
+
+### Alerts
+
+`listAlerts`
+:   List all SQL alerts in the workspace. Returns alert metadata including `id`, `name`, `state` (`OK`, `TRIGGERED`, `UNKNOWN`), and `query_id`.
+
+`getAlert`
+:   Get full details for a specific SQL alert, including the associated query, condition, notification schedule, and current state.
+    - `alertId` (required): The alert ID.
 
 ### Utilities
 
