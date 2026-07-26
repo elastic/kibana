@@ -11,6 +11,7 @@ import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { createErrorResult, getToolResultId } from '@kbn/agent-builder-server';
+import { getIndexPatternFromESQLQuery, getLookupIndicesFromQuery } from '@kbn/esql-utils';
 import type { ResolveMlCapabilities } from '@kbn/ml-common-types/capabilities';
 import type { MlLicense } from '../../../common/license';
 import type { MlFeatures } from '../../../common/constants/app';
@@ -52,23 +53,24 @@ const schema = z.object({
     .describe(`(Optional) Max rows to return. Defaults to ${DEFAULT_LIMIT}.`),
 });
 
-/**
- * Extracts index / pattern names from the leading FROM clause of an ES|QL query.
- * Returns null if no FROM clause is found.
- */
-export const extractFromIndices = (query: string): string[] | null => {
+const stripEsqlComments = (query: string): string => {
   const withoutBlockComments = query.replace(/\/\*[\s\S]*?\*\//g, ' ');
-  const withoutLineComments = withoutBlockComments.replace(/\/\/[^\n]*/g, ' ');
-  const match = withoutLineComments.match(/\bFROM\b\s+([^|]+)/i);
-  if (!match) {
-    return null;
-  }
+  return withoutBlockComments.replace(/\/\/[^\n]*/g, ' ');
+};
 
-  return match[1]
-    .split(',')
-    .map((part) => part.trim())
-    .filter(Boolean)
-    .map((part) => part.replace(/^["']|["']$/g, ''));
+/**
+ * Collects every index the query may touch: FROM/TS sources and LOOKUP JOIN targets.
+ */
+export const extractReferencedIndices = (query: string): string[] => {
+  const fromPattern = getIndexPatternFromESQLQuery(query);
+  const fromIndices = fromPattern
+    ? fromPattern
+        .split(',')
+        .map((part) => part.trim())
+        .filter(Boolean)
+    : [];
+  const lookupIndices = getLookupIndicesFromQuery(query);
+  return [...new Set([...fromIndices, ...lookupIndices])];
 };
 
 export const isAllowedMlIndex = (index: string): boolean => {
@@ -83,12 +85,22 @@ export const isAllowedMlIndex = (index: string): boolean => {
 };
 
 /**
- * Validates that every FROM source is an allowed ML system index.
+ * Validates that every index referenced anywhere in the pipeline is an allowed
+ * ML system index, and rejects ENRICH (policy → arbitrary index).
  * Returns an error message, or undefined when the query is allowed.
  */
 export const validateMlSystemIndexQuery = (query: string): string | undefined => {
-  const indices = extractFromIndices(query);
-  if (!indices || indices.length === 0) {
+  // ENRICH uses policy names, not index names — cannot allow-list without
+  // resolving the policy. Source-data enrichment must use platform.core.execute_esql.
+  if (/\bENRICH\b/i.test(stripEsqlComments(query))) {
+    return (
+      'ENRICH is not permitted in this tool. ' +
+      'For source-data enrichment use platform.core.execute_esql.'
+    );
+  }
+
+  const indices = extractReferencedIndices(query);
+  if (indices.length === 0) {
     return 'Query must start with a FROM clause targeting an allowed ML system index.';
   }
 
@@ -168,6 +180,7 @@ For source-data indices use \`platform.core.execute_esql\` instead.`,
       };
     }
 
+    // Validate if query is touching .ml indices
     const validationError = validateMlSystemIndexQuery(esqlQuery);
     if (validationError) {
       return { results: [createErrorResult(validationError)] };

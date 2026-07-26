@@ -10,7 +10,7 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { getAdminCapabilities } from '../../lib/capabilities/__mocks__/ml_capabilities';
 import {
   createQueryAnomaliesTool,
-  extractFromIndices,
+  extractReferencedIndices,
   isAllowedMlIndex,
   validateMlSystemIndexQuery,
 } from './query_anomalies';
@@ -41,26 +41,28 @@ const createContext = (esClient = createEsClientMock()) =>
     request: {},
   } as any);
 
-describe('extractFromIndices', () => {
-  it('parses a single index', () => {
-    expect(extractFromIndices('FROM .ml-anomalies-* | LIMIT 10')).toEqual(['.ml-anomalies-*']);
+describe('extractReferencedIndices', () => {
+  it('parses a single FROM index', () => {
+    expect(extractReferencedIndices('FROM .ml-anomalies-* | LIMIT 10')).toEqual([
+      '.ml-anomalies-*',
+    ]);
   });
 
-  it('parses multiple comma-separated indices', () => {
-    expect(extractFromIndices('FROM .ml-anomalies-*, .ml-config | WHERE true')).toEqual([
+  it('parses multiple comma-separated FROM indices', () => {
+    expect(extractReferencedIndices('FROM .ml-anomalies-*, .ml-config | WHERE true')).toEqual([
       '.ml-anomalies-*',
       '.ml-config',
     ]);
   });
 
-  it('strips quotes', () => {
-    expect(extractFromIndices('FROM ".ml-notifications-*" | LIMIT 1')).toEqual([
-      '.ml-notifications-*',
-    ]);
+  it('includes LOOKUP JOIN targets', () => {
+    expect(
+      extractReferencedIndices('FROM .ml-config | LOOKUP JOIN secrets ON job_id | LIMIT 1')
+    ).toEqual(['.ml-config', 'secrets']);
   });
 
-  it('returns null when FROM is missing', () => {
-    expect(extractFromIndices('ROW 1')).toBeNull();
+  it('returns empty when FROM is missing', () => {
+    expect(extractReferencedIndices('ROW 1')).toEqual([]);
   });
 });
 
@@ -92,6 +94,32 @@ describe('validateMlSystemIndexQuery', () => {
     expect(validateMlSystemIndexQuery('FROM * METADATA _index | LIMIT 10')).toMatch(
       /disallowed index/
     );
+  });
+
+  it('rejects LOOKUP JOIN to a non-ML index', () => {
+    expect(
+      validateMlSystemIndexQuery('FROM .ml-config | LOOKUP JOIN secrets ON job_id | LIMIT 1')
+    ).toMatch(/disallowed index/);
+  });
+
+  it('allows LOOKUP JOIN when the target is an allowed ML index', () => {
+    expect(
+      validateMlSystemIndexQuery(
+        'FROM .ml-anomalies-for-specific-job | LOOKUP JOIN .ml-config ON job_id | LIMIT 1'
+      )
+    ).toBeUndefined();
+  });
+
+  it('rejects ENRICH', () => {
+    expect(
+      validateMlSystemIndexQuery('FROM .ml-config | ENRICH some_policy ON job_id | LIMIT 1')
+    ).toMatch(/ENRICH is not permitted/);
+  });
+
+  it('ignores ENRICH mentioned only in comments', () => {
+    expect(
+      validateMlSystemIndexQuery('FROM .ml-config // ENRICH not executed\n| LIMIT 1')
+    ).toBeUndefined();
   });
 });
 
@@ -172,6 +200,46 @@ describe('queryAnomaliesTool', () => {
       };
       expect(standardResult.results[0].type).toBe(ToolResultType.error);
       expect(standardResult.results[0].data.message).toMatch(/disallowed index/);
+    });
+
+    it('rejects LOOKUP JOIN to non-ML indices without calling ES', async () => {
+      const esClient = createEsClientMock();
+      const context = createContext(esClient);
+
+      const result = await queryAnomaliesTool.handler(
+        {
+          query: 'FROM .ml-config | LOOKUP JOIN secrets ON job_id | LIMIT 1',
+          limit: 100,
+        },
+        context
+      );
+
+      expect(esClient.asInternalUser.esql.query).not.toHaveBeenCalled();
+      const standardResult = result as {
+        results: Array<{ type: string; data: { message: string } }>;
+      };
+      expect(standardResult.results[0].type).toBe(ToolResultType.error);
+      expect(standardResult.results[0].data.message).toMatch(/disallowed index/);
+    });
+
+    it('rejects ENRICH without calling ES', async () => {
+      const esClient = createEsClientMock();
+      const context = createContext(esClient);
+
+      const result = await queryAnomaliesTool.handler(
+        {
+          query: 'FROM .ml-config | ENRICH some_policy ON job_id | LIMIT 1',
+          limit: 100,
+        },
+        context
+      );
+
+      expect(esClient.asInternalUser.esql.query).not.toHaveBeenCalled();
+      const standardResult = result as {
+        results: Array<{ type: string; data: { message: string } }>;
+      };
+      expect(standardResult.results[0].type).toBe(ToolResultType.error);
+      expect(standardResult.results[0].data.message).toMatch(/ENRICH is not permitted/);
     });
 
     it('returns an error result when ES|QL throws', async () => {
