@@ -48,7 +48,8 @@ export class InMemoryExecutionPersistence
   }
 
   public async updateWorkflowExecution(
-    workflowExecution: Partial<EsWorkflowExecution>
+    workflowExecution: Partial<EsWorkflowExecution>,
+    _options?: { refresh?: boolean | 'wait_for' }
   ): Promise<void> {
     this.execution = { ...this.execution, ...workflowExecution };
   }
