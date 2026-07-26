@@ -74,9 +74,7 @@ export const TabsView = (props: SingleTabViewProps) => {
 
   const wrapTabsBar = useMemo((): UnifiedTabsProps['wrapTabsBar'] => {
     if (isChromeNextProjectHeader) {
-      return (tabsBar) => (
-        <ChromeAppHeader menu={topNavMenuItems} hasTabs={Boolean(tabsBar)} tabsBar={tabsBar} />
-      );
+      return (tabsBar) => <ChromeAppHeader menu={topNavMenuItems} tabsBar={tabsBar} />;
     }
   }, [isChromeNextProjectHeader, topNavMenuItems]);
 
