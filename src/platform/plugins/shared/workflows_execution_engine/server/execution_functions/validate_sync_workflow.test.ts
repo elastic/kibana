@@ -28,7 +28,7 @@ describe('validateSyncWorkflow', () => {
     }
   );
 
-  it('accepts ordinary and capability-backed atomic steps', () => {
-    expect(() => validateSyncWorkflow(createGraph('ai.pii'))).not.toThrow();
+  it('accepts steps that are not in the async-only set', () => {
+    expect(() => validateSyncWorkflow(createGraph('data.set'))).not.toThrow();
   });
 });

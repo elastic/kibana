@@ -43,16 +43,18 @@ export const runWorkflowSync = async ({
   stepExecutionRepository: StepExecutionPersistence;
 }): Promise<EsWorkflowExecution> => {
   apm.currentTransaction?.setLabel('execution_mode', 'sync');
-  const setup = await setupDependencies(
-    workflowExecution.id,
-    workflowExecution.spaceId,
+  const setup = await setupDependencies({
+    workflowRunId: workflowExecution.id,
+    spaceId: workflowExecution.spaceId,
     logger,
     config,
     dependencies,
-    request,
+    fakeRequest: request,
     workflowsExecutionEngine,
-    { workflowExecution, workflowExecutionRepository, stepExecutionRepository }
-  );
+    workflowExecution,
+    workflowExecutionRepository,
+    stepExecutionRepository,
+  });
 
   validateSyncWorkflow(setup.workflowExecutionGraph);
   await setup.workflowRuntime.start();
