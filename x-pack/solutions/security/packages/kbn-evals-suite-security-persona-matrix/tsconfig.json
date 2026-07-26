@@ -10,7 +10,6 @@
     "@kbn/agent-builder-common",
     "@kbn/core",
     "@kbn/evals",
-    "@kbn/evals-extensions",
     "@kbn/evals-suite-attack-discovery",
     "@kbn/scout",
     "@kbn/security-evals-alerts-snapshot",
