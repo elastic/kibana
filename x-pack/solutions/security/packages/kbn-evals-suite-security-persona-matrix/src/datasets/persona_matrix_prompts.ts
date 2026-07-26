@@ -511,58 +511,44 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
     id: 'workflow-execution-a',
     category: 'workflow-execution',
     variant: 'A',
-    description: 'VirusTotal hash verification via a connector-step workflow',
+    description: 'VirusTotal hash verification',
     input: {
       question:
         'The Chrysalis loader hash is 275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f. ' +
-        'Author and run a workflow that checks this hash against VirusTotal using the configured VirusTotal ' +
-        'connector, and tell me the verdict.',
+        'Check this hash against VirusTotal and tell me the verdict.',
     },
     output: {
       reference:
-        'Authors a workflow with a `virustotal.scanFileHash` connector step (connector-id referencing the ' +
-        'configured VirusTotal connector) rather than raw HTTP, then executes it end-to-end and reports the ' +
-        "verdict (malicious/clean detection counts) from the connector's response -- following the same " +
-        'connector-step-as-tool pattern documented for security automation (enrichment step queries a threat ' +
-        'intel connector, agent reasons over the result).',
+        'Calls the virustotal_lookup tool with the given hash and reports the verdict from its response, ' +
+        'rather than reasoning about the hash without checking it or fabricating a verdict.',
     },
     metadata: {
       expectedSkill: 'workflow-authoring',
-      expectedTools: [
-        'platform.core.generate_workflow',
-        'platform.workflows.validate_workflow',
-        'platform.core.execute_workflow',
-      ],
+      expectedTools: ['virustotal_lookup'],
       severity: 'high',
-      tags: ['workflow', 'vt-check', 'connector-step'],
+      tags: ['workflow', 'vt-check'],
     },
   },
   {
     id: 'workflow-execution-b',
     category: 'workflow-execution',
     variant: 'B',
-    description: 'On-call schedule lookup via a connector-step workflow',
+    description: 'On-call schedule lookup',
     input: {
       question:
-        'Who is currently on call to own a Chrysalis incident response? Author and run a workflow that queries ' +
-        'the on-call schedule via the configured PagerDuty connector, and tell me the primary responder.',
+        'Who is currently on call to own a Chrysalis incident response? Look up the on-call schedule and ' +
+        'tell me the primary responder.',
     },
     output: {
       reference:
-        'Authors a workflow with a `pagerduty.listOncalls` connector step (connector-id referencing the ' +
-        'configured PagerDuty connector) rather than raw HTTP, then executes it end-to-end and reports the ' +
-        "current on-call assignee from the connector's response -- matching the documented " +
-        '"Queries the PagerDuty integration to find the on-call engineer" workflow-as-tool pattern.',
+        'Calls the on_call_lookup tool and reports the current on-call assignee from its response, rather ' +
+        'than guessing or asking the user who is on call.',
     },
     metadata: {
       expectedSkill: 'workflow-authoring',
-      expectedTools: [
-        'platform.core.generate_workflow',
-        'platform.workflows.validate_workflow',
-        'platform.core.execute_workflow',
-      ],
+      expectedTools: ['on_call_lookup'],
       severity: 'medium',
-      tags: ['workflow', 'on-call', 'connector-step'],
+      tags: ['workflow', 'on-call'],
     },
   },
   {
