@@ -314,11 +314,10 @@ describe('buildTargetsPerActorQuery (targets per actor)', () => {
 
   describe('timeWindow parameter (log-source path)', () => {
     it('embeds time window in WHERE clause when timeWindow provided', () => {
-      const query = buildTargetsPerActorQuery(
-        accessesConfig,
-        'default',
-        { fromDate: '2026-06-26T00:00:00.000Z', toDate: '2026-06-27T00:00:00.000Z' }
-      );
+      const query = buildTargetsPerActorQuery(accessesConfig, 'default', {
+        fromDate: '2026-06-26T00:00:00.000Z',
+        toDate: '2026-06-27T00:00:00.000Z',
+      });
       expect(query).toContain('@timestamp >= "2026-06-26T00:00:00.000Z"');
       expect(query).toContain('@timestamp <= "2026-06-27T00:00:00.000Z"');
       expect(query).not.toContain('| LIMIT');

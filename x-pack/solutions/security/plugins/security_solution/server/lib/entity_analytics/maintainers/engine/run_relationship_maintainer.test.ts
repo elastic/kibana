@@ -1408,7 +1408,10 @@ describe('runRelationshipMaintainer', () => {
 
       // Probe returns empty → outcome: empty, no further calls
       esql.mockResolvedValueOnce({
-        columns: [{ name: 'sliceBoundary', type: 'date' }, { name: 'actorCount', type: 'long' }],
+        columns: [
+          { name: 'sliceBoundary', type: 'date' },
+          { name: 'actorCount', type: 'long' },
+        ],
         values: [],
       });
 

@@ -13,11 +13,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { EntityUpdateClient, EntityMetadataClient } from '@kbn/entity-store/server';
 
-import type {
-  RelationshipIntegrationConfig,
-  CompositeAfterKey,
-  CompositeBucket,
-} from './types';
+import type { RelationshipIntegrationConfig, CompositeAfterKey, CompositeBucket } from './types';
 import {
   buildActorDiscoveryQuery,
   buildActorPageFilter,
@@ -324,12 +320,17 @@ async function runIntegration(
                 : [];
             })
           : actorFilteredRecords;
-        const pageMeta = await writeRelationshipMetadatas(entityMetadataClient, logger, metadataRecords, {
-          scanId: metadataContext.scanId,
-          lookbackWindow: config.disableLookbackWindow ? '' : LOOKBACK_WINDOW,
-          entitySource: config.id,
-          observedAt: metadataContext.observedAt,
-        });
+        const pageMeta = await writeRelationshipMetadatas(
+          entityMetadataClient,
+          logger,
+          metadataRecords,
+          {
+            scanId: metadataContext.scanId,
+            lookbackWindow: config.disableLookbackWindow ? '' : LOOKBACK_WINDOW,
+            entitySource: config.id,
+            observedAt: metadataContext.observedAt,
+          }
+        );
         metadata = mergeMetadataResult(metadata, pageMeta);
       }
 
@@ -490,8 +491,13 @@ export const runRelationshipMaintainer = async ({
             metadataContext
           );
 
-    const { recordsCount, write, metadata, outcome, truncated: integrationTruncated } =
-      integrationResult;
+    const {
+      recordsCount,
+      write,
+      metadata,
+      outcome,
+      truncated: integrationTruncated,
+    } = integrationResult;
 
     // Map source-specific iteration/bucket fields to unified accumulators.
     // log-source runner returns `slices` (not `iterations`/`buckets`).

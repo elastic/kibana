@@ -25,7 +25,9 @@ const makeClients = () => {
     failed: 0,
   }));
   const crudClient = { bulkUpdateEntity: bulkUpdate } as unknown as EntityUpdateClient;
-  const entityMetadataClient = { bulkAppendMetadata: bulkAppend } as unknown as EntityMetadataClient;
+  const entityMetadataClient = {
+    bulkAppendMetadata: bulkAppend,
+  } as unknown as EntityMetadataClient;
   return { crudClient, entityMetadataClient, bulkUpdate, bulkAppend };
 };
 
@@ -63,8 +65,13 @@ describe('runLogsIntegration', () => {
     esql.mockResolvedValueOnce({ columns: probeColumns, values: [] });
 
     const result = await runLogsIntegration(
-      baseConfig, esClient, logger, 'default',
-      crudClient, entityMetadataClient, undefined,
+      baseConfig,
+      esClient,
+      logger,
+      'default',
+      crudClient,
+      entityMetadataClient,
+      undefined,
       { scanId: 'scan-1', observedAt: '2026-07-26T00:00:00.000Z' }
     );
 
@@ -92,8 +99,13 @@ describe('runLogsIntegration', () => {
     bulkUpdate.mockResolvedValue([]);
 
     const result = await runLogsIntegration(
-      baseConfig, esClient, logger, 'default',
-      crudClient, entityMetadataClient, undefined,
+      baseConfig,
+      esClient,
+      logger,
+      'default',
+      crudClient,
+      entityMetadataClient,
+      undefined,
       { scanId: 'scan-1', observedAt: '2026-07-26T00:00:00.000Z' }
     );
 
@@ -130,8 +142,13 @@ describe('runLogsIntegration', () => {
     esql.mockResolvedValueOnce({ columns: extractColumns, values: [] });
 
     const result = await runLogsIntegration(
-      baseConfig, esClient, logger, 'default',
-      crudClient, entityMetadataClient, undefined,
+      baseConfig,
+      esClient,
+      logger,
+      'default',
+      crudClient,
+      entityMetadataClient,
+      undefined,
       { scanId: 'scan-1', observedAt: '2026-07-26T00:00:00.000Z' }
     );
 
@@ -148,8 +165,13 @@ describe('runLogsIntegration', () => {
     controller.abort();
 
     const result = await runLogsIntegration(
-      baseConfig, esClient, logger, 'default',
-      crudClient, entityMetadataClient, controller.signal,
+      baseConfig,
+      esClient,
+      logger,
+      'default',
+      crudClient,
+      entityMetadataClient,
+      controller.signal,
       { scanId: 'scan-1', observedAt: '2026-07-26T00:00:00.000Z' }
     );
 
@@ -172,8 +194,13 @@ describe('runLogsIntegration', () => {
     esql.mockResolvedValueOnce({ columns: extractColumns, values: [] });
 
     await runLogsIntegration(
-      baseConfig, esClient, logger, 'default',
-      crudClient, entityMetadataClient, undefined,
+      baseConfig,
+      esClient,
+      logger,
+      'default',
+      crudClient,
+      entityMetadataClient,
+      undefined,
       { scanId: 'scan-1', observedAt: '2026-07-26T00:00:00.000Z' }
     );
 
