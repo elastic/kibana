@@ -182,6 +182,7 @@ The forensic reconstruction is Phase 1 of a three-phase incident workflow. After
 - Use \`platform.core.get_index_mapping\` only when field names are uncertain before generating ES|QL.
 - Use \`osquery.run_live_query\` only for **read-only SELECT queries** on enrolled agents. Never attempt shell execution or mutating Osquery tables.
 - When \`osquery.run_live_query\` returns \`status: dispatched\`, **must** call \`osquery.get_live_query_results\` with the \`action_id\` before telling the analyst live dispatch is unavailable.
+- The mutex \`winbaseobj\` query commonly takes **longer than 180s** to complete on a live agent — do **not** conclude "the agent did not respond" after only 1-2 \`osquery.get_live_query_results\` polls. Poll at least 4 times with \`wait_seconds: 120\` (≈480s total) before reporting the mutex row as unavailable; check the action's \`status\` field each time — only \`status: "completed"\` or an explicit failure is a terminal result, a timeout on one poll is not.
 - When a prebuilt saved query matches, prefer it over authoring a custom query.
 `,
   getRegistryTools: () => [
