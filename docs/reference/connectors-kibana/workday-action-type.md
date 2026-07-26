@@ -46,17 +46,10 @@ Actions are grouped by Workday functional area. Each group requires the correspo
 
 | Functional area | Actions | Required scope |
 |-----------------|---------|----------------|
-| Workers & org hierarchy | Search workers, get worker profile, get direct reports, list organizations, get organization | Worker Profile and Skills; Organizations and Roles |
+| Workers & org hierarchy | Get current user, search workers, get worker profile, get direct reports, list organizations, get organization | Worker Profile and Skills; Organizations and Roles |
 | Staffing & inbox | List job postings, get job posting, list inbox tasks | Staffing; Tenant Non-Configurable |
-| Time off & calendars | Get time-off balances, list absence types, list holidays | Time Off and Leave; Time Tracking |
-| Recruiting | List job requisitions, get job requisition, list candidates | Recruiting |
-| Learning | List courses, get course, list enrollments | Learning Core |
-| Expenses | List expense reports, get expense report | Expenses |
-| Self-service requests | List request types, list requests | Benefits; Tenant Non-Configurable |
-| Journeys | List journeys | Journeys |
-| Projects & revenue | List projects, get project, list project revenue | Projects; Project Billing; Project Tracking |
-| Procurement | List purchase requisitions, get purchase requisition, list purchase orders | Procurement |
-| Budgets | Check budget availability | Budgets |
+| Time off & calendars | Get time-off balance, list time-off entries, list absence types, list holidays | Time Off and Leave; Time Tracking |
+| Recruiting | List candidates | Recruiting |
 
 ## Connector networking configuration [workday-connector-networking-configuration]
 

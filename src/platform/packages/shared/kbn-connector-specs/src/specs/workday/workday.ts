@@ -17,10 +17,6 @@
  * Required scopes for Authorization Code:
  *   Worker Profile and Skills, Organizations and Roles, Time Off and Leave, Staffing,
  *   Tenant Non-Configurable, Recruiting
- * Confirmed REST API base paths (per Workday REST directory):
- *   Common v1:      /ccx/api/common/v1/<tenant>/   — workers, organizations
- *   Recruiting v4:  /ccx/api/recruiting/v4/<tenant>/ — jobPostings, candidates
- *   AbsenceMgmt v4: /ccx/api/absenceManagement/v4/<tenant>/ — timeOffDetails, eligibleAbsenceTypes
  */
 
 // Bump these when Workday releases a newer module version.
@@ -373,8 +369,8 @@ export const Workday: ConnectorSpec = {
         const response = await ctx.client.get(url, {
           params: {
             limit: input.limit,
+            worker: input.workerId ?? 'me',
             ...(input.offset !== undefined && { offset: input.offset }),
-            ...(input.workerId && { worker: input.workerId }),
             ...(input.effective && { effective: input.effective }),
           },
         });

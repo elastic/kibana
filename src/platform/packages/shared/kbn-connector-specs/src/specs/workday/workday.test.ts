@@ -88,6 +88,29 @@ describe('Workday', () => {
     });
   });
 
+  describe('whoAmI action', () => {
+    it('should return the current user worker profile', async () => {
+      const mockResponse = {
+        data: { id: 'wid-me', descriptor: 'Erik Currin', businessTitle: 'Engineer' },
+      };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      const result = await Workday.actions.whoAmI.handler(mockContext, {});
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://mycompany.workday.com/ccx/api/common/v1/mycompany/workers/me',
+        {}
+      );
+      expect(result).toEqual(mockResponse.data);
+    });
+
+    it('should propagate API errors', async () => {
+      mockClient.get.mockRejectedValue(new Error('Unauthorized'));
+
+      await expect(Workday.actions.whoAmI.handler(mockContext, {})).rejects.toThrow('Unauthorized');
+    });
+  });
+
   describe('searchWorkers action', () => {
     it('should search workers with default limit', async () => {
       const mockResponse = {
@@ -470,11 +493,74 @@ describe('Workday', () => {
       expect(result).toEqual(mockResponse.data);
     });
 
+    it('should default to the current user when workerId is omitted', async () => {
+      mockClient.get.mockResolvedValue({ data: { data: [], total: 0 } });
+
+      await Workday.actions.getTimeOffBalance.handler(mockContext, { limit: 20 });
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://mycompany.workday.com/ccx/api/absenceManagement/v5/mycompany/balances',
+        { params: { limit: 20, worker: 'me' } }
+      );
+    });
+
     it('should propagate API errors', async () => {
       mockClient.get.mockRejectedValue(new Error('Forbidden'));
 
       await expect(
         Workday.actions.getTimeOffBalance.handler(mockContext, { workerId: 'wid-001' })
+      ).rejects.toThrow('Forbidden');
+    });
+  });
+
+  describe('listTimeOffEntries action', () => {
+    it('should list time off entries for a specific worker', async () => {
+      const mockResponse = {
+        data: {
+          data: [
+            {
+              date: '2025-03-01',
+              hours: 8,
+              status: 'Approved',
+              absencePlan: { descriptor: 'Vacation' },
+            },
+          ],
+          total: 1,
+        },
+      };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      const result = (await Workday.actions.listTimeOffEntries.handler(mockContext, {
+        workerId: 'wid-001',
+        fromDate: '2025-01-01',
+        toDate: '2025-12-31',
+        limit: 20,
+      })) as WorkdayListResponse;
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://mycompany.workday.com/ccx/api/absenceManagement/v5/mycompany/workers/wid-001/timeOffDetails',
+        { params: { limit: 20, fromDate: '2025-01-01', toDate: '2025-12-31' } }
+      );
+      expect(result).toEqual(mockResponse.data);
+    });
+
+    it('should default to the current user when workerId is omitted', async () => {
+      const mockResponse = { data: { data: [], total: 0 } };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      await Workday.actions.listTimeOffEntries.handler(mockContext, { limit: 20 });
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://mycompany.workday.com/ccx/api/absenceManagement/v5/mycompany/workers/me/timeOffDetails',
+        { params: { limit: 20 } }
+      );
+    });
+
+    it('should propagate API errors', async () => {
+      mockClient.get.mockRejectedValue(new Error('Forbidden'));
+
+      await expect(
+        Workday.actions.listTimeOffEntries.handler(mockContext, { workerId: 'wid-001' })
       ).rejects.toThrow('Forbidden');
     });
   });
