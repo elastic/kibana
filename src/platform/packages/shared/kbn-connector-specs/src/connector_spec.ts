@@ -237,6 +237,16 @@ export interface ActionContext {
   connectorUsageCollector?: unknown;
   log: Logger;
   secrets?: Record<string, unknown>;
+  /**
+   * Validates that a request target URL is permitted by the Kibana Actions
+   * `allowedHosts` allowlist, throwing when it is not. Provided by the executor
+   * so handlers that build request URLs from user-controlled input (e.g. the
+   * framework-synthesized generic `request` action) can guard against sending
+   * the connector's credentials to arbitrary hosts (SSRF / credential
+   * exfiltration). Optional so specs can be exercised in isolation without the
+   * full Actions plumbing.
+   */
+  ensureUriAllowed?: (uri: string) => void;
 }
 
 // ============================================================================

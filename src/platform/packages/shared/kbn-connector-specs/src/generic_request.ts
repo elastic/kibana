@@ -168,6 +168,12 @@ export const buildGenericRequestHandler =
   async (ctx: ActionContext, input: GenericRequestInput): Promise<GenericRequestOutput> => {
     const { method, body, headers, query } = input;
     const url = resolveGenericRequestUrl(ctx, input, getBaseUrl);
+    // The resolved URL can be author-controlled (an absolute `url`, or a `path`
+    // joined onto the base URL). Enforce the Actions `allowedHosts` allowlist
+    // before sending the connector's authenticated client at it, so a workflow
+    // author cannot exfiltrate the connector's credentials or drive SSRF to
+    // arbitrary/internal hosts.
+    ctx.ensureUriAllowed?.(url);
     const response = await ctx.client.request({
       method,
       url,

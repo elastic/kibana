@@ -210,5 +210,45 @@ describe('generic_request', () => {
         url: 'https://api.example.com/v0/things',
       });
     });
+
+    describe('allowedHosts enforcement', () => {
+      it('validates the resolved absolute url against the allowlist before requesting', async () => {
+        const ctx = createCtx({ status: 200, headers: {}, data: {} });
+        const ensureUriAllowed = jest.fn();
+        ctx.ensureUriAllowed = ensureUriAllowed;
+        const handler = buildGenericRequestHandler(() => 'https://api.example.com');
+
+        await handler(ctx, { method: 'get', url: 'https://other.example.com/raw' });
+
+        expect(ensureUriAllowed).toHaveBeenCalledWith('https://other.example.com/raw');
+        expect(ctx.client.request as jest.Mock).toHaveBeenCalled();
+      });
+
+      it('validates the resolved base-url + path against the allowlist', async () => {
+        const ctx = createCtx({ status: 200, headers: {}, data: {} });
+        const ensureUriAllowed = jest.fn();
+        ctx.ensureUriAllowed = ensureUriAllowed;
+        const handler = buildGenericRequestHandler(() => 'https://api.example.com');
+
+        await handler(ctx, { method: 'get', path: '/v0/things' });
+
+        expect(ensureUriAllowed).toHaveBeenCalledWith('https://api.example.com/v0/things');
+      });
+
+      it('does not send the request when the host is not allowed', async () => {
+        const ctx = createCtx({ status: 200, headers: {}, data: {} });
+        ctx.ensureUriAllowed = jest.fn(() => {
+          throw new Error(
+            'target url "https://evil.example.com/steal" is not added to the Kibana config'
+          );
+        });
+        const handler = buildGenericRequestHandler(() => 'https://api.example.com');
+
+        await expect(
+          handler(ctx, { method: 'get', url: 'https://evil.example.com/steal' })
+        ).rejects.toThrow('is not added to the Kibana config');
+        expect(ctx.client.request as jest.Mock).not.toHaveBeenCalled();
+      });
+    });
   });
 });
