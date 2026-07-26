@@ -201,10 +201,25 @@ export const runLogsIntegration = async (
         );
         totalWrite = mergeWriteResult(totalWrite, write);
 
-        const { succeededEntityIds } = write;
-        const metadataRecords = pageRecords.filter(
+        const { validTargetIds, succeededEntityIds } = write;
+        const actorFilteredRecords = pageRecords.filter(
           (r) => r.entityId !== null && succeededEntityIds.has(r.entityId)
         );
+
+        // When target validation also ran, further restrict to the validated target set.
+        const metadataRecords = validTargetIds
+          ? actorFilteredRecords.flatMap((r) => {
+              const filteredRels: Record<string, string[]> = {};
+              for (const [relType, targetEuids] of Object.entries(r.relationships)) {
+                const valid = targetEuids.filter((id) => validTargetIds.has(id));
+                if (valid.length > 0) filteredRels[relType] = valid;
+              }
+              return Object.keys(filteredRels).length > 0
+                ? [{ ...r, relationships: filteredRels }]
+                : [];
+            })
+          : actorFilteredRecords;
+
         const metadata = await writeRelationshipMetadatas(
           entityMetadataClient,
           logger,

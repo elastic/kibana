@@ -358,8 +358,8 @@ async function runIntegration(
     return {
       buckets: totalBuckets,
       recordsCount: totalRecordsCount,
-      write: ZERO_WRITE,
-      metadata: ZERO_METADATA,
+      write,
+      metadata,
       outcome: 'error',
       iterations,
       truncated: false,
