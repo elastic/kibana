@@ -23,6 +23,19 @@ export const evaluateCondition = (
   }
 
   if (typeof renderedCondition === 'string') {
+    // Liquid/template boolean expressions (e.g. `{{ a == b and c >= d }}`) render to the
+    // literal strings "true"/"false", not valid KQL — evaluateKql would otherwise silently
+    // misparse them (a bare `true` token isn't a KQL function/field expression and falls
+    // through to `false`), causing every all-true composite condition to be treated as
+    // unmet. Short-circuit on the exact rendered boolean before attempting KQL parsing.
+    const trimmed = renderedCondition.trim();
+    if (trimmed === 'true') {
+      return true;
+    }
+    if (trimmed === 'false') {
+      return false;
+    }
+
     try {
       return evaluateKql(renderedCondition, context);
     } catch (error) {

@@ -1,4 +1,4 @@
-version: "1"
+version: '1'
 name: Dark Watch Worker
 description: >
   Dark Watch domain worker. Continuous hunt-style sweep with threat-intelligence
@@ -8,13 +8,30 @@ enabled: true
 tags:
   - watch-worker
   - watch-dark-worker
+# CWL skill-customization: Option 2 (WG decided 2026-07-23, Slack C0BHGGA6PHC/p1784742716537469).
+# Watch-level skill allowlist authored on the `watch_policy` data.set step (CWL policy bag — the
+# top-level workflow schema is non-strict and strips unknown top-level keys). Passed into the
+# ai.agent step as a runtime override; effective skills = allowlist ∩ skills-exposed-to-the-agent
+# (intersection: the allowlist can only narrow, never widen).
 triggers:
   - type: manual
 steps:
+  - name: watch_policy
+    # CWL policy bag. Dark Watch runs continuous threat-intel hunt sweeps only.
+    type: data.set
+    with:
+      watch:
+        skill_allowlist:
+          - threat-intelligence
   - name: threat_intel_hunt
     type: ai.agent
-    timeout: "10m"
+    timeout: '10m'
     with:
+      # Option 2 runtime override — STAGED. Un-comment once the ai.agent step accepts
+      # configuration_overrides.skill_ids (Ying's platform PR; POC spong/kibana#22). Until then the
+      # skill:// mention in `message` is the interim, functional-but-not-hard allowlist.
+      # configuration_overrides:
+      #   skill_ids: "{{ steps.watch_policy.watch.skill_allowlist | json }}"
       message: >
         Use the [/threat-intelligence](skill://threat-intelligence) skill to
         perform a threat-intelligence hunt sweep. You already have the escalation
@@ -26,6 +43,14 @@ steps:
            using ES|QL over endpoint events, network flows, and alerts
         3. Identify coverage gaps - MITRE techniques without matching detections
         4. Produce a finding with a confidence score and recommended hunt
+
+        Detection Change Signal (CONDITIONAL): if — and ONLY if — you find a real
+        detection coverage gap (a MITRE technique observed with no matching
+        detection rule, or a rule that clearly needs tuning), populate
+        `detection_change_signal.gaps` with one entry per gap. If there is NO
+        coverage gap, OMIT `detection_change_signal` entirely — do not emit an
+        empty object. You never create or tune rules yourself; you only surface
+        the gap for the Detection Watch.
 
         Escalation context:
         {{ inputs.escalation | json }}
@@ -49,6 +74,36 @@ steps:
                 confidence: { type: number }
           recommended_action:
             type: string
+          detection_change_signal:
+            type: object
+            description: >
+              OPTIONAL. Present only when a real detection coverage gap is found;
+              omit entirely when there is no gap.
+            properties:
+              gaps:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    technique:
+                      type: string
+                      description: MITRE ATT&CK technique id, e.g. T1003.001
+                    ruleRef:
+                      type: string
+                      description: Existing rule id/name if this is a tuning target
+                    evidence:
+                      type: string
+                      description: Observation motivating the gap
+                    confidence:
+                      type: number
+                      minimum: 0
+                      maximum: 1
+                  required:
+                    - technique
+                    - evidence
+                    - confidence
+            required:
+              - gaps
         required:
           - finding
           - confidence_score
@@ -58,7 +113,12 @@ steps:
       workerRun:
         watch: watch-dark
         finding: "{{ steps.threat_intel_hunt.output.structured_output.finding | default: 'Dark Watch sweep complete.' }}"
-        confidence: "{{ steps.threat_intel_hunt.output.structured_output.confidence_score | default: 0 }}"
-        indicators: "{{ steps.threat_intel_hunt.output.structured_output.indicators | default: [] }}"
+        confidence: '${{ steps.threat_intel_hunt.output.structured_output.confidence_score | default: 0 }}'
+        indicators: '${{ steps.threat_intel_hunt.output.structured_output.indicators | default: [] }}'
         recommendedAction: "{{ steps.threat_intel_hunt.output.structured_output.recommended_action | default: '' }}"
-        investigationId: "{{ inputs.escalation.investigationId }}"
+        investigationId: '{{ inputs.escalation.investigationId }}'
+        # Detection Change Signal (delta #1/#2) — CONDITIONAL. Renders to the structured signal JSON
+        # only when the model returned `detection_change_signal`; otherwise renders empty/null and the
+        # server (WorkerRunSchema.detectionChangeSignal is optional) drops it — nothing is attached to
+        # the Investigation. sourceWatch/runId/investigationId are stamped by the server on attach.
+        detectionChangeSignalGaps: '{{ steps.threat_intel_hunt.output.structured_output.detection_change_signal.gaps | json }}'

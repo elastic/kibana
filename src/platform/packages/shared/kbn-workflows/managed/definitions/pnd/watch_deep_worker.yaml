@@ -1,4 +1,4 @@
-version: "1"
+version: '1'
 name: Deep Watch Worker
 description: >
   Deep Watch domain worker. Specialist forensic investigation of escalated
@@ -8,19 +8,37 @@ enabled: true
 tags:
   - watch-worker
   - watch-deep-worker
+# CWL skill-customization: Option 2 (WG decided 2026-07-23, Slack C0BHGGA6PHC/p1784742716537469).
+# Watch-level skill allowlist authored on the `watch_policy` data.set step (CWL policy bag — the
+# top-level workflow schema is non-strict and strips unknown top-level keys). Passed into the
+# ai.agent step as a runtime override; effective skills = allowlist ∩ skills-exposed-to-the-agent
+# (intersection: the allowlist can only narrow, never widen).
 triggers:
   - type: manual
 steps:
+  - name: watch_policy
+    # CWL policy bag. Deep Watch runs forensic specialist work only.
+    type: data.set
+    with:
+      watch:
+        skill_allowlist:
+          - deep-watch-forensics
   - name: forensic_investigation
     type: ai.agent
-    timeout: "15m"
+    timeout: '15m'
     with:
+      # Option 2 runtime override — STAGED. Un-comment once the ai.agent step accepts
+      # configuration_overrides.skill_ids (Ying's platform PR; POC spong/kibana#22). Until then the
+      # skill:// mention in `message` is the interim, functional-but-not-hard allowlist.
+      # configuration_overrides:
+      #   skill_ids: "{{ steps.watch_policy.watch.skill_allowlist | json }}"
       message: >
         Use the [/deep-watch-forensics](skill://deep-watch-forensics) skill to
         perform a forensic investigation of the escalated threat context below.
-        You already have the endpoint telemetry and IoC context you need; reason
-        from the evidence and return a single structured draft report. Do NOT ask
-        questions. Do NOT execute response actions.
+        You already have the endpoint telemetry and IoC context you need for
+        historical reconstruction; reason from the evidence and return a single
+        structured draft report. Do NOT ask questions. Do NOT execute response
+        actions.
 
         Correlate endpoint telemetry (process events, network connections, file
         writes, registry modifications) with threat-intel IoCs. Produce:
@@ -29,16 +47,40 @@ steps:
         3. Lateral movement chain across affected hosts
         4. Persistence mechanisms enumerated
         5. IoC validation results (file hashes, C2 IPs, registry keys)
-        6. Draft forensic report with recommended containment actions
+        6. Osquery live-state augmentation (REQUIRED per the skill's Phase 1
+           guardrails) — call osquery.check_integration, then use live queries
+           to confirm findings telemetry alone cannot answer: mutex enumeration
+           for the IoC table, whether a discovered persistence mechanism is
+           still active right now (not just historically observed), and current
+           process state on affected hosts. If Osquery is unavailable, state
+           that gap explicitly rather than omitting live-state findings.
+        7. Draft forensic report with recommended containment actions
 
         All conclusions are DRAFT - for specialist review only.
         Recommend containment to the analyst; do NOT execute.
+
+        Detection Change Signal (CONDITIONAL): if — and ONLY if — the forensic
+        reconstruction reveals a detection coverage gap (an observed technique
+        with no matching detection rule, or a rule that clearly needs tuning),
+        populate `detection_change_signal.gaps` with one entry per gap. If there
+        is NO coverage gap, OMIT `detection_change_signal` entirely — do not emit
+        an empty object. You never create or tune rules yourself; you only surface
+        the gap for the Detection Watch.
 
         Escalation context:
         {{ inputs.escalation | json }}
       schema:
         type: object
         properties:
+          confidence_score:
+            type: number
+            minimum: 0
+            maximum: 1
+            description: >
+              Overall confidence (0-1) that this is a genuine, actionable
+              incident requiring the recommended containment — not a per-gap
+              detection-signal confidence. Base this on the strength of the
+              cross-host correlation and evidence quality in the timeline.
           patient_zero:
             type: string
           timeline_summary:
@@ -49,10 +91,48 @@ steps:
             type: string
           ioc_validation:
             type: string
+          osquery_findings:
+            type: string
+            description: >
+              Live-state findings from osquery (mutexes, current process state,
+              persistence-still-active verification), distinct from historical
+              telemetry findings. State explicitly if Osquery was unavailable
+              rather than leaving this blank without explanation.
           recommended_containment:
             type: string
           draft: { type: boolean }
+          detection_change_signal:
+            type: object
+            description: >
+              OPTIONAL. Present only when a real detection coverage gap is found;
+              omit entirely when there is no gap.
+            properties:
+              gaps:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    technique:
+                      type: string
+                      description: MITRE ATT&CK technique id, e.g. T1003.001
+                    ruleRef:
+                      type: string
+                      description: Existing rule id/name if this is a tuning target
+                    evidence:
+                      type: string
+                      description: Observation motivating the gap
+                    confidence:
+                      type: number
+                      minimum: 0
+                      maximum: 1
+                  required:
+                    - technique
+                    - evidence
+                    - confidence
+            required:
+              - gaps
         required:
+          - confidence_score
           - timeline_summary
           - recommended_containment
   - name: worker_output
@@ -60,7 +140,14 @@ steps:
     with:
       workerRun:
         watch: watch-deep
+        confidence: '${{ steps.forensic_investigation.output.structured_output.confidence_score | default: 0 }}'
         draft: true
-        report: "{{ steps.forensic_investigation.output.structured_output | json }}"
+        report: '{{ steps.forensic_investigation.output.structured_output | json }}'
         recommendedContainment: "{{ steps.forensic_investigation.output.structured_output.recommended_containment | default: '' }}"
-        investigationId: "{{ inputs.escalation.investigationId }}"
+        osqueryFindings: "{{ steps.forensic_investigation.output.structured_output.osquery_findings | default: '' }}"
+        investigationId: '{{ inputs.escalation.investigationId }}'
+        # Detection Change Signal (delta #1/#2) — CONDITIONAL. Renders to the structured signal JSON
+        # only when the model returned `detection_change_signal`; otherwise renders empty/null and the
+        # server (WorkerRunSchema.detectionChangeSignal is optional) drops it — nothing is attached to
+        # the Investigation. sourceWatch/runId/investigationId are stamped by the server on attach.
+        detectionChangeSignalGaps: '{{ steps.forensic_investigation.output.structured_output.detection_change_signal.gaps | json }}'

@@ -32,6 +32,25 @@ describe('evaluateCondition', () => {
     expect(evaluateCondition('status: active', context, 'step-1')).toBe(false);
   });
 
+  it('returns true for the rendered string "true" (liquid boolean expression result)', () => {
+    // Regression: liquid/template boolean expressions (e.g.
+    // `{{ a == 'x' and b >= c }}`) render to the literal string "true"/"false",
+    // not valid KQL. Before the fix, this fell through to KQL parsing, which
+    // returned false for a bare `true` token — silently breaking every
+    // all-true composite `if` condition in managed workflows (e.g. Watch
+    // Floor's escalate-to-Dark gate).
+    expect(evaluateCondition('true', {}, 'step-1')).toBe(true);
+  });
+
+  it('returns false for the rendered string "false" (liquid boolean expression result)', () => {
+    expect(evaluateCondition('false', {}, 'step-1')).toBe(false);
+  });
+
+  it('handles whitespace around the rendered "true"/"false" string', () => {
+    expect(evaluateCondition('  true  ', {}, 'step-1')).toBe(true);
+    expect(evaluateCondition('  false  ', {}, 'step-1')).toBe(false);
+  });
+
   it('throws a syntax error for invalid KQL', () => {
     expect(() => evaluateCondition('invalid ::::', {}, 'step-1')).toThrow(
       /Syntax error in condition/

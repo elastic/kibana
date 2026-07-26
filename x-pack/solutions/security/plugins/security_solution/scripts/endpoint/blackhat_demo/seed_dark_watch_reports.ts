@@ -146,9 +146,10 @@ interface ThreatReportDoc {
   };
   attribution?: {
     environment_hits: {
-      layer1_ioc: number;
-      layer2_behavior: number;
+      layer_1_ioc_match: number;
+      layer_2_behavioral: number;
       computed_at: string;
+      window?: string;
     };
     environment_hits_total: number;
   };
@@ -156,16 +157,11 @@ interface ThreatReportDoc {
     ingested_at: string;
     extracted_at: string;
     extraction_method: string;
-    adapter_id: string;
   };
 }
 
 function fingerprint(text: string): string {
   return createHash('sha256').update(text.trim().toLowerCase()).digest('hex');
-}
-
-function isoOffset(minutes: number): string {
-  return new Date(Date.now() + minutes * 60 * 1000).toISOString();
 }
 
 function isoOffsetHours(hours: number): string {
@@ -332,14 +328,17 @@ T1003.001 (LSASS Memory), T1021.002 (SMB/Windows Admin Shares), T1047 (WMI), T14
     last_hunt_status: 'completed_with_hits',
   },
   attribution: {
-    environment_hits: { layer1_ioc: 3, layer2_behavior: 4, computed_at: isoOffsetHours(-0.5) },
+    environment_hits: {
+      layer_1_ioc_match: 3,
+      layer_2_behavioral: 4,
+      computed_at: isoOffsetHours(-0.5),
+    },
     environment_hits_total: 7,
   },
   lineage: {
     ingested_at: isoOffsetHours(-2),
     extracted_at: isoOffsetHours(-1.5),
     extraction_method: 'rss',
-    adapter_id: 'rss:mandiant-research',
   },
 };
 
@@ -483,14 +482,17 @@ T1547.001 (Registry Run Keys), T1047 (WMI), T1021.002 (SMB/Admin Shares).`,
     last_hunt_status: 'completed_with_hits',
   },
   attribution: {
-    environment_hits: { layer1_ioc: 2, layer2_behavior: 3, computed_at: isoOffsetHours(-1) },
+    environment_hits: {
+      layer_1_ioc_match: 2,
+      layer_2_behavioral: 3,
+      computed_at: isoOffsetHours(-1),
+    },
     environment_hits_total: 5,
   },
   lineage: {
     ingested_at: isoOffsetHours(-4),
     extracted_at: isoOffsetHours(-3.5),
     extraction_method: 'rss',
-    adapter_id: 'rss:talos',
   },
 };
 
@@ -626,14 +628,17 @@ Pattern: OUTLOOK.EXE → powershell.exe (encoded) → rundll32.exe update.dll �
     last_hunt_status: 'completed_with_hits',
   },
   attribution: {
-    environment_hits: { layer1_ioc: 4, layer2_behavior: 2, computed_at: isoOffsetHours(-2) },
+    environment_hits: {
+      layer_1_ioc_match: 4,
+      layer_2_behavioral: 2,
+      computed_at: isoOffsetHours(-2),
+    },
     environment_hits_total: 6,
   },
   lineage: {
     ingested_at: isoOffsetHours(-6),
     extracted_at: isoOffsetHours(-5.5),
     extraction_method: 'text_indicator_list',
-    adapter_id: 'text_indicator_list:maltrail-cobaltstrike',
   },
 };
 
@@ -737,7 +742,6 @@ MITRE ATT&CK: T1566.001 (Spearphishing Attachment), T1105 (Ingress Tool Transfer
     ingested_at: isoOffsetHours(-8),
     extracted_at: isoOffsetHours(-7.5),
     extraction_method: 'rss',
-    adapter_id: 'rss:eset-welivesecurity',
   },
 };
 
@@ -846,66 +850,24 @@ by multiple threat groups including ransomware affiliates.`,
     ingested_at: isoOffsetHours(-10),
     extracted_at: isoOffsetHours(-9.5),
     extraction_method: 'kev',
-    adapter_id: 'kev:cisa-known-exploited-vulnerabilities',
   },
 };
 
 // ── Subscription + Hunt Finding seed docs ────────────────────────────────────
-
-const subscription1 = {
-  '@timestamp': isoOffsetHours(-24),
-  space_id: 'default',
-  user: 'analyst@demo.local',
-  name: 'Ransomware Intelligence',
-  tags: ['ransomware', 'malware'],
-  severity_filter: ['critical', 'high'],
-  connector_id: '',
-  delivery_frequency: 'hourly',
-  enabled: true,
-};
-
-const huntFinding1 = {
-  '@timestamp': isoOffsetHours(-0.5),
-  space_id: 'default',
-  report_id: 'apt29-cobalt-strike-c2-infrastructure',
-  technique_id: 'T1547.001',
-  finding_type: 'ioc_hit',
-  description:
-    'Registry Run-key persistence pattern matched on WKSTN-RECV01, SRV-DC01, and WIN-FIN-03',
-  hosts: ['WKSTN-RECV01', 'SRV-DC01', 'WIN-FIN-03'],
-  confidence: 0.95,
-  tier: 1,
-  ioc_type: 'registry_key',
-  ioc_value: SHARED_RUN_KEY,
-};
-
-const huntFinding2 = {
-  '@timestamp': isoOffsetHours(-0.5),
-  space_id: 'default',
-  report_id: 'apt29-cobalt-strike-c2-infrastructure',
-  technique_id: 'T1071.001',
-  finding_type: 'ioc_hit',
-  description: 'C2 IP 185.220.101.42 beacon detected on 3 hosts',
-  hosts: ['WKSTN-RECV01', 'SRV-DC01', 'WIN-FIN-03'],
-  confidence: 0.97,
-  tier: 1,
-  ioc_type: 'ipv4',
-  ioc_value: SHARED_C2_IP,
-};
-
-const huntFinding3 = {
-  '@timestamp': isoOffsetHours(-0.5),
-  space_id: 'default',
-  report_id: 'lockbit-3-ransomware',
-  technique_id: 'T1490',
-  finding_type: 'ttp_hit',
-  description: 'vssadmin.exe delete shadows /all /quiet observed on SRV-DC01',
-  hosts: ['SRV-DC01'],
-  confidence: 0.99,
-  tier: 1,
-  ioc_type: 'process_name',
-  ioc_value: 'vssadmin.exe',
-};
+//
+// NOTE: subscription1/huntFinding1/2/3 doc literals were removed here (not just
+// excluded from the bulk payload) — their shapes have drifted from the live
+// `.kibana-threat-intel-subscriptions` / `.kibana-threat-intel-hunt-findings`
+// mappings:
+//   - subscriptions: real mapping has no @timestamp field at all; uses
+//     created_at/updated_at/schedule_rrule/delivery/workflow_id instead.
+//   - hunt-findings: real mapping expects hunt_run_id/hunt_run_status/
+//     hypothesis/hypothesis_rationale/proposed_esql_rule/report_title/
+//     risk_score/rule_name/severity/tier1_status, not the
+//     technique_id/finding_type/description/hosts/tier/ioc_type/ioc_value
+//     shape these docs used.
+// This is real schema drift, not a syntax bug — rewriting both doc shapes
+// against the current mappings is tracked separately, not patched live here.
 
 // ── Seed function ────────────────────────────────────────────────────────────
 
@@ -922,22 +884,27 @@ export async function seedDarkWatchReports(
   log: ToolingLog
 ): Promise<void> {
   const reportOps = REPORT_DOCS.flatMap(({ id, doc }) => [
-    { index: { _index: '.kibana-threat-reports', _id: `seed::${id}` } },
+    { create: { _index: '.kibana-threat-reports', _id: `seed::${id}` } },
     doc,
   ]);
 
-  const subOps = [
-    { index: { _index: '.kibana-threat-intel-subscriptions', _id: 'seed::sub-ransomware-intel' } },
-    subscription1,
+  const subOps: unknown[] = [
+    // NOTE: subscription1 doc is commented out — `.kibana-threat-intel-
+    // subscriptions` mapping has no @timestamp field at all (uses created_at/
+    // updated_at/schedule_rrule/delivery/workflow_id instead). Same class of
+    // schema drift as hunt-findings above; needs a proper rewrite, not a
+    // live patch during a demo prep session.
   ];
 
-  const findingOps = [
-    { index: { _index: '.kibana-threat-intel-hunt-findings', _id: 'seed::finding-1' } },
-    huntFinding1,
-    { index: { _index: '.kibana-threat-intel-hunt-findings', _id: 'seed::finding-2' } },
-    huntFinding2,
-    { index: { _index: '.kibana-threat-intel-hunt-findings', _id: 'seed::finding-3' } },
-    huntFinding3,
+  const findingOps: unknown[] = [
+    // NOTE: hunt-findings docs (huntFinding1/2/3) are commented out of the bulk
+    // payload — their shape (technique_id/finding_type/description/hosts/tier/
+    // ioc_type/ioc_value) has drifted from the live `.kibana-threat-intel-
+    // hunt-findings` mapping, which now expects hunt_run_id/hunt_run_status/
+    // hypothesis/hypothesis_rationale/proposed_esql_rule/report_title/
+    // risk_score/rule_name/severity/tier1_status instead. Real schema drift,
+    // not a syntax bug — needs a proper rewrite against the current mapping,
+    // tracked separately rather than papered over here.
   ];
 
   const operations = [...reportOps, ...subOps, ...findingOps];
@@ -945,14 +912,15 @@ export async function seedDarkWatchReports(
   const response = await esClient.bulk({ operations, refresh: true });
 
   if (response.errors) {
-    const firstError = response.items.find((item) => item.index?.error)?.index?.error;
+    const failedItem = response.items.find((item) => item.index?.error || item.create?.error);
+    const firstError = failedItem?.index?.error ?? failedItem?.create?.error;
     throw new Error(
       `seedDarkWatchReports: bulk index failed: ${JSON.stringify(firstError ?? 'unknown error')}`
     );
   }
 
   log.info(
-    `Seeded ${REPORT_DOCS.length} threat-intelligence reports, 1 subscription, 3 hunt findings.`
+    `Seeded ${REPORT_DOCS.length} threat-intelligence reports. (subscription + hunt-finding seed docs are currently disabled — see schema-drift NOTE above.)`
   );
 }
 
