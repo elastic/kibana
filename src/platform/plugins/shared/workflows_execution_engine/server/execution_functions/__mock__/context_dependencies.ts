@@ -32,6 +32,6 @@ export const mockContextDependencies = () => ({
     },
     collectQueueMetrics: false,
     hitlExternalResume: { enabled: true },
-    syncExecution: { maxDurationMs: 60_000 },
+    syncExecution: { enabled: true, maxDurationMs: 60_000 },
   },
 });
