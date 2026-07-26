@@ -70,6 +70,7 @@ plugins:
     - security
     - security_solution
     - serverless_observability
+    - serverless_vectordb
     - share
     - significant_events
     - slo
