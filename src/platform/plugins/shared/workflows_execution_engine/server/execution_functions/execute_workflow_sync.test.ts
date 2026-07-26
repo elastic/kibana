@@ -21,8 +21,11 @@ jest.mock('./run_workflow_sync');
 jest.mock('../lib/build_workflow_execution_document');
 jest.mock('../lib/get_user');
 jest.mock('../lib/validate_workflow_inputs');
+const mockGetWorkflowExecutionById = jest.fn().mockResolvedValue(null);
 jest.mock('../repositories/execution_persistence', () => ({
-  InMemoryExecutionPersistence: jest.fn().mockImplementation(() => ({})),
+  InMemoryExecutionPersistence: jest.fn().mockImplementation(() => ({
+    getWorkflowExecutionById: mockGetWorkflowExecutionById,
+  })),
 }));
 
 const mockRunWorkflowSync = runWorkflowSync as jest.MockedFunction<typeof runWorkflowSync>;
@@ -78,6 +81,7 @@ describe('executeWorkflowSync', () => {
     mockBuildWorkflowExecutionDocument.mockReturnValue(baseWorkflowExecution as any);
     mockValidateWorkflowInputs.mockResolvedValue(true);
     mockRunWorkflowSync.mockResolvedValue(completedExecution);
+    mockGetWorkflowExecutionById.mockResolvedValue(null);
   });
 
   const invoke = (overrides?: Partial<Parameters<typeof executeWorkflowSync>[0]>) =>
@@ -140,6 +144,20 @@ describe('executeWorkflowSync', () => {
         result: { status: ExecutionStatus.FAILED },
       });
       expect(mockRunWorkflowSync).not.toHaveBeenCalled();
+    });
+
+    it('includes error from in-memory persistence when validation fails', async () => {
+      mockValidateWorkflowInputs.mockResolvedValue(false);
+      mockGetWorkflowExecutionById.mockResolvedValueOnce({
+        ...baseWorkflowExecution,
+        status: ExecutionStatus.FAILED,
+        error: { type: 'InputValidationError', message: 'inputs: required field missing' },
+      });
+      const result = await invoke();
+      expect(result.result?.error).toEqual({
+        type: 'InputValidationError',
+        message: 'inputs: required field missing',
+      });
     });
   });
 
