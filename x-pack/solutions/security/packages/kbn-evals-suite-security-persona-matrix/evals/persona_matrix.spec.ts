@@ -7,6 +7,7 @@
 
 import { tags } from '@kbn/scout';
 import type { Client as EsClient } from '@elastic/elasticsearch';
+import type { McpServerSimulator } from '../src/fixtures/pagerduty_mcp_mock';
 import { evaluate } from '../src/evaluate';
 import { personaMatrixDataset } from '../src/datasets';
 import { seedChrysalisAlerts, cleanupChrysalisAlerts } from '../src/fixtures/chrysalis_seed';
@@ -20,16 +21,19 @@ const DATASET_DESCRIPTION =
   'Breadth-first persona matrix: 21 prompts across 7 security skill categories.';
 
 evaluate.describe('Security Persona Matrix', { tag: tags.serverless.security.complete }, () => {
+  let pagerdutyMockServer: McpServerSimulator | undefined;
+
   evaluate.beforeAll(async ({ esClient, kbnClient, log }) => {
     await seedChrysalisAlerts({ esClient: esClient as unknown as EsClient, log, count: 3 });
     log.info('[persona-matrix] seeded Chrysalis alerts');
-    await seedWorkflowConnectors({ kbnClient, log });
+    const { pagerdutyMockServer: server } = await seedWorkflowConnectors({ kbnClient, log });
+    pagerdutyMockServer = server;
     log.info('[persona-matrix] seeded VirusTotal + PagerDuty workflow connectors');
   });
 
   evaluate.afterAll(async ({ esClient, kbnClient, log }) => {
     await cleanupChrysalisAlerts({ esClient: esClient as unknown as EsClient, log });
-    await cleanupWorkflowConnectors({ kbnClient, log });
+    await cleanupWorkflowConnectors({ kbnClient, log, pagerdutyMockServer });
   });
 
   evaluate('all 21 examples', async ({ evaluateDataset, log }) => {

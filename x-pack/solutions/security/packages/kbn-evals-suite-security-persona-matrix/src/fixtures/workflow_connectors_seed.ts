@@ -7,6 +7,8 @@
 
 import type { KbnClient } from '@kbn/kbn-client';
 import type { ToolingLog } from '@kbn/tooling-log';
+import type { McpServerSimulator } from './pagerduty_mcp_mock';
+import { createPagerdutyMockMcpServer } from './pagerduty_mcp_mock';
 
 /**
  * Deterministic connector IDs so re-runs are idempotent (create is a no-op on 409).
@@ -26,20 +28,21 @@ interface SeedConnectorsOptions {
 }
 
 /**
- * VirusTotal API key. In CI/Scout runs this must come from a real (or sandboxed)
- * VirusTotal API key via env var; falls back to a placeholder that will make the
- * connector's own API calls fail cleanly with an auth error rather than fail
- * connector *creation* -- creation only validates the config shape, not that the
- * key is live, so tests can still assert on ExpectedToolCalled / step invocation
- * even when a real key isn't provisioned in every environment.
+ * VirusTotal API key. VirusTotal's connector spec has no config field for its
+ * base URL (it is hardcoded to https://www.virustotal.com/api/v3 in
+ * virustotal.ts), so unlike PagerDuty it CANNOT be pointed at a local mock via
+ * connector config alone -- that would require a boot-time
+ * xpack.actions.proxyUrl / customHostSettings change on the Kibana process
+ * itself (see actions/server/config.ts), which is outside what a Playwright
+ * beforeAll fixture can do to an already-running Kibana. Until that's wired
+ * at the Scout config-set level, this connector runs against a placeholder
+ * key: connector *creation* succeeds (creation only validates config shape),
+ * but the live VirusTotal API call will fail auth. That's an accepted gap
+ * for now -- see workflow-execution-a's expectedTools, which score the
+ * agent's tool-selection (did it author+run the right connector-step
+ * workflow) rather than the live API response content.
  */
 const VIRUSTOTAL_API_KEY = process.env.PERSONA_MATRIX_VIRUSTOTAL_API_KEY ?? 'vt-test-placeholder';
-
-/**
- * PagerDuty API key, same placeholder-fallback rationale as above.
- */
-const PAGERDUTY_API_KEY =
-  process.env.PERSONA_MATRIX_PAGERDUTY_API_KEY ?? 'Token token=pd-test-placeholder';
 
 async function createConnectorIfMissing({
   kbnClient,
@@ -78,11 +81,17 @@ async function createConnectorIfMissing({
  * workflow-execution VirusTotal-lookup and on-call-lookup examples have a
  * real connector instance to reference via `connector-id` in the generated
  * workflow YAML.
+ *
+ * The PagerDuty connector is backed by a real in-process MCP mock server
+ * (see pagerduty_mcp_mock.ts) returning a fixed on-call schedule for the
+ * Chrysalis scenario -- `pagerduty.listOncalls` workflow steps get a genuine
+ * MCP round-trip with no live PagerDuty dependency. The returned server
+ * handle must be passed to `cleanupWorkflowConnectors` to shut it down.
  */
 export async function seedWorkflowConnectors({
   kbnClient,
   log,
-}: SeedConnectorsOptions): Promise<void> {
+}: SeedConnectorsOptions): Promise<{ pagerdutyMockServer: McpServerSimulator }> {
   await createConnectorIfMissing({
     kbnClient,
     log,
@@ -90,8 +99,12 @@ export async function seedWorkflowConnectors({
     name: 'Persona Matrix VirusTotal',
     connectorTypeId: '.virustotal',
     config: {},
-    secrets: { 'x-apikey': VIRUSTOTAL_API_KEY },
+    secrets: { authType: 'api_key_header', 'x-apikey': VIRUSTOTAL_API_KEY },
   });
+
+  const pagerdutyMockServer = createPagerdutyMockMcpServer();
+  const mockServerUrl = await pagerdutyMockServer.start();
+  log.info(`[persona-matrix] PagerDuty mock MCP server started at ${mockServerUrl}`);
 
   await createConnectorIfMissing({
     kbnClient,
@@ -99,15 +112,21 @@ export async function seedWorkflowConnectors({
     id: PERSONA_MATRIX_PAGERDUTY_CONNECTOR_ID,
     name: 'Persona Matrix PagerDuty',
     connectorTypeId: '.pagerduty_mcp',
-    config: {},
-    secrets: { Authorization: PAGERDUTY_API_KEY },
+    config: { serverUrl: mockServerUrl },
+    // The mock MCP server doesn't validate auth, but PagerDuty's connector
+    // spec only declares `api_key_header` as a valid auth type (no `none`),
+    // so a well-formed value is still required to pass secrets validation.
+    secrets: { authType: 'api_key_header', Authorization: 'Token token=mock-not-validated' },
   });
+
+  return { pagerdutyMockServer };
 }
 
 export async function cleanupWorkflowConnectors({
   kbnClient,
   log,
-}: SeedConnectorsOptions): Promise<void> {
+  pagerdutyMockServer,
+}: SeedConnectorsOptions & { pagerdutyMockServer?: McpServerSimulator }): Promise<void> {
   for (const id of [
     PERSONA_MATRIX_VIRUSTOTAL_CONNECTOR_ID,
     PERSONA_MATRIX_PAGERDUTY_CONNECTOR_ID,
@@ -120,5 +139,11 @@ export async function cleanupWorkflowConnectors({
           log.warning(`[persona-matrix] failed to delete connector '${id}': ${error}`);
         }
       });
+  }
+
+  if (pagerdutyMockServer) {
+    await pagerdutyMockServer.stop().catch((error) => {
+      log.warning(`[persona-matrix] failed to stop PagerDuty mock MCP server: ${error}`);
+    });
   }
 }
