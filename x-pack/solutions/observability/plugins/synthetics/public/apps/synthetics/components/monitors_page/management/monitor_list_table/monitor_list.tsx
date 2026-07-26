@@ -17,6 +17,7 @@ import type { MonitorListSortField } from '../../../../../../../common/runtime_t
 import { DeleteMonitor } from './delete_monitor';
 import { ResetMonitorModal } from './reset_monitor_modal';
 import { BulkStatusUpdateModal } from './bulk_status_update_modal';
+import { BulkMaintenanceWindowsFlyout } from './bulk_maintenance_windows_flyout';
 import { useMonitorIntegrationHealth } from '../../../common/hooks/use_monitor_integration_health';
 import type { IHttpSerializedFetchError } from '../../../../state/utils/http_error';
 import type { MonitorListPageState } from '../../../../state';
@@ -64,6 +65,7 @@ export const MonitorList = ({
     ids: string[];
     enabled: boolean;
   } | null>(null);
+  const [isMaintenanceWindowsFlyoutOpen, setIsMaintenanceWindowsFlyoutOpen] = useState(false);
   const { resetMonitors, isFixableByReset } = useMonitorIntegrationHealth();
 
   const items: MonitorListItem[] = useMemo(
@@ -150,6 +152,7 @@ export const MonitorList = ({
           setMonitorPendingDeletion={setMonitorPendingDeletion}
           setMonitorPendingReset={setMonitorPendingReset}
           setMonitorPendingStatusUpdate={setMonitorPendingStatusUpdate}
+          setIsMaintenanceWindowsFlyoutOpen={setIsMaintenanceWindowsFlyoutOpen}
         />
         <EuiHorizontalRule margin="s" />
         <EuiBasicTable<MonitorListItem>
@@ -207,6 +210,16 @@ export const MonitorList = ({
           enabled={monitorPendingStatusUpdate.enabled}
           onClose={() => setMonitorPendingStatusUpdate(null)}
           onCompleted={() => setSelectedItems([])}
+          reloadPage={reloadPage}
+        />
+      )}
+      {isMaintenanceWindowsFlyoutOpen && (
+        <BulkMaintenanceWindowsFlyout
+          monitors={selectedItems as EncryptedSyntheticsSavedMonitor[]}
+          onClose={() => {
+            setIsMaintenanceWindowsFlyoutOpen(false);
+            setSelectedItems([]);
+          }}
           reloadPage={reloadPage}
         />
       )}
