@@ -1,0 +1,22 @@
+{
+  "env": {
+    "KIBANA_REPO": "https://github.com/elastic/kibana.git",
+    "KIBANA_REF": "main",
+    "CLONE_MODE": "shallow"
+  },
+  "specs": {
+    "l5": { "cpus": 8, "memGb": 16, "diskGb": 40 }
+  },
+  "providers": {
+    "docker": { "image": "buildpack-deps:bookworm" },
+    "computesdk": { "provider": "e2b" }
+  },
+  "pricingPerHourUsd": {
+    "docker": 0,
+    "e2b": null,
+    "daytona": null,
+    "modal": null,
+    "namespace": null,
+    "gcp": null
+  }
+}
