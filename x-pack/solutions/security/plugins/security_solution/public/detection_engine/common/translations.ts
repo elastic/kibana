@@ -1549,7 +1549,7 @@ export const RULES_BULK_EDIT_SUCCESS_DATA_VIEW_RULES_SKIPPED_DETAIL = i18n.trans
   'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.successIndexEditToastDescription',
   {
     defaultMessage:
-      'If you did not select to apply changes to rules using Kibana data views, those rules were not updated and will continue using data views.',
+      'Check the bulk update dialog for changes on rules containing data views.',
   }
 );
 
