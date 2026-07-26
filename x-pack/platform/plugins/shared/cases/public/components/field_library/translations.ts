@@ -113,6 +113,19 @@ export const DESCRIPTION_COLUMN = i18n.translate('xpack.cases.fieldLibrary.descr
   defaultMessage: 'Description',
 });
 
+export const REQUIRED_COLUMN = i18n.translate('xpack.cases.fieldLibrary.requiredColumn', {
+  defaultMessage: 'Required',
+});
+
+export const REQUIRED_BADGE = i18n.translate('xpack.cases.fieldLibrary.requiredBadge', {
+  defaultMessage: 'Required',
+});
+
+export const REQUIRED_ON_CLOSE_BADGE = i18n.translate(
+  'xpack.cases.fieldLibrary.requiredOnCloseBadge',
+  { defaultMessage: 'Required on close' }
+);
+
 export const OWNER_COLUMN = i18n.translate('xpack.cases.fieldLibrary.ownerColumn', {
   defaultMessage: 'Owner',
 });
@@ -205,3 +218,10 @@ export const GLOBAL_FIELD_YES = i18n.translate('xpack.cases.fieldLibrary.globalF
 export const GLOBAL_FIELD_NO = i18n.translate('xpack.cases.fieldLibrary.globalFieldNo', {
   defaultMessage: 'No',
 });
+
+export const FIELD_DEFINITIONS_TABLE_CAPTION = i18n.translate(
+  'xpack.cases.fieldLibrary.tableCaption',
+  {
+    defaultMessage: 'Field definitions',
+  }
+);

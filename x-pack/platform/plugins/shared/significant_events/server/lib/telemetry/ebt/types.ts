@@ -34,6 +34,9 @@ interface KnowledgeIndicatorFeaturesIdentifiedProps {
   docs_count: number;
   features_new: number;
   features_updated: number;
+  features_remapped: number;
+  semantic_verify_calls: number;
+  semantic_verify_reuses: number;
   total_filters: number;
   filters_capped: boolean;
   has_filtered_documents: boolean;
@@ -161,6 +164,8 @@ interface AgentToolEventSearchProps {
   has_query: boolean;
   has_stream_filter: boolean;
   status_filter?: SignificantEventStatus;
+  view: 'compact' | 'full';
+  page: number;
   error_message?: string;
 }
 
