@@ -37,7 +37,8 @@ function buildAnyActorFieldNonEmptyEsql(fields: string[]): string {
 
 function buildRelationshipEsql(
   config: StandardRelationshipIntegrationConfig | BucketedRelationshipIntegrationConfig,
-  namespace: string
+  namespace: string,
+  timeWindow?: { fromDate: string; toDate: string }
 ): string {
   const indexPattern = config.indexPattern(namespace);
   // TODO(#266748): 'user' hardcoded for actor — thread actorEntityType through config.
@@ -89,6 +90,12 @@ function buildRelationshipEsql(
           ENGINE_COLUMNS.actor
         }`;
 
+  const timeFilter = timeWindow
+    ? `@timestamp >= "${timeWindow.fromDate}" AND @timestamp <= "${timeWindow.toDate}" AND `
+    : '';
+
+  const limitClause = timeWindow ? '' : `\n| LIMIT ${COMPOSITE_PAGE_SIZE}`;
+
   // NOTE: We use `COALESCE(col, "") != ""` rather than the more natural
   // `col IS NOT NULL AND col != ""` because ES|QL has a quirk where
   // `WHERE col IS NOT NULL` evaluates to FALSE for all rows when `col` is
@@ -97,15 +104,14 @@ function buildRelationshipEsql(
   // from the pipeline. COALESCE is semantically equivalent to the original
   // intent (treat NULL as empty, then check non-empty) and sidesteps the bug.
   return `FROM ${indexPattern}
-| WHERE ${config.esqlWhereClause}
+| WHERE ${timeFilter}${config.esqlWhereClause}
     AND (${userIdFilter})
 ${targetIdFilterLine}${userFieldEvalsLine}${actorEvalClause}
 | WHERE COALESCE(${ENGINE_COLUMNS.actor}, "") != ""
 ${targetEvalClause}
 | MV_EXPAND targetEntityId
 | WHERE COALESCE(targetEntityId, "") != ""${additionalTargetFilter}
-${statsClause}
-| LIMIT ${COMPOSITE_PAGE_SIZE}`;
+${statsClause}${limitClause}`;
 }
 
 /**
@@ -125,11 +131,12 @@ ${statsClause}
  */
 export const buildTargetsPerActorQuery = (
   config: RelationshipIntegrationConfig,
-  namespace: string
+  namespace: string,
+  timeWindow?: { fromDate: string; toDate: string }
 ): string => {
   const body =
     config.kind === 'override'
       ? config.esqlQueryOverride(namespace)
-      : buildRelationshipEsql(config, namespace);
+      : buildRelationshipEsql(config, namespace, timeWindow);
   return `${ESQL_ENGINE_PREAMBLE}\n${body}`;
 };

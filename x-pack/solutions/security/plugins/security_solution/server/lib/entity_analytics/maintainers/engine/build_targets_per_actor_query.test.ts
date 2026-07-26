@@ -312,6 +312,25 @@ describe('buildTargetsPerActorQuery (targets per actor)', () => {
     });
   });
 
+  describe('timeWindow parameter (log-source path)', () => {
+    it('embeds time window in WHERE clause when timeWindow provided', () => {
+      const query = buildTargetsPerActorQuery(
+        accessesConfig,
+        'default',
+        { fromDate: '2026-06-26T00:00:00.000Z', toDate: '2026-06-27T00:00:00.000Z' }
+      );
+      expect(query).toContain('@timestamp >= "2026-06-26T00:00:00.000Z"');
+      expect(query).toContain('@timestamp <= "2026-06-27T00:00:00.000Z"');
+      expect(query).not.toContain('| LIMIT');
+    });
+
+    it('does not embed time window when timeWindow absent (entity-index path)', () => {
+      const query = buildTargetsPerActorQuery(accessesConfig, 'default');
+      expect(query).not.toContain('@timestamp >=');
+      expect(query).toContain('| LIMIT');
+    });
+  });
+
   // Regression guard for an ES|QL quirk where `WHERE col IS NOT NULL`
   // evaluates to FALSE for every row when `col` is produced by CONCAT() over
   // a CASE() with nested CASE arms (as the user EUID actorEval does). Using
