@@ -24,6 +24,10 @@ import { i18n } from '@kbn/i18n';
 
 import type { ConnectorSpec } from '../../connector_spec';
 
+// Base URL for the framework-synthesized `request` action and the single source
+// of truth reused by the handlers below. The version segment stays in paths.
+const getBaseUrl = (): string => 'https://api.urlvoid.com';
+
 export const URLVoidConnector: ConnectorSpec = {
   metadata: {
     id: '.urlvoid',
@@ -51,7 +55,7 @@ export const URLVoidConnector: ConnectorSpec = {
         const typedInput = input as { domain: string };
         const apiKey = ctx.secrets?.authType === 'api_key_header' ? ctx.secrets['X-Api-Key'] : '';
         const response = await ctx.client.get(
-          `https://api.urlvoid.com/api1000/${apiKey}/host/${typedInput.domain}`
+          `${getBaseUrl()}/api1000/${apiKey}/host/${typedInput.domain}`
         );
         return {
           domain: typedInput.domain,
@@ -73,9 +77,7 @@ export const URLVoidConnector: ConnectorSpec = {
         const typedInput = input as { url: string };
         const domain = new URL(typedInput.url).hostname;
         const apiKey = ctx.secrets?.authType === 'api_key_header' ? ctx.secrets['X-Api-Key'] : '';
-        const response = await ctx.client.get(
-          `https://api.urlvoid.com/api1000/${apiKey}/host/${domain}`
-        );
+        const response = await ctx.client.get(`${getBaseUrl()}/api1000/${apiKey}/host/${domain}`);
         return {
           url: typedInput.url,
           domain,
@@ -97,7 +99,7 @@ export const URLVoidConnector: ConnectorSpec = {
         const typedInput = input as { domain: string };
         const apiKey = ctx.secrets?.authType === 'api_key_header' ? ctx.secrets['X-Api-Key'] : '';
         const response = await ctx.client.get(
-          `https://api.urlvoid.com/api1000/${apiKey}/host/${typedInput.domain}`
+          `${getBaseUrl()}/api1000/${apiKey}/host/${typedInput.domain}`
         );
         return {
           domain: typedInput.domain,
@@ -116,9 +118,7 @@ export const URLVoidConnector: ConnectorSpec = {
       input: lazySchema(() => z.object({})),
       handler: async (ctx) => {
         const apiKey = ctx.secrets?.authType === 'api_key_header' ? ctx.secrets['X-Api-Key'] : '';
-        const response = await ctx.client.get(
-          `https://api.urlvoid.com/api1000/${apiKey}/stats/remained`
-        );
+        const response = await ctx.client.get(`${getBaseUrl()}/api1000/${apiKey}/stats/remained`);
         return {
           queriesRemaining: response.data.queries_remaining,
           queriesUsed: response.data.queries_used,
@@ -128,11 +128,13 @@ export const URLVoidConnector: ConnectorSpec = {
     },
   },
 
+  getBaseUrl,
+
   test: {
     handler: async (ctx) => {
       try {
         const apiKey = ctx.secrets?.authType === 'api_key_header' ? ctx.secrets['X-Api-Key'] : '';
-        await ctx.client.get(`https://api.urlvoid.com/api1000/${apiKey}/stats/remained`);
+        await ctx.client.get(`${getBaseUrl()}/api1000/${apiKey}/stats/remained`);
         return {
           ok: true,
           message: 'Successfully connected to URLVoid API',

@@ -6,7 +6,7 @@
  */
 
 import type { ConnectorSpec } from '@kbn/connector-specs';
-import { TEST_CONNECTOR_SUB_ACTION } from '@kbn/connector-specs';
+import { TEST_CONNECTOR_SUB_ACTION, GENERIC_REQUEST_SUB_ACTION } from '@kbn/connector-specs';
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
 import { z as z4 } from '@kbn/zod/v4';
 import { createConnectorTypeFromSpec } from './create_connector_from_spec';
@@ -127,7 +127,7 @@ describe('createConnectorTypeFromSpec', () => {
     expect(connectorType.source).toBe(ACTION_TYPE_SOURCES.spec);
   });
 
-  it('throws an error if the actions are empty', () => {
+  it('produces a usable connector even when the spec defines no explicit actions', () => {
     const spec = createMockSpec({
       metadata: {
         id: 'workflows-multi-feature-connector-no-actions',
@@ -139,10 +139,17 @@ describe('createConnectorTypeFromSpec', () => {
       actions: {},
     });
 
-    // This should throw an error because generateParamsSchema requires actions
-    expect(() => createConnectorTypeFromSpec(spec, mockActionsPlugin)).toThrow(
-      'No actions defined'
-    );
+    // The framework always synthesizes a generic `request` action, so there is
+    // always at least one executable action.
+    const connectorType = createConnectorTypeFromSpec(spec, mockActionsPlugin);
+    expect(connectorType.executor).toBeDefined();
+    expect(connectorType.validate.params).toBeDefined();
+
+    const requestParams = {
+      subAction: GENERIC_REQUEST_SUB_ACTION,
+      subActionParams: { method: 'get', url: 'https://api.example.com/v0/foo' },
+    };
+    expect(() => connectorType.validate.params!.schema.parse(requestParams)).not.toThrow();
   });
 
   it('always includes config and secrets validators', () => {
@@ -386,9 +393,14 @@ describe('createConnectorTypeFromSpec', () => {
         test: { handler: testHandler },
       });
 
-      expect(() =>
-        createConnectorTypeFromSpec(specWithOnlyDisabledTest, mockActionsPlugin)
-      ).toThrow('No actions defined');
+      // Even with no explicit actions and a disabled test, the synthesized
+      // `request` action keeps the connector usable but not testable.
+      const disabledTestConnector = createConnectorTypeFromSpec(
+        specWithOnlyDisabledTest,
+        mockActionsPlugin
+      );
+      expect(disabledTestConnector.isTestable).toBe(false);
+      expect(disabledTestConnector.executor).toBeDefined();
 
       const specWithActions = createMockSpec({
         test: { handler: testHandler },
@@ -496,6 +508,185 @@ describe('createConnectorTypeFromSpec', () => {
 
       const testParams = { subAction: TEST_CONNECTOR_SUB_ACTION, subActionParams: {} };
       expect(() => connectorType.validate.params!.schema.parse(testParams)).not.toThrow();
+    });
+  });
+
+  describe('generic request action', () => {
+    it('synthesizes a url-only request action for a spec without getBaseUrl', () => {
+      const spec = createMockSpec();
+      const connectorType = createConnectorTypeFromSpec(spec, mockActionsPlugin);
+
+      const urlParams = {
+        subAction: GENERIC_REQUEST_SUB_ACTION,
+        subActionParams: { method: 'post', url: 'https://api.example.com/v0/foo', body: { a: 1 } },
+      };
+      expect(() => connectorType.validate.params!.schema.parse(urlParams)).not.toThrow();
+
+      // Without a base URL, a relative `path` can never resolve, so it is not a
+      // valid parameter.
+      const pathParams = {
+        subAction: GENERIC_REQUEST_SUB_ACTION,
+        subActionParams: { method: 'get', path: '/v0/foo' },
+      };
+      expect(() => connectorType.validate.params!.schema.parse(pathParams)).toThrow();
+    });
+
+    it('accepts a relative path in the params schema when getBaseUrl is present', () => {
+      const spec = createMockSpec({ getBaseUrl: () => 'https://api.example.com' });
+      const connectorType = createConnectorTypeFromSpec(spec, mockActionsPlugin);
+
+      const requestParams = {
+        subAction: GENERIC_REQUEST_SUB_ACTION,
+        subActionParams: { method: 'get', path: '/v0/foo' },
+      };
+      expect(() => connectorType.validate.params!.schema.parse(requestParams)).not.toThrow();
+    });
+
+    it('routes a path-based request through the connector axios client using getBaseUrl', async () => {
+      const requestFn = jest
+        .fn()
+        .mockResolvedValue({ status: 200, headers: { 'x-h': '1' }, data: { ok: true } });
+      mockGetAxiosInstanceWithAuth.mockResolvedValue({ request: requestFn });
+
+      const spec = createMockSpec({
+        actions: {},
+        getBaseUrl: (ctx) => (ctx.config as { baseUrl: string }).baseUrl,
+      });
+      const connectorType = createConnectorTypeFromSpec(spec, mockActionsPlugin);
+
+      const result = await connectorType.executor!({
+        actionId: 'connector-id',
+        config: { baseUrl: 'https://api.example.com' },
+        secrets: {},
+        params: {
+          subAction: GENERIC_REQUEST_SUB_ACTION,
+          subActionParams: { method: 'get', path: '/v0/foo' },
+        },
+        services: {} as never,
+        logger: { error: jest.fn(), debug: jest.fn(), warn: jest.fn(), info: jest.fn() } as never,
+        configurationUtilities: mockActionsConfigUtils,
+        connectorUsageCollector: {} as never,
+      });
+
+      expect(requestFn).toHaveBeenCalledWith({
+        method: 'get',
+        url: 'https://api.example.com/v0/foo',
+      });
+      expect(result).toEqual({
+        status: 'ok',
+        data: { status: 200, headers: { 'x-h': '1' }, data: { ok: true } },
+        actionId: 'connector-id',
+      });
+    });
+
+    it('routes a url-based request verbatim even without getBaseUrl', async () => {
+      const requestFn = jest
+        .fn()
+        .mockResolvedValue({ status: 200, headers: {}, data: { ok: true } });
+      mockGetAxiosInstanceWithAuth.mockResolvedValue({ request: requestFn });
+
+      const spec = createMockSpec({ actions: {} });
+      const connectorType = createConnectorTypeFromSpec(spec, mockActionsPlugin);
+
+      const result = await connectorType.executor!({
+        actionId: 'connector-id',
+        config: {},
+        secrets: {},
+        params: {
+          subAction: GENERIC_REQUEST_SUB_ACTION,
+          subActionParams: { method: 'get', url: 'https://api.example.com/raw' },
+        },
+        services: {} as never,
+        logger: { error: jest.fn(), debug: jest.fn(), warn: jest.fn(), info: jest.fn() } as never,
+        configurationUtilities: mockActionsConfigUtils,
+        connectorUsageCollector: {} as never,
+      });
+
+      expect(requestFn).toHaveBeenCalledWith({
+        method: 'get',
+        url: 'https://api.example.com/raw',
+      });
+      expect(result.status).toBe('ok');
+    });
+
+    it('errors when a path is used on a connector without getBaseUrl', async () => {
+      mockGetAxiosInstanceWithAuth.mockResolvedValue({ request: jest.fn() });
+
+      const spec = createMockSpec({ actions: {} });
+      const connectorType = createConnectorTypeFromSpec(spec, mockActionsPlugin);
+
+      const result = await connectorType.executor!({
+        actionId: 'connector-id',
+        config: {},
+        secrets: {},
+        params: {
+          subAction: GENERIC_REQUEST_SUB_ACTION,
+          subActionParams: { method: 'get', path: '/v0/foo' },
+        },
+        services: {} as never,
+        logger: { error: jest.fn(), debug: jest.fn(), warn: jest.fn(), info: jest.fn() } as never,
+        configurationUtilities: mockActionsConfigUtils,
+        connectorUsageCollector: {} as never,
+      });
+
+      expect(result.status).toBe('error');
+      expect(result.message).toMatch(/does not support relative "path"/);
+    });
+
+    it('throws when spec.actions contains the reserved request key', () => {
+      const spec = createMockSpec({
+        actions: {
+          [GENERIC_REQUEST_SUB_ACTION]: {
+            input: z4.object({ test: z4.string() }),
+            handler: jest.fn(),
+          },
+        },
+      });
+
+      expect(() => createConnectorTypeFromSpec(spec, mockActionsPlugin)).toThrow(
+        GENERIC_REQUEST_SUB_ACTION
+      );
+    });
+
+    it('does not synthesize a request action when the spec opts out', () => {
+      const spec = createMockSpec({ disableGenericRequest: true });
+      const connectorType = createConnectorTypeFromSpec(spec, mockActionsPlugin);
+
+      const requestParams = {
+        subAction: GENERIC_REQUEST_SUB_ACTION,
+        subActionParams: { method: 'get', url: 'https://api.example.com/foo' },
+      };
+      expect(() => connectorType.validate.params!.schema.parse(requestParams)).toThrow();
+    });
+
+    it('allows a spec to define its own request action when it opts out', () => {
+      const ownRequestHandler = jest.fn();
+      const spec = createMockSpec({
+        disableGenericRequest: true,
+        actions: {
+          [GENERIC_REQUEST_SUB_ACTION]: {
+            input: z4.object({ path: z4.string() }),
+            handler: ownRequestHandler,
+          },
+        },
+      });
+
+      expect(() => createConnectorTypeFromSpec(spec, mockActionsPlugin)).not.toThrow();
+
+      const connectorType = createConnectorTypeFromSpec(spec, mockActionsPlugin);
+      const requestParams = {
+        subAction: GENERIC_REQUEST_SUB_ACTION,
+        subActionParams: { path: '/custom' },
+      };
+      expect(() => connectorType.validate.params!.schema.parse(requestParams)).not.toThrow();
+    });
+
+    it('produces no executor when a spec opts out and has no other actions or test', () => {
+      const spec = createMockSpec({ actions: {}, disableGenericRequest: true });
+      const connectorType = createConnectorTypeFromSpec(spec, mockActionsPlugin);
+
+      expect(connectorType.executor).toBeUndefined();
+      expect(connectorType.validate.params).toBeUndefined();
     });
   });
 

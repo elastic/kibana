@@ -26,7 +26,7 @@ const ATLASSIAN_NET_SUFFIX = '.atlassian.net';
  * Validates and normalizes subdomain: trims, strips optional .atlassian.net suffix,
  * rejects empty, full hostnames (containing '.'), and invalid characters.
  */
-const buildBaseUrl = (ctx: ActionContext): string => {
+const getBaseUrl = (ctx: ActionContext): string => {
   let sub = String(ctx.config?.subdomain ?? '').trim();
   if (sub === '') {
     throw new Error('Confluence Cloud subdomain is required');
@@ -127,7 +127,7 @@ export const ConfluenceCloudConnector: ConnectorSpec = {
       isTool: true,
       input: ListPagesInputSchema,
       handler: async (ctx, input: ListPagesInput) => {
-        const baseUrl = buildBaseUrl(ctx);
+        const baseUrl = getBaseUrl(ctx);
         const params: Record<string, unknown> = {
           limit: input.limit ?? DEFAULT_LIST_LIMIT,
         };
@@ -153,7 +153,7 @@ export const ConfluenceCloudConnector: ConnectorSpec = {
       isTool: true,
       input: GetPageInputSchema,
       handler: async (ctx, input: GetPageInput) => {
-        const baseUrl = buildBaseUrl(ctx);
+        const baseUrl = getBaseUrl(ctx);
         const params: Record<string, unknown> = {};
         if (input.bodyFormat != null) params['body-format'] = input.bodyFormat;
         const response = await ctx.client.get(
@@ -169,7 +169,7 @@ export const ConfluenceCloudConnector: ConnectorSpec = {
       isTool: true,
       input: ListSpacesInputSchema,
       handler: async (ctx, input: ListSpacesInput) => {
-        const baseUrl = buildBaseUrl(ctx);
+        const baseUrl = getBaseUrl(ctx);
         const params: Record<string, unknown> = {
           limit: input.limit ?? DEFAULT_LIST_LIMIT,
         };
@@ -195,7 +195,7 @@ export const ConfluenceCloudConnector: ConnectorSpec = {
       isTool: true,
       input: GetSpaceInputSchema,
       handler: async (ctx, input: GetSpaceInput) => {
-        const baseUrl = buildBaseUrl(ctx);
+        const baseUrl = getBaseUrl(ctx);
         const response = await ctx.client.get(
           `${baseUrl}${CONFLUENCE_V2_PREFIX}/spaces/${encodeURIComponent(input.id)}`
         );
@@ -203,6 +203,8 @@ export const ConfluenceCloudConnector: ConnectorSpec = {
       },
     },
   },
+  getBaseUrl,
+
   skill: [
     'Typical pattern: listSpaces → listPages (with spaceId) → getPage (with bodyFormat) to retrieve full page content.',
   ].join('\n'),
@@ -212,7 +214,7 @@ export const ConfluenceCloudConnector: ConnectorSpec = {
     }),
     handler: async (ctx) => {
       try {
-        const baseUrl = buildBaseUrl(ctx);
+        const baseUrl = getBaseUrl(ctx);
         const response = await ctx.client.get(`${baseUrl}${CONFLUENCE_V2_PREFIX}/spaces`, {
           params: { limit: 1 },
         });

@@ -25,7 +25,7 @@ import {
 } from './types';
 import type { ActionContext, ConnectorSpec } from '../../../..';
 
-const buildBaseUrl = (ctx: ActionContext): string => {
+const getBaseUrl = (ctx: ActionContext): string => {
   if (ctx.secrets?.authType === 'oauth_authorization_code') {
     const cloudId = String(ctx.config?.cloudId ?? '').trim();
     if (cloudId === '') {
@@ -144,7 +144,7 @@ export const JiraConnector: ConnectorSpec = {
           maxResults?: number;
           nextPageToken?: string;
         };
-        const baseUrl = buildBaseUrl(ctx);
+        const baseUrl = getBaseUrl(ctx);
         const response = await ctx.client.post(`${baseUrl}/rest/api/3/search/jql`, typedInput);
         return response.data;
       },
@@ -158,7 +158,7 @@ export const JiraConnector: ConnectorSpec = {
         const typedInput = input as {
           issueId: string;
         };
-        const baseUrl = buildBaseUrl(ctx);
+        const baseUrl = getBaseUrl(ctx);
         const response = await ctx.client.get(`${baseUrl}/rest/api/3/issue/${typedInput.issueId}`);
         return response.data;
       },
@@ -174,7 +174,7 @@ export const JiraConnector: ConnectorSpec = {
           startAt?: number;
           query?: string;
         };
-        const baseUrl = buildBaseUrl(ctx);
+        const baseUrl = getBaseUrl(ctx);
         const response = await ctx.client.get(`${baseUrl}/rest/api/3/project/search`, {
           params: typedInput,
         });
@@ -190,7 +190,7 @@ export const JiraConnector: ConnectorSpec = {
         const typedInput = input as {
           projectId: string;
         };
-        const baseUrl = buildBaseUrl(ctx);
+        const baseUrl = getBaseUrl(ctx);
         const response = await ctx.client.get(
           `${baseUrl}/rest/api/3/project/${typedInput.projectId}`
         );
@@ -211,7 +211,7 @@ export const JiraConnector: ConnectorSpec = {
           maxResults?: number;
           property?: string;
         };
-        const baseUrl = buildBaseUrl(ctx);
+        const baseUrl = getBaseUrl(ctx);
         const response = await ctx.client.get(`${baseUrl}/rest/api/3/user/search`, {
           params: typedInput,
         });
@@ -219,6 +219,8 @@ export const JiraConnector: ConnectorSpec = {
       },
     },
   },
+  getBaseUrl,
+
   skill: [
     'Typical patterns:',
     '- Discovery: getProjects → getProject (by key) → searchIssuesWithJql (scoped to project)',

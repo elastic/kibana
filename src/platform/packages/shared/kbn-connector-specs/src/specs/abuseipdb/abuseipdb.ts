@@ -23,6 +23,11 @@ import { z, lazySchema } from '@kbn/zod/v4';
 import { i18n } from '@kbn/i18n';
 import type { ConnectorSpec } from '../../connector_spec';
 
+// Base URL for the framework-synthesized `request` action and the single source
+// of truth reused by the handlers below. The version segment stays in paths.
+const getBaseUrl = (): string => 'https://api.abuseipdb.com';
+const ABUSEIPDB_API_V2 = `${getBaseUrl()}/api/v2`;
+
 export const AbuseIPDBConnector: ConnectorSpec = {
   metadata: {
     id: '.abuseipdb',
@@ -56,7 +61,7 @@ export const AbuseIPDBConnector: ConnectorSpec = {
       ),
       handler: async (ctx, input) => {
         const typedInput = input as { ipAddress: string; maxAgeInDays?: number };
-        const response = await ctx.client.get('https://api.abuseipdb.com/api/v2/check', {
+        const response = await ctx.client.get(`${ABUSEIPDB_API_V2}/check`, {
           params: {
             ipAddress: typedInput.ipAddress,
             maxAgeInDays: typedInput.maxAgeInDays || 90,
@@ -85,7 +90,7 @@ export const AbuseIPDBConnector: ConnectorSpec = {
       handler: async (ctx, input) => {
         const typedInput = input as { ip: string; categories: number[]; comment?: string };
         const response = await ctx.client.post(
-          'https://api.abuseipdb.com/api/v2/report',
+          `${ABUSEIPDB_API_V2}/report`,
           new URLSearchParams({
             ip: typedInput.ip,
             categories: typedInput.categories.join(','),
@@ -113,7 +118,7 @@ export const AbuseIPDBConnector: ConnectorSpec = {
       ),
       handler: async (ctx, input) => {
         const typedInput = input as { ipAddress: string };
-        const response = await ctx.client.get('https://api.abuseipdb.com/api/v2/check', {
+        const response = await ctx.client.get(`${ABUSEIPDB_API_V2}/check`, {
           params: {
             ipAddress: typedInput.ipAddress,
             verbose: true,
@@ -150,7 +155,7 @@ export const AbuseIPDBConnector: ConnectorSpec = {
       ),
       handler: async (ctx, input) => {
         const typedInput = input as { network: string; maxAgeInDays?: number };
-        const response = await ctx.client.get('https://api.abuseipdb.com/api/v2/check-block', {
+        const response = await ctx.client.get(`${ABUSEIPDB_API_V2}/check-block`, {
           params: {
             network: typedInput.network,
             maxAgeInDays: typedInput.maxAgeInDays || 30,
@@ -165,9 +170,11 @@ export const AbuseIPDBConnector: ConnectorSpec = {
     },
   },
 
+  getBaseUrl,
+
   test: {
     handler: async (ctx) => {
-      await ctx.client.get('https://api.abuseipdb.com/api/v2/check', {
+      await ctx.client.get(`${ABUSEIPDB_API_V2}/check`, {
         params: { ipAddress: '8.8.8.8' },
       });
       return {};

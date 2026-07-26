@@ -56,7 +56,7 @@ import {
   SUB_ACTION as XSOAR_SUB_ACTION,
 } from '@kbn/connector-schemas/xsoar/constants';
 
-import { connectorsSpecs } from '@kbn/connector-specs';
+import { connectorsSpecs, GENERIC_REQUEST_SUB_ACTION } from '@kbn/connector-specs';
 
 // Helper function to format sub-action names for display
 function formatSubActionName(action: string): string {
@@ -147,7 +147,14 @@ function createSubActionsMapping() {
   });
 
   Object.values(connectorsSpecs).forEach((connectorSpec) => {
-    mapping[connectorSpec.metadata.id] = Object.keys(connectorSpec.actions).map((action) => ({
+    // Every v2 connector gets the framework-synthesized generic request action
+    // (see create_connector_from_spec.ts) unless it opts out, so
+    // `{connector}.request` shows up in step-type autocomplete.
+    const actionNames = [
+      ...Object.keys(connectorSpec.actions),
+      ...(connectorSpec.disableGenericRequest ? [] : [GENERIC_REQUEST_SUB_ACTION]),
+    ];
+    mapping[connectorSpec.metadata.id] = actionNames.map((action) => ({
       name: action,
       displayName: formatSubActionName(action),
     }));

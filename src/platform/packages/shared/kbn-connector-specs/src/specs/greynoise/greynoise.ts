@@ -23,6 +23,12 @@ import { z, lazySchema } from '@kbn/zod/v4';
 import { i18n } from '@kbn/i18n';
 import type { ConnectorSpec } from '../../connector_spec';
 
+// Base URL for the framework-synthesized `request` action and the single source
+// of truth reused by the handlers below. The `/v2` API version stays in the
+// per-action paths.
+const getBaseUrl = (): string => 'https://api.greynoise.io';
+const GREYNOISE_API_V2 = `${getBaseUrl()}/v2`;
+
 const IpInputSchema = lazySchema(() =>
   z.object({
     ip: z.ipv4().describe('IP address'),
@@ -50,9 +56,7 @@ export const GreyNoiseConnector: ConnectorSpec = {
       input: IpInputSchema,
       handler: async (ctx, input) => {
         const typedInput = input as { ip: string };
-        const response = await ctx.client.get(
-          `https://api.greynoise.io/v2/noise/context/${typedInput.ip}`
-        );
+        const response = await ctx.client.get(`${GREYNOISE_API_V2}/noise/context/${typedInput.ip}`);
         return {
           ip: response.data.ip,
           seen: response.data.seen,
@@ -70,9 +74,7 @@ export const GreyNoiseConnector: ConnectorSpec = {
       input: IpInputSchema,
       handler: async (ctx, input) => {
         const typedInput = input as { ip: string };
-        const response = await ctx.client.get(
-          `https://api.greynoise.io/v2/noise/quick/${typedInput.ip}`
-        );
+        const response = await ctx.client.get(`${GREYNOISE_API_V2}/noise/quick/${typedInput.ip}`);
         return {
           ip: typedInput.ip,
           noise: response.data.noise,
@@ -87,7 +89,7 @@ export const GreyNoiseConnector: ConnectorSpec = {
       input: IpInputSchema,
       handler: async (ctx, input) => {
         const typedInput = input as { ip: string };
-        const response = await ctx.client.get('https://api.greynoise.io/v2/meta/metadata', {
+        const response = await ctx.client.get(`${GREYNOISE_API_V2}/meta/metadata`, {
           params: { ip: typedInput.ip },
         });
         return {
@@ -107,7 +109,7 @@ export const GreyNoiseConnector: ConnectorSpec = {
       input: IpInputSchema,
       handler: async (ctx, input) => {
         const typedInput = input as { ip: string };
-        const response = await ctx.client.get(`https://api.greynoise.io/v2/riot/${typedInput.ip}`);
+        const response = await ctx.client.get(`${GREYNOISE_API_V2}/riot/${typedInput.ip}`);
         return {
           ip: typedInput.ip,
           riot: response.data.riot,
@@ -121,10 +123,12 @@ export const GreyNoiseConnector: ConnectorSpec = {
     },
   },
 
+  getBaseUrl,
+
   test: {
     handler: async (ctx) => {
       try {
-        await ctx.client.get('https://api.greynoise.io/v2/noise/quick/8.8.8.8');
+        await ctx.client.get(`${GREYNOISE_API_V2}/noise/quick/8.8.8.8`);
         return {
           ok: true,
           message: 'Successfully connected to GreyNoise API',

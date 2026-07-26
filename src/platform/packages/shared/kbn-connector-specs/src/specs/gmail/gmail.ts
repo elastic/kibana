@@ -10,7 +10,11 @@
 import { i18n } from '@kbn/i18n';
 import { z, lazySchema } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '../../connector_spec';
-const GMAIL_API_BASE = 'https://gmail.googleapis.com/gmail/v1/users/me';
+// Base URL for the framework-synthesized `request` action and the single source
+// of truth reused by the handlers below. The `/gmail/v1/users/me` path stays in the
+// per-action paths.
+const getBaseUrl = (): string => 'https://gmail.googleapis.com';
+const GMAIL_API = `${getBaseUrl()}/gmail/v1/users/me`;
 const DEFAULT_MAX_RESULTS = 10;
 const MAX_PAGE_SIZE = 100;
 
@@ -112,7 +116,7 @@ export const GmailConnector: ConnectorSpec = {
         if (typedInput.query) params.q = typedInput.query;
         if (typedInput.pageToken) params.pageToken = typedInput.pageToken;
         try {
-          const response = await ctx.client.get(`${GMAIL_API_BASE}/messages`, { params });
+          const response = await ctx.client.get(`${GMAIL_API}/messages`, { params });
           return {
             messages: response.data.messages ?? [],
             nextPageToken: response.data.nextPageToken,
@@ -148,12 +152,9 @@ export const GmailConnector: ConnectorSpec = {
       handler: async (ctx, input) => {
         const typedInput = input as { messageId: string; format?: string };
         try {
-          const response = await ctx.client.get(
-            `${GMAIL_API_BASE}/messages/${typedInput.messageId}`,
-            {
-              params: { format: typedInput.format ?? 'minimal' },
-            }
-          );
+          const response = await ctx.client.get(`${GMAIL_API}/messages/${typedInput.messageId}`, {
+            params: { format: typedInput.format ?? 'minimal' },
+          });
           return response.data;
         } catch (error: unknown) {
           throwGmailError(error);
@@ -185,7 +186,7 @@ export const GmailConnector: ConnectorSpec = {
         const typedInput = input as { messageId: string; attachmentId: string };
         try {
           const response = await ctx.client.get(
-            `${GMAIL_API_BASE}/messages/${typedInput.messageId}/attachments/${typedInput.attachmentId}`
+            `${GMAIL_API}/messages/${typedInput.messageId}/attachments/${typedInput.attachmentId}`
           );
           return response.data;
         } catch (error: unknown) {
@@ -231,7 +232,7 @@ export const GmailConnector: ConnectorSpec = {
         if (typedInput.pageToken) params.pageToken = typedInput.pageToken;
         if (typedInput.labelIds?.length) params.labelIds = typedInput.labelIds;
         try {
-          const response = await ctx.client.get(`${GMAIL_API_BASE}/messages`, { params });
+          const response = await ctx.client.get(`${GMAIL_API}/messages`, { params });
           return {
             messages: response.data.messages ?? [],
             nextPageToken: response.data.nextPageToken,
@@ -245,12 +246,14 @@ export const GmailConnector: ConnectorSpec = {
     },
   },
 
+  getBaseUrl,
+
   test: {
     description: 'Verifies Gmail connection by fetching user profile',
     handler: async (ctx) => {
       ctx.log.debug('Gmail test handler');
       try {
-        const response = await ctx.client.get(`${GMAIL_API_BASE}/profile`);
+        const response = await ctx.client.get(`${GMAIL_API}/profile`);
         if (response.status !== 200) {
           return {
             ok: false,

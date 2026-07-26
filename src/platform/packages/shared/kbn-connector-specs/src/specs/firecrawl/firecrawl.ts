@@ -18,7 +18,11 @@ import {
   CrawlAndWaitInputSchema,
   GetCrawlStatusInputSchema,
 } from './types';
-const FIRECRAWL_API_BASE = 'https://api.firecrawl.dev';
+// Base URL for the framework-synthesized `request` action and the single source
+// of truth reused by the handlers below. The `/v2` API version stays in the
+// per-action paths.
+const getBaseUrl = (): string => 'https://api.firecrawl.dev';
+const FIRECRAWL_API_BASE = getBaseUrl();
 
 /** Max characters of markdown to include per page in crawlAndWait output. */
 const MARKDOWN_SNIPPET_LENGTH = 500;
@@ -225,6 +229,8 @@ export const FirecrawlConnector: ConnectorSpec = {
       },
     },
   },
+
+  getBaseUrl,
 
   skill: [
     'Common pattern: **map** a site to find relevant URLs, then **scrape** the specific ones you need.',

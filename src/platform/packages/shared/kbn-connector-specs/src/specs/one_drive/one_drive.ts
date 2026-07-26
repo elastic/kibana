@@ -44,6 +44,11 @@ const SEARCH_SELECT = `${COMMON_SELECT},parentReference`;
 const FILE_METADATA_SELECT = `${COMMON_SELECT},parentReference,@microsoft.graph.downloadUrl`;
 const REMOTE_ITEMS_SELECT = `${COMMON_SELECT},remoteItem`;
 
+// Base URL for the framework-synthesized `request` action and the single source
+// of truth reused by the handlers below. The version segment stays in paths.
+const getBaseUrl = (): string => 'https://graph.microsoft.com';
+const GRAPH_API_V1 = `${getBaseUrl()}/v1.0`;
+
 export const OneDrive: ConnectorSpec = {
   metadata: {
     id: '.one_drive',
@@ -103,7 +108,7 @@ export const OneDrive: ConnectorSpec = {
         'identify which account is connected.',
       input: lazySchema(() => z.object({})),
       handler: async (ctx) => {
-        const response = await ctx.client.get('https://graph.microsoft.com/v1.0/me', {
+        const response = await ctx.client.get(`${GRAPH_API_V1}/me`, {
           params: { $select: 'id,displayName,mail,userPrincipalName' },
         });
         return response.data;
@@ -118,7 +123,7 @@ export const OneDrive: ConnectorSpec = {
         'orient the agent before browsing files.',
       input: lazySchema(() => z.object({})),
       handler: async (ctx) => {
-        const response = await ctx.client.get('https://graph.microsoft.com/v1.0/me/drive', {
+        const response = await ctx.client.get(`${GRAPH_API_V1}/me/drive`, {
           params: { $select: 'id,name,driveType,quota,owner' },
         });
         return response.data;
@@ -137,8 +142,8 @@ export const OneDrive: ConnectorSpec = {
       handler: async (ctx, input: GetItemChildrenInput) => {
         const url =
           input.itemId && input.itemId !== ''
-            ? `https://graph.microsoft.com/v1.0/me/drive/items/${input.itemId}/children`
-            : 'https://graph.microsoft.com/v1.0/me/drive/root/children';
+            ? `${GRAPH_API_V1}/me/drive/items/${input.itemId}/children`
+            : `${GRAPH_API_V1}/me/drive/root/children`;
 
         const response = await ctx.client.get(url, {
           params: {
@@ -163,10 +168,10 @@ export const OneDrive: ConnectorSpec = {
       input: SearchInputSchema,
       handler: async (ctx, input: SearchInput) => {
         const url = input.query
-          ? `https://graph.microsoft.com/v1.0/me/drive/root/search(q='${encodeURIComponent(
+          ? `${GRAPH_API_V1}/me/drive/root/search(q='${encodeURIComponent(
               input.query.replace(/'/g, "''")
             )}')`
-          : 'https://graph.microsoft.com/v1.0/me/drive/root/search';
+          : `${GRAPH_API_V1}/me/drive/root/search`;
         const response = await ctx.client.get(url, {
           params: {
             $select: SEARCH_SELECT,
@@ -191,8 +196,8 @@ export const OneDrive: ConnectorSpec = {
       input: GetFileMetadataInputSchema,
       handler: async (ctx, input: GetFileMetadataInput) => {
         const itemUrl = input.driveId
-          ? `https://graph.microsoft.com/v1.0/drives/${input.driveId}/items/${input.itemId}`
-          : `https://graph.microsoft.com/v1.0/me/drive/items/${input.itemId}`;
+          ? `${GRAPH_API_V1}/drives/${input.driveId}/items/${input.itemId}`
+          : `${GRAPH_API_V1}/me/drive/items/${input.itemId}`;
         const response = await ctx.client.get(itemUrl, {
           params: {
             $select: FILE_METADATA_SELECT,
@@ -215,8 +220,8 @@ export const OneDrive: ConnectorSpec = {
       input: GetFileContentInputSchema,
       handler: async (ctx, input: GetFileContentInput) => {
         const itemUrl = input.driveId
-          ? `https://graph.microsoft.com/v1.0/drives/${input.driveId}/items/${input.itemId}/content`
-          : `https://graph.microsoft.com/v1.0/me/drive/items/${input.itemId}/content`;
+          ? `${GRAPH_API_V1}/drives/${input.driveId}/items/${input.itemId}/content`
+          : `${GRAPH_API_V1}/me/drive/items/${input.itemId}/content`;
         const response = await ctx.client.get(itemUrl, { responseType: 'arraybuffer' });
         const buffer = Buffer.from(response.data);
         const rawContentType = String(response.headers?.['content-type'] ?? '');
@@ -241,15 +246,12 @@ export const OneDrive: ConnectorSpec = {
         'If the response contains a nextPageToken field, pass it as pageToken to fetch the next page.',
       input: ListSharedWithMeInputSchema,
       handler: async (ctx, input: ListSharedWithMeInput) => {
-        const response = await ctx.client.get(
-          'https://graph.microsoft.com/v1.0/me/drive/sharedWithMe',
-          {
-            params: {
-              $select: REMOTE_ITEMS_SELECT,
-              ...(input.pageToken ? { $skiptoken: input.pageToken } : {}),
-            },
-          }
-        );
+        const response = await ctx.client.get(`${GRAPH_API_V1}/me/drive/sharedWithMe`, {
+          params: {
+            $select: REMOTE_ITEMS_SELECT,
+            ...(input.pageToken ? { $skiptoken: input.pageToken } : {}),
+          },
+        });
         return withNextPageToken(response.data);
       },
     },
@@ -264,7 +266,7 @@ export const OneDrive: ConnectorSpec = {
         'If the response contains a nextPageToken field, pass it as pageToken to fetch the next page.',
       input: ListRecentFilesInputSchema,
       handler: async (ctx, input: ListRecentFilesInput) => {
-        const response = await ctx.client.get('https://graph.microsoft.com/v1.0/me/drive/recent', {
+        const response = await ctx.client.get(`${GRAPH_API_V1}/me/drive/recent`, {
           params: {
             $select: REMOTE_ITEMS_SELECT,
             $top: 25,
@@ -276,6 +278,8 @@ export const OneDrive: ConnectorSpec = {
     },
   },
 
+  getBaseUrl,
+
   test: {
     description: i18n.translate('core.kibanaConnectorSpecs.oneDrive.test.description', {
       defaultMessage:
@@ -283,7 +287,7 @@ export const OneDrive: ConnectorSpec = {
     }),
     handler: async (ctx) => {
       try {
-        const response = await ctx.client.get('https://graph.microsoft.com/v1.0/me', {
+        const response = await ctx.client.get(`${GRAPH_API_V1}/me`, {
           params: { $select: 'displayName,mail' },
         });
         const { displayName, mail } = response.data as { displayName: string; mail: string };

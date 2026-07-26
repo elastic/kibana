@@ -334,6 +334,8 @@ export const AzureBlob: ConnectorSpec = {
     },
   },
 
+  getBaseUrl,
+
   skill: [
     'Use this connector to explore and retrieve content from Azure Blob Storage.',
     '',

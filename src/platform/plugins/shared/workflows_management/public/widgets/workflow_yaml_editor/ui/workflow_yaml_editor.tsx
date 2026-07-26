@@ -95,6 +95,7 @@ import {
   GenericMonacoConnectorHandler,
   HttpMonacoConnectorStepHandler,
   KibanaMonacoConnectorHandler,
+  SpecConnectorMonacoHandler,
   WorkflowExecuteMonacoConnectorHandler,
 } from '../lib/monaco_connectors';
 import { CustomMonacoStepHandler } from '../lib/monaco_connectors/custom_monaco_step_handler';
@@ -451,6 +452,12 @@ export const WorkflowYAMLEditor = ({
 
         const customHandler = new CustomMonacoStepHandler();
         registerMonacoConnectorHandler(customHandler);
+
+        // Handles v2 connector-spec connectors (e.g. `.slack`, `.zoom`) using
+        // their real per-action descriptions, including the synthesized
+        // `request` action. Sits above the keyword-based generic fallback.
+        const specConnectorHandler = new SpecConnectorMonacoHandler();
+        registerMonacoConnectorHandler(specConnectorHandler);
 
         const genericHandler = new GenericMonacoConnectorHandler();
         registerMonacoConnectorHandler(genericHandler);

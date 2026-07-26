@@ -556,6 +556,11 @@ Gotchas:
     },
   },
 
+  // Base URL for the framework-synthesized `request` action (and the single
+  // source of truth reused by the handlers above). The `/v0` API version stays
+  // in the per-action paths.
+  getBaseUrl,
+
   test: {
     enabled: true,
     description: i18n.translate('core.kibanaConnectorSpecs.sublimeSecurity.test.description', {
