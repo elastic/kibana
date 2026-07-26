@@ -534,11 +534,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         title: 'invalid query',
         description: '',
         esql: {
-          query: `FROM ${STREAM_NAME},${STREAM_NAME}.* | WHERE KQL("query invalid")`,
+          // Unterminated string literal, so the ES|QL parser reports errors.
+          query: `FROM ${STREAM_NAME},${STREAM_NAME}.* | WHERE message == "unterminated`,
         },
       };
 
-      await apiClient
+      const response = await apiClient
         .fetch('POST /api/streams/{name}/queries/_bulk 2023-10-31', {
           params: {
             path: { name: STREAM_NAME },
@@ -547,7 +548,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             },
           },
         })
-        .expect(400);
+        .expect(400)
+        .then((res) => res.body);
+      // Pin the rejection to ES|QL validation so the test cannot pass on an unrelated 400.
+      expect((response as unknown as { message: string }).message).to.eql(
+        'One or more ES|QL queries are invalid'
+      );
 
       const getQueriesResponse = await getQueries(apiClient, STREAM_NAME);
       expect(getQueriesResponse.queries).to.eql([firstQuery]);
