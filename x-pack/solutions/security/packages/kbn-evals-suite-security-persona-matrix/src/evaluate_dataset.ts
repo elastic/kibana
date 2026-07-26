@@ -9,6 +9,8 @@ import type { Client as EsClient } from '@elastic/elasticsearch';
 import {
   createExampleScopedSkillInvocationEvaluator,
   createTrajectoryEvaluator,
+  getToolCallSteps,
+  withEvaluatorSpan,
   type DefaultEvaluators,
   type EvalsExecutorClient,
   type EvaluationDataset,
@@ -20,8 +22,43 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import type {
   PersonaMatrixExample,
   PersonaMatrixExampleInput,
+  PersonaMatrixExampleOutput,
 } from './datasets/persona_matrix_prompts';
 import type { PersonaMatrixChatClient } from './chat_client';
+
+/**
+ * ExpectedToolCalled — verifies the primary expected tool was invoked.
+ * Reads `expectedTools` from example metadata (first entry) or `tool_sequence`
+ * from the expected output.
+ */
+const createPersonaMatrixExpectedToolCalledEvaluator = (): Evaluator => ({
+  name: 'ExpectedToolCalled',
+  kind: 'CODE',
+  evaluate: async ({ output, expected, metadata }) => {
+    // Try tool_sequence from expected output first, then expectedTools from metadata
+    const toolSequence = (expected as PersonaMatrixExampleOutput | undefined)?.tool_sequence;
+    const meta = metadata as { expectedTools?: string[] } | undefined;
+    const expectedTools = meta?.expectedTools ?? toolSequence;
+
+    if (!expectedTools?.length) {
+      return {
+        score: null,
+        label: 'N/A',
+        explanation: 'No expectedTools annotation — skipping ExpectedToolCalled.',
+      };
+    }
+
+    const expectedToolId = expectedTools[0];
+    const usedToolIds = getToolCallSteps(output as TaskOutput)
+      .map((step) => step.tool_id)
+      .filter((id): id is string => Boolean(id));
+
+    return {
+      score: usedToolIds.includes(expectedToolId) ? 1 : 0,
+      metadata: { expectedToolId, usedToolIds },
+    };
+  },
+});
 
 export function createEvaluatePersonaMatrixDataset({
   chatClient,
@@ -76,12 +113,14 @@ export function createEvaluatePersonaMatrixDataset({
 
     const correctnessEvaluators = createAgentBuilderCorrectnessEvaluators();
 
-    const { inputTokens, outputTokens, cachedTokens, toolCalls, latency } =
-      evaluators.traceBasedEvaluators;
+    const expectedToolCalledEvaluator = createPersonaMatrixExpectedToolCalledEvaluator();
+
+    const { inputTokens, outputTokens, toolCalls, latency } = evaluators.traceBasedEvaluators;
 
     const allEvaluators: Evaluator[] = [
       ...skillEvaluators,
       trajectoryEvaluator,
+      expectedToolCalledEvaluator,
       ...correctnessEvaluators,
       evaluators.criteria([
         'Relevance: The response directly addresses the user security question.',
@@ -91,7 +130,6 @@ export function createEvaluatePersonaMatrixDataset({
       ]),
       inputTokens,
       outputTokens,
-      cachedTokens,
       toolCalls,
       latency,
     ];
@@ -105,13 +143,33 @@ export function createEvaluatePersonaMatrixDataset({
           const question = input?.question;
           if (!question) throw new Error('Missing question in example input');
           const response = await chatClient.query(question, input?.attachment);
-          return {
+
+          const taskOutput: TaskOutput = {
             response,
             traceId: response.traceId ?? null,
             steps: response.steps,
             skillId: response.traceId ?? 'unknown',
             tags: example.metadata?.tags ?? [],
           } as TaskOutput;
+
+          // Run correctnessAnalysis (structured LLM judge) and attach metadata
+          try {
+            const correctnessResult = await withEvaluatorSpan('CorrectnessAnalysis', {}, () =>
+              evaluators.correctnessAnalysis().evaluate({
+                input,
+                expected: example.output,
+                output: taskOutput,
+                metadata: example.metadata,
+              })
+            );
+            return {
+              ...(taskOutput as object),
+              correctnessAnalysis: correctnessResult?.metadata,
+            } as TaskOutput;
+          } catch {
+            // Judge model may fail; continue without correctnessAnalysis
+            return taskOutput;
+          }
         },
       },
       allEvaluators

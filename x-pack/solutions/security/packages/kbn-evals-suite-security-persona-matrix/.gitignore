@@ -1,0 +1,19 @@
+# Generated eval HTML reports (regenerated from committed eval data via scripts/generate_reports.ts).
+# Never commit report output — it churns and is reproducible.
+*.html
+
+# Reference-only eval handoff artifacts (large, uncommitted). Reports source data from
+# scripts/fixtures/sample_eval_scores.json (committed) or the golden cluster (--scores es:<run_id>).
+/scripts/agent_eval.jsonl
+/scripts/agent_prompts.csv
+/scripts/attachments_snapshot.json
+/scripts/attack_discovery_results.jsonl
+/scripts/__pycache__/
+
+# Playwright test-results (failure screenshots / error-context.md from local runs).
+/test-results/
+
+# Real golden-run score snapshots (reference only; committed report data lives in
+# scripts/fixtures/sample_eval_scores.json). Real-run files are gitignored per CI-safety.
+/scripts/fixtures/real_run_scores.json
+/scripts/real_run_scores.json

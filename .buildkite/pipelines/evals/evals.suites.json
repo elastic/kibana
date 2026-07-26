@@ -164,6 +164,25 @@
       ]
     },
     {
+      "id": "security-persona-matrix-attack-discovery",
+      "name": "Security Persona Matrix — Attack Discovery (Dhru kill-chains)",
+      "slackChannel": "#security-generative-ai-evals",
+      "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-security-persona-matrix/attack_discovery.playwright.config.ts",
+      "tags": [
+        "security",
+        "persona-matrix",
+        "attack-discovery"
+      ],
+      "ciLabels": [
+        "evals:security-persona-matrix-attack-discovery"
+      ],
+      "serverConfigSet": "evals_tracing",
+      "weeklyEisModelGroups": [
+        "eis/anthropic-claude-4.6-sonnet",
+        "eis/anthropic-claude-4.5-haiku"
+      ]
+    },
+    {
       "id": "endpoint",
       "name": "Endpoint (Elastic Defend)",
       "slackChannel": "#security-defend-workflows-tests",
