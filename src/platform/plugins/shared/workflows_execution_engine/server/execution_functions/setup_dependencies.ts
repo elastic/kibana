@@ -41,20 +41,29 @@ import { WorkflowExecutionState } from '../workflow_context_manager/workflow_exe
 import { WorkflowEventLoggerService } from '../workflow_event_logger';
 import { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_manager';
 
-export async function setupDependencies(
-  workflowRunId: string,
-  spaceId: string,
-  logger: Logger,
-  config: WorkflowsExecutionEngineConfig,
-  dependencies: ContextDependencies,
-  fakeRequest?: KibanaRequest,
-  workflowsExecutionEngine?: WorkflowsExecutionEnginePluginStart,
-  options: {
-    workflowExecution?: EsWorkflowExecution;
-    workflowExecutionRepository?: WorkflowExecutionPersistence;
-    stepExecutionRepository?: StepExecutionPersistence;
-  } = {}
-) {
+export async function setupDependencies({
+  workflowRunId,
+  spaceId,
+  logger,
+  config,
+  dependencies,
+  fakeRequest,
+  workflowsExecutionEngine,
+  workflowExecution: workflowExecutionOverride,
+  workflowExecutionRepository: workflowExecutionRepositoryOverride,
+  stepExecutionRepository: stepExecutionRepositoryOverride,
+}: {
+  workflowRunId: string;
+  spaceId: string;
+  logger: Logger;
+  config: WorkflowsExecutionEngineConfig;
+  dependencies: ContextDependencies;
+  fakeRequest?: KibanaRequest;
+  workflowsExecutionEngine?: WorkflowsExecutionEnginePluginStart;
+  workflowExecution?: EsWorkflowExecution;
+  workflowExecutionRepository?: WorkflowExecutionPersistence;
+  stepExecutionRepository?: StepExecutionPersistence;
+}) {
   const { coreStart, actions, taskManager, workflowsExtensions } = dependencies;
 
   await workflowsExtensions.isReady();
@@ -63,16 +72,17 @@ export async function setupDependencies(
   const internalEsClient = coreStart.elasticsearch.client.asInternalUser;
 
   const workflowExecutionPersistence =
-    options.workflowExecutionRepository ?? new WorkflowExecutionRepository(internalEsClient, logger);
+    workflowExecutionRepositoryOverride ??
+    new WorkflowExecutionRepository(internalEsClient, logger);
   const stepExecutionPersistence =
-    options.stepExecutionRepository ?? new StepExecutionRepository(internalEsClient, logger);
+    stepExecutionRepositoryOverride ?? new StepExecutionRepository(internalEsClient, logger);
   const workflowRepository = new WorkflowRepository({
     esClient: internalEsClient,
     logger,
   });
 
   const workflowExecution =
-    options.workflowExecution ??
+    workflowExecutionOverride ??
     (await workflowExecutionPersistence.getWorkflowExecutionById(workflowRunId, spaceId));
 
   if (!workflowExecution) {

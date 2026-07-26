@@ -40,8 +40,8 @@ import {
   checkAndSkipIfExistingScheduledExecution,
   resumeWorkflow,
   runWorkflow,
-  runWorkflowSync,
 } from './execution_functions';
+import { executeWorkflowSync } from './execution_functions/execute_workflow_sync';
 import { handlePostExecutionLoop } from './execution_functions/handle_post_execution_loop';
 import { buildWorkflowExecutionDocument } from './lib/build_workflow_execution_document';
 import { checkLicense } from './lib/check_license';
@@ -63,7 +63,6 @@ import {
 } from './lib/workflow_task_run_event_fields';
 import { WorkflowsMeteringService } from './metering/metering_service';
 import { createDataClientBundle, type DataClientBundle } from './repositories/data_access_layer';
-import { InMemoryExecutionPersistence } from './repositories/execution_persistence';
 import { initializeLogsRepositoryDataStream } from './repositories/logs_repository/data_stream';
 import { StepExecutionRepository } from './repositories/step_execution_repository';
 import { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
@@ -117,19 +116,6 @@ import { createWorkflowTaskAbortController } from './workflow_task_shutdown';
  *   it is not meant as extra user workflow retries after successful interrupt recovery.
  */
 const WORKFLOW_RUN_TASK_MAX_ATTEMPTS = 3;
-
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null && !Array.isArray(value);
-
-const getSynchronousWorkflowOutput = (output: unknown): Record<string, unknown> | undefined => {
-  if (output === undefined || output === null) {
-    return undefined;
-  }
-  if (isRecord(output)) {
-    return output;
-  }
-  throw new Error('Synchronous workflow output must be an object');
-};
 
 /**
  * Max Task Manager attempts for `workflow:resume`.
@@ -1130,95 +1116,22 @@ export class WorkflowsExecutionEnginePlugin
         if (!request) {
           throw new Error('Synchronous workflows cannot be executed without the user context');
         }
-
-        const spaceId = typeof context.spaceId === 'string' ? context.spaceId : 'default';
-        await ensureWorkflowEnabled(workflow, spaceId);
-        const authenticatedUser = await getAuthenticatedUser(
-          request,
-          coreStart.security,
-          coreStart.elasticsearch.client
-        );
-        const syncContext = {
-          ...context,
-          ...(options.metadata ? { metadata: options.metadata } : {}),
-        };
-        const workflowExecution = await buildExecutionDocument({
+        if (!this.coreSetup) {
+          throw new Error('Core setup not available');
+        }
+        const coreSetup = this.coreSetup;
+        return executeWorkflowSync({
           workflow,
-          context: syncContext,
-          defaultTriggeredBy: 'manual',
-          authenticatedUser,
-          now: new Date(),
+          context,
+          request,
+          options,
+          logger: this.logger,
+          dependencies,
+          getWorkflowsExecutionEngine: async () => {
+            const [, , workflowsExecutionEngine] = await coreSetup.getStartServices();
+            return workflowsExecutionEngine;
+          },
         });
-        if (options.executionId) {
-          workflowExecution.id = options.executionId;
-        }
-        if (!workflowExecution.workflowDefinition) {
-          throw new Error('Synchronous workflow execution requires a workflow definition');
-        }
-        const syncWorkflowExecution: EsWorkflowExecution = {
-          ...workflowExecution,
-          isTestRun: workflowExecution.isTestRun ?? false,
-          status: workflowExecution.status ?? ExecutionStatus.PENDING,
-          context: workflowExecution.context ?? syncContext,
-          workflowDefinition: workflowExecution.workflowDefinition,
-          yaml: workflowExecution.yaml ?? workflow.yaml,
-          scopeStack: workflowExecution.scopeStack ?? [],
-          error: workflowExecution.error ?? null,
-          startedAt: workflowExecution.startedAt ?? workflowExecution.createdAt,
-          finishedAt: workflowExecution.finishedAt ?? '',
-          cancelRequested: workflowExecution.cancelRequested ?? false,
-          duration: workflowExecution.duration ?? 0,
-        };
-
-        const syncExecutionPersistence = new InMemoryExecutionPersistence(syncWorkflowExecution);
-        const inputsValid = await validateWorkflowInputs(
-          syncWorkflowExecution,
-          syncExecutionPersistence,
-          this.logger,
-          coreStart,
-          { ...dependencies, capabilities: options.capabilities }
-        );
-        if (!inputsValid) {
-          return {
-            workflowExecutionId: syncWorkflowExecution.id,
-            result: { status: ExecutionStatus.FAILED },
-          };
-        }
-        const abortController = new AbortController();
-        const abort = () => abortController.abort(options.abortSignal?.reason);
-        options.abortSignal?.addEventListener('abort', abort, { once: true });
-        if (options.abortSignal?.aborted) {
-          abort();
-        }
-
-        try {
-          if (!this.coreSetup) {
-            throw new Error('Core setup not available');
-          }
-          const [, , workflowsExecutionEngine] = await this.coreSetup.getStartServices();
-          const result = await runWorkflowSync({
-            workflowExecution: syncWorkflowExecution,
-            request,
-            abortController,
-            logger: this.logger,
-            config: this.config,
-            dependencies: { ...dependencies, capabilities: options.capabilities },
-            workflowsExecutionEngine,
-            workflowExecutionRepository: syncExecutionPersistence,
-            stepExecutionRepository: syncExecutionPersistence,
-          });
-
-          const output = getSynchronousWorkflowOutput(result.context?.output);
-          return {
-            workflowExecutionId: result.id,
-            result: {
-              status: result.status,
-              ...(output ? { output } : {}),
-            },
-          };
-        } finally {
-          options.abortSignal?.removeEventListener('abort', abort);
-        }
       }
 
       // AUTO-DETECT: Check if we're already running in a Task Manager context

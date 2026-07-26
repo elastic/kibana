@@ -89,6 +89,10 @@ export interface TriggerEventsContract {
 }
 
 export interface WorkflowsExecutionEnginePluginStart {
+  /**
+   * Type-level discriminant: callers (e.g. inference plugin) narrow on this
+   * before calling executeWorkflow with executionMode: 'sync'.
+   */
   readonly supportsSynchronousExecution: true;
   __internalStorage: {
     workflowExecutionsDataClient: WorkflowExecutionsDataClient;
